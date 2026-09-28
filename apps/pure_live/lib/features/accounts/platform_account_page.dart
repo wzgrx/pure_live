@@ -122,67 +122,67 @@ class _PlatformAccountPageState extends ConsumerState<PlatformAccountPage> {
         : WebAvailability.unsupported;
     final name = platformNames[_platform] ?? _platform;
     return Scaffold(
-      appBar: AppBar(title: Text(t.accounts.accountTitle(name: name))),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-          child: ListView(
-            children: [
-              ListTile(
-                leading: PlatformLogo(platformId: _platform, size: Sizes.iconLg),
-                title: Text(name),
-                subtitle: Text(accountSummary(_platform, store, check, now: DateTime.now())),
-              ),
-              if (signedIn)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: Space.s4),
-                  child: Wrap(
-                    spacing: Space.s2,
-                    runSpacing: Space.s2,
-                    children: [
-                      if (verifiable)
-                        OutlinedButton(
-                          onPressed: check is AccountChecking
-                              ? null
-                              : () => ref.read(accountCheckProvider(_platform).notifier).verify(),
-                          child: Text(t.accounts.verify),
-                        ),
-                      if (douyu != null && douyu.renewable)
-                        OutlinedButton(onPressed: _renewing ? null : _renew, child: Text(t.accounts.renewNow)),
-                      TextButton(onPressed: _signOut, child: Text(t.accounts.signOutAction)),
-                    ],
-                  ),
+      appBar: PageAppBar(
+        maxContentWidth: Sizes.readingWidth,
+        title: Text(t.accounts.accountTitle(name: name)),
+      ),
+      body: PageBody(
+        maxContentWidth: Sizes.readingWidth,
+        child: ListView(
+          children: [
+            ListTile(
+              leading: PlatformLogo(platformId: _platform, size: Sizes.iconLg),
+              title: Text(name),
+              subtitle: Text(accountSummary(_platform, store, check, now: DateTime.now())),
+            ),
+            if (signedIn)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Space.s4),
+                child: Wrap(
+                  spacing: Space.s2,
+                  runSpacing: Space.s2,
+                  children: [
+                    if (verifiable)
+                      OutlinedButton(
+                        onPressed: check is AccountChecking
+                            ? null
+                            : () => ref.read(accountCheckProvider(_platform).notifier).verify(),
+                        child: Text(t.accounts.verify),
+                      ),
+                    if (douyu != null && douyu.renewable)
+                      OutlinedButton(onPressed: _renewing ? null : _renew, child: Text(t.accounts.renewNow)),
+                    TextButton(onPressed: _signOut, child: Text(t.accounts.signOutAction)),
+                  ],
                 ),
-              if (_platform == 'bilibili') ...[
-                SettingsHeader(signedIn ? t.accounts.switchAccount : t.accounts.signIn),
-                if (_qr)
-                  // Keyed: the list above it grows when the sign-in lands.
-                  BilibiliQrPanel(key: const ValueKey('bilibili-qr'), onDone: () => _toast(t.accounts.signedInToast))
-                else
-                  ListTile(
-                    leading: const Icon(Icons.qr_code_2),
-                    title: Text(t.accounts.qrSignIn),
-                    subtitle: Text(t.accounts.qrSignInSubtitle),
-                    onTap: () => setState(() => _qr = true),
-                  ),
-                if (web != WebAvailability.unsupported)
-                  ListTile(
-                    leading: const Icon(Icons.public),
-                    title: Text(t.accounts.webSignIn),
-                    subtitle: Text(t.accounts.webSignInSubtitle),
-                    onTap: _webLogin,
-                  ),
-              ],
-              SettingsHeader(
-                _platform == 'bilibili'
-                    ? t.accounts.manualCookie
-                    : (signedIn ? t.accounts.replaceCookie : t.accounts.enterCookie),
               ),
-              CookieEditor(platform: _platform),
-              Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.accounts.storageNoteFull)),
+            if (_platform == 'bilibili') ...[
+              SettingsHeader(signedIn ? t.accounts.switchAccount : t.accounts.signIn),
+              if (_qr)
+                // Keyed: the list above it grows when the sign-in lands.
+                BilibiliQrPanel(key: const ValueKey('bilibili-qr'), onDone: () => _toast(t.accounts.signedInToast))
+              else
+                ListTile(
+                  leading: const Icon(Icons.qr_code_2),
+                  title: Text(t.accounts.qrSignIn),
+                  subtitle: Text(t.accounts.qrSignInSubtitle),
+                  onTap: () => setState(() => _qr = true),
+                ),
+              if (web != WebAvailability.unsupported)
+                ListTile(
+                  leading: const Icon(Icons.public),
+                  title: Text(t.accounts.webSignIn),
+                  subtitle: Text(t.accounts.webSignInSubtitle),
+                  onTap: _webLogin,
+                ),
             ],
-          ),
+            SettingsHeader(
+              _platform == 'bilibili'
+                  ? t.accounts.manualCookie
+                  : (signedIn ? t.accounts.replaceCookie : t.accounts.enterCookie),
+            ),
+            CookieEditor(platform: _platform),
+            Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.accounts.storageNoteFull)),
+          ],
         ),
       ),
     );

@@ -174,7 +174,8 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     final selectedGuide = guides.where((guide) => guide.selected).firstOrNull;
     final busy = _busy.isNotEmpty;
     return Scaffold(
-      appBar: AppBar(
+      appBar: PageAppBar(
+        maxContentWidth: Sizes.readingWidth,
         title: Text(t.iptv.title),
         actions: [
           IconButton(
@@ -187,104 +188,104 @@ class _IptvPageState extends ConsumerState<IptvPage> {
             ? const PreferredSize(preferredSize: Size.fromHeight(2), child: LinearProgressIndicator(minHeight: 2))
             : null,
       ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-          child: ListView(
-            children: [
-              SettingsHeader(t.iptv.playlists),
-              ...switch (playlists) {
-                AsyncData(:final value) when value.isEmpty => [
-                  ListTile(
-                    leading: const Icon(Icons.live_tv_outlined),
-                    title: Text(t.iptv.noPlaylists),
-                    subtitle: Text(t.iptv.playlistsHint),
+      body: PageBody(
+        maxContentWidth: Sizes.readingWidth,
+        child: ListView(
+          children: [
+            SettingsHeader(t.iptv.playlists),
+            ...switch (playlists) {
+              AsyncData(:final value) when value.isEmpty => [
+                ListTile(
+                  leading: const Icon(Icons.live_tv_outlined),
+                  title: Text(t.iptv.noPlaylists),
+                  subtitle: Text(t.iptv.playlistsHint),
+                ),
+              ],
+              AsyncData(:final value) => [
+                for (final playlist in value)
+                  _PlaylistTile(
+                    playlist: playlist,
+                    busy: _busy.contains('p${playlist.id}') || _busy.contains('all'),
+                    onSync: () => _syncOne(playlist),
+                    onAction: (action) => _menu(playlist, action),
+                  ),
+              ],
+              AsyncError() => [ListTile(title: Text(t.iptv.playlistsLoadFailed))],
+              _ => [const Padding(padding: EdgeInsets.all(Space.s4), child: LinearProgressIndicator())],
+            },
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(
+                horizontal: PageMargin.tilePadding(PageMargin.of(context)).start,
+                vertical: Space.s2,
+              ),
+              child: Wrap(
+                spacing: Space.s2,
+                runSpacing: Space.s2,
+                children: [
+                  FilledButton.tonalIcon(
+                    icon: const Icon(Icons.link, size: 18),
+                    label: Text(t.iptv.importFromUrl),
+                    onPressed: _busy.contains('import') ? null : _importUrl,
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.folder_open, size: 18),
+                    label: Text(t.iptv.importFromFile),
+                    onPressed: _busy.contains('import') ? null : _importFile,
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.vpn_key_outlined, size: 18),
+                    label: Text(t.iptv.xtreamAccount),
+                    onPressed: _busy.contains('import') ? null : _importXtream,
                   ),
                 ],
-                AsyncData(:final value) => [
-                  for (final playlist in value)
-                    _PlaylistTile(
-                      playlist: playlist,
-                      busy: _busy.contains('p${playlist.id}') || _busy.contains('all'),
-                      onSync: () => _syncOne(playlist),
-                      onAction: (action) => _menu(playlist, action),
-                    ),
-                ],
-                AsyncError() => [ListTile(title: Text(t.iptv.playlistsLoadFailed))],
-                _ => [const Padding(padding: EdgeInsets.all(Space.s4), child: LinearProgressIndicator())],
+              ),
+            ),
+            SettingsHeader(t.iptv.guide),
+            ListTile(
+              leading: const Icon(Icons.event_note_outlined),
+              title: Text(t.iptv.guideSources),
+              subtitle: Text(
+                selectedGuide == null
+                    ? (guides.isEmpty ? t.iptv.noGuideAdded : t.iptv.noGuideSelected)
+                    : t.iptv.currentGuide(name: selectedGuide.name),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(iptvGuideLocation),
+            ),
+            SettingsHeader(t.common.sync),
+            SwitchSettingTile(setting: Settings.iptvAutoSync, title: t.iptv.autoSync, subtitle: t.iptv.autoSyncHint),
+            ChoiceSettingTile<int>(
+              setting: Settings.iptvAutoSyncHours,
+              title: t.iptv.syncInterval,
+              labels: {
+                6: t.iptv.every6h,
+                12: t.iptv.every12h,
+                24: t.iptv.daily,
+                48: t.iptv.every2d,
+                72: t.iptv.every3d,
+                168: t.iptv.weekly,
               },
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s2),
-                child: Wrap(
-                  spacing: Space.s2,
-                  runSpacing: Space.s2,
-                  children: [
-                    FilledButton.tonalIcon(
-                      icon: const Icon(Icons.link, size: 18),
-                      label: Text(t.iptv.importFromUrl),
-                      onPressed: _busy.contains('import') ? null : _importUrl,
-                    ),
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.folder_open, size: 18),
-                      label: Text(t.iptv.importFromFile),
-                      onPressed: _busy.contains('import') ? null : _importFile,
-                    ),
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.vpn_key_outlined, size: 18),
-                      label: Text(t.iptv.xtreamAccount),
-                      onPressed: _busy.contains('import') ? null : _importXtream,
-                    ),
-                  ],
-                ),
-              ),
-              SettingsHeader(t.iptv.guide),
-              ListTile(
-                leading: const Icon(Icons.event_note_outlined),
-                title: Text(t.iptv.guideSources),
-                subtitle: Text(
-                  selectedGuide == null
-                      ? (guides.isEmpty ? t.iptv.noGuideAdded : t.iptv.noGuideSelected)
-                      : t.iptv.currentGuide(name: selectedGuide.name),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push(iptvGuideLocation),
-              ),
-              SettingsHeader(t.common.sync),
-              SwitchSettingTile(setting: Settings.iptvAutoSync, title: t.iptv.autoSync, subtitle: t.iptv.autoSyncHint),
-              ChoiceSettingTile<int>(
-                setting: Settings.iptvAutoSyncHours,
-                title: t.iptv.syncInterval,
-                labels: {
-                  6: t.iptv.every6h,
-                  12: t.iptv.every12h,
-                  24: t.iptv.daily,
-                  48: t.iptv.every2d,
-                  72: t.iptv.every3d,
-                  168: t.iptv.weekly,
+            ),
+            SettingBuilder<String>(
+              setting: Settings.iptvUserAgent,
+              builder: (context, value, set) => ListTile(
+                title: Text(t.iptv.customUserAgent),
+                subtitle: Text(value.isEmpty ? t.iptv.userAgentUnset : value, maxLines: 2),
+                trailing: const Icon(Icons.edit_outlined),
+                onTap: () async {
+                  final agent = await askText(
+                    context,
+                    title: t.iptv.customUserAgent,
+                    initial: value,
+                    hint: t.iptv.userAgentExample,
+                    helper: t.iptv.userAgentHint,
+                  );
+                  if (agent != null) set(agent);
                 },
               ),
-              SettingBuilder<String>(
-                setting: Settings.iptvUserAgent,
-                builder: (context, value, set) => ListTile(
-                  title: Text(t.iptv.customUserAgent),
-                  subtitle: Text(value.isEmpty ? t.iptv.userAgentUnset : value, maxLines: 2),
-                  trailing: const Icon(Icons.edit_outlined),
-                  onTap: () async {
-                    final agent = await askText(
-                      context,
-                      title: t.iptv.customUserAgent,
-                      initial: value,
-                      hint: t.iptv.userAgentExample,
-                      helper: t.iptv.userAgentHint,
-                    );
-                    if (agent != null) set(agent);
-                  },
-                ),
-              ),
-              const SizedBox(height: Space.s6),
-            ],
-          ),
+            ),
+            const SizedBox(height: Space.s6),
+          ],
         ),
       ),
     );

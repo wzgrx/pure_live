@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart' show PageMargin;
 import 'package:pure_live_app/core/store.dart';
 
 /// Rebuilds with a setting's current value; the value is read synchronously
@@ -169,7 +170,8 @@ class SettingsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
+    // On the rows' line (principles §2.4).
+    padding: PageMargin.rowInsets(context).copyWith(top: 20, bottom: 4),
     child: Text(
       text,
       style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Theme.of(context).colorScheme.primary),

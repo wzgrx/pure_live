@@ -25,7 +25,9 @@ class HistoryPage extends ConsumerWidget {
     final dpr = MediaQuery.devicePixelRatioOf(context);
     final now = DateTime.now();
     return Scaffold(
-      appBar: AppBar(
+      appBar: PageAppBar(
+        // Rows as wide as a reading column, not the window (principles §4.3).
+        maxContentWidth: Sizes.readingWidth,
         title: Text(t.app.history),
         actions: [
           if (entries.isNotEmpty)
@@ -50,35 +52,38 @@ class HistoryPage extends ConsumerWidget {
           ? const LoadingView()
           : entries.isEmpty
           ? MessageView(icon: Icons.history, title: t.me.noHistory)
-          : ListView.builder(
-              itemCount: entries.length,
-              itemBuilder: (context, index) {
-                final entry = entries[index];
-                final room = entry.room;
-                final watched = entry.lastWatchedAt;
-                return OfflineRoomRow(
-                  platformId: room.ref.platform,
-                  anchorName: room.anchorName,
-                  avatar: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
-                  subtitle: [room.title, if (watched != null) formatAgo(watched, now)].join(' · '),
-                  onTap: () => context.push(roomLocation(room.ref)),
-                  onMenu: () => unawaited(
-                    showRoomCardMenu(
-                      context,
-                      ref,
-                      room: room.ref,
-                      anchorName: room.anchorName,
-                      snapshot: RoomSnapshot(
-                        ref: room.ref,
+          : PageBody(
+              maxContentWidth: Sizes.readingWidth,
+              child: ListView.builder(
+                itemCount: entries.length,
+                itemBuilder: (context, index) {
+                  final entry = entries[index];
+                  final room = entry.room;
+                  final watched = entry.lastWatchedAt;
+                  return OfflineRoomRow(
+                    platformId: room.ref.platform,
+                    anchorName: room.anchorName,
+                    avatar: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
+                    subtitle: [room.title, if (watched != null) formatAgo(watched, now)].join(' · '),
+                    onTap: () => context.push(roomLocation(room.ref)),
+                    onMenu: () => unawaited(
+                      showRoomCardMenu(
+                        context,
+                        ref,
+                        room: room.ref,
                         anchorName: room.anchorName,
-                        title: room.title,
-                        avatar: room.avatar,
-                        cover: room.cover,
+                        snapshot: RoomSnapshot(
+                          ref: room.ref,
+                          anchorName: room.anchorName,
+                          title: room.title,
+                          avatar: room.avatar,
+                          cover: room.cover,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
     );
   }

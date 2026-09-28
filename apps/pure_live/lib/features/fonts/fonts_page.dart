@@ -82,58 +82,60 @@ class _FontsPageState extends ConsumerState<FontsPage> {
     final danmakuFont = settings.get(Settings.danmakuFontFamily);
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(t.fonts.title)),
-      body: catalogue.when(
-        loading: () => const LoadingView(),
-        error: (error, _) => MessageView.error(title: t.fonts.listFailed),
-        data: (fonts) {
-          if (!_scanned) unawaited(_scan(fonts));
-          String nameOf(String id) => id.isEmpty
-              ? t.fonts.systemFont
-              : fonts.where((font) => font.id == id).firstOrNull?.name ?? t.fonts.systemFont;
-          return ListView(
-            children: [
-              SettingsHeader(t.fonts.inUse),
-              ListTile(title: Text(t.fonts.appFont), subtitle: Text(nameOf(appFont))),
-              ListTile(title: Text(t.fonts.danmakuFont), subtitle: Text(nameOf(danmakuFont))),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Space.s4),
-                child: Wrap(
-                  spacing: Space.s2,
-                  children: [
-                    if (appFont.isNotEmpty)
-                      TextButton(
-                        onPressed: () => unawaited(_use(Settings.appFontFamily, null)),
-                        child: Text(t.fonts.resetAppFont),
-                      ),
-                    if (danmakuFont.isNotEmpty)
-                      TextButton(
-                        onPressed: () => unawaited(_use(Settings.danmakuFontFamily, null)),
-                        child: Text(t.fonts.resetDanmakuFont),
-                      ),
-                  ],
+      appBar: PageAppBar(title: Text(t.fonts.title)),
+      body: PageBody(
+        child: catalogue.when(
+          loading: () => const LoadingView(),
+          error: (error, _) => MessageView.error(title: t.fonts.listFailed),
+          data: (fonts) {
+            if (!_scanned) unawaited(_scan(fonts));
+            String nameOf(String id) => id.isEmpty
+                ? t.fonts.systemFont
+                : fonts.where((font) => font.id == id).firstOrNull?.name ?? t.fonts.systemFont;
+            return ListView(
+              children: [
+                SettingsHeader(t.fonts.inUse),
+                ListTile(title: Text(t.fonts.appFont), subtitle: Text(nameOf(appFont))),
+                ListTile(title: Text(t.fonts.danmakuFont), subtitle: Text(nameOf(danmakuFont))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Space.s4),
+                  child: Wrap(
+                    spacing: Space.s2,
+                    children: [
+                      if (appFont.isNotEmpty)
+                        TextButton(
+                          onPressed: () => unawaited(_use(Settings.appFontFamily, null)),
+                          child: Text(t.fonts.resetAppFont),
+                        ),
+                      if (danmakuFont.isNotEmpty)
+                        TextButton(
+                          onPressed: () => unawaited(_use(Settings.danmakuFontFamily, null)),
+                          child: Text(t.fonts.resetDanmakuFont),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              SettingsHeader(t.fonts.downloadable),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(Space.s4, 0, Space.s4, Space.s2),
-                child: Text(t.fonts.downloadableNote, style: theme.textTheme.bodySmall),
-              ),
-              for (final font in fonts)
-                _FontTile(
-                  font: font,
-                  installed: _installed.contains(font.id),
-                  progress: _progress[font.id],
-                  usedForApp: appFont == font.id,
-                  usedForDanmaku: danmakuFont == font.id,
-                  onDownload: () => unawaited(_download(font)),
-                  onDelete: () => unawaited(_delete(font)),
-                  onUseForApp: () => unawaited(_use(Settings.appFontFamily, font)),
-                  onUseForDanmaku: () => unawaited(_use(Settings.danmakuFontFamily, font)),
+                SettingsHeader(t.fonts.downloadable),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(Space.s4, 0, Space.s4, Space.s2),
+                  child: Text(t.fonts.downloadableNote, style: theme.textTheme.bodySmall),
                 ),
-            ],
-          );
-        },
+                for (final font in fonts)
+                  _FontTile(
+                    font: font,
+                    installed: _installed.contains(font.id),
+                    progress: _progress[font.id],
+                    usedForApp: appFont == font.id,
+                    usedForDanmaku: danmakuFont == font.id,
+                    onDownload: () => unawaited(_download(font)),
+                    onDelete: () => unawaited(_delete(font)),
+                    onUseForApp: () => unawaited(_use(Settings.appFontFamily, font)),
+                    onUseForDanmaku: () => unawaited(_use(Settings.danmakuFontFamily, font)),
+                  ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

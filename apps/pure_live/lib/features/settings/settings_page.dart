@@ -79,24 +79,26 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
       );
       return Scaffold(
-        appBar: AppBar(title: Text(t.app.settings)),
-        body: twoPane
-            ? Row(
-                children: [
-                  SizedBox(width: tv ? 240 : 280, child: list),
-                  const VerticalDivider(width: 1),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-                        child: SettingsGroupBody(group: _selected),
+        appBar: PageAppBar(title: Text(t.app.settings)),
+        body: PageBody(
+          child: twoPane
+              ? Row(
+                  children: [
+                    SizedBox(width: tv ? 240 : 280, child: list),
+                    const VerticalDivider(width: 1),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
+                          child: SettingsGroupBody(group: _selected),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              )
-            : list,
+                  ],
+                )
+              : list,
+        ),
       );
     },
   );
@@ -110,13 +112,10 @@ class SettingsGroupPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(group.label)),
-    body: Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-        child: SettingsGroupBody(group: group),
-      ),
+    appBar: PageAppBar(title: Text(group.label), maxContentWidth: Sizes.readingWidth),
+    body: PageBody(
+      maxContentWidth: Sizes.readingWidth,
+      child: SettingsGroupBody(group: group),
     ),
   );
 }

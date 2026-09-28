@@ -10,6 +10,7 @@ export 'src/danmaku/danmaku_text.dart' show danmakuDisplayText;
 export 'src/danmaku/danmaku_view.dart';
 export 'src/format.dart';
 export 'src/metrics.dart';
+export 'src/page_layout.dart';
 export 'src/room_card_view.dart';
 export 'src/status_views.dart';
 export 'src/theme.dart';

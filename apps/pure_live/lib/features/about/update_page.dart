@@ -87,52 +87,49 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
     final theme = Theme.of(context);
     final checking = status == null || status.checking;
     return Scaffold(
-      appBar: AppBar(title: Text(t.about.versionAndUpdates)),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-          child: ListView(
-            children: [
-              if (checking) const LinearProgressIndicator(),
-              ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: Text(t.about.currentVersion(version: appVersion)),
-                subtitle: Text(currentVersion.isPreRelease ? t.about.channelPreview : t.about.channelStable),
-                trailing: TextButton(
-                  onPressed: checking ? null : () => ref.read(updateProvider.notifier).check(),
-                  child: Text(t.about.checkForUpdates),
-                ),
+      appBar: PageAppBar(maxContentWidth: Sizes.readingWidth, title: Text(t.about.versionAndUpdates)),
+      body: PageBody(
+        maxContentWidth: Sizes.readingWidth,
+        child: ListView(
+          children: [
+            if (checking) const LinearProgressIndicator(),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: Text(t.about.currentVersion(version: appVersion)),
+              subtitle: Text(currentVersion.isPreRelease ? t.about.channelPreview : t.about.channelStable),
+              trailing: TextButton(
+                onPressed: checking ? null : () => ref.read(updateProvider.notifier).check(),
+                child: Text(t.about.checkForUpdates),
               ),
-              if (status?.error case final error?)
-                ListTile(
-                  leading: Icon(Icons.error_outline, color: theme.colorScheme.error),
-                  title: Text(updateErrorText(error)),
-                  trailing: TextButton(
-                    onPressed: () => _open(ref.read(updateCheckerProvider).releasesUrl),
-                    child: Text(t.about.openReleasePage),
-                  ),
-                )
-              else if (status != null && !status.checking && latest == null)
-                ListTile(leading: const Icon(Icons.check_circle_outline), title: Text(t.about.upToDate)),
-              if (latest != null) ..._latestSection(context, latest),
-              if (status != null && status.releases.isNotEmpty) ...[
-                const Divider(),
-                ListTile(dense: true, title: Text(t.about.olderReleases)),
-                for (final release in status.releases.where((release) => release != latest))
-                  ExpansionTile(
-                    title: Text(release.tag),
-                    subtitle: Text(_describe(release)),
-                    childrenPadding: const EdgeInsets.fromLTRB(Space.s4, 0, Space.s4, Space.s3),
-                    expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SelectableText(release.notes.trim().isEmpty ? t.about.noNotes : release.notes.trim()),
-                      TextButton(onPressed: () => _open(release.pageUrl), child: Text(t.about.openReleasePage)),
-                    ],
-                  ),
-              ],
+            ),
+            if (status?.error case final error?)
+              ListTile(
+                leading: Icon(Icons.error_outline, color: theme.colorScheme.error),
+                title: Text(updateErrorText(error)),
+                trailing: TextButton(
+                  onPressed: () => _open(ref.read(updateCheckerProvider).releasesUrl),
+                  child: Text(t.about.openReleasePage),
+                ),
+              )
+            else if (status != null && !status.checking && latest == null)
+              ListTile(leading: const Icon(Icons.check_circle_outline), title: Text(t.about.upToDate)),
+            if (latest != null) ..._latestSection(context, latest),
+            if (status != null && status.releases.isNotEmpty) ...[
+              const Divider(),
+              ListTile(dense: true, title: Text(t.about.olderReleases)),
+              for (final release in status.releases.where((release) => release != latest))
+                ExpansionTile(
+                  title: Text(release.tag),
+                  subtitle: Text(_describe(release)),
+                  childrenPadding: const EdgeInsets.fromLTRB(Space.s4, 0, Space.s4, Space.s3),
+                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SelectableText(release.notes.trim().isEmpty ? t.about.noNotes : release.notes.trim()),
+                    TextButton(onPressed: () => _open(release.pageUrl), child: Text(t.about.openReleasePage)),
+                  ],
+                ),
             ],
-          ),
+          ],
         ),
       ),
     );

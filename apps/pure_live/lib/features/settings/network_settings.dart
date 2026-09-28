@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart' show PageMargin;
 import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/system_proxy.dart';
@@ -52,7 +53,7 @@ class NetworkSettings extends StatelessWidget {
       SettingBuilder<List<String>>(
         setting: Settings.proxyPlatforms,
         builder: (context, chosen, set) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: PageMargin.rowInsets(context).copyWith(top: 0, bottom: 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

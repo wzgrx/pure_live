@@ -53,7 +53,7 @@ class PlatformStatusPage extends ConsumerWidget {
     final async = ref.watch(platformHealthProvider);
     final live = LiveTheme.of(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: PageAppBar(
         title: Text(t.about.platformStatus),
         actions: [
           IconButton(
@@ -63,25 +63,27 @@ class PlatformStatusPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: async.when(
-        loading: () => LoadingView(label: t.health.checkingAll),
-        error: (error, _) => MessageView.error(title: t.health.checkFailed, message: '$error'),
-        data: (results) => ListView(
-          children: [
-            for (final result in results)
-              ListTile(
-                leading: PlatformLogo(platformId: result.platform, size: Sizes.iconLg),
-                title: Text(platformNames[result.platform] ?? result.platform),
-                subtitle: Text(
-                  result.ok ? t.health.ok(ms: result.elapsed.inMilliseconds) : result.problem ?? t.health.failed,
+      body: PageBody(
+        child: async.when(
+          loading: () => LoadingView(label: t.health.checkingAll),
+          error: (error, _) => MessageView.error(title: t.health.checkFailed, message: '$error'),
+          data: (results) => ListView(
+            children: [
+              for (final result in results)
+                ListTile(
+                  leading: PlatformLogo(platformId: result.platform, size: Sizes.iconLg),
+                  title: Text(platformNames[result.platform] ?? result.platform),
+                  subtitle: Text(
+                    result.ok ? t.health.ok(ms: result.elapsed.inMilliseconds) : result.problem ?? t.health.failed,
+                  ),
+                  trailing: Icon(
+                    result.ok ? Icons.check_circle : Icons.error,
+                    color: result.ok ? live.success : Theme.of(context).colorScheme.error,
+                  ),
                 ),
-                trailing: Icon(
-                  result.ok ? Icons.check_circle : Icons.error,
-                  color: result.ok ? live.success : Theme.of(context).colorScheme.error,
-                ),
-              ),
-            Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.health.method)),
-          ],
+              Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.health.method)),
+            ],
+          ),
         ),
       ),
     );

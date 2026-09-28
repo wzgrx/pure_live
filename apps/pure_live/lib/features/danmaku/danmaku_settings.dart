@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
-import 'package:live_ui/live_ui.dart' show Sizes, Space;
+import 'package:live_ui/live_ui.dart' show PageMargin, Sizes, Space;
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_presets.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
@@ -349,7 +349,7 @@ class _DanmakuPresetRowState extends ConsumerState<DanmakuPresetRow> {
     final messenger = ScaffoldMessenger.maybeOf(context);
     void say(String text) => messenger?.showSnackBar(SnackBar(content: Text(text)));
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s2),
+      padding: PageMargin.rowInsets(context).copyWith(top: Space.s2, bottom: Space.s2),
       child: Wrap(
         spacing: Space.s2,
         runSpacing: Space.s2,

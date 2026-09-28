@@ -17,7 +17,7 @@ class BlockListPage extends StatelessWidget {
   Widget build(BuildContext context) => DefaultTabController(
     length: 2,
     child: Scaffold(
-      appBar: AppBar(
+      appBar: PageAppBar(
         title: Text(t.danmaku.blockListTitle),
         bottom: TabBar(
           tabs: [
@@ -26,11 +26,13 @@ class BlockListPage extends StatelessWidget {
           ],
         ),
       ),
-      body: const TabBarView(
-        children: [
-          _RuleList(kind: BlockKind.keyword),
-          _RuleList(kind: BlockKind.user),
-        ],
+      body: const PageBody(
+        child: TabBarView(
+          children: [
+            _RuleList(kind: BlockKind.keyword),
+            _RuleList(kind: BlockKind.user),
+          ],
+        ),
       ),
     ),
   );

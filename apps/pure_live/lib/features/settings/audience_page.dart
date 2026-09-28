@@ -18,39 +18,41 @@ class AudiencePage extends ConsumerWidget {
     final preferOnline = ref.watch(preferRealOnlineSetting);
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(t.settings.accounts.audience)),
-      body: ListView(
-        children: [
-          SettingsHeader(t.settings.audience.shown),
-          RadioGroup<bool>(
-            groupValue: preferOnline,
-            onChanged: (value) {
-              if (value != null) unawaited(ref.read(preferRealOnlineSetting.notifier).set(value));
-            },
-            child: Column(
-              children: [
-                RadioListTile<bool>(
-                  value: false,
-                  title: Text(t.settings.audience.heatFirst),
-                  subtitle: Text(t.settings.audience.heatFirstSubtitle),
-                ),
-                RadioListTile<bool>(
-                  value: true,
-                  title: Text(t.settings.audience.onlineFirst),
-                  subtitle: Text(t.settings.audience.onlineFirstSubtitle),
-                ),
-              ],
-            ),
-          ),
-          SettingsHeader(t.settings.audience.meaning),
-          for (final id in platformOrder)
-            if (audienceNotes[id] case final note?)
-              ListTile(
-                leading: PlatformLogo(platformId: id, size: 24),
-                title: Text(platformNames[id] ?? id),
-                subtitle: Text(note, style: theme.textTheme.bodySmall),
+      appBar: PageAppBar(title: Text(t.settings.accounts.audience)),
+      body: PageBody(
+        child: ListView(
+          children: [
+            SettingsHeader(t.settings.audience.shown),
+            RadioGroup<bool>(
+              groupValue: preferOnline,
+              onChanged: (value) {
+                if (value != null) unawaited(ref.read(preferRealOnlineSetting.notifier).set(value));
+              },
+              child: Column(
+                children: [
+                  RadioListTile<bool>(
+                    value: false,
+                    title: Text(t.settings.audience.heatFirst),
+                    subtitle: Text(t.settings.audience.heatFirstSubtitle),
+                  ),
+                  RadioListTile<bool>(
+                    value: true,
+                    title: Text(t.settings.audience.onlineFirst),
+                    subtitle: Text(t.settings.audience.onlineFirstSubtitle),
+                  ),
+                ],
               ),
-        ],
+            ),
+            SettingsHeader(t.settings.audience.meaning),
+            for (final id in platformOrder)
+              if (audienceNotes[id] case final note?)
+                ListTile(
+                  leading: PlatformLogo(platformId: id, size: 24),
+                  title: Text(platformNames[id] ?? id),
+                  subtitle: Text(note, style: theme.textTheme.bodySmall),
+                ),
+          ],
+        ),
       ),
     );
   }

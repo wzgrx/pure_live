@@ -28,7 +28,7 @@ class AreaPage extends ConsumerWidget {
     final area = this.area;
     final followed = area != null && isAreaFollowed(ref.watch(followedAreasProvider).value ?? const [], platform, area);
     return Scaffold(
-      appBar: AppBar(
+      appBar: PageAppBar(
         title: Text(area == null ? '' : areaName(area)),
         actions: [
           if (area != null)

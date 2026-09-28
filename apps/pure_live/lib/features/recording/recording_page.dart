@@ -226,7 +226,9 @@ class RecordingPage extends ConsumerWidget {
     final manager = ref.watch(recordManagerProvider);
     final schedule = ref.watch(recordScheduleProvider);
     return Scaffold(
-      appBar: AppBar(
+      appBar: PageAppBar(
+        // Rows as wide as a reading column, not the window (principles §4.3).
+        maxContentWidth: Sizes.readingWidth,
         title: Text(t.app.recordings),
         actions: [
           IconButton(
@@ -253,17 +255,20 @@ class RecordingPage extends ConsumerWidget {
               message: t.recording.noTasksHint,
             );
           }
-          return ListView(
-            padding: const EdgeInsets.only(bottom: 96),
-            children: [
-              // F-IPTV-10: booked windows first.
-              if (schedule.isNotEmpty) ...[
-                SettingsHeader(t.recording.scheduled),
-                for (final item in schedule) _ScheduledTile(item: item),
-                if (tasks.isNotEmpty) SettingsHeader(t.recording.tasks),
+          return PageBody(
+            maxContentWidth: Sizes.readingWidth,
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 96),
+              children: [
+                // F-IPTV-10: booked windows first.
+                if (schedule.isNotEmpty) ...[
+                  SettingsHeader(t.recording.scheduled),
+                  for (final item in schedule) _ScheduledTile(item: item),
+                  if (tasks.isNotEmpty) SettingsHeader(t.recording.tasks),
+                ],
+                for (final task in tasks) _WatchedTask(initial: task),
               ],
-              for (final task in tasks) _WatchedTask(initial: task),
-            ],
+            ),
           );
         },
       ),

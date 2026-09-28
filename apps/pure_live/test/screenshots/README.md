@@ -12,7 +12,7 @@ flutter test --update-goldens test/screenshots  # 界面有意改动后重新生
 flutter test --exclude-tags screenshots         # 只跑其余测试
 ```
 
-- 这组测试带 `@Tags(['screenshots'])`，标签在 `apps/pure_live/dart_test.yaml` 声明，**默认包含在 `flutter test` 和门禁里**：88 张在 WSL 上约 30 秒，低于 60 秒的门槛（2026-09-28 实测）。
+- 这组测试带 `@Tags(['screenshots'])`，标签在 `apps/pure_live/dart_test.yaml` 声明，**默认包含在 `flutter test` 和门禁里**：93 张在 WSL 上约 25 秒，低于 60 秒的门槛（2026-09-28 实测）。
 - 比较失败时，差异图写在 `test/screenshots/failures/`（`*_masterImage`、`*_testImage`、`*_isolatedDiff`、`*_maskedDiff`，已忽略，不提交）。
 - 更新后用图片查看器或 `git diff --stat` 检查哪些图变了；只改了一处界面却有很多图变化，通常说明改动波及了共用组件。
 - 找不到字体文件的机器（例如 Windows 主机）上整组跳过，不算失败，控制台打印 `screenshots skipped: …`。
@@ -26,8 +26,10 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 | 中文（简体） | 系统的 Noto Sans CJK：`/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc`、`-Bold.ttc`（`fonts-noto-cjk`），取集合里的 SC 字面 | `Microsoft YaHei UI`（主题简体回退链的第一项，也是 Windows 的显式字体族）、`Segoe UI` |
 | 中文（繁体） | 同上，取 TC 字面 | `Microsoft JhengHei UI` |
 | 拉丁字母和数字（Android、TV） | Flutter SDK 的 Roboto：`$FLUTTER_ROOT/bin/cache/artifacts/material_fonts/Roboto-*.ttf` | `Roboto`，以及界面字体 `PureLive-screenshot-roboto` |
-| 图标 | 同目录的 `MaterialIcons-Regular.otf` | `MaterialIcons` |
+| 图标 | `material_symbols_icons` 包的 `MaterialSymbolsRounded.ttf`，从测试资源包读取，和应用打包的是同一个文件 | `packages/material_symbols_icons/MaterialSymbolsRounded` |
 | 画面上的弹幕 | Noto Sans CJK SC | 弹幕字体 `PureLive-screenshot-noto` |
+
+图标全部是 Material Symbols Rounded（principles §2.6）。Material Icons 字体不加载：Material 自带的控件默认画 Material Icons，所以每张截图在比较前先检查画面上有没有 Material Icons 字形，有就失败并列出码位。
 
 两处与真机不同，看图时注意：
 
@@ -164,4 +166,4 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 1. 在对应的 `*_screens_test.dart` 里写 `screenshot('<页面>', ShotScreen.<尺寸>, (app) => app.go('<路由>'), theme: …, locale: …)`；全屏路由用 `app.push`，需要等待的状态用 `app.frames()`。
 2. 页面要的数据放进 `ShotWorld`；需要的 provider 替换放进 `ShotApp.pump`。
 3. `flutter test --update-goldens test/screenshots --plain-name <文件名>` 生成，看过再提交，并把它加进上表。
-4. 总量控制在 10 MB 以内（现在约 8.2 MB）。截图越多越能防走样，但每次重新生成都会进仓库历史，所以只收有意义的组合。
+4. 总量控制在 10 MB 以内（现在约 8.3 MB，另有 `packages/live_ui/test/goldens/` 约 0.2 MB）。截图越多越能防走样，但每次重新生成都会进仓库历史，所以只收有意义的组合。

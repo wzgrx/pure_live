@@ -17,14 +17,19 @@ const _host = 'live.nicovideo.jp';
 /// [NiconicoApi], the seat in [NiconicoSeat]).
 ///
 /// Anonymous, like 3.x: every request goes as `niconico` with 3.x's
-/// headers, no cookie and no redirect following. A room is one program
-/// (`lv…`, the id 3.x stored), read from its watch page; the catalog is the
-/// seven recent-program tabs, natively paged; search lists programs on air.
-/// Streams have no URL: quality discovery opens a seat of its own, reads
-/// the HLS master with the seat's cookies and closes the seat before it
-/// returns; the chosen quality resolves to a [NiconicoInputRecipe] that
-/// playback and recording open themselves (M7, M8). Failures are
-/// `SiteError`s; nothing is disguised as an offline room.
+/// headers, no cookie and no redirect following. A room is a broadcaster
+/// (17-1): `user/<id>` or `ch<n>`, whose watch page shows the latest
+/// program; an official program, which has no broadcaster page, stays its
+/// program `lv…`. A program id 3.x stored is still accepted: its details
+/// come back as its broadcaster's room ([resolveRoomId] gives the id alone,
+/// for the migration, M9). The catalog is the seven recent-program tabs,
+/// natively paged; search lists programs on air. Streams have no URL:
+/// quality discovery opens a seat of its own (on the watch page just read
+/// when the room was entered, 17-6), reads the HLS master with the seat's
+/// cookies and closes the seat before it returns; the chosen quality
+/// resolves to a [NiconicoInputRecipe] of the program on air that playback
+/// and recording open themselves (M7, M8). Failures are `SiteError`s;
+/// nothing is disguised as an offline room.
 final class NiconicoSite extends LiveSite
     with LiveSiteLinks
     implements
@@ -41,14 +46,19 @@ final class NiconicoSite extends LiveSite
   /// `dart:io`) through [proxy]'s route for `niconico`, the one the app
   /// gives [http] too. [discoveryDeadline] bounds a whole quality discovery
   /// and [seatStartupTimeout] the wait for a seat's first grant (3.x: 30 s
-  /// and 20 s).
+  /// and 20 s). A watch page read on entering a room hands its seat
+  /// bootstrap to the first quality discovery within [bootstrapLifetime]
+  /// (17-6; zero turns it off), timed by [clock].
   new(
     this.http, {
     this.proxy = const FixedProxyPolicy(),
     SocketConnector? connector,
     this.discoveryDeadline = const Duration(seconds: 30),
     this.seatStartupTimeout = const Duration(seconds: 20),
-  }) : _connector = connector ?? connectIoSocket;
+    this.bootstrapLifetime = const Duration(seconds: 60),
+    DateTime Function()? clock,
+  }) : _connector = connector ?? connectIoSocket,
+       _clock = clock ?? DateTime.now;
 
   /// Transport.
   final LiveHttp http;
@@ -62,7 +72,22 @@ final class NiconicoSite extends LiveSite
   /// Longest wait for a seat's first grant.
   final Duration seatStartupTimeout;
 
+  /// How long the seat bootstrap of an entered room waits for the first
+  /// quality discovery (17-6). The bootstrap's token is stamped to expire
+  /// 24 h after the page was served and a seat opened on it after 30
+  /// minutes (2026-09-28, see the module record); a minute covers entering
+  /// a room and starting playback.
+  final Duration bootstrapLifetime;
+
   final SocketConnector _connector;
+  final DateTime Function() _clock;
+
+  /// Seat bootstraps of entered rooms by room id, each taken at most once
+  /// ([bootstrapLifetime]); never exported, never in a room.
+  final Map<String, ({NiconicoWatch watch, DateTime readAt})> _bootstraps = {};
+
+  /// Most bootstraps kept at once.
+  static const int _maxBootstraps = 8;
 
   /// How long the master playlist may take (3.x's 5 s budget).
   static const Duration masterTimeout = Duration(seconds: 5);
@@ -205,75 +230,129 @@ final class NiconicoSite extends LiveSite
 
   // Rooms ---------------------------------------------------------------------
 
-  /// [roomId] as a program id; anything else is `NotFound` without a
-  /// request (3.x's identity check).
-  static String _programId(String roomId) {
+  /// [roomId] as a room id (a broadcaster or a program); anything else is
+  /// `NotFound` without a request (3.x's identity check).
+  static String _roomId(String roomId) {
     final id = roomId.trim();
-    if (!NiconicoApi.isProgramId(id)) throw NotFound(_site, 'room id "$id" is not a niconico program');
+    if (!NiconicoApi.isRoomId(id)) throw NotFound(_site, 'room id "$id" is not a niconico room');
     return id;
   }
 
-  Future<NiconicoWatch> _watch(String programId, {CancelToken? cancel}) async {
-    final response = await _get(Uri.parse(NiconicoApi.watchUrl(programId)), cancel: cancel);
-    return NiconicoApi.watch(response.text, programId: programId, status: response.status);
+  Future<NiconicoWatch> _watch(String roomId, {CancelToken? cancel}) async {
+    final response = await _get(Uri.parse(NiconicoApi.watchUrl(roomId)), cancel: cancel);
+    return NiconicoApi.watch(response.text, roomId: roomId, status: response.status);
   }
 
-  Future<LiveRoom> _detail(String roomId) async => NiconicoApi.room(await _watch(_programId(roomId)));
+  /// The watch page of [roomId]. A program 3.x stored whose broadcaster is
+  /// known becomes the broadcaster's room: on air it is the broadcaster's
+  /// current program (one request); otherwise the broadcaster's own page is
+  /// read too (a second request, only for such old ids), since the
+  /// broadcaster may be on air with another program. With [keep], the seat
+  /// bootstrap of a program an anonymous viewer may watch waits for the
+  /// first quality discovery (17-6).
+  Future<LiveRoom> _detail(String roomId, {bool keep = false}) async {
+    final id = _roomId(roomId);
+    var watch = await _watch(id);
+    if (watch.roomId != id && watch.status != NiconicoProgramStatus.onAir) watch = await _watch(watch.roomId);
+    if (keep && watch.socket != null && bootstrapLifetime > Duration.zero) {
+      _bootstraps.remove(watch.roomId);
+      _bootstraps[watch.roomId] = (watch: watch, readAt: _clock());
+      if (_bootstraps.length > _maxBootstraps) _bootstraps.remove(_bootstraps.keys.first);
+    }
+    return NiconicoApi.room(watch);
+  }
 
-  /// The program's watch page (one request). The seat bootstrap on it is
-  /// short-lived and is not kept; streams read the page again.
+  /// The room's watch page (one request; see [resolveRoomId] for a program
+  /// id 3.x stored). The room is the broadcaster's, whatever id was given.
+  /// The seat bootstrap on it is kept for the first quality discovery only
+  /// (17-6), never in the room.
   @override
-  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId);
+  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId, keep: true);
 
-  /// The same one request, as in 3.x.
+  /// The same request, as in 3.x.
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId);
 
-  /// The same one request: recording opens its own seat from the recipe.
+  /// The same request: recording opens its own seat from the recipe.
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId);
 
   @override
   Future<bool> getLiveStatus({required String roomId}) async => (await _detail(roomId)).isLiveNow;
 
+  /// The room a stored [roomId] now is (17-1, for the migration of 3.x's
+  /// follows, M9): a broadcaster's room as it is, without a request; a
+  /// program id becomes its broadcaster's `user/<id>` or `ch<n>` from its
+  /// watch page (one request), or stays itself for an official program.
+  /// A program that no longer exists is `NotFound`; other failures are
+  /// their `SiteError`s, and the stored id is still accepted meanwhile.
+  Future<String> resolveRoomId(String roomId, {CancelToken? cancel}) async {
+    final id = _roomId(roomId);
+    if (!NiconicoApi.isProgramId(id)) return id;
+    return (await _watch(id, cancel: cancel)).roomId;
+  }
+
   // Seats ---------------------------------------------------------------------
 
-  /// Reads [programId]'s watch page and opens a seat on it: the grant of a
-  /// program on air that an anonymous viewer may watch. Not on air is
-  /// `StreamUnavailable`; a restricted program `RegionBlocked` or
-  /// `NeedsLogin`, without a connection (3.x's checks). The caller owns the
-  /// seat and closes it; playback and recording open one each (M7, M8).
-  Future<NiconicoSeat> openSeat(String programId, {CancelToken? cancel}) async {
-    final watch = await _watch(_programId(programId), cancel: cancel);
+  /// Reads [roomId]'s watch page (a broadcaster's shows its program on air)
+  /// and opens a seat on it: the grant of a program on air that an
+  /// anonymous viewer may watch. Not on air is `StreamUnavailable`; a
+  /// restricted program `RegionBlocked`, `NeedsLogin` or `StreamUnavailable`
+  /// with its reason, without a connection (3.x's checks). The caller owns
+  /// the seat and closes it; playback, recording and comments open one each
+  /// (M7, M8, M5).
+  Future<NiconicoSeat> openSeat(String roomId, {CancelToken? cancel}) async =>
+      (await _openSeat(await _watch(_roomId(roomId), cancel: cancel), cancel)).seat;
+
+  Future<({NiconicoWatch watch, NiconicoSeat seat})> _openSeat(NiconicoWatch watch, CancelToken? cancel) async {
     final error = watch.streamError;
     if (error != null) throw error;
     final socket = watch.socket;
-    if (socket == null) throw ApiChanged(_site, 'watch page: $programId has no seat');
-    return await NiconicoSeat.open(
+    if (socket == null) throw ApiChanged(_site, 'watch page: ${watch.programId} has no seat');
+    final seat = await NiconicoSeat.open(
       socket,
       connector: _connector,
       route: proxy.routeFor(_site, socket),
       cancel: cancel,
       startupTimeout: seatStartupTimeout,
     );
+    return (watch: watch, seat: seat);
+  }
+
+  /// A seat for [roomId]'s program on air: on the bootstrap the room was
+  /// entered with when it is fresh (17-6; taken once), else on a watch page
+  /// read now. A seat that fails on a kept bootstrap is opened once more on
+  /// a fresh page; cancellation is never retried.
+  Future<({NiconicoWatch watch, NiconicoSeat seat})> _seatFor(String roomId, CancelToken cancel) async {
+    final kept = _bootstraps.remove(roomId);
+    if (kept != null && _clock().difference(kept.readAt) <= bootstrapLifetime) {
+      try {
+        return await _openSeat(kept.watch, cancel);
+      } on SiteError {
+        // An expired or refused bootstrap: read the page again.
+      }
+    }
+    return await _openSeat(await _watch(roomId, cancel: cancel), cancel);
   }
 
   // Streams -------------------------------------------------------------------
 
-  String _streamProgram(LiveRoom detail) {
+  String _streamRoom(LiveRoom detail) {
     if (detail.platform != _site) throw ArgumentError.value(detail.platform, 'detail', 'not a niconico room');
-    return _programId(detail.roomId);
+    return _roomId(detail.roomId);
   }
 
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) =>
       discoverPlayQualitiesRaw(detail: detail);
 
-  /// The program's exact variants (3.x's quality catalog): the watch page
-  /// again, a seat of its own, the master with the seat's cookies for its
-  /// path; the seat is closed before this returns. A room the platform said
-  /// is offline has none (`StreamUnavailable` without a request; 3.x gave
-  /// an empty list).
+  /// The exact variants of the room's program on air (3.x's quality
+  /// catalog): the watch page again (or the one the room was just entered
+  /// with, 17-6), a seat of its own, the master with the seat's cookies for
+  /// its path; the seat is closed before this returns. A room the platform
+  /// said is offline has none (`StreamUnavailable` without a request; 3.x
+  /// gave an empty list). The watch page decides whether an anonymous
+  /// viewer may watch: a list card marked paid may have a free part.
   ///
   /// Bounded by [discoveryDeadline] (`NetworkFailure`) and [cancel] (a
   /// cancelled `TransportFailure`, also when it arrives while the seat
@@ -282,8 +361,8 @@ final class NiconicoSite extends LiveSite
   @override
   Future<List<LivePlayQuality>> discoverPlayQualitiesRaw({required LiveRoom detail, CancelToken? cancel}) async {
     _checkCancelled(cancel);
-    final programId = _streamProgram(detail);
-    if (detail.isExplicitlyOfflineNow) throw StreamUnavailable(_site, '$programId is offline');
+    final roomId = _streamRoom(detail);
+    if (detail.isExplicitlyOfflineNow) throw StreamUnavailable(_site, '$roomId is offline');
     final token = CancelToken();
     Exception? reason;
     void stop(Exception why) {
@@ -303,7 +382,9 @@ final class NiconicoSite extends LiveSite
     var finished = false;
     late final List<LivePlayQuality> qualities;
     try {
-      final owner = seat = await openSeat(programId, cancel: token);
+      final opened = await _seatFor(roomId, token);
+      final owner = seat = opened.seat;
+      final programId = opened.watch.programId;
       final source = owner.current.uri;
       moves = owner.changes.listen((grant) {
         if (grant.uri != source) stop(const StreamUnavailable(_site, 'the seat moved the stream to another master'));
@@ -317,7 +398,13 @@ final class NiconicoSite extends LiveSite
       final response = await _get(source, cancel: token, headers: {'cookie': ?cookie}, timeout: masterTimeout);
       final ended = reason;
       if (ended != null) throw ended;
-      qualities = NiconicoApi.qualities(response.text, source: source, programId: programId, status: response.status);
+      qualities = NiconicoApi.qualities(
+        response.text,
+        source: source,
+        programId: programId,
+        roomId: roomId,
+        status: response.status,
+      );
     } on TransportFailure catch (failure) {
       if (failure.reason != TransportReason.cancelled) rethrow;
       throw reason ?? failure;
@@ -335,20 +422,26 @@ final class NiconicoSite extends LiveSite
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The recipe of [quality] (3.x's owned input): no URL, no seat. A room
-  /// the platform said is offline is `StreamUnavailable`; a quality that is
-  /// not one of this program's (another program's, or a relabelled one) is
-  /// the caller's mistake. The applied quality is the one asked for.
+  /// The recipe of [quality] (3.x's owned input): no URL, no seat. The
+  /// recipe is the program the quality was read from, the one on air when
+  /// the room's qualities were discovered. A room the platform said is
+  /// offline is `StreamUnavailable`; a quality that is not one of this
+  /// room's (another room's, or a relabelled one) is the caller's mistake.
+  /// The applied quality is the one asked for.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
-    final programId = _streamProgram(detail);
-    if (detail.isExplicitlyOfflineNow) throw StreamUnavailable(_site, '$programId is offline');
+    final roomId = _streamRoom(detail);
+    if (detail.isExplicitlyOfflineNow) throw StreamUnavailable(_site, '$roomId is offline');
     final choice = quality.data;
-    if (choice is! NiconicoQuality || choice.programId != programId || quality.selectionId != choice.id) {
-      throw ArgumentError.value(quality, 'quality', 'not a quality of $programId');
+    if (choice is! NiconicoQuality || choice.roomId != roomId || quality.selectionId != choice.id) {
+      throw ArgumentError.value(quality, 'quality', 'not a quality of $roomId');
     }
     return LivePlayUrlResolution.owned(
-      input: NiconicoInputRecipe(programId: programId, resolution: choice.resolution, bandwidth: choice.bandwidth),
+      input: NiconicoInputRecipe(
+        programId: choice.programId,
+        resolution: choice.resolution,
+        bandwidth: choice.bandwidth,
+      ),
       appliedQualityData: choice.id,
     );
   }
@@ -374,8 +467,36 @@ final class NiconicoSite extends LiveSite
 
   // Links ---------------------------------------------------------------------
 
-  /// An https watch link of a program (3.x's `NiconicoLink`, see
-  /// [NiconicoApi.programIdFromUrl]).
+  /// A broadcaster link, without a request (17-2,
+  /// [NiconicoApi.broadcasterRoomIdFromUrl]): the broadcaster's watch page,
+  /// a user's page or a channel's page.
   @override
-  String? roomIdFromUrl(String url) => NiconicoApi.programIdFromUrl(url);
+  String? roomIdFromUrl(String url) => NiconicoApi.broadcasterRoomIdFromUrl(url);
+
+  /// A program link (3.x's watch link, and since 17-2 the old mobile site
+  /// and the app's `nico.ms` share link, [NiconicoApi.programIdFromUrl]):
+  /// its room is the program's broadcaster, known from its watch page.
+  @override
+  bool needsResolving(String url) => NiconicoApi.programIdFromUrl(url) != null;
+
+  /// The broadcaster of a program link: one request for the program's own
+  /// https watch page (never the link as written). When the page cannot be
+  /// read or parsed, the program itself, which the adapter still accepts
+  /// and turns into its broadcaster's room when entered.
+  @override
+  Future<LinkResolution?> resolveUrl(String url, ShortLinkSession session) async {
+    final programId = NiconicoApi.programIdFromUrl(url);
+    if (programId == null) return null;
+    final response = await session.get(
+      Uri.parse(NiconicoApi.watchUrl(programId)),
+      readBody: true,
+      headers: NiconicoApi.headers,
+    );
+    if (response == null) return LinkRoom(programId);
+    try {
+      return LinkRoom(NiconicoApi.watch(response.text, roomId: programId, status: response.status).roomId);
+    } on SiteError {
+      return LinkRoom(programId);
+    }
+  }
 }

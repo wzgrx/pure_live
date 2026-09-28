@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "platform": "niconico",
+  "sample": "S03-watch-official-channel",
+  "capturedAt": "2026-09-28T18:12:18.870971Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://live.nicovideo.jp/watch/ch2627923",
+    "headers": {
+      "Referer": "https://live.nicovideo.jp/",
+      "User-Agent": "Mozilla/5.0"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/html; charset=utf-8",
+      "content-length": "47410",
+      "connection": "close",
+      "date": "Mon, 28 Sep 2026 18:12:20 GMT",
+      "server": "istio-envoy",
+      "set-cookie": [
+        "nicosid=8265642988.9873545277; Domain=.nicovideo.jp; Path=/; Expires=Thu, 25 Sep 2036 18:12:20 GMT; SameSite=Lax",
+        "nicolive_color_theme=; Domain=.nicovideo.jp; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+        "audience_token=zrfzkszva-rrfu-3w161d84-68b2-6079-8n42-75t34cd72096_6271869744_3ji496w641du21z1104y39lx187687d423b44rq2; Max-Age=86400; Domain=.nicovideo.jp; Path=/; Expires=Tue, 29 Sep 2026 18:12:20 GMT; HttpOnly; Secure; SameSite=Lax",
+        "nicolivehistory=%8Z799462016%6G; Max-Age=2592000; Domain=.nicovideo.jp; Path=/; Expires=Wed, 28 Oct 2026 18:12:20 GMT; HttpOnly; Secure; SameSite=Lax"
+      ],
+      "strict-transport-security": "max-age=5184000",
+      "x-download-options": "noopen",
+      "x-content-type-options": "nosniff",
+      "x-permitted-cross-domain-policies": "none",
+      "x-xss-protection": "1; mode=block",
+      "surrogate-control": "no-store",
+      "cache-control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "pragma": "no-cache",
+      "expires": "0",
+      "x-frame-options": "SAMEORIGIN",
+      "x-nicolive-provider-type": "channel",
+      "x-nicolive-content-id": "lv348051859",
+      "etag": "W/\"b932-/aK5FC2csHk7u8xn9sYUYKs9eFA\"",
+      "vary": "Accept-Encoding",
+      "x-cache": "Miss from cloudfront",
+      "via": "1.1 1c4261963109b08453efb8a8f7b4e54c.cloudfront.net (CloudFront)",
+      "x-amz-cf-pop": "SFO53-P11",
+      "x-amz-cf-id": "4qY3dksfrTKSkRyHjqqvsx3dZ83H9g9oqbuW2h4zf_ju3nybXH72Vw=="
+    }
+  },
+  "raw": {
+    "sha256": "a24dbb9ded0cbf8399cb69c7a7458b3c2827c35dfb718b843d4cf91f70e55779",
+    "length": 47410
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "text:audienceToken",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:nicosid",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:audience_token",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:nicolivehistory",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratch capture script (urllib, schema 1, M4.U.17): adapter headers, redirects not followed; audience tokens, CSRF token and Set-Cookie values replaced by random same-shape values"
+}

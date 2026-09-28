@@ -41,24 +41,35 @@ enum NiconicoAccess {
 
 /// What 3.x kept of a watch page: the program, its state, whether it may be
 /// watched and, when on air and watchable, the seat's WebSocket bootstrap
-/// (short-lived: never stored in a room, used at once).
+/// (short-lived: never stored in a room). Since 17-1 also the room it
+/// belongs to (the broadcaster, [NiconicoApi.roomIdOf]), and the start,
+/// description and payment the room shows.
 @immutable
 final class NiconicoWatch {
-  /// Creates the snapshot.
+  /// Creates the snapshot; [roomId] defaults to the program.
   const new({
     required this.programId,
     required this.title,
     required this.broadcaster,
     required this.status,
     required this.access,
+    String? roomId,
     this.watchCount,
     this.socket,
     this.cover,
     this.avatar,
-  });
+    this.startedAt,
+    this.description,
+    this.paid = false,
+    this.deniedAs = LiveRestriction.needsLogin,
+  }) : roomId = roomId ?? programId;
 
   /// `lv…`: one broadcast, not its broadcaster.
   final String programId;
+
+  /// The room the page belongs to: `user/<id>` or `ch<n>` for a user's or a
+  /// channel's program, else the program itself (an official program).
+  final String roomId;
 
   /// Program title.
   final String title;
@@ -81,11 +92,40 @@ final class NiconicoWatch {
   /// The live screenshot, else the program thumbnail.
   final String? cover;
 
-  /// The broadcaster's icon.
+  /// The broadcaster's icon (a channel's icon for a channel).
   final String? avatar;
 
+  /// `program.beginTime`, when valid.
+  final DateTime? startedAt;
+
+  /// `program.description` as plain text (17-5), or null.
+  final String? description;
+
+  /// Whether the program is paid (a ticket or a channel membership). With
+  /// [access] allowed, an anonymous viewer watches its free part (a trial,
+  /// sample S03-watch-channel).
+  final bool paid;
+
+  /// What keeps a [NiconicoAccess.denied] program from an anonymous viewer:
+  /// private, paid, followers only, else a login.
+  final LiveRestriction deniedAs;
+
+  /// The restriction of a program on air (M2.1): none when an anonymous
+  /// viewer may watch (a paid program's free part too), else why not; null
+  /// when not on air (unified rule: no restriction for an offline room).
+  LiveRestriction? get restriction => status != NiconicoProgramStatus.onAir
+      ? null
+      : switch (access) {
+          NiconicoAccess.allowed => LiveRestriction.none,
+          NiconicoAccess.regionRestricted => LiveRestriction.regionBlocked,
+          NiconicoAccess.loginRequired => LiveRestriction.needsLogin,
+          NiconicoAccess.denied => deniedAs,
+        };
+
   /// Why the program's stream cannot be played now, or null: not on air is
-  /// `StreamUnavailable`, then the access check (3.x checked in this order).
+  /// `StreamUnavailable`, then the access check (3.x checked in this order):
+  /// a region `RegionBlocked`, a login `NeedsLogin`, a private, paid or
+  /// followers-only program `StreamUnavailable` with the reason (M2.1).
   SiteError? get streamError => switch ((status, access)) {
     (NiconicoProgramStatus.scheduled || NiconicoProgramStatus.ended, _) => StreamUnavailable(
       _site,
@@ -93,27 +133,68 @@ final class NiconicoWatch {
     ),
     (_, NiconicoAccess.regionRestricted) => RegionBlocked(_site, '$programId: country restriction'),
     (_, NiconicoAccess.loginRequired) => NeedsLogin(_site, '$programId: needLogin'),
-    (_, NiconicoAccess.denied) => NeedsLogin(_site, '$programId: canWatch false'),
+    (_, NiconicoAccess.denied) => switch (deniedAs) {
+      LiveRestriction.private => StreamUnavailable(_site, '$programId: private program'),
+      LiveRestriction.paid => StreamUnavailable(_site, '$programId: paid program (ticket or channel membership)'),
+      LiveRestriction.subscribersOnly => StreamUnavailable(_site, '$programId: followers-only program'),
+      _ => NeedsLogin(_site, '$programId: canWatch false'),
+    },
     _ => null,
   };
 
   @override
-  String toString() => 'NiconicoWatch($programId, ${status.name}, ${access.name})';
+  String toString() => 'NiconicoWatch($roomId, $programId, ${status.name}, ${access.name})';
 }
 
 /// What a room detail carries besides 3.x's fields: the state and access
 /// behind its notice, so the interface can show the notice in its own
-/// language (M13).
+/// language (M13), the program the watch page showed and whether it is
+/// paid.
 @immutable
 final class NiconicoRoomData {
   /// Creates the data.
-  const new({required this.status, required this.access});
+  const new({required this.status, required this.access, this.programId, this.paid = false});
 
   /// Broadcast state.
   final NiconicoProgramStatus status;
 
   /// Whether an anonymous viewer may watch.
   final NiconicoAccess access;
+
+  /// The program (`lv…`) the room showed: the broadcaster's current one on
+  /// air, else the latest.
+  final String? programId;
+
+  /// Whether that program is paid; with [access] allowed the viewer is on
+  /// its free part (a trial), which the interface may say (M13).
+  final bool paid;
+}
+
+/// What the comment connection (M5, 17-3) needs of a room on air that an
+/// anonymous viewer may watch: the room, to read the watch page and open a
+/// seat (`NiconicoSite.openSeat`) whose `messageServer` names the comment
+/// server, and the program, to tell when the broadcaster moved on to
+/// another one.
+@immutable
+final class NiconicoDanmakuArgs {
+  /// Creates the arguments.
+  const new({required this.roomId, required this.programId});
+
+  /// `user/<id>`, `ch<n>` or an official program's `lv…`.
+  final String roomId;
+
+  /// The program on air.
+  final String programId;
+
+  @override
+  bool operator ==(Object other) =>
+      other is NiconicoDanmakuArgs && other.roomId == roomId && other.programId == programId;
+
+  @override
+  int get hashCode => Object.hash(roomId, programId);
+
+  @override
+  String toString() => 'NiconicoDanmakuArgs($roomId, $programId)';
 }
 
 /// One media cookie of a stream grant; it applies to its path only.
@@ -205,14 +286,25 @@ final class NiconicoGrant {
 
 /// One quality of a program: an exact video variant of the master, by
 /// resolution and bandwidth (3.x's `NiconicoQuality`, bound to its program
-/// like 3.x's `_Choice`). Never holds a media URL or a cookie.
+/// like 3.x's `_Choice`, and to the room it was discovered for). Never
+/// holds a media URL or a cookie.
 @immutable
 final class NiconicoQuality {
-  /// Creates the quality.
-  const new({required this.programId, required this.width, required this.height, required this.bandwidth});
+  /// Creates the quality; [roomId] defaults to the program.
+  const new({
+    required this.programId,
+    required this.width,
+    required this.height,
+    required this.bandwidth,
+    String? roomId,
+  }) : roomId = roomId ?? programId;
 
   /// The program it was read from.
   final String programId;
+
+  /// The room it was discovered for (17-1: a broadcaster's room plays its
+  /// program on air).
+  final String roomId;
 
   /// Video width.
   final int width;
@@ -233,13 +325,14 @@ final class NiconicoQuality {
   String get label => '$width×$height · $bandwidth bps';
 
   @override
-  bool operator ==(Object other) => other is NiconicoQuality && other.programId == programId && other.id == id;
+  bool operator ==(Object other) =>
+      other is NiconicoQuality && other.roomId == roomId && other.programId == programId && other.id == id;
 
   @override
-  int get hashCode => Object.hash(programId, id);
+  int get hashCode => Object.hash(roomId, programId, id);
 
   @override
-  String toString() => 'NiconicoQuality($programId, $id)';
+  String toString() => 'NiconicoQuality($roomId, $programId, $id)';
 }
 
 /// The public recipe of a niconico input (3.x's `NiconicoInputRecipe`): the
@@ -334,25 +427,88 @@ abstract final class NiconicoApi {
   };
 
   static final RegExp _programId = RegExp(r'^lv[1-9][0-9]{0,17}$');
+  static final RegExp _userRoomId = RegExp(r'^user/[1-9][0-9]{0,18}$');
+  static final RegExp _channelRoomId = RegExp(r'^ch[1-9][0-9]{0,18}$');
+  static final RegExp _userId = RegExp(r'^[1-9][0-9]{0,18}$');
 
   /// Whether [id] is a program id (`lv` and up to 18 digits, no leading 0).
   static bool isProgramId(String id) => _programId.hasMatch(id);
 
-  /// The watch page of [programId].
-  static String watchUrl(String programId) => '$origin/watch/$programId';
+  /// Whether [id] is a user's room (`user/<id>`, 17-1).
+  static bool isUserRoomId(String id) => _userRoomId.hasMatch(id);
 
-  static final RegExp _watchLink = RegExp(
-    r'^https://live\.nicovideo\.jp/watch/(lv[1-9][0-9]{0,17})(?:\?[^#\s]*)?(?:#[^\s]*)?$',
+  /// Whether [id] is a channel's room (`ch<n>`, 17-1).
+  static bool isChannelRoomId(String id) => _channelRoomId.hasMatch(id);
+
+  /// Whether [id] is a broadcaster's room: a user or a channel (17-1).
+  static bool isBroadcasterRoomId(String id) => isUserRoomId(id) || isChannelRoomId(id);
+
+  /// Whether [id] is a room: a broadcaster (17-1) or a program (an
+  /// official program, or a follow 3.x stored).
+  static bool isRoomId(String id) => isProgramId(id) || isBroadcasterRoomId(id);
+
+  /// The watch page of a room: `watch/user/<id>` and `watch/ch<n>` show the
+  /// broadcaster's latest program (the one on air, else the last one),
+  /// `watch/lv…` the program.
+  static String watchUrl(String roomId) => '$origin/watch/$roomId';
+
+  /// The room of a program (17-1): a user's program (provider type
+  /// `community`, [userId] its provider id) is `user/<id>`; a channel's
+  /// program (`channel`, [channelId] its social group `ch<n>`) is the
+  /// channel; anything else, an official program included, is the program
+  /// itself ([programId]). `watch/ch<n>` never shows an official program
+  /// (2026-09-28: the official lv351173882 of ch2627923 was on air while
+  /// `watch/ch2627923` showed a 2025 channel program), so an official program
+  /// is not its channel's room.
+  static String roomIdOf({required String programId, Object? providerType, Object? userId, Object? channelId}) {
+    final user = userId is int ? '$userId' : (userId is String ? userId : '');
+    if ((providerType == 'community' || providerType == 'user') && _userId.hasMatch(user)) return 'user/$user';
+    if (providerType == 'channel' && channelId is String && isChannelRoomId(channelId)) return channelId;
+    return programId;
+  }
+
+  static const String _query = r'(?:\?[^#\s]*)?(?:#\S*)?$';
+  static final RegExp _programLink = RegExp(
+    r'^https?://(?:live\.nicovideo\.jp|sp\.live\.nicovideo\.jp)/watch/(lv[1-9][0-9]{0,17})' + _query,
+  );
+  static final RegExp _shortLink = RegExp(r'^https?://nico\.ms/(lv[1-9][0-9]{0,17})' + _query);
+  static final RegExp _broadcasterLink = RegExp(
+    r'^https?://(?:live\.nicovideo\.jp|sp\.live\.nicovideo\.jp)/watch/(user/[1-9][0-9]{0,18}|ch[1-9][0-9]{0,18})' +
+        _query,
+  );
+  static final RegExp _userPage = RegExp(
+    r'^https?://(?:www\.|sp\.)?nicovideo\.jp/user/([1-9][0-9]{0,18})(?:/[a-z_]+)?' + _query,
+  );
+  static final RegExp _channelPage = RegExp(
+    r'^https?://ch\.nicovideo\.jp/(?:channel/)?(ch[1-9][0-9]{0,18})(?:/[a-z_]+)?' + _query,
   );
 
-  /// The program of an https watch link as written (3.x's `NiconicoLink`):
-  /// exactly `https://live.nicovideo.jp/watch/lv…` with an optional query
-  /// and fragment. Other hosts, ports, credentials, `http`, encoded or
-  /// dot-segment paths and user or channel pages are not programs.
+  /// The program of a program link as written: `live.nicovideo.jp/watch/lv…`
+  /// (3.x's `NiconicoLink`), and since 17-2 the old mobile site
+  /// `sp.live.nicovideo.jp/watch/lv…` and the app's share link
+  /// `nico.ms/lv…`, over https or http, with an optional query and
+  /// fragment. Other hosts, ports, credentials, encoded or dot-segment paths
+  /// and trailing segments are not programs. The adapter never requests the
+  /// link itself, only its own https watch page.
   static String? programIdFromUrl(String url) {
     final value = url.trim();
     if (value.length > 2048) return null;
-    return _watchLink.firstMatch(value)?.group(1);
+    return (_programLink.firstMatch(value) ?? _shortLink.firstMatch(value))?.group(1);
+  }
+
+  /// The broadcaster of a broadcaster link as written (17-2):
+  /// `live.nicovideo.jp/watch/user/<id>` and `…/watch/ch<n>` (also on
+  /// `sp.live.nicovideo.jp`), a user's page `www.nicovideo.jp/user/<id>` and
+  /// a channel's page `ch.nicovideo.jp/ch<n>` or `…/channel/ch<n>` (one
+  /// lower-case subpage such as `/live` allowed), over https or http. A
+  /// channel page under a custom name (`ch.nicovideo.jp/<name>`) needs a
+  /// request and is not recognised.
+  static String? broadcasterRoomIdFromUrl(String url) {
+    final value = url.trim();
+    if (value.length > 2048) return null;
+    final user = _userPage.firstMatch(value)?.group(1);
+    if (user != null) return 'user/$user';
+    return (_broadcasterLink.firstMatch(value) ?? _channelPage.firstMatch(value))?.group(1);
   }
 
   // Catalog -------------------------------------------------------------------
@@ -370,11 +526,14 @@ abstract final class NiconicoApi {
   /// `recent/v1/programs` (`search: false`) or `search/v1/programs`: page
   /// [page] of on-air programs, more while `totalCount > page × size`.
   ///
-  /// 3.x's checks: `meta` 200/`OK` (else the service failed:
+  /// 3.x's checks of the page: `meta` 200/`OK` (else the service failed:
   /// `NetworkFailure`); `totalCount` a count not below the rows; at most 70
-  /// (40) rows; every row on air, of a known provider type, with a title, a
-  /// name and a watch link to itself, and no program twice. Anything else is
-  /// `ApiChanged` for the whole page.
+  /// (40) rows; anything else is `ApiChanged`. Each row must be on air, of a
+  /// known provider type, with a title, a name and a watch link to itself;
+  /// since 17-4 a row that is not only drops itself, and the page is
+  /// `ApiChanged` only when every row is malformed. A card is a broadcaster
+  /// ([roomIdOf], 17-1), once per page: a second program of the same room is
+  /// left out.
   static LiveDirectoryPage directoryPage(String body, {required int page, required bool search, int status = 200}) {
     final what = search ? 'search' : 'recent';
     _status(status, what);
@@ -392,10 +551,19 @@ abstract final class NiconicoApi {
     }
     final seen = <String>{};
     final rooms = <LiveRoom>[];
+    ApiChanged? malformed;
     for (final row in rows) {
-      final room = _listRoom(_map(row, '$what row'), search: search);
-      if (!seen.add(room.roomId)) throw ApiChanged(_site, '$what: ${room.roomId} twice');
-      rooms.add(room);
+      final LiveRoom room;
+      try {
+        room = _listRoom(_map(row, '$what row'), search: search);
+      } on ApiChanged catch (error) {
+        malformed ??= error;
+        continue;
+      }
+      if (seen.add(room.roomId)) rooms.add(room);
+    }
+    if (rooms.isEmpty && malformed != null) {
+      throw ApiChanged(_site, 'every $what row is malformed: ${malformed.detail}');
     }
     return LiveDirectoryPage(rooms: rooms, page: page, hasMore: total > page * size);
   }
@@ -407,8 +575,9 @@ abstract final class NiconicoApi {
     if (programIdFromUrl(link) != id && link.trim() != id) throw ApiChanged(_site, 'list: $id links to $link');
     final state = row[search ? 'status' : 'liveCycle'];
     if (state != 'ON_AIR') throw ApiChanged(_site, 'list: $id is $state');
-    if (!const {'community', 'channel', 'official'}.contains(row['providerType'])) {
-      throw ApiChanged(_site, 'list: $id provider type ${row['providerType']}');
+    final providerType = row['providerType'];
+    if (!const {'community', 'channel', 'official'}.contains(providerType)) {
+      throw ApiChanged(_site, 'list: $id provider type $providerType');
     }
     final provider = row[search ? 'supplier' : 'programProvider'];
     final social = row['socialGroup'];
@@ -416,8 +585,14 @@ abstract final class NiconicoApi {
     final icons = provider is Map ? provider['icons'] : null;
     final icon = provider is Map ? (search ? (icons is Map ? icons['uri150x150'] : null) : provider['icon']) : null;
     final count = _count(_map(row['statistics'], 'list statistics')['watchCount'], 'list watchCount');
+    final roomId = roomIdOf(
+      programId: id,
+      providerType: providerType,
+      userId: provider is Map ? provider[search ? 'programProviderId' : 'id'] : null,
+      channelId: social is Map ? social['id'] : null,
+    );
     return LiveRoom(
-      roomId: id,
+      roomId: roomId,
       platform: _site,
       title: _text(row['title'], 'title'),
       nick: _text(name ?? (social is Map ? social['name'] : null), 'name'),
@@ -425,30 +600,70 @@ abstract final class NiconicoApi {
       // to the social group's for a missing one.
       avatar: publicImage(icon) ?? publicImage(social is Map ? social['thumbnailUrl'] : null) ?? '',
       cover: publicImage(row['flippedListingThumbnail']) ?? publicImage(row['listingThumbnail']) ?? '',
-      link: watchUrl(id),
+      link: watchUrl(roomId),
       liveStatus: LiveStatus.live,
+      startedAt: search ? startedAtSeconds(row['beginTime']) : startedAtMilliseconds(row['beginAt']),
+      restriction: _listRestriction(row, search: search),
       totalViewers: count == null ? '' : '$count',
       audienceMetricType: AudienceMetricType.totalViewers,
     );
   }
+
+  /// A list row's restriction: a paid program (`isPayProgram`, search's
+  /// `payment`) is [LiveRestriction.paid], a followers-only one
+  /// [LiveRestriction.subscribersOnly], both flags false none; without the
+  /// flags the row says nothing (null). A paid channel program may still
+  /// have a free part an anonymous viewer can watch: the watch page decides
+  /// playback.
+  static LiveRestriction? _listRestriction(Map<String, dynamic> row, {required bool search}) {
+    final paid = row[search ? 'payment' : 'isPayProgram'];
+    final followers = row['isFollowerOnly'];
+    if (paid == true || paid is Map) return LiveRestriction.paid;
+    if (followers == true) return LiveRestriction.subscribersOnly;
+    return paid == false && followers == false ? LiveRestriction.none : null;
+  }
+
+  /// A start from epoch milliseconds (the recent list's `beginAt`); null
+  /// for anything that is not a time after 2001 and before 2286.
+  static DateTime? startedAtMilliseconds(Object? value) => switch (value) {
+    final int milliseconds when milliseconds >= 1000000000000 && milliseconds < 10000000000000 =>
+      DateTime.fromMillisecondsSinceEpoch(milliseconds, isUtc: true),
+    _ => null,
+  };
+
+  /// A start from epoch seconds (search's and the watch page's
+  /// `beginTime`); null for anything that is not a time after 2001 and
+  /// before 2286.
+  static DateTime? startedAtSeconds(Object? value) => switch (value) {
+    final int seconds when seconds >= 1000000000 && seconds < 10000000000 => DateTime.fromMillisecondsSinceEpoch(
+      seconds * 1000,
+      isUtc: true,
+    ),
+    _ => null,
+  };
 
   // Watch page ----------------------------------------------------------------
 
   static final RegExp _scriptTag = RegExp(r'''<script\b((?:[^>"']|"[^"]*"|'[^']*')*)>''', caseSensitive: false);
   static final RegExp _tagAttribute = RegExp(r'''([^\s"'>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?''');
 
-  /// The watch page of [programId]: `<script id="embedded-data">`'s
+  /// The watch page of [roomId]: `<script id="embedded-data">`'s
   /// `data-props`, HTML-decoded JSON (3.x read it with package:html).
   ///
   /// 3.x's checks, all `ApiChanged`: exactly one such script; the program
-  /// is [programId]; `status` `RELEASED`, `ON_AIR` or `ENDED`; the access
-  /// flags are booleans; `watchCount` null or a count. When on air and
-  /// watchable, the seat's `webSocketUrl` must be `wss://a.live2.nicovideo.jp`
-  /// `/[unama/]wsapi/v2/watch/<n>?…` without port, credentials, fragment or
-  /// repeated parameters, and `frontendId` 1–9999 (added as `frontend_id`).
-  /// Images that are not https on `*.nimg.jp` or `*.nicovideo.jp` are left
-  /// out without failing the page.
-  static NiconicoWatch watch(String body, {required String programId, int status = 200}) {
+  /// is [roomId] when that is a program (a broadcaster's page must be that
+  /// broadcaster's: its user id or its channel); `status` `RELEASED`,
+  /// `ON_AIR` or `ENDED`; the access flags are booleans; `watchCount` null
+  /// or a count. When on air and watchable, the seat's `webSocketUrl` must be
+  /// `wss://a.live2.nicovideo.jp/[unama/]wsapi/v2/watch/<n>?…` without port,
+  /// credentials, fragment or repeated parameters, and `frontendId` 1–9999
+  /// (added as `frontend_id`). Images that are not https on `*.nimg.jp` or
+  /// `*.nicovideo.jp` are left out without failing the page.
+  ///
+  /// The result's [NiconicoWatch.roomId] is [roomId] for a broadcaster; for
+  /// a program it is the program's broadcaster when it has one ([roomIdOf]:
+  /// how a 3.x follow becomes the broadcaster's, 17-1).
+  static NiconicoWatch watch(String body, {required String roomId, int status = 200}) {
     _status(status, 'watch page', notFound: true);
     _limit(body, 'watch page');
     final props = <String>[];
@@ -463,23 +678,42 @@ abstract final class NiconicoApi {
     } on FormatException {
       throw const ApiChanged(_site, 'watch page: embedded-data is not JSON');
     }
-    return watchData(data, programId: programId);
+    return watchData(data, roomId: roomId);
   }
 
   /// [watch] from the decoded `embedded-data`.
-  static NiconicoWatch watchData(Map<String, dynamic> data, {required String programId}) {
+  static NiconicoWatch watchData(Map<String, dynamic> data, {required String roomId}) {
     final program = _map(data['program'], 'program');
     final id = program['nicoliveProgramId'];
-    if (id is! String || id != programId) throw ApiChanged(_site, 'watch page: asked for $programId, got $id');
+    final supplier = _map(program['supplier'], 'supplier');
+    final social = data['socialGroup'];
+    final channel = social is Map && social['type'] == 'channel' ? social : null;
+    final String programId;
+    final String room;
+    if (isProgramId(roomId)) {
+      if (id is! String || id != roomId) throw ApiChanged(_site, 'watch page: asked for $roomId, got $id');
+      programId = id;
+      room = roomIdOf(
+        programId: id,
+        providerType: program['providerType'],
+        userId: supplier['supplierType'] == 'user' ? supplier['programProviderId'] : null,
+        channelId: channel?['id'],
+      );
+    } else {
+      if (id is! String || !isProgramId(id)) throw ApiChanged(_site, 'watch page: program id $id');
+      final owner = isUserRoomId(roomId) ? 'user/${supplier['programProviderId']}' : channel?['id'];
+      if (owner != roomId) throw ApiChanged(_site, 'watch page: asked for $roomId, got $id of $owner');
+      programId = id;
+      room = roomId;
+    }
     final status = switch (program['status']) {
       'RELEASED' => NiconicoProgramStatus.scheduled,
       'ON_AIR' => NiconicoProgramStatus.onAir,
       'ENDED' => NiconicoProgramStatus.ended,
       final other => throw ApiChanged(_site, 'watch page: status $other'),
     };
-    final needsLogin = _boolean(
-      _map(_map(data['programWatch'], 'programWatch')['condition'], 'condition')['needLogin'],
-    );
+    final condition = _map(_map(data['programWatch'], 'programWatch')['condition'], 'condition');
+    final needsLogin = _boolean(condition['needLogin']);
     final user = _map(data['userProgramWatch'], 'userProgramWatch');
     final countryRestricted = _boolean(user['isCountryRestrictionTarget']);
     final canWatch = _boolean(user['canWatch']);
@@ -496,10 +730,12 @@ abstract final class NiconicoApi {
       final site = _map(data['site'], 'site');
       socket = _socket(_map(site['relive'], 'relive')['webSocketUrl'], site['frontendId']);
     }
-    final supplier = _map(program['supplier'], 'supplier');
     final icons = supplier['icons'];
+    final payment = condition['payment'];
+    final paid = (payment is String && payment.isNotEmpty) || program['payment'] is Map;
     return NiconicoWatch(
       programId: programId,
+      roomId: room,
       title: _string(program['title'], 'title'),
       broadcaster: _string(supplier['name'], 'supplier.name'),
       status: status,
@@ -507,8 +743,43 @@ abstract final class NiconicoApi {
       watchCount: count,
       socket: socket,
       cover: _screenshot(program['screenshot']) ?? _thumbnail(program['thumbnail']),
-      avatar: icons is Map ? publicImage(icons['uri150x150']) : null,
+      // A channel's supplier has no icons: a channel's room shows the
+      // channel's icon, as its list card does (a user's social group is a
+      // deleted community with a placeholder icon, never used).
+      avatar:
+          (icons is Map ? publicImage(icons['uri150x150']) : null) ??
+          (isChannelRoomId(room) ? publicImage(channel?['thumbnailImageUrl']) : null),
+      startedAt: startedAtSeconds(program['beginTime']),
+      description: plainText(program['description']),
+      paid: paid,
+      deniedAs: program['isPrivate'] == true
+          ? LiveRestriction.private
+          : paid
+          ? LiveRestriction.paid
+          : program['isFollowerOnly'] == true
+          ? LiveRestriction.subscribersOnly
+          : LiveRestriction.needsLogin,
     );
+  }
+
+  static final RegExp _lineBreak = RegExp(r'<br\s*/?>|</p>|</div>|</li>', caseSensitive: false);
+  static final RegExp _tag = RegExp('<[^>]*>');
+
+  /// A program's `description` as plain text (17-5). In HTML (it has a
+  /// `<br>` or a block end) raw line breaks are only source layout and
+  /// read as spaces, `<br>` and block ends are the line breaks; plain text
+  /// keeps its own. Other tags (links, fonts) are dropped keeping their
+  /// text, entities are decoded, lines trimmed and runs of blank lines kept
+  /// to one; null when nothing is left.
+  static String? plainText(Object? value) {
+    if (value is! String) return null;
+    final source = value.replaceAll(RegExp(r'\r\n?'), '\n');
+    final layout = _lineBreak.hasMatch(source) ? source.replaceAll('\n', ' ') : source;
+    final lines = decodeHtmlEntities(layout.replaceAll(_lineBreak, '\n').replaceAll(_tag, ''))
+        .split('\n')
+        .map((line) => line.trim());
+    final text = lines.join('\n').replaceAll(RegExp(r'\n{3,}'), '\n\n').trim();
+    return text.isEmpty ? null : text;
   }
 
   static Uri _socket(Object? value, Object? frontend) {
@@ -568,28 +839,45 @@ abstract final class NiconicoApi {
     return value;
   }
 
-  /// The room of [watch] (3.x's detail): live when on air, else offline
-  /// (scheduled and ended alike); cumulative visits as `totalViewers`; the
-  /// notice 3.x wrote ([notice]); [NiconicoRoomData] for the interface.
-  static LiveRoom room(NiconicoWatch watch) => LiveRoom(
-    roomId: watch.programId,
-    platform: _site,
-    title: watch.title,
-    nick: watch.broadcaster,
-    cover: watch.cover ?? '',
-    avatar: watch.avatar ?? '',
-    link: watchUrl(watch.programId),
-    liveStatus: watch.status == NiconicoProgramStatus.onAir ? LiveStatus.live : LiveStatus.offline,
-    totalViewers: watch.watchCount == null ? '' : '${watch.watchCount}',
-    audienceMetricType: AudienceMetricType.totalViewers,
-    notice: notice(watch.status, watch.access),
-    data: NiconicoRoomData(status: watch.status, access: watch.access),
-  );
+  /// The room of [watch] (3.x's detail), as [NiconicoWatch.roomId]: live
+  /// when on air (restricted or not), else offline (scheduled and ended
+  /// alike); cumulative visits as `totalViewers`; the notice ([notice]);
+  /// [NiconicoRoomData] for the interface. On air it also has its start,
+  /// its restriction (M2.1) and, when an anonymous viewer may watch, the
+  /// comment arguments [NiconicoDanmakuArgs] (17-3, M5); the description is
+  /// the introduction (17-5).
+  static LiveRoom room(NiconicoWatch watch) {
+    final live = watch.status == NiconicoProgramStatus.onAir;
+    final text = notice(watch.status, watch.access, program: isProgramId(watch.roomId));
+    return LiveRoom(
+      roomId: watch.roomId,
+      platform: _site,
+      title: watch.title,
+      nick: watch.broadcaster,
+      cover: watch.cover ?? '',
+      avatar: watch.avatar ?? '',
+      link: watchUrl(watch.roomId),
+      liveStatus: live ? LiveStatus.live : LiveStatus.offline,
+      startedAt: live ? watch.startedAt : null,
+      restriction: watch.restriction,
+      introduction: watch.description,
+      totalViewers: watch.watchCount == null ? '' : '${watch.watchCount}',
+      audienceMetricType: AudienceMetricType.totalViewers,
+      notice: text.isEmpty ? null : text,
+      data: NiconicoRoomData(status: watch.status, access: watch.access, programId: watch.programId, paid: watch.paid),
+      danmakuData: live && watch.access == NiconicoAccess.allowed
+          ? NiconicoDanmakuArgs(roomId: watch.roomId, programId: watch.programId)
+          : null,
+    );
+  }
 
   /// 3.x's notice in its zh.json text: "not started" for a scheduled
-  /// program, the access restriction of a program on air, and always that a
-  /// follow is this one program.
-  static String notice(NiconicoProgramStatus status, NiconicoAccess access) {
+  /// program, the access restriction of a program on air, and, for a room
+  /// that is one [program] (an official program, or a 3.x follow that has no
+  /// broadcaster), that a follow is this one program. A broadcaster's room
+  /// (17-1) follows the broadcaster, so it has no such sentence; the
+  /// notice may then be empty.
+  static String notice(NiconicoProgramStatus status, NiconicoAccess access, {bool program = true}) {
     final restriction = switch (access) {
       NiconicoAccess.loginRequired => noticeText['niconico_login_required'],
       NiconicoAccess.regionRestricted => noticeText['niconico_region_restricted'],
@@ -599,7 +887,7 @@ abstract final class NiconicoApi {
     return [
       if (status == NiconicoProgramStatus.scheduled) noticeText['niconico_scheduled']!,
       if (status == NiconicoProgramStatus.onAir && restriction != null) restriction,
-      noticeText['niconico_program_scope']!,
+      if (program) noticeText['niconico_program_scope']!,
     ].join(' ');
   }
 
@@ -732,7 +1020,8 @@ abstract final class NiconicoApi {
   // Qualities -----------------------------------------------------------------
 
   /// The qualities of [programId] in the master at [source] (3.x's
-  /// `NiconicoQuality.parse`): one per video variant, by its `RESOLUTION`
+  /// `NiconicoQuality.parse`), discovered for [roomId] (default the
+  /// program): one per video variant, by its `RESOLUTION`
   /// and `BANDWIDTH`, highest first (height, width, then bandwidth). A
   /// variant without a resolution, two variants with the same pair, or a
   /// variant whose audio is ambiguous cannot be selected exactly, so the
@@ -744,6 +1033,7 @@ abstract final class NiconicoApi {
     String text, {
     required Uri source,
     required String programId,
+    String? roomId,
     int status = 200,
   }) {
     switch (status) {
@@ -770,6 +1060,7 @@ abstract final class NiconicoApi {
         final size = resolution.split('x').map(int.parse).toList();
         final quality = NiconicoQuality(
           programId: programId,
+          roomId: roomId,
           width: size[0],
           height: size[1],
           bandwidth: int.parse(variant.attributes['BANDWIDTH']!),

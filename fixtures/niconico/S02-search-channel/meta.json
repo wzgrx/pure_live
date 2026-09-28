@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "platform": "niconico",
+  "sample": "S02-search-channel",
+  "capturedAt": "2026-09-28T18:12:16.143487Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://live.nicovideo.jp/front/api/pages/search/v1/programs?keyword=%E3%83%8B%E3%83%A5%E3%83%BC%E3%82%B9&column=main&status=onair&page=1&disableGrouping=true",
+    "headers": {
+      "Referer": "https://live.nicovideo.jp/",
+      "User-Agent": "Mozilla/5.0"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "13013",
+      "connection": "close",
+      "date": "Mon, 28 Sep 2026 18:12:17 GMT",
+      "server": "istio-envoy",
+      "x-service-version": "v21.6.1",
+      "strict-transport-security": "max-age=5184000",
+      "x-download-options": "noopen",
+      "x-content-type-options": "nosniff",
+      "x-permitted-cross-domain-policies": "none",
+      "x-xss-protection": "1; mode=block",
+      "surrogate-control": "no-store",
+      "cache-control": "no-cache, no-store",
+      "pragma": "no-cache",
+      "expires": "0",
+      "x-frame-options": "SAMEORIGIN",
+      "set-cookie": "nicosid=3198485726.3644055861; Domain=.nicovideo.jp; Path=/; Expires=Thu, 25 Sep 2036 18:12:17 GMT; SameSite=Lax",
+      "x-niconico-sid": "3198485726.3644055861",
+      "etag": "W/\"32d5-FJJBZCrdqd0/sCoNzoygOj/bfag\"",
+      "vary": "Accept-Encoding",
+      "x-cache": "Miss from cloudfront",
+      "via": "1.1 dcca6391207041d7231b852f0754a432.cloudfront.net (CloudFront)",
+      "x-amz-cf-pop": "SFO53-P11",
+      "x-amz-cf-id": "jvj0q0KhLwqdobJ6IsYNQDO0mcvdNfnMRfAgXx_Lt5IW4cGNNl03dQ=="
+    }
+  },
+  "raw": {
+    "sha256": "34d27ae3a0a583ec15f796b5eeaf24a244170c6dfd0dc607a7c500305abfc92d",
+    "length": 13013
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:nicosid",
+      "rule": "secret"
+    },
+    {
+      "where": "header:x-niconico-sid",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratch capture script (urllib, schema 1, M4.U.17): adapter headers, redirects not followed; audience tokens, CSRF token and Set-Cookie values replaced by random same-shape values"
+}

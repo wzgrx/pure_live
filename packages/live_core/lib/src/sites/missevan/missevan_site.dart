@@ -13,17 +13,18 @@ const _site = 'missevan';
 /// The Missevan (猫耳 FM) adapter (3.x's `MissevanSite`; parsing in
 /// [MissevanApi]).
 ///
-/// Anonymous, like 3.x: no cookie, no account and no danmaku (3.x's
-/// Missevan had `EmptyDanmaku`). Every call is one request to
-/// `fm.missevan.com/api/v2/`, as in 3.x:
-/// - the catalog is `meta/data`;
+/// Anonymous, like 3.x: no cookie and no account. Every call is one request
+/// to `fm.missevan.com/api/v2/`, as in 3.x:
+/// - the catalog is `meta/data`, grouped by namespace (13-3);
 /// - recommendations and areas are native pages of `chatroom/open/list`
 ///   ([getDirectoryPage]); an area is asked for by its namespace;
-/// - search is `chatroom/search`, or the room itself for a room number or
-///   link;
+/// - search is `chatroom/search` (a long keyword cut to 100 characters,
+///   13-4), or the room itself for a room number or link;
 /// - room entry, follow refreshes and recordings read `live/{id}`, which
 ///   also holds the pull URLs, so playing asks nothing more; recovery reads
-///   it again for freshly signed URLs.
+///   it again for freshly signed URLs. Room entry also hands over the
+///   danmaku arguments ([MissevanDanmakuArgs], 13-2); the connection is the
+///   danmaku module's (M5), so [getDanmaku] is still 3.x's `EmptyDanmaku`.
 ///
 /// Failures are `SiteError`s; nothing is disguised as an offline room.
 final class MissevanSite extends LiveSite
@@ -83,7 +84,7 @@ final class MissevanSite extends LiveSite
 
   // Catalog and directory -----------------------------------------------------
 
-  /// The one category 猫耳 FM with the site's tabs as areas (see
+  /// The site's tabs as areas, grouped by namespace (see
   /// [MissevanApi.categories]); later pages are empty, without a request.
   @override
   Future<List<LiveCategory>> getCategories(int page, int pageSize) async {
@@ -135,9 +136,10 @@ final class MissevanSite extends LiveSite
   ///   page 1 only, or nothing when it does not exist;
   /// - another link (a URL with a scheme and host) finds nothing;
   /// - anything else is a `chatroom/search` keyword, [pageSize] a page. A
-  ///   keyword over 100 characters or with control characters, a page out
-  ///   of 1–10000 or a [pageSize] over 100 is refused (`ArgumentError`,
-  ///   no request), as 3.x refused them.
+  ///   keyword over 100 characters is cut to its first 100
+  ///   ([MissevanApi.searchKeyword], 13-4; 3.x refused it). A keyword with
+  ///   control characters, a page out of 1–10000 or a [pageSize] over 100
+  ///   is refused (`ArgumentError`, no request), as 3.x refused them.
   @override
   Future<List<LiveRoom>> searchRoomsCancellable(
     String keyword, {
@@ -158,12 +160,13 @@ final class MissevanSite extends LiveSite
       }
     }
     if (_isLink(input)) return const [];
-    if (!MissevanApi.isSearchable(input)) throw ArgumentError.value(keyword, 'keyword', 'not a Missevan keyword');
+    final text = MissevanApi.searchKeyword(input);
+    if (text == null) throw ArgumentError.value(keyword, 'keyword', 'not a Missevan keyword');
     if (page < 1 || page > 10000) throw RangeError.range(page, 1, 10000, 'page');
     if (pageSize > 100) throw RangeError.range(pageSize, 1, 100, 'pageSize');
     final response = await _get(
       'chatroom/search',
-      query: {'s': input, 'p': '$page', 'page_size': '$pageSize'},
+      query: {'s': text, 'p': '$page', 'page_size': '$pageSize'},
       cancel: cancel,
     );
     return MissevanApi.searchRooms(response.text, page: page, pageSize: pageSize, status: response.status);
@@ -193,19 +196,27 @@ final class MissevanSite extends LiveSite
 
   /// `live/{id}` as the room [roomId] (see [MissevanApi.detail]); an id
   /// that is not a room number is `NotFound` without a request.
-  Future<LiveRoom> _detail(String roomId, {bool media = true, CancelToken? cancel}) async {
+  Future<LiveRoom> _detail(String roomId, {bool media = true, bool withDanmaku = false, CancelToken? cancel}) async {
     final id = roomId.trim();
     if (!MissevanApi.idPattern.hasMatch(id)) throw NotFound(_site, 'not a room id: $id');
     final response = await _get('live/$id', cancel: cancel);
-    return MissevanApi.detail(response.text, roomId: id, media: media, status: response.status);
+    return MissevanApi.detail(
+      response.text,
+      roomId: id,
+      media: media,
+      withDanmaku: withDanmaku,
+      status: response.status,
+    );
   }
 
-  /// The room, with its pull URLs when live.
+  /// The room, with its pull URLs when live and the danmaku arguments
+  /// ([MissevanDanmakuArgs], live or not; 13-2).
   @override
-  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId);
+  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId, withDanmaku: true);
 
   /// The same single request as room entry (3.x): the card gets state,
-  /// title, heat and followers; `mergeFrom` keeps the rest.
+  /// title, heat, followers and, when live, the start time and no
+  /// restriction; `mergeFrom` keeps the rest.
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId);
 
@@ -220,31 +231,39 @@ final class MissevanSite extends LiveSite
 
   // Streams -------------------------------------------------------------------
 
-  /// 3.x's qualities, HLS and FLV (see [MissevanApi.qualities]), from the
-  /// pull URLs the room detail brought: no request. A room the platform
-  /// called offline is `StreamUnavailable` (3.x returned no qualities); a
-  /// room without pull URLs (a list card, a pending state) reads its detail
-  /// first.
+  /// The one quality 原画 with its FLV and HLS lines (see
+  /// [MissevanApi.qualities], 13-1), from the pull URLs the room detail
+  /// brought: no request. A room the platform called offline is
+  /// `StreamUnavailable` (3.x returned no qualities); a room without pull
+  /// URLs (a list card, a pending state) reads its detail first.
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
-    if (detail.data case final MissevanRoomData data when detail.isLiveNow) return MissevanApi.qualities(data);
+    if (detail.data case final MissevanRoomData data when detail.isLiveNow) return _offered(detail, data);
     if (detail.isExplicitlyOfflineNow) throw StreamUnavailable(_site, '${detail.roomId} is not live');
     final fresh = await _detail(detail.roomId);
-    if (fresh.data case final MissevanRoomData data) return MissevanApi.qualities(data);
+    if (fresh.data case final MissevanRoomData data) return _offered(fresh, data);
     throw StreamUnavailable(_site, '${detail.roomId} is not live');
+  }
+
+  static List<LivePlayQuality> _offered(LiveRoom room, MissevanRoomData data) {
+    final qualities = MissevanApi.qualities(data);
+    if (qualities.isEmpty) throw StreamUnavailable(_site, '${room.roomId} has no pull URL');
+    return qualities;
   }
 
   @override
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The line of [quality] among the room's qualities (by its id), with the
-  /// media headers and its lease. A quality the room no longer offers is
-  /// `StreamUnavailable`.
+  /// The lines of [quality] among the room's qualities (by its id; 3.x's
+  /// `hls` and `flv` name the one quality now, [MissevanApi.qualityIdFromLegacy]),
+  /// with the media headers and their leases. A quality the room does not
+  /// offer is `StreamUnavailable`.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
     final offered = await getPlayQualities(detail: detail);
-    final same = offered.where((option) => option.selectionId == quality.selectionId).firstOrNull;
+    final wanted = MissevanApi.qualityIdFromLegacy('${quality.selectionId}');
+    final same = offered.where((option) => '${option.selectionId}' == wanted).firstOrNull;
     if (same == null) throw StreamUnavailable(_site, 'quality ${quality.selectionId} is not offered');
     return MissevanApi.resolution(same);
   }

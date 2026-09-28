@@ -1,9 +1,9 @@
 // Missevan parsing against the recorded samples, compared field by field
 // with 3.x's frozen output (expected.json, written by
 // fixtures/missevan/legacy_expected.dart from 3.x's MissevanApi and
-// MissevanSite). Every intended difference is listed with its reason;
-// everything else must match. The synthetic cases port 3.x's
-// missevan_adapter_test.dart.
+// MissevanSite). Every intended difference is listed with its reason (an
+// upgrade row of docs/UPGRADES.md, or a unified principle); everything else
+// must match. The synthetic cases port 3.x's missevan_adapter_test.dart.
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
@@ -13,20 +13,47 @@ import 'fixture.dart';
 
 Fixture _sample(String name) => Fixture.load('missevan', name);
 
+/// Keys 3.x never wrote (M2.1); [_expectParity] checks them apart.
+const _v4Keys = ['startedAt', 'restriction'];
+
 /// Asserts that [actual] (a `toJson`) equals 3.x's [legacy] map on every key
-/// 3.x wrote, except [changed] (intended differences). 3.x wrote null where
-/// the immutable model writes ''.
+/// 3.x wrote, except [changed] (intended differences), and that the v4 keys
+/// are exactly [added]. 3.x wrote null where the immutable model writes ''.
 void _expectParity(
   Map<String, Object?> actual,
   Map<String, dynamic> legacy, {
   Set<String> changed = const {},
+  Map<String, Object?> added = const {},
   String? reason,
 }) {
   for (final MapEntry(:key, :value) in legacy.entries) {
     if (changed.contains(key)) continue;
     expect(actual[key] ?? '', value ?? '', reason: '${reason ?? ''} $key');
   }
+  for (final key in _v4Keys) {
+    expect(actual[key], added[key], reason: '${reason ?? ''} $key (v4 key)');
+  }
 }
+
+/// The recorded rows of a list or search sample.
+List<Map<String, dynamic>> _recordedRows(String name) {
+  final info = _info(name);
+  return ((info['Datas'] ?? info['data']) as List).cast<Map<String, dynamic>>();
+}
+
+/// The start time of a live row as the adapter writes it: `status.open_time`
+/// (epoch milliseconds) in ISO 8601 UTC; nothing when the row has none.
+Map<String, Object?> _startKeys(Map<String, dynamic> row) {
+  final status = row['status'] as Map<String, dynamic>;
+  final open = status['open_time'];
+  if (status['open'] != 1 || open is! int) return const {};
+  return {'startedAt': DateTime.fromMillisecondsSinceEpoch(open, isUtc: true).toIso8601String()};
+}
+
+/// The unified placeholder rule: the site's default picture as a cover is
+/// left empty, so 3.x's `cover` differs for such rows.
+Set<String> _placeholderKeys(Map<String, dynamic> row) =>
+    row['cover_url'] == MissevanApi.placeholderCover ? const {'cover'} : const {};
 
 /// 3.x's room projection: toJson plus `link`.
 Map<String, Object?> _projection(LiveRoom room) => {...room.toJson(), 'link': room.link};
@@ -73,31 +100,57 @@ void main() {
   group('S01 catalog', () {
     final meta = _sample('S01-meta');
 
-    test('3.x failed on the 团播 tab; the areas it knew match, 团播 joins them in place (REG-MISSEVAN-005)', () {
+    test('3.x failed on the 团播 tab; the areas it knew match apart from the group (REG-MISSEVAN-005, 13-3)', () {
       final legacy = _legacy('S01-meta');
       expect(legacy['getCategores'], {'throws': 'MissevanException', 'message': 'Missevan schema'});
       final categories = MissevanApi.categories(meta.body, status: meta.status);
       final known = _maps(legacy['getCategoresWithoutListTab']).single;
-      final category = categories.single;
-      expect((category.id, category.name), (known['id'], known['name']));
-      final areas = category.children.where((area) => area.areaType != 'list').toList();
-      final legacyAreas = _maps(known['children']);
+      expect((known['id'], known['name']), ('missevan', MissevanApi.legacyCategoryName));
+      final areas = [for (final category in categories) ...category.children.where((area) => area.areaType != 'list')];
+      final legacyAreas = {for (final area in _maps(known['children'])) '${area['areaType']}:${area['areaId']}': area};
       expect(areas, hasLength(legacyAreas.length));
-      for (final (index, area) in areas.indexed) {
-        _expectParity(area.toJson(), legacyAreas[index], reason: 'S01[$index]');
+      for (final area in areas) {
+        final key = '${area.areaType}:${area.areaId}';
+        final legacyArea = legacyAreas[key]!;
+        // 13-3: 3.x put every tab under 猫耳 FM; the area's identity
+        // (platform, namespace, id) is unchanged.
+        _expectParity(area.toJson(), legacyArea, changed: {'typeName'}, reason: 'S01 $key');
+        expect(legacyArea['typeName'], MissevanApi.legacyCategoryName);
+        expect(area.typeName, MissevanApi.namespaceNames[area.areaType]);
+        expect(area.hasSameIdentity(LiveArea.fromJson(legacyArea)), isTrue, reason: 'a followed area keeps working');
       }
-      expect(category.children.map((area) => '${area.areaType}:${area.areaId}:${area.areaName}'), [
-        'catalog:105:配音',
-        'catalog:104:音乐',
-        'catalog:116:情感',
-        'list:4:团播',
-        'tag:1:新星',
-        'catalog:115:放松',
-        'catalog:122:古风',
+    });
+
+    test('the tabs are grouped by namespace, in the order the site lists them (13-3)', () {
+      final categories = MissevanApi.categories(meta.body, status: meta.status);
+      expect(categories.map((category) => (category.id, category.name)), [
+        ('catalog', '分区'),
+        ('list', '团播'),
+        ('tag', '标签'),
       ]);
-      final team = category.children[3];
-      expect(team.typeName, '猫耳 FM');
+      expect(categories.map((category) => category.children.map((area) => '${area.areaId}:${area.areaName}')), [
+        ['105:配音', '104:音乐', '116:情感', '115:放松', '122:古风'],
+        ['4:团播'],
+        ['1:新星'],
+      ]);
+      for (final category in categories) {
+        for (final area in category.children) {
+          expect((area.platform, area.areaType, area.typeName), ('missevan', category.id, category.name));
+        }
+      }
+      final team = categories[1].children.single;
       expect(team.areaPic, 'https://static.maoercdn.com/live/catalog/icon/tuanbo.png');
+      final tagFirst = _ok({
+        'tabs': [
+          {'type': 'tag', 'tag_id': 1, 'name': '新星'},
+          {'type': 'catalog', 'catalog_id': 104, 'name': '音乐'},
+          {'type': 'tag', 'tag_id': 2, 'name': '热门'},
+        ],
+      });
+      expect(MissevanApi.categories(tagFirst).map((category) => (category.id, category.children.length)), [
+        ('tag', 2),
+        ('catalog', 1),
+      ]);
     });
 
     test('a catalog and a tag with the same number are different areas (REG-MISSEVAN-003)', () {
@@ -126,18 +179,26 @@ void main() {
       }
     });
 
-    test('other unknown tab types are skipped; a broken known tab still fails the catalog (3.x)', () {
+    test('unknown tab types and broken or repeated tabs are skipped; no usable tab is ApiChanged (容错)', () {
       final mixed = _ok({
         'tabs': [
           {'type': 'future', 'future_id': 9, 'name': 'x'},
           {'type': 'catalog', 'catalog_id': 1, 'name': '音乐'},
+          {'type': 'catalog', 'catalog_id': 1, 'name': '重复'},
+          {'type': 'catalog', 'catalog_id': 0, 'name': 'x'},
+          {'type': 'tag', 'tag_id': 2, 'name': ' '},
+          {'type': 'list', 'list_id': 4, 'name': '团播'},
+          'not a tab',
           {'type': 'tag', 'tag_id': '1', 'name': '新星'},
         ],
       });
-      expect(MissevanApi.categories(mixed).single.children.map((area) => (area.areaType, area.areaId)), [
+      final categories = MissevanApi.categories(mixed);
+      expect(categories.map((category) => category.id), ['catalog', 'tag']);
+      expect(categories.expand((category) => category.children).map((area) => (area.areaType, area.areaId)), [
         ('catalog', '1'),
         ('tag', '1'),
       ]);
+      expect(categories.first.children.single.areaName, '音乐', reason: 'the first of a repeated tab wins');
       for (final tabs in <Object?>[
         <Object?>[],
         null,
@@ -146,19 +207,14 @@ void main() {
           {'type': 'unknown', 'unknown_id': 1, 'name': 'x'},
         ],
         [
-          {'type': 'catalog', 'catalog_id': 1, 'name': 'x'},
-          {'type': 'catalog', 'catalog_id': 1, 'name': 'y'},
-        ],
-        [
           {'type': 'catalog', 'catalog_id': 0, 'name': 'x'},
-        ],
-        [
           {'type': 'tag', 'tag_id': 2, 'name': ' '},
         ],
         [
           {'type': 'list', 'list_id': 4, 'name': '团播'},
         ],
         ['not a tab'],
+        List.generate(101, (index) => {'type': 'catalog', 'catalog_id': index + 1, 'name': '$index'}),
       ]) {
         expect(() => MissevanApi.categories(_ok({'tabs': tabs})), throwsA(isA<ApiChanged>()), reason: '$tabs');
       }
@@ -180,13 +236,69 @@ void main() {
         expect((result.page, result.hasMore), (legacy['page'], legacy['hasMore']));
         final rooms = _maps(legacy['rooms']);
         expect(result.rooms.map((room) => room.roomId), rooms.map((room) => room['roomId']));
+        final rows = {for (final row in _recordedRows(name)) '${row['room_id']}': row};
         for (final (index, room) in result.rooms.indexed) {
-          _expectParity(_projection(room), rooms[index], reason: '$name[$index]');
+          final row = rows[room.roomId]!;
+          _expectParity(
+            _projection(room),
+            rooms[index],
+            changed: _placeholderKeys(row),
+            // The start time (unified principle); a list row does not say
+            // whether the room is restricted.
+            added: _startKeys(row),
+            reason: '$name[$index]',
+          );
           expect(room.isLiveNow, isTrue);
           expect(room.data, isNull, reason: 'list cards carry no pull URLs');
+          expect(room.startedAt, isNotNull, reason: 'every recorded live row has open_time');
         }
       });
     }
+
+    test('the site placeholder cover is left empty (unified placeholder rule)', () {
+      final page = MissevanApi.directoryPage(_sample('S02-list-last').body, page: 29);
+      final room = page.rooms.singleWhere((room) => room.roomId == '869228979');
+      final recorded = _recordedRows('S02-list-last').singleWhere((row) => row['room_id'] == 869228979);
+      expect(recorded['cover_url'], MissevanApi.placeholderCover);
+      expect(room.cover, isEmpty);
+      expect(room.avatar, isNotEmpty, reason: "the streamer's own avatar stays");
+      final stored = LiveRoom(roomId: '869228979', platform: 'missevan', cover: 'https://static.maoercdn.com/old.jpg');
+      expect(stored.mergeFrom(room).cover, 'https://static.maoercdn.com/old.jpg', reason: 'a stored cover stays');
+      final placeholders = [
+        for (final name in [
+          'S02-list-p1',
+          'S02-list-last',
+          'S02-list-catalog',
+          'S02-list-tag',
+          'S02-list-team',
+          'S03-search',
+          'S03-search-p2',
+        ])
+          ..._recordedRows(name).where((row) => _placeholderKeys(row).isNotEmpty),
+      ];
+      expect(placeholders, hasLength(6), reason: 'the recorded rows with the placeholder cover');
+      final row = _row(5)..['cover_url'] = 'http://static.maoercdn.com/avatars/icon01.png?x=1';
+      expect(MissevanApi.directoryPage(_ok(_page(1)..['Datas'] = [row]), page: 1).rooms.single.cover, isEmpty);
+    });
+
+    test('a live row starts at status.open_time; offline and bad values have no start (unified principle)', () {
+      final room = MissevanApi.directoryPage(_sample('S02-list-p1').body, page: 1).rooms.first;
+      expect(room.startedAt, DateTime.utc(2026, 9, 27, 12, 58, 55, 88));
+      expect(room.restriction, isNull, reason: 'a list row does not say');
+      Map<String, dynamic> timed(Object? time, {int open = 1}) =>
+          _row(1, open: open)..['status'] = {'open': open, 'open_time': time};
+      expect(MissevanApi.detail(_ok({'room': timed(1790481150876)}), roomId: '1', media: false).startedAt, isNotNull);
+      for (final value in [0, null, '', 'x', 1790481150, -1, 946684799999, 17904811508760]) {
+        final info = _page(1)..['Datas'] = [timed(value)];
+        expect(MissevanApi.directoryPage(_ok(info), page: 1).rooms.single.startedAt, isNull, reason: '$value');
+      }
+      expect(MissevanApi.startedAt('1790481150876'), DateTime.utc(2026, 9, 27, 3, 52, 30, 876));
+      final search = _ok({
+        'data': [timed(1790481150876, open: 0)],
+        'pagination': {'p': 1, 'pagesize': 20, 'maxpage': 1, 'count': 1},
+      });
+      expect(MissevanApi.searchRooms(search, page: 1, pageSize: 20).single.startedAt, isNull, reason: 'offline');
+    });
 
     test('S02-list-team: 3.x refused the list namespace; its page parses like any other', () {
       expect(_legacy('S02-list-team')['getDirectoryPage'], {
@@ -260,7 +372,8 @@ void main() {
       );
     });
 
-    test('a row without a valid state, score, room or creator id fails the page (3.x)', () {
+    test('a row without a valid state, score, room or creator id is skipped; a page of only such rows is ApiChanged '
+        '(容错; 3.x failed the page)', () {
       for (final edit in <void Function(Map<String, dynamic>)>[
         (row) => row['status'] = {'open': null},
         (row) => row['status'] = {'open': 2},
@@ -274,11 +387,39 @@ void main() {
       ]) {
         final row = _row(1);
         edit(row);
-        final info = _page(1)..['Datas'] = [row];
-        expect(() => MissevanApi.directoryPage(_ok(info), page: 1), throwsA(isA<ApiChanged>()), reason: '$row');
+        final mixed = _page(1)..['Datas'] = [row, _row(2), 'not a row'];
+        expect(MissevanApi.directoryPage(_ok(mixed), page: 1).rooms.map((room) => room.roomId), ['2'], reason: '$row');
+        final search = _ok({
+          'data': [_row(3, open: 0), row],
+          'pagination': {'p': 1, 'pagesize': 20, 'maxpage': 1, 'count': 2},
+        });
+        expect(MissevanApi.searchRooms(search, page: 1, pageSize: 20).map((room) => room.roomId), [
+          '3',
+        ], reason: '$row');
+        final only = _page(1)..['Datas'] = [row, 'not a row'];
+        expect(() => MissevanApi.directoryPage(_ok(only), page: 1), throwsA(isA<ApiChanged>()), reason: '$row');
+        final onlySearch = _ok({
+          'data': [row],
+          'pagination': {'p': 1, 'pagesize': 20, 'maxpage': 1, 'count': 1},
+        });
+        expect(
+          () => MissevanApi.searchRooms(onlySearch, page: 1, pageSize: 20),
+          throwsA(isA<ApiChanged>()),
+          reason: '$row',
+        );
       }
       final text = _row(1)..['status'] = {'open': '1'};
       expect(MissevanApi.directoryPage(_ok(_page(1)..['Datas'] = [text]), page: 1).rooms, hasLength(1));
+      expect(
+        () => MissevanApi.detail(
+          _ok({
+            'room': _row(1)..['status'] = {'open': 2},
+          }),
+          roomId: '1',
+        ),
+        throwsA(isA<ApiChanged>()),
+        reason: 'the room itself is no row to skip',
+      );
     });
 
     test('a card as 3.x built it: protocol-relative avatar made https, missing text empty', () {
@@ -305,8 +446,11 @@ void main() {
         final rooms = MissevanApi.searchRooms(fixture.body, page: page, pageSize: 20, status: fixture.status);
         final legacy = _maps(_legacy(name)['searchRooms']);
         expect(rooms.map((room) => room.roomId), legacy.map((room) => room['roomId']));
+        final rows = {for (final row in _recordedRows(name)) '${row['room_id']}': row};
         for (final (index, room) in rooms.indexed) {
-          _expectParity(_projection(room), legacy[index], reason: '$name[$index]');
+          final row = rows[room.roomId]!;
+          expect(_startKeys(row), isEmpty, reason: 'search rows carry no open_time');
+          _expectParity(_projection(room), legacy[index], changed: _placeholderKeys(row), reason: '$name[$index]');
         }
         expect(_legacy(name)['supportsSearchPaginationFor'], isTrue);
       });
@@ -332,48 +476,68 @@ void main() {
       expect(MissevanApi.searchRooms(sized, page: 1, pageSize: 30).map((room) => room.roomId), ['100', '101']);
     });
 
-    test("keywords 3.x's search accepted", () {
-      expect(MissevanApi.isSearchable(' 配音 '), isTrue);
-      expect(MissevanApi.isSearchable('x' * 100), isTrue);
-      expect(MissevanApi.isSearchable('x' * 101), isFalse);
-      expect(MissevanApi.isSearchable('a\nb'), isFalse);
-      expect(MissevanApi.isSearchable('a\u007fb'), isFalse);
-      expect(MissevanApi.isSearchable('  '), isFalse);
+    test('keywords: trimmed; over 100 characters cut to the first 100 (13-4); control characters refused (3.x)', () {
+      expect(MissevanApi.searchKeyword(' 配音 '), '配音');
+      expect(MissevanApi.searchKeyword('x' * 100), 'x' * 100);
+      expect(MissevanApi.searchKeyword('配' * 101), '配' * 100, reason: '3.x refused it');
+      expect(MissevanApi.searchKeyword('${'y' * 99} ${'z' * 50}'), 'y' * 99, reason: 'trimmed after the cut');
+      final emoji = '\u{1F600}' * 120;
+      expect(MissevanApi.searchKeyword(emoji), '\u{1F600}' * 100, reason: 'code points: an emoji is never split');
+      expect(MissevanApi.searchKeyword('${'a' * 99}\u{1F600}b'), '${'a' * 99}\u{1F600}');
+      for (final keyword in ['a\nb', 'a\u007fb', '  ', '', '${'x' * 150}\u0000']) {
+        expect(MissevanApi.searchKeyword(keyword), isNull, reason: keyword);
+        expect(MissevanApi.isSearchable(keyword), isFalse, reason: keyword);
+      }
+      expect(MissevanApi.isSearchable('x' * 101), isTrue);
+      expect(MissevanApi.maxKeywordLength, 100);
     });
   });
 
   group('S04 detail and streams', () {
-    test('S04-live: the room, its qualities, URLs and renewal times match 3.x', () {
+    test('S04-live: the room matches 3.x; its start time, no restriction (unified principles)', () {
       final fixture = _sample('S04-live');
       final legacy = _legacy('S04-live');
       final room = MissevanApi.detail(fixture.body, roomId: '453091860', status: fixture.status);
       for (final key in ['getRoomDetail', 'getRoomDetailForRefresh']) {
-        _expectParity(_projection(room), legacy[key] as Map<String, dynamic>, reason: key);
+        _expectParity(
+          _projection(room),
+          legacy[key] as Map<String, dynamic>,
+          added: {'startedAt': '2026-09-27T03:52:30.876Z', 'restriction': 'none'},
+          reason: key,
+        );
       }
       expect(room.followers, '2748');
       expect(room.introduction, endsWith('hlh6428'), reason: "the creator's, trimmed");
       expect(room.area, isEmpty, reason: 'the detail has no catalog_name');
-      final qualities = MissevanApi.qualities(room.data! as MissevanRoomData);
-      final expected = _maps(legacy['getPlayQualites']);
-      expect(qualities, hasLength(expected.length));
-      for (final (index, quality) in qualities.indexed) {
-        final want = expected[index];
-        expect((quality.quality, quality.id, quality.sort), (want['quality'], want['id'], want['sort']));
-        final urls = _maps(want['getPlayUrls']);
-        expect(quality.data, urls.map((url) => url['url']));
-        final resolution = MissevanApi.resolution(quality);
-        expect(resolution.urls, urls.map((url) => url['url']));
-        final lease = resolution.lines.single.lease!;
-        expect(lease.refreshAt.toIso8601String(), urls.single['getPlayUrlRefreshAt']);
-        expect(lease.expiresAt!.toIso8601String(), urls.single['getPlayUrlInvalidAt']);
+      expect(room.danmakuData, isNull, reason: 'only asked for on room entry');
+    });
+
+    test("S04-live: one quality 原画 whose lines are 3.x's two qualities, FLV first (13-1)", () {
+      final legacy = _maps(_legacy('S04-live')['getPlayQualites']);
+      expect(legacy.map((quality) => (quality['quality'], quality['id'], quality['sort'])), [
+        ('HLS', 'hls', 2),
+        ('FLV', 'flv', 1),
+      ]);
+      final room = MissevanApi.detail(_sample('S04-live').body, roomId: '453091860');
+      final quality = MissevanApi.qualities(room.data! as MissevanRoomData).single;
+      expect((quality.quality, quality.id, quality.selectionId), ('原画', '10000', '10000'));
+      final resolution = MissevanApi.resolution(quality);
+      expect(resolution.appliedQualityData, '10000');
+      expect(resolution.lines.map((line) => line.lineId), ['flv', 'hls']);
+      final byId = {for (final want in legacy) want['id']: _maps(want['getPlayUrls']).single};
+      for (final line in resolution.lines) {
+        final want = byId[line.lineId]!;
+        expect(line.url, want['url'], reason: '${line.lineId}: byte for byte');
+        expect(line.lease!.refreshAt.toIso8601String(), want['getPlayUrlRefreshAt']);
+        expect(line.lease!.expiresAt!.toIso8601String(), want['getPlayUrlInvalidAt']);
+        expect(Uri.parse(line.url).queryParameters['qn'], MissevanApi.originalQualityId);
       }
     });
 
-    test('S04-live: one line per quality with the media headers, format and lease', () {
+    test('S04-live: each line with the media headers, format and lease', () {
       final room = MissevanApi.detail(_sample('S04-live').body, roomId: '453091860');
-      final [hls, flv] = MissevanApi.qualities(room.data! as MissevanRoomData);
-      final hlsLine = MissevanApi.resolution(hls).lines.single;
-      final flvLine = MissevanApi.resolution(flv).lines.single;
+      final [flvLine, hlsLine] = MissevanApi.resolution(MissevanApi.qualities(room.data! as MissevanRoomData).single)
+          .lines;
       expect((hlsLine.format, hlsLine.lineId), (StreamFormat.hls, 'hls'));
       expect((flvLine.format, flvLine.lineId), (StreamFormat.flv, 'flv'));
       for (final line in [hlsLine, flvLine]) {
@@ -389,7 +553,17 @@ void main() {
       }
       expect(hlsLine.lease!.cutsConnection, isTrue, reason: 'the signed playlist is fetched again and again');
       expect(flvLine.lease!.cutsConnection, isFalse);
-      expect(MissevanApi.resolution(hls).appliedQualityData, 'hls');
+    });
+
+    test("3.x's quality ids map to the one quality, for M9 (13-1)", () {
+      expect(MissevanApi.legacyQualityIds, {'hls': '10000', 'flv': '10000'});
+      expect(MissevanApi.qualityIdFromLegacy('hls'), '10000');
+      expect(MissevanApi.qualityIdFromLegacy(' FLV '), '10000');
+      expect(MissevanApi.qualityIdFromLegacy('10000'), '10000');
+      expect(MissevanApi.qualityIdFromLegacy('other'), 'other');
+      for (final want in _maps(_legacy('S04-live')['getPlayQualites'])) {
+        expect(MissevanApi.qualityIdFromLegacy(want['id'] as String), MissevanApi.originalQualityId);
+      }
     });
 
     test('S04-offline: 3.x gave no qualities; the stale addresses are not read (REG-MISSEVAN-004)', () {
@@ -397,6 +571,8 @@ void main() {
       final legacy = _legacy('S04-offline');
       final room = MissevanApi.detail(fixture.body, roomId: '507069668');
       for (final key in ['getRoomDetail', 'getRoomDetailForRefresh']) {
+        // Offline: open_time is the 2021 broadcast's, so no start time; no
+        // restriction said.
         _expectParity(_projection(room), legacy[key] as Map<String, dynamic>, reason: key);
       }
       expect(legacy['getPlayQualites'], isEmpty);
@@ -404,15 +580,61 @@ void main() {
       expect(room.data, isNull);
       final channel = (_info('S04-offline')['room'] as Map<String, dynamic>)['channel'] as Map<String, dynamic>;
       expect(channel['flv_pull_url'], isNotEmpty, reason: 'the site still lists an old broadcast');
+      final status = (_info('S04-offline')['room'] as Map<String, dynamic>)['status'] as Map<String, dynamic>;
+      expect(status['open_time'], 1639706765164, reason: 'the last broadcast, not a start to show');
     });
 
     test('a room number or link search: the room without its pull URLs, as 3.x', () {
-      for (final (name, id) in [('S04-live', '453091860'), ('S04-offline', '507069668')]) {
+      for (final (name, id, added) in [
+        ('S04-live', '453091860', {'startedAt': '2026-09-27T03:52:30.876Z'}),
+        ('S04-offline', '507069668', const <String, Object?>{}),
+      ]) {
         final room = MissevanApi.detail(_sample(name).body, roomId: id, media: false);
         final legacy = _maps(_legacy(name)['searchRooms']).single;
-        _expectParity(_projection(room), legacy, reason: name);
+        // The start time (unified principle); without the pull URLs read, no
+        // restriction is said.
+        _expectParity(_projection(room), legacy, added: added, reason: name);
         expect(room.data, isNull);
         expect(_legacy(name)['supportsSearchPaginationFor'], isFalse);
+      }
+    });
+
+    test('danmaku arguments on request: the room and its socket, live or not (13-2)', () {
+      for (final (name, id) in [('S04-live', '453091860'), ('S04-offline', '507069668')]) {
+        final room = MissevanApi.detail(_sample(name).body, roomId: id, withDanmaku: true);
+        final args = room.danmakuData! as MissevanDanmakuArgs;
+        expect(args.roomId, id);
+        expect(args.url.toString(), 'wss://im.missevan.com/ws?room_id=$id');
+        expect(args.headers, MissevanApi.headers);
+        expect(args.headers.keys, isNot(contains('cookie')), reason: "the guest session is the connection's");
+        expect(room.toJson().keys, isNot(contains('danmakuData')), reason: 'never stored');
+      }
+      expect(MissevanApi.guestSession.toString(), 'https://fm.missevan.com/api/user/info');
+      expect(_sample('S05-user-info').url, MissevanApi.guestSession);
+    });
+
+    test('danmaku socket: only wss on missevan.com for this room; otherwise the known form', () {
+      Uri socket(Object? sockets) => MissevanApi.danmakuArgs({'websocket': sockets}, roomId: '100').url;
+      const fallback = 'wss://im.missevan.com/ws?room_id=100';
+      expect(socket(['wss://im2.missevan.com/ws?room_id=100']).toString(), 'wss://im2.missevan.com/ws?room_id=100');
+      expect(socket(['wss://missevan.com/ws']).toString(), 'wss://missevan.com/ws');
+      expect(
+        socket(['wss://evil.example/ws?room_id=100', ' wss://im.missevan.com/ws?room_id=100 ']).toString(),
+        fallback,
+      );
+      for (final sockets in <Object?>[
+        null,
+        'wss://im.missevan.com/ws?room_id=100',
+        <Object?>[],
+        [10],
+        ['ws://im.missevan.com/ws?room_id=100'],
+        ['https://im.missevan.com/ws?room_id=100'],
+        ['wss://im.missevan.com.evil.example/ws?room_id=100'],
+        ['wss://user@im.missevan.com/ws?room_id=100'],
+        ['wss://im.missevan.com/ws?room_id=101'],
+        ['wss://im.missevan.com/ws?room_id=%zz'],
+      ]) {
+        expect(socket(sockets).toString(), fallback, reason: '$sockets');
       }
     });
 
@@ -424,7 +646,7 @@ void main() {
       expect(() => MissevanApi.detail(fixture.body, roomId: '1'), throwsA(isA<NotFound>()), reason: 'the code alone');
     });
 
-    test('3.x fixture: HTTPS URLs, stable transport ids, heat and followers', () {
+    test('3.x fixture: HTTPS URLs, stable line ids, heat and followers', () {
       final room = MissevanApi.detail(_ok(_detail()), roomId: '100');
       expect(room.isLiveNow, isTrue);
       expect(room.link, 'https://fm.missevan.com/live/100');
@@ -432,13 +654,16 @@ void main() {
       expect(room.followers, '12');
       expect(room.avatar, 'https://static.maoercdn.com/avatar.png');
       expect(room.introduction, 'fixture');
+      expect(room.restriction, LiveRestriction.none, reason: 'the site hands the pull URLs to anyone');
+      expect(room.startedAt, isNull, reason: 'no open_time in this row');
       final qualities = MissevanApi.qualities(room.data! as MissevanRoomData);
-      expect(qualities.map((quality) => quality.selectionId), ['hls', 'flv']);
-      expect(qualities.map((quality) => quality.quality), ['HLS', 'FLV']);
-      expect(qualities.map((quality) => quality.sort), [2, 1]);
-      expect(MissevanApi.resolution(qualities.first).urls, [_hls.replaceFirst('http:', 'https:')]);
+      expect(qualities.map((quality) => (quality.selectionId, quality.quality)), [('10000', '原画')]);
+      final resolution = MissevanApi.resolution(qualities.single);
+      expect(resolution.urls, [_flv.replaceFirst('http:', 'https:'), _hls.replaceFirst('http:', 'https:')]);
+      expect(resolution.lines.map((line) => line.lineId), ['flv', 'hls']);
       expect(qualities.clear, throwsUnsupportedError);
-      expect(() => (qualities.first.data! as List<String>).add('x'), throwsUnsupportedError);
+      expect(() => (qualities.single.data! as List<String>).add('x'), throwsUnsupportedError);
+      expect(MissevanApi.qualities(const MissevanRoomData()), isEmpty);
     });
 
     test('an offline room ignores even malformed stream data (3.x)', () {
@@ -458,22 +683,33 @@ void main() {
       expect(MissevanApi.detail(_ok(orphan), roomId: '100').avatar, 'https://static.maoercdn.com/avatar.png');
     });
 
-    test('a live room without pull URLs or with a foreign one is ApiChanged; one URL is one quality (3.x)', () {
+    test('a live room without a usable pull URL is ApiChanged; a bad URL only loses its line (容错)', () {
       for (final channel in <Object?>[
         <String, Object?>{},
         {'hls_pull_url': 10},
         {'flv_pull_url': 'https://example.org/a.flv'},
         {'hls_pull_url': '', 'flv_pull_url': null},
+        {'hls_pull_url': _flv, 'flv_pull_url': _hls},
         'not a channel',
       ]) {
         final info = _detail();
         (info['room'] as Map<String, dynamic>)['channel'] = channel;
         expect(() => MissevanApi.detail(_ok(info), roomId: '100'), throwsA(isA<ApiChanged>()), reason: '$channel');
       }
-      final info = _detail();
-      (info['room'] as Map<String, dynamic>)['channel'] = {'flv_pull_url': _flv};
-      final qualities = MissevanApi.qualities(MissevanApi.detail(_ok(info), roomId: '100').data! as MissevanRoomData);
-      expect(qualities.map((quality) => (quality.id, quality.sort)), [('flv', 2)]);
+      for (final (channel, lines) in <(Map<String, Object?>, List<String>)>[
+        ({'flv_pull_url': _flv}, ['flv']),
+        ({'hls_pull_url': _hls, 'flv_pull_url': 'https://example.org/a.flv'}, ['hls']),
+        ({'hls_pull_url': 'https://d1.bilivideo.com/a.m3u8#x', 'flv_pull_url': _flv}, ['flv']),
+        ({'hls_pull_url': _hls, 'flv_pull_url': 7}, ['hls']),
+      ]) {
+        final info = _detail();
+        (info['room'] as Map<String, dynamic>)['channel'] = channel;
+        final room = MissevanApi.detail(_ok(info), roomId: '100');
+        expect(room.restriction, LiveRestriction.none);
+        final quality = MissevanApi.qualities(room.data! as MissevanRoomData).single;
+        expect(quality.selectionId, '10000');
+        expect(MissevanApi.resolution(quality).lines.map((line) => line.lineId), lines, reason: '$channel');
+      }
     });
 
     test('pull URLs: https, the signed query kept byte for byte, default ports dropped (3.x)', () {

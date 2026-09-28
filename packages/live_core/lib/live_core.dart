@@ -31,6 +31,8 @@ export 'src/sites/huya/huya_api.dart';
 export 'src/sites/huya/huya_site.dart';
 export 'src/sites/kuaishou/kuaishou_api.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
+export 'src/sites/missevan/missevan_api.dart';
+export 'src/sites/missevan/missevan_site.dart';
 export 'src/sites/soop/soop_api.dart';
 export 'src/sites/soop/soop_site.dart';
 export 'src/sites/twitch/twitch_api.dart';

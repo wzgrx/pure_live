@@ -1,0 +1,23 @@
+{
+  "generator": "MissevanSite.getRoomDetail + getRoomDetailForRefresh + searchRooms + getLiveStatus + getPlayQualites + getPlayUrls + getPlayUrlRefreshAt + getPlayUrlInvalidAt",
+  "value": {
+    "getRoomDetail": {
+      "throws": "MissevanException",
+      "message": "Missevan notFound"
+    },
+    "getRoomDetailForRefresh": {
+      "throws": "MissevanException",
+      "message": "Missevan notFound"
+    },
+    "searchRooms": [],
+    "supportsSearchPaginationFor": false,
+    "getLiveStatus": {
+      "throws": "MissevanException",
+      "message": "Missevan notFound"
+    },
+    "getPlayQualites": {
+      "throws": "MissevanException",
+      "message": "Missevan notFound"
+    }
+  }
+}

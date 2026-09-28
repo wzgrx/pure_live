@@ -1,0 +1,490 @@
+{
+  "code": 0,
+  "info": {
+    "compatible": true,
+    "live_url": "/live/",
+    "card_frame_url": "https://static.maoercdn.com/gifts/cardframes/000.png",
+    "team_live": {
+      "granted": false,
+      "apply_url": "https://www.missevan.com/blackboard/wL3DwTN5hmNKOZLS.html",
+      "background_special_url": "https://www.missevan.com/blackboard/qcUVbIk3ETc7RZso.html"
+    },
+    "catalogs": [
+      {
+        "catalog_id": 105,
+        "catalog_name": "配音",
+        "color": "#D68DFE",
+        "sub_catalogs": [
+          {
+            "catalog_id": 167,
+            "catalog_name": "pia戏",
+            "color": "#A2B3FF",
+            "catalog_attr": 1
+          },
+          {
+            "catalog_id": 149,
+            "catalog_name": "配音",
+            "color": "#D68DFE"
+          }
+        ],
+        "icon_url": "https://static.maoercdn.com/live/catalog/icon/105.png",
+        "dark_icon_url": "https://static.maoercdn.com/live/catalog/icon/105-dark.png",
+        "web_icon_url": "https://static.maoercdn.com/live/catalog/icon/105-web.png"
+      },
+      {
+        "catalog_id": 104,
+        "catalog_name": "音乐",
+        "color": "#6FEFEC",
+        "sub_catalogs": [
+          {
+            "catalog_id": 147,
+            "catalog_name": "原创音乐人",
+            "color": "#6FEFEC"
+          },
+          {
+            "catalog_id": 166,
+            "catalog_name": "点唱",
+            "color": "#6FEFEC",
+            "catalog_attr": 1
+          },
+          {
+            "catalog_id": 148,
+            "catalog_name": "说唱",
+            "color": "#6FEFEC"
+          },
+          {
+            "catalog_id": 146,
+            "catalog_name": "弹唱",
+            "color": "#6FEFEC"
+          },
+          {
+            "catalog_id": 145,
+            "catalog_name": "点歌",
+            "color": "#6FEFEC"
+          },
+          {
+            "catalog_id": 144,
+            "catalog_name": "摇滚",
+            "color": "#6FEFEC"
+          },
+          {
+            "catalog_id": 143,
+            "catalog_name": "流行",
+            "color": "#6FEFEC"
+          }
+        ],
+        "icon_url": "https://static.maoercdn.com/live/catalog/icon/104.png",
+        "dark_icon_url": "https://static.maoercdn.com/live/catalog/icon/104-dark.png",
+        "web_icon_url": "https://static.maoercdn.com/live/catalog/icon/104-web.png"
+      },
+      {
+        "catalog_id": 116,
+        "catalog_name": "情感",
+        "color": "#9AACFF",
+        "sub_catalogs": [
+          {
+            "catalog_id": 165,
+            "catalog_name": "派对",
+            "color": "#FF99DD",
+            "catalog_attr": 1
+          },
+          {
+            "catalog_id": 164,
+            "catalog_name": "聊天",
+            "color": "#FF99DD",
+            "catalog_attr": 1
+          },
+          {
+            "catalog_id": 138,
+            "catalog_name": "脱口秀",
+            "color": "#9AACFF"
+          },
+          {
+            "catalog_id": 142,
+            "catalog_name": "连麦",
+            "color": "#9AACFF"
+          },
+          {
+            "catalog_id": 141,
+            "catalog_name": "解忧治愈",
+            "color": "#9AACFF"
+          },
+          {
+            "catalog_id": 140,
+            "catalog_name": "闲聊",
+            "color": "#9AACFF"
+          },
+          {
+            "catalog_id": 139,
+            "catalog_name": "电台",
+            "color": "#9AACFF"
+          }
+        ],
+        "icon_url": "https://static.maoercdn.com/live/catalog/icon/116.png",
+        "dark_icon_url": "https://static.maoercdn.com/live/catalog/icon/116-dark.png",
+        "web_icon_url": "https://static.maoercdn.com/live/catalog/icon/116-web.png"
+      },
+      {
+        "catalog_id": 115,
+        "catalog_name": "放松",
+        "color": "#87CAFF",
+        "sub_catalogs": [
+          {
+            "catalog_id": 150,
+            "catalog_name": "放松",
+            "color": "#87CAFF"
+          }
+        ],
+        "icon_url": "https://static.maoercdn.com/live/catalog/icon/115.png",
+        "dark_icon_url": "https://static.maoercdn.com/live/catalog/icon/115-dark.png",
+        "web_icon_url": "https://static.maoercdn.com/live/catalog/icon/115-web.png"
+      },
+      {
+        "catalog_id": 122,
+        "catalog_name": "古风",
+        "color": "#FFCD72",
+        "sub_catalogs": [
+          {
+            "catalog_id": 151,
+            "catalog_name": "古风",
+            "color": "#FFCD72"
+          }
+        ],
+        "icon_url": "https://static.maoercdn.com/live/catalog/icon/122.png",
+        "dark_icon_url": "https://static.maoercdn.com/live/catalog/icon/122-dark.png",
+        "web_icon_url": "https://static.maoercdn.com/live/catalog/icon/122-web.png"
+      }
+    ],
+    "custom_tag_groups": [
+      {
+        "tag_group_id": 1,
+        "tag_group_name": "人设",
+        "tags": [
+          {
+            "tag_id": 10001,
+            "tag_name": "高冷禁欲"
+          },
+          {
+            "tag_id": 10002,
+            "tag_name": "极品少御"
+          },
+          {
+            "tag_id": 10022,
+            "tag_name": "电子男友"
+          },
+          {
+            "tag_id": 10004,
+            "tag_name": "腹黑青叔"
+          },
+          {
+            "tag_id": 10005,
+            "tag_name": "气质女神"
+          },
+          {
+            "tag_id": 10006,
+            "tag_name": "年下犬系"
+          },
+          {
+            "tag_id": 10007,
+            "tag_name": "邻家哥哥"
+          },
+          {
+            "tag_id": 10008,
+            "tag_name": "慵懒学姐"
+          },
+          {
+            "tag_id": 10009,
+            "tag_name": "纯情学长"
+          },
+          {
+            "tag_id": 10010,
+            "tag_name": "傲娇正太"
+          },
+          {
+            "tag_id": 10011,
+            "tag_name": "儒雅公子"
+          },
+          {
+            "tag_id": 10012,
+            "tag_name": "盐系女友"
+          },
+          {
+            "tag_id": 10013,
+            "tag_name": "盐系男友"
+          },
+          {
+            "tag_id": 10014,
+            "tag_name": "治愈男友"
+          },
+          {
+            "tag_id": 10015,
+            "tag_name": "霸道总裁"
+          },
+          {
+            "tag_id": 10016,
+            "tag_name": "甜美萝莉"
+          },
+          {
+            "tag_id": 10017,
+            "tag_name": "元气少年"
+          },
+          {
+            "tag_id": 10018,
+            "tag_name": "奶音萌妹"
+          },
+          {
+            "tag_id": 10019,
+            "tag_name": "撒娇奶音"
+          },
+          {
+            "tag_id": 10020,
+            "tag_name": "磁性低音炮"
+          },
+          {
+            "tag_id": 10021,
+            "tag_name": "爹系年上"
+          }
+        ]
+      },
+      {
+        "tag_group_id": 2,
+        "tag_group_name": "其他",
+        "tags": [
+          {
+            "tag_id": 20001,
+            "tag_name": "哄睡恋人"
+          },
+          {
+            "tag_id": 20002,
+            "tag_name": "倾诉树洞"
+          },
+          {
+            "tag_id": 20003,
+            "tag_name": "深夜电台"
+          },
+          {
+            "tag_id": 20014,
+            "tag_name": "沉浸陪伴"
+          },
+          {
+            "tag_id": 20005,
+            "tag_name": "来 PIA 戏吧"
+          },
+          {
+            "tag_id": 20015,
+            "tag_name": "说唱天花板"
+          },
+          {
+            "tag_id": 20016,
+            "tag_name": "唱给你听"
+          },
+          {
+            "tag_id": 20008,
+            "tag_name": "情绪咖啡馆"
+          },
+          {
+            "tag_id": 20009,
+            "tag_name": "i 人庇护所"
+          },
+          {
+            "tag_id": 20010,
+            "tag_name": "e 人派对"
+          },
+          {
+            "tag_id": 20011,
+            "tag_name": "段子集合地"
+          },
+          {
+            "tag_id": 20012,
+            "tag_name": "专治不开心"
+          },
+          {
+            "tag_id": 20013,
+            "tag_name": "躺着听故事"
+          },
+          {
+            "tag_id": 20017,
+            "tag_name": "民谣酒馆"
+          },
+          {
+            "tag_id": 20018,
+            "tag_name": "治愈弹唱"
+          }
+        ]
+      }
+    ],
+    "tabs": [
+      {
+        "name": "配音",
+        "color": "#D68DFE",
+        "icon_url": "https://static.maoercdn.com/live/catalog/icon/105.png",
+        "dark_icon_url": "https://static.maoercdn.com/live/catalog/icon/105-dark.png",
+        "web_icon_url": "https://static.maoercdn.com/live/catalog/icon/105-web.png",
+        "type": "catalog",
+        "catalog_id": 105
+      },
+      {
+        "name": "音乐",
+        "color": "#6FEFEC",
+        "icon_url": "https://static.maoercdn.com/live/catalog/icon/104.png",
+        "dark_icon_url": "https://static.maoercdn.com/live/catalog/icon/104-dark.png",
+        "web_icon_url": "https://static.maoercdn.com/live/catalog/icon/104-web.png",
+        "type": "catalog",
+        "catalog_id": 104
+      },
+      {
+        "name": "情感",
+        "color": "#9AACFF",
+        "icon_url": "https://static.maoercdn.com/live/catalog/icon/116.png",
+        "dark_icon_url": "https://static.maoercdn.com/live/catalog/icon/116-dark.png",
+        "web_icon_url": "https://static.maoercdn.com/live/catalog/icon/116-web.png",
+        "type": "catalog",
+        "catalog_id": 116
+      },
+      {
+        "name": "团播",
+        "icon_url": "https://static.maoercdn.com/live/catalog/icon/tuanbo.png",
+        "dark_icon_url": "https://static.maoercdn.com/live/catalog/icon/tuanbo-dark.png",
+        "web_icon_url": "https://static.maoercdn.com/live/catalog/icon/tuanbo-web.png",
+        "type": "list",
+        "list_type": 4
+      },
+      {
+        "name": "新星",
+        "icon_url": "https://static.maoercdn.com/live/tags/icon/001_20210322112121.png",
+        "dark_icon_url": "https://static.maoercdn.com/live/tags/icon/001_20210322112121-dark.png",
+        "web_icon_url": "https://static.maoercdn.com/live/tags/icon/001_20210322112121-web.png",
+        "type": "tag",
+        "tag_id": 1
+      },
+      {
+        "name": "放松",
+        "color": "#87CAFF",
+        "icon_url": "https://static.maoercdn.com/live/catalog/icon/115.png",
+        "dark_icon_url": "https://static.maoercdn.com/live/catalog/icon/115-dark.png",
+        "web_icon_url": "https://static.maoercdn.com/live/catalog/icon/115-web.png",
+        "type": "catalog",
+        "catalog_id": 115
+      },
+      {
+        "name": "古风",
+        "color": "#FFCD72",
+        "icon_url": "https://static.maoercdn.com/live/catalog/icon/122.png",
+        "dark_icon_url": "https://static.maoercdn.com/live/catalog/icon/122-dark.png",
+        "web_icon_url": "https://static.maoercdn.com/live/catalog/icon/122-web.png",
+        "type": "catalog",
+        "catalog_id": 122
+      }
+    ],
+    "noblelist": [
+      {
+        "type": 1,
+        "level": 1,
+        "title": "练习生",
+        "icon_mini_url": "https://static.maoercdn.com/live/noble/labels/mini/001.png",
+        "avatar_frame_url": "https://static.maoercdn.com/gifts/avatarframes/001.png",
+        "notify_duration": 5000,
+        "card_frame_url": "https://static.maoercdn.com/gifts/cardframes/001.png"
+      },
+      {
+        "type": 1,
+        "level": 2,
+        "title": "新秀",
+        "icon_mini_url": "https://static.maoercdn.com/live/noble/labels/mini/002.png",
+        "avatar_frame_url": "https://static.maoercdn.com/gifts/avatarframes/002.png",
+        "notify_duration": 10000,
+        "card_frame_url": "https://static.maoercdn.com/gifts/cardframes/002.png"
+      },
+      {
+        "type": 1,
+        "level": 3,
+        "title": "偶像",
+        "effect_url": "https://static.maoercdn.com/gifts/effects/noble/003.svga",
+        "effect_duration": 6000,
+        "icon_mini_url": "https://static.maoercdn.com/live/noble/labels/mini/003.png",
+        "avatar_frame_url": "https://static.maoercdn.com/gifts/avatarframes/003.png",
+        "notify_duration": 15000,
+        "card_frame_url": "https://static.maoercdn.com/gifts/cardframes/003.png"
+      },
+      {
+        "type": 1,
+        "level": 4,
+        "title": "大咖",
+        "effect_url": "https://static.maoercdn.com/gifts/effects/noble/004.webp;https://static.maoercdn.com/gifts/effects/noble/004.svga",
+        "effect_duration": 8000,
+        "icon_mini_url": "https://static.maoercdn.com/live/noble/labels/mini/004.png",
+        "avatar_frame_url": "https://static.maoercdn.com/gifts/avatarframes/004.png",
+        "notify_duration": 20000,
+        "card_frame_url": "https://static.maoercdn.com/gifts/cardframes/004.png"
+      },
+      {
+        "type": 1,
+        "level": 5,
+        "title": "巨星",
+        "effect_url": "https://static.maoercdn.com/gifts/effects/noble/005.webp;https://static.maoercdn.com/gifts/effects/noble/005.svga",
+        "effect_duration": 10000,
+        "icon_mini_url": "https://static.maoercdn.com/live/noble/labels/mini/005.png",
+        "avatar_frame_url": "https://static.maoercdn.com/gifts/avatarframes/005.png",
+        "notify_duration": 25000,
+        "card_frame_url": "https://static.maoercdn.com/gifts/cardframes/005.png"
+      },
+      {
+        "type": 1,
+        "level": 6,
+        "title": "传奇",
+        "effect_url": "https://static.maoercdn.com/gifts/effects/noble/006.webp;https://static.maoercdn.com/gifts/effects/noble/006.svga",
+        "effect_duration": 12000,
+        "icon_mini_url": "https://static.maoercdn.com/live/noble/labels/mini/006.png",
+        "avatar_frame_url": "https://static.maoercdn.com/gifts/avatarframes/006.webp",
+        "notify_duration": 30000,
+        "card_frame_url": "https://static.maoercdn.com/gifts/cardframes/006.png"
+      },
+      {
+        "type": 1,
+        "level": 7,
+        "title": "神话",
+        "effect_url": "https://static.maoercdn.com/gifts/effects/noble/007.webp;https://static.maoercdn.com/gifts/effects/noble/007.svga",
+        "effect_duration": 14000,
+        "icon_mini_url": "https://static.maoercdn.com/live/noble/labels/mini/007.webp",
+        "avatar_frame_url": "https://static.maoercdn.com/gifts/avatarframes/007.webp",
+        "notify_duration": 60000,
+        "card_frame_url": "https://static.maoercdn.com/gifts/cardframes/007.png"
+      }
+    ],
+    "highness": {
+      "type": 2,
+      "level": 1,
+      "title": "上神",
+      "icon_mini_url": "https://static.maoercdn.com/live/noble/labels/mini/highness.webp"
+    },
+    "messages": {
+      "room_close": [
+        "主播正在拯救世界，待会再来看看吧~",
+        "主播正在赶来的路上阿噜~",
+        "主播在给主子铲屎中~"
+      ],
+      "room_tip": "<font color=\"#FFC525\">系统提示：</font><font color=\"#FFFFFF\">猫耳FM直播内容及互动评论须严格遵守直播规范，严禁传播违法违规、低俗血暴、吸烟酗酒、造谣诈骗等不良有害信息。如有违规，平台将进行封禁直至永久封停账号哦！注意理性打赏，严禁未成年人直播或打赏。请勿轻信平台上各类广告信息，谨防私下交易陷阱，请谨慎判断，以免上当受骗。</font>"
+    },
+    "interaction": {
+      "vote_help_url": "https://link.missevan.com/fm/gift-vote-guide",
+      "vote_agreement_url": "https://link.missevan.com/fm/gift-vote-agreement"
+    },
+    "new_user_prize": {
+      "prize_name": "喵喵耳机×10",
+      "icon_url": "https://static.maoercdn.com/live/gifts/icons/30054.png"
+    },
+    "live_task": {
+      "icon_url": "https://static.maoercdn.com/live/task/entrance.png",
+      "icon_active_url": "https://static.maoercdn.com/live/task/entrance.webp",
+      "daily_listen_remain_duration": 0,
+      "gift": {
+        "gift_id": 10244,
+        "name": "喵卡龙",
+        "icon_url": "https://static.maoercdn.com/live/gifts/icons/10244.png",
+        "price": 1
+      }
+    },
+    "enable_team_live": true,
+    "enable_team_live_rank_tab": true
+  }
+}

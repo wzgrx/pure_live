@@ -1,0 +1,71 @@
+{
+  "generator": "MissevanSite.getCategores (getCategoresWithoutListTab: the same answer without the list tab)",
+  "value": {
+    "getCategores": {
+      "throws": "MissevanException",
+      "message": "Missevan schema"
+    },
+    "getCategoresWithoutListTab": [
+      {
+        "id": "missevan",
+        "name": "猫耳 FM",
+        "children": [
+          {
+            "platform": "missevan",
+            "areaType": "catalog",
+            "typeName": "猫耳 FM",
+            "areaId": "105",
+            "areaName": "配音",
+            "areaPic": "https://static.maoercdn.com/live/catalog/icon/105.png",
+            "shortName": null
+          },
+          {
+            "platform": "missevan",
+            "areaType": "catalog",
+            "typeName": "猫耳 FM",
+            "areaId": "104",
+            "areaName": "音乐",
+            "areaPic": "https://static.maoercdn.com/live/catalog/icon/104.png",
+            "shortName": null
+          },
+          {
+            "platform": "missevan",
+            "areaType": "catalog",
+            "typeName": "猫耳 FM",
+            "areaId": "116",
+            "areaName": "情感",
+            "areaPic": "https://static.maoercdn.com/live/catalog/icon/116.png",
+            "shortName": null
+          },
+          {
+            "platform": "missevan",
+            "areaType": "tag",
+            "typeName": "猫耳 FM",
+            "areaId": "1",
+            "areaName": "新星",
+            "areaPic": "https://static.maoercdn.com/live/tags/icon/001_20210322112121.png",
+            "shortName": null
+          },
+          {
+            "platform": "missevan",
+            "areaType": "catalog",
+            "typeName": "猫耳 FM",
+            "areaId": "115",
+            "areaName": "放松",
+            "areaPic": "https://static.maoercdn.com/live/catalog/icon/115.png",
+            "shortName": null
+          },
+          {
+            "platform": "missevan",
+            "areaType": "catalog",
+            "typeName": "猫耳 FM",
+            "areaId": "122",
+            "areaName": "古风",
+            "areaPic": "https://static.maoercdn.com/live/catalog/icon/122.png",
+            "shortName": null
+          }
+        ]
+      }
+    ]
+  }
+}

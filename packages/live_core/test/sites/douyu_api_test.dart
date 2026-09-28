@@ -203,13 +203,36 @@ void main() {
         // introduction: entities decoded (3.x showed `&mdash;`).
         // danmakuData: 3.x stored the rid string; the rid now travels in
         // DouyuDanmakuArgs, compared below.
-        _expectParity(detail.room.toJson(), room, changed: {'introduction', 'danmakuData'}, reason: name);
+        // startedAt: a key 3.x never wrote (unified principle 开播时间,
+        // M2.1): `show_time` of a live room, nothing otherwise.
+        _expectParity(detail.room.toJson(), room, changed: {'introduction', 'danmakuData', 'startedAt'}, reason: name);
         expect(detail.room.introduction, decodeHtmlEntities(room['introduction'] as String));
         expect(detail.rid, room['danmakuData']);
         expect(detail.room.roomId, requested, reason: 'a follow keeps the id it was made with');
         expect(detail.room.isLiveNow, legacy['isLiveRoomPayload']);
+        expect(room.containsKey('startedAt'), isFalse);
+        expect(detail.room.toJson().containsKey('startedAt'), detail.room.isLiveNow, reason: name);
       });
     }
+
+    test('开播时间: a live room starts at show_time; offline and loop rooms have none (M2.1 startedAt)', () {
+      LiveRoom detail(String name) => DouyuApi.roomDetail(_sample(name).body, requestedId: '1').room;
+      final live = detail('S05-live');
+      expect(live.startedAt, DateTime.utc(2026, 9, 26, 11, 0, 29), reason: 'show_time 1790420429');
+      expect(live.toJson()['startedAt'], '2026-09-26T11:00:29.000Z');
+      expect(detail('S05-offline').startedAt, isNull, reason: 'show_time is the last show');
+      expect(detail('S05-replay-videoloop').startedAt, isNull, reason: 'a loop is not a broadcast start');
+      DateTime? startedAt(Object? showTime) => DouyuApi.roomDetail(
+        jsonEncode({
+          'room': {'room_id': 1, 'room_name': 't', 'show_status': 1, 'show_time': ?showTime},
+        }),
+        requestedId: '1',
+      ).room.startedAt;
+      expect(startedAt('1790420429'), DateTime.utc(2026, 9, 26, 11, 0, 29), reason: 'a numeric string counts');
+      expect(startedAt(0), isNull);
+      expect(startedAt(''), isNull);
+      expect(startedAt(null), isNull);
+    });
 
     test('the requested address stays the identity; the rid comes back separately', () {
       final detail = DouyuApi.roomDetail(_sample('S05-live').body, requestedId: ' 123455 ');
@@ -539,6 +562,54 @@ void main() {
       expect(DouyuApi.lease('https://a.test/r.flv?expire=0', issued), isNull);
       expect(DouyuApi.lease('https://a.test/r.flv', issued), isNull);
       expect(DouyuApi.lease('https://a.test/r.flv?noexpire=300', issued), isNull);
+      expect(DouyuApi.statedLifetime('https://a.test/r.flv?wsAuth=x&expire=300'), const Duration(seconds: 300));
+      expect(DouyuApi.statedLifetime('https://a.test/r.flv?expire=0'), isNull);
+      expect(DouyuApi.statedLifetime('https://a.test/r.flv'), isNull);
+    });
+
+    test('forced renewal (2-1): a FLV URL stating no lease gets five minutes; stated leases and HLS are unchanged', () {
+      final issued = DateTime.utc(2026, 9, 27, 10);
+      for (final url in [
+        'https://a.test/r.flv?expire=0&wsAuth=x',
+        'https://a.test/r.flv',
+        'https://a.test/live/R.FLV?noexpire=300',
+      ]) {
+        expect(DouyuApi.lease(url, issued), isNull, reason: 'off by default: $url');
+        final forced = DouyuApi.lease(url, issued, forceRenewal: true)!;
+        expect(forced.expiresAt, issued.add(DouyuApi.forcedLeaseLifetime), reason: url);
+        expect(forced.refreshAt, issued.add(const Duration(minutes: 4, seconds: 15)), reason: '45 s early: $url');
+        expect(forced.cutsConnection, isTrue, reason: 'spliced in like a stated lease (M7): $url');
+      }
+      expect(DouyuApi.forcedLeaseLifetime, const Duration(minutes: 5));
+      final stated = DouyuApi.lease('https://a.test/r.flv?expire=100', issued, forceRenewal: true)!;
+      expect(stated.expiresAt, issued.add(const Duration(seconds: 100)), reason: 'a stated lease wins');
+      expect(DouyuApi.lease('https://a.test/r.m3u8?expire=0', issued, forceRenewal: true), isNull);
+      expect(DouyuApi.lease('not a url', issued, forceRenewal: true), isNull);
+    });
+
+    test('forced renewal (2-1) on the samples: expire=0 (S09 rate 2) gets five minutes, expire=300 keeps 300 s', () {
+      ({LivePlayLine line, int? rate}) answer(String name, {required bool force}) {
+        final fixture = _sample(name);
+        return DouyuApi.answer(
+          DouyuApi.playData(fixture.body),
+          roomId: '24422',
+          cdn: 'hw-h5',
+          cookie: '',
+          issuedAt: fixture.capturedAt,
+          forceRenewal: force,
+        );
+      }
+
+      const zero = 'S09-24422-r2-hw-h5';
+      final zeroAt = _sample(zero).capturedAt.toUtc();
+      expect(Uri.parse(answer(zero, force: false).line.url).queryParameters['expire'], '0');
+      expect(answer(zero, force: false).line.lease, isNull);
+      expect(answer(zero, force: true).line.lease!.expiresAt, zeroAt.add(DouyuApi.forcedLeaseLifetime));
+      const source = 'S09-24422-r0-hw-h5';
+      expect(
+        answer(source, force: true).line.lease!.expiresAt,
+        _sample(source).capturedAt.toUtc().add(const Duration(seconds: 300)),
+      );
     });
   });
 

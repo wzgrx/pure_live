@@ -69,9 +69,13 @@ final class DouyuSite extends LiveSite
         LivePlayLeaseMetadata {
   /// Creates the adapter. [_cookies] holds the user's login cookie, if any;
   /// with [_login] an expiring login is renewed before play requests, as
-  /// 3.x did. [now] and [random] are injectable for tests.
-  new(this.http, {this._cookies, this._login, DateTime Function()? now, Random? random})
-    : _now = now ?? DateTime.now,
+  /// 3.x did. [forceRenewal] reads the cookie page's forced renewal setting
+  /// (`douyuForceRenewal`, off by default; see [DouyuApi.lease]) each time a
+  /// URL is resolved or its lease looked up. [now] and [random] are
+  /// injectable for tests.
+  new(this.http, {this._cookies, this._login, bool Function()? forceRenewal, DateTime Function()? now, Random? random})
+    : _forceRenewal = forceRenewal ?? _off,
+      _now = now ?? DateTime.now,
       _processDid = DouyuApi.generateDeviceId(random ?? Random.secure());
 
   /// Transport.
@@ -79,8 +83,11 @@ final class DouyuSite extends LiveSite
 
   final CookieVault? _cookies;
   final DouyuLoginStore? _login;
+  final bool Function() _forceRenewal;
   final DateTime Function() _now;
   final String _processDid;
+
+  static bool _off() => false;
 
   ({String did, DouyuDescriptor descriptor, DateTime at})? _descriptor;
   ({String did, Future<DouyuDescriptor> future})? _descriptorFetch;
@@ -336,7 +343,14 @@ final class DouyuSite extends LiveSite
 
   Future<({LivePlayLine line, int? rate})> _answer(String rid, int rate, String cdn) async {
     final play = await _play(rid, rate: rate, cdn: cdn);
-    final answer = DouyuApi.answer(play.data, roomId: rid, cdn: cdn, cookie: play.cookie, issuedAt: play.issuedAt);
+    final answer = DouyuApi.answer(
+      play.data,
+      roomId: rid,
+      cdn: cdn,
+      cookie: play.cookie,
+      issuedAt: play.issuedAt,
+      forceRenewal: _forceRenewal(),
+    );
     final lease = answer.line.lease;
     if (lease != null) {
       _leases.remove(answer.line.url);
@@ -432,14 +446,21 @@ final class DouyuSite extends LiveSite
   /// When to fetch a new URL for [url]: from the lease its resolution
   /// computed, else as if it was issued at [now].
   @override
-  DateTime? getPlayUrlRefreshAt(String url, {DateTime? now}) =>
-      (_leases[url] ?? DouyuApi.lease(url, now ?? _now()))?.refreshAt;
+  DateTime? getPlayUrlRefreshAt(String url, {DateTime? now}) => _leaseOf(url, now)?.refreshAt;
 
   /// The last instant [url] can open a new connection (`expire` after it
   /// was issued).
   @override
-  DateTime? getPlayUrlInvalidAt(String url, {DateTime? now}) =>
-      (_leases[url] ?? DouyuApi.lease(url, now ?? _now()))?.expiresAt;
+  DateTime? getPlayUrlInvalidAt(String url, {DateTime? now}) => _leaseOf(url, now)?.expiresAt;
+
+  /// The lease of [url] under the current forced renewal setting: an
+  /// assumed lease computed while it was on is dropped once it is off.
+  PlayLease? _leaseOf(String url, DateTime? now) {
+    final force = _forceRenewal();
+    final known = _leases[url];
+    if (known != null && (force || DouyuApi.statedLifetime(url) != null)) return known;
+    return DouyuApi.lease(url, now ?? _now(), forceRenewal: force);
+  }
 
   // Account -------------------------------------------------------------------
 

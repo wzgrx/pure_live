@@ -160,6 +160,12 @@ abstract final class DouyuApi {
   /// its lifetime).
   static const Duration leaseLead = Duration(seconds: 45);
 
+  /// The lifetime assumed, with the forced renewal on, for a FLV URL that
+  /// states none (`expire=0`: signed-in URLs, and anonymous ones below
+  /// source such as sample S09's rate 2), which the CDN may still cut on its
+  /// own schedule (upgrade 2-1, the upstream TV app's `douyuForceRenewal`).
+  static const Duration forcedLeaseLifetime = Duration(minutes: 5);
+
   /// A descriptor closer than this to its `expire_at` is not used.
   static const Duration descriptorMargin = Duration(seconds: 30);
 
@@ -334,9 +340,10 @@ abstract final class DouyuApi {
   /// a JSON-encoded string.
   ///
   /// `videoLoop == 1` is a loop room (replay); `show_status == 1` without a
-  /// `【回放】` title is live; anything else offline, as in 3.x. A 200 HTML
-  /// page ("该房间目前没有开放", or "已被关闭" for a 靓号) is `NotFound`; 403
-  /// (an alias) is `RiskControl`.
+  /// `【回放】` title is live; anything else offline, as in 3.x. A live room
+  /// starts at `show_time` (Unix seconds; offline it is the last show's, so
+  /// it is left out). A 200 HTML page ("该房间目前没有开放", or "已被关闭"
+  /// for a 靓号) is `NotFound`; 403 (an alias) is `RiskControl`.
   static ({LiveRoom room, String rid}) roomDetail(String body, {required String requestedId, int status = 200}) {
     _status(status, 'betard', body);
     if (body.trimLeft().startsWith('<')) throw NotFound(_site, 'betard/$requestedId: HTML page (${_pageText(body)})');
@@ -373,9 +380,16 @@ abstract final class DouyuApi {
         link: 'https://www.douyu.com/$id',
         introduction: decodeHtmlEntities(jsonString(room['show_details']) ?? ''),
         notice: '',
+        startedAt: live ? _seconds(room['show_time']) : null,
       ),
     );
   }
+
+  /// A Unix-seconds time; null when missing or not after 1970.
+  static DateTime? _seconds(Object? value) => switch (jsonInt(value)) {
+    final int seconds when seconds > 0 => DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true),
+    _ => null,
+  };
 
   /// The canonical rid a room page names: `www.douyu.com/<靓号>` is served
   /// directly with `window.room_id = <rid>` (or `"room_id":<rid>` in its
@@ -534,13 +548,15 @@ abstract final class DouyuApi {
   }
 
   /// One CDN's answer as a line of room [roomId] signed at [issuedAt], with
-  /// the rate the server confirmed. No media URL is `ApiChanged`.
+  /// the rate the server confirmed; [forceRenewal] as in [lease]. No media
+  /// URL is `ApiChanged`.
   static ({LivePlayLine line, int? rate}) answer(
     Map<String, dynamic> data, {
     required String roomId,
     required String cdn,
     required String cookie,
     required DateTime issuedAt,
+    bool forceRenewal = false,
   }) {
     final url = mediaUrl(data);
     if (url == null) throw const ApiChanged(_site, 'getH5PlayV1: no playable URL');
@@ -555,7 +571,7 @@ abstract final class DouyuApi {
             ? StreamFormat.hls
             : null,
         lineId: cdn.isEmpty ? null : cdn,
-        lease: lease(url, issuedAt),
+        lease: lease(url, issuedAt, forceRenewal: forceRenewal),
       ),
       rate: confirmedRate(data),
     );
@@ -583,16 +599,28 @@ abstract final class DouyuApi {
     );
   }
 
-  /// The lease of a media URL issued at [issuedAt]: only with `expire > 0`
-  /// (seconds, no absolute time in the URL); renew [leaseLead] (at most a
-  /// quarter of the lifetime) before. Expiry closes the established
-  /// connection, so the renewed stream is spliced in.
-  static PlayLease? lease(String url, DateTime issuedAt) {
+  /// The lifetime a media URL states: its `expire` seconds when above 0
+  /// (there is no absolute time in the URL); null for `expire=0` or none.
+  static Duration? statedLifetime(String url) {
     final query = Uri.tryParse(url)?.query ?? '';
     final expire = int.tryParse(RegExp(r'(?:^|&)expire=(\d+)(?:&|$)').firstMatch(query)?.group(1) ?? '');
-    if (expire == null || expire <= 0) return null;
-    final expiresAt = issuedAt.toUtc().add(Duration(seconds: expire));
-    final quarter = Duration(seconds: expire ~/ 4);
+    return expire == null || expire <= 0 ? null : Duration(seconds: expire);
+  }
+
+  /// The lease of a media URL issued at [issuedAt]: its [statedLifetime];
+  /// with [forceRenewal], a FLV URL that states none gets
+  /// [forcedLeaseLifetime] (upgrade 2-1). Renew [leaseLead] (at most a
+  /// quarter of the lifetime) before. Expiry closes the established
+  /// connection, so the renewed stream is spliced in.
+  static PlayLease? lease(String url, DateTime issuedAt, {bool forceRenewal = false}) {
+    final lifetime =
+        statedLifetime(url) ??
+        (forceRenewal && (Uri.tryParse(url)?.path.toLowerCase().endsWith('.flv') ?? false)
+            ? forcedLeaseLifetime
+            : null);
+    if (lifetime == null) return null;
+    final expiresAt = issuedAt.toUtc().add(lifetime);
+    final quarter = Duration(seconds: lifetime.inSeconds ~/ 4);
     return PlayLease(
       refreshAt: expiresAt.subtract(quarter < leaseLead ? quarter : leaseLead),
       expiresAt: expiresAt,

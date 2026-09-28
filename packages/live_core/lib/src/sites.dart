@@ -201,13 +201,15 @@ abstract final class SiteIds {
   /// - TikTok: the user name (`uniqueId`). The answer is matched in any case
   ///   and the adapter already lower-cases the room id (M4.22).
   /// - PandaTV: the login id. 3.x matched the room data in any case (M4.25).
+  /// - Douyu: a rid or 靓号 (digits) or an alias. The room page redirects an
+  ///   alias in any case to the same rid (`lpl`, `LPL`, `Lpl` → 288016,
+  ///   M4.U.2).
   ///
   /// Not included: numeric ids (case does not apply), YouTube video and
   /// channel ids (case-sensitive), niconico programme ids, CHZZK channel ids
   /// (hex the adapter already lower-cases), and ids whose case rule the
-  /// platform has not shown: Douyu and Huya aliases, Kuaishou user ids, Bigo
-  /// ids.
-  static const Set<String> caseInsensitiveRoomIds = {twitch, soop, picarto, twitcasting, tiktok, pandaLive};
+  /// platform has not shown: Huya aliases, Kuaishou user ids, Bigo ids.
+  static const Set<String> caseInsensitiveRoomIds = {twitch, soop, picarto, twitcasting, tiktok, pandaLive, douyu};
 
   /// Whether rooms of [platform] are identified without regard to the room
   /// id's case (see [caseInsensitiveRoomIds]).

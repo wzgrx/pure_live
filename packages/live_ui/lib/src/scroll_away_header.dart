@@ -10,13 +10,18 @@ import 'package:live_ui/src/metrics.dart';
 /// header as it is.
 class ScrollAwayHeader extends StatefulWidget {
   /// Creates the header.
-  const new({required this.header, required this.body, super.key});
+  const new({required this.header, required this.body, this.pinned = false, super.key});
 
   /// The header.
   final Widget header;
 
   /// The scrolling content.
   final Widget body;
+
+  /// Keeps the header in view whatever the scrolling, while the page is in a
+  /// mode whose actions sit in it (multi-select); it shows again when
+  /// unpinned.
+  final bool pinned;
 
   @override
   State<ScrollAwayHeader> createState() => ScrollAwayHeaderState();
@@ -31,6 +36,12 @@ class ScrollAwayHeaderState extends State<ScrollAwayHeader> {
 
   void _show(bool value) {
     if (value != _shown) setState(() => _shown = value);
+  }
+
+  @override
+  void didUpdateWidget(ScrollAwayHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pinned && !widget.pinned) _shown = true;
   }
 
   bool _onScroll(ScrollNotification notification) {
@@ -58,7 +69,7 @@ class ScrollAwayHeaderState extends State<ScrollAwayHeader> {
             duration: still ? Duration.zero : Motion.medium,
             curve: Curves.easeOutCubic,
             alignment: Alignment.bottomCenter,
-            heightFactor: _shown ? 1 : 0,
+            heightFactor: _shown || widget.pinned ? 1 : 0,
             child: widget.header,
           ),
         ),

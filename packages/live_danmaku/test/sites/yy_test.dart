@@ -329,6 +329,25 @@ final Set<Duration> _backoff = {for (var seconds = 2; seconds <= 6; seconds++) D
 }
 
 void main() {
+  test("the recorded AP login reply echoes a documentation address, not the recorder's", () {
+    // YY's AP login reply echoes the client's public address in binary; the
+    // text-based fixture privacy check cannot see it (M5.6). A re-recorded
+    // sample must replace it with 203.0.113.7 again.
+    final frames = File('../../fixtures/yy/danmaku/S08-live/frames.jsonl')
+        .readAsLinesSync()
+        .where((line) => line.trim().isNotEmpty)
+        .map((line) => jsonDecode(line) as Map<String, Object?>)
+        .where((frame) => frame['dir'] == 'in')
+        .map((frame) => base64Decode(frame['b64']! as String))
+        .toList();
+    bool holds(List<int> bytes) => frames.any(
+      (frame) => List.generate(frame.length - 3, (i) => i).any(
+        (i) => frame[i] == bytes[0] && frame[i + 1] == bytes[1] && frame[i + 2] == bytes[2] && frame[i + 3] == bytes[3],
+      ),
+    );
+    expect(holds([203, 0, 113, 7]) || holds([7, 113, 0, 203]), isTrue);
+  });
+
   group('protocol', () {
     test("3.x's endpoint, headers and timing", () {
       const uuid = '00000000-0000-4000-8000-000000000001';

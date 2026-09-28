@@ -24,6 +24,7 @@ dart run tools/live_cli/bin/live_cli.dart fixture capture douyu S05-live \
 - 脱敏规则在 `tools/live_cli/lib/src/fixture/rules/<平台>.dart`。只要还能在输出里找到任何被替换的原值，工具就拒绝写入。
 - 有些平台会在响应头里回显调用方的地址（`x-real-ip`、`x-ksclient-ip`、`xhs-real-ip`，百度的 `x-bfe-svbbrers` 是 Base64）。归档的规则漏过几处，录制时的真实出口地址进了 git，已在 2026-09-28 换成 `203.0.113.7`。现在门禁的 `fixture privacy`（`tools/gate/check_fixtures.py`）检查所有 JSON 样本：名字表示客户端地址的字段，只要含有保留段和文档段以外的 IPv4（明文或 Base64），就不通过。服务端地址（负载均衡、CDN 节点）不算。
 - 手工补录或改动样本后，同样要换掉访客编号、设备编号、令牌和 Cookie 值，改成同形的合成值，并记进 `meta.json` 的脱敏记录。
+- 弹幕帧是二进制（`frames.jsonl` 里的 `b64`），门禁的文字检查看不到里面的内容。有的协议会在二进制里回显调用方地址，例如 YY 的 AP 登录回答（M5.6 发现，已换成 `203.0.113.7`，并有测试守着）。录制或补录弹幕帧后，要按协议逐个字段检查，把地址、用户编号、头像路径这类标识换成同形同长度的合成值。
 
 ## 生成和比对期望值
 

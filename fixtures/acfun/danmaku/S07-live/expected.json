@@ -1,0 +1,4455 @@
+{
+  "generator": "archived v4 AcfunLink.read, AcfunProtocol.ack/heartbeatOf/push (archive/v4 6ba709135) over every received link frame, one link for the recorded session (fixtures/acfun/danmaku/v4_expected.dart)",
+  "value": {
+    "session": {
+      "userId": "8500786966578268",
+      "deviceId": "rze_IGYqvF65H07iiTu5",
+      "liveId": "8T5Zd4n34aI",
+      "tickets": [
+        "VkpxBG19Yb34Nm6kDHTJpb3=",
+        "GxtgJA3iQh1cEkYfMoGSYp==",
+        "KdvoZI8zGm9iKlAgOzZESr==",
+        "OjziKI4xLy9wNrX6AaKBPn=="
+      ],
+      "attach": "A7GzEGH5XM0/wpB2rkxesiLPq4t/eflyNDKpwnHH6J5jDWw7lEZnepQGCo8wuf9j",
+      "gifts": 48
+    },
+    "frames": [
+      {
+        "line": 5,
+        "command": "Basic.Register",
+        "seqId": 1,
+        "errorCode": 0,
+        "registered": true
+      },
+      {
+        "line": 8,
+        "command": "Basic.KeepAlive",
+        "seqId": 2,
+        "errorCode": 0
+      },
+      {
+        "line": 9,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 3,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsEnterRoomAck",
+          "code": 0,
+          "heartbeatMs": 10000
+        }
+      },
+      {
+        "line": 10,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846403164,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 12,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846403277,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 14,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846403384,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 16,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846403519,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 18,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846403665,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 20,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846403676,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 22,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846403768,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 24,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846403901,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 26,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846404148,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 28,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846404269,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 30,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846404396,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 32,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846404505,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 34,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846404616,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 37,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 4,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 38,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846404743,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 40,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846404869,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 42,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846404967,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 44,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846405090,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 46,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846405264,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 48,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846405372,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 50,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846405489,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 52,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846405606,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 54,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846405749,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 56,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846405754,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 58,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846405873,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 60,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846405996,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 62,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846406124,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 65,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 5,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 66,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846406235,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 68,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846406359,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 70,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846406486,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 72,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846406587,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 74,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846406706,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 76,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846406830,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 78,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846406845,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 80,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846406996,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 82,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846407236,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 84,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846407249,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 86,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846407396,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 88,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846407503,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 90,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846407638,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 93,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846407729,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 95,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 6,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 96,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846407838,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 98,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846407948,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 100,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846408064,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 102,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846408194,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 104,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846408446,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 106,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846408576,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 108,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846408801,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 110,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846408891,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 112,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846409003,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 114,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846409113,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 117,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 7,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 118,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846409187,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 120,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846409318,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 122,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846409578,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 124,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846409743,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 126,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846409964,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 128,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846409975,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 130,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846410087,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 132,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846410313,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 134,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846410397,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 136,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846410523,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 139,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 8,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 141,
+        "command": "Basic.KeepAlive",
+        "seqId": 9,
+        "errorCode": 0
+      },
+      {
+        "line": 142,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846410662,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 144,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846410762,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 146,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846410879,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 148,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846411086,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 150,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846411184,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 152,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846411310,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 154,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846411435,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 156,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846411528,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 158,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846411642,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 160,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846411768,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 162,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846411871,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 164,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846411987,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 167,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 10,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 168,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846412106,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 170,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846412210,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 172,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846412327,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 174,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846412448,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 176,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846412578,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 178,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846412684,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 180,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846412800,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 76
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 182,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846412911,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 184,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846412920,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 186,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846413054,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 188,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846413167,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 190,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846413286,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 192,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846413405,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 195,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 11,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 196,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846413511,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 198,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846413637,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 200,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846413759,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 202,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846414005,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 204,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846414109,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 206,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846414225,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 208,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846414336,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 210,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846414438,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 212,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846414568,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 75
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 214,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846414695,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 216,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846414805,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 74
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 218,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846414914,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 221,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 12,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 222,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846415128,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 74
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 224,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846415211,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 226,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846415339,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 74
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 228,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846415450,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 230,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846415538,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 232,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846415665,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 74
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 234,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846415795,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 236,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846415930,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 74
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 238,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846415938,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 240,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846416069,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 242,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846416310,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 74
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 245,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 13,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 246,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846416404,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 248,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846416523,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 74
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 250,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846416653,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 252,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846416745,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 254,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846416878,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 74
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 256,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846417019,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 258,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846417131,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 74
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 260,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846417355,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 262,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846417468,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 74
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 264,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846417586,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 266,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846417703,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 74
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 268,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846417818,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 271,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 14,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 272,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846417919,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 274,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846418045,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 276,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846418143,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 278,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846418268,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 280,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846418491,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 282,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846418618,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 284,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846418742,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 286,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846418855,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 288,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846418951,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 290,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846419098,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 292,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846419107,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 294,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846419237,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 297,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 15,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 299,
+        "command": "Basic.KeepAlive",
+        "seqId": 16,
+        "errorCode": 0
+      },
+      {
+        "line": 300,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846419320,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 302,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846419446,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 304,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846419564,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 306,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846419646,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 308,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846419765,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 72
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 310,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846419997,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 72
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 312,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846420092,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 314,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846420221,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 316,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846420346,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 72
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 318,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846420430,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 320,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846420550,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 72
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 322,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846420678,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 325,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 17,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 326,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846420750,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 328,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846420898,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 330,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846420905,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 332,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846421019,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 334,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846421025,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 336,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846421165,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 338,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846421421,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 340,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846421552,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 342,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846421633,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 344,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846421764,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 346,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846421884,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 348,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846421963,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 350,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846422086,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 352,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846422107,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 355,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 18,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 356,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846422237,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 358,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846422360,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 360,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846422552,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 362,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846422709,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 364,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846422920,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 366,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846423048,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 368,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846423258,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 370,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846423355,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 372,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846423487,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 375,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 19,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 376,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846423668,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 378,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846423801,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 380,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846423988,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 382,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846424084,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 384,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846424305,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 386,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846424386,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 388,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846424404,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 390,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846424534,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 392,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846424677,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 394,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846424765,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 396,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846424899,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 399,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 20,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 400,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846425026,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 402,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846425035,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 404,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846425169,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 406,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846425344,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 408,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846425496,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 410,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846425691,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 74
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 412,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846425820,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 414,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846425919,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 416,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846426050,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 418,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846426177,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 420,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846426287,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 422,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846426405,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 425,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 21,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 426,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846426503,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 428,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846426629,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 72
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 430,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846426863,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 432,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846426994,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 434,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846427217,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 436,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846427333,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 438,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846427455,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 440,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846427575,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 442,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846427679,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 444,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846427808,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 447,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 22,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 449,
+        "command": "Basic.KeepAlive",
+        "seqId": 23,
+        "errorCode": 0
+      },
+      {
+        "line": 450,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846428049,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 452,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846428059,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 454,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846428199,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 456,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846428427,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 458,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846428537,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 460,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846428666,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 462,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846428792,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 464,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846428889,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 466,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846429014,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 468,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846429147,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 470,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846429270,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 473,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 24,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 474,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846429388,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 476,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846429516,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 478,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846429647,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 480,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846429746,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 482,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846429868,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 484,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846429994,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 486,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846430111,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 488,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846430231,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 490,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846430361,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 492,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846430485,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 494,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846430607,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 496,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846430720,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 498,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846430844,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 501,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 25,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 502,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846430960,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 504,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846431068,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 506,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846431194,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 508,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846431204,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 510,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846431323,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 512,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846431493,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 514,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846431618,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 516,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846431768,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 518,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846431887,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 520,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846432015,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 522,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846432133,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 524,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846432244,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 526,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846432369,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 529,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 26,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 530,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846432486,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 532,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846432606,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 534,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846432734,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 536,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846432854,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 538,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846432973,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 540,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846433071,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 542,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846433194,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 544,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846433318,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 546,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846433436,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 548,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846433445,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 550,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846433585,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 552,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846433696,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 554,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846433814,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 556,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846433936,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 559,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 27,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 560,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846434043,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 562,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846434172,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 564,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846434269,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 566,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846434382,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 568,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846434634,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 570,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846434752,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 572,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846434852,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 574,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846434979,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 576,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846435094,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 578,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846435212,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 580,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846435332,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 583,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 28,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 584,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846435432,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 586,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846435544,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 588,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846435783,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 590,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846435929,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 592,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846436126,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 594,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846436248,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 596,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846436428,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 598,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846436515,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 600,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846436633,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 602,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846436756,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 605,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 29,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 607,
+        "command": "Basic.KeepAlive",
+        "seqId": 30,
+        "errorCode": 0
+      },
+      {
+        "line": 608,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846436884,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 610,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846437037,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 612,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846437249,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 614,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846437370,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 616,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846437552,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 618,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846437652,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 620,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846437771,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 622,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846437894,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 624,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846437999,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 626,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846438104,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 629,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 31,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 630,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846438213,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 632,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846438322,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 634,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846438427,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 636,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846438625,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 638,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846438722,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 640,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846438833,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 642,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846438955,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 644,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846439072,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 646,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846439084,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 648,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846439206,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 650,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846439319,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 652,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846439420,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 72
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 654,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846439520,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 657,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 32,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 658,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846439607,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 660,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846439718,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 72
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 662,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846439815,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 664,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846439926,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 666,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846440058,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 668,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846440150,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 670,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846440253,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 672,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846440338,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 674,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846440436,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 676,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846440533,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 678,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846440623,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 680,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846440739,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 683,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 33,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 684,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846440923,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 686,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846441012,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 688,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846441101,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 690,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846441197,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 692,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846441289,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 694,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846441395,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 696,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846441495,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 698,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846441587,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 700,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846441596,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 702,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846441719,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 73
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 704,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846441927,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 72
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 706,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846442022,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 709,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 34,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 710,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846442190,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 72
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 712,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846442281,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 714,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846442404,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 716,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846442530,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 718,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846442630,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 720,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846442741,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 70
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 722,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846442847,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 724,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846442955,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 70
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 726,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846443048,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 728,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846443238,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 731,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 35,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 732,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846443328,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 734,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846443442,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 736,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846443544,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 738,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846443555,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "chat",
+            "userId": "363562",
+            "userName": "观众5",
+            "text": "对面是使劲的。",
+            "sentAt": 1790533206443
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 740,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846443680,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 742,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846443822,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 744,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846443916,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 746,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846444023,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 748,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846444115,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 750,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846444307,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 752,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846444398,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 754,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846444510,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 756,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846444614,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 759,
+        "command": "Global.ZtLiveInteractive.CsCmd",
+        "seqId": 36,
+        "errorCode": 0,
+        "ack": {
+          "type": "ZtLiveCsHeartbeatAck",
+          "code": 0
+        }
+      },
+      {
+        "line": 761,
+        "command": "Basic.KeepAlive",
+        "seqId": 37,
+        "errorCode": 0
+      },
+      {
+        "line": 762,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846444735,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 764,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846444871,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 766,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846444974,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 768,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846445082,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 770,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846445161,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 772,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846445362,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 71
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 774,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846445451,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 776,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846445556,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 70
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 778,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846445659,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 780,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846445762,
+        "errorCode": 0,
+        "events": [],
+        "ticketInvalid": false,
+        "liveClosed": false
+      },
+      {
+        "line": 782,
+        "command": "Push.ZtLiveInteractive.Message",
+        "seqId": 846445874,
+        "errorCode": 0,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 70
+          }
+        ],
+        "ticketInvalid": false,
+        "liveClosed": false
+      }
+    ]
+  }
+}

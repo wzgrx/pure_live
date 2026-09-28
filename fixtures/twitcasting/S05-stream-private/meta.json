@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "platform": "twitcasting",
+  "sample": "S05-stream-private",
+  "capturedAt": "2026-09-28T17:34:11.766274Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://twitcasting.tv/streamserver.php?target=g:117931547061051040135&mode=client&player=pc_web",
+    "headers": {
+      "Referer": "https://twitcasting.tv/",
+      "Origin": "https://twitcasting.tv",
+      "User-Agent": "Mozilla/5.0"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Mon, 28 Sep 2026 17:34:13 GMT",
+      "server": "Apache",
+      "expires": "Thu, 01 Dec 1994 16:00:00 GMT",
+      "last-modified": "Mon, 28 Sep 2026 17:34:13 GMT",
+      "cache-control": [
+        "no-cache, must-revalidate",
+        "post-check=0, pre-check=0"
+      ],
+      "pragma": "no-cache",
+      "access-control-allow-origin": "https://twitcasting.tv",
+      "access-control-allow-credentials": "true",
+      "strict-transport-security": "max-age=0",
+      "content-length": "954",
+      "content-type": "application/json",
+      "connection": "close"
+    }
+  },
+  "raw": {
+    "sha256": "e8f402f392bbe4dec4496851e0a40c52a0239bb7cbc52ffa3278a6ea72eb525b",
+    "length": 954
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "scratch capture script (urllib, schema 1, M4.U.12): adapter headers, redirects not followed; CSRF token, web session id and Set-Cookie values replaced by random same-shape values"
+}

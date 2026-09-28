@@ -1,0 +1,86 @@
+{
+  "generator": "SoopSite.getRoomDetail / getRoomDetailForRefresh / getRoomDetailForRecording(zzzqqqxxxnotexist1)",
+  "value": {
+    "getRoomDetail": {
+      "roomId": "zzzqqqxxxnotexist1",
+      "title": "",
+      "nick": "",
+      "avatar": "",
+      "cover": "",
+      "watching": "",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "soop",
+      "liveStatus": 3,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false
+    },
+    "getRoomDetailForRefresh": {
+      "roomId": "zzzqqqxxxnotexist1",
+      "title": "",
+      "nick": "",
+      "avatar": "",
+      "cover": "",
+      "watching": "0",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "soop",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false
+    },
+    "getRoomDetailForRecording": {
+      "roomId": "zzzqqqxxxnotexist1",
+      "title": "",
+      "nick": "",
+      "avatar": "",
+      "cover": "",
+      "watching": "0",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "soop",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false
+    },
+    "getPlayQualites": [],
+    "request": {
+      "method": "POST",
+      "url": "https://live.sooplive.co.kr/afreeca/player_live_api.php?bjid=zzzqqqxxxnotexist1",
+      "form": {
+        "bid": "zzzqqqxxxnotexist1",
+        "bno": "",
+        "type": "live",
+        "pwd": "",
+        "player_type": "html5",
+        "stream_type": "common",
+        "quality": "HD",
+        "mode": "landing",
+        "from_api": "0",
+        "is_revive": "false"
+      },
+      "headers": {
+        "Accept": "*/*",
+        "Origin": "https://www.sooplive.co.kr",
+        "Referer": "https://www.sooplive.co.kr/",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        "Cookie": ""
+      }
+    }
+  }
+}

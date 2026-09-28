@@ -1,0 +1,21 @@
+{
+  "generator": "SoopSite.getCdnUrl(rmd, cdn, bno, original)",
+  "value": {
+    "getCdnUrl": "https://live-global-cdn-v02.sooplive.com/live-stmc-28/auth_playlist.m3u8",
+    "request": {
+      "method": "GET",
+      "url": "https://livestream-manager.sooplive.com/broad_stream_assign.html?return_type=gcp_cdn&broad_key=297314125-common-original-hls",
+      "form": {},
+      "headers": {
+        "Accept": "*/*",
+        "Origin": "https://www.sooplive.co.kr",
+        "Referer": "https://www.sooplive.co.kr/",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        "Cookie": ""
+      }
+    }
+  }
+}

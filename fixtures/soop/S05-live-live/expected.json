@@ -1,0 +1,253 @@
+{
+  "generator": "SoopSite.getRoomDetail / getRoomDetailForRefresh / getRoomDetailForRecording(khm11903)",
+  "value": {
+    "getRoomDetail": {
+      "roomId": "khm11903",
+      "userId": "297314125",
+      "title": "봉준",
+      "nick": "봉준",
+      "avatar": "https://stimg.sooplive.co.kr/LOGO/kh/khm11903/khm11903.jpg",
+      "cover": "https://liveimg.sooplive.co.kr/m/297314125?_t={now}",
+      "area": "토크/캠방",
+      "watching": "",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "soop",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "data": {
+        "viewpreset": [
+          {
+            "label": "360p",
+            "label_resolution": "360",
+            "name": "sd",
+            "bps": 500,
+            "vcodec": "h264"
+          },
+          {
+            "label": "540p",
+            "label_resolution": "540",
+            "name": "hd",
+            "bps": 1000,
+            "vcodec": "h264"
+          },
+          {
+            "label": "720p",
+            "label_resolution": "720",
+            "name": "hd4k",
+            "bps": 4000,
+            "vcodec": "h264"
+          },
+          {
+            "label": "1080p",
+            "label_resolution": "1080",
+            "name": "original",
+            "bps": 8000,
+            "vcodec": "h264"
+          },
+          {
+            "label": "자동",
+            "label_resolution": "",
+            "name": "auto",
+            "bps": 8000,
+            "vcodec": ""
+          }
+        ],
+        "bno": "297314125",
+        "rmd": "https://livestream-manager.sooplive.com",
+        "cdn": "gcp_cdn"
+      },
+      "danmakuData": {
+        "url": "wss://chat-6e0a4c4e.sooplive.com:9001/Websocket/khm11903",
+        "chatNo": "4172"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "roomId": "khm11903",
+      "userId": "297314125",
+      "title": "봉준",
+      "nick": "봉준",
+      "avatar": "https://stimg.sooplive.co.kr/LOGO/kh/khm11903/khm11903.jpg",
+      "cover": "https://liveimg.sooplive.co.kr/m/297314125?_t={now}",
+      "area": "토크/캠방",
+      "watching": "",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "soop",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "data": {
+        "viewpreset": [
+          {
+            "label": "360p",
+            "label_resolution": "360",
+            "name": "sd",
+            "bps": 500,
+            "vcodec": "h264"
+          },
+          {
+            "label": "540p",
+            "label_resolution": "540",
+            "name": "hd",
+            "bps": 1000,
+            "vcodec": "h264"
+          },
+          {
+            "label": "720p",
+            "label_resolution": "720",
+            "name": "hd4k",
+            "bps": 4000,
+            "vcodec": "h264"
+          },
+          {
+            "label": "1080p",
+            "label_resolution": "1080",
+            "name": "original",
+            "bps": 8000,
+            "vcodec": "h264"
+          },
+          {
+            "label": "자동",
+            "label_resolution": "",
+            "name": "auto",
+            "bps": 8000,
+            "vcodec": ""
+          }
+        ],
+        "bno": "297314125",
+        "rmd": "https://livestream-manager.sooplive.com",
+        "cdn": "gcp_cdn"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "roomId": "khm11903",
+      "userId": "297314125",
+      "title": "봉준",
+      "nick": "봉준",
+      "avatar": "https://stimg.sooplive.co.kr/LOGO/kh/khm11903/khm11903.jpg",
+      "cover": "https://liveimg.sooplive.co.kr/m/297314125?_t={now}",
+      "area": "토크/캠방",
+      "watching": "",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "soop",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "data": {
+        "viewpreset": [
+          {
+            "label": "360p",
+            "label_resolution": "360",
+            "name": "sd",
+            "bps": 500,
+            "vcodec": "h264"
+          },
+          {
+            "label": "540p",
+            "label_resolution": "540",
+            "name": "hd",
+            "bps": 1000,
+            "vcodec": "h264"
+          },
+          {
+            "label": "720p",
+            "label_resolution": "720",
+            "name": "hd4k",
+            "bps": 4000,
+            "vcodec": "h264"
+          },
+          {
+            "label": "1080p",
+            "label_resolution": "1080",
+            "name": "original",
+            "bps": 8000,
+            "vcodec": "h264"
+          },
+          {
+            "label": "자동",
+            "label_resolution": "",
+            "name": "auto",
+            "bps": 8000,
+            "vcodec": ""
+          }
+        ],
+        "bno": "297314125",
+        "rmd": "https://livestream-manager.sooplive.com",
+        "cdn": "gcp_cdn"
+      }
+    },
+    "getPlayQualites": [
+      {
+        "quality": "原画",
+        "id": "original",
+        "data": [],
+        "sort": 600008000
+      },
+      {
+        "quality": "高清",
+        "id": "hd",
+        "data": [],
+        "sort": 300001000
+      },
+      {
+        "quality": "标清",
+        "id": "sd",
+        "data": [],
+        "sort": 200000500
+      },
+      {
+        "quality": "hd4k",
+        "id": "hd4k",
+        "data": [],
+        "sort": 4000
+      }
+    ],
+    "request": {
+      "method": "POST",
+      "url": "https://live.sooplive.co.kr/afreeca/player_live_api.php?bjid=khm11903",
+      "form": {
+        "bid": "khm11903",
+        "bno": "",
+        "type": "live",
+        "pwd": "",
+        "player_type": "html5",
+        "stream_type": "common",
+        "quality": "HD",
+        "mode": "landing",
+        "from_api": "0",
+        "is_revive": "false"
+      },
+      "headers": {
+        "Accept": "*/*",
+        "Origin": "https://www.sooplive.co.kr",
+        "Referer": "https://www.sooplive.co.kr/",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        "Cookie": ""
+      }
+    }
+  }
+}

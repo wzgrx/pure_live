@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "platform": "soop",
+  "sample": "S05-station-missing",
+  "capturedAt": "2026-09-27T17:31:04.604531Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://chapi.sooplive.co.kr/api/zzzqqqxxxnotexist1/station",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://ch.sooplive.co.kr/"
+    }
+  },
+  "response": {
+    "status": 515,
+    "headers": {
+      "connection": "keep-alive",
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, private",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 17:31:05 GMT",
+      "x-amz-cf-pop": "SFO53-P12",
+      "x-amz-cf-id": "x9ohkWoww0qLTnNCAoHU3BS2fxKw8MjYXRM-5bqdU6sHCowcIt0aYg==",
+      "via": "1.1 a776897eaea889232915df730b539976.cloudfront.net (CloudFront)",
+      "content-type": "application/json",
+      "server": "nginx",
+      "x-cache": "Error from cloudfront"
+    }
+  },
+  "raw": {
+    "sha256": "485eeaa80d3a3fb7ce6fad61d90cd32766e6b2f30f6f2ba819ddf99e998e10a9",
+    "length": 53
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

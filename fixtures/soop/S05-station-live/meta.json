@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "platform": "soop",
+  "sample": "S05-station-live",
+  "capturedAt": "2026-09-27T17:30:48.415598Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://chapi.sooplive.co.kr/api/khm11903/station",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://ch.sooplive.co.kr/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": "bjStationHistory=%1628816621; expires=Thu, 14-Apr-5431 12:18:48 GMT; Max-Age=107436998880; path=/; domain=.sooplive.co.kr; httponly",
+      "cache-control": "no-cache, private",
+      "date": "Sun, 27 Sep 2026 17:30:48 GMT",
+      "transfer-encoding": "chunked",
+      "vary": "Accept-Encoding",
+      "x-amz-cf-pop": "SFO53-P12",
+      "x-amz-cf-id": "6TCv-5PUcTi8lDS29PfHe06cUumqlxIRW6gYZJdDAejGFr3D64Qg2Q==",
+      "content-type": "application/json",
+      "server": "nginx",
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "via": "1.1 a441f3c3c4dcd453392dda3af11ddcce.cloudfront.net (CloudFront)",
+      "x-cache": "Miss from cloudfront"
+    }
+  },
+  "raw": {
+    "sha256": "8ebe767013e8a3a4c513730f60019e24e0bdfea5fe99cbc2492940aca33b7756",
+    "length": 14231
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:bjStationHistory",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

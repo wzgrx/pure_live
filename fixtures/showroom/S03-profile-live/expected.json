@@ -1,0 +1,369 @@
+{
+  "generator": "ShowroomSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw (with S02-status-key, S03-profile-live, S04-live-info-live, S05-streaming-live)",
+  "value": {
+    "577362": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "577362",
+          "title": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+          "nick": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+          "avatar": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+          "cover": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+          "area": "music",
+          "watching": "3941",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "3941",
+          "followers": "91",
+          "platform": "showroom",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "introduction": "初めまして！KINGです！初心者配信者ではありますが、皆さん宜しくお願い致します🤲\r\nインスタ　tosi.0927此方も宜しくです",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "referer": "https://www.showroom-live.com/",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.showroom-live.com/r/0c1c310117354"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=577362",
+          "https://www.showroom-live.com/api/live/live_info?room_id=577362",
+          "https://www.showroom-live.com/api/live/streaming_url?room_id=577362&abr_available=1"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "577362",
+          "title": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+          "nick": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+          "avatar": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+          "cover": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+          "area": "music",
+          "watching": "3941",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "3941",
+          "followers": "91",
+          "platform": "showroom",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "introduction": "初めまして！KINGです！初心者配信者ではありますが、皆さん宜しくお願い致します🤲\r\nインスタ　tosi.0927此方も宜しくです",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "referer": "https://www.showroom-live.com/",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.showroom-live.com/r/0c1c310117354"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=577362",
+          "https://www.showroom-live.com/api/live/live_info?room_id=577362"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "577362",
+          "title": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+          "nick": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+          "avatar": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+          "cover": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+          "area": "music",
+          "watching": "3941",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "3941",
+          "followers": "91",
+          "platform": "showroom",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "introduction": "初めまして！KINGです！初心者配信者ではありますが、皆さん宜しくお願い致します🤲\r\nインスタ　tosi.0927此方も宜しくです",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "referer": "https://www.showroom-live.com/",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.showroom-live.com/r/0c1c310117354"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=577362",
+          "https://www.showroom-live.com/api/live/live_info?room_id=577362",
+          "https://www.showroom-live.com/api/live/streaming_url?room_id=577362&abr_available=1"
+        ]
+      },
+      "getLiveStatus": {
+        "result": true,
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=577362",
+          "https://www.showroom-live.com/api/live/live_info?room_id=577362"
+        ]
+      },
+      "getPlayQualites": {
+        "result": [
+          {
+            "quality": "自动",
+            "id": "hls_all:100:0",
+            "sort": 2000,
+            "data": [
+              "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_abr202510.m3u8"
+            ]
+          },
+          {
+            "quality": "原画",
+            "id": "hls:2:1000",
+            "sort": 1000,
+            "data": [
+              "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_ss.m3u8"
+            ]
+          },
+          {
+            "quality": "中画质",
+            "id": "hls:6:200",
+            "sort": 200,
+            "data": [
+              "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_mm.m3u8"
+            ]
+          },
+          {
+            "quality": "低画质",
+            "id": "hls:4:100",
+            "sort": 100,
+            "data": [
+              "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_ll.m3u8"
+            ]
+          }
+        ],
+        "requests": []
+      },
+      "getPlayUrls": {
+        "hls_all:100:0": {
+          "result": [
+            "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_abr202510.m3u8"
+          ],
+          "requests": []
+        },
+        "hls:2:1000": {
+          "result": [
+            "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_ss.m3u8"
+          ],
+          "requests": []
+        },
+        "hls:6:200": {
+          "result": [
+            "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_mm.m3u8"
+          ],
+          "requests": []
+        },
+        "hls:4:100": {
+          "result": [
+            "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_ll.m3u8"
+          ],
+          "requests": []
+        }
+      },
+      "resolvePlayUrlsForRecoveryRaw(hls_all:100:0)": {
+        "result": {
+          "urls": [
+            "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_abr202510.m3u8"
+          ],
+          "appliedQualityData": "hls_all:100:0"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=577362",
+          "https://www.showroom-live.com/api/live/live_info?room_id=577362",
+          "https://www.showroom-live.com/api/live/streaming_url?room_id=577362&abr_available=1"
+        ]
+      }
+    },
+    "0c1c310117354": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "577362",
+          "title": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+          "nick": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+          "avatar": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+          "cover": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+          "area": "music",
+          "watching": "3941",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "3941",
+          "followers": "91",
+          "platform": "showroom",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "introduction": "初めまして！KINGです！初心者配信者ではありますが、皆さん宜しくお願い致します🤲\r\nインスタ　tosi.0927此方も宜しくです",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "referer": "https://www.showroom-live.com/",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.showroom-live.com/r/0c1c310117354"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/status?room_url_key=0c1c310117354",
+          "https://www.showroom-live.com/api/room/profile?room_id=577362",
+          "https://www.showroom-live.com/api/live/live_info?room_id=577362",
+          "https://www.showroom-live.com/api/live/streaming_url?room_id=577362&abr_available=1"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "577362",
+          "title": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+          "nick": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+          "avatar": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+          "cover": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+          "area": "music",
+          "watching": "3941",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "3941",
+          "followers": "91",
+          "platform": "showroom",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "introduction": "初めまして！KINGです！初心者配信者ではありますが、皆さん宜しくお願い致します🤲\r\nインスタ　tosi.0927此方も宜しくです",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "referer": "https://www.showroom-live.com/",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.showroom-live.com/r/0c1c310117354"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/status?room_url_key=0c1c310117354",
+          "https://www.showroom-live.com/api/room/profile?room_id=577362",
+          "https://www.showroom-live.com/api/live/live_info?room_id=577362"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "577362",
+          "title": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+          "nick": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+          "avatar": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+          "cover": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+          "area": "music",
+          "watching": "3941",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "3941",
+          "followers": "91",
+          "platform": "showroom",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "introduction": "初めまして！KINGです！初心者配信者ではありますが、皆さん宜しくお願い致します🤲\r\nインスタ　tosi.0927此方も宜しくです",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "referer": "https://www.showroom-live.com/",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.showroom-live.com/r/0c1c310117354"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/status?room_url_key=0c1c310117354",
+          "https://www.showroom-live.com/api/room/profile?room_id=577362",
+          "https://www.showroom-live.com/api/live/live_info?room_id=577362",
+          "https://www.showroom-live.com/api/live/streaming_url?room_id=577362&abr_available=1"
+        ]
+      },
+      "getLiveStatus": {
+        "result": true,
+        "requests": [
+          "https://www.showroom-live.com/api/room/status?room_url_key=0c1c310117354",
+          "https://www.showroom-live.com/api/room/profile?room_id=577362",
+          "https://www.showroom-live.com/api/live/live_info?room_id=577362"
+        ]
+      },
+      "getPlayQualites": {
+        "result": [
+          {
+            "quality": "自动",
+            "id": "hls_all:100:0",
+            "sort": 2000,
+            "data": [
+              "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_abr202510.m3u8"
+            ]
+          },
+          {
+            "quality": "原画",
+            "id": "hls:2:1000",
+            "sort": 1000,
+            "data": [
+              "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_ss.m3u8"
+            ]
+          },
+          {
+            "quality": "中画质",
+            "id": "hls:6:200",
+            "sort": 200,
+            "data": [
+              "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_mm.m3u8"
+            ]
+          },
+          {
+            "quality": "低画质",
+            "id": "hls:4:100",
+            "sort": 100,
+            "data": [
+              "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_ll.m3u8"
+            ]
+          }
+        ],
+        "requests": []
+      },
+      "getPlayUrls": {
+        "hls_all:100:0": {
+          "result": [
+            "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_abr202510.m3u8"
+          ],
+          "requests": []
+        },
+        "hls:2:1000": {
+          "result": [
+            "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_ss.m3u8"
+          ],
+          "requests": []
+        },
+        "hls:6:200": {
+          "result": [
+            "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_mm.m3u8"
+          ],
+          "requests": []
+        },
+        "hls:4:100": {
+          "result": [
+            "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_ll.m3u8"
+          ],
+          "requests": []
+        }
+      },
+      "resolvePlayUrlsForRecoveryRaw(hls_all:100:0)": {
+        "result": {
+          "urls": [
+            "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_abr202510.m3u8"
+          ],
+          "appliedQualityData": "hls_all:100:0"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=577362",
+          "https://www.showroom-live.com/api/live/live_info?room_id=577362",
+          "https://www.showroom-live.com/api/live/streaming_url?room_id=577362&abr_available=1"
+        ]
+      }
+    }
+  }
+}

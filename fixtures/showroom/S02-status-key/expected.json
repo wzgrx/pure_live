@@ -1,0 +1,64 @@
+{
+  "generator": "ShowroomApi.resolveRoomId + ShowroomLink.parse + ShowroomLink.roomUrl",
+  "value": {
+    "resolveRoomId": {
+      "0c1c310117354": {
+        "result": 577362,
+        "requests": [
+          "https://www.showroom-live.com/api/room/status?room_url_key=0c1c310117354"
+        ]
+      },
+      "577362": {
+        "result": 577362,
+        "requests": []
+      },
+      " 577362 ": {
+        "result": 577362,
+        "requests": []
+      },
+      "a b": {
+        "result": {
+          "throws": "ShowroomException",
+          "message": "Showroom identity"
+        },
+        "requests": []
+      },
+      "../x": {
+        "result": {
+          "throws": "ShowroomException",
+          "message": "Showroom identity"
+        },
+        "requests": []
+      }
+    },
+    "ShowroomLink.parse": {
+      "https://www.showroom-live.com/r/0c1c310117354": "0c1c310117354",
+      "https://www.showroom-live.com/r/0c1c310117354?t=1790532886": "0c1c310117354",
+      "https://www.showroom-live.com/48_Seina_Fukuoka": "48_Seina_Fukuoka",
+      "https://showroom-live.com/r/48_Seina_Fukuoka/": "48_Seina_Fukuoka",
+      "http://www.showroom-live.com/r/7779344804": "7779344804",
+      "https://www.showroom-live.com/room/profile?room_id=61576": "61576",
+      "https://www.showroom-live.com/room/profile?room_id=0061576": null,
+      "https://www.showroom-live.com/room/profile": null,
+      "https://www.showroom-live.com/event/some_event": null,
+      "https://www.showroom-live.com/ranking": null,
+      "https://www.showroom-live.com/onlive": "onlive",
+      "https://www.showroom-live.com/r": "r",
+      "https://www.showroom-live.com/campaign/x": null,
+      "https://www.showroom-live.com/r/a/b": null,
+      "https://www.showroom-live.com/": null,
+      "https://user@www.showroom-live.com/r/abc": null,
+      "https://evilshowroom-live.com/r/abc": null,
+      "https://www.showroom-live.com/r/%E3%81%82": null,
+      "ftp://www.showroom-live.com/r/abc": null,
+      "https://m.showroom-live.com/r/abc": "abc"
+    },
+    "ShowroomLink.roomUrl": {
+      "577362": "https://www.showroom-live.com/room/profile?room_id=577362",
+      "0c1c310117354": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid SHOWROOM room ID"
+      }
+    }
+  }
+}

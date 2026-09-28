@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "platform": "showroom",
+  "sample": "S02-status-notfound",
+  "capturedAt": "2026-09-27T18:14:49.048162Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.showroom-live.com/api/room/status?room_url_key=zxqvnoroomfixture",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Referer": "https://www.showroom-live.com/"
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "no-store",
+      "set-cookie": [
+        "sr_id=w5b1aWRWaq7vKTXxh8UjvufXSRyfHVx6OkBIgnim7mLRlH3le0sOGQ7NNWTXeUKS; path=/; expires=Wed, 22-Sep-2027 18:14:49 GMT; secure; SameSite=None",
+        "f=95K4R756-SN5M-78S6-6607-9353D6YN7918; domain=.www.showroom-live.com; path=/; expires=Wed, 24-Sep-2036 18:14:49 GMT"
+      ],
+      "date": "Sun, 27 Sep 2026 18:14:49 GMT",
+      "content-encoding": "gzip",
+      "x-amz-cf-pop": "SFO53-P9",
+      "x-amz-cf-id": "5Z6t158MQJC4M6aDAE2QVfoGFnLmA4Q5iBLPg03pYOFSR8aax_0i6g==",
+      "content-type": "application/json; charset=utf-8",
+      "server": "nginx",
+      "content-length": "90",
+      "x-frame-options": "DENY",
+      "via": "1.1 9f134613c537a668ce2a318739330836.cloudfront.net (CloudFront)",
+      "x-content-type-options": "nosniff",
+      "x-cache": "Error from cloudfront"
+    }
+  },
+  "raw": {
+    "sha256": "7ad1cae6d843286209e33689b0a1443e5a23837aed810c8bf6f6cbf7b8369897",
+    "length": 81
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:sr_id",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:f",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

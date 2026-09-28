@@ -1665,6 +1665,31 @@ class Translations$follows$zh_Hans {
 
   /// zh-Hans: '已删除分组“{name}”'
   String groupDeleted({required Object name}) => '已删除分组“${name}”';
+
+  /// zh-Hans: '多选'
+  String get select => '多选';
+
+  /// zh-Hans: '(other) {已选 {n}}'
+  String selectedCount({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '已选 ${n}');
+
+  /// zh-Hans: '全选'
+  String get selectAll => '全选';
+
+  /// zh-Hans: '取消多选'
+  String get cancelSelection => '取消多选';
+
+  /// zh-Hans: '(other) {已选的 {n} 个主播}'
+  String selectedStreamers({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '已选的 ${n} 个主播');
+
+  /// zh-Hans: '(other) {已取消关注 {n} 个主播}'
+  String unfollowedMany({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '已取消关注 ${n} 个主播');
+
+  /// zh-Hans: '(other) {多画面在这里最多放 {n} 路，已按选择顺序放入前 {n} 个}'
+  String multiviewLimit({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '多画面在这里最多放 ${n} 路，已按选择顺序放入前 ${n} 个');
 }
 
 // Path: fonts
@@ -2801,6 +2826,24 @@ class Translations$search$zh_Hans {
 
   late final Translations$search$sort$zh_Hans sort = Translations$search$sort$zh_Hans.internal(_root);
   late final Translations$search$web$zh_Hans web = Translations$search$web$zh_Hans.internal(_root);
+
+  /// zh-Hans: '最近搜索'
+  String get recent => '最近搜索';
+
+  /// zh-Hans: '清空'
+  String get clearHistory => '清空';
+
+  /// zh-Hans: '从搜索历史中删除'
+  String get removeFromHistory => '从搜索历史中删除';
+
+  /// zh-Hans: '已从搜索历史中删除“{keyword}”'
+  String historyRemoved({required Object keyword}) => '已从搜索历史中删除“${keyword}”';
+
+  /// zh-Hans: '已清空搜索历史'
+  String get historyCleared => '已清空搜索历史';
+
+  /// zh-Hans: '已关闭并清空搜索历史'
+  String get historyOffCleared => '已关闭并清空搜索历史';
 }
 
 // Path: settings
@@ -3186,6 +3229,9 @@ class Translations$backup$section$zh_Hans {
 
   /// zh-Hans: '平台登录信息'
   String get secrets => '平台登录信息';
+
+  /// zh-Hans: '搜索历史'
+  String get searchHistory => '搜索历史';
 }
 
 // Path: cast.failure
@@ -4116,6 +4162,12 @@ class Translations$settings$data$zh_Hans {
 
   /// zh-Hans: '观看历史最多保留'
   String get historyLimit => '观看历史最多保留';
+
+  /// zh-Hans: '记录搜索历史'
+  String get searchHistory => '记录搜索历史';
+
+  /// zh-Hans: '搜索框为空时列出最近 20 个搜索词；关闭时清空'
+  String get searchHistorySubtitle => '搜索框为空时列出最近 20 个搜索词；关闭时清空';
 }
 
 // Path: settings.accounts

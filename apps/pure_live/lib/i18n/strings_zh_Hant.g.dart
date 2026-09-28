@@ -1220,6 +1220,24 @@ class Translations$follows$zh_Hant implements Translations$follows$zh_Hans {
   String get renameAndDescribe => '重新命名和描述';
   @override
   String groupDeleted({required Object name}) => '已刪除群組「${name}」';
+  @override
+  String get select => '多選';
+  @override
+  String selectedCount({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '已選 ${n}');
+  @override
+  String get selectAll => '全選';
+  @override
+  String get cancelSelection => '結束多選';
+  @override
+  String selectedStreamers({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '已選的 ${n} 位主播');
+  @override
+  String unfollowedMany({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '已取消追蹤 ${n} 位主播');
+  @override
+  String multiviewLimit({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '多畫面在這裡最多放 ${n} 路，已依選取順序放入前 ${n} 個');
 }
 
 // Path: fonts
@@ -2030,6 +2048,18 @@ class Translations$search$zh_Hant implements Translations$search$zh_Hans {
   late final Translations$search$sort$zh_Hant sort = Translations$search$sort$zh_Hant.internal(_root);
   @override
   late final Translations$search$web$zh_Hant web = Translations$search$web$zh_Hant.internal(_root);
+  @override
+  String get recent => '最近搜尋';
+  @override
+  String get clearHistory => '清除';
+  @override
+  String get removeFromHistory => '從搜尋紀錄中刪除';
+  @override
+  String historyRemoved({required Object keyword}) => '已從搜尋紀錄中刪除「${keyword}」';
+  @override
+  String get historyCleared => '已清除搜尋紀錄';
+  @override
+  String get historyOffCleared => '已關閉並清除搜尋紀錄';
 }
 
 // Path: settings
@@ -2355,6 +2385,8 @@ class Translations$backup$section$zh_Hant implements Translations$backup$section
   String get recordTasks => '錄製任務';
   @override
   String get secrets => '平台登入資訊';
+  @override
+  String get searchHistory => '搜尋紀錄';
 }
 
 // Path: cast.failure
@@ -3057,6 +3089,10 @@ class Translations$settings$data$zh_Hant implements Translations$settings$data$z
   // Translations
   @override
   String get historyLimit => '觀看紀錄最多保留';
+  @override
+  String get searchHistory => '保留搜尋紀錄';
+  @override
+  String get searchHistorySubtitle => '搜尋框空白時列出最近 20 個搜尋字詞；關閉時清除';
 }
 
 // Path: settings.accounts

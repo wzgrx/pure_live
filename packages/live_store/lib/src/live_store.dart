@@ -11,6 +11,7 @@ import 'package:live_store/src/iptv.dart';
 import 'package:live_store/src/meta_store.dart';
 import 'package:live_store/src/room_prefs.dart';
 import 'package:live_store/src/room_store.dart';
+import 'package:live_store/src/search_history.dart';
 import 'package:live_store/src/settings/settings_store.dart';
 import 'package:live_store/src/store_log.dart';
 import 'package:live_store/src/tags.dart';
@@ -34,6 +35,7 @@ final class LiveStore {
       iptv = IptvStore(database),
       meta = MetaStore(database) {
     history = HistoryStore(database, settings);
+    searchHistory = SearchHistoryStore(database, settings);
   }
 
   /// Path of the database file under the app data root [rootDirectory]:
@@ -94,6 +96,9 @@ final class LiveStore {
 
   /// Watch history.
   late final HistoryStore history;
+
+  /// Recent search keywords.
+  late final SearchHistoryStore searchHistory;
 
   /// Danmaku block words and users.
   final BlockRuleStore blockRules;

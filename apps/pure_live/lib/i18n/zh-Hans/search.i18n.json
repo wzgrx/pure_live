@@ -33,5 +33,11 @@
     "scanning": "正在识别本页的直播间",
     "noRooms": "本页没有识别出直播间链接",
     "pageRoomsTitle": "本页的直播间"
-  }
+  },
+  "recent": "最近搜索",
+  "clearHistory": "清空",
+  "removeFromHistory": "从搜索历史中删除",
+  "historyRemoved": "已从搜索历史中删除“{keyword}”",
+  "historyCleared": "已清空搜索历史",
+  "historyOffCleared": "已关闭并清空搜索历史"
 }

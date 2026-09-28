@@ -23,6 +23,13 @@ void main() {
     ]);
   });
 
+  test('F-FAV-09: the follows page adds 多选 first; the rest stays as on every card', () {
+    expect(roomCardActions(followed: true, newWindow: false, select: true), [
+      RoomCardAction.select,
+      ...roomCardActions(followed: true, newWindow: false),
+    ]);
+  });
+
   test('F-FAV-08: a platform without an adapter keeps only following and groups', () {
     expect(roomCardActions(followed: true, newWindow: true, supported: false), [
       RoomCardAction.unfollow,

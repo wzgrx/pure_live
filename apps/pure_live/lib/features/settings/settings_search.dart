@@ -274,6 +274,7 @@ List<SettingsEntry> settingsIndex({bool? android, bool? windows}) {
   const data = SettingsGroup.data;
   final b = t.backup;
   add(data, Settings.historyLimit.id, s.data.historyLimit);
+  add(data, Settings.recordSearchHistory.id, s.data.searchHistory, subtitle: s.data.searchHistorySubtitle);
   add(data, backupAnchor, b.backupAndRestore, subtitle: b.backupAndRestoreSubtitle);
   add(data, webDavAnchor, 'WebDAV');
   add(data, lanSyncAnchor, b.lanSync);

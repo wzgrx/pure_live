@@ -280,6 +280,7 @@ v4 的数据根 **[决定 2026-09-28，F-WIN-06]**：Windows 为 `{exe 所在目
 | record_files | id、task_id（可空）、room_id、path、kind（flv / hls / ts / mp4 / xml / gaps / legacy_ts）、state（writing / complete / interrupted / remuxing / remuxed / remux_failed / missing）、bytes、media_ms、started_at、ended_at、gap_count、source_file_id | 删除任务不删记录 |
 | webdav_profiles | id、name、base_url、username、secret_ref、is_current、remote_dir | name 唯一；密码只在密钥库 |
 | settings | key、value（JSON）、updated_at | 键必须在设置注册表里（§5） |
+| search_history | keyword_folded（主键：去首尾空白、连续空白算一个、小写）、keyword（最近一次的写法）、searched_at | schema 3（2026-09-28，product F-SRC-06）。最多 20 行，写入时删掉最旧的；“记录搜索历史”（`search.recordHistory`）关闭时不写入 |
 | meta | key、value | schema 版本、导入账本、设备 id、首启标记、开播提醒记录（`alerts.liveRecords`）、节目提醒列表（`alerts.programmeReminders`）等 |
 
 - 所有写入等待完成才算成功；失败回滚内存状态（旧版关注、历史已这样做：favorite_room_controller.dart:404-436；69e5b80b）。退出前把未完成的写入刷盘，最多等 2 s（plugins/utils.dart:19-23）。
@@ -316,7 +317,7 @@ v4 的数据根 **[决定 2026-09-28，F-WIN-06]**：Windows 为 `{exe 所在目
 
 由注册表派生：设置页的重置、备份范围、导入映射、同步范围、未知键的处理（导入时忽略并写进报告）。
 
-作用域分配 **[决定]**：弹幕、主题（字体文件名除外）、卡片、分页、刷新、播放的通用项、目录平台为 `synced`；窗口、代理、路径类、退出、开机自启、播放输出驱动和硬解选项、字体文件名、本地互动、录制为 `device`；迁移计数、设备 id、缓存为 `internal`；Cookie 和密码为 `secret`。TV 模式（`app.tvMode` 自动 / 开启 / 关闭，`app.tvPerformanceMode`）是 v4 新增、没有旧键的 `device` 设置：电视上的选择不能随备份跑到手机上；竖屏全屏上下滑换台（`player.switchRoomGesture`，默认关）属于播放的通用项，为 `synced`（2026-09-28，ADR 0026）。关注页排序（`follows.sort`：人数 / 开播时间 / 平台 / 自定义，默认人数，与旧版固定按人数一致）是 v4 新增、没有旧键的 `synced` 设置（2026-09-28，F-FAV-01）。
+作用域分配 **[决定]**：弹幕、主题（字体文件名除外）、卡片、分页、刷新、播放的通用项、目录平台为 `synced`；窗口、代理、路径类、退出、开机自启、播放输出驱动和硬解选项、字体文件名、本地互动、录制为 `device`；迁移计数、设备 id、缓存为 `internal`；Cookie 和密码为 `secret`。TV 模式（`app.tvMode` 自动 / 开启 / 关闭，`app.tvPerformanceMode`）是 v4 新增、没有旧键的 `device` 设置：电视上的选择不能随备份跑到手机上；竖屏全屏上下滑换台（`player.switchRoomGesture`，默认关）属于播放的通用项，为 `synced`（2026-09-28，ADR 0026）。关注页排序（`follows.sort`：人数 / 开播时间 / 平台 / 自定义，默认人数，与旧版固定按人数一致）是 v4 新增、没有旧键的 `synced` 设置（2026-09-28，F-FAV-01）。“记录搜索历史”（`search.recordHistory`，默认开）同样是 v4 新增的 `synced` 设置（2026-09-28，F-SRC-06）。
 
 ## 6. 旧数据导入（迁移）
 
@@ -441,6 +442,7 @@ v4 的数据根 **[决定 2026-09-28，F-WIN-06]**：Windows 为 `{exe 所在目
     "followAreas": [],
     "tags": [], "roomTags": [],
     "history": [],
+    "searchHistory": [{"keyword": "英雄联盟", "searchedAt": 0}],
     "blockRules": [],
     "roomPrefs": [],
     "recordTasks": [{"platform": "douyu", "roomId": "5526219", "nick": "…", "title": "…", "quality": "original", "autoReconnect": true, "monitor": true, "createdAt": 0, "order": 0}],
@@ -457,6 +459,7 @@ v4 的数据根 **[决定 2026-09-28，F-WIN-06]**：Windows 为 `{exe 所在目
 - 不含：签名 URL、Cookie、密码（除非 §7.3）、EPG 节目数据、缓存、录制文件本身。
 - iptv 分区包含网址来源的播放列表和节目单源（名称、地址、播放列表 UA、自动同步、当前节目单、顺序）**[决定]**（旧备份没有 IPTV 数据：诊断 05 ⑦-7）。文件来源、频道和节目不进备份，换设备后重新同步；收藏列表、备用组已合并进关注和线路（product F-IPTV-08、F-IPTV-11），节目单匹配每次自动计算，都不需要备份（2026-09-28 修订，见 iptv.md §7）。读取时 `providers` 是 `playlists` 的别名；Xtream 以后加入时密码仍不进备份。
 - recordTasks 分区 **[决定 2026-09-28]**：录制任务（record.md §2），每项是房间（platform + roomId）、展示快照（nick、title、avatar、cover）、任务画质（`QualityPreference` 的名字，null 用 `record.defaultQuality`）、autoReconnect、monitor、createdAt（毫秒）、order。`monitor` 表示用户想在开播时录它：导出时任务正在排队、解析、录制、重连、收尾、等待开播，或因轮询关闭、应用退出而停止。不含会话信息（目录、分段、MP4）、游标、失败原因和错误文本：这些只对本机的文件有意义，录制文件本身也不进备份。录制任务不在数据库里（应用用 `<数据根>/DB/record_tasks.json`，record.md §13），`BackupService` 通过应用提供的 `RecordTaskBackup` 读写；没有提供时不导出这个分区，恢复时记 `unsupported` 并保持本机任务不变。任务不是设备设置，跨平台家族也恢复。只在完整备份里。
+- searchHistory 分区 **[决定 2026-09-28]**：最近的搜索词（product F-SRC-06），最新在前，每项是 keyword 和 searchedAt（毫秒）。只在完整备份里。这是 v4 格式里新增的可选分区，`version` 仍为 4：没有这个分区的旧 v4 备份和 3.x 备份恢复时本机搜索历史不变（§7.2）；更早的 v4 版本读到它只在报告里记 `unknownSection`，其余照常导入。
 - 文件名：`purelive_v4_<yyyy-MM-ddTHH_mm_ss>_<uuid>.json`，关注专用为 `purelive_v4_follows_…json` **[决定]**。写 `.part` 后改名，替换已有文件时先保留 `.previous`，与旧版一致（backup_controller.dart:363-405）。
 - 旧版遇到 v4 文件会因为找不到已识别的分区而拒绝，不会写坏数据（backup_controller.dart:146-168）。
 
@@ -468,6 +471,7 @@ v4 的数据根 **[决定 2026-09-28，F-WIN-06]**：Windows 为 `{exe 所在目
 - 完整恢复：文件里有的分区整体替换本机对应数据；**文件里没有的分区保持本机不变** **[决定]**（旧版缺少的分区会被重置为默认值：backup_controller.dart:241-281）。
 - 仅关注恢复：只替换 follows 和 followAreas，其它全部不动（ISSUE_865 审计；backup_controller.dart:414-433）。
 - 录制任务 **[决定 2026-09-28]**：和其它分区一样先整体校验（房间无效、重复的项丢弃并记入报告，未知画质按默认画质并记 `invalidValue`，分区不是列表 → 整个文件报格式错误、什么都不写），数据库事务提交后（和密钥一样在事务外）交给录制器：“整体替换”任务列表，但正在排队、解析、录制、重连、收尾的任务不动（不打断录制；文件里的同一房间也跳过），其余本机任务不在文件里的删除（文件保留），文件里的任务以“已停止”写入；`monitor` 的任务在开播监控打开时进入等待开播（首次检查按 `record.liveCheckInterval`），关闭时为“已停止（开播监控已关闭）”，打开监控后开始等待。同一房间的本机任务保留它的会话信息。录制器写入失败时报告记 `writeFailed`，已提交的数据库部分不回滚。
+- 搜索历史 **[决定 2026-09-28]**：同一个词（按 search_history 的主键）重复的只留最新一条，超过 20 条的丢弃，都记入报告；分区不是列表 → 整个文件报格式错误、什么都不写。恢复后“记录搜索历史”为关（文件的设置分区关掉了它，或本机本来就关）时不写入，本机的搜索历史也清空，报告记 `recordingOff`，与用户关掉开关时一致。
 - 完整恢复入口选到关注专用文件 → 在写入前报格式错误（backup_controller.dart:171-173, 408-410）。
 
 ### 7.3 密钥部分

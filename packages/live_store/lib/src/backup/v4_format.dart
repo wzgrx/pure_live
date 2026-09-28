@@ -11,6 +11,7 @@ import 'package:live_store/src/follow_areas.dart';
 import 'package:live_store/src/iptv.dart';
 import 'package:live_store/src/live_store.dart';
 import 'package:live_store/src/rooms.dart';
+import 'package:live_store/src/search_history.dart';
 import 'package:live_store/src/secrets/secret_store.dart';
 import 'package:live_store/src/settings/registry.dart';
 import 'package:live_store/src/settings/setting.dart';
@@ -60,6 +61,7 @@ abstract final class V4Format {
     'roomPrefs',
     'iptv',
     'recordTasks',
+    'searchHistory',
   };
 
   /// Sections of the format this app does not store yet; restoring leaves
@@ -126,6 +128,10 @@ abstract final class V4Format {
       sections['history'] = [
         for (final entry in await store.history.all())
           {..._room(entry.room), 'lastWatchedAt': entry.lastWatchedAt?.millisecondsSinceEpoch},
+      ];
+      sections['searchHistory'] = [
+        for (final entry in await store.searchHistory.all())
+          {'keyword': entry.keyword, 'searchedAt': entry.searchedAt.millisecondsSinceEpoch},
       ];
       sections['blockRules'] = [
         for (final rule in await store.blockRules.all())
@@ -315,6 +321,18 @@ abstract final class V4Format {
       return room == null ? null : PlannedHistory(room, lastWatchedAt: JsonRead.millis(item['lastWatchedAt']));
     });
     if (history != null) plan.history = _history(history, report, limit);
+    final searches = _list(sections, 'searchHistory', report, (item) {
+      final keyword = JsonRead.nonEmpty(item['keyword']);
+      if (keyword == null || SearchHistoryStore.normalize(keyword).isEmpty) {
+        report.drop('searchHistory', 'invalidItem');
+        return null;
+      }
+      return SearchHistoryEntry(
+        keyword: keyword,
+        searchedAt: JsonRead.millis(item['searchedAt']) ?? DateTime.utc(1970),
+      );
+    });
+    if (searches != null) plan.searchHistory = _searchHistory(searches, report);
     final rules = _list(sections, 'blockRules', report, (item) {
       final kind = BlockKind.values.asNameMap()[item['kind']];
       final value = JsonRead.nonEmpty(item['value']);
@@ -391,6 +409,7 @@ abstract final class V4Format {
       report.written('blockRules', rules.values.fold(0, (sum, list) => sum + list.length));
     }
     if (plan.roomPrefs case final prefs?) report.written('roomPrefs', prefs.length);
+    if (plan.searchHistory case final searches?) report.written('searchHistory', searches.length);
     if (plan.iptv case final iptv?) {
       report
         ..written('iptvPlaylists', iptv.playlists.length)
@@ -585,6 +604,28 @@ abstract final class V4Format {
         continue;
       }
       result.add(Tag(id: tag.id, name: tag.name, description: tag.description, order: result.length));
+    }
+    return result;
+  }
+
+  /// Newest first, one entry per keyword (the newest), at most
+  /// [SearchHistoryStore.limit].
+  static List<SearchHistoryEntry> _searchHistory(List<SearchHistoryEntry> entries, ImportReport report) {
+    final sorted = [...entries.indexed]
+      ..sort((a, b) {
+        final byTime = b.$2.searchedAt.compareTo(a.$2.searchedAt);
+        return byTime != 0 ? byTime : a.$1.compareTo(b.$1);
+      });
+    final seen = <String>{};
+    final result = <SearchHistoryEntry>[];
+    for (final (_, entry) in sorted) {
+      if (!seen.add(entry.folded)) {
+        report.drop('searchHistory', 'duplicate', entry.keyword);
+      } else if (result.length >= SearchHistoryStore.limit) {
+        report.drop('searchHistory', 'overLimit', entry.keyword);
+      } else {
+        result.add(entry);
+      }
     }
     return result;
   }

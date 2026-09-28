@@ -383,18 +383,7 @@ void main() {
     });
   });
 
-  test('ENT-3: the default layout grows to show every entered room, never past the capacity', () {
-    MultiviewLayout fit(MultiviewLayout layout, int rooms, int capacity) =>
-        MultiviewController.fittingLayout(layout, rooms: rooms, capacity: capacity);
-    expect(fit(MultiviewLayout.two, 2, 4), MultiviewLayout.two);
-    expect(fit(MultiviewLayout.two, 3, 4), MultiviewLayout.four, reason: 'a phone prefilled with 3');
-    expect(fit(MultiviewLayout.two, 4, 4), MultiviewLayout.four);
-    expect(fit(MultiviewLayout.four, 6, 9), MultiviewLayout.nine);
-    expect(fit(MultiviewLayout.four, 3, 9), MultiviewLayout.four);
-    expect(fit(MultiviewLayout.onePlusN, 5, 9), MultiviewLayout.onePlusN, reason: '1+N grows by itself');
-  });
-
-  test('ENT-3: prefilled rooms on a phone layout leave no cell off screen', () async {
+  test('ENT-3: start places only the rooms its layout shows', () async {
     await controller().start(
       layout: MultiviewLayout.two,
       rooms: [
@@ -402,8 +391,25 @@ void main() {
       ],
     );
     await settle();
-    expect(state().cells, hasLength(MultiviewLayout.four.cells));
-    expect(state().layout, MultiviewLayout.four, reason: 'all four shown, none decoding unseen');
+    expect(state().cells, hasLength(2), reason: 'no cell decodes off screen');
+    expect(state().layout, MultiviewLayout.two);
+  });
+
+  test('rooms brought along: the first one that plays keeps the sound', () async {
+    await controller().start(
+      layout: MultiviewLayout.four,
+      rooms: [
+        for (final id in ['1', '2', '3', '4']) RoomRef('douyu', id),
+      ],
+    );
+    await settle();
+    expect(state().cells.every((cell) => cell.status == CellStatus.playing), isTrue);
+    expect(state().audioFocus, 0, reason: 'not the last cell whose stream opened');
+    // A room added later takes the sound as before (AUD-2).
+    controller().setLayout(MultiviewLayout.nine);
+    await controller().assign(4, RoomRef('douyu', '5'));
+    await settle();
+    expect(state().audioFocus, 4);
   });
 
   test('entering pauses the room page player (ENT-2, INV-MULTI-02)', () async {

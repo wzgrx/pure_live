@@ -42,7 +42,8 @@
     "settings": "Settings",
     "roomPrefs": "Room preferences",
     "recordTasks": "Recording tasks",
-    "secrets": "Platform sign-ins"
+    "secrets": "Platform sign-ins",
+    "searchHistory": "Search history"
   },
   "format": "Backup format: {format}",
   "nothingToImport": "The file has nothing to import",

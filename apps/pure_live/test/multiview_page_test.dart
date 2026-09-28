@@ -217,6 +217,24 @@ void main() {
       expect(stateOf(container).cells[1].room, RoomRef('douyu', '7'));
       await close(tester);
     });
+
+    testWidgets('ENT-3: rooms brought along that 1×2 cannot show open 2×2 on a phone, in their order', (tester) async {
+      final rooms = [
+        for (final id in ['3', '1', '2']) RoomRef('douyu', id),
+      ];
+      final container = await open(tester, size: const Size(393, 852), rooms: rooms);
+      expect(stateOf(container).layout, MultiviewLayout.four);
+      expect([for (final cell in stateOf(container).cells) cell.room], [...rooms, null]);
+      await close(tester);
+    });
+
+    testWidgets('ENT-3: rooms beyond what the window shows are left out, never put in hidden cells', (tester) async {
+      final rooms = [for (var i = 1; i <= 6; i++) RoomRef('douyu', '$i')];
+      final container = await open(tester, size: const Size(393, 852), rooms: rooms);
+      expect(stateOf(container).layout, MultiviewLayout.four);
+      expect([for (final cell in stateOf(container).cells) cell.room], rooms.take(4));
+      await close(tester);
+    });
   });
 
   testWidgets('the cell menu pauses and resumes; the volume panel sets and stores the volume (F-MV-03, F-MV-04)', (

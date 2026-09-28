@@ -1256,6 +1256,33 @@ class _Translations$follows$en implements Translations$follows$zh_Hans {
   String get renameAndDescribe => 'Rename and describe';
   @override
   String groupDeleted({required Object name}) => 'Deleted the group "${name}"';
+  @override
+  String get select => 'Select';
+  @override
+  String selectedCount({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, other: '${n} selected');
+  @override
+  String get selectAll => 'Select all';
+  @override
+  String get cancelSelection => 'Cancel selection';
+  @override
+  String selectedStreamers({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(
+    n,
+    one: '${n} selected streamer',
+    other: '${n} selected streamers',
+  );
+  @override
+  String unfollowedMany({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(
+    n,
+    one: 'Unfollowed ${n} streamer',
+    other: 'Unfollowed ${n} streamers',
+  );
+  @override
+  String multiviewLimit({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(
+    n,
+    one: 'Multiview holds ${n} stream here; the first you picked was added',
+    other: 'Multiview holds ${n} streams here; the first ${n} you picked were added',
+  );
 }
 
 // Path: fonts
@@ -2105,6 +2132,18 @@ class _Translations$search$en implements Translations$search$zh_Hans {
   late final _Translations$search$sort$en sort = _Translations$search$sort$en._(_root);
   @override
   late final _Translations$search$web$en web = _Translations$search$web$en._(_root);
+  @override
+  String get recent => 'Recent searches';
+  @override
+  String get clearHistory => 'Clear';
+  @override
+  String get removeFromHistory => 'Remove from search history';
+  @override
+  String historyRemoved({required Object keyword}) => 'Removed “${keyword}” from search history';
+  @override
+  String get historyCleared => 'Search history cleared';
+  @override
+  String get historyOffCleared => 'Search history turned off and cleared';
 }
 
 // Path: settings
@@ -2439,6 +2478,8 @@ class _Translations$backup$section$en implements Translations$backup$section$zh_
   String get recordTasks => 'Recording tasks';
   @override
   String get secrets => 'Platform sign-ins';
+  @override
+  String get searchHistory => 'Search history';
 }
 
 // Path: cast.failure
@@ -3153,6 +3194,11 @@ class _Translations$settings$data$en implements Translations$settings$data$zh_Ha
   // Translations
   @override
   String get historyLimit => 'Keep watch history up to';
+  @override
+  String get searchHistory => 'Keep search history';
+  @override
+  String get searchHistorySubtitle =>
+      'Lists your last 20 searches when the search box is empty; turning it off clears them';
 }
 
 // Path: settings.accounts

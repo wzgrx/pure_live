@@ -127,31 +127,77 @@ Future<void> editRoomGroups(BuildContext context, WidgetRef ref, RoomRef room, S
   final store = ref.read(storeProvider);
   final current = await store.tags.tagsOf(room);
   if (!context.mounted) return;
-  final chosen = await showDialog<Set<String>>(
+  final chosen = await showDialog<Map<String, bool?>>(
     context: context,
-    builder: (context) => _GroupPicker(title: title, initial: current),
+    builder: (context) => _GroupPicker(title: title, all: current),
   );
   if (chosen == null) return;
   try {
-    await store.tags.setTagsOf(room, chosen);
+    await store.tags.setTagsOf(room, {
+      for (final MapEntry(key: id, :value) in chosen.entries)
+        if (value ?? false) id,
+    });
   } on Object {
     // The write is one transaction: the groups stay as they were.
     if (context.mounted) _say(context, t.follows.groupNotSaved);
   }
 }
 
+/// Picks the groups of several followed rooms at once (multi-select 设置分组,
+/// spec/product.md F-FAV-09). A group that some of them are in starts
+/// half-checked and stays as it is unless changed; checked adds every room,
+/// unchecked takes every room out. Returns whether the groups were saved.
+Future<bool> editRoomsGroups(BuildContext context, WidgetRef ref, List<RoomRef> rooms, String title) async {
+  final store = ref.read(storeProvider);
+  final memberships = [for (final room in rooms) await store.tags.tagsOf(room)];
+  if (!context.mounted) return false;
+  final all = memberships.isEmpty ? <String>{} : memberships.reduce((a, b) => a.intersection(b));
+  final some = {for (final tags in memberships) ...tags}.difference(all);
+  final chosen = await showDialog<Map<String, bool?>>(
+    context: context,
+    builder: (context) => _GroupPicker(title: title, all: all, some: some),
+  );
+  if (chosen == null) return false;
+  try {
+    await store.tags.changeTagsOf(
+      rooms,
+      add: {
+        for (final MapEntry(key: id, :value) in chosen.entries)
+          if (value == true) id,
+      },
+      remove: {
+        for (final MapEntry(key: id, :value) in chosen.entries)
+          if (value == false) id,
+      },
+    );
+    return true;
+  } on Object {
+    // One transaction: every room keeps its groups.
+    if (context.mounted) _say(context, t.follows.groupNotSaved);
+    return false;
+  }
+}
+
+/// Group checkboxes: [all] start checked, [some] (multi-select) half-checked.
+/// Pops each group's choice: true in the group, false out of it, null as it
+/// was (a half-checked group left alone).
 class _GroupPicker extends ConsumerStatefulWidget {
-  const new({required this.title, required this.initial});
+  const new({required this.title, required this.all, this.some = const {}});
 
   final String title;
-  final Set<String> initial;
+  final Set<String> all;
+  final Set<String> some;
 
   @override
   ConsumerState<_GroupPicker> createState() => _GroupPickerState();
 }
 
 class _GroupPickerState extends ConsumerState<_GroupPicker> {
-  late final Set<String> _selected = {...widget.initial};
+  final Map<String, bool?> _changed = {};
+
+  bool? _value(String id) => _changed.containsKey(id)
+      ? _changed[id]
+      : (widget.all.contains(id) ? true : (widget.some.contains(id) ? null : false));
 
   @override
   Widget build(BuildContext context) {
@@ -165,16 +211,18 @@ class _GroupPickerState extends ConsumerState<_GroupPicker> {
           children: [
             for (final tag in tags)
               CheckboxListTile(
-                value: _selected.contains(tag.id),
+                value: _value(tag.id),
+                // Only a group some of the rooms are in has the third state.
+                tristate: widget.some.contains(tag.id),
                 title: Text(tag.name),
-                onChanged: (on) => setState(() => on! ? _selected.add(tag.id) : _selected.remove(tag.id)),
+                onChanged: (value) => setState(() => _changed[tag.id] = value),
               ),
             ListTile(
               leading: const Icon(Icons.add),
               title: Text(t.follows.newGroup),
               onTap: () async {
                 final tag = await createGroup(context, ref);
-                if (tag != null) setState(() => _selected.add(tag.id));
+                if (tag != null) setState(() => _changed[tag.id] = true);
               },
             ),
           ],
@@ -182,7 +230,11 @@ class _GroupPickerState extends ConsumerState<_GroupPicker> {
       ),
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.cancel)),
-        FilledButton(onPressed: () => Navigator.pop(context, _selected), child: Text(t.common.save)),
+        FilledButton(
+          // A group created here may not be in the list yet.
+          onPressed: () => Navigator.pop(context, {for (final tag in tags) tag.id: _value(tag.id), ..._changed}),
+          child: Text(t.common.save),
+        ),
       ],
     );
   }

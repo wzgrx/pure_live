@@ -41,7 +41,8 @@
     "settings": "设置",
     "roomPrefs": "直播间偏好",
     "recordTasks": "录制任务",
-    "secrets": "平台登录信息"
+    "secrets": "平台登录信息",
+    "searchHistory": "搜索历史"
   },
   "format": "备份格式：{format}",
   "nothingToImport": "文件里没有可以导入的内容",

@@ -19,6 +19,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// What the card menu offers (principles §4.2).
 enum RoomCardAction {
+  /// 多选: starts the follows page's multi-select with this room
+  /// (spec/product.md F-FAV-09; not on TV).
+  select,
+
   /// 关注.
   follow,
 
@@ -49,8 +53,15 @@ enum RoomCardAction {
 
 /// The entries for a room that is [followed], in menu order. A room of a
 /// platform this build does not [supported] keeps only what needs no adapter:
-/// following and groups (F-FAV-08).
-List<RoomCardAction> roomCardActions({required bool followed, required bool newWindow, bool supported = true}) => [
+/// following and groups (F-FAV-08). [select] adds 多选 first (the follows
+/// page).
+List<RoomCardAction> roomCardActions({
+  required bool followed,
+  required bool newWindow,
+  bool supported = true,
+  bool select = false,
+}) => [
+  if (select) RoomCardAction.select,
   if (followed) RoomCardAction.unfollow else RoomCardAction.follow,
   if (followed) RoomCardAction.groups,
   if (supported) ...[
@@ -67,19 +78,25 @@ List<RoomCardAction> roomCardActions({required bool followed, required bool newW
 /// long press on touch, right click on desktops, long OK or the menu key on
 /// a remote. [snapshot] is what following stores when the room is not
 /// followed yet; share, link and site need the room's detail, loaded when
-/// chosen.
+/// chosen. With [onSelect] the menu starts with 多选 (F-FAV-09).
 Future<void> showRoomCardMenu(
   BuildContext context,
   WidgetRef ref, {
   required RoomRef room,
   required String anchorName,
   RoomSnapshot? snapshot,
+  VoidCallback? onSelect,
 }) async {
   final store = ref.read(storeProvider);
   final followed = await store.follows.contains(room);
   if (!context.mounted) return;
   final supported = ref.read(sitesProvider).containsKey(room.platform);
-  final actions = roomCardActions(followed: followed, newWindow: newWindowSupported, supported: supported);
+  final actions = roomCardActions(
+    followed: followed,
+    newWindow: newWindowSupported,
+    supported: supported,
+    select: onSelect != null,
+  );
   final action = await showModalBottomSheet<RoomCardAction>(
     context: context,
     builder: (context) => SafeArea(
@@ -100,6 +117,7 @@ Future<void> showRoomCardMenu(
             for (final action in actions)
               ListTile(
                 leading: Icon(switch (action) {
+                  RoomCardAction.select => Icons.checklist,
                   RoomCardAction.follow => Icons.favorite_border,
                   RoomCardAction.unfollow => Icons.heart_broken_outlined,
                   RoomCardAction.groups => Icons.folder_outlined,
@@ -111,6 +129,7 @@ Future<void> showRoomCardMenu(
                   RoomCardAction.openSite => Icons.open_in_new,
                 }),
                 title: Text(switch (action) {
+                  RoomCardAction.select => t.follows.select,
                   RoomCardAction.follow => t.common.follow,
                   RoomCardAction.unfollow => t.common.unfollow,
                   RoomCardAction.groups => t.rooms.setGroups,
@@ -142,6 +161,8 @@ Future<void> showRoomCardMenu(
   }
 
   switch (action) {
+    case RoomCardAction.select:
+      onSelect?.call();
     case RoomCardAction.follow:
       final stored = snapshot ?? (await detail()).let(RoomSnapshot.fromDetail);
       if (stored == null || !context.mounted) return;

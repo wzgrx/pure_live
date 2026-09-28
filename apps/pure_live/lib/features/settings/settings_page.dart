@@ -8,6 +8,7 @@ import 'package:pure_live_app/features/alerts/alert_tiles.dart';
 import 'package:pure_live_app/features/backup/data_settings.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_settings.dart';
 import 'package:pure_live_app/features/health/cache_tile.dart';
+import 'package:pure_live_app/features/search/search_history.dart';
 import 'package:pure_live_app/features/settings/network_settings.dart';
 import 'package:pure_live_app/features/settings/record_settings.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
@@ -305,105 +306,7 @@ class SettingsGroupBody extends StatelessWidget {
             divisions: 9,
           ),
         ],
-        SettingsGroup.playback => [
-          ChoiceSettingTile<QualityPreference>(
-            setting: Settings.qualityWifi,
-            title: t.settings.playback.qualityWifi,
-            labels: _quality,
-          ),
-          ChoiceSettingTile<QualityPreference>(
-            setting: Settings.qualityMobile,
-            title: t.settings.playback.qualityMobile,
-            labels: _quality,
-          ),
-          SwitchSettingTile(
-            setting: Settings.autoLowerQuality,
-            title: t.settings.playback.autoLower,
-            subtitle: t.settings.playback.autoLowerSubtitle,
-          ),
-          const PlaybackOutputTiles(),
-          ChoiceSettingTile<VideoFit>(
-            setting: Settings.videoFit,
-            title: t.room.aspect,
-            labels: {
-              VideoFit.contain: t.room.fit.contain,
-              VideoFit.cover: t.settings.playback.fitCover,
-              VideoFit.fill: t.room.fit.fill,
-            },
-          ),
-          SwitchSettingTile(setting: Settings.fullScreenDefault, title: t.settings.playback.autoFullscreen),
-          SwitchSettingTile(
-            setting: Settings.switchRoomGesture,
-            title: t.settings.playback.swipeRooms,
-            subtitle: t.settings.playback.swipeRoomsSubtitle,
-          ),
-          SettingsHeader(t.settings.playback.portrait),
-          SwitchSettingTile(
-            setting: Settings.portraitAdaptation,
-            title: t.settings.playback.portraitAdaptation,
-            subtitle: t.settings.playback.portraitAdaptationSubtitle,
-          ),
-          ChoiceSettingTile<PortraitFullscreenPolicy>(
-            setting: Settings.portraitFullscreenPolicy,
-            title: t.settings.playback.fullscreenOrientation,
-            labels: {
-              PortraitFullscreenPolicy.followSource: t.settings.playback.orientationSource,
-              PortraitFullscreenPolicy.followSystem: t.settings.playback.orientationSystem,
-              PortraitFullscreenPolicy.landscape: t.settings.playback.orientationLandscape,
-            },
-          ),
-          ChoiceSettingTile<PortraitFit>(
-            setting: Settings.portraitFit,
-            title: t.settings.playback.portraitFit,
-            labels: {
-              PortraitFit.contain: t.settings.playback.portraitFitContain,
-              PortraitFit.cover: t.settings.playback.portraitFitCover,
-            },
-          ),
-          ChoiceSettingTile<PortraitDanmakuArea>(
-            setting: Settings.portraitDanmakuArea,
-            title: t.settings.playback.portraitDanmaku,
-            labels: {
-              PortraitDanmakuArea.followGlobal: t.settings.playback.danmakuFollow,
-              PortraitDanmakuArea.upperQuarter: t.settings.playback.danmakuUpperQuarter,
-              PortraitDanmakuArea.reduced: t.settings.playback.danmakuHalf,
-              PortraitDanmakuArea.hidden: t.settings.playback.danmakuHidden,
-            },
-          ),
-          SwitchSettingTile(
-            setting: Settings.rememberPortraitOverride,
-            title: t.settings.playback.rememberOrientation,
-            subtitle: t.settings.playback.rememberOrientationSubtitle,
-          ),
-          SwitchSettingTile(
-            setting: Settings.backgroundPlay,
-            title: t.settings.playback.background,
-            subtitle: t.settings.playback.backgroundSubtitle,
-          ),
-          SettingsHeader(t.settings.playback.sleep),
-          SwitchSettingTile(
-            setting: Settings.asmrSleepMode,
-            title: t.settings.playback.sleepMode,
-            subtitle: t.settings.playback.sleepModeSubtitle,
-          ),
-          SliderSettingTile(
-            setting: Settings.asmrSleepMinutes,
-            title: t.settings.playback.sleepMinutes,
-            min: 5,
-            max: 180,
-            divisions: 35,
-            format: _minutes,
-          ),
-          const SystemSettingTiles(SystemSettingsSection.playback),
-          SliderSettingTile(
-            setting: Settings.defaultMobileVolume,
-            title: t.settings.playback.phoneVolume,
-            min: 0,
-            max: 1,
-            divisions: 20,
-            format: _percent,
-          ),
-        ],
+        SettingsGroup.playback => playbackSettingTiles(),
         SettingsGroup.danmaku => const [DanmakuSettingsTiles(), PipDanmakuTiles()],
         SettingsGroup.data => [
           SliderSettingTile(
@@ -414,6 +317,7 @@ class SettingsGroupBody extends StatelessWidget {
             divisions: 50,
             format: _historyLimit,
           ),
+          const SearchHistorySettingTile(),
           const DataSyncTiles(),
           const CacheTile(),
         ],
@@ -452,6 +356,116 @@ class SettingsGroupBody extends StatelessWidget {
     ),
   );
 }
+
+/// Whether the settings describe a touch device (Android or iOS); [android]
+/// picks one in tests.
+bool _touch(bool? android) => android ?? (Platform.isAndroid || Platform.isIOS);
+
+/// The tiles of 设置 › 播放, for this device or, in tests, the one [android]
+/// and [windows] describe. Each setting has one tile: the phone's default
+/// volume shows under 音量 on phones and at the end on desktops.
+List<Widget> playbackSettingTiles({bool? android, bool? windows}) => [
+  ChoiceSettingTile<QualityPreference>(
+    setting: Settings.qualityWifi,
+    title: t.settings.playback.qualityWifi,
+    labels: _quality,
+  ),
+  ChoiceSettingTile<QualityPreference>(
+    setting: Settings.qualityMobile,
+    title: t.settings.playback.qualityMobile,
+    labels: _quality,
+  ),
+  SwitchSettingTile(
+    setting: Settings.autoLowerQuality,
+    title: t.settings.playback.autoLower,
+    subtitle: t.settings.playback.autoLowerSubtitle,
+  ),
+  PlaybackOutputTiles(android: android, windows: windows),
+  ChoiceSettingTile<VideoFit>(
+    setting: Settings.videoFit,
+    title: t.room.aspect,
+    labels: {
+      VideoFit.contain: t.room.fit.contain,
+      VideoFit.cover: t.settings.playback.fitCover,
+      VideoFit.fill: t.room.fit.fill,
+    },
+  ),
+  SwitchSettingTile(setting: Settings.fullScreenDefault, title: t.settings.playback.autoFullscreen),
+  SwitchSettingTile(
+    setting: Settings.switchRoomGesture,
+    title: t.settings.playback.swipeRooms,
+    subtitle: t.settings.playback.swipeRoomsSubtitle,
+  ),
+  SettingsHeader(t.settings.playback.portrait),
+  SwitchSettingTile(
+    setting: Settings.portraitAdaptation,
+    title: t.settings.playback.portraitAdaptation,
+    subtitle: t.settings.playback.portraitAdaptationSubtitle,
+  ),
+  ChoiceSettingTile<PortraitFullscreenPolicy>(
+    setting: Settings.portraitFullscreenPolicy,
+    title: t.settings.playback.fullscreenOrientation,
+    labels: {
+      PortraitFullscreenPolicy.followSource: t.settings.playback.orientationSource,
+      PortraitFullscreenPolicy.followSystem: t.settings.playback.orientationSystem,
+      PortraitFullscreenPolicy.landscape: t.settings.playback.orientationLandscape,
+    },
+  ),
+  ChoiceSettingTile<PortraitFit>(
+    setting: Settings.portraitFit,
+    title: t.settings.playback.portraitFit,
+    labels: {
+      PortraitFit.contain: t.settings.playback.portraitFitContain,
+      PortraitFit.cover: t.settings.playback.portraitFitCover,
+    },
+  ),
+  ChoiceSettingTile<PortraitDanmakuArea>(
+    setting: Settings.portraitDanmakuArea,
+    title: t.settings.playback.portraitDanmaku,
+    labels: {
+      PortraitDanmakuArea.followGlobal: t.settings.playback.danmakuFollow,
+      PortraitDanmakuArea.upperQuarter: t.settings.playback.danmakuUpperQuarter,
+      PortraitDanmakuArea.reduced: t.settings.playback.danmakuHalf,
+      PortraitDanmakuArea.hidden: t.settings.playback.danmakuHidden,
+    },
+  ),
+  SwitchSettingTile(
+    setting: Settings.rememberPortraitOverride,
+    title: t.settings.playback.rememberOrientation,
+    subtitle: t.settings.playback.rememberOrientationSubtitle,
+  ),
+  SwitchSettingTile(
+    setting: Settings.backgroundPlay,
+    title: t.settings.playback.background,
+    subtitle: t.settings.playback.backgroundSubtitle,
+  ),
+  SettingsHeader(t.settings.playback.sleep),
+  SwitchSettingTile(
+    setting: Settings.asmrSleepMode,
+    title: t.settings.playback.sleepMode,
+    subtitle: t.settings.playback.sleepModeSubtitle,
+  ),
+  SliderSettingTile(
+    setting: Settings.asmrSleepMinutes,
+    title: t.settings.playback.sleepMinutes,
+    min: 5,
+    max: 180,
+    divisions: 35,
+    format: _minutes,
+  ),
+  SystemSettingTiles(SystemSettingsSection.playback, android: android, windows: windows),
+  // A desktop sets the synced phone default here too; on a phone
+  // PlaybackOutputTiles already shows it under 音量.
+  if (!_touch(android))
+    SliderSettingTile(
+      setting: Settings.defaultMobileVolume,
+      title: t.settings.playback.phoneVolume,
+      min: 0,
+      max: 1,
+      divisions: 20,
+      format: _percent,
+    ),
+];
 
 /// 语言 (F-APP-06): follow the system, or Simplified Chinese, Traditional
 /// Chinese or English; stored once in [Settings.locale]. Each language shows
@@ -493,13 +507,19 @@ String _historyLimit(double value) =>
 /// F-SET-05, F-SET-06: volume defaults and the decoding and output options
 /// of this device; each platform lists its own decoders and outputs.
 class PlaybackOutputTiles extends StatelessWidget {
-  const new({super.key});
+  const new({this.android, this.windows, super.key});
+
+  /// Describes Android (true) or not (false) instead of this device; tests.
+  final bool? android;
+
+  /// Describes Windows (true) or not (false) instead of this device; tests.
+  final bool? windows;
 
   @override
   Widget build(BuildContext context) {
-    final android = Platform.isAndroid;
-    final windows = Platform.isWindows;
-    final touch = android || Platform.isIOS;
+    final android = this.android ?? Platform.isAndroid;
+    final windows = this.windows ?? Platform.isWindows;
+    final touch = _touch(this.android);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

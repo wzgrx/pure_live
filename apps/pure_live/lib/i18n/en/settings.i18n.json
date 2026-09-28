@@ -80,7 +80,9 @@
     "phoneVolume": "Default volume on phones"
   },
   "data": {
-    "historyLimit": "Keep watch history up to"
+    "historyLimit": "Keep watch history up to",
+    "searchHistory": "Keep search history",
+    "searchHistorySubtitle": "Lists your last 20 searches when the search box is empty; turning it off clears them"
   },
   "accounts": {
     "platforms": "Platforms",

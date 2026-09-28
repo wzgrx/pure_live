@@ -4,6 +4,7 @@ import 'package:live_store/src/backup/record_tasks.dart';
 import 'package:live_store/src/block_rules.dart';
 import 'package:live_store/src/follow_areas.dart';
 import 'package:live_store/src/rooms.dart';
+import 'package:live_store/src/search_history.dart';
 import 'package:live_store/src/tags.dart';
 import 'package:meta/meta.dart';
 
@@ -198,6 +199,10 @@ final class ImportPlan {
   @internal
   List<BackupRecordTask>? recordTasks;
 
+  /// Recent search keywords, newest first (F-SRC-06).
+  @internal
+  List<SearchHistoryEntry>? searchHistory;
+
   /// Keeps only follows and followed areas (follows-only restore).
   @internal
   void restrictToFollows() {
@@ -210,6 +215,7 @@ final class ImportPlan {
     secrets = null;
     iptv = null;
     recordTasks = null;
+    searchHistory = null;
   }
 }
 

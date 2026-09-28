@@ -80,7 +80,9 @@
     "phoneVolume": "手機預設音量"
   },
   "data": {
-    "historyLimit": "觀看紀錄最多保留"
+    "historyLimit": "觀看紀錄最多保留",
+    "searchHistory": "保留搜尋紀錄",
+    "searchHistorySubtitle": "搜尋框空白時列出最近 20 個搜尋字詞；關閉時清除"
   },
   "accounts": {
     "platforms": "首頁平台",

@@ -152,11 +152,22 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
     _rail.addListener(_reportRail);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final compact = WindowLayout(MediaQuery.sizeOf(context)).width == WidthClass.compact;
+      final width = WindowLayout(MediaQuery.sizeOf(context)).width;
+      final tv = TvScope.of(context).enabled;
+      final capacity = multiviewCapacity();
       // Default layout by window class (ENT-3): 1×2 on phones, 2×2 elsewhere;
-      // TV is always 2×2 (principles §5.3).
-      final layout = compact && !TvScope.of(context).enabled ? MultiviewLayout.two : MultiviewLayout.four;
-      unawaited(_controller.start(layout: layout, rooms: widget.rooms));
+      // a larger one when the rooms brought along do not fit. TV is always
+      // 2×2 (principles §5.3).
+      final layout = tv
+          ? MultiviewLayout.four
+          : multiviewStartLayout(
+              widget.rooms.length,
+              preferred: width == WidthClass.compact ? MultiviewLayout.two : MultiviewLayout.four,
+              layouts: multiviewLayoutsFor(width, capacity: capacity),
+              capacity: capacity,
+            );
+      final rooms = widget.rooms.take(multiviewHolds(layout, capacity: capacity)).toList();
+      unawaited(_controller.start(layout: layout, rooms: rooms));
     });
   }
 
@@ -328,13 +339,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
     final window = WindowLayout(MediaQuery.sizeOf(context));
     final capacity = multiviewCapacity();
     _panel = _display == MultiviewDisplay.normal && !tv && window.width.atLeast(WidthClass.expanded);
-    final layouts = [
-      MultiviewLayout.one,
-      MultiviewLayout.two,
-      MultiviewLayout.four,
-      if (window.width.atLeast(WidthClass.expanded)) MultiviewLayout.onePlusN,
-      if (capacity >= 9 && window.width.atLeast(WidthClass.large)) MultiviewLayout.nine,
-    ];
+    final layouts = multiviewLayoutsFor(window.width, capacity: capacity);
     // DM-2: the chat shows on the selected cell only, while it plays.
     final danmakuCell = state.danmaku && danmakuOn && state.selectedCell?.status == CellStatus.playing
         ? state.selected

@@ -28,6 +28,7 @@ export 'src/meta_store.dart' show MetaStore;
 export 'src/room_prefs.dart' show PortraitOverride, RoomPrefStore;
 export 'src/room_store.dart' show RoomStore;
 export 'src/rooms.dart' show RoomSnapshot, StoredRoom;
+export 'src/search_history.dart' show SearchHistoryEntry, SearchHistoryStore;
 export 'src/secrets/secret_cipher.dart' show AesGcmSecretCipher, SecretCipher;
 export 'src/secrets/secret_store.dart'
     show FileSecretBackend, MemorySecretBackend, SecretBackend, SecretRefs, SecretStore;

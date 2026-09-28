@@ -1,10 +1,15 @@
 @Tags(['screenshots'])
 library;
 
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
 import 'shot_harness.dart';
@@ -47,6 +52,38 @@ void main() {
       world: () => ShotWorld(followsFail: true),
       theme: ShotTheme.dark,
     );
+
+    Finder card(String name) => find.byWidgetPredicate((widget) => widget is RoomCardView && widget.anchorName == name);
+
+    // F-FAV-09: 多选 from the card menu; then taps choose (a row too).
+    screenshot('follows-select', ShotScreen.phone, (app) async {
+      await follows(app);
+      await app.tester.longPress(card('夜航星'));
+      await app.frames();
+      await app.tester.tap(find.text(t.follows.select));
+      await app.frames();
+      await app.tester.tap(card('北岛看海'));
+      await app.tester.tap(card('橘子汽水'));
+      await app.frames(3);
+    });
+    // Desktops: Ctrl-click starts it, Shift-click adds a range.
+    screenshot('follows-select', ShotScreen.large, (app) async {
+      await follows(app);
+      final keys = app.tester;
+      await keys.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await keys.tap(card('夜航星'), kind: PointerDeviceKind.mouse);
+      await keys.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await keys.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await keys.tap(card('橘子汽水'), kind: PointerDeviceKind.mouse);
+      await keys.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await app.frames(3);
+    }, theme: ShotTheme.dark);
+    // principles §5.2: on a landscape phone the top bar scrolls away.
+    screenshot('follows-scrolled', ShotScreen.phoneLandscape, (app) async {
+      await follows(app);
+      await app.tester.drag(find.byType(CustomScrollView).first, const Offset(0, -240));
+      await app.frames();
+    });
   });
 
   group('discover', () {
@@ -101,5 +138,22 @@ void main() {
     );
     screenshot('search', ShotScreen.medium, search, locale: AppLocale.zhHant);
     screenshot('search-empty', ShotScreen.phone, search, world: nothing, theme: ShotTheme.dark, locale: AppLocale.en);
+
+    // F-SRC-06: a focused, empty box lists the recent searches.
+    Future<void> history(ShotApp app) async {
+      final store = app.container.read(storeProvider);
+      await app.tester.runAsync(() async {
+        for (final (index, keyword) in ['原神', 'LOL', '王者荣耀', '英雄联盟 大师分段', '户外 川西', 'Chill stream'].indexed) {
+          await store.searchHistory.record(keyword, at: DateTime.utc(2026, 9, 27, 20, index));
+        }
+      });
+      await app.go('/search');
+      await app.tester.tap(find.byType(TextField));
+      await app.tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+      await app.frames();
+    }
+
+    screenshot('search-history', ShotScreen.phone, history);
+    screenshot('search-history', ShotScreen.large, history, theme: ShotTheme.dark, locale: AppLocale.en);
   });
 }

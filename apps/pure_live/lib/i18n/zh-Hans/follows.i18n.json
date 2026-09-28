@@ -63,5 +63,20 @@
   "setGroupsFor": "设置分组 · {title}",
   "groupsHint": "分组可以把关注的主播归类，在关注页按分组查看。",
   "renameAndDescribe": "改名和描述",
-  "groupDeleted": "已删除分组“{name}”"
+  "groupDeleted": "已删除分组“{name}”",
+  "select": "多选",
+  "selectedCount(param=n)": {
+    "other": "已选 {n}"
+  },
+  "selectAll": "全选",
+  "cancelSelection": "取消多选",
+  "selectedStreamers(param=n)": {
+    "other": "已选的 {n} 个主播"
+  },
+  "unfollowedMany(param=n)": {
+    "other": "已取消关注 {n} 个主播"
+  },
+  "multiviewLimit(param=n)": {
+    "other": "多画面在这里最多放 {n} 路，已按选择顺序放入前 {n} 个"
+  }
 }

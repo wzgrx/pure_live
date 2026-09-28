@@ -1,0 +1,180 @@
+{
+  "note": "Synthetic chat frames for Picarto (docs/modules/M5.10-picarto.md), read on the chat socket of channelId. Each case is one or more frames in order: a string is a text frame as written, {\"b64\": ...} a binary frame. Field names follow S07-live and the site's client (picarto.tv/static/js, the chat message mapping); names, ids and times are made up.",
+  "channelId": 942670,
+  "cases": [
+    {
+      "name": "a chat line with every field (the shape of S07-live)",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"hello\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000001\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}]}"
+      ]
+    },
+    {
+      "name": "several lines in one frame, in order",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"first\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000002\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300002\",\"n\":\"ViewerTwo\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"second\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000003\",\"d\":1790531380528,\"cb\":true,\"k\":\"66AFFF\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300003\",\"n\":\"ViewerThree\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"third\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000004\",\"d\":1790531380528,\"cb\":true,\"k\":\"f0ff98\",\"rc\":\"a357ee\"}]}"
+      ]
+    },
+    {
+      "name": "text is trimmed; blank and empty text is no chat",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"  padded text \\n\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000005\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"   \",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000006\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000007\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000008\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":12345,\"id\":\"aaaaaaaa-0000-11f1-8000-000000000009\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}]}"
+      ]
+    },
+    {
+      "name": "emotes stay as :name:, other scripts and emoji are kept",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"KChAU :race_car: 你好 こんにちは 😀 👍🏽\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000010\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}]}"
+      ]
+    },
+    {
+      "name": "the message id: id, else _id, else none",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"with _id\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\",\"_id\":\"5f0000000000000000000001\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"without id\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"numeric id\",\"id\":42,\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}]}"
+      ]
+    },
+    {
+      "name": "the time: milliseconds; missing, text, fractional and out of range times",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"no time\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000011\",\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"text time\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000012\",\"d\":\"1790531380528\",\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"fractional time\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000013\",\"d\":1790531380528.5,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"zero time\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000014\",\"d\":0,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}]}"
+      ]
+    },
+    {
+      "name": "a time out of range",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"before\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000015\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"far future\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000016\",\"d\":9007199254740991,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"after\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000017\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}]}"
+      ]
+    },
+    {
+      "name": "name colours: 6 digits in either case, #, the 3-digit CSS form; anything else is white",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"lower\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000020\",\"d\":1790531380528,\"cb\":true,\"k\":\"2f5ea9\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"upper\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000021\",\"d\":1790531380528,\"cb\":true,\"k\":\"66AFFF\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"hash\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000022\",\"d\":1790531380528,\"cb\":true,\"k\":\"#1da456\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"short\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000023\",\"d\":1790531380528,\"cb\":true,\"k\":\"f80\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"black\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000024\",\"d\":1790531380528,\"cb\":true,\"k\":\"000000\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"blue\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000025\",\"d\":1790531380528,\"cb\":true,\"k\":\"0000ff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"eight digits\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000026\",\"d\":1790531380528,\"cb\":true,\"k\":\"ff66afff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"not hex\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000027\",\"d\":1790531380528,\"cb\":true,\"k\":\"zzzzzz\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"empty\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000028\",\"d\":1790531380528,\"cb\":true,\"k\":\"\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"missing\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000029\",\"d\":1790531380528,\"cb\":true,\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"a sign\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000031\",\"d\":1790531380528,\"cb\":true,\"k\":\"-12345\",\"rc\":\"a357ee\"}]}"
+      ]
+    },
+    {
+      "name": "a colour that is a number",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"a number\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000030\",\"d\":1790531380528,\"cb\":true,\"k\":16777215,\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"after it\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000032\",\"d\":1790531380528,\"cb\":true,\"k\":\"2f5ea9\",\"rc\":\"a357ee\"}]}"
+      ]
+    },
+    {
+      "name": "user fields: numbers, missing, and other types",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":7300004,\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"numeric user id\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000040\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"no user\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000041\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":true,\"n\":{\"x\":1},\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"object name\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000042\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}]}"
+      ]
+    },
+    {
+      "name": "lines of another type in a chat frame, and lines that are not objects",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"chat\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000050\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"system\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"system line\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000051\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"w\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"whisper line\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000052\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"no type\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000053\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},\"text\",7,null,[\"nested\"],{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"last\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000054\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}]}"
+      ]
+    },
+    {
+      "name": "a chat frame whose m is not a list, or missing",
+      "frames": [
+        "{\"t\":\"c\",\"m\":{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"object\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000060\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}}",
+        "{\"t\":\"c\"}",
+        "{\"t\":\"c\",\"m\":[]}"
+      ]
+    },
+    {
+      "name": "a page of history (paginated or p) is not live chat",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"history\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000061\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}],\"paginated\":true}",
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"history p\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000062\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}],\"p\":1}",
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"not a page\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000063\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}],\"p\":false}"
+      ]
+    },
+    {
+      "name": "the other spellings the site reads: type and messages",
+      "frames": [
+        "{\"type\":\"c\",\"messages\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"spelled out\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000064\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}]}",
+        "{\"t\":\"stream\",\"m\":{\"id\":942670,\"viewers\":61}}"
+      ]
+    },
+    {
+      "name": "stream: the channel's viewers, including zero when it goes offline",
+      "frames": [
+        "{\"type\":\"stream\",\"messages\":{\"id\":942670,\"name\":\"allatir\",\"online\":true,\"multistream\":false,\"adult\":false,\"viewers\":53,\"streams\":[]}}",
+        "{\"type\":\"stream\",\"messages\":{\"id\":942670,\"name\":\"allatir\",\"online\":false,\"multistream\":false,\"adult\":false,\"viewers\":0,\"streams\":[]}}"
+      ]
+    },
+    {
+      "name": "stream: another channel's state, no id, an id as text",
+      "frames": [
+        "{\"type\":\"stream\",\"messages\":{\"id\":122866,\"name\":\"OtherChannel\",\"online\":true,\"multistream\":false,\"adult\":false,\"viewers\":34,\"streams\":[]}}",
+        "{\"type\":\"stream\",\"messages\":{\"name\":\"allatir\",\"online\":true,\"multistream\":false,\"adult\":false,\"viewers\":40,\"streams\":[]}}",
+        "{\"type\":\"stream\",\"messages\":{\"id\":\"942670\",\"name\":\"allatir\",\"online\":true,\"multistream\":false,\"adult\":false,\"viewers\":41,\"streams\":[]}}"
+      ]
+    },
+    {
+      "name": "stream: viewers missing, negative, fractional, text; no state",
+      "frames": [
+        "{\"type\":\"stream\",\"messages\":{\"id\":942670,\"name\":\"allatir\",\"online\":true,\"multistream\":false,\"adult\":false,\"streams\":[]}}",
+        "{\"type\":\"stream\",\"messages\":{\"id\":942670,\"name\":\"allatir\",\"online\":true,\"multistream\":false,\"adult\":false,\"viewers\":-1,\"streams\":[]}}",
+        "{\"type\":\"stream\",\"messages\":{\"id\":942670,\"name\":\"allatir\",\"online\":true,\"multistream\":false,\"adult\":false,\"viewers\":53.0,\"streams\":[]}}",
+        "{\"type\":\"stream\",\"messages\":{\"id\":942670,\"name\":\"allatir\",\"online\":true,\"multistream\":false,\"adult\":false,\"viewers\":\"53\",\"streams\":[]}}",
+        "{\"type\":\"stream\"}",
+        "{\"type\":\"stream\",\"messages\":[1,2]}"
+      ]
+    },
+    {
+      "name": "joins, leaves and other notices show nothing",
+      "frames": [
+        "{\"t\":\"un\",\"m\":{\"c\":\"942670\",\"u\":\"7300005\",\"n\":\"Joiner\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/x.png\",\"y\":\"F\",\"r\":1465365629,\"k\":\"66AFFF\",\"cb\":true}}",
+        "{\"t\":\"ur\",\"m\":{\"u\":\"0\",\"n\":\"\"}}",
+        "{\"t\":\"ul\",\"m\":[{\"u\":\"7300006\",\"n\":\"Listed\"}],\"pg\":1}",
+        "{\"t\":\"ws\",\"m\":[]}",
+        "{\"t\":\"system\",\"m\":[{\"t\":\"system\",\"m\":\"Stream is live\"}]}",
+        "{\"t\":\"raid\",\"m\":{\"rn\":\"allatir\",\"n\":\"Raider\",\"m\":\"raid!\"}}",
+        "{\"t\":\"ns\",\"m\":{\"sn\":\"Gifter\",\"n\":\"Receiver\",\"md\":3}}",
+        "{\"t\":\"w\",\"m\":[{\"t\":\"w\",\"m\":\"a whisper\",\"n\":\"Whisperer\"}]}"
+      ]
+    },
+    {
+      "name": "a chip tip is not shown (no sample of it; its fields come from the site's client)",
+      "frames": [
+        "{\"t\":\"ct\",\"m\":[{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"m\":\"for you\",\"x\":100,\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"aaaaaaaa-0000-11f1-8000-000000000070\",\"d\":1790531380528}]}"
+      ]
+    },
+    {
+      "name": "the answer to the keep-alive, and the refusal of a token",
+      "frames": [
+        "{\"success\":true,\"code\":\"PONG\"}",
+        "{\"success\":false,\"code\":\"JWT_TOKEN\"}"
+      ]
+    },
+    {
+      "name": "other failures are not a token refusal",
+      "frames": [
+        "{\"success\":false,\"code\":\"SOMETHING_ELSE\"}",
+        "{\"success\":false}",
+        "{\"success\":\"false\",\"code\":\"JWT_TOKEN\"}",
+        "{\"code\":\"JWT_TOKEN\"}"
+      ]
+    },
+    {
+      "name": "frames that are not JSON objects",
+      "frames": [
+        "not json",
+        "",
+        "[1,2,3]",
+        "\"__pong__\"",
+        "null",
+        "42",
+        "{\"t\":\"c\",\"m\":[",
+        "{\"t\":\"c\",\"m\":[\"unterminated}"
+      ]
+    },
+    {
+      "name": "binary frames are read as UTF-8, bad bytes replaced",
+      "frames": [
+        {
+          "b64": "eyJ0IjoiYyIsIm0iOlt7InQiOiJjIiwiYyI6Ijk0MjY3MCIsInUiOiI3MzAwMDAxIiwibiI6IlZpZXdlck9uZSIsInJuIjoiYWxsYXRpciIsImkiOiJhYmNkZWZnaGkvMS8yMy80NTY3ODkwL2FiY2RlZmcvMDEyMzQ1Njc4OWFiY2RlZmdoaWoucG5nIiwieSI6IlAiLCJtIjoiYmluYXJ5IOW8ueW5lSIsImlkIjoiYWFhYWFhYWEtMDAwMC0xMWYxLTgwMDAtMDAwMDAwMDAwMDgwIiwiZCI6MTc5MDUzMTM4MDUyOCwiY2IiOnRydWUsImsiOiJmZmZmZmYiLCJyYyI6ImEzNTdlZSJ9XX0="
+        },
+        {
+          "b64": "eyJ0IjoiYyIsIm0iOlt7InQiOiJjIiwiYyI6Ijk0MjY3MCIsInUiOiI3MzAwMDAxIiwibiI6IlZpZXdlck9uZSIsInJuIjoiYWxsYXRpciIsImkiOiJhYmNkZWZnaGkvMS8yMy80NTY3ODkwL2FiY2RlZmcvMDEyMzQ1Njc4OWFiY2RlZmdoaWoucG5nIiwieSI6IlAiLCJtIjoiYmFkIP8gYnl0ZSIsImlkIjoiYWFhYWFhYWEtMDAwMC0xMWYxLTgwMDAtMDAwMDAwMDAwMDgxIiwiZCI6MTc5MDUzMTM4MDUyOCwiY2IiOnRydWUsImsiOiJmZmZmZmYiLCJyYyI6ImEzNTdlZSJ9XX0="
+        }
+      ]
+    }
+  ]
+}

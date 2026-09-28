@@ -1,0 +1,489 @@
+{
+  "generator": "fixtures/picarto/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) PicartoProtocol.token over the token answer, PicartoProtocol.endpoint, and PicartoProtocol.decode over every incoming frame (copied as they were; the event classes cut down to their fields)",
+  "value": {
+    "cases": {
+      "a chat line with every field (the shape of S07-live)": [
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000001",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "hello",
+            "color": "#ffffff"
+          }
+        ]
+      ],
+      "several lines in one frame, in order": [
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000002",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "first",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000003",
+            "sentAt": 1790531380528,
+            "userId": "7300002",
+            "userName": "ViewerTwo",
+            "text": "second",
+            "color": "#66afff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000004",
+            "sentAt": 1790531380528,
+            "userId": "7300003",
+            "userName": "ViewerThree",
+            "text": "third",
+            "color": "#f0ff98"
+          }
+        ]
+      ],
+      "text is trimmed; blank and empty text is no chat": [
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000005",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "padded text",
+            "color": "#ffffff"
+          }
+        ]
+      ],
+      "emotes stay as :name:, other scripts and emoji are kept": [
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000010",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "KChAU :race_car: 你好 こんにちは 😀 👍🏽",
+            "color": "#ffffff"
+          }
+        ]
+      ],
+      "the message id: id, else _id, else none": [
+        [
+          {
+            "kind": "chat",
+            "id": null,
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "with _id",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": null,
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "without id",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": null,
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "numeric id",
+            "color": "#ffffff"
+          }
+        ]
+      ],
+      "the time: milliseconds; missing, text, fractional and out of range times": [
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000011",
+            "sentAt": null,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "no time",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000012",
+            "sentAt": null,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "text time",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000013",
+            "sentAt": null,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "fractional time",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000014",
+            "sentAt": 0,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "zero time",
+            "color": "#ffffff"
+          }
+        ]
+      ],
+      "a time out of range": [
+        {
+          "throws": "RangeError"
+        }
+      ],
+      "name colours: 6 digits in either case, #, the 3-digit CSS form; anything else is white": [
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000020",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "lower",
+            "color": "#2f5ea9"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000021",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "upper",
+            "color": "#66afff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000022",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "hash",
+            "color": "#1da456"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000023",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "short",
+            "color": "#000f80"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000024",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "black",
+            "color": "#000000"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000025",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "blue",
+            "color": "#0000ff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000026",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "eight digits",
+            "color": "#66afff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000027",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "not hex",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000028",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "empty",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000029",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "missing",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000031",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "a sign",
+            "color": "#ffffff"
+          }
+        ]
+      ],
+      "a colour that is a number": [
+        {
+          "throws": "TypeError"
+        }
+      ],
+      "user fields: numbers, missing, and other types": [
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000040",
+            "sentAt": 1790531380528,
+            "userId": "7300004",
+            "userName": "ViewerOne",
+            "text": "numeric user id",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000041",
+            "sentAt": 1790531380528,
+            "userId": "",
+            "userName": "",
+            "text": "no user",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000042",
+            "sentAt": 1790531380528,
+            "userId": "true",
+            "userName": "{x: 1}",
+            "text": "object name",
+            "color": "#ffffff"
+          }
+        ]
+      ],
+      "lines of another type in a chat frame, and lines that are not objects": [
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000050",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "chat",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000051",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "system line",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000052",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "whisper line",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000053",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "no type",
+            "color": "#ffffff"
+          },
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000054",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "last",
+            "color": "#ffffff"
+          }
+        ]
+      ],
+      "a chat frame whose m is not a list, or missing": [
+        [],
+        [],
+        []
+      ],
+      "a page of history (paginated or p) is not live chat": [
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000061",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "history",
+            "color": "#ffffff"
+          }
+        ],
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000062",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "history p",
+            "color": "#ffffff"
+          }
+        ],
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000063",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "not a page",
+            "color": "#ffffff"
+          }
+        ]
+      ],
+      "the other spellings the site reads: type and messages": [
+        [],
+        []
+      ],
+      "stream: the channel's viewers, including zero when it goes offline": [
+        [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 53
+          }
+        ],
+        [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 0
+          }
+        ]
+      ],
+      "stream: another channel's state, no id, an id as text": [
+        [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 34
+          }
+        ],
+        [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 40
+          }
+        ],
+        [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 41
+          }
+        ]
+      ],
+      "stream: viewers missing, negative, fractional, text; no state": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "joins, leaves and other notices show nothing": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "a chip tip is not shown (no sample of it; its fields come from the site's client)": [
+        []
+      ],
+      "the answer to the keep-alive, and the refusal of a token": [
+        [],
+        []
+      ],
+      "other failures are not a token refusal": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "frames that are not JSON objects": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "binary frames are read as UTF-8, bad bytes replaced": [
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000080",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "binary 弹幕",
+            "color": "#ffffff"
+          }
+        ],
+        [
+          {
+            "kind": "chat",
+            "id": "picarto:aaaaaaaa-0000-11f1-8000-000000000081",
+            "sentAt": 1790531380528,
+            "userId": "7300001",
+            "userName": "ViewerOne",
+            "text": "bad � byte",
+            "color": "#ffffff"
+          }
+        ]
+      ]
+    }
+  }
+}

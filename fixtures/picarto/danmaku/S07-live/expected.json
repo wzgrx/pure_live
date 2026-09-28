@@ -1,0 +1,113 @@
+{
+  "generator": "fixtures/picarto/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) PicartoProtocol.token over the token answer, PicartoProtocol.endpoint, and PicartoProtocol.decode over every incoming frame (copied as they were; the event classes cut down to their fields)",
+  "value": {
+    "channel": "allatir",
+    "token": "ivD3mQAcQrMOQ4PuQWUoiLdoApODDhL7AtU8.niH7j0ItCUAvHtOhSnNnu5FiCLyPOQ3hFhaqEyhxGRLjrVZdIjznKdueXXEte0RpyHE8kVMiXdFyKMUjvOZufdSnAJHoZiz5VdE6MFabP7ocxr0gkF2rbNPgUeNhsCjwuCyuJyuoeBWseyXrVJ9kEHdOBPG1RWvpU09vz8VqNoBgEWKtSTL3Yswew2Agq4XlhNPctaW7YzKih0QqGxExaTmhy9EzRpnzPXexZGsvc7MpUKMhTHAbKdUgtPRtADFpXJeol6OpxtOvHUU2UIV0AGohSk28HgkjBIfjKDpurHEaIiX0JsSjSnvfBVskg2nuXIBbfRBMcGlvUku9BpV8ZjI5XXVcDKsvuumqc31tzUIVf5arezJ4TjPoBgNlOnSnFfXgyykenVYkQwetNNzgRX6.qkrhmE8MLSWdt4vaWifystE6ZzgaKSs1n4_eTbov_JB",
+    "endpoint": "wss://chat.picarto.tv/chat/token=ivD3mQAcQrMOQ4PuQWUoiLdoApODDhL7AtU8.niH7j0ItCUAvHtOhSnNnu5FiCLyPOQ3hFhaqEyhxGRLjrVZdIjznKdueXXEte0RpyHE8kVMiXdFyKMUjvOZufdSnAJHoZiz5VdE6MFabP7ocxr0gkF2rbNPgUeNhsCjwuCyuJyuoeBWseyXrVJ9kEHdOBPG1RWvpU09vz8VqNoBgEWKtSTL3Yswew2Agq4XlhNPctaW7YzKih0QqGxExaTmhy9EzRpnzPXexZGsvc7MpUKMhTHAbKdUgtPRtADFpXJeol6OpxtOvHUU2UIV0AGohSk28HgkjBIfjKDpurHEaIiX0JsSjSnvfBVskg2nuXIBbfRBMcGlvUku9BpV8ZjI5XXVcDKsvuumqc31tzUIVf5arezJ4TjPoBgNlOnSnFfXgyykenVYkQwetNNzgRX6.qkrhmE8MLSWdt4vaWifystE6ZzgaKSs1n4_eTbov_JB",
+    "connector": {
+      "tokenRequest": {
+        "method": "POST",
+        "url": "https://ptvintern.picarto.tv/ptvapi",
+        "headers": {
+          "origin": "https://picarto.tv",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+          "content-type": "application/json",
+          "referer": "https://picarto.tv/"
+        },
+        "body": {
+          "query": "query ($name: String) { generateJwtToken(channel_name: $name) { key } }",
+          "variables": {
+            "name": "allatir"
+          }
+        }
+      },
+      "handshakeHeaders": {
+        "origin": "https://picarto.tv",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "openFrames": [],
+      "heartbeat": null,
+      "watchIntervalSeconds": 60
+    },
+    "frames": [
+      {
+        "frame": 1,
+        "events": []
+      },
+      {
+        "frame": 2,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 53
+          }
+        ]
+      },
+      {
+        "frame": 3,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 53
+          }
+        ]
+      },
+      {
+        "frame": 4,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 53
+          }
+        ]
+      },
+      {
+        "frame": 5,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "picarto:d075e300-ba9b-11f1-8b7e-a3860776556d",
+            "sentAt": 1790531380528,
+            "userId": "7416279",
+            "userName": "CEjysCgufEsSgiu",
+            "text": "You guys can say no, I don't mind. But are you interested in letting one more stream with you all?",
+            "color": "#ffffff"
+          }
+        ]
+      },
+      {
+        "frame": 6,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 59
+          }
+        ]
+      },
+      {
+        "frame": 7,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 59
+          }
+        ]
+      },
+      {
+        "frame": 8,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 59
+          }
+        ]
+      }
+    ]
+  }
+}

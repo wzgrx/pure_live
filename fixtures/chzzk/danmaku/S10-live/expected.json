@@ -1,0 +1,1356 @@
+{
+  "generator": "fixtures/chzzk/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) ChzzkProtocol (tokenUrl, accessToken, endpoint, headers, join, recent, ping, pong, decode) over every received frame (copied as it was; the event classes cut down to their fields)",
+  "value": {
+    "chatChannelId": "N2l_uf",
+    "accessToken": "XHRZysUQaflbi0e8XQL/IZxXjOep2tb6Scx7JChpbXnnaJOMYlJOpIbomjE1/yZm",
+    "connector": {
+      "tokenUrl": "https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=N2l_uf&chatType=STREAMING",
+      "tokenHeaders": {
+        "origin": "https://chzzk.naver.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "endpoint": "wss://kr-ss2.chat.naver.com/chat",
+      "handshakeHeaders": {
+        "origin": "https://chzzk.naver.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "join": "{\"ver\":\"3\",\"cmd\":100,\"svcid\":\"game\",\"cid\":\"N2l_uf\",\"bdy\":{\"uid\":null,\"devType\":2001,\"accTkn\":\"XHRZysUQaflbi0e8XQL/IZxXjOep2tb6Scx7JChpbXnnaJOMYlJOpIbomjE1/yZm\",\"auth\":\"READ\"},\"tid\":1}",
+      "ping": "{\"ver\":\"3\",\"cmd\":0}",
+      "heartbeatSeconds": 20
+    },
+    "frames": [
+      {
+        "frame": 3,
+        "joined": true,
+        "rejected": false,
+        "replies": [
+          {
+            "ver": "3",
+            "cmd": 5101,
+            "svcid": "game",
+            "cid": "N2l_uf",
+            "sid": "zNF8m2s3YhhouuJQ7cDbRUS_80I1qNNbJwNSaOmaTrmQyEI_HYgPupTSm7KVpSPK",
+            "bdy": {
+              "recentMessageCount": 50
+            },
+            "tid": 2
+          }
+        ],
+        "events": []
+      },
+      {
+        "frame": 5,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:43c2c6db8ba45f8d86c1f63b37641f53:1790632293066",
+            "sentAt": 1790632293066,
+            "userId": "43c2c6db8ba45f8d86c1f63b37641f53",
+            "userName": "观众1",
+            "text": "지금 거의 막바지에 터진거면 그동안 대밌었단거여"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:e70a555a6d7490ae5d6dc41122d91051:1790632293246",
+            "sentAt": 1790632293246,
+            "userId": "e70a555a6d7490ae5d6dc41122d91051",
+            "userName": "观众2",
+            "text": "응원할게 힘내고 서버 만들어줘서 고마워"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:627d41f2746568839d0c06b9a0824b7d:1790632293361",
+            "sentAt": 1790632293361,
+            "userId": "627d41f2746568839d0c06b9a0824b7d",
+            "userName": "观众3",
+            "text": "뭐해 이미 잘 하고 있는데!!! 더 잘하면 죽어!!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:ff379b80314bb155075ccc31f19c7a5c:1790632293465",
+            "sentAt": 1790632293465,
+            "userId": "ff379b80314bb155075ccc31f19c7a5c",
+            "userName": "观众4",
+            "text": "좀 쉬면서 하쇼"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:d47076de0fa1d14c2daa78949acbc072:1790632293776",
+            "sentAt": 1790632293776,
+            "userId": "d47076de0fa1d14c2daa78949acbc072",
+            "userName": "观众5",
+            "text": "얌마 덕분에 존내 재밌어 나"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:3ec428118cc6e3116411572cb95e77d9:1790632293886",
+            "sentAt": 1790632293886,
+            "userId": "3ec428118cc6e3116411572cb95e77d9",
+            "userName": "观众6",
+            "text": "그래도 시도해주고 노력해줬다는게 너무 고마워요 재밌게봤어요"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:ac23dc7771f4066dd6e2e2101300b055:1790632294300",
+            "sentAt": 1790632294300,
+            "userId": "ac23dc7771f4066dd6e2e2101300b055",
+            "userName": "观众7",
+            "text": "ㅎㅇㅌ !"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:c08bf4fb3537c575e8d9fee2f8e3f1ff:1790632294655",
+            "sentAt": 1790632294655,
+            "userId": "c08bf4fb3537c575e8d9fee2f8e3f1ff",
+            "userName": "观众8",
+            "text": "털어버리고 화이팅이야 남봉"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:5b37d0223953cbfe550f6db226337bcc:1790632294776",
+            "sentAt": 1790632294776,
+            "userId": "5b37d0223953cbfe550f6db226337bcc",
+            "userName": "观众9",
+            "text": "더 좋아지는거 같으니까"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:6f35e4eede0400159074ee59de8e2fba:1790632295049",
+            "sentAt": 1790632295049,
+            "userId": "6f35e4eede0400159074ee59de8e2fba",
+            "userName": "观众10",
+            "text": "ㅎㅇㅌ 너무 즐겁게 잘 보고있습니다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:e67510ec85c029724a54831eb3d0f36b:1790632295326",
+            "sentAt": 1790632295326,
+            "userId": "e67510ec85c029724a54831eb3d0f36b",
+            "userName": "观众11",
+            "text": "잠이나 자라"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:43c2c6db8ba45f8d86c1f63b37641f53:1790632295354",
+            "sentAt": 1790632295354,
+            "userId": "43c2c6db8ba45f8d86c1f63b37641f53",
+            "userName": "观众1",
+            "text": "재"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:f5f3b2874b168bdf06082b733611f26c:1790632295414",
+            "sentAt": 1790632295414,
+            "userId": "f5f3b2874b168bdf06082b733611f26c",
+            "userName": "观众12",
+            "text": "진짜 고생이 많아요..."
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:705e490bd405ea703d8fdacbdfe05f7f:1790632295432",
+            "sentAt": 1790632295432,
+            "userId": "705e490bd405ea703d8fdacbdfe05f7f",
+            "userName": "观众13",
+            "text": "수고하셨소 이제 쉬고 좀따 봅시더"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:af282fd8077097cfe11499d0b802c805:1790632295721",
+            "sentAt": 1790632295721,
+            "userId": "af282fd8077097cfe11499d0b802c805",
+            "userName": "观众14",
+            "text": "좀비 진짜 나와요?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:3ee8878c8610c4fca63de483fffdab1a:1790632295785",
+            "sentAt": 1790632295785,
+            "userId": "3ee8878c8610c4fca63de483fffdab1a",
+            "userName": "观众15",
+            "text": "{:d_49:}{:d_55:}{:d_49:}{:d_55:}{:d_49:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:3af2bbd2d1535cfee7f5a6d356fbbf42:1790632296269",
+            "sentAt": 1790632296269,
+            "userId": "3af2bbd2d1535cfee7f5a6d356fbbf42",
+            "userName": "观众16",
+            "text": "마무리라도 잘해보자"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:98cd9c6820771f1b989057dd3ebf0dc9:1790632296855",
+            "sentAt": 1790632296855,
+            "userId": "98cd9c6820771f1b989057dd3ebf0dc9",
+            "userName": "观众17",
+            "text": "재밌어요!!!진짜 엄청요!!!! 화이팅!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0de4deb4b81e5d9a83255e01586edaeb:1790632297125",
+            "sentAt": 1790632297125,
+            "userId": "0de4deb4b81e5d9a83255e01586edaeb",
+            "userName": "观众18",
+            "text": "미안한건 미안한거고 건강좀 챙기쇼"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:8f31a572c36053ff2d47068568b09bf0:1790632297198",
+            "sentAt": 1790632297198,
+            "userId": "8f31a572c36053ff2d47068568b09bf0",
+            "userName": "观众19",
+            "text": "ㅎㅇㅌ~!!!!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:666480cf8a769d77b6d5e67323fcd230:1790632297231",
+            "sentAt": 1790632297231,
+            "userId": "666480cf8a769d77b6d5e67323fcd230",
+            "userName": "观众20",
+            "text": "오픈전까지 좀 주무시고 오세영"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:fb331aa00879bb25582a66774b859612:1790632297231",
+            "sentAt": 1790632297231,
+            "userId": "fb331aa00879bb25582a66774b859612",
+            "userName": "观众21",
+            "text": "남봉아 항상 응원한다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:f7b0f064fbbe0d0b37e489818d686c2d:1790632298228",
+            "sentAt": 1790632298228,
+            "userId": "f7b0f064fbbe0d0b37e489818d686c2d",
+            "userName": "观众22",
+            "text": "화이팅!!!!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:627d41f2746568839d0c06b9a0824b7d:1790632298386",
+            "sentAt": 1790632298386,
+            "userId": "627d41f2746568839d0c06b9a0824b7d",
+            "userName": "观众3",
+            "text": "얼른 자러가요!!!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:c08bf4fb3537c575e8d9fee2f8e3f1ff:1790632299301",
+            "sentAt": 1790632299301,
+            "userId": "c08bf4fb3537c575e8d9fee2f8e3f1ff",
+            "userName": "观众8",
+            "text": "덕분에 서버 재밌게 잘 보고있어요"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4c9d821462274a98cfeb81873f4fda01:1790632299724",
+            "sentAt": 1790632299724,
+            "userId": "4c9d821462274a98cfeb81873f4fda01",
+            "userName": "观众23",
+            "text": "끝나고 나면 다 재밌다고한다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:15db5cafac3ff8016c48574e43c67c3e:1790632299805",
+            "sentAt": 1790632299805,
+            "userId": "15db5cafac3ff8016c48574e43c67c3e",
+            "userName": "观众24",
+            "text": "잘만든만큼 아쉬운거아닌교"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:7676d9826e3423972bc2d85a3d6d6cf6:1790632299837",
+            "sentAt": 1790632299837,
+            "userId": "7676d9826e3423972bc2d85a3d6d6cf6",
+            "userName": "观众25",
+            "text": "힘내고"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:8446fed6d9b7467de6354ee9de86de8e:1790632299838",
+            "sentAt": 1790632299838,
+            "userId": "8446fed6d9b7467de6354ee9de86de8e",
+            "userName": "观众26",
+            "text": "남은기간 깖금하게 잘하면댜!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4880a8b467c563121b13baed22ead572:1790632299936",
+            "sentAt": 1790632299936,
+            "userId": "4880a8b467c563121b13baed22ead572",
+            "userName": "观众27",
+            "text": "푹쉬라잉"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:7335d7d3d12a18207e3c67c29fcca04c:1790632300097",
+            "sentAt": 1790632300097,
+            "userId": "7335d7d3d12a18207e3c67c29fcca04c",
+            "userName": "观众28",
+            "text": "{:d_47:}{:d_47:}{:d_47:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:76476e157cfa9a28b7d7bc3dd5889150:1790632300237",
+            "sentAt": 1790632300237,
+            "userId": "76476e157cfa9a28b7d7bc3dd5889150",
+            "userName": "观众29",
+            "text": "ㅎㅇㅌ!!!!!!!!!!!!!!!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:7047debcd0cc60697fd845f608af01be:1790632300285",
+            "sentAt": 1790632300285,
+            "userId": "7047debcd0cc60697fd845f608af01be",
+            "userName": "观众30",
+            "text": "건강이 우선이다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:45ae56dfb92b7bf57225ad33c6a892de:1790632300878",
+            "sentAt": 1790632300878,
+            "userId": "45ae56dfb92b7bf57225ad33c6a892de",
+            "userName": "观众31",
+            "text": "잘하고 있으니까 좀만 더 힘내주십쇼"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:2107594196c383a498e84d75faec067f:1790632300919",
+            "sentAt": 1790632300919,
+            "userId": "2107594196c383a498e84d75faec067f",
+            "userName": "观众32",
+            "text": "얼릉 자고 오세요잉"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:d67a405f8f9ba07a9446f302bebdfaca:1790632301054",
+            "sentAt": 1790632301054,
+            "userId": "d67a405f8f9ba07a9446f302bebdfaca",
+            "userName": "观众33",
+            "text": "좀자셈 ㄱㄱ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:6928ed4cb3646464825f491123eaa6c9:1790632301263",
+            "sentAt": 1790632301263,
+            "userId": "6928ed4cb3646464825f491123eaa6c9",
+            "userName": "观众34",
+            "text": "파이팅!!!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:72f5cbe43e1efacf37ea1643a606cb95:1790632301416",
+            "sentAt": 1790632301416,
+            "userId": "72f5cbe43e1efacf37ea1643a606cb95",
+            "userName": "观众35",
+            "text": "화이팅"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:c08bf4fb3537c575e8d9fee2f8e3f1ff:1790632302768",
+            "sentAt": 1790632302768,
+            "userId": "c08bf4fb3537c575e8d9fee2f8e3f1ff",
+            "userName": "观众8",
+            "text": "고마워요"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:e70a555a6d7490ae5d6dc41122d91051:1790632303506",
+            "sentAt": 1790632303506,
+            "userId": "e70a555a6d7490ae5d6dc41122d91051",
+            "userName": "观众2",
+            "text": "김남봉 화이팅!!!!!!{:d_55:}{:d_55:}{:d_55:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:3d1d35b0fff9dae00cb0d0e891a67d57:1790632304402",
+            "sentAt": 1790632304402,
+            "userId": "3d1d35b0fff9dae00cb0d0e891a67d57",
+            "userName": "观众36",
+            "text": "디저트가 개지리면 다 좋아보인데 최고로 마무리 할수있도록 합시다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:7603aaa71fd2aec2d9a7d4fc9298083c:1790632304637",
+            "sentAt": 1790632304637,
+            "userId": "7603aaa71fd2aec2d9a7d4fc9298083c",
+            "userName": "观众37",
+            "text": "마무리나 잘하쇼 ㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:ee23ac2f73cdc4b38f3917226a1e480b:1790632304659",
+            "sentAt": 1790632304659,
+            "userId": "ee23ac2f73cdc4b38f3917226a1e480b",
+            "userName": "观众38",
+            "text": "일단 자고 남은 기간 수습해보자잉"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:d47076de0fa1d14c2daa78949acbc072:1790632304924",
+            "sentAt": 1790632304924,
+            "userId": "d47076de0fa1d14c2daa78949acbc072",
+            "userName": "观众5",
+            "text": "너 떄문에 새벽에 봉누도 보느라 잠을 못자요"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:76476e157cfa9a28b7d7bc3dd5889150:1790632305281",
+            "sentAt": 1790632305281,
+            "userId": "76476e157cfa9a28b7d7bc3dd5889150",
+            "userName": "观众29",
+            "text": "빨리 자러가"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:627d41f2746568839d0c06b9a0824b7d:1790632305560",
+            "sentAt": 1790632305560,
+            "userId": "627d41f2746568839d0c06b9a0824b7d",
+            "userName": "观众3",
+            "text": "파이팅!!!!!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:1d0bf77310614f50d992896435e6d225:1790632305654",
+            "sentAt": 1790632305654,
+            "userId": "1d0bf77310614f50d992896435e6d225",
+            "userName": "观众39",
+            "text": "그래도 재밌었어 조금이라도 자고 서버 잘해내가자"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:2f37ec2e4869a80b679c73637f279a8e:1790632306087",
+            "sentAt": 1790632306087,
+            "userId": "2f37ec2e4869a80b679c73637f279a8e",
+            "userName": "观众40",
+            "text": "{:d_55:}{:d_55:}{:d_55:}{:d_55:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:c08bf4fb3537c575e8d9fee2f8e3f1ff:1790632306401",
+            "sentAt": 1790632306401,
+            "userId": "c08bf4fb3537c575e8d9fee2f8e3f1ff",
+            "userName": "观众8",
+            "text": "건강 잘 챙기쇼"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:90a3c45521adad68e6bee7cbf66ea851:1790632307012",
+            "sentAt": 1790632307012,
+            "userId": "90a3c45521adad68e6bee7cbf66ea851",
+            "userName": "观众41",
+            "text": "푹 쉬쇼"
+          }
+        ]
+      },
+      {
+        "frame": 6,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:4c9d821462274a98cfeb81873f4fda01:1790632307830",
+            "sentAt": 1790632307830,
+            "userId": "4c9d821462274a98cfeb81873f4fda01",
+            "userName": "观众23",
+            "text": "끝나고 나면 어차피 다 잊어"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4228
+          }
+        ]
+      },
+      {
+        "frame": 7,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:89d18433fd15d186562eb2c0b21673c8:1790632307994",
+            "sentAt": 1790632307994,
+            "userId": "89d18433fd15d186562eb2c0b21673c8",
+            "userName": "观众42",
+            "text": "힘내세요"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4228
+          }
+        ]
+      },
+      {
+        "frame": 8,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:d560efe0d45d2dd314df4aca7827f376:1790632308485",
+            "sentAt": 1790632308485,
+            "userId": "d560efe0d45d2dd314df4aca7827f376",
+            "userName": "观众43",
+            "text": "ㄱㅊ"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4228
+          }
+        ]
+      },
+      {
+        "frame": 9,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:33d27a45b84975cb188d4bdf209bcb21:1790632308729",
+            "sentAt": 1790632308729,
+            "userId": "33d27a45b84975cb188d4bdf209bcb21",
+            "userName": "观众44",
+            "text": "버퍼링걸려서 우는거 못들었네 앙앙앙"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4228
+          }
+        ]
+      },
+      {
+        "frame": 10,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:a833b5297b569d080958c164a117b0fa:1790632309498",
+            "sentAt": 1790632309498,
+            "userId": "a833b5297b569d080958c164a117b0fa",
+            "userName": "观众45",
+            "text": "푹 자면 왠만한건 털어버릴수있어"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4228
+          }
+        ]
+      },
+      {
+        "frame": 11,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:f7b0f064fbbe0d0b37e489818d686c2d:1790632310093",
+            "sentAt": 1790632310093,
+            "userId": "f7b0f064fbbe0d0b37e489818d686c2d",
+            "userName": "观众22",
+            "text": "울지말고 ㅋㅋㅋㅋㅋㅋ 재밌게 보고있단말이야"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4228
+          }
+        ]
+      },
+      {
+        "frame": 12,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:6fa4e596b12227b91a92e5ae7b96ce42:1790632310591",
+            "sentAt": 1790632310591,
+            "userId": "6fa4e596b12227b91a92e5ae7b96ce42",
+            "userName": "观众46",
+            "text": "봉아 화이팅해라 푹자고"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4228
+          }
+        ]
+      },
+      {
+        "frame": 13,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:d47076de0fa1d14c2daa78949acbc072:1790632311057",
+            "sentAt": 1790632311057,
+            "userId": "d47076de0fa1d14c2daa78949acbc072",
+            "userName": "观众5",
+            "text": "존~~내 재밌다고 임마"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4198
+          }
+        ]
+      },
+      {
+        "frame": 14,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:705e490bd405ea703d8fdacbdfe05f7f:1790632312155",
+            "sentAt": 1790632312155,
+            "userId": "705e490bd405ea703d8fdacbdfe05f7f",
+            "userName": "观众13",
+            "text": "마지막까지 홧팅!"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4198
+          }
+        ]
+      },
+      {
+        "frame": 15,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:eb691977c2561814bf82eb31189ec268:1790632312631",
+            "sentAt": 1790632312631,
+            "userId": "eb691977c2561814bf82eb31189ec268",
+            "userName": "观众47",
+            "text": "2주 패착으로 망했으니까 남은기간이라도 잘 해결해주세요"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4198
+          }
+        ]
+      },
+      {
+        "frame": 16,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:edfce2f4116f144f9be69877c08b1220:1790632312833",
+            "sentAt": 1790632312833,
+            "userId": "edfce2f4116f144f9be69877c08b1220",
+            "userName": "观众48",
+            "text": "푹 쉬쇼"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4198
+          }
+        ]
+      },
+      {
+        "frame": 17,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:ff379b80314bb155075ccc31f19c7a5c:1790632313618",
+            "sentAt": 1790632313618,
+            "userId": "ff379b80314bb155075ccc31f19c7a5c",
+            "userName": "观众4",
+            "text": "마무리만 잘하면 돼 마무리만"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4198
+          }
+        ]
+      },
+      {
+        "frame": 18,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:1637f72c8bc03e9254f34e0d7d4af5ee:1790632314406",
+            "sentAt": 1790632314406,
+            "userId": "1637f72c8bc03e9254f34e0d7d4af5ee",
+            "userName": "观众49",
+            "text": "고생이 많소 남봉씨"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4183
+          }
+        ]
+      },
+      {
+        "frame": 19,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:45ae56dfb92b7bf57225ad33c6a892de:1790632315124",
+            "sentAt": 1790632315124,
+            "userId": "45ae56dfb92b7bf57225ad33c6a892de",
+            "userName": "观众31",
+            "text": "청자 입장에서 쥰내 재밌고 이런 서버 열어주셔서 감사합니다"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4198
+          }
+        ]
+      },
+      {
+        "frame": 20,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:4c9d821462274a98cfeb81873f4fda01:1790632315319",
+            "sentAt": 1790632315319,
+            "userId": "4c9d821462274a98cfeb81873f4fda01",
+            "userName": "观众23",
+            "text": "안좋은 부분은 날아가고 추억만 남는다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:d560efe0d45d2dd314df4aca7827f376:1790632315837",
+            "sentAt": 1790632315837,
+            "userId": "d560efe0d45d2dd314df4aca7827f376",
+            "userName": "观众43",
+            "text": "마무리잘하명 그만이야"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:76476e157cfa9a28b7d7bc3dd5889150:1790632315983",
+            "sentAt": 1790632315983,
+            "userId": "76476e157cfa9a28b7d7bc3dd5889150",
+            "userName": "观众29",
+            "text": "{:d_55:}{:d_55:}"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4183
+          }
+        ]
+      },
+      {
+        "frame": 21,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:5113f67851803000302b01126d2e36af:1790632316783",
+            "sentAt": 1790632316783,
+            "userId": "5113f67851803000302b01126d2e36af",
+            "userName": "观众50",
+            "text": "오늘도 일해야 하잔아 빨리 자러가"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4183
+          }
+        ]
+      },
+      {
+        "frame": 22,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:43c2c6db8ba45f8d86c1f63b37641f53:1790632316907",
+            "sentAt": 1790632316907,
+            "userId": "43c2c6db8ba45f8d86c1f63b37641f53",
+            "userName": "观众1",
+            "text": "봉누도 시리즈 이렇게는 못끝네겠다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:a79f42671a80146fcf5e596d7c82af60:1790632317452",
+            "sentAt": 1790632317452,
+            "userId": "a79f42671a80146fcf5e596d7c82af60",
+            "userName": "观众51",
+            "text": "스머분들한테도 도움받고 그러셔 피드백이라든지"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4183
+          }
+        ]
+      },
+      {
+        "frame": 23,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:23e151e9f95564312f2f488367872c45:1790632318371",
+            "sentAt": 1790632318371,
+            "userId": "23e151e9f95564312f2f488367872c45",
+            "userName": "观众52",
+            "text": "그래 푹쉬거라"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4183
+          }
+        ]
+      },
+      {
+        "frame": 24,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:d47076de0fa1d14c2daa78949acbc072:1790632319640",
+            "sentAt": 1790632319640,
+            "userId": "d47076de0fa1d14c2daa78949acbc072",
+            "userName": "观众5",
+            "text": "남자가 우는거 아니다 뚝 그치라"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4170
+          }
+        ]
+      },
+      {
+        "frame": 25,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:7047debcd0cc60697fd845f608af01be:1790632320674",
+            "sentAt": 1790632320674,
+            "userId": "7047debcd0cc60697fd845f608af01be",
+            "userName": "观众30",
+            "text": "이거 아니면 나 볼거 없다"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4170
+          }
+        ]
+      },
+      {
+        "frame": 26,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:666480cf8a769d77b6d5e67323fcd230:1790632319902",
+            "sentAt": 1790632319902,
+            "userId": "666480cf8a769d77b6d5e67323fcd230",
+            "userName": "观众20",
+            "text": "빡센건 모두가 알고 계실겁니다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:df4d86dd605895171b7c68e8e958ef95:1790632320028",
+            "sentAt": 1790632320028,
+            "userId": "df4d86dd605895171b7c68e8e958ef95",
+            "userName": "观众53",
+            "text": "그래 일단 푹 쉬고 마무리 잘하자. 재화는 진짜 좀 풀고"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:fd282abd66e40367c1758c5b999524ed:1790632320209",
+            "sentAt": 1790632320209,
+            "userId": "fd282abd66e40367c1758c5b999524ed",
+            "userName": "观众54",
+            "text": "재밌게 보고 있어"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4170
+          }
+        ]
+      },
+      {
+        "frame": 27,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:ff379b80314bb155075ccc31f19c7a5c:1790632320713",
+            "sentAt": 1790632320713,
+            "userId": "ff379b80314bb155075ccc31f19c7a5c",
+            "userName": "观众4",
+            "text": "마무리만 잘 되면 다들 좋은 기억으로 끝낼 수 있을꺼야"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:666480cf8a769d77b6d5e67323fcd230:1790632320999",
+            "sentAt": 1790632320999,
+            "userId": "666480cf8a769d77b6d5e67323fcd230",
+            "userName": "观众20",
+            "text": "넵"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:5d403df68332698d6fadf13f8347f4eb:1790632321429",
+            "sentAt": 1790632321429,
+            "userId": "5d403df68332698d6fadf13f8347f4eb",
+            "userName": "观众55",
+            "text": "마무리 잘하면 그래도 재밋는, 서버로 기억될거다"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4170
+          }
+        ]
+      },
+      {
+        "frame": 28,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:627d41f2746568839d0c06b9a0824b7d:1790632321879",
+            "sentAt": 1790632321879,
+            "userId": "627d41f2746568839d0c06b9a0824b7d",
+            "userName": "观众3",
+            "text": "추억이야!!!"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4170
+          }
+        ]
+      },
+      {
+        "frame": 29,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:76476e157cfa9a28b7d7bc3dd5889150:1790632322127",
+            "sentAt": 1790632322127,
+            "userId": "76476e157cfa9a28b7d7bc3dd5889150",
+            "userName": "观众29",
+            "text": "봉바"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:db08c5cb0a88768f0830149a24465ddb:1790632322195",
+            "sentAt": 1790632322195,
+            "userId": "db08c5cb0a88768f0830149a24465ddb",
+            "userName": "观众56",
+            "text": "스머들 일주일 연장해달라던데"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:9292b94a46b0c9b94e79834f995d0d86:1790632322341",
+            "sentAt": 1790632322341,
+            "userId": "9292b94a46b0c9b94e79834f995d0d86",
+            "userName": "观众57",
+            "text": "화이팅"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4e3bc0df6202d12b5365b0600f93d2d6:1790632322412",
+            "sentAt": 1790632322412,
+            "userId": "4e3bc0df6202d12b5365b0600f93d2d6",
+            "userName": "观众58",
+            "text": "굳밤"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:5e24eb21e7c18002d18a1557a688a254:1790632322623",
+            "sentAt": 1790632322623,
+            "userId": "5e24eb21e7c18002d18a1557a688a254",
+            "userName": "观众59",
+            "text": "힘내세요"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4170
+          }
+        ]
+      },
+      {
+        "frame": 30,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:17c2a364e888f324a2af66584d0a63c5:1790632323160",
+            "sentAt": 1790632323160,
+            "userId": "17c2a364e888f324a2af66584d0a63c5",
+            "userName": "观众60",
+            "text": "{:sd_8:}"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4170
+          }
+        ]
+      },
+      {
+        "frame": 31,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:33d27a45b84975cb188d4bdf209bcb21:1790632323681",
+            "sentAt": 1790632323681,
+            "userId": "33d27a45b84975cb188d4bdf209bcb21",
+            "userName": "观众44",
+            "text": "ㅂㅂ"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4170
+          }
+        ]
+      },
+      {
+        "frame": 32,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:ebb9ce05d4b14aaec9412515f9abc467:1790632324033",
+            "sentAt": 1790632324033,
+            "userId": "ebb9ce05d4b14aaec9412515f9abc467",
+            "userName": "观众61",
+            "text": "화이팅입니다! 재미있게보고있어요"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:5b4c1d7819cc4dc10686ed5f84ec1e90:1790632324084",
+            "sentAt": 1790632324084,
+            "userId": "5b4c1d7819cc4dc10686ed5f84ec1e90",
+            "userName": "观众62",
+            "text": "ㅎㅇㅌ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:42925a9765d2b3bae3e4eac2aed7cd71:1790632324275",
+            "sentAt": 1790632324275,
+            "userId": "42925a9765d2b3bae3e4eac2aed7cd71",
+            "userName": "观众63",
+            "text": "{:d_41:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:122f9a7b67660149937f7ad8f9d78fa4:1790632324395",
+            "sentAt": 1790632324395,
+            "userId": "122f9a7b67660149937f7ad8f9d78fa4",
+            "userName": "观众64",
+            "text": "얼른 쉬어라"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:2668c71f7c756fa2bc9e5753e981d7a2:1790632324536",
+            "sentAt": 1790632324536,
+            "userId": "2668c71f7c756fa2bc9e5753e981d7a2",
+            "userName": "观众65",
+            "text": "그래그래 내일보자"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:abc91ea5f1d863f5b686adab5cae7733:1790632324581",
+            "sentAt": 1790632324581,
+            "userId": "abc91ea5f1d863f5b686adab5cae7733",
+            "userName": "观众66",
+            "text": "푹 울고 잘 쉬어라"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4162
+          }
+        ]
+      },
+      {
+        "frame": 33,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:627d41f2746568839d0c06b9a0824b7d:1790632325553",
+            "sentAt": 1790632325553,
+            "userId": "627d41f2746568839d0c06b9a0824b7d",
+            "userName": "观众3",
+            "text": "고마워요°"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4170
+          }
+        ]
+      },
+      {
+        "frame": 34,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:3ec428118cc6e3116411572cb95e77d9:1790632325548",
+            "sentAt": 1790632325548,
+            "userId": "3ec428118cc6e3116411572cb95e77d9",
+            "userName": "观众6",
+            "text": "뭐가 문제다하면서 문제만 삼으면 도전하려는 사람이 모가돼.. 시도하고 도전하는사람은 응원해줘야지"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4170
+          }
+        ]
+      },
+      {
+        "frame": 35,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:3e17f25a27250990eced47423fbf52eb:1790632324999",
+            "sentAt": 1790632324999,
+            "userId": "3e17f25a27250990eced47423fbf52eb",
+            "userName": "观众67",
+            "text": "{:d_91:}{:d_91:}{:d_54:}{:d_54:}{:d_54:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:46479ed63719c3fa2206be7be7cd491f:1790632325071",
+            "sentAt": 1790632325071,
+            "userId": "46479ed63719c3fa2206be7be7cd491f",
+            "userName": "观众68",
+            "text": "정리잘하고 화이팅하소"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:2f37ec2e4869a80b679c73637f279a8e:1790632325211",
+            "sentAt": 1790632325211,
+            "userId": "2f37ec2e4869a80b679c73637f279a8e",
+            "userName": "观众40",
+            "text": "푹쉬어요"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:c39a92269e7a492b4482acf680b0126d:1790632325400",
+            "sentAt": 1790632325400,
+            "userId": "c39a92269e7a492b4482acf680b0126d",
+            "userName": "观众69",
+            "text": "잘자"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:666480cf8a769d77b6d5e67323fcd230:1790632325407",
+            "sentAt": 1790632325407,
+            "userId": "666480cf8a769d77b6d5e67323fcd230",
+            "userName": "观众20",
+            "text": "봉바~"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4162
+          }
+        ]
+      },
+      {
+        "frame": 36,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:43c2c6db8ba45f8d86c1f63b37641f53:1790632325604",
+            "sentAt": 1790632325604,
+            "userId": "43c2c6db8ba45f8d86c1f63b37641f53",
+            "userName": "观众1",
+            "text": "3까지 가자"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:168e6b575ab3a55de2b28d3765b070ce:1790632325774",
+            "sentAt": 1790632325774,
+            "userId": "168e6b575ab3a55de2b28d3765b070ce",
+            "userName": "观众70",
+            "text": "{:d_55:}{:d_55:}{:d_55:}{:d_55:}{:d_55:}{:d_55:}{:d_55:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:76476e157cfa9a28b7d7bc3dd5889150:1790632325934",
+            "sentAt": 1790632325934,
+            "userId": "76476e157cfa9a28b7d7bc3dd5889150",
+            "userName": "观众29",
+            "text": "ㅂㅂ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0b21c5b54fc11d679c10c64835f592db:1790632326137",
+            "sentAt": 1790632326137,
+            "userId": "0b21c5b54fc11d679c10c64835f592db",
+            "userName": "观众71",
+            "text": "에바에 타라 봉지"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:457d41853715857c6193dfbe75304493:1790632326288",
+            "sentAt": 1790632326288,
+            "userId": "457d41853715857c6193dfbe75304493",
+            "userName": "观众72",
+            "text": "남봉아 잘자"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4162
+          }
+        ]
+      },
+      {
+        "frame": 37,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:cbea18b875754fab72f18ddc0578c59a:1790632326834",
+            "sentAt": 1790632326834,
+            "userId": "cbea18b875754fab72f18ddc0578c59a",
+            "userName": "观众73",
+            "text": "푹 쉬어라"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 4162
+          }
+        ]
+      },
+      {
+        "frame": 39,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": []
+      },
+      {
+        "frame": 40,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": []
+      },
+      {
+        "frame": 41,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 2375
+          }
+        ]
+      },
+      {
+        "frame": 42,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": []
+      },
+      {
+        "frame": 44,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,1513 @@
+{
+  "generator": "fixtures/chzzk/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) ChzzkProtocol (tokenUrl, accessToken, endpoint, headers, join, recent, ping, pong, decode) over every received frame (copied as it was; the event classes cut down to their fields)",
+  "value": {
+    "chatChannelId": "N2lpu9",
+    "accessToken": "5bXJTFe+eZ3vXyIWMcOIqvHGA6H34FI6x6rhtwJ5Wtt44kISozrqff04VvQBz4xu",
+    "connector": {
+      "tokenUrl": "https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=N2lpu9&chatType=STREAMING",
+      "tokenHeaders": {
+        "origin": "https://chzzk.naver.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "endpoint": "wss://kr-ss1.chat.naver.com/chat",
+      "handshakeHeaders": {
+        "origin": "https://chzzk.naver.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "join": "{\"ver\":\"3\",\"cmd\":100,\"svcid\":\"game\",\"cid\":\"N2lpu9\",\"bdy\":{\"uid\":null,\"devType\":2001,\"accTkn\":\"5bXJTFe+eZ3vXyIWMcOIqvHGA6H34FI6x6rhtwJ5Wtt44kISozrqff04VvQBz4xu\",\"auth\":\"READ\"},\"tid\":1}",
+      "ping": "{\"ver\":\"3\",\"cmd\":0}",
+      "heartbeatSeconds": 20
+    },
+    "frames": [
+      {
+        "frame": 2,
+        "joined": true,
+        "rejected": false,
+        "replies": [
+          {
+            "ver": "3",
+            "cmd": 5101,
+            "svcid": "game",
+            "cid": "N2lpu9",
+            "sid": "10_wVmh3UiAsjudj3yv70Pn__c5vHjLRTtqH59OpL7044_SwWFiCXLscf2WHHAJ1",
+            "bdy": {
+              "recentMessageCount": 50
+            },
+            "tid": 2
+          }
+        ],
+        "events": []
+      },
+      {
+        "frame": 4,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:605lz6d3a8k0x1zx4r75f5mt1p7tf990:1790525942218",
+            "sentAt": 1790525942218,
+            "userId": "605lz6d3a8k0x1zx4r75f5mt1p7tf990",
+            "userName": "观众1",
+            "text": "헉"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0x857915t05031j5z59r872vqk527kll:1790525942222",
+            "sentAt": 1790525942222,
+            "userId": "0x857915t05031j5z59r872vqk527kll",
+            "userName": "观众2",
+            "text": "어머"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:12kyg6pv2141302139kmdn72wp69zfn3:1790525942240",
+            "sentAt": 1790525942240,
+            "userId": "12kyg6pv2141302139kmdn72wp69zfn3",
+            "userName": "观众3",
+            "text": "오?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:8u537t6z8821vhga03o1rc34n0x89918:1790525942556",
+            "sentAt": 1790525942556,
+            "userId": "8u537t6z8821vhga03o1rc34n0x89918",
+            "userName": "观众4",
+            "text": "엥"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:86173402se8w4h42t87351tz2pfeyyn0:1790525942628",
+            "sentAt": 1790525942628,
+            "userId": "86173402se8w4h42t87351tz2pfeyyn0",
+            "userName": "观众5",
+            "text": "?"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8826
+          }
+        ]
+      },
+      {
+        "frame": 5,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:605lz6d3a8k0x1zx4r75f5mt1p7tf990:1790525924254",
+            "sentAt": 1790525924254,
+            "userId": "605lz6d3a8k0x1zx4r75f5mt1p7tf990",
+            "userName": "观众1",
+            "text": "애매하긴해"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4p5055586l682x592890f525o5u57bex:1790525924449",
+            "sentAt": 1790525924449,
+            "userId": "4p5055586l682x592890f525o5u57bex",
+            "userName": "观众6",
+            "text": "쓰자"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:j8706y26g8580622419bh580c494b4x9:1790525924538",
+            "sentAt": 1790525924538,
+            "userId": "j8706y26g8580622419bh580c494b4x9",
+            "userName": "观众7",
+            "text": "흠"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:52x873xx69108e6pti5s6dw0y6102znd:1790525924867",
+            "sentAt": 1790525924867,
+            "userId": "52x873xx69108e6pti5s6dw0y6102znd",
+            "userName": "观众8",
+            "text": "ㅁ?ㄹ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:91fx569u79ig294n461q1kfa36h71291:1790525925048",
+            "sentAt": 1790525925048,
+            "userId": "91fx569u79ig294n461q1kfa36h71291",
+            "userName": "观众9",
+            "text": "되지않나"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:i535lxu0b30p7u4595w486x25722b739:1790525925129",
+            "sentAt": 1790525925129,
+            "userId": "i535lxu0b30p7u4595w486x25722b739",
+            "userName": "观众10",
+            "text": "혹시모르니까"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:54a963xn8a11db760880435rg9o7l58d:1790525925474",
+            "sentAt": 1790525925474,
+            "userId": "54a963xn8a11db760880435rg9o7l58d",
+            "userName": "观众11",
+            "text": "사긴삿는데"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:tb5v8jk175rw16ab507671r881t28m59:1790525926394",
+            "sentAt": 1790525926394,
+            "userId": "tb5v8jk175rw16ab507671r881t28m59",
+            "userName": "观众12",
+            "text": "물어보고 사죠?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:057pb5947kv4o526547t24dp0d5yvi68:1790525926662",
+            "sentAt": 1790525926662,
+            "userId": "057pb5947kv4o526547t24dp0d5yvi68",
+            "userName": "观众13",
+            "text": "안될듯?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:6n69j357o867h7199zcf1439w308pz4n:1790525926990",
+            "sentAt": 1790525926990,
+            "userId": "6n69j357o867h7199zcf1439w308pz4n",
+            "userName": "观众14",
+            "text": "직원 보급가라"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0x857915t05031j5z59r872vqk527kll:1790525927659",
+            "sentAt": 1790525927659,
+            "userId": "0x857915t05031j5z59r872vqk527kll",
+            "userName": "观众2",
+            "text": "경찰에서 가져온거라"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:3zh66xz296132239oet1l23ej2310773:1790525927735",
+            "sentAt": 1790525927735,
+            "userId": "3zh66xz296132239oet1l23ej2310773",
+            "userName": "Jmjiwf92",
+            "text": "돈주고 샀는데 쓰죠"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:605lz6d3a8k0x1zx4r75f5mt1p7tf990:1790525927850",
+            "sentAt": 1790525927850,
+            "userId": "605lz6d3a8k0x1zx4r75f5mt1p7tf990",
+            "userName": "观众1",
+            "text": "ㅇㅈ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:66764r6bo9258m27c07142440818fa91:1790525927978",
+            "sentAt": 1790525927978,
+            "userId": "66764r6bo9258m27c07142440818fa91",
+            "userName": "观众15",
+            "text": "돈주고 산거면..... 썾도 되나?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:i535lxu0b30p7u4595w486x25722b739:1790525928120",
+            "sentAt": 1790525928120,
+            "userId": "i535lxu0b30p7u4595w486x25722b739",
+            "userName": "观众10",
+            "text": "시줘버령"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:7986ly92hz261156gvxm7e630shh8kev:1790525928357",
+            "sentAt": 1790525928357,
+            "userId": "7986ly92hz261156gvxm7e630shh8kev",
+            "userName": "观众16",
+            "text": "안써지지 아노아?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:t8p5x22m4494x317u4286nl5ycq33t75:1790525928483",
+            "sentAt": 1790525928483,
+            "userId": "t8p5x22m4494x317u4286nl5ycq33t75",
+            "userName": "观众17",
+            "text": "안써질걸?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:46m746p54d6c60064768ba895vt2w024:1790525928607",
+            "sentAt": 1790525928607,
+            "userId": "46m746p54d6c60064768ba895vt2w024",
+            "userName": "观众18",
+            "text": "경찰만 써질껄"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:r215av00t77dp35k3zswu57323v1vpi1:1790525928788",
+            "sentAt": 1790525928788,
+            "userId": "r215av00t77dp35k3zswu57323v1vpi1",
+            "userName": "观众19",
+            "text": "안될껄요"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:54a963xn8a11db760880435rg9o7l58d:1790525928788",
+            "sentAt": 1790525928788,
+            "userId": "54a963xn8a11db760880435rg9o7l58d",
+            "userName": "观众11",
+            "text": "경찰아니면못입지않음?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:605lz6d3a8k0x1zx4r75f5mt1p7tf990:1790525929266",
+            "sentAt": 1790525929266,
+            "userId": "605lz6d3a8k0x1zx4r75f5mt1p7tf990",
+            "userName": "观众1",
+            "text": "버리자잉"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:581lda76424r6o4wa1ark9f3g62752hc:1790525929353",
+            "sentAt": 1790525929353,
+            "userId": "581lda76424r6o4wa1ark9f3g62752hc",
+            "userName": "观众20",
+            "text": "경찰이 아니라"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0ea273272i3kpe1923v337p28vo19sku:1790525930354",
+            "sentAt": 1790525930354,
+            "userId": "0ea273272i3kpe1923v337p28vo19sku",
+            "userName": "观众21",
+            "text": "안써지걸?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:61on7kx7av729xo0ba7791h4v169x35s:1790525931207",
+            "sentAt": 1790525931207,
+            "userId": "61on7kx7av729xo0ba7791h4v169x35s",
+            "userName": "观众22",
+            "text": "경찰보급은안도ㅓㅐ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:1m22i84zb5s5591x16dc6yi919w58740:1790525931463",
+            "sentAt": 1790525931463,
+            "userId": "1m22i84zb5s5591x16dc6yi919w58740",
+            "userName": "观众23",
+            "text": "혹시 모르니 버리자"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:06m7167o76n1j063zc75vmq95778i377:1790525931699",
+            "sentAt": 1790525931699,
+            "userId": "06m7167o76n1j063zc75vmq95778i377",
+            "userName": "观众24",
+            "text": "아 그러네 다 사비 썼네"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:71tffq4fk66c0yzf6wq2757m1j3q7e5n:1790525932770",
+            "sentAt": 1790525932770,
+            "userId": "71tffq4fk66c0yzf6wq2757m1j3q7e5n",
+            "userName": "观众25",
+            "text": "혹시 모르니까 버릴까"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:8u537t6z8821vhga03o1rc34n0x89918:1790525932881",
+            "sentAt": 1790525932881,
+            "userId": "8u537t6z8821vhga03o1rc34n0x89918",
+            "userName": "观众4",
+            "text": "경찰말고 안 써진다고 하지않았나"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:i535lxu0b30p7u4595w486x25722b739:1790525933075",
+            "sentAt": 1790525933075,
+            "userId": "i535lxu0b30p7u4595w486x25722b739",
+            "userName": "观众10",
+            "text": "지워버려 혹시모르니까"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0x857915t05031j5z59r872vqk527kll:1790525933086",
+            "sentAt": 1790525933086,
+            "userId": "0x857915t05031j5z59r872vqk527kll",
+            "userName": "观众2",
+            "text": "버릴까요?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:02103ua4n732458eeq25i1m9n03v0206:1790525933525",
+            "sentAt": 1790525933525,
+            "userId": "02103ua4n732458eeq25i1m9n03v0206",
+            "userName": "观众26",
+            "text": "불안한건 안ㅆ느느게 좋아"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:t8p5x22m4494x317u4286nl5ycq33t75:1790525933588",
+            "sentAt": 1790525933588,
+            "userId": "t8p5x22m4494x317u4286nl5ycq33t75",
+            "userName": "观众17",
+            "text": "경찰만 쓸수 있지 않음?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:jd97ww88om9755n6b80r84l23uf3q7q8:1790525935149",
+            "sentAt": 1790525935149,
+            "userId": "jd97ww88om9755n6b80r84l23uf3q7q8",
+            "userName": "观众27",
+            "text": "애매할듯"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:39ty01a9302dhz154826cw00zn64337c:1790525935476",
+            "sentAt": 1790525935476,
+            "userId": "39ty01a9302dhz154826cw00zn64337c",
+            "userName": "观众28",
+            "text": "경찰한테 리셀하죠?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:81mc23z65502m6317e4s1113733k91qw:1790525936603",
+            "sentAt": 1790525936603,
+            "userId": "81mc23z65502m6317e4s1113733k91qw",
+            "userName": "观众29",
+            "text": "안써지나?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:2l8397473272o0rf6927jg1c3yfpji66:1790525937310",
+            "sentAt": 1790525937310,
+            "userId": "2l8397473272o0rf6927jg1c3yfpji66",
+            "userName": "观众30",
+            "text": "아 경찰보급?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:t8p5x22m4494x317u4286nl5ycq33t75:1790525937701",
+            "sentAt": 1790525937701,
+            "userId": "t8p5x22m4494x317u4286nl5ycq33t75",
+            "userName": "观众17",
+            "text": "한번 서보자"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:6364mi91ah6l01go21q4qp8m218p89q2:1790525938225",
+            "sentAt": 1790525938225,
+            "userId": "6364mi91ah6l01go21q4qp8m218p89q2",
+            "userName": "观众31",
+            "text": "돈만썼네"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:1ou0i419wgk68mzj42m85cx35187v519:1790525938728",
+            "sentAt": 1790525938728,
+            "userId": "1ou0i419wgk68mzj42m85cx35187v519",
+            "userName": "GGHHX",
+            "text": "문의"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:52x873xx69108e6pti5s6dw0y6102znd:1790525938811",
+            "sentAt": 1790525938811,
+            "userId": "52x873xx69108e6pti5s6dw0y6102znd",
+            "userName": "观众8",
+            "text": "시청 갖다주죠?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:664s5t4s57586980032i3ee6h8b74vs9:1790525941147",
+            "sentAt": 1790525941147,
+            "userId": "664s5t4s57586980032i3ee6h8b74vs9",
+            "userName": "pbd",
+            "text": "어?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:t8p5x22m4494x317u4286nl5ycq33t75:1790525941662",
+            "sentAt": 1790525941662,
+            "userId": "t8p5x22m4494x317u4286nl5ycq33t75",
+            "userName": "观众17",
+            "text": "어"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:791553ymqgj4v8156g0n85m8970079i6:1790525941749",
+            "sentAt": 1790525941749,
+            "userId": "791553ymqgj4v8156g0n85m8970079i6",
+            "userName": "观众32",
+            "text": "써지네"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:54a963xn8a11db760880435rg9o7l58d:1790525941970",
+            "sentAt": 1790525941970,
+            "userId": "54a963xn8a11db760880435rg9o7l58d",
+            "userName": "观众11",
+            "text": "왜되냐"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:7986ly92hz261156gvxm7e630shh8kev:1790525942108",
+            "sentAt": 1790525942108,
+            "userId": "7986ly92hz261156gvxm7e630shh8kev",
+            "userName": "观众16",
+            "text": "아 근데 아까 그것도 써진거보면"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:605lz6d3a8k0x1zx4r75f5mt1p7tf990:1790525942218",
+            "sentAt": 1790525942218,
+            "userId": "605lz6d3a8k0x1zx4r75f5mt1p7tf990",
+            "userName": "观众1",
+            "text": "헉"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0x857915t05031j5z59r872vqk527kll:1790525942222",
+            "sentAt": 1790525942222,
+            "userId": "0x857915t05031j5z59r872vqk527kll",
+            "userName": "观众2",
+            "text": "어머"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:12kyg6pv2141302139kmdn72wp69zfn3:1790525942240",
+            "sentAt": 1790525942240,
+            "userId": "12kyg6pv2141302139kmdn72wp69zfn3",
+            "userName": "观众3",
+            "text": "오?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:8u537t6z8821vhga03o1rc34n0x89918:1790525942556",
+            "sentAt": 1790525942556,
+            "userId": "8u537t6z8821vhga03o1rc34n0x89918",
+            "userName": "观众4",
+            "text": "엥"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:86173402se8w4h42t87351tz2pfeyyn0:1790525942628",
+            "sentAt": 1790525942628,
+            "userId": "86173402se8w4h42t87351tz2pfeyyn0",
+            "userName": "观众5",
+            "text": "?"
+          }
+        ]
+      },
+      {
+        "frame": 6,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:t8p5x22m4494x317u4286nl5ycq33t75:1790525942711",
+            "sentAt": 1790525942711,
+            "userId": "t8p5x22m4494x317u4286nl5ycq33t75",
+            "userName": "观众17",
+            "text": "되네"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:81mc23z65502m6317e4s1113733k91qw:1790525942899",
+            "sentAt": 1790525942899,
+            "userId": "81mc23z65502m6317e4s1113733k91qw",
+            "userName": "观众29",
+            "text": "?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:tb5v8jk175rw16ab507671r881t28m59:1790525942940",
+            "sentAt": 1790525942940,
+            "userId": "tb5v8jk175rw16ab507671r881t28m59",
+            "userName": "观众12",
+            "text": "어라"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:9g47458737ql79tz6606u65bm7hm5067:1790525942999",
+            "sentAt": 1790525942999,
+            "userId": "9g47458737ql79tz6606u65bm7hm5067",
+            "userName": "观众33",
+            "text": "되네"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:54a963xn8a11db760880435rg9o7l58d:1790525943357",
+            "sentAt": 1790525943357,
+            "userId": "54a963xn8a11db760880435rg9o7l58d",
+            "userName": "观众11",
+            "text": "버그미쳣네"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4ol672xox73v8p01ll588i7s07559698:1790525943427",
+            "sentAt": 1790525943427,
+            "userId": "4ol672xox73v8p01ll588i7s07559698",
+            "userName": "观众34",
+            "text": "?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:605lz6d3a8k0x1zx4r75f5mt1p7tf990:1790525943552",
+            "sentAt": 1790525943552,
+            "userId": "605lz6d3a8k0x1zx4r75f5mt1p7tf990",
+            "userName": "观众1",
+            "text": "버리자"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8826
+          }
+        ]
+      },
+      {
+        "frame": 7,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:1yi5f340m94631z32n95d9ka9j09gi60:1790525943597",
+            "sentAt": 1790525943597,
+            "userId": "1yi5f340m94631z32n95d9ka9j09gi60",
+            "userName": "观众35",
+            "text": "어?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0x857915t05031j5z59r872vqk527kll:1790525943684",
+            "sentAt": 1790525943684,
+            "userId": "0x857915t05031j5z59r872vqk527kll",
+            "userName": "观众2",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:12371a2b8i0z2o43892s1910n63c501d:1790525943836",
+            "sentAt": 1790525943836,
+            "userId": "12371a2b8i0z2o43892s1910n63c501d",
+            "userName": "观众36",
+            "text": "써지는데"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:n89g06357cp4s139k3u1622a165b1cp1:1790525943860",
+            "sentAt": 1790525943860,
+            "userId": "n89g06357cp4s139k3u1622a165b1cp1",
+            "userName": "观众37",
+            "text": "되는데??"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0ea273272i3kpe1923v337p28vo19sku:1790525944289",
+            "sentAt": 1790525944289,
+            "userId": "0ea273272i3kpe1923v337p28vo19sku",
+            "userName": "观众21",
+            "text": "어?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:26y05l2r66x9n70t6547434z049f2s13:1790525944398",
+            "sentAt": 1790525944398,
+            "userId": "26y05l2r66x9n70t6547434z049f2s13",
+            "userName": "观众38",
+            "text": "되네"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:i535lxu0b30p7u4595w486x25722b739:1790525944422",
+            "sentAt": 1790525944422,
+            "userId": "i535lxu0b30p7u4595w486x25722b739",
+            "userName": "观众10",
+            "text": "오쉣 버려잇"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8826
+          }
+        ]
+      },
+      {
+        "frame": 8,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:o3493b19qy398m6q6he2960kyq76je59:1790525944662",
+            "sentAt": 1790525944662,
+            "userId": "o3493b19qy398m6q6he2960kyq76je59",
+            "userName": "观众39",
+            "text": "헉"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:jd97ww88om9755n6b80r84l23uf3q7q8:1790525944732",
+            "sentAt": 1790525944732,
+            "userId": "jd97ww88om9755n6b80r84l23uf3q7q8",
+            "userName": "观众27",
+            "text": "경찰한테 리셀가로 팔자 ㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:44f050vqto177c1795qbu1w69922y5i3:1790525944772",
+            "sentAt": 1790525944772,
+            "userId": "44f050vqto177c1795qbu1w69922y5i3",
+            "userName": "观众40",
+            "text": "엇"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4p5055586l682x592890f525o5u57bex:1790525944831",
+            "sentAt": 1790525944831,
+            "userId": "4p5055586l682x592890f525o5u57bex",
+            "userName": "观众6",
+            "text": "오"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:58b2280n26079gsd629e3a4u420l4744:1790525944839",
+            "sentAt": 1790525944839,
+            "userId": "58b2280n26079gsd629e3a4u420l4744",
+            "userName": "观众41",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:5sk0522l1jo006r4lb0c3a7v4y97q859:1790525945004",
+            "sentAt": 1790525945004,
+            "userId": "5sk0522l1jo006r4lb0c3a7v4y97q859",
+            "userName": "观众42",
+            "text": "어?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:199277751itqzo52ki79533n0537569z:1790525945063",
+            "sentAt": 1790525945063,
+            "userId": "199277751itqzo52ki79533n0537569z",
+            "userName": "观众43",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4036ep9nfy555678y4540f230y216038:1790525945411",
+            "sentAt": 1790525945411,
+            "userId": "4036ep9nfy555678y4540f230y216038",
+            "userName": "观众44",
+            "text": "어?"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8826
+          }
+        ]
+      },
+      {
+        "frame": 9,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:517pbxo38m19332i4g9g479pk0mpg1cw:1790525946709",
+            "sentAt": 1790525946709,
+            "userId": "517pbxo38m19332i4g9g479pk0mpg1cw",
+            "userName": "观众45",
+            "text": "? 되네"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8826
+          }
+        ]
+      },
+      {
+        "frame": 10,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:7986ly92hz261156gvxm7e630shh8kev:1790525945670",
+            "sentAt": 1790525945670,
+            "userId": "7986ly92hz261156gvxm7e630shh8kev",
+            "userName": "观众16",
+            "text": "버려야해 그냥"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:81mc23z65502m6317e4s1113733k91qw:1790525945800",
+            "sentAt": 1790525945800,
+            "userId": "81mc23z65502m6317e4s1113733k91qw",
+            "userName": "观众29",
+            "text": "그렇다면"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:91fx569u79ig294n461q1kfa36h71291:1790525945816",
+            "sentAt": 1790525945816,
+            "userId": "91fx569u79ig294n461q1kfa36h71291",
+            "userName": "观众9",
+            "text": "되는디?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4o625be67t2vxt9734wh9g5966d5er26:1790525946075",
+            "sentAt": 1790525946075,
+            "userId": "4o625be67t2vxt9734wh9g5966d5er26",
+            "userName": "观众46",
+            "text": "어? 쓰자"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4599t620122a78e5x6m5e4xf4lj62h70:1790525946337",
+            "sentAt": 1790525946337,
+            "userId": "4599t620122a78e5x6m5e4xf4lj62h70",
+            "userName": "观众47",
+            "text": "어?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:579101ec477v50x25qr3s175uribj7ea:1790525946394",
+            "sentAt": 1790525946394,
+            "userId": "579101ec477v50x25qr3s175uribj7ea",
+            "userName": "观众48",
+            "text": "방탄복은 되용"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8826
+          }
+        ]
+      },
+      {
+        "frame": 11,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:1h82i27zm4465p919ce24rycw295k396:1790525947009",
+            "sentAt": 1790525947009,
+            "userId": "1h82i27zm4465p919ce24rycw295k396",
+            "userName": "观众49",
+            "text": "경찰서 반납?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:2l8397473272o0rf6927jg1c3yfpji66:1790525947012",
+            "sentAt": 1790525947012,
+            "userId": "2l8397473272o0rf6927jg1c3yfpji66",
+            "userName": "观众30",
+            "text": "걍 버려"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:9g47458737ql79tz6606u65bm7hm5067:1790525947018",
+            "sentAt": 1790525947018,
+            "userId": "9g47458737ql79tz6606u65bm7hm5067",
+            "userName": "观众33",
+            "text": "경찰 리셀?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:bx9kv4n85k2597xwv566y68299xo2uay:1790525947167",
+            "sentAt": 1790525947167,
+            "userId": "bx9kv4n85k2597xwv566y68299xo2uay",
+            "userName": "观众50",
+            "text": "전리품인것이야"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:8x0v237x859m5012026b8u9ue0ea0n26:1790525947711",
+            "sentAt": 1790525947711,
+            "userId": "8x0v237x859m5012026b8u9ue0ea0n26",
+            "userName": "观众51",
+            "text": "경찰쪽에서 안써진댔는데"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8826
+          }
+        ]
+      },
+      {
+        "frame": 12,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:bn8vyff481628ll7583w3hp53543hd42:1790525948725",
+            "sentAt": 1790525948725,
+            "userId": "bn8vyff481628ll7583w3hp53543hd42",
+            "userName": "观众52",
+            "text": "시청에 가져다 줄까?"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8826
+          }
+        ]
+      },
+      {
+        "frame": 13,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:44f050vqto177c1795qbu1w69922y5i3:1790525947950",
+            "sentAt": 1790525947950,
+            "userId": "44f050vqto177c1795qbu1w69922y5i3",
+            "userName": "观众40",
+            "text": "버려잇"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4l25wdqa9s080rh4it87602ozsud754p:1790525948334",
+            "sentAt": 1790525948334,
+            "userId": "4l25wdqa9s080rh4it87602ozsud754p",
+            "userName": "观众53",
+            "text": "경찰에 선문주러가자"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8826
+          }
+        ]
+      },
+      {
+        "frame": 14,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:72s1x70m557vw91v4w8022m49981687r:1790525949317",
+            "sentAt": 1790525949317,
+            "userId": "72s1x70m557vw91v4w8022m49981687r",
+            "userName": "Bbyf",
+            "text": "시청에 물어볼까요"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:3zh66xz296132239oet1l23ej2310773:1790525949664",
+            "sentAt": 1790525949664,
+            "userId": "3zh66xz296132239oet1l23ej2310773",
+            "userName": "Jmjiwf92",
+            "text": "버리면 누가 주울것 같은데"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8826
+          }
+        ]
+      },
+      {
+        "frame": 15,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:66764r6bo9258m27c07142440818fa91:1790525949904",
+            "sentAt": 1790525949904,
+            "userId": "66764r6bo9258m27c07142440818fa91",
+            "userName": "观众15",
+            "text": "테이저건은 좀 가지고있다가 애들한테 쏘면서 놀자"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8826
+          }
+        ]
+      },
+      {
+        "frame": 16,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:54a963xn8a11db760880435rg9o7l58d:1790525950902",
+            "sentAt": 1790525950902,
+            "userId": "54a963xn8a11db760880435rg9o7l58d",
+            "userName": "观众11",
+            "text": "중급받앗으면ㄲㅂ"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8825
+          }
+        ]
+      },
+      {
+        "frame": 17,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:0ea273272i3kpe1923v337p28vo19sku:1790525951068",
+            "sentAt": 1790525951068,
+            "userId": "0ea273272i3kpe1923v337p28vo19sku",
+            "userName": "观众21",
+            "text": "어메.."
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8826
+          }
+        ]
+      },
+      {
+        "frame": 18,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:81mc23z65502m6317e4s1113733k91qw:1790525952159",
+            "sentAt": 1790525952159,
+            "userId": "81mc23z65502m6317e4s1113733k91qw",
+            "userName": "观众29",
+            "text": "바로 슈킹을...."
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8825
+          }
+        ]
+      },
+      {
+        "frame": 19,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:j9h03b7f6k26hk4of12ays4932m19079:1790525952454",
+            "sentAt": 1790525952454,
+            "userId": "j9h03b7f6k26hk4of12ays4932m19079",
+            "userName": "LXQfUB",
+            "text": "시청에 반품?"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8825
+          }
+        ]
+      },
+      {
+        "frame": 20,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:12kyg6pv2141302139kmdn72wp69zfn3:1790525953166",
+            "sentAt": 1790525953166,
+            "userId": "12kyg6pv2141302139kmdn72wp69zfn3",
+            "userName": "观众3",
+            "text": "경찰한테 팔래? ㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8825
+          }
+        ]
+      },
+      {
+        "frame": 21,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:605lz6d3a8k0x1zx4r75f5mt1p7tf990:1790525954017",
+            "sentAt": 1790525954017,
+            "userId": "605lz6d3a8k0x1zx4r75f5mt1p7tf990",
+            "userName": "观众1",
+            "text": "순찰이가 애초에 버리랬으"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8866
+          }
+        ]
+      },
+      {
+        "frame": 22,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:81mc23z65502m6317e4s1113733k91qw:1790525954467",
+            "sentAt": 1790525954467,
+            "userId": "81mc23z65502m6317e4s1113733k91qw",
+            "userName": "观众29",
+            "text": "ㄲㅂ"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8866
+          }
+        ]
+      },
+      {
+        "frame": 23,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:f39rj4237r86677bw3okbat8h71ezjt8:1790525955419",
+            "sentAt": 1790525955419,
+            "userId": "f39rj4237r86677bw3okbat8h71ezjt8",
+            "userName": "观众54",
+            "text": "경찰한테 팔자"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8825
+          }
+        ]
+      },
+      {
+        "frame": 24,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:t8p5x22m4494x317u4286nl5ycq33t75:1790525955770",
+            "sentAt": 1790525955770,
+            "userId": "t8p5x22m4494x317u4286nl5ycq33t75",
+            "userName": "观众17",
+            "text": "순찰이가 안 써진다고 했는데 아니넹"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:q7ci08v2xa34463a9ll5x487b48b58cw:1790525956086",
+            "sentAt": 1790525956086,
+            "userId": "q7ci08v2xa34463a9ll5x487b48b58cw",
+            "userName": "观众55",
+            "text": "스턴건 ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:2cowc9470dz717s15tj941u04s410c6t:1790525956274",
+            "sentAt": 1790525956274,
+            "userId": "2cowc9470dz717s15tj941u04s410c6t",
+            "userName": "观众56",
+            "text": "경찰 리셀?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0cl11u7d352k5o8i11hfy9yqj750ef9a:1790525956321",
+            "sentAt": 1790525956321,
+            "userId": "0cl11u7d352k5o8i11hfy9yqj750ef9a",
+            "userName": "观众57",
+            "text": "스턴건"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8866
+          }
+        ]
+      },
+      {
+        "frame": 25,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:967c640fkb179092wyp7fue0r18771f1:1790525957899",
+            "sentAt": 1790525957899,
+            "userId": "967c640fkb179092wyp7fue0r18771f1",
+            "userName": "CqamYpbmn",
+            "text": "옷 미리 갈아입어두자"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8866
+          }
+        ]
+      },
+      {
+        "frame": 26,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:f5f2i73f218w8s861y783hkj17w3w0i9:1790525958864",
+            "sentAt": 1790525958864,
+            "userId": "f5f2i73f218w8s861y783hkj17w3w0i9",
+            "userName": "vvlfxh",
+            "text": "애매하면 버리는게"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8866
+          }
+        ]
+      },
+      {
+        "frame": 27,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:fhw4005s07364h8u2243ne9l66d54en1:1790525958886",
+            "sentAt": 1790525958886,
+            "userId": "fhw4005s07364h8u2243ne9l66d54en1",
+            "userName": "观众58",
+            "text": "그럼 무전기도"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8866
+          }
+        ]
+      },
+      {
+        "frame": 28,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:q46l64nt243eq521s168w6f1i4671svn:1790525959318",
+            "sentAt": 1790525959318,
+            "userId": "q46l64nt243eq521s168w6f1i4671svn",
+            "userName": "gds6",
+            "text": "스턴건"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8866
+          }
+        ]
+      },
+      {
+        "frame": 29,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:tb5v8jk175rw16ab507671r881t28m59:1790525960833",
+            "sentAt": 1790525960833,
+            "userId": "tb5v8jk175rw16ab507671r881t28m59",
+            "userName": "观众12",
+            "text": "스턴건은 재미용으로 두자"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8866
+          }
+        ]
+      },
+      {
+        "frame": 31,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": []
+      },
+      {
+        "frame": 32,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:9uy81l2a022g6218i3a52br389z64694:1790525963743",
+            "sentAt": 1790525963743,
+            "userId": "9uy81l2a022g6218i3a52br389z64694",
+            "userName": "观众59",
+            "text": "그때 대충 바닥에 버리라고 주워도 못쓴다하긴했는데"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8844
+          }
+        ]
+      },
+      {
+        "frame": 33,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:1q525478j2t1184u969reet7lo52dcyo:1790525964934",
+            "sentAt": 1790525964934,
+            "userId": "1q525478j2t1184u969reet7lo52dcyo",
+            "userName": "观众60",
+            "text": "그건 수갑이지 않을까 안써지는ㄱ너"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8812
+          }
+        ]
+      },
+      {
+        "frame": 34,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:6364mi91ah6l01go21q4qp8m218p89q2:1790525965674",
+            "sentAt": 1790525965674,
+            "userId": "6364mi91ah6l01go21q4qp8m218p89q2",
+            "userName": "观众31",
+            "text": "스턴건은 장난감"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8812
+          }
+        ]
+      },
+      {
+        "frame": 35,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:1m22i84zb5s5591x16dc6yi919w58740:1790525965845",
+            "sentAt": 1790525965845,
+            "userId": "1m22i84zb5s5591x16dc6yi919w58740",
+            "userName": "观众23",
+            "text": "스턴건은 wwe 용으로 냅두지 뭐 ㅋㅋㅋ"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8844
+          }
+        ]
+      },
+      {
+        "frame": 36,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:8u537t6z8821vhga03o1rc34n0x89918:1790525966348",
+            "sentAt": 1790525966348,
+            "userId": "8u537t6z8821vhga03o1rc34n0x89918",
+            "userName": "观众4",
+            "text": "스턴건은 기념품으로 ㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:c7l57z2s16962oayp09xo76j54w86s9t:1790525966358",
+            "sentAt": 1790525966358,
+            "userId": "c7l57z2s16962oayp09xo76j54w86s9t",
+            "userName": "观众61",
+            "text": "꼬봉이한테 주자"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8812
+          }
+        ]
+      },
+      {
+        "frame": 37,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:26y05l2r66x9n70t6547434z049f2s13:1790525967581",
+            "sentAt": 1790525967581,
+            "userId": "26y05l2r66x9n70t6547434z049f2s13",
+            "userName": "观众38",
+            "text": "총은 버렸었고"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8812
+          }
+        ]
+      },
+      {
+        "frame": 38,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:y3l00555i00l5rd6076c302vosm63jdj:1790525967948",
+            "sentAt": 1790525967948,
+            "userId": "y3l00555i00l5rd6076c302vosm63jdj",
+            "userName": "观众62",
+            "text": "스턴은 재미용"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8812
+          }
+        ]
+      },
+      {
+        "frame": 39,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:3k798myh2833si5v72cco31vj8uan38i:1790525969443",
+            "sentAt": 1790525969443,
+            "userId": "3k798myh2833si5v72cco31vj8uan38i",
+            "userName": "观众63",
+            "text": "ㅇㅈ"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8812
+          }
+        ]
+      },
+      {
+        "frame": 40,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:66764r6bo9258m27c07142440818fa91:1790525969753",
+            "sentAt": 1790525969753,
+            "userId": "66764r6bo9258m27c07142440818fa91",
+            "userName": "观众15",
+            "text": "결국 전쟁이 오는구나 그러게"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0x857915t05031j5z59r872vqk527kll:1790525970267",
+            "sentAt": 1790525970267,
+            "userId": "0x857915t05031j5z59r872vqk527kll",
+            "userName": "观众2",
+            "text": "ㄹㅇㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:1yi5f340m94631z32n95d9ka9j09gi60:1790525970310",
+            "sentAt": 1790525970310,
+            "userId": "1yi5f340m94631z32n95d9ka9j09gi60",
+            "userName": "观众35",
+            "text": "그러게 ㅋㅋㅋ"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8812
+          }
+        ]
+      },
+      {
+        "frame": 41,
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:06m7167o76n1j063zc75vmq95778i377:1790525970826",
+            "sentAt": 1790525970826,
+            "userId": "06m7167o76n1j063zc75vmq95778i377",
+            "userName": "观众24",
+            "text": "ㅁㅊㄱㅁㅉ"
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 8812
+          }
+        ]
+      }
+    ]
+  }
+}

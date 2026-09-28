@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "platform": "chzzk",
+  "case": "S10-live",
+  "room": "chzzk:ac6a03808bffbe58b3bfb0e25271836e",
+  "danmakuKeys": {
+    "channelId": "ac6a03808bffbe58b3bfb0e25271836e",
+    "chatChannelId": "N2l_uf"
+  },
+  "capturedAt": "2026-09-28T21:51:41.355860Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://kr-ss5.chat.naver.com/chat",
+      "headers": {
+        "origin": "https://chzzk.naver.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 45,
+  "kept": {
+    "of": 154,
+    "lines": "0-39, 114-118"
+  },
+  "raw": {
+    "sha256": "8bcb918c25475cb3aac791e853ff09c130cbe2bec326fa4e8687b0a5ce5f16d7",
+    "length": 317992
+  },
+  "scrubbed": [
+    {
+      "where": "$..accTkn",
+      "rule": "secret"
+    },
+    {
+      "where": "$..accessToken",
+      "rule": "secret"
+    },
+    {
+      "where": "$..extraToken",
+      "rule": "secret"
+    },
+    {
+      "where": "$..nickname",
+      "rule": "person"
+    },
+    {
+      "where": "$..sid",
+      "rule": "secret"
+    },
+    {
+      "where": "$..uid",
+      "rule": "person"
+    },
+    {
+      "where": "$..userId",
+      "rule": "person"
+    },
+    {
+      "where": "$..userIdHash",
+      "rule": "person"
+    },
+    {
+      "where": "$..uuid",
+      "rule": "secret"
+    }
+  ],
+  "tool": "record.dart (dart:io; routing, access token, READ join, recent chat, a ping every 20 s, a pong to server pings; nothing else sent) and scrub.py, M5.16; neither is in the repository",
+  "note": "Recorded 2026-09-29 for M5.16 (06:51 KST, a quiet hour): 300 s and 154 lines, of which lines 0-39 (the first 25 s: routing, token, join, recent chat, chat, the first ping and pong) and 114-118 (119-125 s) are kept; the lines between and after are more plain chat and pongs. The live apparently ended about 35 s in (live-status then showed its accumulated count, which CHZZK gives only after a live, and the chat's member count fell from 4228 to about 1900 by the end), but its chat went on (viewers kept talking; at 119 s the chat switched to emoji-only mode: a CHANGE_CHAT_MODE event, a system line in cmd 93102, then a blind notice cmd 94008). The recorder picked kr-ss5 from the routing list (sum of the chat channel id's code units modulo its length). User ids, nicknames, tokens, the session id and uuid are synthetic values of the same shape and length, the same person keeping the same values; chat text, badges, emoji and the streamer's public channel id are kept. No donation happened while recording (see S11-recent). The handshake headers are what the recorder gave dart:io, which sends the user-agent after its own (\"Dart/3.13 (dart:io), Mozilla/5.0 …\"); the server accepts it."
+}

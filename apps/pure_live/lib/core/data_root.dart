@@ -6,18 +6,26 @@ import 'package:path_provider/path_provider.dart';
 /// Where the app keeps its data (database, secrets, logs, IPTV files,
 /// recordings by default).
 ///
-/// Windows (F-WIN-06): `<exe folder>\data`, so a portable copy carries its
-/// data; when that folder cannot be written (Program Files, read-only media)
-/// the per-user application support folder. It never uses 3.x's
-/// `<exe folder>\AppData`, which v4 only reads for the import (store.md §1).
-/// Elsewhere: the application support folder.
+/// Windows (F-WIN-06): [portableDataDir] beside the exe, so a portable copy
+/// carries its data; when that folder cannot be written (Program Files,
+/// read-only media) the per-user application support folder. It never uses
+/// 3.x's `<exe folder>\AppData`, which v4 only reads for the import
+/// (store.md §1). Elsewhere: the application support folder.
 Future<Directory> resolveDataRoot({String? executable}) async {
   if (Platform.isWindows) {
-    final exe = File(executable ?? Platform.resolvedExecutable);
-    final portable = Directory('${exe.parent.path}${Platform.pathSeparator}data');
+    final portable = Directory(portableDataDir(executable ?? Platform.resolvedExecutable));
     if (await isWritableDirectory(portable)) return portable;
   }
   return await getApplicationSupportDirectory();
+}
+
+/// The portable data folder of the exe at [executable]: `UserData` beside
+/// it. Not `data`: that is Flutter's own folder (flutter_assets, app.so,
+/// icudtl.dat), which an update or a new portable copy replaces whole.
+String portableDataDir(String executable, {String separator = r'\'}) {
+  final cut = executable.lastIndexOf(RegExp(r'[\\/]'));
+  final folder = cut < 0 ? '.' : executable.substring(0, cut);
+  return '$folder${separator}UserData';
 }
 
 /// Whether [directory] exists or can be made, and takes a file.

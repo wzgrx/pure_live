@@ -41,6 +41,14 @@ function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_features(${TARGET} PUBLIC cxx_std_17)
   target_compile_options(${TARGET} PRIVATE /W4 /WX /wd"4100")
   target_compile_options(${TARGET} PRIVATE /EHsc)
+  # Sources are UTF-8: without /utf-8 a machine whose code page is 936 (and
+  # other non-Latin ones) reads them in its code page, warns C4819, and /WX
+  # fails the build (connectivity_plus).
+  target_compile_options(${TARGET} PRIVATE /utf-8)
+  # webview_all_windows reaches <experimental/coroutine>, which MSVC 14.51
+  # (VS 2026) turns into an error; this keeps it building until the plugin
+  # moves to C++20 coroutines (ADR 0032).
+  target_compile_definitions(${TARGET} PRIVATE _SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
   target_compile_definitions(${TARGET} PRIVATE "_HAS_EXCEPTIONS=0")
   target_compile_definitions(${TARGET} PRIVATE "$<$<CONFIG:Debug>:_DEBUG>")
 endfunction()

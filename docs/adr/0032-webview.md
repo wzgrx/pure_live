@@ -54,3 +54,9 @@ webview_all_windows 和 webview_windows 同源（同样的 CMake、同样用 NuG
   - 退出 B 站账号会清空内置浏览器的全部 Cookie（spec/sites/bilibili.md §8.2），网页搜索里其它网站的登录状态也会一起清掉。
 - **待验证**（本次没有构建 APK/EXE）：Windows 构建时确认 WebView2Loader 是静态链接还是随包的 DLL，并核对 NuGet 包 Microsoft.Web.WebView2 的许可证文本，随包分发的部分在关于页的许可证里补登记；Android 和 Windows 真机各走一遍网页登录和网页搜索。
 - Flutter 升级时复查这两个包；webview_all_windows 只有一个发布者，停更时退回自维护分支（接口不变，功能代码不动）。
+
+## 补充（2026-09-28，第一次 Windows 发布构建）
+
+- webview_all_windows 1.4.2 的代码会引用 `<experimental/coroutine>`。MSVC 14.51（VS 2026）把它从弃用警告改成了错误（STL1011），微软说很快会删除这个头文件。
+- 暂时的做法：`apps/pure_live/windows/CMakeLists.txt` 的 `APPLY_STANDARD_SETTINGS` 定义 `_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS`，让它还能编译。
+- 等 MSVC 真的删掉这个头文件时，需要插件改用 C++20 的 `<coroutine>`，否则只能退回 VS 2022 的工具集。`check_latest` 升级插件时要回看这一条。

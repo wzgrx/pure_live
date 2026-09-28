@@ -347,8 +347,17 @@ final class ShotApp {
     await tester.pump();
   }
 
-  /// Compares the window with `goldens/<name>.png`.
+  /// Compares the window with `goldens/<name>.png`, after checking that no
+  /// Material Icons glyph is on screen (principles §2.6: every icon is
+  /// Material Symbols Rounded; Material's own widgets default to Material
+  /// Icons, and that font is not loaded here).
   Future<void> capture(String name) async {
+    final material = [
+      for (final text in tester.widgetList<RichText>(find.byType(RichText, skipOffstage: false)))
+        if (text.text.style?.fontFamily == 'MaterialIcons')
+          'U+${text.text.toPlainText().runes.first.toRadixString(16)}',
+    ];
+    expect(material, isEmpty, reason: 'Material Icons glyphs on screen: ${material.join(', ')}');
     await _images();
     final view = tester.binding.renderViews.single;
     final layer = view.debugLayer! as OffsetLayer;

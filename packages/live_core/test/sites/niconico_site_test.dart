@@ -269,6 +269,10 @@ final class _ManualTimer implements Timer {
 
 final Uri _socket = Uri.parse('wss://a.live2.nicovideo.jp/unama/wsapi/v2/watch/24876040585822?audience_token=x');
 
+/// When S04-seat was recorded: its session cookie expired at 2026-09-28
+/// 18:41 UTC, so the seats read their grants at this time, not now.
+final DateTime _seatRecordedAt = Fixture.load('niconico', 'seat/S04-seat').capturedAt;
+
 /// Opens a seat on [channel] with the manual [clock].
 Future<NiconicoSeat> _open(
   _Channel channel,
@@ -281,6 +285,7 @@ Future<NiconicoSeat> _open(
   connector: (connector ?? _Connector([channel])).call,
   cancel: cancel,
   closeTimeout: closeTimeout,
+  now: () => _seatRecordedAt,
   timer: clock.timer,
   periodicTimer: clock.periodic,
 );

@@ -4,11 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
-import 'package:pure_live_app/core/error_text.dart';
+import 'package:pure_live_app/core/error_view.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/tv.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
+import 'package:pure_live_app/features/search/search_empty.dart';
 import 'package:pure_live_app/features/search/search_results.dart';
 import 'package:pure_live_app/features/search/web_search_page.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
@@ -134,7 +135,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         ),
         actions: [WebSearchButton(keyword: _controller)],
       ),
-      body: _link != null ? _LinkResult(future: _link!) : _keywordResults(),
+      body: _link != null ? _LinkResult(future: _link!, onRetry: () => _submit(_controller.text)) : _keywordResults(),
     );
   }
 
@@ -159,7 +160,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             query: SearchQuery(platform, keyword),
             where: where,
             arrange: (cards) => sortSearch(cards, sort, platforms: platforms),
-            emptyText: t.search.empty,
+            empty: const SearchEmptyView(),
             originLabel: t.search.results,
           );
     final tools = [
@@ -285,7 +286,7 @@ class _PlatformRail extends ConsumerWidget {
         ),
         for (final id in platforms)
           ListTile(
-            leading: PlatformLogo(platformId: id, size: Sizes.iconDense),
+            leading: PlatformLogo(platformId: id, size: Sizes.logoMedium),
             title: Text(platformName(id)),
             trailing: combined == null
                 ? null
@@ -299,19 +300,19 @@ class _PlatformRail extends ConsumerWidget {
 }
 
 class _LinkResult extends StatelessWidget {
-  const new({required this.future});
+  const new({required this.future, required this.onRetry});
 
   final Future<RoomRef?> future;
+
+  /// Resolves the link again.
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) => FutureBuilder<RoomRef?>(
     future: future,
     builder: (context, snapshot) {
       if (snapshot.connectionState != ConnectionState.done) return LoadingView(label: t.search.resolvingLink);
-      if (snapshot.hasError) {
-        final text = describeError(snapshot.error!);
-        return MessageView.error(title: text.title, message: text.message);
-      }
+      if (snapshot.hasError) return ErrorView(snapshot.error!, onRetry: onRetry);
       final room = snapshot.data;
       if (room == null) return MessageView(title: t.search.noLinkMatch);
       return ListView(
@@ -319,7 +320,7 @@ class _LinkResult extends StatelessWidget {
         children: [
           Card(
             child: ListTile(
-              leading: PlatformLogo(platformId: room.platform, size: Sizes.iconLg),
+              leading: PlatformLogo(platformId: room.platform, size: Sizes.logoLarge),
               title: Text(t.common.openRoom),
               subtitle: Text('${platformNames[room.platform] ?? room.platform} · ${room.roomId}'),
               trailing: const Icon(Icons.chevron_right),
@@ -344,19 +345,26 @@ class _CombinedResults extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = combinedSearchProvider(keyword);
     final async = ref.watch(provider);
+    final density = ref.watch(cardDensityProvider);
     return async.when(
       skipLoadingOnRefresh: true,
-      loading: () => const LoadingView(),
-      error: (error, _) => MessageView.error(title: describeError(error).title),
+      loading: () => RoomGridSkeleton(density: density),
+      error: (error, _) => ErrorView(error, onRetry: () => ref.invalidate(provider)),
       data: (state) {
         final found = liveOnly ? state.items.where((card) => card.state == LiveState.live).toList() : state.items;
         final failed = state.failed;
         return RoomCardGrid(
-          density: ref.watch(cardDensityProvider),
+          density: density,
           items: sortSearch(found, sort, platforms: platforms),
           hasMore: state.hasMore,
           moreError: state.moreError,
-          emptyText: failed.length == platforms.length ? t.search.allFailed : t.search.empty,
+          empty: failed.length == platforms.length
+              ? MessageView.error(
+                  illustration: Illustration.offline,
+                  title: t.search.allFailed,
+                  onAction: () => ref.invalidate(provider),
+                )
+              : const SearchEmptyView(),
           originLabel: t.search.results,
           header: failed.isEmpty || failed.length == platforms.length
               ? null

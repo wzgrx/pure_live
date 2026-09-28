@@ -10,7 +10,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/audience.dart';
-import 'package:pure_live_app/core/error_text.dart';
+import 'package:pure_live_app/core/error_view.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
@@ -103,6 +103,7 @@ class RoomGrid extends ConsumerWidget {
     this.arrange,
     this.density,
     this.emptyText,
+    this.empty,
     this.refreshOn,
     this.originLabel,
     super.key,
@@ -123,6 +124,9 @@ class RoomGrid extends ConsumerWidget {
   /// Empty-state title.
   final String? emptyText;
 
+  /// The whole empty state, in place of the default one with [emptyText].
+  final Widget? empty;
+
   /// Reloads the list when this changes (discover on resume, F-APP-03).
   final ProviderListenable<Object?>? refreshOn;
 
@@ -134,13 +138,11 @@ class RoomGrid extends ConsumerWidget {
     final provider = roomListProvider(query);
     if (refreshOn case final signal?) ref.listen(signal, (_, _) => ref.invalidate(provider));
     final async = ref.watch(provider);
+    final cardDensity = density ?? ref.watch<CardDensity>(cardDensityProvider);
     return async.when(
       skipLoadingOnRefresh: true,
-      loading: () => const LoadingView(),
-      error: (error, _) {
-        final text = describeError(error);
-        return MessageView.error(title: text.title, message: text.message, onAction: () => ref.invalidate(provider));
-      },
+      loading: () => RoomGridSkeleton(density: cardDensity),
+      error: (error, _) => ErrorView(error, onRetry: () => ref.invalidate(provider)),
       data: (state) {
         final filtered = where == null ? state.items : state.items.where(where!).toList();
         final items = arrange == null ? filtered : arrange!(filtered);
@@ -148,8 +150,9 @@ class RoomGrid extends ConsumerWidget {
           items: items,
           hasMore: state.hasMore,
           moreError: state.moreError,
-          density: density ?? ref.watch(cardDensityProvider),
+          density: cardDensity,
           emptyText: emptyText,
+          empty: empty,
           originLabel: originLabel,
           onLoadMore: () => ref.read(provider.notifier).loadMore(),
           onRefresh: () => ref.refresh(provider.future),
@@ -170,6 +173,7 @@ class RoomCardGrid extends StatefulWidget {
     this.moreError,
     this.density = CardDensity.standard,
     this.emptyText,
+    this.empty,
     this.originLabel,
     this.header,
     super.key,
@@ -189,6 +193,9 @@ class RoomCardGrid extends StatefulWidget {
 
   /// Empty-state title.
   final String? emptyText;
+
+  /// The whole empty state, in place of the default one with [emptyText].
+  final Widget? empty;
 
   /// Name of the list for switching rooms (F-NEW-04).
   final String? originLabel;
@@ -219,12 +226,14 @@ class _RoomCardGridState extends State<RoomCardGrid> {
   Widget build(BuildContext context) {
     final items = widget.items;
     if (items.isEmpty && !widget.hasMore) {
+      // A list, so pulling down still refreshes.
       return RefreshIndicator(
         onRefresh: widget.onRefresh,
         child: ListView(
           children: [
-            const SizedBox(height: 120),
-            MessageView(title: widget.emptyText ?? t.common.noRooms),
+            const SizedBox(height: Space.s8),
+            widget.empty ??
+                MessageView(illustration: Illustration.noResults, title: widget.emptyText ?? t.common.noRooms),
           ],
         ),
       );
@@ -283,6 +292,30 @@ class _RoomCardGridState extends State<RoomCardGrid> {
       },
     );
   }
+}
+
+/// A card grid that is loading its first page: a static skeleton with the
+/// grid's own geometry, so the cards land where the blocks were (principles
+/// §2.5, §7.8).
+class RoomGridSkeleton extends StatelessWidget {
+  const new({this.density = CardDensity.standard, super.key});
+
+  /// Card density of the grid to come.
+  final CardDensity density;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final grid = CardGridGeometry.of(context, constraints.maxWidth, density: density);
+      return SkeletonGrid(
+        columns: grid.columns,
+        gap: grid.gap,
+        padding: grid.padding,
+        cellHeight: grid.cellHeight,
+        density: density,
+      );
+    },
+  );
 }
 
 class _Footer extends StatelessWidget {

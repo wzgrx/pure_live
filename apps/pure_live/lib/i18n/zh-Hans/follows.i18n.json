@@ -6,6 +6,8 @@
   "emptyTitle": "还没有关注的主播",
   "emptyMessage": "在发现或搜索里找到主播，进入直播间后点“关注”。",
   "goDiscover": "去发现",
+  "pasteLink": "粘贴链接",
+  "importData": "导入旧数据或备份",
   "orderNotSaved": "顺序没有保存，请重试",
   "reorder": "调整顺序",
   "sort": {
@@ -41,6 +43,8 @@
   },
   "manageGroups": "管理分组",
   "noneLive": "关注的主播都没开播",
+  "noneLiveMessage": "开播后会出现在这里；打开“开播提醒”可以第一时间知道。",
+  "showAll": "看全部关注",
   "allCount": "全部关注 {n}",
   "offlineCount": "未开播 {n}",
   "ungrouped": "未分组",

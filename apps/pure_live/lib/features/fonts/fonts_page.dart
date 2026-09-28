@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/core/error_view.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/fonts/fonts.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
@@ -50,8 +51,9 @@ class _FontsPageState extends ConsumerState<FontsPage> {
       if (!mounted) return;
       setState(() => _installed.add(font.id));
       _say(t.fonts.downloaded(name: font.name));
-    } on Object catch (error) {
-      _say('$error');
+    } on Object {
+      // Why, in the user's words; never the exception's text.
+      _say(t.fonts.downloadFailed(font: font.name));
     } finally {
       if (mounted) setState(() => _progress.remove(font.id));
     }
@@ -84,8 +86,9 @@ class _FontsPageState extends ConsumerState<FontsPage> {
     return Scaffold(
       appBar: AppBar(title: Text(t.fonts.title)),
       body: catalogue.when(
-        loading: () => const LoadingView(),
-        error: (error, _) => MessageView.error(title: t.fonts.listFailed),
+        loading: () => const SkeletonList(leading: false),
+        error: (error, _) =>
+            ErrorView(error, title: t.fonts.listFailed, onRetry: () => ref.invalidate(fontCatalogProvider)),
         data: (fonts) {
           if (!_scanned) unawaited(_scan(fonts));
           String nameOf(String id) => id.isEmpty

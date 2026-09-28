@@ -6,6 +6,8 @@
   "emptyTitle": "You are not following anyone yet",
   "emptyMessage": "Find streamers in Discover or Search, open their room and tap Follow.",
   "goDiscover": "Go to Discover",
+  "pasteLink": "Paste a link",
+  "importData": "Import old data or a backup",
   "orderNotSaved": "The order was not saved. Try again.",
   "reorder": "Reorder",
   "sort": {
@@ -41,6 +43,8 @@
   },
   "manageGroups": "Manage groups",
   "noneLive": "None of the streamers you follow are live",
+  "noneLiveMessage": "They show up here when they go live; turn on live alerts to know at once.",
+  "showAll": "Show all follows",
   "allCount": "All follows {n}",
   "offlineCount": "Offline {n}",
   "ungrouped": "Ungrouped",

@@ -21,5 +21,6 @@
   "networkDetail": "Check your network or proxy settings and try again.",
   "platformUnsupported": "Platform not supported",
   "platformUnsupportedDetail": "{name} has been retired or is not supported by this version. Its follows and watch history are kept.",
-  "generic": "Something went wrong"
+  "generic": "Something went wrong",
+  "genericDetail": "The cause is not one we recognise. Try again; if it keeps happening, export a diagnostics bundle from Diagnostics and logs and attach it to a bug report."
 }

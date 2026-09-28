@@ -22,5 +22,7 @@ import 'package:pure_live_app/i18n/strings.g.dart';
     message: t.errors.platformUnsupportedDetail(name: platformName(platform)),
     retryable: false,
   ),
-  _ => (title: t.errors.generic, message: '$error', retryable: true),
+  // Never the exception's own text: it is written for developers, and may
+  // quote a URL or a server reply.
+  _ => (title: t.errors.generic, message: t.errors.genericDetail, retryable: true),
 };

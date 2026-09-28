@@ -11,6 +11,8 @@
   "resolvingLink": "Recognising the link",
   "noLinkMatch": "No room link found",
   "empty": "No matching rooms",
+  "emptyHint": "Check the spelling or try another platform. If you have a link to the room, paste it to open it.",
+  "clipboardEmpty": "The clipboard has no text; copy a room link or share code first",
   "sort": {
     "smart": "Smart",
     "platform": "By platform",

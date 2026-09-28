@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:live_iptv/live_iptv.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
-import 'package:pure_live_app/core/error_text.dart';
+import 'package:pure_live_app/core/error_view.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/iptv/iptv_page.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
@@ -77,14 +77,7 @@ class _Groups extends ConsumerWidget {
         .watch(provider)
         .when(
           loading: () => const LoadingView(),
-          error: (error, _) {
-            final text = describeError(error);
-            return MessageView.error(
-              title: text.title,
-              message: text.message,
-              onAction: () => ref.invalidate(provider),
-            );
-          },
+          error: (error, _) => ErrorView(error, onRetry: () => ref.invalidate(provider)),
           data: (playlists) => ListView(
             padding: EdgeInsets.symmetric(horizontal: layout.margin, vertical: Space.s2),
             children: [

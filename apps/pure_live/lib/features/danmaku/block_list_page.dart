@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/core/error_view.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_preferences.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
@@ -109,8 +110,12 @@ class _RuleListState extends ConsumerState<_RuleList> {
         ),
         Expanded(
           child: rules.when(
-            loading: () => const LoadingView(),
-            error: (error, _) => MessageView.error(title: t.danmaku.blockListLoadFailed, message: '$error'),
+            loading: () => const SkeletonList(leading: false),
+            error: (error, _) => ErrorView(
+              error,
+              title: t.danmaku.blockListLoadFailed,
+              onRetry: () => ref.invalidate(blockRulesProvider),
+            ),
             data: (all) {
               final shown = [
                 for (final rule in all.reversed)

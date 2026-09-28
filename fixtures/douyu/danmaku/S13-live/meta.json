@@ -91,6 +91,26 @@
     {
       "where": "hintInfo.avatar",
       "rule": "secret"
+    },
+    {
+      "where": "userName",
+      "rule": "person"
+    },
+    {
+      "where": "list[].icon",
+      "rule": "secret"
+    },
+    {
+      "where": "list_all[].icon",
+      "rule": "secret"
+    },
+    {
+      "where": "list_day[].icon",
+      "rule": "secret"
+    },
+    {
+      "where": "dceicon",
+      "rule": "secret"
     }
   ],
   "tool": "live_cli danmaku --record (schema 1)"

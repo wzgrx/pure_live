@@ -34,8 +34,15 @@ final RegExp _authorPattern = RegExp(r'^[1-9][0-9]{0,19}$');
 
 const _deviceAlphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-/// What one `startPlay` gave, with the visitor session it was asked with.
-typedef _Play = ({AcfunRoomData data, List<String> tickets, String enterRoomAttach, AcfunVisitor visitor});
+/// What one `startPlay` gave, with the visitor session it was asked with;
+/// no [AcfunRoomData] for a paid show (see [AcfunApi.startPlay]).
+typedef _Play = ({
+  AcfunRoomData? data,
+  LiveRestriction restriction,
+  List<String> tickets,
+  String enterRoomAttach,
+  AcfunVisitor visitor,
+});
 
 /// The AcFun adapter (3.x's `AcfunSite`, `AcfunApi`, `AcfunDirectory` and
 /// `AcfunSearchClient`; parsing in [AcfunApi]).
@@ -44,16 +51,27 @@ typedef _Play = ({AcfunRoomData data, List<String> tickets, String enterRoomAtta
 /// streams come from `startPlay`, asked with a visitor session that is kept
 /// in memory for five minutes and shared by concurrent callers. The
 /// directory and the author search are cursor-paged by the site and served
-/// here by page number, as 3.x did. Failures are `SiteError`s; nothing is
-/// disguised as an offline room.
+/// here by page number, as 3.x did; the directory is also served by cursor
+/// ([getDirectoryPageAtCursor], upgrade 10-5). Failures are `SiteError`s;
+/// nothing is disguised as an offline room. A live paid show stays live,
+/// marked [LiveRestriction.paid], and its streams are `StreamUnavailable`.
 final class AcfunSite extends LiveSite
     with LiveSiteLinks
-    implements LiveSiteRoomRefresher, LiveSiteRecordRoomResolver, LivePlayUrlResolver, LivePlayRecoveryResolver {
+    implements
+        LiveSiteRoomRefresher,
+        LiveSiteRecordRoomResolver,
+        LiveSiteCursorDirectoryPager,
+        LivePlayUrlResolver,
+        LivePlayRecoveryResolver {
   /// Creates the adapter; [now], [random] (the visitor's device id) and
   /// `searchTimeout` (8 seconds, 3.x's) are injectable for tests.
   new(this.http, {DateTime Function()? now, Random? random, this._searchTimeout = _defaultSearchTimeout})
     : _now = now ?? DateTime.now,
       _random = random ?? Random.secure();
+
+  /// Rooms a directory page asks for ([getDirectoryPage] and
+  /// [getDirectoryPageAtCursor]; 3.x's default page size).
+  static const int directoryPageSize = 30;
 
   /// Transport.
   final LiveHttp http;
@@ -84,7 +102,8 @@ final class AcfunSite extends LiveSite
     }
   }
 
-  Future<LiveResponse> _get(Uri url) => _send(LiveRequest(site: _site, url: url, headers: AcfunApi.apiHeaders));
+  Future<LiveResponse> _get(Uri url, {CancelToken? cancel}) =>
+      _send(LiveRequest(site: _site, url: url, headers: AcfunApi.apiHeaders, cancel: cancel));
 
   /// `api/channel/list` with 3.x's query (`pcursor=` even when empty).
   static Uri _listUrl({required int count, String cursor = '', String? filters}) => LiveRequest.withQuery(
@@ -116,10 +135,82 @@ final class AcfunSite extends LiveSite
   }
 
   /// Live rooms of [category] (its filter type and id); [pageSize] is sent,
-  /// limited to 1–60 (3.x). An area of another platform, or without numeric
-  /// ids, is `NotFound`.
+  /// limited to 1–60 (3.x). A stored `全部` area (3.x listed it) is the
+  /// recommendations (upgrade 10-2). An area of another platform, or without
+  /// numeric ids, is `NotFound`.
   @override
-  Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
+  Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async =>
+      await _listingPage(page, pageSize.clamp(1, 60), _filters(category));
+
+  /// Every live room by popularity; [pageSize] is sent, limited to 1–60.
+  @override
+  Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) =>
+      _listingPage(page, pageSize.clamp(1, 60), null);
+
+  /// The directory page after [cursor] (null or empty on page 1), one
+  /// request of [directoryPageSize] rooms: the site's own cursor paging,
+  /// without the adapter's page-to-cursor chains (upgrade 10-5; the list
+  /// control that passes the cursor on is M13's). [page] is the caller's
+  /// sequence: page 1 takes no cursor and later pages need one, else it is
+  /// an `ArgumentError` before any request. [category] is an area, or null
+  /// for the recommendations (see [getCategoryRooms]). Rooms are not
+  /// deduplicated across pages here; the caller's list does that.
+  @override
+  Future<LiveDirectoryPage> getDirectoryPageAtCursor({
+    required int page,
+    String? cursor,
+    LiveArea? category,
+    CancelToken? cancel,
+  }) async {
+    if (page < 1) throw RangeError.range(page, 1, null, 'page');
+    final from = cursor?.trim() ?? '';
+    if ((page == 1) != from.isEmpty) {
+      throw ArgumentError.value(cursor, 'cursor', page == 1 ? 'page 1 takes no cursor' : 'page $page needs a cursor');
+    }
+    final filters = _filters(category);
+    final response = await _get(
+      _listUrl(count: directoryPageSize, cursor: from, filters: filters),
+      cancel: cancel,
+    );
+    final result = AcfunApi.directory(response.text, status: response.status);
+    final next = result.next;
+    if (next != null && next == from) throw ApiChanged(_site, 'channel/list: page $page repeats its cursor');
+    return LiveDirectoryPage(rooms: result.rooms, page: page, hasMore: next != null, nextCursor: next);
+  }
+
+  /// Page [page] (below 1 is 1) of [directoryPageSize] rooms by page number:
+  /// the listing chain of [getRecommendRooms] and [getCategoryRooms], with
+  /// the cursor of the next page. [cancel] ends the wait with a cancelled
+  /// `TransportFailure`; a read other callers share goes on.
+  @override
+  Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel}) async {
+    final number = page < 1 ? 1 : page;
+    final filters = _filters(category);
+    if (cancel?.isCancelled ?? false) throw const TransportFailure(_site, TransportReason.cancelled, 'directory page');
+    final listing = _listing(number, directoryPageSize, filters);
+    final load = _page(listing, number, directoryPageSize, filters);
+    final rooms = cancel == null
+        ? await load
+        : await Future.any([
+            load,
+            cancel.whenCancelled.then<List<LiveRoom>>(
+              (_) => throw const TransportFailure(_site, TransportReason.cancelled, 'directory page'),
+            ),
+          ]);
+    final last = listing.lastPage;
+    return LiveDirectoryPage(
+      rooms: rooms,
+      page: number,
+      hasMore: last == null || number < last,
+      nextCursor: listing.next[number + 1]?.cursor,
+    );
+  }
+
+  /// The `filters` of [category]: null for the recommendations (no area, or
+  /// a stored `全部`). An area of another platform, or without numeric ids,
+  /// is `NotFound`.
+  static String? _filters(LiveArea? category) {
+    if (category == null) return null;
     final type = jsonCount(category.areaType);
     final area = jsonCount(category.areaId);
     final platform = category.platform.trim().toLowerCase();
@@ -129,13 +220,8 @@ final class AcfunSite extends LiveSite
         'area ${category.areaType}/${category.areaId} of "${category.platform}" is not an AcFun area',
       );
     }
-    return await _listingPage(page, pageSize.clamp(1, 60), AcfunApi.filterQuery(type: type, id: area));
+    return area == AcfunApi.allFilterId ? null : AcfunApi.filterQuery(type: type, id: area);
   }
-
-  /// Every live room by popularity; [pageSize] is sent, limited to 1–60.
-  @override
-  Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) =>
-      _listingPage(page, pageSize.clamp(1, 60), null);
 
   /// Page [page] of a listing. The site pages by opaque cursor (`pcursor`);
   /// a first-page read starts a new chain of cursors (a refresh; a first
@@ -143,14 +229,20 @@ final class AcfunSite extends LiveSite
   /// without a request.
   Future<List<LiveRoom>> _listingPage(int page, int count, String? filters) {
     final number = page < 1 ? 1 : page;
+    return _page(_listing(number, count, filters), number, count, filters);
+  }
+
+  /// The listing of [count] and [filters] that page [page] is read from: a
+  /// new chain for a first-page read, unless the first page is loading.
+  _Listing _listing(int page, int count, String? filters) {
     final key = '$count ${filters ?? ''}';
     var listing = _listings.remove(key);
-    if (listing == null || (number == 1 && listing.pending[1] == null)) listing = _Listing();
+    if (listing == null || (page == 1 && listing.pending[1] == null)) listing = _Listing();
     _listings[key] = listing;
     while (_listings.length > _maxListings) {
       _listings.remove(_listings.keys.first);
     }
-    return _page(listing, number, count, filters);
+    return listing;
   }
 
   Future<List<LiveRoom>> _page(_Listing listing, int page, int count, String? filters) {
@@ -158,37 +250,46 @@ final class AcfunSite extends LiveSite
     if (pending != null) return pending;
     final last = listing.lastPage;
     if (last != null && page > last) return Future.value(const []);
-    final cursor = listing.cursorOf(page);
-    if (cursor == null) {
+    final start = listing.startOf(page);
+    if (start == null) {
       // The chain lost this page's cursor (a refresh by another list, or an
       // evicted listing). 3.x failed with "pagination expired"
       // (REG-ACFUN-004); the pages before it are read again instead.
       return _page(listing, page - 1, count, filters).then((_) => _page(listing, page, count, filters));
     }
-    return listing.pending[page] = _load(listing, page, cursor, count, filters);
+    return listing.pending[page] = _load(listing, page, start, count, filters);
   }
 
-  Future<List<LiveRoom>> _load(_Listing listing, int page, String cursor, int count, String? filters) async {
+  /// Reads page [page] from [start]. A room an earlier page of this chain
+  /// listed, or one repeated on this page, is left out: the ranking shifts
+  /// between reads (the unified paging rule, M4.U). The same answer read
+  /// again gives the same page.
+  Future<List<LiveRoom>> _load(_Listing listing, int page, _PageStart start, int count, String? filters) async {
     try {
-      final response = await _get(_listUrl(count: count, cursor: cursor, filters: filters));
+      final response = await _get(_listUrl(count: count, cursor: start.cursor, filters: filters));
       final result = AcfunApi.directory(response.text, status: response.status);
+      final listed = {...start.listed};
+      final rooms = [
+        for (final room in result.rooms)
+          if (listed.add(room.roomId)) room,
+      ];
       final next = result.next;
       if (next == null) {
         listing.lastPage = page;
       } else {
         // A cursor this chain already used cannot lead anywhere new (3.x).
         for (var earlier = 1; earlier <= page; earlier++) {
-          if (listing.cursorOf(earlier) == next) {
+          if (listing.startOf(earlier)?.cursor == next) {
             throw ApiChanged(_site, 'channel/list: page $page repeats the cursor of page $earlier');
           }
         }
         if (listing.lastPage == page) listing.lastPage = null;
-        listing.cursors[page + 1] = next;
-        while (listing.cursors.length > _maxCursors) {
-          listing.cursors.remove(listing.cursors.keys.reduce(min));
+        listing.next[page + 1] = (cursor: next, listed: Set.unmodifiable(listed));
+        while (listing.next.length > _maxCursors) {
+          listing.next.remove(listing.next.keys.reduce(min));
         }
       }
-      return result.rooms;
+      return rooms;
     } finally {
       listing.pending.removeWhere((key, _) => key == page);
     }
@@ -338,11 +439,21 @@ final class AcfunSite extends LiveSite
 
   /// [room] with its broadcast when it is live (3.x asked `startPlay` on
   /// room entry and before recording); a broadcast that ended in between
-  /// is `StreamUnavailable` (3.x failed the load too).
+  /// is `StreamUnavailable` (3.x failed the load too). `startPlay` decides
+  /// the restriction: a paid show stays live with [LiveRestriction.paid]
+  /// and no broadcast (3.x failed the load), a broadcast that plays has
+  /// none. The start comes from `live/info`, else from `startPlay`.
   Future<LiveRoom> _withBroadcast(LiveRoom room, {required bool danmaku}) async {
     if (!room.isLiveNow) return room;
     final play = await _startPlay(room.roomId);
-    return room.copyWith(data: play.data, danmakuData: danmaku ? _danmakuArgs(room.roomId, play) : null);
+    final data = play.data;
+    if (data == null) return room.copyWith(restriction: play.restriction);
+    return room.copyWith(
+      data: data,
+      danmakuData: danmaku ? _danmakuArgs(room.roomId, data, play) : null,
+      startedAt: room.startedAt ?? data.startedAt,
+      restriction: play.restriction,
+    );
   }
 
   /// The room with its broadcast (the stream data) and danmaku arguments.
@@ -393,7 +504,8 @@ final class AcfunSite extends LiveSite
   /// `startPlay` for [authorId]. A refused session is dropped and the
   /// request made once more with a new one (REG-ACFUN-003; 3.x dropped it
   /// only for the next request, so that attempt failed). An ended
-  /// broadcast is `StreamUnavailable` and keeps the session.
+  /// broadcast is `StreamUnavailable` and a paid show has no broadcast
+  /// data; both keep the session.
   Future<_Play> _startPlay(String authorId, {bool freshSession = false}) async {
     for (var attempt = 0; ; attempt++) {
       final visitor = await _session(fresh: freshSession || attempt > 0);
@@ -414,7 +526,13 @@ final class AcfunSite extends LiveSite
       );
       try {
         final play = AcfunApi.startPlay(response.text, issuedAt: _now(), status: response.status);
-        return (data: play.data, tickets: play.tickets, enterRoomAttach: play.enterRoomAttach, visitor: visitor);
+        return (
+          data: play.data,
+          restriction: play.restriction,
+          tickets: play.tickets,
+          enterRoomAttach: play.enterRoomAttach,
+          visitor: visitor,
+        );
       } on RiskControl {
         if (identical(_visitor?.visitor, visitor)) _visitor = null;
         if (attempt > 0) rethrow;
@@ -426,8 +544,9 @@ final class AcfunSite extends LiveSite
 
   /// Qualities of the broadcast [detail] carries, best first (a live room
   /// without one, like a list card, asks `startPlay` first). A room the
-  /// platform said is offline is `StreamUnavailable` without a request
-  /// (3.x returned no qualities).
+  /// platform said is offline (3.x returned no qualities) or restricted is
+  /// `StreamUnavailable` without a request; so is a paid show `startPlay`
+  /// turns away. The error names the restriction.
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
       AcfunApi.playQualities(await _broadcast(detail));
@@ -454,18 +573,27 @@ final class AcfunSite extends LiveSite
   }) async => AcfunApi.resolution(await _broadcast(detail, fresh: true), qualityId: quality.selectionId);
 
   Future<AcfunRoomData> _broadcast(LiveRoom detail, {bool fresh = false}) async {
-    if (detail.data case final AcfunRoomData data when !fresh) return data;
-    if (!fresh && detail.isExplicitlyOfflineNow) {
-      throw StreamUnavailable(_site, '${detail.roomId} is ${detail.effectiveLiveStatus.name}');
+    if (!fresh) {
+      if (detail.data case final AcfunRoomData data) return data;
+      if (detail.isExplicitlyOfflineNow) {
+        throw StreamUnavailable(_site, '${detail.roomId} is ${detail.effectiveLiveStatus.name}');
+      }
+      if (detail.isRestricted) throw _restricted(detail.roomId, detail.effectiveRestriction);
     }
-    return (await _startPlay(_authorId(detail.roomId))).data;
+    final play = await _startPlay(_authorId(detail.roomId));
+    return play.data ?? (throw _restricted(detail.roomId, play.restriction));
   }
+
+  /// The error of a stream the restriction [kind] keeps from this client
+  /// (M2.1: a paid show plays only for ticket holders).
+  static StreamUnavailable _restricted(String roomId, LiveRestriction kind) =>
+      StreamUnavailable(_site, '$roomId: restricted room (${kind.name})');
 
   // Danmaku -------------------------------------------------------------------
 
-  AcfunDanmakuArgs _danmakuArgs(String authorId, _Play play) => AcfunDanmakuArgs(
+  AcfunDanmakuArgs _danmakuArgs(String authorId, AcfunRoomData data, _Play play) => AcfunDanmakuArgs(
     authorId: authorId,
-    liveId: play.data.liveId,
+    liveId: data.liveId,
     visitor: play.visitor,
     tickets: play.tickets,
     enterRoomAttach: play.enterRoomAttach,
@@ -473,18 +601,22 @@ final class AcfunSite extends LiveSite
   );
 
   /// Danmaku arguments from a new visitor session and a new `startPlay`
-  /// (tickets are per session; a broadcast that ended is
-  /// `StreamUnavailable`).
+  /// (tickets are per session). A broadcast that ended, or a paid show
+  /// (no tickets), is `StreamUnavailable`.
   Future<AcfunDanmakuArgs> danmakuArgs(String authorId) async {
     final id = _authorId(authorId);
-    return _danmakuArgs(id, await _startPlay(id, freshSession: true));
+    final play = await _startPlay(id, freshSession: true);
+    return _danmakuArgs(id, play.data ?? (throw _restricted(id, play.restriction)), play);
   }
 
   // Links ---------------------------------------------------------------------
 
   /// A live room page: `live.acfun.cn/live/{id}` (3.x's rule: exactly those
-  /// two segments), or the mobile `m.acfun.cn/live/detail/{id}`. Profile
-  /// pages (`www.acfun.cn/u/{id}`) are not rooms, as in 3.x.
+  /// two segments), or the mobile `m.acfun.cn/live/detail/{id}`. A profile
+  /// page is the author's room too (upgrade 10-1; the author id is the room
+  /// id, 3.x did not take them): `www.acfun.cn/u/{id}` or `acfun.cn/u/{id}`,
+  /// also with the old `.aspx` suffix the site still redirects, and the
+  /// mobile `m.acfun.cn/upPage/{id}`.
   @override
   String? roomIdFromUrl(String url) {
     final uri = Uri.tryParse(url.trim());
@@ -494,6 +626,9 @@ final class AcfunSite extends LiveSite
     final id = switch (segments) {
       ['live', final id] when host == 'live.acfun.cn' => id,
       ['live', 'detail', final id] when host == 'm.acfun.cn' => id,
+      ['u', final id] when host == 'www.acfun.cn' || host == 'acfun.cn' =>
+        id.endsWith('.aspx') ? id.substring(0, id.length - '.aspx'.length) : id,
+      ['upPage', final id] when host == 'm.acfun.cn' => id,
       _ => null,
     };
     if (id == null) return null;
@@ -502,15 +637,19 @@ final class AcfunSite extends LiveSite
   }
 }
 
-/// One listing (a page size and filter): the cursors of the pages read so
-/// far, the page that said "no more", and the pages being read.
+/// Where a page of a listing starts: its cursor and the rooms the pages
+/// before it listed.
+typedef _PageStart = ({String cursor, Set<String> listed});
+
+/// One listing (a page size and filter): where the pages read so far lead,
+/// the page that said "no more", and the pages being read.
 final class _Listing {
-  /// Cursors of pages 2 and on (page 1's is empty).
-  final Map<int, String> cursors = {};
+  /// The starts of pages 2 and on (page 1 starts with nothing).
+  final Map<int, _PageStart> next = {};
   final Map<int, Future<List<LiveRoom>>> pending = {};
   int? lastPage;
 
-  String? cursorOf(int page) => page <= 1 ? '' : cursors[page];
+  _PageStart? startOf(int page) => page <= 1 ? (cursor: '', listed: const {}) : next[page];
 }
 
 /// One author search (a keyword and page size): the rows of the last server

@@ -41,6 +41,23 @@ void _expectRooms(List<LiveRoom> rooms, Object? legacy, {required String reason}
   }
 }
 
+/// The keys [actual] (a `toJson`) has beyond 3.x's [legacy] map, which
+/// leaves out nulls and empty collections: the v4 keys M2.1 added (3.x
+/// ignores them when reading).
+Set<String> _added(Map<String, Object?> actual, Map<String, dynamic> legacy) => {
+  for (final MapEntry(:key, :value) in actual.entries)
+    if (value != null && !(value is Iterable && value.isEmpty) && !(value is Map && value.isEmpty))
+      if (!legacy.containsKey(key)) key,
+};
+
+/// The raw list cards of a `channel/list` sample.
+List<Map<String, dynamic>> _cards(String name) =>
+    (((jsonDecode(_sample(name).body) as Map<String, dynamic>)['channelListData'] as Map)['liveList'] as List)
+        .cast<Map<String, dynamic>>();
+
+/// The broadcast of the live startPlay sample.
+AcfunRoomData _liveData() => AcfunApi.startPlay(_sample('S06-startplay-live').body, issuedAt: _issuedAt).data!;
+
 /// The `data.videoPlayRes` of the live startPlay sample.
 Object? _videoPlayRes() =>
     ((jsonDecode(_sample('S06-startplay-live').body) as Map<String, dynamic>)['data'] as Map)['videoPlayRes'];
@@ -104,13 +121,16 @@ String _searchAnswer(List<String> cards, {required int total, bool blankZero = f
 
 void main() {
   group('S01 catalog', () {
-    test('the areas 3.x listed: 全部 included, in answer order, under the site name', () {
+    test('the areas 3.x listed but 全部 (10-2), in answer order, under the site name', () {
       final fixture = _sample('S01-list-filters');
       final areas = AcfunApi.areas(fixture.body, typeName: 'AcFun 直播', status: fixture.status);
       final category = (_legacy('S01-list-filters')['getCategores'] as List).single as Map<String, dynamic>;
       expect((category['id'], category['name']), ('acfun', 'AcFun 直播'));
-      final legacy = (category['children'] as List).cast<Map<String, dynamic>>();
-      expect(areas.map((area) => area.areaName), ['全部', '虚拟偶像', '游戏', '娱乐', '其他']);
+      final all = (category['children'] as List).cast<Map<String, dynamic>>();
+      // changed: 10-2 leaves out 全部 (filter 0), the recommendations again.
+      expect((all.first['areaId'], all.first['areaName']), ('0', '全部'));
+      final legacy = all.skip(1).toList();
+      expect(areas.map((area) => area.areaName), ['虚拟偶像', '游戏', '娱乐', '其他']);
       expect(areas, hasLength(legacy.length));
       for (final (index, area) in areas.indexed) {
         // 3.x wrote shortName null, the model ''; 3.x reads both the same.
@@ -139,13 +159,23 @@ void main() {
         }),
         typeName: 'AcFun 直播',
       );
-      expect(areas.map((area) => (area.areaType, area.areaId, area.areaName)), [('1', '0', '全部'), ('1', '4', '虚拟偶像')]);
+      expect(areas.map((area) => (area.areaType, area.areaId, area.areaName)), [('1', '4', '虚拟偶像')]);
       expect(areas.last.areaPic, 'https://img.example/virtual.jpg');
       for (final broken in <Object?>[
         null,
         <String, Object>{},
         {'liveChannelDisplayFilters': <String, Object>{}},
         {'liveChannelDisplayFilters': <Object>[]},
+        // Only 全部 (10-2 leaves it out): no area at all.
+        {
+          'liveChannelDisplayFilters': [
+            {
+              'displayFilters': [
+                {'filterType': 1, 'filterId': 0, 'name': '全部'},
+              ],
+            },
+          ],
+        },
       ]) {
         expect(() => AcfunApi.areas(answer(broken), typeName: ''), throwsA(isA<ApiChanged>()), reason: '$broken');
       }
@@ -178,12 +208,66 @@ void main() {
       expect(page.rooms.every((room) => room.isLiveNow), isTrue);
     });
 
+    test('S01, S02: every card starts at its createTime (10-3) and has no restriction; nothing else is added', () {
+      for (final (name, method) in [('S01-list-all', 'getRecommendRooms'), ('S02-list-game', 'getCategoryRooms')]) {
+        final fixture = _sample(name);
+        final rooms = AcfunApi.directory(fixture.body, status: fixture.status).rooms;
+        final cards = _cards(name);
+        final legacy = (_legacy(name)[method] as List).cast<Map<String, dynamic>>();
+        for (final (index, room) in rooms.indexed) {
+          final start = DateTime.fromMillisecondsSinceEpoch(cards[index]['createTime'] as int, isUtc: true);
+          expect(room.startedAt, start, reason: '$name[$index]');
+          expect(room.startedAt!.isBefore(fixture.capturedAt), isTrue, reason: '$name[$index]');
+          // No paidShowUuid next to paidShowUserBuyStatus: not a paid show.
+          expect(cards[index], containsPair('paidShowUserBuyStatus', false));
+          expect(cards[index].containsKey('paidShowUuid'), isFalse);
+          expect(room.restriction, LiveRestriction.none, reason: '$name[$index]');
+          // changed (new keys, which 3.x does not read): startedAt (10-3),
+          // restriction (unified principles, M2.1).
+          expect(_added(room.toJson(), legacy[index]), {'startedAt', 'restriction'}, reason: '$name[$index]');
+          expect(room.toJson()['startedAt'], start.toIso8601String());
+          expect(room.toJson()['restriction'], 'none');
+        }
+      }
+    });
+
     test('S02 area rooms of 游戏: the 8 rooms 3.x listed, the area as each card names it', () {
       final fixture = _sample('S02-list-game');
       final page = AcfunApi.directory(fixture.body, status: fixture.status);
       _expectRooms(page.rooms, _legacy('S02-list-game')['getCategoryRooms'], reason: 'S02');
       expect(page.rooms, hasLength(8));
       expect(page.next, isNull);
+    });
+
+    test('a paid show (paidShowUuid) is live and paid unless bought; no paid-show fields say nothing', () {
+      LiveRoom card(Map<String, Object?> extra) => AcfunApi.directory(
+        jsonEncode({
+          'result': 0,
+          'pcursor': 'no_more',
+          'liveList': [
+            {..._info(), ...extra},
+          ],
+        }),
+      ).rooms.single;
+      final paid = card({'paidShowUuid': 'show-a', 'paidShowUserBuyStatus': false});
+      expect((paid.effectiveLiveStatus, paid.restriction), (LiveStatus.live, LiveRestriction.paid));
+      expect(paid.followGroup, FollowGroup.live, reason: 'a restricted live room stays live');
+      expect(card({'paidShowUuid': 'show-a', 'paidShowUserBuyStatus': true}).restriction, LiveRestriction.none);
+      expect(card({'paidShowUuid': '', 'paidShowUserBuyStatus': false}).restriction, LiveRestriction.none);
+      expect(card({}).restriction, isNull, reason: 'the answer says nothing');
+      final offline = AcfunApi.roomDetail(
+        jsonEncode({..._info(live: false), 'paidShowUuid': 'show-a', 'createTime': 1790519855941}),
+        authorId: '42',
+      );
+      expect((offline.restriction, offline.startedAt), (null, null), reason: 'neither belongs to an offline room');
+    });
+
+    test('start times are epoch milliseconds; zero, seconds and other values are none', () {
+      expect(AcfunApi.startedAt(1790519855941), DateTime.utc(2026, 9, 27, 14, 37, 35, 941));
+      expect(AcfunApi.startedAt('1790519855941'), DateTime.utc(2026, 9, 27, 14, 37, 35, 941));
+      for (final value in [null, 0, -1, 1790519855, 'x', 1.5, true, 17905198559410]) {
+        expect(AcfunApi.startedAt(value), isNull, reason: '$value');
+      }
     });
 
     test('the online count is concurrent viewers, likes are not an audience (3.x contract test)', () {
@@ -347,6 +431,17 @@ void main() {
       expect(room.onlineViewers, '116');
       expect(room.followers, '5313');
       expect(room.data, isNull, reason: 'the broadcast comes from startPlay');
+      // 10-3: createTime; the restriction of live/info (no paid show).
+      expect(room.startedAt, DateTime.utc(2026, 9, 27, 14, 37, 35, 941));
+      expect(room.startedAt!.isBefore(fixture.capturedAt), isTrue);
+      expect(room.restriction, LiveRestriction.none);
+      // changed: new keys startedAt (10-3) and restriction (M2.1); the
+      // introduction 3.x left empty (M4.10).
+      expect(_added(room.toJson(), legacy['getRoomDetailForRefresh'] as Map<String, dynamic>), {
+        'startedAt',
+        'restriction',
+        'introduction',
+      });
     });
 
     test('offline: the room 3.x built (no title, cover or audience)', () {
@@ -360,6 +455,7 @@ void main() {
       expect(room.effectiveLiveStatus, LiveStatus.offline);
       expect(room.watching, isEmpty, reason: "not 3.x's '0' default");
       expect(room.introduction, '我们不是直销!是传销!');
+      expect((room.startedAt, room.restriction), (null, null), reason: 'no broadcast');
     });
 
     test('an unknown author is NotFound (3.x: a schema error)', () {
@@ -450,34 +546,38 @@ void main() {
       final fixture = _sample('S06-startplay-live');
       final play = AcfunApi.startPlay(fixture.body, issuedAt: _issuedAt, status: fixture.status);
       final legacy = _legacy('S06-startplay-live')['playback'] as Map<String, dynamic>;
-      expect(play.data.liveId, legacy['liveId']);
+      final data = play.data!;
+      expect(data.liveId, legacy['liveId']);
       expect([
-        for (final quality in play.data.qualities)
+        for (final quality in data.qualities)
           {'id': quality.id, 'label': quality.label, 'rank': quality.rank, 'urls': quality.urls},
       ], legacy['qualities']);
-      expect(play.data.qualities.map((quality) => quality.label), ['蓝光 8M', '蓝光 4M', '超清', '高清']);
+      expect(data.qualities.map((quality) => quality.label), ['蓝光 8M', '蓝光 4M', '超清', '高清']);
       expect(play.tickets, hasLength(4));
       expect(play.enterRoomAttach, isNotEmpty);
-      expect(play.data.issuedAt, _issuedAt);
+      expect(data.issuedAt, _issuedAt);
+      // A broadcast that plays has no restriction; liveStartTime is the
+      // createTime of live/info (10-3).
+      expect(play.restriction, LiveRestriction.none);
+      expect(data.startedAt, DateTime.utc(2026, 9, 27, 14, 37, 35, 941));
     });
 
     test("the qualities as 3.x listed them, and each one's URLs", () {
-      final play = AcfunApi.startPlay(_sample('S06-startplay-live').body, issuedAt: _issuedAt);
+      final data = _liveData();
       final legacy = _legacy('S05-info-live');
-      final qualities = AcfunApi.playQualities(play.data);
+      final qualities = AcfunApi.playQualities(data);
       expect([
         for (final quality in qualities)
           {'quality': quality.quality, 'id': quality.id, 'sort': quality.sort, 'data': quality.data},
       ], legacy['getPlayQualites']);
       final urls = legacy['getPlayUrls'] as Map<String, dynamic>;
       for (final quality in qualities) {
-        expect(AcfunApi.resolution(play.data, qualityId: quality.id).urls, urls['${quality.id}']);
+        expect(AcfunApi.resolution(data, qualityId: quality.id).urls, urls['${quality.id}']);
       }
     });
 
     test("lines carry 3.x's media headers, FLV, the CDN as line id and the signature's lease", () {
-      final play = AcfunApi.startPlay(_sample('S06-startplay-live').body, issuedAt: _issuedAt);
-      final resolution = AcfunApi.resolution(play.data, qualityId: 'BLUE_RAY');
+      final resolution = AcfunApi.resolution(_liveData(), qualityId: 'BLUE_RAY');
       final line = resolution.lines.single;
       expect(resolution.appliedQualityData, 'BLUE_RAY');
       expect(line.headers, {
@@ -496,8 +596,7 @@ void main() {
     });
 
     test('a quality the answer does not offer is StreamUnavailable, never another one', () {
-      final play = AcfunApi.startPlay(_sample('S06-startplay-live').body, issuedAt: _issuedAt);
-      expect(() => AcfunApi.resolution(play.data, qualityId: 'ORIGIN'), throwsA(isA<StreamUnavailable>()));
+      expect(() => AcfunApi.resolution(_liveData(), qualityId: 'ORIGIN'), throwsA(isA<StreamUnavailable>()));
     });
 
     test('offline: 129004 is StreamUnavailable (3.x: a service error)', () {
@@ -507,6 +606,17 @@ void main() {
         () => AcfunApi.startPlay(fixture.body, issuedAt: _issuedAt, status: fixture.status),
         throwsA(isA<StreamUnavailable>()),
       );
+    });
+
+    test('a paid show without a ticket (380205) is live but paid: no broadcast, no tickets (3.x: RiskControl)', () {
+      final play = AcfunApi.startPlay(
+        jsonEncode({'result': AcfunApi.paidShowResult, 'error_msg': 'x'}),
+        issuedAt: _issuedAt,
+      );
+      expect(play.data, isNull);
+      expect(play.restriction, LiveRestriction.paid);
+      expect(play.tickets, isEmpty);
+      expect(play.enterRoomAttach, isEmpty);
     });
 
     test('another result is RiskControl (the session was refused); no liveId ApiChanged', () {

@@ -76,7 +76,7 @@ final class AcfunQuality {
 @immutable
 final class AcfunRoomData {
   /// Creates the data.
-  new({required this.liveId, required List<AcfunQuality> qualities, required this.issuedAt})
+  new({required this.liveId, required List<AcfunQuality> qualities, required this.issuedAt, this.startedAt})
     : qualities = List.unmodifiable(qualities);
 
   /// The broadcast id (`liveId`), new with every broadcast.
@@ -87,6 +87,10 @@ final class AcfunRoomData {
 
   /// When the answer arrived: the origin of the URLs' leases.
   final DateTime issuedAt;
+
+  /// When the broadcast started (`liveStartTime`, the `createTime` of
+  /// `live/info`), or null.
+  final DateTime? startedAt;
 
   /// The quality of id [id], or null.
   AcfunQuality? quality(Object? id) => qualities.where((quality) => quality.id == '$id').firstOrNull;
@@ -170,6 +174,14 @@ abstract final class AcfunApi {
   /// `startPlay`'s answer for a broadcast that has ended (`直播已关播`).
   static const int closedResult = 129004;
 
+  /// `startPlay`'s answer for a paid show the viewer has no ticket for (the
+  /// web player's `liveNotPaid`; the anonymous visitor never has one).
+  static const int paidShowResult = 380205;
+
+  /// The filter id of `全部`, which lists every live room: the
+  /// recommendations, not an area (upgrade 10-2).
+  static const int allFilterId = 0;
+
   /// The live page of author [authorId] (3.x's `link`).
   static String roomPageUrl(String authorId) => '$_live/live/${authorId.trim()}';
 
@@ -182,12 +194,23 @@ abstract final class AcfunApi {
     {'filterType': type, 'filterId': id},
   ]);
 
+  /// When a broadcast started, from `createTime` or `liveStartTime` (epoch
+  /// milliseconds); null for 0, negatives, values that are not milliseconds
+  /// (before 2001 or after 2286, such as a time in seconds) and anything
+  /// that is not an integer.
+  static DateTime? startedAt(Object? value) => switch (jsonInt(value)) {
+    final int milliseconds when milliseconds >= 1000000000000 && milliseconds < 10000000000000 =>
+      DateTime.fromMillisecondsSinceEpoch(milliseconds, isUtc: true),
+    _ => null,
+  };
+
   // Catalog -------------------------------------------------------------------
 
-  /// `api/channel/list` (`count=1`): the areas of `channelFilters`, `全部`
-  /// (filter 0) included as 3.x listed it, in answer order, one per
-  /// (type, id). [typeName] is the parent category's name (3.x used the
-  /// site's display name). The list answer must be a success like any page.
+  /// `api/channel/list` (`count=1`): the areas of `channelFilters` in answer
+  /// order, one per (type, id). `全部` ([allFilterId]) lists the same rooms
+  /// as the recommendations and is left out (upgrade 10-2; 3.x listed it).
+  /// [typeName] is the parent category's name (3.x used the site's display
+  /// name). The list answer must be a success like any page.
   static List<LiveArea> areas(String body, {required String typeName, int status = 200}) {
     final root = _root(body, status: status, what: 'channel/list');
     _listData(root);
@@ -205,7 +228,7 @@ abstract final class AcfunApi {
         final type = jsonCount(filter['filterType']);
         final id = jsonCount(filter['filterId']);
         final name = _text(filter['name']);
-        if (type == null || id == null || name.isEmpty || !seen.add('$type:$id')) continue;
+        if (type == null || id == null || id == allFilterId || name.isEmpty || !seen.add('$type:$id')) continue;
         areas.add(
           LiveArea(
             platform: _site,
@@ -259,7 +282,9 @@ abstract final class AcfunApi {
   }
 
   /// A room card or detail (3.x's `parseRoom`): the online count as
-  /// concurrent viewers, the followers as the site writes them.
+  /// concurrent viewers, the followers as the site writes them. A live
+  /// room also has its start (`createTime`, upgrade 10-3) and restriction
+  /// ([_restriction]); an offline one neither.
   static LiveRoom _room(Map<String, dynamic> item, String authorId) {
     final user = _object(item['user']) ?? const <String, dynamic>{};
     final covers = item['coverUrls'];
@@ -282,7 +307,23 @@ abstract final class AcfunApi {
       audienceMetricType: AudienceMetricType.onlineViewers,
       followers: _text(user['fanCountValue']),
       liveStatus: live ? LiveStatus.live : LiveStatus.offline,
+      startedAt: live ? startedAt(item['createTime']) : null,
+      restriction: live ? _restriction(item) : null,
     );
+  }
+
+  /// A live room's restriction, read from the fields the web player reads
+  /// (`live/info` is its `liveInfo`; list cards have the same shape): a paid
+  /// show (`paidShowUuid`, the show a ticket is bought for) is
+  /// [LiveRestriction.paid] unless the viewer bought it
+  /// (`paidShowUserBuyStatus`, never true for the anonymous visitor). An
+  /// answer with the paid-show fields and no show has no restriction; one
+  /// without them says nothing (null).
+  static LiveRestriction? _restriction(Map<String, dynamic> item) {
+    if (_text(item['paidShowUuid']).isNotEmpty) {
+      return item['paidShowUserBuyStatus'] == true ? LiveRestriction.none : LiveRestriction.paid;
+    }
+    return item.containsKey('paidShowUserBuyStatus') ? LiveRestriction.none : null;
   }
 
   /// Whether [item] is the room of [authorId]: the echoed `authorId` and
@@ -310,11 +351,13 @@ abstract final class AcfunApi {
   }
 
   /// `startPlay`: the broadcast, its qualities and the danmaku tickets.
-  /// `result` 1 is live; [closedResult] (the broadcast ended) is
-  /// `StreamUnavailable`; any other `RiskControl` (the session was refused;
-  /// the caller retries once with a new one). [issuedAt] is when the answer
-  /// arrived.
-  static ({AcfunRoomData data, List<String> tickets, String enterRoomAttach}) startPlay(
+  /// `result` 1 is live, with no restriction; [paidShowResult] (a paid
+  /// show without a ticket) is live but restricted: no broadcast data,
+  /// [LiveRestriction.paid] (3.x: a failed room). [closedResult] (the
+  /// broadcast ended) is `StreamUnavailable`; any other `RiskControl` (the
+  /// session was refused; the caller retries once with a new one).
+  /// [issuedAt] is when the answer arrived.
+  static ({AcfunRoomData? data, LiveRestriction restriction, List<String> tickets, String enterRoomAttach}) startPlay(
     String body, {
     required DateTime issuedAt,
     int status = 200,
@@ -323,13 +366,22 @@ abstract final class AcfunApi {
     final result = jsonInt(root['result']);
     if (result == null) throw ApiChanged(_site, 'startPlay: no result (${_snippet(body)})');
     if (result == closedResult) throw StreamUnavailable(_site, 'startPlay: ${_text(root['error_msg'])} ($result)');
+    if (result == paidShowResult) {
+      return (data: null, restriction: LiveRestriction.paid, tickets: const [], enterRoomAttach: '');
+    }
     if (result != 1) throw RiskControl(_site, detail: 'startPlay: result $result ${_text(root['error_msg'])}');
     final data = _object(root['data']);
     final liveId = _text(data?['liveId']);
     if (data == null || liveId.isEmpty) throw ApiChanged(_site, 'startPlay: no liveId (${_snippet(body)})');
     final tickets = data['availableTickets'];
     return (
-      data: AcfunRoomData(liveId: liveId, qualities: qualities(data['videoPlayRes']), issuedAt: issuedAt),
+      data: AcfunRoomData(
+        liveId: liveId,
+        qualities: qualities(data['videoPlayRes']),
+        issuedAt: issuedAt,
+        startedAt: startedAt(data['liveStartTime']),
+      ),
+      restriction: LiveRestriction.none,
       tickets: [for (final ticket in tickets is List ? tickets : const []) ?jsonString(ticket)],
       enterRoomAttach: _text(data['enterRoomAttach']),
     );

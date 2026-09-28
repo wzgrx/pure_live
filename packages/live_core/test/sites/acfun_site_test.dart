@@ -30,6 +30,9 @@ const _live = [
 
 Map<String, dynamic> _legacy(String name) => Fixture.load('acfun', name).legacy as Map<String, dynamic>;
 
+/// 3.x's recommendation request (S01-list-all: 30 rooms, no filter).
+Uri _recommendationUrl() => Uri.parse(((_legacy('S01-list-all')['requests'] as List).single as Map)['url'] as String);
+
 /// 3.x's headers of a request it made, names in lower case (Dio's own
 /// content type left out).
 Map<String, String> _headers(Map<String, dynamic> request) => {
@@ -78,18 +81,20 @@ final class _Scripted implements LiveHttp {
   List<String> get paths => [for (final request in requests) request.url.path];
 }
 
-/// A `channel/list` answer with one room of [id] and cursor [next].
-Map<String, Object?> _list(String next, {int id = 42}) => {
+/// A `channel/list` answer with one room of [id] (or the rooms of [ids])
+/// and cursor [next].
+Map<String, Object?> _list(String next, {int id = 42, List<int>? ids}) => {
   'channelListData': {
     'result': 0,
     'pcursor': next,
     'liveList': [
-      {
-        'authorId': id,
-        'user': {'id': '$id', 'name': 'Fixture $id'},
-        'liveId': 'live-$id',
-        'onlineCount': 99,
-      },
+      for (final id in ids ?? [id])
+        {
+          'authorId': id,
+          'user': {'id': '$id', 'name': 'Fixture $id'},
+          'liveId': 'live-$id',
+          'onlineCount': 99,
+        },
     ],
   },
   'channelFilters': {
@@ -166,10 +171,12 @@ void main() {
       final legacy = _legacy('S01-list-filters');
       final category = categories.single;
       expect((category.id, category.name), ('acfun', 'AcFun 直播'));
+      // changed: 10-2 leaves out 全部 (filter 0).
       expect(category.children.map((area) => area.areaId), [
         for (final area in ((legacy['getCategores'] as List).single as Map)['children'] as List)
-          (area as Map)['areaId'],
+          if ((area as Map)['areaId'] != '0') area['areaId'],
       ]);
+      expect(category.children.map((area) => area.areaName), isNot(contains('全部')));
       final request = (legacy['requests'] as List).single as Map<String, dynamic>;
       expect(setup.http.requests.single.url, Uri.parse(request['url'] as String));
       expect(setup.http.requests.single.headers, _headers(request));
@@ -246,8 +253,9 @@ void main() {
       var firstReads = 0;
       final http = _Scripted((request) {
         final cursor = request.url.queryParameters['pcursor']!;
-        if (cursor.isEmpty) return _list(++firstReads == 1 ? 'old-2' : 'new-2');
-        return _list(cursor.startsWith('new-') ? 'new-${int.parse(cursor.substring(4)) + 1}' : 'old-3');
+        if (cursor.isEmpty) return _list(++firstReads == 1 ? 'old-2' : 'new-2', id: 1);
+        final page = int.parse(cursor.substring(4));
+        return _list(cursor.startsWith('new-') ? 'new-${page + 1}' : 'old-3', id: page);
       });
       final site = AcfunSite(http);
       await site.getRecommendRooms();
@@ -265,6 +273,136 @@ void main() {
       final site = AcfunSite(_Scripted((_) => _list('same')));
       await site.getRecommendRooms();
       await expectLater(site.getRecommendRooms(page: 2), throwsA(isA<ApiChanged>()));
+    });
+
+    test('a stored 全部 area is the recommendations: no filter, the same listing (10-2)', () async {
+      final http = _Scripted((_) => _list('no_more'));
+      final site = AcfunSite(http);
+      const all = LiveArea(platform: 'acfun', areaType: '1', typeName: 'AcFun 直播', areaId: '0', areaName: '全部');
+      expect((await site.getCategoryRooms(all)).single.roomId, '42');
+      expect(http.requests.single.url.queryParameters.containsKey('filters'), isFalse);
+      expect(http.requests.single.url, _recommendationUrl());
+      expect(await site.getRecommendRooms(page: 2), isEmpty, reason: 'the listing 全部 read');
+      expect(http.requests, hasLength(1));
+    });
+
+    test('pages after the first leave out rooms listed since page 1 was read; a re-read page is the same', () async {
+      final http = _Scripted((request) {
+        final cursor = request.url.queryParameters['pcursor']!;
+        return switch (cursor) {
+          '' => _list('p2', ids: [1, 2, 3]),
+          'p2' => _list('p3', ids: [3, 4, 4, 1, 5]),
+          _ => _list('no_more', ids: [5, 6]),
+        };
+      });
+      final site = AcfunSite(http);
+      Future<List<String>> ids(int page) async => [
+        for (final room in await site.getRecommendRooms(page: page, pageSize: 3)) room.roomId,
+      ];
+      expect(await ids(1), ['1', '2', '3']);
+      expect(await ids(2), ['4', '5']);
+      expect(await ids(3), ['6']);
+      expect(await ids(2), ['4', '5'], reason: 'the same answer read again');
+      expect(await ids(1), ['1', '2', '3'], reason: 'page 1 starts over');
+      expect(http.requests, hasLength(5), reason: 'no more requests than before');
+    });
+  });
+
+  group('cursor directory (10-5)', () {
+    test('page 1 without a cursor, the next by the opaque cursor, 30 rooms a page, one request each', () async {
+      final http = _Scripted((request) {
+        final cursor = request.url.queryParameters['pcursor']!;
+        return cursor.isEmpty ? _list('opaque-2', id: 1) : _list('no_more', id: 2);
+      });
+      final site = AcfunSite(http);
+      final first = await site.getDirectoryPageAtCursor(page: 1);
+      expect((first.rooms.single.roomId, first.page, first.hasMore, first.nextCursor), ('1', 1, true, 'opaque-2'));
+      final second = await site.getDirectoryPageAtCursor(page: 2, cursor: first.nextCursor);
+      expect((second.rooms.single.roomId, second.page, second.hasMore, second.nextCursor), ('2', 2, false, null));
+      expect([for (final request in http.requests) request.url.queryParameters['pcursor']], ['', 'opaque-2']);
+      expect([for (final request in http.requests) request.url.queryParameters['count']], ['30', '30']);
+      expect(http.requests.first.url, _recommendationUrl());
+      expect(http.requests.first.headers, AcfunApi.apiHeaders);
+    });
+
+    test("an area sends its filter, 全部 none; another platform's area is NotFound; the token is forwarded", () async {
+      final http = _Scripted((_) => _list('no_more'));
+      final site = AcfunSite(http);
+      final cancel = CancelToken();
+      const game = LiveArea(platform: 'acfun', areaType: '1', areaId: '1', areaName: '游戏');
+      await site.getDirectoryPageAtCursor(page: 1, category: game, cancel: cancel);
+      expect(jsonDecode(http.requests.last.url.queryParameters['filters']!), [
+        {'filterType': 1, 'filterId': 1},
+      ]);
+      expect(http.requests.last.cancel, same(cancel));
+      await site.getDirectoryPageAtCursor(
+        page: 1,
+        category: const LiveArea(platform: 'acfun', areaType: '1', areaId: '0'),
+      );
+      expect(http.requests.last.url.queryParameters.containsKey('filters'), isFalse);
+      await expectLater(
+        site.getDirectoryPageAtCursor(
+          page: 1,
+          category: const LiveArea(platform: 'huya', areaType: '1', areaId: '1'),
+        ),
+        throwsA(isA<NotFound>()),
+      );
+      expect(http.requests, hasLength(2));
+    });
+
+    test('a page and its cursor must agree; a cursor that leads to itself is ApiChanged', () async {
+      final http = _Scripted((_) => _list('same'));
+      final site = AcfunSite(http);
+      expect(() => site.getDirectoryPageAtCursor(page: 1, cursor: 'x'), throwsArgumentError);
+      expect(() => site.getDirectoryPageAtCursor(page: 2), throwsArgumentError);
+      expect(() => site.getDirectoryPageAtCursor(page: 0), throwsRangeError);
+      expect(http.requests, isEmpty);
+      await expectLater(site.getDirectoryPageAtCursor(page: 2, cursor: 'same'), throwsA(isA<ApiChanged>()));
+    });
+
+    test('by page number: the listing chain, with whether more follow and the next cursor', () async {
+      final http = _Scripted((request) {
+        final cursor = request.url.queryParameters['pcursor']!;
+        return cursor.isEmpty ? _list('opaque-2', id: 1) : _list('no_more', id: 2);
+      });
+      final site = AcfunSite(http);
+      final first = await site.getDirectoryPage();
+      expect((first.rooms.single.roomId, first.hasMore, first.nextCursor), ('1', true, 'opaque-2'));
+      final second = await site.getDirectoryPage(page: 2);
+      expect((second.rooms.single.roomId, second.hasMore, second.nextCursor), ('2', false, null));
+      final after = await site.getDirectoryPage(page: 3);
+      expect(after.rooms, isEmpty);
+      expect(after.hasMore, isFalse);
+      expect(http.requests, hasLength(2));
+      // The recommendations at the same page size share the chain: page 2
+      // is read again by its cursor, page 1 is not.
+      expect((await site.getRecommendRooms(page: 2)).single.roomId, '2');
+      expect(
+        [for (final request in http.requests) request.url.queryParameters['pcursor']],
+        ['', 'opaque-2', 'opaque-2'],
+      );
+    });
+
+    test('by page number, a cancelled wait fails; the shared read goes on', () async {
+      final gate = Completer<Object>();
+      final http = _Scripted((_) => gate.future);
+      final site = AcfunSite(http);
+      final cancel = CancelToken();
+      final waiting = site.getDirectoryPage(cancel: cancel);
+      final other = site.getRecommendRooms();
+      cancel.cancel();
+      await expectLater(
+        waiting,
+        throwsA(isA<TransportFailure>().having((failure) => failure.reason, 'reason', TransportReason.cancelled)),
+      );
+      gate.complete(_list('no_more'));
+      expect((await other).single.roomId, '42');
+      expect(http.requests, hasLength(1));
+      await expectLater(
+        site.getDirectoryPage(cancel: cancel),
+        throwsA(isA<TransportFailure>().having((failure) => failure.reason, 'reason', TransportReason.cancelled)),
+      );
+      expect(http.requests, hasLength(1));
     });
   });
 
@@ -514,6 +652,111 @@ void main() {
       });
       await expectLater(AcfunSite(http).getRoomDetail(roomId: '42'), throwsA(isA<StreamUnavailable>()));
     });
+
+    test('S05: refresh and entry start at createTime (10-3) without another request; neither is restricted', () async {
+      final setup = _setup(_live);
+      final start = DateTime.utc(2026, 9, 27, 14, 37, 35, 941);
+      final refreshed = await setup.site.getRoomDetailForRefresh(roomId: '40740702');
+      expect((refreshed.startedAt, refreshed.restriction), (start, LiveRestriction.none));
+      expect(setup.http.requests, hasLength(1));
+      final entered = await setup.site.getRoomDetail(roomId: '40740702');
+      expect((entered.startedAt, entered.restriction), (start, LiveRestriction.none));
+      final offline = await setup.site.getRoomDetailForRefresh(roomId: '1');
+      expect((offline.startedAt, offline.restriction), (null, null));
+      expect(setup.http.requests, hasLength(5), reason: '3.x: one, then three, then one');
+    });
+
+    test("entry takes startPlay's liveStartTime when live/info has no createTime", () async {
+      final http = _Scripted((request) {
+        if (request.url.path == '/api/live/info') return _info();
+        if (request.url.path.endsWith('/visitor/login')) return _visitorAnswer;
+        return {
+          ..._play('a'),
+          'data': {...(_play('a')['data']! as Map<String, Object?>), 'liveStartTime': 1790519855941},
+        };
+      });
+      final room = await AcfunSite(http).getRoomDetail(roomId: '42');
+      expect(room.startedAt, DateTime.utc(2026, 9, 27, 14, 37, 35, 941));
+    });
+  });
+
+  group('paid shows (M2.1 restrictions)', () {
+    /// A live paid show: live/info with [uuid], startPlay 380205.
+    _Scripted paidShow({String? uuid = 'show-a'}) => _Scripted((request) {
+      if (request.url.path == '/api/live/info') {
+        return {..._info(), 'paidShowUuid': ?uuid, 'paidShowUserBuyStatus': false};
+      }
+      if (request.url.path.endsWith('/visitor/login')) return _visitorAnswer;
+      return {'result': AcfunApi.paidShowResult, 'error_msg': 'not paid'};
+    });
+
+    final notPlayable = throwsA(
+      isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('restricted room (paid)')),
+    );
+
+    test('entry: live and paid, no broadcast or danmaku; streams fail naming it without a request', () async {
+      final http = paidShow();
+      final site = AcfunSite(http);
+      final room = await site.getRoomDetail(roomId: '42');
+      expect((room.isLiveNow, room.restriction, room.data, room.danmakuData), (true, LiveRestriction.paid, null, null));
+      expect(room.followGroup, FollowGroup.live);
+      expect(http.paths.map((path) => path.split('/').last), ['info', 'login', 'startPlay'], reason: 'no new session');
+      await expectLater(site.getPlayQualities(detail: room), notPlayable);
+      await expectLater(
+        site.resolvePlayUrls(
+          detail: room,
+          quality: const LivePlayQuality(quality: '超清', id: 'HIGH'),
+        ),
+        notPlayable,
+      );
+      expect(http.requests, hasLength(3));
+      final recording = await site.getRoomDetailForRecording(roomId: '42');
+      expect((recording.isLiveNow, recording.restriction), (true, LiveRestriction.paid));
+    });
+
+    test('refresh marks the paid show from live/info alone (3.x: live, unmarked)', () async {
+      final http = paidShow();
+      final room = await AcfunSite(http).getRoomDetailForRefresh(roomId: '42');
+      expect((room.isLiveNow, room.restriction), (true, LiveRestriction.paid));
+      expect(http.requests, hasLength(1));
+    });
+
+    test('startPlay decides: 380205 without paidShowUuid is paid too; a playing show is not restricted', () async {
+      final room = await AcfunSite(paidShow(uuid: null)).getRoomDetail(roomId: '42');
+      expect(room.restriction, LiveRestriction.paid);
+      final playing = _Scripted((request) {
+        if (request.url.path == '/api/live/info') return {..._info(), 'paidShowUuid': 'show-a'};
+        if (request.url.path.endsWith('/visitor/login')) return _visitorAnswer;
+        return _play('a');
+      });
+      final bought = await AcfunSite(playing).getRoomDetail(roomId: '42');
+      expect(bought.restriction, LiveRestriction.none);
+      expect(bought.data, isA<AcfunRoomData>());
+    });
+
+    test('a paid card fails without a request; an unmarked card, recovery and danmaku fail after startPlay', () async {
+      final http = paidShow();
+      final site = AcfunSite(http);
+      final paidCard = LiveRoom(
+        platform: 'acfun',
+        roomId: '42',
+        liveStatus: LiveStatus.live,
+        restriction: LiveRestriction.paid,
+      );
+      await expectLater(site.getPlayQualities(detail: paidCard), notPlayable);
+      expect(http.requests, isEmpty);
+      final card = LiveRoom(platform: 'acfun', roomId: '42', liveStatus: LiveStatus.live);
+      await expectLater(site.getPlayQualities(detail: card), notPlayable);
+      await expectLater(
+        site.resolvePlayUrlsForRecovery(
+          detail: paidCard,
+          quality: const LivePlayQuality(quality: '超清', id: 'HIGH'),
+        ),
+        notPlayable,
+      );
+      await expectLater(site.danmakuArgs('42'), notPlayable);
+      expect(http.paths.where((path) => path.endsWith('/startPlay')), hasLength(3));
+    });
   });
 
   group('visitor session', () {
@@ -710,7 +953,6 @@ void main() {
       expect(site.roomIdFromUrl('http://live.acfun.cn/live/40740702'), '40740702');
       expect(site.roomIdFromUrl('https://m.acfun.cn/live/detail/40740702'), '40740702');
       for (final url in [
-        'https://www.acfun.cn/u/42',
         'https://www.acfun.cn/v/ac42',
         'https://live.acfun.cn/live/0',
         'https://live.acfun.cn/live/042',
@@ -725,6 +967,36 @@ void main() {
         expect(site.roomIdFromUrl(url), isNull, reason: url);
       }
       expect(site.needsResolving('https://live.acfun.cn/live/42'), isFalse);
+    });
+
+    test("profile pages are the author's room (10-1; 3.x did not take them)", () async {
+      final site = AcfunSite(ReplayHttp([]));
+      for (final url in [
+        'https://www.acfun.cn/u/40740702',
+        'https://acfun.cn/u/40740702?tab=video',
+        'http://www.acfun.cn/u/40740702.aspx',
+        'https://m.acfun.cn/upPage/40740702?shareUid=1',
+        'https://WWW.ACFUN.CN/u/40740702/',
+      ]) {
+        expect(site.roomIdFromUrl(url), '40740702', reason: url);
+      }
+      for (final url in [
+        'https://www.acfun.cn/u/0',
+        'https://www.acfun.cn/u/042',
+        'https://www.acfun.cn/u/42/extra',
+        'https://www.acfun.cn/u/.aspx',
+        'https://www.acfun.cn/u/42.html',
+        'https://m.acfun.cn/u/42',
+        'https://live.acfun.cn/u/42',
+        'https://www.acfun.cn.evil.example/u/42',
+        'https://m.acfun.cn/upPage/abc',
+      ]) {
+        expect(site.roomIdFromUrl(url), isNull, reason: url);
+      }
+      final http = ReplayHttp([]);
+      final parser = LinkParser(SiteRegistry({'acfun': () => AcfunSite(http)}), http);
+      expect(await parser.parse('关注这个UP主 https://www.acfun.cn/u/40740702'), const RoomLink('acfun', '40740702'));
+      expect(http.requests, isEmpty);
     });
 
     test('a share text is parsed without a request (3.x)', () async {

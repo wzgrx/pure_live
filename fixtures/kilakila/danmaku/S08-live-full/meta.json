@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "platform": "kilakila",
+  "case": "S08-live-full",
+  "room": "kilakila:2755394408455",
+  "danmakuKeys": {
+    "roomId": "2269142054376308832"
+  },
+  "capturedAt": "2026-09-28T21:05:23.445094Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://wim.hongrenshuo.com.cn/socket.io/?roomId=2269142054376308832&appId=111&clientType=1&EIO=3&transport=websocket",
+      "headers": {
+        "origin": "https://live.kilakila.cn",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "status": 101
+    }
+  ],
+  "frames": 74,
+  "raw": {
+    "sha256": "8c21f7a72f92b2bb65f2160fc18c911edd62e7ed2f59e1cd84769318d7ba478f",
+    "length": 159388
+  },
+  "scrubbed": [
+    {
+      "where": "engine.io open (0{…}).sid",
+      "rule": "session"
+    },
+    {
+      "where": "$.body.response.sender_info.uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.body.response.user_agent (uxid=)",
+      "rule": "device"
+    },
+    {
+      "where": "$.content.u",
+      "rule": "person"
+    },
+    {
+      "where": "$.content.n",
+      "rule": "person"
+    },
+    {
+      "where": "$.content.a",
+      "rule": "person"
+    },
+    {
+      "where": "$.content.s",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M5.13 recorder (a raw WebSocket client in Python; sends only the guest namespace join and the Engine.IO ping 2 every 25 s, as the site's socket.io-client 2 does)",
+  "note": "Direct, 150 s, the hottest broadcast of the hot timeline (about 315 listeners). Unlike S07-live, every content is kept whole: the room state 637 (every ~5 s, URL-encoded JSON with watchNumber), 636, entries 101/603, leaves 102, likes 210/211 and 7 chat lines. Viewers' uids, names and avatar paths became same-shape synthetic values (one person keeps one set of values across frames; the system sender 111111 and the anchor 2755394408455 are kept); the per-message hash s and the device id uxid in the sender's client string became synthetic hex of the same length; the Engine.IO session id became a synthetic one of the same form. Each level was decoded and re-encoded as the server writes it (event: characters outside the BMP as surrogate escapes; content: slashes escaped), so everything else is byte for byte the recording. Control frames are not recorded (the server sent none)."
+}

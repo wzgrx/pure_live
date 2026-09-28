@@ -1,0 +1,510 @@
+{
+  "generator": "fixtures/kilakila/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) KilakilaProtocol.endpoint, .headers, .join, .ping and .decode over every incoming frame (copied as they were; the event classes cut down to their fields), with the socket settings of KilakilaConnector",
+  "value": {
+    "roomId": "2269142054376308832",
+    "connector": {
+      "endpoints": [
+        "wss://wim.hongrenshuo.com.cn/socket.io/?roomId=2269142054376308832&appId=111&clientType=1&EIO=3&transport=websocket"
+      ],
+      "headers": {
+        "origin": "https://live.kilakila.cn",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "openFrames": [
+        "40/live_chat_room_guest?roomId=2269142054376308832&appId=111&clientType=1,"
+      ],
+      "joinedOnOpen": false,
+      "heartbeatSeconds": 25,
+      "heartbeatOnJoin": false,
+      "heartbeat": "2",
+      "authTimeoutSeconds": 8,
+      "silenceTimeoutSeconds": 90,
+      "maxRejections": 3,
+      "connectTimeoutSeconds": 10,
+      "withoutRoom": {
+        "terminal": "credentials",
+        "detail": "no current broadcast"
+      }
+    },
+    "frames": [
+      {
+        "frame": 1,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 2,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 3,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 4,
+        "joined": true,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 5,
+        "joined": true,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 6,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "kilakila:1047028601860070400",
+            "sentAt": 1790629525534,
+            "userId": "9808547595636",
+            "userName": "观众1友友友友友友友友友",
+            "text": "心存善良，万物晴朗☀",
+            "userLevel": 161
+          }
+        ]
+      },
+      {
+        "frame": 7,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "kilakila:1047028608579344384",
+            "sentAt": 1790629527136,
+            "userId": "9808547595636",
+            "userName": "观众1友友友友友友友友友",
+            "text": "打扰了",
+            "userLevel": 161
+          }
+        ]
+      },
+      {
+        "frame": 8,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 9,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "kilakila:1047028613302130688",
+            "sentAt": 1790629528262,
+            "userId": "9808547595636",
+            "userName": "观众1友友友友友友友友友",
+            "text": "绝美声线",
+            "userLevel": 161
+          }
+        ]
+      },
+      {
+        "frame": 10,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "kilakila:1047028618020722688",
+            "sentAt": 1790629529387,
+            "userId": "9808547595636",
+            "userName": "观众1友友友友友友友友友",
+            "text": "是神仙在唱歌",
+            "userLevel": 161
+          }
+        ]
+      },
+      {
+        "frame": 11,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "kilakila:1047028622454102016",
+            "sentAt": 1790629530444,
+            "userId": "9808547595636",
+            "userName": "观众1友友友友友友友友友",
+            "text": "好家伙！",
+            "userLevel": 161
+          }
+        ]
+      },
+      {
+        "frame": 12,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "kilakila:1047028627474684928",
+            "sentAt": 1790629531641,
+            "userId": "9808547595636",
+            "userName": "观众1友友友友友友友友友",
+            "text": "哈哈哈哈哈",
+            "userLevel": 161
+          }
+        ]
+      },
+      {
+        "frame": 13,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 14,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "kilakila:1047028633229270016",
+            "sentAt": 1790629533013,
+            "userId": "9808547595636",
+            "userName": "观众1友友友友友友友友友",
+            "text": "（づ￣3￣）づ╭❤～比心心",
+            "userLevel": 161
+          }
+        ]
+      },
+      {
+        "frame": 15,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 16,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 17,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 18,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 19,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 20,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 22,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 23,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 24,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 25,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 26,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 27,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 28,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 29,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 30,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 32,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 33,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 34,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 35,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 36,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 37,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 38,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 39,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 40,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 41,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 42,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 43,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 45,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 46,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 47,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 48,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 49,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 50,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 51,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 52,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 53,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 54,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 55,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 57,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 58,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 59,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 60,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 61,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 62,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 63,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 64,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 66,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 67,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 68,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 69,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 70,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 71,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 72,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 73,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      }
+    ]
+  }
+}

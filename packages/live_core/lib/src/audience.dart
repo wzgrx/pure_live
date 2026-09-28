@@ -265,7 +265,9 @@ const Map<String, AudiencePlatformCapability> audienceCapabilities = {
   ),
   // KilaKila's anchor profile (follow refresh and room entry) has the
   // broadcast's current onlineNumber; the timelines and getRoomInfo have only
-  // watchNumber, its cumulative listeners (REG-KILAKILA-003, M4.U 15-2).
+  // watchNumber, its cumulative listeners (REG-KILAKILA-003, M4.U 15-2). In
+  // the room, the guest chat's room state (637) pushes the listeners now
+  // about every 5 s, the number the live page shows (M5.13).
   'kilakila': AudiencePlatformCapability(
     hasPopularity: false,
     hasTotalViewers: true,

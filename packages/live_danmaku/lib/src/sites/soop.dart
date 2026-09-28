@@ -6,7 +6,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/src/binary.dart';
 import 'package:live_danmaku/src/connection.dart';
 import 'package:live_danmaku/src/connection_base.dart';
-import 'package:live_danmaku/src/sites/soop/chat_socket.dart';
+import 'package:live_danmaku/src/exact_websocket.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:live_net/live_net.dart';
 
@@ -122,7 +122,7 @@ abstract final class SoopDanmakuProtocol {
 
 /// SOOP's danmaku connection (3.x `SoopDanmaku`): a WebSocket with the
 /// `chat` subprotocol and the room's handshake headers, opened by a
-/// connector that keeps the header spelling ([connectSoopChatSocket]). An
+/// connector that keeps the header spelling ([connectExactWebSocket]). An
 /// open socket counts as joined; the login packet follows at once, the join
 /// packet 200 ms later, a keep-alive every 20 s, and a socket silent for
 /// 90 s is replaced. The TLS port comes first, the plain port second.
@@ -137,7 +137,7 @@ final class SoopDanmakuConnection extends DanmakuSocketConnection<SoopDanmakuArg
     : super(
         site: SiteIds.soop,
         policy: socketPolicy,
-        connector: _withoutPlainCookie(connector ?? connectSoopChatSocket),
+        connector: _withoutPlainCookie(connector ?? connectExactWebSocket),
       );
 
   /// Socket timing: 3.x's `WebScoketUtils` defaults with a 20 s heartbeat,

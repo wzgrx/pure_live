@@ -74,6 +74,12 @@ final class ExactWebSocket implements SocketChannel {
     Iterable<String> protocols = const [],
     Map<String, String> headers = const {},
   }) {
+    for (final MapEntry(key: name, :value) in headers.entries) {
+      // A line break would let a caller's value inject header lines.
+      if ('$name$value'.contains(RegExp('[\r\n]'))) {
+        throw ArgumentError.value(name, 'headers', 'Holds a line break');
+      }
+    }
     final defaultPort = endpoint.scheme == 'wss' ? 443 : 80;
     final port = endpoint.hasPort ? endpoint.port : defaultPort;
     final host = port == defaultPort ? endpoint.host : '${endpoint.host}:$port';

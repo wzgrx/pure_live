@@ -5,7 +5,6 @@ import 'dart:typed_data';
 
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
-import 'package:live_danmaku/src/sites/soop/chat_socket.dart';
 import 'package:live_net/live_net.dart';
 import 'package:test/test.dart';
 
@@ -272,7 +271,7 @@ final class _ChatServer {
           socket.add(
             latin1.encode(
               'HTTP/1.1 101 Switching Protocols\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\n'
-              'Sec-WebSocket-Accept: ${SoopChatSocket.acceptKey(key)}\r\nSec-WebSocket-Protocol: chat\r\n\r\n',
+              'Sec-WebSocket-Accept: ${ExactWebSocket.acceptKey(key)}\r\nSec-WebSocket-Protocol: chat\r\n\r\n',
             ),
           );
         }
@@ -355,7 +354,7 @@ SocketConnector _local(_ChatServer server, List<Uri> endpoints, List<Map<String,
     (endpoint, {required headers, required protocols, required route, required connectTimeout}) {
       endpoints.add(endpoint);
       seen.add(headers);
-      return connectSoopChatSocket(
+      return connectExactWebSocket(
         Uri.parse('ws://127.0.0.1:${server.port}${endpoint.path}'),
         headers: headers,
         protocols: protocols,
@@ -487,196 +486,6 @@ void main() {
         expect(SoopDanmakuProtocol.decode(_serverFrame(testCase)).map(_project).toList(), expected[name]);
       });
     }
-  });
-
-  group('case-sensitive socket', () {
-    const nonce = 'dGhlIHNhbXBsZSBub25jZQ==';
-
-    test("the handshake is 3.x's: headers as spelled, controlled ones written by the socket", () {
-      final request = SoopChatSocket.handshake(
-        Uri.parse('wss://chat-6e0a4c63.sooplive.com:9001/Websocket/khm11903'),
-        nonce: nonce,
-        headers: const {
-          'Origin': 'https://play.sooplive.co.kr',
-          'connection': 'close',
-          'User-Agent': 'UA',
-          'HOST': 'x',
-        },
-        protocols: SoopDanmakuProtocol.protocols,
-      );
-      expect(
-        request,
-        'GET /Websocket/khm11903 HTTP/1.1\r\n'
-        'Host: chat-6e0a4c63.sooplive.com:9001\r\n'
-        'Origin: https://play.sooplive.co.kr\r\n'
-        'User-Agent: UA\r\n'
-        'Connection: Upgrade\r\n'
-        'Upgrade: websocket\r\n'
-        'Cache-Control: no-cache\r\n'
-        'Sec-WebSocket-Key: $nonce\r\n'
-        'Sec-WebSocket-Version: 13\r\n'
-        'Sec-WebSocket-Protocol: chat\r\n'
-        '\r\n',
-      );
-      expect(SoopChatSocket.handshake(Uri.parse('ws://h.example:80?a=1'), nonce: nonce).split('\r\n').take(2), [
-        'GET ?a=1 HTTP/1.1',
-        'Host: h.example',
-      ]);
-      expect(SoopChatSocket.handshake(Uri.parse('wss://h.example'), nonce: nonce).split('\r\n').take(2), [
-        'GET / HTTP/1.1',
-        'Host: h.example',
-      ]);
-      expect(
-        () => SoopChatSocket.handshake(Uri.parse('ws://h.example/'), nonce: nonce, headers: {'Cookie': 'a\r\nX: y'}),
-        throwsArgumentError,
-      );
-    });
-
-    test('checks the answer: 101, upgrade fields, accept key, subprotocol', () {
-      final accept = SoopChatSocket.acceptKey(nonce);
-      expect(accept, 's3pPLMBiTxaQ9kYGzzhZRbK+xOo=', reason: 'RFC 6455 §1.3');
-      String answer(List<String> lines) => ['HTTP/1.1 101 Switching Protocols', ...lines].join('\r\n');
-      final good = ['Upgrade: WebSocket', 'Connection: keep-alive, Upgrade', 'Sec-WebSocket-Accept: $accept'];
-      expect(SoopChatSocket.verify(answer(good), nonce: nonce), isNull);
-      expect(
-        SoopChatSocket.verify(answer([...good, 'Sec-WebSocket-Protocol: chat']), nonce: nonce, protocols: ['chat']),
-        'chat',
-      );
-      final bad = {
-        'status': 'HTTP/1.1 403 Forbidden\r\n${good.join('\r\n')}',
-        'status 1010': answer(good).replaceFirst('101', '1010'),
-        'no Connection': answer([good[0], good[2]]),
-        'no Upgrade': answer([good[1], good[2]]),
-        'wrong accept': answer([good[0], good[1], 'Sec-WebSocket-Accept: x']),
-        'repeated accept': answer([...good, 'Sec-WebSocket-Accept: $accept']),
-        'unrequested protocol': answer([...good, 'Sec-WebSocket-Protocol: chat']),
-      };
-      for (final MapEntry(:key, :value) in bad.entries) {
-        expect(() => SoopChatSocket.verify(value, nonce: nonce), throwsA(isA<WebSocketException>()), reason: key);
-      }
-    });
-
-    test('talks to a case-sensitive server: frames both ways, fragments, ping, close', () async {
-      final server = await _ChatServer.start();
-      server.onMessage = (server, socket, message) {
-        if (message == 'go') {
-          _ChatServer.send(socket, 2, [1, 2, 3]);
-          _ChatServer.send(socket, 1, utf8.encode('text'));
-          _ChatServer.send(socket, 1, utf8.encode('frag'), fin: false);
-          _ChatServer.send(socket, 9, [7]);
-          _ChatServer.send(socket, 0, List.filled(300, 0x61));
-          _ChatServer.send(socket, 2, List.filled(70000, 5));
-        }
-      };
-      final socket = await SoopChatSocket.connect(
-        Uri.parse('ws://127.0.0.1:${server.port}/Websocket/room'),
-        headers: const {'Origin': 'https://play.sooplive.co.kr'},
-        protocols: const ['chat'],
-      );
-      expect(socket.protocol, 'chat');
-      final messages = <Object?>[];
-      final done = Completer<void>();
-      socket.stream.listen(messages.add, onDone: done.complete);
-      socket
-        ..add('go')
-        ..add([9, 8]);
-      await _until(() => messages.length == 4);
-      expect(messages[0], [1, 2, 3]);
-      expect(messages[1], 'text');
-      expect(messages[2], 'frag${'a' * 300}');
-      expect(messages[3], List.filled(70000, 5));
-      await _until(() => server.received.length == 3);
-      expect(server.received.map((frame) => frame.opcode), [1, 2, 10]);
-      expect(server.received[1].payload, [9, 8]);
-      expect(server.received[2].payload, [7], reason: 'the pong echoes the ping');
-      await socket.close(1000, 'bye');
-      await done.future;
-      expect(server.received.last.opcode, 8);
-      expect(server.received.last.payload, [0x03, 0xe8, ...utf8.encode('bye')]);
-      expect(socket.closeCode, 1000, reason: "the server's close echoed ours");
-      expect(() => socket.add('late'), throwsStateError);
-    });
-
-    test("the peer's close frame ends the stream with its code and reason", () async {
-      final server = await _ChatServer.start();
-      server.onMessage = (server, socket, message) => _ChatServer.send(socket, 8, [0x0f, 0xa0, ...utf8.encode('idle')]);
-      final socket = await SoopChatSocket.connect(
-        Uri.parse('ws://127.0.0.1:${server.port}/'),
-        protocols: const ['chat'],
-      );
-      final done = Completer<void>();
-      socket.stream.listen(null, onDone: done.complete);
-      socket.add('hello');
-      await done.future;
-      expect(socket.closeCode, 4000);
-      expect(socket.closeReason, 'idle');
-      await _until(() => server.received.last.opcode == 8);
-      expect(server.received.last.payload, [0x0f, 0xa0, ...utf8.encode('idle')], reason: 'the close is echoed');
-    });
-
-    test('a protocol error (RSV bits) fails the stream', () async {
-      final server = await _ChatServer.start();
-      server.onMessage = (server, socket, message) => socket.add([0xc2, 0x00]);
-      final socket = await SoopChatSocket.connect(
-        Uri.parse('ws://127.0.0.1:${server.port}/'),
-        protocols: const ['chat'],
-      );
-      final errors = <Object>[];
-      final done = Completer<void>();
-      socket.stream.listen(null, onError: errors.add, onDone: done.complete);
-      socket.add('hello');
-      await done.future;
-      expect(errors.single, isA<WebSocketException>());
-    });
-
-    test("dart:io's lower-cased handshake stays pending where this one upgrades (REG-SOOP-001)", () async {
-      final server = await _ChatServer.start();
-      await expectLater(
-        connectIoSocket(
-          Uri.parse('ws://127.0.0.1:${server.port}/Websocket/room'),
-          headers: const {'Origin': 'https://play.sooplive.co.kr'},
-          protocols: const ['chat'],
-          route: const DirectRoute(),
-          connectTimeout: const Duration(milliseconds: 300),
-        ),
-        throwsA(isA<TimeoutException>()),
-      );
-      expect(server.requests.single, contains('\r\nsec-websocket-key: '));
-      final socket = await connectSoopChatSocket(
-        Uri.parse('ws://127.0.0.1:${server.port}/Websocket/room'),
-        headers: const {'Origin': 'https://play.sooplive.co.kr'},
-        protocols: const ['chat'],
-        route: const HttpProxyRoute('127.0.0.1', 9),
-        connectTimeout: const Duration(seconds: 5),
-      );
-      expect(server.requests, hasLength(2), reason: 'the proxy route is ignored, as in 3.x');
-      await socket.close();
-    });
-
-    test('a refused, cut or silent handshake fails within the connect timeout', () async {
-      final refused = await _ChatServer.start(reply: 'HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n');
-      await expectLater(
-        SoopChatSocket.connect(Uri.parse('ws://127.0.0.1:${refused.port}/')),
-        throwsA(isA<WebSocketException>().having((error) => error.message, 'message', contains('403'))),
-      );
-      final silent = await _ChatServer.start(upgrade: false);
-      final started = DateTime.now();
-      await expectLater(
-        SoopChatSocket.connect(
-          Uri.parse('ws://127.0.0.1:${silent.port}/'),
-          connectTimeout: const Duration(milliseconds: 200),
-        ),
-        throwsA(isA<TimeoutException>()),
-      );
-      expect(DateTime.now().difference(started), lessThan(const Duration(seconds: 2)));
-      await silent.closedSockets.single.future.timeout(const Duration(seconds: 2));
-      final cut = await _ChatServer.start(upgrade: false);
-      final closing = SoopChatSocket.connect(Uri.parse('ws://127.0.0.1:${cut.port}/'));
-      await _until(() => cut.sockets.isNotEmpty);
-      await cut.sockets.single.close();
-      await expectLater(closing, throwsA(isA<WebSocketException>()));
-      await expectLater(SoopChatSocket.connect(Uri.parse('https://h.example/')), throwsArgumentError);
-    });
   });
 
   group('connection', () {

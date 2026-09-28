@@ -231,6 +231,19 @@ void main() {
       );
     });
 
+    test('a header name or value with a line break is refused (3.x SOOP guard)', () {
+      for (final headers in [
+        {'Cookie': 'a\r\nX: y'},
+        {'X-Test': 'a\nb'},
+        {'Bad\rName': 'v'},
+      ]) {
+        expect(
+          () => ExactWebSocket.handshake(Uri.parse('ws://h.example/'), nonce: 'bm9uY2U=', headers: headers),
+          throwsArgumentError,
+        );
+      }
+    });
+
     test('the accept value of RFC 6455 and across SHA-1 block boundaries', () {
       expect(ExactWebSocket.acceptKey('dGhlIHNhbXBsZSBub25jZQ=='), 's3pPLMBiTxaQ9kYGzzhZRbK+xOo=');
       // Python's hashlib over nonce + GUID: 36, 55, 56, 63, 64, 119 and 120 bytes.

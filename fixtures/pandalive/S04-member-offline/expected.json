@@ -1,0 +1,227 @@
+{
+  "generator": "PandaLiveSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + searchRooms",
+  "value": {
+    "getRoomDetail": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/member/bj",
+          "form": {
+            "userId": "flffl369",
+            "info": "media fanGrade"
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/flffl369"
+        }
+      ],
+      "value": {
+        "roomId": "flffl369",
+        "userId": "28103135",
+        "title": "데이지ෆ님의 방송국",
+        "nick": "데이지ෆ",
+        "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_F0.jpg",
+        "cover": "",
+        "area": "",
+        "watching": "0",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "9",
+        "platform": "pandalive",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+        "introduction": "데이지ෆ님의 방송국에 어서오세요.",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.pandalive.co.kr",
+          "referer": "https://www.pandalive.co.kr/live/play/flffl369",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.pandalive.co.kr/live/play/flffl369"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/member/bj",
+          "form": {
+            "userId": "flffl369",
+            "info": "media fanGrade"
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/flffl369"
+        }
+      ],
+      "value": {
+        "roomId": "flffl369",
+        "userId": "28103135",
+        "title": "데이지ෆ님의 방송국",
+        "nick": "데이지ෆ",
+        "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_F0.jpg",
+        "cover": "",
+        "area": "",
+        "watching": "0",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "9",
+        "platform": "pandalive",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+        "introduction": "데이지ෆ님의 방송국에 어서오세요.",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.pandalive.co.kr",
+          "referer": "https://www.pandalive.co.kr/live/play/flffl369",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.pandalive.co.kr/live/play/flffl369"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/member/bj",
+          "form": {
+            "userId": "flffl369",
+            "info": "media fanGrade"
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/flffl369"
+        }
+      ],
+      "value": {
+        "roomId": "flffl369",
+        "userId": "28103135",
+        "title": "데이지ෆ님의 방송국",
+        "nick": "데이지ෆ",
+        "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_F0.jpg",
+        "cover": "",
+        "area": "",
+        "watching": "0",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "9",
+        "platform": "pandalive",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+        "introduction": "데이지ෆ님의 방송국에 어서오세요.",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.pandalive.co.kr",
+          "referer": "https://www.pandalive.co.kr/live/play/flffl369",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.pandalive.co.kr/live/play/flffl369"
+      }
+    },
+    "getLiveStatus": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/member/bj",
+          "form": {
+            "userId": "flffl369",
+            "info": "media fanGrade"
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/flffl369"
+        }
+      ],
+      "value": false
+    },
+    "getPlayQualites": {
+      "requests": [],
+      "value": []
+    },
+    "getPlayUrls": {},
+    "resolvePlayUrlsRaw": {},
+    "resolvePlayUrlsForRecoveryRaw": {},
+    "searchRooms": {
+      "flffl369": {
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://api.pandalive.co.kr/v1/member/bj",
+            "form": {
+              "userId": "flffl369",
+              "info": "media fanGrade"
+            },
+            "referer": "https://www.pandalive.co.kr/live/play/flffl369"
+          }
+        ],
+        "value": [
+          {
+            "roomId": "flffl369",
+            "userId": "28103135",
+            "title": "데이지ෆ님의 방송국",
+            "nick": "데이지ෆ",
+            "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_F0.jpg",
+            "cover": "",
+            "area": "",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "followers": "9",
+            "platform": "pandalive",
+            "liveStatus": 1,
+            "isRecord": false,
+            "status": false,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "introduction": "데이지ෆ님의 방송국에 어서오세요.",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/flffl369",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/flffl369"
+          }
+        ]
+      },
+      "https://www.pandalive.co.kr/channel/flffl369": {
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://api.pandalive.co.kr/v1/member/bj",
+            "form": {
+              "userId": "flffl369",
+              "info": "media fanGrade"
+            },
+            "referer": "https://www.pandalive.co.kr/live/play/flffl369"
+          }
+        ],
+        "value": [
+          {
+            "roomId": "flffl369",
+            "userId": "28103135",
+            "title": "데이지ෆ님의 방송국",
+            "nick": "데이지ෆ",
+            "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_F0.jpg",
+            "cover": "",
+            "area": "",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "followers": "9",
+            "platform": "pandalive",
+            "liveStatus": 1,
+            "isRecord": false,
+            "status": false,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "introduction": "데이지ෆ님의 방송국에 어서오세요.",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/flffl369",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/flffl369"
+          }
+        ]
+      }
+    }
+  }
+}

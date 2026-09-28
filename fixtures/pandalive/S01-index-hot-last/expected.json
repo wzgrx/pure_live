@@ -1,0 +1,233 @@
+{
+  "generator": "PandaLiveSite.getDirectoryPage(5)",
+  "value": {
+    "getDirectoryPage(5)": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/live/index",
+          "form": {
+            "offset": "120",
+            "limit": "30",
+            "orderBy": "hot"
+          },
+          "referer": "https://www.pandalive.co.kr/live"
+        }
+      ],
+      "value": {
+        "page": 5,
+        "hasMore": false,
+        "rooms": [
+          {
+            "roomId": "kimminsu93",
+            "userId": "kimminsu93",
+            "title": "로로의 슬기로운 홍보생활 루루/옥이/저시커/윤채윤 라이브맛집홍보 추천즐찾팬갑!!",
+            "nick": "루루ෆ로로RoRo",
+            "avatar": "https://cdn.pandalive.co.kr/upload/user/1e/1e3d8207-094f-44bb-bada-c8b3ddf8e9ae.jpeg",
+            "cover": "https://cdn.pandalive.co.kr/thumbnails/2026/9/26/B3Vtvgbx12UM_zJ0Fs6YHe7sv_23_47.jpg",
+            "area": "ind",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "5",
+            "followers": "868",
+            "platform": "pandalive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/kimminsu93",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/kimminsu93"
+          },
+          {
+            "roomId": "maskismask",
+            "userId": "maskismask",
+            "title": "24시 주식공부방)에이아이 음악수다방  [홍보]",
+            "nick": "zoosik공부",
+            "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_M1.jpg",
+            "cover": "https://cdn.pandalive.co.kr/thumbnails/2026/9/27/AQ8HbWkhLn4P_ENfJ6PYpzJLL_10_11.jpg",
+            "area": "ind",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "5",
+            "followers": "64",
+            "platform": "pandalive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/maskismask",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/maskismask"
+          },
+          {
+            "roomId": "skybluekiii",
+            "userId": "skybluekiii",
+            "title": "[홍보]BJ리브/채은/신세련/연아/저시커/지원/한은비/킹유라/비키/카나/고아윤/박도라",
+            "nick": "[BB2]앞다리",
+            "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_M0.jpg",
+            "cover": "https://cdn.pandalive.co.kr/thumbnails/2026/9/26/PnN8mto563YN_XgBhmRlQ72dr_18_46.jpg",
+            "area": "ind",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "4",
+            "followers": "180",
+            "platform": "pandalive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/skybluekiii",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/skybluekiii"
+          },
+          {
+            "roomId": "zero97",
+            "userId": "zero97",
+            "title": "(홍보) 미소 AM 11시~3시",
+            "nick": "미소❤️제로",
+            "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_M0.jpg",
+            "cover": "https://cdn.pandalive.co.kr/thumbnails/2026/9/27/XUgjx1fysSwJ_PR6eCxlP5FkI_17_27.jpg",
+            "area": "ind",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "4",
+            "followers": "13",
+            "platform": "pandalive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/zero97",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/zero97"
+          },
+          {
+            "roomId": "1687525114@ka",
+            "userId": "1687525114@ka",
+            "title": "홍보)9월 EVENT / 시그니처제작 /방송세팅 / 시그음악 제작 / ai대기화면 / 배너 / 전광판레졸룸 / 움짤/ 고퀄리티",
+            "nick": "제이미디어ღ",
+            "avatar": "https://cdn.pandalive.co.kr/upload/user/c1/c1f67d69-22c3-42ff-92a0-14b74147175a.png",
+            "cover": "https://cdn.pandalive.co.kr/thumbnails/2026/9/27/MHzDZnBRND8c_r0eM9BGJGcmI_9_31.jpg",
+            "area": "ind",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "6",
+            "followers": "74",
+            "platform": "pandalive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/1687525114@ka",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/1687525114@ka"
+          },
+          {
+            "roomId": "skaru7",
+            "userId": "skaru7",
+            "title": "[홍보] 김코치 고퀄리티 입장영상제작",
+            "nick": "김코치입장영상제작",
+            "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_M0.jpg",
+            "cover": "https://cdn.pandalive.co.kr/thumbnails/2026/9/27/lrpEA1Rpa32s_H428o30HZZkC_6_8.jpg",
+            "area": "talk",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "5",
+            "followers": "67",
+            "platform": "pandalive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/skaru7",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/skaru7"
+          },
+          {
+            "roomId": "sigclinic",
+            "userId": "sigclinic",
+            "title": "[홍보]시그니처 /배너/  당일제작가능",
+            "nick": "시그클리닉",
+            "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_F1.jpg",
+            "cover": "https://cdn.pandalive.co.kr/thumbnails/2026/9/27/WWWbXgQ76YTp_ggYmUZwf2nTq_14_57.jpg",
+            "area": "ind",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "5",
+            "followers": "1",
+            "platform": "pandalive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/sigclinic",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/sigclinic"
+          },
+          {
+            "roomId": "aria0310",
+            "userId": "aria0310",
+            "title": "홍보] 도지원/소정/아인/초월/여을/해로/감예봉/다우닝/원지/유은/킹더/노블/헤븐/순둥",
+            "nick": "__♡리나",
+            "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_M0.jpg",
+            "cover": "https://cdn.pandalive.co.kr/thumbnails/2026/9/27/oZp2NyhdGGvQ_Jkco4rUMTS19_8_41.jpg",
+            "area": "ind",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "4",
+            "followers": "35",
+            "platform": "pandalive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/aria0310",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/aria0310"
+          }
+        ]
+      }
+    }
+  }
+}

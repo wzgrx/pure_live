@@ -1,0 +1,80 @@
+{
+  "generator": "PandaLiveSite.getRoomDetail + getRoomDetailForRecording (member/bj: S04-member-live with this id) + PandaLiveApi._post(live/play)",
+  "value": {
+    "getRoomDetail": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/member/bj",
+          "form": {
+            "userId": "youngddo819",
+            "info": "media fanGrade"
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/youngddo819"
+        },
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/live/play",
+          "form": {
+            "action": "watch",
+            "userId": "youngddo819",
+            "password": "",
+            "shareLinkType": ""
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/youngddo819"
+        }
+      ],
+      "value": {
+        "throws": "PandaLiveException",
+        "message": "PandaTV schema"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/member/bj",
+          "form": {
+            "userId": "youngddo819",
+            "info": "media fanGrade"
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/youngddo819"
+        },
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/live/play",
+          "form": {
+            "action": "watch",
+            "userId": "youngddo819",
+            "password": "",
+            "shareLinkType": ""
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/youngddo819"
+        }
+      ],
+      "value": {
+        "throws": "PandaLiveException",
+        "message": "PandaTV schema"
+      }
+    },
+    "live/play": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/live/play",
+          "form": {
+            "action": "watch",
+            "userId": "youngddo819",
+            "password": "",
+            "shareLinkType": ""
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/youngddo819"
+        }
+      ],
+      "value": {
+        "throws": "PandaLiveException",
+        "message": "PandaTV schema"
+      }
+    }
+  }
+}

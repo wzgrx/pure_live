@@ -1,0 +1,80 @@
+{
+  "generator": "PandaLiveSite.getRoomDetail + getRoomDetailForRecording (member/bj: S04-member-live with this id) + PandaLiveApi._post(live/play)",
+  "value": {
+    "getRoomDetail": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/member/bj",
+          "form": {
+            "userId": "flffl369",
+            "info": "media fanGrade"
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/flffl369"
+        },
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/live/play",
+          "form": {
+            "action": "watch",
+            "userId": "flffl369",
+            "password": "",
+            "shareLinkType": ""
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/flffl369"
+        }
+      ],
+      "value": {
+        "throws": "PandaLiveException",
+        "message": "PandaTV schema"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/member/bj",
+          "form": {
+            "userId": "flffl369",
+            "info": "media fanGrade"
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/flffl369"
+        },
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/live/play",
+          "form": {
+            "action": "watch",
+            "userId": "flffl369",
+            "password": "",
+            "shareLinkType": ""
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/flffl369"
+        }
+      ],
+      "value": {
+        "throws": "PandaLiveException",
+        "message": "PandaTV schema"
+      }
+    },
+    "live/play": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/live/play",
+          "form": {
+            "action": "watch",
+            "userId": "flffl369",
+            "password": "",
+            "shareLinkType": ""
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/flffl369"
+        }
+      ],
+      "value": {
+        "throws": "PandaLiveException",
+        "message": "PandaTV schema"
+      }
+    }
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "generator": "TwitcastingSite.getCategores (pages 1 and 2)",
+  "value": {
+    "page1": [
+      {
+        "id": "twitcasting",
+        "name": "TwitCasting",
+        "children": [
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "_system_channel_popular",
+            "areaName": "Popular",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "_system_channel_4",
+            "areaName": "KawaVo",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "_system_channel_5",
+            "areaName": "Music",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "_system_channel_6",
+            "areaName": "Ikebo",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "_system_channel_8",
+            "areaName": "Girls",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "_system_channel_9",
+            "areaName": "Guys",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "_system_channel_12",
+            "areaName": "Game",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "_system_new",
+            "areaName": "Recent",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "_system_beginner",
+            "areaName": "Debut",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "_system_transcription",
+            "areaName": "With live captions",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "_system_call_engaged",
+            "areaName": "On Collabo",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "boys_healingvoice_jp",
+            "areaName": "Soothing Vo.",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "boys_goodvoice_jp",
+            "areaName": "Ikebo",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "girls_healingvoice_jp",
+            "areaName": "Soothing Vo.",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "girls_cutevoice_jp",
+            "areaName": "Kawabo",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "boys_talk_jp",
+            "areaName": "Guys atting",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "girls_talk_jp",
+            "areaName": "Girls atting",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "twitcasting",
+            "areaType": "directory",
+            "typeName": "TwitCasting",
+            "areaId": "_system_games_only",
+            "areaName": "Twitcast Games",
+            "areaPic": null,
+            "shortName": null
+          }
+        ]
+      }
+    ],
+    "page2": 0
+  }
+}

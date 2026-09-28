@@ -1,0 +1,93 @@
+{
+  "generator": "TwitcastingSite.getRoomDetail + getRoomDetailForRefresh + searchRooms(link) + getPlayQualites + getPlayUrls (with S05-stream-live)",
+  "value": {
+    "getRoomDetail": {
+      "roomId": "nabo66game",
+      "userId": "nabo66game",
+      "title": "Live #841525457",
+      "nick": "山本",
+      "avatar": "https://imagegw02.twitcasting.tv/image3s/pbs.twimg.com/profile_images/2037458169312718848/H4TTrLJg_bigger.jpg",
+      "cover": "http://imagegw03.twitcasting.tv/image3/image.twitcasting.tv/image159_1/d1/a8/3228a8d1-1.jpg",
+      "watching": "",
+      "audienceMetricType": "unknown",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "twitcasting",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "https://twitcasting.tv/nabo66game"
+    },
+    "getRoomDetailForRefresh": {
+      "roomId": "nabo66game",
+      "userId": "nabo66game",
+      "title": "Live #841525457",
+      "nick": "山本",
+      "avatar": "https://imagegw02.twitcasting.tv/image3s/pbs.twimg.com/profile_images/2037458169312718848/H4TTrLJg_bigger.jpg",
+      "cover": "http://imagegw03.twitcasting.tv/image3/image.twitcasting.tv/image159_1/d1/a8/3228a8d1-1.jpg",
+      "watching": "",
+      "audienceMetricType": "unknown",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "twitcasting",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "https://twitcasting.tv/nabo66game"
+    },
+    "searchRooms(link)": [
+      {
+        "roomId": "nabo66game",
+        "userId": "nabo66game",
+        "title": "Live #841525457",
+        "nick": "山本",
+        "avatar": "https://imagegw02.twitcasting.tv/image3s/pbs.twimg.com/profile_images/2037458169312718848/H4TTrLJg_bigger.jpg",
+        "cover": "http://imagegw03.twitcasting.tv/image3/image.twitcasting.tv/image159_1/d1/a8/3228a8d1-1.jpg",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "twitcasting",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "isCatchUp": false,
+        "link": "https://twitcasting.tv/nabo66game"
+      }
+    ],
+    "getPlayQualites": [
+      {
+        "quality": "HLS high",
+        "id": "high",
+        "sort": 3,
+        "getPlayUrls": [
+          "https://202-218-143-79.twitcasting.tv/tc.livehls/v1/streams/841525457/hls/1008.96/media.m3u8"
+        ]
+      },
+      {
+        "quality": "HLS medium",
+        "id": "medium",
+        "sort": 2,
+        "getPlayUrls": [
+          "https://202-218-143-79.twitcasting.tv/tc.livehls/v1/streams/841525457/hls/1007.96/media.m3u8"
+        ]
+      },
+      {
+        "quality": "HLS low",
+        "id": "low",
+        "sort": 1,
+        "getPlayUrls": [
+          "https://202-218-143-79.twitcasting.tv/tc.livehls/v1/streams/841525457/hls/720.64/media.m3u8"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "platform": "twitcasting",
+  "sample": "S06-media",
+  "capturedAt": "2026-09-27T18:02:30.413725Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://202-218-143-79.twitcasting.tv/tc.livehls/v1/streams/841525457/hls/1008.96/media.m3u8",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://twitcasting.tv/",
+      "Accept-Language": "en"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": "lvhls_ssid_841525457=faea9dd15d5b78f7fee85b5169500613; Path=/tc.livehls/v1/streams/841525457/hls/; Max-Age=600; HttpOnly",
+      "date": "Sun, 27 Sep 2026 18:02:30 GMT",
+      "content-length": "449",
+      "strict-transport-security": "max-age=15768000",
+      "content-type": "application/vnd.apple.mpegurl",
+      "server": "nginx/1.10.3"
+    }
+  },
+  "raw": {
+    "sha256": "75b4c65fb3ee413b7d855db57e40f4c195bbb587cda45efc0e3e83bb2b5e743d",
+    "length": 449
+  },
+  "body": "body.m3u8",
+  "scrubbed": [
+    {
+      "where": "set-cookie:lvhls_ssid_841525457",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

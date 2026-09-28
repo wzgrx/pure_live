@@ -1,0 +1,68 @@
+{
+  "generator": "TwitcastingSite.getRoomDetail + getRoomDetailForRefresh + searchRooms(link) + getPlayQualites + getPlayUrls (with S05-stream-offline)",
+  "value": {
+    "getRoomDetail": {
+      "roomId": "twitcasting_jp",
+      "userId": "twitcasting_jp",
+      "title": "映画「シャークネード エクストリーム・ミッション（吹替版）」",
+      "nick": "ツイキャス公式",
+      "avatar": "https://imagegw02.twitcasting.tv/image3s/pbs.twimg.com/profile_images/1602128618913943552/cldH8Zpe_bigger.jpg",
+      "cover": "http://imagegw03.twitcasting.tv/image3/image.twitcasting.tv/image159_1/df/11/322711df-1.jpg",
+      "watching": "",
+      "audienceMetricType": "unknown",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "twitcasting",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false,
+      "link": "https://twitcasting.tv/twitcasting_jp"
+    },
+    "getRoomDetailForRefresh": {
+      "roomId": "twitcasting_jp",
+      "userId": "twitcasting_jp",
+      "title": "映画「シャークネード エクストリーム・ミッション（吹替版）」",
+      "nick": "ツイキャス公式",
+      "avatar": "https://imagegw02.twitcasting.tv/image3s/pbs.twimg.com/profile_images/1602128618913943552/cldH8Zpe_bigger.jpg",
+      "cover": "http://imagegw03.twitcasting.tv/image3/image.twitcasting.tv/image159_1/df/11/322711df-1.jpg",
+      "watching": "",
+      "audienceMetricType": "unknown",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "twitcasting",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false,
+      "link": "https://twitcasting.tv/twitcasting_jp"
+    },
+    "searchRooms(link)": [
+      {
+        "roomId": "twitcasting_jp",
+        "userId": "twitcasting_jp",
+        "title": "映画「シャークネード エクストリーム・ミッション（吹替版）」",
+        "nick": "ツイキャス公式",
+        "avatar": "https://imagegw02.twitcasting.tv/image3s/pbs.twimg.com/profile_images/1602128618913943552/cldH8Zpe_bigger.jpg",
+        "cover": "http://imagegw03.twitcasting.tv/image3/image.twitcasting.tv/image159_1/df/11/322711df-1.jpg",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "twitcasting",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "isCatchUp": false,
+        "link": "https://twitcasting.tv/twitcasting_jp"
+      }
+    ],
+    "getPlayQualites": []
+  }
+}

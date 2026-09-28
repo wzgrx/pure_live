@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "platform": "niconico",
+  "sample": "S03-watch-user-live",
+  "capturedAt": "2026-09-27T18:40:09.906538Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.nicovideo.jp/watch/user/144846457",
+    "headers": {
+      "Accept": "text/html",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "surrogate-control": "no-store",
+      "set-cookie": [
+        "nicosid=9004073717.29652001; Domain=.nicovideo.jp; Path=/; Expires=Wed, 24 Sep 2036 18:40:10 GMT; SameSite=Lax",
+        "nicolive_color_theme=; Domain=.nicovideo.jp; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+        "audience_token=avyamcayv-ilcj-2fnku813-68c3-8lmv-gd36-38n222874764_1426444763_oku5x13ywz78h18u06vt065j348829415jq32301; Max-Age=86400; Domain=.nicovideo.jp; Path=/; Expires=Mon, 28 Sep 2026 18:40:10 GMT; HttpOnly; Secure; SameSite=Lax",
+        "nicolivehistory=%1X314329966%9S; Max-Age=2592000; Domain=.nicovideo.jp; Path=/; Expires=Tue, 27 Oct 2026 18:40:10 GMT; HttpOnly; Secure; SameSite=Lax"
+      ],
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 18:40:10 GMT",
+      "vary": "Accept-Encoding",
+      "content-encoding": "gzip",
+      "x-amz-cf-pop": "SFO53-P11",
+      "pragma": "no-cache",
+      "x-nicolive-provider-type": "community",
+      "server": "istio-envoy",
+      "etag": "W/\"c181-my8Lyw2G0Pg34nyKbDdNiDD9hPU\"",
+      "x-frame-options": "SAMEORIGIN",
+      "x-nicolive-content-id": "lv351482868",
+      "connection": "keep-alive",
+      "cache-control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "strict-transport-security": "max-age=5184000",
+      "x-amz-cf-id": "cQHyZpmbD73OP_XM_FaqLWTDONLf8WAxSncECUZtQ9gHz08ntgT7SQ==",
+      "x-permitted-cross-domain-policies": "none",
+      "content-type": "text/html; charset=utf-8",
+      "x-xss-protection": "1; mode=block",
+      "x-download-options": "noopen",
+      "via": "1.1 1c4261963109b08453efb8a8f7b4e54c.cloudfront.net (CloudFront)",
+      "x-content-type-options": "nosniff",
+      "x-cache": "Miss from cloudfront",
+      "expires": "0"
+    }
+  },
+  "raw": {
+    "sha256": "d9b8d9147c48e8be8b8e05af45089c305db8fb29d70fcf867446c63ceca13591",
+    "length": 49537
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "text:csrfToken",
+      "rule": "secret"
+    },
+    {
+      "where": "text:audienceToken",
+      "rule": "secret"
+    },
+    {
+      "where": "text:audience_token",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:nicosid",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:audience_token",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:nicolivehistory",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -1,0 +1,25 @@
+{
+  "generator": "NiconicoSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + NiconicoApi.room (lv1)",
+  "value": {
+    "getRoomDetail": {
+      "throws": "NiconicoException",
+      "message": "Niconico missing"
+    },
+    "getRoomDetailForRefresh": {
+      "throws": "NiconicoException",
+      "message": "Niconico missing"
+    },
+    "getRoomDetailForRecording": {
+      "throws": "NiconicoException",
+      "message": "Niconico missing"
+    },
+    "getLiveStatus": {
+      "throws": "NiconicoException",
+      "message": "Niconico missing"
+    },
+    "watch": {
+      "throws": "NiconicoException",
+      "message": "Niconico missing"
+    }
+  }
+}

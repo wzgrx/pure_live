@@ -1,0 +1,72 @@
+{
+  "generator": "NiconicoSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + NiconicoApi.room (lv351292489)",
+  "value": {
+    "getRoomDetail": {
+      "roomId": "lv351292489",
+      "title": "顔出し料理｜チーズフォンデュと極上味噌で乾杯ッ♪＊。【限定】",
+      "nick": "くるる!!",
+      "avatar": "",
+      "cover": "https://listing-thumbnail.live.nicovideo.jp?image=prod-lv351292489/thumbnail_1790505360823.jpg&w=640&h=360&v=1790505360823",
+      "watching": "0",
+      "audienceMetricType": "totalViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "1993",
+      "followers": "0",
+      "platform": "niconico",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。",
+      "isCatchUp": false,
+      "link": "https://live.nicovideo.jp/watch/lv351292489"
+    },
+    "getRoomDetailForRefresh": {
+      "roomId": "lv351292489",
+      "title": "顔出し料理｜チーズフォンデュと極上味噌で乾杯ッ♪＊。【限定】",
+      "nick": "くるる!!",
+      "avatar": "",
+      "cover": "https://listing-thumbnail.live.nicovideo.jp?image=prod-lv351292489/thumbnail_1790505360823.jpg&w=640&h=360&v=1790505360823",
+      "watching": "0",
+      "audienceMetricType": "totalViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "1993",
+      "followers": "0",
+      "platform": "niconico",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。",
+      "isCatchUp": false,
+      "link": "https://live.nicovideo.jp/watch/lv351292489"
+    },
+    "getRoomDetailForRecording": {
+      "roomId": "lv351292489",
+      "title": "顔出し料理｜チーズフォンデュと極上味噌で乾杯ッ♪＊。【限定】",
+      "nick": "くるる!!",
+      "avatar": "",
+      "cover": "https://listing-thumbnail.live.nicovideo.jp?image=prod-lv351292489/thumbnail_1790505360823.jpg&w=640&h=360&v=1790505360823",
+      "watching": "0",
+      "audienceMetricType": "totalViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "1993",
+      "followers": "0",
+      "platform": "niconico",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。",
+      "isCatchUp": false,
+      "link": "https://live.nicovideo.jp/watch/lv351292489"
+    },
+    "getLiveStatus": true,
+    "watch": {
+      "status": "onAir",
+      "access": "allowed",
+      "reportedWatchCount": 1993,
+      "webSocketUri": "wss://a.live2.nicovideo.jp/unama/wsapi/v2/watch/47428216554077?audience_token=69526055840576_iyegflhta-pzuc-9085352m-5z82-2t5x-45e2-8k494u7253n7_4583013329_d59993g9j3996j9hh382l0c71i74l93ja0nb348s&frontend_id=9"
+    }
+  }
+}

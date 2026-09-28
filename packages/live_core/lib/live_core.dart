@@ -5,6 +5,7 @@ library;
 
 export 'src/audience.dart';
 export 'src/convert.dart';
+export 'src/hls_master.dart';
 export 'src/hls_source_query_policy.dart';
 export 'src/html.dart';
 export 'src/input_recipe.dart';
@@ -36,6 +37,9 @@ export 'src/sites/kuaishou/kuaishou_api.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
 export 'src/sites/missevan/missevan_api.dart';
 export 'src/sites/missevan/missevan_site.dart';
+export 'src/sites/niconico/niconico_api.dart';
+export 'src/sites/niconico/niconico_seat.dart';
+export 'src/sites/niconico/niconico_site.dart';
 export 'src/sites/picarto/picarto_api.dart';
 export 'src/sites/picarto/picarto_site.dart';
 export 'src/sites/soop/soop_api.dart';

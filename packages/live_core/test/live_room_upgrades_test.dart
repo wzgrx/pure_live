@@ -240,6 +240,7 @@ void main() {
         'pandalive',
         'douyu',
         'kuaishou',
+        'bigo',
       });
       expect(SiteIds.supported.toSet().containsAll(SiteIds.caseInsensitiveRoomIds), isTrue);
       for (final platform in SiteIds.supported) {
@@ -268,7 +269,8 @@ void main() {
     test('the key folds the room id on case-insensitive platforms, whatever the platform spelling', () {
       expect(LiveRoom.identityKeyFor(platform: ' Picarto ', roomId: ' TheBaker '), 'picarto:thebaker');
       expect(LiveRoom.identityKeyFor(platform: 'TWITCH', roomId: 'Shroud'), 'twitch:shroud');
-      expect(LiveRoom.identityKeyFor(platform: 'bigo', roomId: 'Qashia305'), 'bigo:Qashia305');
+      expect(LiveRoom.identityKeyFor(platform: 'bigo', roomId: 'Qashia305'), 'bigo:qashia305');
+      expect(LiveRoom.identityKeyFor(platform: 'huya', roomId: 'Qashia305'), 'huya:Qashia305');
       expect(SiteIds.ignoresRoomIdCase(' SOOP '), isTrue);
       expect(SiteIds.ignoresRoomIdCase('youtube'), isFalse);
       expect(_room(platform: 'picarto', roomId: 'TheBaker').toString(), contains('picarto:TheBaker'));

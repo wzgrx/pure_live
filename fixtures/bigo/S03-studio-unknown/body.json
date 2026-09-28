@@ -1,0 +1,30 @@
+{
+  "code": 0,
+  "data": {
+    "sid": null,
+    "siteId": "",
+    "uid": null,
+    "avatar": "",
+    "nick_name": "",
+    "country_code": "",
+    "gameTitle": "",
+    "gameId": null,
+    "roomTopic": "",
+    "snapshot": "",
+    "alive": null,
+    "roomId": "",
+    "roomStatus": null,
+    "covers": null,
+    "client_ip": "",
+    "hls_src": null,
+    "cdn_src": [],
+    "needLogin": false,
+    "passRoom": null,
+    "reserver": null,
+    "clientBigoId": null,
+    "roomType": "0",
+    "isPaidShow": null
+  },
+  "msg": "success",
+  "flag": null
+}

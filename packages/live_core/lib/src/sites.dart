@@ -207,11 +207,14 @@ abstract final class SiteIds {
   /// - Kuaishou: the user id. The room page finds a streamer in any case and
   ///   answers its own spelling (`kpl704668133` → `KPL704668133`,
   ///   `3X6B3WKUDIYPU2C` → `3x6b3wkudiypu2c`; M4.U.5, sample S13).
+  /// - Bigo: the Bigo id. The studio finds a streamer's chosen id in any case
+  ///   and answers its own spelling (`chrispcritter78`, `CHRISPCRITTER78` →
+  ///   `ChrisPCritter78`, `QASHIA305` → `qashia305`; M4.U.24).
   ///
   /// Not included: numeric ids (case does not apply), YouTube video and
   /// channel ids (case-sensitive), niconico programme ids, CHZZK channel ids
   /// (hex the adapter already lower-cases), and ids whose case rule the
-  /// platform has not shown: Huya aliases, Bigo ids.
+  /// platform has not shown: Huya aliases.
   static const Set<String> caseInsensitiveRoomIds = {
     twitch,
     soop,
@@ -221,6 +224,7 @@ abstract final class SiteIds {
     pandaLive,
     douyu,
     kuaishou,
+    bigo,
   };
 
   /// Whether rooms of [platform] are identified without regard to the room

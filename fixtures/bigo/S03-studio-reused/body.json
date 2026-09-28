@@ -1,0 +1,30 @@
+{
+  "code": 0,
+  "data": {
+    "sid": 2797850262,
+    "siteId": "1005503375",
+    "uid": 774851884,
+    "avatar": "https://esx.bigo.sg/as/live-enhancer/ls3/01vNrpWD9jjF.jpg?auth-token=yOhZjAv751s9-pLaw4q0WIopvPSizeXCTveCtrFve67:hfGnXkz0HNwaKhZ9DaMvQ98kbd4akU1azmTyDMIsDmbnXOW1VCi6OJi9COS0JfxwerR2EyWdzE",
+    "nick_name": "Lyrics",
+    "country_code": "",
+    "gameTitle": "",
+    "gameId": 0,
+    "roomTopic": "",
+    "snapshot": "https://esx.bigo.sg/as/live-enhancer/ls3/01vNrpWC8iiA.jpg?auth-token=yI0bgs7oRE8z9WHzbqLZizx0ySnIR-mzrp9IpceVRzB:bkScLdp2OWmwClR2OtJihT9oOIkmOqG1JvtuPMR2GSj9STxnGOD2TjqogwT0KpKvvW",
+    "alive": 1,
+    "roomId": "7367135243595402902",
+    "roomStatus": 0,
+    "covers": null,
+    "client_ip": "",
+    "hls_src": "",
+    "cdn_src": [],
+    "needLogin": false,
+    "passRoom": null,
+    "reserver": 12,
+    "clientBigoId": "1005503375",
+    "roomType": "0",
+    "isPaidShow": ""
+  },
+  "msg": "success",
+  "flag": null
+}

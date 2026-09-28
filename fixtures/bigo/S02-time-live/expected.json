@@ -1,0 +1,13 @@
+{
+  "generator": "BigoApi._jsonp (3.x's callback check)",
+  "value": {
+    "jsonp_purelive_t": {
+      "code": 0,
+      "time": "1672503768"
+    },
+    "jsonp_other": {
+      "throws": "BigoException",
+      "message": "Bigo schema"
+    }
+  }
+}

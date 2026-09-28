@@ -1,0 +1,30 @@
+{
+  "generator": "BigoApi._jsonp + BigoTokenCodec.buildData (3.x's codec, fixed salt and nonce)",
+  "value": {
+    "jsonp_purelive_s": {
+      "code": 0,
+      "info": "success",
+      "token": "DOmOJRj8G2MasRYxGhnGwdhhGCcQoWQGUo7TlgKp88ZTniqMFVN03y"
+    },
+    "tokenData": {
+      "1672503768": "U2FsdGVkX18AAQIDBAUGBw9CExflNpp/+hw4FEvQ48pkY9f2hYxzYBNOjHbCB45L1kMM+njoY+ywzq8/nIukZdvMK///nfADHW0eTrVT7LFdOBDiydMHD1bQXb8LIIH6fnlIjPx8FAexmAHtUtqgW53BTjlifWtHKWYxueT8MxTnQfeTqrG7IKU960GhNIca",
+      "1723456789": "U2FsdGVkX18AAQIDBAUGBw9CExflNpp/+hw4FEvQ48pkY9f2hYxzYBNOjHbCB45L1kMM+njoY+ywzq8/nIukZdvMK///nfADHW0eTrVT7LFdOBDiydMHD1bQXb8LIIH6FSRtElvqM7EhdCvLpZW9RzGf9qNU4yDT2LciUoRF/Dz6pDiEIxTYPaEri+1At/i8",
+      "1790000000": "U2FsdGVkX18AAQIDBAUGBw9CExflNpp/+hw4FEvQ48pkY9f2hYxzYBNOjHbCB45L1kMM+njoY+ywzq8/nIukZdvMK///nfADHW0eTrVT7LFdOBDiydMHD1bQXb8LIIH6K9xTVZDTnTy5MCtpnW77ASbrUir4a6wV3vscHsEeqlRkSWRcAR2fuFbiLFYnlPaB"
+    },
+    "tokenData(1790000000, salt 1..8)": "U2FsdGVkX18BAgMEBQYHCGgtZH+SaDTmSqohBVEeTYk6fpwByYwRdHxnrSXQf/8ob1PLazm7i6YgNgYug8sTpgkPNvEUPrAQA3CNH2PIUzWLpz2mVWYajBRwlxIPM1Cn0yJTTOZnEBSSwXkuBmsFVabucMah0XDuO/y7/t8qOnCzJmjBnJ1eqBRdnb4YAEd1",
+    "tokenData errors": {
+      "timestamp": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid Bigo token timestamp"
+      },
+      "salt": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid Bigo token salt"
+      },
+      "nonce": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid Bigo token nonce"
+      }
+    }
+  }
+}

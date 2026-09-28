@@ -1,6 +1,10 @@
 // AES-128 decryption, from the archived v4 packages/live_core/lib/src/aes.dart
 // (archive/v4, AGPL-3.0, this project). 3.x used PointyCastle for the one
 // caller, KilaKila's share links; this keeps live_core free of it.
+//
+// AES encryption ([AesCbc]), from the archived v4
+// packages/live_core/lib/src/crypto/aes.dart (archive/v4, AGPL-3.0, this
+// project), for Bigo's web token request (3.x: PointyCastle).
 import 'dart:typed_data';
 
 /// AES-128 decryption in CBC mode with PKCS#7 padding (FIPS 197,
@@ -151,6 +155,112 @@ abstract final class Aes128Cbc {
     }
     inverseShiftAndSub();
     addRoundKey(rounds[0]);
+    return state;
+  }
+}
+
+/// AES encryption in CBC mode with PKCS#7 padding for 128-, 192- and 256-bit
+/// keys (FIPS 197, SP 800-38A), for request envelopes made with published
+/// constants: Bigo's web token is OpenSSL `enc -aes-256-cbc`. Encryption
+/// only; decryption of AES-128 is [Aes128Cbc].
+abstract final class AesCbc {
+  /// Encrypts [plain] after PKCS#7 padding with [key] (16, 24 or 32 bytes)
+  /// and [iv] (16 bytes); throws [FormatException] for another length.
+  static Uint8List encrypt(List<int> plain, {required List<int> key, required List<int> iv}) {
+    if (iv.length != 16) throw const FormatException('AES-CBC needs a 16-byte IV');
+    final rounds = _expand(key);
+    final pad = 16 - plain.length % 16;
+    final data = Uint8List(plain.length + pad)
+      ..setRange(0, plain.length, plain)
+      ..fillRange(plain.length, plain.length + pad, pad);
+    final chain = Uint8List.fromList(iv);
+    for (var offset = 0; offset < data.length; offset += 16) {
+      final block = Uint8List.sublistView(data, offset, offset + 16);
+      for (var i = 0; i < 16; i++) {
+        block[i] ^= chain[i];
+      }
+      _encryptBlock(block, rounds);
+      chain.setRange(0, 16, block);
+    }
+    return data;
+  }
+
+  /// One 16-byte [block] encrypted with [key] (the FIPS 197 vectors).
+  static Uint8List encryptBlock(List<int> block, {required List<int> key}) {
+    if (block.length != 16) throw const FormatException('An AES block is 16 bytes');
+    return _encryptBlock(Uint8List.fromList(block), _expand(key));
+  }
+
+  /// Key expansion: rounds + 1 round keys of 16 bytes (11, 13 or 15).
+  static List<Uint8List> _expand(List<int> key) {
+    if (key.length != 16 && key.length != 24 && key.length != 32) {
+      throw const FormatException('An AES key is 16, 24 or 32 bytes');
+    }
+    final sbox = Aes128Cbc._sbox;
+    final words = key.length ~/ 4;
+    final rounds = words + 6;
+    final bytes = Uint8List(16 * (rounds + 1))..setRange(0, key.length, key);
+    var rcon = 1;
+    for (var i = words; i < 4 * (rounds + 1); i++) {
+      var t0 = bytes[4 * i - 4];
+      var t1 = bytes[4 * i - 3];
+      var t2 = bytes[4 * i - 2];
+      var t3 = bytes[4 * i - 1];
+      if (i % words == 0) {
+        final first = t0;
+        t0 = sbox[t1] ^ rcon;
+        t1 = sbox[t2];
+        t2 = sbox[t3];
+        t3 = sbox[first];
+        rcon = Aes128Cbc._xtime(rcon);
+      } else if (words > 6 && i % words == 4) {
+        t0 = sbox[t0];
+        t1 = sbox[t1];
+        t2 = sbox[t2];
+        t3 = sbox[t3];
+      }
+      final previous = 4 * (i - words);
+      bytes[4 * i] = bytes[previous] ^ t0;
+      bytes[4 * i + 1] = bytes[previous + 1] ^ t1;
+      bytes[4 * i + 2] = bytes[previous + 2] ^ t2;
+      bytes[4 * i + 3] = bytes[previous + 3] ^ t3;
+    }
+    return [for (var round = 0; round <= rounds; round++) Uint8List.sublistView(bytes, round * 16, round * 16 + 16)];
+  }
+
+  /// Encrypts [state] in place and returns it.
+  static Uint8List _encryptBlock(Uint8List state, List<Uint8List> rounds) {
+    final sbox = Aes128Cbc._sbox;
+    final last = rounds.length - 1;
+    final shifted = Uint8List(16);
+    for (var i = 0; i < 16; i++) {
+      state[i] ^= rounds[0][i];
+    }
+    for (var round = 1; round <= last; round++) {
+      // SubBytes and ShiftRows. Column-major state: byte (row r, column c)
+      // is at 4c + r, and row r moves r columns left.
+      for (var column = 0; column < 4; column++) {
+        for (var row = 0; row < 4; row++) {
+          shifted[4 * column + row] = sbox[state[4 * ((column + row) % 4) + row]];
+        }
+      }
+      if (round != last) {
+        for (var column = 0; column < 4; column++) {
+          final a0 = shifted[4 * column];
+          final a1 = shifted[4 * column + 1];
+          final a2 = shifted[4 * column + 2];
+          final a3 = shifted[4 * column + 3];
+          final all = a0 ^ a1 ^ a2 ^ a3;
+          shifted[4 * column] = a0 ^ all ^ Aes128Cbc._xtime(a0 ^ a1);
+          shifted[4 * column + 1] = a1 ^ all ^ Aes128Cbc._xtime(a1 ^ a2);
+          shifted[4 * column + 2] = a2 ^ all ^ Aes128Cbc._xtime(a2 ^ a3);
+          shifted[4 * column + 3] = a3 ^ all ^ Aes128Cbc._xtime(a3 ^ a0);
+        }
+      }
+      for (var i = 0; i < 16; i++) {
+        state[i] = shifted[i] ^ rounds[round][i];
+      }
+    }
     return state;
   }
 }

@@ -1,0 +1,592 @@
+{
+  "data": {
+    "streams": {
+      "edges": [
+        {
+          "cursor": "eyJzIjo4MDI2LjA0Mjk0NjMzMjg0MywiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "315567803504",
+            "title": "叉滴娛樂 9/28 星期一 晚上好 麻吉們  吃飽飽 讚讚 伊莫冒險",
+            "type": "live",
+            "viewersCount": 8026,
+            "createdAt": "2026-09-28T13:28:26Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_roger9527-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "65653595",
+              "login": "roger9527",
+              "displayName": "羅傑",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/roger9527-profile_image-e6cccadfeba28124-70x70.jpeg"
+            },
+            "game": {
+              "id": "516575",
+              "name": "VALORANT",
+              "displayName": "VALORANT",
+              "slug": "valorant"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo0NTMyLjcyMjM3MDI2NDUyMTUsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315567930864",
+            "title": "【 璃Miri 】突然變成恐怖遊戲 why ft.克拉拉、羅暹",
+            "type": "live",
+            "viewersCount": 4532,
+            "createdAt": "2026-09-28T14:22:34Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_miri_aetris-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "1520342995",
+              "login": "miri_aetris",
+              "displayName": "璃みり_沉珀",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/252cde14-5b52-4a86-afeb-2cbd6d090906-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "518184",
+              "name": "Phasmophobia",
+              "displayName": "Phasmophobia",
+              "slug": "phasmophobia"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjozMzk4LjM3MzQxNzQ0NjcwOTUsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315546926703",
+            "title": "【KSP】-w-  | @kspksp",
+            "type": "live",
+            "viewersCount": 3398,
+            "createdAt": "2026-09-28T12:48:06Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_kspksp-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "456798977",
+              "login": "kspksp",
+              "displayName": "KSPKSP",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/12e02c43-fa93-4052-9e07-fdf2d24b0de2-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "1832841853",
+              "name": "Mortal Shell II",
+              "displayName": "Mortal Shell II",
+              "slug": "mortal-shell-ii"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjozMjU3LjAwNTMzMTk3MDA1NCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316143633130",
+            "title": "瓦上癮 贈訂5份有頭像+爆擊！爆10份送抱枕  9/28",
+            "type": "live",
+            "viewersCount": 3257,
+            "createdAt": "2026-09-28T11:30:37Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_gearbaby1010-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "162323092",
+              "login": "gearbaby1010",
+              "displayName": "花輪同學",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/161ac1d2-7a11-4c68-83aa-7539e33dae89-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "516575",
+              "name": "VALORANT",
+              "displayName": "VALORANT",
+              "slug": "valorant"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoyMTA2Ljg2MTgzODcxOTU0MjQsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315546622831",
+            "title": "【珮蕾pele】現在要幹嘛",
+            "type": "live",
+            "viewersCount": 2106,
+            "createdAt": "2026-09-28T10:43:36Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_p1lepe1el1-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "1322264153",
+              "login": "p1lepe1el1",
+              "displayName": "珮蕾",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/cc28639e-8f2f-45df-9699-0d66b31b7bec-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoyMDI4LjY4NDI1MDgwMTcyODIsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315547238639",
+            "title": "【9/28- 連假最後一天】!DC !YT !寫真",
+            "type": "live",
+            "viewersCount": 2028,
+            "createdAt": "2026-09-28T14:53:16Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_niu0716-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "46624156",
+              "login": "niu0716",
+              "displayName": "牛牛妹",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/86829a2d-d72b-4070-ada2-906aa1f6271f-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxOTQ0LjA1NjUzNTgwMjMyOSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "315547299055",
+            "title": "全勤𝖣𝖺𝗒𝟧𝟪+𝟣🐏𝟢𝟫𝟤𝟪ˊ˗｜今天有乖乖看醫生 LEV企劃募資條 (´-ωก`)｜@hennie2001｜!YT !DC !周表 !周邊 !行充 !行動電源",
+            "type": "live",
+            "viewersCount": 1944,
+            "createdAt": "2026-09-28T15:19:25Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_hennie2001-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "197367758",
+              "login": "hennie2001",
+              "displayName": "烟花蹦蹦蹦",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/499b8cea-8c13-417e-83df-ada0c763fecc-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxOTM4LjgzMTM0MTY0MTkxNTcsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316519400050",
+            "title": "今天是學姐! 9/28",
+            "type": "live",
+            "viewersCount": 1938,
+            "createdAt": "2026-09-28T14:22:14Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_et_1231-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "117348035",
+              "login": "et_1231",
+              "displayName": "依渟",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/2f049f01-d774-46b5-ac1f-b034c73964eb-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxOTExLjI4NDUyOTQ2Njk0NjcsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315532173422",
+            "title": "【懶貓】9/28 送5份訂閱有爆擊 中秋最後一天 遊戲儲值找!魔儲!尚品",
+            "type": "live",
+            "viewersCount": 1911,
+            "createdAt": "2026-09-28T02:59:34Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_failverde-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "23852822",
+              "login": "failverde",
+              "displayName": "懶貓",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/963d9792-e9de-4b0e-a418-5ffd871dc4ee-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxNzAyLjA5NTg0NTQzNzYzMSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "315547229551",
+            "title": "28/9/2026  狼人",
+            "type": "live",
+            "viewersCount": 1702,
+            "createdAt": "2026-09-28T14:49:44Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_underground_dv-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "25684280",
+              "login": "underground_dv",
+              "displayName": "達哥",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/underground_dv-profile_image-36cd6cc091577d13-70x70.jpeg"
+            },
+            "game": {
+              "id": "75101830",
+              "name": "Marvel's Wolverine",
+              "displayName": "Marvel's Wolverine",
+              "slug": "marvels-wolverine"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxNjM5LjQ3NTAzNDI1MTQ1NCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316519250418",
+            "title": "LIVE]new korean girl [ kor/eng/中文/jp ] !fantrie, !toonation, !dance, !draw",
+            "type": "live",
+            "viewersCount": 1639,
+            "createdAt": "2026-09-28T13:52:23Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_mooyoo__-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "1394581107",
+              "login": "mooyoo__",
+              "displayName": "mooyoo__",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/cb0a655c-2dd1-4329-bdf3-fbab9a48571a-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxNTc5LjUyMjAyMjQ4MzUyNjQsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315533522414",
+            "title": "Qttsix｜瓦爾海姆｜!ExitLag",
+            "type": "live",
+            "viewersCount": 1579,
+            "createdAt": "2026-09-28T12:59:14Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_qttsix-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "16677765",
+              "login": "qttsix",
+              "displayName": "六希夫",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/28a06cd5-85a5-409f-87a1-2bdd84ee2584-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "508455",
+              "name": "Valheim",
+              "displayName": "Valheim",
+              "slug": "valheim"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxNTAxLjY5ODM1MjU5NTcyMSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316142994026",
+            "title": "22222",
+            "type": "live",
+            "viewersCount": 1501,
+            "createdAt": "2026-09-28T08:17:04Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_dingding248-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "66548548",
+              "login": "dingding248",
+              "displayName": "丁義",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/2a57b5ba-f601-4f53-ac85-5682d84f7e49-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "516575",
+              "name": "VALORANT",
+              "displayName": "VALORANT",
+              "slug": "valorant"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMzUxLjk1ODg2NTA2NjA0OTQsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316510863090",
+            "title": "⏰海賊OP17 遊戲王最新 開爆送一整盒🎁各種卡片發DC 甜甜價格直接私我出價🔞🈲恐怖之夜D118⏰每晚6~7點🎁看台免費拿MyCard/Steam點數!MY🔴 【🍊蝦愛橘子】",
+            "type": "live",
+            "viewersCount": 1351,
+            "createdAt": "2026-09-26T16:52:11Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_shuteye_orange-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "25202416",
+              "login": "shuteye_orange",
+              "displayName": "蝦愛橘子",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/e496689c-5e8f-44a6-8733-b3c5b6e17e19-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMzQ5LjUxMjMyMzYwNTI0ODksImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316575493235",
+            "title": "Vivi💜大家好～下一次跳舞活動在10/11 !地偶｜9/28",
+            "type": "live",
+            "viewersCount": 1349,
+            "createdAt": "2026-09-28T14:34:46Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_vivi0z1-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "205058897",
+              "login": "vivi0z1",
+              "displayName": "芝衣芝衣",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/d49600c7-8199-4acd-95c5-f9ed8de9f4d3-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "516575",
+              "name": "VALORANT",
+              "displayName": "VALORANT",
+              "slug": "valorant"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMzM5LjM2MTcxNjA1NzAyNTIsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315546952559",
+            "title": "09/28 真小開",
+            "type": "live",
+            "viewersCount": 1339,
+            "createdAt": "2026-09-28T12:58:28Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_yuki878-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "522657771",
+              "login": "yuki878",
+              "displayName": "Yuki878",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/286f5917-d7fe-49b4-8ec5-ee9b1324208d-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMzEyLjc3NDcwNjk2MjY5ODcsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315547159535",
+            "title": "【老王】9/28 加利宅邸事件 day 3",
+            "type": "live",
+            "viewersCount": 1312,
+            "createdAt": "2026-09-28T14:20:44Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_wannasinging-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "21534857",
+              "login": "wannasinging",
+              "displayName": "老王",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/bfc0a3ea-b251-4eeb-84f0-6134afcfb304-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "626441414",
+              "name": "The Incident at Galley House",
+              "displayName": "The Incident at Galley House",
+              "slug": "the-incident-at-galley-house"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMjE0LjI0MzkzMzAxNjcyNCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "315567740400",
+            "title": "9/28 身為肢體協調有障礙的我覺得大家在WirForce跳舞都好好看 ദ്ദി^ᴗ ᴗ^₎🤍/ !VIP !層三｜拍拍",
+            "type": "live",
+            "viewersCount": 1214,
+            "createdAt": "2026-09-28T13:03:36Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_piper729-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "77813460",
+              "login": "piper729",
+              "displayName": "拍拍",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/cb2f5481-ce61-458e-bdfc-efb355c42d3c-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "516575",
+              "name": "VALORANT",
+              "displayName": "VALORANT",
+              "slug": "valorant"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMTgxLjY5MDYzODIxMTQ4MzcsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316575231987",
+            "title": "【湯米】9/28 感謝GAM送我隊服~小開一下心動的訊號，看完第八期就休息 <3",
+            "type": "live",
+            "viewersCount": 1181,
+            "createdAt": "2026-09-28T13:36:37Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_chen810830-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "70985559",
+              "login": "chen810830",
+              "displayName": "湯米",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/97cad0db-6a94-4722-b44a-f69d69a4614a-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMTQ1Ljc1MjMxMTIyODAxODIsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316505416177",
+            "title": "9/28 感謝22位觀眾的參與 跟斗內真心感謝! 贈訂5份有爆擊 歡迎支持10月線下賽旅費  !魚油 !葉黃素 !百弟 !改版 !更新!比賽",
+            "type": "live",
+            "viewersCount": 1145,
+            "createdAt": "2026-09-28T06:16:05Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_ssssshaoooo-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "1291086815",
+              "login": "ssssshaoooo",
+              "displayName": "波風水雞",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/5135ccdd-903a-40ff-aa25-0a183bd9af06-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "511224",
+              "name": "Apex Legends",
+              "displayName": "Apex Legends",
+              "slug": "apex-legends"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMTAwLjYwOTk3NTU5MDUxMjcsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315532690542",
+            "title": "【小烈】250抽2+1真珠+測測~深夜搞笑遊戲 I 健檢->用兌換點數就好 I !yt !fb !dc加入烈車 I 9/30 22:00抽獎 I",
+            "type": "live",
+            "viewersCount": 1100,
+            "createdAt": "2026-09-28T06:59:57Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_hyper2374-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "58686695",
+              "login": "hyper2374",
+              "displayName": "小烈",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/71391d1c-2a25-4f14-ac7f-3ca03a8033ac-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "213930085",
+              "name": "Honkai: Star Rail",
+              "displayName": "Honkai: Star Rail",
+              "slug": "honkai-star-rail"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMDcxLjIzMzM2ODUzMzAxOTMsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316078426984",
+            "title": "[ko] 9/28《三角洲行動》洲年慶台服吳彥祖造型來啦！趕緊上線領取免費3900券",
+            "type": "live",
+            "viewersCount": 1071,
+            "createdAt": "2026-09-28T10:33:08Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_ko0416-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "100438963",
+              "login": "ko0416",
+              "displayName": "Ko0416",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/9ba24244-d3f8-4df9-a825-902dd265b61a-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "497916",
+              "name": "The Walking Dead: The Final Season",
+              "displayName": "The Walking Dead: The Final Season",
+              "slug": "the-walking-dead-the-final-season"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo5OTkuOTk3NTE2NzE0MDM1OSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "315567310704",
+            "title": "瓦 ｜ 0928⚡️ @mayj0501 ｜ !雷蛇 !簽到 自主訂閱++",
+            "type": "live",
+            "viewersCount": 999,
+            "createdAt": "2026-09-28T10:04:19Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_mayj0501-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "1047145019",
+              "login": "mayj0501",
+              "displayName": "梅婕",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/542ac375-d273-42cb-a5ac-b5e386588167-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "516575",
+              "name": "VALORANT",
+              "displayName": "VALORANT",
+              "slug": "valorant"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo5OTQuMDA4NTc0ODcyMDQ2OSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "319385153623",
+            "title": "Seeing you twice in one day 💥",
+            "type": "live",
+            "viewersCount": 994,
+            "createdAt": "2026-09-28T13:16:34Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_narang_421-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "562644209",
+              "login": "narang_421",
+              "displayName": "뉴나랑",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/f6bef4f8-26db-4163-9069-c150feddc6df-profile_image-70x70.jpeg"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        }
+      ],
+      "pageInfo": {
+        "hasNextPage": true
+      }
+    }
+  },
+  "extensions": {
+    "v": 1,
+    "durationMilliseconds": 62,
+    "requestID": "01M3MEWJY576DZD535X2CCP8RZ"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "errors": [
+    {
+      "message": "failed integrity check",
+      "path": [
+        "streams"
+      ],
+      "extensions": {
+        "code": "IntegrityCheckFailed"
+      }
+    }
+  ],
+  "data": {
+    "streams": null
+  },
+  "extensions": {
+    "challenge": {
+      "type": "integrity"
+    },
+    "durationMilliseconds": 5,
+    "requestID": "01M3MEWHY24E6AA3Z1DCQA66XE"
+  }
+}

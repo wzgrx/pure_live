@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
@@ -44,6 +45,17 @@ final class TwitchDanmakuArgs {
   String toString() => channel;
 }
 
+/// The `data` of a Twitch [LivePlayQuality]: its variant URLs, as 3.x kept
+/// them, with the video codec the master playlist names for them (`avc`,
+/// `hevc`, `av1`; null when it names none), so each line says what it holds.
+final class TwitchVariants extends UnmodifiableListView<String> {
+  /// The variant [urls] of one quality, encoded with [codec].
+  new(Iterable<String> urls, {this.codec}) : super(List<String>.of(urls));
+
+  /// Video codec of the variants, when the playlist names it.
+  final String? codec;
+}
+
 /// Pure parsing of Twitch responses (3.x's `TwitchSite`). GraphQL answers
 /// are decoded once by [decode], which also recognises the integrity
 /// challenge; each parser takes that value and returns 3.x's models or
@@ -70,11 +82,38 @@ abstract final class TwitchApi {
   /// Directories per page of a category tag (3.x's page size).
   static const int tagDirectoryLimit = 30;
 
-  /// The broadcast languages 3.x asked `DirectoryPage_Game` for.
-  static const List<String> directoryLanguages = ['ZH', 'KO'];
+  /// Streams one `DirectoryPage_Game` request asks for: an area's list is
+  /// fetched 100 at a time and paged locally (8-10), as 3.x's popular page
+  /// did with its recommendations.
+  static const int directoryFetchLimit = 100;
 
-  /// The directory 3.x recommended from.
-  static const String recommendSlug = 'just-chatting';
+  /// Streams one site-wide `streams` request may ask for (`first` is 1–30).
+  static const int streamsLimit = 30;
+
+  /// `Accept-Language` of every request: Chinese names for category tags,
+  /// directories and games (8-2; 3.x asked for en-US).
+  static const String acceptLanguage = 'zh-CN,zh;q=0.9,en;q=0.8';
+
+  /// `Accept-Language` of the one request for English tag names, for the
+  /// tags Twitch has no Chinese name for.
+  static const String englishLanguage = 'en-US,en;q=0.9';
+
+  /// The broadcast languages 3.x always filtered the lists by (Chinese and
+  /// Korean): the preset of the "Twitch 语言筛选" setting (8-3). The
+  /// adapter filters by nothing unless given languages.
+  static const List<String> legacyLanguages = ['ZH', 'KO'];
+
+  /// A broadcast language as Twitch's `Language` enum spells it (`ZH`,
+  /// `ZH_HK`, `ASL`, `OTHER`).
+  static final RegExp languagePattern = RegExp(r'^[A-Z]{2,5}(_[A-Z]{2,4})?$');
+
+  /// usher's `supported_codecs` when H.264 is preferred (8-8), as the web
+  /// player names it.
+  static const String h264Codecs = 'h264';
+
+  /// usher's `supported_codecs` that also allows HEVC and AV1 (Enhanced
+  /// Broadcasting), as the web player asks.
+  static const String enhancedCodecs = 'av1,h265,h264';
 
   /// The channel login pattern (the lower-cased room id).
   static final RegExp loginPattern = RegExp(r'^[a-z0-9_]{1,25}$');
@@ -86,12 +125,25 @@ abstract final class TwitchApi {
   static const String _accessTokenHash = 'ed230aa1e33e07eebb8928504583da78a5173989fadfb1ac94be06a04f3cdbe9';
 
   /// One channel with its stream: replaces 3.x's `ChannelShell` +
-  /// `StreamMetadata` pair, whose `viewersCount` stopped being filled.
+  /// `StreamMetadata` pair, whose `viewersCount` stopped being filled. The
+  /// stream's `restriction` (null when anyone may watch) says whether it is
+  /// for subscribers only.
   static const String userQuery =
       r'query($login: String!) { user(login: $login) { id login displayName description '
       'profileImageURL(width: 300) stream { id title type viewersCount createdAt '
-      'previewImageURL(width: 640, height: 360) game { id name displayName slug } } '
+      'previewImageURL(width: 640, height: 360) restriction { type } game { id name displayName slug } } '
       'lastBroadcast { title game { name displayName } } } }';
+
+  /// The busiest live streams of the whole site, in the broadcast
+  /// `languages` when given (the recommendations, 8-3). The web client has
+  /// no persisted query for it; `first` is at most 30 and pages after the
+  /// first need a browser's integrity token.
+  static const String streamsQuery =
+      r'query($first: Int!, $after: Cursor, $languages: [String!]) { streams(first: $first, after: $after, '
+      r'options: {broadcasterLanguages: $languages}) { edges { cursor node { id title type viewersCount '
+      'createdAt previewImageURL(width: 440, height: 248) restriction { type } broadcaster { id login '
+      'displayName profileImageURL(width: 70) } game { id name displayName slug } } } '
+      'pageInfo { hasNextPage } } }';
 
   /// The two `play_session_id`s 3.x picked from.
   static const List<String> playSessionIds = ['bdd22331a986c7f1073628f2fc5b19da', '064bc3ff1722b6f53b0b5b8c01e46ca5'];
@@ -125,25 +177,56 @@ abstract final class TwitchApi {
       });
 
   /// `DirectoryPage_Game` of the directory [slug]: [limit] streams by
-  /// viewers in the broadcast languages 3.x asked for, after [cursor].
-  static Map<String, Object?> gameOperation(String slug, {required int limit, String? cursor}) =>
-      persisted('DirectoryPage_Game', _gameHash, {
-        'imageWidth': 50,
-        'slug': slug,
-        'options': {
-          'sort': 'VIEWER_COUNT',
-          'recommendationsContext': {'platform': 'web'},
-          'requestID': 'JIRA-VXP-2397',
-          'freeformTags': null,
-          'tags': <String>[],
-          'broadcasterLanguages': directoryLanguages,
-          'systemFilters': <String>[],
-        },
-        'sortTypeIsRecency': false,
-        'limit': limit,
-        'includeCostreaming': true,
-        'cursor': ?cursor,
-      });
+  /// viewers after [cursor], in [languages] (all when empty; 3.x always
+  /// asked for [legacyLanguages]).
+  static Map<String, Object?> gameOperation(
+    String slug, {
+    required int limit,
+    String? cursor,
+    List<String> languages = const [],
+  }) => persisted('DirectoryPage_Game', _gameHash, {
+    'imageWidth': 50,
+    'slug': slug,
+    'options': {
+      'sort': 'VIEWER_COUNT',
+      'recommendationsContext': {'platform': 'web'},
+      'requestID': 'JIRA-VXP-2397',
+      'freeformTags': null,
+      'tags': <String>[],
+      'broadcasterLanguages': languages,
+      'systemFilters': <String>[],
+    },
+    'sortTypeIsRecency': false,
+    'limit': limit,
+    'includeCostreaming': true,
+    'cursor': ?cursor,
+  });
+
+  /// The raw [streamsQuery]: [limit] (1–30) of the site's busiest streams
+  /// after [cursor], in [languages] (all when empty).
+  static Map<String, Object?> streamsOperation({
+    required int limit,
+    String? cursor,
+    List<String> languages = const [],
+  }) => {
+    'query': streamsQuery,
+    'variables': {
+      'first': limit.clamp(1, streamsLimit),
+      'after': ?cursor,
+      if (languages.isNotEmpty) 'languages': languages,
+    },
+  };
+
+  /// The broadcast languages of a setting as Twitch spells them: upper
+  /// case, `-` as `_`, each once; blanks and values that cannot be a
+  /// language are left out (an unknown one fails the whole request).
+  static List<String> normalizeLanguages(Iterable<String> languages) => [
+    ...{
+      for (final language in languages)
+        if (language.trim().toUpperCase().replaceAll('-', '_') case final code when languagePattern.hasMatch(code))
+          code,
+    },
+  ];
 
   /// `SearchResultsPage_SearchResults` for [keyword]; a later page names
   /// the channel index's [cursor] in `options.targets` (a top-level `cursor`
@@ -182,13 +265,18 @@ abstract final class TwitchApi {
     'platform': 'site',
   });
 
-  /// The GraphQL request headers 3.x sent, with the adapter's [deviceId].
+  /// The GraphQL request headers 3.x sent, with the adapter's [deviceId],
+  /// asking for [language] ([acceptLanguage] unless told otherwise).
   /// [cookie] (the stored session) adds `Cookie` and, when it has an
   /// `auth-token`, `Authorization: OAuth`.
-  static Map<String, String> gqlHeaders({required String deviceId, String cookie = ''}) {
+  static Map<String, String> gqlHeaders({
+    required String deviceId,
+    String cookie = '',
+    String language = acceptLanguage,
+  }) {
     final token = authToken(cookie);
     return {
-      ..._identity(deviceId),
+      ..._identity(deviceId, language),
       'content-type': 'text/plain;charset=UTF-8',
       if (cookie.isNotEmpty) 'cookie': cookie,
       'authorization': ?(token == null ? null : 'OAuth $token'),
@@ -196,11 +284,11 @@ abstract final class TwitchApi {
   }
 
   /// The usher request headers: 3.x's GraphQL identity, without the session.
-  static Map<String, String> usherHeaders({required String deviceId}) => _identity(deviceId);
+  static Map<String, String> usherHeaders({required String deviceId}) => _identity(deviceId, acceptLanguage);
 
-  static Map<String, String> _identity(String deviceId) => {
+  static Map<String, String> _identity(String deviceId, String language) => {
     'user-agent': userAgent,
-    'accept-language': 'en-US,en;q=0.9',
+    'accept-language': language,
     'accept': 'application/vnd.twitchtv.v5+json',
     'client-id': clientId,
     'origin': origin,
@@ -209,14 +297,14 @@ abstract final class TwitchApi {
   };
 
   /// Media request headers for [roomId] (3.x's `PlaybackHeaderResolver`):
-  /// UA, Origin, the channel page as Referer and the stored [cookie].
-  static Map<String, String> mediaHeaders(String roomId, {String cookie = ''}) {
+  /// UA, Origin and the channel page as Referer. The login cookie is not
+  /// sent to the CDN (8-7; 3.x sent it).
+  static Map<String, String> mediaHeaders(String roomId) {
     final id = roomId.trim();
     return {
       'user-agent': userAgent,
       'origin': origin,
       'referer': id.isEmpty ? '$origin/' : '$origin/${Uri.encodeComponent(id)}',
-      if (cookie.trim().isNotEmpty) 'cookie': cookie.trim(),
     };
   }
 
@@ -246,9 +334,10 @@ abstract final class TwitchApi {
     return token == null || login == null ? null : (login: login, token: token);
   }
 
-  /// The usher master playlist of [login] with 3.x's parameters: a random
-  /// `p` and one of [playSessionIds].
-  static Uri usherUrl(String login, TwitchAccessToken token, Random random) {
+  /// The usher master playlist of [login] with 3.x's parameters (a random
+  /// `p` and one of [playSessionIds]) and the codecs asked for (8-8):
+  /// H.264 only when [preferH264], else HEVC and AV1 as well.
+  static Uri usherUrl(String login, TwitchAccessToken token, Random random, {bool preferH264 = true}) {
     final session = playSessionIds[random.nextInt(playSessionIds.length)];
     return Uri.https('usher.ttvnw.net', '/api/channel/hls/$login.m3u8', {
       'acmb': 'e30=',
@@ -263,6 +352,7 @@ abstract final class TwitchApi {
       'playlist_include_framerate': 'true',
       'reassignments_supported': 'true',
       'sig': token.signature,
+      'supported_codecs': preferH264 ? h264Codecs : enhancedCodecs,
       'token': token.value,
       'transcode_mode': 'cbr_v1',
     });
@@ -348,7 +438,7 @@ abstract final class TwitchApi {
 
   /// `SearchCategoryTags`: every tag in the server's order, named by
   /// `tagName` as in 3.x; `localizedName` only when `tagName` is empty, and
-  /// a tag with neither keeps its empty name, as 3.x showed it.
+  /// a tag with neither keeps its empty name (see [namedTags]).
   static List<TwitchTag> tags(Object? decoded) {
     final list = _data(decoded, 'SearchCategoryTags')['searchCategoryTags'];
     if (list is! List) throw const ApiChanged(_site, 'SearchCategoryTags: no list');
@@ -360,11 +450,22 @@ abstract final class TwitchApi {
     ];
   }
 
+  /// [tags] with each empty name taken from [fallback] (the same tags asked
+  /// for in English): Twitch has no Chinese name for some tags (S01-tags:
+  /// "Gambling"). A tag [fallback] cannot name keeps its empty name.
+  static List<TwitchTag> namedTags(List<TwitchTag> tags, List<TwitchTag> fallback) {
+    final names = {for (final tag in fallback) tag.id: tag.name};
+    return [
+      for (final tag in tags)
+        if (tag.name.isNotEmpty) tag else (id: tag.id, name: names[tag.id] ?? ''),
+    ];
+  }
+
   /// One `BrowsePage_AllDirectories` envelope: the directories of [tag] as
   /// 3.x's areas (`areaId` the game id, `shortName` the slug that
-  /// `DirectoryPage_Game` needs, the box art through `i2.wp.com`), and the
-  /// cursor of the next page when `pageInfo` says there is one. An envelope
-  /// with errors and no data is a page without areas, as 3.x read it.
+  /// `DirectoryPage_Game` needs, the box art), and the cursor of the next
+  /// page when `pageInfo` says there is one. An envelope with errors and no
+  /// data is a page without areas, as 3.x read it.
   static ({List<LiveArea> areas, String? cursor}) directories(Object? envelope, TwitchTag tag) {
     final data = _envelope(envelope, 'BrowsePage_AllDirectories').data;
     final connection = _connection(data?['directoriesWithTags']);
@@ -377,8 +478,8 @@ abstract final class TwitchApi {
               areaType: tag.id,
               typeName: tag.name,
               areaId: id,
-              areaName: _text(node['displayName']),
-              areaPic: _proxied(node['avatarURL']),
+              areaName: _gameName(node),
+              areaPic: _image(node['avatarURL']),
               shortName: slug,
             ),
     ];
@@ -387,52 +488,73 @@ abstract final class TwitchApi {
 
   // Lists ---------------------------------------------------------------------
 
-  /// `DirectoryPage_Game`: the streams of a directory as 3.x's cards (all
-  /// live, whatever the stream's `type`), and the cursor of the next page
-  /// when `pageInfo` says there is one. An unknown directory (`game ==
-  /// null`) has no streams, as 3.x showed it.
+  /// `DirectoryPage_Game`: the streams of a directory as 3.x's cards, and
+  /// the cursor of the next page when `pageInfo` says there is one. A
+  /// stream is live, or a replay when it is a rerun (8-9; 3.x called every
+  /// card live). The answer has no start time or restriction. An unknown
+  /// directory (`game == null`) is `NotFound` (8-6; 3.x showed no streams).
   static ({List<LiveRoom> rooms, String? cursor}) gameStreams(
     Object? decoded, {
     required DateTime now,
     TwitchChatLogin? chat,
+    String slug = '',
   }) {
-    final streams = _object(_object(_data(decoded, 'DirectoryPage_Game')['game'])?['streams']);
-    if (streams == null) return (rooms: const [], cursor: null);
-    final connection = _connection(streams);
-    final rooms = <LiveRoom>[];
-    for (final edge in connection.edges) {
-      final node = _object(edge['node']);
-      final broadcaster = _object(node?['broadcaster']);
-      if (node == null || broadcaster == null) continue;
-      final login = jsonString(broadcaster['login']);
-      if (login == null) continue;
-      final area = _object(node['game']);
-      final viewers = _text(node['viewersCount'] ?? 0);
-      rooms.add(
-        LiveRoom(
-          roomId: login,
-          platform: _site,
-          title: _text(node['title']),
-          nick: broadcaster['displayName'] == null ? login : _text(broadcaster['displayName']),
-          avatar: _proxied(broadcaster['profileImageURL']),
-          cover: _cover(node['previewImageURL'], now),
-          area: area == null ? '' : _text(area['displayName'] ?? area['name']),
-          watching: viewers,
-          onlineViewers: viewers,
-          audienceMetricType: AudienceMetricType.onlineViewers,
-          liveStatus: LiveStatus.live,
-          introduction: '',
-          notice: '',
-          danmakuData: TwitchDanmakuArgs(channel: login.toLowerCase(), chat: chat),
-        ),
-      );
-    }
+    final game = _object(_data(decoded, 'DirectoryPage_Game')['game']);
+    if (game == null) throw NotFound(_site, 'DirectoryPage_Game: no directory $slug'.trim());
+    final connection = _connection(game['streams']);
+    final rooms = [for (final edge in connection.edges) ?_streamCard(_object(edge['node']), now: now, chat: chat)];
     return (rooms: rooms, cursor: _nextCursor(connection));
+  }
+
+  /// The raw [streamsQuery]: the site's busiest streams as cards (the
+  /// recommendations, 8-3), each with its start time and restriction, and
+  /// the cursor of the next page when `pageInfo` says there is one.
+  static ({List<LiveRoom> rooms, String? cursor}) streams(
+    Object? decoded, {
+    required DateTime now,
+    TwitchChatLogin? chat,
+  }) {
+    final connection = _connection(_data(decoded, 'streams')['streams']);
+    final rooms = [for (final edge in connection.edges) ?_streamCard(_object(edge['node']), now: now, chat: chat)];
+    return (rooms: rooms, cursor: _nextCursor(connection));
+  }
+
+  /// One stream node of a list as a card: the broadcaster's login as room,
+  /// its display name (the login without one), live or a rerun's replay,
+  /// the preview as cover, the game's Chinese name as area. The start time
+  /// (`createdAt`) and restriction come with the raw [streamsQuery] only.
+  /// Null without a broadcaster login.
+  static LiveRoom? _streamCard(Map<String, dynamic>? node, {required DateTime now, TwitchChatLogin? chat}) {
+    final broadcaster = _object(node?['broadcaster']);
+    final login = jsonString(broadcaster?['login']);
+    if (node == null || broadcaster == null || login == null) return null;
+    final area = _object(node['game']);
+    final viewers = _text(node['viewersCount'] ?? 0);
+    return LiveRoom(
+      roomId: login,
+      platform: _site,
+      title: _text(node['title']),
+      nick: broadcaster['displayName'] == null ? login : _text(broadcaster['displayName']),
+      avatar: _image(broadcaster['profileImageURL']),
+      cover: _cover(node['previewImageURL'], now),
+      area: area == null ? '' : _gameName(area),
+      watching: viewers,
+      onlineViewers: viewers,
+      audienceMetricType: AudienceMetricType.onlineViewers,
+      liveStatus: _isRerun(node) ? LiveStatus.replay : LiveStatus.live,
+      startedAt: _time(node['createdAt']),
+      restriction: restriction(node),
+      introduction: '',
+      notice: '',
+      danmakuData: TwitchDanmakuArgs(channel: login.toLowerCase(), chat: chat),
+    );
   }
 
   /// `SearchResultsPage_SearchResults`: channels, live or not, as 3.x's
   /// cards, and the channel index's cursor (none when empty or when the page
-  /// had no channels).
+  /// had no channels). A rerun is a replay (8-9); a stream's start time is
+  /// its broadcast's `startedAt` (`lastBroadcast` is the stream on air when
+  /// their ids match). No restriction is given.
   static ({List<LiveRoom> rooms, String? cursor}) searchPage(
     Object? decoded, {
     required DateTime now,
@@ -447,6 +569,11 @@ abstract final class TwitchApi {
       final login = jsonString(item?['login']);
       if (item == null || login == null) continue;
       final stream = _object(item['stream']);
+      final broadcast = _object(item['lastBroadcast']);
+      final current =
+          stream != null &&
+          jsonString(stream['id']) != null &&
+          jsonString(stream['id']) == jsonString(broadcast?['id']);
       final viewers = _text(stream?['viewersCount'] ?? 0);
       rooms.add(
         LiveRoom(
@@ -454,13 +581,18 @@ abstract final class TwitchApi {
           platform: _site,
           title: _text(_object(item['broadcastSettings'])?['title']),
           nick: _text(item['displayName']),
-          avatar: _proxied(item['profileImageURL']),
+          avatar: _image(item['profileImageURL']),
           cover: _cover(stream?['previewImageURL'], now),
           area: _text(_object(stream?['game'])?['displayName']),
           watching: viewers,
           onlineViewers: viewers,
           audienceMetricType: AudienceMetricType.onlineViewers,
-          liveStatus: stream != null ? LiveStatus.live : LiveStatus.offline,
+          liveStatus: stream == null
+              ? LiveStatus.offline
+              : _isRerun(stream)
+              ? LiveStatus.replay
+              : LiveStatus.live,
+          startedAt: current ? _time(broadcast?['startedAt']) : null,
           introduction: '',
           notice: '',
           danmakuData: TwitchDanmakuArgs(channel: login.toLowerCase(), chat: chat),
@@ -474,12 +606,24 @@ abstract final class TwitchApi {
   // Rooms ---------------------------------------------------------------------
 
   /// The raw `user` query: the room as the user asked for it
-  /// ([requestedId]), with 3.x's fields: the last broadcast's title, the
-  /// profile image as avatar and cover, live only for a stream of type
-  /// `live`, viewers `'0'` when not live, the game's `name` as area, no
-  /// introduction or notice. `user == null` is `NotFound`; another login in
-  /// the answer is `ApiChanged`.
-  static LiveRoom roomDetail(Object? decoded, {required String requestedId, TwitchChatLogin? chat}) {
+  /// ([requestedId]), with 3.x's fields where no upgrade changed them: the
+  /// last broadcast's title, the profile image as avatar, no notice, viewers
+  /// `'0'` when nothing is on air. A stream of type `live` is live, a rerun
+  /// a replay (8-9; 3.x: offline), any other type or none offline. While a
+  /// stream is on (live or rerun) the room has:
+  /// - the stream's preview as cover (8-5; else the profile image, as 3.x),
+  ///   with 3.x's list `?&t=<Unix seconds of [now]>`;
+  /// - the game's Chinese name as area (8-2; 3.x: its English `name`);
+  /// - its start time (`createdAt`) and restriction.
+  ///
+  /// The channel's description is the introduction (8-4). `user == null` is
+  /// `NotFound`; another login in the answer is `ApiChanged`.
+  static LiveRoom roomDetail(
+    Object? decoded, {
+    required String requestedId,
+    required DateTime now,
+    TwitchChatLogin? chat,
+  }) {
     final id = requestedId.trim();
     final login = id.toLowerCase();
     final user = _object(_data(decoded, 'user')['user']);
@@ -487,10 +631,16 @@ abstract final class TwitchApi {
     final answered = jsonString(user['login'])?.toLowerCase();
     if (answered != login) throw ApiChanged(_site, 'user: answered $answered for $login');
     final stream = _object(user['stream']);
-    final live = stream != null && stream['type'] == 'live';
-    final viewers = live ? _text(stream['viewersCount'] ?? 0) : '0';
+    final status = switch (stream?['type']) {
+      'live' => LiveStatus.live,
+      'rerun' => LiveStatus.replay,
+      _ => LiveStatus.offline,
+    };
+    final onAir = status != LiveStatus.offline;
+    final viewers = onAir ? _text(stream!['viewersCount'] ?? 0) : '0';
     final game = _object(stream?['game']);
     final profile = _text(user['profileImageURL']);
+    final preview = onAir ? _cover(stream!['previewImageURL'], now) : '';
     return LiveRoom(
       roomId: id,
       platform: _site,
@@ -499,16 +649,32 @@ abstract final class TwitchApi {
       title: _text(_object(user['lastBroadcast'])?['title']),
       nick: _text(user['displayName']),
       avatar: profile,
-      cover: profile,
-      area: game == null ? null : _text(game['name']),
+      cover: preview.isEmpty ? profile : preview,
+      area: game == null ? null : _gameName(game),
       watching: viewers,
       onlineViewers: viewers,
       audienceMetricType: AudienceMetricType.onlineViewers,
-      liveStatus: live ? LiveStatus.live : LiveStatus.offline,
-      introduction: '',
+      liveStatus: status,
+      startedAt: onAir ? _time(stream!['createdAt']) : null,
+      restriction: onAir ? restriction(stream) : null,
+      introduction: _text(user['description']).trim(),
       notice: '',
       danmakuData: TwitchDanmakuArgs(channel: login, chat: chat),
     );
+  }
+
+  /// The restriction of a stream node that was asked for its `restriction`
+  /// ([userQuery], [streamsQuery]): none when it is null; subscribers only
+  /// for Twitch's subscriber-only streams (a type naming `SUB`, such as
+  /// `SUB_ONLY_LIVE`); another kind is `unplayable`, since what it asks of
+  /// the viewer is unknown. Null when the node has no such key (the
+  /// persisted list queries do not ask for it).
+  static LiveRestriction? restriction(Map<String, dynamic>? stream) {
+    if (stream == null || !stream.containsKey('restriction')) return null;
+    final value = stream['restriction'];
+    if (value == null) return LiveRestriction.none;
+    final type = '${_object(value)?['type'] ?? ''}'.toUpperCase();
+    return type.contains('SUB') ? LiveRestriction.subscribersOnly : LiveRestriction.unplayable;
   }
 
   // Streams -------------------------------------------------------------------
@@ -568,12 +734,13 @@ abstract final class TwitchApi {
   /// `#EXT-X-STREAM-INF` with the URI after it, grouped by height, frame
   /// rate, bandwidth and `VIDEO` group; the broadcaster's own stream
   /// (`chunked`) first, the rest by bandwidth. `data` is the list of the
-  /// variant URLs. No variant is `StreamUnavailable`.
+  /// variant URLs ([TwitchVariants], with the codec `CODECS` names). No
+  /// variant is `StreamUnavailable`.
   static List<LivePlayQuality> qualities(String playlist, {required Uri master}) {
     if (!playlist.trimLeft().startsWith('#EXTM3U')) {
       throw ApiChanged(_site, 'usher: not a playlist (${_snippet(playlist)})');
     }
-    final grouped = <String, ({String label, int sort, List<String> urls})>{};
+    final grouped = <String, ({String label, int sort, List<String> urls, String? codec})>{};
     Map<String, String>? pending;
     for (final raw in playlist.split(RegExp(r'\r?\n'))) {
       final line = raw.trim();
@@ -605,6 +772,7 @@ abstract final class TwitchApi {
           label: _qualityName(bandwidth, height: height, frameRate: frameRate, source: source),
           sort: source ? 1 << 30 : bandwidth,
           urls: [url],
+          codec: videoCodec(attributes['CODECS'] ?? ''),
         );
       } else if (!existing.urls.contains(url)) {
         existing.urls.add(url);
@@ -613,8 +781,30 @@ abstract final class TwitchApi {
     if (grouped.isEmpty) throw const StreamUnavailable(_site, 'usher: no variant');
     return [
       for (final MapEntry(:key, :value) in grouped.entries)
-        LivePlayQuality(quality: value.label, id: key, sort: value.sort, data: List<String>.unmodifiable(value.urls)),
+        LivePlayQuality(
+          quality: value.label,
+          id: key,
+          sort: value.sort,
+          data: TwitchVariants(value.urls, codec: value.codec),
+        ),
     ]..sort((a, b) => b.sort.compareTo(a.sort));
+  }
+
+  /// The video codec of an HLS `CODECS` list: `avc` (`avc1`, `avc3`),
+  /// `hevc` (`hvc1`, `hev1`) or `av1` (`av01`); null for none of them.
+  static String? videoCodec(String codecs) {
+    for (final entry in codecs.toLowerCase().split(',')) {
+      final name = entry.trim().split('.').first;
+      switch (name) {
+        case 'avc1' || 'avc3':
+          return 'avc';
+        case 'hvc1' || 'hev1':
+          return 'hevc';
+        case 'av01':
+          return 'av1';
+      }
+    }
+    return null;
   }
 
   /// The quality of [fresh] that is [wanted]: the same id, else the same
@@ -628,20 +818,26 @@ abstract final class TwitchApi {
         fresh.where((quality) => quality.quality == wanted.quality).firstOrNull;
   }
 
-  /// The lines of one quality: each variant URL (HLS, lined by its host)
-  /// with the media headers for [roomId] and the stored [cookie]. Variant
+  /// The lines of one quality: each variant URL (HLS, lined by its host,
+  /// encoded with [codec]) with the media headers for [roomId]. Variant
   /// playlists outlive the 20-minute access token, so no lease.
   static LivePlayUrlResolution resolution(
     Iterable<String> urls, {
     required String roomId,
     required Object? appliedQualityData,
-    String cookie = '',
+    String? codec,
   }) {
-    final headers = mediaHeaders(roomId, cookie: cookie);
+    final headers = mediaHeaders(roomId);
     return LivePlayUrlResolution.lines([
       for (final url in urls)
         if (url.trim().isNotEmpty)
-          LivePlayLine(url.trim(), headers: headers, format: StreamFormat.hls, lineId: Uri.tryParse(url.trim())?.host),
+          LivePlayLine(
+            url.trim(),
+            headers: headers,
+            format: StreamFormat.hls,
+            codec: codec,
+            lineId: Uri.tryParse(url.trim())?.host,
+          ),
     ], appliedQualityData: appliedQualityData);
   }
 
@@ -690,14 +886,32 @@ abstract final class TwitchApi {
     );
   }
 
-  /// An image URL through `i2.wp.com`, as 3.x wrote every list image.
-  static String _proxied(Object? value) => _text(value).replaceFirst('https://', 'https://i2.wp.com/');
+  /// An image URL as Twitch gives it: straight from its CDN (8-7; 3.x
+  /// rewrote every list image through the `i2.wp.com` proxy).
+  static String _image(Object? value) => _text(value);
 
-  /// A stream preview through `i2.wp.com` with 3.x's `?&t=<Unix seconds>`,
-  /// so a refresh fetches the current frame; empty without a preview.
+  /// A stream preview with 3.x's `?&t=<Unix seconds>`, so a refresh fetches
+  /// the current frame; empty without a preview.
   static String _cover(Object? value, DateTime now) {
-    final url = _proxied(value);
+    final url = _image(value);
     return url.trim().isEmpty ? '' : '$url?&t=${now.millisecondsSinceEpoch ~/ 1000}';
+  }
+
+  /// A game's (directory's) name in the requested language, `displayName`
+  /// (Chinese under [acceptLanguage]); its `name` when there is none.
+  static String _gameName(Map<String, dynamic> game) {
+    final display = _text(game['displayName']);
+    return display.isNotEmpty ? display : _text(game['name']);
+  }
+
+  /// Whether a stream is a rerun (Twitch's replay of a past broadcast).
+  static bool _isRerun(Map<String, dynamic> stream) => stream['type'] == 'rerun';
+
+  /// An ISO 8601 time (`2026-09-27T12:49:35Z`) as UTC; null when missing,
+  /// unreadable or not after 1970.
+  static DateTime? _time(Object? value) {
+    final time = DateTime.tryParse(jsonString(value) ?? '')?.toUtc();
+    return time == null || time.millisecondsSinceEpoch <= 0 ? null : time;
   }
 }
 

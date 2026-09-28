@@ -1,0 +1,711 @@
+{
+  "data": {
+    "streams": {
+      "edges": [
+        {
+          "cursor": "eyJzIjozNzAyNy43MzE4OTg0NjcyMjQsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316575015155",
+            "title": "妹に運転教えるゲームやって早く寝ろ",
+            "type": "live",
+            "viewersCount": 37027,
+            "createdAt": "2026-09-28T12:56:25Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_kato_junichi0817-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "545050196",
+              "login": "kato_junichi0817",
+              "displayName": "加藤純一うん〇ちゃん",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/a4977cfd-1962-41ec-9355-ab2611b97552-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "501028374",
+              "name": "Teach My Little Sister How to Drive",
+              "displayName": "Teach My Little Sister How to Drive",
+              "slug": "teach-my-little-sister-how-to-drive"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjozMTczMC4xMzY3NzM3MTU5OTMsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "317849593314",
+            "title": "LLAMADITA DE ROCKSTAR 📞 EN BUSCA Y CAPTURA 🚨 DÍA 2 EN SAN ANDREAS 🚬 - Grand Theft Auto: San Andreas 2026 #2",
+            "type": "live",
+            "viewersCount": 31730,
+            "createdAt": "2026-09-28T15:22:00Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_illojuan-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "90075649",
+              "login": "illojuan",
+              "displayName": "IlloJuan",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/593b5641-c626-4ba4-ba49-11cb33f6c3e8-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "6521",
+              "name": "Grand Theft Auto: San Andreas",
+              "displayName": "Grand Theft Auto: San Andreas",
+              "slug": "grand-theft-auto-san-andreas"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoyMzg5Ni40NDQxNTc1MTcxNSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "317882888291",
+            "title": "HARDCORE #5 CON JUANITO (listo para verlo morir 400 veces más porque es malisimo)",
+            "type": "live",
+            "viewersCount": 23896,
+            "createdAt": "2026-09-28T16:24:26Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_auronplay-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "459331509",
+              "login": "auronplay",
+              "displayName": "auronplay",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/f1ea7d5a-ab2c-4e91-bba5-3ce211adfc3b-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoyMDg1Ny4wODc4MDc2NTIzMywiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "321608743898",
+            "title": "30 JOURS POUR FAIRE DAKAR-PARIS SANS AVION - JOUR 9 (@byilhann et @flamby) !site !prime !revolut !jd !airup !macif *Publicité*",
+            "type": "live",
+            "viewersCount": 20857,
+            "createdAt": "2026-09-27T15:30:56Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_nico_la-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "887001013",
+              "login": "nico_la",
+              "displayName": "Nico_la",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/d72e4845-0556-4433-b3be-efcb1a34bb3a-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509672",
+              "name": "IRL",
+              "displayName": "IRL",
+              "slug": "irl"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoyMDUyMS4xMDgxMDEwMTg3MywiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316517939954",
+            "title": "あぺっくす おれはよわい",
+            "type": "live",
+            "viewersCount": 20521,
+            "createdAt": "2026-09-28T09:37:29Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_fps_shaka-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "49207184",
+              "login": "fps_shaka",
+              "displayName": "fps_shaka",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/d8a3e3e9-f70a-4634-bd59-b4a1cab834de-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "676802825",
+              "name": "Big Walk",
+              "displayName": "Big Walk",
+              "slug": "big-walk"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxOTY2My43OTc2NjYzNzI0NSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "319385374423",
+            "title": "🔴DROPS🔴!MOUSEATHON DAY 28! 50% TO IMMUNE DEFICIENCY FOUNDATION! | !glamb !youtooz !omocat !fox !cheeky !ht !starforge !tts !merch !razer",
+            "type": "live",
+            "viewersCount": 19663,
+            "createdAt": "2026-09-28T14:21:00Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_ironmouse-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "175831187",
+              "login": "ironmouse",
+              "displayName": "ironmouse",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/c2aca19b-b318-4398-99a5-fb6a597536fd-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "263490",
+              "name": "Rust",
+              "displayName": "Rust",
+              "slug": "rust"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxOTQxMi4xODA1NTcxMTUyOCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316926987349",
+            "title": "[4 свадьбы, разбаны ] | !winline !поиск !tg",
+            "type": "live",
+            "viewersCount": 19412,
+            "createdAt": "2026-09-28T16:16:45Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_deepins02-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "135385636",
+              "login": "deepins02",
+              "displayName": "deepins02",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/5537e5db-a0d9-489e-bc37-eb6609b6a713-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxODU2MS44NTQwMzQ4MDM3NzUsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "318612472423",
+            "title": "🤏 MR. GEIL STREAMT 🤏 GEILE REACTIONS 🤏 UNTIL DAWN HORROR ABEND 🤏 BIN KRANK 🤏  !socials !merch !esn !pmm",
+            "type": "live",
+            "viewersCount": 18561,
+            "createdAt": "2026-09-28T14:02:26Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_zarbex-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "403594122",
+              "login": "zarbex",
+              "displayName": "zarbex",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/436a50ca-f8e9-4cc0-aae8-def977448ac7-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxODQ3MC40ODE3MzMzMzQxMywiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "317882372195",
+            "title": "🟥EL MEJOR STREAMER🟥PERSIANA🟥IS🟥BACK🟥CLUBES PRO🟥DEDEADORES🟥ROAD TO 2A🟥GANGA GAME🟥LONG STREAM🟥MEGA SHOW DAY🟥ROCKET🟥WINNERS🟥FARM🟥",
+            "type": "live",
+            "viewersCount": 18470,
+            "createdAt": "2026-09-28T15:26:10Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_peereira7-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "182714869",
+              "login": "peereira7",
+              "displayName": "Peereira7",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/c157ed0d-1623-444f-8879-77ae4555684a-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "123184772",
+              "name": "EA Sports FC 27",
+              "displayName": "EA Sports FC 27",
+              "slug": "ea-sports-fc-27"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxNzA3OS44NDY0MTY2MjUxNTgsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "317872913892",
+            "title": "Reactions & Talks🔥 20 Uhr 1. Eligella Cup in EA FC 27🔥 | !iconleague !doku !eligella  !gaming",
+            "type": "live",
+            "viewersCount": 13322,
+            "createdAt": "2026-09-28T16:33:20Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_eliasn97-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "238813810",
+              "login": "eliasn97",
+              "displayName": "eliasn97",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/4fb94c7a-b4c0-4ed1-9782-b630a59915d5-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxNDI2NS43ODAyMjExMDM2NCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "317003398100",
+            "title": "maroon 500 bangers",
+            "type": "live",
+            "viewersCount": 14265,
+            "createdAt": "2026-09-28T13:00:14Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_thebausffs-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "93869876",
+              "login": "thebausffs",
+              "displayName": "Thebausffs",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/04c65db8-ef62-4fb5-8cff-09f0521de151-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "21779",
+              "name": "League of Legends",
+              "displayName": "League of Legends",
+              "slug": "league-of-legends"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxNDEwMy4xNTI5MDc0Mzc2ODEsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "319158363636",
+            "title": "SUPER FARANEWS!",
+            "type": "live",
+            "viewersCount": 14103,
+            "createdAt": "2026-09-28T14:50:49Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_martinciriook-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "561111389",
+              "login": "martinciriook",
+              "displayName": "MartinCirioOk",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/8fc15854-004c-49e3-80d2-c036ae0c0ae9-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxNDA3My42OTgyNDI1ODM5NCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "318803735270",
+            "title": "1win Private Club | Ninjas in Pyjamas [1] vs [1] GamerLegion | Grand Final | Bo5 | w/ @zloba113 @baz1221",
+            "type": "live",
+            "viewersCount": 14073,
+            "createdAt": "2026-09-28T11:33:42Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_stariy_bog-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "121821372",
+              "login": "stariy_bog",
+              "displayName": "stariy_bog",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/f9435c16-7fff-44c9-88cd-43494e59da56-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "32399",
+              "name": "Counter-Strike",
+              "displayName": "Counter-Strike",
+              "slug": "counter-strike"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMzgzMy43OTMwMDM3NTg4MzQsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316927034325",
+            "title": "ПОНЕДЕЛЬНИК/ДОМАШНИЙ",
+            "type": "live",
+            "viewersCount": 13833,
+            "createdAt": "2026-09-28T16:22:50Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_sasavot-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "89132304",
+              "login": "sasavot",
+              "displayName": "sasavot",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/c1372b44-c4c9-451d-867e-377b0d227756-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMjMxNC40NTUwMjM0OTc0NDksImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "318750640485",
+            "title": "EML 2026 | Stage 2 - Day 7",
+            "type": "live",
+            "viewersCount": 12314,
+            "createdAt": "2026-09-28T15:32:03Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_rainbow6-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "65171890",
+              "login": "rainbow6",
+              "displayName": "Rainbow6",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/929b9591-07c5-4adb-adf0-5f0897332391-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "460630",
+              "name": "Rainbow Six Siege",
+              "displayName": "Rainbow Six Siege",
+              "slug": "tom-clancys-rainbow-six-siege"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMDc0My41NDc5ODU5MzczNCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "317546034679",
+            "title": "Batomon Returns | !prime !DemonBluff",
+            "type": "live",
+            "viewersCount": 10456,
+            "createdAt": "2026-09-28T15:59:55Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_northernlion-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "14371185",
+              "login": "northernlion",
+              "displayName": "Northernlion",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/6e593335-c2f3-4227-bc0d-34634472cf0f-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "903469103",
+              "name": "Batomon Showdown",
+              "displayName": "Batomon Showdown",
+              "slug": "batomon-showdown"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMDUzOC4zMjgzNTQ5MzE5NzksImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "318748976613",
+            "title": "Blind playthrough of Terraria! Permadeath and Expert mode!",
+            "type": "live",
+            "viewersCount": 10538,
+            "createdAt": "2026-09-28T13:00:42Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_forsen-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "22484632",
+              "login": "forsen",
+              "displayName": "forsen",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-70x70.png"
+            },
+            "game": {
+              "id": "31376",
+              "name": "Terraria",
+              "displayName": "Terraria",
+              "slug": "terraria"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMDUzOC4wOTMwNDk1NDE4MzYsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "318747958373",
+            "title": "3 Tage League Classic LAN Party aus der Streamer WG! Mit JEDEM Champ 2 Wins als Team!    | !Gillette !Prepmymeal !ESN |",
+            "type": "live",
+            "viewersCount": 10538,
+            "createdAt": "2026-09-28T10:53:46Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_trymacs-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "64342766",
+              "login": "trymacs",
+              "displayName": "Trymacs",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/22a56845-20d0-4e14-932e-0ec099b088eb-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509663",
+              "name": "Special Events",
+              "displayName": "特别活动",
+              "slug": "special-events"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMDQyNC45NTY4NTgwNzM4MTYsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "320522348252",
+            "title": "YO",
+            "type": "live",
+            "viewersCount": 10424,
+            "createdAt": "2026-09-28T16:01:25Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_lirik-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "23161357",
+              "login": "lirik",
+              "displayName": "LIRIK",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/38e925fc-0b07-4e1e-82e2-6639e01344f3-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMDA1Ny40OTM0MTM4OTA4MjcsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "317004184404",
+            "title": "CS2 KILLS MENTAL HEALTH 💉😀👍",
+            "type": "live",
+            "viewersCount": 10057,
+            "createdAt": "2026-09-28T15:19:27Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_skywhywalker-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "254030065",
+              "login": "skywhywalker",
+              "displayName": "skywhywalker",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/6cf5c0a9-24f3-4e63-8433-022ef586e279-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "32399",
+              "name": "Counter-Strike",
+              "displayName": "Counter-Strike",
+              "slug": "counter-strike"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo5OTE1LjEyNzA1ODAzOTQ0OCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "321623159386",
+            "title": "NEW SERVAL ENCLOSURE REVEAL🐈 @alveussanctuary",
+            "type": "live",
+            "viewersCount": 9915,
+            "createdAt": "2026-09-28T15:33:55Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_maya-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "235835559",
+              "login": "maya",
+              "displayName": "Maya",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/42b93509-a232-452f-ae01-2051ad6ab1fc-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo5MzE2LjkxNTI1MzcyMTYyMywiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "317872779364",
+            "title": "Dernier lundi... Venez on fait comme si c'était pas le dernier... s'il vous plait... Ce sera plus simple (DEIFIED DISPO SUR STEAM)",
+            "type": "live",
+            "viewersCount": 9316,
+            "createdAt": "2026-09-28T16:18:24Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_zerator-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "41719107",
+              "login": "zerator",
+              "displayName": "ZeratoR",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/599b546a-c27f-4684-93ff-5eeecd01fb2b-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "687129551",
+              "name": "Trackmania",
+              "displayName": "Trackmania",
+              "slug": "trackmania"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo5MTYwLjM2MjUwMDkyODQyNiwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "320560851296",
+            "title": "✨NOPIXEL V✨TONY CORLEONE BRICK BOYS✨GRIND TIMEEEEE✨MULTISTREAM!",
+            "type": "live",
+            "viewersCount": 9160,
+            "createdAt": "2026-09-28T13:30:27Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_anthonyz-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "119415848",
+              "login": "anthonyz",
+              "displayName": "AnthonyZ",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/3cf02b44-afa0-4824-9302-27d2d6910f44-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "32982",
+              "name": "Grand Theft Auto V",
+              "displayName": "Grand Theft Auto V",
+              "slug": "grand-theft-auto-v"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo5MDAzLjQ3NTQ2MTU0NzE0MSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "318613805031",
+            "title": "[EN/ES CC] 🛑 MIMIC PARTY Z EKIPĄ (NAŚLADUJEMY DŹWIĘKI JAK DEBlLE) -> SKATE 3 Z EKIPĄ 🛑 | DARMOWY SUB -> !prime !OperaGX !holy",
+            "type": "live",
+            "viewersCount": 9003,
+            "createdAt": "2026-09-28T16:03:17Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_youngmulti-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "28141853",
+              "login": "youngmulti",
+              "displayName": "YoungMulti",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/c3e35a62-e614-46ed-9bc7-a8d307c369dc-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo4MjI4LjM0NzA4MDk3NTM4NSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "320561010016",
+            "title": "MULLET MONDAY | DELTAA WITH PEAANUT",
+            "type": "live",
+            "viewersCount": 8228,
+            "createdAt": "2026-09-28T13:58:27Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_hutchmf-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "180118013",
+              "login": "hutchmf",
+              "displayName": "HutchMF",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/273f15a6-bb3b-40eb-ac76-c3a08e082678-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "1282866981",
+              "name": "Delta Force",
+              "displayName": "Delta Force",
+              "slug": "delta-force-hawk-ops"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo4MTQ3LjM5MjUwODI5Nzc4NCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "321623422938",
+            "title": "!DROPS, CLASSIC FOREVER $50K !TOURNY ANNOUNCED | TESTING & THEORYCRAFTING",
+            "type": "live",
+            "viewersCount": 8147,
+            "createdAt": "2026-09-28T16:13:30Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_xaryu-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "32085830",
+              "login": "xaryu",
+              "displayName": "Xaryu",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/b79e636b-26ad-49f8-8fd1-60a6e4cf9cca-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "18122",
+              "name": "World of Warcraft",
+              "displayName": "World of Warcraft",
+              "slug": "world-of-warcraft"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo4MDI2LjA0Mjk0NjMzMjg0MywiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "315567803504",
+            "title": "叉滴娛樂 9/28 星期一 晚上好 麻吉們  吃飽飽 讚讚 伊莫冒險",
+            "type": "live",
+            "viewersCount": 8026,
+            "createdAt": "2026-09-28T13:28:26Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_roger9527-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "65653595",
+              "login": "roger9527",
+              "displayName": "羅傑",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/roger9527-profile_image-e6cccadfeba28124-70x70.jpeg"
+            },
+            "game": {
+              "id": "516575",
+              "name": "VALORANT",
+              "displayName": "VALORANT",
+              "slug": "valorant"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo3Njk1LjQ1MDY4NDY5NTM3NiwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "321740404315",
+            "title": "[DROPS] 50K$ !TOURNEY PREP | FOREVER ROGUE PVP CLASSIC + PAYO STREAMED 16H YESTERDAY AND SLEPT ONLY 4H. HE IS DEADGE",
+            "type": "live",
+            "viewersCount": 7695,
+            "createdAt": "2026-09-28T11:59:30Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_payo-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "59624901",
+              "login": "payo",
+              "displayName": "Payo",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/996d2d80-c1c4-4dd7-99dd-074c47cf7196-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "18122",
+              "name": "World of Warcraft",
+              "displayName": "World of Warcraft",
+              "slug": "world-of-warcraft"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo3NTQ3LjQ3NjY5MjE0OTI5NCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "317003749716",
+            "title": "road to top 100 eu ladder no jokes only tryhard !тимспиритжди !tg !BETBOOM !vtb",
+            "type": "live",
+            "viewersCount": 7547,
+            "createdAt": "2026-09-28T14:08:06Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_avice-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "215363437",
+              "login": "avice",
+              "displayName": "avice",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/25da635a-0d2b-4b40-b7f3-742c68c3e717-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "29595",
+              "name": "Dota 2",
+              "displayName": "Dota 2",
+              "slug": "dota-2"
+            }
+          }
+        }
+      ],
+      "pageInfo": {
+        "hasNextPage": true
+      }
+    }
+  },
+  "extensions": {
+    "durationMilliseconds": 62,
+    "requestID": "01M3MEWH09M0W93NBRQG5MSQFJ"
+  }
+}

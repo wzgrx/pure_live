@@ -4,10 +4,19 @@
 // 3.x's parser kept apart from this adapter. Every intended difference is
 // listed with its reason; everything else must match.
 //
-// S05-user-* answer the raw `user` query 3.x never sent (it asked for the
-// ChannelShell + StreamMetadata pair); their tests check 3.x's field rules
-// (twitch_site.dart:708-754) instead. S03-streams is not used: 3.x
-// recommended from the Just Chatting directory, not the site-wide list.
+// S05-user-* and S05-detail-* answer the raw `user` query 3.x never sent (it
+// asked for the ChannelShell + StreamMetadata pair); their tests check 3.x's
+// field rules (twitch_site.dart:708-754) and the M4.U upgrades instead.
+// S03-* answer the site-wide `streams` query the recommendations use since
+// M4.U (8-3; 3.x recommended from the Just Chatting directory), so they have
+// no 3.x output either.
+//
+// M4.U differences from 3.x's output, by upgrade (docs/UPGRADES.md):
+// - 8-7: images come straight from Twitch's CDN, not through `i2.wp.com`
+//   (`avatar`, `cover`, `areaPic`);
+// - 8-6: an unknown directory is NotFound instead of an empty list;
+// - M2.1 keys 3.x never wrote (`startedAt`, `restriction`) are checked on
+//   their own.
 import 'dart:convert';
 import 'dart:math';
 
@@ -45,6 +54,9 @@ TwitchTag _tag(String id) => TwitchApi.tags(_decode(_sample('S01-tags'))).firstW
 
 Map<String, dynamic> _json(String body) => jsonDecode(body) as Map<String, dynamic>;
 
+/// 3.x's image URL without its `i2.wp.com` proxy (8-7).
+String _direct(Object? legacy) => '${legacy ?? ''}'.replaceFirst('https://i2.wp.com/', 'https://');
+
 void main() {
   group('S01 categories', () {
     test('S01-tags: every tag, ids and names as 3.x (tagName), the nameless one included', () {
@@ -69,6 +81,18 @@ void main() {
       expect(tags, [(id: 'a', name: 'Shooter'), (id: 'b', name: '策略')]);
     });
 
+    test('8-2: the tag without a Chinese name takes its English one (S01-tags-en); the others stay Chinese', () {
+      final chinese = TwitchApi.tags(_decode(_sample('S01-tags')));
+      final english = TwitchApi.tags(_decode(_sample('S01-tags-en')));
+      final named = TwitchApi.namedTags(chinese, english);
+      expect(named.map((tag) => tag.id), chinese.map((tag) => tag.id));
+      expect(named.where((tag) => tag.name.isEmpty), isEmpty);
+      final gambling = named.singleWhere((tag) => tag.id == '2cf37ad2-6700-4312-a114-27bb91800254');
+      expect(gambling.name, 'Gambling');
+      expect(named.first.name, '冒险游戏');
+      expect(TwitchApi.namedTags([(id: 'x', name: '')], const []), [(id: 'x', name: '')]);
+    });
+
     for (final name in ['S01-dirs-1', 'S01-dirs-2']) {
       test("$name: each tag page gives 3.x's areas and next cursor", () {
         final fixture = _sample(name);
@@ -87,7 +111,10 @@ void main() {
           final areas = (expected['areas'] as List).cast<Map<String, dynamic>>();
           expect(page.areas, hasLength(areas.length), reason: tagId);
           for (final (position, area) in page.areas.indexed) {
-            _expectParity(area.toJson(), areas[position], reason: '$tagId[$position]');
+            // areaPic: the box art straight from Twitch's CDN (8-7).
+            _expectParity(area.toJson(), areas[position], changed: {'areaPic'}, reason: '$tagId[$position]');
+            expect(area.areaPic, _direct(areas[position]['areaPic']), reason: '$tagId[$position]');
+            expect(area.areaPic, isNot(contains('i2.wp.com')));
           }
           expect(page.cursor ?? '', expected['nextCursor'], reason: tagId);
           compared++;
@@ -132,23 +159,62 @@ void main() {
       final legacy = (fixture.legacy as Map)['rooms'] as List;
       expect(result.rooms.map((room) => room.roomId), legacy.map((room) => (room as Map)['roomId']));
       for (final (index, room) in result.rooms.indexed) {
+        final card = legacy[index] as Map<String, dynamic>;
         // danmakuData: 3.x wrote the numeric channel id, but its IRC
         // connection joins `#<text>`, so a card's own data joined no channel;
         // the arguments name the login now.
-        _expectParity(_card(room), legacy[index] as Map<String, dynamic>, changed: {'danmakuData'}, reason: '[$index]');
+        // avatar, cover: straight from Twitch's CDN (8-7).
+        _expectParity(_card(room), card, changed: {'danmakuData', 'avatar', 'cover'}, reason: '[$index]');
         expect((room.danmakuData! as TwitchDanmakuArgs).channel, room.roomId);
+        expect(room.avatar, _direct(card['avatar']), reason: '[$index]');
+        expect(room.cover, _direct(card['cover']), reason: '[$index]');
+        // The persisted query gives neither a start time nor a restriction.
+        expect(room.startedAt, isNull);
+        expect(room.restriction, isNull);
       }
       expect(result.cursor, (fixture.legacy as Map)['nextCursor']);
       expect(result.rooms.first.cover, endsWith('?&t=${fixture.capturedAt.millisecondsSinceEpoch ~/ 1000}'));
-      expect(result.rooms.first.cover, startsWith('https://i2.wp.com/static-cdn.jtvnw.net/'));
+      expect(result.rooms.first.cover, startsWith('https://static-cdn.jtvnw.net/'));
+      expect(result.rooms.first.area, '谈天说地', reason: 'the Chinese directory name (8-2)');
     });
 
-    test('S02-game-missing: an unknown directory has no streams, as in 3.x', () {
+    test('S02-game-missing: an unknown directory is NotFound (8-6; 3.x showed no streams)', () {
       final fixture = _sample('S02-game-missing');
       expect((fixture.legacy as Map)['rooms'], isEmpty);
-      final result = TwitchApi.gameStreams(_decode(fixture), now: fixture.capturedAt);
-      expect(result.rooms, isEmpty);
-      expect(result.cursor, isNull);
+      expect(
+        () => TwitchApi.gameStreams(_decode(fixture), now: fixture.capturedAt, slug: 'zzz'),
+        throwsA(isA<NotFound>().having((error) => error.detail, 'detail', contains('zzz'))),
+      );
+    });
+
+    test('8-9: a rerun card is a replay, not live (3.x called every card live)', () {
+      final result = TwitchApi.gameStreams({
+        'data': {
+          'game': {
+            'streams': {
+              'edges': [
+                {
+                  'node': {
+                    'type': 'rerun',
+                    'viewersCount': 3,
+                    'broadcaster': {'login': 'a'},
+                  },
+                },
+                {
+                  'node': {
+                    'type': 'live',
+                    'broadcaster': {'login': 'b'},
+                  },
+                },
+              ],
+            },
+          },
+        },
+      }, now: DateTime.utc(2026));
+      expect(result.rooms.map((room) => room.liveStatus), [LiveStatus.replay, LiveStatus.live]);
+      expect(result.rooms.first.isPlayableNow, isTrue);
+      expect(result.rooms.first.followGroup, FollowGroup.replay);
+      expect(result.rooms.first.watching, '3');
     });
 
     test('S02-game-cursor: the integrity challenge is RiskControl (3.x threw a StateError)', () {
@@ -188,7 +254,7 @@ void main() {
         now: DateTime.utc(2026),
       );
       expect(more.cursor, 'c1');
-      expect(TwitchApi.gameStreams(page(null), now: DateTime.utc(2026)).rooms, isEmpty);
+      expect(TwitchApi.gameStreams(page(null), now: DateTime.utc(2026)).rooms, isEmpty, reason: 'no streams at all');
     });
 
     test('a card without a preview has no cover (3.x: appendTxt on an empty string)', () {
@@ -216,6 +282,115 @@ void main() {
     });
   });
 
+  group('S03 site-wide streams (the recommendations since 8-3; no 3.x output)', () {
+    test('S03-top: every stream a live card with its start time, no restriction, straight images; the cursor', () {
+      final fixture = _sample('S03-top');
+      final edges = (((_json(fixture.body)['data'] as Map)['streams'] as Map)['edges'] as List)
+          .cast<Map<String, dynamic>>();
+      final result = TwitchApi.streams(_decode(fixture), now: fixture.capturedAt, chat: (login: 'me', token: 't'));
+      expect(result.rooms, hasLength(edges.length));
+      expect(result.rooms, hasLength(29), reason: 'Twitch gave 29 for first: 30');
+      for (final (index, room) in result.rooms.indexed) {
+        final node = edges[index]['node'] as Map;
+        final broadcaster = node['broadcaster'] as Map;
+        expect(room.roomId, broadcaster['login']);
+        expect(room.nick, broadcaster['displayName']);
+        expect(room.title, node['title']);
+        expect(room.isLiveNow, isTrue);
+        expect(room.startedAt, DateTime.parse(node['createdAt'] as String));
+        expect(room.startedAt!.isBefore(fixture.capturedAt), isTrue);
+        expect(room.restriction, LiveRestriction.none, reason: 'restriction: null');
+        expect(room.onlineViewers, '${node['viewersCount']}');
+        expect(room.avatar, broadcaster['profileImageURL']);
+        expect(room.cover, '${node['previewImageURL']}?&t=${fixture.capturedAt.millisecondsSinceEpoch ~/ 1000}');
+        expect(room.area, (node['game'] as Map)['displayName']);
+        expect((room.danmakuData! as TwitchDanmakuArgs).chat, (login: 'me', token: 't'));
+      }
+      expect(result.cursor, edges.last['cursor'], reason: 'pageInfo.hasNextPage is true');
+    });
+
+    test('S03-top-zh-ko: only Chinese and Korean streams come back for the 3.x preset', () {
+      final fixture = _sample('S03-top-zh-ko');
+      final variables = _json((fixture.meta['request'] as Map)['body'] as String)['variables'] as Map;
+      expect(variables['languages'], TwitchApi.legacyLanguages);
+      final rooms = TwitchApi.streams(_decode(fixture), now: fixture.capturedAt).rooms;
+      expect(rooms, hasLength(24));
+      final top = TwitchApi.streams(_decode(_sample('S03-top')), now: fixture.capturedAt).rooms;
+      expect(rooms.first.roomId, isNot(top.first.roomId), reason: 'the filtered list is another list');
+    });
+
+    test("S03-top-cursor: the next page wants a browser's integrity token (RiskControl)", () {
+      expect(() => _decode(_sample('S03-top-cursor')), throwsA(isA<RiskControl>()));
+    });
+
+    test('S03-streams (the archived query, without restriction or pageInfo): no restriction said, no cursor', () {
+      final fixture = _sample('S03-streams');
+      final result = TwitchApi.streams(_decode(fixture), now: fixture.capturedAt);
+      expect(result.rooms, hasLength(30));
+      expect(result.rooms.every((room) => room.restriction == null), isTrue);
+      expect(result.rooms.every((room) => room.startedAt != null), isTrue);
+      expect(result.cursor, isNull);
+    });
+
+    test('restriction: null is none; a subscriber-only type is subscribersOnly; another kind unplayable; no key, '
+        'not said', () {
+      expect(TwitchApi.restriction({'restriction': null}), LiveRestriction.none);
+      expect(
+        TwitchApi.restriction({
+          'restriction': {'type': 'SUB_ONLY_LIVE'},
+        }),
+        LiveRestriction.subscribersOnly,
+      );
+      expect(
+        TwitchApi.restriction({
+          'restriction': {'type': 'SOMETHING_ELSE'},
+        }),
+        LiveRestriction.unplayable,
+      );
+      expect(TwitchApi.restriction({'restriction': 'x'}), LiveRestriction.unplayable);
+      expect(TwitchApi.restriction({'type': 'live'}), isNull);
+      expect(TwitchApi.restriction(null), isNull);
+    });
+
+    test('a subscriber-only card is still live, marked; a start time that is no time is left out', () {
+      final result = TwitchApi.streams({
+        'data': {
+          'streams': {
+            'edges': [
+              {
+                'node': {
+                  'type': 'live',
+                  'createdAt': 'soon',
+                  'restriction': {'type': 'SUB_ONLY_LIVE'},
+                  'broadcaster': {'login': 'a'},
+                },
+              },
+              {
+                'node': {'type': 'live', 'broadcaster': null},
+              },
+            ],
+          },
+        },
+      }, now: DateTime.utc(2026));
+      final room = result.rooms.single;
+      expect(room.isLiveNow, isTrue);
+      expect(room.followGroup, FollowGroup.live);
+      expect(room.restriction, LiveRestriction.subscribersOnly);
+      expect(room.startedAt, isNull);
+      expect(result.cursor, isNull, reason: 'no pageInfo');
+    });
+
+    test('normalizeLanguages: upper case, `-` as `_`, once each; blanks and non-codes dropped', () {
+      expect(TwitchApi.normalizeLanguages([' zh ', 'KO', 'zh', 'zh-hk', '', 'x', 'en-US-extra', 'asl']), [
+        'ZH',
+        'KO',
+        'ZH_HK',
+        'ASL',
+      ]);
+      expect(TwitchApi.normalizeLanguages(TwitchApi.legacyLanguages), ['ZH', 'KO']);
+    });
+  });
+
   group('S04 search', () {
     for (final name in ['S04-search-p1', 'S04-search-p2', 'S04-search-empty']) {
       test('$name: the same cards as 3.x, live and offline, with the channel cursor', () {
@@ -225,11 +400,64 @@ void main() {
         final rooms = (legacy['rooms'] as List).cast<Map<String, dynamic>>();
         expect(result.rooms, hasLength(rooms.length));
         for (final (index, room) in result.rooms.indexed) {
-          _expectParity(_card(room), rooms[index], reason: '$name[$index]');
+          // avatar, cover: straight from Twitch's CDN (8-7).
+          _expectParity(_card(room), rooms[index], changed: {'avatar', 'cover'}, reason: '$name[$index]');
+          expect(room.avatar, _direct(rooms[index]['avatar']), reason: '$name[$index]');
+          expect(room.cover, _direct(rooms[index]['cover']), reason: '$name[$index]');
+          expect(room.restriction, isNull, reason: 'the search answer says nothing about restrictions');
         }
         expect(result.cursor ?? '', legacy['cursor']);
       });
     }
+
+    test("start times: a live channel's broadcast startedAt, when that broadcast is the stream on air", () {
+      final fixture = _sample('S04-search-p1');
+      final channels = ((_json(fixture.body)['data'] as Map)['searchFor'] as Map)['channels'] as Map;
+      final items = {
+        for (final edge in (channels['edges'] as List).cast<Map<String, dynamic>>())
+          (edge['item'] as Map)['login'] as String: edge['item'] as Map,
+      };
+      final rooms = TwitchApi.searchPage(_decode(fixture), now: fixture.capturedAt).rooms;
+      for (final room in rooms) {
+        if (room.isLiveNow) {
+          final started = DateTime.parse((items[room.roomId]!['lastBroadcast'] as Map)['startedAt'] as String);
+          expect(room.startedAt, started, reason: room.roomId);
+          expect(room.startedAt!.isBefore(fixture.capturedAt), isTrue);
+        } else {
+          expect(room.startedAt, isNull, reason: '${room.roomId}: its last broadcast is over');
+        }
+      }
+      expect(rooms.first.toJson()['startedAt'], '2026-09-27T17:44:23.615106Z');
+    });
+
+    test('a broadcast that is not the stream on air gives no start time; a rerun is a replay (8-9)', () {
+      Map<String, Object?> item(String login, {Object? stream, Object? broadcast}) => {
+        'item': {'login': login, 'stream': stream, 'lastBroadcast': broadcast},
+      };
+      final result = TwitchApi.searchPage({
+        'data': {
+          'searchFor': {
+            'channels': {
+              'edges': [
+                item(
+                  'a',
+                  stream: {'id': '1', 'type': 'live'},
+                  broadcast: {'id': '2', 'startedAt': '2026-09-27T10:00:00Z'},
+                ),
+                item(
+                  'b',
+                  stream: {'id': '3', 'type': 'rerun'},
+                  broadcast: {'id': '3', 'startedAt': '2026-09-27T10:00:00Z'},
+                ),
+                item('c', stream: {'type': 'live'}, broadcast: {'startedAt': '2026-09-27T10:00:00Z'}),
+              ],
+            },
+          },
+        },
+      }, now: DateTime.utc(2026));
+      expect(result.rooms.map((room) => room.startedAt), [null, DateTime.utc(2026, 9, 27, 10), null]);
+      expect(result.rooms.map((room) => room.liveStatus), [LiveStatus.live, LiveStatus.replay, LiveStatus.live]);
+    });
 
     test('offline channels: no cover, "0" viewers, offline', () {
       final fixture = _sample('S04-search-p1');
@@ -268,42 +496,84 @@ void main() {
     });
   });
 
-  group("S05 detail (3.x's field rules; 3.x never sent this query)", () {
-    test("live: one query gives 3.x's fields and the real viewer count (REG-TWITCH-003)", () {
+  group("S05 detail (3.x's field rules and the upgrades; 3.x never sent this query)", () {
+    final now = DateTime.utc(2026, 9, 27, 18, 42, 6);
+    final stamp = '?&t=${now.millisecondsSinceEpoch ~/ 1000}';
+
+    test("live: one query gives 3.x's fields and the real viewer count (REG-TWITCH-003); the upgrades' fields", () {
       final fixture = _sample('S05-user-live');
       final raw = (_json(fixture.body)['data'] as Map)['user'] as Map;
-      final room = TwitchApi.roomDetail(_decode(fixture), requestedId: 'zarbex');
+      final stream = raw['stream'] as Map;
+      final room = TwitchApi.roomDetail(_decode(fixture), requestedId: 'zarbex', now: now);
       expect(room.roomId, 'zarbex');
       expect(room.userId, 'zarbex');
       expect(room.link, 'https://www.twitch.tv/zarbex');
       expect(room.title, (raw['lastBroadcast'] as Map)['title'], reason: 'site:733');
       expect(room.nick, 'zarbex');
       expect(room.avatar, raw['profileImageURL']);
-      expect(room.cover, raw['profileImageURL'], reason: '3.x used the profile image as cover (site:737)');
+      expect(room.cover, '${stream['previewImageURL']}$stamp', reason: 'the live screenshot (8-5; 3.x: the avatar)');
       expect(room.isLiveNow, isTrue);
       expect(room.watching, '23169');
       expect(room.onlineViewers, '23169');
       expect(room.effectiveAudienceMetricType, AudienceMetricType.onlineViewers);
-      expect(room.area, 'IRL', reason: 'the game name first (site:743)');
-      expect(room.introduction, isEmpty);
+      expect(room.area, 'IRL', reason: "the game's display name (8-2)");
+      expect(room.introduction, 'GEIL GEMACHT 🗣️', reason: "the channel's description (8-4)");
       expect(room.notice, isEmpty);
+      expect(room.startedAt, DateTime.utc(2026, 9, 27, 12, 49, 35));
+      expect(room.restriction, isNull, reason: 'this recording did not ask for the restriction');
       expect(room.danmakuData.toString(), 'zarbex');
     });
 
-    test('offline: the last broadcast\'s title, "0" viewers, no area', () {
-      final room = TwitchApi.roomDetail(_decode(_sample('S05-user-offline')), requestedId: 'minecraft');
-      expect(room.isExplicitlyOfflineNow, isTrue);
-      expect(room.title, 'Minecraft LIVE - September 2026');
-      expect(room.nick, 'Minecraft');
-      expect(room.watching, '0');
-      expect(room.onlineViewers, '0');
-      expect(room.area, isNull);
+    test('S05-detail-live (the query with the restriction): none, the Chinese area, start time', () {
+      final fixture = _sample('S05-detail-live');
+      final room = TwitchApi.roomDetail(_decode(fixture), requestedId: 'zarbex', now: fixture.capturedAt);
+      expect(room.isLiveNow, isTrue);
+      expect(room.restriction, LiveRestriction.none);
+      expect(room.toJson()['restriction'], 'none');
+      expect(room.area, '谈天说地', reason: 'Just Chatting in Chinese (8-2; 3.x: the English name)');
+      expect(room.startedAt, DateTime.utc(2026, 9, 28, 14, 2, 26));
+      expect(room.startedAt!.isBefore(fixture.capturedAt), isTrue);
+      expect(room.cover, startsWith('https://static-cdn.jtvnw.net/previews-ttv/live_user_zarbex-640x360.jpg?&t='));
+      expect(room.onlineViewers, '18561');
     });
+
+    test('a subscriber-only stream is live and marked (no recording: Twitch showed none)', () {
+      final body = _sample('S05-detail-live').body
+          .replaceFirst('"restriction": null', '"restriction": {"type": "SUB_ONLY_LIVE"}');
+      final room = TwitchApi.roomDetail(
+        TwitchApi.decode(body, status: 200, what: 'user'),
+        requestedId: 'zarbex',
+        now: now,
+      );
+      expect(room.isLiveNow, isTrue);
+      expect(room.followGroup, FollowGroup.live);
+      expect(room.restriction, LiveRestriction.subscribersOnly);
+      expect(room.isRestricted, isTrue);
+    });
+
+    for (final name in ['S05-user-offline', 'S05-detail-offline']) {
+      test('$name: the last broadcast\'s title, "0" viewers, no area, the avatar as cover, the description', () {
+        final fixture = _sample(name);
+        final raw = (_json(fixture.body)['data'] as Map)['user'] as Map;
+        final room = TwitchApi.roomDetail(_decode(fixture), requestedId: 'minecraft', now: now);
+        expect(room.isExplicitlyOfflineNow, isTrue);
+        expect(room.title, 'Minecraft LIVE - September 2026');
+        expect(room.nick, 'Minecraft');
+        expect(room.watching, '0');
+        expect(room.onlineViewers, '0');
+        expect(room.area, isNull);
+        expect(room.cover, raw['profileImageURL'], reason: '3.x used the profile image as cover (site:737)');
+        expect(room.introduction, 'Survive the night, or build a work of art. Watch and join us in Minecraft!');
+        expect(room.startedAt, isNull);
+        expect(room.restriction, isNull, reason: 'nothing on air to restrict');
+      });
+    }
 
     test('the room keeps the id as asked; the danmaku channel is the login', () {
       final room = TwitchApi.roomDetail(
         _decode(_sample('S05-user-live')),
         requestedId: ' Zarbex ',
+        now: now,
         chat: (login: 'me', token: 'secret'),
       );
       expect(room.roomId, 'Zarbex');
@@ -314,21 +584,43 @@ void main() {
       expect(args.toString(), isNot(contains('secret')));
     });
 
-    test('a stream that is not `live` (a rerun) is offline, as in 3.x', () {
+    test('8-9: a rerun is a replay with its viewers, screenshot and start time (3.x: offline)', () {
       final body = _sample('S05-user-live').body.replaceFirst('"type": "live"', '"type": "rerun"');
-      final room = TwitchApi.roomDetail(TwitchApi.decode(body, status: 200, what: 'user'), requestedId: 'zarbex');
+      final room = TwitchApi.roomDetail(
+        TwitchApi.decode(body, status: 200, what: 'user'),
+        requestedId: 'zarbex',
+        now: now,
+      );
+      expect(room.liveStatus, LiveStatus.replay);
+      expect(room.isPlayableNow, isTrue);
+      expect(room.followGroup, FollowGroup.replay);
+      expect(room.watching, '23169');
+      expect(room.cover, endsWith('live_user_zarbex-640x360.jpg$stamp'));
+      expect(room.startedAt, DateTime.utc(2026, 9, 27, 12, 49, 35));
+      expect(room.area, 'IRL');
+    });
+
+    test('a stream of another type is offline, as in 3.x', () {
+      final body = _sample('S05-user-live').body.replaceFirst('"type": "live"', '"type": "premiere"');
+      final room = TwitchApi.roomDetail(
+        TwitchApi.decode(body, status: 200, what: 'user'),
+        requestedId: 'zarbex',
+        now: now,
+      );
       expect(room.isExplicitlyOfflineNow, isTrue);
       expect(room.watching, '0');
+      expect(room.cover, room.avatar);
+      expect(room.startedAt, isNull);
       expect(room.area, 'IRL', reason: '3.x read the area from any stream');
     });
 
     test('an unknown channel is NotFound (3.x: StateError); another login is ApiChanged', () {
       expect(
-        () => TwitchApi.roomDetail(_decode(_sample('S05-user-missing')), requestedId: 'zzzznotachannelzzzz'),
+        () => TwitchApi.roomDetail(_decode(_sample('S05-user-missing')), requestedId: 'zzzznotachannelzzzz', now: now),
         throwsA(isA<NotFound>()),
       );
       expect(
-        () => TwitchApi.roomDetail(_decode(_sample('S05-user-live')), requestedId: 'someone_else'),
+        () => TwitchApi.roomDetail(_decode(_sample('S05-user-live')), requestedId: 'someone_else', now: now),
         throwsA(isA<ApiChanged>()),
       );
     });
@@ -374,6 +666,36 @@ void main() {
           {'quality': quality.quality, 'id': quality.id, 'data': quality.data, 'sort': quality.sort},
       ], fixture.legacy);
       expect(qualities.first.quality, '1080P50（原画）');
+      // The data is still 3.x's URL list, now naming its codec (8-8).
+      expect(qualities.map((quality) => (quality.data! as TwitchVariants).codec).toSet(), {'avc'});
+    });
+
+    test('videoCodec: the video entry of CODECS', () {
+      expect(TwitchApi.videoCodec('avc1.64002A,mp4a.40.2'), 'avc');
+      expect(TwitchApi.videoCodec('mp4a.40.2, hvc1.1.6.L150.B0'), 'hevc');
+      expect(TwitchApi.videoCodec('hev1.1.6.L93.B0'), 'hevc');
+      expect(TwitchApi.videoCodec('av01.0.08M.08,mp4a.40.2'), 'av1');
+      expect(TwitchApi.videoCodec('mp4a.40.2'), isNull);
+      expect(TwitchApi.videoCodec(''), isNull);
+    });
+
+    test('an HEVC variant (Enhanced Broadcasting; no channel offered one when probed) says so', () {
+      const playlist = '''
+#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=8000000,RESOLUTION=2560x1440,CODECS="hvc1.2.4.L150.B0,mp4a.40.2",VIDEO="chunked",FRAME-RATE=60.000
+https://a.test/source.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1280x720,CODECS="avc1.4D401F,mp4a.40.2",VIDEO="720p60",FRAME-RATE=60.000
+https://a.test/720.m3u8
+''';
+      final qualities = TwitchApi.qualities(playlist, master: Uri.parse('https://usher.ttvnw.net/x.m3u8'));
+      expect(qualities.map((quality) => (quality.data! as TwitchVariants).codec), ['hevc', 'avc']);
+      final lines = TwitchApi.resolution(
+        qualities.first.data! as List<String>,
+        roomId: 'x',
+        appliedQualityData: qualities.first.id,
+        codec: (qualities.first.data! as TwitchVariants).codec,
+      ).lines;
+      expect(lines.single.codec, 'hevc');
     });
 
     test('S06-usher-offline: StreamUnavailable (3.x: HttpError 404); 403, 429 and 5xx typed', () {
@@ -457,25 +779,24 @@ https://c.test/1.m3u8
       expect(() => TwitchApi.qualities('<html>', master: master), throwsA(isA<ApiChanged>()));
     });
 
-    test("lines: 3.x's media headers, HLS, the playlist host as line; no lease", () {
+    test("lines: 3.x's media headers without the login cookie (8-7), HLS, the codec, the playlist host; no lease", () {
       final resolution = TwitchApi.resolution(
         ['https://use22.playlist.ttvnw.net/v1/playlist/a.m3u8', ' '],
         roomId: 'Zarbex',
         appliedQualityData: 'q',
-        cookie: ' auth-token=x ',
+        codec: 'avc',
       );
       final line = resolution.lines.single;
       expect(line.headers, {
         'user-agent': TwitchApi.userAgent,
         'origin': 'https://www.twitch.tv',
         'referer': 'https://www.twitch.tv/Zarbex',
-        'cookie': 'auth-token=x',
       });
       expect(line.format, StreamFormat.hls);
+      expect(line.codec, 'avc');
       expect(line.lineId, 'use22.playlist.ttvnw.net');
       expect(line.lease, isNull);
       expect(resolution.appliedQualityData, 'q');
-      expect(TwitchApi.mediaHeaders('').keys, isNot(contains('cookie')));
       expect(TwitchApi.mediaHeaders('')['referer'], 'https://www.twitch.tv/');
     });
 
@@ -493,7 +814,7 @@ https://c.test/1.m3u8
       expect(TwitchApi.sameQuality(fresh, const LivePlayQuality(quality: 'none', id: 'x')), isNull);
     });
 
-    test("the usher URL carries 3.x's parameters with the token and signature", () {
+    test("the usher URL carries 3.x's parameters with the token and signature, and the codecs (8-8)", () {
       final url = TwitchApi.usherUrl('zarbex', (value: '{"a":1}', signature: 'sig'), Random(1));
       expect(url.host, 'usher.ttvnw.net');
       expect(url.path, '/api/channel/hls/zarbex.m3u8');
@@ -510,12 +831,16 @@ https://c.test/1.m3u8
         'playlist_include_framerate',
         'reassignments_supported',
         'sig',
+        'supported_codecs',
         'token',
         'transcode_mode',
       });
       expect(url.queryParameters['token'], '{"a":1}');
       expect(url.queryParameters['sig'], 'sig');
+      expect(url.queryParameters['supported_codecs'], 'h264', reason: 'H.264 only by default');
       expect(TwitchApi.playSessionIds, contains(url.queryParameters['play_session_id']));
+      final enhanced = TwitchApi.usherUrl('zarbex', (value: 't', signature: 's'), Random(1), preferH264: false);
+      expect(enhanced.queryParameters['supported_codecs'], 'av1,h265,h264');
     });
   });
 
@@ -603,11 +928,16 @@ https://c.test/1.m3u8
       expect(() => TwitchApi.batch([1], expected: 2, what: 'x'), throwsA(isA<ApiChanged>()));
     });
 
-    test("headers: 3.x's identity; a session adds Cookie and OAuth", () {
+    test("headers: 3.x's identity asking for Chinese (8-2); a session adds Cookie and OAuth", () {
       final anonymous = TwitchApi.gqlHeaders(deviceId: 'd');
+      expect(
+        TwitchApi.gqlHeaders(deviceId: 'd', language: TwitchApi.englishLanguage)['accept-language'],
+        'en-US,en;q=0.9',
+        reason: "3.x's value, for the English tag names only",
+      );
       expect(anonymous, {
         'user-agent': TwitchApi.userAgent,
-        'accept-language': 'en-US,en;q=0.9',
+        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
         'accept': 'application/vnd.twitchtv.v5+json',
         'client-id': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
         'origin': 'https://www.twitch.tv',

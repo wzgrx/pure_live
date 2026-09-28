@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "platform": "twitch",
+  "sample": "S05-detail-live",
+  "capturedAt": "2026-09-28T16:52:05.688018Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://gql.twitch.tv/gql",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+      "Accept": "application/vnd.twitchtv.v5+json",
+      "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko",
+      "Origin": "https://www.twitch.tv",
+      "Referer": "https://www.twitch.tv/",
+      "Device-Id": "5f0c3e9a7b2d4e6f8a1c3e5f7a9b1d3f",
+      "Content-Type": "text/plain;charset=UTF-8"
+    },
+    "body": "{\"query\":\"query($login: String!) { user(login: $login) { id login displayName description profileImageURL(width: 300) stream { id title type viewersCount createdAt previewImageURL(width: 640, height: 360) restriction { type } game { id name displayName slug } } lastBroadcast { title game { name displayName } } } }\",\"variables\":{\"login\":\"zarbex\"}}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "close",
+      "content-length": "971",
+      "content-type": "application/json; charset=utf-8",
+      "access-control-allow-origin": "*",
+      "x-amzn-trace-id": "Self=1-6aba9b37-221b6ce44ff9dfe4561c9fb2;Root=1-6aba9b37-aeb894510baa7999a0971efa",
+      "x-gateway-trace": "2d80fab68edf50b2dcd968fa63551ee7",
+      "x-router-config-version": "b3f449cc-3f52-474b-a722-53905cc8f367",
+      "date": "Mon, 28 Sep 2026 16:52:07 GMT",
+      "timing-allow-origin": "*",
+      "alt-svc": "h3=\":443\";ma=3600,\"h3-29\"=\":443\";ma=3600,\"h3-27\"=\":443\";ma=3600",
+      "x-served-by": "gateway"
+    }
+  },
+  "raw": {
+    "sha256": "76412cefce112f4f579ba9c5013f28927a045b82a027304127188077b13f5a83",
+    "length": 971
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "header:Device-Id",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratch capture script (urllib, schema 1, M4.U.8); random Device-Id replaced by a synthetic one"
+}

@@ -1,0 +1,55 @@
+{
+  "generator": "XiaohongshuSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + searchRooms(id, link) + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw",
+  "value": {
+    "getRoomDetail": {
+      "requests": 1,
+      "value": {
+        "throws": "XiaohongshuException",
+        "message": "Xiaohongshu api"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "requests": 1,
+      "value": {
+        "throws": "XiaohongshuException",
+        "message": "Xiaohongshu api"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": 1,
+      "value": {
+        "throws": "XiaohongshuException",
+        "message": "Xiaohongshu api"
+      }
+    },
+    "getLiveStatus": {
+      "requests": 1,
+      "value": {
+        "throws": "XiaohongshuException",
+        "message": "Xiaohongshu api"
+      }
+    },
+    "searchRooms(roomId)": {
+      "requests": 1,
+      "value": {
+        "throws": "XiaohongshuException",
+        "message": "Xiaohongshu api"
+      }
+    },
+    "searchRooms(link)": {
+      "requests": 1,
+      "value": {
+        "throws": "XiaohongshuException",
+        "message": "Xiaohongshu api"
+      }
+    },
+    "searchRooms(link, page 2)": {
+      "requests": 0,
+      "value": []
+    },
+    "getPlayQualites": {
+      "throws": "XiaohongshuException",
+      "message": "Xiaohongshu api"
+    }
+  }
+}

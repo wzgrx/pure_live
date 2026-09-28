@@ -1,0 +1,166 @@
+{
+  "generator": "XiaohongshuSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + searchRooms(id, link) + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw",
+  "value": {
+    "getRoomDetail": {
+      "requests": 1,
+      "value": {
+        "roomId": "570459564696889177",
+        "title": "老片回放《武林外传》",
+        "nick": "新华网",
+        "avatar": "https://sns-avatar-qc.xhscdn.com/avatar/68391049ffe18a0001091646.jpg?imageView2/2/w/80/format/jpg",
+        "cover": "https://live-i2.xhscdn.com/gotokuji/104100uo3259i6lftl606c74bn8o00000000003nvc4kgu?imageView2/2/w/640/format/webp/q/85|imageMogr2/strip/sharpen/1/auto-orient&redImage/frame/0&ap=7&sc=LVC_PRV",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "xiaohongshu",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "当前以直播房间号跟踪；主播重新开播使用新房间号时，请重新导入分享链接。\n平台展示观看值：300万+（非已验证的实时在线人数）",
+        "isCatchUp": false,
+        "link": "https://www.xiaohongshu.com/livestream/570459564696889177"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "requests": 1,
+      "value": {
+        "roomId": "570459564696889177",
+        "title": "老片回放《武林外传》",
+        "nick": "新华网",
+        "avatar": "https://sns-avatar-qc.xhscdn.com/avatar/68391049ffe18a0001091646.jpg?imageView2/2/w/80/format/jpg",
+        "cover": "https://live-i2.xhscdn.com/gotokuji/104100uo3259i6lftl606c74bn8o00000000003nvc4kgu?imageView2/2/w/640/format/webp/q/85|imageMogr2/strip/sharpen/1/auto-orient&redImage/frame/0&ap=7&sc=LVC_PRV",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "xiaohongshu",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "当前以直播房间号跟踪；主播重新开播使用新房间号时，请重新导入分享链接。\n平台展示观看值：300万+（非已验证的实时在线人数）",
+        "isCatchUp": false,
+        "link": "https://www.xiaohongshu.com/livestream/570459564696889177"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": 1,
+      "value": {
+        "roomId": "570459564696889177",
+        "title": "老片回放《武林外传》",
+        "nick": "新华网",
+        "avatar": "https://sns-avatar-qc.xhscdn.com/avatar/68391049ffe18a0001091646.jpg?imageView2/2/w/80/format/jpg",
+        "cover": "https://live-i2.xhscdn.com/gotokuji/104100uo3259i6lftl606c74bn8o00000000003nvc4kgu?imageView2/2/w/640/format/webp/q/85|imageMogr2/strip/sharpen/1/auto-orient&redImage/frame/0&ap=7&sc=LVC_PRV",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "xiaohongshu",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "当前以直播房间号跟踪；主播重新开播使用新房间号时，请重新导入分享链接。\n平台展示观看值：300万+（非已验证的实时在线人数）",
+        "isCatchUp": false,
+        "link": "https://www.xiaohongshu.com/livestream/570459564696889177"
+      }
+    },
+    "getLiveStatus": {
+      "requests": 1,
+      "value": true
+    },
+    "searchRooms(roomId)": {
+      "requests": 1,
+      "value": [
+        {
+          "roomId": "570459564696889177",
+          "title": "老片回放《武林外传》",
+          "nick": "新华网",
+          "avatar": "https://sns-avatar-qc.xhscdn.com/avatar/68391049ffe18a0001091646.jpg?imageView2/2/w/80/format/jpg",
+          "cover": "https://live-i2.xhscdn.com/gotokuji/104100uo3259i6lftl606c74bn8o00000000003nvc4kgu?imageView2/2/w/640/format/webp/q/85|imageMogr2/strip/sharpen/1/auto-orient&redImage/frame/0&ap=7&sc=LVC_PRV",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "xiaohongshu",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "当前以直播房间号跟踪；主播重新开播使用新房间号时，请重新导入分享链接。\n平台展示观看值：300万+（非已验证的实时在线人数）",
+          "isCatchUp": false,
+          "link": "https://www.xiaohongshu.com/livestream/570459564696889177"
+        }
+      ]
+    },
+    "searchRooms(link)": {
+      "requests": 1,
+      "value": [
+        {
+          "roomId": "570459564696889177",
+          "title": "老片回放《武林外传》",
+          "nick": "新华网",
+          "avatar": "https://sns-avatar-qc.xhscdn.com/avatar/68391049ffe18a0001091646.jpg?imageView2/2/w/80/format/jpg",
+          "cover": "https://live-i2.xhscdn.com/gotokuji/104100uo3259i6lftl606c74bn8o00000000003nvc4kgu?imageView2/2/w/640/format/webp/q/85|imageMogr2/strip/sharpen/1/auto-orient&redImage/frame/0&ap=7&sc=LVC_PRV",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "xiaohongshu",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "当前以直播房间号跟踪；主播重新开播使用新房间号时，请重新导入分享链接。\n平台展示观看值：300万+（非已验证的实时在线人数）",
+          "isCatchUp": false,
+          "link": "https://www.xiaohongshu.com/livestream/570459564696889177"
+        }
+      ]
+    },
+    "searchRooms(link, page 2)": {
+      "requests": 0,
+      "value": []
+    },
+    "getPlayQualites": [
+      {
+        "quality": "原画 · H264",
+        "id": "h264:HD",
+        "sort": 0,
+        "getPlayUrls": [
+          "http://live-source-play.xhscdn.com/live/570459564696889177.m3u8",
+          "http://live-source-play.xhscdn.com/live/570459564696889177.flv",
+          "http://live-source-play-bak-tx.xhscdn.com/live/570459564696889177.flv",
+          "http://live-source-play-hw.xhscdn.com/live/570459564696889177.flv"
+        ],
+        "resolvePlayUrlsForRecovery": {
+          "requests": 1,
+          "value": {
+            "urls": [
+              "http://live-source-play.xhscdn.com/live/570459564696889177.m3u8",
+              "http://live-source-play.xhscdn.com/live/570459564696889177.flv",
+              "http://live-source-play-bak-tx.xhscdn.com/live/570459564696889177.flv",
+              "http://live-source-play-hw.xhscdn.com/live/570459564696889177.flv"
+            ],
+            "appliedQualityData": "h264:HD"
+          }
+        }
+      }
+    ],
+    "getPlayUrls(h264:HD)": {
+      "requests": 0,
+      "value": [
+        "http://live-source-play.xhscdn.com/live/570459564696889177.m3u8",
+        "http://live-source-play.xhscdn.com/live/570459564696889177.flv",
+        "http://live-source-play-bak-tx.xhscdn.com/live/570459564696889177.flv",
+        "http://live-source-play-hw.xhscdn.com/live/570459564696889177.flv"
+      ]
+    }
+  }
+}

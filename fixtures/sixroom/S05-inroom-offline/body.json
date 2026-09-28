@@ -1,0 +1,753 @@
+{
+  "flag": "001",
+  "content": {
+    "roominfo": {
+      "id": "63213382",
+      "max": "1",
+      "ltime": 1586708026,
+      "notice": "",
+      "utype": "0",
+      "backpic": "",
+      "utypetm": "0",
+      "status": "1",
+      "uoption": {
+        "picuser": "https://vi3.6rooms.com/live/2016/06/01/14/1003v1464762358720321773.jpg",
+        "identity": 16,
+        "usertype": 0,
+        "livetype": 0,
+        "prive": 0,
+        "gid": 0,
+        "follow_last": 1476387699,
+        "propflag": 1,
+        "goldAnchor": 0,
+        "approveTag": {
+          "1012": {
+            "tagId": 1012,
+            "tagName": "舞秀"
+          },
+          "13": {
+            "tagId": 13,
+            "tagName": "颜值"
+          }
+        },
+        "sfClub": 1
+      },
+      "alias": "依诺♔休息",
+      "rid": "191111",
+      "userfrom": "0",
+      "coin6late": 3538272,
+      "wealtlate": 35906406,
+      "newCoin6rank": 26,
+      "newCoin6late": 538272,
+      "coin6rank": 18,
+      "wealthrank": 36,
+      "isShowTransferCheckBox": 1,
+      "province": "辽宁",
+      "rtype": "u0",
+      "rtypename": "歌区",
+      "dt_tagId": "",
+      "headPicUrl": "",
+      "anchor_area": "歌区",
+      "nicknameTitle": "",
+      "nicknameUid": 0,
+      "coin6pic": "",
+      "newCoin6pic": "",
+      "cnInfo": {
+        "id": 0,
+        "type": 0,
+        "etm": 0
+      },
+      "nickType": {
+        "title": "",
+        "uid": 0,
+        "type": 1,
+        "icon": "https://vr1.6rooms.com/tao/i/r6/cd7c12c58f2460f355ae37f916fec901.png",
+        "iconTwo": "https://vr1.6rooms.com/tao/i/r6/cd7c12c58f2460f355ae37f916fec901.png",
+        "colorOne": "#FFAB3F",
+        "colorTwo": "#FFBB9C"
+      }
+    },
+    "liveinfo": {
+      "title": "",
+      "type": 0,
+      "recordtype": 1,
+      "videotype": 1,
+      "flvtitle": "",
+      "sound": "",
+      "uploadurl": "",
+      "content": {
+        "1": {
+          "red": {
+            "allgetnum": "1332659",
+            "usepostnum": "79",
+            "usegetnum": "13159",
+            "allpostnum": "42079",
+            "uid": 63213382
+          }
+        },
+        "sdkBrand": "0"
+      },
+      "spredPic": "https://vi2.6rooms.com/live/2020/02/06/20/1010v1580991040416369443.jpg?x-oss-process=style/poster_800",
+      "starttime": "",
+      "endtime": "",
+      "pospic": "https://vi2.6rooms.com/live/2020/02/06/20/1010v1580991040416369443.jpg?x-oss-process=style/poster_320",
+      "rioUid": 63213382,
+      "largepic": ""
+    },
+    "roomParamInfo": {
+      "uid": "63213382",
+      "medal": "[]",
+      "sofa": "{\"1\":{\"uid\":\"1900000047\",\"rid\":\"\",\"alias\":\"\\u795e\\u79d8\\u4eba\",\"pic\":\"https:\\/\\/vi0.6rooms.com\\/live\\/2014\\/05\\/14\\/1003v1400000000000000000.jpg\",\"num\":2,\"item\":22801,\"itemName\":\"\\u6267\\u5251\\u62a4\\u7ea2\\u989c\",\"coin6\":1040000,\"sex\":4,\"site\":1,\"timestamp\":1790602409000,\"eid\":3,\"seq\":202609282130,\"endtm\":502,\"falias\":\"\\u4f9d\\u66fc\\u6c42\\u5347\\u51a0\\ud83d\\ude0e\",\"fuid\":\"117605019\",\"frid\":\"896456\",\"fpic\":\"https:\\/\\/vi2.6rooms.com\\/live\\/2026\\/07\\/29\\/12\\/1003v1785300199054415657.jpg\",\"tm\":1790602410,\"showTm\":15,\"rank\":4,\"nicknameTitle\":\"\",\"nicknameUid\":0,\"nickType\":{\"title\":\"\",\"uid\":0,\"type\":1,\"icon\":\"\",\"iconTwo\":\"\",\"colorOne\":\"\",\"colorTwo\":\"\"}}}",
+      "operation": {
+        "livetype": 0,
+        "note": "别说你一无所有，还有我在191111等你，不要让我们擦肩而过",
+        "privnote": "　一份好的感情或友谊，不是追逐，而是相吸;不是纠缠，而是随意;不是游戏，而是珍惜",
+        "backstyle": "{\"skin\":\"skin2\",\"skinA\":\"\",\"bgimg\":\"https:\\/\\/vr0.6rooms.com\\/images\\/room\\/skbg\\/2007.jpg\"}",
+        "paylink": {
+          "url": "http://v.6.cn/user/payshow.php?pxuid=67459271"
+        },
+        "vest": {
+          "tm": 0,
+          "url": "",
+          "edit": 0,
+          "content": ""
+        },
+        "setranking": 0,
+        "pubchat": 0,
+        "luckyGrass": 1,
+        "userMood": "前行再难感恩有你陪伴",
+        "fb": "依诺",
+        "video_manyVideo": 0,
+        "privechat": 1,
+        "set_contribution": 1,
+        "choujiang_custom": 0,
+        "song": 1,
+        "differ": 1,
+        "audiencesort": 0,
+        "flyScreen": 1,
+        "hot_ranking": 1,
+        "closeMsgPic": 0,
+        "ismack": 0,
+        "voice_template": 0,
+        "voice_gameType": 1,
+        "video_manyVideo_custom": 0,
+        "video_manyVideo_link": 3,
+        "publishType": 0,
+        "auto_transcribe": 1,
+        "voice_note": {
+          "title": "",
+          "playIntro": "",
+          "tips": ""
+        },
+        "videocall": {
+          "isAnchor": 1,
+          "isInvi": 1
+        },
+        "fbcf": 0,
+        "voiceConnect": "{\"isOpen\":1,\"range\":0,\"voicePart\":[{\"name\":\"roomAdmin\",\"title\":\"\\u623f\\u7ba1\",\"value\":1},{\"name\":\"angle\",\"title\":\"\\u5b88\\u62a4\",\"value\":1},{\"name\":\"friend\",\"title\":\"\\u4e92\\u7c89\\u548c\\u597d\\u53cb\",\"value\":1},{\"name\":\"follow\",\"title\":\"\\u6211\\u5173\\u6ce8\\u7684\\u4eba\",\"value\":1}],\"isShowConnect\":1}",
+        "fbNum": 2,
+        "safeNum": 0,
+        "privateGifts": "[]",
+        "voicePassword": 0
+      },
+      "medalall": "{\"w\":[],\"lastGiftFans\":[],\"superRank\":[],\"superLastRank\":[],\"superLastGiftFans\":[]}",
+      "game_award": "[]",
+      "game_swap": "[]",
+      "sofaRule": "普通沙发规则\n1.赠送沙发礼物抢沙发位，超过当前座位上已有的沙发数量才能抢座成功\n2.用户赠送超过1个、9个、99个、500个、1000个即可触发不同样式的沙发\n3.用户单笔赠送沙发数量等于100个可触发隐藏沙发动画\n4.用户单笔赠送沙发数量≥100个，房间发言将变为小飞屏样式持续时间60分钟\n5.当前赠送沙发礼物数量最多的获得皇冠，如果沙发数量相同最后一位赠送这获得皇冠\n6.新增道具沙发抢夺卡，超级沙发每轮胜者可获得，沙发抢夺卡：用户使用后可立即占领房间全部空余沙发位，如果位置上有人则无法占领\n7.新增超级沙发玩法，超级沙发将于每晚20:00开启，届时请各位留意相关房间消息",
+      "fans_num": 1812607,
+      "fansbrand_num": "2"
+    },
+    "roomlist": "{\"typeID\":403,\"num\":\"0\",\"content\":{\"typeID\":403,\"num\":0,\"content\":{\"all\":[],\"liv\":[],\"adm\":[],\"admnum\":0,\"safe\":[],\"safeanum\":0,\"safenum\":0,\"carnum\":0,\"carary\":[],\"ntvs\":[],\"ntvsn\":0,\"mountList\":[],\"mountNum\":0,\"safeBnum\":0,\"safeHnum\":0,\"safeZnum\":0,\"safeStar\":{\"uid\":0,\"rid\":0,\"alias\":\"\",\"pic\":\"\",\"num\":0}}}}",
+    "roommsg": "[]",
+    "isFav": 0,
+    "notice": [],
+    "isBirth": 0,
+    "tplType": 1,
+    "giftUserConf": [
+      {
+        "uid": "63213382",
+        "alias": "依诺♔休息",
+        "rid": "191111",
+        "pic": "https://vi3.6rooms.com/live/2016/06/01/14/1003v1464762358720321773.jpg"
+      }
+    ],
+    "generalEventFloat": [],
+    "middleEventFloat": [],
+    "isAnchor": 1,
+    "roomChouJiang": {
+      "type": [
+        {
+          "id": 1,
+          "name": "所有人"
+        },
+        {
+          "id": 3,
+          "name": "房管"
+        },
+        {
+          "id": 4,
+          "name": "赠送免费红包"
+        },
+        {
+          "id": 11,
+          "name": "赠送上头条"
+        },
+        {
+          "id": 18,
+          "name": "发送口号"
+        },
+        {
+          "id": 21,
+          "name": "粉丝团成员"
+        },
+        {
+          "id": 23,
+          "name": "赠送粉丝牌"
+        },
+        {
+          "id": 29,
+          "name": "房间守护"
+        },
+        {
+          "id": 40,
+          "name": "爱管"
+        },
+        {
+          "id": 54,
+          "name": "赠送派遣包"
+        }
+      ],
+      "gift": {
+        "11": "536",
+        "26": "1116",
+        "23": "2513",
+        "36": "2166",
+        "14": "20370",
+        "54": "21730",
+        "52": "20961",
+        "53": "21901"
+      },
+      "item": [
+        {
+          "id": 21625,
+          "name": "冰淇淋",
+          "pric": 100,
+          "unit": "六币",
+          "tips": "中奖用户每人可获赠<font color=\"#FE5122\">1个</font>奖励礼物"
+        },
+        {
+          "id": 31,
+          "name": "香水",
+          "pric": 500,
+          "unit": "六币",
+          "tips": "中奖用户每人可获赠<font color=\"#FE5122\">1个</font>奖励礼物"
+        },
+        {
+          "id": 6,
+          "name": "钻戒",
+          "pric": 1000,
+          "unit": "六币",
+          "tips": "中奖用户每人可获赠<font color=\"#FE5122\">1个</font>奖励礼物"
+        },
+        {
+          "id": 41,
+          "name": "飞机",
+          "pric": 10000,
+          "unit": "六币",
+          "tips": "中奖用户每人可获赠<font color=\"#FE5122\">1个</font>奖励礼物"
+        },
+        {
+          "id": 21548,
+          "name": "火山",
+          "pric": 100000,
+          "unit": "六币",
+          "tips": "中奖用户每人可获赠<font color=\"#FE5122\">1个</font>奖励礼物"
+        },
+        {
+          "id": 2363,
+          "name": "拼手气贝壳",
+          "pric": 100,
+          "unit": "贝壳",
+          "tips": "参与人将有机会获得<font color=\"#FE5122\">拼手气</font>福利"
+        },
+        {
+          "id": 2364,
+          "name": "拼手气贝壳",
+          "pric": 500,
+          "unit": "贝壳",
+          "tips": "参与人将有机会获得<font color=\"#FE5122\">拼手气</font>福利"
+        },
+        {
+          "id": 2365,
+          "name": "拼手气贝壳",
+          "pric": 1000,
+          "unit": "贝壳",
+          "tips": "参与人将有机会获得<font color=\"#FE5122\">拼手气</font>福利"
+        },
+        {
+          "id": 21136,
+          "name": "1000六币",
+          "pric": 1000,
+          "unit": "六币",
+          "tips": "中奖用户每人可获赠<font color=\"#FE5122\">随机六币</font>"
+        },
+        {
+          "id": 21585,
+          "name": "500六币",
+          "pric": 500,
+          "unit": "六币",
+          "tips": "中奖用户每人可获赠<font color=\"#FE5122\">随机六币</font>"
+        },
+        {
+          "id": 1430,
+          "name": "玫瑰礼盒",
+          "pric": 500,
+          "unit": "六币",
+          "tips": "中奖用户每人可获赠<font color=\"#FE5122\">1个</font>奖励礼物"
+        }
+      ],
+      "nums": [
+        1,
+        2,
+        3,
+        5,
+        10,
+        20,
+        50,
+        100,
+        200
+      ],
+      "chat": [
+        {
+          "id": 1,
+          "name": "666"
+        },
+        {
+          "id": 2,
+          "name": "威武霸气帅"
+        },
+        {
+          "id": 3,
+          "name": "/抱拳"
+        },
+        {
+          "id": 4,
+          "name": "厉害厉害，佩服佩服"
+        },
+        {
+          "id": 5,
+          "name": "大哥英明神武帅炸天"
+        },
+        {
+          "id": 6,
+          "name": "你在我眼里是最美"
+        },
+        {
+          "id": 7,
+          "name": "蛇年大吉"
+        },
+        {
+          "id": 8,
+          "name": "火山苏醒，惊喜无限"
+        }
+      ],
+      "duration": [
+        5
+      ],
+      "need": [
+        4,
+        11,
+        26,
+        23,
+        36,
+        14,
+        54,
+        52,
+        53
+      ],
+      "enrolled": [
+        {
+          "type": 29,
+          "router": "router://ad/acivity/module/room_open_guard"
+        },
+        {
+          "type": 7,
+          "router": "router://ad/acivity/module/fshare"
+        },
+        {
+          "type": 9,
+          "router": "router://ad/acivity/module/follow_anchor?title=%E5%85%B3%E6%B3%A8%E4%B8%BB%E6%92%AD&message=%E5%85%B3%E6%B3%A8%E4%B8%BB%E6%92%AD%E5%8D%B3%E5%8F%AF%E5%8F%82%E4%B8%8E%E7%A6%8F%E5%88%A9&uid=63213382"
+        },
+        {
+          "type": 4,
+          "router": "router://ad/acivity/module/fgift?pid=0"
+        },
+        {
+          "type": 21,
+          "router": "router://ad/acivity/module/fgift?pid=2513"
+        },
+        {
+          "type": 11,
+          "router": "router://ad/acivity/module/fgift?pid=536"
+        },
+        {
+          "type": 17,
+          "router": "router://ad/acivity/module/fgift?pid=68"
+        },
+        {
+          "type": 13,
+          "router": "router://ad/acivity/module/fgift?pid=37"
+        },
+        {
+          "type": 15,
+          "router": "router://ad/acivity/module/fgift?pid=963"
+        },
+        {
+          "type": 19,
+          "router": "router://ad/acivity/module/fgift?pid=1180"
+        },
+        {
+          "type": 20,
+          "router": "router://ad/acivity/module/fgift?pid=1188"
+        },
+        {
+          "type": 22,
+          "router": "router://ad/acivity/module/fgift?pid=1203"
+        },
+        {
+          "type": 23,
+          "router": "router://ad/acivity/module/fgift?pid=2513"
+        },
+        {
+          "type": 24,
+          "router": "router://ad/acivity/module/fgift?pid=5006"
+        },
+        {
+          "type": 25,
+          "router": "router://ad/acivity/module/fgift?pid=41"
+        },
+        {
+          "type": 26,
+          "router": "router://ad/acivity/module/fgift?pid=1116"
+        },
+        {
+          "type": 27,
+          "router": "router://ad/acivity/module/fgift?pid=1321"
+        },
+        {
+          "type": 28,
+          "router": "router://ad/acivity/module/fgift?pid=1341"
+        },
+        {
+          "type": 30,
+          "router": "router://ad/acivity/module/fgift?pid=1363"
+        },
+        {
+          "type": 31,
+          "router": "router://ad/acivity/module/fgift?pid=1140"
+        },
+        {
+          "type": 36,
+          "router": "router://ad/acivity/module/fgift?pid=2166"
+        },
+        {
+          "type": 37,
+          "router": "router://ad/acivity/module/fgift?pid=2270"
+        },
+        {
+          "type": 38,
+          "router": "router://ad/acivity/module/fgift?pid=2560"
+        },
+        {
+          "type": 39,
+          "router": "router://ad/acivity/module/fgift?pid=2542"
+        },
+        {
+          "type": 43,
+          "router": "router://ad/acivity/module/fgift?pid=20880"
+        },
+        {
+          "type": 45,
+          "router": "router://ad/acivity/module/fgift?pid=21034"
+        },
+        {
+          "type": 47,
+          "router": "router://ad/acivity/module/fgift?pid=21252"
+        },
+        {
+          "type": 48,
+          "router": "router://ad/acivity/module/fgift?pid=20632"
+        },
+        {
+          "type": 50,
+          "router": "router://ad/acivity/module/fgift?pid=20370"
+        },
+        {
+          "type": 51,
+          "router": "router://ad/acivity/module/fgift?pid=21628"
+        },
+        {
+          "type": 52,
+          "router": "router://ad/acivity/module/fgift?pid=20961"
+        },
+        {
+          "type": 53,
+          "router": "router://ad/acivity/module/fgift?pid=21901"
+        },
+        {
+          "type": 54,
+          "router": "router://ad/acivity/module/fgift?pid=21730"
+        },
+        {
+          "type": 14,
+          "router": "router://ad/acivity/module/fgift?pid=20370"
+        },
+        {
+          "type": 42,
+          "router": "router://ad/acivity/module/fgift?pid=20370"
+        },
+        {
+          "type": 44,
+          "router": "router://ad/acivity/module/fgift?pid=20237"
+        },
+        {
+          "type": 49,
+          "router": "router://ad/acivity/module/fgift?pid=21376"
+        }
+      ],
+      "armyList": []
+    },
+    "groupCallConf": {
+      "type": [],
+      "giftType": [],
+      "chat": [
+        {
+          "id": 1,
+          "name": "666"
+        },
+        {
+          "id": 2,
+          "name": "威武霸气帅"
+        },
+        {
+          "id": 3,
+          "name": "/抱拳"
+        },
+        {
+          "id": 4,
+          "name": "厉害厉害，佩服佩服"
+        },
+        {
+          "id": 5,
+          "name": "大哥英明神武帅炸天"
+        },
+        {
+          "id": 6,
+          "name": "你在我眼里是最美"
+        },
+        {
+          "id": 7,
+          "name": "玉兔闹新春"
+        },
+        {
+          "id": 8,
+          "name": "火山苏醒，惊喜无限"
+        }
+      ],
+      "peopleNum": [
+        10,
+        20,
+        50
+      ],
+      "need": [
+        11,
+        13,
+        22,
+        23,
+        25,
+        24,
+        30,
+        31
+      ]
+    },
+    "teamGiftPkTm": [
+      3,
+      10,
+      15,
+      20,
+      30
+    ],
+    "autoMsg": [
+      {
+        "s": "主播真好看",
+        "m": "主播真好看"
+      },
+      {
+        "s": "鼓掌鼓掌鼓掌",
+        "m": "鼓掌鼓掌鼓掌"
+      },
+      {
+        "s": "醉了",
+        "m": "醉了"
+      },
+      {
+        "s": "豪横！",
+        "m": "豪横！"
+      },
+      {
+        "s": "有啥可豪横的",
+        "m": "有啥可豪横的"
+      },
+      {
+        "s": "我来了",
+        "m": "我来了"
+      }
+    ],
+    "newUserAutoMsg": [],
+    "videoList": {
+      "state": 0,
+      "flvtitle": "",
+      "userlist": []
+    },
+    "ovideoList": {
+      "state": 0,
+      "userlist": []
+    },
+    "manyVideoList": {
+      "limit": 0,
+      "state": 0,
+      "flvtitle": "",
+      "userlist": []
+    },
+    "videoConnectList": {
+      "begin": 0,
+      "wait": 0,
+      "layout": 1,
+      "userList": [],
+      "seatList": [],
+      "userCount": 0,
+      "voiceList": {},
+      "state": 0
+    },
+    "officialRoomType": "0",
+    "officialRoomConf": {},
+    "outdoorInfo": {},
+    "blackScreenInfo": {
+      "msg": "",
+      "endtm": 0
+    },
+    "roomNotice": 1,
+    "voicePlayer": "2",
+    "openLiveTitle": 1,
+    "voiceSecond": [
+      10,
+      30,
+      60
+    ],
+    "voiceTeamGiftPkTm": [
+      5,
+      10,
+      15
+    ],
+    "voiceConnectEntrance": 1,
+    "isCelebration": 0,
+    "swapConfig": [
+      {
+        "stype": 1,
+        "name": "如花"
+      },
+      {
+        "stype": 2,
+        "name": "皮皮虾"
+      },
+      {
+        "stype": 3,
+        "name": "二哈"
+      },
+      {
+        "stype": 4,
+        "name": "柠檬精"
+      },
+      {
+        "stype": 5,
+        "name": "招财猫"
+      }
+    ],
+    "guardInfo": {},
+    "gameResultConfig": [],
+    "isPriveRoom": 0,
+    "allowReplaceSendProp": [],
+    "wonderfulUrl": "",
+    "propBoxMask": [],
+    "videoConnect": {
+      "allowRequest": 0,
+      "delay": 5
+    },
+    "screenSocket": [],
+    "likeList": [],
+    "consumeReminderUrl": "https://m.6.cn/appmate/set-consume-reminder",
+    "allowPaimai": 0,
+    "voiceRtcType": 0,
+    "voiceRtcConnect": {
+      "ltm": 3000,
+      "limit": 10
+    },
+    "guardHotRankUrl": "https://m.6.cn/appmate/guard?thepage=rank&position=bottom",
+    "guardStarRuleTips": "规则介绍：\n1.守护之星为当前房间的守护用户；\n2.当前守护值最高的用户将成为本房间的守护之星，在此期间如果有其它用户守护值高于当前用户则即刻取代其展示资格；",
+    "giftBoxIcon": "",
+    "roomSuperSofa": {},
+    "anchorHotDanceInfo": {
+      "isHotDance": 0,
+      "hotDanceStatus": -1,
+      "totalTm": 180,
+      "tm": 0
+    },
+    "isVrp": 0,
+    "roomChatCardOpen": 1,
+    "voiceBackground": [],
+    "giftReplaceConfig": [],
+    "chartlet_max_width": 74,
+    "voiceInfo": {
+      "wheatNum": 8
+    },
+    "talentArr": {
+      "isShowNew": 1,
+      "isShowBadge": 0
+    },
+    "isPlayMp4": 0,
+    "isHideGiftBoxShellMenu": 1,
+    "userFansIntimacyValRank": {
+      "value": 0,
+      "rank": 0,
+      "gray": 0
+    },
+    "voiceRoomWatchMode": {
+      "mode": "rtmp",
+      "sound_delay": 2,
+      "video_delay": 3
+    },
+    "voiceSpanRoomGiftPk": {
+      "state": 0
+    },
+    "roomHonor": {},
+    "isGroupRoom": 0,
+    "talentExclusive": {
+      "show": 0,
+      "downTm": 0,
+      "id": 0,
+      "uid": 0,
+      "mp4": ""
+    },
+    "isAiVirtualAnchor": 0,
+    "newYearButtonTheme": {
+      "chatBtnIcon": "",
+      "followBtnIcon": "",
+      "giftBtnIcon": ""
+    },
+    "isCanUseVoiceToText": 0,
+    "newUserGuide": [],
+    "messageInputTips": "聊聊吧...",
+    "isNewUserFlow": 0,
+    "isGiftPk": 0
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "generator": "SixRoomApi.parseRoomUserIdHtml",
+  "value": {
+    "recorded": {
+      "throws": "SixRoomException.schema",
+      "message": "Six Rooms schema"
+    },
+    "roomid quoted (3.x format)": "56182128",
+    "roomid quoted, double quotes": "56182128",
+    "roomid quoted, other room asked": {
+      "throws": "SixRoomException.identity",
+      "message": "Six Rooms identity"
+    },
+    "roomid quoted, link asked": "56182128",
+    "roomid quoted, bad id asked": {
+      "throws": "SixRoomException.identity",
+      "message": "Six Rooms identity"
+    },
+    "roomid quoted, canonical of another room": {
+      "throws": "SixRoomException.identity",
+      "message": "Six Rooms identity"
+    },
+    "roomid quoted, no canonical": {
+      "throws": "SixRoomException.identity",
+      "message": "Six Rooms identity"
+    },
+    "roomid quoted, rid of another room": {
+      "throws": "SixRoomException.schema",
+      "message": "Six Rooms schema"
+    },
+    "no rid": {
+      "throws": "SixRoomException.schema",
+      "message": "Six Rooms schema"
+    },
+    "unquoted roomid with more digits": {
+      "throws": "SixRoomException.schema",
+      "message": "Six Rooms schema"
+    },
+    "remind page": {
+      "throws": "SixRoomException.missing",
+      "message": "Six Rooms missing"
+    },
+    "short page": {
+      "throws": "SixRoomException.missing",
+      "message": "Six Rooms missing"
+    },
+    "3.x's test page": "56182128"
+  }
+}

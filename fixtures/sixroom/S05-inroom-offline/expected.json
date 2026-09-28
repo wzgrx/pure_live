@@ -1,0 +1,439 @@
+{
+  "generator": "SixRoomSite room calls, cold and after searchRooms (with S05-page-offline, S02-search) + SixRoomApi.room + parseRoomJson",
+  "value": {
+    "cold": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "SixRoomException.schema",
+          "message": "Six Rooms schema"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://v.6.cn/191111",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://v.6.cn/"
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "SixRoomException.schema",
+          "message": "Six Rooms schema"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://v.6.cn/191111",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://v.6.cn/"
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "throws": "SixRoomException.schema",
+          "message": "Six Rooms schema"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://v.6.cn/191111",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://v.6.cn/"
+            }
+          }
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "SixRoomException.schema",
+          "message": "Six Rooms schema"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://v.6.cn/191111",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://v.6.cn/"
+            }
+          }
+        ]
+      },
+      "getRoomDetail → streams": {
+        "throws": "SixRoomException.schema",
+        "message": "Six Rooms schema"
+      },
+      "getRoomDetailForRefresh → streams": {
+        "throws": "SixRoomException.schema",
+        "message": "Six Rooms schema"
+      }
+    },
+    "after the search": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "191111",
+          "userId": "63213382",
+          "title": "依诺♔休息",
+          "nick": "依诺♔休息",
+          "avatar": "https://vi3.6rooms.com/live/2016/06/01/14/1003v1464762358720321773.jpg",
+          "cover": "https://vi2.6rooms.com/live/2020/02/06/20/1010v1580991040416369443.jpg?x-oss-process=style/poster_800",
+          "area": "歌区",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "1812607",
+          "platform": "sixroom",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "六间房远端聊天尚待接入；大厅 count 保留为平台热度，不标记为唯一并发人数，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://v.6.cn",
+            "referer": "https://v.6.cn/191111",
+            "user-agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))"
+          },
+          "link": "https://v.6.cn/191111",
+          "data": {
+            "roomId": "191111",
+            "userId": "63213382",
+            "liveId": "",
+            "nick": "依诺♔休息",
+            "title": "依诺♔休息",
+            "avatar": "https://vi3.6rooms.com/live/2016/06/01/14/1003v1464762358720321773.jpg",
+            "cover": "https://vi2.6rooms.com/live/2020/02/06/20/1010v1580991040416369443.jpg?x-oss-process=style/poster_800",
+            "category": "歌区",
+            "popularity": null,
+            "followers": 1812607,
+            "state": "offline",
+            "variants": []
+          }
+        },
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+            "headers": {
+              "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+              "Accept": "application/json,text/plain,*/*",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+            },
+            "form": {
+              "av": "3.1",
+              "encpass": "",
+              "logiuid": "",
+              "project": "v6iphone",
+              "rate": "1",
+              "rid": "",
+              "ruid": "63213382"
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "191111",
+          "userId": "63213382",
+          "title": "依诺♔休息",
+          "nick": "依诺♔休息",
+          "avatar": "https://vi3.6rooms.com/live/2016/06/01/14/1003v1464762358720321773.jpg",
+          "cover": "https://vi2.6rooms.com/live/2020/02/06/20/1010v1580991040416369443.jpg?x-oss-process=style/poster_800",
+          "area": "歌区",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "1812607",
+          "platform": "sixroom",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "六间房远端聊天尚待接入；大厅 count 保留为平台热度，不标记为唯一并发人数，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://v.6.cn",
+            "referer": "https://v.6.cn/191111",
+            "user-agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))"
+          },
+          "link": "https://v.6.cn/191111"
+        },
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+            "headers": {
+              "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+              "Accept": "application/json,text/plain,*/*",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+            },
+            "form": {
+              "av": "3.1",
+              "encpass": "",
+              "logiuid": "",
+              "project": "v6iphone",
+              "rate": "1",
+              "rid": "",
+              "ruid": "63213382"
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "191111",
+          "userId": "63213382",
+          "title": "依诺♔休息",
+          "nick": "依诺♔休息",
+          "avatar": "https://vi3.6rooms.com/live/2016/06/01/14/1003v1464762358720321773.jpg",
+          "cover": "https://vi2.6rooms.com/live/2020/02/06/20/1010v1580991040416369443.jpg?x-oss-process=style/poster_800",
+          "area": "歌区",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "1812607",
+          "platform": "sixroom",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "六间房远端聊天尚待接入；大厅 count 保留为平台热度，不标记为唯一并发人数，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://v.6.cn",
+            "referer": "https://v.6.cn/191111",
+            "user-agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))"
+          },
+          "link": "https://v.6.cn/191111",
+          "data": {
+            "roomId": "191111",
+            "userId": "63213382",
+            "liveId": "",
+            "nick": "依诺♔休息",
+            "title": "依诺♔休息",
+            "avatar": "https://vi3.6rooms.com/live/2016/06/01/14/1003v1464762358720321773.jpg",
+            "cover": "https://vi2.6rooms.com/live/2020/02/06/20/1010v1580991040416369443.jpg?x-oss-process=style/poster_800",
+            "category": "歌区",
+            "popularity": null,
+            "followers": 1812607,
+            "state": "offline",
+            "variants": []
+          }
+        },
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+            "headers": {
+              "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+              "Accept": "application/json,text/plain,*/*",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+            },
+            "form": {
+              "av": "3.1",
+              "encpass": "",
+              "logiuid": "",
+              "project": "v6iphone",
+              "rate": "1",
+              "rid": "",
+              "ruid": "63213382"
+            }
+          }
+        ]
+      },
+      "getLiveStatus": {
+        "result": false,
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+            "headers": {
+              "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+              "Accept": "application/json,text/plain,*/*",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+            },
+            "form": {
+              "av": "3.1",
+              "encpass": "",
+              "logiuid": "",
+              "project": "v6iphone",
+              "rate": "1",
+              "rid": "",
+              "ruid": "63213382"
+            }
+          }
+        ]
+      },
+      "getRoomDetail → streams": {
+        "getPlayQualites": {
+          "result": [],
+          "requests": []
+        },
+        "resolvePlayUrlsRaw": {
+          "result": {
+            "throws": "SixRoomException.mediaUnavailable",
+            "message": "Six Rooms mediaUnavailable"
+          },
+          "requests": []
+        },
+        "resolvePlayUrlsForRecoveryRaw": {
+          "result": {
+            "throws": "SixRoomException.mediaUnavailable",
+            "message": "Six Rooms mediaUnavailable"
+          },
+          "requests": []
+        },
+        "getPlayUrls": {
+          "result": {
+            "throws": "SixRoomException.mediaUnavailable",
+            "message": "Six Rooms mediaUnavailable"
+          },
+          "requests": []
+        },
+        "otherQuality": {
+          "result": {
+            "throws": "SixRoomException.mediaUnavailable",
+            "message": "Six Rooms mediaUnavailable"
+          },
+          "requests": []
+        }
+      },
+      "getRoomDetailForRefresh → streams": {
+        "getPlayQualites": {
+          "result": [],
+          "requests": []
+        },
+        "resolvePlayUrlsRaw": {
+          "result": {
+            "throws": "SixRoomException.identity",
+            "message": "Six Rooms identity"
+          },
+          "requests": []
+        },
+        "resolvePlayUrlsForRecoveryRaw": {
+          "result": {
+            "throws": "SixRoomException.identity",
+            "message": "Six Rooms identity"
+          },
+          "requests": []
+        },
+        "getPlayUrls": {
+          "result": {
+            "throws": "SixRoomException.identity",
+            "message": "Six Rooms identity"
+          },
+          "requests": []
+        },
+        "otherQuality": {
+          "result": {
+            "throws": "SixRoomException.identity",
+            "message": "Six Rooms identity"
+          },
+          "requests": []
+        }
+      }
+    },
+    "knownUserId": {
+      "result": {
+        "roomId": "191111",
+        "userId": "63213382",
+        "title": "依诺♔休息",
+        "nick": "依诺♔休息",
+        "avatar": "https://vi2.6rooms.com/live/2020/02/06/20/1010v1580991040416369443.jpg?x-oss-process=style/poster_800",
+        "cover": "https://vi2.6rooms.com/live/2020/02/06/20/1010v1580991040416369443.jpg?x-oss-process=style/poster_800",
+        "area": "歌区",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "1812607",
+        "platform": "sixroom",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "六间房远端聊天尚待接入；大厅 count 保留为平台热度，不标记为唯一并发人数，主播粉丝数单独展示。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://v.6.cn",
+          "referer": "https://v.6.cn/191111",
+          "user-agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))"
+        },
+        "link": "https://v.6.cn/191111",
+        "data": {
+          "roomId": "191111",
+          "userId": "63213382",
+          "liveId": "",
+          "nick": "依诺♔休息",
+          "title": "依诺♔休息",
+          "avatar": "",
+          "cover": "https://vi2.6rooms.com/live/2020/02/06/20/1010v1580991040416369443.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 1812607,
+          "state": "offline",
+          "variants": []
+        }
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+          "headers": {
+            "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+            "Accept": "application/json,text/plain,*/*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+            "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+          },
+          "form": {
+            "av": "3.1",
+            "encpass": "",
+            "logiuid": "",
+            "project": "v6iphone",
+            "rate": "1",
+            "rid": "",
+            "ruid": "63213382"
+          }
+        }
+      ]
+    },
+    "parseRoomJson": {
+      "recorded": {
+        "roomId": "191111",
+        "userId": "63213382",
+        "liveId": "",
+        "nick": "依诺♔休息",
+        "title": "依诺♔休息",
+        "avatar": "",
+        "cover": "https://vi2.6rooms.com/live/2020/02/06/20/1010v1580991040416369443.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 1812607,
+        "state": "offline",
+        "variants": []
+      },
+      "other user asked": {
+        "throws": "SixRoomException.identity",
+        "message": "Six Rooms identity"
+      }
+    }
+  }
+}

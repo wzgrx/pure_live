@@ -68,6 +68,8 @@ export 'src/sites/seventeenlive/seventeenlive_api.dart';
 export 'src/sites/seventeenlive/seventeenlive_site.dart';
 export 'src/sites/showroom/showroom_api.dart';
 export 'src/sites/showroom/showroom_site.dart';
+export 'src/sites/sixroom/sixroom_api.dart';
+export 'src/sites/sixroom/sixroom_site.dart';
 export 'src/sites/soop/soop_api.dart';
 export 'src/sites/soop/soop_site.dart';
 export 'src/sites/steambroadcast/steambroadcast_api.dart';

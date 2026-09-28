@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="renderer" content="webkit">
+<link rel="shortcut icon" href="//vr0.xiu123.cn/imges/favicon.ico"/>
+<title>六间房提示您</title>
+<style type="text/css">
+*{ margin:0; padding:0; }
+body{background:#fff; text-align:center; font-family: Arial,"\5FAE\8F6F\96C5\9ED1",sans-serif,"\5b8b\4f53";
+}
+
+h1{visibility:hidden;width:200px;height:20px;}
+.remind {width:508px; height:190px; margin:160px auto; position:relative; background:url(//vr0.xiu123.cn/imges/base/redirect.jpg) no-repeat 0 0; text-align:left;}
+.remind-coop{ background-image:url(//vr0.xiu123.cn/imges/base/redirect-coop.png); }
+.remind ul {margin:0px; padding:0px; list-style:none;}
+#speak{width:300px;position:absolute;left:160px;top:66px;}
+#speak .rcontent{font-size:14px;color:#000000;}
+#jump{position:absolute;bottom:28px;right:40px;}
+#face{width:100px;height:111px;margin:40px 0 0 18px;background:url(//vr0.xiu123.cn/imges/new_6/xiao6.jpg) no-repeat -995px top;}
+</style>
+</head>
+<body>
+<div id="remind" class="remind">
+<h1>六间房提示您</h1>
+<div id='face'></div>
+<div id="speak">
+<b class="rtop">
+<b class="r1"></b>
+<b class="r2"></b>
+<b class="r3"></b>
+<b class="r4"></b>
+</b>
+<div class="rcontent">输入内容过长</div>
+<b class="rbottom">
+<b class="r4"></b>
+<b class="r3"></b>
+<b class="r2"></b>
+<b class="r1"></b>
+</b>
+</div><!--/speak-->
+<p id="jump">如果您的浏览器没有自动跳转，请<a href="https://v.6.cn/">点击这里</a></p><script type="text/javascript">
+		setTimeout('location.replace("https://v.6.cn/")',4000)
+		</script></div><!--/#remind--><script>
+if(!window.console){
+  	window.console = {
+		log: function(){}
+	};
+}
+//合作伙伴用
+;(function(_cookie){
+	if(_cookie.indexOf('coop=') > -1){
+		var _box = document.getElementById('remind');
+		_box.className = 'remind remind-coop';
+		console.log('https://v.6.cn/');
+	}
+})(document.cookie);
+</script></body>
+</html>

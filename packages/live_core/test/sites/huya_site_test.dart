@@ -373,16 +373,42 @@ void main() {
       expect(await site.getLiveStatus(roomId: '660000'), isTrue);
     });
 
-    test('offline and replay rooms are offline, without stream data (REG-HUYA-015)', () async {
-      final site = _site(_Http([_sample('S06-off'), _sample('S06-replay')]));
-      for (final id in ['441195', '102411']) {
-        final room = await site.getRoomDetail(roomId: id);
-        expect(room.isExplicitlyOfflineNow, isTrue, reason: id);
-        expect((room.data, room.danmakuData), (null, null));
-        expect(await site.getLiveStatus(roomId: id), isFalse);
-        final recording = await site.getRoomDetailForRecording(roomId: id);
-        expect(recording.isExplicitlyOfflineNow, isTrue, reason: 'no FormatException for a replay');
-      }
+    test(
+      'offline and replay rooms keep their state on every entry point, without stream data (REG-HUYA-015)',
+      () async {
+        final site = _site(_Http([_sample('S06-off'), _sample('S06-replay')]));
+        for (final (id, status) in [('441195', LiveStatus.offline), ('102411', LiveStatus.replay)]) {
+          for (final room in [
+            await site.getRoomDetail(roomId: id),
+            await site.getRoomDetailForRefresh(roomId: id),
+            // 3.x's recording detail threw FormatException for a replay.
+            await site.getRoomDetailForRecording(roomId: id),
+          ]) {
+            expect(room.effectiveLiveStatus, status, reason: id);
+            expect((room.data, room.danmakuData), (null, null));
+          }
+          expect(await site.getLiveStatus(roomId: id), isFalse);
+        }
+      },
+    );
+
+    test('a replay room has no stream: qualities and lines are StreamUnavailable', () async {
+      final http = _Http([_sample('S06-replay')]);
+      final site = _site(http);
+      final room = await site.getRoomDetail(roomId: '102411');
+      expect(room.isRecord, isTrue);
+      await expectLater(site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
+      const quality = LivePlayQuality(quality: '原画', id: 0, data: 0);
+      await expectLater(site.resolvePlayUrls(detail: room, quality: quality), throwsA(isA<StreamUnavailable>()));
+      await expectLater(
+        site.resolvePlayUrlsForRecovery(detail: room, quality: quality),
+        throwsA(isA<StreamUnavailable>()),
+      );
+      await expectLater(
+        site.resolvePlayUrlAtRaw(detail: room, quality: quality, lineIndex: 0),
+        throwsA(isA<StreamUnavailable>()),
+      );
+      expect(http.on('wup.huya.com'), isEmpty);
     });
 
     test('a missing room is NotFound; a letter alias is NotFound without a request', () async {

@@ -286,7 +286,8 @@ final class HuyaSite extends LiveSite
     subSid: profile.subSid,
   );
 
-  /// The room; a live one with its stream data and danmaku arguments.
+  /// The room; a live one with its stream data and danmaku arguments. An
+  /// offline or replay room is returned as the platform describes it.
   Future<LiveRoom> _detail(String roomId) async {
     final profile = await _profile(roomId);
     if (!profile.room.isLiveNow) return profile.room;
@@ -310,7 +311,8 @@ final class HuyaSite extends LiveSite
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) async => (await _profile(roomId)).room;
 
   /// The same detail as room entry (the recorder also records danmaku);
-  /// failures are thrown, offline only when the platform says so.
+  /// failures are thrown, offline or replay only when the platform says so
+  /// (neither is live, so neither is recorded).
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId);
 
@@ -451,7 +453,11 @@ final class HuyaSite extends LiveSite
 
   Future<HuyaRoomData> _freshData(String roomId) async {
     final profile = await _profile(roomId);
-    if (!profile.room.isLiveNow) throw const StreamUnavailable(_site, 'profileRoom: the room is not live');
+    // A replay has no playable stream: "no playable stream right now", not
+    // an error of the room.
+    if (!profile.room.isLiveNow) {
+      throw StreamUnavailable(_site, 'profileRoom: the room is ${profile.room.effectiveLiveStatus.name}');
+    }
     return _data(profile);
   }
 

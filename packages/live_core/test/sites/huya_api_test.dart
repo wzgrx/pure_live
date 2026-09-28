@@ -282,26 +282,26 @@ void main() {
       expect(profile.topSid, isPositive, reason: 'chTopId: offline rooms have no baseSteamInfoList');
     });
 
-    test('S06-replay is offline everywhere (3.x: unknown, FormatException or replay by entry point)', () {
+    test('S06-replay is a replay as 3.x refreshed it, on every entry point, without lines', () {
       final fixture = _sample('S06-replay');
       final legacy = fixture.legacy as Map<String, dynamic>;
       final profile = HuyaApi.profile(fixture.body, requestedId: '102411', status: fixture.status);
-      // liveStatus/isRecord: 3.x's refresh put the room under "replay", but
-      // REPLAY has no stream (its liveData.hls is a recorded VOD 3.x never
-      // played), so the card promised a replay the player refused; the
-      // upstream TV build files it as offline too. Room entry was an error
-      // room, recording a FormatException.
       _expectParity(
         profile.room.toJson(),
         (legacy['getRoomDetailForRefresh'] as Map)['value'] as Map<String, dynamic>,
-        changed: {'liveStatus', 'isRecord'},
+        reason: 'S06-replay',
       );
-      expect(((legacy['getRoomDetailForRefresh'] as Map)['value'] as Map)['liveStatus'], LiveStatus.replay.index);
+      // 3.x's room entry gave an error room (unknown) and its recording
+      // detail a FormatException for the same answer; both are the replay
+      // room now.
       expect(((legacy['getRoomDetail'] as Map)['value'] as Map)['liveStatus'], LiveStatus.unknown.index);
       expect((legacy['getRoomDetailForRecording'] as Map)['error'], 'FormatException');
-      expect(profile.room.effectiveLiveStatus, LiveStatus.offline);
-      expect(profile.room.isRecord, isFalse);
+      expect(profile.room.effectiveLiveStatus, LiveStatus.replay);
+      expect(profile.room.isRecord, isTrue);
+      expect(profile.room.isLiveNow, isFalse);
+      expect(profile.hasStream, isFalse);
       expect(profile.lines, isEmpty);
+      expect(profile.qualities, isEmpty);
     });
 
     test('S06-notfound and S06-alias (status 422) are NotFound (3.x: an error room or FormatException)', () {
@@ -322,9 +322,10 @@ void main() {
         (jsonDecode(_sample('S06-off').body) as Map<String, dynamic>)['data'] as Map<String, dynamic>;
     String wrap(Map<String, dynamic> data) => jsonEncode({'status': 200, 'message': '', 'data': data});
 
-    test('liveStatus is trimmed and upper-cased; only OFF, OFFLINE, CLOSED (and REPLAY) are offline', () {
+    test('liveStatus is trimmed and upper-cased; REPLAY is a replay; only OFF, OFFLINE, CLOSED are offline', () {
       for (final (raw, status) in [
         (' on ', LiveStatus.live),
+        (' replay ', LiveStatus.replay),
         ('offline', LiveStatus.offline),
         ('CLOSED', LiveStatus.offline),
         ('OFF', LiveStatus.offline),

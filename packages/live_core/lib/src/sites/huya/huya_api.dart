@@ -375,9 +375,10 @@ abstract final class HuyaApi {
   /// - `status` 422 (a missing room, or a letter alias) is `NotFound`; any
   ///   other non-200 status or a `data` that is not an object is
   ///   `ApiChanged`.
-  /// - `liveStatus` `ON` is live; `OFF`, `OFFLINE`, `CLOSED` and `REPLAY`
-  ///   are offline (a replay has no stream this app can play); anything
-  ///   else is `ApiChanged`, never offline.
+  /// - `liveStatus` `ON` is live; `REPLAY` is a replay, shown as 3.x did,
+  ///   but without a stream this app can play (`liveData.hls` is a recorded
+  ///   VOD 3.x never played); `OFF`, `OFFLINE` and `CLOSED` are offline;
+  ///   anything else is `ApiChanged`, never offline.
   /// - Every count is popularity: `totalCount`, else `userCount`.
   /// - topSid / subSid: the first positive `lChannelId` / `lSubChannelId`
   ///   of `baseSteamInfoList`, else `chTopId` / `subChId`.
@@ -392,7 +393,8 @@ abstract final class HuyaApi {
     if (data == null) throw ApiChanged(_site, 'profileRoom: data is not an object (${_snippet(body)})');
     final state = switch (jsonString(data['liveStatus'])?.toUpperCase()) {
       'ON' => LiveStatus.live,
-      'OFF' || 'OFFLINE' || 'CLOSED' || 'REPLAY' => LiveStatus.offline,
+      'REPLAY' => LiveStatus.replay,
+      'OFF' || 'OFFLINE' || 'CLOSED' => LiveStatus.offline,
       final other => throw ApiChanged(_site, 'profileRoom: liveStatus ${other ?? 'missing'}'),
     };
     final live = _object(data['liveData']) ?? const <String, dynamic>{};

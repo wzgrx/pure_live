@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
 import 'package:pure_live_app/features/me/history_page.dart';
 import 'package:pure_live_app/features/multiview/multiview_controller.dart';
@@ -30,6 +29,8 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
   Widget build(BuildContext context) {
     final follows = ref.watch(followsProvider);
     final history = ref.watch(historyProvider);
+    final theme = Theme.of(context);
+    final status = theme.textTheme.labelMedium!.copyWith(color: theme.colorScheme.onSurfaceVariant);
     bool matches(StoredRoom room) =>
         _filter.isEmpty ||
         room.anchorName.toLowerCase().contains(_filter) ||
@@ -52,9 +53,13 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
             leading: PlatformLogo(platformId: room.ref.platform, size: Sizes.iconMd),
             title: Text(room.anchorName, maxLines: 1, overflow: TextOverflow.ellipsis),
             subtitle: Text(room.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-            trailing: room.lastState == LiveState.live
-                ? const LiveBadge()
-                : Text(platformNames[room.ref.platform] ?? ''),
+            // The row's end says only the state; the logo says the platform.
+            trailing: switch (room.lastState) {
+              LiveState.live => const LiveBadge(),
+              LiveState.offline => Text(t.common.offline, style: status),
+              LiveState.replay => Text(t.common.replay, style: status),
+              null => null,
+            },
             onTap: () => widget.onPicked(room.ref),
           );
         },

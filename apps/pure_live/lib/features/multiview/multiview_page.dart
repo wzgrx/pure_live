@@ -352,6 +352,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
         onPick: () => unawaited(pickRoomForCell(context, ref, index)),
         covered: _covered,
         big: big,
+        picksReplace: _panel,
         danmaku: index == danmakuCell ? DanmakuOverlay(key: _danmakuKey, controller: _overlay, visible: true) : null,
         controls: big && _controls
             ? MultiviewControlBar(index: index, fullscreen: fullscreen, onFullscreen: tv ? null : _toggleFullscreen)

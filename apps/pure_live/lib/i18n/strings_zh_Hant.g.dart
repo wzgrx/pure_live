@@ -877,7 +877,9 @@ class Translations$danmaku$zh_Hant implements Translations$danmaku$zh_Hans {
   @override
   String get offlineNoDanmaku => '未開播時沒有彈幕';
   @override
-  String get localHint => '發一則本機彈幕（只在本機顯示）';
+  String get localHint => '發一則本機彈幕';
+  @override
+  String get localSend => '傳送（只在本機顯示）';
   @override
   String get reconnect => '重新連線';
   @override
@@ -1618,6 +1620,8 @@ class Translations$multiview$zh_Hant implements Translations$multiview$zh_Hans {
   String pickRoomFor({required Object n}) => '選擇直播間 · 放到第 ${n} 格';
   @override
   String get filterHint => '按主播名稱或標題篩選';
+  @override
+  String get pickTarget => '放到這裡';
   @override
   String cell({required Object n}) => '第 ${n} 格';
   @override

@@ -21,7 +21,8 @@ Future<void> showChatLineActions(
 }) async {
   final (user, text) = switch (line) {
     DanmakuChat(:final userName, :final text) => (userName, text),
-    final DanmakuGift gift => (gift.userName, giftText(gift)),
+    // A whole sentence: "今天也要早睡 送出 火箭", "Alice sent Rocket".
+    final DanmakuGift gift => (gift.userName, '${gift.userName} ${giftText(gift)}'),
     _ => ('', ''),
   };
   final messenger = ScaffoldMessenger.maybeOf(context);
@@ -34,7 +35,7 @@ Future<void> showChatLineActions(
         children: [
           ListTile(
             title: Text(text, maxLines: 3, overflow: TextOverflow.ellipsis),
-            subtitle: user.isEmpty ? null : Text(user),
+            subtitle: user.isEmpty || line is DanmakuGift ? null : Text(user),
           ),
           const Divider(height: 1),
           if (line is DanmakuChat) ...[

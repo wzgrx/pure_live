@@ -35,7 +35,10 @@ final class CardGridGeometry {
 
   /// The geometry for [context] at [width] with [density].
   factory of(BuildContext context, double width, {CardDensity density = CardDensity.standard}) {
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final scaler = MediaQuery.textScalerOf(context);
+    final textScale = scaler.scale(1);
+    // Large text turns compact cards into two lines; the cells follow.
+    final shown = density.shownAt(scaler);
     if (TvScope.of(context).enabled) {
       // A little side room so a focused card can grow without being clipped;
       // the rail and the safe area already hold the margins.
@@ -43,7 +46,7 @@ final class CardGridGeometry {
       const gap = TvMetrics.gutter;
       final text = Theme.of(context).textTheme;
       double line(TextStyle style) => style.fontSize! * (style.height ?? 1.4);
-      final lines = density == CardDensity.standard
+      final lines = shown == CardDensity.standard
           ? line(text.titleSmall!) + line(text.bodySmall!)
           : line(text.titleSmall!);
       final cellWidth = (width - padding.horizontal - (TvMetrics.columns - 1) * gap) / TvMetrics.columns;
@@ -64,7 +67,7 @@ final class CardGridGeometry {
       gap: layout.gap,
       padding: EdgeInsets.fromLTRB(layout.margin, layout.gap, layout.margin, layout.gap),
       cellWidth: cellWidth,
-      cellHeight: cellWidth * 9 / 16 + (density == CardDensity.standard ? 44 : 24) * textScale + 12,
+      cellHeight: cellWidth * 9 / 16 + (shown == CardDensity.standard ? 44 : 24) * textScale + 12,
     );
   }
 

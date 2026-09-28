@@ -8,8 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_store/live_store.dart';
-import 'package:live_ui/live_ui.dart' show DanmakuController;
+import 'package:live_ui/live_ui.dart' show DanmakuController, VideoBarScrim;
 import 'package:pure_live_app/core/clock.dart';
+import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/room/player_view.dart';
@@ -41,6 +42,7 @@ void main() {
     RoomPresentation presentation = RoomPresentation.inline,
     Size size = const Size(400, 300),
     List<Override> overrides = const [],
+    TextScaler? textScaler,
   }) async {
     tester.view.physicalSize = const Size(900, 600);
     tester.view.devicePixelRatio = 1;
@@ -63,19 +65,28 @@ void main() {
           ...overrides,
         ],
         child: MaterialApp(
+          builder: (context, child) => textScaler == null
+              ? child!
+              : MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                  child: child!,
+                ),
           home: Scaffold(
             body: Center(
               child: SizedBox.fromSize(
                 size: size,
-                child: ValueListenableBuilder(
-                  valueListenable: shown,
-                  builder: (context, presentation, _) => PlayerView(
-                    detail: liveRoom(),
-                    session: session,
-                    presentation: presentation,
-                    overlay: overlay,
-                    onToggleFullscreen: () => calls.fullscreen++,
-                    onBack: () => calls.back++,
+                child: RepaintBoundary(
+                  key: const ValueKey('picture'),
+                  child: ValueListenableBuilder(
+                    valueListenable: shown,
+                    builder: (context, presentation, _) => PlayerView(
+                      detail: liveRoom(),
+                      session: session,
+                      presentation: presentation,
+                      overlay: overlay,
+                      onToggleFullscreen: () => calls.fullscreen++,
+                      onBack: () => calls.back++,
+                    ),
                   ),
                 ),
               ),
@@ -244,6 +255,101 @@ void main() {
     player.toggleMute();
     expect(player.volume, closeTo(0.45, 1e-9));
     await tester.pump(const Duration(seconds: 2));
+  });
+
+  group('on a white frame', () {
+    setUp(() => debugPictureBackground = Colors.white);
+    tearDown(() => debugPictureBackground = Colors.black);
+
+    double contrast(Color a, Color b) {
+      final (la, lb) = (a.computeLuminance(), b.computeLuminance());
+      return (la > lb ? la + 0.05 : lb + 0.05) / (la > lb ? lb + 0.05 : la + 0.05);
+    }
+
+    /// The colour of the picture at [position] (relative to the player).
+    Future<Color> pixel(WidgetTester tester, Offset position) async {
+      final image = (await tester.runAsync(() => captureImage(tester.element(find.byKey(const ValueKey('picture'))))))!;
+      final bytes = (await tester.runAsync(image.toByteData))!;
+      final offset = (position.dy.floor() * image.width + position.dx.floor()) * 4;
+      final color = Color.fromARGB(
+        bytes.getUint8(offset + 3),
+        bytes.getUint8(offset),
+        bytes.getUint8(offset + 1),
+        bytes.getUint8(offset + 2),
+      );
+      image.dispose();
+      return color;
+    }
+
+    testWidgets('principles §2.2: both bars sit on 60% black, white text reads at 4.5:1 or more', (tester) async {
+      // The review's case: a 393 dp phone, the picture 221 dp high. The old
+      // gradient left 38% black where the title is (2.7:1).
+      await pumpPlayer(
+        tester,
+        size: const Size(393, 221),
+        // Real time passes while the picture is captured: no platform network state.
+        overrides: [networkKindProvider.overrideWith((ref) => Stream.value(NetworkKind.unmetered))],
+      );
+      final picture = tester.getTopLeft(find.byKey(const ValueKey('picture')));
+      expect(await pixel(tester, const Offset(100, 110)), Colors.white, reason: 'the middle stays clear');
+      for (final bar in ['room-top-bar', 'room-bottom-bar']) {
+        final rect = tester.getRect(find.byKey(ValueKey(bar))).shift(-picture);
+        // The button's padding at the left edge: scrim, no glyph. The whole
+        // height of the bar is covered, not only the edge of the picture.
+        for (final y in [rect.top + 1, rect.center.dy, rect.bottom - 1]) {
+          final behind = await pixel(tester, Offset(2, y));
+          expect(behind, const Color(0xFF666666), reason: '$bar at $y: 60% black over white');
+          expect(contrast(Colors.white, behind), greaterThanOrEqualTo(4.5), reason: bar);
+        }
+      }
+      await tester.pump(const Duration(seconds: 5));
+    });
+  });
+
+  testWidgets('principles §2.3: text on the picture grows at most 1.3×', (tester) async {
+    await pumpPlayer(
+      tester,
+      presentation: RoomPresentation.fullscreen,
+      size: const Size(800, 400),
+      textScaler: const TextScaler.linear(2),
+    );
+    final title = find.descendant(of: find.byKey(const ValueKey('room-top-bar')), matching: find.byType(Text)).first;
+    expect(MediaQuery.textScalerOf(tester.element(title)).scale(10), 13);
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('the lock sits on the left edge, white on black, clear of the chat on the right', (tester) async {
+    await pumpPlayer(tester, presentation: RoomPresentation.fullscreen, size: const Size(800, 400));
+    final lock = find.byKey(const ValueKey('room-lock'));
+    final rect = tester.getRect(lock);
+    final picture = tester.getRect(find.byType(PlayerView));
+    expect(rect.left - picture.left, lessThan(24));
+    expect(rect.right, lessThan(picture.left + picture.width * 0.6), reason: 'the chat overlay takes the right 40%');
+    final style = tester.widget<IconButton>(lock).style!;
+    expect(style.backgroundColor!.resolve({}), VideoBarScrim.color);
+    expect(style.foregroundColor!.resolve({}), Colors.white);
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('principles §6.5: a tip shows at the top left under the bar and goes after 3 s or a tap', (tester) async {
+    final player = await pumpPlayer(tester, presentation: RoomPresentation.fullscreen, size: const Size(800, 400))
+      ..showTip('按 C 收起聊天栏');
+    await tester.pump();
+    final tip = find.byKey(const ValueKey('room-tip'));
+    final picture = tester.getRect(find.byType(PlayerView));
+    final rect = tester.getRect(tip);
+    expect(rect.left - picture.left, lessThan(24));
+    expect(rect.top, greaterThanOrEqualTo(tester.getRect(find.byKey(const ValueKey('room-top-bar'))).bottom));
+    expect(rect.bottom, lessThan(picture.center.dy), reason: 'off the middle of the picture');
+    await tester.pump(const Duration(seconds: 3));
+    expect(tip, findsNothing);
+
+    player.showTip('按 C 收起聊天栏');
+    await tester.pump();
+    await tester.tap(tip);
+    await tester.pump();
+    expect(tip, findsNothing);
+    await tester.pump(const Duration(seconds: 5));
   });
 
   testWidgets('the top bar back button goes to the page', (tester) async {

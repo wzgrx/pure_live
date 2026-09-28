@@ -15,6 +15,13 @@ import 'package:pure_live_app/i18n/strings.g.dart';
 /// One cell (CEL-1): the video, the chat layer when the cell is the danmaku
 /// target (DM-3), the state overlay, the sound-focus and pick-target marks
 /// (AUD-4), and in 1+N's big cell the control bar (OPS-3).
+///
+/// Cells have no lines of their own: the grid's 2 dp black gaps part them
+/// (principles §7 rule 4); a cell without a picture is a shade lighter so
+/// the slot still shows. The sound focus is a 2 dp primary border and the
+/// speaker in the label; the pick target a 2 dp tertiary border and a
+/// "放到这里" badge, so neither relies on colour, and a cell that is both
+/// shows both.
 class MultiviewCellView extends ConsumerWidget {
   const new({
     required this.index,
@@ -27,8 +34,12 @@ class MultiviewCellView extends ConsumerWidget {
     this.danmaku,
     this.controls,
     this.big = false,
+    this.picksReplace = false,
     super.key,
   });
+
+  /// The empty slot's shade (the pure black theme's container colour).
+  static const Color slotColor = Color(0xFF161618);
 
   final int index;
 
@@ -58,6 +69,11 @@ class MultiviewCellView extends ConsumerWidget {
   /// 1+N's big cell: its label also shows the quality.
   final bool big;
 
+  /// The picker panel is on screen (LYT-7): its picks go to the target cell
+  /// even when that cell plays, so the target is marked on a playing cell
+  /// too.
+  final bool picksReplace;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(multiviewProvider);
@@ -66,7 +82,7 @@ class MultiviewCellView extends ConsumerWidget {
     final controller = ref.read(multiviewProvider.notifier);
     final scheme = Theme.of(context).colorScheme;
     final focused = index == state.audioFocus && cell.status == CellStatus.playing;
-    final targeted = index == state.target && cell.assignable;
+    final targeted = index == state.target && (cell.assignable || picksReplace);
     final session = cell.session;
     final menu = cell.status == CellStatus.playing ? () => unawaited(showMultiviewCellMenu(context, ref, index)) : null;
     final controls = this.controls;
@@ -87,40 +103,70 @@ class MultiviewCellView extends ConsumerWidget {
         onLongPress: menu,
         onSecondaryTap: menu,
         child: DecoratedBox(
-          // Sound focus and pick target are both visible (AUD-4).
+          // Sound focus and pick target are both visible (AUD-4): the focus
+          // outside, the target inside it.
           position: DecorationPosition.foreground,
-          decoration: BoxDecoration(
-            border: focused
-                ? Border.all(color: scheme.primary, width: 2)
-                : targeted
-                ? Border.all(color: scheme.tertiary, width: 2)
-                : Border.all(color: const Color(0xFF222222)),
-          ),
-          child: ColoredBox(
-            color: Colors.black,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                if (session != null && cell.status == CellStatus.playing)
-                  LiveVideoView(key: GlobalObjectKey(session), session: session, occluded: covered),
-                ?danmaku,
-                _CellOverlay(
-                  cell: cell,
-                  focused: focused,
-                  targeted: targeted,
-                  muteAll: state.muteAll,
-                  big: big,
-                  label: controls == null,
-                  onRetry: () {
-                    if (cell.room != null) {
-                      unawaited(controller.refresh(index));
-                    } else {
-                      onPick();
-                    }
-                  },
-                ),
-                if (controls != null) Positioned(left: Space.s2, right: Space.s2, bottom: Space.s2, child: controls),
-              ],
+          decoration: BoxDecoration(border: focused ? Border.all(color: scheme.primary, width: 2) : null),
+          child: DecoratedBox(
+            position: DecorationPosition.foreground,
+            decoration: BoxDecoration(border: targeted ? Border.all(color: scheme.tertiary, width: 2) : null),
+            child: ColoredBox(
+              color: cell.status == CellStatus.playing ? Colors.black : slotColor,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (session != null && cell.status == CellStatus.playing)
+                    LiveVideoView(key: GlobalObjectKey(session), session: session, occluded: covered),
+                  ?danmaku,
+                  // Labels and the bar over the picture grow at most 1.3×
+                  // (principles §2.3).
+                  OnVideoTextScale(
+                    child: _CellOverlay(
+                      cell: cell,
+                      focused: focused,
+                      targeted: targeted,
+                      muteAll: state.muteAll,
+                      big: big,
+                      label: controls == null,
+                      onRetry: () {
+                        if (cell.room != null) {
+                          unawaited(controller.refresh(index));
+                        } else {
+                          onPick();
+                        }
+                      },
+                    ),
+                  ),
+                  if (controls != null)
+                    Positioned(
+                      left: Space.s2,
+                      right: Space.s2,
+                      bottom: Space.s2,
+                      child: OnVideoTextScale(child: controls),
+                    ),
+                  if (targeted)
+                    Positioned(
+                      left: Space.s1,
+                      top: Space.s1,
+                      child: OnVideoTextScale(
+                        child: DecoratedBox(
+                          key: const ValueKey('multiview-target'),
+                          decoration: BoxDecoration(
+                            color: scheme.tertiary,
+                            borderRadius: BorderRadius.circular(Radii.r1),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: Space.s1, vertical: 1),
+                            child: Text(
+                              t.multiview.pickTarget,
+                              style: TextStyle(color: scheme.onTertiary, fontSize: 12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

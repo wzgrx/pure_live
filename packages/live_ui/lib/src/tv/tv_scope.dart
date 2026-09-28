@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:live_ui/src/metrics.dart';
+import 'package:live_ui/src/tv/list_focus_ring.dart';
 
 /// Sizes of the TV presentation (spec/design/principles.md §5.3).
 abstract final class TvMetrics {
@@ -227,7 +228,8 @@ class _TvRootState extends State<TvRoot> {
         canRequestFocus: false,
         skipTraversal: true,
         onKeyEvent: _dropRepeats,
-        child: TvCanvas(child: child),
+        // List rows get the ring cards and buttons have (principles §5.3).
+        child: TvCanvas(child: TvListFocusRings(child: child)),
       );
     }
     return TvScope(config: widget.config, child: child);

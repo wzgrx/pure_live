@@ -91,7 +91,7 @@
   },
   "forceLandscape": "Landscape full screen",
   "platformLimited": "Limited by the platform to {quality}",
-  "qualityLine": "{quality} · line {n}",
+  "qualityLine": "{quality} · Line {n}",
   "quickPanelHint": "Long-press the video for the quick panel; long-press a danmaku to copy or block it",
   "screenshot": "Screenshot",
   "sleepTimer": "Sleep timer",

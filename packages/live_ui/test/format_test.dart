@@ -2,12 +2,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:live_ui/live_ui.dart';
 
 void main() {
-  test('counts use 万 and 亿 with one decimal', () {
+  test('counts use 万 and 亿 with one decimal below 100 of a unit', () {
     expect(formatCount(9876), '9876');
     expect(formatCount(10000), '1万');
-    expect(formatCount(3551234), '355.1万');
+    expect(formatCount(355123), '35.5万');
     expect(formatCount(123456789), '1.2亿');
     expect(formatCount(999999999), '10亿');
+  });
+
+  test('from 100 of a unit on, no decimal: at most three significant digits in English', () {
+    // The review found "355.1K" and "355.1万".
+    expect(formatCount(3551234), '355万');
+    expect(formatCount(355123, text: english), '355K');
+    expect(formatCount(35512, text: english), '35.5K');
+    expect(formatCount(999549, text: english), '1M', reason: '999.5K rounds up to the next unit');
+    expect(formatCount(99960, text: english), '100K', reason: '99.96K rounds to 100, which loses its decimal');
+    expect(formatCount(12345678), '1235万');
+    expect(formatCount(99996000), '1亿');
   });
 
   test('F-APP-06: counts follow the injected language (principles §2.3)', () {

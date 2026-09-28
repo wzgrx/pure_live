@@ -8,6 +8,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_preferences.dart';
@@ -75,6 +76,8 @@ void main() {
           // This run already checked the follows (F-FAV-03).
           followRefreshProvider.overrideWith(_Checked.new),
           historyProvider.overrideWith((ref) => Stream.value(const [])),
+          // Real time passes while a picture is captured: no platform network state.
+          networkKindProvider.overrideWith((ref) => Stream.value(NetworkKind.unmetered)),
         ],
         child: MaterialApp(
           theme: tv ? PureTheme.tv(Appearance.dark) : PureTheme.of(Appearance.light),
@@ -199,6 +202,56 @@ void main() {
     await press(tester, LogicalKeyboardKey.arrowDown);
     expect(showing(tester), 'small');
     await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('TV-04: the control row keeps inside the safe margins and scrolls to the focused button', (tester) async {
+    await openRoom(tester, origin: RoomOrigin([for (var i = 1; i <= 8; i++) entry('$i')], label: '推荐'));
+    await press(tester, LogicalKeyboardKey.select);
+    expect(layer(tester).controlsVisible, isTrue);
+    const right = 960 - TvMetrics.safeX;
+    // "1 / 8" ends at the right margin, not halfway along the row.
+    expect(tester.getRect(find.byKey(const ValueKey('tv-room-position'))).right, closeTo(right, 0.5));
+    final row = find.byKey(const ValueKey('tv-room-buttons'));
+    expect(tester.getRect(row).left, TvMetrics.safeX);
+    expect(tester.getRect(row).right, closeTo(right, 0.5));
+    expect(tester.widget<SingleChildScrollView>(row).clipBehavior, isNot(Clip.none), reason: 'nothing past the margin');
+    // Seven buttons do not fit: each one the D-pad reaches is shown whole.
+    final buttons = find.descendant(of: row, matching: find.byType(FilledButton));
+    expect(buttons, findsNWidgets(7));
+    for (var i = 0; i < 6; i++) {
+      await press(tester, LogicalKeyboardKey.arrowRight);
+      final rect = FocusManager.instance.primaryFocus!.rect;
+      expect(rect.left, greaterThanOrEqualTo(TvMetrics.safeX - 0.5), reason: 'button ${i + 2}');
+      expect(rect.right, lessThanOrEqualTo(right + 0.5), reason: 'button ${i + 2}');
+    }
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  group('on a white frame', () {
+    setUp(() => debugPictureBackground = Colors.white);
+    tearDown(() => debugPictureBackground = Colors.black);
+
+    testWidgets('principles §2.2: the info bar sits on 60% black to the bottom edge', (tester) async {
+      await openRoom(tester, origin: RoomOrigin([entry('1'), entry('2')], label: '推荐'));
+      await press(tester, LogicalKeyboardKey.select);
+      final bar = find.byKey(const ValueKey('tv-room-bar'));
+      final image = (await tester.runAsync(() => captureImage(tester.element(bar))))!;
+      final bytes = (await tester.runAsync(image.toByteData))!;
+      Color at(double x, double y) {
+        final offset = (y.floor() * image.width + x.floor()) * 4;
+        return Color.fromARGB(255, bytes.getUint8(offset), bytes.getUint8(offset + 1), bytes.getUint8(offset + 2));
+      }
+
+      expect(at(480, 100), Colors.white, reason: 'the picture above the bar stays clear');
+      final rect = tester.getRect(bar);
+      // In the side margin, beside the name, the title and the buttons, and
+      // below them to the edge.
+      for (final y in [rect.top + 1, rect.center.dy, rect.bottom - 1, 539.0]) {
+        expect(at(20, y), const Color(0xFF666666), reason: 'at $y');
+      }
+      image.dispose();
+      await tester.pump(const Duration(seconds: 5));
+    });
   });
 
   testWidgets('§6.2: PageDown and PageUp switch rooms on a keyboard too', (tester) async {

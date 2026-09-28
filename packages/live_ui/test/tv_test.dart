@@ -293,6 +293,155 @@ void main() {
     expect(find.descendant(of: focused, matching: find.text('第二')), findsNothing);
   });
 
+  testWidgets('list rows get the 3 dp ring, inside the row and its viewport; buttons in a row keep theirs', (
+    tester,
+  ) async {
+    addTearDown(() => FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic);
+    tester.view
+      ..physicalSize = const Size(960, 540)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final theme = PureTheme.tv(Appearance.dark);
+    final ringColor = theme.extension<LiveTheme>()!.focusRing;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        builder: (context, child) => TvRoot(config: const TvConfig(enabled: true), child: child!),
+        home: Scaffold(
+          body: ListView(
+            children: [
+              ListTile(autofocus: true, title: const Text('通用'), onTap: () {}),
+              SwitchListTile(title: const Text('开关'), value: true, onChanged: (_) {}),
+              ListTile(
+                title: const Text('带按钮'),
+                trailing: IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+                onTap: () {},
+              ),
+              for (var i = 0; i < 20; i++) ListTile(title: Text('行 $i'), onTap: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final rings = find.byType(TvListFocusRings);
+    Rect row(String text) => tester.getRect(find.ancestor(of: find.text(text), matching: find.byType(ListTile)));
+    // Any stroke of 3 dp in the ring colour along the row's inside edge.
+    PaintPattern ringOn(String text) {
+      final expected = row(text).deflate(1.5);
+      return paints..something((method, arguments) {
+        if (method != #drawRect) return false;
+        final paint = arguments[1] as Paint;
+        return arguments[0] == expected &&
+            paint.style == PaintingStyle.stroke &&
+            paint.strokeWidth == 3 &&
+            // Paint keeps 32-bit floats: compare the 8-bit channels.
+            paint.color.toARGB32() == ringColor.toARGB32();
+      });
+    }
+
+    // The focus fill alone was all a focused row had (1.9:1 on the sofa).
+    expect(rings, ringOn('通用'));
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(rings, ringOn('开关'), reason: 'a switch row');
+    expect(rings, isNot(ringOn('通用')));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(rings, ringOn('带按钮'));
+    Focus.of(tester.element(find.byIcon(Icons.more_vert))).requestFocus();
+    await tester.pump();
+    expect(FocusManager.instance.primaryFocus!.context!.findAncestorWidgetOfExactType<IconButton>(), isNotNull);
+    expect(rings, isNot(ringOn('带按钮')), reason: 'the button shows its own ring');
+
+    // Far down the list the ring follows the scrolled row.
+    for (var i = 0; i < 12; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+    }
+    await tester.pumpAndSettle();
+    final focused = FocusManager.instance.primaryFocus!.context!.findAncestorWidgetOfExactType<ListTile>()!;
+    final text = (focused.title! as Text).data!;
+    expect(rings, ringOn(text));
+  });
+
+  testWidgets('a focused segment of a segmented button gets the ring too', (tester) async {
+    addTearDown(() => FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic);
+    tester.view
+      ..physicalSize = const Size(960, 540)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: PureTheme.tv(Appearance.dark),
+        builder: (context, child) => TvRoot(config: const TvConfig(enabled: true), child: child!),
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const [
+                ButtonSegment(value: 0, label: Text('暂停')),
+                ButtonSegment(value: 1, label: Text('退出')),
+              ],
+              selected: const {0},
+              onSelectionChanged: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    Focus.of(tester.element(find.text('退出'))).requestFocus();
+    await tester.pump();
+    final segment = tester.getRect(find.ancestor(of: find.text('退出'), matching: find.byType(TextButton)));
+    expect(
+      find.byType(TvListFocusRings),
+      paints..something((method, arguments) {
+        if (method != #drawRect) return false;
+        final paint = arguments[1] as Paint;
+        return arguments[0] == segment.deflate(1.5) && paint.style == PaintingStyle.stroke && paint.strokeWidth == 3;
+      }),
+    );
+  });
+
+  testWidgets('a focused tab gets the ring too', (tester) async {
+    addTearDown(() => FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic);
+    tester.view
+      ..physicalSize = const Size(960, 540)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final theme = PureTheme.tv(Appearance.dark);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        builder: (context, child) => TvRoot(config: const TvConfig(enabled: true), child: child!),
+        home: DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: const TabBar(
+                tabs: [
+                  Tab(text: '关注'),
+                  Tab(text: '历史'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    Focus.of(tester.element(find.text('历史'))).requestFocus();
+    await tester.pump();
+    final tab = tester.getRect(find.ancestor(of: find.text('历史'), matching: find.byType(InkWell)).first);
+    expect(
+      find.byType(TvListFocusRings),
+      paints..something((method, arguments) {
+        if (method != #drawRect) return false;
+        final paint = arguments[1] as Paint;
+        return arguments[0] == tab.deflate(1.5) && paint.style == PaintingStyle.stroke && paint.strokeWidth == 3;
+      }),
+    );
+  });
+
   group('TvNavScaffold', () {
     const destinations = [
       NavDestination(icon: Icons.favorite_border, selectedIcon: Icons.favorite, label: '关注'),

@@ -25,6 +25,7 @@
   "selectedVolume": "所选画面音量",
   "pickRoomFor": "选择直播间 · 放到第 {n} 格",
   "filterHint": "按主播名或标题筛选",
+  "pickTarget": "放到这里",
   "cell": "第 {n} 格",
   "switchRoom": "换房",
   "lineN": "线路 {n}",

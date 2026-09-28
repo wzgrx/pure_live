@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_store/live_store.dart' show BlockKind;
+import 'package:pure_live_app/app/locale.dart';
 import 'package:pure_live_app/features/danmaku/chat_actions.dart';
 import 'package:pure_live_app/features/danmaku/chat_panel.dart';
 import 'package:pure_live_app/features/danmaku/room_danmaku.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 import 'fake_danmaku.dart';
 
@@ -118,9 +120,30 @@ void main() {
 
     // Blank input sends nothing.
     await tester.enterText(find.byKey(const ValueKey('local-chat-input')), '   ');
-    await tester.tap(find.byTooltip('发送'));
+    await tester.tap(find.byTooltip('发送（只在本机显示）'));
     await tester.pumpAndSettle();
     expect(find.byType(ChatLineTile).evaluate().length, lessThanOrEqualTo(41));
+  });
+
+  testWidgets('F-LI-01: the input hint stays short; the send button says the line stays here', (tester) async {
+    await pumpPanel(tester);
+    // The long hint was cut off in a 320 dp chat column.
+    final field = tester.widget<TextField>(find.byKey(const ValueKey('local-chat-input')));
+    expect(field.decoration!.hintText, '发条本地弹幕');
+    expect(find.byTooltip('发送（只在本机显示）'), findsOneWidget);
+  });
+
+  testWidgets('English: a gift reads as one sentence, "sent" in lower case', (tester) async {
+    applyAppLocale(AppLocale.en);
+    addTearDown(() => applyAppLocale(AppLocale.zhHans));
+    await pumpPanel(tester);
+    await deliver(tester, batchOf(const [], gifts: [giftLine('Alice', 'Rocket', count: 2)]));
+    expect(find.textContaining('Alice sent Rocket ×2'), findsOneWidget);
+    expect(find.byTooltip('Send (shown on this device only)'), findsOneWidget);
+    expect(
+      tester.widget<TextField>(find.byKey(const ValueKey('local-chat-input'))).decoration!.hintText,
+      'Post a local danmaku',
+    );
   });
 
   testWidgets('LST-3: blocking while frozen removes the lines and keeps the position', (tester) async {

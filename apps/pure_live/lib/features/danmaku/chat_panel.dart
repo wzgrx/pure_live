@@ -114,7 +114,9 @@ class _LocalChatInputState extends State<LocalChatInput> {
             ),
           ),
         ),
-        IconButton(tooltip: t.common.send, icon: const Icon(Icons.send), onPressed: _send),
+        // The field's hint stays short enough for a 320 dp chat column; what
+        // "local" means is on the button.
+        IconButton(tooltip: t.danmaku.localSend, icon: const Icon(Icons.send), onPressed: _send),
       ],
     ),
   );

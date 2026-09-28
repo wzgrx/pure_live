@@ -1173,8 +1173,11 @@ class Translations$danmaku$zh_Hans {
   /// zh-Hans: '未开播时没有弹幕'
   String get offlineNoDanmaku => '未开播时没有弹幕';
 
-  /// zh-Hans: '发条本地弹幕（只在本机显示）'
-  String get localHint => '发条本地弹幕（只在本机显示）';
+  /// zh-Hans: '发条本地弹幕'
+  String get localHint => '发条本地弹幕';
+
+  /// zh-Hans: '发送（只在本机显示）'
+  String get localSend => '发送（只在本机显示）';
 
   /// zh-Hans: '重新连接'
   String get reconnect => '重新连接';
@@ -2229,6 +2232,9 @@ class Translations$multiview$zh_Hans {
 
   /// zh-Hans: '按主播名或标题筛选'
   String get filterHint => '按主播名或标题筛选';
+
+  /// zh-Hans: '放到这里'
+  String get pickTarget => '放到这里';
 
   /// zh-Hans: '第 {n} 格'
   String cell({required Object n}) => '第 ${n} 格';

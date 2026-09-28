@@ -153,6 +153,15 @@ void main() {
       expect(BilibiliProtocol.isMasked('a＊＊'), isTrue);
     });
 
+    test('heartbeat popularity: a real figure is reported, the placeholder 1 for guests is not (REG-BILIBILI-015)', () {
+      Uint8List reply(int value) =>
+          _packet(3, [value >> 24 & 0xff, value >> 16 & 0xff, value >> 8 & 0xff, value & 0xff]);
+      final real = _decode(reply(619543)).events.single as DanmakuOnline;
+      expect((real.audience, real.value), (AudienceKind.popularity, 619543));
+      expect(_decode(reply(1)).events, isEmpty);
+      expect(_decode(reply(0)).events, isEmpty);
+    });
+
     test('WATCHED_CHANGE is cumulative; SUPER_CHAT_MESSAGE and SEND_GIFT', () {
       final watched = _decode(
         _notice({
@@ -263,7 +272,8 @@ void main() {
       expect(chats.every((chat) => BilibiliProtocol.isMasked(chat.userName)), isTrue);
       expect(frames.any((frame) => frame.masked), isTrue);
       final online = events.whereType<DanmakuOnline>().toList();
-      expect(online.where((figure) => figure.audience == AudienceKind.popularity), hasLength(2));
+      // The recorded guest heartbeats answered the placeholder 1.
+      expect(online.where((figure) => figure.audience == AudienceKind.popularity), isEmpty);
       expect(online.where((figure) => figure.audience == AudienceKind.cumulative), hasLength(11));
     });
 

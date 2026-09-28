@@ -137,7 +137,12 @@ abstract final class BilibiliProtocol {
   static void _packet(int version, int op, Uint8List body, int depth, _State state) {
     switch (op) {
       case opHeartbeatReply:
-        if (body.length >= 4) state.online(AudienceKind.popularity, ByteData.sublistView(body).getUint32(0));
+        // Guests get a placeholder 1 (spec §7.6, REG-BILIBILI-015): the
+        // room's real figure from the detail must not give way to it.
+        if (body.length >= 4) {
+          final popularity = ByteData.sublistView(body).getUint32(0);
+          if (popularity > 1) state.online(AudienceKind.popularity, popularity);
+        }
       case opAuthReply:
         final text = utf8.decode(body, allowMalformed: true).trim();
         final reply = text.isEmpty ? null : jsonDecode(text);

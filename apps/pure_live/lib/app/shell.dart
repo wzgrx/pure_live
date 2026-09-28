@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/core/app_prefs.dart';
 import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/features/discover/discover_refresh.dart';
 import 'package:pure_live_app/features/search/search_page.dart';
@@ -81,6 +84,12 @@ class _AppShellState extends ConsumerState<AppShell> {
             selectedIndex: shell.currentIndex,
             onSelected: _select,
             body: body,
+            // principles §5.2: the rail expands and collapses by hand, remembered.
+            railExtended: ref.watch(appPrefsProvider.select((prefs) => prefs.navRailExtended)),
+            onRailExtendedChanged: (extended) =>
+                unawaited(ref.read(appPrefsProvider.notifier).setNavRailExtended(extended: extended)),
+            expandRailLabel: t.app.expandNavigation,
+            collapseRailLabel: t.app.collapseNavigation,
           );
   }
 }

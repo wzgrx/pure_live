@@ -52,19 +52,16 @@ class PageBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final margin = PageMargin.of(context);
-    Widget body = ListTileTheme.merge(contentPadding: PageMargin.tilePadding(margin), child: child);
+    final rows = ListTileTheme.merge(contentPadding: PageMargin.tilePadding(PageMargin.of(context)), child: child);
     final max = maxContentWidth;
-    if (max != null) {
-      body = Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: max),
-          child: body,
-        ),
-      );
-    }
-    return body;
+    if (max == null) return rows;
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: max),
+        child: rows,
+      ),
+    );
   }
 }
 
@@ -174,14 +171,7 @@ class PageAppBar extends StatelessWidget implements PreferredSizeWidget {
 /// line (principles §2.4), for [PageAppBar.bottom] or above a page's content.
 class PageTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates the tab bar.
-  const new({
-    required this.tabs,
-    this.controller,
-    this.maxContentWidth,
-    this.dividerHeight,
-    this.onTap,
-    super.key,
-  });
+  const new({required this.tabs, this.controller, this.maxContentWidth, this.dividerHeight, this.onTap, super.key});
 
   /// The tabs.
   final List<Widget> tabs;

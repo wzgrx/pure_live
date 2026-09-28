@@ -22,4 +22,15 @@ void main() {
     expect(loaded.shown(Tip.quickPanel), isTrue);
     expect(loaded.shown(Tip.tvRoom), isFalse);
   });
+
+  test('principles §5.2: the rail choice is remembered on this device', () async {
+    final store = await LiveStore.inMemory();
+    addTearDown(store.close);
+    final container = ProviderContainer(overrides: [storeProvider.overrideWithValue(store)]);
+    addTearDown(container.dispose);
+    expect((await AppPrefs.load(store.meta)).navRailExtended, isNull, reason: 'the window class decides at first');
+    await container.read(appPrefsProvider.notifier).setNavRailExtended(extended: false);
+    expect(container.read(appPrefsProvider).navRailExtended, isFalse);
+    expect((await AppPrefs.load(store.meta)).navRailExtended, isFalse);
+  });
 }

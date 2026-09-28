@@ -7,6 +7,8 @@
     "search": "搜索",
     "me": "我的"
   },
+  "expandNavigation": "展开导航栏",
+  "collapseNavigation": "收起导航栏",
   "history": "观看历史",
   "recordings": "录制中心",
   "multiview": "多画面",

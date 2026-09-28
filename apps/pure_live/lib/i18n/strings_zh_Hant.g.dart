@@ -450,6 +450,10 @@ class Translations$app$zh_Hant implements Translations$app$zh_Hans {
   @override
   late final Translations$app$tabs$zh_Hant tabs = Translations$app$tabs$zh_Hant.internal(_root);
   @override
+  String get expandNavigation => '展開導覽列';
+  @override
+  String get collapseNavigation => '收合導覽列';
+  @override
   String get history => '觀看紀錄';
   @override
   String get recordings => '錄製中心';

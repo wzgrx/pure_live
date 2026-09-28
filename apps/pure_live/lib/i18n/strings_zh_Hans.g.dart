@@ -570,6 +570,12 @@ class Translations$app$zh_Hans {
 
   late final Translations$app$tabs$zh_Hans tabs = Translations$app$tabs$zh_Hans.internal(_root);
 
+  /// zh-Hans: '展开导航栏'
+  String get expandNavigation => '展开导航栏';
+
+  /// zh-Hans: '收起导航栏'
+  String get collapseNavigation => '收起导航栏';
+
   /// zh-Hans: '观看历史'
   String get history => '观看历史';
 

@@ -460,6 +460,10 @@ class _Translations$app$en implements Translations$app$zh_Hans {
   @override
   late final _Translations$app$tabs$en tabs = _Translations$app$tabs$en._(_root);
   @override
+  String get expandNavigation => 'Expand navigation';
+  @override
+  String get collapseNavigation => 'Collapse navigation';
+  @override
   String get history => 'Watch history';
   @override
   String get recordings => 'Recordings';

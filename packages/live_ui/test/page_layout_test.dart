@@ -94,7 +94,10 @@ void main() {
       theme: desktop,
       page: (context) => const Scaffold(
         appBar: PageAppBar(title: Text('Me'), maxContentWidth: Sizes.readingWidth),
-        body: PageBody(maxContentWidth: Sizes.readingWidth, child: ListTile(title: Text('row'))),
+        body: PageBody(
+          maxContentWidth: Sizes.readingWidth,
+          child: ListTile(title: Text('row')),
+        ),
       ),
     );
     final row = tester.getTopLeft(find.text('row')).dx;
@@ -112,7 +115,12 @@ void main() {
         child: Scaffold(
           appBar: const PageAppBar(
             title: Text('Discover'),
-            bottom: PageTabBar(tabs: [Tab(text: 'One'), Tab(text: 'Two')]),
+            bottom: PageTabBar(
+              tabs: [
+                Tab(text: 'One'),
+                Tab(text: 'Two'),
+              ],
+            ),
           ),
           body: content(),
         ),
@@ -134,7 +142,12 @@ void main() {
           appBar: PageAppBar(
             title: const Text('Follows'),
             actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.refresh))],
-            bottom: const PageTabBar(tabs: [Tab(text: 'One'), Tab(text: 'Two')]),
+            bottom: const PageTabBar(
+              tabs: [
+                Tab(text: 'One'),
+                Tab(text: 'Two'),
+              ],
+            ),
           ),
           body: content(),
         ),

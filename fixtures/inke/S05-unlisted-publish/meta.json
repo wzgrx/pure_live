@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "platform": "inke",
+  "sample": "S05-unlisted-publish",
+  "capturedAt": "2026-09-28T11:00:39.359396Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://service.inke.cn/api/live/now_publish?id=778920027",
+    "headers": {
+      "Referer": "https://www.inke.cn/",
+      "Origin": "https://www.inke.cn",
+      "User-Agent": "Mozilla/5.0"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "openresty/1.13.6.1",
+      "date": "Mon, 28 Sep 2026 11:00:40 GMT",
+      "content-type": "text/plain; charset=utf-8",
+      "content-length": "1578",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": [
+        "content-type,x-requested-with",
+        "uberctx-_namespace_appkey_",
+        "ticket",
+        "User-Agent",
+        "Accept-Encoding",
+        "Uber-Trace-Id",
+        "X-Real-Ip",
+        "X-Forwarded-For",
+        "Referer",
+        "Origin"
+      ],
+      "access-control-allow-origin": "https://www.inke.cn",
+      "x-trace-id": "bb8f3c83e900bd8b76a3fa64",
+      "server-info": "ali-e-ops-inke-proxy10.bj_tcbb8f3c83e900bd8b76a3fa64_2026-09-28-19:00:40:288"
+    }
+  },
+  "raw": {
+    "sha256": "ddbc322c4d3efa5fb138342d2c49425731f4f78dac032e27746143de13d5f7c1",
+    "length": 1578
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.live.stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.live.stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.live.token",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.14 recorder (schema 1)"
+}

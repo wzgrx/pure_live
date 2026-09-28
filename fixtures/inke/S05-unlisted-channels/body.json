@@ -1,0 +1,414 @@
+{
+  "error_code": 0,
+  "message": "ok",
+  "data": {
+    "list": [
+      {
+        "tab_key": "62F3CD3ACF8347C9",
+        "channel_name": "音乐",
+        "list": [
+          {
+            "uid": 764622336,
+            "live_id": "1790589556486896",
+            "gender": 0,
+            "level": 71,
+            "nick": "🎙️欣乐yue🌙",
+            "portrait": "http://img.ikstatic.cn/MTc2NDM1MzkyMjczMSM3NjYjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790589556486896_t.flv?stream_id=1790589556486896_t&wsSecret=d11e071c8cbfd720117ffdd18325c3b5&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790589556486896_0_en.flv?stream_id=1790589556486896_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=bede426cc255d8a6d431a1baa70810a6&wsABStime=6abb8c32"
+          },
+          {
+            "uid": 714515206,
+            "live_id": "1790575830747099",
+            "gender": 0,
+            "level": 62,
+            "nick": "🌻小格g.",
+            "portrait": "http://img.ikstatic.cn/MTc2NzAzMzEzNjg3OCM4NDkjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790575830747099_t.flv?stream_id=1790575830747099_t&wsSecret=f3d5a336356e7a8be462d0b8a4f44775&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790575830747099_0_en.flv?stream_id=1790575830747099_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=5676a15ec3d0ba2afb22e78c5e27beef&wsABStime=6abb570e"
+          },
+          {
+            "uid": 3604610,
+            "live_id": "1790592198696549",
+            "gender": 1,
+            "level": 167,
+            "nick": "三毛",
+            "portrait": "http://img.ikstatic.cn/MTc5MDEzMTg2ODE4OSM5ODIjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790592198696549_t.flv?stream_id=1790592198696549_t&wsSecret=c228d80830b836a54a7aa7c783e00bc1&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790592198696549_0_en.flv?stream_id=1790592198696549_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=74c30284cbc43d7822dd4bda83fe9d63&wsABStime=6abb9646"
+          },
+          {
+            "uid": 10748095,
+            "live_id": "1790592384661315",
+            "gender": 0,
+            "level": 48,
+            "nick": "🎶琪琪",
+            "portrait": "http://img.ikstatic.cn/MTc0MzEyOTU4NjAxOCM4ODEjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790592384661315_t.flv?stream_id=1790592384661315_t&wsSecret=916499b1b1c492d547e6958392c05ade&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790592384661315_0_en.flv?stream_id=1790592384661315_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=189908dda596662014e5544b274d2e63&wsABStime=6abb976b"
+          },
+          {
+            "uid": 759234081,
+            "live_id": "1790581324603173",
+            "gender": 0,
+            "level": 35,
+            "nick": "心儿💫（青萝）",
+            "portrait": "http://img.ikstatic.cn/MTc4ODYzMjM0MjA1NyM0MzcjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790581324603173_t.flv?stream_id=1790581324603173_t&wsSecret=a9a1cea789fc37423db922f20b168f9d&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790581324603173_0_en.flv?stream_id=1790581324603173_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=5085fe977b0026786e1530b8578ad236&wsABStime=6abb6c1b"
+          },
+          {
+            "uid": 748629012,
+            "live_id": "1790573024359379",
+            "gender": 0,
+            "level": 30,
+            "nick": "☀️姊悦悦",
+            "portrait": "http://img.ikstatic.cn/MTc4NjcyMjM4Mjg3OCMxNjcjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790573024359379_t.flv?stream_id=1790573024359379_t&wsSecret=1b261c2f377105ca8adbb4a5c12da430&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790573024359379_0_en.flv?stream_id=1790573024359379_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=b3186b68ad460b426808d2144ca3c9de&wsABStime=6abb4d21"
+          },
+          {
+            "uid": 767389347,
+            "live_id": "1790579869843268",
+            "gender": 0,
+            "level": 36,
+            "nick": "杬🦋",
+            "portrait": "http://img.ikstatic.cn/MTc3NjM0NTA2Nzk0MCM2MjUjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790579869843268_t.flv?stream_id=1790579869843268_t&wsSecret=a1bd4f17d03e4a393410ecdf3b1788fe&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790579869843268_0_en.flv?stream_id=1790579869843268_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=cab4a60d2d40393ece530ce5a7c72053&wsABStime=6abb6673"
+          },
+          {
+            "uid": 14064969,
+            "live_id": "1790588103270432",
+            "gender": 0,
+            "level": 171,
+            "nick": "一西issy🥀",
+            "portrait": "http://img.ikstatic.cn/MTc4NzExMjI0NjA0MyM4OTMjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790588103270432_t.flv?stream_id=1790588103270432_t&wsSecret=5debe70c484b70c03ba4e4ad40c2bbb5&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790588103270432_0_en.flv?stream_id=1790588103270432_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=0f98a7ca67e68c5856457f2993e0ce40&wsABStime=6abb8701"
+          }
+        ]
+      },
+      {
+        "tab_key": "411F2448D92E4317",
+        "channel_name": "舞蹈",
+        "list": [
+          {
+            "uid": 622302427,
+            "live_id": "1790591882700702",
+            "gender": 0,
+            "level": 97,
+            "nick": "奶油⭐",
+            "portrait": "http://img.ikstatic.cn/MTc4NzQ3Nzc5MzI0NiM0OTEjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790591882700702_t.flv?stream_id=1790591882700702_t&wsSecret=6822ca8e8c663597057a74afb396ca55&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790591882700702_0_en.flv?stream_id=1790591882700702_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=ca6cb8a0525e270630b6579b32e1d2d3&wsABStime=6abb951e"
+          },
+          {
+            "uid": 764784894,
+            "live_id": "1790588594385482",
+            "gender": 0,
+            "level": 17,
+            "nick": "叶子🍃",
+            "portrait": "http://img.ikstatic.cn/MTc4Njg4MDgzMjk5NiM2NzYjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790588594385482_t.flv?stream_id=1790588594385482_t&wsSecret=f825ee25f12d517fd3c9989bc4e1024f&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790588594385482_0_en.flv?stream_id=1790588594385482_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=237545a701a0444683a2a508dbeb2ea1&wsABStime=6abb8923"
+          },
+          {
+            "uid": 777026502,
+            "live_id": "1790564885687391",
+            "gender": 0,
+            "level": 26,
+            "nick": "小金条",
+            "portrait": "http://img.ikstatic.cn/MTc4MzU4NDc3MzYwMiM2MTgjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790564885687391_t.flv?stream_id=1790564885687391_t&wsSecret=f0723cf5daabb3bf5e4a0fd26f35d972&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790564885687391_0_en.flv?stream_id=1790564885687391_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=b529418fb20549116dda63851e6b35e2&wsABStime=6abb2c43"
+          },
+          {
+            "uid": 776792496,
+            "live_id": "1790585381378084",
+            "gender": 0,
+            "level": 19,
+            "nick": "芙芙",
+            "portrait": "http://img.ikstatic.cn/MTc4OTkyMzM3MjA1MSMxMjIjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790585381378084_t.flv?stream_id=1790585381378084_t&wsSecret=3434e72e56efe90a7c7a38f6f7d411f5&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790585381378084_0_en.flv?stream_id=1790585381378084_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=7ccce6ac84a7a05d633981ec9bef8648&wsABStime=6abb7bd2"
+          },
+          {
+            "uid": 778530997,
+            "live_id": "1790591955275194",
+            "gender": 5,
+            "level": 9,
+            "nick": "咩咩🐑",
+            "portrait": "http://img.ikstatic.cn/MTc4NzA5ODE0ODU0NSMgMjkjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790591955275194_t.flv?stream_id=1790591955275194_t&wsSecret=9864926587a3dee09d8fff5a0e7559c2&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790591955275194_0_en.flv?stream_id=1790591955275194_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=b10621c2bba4c2d1695e9c7493f3e7ce&wsABStime=6abb956c"
+          }
+        ]
+      },
+      {
+        "tab_key": "004201909183MQTW",
+        "channel_name": "新颜",
+        "list": [
+          {
+            "uid": 763487003,
+            "live_id": "1790591301671774",
+            "gender": 0,
+            "level": 52,
+            "nick": "大千",
+            "portrait": "http://img.ikstatic.cn/MTc2NTIxNzg5ODY4NiM1MDAjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790591301671774_t.flv?stream_id=1790591301671774_t&wsSecret=dd3accb086f62c80a3de0e139c16e63e&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790591301671774_0_en.flv?stream_id=1790591301671774_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=2f7bed4a48e9e1f9c4ba3216106b216d&wsABStime=6abb9476"
+          },
+          {
+            "uid": 778945970,
+            "live_id": "1790570846378131",
+            "gender": 0,
+            "level": 7,
+            "nick": "江映晚🌻",
+            "portrait": "http://img.ikstatic.cn/MTc5MDMzOTQ2NzU3NyM3NzEjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790570846378131_t.flv?stream_id=1790570846378131_t&wsSecret=1009d1cce183ab3dfc568fe0f77cd2c3&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790570846378131_0_en.flv?stream_id=1790570846378131_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=9dcf3ba458c88d312fafe15369d857a7&wsABStime=6abb44ba"
+          },
+          {
+            "uid": 778824961,
+            "live_id": "1790591813858442",
+            "gender": 0,
+            "level": 5,
+            "nick": "桃桃🍑逃不掉～",
+            "portrait": "http://img.ikstatic.cn/MTc4OTg3ODM0ODQ1NiMyMDIjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790591813858442_t.flv?stream_id=1790591813858442_t&wsSecret=222efa15116faf446f12fc192c9c628b&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790591813858442_0_en.flv?stream_id=1790591813858442_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=1f19dcd8ec168f4c789e0a873dc1b152&wsABStime=6abb95fa"
+          },
+          {
+            "uid": 778904833,
+            "live_id": "1790585097133235",
+            "gender": 0,
+            "level": 7,
+            "nick": "果子",
+            "portrait": "http://img.ikstatic.cn/MTc5MDU3NjcyOTk1NSMyNjIjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790585097133235_t.flv?stream_id=1790585097133235_t&wsSecret=7f0aa14670996693bb9fa764830d5f8e&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790585097133235_0_en.flv?stream_id=1790585097133235_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=af7eab0d36cd3723fc737cd338680ad4&wsABStime=6abb7b0d"
+          },
+          {
+            "uid": 778897576,
+            "live_id": "1790591219294281",
+            "gender": 5,
+            "level": 12,
+            "nick": "小欣",
+            "portrait": "http://img.ikstatic.cn/MTc4OTI5NTkyMTkxOCMzMzQjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790591219294281_t.flv?stream_id=1790591219294281_t&wsSecret=285df5e22b9e11683634ac988426651f&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790591219294281_0_en.flv?stream_id=1790591219294281_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=252259e9dacfd6c71dae78474d32bf36&wsABStime=6abb9275"
+          },
+          {
+            "uid": 760637074,
+            "live_id": "1790588217574281",
+            "gender": 0,
+            "level": 9,
+            "nick": "小语",
+            "portrait": "http://img.ikstatic.cn/MTc5MDAwMDI4MjMxOSMyMjcjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790588217574281_t.flv?stream_id=1790588217574281_t&wsSecret=a7f46da11dcc80c84f25fa7bbd0e24c2&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790588217574281_0_en.flv?stream_id=1790588217574281_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=ad5451fb06ac383ad595abb279d8e6b7&wsABStime=6abb875e"
+          },
+          {
+            "uid": 778759140,
+            "live_id": "1790589351270719",
+            "gender": 0,
+            "level": 9,
+            "nick": "荔枝",
+            "portrait": "http://img.ikstatic.cn/MTc4NzkxMzkwMDI2MCM5NzcjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790589351270719_t.flv?stream_id=1790589351270719_t&wsSecret=be79d4b093e5276db43f602b313b2280&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790589351270719_0_en.flv?stream_id=1790589351270719_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=4973b99781892aaeede2ce57db5a4fbe&wsABStime=6abb8b39"
+          },
+          {
+            "uid": 764784894,
+            "live_id": "1790588594385482",
+            "gender": 0,
+            "level": 17,
+            "nick": "叶子🍃",
+            "portrait": "http://img.ikstatic.cn/MTc4Njg4MDgzMjk5NiM2NzYjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790588594385482_t.flv?stream_id=1790588594385482_t&wsSecret=f825ee25f12d517fd3c9989bc4e1024f&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790588594385482_0_en.flv?stream_id=1790588594385482_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=237545a701a0444683a2a508dbeb2ea1&wsABStime=6abb8923"
+          }
+        ]
+      },
+      {
+        "tab_key": "03FF96A6E88E36F4",
+        "channel_name": "校园",
+        "list": [
+          {
+            "uid": 766085156,
+            "live_id": "1790561398974985",
+            "gender": 0,
+            "level": 65,
+            "nick": "桃子祺🍯",
+            "portrait": "http://img.ikstatic.cn/MTc2MTU3OTUwMzUwOSM1MTMjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790561398974985_t.flv?stream_id=1790561398974985_t&wsSecret=9930587f15e460d13bebd86915c8bc89&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790561398974985_0_en.flv?stream_id=1790561398974985_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=45f6192a1b87f6db24b7ece5feaaa72f&wsABStime=6abb1dfb"
+          },
+          {
+            "uid": 778921918,
+            "live_id": "1790587011560269",
+            "gender": 0,
+            "level": 9,
+            "nick": "星软软",
+            "portrait": "http://img.ikstatic.cn/MTc4OTc5NTU0MzE3OSM2MjgjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790587011560269_t.flv?stream_id=1790587011560269_t&wsSecret=87b350f772f22ae6e3cca4a72f0097e5&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790587011560269_0_en.flv?stream_id=1790587011560269_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=b31b4ff132b03c1d94ef37cf9d43d157&wsABStime=6abb820b"
+          },
+          {
+            "uid": 39913843,
+            "live_id": "1790589018172377",
+            "gender": 0,
+            "level": 39,
+            "nick": "🎂10.2阿昭💕",
+            "portrait": "http://img.ikstatic.cn/MTc2NDMyMDc3NDE5NiM2NDQjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790589018172377_t.flv?stream_id=1790589018172377_t&wsSecret=7b0dc0fd4ab88dbe700c4b72135db49b&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790589018172377_0_en.flv?stream_id=1790589018172377_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=e29f783331ee64d3901b9bd36097560a&wsABStime=6abb8a8e"
+          },
+          {
+            "uid": 772651089,
+            "live_id": "1790592336238777",
+            "gender": 0,
+            "level": 17,
+            "nick": "羽儿",
+            "portrait": "http://img.ikstatic.cn/MTc3MzI5OTQ2OTcxNiM0NDYjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790592336238777_t.flv?stream_id=1790592336238777_t&wsSecret=939fb6340624c118a167d76526656eb4&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790592336238777_0_en.flv?stream_id=1790592336238777_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=83a22092e1ea65790fe430a6af62fc1d&wsABStime=6abb96d3"
+          },
+          {
+            "uid": 57311360,
+            "live_id": "1790586241752118",
+            "gender": 0,
+            "level": 103,
+            "nick": "可乐🎠",
+            "portrait": "http://img.ikstatic.cn/MTc4Mjk5MDI5ODQ1NiM0NTgjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790586241752118_t.flv?stream_id=1790586241752118_t&wsSecret=9a11b1635322469fdfa84bbbdec3c81c&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790586241752118_0_en.flv?stream_id=1790586241752118_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=1fea8cd1da4be96a5f9408558d96b6c3&wsABStime=6abb8055"
+          },
+          {
+            "uid": 178415466,
+            "live_id": "1790579859449214",
+            "gender": 0,
+            "level": 91,
+            "nick": "Kiki♒️",
+            "portrait": "http://img.ikstatic.cn/MTc4NTU1OTYxNjYzMiMgMTgjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790579859449214_t.flv?stream_id=1790579859449214_t&wsSecret=43142f98057ebe479a7a9f7586df57b9&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790579859449214_0_en.flv?stream_id=1790579859449214_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=5bf2924c965a23242979b5324f0b0900&wsABStime=6abb6695"
+          },
+          {
+            "uid": 616296673,
+            "live_id": "1790572132350391",
+            "gender": 0,
+            "level": 176,
+            "nick": "杜薇薇🐯",
+            "portrait": "http://img.ikstatic.cn/MTc4NTgxNzc2ODE2MyM4NTUjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790572132350391_t.flv?stream_id=1790572132350391_t&wsSecret=9a552b1e917dcc66cfed3893ee64217f&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790572132350391_0_en.flv?stream_id=1790572132350391_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=3714276e839c142f04499db8e1241745&wsABStime=6abb48fa"
+          },
+          {
+            "uid": 12618524,
+            "live_id": "1790590832447353",
+            "gender": 0,
+            "level": 34,
+            "nick": "吉祥妹妹",
+            "portrait": "http://img.ikstatic.cn/MTc4ODMzNTE4MjM2NiM1MDUjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790590832447353_t.flv?stream_id=1790590832447353_t&wsSecret=76e933c05a72efda6ca5ef0ae6df3991&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790590832447353_0_en.flv?stream_id=1790590832447353_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=9faa279d6239fe851a09212875698b30&wsABStime=6abb9100"
+          }
+        ]
+      },
+      {
+        "tab_key": "70B3E8C2C645A0EC",
+        "channel_name": "男神",
+        "list": [
+          {
+            "uid": 52674081,
+            "live_id": "1790591165223078",
+            "gender": 1,
+            "level": 48,
+            "nick": "李奇✨",
+            "portrait": "http://img.ikstatic.cn/MTc4NjgxODI3OTM5NCM5MjkjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790591165223078_t.flv?stream_id=1790591165223078_t&wsSecret=50cd267b8edba573642e3e77e50c5ed9&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790591165223078_0_en.flv?stream_id=1790591165223078_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=2440d31ebc1bfa29e8203cc00459f90a&wsABStime=6abb927a"
+          },
+          {
+            "uid": 15672369,
+            "live_id": "1790584070459983",
+            "gender": 1,
+            "level": 328,
+            "nick": "Ren.義 🦁",
+            "portrait": "http://img.ikstatic.cn/MTc4MDczNDM0NjAzNCM3MzgjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790584070459983_t.flv?stream_id=1790584070459983_t&wsSecret=c5e9ffe481a3c2472a511c30c0046baf&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790584070459983_0.flv?stream_id=1790584070459983_0&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=224f284ce932fba7a4a81b8bf46eca99&wsABStime=6abb7686"
+          },
+          {
+            "uid": 9731654,
+            "live_id": "1790565679565397",
+            "gender": 1,
+            "level": 121,
+            "nick": "唐寅",
+            "portrait": "http://img.ikstatic.cn/MTcxMTQ2OTIzMzIyNSMgODYjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790565679565397_t.flv?stream_id=1790565679565397_t&wsSecret=4ab7b31fd761f4a3b9f5ec2fb4437157&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790565679565397_0_en.flv?stream_id=1790565679565397_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=7d2fcbf0c25eacc2659ca17ec797b35d&wsABStime=6abb2eb8"
+          },
+          {
+            "uid": 771180493,
+            "live_id": "1790588496807404",
+            "gender": 1,
+            "level": 48,
+            "nick": "Cc🕴️",
+            "portrait": "http://img.ikstatic.cn/MTc4NTMyNDIxNTkxNSMyNTUjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790588496807404_t.flv?stream_id=1790588496807404_t&wsSecret=4b82bce68b4c2f9a51b2b405c34b8652&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790588496807404_0_en.flv?stream_id=1790588496807404_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=ddf58b404f56b8738ff25649e146e8de&wsABStime=6abb87e0"
+          }
+        ]
+      },
+      {
+        "tab_key": "00420190126LHHBM",
+        "channel_name": "派对",
+        "list": [
+          {
+            "uid": 45389806,
+            "live_id": "1790591656247756",
+            "gender": 0,
+            "level": 88,
+            "nick": "竹子🎋（不熬夜）",
+            "portrait": "http://img.ikstatic.cn/MTc3NjA3MTkxMDk5NSMgNDUjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790591656247756_t.flv?stream_id=1790591656247756_t&wsSecret=588ded11e7c9e391521030975303118e&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790591656247756_0_en.flv?stream_id=1790591656247756_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=5be18fd96a295b4598119953e31f35ae&wsABStime=6abb94a2"
+          },
+          {
+            "uid": 15672369,
+            "live_id": "1790584070459983",
+            "gender": 1,
+            "level": 328,
+            "nick": "Ren.義 🦁",
+            "portrait": "http://img.ikstatic.cn/MTc4MDczNDM0NjAzNCM3MzgjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790584070459983_t.flv?stream_id=1790584070459983_t&wsSecret=c5e9ffe481a3c2472a511c30c0046baf&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790584070459983_0.flv?stream_id=1790584070459983_0&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=224f284ce932fba7a4a81b8bf46eca99&wsABStime=6abb7686"
+          },
+          {
+            "uid": 182735109,
+            "live_id": "1790591377247895",
+            "gender": 0,
+            "level": 81,
+            "nick": "丑丫头🌻",
+            "portrait": "http://img.ikstatic.cn/MTc3ODY5NDc1NDYxMSM4NTEjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790591377247895_t.flv?stream_id=1790591377247895_t&wsSecret=30d3b639559dffc7e63791f5c4e9ca5a&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790591377247895_0_en.flv?stream_id=1790591377247895_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=f49c42560dc479a31098f76228c7a716&wsABStime=6abb931a"
+          },
+          {
+            "uid": 3604610,
+            "live_id": "1790592198696549",
+            "gender": 1,
+            "level": 167,
+            "nick": "三毛",
+            "portrait": "http://img.ikstatic.cn/MTc5MDEzMTg2ODE4OSM5ODIjanBn.jpg",
+            "stream_addr": "https://live-pull-ws.ikstatic.cn/live/1790592198696549_t.flv?stream_id=1790592198696549_t&wsSecret=c228d80830b836a54a7aa7c783e00bc1&wsABStime=6aba64f7",
+            "stream_multi_addr": "http://live-pull-zego.ikstatic.cn/inkemain/1790592198696549_0_en.flv?stream_id=1790592198696549_0_en&stream_type=zego&codecInfo=8192&ikFastRate=1.1&ikMaxBuf=3600&ikMinBuf=2900&ikHost=ws&ikSlowRate=0.9&wsSecret=74c30284cbc43d7822dd4bda83fe9d63&wsABStime=6abb9646"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "generator": "InkeSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + searchRooms + getLiveStatus + externalRoomUrl + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw (with S01-top)",
+  "value": {
+    "getRoomDetail": {
+      "result": {
+        "roomId": "771067357",
+        "userId": "771067357",
+        "title": "木子",
+        "nick": "木子",
+        "avatar": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc2MTg4Mjk2ODg0NCM3NjgjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+        "cover": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc2MTg4Mjk2ODg0NCM3NjgjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "inke",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "isCatchUp": false,
+        "link": "https://www.inke.cn/liveroom/index.html?uid=771067357&id=1790521153165881"
+      },
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=771067357",
+        "https://webapi.busi.inke.cn/web/Live_top_pc"
+      ]
+    },
+    "getRoomDetailForRefresh": {
+      "result": {
+        "roomId": "771067357",
+        "userId": "771067357",
+        "title": "木子",
+        "nick": "木子",
+        "avatar": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc2MTg4Mjk2ODg0NCM3NjgjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+        "cover": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc2MTg4Mjk2ODg0NCM3NjgjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "inke",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "isCatchUp": false,
+        "link": "https://www.inke.cn/liveroom/index.html?uid=771067357&id=1790521153165881"
+      },
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=771067357"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "roomId": "771067357",
+        "userId": "771067357",
+        "title": "木子",
+        "nick": "木子",
+        "avatar": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc2MTg4Mjk2ODg0NCM3NjgjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+        "cover": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc2MTg4Mjk2ODg0NCM3NjgjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "inke",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "isCatchUp": false,
+        "link": "https://www.inke.cn/liveroom/index.html?uid=771067357&id=1790521153165881"
+      },
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=771067357",
+        "https://webapi.busi.inke.cn/web/Live_top_pc"
+      ]
+    },
+    "searchRooms": {
+      "result": [
+        {
+          "roomId": "771067357",
+          "userId": "771067357",
+          "title": "木子",
+          "nick": "木子",
+          "avatar": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc2MTg4Mjk2ODg0NCM3NjgjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+          "cover": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc2MTg4Mjk2ODg0NCM3NjgjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "inke",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "isCatchUp": false,
+          "link": "https://www.inke.cn/liveroom/index.html?uid=771067357&id=1790521153165881"
+        }
+      ],
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=771067357"
+      ]
+    },
+    "searchRooms(link)": {
+      "result": [
+        {
+          "roomId": "771067357",
+          "userId": "771067357",
+          "title": "木子",
+          "nick": "木子",
+          "avatar": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc2MTg4Mjk2ODg0NCM3NjgjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+          "cover": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc2MTg4Mjk2ODg0NCM3NjgjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "inke",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "isCatchUp": false,
+          "link": "https://www.inke.cn/liveroom/index.html?uid=771067357&id=1790521153165881"
+        }
+      ],
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=771067357"
+      ]
+    },
+    "supportsSearchPaginationFor": false,
+    "getLiveStatus": {
+      "result": true,
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=771067357"
+      ]
+    },
+    "externalRoomUrl": "https://www.inke.cn/liveroom/index.html?uid=771067357&id=1790521153165881",
+    "getPlayQualites": [
+      {
+        "quality": "FLV",
+        "id": "flv",
+        "sort": 0,
+        "getPlayUrls": [
+          "https://live-pull-ws.ikstatic.cn/live/1790521153165881_t.flv?stream_id=1790521153165881_t&wsSecret=d3c7cd200fddd6130c421d72f7da321f&wsABStime=6ab96eeb"
+        ]
+      }
+    ],
+    "getPlayUrls(flv)": [
+      "https://live-pull-ws.ikstatic.cn/live/1790521153165881_t.flv?stream_id=1790521153165881_t&wsSecret=d3c7cd200fddd6130c421d72f7da321f&wsABStime=6ab96eeb"
+    ],
+    "resolvePlayUrlsForRecoveryRaw": {
+      "result": {
+        "urls": [
+          "https://live-pull-ws.ikstatic.cn/live/1790521153165881_t.flv?stream_id=1790521153165881_t&wsSecret=d3c7cd200fddd6130c421d72f7da321f&wsABStime=6ab96eeb"
+        ],
+        "appliedQualityData": "flv"
+      },
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=771067357",
+        "https://webapi.busi.inke.cn/web/Live_top_pc"
+      ]
+    }
+  }
+}

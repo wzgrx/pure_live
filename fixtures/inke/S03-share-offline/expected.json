@@ -1,0 +1,156 @@
+{
+  "generator": "InkeSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + searchRooms + getLiveStatus + externalRoomUrl + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw",
+  "value": {
+    "getRoomDetail": {
+      "result": {
+        "roomId": "1",
+        "userId": "1",
+        "title": "",
+        "nick": "",
+        "avatar": "",
+        "cover": "",
+        "watching": "0",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "inke",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "isCatchUp": false,
+        "link": "https://www.inke.cn/liveroom/index.html?uid=1"
+      },
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=1"
+      ]
+    },
+    "getRoomDetailForRefresh": {
+      "result": {
+        "roomId": "1",
+        "userId": "1",
+        "title": "",
+        "nick": "",
+        "avatar": "",
+        "cover": "",
+        "watching": "0",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "inke",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "isCatchUp": false,
+        "link": "https://www.inke.cn/liveroom/index.html?uid=1"
+      },
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=1"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "roomId": "1",
+        "userId": "1",
+        "title": "",
+        "nick": "",
+        "avatar": "",
+        "cover": "",
+        "watching": "0",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "inke",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "isCatchUp": false,
+        "link": "https://www.inke.cn/liveroom/index.html?uid=1"
+      },
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=1"
+      ]
+    },
+    "searchRooms": {
+      "result": [
+        {
+          "roomId": "1",
+          "userId": "1",
+          "title": "UID 1",
+          "nick": "UID 1",
+          "avatar": "",
+          "cover": "",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "inke",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "isCatchUp": false,
+          "link": "https://www.inke.cn/liveroom/index.html?uid=1"
+        }
+      ],
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=1"
+      ]
+    },
+    "searchRooms(link)": {
+      "result": [
+        {
+          "roomId": "1",
+          "userId": "1",
+          "title": "UID 1",
+          "nick": "UID 1",
+          "avatar": "",
+          "cover": "",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "inke",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "isCatchUp": false,
+          "link": "https://www.inke.cn/liveroom/index.html?uid=1"
+        }
+      ],
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=1"
+      ]
+    },
+    "supportsSearchPaginationFor": false,
+    "getLiveStatus": {
+      "result": false,
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=1"
+      ]
+    },
+    "externalRoomUrl": "https://www.inke.cn/",
+    "getPlayQualites": [],
+    "getPlayUrls(flv)": {
+      "throws": "InkeException",
+      "message": "Inke mediaUnavailable"
+    },
+    "resolvePlayUrlsForRecoveryRaw": {
+      "result": {
+        "throws": "InkeException",
+        "message": "Inke mediaUnavailable"
+      },
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=1"
+      ]
+    }
+  }
+}

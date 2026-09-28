@@ -29,6 +29,8 @@ export 'src/sites/douyu/douyu_api.dart';
 export 'src/sites/douyu/douyu_site.dart';
 export 'src/sites/huya/huya_api.dart';
 export 'src/sites/huya/huya_site.dart';
+export 'src/sites/inke/inke_api.dart';
+export 'src/sites/inke/inke_site.dart';
 export 'src/sites/kuaishou/kuaishou_api.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
 export 'src/sites/missevan/missevan_api.dart';

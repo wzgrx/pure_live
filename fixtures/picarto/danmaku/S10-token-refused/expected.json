@@ -1,0 +1,43 @@
+{
+  "generator": "fixtures/picarto/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) PicartoProtocol.token over the token answer, PicartoProtocol.endpoint, and PicartoProtocol.decode over every incoming frame (copied as they were; the event classes cut down to their fields)",
+  "value": {
+    "channel": "allatir",
+    "token": null,
+    "endpoint": null,
+    "connector": {
+      "tokenRequest": {
+        "method": "POST",
+        "url": "https://ptvintern.picarto.tv/ptvapi",
+        "headers": {
+          "origin": "https://picarto.tv",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+          "content-type": "application/json",
+          "referer": "https://picarto.tv/"
+        },
+        "body": {
+          "query": "query ($name: String) { generateJwtToken(channel_name: $name) { key } }",
+          "variables": {
+            "name": "allatir"
+          }
+        }
+      },
+      "handshakeHeaders": {
+        "origin": "https://picarto.tv",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "openFrames": [],
+      "heartbeat": null,
+      "watchIntervalSeconds": 60
+    },
+    "frames": [
+      {
+        "frame": 0,
+        "events": []
+      },
+      {
+        "frame": 2,
+        "events": []
+      }
+    ]
+  }
+}

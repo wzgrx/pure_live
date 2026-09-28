@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "platform": "picarto",
+  "case": "S09-keepalive",
+  "room": "picarto:allatir",
+  "danmakuKeys": {
+    "channelName": "allatir",
+    "channelId": "942670"
+  },
+  "capturedAt": "2026-09-28T18:57:28.964477Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://chat.picarto.tv/chat/token=vzR4yNNdZcEUK2RfLXXiwNxhJzKQMnA9IcZ1.dnX8h3ZoUFRtRrOyWkJsa5FlGMfWGE5cDynkAwihQDWpyEFmAoawIealSRCdk8CnrPX6tFPsUgXzWEXytMGawaKeJMVdTtu4QcD1GRnwV2pckc7nlC2nhQAkVgEsaKbzxZvjIqllsUUydrKmDJ6lTRqYVRB4UHwhH79gm6HfIxBbEVPcWYE7Wdqof1Hkt7HchCRuhoN5QqSpy6BaRsUcpDtke3AcGnnvCHseIWpvx6YeOGJkJFXsWaTtxVMaUGUuZExfc5PsjmEoJBE8QDU8BLqcQu24XzwbLUtyLQpckBDdWkH3UmQiBawlFVhdh5peVBOxlOKCkXlmIlx3BrR5XuQ4MBSdFNiqsqcaj71hiKTOf2wrdoV2GkUeDxViXvQnZnBvieonbDXhFxnrKWjqRJ4.qziczP8SFKXps1lhQoutowI7BrwmLZw1i9_sVssw_AH",
+      "headers": {
+        "origin": "https://picarto.tv",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "status": 101
+    }
+  ],
+  "frames": 13,
+  "raw": {
+    "sha256": "bcd081e485bd349514f50ade9034bbbe32302de831535646a72699234e33917f",
+    "length": 14468
+  },
+  "scrubbed": [
+    {
+      "where": "$.data.generateJwtToken.key",
+      "rule": "secret"
+    },
+    {
+      "where": "$.m.i",
+      "rule": "secret"
+    },
+    {
+      "where": "$.m.n",
+      "rule": "person"
+    },
+    {
+      "where": "$.m.r",
+      "rule": "person"
+    },
+    {
+      "where": "$.m.u",
+      "rule": "person"
+    },
+    {
+      "where": "handshake.token",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M5.10 recorder (a raw WebSocket client in Python; sends only the site's keep-alive ping)",
+  "note": "Direct, 200 s, the channel live in a multistream group of four. The client sent only the site's keep-alive ping, every 50 s from the open, as PicartoDanmakuConnection does; the server answered each within 0.4 s. No chat was written meanwhile. Control frames are not recorded (the server sent no WebSocket ping during this session)."
+}

@@ -15,6 +15,7 @@ export 'src/status_views.dart';
 export 'src/text_scale.dart';
 export 'src/theme.dart';
 export 'src/tv/focus_frame.dart';
+export 'src/tv/list_focus_ring.dart';
 export 'src/tv/tv_grid.dart';
 export 'src/tv/tv_nav_scaffold.dart';
 export 'src/tv/tv_scope.dart';

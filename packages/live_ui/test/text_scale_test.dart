@@ -104,15 +104,7 @@ void main() {
 
     testWidgets('the badges on the cover grow 1.3×, the name below 2×', (tester) async {
       await tester.pumpWidget(
-        host(
-          const RoomCardView(
-            platformId: 'douyu',
-            anchorName: '主播',
-            title: '标题',
-            isLive: true,
-            audience: '1.2万',
-          ),
-        ),
+        host(const RoomCardView(platformId: 'douyu', anchorName: '主播', title: '标题', isLive: true, audience: '1.2万')),
       );
       double scaleOf(Finder text) => MediaQuery.textScalerOf(tester.element(text)).scale(10) / 10;
       expect(scaleOf(find.text('1.2万')), closeTo(1.3, 1e-9));

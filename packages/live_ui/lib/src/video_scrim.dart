@@ -30,7 +30,9 @@ class VideoBarScrim extends StatelessWidget {
   Widget build(BuildContext context) {
     final bar = Stack(
       children: [
-        const Positioned.fill(child: IgnorePointer(child: ColoredBox(color: color))),
+        const Positioned.fill(
+          child: IgnorePointer(child: ColoredBox(color: color)),
+        ),
         child,
       ],
     );

@@ -33,8 +33,9 @@ final RegExp _alias = RegExp(r'^[A-Za-z0-9_-]+$');
 /// [RoomPaths.reservedSegments]).
 const _pages = {'g', 'l', 'e', 'myfollow', 'download', 'play'};
 
-/// What a live room's streams need (3.x `HuyaUrlDataModel`): its lines, its
-/// qualities and the ids the room identity does not carry.
+/// What a room's streams need (3.x `HuyaUrlDataModel`): a live room's lines,
+/// its qualities and the ids the room identity does not carry, or a replay's
+/// recording.
 @immutable
 final class HuyaRoomData {
   /// Creates the data.
@@ -44,13 +45,16 @@ final class HuyaRoomData {
     required this.presenterUid,
     required this.topSid,
     required this.subSid,
+    this.replay,
+    this.restriction,
   }) : lines = List.unmodifiable(lines),
        qualities = List.unmodifiable(qualities);
 
-  /// Lines in server order: FLV, then HLS.
+  /// Lines in server order: FLV, then HLS; none for a replay.
   final List<HuyaLine> lines;
 
-  /// Qualities, the source first.
+  /// Qualities, the source first; a replay's is its recording's one
+  /// quality until `getMomentContent` lists the others.
   final List<LivePlayQuality> qualities;
 
   /// Streamer uid.
@@ -61,6 +65,12 @@ final class HuyaRoomData {
 
   /// Sub channel id.
   final int subSid;
+
+  /// The recording of a replay room (upgrade 3-1); null for a live room.
+  final HuyaReplay? replay;
+
+  /// The room's restriction; a paid or secret room is not played.
+  final LiveRestriction? restriction;
 }
 
 typedef _Token = ({String token, int expireTime, DateTime receivedAt});
@@ -284,12 +294,16 @@ final class HuyaSite extends LiveSite
     presenterUid: profile.presenterUid,
     topSid: profile.topSid,
     subSid: profile.subSid,
+    replay: profile.replay,
+    restriction: profile.room.restriction,
   );
 
-  /// The room; a live one with its stream data and danmaku arguments. An
-  /// offline or replay room is returned as the platform describes it.
+  /// The room; a live one with its stream data and danmaku arguments, a
+  /// replay with its recording (no danmaku). An offline room, or a replay
+  /// without a recording, is returned as the platform describes it.
   Future<LiveRoom> _detail(String roomId) async {
     final profile = await _profile(roomId);
+    if (profile.replay != null) return profile.room.copyWith(data: _data(profile));
     if (!profile.room.isLiveNow) return profile.room;
     final topSid = profile.topSid;
     return profile.room.copyWith(
@@ -364,10 +378,30 @@ final class HuyaSite extends LiveSite
   }();
 
   /// The qualities of the room's stream data (requested again when the
-  /// room has none).
+  /// room has none). A replay's come from `getMomentContent` (one request
+  /// when the replay is opened, upgrade 3-1); when that fails or lists
+  /// nothing, the recording `profileRoom` named is the one quality.
   @override
-  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
-      (await _roomData(detail)).qualities;
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
+    final data = await _roomData(detail);
+    if (data.replay case final replay?) return await _replayQualities(replay, data.qualities);
+    return data.qualities;
+  }
+
+  Future<List<LivePlayQuality>> _replayQualities(HuyaReplay replay, List<LivePlayQuality> fallback) async {
+    final videoId = replay.videoId;
+    if (videoId == null) return fallback;
+    try {
+      final response = await _get(
+        Uri.https('liveapi.huya.com', '/moment/getMomentContent', {'videoId': '$videoId'}),
+        headers: const {'user-agent': HuyaApi.userAgent, 'origin': _web, 'referer': '$_web/'},
+      );
+      final qualities = HuyaApi.replayQualities(response.text, status: response.status);
+      return qualities.isEmpty ? fallback : qualities;
+    } on SiteError {
+      return fallback;
+    }
+  }
 
   @override
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
@@ -376,22 +410,28 @@ final class HuyaSite extends LiveSite
   /// Every line of the room's stream data at [quality], signed in parallel,
   /// in server order. Huya does not report the delivered quality, so the
   /// requested one counts as applied. When no line opens because the
-  /// room's AntiCode expired, `profileRoom` is asked again once.
+  /// room's AntiCode expired, `profileRoom` is asked again once. A replay
+  /// gives its recording's one line.
   @override
-  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
-    required LiveRoom detail,
-    required LivePlayQuality quality,
-  }) async => await _resolve(detail.roomId, await _roomData(detail), quality);
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
+    final data = await _roomData(detail);
+    if (data.replay case final replay?) return _replayLines(detail.roomId, replay, quality);
+    return await _resolve(detail.roomId, data, quality);
+  }
 
   /// A fresh `profileRoom` and fresh signatures (a cached URL would reopen
   /// an expired source, REG-HUYA-025); the quality with the same id, else
-  /// the best one.
+  /// the best one. A replay quality's recording does not expire and is
+  /// returned again without a request.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
     required LiveRoom detail,
     required LivePlayQuality quality,
   }) async {
-    final data = await _freshData(detail.roomId);
+    if (HuyaApi.replayUrl(quality.data) case final url?) {
+      return _replayLines(detail.roomId, HuyaReplay(url: url), quality);
+    }
+    final data = await _freshLiveData(detail.roomId);
     final requested = quality.selectionId.toString();
     final refreshed = data.qualities.firstWhere(
       (option) => option.selectionId.toString() == requested,
@@ -401,7 +441,7 @@ final class HuyaSite extends LiveSite
   }
 
   /// Signs only line [lineIndex] (recording asks for one line at a time);
-  /// an index past the last line gives no URLs.
+  /// an index past the last line gives no URLs. A replay has one line.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlAtRaw({
     required LiveRoom detail,
@@ -409,6 +449,7 @@ final class HuyaSite extends LiveSite
     required int lineIndex,
   }) async {
     final data = await _roomData(detail);
+    if (data.replay case final replay? when lineIndex == 0) return _replayLines(detail.roomId, replay, quality);
     if (lineIndex < 0 || lineIndex >= data.lines.length) {
       return LivePlayUrlResolution(urls: const [], appliedQualityData: quality.selectionId);
     }
@@ -446,19 +487,59 @@ final class HuyaSite extends LiveSite
     if (_leases.length > 64) _leases.remove(_leases.keys.first);
   }
 
+  /// The room's stream data (requested again when the room has none), once
+  /// it can be played.
   Future<HuyaRoomData> _roomData(LiveRoom detail) async => switch (detail.data) {
-    final HuyaRoomData data => data,
+    final HuyaRoomData data => _playable(data),
     _ => await _freshData(detail.roomId),
   };
 
+  /// A fresh `profileRoom`'s stream data: a live room, or a replay with a
+  /// recording. Anything else has no playable stream right now, which is
+  /// `StreamUnavailable`, not an error of the room.
   Future<HuyaRoomData> _freshData(String roomId) async {
     final profile = await _profile(roomId);
-    // A replay has no playable stream: "no playable stream right now", not
-    // an error of the room.
-    if (!profile.room.isLiveNow) {
-      throw StreamUnavailable(_site, 'profileRoom: the room is ${profile.room.effectiveLiveStatus.name}');
+    final room = profile.room;
+    if (!room.isLiveNow && profile.replay == null) {
+      final unplayable = room.effectiveRestriction == LiveRestriction.unplayable ? ' without a recording' : '';
+      throw StreamUnavailable(_site, 'profileRoom: the room is ${room.effectiveLiveStatus.name}$unplayable');
     }
-    return _data(profile);
+    return _playable(_data(profile));
+  }
+
+  /// [_freshData] of a room that is still live: recovering or re-signing a
+  /// live quality never switches to a replay's recording.
+  Future<HuyaRoomData> _freshLiveData(String roomId) async {
+    final data = await _freshData(roomId);
+    if (data.replay != null) throw const StreamUnavailable(_site, 'profileRoom: the broadcast ended (replay)');
+    return data;
+  }
+
+  /// [data] unless the room is restricted (M2.1): a paid room plays only
+  /// for buyers and a secret room needs its password, so neither is opened;
+  /// the error names the restriction.
+  static HuyaRoomData _playable(HuyaRoomData data) => switch (data.restriction) {
+    final LiveRestriction kind? when kind != LiveRestriction.none => throw StreamUnavailable(
+      _site,
+      'restricted room (${kind.name})',
+    ),
+    _ => data,
+  };
+
+  /// The recording's one line: [quality]'s playlist when it is a replay
+  /// quality, else the one `profileRoom` named. No signature and no lease
+  /// (the VOD URL does not expire); the media headers without the cookie.
+  LivePlayUrlResolution _replayLines(String roomId, HuyaReplay replay, LivePlayQuality quality) {
+    final requested = HuyaApi.replayUrl(quality.data);
+    final url = requested ?? replay.url;
+    return LivePlayUrlResolution.lines([
+      LivePlayLine(
+        url,
+        headers: HuyaApi.mediaHeaders(roomId, userAgent: playUserAgent),
+        format: StreamFormat.hls,
+        lineId: 'replay|hls',
+      ),
+    ], appliedQualityData: requested != null ? quality.selectionId : HuyaApi.replayQuality(url).selectionId);
   }
 
   static int _bitRate(LivePlayQuality quality) => jsonInt(quality.data) ?? jsonInt(quality.id) ?? 0;
@@ -481,7 +562,7 @@ final class HuyaSite extends LiveSite
     ];
     if (lines.isNotEmpty) return LivePlayUrlResolution.lines(lines, appliedQualityData: quality.selectionId);
     if (!fresh && results.any((result) => result.expired)) {
-      return await _resolve(roomId, await _freshData(roomId), quality, fresh: true);
+      return await _resolve(roomId, await _freshLiveData(roomId), quality, fresh: true);
     }
     final errors = [for (final result in results) ?result.error];
     if (errors.isNotEmpty && errors.every((error) => error is NetworkFailure)) throw errors.first;

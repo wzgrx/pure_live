@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "sample": "S15-vod-missing",
+  "capturedAt": "2026-09-28T16:16:26.958853Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://liveapi.huya.com/moment/getMomentContent?videoId=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36 Edg/117.0.0.0",
+      "Origin": "https://www.huya.com",
+      "Referer": "https://www.huya.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "Tengine",
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "933",
+      "connection": "close",
+      "date": "Mon, 28 Sep 2026 16:16:27 GMT",
+      "access-control-allow-origin": "https://www.huya.com",
+      "vary": "Origin",
+      "access-control-allow-methods": "GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS,CONNECT,TRACE",
+      "access-control-max-age": "1728000",
+      "access-control-expose-headers": "**",
+      "access-control-allow-credentials": "true",
+      "via": "ens-cache70.l2cn9600[42,41,200-0,M], ens-cache46.l2cn9600[43,0], ens-cache11.cn9055[106,105,200-0,M], ens-cache8.cn9055[108,0]",
+      "ali-swift-global-savetime": "1790612187",
+      "x-cache": "MISS TCP_MISS dirn:-2:-2",
+      "x-swift-savetime": "Mon, 28 Sep 2026 16:16:27 GMT",
+      "x-swift-cachetime": "0",
+      "cache-control": "no-cache",
+      "timing-allow-origin": "*",
+      "eagleid": "76b4281c17906121878608151e"
+    }
+  },
+  "raw": {
+    "sha256": "c1a3789c974394a497fe37f27c12d4a237729bf2acf434207fb2907b5c547b5d",
+    "length": 933
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "scratch capture script (urllib, schema 1); srckey scrubbed by hand per the huya rules"
+}

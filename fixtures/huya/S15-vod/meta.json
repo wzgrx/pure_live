@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "sample": "S15-vod",
+  "capturedAt": "2026-09-28T16:16:18.198168Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://liveapi.huya.com/moment/getMomentContent?videoId=1126494362",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36 Edg/117.0.0.0",
+      "Origin": "https://www.huya.com",
+      "Referer": "https://www.huya.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "Tengine",
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "3840",
+      "connection": "close",
+      "vary": "Origin",
+      "date": "Mon, 28 Sep 2026 16:16:19 GMT",
+      "access-control-allow-origin": "https://www.huya.com",
+      "access-control-allow-methods": "GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS,CONNECT,TRACE",
+      "access-control-max-age": "1728000",
+      "access-control-expose-headers": "**",
+      "access-control-allow-credentials": "true",
+      "via": "ens-cache26.l2cn9600[94,93,200-0,M], ens-cache60.l2cn9600[95,0], ens-cache5.cn9055[154,153,200-0,M], ens-cache4.cn9055[156,0]",
+      "ali-swift-global-savetime": "1790612179",
+      "x-cache": "MISS TCP_MISS dirn:-2:-2",
+      "x-swift-savetime": "Mon, 28 Sep 2026 16:16:19 GMT",
+      "x-swift-cachetime": "0",
+      "cache-control": "no-cache",
+      "timing-allow-origin": "*",
+      "eagleid": "76b4281817906121790984171e"
+    }
+  },
+  "raw": {
+    "sha256": "cbed4e1ba0f8b4675148aca6ecedd5dffdfd806262a35403bd3a3a1ea936c995",
+    "length": 3840
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.moment.videoInfo.definitions[0].url:srckey",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.moment.videoInfo.definitions[0].m3u8:srckey",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.moment.videoInfo.definitions[1].url:srckey",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.moment.videoInfo.definitions[1].m3u8:srckey",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.moment.videoInfo.definitions[2].url:srckey",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.moment.videoInfo.definitions[2].m3u8:srckey",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratch capture script (urllib, schema 1); srckey scrubbed by hand per the huya rules"
+}

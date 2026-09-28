@@ -20,20 +20,31 @@ final RegExp _channelPattern = RegExp(r'^[1-9]\d{0,15}$');
 /// The YY adapter (3.x's `YYSite`; parsing in [YyApi]).
 ///
 /// API requests carry 3.x's browser headers and the user's cookie when one
-/// is stored; there is no anonymous session. Streams come from the
-/// anonymous mobile HLS route, what 3.x users got (3.x meant stream-manager
-/// to come first, but its request never worked); stream-manager (FLV) stands
-/// in when mobile HLS has nothing. Failures are `SiteError`s; nothing is
-/// disguised as an offline room.
+/// is stored; there is no anonymous session. By default streams come from
+/// the anonymous mobile HLS route, what 3.x users got (3.x meant
+/// stream-manager to come first, but its request never worked), and
+/// stream-manager (FLV) stands in when mobile HLS has nothing; [flvFirst]
+/// turns the order round. FLV qualities carry every CDN line of their
+/// stream. Failures are `SiteError`s; nothing is disguised as an offline
+/// room.
 final class YySite extends LiveSite
     with LiveSiteLinks
     implements LiveSiteRoomRefresher, LiveSiteRecordRoomResolver, LivePlayUrlResolver {
-  /// Creates the adapter. [_cookies] holds the user's cookie, if any; [now]
+  /// Creates the adapter. [_cookies] holds the user's cookie, if any;
+  /// [flvFirst] lists stream-manager's qualities first (see there); [now]
   /// (the stream-manager sequence and the leases) is injectable for tests.
-  new(this.http, {this._cookies, DateTime Function()? now}) : _now = now ?? DateTime.now;
+  new(this.http, {this._cookies, this.flvFirst = false, DateTime Function()? now}) : _now = now ?? DateTime.now;
 
   /// Transport.
   final LiveHttp http;
+
+  /// Whether qualities come from stream-manager (FLV: lower latency, the
+  /// platform's names 蓝光, 高清, 流畅, URLs signed for 10 minutes) with
+  /// mobile HLS standing in, instead of mobile HLS first (3.x's
+  /// `高清 · 720p`, `流畅 · 360p`). Off until the player renews URLs by their
+  /// `PlayLease` (M7); the quality ids change with it
+  /// ([YyApi.flvQualityId]).
+  final bool flvFirst;
 
   final CookieVault? _cookies;
   final DateTime Function() _now;
@@ -44,12 +55,17 @@ final class YySite extends LiveSite
   /// The listing module of each area whose page was read (null: none).
   final Map<String, YyModule?> _modules = {};
 
-  /// Area names by `biz`, learnt from the area pages read so far; the first
+  /// Area names by `biz`, learnt from the area modules seen so far (read
+  /// from a page, or stored in a followed area's `shortName`); the first
   /// area of a `biz` names it (3.x's `bizAreaNameMap`).
   final Map<String, String> _areaNames = {};
 
-  /// The canonical channel of each short number seen.
-  final Map<String, YyRoomData> _shortIds = {};
+  /// The canonical channel of each room id whose room page was read (a
+  /// short number's differs from it), most recent last.
+  final Map<String, YyRoomData> _channels = {};
+
+  /// How many room ids [_channels] keeps.
+  static const int _channelLimit = 4096;
 
   @override
   String get id => _site;
@@ -82,27 +98,20 @@ final class YySite extends LiveSite
 
   // Catalog and search --------------------------------------------------------
 
-  /// The categories of the header and their areas from `getCategory`, each
-  /// area with the listing module of its page as `shortName` (3.x's
-  /// format; follows store it). Area pages are read concurrently; one that
-  /// fails leaves its area without `shortName` (it is read again when the
-  /// area is opened) instead of dropping the category as 3.x did.
+  /// The categories of the header and their areas from `getCategory`: four
+  /// requests. An area's listing module is read from its page when the
+  /// area is opened ([_module]), not here (3.x read all 18 area pages to
+  /// fill `shortName`); areas come without `shortName`, and followed areas
+  /// that stored one (3.x's) still open without reading their page.
   @override
   Future<List<LiveCategory>> getCategories(int page, int pageSize) async {
     final response = await _get(Uri.https(_host, '/yyweb/module/data/header'));
     final tabs = YyApi.categoryTabs(response.text, status: response.status);
     final listings = await Future.wait([for (final tab in tabs) _areas(tab.id, tab.name)]);
-    final categories = await Future.wait([
+    return [
       for (final (index, tab) in tabs.indexed)
-        Future.wait([for (final entry in listings[index]) _withModule(entry.area, entry.page)])
-            .then((areas) => LiveCategory(id: tab.id, name: tab.name, children: areas)),
-    ]);
-    for (final category in categories) {
-      for (final area in category.children) {
-        if (YyApi.moduleOf(area.shortName) case final module?) _areaNames.putIfAbsent(module.biz, () => area.areaName);
-      }
-    }
-    return categories;
+        LiveCategory(id: tab.id, name: tab.name, children: [for (final entry in listings[index]) entry.area]),
+    ];
   }
 
   /// The areas of category [id] and their pages, remembered for [_module].
@@ -113,26 +122,6 @@ final class YySite extends LiveSite
       if (page != null) _areaPages[area.areaId] = page;
     }
     return areas;
-  }
-
-  Future<LiveArea> _withModule(LiveArea area, Uri? page) async {
-    if (page == null) return area;
-    final YyModule? module;
-    try {
-      module = await _pageModule(area.areaId, page);
-    } on SiteError {
-      return area;
-    }
-    if (module == null) return area;
-    return LiveArea(
-      platform: area.platform,
-      areaType: area.areaType,
-      typeName: area.typeName,
-      areaId: area.areaId,
-      areaName: area.areaName,
-      areaPic: area.areaPic,
-      shortName: YyApi.shortName(module),
-    );
   }
 
   /// Reads the listing module of area [areaId] from its [page].
@@ -151,7 +140,7 @@ final class YySite extends LiveSite
   /// loaded).
   Future<YyModule> _module(LiveArea area) async {
     final stored = YyApi.moduleOf(area.shortName);
-    if (stored != null) return stored;
+    if (stored != null) return _learn(stored, area);
     final id = area.areaId.trim();
     var module = _modules[id];
     if (!_modules.containsKey(id)) {
@@ -161,9 +150,16 @@ final class YySite extends LiveSite
       final page = _areaPages[id];
       if (page == null) throw NotFound(_site, 'area $id is not in category ${area.areaType}');
       module = await _pageModule(id, page);
-      if (module != null) _areaNames.putIfAbsent(module.biz, () => area.areaName);
     }
     if (module == null) throw ApiChanged(_site, 'area $id: its page has no pageInfo');
+    return _learn(module, area);
+  }
+
+  /// [module], its `biz` now naming [area] for recommendations and details
+  /// (the first area of a `biz` wins).
+  YyModule _learn(YyModule module, LiveArea area) {
+    final name = area.areaName.trim();
+    if (name.isNotEmpty && YyApi.hasListing(module)) _areaNames.putIfAbsent(module.biz, () => name);
     return module;
   }
 
@@ -188,7 +184,8 @@ final class YySite extends LiveSite
   }
 
   /// The home listing (`biz=other`); cards name their area by `biz` when an
-  /// area page taught it, else show the raw `biz`, as in 3.x.
+  /// area module taught it, else leave it empty (3.x showed the raw `biz`,
+  /// `other` on every card).
   @override
   Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async {
     final response = await _get(
@@ -228,29 +225,31 @@ final class YySite extends LiveSite
 
   // Rooms ---------------------------------------------------------------------
 
-  /// `liveInfoDetail` of the channel (under its canonical number when a
-  /// short number was resolved before). When it is not live (`data: null`,
-  /// also the answer for unknown channels and short numbers) and [withPage]
-  /// (room entry), the room page tells them apart: the 404 page is
-  /// `NotFound`, a short number is looked up again under its canonical
-  /// channel, anything else is offline with the page's streamer and title.
-  /// Without it (follow refresh, recording) the room is offline, as in 3.x,
-  /// with 3.x's one request. The room keeps [roomId] as its identity.
-  Future<LiveRoom> _detail(String roomId, {required bool withPage}) async {
+  /// `liveInfoDetail` of the channel (under its canonical number once the
+  /// room page named it). When it is not live (`data: null`, also the
+  /// answer for unknown channels and short numbers) the room page tells
+  /// them apart: the 404 page is `NotFound`, a short number is looked up
+  /// again under its canonical channel, anything else is offline with the
+  /// page's streamer, title and danmaku arguments.
+  ///
+  /// Room entry ([always]) reads the page every time. A refresh, recording
+  /// or state check reads it once per room id and adapter (the channel is
+  /// remembered); after that an offline room is 3.x's, with 3.x's one
+  /// request, and `mergeFrom` keeps the stored name and avatar. The room
+  /// keeps [roomId] as its identity.
+  Future<LiveRoom> _detail(String roomId, {required bool always}) async {
     final id = roomId.trim();
     if (!_channelPattern.hasMatch(id)) throw NotFound(_site, 'room id $id is not a channel number');
-    final known = _shortIds[id];
+    final known = _channels[id];
     final live = await _liveDetail(known?.sid ?? id, requestedId: id);
     if (live != null) return live;
-    if (!withPage) return YyApi.offlineRoom(requestedId: id, channel: known);
+    if (!always && known != null) return YyApi.offlineRoom(requestedId: id, channel: known);
     final response = await _get(Uri.https(_host, '/$id'));
     final page = YyApi.roomPage(response.text, status: response.status);
-    if (page.sid != id) {
-      _remember(id, YyRoomData(sid: page.sid, ssid: page.ssid));
-      if (known?.sid != page.sid) {
-        final canonical = await _liveDetail(page.sid, requestedId: id);
-        if (canonical != null) return canonical;
-      }
+    _remember(id, YyRoomData(sid: page.sid, ssid: page.ssid));
+    if (page.sid != id && known?.sid != page.sid) {
+      final canonical = await _liveDetail(page.sid, requestedId: id);
+      if (canonical != null) return canonical;
     }
     return YyApi.offlineRoom(requestedId: id, page: page);
   }
@@ -260,50 +259,54 @@ final class YySite extends LiveSite
     return YyApi.liveDetail(response.text, requestedId: requestedId, areaNames: _areaNames, status: response.status);
   }
 
-  void _remember(String shortId, YyRoomData channel) {
-    _shortIds.remove(shortId);
-    _shortIds[shortId] = channel;
-    if (_shortIds.length > 512) _shortIds.remove(_shortIds.keys.first);
+  void _remember(String roomId, YyRoomData channel) {
+    _channels.remove(roomId);
+    _channels[roomId] = channel;
+    if (_channels.length > _channelLimit) _channels.remove(_channels.keys.first);
   }
 
-  /// The room with its danmaku arguments (live rooms only, as in 3.x); an
-  /// offline one also reads the room page (see [_detail]).
+  /// The room with its danmaku arguments; an offline one also reads the
+  /// room page (see [_detail]).
   @override
-  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId, withPage: true);
+  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId, always: true);
 
-  /// `liveInfoDetail` only, 3.x's one request per follow: an offline card
-  /// keeps its stored name and avatar when merged (`LiveRoom.mergeFrom`).
+  /// `liveInfoDetail`, 3.x's one request per follow; an offline room's page
+  /// once (see [_detail]), so an unknown channel is `NotFound` and a short
+  /// number is followed to its canonical channel (3.x showed both offline
+  /// for ever).
   @override
-  Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId, withPage: false);
+  Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId, always: false);
 
   /// Like the refresh; streams are requested by channel, so it holds all a
   /// recording needs.
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, withPage: false);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, always: false);
 
   @override
-  Future<bool> getLiveStatus({required String roomId}) async => (await _detail(roomId, withPage: false)).isLiveNow;
+  Future<bool> getLiveStatus({required String roomId}) async => (await _detail(roomId, always: false)).isLiveNow;
 
   // Streams -------------------------------------------------------------------
 
   /// The channel [room] plays: its [YyRoomData], else its danmaku
-  /// arguments (3.x), else a short number seen before, else its id.
+  /// arguments (3.x), else a room page read before, else its id.
   ({String sid, String ssid}) _channel(LiveRoom room) {
     if (room.data case YyRoomData(:final sid, :final ssid)) return (sid: sid, ssid: ssid);
     if (room.danmakuData case YyDanmakuArgs(:final topSid, :final subSid) when topSid > 0) {
       return (sid: '$topSid', ssid: '${subSid > 0 ? subSid : topSid}');
     }
     final id = room.roomId.trim();
-    final known = _shortIds[id];
+    final known = _channels[id];
     return known == null ? (sid: id, ssid: id) : (sid: known.sid, ssid: known.ssid);
   }
 
-  /// One stream-manager request for [gear]: a JSON body sent as
-  /// `text/plain`, anonymous (`uid=0`), `sequence` the time in milliseconds.
+  /// One stream-manager request for [gear] on CDN [line] (-1: the server's
+  /// choice): a JSON body sent as `text/plain`, anonymous (`uid=0`),
+  /// `sequence` the time in milliseconds.
   Future<({Map<String, dynamic> streams, DateTime issuedAt})> _streamManager(
     ({String sid, String ssid}) channel,
-    int gear,
-  ) async {
+    int gear, {
+    int line = -1,
+  }) async {
     final issuedAt = _now();
     final sequence = issuedAt.millisecondsSinceEpoch;
     final response = await _send(
@@ -320,11 +323,36 @@ final class YySite extends LiveSite
         method: 'POST',
         headers: YyApi.streamManagerHeaders(channel.sid, channel.ssid, cookie: _login()),
         body: utf8.encode(
-          jsonEncode(YyApi.streamManagerBody(sid: channel.sid, ssid: channel.ssid, gear: gear, sequence: sequence)),
+          jsonEncode(
+            YyApi.streamManagerBody(sid: channel.sid, ssid: channel.ssid, gear: gear, sequence: sequence, line: line),
+          ),
         ),
       ),
     );
     return (streams: YyApi.streams(response.text, status: response.status), issuedAt: issuedAt);
+  }
+
+  /// The FLV lines of [gear]: stream-manager's answer (the server picks
+  /// the line), then the served gear asked again on each other CDN line
+  /// of its stream ([YyApi.otherLines], one request each, concurrently). An
+  /// extra line that fails or serves another gear is left out.
+  Future<LivePlayUrlResolution> _flv(({String sid, String ssid}) channel, int gear) async {
+    final answer = await _streamManager(channel, gear);
+    final first = YyApi.resolution(answer.streams, issuedAt: answer.issuedAt, cookie: _login());
+    final served = int.tryParse('${first.appliedQualityData ?? ''}');
+    final others = YyApi.otherLines(answer.streams);
+    if (!first.hasSources || served == null || others.isEmpty) return first;
+    final extra = await Future.wait([for (final line in others) _otherLine(channel, served, line)]);
+    return YyApi.withLines(first, extra.nonNulls);
+  }
+
+  Future<LivePlayUrlResolution?> _otherLine(({String sid, String ssid}) channel, int gear, int line) async {
+    try {
+      final answer = await _streamManager(channel, gear, line: line);
+      return YyApi.resolution(answer.streams, issuedAt: answer.issuedAt, cookie: _login());
+    } on SiteError {
+      return null;
+    }
   }
 
   /// The mobile HLS answer at [rate]; null when the channel has no stream.
@@ -337,31 +365,35 @@ final class YySite extends LiveSite
     return YyApi.mobileHls(response.text, status: response.status);
   }
 
-  /// The mobile HLS qualities, 3.x users' (`流畅 · 360p`, `高清 · 720p`).
-  /// When mobile HLS has none, stream-manager's at gear 1 (FLV). A channel
-  /// with neither is `StreamUnavailable` when a route said it has no
-  /// stream, else the first failure is thrown.
+  /// The mobile HLS qualities, 3.x users' (`流畅 · 360p`, `高清 · 720p`);
+  /// when mobile HLS has none, stream-manager's (FLV, asked at gear 1). With
+  /// [flvFirst] the other way round. A channel with neither is
+  /// `StreamUnavailable` when a route said it has no stream, else the first
+  /// failure is thrown.
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
     final channel = _channel(detail);
     SiteError? failure;
     var noStream = false;
-    try {
-      return await _mobileQualities(channel);
-    } on StreamUnavailable {
-      noStream = true;
-    } on SiteError catch (error) {
-      failure = error;
-    }
-    try {
-      final qualities = YyApi.qualities((await _streamManager(channel, 1)).streams);
-      if (qualities.isNotEmpty) return qualities;
-      noStream = true;
-    } on SiteError catch (error) {
-      failure ??= error;
+    for (final route in flvFirst ? [_flvQualities, _mobileQualities] : [_mobileQualities, _flvQualities]) {
+      try {
+        return await route(channel);
+      } on StreamUnavailable {
+        noStream = true;
+      } on SiteError catch (error) {
+        failure ??= error;
+      }
     }
     if (noStream || failure == null) throw const StreamUnavailable(_site, 'no stream on mobile HLS or stream-manager');
     throw failure;
+  }
+
+  /// stream-manager's qualities (one request at gear 1);
+  /// `StreamUnavailable` when it lists none.
+  Future<List<LivePlayQuality>> _flvQualities(({String sid, String ssid}) channel) async {
+    final qualities = YyApi.qualities((await _streamManager(channel, 1)).streams);
+    if (qualities.isEmpty) throw const StreamUnavailable(_site, 'stream-manager: no stream');
+    return qualities;
   }
 
   /// Both mobile rates at once (3.x's `_getMobileHlsQualities`). A rate that
@@ -394,11 +426,12 @@ final class YySite extends LiveSite
   ///
   /// A mobile quality asks the mobile route at its rate (3.x); when that
   /// has no stream or fails, stream-manager plays the same tier as FLV
-  /// (4000 is gear 2 高清, 1200 gear 1 流畅, as measured), with its lease but
-  /// without confirming a quality. A stream-manager quality (listed when
-  /// mobile HLS had none) asks stream-manager at its gear and reports the
-  /// gear it was served; when that fails or has no URL, the mobile route at
-  /// 4000 (quality rate 2000 or more) or 1200 plays instead, as in 3.x.
+  /// (4000 is gear 2 高清, 1200 gear 1 流畅, as measured), with its leases
+  /// but without confirming a quality. A stream-manager quality asks
+  /// stream-manager at its gear, adds the other CDN lines of the served
+  /// stream and reports the gear it was served; when that fails or has no
+  /// URL, the mobile route at 4000 (quality rate 2000 or more) or 1200 plays
+  /// instead, as in 3.x.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
     final channel = _channel(detail);
@@ -416,8 +449,7 @@ final class YySite extends LiveSite
         failure = error;
       }
       try {
-        final answer = await _streamManager(channel, (int.tryParse(rate) ?? 0) >= 2000 ? 2 : 1);
-        final resolution = YyApi.resolution(answer.streams, issuedAt: answer.issuedAt, cookie: _login());
+        final resolution = await _flv(channel, (int.tryParse(rate) ?? 0) >= 2000 ? 2 : 1);
         if (resolution.hasSources) return LivePlayUrlResolution.lines(resolution.lines);
         noStream = true;
       } on SiteError catch (error) {
@@ -428,8 +460,7 @@ final class YySite extends LiveSite
     }
     if (int.tryParse(data) case final gear?) {
       try {
-        final answer = await _streamManager(channel, gear);
-        final resolution = YyApi.resolution(answer.streams, issuedAt: answer.issuedAt, cookie: _login());
+        final resolution = await _flv(channel, gear);
         if (resolution.hasSources) return resolution;
       } on SiteError {
         // Mobile HLS below, as in 3.x.

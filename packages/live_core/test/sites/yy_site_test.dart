@@ -1,10 +1,11 @@
-// YySite over the recorded responses (ReplayHttp): the catalog and its area
-// pages, area modules (stored, read, module-less), recommendations, search,
-// room detail (entry and refresh: live, offline, unknown, short numbers),
-// mobile HLS first and stream-manager standing in, cookies, links and error
-// mapping. The stream-manager
-// body carries clock values (seq, send_time, the URL's sequence) and the
-// recording's browser (osversion, width, height), left out of matching.
+// YySite over the recorded responses (ReplayHttp): the catalog, area modules
+// (stored, read on opening, module-less), recommendations, search, room
+// detail (entry and refresh: live, offline, unknown, short numbers), mobile
+// HLS first and stream-manager standing in, FLV first (6-1), the second CDN
+// line (6-4), cookies, links and error mapping; the M4.U upgrades are named
+// by their number in docs/UPGRADES.md. The stream-manager body carries clock
+// values (seq, send_time, the URL's sequence) and the recording's browser
+// (osversion, width, height), left out of matching.
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
@@ -140,69 +141,65 @@ List<String> _paths(ReplayHttp http) => [for (final request in http.requests) re
 
 LiveRoom _room(String sid) => LiveRoom(platform: 'yy', roomId: sid);
 
-/// The area pages 3.x read that were not recorded, answered without a
-/// listing module.
-List<ReplaySample> _unrecordedAreaPages() => [
-  for (final name in ['S01-category-ent', 'S01-category-game', 'S01-category-other'])
-    for (final url in ((Fixture.load('yy', name).legacy as Map)['unrecordedAreaPages'] as List).cast<String>())
-      _synthetic(url, '<html><body>no listing module</body></html>'),
-];
-
 const _dance = LiveArea(platform: 'yy', areaType: '1', typeName: '娱乐', areaId: '4', areaName: '舞蹈');
 const _lol = LiveArea(platform: 'yy', areaType: '2', typeName: '游戏', areaId: '23', areaName: '英雄联盟');
 const _categorySamples = ['S01-category-ent', 'S01-category-game', 'S01-category-other'];
 
 void main() {
   group('catalog', () {
-    test('header, getCategory and every area page: the areas and shortNames of 3.x', () async {
-      final setup = _setup([
-        'S01-header',
-        ..._categorySamples,
-        'S02-area-page-dance',
-        'S02-area-page-lol',
-      ], extra: _unrecordedAreaPages());
+    test('6-5: header and getCategory only (4 requests, 3.x: 22); the areas of 3.x without shortName', () async {
+      final setup = _setup(['S01-header', ..._categorySamples]);
       final categories = await setup.site.getCategories(1, 20);
       expect(categories.map((category) => (category.id, category.name)), [('1', '娱乐'), ('2', '游戏'), ('3', '其他')]);
+      var stored = 0;
       for (final (index, name) in _categorySamples.indexed) {
         final legacy = ((Fixture.load('yy', name).legacy as Map)['areas'] as List).cast<Map<String, dynamic>>();
         final areas = categories[index].children;
         expect(areas.map((area) => area.areaId), legacy.map((area) => area['areaId']), reason: name);
         for (final (position, area) in areas.indexed) {
           final json = area.toJson();
-          for (final key in ['platform', 'areaType', 'typeName', 'areaId', 'areaName', 'shortName']) {
+          for (final key in ['platform', 'areaType', 'typeName', 'areaId', 'areaName']) {
             expect(json[key] ?? '', legacy[position][key] ?? '', reason: '$name[$position] $key');
           }
+          // shortName: 6-5 (3.x read every area page to fill it; the area's
+          // page is read when it is opened).
+          expect(area.shortName, isEmpty);
+          if ((legacy[position]['shortName'] as String? ?? '').isNotEmpty) stored++;
         }
       }
-      expect(_paths(setup.http).where((path) => path.endsWith('getCategory.action')), hasLength(3));
-      expect(setup.http.requests, hasLength(1 + 3 + 18), reason: 'every area page once, as 3.x read them');
+      expect(stored, 2, reason: '3.x filled it from the two recorded area pages');
+      expect(_paths(setup.http), [
+        '/yyweb/module/data/header',
+        for (var i = 0; i < 3; i++) '/c/yycom/category/getCategory.action',
+      ]);
     });
 
-    test(
-      'an area page that fails leaves its area without shortName; a failing getCategory fails the catalog',
-      () async {
-        final setup = _setup(
-          ['S01-header', ..._categorySamples, 'S02-area-page-lol'],
-          extra: _unrecordedAreaPages(),
-          script: {
-            '/dancing': [TransportReason.timeout],
-          },
-        );
-        final categories = await setup.site.getCategories(1, 20);
-        final dance = categories.first.children.firstWhere((area) => area.areaId == '4');
-        expect(dance.shortName, isEmpty, reason: '3.x dropped every area of the category');
-        expect(categories.first.children, hasLength(8));
+    test('6-5: after the catalog, opening an area reads its page once; one that fails fails only there', () async {
+      final setup = _setup(
+        ['S01-header', ..._categorySamples, 'S02-area-page-dance', 'S02-dance-p1', 'S02-dance-p5'],
+        script: {
+          '/chicken/lol': [TransportReason.timeout],
+        },
+      );
+      final categories = await setup.site.getCategories(1, 20);
+      final dance = categories.first.children.firstWhere((area) => area.areaId == '4');
+      expect(await setup.site.getCategoryRooms(dance), hasLength(30));
+      expect(await setup.site.getCategoryRooms(dance, page: 5), hasLength(16));
+      expect(_paths(setup.http).skip(4), ['/dancing', '/more/page.action', '/more/page.action']);
+      final lol = categories[1].children.firstWhere((area) => area.areaId == '23');
+      await expectLater(setup.site.getCategoryRooms(lol), throwsA(isA<NetworkFailure>()));
+    });
 
-        final failing = _synthetic('https://www.yy.com/c/yycom/category/getCategory.action', 'x', status: 502);
-        final broken = _setup(
-          ['S01-header'],
-          script: {
-            '/c/yycom/category/getCategory.action': [failing, failing, failing],
-          },
-        );
-        await expectLater(broken.site.getCategories(1, 20), throwsA(isA<NetworkFailure>()));
-      },
-    );
+    test('a failing getCategory fails the catalog', () async {
+      final failing = _synthetic('https://www.yy.com/c/yycom/category/getCategory.action', 'x', status: 502);
+      final broken = _setup(
+        ['S01-header'],
+        script: {
+          '/c/yycom/category/getCategory.action': [failing, failing, failing],
+        },
+      );
+      await expectLater(broken.site.getCategories(1, 20), throwsA(isA<NetworkFailure>()));
+    });
   });
 
   group('area rooms', () {
@@ -265,7 +262,7 @@ void main() {
   });
 
   group('recommend and search', () {
-    test('recommendations: 3.x’s query; the area is the raw biz until an area page names it', () async {
+    test('recommendations: 3.x’s query; no area until an area page names the biz (6-3)', () async {
       final setup = _setup(
         ['S03-recommend-p1', 'S01-category-ent', 'S02-area-page-dance', 'S02-dance-p1'],
         extra: [
@@ -277,21 +274,42 @@ void main() {
       );
       final rooms = await setup.site.getRecommendRooms();
       expect(rooms, hasLength(30));
-      expect(rooms.first.area, 'other');
+      expect(rooms.map((room) => room.area).toSet(), {''}, reason: '3.x: `other` on every card');
+      expect(rooms.every((room) => room.startedAt != null), isTrue);
       expect(
         setup.http.requests.single.url.queryParameters,
         ((Fixture.load('yy', 'S03-recommend-p1').legacy as Map)['query'] as Map).cast<String, String>(),
       );
-      // Cards whose biz is `dance`: raw before the area page was read, named after.
-      expect((await setup.site.getRecommendRooms(page: 2)).first.area, 'dance');
+      // Cards whose biz is `dance`: no area before the area page was read
+      // (3.x: `dance`), named after.
+      expect((await setup.site.getRecommendRooms(page: 2)).first.area, isEmpty);
       await setup.site.getCategoryRooms(_dance);
       expect((await setup.site.getRecommendRooms(page: 2)).first.area, '舞蹈');
     });
 
-    test('search: rooms and streamers with 3.x’s query; a blank keyword sends nothing', () async {
+    test('6-3/6-5: a followed area’s stored shortName names its biz too, without reading the page', () async {
+      final setup = _setup(
+        ['S02-dance-p1'],
+        extra: [
+          _moved(
+            'S02-dance-p1',
+            'https://www.yy.com/more/page.action?page=2&pageSize=30&biz=other&subBiz=idx&moduleId=-1',
+          ),
+        ],
+      );
+      final shortName = (Fixture.load('yy', 'S02-area-page-dance').legacy as Map)['shortName'] as String;
+      await setup.site.getCategoryRooms(
+        LiveArea(platform: 'yy', areaType: '1', areaId: '4', areaName: '舞蹈', shortName: shortName),
+      );
+      expect((await setup.site.getRecommendRooms(page: 2)).first.area, '舞蹈');
+      expect(_paths(setup.http), ['/more/page.action', '/more/page.action']);
+    });
+
+    test('search: rooms and streamers with 3.x’s query and one request each; a blank keyword sends nothing', () async {
       final setup = _setup(['S04-search-p1', 'S04-search-anchors']);
       final rooms = await setup.site.searchRooms('舞蹈');
       expect(rooms, hasLength(16));
+      expect(rooms.first.title, '创艺灵珊', reason: '6-2');
       expect(
         setup.http.requests.single.url.queryParameters,
         ((Fixture.load('yy', 'S04-search-p1').legacy as Map)['query'] as Map).cast<String, String>(),
@@ -304,50 +322,85 @@ void main() {
   });
 
   group('detail', () {
-    test('a live channel: one request; danmaku arguments and channel data', () async {
+    test('a live channel: one request; danmaku arguments, channel data and the start', () async {
       final setup = _setup(['S05-detail-live']);
       final room = await setup.site.getRoomDetail(roomId: _live);
       expect(room.isLiveNow, isTrue);
       expect(room.danmakuData, const YyDanmakuArgs(topSid: 22490906, subSid: 22490906));
       expect((room.data! as YyRoomData).sid, _live);
+      expect(room.startedAt, DateTime.utc(2026, 9, 27, 16, 50, 18));
+      expect(room.area, isEmpty, reason: '6-3: the raw biz `other`');
       expect(_paths(setup.http), ['/api/liveInfoDetail/$_live/$_live/0']);
       expect(await setup.site.getLiveStatus(roomId: _live), isTrue);
+      expect((await setup.site.getRoomDetailForRefresh(roomId: _live)).startedAt, room.startedAt);
+      expect(setup.http.requests, hasLength(3), reason: 'a live room never needs its page');
     });
 
-    test('offline on entry: the room page names the streamer; the state stays offline as in 3.x', () async {
+    test('offline on entry: the room page names the streamer and gives the danmaku arguments (6-7)', () async {
       final setup = _setup(['S05-detail-offline', 'S05-page-offline']);
       final room = await setup.site.getRoomDetail(roomId: _offline);
       expect(room.effectiveLiveStatus, LiveStatus.offline);
       expect(room.roomId, _offline);
       expect(room.nick, '小洲- 00000o0000');
       expect(room.area, '段子手');
+      expect(room.danmakuData, const YyDanmakuArgs(topSid: 85520900, subSid: 85520900), reason: '3.x: none');
       expect(_paths(setup.http), ['/api/liveInfoDetail/$_offline/$_offline/0', '/$_offline']);
+      await setup.site.getRoomDetail(roomId: _offline);
+      expect(_paths(setup.http).skip(2), ['/api/liveInfoDetail/$_offline/$_offline/0', '/$_offline'], reason: 'always');
     });
 
-    test('follow refresh, recording and live status: 3.x’s one request, no room page', () async {
-      final setup = _setup(['S05-detail-offline', 'S05-detail-missing']);
+    test('6-8: refresh, recording and live status read an offline room’s page once, then 3.x’s one request', () async {
+      final setup = _setup(['S05-detail-offline', 'S05-page-offline']);
       final legacy = (Fixture.load('yy', 'S05-detail-offline').legacy as Map)['room'] as Map<String, dynamic>;
-      final refreshed = await setup.site.getRoomDetailForRefresh(roomId: _offline);
+      final first = await setup.site.getRoomDetailForRefresh(roomId: _offline);
+      // title, nick, avatar: the page read once (6-8) names the streamer as
+      // room entry does; the state and the rest are 3.x's.
       for (final MapEntry(:key, :value) in legacy.entries) {
-        expect(refreshed.toJson()[key] ?? '', value ?? '', reason: key);
+        if (key == 'danmakuData' || key == 'title' || key == 'nick' || key == 'avatar') continue;
+        expect(first.toJson()[key] ?? '', value ?? '', reason: key);
+      }
+      expect(first.nick, '小洲- 00000o0000');
+      expect(_paths(setup.http), ['/api/liveInfoDetail/$_offline/$_offline/0', '/$_offline']);
+      final again = await setup.site.getRoomDetailForRefresh(roomId: _offline);
+      for (final MapEntry(:key, :value) in legacy.entries) {
+        expect(again.toJson()[key] ?? '', value ?? '', reason: 'afterwards 3.x’s room: $key');
       }
       expect((await setup.site.getRoomDetailForRecording(roomId: _offline)).effectiveLiveStatus, LiveStatus.offline);
       expect(await setup.site.getLiveStatus(roomId: _offline), isFalse);
-      expect(
-        (await setup.site.getRoomDetailForRefresh(roomId: _missing)).effectiveLiveStatus,
-        LiveStatus.offline,
-        reason: 'an unknown channel is told apart on room entry only, as 3.x never could',
-      );
-      expect(_paths(setup.http).where((path) => !path.startsWith('/api/')), isEmpty);
-      expect(setup.http.requests, hasLength(4));
-      final merged = LiveRoom(
-        platform: 'yy',
-        roomId: _offline,
-        nick: '小洲',
-        avatar: 'https://a/b.png',
-      ).mergeFrom(refreshed);
+      expect(_paths(setup.http).skip(2), everyElement('/api/liveInfoDetail/$_offline/$_offline/0'));
+      expect(setup.http.requests, hasLength(5));
+      final merged = LiveRoom(platform: 'yy', roomId: _offline, nick: '小洲', avatar: 'https://a/b.png').mergeFrom(again);
       expect((merged.nick, merged.avatar), ('小洲', 'https://a/b.png'), reason: 'the follow keeps its name');
       expect(merged.effectiveLiveStatus, LiveStatus.offline);
+    });
+
+    test('6-8: an unknown channel is NotFound on refresh, recording and state checks too (3.x: offline)', () async {
+      final setup = _setup(['S05-detail-missing', 'S05-page-missing']);
+      await expectLater(setup.site.getRoomDetailForRefresh(roomId: _missing), throwsA(isA<NotFound>()));
+      await expectLater(setup.site.getRoomDetailForRecording(roomId: _missing), throwsA(isA<NotFound>()));
+      await expectLater(setup.site.getLiveStatus(roomId: _missing), throwsA(isA<NotFound>()));
+      expect(_paths(setup.http), [
+        for (var i = 0; i < 3; i++) ...['/api/liveInfoDetail/$_missing/$_missing/0', '/$_missing'],
+      ], reason: 'an unknown channel is not remembered: it may be created');
+    });
+
+    test('6-8: a followed short number is followed to its canonical channel on refresh', () async {
+      final setup = _setup(
+        ['S05-page-asid'],
+        extra: [
+          _synthetic(_detailUrl('2149'), {'resultCode': 0, 'data': null}),
+          _moved('S05-detail-live', _detailUrl('35340121'), edit: (body) => body.replaceAll(_live, '35340121')),
+        ],
+      );
+      final room = await setup.site.getRoomDetailForRefresh(roomId: '2149');
+      expect((room.roomId, room.isLiveNow), ('2149', true), reason: '3.x: offline for ever');
+      expect(_paths(setup.http), [
+        '/api/liveInfoDetail/2149/2149/0',
+        '/2149',
+        '/api/liveInfoDetail/35340121/35340121/0',
+      ]);
+      expect(await setup.site.getLiveStatus(roomId: '2149'), isTrue);
+      expect(_paths(setup.http).skip(3), ['/api/liveInfoDetail/35340121/35340121/0'], reason: 'remembered');
     });
 
     test('an unknown channel is NotFound on entry, not offline (REG-YY-007); a non-number asks nothing', () async {
@@ -393,6 +446,10 @@ void main() {
       final room = await setup.site.getRoomDetail(roomId: '2149');
       expect((room.roomId, room.effectiveLiveStatus), ('2149', LiveStatus.offline));
       expect((room.data! as YyRoomData).sid, '35340121');
+      expect(room.danmakuData, const YyDanmakuArgs(topSid: 35340121, subSid: 35340121), reason: '6-7');
+      final refreshed = await setup.site.getRoomDetailForRefresh(roomId: '2149');
+      expect((refreshed.data! as YyRoomData).sid, '35340121');
+      expect(_paths(setup.http).skip(3), ['/api/liveInfoDetail/35340121/35340121/0'], reason: 'no page again (6-8)');
     });
 
     test('another resultCode is ApiChanged (3.x showed an error room)', () async {
@@ -450,22 +507,61 @@ void main() {
       });
     });
 
-    test('lines at gear 2: FLV, media headers, line_seq and the lease; gear 2 confirmed', () async {
-      final setup = _setup(['S06-streams-g2']);
+    test('lines at gear 2: both CDN lines (6-4), FLV, media headers, line_seq and leases; gear 2 confirmed', () async {
+      final setup = _setup(['S06-streams-g2', 'S06-streams-g2-l10']);
       final resolution = await setup.site.resolvePlayUrls(
         detail: _room(_live),
         quality: const LivePlayQuality(quality: '高清', id: '2', data: '2', sort: 2300),
       );
-      final line = resolution.lines.single;
-      expect(line.format, StreamFormat.flv);
-      expect(line.headers, YyApi.mediaHeaders());
-      expect(line.lineId, '14');
-      expect(line.lease!.expiresAt!.difference(_now).inSeconds, inInclusiveRange(599, 601));
+      expect(resolution.lines.map((line) => (line.lineId, Uri.parse(line.url).host)), [
+        ('14', 'ks-flv-web.yy.com'),
+        ('10', 'tx-flv-web.yy.com'),
+      ], reason: '3.x: line 14 only');
+      for (final line in resolution.lines) {
+        expect(line.format, StreamFormat.flv);
+        expect(line.headers, YyApi.mediaHeaders());
+        expect(line.lease!.expiresAt!.difference(_now).inSeconds, inInclusiveRange(599, 604));
+      }
       expect(resolution.appliedQualityData, '2');
+      final bodies = [
+        for (final request in setup.http.requests) (jsonDecode(utf8.decode(request.body!)) as Map)['avp_parameter'],
+      ];
+      expect(bodies.map((body) => ((body as Map)['gear'], body['line_seq'])), [(2, -1), (2, 10)]);
+    });
+
+    test('6-4: another line that fails or serves another gear is left out', () async {
+      final failing = _setup(
+        ['S06-streams-g2'],
+        script: {
+          _streams: [ReplaySample.load('$_root/S06-streams-g2'), _serverTimeout],
+        },
+      );
+      const quality = LivePlayQuality(quality: '高清', id: '2', data: '2', sort: 2300);
+      final one = await failing.site.resolvePlayUrls(detail: _room(_live), quality: quality);
+      expect(one.lines.single.lineId, '14');
+      expect(failing.http.requests, hasLength(2));
+      final otherGear = _setup(
+        [],
+        script: {
+          _streams: [ReplaySample.load('$_root/S06-streams-g2'), ReplaySample.load('$_root/S06-streams-g1')],
+        },
+      );
+      expect((await otherGear.site.resolvePlayUrls(detail: _room(_live), quality: quality)).lines, hasLength(1));
+      final cancelled = _setup(
+        [],
+        script: {
+          _streams: [ReplaySample.load('$_root/S06-streams-g2'), TransportReason.cancelled],
+        },
+      );
+      await expectLater(
+        cancelled.site.resolvePlayUrls(detail: _room(_live), quality: quality),
+        throwsA(isA<TransportFailure>()),
+        reason: 'a cancelled request is not a missing line',
+      );
     });
 
     test('gear 3 has no web stream: served gear 2, and the lines say so (REG-YY-004)', () async {
-      final setup = _setup(['S06-streams-g1', 'S06-streams-g3'], script: _mobileDown(_live));
+      final setup = _setup(['S06-streams-g1', 'S06-streams-g3', 'S06-streams-g2-l10'], script: _mobileDown(_live));
       final qualities = await setup.site.getPlayQualities(detail: _room(_live));
       expect(qualities.map((quality) => quality.id), isNot(contains('3')), reason: '3.x listed 超清');
       const requested = LivePlayQuality(quality: '超清', id: '3', data: '3', sort: 2100);
@@ -477,16 +573,17 @@ void main() {
       );
     });
 
-    test('a mobile quality whose HLS fails plays the same tier as FLV, with its lease', () async {
+    test('a mobile quality whose HLS fails plays the same tier as FLV on both lines, with leases', () async {
       final setup = _setup(
-        ['S06-streams-g2'],
+        ['S06-streams-g2', 'S06-streams-g2-l10'],
         script: {
           '/hls/new/get/$_live/$_live/4000': [TransportReason.timeout],
         },
       );
       const quality = LivePlayQuality(quality: '高清 · 720p', id: 'mobile-hls:4000', data: 'mobile-hls:4000', sort: 4000);
       final resolution = await setup.site.resolvePlayUrls(detail: _room(_live), quality: quality);
-      final line = resolution.lines.single;
+      expect(resolution.lines.map((line) => line.lineId), ['14', '10'], reason: '6-4');
+      final line = resolution.lines.first;
       expect(line.format, StreamFormat.flv);
       expect(line.headers, YyApi.mediaHeaders());
       final lease = line.lease!;
@@ -494,7 +591,7 @@ void main() {
       expect(lease.expiresAt!.difference(lease.refreshAt), YyApi.leaseLead);
       expect(lease.cutsConnection, isFalse);
       expect(resolution.appliedQualityData, isNull, reason: 'standing in confirms no quality');
-      final body = jsonDecode(utf8.decode(setup.http.requests.last.body!)) as Map<String, dynamic>;
+      final body = jsonDecode(utf8.decode(setup.http.requests[1].body!)) as Map<String, dynamic>;
       expect((body['avp_parameter'] as Map)['gear'], 2, reason: '4000 is the 高清 tier (gear 2)');
       expect(
         resolveAppliedPlayQuality(qualities: const [quality], requested: quality, resolution: resolution).quality,
@@ -591,14 +688,101 @@ void main() {
     test('the user cookie goes with API requests and media lines', () async {
       final vault = MemoryCookieVault()..set('yy', 'yyuid=1; udb_oar=x');
       addTearDown(vault.dispose);
-      final setup = _setup(['S05-detail-live', 'S06-streams-g2'], cookies: vault);
+      final setup = _setup(['S05-detail-live', 'S06-streams-g2', 'S06-streams-g2-l10'], cookies: vault);
       await setup.site.getRoomDetail(roomId: _live);
       final resolution = await setup.site.resolvePlayUrls(
         detail: _room(_live),
         quality: const LivePlayQuality(quality: '高清', id: '2', data: '2', sort: 2300),
       );
+      expect(setup.http.requests, hasLength(3));
       expect(setup.http.requests.map((request) => request.headers['cookie']).toSet(), {'yyuid=1; udb_oar=x'});
-      expect(resolution.lines.single.headers['cookie'], 'yyuid=1; udb_oar=x');
+      expect(resolution.lines.map((line) => line.headers['cookie']), ['yyuid=1; udb_oar=x', 'yyuid=1; udb_oar=x']);
+    });
+  });
+
+  group('FLV first (6-1)', () {
+    _Setup flvFirst(
+      List<String> samples, {
+      List<ReplaySample> extra = const [],
+      Map<String, List<Object>> script = const {},
+    }) {
+      final http = ReplayHttp([
+        ...extra,
+        for (final name in samples) ReplaySample.load('$_root/$name'),
+      ], ignoredQuery: _ignored);
+      final transport = script.isEmpty
+          ? http
+          : _Scripted(http, {
+              for (final MapEntry(:key, :value) in script.entries) key: [...value],
+            });
+      return (site: YySite(transport, flvFirst: true, now: () => _now), http: http);
+    }
+
+    test('off by default: 3.x’s mobile HLS qualities come first', () {
+      expect(YySite(ReplayHttp(const [])).flvFirst, isFalse);
+    });
+
+    test('qualities from stream-manager in one request, the platform’s names; mobile HLS is not asked', () async {
+      final setup = flvFirst(['S06-streams-g1', 'S06-streams-g2', 'S06-streams-g2-l10']);
+      final qualities = await setup.site.getPlayQualities(detail: _room(_live));
+      expect(qualities.map((quality) => (quality.id, quality.quality)), [('2', '高清'), ('1', '流畅')]);
+      expect(_paths(setup.http), [_streams]);
+      final resolution = await setup.site.resolvePlayUrls(detail: _room(_live), quality: qualities.first);
+      expect(resolution.lines.map((line) => (line.format, line.lineId)), [
+        (StreamFormat.flv, '14'),
+        (StreamFormat.flv, '10'),
+      ]);
+      expect(resolution.lines.every((line) => line.lease != null), isTrue, reason: 'renewed by M7');
+      expect(resolution.appliedQualityData, '2');
+      expect(setup.http.requests.where((request) => request.url.host == 'interface.yy.com'), isEmpty);
+      expect(YyApi.flvQualityId('mobile-hls:4000', qualities), '2', reason: 'M9: 高清 · 720p becomes 高清');
+    });
+
+    test('stream-manager failing or without a stream: mobile HLS stands in', () async {
+      final failing = flvFirst(
+        ['S07-mobile-hls'],
+        extra: [_mobile4000(_live)],
+        script: {
+          _streams: [_serverTimeout],
+        },
+      );
+      final qualities = await failing.site.getPlayQualities(detail: _room(_live));
+      expect(qualities.map((quality) => quality.quality), ['高清 · 720p', '流畅 · 360p']);
+      expect(_paths(failing.http).first, _streams);
+      final offline = flvFirst(['S06-streams-offline', 'S07-mobile-hls-offline'], extra: [_noStream4000(_offline)]);
+      await expectLater(offline.site.getPlayQualities(detail: _room(_offline)), throwsA(isA<StreamUnavailable>()));
+      expect(_paths(offline.http), [
+        _streams,
+        '/hls/new/get/$_offline/$_offline/1200',
+        '/hls/new/get/$_offline/$_offline/4000',
+      ]);
+    });
+
+    test('a quality whose stream-manager request fails plays mobile HLS (3.x’s fallback)', () async {
+      final setup = flvFirst(
+        ['S07-mobile-hls'],
+        script: {
+          _streams: [_serverTimeout],
+        },
+      );
+      final low = await setup.site.resolvePlayUrls(
+        detail: _room(_live),
+        quality: const LivePlayQuality(quality: '流畅', id: '1', data: '1', sort: 600),
+      );
+      expect(low.lines.single.format, StreamFormat.hls);
+      expect(low.appliedQualityData, isNull);
+    });
+
+    test('every route failing reports the first failure', () async {
+      final setup = flvFirst(
+        [],
+        script: {
+          ..._mobileDown(_live),
+          _streams: [_serverTimeout],
+        },
+      );
+      await expectLater(setup.site.getPlayQualities(detail: _room(_live)), throwsA(isA<NetworkFailure>()));
+      expect(setup.http.requests.first.url.path, _streams);
     });
   });
 

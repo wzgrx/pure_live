@@ -1681,6 +1681,8 @@ class _Translations$multiview$en implements Translations$multiview$zh_Hans {
   @override
   String get filterHint => 'Filter by streamer or title';
   @override
+  String get pickTarget => 'Picks go here';
+  @override
   String cell({required Object n}) => 'View ${n}';
   @override
   String get switchRoom => 'Change room';

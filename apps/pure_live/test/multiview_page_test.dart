@@ -55,6 +55,7 @@ void main() {
     Size size = const Size(1280, 800),
     List<RoomRef> rooms = const [],
     bool danmakuEnabled = true,
+    List<FollowedRoom>? follows,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -95,7 +96,7 @@ void main() {
           danmakuSourceProvider.overrideWithValue(chats),
           blockRulesProvider.overrideWith((ref) => Stream.value(const [])),
           roomVolumesProvider.overrideWithValue(volumes),
-          followsProvider.overrideWith((ref) => Stream.value([follow])),
+          followsProvider.overrideWith((ref) => Stream.value(follows ?? [follow])),
           historyProvider.overrideWith((ref) => Stream.value(const [])),
           multiviewSystemFullscreenProvider.overrideWithValue(
             ({required enabled, required phone}) async => fullscreen.add(enabled),
@@ -143,6 +144,63 @@ void main() {
       expect(stateOf(container).cells[2].room, RoomRef('douyu', '7'));
       expect(stateOf(container).cells[2].status, CellStatus.playing);
       expect(stateOf(container).target, 3, reason: 'the target moved on to the next free cell');
+      await close(tester);
+    });
+
+    testWidgets('a row ends with its state only: 直播 or 未开播, never the platform (the logo says it)', (tester) async {
+      final offline = FollowedRoom(
+        room: StoredRoom(
+          ref: RoomRef('douyu', '8'),
+          anchorName: '主播8',
+          title: '标题8',
+          updatedAt: DateTime(2026),
+          lastState: LiveState.offline,
+        ),
+        followedAt: DateTime(2026),
+        order: 1,
+      );
+      await open(tester, follows: [follow, offline]);
+      ListTile row(String name) =>
+          tester.widget<ListTile>(find.ancestor(of: find.text(name), matching: find.byType(ListTile)));
+      expect(row('主播7').trailing, isA<LiveBadge>());
+      expect((row('主播8').trailing! as Text).data, '未开播', reason: 'it said 斗鱼 here');
+      expect(find.text('斗鱼'), findsNothing);
+      await close(tester);
+    });
+
+    testWidgets('AUD-4: the pick target has a text badge; on the sound-focus cell both marks show', (tester) async {
+      final container = await open(tester, rooms: [RoomRef('douyu', '1')]);
+      await settle(tester);
+      final scheme = Theme.of(tester.element(cellAt(0))).colorScheme;
+      Iterable<Color> borders(int index) => tester
+          .widgetList<DecoratedBox>(find.descendant(of: cellAt(index), matching: find.byType(DecoratedBox)))
+          .map((box) => box.decoration)
+          .whereType<BoxDecoration>()
+          .map((decoration) => decoration.border)
+          .whereType<Border>()
+          .map((border) => border.top.color);
+      Finder badge(int index) =>
+          find.descendant(of: cellAt(index), matching: find.byKey(const ValueKey('multiview-target')));
+
+      // Cell 1 is free and the target: tertiary border and the words.
+      expect(stateOf(container).target, 1);
+      expect(badge(1), findsOneWidget);
+      expect(find.descendant(of: badge(1), matching: find.text('放到这里')), findsOneWidget);
+      expect(borders(1), contains(scheme.tertiary));
+      expect(borders(2), isEmpty, reason: 'no 1 px lines between cells: the 2 dp black gap parts them');
+
+      // The panel's picks now go to the playing cell with the sound: it was
+      // drawn with the focus border only, and the target vanished.
+      container.read(multiviewProvider.notifier).setTarget(0);
+      await settle(tester);
+      expect(stateOf(container).audioFocus, 0);
+      expect(badge(0), findsOneWidget);
+      expect(borders(0), containsAll([scheme.primary, scheme.tertiary]));
+      expect(find.text('选择直播间 · 放到第 1 格'), findsOneWidget);
+
+      final first = tester.getRect(cellAt(0));
+      final second = tester.getRect(cellAt(1));
+      expect(second.left - first.right, 2, reason: 'principles §7 rule 4: a 2 dp gap');
       await close(tester);
     });
 

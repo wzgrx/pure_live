@@ -27,6 +27,7 @@
   "selectedVolume": "Volume of the selected view",
   "pickRoomFor": "Choose a room · view {n}",
   "filterHint": "Filter by streamer or title",
+  "pickTarget": "Picks go here",
   "cell": "View {n}",
   "switchRoom": "Change room",
   "lineN": "Line {n}",

@@ -2224,6 +2224,9 @@ class Translations$multiview$zh_Hans {
   /// zh-Hans: '按主播名或标题筛选'
   String get filterHint => '按主播名或标题筛选';
 
+  /// zh-Hans: '放到这里'
+  String get pickTarget => '放到这里';
+
   /// zh-Hans: '第 {n} 格'
   String cell({required Object n}) => '第 ${n} 格';
 

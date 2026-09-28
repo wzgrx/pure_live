@@ -1615,6 +1615,8 @@ class Translations$multiview$zh_Hant implements Translations$multiview$zh_Hans {
   @override
   String get filterHint => '按主播名稱或標題篩選';
   @override
+  String get pickTarget => '放到這裡';
+  @override
   String cell({required Object n}) => '第 ${n} 格';
   @override
   String get switchRoom => '換房';

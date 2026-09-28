@@ -6,6 +6,9 @@ set -uo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$root"
 [[ -f ~/tools/purelive-env.sh ]] && source ~/tools/purelive-env.sh >/dev/null 2>&1
+# Tests never need the network; a proxy from the environment makes some of
+# them hang once the wall clock is shifted.
+unset HTTPS_PROXY HTTP_PROXY https_proxy http_proxy ALL_PROXY all_proxy
 lib="${TMPDIR:-/tmp}/pure_live-timeshift.so"
 cc -shared -fPIC -O2 -o "$lib" tools/timeshift/shift.c -ldl || exit 1
 days=("$@"); [[ ${#days[@]} -eq 0 ]] && days=(30 365 1825)

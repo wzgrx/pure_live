@@ -1,0 +1,304 @@
+{
+  "generator": "JdLiveSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + getPlayUrls + JdLiveApi.parseRoomJson",
+  "value": {
+    "parseRoomJson": {
+      "liveId": "10000",
+      "authorId": "",
+      "nick": "JD Live",
+      "title": "JD Live",
+      "avatar": "",
+      "cover": "",
+      "totalViews": null,
+      "state": "replay",
+      "hls": null,
+      "flv": null
+    },
+    "recorded": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "10000",
+          "userId": "10000",
+          "title": "JD Live",
+          "nick": "JD Live",
+          "avatar": "",
+          "cover": "",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/10000",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/10000"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"10000\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "10000",
+          "userId": "10000",
+          "title": "JD Live",
+          "nick": "JD Live",
+          "avatar": "",
+          "cover": "",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/10000",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/10000"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"10000\"}"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "10000",
+          "userId": "10000",
+          "title": "JD Live",
+          "nick": "JD Live",
+          "avatar": "",
+          "cover": "",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/10000",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/10000"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"10000\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": false,
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"10000\"}"
+        ]
+      },
+      "getRoomDetail → getPlayQualites": {
+        "result": [],
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(hls)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(flv)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsForRecoveryRaw(hls)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → getPlayUrls(flv)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → getPlayQualites": {
+        "result": [],
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(hls)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(flv)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsForRecoveryRaw(hls)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → getPlayUrls(flv)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → getPlayQualites": {
+        "result": [],
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(hls)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(flv)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsForRecoveryRaw(hls)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → getPlayUrls(flv)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "otherPlatform": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live identity"
+        },
+        "requests": []
+      },
+      "platform in another case": {
+        "result": {
+          "roomId": "10000",
+          "userId": "10000",
+          "title": "JD Live",
+          "nick": "JD Live",
+          "avatar": "",
+          "cover": "",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/10000",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/10000"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"10000\"}"
+        ]
+      },
+      "room link as id": {
+        "result": {
+          "roomId": "10000",
+          "userId": "10000",
+          "title": "JD Live",
+          "nick": "JD Live",
+          "avatar": "",
+          "cover": "",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/10000",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/10000"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"10000\"}"
+        ]
+      }
+    }
+  }
+}

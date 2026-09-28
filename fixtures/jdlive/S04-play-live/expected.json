@@ -1,0 +1,512 @@
+{
+  "generator": "JdLiveSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + getPlayUrls + JdLiveApi.parseRoomJson (with S04-playlist, S04-list)",
+  "value": {
+    "headers": {
+      "mediaHeaders(48395626)": {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+        "Origin": "https://lives.jd.com",
+        "Referer": "https://lives.jd.com/#/48395626"
+      }
+    },
+    "parseRoomJson": {
+      "liveId": "48395626",
+      "authorId": "",
+      "nick": "JD Live",
+      "title": "JD Live",
+      "avatar": "",
+      "cover": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+      "totalViews": null,
+      "state": "live",
+      "hls": "https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8",
+      "flv": "https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.flv"
+    },
+    "recorded": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "48395626",
+          "userId": "48395626",
+          "title": "JD Live",
+          "nick": "JD Live",
+          "avatar": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "cover": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/48395626",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/48395626"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}",
+          "GET https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8 headers {\"User-Agent\":\"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148\",\"Origin\":\"https://lives.jd.com\",\"Referer\":\"https://lives.jd.com/#/48395626\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "48395626",
+          "userId": "48395626",
+          "title": "JD Live",
+          "nick": "JD Live",
+          "avatar": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "cover": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/48395626",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/48395626"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "48395626",
+          "userId": "48395626",
+          "title": "JD Live",
+          "nick": "JD Live",
+          "avatar": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "cover": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/48395626",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/48395626"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}",
+          "GET https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8 headers {\"User-Agent\":\"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148\",\"Origin\":\"https://lives.jd.com\",\"Referer\":\"https://lives.jd.com/#/48395626\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": true,
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}"
+        ]
+      },
+      "getRoomDetail → getPlayQualites": {
+        "result": [
+          {
+            "quality": "HLS（推荐）",
+            "id": "hls",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(hls)": {
+        "result": {
+          "urls": [
+            "https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8"
+          ],
+          "appliedQualityData": "hls"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(flv)": {
+        "result": {
+          "urls": [
+            "https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.flv"
+          ],
+          "appliedQualityData": "flv"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsForRecoveryRaw(hls)": {
+        "result": {
+          "urls": [
+            "https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8"
+          ],
+          "appliedQualityData": "hls"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}",
+          "GET https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8 headers {\"User-Agent\":\"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148\",\"Origin\":\"https://lives.jd.com\",\"Referer\":\"https://lives.jd.com/#/48395626\"}"
+        ]
+      },
+      "getRoomDetail → getPlayUrls(flv)": {
+        "result": [
+          "https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.flv"
+        ],
+        "requests": []
+      },
+      "getRoomDetailForRefresh → getPlayQualites": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(hls)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(flv)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsForRecoveryRaw(hls)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → getPlayUrls(flv)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → getPlayQualites": {
+        "result": [
+          {
+            "quality": "HLS（推荐）",
+            "id": "hls",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(hls)": {
+        "result": {
+          "urls": [
+            "https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8"
+          ],
+          "appliedQualityData": "hls"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(flv)": {
+        "result": {
+          "urls": [
+            "https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.flv"
+          ],
+          "appliedQualityData": "flv"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsForRecoveryRaw(hls)": {
+        "result": {
+          "urls": [
+            "https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8"
+          ],
+          "appliedQualityData": "hls"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}",
+          "GET https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8 headers {\"User-Agent\":\"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148\",\"Origin\":\"https://lives.jd.com\",\"Referer\":\"https://lives.jd.com/#/48395626\"}"
+        ]
+      },
+      "getRoomDetailForRecording → getPlayUrls(flv)": {
+        "result": [
+          "https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.flv"
+        ],
+        "requests": []
+      },
+      "otherPlatform": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live identity"
+        },
+        "requests": []
+      },
+      "platform in another case": {
+        "result": {
+          "roomId": "48395626",
+          "userId": "48395626",
+          "title": "JD Live",
+          "nick": "JD Live",
+          "avatar": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "cover": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/48395626",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/48395626"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}"
+        ]
+      },
+      "room link as id": {
+        "result": {
+          "roomId": "48395626",
+          "userId": "48395626",
+          "title": "JD Live",
+          "nick": "JD Live",
+          "avatar": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "cover": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/48395626",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/48395626"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}"
+        ]
+      }
+    },
+    "after the list": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "48395626",
+          "userId": "23924087",
+          "title": "国民喜糖徐福记优选",
+          "nick": "徐福记食品店",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/266368/31/2882/19986/676b8ce4Ff9325cf9/f05033d52b97992a.jpg",
+          "cover": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "154",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/48395626",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/48395626"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}",
+          "GET https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8 headers {\"User-Agent\":\"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148\",\"Origin\":\"https://lives.jd.com\",\"Referer\":\"https://lives.jd.com/#/48395626\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "48395626",
+          "userId": "23924087",
+          "title": "国民喜糖徐福记优选",
+          "nick": "徐福记食品店",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/266368/31/2882/19986/676b8ce4Ff9325cf9/f05033d52b97992a.jpg",
+          "cover": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "154",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/48395626",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/48395626"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": [
+          {
+            "roomId": "48395626",
+            "userId": "23924087",
+            "title": "国民喜糖徐福记优选",
+            "nick": "徐福记食品店",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/266368/31/2882/19986/676b8ce4Ff9325cf9/f05033d52b97992a.jpg",
+            "cover": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+            "area": "JD Live",
+            "watching": "0",
+            "audienceMetricType": "totalViewers",
+            "popularity": "",
+            "onlineViewers": "",
+            "totalViewers": "154",
+            "followers": "0",
+            "platform": "jdlive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://lives.jd.com",
+              "referer": "https://lives.jd.com/#/48395626",
+              "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+            },
+            "link": "https://lives.jd.com/#/48395626"
+          }
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}"
+        ]
+      }
+    },
+    "empty playlist": {
+      "result": {
+        "throws": "JdLiveException",
+        "message": "JD Live schema"
+      },
+      "requests": [
+        "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}",
+        "GET https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8 headers {\"User-Agent\":\"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148\",\"Origin\":\"https://lives.jd.com\",\"Referer\":\"https://lives.jd.com/#/48395626\"}"
+      ]
+    },
+    "playlist 404": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live missing"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}",
+          "GET https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8 headers {\"User-Agent\":\"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148\",\"Origin\":\"https://lives.jd.com\",\"Referer\":\"https://lives.jd.com/#/48395626\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "48395626",
+          "userId": "48395626",
+          "title": "JD Live",
+          "nick": "JD Live",
+          "avatar": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "cover": "https://m.360buyimg.com/live/jfs/t1/534518/36/672/9782/6ab16b46Fc7b19c9e/00292ee536f00e28.jpg!q70.jpg",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/48395626",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/48395626"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48395626\"}"
+        ]
+      }
+    }
+  }
+}

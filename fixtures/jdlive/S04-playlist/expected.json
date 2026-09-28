@@ -1,0 +1,67 @@
+{
+  "generator": "JdLiveApi.validatePlaylist",
+  "value": {
+    "recorded": "ok",
+    "CRLF": "ok",
+    "leading blank": "ok",
+    "other stem": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    },
+    "absolute same host": "ok",
+    "absolute other host": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    },
+    "absolute http": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    },
+    "host in another case": "ok",
+    "port 443": "ok",
+    "other port": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    },
+    "outside /live/": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    },
+    "root-relative": "ok",
+    "fragment": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    },
+    "user info": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    },
+    "URI attribute same stream": "ok",
+    "URI attribute other stream": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    },
+    "only tags": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    },
+    "only a URI attribute": "ok",
+    "not a playlist": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    },
+    "empty": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    },
+    "1000 segments": "ok",
+    "1001 segments": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    },
+    "over 1 MiB": {
+      "throws": "JdLiveException",
+      "message": "JD Live schema"
+    }
+  }
+}

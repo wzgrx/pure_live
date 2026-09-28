@@ -38,6 +38,12 @@ class CheckTest(unittest.TestCase):
             meta = self._meta(directory, {'x-ksclient-ip': '8.8.4.4', 'xhs-real-ip': '9.9.9.9'})
             self.assertEqual(len(check_fixtures.check([meta])), 2)
 
+    def test_body_fields_with_underscores_fail(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'body.json'
+            path.write_text(json.dumps({'data': {'client_ip': '8.8.4.4', 'deviceInfo': {'publicIP': '9.9.9.9'}}}), encoding='utf-8')
+            self.assertEqual(len(check_fixtures.check([path])), 2)
+
     def test_server_address_headers_are_ignored(self):
         with tempfile.TemporaryDirectory() as directory:
             meta = self._meta(directory, {'lb': '8.8.4.4', 'x-server-ip': '8.8.4.4'})

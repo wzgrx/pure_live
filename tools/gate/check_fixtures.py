@@ -20,7 +20,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 
 CLIENT_HEADER = re.compile(
-    r'(real-?ip|client-?ip|clientip|forwarded|remote-?addr|connecting-?ip|originating-?ip|svbbrers)',
+    r'(real[-_]?ip|client[-_]?ip|public[-_]?ip|forwarded|remote[-_]?addr|connecting[-_]?ip|originating[-_]?ip|svbbrers)',
     re.IGNORECASE,
 )
 IPV4 = re.compile(r'(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])')

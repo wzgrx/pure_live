@@ -43,7 +43,10 @@ void main() {
       );
       await tester.pump();
       final shown = anchorsOnScreen(tester);
-      final indexed = {for (final entry in settingsIndex()) if (entry.group == group) entry.id};
+      final indexed = {
+        for (final entry in settingsIndex())
+          if (entry.group == group) entry.id,
+      };
       expect(indexed.difference(shown), isEmpty, reason: 'every indexed setting has a tile to show');
       expect(shown.difference(indexed), isEmpty, reason: 'every tile of the group can be found');
     });
@@ -51,7 +54,7 @@ void main() {
 
   test('every 3.x name belongs to an indexed setting', () {
     final entries = [...settingsIndex(android: true, windows: false), ...settingsIndex(android: false, windows: true)];
-    for (final MapEntry(key: key, value: names) in t.settings.search.legacy.entries) {
+    for (final MapEntry(:key, value: names) in t.settings.search.legacy.entries) {
       expect(
         entries.any((entry) => entry.legacy.join('|') == names),
         isTrue,
@@ -61,7 +64,9 @@ void main() {
   });
 
   group('search', () {
-    List<String> titles(String query) => [for (final match in searchSettings(query, settingsIndex())) match.entry.title];
+    List<String> titles(String query) => [
+      for (final match in searchSettings(query, settingsIndex())) match.entry.title,
+    ];
 
     test('titles, descriptions and case-insensitive English', () {
       expect(titles('画质').take(2), ['默认画质（Wi-Fi）', '默认画质（移动网络）']);

@@ -248,7 +248,11 @@ void main() {
     testWidgets('compact: logo tabs over the whole width, order and 只看开播 on the row below', (tester) async {
       await pumpSearch(tester, const Size(393, 852), TargetPlatform.android);
       final tabs = find.byType(TabBar);
-      expect(find.descendant(of: tabs, matching: find.byType(PlatformLogo)), findsWidgets, reason: 'as in discover');
+      expect(
+        find.descendant(of: tabs, matching: find.byType(PlatformLogo)),
+        findsWidgets,
+        reason: 'as in discover',
+      );
       expect(tester.getSize(tabs).width, 393, reason: 'the tools no longer share the row');
       final chip = tester.getRect(find.text('只看开播'));
       expect(chip.top, greaterThan(tester.getRect(tabs).bottom));

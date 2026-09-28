@@ -196,7 +196,9 @@ class PageTabBar extends StatelessWidget implements PreferredSizeWidget {
     builder: (context, constraints) {
       final margin = PageMargin.of(context);
       final start = PageMargin.contentStart(constraints.maxWidth, margin, maxContentWidth: maxContentWidth);
-      // Labels carry 16 dp on each side; a narrower line (TV) narrows them.
+      // Labels carry 16 dp on each side; on a narrower line (TV) the space
+      // before each label shrinks and the space after it grows, so labels
+      // keep their 32 dp apart.
       final label = math.min(Space.s4, start);
       return TabBar(
         controller: controller,
@@ -204,8 +206,8 @@ class PageTabBar extends StatelessWidget implements PreferredSizeWidget {
         tabAlignment: TabAlignment.start,
         dividerHeight: dividerHeight,
         onTap: onTap,
-        labelPadding: EdgeInsets.symmetric(horizontal: label),
-        padding: EdgeInsetsDirectional.only(start: start - label, end: math.max(0, margin - label)),
+        labelPadding: EdgeInsetsDirectional.only(start: label, end: 2 * Space.s4 - label),
+        padding: EdgeInsetsDirectional.only(start: start - label, end: math.max(0, margin - Space.s4)),
         tabs: tabs,
       );
     },

@@ -368,8 +368,9 @@ class _LinkResult extends StatelessWidget {
       }
       final room = snapshot.data;
       if (room == null) return MessageView(title: t.search.noLinkMatch);
+      final margin = PageMargin.of(context);
       return ListView(
-        padding: const EdgeInsets.all(Space.s4),
+        padding: EdgeInsets.fromLTRB(margin, Space.s2, margin, Space.s4),
         children: [
           Card(
             child: ListTile(

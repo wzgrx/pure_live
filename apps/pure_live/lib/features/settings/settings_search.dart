@@ -452,7 +452,8 @@ class SettingAnchorState extends State<SettingAnchor> {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.primaryContainer;
+    // The selection tone of Material lists: marked, not shouting.
+    final color = Theme.of(context).colorScheme.secondaryContainer;
     final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     // A Material of its own, so the tile's ink still shows over the light.
     return TweenAnimationBuilder<Color?>(

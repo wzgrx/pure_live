@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "platform": "weibo",
+  "sample": "S04-shortlink-missing",
+  "capturedAt": "2026-09-28T18:50:48.963664Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://t.cn/zzzzzzzz",
+    "headers": {
+      "Referer": "https://weibo.com/l/wblive/",
+      "User-Agent": "Mozilla/5.0"
+    }
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content-length": "0",
+      "connection": "keep-alive",
+      "location": "http://weibo.com/sorry",
+      "date": "Mon, 28 Sep 2026 18:50:49 GMT",
+      "server": "SHANHAI-SERVER",
+      "lb": "123.56.139.83",
+      "ssl_node": "ecs-10-93-179-233-aliyun.paas.weibo.com"
+    }
+  },
+  "raw": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "length": 0
+  },
+  "body": "body.html",
+  "scrubbed": [],
+  "tool": "M4.U.18 recorder (schema 1)"
+}

@@ -1,9 +1,11 @@
 // ShowroomSite over the recorded SHOWROOM responses (ReplayHttp) and a few
 // synthetic ones: the request headers, the shared snapshot and its 30 s
-// reuse, the directory pages and 3.x's slices, the search, room details by
-// id and by key for entry, refresh and recording, qualities, lines and
-// recovery, cancellation, links and the error mapping. Requests are
-// compared with the ones 3.x sent (expected.json records them).
+// reuse (page 1 of the directory and the search asks anew, later pages reuse
+// it: 19-1), the directory pages and 3.x's slices, the search, room details
+// by id and by key for entry, refresh and recording (with the comment
+// arguments, 19-3), qualities, lines and recovery, cancellation, links and
+// the error mapping. Requests are compared with the ones 3.x sent
+// (expected.json records them).
 import 'dart:async';
 import 'dart:convert';
 
@@ -143,7 +145,11 @@ void main() {
       }
       expect((setup.site.id, setup.site.name), ('showroom', 'SHOWROOM'));
       expect(setup.site.directoryNoticeKey, 'showroom_directory_scope');
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no SHOWROOM comments');
+      expect(
+        setup.site.getDanmaku(),
+        isA<EmptyDanmaku>(),
+        reason: '3.x had no SHOWROOM comments; M5 connects them from danmakuData',
+      );
     });
 
     test('transport failures are NetworkFailure; a cancelled transport stays cancelled; statuses are mapped', () async {
@@ -176,7 +182,9 @@ void main() {
       await setup.site.getRecommendRooms();
       await setup.site.getCategoryRooms(_genreMusic);
       await setup.site.searchRooms('king');
-      await setup.site.getDirectoryPage();
+      await setup.site.searchRooms('king', page: 2);
+      await setup.site.getDirectoryPage(page: 2);
+      await setup.site.searchRoomsCancellable('king', page: 2, cancel: CancelToken());
       expect(setup.http.requests, hasLength(1));
       now = now.add(const Duration(seconds: 29));
       await setup.site.getRecommendRooms(page: 2);
@@ -185,21 +193,88 @@ void main() {
       await setup.site.getRecommendRooms();
       expect(setup.http.requests, hasLength(2), reason: 'a snapshot 30 s old is fetched again');
       // 3.x: getCategores, getRecommendRooms and searchRooms without a token
-      // shared one request; the directory page with a token asked again.
-      expect(_legacyRequests(legacy['cache']), hasLength(2));
+      // shared one request; the directory page 1 with a token asked again.
+      // Same now: page 1 of the directory is the pull to refresh (19-1).
+      final cache = _setup(['S01-onlives']);
+      await cache.site.getCategories(1, 30);
+      await cache.site.getRecommendRooms();
+      await cache.site.searchRooms('king');
+      await cache.site.getDirectoryPage(cancel: CancelToken());
+      expect(_sent(cache.http.requests), _legacyRequests(legacy['cache']));
     });
 
-    test('a cancellable caller always fetches anew and never touches the shared snapshot (3.x)', () async {
-      final setup = _setup(['S01-onlives']);
-      await setup.site.getCategories(1, 30);
+    test('19-1: page 1 of the directory and the search asks anew; later pages reuse it for 30 s', () async {
+      var now = DateTime.utc(2026, 9, 28);
+      final setup = _setup(['S01-onlives'], now: () => now);
       final token = CancelToken();
-      await setup.site.getDirectoryPage(cancel: token);
-      await setup.site.getDirectoryPage(page: 2, cancel: token);
+      final first = await setup.site.getDirectoryPage(cancel: token);
+      expect(setup.http.requests.single.cancel, same(token));
+      final second = await setup.site.getDirectoryPage(page: 2, cancel: CancelToken());
+      final third = await setup.site.getDirectoryPage(page: 3, cancel: CancelToken());
+      final music = await setup.site.getDirectoryPage(page: 2, category: _genreMusic, cancel: CancelToken());
+      await setup.site.searchRoomsCancellable('a', page: 2, pageSize: 20, cancel: CancelToken());
+      await setup.site.getCategories(1, 30);
+      await setup.site.getRecommendRooms(page: 2);
+      expect(setup.http.requests, hasLength(1), reason: '3.x asked once per page with a token (five requests)');
+      final ids = [
+        for (final page in [first, second, third]) ...page.rooms.map((room) => room.roomId),
+      ];
+      expect(ids.toSet(), hasLength(ids.length), reason: 'one snapshot: no room twice');
+      expect(ids, hasLength(64), reason: 'and none skipped');
+      expect((music.page, third.hasMore), (2, false));
       await setup.site.searchRoomsCancellable('king', cancel: token);
-      expect(setup.http.requests, hasLength(4));
-      expect(setup.http.requests.skip(1).map((request) => request.cancel), everyElement(same(token)));
+      expect(setup.http.requests, hasLength(2), reason: 'page 1 of the search is a refresh too');
+      now = now.add(const Duration(seconds: 29));
+      await setup.site.searchRoomsCancellable('king', page: 2, cancel: token);
+      expect(setup.http.requests, hasLength(2), reason: 'reused: the search page 1 snapshot is 29 s old');
+      now = now.add(const Duration(seconds: 1));
+      await setup.site.getDirectoryPage(page: 2, cancel: token);
+      expect(setup.http.requests, hasLength(3), reason: 'a snapshot 30 s old is fetched again, with the token');
+      expect(setup.http.requests.last.cancel, same(token));
       await setup.site.getRecommendRooms();
-      expect(setup.http.requests, hasLength(4), reason: 'the shared snapshot is still the first one');
+      expect(setup.http.requests, hasLength(3), reason: 'which is shared again');
+      await setup.site.getDirectoryPage();
+      expect(setup.http.requests, hasLength(4), reason: 'page 1 without a token refreshes too');
+      now = now.subtract(const Duration(minutes: 1));
+      await setup.site.getRecommendRooms();
+      expect(setup.http.requests, hasLength(5), reason: 'a snapshot from the future (clock set back) is not reused');
+    });
+
+    test('a cancellable later page only reuses an arrived snapshot; a cancelled or failed fetch is not kept', () async {
+      final body = Fixture.load('showroom', 'S01-onlives').body;
+      final gate = Completer<void>();
+      var status = 200;
+      final http = _Scripted((request) async {
+        if (request.cancel == null) await gate.future;
+        return _response(request, status == 200 ? body : '', status: status);
+      });
+      final site = ShowroomSite(http);
+      final shared = site.getRecommendRooms();
+      final token = CancelToken();
+      expect((await site.getDirectoryPage(page: 2, cancel: token)).rooms, hasLength(30));
+      expect(http.requests.map((request) => request.cancel), [isNull, same(token)]);
+      gate.complete();
+      expect(await shared, hasLength(30));
+      await site.getDirectoryPage(page: 3, cancel: token);
+      expect(http.requests, hasLength(2));
+      token.cancel();
+      await expectLater(site.getDirectoryPage(page: 2, cancel: token), _cancelled);
+      await expectLater(site.getDirectoryPage(cancel: token), _cancelled);
+      expect(http.requests, hasLength(2));
+      final lateCancel = CancelToken();
+      final dropped = _Scripted((request) {
+        lateCancel.cancel();
+        return _response(request, body);
+      });
+      final other = ShowroomSite(dropped);
+      await expectLater(other.getDirectoryPage(cancel: lateCancel), _cancelled);
+      await other.getRecommendRooms();
+      expect(dropped.requests, hasLength(2), reason: 'an answer after cancellation is not kept');
+      status = 503;
+      await expectLater(site.getDirectoryPage(cancel: CancelToken()), throwsA(isA<NetworkFailure>()));
+      status = 200;
+      await site.getRecommendRooms();
+      expect(http.requests, hasLength(3), reason: 'the snapshot before the failed refresh is still shared');
     });
 
     test('concurrent callers share the fetch under way; a failed fetch is forgotten', () async {
@@ -356,15 +431,19 @@ void main() {
         expect(_sent(setup.http.requests), _legacyRequests(legacy[entry]), reason: entry);
         expect(room.roomId, _live);
         expect(room.isLiveNow, isTrue);
+        expect(room.startedAt, DateTime.utc(2026, 9, 27, 13, 49, 2));
+        expect(room.restriction, LiveRestriction.none);
+        expect(room.totalViewers, '3941');
         if (entry == 'getRoomDetailForRefresh') {
           expect(room.data, isNull, reason: 'refresh keeps 3.x metadata only');
+          expect(room.danmakuData, isNull, reason: 'comments connect on room entry');
         } else {
           final data = room.data! as ShowroomRoomData;
-          expect(
-            (data.roomId, data.bcsvrHost, data.bcsvrKey),
-            (_live, 'online.showroom-live.com', '6e6c686835796846:23483509'),
-          );
+          expect(data.roomId, _live);
           expect(data.streams, hasLength(8), reason: 'the rows as answered, WebRTC included');
+          // 19-3 (the platform part): the comment arguments, no request.
+          final args = room.danmakuData! as ShowroomDanmakuArgs;
+          expect((args.roomId, args.host, args.key), (_live, 'online.showroom-live.com', '6e6c686835796846:23483509'));
         }
       }
     });
@@ -392,6 +471,12 @@ void main() {
       expect(_sent(setup.http.requests), _legacyRequests(legacy['getRoomDetail']));
       expect(room.effectiveLiveStatus, LiveStatus.offline);
       expect(room.data, isNull);
+      expect(room.danmakuData, isNull);
+      expect(
+        (room.watching, room.totalViewers, room.startedAt, room.restriction),
+        ('', '', null, null),
+        reason: '19-4',
+      );
       expect(await setup.site.getLiveStatus(roomId: _offline), isFalse);
       await expectLater(setup.site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
       expect(setup.http.requests, hasLength(3), reason: 'live_info for the status; qualities ask nothing');
@@ -486,6 +571,22 @@ void main() {
       final merged = stored.mergeFrom(fresh);
       expect(merged.identityKey, stored.identityKey);
       expect((merged.isLiveNow, merged.title), (true, fresh.title));
+      expect((merged.startedAt, merged.restriction), (fresh.startedAt, LiveRestriction.none));
+      // The same room after it went offline (S04-live-info-offline's answer).
+      final offline = await _setup(
+        ['S03-profile-live'],
+        extra: [
+          _synthetic('$_api/live/live_info?room_id=$_live', {
+            ...jsonDecode(Fixture.load('showroom', 'S04-live-info-offline').body) as Map<String, dynamic>,
+            'room_id': 577362,
+          }),
+        ],
+      ).site.getRoomDetailForRefresh(roomId: _live);
+      expect((offline.watching, offline.totalViewers), ('', ''), reason: '19-4');
+      final ended = merged.mergeFrom(offline);
+      expect(ended.effectiveLiveStatus, LiveStatus.offline);
+      expect((ended.startedAt, ended.restriction), (null, null), reason: 'M2.1: the broadcast ended');
+      expect(ended.totalViewers, '3941', reason: 'mergeFrom keeps a stored audience: M13 hides it offline (19-4)');
     });
   });
 
@@ -495,7 +596,9 @@ void main() {
       final room = await setup.site.getRoomDetail(roomId: _live);
       final before = setup.http.requests.length;
       final qualities = await setup.site.getPlayQualities(detail: room);
-      expect(qualities.map((quality) => quality.quality), ['自动', '原画', '中画质', '低画质']);
+      // 19-2: 原画 first (the default), 自动 last; 3.x: 自动, 原画, 中画质, 低画质.
+      expect(qualities.map((quality) => quality.quality), ['原画', '中画质', '低画质', '自动']);
+      expect(qualities.map((quality) => quality.id), ['hls:2:1000', 'hls:6:200', 'hls:4:100', 'hls_all:100:0']);
       final urls = (_legacy('S03-profile-live')[_live] as Map<String, dynamic>)['getPlayUrls'] as Map<String, dynamic>;
       for (final quality in qualities) {
         final resolution = await setup.site.resolvePlayUrls(detail: room, quality: quality);
@@ -515,7 +618,7 @@ void main() {
       final qualities = await setup.site.getPlayQualities(detail: card);
       expect(qualities, hasLength(4));
       final refreshed = await setup.site.getRoomDetailForRefresh(roomId: _live);
-      final lines = await setup.site.resolvePlayUrls(detail: refreshed, quality: qualities[1]);
+      final lines = await setup.site.resolvePlayUrls(detail: refreshed, quality: qualities.first);
       expect(lines.urls.single, endsWith('_main_ss.m3u8'));
       expect(setup.http.requests.map((request) => request.url.path), [
         '/api/live/onlives',
@@ -547,7 +650,8 @@ void main() {
     test('recovery asks streaming_url alone (3.x read the whole room: three requests) and keeps the quality', () async {
       final setup = _setup(_liveSamples);
       final room = await setup.site.getRoomDetail(roomId: _live);
-      final auto = (await setup.site.getPlayQualities(detail: room)).first;
+      final auto = (await setup.site.getPlayQualities(detail: room)).last;
+      expect(auto.id, 'hls_all:100:0');
       final before = setup.http.requests.length;
       final recovered = await setup.site.resolvePlayUrlsForRecovery(detail: room, quality: auto);
       final legacy =

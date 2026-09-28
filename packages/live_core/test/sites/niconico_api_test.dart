@@ -532,22 +532,29 @@ void main() {
   test('S04 the recorded grant: qualities and the cookies of each path match 3.x', () {
     final legacy = Fixture.load('niconico', 'seat/S04-seat');
     final expected = legacy.legacy as Map<String, dynamic>;
-    final grant = NiconicoApi.grant(_recordedStream(), now: DateTime.parse(legacy.meta['capturedAt'] as String));
+    // The recorded session cookie expired at 2026-09-28 18:41 UTC: every
+    // cookie lookup happens at the recording time, not now.
+    final at = DateTime.parse(legacy.meta['capturedAt'] as String);
+    final grant = NiconicoApi.grant(_recordedStream(), now: at);
     expect(grant.uri.toString(), expected['uri']);
     expect(grant.quality, expected['quality']);
     expect(grant.availableQualities, expected['availableQualities']);
     expect(grant.cookieCount, expected['retainedCookieCount']);
     final program = grant.uri.pathSegments[2];
     final headers = expected['cookieHeaderFor'] as Map<String, dynamic>;
-    expect(grant.cookieHeaderFor(grant.uri), headers['master']);
-    expect(grant.cookieHeaderFor(_media.resolve('/hls/segments/$program/video/1.cmfv')), headers['video']);
-    expect(grant.cookieHeaderFor(_media.resolve('/hls/segments/$program/audio/1.cmfa')), headers['audio']);
+    expect(grant.cookieHeaderFor(grant.uri, now: at), headers['master']);
+    expect(grant.cookieHeaderFor(_media.resolve('/hls/segments/$program/video/1.cmfv'), now: at), headers['video']);
+    expect(grant.cookieHeaderFor(_media.resolve('/hls/segments/$program/audio/1.cmfa'), now: at), headers['audio']);
     expect(
-      grant.cookieHeaderFor(_media.resolve('/hls/keys/$program/${grant.uri.pathSegments[3]}/1.key')),
+      grant.cookieHeaderFor(_media.resolve('/hls/keys/$program/${grant.uri.pathSegments[3]}/1.key'), now: at),
       headers['key'],
     );
-    expect(grant.cookieHeaderFor(_media.resolve('/hls/keys/$program/1.key')), headers['sessionKey']);
-    expect(grant.cookieHeaderFor(grant.uri)!.split('; '), hasLength(3), reason: 'one set per request (403 otherwise)');
+    expect(grant.cookieHeaderFor(_media.resolve('/hls/keys/$program/1.key'), now: at), headers['sessionKey']);
+    expect(
+      grant.cookieHeaderFor(grant.uri, now: at)!.split('; '),
+      hasLength(3),
+      reason: 'one set per request (403 otherwise)',
+    );
   });
 
   group("3.x's watch parser", () {

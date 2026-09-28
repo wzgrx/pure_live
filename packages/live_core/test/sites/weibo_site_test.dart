@@ -3,7 +3,8 @@
 // list calls, nickname and exact search, room details for entry, refresh and
 // recording, the live status, streams read again for every playback,
 // cancellation, links and the error mapping. The synthetic cases port 3.x's
-// weibo_site_test.dart and weibo_application_test.dart.
+// weibo_site_test.dart and weibo_application_test.dart. Differences from
+// 3.x's frozen output name their upgrade (docs/UPGRADES.md, 18-x).
 import 'dart:async';
 import 'dart:convert';
 
@@ -16,7 +17,17 @@ import 'fixture.dart';
 
 const _root = '../../fixtures/weibo';
 const _detailUrl = 'https://weibo.com/l/!/2/wblive/room/show_pc_live.json';
-const _recommendUrl = 'https://weibo.com/l/!/2/wblive/pc_recommend/list.json?count=10&uid=';
+const _recommendUrl = 'https://weibo.com/l/!/2/wblive/pc_recommend/list.json?count=100&uid=';
+
+/// 3.x's snapshot request (18-1 asks count=100).
+const _legacyRecommendUrl = 'https://weibo.com/l/!/2/wblive/pc_recommend/list.json?count=10&uid=';
+
+/// 3.x's request list [requests] as the adapter sends it now: the snapshot
+/// with count=100 (18-1), the rest unchanged.
+List<Object?> _now(Object? requests) => [
+  for (final url in requests! as List)
+    if (url == _legacyRecommendUrl) _recommendUrl else url,
+];
 
 /// The samples' broadcasts.
 const _live = '1022:2321325347923495092258';
@@ -27,6 +38,9 @@ const _ended = '1022:2320508a306db1bc389510651e77d5feb4f90d';
 
 /// S03-live, the first card of S03-recommend.
 const _s03Live = '1022:2321325348206094712906';
+
+/// S04-shortlink-room, where the short link of S04-shortlink leads.
+const _shortLinkRoom = '1022:2321325347771573207158';
 
 /// 3.x's test broadcast.
 const _id = '1022:2321325000000000000000';
@@ -83,8 +97,18 @@ final class _Scripted implements LiveHttp {
     return await answer(request);
   }
 
+  /// As [send]: the short link session reads headers only.
   @override
-  Future<LiveStreamedResponse> open(LiveRequest request) async => throw UnsupportedError('open');
+  Future<LiveStreamedResponse> open(LiveRequest request) async {
+    final response = await send(request);
+    return LiveStreamedResponse(
+      status: response.status,
+      headers: response.headers,
+      body: Stream.value(response.bytes),
+      url: response.url,
+      contentLength: response.bytes.length,
+    );
+  }
 
   @override
   void close() {}
@@ -110,8 +134,9 @@ LiveResponse _response(LiveRequest request, Object body, {int status = 200}) =>
 
 typedef _Setup = ({WeiboSite site, ReplayHttp http});
 
-/// The site over [samples]; S01-recommend was recorded with `count=100`, so
-/// [anyCount] lets it answer the `count=10` request.
+/// The site over [samples]; S03-recommend was recorded with 3.x's
+/// `count=10`, so [anyCount] lets it answer the `count=100` request (18-1;
+/// S01-recommend was recorded with `count=100`).
 _Setup _setup(List<String> samples, {bool anyCount = false}) {
   final http = ReplayHttp.fixtures(_root, samples, ignoredQuery: {if (anyCount) 'count'});
   return (site: WeiboSite(http), http: http);
@@ -126,7 +151,7 @@ final Matcher _cancelled = throwsA(
 void main() {
   group('requests', () {
     test("3.x's headers on every request, redirects not followed", () async {
-      final setup = _setup(['S03-recommend', 'S03-live']);
+      final setup = _setup(['S03-recommend', 'S03-live'], anyCount: true);
       await setup.site.getDirectoryPage();
       final room = await setup.site.getRoomDetail(roomId: _s03Live);
       await setup.site.resolvePlayUrls(detail: room, quality: WeiboApi.original);
@@ -190,8 +215,8 @@ void main() {
       expect(setup.http.requests, isEmpty);
     });
 
-    test('the snapshot: count=10, one page; page 2 empty without a request; the area is the same (3.x)', () async {
-      final setup = _setup(['S03-recommend']);
+    test('the snapshot: count=100 (18-1), one page; page 2 empty without a request; the area is the same', () async {
+      final setup = _setup(['S03-recommend'], anyCount: true);
       final area = (await setup.site.getCategories(1, 30)).single.children.single;
       for (final (key, call) in [
         ('getDirectoryPage', setup.site.getDirectoryPage),
@@ -204,12 +229,14 @@ void main() {
         final result = want['result'] as Map<String, dynamic>;
         expect(page.rooms.map((room) => room.roomId), _legacyIds(result['rooms']), reason: key);
         expect((page.page, page.hasMore), (result['page'], result['hasMore']), reason: key);
-        expect(_urls(setup.http.requests), want['requests'], reason: key);
+        // changed: 18-1, count=100 instead of 3.x's count=10.
+        expect(_urls(setup.http.requests), _now(want['requests']), reason: key);
       }
+      expect((legacy['getDirectoryPage'] as Map<String, dynamic>)['requests'], [_legacyRecommendUrl]);
     });
 
     test("3.x's list calls: the whole snapshot whatever the page size; page 2 asks nothing", () async {
-      final setup = _setup(['S03-recommend']);
+      final setup = _setup(['S03-recommend'], anyCount: true);
       final area = (await setup.site.getCategories(1, 30)).single.children.single;
       final recommended = legacy['getRecommendRooms'] as Map<String, dynamic>;
       for (final (page, size) in [(1, 30), (1, 3), (2, 3)]) {
@@ -218,7 +245,7 @@ void main() {
         final rooms = await setup.site.getRecommendRooms(page: page, pageSize: size);
         final want = recommended[key] as Map<String, dynamic>;
         expect(rooms.map((room) => room.roomId), _legacyIds(want['result']), reason: key);
-        expect(_urls(setup.http.requests), want['requests'], reason: key);
+        expect(_urls(setup.http.requests), _now(want['requests']), reason: key);
       }
       final categoryRooms = legacy['getCategoryRooms'] as Map<String, dynamic>;
       for (final page in [1, 2]) {
@@ -227,16 +254,20 @@ void main() {
         final rooms = await setup.site.getCategoryRooms(area, page: page);
         final want = categoryRooms[key] as Map<String, dynamic>;
         expect(rooms.map((room) => room.roomId), _legacyIds(want['result']), reason: key);
-        expect(_urls(setup.http.requests), want['requests'], reason: key);
+        expect(_urls(setup.http.requests), _now(want['requests']), reason: key);
       }
     });
 
-    test('S01-recommend (recorded with count=100): all 51 cards, as 3.x parsed them', () async {
-      final setup = _setup(['S01-recommend'], anyCount: true);
+    test('S01-recommend (the count=100 request, 18-1): all 51 cards, as 3.x parsed them, live (18-2)', () async {
+      final setup = _setup(['S01-recommend']);
       final page = await setup.site.getDirectoryPage();
+      expect(_urls(setup.http.requests), [_recommendUrl]);
       final want = _result(_legacy('S01-recommend')['getDirectoryPage'])! as Map<String, dynamic>;
       expect(page.rooms.map((room) => room.roomId), _legacyIds(want['rooms']));
-      expect(page.rooms.every((room) => room.liveStatus == LiveStatus.unknown && !room.hasRealOnlineCount), isTrue);
+      expect(page.rooms, hasLength(51));
+      expect(page.rooms.every((room) => room.liveStatus == LiveStatus.live && !room.hasRealOnlineCount), isTrue);
+      expect(page.rooms.every((room) => room.restriction == null && room.startedAt == null), isTrue);
+      expect(await setup.site.getRecommendRooms(pageSize: 3), hasLength(51), reason: "3.x's page size not applied");
     });
 
     test('bad pages, sizes and areas are caller errors, without a request (3.x)', () async {
@@ -260,7 +291,7 @@ void main() {
 
     test('the cancellation goes with the request, and wins after the answer (3.x)', () async {
       final token = CancelToken();
-      final setup = _setup(['S03-recommend']);
+      final setup = _setup(['S03-recommend'], anyCount: true);
       await setup.site.getDirectoryPage(cancel: token);
       expect(identical(setup.http.requests.single.cancel, token), isTrue);
       await expectLater(setup.site.getDirectoryPage(cancel: CancelToken()..cancel()), _cancelled);
@@ -277,7 +308,7 @@ void main() {
 
   group('search', () {
     test('keywords filter the snapshot nicknames, as 3.x (one request each)', () async {
-      for (final (name, anyCount) in [('S03-recommend', false), ('S01-recommend', true)]) {
+      for (final (name, anyCount) in [('S03-recommend', true), ('S01-recommend', false)]) {
         final setup = _setup([name], anyCount: anyCount);
         final searches = _legacy(name)['searchRooms'] as Map<String, dynamic>;
         for (final keyword in ['卫视', '学长', '发布', 'vortex', 'bang', '_', '小', ' 卫视 ', 'zxqvnoresultfixture']) {
@@ -350,7 +381,7 @@ void main() {
       final setup = _setup([]);
       for (final input in [
         'https://weibo.com/u/101',
-        'https://t.cn/fixture',
+        'https://t.cn/fixture-link',
         'https://weibo.com/l/wblive/p/show/$_id/..',
         '   ',
       ]) {
@@ -368,7 +399,7 @@ void main() {
     });
 
     test('pre-cancelled searches send nothing; the cancellation reaches the exact lookup (3.x)', () async {
-      final setup = _setup(['S03-recommend', 'S02-live']);
+      final setup = _setup(['S03-recommend', 'S02-live'], anyCount: true);
       final cancelled = CancelToken()..cancel();
       await expectLater(setup.site.searchRoomsCancellable(_live, cancel: cancelled), _cancelled);
       await expectLater(setup.site.searchRoomsCancellable('卫视', cancel: cancelled), _cancelled);
@@ -410,8 +441,15 @@ void main() {
           final want = legacy[key] as Map<String, dynamic>;
           final result = want['result'] as Map<String, dynamic>;
           expect((rooms[index].roomId, rooms[index].userId), (result['roomId'], result['userId']), reason: key);
-          expect(rooms[index].liveStatus!.index, result['liveStatus'], reason: key);
+          // changed: 18-4, the friends-only broadcast is live (3.x: unknown).
+          expect(
+            rooms[index].liveStatus!.index,
+            name == 'S02-watch-limit' ? LiveStatus.live.index : result['liveStatus'],
+            reason: key,
+          );
           expect(rooms[index].data, isA<WeiboRoomData>());
+          expect(rooms[index].restriction, name == 'S02-watch-limit' ? LiveRestriction.private : LiveRestriction.none);
+          expect(rooms[index].startedAt, rooms[index].isLiveNow ? isNotNull : isNull);
         }
         expect(_urls(setup.http.requests), everyElement(_detailOf(id)));
         expect(setup.http.requests, hasLength(3));
@@ -419,23 +457,43 @@ void main() {
     }
 
     test('a card refreshed by its detail keeps its identity and takes the detail (mergeFrom)', () async {
-      final setup = _setup(['S03-recommend', 'S03-live']);
+      final setup = _setup(['S03-recommend', 'S03-live'], anyCount: true);
       final card = (await setup.site.getDirectoryPage()).rooms.first;
-      expect((card.roomId, card.liveStatus, card.avatar), (_s03Live, LiveStatus.unknown, ''));
+      expect((card.roomId, card.liveStatus, card.avatar), (_s03Live, LiveStatus.live, ''));
       final merged = card.mergeFrom(await setup.site.getRoomDetailForRefresh(roomId: card.roomId));
       expect(merged.identityKey, 'weibo:$_s03Live');
       expect((merged.title, merged.nick, merged.liveStatus), ('惑星VORTEX四周年吃播', '惑星VORTEX', LiveStatus.live));
-      expect(merged.avatar, startsWith('https://tvax1.sinaimg.cn/'));
+      expect(merged.avatar, allOf(startsWith('https://tvax1.sinaimg.cn/'), contains('.1024/')));
       expect(merged.userId, '6596154111');
+      expect((merged.restriction, merged.startedAt), (LiveRestriction.none, DateTime.utc(2026, 9, 28, 11, 36, 3)));
       expect(setup.http.requests, hasLength(2));
     });
 
-    test('S02-ended: an older id 3.x refused opens; status 5 stays unknown (3.x mapped any other status so)', () async {
+    test('S02-ended: an older id 3.x refused opens; status 5 is offline (18-3)', () async {
       final setup = _setup(['S02-ended']);
       final room = await setup.site.getRoomDetail(roomId: _ended);
-      expect((room.liveStatus, room.title), (LiveStatus.unknown, '泸县地震救援现场'));
+      expect((room.liveStatus, room.title), (LiveStatus.offline, '泸县地震救援现场'));
       await expectLater(setup.site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
       expect(setup.http.requests, hasLength(1));
+    });
+
+    test('a live follow that ended: the refresh says offline and drops the start and restriction (M2.1)', () async {
+      var ended = false;
+      final http = _Scripted((request) {
+        final answer = _answer(status: ended ? 5 : 1);
+        (answer['data'] as Map)['startTime'] = 1790595363000;
+        return _response(request, answer);
+      });
+      final site = WeiboSite(http);
+      final live = await site.getRoomDetailForRefresh(roomId: _id);
+      expect((live.liveStatus, live.restriction), (LiveStatus.live, LiveRestriction.none));
+      expect(live.startedAt, DateTime.utc(2026, 9, 28, 11, 36, 3));
+      ended = true;
+      final merged = live.mergeFrom(await site.getRoomDetailForRefresh(roomId: _id));
+      expect(
+        (merged.liveStatus, merged.restriction, merged.startedAt, merged.followGroup),
+        (LiveStatus.offline, null, null, FollowGroup.offline),
+      );
     });
 
     test('an id that is no broadcast id is NotFound without a request; so is error_code 27401', () async {
@@ -448,17 +506,23 @@ void main() {
       expect(setup.http.requests, hasLength(1));
     });
 
-    test('the live status: live, a replay not live, other states no answer (3.x threw)', () async {
+    test('the live status: live (restricted too), a replay or ended broadcast not live, others no answer', () async {
       final setup = _setup(['S02-live', 'S02-ended-replay', 'S02-watch-limit', 'S02-ended']);
       expect(await setup.site.getLiveStatus(roomId: _live), _result(_legacy('S02-live')['getLiveStatus']));
       expect(
         await setup.site.getLiveStatus(roomId: _endedReplay),
         _result(_legacy('S02-ended-replay')['getLiveStatus']),
       );
-      await expectLater(setup.site.getLiveStatus(roomId: _watchLimit), throwsA(isA<NeedsLogin>()));
-      await expectLater(setup.site.getLiveStatus(roomId: _ended), throwsA(isA<StreamUnavailable>()));
+      // changed: 18-4, 3.x's access failure; the broadcast is on air.
+      expect(_result(_legacy('S02-watch-limit')['getLiveStatus']), {
+        'throws': 'WeiboException',
+        'message': 'Weibo access',
+      });
+      expect(await setup.site.getLiveStatus(roomId: _watchLimit), isTrue);
+      // changed: 18-3, 3.x refused the id (M4.18: no answer for status 5).
+      expect(await setup.site.getLiveStatus(roomId: _ended), isFalse);
       final disabled = _Scripted((request) => _response(request, _answer(playSwitch: 0)));
-      await expectLater(WeiboSite(disabled).getLiveStatus(roomId: _id), throwsA(isA<StreamUnavailable>()));
+      expect(await WeiboSite(disabled).getLiveStatus(roomId: _id), isTrue, reason: 'on air, playback switched off');
       final unknown = _Scripted((request) => _response(request, _answer(status: 99)));
       await expectLater(WeiboSite(unknown).getLiveStatus(roomId: _id), throwsA(isA<StreamUnavailable>()));
       final failing = _Scripted((request) => _response(request, '', status: 503));
@@ -542,6 +606,7 @@ void main() {
       for (final quality in [
         const LivePlayQuality(quality: 'fake', id: 'fake', data: ['https://evil.test/a.flv']),
         const LivePlayQuality(quality: '原画', id: 'origin'),
+        WeiboApi.replay,
       ]) {
         await expectLater(
           site.resolvePlayUrls(detail: room, quality: quality),
@@ -552,25 +617,109 @@ void main() {
       expect(http.requests, hasLength(1));
     });
 
-    test('a room whose detail does not play is refused before any request', () async {
-      final setup = _setup(['S02-watch-limit', 'S02-ended-replay']);
+    test('a room whose detail does not play is refused before any request, with its reason', () async {
+      final setup = _setup(['S02-watch-limit', 'S02-ended']);
       final restricted = await setup.site.getRoomDetail(roomId: _watchLimit);
-      final replay = await setup.site.getRoomDetail(roomId: _endedReplay);
+      final ended = await setup.site.getRoomDetail(roomId: _ended);
       setup.http.requests.clear();
-      await expectLater(setup.site.getPlayQualities(detail: restricted), throwsA(isA<NeedsLogin>()));
+      // changed: 3.x's access failure (M4.18: NeedsLogin) is StreamUnavailable
+      // with the kind (18-4, M2.1).
+      final friendsOnly = isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('private'));
+      await expectLater(setup.site.getPlayQualities(detail: restricted), throwsA(friendsOnly));
       await expectLater(
         setup.site.resolvePlayUrls(detail: restricted, quality: WeiboApi.original),
-        throwsA(isA<NeedsLogin>()),
+        throwsA(friendsOnly),
       );
-      // changed: 3.x returned no qualities for a replay; the reason is given.
-      await expectLater(setup.site.getPlayQualities(detail: replay), throwsA(isA<StreamUnavailable>()));
+      await expectLater(setup.site.getPlayQualities(detail: ended), throwsA(isA<StreamUnavailable>()));
+      final stored = LiveRoom(platform: 'weibo', roomId: _id, liveStatus: LiveStatus.offline);
+      await expectLater(setup.site.getPlayQualities(detail: stored), throwsA(isA<StreamUnavailable>()));
       await expectLater(
-        setup.site.resolvePlayUrlsForRecovery(detail: replay, quality: WeiboApi.original),
+        setup.site.resolvePlayUrls(detail: stored, quality: WeiboApi.original),
         throwsA(isA<StreamUnavailable>()),
       );
-      final stored = LiveRoom(platform: 'weibo', roomId: _id, liveStatus: LiveStatus.replay);
-      await expectLater(setup.site.getPlayQualities(detail: stored), throwsA(isA<StreamUnavailable>()));
       expect(setup.http.requests, isEmpty);
+    });
+
+    test('S04-self-only-replay: a private replay offers nothing, with the platform text', () async {
+      final setup = _setup(['S04-self-only-replay']);
+      final room = await setup.site.getRoomDetail(roomId: _watchLimit);
+      expect((room.liveStatus, room.restriction), (LiveStatus.replay, LiveRestriction.private));
+      await expectLater(
+        setup.site.getPlayQualities(detail: room),
+        throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('主播自己'))),
+      );
+      await expectLater(
+        setup.site.resolvePlayUrls(detail: room, quality: WeiboApi.replay),
+        throwsA(isA<StreamUnavailable>()),
+      );
+      expect(setup.http.requests, hasLength(1));
+    });
+
+    test('S02-ended-replay (18-5): the replay offers 原画 and plays its recording without another request', () async {
+      final setup = _setup(['S02-ended-replay']);
+      final room = await setup.site.getRoomDetail(roomId: _endedReplay);
+      final legacy = _legacy('S02-ended-replay');
+      // changed: 3.x offered no quality and refused the URLs.
+      expect(legacy['getPlayQualites'], isEmpty);
+      expect(_result(legacy['getPlayUrls']), {'throws': 'WeiboException', 'message': 'Weibo notLive'});
+      expect(await setup.site.getPlayQualities(detail: room), [WeiboApi.replay]);
+      const recording = 'https://live.video.weibocdn.com/5269875505238409_wb1080avc_index.m3u8';
+      for (final resolve in [setup.site.resolvePlayUrls, setup.site.resolvePlayUrlsForRecovery]) {
+        final resolution = await resolve(detail: room, quality: WeiboApi.replay);
+        expect(resolution.urls, [recording]);
+        expect(resolution.appliedQualityData, 'replay');
+        final line = resolution.lines.single;
+        expect((line.format, line.codec, line.lease), (StreamFormat.hls, 'avc', null));
+        expect(line.headers, isEmpty);
+      }
+      expect(await setup.site.getPlayUrls(detail: room, quality: WeiboApi.replay), [recording]);
+      expect(setup.http.requests, hasLength(1), reason: 'the recording came with the detail');
+      await expectLater(
+        setup.site.resolvePlayUrls(detail: room, quality: WeiboApi.original),
+        throwsA(isA<StreamUnavailable>()),
+        reason: 'the live quality of an ended broadcast',
+      );
+      expect(setup.http.requests, hasLength(1));
+    });
+
+    test('a stored replay without detail data offers 原画 and reads the detail once to play', () async {
+      final setup = _setup(['S02-ended-replay']);
+      final stored = LiveRoom(
+        platform: 'weibo',
+        roomId: _endedReplay,
+        userId: '5371906414',
+        liveStatus: LiveStatus.replay,
+      );
+      expect(await setup.site.getPlayQualities(detail: stored), [WeiboApi.replay]);
+      expect(setup.http.requests, isEmpty);
+      final resolution = await setup.site.resolvePlayUrls(detail: stored, quality: WeiboApi.replay);
+      expect(resolution.urls.single, endsWith('_wb1080avc_index.m3u8'));
+      expect(_urls(setup.http.requests), [_detailOf(_endedReplay)]);
+      await expectLater(
+        setup.site.resolvePlayUrls(detail: stored, quality: WeiboApi.original),
+        throwsA(isA<StreamUnavailable>()),
+      );
+    });
+
+    test('a live broadcast that ended while playing: recovery reports it, never switches to the replay', () async {
+      var ended = false;
+      final http = _Scripted((request) {
+        final answer = _answer(status: ended ? 3 : 1);
+        if (ended) (answer['data'] as Map)['replay_origin_url'] = 'http://media.example.test/replay_index.m3u8';
+        return _response(request, answer);
+      });
+      final site = WeiboSite(http);
+      final room = await site.getRoomDetail(roomId: _id);
+      ended = true;
+      await expectLater(
+        site.resolvePlayUrlsForRecovery(detail: room, quality: WeiboApi.original),
+        throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('ended'))),
+      );
+      final replay = await site.getRoomDetail(roomId: _id);
+      expect((await site.resolvePlayUrls(detail: replay, quality: WeiboApi.replay)).urls, [
+        'https://media.example.test/replay_index.m3u8',
+      ]);
+      expect(http.requests, hasLength(3));
     });
 
     for (final mode in ['restricted', 'disabled', 'unknown', 'replay', 'empty-media']) {
@@ -595,13 +744,21 @@ void main() {
         fresh = true;
         await expectLater(
           site.getPlayUrls(detail: room, quality: WeiboApi.original),
-          throwsA(mode == 'restricted' ? isA<NeedsLogin>() : isA<StreamUnavailable>()),
+          throwsA(isA<StreamUnavailable>()),
         );
         final again = await site.getRoomDetail(roomId: _id);
-        expect(
-          again.liveStatus,
-          mode == 'replay' ? LiveStatus.replay : (mode == 'empty-media' ? LiveStatus.live : LiveStatus.unknown),
-        );
+        // changed: 18-4, restricted and switched-off broadcasts on air are
+        // live (3.x: unknown).
+        expect(again.liveStatus, switch (mode) {
+          'replay' => LiveStatus.replay,
+          'unknown' => LiveStatus.unknown,
+          _ => LiveStatus.live,
+        });
+        expect(again.restriction, switch (mode) {
+          'restricted' => LiveRestriction.appOnly,
+          'unknown' => null,
+          _ => LiveRestriction.unplayable,
+        });
         expect(http.requests, hasLength(3));
       });
     }
@@ -616,6 +773,112 @@ void main() {
         'https://media.example.test/stream_wb720avc.flv?token=fixture',
       ]);
       expect(http.requests, hasLength(1));
+    });
+  });
+
+  group('short links (18-9)', () {
+    test('a t.cn link in a share text is followed once, without the target; the room is its broadcast', () async {
+      final setup = _setup(['S04-shortlink']);
+      final site = setup.site;
+      final parser = LinkParser(SiteRegistry({'weibo': () => site}), setup.http);
+      const text = '我在#微博直播#开播啦，快来看看吧 http://t.cn/AXWbinBd 候鸟书的微博直播';
+      expect(site.needsResolving('http://t.cn/AXWbinBd'), isTrue);
+      expect(site.roomIdFromUrl('http://t.cn/AXWbinBd'), isNull);
+      expect(parser.containsSupportedLink(text), isTrue);
+      expect(await parser.parse(text), const RoomLink('weibo', _shortLinkRoom));
+      final request = setup.http.requests.single;
+      expect(request.url.toString(), 'https://t.cn/AXWbinBd');
+      expect(request.followRedirects, isFalse);
+      expect(request.headers, WeiboApi.headers);
+    });
+
+    test('an unknown code (weibo.com/sorry) leads nowhere; so does an answer without a redirect', () async {
+      final setup = _setup(['S04-shortlink-missing']);
+      final parser = LinkParser(SiteRegistry({'weibo': () => setup.site}), setup.http);
+      expect(await parser.parse('https://t.cn/zzzzzzzz'), isNull);
+      expect(setup.http.requests, hasLength(1));
+      final page = _Scripted((request) => _response(request, '<html>t.cn</html>'));
+      expect(
+        await WeiboSite(page)
+            .resolveUrl('https://t.cn/AXWbinBd', ShortLinkSession(page, timeout: const Duration(seconds: 5))),
+        isNull,
+      );
+    });
+
+    test('a t.cn link to another site is handed back to every platform', () async {
+      final http = _Scripted(
+        (request) => LiveResponse(
+          status: 302,
+          headers: const {
+            'location': ['https://live.bilibili.com/22603245'],
+          },
+          bytes: const [],
+          url: request.url,
+        ),
+      );
+      final resolution = await WeiboSite(http)
+          .resolveUrl('http://t.cn/A6bili', ShortLinkSession(http, timeout: const Duration(seconds: 5)));
+      expect(
+        resolution,
+        isA<LinkRedirect>().having((link) => '${link.target}', 'target', 'https://live.bilibili.com/22603245'),
+      );
+      expect(http.requests.single.url.toString(), 'https://t.cn/A6bili');
+    });
+
+    test('search: a t.cn link finds its broadcast with two requests; nothing for other targets', () async {
+      final setup = _setup(['S04-shortlink', 'S04-shortlink-room', 'S04-shortlink-missing']);
+      final rooms = await setup.site.searchRooms('http://t.cn/AXWbinBd');
+      expect(
+        (rooms.single.roomId, rooms.single.nick, rooms.single.liveStatus),
+        (_shortLinkRoom, '候鸟书', LiveStatus.offline),
+      );
+      expect(_urls(setup.http.requests), ['https://t.cn/AXWbinBd', _detailOf(_shortLinkRoom)]);
+      setup.http.requests.clear();
+      expect(await setup.site.searchRooms('https://t.cn/zzzzzzzz'), isEmpty);
+      expect(_urls(setup.http.requests), ['https://t.cn/zzzzzzzz']);
+      for (final (status, location) in [(302, 'https://live.bilibili.com/1'), (200, null), (404, null)]) {
+        final http = _Scripted(
+          (request) => LiveResponse(
+            status: status,
+            headers: {
+              'location': [?location],
+            },
+            bytes: const [],
+            url: request.url,
+          ),
+        );
+        expect(await WeiboSite(http).searchRooms('https://t.cn/AXWbinBd'), isEmpty, reason: '$status');
+        expect(http.requests, hasLength(1));
+      }
+      for (final (status, matcher) in [
+        (403, isA<RiskControl>()),
+        (429, isA<RateLimited>()),
+        (503, isA<NetworkFailure>()),
+      ]) {
+        final http = _Scripted((request) => _response(request, '', status: status));
+        await expectLater(WeiboSite(http).searchRooms('https://t.cn/AXWbinBd'), throwsA(matcher), reason: '$status');
+      }
+      await expectLater(
+        WeiboSite(_Failing(TransportReason.timeout)).searchRooms('https://t.cn/AXWbinBd'),
+        throwsA(isA<NetworkFailure>()),
+      );
+    });
+
+    test('search: a t.cn link to a broadcast that does not exist finds nothing', () async {
+      final http = _Scripted(
+        (request) => request.url.host == 't.cn'
+            ? LiveResponse(
+                status: 302,
+                headers: const {
+                  'location': ['https://weibo.com/l/wblive/p/show/$_notFound'],
+                },
+                bytes: const [],
+                url: request.url,
+              )
+            : _response(request, Fixture.load('weibo', 'S02-notfound').body),
+      );
+      expect(await WeiboSite(http).searchRooms('https://t.cn/AXWbinBd'), isEmpty);
+      expect(_urls(http.requests), ['https://t.cn/AXWbinBd', _detailOf(_notFound)]);
     });
   });
 
@@ -667,7 +930,7 @@ void main() {
       '$watch/%2e',
       watch.replaceFirst('/p/show/', '/p/x/../show/'),
       watch.replaceFirst('1022:', '1022%253a'),
-      'https://t.cn/fixture',
+      'https://t.cn/fixture-link',
       'https://weibo.com/l/wblive/app/h5_compatible?live_id=$_id',
     ]) {
       test('not salvaged into a room: $raw (3.x)', () async {

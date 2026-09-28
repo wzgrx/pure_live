@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "platform": "steambroadcast",
+  "sample": "S01-directory-p2",
+  "capturedAt": "2026-09-27T17:32:55.750015Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=2&broadcastsoffset=10&numperpage=10",
+    "headers": {
+      "X-Requested-With": "XMLHttpRequest",
+      "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+      "Accept": "text/html, */*; q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "public,max-age=60",
+      "last-modified": "Sun, 27 Sep 2026 17:32:00 GMT",
+      "date": "Sun, 27 Sep 2026 17:32:56 GMT",
+      "vary": "Accept-Encoding",
+      "content-encoding": "gzip",
+      "content-length": "2130",
+      "content-type": "text/html; charset=UTF-8",
+      "x-frame-options": "SAMEORIGIN",
+      "content-security-policy": "default-src blob: data: https: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://community.fastly.steamstatic.com/ https://cdn.fastly.steamstatic.com/steamcommunity/public/assets/ https://api.steampowered.com/ https://recaptcha.net https://www.google.com/recaptcha/ https://www.gstatic.cn/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.youtube.com/ https://s.ytimg.com; object-src 'none'; connect-src 'self' https://community.fastly.steamstatic.com/ https://store.steampowered.com/ https://checkout.steampowered.com/ wss://community.steam-api.com/websocket/ https://api.steampowered.com/ https://login.steampowered.com/ https://help.steampowered.com/ https://steam.tv/ https://steamcommunity.com/ https://*.valvesoftware.com https://*.steambeta.net https://*.discovery.beta.steamserver.net https://*.steamcontent.com https://steambroadcast.akamaized.net https://steambroadcast-test.akamaized.net https://broadcast.st.dl.eccdnx.com https://lv.queniujq.cn https://steambroadcastchat.akamaized.net http://127.0.0.1:27060 ws://127.0.0.1:27060 https://steamvideo-a.akamaihd.net/; frame-src 'self' steam: https://store.steampowered.com/ https://help.steampowered.com/ https://login.steampowered.com/ https://checkout.steampowered.com/ https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://sketchfab.com https://player.vimeo.com https://medal.tv https://www.google.com/recaptcha/ https://recaptcha.net/recaptcha/; frame-ancestors 'self' https://steamloopback.host ;",
+      "server": "nginx",
+      "expires": "Sun, 27 Sep 2026 17:33:56 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "aaf2e696db41bd4a1f37df3e2640805413f6e6083d40db7f50dc3915284dff0c",
+    "length": 19389
+  },
+  "body": "body.html",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

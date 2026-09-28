@@ -1,0 +1,2826 @@
+{
+  "generator": "SteamBroadcastSite.getCategores + getDirectoryPage + getRecommendRooms + getCategoryRooms + searchRoomsCancellable (with S01-directory-p2, S05-*, S04-mpd-offline) + SteamBroadcastApi.parseDirectoryHtml + parseViewerCount + SteamBroadcastLink",
+  "value": {
+    "getCategores": {
+      "result": [
+        {
+          "id": "steambroadcast",
+          "name": "Steam Broadcasts",
+          "children": [
+            {
+              "platform": "steambroadcast",
+              "areaType": "community",
+              "typeName": "Steam Broadcasts",
+              "areaId": "trending",
+              "areaName": "热门社区直播",
+              "areaPic": null,
+              "shortName": null
+            }
+          ]
+        }
+      ],
+      "requests": []
+    },
+    "getCategores(page: 2)": {
+      "result": 0,
+      "requests": []
+    },
+    "getCategores(pageSize: 0)": {
+      "result": 0,
+      "requests": []
+    },
+    "parseDirectoryHtml": {
+      "rooms": [
+        {
+          "steamId": "76561199485215572",
+          "broadcaster": "PWM Game Manager",
+          "title": "NTE: Neverness to Everness",
+          "game": "NTE: Neverness to Everness",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+          "avatar": "",
+          "currentViewers": 6763,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199546949051",
+          "broadcaster": "ArtDock",
+          "title": "SOS OPS!",
+          "game": "SOS OPS!",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+          "avatar": "",
+          "currentViewers": 4618,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561198843011284",
+          "broadcaster": "SCS Software",
+          "title": "Euro Truck Simulator 2",
+          "game": "Euro Truck Simulator 2",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+          "avatar": "",
+          "currentViewers": 3840,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199203486555",
+          "broadcaster": "tinyStreamer18",
+          "title": "Graveyard Keeper 2",
+          "game": "Graveyard Keeper 2",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+          "avatar": "",
+          "currentViewers": 3698,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199646547969",
+          "broadcaster": "Active Matter",
+          "title": "Active Matter",
+          "game": "Active Matter",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+          "avatar": "",
+          "currentViewers": 2765,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199799018508",
+          "broadcaster": "metaterplays",
+          "title": "Scam With Your Friends",
+          "game": "Scam With Your Friends",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+          "avatar": "",
+          "currentViewers": 2479,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199886953034",
+          "broadcaster": "TARK",
+          "title": "BOMBANANA!",
+          "game": "BOMBANANA!",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+          "avatar": "",
+          "currentViewers": 2069,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561197998179700",
+          "broadcaster": "Nathillien",
+          "title": "Warhammer 40,000: Rogue Trader",
+          "game": "Warhammer 40,000: Rogue Trader",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+          "avatar": "",
+          "currentViewers": 1823,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199683996121",
+          "broadcaster": "livecontentsteam12",
+          "title": "Stellaris",
+          "game": "Stellaris",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+          "avatar": "",
+          "currentViewers": 1634,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199872447934",
+          "broadcaster": "UbiThibs",
+          "title": "Tom Clancy's Rainbow Six Siege",
+          "game": "Tom Clancy's Rainbow Six Siege",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+          "avatar": "",
+          "currentViewers": 1461,
+          "state": "live",
+          "master": null
+        }
+      ],
+      "hasMore": true
+    },
+    "parseDirectoryHtml(page: 2)": {
+      "rooms": [
+        {
+          "steamId": "76561199485215572",
+          "broadcaster": "PWM Game Manager",
+          "title": "NTE: Neverness to Everness",
+          "game": "NTE: Neverness to Everness",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+          "avatar": "",
+          "currentViewers": 6763,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199546949051",
+          "broadcaster": "ArtDock",
+          "title": "SOS OPS!",
+          "game": "SOS OPS!",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+          "avatar": "",
+          "currentViewers": 4618,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561198843011284",
+          "broadcaster": "SCS Software",
+          "title": "Euro Truck Simulator 2",
+          "game": "Euro Truck Simulator 2",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+          "avatar": "",
+          "currentViewers": 3840,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199203486555",
+          "broadcaster": "tinyStreamer18",
+          "title": "Graveyard Keeper 2",
+          "game": "Graveyard Keeper 2",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+          "avatar": "",
+          "currentViewers": 3698,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199646547969",
+          "broadcaster": "Active Matter",
+          "title": "Active Matter",
+          "game": "Active Matter",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+          "avatar": "",
+          "currentViewers": 2765,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199799018508",
+          "broadcaster": "metaterplays",
+          "title": "Scam With Your Friends",
+          "game": "Scam With Your Friends",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+          "avatar": "",
+          "currentViewers": 2479,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199886953034",
+          "broadcaster": "TARK",
+          "title": "BOMBANANA!",
+          "game": "BOMBANANA!",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+          "avatar": "",
+          "currentViewers": 2069,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561197998179700",
+          "broadcaster": "Nathillien",
+          "title": "Warhammer 40,000: Rogue Trader",
+          "game": "Warhammer 40,000: Rogue Trader",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+          "avatar": "",
+          "currentViewers": 1823,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199683996121",
+          "broadcaster": "livecontentsteam12",
+          "title": "Stellaris",
+          "game": "Stellaris",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+          "avatar": "",
+          "currentViewers": 1634,
+          "state": "live",
+          "master": null
+        },
+        {
+          "steamId": "76561199872447934",
+          "broadcaster": "UbiThibs",
+          "title": "Tom Clancy's Rainbow Six Siege",
+          "game": "Tom Clancy's Rainbow Six Siege",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+          "avatar": "",
+          "currentViewers": 1461,
+          "state": "live",
+          "master": null
+        }
+      ],
+      "hasMore": false
+    },
+    "getDirectoryPage": {
+      "recommend:1": {
+        "result": {
+          "rooms": [
+            {
+              "roomId": "76561199485215572",
+              "userId": "76561199485215572",
+              "title": "NTE: Neverness to Everness",
+              "nick": "PWM Game Manager",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+              "area": "NTE: Neverness to Everness",
+              "watching": "6763",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "6763",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+            },
+            {
+              "roomId": "76561199546949051",
+              "userId": "76561199546949051",
+              "title": "SOS OPS!",
+              "nick": "ArtDock",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+              "area": "SOS OPS!",
+              "watching": "4618",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "4618",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199546949051",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199546949051"
+            },
+            {
+              "roomId": "76561198843011284",
+              "userId": "76561198843011284",
+              "title": "Euro Truck Simulator 2",
+              "nick": "SCS Software",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+              "area": "Euro Truck Simulator 2",
+              "watching": "3840",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "3840",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561198843011284",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561198843011284"
+            },
+            {
+              "roomId": "76561199203486555",
+              "userId": "76561199203486555",
+              "title": "Graveyard Keeper 2",
+              "nick": "tinyStreamer18",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+              "area": "Graveyard Keeper 2",
+              "watching": "3698",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "3698",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199203486555",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199203486555"
+            },
+            {
+              "roomId": "76561199646547969",
+              "userId": "76561199646547969",
+              "title": "Active Matter",
+              "nick": "Active Matter",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+              "area": "Active Matter",
+              "watching": "2765",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "2765",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199646547969",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199646547969"
+            },
+            {
+              "roomId": "76561199799018508",
+              "userId": "76561199799018508",
+              "title": "Scam With Your Friends",
+              "nick": "metaterplays",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+              "area": "Scam With Your Friends",
+              "watching": "2479",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "2479",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199799018508",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199799018508"
+            },
+            {
+              "roomId": "76561199886953034",
+              "userId": "76561199886953034",
+              "title": "BOMBANANA!",
+              "nick": "TARK",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+              "area": "BOMBANANA!",
+              "watching": "2069",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "2069",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199886953034",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199886953034"
+            },
+            {
+              "roomId": "76561197998179700",
+              "userId": "76561197998179700",
+              "title": "Warhammer 40,000: Rogue Trader",
+              "nick": "Nathillien",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+              "area": "Warhammer 40,000: Rogue Trader",
+              "watching": "1823",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "1823",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561197998179700",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561197998179700"
+            },
+            {
+              "roomId": "76561199683996121",
+              "userId": "76561199683996121",
+              "title": "Stellaris",
+              "nick": "livecontentsteam12",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+              "area": "Stellaris",
+              "watching": "1634",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "1634",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199683996121",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199683996121"
+            },
+            {
+              "roomId": "76561199872447934",
+              "userId": "76561199872447934",
+              "title": "Tom Clancy's Rainbow Six Siege",
+              "nick": "UbiThibs",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+              "area": "Tom Clancy's Rainbow Six Siege",
+              "watching": "1461",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "1461",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199872447934",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199872447934"
+            }
+          ],
+          "page": 1,
+          "hasMore": true
+        },
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "trending:1": {
+        "result": {
+          "rooms": [
+            {
+              "roomId": "76561199485215572",
+              "userId": "76561199485215572",
+              "title": "NTE: Neverness to Everness",
+              "nick": "PWM Game Manager",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+              "area": "NTE: Neverness to Everness",
+              "watching": "6763",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "6763",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+            },
+            {
+              "roomId": "76561199546949051",
+              "userId": "76561199546949051",
+              "title": "SOS OPS!",
+              "nick": "ArtDock",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+              "area": "SOS OPS!",
+              "watching": "4618",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "4618",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199546949051",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199546949051"
+            },
+            {
+              "roomId": "76561198843011284",
+              "userId": "76561198843011284",
+              "title": "Euro Truck Simulator 2",
+              "nick": "SCS Software",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+              "area": "Euro Truck Simulator 2",
+              "watching": "3840",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "3840",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561198843011284",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561198843011284"
+            },
+            {
+              "roomId": "76561199203486555",
+              "userId": "76561199203486555",
+              "title": "Graveyard Keeper 2",
+              "nick": "tinyStreamer18",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+              "area": "Graveyard Keeper 2",
+              "watching": "3698",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "3698",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199203486555",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199203486555"
+            },
+            {
+              "roomId": "76561199646547969",
+              "userId": "76561199646547969",
+              "title": "Active Matter",
+              "nick": "Active Matter",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+              "area": "Active Matter",
+              "watching": "2765",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "2765",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199646547969",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199646547969"
+            },
+            {
+              "roomId": "76561199799018508",
+              "userId": "76561199799018508",
+              "title": "Scam With Your Friends",
+              "nick": "metaterplays",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+              "area": "Scam With Your Friends",
+              "watching": "2479",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "2479",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199799018508",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199799018508"
+            },
+            {
+              "roomId": "76561199886953034",
+              "userId": "76561199886953034",
+              "title": "BOMBANANA!",
+              "nick": "TARK",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+              "area": "BOMBANANA!",
+              "watching": "2069",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "2069",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199886953034",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199886953034"
+            },
+            {
+              "roomId": "76561197998179700",
+              "userId": "76561197998179700",
+              "title": "Warhammer 40,000: Rogue Trader",
+              "nick": "Nathillien",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+              "area": "Warhammer 40,000: Rogue Trader",
+              "watching": "1823",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "1823",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561197998179700",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561197998179700"
+            },
+            {
+              "roomId": "76561199683996121",
+              "userId": "76561199683996121",
+              "title": "Stellaris",
+              "nick": "livecontentsteam12",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+              "area": "Stellaris",
+              "watching": "1634",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "1634",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199683996121",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199683996121"
+            },
+            {
+              "roomId": "76561199872447934",
+              "userId": "76561199872447934",
+              "title": "Tom Clancy's Rainbow Six Siege",
+              "nick": "UbiThibs",
+              "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+              "cover": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+              "area": "Tom Clancy's Rainbow Six Siege",
+              "watching": "1461",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "",
+              "onlineViewers": "1461",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "steambroadcast",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://steamcommunity.com",
+                "referer": "https://steamcommunity.com/broadcast/watch/76561199872447934",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+              },
+              "link": "https://steamcommunity.com/broadcast/watch/76561199872447934"
+            }
+          ],
+          "page": 1,
+          "hasMore": true
+        },
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "recommend:0": {
+        "result": {
+          "rooms": [],
+          "page": 0,
+          "hasMore": false
+        },
+        "requests": []
+      },
+      "recommend:10001": {
+        "result": {
+          "throws": "SteamBroadcastException.schema",
+          "message": "Steam Broadcast schema"
+        },
+        "requests": []
+      },
+      "otherArea:1": {
+        "result": {
+          "throws": "SteamBroadcastException.identity",
+          "message": "Steam Broadcast identity"
+        },
+        "requests": []
+      }
+    },
+    "getRecommendRooms": {
+      "page 1 size 30": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "NTE: Neverness to Everness",
+            "nick": "PWM Game Manager",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "area": "NTE: Neverness to Everness",
+            "watching": "6763",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "6763",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          },
+          {
+            "roomId": "76561199546949051",
+            "userId": "76561199546949051",
+            "title": "SOS OPS!",
+            "nick": "ArtDock",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "area": "SOS OPS!",
+            "watching": "4618",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "4618",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199546949051",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199546949051"
+          },
+          {
+            "roomId": "76561198843011284",
+            "userId": "76561198843011284",
+            "title": "Euro Truck Simulator 2",
+            "nick": "SCS Software",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+            "area": "Euro Truck Simulator 2",
+            "watching": "3840",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "3840",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561198843011284",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561198843011284"
+          },
+          {
+            "roomId": "76561199203486555",
+            "userId": "76561199203486555",
+            "title": "Graveyard Keeper 2",
+            "nick": "tinyStreamer18",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+            "area": "Graveyard Keeper 2",
+            "watching": "3698",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "3698",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199203486555",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199203486555"
+          },
+          {
+            "roomId": "76561199646547969",
+            "userId": "76561199646547969",
+            "title": "Active Matter",
+            "nick": "Active Matter",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+            "area": "Active Matter",
+            "watching": "2765",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2765",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199646547969",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199646547969"
+          },
+          {
+            "roomId": "76561199799018508",
+            "userId": "76561199799018508",
+            "title": "Scam With Your Friends",
+            "nick": "metaterplays",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+            "area": "Scam With Your Friends",
+            "watching": "2479",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2479",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199799018508",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199799018508"
+          },
+          {
+            "roomId": "76561199886953034",
+            "userId": "76561199886953034",
+            "title": "BOMBANANA!",
+            "nick": "TARK",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+            "area": "BOMBANANA!",
+            "watching": "2069",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2069",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199886953034",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199886953034"
+          },
+          {
+            "roomId": "76561197998179700",
+            "userId": "76561197998179700",
+            "title": "Warhammer 40,000: Rogue Trader",
+            "nick": "Nathillien",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+            "area": "Warhammer 40,000: Rogue Trader",
+            "watching": "1823",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1823",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561197998179700",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561197998179700"
+          },
+          {
+            "roomId": "76561199683996121",
+            "userId": "76561199683996121",
+            "title": "Stellaris",
+            "nick": "livecontentsteam12",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+            "area": "Stellaris",
+            "watching": "1634",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1634",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199683996121",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199683996121"
+          },
+          {
+            "roomId": "76561199872447934",
+            "userId": "76561199872447934",
+            "title": "Tom Clancy's Rainbow Six Siege",
+            "nick": "UbiThibs",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+            "area": "Tom Clancy's Rainbow Six Siege",
+            "watching": "1461",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1461",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199872447934",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199872447934"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "page 1 size 10": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "NTE: Neverness to Everness",
+            "nick": "PWM Game Manager",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "area": "NTE: Neverness to Everness",
+            "watching": "6763",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "6763",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          },
+          {
+            "roomId": "76561199546949051",
+            "userId": "76561199546949051",
+            "title": "SOS OPS!",
+            "nick": "ArtDock",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "area": "SOS OPS!",
+            "watching": "4618",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "4618",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199546949051",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199546949051"
+          },
+          {
+            "roomId": "76561198843011284",
+            "userId": "76561198843011284",
+            "title": "Euro Truck Simulator 2",
+            "nick": "SCS Software",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+            "area": "Euro Truck Simulator 2",
+            "watching": "3840",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "3840",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561198843011284",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561198843011284"
+          },
+          {
+            "roomId": "76561199203486555",
+            "userId": "76561199203486555",
+            "title": "Graveyard Keeper 2",
+            "nick": "tinyStreamer18",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+            "area": "Graveyard Keeper 2",
+            "watching": "3698",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "3698",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199203486555",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199203486555"
+          },
+          {
+            "roomId": "76561199646547969",
+            "userId": "76561199646547969",
+            "title": "Active Matter",
+            "nick": "Active Matter",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+            "area": "Active Matter",
+            "watching": "2765",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2765",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199646547969",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199646547969"
+          },
+          {
+            "roomId": "76561199799018508",
+            "userId": "76561199799018508",
+            "title": "Scam With Your Friends",
+            "nick": "metaterplays",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+            "area": "Scam With Your Friends",
+            "watching": "2479",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2479",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199799018508",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199799018508"
+          },
+          {
+            "roomId": "76561199886953034",
+            "userId": "76561199886953034",
+            "title": "BOMBANANA!",
+            "nick": "TARK",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+            "area": "BOMBANANA!",
+            "watching": "2069",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2069",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199886953034",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199886953034"
+          },
+          {
+            "roomId": "76561197998179700",
+            "userId": "76561197998179700",
+            "title": "Warhammer 40,000: Rogue Trader",
+            "nick": "Nathillien",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+            "area": "Warhammer 40,000: Rogue Trader",
+            "watching": "1823",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1823",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561197998179700",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561197998179700"
+          },
+          {
+            "roomId": "76561199683996121",
+            "userId": "76561199683996121",
+            "title": "Stellaris",
+            "nick": "livecontentsteam12",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+            "area": "Stellaris",
+            "watching": "1634",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1634",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199683996121",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199683996121"
+          },
+          {
+            "roomId": "76561199872447934",
+            "userId": "76561199872447934",
+            "title": "Tom Clancy's Rainbow Six Siege",
+            "nick": "UbiThibs",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+            "area": "Tom Clancy's Rainbow Six Siege",
+            "watching": "1461",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1461",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199872447934",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199872447934"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "page 1 size 3": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "NTE: Neverness to Everness",
+            "nick": "PWM Game Manager",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "area": "NTE: Neverness to Everness",
+            "watching": "6763",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "6763",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          },
+          {
+            "roomId": "76561199546949051",
+            "userId": "76561199546949051",
+            "title": "SOS OPS!",
+            "nick": "ArtDock",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "area": "SOS OPS!",
+            "watching": "4618",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "4618",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199546949051",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199546949051"
+          },
+          {
+            "roomId": "76561198843011284",
+            "userId": "76561198843011284",
+            "title": "Euro Truck Simulator 2",
+            "nick": "SCS Software",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+            "area": "Euro Truck Simulator 2",
+            "watching": "3840",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "3840",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561198843011284",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561198843011284"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "page 1 size 0": {
+        "result": [],
+        "requests": []
+      },
+      "page 0 size 30": {
+        "result": [],
+        "requests": []
+      },
+      "page 1 size 100": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "NTE: Neverness to Everness",
+            "nick": "PWM Game Manager",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "area": "NTE: Neverness to Everness",
+            "watching": "6763",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "6763",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          },
+          {
+            "roomId": "76561199546949051",
+            "userId": "76561199546949051",
+            "title": "SOS OPS!",
+            "nick": "ArtDock",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "area": "SOS OPS!",
+            "watching": "4618",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "4618",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199546949051",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199546949051"
+          },
+          {
+            "roomId": "76561198843011284",
+            "userId": "76561198843011284",
+            "title": "Euro Truck Simulator 2",
+            "nick": "SCS Software",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+            "area": "Euro Truck Simulator 2",
+            "watching": "3840",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "3840",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561198843011284",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561198843011284"
+          },
+          {
+            "roomId": "76561199203486555",
+            "userId": "76561199203486555",
+            "title": "Graveyard Keeper 2",
+            "nick": "tinyStreamer18",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+            "area": "Graveyard Keeper 2",
+            "watching": "3698",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "3698",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199203486555",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199203486555"
+          },
+          {
+            "roomId": "76561199646547969",
+            "userId": "76561199646547969",
+            "title": "Active Matter",
+            "nick": "Active Matter",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+            "area": "Active Matter",
+            "watching": "2765",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2765",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199646547969",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199646547969"
+          },
+          {
+            "roomId": "76561199799018508",
+            "userId": "76561199799018508",
+            "title": "Scam With Your Friends",
+            "nick": "metaterplays",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+            "area": "Scam With Your Friends",
+            "watching": "2479",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2479",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199799018508",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199799018508"
+          },
+          {
+            "roomId": "76561199886953034",
+            "userId": "76561199886953034",
+            "title": "BOMBANANA!",
+            "nick": "TARK",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+            "area": "BOMBANANA!",
+            "watching": "2069",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2069",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199886953034",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199886953034"
+          },
+          {
+            "roomId": "76561197998179700",
+            "userId": "76561197998179700",
+            "title": "Warhammer 40,000: Rogue Trader",
+            "nick": "Nathillien",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+            "area": "Warhammer 40,000: Rogue Trader",
+            "watching": "1823",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1823",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561197998179700",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561197998179700"
+          },
+          {
+            "roomId": "76561199683996121",
+            "userId": "76561199683996121",
+            "title": "Stellaris",
+            "nick": "livecontentsteam12",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+            "area": "Stellaris",
+            "watching": "1634",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1634",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199683996121",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199683996121"
+          },
+          {
+            "roomId": "76561199872447934",
+            "userId": "76561199872447934",
+            "title": "Tom Clancy's Rainbow Six Siege",
+            "nick": "UbiThibs",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+            "area": "Tom Clancy's Rainbow Six Siege",
+            "watching": "1461",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1461",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199872447934",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199872447934"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      }
+    },
+    "getCategoryRooms": {
+      "trending page 1": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "NTE: Neverness to Everness",
+            "nick": "PWM Game Manager",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "area": "NTE: Neverness to Everness",
+            "watching": "6763",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "6763",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          },
+          {
+            "roomId": "76561199546949051",
+            "userId": "76561199546949051",
+            "title": "SOS OPS!",
+            "nick": "ArtDock",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "area": "SOS OPS!",
+            "watching": "4618",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "4618",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199546949051",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199546949051"
+          },
+          {
+            "roomId": "76561198843011284",
+            "userId": "76561198843011284",
+            "title": "Euro Truck Simulator 2",
+            "nick": "SCS Software",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+            "area": "Euro Truck Simulator 2",
+            "watching": "3840",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "3840",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561198843011284",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561198843011284"
+          },
+          {
+            "roomId": "76561199203486555",
+            "userId": "76561199203486555",
+            "title": "Graveyard Keeper 2",
+            "nick": "tinyStreamer18",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199203486555/3373905835727662120/thumbnail/?broadcast_origin=ext2-sto2.steamserver.net",
+            "area": "Graveyard Keeper 2",
+            "watching": "3698",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "3698",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199203486555",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199203486555"
+          },
+          {
+            "roomId": "76561199646547969",
+            "userId": "76561199646547969",
+            "title": "Active Matter",
+            "nick": "Active Matter",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199646547969/1290800536097635678/thumbnail/?broadcast_origin=ext2-sto1.steamserver.net",
+            "area": "Active Matter",
+            "watching": "2765",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2765",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199646547969",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199646547969"
+          },
+          {
+            "roomId": "76561199799018508",
+            "userId": "76561199799018508",
+            "title": "Scam With Your Friends",
+            "nick": "metaterplays",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199799018508/3718707516587165478/thumbnail/?broadcast_origin=ext1-ord1.steamserver.net",
+            "area": "Scam With Your Friends",
+            "watching": "2479",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2479",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199799018508",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199799018508"
+          },
+          {
+            "roomId": "76561199886953034",
+            "userId": "76561199886953034",
+            "title": "BOMBANANA!",
+            "nick": "TARK",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199886953034/5766463998028346840/thumbnail/?broadcast_origin=ext3-fra2.steamserver.net",
+            "area": "BOMBANANA!",
+            "watching": "2069",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2069",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199886953034",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199886953034"
+          },
+          {
+            "roomId": "76561197998179700",
+            "userId": "76561197998179700",
+            "title": "Warhammer 40,000: Rogue Trader",
+            "nick": "Nathillien",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561197998179700/6394053613577428567/thumbnail/?broadcast_origin=ext1-ams1.steamserver.net",
+            "area": "Warhammer 40,000: Rogue Trader",
+            "watching": "1823",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1823",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561197998179700",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561197998179700"
+          },
+          {
+            "roomId": "76561199683996121",
+            "userId": "76561199683996121",
+            "title": "Stellaris",
+            "nick": "livecontentsteam12",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+            "area": "Stellaris",
+            "watching": "1634",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1634",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199683996121",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199683996121"
+          },
+          {
+            "roomId": "76561199872447934",
+            "userId": "76561199872447934",
+            "title": "Tom Clancy's Rainbow Six Siege",
+            "nick": "UbiThibs",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199872447934/927470858288839210/thumbnail/?broadcast_origin=ext3-fra1.steamserver.net",
+            "area": "Tom Clancy's Rainbow Six Siege",
+            "watching": "1461",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1461",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199872447934",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199872447934"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "trending page 1 size 3": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "NTE: Neverness to Everness",
+            "nick": "PWM Game Manager",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "area": "NTE: Neverness to Everness",
+            "watching": "6763",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "6763",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          },
+          {
+            "roomId": "76561199546949051",
+            "userId": "76561199546949051",
+            "title": "SOS OPS!",
+            "nick": "ArtDock",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "area": "SOS OPS!",
+            "watching": "4618",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "4618",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199546949051",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199546949051"
+          },
+          {
+            "roomId": "76561198843011284",
+            "userId": "76561198843011284",
+            "title": "Euro Truck Simulator 2",
+            "nick": "SCS Software",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext2-fra1.steamserver.net",
+            "area": "Euro Truck Simulator 2",
+            "watching": "3840",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "3840",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561198843011284",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561198843011284"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "otherPlatform": {
+        "result": {
+          "throws": "SteamBroadcastException.identity",
+          "message": "Steam Broadcast identity"
+        },
+        "requests": []
+      }
+    },
+    "searchRooms": {
+      "NTE page 1": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "NTE: Neverness to Everness",
+            "nick": "PWM Game Manager",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "area": "NTE: Neverness to Everness",
+            "watching": "6763",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "6763",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          },
+          {
+            "roomId": "76561199683996121",
+            "userId": "76561199683996121",
+            "title": "Stellaris",
+            "nick": "livecontentsteam12",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199683996121/4842647424224184521/thumbnail/?broadcast_origin=ext4-fra2.steamserver.net",
+            "area": "Stellaris",
+            "watching": "1634",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1634",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199683996121",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199683996121"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "neverness page 1": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "NTE: Neverness to Everness",
+            "nick": "PWM Game Manager",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "area": "NTE: Neverness to Everness",
+            "watching": "6763",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "6763",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "pwm game page 1": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "NTE: Neverness to Everness",
+            "nick": "PWM Game Manager",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "area": "NTE: Neverness to Everness",
+            "watching": "6763",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "6763",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "ARTDOCK page 1": {
+        "result": [
+          {
+            "roomId": "76561199546949051",
+            "userId": "76561199546949051",
+            "title": "SOS OPS!",
+            "nick": "ArtDock",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199546949051/5967470153270666619/thumbnail/?broadcast_origin=ext2-fra2.steamserver.net",
+            "area": "SOS OPS!",
+            "watching": "4618",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "4618",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199546949051",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199546949051"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "7656119948521 page 1": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "NTE: Neverness to Everness",
+            "nick": "PWM Game Manager",
+            "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "area": "NTE: Neverness to Everness",
+            "watching": "6763",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "6763",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "zzqxnomatch page 1": {
+        "result": [],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "76561199485215572 page 1": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "Steam Broadcast",
+            "nick": "PWM Game Manager",
+            "avatar": "",
+            "cover": "",
+            "area": "Steam Community",
+            "watching": "7994",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "7994",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+            }
+          },
+          {
+            "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199485215572&viewertoken=0&sessionid",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/javascript, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      " 76561199485215572  page 1": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "Steam Broadcast",
+            "nick": "PWM Game Manager",
+            "avatar": "",
+            "cover": "",
+            "area": "Steam Community",
+            "watching": "7994",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "7994",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+            }
+          },
+          {
+            "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199485215572&viewertoken=0&sessionid",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/javascript, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "https://steamcommunity.com/broadcast/watch/76561199485215572 page 1": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "Steam Broadcast",
+            "nick": "PWM Game Manager",
+            "avatar": "",
+            "cover": "",
+            "area": "Steam Community",
+            "watching": "7994",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "7994",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+            }
+          },
+          {
+            "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199485215572&viewertoken=0&sessionid",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/javascript, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "https://steamcommunity.com/broadcast/watch/76561199485215572?l=english page 1": {
+        "result": [
+          {
+            "roomId": "76561199485215572",
+            "userId": "76561199485215572",
+            "title": "Steam Broadcast",
+            "nick": "PWM Game Manager",
+            "avatar": "",
+            "cover": "",
+            "area": "Steam Community",
+            "watching": "7994",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "7994",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+            }
+          },
+          {
+            "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199485215572&viewertoken=0&sessionid",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/javascript, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "76561197960287930 page 1": {
+        "result": [
+          {
+            "roomId": "76561197960287930",
+            "userId": "76561197960287930",
+            "title": "Steam Broadcast",
+            "nick": "Rabscuttle",
+            "avatar": "",
+            "cover": "",
+            "area": "Steam Community",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "popularity": "",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "steambroadcast",
+            "liveStatus": 1,
+            "isRecord": false,
+            "status": false,
+            "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://steamcommunity.com",
+              "referer": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://steamcommunity.com/broadcast/watch/76561197960287930"
+          }
+        ],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561197960287930"
+            }
+          },
+          {
+            "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561197960287930&viewertoken=0&sessionid",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/javascript, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "https://steamcommunity.com/profiles/76561199485215572 page 1": {
+        "result": [],
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          }
+        ]
+      },
+      "    page 1": {
+        "result": [],
+        "requests": []
+      },
+      "pwm page 1 size 101": {
+        "result": [],
+        "requests": []
+      },
+      "pwm page 0": {
+        "result": [],
+        "requests": []
+      },
+      "NTE page 1 size 0": {
+        "result": [],
+        "requests": []
+      },
+      "76561199485215572 page 2": {
+        "result": [],
+        "requests": []
+      }
+    },
+    "SteamBroadcastLink.parseSteamId": {
+      "76561198373527746": "76561198373527746",
+      "https://steamcommunity.com/broadcast/watch/76561198373527746?l=english": "76561198373527746",
+      "https://steam.tv/example": null,
+      "https://steamcommunity.com/app/730/broadcasts": null,
+      "https://steamcommunity.com/broadcast/watch/76561198373527746/more": null,
+      "https://steamcommunity.com.evil.test/broadcast/watch/76561198373527746": null,
+      "7656119837352774": null,
+      " 76561198373527746 ": "76561198373527746",
+      "76561198373527746x": null,
+      "86561198373527746": null,
+      "http://steamcommunity.com/broadcast/watch/76561198373527746": "76561198373527746",
+      "https://steamcommunity.com/broadcast/watch/76561198373527746/": "76561198373527746",
+      "https://STEAMCOMMUNITY.com/broadcast/watch/76561198373527746": "76561198373527746",
+      "https://www.steamcommunity.com/broadcast/watch/76561198373527746": null,
+      "https://steamcommunity.com:443/broadcast/watch/76561198373527746": "76561198373527746",
+      "https://steamcommunity.com:8443/broadcast/watch/76561198373527746": null,
+      "https://user@steamcommunity.com/broadcast/watch/76561198373527746": null,
+      "https://steamcommunity.com/broadcast/watch/76561198373527746#chat": null,
+      "ftp://steamcommunity.com/broadcast/watch/76561198373527746": null,
+      "https://steamcommunity.com/Broadcast/watch/76561198373527746": null,
+      "https://steamcommunity.com//broadcast//watch//76561198373527746": "76561198373527746",
+      "https://steamcommunity.com/broadcast/watch/%37%36561198373527746": "76561198373527746",
+      "https://steamcommunity.com/broadcast/watch/%FF": null,
+      "https://steamcommunity.com/profiles/76561198373527746": null,
+      "https://steamcommunity.com/id/probrawlhallastream/": null,
+      "steamcommunity.com/broadcast/watch/76561198373527746": null
+    },
+    "SteamBroadcastLink.watchUrl": {
+      "76561199485215572": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+      " 76561199485215572 ": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+      "https://steamcommunity.com/broadcast/watch/76561199485215572": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+      "123": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid Steam broadcast identity"
+      }
+    },
+    "parseViewerCount": {
+      "6,763 viewers": 6763,
+      "6,763 viewers ": 6763,
+      "1 viewer": 1,
+      "12.345 viewers": 12345,
+      "1 234 viewers": 1234,
+      "viewers": null,
+      "0 viewers": 0,
+      "1234567890123 viewers": null,
+      "5 watching": null,
+      "": null
+    }
+  }
+}

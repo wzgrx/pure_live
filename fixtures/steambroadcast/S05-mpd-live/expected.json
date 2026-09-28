@@ -1,0 +1,16 @@
+{
+  "generator": "SteamBroadcastApi.parseBroadcastJson",
+  "value": {
+    "recorded": {
+      "steamId": "76561199485215572",
+      "broadcaster": "X",
+      "title": "Steam Broadcast",
+      "game": "",
+      "cover": "",
+      "avatar": "",
+      "currentViewers": 7994,
+      "state": "live",
+      "master": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+    }
+  }
+}

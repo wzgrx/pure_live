@@ -1,0 +1,451 @@
+{
+  "generator": "SteamBroadcastApi.parseBroadcastJson",
+  "value": {
+    "recorded": {
+      "steamId": "76561199485215572",
+      "broadcaster": "X",
+      "title": "Steam Broadcast",
+      "game": "",
+      "cover": "",
+      "avatar": "",
+      "currentViewers": 6862,
+      "state": "live",
+      "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+    },
+    "otherSteamId": {
+      "throws": "SteamBroadcastException.schema",
+      "message": "Steam Broadcast schema"
+    },
+    "success": {
+      "ready": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "READY": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "unavailable": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "offline",
+        "master": null
+      },
+      "offline": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "offline",
+        "master": null
+      },
+      "not_live": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "offline",
+        "master": null
+      },
+      "no_broadcast": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "offline",
+        "master": null
+      },
+      "user_restricted": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "restricted",
+        "master": null
+      },
+      "waiting": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "unknown",
+        "master": null
+      },
+      "waiting_to_start": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "unknown",
+        "master": null
+      },
+      "waiting_for_start": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "unknown",
+        "master": null
+      },
+      "something_new": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "unknown",
+        "master": null
+      },
+      "": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "42": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "null": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      }
+    },
+    "title": {
+      "A title": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "A title",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "  spaced   title ": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "spaced title",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "null": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "7": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      }
+    },
+    "num_viewers": {
+      "0": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 0,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "12": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 12,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "-1": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": null,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "3.7": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 3,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "15": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 15,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      " 16 ": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 16,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "x": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": null,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "null": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": null,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "true": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": null,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      }
+    },
+    "cdn_auth_url_parameters": {
+      "null": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "  ": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+      },
+      "&token=abc": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net&token=abc"
+      },
+      "?token=abc&exp=1": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net&token=abc&exp=1"
+      },
+      "&&a=1": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net&a=1"
+      },
+      "a=1&a=2": {
+        "steamId": "76561199485215572",
+        "broadcaster": "X",
+        "title": "Steam Broadcast",
+        "game": "",
+        "cover": "",
+        "avatar": "",
+        "currentViewers": 6862,
+        "state": "live",
+        "master": "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net&a=1&a=2"
+      },
+      "broadcast_origin=x": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "a b=1": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "a=1#x": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "&": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "a": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "7": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      }
+    },
+    "hls_url": {
+      "http://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "https://broadcast.st.dl.eccdnx.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/broadcast.st.dl.eccdnx.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache9-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "https://cache15-lax2.steamcontent.com/broadcast/76561197960287930/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "https://cache15-lax2.steamcontent.com/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=example.com": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "https://cache15-lax2.steamcontent.com:8443/broadcast/76561199485215572/2173332649075168964/hls_manifest/0/cache15-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "null": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      }
+    },
+    "notAnObject": {
+      "throws": "SteamBroadcastException.schema",
+      "message": "Steam Broadcast schema"
+    }
+  }
+}

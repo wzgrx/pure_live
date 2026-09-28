@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "platform": "steambroadcast",
+  "sample": "S05-watch-offline",
+  "capturedAt": "2026-09-28T13:05:15.584016Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Referer": "https://steamcommunity.com/broadcast/watch/76561197960287930"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "nginx",
+      "content-type": "text/html; charset=UTF-8",
+      "content-security-policy": "default-src blob: data: https: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://community.fastly.steamstatic.com/ https://cdn.fastly.steamstatic.com/steamcommunity/public/assets/ https://api.steampowered.com/ https://recaptcha.net https://www.google.com/recaptcha/ https://www.gstatic.cn/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.youtube.com/ https://s.ytimg.com; object-src 'none'; frame-src 'self' steam: https://store.steampowered.com/ https://help.steampowered.com/ https://login.steampowered.com/ https://checkout.steampowered.com/ https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://sketchfab.com https://player.vimeo.com https://medal.tv https://www.google.com/recaptcha/ https://recaptcha.net/recaptcha/;",
+      "expires": "Mon, 26 Jul 1997 05:00:00 GMT",
+      "cache-control": "no-cache",
+      "vary": [
+        "origin",
+        "Accept-Encoding"
+      ],
+      "date": "Mon, 28 Sep 2026 13:05:17 GMT",
+      "content-length": "26406",
+      "connection": "close",
+      "set-cookie": [
+        "sessionid=dfa52466ee84b074694f556b; Path=/; Secure; SameSite=None",
+        "steamCountry=US%7Cdfd1e061077ffc9af52852c47303916e; path=/; secure; HttpOnly; SameSite=None"
+      ]
+    }
+  },
+  "raw": {
+    "sha256": "fdea7472c24fd008754b024b5c0b4a5cd2c3de3354d2baec64d62e9ba39aeb9b",
+    "length": 26406
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "set-cookie:sessionid",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:steamCountry",
+      "rule": "secret"
+    },
+    {
+      "where": "g_sessionID",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.27 recorder (schema 1)"
+}

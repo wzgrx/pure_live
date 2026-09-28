@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "platform": "steambroadcast",
+  "sample": "S05-master-live",
+  "capturedAt": "2026-09-28T13:05:13.617406Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Origin": "https://steamcommunity.com",
+      "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "nginx/1.29.8",
+      "date": "Mon, 28 Sep 2026 13:05:16 GMT",
+      "content-type": "application/x-mpegURL",
+      "content-length": "634",
+      "connection": "close",
+      "access-control-allow-origin": "*",
+      "access-control-expose-headers": "Date",
+      "expires": "Mon, 28 Sep 2026 13:05:18 GMT",
+      "last-modified": "Mon, 28 Sep 2026 13:05:16 GMT",
+      "access-control-allow-headers": "",
+      "access-control-allow-methods": "GET,HEAD,OPTIONS",
+      "x-cache-status": "MISS"
+    }
+  },
+  "raw": {
+    "sha256": "c2197e290bac7bcf79809b654e2599d5149012de0ad266c3ce61592846e87ea5",
+    "length": 634
+  },
+  "body": "body.m3u8",
+  "scrubbed": [],
+  "tool": "M4.27 recorder (schema 1)"
+}

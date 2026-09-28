@@ -788,7 +788,7 @@ void main() {
           throw const TransportFailure('chzzk', TransportReason.cancelled);
         },
       );
-      final site = ChzzkSite(http);
+      final site = ChzzkSite(http, now: () => DateTime.utc(2026, 9, 29));
       final room = await site.getRoomDetail(roomId: _live);
       final cancel = CancelToken();
       final future = site.discoverPlayQualities(detail: room, cancel: cancel);
@@ -850,7 +850,7 @@ void main() {
           return _response(request, '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1,RESOLUTION=1x720\nv$issue/720p.m3u8');
         },
       );
-      final site = ChzzkSite(http);
+      final site = ChzzkSite(http, now: () => DateTime.utc(2026, 9, 29));
       final room = await site.getRoomDetail(roomId: _live);
       final quality = (await site.getPlayQualities(detail: room)).single;
       expect(

@@ -865,7 +865,7 @@ void main() {
 
   group('streams', () {
     test("the room's broadcast: qualities and lines without another request", () async {
-      final setup = _setup(_live);
+      final setup = _setup(_live, now: () => Fixture.load('acfun', 'S06-startplay-live').capturedAt);
       final room = await setup.site.getRoomDetail(roomId: '40740702');
       final before = setup.http.requests.length;
       final qualities = await setup.site.getPlayQualities(detail: room);

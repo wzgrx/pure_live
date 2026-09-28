@@ -556,7 +556,9 @@ void main() {
     group('credentials', () {
       test('a start without a token refreshes first: three attempts, 1× and 2× the step apart', () async {
         final connector = _Connector();
-        final calls = <DateTime>[];
+        // A monotonic clock, as timers use; wall time can step backwards.
+        final clock = Stopwatch()..start();
+        final calls = <Duration>[];
         final refreshed = _args(token: 'token-2', servers: [_node], headers: const {'cookie': 'fresh'});
         final answers = <FutureOr<BilibiliDanmakuArgs> Function()>[
           () => _args(token: ''),
@@ -572,14 +574,15 @@ void main() {
           _args(
             token: '',
             refresh: () async {
-              calls.add(DateTime.now());
+              calls.add(clock.elapsed);
               return await answers[calls.length - 1]();
             },
           ),
         );
         expect(calls, hasLength(3));
-        expect(calls[1].difference(calls[0]), greaterThanOrEqualTo(const Duration(milliseconds: 20)));
-        expect(calls[2].difference(calls[1]), greaterThanOrEqualTo(const Duration(milliseconds: 40)));
+        // 1 ms of slack for timer granularity.
+        expect(calls[1] - calls[0], greaterThanOrEqualTo(const Duration(milliseconds: 19)));
+        expect(calls[2] - calls[1], greaterThanOrEqualTo(const Duration(milliseconds: 39)));
         expect(connector.endpoints, [_node]);
         expect(connector.headers.single, {'cookie': 'fresh'});
         expect((_body(connector.channels.single.sent.single)! as Map)['key'], 'token-2');

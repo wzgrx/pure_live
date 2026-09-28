@@ -756,7 +756,7 @@ void main() {
     test('recovery follows the anchor to a new broadcast with the same quality id (3.x)', () async {
       var current = _first;
       final http = _world(current: () => current);
-      final site = KilakilaSite(http);
+      final site = KilakilaSite(http, now: () => DateTime.utc(2026, 9, 27, 17, 10));
       final room = await site.getRoomDetail(roomId: '100');
       final quality = (await site.getPlayQualities(detail: room)).single;
       expect(quality.selectionId, 'original');

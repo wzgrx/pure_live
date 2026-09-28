@@ -5,6 +5,7 @@
 ## 目录
 
 - `tools/gate/`：门禁（格式、依赖方向、分析、测试）。
+- `tools/timeshift/`：把系统时间往后推再跑测试，找出拿样本里的过期时间和“现在”比较的测试（时间炸弹）。
 - `tools/check_latest/`：对照官方渠道检查工具链和依赖是否最新。
 - `packages/`、`apps/pure_live`：按 docs/PLAN.md 第 6 节逐模块加入，分层见第 4 节。
 - `assets/version.json`、`assets/releases.json`：已安装的 3.x 检查更新时从 master 读取。只在发布新版本时修改，不能删。
@@ -16,6 +17,7 @@
 - **工具链和依赖用最新稳定版**，固定在 `toolchain.env` 和根目录的 `pubspec.lock`。检查命令：`GITHUB_TOKEN=$(gh auth token) dart run tools/check_latest/bin/check_latest.dart`。
 - **代码规范**：very_good_analysis，行宽 120，公开接口写文档注释，Dart 主构造函数写 `const new(...)`。纯 Dart 包不引用 Flutter；依赖方向由 `tools/gate/check_deps.py` 强制。
 - **门禁**：开发中跑 `bash tools/gate/gate.sh`，推送前必须跑 `bash tools/gate/gate.sh --all`，日志里出现 `gate: passed` 才算通过。
+- **时间炸弹**：每个模块收尾时和发布前跑 `tools/timeshift/run.sh`（默认 +30 天、+1 年、+5 年），必须全部 ok。测试里凡是用到样本时间（Cookie、签名地址、租期、开播时间）的，都要把“现在”固定成录制时间，被测代码要能注入时间（`now:` 参数）。
 - **构建只在本机**：Android 在 WSL，Windows 在主机，不用 GitHub Actions。同一时间只跑一个重任务。
 - **安全**：签名文件和密钥不进 Git；Cookie 加密存储，不写进日志。
 - **版本号**只在发布时改。

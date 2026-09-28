@@ -1186,7 +1186,8 @@ void main() {
 
   group("3.x's stream grant", () {
     test('six declared qualities and thirteen path cookies stay separate', () {
-      final grant = NiconicoApi.grant(_stream());
+      final at = DateTime.utc(2026, 9, 10);
+      final grant = NiconicoApi.grant(_stream(), now: at);
       expect(grant.availableQualities, [
         'abr',
         'super_high',
@@ -1197,14 +1198,20 @@ void main() {
       ]);
       expect(grant.cookieCount, 13);
       expect(
-        grant.cookieHeaderFor(grant.uri),
+        grant.cookieHeaderFor(grant.uri, now: at),
         'CloudFront-Policy=fixture-1; CloudFront-Signature=fixture-2; CloudFront-Key-Pair-Id=fixture-3',
       );
-      expect(grant.cookieHeaderFor(_media.resolve('/hls/segments/fixture-program/video/a.ts')), contains('fixture-4'));
-      expect(grant.cookieHeaderFor(_media.resolve('/hls/segments/fixture-program/audio/a.ts')), contains('fixture-7'));
+      expect(
+        grant.cookieHeaderFor(_media.resolve('/hls/segments/fixture-program/video/a.ts'), now: at),
+        contains('fixture-4'),
+      );
+      expect(
+        grant.cookieHeaderFor(_media.resolve('/hls/segments/fixture-program/audio/a.ts'), now: at),
+        contains('fixture-7'),
+      );
       final key = _media.resolve('/hls/keys/fixture-program/fixture-session/key');
-      expect(grant.cookieHeaderFor(key), startsWith('CloudFront-Policy=fixture-10'));
-      expect(grant.cookieHeaderFor(key), endsWith('session=fixture-0'), reason: 'longest path first');
+      expect(grant.cookieHeaderFor(key, now: at), startsWith('CloudFront-Policy=fixture-10'));
+      expect(grant.cookieHeaderFor(key, now: at), endsWith('session=fixture-0'), reason: 'longest path first');
       expect(grant.availableQualities.clear, throwsUnsupportedError);
     });
 

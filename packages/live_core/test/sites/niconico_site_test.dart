@@ -6,8 +6,10 @@
 // protocol (3.x's test/niconico_session_test.dart, on a manual clock), links
 // and the error mapping (3.x's niconico_site_test.dart,
 // niconico_directory_test.dart, niconico_quality_catalog_test.dart and
-// niconico_application_test.dart, adapter parts). The master playlist is
-// 3.x's synthetic `officialMaster`: no sample has one.
+// niconico_application_test.dart, adapter parts), and the M4.U upgrades:
+// broadcaster rooms and 3.x's program ids (17-1), program and broadcaster
+// links (17-2), the entered room's seat bootstrap (17-6). The master
+// playlist is 3.x's synthetic `officialMaster`: no sample has one.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -51,19 +53,22 @@ ReplaySample _synthetic(String url, Object body, {int status = 200}) => ReplaySa
   bytes: utf8.encode(body is String ? body : jsonEncode(body)),
 );
 
-/// A recorded watch page served as the watch page of [program] (the samples
+/// A recorded watch page served as the watch page of [room] (the samples
 /// were recorded as `watch/user/<id>` and `watch/ch<id>`, which answer with
 /// the same page as the program id).
-ReplaySample _watchPage(String sample, String program) {
+ReplaySample _watchPage(String sample, String room) {
   final recorded = ReplaySample.load('$_root/$sample');
   return ReplaySample(
     method: 'GET',
-    url: Uri.parse('https://live.nicovideo.jp/watch/$program'),
+    url: Uri.parse('https://live.nicovideo.jp/watch/$room'),
     status: recorded.status,
     headers: recorded.headers,
     bytes: recorded.bytes,
   );
 }
+
+/// The broadcaster of [_live] (S03-watch-user-live was recorded as its page).
+const _user = 'user/144846457';
 
 /// The embedded data of the live watch page, for synthetic variants.
 Map<String, dynamic> _liveProps() {
@@ -288,6 +293,8 @@ _Setup _setup(
   ProxyPolicy proxy = const FixedProxyPolicy(),
   Duration discoveryDeadline = const Duration(seconds: 30),
   Duration seatStartupTimeout = const Duration(seconds: 20),
+  Duration bootstrapLifetime = const Duration(seconds: 60),
+  DateTime Function()? clock,
   LiveHttp Function(ReplayHttp http)? wrap,
 }) {
   final http = ReplayHttp(samples);
@@ -298,6 +305,8 @@ _Setup _setup(
     connector: connector.call,
     discoveryDeadline: discoveryDeadline,
     seatStartupTimeout: seatStartupTimeout,
+    bootstrapLifetime: bootstrapLifetime,
+    clock: clock,
   );
   return (site: site, http: http, connector: connector);
 }
@@ -486,45 +495,150 @@ void main() {
   });
 
   group('detail', () {
-    test('one watch page request at every depth; the program id is the room id (3.x)', () async {
-      final setup = _setup([_watchPage('S03-watch-user-live', _live)]);
-      final room = await setup.site.getRoomDetail(roomId: ' $_live ');
-      expect(room.roomId, _live);
+    test('one watch page request at every depth; the broadcaster is the room (17-1)', () async {
+      final setup = _setup([_watchPage('S03-watch-user-live', _user)]);
+      final room = await setup.site.getRoomDetail(roomId: ' $_user ');
+      expect(room.roomId, _user);
       expect(room.isLiveNow, isTrue);
       expect(room.totalViewers, '2292');
-      expect(room.link, 'https://live.nicovideo.jp/watch/$_live');
+      expect(room.link, 'https://live.nicovideo.jp/watch/$_user');
       expect((room.data! as NiconicoRoomData).access, NiconicoAccess.allowed);
-      expect(room.danmakuData, isNull);
-      expect(_paths(setup.http), ['/watch/$_live']);
+      expect((room.data! as NiconicoRoomData).programId, _live);
+      expect(
+        room.danmakuData,
+        const NiconicoDanmakuArgs(roomId: _user, programId: _live),
+        reason: '17-3 (M5)',
+      );
+      expect(room.startedAt, DateTime.utc(2026, 9, 27, 17, 42, 14));
+      expect(room.restriction, LiveRestriction.none);
+      expect(room.introduction, isNotEmpty, reason: '17-5');
+      expect(_paths(setup.http), ['/watch/$_user']);
       final request = setup.http.requests.single;
       expect(request.headers, NiconicoApi.headers);
       expect(request.followRedirects, isFalse);
-      await setup.site.getRoomDetailForRefresh(roomId: _live);
-      await setup.site.getRoomDetailForRecording(roomId: _live);
-      expect(await setup.site.getLiveStatus(roomId: _live), isTrue);
+      await setup.site.getRoomDetailForRefresh(roomId: _user);
+      await setup.site.getRoomDetailForRecording(roomId: _user);
+      expect(await setup.site.getLiveStatus(roomId: _user), isTrue);
       expect(setup.http.requests, hasLength(4), reason: 'one request each, no seat');
       expect(setup.connector.calls, isEmpty);
     });
 
-    test('a follow refresh merges into the stored 3.x room', () async {
-      final setup = _setup([_watchPage('S03-watch-user-ended', 'lv351482791')]);
+    test("a channel's room reads the channel's page", () async {
+      final setup = _setup([_watchPage('S03-watch-channel', 'ch2640864')]);
+      final room = await setup.site.getRoomDetail(roomId: 'ch2640864');
+      expect(room.roomId, 'ch2640864');
+      expect(room.isLiveNow, isTrue);
+      expect(room.avatar, endsWith('/ch2640864.jpg?1785535320'), reason: "the channel's icon");
+      expect(_paths(setup.http), ['/watch/ch2640864']);
+    });
+
+    test("3.x's program id on air: one request, the broadcaster's room", () async {
+      final setup = _setup([_watchPage('S03-watch-user-live', _live)]);
+      final room = await setup.site.getRoomDetailForRefresh(roomId: _live);
+      expect(room.roomId, _user);
+      expect(room.isLiveNow, isTrue);
+      expect(_paths(setup.http), ['/watch/$_live']);
+    });
+
+    test("3.x's program id no longer on air: the broadcaster's page too (a second request)", () async {
+      final setup = _setup([
+        _watchPage('S03-watch-user-ended', 'lv351482791'),
+        _watchPage('S03-watch-user-ended', 'user/138383030'),
+      ]);
+      final room = await setup.site.getRoomDetailForRefresh(roomId: 'lv351482791');
+      expect(room.roomId, 'user/138383030');
+      expect(room.effectiveLiveStatus, LiveStatus.offline);
+      expect(_paths(setup.http), ['/watch/lv351482791', '/watch/user/138383030']);
+      expect(await setup.site.getLiveStatus(roomId: 'lv351482791'), isFalse);
+      expect(setup.http.requests, hasLength(4));
+    });
+
+    test('the broadcaster may be on air with another program: the old id shows it', () async {
+      final ended = _liveProps();
+      final program = ended['program'] as Map<String, dynamic>;
+      program['nicoliveProgramId'] = 'lv351482700';
+      program['status'] = 'ENDED';
+      final setup = _setup([_syntheticWatch(ended, program: 'lv351482700'), _watchPage('S03-watch-user-live', _user)]);
+      final room = await setup.site.getRoomDetail(roomId: 'lv351482700');
+      expect(room.roomId, _user);
+      expect(room.isLiveNow, isTrue);
+      expect((room.data! as NiconicoRoomData).programId, _live);
+    });
+
+    test('an official program stays its program (one request)', () async {
+      final setup = _setup([_watchPage('S03-watch-official', 'lv351173882')]);
+      final room = await setup.site.getRoomDetail(roomId: 'lv351173882');
+      expect(room.roomId, 'lv351173882');
+      expect(room.isLiveNow, isTrue);
+      expect(room.notice, NiconicoApi.noticeText['niconico_program_scope']);
+      expect(setup.http.requests, hasLength(1));
+    });
+
+    test('resolveRoomId: the migration of a 3.x follow (M9)', () async {
+      final setup = _setup([
+        _watchPage('S03-watch-user-ended', 'lv351482791'),
+        _watchPage('S03-watch-channel', 'lv351292489'),
+        _watchPage('S03-watch-official', 'lv351173882'),
+        ReplaySample.load('$_root/S03-watch-notfound'),
+      ]);
+      expect(await setup.site.resolveRoomId(_user), _user);
+      expect(await setup.site.resolveRoomId(' ch2640864 '), 'ch2640864');
+      expect(setup.http.requests, isEmpty, reason: 'a broadcaster needs no request');
+      expect(await setup.site.resolveRoomId('lv351482791'), 'user/138383030', reason: 'one request, even when ended');
+      expect(await setup.site.resolveRoomId('lv351292489'), 'ch2640864');
+      expect(await setup.site.resolveRoomId('lv351173882'), 'lv351173882');
+      expect(setup.http.requests, hasLength(3));
+      await expectLater(setup.site.resolveRoomId('lv1'), throwsA(isA<NotFound>()));
+      await expectLater(setup.site.resolveRoomId('abc'), throwsA(isA<NotFound>()));
+      await expectLater(setup.site.resolveRoomId(_live, cancel: CancelToken()..cancel()), _cancelled());
+      expect(setup.http.requests, hasLength(4));
+    });
+
+    test('a follow refresh merges into the stored room of the same broadcaster', () async {
+      final setup = _setup([_watchPage('S03-watch-user-ended', 'user/138383030')]);
       final stored = LiveRoom.fromJson(const {
-        'roomId': 'lv351482791',
+        'roomId': 'user/138383030',
         'platform': 'niconico',
         'title': 'old',
         'liveStatus': 0,
         'status': true,
         'tagIds': ['t'],
       });
-      final merged = stored.mergeFrom(await setup.site.getRoomDetailForRefresh(roomId: 'lv351482791'));
+      final merged = stored.mergeFrom(await setup.site.getRoomDetailForRefresh(roomId: 'user/138383030'));
       expect(merged.title, 'プログラミング');
       expect(merged.effectiveLiveStatus, LiveStatus.offline);
       expect(merged.tagIds, ['t']);
     });
 
-    test('not a program id is NotFound without a request; a missing program is NotFound', () async {
+    test("a 3.x follow is merged only once migrated to its broadcaster (M9's job)", () async {
+      final setup = _setup([
+        _watchPage('S03-watch-user-ended', 'lv351482791'),
+        _watchPage('S03-watch-user-ended', 'user/138383030'),
+      ]);
+      final json = <String, dynamic>{
+        'roomId': 'lv351482791',
+        'platform': 'niconico',
+        'title': 'old',
+        'liveStatus': 0,
+        'status': true,
+        'tagIds': ['t'],
+        'notice': NiconicoApi.noticeText['niconico_program_scope'],
+      };
+      final fresh = await setup.site.getRoomDetailForRefresh(roomId: 'lv351482791');
+      final stored = LiveRoom.fromJson(json);
+      expect(identical(stored.mergeFrom(fresh), stored), isTrue, reason: 'another identity is ignored');
+      final id = await setup.site.resolveRoomId('lv351482791');
+      final migrated = LiveRoom.fromJson({...json, 'roomId': id, 'link': NiconicoApi.watchUrl(id), 'notice': null})
+          .mergeFrom(fresh);
+      expect(migrated.roomId, 'user/138383030');
+      expect(migrated.title, 'プログラミング');
+      expect(migrated.tagIds, ['t']);
+      expect(migrated.notice ?? '', isEmpty, reason: 'the 3.x sentence is dropped by the migration');
+    });
+
+    test('not a room id is NotFound without a request; a missing room is NotFound', () async {
       final setup = _setup([ReplaySample.load('$_root/S03-watch-notfound')]);
-      for (final id in ['abc', 'lv0', '351482868', 'user/144846457', 'ch2640864', '../lv100']) {
+      for (final id in ['abc', 'lv0', '351482868', 'user/0', 'user/x', 'user/1/2', 'ch0', 'CH1', 'co1', '../lv100']) {
         await expectLater(setup.site.getRoomDetail(roomId: id), throwsA(isA<NotFound>()), reason: id);
       }
       expect(setup.http.requests, isEmpty);
@@ -533,12 +647,17 @@ void main() {
     });
 
     test('a failing watch page is an error, never an offline room', () async {
-      final setup = _setup([_synthetic('https://live.nicovideo.jp/watch/$_live', '', status: 503)]);
-      await expectLater(setup.site.getRoomDetailForRecording(roomId: _live), throwsA(isA<NetworkFailure>()));
+      final setup = _setup([_synthetic('https://live.nicovideo.jp/watch/$_user', '', status: 503)]);
+      await expectLater(setup.site.getRoomDetailForRecording(roomId: _user), throwsA(isA<NetworkFailure>()));
       await expectLater(
         NiconicoSite(_Failing(TransportReason.connect)).getRoomDetail(roomId: _live),
         throwsA(isA<NetworkFailure>()),
       );
+    });
+
+    test("a broadcaster's page of someone else is ApiChanged", () async {
+      final setup = _setup([_watchPage('S03-watch-user-live', 'user/1')]);
+      await expectLater(setup.site.getRoomDetail(roomId: 'user/1'), throwsA(isA<ApiChanged>()));
     });
   });
 
@@ -725,6 +844,194 @@ void main() {
       await seat.close();
       expect(setup.connector.channels, isEmpty);
       expect(await seat.done, isNull);
+    });
+  });
+
+  group("a broadcaster's streams (17-1)", () {
+    test("discovery reads the broadcaster's page and binds the qualities to the room and its program", () async {
+      final setup = _setup(
+        [_watchPage('S03-watch-user-live', _user), _synthetic('$_master', _officialMaster)],
+        channels: [_Channel(_serverFrames(pings: false))],
+      );
+      final qualities = await setup.site.getPlayQualities(detail: _room(_user));
+      expect(_paths(setup.http), ['/watch/$_user', _master.path]);
+      final choice = qualities.last.data! as NiconicoQuality;
+      expect(choice.roomId, _user);
+      expect(choice.programId, _live);
+      expect(qualities.map((quality) => quality.selectionId), ['800x450@1080800', '512x288@412800', '512x288@201600']);
+      final resolved = await setup.site.resolvePlayUrls(detail: _room(_user), quality: qualities.last);
+      expect(
+        (resolved.inputRecipe! as NiconicoInputRecipe).identity,
+        'niconico:$_live:512x288:201600',
+        reason: 'the recipe is the program on air',
+      );
+      await expectLater(
+        setup.site.resolvePlayUrlsRaw(detail: _room(_live), quality: qualities.last),
+        throwsArgumentError,
+        reason: "the broadcaster's quality is not the program room's",
+      );
+      await expectLater(
+        setup.site.resolvePlayUrlsRaw(detail: _room('user/1'), quality: qualities.last),
+        throwsArgumentError,
+      );
+    });
+
+    test('openSeat takes a broadcaster: the seat of its program on air', () async {
+      final setup = _setup(
+        [_watchPage('S03-watch-user-live', _user)],
+        channels: [_Channel(_serverFrames(pings: false))],
+      );
+      final seat = await setup.site.openSeat(_user);
+      expect(seat.current.uri, _master);
+      await pumpEventQueue();
+      expect(seat.messageServer?.host, 'mpn.live.nicovideo.jp', reason: 'what the comments need (M5)');
+      await seat.close();
+      await expectLater(setup.site.openSeat('user/0'), throwsA(isA<NotFound>()));
+    });
+
+    for (final (name, change, error) in [
+      (
+        'paid',
+        (Map<String, dynamic> props) {
+          (props['userProgramWatch'] as Map)['canWatch'] = false;
+          ((props['programWatch'] as Map)['condition'] as Map)['payment'] = 'Ticket';
+        },
+        isA<StreamUnavailable>().having((e) => e.detail, 'detail', contains('paid')),
+      ),
+      (
+        'private',
+        (Map<String, dynamic> props) {
+          (props['userProgramWatch'] as Map)['canWatch'] = false;
+          (props['program'] as Map)['isPrivate'] = true;
+        },
+        isA<StreamUnavailable>().having((e) => e.detail, 'detail', contains('private')),
+      ),
+    ]) {
+      test('a $name program is live and marked; its stream says why before any seat', () async {
+        final props = _liveProps();
+        change(props);
+        final setup = _setup([_syntheticWatch(props, program: _user)], channels: [_Channel()]);
+        final room = await setup.site.getRoomDetail(roomId: _user);
+        expect(room.isLiveNow, isTrue);
+        expect(room.isRestricted, isTrue);
+        await expectLater(setup.site.getPlayQualities(detail: room), throwsA(error));
+        expect(setup.connector.calls, isEmpty);
+      });
+    }
+
+    test('a card marked paid is not refused by its mark: the watch page decides (a free part)', () async {
+      final setup = _setup(
+        [_watchPage('S03-watch-channel', 'ch2640864'), _synthetic('$_master', _officialMaster)],
+        channels: [_Channel(_serverFrames(pings: false))],
+      );
+      final card = LiveRoom(
+        roomId: 'ch2640864',
+        platform: 'niconico',
+        liveStatus: LiveStatus.live,
+        restriction: LiveRestriction.paid,
+      );
+      expect(await setup.site.getPlayQualities(detail: card), hasLength(3));
+    });
+  });
+
+  group('the entered room hands its seat bootstrap to the first discovery (17-6)', () {
+    test('entering and playing reads the watch page once', () async {
+      final setup = _setup(
+        [_watchPage('S03-watch-user-live', _user), _synthetic('$_master', _officialMaster)],
+        channels: [_Channel(_serverFrames(pings: false)), _Channel(_serverFrames(pings: false))],
+      );
+      final room = await setup.site.getRoomDetail(roomId: _user);
+      final qualities = await setup.site.getPlayQualities(detail: room);
+      expect(qualities, hasLength(3));
+      expect(_paths(setup.http), ['/watch/$_user', _master.path], reason: 'no second watch page (v3 read it twice)');
+      expect(setup.connector.calls.single.endpoint.queryParameters['frontend_id'], '9');
+      await setup.site.getPlayQualities(detail: room);
+      expect(_paths(setup.http), [
+        '/watch/$_user',
+        _master.path,
+        '/watch/$_user',
+        _master.path,
+      ], reason: 'taken once: the next discovery reads the page');
+    });
+
+    test('an old id entered is kept under its broadcaster', () async {
+      final setup = _setup(
+        [_watchPage('S03-watch-user-live', _live), _synthetic('$_master', _officialMaster)],
+        channels: [_Channel(_serverFrames(pings: false))],
+      );
+      final room = await setup.site.getRoomDetail(roomId: _live);
+      await setup.site.getPlayQualities(detail: room);
+      expect(_paths(setup.http), ['/watch/$_live', _master.path]);
+    });
+
+    test('a bootstrap older than its lifetime is dropped', () async {
+      var now = DateTime.utc(2026, 9, 29);
+      final setup = _setup(
+        [_watchPage('S03-watch-user-live', _user), _synthetic('$_master', _officialMaster)],
+        channels: [_Channel(_serverFrames(pings: false))],
+        clock: () => now,
+      );
+      final room = await setup.site.getRoomDetail(roomId: _user);
+      now = now.add(const Duration(seconds: 61));
+      await setup.site.getPlayQualities(detail: room);
+      expect(_paths(setup.http), ['/watch/$_user', '/watch/$_user', _master.path]);
+    });
+
+    test('refresh, recording and the live state keep nothing; a zero lifetime turns it off', () async {
+      final setup = _setup(
+        [_watchPage('S03-watch-user-live', _user), _synthetic('$_master', _officialMaster)],
+        channels: [_Channel(_serverFrames(pings: false))],
+      );
+      await setup.site.getRoomDetailForRefresh(roomId: _user);
+      await setup.site.getRoomDetailForRecording(roomId: _user);
+      await setup.site.getLiveStatus(roomId: _user);
+      await setup.site.getPlayQualities(detail: _room(_user));
+      expect(_paths(setup.http).where((path) => path.startsWith('/watch/')), hasLength(4));
+      final off = _setup(
+        [_watchPage('S03-watch-user-live', _user), _synthetic('$_master', _officialMaster)],
+        channels: [_Channel(_serverFrames(pings: false))],
+        bootstrapLifetime: Duration.zero,
+      );
+      await off.site.getRoomDetail(roomId: _user);
+      await off.site.getPlayQualities(detail: _room(_user));
+      expect(_paths(off.http), ['/watch/$_user', '/watch/$_user', _master.path]);
+    });
+
+    test('a refused kept bootstrap is retried once on a fresh page', () async {
+      final refused = _Channel([
+        _frame('error', {'code': 'CONNECT_ERROR'}),
+      ]);
+      final setup = _setup(
+        [_watchPage('S03-watch-user-live', _user), _synthetic('$_master', _officialMaster)],
+        channels: [refused, _Channel(_serverFrames(pings: false))],
+      );
+      final room = await setup.site.getRoomDetail(roomId: _user);
+      expect(await setup.site.getPlayQualities(detail: room), hasLength(3));
+      expect(_paths(setup.http), ['/watch/$_user', '/watch/$_user', _master.path]);
+      expect(setup.connector.calls, hasLength(2));
+      expect(refused.closed, isTrue);
+    });
+
+    test('an offline or restricted room keeps no bootstrap; a cancelled discovery is not retried', () async {
+      final setup = _setup([_watchPage('S03-watch-user-ended', 'user/138383030')]);
+      await setup.site.getRoomDetail(roomId: 'user/138383030');
+      await expectLater(
+        setup.site.getPlayQualities(detail: _room('user/138383030')),
+        throwsA(isA<StreamUnavailable>()),
+      );
+      expect(setup.http.requests, hasLength(2), reason: 'the page read again: nothing was kept');
+      final held = _Connector([_Channel()])..gate = Completer<void>();
+      final http = ReplayHttp([_watchPage('S03-watch-user-live', _user)]);
+      final site = NiconicoSite(http, connector: held.call);
+      final room = await site.getRoomDetail(roomId: _user);
+      final cancel = CancelToken();
+      final result = expectLater(site.discoverPlayQualities(detail: room, cancel: cancel), _cancelled());
+      await pumpEventQueue();
+      cancel.cancel();
+      await result;
+      held.gate!.complete();
+      expect(held.calls, hasLength(1), reason: 'no second seat after a cancellation');
+      expect(http.requests, hasLength(1));
     });
   });
 
@@ -975,18 +1282,61 @@ void main() {
   });
 
   group('links', () {
-    test("3.x's watch links, without requests", () async {
+    test('broadcaster links need no request (17-2)', () async {
       final http = ReplayHttp(const []);
       final site = NiconicoSite(http);
-      expect(site.roomIdFromUrl('https://live.nicovideo.jp/watch/lv100?ref=share#player'), 'lv100');
-      expect(site.roomIdFromUrl('http://live.nicovideo.jp/watch/lv100'), isNull);
-      expect(site.roomIdFromUrl('https://live.nicovideo.jp/watch/user/144846457'), isNull);
-      expect(site.needsResolving('https://nico.ms/lv100'), isFalse);
+      expect(site.roomIdFromUrl('https://live.nicovideo.jp/watch/user/144846457'), _user);
+      expect(site.roomIdFromUrl('https://ch.nicovideo.jp/channel/ch2640864'), 'ch2640864');
+      expect(site.roomIdFromUrl('https://live.nicovideo.jp/watch/lv100'), isNull, reason: 'a program is resolved');
+      expect(site.needsResolving('https://live.nicovideo.jp/watch/user/144846457'), isFalse);
       final parser = LinkParser(SiteRegistry({'niconico': () => site}), http);
-      expect(parser.containsSupportedLink('节目 https://live.nicovideo.jp/watch/lv100'), isTrue);
-      expect(await parser.parse('节目 https://live.nicovideo.jp/watch/lv100。快来'), const RoomLink('niconico', 'lv100'));
+      expect(parser.containsSupportedLink('主播 https://www.nicovideo.jp/user/144846457'), isTrue);
+      expect(await parser.parse('主播 https://www.nicovideo.jp/user/144846457。快来'), const RoomLink('niconico', _user));
+      expect(await parser.parse('https://ch.nicovideo.jp/ch2640864/live'), const RoomLink('niconico', 'ch2640864'));
       expect(await parser.parse('https://live.nicovideo.jp/watch/lv0'), isNull);
       expect(http.requests, isEmpty);
+    });
+
+    test("a program link is its broadcaster's room: one request for the program's own watch page", () async {
+      final http = ReplayHttp([_watchPage('S03-watch-user-live', _live)]);
+      final site = NiconicoSite(http);
+      for (final url in [
+        'https://live.nicovideo.jp/watch/$_live?ref=share',
+        'http://live.nicovideo.jp/watch/$_live',
+        'https://sp.live.nicovideo.jp/watch/$_live',
+        'https://nico.ms/$_live',
+      ]) {
+        expect(site.needsResolving(url), isTrue, reason: url);
+        final parser = LinkParser(SiteRegistry({'niconico': () => site}), http);
+        expect(parser.containsSupportedLink('节目 $url'), isTrue);
+        expect(await parser.parse('节目 $url。快来'), const RoomLink('niconico', _user), reason: url);
+      }
+      expect(http.requests.map((request) => request.url.toString()).toSet(), {
+        'https://live.nicovideo.jp/watch/$_live',
+      });
+      expect(http.requests.first.headers, NiconicoApi.headers);
+      expect(http.requests.first.followRedirects, isFalse);
+    });
+
+    test('an official program link stays the program; an unreadable page falls back to the program', () async {
+      final http = ReplayHttp([
+        _watchPage('S03-watch-official', 'lv351173882'),
+        ReplaySample.load('$_root/S03-watch-notfound'),
+        _synthetic('https://live.nicovideo.jp/watch/lv2', 'not a watch page'),
+      ]);
+      final parser = LinkParser(SiteRegistry({'niconico': () => NiconicoSite(http)}), http);
+      expect(await parser.parse('https://nico.ms/lv351173882'), const RoomLink('niconico', 'lv351173882'));
+      expect(
+        await parser.parse('https://nico.ms/lv1'),
+        const RoomLink('niconico', 'lv1'),
+        reason: '404: entering says so',
+      );
+      expect(await parser.parse('https://nico.ms/lv2'), const RoomLink('niconico', 'lv2'));
+      final failing = LinkParser(
+        SiteRegistry({'niconico': () => NiconicoSite(_Failing(TransportReason.connect))}),
+        _Failing(TransportReason.connect),
+      );
+      expect(await failing.parse('https://nico.ms/lv3'), const RoomLink('niconico', 'lv3'));
     });
   });
 }

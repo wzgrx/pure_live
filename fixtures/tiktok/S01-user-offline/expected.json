@@ -1,0 +1,719 @@
+{
+  "generator": "TikTokSite.getRoomDetailForRefresh + getRoomDetail + getRoomDetailForRecording + getLiveStatus + searchRooms + getPlayQualites + getPlayUrls + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + getDirectoryPage + getRecommendRooms; TikTokLink.parse + parseOrUsername + parseDurableUsername + normalizeUsername + url; WebSearchRoomParser.parse (TikTok step); trustedHosts: the same calls over this answer with tiktokcdn-us.com spelled tiktokcdn.com (3.x trusted only the latter)",
+  "value": {
+    "getRoomDetailForRefresh(cnn)": {
+      "result": {
+        "roomId": "cnn",
+        "userId": "6971822573634978822",
+        "title": "Fans pay tribute to Dolly Parton",
+        "nick": "CNN",
+        "avatar": "",
+        "cover": "",
+        "area": "TikTok LIVE",
+        "watching": "",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "16152702",
+        "platform": "tiktok",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+        "introduction": "This is CNN...",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.tiktok.com",
+          "referer": "https://www.tiktok.com/@cnn/live",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.tiktok.com/@cnn/live"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+      ]
+    },
+    "getRoomDetailForRefresh(CNN)": {
+      "result": {
+        "roomId": "cnn",
+        "userId": "6971822573634978822",
+        "title": "Fans pay tribute to Dolly Parton",
+        "nick": "CNN",
+        "avatar": "",
+        "cover": "",
+        "area": "TikTok LIVE",
+        "watching": "",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "16152702",
+        "platform": "tiktok",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+        "introduction": "This is CNN...",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.tiktok.com",
+          "referer": "https://www.tiktok.com/@cnn/live",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.tiktok.com/@cnn/live"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+      ]
+    },
+    "getRoomDetailForRefresh(@cnn)": {
+      "result": {
+        "throws": "TikTokException",
+        "message": "TikTok identity"
+      },
+      "requests": []
+    },
+    "getRoomDetail": {
+      "result": {
+        "roomId": "cnn",
+        "userId": "6971822573634978822",
+        "title": "Fans pay tribute to Dolly Parton",
+        "nick": "CNN",
+        "avatar": "",
+        "cover": "",
+        "area": "TikTok LIVE",
+        "watching": "",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "16152702",
+        "platform": "tiktok",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+        "introduction": "This is CNN...",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.tiktok.com",
+          "referer": "https://www.tiktok.com/@cnn/live",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.tiktok.com/@cnn/live"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "roomId": "cnn",
+        "userId": "6971822573634978822",
+        "title": "Fans pay tribute to Dolly Parton",
+        "nick": "CNN",
+        "avatar": "",
+        "cover": "",
+        "area": "TikTok LIVE",
+        "watching": "",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "16152702",
+        "platform": "tiktok",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+        "introduction": "This is CNN...",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.tiktok.com",
+          "referer": "https://www.tiktok.com/@cnn/live",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.tiktok.com/@cnn/live"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+      ]
+    },
+    "getLiveStatus": {
+      "result": false,
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+      ]
+    },
+    "searchRooms(cnn)": {
+      "result": [
+        {
+          "roomId": "cnn",
+          "userId": "6971822573634978822",
+          "title": "Fans pay tribute to Dolly Parton",
+          "nick": "CNN",
+          "avatar": "",
+          "cover": "",
+          "area": "TikTok LIVE",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "16152702",
+          "platform": "tiktok",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is CNN...",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@cnn/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@cnn/live"
+        }
+      ],
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+      ]
+    },
+    "searchRooms(@cnn)": {
+      "result": [
+        {
+          "roomId": "cnn",
+          "userId": "6971822573634978822",
+          "title": "Fans pay tribute to Dolly Parton",
+          "nick": "CNN",
+          "avatar": "",
+          "cover": "",
+          "area": "TikTok LIVE",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "16152702",
+          "platform": "tiktok",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is CNN...",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@cnn/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@cnn/live"
+        }
+      ],
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+      ]
+    },
+    "searchRooms(CNN)": {
+      "result": [
+        {
+          "roomId": "cnn",
+          "userId": "6971822573634978822",
+          "title": "Fans pay tribute to Dolly Parton",
+          "nick": "CNN",
+          "avatar": "",
+          "cover": "",
+          "area": "TikTok LIVE",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "16152702",
+          "platform": "tiktok",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is CNN...",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@cnn/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@cnn/live"
+        }
+      ],
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+      ]
+    },
+    "searchRooms(https://www.tiktok.com/@cnn/live)": {
+      "result": [
+        {
+          "roomId": "cnn",
+          "userId": "6971822573634978822",
+          "title": "Fans pay tribute to Dolly Parton",
+          "nick": "CNN",
+          "avatar": "",
+          "cover": "",
+          "area": "TikTok LIVE",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "16152702",
+          "platform": "tiktok",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is CNN...",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@cnn/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@cnn/live"
+        }
+      ],
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+      ]
+    },
+    "searchRooms(https://vm.tiktok.com/ZMabcdef/)": {
+      "result": [],
+      "requests": []
+    },
+    "searchRooms(not a user!)": {
+      "result": [],
+      "requests": []
+    },
+    "searchRooms()": {
+      "result": [],
+      "requests": []
+    },
+    "searchRooms(cnn, page: 2)": {
+      "result": [],
+      "requests": []
+    },
+    "getPlayQualites": {
+      "result": [],
+      "requests": []
+    },
+    "getPlayUrls": {
+      "h264:hd:flv": {
+        "result": {
+          "throws": "TikTokException",
+          "message": "TikTok mediaUnavailable"
+        },
+        "requests": []
+      }
+    },
+    "resolvePlayUrlsRaw": {
+      "h264:hd:flv": {
+        "result": {
+          "throws": "TikTokException",
+          "message": "TikTok mediaUnavailable"
+        },
+        "requests": []
+      }
+    },
+    "resolvePlayUrlsForRecoveryRaw": {
+      "result": {
+        "throws": "TikTokException",
+        "message": "TikTok mediaUnavailable"
+      },
+      "requests": []
+    },
+    "getPlayQualites(refresh card)": [],
+    "links": {
+      "cnn": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "cnn"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "cnn",
+        "WebSearchRoomParser.parse": null
+      },
+      "@cnn": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "cnn"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "CNN": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "cnn"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "cnn",
+        "WebSearchRoomParser.parse": null
+      },
+      " cnn ": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "cnn"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "cnn",
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/@cnn": {
+        "TikTokLink.parse": {
+          "kind": "username",
+          "id": "cnn"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "cnn"
+        },
+        "TikTokLink.parseDurableUsername": "cnn",
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": [
+          "tiktok",
+          "cnn"
+        ]
+      },
+      "https://www.tiktok.com/@cnn/live": {
+        "TikTokLink.parse": {
+          "kind": "username",
+          "id": "cnn"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "cnn"
+        },
+        "TikTokLink.parseDurableUsername": "cnn",
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": [
+          "tiktok",
+          "cnn"
+        ]
+      },
+      "https://m.tiktok.com/@CNN/live/": {
+        "TikTokLink.parse": {
+          "kind": "username",
+          "id": "cnn"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "cnn"
+        },
+        "TikTokLink.parseDurableUsername": "cnn",
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": [
+          "tiktok",
+          "cnn"
+        ]
+      },
+      "http://tiktok.com/@cnn": {
+        "TikTokLink.parse": {
+          "kind": "username",
+          "id": "cnn"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "cnn"
+        },
+        "TikTokLink.parseDurableUsername": "cnn",
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": [
+          "tiktok",
+          "cnn"
+        ]
+      },
+      "https://www.tiktok.com/@cnn/video/7300000000000000000": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/@cnn/live#chat": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://user:pass@www.tiktok.com/@cnn": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/@cnn/../live": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://vm.tiktok.com/ZMabcdef/": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/t/ZTabcdef/": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/share/live/7690279124098681614": {
+        "TikTokLink.parse": {
+          "kind": "roomId",
+          "id": "7690279124098681614"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "roomId",
+          "id": "7690279124098681614"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/share/live/123": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.evil.com/@cnn": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "not a user!": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "a..b": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "a..b"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "a..b",
+        "WebSearchRoomParser.parse": null
+      },
+      "_": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "_"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "_",
+        "WebSearchRoomParser.parse": null
+      },
+      "": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      }
+    },
+    "TikTokLink.url": "https://www.tiktok.com/@cnn/live",
+    "getDirectoryPage": {
+      "result": {
+        "rooms": [],
+        "page": 1,
+        "hasMore": false
+      },
+      "requests": []
+    },
+    "getDirectoryPage(page: 2)": {
+      "result": {
+        "rooms": [],
+        "page": 2,
+        "hasMore": false
+      },
+      "requests": []
+    },
+    "getRecommendRooms": {
+      "result": [],
+      "requests": []
+    },
+    "trustedHosts": {
+      "getRoomDetailForRefresh(cnn)": {
+        "result": {
+          "roomId": "cnn",
+          "userId": "6971822573634978822",
+          "title": "Fans pay tribute to Dolly Parton",
+          "nick": "CNN",
+          "avatar": "https://p16-common-sign.tiktokcdn.com/tos-useast5-avt-0068-tx/99d43f49d3f1749ffa85f5954ca10a8c~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=dddb9a46&x-expires=1790712000&x-signature=ji8MXtbLMRt7ZGTwKnJvy8eXCj0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "cover": "https://p16-common-sign.tiktokcdn.com/tos-useast5-avt-0068-tx/99d43f49d3f1749ffa85f5954ca10a8c~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=f2321464&x-expires=1790712000&x-signature=tbXjUg9N1innmYJkFboHbtrQmEw%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "area": "TikTok LIVE",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "16152702",
+          "platform": "tiktok",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is CNN...",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@cnn/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@cnn/live"
+        },
+        "requests": [
+          "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+        ]
+      },
+      "getRoomDetailForRefresh(CNN)": {
+        "result": {
+          "roomId": "cnn",
+          "userId": "6971822573634978822",
+          "title": "Fans pay tribute to Dolly Parton",
+          "nick": "CNN",
+          "avatar": "https://p16-common-sign.tiktokcdn.com/tos-useast5-avt-0068-tx/99d43f49d3f1749ffa85f5954ca10a8c~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=dddb9a46&x-expires=1790712000&x-signature=ji8MXtbLMRt7ZGTwKnJvy8eXCj0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "cover": "https://p16-common-sign.tiktokcdn.com/tos-useast5-avt-0068-tx/99d43f49d3f1749ffa85f5954ca10a8c~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=f2321464&x-expires=1790712000&x-signature=tbXjUg9N1innmYJkFboHbtrQmEw%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "area": "TikTok LIVE",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "16152702",
+          "platform": "tiktok",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is CNN...",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@cnn/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@cnn/live"
+        },
+        "requests": [
+          "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+        ]
+      },
+      "getRoomDetailForRefresh(@cnn)": {
+        "result": {
+          "throws": "TikTokException",
+          "message": "TikTok identity"
+        },
+        "requests": []
+      },
+      "getRoomDetail": {
+        "result": {
+          "roomId": "cnn",
+          "userId": "6971822573634978822",
+          "title": "Fans pay tribute to Dolly Parton",
+          "nick": "CNN",
+          "avatar": "https://p16-common-sign.tiktokcdn.com/tos-useast5-avt-0068-tx/99d43f49d3f1749ffa85f5954ca10a8c~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=dddb9a46&x-expires=1790712000&x-signature=ji8MXtbLMRt7ZGTwKnJvy8eXCj0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "cover": "https://p16-common-sign.tiktokcdn.com/tos-useast5-avt-0068-tx/99d43f49d3f1749ffa85f5954ca10a8c~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=f2321464&x-expires=1790712000&x-signature=tbXjUg9N1innmYJkFboHbtrQmEw%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "area": "TikTok LIVE",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "16152702",
+          "platform": "tiktok",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is CNN...",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@cnn/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@cnn/live"
+        },
+        "requests": [
+          "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "cnn",
+          "userId": "6971822573634978822",
+          "title": "Fans pay tribute to Dolly Parton",
+          "nick": "CNN",
+          "avatar": "https://p16-common-sign.tiktokcdn.com/tos-useast5-avt-0068-tx/99d43f49d3f1749ffa85f5954ca10a8c~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=dddb9a46&x-expires=1790712000&x-signature=ji8MXtbLMRt7ZGTwKnJvy8eXCj0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "cover": "https://p16-common-sign.tiktokcdn.com/tos-useast5-avt-0068-tx/99d43f49d3f1749ffa85f5954ca10a8c~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=f2321464&x-expires=1790712000&x-signature=tbXjUg9N1innmYJkFboHbtrQmEw%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "area": "TikTok LIVE",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "16152702",
+          "platform": "tiktok",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is CNN...",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@cnn/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@cnn/live"
+        },
+        "requests": [
+          "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+        ]
+      },
+      "getLiveStatus": {
+        "result": false,
+        "requests": [
+          "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=cnn"
+        ]
+      },
+      "getPlayQualites": {
+        "result": [],
+        "requests": []
+      },
+      "getPlayUrls": {
+        "h264:hd:flv": {
+          "result": {
+            "throws": "TikTokException",
+            "message": "TikTok mediaUnavailable"
+          },
+          "requests": []
+        }
+      },
+      "resolvePlayUrlsRaw": {
+        "h264:hd:flv": {
+          "result": {
+            "throws": "TikTokException",
+            "message": "TikTok mediaUnavailable"
+          },
+          "requests": []
+        }
+      },
+      "resolvePlayUrlsForRecoveryRaw": {
+        "result": {
+          "throws": "TikTokException",
+          "message": "TikTok mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getPlayQualites(refresh card)": []
+    }
+  }
+}

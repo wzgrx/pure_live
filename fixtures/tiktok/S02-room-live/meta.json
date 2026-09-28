@@ -1,0 +1,282 @@
+{
+  "schema": 1,
+  "platform": "tiktok",
+  "sample": "S02-room-live",
+  "capturedAt": "2026-09-27T20:15:56.667967Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://webcast.tiktok.com/webcast/room/info/?aid=1988&room_id=7690279124098681614",
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Origin": "https://www.tiktok.com",
+      "Referer": "https://www.tiktok.com/",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Sun, 27 Sep 2026 20:15:57 GMT",
+      "transfer-encoding": "chunked",
+      "x-origin-response-time": "181,23.40.189.169",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "x-parent-response-time": "327,2.22.28.138",
+      "access-control-expose-headers": [
+        "x-tt-traceflag,x-tt-logid",
+        "Content-Length,X-Tt-Logid,X-Ware-Csrf-Token,Timing-Allow-Origin,Tt-Ticket-Guard-Result"
+      ],
+      "pragma": "no-cache",
+      "x-tt-trace-host": "01950f0104d0d35fca1a7be1206751e26ff6337dc469b832f3e9934af75d9679ed155e0da8eda39a87c9f5f4edcddf3809c0d4999268a2263378d2306554e1cb2b158db56a0919d1767c6e7ec745c6c8831c7dc7e2696f63ed4f71b8e726532d774e82738cdbe3bc4e4fd216467cf5774d",
+      "server": "TLB",
+      "x-envoy-response-flags": "-",
+      "x-tt-trace-tag": "id=16;cdn-cache=miss;type=dyn",
+      "tt_stable": "1",
+      "x-akamai-request-id": "7997ef17.599211d2",
+      "connection": [
+        "keep-alive",
+        "Transfer-Encoding"
+      ],
+      "cache-control": "max-age=0, no-cache, no-store",
+      "access-control-allow-origin": "https://www.tiktok.com",
+      "strict-transport-security": "max-age=31536000; includeSubDomains",
+      "server-timing": [
+        "cdn-cache; desc=MISS, edge; dur=146, origin; dur=181",
+        "inner; dur=133"
+      ],
+      "x-tt-trace-id": "00-2609280415567C32DDAE83B93EC50178-2ABBA65B6ED74BA3-00",
+      "content-type": "application/json; charset=utf-8",
+      "x-tt-logid": "202609280415567C32DDAE83B93EC50178",
+      "access-control-allow-credentials": "true",
+      "x-cache-remote": "TCP_MISS from a23-40-189-169.deploy.akamaitechnologies.com (AkamaiGHost/22.6.3-da071da6976b6d633b0b37bcfe65c0fc) (-)",
+      "x-cache": "TCP_MISS from a2-22-28-138.deploy.akamaitechnologies.com (AkamaiGHost/22.6.3-da071da6976b6d633b0b37bcfe65c0fc) (-)",
+      "expires": "Sun, 27 Sep 2026 20:15:57 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "5938857ecc383f1b5f2b7be21ac537780a7d93f2576a8d958cb2c3758baef476",
+    "length": 45719
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.cover.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.cover.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.cover.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.owner.avatar_large.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.owner.avatar_large.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.owner.avatar_large.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.owner.avatar_medium.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.owner.avatar_medium.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.owner.avatar_medium.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.owner.avatar_thumb.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.owner.avatar_thumb.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.owner.avatar_thumb.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.flv_pull_url.HD1:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.flv_pull_url_params.HD1.cmaf_auth:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.hls_pull_url:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.hls_pull_url_params.cmaf_auth:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.live_core_sdk_data.pull_data.stream_data.data.hd.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.live_core_sdk_data.pull_data.stream_data.data.hd.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.live_core_sdk_data.pull_data.stream_data.data.hd.main.cmaf:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.live_core_sdk_data.pull_data.stream_data.data.hd.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.live_core_sdk_data.pull_data.stream_data.data.hd.main.sdk_params.cmaf_auth:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.live_core_sdk_data.pull_data.stream_data.data.ao.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.live_core_sdk_data.pull_data.stream_data.data.ao.main.cmaf:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.live_core_sdk_data.pull_data.stream_data.data.ao.main.sdk_params.cmaf_auth:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.rtmp_pull_url:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream_url.rtmp_pull_url_params.cmaf_auth:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[0].user.avatar_large.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[0].user.avatar_large.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[0].user.avatar_large.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[0].user.avatar_medium.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[0].user.avatar_medium.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[0].user.avatar_medium.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[0].user.avatar_thumb.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[0].user.avatar_thumb.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[0].user.avatar_thumb.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[1].user.avatar_large.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[1].user.avatar_large.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[1].user.avatar_large.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[1].user.avatar_medium.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[1].user.avatar_medium.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[1].user.avatar_medium.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[1].user.avatar_thumb.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[1].user.avatar_thumb.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[1].user.avatar_thumb.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[2].user.avatar_large.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[2].user.avatar_large.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[2].user.avatar_large.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[2].user.avatar_medium.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[2].user.avatar_medium.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[2].user.avatar_medium.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[2].user.avatar_thumb.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[2].user.avatar_thumb.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.top_fans[2].user.avatar_thumb.url_list[2]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "stream_data:sign",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

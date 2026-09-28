@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +9,7 @@ import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/tv.dart';
+import 'package:pure_live_app/features/discover/discover_page.dart' show platformTab;
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
 import 'package:pure_live_app/features/search/search_results.dart';
@@ -42,6 +45,9 @@ class SearchFocusRequest extends Notifier<int> {
 final searchFocusRequestProvider = NotifierProvider<SearchFocusRequest, int>(SearchFocusRequest.new);
 
 class _SearchPageState extends ConsumerState<SearchPage> {
+  static const double _boxHeight = 48;
+  static const double _barHeight = _boxHeight + 2 * Space.s2;
+
   final _controller = TextEditingController();
   final _focus = FocusNode(debugLabel: 'search box');
   String _keyword = '';
@@ -100,20 +106,21 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    final layout = WindowLayout(MediaQuery.sizeOf(context));
     final voice = TvScope.of(context).enabled && ref.watch(tvDeviceProvider).voiceSearch;
     ref.listen(searchFocusRequestProvider, (_, _) {
       _focus.requestFocus();
       _controller.selection = TextSelection(baseOffset: 0, extentOffset: _controller.text.length);
     });
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: TvScope.of(context).enabled ? Space.s2 : layout.margin,
+      // The box keeps 8 dp above and below instead of filling the bar.
+      appBar: PageAppBar(
+        toolbarHeight: _barHeight,
         title: SearchBar(
           controller: _controller,
           focusNode: _focus,
           hintText: t.search.hint,
           elevation: const WidgetStatePropertyAll(0),
+          constraints: const BoxConstraints(minHeight: _boxHeight, maxHeight: _boxHeight, maxWidth: 800),
           leading: const Icon(Icons.search),
           textInputAction: TextInputAction.search,
           onSubmitted: _submit,
@@ -151,6 +158,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     final wide = !TvScope.of(context).enabled && layout.width.atLeast(WidthClass.expanded) && !layout.isShortLandscape;
     final keyword = _keyword;
     final sort = _sort;
+    final margin = PageMargin.of(context);
     bool Function(RoomCard card)? where;
     if (_liveOnly) where = (card) => card.state == LiveState.live;
     Widget results(String? platform) => platform == null
@@ -161,7 +169,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             arrange: (cards) => sortSearch(cards, sort, platforms: platforms),
             emptyText: t.search.empty,
             originLabel: t.search.results,
+            offlineAsRows: true,
           );
+    // The sort menu's icon sits on the line it starts from; its label and
+    // the chip follow.
     final tools = [
       PopupMenuButton<SearchSort>(
         tooltip: t.follows.sortTooltip,
@@ -172,7 +183,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             CheckedPopupMenuItem(value: option, checked: option == sort, child: Text(label)),
         ],
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Space.s2, vertical: Space.s2),
+          padding: const EdgeInsets.all(Space.s2),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -183,13 +194,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           ),
         ),
       ),
-      Padding(
-        padding: const EdgeInsets.only(right: Space.s2),
-        child: FilterChip(
-          label: Text(t.search.liveOnly),
-          selected: _liveOnly,
-          onSelected: (value) => setState(() => _liveOnly = value),
-        ),
+      const SizedBox(width: Space.s2),
+      FilterChip(
+        label: Text(t.search.liveOnly),
+        selected: _liveOnly,
+        onSelected: (value) => setState(() => _liveOnly = value),
       ),
     ];
     if (wide) {
@@ -198,7 +207,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(
-            width: 200,
+            width: _PlatformRail.width,
             child: _PlatformRail(
               keyword: keyword,
               platforms: platforms,
@@ -210,18 +219,22 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           Expanded(
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: layout.margin),
-                      child: Text(
-                        platform == null ? t.search.all : platformName(platform),
-                        style: Theme.of(context).textTheme.titleMedium,
+                // The heading on the grid's line, the chip ending on the margin.
+                Padding(
+                  padding: EdgeInsetsDirectional.only(start: margin, end: margin),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          platform == null ? t.search.all : platformName(platform),
+                          style: Theme.of(context).textTheme.titleMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    ...tools,
-                  ],
+                      ...tools,
+                    ],
+                  ),
                 ),
                 Expanded(
                   child: KeyedSubtree(key: ValueKey(platform), child: results(platform)),
@@ -232,24 +245,31 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         ],
       );
     }
+    // Compact and medium (principles §5.2): the platforms as discover's logo
+    // tabs over the whole width, the order and 只看开播 on a second row.
     return DefaultTabController(
       length: platforms.length + 1,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: TabBar(
-                  isScrollable: true,
-                  tabAlignment: TabAlignment.start,
-                  tabs: [
-                    Tab(text: t.search.all),
-                    for (final id in platforms) Tab(text: platformNames[id]),
+          PageTabBar(
+            tabs: [
+              Tab(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.travel_explore, size: 18),
+                    const SizedBox(width: Space.s2),
+                    Text(t.search.all),
                   ],
                 ),
               ),
-              ...tools,
+              for (final id in platforms) platformTab(id),
             ],
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(math.max(0, margin - Space.s2), Space.s1, margin, 0),
+            child: Row(children: tools),
           ),
           Expanded(child: TabBarView(children: [results(null), for (final id in platforms) results(id)])),
         ],
@@ -259,9 +279,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 }
 
 /// The filter rail of wide windows (principles §5.2): 综合 and each platform
-/// with the number of rooms the combined search found there so far.
-class _PlatformRail extends ConsumerWidget {
+/// with the number of rooms the combined search found there so far. The
+/// platforms without results fold into one "其它平台" entry, so the few that
+/// matter are not lost among a dozen zeros.
+class _PlatformRail extends ConsumerStatefulWidget {
   const new({required this.keyword, required this.platforms, required this.selected, required this.onSelected});
+
+  /// Width of the rail.
+  static const double width = 216;
 
   final String keyword;
   final List<String> platforms;
@@ -269,31 +294,60 @@ class _PlatformRail extends ConsumerWidget {
   final ValueChanged<String?> onSelected;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final combined = ref.watch(combinedSearchProvider(keyword)).value;
+  ConsumerState<_PlatformRail> createState() => _PlatformRailState();
+}
+
+class _PlatformRailState extends ConsumerState<_PlatformRail> {
+  bool _othersOpen = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final combined = ref.watch(combinedSearchProvider(widget.keyword)).value;
     final counts = combined?.counts ?? const <String, int>{};
-    String? count(int? value) => value == null ? null : '$value';
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: Space.s2),
-      children: [
-        ListTile(
-          leading: const Icon(Icons.travel_explore),
-          title: Text(t.search.all),
-          trailing: combined == null ? null : Text('${combined.items.length}'),
-          selected: selected == null,
-          onTap: () => onSelected(null),
-        ),
-        for (final id in platforms)
+    // A failure is news too: it stays in view with its tag.
+    bool found(String id) => (counts[id] ?? 0) > 0 || (combined?.failed.contains(id) ?? false);
+    final shown = [
+      for (final id in widget.platforms)
+        if (found(id)) id,
+    ];
+    final others = [
+      for (final id in widget.platforms)
+        if (!found(id)) id,
+    ];
+    final open = _othersOpen || others.contains(widget.selected);
+    Widget? count(String text) => combined == null ? null : Text(text, style: LiveTheme.of(context).numeric);
+    Widget platform(String id) => ListTile(
+      leading: PlatformLogo(platformId: id, size: Sizes.iconDense),
+      title: Text(platformName(id), maxLines: 1, overflow: TextOverflow.ellipsis),
+      trailing: count(combined?.failed.contains(id) ?? false ? t.search.failedTag : '${counts[id] ?? 0}'),
+      selected: widget.selected == id,
+      onTap: () => widget.onSelected(id),
+    );
+    return ListTileTheme.merge(
+      contentPadding: EdgeInsetsDirectional.only(start: PageMargin.of(context), end: Space.s4),
+      horizontalTitleGap: Space.s3,
+      minLeadingWidth: Sizes.iconDense,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: Space.s2),
+        children: [
           ListTile(
-            leading: PlatformLogo(platformId: id, size: Sizes.iconDense),
-            title: Text(platformName(id)),
-            trailing: combined == null
-                ? null
-                : Text(combined.failed.contains(id) ? t.search.failedTag : count(counts[id]) ?? '0'),
-            selected: selected == id,
-            onTap: () => onSelected(id),
+            leading: const Icon(Icons.travel_explore, size: Sizes.iconDense),
+            title: Text(t.search.all, maxLines: 1, overflow: TextOverflow.ellipsis),
+            trailing: count('${combined?.items.length ?? 0}'),
+            selected: widget.selected == null,
+            onTap: () => widget.onSelected(null),
           ),
-      ],
+          for (final id in shown) platform(id),
+          if (others.isNotEmpty)
+            ListTile(
+              leading: Icon(open ? Icons.expand_less : Icons.expand_more, size: Sizes.iconDense),
+              title: Text(t.search.otherPlatforms(n: others.length), maxLines: 1, overflow: TextOverflow.ellipsis),
+              onTap: () => setState(() => _othersOpen = !open),
+            ),
+          if (open)
+            for (final id in others) platform(id),
+        ],
+      ),
     );
   }
 }
@@ -353,6 +407,7 @@ class _CombinedResults extends ConsumerWidget {
         final failed = state.failed;
         return RoomCardGrid(
           density: ref.watch(cardDensityProvider),
+          offlineAsRows: true,
           items: sortSearch(found, sort, platforms: platforms),
           hasMore: state.hasMore,
           moreError: state.moreError,
@@ -361,7 +416,7 @@ class _CombinedResults extends ConsumerWidget {
           header: failed.isEmpty || failed.length == platforms.length
               ? null
               : Padding(
-                  padding: const EdgeInsets.fromLTRB(Space.s4, Space.s2, Space.s4, 0),
+                  padding: EdgeInsets.fromLTRB(PageMargin.of(context), Space.s2, PageMargin.of(context), 0),
                   child: Text(
                     t.search.someFailed(platforms: failed.map(platformName).join(t.common.listSeparator)),
                     style: Theme.of(context).textTheme.bodySmall,

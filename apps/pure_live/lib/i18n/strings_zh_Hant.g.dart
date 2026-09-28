@@ -1993,6 +1993,8 @@ class Translations$search$zh_Hant implements Translations$search$zh_Hans {
   @override
   String get failedTag => '失敗';
   @override
+  String otherPlatforms({required Object n}) => '其他平台 ${n}';
+  @override
   String get allFailed => '搜尋失敗，檢查網路後下拉重試';
   @override
   String someFailed({required Object platforms}) => '${platforms}搜尋失敗，下拉可以重試';

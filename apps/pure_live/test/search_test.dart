@@ -204,4 +204,84 @@ void main() {
     expect(names(), ['主播h1']);
     expect(huya.cursors, [null, null], reason: 'the platform list pages on its own');
   });
+
+  group('search layout', () {
+    Future<Map<String, FakeSite>> pumpSearch(WidgetTester tester, Size size, TargetPlatform platform) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final store = (await tester.runAsync(LiveStore.inMemory))!;
+      addTearDown(() => tester.runAsync(store.close));
+      final sites = {
+        'douyu': FakeSite(
+          'douyu',
+          pages: [
+            Page([_card('douyu', 'd1', online: 10), _card('douyu', 'd2', state: LiveState.offline)]),
+          ],
+        ),
+        'huya': FakeSite('huya'),
+        'bilibili': FakeSite('bilibili'),
+        'showroom': FakeSite('showroom'),
+      };
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            storeProvider.overrideWithValue(store),
+            sitesProvider.overrideWithValue({for (final e in sites.entries) e.key: PlatformSite(e.value)}),
+            enabledPlatformsProvider.overrideWithValue(sites.keys.toList()),
+            recordingRoomsProvider.overrideWith((ref) => Stream.value(const {})),
+          ],
+          child: MaterialApp(
+            theme: PureTheme.of(Appearance.light, platform: platform),
+            home: const SearchPage(),
+          ),
+        ),
+      );
+      await tester.enterText(find.byType(TextField), '英雄联盟');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+      return sites;
+    }
+
+    testWidgets('compact: logo tabs over the whole width, order and 只看开播 on the row below', (tester) async {
+      await pumpSearch(tester, const Size(393, 852), TargetPlatform.android);
+      final tabs = find.byType(TabBar);
+      expect(find.descendant(of: tabs, matching: find.byType(PlatformLogo)), findsWidgets, reason: 'as in discover');
+      expect(tester.getSize(tabs).width, 393, reason: 'the tools no longer share the row');
+      final chip = tester.getRect(find.text('只看开播'));
+      expect(chip.top, greaterThan(tester.getRect(tabs).bottom));
+      expect(tester.getRect(find.text('虎牙')).right, lessThan(393), reason: 'the third platform is not cut');
+    });
+
+    testWidgets('the box keeps a gap above it instead of touching the top', (tester) async {
+      await pumpSearch(tester, const Size(393, 852), TargetPlatform.android);
+      expect(tester.getRect(find.byType(SearchBar)).top, Space.s2);
+      expect(tester.getRect(find.byType(SearchBar)).left, Space.s4, reason: 'on the page margin');
+    });
+
+    testWidgets('F-SRC-01: rooms that are not live are rows, as on the follows page', (tester) async {
+      await pumpSearch(tester, const Size(393, 852), TargetPlatform.android);
+      expect(find.widgetWithText(RoomCardView, '主播d1'), findsOneWidget);
+      expect(find.widgetWithText(OfflineRoomRow, '主播d2'), findsOneWidget);
+      expect(find.widgetWithText(RoomCardView, '主播d2'), findsNothing, reason: 'no blank cover card');
+      expect(find.text('未开播 1'), findsOneWidget);
+    });
+
+    testWidgets('wide: platforms without results fold into 其它平台, names stay on one line', (tester) async {
+      await pumpSearch(tester, const Size(1920, 1080), TargetPlatform.windows);
+      expect(find.widgetWithText(ListTile, '斗鱼'), findsOneWidget);
+      expect(find.widgetWithText(ListTile, '虎牙'), findsNothing, reason: 'no results: folded');
+      expect(find.text('其它平台 3'), findsOneWidget);
+      await tester.tap(find.text('其它平台 3'));
+      await tester.pump();
+      expect(find.widgetWithText(ListTile, '虎牙'), findsOneWidget);
+      final name = tester.widget<Text>(find.text('SHOWROOM'));
+      expect(name.maxLines, 1);
+      expect(name.overflow, TextOverflow.ellipsis);
+      final chip = tester.getRect(find.byType(FilterChip));
+      expect(1920 - chip.right, 32, reason: '只看开播 ends on the page margin');
+    });
+  });
 }

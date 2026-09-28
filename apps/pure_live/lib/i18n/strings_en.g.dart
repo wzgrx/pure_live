@@ -2066,6 +2066,8 @@ class _Translations$search$en implements Translations$search$zh_Hans {
   @override
   String get failedTag => 'Failed';
   @override
+  String otherPlatforms({required Object n}) => 'Other platforms ${n}';
+  @override
   String get allFailed => 'Search failed. Check your network and pull down to retry.';
   @override
   String someFailed({required Object platforms}) => 'Search failed on ${platforms}. Pull down to retry.';

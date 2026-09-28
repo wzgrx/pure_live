@@ -105,11 +105,16 @@ class RoomGrid extends ConsumerWidget {
     this.emptyText,
     this.refreshOn,
     this.originLabel,
+    this.offlineAsRows = false,
     super.key,
   });
 
   /// The list to show.
   final RoomListQuery query;
+
+  /// Rooms that are not live show as compact rows under the cards
+  /// ([RoomCardGrid.offlineAsRows]).
+  final bool offlineAsRows;
 
   /// Optional client-side filter ("只看开播").
   final bool Function(RoomCard card)? where;
@@ -151,6 +156,7 @@ class RoomGrid extends ConsumerWidget {
           density: density ?? ref.watch(cardDensityProvider),
           emptyText: emptyText,
           originLabel: originLabel,
+          offlineAsRows: offlineAsRows,
           onLoadMore: () => ref.read(provider.notifier).loadMore(),
           onRefresh: () => ref.refresh(provider.future),
         );
@@ -172,11 +178,18 @@ class RoomCardGrid extends StatefulWidget {
     this.emptyText,
     this.originLabel,
     this.header,
+    this.offlineAsRows = false,
     super.key,
   });
 
   /// Cards in their shown order.
   final List<RoomCard> items;
+
+  /// Rooms that are not live show as compact rows (avatar, name, title)
+  /// under a "未开播" heading after the cards, as on the follows page
+  /// (principles §4.1), instead of blank cover cards; search results mix
+  /// both.
+  final bool offlineAsRows;
 
   /// Whether another page can load.
   final bool hasMore;
@@ -229,6 +242,18 @@ class _RoomCardGridState extends State<RoomCardGrid> {
         ),
       );
     }
+    final cards = widget.offlineAsRows
+        ? [
+            for (final card in items)
+              if (card.state == LiveState.live) card,
+          ]
+        : items;
+    final rows = widget.offlineAsRows
+        ? [
+            for (final card in items)
+              if (card.state != LiveState.live) card,
+          ]
+        : const <RoomCard>[];
     // The column count follows the content width, which excludes the
     // navigation rail (principles §5.2).
     return LayoutBuilder(
@@ -236,6 +261,8 @@ class _RoomCardGridState extends State<RoomCardGrid> {
         final grid = CardGridGeometry.of(context, constraints.maxWidth, density: widget.density);
         final dpr = MediaQuery.devicePixelRatioOf(context);
         final now = DateTime.now();
+        final margin = grid.padding.left;
+        final theme = Theme.of(context);
         return NotificationListener<ScrollNotification>(
           onNotification: (notification) {
             if (notification.metrics.extentAfter < 800 && widget.hasMore) widget.onLoadMore();
@@ -251,9 +278,9 @@ class _RoomCardGridState extends State<RoomCardGrid> {
                   padding: grid.padding,
                   sliver: SliverGrid.builder(
                     gridDelegate: grid.delegate,
-                    itemCount: items.length,
+                    itemCount: cards.length,
                     itemBuilder: (context, index) => RoomCardTile(
-                      card: items[index],
+                      card: cards[index],
                       density: widget.density,
                       coverWidth: grid.cellWidth,
                       devicePixelRatio: dpr,
@@ -266,13 +293,37 @@ class _RoomCardGridState extends State<RoomCardGrid> {
                       onKeyEvent: (node, event) => _focus.handleKey(
                         index,
                         event,
-                        count: items.length,
+                        count: cards.length,
                         columns: grid.columns,
                         rowExtent: grid.rowExtent,
                       ),
                     ),
                   ),
                 ),
+                if (rows.isNotEmpty) ...[
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(margin, Space.s4, margin, Space.s1),
+                    sliver: SliverToBoxAdapter(
+                      child: Text(t.follows.offlineCount(n: rows.length), style: theme.textTheme.titleSmall),
+                    ),
+                  ),
+                  // As wide as a reading column on the grid's left line, like
+                  // the follows page (principles §4.3).
+                  SliverConstrainedCrossAxis(
+                    maxExtent: Sizes.readingWidth + 2 * margin,
+                    sliver: ListTileTheme.merge(
+                      contentPadding: PageMargin.tilePadding(margin),
+                      child: SliverList.builder(
+                        itemCount: rows.length,
+                        itemBuilder: (context, index) => OfflineRoomTile(
+                          card: rows[index],
+                          devicePixelRatio: dpr,
+                          origin: () => RoomOrigin.fromCards(items, label: widget.originLabel),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 SliverToBoxAdapter(
                   child: _Footer(hasMore: widget.hasMore, moreError: widget.moreError, onRetry: widget.onLoadMore),
                 ),
@@ -369,6 +420,41 @@ class RoomCardTile extends ConsumerWidget {
       onFocusChange: onFocusChange,
       onTap: () => context.push(roomLocation(card.ref), extra: origin?.call()),
       // principles §4.2: the same menu on every card.
+      onMenu: () => unawaited(
+        showRoomCardMenu(
+          context,
+          ref,
+          room: card.ref,
+          anchorName: card.anchorName,
+          snapshot: RoomSnapshot.fromCard(card),
+        ),
+      ),
+    );
+  }
+}
+
+/// A room that is not live, as a compact row: avatar, name, title, platform
+/// logo (principles §4.1); the same taps and menu as a card (§4.2).
+class OfflineRoomTile extends ConsumerWidget {
+  const new({required this.card, required this.devicePixelRatio, this.origin, super.key});
+
+  final RoomCard card;
+  final double devicePixelRatio;
+
+  /// The list the room belongs to, for switching rooms (F-NEW-04).
+  final RoomOrigin Function()? origin;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recording = ref.watch(recordingRoomsProvider.select((rooms) => rooms.value?.contains(card.ref.key) ?? false));
+    return OfflineRoomRow(
+      platformId: card.ref.platform,
+      anchorName: card.anchorName.isEmpty ? card.ref.roomId : card.anchorName,
+      avatar: networkImage(card.avatar, logicalWidth: 40, devicePixelRatio: devicePixelRatio),
+      subtitle: card.title.isEmpty ? t.common.offline : card.title,
+      tag: card.state == LiveState.replay ? t.follows.tag.replay : null,
+      recording: recording,
+      onTap: () => context.push(roomLocation(card.ref), extra: origin?.call()),
       onMenu: () => unawaited(
         showRoomCardMenu(
           context,

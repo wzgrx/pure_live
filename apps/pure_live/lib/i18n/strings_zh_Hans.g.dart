@@ -2748,6 +2748,9 @@ class Translations$search$zh_Hans {
   /// zh-Hans: '失败'
   String get failedTag => '失败';
 
+  /// zh-Hans: '其它平台 {n}'
+  String otherPlatforms({required Object n}) => '其它平台 ${n}';
+
   /// zh-Hans: '搜索失败，检查网络后下拉重试'
   String get allFailed => '搜索失败，检查网络后下拉重试';
 

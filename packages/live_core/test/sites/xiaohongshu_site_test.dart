@@ -167,8 +167,12 @@ void main() {
       );
     });
 
-    test("the notice text is 3.x's", () {
-      expect(XiaohongshuApi.directoryScope, startsWith('暂无已接入的公开直播目录。'));
+    test("the notice text keeps 3.x's key, reworded for users (the unified rule on notice texts)", () {
+      // 3.x: 暂无已接入的公开直播目录。请在搜索页输入直播房间号，或导入官网 /livestream/
+      // 分享链接；收藏仅跟踪该直播房间，不代表跨场次跟随主播。
+      expect(XiaohongshuSite(ReplayHttp(const [])).directoryNoticeKey, 'xiaohongshu_directory_scope');
+      expect(XiaohongshuApi.directoryScope, startsWith('小红书没有公开的直播列表。'));
+      expect(XiaohongshuApi.directoryScope, isNot(contains('/livestream/')));
     });
   });
 
@@ -185,7 +189,10 @@ void main() {
       expect(room.danmakuData, isNull);
     });
 
-    for (final (sample, roomId) in [('S01-room-live', _live), ('S01-room-ended', _ended)]) {
+    for (final (sample, roomId, restriction) in [
+      ('S01-room-live', _live, LiveRestriction.none),
+      ('S01-room-ended', _ended, null),
+    ]) {
       test("$sample: every depth is 3.x's room under the id asked for, one request each", () async {
         final setup = _setup([sample]);
         final legacy = Fixture.load('xiaohongshu', sample).legacy as Map<String, dynamic>;
@@ -205,9 +212,17 @@ void main() {
           final legacyRoom = (answer is List ? answer.single : answer) as Map<String, dynamic>;
           final json = {...room.toJson(), 'link': room.link};
           for (final MapEntry(:key, :value) in legacyRoom.entries) {
+            // changed: notice, reworded for users (the unified rule on notice
+            // texts; the lines are compared in xiaohongshu_api_test.dart).
+            if (key == 'notice') continue;
             expect(json[key] ?? '', value ?? '', reason: '$name $key');
           }
+          expect(room.notice, startsWith(XiaohongshuApi.roomScopeNotice), reason: name);
           expect(room.roomId, roomId);
+          // added: the restriction of a live room at every depth (the page
+          // tells it); an ended room has none. No start time on the page.
+          expect(room.restriction, restriction, reason: name);
+          expect(room.startedAt, isNull, reason: name);
         }
         expect(setup.http.requests, hasLength(4));
         expect(refresh.data, isNull, reason: '3.x refreshed without stream data');
@@ -258,7 +273,7 @@ void main() {
       await expectLater(room.site.getLiveStatus(roomId: _live), throwsA(isA<ApiChanged>()));
     });
 
-    test('recording: ended rooms as they are; a room that cannot be played fails (3.x)', () async {
+    test('recording: ended rooms as they are; a room that cannot be played fails, saying why', () async {
       final room = _Room()..offline();
       expect((await room.site.getRoomDetailForRecording(roomId: _live)).isExplicitlyOfflineNow, isTrue);
       room
@@ -267,23 +282,50 @@ void main() {
         ..info['monetizeType'] = 1;
       final refresh = await room.site.getRoomDetailForRefresh(roomId: _live);
       expect(refresh.isLiveNow, isTrue);
+      expect(refresh.restriction, LiveRestriction.paid);
       expect(refresh.notice, contains(XiaohongshuApi.restrictedNotice));
-      await expectLater(room.site.getRoomDetailForRecording(roomId: _live), throwsA(isA<NeedsLogin>()));
+      await expectLater(
+        room.site.getRoomDetailForRecording(roomId: _live),
+        throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('paid'))),
+      );
       room.info
         ..['monetizeType'] = 0
+        ..['joinLimitTypes'] = [4];
+      expect((await room.site.getRoomDetailForRefresh(roomId: _live)).restriction, LiveRestriction.regionBlocked);
+      await expectLater(room.site.getRoomDetailForRecording(roomId: _live), throwsA(isA<RegionBlocked>()));
+      room.info.remove('joinLimitTypes');
+      expect((await room.site.getRoomDetailForRefresh(roomId: _live)).restriction, isNull);
+      await expectLater(room.site.getRoomDetailForRecording(roomId: _live), throwsA(isA<NeedsLogin>()));
+      room.info
+        ..['joinLimitTypes'] = [0]
         ..remove('pullConfig');
+      expect((await room.site.getRoomDetailForRefresh(roomId: _live)).restriction, LiveRestriction.unplayable);
       await expectLater(room.site.getRoomDetailForRecording(roomId: _live), throwsA(isA<StreamUnavailable>()));
       room.info['status'] = 9;
       await expectLater(room.site.getRoomDetailForRecording(roomId: _live), throwsA(isA<StreamUnavailable>()));
     });
 
-    test('a malformed pull address fails playback and recording, not the room page or the refresh', () async {
-      final room = _Room()
-        ..streams((config) => _rows(config, 'h264').first['master_url'] = 'http://127.0.0.1/live/x.flv');
+    test('16-4: a malformed pull address is left out; only no usable one fails playback, never the page', () async {
+      final room = _Room()..streams((config) => _rows(config, 'h264')[1]['master_url'] = 'http://127.0.0.1/live/x.flv');
       final detail = await room.site.getRoomDetail(roomId: _live);
       expect(detail.isLiveNow, isTrue);
+      final quality = (await room.site.getPlayQualities(detail: detail)).single;
+      final resolution = await room.site.resolvePlayUrls(detail: detail, quality: quality);
+      expect(resolution.lines.map((line) => line.lineId), [
+        'flv:live-source-play-bak-tx',
+        'flv:live-source-play-hw',
+        'hls:live-source-play',
+      ]);
+      expect((await room.site.getRoomDetailForRecording(roomId: _live)).isLiveNow, isTrue);
+      room.streams((config) {
+        for (final row in _rows(config, 'h264')) {
+          row['master_url'] = 'http://127.0.0.1/live/x.flv';
+        }
+      });
+      final broken = await room.site.getRoomDetail(roomId: _live);
+      expect(broken.isLiveNow, isTrue);
       expect((await room.site.getRoomDetailForRefresh(roomId: _live)).isLiveNow, isTrue);
-      await expectLater(room.site.getPlayQualities(detail: detail), throwsA(isA<ApiChanged>()));
+      await expectLater(room.site.getPlayQualities(detail: broken), throwsA(isA<ApiChanged>()));
       await expectLater(room.site.getRoomDetailForRecording(roomId: _live), throwsA(isA<ApiChanged>()));
     });
 
@@ -347,11 +389,44 @@ void main() {
       expect(await room.site.searchRooms(_live), isEmpty);
       room.status = 403;
       await expectLater(room.site.searchRooms(_live), throwsA(isA<RiskControl>()));
-      final missing = _setup(['S01-room-notfound']);
+      room.status = 503;
+      await expectLater(room.site.searchRooms(_live), throwsA(isA<NetworkFailure>()));
+      room
+        ..status = 200
+        ..info['status'] = true;
+      await expectLater(room.site.searchRooms(_live), throwsA(isA<ApiChanged>()));
+    });
+
+    test('16-1: S01 not found gives nothing, by id and by link, in one request (3.x showed an error)', () async {
       final legacy = Fixture.load('xiaohongshu', 'S01-room-notfound').legacy as Map<String, dynamic>;
       final thrown = (legacy['searchRooms(roomId)'] as Map<String, dynamic>)['value'] as Map<String, dynamic>;
       expect(thrown['message'], 'Xiaohongshu api', reason: '3.x showed an error');
-      await expectLater(missing.site.searchRooms(_missing), throwsA(isA<NotFound>()));
+      for (final input in [_missing, 'https://www.xiaohongshu.com/livestream/$_missing']) {
+        final missing = _setup(['S01-room-notfound']);
+        // changed: the value, 16-1 (no room instead of an error).
+        expect(await missing.site.searchRooms(input), isEmpty, reason: input);
+        expect(missing.http.requests, hasLength(1), reason: input);
+      }
+      final page = _setup(['S01-room-notfound']);
+      await expectLater(page.site.getRoomDetail(roomId: _missing), throwsA(isA<NotFound>()), reason: 'room entry');
+    });
+
+    test('16-1: a short link to a room that does not exist gives nothing', () async {
+      const id = '570341209400361612';
+      final notFound = _state()
+        ..['pageStatus'] = 'error'
+        ..['errorMessage'] = '未找到直播间，请稍后再试';
+      final http = _FakeHttp(
+        (request) async => request.url.host == 'xhslink.com'
+            ? _redirect(302, 'https://www.xiaohongshu.com/livestream/$id', request)
+            : LiveResponse(
+                status: 200,
+                bytes: utf8.encode('<script>window.__INITIAL_STATE__=${jsonEncode({'liveStream': notFound})}</script>'),
+                url: request.url,
+              ),
+      );
+      expect(await XiaohongshuSite(http).searchRooms('https://xhslink.com/m/gone'), isEmpty);
+      expect(http.requests, hasLength(2));
     });
 
     test('S02 an expired short link: one hop to the home page, no room, no page request', () async {
@@ -396,36 +471,57 @@ void main() {
   });
 
   group('streams', () {
-    test("room entry's stream: 3.x's quality and four lines, without another request", () async {
+    test("room entry's stream: one quality 原画 and four lines, FLV first (16-3), without another request", () async {
       final room = _Room();
       final detail = await room.site.getRoomDetail(roomId: _live);
       final qualities = await room.site.getPlayQualities(detail: detail);
-      expect(qualities.single.selectionId, 'h264:HD');
+      expect(qualities.single.quality, '原画');
+      expect(qualities.single.selectionId, 'HD');
       expect(qualities.single.data, isNull);
       final resolution = await room.site.resolvePlayUrls(detail: detail, quality: qualities.single);
       expect(resolution.urls, hasLength(4));
-      expect(resolution.urls.first, endsWith('.m3u8'));
-      expect(resolution.appliedQualityData, 'h264:HD');
+      expect(resolution.urls.first, endsWith('.flv'));
+      expect(resolution.urls.last, endsWith('.m3u8'));
+      expect(resolution.appliedQualityData, 'HD');
       expect(resolution.lines.first.headers['referer'], 'https://www.xiaohongshu.com/');
       expect(await room.site.getPlayUrls(detail: detail, quality: qualities.single), resolution.urls);
       expect(room.http.requests, hasLength(1));
     });
 
-    test('codec-qualified ids survive a reorder; recovery reads the page again (3.x)', () async {
+    test('a stored 3.x quality id (h264:HD) plays the quality now, reported as HD', () async {
+      final room = _Room();
+      final detail = await room.site.getRoomDetail(roomId: _live);
+      const legacy = LivePlayQuality(quality: '原画 · H264', id: 'h264:HD');
+      final resolution = await room.site.resolvePlayUrls(detail: detail, quality: legacy);
+      expect(resolution.urls, hasLength(4));
+      expect(resolution.appliedQualityData, 'HD');
+      final recovery = await room.site.resolvePlayUrlsForRecovery(detail: detail, quality: legacy);
+      expect(recovery.appliedQualityData, 'HD');
+      expect(room.http.requests, hasLength(2));
+    });
+
+    test('both codecs in one quality survive a reorder; recovery reads the page again (3.x)', () async {
       final room = _Room()..streams((config) => config['h265'] = [(config['h264'] as List<dynamic>)[0]]);
       final detail = await room.site.getRoomDetail(roomId: _live);
       final qualities = await room.site.getPlayQualities(detail: detail);
-      expect(qualities.map((quality) => quality.selectionId), ['h264:HD', 'h265:HD']);
+      expect(qualities.map((quality) => quality.selectionId), ['HD']);
       room.streams((config) {
         config['h264'] = (config['h264'] as List<dynamic>).reversed.toList();
         for (final row in _rows(config, 'h265')) {
           row['master_url'] = '${row['master_url']}?token=renewed';
         }
       });
-      final result = await room.site.resolvePlayUrlsForRecovery(detail: detail, quality: qualities.last);
-      expect(result.urls.single, endsWith('?token=renewed'));
-      expect(result.appliedQualityData, 'h265:HD');
-      expect(result.lines.single.codec, 'hevc');
+      final result = await room.site.resolvePlayUrlsForRecovery(detail: detail, quality: qualities.single);
+      expect(result.appliedQualityData, 'HD');
+      expect(result.lines.map((line) => line.lineId), [
+        'flv:live-source-play-hw',
+        'flv:live-source-play-bak-tx',
+        'flv:live-source-play',
+        'hls:live-source-play',
+        'hls:live-source-play:hevc',
+      ]);
+      expect(result.lines.last.codec, 'hevc');
+      expect(result.urls.last, endsWith('?token=renewed'));
       expect(room.http.requests, hasLength(2));
     });
 
@@ -443,7 +539,7 @@ void main() {
         ..['monetizeType'] = 1;
       await expectLater(
         room.site.resolvePlayUrlsForRecovery(detail: detail, quality: quality),
-        throwsA(isA<NeedsLogin>()),
+        throwsA(isA<StreamUnavailable>()),
       );
       room.info['monetizeType'] = 0;
       room.offline();
@@ -485,10 +581,10 @@ void main() {
       final room = _Room();
       final card = (await room.site.searchRooms(_live)).single;
       final qualities = await room.site.getPlayQualities(detail: card);
-      expect(qualities.single.selectionId, 'h264:HD');
+      expect(qualities.single.selectionId, 'HD');
       expect(room.http.requests, hasLength(2));
       final stale = card.copyWith(
-        data: const XiaohongshuRoomData(roomId: '1', live: true, access: XiaohongshuAccess.public),
+        data: const XiaohongshuRoomData(roomId: '1', live: true, restriction: LiveRestriction.none),
       );
       expect(await room.site.getPlayUrls(detail: stale, quality: qualities.single), hasLength(4));
       expect(room.http.requests, hasLength(3), reason: "another room's data is not used");
@@ -537,11 +633,22 @@ void main() {
       expect(http.requests, isEmpty);
     });
 
-    for (final link in [
+    for (final text in [
       'xhsdiscover://live_audience?room_id=$id',
+      'xhsdiscover://live_audience?room_id=$id&source=',
+      '看直播 xhsdiscover://live_audience?room_id=$id&host_id=63301151000000002303b082，复制',
+    ]) {
+      test('16-2: a deep link without a source imports its room, without a request: $text', () async {
+        expect(parser.containsSupportedLink(text), isTrue);
+        expect(await parser.parse(text), const RoomLink('xiaohongshu', id));
+        expect(http.requests, isEmpty);
+      });
+    }
+
+    for (final link in [
+      'xhsdiscover://live_audience?source=share',
       'xhsdiscover://live_audience?room_id=$id&room_id=42&source=share',
       'xhsdiscover://live_audience?room_id=0&source=share',
-      'xhsdiscover://live_audience?room_id=$id&source=',
       'xhsdiscover://live_audience/path?room_id=$id&source=share',
       'xhsdiscover://live_audience?room_id=$id&source=share#fragment',
       'xhsdiscover://other?room_id=$id&source=share',

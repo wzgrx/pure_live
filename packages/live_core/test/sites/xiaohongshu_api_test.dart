@@ -19,20 +19,45 @@ const _missing = '569865232324657152';
 
 Fixture _sample(String name) => Fixture.load('xiaohongshu', name);
 
+/// Keys 3.x never wrote (M2.1); [_expectParity] checks them apart.
+const _v4Keys = ['startedAt', 'restriction'];
+
+/// 3.x's notice lines, reworded for users (the unified rule on notice
+/// texts); the lines themselves are the same.
+const _legacyScope = '当前以直播房间号跟踪；主播重新开播使用新房间号时，请重新导入分享链接。';
+const _legacyViewers = '平台展示观看值：300万+（非已验证的实时在线人数）';
+
 /// Asserts that [actual] (a `toJson`) equals 3.x's [legacy] map on every key
-/// 3.x wrote, except [changed] (intended differences). 3.x wrote null where
-/// the immutable model writes ''.
+/// 3.x wrote, except [changed] (intended differences), and that the v4 keys
+/// are exactly [added]. 3.x wrote null where the immutable model writes ''.
 void _expectParity(
   Map<String, Object?> actual,
   Map<String, dynamic> legacy, {
   Set<String> changed = const {},
+  Map<String, Object?> added = const {},
   String? reason,
 }) {
   for (final MapEntry(:key, :value) in legacy.entries) {
     if (changed.contains(key)) continue;
     expect(actual[key] ?? '', value ?? '', reason: '${reason ?? ''} $key');
   }
+  for (final key in _v4Keys) {
+    expect(actual[key], added[key], reason: '${reason ?? ''} $key (v4 key)');
+  }
 }
+
+/// 3.x's [legacy] notice with each line reworded: the same lines, in the
+/// same order.
+String _reworded(String legacy) => legacy
+    .split('\n')
+    .map(
+      (line) => switch (line) {
+        _legacyScope => XiaohongshuApi.roomScopeNotice,
+        _legacyViewers => XiaohongshuApi.displayViewersNotice('300万+'),
+        _ => fail('an unexpected 3.x notice line: $line'),
+      },
+    )
+    .join('\n');
 
 /// 3.x's room projection: toJson plus `link`.
 Map<String, Object?> _projection(LiveRoom room) => {...room.toJson(), 'link': room.link};
@@ -82,15 +107,23 @@ List<XiaohongshuStream> _streams(Map<String, dynamic> state) => XiaohongshuApi.p
 
 void main() {
   group('S01 share pages match 3.x', () {
-    for (final (sample, roomId) in [('S01-room-live', _live), ('S01-room-ended', _ended)]) {
+    for (final (sample, roomId, added) in [
+      ('S01-room-live', _live, const {'restriction': 'none'}),
+      ('S01-room-ended', _ended, const <String, Object?>{}),
+    ]) {
       test("$sample: room entry, follow refresh, recording and search are 3.x's room", () {
         final room = _page(sample, roomId).room;
-        for (final entry in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
-          _expectParity(_projection(room), _legacyValue(sample, entry)! as Map<String, dynamic>, reason: entry);
-        }
-        for (final entry in ['searchRooms(roomId)', 'searchRooms(link)']) {
-          final legacy = (_legacyValue(sample, entry)! as List).cast<Map<String, dynamic>>();
-          _expectParity(_projection(room), legacy.single, reason: entry);
+        final entries = ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording'];
+        final searches = ['searchRooms(roomId)', 'searchRooms(link)'];
+        for (final (entry, legacy) in [
+          for (final entry in entries) (entry, _legacyValue(sample, entry)! as Map<String, dynamic>),
+          for (final entry in searches) (entry, (_legacyValue(sample, entry)! as List).single as Map<String, dynamic>),
+        ]) {
+          // changed: notice, the same lines reworded for users (the unified
+          // rule on notice texts); added: a live public room is restriction
+          // none (the unified rule on restrictions), an ended one has none.
+          _expectParity(_projection(room), legacy, changed: {'notice'}, added: added, reason: entry);
+          expect(room.notice, _reworded(legacy['notice'] as String), reason: entry);
         }
         expect(room.roomId, roomId, reason: 'the id asked for, as 3.x stored follows');
         expect(room.userId, isNull, reason: '3.x had no streamer identity');
@@ -106,43 +139,55 @@ void main() {
       expect(page.room.isLiveNow, isTrue);
       expect(page.data.live, isTrue);
       expect(page.data.access, XiaohongshuAccess.public);
+      expect(page.data.restriction, LiveRestriction.none);
+      expect(page.room.restriction, LiveRestriction.none);
+      expect(page.room.startedAt, isNull, reason: 'the share page has no start time');
       expect(page.data.displayViewers, '300万+');
       expect(page.room.notice, '${XiaohongshuApi.roomScopeNotice}\n${XiaohongshuApi.displayViewersNotice('300万+')}');
-      expect(page.room.notice, contains('平台展示观看值：300万+'));
+      expect(page.room.notice, contains('小红书显示 300万+ 人看过'));
     });
 
-    test("S01 live: 3.x's one quality and its four addresses, HLS first", () {
+    test('S01 live: one quality 原画 (16-3), its four addresses FLV first; 3.x ids map to it', () {
       final legacy = (_sample('S01-room-live').legacy as Map<String, dynamic>)['getPlayQualites'] as List;
       final streams = XiaohongshuApi.playable(_page('S01-room-live', _live).data);
       final qualities = XiaohongshuApi.qualities(streams);
       expect(qualities, hasLength(legacy.length));
       for (final (index, quality) in qualities.indexed) {
         final expected = legacy[index] as Map<String, dynamic>;
-        expect(quality.quality, expected['quality']);
-        expect(quality.id, expected['id']);
+        // changed: quality and id, 16-3 (one quality per quality_type, named
+        // by the page); the old id maps to the new one for M9.
+        expect(quality.quality, '原画');
+        expect(expected['quality'], '原画 · H264');
+        expect(quality.id, XiaohongshuApi.qualityIdFromLegacy(expected['id'] as String));
         expect(quality.sort, expected['sort']);
         expect(quality.data, isNull);
-        expect(XiaohongshuApi.resolution(streams, quality).urls, expected['getPlayUrls']);
+        // changed: order, 16-3 (FLV before HLS); the same four addresses.
+        final urls = XiaohongshuApi.resolution(streams, quality).urls;
+        final legacyUrls = (expected['getPlayUrls'] as List).cast<String>();
+        expect(urls, unorderedEquals(legacyUrls));
+        expect(urls, [
+          ...legacyUrls.where((url) => url.endsWith('.flv')),
+          ...legacyUrls.where((u) => u.endsWith('.m3u8')),
+        ]);
       }
-      expect(qualities.single.quality, '原画 · H264');
-      expect(qualities.single.selectionId, 'h264:HD');
+      expect(qualities.single.selectionId, 'HD');
     });
 
     test("S01 live: lines carry 3.x's media headers, format, codec and CDN; the addresses do not expire", () {
       final streams = XiaohongshuApi.playable(_page('S01-room-live', _live).data);
       final resolution = XiaohongshuApi.resolution(streams, XiaohongshuApi.qualities(streams).single);
-      expect(resolution.appliedQualityData, 'h264:HD');
+      expect(resolution.appliedQualityData, 'HD');
       expect(resolution.lines.map((line) => line.format), [
+        StreamFormat.flv,
+        StreamFormat.flv,
+        StreamFormat.flv,
         StreamFormat.hls,
-        StreamFormat.flv,
-        StreamFormat.flv,
-        StreamFormat.flv,
       ]);
       expect(resolution.lines.map((line) => line.lineId), [
-        'hls:live-source-play',
         'flv:live-source-play',
         'flv:live-source-play-bak-tx',
         'flv:live-source-play-hw',
+        'hls:live-source-play',
       ]);
       for (final line in resolution.lines) {
         expect(line.codec, 'avc');
@@ -161,6 +206,8 @@ void main() {
       expect(page.room.effectiveLiveStatus, LiveStatus.offline);
       expect(page.data.live, isFalse);
       expect(page.data.pullConfig, isNull);
+      expect(page.data.restriction, LiveRestriction.none, reason: 'the page tells');
+      expect(page.room.restriction, isNull, reason: 'an ended broadcast carries none');
       expect(_state('S01-room-ended')['nextRoomInfo'], containsPair('pullConfig', isNotEmpty));
       expect(page.room.notice, XiaohongshuApi.roomScopeNotice);
       expect(() => XiaohongshuApi.playable(page.data), throwsA(isA<StreamUnavailable>()));
@@ -252,27 +299,109 @@ void main() {
       expect(() => _parse(state, roomId: _ended), throwsA(isA<ApiChanged>()));
     });
 
-    for (final MapEntry(key: name, value: edit) in <String, void Function(Map<String, dynamic>)>{
-      'paid': (info) => info['monetizeType'] = 1,
-      'family': (info) => info['joinLimitTypes'] = [2],
-      'group': (info) => info['joinLimitTypes'] = [1],
-      'regional': (info) => info['joinLimitTypes'] = [4],
-      'a future restriction': (info) => info['joinLimitTypes'] = [32],
-      'monetizeType missing': (info) => info.remove('monetizeType'),
-      'joinLimitTypes missing': (info) => info.remove('joinLimitTypes'),
-    }.entries) {
-      test('$name: no stream is read (not even a broken preview), playback needs an account', () {
+    // The kinds are the web page's enums (monetizeType Free 0, Paid 1;
+    // joinLimitTypes GroupChat 1, Family 2, IpFence 4).
+    for (final (name, edit, restriction, error)
+        in <(String, void Function(Map<String, dynamic>), LiveRestriction, Matcher)>[
+          ('paid', (info) => info['monetizeType'] = 1, LiveRestriction.paid, isA<StreamUnavailable>()),
+          ('another paid kind', (info) => info['monetizeType'] = 3, LiveRestriction.paid, isA<StreamUnavailable>()),
+          ('family', (info) => info['joinLimitTypes'] = [2], LiveRestriction.private, isA<StreamUnavailable>()),
+          ('group chat', (info) => info['joinLimitTypes'] = [1], LiveRestriction.private, isA<StreamUnavailable>()),
+          ('IP fence', (info) => info['joinLimitTypes'] = [4], LiveRestriction.regionBlocked, isA<RegionBlocked>()),
+          (
+            'a future limit',
+            (info) => info['joinLimitTypes'] = [32],
+            LiveRestriction.unplayable,
+            isA<StreamUnavailable>(),
+          ),
+          (
+            'a future limit and a fence',
+            (info) => info['joinLimitTypes'] = [0, 32, 4],
+            LiveRestriction.regionBlocked,
+            isA<RegionBlocked>(),
+          ),
+          (
+            'paid and fenced',
+            (info) {
+              info['monetizeType'] = 1;
+              info['joinLimitTypes'] = [4, 1];
+            },
+            LiveRestriction.paid,
+            isA<StreamUnavailable>(),
+          ),
+        ]) {
+      test('$name: live with its restriction; no stream is read (not even a broken preview); playing says why', () {
         final state = _state();
         edit(_info(state));
         _info(state)['pullConfig'] = 'broken preview';
         final page = _parse(state);
-        expect(page.data.access, isNot(XiaohongshuAccess.public));
+        expect(page.data.access, XiaohongshuAccess.restricted);
+        expect(page.data.restriction, restriction);
         expect(page.data.pullConfig, isNull);
         expect(page.room.isLiveNow, isTrue, reason: 'the room is live; it is the stream that is closed');
+        expect(page.room.restriction, restriction);
+        expect(page.room.isRestricted, isTrue);
+        expect(page.room.followGroup, FollowGroup.live);
         expect(page.room.notice, contains(XiaohongshuApi.restrictedNotice));
+        expect(() => XiaohongshuApi.playable(page.data), throwsA(error));
+      });
+    }
+
+    for (final (name, edit) in <(String, void Function(Map<String, dynamic>))>[
+      ('monetizeType missing', (info) => info.remove('monetizeType')),
+      ('joinLimitTypes missing', (info) => info.remove('joinLimitTypes')),
+    ]) {
+      test('$name: access not known, no restriction; playback needs an account (3.x)', () {
+        final state = _state();
+        edit(_info(state));
+        final page = _parse(state);
+        expect(page.data.access, XiaohongshuAccess.unknown);
+        expect(page.data.restriction, isNull);
+        expect(page.data.pullConfig, isNull);
+        expect(page.room.isLiveNow, isTrue);
+        expect(page.room.restriction, isNull);
+        expect(page.room.notice, contains(XiaohongshuApi.unknownAccessNotice));
+        expect(page.room.notice, isNot(contains(XiaohongshuApi.restrictedNotice)));
         expect(() => XiaohongshuApi.playable(page.data), throwsA(isA<NeedsLogin>()));
       });
     }
+
+    test('an ended or unknown room carries no restriction, even a restricted one', () {
+      final ended = _state('S01-room-ended');
+      _info(ended)['monetizeType'] = 1;
+      final page = _parse(ended, roomId: _ended);
+      expect(page.data.restriction, LiveRestriction.paid);
+      expect(page.room.restriction, isNull);
+      final unknown = _state();
+      _info(unknown)['status'] = 9;
+      expect(_parse(unknown).room.restriction, isNull);
+    });
+
+    for (final (name, edit) in <(String, void Function(Map<String, dynamic>))>[
+      ('no pullConfig', (info) => info.remove('pullConfig')),
+      ('an empty pullConfig', (info) => info['pullConfig'] = ''),
+      ('no rows', (info) => info['pullConfig'] = '{"h264":[],"h265":[],"width":1080}'),
+      ('no codec lists', (info) => info['pullConfig'] = '{"width":1080}'),
+    ]) {
+      test('a live public room with $name is unplayable (the unified rule on restrictions)', () {
+        final state = _state();
+        edit(_info(state));
+        final page = _parse(state);
+        expect(page.room.isLiveNow, isTrue);
+        expect(page.room.restriction, LiveRestriction.unplayable);
+        expect(page.room.followGroup, FollowGroup.live);
+        expect(page.data.restriction, LiveRestriction.none);
+        expect(() => XiaohongshuApi.playable(page.data), throwsA(isA<StreamUnavailable>()));
+      });
+    }
+
+    test('a pullConfig that cannot be read is not called unplayable: playing tells why', () {
+      final state = _state();
+      _info(state)['pullConfig'] = '{';
+      final page = _parse(state);
+      expect(page.room.restriction, LiveRestriction.none);
+      expect(() => XiaohongshuApi.playable(page.data), throwsA(isA<ApiChanged>()));
+    });
 
     test('a state other than 2 and 3 stays unknown, whatever liveStatus says', () {
       final state = _state();
@@ -335,6 +464,8 @@ void main() {
       });
     }
 
+    // 16-4: 3.x failed the room for one bad row; the row is left out now,
+    // and only a config without one usable row is ApiChanged.
     for (final url in [
       'http://xhscdn.com.evil.test/live/$_live.flv',
       'http://127.0.0.1/live/$_live.flv',
@@ -343,26 +474,59 @@ void main() {
       'http://live.xhscdn.com:8080/live/$_live.flv',
       'http://live.xhscdn.com/live/$_live.flv#x',
       'file:///live/$_live.flv',
+      'http://live.xhscdn.com/live/$_live.flv?${'x' * 4096}',
     ]) {
-      test("an address outside the room's contract is ApiChanged on playing: $url", () {
-        final state = _state();
-        _editStreams(state, (config) => _row(config, 0)['master_url'] = url);
-        expect(() => _streams(state), throwsA(isA<ApiChanged>()));
-      });
+      test(
+        "an address outside the room's contract is left out; all of them is ApiChanged: ${url.length > 80 ? '(4 KiB)' : url}",
+        () {
+          final state = _state();
+          _editStreams(state, (config) => _row(config, 1)['master_url'] = url);
+          final streams = _streams(state);
+          expect(streams.map((stream) => '${stream.url}'), isNot(contains(url)));
+          expect(streams.map((stream) => stream.url.host), [
+            'live-source-play.xhscdn.com',
+            'live-source-play-bak-tx.xhscdn.com',
+            'live-source-play-hw.xhscdn.com',
+          ]);
+          _editStreams(state, (config) {
+            for (final row in (config['h264'] as List).cast<Map<String, dynamic>>()) {
+              row['master_url'] = url;
+            }
+          });
+          expect(() => _streams(state), throwsA(isA<ApiChanged>()));
+        },
+      );
     }
 
     for (final MapEntry(key: name, value: edit) in <String, void Function(Map<String, dynamic>)>{
       'no address': (row) => row.remove('master_url'),
+      'a numeric address': (row) => row['master_url'] = 42,
       'an empty quality': (row) => row['quality_type'] = '',
       'no label': (row) => row.remove('quality_type_name'),
+      'an empty label': (row) => row['quality_type_name'] = '',
       'a long quality': (row) => row['quality_type'] = 'Q' * 65,
+      'a long label': (row) => row['quality_type_name'] = 'L' * 129,
     }.entries) {
-      test('a row with $name is ApiChanged on playing', () {
+      test('a row with $name is left out (16-4); only such rows is ApiChanged', () {
         final state = _state();
         _editStreams(state, (config) => edit(_row(config, 0)));
+        expect(_streams(state), hasLength(3));
+        _editStreams(state, (config) => (config['h264'] as List).cast<Map<String, dynamic>>().forEach(edit));
         expect(() => _streams(state), throwsA(isA<ApiChanged>()));
       });
     }
+
+    test('a row that is not an object is left out; the other codec still plays', () {
+      final state = _state();
+      _editStreams(state, (config) {
+        config['h265'] = [(config['h264'] as List<dynamic>)[1]];
+        config['h264'] = [42, 'row', null];
+      });
+      final streams = _streams(state);
+      expect(streams.single.codec, 'h265');
+      final resolution = XiaohongshuApi.resolution(streams, XiaohongshuApi.qualities(streams).single);
+      expect(resolution.lines.single.codec, 'hevc');
+    });
 
     test('the signed query and codec are kept; exact repeats are one address', () {
       final state = _state();
@@ -384,25 +548,95 @@ void main() {
       expect(() => _streams(state), throwsA(isA<ApiChanged>()));
     });
 
-    test('H.265 is its own quality, after H.264; its lines are HEVC', () {
+    test('16-3: both codecs are one quality 原画; H.264 lines first, FLV first within each codec', () {
       final state = _state();
-      _editStreams(state, (config) => config['h265'] = [(config['h264'] as List<dynamic>)[1]]);
+      _editStreams(state, (config) {
+        final h264 = config['h264'] as List<dynamic>;
+        config['h265'] = [
+          for (final row in [h264[0], h264[3], h264[1]])
+            {...row as Map<String, dynamic>, 'master_url': '${row['master_url']}?codec=hevc'},
+        ];
+      });
       final streams = _streams(state);
       final qualities = XiaohongshuApi.qualities(streams);
-      expect(qualities.map((quality) => quality.selectionId), ['h264:HD', 'h265:HD']);
-      expect(qualities.map((quality) => quality.quality), ['原画 · H264', '原画 · H265']);
-      final hevc = XiaohongshuApi.resolution(streams, qualities.last);
-      expect(hevc.lines.single.codec, 'hevc');
-      expect(hevc.appliedQualityData, 'h265:HD');
+      expect(qualities.map((quality) => (quality.quality, quality.selectionId, quality.sort)), [('原画', 'HD', 0)]);
+      final resolution = XiaohongshuApi.resolution(streams, qualities.single);
+      expect(resolution.appliedQualityData, 'HD');
+      expect(resolution.lines.map((line) => (line.codec, line.format, line.lineId)), [
+        ('avc', StreamFormat.flv, 'flv:live-source-play'),
+        ('avc', StreamFormat.flv, 'flv:live-source-play-bak-tx'),
+        ('avc', StreamFormat.flv, 'flv:live-source-play-hw'),
+        ('avc', StreamFormat.hls, 'hls:live-source-play'),
+        ('hevc', StreamFormat.flv, 'flv:live-source-play-hw:hevc'),
+        ('hevc', StreamFormat.flv, 'flv:live-source-play:hevc'),
+        ('hevc', StreamFormat.hls, 'hls:live-source-play:hevc'),
+      ]);
+      expect(resolution.lines.skip(4).map((line) => line.url), everyElement(endsWith('?codec=hevc')));
+    });
+
+    test('several quality types stay apart, in address order, each named by the page', () {
+      final state = _state();
+      _editStreams(state, (config) {
+        final h264 = config['h264'] as List<dynamic>;
+        config['h265'] = [
+          {...h264[1] as Map<String, dynamic>, 'quality_type': 'SD', 'quality_type_name': '标清'},
+        ];
+      });
+      final streams = _streams(state);
+      final qualities = XiaohongshuApi.qualities(streams);
+      expect(qualities.map((quality) => (quality.quality, quality.selectionId)), [('原画', 'HD'), ('标清', 'SD')]);
       expect(XiaohongshuApi.resolution(streams, qualities.first).lines, hasLength(4));
+      expect(XiaohongshuApi.resolution(streams, qualities.last).lines.single.lineId, 'flv:live-source-play:hevc');
+    });
+
+    test('repeated hosts get numbered line ids', () {
+      final state = _state();
+      _editStreams(state, (config) {
+        final first = _row(config, 1);
+        (config['h264'] as List<dynamic>).add({...first, 'master_url': '${first['master_url']}?backup=1'});
+      });
+      final streams = _streams(state);
+      final lines = XiaohongshuApi.resolution(streams, XiaohongshuApi.qualities(streams).single).lines;
+      expect(lines.map((line) => line.lineId), [
+        'flv:live-source-play',
+        'flv:live-source-play-bak-tx',
+        'flv:live-source-play-hw',
+        'flv:live-source-play#2',
+        'hls:live-source-play',
+      ]);
+    });
+
+    test("3.x's quality ids map to the ids now (for M9), and still play", () {
+      expect(XiaohongshuApi.legacyQualityIds, {'h264:HD': 'HD', 'h265:HD': 'HD'});
+      for (final (legacy, now) in [
+        ('h264:HD', 'HD'),
+        ('h265:HD', 'HD'),
+        (' H264:SD ', 'SD'),
+        ('h265:SD', 'SD'),
+        ('HD', 'HD'),
+        ('h266:HD', 'h266:HD'),
+        ('原画 · H264', '原画 · H264'),
+      ]) {
+        expect(XiaohongshuApi.qualityIdFromLegacy(legacy), now, reason: legacy);
+        expect(XiaohongshuApi.qualityIdFromLegacy(now), now, reason: 'applied again: $now');
+      }
+      final streams = _streams(_state());
+      for (final id in ['h264:HD', 'h265:HD', 'HD']) {
+        final resolution = XiaohongshuApi.resolution(streams, LivePlayQuality(quality: '原画 · H264', id: id));
+        expect(resolution.appliedQualityData, 'HD', reason: id);
+        expect(resolution.lines, hasLength(4), reason: id);
+      }
     });
 
     test('a quality the addresses no longer have is StreamUnavailable', () {
       final streams = _streams(_state());
-      expect(
-        () => XiaohongshuApi.resolution(streams, const LivePlayQuality(quality: '原画 · H264', id: 'h264:SD')),
-        throwsA(isA<StreamUnavailable>()),
-      );
+      for (final id in ['h264:SD', 'SD']) {
+        expect(
+          () => XiaohongshuApi.resolution(streams, LivePlayQuality(quality: '原画', id: id)),
+          throwsA(isA<StreamUnavailable>()),
+          reason: id,
+        );
+      }
     });
 
     group('HTTP status is not a page state', () {
@@ -478,9 +712,21 @@ void main() {
 
     for (final link in [
       'xhsdiscover://live_audience?room_id=$id',
+      'xhsdiscover://live_audience?room_id=$id&source=',
+      'xhsdiscover://live_audience?source=a&room_id=$id&source=b',
+      'xhsdiscover://live_audience?room_id=$id&host_id=63301151000000002303b082',
+    ]) {
+      test('16-2: a deep link names its room without a source: $link', () {
+        expect(XiaohongshuApi.deepLinkRoomId(link), id);
+        expect(XiaohongshuApi.roomIdFrom(link), id);
+      });
+    }
+
+    for (final link in [
+      'xhsdiscover://live_audience?source=share',
       'xhsdiscover://live_audience?room_id=$id&room_id=42&source=share',
       'xhsdiscover://live_audience?room_id=0&source=share',
-      'xhsdiscover://live_audience?room_id=$id&source=',
+      'xhsdiscover://live_audience?room_id=&source=share',
       'xhsdiscover://live_audience/path?room_id=$id&source=share',
       'xhsdiscover://live_audience?room_id=$id&source=share#fragment',
       'xhsdiscover://live_audience:8080?room_id=$id&source=share',
@@ -577,7 +823,7 @@ void main() {
         ),
         isEmpty,
       );
-      expect(XiaohongshuApi.shareTextRoomIds('xhsdiscover://live_audience?room_id=$id'), isEmpty);
+      expect(XiaohongshuApi.shareTextRoomIds('看直播 xhsdiscover://live_audience?room_id=$id，复制'), [id], reason: '16-2');
     });
   });
 }

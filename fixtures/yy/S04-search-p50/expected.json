@@ -1,0 +1,11 @@
+{
+  "generator": "YYSite.searchRooms (fresh site: bizAreaNameMap empty); transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "query": {
+      "q": "舞蹈",
+      "t": "120",
+      "n": "50"
+    },
+    "rooms": []
+  }
+}

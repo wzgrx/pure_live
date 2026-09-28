@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "platform": "yy",
+  "sample": "S01-category-ent",
+  "capturedAt": "2026-09-27T16:55:53.912893Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.yy.com/c/yycom/category/getCategory.action?parentId=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.yy.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "connection": "keep-alive",
+      "access-control-allow-headers": "X-Requested-With",
+      "date": "Sun, 27 Sep 2026 16:55:54 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "access-control-allow-methods": "GET,POST",
+      "p3p": "CP=CAO PSA OUR",
+      "content-type": "text/html;charset=UTF-8",
+      "server": "nginx"
+    }
+  },
+  "raw": {
+    "sha256": "c4e49df76165669665b3212af92e31260d7d102a65a9c34893b2b9ea2b759e48",
+    "length": 2164
+  },
+  "body": "body.html",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

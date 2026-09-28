@@ -1,0 +1,8 @@
+{
+  "generator": "YYSite.parseMobileHlsPayload + _getMobileHlsQualities (only rate 1200 answered) + getPlayUrls; transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "parseMobileHlsPayload": null,
+    "mobileQualities": [],
+    "getPlayUrls": []
+  }
+}

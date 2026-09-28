@@ -1,0 +1,91 @@
+{
+  "generator": "YYSite.getSubCategores (area pages served from S02-area-page-*; an unrecorded area page is treated as one without pageInfo, so its shortName stays null); transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "areas": [
+      {
+        "platform": "yy",
+        "areaType": "1",
+        "typeName": "娱乐",
+        "areaId": "7",
+        "areaName": "音乐",
+        "areaPic": "http://image.yy.com/contimage/6Z-z5LmQMTY0MDc3NDY0NjE2NQ.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "1",
+        "typeName": "娱乐",
+        "areaId": "8",
+        "areaName": "脱口秀",
+        "areaPic": "http://image.yy.com/contimage/6ISx5Y-j56eAMTY0MDc3NDY1NzQ1OQ.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "1",
+        "typeName": "娱乐",
+        "areaId": "4",
+        "areaName": "舞蹈",
+        "areaPic": "http://image.yy.com/contimage/6Iie6LmIMTY0MDc3NDYzMDA3Nw.jpg",
+        "shortName": "{\"moduleId\":313,\"biz\":\"dance\",\"subBiz\":\"idx\"}"
+      },
+      {
+        "platform": "yy",
+        "areaType": "1",
+        "typeName": "娱乐",
+        "areaId": "37",
+        "areaName": "户外",
+        "areaPic": "http://image.yy.com/contimage/5oi35aSWMTY0MDc3NDc3MzE4Nw.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "1",
+        "typeName": "娱乐",
+        "areaId": "48",
+        "areaName": "颜值",
+        "areaPic": "http://image.yy.com/contimage/6aKc5YC8MTY0MDc3NDY3NjM3Mg.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "1",
+        "typeName": "娱乐",
+        "areaId": "29",
+        "areaName": "喊麦",
+        "areaPic": "http://image.yy.com/contimage/5ZaK6bqmMTY0MDc3NDcxMDE3MA.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "1",
+        "typeName": "娱乐",
+        "areaId": "16",
+        "areaName": "体育",
+        "areaPic": "http://image.yy.com/contimage/5L2T6IKyMTY0MDc3NDc0MzE5MQ.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "1",
+        "typeName": "娱乐",
+        "areaId": "17",
+        "areaName": "二次元",
+        "areaPic": "http://image.yy.com/contimage/5LqM5qyh5YWDMTY0MDc3NDcyOTI5NQ.jpg",
+        "shortName": null
+      }
+    ],
+    "bizAreaNameMap": {
+      "dance": "舞蹈"
+    },
+    "unrecordedAreaPages": [
+      "https://www.yy.com/music/",
+      "https://www.yy.com/show/",
+      "https://www.yy.com/travel",
+      "https://www.yy.com/pretty/",
+      "https://www.yy.com/mc/",
+      "https://www.yy.com/sport/",
+      "https://www.yy.com/acg/"
+    ]
+  }
+}

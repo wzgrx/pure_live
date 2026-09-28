@@ -1,0 +1,102 @@
+{
+  "generator": "YYSite.searchAnchors; transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "query": {
+      "q": "舞蹈",
+      "t": "1",
+      "n": "1"
+    },
+    "anchors": [
+      {
+        "roomId": "1454853871",
+        "avatar": "",
+        "userName": "奇领心儿",
+        "liveStatus": false
+      },
+      {
+        "roomId": "22490906",
+        "avatar": "https://downhdlogo.yy.com/hdlogo/6060/60/60/86/0411865223/u411865223uqYORFQp.jpg",
+        "userName": "燃舞蹈-Chisato",
+        "liveStatus": false
+      },
+      {
+        "roomId": "1345152619",
+        "avatar": "https://downhdlogo.yy.com/hdlogo/6060/60/60/82/1546829403/u15468294032j1wYV_.jpeg",
+        "userName": "小安九",
+        "liveStatus": false
+      },
+      {
+        "roomId": "37304547",
+        "avatar": "",
+        "userName": "纵横小美酱",
+        "liveStatus": false
+      },
+      {
+        "roomId": "1354164416",
+        "avatar": "",
+        "userName": "988林软软",
+        "liveStatus": false
+      },
+      {
+        "roomId": "1349606469",
+        "avatar": "https://downhdlogo.yy.com/hdlogo/6060/60/60/91/1813911972/u1813911972dD7gLcF.jpg",
+        "userName": "郭mini",
+        "liveStatus": false
+      },
+      {
+        "roomId": "1330802494",
+        "avatar": "https://downhdlogo.yy.com/hdlogo/6060/60/60/48/1485486415/u14854864154D5rItE.jpg",
+        "userName": "奇领晓晓",
+        "liveStatus": false
+      },
+      {
+        "roomId": "62628077",
+        "avatar": "https://downhdlogo.yy.com/hdlogo/6060/60/60/49/0976498631/u976498631OgW9ly9L.png",
+        "userName": "饺子",
+        "liveStatus": false
+      },
+      {
+        "roomId": "1383545408",
+        "avatar": "https://downhdlogo.yy.com/hdlogo/6060/60/60/91/3085911413/u3085911413jAPw7tE.png",
+        "userName": "婉伊依",
+        "liveStatus": false
+      },
+      {
+        "roomId": "1355735371",
+        "avatar": "",
+        "userName": "7038安安",
+        "liveStatus": false
+      },
+      {
+        "roomId": "1356053132",
+        "avatar": "https://downhdlogo.yy.com/hdlogo/6060/60/60/67/2944671330/u294467133093OH2HM.jpg",
+        "userName": "myg~正义联盟",
+        "liveStatus": false
+      },
+      {
+        "roomId": "21824646",
+        "avatar": "https://downhdlogo.yy.com/hdlogo/6060/60/60/35/2451351111/u2451351111BRq5xHt.jpg",
+        "userName": "安安",
+        "liveStatus": false
+      },
+      {
+        "roomId": "1355326156",
+        "avatar": "",
+        "userName": "0",
+        "liveStatus": false
+      },
+      {
+        "roomId": "1354656276",
+        "avatar": "https://downhdlogo.yy.com/hdlogo/6060/60/60/54/2649547353/u2649547353jx1PW4d.jpg",
+        "userName": "长沙小希含",
+        "liveStatus": false
+      },
+      {
+        "roomId": "85508314",
+        "avatar": "",
+        "userName": "小香香",
+        "liveStatus": false
+      }
+    ]
+  }
+}

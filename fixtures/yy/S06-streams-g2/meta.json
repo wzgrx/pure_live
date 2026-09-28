@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "platform": "yy",
+  "sample": "S06-streams-g2",
+  "capturedAt": "2026-09-27T16:56:56.007156Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://stream-manager.yy.com/v3/channel/streams?uid=0&cid=22490906&sid=22490906&appid=0&sequence=1790528213649&encode=json",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Content-Type": "text/plain;charset=UTF-8",
+      "Referer": "https://www.yy.com/22490906/22490906",
+      "Origin": "https://www.yy.com"
+    },
+    "body": "{\"head\":{\"seq\":1790528213649,\"appidstr\":\"0\",\"bidstr\":\"121\",\"cidstr\":\"22490906\",\"sidstr\":\"22490906\",\"uid64\":0,\"client_type\":108,\"client_ver\":\"5.23.0-beta.2\",\"stream_sys_ver\":1,\"app\":\"yylive_web\",\"playersdk_ver\":\"5.23.0-beta.2\",\"thundersdk_ver\":\"0\",\"streamsdk_ver\":\"5.23.0-beta.2\"},\"client_attribute\":{\"client\":\"web\",\"model\":\"web0\",\"cpu\":\"\",\"graphics_card\":\"\",\"os\":\"chrome\",\"osversion\":\"140.0.0.0\",\"vsdk_version\":\"\",\"app_identify\":\"\",\"app_version\":\"\",\"business\":\"\",\"width\":\"1920\",\"height\":\"1080\",\"scale\":\"\",\"client_type\":8,\"h265\":0},\"avp_parameter\":{\"version\":1,\"client_type\":8,\"service_type\":0,\"imsi\":0,\"send_time\":1790528213,\"line_seq\":-1,\"gear\":2,\"ssl\":1,\"stream_format\":0}}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "access-control-allow-headers": "Origin, X-Requested-With, Content-Type, Accept, Connection, User-Agent, Cookie",
+      "date": "Sun, 27 Sep 2026 16:56:56 GMT",
+      "transfer-encoding": "chunked",
+      "access-control-allow-origin": "*",
+      "x-traceid": "::13f610a94cfc1d52:13f610a94cfc1d52:0000000000000000:0",
+      "content-type": "json; charset=utf-8"
+    }
+  },
+  "raw": {
+    "sha256": "f7fd429ca9a8b07932a88550e8fb7260e6734900cecc4f50aaa70213d7c677d6",
+    "length": 9207
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.avp_info_res.stream_line_addr.15013_xv_22490906_22490906_0_0_0.cdn_info.url:rts_tk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.avp_info_res.stream_line_addr.15013_xv_22490906_22490906_0_0_0.cdn_info.url:secret",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

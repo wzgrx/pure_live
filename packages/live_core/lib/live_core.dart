@@ -22,3 +22,5 @@ export 'src/sites/bilibili/bilibili_api.dart';
 export 'src/sites/bilibili/bilibili_site.dart';
 export 'src/sites/kuaishou/kuaishou_api.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
+export 'src/sites/yy/yy_api.dart';
+export 'src/sites/yy/yy_site.dart';

@@ -1,0 +1,11 @@
+{
+  "generator": "YYSite.parseCategoryPageInfo (+ the shortName getSubCategores stores); transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "parseCategoryPageInfo": {
+      "moduleId": 0,
+      "biz": "null",
+      "subBiz": "null"
+    },
+    "shortName": "{\"moduleId\":0,\"biz\":\"null\",\"subBiz\":\"null\"}"
+  }
+}

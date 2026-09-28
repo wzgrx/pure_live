@@ -1,0 +1,13 @@
+{
+  "generator": "YYSite.getRecommendRooms (fresh site: bizAreaNameMap empty); transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "query": {
+      "page": "3",
+      "pageSize": "30",
+      "biz": "other",
+      "subBiz": "idx",
+      "moduleId": "-1"
+    },
+    "rooms": []
+  }
+}

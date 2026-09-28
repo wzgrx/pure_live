@@ -1,0 +1,9 @@
+{
+  "generator": "YYSite.parsePlayQualities + parsePlayUrls (the 3.x request was form-encoded; see M4.06); transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "requestedGear": 1,
+    "requestedLine": -1,
+    "parsePlayQualities": [],
+    "parsePlayUrls": []
+  }
+}

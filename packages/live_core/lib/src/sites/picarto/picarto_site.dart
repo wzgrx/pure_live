@@ -16,10 +16,12 @@ const _site = 'picarto';
 /// first area is the public directory; lists come from `api/explore` pages
 /// of 30, search from channel profiles (offline ones too). Room entry reads
 /// the detail and, when live, the HLS master playlist on the edge the load
-/// balancer chose (3.x's two requests); follow refreshes read the detail
-/// only. Room ids are the platform's spelling of the channel name, as 3.x
-/// stored follows (a room asked for as `thebaker` is `TheBaker`). Failures
-/// are `SiteError`s; nothing is disguised as an offline room.
+/// balancer chose (3.x's two requests) and, at the same time, the public
+/// API's start of the broadcast; follow refreshes read the detail only.
+/// Room ids are the platform's spelling of the channel name, as 3.x stored
+/// follows (a room asked for as `thebaker` is `TheBaker`); rooms compare
+/// ignoring case (`SiteIds.caseInsensitiveRoomIds`, 11-8). Failures are
+/// `SiteError`s; nothing is disguised as an offline room.
 final class PicartoSite extends LiveSite
     with LiveSiteLinks
     implements
@@ -163,42 +165,74 @@ final class PicartoSite extends LiveSite
 
   // Rooms ---------------------------------------------------------------------
 
-  /// `api/channel/detail/<name>`; a room id that is no channel name is
-  /// `NotFound` without a request.
-  Future<PicartoChannel> _detail(String roomId) async {
+  /// `api/channel/detail/<name>`, with the stream fields checked when
+  /// [stream]; a room id that is no channel name is `NotFound` without a
+  /// request.
+  Future<PicartoChannel> _detail(String roomId, {required bool stream}) async {
     final id = roomId.trim();
     if (!PicartoApi.isChannelName(id)) throw NotFound(_site, 'room id "$id" is not a Picarto channel name');
     final response = await _get(Uri.https(PicartoApi.apiHost, '/api/channel/detail/$id'));
-    return PicartoApi.roomDetail(response.text, requestedId: id, status: response.status);
+    return PicartoApi.roomDetail(response.text, requestedId: id, status: response.status, stream: stream);
   }
 
   /// The detail and, when live, the master playlist's qualities in
-  /// [PicartoRoomData] (3.x's room entry); [withDanmaku] adds the danmaku
-  /// arguments.
-  Future<LiveRoom> _entered(String roomId, {bool withDanmaku = false}) async {
-    final channel = await _detail(roomId);
+  /// [PicartoRoomData] (3.x's room entry; a private channel has no stream,
+  /// 11-9). [entry] (the room page) adds the danmaku arguments and, for a
+  /// live channel, the start of its broadcast, asked for beside the master
+  /// playlist (one request more than 3.x; the room stands without it).
+  Future<LiveRoom> _entered(String roomId, {bool entry = false}) async {
+    final channel = await _detail(roomId, stream: true);
+    final since = entry && channel.room.isLiveNow ? _liveSince(channel.name) : null;
     final master = channel.master;
     PicartoRoomData? data;
     if (master != null) {
-      final response = await _get(master);
-      data = PicartoRoomData(
-        name: channel.name,
-        channelId: channel.channelId,
-        master: master,
-        qualities: PicartoApi.qualities(response.text, master: master, status: response.status),
-        requestedId: channel.requestedId,
-      );
+      try {
+        final response = await _get(master);
+        data = PicartoRoomData(
+          name: channel.name,
+          channelId: channel.channelId,
+          master: master,
+          qualities: PicartoApi.qualities(response.text, master: master, status: response.status),
+          requestedId: channel.requestedId,
+        );
+      } on Object {
+        since?.ignore();
+        rethrow;
+      }
     }
-    return channel.room.copyWith(data: data, danmakuData: withDanmaku ? PicartoApi.danmakuArgs(channel) : null);
+    return channel.room.copyWith(
+      data: data,
+      danmakuData: entry ? PicartoApi.danmakuArgs(channel) : null,
+      startedAt: await since,
+    );
   }
 
-  /// The room with its stream (when live) and danmaku arguments.
-  @override
-  Future<LiveRoom> getRoomDetail({required String roomId}) => _entered(roomId, withDanmaku: true);
+  /// The start of [name]'s broadcast on air ([PicartoApi.liveSince]), or
+  /// null when the public API fails or does not say. Never completes with
+  /// an exception, so it can run beside the master playlist.
+  Future<DateTime?> _liveSince(String name) async {
+    try {
+      final response = await _get(Uri.https(PicartoApi.publicApiHost, '/api/v1/channel/name/$name'));
+      return PicartoApi.liveSince(response.text, name: name, status: response.status);
+    } on Exception {
+      // SiteError, a cancelled TransportFailure: the room stands without it.
+      return null;
+    }
+  }
 
-  /// Follow-card refresh: the detail only, one request as in 3.x.
+  /// The room with its stream (when live), the start of its broadcast and
+  /// danmaku arguments.
   @override
-  Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) async => (await _detail(roomId)).room;
+  Future<LiveRoom> getRoomDetail({required String roomId}) => _entered(roomId, entry: true);
+
+  /// Follow-card refresh: the detail only, one request as in 3.x. The
+  /// stream fields are not checked (11-2): a live channel whose answer lacks
+  /// its edge or stream still refreshes. The detail has no start time, so
+  /// `startedAt` stays null (the follow keeps the one room entry found
+  /// while the state does not change).
+  @override
+  Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) async =>
+      (await _detail(roomId, stream: false)).room;
 
   /// Room entry's answer (the stream included), as 3.x's recorder asked.
   @override
@@ -212,7 +246,8 @@ final class PicartoSite extends LiveSite
 
   /// Qualities of the stream [detail] carries (a room without one, like a
   /// list card, is entered first). A room the platform said is offline has
-  /// none (`StreamUnavailable`, without a request; 3.x listed nothing).
+  /// none (`StreamUnavailable`, without a request; 3.x listed nothing); a
+  /// private channel neither (`StreamUnavailable` naming it private, 11-9).
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
       (await _stream(detail, fresh: false)).qualities;
@@ -221,23 +256,28 @@ final class PicartoSite extends LiveSite
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The lines of [quality] in the stream [detail] carries.
+  /// The lines of [quality] in the stream [detail] carries. A room without
+  /// one is entered first, and when its playlist no longer has [quality]
+  /// the best quality is played instead (as in recovery).
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
     required LiveRoom detail,
     required LivePlayQuality quality,
-  }) async => _resolve(await _stream(detail, fresh: false), quality);
+  }) async => _resolve(await _stream(detail, fresh: false), quality, best: detail.data is! PicartoRoomData);
 
   /// Recovery reads the detail and the master playlist again: the load
   /// balancer may have moved the stream to another edge (REG-PICARTO-003).
+  /// When the streamer changed the profile (720p60 → 1080p60) the playlist
+  /// no longer has [quality]: the best quality is played and reported as
+  /// applied (11-1; 3.x failed the recovery).
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
     required LiveRoom detail,
     required LivePlayQuality quality,
-  }) async => _resolve(await _stream(detail, fresh: true), quality);
+  }) async => _resolve(await _stream(detail, fresh: true), quality, best: true);
 
   /// The stream [detail] carries, or (when it has none, or [fresh]) the one
-  /// of a new room entry; a channel that is not live has none.
+  /// of a new room entry; a channel that is not live, or private, has none.
   Future<PicartoRoomData> _stream(LiveRoom detail, {required bool fresh}) async {
     if (detail.data case final PicartoRoomData data when !fresh) return data;
     if (!fresh && detail.isExplicitlyOfflineNow) {
@@ -245,18 +285,22 @@ final class PicartoSite extends LiveSite
     }
     final room = await _entered(detail.roomId);
     final data = room.data;
-    if (!room.isLiveNow || data is! PicartoRoomData) {
-      throw StreamUnavailable(_site, 'channel/detail: ${detail.roomId} is ${room.effectiveLiveStatus.name}');
+    if (data is PicartoRoomData) return data;
+    if (room.isLiveNow && room.effectiveRestriction == LiveRestriction.private) {
+      throw StreamUnavailable(_site, "channel ${room.roomId} is private: it needs the streamer's private key");
     }
-    return data;
+    throw StreamUnavailable(_site, 'channel/detail: ${detail.roomId} is ${room.effectiveLiveStatus.name}');
   }
 
   /// The lines of the quality of [data] that is [quality] (by id: the
-  /// profile, whatever the edge); a profile the playlist no longer has is
-  /// `StreamUnavailable` (3.x's "quality unavailable").
-  static LivePlayUrlResolution _resolve(PicartoRoomData data, LivePlayQuality quality) {
+  /// profile, whatever the edge). A profile the playlist no longer has is
+  /// `StreamUnavailable` (3.x's "quality unavailable"), or with [best] the
+  /// playlist's best quality, whose id the resolution reports.
+  static LivePlayUrlResolution _resolve(PicartoRoomData data, LivePlayQuality quality, {required bool best}) {
     final wanted = '${quality.selectionId}';
-    final current = data.qualities.where((option) => '${option.selectionId}' == wanted).firstOrNull;
+    final current =
+        data.qualities.where((option) => '${option.selectionId}' == wanted).firstOrNull ??
+        (best ? data.qualities.firstOrNull : null);
     if (current == null) throw StreamUnavailable(_site, 'master playlist: no quality $wanted');
     return PicartoApi.resolution(current, master: data.master);
   }

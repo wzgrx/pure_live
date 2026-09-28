@@ -96,9 +96,10 @@ final class PicartoChannel {
 /// function takes the response text and status and returns 3.x's models or
 /// throws a `SiteError`.
 ///
-/// 3.x checked the shape of every answer strictly (a page that does not
-/// match its request, a row without a valid name, id or state fails the
-/// whole answer instead of showing a partial or empty list); that is kept.
+/// Answers are checked as 3.x did (a page that does not match its request
+/// is `ApiChanged`), except that a bad row is left out and only an answer
+/// without any usable row fails (11-3), so a change of format is still not
+/// shown as an empty list.
 abstract final class PicartoApi {
   /// Desktop Chrome 140, the UA 3.x's player sent to the media servers
   /// (`PlaybackHeaderResolver`).
@@ -112,6 +113,15 @@ abstract final class PicartoApi {
 
   /// Host of the site's internal API.
   static const String apiHost = 'ptvintern.picarto.tv';
+
+  /// Host of the public API (v1). Of its answers only the start of the
+  /// broadcast on air (`last_live`) is used: the internal API has none.
+  static const String publicApiHost = 'api.picarto.tv';
+
+  /// The title Picarto gives a channel whose streamer never set one (11 of
+  /// 186 live channels on 2026-09-28). A placeholder: it is left empty, so
+  /// it never replaces a follow's stored title (the unified rule, X-2).
+  static const String placeholderTitle = 'My Channel Title';
 
   /// The headers of every request, names in lower case: 3.x's
   /// `PicartoApi.playHeaders` (`Referer`, `Origin`) with the desktop UA its
@@ -174,9 +184,10 @@ abstract final class PicartoApi {
   // Catalog -------------------------------------------------------------------
 
   /// `api/languages-categories`: the platform's categories in answer order,
-  /// each an area of [category] (`areaType: 'category'`). An empty list,
-  /// more than 200 entries, a missing id or label, or a repeated id is
-  /// `ApiChanged` (3.x surfaced them rather than an empty catalog).
+  /// each an area of [category] (`areaType: 'category'`). An entry without
+  /// a valid id or label, or repeating an id, is left out (11-3; 3.x failed
+  /// the catalog); no list, more than 200 entries or no valid entry at all
+  /// is `ApiChanged` (3.x surfaced them rather than an empty catalog).
   static List<LiveArea> categories(String body, {int status = 200}) {
     final root = _root(body, status: status, what: 'languages-categories');
     final rows = root['categories'];
@@ -188,9 +199,7 @@ abstract final class PicartoApi {
       final item = _object(raw);
       final id = jsonInt(item?['id']);
       final label = jsonString(item?['label']) ?? '';
-      if (id == null || id <= 0 || label.length > 100 || label.isEmpty || areas.containsKey('$id')) {
-        throw ApiChanged(_site, 'languages-categories: bad or repeated category ${jsonEncode(raw)}');
-      }
+      if (id == null || id <= 0 || label.length > 100 || label.isEmpty || areas.containsKey('$id')) continue;
       areas['$id'] = LiveArea(
         platform: _site,
         areaType: 'category',
@@ -199,6 +208,7 @@ abstract final class PicartoApi {
         areaName: label,
       );
     }
+    if (areas.isEmpty) throw ApiChanged(_site, 'languages-categories: no valid category (${_snippet(body)})');
     return List.unmodifiable(areas.values);
   }
 
@@ -217,9 +227,14 @@ abstract final class PicartoApi {
 
   /// An `api/explore` page: live, non-adult channels by viewers, one per
   /// name (case ignored). The page must be the one asked for ([page],
-  /// [pageSize]); with [categoryId] every row must carry that category.
+  /// [pageSize]). A row that is no channel (no valid name, id, state or
+  /// `adult` flag) or, with [categoryId], not of that category is left out
+  /// (11-3; 3.x failed the page); a page none of whose rows is usable is
+  /// `ApiChanged` (a changed format, or a category filter the API ignored).
   /// More pages follow while [page] is below `last_page` (the row count
-  /// proves nothing: offline and adult rows are left out).
+  /// proves nothing: offline and adult rows are left out). Rows say nothing
+  /// about private channels or start times: `restriction` and `startedAt`
+  /// stay null.
   static LiveDirectoryPage directoryPage(
     String body, {
     required int page,
@@ -243,22 +258,26 @@ abstract final class PicartoApi {
       throw ApiChanged(_site, 'explore: not page $page of $pageSize (${_snippet(body)})');
     }
     final rooms = <String, LiveRoom>{};
+    var usable = 0;
     for (final raw in rows) {
       final row = _object(raw);
-      if (row == null || row['adult'] is! bool) {
-        throw ApiChanged(_site, 'explore: bad row ${_snippet(jsonEncode(raw))}');
-      }
+      if (row == null || row['adult'] is! bool || !_isChannel(row)) continue;
       if (categoryId != null) {
         final categories = row['categories'];
-        if (categories is! List || !categories.any((value) => jsonInt(_object(value)?['id']) == categoryId)) {
-          throw ApiChanged(_site, 'explore: a row outside category $categoryId');
-        }
+        if (categories is! List || !categories.any((value) => jsonInt(_object(value)?['id']) == categoryId)) continue;
       }
+      usable++;
       final room = _card(row);
       // Filtering, not an invented offline state: adult and offline rows
       // are left out, and a short page is not topped up from the next.
       if (row['adult'] != false || !room.isLiveNow) continue;
       rooms.putIfAbsent(room.roomId.toLowerCase(), () => room);
+    }
+    if (rows.isNotEmpty && usable == 0) {
+      throw ApiChanged(
+        _site,
+        'explore: no usable row${categoryId == null ? '' : ' of category $categoryId'} (${_snippet(body)})',
+      );
     }
     return LiveDirectoryPage(rooms: rooms.values, page: page, hasMore: page < last);
   }
@@ -266,9 +285,13 @@ abstract final class PicartoApi {
   // Search --------------------------------------------------------------------
 
   /// An `api/search` (`searchProfiles`) page: channel profiles, live and
-  /// offline, one per name. Profiles have no title, cover or audience; the
-  /// followers are `follower_count`. `count` differs between pages and is
-  /// not read (REG-PICARTO-002): the results end with an empty page.
+  /// offline, one per name. Profiles have no stream title, cover or
+  /// audience: the title is the channel name and the introduction the
+  /// profile's `bio` (11-5); the followers are `follower_count`. A profile
+  /// without a valid name, id or state, or with negative followers, is left
+  /// out (11-3); a page none of whose profiles is usable is `ApiChanged`.
+  /// `count` differs between pages and is not read (REG-PICARTO-002): the
+  /// results end with an empty page.
   static List<LiveRoom> searchRooms(String body, {required int pageSize, int status = 200}) {
     final root = _root(body, status: status, what: 'search');
     final result = _object(root['searchProfiles']);
@@ -277,36 +300,33 @@ abstract final class PicartoApi {
       throw ApiChanged(_site, 'search: no searchProfiles.data of at most $pageSize (${_snippet(body)})');
     }
     final rooms = <String, LiveRoom>{};
+    var usable = 0;
     for (final raw in rows) {
       final profile = _object(raw);
-      final id = jsonInt(profile?['id']);
-      final name = jsonString(profile?['name']) ?? '';
-      final online = profile?['online'];
       final followers = jsonInt(profile?['follower_count']);
-      if (profile == null ||
-          id == null ||
-          id <= 0 ||
-          !isChannelName(name) ||
-          online is! bool ||
-          (followers != null && followers < 0)) {
-        throw ApiChanged(_site, 'search: bad profile ${_snippet(jsonEncode(raw))}');
-      }
+      if (profile == null || !_isChannel(profile) || (followers != null && followers < 0)) continue;
+      usable++;
+      final name = jsonString(profile['name'])!;
+      final bio = decodeHtmlEntities(jsonString(profile['bio']) ?? '').trim();
       rooms.putIfAbsent(
         name.toLowerCase(),
         () => LiveRoom(
           roomId: name,
           platform: _site,
-          userId: '$id',
+          userId: '${jsonInt(profile['id'])}',
+          title: name,
           nick: name,
           link: roomPageUrl(name),
           avatar: normalizeImageUrl(profile['avatar']),
           watching: '',
           followers: followers == null ? '' : '$followers',
           audienceMetricType: AudienceMetricType.unknown,
-          liveStatus: online ? LiveStatus.live : LiveStatus.offline,
+          liveStatus: profile['online'] == true ? LiveStatus.live : LiveStatus.offline,
+          introduction: bio.isEmpty ? null : bio,
         ),
       );
     }
+    if (rows.isNotEmpty && usable == 0) throw ApiChanged(_site, 'search: no usable profile (${_snippet(body)})');
     return List.unmodifiable(rooms.values);
   }
 
@@ -319,18 +339,29 @@ abstract final class PicartoApi {
   /// lower-case link is the followed one. [requestedId] is kept in
   /// [PicartoChannel.requestedId].
   ///
-  /// - `channel: null`: `NotFound`; a private channel: `NeedsLogin`.
+  /// - `channel: null`: `NotFound`.
   /// - A channel of another name, or without id, state or `private` flag:
   ///   `ApiChanged`.
-  /// - Live: the master playlist on the load balancer's edge, of the one
-  ///   stream in `getMultiStreams` that is this channel's (a multistream
-  ///   group lists the others too, REG-PICARTO-001). Without an edge or
-  ///   exactly one own stream the answer is `ApiChanged`, as in 3.x.
+  /// - A private channel (the viewer needs the streamer's private key) is
+  ///   shown as usual, live or offline, with the restriction `private` and
+  ///   no stream (11-9; 3.x failed with "access denied"); any other channel
+  ///   has the restriction `none`. Adult channels are not restricted: they
+  ///   play without an account.
+  /// - With [stream], a live channel that is not private carries the master
+  ///   playlist on the load balancer's edge, of the one stream in
+  ///   `getMultiStreams` that is this channel's (a multistream group lists
+  ///   the others too, REG-PICARTO-001). Without an edge or exactly one own
+  ///   stream the answer is `ApiChanged`, as in 3.x. Without [stream] (the
+  ///   follow refresh, 11-2) these fields are not checked and there is no
+  ///   master.
   ///
-  /// The room is 3.x's: viewers concurrent, `total_views` cumulative, the
-  /// cover of a live room its stream thumbnail; plus the description panels
-  /// as the introduction and `followers_count`, which 3.x did not read.
-  static PicartoChannel roomDetail(String body, {required String requestedId, int status = 200}) {
+  /// The room is 3.x's: viewers concurrent, `total_views` cumulative; plus
+  /// the description panels as the introduction and `followers_count`,
+  /// which 3.x did not read. The cover is the own stream's thumbnail, of
+  /// the broadcast on air or, offline, of the last one (11-6; 3.x showed no
+  /// cover offline), else the channel's `image_thumbnail`. The answer has
+  /// no start time (see [liveSince]).
+  static PicartoChannel roomDetail(String body, {required String requestedId, int status = 200, bool stream = true}) {
     final root = _root(body, status: status, what: 'channel/detail');
     final id = requestedId.trim();
     if (root.containsKey('channel') && root['channel'] == null) {
@@ -338,35 +369,43 @@ abstract final class PicartoApi {
     }
     final channel = _object(root['channel']);
     if (channel == null) throw ApiChanged(_site, 'channel/detail: no channel object (${_snippet(body)})');
-    final card = _card(channel, requestedId: id);
+    if (!_isChannel(channel) ||
+        (jsonString(channel['name']) ?? '').toLowerCase() != id.toLowerCase() ||
+        channel['private'] is! bool) {
+      throw ApiChanged(
+        _site,
+        'channel "$id" without a valid name, id, state or private flag: ${_snippet(jsonEncode(channel))}',
+      );
+    }
+    final card = _card(channel);
     final channelId = int.parse(card.userId!);
+    final streams = _object(root['getMultiStreams'])?['streams'];
+    final own = [
+      if (streams is List && streams.length <= 100)
+        for (final raw in streams)
+          if (_object(raw) case final entry? when jsonInt(entry['channelId']) == channelId) entry,
+    ];
     Uri? master;
-    var cover = card.cover;
-    if (card.isLiveNow) {
+    if (stream && card.isLiveNow && card.restriction != LiveRestriction.private) {
       final edge = jsonString(_object(root['getLoadBalancerUrl'])?['origin']) ?? '';
       if (edge.length > 63 || !RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$').hasMatch(edge)) {
         throw ApiChanged(_site, 'channel/detail: no load balancer edge (${_snippet(body)})');
       }
-      final streams = _object(root['getMultiStreams'])?['streams'];
       if (streams is! List || streams.length > 100) throw const ApiChanged(_site, 'channel/detail: no stream list');
-      final own = [
-        for (final raw in streams)
-          if (_object(raw) case final stream? when jsonInt(stream['channelId']) == channelId) stream,
-      ];
       if (own.length != 1) throw ApiChanged(_site, 'channel/detail: ${own.length} streams of channel $channelId');
       final streamName = jsonString(own.single['stream_name']) ?? '';
       if (!RegExp(r'^[a-zA-Z0-9_+-]{1,150}$').hasMatch(streamName)) {
         throw ApiChanged(_site, 'channel/detail: bad stream name "$streamName"');
       }
       master = Uri.parse('https://$edge.picarto.tv/stream/hls/$streamName/index.m3u8');
-      // 3.x showed the stream's thumbnail; the channel's is the fallback.
-      final thumbnail = normalizeImageUrl(own.single['thumbnail_image']);
-      if (thumbnail.isNotEmpty) cover = thumbnail;
     }
+    // 3.x showed the stream's thumbnail when live; the channel's is the
+    // fallback.
+    final thumbnail = own.length == 1 ? normalizeImageUrl(own.single['thumbnail_image']) : '';
     final followers = jsonCount(channel['followers_count']);
     return PicartoChannel(
       room: card.copyWith(
-        cover: cover,
+        cover: thumbnail.isEmpty ? null : thumbnail,
         followers: followers == null ? null : '$followers',
         introduction: _introduction(channel['descriptions']),
       ),
@@ -375,6 +414,30 @@ abstract final class PicartoApi {
       requestedId: id,
       master: master,
     );
+  }
+
+  /// When the broadcast on air started: `last_live` of the public API's
+  /// `api/v1/channel/name/<name>`, in UTC (`2026-09-28 16:12:10`; checked
+  /// on 2026-09-28 against the stream time in the HLS segment names of four
+  /// broadcasts, within 10 seconds). Null when the answer is of another
+  /// channel, the channel is offline (`last_live` is then the previous
+  /// broadcast's start) or the time is missing or malformed. Statuses as
+  /// the internal API (404 is `NotFound`).
+  static DateTime? liveSince(String body, {required String name, int status = 200}) {
+    final root = _root(body, status: status, what: 'channel/name');
+    if ((jsonString(root['name']) ?? '').toLowerCase() != name.trim().toLowerCase() || root['online'] != true) {
+      return null;
+    }
+    final match = RegExp(r'^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$')
+        .firstMatch((jsonString(root['last_live']) ?? '').trim());
+    if (match == null) return null;
+    final parts = [for (var group = 1; group <= 6; group++) int.parse(match.group(group)!)];
+    final time = DateTime.utc(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+    final exact = [time.year, time.month, time.day, time.hour, time.minute, time.second];
+    for (var index = 0; index < parts.length; index++) {
+      if (exact[index] != parts[index]) return null;
+    }
+    return time.year > 1970 ? time : null;
   }
 
   /// The danmaku arguments of [channel].
@@ -387,12 +450,15 @@ abstract final class PicartoApi {
   /// `parsePicartoHls`): one quality per video profile (resolution, frame
   /// rate, codecs and groups; the bandwidth and host are not part of it, so
   /// a renewed playlist keeps its ids), labelled `720p 60fps` (or
-  /// `HLS 3.5 Mbps` without a resolution), highest bandwidth first; `data`
-  /// holds the variant URLs of the profile.
+  /// `HLS 3.5 Mbps` without a resolution); `data` holds the variant URLs of
+  /// the profile. The tallest first, then the highest bandwidth (11-4; 3.x
+  /// ordered by bandwidth alone); `sort` says the same ([heightWeight]
+  /// times the height plus the bandwidth).
   ///
   /// A master with separate audio renditions, or a media playlist, is one
-  /// quality `HLS Auto` whose URL is [master] itself (a bare variant would
-  /// play without sound). HTTP 404 is `StreamUnavailable` (the broadcast
+  /// quality [autoQualityName] (11-4; 3.x: `HLS Auto`) whose URL is
+  /// [master] itself (a bare variant would play without sound). Quality
+  /// ids are 3.x's. HTTP 404 is `StreamUnavailable` (the broadcast
   /// ended since the detail); anything that is not a playlist, a variant
   /// without a bandwidth or with a malformed resolution or frame rate, or
   /// a URL that is not http(s) is `ApiChanged`.
@@ -403,7 +469,7 @@ abstract final class PicartoApi {
     if (body.trimLeft().split('\n').first.trim() != '#EXTM3U') {
       throw ApiChanged(_site, 'master playlist: not a playlist (${_snippet(body)})');
     }
-    final grouped = <String, ({String label, int rank, Set<String> urls})>{};
+    final grouped = <String, ({String label, int height, int rank, Set<String> urls})>{};
     Map<String, String>? pending;
     var externalAudio = false;
     var media = false;
@@ -460,6 +526,7 @@ abstract final class PicartoApi {
       final previous = grouped[id];
       grouped[id] = (
         label: previous?.label ?? label,
+        height: size == null ? 0 : int.parse(size.group(2)!),
         rank: previous != null && previous.rank >= bandwidth ? previous.rank : bandwidth,
         urls: {...?previous?.urls, uri.toString()},
       );
@@ -469,22 +536,41 @@ abstract final class PicartoApi {
     }
     if (externalAudio || grouped.isEmpty) {
       return [
-        LivePlayQuality(id: autoQualityId, quality: 'HLS Auto', data: List<String>.unmodifiable([master.toString()])),
+        LivePlayQuality(
+          id: autoQualityId,
+          quality: autoQualityName,
+          data: List<String>.unmodifiable([master.toString()]),
+        ),
       ];
     }
     final ordered = grouped.entries.indexed.toList()
       ..sort((a, b) {
+        final byHeight = b.$2.value.height.compareTo(a.$2.value.height);
+        if (byHeight != 0) return byHeight;
         final byRank = b.$2.value.rank.compareTo(a.$2.value.rank);
         return byRank != 0 ? byRank : a.$1.compareTo(b.$1);
       });
     return [
       for (final (_, MapEntry(:key, :value)) in ordered)
-        LivePlayQuality(id: key, quality: value.label, sort: value.rank, data: List<String>.unmodifiable(value.urls)),
+        LivePlayQuality(
+          id: key,
+          quality: value.label,
+          sort: value.height * heightWeight + value.rank,
+          data: List<String>.unmodifiable(value.urls),
+        ),
     ];
   }
 
-  /// The id of the one quality of a master played as it is.
+  /// The id of the one quality of a master played as it is (3.x's; the
+  /// label changed, the id did not).
   static const String autoQualityId = 'master';
+
+  /// The label of [autoQualityId] (11-4; 3.x: `HLS Auto`).
+  static const String autoQualityName = '自动';
+
+  /// How much one line of height weighs in a quality's `sort` against the
+  /// bandwidth (bits per second, far below it).
+  static const int heightWeight = 1000000000;
 
   /// The video codec of [quality] (`avc`, `hevc`) from the `CODECS` in its
   /// id, or null (`HLS Auto`, or none declared).
@@ -558,37 +644,33 @@ abstract final class PicartoApi {
 
   // Helpers -------------------------------------------------------------------
 
-  /// A channel of an explore row, or of a detail asked for as [requestedId]
-  /// (3.x's `parseChannel`), under the platform's spelling of its name. The
-  /// name (a valid channel name), id and state are required; a detail must
-  /// answer the name asked for (case ignored) and say whether it is
-  /// private. A private channel is `NeedsLogin`. The audience is `viewers`
-  /// (concurrent) and `total_views` (cumulative, details only).
-  static LiveRoom _card(Map<String, dynamic> channel, {String? requestedId}) {
-    final name = jsonString(channel['name']) ?? '';
+  /// Whether [channel] (an explore row, a detail's channel, a search
+  /// profile) is one: a valid channel name, a positive id and a boolean
+  /// state (3.x's `parseChannel` checks).
+  static bool _isChannel(Map<String, dynamic> channel) {
     final id = jsonInt(channel['id']);
-    final online = channel['online'];
-    if (!isChannelName(name) ||
-        id == null ||
-        id <= 0 ||
-        online is! bool ||
-        (requestedId != null && (name.toLowerCase() != requestedId.toLowerCase() || channel['private'] is! bool))) {
-      throw ApiChanged(
-        _site,
-        'channel${requestedId == null ? '' : ' "$requestedId"'} without a valid name, id, state or private flag: '
-        '${_snippet(jsonEncode(channel))}',
-      );
-    }
-    if (channel['private'] == true) throw NeedsLogin(_site, 'channel "$name" is private');
+    return isChannelName(jsonString(channel['name']) ?? '') && id != null && id > 0 && channel['online'] is bool;
+  }
+
+  /// The room of a channel that [_isChannel] accepted (3.x's
+  /// `parseChannel`), under the platform's spelling of its name. The
+  /// audience is `viewers` (concurrent) and `total_views` (cumulative,
+  /// details only). A `private` flag gives the restriction (`private` or
+  /// `none`); rows without it leave it unknown. [placeholderTitle] is left
+  /// empty.
+  static LiveRoom _card(Map<String, dynamic> channel) {
+    final name = jsonString(channel['name'])!;
     final viewers = jsonCount(channel['viewers']);
     final total = jsonCount(channel['total_views']);
     final categories = channel['categories'];
+    final title = jsonString(channel['title']) ?? '';
+    final private = channel['private'];
     return LiveRoom(
       roomId: name,
       platform: _site,
-      userId: '$id',
+      userId: '${jsonInt(channel['id'])}',
       nick: name,
-      title: jsonString(channel['title']) ?? '',
+      title: title.trim() == placeholderTitle ? '' : title,
       link: roomPageUrl(name),
       avatar: normalizeImageUrl(channel['avatar']),
       cover: normalizeImageUrl(channel['image_thumbnail']),
@@ -599,7 +681,8 @@ abstract final class PicartoApi {
       onlineViewers: viewers == null ? '' : '$viewers',
       totalViewers: total == null ? '' : '$total',
       audienceMetricType: AudienceMetricType.onlineViewers,
-      liveStatus: online ? LiveStatus.live : LiveStatus.offline,
+      liveStatus: channel['online'] == true ? LiveStatus.live : LiveStatus.offline,
+      restriction: private is bool ? (private ? LiveRestriction.private : LiveRestriction.none) : null,
     );
   }
 

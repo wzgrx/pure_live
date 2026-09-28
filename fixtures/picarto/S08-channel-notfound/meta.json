@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "platform": "picarto",
+  "sample": "S08-channel-notfound",
+  "capturedAt": "2026-09-28T17:22:33.603798Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.picarto.tv/api/v1/channel/name/zxqvnochannelfixture",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://picarto.tv/",
+      "Origin": "https://picarto.tv"
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "date": "Mon, 28 Sep 2026 17:22:35 GMT",
+      "content-type": "application/json",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "server": "cloudflare",
+      "vary": "Accept-Encoding",
+      "cache-control": "public, s-maxage=60",
+      "x-cacheable": "1",
+      "access-control-allow-origin": "*",
+      "content-encoding": "gzip",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "a4246e59bd8123fd-SJC",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    }
+  },
+  "raw": {
+    "sha256": "06e1fb14fba756d20dfd539aadc92b02dedebfad7d5b22a0f91bbc8c347ccab5",
+    "length": 24
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "manual capture (M4.U.11): urllib, checked by hand as fixtures/README.md asks"
+}

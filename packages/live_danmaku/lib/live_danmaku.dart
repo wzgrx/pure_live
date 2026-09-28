@@ -26,6 +26,7 @@ export 'src/sites/huya.dart';
 export 'src/sites/kuaishou.dart';
 export 'src/sites/missevan.dart';
 export 'src/sites/picarto.dart';
+export 'src/sites/showroom.dart';
 export 'src/sites/soop.dart';
 export 'src/sites/twitcasting.dart';
 export 'src/sites/twitch.dart';

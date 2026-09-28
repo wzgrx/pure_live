@@ -1,0 +1,269 @@
+{
+  "generator": "archived v4 ShowroomProtocol (archive/v4 6ba709135: endpoint, headers, subscribe, ping, decode) over the recording's danmakuKeys and every received frame (fixtures/showroom/danmaku/v4_expected.dart)",
+  "value": {
+    "endpoint": "wss://online.showroom-live.com/",
+    "headers": {
+      "origin": "https://www.showroom-live.com",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    },
+    "subscribe": "SUB\t6e6c686835796846:23483509",
+    "ping": "PING\tshowroom",
+    "heartbeatSeconds": 60,
+    "frames": [
+      {
+        "line": 2,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:8871847:1790533151:924276443",
+            "userId": "8871847",
+            "userName": "观众1",
+            "text": "KINGが寂しそうだったもんで",
+            "sentAt": 1790533151000
+          }
+        ]
+      },
+      {
+        "line": 3,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:4718373:1790533154:417591001",
+            "userId": "4718373",
+            "userName": "观众2",
+            "text": "では、失礼しますね。配信ありがとうございました✨",
+            "sentAt": 1790533154000
+          }
+        ]
+      },
+      {
+        "line": 4,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:2349053:1790533159:888151697",
+            "userId": "2349053",
+            "userName": "观众3",
+            "text": "なっちさん！俺はもう遅いですか？？",
+            "sentAt": 1790533159000
+          }
+        ]
+      },
+      {
+        "line": 5,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:6179378:1790533162:888224109",
+            "userId": "6179378",
+            "userName": "观众4",
+            "text": "○カレーキングさん、おやすみなさい💤",
+            "sentAt": 1790533162000
+          }
+        ]
+      },
+      {
+        "line": 6,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:8871847:1790533168:626329652",
+            "userId": "8871847",
+            "userName": "观众1",
+            "text": "◯かれきんさん，またです～",
+            "sentAt": 1790533168000
+          }
+        ]
+      },
+      {
+        "line": 7,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:4718373:1790533170:475388851",
+            "userId": "4718373",
+            "userName": "观众2",
+            "text": "◯おやすみー",
+            "sentAt": 1790533170000
+          }
+        ]
+      },
+      {
+        "line": 8,
+        "events": []
+      },
+      {
+        "line": 9,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:6767726:1790533176:437377801",
+            "userId": "6767726",
+            "userName": "观众5",
+            "text": "なっちさん 相手にしなくていいですよ👀",
+            "sentAt": 1790533176000
+          }
+        ]
+      },
+      {
+        "line": 10,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:7729403:1790533176:7045321",
+            "userId": "7729403",
+            "userName": "观众6",
+            "text": "1",
+            "sentAt": 1790533176000
+          }
+        ]
+      },
+      {
+        "line": 11,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:6179378:1790533180:980211312",
+            "userId": "6179378",
+            "userName": "观众4",
+            "text": "○Issaさん、遅いです……",
+            "sentAt": 1790533180000
+          }
+        ]
+      },
+      {
+        "line": 12,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:2349053:1790533182:562344126",
+            "userId": "2349053",
+            "userName": "观众3",
+            "text": "○カレキンさん ごゆるりと！",
+            "sentAt": 1790533182000
+          }
+        ]
+      },
+      {
+        "line": 13,
+        "events": []
+      },
+      {
+        "line": 14,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:6767726:1790533188:650971915",
+            "userId": "6767726",
+            "userName": "观众5",
+            "text": "(ง`▽´)งﾖｯｼｬｧ!",
+            "sentAt": 1790533188000
+          }
+        ]
+      },
+      {
+        "line": 15,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:6767726:1790533197:260256428",
+            "userId": "6767726",
+            "userName": "观众5",
+            "text": "ねぇ",
+            "sentAt": 1790533197000
+          }
+        ]
+      },
+      {
+        "line": 16,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:2349053:1790533197:637206809",
+            "userId": "2349053",
+            "userName": "观众3",
+            "text": "え！！！！！遅いか…",
+            "sentAt": 1790533197000
+          }
+        ]
+      },
+      {
+        "line": 17,
+        "events": []
+      },
+      {
+        "line": 18,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:8871847:1790533202:44822774",
+            "userId": "8871847",
+            "userName": "观众1",
+            "text": "ですです",
+            "sentAt": 1790533202000
+          }
+        ]
+      },
+      {
+        "line": 19,
+        "events": []
+      },
+      {
+        "line": 20,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:6767726:1790533203:1021243612",
+            "userId": "6767726",
+            "userName": "观众5",
+            "text": "KINGよ",
+            "sentAt": 1790533203000
+          }
+        ]
+      },
+      {
+        "line": 21,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:6179378:1790533205:321084001",
+            "userId": "6179378",
+            "userName": "观众4",
+            "text": "www",
+            "sentAt": 1790533205000
+          }
+        ]
+      },
+      {
+        "line": 23,
+        "events": []
+      },
+      {
+        "line": 24,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:6767726:1790533213:260256428",
+            "userId": "6767726",
+            "userName": "观众5",
+            "text": "ねぇ",
+            "sentAt": 1790533213000
+          }
+        ]
+      },
+      {
+        "line": 25,
+        "events": [
+          {
+            "type": "chat",
+            "id": "showroom:2349053:1790533217:706064396",
+            "userId": "2349053",
+            "userName": "观众3",
+            "text": "やっぱりか(´＞∀＜｀)ゝ",
+            "sentAt": 1790533217000
+          }
+        ]
+      }
+    ]
+  }
+}

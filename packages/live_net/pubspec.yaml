@@ -1,0 +1,16 @@
+name: live_net
+description: Network layer of Pure Live — HTTP and WebSocket transport for platform adapters and the app.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.0
+
+resolution: workspace
+
+dependencies:
+  meta: ^1.19.0
+
+dev_dependencies:
+  test: ^1.32.0
+  very_good_analysis: ^11.0.0

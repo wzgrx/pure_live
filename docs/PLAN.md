@@ -83,8 +83,8 @@ tools/live_cli（平台探针、样本录制）、tools/check_latest、tools/gat
 | 编号 | 模块 | v3 来源 | 目标 | 状态 |
 |---|---|---|---|---|
 | M0 | 工程底座 | 工具链、门禁、代码规范 | 根目录、`tools/` | 完成（2026-09-28，[记录](modules/M0-foundation.md)） |
-| M1 | 基础模型与工具 | `core/interface`、`common/models`、`core/common` 中的错误、转换和二进制工具、`pkg/tars` | live_core | 进行中 |
-| M2 | 网络 | `core/common` 中的 HTTP 客户端、拦截器、请求头策略、代理路由、请求作用域和 WebSocket，`plugins/race_http`、`fake_useragent` | live_net | 未开始 |
+| M1 | 网络 | `core/common` 中的 HTTP 客户端、拦截器、请求头策略、代理路由、请求作用域和 WebSocket，`plugins/race_http`、`fake_useragent` | live_net | 完成（2026-09-28，[记录](modules/M1-network.md)） |
+| M2 | 基础模型与接口 | `core/interface`、`common/models`（直播间、分区、弹幕消息）、`model/`、`core/common` 中的错误、转换和二进制工具 | live_core | 进行中 |
 | M3 | 平台框架与链接解析 | `core/sites.dart`，站点注册，`common/utils` 中的链接工具和短链 | live_core | 未开始 |
 | M4.x | 各直播平台，一个平台一次上传 | `core/site/<平台>` | live_core | 未开始 |
 | M5.x | 弹幕：先框架和过滤，再一个平台一次 | `core/danmaku`、`core/emoji`、`plugins/emoji_manager` | live_danmaku | 未开始 |
@@ -100,6 +100,8 @@ tools/live_cli（平台探针、样本录制）、tools/check_latest、tools/gat
 | M15 | 发布：正式签名、Windows 安装包、覆盖安装 3.x 验证 | — | — | 未开始 |
 
 补充说明：
+- **网络在模型之前**：v3 的模型和接口依赖网络层（取消令牌、请求头规则），所以网络是最底层，先做（2026-09-28 调整）。
+- **虎牙的 tars 编解码**（`pkg/tars`、`core/tars`）随虎牙一起做（M4）。
 - **平台的顺序**：先哔哩哔哩、斗鱼、虎牙、抖音、快手，再 YY、SOOP、Twitch、网易 CC、AcFun，其余按使用量依次做。Kick 等 v3 没有的平台放在 M4 最后，作为增强。
 - **页面的顺序**：关注 → 热门 → 分区（含分区房间、热门分区） → 搜索 → 直播间（分成几次上传） → 多画面 → 录制中心 → 网络电视 → 设置（分成几次上传） → 账号 → 历史、标签、屏蔽 → 备份和 WebDAV → 关于和版本 → 工具箱 → 远程同步 → 启动页。
 - **应用何时能跑**：M12 之后应用就能运行，之后每上传一个页面，就在 Windows 和手机上对照 v3 实测。

@@ -43,6 +43,7 @@
 | [0035](0035-hls-record.md) | 录制 HLS：连续文件、内存解密、纯 Dart 的 TS / fMP4 转封装；修订：IPTV 连续 TS | 已接受 |
 | [0036](0036-icons.md) | 图标：Material Symbols Rounded 的语义目录（LiveIcons）、轴的落实、自绘弹幕图标、发布包裁剪的验证 | 已接受 |
 | [0037](0037-v3-ui-replica.md) | 界面先复刻 3.x，再逐项升级 | 已接受 |
+| [0038](0038-upstream-references.md) | 上游参考仓库：电视端照 pure_live_TV 复刻，flame_barrage、media_core、flv_lzc 作为长期参考 | 已接受 |
 
 ## 模板
 

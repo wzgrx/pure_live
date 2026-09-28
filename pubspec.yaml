@@ -8,5 +8,6 @@ environment:
   sdk: ^3.13.0
 
 workspace:
+  - packages/live_core
   - packages/live_net
   - tools/check_latest

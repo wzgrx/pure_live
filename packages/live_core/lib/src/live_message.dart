@@ -1,0 +1,287 @@
+import 'package:meta/meta.dart';
+
+/// Kind of a danmaku message.
+enum LiveMessageType {
+  /// Chat.
+  chat,
+
+  /// Gift (not shown yet).
+  gift,
+
+  /// Audience update; [LiveMessage.data] holds a [LiveAudienceUpdate].
+  online,
+
+  /// Super chat.
+  superChat,
+}
+
+/// Which audience number an update carries.
+enum LiveAudienceMetricKind {
+  /// Popularity or heat.
+  popularity,
+
+  /// Concurrent viewers.
+  onlineViewers,
+
+  /// Cumulative viewers.
+  totalViewers,
+}
+
+/// A typed audience update, so heat, concurrent and cumulative viewers are
+/// never relabelled as the same number.
+@immutable
+final class LiveAudienceUpdate {
+  /// Creates an update.
+  const new({required this.kind, required this.value});
+
+  /// What [value] means.
+  final LiveAudienceMetricKind kind;
+
+  /// The number.
+  final int value;
+}
+
+/// Where a locally composed danmaku flies.
+enum LiveMessagePlacement {
+  /// Scrolling.
+  scroll,
+
+  /// Fixed at the top.
+  top,
+
+  /// Fixed at the bottom.
+  bottom,
+}
+
+/// Presentation of a locally composed danmaku; platform messages use the
+/// room's danmaku settings.
+@immutable
+final class LiveMessageStyle {
+  /// Creates a style.
+  const new({
+    required this.fontSize,
+    required this.baseSpeed,
+    required this.fontWeight,
+    required this.showStroke,
+    required this.strokeWidth,
+    this.placement = LiveMessagePlacement.scroll,
+    this.fontFamily,
+    this.italic = false,
+    this.opacity = 1,
+    this.letterSpacing = 0,
+    this.strokeColor = 0xFF000000,
+    this.showShadow = false,
+    this.shadowColor = 0xFF000000,
+    this.shadowBlur = 2,
+    this.shadowOffset = 1,
+    this.fixedDurationMs = 4000,
+  });
+
+  /// Font size.
+  final double fontSize;
+
+  /// Scrolling speed.
+  final double baseSpeed;
+
+  /// Font weight (100–900).
+  final int fontWeight;
+
+  /// Whether to draw an outline.
+  final bool showStroke;
+
+  /// Outline width.
+  final double strokeWidth;
+
+  /// Placement.
+  final LiveMessagePlacement placement;
+
+  /// Font family, or null for the default.
+  final String? fontFamily;
+
+  /// Italic.
+  final bool italic;
+
+  /// Opacity 0–1.
+  final double opacity;
+
+  /// Letter spacing.
+  final double letterSpacing;
+
+  /// Outline colour, ARGB.
+  final int strokeColor;
+
+  /// Whether to draw a shadow.
+  final bool showShadow;
+
+  /// Shadow colour, ARGB.
+  final int shadowColor;
+
+  /// Shadow blur.
+  final double shadowBlur;
+
+  /// Shadow offset.
+  final double shadowOffset;
+
+  /// How long a fixed (top or bottom) message stays, in milliseconds.
+  final int fixedDurationMs;
+}
+
+/// A danmaku colour.
+@immutable
+final class LiveMessageColor {
+  /// Creates a colour from its channels (0–255).
+  const new(this.r, this.g, this.b);
+
+  /// The colour of a platform's integer: `0xRRGGBB`, or `0xAARRGGBB` with
+  /// the alpha ignored (negative 32-bit values included).
+  ///
+  /// 3.x parsed the hexadecimal text and only understood 4, 6 or 8 digits:
+  /// values with 1–3, 5 or 7 digits (blue `0x0000FF`, dark grey `0x0A0A0A`)
+  /// and negative 32-bit values all came out white.
+  factory numberToColor(int value) => LiveMessageColor((value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF);
+
+  /// White, the default.
+  static const LiveMessageColor white = LiveMessageColor(255, 255, 255);
+
+  /// Red.
+  final int r;
+
+  /// Green.
+  final int g;
+
+  /// Blue.
+  final int b;
+
+  @override
+  bool operator ==(Object other) => other is LiveMessageColor && other.r == r && other.g == g && other.b == b;
+
+  @override
+  int get hashCode => Object.hash(r, g, b);
+
+  /// `#rrggbb`.
+  @override
+  String toString() =>
+      '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
+}
+
+/// One danmaku message.
+@immutable
+final class LiveMessage {
+  /// Creates a message.
+  const new({
+    required this.type,
+    required this.userName,
+    required this.message,
+    required this.color,
+    this.userId = '',
+    this.data,
+    this.userLevel = '',
+    this.fansLevel = '',
+    this.fansName = '',
+    this.isLocal = false,
+    this.messageId = '',
+    this.sentAt,
+    this.style,
+  });
+
+  /// Kind.
+  final LiveMessageType type;
+
+  /// Sender name.
+  final String userName;
+
+  /// Sender id.
+  final String userId;
+
+  /// Text.
+  final String message;
+
+  /// For [LiveMessageType.online] a [LiveAudienceUpdate] (older engines may
+  /// send a number).
+  final Object? data;
+
+  /// Colour.
+  final LiveMessageColor color;
+
+  /// Sender level.
+  final String userLevel;
+
+  /// Fan badge level.
+  final String fansLevel;
+
+  /// Fan badge name.
+  final String fansName;
+
+  /// Composed on this device.
+  final bool isLocal;
+
+  /// The platform's id for the message, when it has one: suppresses packets
+  /// replayed after a reconnect without merging two genuine identical texts.
+  final String messageId;
+
+  /// The platform's timestamp; null when it has none (reception order then).
+  final DateTime? sentAt;
+
+  /// Presentation of a local message.
+  final LiveMessageStyle? style;
+}
+
+/// A super chat (paid message).
+@immutable
+final class LiveSuperChatMessage {
+  /// Creates a message.
+  const new({
+    required this.userName,
+    required this.face,
+    required this.message,
+    required this.price,
+    required this.startTime,
+    required this.endTime,
+    required this.backgroundColor,
+    required this.backgroundBottomColor,
+    this.messageId = '',
+  });
+
+  /// The platform's id for the event, when it has one. Some message-board
+  /// APIs rebuild [startTime] from a countdown on every poll, so equality by
+  /// time would make the same paid message look new.
+  final String messageId;
+
+  /// Sender name.
+  final String userName;
+
+  /// Sender avatar URL.
+  final String face;
+
+  /// Text.
+  final String message;
+
+  /// Price in the platform's unit.
+  final int price;
+
+  /// Start of display.
+  final DateTime startTime;
+
+  /// End of display.
+  final DateTime endTime;
+
+  /// Top background colour.
+  final String backgroundColor;
+
+  /// Bottom background colour.
+  final String backgroundBottomColor;
+
+  /// Same [messageId] when either has one; otherwise same sender, text and
+  /// price.
+  @override
+  bool operator ==(Object other) {
+    if (other is! LiveSuperChatMessage) return false;
+    if (messageId.isNotEmpty || other.messageId.isNotEmpty) {
+      return messageId.isNotEmpty && other.messageId == messageId;
+    }
+    return other.userName == userName && other.message == message && other.price == price;
+  }
+
+  @override
+  int get hashCode => messageId.isNotEmpty ? messageId.hashCode : Object.hash(userName, message, price);
+}

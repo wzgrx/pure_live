@@ -133,6 +133,7 @@ _Setup _setup(
   DouyuLoginStore? login,
   Map<String, List<ReplaySample>> script = const {},
   DateTime Function()? now,
+  bool Function()? forceRenewal,
 }) {
   final http = ReplayHttp([
     ...extra,
@@ -146,6 +147,7 @@ _Setup _setup(
           }),
     cookies: cookies,
     login: login,
+    forceRenewal: forceRenewal,
     now: now ?? () => _captured,
     random: Random(7),
   );
@@ -236,6 +238,7 @@ void main() {
       final room = await setup.site.getRoomDetail(roomId: '5526219');
       expect(room.roomId, '5526219');
       expect(room.isLiveNow, isTrue);
+      expect(room.startedAt, DateTime.utc(2026, 9, 26, 11, 0, 29), reason: 'show_time, no extra request');
       expect((room.data! as DouyuRoomData).rid, '5526219');
       expect((room.danmakuData! as DouyuDanmakuArgs).roomId, '5526219');
       expect(setup.http.requests.single.headers, {
@@ -511,6 +514,48 @@ void main() {
       expect(setup.site.getPlayUrlInvalidAt('https://x.douyucdn2.cn/live/r.flv?expire=0'), isNull);
     });
 
+    test('forced renewal (2-1): off by default; on, an expire=0 line gets a five-minute lease, read live', () async {
+      var force = false;
+      final setup = _setup(['S06-encryption', 'S09-24422-r2-hw-h5'], forceRenewal: () => force);
+      Future<LivePlayLine> resolve() async => (await setup.site.resolvePlayUrlAtRaw(
+        detail: _room('24422'),
+        quality: _quality(2, ['hw-h5']),
+        lineIndex: 0,
+      )).lines.single;
+
+      final plain = await resolve();
+      expect(plain.lease, isNull, reason: 'expire=0 states no lease');
+      expect(setup.site.getPlayUrlRefreshAt(plain.url), isNull);
+
+      force = true;
+      final forced = await resolve();
+      expect(forced.lease!.expiresAt, _captured.toUtc().add(const Duration(minutes: 5)));
+      expect(forced.lease!.refreshAt, _captured.toUtc().add(const Duration(minutes: 4, seconds: 15)));
+      expect(forced.lease!.cutsConnection, isTrue);
+      expect(
+        setup.site.getPlayUrlRefreshAt(forced.url, now: DateTime.utc(2030)),
+        forced.lease!.refreshAt,
+        reason: 'the lease of the resolution, not one counted from now',
+      );
+      final later = DateTime.utc(2026, 9, 27, 12);
+      expect(
+        setup.site.getPlayUrlInvalidAt('https://x.douyucdn2.cn/live/r.flv?expire=0', now: later),
+        later.add(const Duration(minutes: 5)),
+        reason: 'an unknown URL counts from now',
+      );
+      expect(setup.site.getPlayUrlInvalidAt('https://x.douyucdn2.cn/live/r.m3u8?expire=0', now: later), isNull);
+
+      force = false;
+      expect(setup.site.getPlayUrlRefreshAt(forced.url), isNull, reason: 'the setting is read at every lookup');
+      expect(setup.site.getPlayUrlInvalidAt(forced.url), isNull);
+      expect(
+        setup.site.getPlayUrlInvalidAt('https://x.douyucdn2.cn/live/r.flv?expire=300', now: later),
+        later.add(const Duration(seconds: 300)),
+        reason: 'a stated lease does not depend on it',
+      );
+      expect(_count(setup.http, _play), 2, reason: 'no extra request: one per resolution');
+    });
+
     test('a quality of another shape resolves to nothing', () async {
       final setup = _setup([]);
       final resolution = await setup.site.resolvePlayUrlsRaw(
@@ -686,6 +731,23 @@ void main() {
       expect(http.requests, hasLength(1));
       expect(parser.containsSupportedLink('https://www.douyu.com/lpl'), isTrue);
       expect(parser.containsSupportedLink('https://www.douyu.com/search?kw=game'), isFalse);
+    });
+
+    test('aliases ignore case: LPL and lpl lead to the same rid, and rooms compare without case', () async {
+      final http = ReplayHttp([
+        ReplaySample.load('$_root/S05-alias-redirect'),
+        ReplaySample.load('$_root/S05-alias-redirect-upper'),
+      ]);
+      final parser = LinkParser(SiteRegistry({'douyu': () => DouyuSite(http, random: Random(1))}), http);
+      expect(await parser.parse('https://www.douyu.com/LPL'), const RoomLink('douyu', '288016'));
+      expect(await parser.parse('https://www.douyu.com/lpl'), const RoomLink('douyu', '288016'));
+      expect(_paths(http), ['/LPL', '/lpl']);
+      expect(SiteIds.ignoresRoomIdCase('douyu'), isTrue);
+      final upper = _room('LPL');
+      expect(upper.hasSameIdentity(_room('lpl')), isTrue);
+      expect(upper.identityKey, 'douyu:lpl');
+      expect(upper.roomId, 'LPL', reason: 'the stored spelling stays');
+      expect(_room('288016').hasSameIdentity(_room('lpl')), isFalse, reason: 'an alias is not its rid');
     });
 
     test('an alias page without a redirect to a rid leads nowhere', () async {

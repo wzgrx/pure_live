@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "platform": "douyu",
+  "sample": "S05-alias-redirect-upper",
+  "capturedAt": "2026-09-28T16:16:15.872474Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.douyu.com/LPL",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "server": "Tengine",
+      "content-type": "text/html; charset=UTF-8",
+      "transfer-encoding": "chunked",
+      "connection": "keep-alive",
+      "strict-transport-security": "max-age=86400",
+      "date": "Mon, 28 Sep 2026 16:16:16 GMT",
+      "location": "/288016",
+      "x-request-id": "f5505685-53ee-4084-b09a-924b911a1bd5",
+      "x-gw-cache-status": "MISS",
+      "via": "cache13.l2cm9-10[30,29,302-0,M], cache50.l2cm9-10[31,0], ens-cache10.cn9479[65,64,302-0,M], ens-cache12.cn9479[70,0]",
+      "ali-swift-global-savetime": "1790612176",
+      "x-cache": "MISS TCP_MISS dirn:-2:-2",
+      "x-swift-savetime": "Mon, 28 Sep 2026 16:16:16 GMT",
+      "x-swift-cachetime": "0",
+      "c-via": "200",
+      "timing-allow-origin": "*",
+      "eagleid": "76b7ae2017906121767882821e"
+    }
+  },
+  "raw": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "length": 0
+  },
+  "body": "body.html",
+  "scrubbed": [],
+  "tool": "M4.U.2 recorder (schema 1)"
+}

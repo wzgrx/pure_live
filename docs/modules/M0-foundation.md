@@ -48,4 +48,4 @@
 
 ## 其他
 
-- 清空 master 时，已安装的 3.x 检查更新要读的 `assets/version.json` 和 `assets/releases.json` 也被删了，导致更新检查返回 404。已原样恢复（提交 `c12bd5889`），AGENTS.md 里注明不能删。
+- 清空 master 时，已安装的 3.x 检查更新要读的 `assets/version.json` 和 `assets/releases.json` 也被删了，导致更新检查返回 404。已原样恢复（提交 `ac40984d8`），AGENTS.md 里注明不能删。

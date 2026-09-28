@@ -1,10 +1,12 @@
 // KugouLiveSite over the recorded Kugou Live responses (ReplayHttp) and a few
 // synthetic ones: the requests (URL, headers, redirects) and their counts,
 // compared with the requests 3.x made (expected.json), the catalog and its
-// cache, the directory, the keyword and room searches, room details for
-// entry, refresh and recording, streams with their lines and recovery, the
-// lease queries, cancellation, links through the link parser and the error
-// mapping. Ports the orchestration parts of 3.x's kugou_live_site_test.dart.
+// cache, the directory, the keyword and room searches (with the search
+// snapshot, UPGRADES "翻页"), room details for entry, refresh and recording,
+// streams with their lines, restrictions and recovery, the lease queries,
+// "优先 H.264", cancellation, links through the link parser and the error
+// mapping. Ports the orchestration parts of 3.x's kugou_live_site_test.dart;
+// the M4.U items are named by their docs/UPGRADES.md numbers.
 import 'dart:async';
 import 'dart:convert';
 
@@ -19,6 +21,9 @@ const _root = '../../fixtures/kugoulive';
 
 /// The live room's entry.
 const _liveSamples = ['S04-room-live', 'S05-stream-live'];
+
+/// The chat-limited room's entry (M4.U.29).
+const _chatLimitSamples = ['S04-room-chatlimit', 'S05-stream-chatlimit'];
 
 /// 1 µs after the epoch: the search callback is `pureLive1`, as recorded;
 /// the stream request's `_` (milliseconds) is 0, left out of matching.
@@ -60,12 +65,12 @@ typedef _Setup = ({KugouLiveSite site, ReplayHttp http});
 
 /// A site over [samples] (and [extra]); the stream request's clock value
 /// `_` is left out of matching.
-_Setup _setup(List<String> samples, {List<ReplaySample> extra = const []}) {
+_Setup _setup(List<String> samples, {List<ReplaySample> extra = const [], bool Function()? preferH264}) {
   final http = ReplayHttp(
     [...extra, for (final sample in samples) ReplaySample.load('$_root/$sample')],
     ignoredQuery: const {'_'},
   );
-  return (site: KugouLiveSite(http, now: () => _clock), http: http);
+  return (site: KugouLiveSite(http, preferH264: preferH264, now: () => _clock), http: http);
 }
 
 /// [sample]'s recorded request answered with [body] instead.
@@ -110,22 +115,60 @@ void _expectLegacyRequests(List<LiveRequest> requests, Map<String, dynamic> outc
   }
 }
 
-/// [actual] equals 3.x's [legacy] on every key but `httpHeaders` (3.x's
-/// media headers on the room, now on the lines); null reads as ''.
-void _expectParity(Map<String, Object?> actual, Map<String, dynamic> legacy, {String? reason}) {
+/// What every room changes against 3.x: `httpHeaders` (3.x's media headers
+/// on the room, now on the lines, M4.29) and `notice` (29-6; 29-2 for the
+/// room info's announcements). The new keys (`startedAt`, `restriction`)
+/// are not in 3.x's output; kugoulive_api_test.dart checks them.
+const _roomChanged = {'httpHeaders', 'notice'};
+
+/// A room from the room info also leaves its title empty (29-2).
+const Set<String> _infoChanged = {..._roomChanged, 'title'};
+
+/// A phone broadcast's card is live (29-1; 3.x: unknown, `liveStatus` 3).
+const Set<String> _phoneChanged = {..._roomChanged, 'liveStatus', 'status'};
+
+/// A search card has no audience unless live and above 0 (29-3).
+const Set<String> _searchChanged = {..._roomChanged, 'watching', 'onlineViewers', 'audienceMetricType'};
+
+/// A list card's changes: a phone broadcast's ([_phoneChanged]) or
+/// [_roomChanged].
+Set<String> _cardChanged(Map<String, dynamic> legacy) => legacy['liveStatus'] == 3 ? _phoneChanged : _roomChanged;
+
+/// [actual] equals 3.x's [legacy] on every key but [changed]; null reads as
+/// ''.
+void _expectParity(
+  Map<String, Object?> actual,
+  Map<String, dynamic> legacy, {
+  Set<String> changed = _roomChanged,
+  String? reason,
+}) {
   for (final MapEntry(:key, :value) in legacy.entries) {
-    if (key == 'httpHeaders') continue;
+    if (changed.contains(key)) continue;
     expect(actual[key] ?? '', value ?? '', reason: '${reason ?? ''} $key');
   }
 }
 
-void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String? reason}) {
+void _expectRooms(
+  List<LiveRoom> rooms,
+  Object? legacy, {
+  Set<String> Function(Map<String, dynamic> legacy) changed = _cardChanged,
+  String? reason,
+}) {
   final expected = (legacy! as List).cast<Map<String, dynamic>>();
   expect(rooms.map((room) => room.roomId), expected.map((room) => room['roomId']), reason: reason);
   for (final (index, room) in rooms.indexed) {
-    _expectParity(_projection(room), expected[index], reason: '${reason ?? ''}[$index]');
+    _expectParity(
+      _projection(room),
+      expected[index],
+      changed: changed(expected[index]),
+      reason: '${reason ?? ''}[$index]',
+    );
   }
 }
+
+Set<String> _info(Map<String, dynamic> legacy) => _infoChanged;
+
+Set<String> _search(Map<String, dynamic> legacy) => _searchChanged;
 
 Map<String, Object?> _projection(LiveRoom room) => {...room.toJson(), 'link': room.link};
 
@@ -139,7 +182,7 @@ final Matcher _cancelled = throwsA(
 String _roomInfo({Map<String, Object?> info = const {}, Map<String, Object?> data = const {}}) => jsonEncode({
   'code': 0,
   'data': {
-    'liveSessionId': 'fixture-session',
+    'liveSessionId': '6ab93a1bh6b263401',
     'liveType': 0,
     'normalRoomInfo': {
       'fansCount': 9083,
@@ -155,6 +198,46 @@ String _roomInfo({Map<String, Object?> info = const {}, Map<String, Object?> dat
     ...data,
   },
 });
+
+/// A signed media URL of room 5085706.
+String _signed(String path) =>
+    'https://tx2.liveplay.live.kugou.com/live/$path?cn=fx&txSecret=0123456789abcdef0123456789abcdef'
+    '&txTime=6AB1DA15&token=0-5085706-0-1010-7-1000-fixture-2';
+
+/// A stream answer of room 5085706 with an H.264 tier 4 and an HEVC tier 5.
+final String _twoCodecs = jsonEncode({
+  'code': 0,
+  'data': {
+    'status': 1,
+    'roomId': 5085706,
+    'lines': [
+      {
+        'sid': 40,
+        'streamProfiles': [
+          {
+            'rate': 5,
+            'codec': 2,
+            'layout': 1,
+            'httpsFlv': [_signed('hevc.flv')],
+          },
+          {
+            'rate': 4,
+            'codec': 1,
+            'layout': 1,
+            'httpsFlv': [_signed('avc.flv')],
+          },
+        ],
+      },
+    ],
+  },
+});
+
+/// The room info of 5085706 and then [stream] for its stream answer.
+_Scripted _roomThenStream(String stream, {int status = 200}) => _Scripted(
+  (request) => request.url.host == KugouLiveApi.roomHost
+      ? _response(request, _roomInfo())
+      : _response(request, stream, status: status),
+);
 
 const _area7024 = LiveArea(platform: 'kugoulive', areaType: 'official', areaId: '7024', areaName: '舞蹈');
 
@@ -193,7 +276,7 @@ void main() {
       final areas = (legacy['children'] as List).cast<Map<String, dynamic>>();
       expect(categories.single.children, hasLength(areas.length));
       for (final (index, area) in categories.single.children.indexed) {
-        _expectParity(area.toJson(), areas[index], reason: '[$index]');
+        _expectParity(area.toJson(), areas[index], changed: const {}, reason: '[$index]');
       }
       expect((await site.getCategories(1, 3)).single.children.map((area) => area.areaName), ['推荐', '一起玩', '音乐']);
       await site.getCategories(1, 1000);
@@ -221,6 +304,7 @@ void main() {
         final legacy = _legacyValue(sample, 'getDirectoryPage($page)')! as Map<String, dynamic>;
         expect((result.page, result.hasMore), (legacy['page'], legacy['hasMore']));
         _expectRooms(result.rooms, legacy['rooms'], reason: sample);
+        expect(result.rooms.every((room) => room.liveStatus == LiveStatus.live), isTrue, reason: '29-1');
         http.requests.clear();
         _expectRooms(
           await site.getRecommendRooms(page: page),
@@ -299,16 +383,64 @@ void main() {
   });
 
   group('search', () {
-    test('a keyword: one request per page, paged locally as in 3.x', () async {
+    test('a keyword: pages match 3.x; page 1 asks as 3.x, later pages cut its answer (snapshot)', () async {
       final (:site, :http) = _setup(['S06-search']);
       for (final (page, pageSize) in [(1, 30), (2, 30), (4, 30), (5, 30), (1, 100)]) {
         http.requests.clear();
         final key = 'searchRooms($page, $pageSize)';
         final rooms = await site.searchRoomsCancellable('唱歌', page: page, pageSize: pageSize, cancel: CancelToken());
-        _expectRooms(rooms, _legacyValue('S06-search', key), reason: key);
-        _expectLegacyRequests(http.requests, _outcome('S06-search', key));
+        _expectRooms(rooms, _legacyValue('S06-search', key), changed: _search, reason: key);
+        if (page == 1) {
+          _expectLegacyRequests(http.requests, _outcome('S06-search', key));
+        } else {
+          expect(_outcome('S06-search', key)['requests'], hasLength(1), reason: '3.x asked again');
+          expect(http.requests, isEmpty, reason: 'the answer of page 1, under 30 s old');
+        }
       }
       expect((await site.searchRooms(' 唱歌 ', pageSize: 100)).length, 98);
+    });
+
+    test('the snapshot lives 30 s, per keyword; page 1 and a failure keep nothing old', () async {
+      final body = Fixture.load('kugoulive', 'S06-search').body.trim();
+      var failing = false;
+      final http = _Scripted((request) {
+        if (failing) return _response(request, '', status: 500);
+        // The platform echoes the callback it is given.
+        final callback = request.url.queryParameters['callback']!;
+        return _response(request, body.replaceFirst('pureLive1(', '$callback('));
+      });
+      var now = DateTime.utc(2026, 9, 27, 17, 52, 27);
+      final site = KugouLiveSite(http, now: () => now);
+      Future<List<LiveRoom>> search(String keyword, int page) => site.searchRooms(keyword, page: page);
+      expect(await search('唱歌', 2), hasLength(30), reason: 'nothing kept: asks');
+      expect(http.requests, hasLength(1));
+      now = now.add(const Duration(seconds: 29));
+      expect(await search('唱歌', 3), hasLength(30));
+      expect(http.requests, hasLength(1), reason: 'under 30 s');
+      expect(await search('歌', 2), hasLength(30));
+      expect(http.requests, hasLength(2), reason: 'another keyword');
+      expect(await search('唱歌', 1), hasLength(30));
+      expect(http.requests, hasLength(3), reason: 'page 1 always asks');
+      now = now.add(const Duration(seconds: 30));
+      expect(await search('唱歌', 4), hasLength(8));
+      expect(http.requests, hasLength(4), reason: '30 s old: asks again');
+      now = now.subtract(const Duration(minutes: 1));
+      expect(await search('唱歌', 2), hasLength(30));
+      expect(http.requests, hasLength(5), reason: 'a clock turned back asks again');
+      failing = true;
+      now = now.add(const Duration(minutes: 5));
+      await expectLater(search('唱歌', 2), throwsA(isA<NetworkFailure>()));
+      expect(http.requests, hasLength(6));
+      for (final keyword in ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9']) {
+        failing = false;
+        await search(keyword, 1);
+      }
+      http.requests.clear();
+      await search('a9', 2);
+      await search('a2', 2);
+      expect(http.requests, isEmpty, reason: 'the last eight keywords are kept');
+      await search('a1', 2);
+      expect(http.requests, hasLength(1), reason: 'the oldest is dropped');
     });
 
     test('searches answered without a request, as in 3.x', () async {
@@ -340,13 +472,26 @@ void main() {
         http.requests.clear();
         final rooms = await site.searchRoomsCancellable(key, cancel: CancelToken());
         final outcome = value as Map<String, dynamic>;
-        _expectRooms(rooms, outcome['value'], reason: key);
+        _expectRooms(rooms, outcome['value'], changed: _info, reason: key);
         _expectLegacyRequests(http.requests, outcome);
         expect(rooms.single.data, isNull, reason: 'refresh depth');
+        expect(rooms.single.startedAt, isNotNull);
       }
       http.requests.clear();
       expect(await site.searchRooms('3197156', page: 2), isEmpty);
+      expect(
+        await site.searchRooms(
+          'http://mfanxing.kugou.com/staticPub/rmobile/sharePage/normalRoom/views/index.html?roomId=3197156',
+          page: 2,
+        ),
+        isEmpty,
+      );
       expect(http.requests, isEmpty);
+      final shared = await site.searchRooms(
+        'http://mfanxing.kugou.com/staticPub/rmobile/sharePage/normalRoom/views/index.html?roomId=3197156',
+      );
+      expect(shared.single.roomId, '3197156', reason: '29-4');
+      expect(_paths(http.requests), ['/roomcen/room/web/cdn/getEnterRoomInfo']);
     });
 
     test('a room that does not exist finds nothing (3.x showed a room named "Kugou Live")', () async {
@@ -365,12 +510,15 @@ void main() {
       await expectLater(site.searchRooms('唱歌'), throwsA(isA<NetworkFailure>()));
     });
 
-    test('cancellation before and during the request', () async {
+    test('cancellation before and during the request, and with a kept answer', () async {
       final (:site, :http) = _setup(['S06-search']);
       final before = CancelToken()..cancel();
       await expectLater(site.searchRoomsCancellable('唱歌', cancel: before), _cancelled);
       await expectLater(site.searchRoomsCancellable('3197156', cancel: before), _cancelled);
       expect(http.requests, isEmpty);
+      await site.searchRooms('唱歌');
+      await expectLater(site.searchRoomsCancellable('唱歌', page: 2, cancel: before), _cancelled);
+      expect(http.requests, hasLength(1));
       final during = CancelToken();
       final scripted = _Scripted((request) {
         during.cancel();
@@ -395,12 +543,20 @@ void main() {
         http.requests.clear();
         final room = await call();
         _expectLegacyRequests(http.requests, _outcome('S04-room-live', key));
-        _expectParity(_projection(room), _legacyValue('S04-room-live', key)! as Map<String, dynamic>, reason: key);
+        _expectParity(
+          _projection(room),
+          _legacyValue('S04-room-live', key)! as Map<String, dynamic>,
+          changed: _infoChanged,
+          reason: key,
+        );
         expect(room.httpHeaders, isEmpty, reason: key);
+        expect(room.startedAt, DateTime.utc(2026, 9, 27, 15, 45, 31), reason: key);
         final data = room.data;
         if (key == 'getRoomDetailForRefresh') {
           expect(data, isNull);
+          expect(room.restriction, isNull, reason: 'the refresh cannot tell');
         } else {
+          expect(room.restriction, LiveRestriction.none, reason: 'the stream answer gave a stream');
           expect(data, isA<KugouLiveRoomData>().having((data) => data.roomId, 'roomId', '3197156'));
           final variants = (data! as KugouLiveRoomData).variants;
           final legacy = (_legacy('S04-room-live')['data.variants'] as List).cast<Map<String, dynamic>>();
@@ -413,16 +569,24 @@ void main() {
       _expectLegacyRequests(http.requests, _outcome('S04-room-live', 'getLiveStatus'));
     });
 
-    test('a room link names its number (3.x identity)', () async {
+    test('a room link names its number (3.x identity), the share page too (29-4)', () async {
       final (:site, :http) = _setup(_liveSamples);
       final room = await site.getRoomDetail(roomId: 'https://fanxing.kugou.com/3197156');
       expect(room.roomId, '3197156');
-      _expectParity(_projection(room), _legacyValue('S04-room-live', 'getRoomDetail(link)')! as Map<String, dynamic>);
+      _expectParity(
+        _projection(room),
+        _legacyValue('S04-room-live', 'getRoomDetail(link)')! as Map<String, dynamic>,
+        changed: _infoChanged,
+      );
       _expectLegacyRequests(http.requests, _outcome('S04-room-live', 'getRoomDetail(link)'));
       expect(room.hasIdentity(platform: 'kugoulive', roomId: '3197156'), isTrue);
+      final shared = await site.getRoomDetailForRefresh(
+        roomId: 'https://mfanxing.kugou.com/staticPub/rmobile/sharePage/normalRoom/views/index.html?roomId=3197156',
+      );
+      expect(shared.roomId, '3197156');
     });
 
-    test('offline: one request at every depth; no stream', () async {
+    test('offline: one request at every depth; no stream, no start, no restriction', () async {
       final (:site, :http) = _setup(['S04-room-offline']);
       for (final key in ['getRoomDetail', 'getRoomDetailForRecording', 'getRoomDetailForRefresh']) {
         http.requests.clear();
@@ -432,8 +596,14 @@ void main() {
           _ => await site.getRoomDetailForRefresh(roomId: '1014306'),
         };
         _expectLegacyRequests(http.requests, _outcome('S04-room-offline', key));
-        _expectParity(_projection(room), _legacyValue('S04-room-offline', key)! as Map<String, dynamic>, reason: key);
+        _expectParity(
+          _projection(room),
+          _legacyValue('S04-room-offline', key)! as Map<String, dynamic>,
+          changed: _infoChanged,
+          reason: key,
+        );
         expect(room.liveStatus, LiveStatus.offline);
+        expect((room.startedAt, room.restriction), (null, null), reason: key);
       }
       expect(await site.getLiveStatus(roomId: '1014306'), isFalse);
       final entered = await site.getRoomDetail(roomId: '1014306');
@@ -451,7 +621,9 @@ void main() {
       _expectParity(
         _projection(room),
         _legacyValue('S04-room-mobile', 'getRoomDetailForRefresh')! as Map<String, dynamic>,
+        changed: _infoChanged,
       );
+      expect(room.startedAt, DateTime.fromMillisecondsSinceEpoch(0x6ab8d6ec * 1000, isUtc: true));
       expect(await site.getLiveStatus(roomId: '50595748'), isTrue);
       expect(http.requests, hasLength(2));
     });
@@ -478,16 +650,42 @@ void main() {
       expect((_legacyValue('S04-room-live', 'getRoomDetail(bad id)')! as Map)['message'], 'Kugou Live identity');
     });
 
-    test('restricted: unknown with 3.x notice; entry one request; NeedsLogin for the stream and state', () async {
-      final http = _Scripted((request) => _response(request, _roomInfo(info: {'limitType': 1})));
+    test('a chat limit (limitType 2) is live and plays: two requests, restriction none (3.x: unknown)', () async {
+      final (:site, :http) = _setup(_chatLimitSamples);
+      final room = await site.getRoomDetail(roomId: '5171815');
+      expect(_paths(http.requests), [
+        '/roomcen/room/web/cdn/getEnterRoomInfo',
+        '/video/pc/live/pull/mutiline/streamaddr',
+      ]);
+      expect((room.liveStatus, room.restriction), (LiveStatus.live, LiveRestriction.none));
+      expect(room.notice, isNot(contains(KugouLiveApi.restrictedNotice)));
+      expect(room.startedAt, isNotNull);
+      http.requests.clear();
+      final quality = (await site.getPlayQualities(detail: room)).single;
+      expect(quality.quality, 'FLV 码率档 5');
+      expect((await site.resolvePlayUrlsRaw(detail: room, quality: quality)).lines, hasLength(2));
+      expect(http.requests, isEmpty);
+      expect(await site.getLiveStatus(roomId: '5171815'), isTrue, reason: '3.x: access');
+      final refreshed = await site.getRoomDetailForRefresh(roomId: '5171815');
+      expect((refreshed.liveStatus, refreshed.restriction), (LiveStatus.live, null));
+    });
+
+    test('a stream answer asking for a login: live, needsLogin with its notice; NeedsLogin to play', () async {
+      final http = _roomThenStream(jsonEncode({'code': KugouLiveApi.loginRequiredCode, 'msg': '', 'data': null}));
       final site = KugouLiveSite(http);
       final room = await site.getRoomDetail(roomId: '5085706');
-      expect(room.liveStatus, LiveStatus.unknown);
-      expect(room.notice, '${KugouLiveApi.restrictedNotice}\n${KugouLiveApi.chatNotice}');
-      expect(_paths(http.requests), ['/roomcen/room/web/cdn/getEnterRoomInfo']);
+      expect(http.requests, hasLength(2));
+      expect(
+        (room.liveStatus, room.restriction, room.isRestricted),
+        (LiveStatus.live, LiveRestriction.needsLogin, true),
+      );
+      expect(room.notice!.split('\n').first, KugouLiveApi.restrictedNotice);
+      expect(room.followGroup, FollowGroup.live);
       await expectLater(site.getPlayQualities(detail: room), throwsA(isA<NeedsLogin>()));
-      expect(http.requests, hasLength(1));
-      await expectLater(site.getLiveStatus(roomId: '5085706'), throwsA(isA<NeedsLogin>()));
+      expect(http.requests, hasLength(2), reason: 'the entry kept why');
+      await expectLater(site.getPlayQualities(detail: room.copyWith(data: 'x')), throwsA(isA<NeedsLogin>()));
+      expect(http.requests, hasLength(4), reason: 'without the data: entered again');
+      expect(await site.getLiveStatus(roomId: '5085706'), isTrue);
     });
 
     test('no live session: unknown; the stream is unavailable and the state has no answer', () async {
@@ -495,19 +693,21 @@ void main() {
       final site = KugouLiveSite(http);
       final room = await site.getRoomDetail(roomId: '5085706');
       expect(room.liveStatus, LiveStatus.unknown);
+      expect(room.restriction, isNull);
       expect(http.requests, hasLength(1));
       await expectLater(site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
       await expectLater(site.getLiveStatus(roomId: '5085706'), throwsA(isA<ApiChanged>()));
     });
 
-    test('a live room whose stream answer has no stream is entered (3.x failed the entry)', () async {
+    test('a live room whose stream answer has no stream is entered, unplayable (3.x failed the entry)', () async {
       final offline = jsonEncode({
         'code': 0,
         'data': {'status': 0, 'roomId': 3197156, 'lines': <Object?>[]},
       });
       final (:site, :http) = _setup(['S04-room-live'], extra: [_answer('S05-stream-live', offline)]);
       final room = await site.getRoomDetail(roomId: '3197156');
-      expect(room.liveStatus, LiveStatus.live);
+      expect((room.liveStatus, room.restriction), (LiveStatus.live, LiveRestriction.unplayable));
+      expect(room.isLiveNow, isTrue, reason: 'M2.1: still live');
       expect(http.requests, hasLength(2));
       await expectLater(site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
       expect(http.requests, hasLength(2));
@@ -525,31 +725,36 @@ void main() {
           }),
           isA<ApiChanged>(),
         ),
+        (200, jsonEncode({'code': 2, 'msg': 'busy'}), isA<ApiChanged>()),
       ]) {
-        final http = _Scripted(
-          (request) => request.url.host == KugouLiveApi.roomHost
-              ? _response(request, _roomInfo())
-              : _response(request, body, status: status),
+        await expectLater(
+          KugouLiveSite(_roomThenStream(body, status: status)).getRoomDetail(roomId: '5085706'),
+          throwsA(matcher),
+          reason: body,
         );
-        await expectLater(KugouLiveSite(http).getRoomDetail(roomId: '5085706'), throwsA(matcher), reason: body);
       }
     });
 
-    test('a refresh merged into a stored 3.x follow keeps its identity and data', () async {
+    test('a refresh merged into a stored 3.x follow keeps its identity, title and data', () async {
       final (:site, :http) = _setup(_liveSamples);
       final entered = await site.getRoomDetail(roomId: '3197156');
       final stored = LiveRoom.fromJson({
         ...entered.toJson(),
+        'title': '通宵主播！！！！王者女侠，峡谷相约！！！！打王者的可以预约！',
         'watching': '10',
         'onlineViewers': '10',
         'audienceMetricType': 'onlineViewers',
         'httpHeaders': KugouLiveApi.mediaHeaders('3197156'),
       }).copyWith(data: entered.data);
-      final merged = stored.mergeFrom(await site.getRoomDetailForRefresh(roomId: '3197156'));
+      final refreshed = await site.getRoomDetailForRefresh(roomId: '3197156');
+      final merged = stored.mergeFrom(refreshed);
       expect(merged.roomId, '3197156');
+      expect(merged.title, stored.title, reason: '29-2: an empty title keeps the stored one');
       expect(merged.onlineViewers, '10', reason: 'the refresh has no audience');
       expect(merged.data, same(entered.data));
       expect(merged.httpHeaders, isNotEmpty, reason: '3.x stored value kept');
+      expect(merged.startedAt, refreshed.startedAt);
+      expect(merged.restriction, LiveRestriction.none, reason: 'same broadcast: the entry value stays');
     });
   });
 
@@ -585,6 +790,24 @@ void main() {
         throwsA(isA<StreamUnavailable>()),
       );
       expect((_legacyValue('S04-room-live', 'resolvePlayUrlsRaw(hls:4:1:2)')! as Map)['message'], contains('media'));
+    });
+
+    test('"优先 H.264": read at each call; on (default) H.264 first, off HEVC first; lines say hevc (29-8)', () async {
+      var prefer = true;
+      final http = _roomThenStream(_twoCodecs);
+      final site = KugouLiveSite(http, preferH264: () => prefer);
+      final room = await site.getRoomDetail(roomId: '5085706');
+      expect((await site.getPlayQualities(detail: room)).map((quality) => quality.id), ['flv:4:1:1', 'flv:5:2:1']);
+      prefer = false;
+      final qualities = await site.getPlayQualities(detail: room);
+      expect(qualities.map((quality) => quality.id), ['flv:5:2:1', 'flv:4:1:1']);
+      final hevc = await site.resolvePlayUrlsRaw(detail: room, quality: qualities.first);
+      expect(hevc.lines.single.codec, 'hevc');
+      expect(
+        (await KugouLiveSite(_roomThenStream(_twoCodecs)).getPlayQualities(detail: room)).first.id,
+        'flv:4:1:1',
+        reason: 'on by default',
+      );
     });
 
     test('a room without data is entered first (3.x: identity); an offline card needs no request', () async {
@@ -719,6 +942,12 @@ void main() {
         ('https://fanxing.kugou.com/5085706?refer=2177', '5085706'),
         ('看 https://mfanxing.kugou.com/?roomId=5085706 吧', '5085706'),
         ('http://mfanxing.kugou.com/3197156', '3197156'),
+        // 29-4: the phone share page (recorded from the room page, 2026-09-28).
+        (
+          '快来看 http://mfanxing.kugou.com/staticPub/rmobile/sharePage/normalRoom/views/index.html?roomId=3197156 ',
+          '3197156',
+        ),
+        ('https://mfanxing.kugou.com/share?roomId=5085706', '5085706'),
       ]) {
         expect(await parser(http).parse(text), RoomLink('kugoulive', id), reason: text);
       }
@@ -726,7 +955,7 @@ void main() {
       expect(http.requests, isEmpty);
     });
 
-    test('other pages and hosts are not rooms (3.x rules)', () async {
+    test('other pages and hosts are not rooms (3.x rules; fanxing2 blocked, 29-4)', () async {
       final http = ReplayHttp(const []);
       for (final text in [
         'https://fanxing.kugou.com/channel/5085706',
@@ -736,6 +965,7 @@ void main() {
         'https://fanxing.kugou.com:8443/5085706',
         'https://fanxing.kugou.com/12',
         'https://fanxing2.kugou.com/5085706',
+        'https://mfanxing.kugou.com/staticPub/rmobile/sharePage/normalRoom/views/index.html',
       ]) {
         expect(await parser(http).parse(text), isNull, reason: text);
       }

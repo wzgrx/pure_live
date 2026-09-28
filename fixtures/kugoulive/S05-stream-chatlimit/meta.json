@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "platform": "kugoulive",
+  "sample": "S05-stream-chatlimit",
+  "capturedAt": "2026-09-28T20:47:31.676313Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://fx1.service.kugou.com/video/pc/live/pull/mutiline/streamaddr?std_rid=5171815&std_plat=7&std_kid=0&streamType=1-2-4-5-8&ua=fx-flash&targetLiveTypes=1-5-6&version=1000&supportEncryptMode=1&appid=1010&_=1790628451638",
+    "headers": {
+      "Origin": "https://fanxing.kugou.com",
+      "Referer": "https://fanxing.kugou.com/",
+      "Accept": "application/json, text/plain, */*",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Mon, 28 Sep 2026 20:47:32 GMT",
+      "content-type": "application/json;charset=utf-8",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "server": "openresty",
+      "access-control-allow-origin": "https://fanxing.kugou.com",
+      "access-control-allow-credentials": "true",
+      "cache-control": "max-age=2",
+      "x-envoy-upstream-service-time": "40",
+      "content-encoding": "gzip",
+      "x-via": "1.1 PS-ZHY-01BNR40:17 (Cdn Cache Server V2.0)",
+      "x-ws-request-id": "6abad264_PS-ZHY-01BNR40_14822-17001"
+    }
+  },
+  "raw": {
+    "sha256": "6c8a47de629521dbde398dc9d181fda94f49f6a89560902e579dcf77bd28832e",
+    "length": 4345
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.lines[0].streamProfiles[0].rtmp[0]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].rtmp[0]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].rtmp[1]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].rtmp[1]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].flv[0]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].flv[0]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].flv[1]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].flv[1]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].httpsFlv[0]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].httpsFlv[0]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].httpsFlv[1]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].httpsFlv[1]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].webrtc[0]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[0].streamProfiles[0].webrtc[0]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].rtmp[0]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].rtmp[0]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].rtmp[1]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].rtmp[1]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].flv[0]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].flv[0]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].flv[1]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].flv[1]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].httpsFlv[0]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].httpsFlv[0]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].httpsFlv[1]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].httpsFlv[1]:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].webrtc[0]:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.lines[1].streamProfiles[0].webrtc[0]:token",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratch capture script (urllib, schema 1, M4.U.29): the adapter's headers, answered 200 without a redirect; txSecret and the part of token after 0-<room>- replaced by random same-shape values"
+}

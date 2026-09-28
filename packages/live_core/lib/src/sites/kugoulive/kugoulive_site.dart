@@ -21,7 +21,9 @@ const _site = 'kugoulive';
 ///   directory page is one room list (`index/list` for 推荐, `list_v4` for an
 ///   area);
 /// - search is one `getEnterRoomInfo` for a room number or link (page 1),
-///   else one `type_all.jsonp` of 200 streamers per page, paged here;
+///   else one `type_all.jsonp` of 200 streamers, paged here: page 1 asks
+///   anew, later pages reuse it for [snapshotLifetime] (the unified paging
+///   rule; 3.x asked again for every page);
 /// - follow refreshes and the live state are one `getEnterRoomInfo`;
 /// - room entry, recordings and recovery add `streamaddr` while the room is
 ///   live.
@@ -38,15 +40,34 @@ final class KugouLiveSite extends LiveSite
         LivePlayUrlResolver,
         LivePlayRecoveryResolver,
         LivePlayLeaseMetadata {
-  /// Creates the adapter; [now] (the search callback's and the stream
-  /// request's clock values, the default time of the lease queries) is
-  /// injectable for tests.
-  new(this.http, {DateTime Function()? now}) : _now = now ?? DateTime.now;
+  /// Creates the adapter. [preferH264] reads "优先 H.264" (the unified rule
+  /// on the default codec, on by default) each time the qualities are
+  /// listed: on, H.264 qualities come before HEVC ones (see
+  /// [KugouLiveApi.qualities]). [now] (the search callback's and the stream
+  /// request's clock values, the search snapshots' age, the default time of
+  /// the lease queries) is injectable for tests.
+  new(this.http, {bool Function()? preferH264, DateTime Function()? now})
+    : _preferH264 = preferH264 ?? _on,
+      _now = now ?? DateTime.now;
+
+  static bool _on() => true;
+
+  /// How long pages after the first reuse the keyword search page 1
+  /// fetched (the unified paging rule): the pages of one browse cut one
+  /// answer, a new page 1 (a pull to refresh) asks anew.
+  static const Duration snapshotLifetime = Duration(seconds: 30);
+
+  /// Keywords whose answers are kept.
+  static const int _snapshotLimit = 8;
 
   /// Transport.
   final LiveHttp http;
 
+  final bool Function() _preferH264;
   final DateTime Function() _now;
+
+  /// The last answer of each keyword and when it arrived.
+  final Map<String, ({DateTime at, List<LiveRoom> rooms})> _searches = {};
 
   /// The home page's areas, read once for the adapter's lifetime (3.x); a
   /// failed read is asked again next time.
@@ -153,7 +174,9 @@ final class KugouLiveSite extends LiveSite
   /// - a keyword over 100 characters is an `ArgumentError` (3.x refused it
   ///   before the request);
   /// - else one `type_all.jsonp` answering 200 streamers, live or not, of
-  ///   which page [page] of [pageSize] is returned.
+  ///   which page [page] of [pageSize] is returned. Page 1 always asks;
+  ///   a later page cuts the answer of the same keyword while it is under
+  ///   [snapshotLifetime] old, else asks again (3.x asked for every page).
   @override
   Future<List<LiveRoom>> searchRoomsCancellable(
     String keyword, {
@@ -175,10 +198,28 @@ final class KugouLiveSite extends LiveSite
     if (text.length > KugouLiveApi.maxKeywordLength) {
       throw ArgumentError.value(keyword, 'keyword', 'longer than ${KugouLiveApi.maxKeywordLength} characters');
     }
-    final callback = 'pureLive${_now().microsecondsSinceEpoch}';
-    final response = await _get(KugouLiveApi.searchUrl(text, callback), cancel: cancel);
-    final rooms = KugouLiveApi.searchRooms(response.text, callback: callback, status: response.status);
+    final rooms = await _keywordRooms(text, page: page, cancel: cancel);
     return rooms.skip((page - 1) * pageSize).take(pageSize).toList();
+  }
+
+  /// The streamers [keyword] finds: the kept answer for a page after the
+  /// first while it is under [snapshotLifetime] old, else a new request,
+  /// kept when it succeeds. A cancelled token fails either way.
+  Future<List<LiveRoom>> _keywordRooms(String keyword, {required int page, CancelToken? cancel}) async {
+    _checkCancelled(cancel);
+    final kept = _searches[keyword];
+    if (page > 1 && kept != null) {
+      final age = _now().difference(kept.at);
+      if (age >= Duration.zero && age < snapshotLifetime) return kept.rooms;
+    }
+    final callback = 'pureLive${_now().microsecondsSinceEpoch}';
+    final response = await _get(KugouLiveApi.searchUrl(keyword, callback), cancel: cancel);
+    final rooms = KugouLiveApi.searchRooms(response.text, callback: callback, status: response.status);
+    _searches
+      ..remove(keyword)
+      ..[keyword] = (at: _now(), rooms: rooms);
+    if (_searches.length > _snapshotLimit) _searches.remove(_searches.keys.first);
+    return rooms;
   }
 
   // Rooms ---------------------------------------------------------------------
@@ -195,10 +236,13 @@ final class KugouLiveSite extends LiveSite
 
   /// Room entry (3.x's `room` with media): `getEnterRoomInfo`, then, while
   /// the room is live, `streamaddr`, whose variants go into
-  /// [KugouLiveRoomData]. A room that cannot be played (offline, restricted,
-  /// no live session, no stream in the answer) is entered; its stream says
-  /// why (3.x failed the entry when the answer had no stream). A stream
-  /// answer that fails otherwise fails the entry, as in 3.x.
+  /// [KugouLiveRoomData]. A room that cannot be played (offline, no live
+  /// session, a login required, no stream in the answer) is entered; its
+  /// stream says why (3.x failed the entry when the answer had no stream).
+  /// A live room carries what the stream answer tells
+  /// ([KugouLiveApi.withRestriction]): `none` with a stream, `needsLogin`,
+  /// `unplayable` without a stream. A stream answer that fails otherwise
+  /// fails the entry, as in 3.x.
   Future<LiveRoom> _entered(String roomId) async {
     final id = _checkedId(roomId);
     final (:room, :state) = await _info(id);
@@ -209,15 +253,18 @@ final class KugouLiveSite extends LiveSite
       );
     }
     final response = await _get(KugouLiveApi.streamUrl(id, millis: _now().millisecondsSinceEpoch));
+    final (restriction, data) = _playback(id, response);
+    return KugouLiveApi.withRestriction(room, restriction).copyWith(data: data);
+  }
+
+  static (LiveRestriction, KugouLiveRoomData) _playback(String roomId, LiveResponse response) {
     try {
-      final variants = KugouLiveApi.variants(response.text, roomId: id, status: response.status);
-      return room.copyWith(
-        data: KugouLiveRoomData(roomId: id, variants: variants),
-      );
+      final variants = KugouLiveApi.variants(response.text, roomId: roomId, status: response.status);
+      return (LiveRestriction.none, KugouLiveRoomData(roomId: roomId, variants: variants));
+    } on NeedsLogin catch (error) {
+      return (LiveRestriction.needsLogin, KugouLiveRoomData(roomId: roomId, unavailable: error));
     } on StreamUnavailable catch (error) {
-      return room.copyWith(
-        data: KugouLiveRoomData(roomId: id, unavailable: error),
-      );
+      return (LiveRestriction.unplayable, KugouLiveRoomData(roomId: roomId, unavailable: error));
     }
   }
 
@@ -235,29 +282,31 @@ final class KugouLiveSite extends LiveSite
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _entered(roomId);
 
   /// Whether the refresh detail says live (one request). A room shown as
-  /// unknown has no answer, never "offline": restricted is `NeedsLogin`,
-  /// without a live session `ApiChanged` (3.x: `access` for both).
+  /// unknown has no answer, never "offline": without a live session it is
+  /// `ApiChanged` (3.x: `access`). A room with a chat limit is live (3.x:
+  /// `access`, see [KugouLiveState]).
   @override
   Future<bool> getLiveStatus({required String roomId}) async {
     final id = _checkedId(roomId);
     return switch ((await _info(id)).state) {
       KugouLiveState.live => true,
       KugouLiveState.offline => false,
-      KugouLiveState.restricted => throw NeedsLogin(_site, 'room $id is restricted (limitType)'),
       KugouLiveState.unknown => throw ApiChanged(_site, 'room $id: neither offline nor a live session'),
     };
   }
 
   // Streams -------------------------------------------------------------------
 
-  /// 3.x's qualities (see [KugouLiveApi.qualities]) from the variants room
-  /// entry kept: no request. A room without them (a list card, a refreshed
-  /// follow) is entered first; one the platform called offline has no
-  /// stream (`StreamUnavailable`, without a request). A room that cannot be
-  /// played says why.
+  /// 3.x's qualities (see [KugouLiveApi.qualities], H.264 first while
+  /// "优先 H.264" is on) from the variants room entry kept: no request. A
+  /// room without them (a list card, a refreshed follow) is entered first;
+  /// one the platform called offline has no stream (`StreamUnavailable`,
+  /// without a request). A room that cannot be played says why:
+  /// `NeedsLogin` when the stream answer asks for a login,
+  /// `StreamUnavailable` otherwise.
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
-      KugouLiveApi.qualities(await _variants(detail, fresh: false));
+      KugouLiveApi.qualities(await _variants(detail, fresh: false), preferH264: _preferH264());
 
   @override
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>

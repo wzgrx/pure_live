@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "platform": "sixroom",
+  "sample": "S06-subarea-face",
+  "capturedAt": "2026-09-28T21:02:46.315158Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://v.6.cn/subareaIndex/getSubareaIndexNew.php?subarea=10",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+      "Referer": "https://v.6.cn/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Mon, 28 Sep 2026 21:02:47 GMT",
+      "content-type": "text/html; charset=UTF-8",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "expires": "Mon, 28 Sep 2026 21:01:07 GMT",
+      "last-modified": "Mon, 28 Sep 2026 21:02:47 GMT",
+      "cache-control": "no-cache",
+      "content-encoding": "gzip",
+      "x-xss-protection": "1; mode=block",
+      "x-content-type-options": "nosniff",
+      "content-security-policy-report-only": "default-src 'self' 'unsafe-inline' *.6rooms.com *.xiu123.cn *.6.cn; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.6rooms.com *.xiu123.cn *.6.cn www.googletagmanager.com www.google-analytics.com *.fengkongcloud.cn *.qq.com *.alicdn.com *.ronghub.com lf3-data.volccdn.com static.portal101.cn fp-it.portal101.cn *.fengkongcloud.com blob: ; img-src *.6rooms.com *.xiu123.cn *.6.cn  *.rco.hk data: blob: http://127.0.0.1:* *.aliyuncs.com *.fengkongcloud.cn stcms.beisen.com *.alicdn.com *.ronghub.com; media-src *.6rooms.com *.xiu123.cn *.6.cn *.tencentmusic.com *.ronghub.com blob: *.100ycdn.com; connect-src blob: *.6rooms.com *.xiu123.cn *.6.cn *.rongcfg.com *.fengkongcloud.cn analytics.google.com stats.g.doubleclick.net www.google-analytics.com http://127.0.0.1:* *.huafang.com *.aliyuncs.com *.alicdn.com *.ronghub.com *.rongnav.com upload.qiniup.com *.rong-edge.com https://*.ourdvsssvip.com:20443 *.ourdvsssvip.com *.100ycdn.com wss://*.6rooms.com:5190 wss://*.6rooms.com:5290 wss://*.6rooms.com:5390 wss://*.6rooms.com:5490 wss://*.6rooms.com:5590 wss://*.6rooms.com:5690 wss://*.ronghub.com wss://*.rong-edge.com web.openinstall.io *.opstatistics.cn ws://127.0.0.1:* ; frame-src *.6rooms.com *.xiu123.cn *.6.cn cdn.lxbj.xyhy.asia *.rco.hk www.qianzhao888.com game.ibucoin.com *.7moor.com *.qq.com *.alipay.com m.so.com *.qianzhao666.com *.qianzhao777.com qianzhao888.com qianzhao999.com *.changuang360.cn ; style-src-elem 'self' data: 'unsafe-inline' *.6rooms.com *.xiu123.cn *.6.cn *.alicdn.com *.fengkongcloud.cn ; font-src *.6rooms.com *.xiu123.cn *.6.cn data: *.fengkongcloud.cn; worker-src data: blob: 'self'; report-uri https://v.6.cn/api/ops/csp_report.php",
+      "x-via": "1.1 PSbjwjBGP2vr235:3 (Cdn Cache Server V2.0), 1.1 PS-XUZ-01Ydq36:19 (Cdn Cache Server V2.0), 1.1 PS-ZHY-019D151:0 (Cdn Cache Server V2.0)",
+      "x-ws-request-id": "6abad5f7_PS-ZHY-019D151_47518-24630"
+    }
+  },
+  "raw": {
+    "sha256": "6e9e7ac0d23b53f1e5095738b24e3566ca65c9f1694d36a35d6fcd9a6c5efc0f",
+    "length": 64928
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "M4.U.31 recorder (schema 1)"
+}

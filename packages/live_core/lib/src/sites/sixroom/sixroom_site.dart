@@ -13,7 +13,7 @@ const _site = 'sixroom';
 
 /// How many rooms the site remembers to fill room answers from and to skip
 /// the room page with (3.x kept every one it listed; the homepage lists
-/// about 450).
+/// about 450 at the evening peak).
 const _rememberLimit = 2000;
 
 /// The 6.cn (六间房) adapter (3.x's `SixRoomSite` and `SixRoomApi`; parsing
@@ -22,12 +22,15 @@ const _rememberLimit = 2000;
 /// Anonymous, like 3.x: no cookie, no account and no chat (3.x's Six Rooms
 /// had `EmptyDanmaku`). Every request carries 3.x's headers, does not follow
 /// redirects, may take 15 s (3.x's receive timeout) and goes as `sixroom`,
-/// so the app routes the platform through its proxy setting. The requests
-/// are 3.x's:
-/// - the directory is the homepage (every live room, about 1 MB), filtered
-///   into 3.x's six areas and paged locally. Page 1 of all rooms (and of the
-///   recommendations) always loads it; other pages and areas reuse it for
-///   90 s;
+/// so the app routes the platform through its proxy setting. The requests:
+/// - the recommendations and 歌区, 舞区, 脱口秀, 派对 are pages of the
+///   app's mobile lists (`special`, `u0`, `u1`, `u2`, `u8`; M4.U.31, 31-4:
+///   3.x filtered the 1 MB homepage for every list), one request a page.
+///   Rooms an earlier page of the list gave since its page 1 are left out;
+/// - "全部" is still the homepage (every live room; the app has no such
+///   list), 星颜 the web's subarea list (the app's `u10` answers nothing).
+///   Both are read whole and paged locally: page 1 loads the list, later
+///   pages reuse it for 90 s (3.x's homepage snapshot);
 /// - the search is `search.php` (one page); a room number or room link
 ///   looks the room up instead;
 /// - a room is the mobile inroom POST for its broadcaster's user id. The id
@@ -36,8 +39,8 @@ const _rememberLimit = 2000;
 /// - each list or room call has one 20 s deadline (3.x's `_scope`).
 ///
 /// Like 3.x, the site remembers the rooms it listed and read, and fills a
-/// room answer's missing avatar, cover, area, popularity and followers
-/// from them.
+/// room answer's missing avatar, cover, area and followers from them, and
+/// the popularity and start only while the same broadcast is live (31-5).
 ///
 /// Rooms are identified by their room number (`rid`), as in 3.x. Failures
 /// are `SiteError`s; nothing is disguised as an offline room.
@@ -52,7 +55,8 @@ final class SixRoomSite extends LiveSite
         LivePlayUrlResolver,
         LivePlayRecoveryResolver {
   /// Creates the adapter. [deadline] bounds one list call, or one room call
-  /// with all its requests (3.x: 20 s); [clock] dates the homepage snapshot.
+  /// with all its requests (3.x: 20 s); [clock] dates the snapshots of the
+  /// lists read whole.
   new(this.http, {this.deadline = const Duration(seconds: 20), DateTime Function()? clock})
     : _clock = clock ?? DateTime.now;
 
@@ -70,9 +74,13 @@ final class SixRoomSite extends LiveSite
   /// The last room seen of each room number, oldest first.
   final Map<String, SixRoomRoom> _known = {};
 
-  /// The homepage's rooms and when they were loaded.
-  List<SixRoomRoom>? _home;
-  DateTime? _homeAt;
+  /// The lists read whole (the homepage, web subareas) by their URL, and
+  /// when they were loaded.
+  final Map<Uri, ({List<SixRoomRoom> rooms, DateTime at})> _snapshots = {};
+
+  /// The rooms of each page of each mobile list sequence (type and page
+  /// size) since its page 1.
+  final Map<String, Map<int, Set<String>>> _listed = {};
 
   @override
   String get id => _site;
@@ -106,11 +114,12 @@ final class SixRoomSite extends LiveSite
     return response;
   }
 
-  Future<LiveResponse> _get(Uri url, {required CancelToken cancel}) => _send(
+  /// A GET with 3.x's web headers, or the mobile ones for the app's lists.
+  Future<LiveResponse> _get(Uri url, {required CancelToken cancel, bool mobile = false}) => _send(
     LiveRequest(
       site: _site,
       url: url,
-      headers: SixRoomApi.webHeaders,
+      headers: mobile ? SixRoomApi.listHeaders : SixRoomApi.webHeaders,
       followRedirects: false,
       timeout: requestTimeout,
       cancel: cancel,
@@ -174,47 +183,109 @@ final class SixRoomSite extends LiveSite
 
   // Directory -----------------------------------------------------------------
 
-  /// The homepage's rooms: loaded for [refresh], else reused while younger
-  /// than 90 s (and not from the future, 3.x).
-  Future<List<SixRoomRoom>> _homeRooms({required bool refresh, required CancelToken cancel}) async {
-    final cached = _home;
-    final at = _homeAt;
+  /// The rooms of the list [url] read whole ([parse] reads its answer):
+  /// loaded for [refresh], else reused while younger than 90 s (and not from
+  /// the future, 3.x's homepage snapshot).
+  Future<List<SixRoomRoom>> _whole(
+    Uri url,
+    List<SixRoomRoom> Function(String body, int status) parse, {
+    required bool refresh,
+    required CancelToken cancel,
+  }) async {
+    final cached = _snapshots[url];
     final now = _clock();
     if (!refresh &&
         cached != null &&
-        at != null &&
-        !now.isBefore(at) &&
-        now.difference(at) < SixRoomApi.directoryCacheLifetime) {
-      return cached;
+        !now.isBefore(cached.at) &&
+        now.difference(cached.at) < SixRoomApi.directoryCacheLifetime) {
+      return cached.rooms;
     }
-    final response = await _get(SixRoomApi.homeUrl, cancel: cancel);
-    final rooms = SixRoomApi.directory(response.text, status: response.status);
-    _home = rooms;
-    _homeAt = _clock();
+    final response = await _get(url, cancel: cancel);
+    final rooms = parse(response.text, response.status);
+    _snapshots[url] = (rooms: rooms, at: _clock());
     return rooms;
   }
 
-  /// Page [page] of [pageSize] rooms of area [areaId] (3.x's `directory`):
-  /// the homepage filtered and paged locally, its cards remembered. A page
-  /// past 10000 is a caller error, without a request.
-  Future<LiveDirectoryPage> _directoryPage(int page, int pageSize, String areaId, CancelToken? cancel) {
+  /// Page [page] of [pageSize] rooms of a list read whole (the homepage for
+  /// all rooms, 3.x; a web subarea for 星颜, 31-4), paged locally.
+  Future<LiveDirectoryPage> _wholePage(
+    int page,
+    int pageSize,
+    Uri url,
+    List<SixRoomRoom> Function(String body, int status) parse,
+    CancelToken token,
+  ) async {
+    final rooms = await _whole(url, parse, refresh: page == 1, cancel: token);
+    final start = (page - 1) * pageSize;
+    if (start >= rooms.length) return LiveDirectoryPage(rooms: const [], page: page, hasMore: false);
+    final end = (start + pageSize).clamp(0, rooms.length);
+    return LiveDirectoryPage(
+      rooms: [for (final room in rooms.sublist(start, end)) SixRoomApi.liveRoom(_remember(room))],
+      page: page,
+      hasMore: end < rooms.length,
+    );
+  }
+
+  /// Page [page] of [pageSize] rooms of the mobile list [type] (31-4): one
+  /// request. Rooms an earlier page of the list at this size gave since its
+  /// page 1 are left out (the list moves by popularity between pages); a
+  /// page asked again is not measured against itself.
+  Future<LiveDirectoryPage> _listPage(int page, int pageSize, String type, CancelToken token) async {
+    final response = await _get(
+      SixRoomApi.listUrl(type, page: page, size: pageSize),
+      cancel: token,
+      mobile: true,
+    );
+    final result = SixRoomApi.list(response.text, type: type, page: page, size: pageSize, status: response.status);
+    final key = '$type/$pageSize';
+    if (page == 1) _listed.remove(key);
+    final pages = _listed.putIfAbsent(key, () => {});
+    final earlier = {
+      for (final MapEntry(key: number, value: ids) in pages.entries)
+        if (number < page) ...ids,
+    };
+    pages[page] = {for (final room in result.rooms) room.roomId};
+    return LiveDirectoryPage(
+      rooms: [
+        for (final room in result.rooms)
+          if (!earlier.contains(room.roomId)) SixRoomApi.liveRoom(_remember(room)),
+      ],
+      page: page,
+      hasMore: result.hasMore,
+    );
+  }
+
+  /// Page [page] of [pageSize] rooms of area [areaId], or of the
+  /// recommendations when null, within one deadline; the cards are
+  /// remembered. A page past 10000 is a caller error, without a request.
+  Future<LiveDirectoryPage> _directoryPage(int page, int pageSize, String? areaId, CancelToken? cancel) {
     if (page > SixRoomApi.maxPage) throw RangeError.range(page, 1, SixRoomApi.maxPage, 'page');
-    return _scoped(cancel, (token) async {
-      final rooms = SixRoomApi.inArea(await _homeRooms(refresh: page == 1 && areaId == 'all', cancel: token), areaId);
-      final start = (page - 1) * pageSize;
-      if (start >= rooms.length) return LiveDirectoryPage(rooms: const [], page: page, hasMore: false);
-      final end = (start + pageSize).clamp(0, rooms.length);
-      return LiveDirectoryPage(
-        rooms: [for (final room in rooms.sublist(start, end)) SixRoomApi.liveRoom(_remember(room))],
-        page: page,
-        hasMore: end < rooms.length,
+    final type = areaId == null ? SixRoomApi.recommendType : SixRoomApi.mobileTypeOf(areaId);
+    final subarea = areaId == null ? null : SixRoomApi.subareaOf(areaId);
+    return _scoped(cancel, (token) {
+      if (type != null) return _listPage(page, pageSize, type, token);
+      if (subarea != null) {
+        return _wholePage(
+          page,
+          pageSize,
+          SixRoomApi.subareaUrl(subarea),
+          (body, status) => SixRoomApi.subarea(body, status: status),
+          token,
+        );
+      }
+      return _wholePage(
+        page,
+        pageSize,
+        SixRoomApi.homeUrl,
+        (body, status) => SixRoomApi.directory(body, status: status),
+        token,
       );
     });
   }
 
   /// The area id of [category]; another platform, type or id is a caller
   /// error.
-  static String _areaId(LiveArea? category) =>
+  static String _areaId(LiveArea category) =>
       SixRoomApi.areaIdOf(category) ?? (throw ArgumentError.value(category, 'category', 'not a Six Rooms area'));
 
   /// 3.x's one category `六间房直播` with the first [pageSize] of its six
@@ -223,24 +294,26 @@ final class SixRoomSite extends LiveSite
   Future<List<LiveCategory>> getCategories(int page, int pageSize) async =>
       page == 1 && pageSize >= 1 ? SixRoomApi.categories(limit: pageSize) : const [];
 
-  /// Page [page] (30 rooms) of [category], or of all rooms. A page below 1
-  /// is empty without a request (3.x); another area is a caller error.
+  /// Page [page] (30 rooms) of [category], or of the recommendations (the
+  /// mobile list `special`, 31-4; 3.x: all rooms). A page below 1 is empty
+  /// without a request (3.x); another area is a caller error.
   @override
   Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel}) async {
     if (page < 1) return LiveDirectoryPage(rooms: const [], page: page, hasMore: false);
-    return await _directoryPage(page, SixRoomApi.pageSize, _areaId(category), cancel);
+    return await _directoryPage(page, SixRoomApi.pageSize, category == null ? null : _areaId(category), cancel);
   }
 
-  /// Page [page] of [pageSize] (at most 100) rooms of all rooms (3.x); a
-  /// page or size below 1 gives nothing without a request.
+  /// Page [page] of [pageSize] (at most 100) rooms of the recommendations
+  /// (the mobile list `special`, 31-4; 3.x: all rooms); a page or size
+  /// below 1 gives nothing without a request.
   @override
   Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async {
     if (page < 1 || pageSize < 1) return const [];
-    return (await _directoryPage(page, pageSize.clamp(1, SixRoomApi.maxPageSize), 'all', null)).rooms;
+    return (await _directoryPage(page, pageSize.clamp(1, SixRoomApi.maxPageSize), null, null)).rooms;
   }
 
-  /// Page [page] of [pageSize] (at most 100) rooms of [category] (3.x); a
-  /// page or size below 1 gives nothing without a request.
+  /// Page [page] of [pageSize] (at most 100) rooms of [category]; a page or
+  /// size below 1 gives nothing without a request.
   @override
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
     if (page < 1 || pageSize < 1) return const [];
@@ -342,8 +415,9 @@ final class SixRoomSite extends LiveSite
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, media: true);
 
-  /// Whether the room is live (the refresh's requests, 3.x). A private,
-  /// black-screen or unknown room is `StreamUnavailable`, never "offline".
+  /// Whether the room is live (the refresh's requests, 3.x); a live private
+  /// or black-screen room is live (M2.1; 3.x failed). A state the answer
+  /// does not give is `StreamUnavailable`, never "offline".
   @override
   Future<bool> getLiveStatus({required String roomId}) async {
     final room = await getRoomDetailForRefresh(roomId: roomId);

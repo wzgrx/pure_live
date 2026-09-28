@@ -1,0 +1,104 @@
+{
+  "generator": "MissevanSite.getRoomDetail + getRoomDetailForRefresh + searchRooms + getLiveStatus + getPlayQualites + getPlayUrls + getPlayUrlRefreshAt + getPlayUrlInvalidAt",
+  "value": {
+    "getRoomDetail": {
+      "roomId": "453091860",
+      "userId": "11875538",
+      "title": "中秋快乐，花间陪你走花路",
+      "nick": "花间_配音pia戏点唱厅",
+      "avatar": "https://static.maoercdn.com/avatars/202608/13/12b93163baf63c0038b795c2b0393696105704.png",
+      "cover": "https://static.maoercdn.com/fmcovers/202601/15/6d36e73673c411679a49601551872345.jpg",
+      "area": "",
+      "watching": "5164",
+      "audienceMetricType": "popularity",
+      "popularity": "5164",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "2748",
+      "platform": "missevan",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "祝大家九月快乐，欢迎来到猫耳第一家配音pia戏才艺厅",
+      "introduction": "这里是花间的第六个年头，开始新征程  约本/约歌/应聘考核可联系花间厅主：hlh6428",
+      "isCatchUp": false,
+      "link": "https://fm.missevan.com/live/453091860"
+    },
+    "getRoomDetailForRefresh": {
+      "roomId": "453091860",
+      "userId": "11875538",
+      "title": "中秋快乐，花间陪你走花路",
+      "nick": "花间_配音pia戏点唱厅",
+      "avatar": "https://static.maoercdn.com/avatars/202608/13/12b93163baf63c0038b795c2b0393696105704.png",
+      "cover": "https://static.maoercdn.com/fmcovers/202601/15/6d36e73673c411679a49601551872345.jpg",
+      "area": "",
+      "watching": "5164",
+      "audienceMetricType": "popularity",
+      "popularity": "5164",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "2748",
+      "platform": "missevan",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "祝大家九月快乐，欢迎来到猫耳第一家配音pia戏才艺厅",
+      "introduction": "这里是花间的第六个年头，开始新征程  约本/约歌/应聘考核可联系花间厅主：hlh6428",
+      "isCatchUp": false,
+      "link": "https://fm.missevan.com/live/453091860"
+    },
+    "searchRooms": [
+      {
+        "roomId": "453091860",
+        "userId": "11875538",
+        "title": "中秋快乐，花间陪你走花路",
+        "nick": "花间_配音pia戏点唱厅",
+        "avatar": "https://static.maoercdn.com/avatars/202608/13/12b93163baf63c0038b795c2b0393696105704.png",
+        "cover": "https://static.maoercdn.com/fmcovers/202601/15/6d36e73673c411679a49601551872345.jpg",
+        "area": "",
+        "watching": "5164",
+        "audienceMetricType": "popularity",
+        "popularity": "5164",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "2748",
+        "platform": "missevan",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "祝大家九月快乐，欢迎来到猫耳第一家配音pia戏才艺厅",
+        "introduction": "这里是花间的第六个年头，开始新征程  约本/约歌/应聘考核可联系花间厅主：hlh6428",
+        "isCatchUp": false,
+        "link": "https://fm.missevan.com/live/453091860"
+      }
+    ],
+    "supportsSearchPaginationFor": false,
+    "getLiveStatus": true,
+    "getPlayQualites": [
+      {
+        "quality": "HLS",
+        "id": "hls",
+        "sort": 2,
+        "getPlayUrls": [
+          {
+            "url": "https://d1-missevan104.bilivideo.com/live-bvc/933146/maoer_11875538_453091860.m3u8?cdn=missevan104&oi=6522856238&pt=web&expires=1790534410&qn=10000&len=0&trid=96827198643ca6dea282b3a5fe339c87&sigparams=cdn,oi,pt,expires,qn,len,trid&sign=2e0210ed8418b9e98980659c55a719c8&sk=df3458b065022135692b4465770737dbe746b047656ef6e0cc0ae497eb90edfa",
+            "getPlayUrlRefreshAt": "2026-09-27T18:39:10.000Z",
+            "getPlayUrlInvalidAt": "2026-09-27T18:40:10.000Z"
+          }
+        ]
+      },
+      {
+        "quality": "FLV",
+        "id": "flv",
+        "sort": 1,
+        "getPlayUrls": [
+          {
+            "url": "https://d1-missevan04.bilivideo.com/live-bvc/944249/maoer_11875538_453091860.flv?cdn=missevan04&oi=6522856238&pt=web&expires=1790534410&qn=10000&len=0&trid=96827198643ca6dea282b3a5fe339c87&sigparams=cdn,oi,pt,expires,qn,len,trid&sign=9ee484e7c2fce6d2dc90b0e2f341986d&sk=df3458b065022135692b4465770737dbe746b047656ef6e0cc0ae497eb90edfa",
+            "getPlayUrlRefreshAt": "2026-09-27T18:39:10.000Z",
+            "getPlayUrlInvalidAt": "2026-09-27T18:40:10.000Z"
+          }
+        ]
+      }
+    ]
+  }
+}

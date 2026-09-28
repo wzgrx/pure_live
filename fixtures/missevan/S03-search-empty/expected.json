@@ -1,0 +1,7 @@
+{
+  "generator": "MissevanSite.searchRooms + supportsSearchPaginationFor",
+  "value": {
+    "searchRooms": [],
+    "supportsSearchPaginationFor": true
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "generator": "MissevanSite.getDirectoryPage",
+  "value": {
+    "getDirectoryPage": {
+      "throws": "MissevanException",
+      "message": "Missevan schema"
+    },
+    "requests": []
+  }
+}

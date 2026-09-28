@@ -1,0 +1,911 @@
+{
+  "code": 0,
+  "info": {
+    "pagination": {
+      "count": 132,
+      "maxpage": 7,
+      "p": 1,
+      "pagesize": 20
+    },
+    "Datas": [
+      {
+        "room_id": 869207296,
+        "catalog_id": 140,
+        "name": "容纳不开心",
+        "announcement": "\n本次直播的主题是聊聊天，听听歌\n希望大家偷偷喜欢我，默默关注我",
+        "creator_id": 37472821,
+        "creator_username": "寒柏壑",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 112,
+          "open_time": 1790526741210,
+          "open_log_id": "6ab945151367280011809cc0",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "android",
+            "time": 1790526742802
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/09/d234e5ff101c442666fb867bf15db526.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/09/912165363b89d2da5e6452e065cb073c224630.png",
+        "catalog_name": "闲聊",
+        "catalog_color": "#9AACFF",
+        "custom_tag": {
+          "tag_id": 20002,
+          "tag_name": "倾诉树洞"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 112,
+          "team_live_revenue": 0,
+          "accumulation": 2,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 15120
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"6c5aa61d-0e06-42d0-b099-fe7e074195e5\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869214626,
+        "catalog_id": 139,
+        "name": "人哪去了？我超威!!!",
+        "announcement": "欢迎来到沈河的直播间！\n相逢一场便是缘，感谢陪伴!\n本次直播的主题是*&#￥(难以描述)…\n希望大家偷偷喜欢我，默默关注我(ゝ∀･)！",
+        "creator_id": 37501793,
+        "creator_username": "沈河Rive",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 26057,
+          "open_time": 1790525420881,
+          "open_log_id": "6ab93fec83e9a100123fa1fe",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "android",
+            "time": 1790525422821
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/05/533ff742999ee742c2d4328e2a451bc2.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/05/5b5a3c41047fe693c1ab373d35b54397193924.png",
+        "creator_introduction": "相逢即永远，随时打工&",
+        "catalog_name": "电台",
+        "catalog_color": "#9AACFF",
+        "custom_tag": {
+          "tag_id": 20014,
+          "tag_name": "沉浸陪伴"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 26562,
+          "team_live_revenue": 11905,
+          "accumulation": 38,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 9168
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"ed12e1d2-4e35-4a08-9543-235084443641\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869185483,
+        "catalog_id": 145,
+        "name": "青年音可以吗、",
+        "announcement": "啥歌都会，随便点",
+        "creator_id": 36871545,
+        "creator_username": "巳月・",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 76274,
+          "open_time": 1790522231078,
+          "open_log_id": "6ab9337783e9a100123fa07e",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790522233409
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202608/31/3fd065cba6dd9031883245f9a93799a9.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/10/dcedbfdfaf34542062ff8619399435b7193215.png",
+        "creator_introduction": "接档:回响Echo20-24 直播:0-2",
+        "catalog_name": "点歌",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 20003,
+          "tag_name": "深夜电台"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 76784,
+          "team_live_revenue": 159823,
+          "accumulation": 58,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 9143
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"d1c1f94b-772f-4e91-b0f3-0fa05e0032c1\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869183702,
+        "catalog_id": 145,
+        "name": "新人开播   带你入坑",
+        "announcement": "快到碗里来",
+        "creator_id": 36850950,
+        "creator_username": "伊布_XT",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 673,
+          "open_time": 1790524801120,
+          "open_log_id": "6ab93d8183e9a100123fa1a4",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790524805195
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/20/a38589f0521bbd3e2bb828a9b936dc87.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/15/e2c4201ccd68ea1c7dcb54e46e5def01143616.png",
+        "creator_introduction": "生活原本沉闷，幸有热忱的你～港粤 厅播：22-02  个播 2:00",
+        "catalog_name": "点歌",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 20016,
+          "tag_name": "唱给你听"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 673,
+          "team_live_revenue": 61386,
+          "accumulation": 10,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 9140
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"2d93c756-606c-4e12-9cfe-da80c135d192\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 868860952,
+        "catalog_id": 145,
+        "name": "你会对什么上瘾？",
+        "announcement": "说唱流行摇滚民谣rnb 小小星球or任意三抽点歌",
+        "creator_id": 23703076,
+        "creator_username": "瘾in_声演",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 54698,
+          "open_time": 1790518557823,
+          "open_log_id": "6ab9251d83e9a100123f9e7f",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790518562768
+          },
+          "pk": 1,
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/18/f67b72e39ec364d094d12a4eb63097c9.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/17/6c5ccc019910f7e79171977ebf7092cc162123.png",
+        "catalog_name": "点歌",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 20016,
+          "tag_name": "唱给你听"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 57358,
+          "team_live_revenue": 0,
+          "accumulation": 971,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 6923
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"1d4a69d5-5872-41f2-b346-ec4d12ceb71a\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869215285,
+        "catalog_id": 146,
+        "name": "安安静静吉他弹唱~",
+        "announcement": "你喜欢的声音，不骗你，这人吉他弹得真可以",
+        "creator_id": 35629553,
+        "creator_username": "言澈吉他",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 67864,
+          "open_time": 1790525544175,
+          "open_log_id": "6ab9406894a9650011ec2277",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790525546500
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202608/18/4cba4914af11fc77553e1f03eb93d90d.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202608/17/f1086647b879fbb8cfbc34b9921fb300230501.png",
+        "creator_introduction": "每晚00:00到累。吉他唱见。",
+        "catalog_name": "弹唱",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 20003,
+          "tag_name": "深夜电台"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 69013,
+          "team_live_revenue": 0,
+          "accumulation": 24,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 6902
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"df379ea5-0361-4bcc-a0e7-d9af6563063f\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 868855900,
+        "catalog_id": 146,
+        "name": "是个小弹唱",
+        "announcement": "弹唱，理性消费，希望大家开开心心，不开心的时候，不开心的夜晚，能来到这，让我带给你内心的平复，乖～有我在呢。",
+        "creator_id": 23665722,
+        "creator_username": "笨笨_弹唱",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 370,
+          "open_time": 1790522677790,
+          "open_log_id": "6ab9353583e9a100123fa0b1",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "android",
+            "time": 1790522678862
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/27/73e0ddff63163b64d6f934575b1492f5.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/21/8472aefea2853e5954ef79588af03a63160407.png",
+        "creator_introduction": "耳机里放的是电子止痛药",
+        "catalog_name": "弹唱",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 20018,
+          "tag_name": "治愈弹唱"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 463,
+          "team_live_revenue": 8808,
+          "accumulation": 26,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 6130
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"353e2f17-31ff-42df-b245-f82dc99b32d7\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869228958,
+        "catalog_id": 150,
+        "name": "回家am 的直播间~",
+        "announcement": "欢迎来到回家am的直播间！\n本次直播的主题是*&#￥(难以描述)…\n希望大家偷偷喜欢我，默默关注我(ゝ∀･)！",
+        "creator_id": 38334961,
+        "creator_username": "回家am",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 0,
+          "open_time": 1790525490789,
+          "open_log_id": "6ab940321367280011809c44",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "android",
+            "time": 1790525498132
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/27/48413b1dde042421bbf6f2fec46508fc.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/27/016991ce2c730979207a06ff75dd3ba7222038.png",
+        "catalog_name": "放松",
+        "catalog_color": "#87CAFF",
+        "custom_tag": {
+          "tag_id": 20014,
+          "tag_name": "沉浸陪伴"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 3,
+          "team_live_revenue": 0,
+          "accumulation": 20,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 6122
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"b6c133b1-2bde-40f4-b0e9-b2e76d0ddaa5\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869150454,
+        "catalog_id": 143,
+        "name": "唱情歌！",
+        "announcement": "等一个心软的神~",
+        "creator_id": 36008745,
+        "creator_username": "G_好吃",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 34923,
+          "open_time": 1790524907631,
+          "open_log_id": "6ab93deb94a9650011ec221c",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790524911222
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202608/20/9728318b776eb7722af53c853e8cd19a.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/21/4d01544023bf2f7cf2a00113245f7498002046.jpg",
+        "creator_introduction": "等一个心软的神～ 排厅18-24 个播0:00-2:00 其他不定时",
+        "catalog_name": "流行",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 20016,
+          "tag_name": "唱给你听"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 35487,
+          "team_live_revenue": 130854,
+          "accumulation": 650,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 5706
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"49a50574-d96d-4412-a0c9-e3f0cd5da16c\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869225208,
+        "catalog_id": 140,
+        "name": "深夜树洞/聊天/哄睡/真心话",
+        "announcement": "聊天/树洞/游戏",
+        "creator_id": 38146038,
+        "creator_username": "周野_",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 12011,
+          "open_time": 1790526455329,
+          "open_log_id": "6ab943f7fee3930012dc4c90",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790526457435
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/16/dbb58579513ac2d7ad7e4814042fac56.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/18/d8c1ab6be41803ed63081caf7ada2660005404.png",
+        "creator_introduction": "小众主播 有点bt",
+        "catalog_name": "闲聊",
+        "catalog_color": "#9AACFF",
+        "custom_tag": {
+          "tag_id": 10004,
+          "tag_name": "腹黑青叔"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 12140,
+          "team_live_revenue": 0,
+          "accumulation": 10,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 5366
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"2924a153-cbbc-4a46-96cc-590ddb497f7d\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869227822,
+        "catalog_id": 145,
+        "name": "新人第四天丨猫耳薛之谦",
+        "announcement": "主打老薛门尼 啥都会点 不会能学 看就完了",
+        "creator_id": 38298962,
+        "creator_username": "祺゛",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 33133,
+          "open_time": 1790524830473,
+          "open_log_id": "6ab93d9e94a9650011ec220e",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790524840094
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/26/337e4e29d514f730b4fa71657f9bd133.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/24/ac948074116ebfd7c8ec15b4c6706bc7012341.png",
+        "creator_introduction": "借一曲歌声 予你片刻祺安",
+        "catalog_name": "点歌",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 20016,
+          "tag_name": "唱给你听"
+        },
+        "icon_url": "https://static.maoercdn.com/live/labelicon/livelist/creator-iron.png",
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 34656,
+          "team_live_revenue": 0,
+          "accumulation": 16,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 5212
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"956aecbd-aa67-4db5-8570-b9b973ee1fb3\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869224231,
+        "catalog_id": 148,
+        "name": "听说旋律说唱的神在这里",
+        "announcement": "欢迎来到我的直播间！\r\n本次直播的主题是*&#￥(难以描述)…\r\n希望大家偷偷喜欢我，默默关注我(ゝ∀･)！",
+        "creator_id": 38189825,
+        "creator_username": "玉_礼声",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 8957,
+          "open_time": 1790510996385,
+          "open_log_id": "6ab9079483e9a100123f9a94",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790511000182
+          },
+          "multi_connect": 1,
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/13/baeb8d04a5be8b572b9bd1d17cf18dd0.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/27/15fdc603face2c2e41089181d6135c6c032420.png",
+        "creator_introduction": "神总是孤独的",
+        "catalog_name": "说唱",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 10022,
+          "tag_name": "电子男友"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 9226,
+          "team_live_revenue": 0,
+          "accumulation": 1358,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 4798
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"e372ab95-38bf-46ae-aa4b-d811ac15a3b9\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869224666,
+        "catalog_id": 143,
+        "name": "温柔低音？",
+        "announcement": "00-02     谢谢喜欢",
+        "creator_id": 38176939,
+        "creator_username": "沈毅驰",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 14563,
+          "open_time": 1790519989368,
+          "open_log_id": "6ab92ab583e9a100123f9f47",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790520014994
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/14/403a563efac1f94b13c464f20e7a6739.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/14/3e00c6525f92bd2086f90a7f9c0086f2213220.jpg",
+        "catalog_name": "流行",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 10020,
+          "tag_name": "磁性低音炮"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 14567,
+          "team_live_revenue": 0,
+          "accumulation": 438,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 4711
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"0b0c06a4-42db-4051-bece-c4bbdcda7a0f\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869151918,
+        "catalog_id": 140,
+        "name": "新人，极品温青音",
+        "announcement": "猫耳最惨新人主播。",
+        "creator_id": 36026949,
+        "creator_username": "屿安_an",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 3896,
+          "open_time": 1790517490214,
+          "open_log_id": "6ab920f2136728001180982b",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790526804781
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/12/6c2631dc5f25b5c9f2a48e21cd80f9b9.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202603/12/e4cdaf779127fac70115daa58d0e94a5133636.png",
+        "catalog_name": "闲聊",
+        "catalog_color": "#9AACFF",
+        "custom_tag": {
+          "tag_id": 10014,
+          "tag_name": "治愈男友"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 4027,
+          "team_live_revenue": 0,
+          "accumulation": 84,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 4144
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"7b49a7a4-4712-40a6-9d0b-4f408b71e66a\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 868842056,
+        "catalog_id": 139,
+        "name": "超级新人 极致邪魅青年",
+        "announcement": "欢迎来到夕野的直播间～主播情感治疗师 唱歌卡点 吹🐮皮都会😏新人初到  还请多多指教～",
+        "creator_id": 23222197,
+        "creator_username": "夕野Y",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 2408,
+          "open_time": 1790522123778,
+          "open_log_id": "6ab9330bfee3930012dc4ad9",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790522132032
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/25/b371a85a64a8159c79844d6aec074377.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/22/fc448b0c541bed0764ecf9aaf24f03fe163049.png",
+        "creator_introduction": "一顿操作猛如虎",
+        "catalog_name": "电台",
+        "catalog_color": "#9AACFF",
+        "custom_tag": {
+          "tag_id": 20016,
+          "tag_name": "唱给你听"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 2609,
+          "team_live_revenue": 0,
+          "accumulation": 33,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 4142
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"4803d031-c821-41b0-a778-0bc42dc58837\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869221016,
+        "catalog_id": 143,
+        "name": "新人反差唱见.",
+        "announcement": "欢迎来到我的直播间！\r\n本次直播的主题是*&#￥(难以描述)…\r\n希望大家偷偷喜欢我，默默关注我(ゝ∀･)！",
+        "creator_id": 38029916,
+        "creator_username": "奕鑫_",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 85409,
+          "open_time": 1790518218982,
+          "open_log_id": "6ab923ca13672800118098a3",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790518221033
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/21/a9f2da5065be7a45bef66b06c389363e.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/21/6de86adbc6f16ec76ceafa340bf24e15162036.png",
+        "creator_introduction": "直播时间：22：00-2：00",
+        "catalog_name": "流行",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 10001,
+          "tag_name": "高冷禁欲"
+        },
+        "icon_url": "https://static.maoercdn.com/live/labelicon/livelist/creator-iron.png",
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 87892,
+          "team_live_revenue": 0,
+          "accumulation": 493,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 3480
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"9b8a687f-8e58-42d0-8dc2-3bf227b7dadc\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869212921,
+        "catalog_id": 145,
+        "name": "逛累了进来听歌呀",
+        "announcement": "擅长门尼 薛之谦 许嵩 的歌",
+        "creator_id": 37565908,
+        "creator_username": "Vs_Cloud",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 97662,
+          "open_time": 1790525060301,
+          "open_log_id": "6ab93e84fee3930012dc4c0b",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790525063822
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/28/4829b7614ce349c652427d66aaa871d1.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/18/ed460448684748d8fc2caa793d4548fd173824.png",
+        "creator_introduction": "擅长门尼，薛之谦，许嵩的歌。在档时间16-20/22-0，0点后偶尔开个播分享一些好听或有趣的歌。",
+        "catalog_name": "点歌",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 20009,
+          "tag_name": "i 人庇护所"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 99658,
+          "team_live_revenue": 386146,
+          "accumulation": 471,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 3352
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"cfb0e5ed-9cff-49dc-af3f-9c8bbf7b26f2\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869224455,
+        "catalog_id": 164,
+        "name": "Rain_Club 新厅开业",
+        "announcement": "欢迎来到 Rain_Club 的直播间!\n本次直播的主题是*&#¥(难以描述)... \n希望大家偷偷喜欢我，默默关注我(ゝ∀・)!",
+        "creator_id": 37641032,
+        "creator_username": "坏天气ovo_",
+        "status": {
+          "open": 1,
+          "open_mode": 1,
+          "open_revenue": 26663,
+          "open_time": 1790503322365,
+          "open_log_id": "6ab8e99a136728001180927b",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "ios",
+            "time": 1790526911442
+          },
+          "team_live": 1,
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/19/8c362297e40e9a8ce2e22c23618f10d2.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/24/1fdc3c73529dcf3adf7aade91b45e047213411.png",
+        "catalog_name": "聊天",
+        "catalog_color": "#FF99DD",
+        "custom_tag": {
+          "tag_id": 10014,
+          "tag_name": "治愈男友"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 27763,
+          "team_live_revenue": 0,
+          "accumulation": 1056,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 3304
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":1,\"members\":\"869225887,869228008,869226179,869228005,869226173\",\"request_id\":\"15696bf5-df4d-4e1c-95b4-854b885e71ad\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869228613,
+        "catalog_id": 141,
+        "name": "青年音第2天直播哦",
+        "announcement": "聊天 唱歌 哄睡",
+        "creator_id": 35143822,
+        "creator_username": "明愿_和声",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 1736,
+          "open_time": 1790517808893,
+          "open_log_id": "6ab9223094a9650011ec1ed9",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790517813399
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/26/e3e8a3313b8e20405f37591b999973be.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/26/a665483a47b74135a879f971594df8f7111501.png",
+        "catalog_name": "解忧治愈",
+        "catalog_color": "#9AACFF",
+        "custom_tag": {
+          "tag_id": 10019,
+          "tag_name": "撒娇奶音"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 2507,
+          "team_live_revenue": 0,
+          "accumulation": 149,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 3146
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"d67eb3fe-c49a-4b31-8d01-cbd7ade39abe\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 868776401,
+        "catalog_id": 145,
+        "name": "我好像在哪见过你~",
+        "announcement": "流行 民谣 rnb 粤英",
+        "creator_id": 13492995,
+        "creator_username": "钟_CX",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 10325,
+          "open_time": 1790523136616,
+          "open_log_id": "6ab9370094a9650011ec216b",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790523140200
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/23/832b3c2c9ba9454e1f35efaf809c2a1d.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/23/6b3daae5cc248421ce0b27e47753f3c2233456.png",
+        "creator_introduction": "对",
+        "catalog_name": "点歌",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 20017,
+          "tag_name": "民谣酒馆"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 11236,
+          "team_live_revenue": 106550,
+          "accumulation": 355,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 3063
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":1,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"b4b94b9c-bd63-44e0-ba80-dbc4998b2d5b\",\"from\":2,\"is_exp_work\":0}"
+      }
+    ]
+  }
+}

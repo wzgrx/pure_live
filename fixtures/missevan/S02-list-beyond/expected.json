@@ -1,0 +1,13 @@
+{
+  "generator": "MissevanSite.getDirectoryPage",
+  "value": {
+    "getDirectoryPage": {
+      "rooms": [],
+      "page": 30,
+      "hasMore": false
+    },
+    "requests": [
+      "https://fm.missevan.com/api/v2/chatroom/open/list?p=30"
+    ]
+  }
+}

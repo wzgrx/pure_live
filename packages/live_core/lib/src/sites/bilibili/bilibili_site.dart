@@ -368,6 +368,7 @@ final class BilibiliSite extends LiveSite
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId);
 
+  /// Whether the room is live; a carousel is not.
   @override
   Future<bool> getLiveStatus({required String roomId}) async {
     final response = await _unsigned(Uri.https(_liveApi, '/room/v1/Room/get_info', {'room_id': roomId.trim()}));
@@ -392,7 +393,8 @@ final class BilibiliSite extends LiveSite
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
   /// Lines at [quality] with the quality the server applied: guests asking
-  /// for 10000 are served 250, and the lines say so.
+  /// for 10000 are served 250, and the lines say so. The room's state is not
+  /// checked first: a carousel plays whenever the platform gives it a stream.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
     final longId = _longId(detail);

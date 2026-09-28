@@ -1,0 +1,1771 @@
+{
+  "generator": "fixtures/kuaishou/danmaku/legacy_expected.dart: 3.x KuaishouDanmaku.parseFeedPayload over every recorded answer (decoded once first, as dio did), and one 3.x session (start with the liveStreamId of meta.json danmakuKeys, no cookie) answered by the recorded answers in order",
+  "value": {
+    "liveStreamId": "tboibnUkiRK",
+    "answers": [
+      {
+        "cursor": "5UJNr1InRqw",
+        "pullDelayMs": 3000,
+        "onlineViewers": 56000,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "观众1",
+            "userId": "1516004686",
+            "message": "好的是播加油主",
+            "color": "#ffffff",
+            "messageId": "kuaishou:f926b588fde0e80253a6edec04b81080049b62eb",
+            "sentAt": 1790520023470,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众2",
+            "userId": "6576259282",
+            "message": "duc是一直好播~",
+            "color": "#ffffff",
+            "messageId": "kuaishou:446cc00a23098b1a909ea27555e20702561024cd",
+            "sentAt": 1790520023975,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "Ts Wlen",
+            "userId": "6923494891",
+            "message": "[主的][一是][主油]",
+            "color": "#ffffff",
+            "messageId": "kuaishou:b92c7f90a583ce29c9526a3670da9af825493860",
+            "sentAt": 1790520025294,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "cursor": "DA5vA0ooGKE",
+        "pullDelayMs": 3000,
+        "onlineViewers": 55000,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "观众3",
+            "userId": "1985115944",
+            "message": "个主油是加",
+            "color": "#ffffff",
+            "messageId": "kuaishou:c5fde3bd949003ae0988efe1463151349bb4d410",
+            "sentAt": 1790520025870,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众4",
+            "userId": "5521712428",
+            "message": "好直直的直主",
+            "color": "#ffffff",
+            "messageId": "kuaishou:2d1421a916f630f7854919a7455c94d5ba8b92bb",
+            "sentAt": 1790520026145,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众2",
+            "userId": "6576259282",
+            "message": "播一来看主播个看",
+            "color": "#ffffff",
+            "messageId": "kuaishou:1016cc2862d2dc70bee0057777868058181b3848",
+            "sentAt": 1790520026281,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众5",
+            "userId": "5397785254",
+            "message": "播好的来",
+            "color": "#ffffff",
+            "messageId": "kuaishou:502dacf3f25a01aa12c108228e105040d90c6688",
+            "sentAt": 1790520026760,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众6",
+            "userId": "7623462314",
+            "message": "这播",
+            "color": "#ffffff",
+            "messageId": "kuaishou:49f36debb8c72f44753cbd4e5a2ddfac26e8090b",
+            "sentAt": 1790520026889,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众7",
+            "userId": "3458113034",
+            "message": "播一来看主播个看",
+            "color": "#ffffff",
+            "messageId": "kuaishou:2fce9c28131dfca29b350c05889d0ff7cf2a8201",
+            "sentAt": 1790520027762,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众8",
+            "userId": "8815833203",
+            "message": "632的",
+            "color": "#ffffff",
+            "messageId": "kuaishou:3ff9fac38ab0b3585da439e921ef83a43682900c",
+            "sentAt": 1790520028295,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众2",
+            "userId": "6576259282",
+            "message": "duc是一直好播~",
+            "color": "#ffffff",
+            "messageId": "kuaishou:a7a87d2e0ddc471ff100926fae7f4f8e69a4b983",
+            "sentAt": 1790520028383,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众9",
+            "userId": "8743421910",
+            "message": "播油油直？[的来]",
+            "color": "#ffffff",
+            "messageId": "kuaishou:c8c73b14e4f27cb300b701773d729cc5ccbfb50a",
+            "sentAt": 1790520028521,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "cursor": "vyPla9lBMYU",
+        "pullDelayMs": 3000,
+        "onlineViewers": 55000,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "观众10",
+            "userId": "487587708",
+            "message": "哈播看一来来[的来的]",
+            "color": "#ffffff",
+            "messageId": "kuaishou:d3c8a430a76a12ac8420576ce7f4ba7494f476ff",
+            "sentAt": 1790520029318,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众11",
+            "userId": "4900883186",
+            "message": "duc是一直好播~",
+            "color": "#ffffff",
+            "messageId": "kuaishou:bf62d7e0a3deb8cfd8f14fc4b63f63834366e8ec",
+            "sentAt": 1790520029447,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众2",
+            "userId": "6576259282",
+            "message": "duc是一直好播~",
+            "color": "#ffffff",
+            "messageId": "kuaishou:7bc3f41b49a03f9fcf4805d8bd52b44d24999382",
+            "sentAt": 1790520030532,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众12",
+            "userId": "86668255",
+            "message": "038是来这一播[好是][来哈][个哈][好哈]",
+            "color": "#ffffff",
+            "messageId": "kuaishou:bffff843c3fcc2b8e85c8e68a4f2015f2a1c9552",
+            "sentAt": 1790520031867,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "cursor": "BLgAlmgZzC8",
+        "pullDelayMs": 3000,
+        "onlineViewers": 55000,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "观众2",
+            "userId": "6576259282",
+            "message": "播一来看主播个看",
+            "color": "#ffffff",
+            "messageId": "kuaishou:615d7c73007efe7cf8db45e6e444fcf727281dea",
+            "sentAt": 1790520032887,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众13",
+            "userId": "100280149",
+            "message": "播一来看主播个看",
+            "color": "#ffffff",
+            "messageId": "kuaishou:55085872f3f75a0b990a02ebf82e8a4b781a71c2",
+            "sentAt": 1790520033268,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众14",
+            "userId": "531834175",
+            "message": "直",
+            "color": "#ffffff",
+            "messageId": "kuaishou:39b3e62d46d696e3885fee7dcccbe2cecb6dfbb2",
+            "sentAt": 1790520033828,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众1",
+            "userId": "1516004686",
+            "message": "一的播播播播主",
+            "color": "#ffffff",
+            "messageId": "kuaishou:be30c39ec81e4ac72adef1da1b5ce34beb1c5a18",
+            "sentAt": 1790520034291,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众15",
+            "userId": "457349677",
+            "message": "播[哈]",
+            "color": "#ffffff",
+            "messageId": "kuaishou:f68dc4f10462940856c92149e92d0775d193afa1",
+            "sentAt": 1790520034750,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "cursor": "zPZNoVqMvcU",
+        "pullDelayMs": 3000,
+        "onlineViewers": 54000,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "观众2",
+            "userId": "6576259282",
+            "message": "duc是一直好播~",
+            "color": "#ffffff",
+            "messageId": "kuaishou:84b90a907d2e2e38f6bc027b0b342b313c34e252",
+            "sentAt": 1790520035281,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众16",
+            "userId": "823742367",
+            "message": "主哈个好个哈",
+            "color": "#ffffff",
+            "messageId": "kuaishou:76db9ed2c0adc56c5b76bbe7e8398820c98f4228",
+            "sentAt": 1790520037619,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "cursor": "emW1c2hFQjE",
+        "pullDelayMs": 3000,
+        "onlineViewers": 54000,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "观众17",
+            "userId": "282989283",
+            "message": "主这主加的",
+            "color": "#ffffff",
+            "messageId": "kuaishou:4357a428e5ff35786a1bc2d668c85e8c80d1f64d",
+            "sentAt": 1790520038603,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众18",
+            "userId": "2379357677",
+            "message": "播主好来哈看来播是油是播哈[来哈]",
+            "color": "#ffffff",
+            "messageId": "kuaishou:b66d98ec4aea31341135bf7490cf0e3bbdeb8a03",
+            "sentAt": 1790520038788,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众19",
+            "userId": "1842491024",
+            "message": "[来]",
+            "color": "#ffffff",
+            "messageId": "kuaishou:24af22ecd2aafae802ec6f2c0baba67978c940da",
+            "sentAt": 1790520038813,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众20",
+            "userId": "86749643",
+            "message": "duc是一直好播~",
+            "color": "#ffffff",
+            "messageId": "kuaishou:657e37c47b1460c8927894fe767e7b8b8e7444c1",
+            "sentAt": 1790520040112,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众21",
+            "userId": "4644474375",
+            "message": "播哈个播",
+            "color": "#ffffff",
+            "messageId": "kuaishou:bf36be323124f183155433f1b82de56d24b9fca9",
+            "sentAt": 1790520040674,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "cursor": "zR8C5BjfSpY",
+        "pullDelayMs": 3000,
+        "onlineViewers": 54000,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "观众22",
+            "userId": "6297188215",
+            "message": "主这油的好",
+            "color": "#ffffff",
+            "messageId": "kuaishou:cd40166f810ab0c9d2ff92ed4020bcbe2ca2296b",
+            "sentAt": 1790520041799,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众23",
+            "userId": "858515533",
+            "message": "好是加主？",
+            "color": "#ffffff",
+            "messageId": "kuaishou:fbf981991b64405284d74be2c3cdd549bb69bbe5",
+            "sentAt": 1790520042505,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众24",
+            "userId": "4564186357",
+            "message": "。",
+            "color": "#ffffff",
+            "messageId": "kuaishou:7a98e4c9312c27dbf86d5c077143370557b987cf",
+            "sentAt": 1790520042603,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众25",
+            "userId": "2763964692",
+            "message": "个一这的的哈？",
+            "color": "#ffffff",
+            "messageId": "kuaishou:9f8af24a4600d55b571b74c6ccd83a125c99967b",
+            "sentAt": 1790520044056,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众26",
+            "userId": "393972863",
+            "message": "看播",
+            "color": "#ffffff",
+            "messageId": "kuaishou:79b20a45088c550be996e19aedd98cc5be3c57b7",
+            "sentAt": 1790520044248,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "cursor": "Sbi_xDq_bV0",
+        "pullDelayMs": 3000,
+        "onlineViewers": 54000,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "观众27",
+            "userId": "3311684105",
+            "message": "看播哈，998加看直",
+            "color": "#ffffff",
+            "messageId": "kuaishou:81e9fb4ccddc10f6c24baf16004658fcbe7f3eae",
+            "sentAt": 1790520044742,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众28",
+            "userId": "6956008908",
+            "message": "duc是一直好播~",
+            "color": "#ffffff",
+            "messageId": "kuaishou:d62e960301d1785172444493a901473ae2a608fc",
+            "sentAt": 1790520045715,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众29",
+            "userId": "102183930",
+            "message": "个哈这播油",
+            "color": "#ffffff",
+            "messageId": "kuaishou:32568e876e255961a36f1f68e3fca9483439ca4c",
+            "sentAt": 1790520046469,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众30",
+            "userId": "4916382696",
+            "message": "加一",
+            "color": "#ffffff",
+            "messageId": "kuaishou:51495de8e848cb463fa4c2ecfa108ae14b2caf3a",
+            "sentAt": 1790520047529,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众31",
+            "userId": "113605178",
+            "message": "播一来看主播个看",
+            "color": "#ffffff",
+            "messageId": "kuaishou:453ee1cef75dd44e926a49d3eb3ce33fad352355",
+            "sentAt": 1790520047808,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "cursor": "6aPw4dMwJho",
+        "pullDelayMs": 3000,
+        "onlineViewers": 54000,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "观众31",
+            "userId": "113605178",
+            "message": "播一来看主播个看",
+            "color": "#ffffff",
+            "messageId": "kuaishou:52400baa419e1f6b4e145a9083ea28daf4467b65",
+            "sentAt": 1790520050840,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "cursor": "EMwpxNyF2f8",
+        "pullDelayMs": 3000,
+        "onlineViewers": 53000,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "观众32",
+            "userId": "10961344",
+            "message": "主直",
+            "color": "#ffffff",
+            "messageId": "kuaishou:4400cd4e640e5ddf9374c90798d24b8fd4e4a3c2",
+            "sentAt": 1790520051155,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众33",
+            "userId": "639944340",
+            "message": "播一来看主播个看",
+            "color": "#ffffff",
+            "messageId": "kuaishou:033998028a990873caf6630dd24467810a09c877",
+            "sentAt": 1790520052543,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "观众31",
+            "userId": "113605178",
+            "message": "播一来看主播个看",
+            "color": "#ffffff",
+            "messageId": "kuaishou:a4d3b90d09ce9f2c908f906a966b6a52d24809f8",
+            "sentAt": 1790520053398,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      }
+    ],
+    "session": [
+      {
+        "request": {
+          "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+          "query": {
+            "liveStreamId": "tboibnUkiRK"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://livev.m.chenzhongtech.com/"
+          }
+        }
+      },
+      {
+        "event": "ready"
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "onlineViewers",
+            "value": 56000
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众1",
+          "userId": "1516004686",
+          "message": "好的是播加油主",
+          "color": "#ffffff",
+          "messageId": "kuaishou:f926b588fde0e80253a6edec04b81080049b62eb",
+          "sentAt": 1790520023470,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众2",
+          "userId": "6576259282",
+          "message": "duc是一直好播~",
+          "color": "#ffffff",
+          "messageId": "kuaishou:446cc00a23098b1a909ea27555e20702561024cd",
+          "sentAt": 1790520023975,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "Ts Wlen",
+          "userId": "6923494891",
+          "message": "[主的][一是][主油]",
+          "color": "#ffffff",
+          "messageId": "kuaishou:b92c7f90a583ce29c9526a3670da9af825493860",
+          "sentAt": 1790520025294,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "delay": 3000
+      },
+      {
+        "start": "returned"
+      },
+      {
+        "request": {
+          "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+          "query": {
+            "liveStreamId": "tboibnUkiRK",
+            "cursor": "5UJNr1InRqw"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://livev.m.chenzhongtech.com/"
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "onlineViewers",
+            "value": 55000
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众3",
+          "userId": "1985115944",
+          "message": "个主油是加",
+          "color": "#ffffff",
+          "messageId": "kuaishou:c5fde3bd949003ae0988efe1463151349bb4d410",
+          "sentAt": 1790520025870,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众4",
+          "userId": "5521712428",
+          "message": "好直直的直主",
+          "color": "#ffffff",
+          "messageId": "kuaishou:2d1421a916f630f7854919a7455c94d5ba8b92bb",
+          "sentAt": 1790520026145,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众2",
+          "userId": "6576259282",
+          "message": "播一来看主播个看",
+          "color": "#ffffff",
+          "messageId": "kuaishou:1016cc2862d2dc70bee0057777868058181b3848",
+          "sentAt": 1790520026281,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众5",
+          "userId": "5397785254",
+          "message": "播好的来",
+          "color": "#ffffff",
+          "messageId": "kuaishou:502dacf3f25a01aa12c108228e105040d90c6688",
+          "sentAt": 1790520026760,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众6",
+          "userId": "7623462314",
+          "message": "这播",
+          "color": "#ffffff",
+          "messageId": "kuaishou:49f36debb8c72f44753cbd4e5a2ddfac26e8090b",
+          "sentAt": 1790520026889,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众7",
+          "userId": "3458113034",
+          "message": "播一来看主播个看",
+          "color": "#ffffff",
+          "messageId": "kuaishou:2fce9c28131dfca29b350c05889d0ff7cf2a8201",
+          "sentAt": 1790520027762,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众8",
+          "userId": "8815833203",
+          "message": "632的",
+          "color": "#ffffff",
+          "messageId": "kuaishou:3ff9fac38ab0b3585da439e921ef83a43682900c",
+          "sentAt": 1790520028295,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众2",
+          "userId": "6576259282",
+          "message": "duc是一直好播~",
+          "color": "#ffffff",
+          "messageId": "kuaishou:a7a87d2e0ddc471ff100926fae7f4f8e69a4b983",
+          "sentAt": 1790520028383,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众9",
+          "userId": "8743421910",
+          "message": "播油油直？[的来]",
+          "color": "#ffffff",
+          "messageId": "kuaishou:c8c73b14e4f27cb300b701773d729cc5ccbfb50a",
+          "sentAt": 1790520028521,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "delay": 3000
+      },
+      {
+        "request": {
+          "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+          "query": {
+            "liveStreamId": "tboibnUkiRK",
+            "cursor": "DA5vA0ooGKE"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://livev.m.chenzhongtech.com/"
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "onlineViewers",
+            "value": 55000
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众10",
+          "userId": "487587708",
+          "message": "哈播看一来来[的来的]",
+          "color": "#ffffff",
+          "messageId": "kuaishou:d3c8a430a76a12ac8420576ce7f4ba7494f476ff",
+          "sentAt": 1790520029318,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众11",
+          "userId": "4900883186",
+          "message": "duc是一直好播~",
+          "color": "#ffffff",
+          "messageId": "kuaishou:bf62d7e0a3deb8cfd8f14fc4b63f63834366e8ec",
+          "sentAt": 1790520029447,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众2",
+          "userId": "6576259282",
+          "message": "duc是一直好播~",
+          "color": "#ffffff",
+          "messageId": "kuaishou:7bc3f41b49a03f9fcf4805d8bd52b44d24999382",
+          "sentAt": 1790520030532,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众12",
+          "userId": "86668255",
+          "message": "038是来这一播[好是][来哈][个哈][好哈]",
+          "color": "#ffffff",
+          "messageId": "kuaishou:bffff843c3fcc2b8e85c8e68a4f2015f2a1c9552",
+          "sentAt": 1790520031867,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "delay": 3000
+      },
+      {
+        "request": {
+          "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+          "query": {
+            "liveStreamId": "tboibnUkiRK",
+            "cursor": "vyPla9lBMYU"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://livev.m.chenzhongtech.com/"
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "onlineViewers",
+            "value": 55000
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众2",
+          "userId": "6576259282",
+          "message": "播一来看主播个看",
+          "color": "#ffffff",
+          "messageId": "kuaishou:615d7c73007efe7cf8db45e6e444fcf727281dea",
+          "sentAt": 1790520032887,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众13",
+          "userId": "100280149",
+          "message": "播一来看主播个看",
+          "color": "#ffffff",
+          "messageId": "kuaishou:55085872f3f75a0b990a02ebf82e8a4b781a71c2",
+          "sentAt": 1790520033268,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众14",
+          "userId": "531834175",
+          "message": "直",
+          "color": "#ffffff",
+          "messageId": "kuaishou:39b3e62d46d696e3885fee7dcccbe2cecb6dfbb2",
+          "sentAt": 1790520033828,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众1",
+          "userId": "1516004686",
+          "message": "一的播播播播主",
+          "color": "#ffffff",
+          "messageId": "kuaishou:be30c39ec81e4ac72adef1da1b5ce34beb1c5a18",
+          "sentAt": 1790520034291,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众15",
+          "userId": "457349677",
+          "message": "播[哈]",
+          "color": "#ffffff",
+          "messageId": "kuaishou:f68dc4f10462940856c92149e92d0775d193afa1",
+          "sentAt": 1790520034750,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "delay": 3000
+      },
+      {
+        "request": {
+          "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+          "query": {
+            "liveStreamId": "tboibnUkiRK",
+            "cursor": "BLgAlmgZzC8"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://livev.m.chenzhongtech.com/"
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "onlineViewers",
+            "value": 54000
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众2",
+          "userId": "6576259282",
+          "message": "duc是一直好播~",
+          "color": "#ffffff",
+          "messageId": "kuaishou:84b90a907d2e2e38f6bc027b0b342b313c34e252",
+          "sentAt": 1790520035281,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众16",
+          "userId": "823742367",
+          "message": "主哈个好个哈",
+          "color": "#ffffff",
+          "messageId": "kuaishou:76db9ed2c0adc56c5b76bbe7e8398820c98f4228",
+          "sentAt": 1790520037619,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "delay": 3000
+      },
+      {
+        "request": {
+          "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+          "query": {
+            "liveStreamId": "tboibnUkiRK",
+            "cursor": "zPZNoVqMvcU"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://livev.m.chenzhongtech.com/"
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "onlineViewers",
+            "value": 54000
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众17",
+          "userId": "282989283",
+          "message": "主这主加的",
+          "color": "#ffffff",
+          "messageId": "kuaishou:4357a428e5ff35786a1bc2d668c85e8c80d1f64d",
+          "sentAt": 1790520038603,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众18",
+          "userId": "2379357677",
+          "message": "播主好来哈看来播是油是播哈[来哈]",
+          "color": "#ffffff",
+          "messageId": "kuaishou:b66d98ec4aea31341135bf7490cf0e3bbdeb8a03",
+          "sentAt": 1790520038788,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众19",
+          "userId": "1842491024",
+          "message": "[来]",
+          "color": "#ffffff",
+          "messageId": "kuaishou:24af22ecd2aafae802ec6f2c0baba67978c940da",
+          "sentAt": 1790520038813,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众20",
+          "userId": "86749643",
+          "message": "duc是一直好播~",
+          "color": "#ffffff",
+          "messageId": "kuaishou:657e37c47b1460c8927894fe767e7b8b8e7444c1",
+          "sentAt": 1790520040112,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众21",
+          "userId": "4644474375",
+          "message": "播哈个播",
+          "color": "#ffffff",
+          "messageId": "kuaishou:bf36be323124f183155433f1b82de56d24b9fca9",
+          "sentAt": 1790520040674,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "delay": 3000
+      },
+      {
+        "request": {
+          "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+          "query": {
+            "liveStreamId": "tboibnUkiRK",
+            "cursor": "emW1c2hFQjE"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://livev.m.chenzhongtech.com/"
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "onlineViewers",
+            "value": 54000
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众22",
+          "userId": "6297188215",
+          "message": "主这油的好",
+          "color": "#ffffff",
+          "messageId": "kuaishou:cd40166f810ab0c9d2ff92ed4020bcbe2ca2296b",
+          "sentAt": 1790520041799,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众23",
+          "userId": "858515533",
+          "message": "好是加主？",
+          "color": "#ffffff",
+          "messageId": "kuaishou:fbf981991b64405284d74be2c3cdd549bb69bbe5",
+          "sentAt": 1790520042505,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众24",
+          "userId": "4564186357",
+          "message": "。",
+          "color": "#ffffff",
+          "messageId": "kuaishou:7a98e4c9312c27dbf86d5c077143370557b987cf",
+          "sentAt": 1790520042603,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众25",
+          "userId": "2763964692",
+          "message": "个一这的的哈？",
+          "color": "#ffffff",
+          "messageId": "kuaishou:9f8af24a4600d55b571b74c6ccd83a125c99967b",
+          "sentAt": 1790520044056,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众26",
+          "userId": "393972863",
+          "message": "看播",
+          "color": "#ffffff",
+          "messageId": "kuaishou:79b20a45088c550be996e19aedd98cc5be3c57b7",
+          "sentAt": 1790520044248,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "delay": 3000
+      },
+      {
+        "request": {
+          "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+          "query": {
+            "liveStreamId": "tboibnUkiRK",
+            "cursor": "zR8C5BjfSpY"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://livev.m.chenzhongtech.com/"
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "onlineViewers",
+            "value": 54000
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众27",
+          "userId": "3311684105",
+          "message": "看播哈，998加看直",
+          "color": "#ffffff",
+          "messageId": "kuaishou:81e9fb4ccddc10f6c24baf16004658fcbe7f3eae",
+          "sentAt": 1790520044742,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众28",
+          "userId": "6956008908",
+          "message": "duc是一直好播~",
+          "color": "#ffffff",
+          "messageId": "kuaishou:d62e960301d1785172444493a901473ae2a608fc",
+          "sentAt": 1790520045715,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众29",
+          "userId": "102183930",
+          "message": "个哈这播油",
+          "color": "#ffffff",
+          "messageId": "kuaishou:32568e876e255961a36f1f68e3fca9483439ca4c",
+          "sentAt": 1790520046469,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众30",
+          "userId": "4916382696",
+          "message": "加一",
+          "color": "#ffffff",
+          "messageId": "kuaishou:51495de8e848cb463fa4c2ecfa108ae14b2caf3a",
+          "sentAt": 1790520047529,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众31",
+          "userId": "113605178",
+          "message": "播一来看主播个看",
+          "color": "#ffffff",
+          "messageId": "kuaishou:453ee1cef75dd44e926a49d3eb3ce33fad352355",
+          "sentAt": 1790520047808,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "delay": 3000
+      },
+      {
+        "request": {
+          "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+          "query": {
+            "liveStreamId": "tboibnUkiRK",
+            "cursor": "Sbi_xDq_bV0"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://livev.m.chenzhongtech.com/"
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "onlineViewers",
+            "value": 54000
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众31",
+          "userId": "113605178",
+          "message": "播一来看主播个看",
+          "color": "#ffffff",
+          "messageId": "kuaishou:52400baa419e1f6b4e145a9083ea28daf4467b65",
+          "sentAt": 1790520050840,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "delay": 3000
+      },
+      {
+        "request": {
+          "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+          "query": {
+            "liveStreamId": "tboibnUkiRK",
+            "cursor": "6aPw4dMwJho"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://livev.m.chenzhongtech.com/"
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "onlineViewers",
+            "value": 53000
+          }
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众32",
+          "userId": "10961344",
+          "message": "主直",
+          "color": "#ffffff",
+          "messageId": "kuaishou:4400cd4e640e5ddf9374c90798d24b8fd4e4a3c2",
+          "sentAt": 1790520051155,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众33",
+          "userId": "639944340",
+          "message": "播一来看主播个看",
+          "color": "#ffffff",
+          "messageId": "kuaishou:033998028a990873caf6630dd24467810a09c877",
+          "sentAt": 1790520052543,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "event": "message",
+        "message": {
+          "type": "chat",
+          "userName": "观众31",
+          "userId": "113605178",
+          "message": "播一来看主播个看",
+          "color": "#ffffff",
+          "messageId": "kuaishou:a4d3b90d09ce9f2c908f906a966b6a52d24809f8",
+          "sentAt": 1790520053398,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      },
+      {
+        "delay": 3000
+      },
+      {
+        "request": {
+          "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+          "query": {
+            "liveStreamId": "tboibnUkiRK",
+            "cursor": "EMwpxNyF2f8"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://livev.m.chenzhongtech.com/"
+          }
+        }
+      }
+    ]
+  }
+}

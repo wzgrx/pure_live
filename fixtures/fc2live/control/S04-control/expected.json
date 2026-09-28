@@ -1,0 +1,13 @@
+{
+  "generator": "Fc2ControlSession.parseHlsResponse (the `_response_` frame)",
+  "value": {
+    "sent": [
+      "{\"name\":\"get_hls_information\",\"arguments\":{},\"id\":1}"
+    ],
+    "62996200": "https://us-west-1-media.live.fc2.com/a/stream/62996200/0/master_playlist?targets=10,20,30,90&c=DMJsVCMTbd39dBV5IW8j9&d=y4SAYvU80_qsYye1Hi6yR2ar43pdh_IWioYqJl6Dr3kW4oyuHNeOIvMN6rap7Ywp",
+    "10608314": {
+      "throws": "Fc2Exception",
+      "message": "FC2 Live schema"
+    }
+  }
+}

@@ -284,6 +284,76 @@ void main() {
     expect(connector.channels.single.closed, isTrue);
     expect(socket.status, SocketStatus.closed);
   });
+
+  group('connectIoSocket pings', () {
+    /// A dart:io WebSocket server behind a TCP relay that records the bytes
+    /// the client sends after its upgrade request.
+    Future<({int port, List<int> Function() afterHandshake})> relayedServer() async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      server.listen((request) async {
+        final ws = await WebSocketTransformer.upgrade(request);
+        ws.listen((_) {});
+      });
+      final relay = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+      final fromClient = <int>[];
+      final sockets = <Socket>[];
+      relay.listen((client) async {
+        final upstream = await Socket.connect(InternetAddress.loopbackIPv4, server.port);
+        sockets.addAll([client, upstream]);
+        upstream.listen(client.add, onDone: client.destroy, onError: (Object _) {});
+        client.listen(
+          (bytes) {
+            fromClient.addAll(bytes);
+            upstream.add(bytes);
+          },
+          onDone: upstream.destroy,
+          onError: (Object _) {},
+        );
+      });
+      addTearDown(() async {
+        for (final socket in sockets) {
+          socket.destroy();
+        }
+        await relay.close();
+        await server.close(force: true);
+      });
+      List<int> afterHandshake() {
+        final end = String.fromCharCodes(fromClient).indexOf('\r\n\r\n');
+        return end < 0 ? const [] : fromClient.sublist(end + 4);
+      }
+
+      return (port: relay.port, afterHandshake: afterHandshake);
+    }
+
+    Future<SocketChannel> connect(int port, {Duration? pingInterval}) => connectIoSocket(
+      Uri.parse('ws://127.0.0.1:$port/'),
+      headers: const {},
+      protocols: null,
+      route: const DirectRoute(),
+      connectTimeout: const Duration(seconds: 2),
+      pingInterval: pingInterval,
+    );
+
+    test('with an interval the client sends ping frames', () async {
+      final relay = await relayedServer();
+      final channel = await connect(relay.port, pingInterval: const Duration(milliseconds: 40));
+      addTearDown(channel.close);
+      final deadline = DateTime.now().add(const Duration(seconds: 2));
+      while (relay.afterHandshake().isEmpty && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      // FIN + opcode 9 (ping), masked as every client frame.
+      expect(relay.afterHandshake().take(2), [0x89, 0x80]);
+    });
+
+    test('without one the client stays silent', () async {
+      final relay = await relayedServer();
+      final channel = await connect(relay.port);
+      addTearDown(channel.close);
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(relay.afterHandshake(), isEmpty);
+    });
+  });
 }
 
 final class _MutablePolicy implements ProxyPolicy {

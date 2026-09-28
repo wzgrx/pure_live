@@ -12,21 +12,36 @@ Fixture _sample(String name) => Fixture.load('kuaishou', name);
 
 const _names = {'1': '热门', '2': '网游', '3': '单机', '4': '手游', '5': '棋牌', '6': '娱乐', '7': '综合', '8': '文化'};
 
+/// The room keys v4 added after 3.x (M2.1); 3.x's output never has them.
+const _v4Keys = ['startedAt', 'restriction'];
+
 /// Asserts that [actual] (a `toJson`) equals 3.x's [legacy] map on every key
 /// 3.x wrote, except [changed] (intended differences) and the projections
 /// compared separately (`danmakuData`, `qualities`). 3.x wrote null where the
-/// immutable model writes ''.
+/// immutable model writes ''. The v4 keys must be exactly [added] (M4.U.5,
+/// the unified principles of docs/UPGRADES.md).
 void _expectParity(
   Map<String, Object?> actual,
   Map<String, dynamic> legacy, {
   Set<String> changed = const {},
+  Map<String, Object?> added = const {},
   String? reason,
 }) {
   for (final MapEntry(:key, :value) in legacy.entries) {
     if (changed.contains(key) || key == 'danmakuData' || key == 'qualities') continue;
     expect(actual[key] ?? '', value ?? '', reason: '${reason ?? ''} $key');
   }
+  for (final key in _v4Keys) {
+    expect(actual[key], added[key], reason: '${reason ?? ''} $key (v4 key)');
+  }
 }
+
+/// M4.U.5 (unified principles "开播时间", "受限"): a list card starts at its
+/// `statrtTime` (epoch milliseconds) and, having streams, is unrestricted.
+Map<String, Object?> _cardKeys(Map<String, dynamic> card) => {
+  'startedAt': DateTime.fromMillisecondsSinceEpoch(card['statrtTime'] as int, isUtc: true).toIso8601String(),
+  'restriction': 'none',
+};
 
 /// 3.x's quality projection: label, id, sort and the line URLs.
 List<Map<String, Object?>> _projection(List<LivePlayQuality> qualities) => [
@@ -140,7 +155,13 @@ void main() {
           // link: 3.x wrote the broadcast's liveStreamId there (search wrote
           // the page URL); it is the room page now and the liveStreamId is in
           // KuaishouRoomData (REG-KUAISHOU-023).
-          _expectParity(room.toJson(), legacy[index], changed: {'link'}, reason: '$name[$index]');
+          _expectParity(
+            room.toJson(),
+            legacy[index],
+            changed: {'link'},
+            added: _cardKeys(raw[index]),
+            reason: '$name[$index]',
+          );
           expect(room.link, 'https://live.kuaishou.com/u/${room.roomId}');
           expect(_danmaku(room), legacy[index]['danmakuData']);
           final data = room.data! as KuaishouRoomData;
@@ -207,6 +228,7 @@ void main() {
       expect(result.rooms.single.roomId, 'abc');
       final room = result.rooms.single;
       expect((room.cover, room.title, room.nick, room.area, room.watching), ('', '', '', '', ''));
+      expect((room.startedAt, room.restriction), (null, null));
       expect(_danmaku(room), {'liveStreamId': 'L1', 'cookie': 'did=1'});
       expect(result.hasMore, isFalse);
       expect(KuaishouApi.areaRooms('{"data":{"hasMore":true,"list":[]}}', issuedAt: DateTime(2026)).hasMore, isFalse);
@@ -233,7 +255,13 @@ void main() {
       // showed the streamer bio. Both are the card's now, like the area
       // lists (the bio stays the introduction and notice). link: see area
       // rooms.
-      _expectParity(room.toJson(), legacy[index], changed: {'cover', 'title', 'link'}, reason: 'S04[$index]');
+      _expectParity(
+        room.toJson(),
+        legacy[index],
+        changed: {'cover', 'title', 'link'},
+        added: _cardKeys(card),
+        reason: 'S04[$index]',
+      );
       expect(legacy[index]['cover'], (card['gameInfo'] as Map)['poster']);
       expect(room.cover, anyOf(card['poster'], '${card['poster']}.jpg'), reason: 'the card, .jpg appended as 3.x did');
       final bio = ((card['author'] as Map)['description'] as String?)?.replaceAll('\n', ' ') ?? '';
@@ -336,10 +364,13 @@ void main() {
           // page has none for the room (REG-KUAISHOU-016).
           // followers: author.counts.fan, which 3.x never read.
           // link: see area rooms.
+          // v4 keys (M4.U.5): living with streams is unrestricted; the page
+          // has no broadcast start.
           _expectParity(
             room.toJson(),
             expected,
             changed: {'watching', 'onlineViewers', 'followers', 'link'},
+            added: const {'restriction': 'none'},
             reason: '$name $entry',
           );
           expect(expected['watching'], '1万+');
@@ -366,6 +397,8 @@ void main() {
       );
       expect((room.data! as KuaishouRoomData).playUrls, isNull);
       expect((room.data! as KuaishouRoomData).liveStreamId, 'XT8F1KPOf0c');
+      expect(room.restriction, LiveRestriction.none, reason: 'the same page: the refresh sees the streams too');
+      expect(room.startedAt, isNull);
     });
 
     test('S11 offline room is offline without cover or danmaku (REG-KUAISHOU-020; 3.x threw TypeError)', () {
@@ -385,6 +418,8 @@ void main() {
       expect(room.danmakuData, isNull);
       expect((room.data! as KuaishouRoomData).liveStreamId, isNull);
       expect(KuaishouApi.qualities((room.data! as KuaishouRoomData).playUrls), isEmpty);
+      expect((room.restriction, room.startedAt), (null, null), reason: 'M4.U.5: nothing to say for an offline room');
+      expect(room.toJson().keys, isNot(anyOf(contains('restriction'), contains('startedAt'))));
     });
 
     test('S12 errorType 22 is NotFound (3.x threw TypeError or showed an unknown room)', () {
@@ -739,5 +774,173 @@ void main() {
     expect(cover('https://a.test/x.WEBP'), 'https://a.test/x.WEBP');
     expect(cover('https://a.test/x?size=1'), 'https://a.test/x?size=1', reason: '3.x appended into the query');
     expect(cover(null), '');
+  });
+
+  group('M4.U.5 upgrades (unified principles)', () {
+    const stream = {
+      'adaptationSet': {
+        'representation': [
+          {'name': '高清', 'level': 30, 'url': 'https://tx-origin.pull.yximgs.com/gifshow/x_GameAvcSdL0.flv'},
+        ],
+      },
+    };
+    String list(List<Map<String, dynamic>> cards) => jsonEncode({
+      'data': {'hasMore': false, 'list': cards},
+    });
+    Map<String, dynamic> card(Map<String, dynamic> fields) => {
+      'id': 'L1',
+      'author': {'id': 'abc'},
+      ...fields,
+    };
+    String page(Map<String, dynamic> room) =>
+        '<html><script>window.__INITIAL_STATE__=${jsonEncode({
+          'liveroom': {
+            'playList': [room],
+          },
+        })};(function(){})();</script></html>';
+
+    test('开播时间: a card starts at statrtTime (epoch ms), else startTime; placeholders and seconds are none', () {
+      DateTime? started(Map<String, dynamic> fields) =>
+          KuaishouApi.areaRooms(list([card(fields)]), issuedAt: DateTime(2026)).rooms.single.startedAt;
+      final at = DateTime.utc(2026, 9, 27, 9, 19, 38, 677);
+      expect(started({'statrtTime': 1790500778677}), at);
+      expect(started({'statrtTime': '1790500778677'}), at);
+      expect(started({'startTime': 1790500778677}), at, reason: 'the correct spelling, should the platform fix it');
+      expect(started({'statrtTime': 0, 'startTime': 1790500778677}), at);
+      for (final value in <Object?>[null, 0, -1, 1790500778, 1790500778.5, 'soon', 17905007786770]) {
+        expect(started({'statrtTime': value}), isNull, reason: '$value');
+      }
+      final room = KuaishouApi.areaRooms(
+        list([
+          card({'statrtTime': 1790500778677}),
+        ]),
+        issuedAt: DateTime(2026),
+      ).rooms.single;
+      expect(room.toJson()['startedAt'], '2026-09-27T09:19:38.677Z');
+      expect(LiveRoom.fromJson(room.toJson()).startedAt, at);
+      final recommended = KuaishouApi.recommendRooms(
+        jsonEncode({
+          'data': {
+            'list': [
+              {
+                'gameLiveInfo': [
+                  {
+                    'liveInfo': [
+                      card({'statrtTime': 1790500778677}),
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        }),
+        issuedAt: DateTime(2026),
+      ).single;
+      expect(recommended.startedAt, at, reason: 'recommendation cards too');
+    });
+
+    test('受限: a card with a playable stream is unrestricted; without one it is unknown and still live', () {
+      List<LiveRoom> rooms(List<Map<String, dynamic>> cards) =>
+          KuaishouApi.areaRooms(list(cards), issuedAt: DateTime(2026)).rooms;
+      final parsed = rooms([
+        card({
+          'playUrls': [stream],
+        }),
+        {
+          'id': 'L2',
+          'author': {'id': 'no_streams'},
+        },
+        {
+          'id': 'L3',
+          'author': {'id': 'bad_streams'},
+          'playUrls': [
+            {
+              'adaptationSet': {
+                'representation': [
+                  {'name': '高清', 'level': 30, 'url': 'javascript:alert(1)'},
+                ],
+              },
+            },
+          ],
+        },
+      ]);
+      expect(parsed.map((room) => room.restriction), [LiveRestriction.none, null, null]);
+      expect(parsed.every((room) => room.isLiveNow && room.followGroup == FollowGroup.live), isTrue);
+    });
+
+    test('受限: a living page without a playable stream is live and unplayable, with or without streams', () {
+      for (final playUrls in <Object?>[
+        null,
+        <String, dynamic>{'h264': <String, dynamic>{}, 'hevc': <String, dynamic>{}},
+        <String, dynamic>{
+          'h264': {
+            'adaptationSet': {
+              'representation': [
+                {'name': '高清', 'level': 30, 'url': '/relative.flv'},
+              ],
+            },
+          },
+        },
+      ]) {
+        for (final withStreams in [true, false]) {
+          final room = KuaishouApi.roomDetail(
+            page({
+              'isLiving': true,
+              'author': {'id': 'abc'},
+              'liveStream': {'id': 'L1', 'playUrls': playUrls},
+            }),
+            requestedId: 'abc',
+            issuedAt: DateTime(2026),
+            withStreams: withStreams,
+          );
+          expect(room.liveStatus, LiveStatus.live, reason: '$playUrls');
+          expect(room.restriction, LiveRestriction.unplayable, reason: '$playUrls');
+          expect((room.isLiveNow, room.isPlayableNow, room.followGroup), (true, true, FollowGroup.live));
+          expect(room.toJson()['restriction'], 'unplayable');
+        }
+      }
+      final playable = KuaishouApi.roomDetail(
+        page({
+          'isLiving': true,
+          'liveStream': {
+            'privateLive': true,
+            'playUrls': {'h264': stream},
+          },
+        }),
+        requestedId: 'abc',
+        issuedAt: DateTime(2026),
+      );
+      expect(playable.restriction, LiveRestriction.none, reason: 'privateLive is not read (never seen true)');
+      final offline = KuaishouApi.roomDetail(
+        page({
+          'isLiving': false,
+          'liveStream': {'playUrls': <String, dynamic>{}},
+        }),
+        requestedId: 'abc',
+        issuedAt: DateTime(2026),
+      );
+      expect(offline.restriction, isNull);
+    });
+
+    test('房间身份: S13 the page of a lower-case id is the streamer in its own spelling', () {
+      final fixture = _sample('S13-room-id-case');
+      expect(fixture.url.path, '/u/kpl704668133');
+      final state = KuaishouApi.initialState(fixture.body);
+      final raw = ((state['liveroom'] as Map)['playList'] as List).first as Map;
+      expect((raw['author'] as Map)['id'], 'KPL704668133', reason: 'the platform answers its own spelling');
+      final replay = _sample('S09-room-live-replay');
+      final recorded = KuaishouApi.roomDetail(replay.body, requestedId: 'KPL704668133', issuedAt: replay.capturedAt);
+      final room = KuaishouApi.roomDetail(fixture.body, requestedId: 'kpl704668133', issuedAt: fixture.capturedAt);
+      expect(room.roomId, 'kpl704668133', reason: 'the requested spelling stays (M2.1)');
+      expect((room.nick, room.isLiveNow), (recorded.nick, true));
+      expect((room.data! as KuaishouRoomData).liveStreamId, (recorded.data! as KuaishouRoomData).liveStreamId);
+      expect(room.hasSameIdentity(recorded), isTrue);
+      expect(room.identityKey, 'kuaishou:kpl704668133');
+      expect(SiteIds.ignoresRoomIdCase('kuaishou'), isTrue);
+      expect(room.restriction, LiveRestriction.none);
+      final data = room.data! as KuaishouRoomData;
+      expect(KuaishouApi.qualities(data.playUrls).map((quality) => quality.sort), [130, 70, 50, 30]);
+      _expectLines(data.playUrls, roomId: room.roomId, issuedAt: fixture.capturedAt);
+    });
   });
 }

@@ -231,7 +231,15 @@ void main() {
 
   group('identity', () {
     test('case is ignored only on the listed platforms', () {
-      expect(SiteIds.caseInsensitiveRoomIds, {'twitch', 'soop', 'picarto', 'twitcasting', 'tiktok', 'pandalive'});
+      expect(SiteIds.caseInsensitiveRoomIds, {
+        'twitch',
+        'soop',
+        'picarto',
+        'twitcasting',
+        'tiktok',
+        'pandalive',
+        'kuaishou',
+      });
       expect(SiteIds.supported.toSet().containsAll(SiteIds.caseInsensitiveRoomIds), isTrue);
       for (final platform in SiteIds.supported) {
         final upper = _room(platform: platform, roomId: 'TheBaker');

@@ -36,14 +36,20 @@ void _expectParity(
 /// 3.x's room projection: toJson plus `link`.
 Map<String, Object?> _projection(LiveRoom room) => {...room.toJson(), 'link': room.link};
 
-/// httpHeaders: 3.x also wrote the media headers into the room, which only
-/// IPTV's player path read (playback_header_resolver.dart:143-147); they now
-/// travel with every line (asserted in "lines").
-const _headersMoved = {'httpHeaders'};
+/// Keys that differ from 3.x's frozen output on every sample card:
+/// - httpHeaders: 3.x also wrote the media headers into the room, which
+///   only IPTV's player path read (playback_header_resolver.dart:143-147);
+///   they now travel with every line (asserted in "lines");
+/// - notice: 3.x's `tiktok_chat_notice` said for viewers (the unified rule
+///   on notices, M4.U.22; asserted in "card fields").
+const _headersMoved = {'httpHeaders', 'notice'};
 
 /// avatar, cover: the samples' pictures are on the regional CDN
 /// tiktokcdn-us.com, which 3.x did not trust (it showed none).
-const _picturesTrusted = {'avatar', 'cover', 'httpHeaders'};
+const Set<String> _picturesTrusted = {'avatar', 'cover', ..._headersMoved};
+
+/// S01-user-live's `liveRoom.startTime` (1790532724).
+final DateTime _started = DateTime.utc(2026, 9, 27, 18, 12, 4);
 
 /// The answer as 3.x's `trustedHosts` run saw it: tiktokcdn-us.com spelled
 /// tiktokcdn.com, nothing else changed.
@@ -149,11 +155,24 @@ void main() {
         (data.username, data.userId, data.liveRoomId, data.streamId),
         ('qvc', '6768510980420043782', '7690279124098681614', '3578925130487169980'),
       );
-      expect((data.state, data.status, data.restriction), (TikTokState.live, 2, null));
+      expect((data.state, data.status, data.restriction), (TikTokState.live, 2, LiveRestriction.none));
       expect(data.secUid, startsWith('MS4wLjABAAAA'));
-      expect(data.streams, hasLength(14));
+      expect(data.streams, hasLength(7), reason: "3.x's 14 qualities, FLV and HLS now one quality each (22-2)");
+      expect(data.skipped, isEmpty);
       expect(data.issuedAt, _issued);
       expect(TikTokApi.unplayable(data), isNull);
+    });
+
+    test('S01-user-live: the start and who may watch (M4.U.22, new keys; 3.x had neither)', () {
+      final body = _sample('S01-user-live').body;
+      for (final media in [true, false]) {
+        final room = _room(body, 'qvc', media: media);
+        expect((room.startedAt, room.restriction), (_started, LiveRestriction.none));
+        final json = room.toJson();
+        expect((json['startedAt'], json['restriction']), ('2026-09-27T18:12:04.000Z', 'none'));
+        final legacy = _result(_legacy('S01-user-live')['getRoomDetailForRefresh(qvc)'])! as Map<String, dynamic>;
+        expect(legacy.keys, isNot(anyOf(contains('startedAt'), contains('restriction'))));
+      }
     });
 
     test("S01-user-live: 3.x's card fields, audience and notice", () {
@@ -167,6 +186,9 @@ void main() {
       expect(room.audienceMetricType, AudienceMetricType.onlineViewers);
       expect(room.supportsRealOnlineCount, isTrue);
       expect(room.notice, TikTokApi.chatNotice);
+      final legacy = _result(_legacy('S01-user-live')['getRoomDetailForRefresh(qvc)'])! as Map<String, dynamic>;
+      expect(legacy['notice'], 'TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。');
+      expect(room.notice, 'TikTok 直播的评论暂时不能在这里显示。在线人数是正在看的人数，累计是进过直播间的人数。');
       expect(room.introduction, startsWith('This is shopping brought to life'));
       expect(room.cover, contains('cropcenter:720:720'), reason: '`coverUrl` before `squareCoverImg` (3.x)');
       expect(room.avatar, contains('cropcenter:1080:1080'), reason: '`avatarLarger` first (3.x)');
@@ -179,9 +201,11 @@ void main() {
       expect((room.watching, room.onlineViewers, room.totalViewers), ('', '', ''));
       expect(room.title, 'Fans pay tribute to Dolly Parton', reason: "the last LIVE's title, as the site sends it");
       final data = _data(room);
-      expect((data.state, data.status), (TikTokState.offline, 4));
+      expect((data.state, data.status, data.restriction), (TikTokState.offline, 4, null));
       expect(data.streams, isEmpty);
       expect(fixture.body, contains('stream_data'));
+      expect(fixture.body, contains('"startTime":'), reason: "the last LIVE's start, not filled while offline");
+      expect((room.startedAt, room.restriction), (null, null));
       // 3.x listed no qualities (an empty list); now the reason.
       expect(_result(_legacy('S01-user-offline')['getPlayQualites']), isEmpty);
       expect(TikTokApi.unplayable(data), isA<StreamUnavailable>());
@@ -210,13 +234,37 @@ void main() {
     final legacy = _legacy('S01-user-live')['trustedHosts'] as Map<String, dynamic>;
     final wanted = (_result(legacy['getPlayQualites'])! as List).cast<Map<String, dynamic>>();
 
-    test("3.x's qualities (names, ids, ranks, order), also over the recorded regional hosts", () {
+    // With "优先 H.264" on (the default, 22-3): H.264 first, then H.265.
+    const preferred = [
+      ('原画', 'h264:origin', 10100),
+      ('720p', 'h264:hd', 6100),
+      ('1080p60 · H.265', 'h265:uhd_60', 9000),
+      ('720p60 · H.265', 'h265:hd_60', 8000),
+      ('720p · H.265', 'h265:hd', 6000),
+      ('540p · H.265', 'h265:sd', 5000),
+      ('360p · H.265', 'h265:ld', 4000),
+    ];
+
+    List<(String, Object?, int)> project(List<LivePlayQuality> qualities) => [
+      for (final quality in qualities) (quality.quality, quality.id, quality.sort),
+    ];
+
+    test('changed: one quality per tier and codec (22-2), named as the site does (22-4), H.264 first (22-3)', () {
       for (final body in [_trusted(_sample('S01-user-live').body), _sample('S01-user-live').body]) {
-        final qualities = TikTokApi.qualities(_data(_room(body, 'qvc')));
-        expect([
-          for (final quality in qualities) {'quality': quality.quality, 'id': quality.id, 'sort': quality.sort},
-        ], wanted);
+        final data = _data(_room(body, 'qvc'));
+        expect(project(TikTokApi.qualities(data)), preferred);
+        // Off: 3.x's order, best tier first, H.264 before H.265 within a tier.
+        expect(project(TikTokApi.qualities(data, preferH264: false)), [
+          preferred[0],
+          preferred[2],
+          preferred[3],
+          preferred[1],
+          preferred[4],
+          preferred[5],
+          preferred[6],
+        ]);
       }
+      expect(wanted, hasLength(14), reason: '3.x: one quality per protocol');
       expect(
         wanted.first['quality'],
         '原始画质 · 1080x1920 · H264 · FLV',
@@ -224,49 +272,68 @@ void main() {
       );
     });
 
-    test("3.x's URLs for every quality, applied as asked; the recording's hosts are the regional CDN", () {
-      final trusted = _data(_room(_trusted(_sample('S01-user-live').body), 'qvc'));
-      final recorded = _data(_room(_sample('S01-user-live').body, 'qvc'));
-      final urls = legacy['resolvePlayUrlsRaw'] as Map<String, dynamic>;
-      for (final quality in TikTokApi.qualities(trusted)) {
-        final want = _result(urls['${quality.id}'])! as Map<String, dynamic>;
-        final resolution = TikTokApi.resolution(trusted, quality);
-        expect(resolution.urls, want['urls'], reason: '${quality.id}');
-        expect(resolution.appliedQualityData, want['appliedQualityData']);
-        expect(TikTokApi.resolution(recorded, quality).urls, [
-          for (final url in want['urls'] as List) (url as String).replaceAll('tiktokcdn.com', 'tiktokcdn-us.com'),
-        ]);
+    test("every 3.x quality id maps to one now (for M9), in 3.x's relative order", () {
+      final data = _data(_room(_sample('S01-user-live').body, 'qvc'));
+      final mapped = [for (final quality in wanted) TikTokApi.qualityIdFromLegacy(quality['id'] as String)];
+      expect(mapped.toSet().toList(), [for (final quality in TikTokApi.qualities(data, preferH264: false)) quality.id]);
+      expect(TikTokApi.qualityIdFromLegacy('h264:origin:flv'), 'h264:origin');
+      expect(TikTokApi.qualityIdFromLegacy(' H265:UHD_60:HLS '), 'h265:uhd_60');
+      for (final id in ['h264:origin', 'h264:origin:dash', 'origin', 'flv', '']) {
+        expect(TikTokApi.qualityIdFromLegacy(id), id, reason: 'not a 3.x id: kept');
       }
     });
 
-    test("lines: 3.x's media headers, the protocol's format, the codec, the CDN host, the lease of `expire`", () {
+    test("changed: 3.x's two qualities of a tier are its FLV then HLS lines (22-2); a 3.x id plays its quality", () {
+      final trusted = _data(_room(_trusted(_sample('S01-user-live').body), 'qvc'));
+      final recorded = _data(_room(_sample('S01-user-live').body, 'qvc'));
+      final urls = legacy['resolvePlayUrlsRaw'] as Map<String, dynamic>;
+      List<Object?> legacyUrls(String id) => (_result(urls[id])! as Map<String, dynamic>)['urls'] as List<Object?>;
+      for (final quality in TikTokApi.qualities(trusted)) {
+        final resolution = TikTokApi.resolution(trusted, quality);
+        expect(resolution.urls, [...legacyUrls('${quality.id}:flv'), ...legacyUrls('${quality.id}:hls')]);
+        expect(resolution.appliedQualityData, quality.id);
+        expect(TikTokApi.resolution(recorded, quality).urls, [
+          for (final url in resolution.urls) url.replaceAll('tiktokcdn.com', 'tiktokcdn-us.com'),
+        ]);
+      }
+      for (final old in wanted) {
+        final id = old['id'] as String;
+        final resolution = TikTokApi.resolution(trusted, LivePlayQuality(quality: '', id: id));
+        expect(resolution.appliedQualityData, TikTokApi.qualityIdFromLegacy(id));
+        expect(resolution.urls, containsAll(legacyUrls(id)));
+      }
+    });
+
+    test("lines: 3.x's media headers, FLV then HLS, the codec, the protocol as line id, the lease of `expire`", () {
       final data = _data(_room(_sample('S01-user-live').body, 'qvc'));
       final headers =
           (_result(legacy['getRoomDetail'])! as Map<String, dynamic>)['httpHeaders'] as Map<String, dynamic>;
       final expiresAt = DateTime.fromMillisecondsSinceEpoch(1791749747 * 1000, isUtc: true);
       for (final quality in TikTokApi.qualities(data)) {
-        final line = TikTokApi.resolution(data, quality).lines.single;
-        final id = '${quality.id}';
-        expect(line.headers, headers, reason: 'PlaybackHeaderResolver sent TikTokApi.mediaHeaders');
-        expect(line.headers, TikTokApi.mediaHeaders('qvc'));
-        expect(line.format, id.endsWith(':flv') ? StreamFormat.flv : StreamFormat.hls);
-        expect(line.codec, id.startsWith('h264') ? 'avc' : 'hevc');
-        expect(
-          line.lineId,
-          id.endsWith(':flv') ? 'pull-f5-tt01.tiktokcdn-us.com' : 'pull-hls-f16-tt01.tiktokcdn-us.com',
-        );
-        expect(line.lease!.expiresAt, expiresAt, reason: 'signed for about 14 days');
-        expect(line.lease!.refreshAt, expiresAt.subtract(const Duration(hours: 1)));
-        expect(line.lease!.cutsConnection, isFalse);
+        final lines = TikTokApi.resolution(data, quality).lines;
+        expect(lines.map((line) => (line.format, line.lineId)), [(StreamFormat.flv, 'flv'), (StreamFormat.hls, 'hls')]);
+        expect(Uri.parse(lines.first.url).host, 'pull-f5-tt01.tiktokcdn-us.com');
+        expect(Uri.parse(lines.last.url).host, 'pull-hls-f16-tt01.tiktokcdn-us.com');
+        for (final line in lines) {
+          expect(line.headers, headers, reason: 'PlaybackHeaderResolver sent TikTokApi.mediaHeaders');
+          expect(line.headers, TikTokApi.mediaHeaders('qvc'));
+          expect(line.codec, '${quality.id}'.startsWith('h264') ? 'avc' : 'hevc');
+          expect(line.lease!.expiresAt, expiresAt, reason: 'signed for about 14 days');
+          expect(line.lease!.refreshAt, expiresAt.subtract(const Duration(hours: 1)));
+          expect(line.lease!.cutsConnection, isFalse);
+        }
       }
     });
 
     test('a quality the LIVE does not offer is StreamUnavailable (3.x: mediaUnavailable)', () {
       final data = _data(_room(_sample('S01-user-live').body, 'qvc'));
-      expect(
-        () => TikTokApi.resolution(data, const LivePlayQuality(quality: 'x', id: 'h264:uhd:flv')),
-        throwsA(isA<StreamUnavailable>()),
-      );
+      for (final id in ['h264:uhd', 'h264:uhd:flv', 'h265:origin']) {
+        expect(
+          () => TikTokApi.resolution(data, LivePlayQuality(quality: 'x', id: id)),
+          throwsA(isA<StreamUnavailable>()),
+          reason: id,
+        );
+      }
     });
 
     test('the lease: none without `expire` or once past; a short lifetime renews at three quarters', () {
@@ -280,7 +347,6 @@ void main() {
       expect(lease.refreshAt, issued.add(const Duration(seconds: 300)));
     });
   });
-
   group('links against 3.x (TikTokLink)', () {
     for (final name in ['S01-user-live', 'S01-user-offline', 'S01-user-missing']) {
       test('$name: parse, lookup (parseOrUsername), user links and usernames as 3.x', () {
@@ -343,32 +409,73 @@ void main() {
   });
 
   group("answers (3.x's checks)", () {
-    test('restricted: a private account, subscribers only, paid, in that order; banned, NeedsLogin, no streams', () {
-      for (final (edit, restriction) in <(void Function(Map<String, dynamic>), TikTokRestriction)>[
-        ((json) => _user(json)['secret'] = true, TikTokRestriction.privateAccount),
-        ((json) => _live(json)['liveSubOnly'] = 1, TikTokRestriction.subscriberOnly),
-        ((json) => _live(json)['liveSubOnly'] = '1', TikTokRestriction.subscriberOnly),
-        ((json) => (_live(json)['paidEvent'] as Map)['paid_type'] = 2, TikTokRestriction.paid),
+    test('22-1: a private account, subscribers only, paid, in that order: live and marked; no streams read', () {
+      for (final (edit, restriction) in <(void Function(Map<String, dynamic>), LiveRestriction)>[
+        ((json) => _user(json)['secret'] = true, LiveRestriction.private),
+        ((json) => _live(json)['liveSubOnly'] = 1, LiveRestriction.subscribersOnly),
+        ((json) => _live(json)['liveSubOnly'] = '1', LiveRestriction.subscribersOnly),
+        ((json) => (_live(json)['paidEvent'] as Map)['paid_type'] = 2, LiveRestriction.paid),
         (
           (json) {
             _user(json)['secret'] = true;
             _live(json)['liveSubOnly'] = 1;
           },
-          TikTokRestriction.privateAccount,
+          LiveRestriction.private,
         ),
       ]) {
         final json = _liveJson();
         edit(json);
         final room = _room(jsonEncode(json), 'qvc');
         final data = _data(room);
-        expect(
-          (room.liveStatus, data.state, data.restriction),
-          (LiveStatus.banned, TikTokState.restricted, restriction),
-        );
+        // 3.x: banned, "server error" at entry, recordings stopped as banned.
+        expect((room.liveStatus, room.restriction, room.followGroup), (LiveStatus.live, restriction, FollowGroup.live));
+        expect((data.state, data.restriction), (TikTokState.live, restriction));
+        expect((room.isLiveNow, room.isRestricted, room.startedAt), (true, true, _started));
         expect(data.streams, isEmpty);
-        expect((room.onlineViewers, room.totalViewers), ('', ''), reason: 'counts only while live (3.x)');
-        expect(TikTokApi.unplayable(data), isA<NeedsLogin>());
+        expect((room.onlineViewers, room.totalViewers), ('203', '9492'), reason: 'a live LIVE, restricted or not');
+        expect(TikTokApi.unplayable(data), isA<StreamUnavailable>(), reason: 'no TikTok login would help');
+        expect(_room(jsonEncode(json), 'qvc', media: false).restriction, restriction, reason: 'refreshes mark it too');
       }
+    });
+
+    test('22-1: a restriction is kept only while live; the reasons name who may watch', () {
+      final json = _liveJson();
+      _user(json)['secret'] = true;
+      _live(json)['status'] = 4;
+      final offline = _room(jsonEncode(json), 'qvc');
+      expect((offline.liveStatus, offline.restriction, offline.startedAt), (LiveStatus.offline, null, null));
+      _live(json)['status'] = 3;
+      expect(_room(jsonEncode(json), 'qvc').restriction, isNull);
+      for (final (restriction, words) in [
+        (LiveRestriction.private, 'followers only'),
+        (LiveRestriction.subscribersOnly, 'subscribers only'),
+        (LiveRestriction.paid, 'a paid LIVE'),
+      ]) {
+        final data = TikTokRoomData(
+          username: 'qvc',
+          userId: '',
+          state: TikTokState.live,
+          restriction: restriction,
+          issuedAt: _issued,
+        );
+        expect(
+          TikTokApi.unplayable(data),
+          isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains(words)),
+        );
+      }
+    });
+
+    test('startTime: Unix seconds from 2000 to 2100, else none', () {
+      expect(TikTokApi.startTime(1790532724), _started);
+      expect(TikTokApi.startTime('1790532724'), _started);
+      for (final value in [null, 0, -1, 'x', 946684799, 4102444801, 1790532724000]) {
+        expect(TikTokApi.startTime(value), isNull, reason: '$value');
+      }
+      final json = _liveJson();
+      _live(json)['startTime'] = 0;
+      expect(_room(jsonEncode(json), 'qvc').startedAt, isNull);
+      _live(json).remove('startTime');
+      expect(_room(jsonEncode(json), 'qvc').startedAt, isNull);
     });
 
     test('paidEvent may be missing, null or an empty list; paid_type 0 is free', () {
@@ -438,35 +545,53 @@ void main() {
       },
     );
 
-    test('a field of the wrong shape fails the answer (ApiChanged), as 3.x (schema, identity)', () {
+    test("the identity, the state and who may watch keep 3.x's checks (ApiChanged: schema, identity)", () {
       for (final edit in <void Function(Map<String, dynamic>)>[
         (json) => json['data'] = null,
         (json) => (json['data'] as Map).remove('user'),
         (json) => (json['data'] as Map).remove('liveRoom'),
-        (json) => (json['data'] as Map)['stats'] = 'x',
         (json) => _user(json)['uniqueId'] = 'cnn',
         (json) => _user(json)['uniqueId'] = 42,
         (json) => _user(json)['uniqueId'] = 'q v c',
-        (json) => _user(json)['nickname'] = ' ',
-        (json) => _user(json)['nickname'] = 7,
-        (json) => _user(json)['id'] = '123',
-        (json) => _user(json).remove('id'),
-        (json) => _user(json)['roomId'] = 'abc',
         (json) => _user(json)['secret'] = 'no',
-        (json) => _user(json)['verified'] = 1,
-        (json) => _user(json)['signature'] = 5,
-        (json) => _user(json)['secUid'] = false,
-        (json) => _live(json)['streamId'] = '12',
-        (json) => _live(json)['title'] = 3,
         (json) => _live(json)['paidEvent'] = 'free',
-        (json) => _live(json)['liveRoomStats'] = <Object?>[],
-        (json) => (_live(json)['liveRoomStats'] as Map)['userCount'] = -1,
-        (json) => (_live(json)['liveRoomStats'] as Map)['enterCount'] = 'many',
-        (json) => (json['data'] as Map)['stats'] = {'followerCount': -5},
       ]) {
         final json = _liveJson();
         edit(json);
         expect(() => _room(jsonEncode(json), 'qvc'), throwsA(isA<ApiChanged>()), reason: '$edit');
+      }
+    });
+
+    test('changed: a malformed field that only fills the card is left empty (22-6; 3.x failed the whole room)', () {
+      for (final (edit, check) in <(void Function(Map<String, dynamic>), void Function(LiveRoom))>[
+        ((json) => (json['data'] as Map)['stats'] = 'x', (room) => expect(room.followers, '')),
+        ((json) => (json['data'] as Map)['stats'] = {'followerCount': -5}, (room) => expect(room.followers, '')),
+        ((json) => _user(json)['nickname'] = ' ', (room) => expect((room.nick, room.hasNick), ('', false))),
+        ((json) => _user(json)['nickname'] = 7, (room) => expect(room.nick, '')),
+        ((json) => _user(json)['id'] = '123', (room) => expect(room.userId, '')),
+        ((json) => _user(json).remove('id'), (room) => expect(_data(room).userId, '')),
+        ((json) => _user(json)['roomId'] = 'abc', (room) => expect(_data(room).liveRoomId, '')),
+        ((json) => _user(json)['verified'] = 1, (room) => expect(room.nick, 'QVC, Inc')),
+        ((json) => _user(json)['signature'] = 5, (room) => expect(room.introduction, '')),
+        ((json) => _user(json)['secUid'] = false, (room) => expect(_data(room).secUid, '')),
+        ((json) => _live(json)['streamId'] = '12', (room) => expect(_data(room).streamId, '')),
+        ((json) => _live(json)['title'] = 3, (room) => expect(room.title, 'QVC, Inc')),
+        ((json) => _live(json)['liveRoomStats'] = <Object?>[], (room) => expect(room.onlineViewers, '')),
+        (
+          (json) => (_live(json)['liveRoomStats'] as Map)['userCount'] = -1,
+          (room) => expect((room.onlineViewers, room.totalViewers), ('', '9492')),
+        ),
+        (
+          (json) => (_live(json)['liveRoomStats'] as Map)['enterCount'] = 'many',
+          (room) => expect((room.onlineViewers, room.totalViewers), ('203', '')),
+        ),
+      ]) {
+        final json = _liveJson();
+        edit(json);
+        final room = _room(jsonEncode(json), 'qvc');
+        expect((room.roomId, room.liveStatus), ('qvc', LiveStatus.live), reason: '$edit');
+        expect(_data(room).streams, hasLength(7), reason: '$edit');
+        check(room);
       }
     });
 
@@ -561,7 +686,7 @@ void main() {
   });
 
   group("streams (3.x's reading of both containers)", () {
-    test('both containers are read, merged by codec, tier and protocol; ao is left out; each URL once', () {
+    test('both containers are read, merged by codec and tier (22-2); ao is left out; each URL once', () {
       final streams = _streams(
         _withStreams(
           _container({
@@ -573,19 +698,99 @@ void main() {
             'ao': _tier(flv: '$_cdn/a.flv?only_audio=1'),
           }),
           _container({
-            'HD': _tier(flv: '$_cdn/b_hd.flv', sdk: {'VCodec': 'h264', 'vbitrate': 1800000}),
+            'HD': _tier(flv: '$_cdn/b_hd.flv', hls: '$_cdn/a_hd.m3u8', sdk: {'VCodec': 'h264', 'vbitrate': 1800000}),
             'sd': _tier(flv: '$_cdn/a_sd.flv'),
           }),
         ),
       );
-      expect(streams.map((stream) => stream.id), ['h264:hd:flv', 'h264:hd:hls', 'h265:sd:flv']);
+      expect(streams.map((stream) => stream.id), ['h264:hd', 'h265:sd']);
       final hd = streams.first;
-      expect(hd.urls.map((url) => '$url'), ['$_cdn/a_hd.flv', '$_cdn/b_hd.flv']);
+      expect(hd.flvUrls.map((url) => '$url'), ['$_cdn/a_hd.flv', '$_cdn/b_hd.flv']);
+      expect(hd.hlsUrls.map((url) => '$url'), ['$_cdn/a_hd.m3u8']);
+      expect(hd.urls, [...hd.flvUrls, ...hd.hlsUrls]);
       expect((hd.resolution, hd.bitrate), ('720x1280', 1800000), reason: 'filled from the second container');
       expect(streams.last.codec, 'h265', reason: 'hevcStreamData without VCodec is H.265');
+      final data = _data(_room(_withStreams(_container({'hd': _tier(flv: '$_cdn/a.flv', hls: '$_cdn/b.flv')})), 'qvc'));
+      final lines = TikTokApi.resolution(data, TikTokApi.qualities(data).single).lines;
+      expect(lines.map((line) => line.lineId), ['flv', 'hls']);
+      final twice = _data(
+        _room(
+          _withStreams(
+            _container({'hd': _tier(flv: '$_cdn/a.flv')}),
+            _container({
+              'hd': _tier(flv: '$_cdn/b.flv', sdk: {'VCodec': 'avc'}),
+            }),
+          ),
+          'qvc',
+        ),
+      );
+      expect(TikTokApi.resolution(twice, TikTokApi.qualities(twice).single).lines.map((line) => line.lineId), [
+        'flv',
+        'flv#2',
+      ]);
     });
 
-    test("codec names: 3.x's (avc, hevc, h264, h265, any case, v_codec) and bytevc1; anything else fails", () {
+    test("22-4: the site's names from options.qualities, the source as 原画, H.265 marked; fallbacks", () {
+      Map<String, dynamic> named(Map<String, Object?> tiers, List<Object?> qualities) {
+        final container = _container(tiers);
+        ((container['pull_data'] as Map)['options'] as Map)['qualities'] = qualities;
+        return container;
+      }
+
+      final body = _withStreams(
+        named(
+          {
+            'hd': _tier(flv: '$_cdn/1.flv', sdk: {'VCodec': 'h264', 'resolution': '720x1280'}),
+          },
+          [
+            {'sdk_key': 'hd', 'name': 'HD 720'},
+          ],
+        ),
+        named(
+          {
+            'origin': _tier(flv: '$_cdn/2.flv', sdk: {'VCodec': 'h265'}),
+            'hd': _tier(flv: '$_cdn/3.flv', sdk: {'resolution': '720x1280'}),
+            'uhd_60': _tier(flv: '$_cdn/4.flv', sdk: {'resolution': '1920x1080'}),
+            'sd': _tier(flv: '$_cdn/5.flv', sdk: {'resolution': '540p'}),
+            'auto': _tier(flv: '$_cdn/6.flv'),
+            'md': _tier(flv: '$_cdn/7.flv'),
+          },
+          [
+            {'sdk_key': 'origin', 'name': 'Original'},
+            {'sdk_key': 'HD', 'name': ' 720p '},
+            {'sdk_key': 'sd', 'name': ''},
+            {'sdk_key': 'md', 'name': 'x' * 33},
+            'bad',
+            {'sdk_key': 5, 'name': 'five'},
+          ],
+        ),
+      );
+      final qualities = TikTokApi.qualities(_data(_room(body, 'qvc')));
+      expect(
+        [for (final quality in qualities) (quality.quality, quality.id)],
+        [
+          ('HD 720', 'h264:hd'),
+          ('原画 · H.265', 'h265:origin'),
+          ('1080p60 · H.265', 'h265:uhd_60'),
+          ('720p · H.265', 'h265:hd'),
+          ('540p · H.265', 'h265:sd'),
+          ('自动 · H.265', 'h265:auto'),
+          ('MD · H.265', 'h265:md'),
+        ],
+      );
+      final twins = _withStreams(
+        _container({
+          'hd': _tier(flv: '$_cdn/1.flv', sdk: {'resolution': '720p'}),
+          'uhd': _tier(flv: '$_cdn/2.flv', sdk: {'resolution': '720x1280'}),
+        }),
+      );
+      expect(TikTokApi.qualities(_data(_room(twins, 'qvc'))).map((quality) => quality.quality), [
+        '720p (uhd)',
+        '720p (hd)',
+      ]);
+    });
+
+    test("codec names: 3.x's (avc, hevc, h264, h265, any case, v_codec) and bytevc1; any other loses its tier", () {
       for (final (sdk, codec) in [
         ({'VCodec': 'avc'}, 'h264'),
         ({'VCodec': 'HEVC'}, 'h265'),
@@ -601,29 +806,31 @@ void main() {
         {'VCodec': 'vp9'},
         {'VCodec': 264},
       ]) {
-        expect(
-          () => _streams(_withStreams(_container({'hd': _tier(flv: '$_cdn/x.flv', sdk: sdk)}))),
-          throwsA(isA<ApiChanged>()),
-          reason: '$sdk',
+        final data = _data(
+          _room(
+            _withStreams(_container({'hd': _tier(flv: '$_cdn/x.flv', sdk: sdk), 'sd': _tier(flv: '$_cdn/y.flv')})),
+            'qvc',
+          ),
         );
+        expect(data.streams.map((stream) => stream.id), ['h264:sd'], reason: '$sdk');
+        expect(data.skipped.single, contains('streamData.hd'));
       }
     });
 
-    test(
-      'resolutions 3.x accepted (720x1280, 720p) and blanks for others; unknown tiers are upper case, ranked 1000',
-      () {
-        final streams = _streams(
-          _withStreams(
-            _container({
-              'hd': _tier(flv: '$_cdn/hd.flv', sdk: {'resolution': '720p'}),
-              'md': _tier(hls: '$_cdn/md.m3u8', sdk: {'resolution': 'big'}),
-            }),
-          ),
-        );
-        expect(streams.map(TikTokApi.qualityName), ['高清 · 720p · H264 · FLV', 'MD · H264 · HLS']);
-        expect(streams.map(TikTokApi.qualitySort), [6120, 1110]);
-      },
-    );
+    test('resolutions 3.x accepted (720x1280, 720p) and blanks for others; unknown tiers rank 1000', () {
+      final streams = _streams(
+        _withStreams(
+          _container({
+            'hd': _tier(flv: '$_cdn/hd.flv', sdk: {'resolution': '720p'}),
+            'md': _tier(hls: '$_cdn/md.m3u8', sdk: {'resolution': 'big'}),
+            'ld': _tier(hls: '$_cdn/ld.m3u8', sdk: {'resolution': 360}),
+          }),
+        ),
+      );
+      expect(streams.map((stream) => stream.resolution), ['720p', '', '']);
+      expect(streams.map(TikTokApi.qualityName), ['720p', 'MD', '流畅']);
+      expect(streams.map(TikTokApi.qualitySort), [6100, 1100, 4100]);
+    });
 
     test("URLs must be https on a trusted host without fragment or spaces (3.x's rule, regional CDNs added)", () {
       for (final url in [
@@ -643,15 +850,18 @@ void main() {
         'https://user@pull.tiktokcdn.com/x.flv',
         'https://pull.tiktokcdn.com/x y.flv',
       ]) {
-        expect(
-          () => _streams(_withStreams(_container({'hd': _tier(flv: url)}))),
-          throwsA(isA<ApiChanged>()),
-          reason: url,
-        );
+        // Changed (the unified rule on bad data): only this line is lost.
+        final streams = _streams(_withStreams(_container({'hd': _tier(flv: url, hls: '$_cdn/hd.m3u8')})));
+        expect(streams.single.flvUrls, isEmpty, reason: url);
+        expect(streams.single.hlsUrls.single, Uri.parse('$_cdn/hd.m3u8'), reason: url);
+        final alone = _data(_room(_withStreams(_container({'hd': _tier(flv: url)})), 'qvc'));
+        expect(alone.streams, isEmpty, reason: url);
+        expect(alone.skipped.single, contains('streamData.hd.flv'), reason: url);
+        expect(TikTokApi.unplayable(alone), isA<ApiChanged>(), reason: url);
       }
     });
 
-    test('bad containers fail the answer; an empty stream_data or a missing container is skipped', () {
+    test('changed: a bad container or tier only loses itself; with nothing left, playing is ApiChanged', () {
       expect(_streams(_withStreams(null)), isEmpty);
       expect(
         _streams(
@@ -662,6 +872,9 @@ void main() {
         isEmpty,
       );
       final tooMany = {for (var index = 0; index < 33; index++) 't$index': _tier(flv: '$_cdn/$index.flv')};
+      final good = _container({
+        'hd': _tier(flv: '$_cdn/good.flv', sdk: {'VCodec': 'h265'}),
+      });
       for (final container in <Object?>[
         'x',
         {'pull_data': null},
@@ -676,6 +889,9 @@ void main() {
             'stream_data': jsonEncode({'data': 'x'}),
           },
         },
+        {
+          'pull_data': {'stream_data': 5},
+        },
         _container(tooMany),
         _container({'h-d': _tier(flv: '$_cdn/x.flv')}),
         _container({'hd': 'x'}),
@@ -684,28 +900,45 @@ void main() {
         }),
         _container({'hd': _tier(flv: '$_cdn/x.flv', sdk: 'not json')}),
         _container({
-          'hd': _tier(flv: '$_cdn/x.flv', sdk: {'vbitrate': -1}),
-        }),
-        _container({
           'hd': {
             'main': {'flv': 5},
           },
         }),
       ]) {
         final json = _liveJson();
-        _live(json)['streamData'] = container;
-        expect(() => _room(jsonEncode(json), 'qvc'), throwsA(isA<ApiChanged>()), reason: '$container');
+        _live(json)
+          ..['streamData'] = container
+          ..['hevcStreamData'] = good;
+        final data = _data(_room(jsonEncode(json), 'qvc'));
+        expect(data.streams.map((stream) => stream.id), ['h265:hd'], reason: '$container');
+        expect(data.skipped, hasLength(1), reason: '$container');
+        expect(TikTokApi.unplayable(data), isNull);
+        _live(json).remove('hevcStreamData');
+        final nothing = _data(_room(jsonEncode(json), 'qvc'));
+        expect(nothing.streams, isEmpty);
+        expect(TikTokApi.unplayable(nothing), isA<ApiChanged>(), reason: '$container');
       }
+      // 3.x's negative bitrate failed the room; it is only left out now.
+      final bitrate = _streams(
+        _withStreams(
+          _container({
+            'hd': _tier(flv: '$_cdn/x.flv', sdk: {'vbitrate': -1}),
+          }),
+        ),
+      );
+      expect(bitrate.single.bitrate, isNull);
     });
 
-    test('streams are not read without media, or when the LIVE is not live, even when they are broken (3.x)', () {
+    test('streams are not read without media, or when the LIVE is not live (3.x)', () {
       final json = _liveJson();
       _live(json)['streamData'] = _container({'hd': _tier(flv: 'http://evil.test/x.flv')});
+      _live(json).remove('hevcStreamData');
       final body = jsonEncode(json);
       expect(_room(body, 'qvc', media: false).liveStatus, LiveStatus.live);
+      expect(_data(_room(body, 'qvc')).skipped, isNotEmpty, reason: 'read at room entry');
       _live(json)['status'] = 4;
-      expect(_data(_room(jsonEncode(json), 'qvc')).streams, isEmpty);
-      expect(() => _room(body, 'qvc'), throwsA(isA<ApiChanged>()));
+      final offline = _data(_room(jsonEncode(json), 'qvc'));
+      expect([...offline.streams, ...offline.skipped], isEmpty);
     });
 
     test('live without a stream is StreamUnavailable to play (3.x refused the whole room)', () {

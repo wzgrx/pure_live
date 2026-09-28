@@ -1,0 +1,74 @@
+{
+  "errno": "0",
+  "timestamp": "1790629328000",
+  "data": {
+    "371": {
+      "nid": "17093274278477304017",
+      "category": "时事",
+      "title": "听！号声穿越90年——沿着红军足迹，弘扬伟大长征精神，书写更多的“新长征故事”",
+      "cover": "https://p2.bdstatic.com/liveUpload/pc_client_2e2b0b307db6074d449f358711a87ae9.jpeg",
+      "vertical_cover": "https://p2.bdstatic.com/liveUpload/pc_client_ea5449f110a66912c85cb32599b829b8.jpeg",
+      "description": "1934年10月至1936年10月，中国共产党领导红军，以非凡的智慧和大无畏的英雄气概，跨越滔滔急流、征服皑皑雪山、穿越茫茫草地、突破层层封锁，粉碎上百万敌军的围追堵截，走过二万五千里漫漫征途，完成了一次开创新局的伟大远征，创造了气吞山河的人间奇迹，打开了中国革命新局面。\n\n听，那是出发的号角\n听，那是冲锋的号角\n听，那是胜利的号角\n\n军号嘹亮 ，穿越时空。2026年是中国工农红军长征胜利90周年，长征沿线十五家省（自治区、直辖市）主流媒体开展联动直播《号声穿越90年》，沿着红军足迹，弘扬伟大长征精神，书写更多的“新长征故事”——\n\n回望峥嵘岁月，感悟赤诚信仰\n赓续红色血脉，凝聚奋进力量",
+      "status": "-1",
+      "topic": "22462449",
+      "url": "https://live.baidu.com/m/media/multipage/liveshow/index/mwdwyr?room_id=11586142356&source=",
+      "start_time": "1790643655",
+      "end_time": "1790652655",
+      "video_url": "",
+      "appointment_status": 0,
+      "appointment_number": 0,
+      "cmd": "baiduboxapp://v14/live/enterRoom?upgrade=0&params=%7B%22roomId%22%3A%2211586142356%22%2C%22screen%22%3A%221%22%2C%22source%22%3A%22%7B%5C%22livefrom%5C%22%3A%5C%22preview%5C%22%2C%5C%22livesource%5C%22%3A%5C%22preview%5C%22%2C%5C%22liveinvoke%5C%22%3A%5C%220%5C%22%7D%22%7D",
+      "gap": 1,
+      "topic_source": "zhiboyugao_sbox",
+      "is_login": 0,
+      "screen": "1",
+      "chat_mcast_id": "11586142356",
+      "host_mcast_id": "11586142358",
+      "reliable_mcast_id": "11586142359",
+      "countdown": 14328,
+      "source": "向东传媒",
+      "avatar": "https://avatar.bdstatic.com/it/u=2198437777,2624610511&fm=3012&app=3012&autime=1789606187&size=b200,200",
+      "follow_id": "1611381799184963",
+      "follow_type": "media",
+      "follows": "251",
+      "identification": "百度认证:向东传媒（贵州）有限公司官方账号",
+      "pa_uid": "17592328382559",
+      "uk": "W6egNwOMg9YzIy5hDOHz2w",
+      "follow": "0",
+      "real_fans_num": 1610,
+      "is_living": 0,
+      "living_h5": "",
+      "living_cmd": "",
+      "is_paying_user": 0,
+      "new_description": [],
+      "lecturer_list": [],
+      "has_reflow_bar": 1,
+      "host": {
+        "verified_title": "0"
+      },
+      "template_id": 0,
+      "template": "preview",
+      "user_info": {
+        "is_login": 0
+      },
+      "room_type": 0,
+      "visual_id": 0,
+      "has_recommend": 1,
+      "watch_video_duration": 5,
+      "slide_status": 1,
+      "share": {
+        "main_title": "【百度直播】听！号声穿越90年——沿着红军足迹，弘扬伟大长征精神，书写更多的“新长征故事”",
+        "sub_title": "9月29号  09:00开播",
+        "share_url": "https://live.baidu.com/m/media/multipage/liveshow/index/gdljpo?room_id=11586142356",
+        "cover": "https://avatar.bdstatic.com/it/u=2198437777,2624610511&fm=3012&app=3012&autime=1789606187&size=b200,200"
+      },
+      "background_url": "",
+      "ban_status": 0,
+      "emergency_controller": {
+        "stream_cut": 0,
+        "chat_disable": 0,
+        "share_disable": 0
+      }
+    }
+  }
+}

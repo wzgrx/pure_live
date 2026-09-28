@@ -1,0 +1,290 @@
+{
+  "errno": "0",
+  "timestamp": "1790629328000",
+  "data": {
+    "371": {
+      "request_id": "2465795029",
+      "error_code": "0",
+      "host": {
+        "fans": "105387",
+        "follows": "19",
+        "gender": "0",
+        "image": {
+          "image_33": "https://avatar.bdstatic.com/it/u=3463399246,1597483340&fm=3012&app=3012&autime=1790006409&size=b200,200",
+          "image_42": ""
+        },
+        "name": "玉福居翡翠",
+        "nick_name": "玉福居翡翠",
+        "app_id": "",
+        "is_anchor": "1",
+        "vip": "1",
+        "verified_title": "0",
+        "is_fans_anonymous": true,
+        "is_self": false,
+        "uk": "lMB7AFU3uqXzEWjqrUvrrg"
+      },
+      "video": {
+        "cover": {
+          "cover_100": "https://p2.bdstatic.com/liveUpload/bjh_client_6cb69a76c673c43f413870ca7c027feb.jpeg",
+          "vertical_cover": "https://p2.bdstatic.com/liveUpload/bjh_client_72c37fb543bf70629b57af27fff23176.jpeg"
+        },
+        "title": "山藏玉则草木润，人藏玉则万事兴",
+        "label": "矿区直达",
+        "screen": "0",
+        "live_hls_url_origin": "http://hls.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324.m3u8",
+        "live_flv_url_origin": "https://flv-live.bdstatic.com/live/stream_bduid_7029522182_11586291324.flv",
+        "live_hls_url": "http://hls.liveshow.bdstatic.com/live/stream_bduid_7029522182_11586291324-L3.m3u8",
+        "live_flv_url": "https://hls-live.bdstatic.com/live/stream_bduid_7029522182_11586291324-L3.flv?kabr_spts=-3000&logid=2465795029&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+        "play_hls": "",
+        "play_flv": "",
+        "avc_hls_url": "",
+        "msg_hls_url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11586291324.m3u8?authorization=xld-npek-r3/9q7742de14ct445a698351z24pf8t3m6/3698-16-38J96:41:23T/70333413/nfjr/8ll8m1e2nk292c494hpj11043npmwh8b2c24qy32213ab589lb06l6e71qtyih28",
+        "msg_hls_pull_internal_in_second": 5,
+        "url_list": [
+          {
+            "resolution": 720,
+            "description": "画质720p:",
+            "urls": [
+              {
+                "rtmp": "rtmp://rtmp.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L3",
+                "hls": "http://hls.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L3.m3u8",
+                "flv": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L3.flv"
+              },
+              {
+                "rtmp": "rtmp://rtmp2.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L3",
+                "hls": "http://hls2.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L3/playlist.m3u8",
+                "flv": "http://flv2.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L3.flv"
+              }
+            ]
+          },
+          {
+            "resolution": 480,
+            "description": "画质480p:",
+            "urls": [
+              {
+                "rtmp": "rtmp://rtmp.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L4",
+                "hls": "http://hls.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L4.m3u8",
+                "flv": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L4.flv"
+              },
+              {
+                "rtmp": "rtmp://rtmp2.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L4",
+                "hls": "http://hls2.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L4/playlist.m3u8",
+                "flv": "http://flv2.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L4.flv"
+              }
+            ]
+          }
+        ],
+        "description": "矿区直达的满色翡翠竟然只要这个价！",
+        "url_clarity_list": [],
+        "play_url": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L3.flv?kabr_spts=-3000&logid=2465795029&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+        "avc_url": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-L3.flv?kabr_spts=-3000&logid=2465795029&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+        "hevc_url": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324_wz_hevc.flv?kabr_spts=-3000&logid=2465795029&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+        "kabr_spts": -1800,
+        "flv_avc_high": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_7029522182_11586291324-enhance-LV1080.flv?logid=2465795029&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+        "stream": 1
+      },
+      "feedbacks": "10357",
+      "user_feedback": "0",
+      "location": "未知地区",
+      "status": "0",
+      "share_url": "https://live.baidu.com/m/media/multipage/liveshow/index/flmi?room_id=11586291324",
+      "warning": "官方提醒：欢迎来到直播间！我们提倡绿色文明直播，禁止未成年人直播或充值消费。如直播间内出现反动、违法违规、色情低俗、吸烟酗酒、网络乞讨等内容，经举报或巡查发现将严肃处理。如主播在直播过程中以推广服务，交友等方式诱导打赏、私下交易，请谨慎判断，以防人身或财产损失。",
+      "online_users": "1135",
+      "real_online_users": "1140",
+      "online_user_list": [
+        {
+          "uid": 3075526104,
+          "avatar": "uniph://fllx.qnggq.uzk/cbg/kwffwhbx/notk/vgtr.7.41175mf9.zFlFqzni3SksNrTCGvc6DM.cno?pvks=4309&vysss_anngfnpx_emmo=0241",
+          "name": "观众1",
+          "nick_name": "观众1",
+          "gender": "0",
+          "rank": 1,
+          "score": 309
+        },
+        {
+          "uid": 5793311124,
+          "avatar": "ytgvk://vaop.xbdax.dyq/lxw/ayvimham/bruc/zdtv.0.69vv28k.vWtpjulb8UfmLC-IpJc0dk.dgw?jdqk=2234&sqeox_wlqpccry_hxsm=1626",
+          "name": "观众2",
+          "nick_name": "观众2",
+          "gender": "2",
+          "rank": 2,
+          "score": 308
+        },
+        {
+          "uid": 6356027976,
+          "avatar": "lhtal://uvum.mtbwx.idd/klm/crztxpjc/kjqo/esxa.3.x4v94780.MRRlyVbrMjg8tehEL6Epsl.lhk?cmud=90971&xuinn_sgnytpvp_bidt=77554",
+          "name": "观众3",
+          "nick_name": "观众3",
+          "gender": "2",
+          "rank": 3,
+          "score": 308
+        },
+        {
+          "uid": 6430149722,
+          "avatar": "nghkf://txdp.jljkh.fsh/xar/ziaxbbze/qctb/seqz.8.94018767.-56BmwXQ_errShYWxWpBaM.gru?dodx=75191&pfghu_adjfooye_wfge=55580",
+          "name": "观众4",
+          "nick_name": "观众4",
+          "gender": "1",
+          "rank": 4,
+          "score": 308
+        },
+        {
+          "uid": 1460229951,
+          "avatar": "tegsm://qowu.jkbsn.pce/xki/syzjoqco/zieq/vtwf.9.a65g2n37.Budj8ivov4rgT3YEW70cZE.pbt?zgae=3017&mvjfd_gfnxscap_eiyr=6994",
+          "name": "观众5",
+          "nick_name": "观众5",
+          "gender": "1",
+          "rank": 5,
+          "score": 307
+        },
+        {
+          "uid": 4474796095,
+          "avatar": "ghuwc://ptfz.beqse.yut/csq/jjmjezvq/djco/irsk.1.43420h23.lvZ3gz_KufGnTrCMwFYEqb.qyw?clap=2311&tpfyp_pbzrbzxh_qsja=9731",
+          "name": "观众6",
+          "nick_name": "观众6",
+          "gender": "2",
+          "rank": 6,
+          "score": 305
+        },
+        {
+          "uid": 9254369682,
+          "avatar": "fqicx://tklk.uzcga.gow/qsq/jnglslsi/dija/tvve.4.pd63c8.B537Swj1LwHXCjFh0nYXdF.gun?mhiu=8403&hrdpn_ktamsshc_fvio=3513",
+          "name": "观众7",
+          "nick_name": "观众7",
+          "gender": "2",
+          "rank": 7,
+          "score": 0
+        },
+        {
+          "uid": 3053971513,
+          "avatar": "axgdj://kpcq.ylggn.ijf/oix/rjiwgjji/ayba/vbqx.4.j3eb029q.WoUvWSTFJpeY0dGBDNOUEZ.smf?nxkd=5770&krlcb_uuluvqan_mvqw=3712",
+          "name": "观众8",
+          "nick_name": "观众8",
+          "gender": "1",
+          "rank": 8,
+          "score": 0
+        },
+        {
+          "uid": 1210266709,
+          "avatar": "tvdyf://jsaz.obfqn.ltl/hbp/ftywyoph/fqbu/mebp.6.4r2174.IrIyu1HzKPmqzR9E_-CJEo.okf?vegr=9570&zeymv_fmdwzlyn_iyrp=8782",
+          "name": "观众9",
+          "nick_name": "观众9",
+          "gender": "1",
+          "rank": 9,
+          "score": 0
+        },
+        {
+          "uid": 6876562479,
+          "avatar": "khqya://ayjf.qosyi.ypu/lla/mcoxhtsw/urlf/kokc.8.374152j3.xA5bv7s6qzTbNrvWSfyoDk.nvb?koqx=6984&ppsvh_jnwutpzy_okly=9586",
+          "name": "观众10",
+          "nick_name": "观众10",
+          "gender": "1",
+          "rank": 10,
+          "score": 0
+        }
+      ],
+      "is_admin": "0",
+      "role": "0",
+      "role_name": "",
+      "role_display_name": "",
+      "chat_mcast_id": "11586291324",
+      "host_mcast_id": "11586291325",
+      "reliable_mcast_id": "11586291326",
+      "has_host_room": "0",
+      "has_chat_room": "1",
+      "has_recommend": 1,
+      "enable_robot": "0",
+      "show_host": "1",
+      "has_feedbacks": "1",
+      "has_userlist": "0",
+      "has_comment": "1",
+      "has_video": "1",
+      "ext_params": "{\"ak\":\"bjh_client\",\"create_from_liveshow\":1,\"follow_type\":\"media\",\"source\":\"bjh\"}",
+      "stick_msgs": "",
+      "authorities": null,
+      "chat_msg_hls_url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11586291324.m3u8?authorization=vwl-qhmb-f3/7m8031ze15uz339o979463i50yd2q6h8/8664-19-68N21:46:93T/23458682/dsor/3lb2a1m3hm541a909zyf47765kagfd5w8e78oj91075el638ht16t9q35hsaxd26",
+      "host_msg_hls_url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11586291325.m3u8?authorization=kkt-pxyk-l8/7h7083wk27wb763r013738v68sy5g2k4/7157-54-56F29:36:89D/34789273/auwz/s214e8y075u129sbj98r4g3td2r48095tofe84v322jweer9n84jh433m0f533g1",
+      "reliable_msg_hls_url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11586291326.m3u8?authorization=svv-tpfx-v8/5j3954et90tg337i849753l44td3q1t5/9394-45-62I62:42:32F/41322524/nnxv/8d708503av005tx6b1vaz697uhy988343la4z831b326i1g69qz65xqn7s309l06",
+      "msg_hls_pull_internal_in_second": "5",
+      "total_users_count": "1140",
+      "source": 1,
+      "caller_flag": "0",
+      "lss_account": 0,
+      "group_list": [
+        {
+          "group_ids": "8314255850,7171800648,4580542560,4637434371",
+          "group_type": 37
+        }
+      ],
+      "total_users": "0",
+      "room_template": "1",
+      "show_times": "0",
+      "replay_list": [],
+      "replay_list_whole": [],
+      "replay_list_clips": [],
+      "comment_block_ts": "5",
+      "video_block_ts": "1",
+      "has_pay_service": "0",
+      "pay_service_type": "0",
+      "watch_free_duration_second": "0",
+      "has_sales_service": "1",
+      "create_time": 1790608084,
+      "has_speech_connect": "1",
+      "speech_connect": null,
+      "has_reflow_bar": 1,
+      "has_mission_activity": 1,
+      "mission_activity_version": 1,
+      "room_switch_info": "{\"descriptionTab\":1,\"hasChatScript\":1}",
+      "ad_place": {
+        "h5_ad_status": "",
+        "h5_compulsory_display": "",
+        "h5_image": "",
+        "h5_skip": "",
+        "h5_position": 0,
+        "h5_skip_type": 0,
+        "h5_screen": 0,
+        "h5_title": ""
+      },
+      "is_forbidden_url": 0,
+      "is_clubhouse": 0,
+      "template_id": 2,
+      "nid": "16998826543191049520",
+      "category": "珠宝文玩",
+      "star_id": "0",
+      "cmd": "",
+      "follow_id": "1858388220762900",
+      "follow_type": "media",
+      "follow": "0",
+      "isLogin": false,
+      "users": {
+        "nick_name": null,
+        "avatar": null
+      },
+      "real_fans_num": 105387,
+      "template": "live",
+      "screen": "0",
+      "use_new_version": 1,
+      "show_im_tags": 1,
+      "user_info": {
+        "is_login": 0
+      },
+      "room_type": 0,
+      "visual_id": 0,
+      "watch_video_duration": 5,
+      "slide_status": 1,
+      "share": {
+        "main_title": "【百度直播】山藏玉则草木润，人藏玉则万事兴",
+        "sub_title": "直播正在进行，邀请你速来观看",
+        "share_url": "https://live.baidu.com/m/media/multipage/liveshow/index/rrhn?room_id=11586291324",
+        "cover": "https://avatar.bdstatic.com/it/u=3463399246,1597483340&fm=3012&app=3012&autime=1790006409&size=b200,200"
+      },
+      "background_url": "",
+      "ban_status": 0,
+      "emergency_controller": {
+        "stream_cut": 0,
+        "chat_disable": 0,
+        "share_disable": 0
+      }
+    }
+  }
+}

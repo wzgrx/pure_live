@@ -1,0 +1,51 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "group": "live",
+    "business_id": 0,
+    "refresh_row_factor": 0.125,
+    "refresh_rate": 100,
+    "max_delay": 5000,
+    "token": "S0RtsY4FjBNjvoa-XqBsNNafzc2lV4Lt03xPeJoZkta2NjNJDbhaZn8X215pvWboDUz1gXuH6fexd-Hm0j_GGqiaysltHmH24E4Neq7KYt0Fth3Cgg0yn08EbrKjMXkdOkK38x_0Fkspief9GX7pvCvddXkWgJb5NRscaBQz4brb7IZ05YpyzYyb-YLwrsZbasa9ev8grAAUUOAMHl3BYgKQvKZcmTwQZcPQgRH_z_eLErCWzm0O8bpa",
+    "host_list": [
+      {
+        "host": "zj-cn-live-comet.chat.bilibili.com",
+        "port": 2243,
+        "wss_port": 2245,
+        "ws_port": 2244
+      },
+      {
+        "host": "zj-cn-live-comet.chat.bilibili.com",
+        "port": 2243,
+        "wss_port": 2245,
+        "ws_port": 2244
+      },
+      {
+        "host": "zj-cn-live-comet.chat.bilibili.com",
+        "port": 2243,
+        "wss_port": 2245,
+        "ws_port": 2244
+      },
+      {
+        "host": "bd-sz-live-comet-08.chat.bilibili.com",
+        "port": 2243,
+        "wss_port": 2245,
+        "ws_port": 2244
+      },
+      {
+        "host": "bd-gz-live-comet-05.chat.bilibili.com",
+        "port": 2243,
+        "wss_port": 2245,
+        "ws_port": 2244
+      },
+      {
+        "host": "broadcastlv.chat.bilibili.com",
+        "port": 2243,
+        "wss_port": 2245,
+        "ws_port": 2244
+      }
+    ]
+  }
+}

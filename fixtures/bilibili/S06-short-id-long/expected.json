@@ -1,0 +1,28 @@
+{
+  "generator": "BiliBiliSite.parseRoomInfoResponse + BiliBiliSite.getRoomDetailForRefresh",
+  "value": {
+    "parseRoomInfoResponse.room_info.room_id": 7734200,
+    "getRoomDetailForRefresh": {
+      "roomId": "7734200",
+      "title": "【预告】10月15号全球总决赛入围赛",
+      "nick": "哔哩哔哩英雄联盟赛事",
+      "avatar": "https://i2.hdslb.com/bfs/face/544c89e68f2b1f12ffcbb8b3c062a3328e8692d9.jpg@100w.jpg",
+      "cover": "https://i0.hdslb.com/bfs/live/562ed713b5c050fb86310d87f790efc9d772bb8b.jpg",
+      "area": "游戏赛事",
+      "watching": "159349",
+      "audienceMetricType": "popularity",
+      "popularity": "159349",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "bilibili",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "https://live.bilibili.com/7734200"
+    }
+  }
+}

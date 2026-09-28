@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "platform": "bilibili",
+  "case": "S13-live",
+  "room": "bilibili:5050",
+  "danmakuKeys": {
+    "roomId": "5050"
+  },
+  "capturedAt": "2026-09-27T14:38:10.989833Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://broadcastlv.chat.bilibili.com/sub",
+      "headers": {
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+        "origin": "https://live.bilibili.com",
+        "referer": "https://live.bilibili.com/5050",
+        "cookie": "<redacted>"
+      }
+    }
+  ],
+  "frames": 166,
+  "raw": {
+    "sha256": "50ca8428879b53dc9a4d9d6adf5b527622a28ab8a4d954d2a3860be44eb7b261",
+    "length": 138269
+  },
+  "scrubbed": [
+    {
+      "where": "$.buvid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.key",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.pb",
+      "rule": "dropped"
+    },
+    {
+      "where": "$.info[2][0,1]",
+      "rule": "person"
+    },
+    {
+      "where": "$.info[0][7]",
+      "rule": "secret"
+    },
+    {
+      "where": "$.dm_v2",
+      "rule": "dropped"
+    },
+    {
+      "where": "$.info[*][*].extra(json).user_hash",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info[*][*].extra(json).reply_uname",
+      "rule": "person"
+    },
+    {
+      "where": "$.info[*][*].user.base.face",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info[*][*].user.base.name",
+      "rule": "person"
+    },
+    {
+      "where": "$.info[*][*].user.base.origin_info.face",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info[*][*].user.base.origin_info.name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.face",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.uinfo.uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.uinfo.base.name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.uinfo.base.face",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.uinfo.base.origin_info.face",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.uinfo.base.origin_info.name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.uname",
+      "rule": "person"
+    },
+    {
+      "where": "handshake.cookie",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli danmaku --record (schema 1)"
+}

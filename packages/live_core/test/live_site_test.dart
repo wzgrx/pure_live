@@ -41,7 +41,7 @@ final class _CapableSite extends _PlainSite
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
     calls.add('resolve');
-    return const LivePlayUrlResolution(urls: ['https://c.test/1.flv', 'https://c.test/1.flv'], appliedQualityData: 250);
+    return LivePlayUrlResolution(urls: const ['https://c.test/1.flv', 'https://c.test/1.flv'], appliedQualityData: 250);
   }
 
   @override
@@ -50,7 +50,7 @@ final class _CapableSite extends _PlainSite
     required LivePlayQuality quality,
   }) async {
     calls.add('recover');
-    return const LivePlayUrlResolution(urls: ['https://fresh.test/1.flv']);
+    return LivePlayUrlResolution(urls: const ['https://fresh.test/1.flv']);
   }
 
   @override
@@ -104,14 +104,14 @@ void main() {
       final unknown = resolveAppliedPlayQuality(
         qualities: const [_hd],
         requested: _hd,
-        resolution: const LivePlayUrlResolution(urls: ['u'], appliedQualityData: 9999),
+        resolution: LivePlayUrlResolution(urls: const ['u'], appliedQualityData: 9999),
       );
       expect(unknown.quality, '高清');
       expect(unknown.isPlaybackUnconfirmed, isTrue);
       final missing = resolveAppliedPlayQuality(
         qualities: const [_hd],
         requested: _hd,
-        resolution: const LivePlayUrlResolution(urls: ['u'], qualityUnconfirmed: true),
+        resolution: LivePlayUrlResolution(urls: const ['u'], qualityUnconfirmed: true),
       );
       expect(missing.isPlaybackUnconfirmed, isTrue);
       expect(_hd.withPlaybackUnconfirmed(unconfirmed: false), same(_hd));

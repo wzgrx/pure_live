@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "platform": "bilibili",
+  "sample": "S06-risk352",
+  "capturedAt": "2026-09-27T09:52:41.602976Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=42062",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://live.bilibili.com/",
+      "Cookie": "buvid3=7S6N4277-Y83E-N439-9534-DWSC8ILC9LS757378zgwtu;buvid4=4985UP9F-Y0I6-34PO-A024-0S00Y6TMI45818225-052506412-5GLgijOjMBM1y6n13YW3YX==;"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-cache-webcdn": "BYPASS from blzone01",
+      "connection": "keep-alive",
+      "x-bili-gaia-vvoucher": "voucher_d6cbc86c-ea75-4a25-abc9-c51d7b61bf13",
+      "cache-control": "no-cache",
+      "date": "Sun, 27 Sep 2026 09:52:42 GMT",
+      "vary": "Accept-Encoding,Origin,Accept",
+      "content-length": "39",
+      "x-ticket-status": "1",
+      "x-rid-result": "2",
+      "content-type": "application/json; charset=utf-8",
+      "bili-status-code": "-352",
+      "expires": "Sun, 27 Sep 2026 09:52:41 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "16f4584808bcd233bea877ac105153ffb85997ff7f1418006aa36f6c72ef2cbc",
+    "length": 39
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie:buvid3",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:buvid4",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

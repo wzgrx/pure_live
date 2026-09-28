@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "platform": "bilibili",
+  "sample": "S15-poll-86038",
+  "capturedAt": "2026-09-27T09:58:08.195206Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://passport.bilibili.com/x/passport-login/web/qrcode/poll?qrcode_key=530d778524b7332180b28c7b08225f7c",
+    "headers": {}
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-cache-webcdn": "BYPASS from blzone01",
+      "x-bili-trace-id": "43f23783896dc8c90746f92f0a6ab8e8",
+      "connection": "keep-alive",
+      "cache-control": "no-cache",
+      "date": "Sun, 27 Sep 2026 09:58:08 GMT",
+      "content-length": "128",
+      "content-type": "application/json; charset=utf-8",
+      "bili-status-code": "0",
+      "cpu_usage": "84",
+      "bili-trace-id": "0746f92f0a6ab8e8",
+      "expires": "Sun, 27 Sep 2026 09:58:07 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "f021a8d7106adb485986221d442ee28fb9382689a2c8b5a2db7d7f93e070b2f7",
+    "length": 128
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "url:qrcode_key",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

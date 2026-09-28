@@ -6,6 +6,7 @@ import 'package:live_core/src/live_area.dart';
 import 'package:live_core/src/live_danmaku.dart';
 import 'package:live_core/src/live_message.dart';
 import 'package:live_core/src/live_room.dart';
+import 'package:live_core/src/play_line.dart';
 import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
 
@@ -67,19 +68,27 @@ abstract class LiveSite {
 /// [appliedQualityData] to the server's stable quality id.
 @immutable
 final class LivePlayUrlResolution {
-  /// URLs, with [appliedQualityData] when the platform confirmed a quality.
-  const new({required this.urls, this.appliedQualityData, this.qualityUnconfirmed = false})
-    : sourceQueryPolicies = const {},
+  /// Plain URLs (lines without metadata), with [appliedQualityData] when the
+  /// platform confirmed a quality.
+  new({required List<String> urls, this.appliedQualityData, this.qualityUnconfirmed = false})
+    : lines = List.unmodifiable([for (final url in urls) LivePlayLine(url)]),
+      sourceQueryPolicies = const {},
+      inputRecipe = null;
+
+  /// Lines that describe themselves (headers, format, lease).
+  new lines(List<LivePlayLine> lines, {this.appliedQualityData, this.qualityUnconfirmed = false})
+    : lines = List.unmodifiable(lines),
+      sourceQueryPolicies = const {},
       inputRecipe = null;
 
   /// A source without an exportable URL (see [LiveInputRecipe]).
   const new owned({required LiveInputRecipe input, this.appliedQualityData, this.qualityUnconfirmed = false})
     : inputRecipe = input,
-      urls = const [],
+      lines = const [],
       sourceQueryPolicies = const {};
 
   const new _({
-    required this.urls,
+    required this.lines,
     required this.sourceQueryPolicies,
     this.appliedQualityData,
     this.qualityUnconfirmed = false,
@@ -92,26 +101,39 @@ final class LivePlayUrlResolution {
     required Map<String, HlsSourceQueryPolicy> sourceQueryPolicies,
     Object? appliedQualityData,
     bool qualityUnconfirmed = false,
+  }) => LivePlayUrlResolution._validated(
+    [for (final url in urls) LivePlayLine(url)],
+    sourceQueryPolicies,
+    appliedQualityData: appliedQualityData,
+    qualityUnconfirmed: qualityUnconfirmed,
+  );
+
+  factory _validated(
+    List<LivePlayLine> lines,
+    Map<String, HlsSourceQueryPolicy> sourceQueryPolicies, {
+    Object? appliedQualityData,
+    bool qualityUnconfirmed = false,
   }) {
-    final normalized = normalizeResolvedPlayUrls(urls);
+    final normalized = normalizePlayLines(lines);
+    final urls = {for (final line in normalized) line.url};
     final policies = <String, HlsSourceQueryPolicy>{};
     for (final MapEntry(:key, :value) in sourceQueryPolicies.entries) {
       final uri = Uri.tryParse(key);
-      if (!normalized.contains(key) || uri == null || !value.matchesSource(uri)) {
+      if (!urls.contains(key) || uri == null || !value.matchesSource(uri)) {
         throw const FormatException('Source query policy does not match resolved URLs');
       }
       policies[key] = value;
     }
     return LivePlayUrlResolution._(
-      urls: normalized,
+      lines: normalized,
       sourceQueryPolicies: Map<String, HlsSourceQueryPolicy>.unmodifiable(policies),
       appliedQualityData: appliedQualityData,
       qualityUnconfirmed: qualityUnconfirmed,
     );
   }
 
-  /// Stream URLs, one per line.
-  final List<String> urls;
+  /// Lines in the platform's order.
+  final List<LivePlayLine> lines;
 
   /// The source when it has no plain URL.
   final LiveInputRecipe? inputRecipe;
@@ -125,8 +147,11 @@ final class LivePlayUrlResolution {
   /// The adapter expected a confirmation but the answer had none.
   final bool qualityUnconfirmed;
 
+  /// Stream URLs, one per line.
+  List<String> get urls => [for (final line in lines) line.url];
+
   /// Number of lines.
-  int get lineCount => inputRecipe == null ? urls.length : 1;
+  int get lineCount => inputRecipe == null ? lines.length : 1;
 
   /// Whether there is anything to play.
   bool get hasSources => lineCount > 0;
@@ -134,9 +159,9 @@ final class LivePlayUrlResolution {
   /// This resolution with blank and duplicate URLs removed.
   LivePlayUrlResolution normalized() => inputRecipe != null
       ? this
-      : LivePlayUrlResolution.withSourcePolicies(
-          urls: urls,
-          sourceQueryPolicies: sourceQueryPolicies,
+      : LivePlayUrlResolution._validated(
+          lines,
+          sourceQueryPolicies,
           appliedQualityData: appliedQualityData,
           qualityUnconfirmed: qualityUnconfirmed,
         );
@@ -157,6 +182,27 @@ LivePlayQuality resolveAppliedPlayQuality({
   return (matched ?? requested).withPlaybackUnconfirmed(
     unconfirmed: resolution.qualityUnconfirmed || (appliedId != null && matched == null),
   );
+}
+
+/// [lines] with trimmed URLs, without blank or repeated URLs (the first
+/// line of a URL wins), in the platform's order.
+List<LivePlayLine> normalizePlayLines(Iterable<LivePlayLine> lines) {
+  final seen = <String>{};
+  return List.unmodifiable([
+    for (final line in lines)
+      if (line.url.trim() case final url when url.isNotEmpty && seen.add(url))
+        if (url == line.url)
+          line
+        else
+          LivePlayLine(
+            url,
+            headers: line.headers,
+            format: line.format,
+            codec: line.codec,
+            lineId: line.lineId,
+            lease: line.lease,
+          ),
+  ]);
 }
 
 /// [urls] trimmed, without blanks and duplicates, in the platform's order.

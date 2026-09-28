@@ -1,0 +1,568 @@
+{
+  "schema": 1,
+  "platform": "bilibili",
+  "sample": "S07-hevc-qn10000",
+  "capturedAt": "2026-09-27T09:53:29.272739Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?protocol=0,1&format=0,1,2&platform=web&ptype=8&dolby=5&panorama=1&mask=0&no_playurl=0&room_id=42062&codec=0,1&qn=10000",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://live.bilibili.com/",
+      "Cookie": "buvid3=Q8F67U4X-71JB-12X0-R219-0043PD0O0KX155146ebqff;buvid4=487Y7UDV-127E-86B1-9Z5A-207582A1WCW528814-301181366-4VUwllAvALF0q1v16AS7EH==;"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-bili-trace-id": "54268f3602df55e152eb155e5a6ab8e7",
+      "cache-control": "no-cache",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 09:53:29 GMT",
+      "vary": "Accept-Encoding,Origin,Accept",
+      "content-encoding": "gzip",
+      "content-type": "application/json; charset=utf-8",
+      "bili-trace-id": "52eb155e5a6ab8e7",
+      "x-cache-webcdn": "BYPASS from blzone01",
+      "x-ticket-status": "1",
+      "x-rid-result": "2",
+      "bili-status-code": "0",
+      "cpu_usage": "41",
+      "expires": "Sun, 27 Sep 2026 09:53:28 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "0be16e658246c01e7daf7bd6b3569e3a451a5aa78c846135ecf515c6cd4110ab",
+    "length": 18118
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie:buvid3",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:buvid4",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[0].extra:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[0].extra:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[0].extra:upsig",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[0].extra:site",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[0].extra:mid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[0].extra:isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[0].extra:rg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[0].extra:pv",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[0].extra:ld",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[0].extra:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[0].extra:zoneid_l",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[1].extra:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[1].extra:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[1].extra:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[1].extra:site",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[1].extra:mid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[1].extra:isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[1].extra:rg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[1].extra:pv",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[1].extra:ld",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[0].url_info[1].extra:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[0].extra:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[0].extra:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[0].extra:upsig",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[0].extra:site",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[0].extra:mid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[0].extra:isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[0].extra:rg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[0].extra:pv",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[0].extra:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[0].extra:ld",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[0].extra:zoneid_l",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[1].extra:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[1].extra:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[1].extra:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[1].extra:site",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[1].extra:mid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[1].extra:isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[1].extra:rg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[1].extra:pv",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[1].extra:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[0].format[0].codec[1].url_info[1].extra:ld",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[0].extra:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[0].extra:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[0].extra:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[0].extra:site",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[0].extra:mid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[0].extra:isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[0].extra:rg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[0].extra:pv",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[0].extra:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[0].extra:ld",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[1].extra:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[1].extra:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[1].extra:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[1].extra:site",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[1].extra:mid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[1].extra:isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[1].extra:rg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[1].extra:pv",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[1].extra:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[0].url_info[1].extra:ld",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[0].extra:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[0].extra:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[0].extra:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[0].extra:site",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[0].extra:mid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[0].extra:isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[0].extra:rg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[0].extra:pv",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[0].extra:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[0].extra:ld",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[1].extra:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[1].extra:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[1].extra:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[1].extra:site",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[1].extra:mid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[1].extra:isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[1].extra:rg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[1].extra:pv",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[1].extra:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[0].codec[1].url_info[1].extra:ld",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[0].extra:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[0].extra:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[0].extra:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[0].extra:site",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[0].extra:mid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[0].extra:isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[0].extra:rg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[0].extra:pv",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[0].extra:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[0].extra:ld",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[0].extra:flvsk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[0].extra:zoneid_l",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[1].extra:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[1].extra:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[1].extra:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[1].extra:site",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[1].extra:mid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[1].extra:isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[1].extra:rg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[1].extra:pv",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[1].extra:ld",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[1].extra:flvsk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[0].url_info[1].extra:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[0].extra:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[0].extra:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[0].extra:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[0].extra:site",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[0].extra:mid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[0].extra:isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[0].extra:rg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[0].extra:pv",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[0].extra:flvsk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[0].extra:ld",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[0].extra:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[0].extra:zoneid_l",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[1].extra:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[1].extra:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[1].extra:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[1].extra:site",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[1].extra:mid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[1].extra:isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[1].extra:rg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[1].extra:pv",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[1].extra:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[1].extra:flvsk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].codec[1].url_info[1].extra:ld",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.playurl_info.playurl.stream[1].format[1].master_url:mid",
+      "rule": "person"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -1,0 +1,9 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "url": "https://account.bilibili.com/h5/account-h5/auth/scan-web?navhide=1&callback=close&qrcode_key=22bbde1ac11a41f5ab2767c2e543acd3&from=",
+    "qrcode_key": "22bbde1ac11a41f5ab2767c2e543acd3"
+  }
+}

@@ -1,0 +1,375 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "room_id": 7734200,
+    "short_id": 6,
+    "uid": 50329118,
+    "is_hidden": false,
+    "is_locked": false,
+    "is_portrait": false,
+    "live_status": 1,
+    "hidden_till": 0,
+    "lock_till": 0,
+    "encrypted": false,
+    "pwd_verified": true,
+    "live_time": 1788762159,
+    "room_shield": 1,
+    "all_special_types": [
+      19,
+      50
+    ],
+    "playurl_info": {
+      "conf_json": "{\"cdn_rate\":10000,\"report_interval_sec\":150}",
+      "playurl": {
+        "cid": 7734200,
+        "g_qn_desc": [
+          {
+            "qn": 30000,
+            "desc": "杜比",
+            "hdr_desc": "",
+            "attr_desc": null,
+            "hdr_type": 0,
+            "media_base_desc": null,
+            "eotf": 0
+          },
+          {
+            "qn": 20000,
+            "desc": "4K",
+            "hdr_desc": "",
+            "attr_desc": null,
+            "hdr_type": 0,
+            "media_base_desc": null,
+            "eotf": 0
+          },
+          {
+            "qn": 15000,
+            "desc": "2K",
+            "hdr_desc": "",
+            "attr_desc": null,
+            "hdr_type": 0,
+            "media_base_desc": null,
+            "eotf": 0
+          },
+          {
+            "qn": 10000,
+            "desc": "原画",
+            "hdr_desc": "",
+            "attr_desc": null,
+            "hdr_type": 0,
+            "media_base_desc": {
+              "detail_desc": {
+                "desc": "1080P 原画",
+                "tag": [
+                  "高帧率"
+                ]
+              },
+              "brief_desc": {
+                "desc": "1080P",
+                "badge": "原画"
+              }
+            },
+            "eotf": 0
+          },
+          {
+            "qn": 400,
+            "desc": "蓝光",
+            "hdr_desc": "",
+            "attr_desc": null,
+            "hdr_type": 0,
+            "media_base_desc": {
+              "detail_desc": {
+                "desc": "1080P 蓝光"
+              },
+              "brief_desc": {
+                "desc": "1080P"
+              }
+            },
+            "eotf": 0
+          },
+          {
+            "qn": 250,
+            "desc": "超清",
+            "hdr_desc": "",
+            "attr_desc": null,
+            "hdr_type": 0,
+            "media_base_desc": {
+              "detail_desc": {
+                "desc": "720P 超清"
+              },
+              "brief_desc": {
+                "desc": "720P"
+              }
+            },
+            "eotf": 0
+          },
+          {
+            "qn": 150,
+            "desc": "高清",
+            "hdr_desc": "",
+            "attr_desc": null,
+            "hdr_type": 0,
+            "media_base_desc": {
+              "detail_desc": {
+                "desc": "480P 高清"
+              },
+              "brief_desc": {
+                "desc": "480P"
+              }
+            },
+            "eotf": 0
+          },
+          {
+            "qn": 80,
+            "desc": "流畅",
+            "hdr_desc": "",
+            "attr_desc": null,
+            "hdr_type": 0,
+            "media_base_desc": null,
+            "eotf": 0
+          }
+        ],
+        "stream": [
+          {
+            "protocol_name": "http_stream",
+            "format": [
+              {
+                "format_name": "flv",
+                "codec": [
+                  {
+                    "codec_name": "avc",
+                    "current_qn": 250,
+                    "accept_qn": [
+                      10000,
+                      400,
+                      250,
+                      150
+                    ],
+                    "base_url": "/live-bvc/611450/live_50329118_9516950_2500.flv?",
+                    "url_info": [
+                      {
+                        "host": "https://d1--cn-gotcha04.bilivideo.com",
+                        "extra": "expires=1790506412&len=0&oi=6410721610&pt=web&qn=250&trid=04675ea721af075dd52020cbe644dd3fa3a7&bmt=2&sigparams=cdn,expires,len,oi,pt,qn,trid,bmt&cdn=cn-gotcha04&sign=677f60f53c4022137fcdce2707202452&site=e6e1c6f29347343d9b8a489ba02b7430&free_type=0&mid=7&sche=ban&trace=16&isp=ng&rg=AywhdQzcf&pv=Smojyiw&expected_qn=250&strategy_types=0,1&hot_cdn=852364&source=puv3_onetier&strategy_type=0&media_type=0&score=100&sl=10&deploy_env=prod&codec=0&pp=&sk=ba5d3e877cc77f847b251dd1c94894ef&strategy_ids=25,122&strategy_id=25&origin_bitrate=1049&suffix=2500&ld=cykk&hdr_type=0&info_source=hot_cache&p2p_type=1&vd=bc&src=puv3&order=1",
+                        "stream_ttl": 0
+                      },
+                      {
+                        "host": "https://d1--cn-gotcha04b.bilivideo.com",
+                        "extra": "expires=1790506412&len=0&oi=6410721610&pt=web&qn=250&trid=04675ea721af075dd52020cbe644dd3fa3a7&bmt=2&sigparams=cdn,expires,len,oi,pt,qn,trid,bmt&cdn=cn-gotcha04&sign=677f60f53c4022137fcdce2707202452&site=e6e1c6f29347343d9b8a489ba02b7430&free_type=0&mid=7&sche=ban&trace=16&isp=ng&rg=AywhdQzcf&pv=Smojyiw&expected_qn=250&strategy_types=0,1&hot_cdn=852364&source=puv3_onetier&strategy_type=0&media_type=0&score=100&sl=10&deploy_env=prod&codec=0&pp=&sk=ba5d3e877cc77f847b251dd1c94894ef&strategy_ids=25,122&strategy_id=25&origin_bitrate=1049&suffix=2500&ld=cykk&hdr_type=0&info_source=hot_cache&p2p_type=1&vd=bc&src=puv3&order=2",
+                        "stream_ttl": 0
+                      }
+                    ],
+                    "hdr_qn": null,
+                    "dolby_type": 0,
+                    "attr_name": "",
+                    "hdr_type": 0,
+                    "drm": false,
+                    "drm_key_systems": null,
+                    "video_codecs": {
+                      "base": "avc1.64001f",
+                      "ext": [
+                        ""
+                      ]
+                    },
+                    "audio_codecs": {
+                      "base": "mp4a.40.2",
+                      "ext": [
+                        ""
+                      ]
+                    },
+                    "session": "live_50329118_9516950",
+                    "is_pushing": true,
+                    "stream_resource_req": null,
+                    "video_color_info": {
+                      "colorspace": "bt709",
+                      "metadata_types": [
+                        "none"
+                      ]
+                    },
+                    "media_info": {
+                      "height": 720,
+                      "width": 1280,
+                      "realtime_avg_bw": 125546
+                    }
+                  }
+                ],
+                "master_url": ""
+              }
+            ]
+          },
+          {
+            "protocol_name": "http_hls",
+            "format": [
+              {
+                "format_name": "ts",
+                "codec": [
+                  {
+                    "codec_name": "avc",
+                    "current_qn": 250,
+                    "accept_qn": [
+                      10000,
+                      400,
+                      250,
+                      150
+                    ],
+                    "base_url": "/live-bvc/929869/live_50329118_9516950_2500.m3u8?",
+                    "url_info": [
+                      {
+                        "host": "https://d1--cn-gotcha104.bilivideo.com",
+                        "extra": "expires=1790506412&len=0&oi=6410721610&pt=web&qn=250&trid=75582ea841fc183fd69357fde035cd3da5b8&bmt=2&sigparams=cdn,expires,len,oi,pt,qn,trid,bmt&cdn=cn-gotcha104&sign=6f0438e09ad4d54f4730f1c61db97124&site=e6e1c6f29347343d9b8a489ba02b7430&free_type=0&mid=7&sche=ban&trace=16&isp=ng&rg=AywhdQzcf&pv=Smojyiw&info_source=hot_cache&suffix=2500&ld=cykk&sk=ba5d3e877cc77f847b251dd1c94894ef&strategy_type=0&strategy_types=0,1&origin_bitrate=1049&codec=0&media_type=0&score=100&pp=&hdr_type=0&p2p_type=1&sl=10&strategy_id=25&hot_cdn=852364&strategy_ids=25,122&source=puv3_onetier&deploy_env=prod&expected_qn=250&vd=bc&src=puv3&order=1",
+                        "stream_ttl": 0
+                      },
+                      {
+                        "host": "https://d1--cn-gotcha104b.bilivideo.com",
+                        "extra": "expires=1790506412&len=0&oi=6410721610&pt=web&qn=250&trid=75582ea841fc183fd69357fde035cd3da5b8&bmt=2&sigparams=cdn,expires,len,oi,pt,qn,trid,bmt&cdn=cn-gotcha104&sign=6f0438e09ad4d54f4730f1c61db97124&site=e6e1c6f29347343d9b8a489ba02b7430&free_type=0&mid=7&sche=ban&trace=16&isp=ng&rg=AywhdQzcf&pv=Smojyiw&info_source=hot_cache&suffix=2500&ld=cykk&sk=ba5d3e877cc77f847b251dd1c94894ef&strategy_type=0&strategy_types=0,1&origin_bitrate=1049&codec=0&media_type=0&score=100&pp=&hdr_type=0&p2p_type=1&sl=10&strategy_id=25&hot_cdn=852364&strategy_ids=25,122&source=puv3_onetier&deploy_env=prod&expected_qn=250&vd=bc&src=puv3&order=2",
+                        "stream_ttl": 0
+                      }
+                    ],
+                    "hdr_qn": null,
+                    "dolby_type": 0,
+                    "attr_name": "",
+                    "hdr_type": 0,
+                    "drm": false,
+                    "drm_key_systems": null,
+                    "video_codecs": {
+                      "base": "avc1.64001f",
+                      "ext": [
+                        ""
+                      ]
+                    },
+                    "audio_codecs": {
+                      "base": "mp4a.40.2",
+                      "ext": [
+                        ""
+                      ]
+                    },
+                    "session": "live_50329118_9516950",
+                    "is_pushing": true,
+                    "stream_resource_req": null,
+                    "video_color_info": {
+                      "colorspace": "bt709",
+                      "metadata_types": [
+                        "none"
+                      ]
+                    },
+                    "media_info": {
+                      "height": 720,
+                      "width": 1280,
+                      "realtime_avg_bw": 125546
+                    }
+                  }
+                ],
+                "master_url": ""
+              },
+              {
+                "format_name": "fmp4",
+                "codec": [
+                  {
+                    "codec_name": "avc",
+                    "current_qn": 250,
+                    "accept_qn": [
+                      10000,
+                      400,
+                      250,
+                      150
+                    ],
+                    "base_url": "/live-bvc/206672/live_50329118_9516950_2500/index.m3u8?",
+                    "url_info": [
+                      {
+                        "host": "https://d1--cn-gotcha209.bilivideo.com",
+                        "extra": "expires=1790506412&len=0&oi=6410721610&pt=web&qn=250&trid=43279ad863cb553ec82253eff691cc6ee3b1&bmt=2&sigparams=cdn,expires,len,oi,pt,qn,trid,bmt&cdn=cn-gotcha209&sign=1a7574df22f45934d95a60e6126a5540&site=e6e1c6f29347343d9b8a489ba02b7430&free_type=0&mid=7&sche=ban&bvchls=1&trace=16&isp=ng&rg=AywhdQzcf&pv=Smojyiw&score=100&expected_qn=250&strategy_ids=25,122&sk=fdaa05dd76898c2d60cecaa6e207203d&strategy_type=0&media_type=0&sl=10&flvsk=ba5d3e877cc77f847b251dd1c94894ef&source=puv3_onetier&p2p_type=1&hot_cdn=852364&ld=cykk&suffix=2500&deploy_env=prod&origin_bitrate=1049&codec=0&pp=&hdr_type=0&info_source=hot_cache&strategy_types=0,1&strategy_id=25&vd=bc&src=puv3&order=1",
+                        "stream_ttl": 0
+                      },
+                      {
+                        "host": "https://d1--cn-gotcha209b.bilivideo.com",
+                        "extra": "expires=1790506412&len=0&oi=6410721610&pt=web&qn=250&trid=43279ad863cb553ec82253eff691cc6ee3b1&bmt=2&sigparams=cdn,expires,len,oi,pt,qn,trid,bmt&cdn=cn-gotcha209&sign=1a7574df22f45934d95a60e6126a5540&site=e6e1c6f29347343d9b8a489ba02b7430&free_type=0&mid=7&sche=ban&bvchls=1&trace=16&isp=ng&rg=AywhdQzcf&pv=Smojyiw&score=100&expected_qn=250&strategy_ids=25,122&sk=fdaa05dd76898c2d60cecaa6e207203d&strategy_type=0&media_type=0&sl=10&flvsk=ba5d3e877cc77f847b251dd1c94894ef&source=puv3_onetier&p2p_type=1&hot_cdn=852364&ld=cykk&suffix=2500&deploy_env=prod&origin_bitrate=1049&codec=0&pp=&hdr_type=0&info_source=hot_cache&strategy_types=0,1&strategy_id=25&vd=bc&src=puv3&order=2",
+                        "stream_ttl": 0
+                      }
+                    ],
+                    "hdr_qn": null,
+                    "dolby_type": 0,
+                    "attr_name": "",
+                    "hdr_type": 0,
+                    "drm": false,
+                    "drm_key_systems": null,
+                    "video_codecs": {
+                      "base": "avc1.64001f",
+                      "ext": [
+                        ""
+                      ]
+                    },
+                    "audio_codecs": {
+                      "base": "mp4a.40.2",
+                      "ext": [
+                        ""
+                      ]
+                    },
+                    "session": "live_50329118_9516950",
+                    "is_pushing": true,
+                    "stream_resource_req": null,
+                    "video_color_info": {
+                      "colorspace": "bt709",
+                      "metadata_types": [
+                        "none"
+                      ]
+                    },
+                    "media_info": {
+                      "height": 720,
+                      "width": 1280,
+                      "realtime_avg_bw": 125546
+                    }
+                  }
+                ],
+                "master_url": "https://api.live.bilibili.com/xlive/play-gateway/master/url?cid=7734200&mid=7&pt=web&p2p_type=1&net=0&free_type=0&build=0&feature=0&qn=250&drm_type=0&cam_id=0"
+              }
+            ]
+          }
+        ],
+        "p2p_data": {
+          "p2p": true,
+          "p2p_type": 1,
+          "m_p2p": false,
+          "m_servers": null
+        },
+        "dolby_qn": null,
+        "hot": true,
+        "hdr_metadata_degrade_desc": [
+          {
+            "type": "smpte_st2086",
+            "display_badge": "HDR"
+          },
+          {
+            "type": "t_uwa_005_1",
+            "display_badge": "HDR Vivid"
+          },
+          {
+            "type": "smpte_st2094_10",
+            "display_badge": "杜比视界"
+          },
+          {
+            "type": "smpte_st2094_40",
+            "display_badge": "HDR10+"
+          },
+          {
+            "type": "none",
+            "display_badge": "HDR"
+          }
+        ]
+      },
+      "expected_quality": {
+        "qn": 250,
+        "hdr_type": 0,
+        "eotf": 0
+      },
+      "qn_desc_more_ab": 1
+    },
+    "official_type": 0,
+    "official_room_id": 0,
+    "risk_with_delay": 0,
+    "multi_screen_info": "",
+    "pure_control_function": null,
+    "degraded_playurl": null,
+    "subtitle_cfg": null,
+    "relay_room_id": 0
+  }
+}

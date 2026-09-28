@@ -1,0 +1,1679 @@
+{
+  "generator": "SixRoomSite room calls, cold and after getDirectoryPage (with S05-page-live, S04-home) + SixRoomApi.room + parseRoomJson + mediaUri",
+  "value": {
+    "cold": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "SixRoomException.schema",
+          "message": "Six Rooms schema"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://v.6.cn/8838",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://v.6.cn/"
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "SixRoomException.schema",
+          "message": "Six Rooms schema"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://v.6.cn/8838",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://v.6.cn/"
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "throws": "SixRoomException.schema",
+          "message": "Six Rooms schema"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://v.6.cn/8838",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://v.6.cn/"
+            }
+          }
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "SixRoomException.schema",
+          "message": "Six Rooms schema"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://v.6.cn/8838",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://v.6.cn/"
+            }
+          }
+        ]
+      },
+      "getRoomDetail → streams": {
+        "throws": "SixRoomException.schema",
+        "message": "Six Rooms schema"
+      },
+      "getRoomDetailForRefresh → streams": {
+        "throws": "SixRoomException.schema",
+        "message": "Six Rooms schema"
+      }
+    },
+    "after the directory": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "title": "唯一恭贺乖总荣升大神",
+          "nick": "唯一恭贺乖总荣升大神",
+          "avatar": "https://vi1.6rooms.com/live/2023/11/27/03/1003v1701026023898195476.jpg",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "area": "歌区",
+          "watching": "23444",
+          "audienceMetricType": "popularity",
+          "popularity": "23444",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "425628",
+          "platform": "sixroom",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "六间房远端聊天尚待接入；大厅 count 保留为平台热度，不标记为唯一并发人数，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://v.6.cn",
+            "referer": "https://v.6.cn/8838",
+            "user-agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))"
+          },
+          "link": "https://v.6.cn/8838",
+          "data": {
+            "roomId": "8838",
+            "userId": "56182128",
+            "liveId": "222428847",
+            "nick": "唯一恭贺乖总荣升大神",
+            "title": "唯一恭贺乖总荣升大神",
+            "avatar": "https://vi1.6rooms.com/live/2023/11/27/03/1003v1701026023898195476.jpg",
+            "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+            "category": "歌区",
+            "popularity": 23444,
+            "followers": 425628,
+            "state": "live",
+            "variants": [
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "resolution": "1024x768",
+                "bitrate": 2652,
+                "urls": [
+                  "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+                ]
+              }
+            ]
+          }
+        },
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+            "headers": {
+              "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+              "Accept": "application/json,text/plain,*/*",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+            },
+            "form": {
+              "av": "3.1",
+              "encpass": "",
+              "logiuid": "",
+              "project": "v6iphone",
+              "rate": "1",
+              "rid": "",
+              "ruid": "56182128"
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "title": "唯一恭贺乖总荣升大神",
+          "nick": "唯一恭贺乖总荣升大神",
+          "avatar": "https://vi1.6rooms.com/live/2023/11/27/03/1003v1701026023898195476.jpg",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "area": "歌区",
+          "watching": "23444",
+          "audienceMetricType": "popularity",
+          "popularity": "23444",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "425628",
+          "platform": "sixroom",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "六间房远端聊天尚待接入；大厅 count 保留为平台热度，不标记为唯一并发人数，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://v.6.cn",
+            "referer": "https://v.6.cn/8838",
+            "user-agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))"
+          },
+          "link": "https://v.6.cn/8838"
+        },
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+            "headers": {
+              "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+              "Accept": "application/json,text/plain,*/*",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+            },
+            "form": {
+              "av": "3.1",
+              "encpass": "",
+              "logiuid": "",
+              "project": "v6iphone",
+              "rate": "1",
+              "rid": "",
+              "ruid": "56182128"
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "title": "唯一恭贺乖总荣升大神",
+          "nick": "唯一恭贺乖总荣升大神",
+          "avatar": "https://vi1.6rooms.com/live/2023/11/27/03/1003v1701026023898195476.jpg",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "area": "歌区",
+          "watching": "23444",
+          "audienceMetricType": "popularity",
+          "popularity": "23444",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "425628",
+          "platform": "sixroom",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "六间房远端聊天尚待接入；大厅 count 保留为平台热度，不标记为唯一并发人数，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://v.6.cn",
+            "referer": "https://v.6.cn/8838",
+            "user-agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))"
+          },
+          "link": "https://v.6.cn/8838",
+          "data": {
+            "roomId": "8838",
+            "userId": "56182128",
+            "liveId": "222428847",
+            "nick": "唯一恭贺乖总荣升大神",
+            "title": "唯一恭贺乖总荣升大神",
+            "avatar": "https://vi1.6rooms.com/live/2023/11/27/03/1003v1701026023898195476.jpg",
+            "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+            "category": "歌区",
+            "popularity": 23444,
+            "followers": 425628,
+            "state": "live",
+            "variants": [
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "resolution": "1024x768",
+                "bitrate": 2652,
+                "urls": [
+                  "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+                ]
+              }
+            ]
+          }
+        },
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+            "headers": {
+              "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+              "Accept": "application/json,text/plain,*/*",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+            },
+            "form": {
+              "av": "3.1",
+              "encpass": "",
+              "logiuid": "",
+              "project": "v6iphone",
+              "rate": "1",
+              "rid": "",
+              "ruid": "56182128"
+            }
+          }
+        ]
+      },
+      "getLiveStatus": {
+        "result": true,
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+            "headers": {
+              "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+              "Accept": "application/json,text/plain,*/*",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+            },
+            "form": {
+              "av": "3.1",
+              "encpass": "",
+              "logiuid": "",
+              "project": "v6iphone",
+              "rate": "1",
+              "rid": "",
+              "ruid": "56182128"
+            }
+          }
+        ]
+      },
+      "getRoomDetail → streams": {
+        "getPlayQualites": {
+          "result": [
+            {
+              "quality": "FLV 原始线路 · 1024x768 · 2652 kbps",
+              "id": "flv:source",
+              "sort": 2652,
+              "data": null
+            }
+          ],
+          "requests": []
+        },
+        "resolvePlayUrlsRaw": {
+          "result": {
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ],
+            "appliedQualityData": "flv:source"
+          },
+          "requests": []
+        },
+        "resolvePlayUrlsForRecoveryRaw": {
+          "result": {
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ],
+            "appliedQualityData": "flv:source"
+          },
+          "requests": [
+            {
+              "method": "POST",
+              "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+              "headers": {
+                "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+                "Accept": "application/json,text/plain,*/*",
+                "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+                "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+              },
+              "form": {
+                "av": "3.1",
+                "encpass": "",
+                "logiuid": "",
+                "project": "v6iphone",
+                "rate": "1",
+                "rid": "",
+                "ruid": "56182128"
+              }
+            }
+          ]
+        },
+        "getPlayUrls": {
+          "result": [
+            "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+          ],
+          "requests": []
+        },
+        "otherQuality": {
+          "result": {
+            "throws": "SixRoomException.mediaUnavailable",
+            "message": "Six Rooms mediaUnavailable"
+          },
+          "requests": []
+        }
+      },
+      "getRoomDetailForRefresh → streams": {
+        "getPlayQualites": {
+          "result": {
+            "throws": "SixRoomException.identity",
+            "message": "Six Rooms identity"
+          },
+          "requests": []
+        },
+        "resolvePlayUrlsRaw": {
+          "result": {
+            "throws": "SixRoomException.identity",
+            "message": "Six Rooms identity"
+          },
+          "requests": []
+        },
+        "resolvePlayUrlsForRecoveryRaw": {
+          "result": {
+            "throws": "SixRoomException.identity",
+            "message": "Six Rooms identity"
+          },
+          "requests": []
+        },
+        "getPlayUrls": {
+          "result": {
+            "throws": "SixRoomException.identity",
+            "message": "Six Rooms identity"
+          },
+          "requests": []
+        },
+        "otherQuality": {
+          "result": {
+            "throws": "SixRoomException.identity",
+            "message": "Six Rooms identity"
+          },
+          "requests": []
+        }
+      }
+    },
+    "knownUserId": {
+      "includeMedia true": {
+        "result": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "title": "唯一恭贺乖总荣升大神",
+          "nick": "唯一恭贺乖总荣升大神",
+          "avatar": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "area": "歌区",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "425628",
+          "platform": "sixroom",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "六间房远端聊天尚待接入；大厅 count 保留为平台热度，不标记为唯一并发人数，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://v.6.cn",
+            "referer": "https://v.6.cn/8838",
+            "user-agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))"
+          },
+          "link": "https://v.6.cn/8838",
+          "data": {
+            "roomId": "8838",
+            "userId": "56182128",
+            "liveId": "222428847",
+            "nick": "唯一恭贺乖总荣升大神",
+            "title": "唯一恭贺乖总荣升大神",
+            "avatar": "",
+            "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+            "category": "歌区",
+            "popularity": null,
+            "followers": 425628,
+            "state": "live",
+            "variants": [
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "resolution": "1024x768",
+                "bitrate": 2652,
+                "urls": [
+                  "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+                ]
+              }
+            ]
+          }
+        },
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+            "headers": {
+              "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+              "Accept": "application/json,text/plain,*/*",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+            },
+            "form": {
+              "av": "3.1",
+              "encpass": "",
+              "logiuid": "",
+              "project": "v6iphone",
+              "rate": "1",
+              "rid": "",
+              "ruid": "56182128"
+            }
+          }
+        ]
+      },
+      "includeMedia false": {
+        "result": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "title": "唯一恭贺乖总荣升大神",
+          "nick": "唯一恭贺乖总荣升大神",
+          "avatar": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "area": "歌区",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "425628",
+          "platform": "sixroom",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "六间房远端聊天尚待接入；大厅 count 保留为平台热度，不标记为唯一并发人数，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://v.6.cn",
+            "referer": "https://v.6.cn/8838",
+            "user-agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))"
+          },
+          "link": "https://v.6.cn/8838"
+        },
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+            "headers": {
+              "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+              "Accept": "application/json,text/plain,*/*",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+              "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+            },
+            "form": {
+              "av": "3.1",
+              "encpass": "",
+              "logiuid": "",
+              "project": "v6iphone",
+              "rate": "1",
+              "rid": "",
+              "ruid": "56182128"
+            }
+          }
+        ]
+      }
+    },
+    "knownUserId (bad)": {
+      "result": {
+        "throws": "SixRoomException.schema",
+        "message": "Six Rooms schema"
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://v.6.cn/8838",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+            "Referer": "https://v.6.cn/"
+          }
+        }
+      ]
+    },
+    "getRoomDetail(link)": {
+      "result": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "title": "唯一恭贺乖总荣升大神",
+        "nick": "唯一恭贺乖总荣升大神",
+        "avatar": "https://vi1.6rooms.com/live/2023/11/27/03/1003v1701026023898195476.jpg",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "area": "歌区",
+        "watching": "23444",
+        "audienceMetricType": "popularity",
+        "popularity": "23444",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "425628",
+        "platform": "sixroom",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "六间房远端聊天尚待接入；大厅 count 保留为平台热度，不标记为唯一并发人数，主播粉丝数单独展示。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://v.6.cn",
+          "referer": "https://v.6.cn/8838",
+          "user-agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))"
+        },
+        "link": "https://v.6.cn/8838",
+        "data": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "https://vi1.6rooms.com/live/2023/11/27/03/1003v1701026023898195476.jpg",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": 23444,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        }
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://v.6.cn/",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+            "Referer": "https://v.6.cn/"
+          }
+        },
+        {
+          "method": "POST",
+          "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+          "headers": {
+            "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+            "Accept": "application/json,text/plain,*/*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+            "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+          },
+          "form": {
+            "av": "3.1",
+            "encpass": "",
+            "logiuid": "",
+            "project": "v6iphone",
+            "rate": "1",
+            "rid": "",
+            "ruid": "56182128"
+          }
+        }
+      ]
+    },
+    "getRoomDetail(other platform)": {
+      "result": {
+        "throws": "SixRoomException.identity",
+        "message": "Six Rooms identity"
+      },
+      "requests": []
+    },
+    "getRoomDetail(not an id)": {
+      "result": {
+        "throws": "SixRoomException.identity",
+        "message": "Six Rooms identity"
+      },
+      "requests": []
+    },
+    "directory card after the room": {
+      "result": [
+        {
+          "roomId": "8838",
+          "userId": "56182128",
+          "title": "但行好事，莫问前程",
+          "nick": "唯一恭贺乖总荣升大神",
+          "avatar": "https://vi1.6rooms.com/live/2023/11/27/03/1003v1701026023898195476.jpg",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "area": "歌区",
+          "watching": "23444",
+          "audienceMetricType": "popularity",
+          "popularity": "23444",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "425628",
+          "platform": "sixroom",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "六间房远端聊天尚待接入；大厅 count 保留为平台热度，不标记为唯一并发人数，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://v.6.cn",
+            "referer": "https://v.6.cn/8838",
+            "user-agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))"
+          },
+          "link": "https://v.6.cn/8838"
+        }
+      ],
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://v.6.cn/",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+            "Referer": "https://v.6.cn/"
+          }
+        },
+        {
+          "method": "POST",
+          "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+          "headers": {
+            "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+            "Accept": "application/json,text/plain,*/*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+            "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+          },
+          "form": {
+            "av": "3.1",
+            "encpass": "",
+            "logiuid": "",
+            "project": "v6iphone",
+            "rate": "1",
+            "rid": "",
+            "ruid": "56182128"
+          }
+        },
+        {
+          "method": "GET",
+          "url": "https://v.6.cn/",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+            "Referer": "https://v.6.cn/"
+          }
+        }
+      ]
+    },
+    "parseRoomJson": {
+      "recorded": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "1024x768",
+            "bitrate": 2652,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ]
+          }
+        ]
+      },
+      "recorded (includeMedia false)": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": []
+      },
+      "other room asked": {
+        "throws": "SixRoomException.identity",
+        "message": "Six Rooms identity"
+      },
+      "other user asked": {
+        "throws": "SixRoomException.identity",
+        "message": "Six Rooms identity"
+      },
+      "link asked": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "1024x768",
+            "bitrate": 2652,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ]
+          }
+        ]
+      },
+      "bad user asked": {
+        "throws": "SixRoomException.identity",
+        "message": "Six Rooms identity"
+      },
+      "flag 402": {
+        "throws": "SixRoomException.access",
+        "message": "Six Rooms access"
+      },
+      "flag missing": {
+        "throws": "SixRoomException.access",
+        "message": "Six Rooms access"
+      },
+      "flag number": {
+        "throws": "SixRoomException.access",
+        "message": "Six Rooms access"
+      },
+      "no content": {
+        "throws": "SixRoomException.schema",
+        "message": "Six Rooms schema"
+      },
+      "no roominfo": {
+        "throws": "SixRoomException.schema",
+        "message": "Six Rooms schema"
+      },
+      "no liveinfo": {
+        "throws": "SixRoomException.schema",
+        "message": "Six Rooms schema"
+      },
+      "no roomParamInfo": {
+        "throws": "SixRoomException.schema",
+        "message": "Six Rooms schema"
+      },
+      "roominfo without id": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "1024x768",
+            "bitrate": 2652,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ]
+          }
+        ]
+      },
+      "roominfo of another room": {
+        "throws": "SixRoomException.identity",
+        "message": "Six Rooms identity"
+      },
+      "private (1)": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "restricted",
+        "variants": []
+      },
+      "private (\"1\")": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "restricted",
+        "variants": []
+      },
+      "private (true)": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "restricted",
+        "variants": []
+      },
+      "private (\"0\")": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "1024x768",
+            "bitrate": 2652,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ]
+          }
+        ]
+      },
+      "black screen": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "restricted",
+        "variants": []
+      },
+      "black screen not a map": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "1024x768",
+            "bitrate": 2652,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ]
+          }
+        ]
+      },
+      "no live id": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "offline",
+        "variants": []
+      },
+      "no stream name": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "offline",
+        "variants": []
+      },
+      "stream name of another user": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": []
+      },
+      "stream name -many": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "",
+            "bitrate": null,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847-many.flv"
+            ]
+          }
+        ]
+      },
+      "stream name with a path": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": []
+      },
+      "live id not digits": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "x222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": []
+      },
+      "no stream info": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "",
+            "bitrate": null,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ]
+          }
+        ]
+      },
+      "bitrate instead of videoBitrate": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "1024x768",
+            "bitrate": 2652,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ]
+          }
+        ]
+      },
+      "stream info in another lane": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "唯一恭贺乖总荣升大神",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "1024x768",
+            "bitrate": 2652,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ]
+          }
+        ]
+      },
+      "title": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "今晚 唱歌",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "1024x768",
+            "bitrate": 2652,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ]
+          }
+        ]
+      },
+      "userMood": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "唯一恭贺乖总荣升大神",
+        "title": "签名",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "1024x768",
+            "bitrate": 2652,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ]
+          }
+        ]
+      },
+      "no alias": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "Six Rooms",
+        "title": "Six Rooms",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "1024x768",
+            "bitrate": 2652,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ]
+          }
+        ]
+      },
+      "no alias, no title": {
+        "roomId": "8838",
+        "userId": "56182128",
+        "liveId": "222428847",
+        "nick": "Six Rooms",
+        "title": "Six Rooms",
+        "avatar": "",
+        "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+        "category": "歌区",
+        "popularity": null,
+        "followers": 425628,
+        "state": "live",
+        "variants": [
+          {
+            "id": "flv:source",
+            "protocol": "flv",
+            "resolution": "1024x768",
+            "bitrate": 2652,
+            "urls": [
+              "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+            ]
+          }
+        ]
+      },
+      "avatars": {
+        "headPicUrl https://vi1.6rooms.com/live/a.jpg": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "https://vi1.6rooms.com/live/a.jpg",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "headPicUrl http://vi1.6rooms.com/live/a.jpg": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "https://vi1.6rooms.com/live/a.jpg",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "headPicUrl //vi1.6rooms.com/live/a.jpg": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "https://vi1.6rooms.com/live/a.jpg",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "headPicUrl https://example.com/a.jpg": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "headPicUrl https://vi1.xiu123.cn/a.jpg": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "https://vi1.xiu123.cn/a.jpg",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "picuser https://vi1.6rooms.com/live/p.jpg": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "https://vi1.6rooms.com/live/p.jpg",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        }
+      },
+      "covers": {
+        "no spredPic": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_320",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "no spredPic, no pospic": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "only pic": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "https://vi0.6rooms.com/live/pic.jpg",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "no image": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        }
+      },
+      "category": {
+        "no anchor_area": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "neither": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "",
+          "popularity": null,
+          "followers": 425628,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        }
+      },
+      "fans_num": {
+        "1,234": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 1234,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "-1": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": null,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "3.9": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 3,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "null": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": null,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "x": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": null,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        },
+        "12": {
+          "roomId": "8838",
+          "userId": "56182128",
+          "liveId": "222428847",
+          "nick": "唯一恭贺乖总荣升大神",
+          "title": "唯一恭贺乖总荣升大神",
+          "avatar": "",
+          "cover": "https://vi0.6rooms.com/live/2025/08/02/02/1010v1754071470982187080.jpg?x-oss-process=style/poster_800",
+          "category": "歌区",
+          "popularity": null,
+          "followers": 12,
+          "state": "live",
+          "variants": [
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "resolution": "1024x768",
+              "bitrate": 2652,
+              "urls": [
+                "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv"
+              ]
+            }
+          ]
+        }
+      },
+      "not JSON": {
+        "throws": "SixRoomException.schema",
+        "message": "Six Rooms schema"
+      },
+      "a list": {
+        "throws": "SixRoomException.schema",
+        "message": "Six Rooms schema"
+      }
+    },
+    "mediaUri": {
+      "56182128 222428847 v56182128-222428847": "https://wlive.6rooms.com/httpflv/v56182128-222428847.flv",
+      "56182128 222428847 v56182128-222428847-many": "https://wlive.6rooms.com/httpflv/v56182128-222428847-many.flv",
+      "56182128 222428847 v99999999-222428847": null,
+      "56182128 222428847 v56182128-222428847-other": null,
+      "1 222428847 v1-222428847": null,
+      "56182128  v56182128-": null,
+      "56182128 222428847 v56182128-222428847.flv": null
+    }
+  }
+}

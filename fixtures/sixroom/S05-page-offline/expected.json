@@ -1,0 +1,10 @@
+{
+  "generator": "SixRoomApi.parseRoomUserIdHtml",
+  "value": {
+    "recorded": {
+      "throws": "SixRoomException.schema",
+      "message": "Six Rooms schema"
+    },
+    "roomid quoted (3.x format)": "63213382"
+  }
+}

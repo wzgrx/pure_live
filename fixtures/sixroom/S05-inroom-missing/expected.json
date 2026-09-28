@@ -1,0 +1,36 @@
+{
+  "generator": "SixRoomApi.room (knownUserId) + parseRoomJson",
+  "value": {
+    "room": {
+      "result": {
+        "throws": "SixRoomException.access",
+        "message": "Six Rooms access"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://v.6.cn/coop/mobile/index.php?padapi=coop-mobile-inroom.php",
+          "headers": {
+            "User-Agent": "ios/7.830 (ios 17.0; ; iPhone 15 (A2846/A3089/A3090/A3092))",
+            "Accept": "application/json,text/plain,*/*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+            "Referer": "https://ios.6.cn/?ver=8.0.3&build=4"
+          },
+          "form": {
+            "av": "3.1",
+            "encpass": "",
+            "logiuid": "",
+            "project": "v6iphone",
+            "rate": "1",
+            "rid": "",
+            "ruid": "99999999999"
+          }
+        }
+      ]
+    },
+    "parseRoomJson": {
+      "throws": "SixRoomException.access",
+      "message": "Six Rooms access"
+    }
+  }
+}

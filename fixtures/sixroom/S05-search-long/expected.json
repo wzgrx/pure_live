@@ -1,0 +1,9 @@
+{
+  "generator": "SixRoomApi.parseSearchHtml",
+  "value": {
+    "parseSearchHtml": {
+      "throws": "SixRoomException.access",
+      "message": "Six Rooms access"
+    }
+  }
+}

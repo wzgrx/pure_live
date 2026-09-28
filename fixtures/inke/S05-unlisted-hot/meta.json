@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "platform": "inke",
+  "sample": "S05-unlisted-hot",
+  "capturedAt": "2026-09-28T11:00:38.072448Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://webapi.busi.inke.cn/web/Live_hot_pc",
+    "headers": {
+      "Referer": "https://www.inke.cn/",
+      "Origin": "https://www.inke.cn",
+      "User-Agent": "Mozilla/5.0"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "openresty/1.9.7.4",
+      "date": "Mon, 28 Sep 2026 11:00:39 GMT",
+      "content-type": "text/html; charset=UTF-8",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "x-powered-by": "PHP/7.1.12",
+      "access-control-allow-origin": "https://www.inke.cn",
+      "access-control-allow-headers": "X-Requested-With",
+      "access-control-allow-methods": "GET,POST,OPTIONS",
+      "access-control-allow-credentials": "true",
+      "server-info": "ali-a-opd-proxy05.bj_2026-09-28-19:00:39:207",
+      "content-encoding": "gzip"
+    }
+  },
+  "raw": {
+    "sha256": "4cda060b081211e5195a6ab1234e77835d8f11cd86738a8e223123e74be349c8",
+    "length": 10166
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.list.recommend[0].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[0].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[1].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[1].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[2].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[2].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[3].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[3].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[4].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[4].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[5].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[5].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[6].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[6].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[7].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.recommend[7].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[0].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[0].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[1].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[1].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[2].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[2].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[3].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[3].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[4].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[4].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[5].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[5].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[6].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[6].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[7].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list.hot[7].stream_multi_addr:wsSecret",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.14 recorder (schema 1)"
+}

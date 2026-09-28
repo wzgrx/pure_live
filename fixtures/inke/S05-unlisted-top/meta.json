@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "platform": "inke",
+  "sample": "S05-unlisted-top",
+  "capturedAt": "2026-09-28T11:00:37.832298Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://webapi.busi.inke.cn/web/Live_top_pc",
+    "headers": {
+      "Referer": "https://www.inke.cn/",
+      "Origin": "https://www.inke.cn",
+      "User-Agent": "Mozilla/5.0"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "openresty/1.9.7.4",
+      "date": "Mon, 28 Sep 2026 11:00:38 GMT",
+      "content-type": "text/html; charset=UTF-8",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "x-powered-by": "PHP/7.1.12",
+      "set-cookie": "PHPSESSID=b310f2072bebbbeef34718990d5cb820; path=/",
+      "expires": "Thu, 19 Nov 1981 08:52:00 GMT",
+      "cache-control": "no-store, no-cache, must-revalidate",
+      "pragma": "no-cache",
+      "access-control-allow-origin": "https://www.inke.cn",
+      "access-control-allow-headers": "X-Requested-With",
+      "access-control-allow-methods": "GET,POST,OPTIONS",
+      "access-control-allow-credentials": "true",
+      "server-info": "ali-c-opd-proxy06.bj_2026-09-28-19:00:38:736",
+      "content-encoding": "gzip"
+    }
+  },
+  "raw": {
+    "sha256": "19363f0c0ddcc952b9de2840b551ca0a8c15027c6386f897bf54118becc12f1d",
+    "length": 3724
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:PHPSESSID",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list[0].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list[1].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list[2].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list[3].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list[4].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list[5].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list[6].stream_addr:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.list[7].stream_addr:wsSecret",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.14 recorder (schema 1)"
+}

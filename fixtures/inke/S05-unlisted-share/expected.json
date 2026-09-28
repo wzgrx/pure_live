@@ -1,0 +1,119 @@
+{
+  "generator": "InkeSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + searchRooms + getLiveStatus + externalRoomUrl + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw (with S05-unlisted-top, S05-unlisted-hot, S05-unlisted-channels)",
+  "value": {
+    "getRoomDetail": {
+      "result": {
+        "throws": "InkeException",
+        "message": "该房间仍在直播，但当前官网精选未提供已验证的公开播放地址，请稍后刷新。"
+      },
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=778920027",
+        "https://webapi.busi.inke.cn/web/Live_top_pc",
+        "https://webapi.busi.inke.cn/web/Live_hot_pc",
+        "https://webapi.busi.inke.cn/web/Live_channel_pc"
+      ]
+    },
+    "getRoomDetailForRefresh": {
+      "result": {
+        "roomId": "778920027",
+        "userId": "778920027",
+        "title": "璇璇",
+        "nick": "璇璇",
+        "avatar": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc5MDQ5NTQwNTk4MCM4NDIjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+        "cover": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc5MDQ5NTQwNTk4MCM4NDIjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "inke",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "isCatchUp": false,
+        "link": "https://www.inke.cn/liveroom/index.html?uid=778920027&id=1790588581683219"
+      },
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=778920027"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "throws": "InkeException",
+        "message": "该房间仍在直播，但当前官网精选未提供已验证的公开播放地址，请稍后刷新。"
+      },
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=778920027",
+        "https://webapi.busi.inke.cn/web/Live_top_pc",
+        "https://webapi.busi.inke.cn/web/Live_hot_pc",
+        "https://webapi.busi.inke.cn/web/Live_channel_pc"
+      ]
+    },
+    "searchRooms": {
+      "result": [
+        {
+          "roomId": "778920027",
+          "userId": "778920027",
+          "title": "璇璇",
+          "nick": "璇璇",
+          "avatar": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc5MDQ5NTQwNTk4MCM4NDIjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+          "cover": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc5MDQ5NTQwNTk4MCM4NDIjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "inke",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "isCatchUp": false,
+          "link": "https://www.inke.cn/liveroom/index.html?uid=778920027&id=1790588581683219"
+        }
+      ],
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=778920027"
+      ]
+    },
+    "searchRooms(link)": {
+      "result": [
+        {
+          "roomId": "778920027",
+          "userId": "778920027",
+          "title": "璇璇",
+          "nick": "璇璇",
+          "avatar": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc5MDQ5NTQwNTk4MCM4NDIjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+          "cover": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc5MDQ5NTQwNTk4MCM4NDIjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "inke",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "isCatchUp": false,
+          "link": "https://www.inke.cn/liveroom/index.html?uid=778920027&id=1790588581683219"
+        }
+      ],
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=778920027"
+      ]
+    },
+    "supportsSearchPaginationFor": false,
+    "getLiveStatus": {
+      "result": true,
+      "requests": [
+        "https://webapi.busi.inke.cn/web/live_share_pc?uid=778920027"
+      ]
+    },
+    "getPlayQualites": {
+      "throws": "InkeException",
+      "message": "该房间仍在直播，但当前官网精选未提供已验证的公开播放地址，请稍后刷新。"
+    }
+  }
+}

@@ -1,0 +1,1542 @@
+{
+  "data": {
+    "data": [
+      {
+        "id_str": "7690129480030980906",
+        "status": 2,
+        "status_str": "2",
+        "title": "人间美味大锅菜",
+        "user_count_str": "2000+",
+        "cover": {
+          "url_list": [
+            "https://p3-webcast-sign.douyinpic.com/webcast-cover/7620813030049565449~tplv-qz53dukwul-common-resize:0:0.image?biz_tag=app_6383_webcast&from=webcast.room.pack&l=2026092717524256ADD9A061D3AEC3A8B3&lk3s=39e7556e&s=enter_room&sc=webcast_cover&x-expires=1793094763&x-signature=q9zzmQ%2B5LDZJ1Zp%2Blrw60H%2FbRB8%3D",
+            "https://p11-webcast-sign.douyinpic.com/webcast-cover/7620813030049565449~tplv-qz53dukwul-common-resize:0:0.image?biz_tag=app_6383_webcast&from=webcast.room.pack&l=2026092717524256ADD9A061D3AEC3A8B3&lk3s=39e7556e&s=enter_room&sc=webcast_cover&x-expires=1793094763&x-signature=SARRC%2BNsTbeQQt8mr4OCBW9j8so%3D"
+          ]
+        },
+        "stream_url": {
+          "flv_pull_url": {
+            "FULL_HD1": "http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809_or4.flv?expire=1791107563&sign=94ce98c33bf7c52dd0a5d59735f18577&exp_hrchy=w1&major_anchor_level=common&arch_hrchy=w1&unique_id=qowymw-951708096174313729_254_scp_na4&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT",
+            "HD1": "http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809_Stage0T000hd.flv?expire=1791107563&sign=5191eb56164aff16d36e91550c173a78&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&unique_id=qclsme-665992578755616306_371_lak_Aobdw8Z254za&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT",
+            "SD1": "http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809_ld.flv?expire=1791107563&sign=cfa00aae053a025794ef2ad502f96953&major_anchor_level=common&arch_hrchy=w1&exp_hrchy=w1&unique_id=khljvj-951576424274069208_603_cfx_na&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT",
+            "SD2": "http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809_sd.flv?expire=1791107563&sign=2b6267097628106004ba0bb9a2bf54fa&exp_hrchy=w1&arch_hrchy=w1&major_anchor_level=common&unique_id=pkukdm-673827042241937363_168_nhn_fg&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT"
+          },
+          "default_resolution": "HD1",
+          "hls_pull_url_map": {
+            "FULL_HD1": "http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_or4.m3u8?expire=1791107563&sign=44ca3b7242c36cf820519cf105748562&major_anchor_level=common&arch_hrchy=w1&exp_hrchy=w1&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT",
+            "HD1": "http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_Stage0T000hd.m3u8?expire=1791107563&sign=208f54c474b22ea810d1ceac223abbd2&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT",
+            "SD1": "http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_ld.m3u8?expire=1791107563&sign=8f8206c3282be577de5216268cc21bd5&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT",
+            "SD2": "http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_sd.m3u8?expire=1791107563&sign=2ef6a68430d616ae4c4ddff9d75e7617&exp_hrchy=w1&arch_hrchy=w1&major_anchor_level=common&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT"
+          },
+          "hls_pull_url": "http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_or4.m3u8?expire=1791107563&sign=44ca3b7242c36cf820519cf105748562&major_anchor_level=common&arch_hrchy=w1&exp_hrchy=w1&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT",
+          "stream_orientation": 1,
+          "live_core_sdk_data": {
+            "pull_data": {
+              "options": {
+                "default_quality": {
+                  "name": "蓝光",
+                  "sdk_key": "origin",
+                  "v_codec": "264",
+                  "resolution": "1088x1920",
+                  "level": 4,
+                  "v_bit_rate": 0,
+                  "additional_content": "",
+                  "fps": 0,
+                  "disable": 0
+                },
+                "qualities": [
+                  {
+                    "name": "标清",
+                    "sdk_key": "ld",
+                    "v_codec": "264",
+                    "resolution": "480x847",
+                    "level": 1,
+                    "v_bit_rate": 1000000,
+                    "additional_content": "",
+                    "fps": 19,
+                    "disable": 0
+                  },
+                  {
+                    "name": "高清",
+                    "sdk_key": "sd",
+                    "v_codec": "264",
+                    "resolution": "540x952",
+                    "level": 2,
+                    "v_bit_rate": 1600000,
+                    "additional_content": "",
+                    "fps": 19,
+                    "disable": 0
+                  },
+                  {
+                    "name": "超清",
+                    "sdk_key": "hd",
+                    "v_codec": "264",
+                    "resolution": "720x1270",
+                    "level": 3,
+                    "v_bit_rate": 2000000,
+                    "additional_content": "",
+                    "fps": 19,
+                    "disable": 0
+                  },
+                  {
+                    "name": "蓝光",
+                    "sdk_key": "origin",
+                    "v_codec": "264",
+                    "resolution": "1088x1920",
+                    "level": 4,
+                    "v_bit_rate": 3774000,
+                    "additional_content": "",
+                    "fps": 19,
+                    "disable": 0
+                  }
+                ]
+              },
+              "stream_data": "{\"common\":{\"ts\":\"1790502763\",\"session_id\":\"037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"stream\":\"408388649177841809\",\"version\":0,\"rule_ids\":\"{\\\"ab_version_trace\\\":null,\\\"sched\\\":\\\"{\\\\\\\"result\\\\\\\":{\\\\\\\"hit\\\\\\\":\\\\\\\"default\\\\\\\",\\\\\\\"cdn\\\\\\\":191}}\\\"}\",\"common_trace\":\"{\\\"StrategyTrace\\\":{\\\"Neptune\\\":{\\\"PlayStream\\\":{\\\"ids\\\":null}}},\\\"VpaasFunctionIDS\\\":\\\"\\\",\\\"VpaasABOptionIDS\\\":\\\"\\\",\\\"BusinessType\\\":\\\"default_business\\\",\\\"SceneNames\\\":[\\\"ecom\\\"],\\\"SceneTags\\\":{\\\"ecom\\\":\\\"\\\"},\\\"BigeventAnchorLevel\\\":\\\"\\\",\\\"BizType\\\":\\\"ecom_room\\\"}\",\"secret_key\":\"5404g506-39p9-19543zl3264prv7365gs8833p1n7p45k3tz8j4020817547w40lr4365wn8z73069483193sd04m9kd97kv748gb58747243ih\",\"app_id\":\"100100\",\"major_anchor_level\":\"common\",\"mode\":\"Normal\",\"lines\":{\"main\":\"line_191\"},\"p2p_params\":{\"PcdnIsolationConfig\":{\"FsV4Domain\":\"signal-t1-v4-az2.rtcxyz.com\",\"FsHttpsDomain\":\"vcl-brain-http.ndcppx.com\",\"StunV4Domain\":\"vc-mirror.ndcpp.com\",\"HoleV4Domain\":\"signal-t3-v4-az2.rtcxyz.com\",\"HoleV6Domain\":\"signal-t3-v6-az2.rtcxyz.com\",\"IsolationName\":\"isolation2\",\"FsV6Domain\":\"signal-t1-v6-az2.rtcxyz.com\",\"StunV6Domain\":\"vc-mirror-v6.ndcpp.com\"}},\"label\":{\"peer_labels\":{},\"labels\":{}},\"stream_data_content_encoding\":\"default\",\"common_sdk_params\":{\"main\":\"{}\"},\"stream_name\":\"stream-408388649177841809\",\"main_push_id\":145,\"backup_push_id\":0},\"data\":{\"origin\":{\"main\":{\"flv\":\"http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809_or4.flv?expire=1791107563&sign=94ce98c33bf7c52dd0a5d59735f18577&exp_hrchy=w1&major_anchor_level=common&arch_hrchy=w1&unique_id=qowymw-951708096174313729_254_scp_na4&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"hls\":\"http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_or4.m3u8?expire=1791107563&sign=44ca3b7242c36cf820519cf105748562&major_anchor_level=common&arch_hrchy=w1&exp_hrchy=w1&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"cmaf\":\"\",\"dash\":\"\",\"lls\":\"http://pull-lls-l11.douyincdn.com/stage/stream-408388649177841809_or4.sdp?expire=1791107563&sign=cbe3224b2bb13e4244586b7e35d3c7f3&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&unique_id=pholvd-883174946615962371_380_xxj_og1&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"tsl\":\"\",\"tile\":\"\",\"http_ts\":\"\",\"ll_hls\":\"\",\"sdk_params\":\"{\\\"VCodec\\\":\\\"h264\\\",\\\"vbitrate\\\":3774000,\\\"resolution\\\":\\\"1088x1920\\\",\\\"gop\\\":2,\\\"drType\\\":\\\"sdr\\\",\\\"fps\\\":19}\",\"enableEncryption\":false,\"templateRealTimeInfo\":{\"name\":\"or4\",\"bitrateKbps\":3550,\"updatedTime\":1790502752027}}},\"ld\":{\"main\":{\"flv\":\"http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809_ld.flv?expire=1791107563&sign=cfa00aae053a025794ef2ad502f96953&major_anchor_level=common&arch_hrchy=w1&exp_hrchy=w1&unique_id=khljvj-951576424274069208_603_cfx_na&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"hls\":\"http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_ld.m3u8?expire=1791107563&sign=8f8206c3282be577de5216268cc21bd5&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"cmaf\":\"\",\"dash\":\"\",\"lls\":\"http://pull-lls-l11.douyincdn.com/stage/stream-408388649177841809_ld.sdp?expire=1791107563&sign=e75f44842f2ec9a241160c8e4c93b186&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&unique_id=vqqojx-866085151014699432_227_qcy_yc&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"tsl\":\"\",\"tile\":\"\",\"http_ts\":\"\",\"ll_hls\":\"\",\"sdk_params\":\"{\\\"VCodec\\\":\\\"h264\\\",\\\"vbitrate\\\":1000000,\\\"resolution\\\":\\\"480x847\\\",\\\"gop\\\":2,\\\"drType\\\":\\\"sdr\\\",\\\"fps\\\":19}\",\"enableEncryption\":false,\"templateRealTimeInfo\":{\"name\":\"ld\",\"bitrateKbps\":988,\"updatedTime\":1790500626060}}},\"sd\":{\"main\":{\"flv\":\"http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809_sd.flv?expire=1791107563&sign=2b6267097628106004ba0bb9a2bf54fa&exp_hrchy=w1&arch_hrchy=w1&major_anchor_level=common&unique_id=pkukdm-673827042241937363_168_nhn_fg&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"hls\":\"http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_sd.m3u8?expire=1791107563&sign=2ef6a68430d616ae4c4ddff9d75e7617&exp_hrchy=w1&arch_hrchy=w1&major_anchor_level=common&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"cmaf\":\"\",\"dash\":\"\",\"lls\":\"http://pull-lls-l11.douyincdn.com/stage/stream-408388649177841809_sd.sdp?expire=1791107563&sign=5ab740256031bd195c044865a86af0f1&exp_hrchy=w1&arch_hrchy=w1&major_anchor_level=common&unique_id=blhhlh-555701251449518387_211_lsd_au&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"tsl\":\"\",\"tile\":\"\",\"http_ts\":\"\",\"ll_hls\":\"\",\"sdk_params\":\"{\\\"VCodec\\\":\\\"h264\\\",\\\"vbitrate\\\":1600000,\\\"resolution\\\":\\\"540x952\\\",\\\"gop\\\":2,\\\"drType\\\":\\\"sdr\\\",\\\"fps\\\":19}\",\"enableEncryption\":false,\"templateRealTimeInfo\":{\"name\":\"sd\",\"bitrateKbps\":1107,\"updatedTime\":1790502698037}}},\"md\":{\"main\":{\"flv\":\"https://pull-flv-l11-admin.douyincdn.com/stage/stream-408388649177841809_md.flv?expire=1791107563&sign=e2d4d7ee393b3888ad800653af0b32b8&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&unique_id=rnzarz-804502892345983164_233_mog_rs&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"hls\":\"http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_md.m3u8?expire=1791107563&sign=f7631eda68984d6d34292f3c1147723f&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"cmaf\":\"\",\"dash\":\"\",\"lls\":\"http://pull-lls-l11.douyincdn.com/stage/stream-408388649177841809_md.sdp?expire=1791107563&sign=1bddb51761437dd0696a070885f5f01f&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&unique_id=agynnj-479536578896858642_859_ebv_lq&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"tsl\":\"\",\"tile\":\"\",\"http_ts\":\"\",\"ll_hls\":\"\",\"sdk_params\":\"{\\\"VCodec\\\":\\\"h264\\\",\\\"vbitrate\\\":250000,\\\"resolution\\\":\\\"240x423\\\",\\\"gop\\\":2,\\\"drType\\\":\\\"sdr\\\",\\\"fps\\\":15}\",\"enableEncryption\":false,\"templateRealTimeInfo\":{\"name\":\"md\",\"bitrateKbps\":250,\"updatedTime\":1790502687031}}},\"ao\":{\"main\":{\"flv\":\"http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809.flv?expire=1791107563&sign=ad00e52d4cd68942d3c5b387bae3af83&major_anchor_level=common&arch_hrchy=w1&exp_hrchy=w1&only_audio=1&eupf_relay_mode=err&unique_id=ghdbet-030744965666451189_740_ccm&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"hls\":\"\",\"cmaf\":\"\",\"dash\":\"\",\"lls\":\"\",\"tsl\":\"\",\"tile\":\"\",\"http_ts\":\"\",\"ll_hls\":\"\",\"sdk_params\":\"{\\\"VCodec\\\":\\\"h264\\\",\\\"vbitrate\\\":0,\\\"resolution\\\":\\\"\\\",\\\"gop\\\":2,\\\"drType\\\":\\\"sdr\\\",\\\"fps\\\":19}\",\"enableEncryption\":false}},\"hd\":{\"main\":{\"flv\":\"http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809_Stage0T000hd.flv?expire=1791107563&sign=5191eb56164aff16d36e91550c173a78&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&unique_id=qclsme-665992578755616306_371_lak_Aobdw8Z254za&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"hls\":\"http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_Stage0T000hd.m3u8?expire=1791107563&sign=208f54c474b22ea810d1ceac223abbd2&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"cmaf\":\"\",\"dash\":\"\",\"lls\":\"http://pull-lls-l11.douyincdn.com/stage/stream-408388649177841809_Stage0T000hd.sdp?expire=1791107563&sign=c09c57aab93b473452c634b2f9c59904&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&unique_id=kbokdo-471636277314952900_735_xrf_Dclqh1I277xv&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT\",\"tsl\":\"\",\"tile\":\"\",\"http_ts\":\"\",\"ll_hls\":\"\",\"sdk_params\":\"{\\\"VCodec\\\":\\\"h264\\\",\\\"vbitrate\\\":2000000,\\\"resolution\\\":\\\"720x1270\\\",\\\"gop\\\":4,\\\"drType\\\":\\\"sdr\\\",\\\"fps\\\":19}\",\"enableEncryption\":false,\"templateRealTimeInfo\":{\"name\":\"Stage0T000hd\",\"bitrateKbps\":1428,\"updatedTime\":1790502437018}}}}}"
+            }
+          },
+          "extra": {
+            "height": 1920,
+            "width": 1088,
+            "fps": 0,
+            "max_bitrate": 0,
+            "min_bitrate": 0,
+            "default_bitrate": 0,
+            "bitrate_adapt_strategy": 0,
+            "anchor_interact_profile": 0,
+            "audience_interact_profile": 0,
+            "hardware_encode": false,
+            "video_profile": 0,
+            "h265_enable": false,
+            "gop_sec": 0,
+            "bframe_enable": false,
+            "roi": false,
+            "sw_roi": false,
+            "bytevc1_enable": false
+          },
+          "pull_datas": {}
+        },
+        "mosaic_status": 0,
+        "mosaic_status_str": "0",
+        "admin_user_ids": [
+          4242366865346876,
+          105088062891,
+          108761669521,
+          4374281358684420,
+          2922957801011211
+        ],
+        "admin_user_ids_str": [
+          "4242366865346876",
+          "105088062891",
+          "108761669521",
+          "4374281358684420",
+          "2922957801011211"
+        ],
+        "owner": {
+          "id_str": "4330329330163743",
+          "sec_uid": "KF8uGmGPBDCZjg_XhgBw5UWwX0TvIvOv4OSpF6ui-0BjWS99ZGq6k6w9Ki_g1MkMVPGoxfBu8tNE",
+          "nickname": "小禅",
+          "avatar_thumb": {
+            "url_list": [
+              "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_oQAflBEgDOAFDEgADG9N2wfMAKD9ACAI6AopyC.jpeg?from=3067671334",
+              "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_oQAflBEgDOAFDEgADG9N2wfMAKD9ACAI6AopyC.jpeg?from=3067671334",
+              "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_oQAflBEgDOAFDEgADG9N2wfMAKD9ACAI6AopyC.jpeg?from=3067671334"
+            ]
+          },
+          "follow_info": {
+            "follow_status": 0,
+            "follow_status_str": "0"
+          },
+          "subscribe": {
+            "is_member": false,
+            "level": 0,
+            "identity_type": 0,
+            "buy_type": 0,
+            "open": 0
+          },
+          "foreign_user": 0,
+          "open_id_str": ""
+        },
+        "room_auth": {
+          "Chat": true,
+          "Danmaku": false,
+          "Gift": true,
+          "LuckMoney": true,
+          "Digg": true,
+          "RoomContributor": true,
+          "Props": true,
+          "UserCard": true,
+          "POI": true,
+          "MoreAnchor": 1,
+          "Banner": 1,
+          "Share": 1,
+          "UserCorner": 0,
+          "Landscape": 1,
+          "LandscapeChat": 1,
+          "PublicScreen": 1,
+          "GiftAnchorMt": 0,
+          "RecordScreen": 2,
+          "DonationSticker": 0,
+          "HourRank": 0,
+          "CommerceCard": 1,
+          "AudioChat": 1,
+          "DanmakuDefault": 0,
+          "KtvOrderSong": 2,
+          "SelectionAlbum": 2,
+          "Like": 0,
+          "MultiplierPlayback": 0,
+          "DownloadVideo": 0,
+          "Collect": 2,
+          "TimedShutdown": 0,
+          "Seek": 0,
+          "Denounce": 0,
+          "Dislike": 0,
+          "OnlyTa": 0,
+          "CastScreen": 1,
+          "CommentWall": 1,
+          "BulletStyle": 0,
+          "ShowGamePlugin": 2,
+          "VSGift": 0,
+          "VSTopic": 0,
+          "VSRank": 0,
+          "AdminCommentWall": 0,
+          "CommerceComponent": 1,
+          "DouPlus": 1,
+          "GamePointsPlaying": 2,
+          "Poster": 2,
+          "Highlights": 2,
+          "TypingCommentState": 1,
+          "StrokeUpDownGuide": 1,
+          "UpRightStatsFloatingLayer": 1,
+          "CastScreenExplicit": 2,
+          "Selection": 2,
+          "IndustryService": 0,
+          "VerticalRank": 1,
+          "EnterEffects": 0,
+          "FansClub": 1,
+          "EmojiOutside": 0,
+          "CanSellTicket": 0,
+          "DouPlusPopularityGem": 0,
+          "MissionCenter": 0,
+          "ExpandScreen": 2,
+          "FansGroup": 2,
+          "Topic": 2,
+          "AnchorMission": 0,
+          "Teleprompter": 0,
+          "LongTouch": 2,
+          "FirstFeedHistChat": 1,
+          "MoreHistChat": 1,
+          "TaskBanner": 0,
+          "SpecialStyle": {
+            "Chat": {
+              "UnableStyle": 0,
+              "Content": "主播已设置所有人可评论",
+              "OffType": 0,
+              "AnchorSwitchForPaidLive": 0,
+              "ContentForPaidLive": ""
+            },
+            "Like": {
+              "UnableStyle": 0,
+              "Content": "",
+              "OffType": 0,
+              "AnchorSwitchForPaidLive": 0,
+              "ContentForPaidLive": ""
+            }
+          },
+          "FixedChat": 2,
+          "QuizGamePointsPlaying": 2
+        },
+        "live_room_mode": 0,
+        "stats": {
+          "total_user_desp": "",
+          "like_count": 0,
+          "total_user_str": "4万+",
+          "user_count_str": "2268"
+        },
+        "has_commerce_goods": true,
+        "linker_map": {},
+        "linker_detail": {
+          "linker_play_modes": [],
+          "big_party_layout_config_version": 0,
+          "accept_audience_pre_apply": false,
+          "linker_ui_layout": 0,
+          "enable_audience_linkmic": 0,
+          "function_type": "",
+          "linker_map_str": {},
+          "ktv_lyric_mode": "",
+          "init_source": "",
+          "forbid_apply_from_other": false,
+          "ktv_exhibit_mode": 0,
+          "enlarge_guest_turn_on_source": 0,
+          "playmode_detail": {},
+          "client_ui_info": "",
+          "manual_open_ui": 0,
+          "feature_list": []
+        },
+        "room_view_stats": {
+          "is_hidden": false,
+          "display_short": "2268",
+          "display_middle": "2268",
+          "display_long": "2268在线观众",
+          "display_value": 2268,
+          "display_version": 1663849727,
+          "incremental": false,
+          "display_type": 1,
+          "display_short_anchor": "2268",
+          "display_middle_anchor": "2268",
+          "display_long_anchor": "2268在线观众"
+        },
+        "scene_type_info": {
+          "is_union_live_room": false,
+          "is_life": false,
+          "is_protected_room": 0,
+          "is_lasted_goods_room": 1,
+          "is_desire_room": 2,
+          "commentary_type": false,
+          "is_sub_orientation_vertical_room": 2
+        },
+        "toolbar_data": {
+          "entrance_list": [
+            {
+              "group_id": 0,
+              "component_type": 1,
+              "op_type": 0,
+              "text": "购物车",
+              "schema_url": "",
+              "show_type": 3,
+              "data_status": 1,
+              "extra": ""
+            },
+            {
+              "group_id": 5,
+              "component_type": 24,
+              "op_type": 0,
+              "text": "更多",
+              "schema_url": "",
+              "show_type": 1,
+              "data_status": 1,
+              "extra": ""
+            },
+            {
+              "group_id": 6,
+              "component_type": 29,
+              "op_type": 0,
+              "text": "快捷送礼",
+              "schema_url": "",
+              "icon": {
+                "url_list": [
+                  "https://p3-webcast.douyinpic.com/img/webcast/7ef47758a435313180e6b78b056dda4e.png~tplv-resize:0:0.image",
+                  "https://p11-webcast.douyinpic.com/img/webcast/7ef47758a435313180e6b78b056dda4e.png~tplv-resize:0:0.image"
+                ],
+                "uri": "webcast/7ef47758a435313180e6b78b056dda4e.png",
+                "height": 0,
+                "width": 0,
+                "avg_color": "#405237",
+                "image_type": 0,
+                "open_web_url": "",
+                "is_animated": false,
+                "flex_setting_list": [],
+                "text_setting_list": []
+              },
+              "show_type": 3,
+              "data_status": 1,
+              "extra": "{\"id\":463,\"name\":\"小心心\",\"type\":1,\"diamond_count\":1,\"combo\":true,\"image\":{\"url_list\":[\"https://p3-webcast.douyinpic.com/img/webcast/7ef47758a435313180e6b78b056dda4e.png~tplv-obj.image\",\"https://p11-webcast.douyinpic.com/img/webcast/7ef47758a435313180e6b78b056dda4e.png~tplv-obj.image\"],\"uri\":\"webcast/7ef47758a435313180e6b78b056dda4e.png\",\"avg_color\":\"#405237\"},\"webp_image\":{\"url_list\":[\"https://p11-webcast.douyinpic.com/img/webcast/7ef47758a435313180e6b78b056dda4e.png~tplv-obj.webp\",\"https://p3-webcast.douyinpic.com/img/webcast/7ef47758a435313180e6b78b056dda4e.png~tplv-obj.webp\"],\"uri\":\"webcast/7ef47758a435313180e6b78b056dda4e.png\",\"avg_color\":\"#3D3D3D\"}}"
+            },
+            {
+              "group_id": 8,
+              "component_type": 28,
+              "op_type": 0,
+              "text": "礼物",
+              "schema_url": "",
+              "icon": {
+                "url_list": [
+                  "https://p11-webcast.douyinpic.com/img/webcast/profit_gift_entrance_ab_v2.webp~tplv-resize:0:0.image",
+                  "https://p3-webcast.douyinpic.com/img/webcast/profit_gift_entrance_ab_v2.webp~tplv-resize:0:0.image"
+                ],
+                "uri": "webcast/profit_gift_entrance_ab_v2.webp",
+                "height": 0,
+                "width": 0,
+                "avg_color": "#7A5353",
+                "image_type": 0,
+                "open_web_url": "",
+                "is_animated": false,
+                "flex_setting_list": [],
+                "text_setting_list": []
+              },
+              "show_type": 3,
+              "data_status": 1,
+              "extra": ""
+            },
+            {
+              "group_id": 12,
+              "component_type": 35,
+              "op_type": 0,
+              "text": "清晰度",
+              "schema_url": "",
+              "show_type": 2,
+              "data_status": 1,
+              "extra": ""
+            }
+          ],
+          "more_panel": [
+            {
+              "group_id": 1,
+              "component_type": 20,
+              "op_type": 0,
+              "text": "分享",
+              "schema_url": "",
+              "show_type": 1,
+              "data_status": 1,
+              "extra": "{\"ShareStory\":1}"
+            },
+            {
+              "group_id": 10,
+              "component_type": 31,
+              "op_type": 0,
+              "text": "聊天频道",
+              "schema_url": "",
+              "show_type": 1,
+              "data_status": 1,
+              "extra": ""
+            }
+          ],
+          "max_entrance_cnt": 4,
+          "landscape_up_right": [],
+          "skin_resource": {},
+          "max_entrance_cnt_landscape": 4,
+          "permutation": {
+            "general": {
+              "GroupPriority": [
+                18,
+                17,
+                12,
+                14,
+                16,
+                5,
+                1,
+                8,
+                4,
+                15,
+                10,
+                13,
+                0,
+                22,
+                23,
+                19,
+                9,
+                3,
+                2,
+                7,
+                6
+              ],
+              "ComponentSequence": [
+                31,
+                33,
+                34,
+                37,
+                35,
+                38,
+                36,
+                26,
+                42,
+                23,
+                27,
+                32,
+                21,
+                2,
+                3,
+                43,
+                44,
+                1,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                22,
+                30,
+                25,
+                41,
+                29,
+                28,
+                20,
+                24
+              ]
+            },
+            "on_demand_component_list": [],
+            "block_component_list": []
+          },
+          "extra_info": {
+            "game_promotion_coexist": 0
+          }
+        },
+        "ecom_data": {
+          "reds_show_infos": [],
+          "instant_type": 0,
+          "route_rule": "",
+          "shop_author_header": "",
+          "intro_type": 0,
+          "float_window_type": 0,
+          "ecom_live_arua": 0
+        },
+        "room_cart": {
+          "contain_cart": true,
+          "total": 1,
+          "flash_total": 0,
+          "cart_icon": "",
+          "show_cart": 1
+        },
+        "AnchorABMap": {
+          "ab_admin_comment_on_wall": "0",
+          "ab_friend_chat": "4",
+          "admin_optimize_third": "1",
+          "admin_pin_ab_group": "1",
+          "admin_privilege_refine": "2",
+          "admin_screen_chat_value": "1",
+          "allow_join_guest_fansclub": "1",
+          "allow_shared_to_fans": "false",
+          "anchor_battle_enable_remote_pk": "1",
+          "anchor_battle_frame_bar_anime": "1",
+          "anchor_battle_frame_notice_bar_layout": "1",
+          "anchor_other_device": "1",
+          "anchor_public_user_feature_suffix": "1",
+          "audience_linkmic_continue": "2",
+          "audio_1v8_stage_enlarge": "1",
+          "audio_double_enlarge_enable": "1",
+          "audio_goal_challenge": "1",
+          "audio_honor_rank": "1",
+          "audio_radio_v2": "1",
+          "audio_room_subtitle_opt": "3",
+          "audio_subtitle_default_open": "2",
+          "battle_match_rebuild_anchor": "2",
+          "big_party_enable_open_camera": "2",
+          "chat_intercommunicate_multi_anchor": "2",
+          "chat_intercommunicate_pk": "2",
+          "cold_start": "1",
+          "cross_default_enlarge": "1",
+          "cross_link_support_enlarge_guest": "1",
+          "cross_room_battle_pop_mode": "1",
+          "double_enlarge_enable": "1",
+          "ecom_room_disable_gift": "0",
+          "enable_enter_by_sharing": "2",
+          "enable_link_guest_enter": "2",
+          "enable_linkmic_manage_panel": "true",
+          "enable_multi_pk_change_sofa_position": "1",
+          "enable_prop_card_exp": "2",
+          "enter_message_tip_relation": "0",
+          "enter_source_mark": "0",
+          "faction_clash": "1",
+          "frequently_chat_ab_value": "2",
+          "friend_room_audio_tuning": "1",
+          "friend_room_support_ns_mode": "0",
+          "friend_share_video_feature_type": "3",
+          "game_link_entrance": "1",
+          "gift_comment": "1",
+          "gift_comment_v2": "2",
+          "gift_hide_tip": "2",
+          "guest_battle_1v6_anchor_involved": "1",
+          "guest_battle_crown_upgrade": "4",
+          "guest_battle_expand": "2",
+          "guest_battle_score_expand": "2",
+          "guest_battle_upgrade": "2",
+          "guest_goal": "1",
+          "interact_acting_ab": "1",
+          "interact_anchor_guide": "0",
+          "ktv_aigc_mv": "1",
+          "ktv_anchor_enable_add_all": "1",
+          "ktv_atmosphere_video": "0",
+          "ktv_auto_mute_self": "1",
+          "ktv_challenge_minus_gift": "1",
+          "ktv_component_auto_open": "2",
+          "ktv_component_new_midi": "3",
+          "ktv_enable_avatar": "0",
+          "ktv_enable_open_camera": "0",
+          "ktv_fragment_song": "1",
+          "ktv_grab_guide_song": "0",
+          "ktv_guide_song_switch": "0",
+          "ktv_kick_when_linker_full": "1",
+          "ktv_mc_host_show_tag": "2",
+          "ktv_midi_score": "1",
+          "ktv_midi_sense_enhance": "1",
+          "ktv_new_challenge": "1",
+          "ktv_new_mv": "1",
+          "ktv_room_atmosphere": "1",
+          "ktv_singing_hot_rank": "1",
+          "ktv_video_stream_optimize": "1",
+          "ktv_want_listen_enable": "2",
+          "lead_real_time_chorus": "2",
+          "link_efficiency": "1",
+          "linkmic_chorus": "true",
+          "linkmic_cross_room_battle_double_score": "0",
+          "linkmic_multi_chorus": "2",
+          "linkmic_order_sing_ai_mv": "1",
+          "linkmic_order_sing_search_fingerprint": "1",
+          "linkmic_order_sing_upgrade": "1",
+          "linkmic_position_name_hide": "1",
+          "linkmic_starwish": "1",
+          "linkmic_starwish_gift": "true",
+          "linkmic_team_battle_double_score": "1",
+          "linkmic_video_equal_layout_frame_opt": "1",
+          "live_anchor_enable_chorus": "false",
+          "live_anchor_enable_custom_position": "1",
+          "live_anchor_flow_feedback_enable": "1",
+          "live_anchor_hit_new_audience_linkmic": "2",
+          "live_anchor_hit_position_opt": "2",
+          "live_anchor_hit_video_bid_paid": "2",
+          "live_anchor_hit_video_teamfight": "2",
+          "live_anchor_hl_auto_post_enable": "true",
+          "live_anchor_hl_auto_post_scheme": "\"sslocal://webcast_lynxview/?rate_height=487&url=https%3A%2F%2Flf-webcast-gr-sourcecdn.bytegecko.com%2Fobj%2Fbyte-gurd-source-gr%2Fwebcast%2Fmono%2Flynx%2Fopenlive_community_lynx_douyin%2Fpages%2Fhighlight_drive_traffic%2Ftemplate.js&mix_container_type=annie&type=popup&gravity=bottom&width_percent=100&android_soft_input_mode=32&bdhm_bid=community_openlive_lynx&bdhm_pid=highlight_drive_traffic\"",
+          "live_answer_on_wall": "1",
+          "live_audio_announce_menu_opt": "1",
+          "live_audio_enable_c_position": "2",
+          "live_chat_streamline": "2",
+          "live_chatroom_announce_image_enable": "true",
+          "live_dou_plus_enter": "1",
+          "live_ktv_enable_beat": "0",
+          "live_ktv_group": "2",
+          "live_ktv_show_singer_icon": "1",
+          "live_ktv_singing_challenge": "1",
+          "live_linkmic_battle_optimize": "1",
+          "live_linkmic_ktv_anchor_lyric_mode": "0",
+          "live_linkmic_order_sing_custom_gift": "2",
+          "live_linkmic_order_sing_micro_opt": "3",
+          "live_linkmic_order_sing_new": "1",
+          "live_linkmic_order_sing_v3": "2",
+          "live_pc_helper_new_layout": "0",
+          "live_radio_avatar_visible_switch": "1",
+          "live_radio_bg_phase2_enable": "true",
+          "live_room_manage_style": "0",
+          "live_team_fight_flexible": "1",
+          "live_video_enable_c_position": "0",
+          "live_video_enable_self_discipline": "2",
+          "live_video_host_identity_enable": "2",
+          "live_video_on_wall": "1",
+          "live_video_share": "2",
+          "lonely_room_enter_msg_unfold": "0",
+          "mark_user": "0",
+          "merge_ktv_mode_enable": "1",
+          "merge_ktv_optimize_enable": "2",
+          "mic_avatar_tool": "1",
+          "multi_chorus_offline": "1",
+          "opt_audience_linkmic": "3",
+          "opt_paid_link_feature_switch": "1",
+          "optran_paid_linkmic": "2",
+          "order_sing_aigcmv": "1",
+          "order_sing_enable_gift_chorus": "1",
+          "order_sing_gold_mic_offline": "1",
+          "order_singer_rank": "2",
+          "play_mode_opt_24": "1",
+          "ps_use_new_panel": "0",
+          "public_area_helper_ab_value": "3",
+          "radio_paid_linkmic": "2",
+          "radio_prepare_apply": "0",
+          "radio_subtitle": "1",
+          "real_time_chorus": "1",
+          "real_time_chorus_gift": "2",
+          "room_battle_compose_message": "1",
+          "room_battle_mode_switch": "2",
+          "room_battle_mode_switch_audio": "3",
+          "room_battle_video_audio_interconnection": "1",
+          "room_double_like": "2",
+          "search_user_entry_enable": "1",
+          "self_discipline_name": "1",
+          "self_discipline_v2": "1",
+          "self_discipline_v3": "1",
+          "social_share_video_adjust_volume": "2",
+          "specified_guests_pk": "1",
+          "support_multiple_add_price": "1",
+          "themed_competition": "1",
+          "themed_competition_v2": "1",
+          "traffic_strategy": "3",
+          "tt_ui_opt": "1",
+          "use_new_linkmic_manage_panle": "1",
+          "video_chorus_offline": "1",
+          "video_equal_1v8fix_switch": "1",
+          "video_ktv_challenge": "0",
+          "video_real_time_chorus": "1",
+          "video_talk_enable_avatar": "1",
+          "vip_elaborate": "1",
+          "webcast_chat_model": "1"
+        },
+        "like_count": 13067,
+        "owner_user_id_str": "",
+        "paid_live_data": {
+          "paid_type": 0,
+          "view_right": 0,
+          "duration": 0,
+          "delivery": 0,
+          "need_delivery_notice": false,
+          "anchor_right": 0,
+          "pay_ab_type": 0,
+          "privilege_info": {},
+          "privilege_info_map": {},
+          "max_preview_duration": 0
+        },
+        "basis": {
+          "next_ping": 300,
+          "is_customize_audio_room": false,
+          "need_request_luckybox": 0,
+          "secret_room": 0,
+          "foreign_user_room": 0
+        },
+        "game_data": {
+          "game_tag_info": {
+            "is_game": 2,
+            "game_tag_id": 0,
+            "game_tag_name": ""
+          }
+        },
+        "pico_info": {
+          "pico_live_type": 0,
+          "pico_virtual_live_bg_image_uri": "",
+          "pico_create_scene": "",
+          "custom_info": "",
+          "pico_virtual_live_bg_image_digest": "",
+          "virtual_live_bg_images": {
+            "original_digest": "",
+            "is_upright": false,
+            "converted_images": [],
+            "converted_list": []
+          },
+          "pitch": 0,
+          "client_live_type": 0,
+          "pico_vr_transfer": 0,
+          "pico_live_mode": 0,
+          "stream_mapping": {}
+        },
+        "extra": {
+          "vs_type": 0
+        },
+        "gift_msg_style": 2,
+        "fansclub_msg_style": 2,
+        "follow_msg_style": 2,
+        "share_msg_style": 2,
+        "short_touch_area_config": {
+          "elements": {
+            "1": {
+              "type": 1,
+              "priority": 1
+            },
+            "2": {
+              "type": 2,
+              "priority": 1
+            },
+            "3": {
+              "type": 3,
+              "priority": 1
+            },
+            "4": {
+              "type": 4,
+              "priority": 3
+            },
+            "5": {
+              "type": 5,
+              "priority": 4
+            },
+            "6": {
+              "type": 6,
+              "priority": 3
+            },
+            "7": {
+              "type": 7,
+              "priority": 3
+            },
+            "8": {
+              "type": 8,
+              "priority": 3
+            },
+            "9": {
+              "type": 9,
+              "priority": 3
+            },
+            "10": {
+              "type": 10,
+              "priority": 3
+            },
+            "12": {
+              "type": 12,
+              "priority": 3
+            },
+            "22": {
+              "type": 22,
+              "priority": 1
+            },
+            "27": {
+              "type": 27,
+              "priority": 3
+            },
+            "30": {
+              "type": 30,
+              "priority": 2
+            }
+          },
+          "forbidden_types_map": {},
+          "temp_state_condition_map": {
+            "1": {
+              "type": {
+                "strategy_type": 1,
+                "priority": 30
+              },
+              "minimum_gap": 900
+            },
+            "2": {
+              "type": {
+                "strategy_type": 2,
+                "priority": 20
+              },
+              "minimum_gap": 900
+            },
+            "3": {
+              "type": {
+                "strategy_type": 3,
+                "priority": 10
+              },
+              "minimum_gap": 900
+            },
+            "4": {
+              "type": {
+                "strategy_type": 4,
+                "priority": 1
+              },
+              "minimum_gap": 0
+            },
+            "5": {
+              "type": {
+                "strategy_type": 5,
+                "priority": 5
+              },
+              "minimum_gap": 0
+            },
+            "6": {
+              "type": {
+                "strategy_type": 6,
+                "priority": 7
+              },
+              "minimum_gap": 0
+            },
+            "7": {
+              "type": {
+                "strategy_type": 7,
+                "priority": 6
+              },
+              "minimum_gap": 0
+            }
+          },
+          "temp_state_strategy": {
+            "4": {
+              "short_touch_type": 4,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "3": {
+                  "type": {
+                    "strategy_type": 3,
+                    "priority": 10
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "6": {
+                  "type": {
+                    "strategy_type": 6,
+                    "priority": 7
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "7": {
+                  "type": {
+                    "strategy_type": 7,
+                    "priority": 6
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "7": {
+              "short_touch_type": 7,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "3": {
+                  "type": {
+                    "strategy_type": 3,
+                    "priority": 10
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "4": {
+                  "type": {
+                    "strategy_type": 4,
+                    "priority": 1
+                  },
+                  "duration": 0,
+                  "strategy_method": ""
+                },
+                "5": {
+                  "type": {
+                    "strategy_type": 5,
+                    "priority": 5
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "6": {
+                  "type": {
+                    "strategy_type": 6,
+                    "priority": 7
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "8": {
+              "short_touch_type": 8,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "86": {
+              "short_touch_type": 86,
+              "strategy_map": {
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "3": {
+                  "type": {
+                    "strategy_type": 3,
+                    "priority": 10
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "97": {
+              "short_touch_type": 97,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "3": {
+                  "type": {
+                    "strategy_type": 3,
+                    "priority": 10
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                },
+                "5": {
+                  "type": {
+                    "strategy_type": 5,
+                    "priority": 5
+                  },
+                  "duration": 10,
+                  "strategy_method": "short_touch_tempstate_redpack_entry_type"
+                },
+                "6": {
+                  "type": {
+                    "strategy_type": 6,
+                    "priority": 7
+                  },
+                  "duration": 10,
+                  "strategy_method": "short_touch_tempstate_redpack_match_amunt"
+                },
+                "7": {
+                  "type": {
+                    "strategy_type": 7,
+                    "priority": 6
+                  },
+                  "duration": 10,
+                  "strategy_method": "short_touch_tempstate_redpack_user_wish_tobuy"
+                }
+              }
+            },
+            "136": {
+              "short_touch_type": 136,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "141": {
+              "short_touch_type": 141,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "3": {
+                  "type": {
+                    "strategy_type": 3,
+                    "priority": 10
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "149": {
+              "short_touch_type": 149,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "152": {
+              "short_touch_type": 152,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "153": {
+              "short_touch_type": 153,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                },
+                "4": {
+                  "type": {
+                    "strategy_type": 4,
+                    "priority": 1
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "159": {
+              "short_touch_type": 159,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "161": {
+              "short_touch_type": 161,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "210": {
+              "short_touch_type": 210,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "217": {
+              "short_touch_type": 217,
+              "strategy_map": {
+                "3": {
+                  "type": {
+                    "strategy_type": 3,
+                    "priority": 10
+                  },
+                  "duration": 15,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "222": {
+              "short_touch_type": 222,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 5,
+                  "strategy_method": "结束态"
+                }
+              }
+            },
+            "228": {
+              "short_touch_type": 228,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "229": {
+              "short_touch_type": 229,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "230": {
+              "short_touch_type": 230,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "232": {
+              "short_touch_type": 232,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                },
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 10,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "306": {
+              "short_touch_type": 306,
+              "strategy_map": {
+                "3": {
+                  "type": {
+                    "strategy_type": 3,
+                    "priority": 10
+                  },
+                  "duration": 30,
+                  "strategy_method": "test_temp_30"
+                }
+              }
+            },
+            "307": {
+              "short_touch_type": 307,
+              "strategy_map": {
+                "4": {
+                  "type": {
+                    "strategy_type": 4,
+                    "priority": 1
+                  },
+                  "duration": 15,
+                  "strategy_method": "test_strategy_5"
+                }
+              }
+            },
+            "308": {
+              "short_touch_type": 308,
+              "strategy_map": {
+                "5": {
+                  "type": {
+                    "strategy_type": 5,
+                    "priority": 5
+                  },
+                  "duration": 10,
+                  "strategy_method": "test_strategy_5"
+                }
+              }
+            },
+            "311": {
+              "short_touch_type": 311,
+              "strategy_map": {
+                "3": {
+                  "type": {
+                    "strategy_type": 3,
+                    "priority": 10
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "312": {
+              "short_touch_type": 312,
+              "strategy_map": {
+                "1": {
+                  "type": {
+                    "strategy_type": 1,
+                    "priority": 30
+                  },
+                  "duration": 30,
+                  "strategy_method": ""
+                }
+              }
+            },
+            "313": {
+              "short_touch_type": 313,
+              "strategy_map": {
+                "2": {
+                  "type": {
+                    "strategy_type": 2,
+                    "priority": 20
+                  },
+                  "duration": 30,
+                  "strategy_method": "test_strategy_2"
+                }
+              }
+            }
+          },
+          "strategy_feat_whitelist": [
+            "feat_coin_lottery_amount",
+            "feat_redpack_amount",
+            "live_short_touch_ecom_redpack_type",
+            "live_short_touch_ecom_redpack_sub_type",
+            "live_short_touch_ecom_redpack_total_amount",
+            "live_short_touch_ecom_redpack_total_stock",
+            "live_ecom_cart_click_twice",
+            "live_ecom_cart_stop_buy",
+            "live_watch_6_min"
+          ],
+          "temp_state_global_condition": {
+            "duration_gap": 300,
+            "allow_count": 1,
+            "ignore_strategy_types": [
+              4
+            ]
+          },
+          "big_card_display_strategy": {}
+        },
+        "preview_expose": {
+          "style": 0,
+          "metas": [],
+          "chat_msgs": [],
+          "force_insertion": [],
+          "scroll_after_ms": 0,
+          "need_realtime": false,
+          "message_scroll_after_ms": 0,
+          "message_scroll_interval_ms": 0,
+          "preview_intro": "",
+          "show_uv_pv": 0,
+          "show_name_abbreviation": 0,
+          "is_preview_use_websocket": 0,
+          "is_aweme_video_feed": false,
+          "show_preview_cards": false,
+          "et_data": [],
+          "alive_checker": 0,
+          "preview_exit_guide_list": [],
+          "chat_group_extend_data": [],
+          "show_similar_feed_button": false,
+          "feed_extra": "",
+          "feed_enter_extra": "",
+          "preview_enter_extra": "",
+          "need_preload": 0,
+          "relation_info": ""
+        },
+        "req_user": {
+          "user_share_room_score": 0,
+          "enter_user_device_type": 0
+        },
+        "others": {
+          "deco_detail": {},
+          "more_panel_info": {
+            "load_strategy": 3
+          },
+          "appointment_info": {
+            "appointment_id": 0,
+            "is_subscribe": false
+          },
+          "web_skin": {
+            "enable_skin": false
+          },
+          "programme": {
+            "enable_programme": false
+          },
+          "web_live_port_optimization": {
+            "strategy_config": {
+              "background": {
+                "strategy_type": 1,
+                "use_config_duration": false,
+                "pause_monitor_duration": "1800"
+              },
+              "detail": {
+                "strategy_type": 1,
+                "use_config_duration": false,
+                "pause_monitor_duration": "1800"
+              },
+              "tab": {
+                "strategy_type": 1,
+                "use_config_duration": false,
+                "pause_monitor_duration": "1800"
+              }
+            },
+            "strategy_extra": ""
+          },
+          "lvideo_item_id": 0,
+          "recognition_containers": {
+            "recognition_candidates": []
+          },
+          "anchor_together_live": {
+            "is_together_live": 0,
+            "user_list": [],
+            "title": "",
+            "schema_url": "",
+            "scene": 1,
+            "is_show": true
+          },
+          "mosaic_version": 0,
+          "metric_tracker_data_list": [],
+          "cloud_collaborate_data": {
+            "collaborate_room_id": 0,
+            "collaborate_room_id_str": "",
+            "rejoin_time": 0
+          },
+          "room_chat_guide_locale_city": "中卫",
+          "redirect_from": 0,
+          "panel_guidance": "",
+          "participant_activity": "",
+          "labels": {},
+          "anonymous_ratio_display_affected": false
+        },
+        "admin_user_open_ids": [],
+        "admin_user_open_ids_str": [],
+        "owner_open_id_str": ""
+      }
+    ],
+    "enter_room_id": "7690129480030980906",
+    "extra": {
+      "digg_color": "0",
+      "pay_scores": "0",
+      "is_official_channel": false,
+      "signature": "",
+      "vr_type": 0
+    },
+    "user": {
+      "id_str": "4330329330163743",
+      "sec_uid": "KF8uGmGPBDCZjg_XhgBw5UWwX0TvIvOv4OSpF6ui-0BjWS99ZGq6k6w9Ki_g1MkMVPGoxfBu8tNE",
+      "nickname": "小禅",
+      "avatar_thumb": {
+        "url_list": [
+          "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_oQAflBEgDOAFDEgADG9N2wfMAKD9ACAI6AopyC.jpeg?from=3067671334",
+          "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_oQAflBEgDOAFDEgADG9N2wfMAKD9ACAI6AopyC.jpeg?from=3067671334",
+          "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_oQAflBEgDOAFDEgADG9N2wfMAKD9ACAI6AopyC.jpeg?from=3067671334"
+        ]
+      },
+      "follow_info": {
+        "follow_status": 0,
+        "follow_status_str": "0"
+      },
+      "foreign_user": 0,
+      "open_id_str": ""
+    },
+    "qrcode_url": "https://p3-pc.douyinpic.com/img/aweme-qrcode/BAkoXh7690132098665776943~c5_720x720.webp?from=746027608",
+    "enter_mode": 0,
+    "room_status": 0,
+    "partition_road_map": {},
+    "similar_rooms": [],
+    "shark_decision_conf": "",
+    "web_stream_url": {
+      "flv_pull_url": {},
+      "default_resolution": "",
+      "hls_pull_url_map": {},
+      "hls_pull_url": "",
+      "stream_orientation": 0,
+      "pull_datas": {}
+    },
+    "login_lead": {
+      "is_login": false,
+      "level": 0,
+      "items": {}
+    },
+    "auth_cert_info": "{\"CertDataMap\":{\"4330329330163743\":{\"CertLabelList\":[],\"DataMap\":{}}},\"BaseResp\":{\"StatusMessage\":\"\",\"StatusCode\":0}}"
+  },
+  "extra": {
+    "now": 1790502763170
+  },
+  "status_code": 0
+}

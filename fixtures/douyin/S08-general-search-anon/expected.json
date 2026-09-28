@@ -1,0 +1,11 @@
+{
+  "generator": "HttpClient.getJson (as used by DouyinSearch)",
+  "value": {
+    "dataType": null,
+    "data": null,
+    "error": {
+      "type": "HttpError",
+      "message": "发送GET请求失败"
+    }
+  }
+}

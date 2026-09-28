@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "platform": "douyin",
+  "sample": "S08-partition-search",
+  "capturedAt": "2026-09-27T09:53:25.658094Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.douyin.com/webcast/web/partition/search/?keyword=%E5%92%8C%E5%B9%B3%E7%B2%BE%E8%8B%B1&aid=6383",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "zh-CN,zh;q=0.9",
+      "Referer": "https://www.douyin.com/search/%E5%92%8C%E5%B9%B3%E7%B2%BE%E8%8B%B1?source=switch_tab&type=live",
+      "Origin": "https://www.douyin.com",
+      "Sec-Fetch-Dest": "empty",
+      "Sec-Fetch-Mode": "cors",
+      "Sec-Fetch-Site": "same-origin",
+      "Cookie": "ttwid=2%9SOIUHVYOaq8xPmVnDNYKtOk0yNtCRNR4pg2-UlvhVVjo%9R5016971447%1Ujqakwxd71v3vkjx137r55b6y1c62yi9d1g4301j7543dj80e7ait5n69qb23b102; UIFID_TEMP=5fb6a090c2ce2601998e7e62bb24c77075f12b92c8607be4ba0c53ab24d7264151e25c577a18204000eee6d1488ce6ab401b781cb39b81f97bee0708e8e9d826ec43f9a30f50b5c0a7c54017d50aaa70"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-tt-supplier-id": "0_9",
+      "set-cookie": "odin_tt=b22f22a56266c82eb0e40b5e168865d51f52341f5fa39eaeb7aacfe4a631fc7bb089c94a94735ae891795d1d0d2bd16e8ab9d1560a8a5a953953b33fe4bde56e6496638eb157f709b2a9527264aa8a00; Path=/; Domain=douyin.com; Max-Age=31536000; HttpOnly",
+      "date": "Sun, 27 Sep 2026 09:53:26 GMT",
+      "vary": "Accept-Encoding",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "server-timing": [
+        "cdn-cache;desc=MISS, edge;dur=1, origin;dur=135",
+        "inner; dur=112"
+      ],
+      "x-tt-trace-id": "00-26092717532680AB86EC1E3585C3A69F-618D62F71F9B090F-00",
+      "content-type": "application/json; charset=utf-8",
+      "x-tt-logid": "2026092717532680AB86EC1E3585C3A69F",
+      "x-tt-trace-host": "013bebe0cafb8d31a21521a307737c76629dadea4dd49378dc39819e683a02d2ed834b0c0c5a97d29b28d79f305650a8779f50158b48053c69affd9d9c3372633e47059e30db3e1f4a5a8eb2d97fb30173c25e370cf90a29515e087ddf7eb1dfa1",
+      "server": "TLB",
+      "x-tt-trace-tag": "id=26;cdn-cache=miss;type=dyn",
+      "tt_stable": "1",
+      "x-ms-token": "bNHZDlgrD-lEayLhXYi3yo3Sd75_w7pJyy89-fkthciWXmVVuuvyu5jud6YmN-OXmX8Yk9GaZs1evln__8VtcinoJIX4w6oPWqRio72m",
+      "webcast-ntp-t3": "1790502806150",
+      "content-length": "172",
+      "webcast-ntp-t2": "1790502806051",
+      "via": "CHN-SNxianyang-CT4-CACHE2[136],CHN-SNxianyang-CT4-CACHE2[ovl,135]",
+      "x-ccdn-req-id-46b1": "67c020aa26ff0a50409e8107194e0ed4"
+    }
+  },
+  "raw": {
+    "sha256": "2736c47e0f81804bad952e8aaa120cbc50e6c896456a79e49c65e41269ed5fc2",
+    "length": 172
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "header:x-ms-token",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:ttwid",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:UIFID_TEMP",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:odin_tt",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1) + x-ms-token response header scrub"
+}

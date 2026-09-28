@@ -1,0 +1,23 @@
+{
+  "data": {
+    "SearchResult": [
+      {
+        "partition": {
+          "id_str": "1010032",
+          "type": 1,
+          "title": "和平精英"
+        },
+        "keyword_idx": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ]
+      }
+    ]
+  },
+  "extra": {
+    "now": 1790502806150
+  },
+  "status_code": 0
+}

@@ -1,5 +1,0 @@
-{
-  "webView2Title": "需要 WebView2 运行时",
-  "webView2Body": "网页登录和网页搜索要用微软的 Microsoft Edge WebView2 运行时，这台电脑上没有找到它。Windows 11 和更新过的 Windows 10 一般已经自带。\n\n安装方法：打开微软的下载页，下载“常青版引导程序”（Evergreen Bootstrapper）并运行，装好后重新打开纯粹直播。",
-  "openDownloadPage": "打开下载页"
-}

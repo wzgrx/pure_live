@@ -1,9 +1,0 @@
-{
-  "generator": "DouyuSite.getRoomDetailForRefresh",
-  "value": {
-    "throws": {
-      "type": "FormatException",
-      "message": "Unexpected character"
-    }
-  }
-}

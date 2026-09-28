@@ -1,1 +1,0 @@
-pureLive1({"msg":"","code":0,"data":{"live":{"list":[]},"anchor":{"list":[]},"mobile":{"list":[]},"opus":{"list":[]}},"time":1790531549893})

@@ -1,6 +1,0 @@
-* text=auto eol=lf
-*.bat text eol=crlf
-*.cmd text eol=crlf
-
-# Recorded samples keep their exact bytes (docs/adr/0009-fixture-format.md).
-fixtures/**/body.* -text

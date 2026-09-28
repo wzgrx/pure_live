@@ -1,9 +1,0 @@
-{
-  "generator": "DouyinSite.getUserInfoByCookie",
-  "value": {
-    "info": {
-      "message": "User doesn't login",
-      "prompts": "请登录后进入直播间"
-    }
-  }
-}

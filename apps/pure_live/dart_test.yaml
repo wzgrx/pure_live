@@ -1,4 +1,0 @@
-tags:
-  # Golden screenshots of the pages (test/screenshots/README.md). They run
-  # with every `flutter test`; `--exclude-tags screenshots` leaves them out.
-  screenshots:

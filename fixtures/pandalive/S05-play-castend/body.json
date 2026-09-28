@@ -1,8 +1,0 @@
-{
-  "result": false,
-  "message": "종료되거나 확인할 수 없는 방송입니다.\n다시 시도해 주세요.",
-  "errorData": {
-    "code": "castEnd"
-  },
-  "userIp": "907.541.898.068"
-}

@@ -1,9 +1,0 @@
-{
-  "generator": "DouyuSite.searchRooms",
-  "value": {
-    "throws": {
-      "type": "Exception",
-      "message": "Exception: 【kw】kw不能为空"
-    }
-  }
-}

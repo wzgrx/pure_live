@@ -1,5 +1,0 @@
-{
-  "webView2Title": "需要 WebView2 執行階段",
-  "webView2Body": "網頁登入和網頁搜尋要用微軟的 Microsoft Edge WebView2 執行階段，這台電腦上找不到它。Windows 11 和更新過的 Windows 10 通常已經內建。\n\n安裝方法：開啟微軟的下載頁面，下載「常青版啟動載入器」（Evergreen Bootstrapper）並執行，裝好後重新開啟純粹直播。",
-  "openDownloadPage": "開啟下載頁面"
-}

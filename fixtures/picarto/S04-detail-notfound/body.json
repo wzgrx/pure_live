@@ -1,8 +1,0 @@
-{
-  "channel": null,
-  "getLoadBalancerUrl": {
-    "url": "http://edge1-eu-west.picarto.tv",
-    "origin": "edge1-eu-west"
-  },
-  "getMultiStreams": null
-}

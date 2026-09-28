@@ -1,1 +1,0 @@
-jsonp_purelive_s({"code":0,"info":"success","token":"DOmOJRj8G2MasRYxGhnGwdhhGCcQoWQGUo7TlgKp88ZTniqMFVN03y"});

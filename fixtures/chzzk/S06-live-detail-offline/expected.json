@@ -1,0 +1,87 @@
+{
+  "generator": "ChzzkSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw",
+  "value": {
+    "getRoomDetail": {
+      "requests": 2,
+      "value": {
+        "roomId": "12bba8d480ba0ffaf85656afd76fa792",
+        "userId": "12bba8d480ba0ffaf85656afd76fa792",
+        "title": "PUBG 배틀그라운드B",
+        "nick": "PUBG 배틀그라운드B",
+        "avatar": "https://nng-phinf.pstatic.net/MjAyNjAzMTNfNTEg/MDAxNzczMzkxMjA0NzIz.pyTznT2-cNmW94a2iHopy2OSaDLNqGLyiTtumfX3EmQg.pEcRtir7CIqHn5czqaaZTocJim8CqEhJj3iUbm5Xw2cg.PNG/image.png",
+        "cover": "https://nng-phinf.pstatic.net/MjAyNjAzMTNfNTEg/MDAxNzczMzkxMjA0NzIz.pyTznT2-cNmW94a2iHopy2OSaDLNqGLyiTtumfX3EmQg.pEcRtir7CIqHn5czqaaZTocJim8CqEhJj3iUbm5Xw2cg.PNG/image.png",
+        "watching": "0",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "7071",
+        "platform": "chzzk",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "introduction": "",
+        "isCatchUp": false,
+        "link": "https://chzzk.naver.com/live/12bba8d480ba0ffaf85656afd76fa792"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "requests": 2,
+      "value": {
+        "roomId": "12bba8d480ba0ffaf85656afd76fa792",
+        "userId": "12bba8d480ba0ffaf85656afd76fa792",
+        "title": "PUBG 배틀그라운드B",
+        "nick": "PUBG 배틀그라운드B",
+        "avatar": "https://nng-phinf.pstatic.net/MjAyNjAzMTNfNTEg/MDAxNzczMzkxMjA0NzIz.pyTznT2-cNmW94a2iHopy2OSaDLNqGLyiTtumfX3EmQg.pEcRtir7CIqHn5czqaaZTocJim8CqEhJj3iUbm5Xw2cg.PNG/image.png",
+        "cover": "https://nng-phinf.pstatic.net/MjAyNjAzMTNfNTEg/MDAxNzczMzkxMjA0NzIz.pyTznT2-cNmW94a2iHopy2OSaDLNqGLyiTtumfX3EmQg.pEcRtir7CIqHn5czqaaZTocJim8CqEhJj3iUbm5Xw2cg.PNG/image.png",
+        "watching": "0",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "7071",
+        "platform": "chzzk",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "introduction": "",
+        "isCatchUp": false,
+        "link": "https://chzzk.naver.com/live/12bba8d480ba0ffaf85656afd76fa792"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": 2,
+      "value": {
+        "roomId": "12bba8d480ba0ffaf85656afd76fa792",
+        "userId": "12bba8d480ba0ffaf85656afd76fa792",
+        "title": "PUBG 배틀그라운드B",
+        "nick": "PUBG 배틀그라운드B",
+        "avatar": "https://nng-phinf.pstatic.net/MjAyNjAzMTNfNTEg/MDAxNzczMzkxMjA0NzIz.pyTznT2-cNmW94a2iHopy2OSaDLNqGLyiTtumfX3EmQg.pEcRtir7CIqHn5czqaaZTocJim8CqEhJj3iUbm5Xw2cg.PNG/image.png",
+        "cover": "https://nng-phinf.pstatic.net/MjAyNjAzMTNfNTEg/MDAxNzczMzkxMjA0NzIz.pyTznT2-cNmW94a2iHopy2OSaDLNqGLyiTtumfX3EmQg.pEcRtir7CIqHn5czqaaZTocJim8CqEhJj3iUbm5Xw2cg.PNG/image.png",
+        "watching": "0",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "7071",
+        "platform": "chzzk",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "introduction": "",
+        "isCatchUp": false,
+        "link": "https://chzzk.naver.com/live/12bba8d480ba0ffaf85656afd76fa792"
+      }
+    },
+    "getLiveStatus": {
+      "requests": 2,
+      "value": false
+    },
+    "getPlayQualites": {
+      "requests": 0,
+      "value": []
+    },
+    "getPlayUrls": {},
+    "resolvePlayUrlsForRecoveryRaw": {}
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "platform": "chzzk",
+  "sample": "S05-channel-offline",
+  "capturedAt": "2026-09-27T16:02:18.435388Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.chzzk.naver.com/service/v1/channels/12bba8d480ba0ffaf85656afd76fa792",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Origin": "https://chzzk.naver.com",
+      "Referer": "https://chzzk.naver.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "access-control-allow-origin": "https://chzzk.naver.com",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 16:02:18 GMT",
+      "vary": [
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers"
+      ],
+      "referrer-policy": "unsafe-url",
+      "content-type": "application/json",
+      "pragma": "no-cache",
+      "x-xss-protection": "0",
+      "server": "nfront",
+      "access-control-allow-credentials": "true",
+      "x-frame-options": "DENY",
+      "x-content-type-options": "nosniff",
+      "expires": "0"
+    }
+  },
+  "raw": {
+    "sha256": "74da7fb75bb598b72c1c1549c5000afcdffbe4908371857dd7c071365f00fdfd",
+    "length": 688
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

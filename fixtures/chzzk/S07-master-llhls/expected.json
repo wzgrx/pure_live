@@ -1,0 +1,50 @@
+{
+  "generator": "ChzzkSite._qualities (this master only)",
+  "value": {
+    "qualities": {
+      "requests": 1,
+      "value": [
+        {
+          "quality": "1080p60 · HLS",
+          "id": "1080p60",
+          "sort": 10808384000,
+          "data": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/1080p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ]
+        },
+        {
+          "quality": "720p60 · HLS",
+          "id": "720p60",
+          "sort": 7203192000,
+          "data": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/720p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ]
+        },
+        {
+          "quality": "480p · HLS",
+          "id": "480p",
+          "sort": 4801692000,
+          "data": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/480p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ]
+        },
+        {
+          "quality": "360p · HLS",
+          "id": "360p",
+          "sort": 3600696000,
+          "data": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/360p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ]
+        },
+        {
+          "quality": "144p · HLS",
+          "id": "144p",
+          "sort": 1440192000,
+          "data": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/144p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ]
+        }
+      ]
+    }
+  }
+}

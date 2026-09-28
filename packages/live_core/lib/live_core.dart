@@ -27,6 +27,8 @@ export 'src/sites/bilibili/bilibili_api.dart';
 export 'src/sites/bilibili/bilibili_site.dart';
 export 'src/sites/cc/cc_api.dart';
 export 'src/sites/cc/cc_site.dart';
+export 'src/sites/chzzk/chzzk_api.dart';
+export 'src/sites/chzzk/chzzk_site.dart';
 export 'src/sites/douyin/douyin_api.dart';
 export 'src/sites/douyin/douyin_sign.dart';
 export 'src/sites/douyin/douyin_site.dart';

@@ -1,0 +1,103 @@
+{
+  "generator": "ChzzkSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw",
+  "value": {
+    "getRoomDetail": {
+      "requests": 2,
+      "value": {
+        "roomId": "75cbf189b3bb8f9f687d2aca0d0a382b",
+        "userId": "75cbf189b3bb8f9f687d2aca0d0a382b",
+        "title": "에반게리온 처음보는사람 끝까지 보기",
+        "nick": "한동숙",
+        "avatar": "https://nng-phinf.pstatic.net/MjAyMzEyMTVfMTgx/MDAxNzAyNjAxMjEyMTYw.Hw6vs76aI0L1zeu4fziwXDE35gidFriwTSgAjq7KWxUg.0V3KaKvctGKcVYa76UiDVTXMjXeUSuUezHX6nGU4y9kg.PNG/123.png",
+        "cover": "",
+        "area": "",
+        "watching": "0",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "14487",
+        "totalViewers": "",
+        "platform": "chzzk",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "当前地区受到播放限制。",
+        "introduction": "",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "referer": "https://chzzk.naver.com/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://chzzk.naver.com/live/75cbf189b3bb8f9f687d2aca0d0a382b"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "requests": 2,
+      "value": {
+        "roomId": "75cbf189b3bb8f9f687d2aca0d0a382b",
+        "userId": "75cbf189b3bb8f9f687d2aca0d0a382b",
+        "title": "에반게리온 처음보는사람 끝까지 보기",
+        "nick": "한동숙",
+        "avatar": "https://nng-phinf.pstatic.net/MjAyMzEyMTVfMTgx/MDAxNzAyNjAxMjEyMTYw.Hw6vs76aI0L1zeu4fziwXDE35gidFriwTSgAjq7KWxUg.0V3KaKvctGKcVYa76UiDVTXMjXeUSuUezHX6nGU4y9kg.PNG/123.png",
+        "cover": "",
+        "area": "",
+        "watching": "0",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "14487",
+        "totalViewers": "",
+        "platform": "chzzk",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "当前地区受到播放限制。",
+        "introduction": "",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "referer": "https://chzzk.naver.com/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://chzzk.naver.com/live/75cbf189b3bb8f9f687d2aca0d0a382b"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": 2,
+      "value": {
+        "roomId": "75cbf189b3bb8f9f687d2aca0d0a382b",
+        "userId": "75cbf189b3bb8f9f687d2aca0d0a382b",
+        "title": "에반게리온 처음보는사람 끝까지 보기",
+        "nick": "한동숙",
+        "avatar": "https://nng-phinf.pstatic.net/MjAyMzEyMTVfMTgx/MDAxNzAyNjAxMjEyMTYw.Hw6vs76aI0L1zeu4fziwXDE35gidFriwTSgAjq7KWxUg.0V3KaKvctGKcVYa76UiDVTXMjXeUSuUezHX6nGU4y9kg.PNG/123.png",
+        "cover": "",
+        "area": "",
+        "watching": "0",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "14487",
+        "totalViewers": "",
+        "platform": "chzzk",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "当前地区受到播放限制。",
+        "introduction": "",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "referer": "https://chzzk.naver.com/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://chzzk.naver.com/live/75cbf189b3bb8f9f687d2aca0d0a382b"
+      }
+    },
+    "getLiveStatus": {
+      "requests": 2,
+      "value": true
+    },
+    "getPlayQualites": {
+      "requests": 0,
+      "value": {
+        "throws": "ChzzkException",
+        "message": "CHZZK mediaUnavailable"
+      }
+    }
+  }
+}

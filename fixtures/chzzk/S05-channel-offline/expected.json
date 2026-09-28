@@ -1,0 +1,16 @@
+{
+  "generator": "ChzzkApi.channel",
+  "value": {
+    "channel": {
+      "requests": 1,
+      "value": {
+        "id": "12bba8d480ba0ffaf85656afd76fa792",
+        "name": "PUBG 배틀그라운드B",
+        "avatar": "https://nng-phinf.pstatic.net/MjAyNjAzMTNfNTEg/MDAxNzczMzkxMjA0NzIz.pyTznT2-cNmW94a2iHopy2OSaDLNqGLyiTtumfX3EmQg.pEcRtir7CIqHn5czqaaZTocJim8CqEhJj3iUbm5Xw2cg.PNG/image.png",
+        "description": "",
+        "followers": 7071,
+        "isLive": false
+      }
+    }
+  }
+}

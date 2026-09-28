@@ -1,0 +1,9 @@
+{
+  "generator": "ChzzkSite.searchRooms(page 1, pageSize 20)",
+  "value": {
+    "searchRooms": {
+      "requests": 1,
+      "value": []
+    }
+  }
+}

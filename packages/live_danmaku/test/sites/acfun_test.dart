@@ -6,7 +6,7 @@ import 'dart:typed_data';
 
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
-import 'package:live_danmaku/src/sites/douyin/protobuf.dart';
+import 'package:live_danmaku/src/codec/protobuf.dart';
 import 'package:live_net/live_net.dart';
 import 'package:test/test.dart';
 

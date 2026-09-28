@@ -3,8 +3,8 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:live_core/live_core.dart';
+import 'package:live_danmaku/src/codec/protobuf.dart';
 import 'package:live_danmaku/src/connection_base.dart';
-import 'package:live_danmaku/src/sites/douyin/protobuf.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:meta/meta.dart';
 

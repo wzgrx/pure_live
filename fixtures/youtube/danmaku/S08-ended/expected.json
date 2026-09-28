@@ -1,0 +1,83 @@
+{
+  "generator": "fixtures/youtube/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) YouTubeChatProtocol (headers, endpoint, nextBody, chatBody, initialContinuation, parse) and YouTubeChatConnector (its settings and its run loop over scripted answers), copied as they were; the event classes, DecodeContext, ConnectorBase and the transport cut down to recorders",
+  "value": {
+    "frames": [
+      {
+        "frame": 0,
+        "initialContinuation": "op2w0wRyGl5DaWtxSndvWVZVTlRSbDloUmtkSlNVbHZWMWt6TUVkV1ZqRTVWRXRCRWd0NFpGOW1TbEpYV25WV1NSb1Q2cWpkdVFFTkNndDRaRjltU2xKWFduVldTU0FCTUFBJTNEQAFyDAgEGAIgACgAMAA4AHgB"
+      },
+      {
+        "frame": 1,
+        "status": 400
+      },
+      {
+        "frame": 2,
+        "initialContinuation": null
+      },
+      {
+        "frame": 3,
+        "events": [],
+        "continuation": "0ofMyAOWARp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRDABggEMCAQYAiAAKAAwADgAoAGLvdv9p5KXA6gBAA%3D%3D",
+        "delayMs": null
+      },
+      {
+        "frame": 4,
+        "events": [],
+        "continuation": null,
+        "delayMs": null
+      }
+    ],
+    "sessions": {
+      "replay": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "xd_fJRWZuVI"
+        },
+        {
+          "wait": 0
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "op2w0wRyGl5DaWtxSndvWVZVTlRSbDloUmtkSlNVbHZWMWt6TUVkV1ZqRTVWRXRCRWd0NFpGOW1TbEpYV25WV1NSb1Q2cWpkdVFFTkNndDRaRjltU2xKWFduVldTU0FCTUFBJTNEQAFyDAgEGAIgACgAMAA4AHgB"
+        },
+        {
+          "status": "reconnecting"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "op2w0wRyGl5DaWtxSndvWVZVTlRSbDloUmtkSlNVbHZWMWt6TUVkV1ZqRTVWRXRCRWd0NFpGOW1TbEpYV25WV1NSb1Q2cWpkdVFFTkNndDRaRjltU2xKWFduVldTU0FCTUFBJTNEQAFyDAgEGAIgACgAMAA4AHgB"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "op2w0wRyGl5DaWtxSndvWVZVTlRSbDloUmtkSlNVbHZWMWt6TUVkV1ZqRTVWRXRCRWd0NFpGOW1TbEpYV25WV1NSb1Q2cWpkdVFFTkNndDRaRjltU2xKWFduVldTU0FCTUFBJTNEQAFyDAgEGAIgACgAMAA4AHgB"
+        },
+        {
+          "terminal": "failed",
+          "detail": "FormatException: HTTP 400 live_chat/get_live_chat"
+        }
+      ],
+      "noChat": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "9njefMDxzqw"
+        },
+        {
+          "terminal": "offline",
+          "detail": "no live chat"
+        }
+      ]
+    }
+  }
+}

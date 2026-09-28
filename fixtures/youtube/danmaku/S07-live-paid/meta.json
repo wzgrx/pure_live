@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "case": "S07-live-paid",
+  "room": "youtube:UCHjbBVD4yRI7vU-S9Pwpnkw",
+  "danmakuKeys": {
+    "videoId": "e3n116VqcrE",
+    "channelId": "UCHjbBVD4yRI7vU-S9Pwpnkw"
+  },
+  "capturedAt": "2026-09-28T22:06:57.193452Z",
+  "route": "proxy",
+  "handshakes": [],
+  "frames": 21,
+  "raw": {
+    "sha256": "c15d53049a47d21d7d140a9d87061945cb2013bf873c6fde48a4b582c42482b0",
+    "length": 938002
+  },
+  "scrubbed": [
+    {
+      "where": "$..clickTrackingParams",
+      "rule": "dropped"
+    },
+    {
+      "where": "$..trackingParams",
+      "rule": "dropped"
+    },
+    {
+      "where": "$..loggingDirectives",
+      "rule": "dropped"
+    },
+    {
+      "where": "next: all but $.contents.twoColumnWatchNextResults.conversationBar and .results.results.contents[*].videoPrimaryInfoRenderer.viewCount",
+      "rule": "dropped"
+    },
+    {
+      "where": "get_live_chat: all but $.continuationContents.liveChatContinuation.continuations and .actions (an answer without continuationContents: all but $.contents)",
+      "rule": "dropped"
+    },
+    {
+      "where": "$..authorName.simpleText",
+      "rule": "person: same-shaped synthetic handle, one per person"
+    },
+    {
+      "where": "$..message.runs[*].text @mentions",
+      "rule": "person: the same synthetic handle as the author"
+    },
+    {
+      "where": "$..authorExternalChannelId",
+      "rule": "person: synthetic UC + 22 characters, one per person"
+    },
+    {
+      "where": "$..externalChannelId",
+      "rule": "person: synthetic UC + 22 characters, one per person"
+    },
+    {
+      "where": "$..authorPhoto",
+      "rule": "dropped"
+    },
+    {
+      "where": "$..contextMenuEndpoint",
+      "rule": "dropped (its params hold the author channel id)"
+    },
+    {
+      "where": "$..contextMenuAccessibility",
+      "rule": "dropped"
+    },
+    {
+      "where": "$.actions[*].addChatItemAction.clientId",
+      "rule": "dropped"
+    },
+    {
+      "where": "$..creatorHeartButton",
+      "rule": "dropped"
+    },
+    {
+      "where": "$..replyButton",
+      "rule": "dropped (its params hold channel ids)"
+    },
+    {
+      "where": "$..beforeContentButtons",
+      "rule": "dropped (its params hold channel ids)"
+    },
+    {
+      "where": "$..leaderboardBadge",
+      "rule": "dropped"
+    },
+    {
+      "where": "actions other than add/remove/replace chat items (addLiveChatTickerItemAction, updateLiveChatPollAction, showLiveChatActionPanelAction)",
+      "rule": "content dropped, the action type kept as {}"
+    },
+    {
+      "where": "$..continuation (answers) and request.continuation",
+      "rule": "synthetic: the first 7 characters and the %3D padding kept, the rest random; the same value in the answer and the next request (the tokens carry the channel ids of the paid-message ticker)"
+    }
+  ],
+  "note": "The busiest broadcast on the \"Live\" destination at the time (Kontraspor, 49,142 watching): `next`, then 20 get_live_chat polls over 117 s with the archived v4 timing (timeoutMs capped to 1-5 s). 6 Super Chats (2 in the first answer), 105 placeholders, 3 removals, polls and ticker items. The broadcaster keeps its public name and channel id.",
+  "tool": "scratch Python scripts (not in the repository): read-only anonymous InnerTube requests (WEB context of YouTubeApi.webContext, YouTubeApi.apiHeaders, prettyPrint=false) through the local proxy 127.0.0.1:7897; no login, nothing posted. Scrubbing refuses to write while an original author name, channel id or photo path can be found plainly, percent-encoded or in (nested) Base64"
+}

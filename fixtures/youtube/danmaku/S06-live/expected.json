@@ -1,0 +1,1293 @@
+{
+  "generator": "fixtures/youtube/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) YouTubeChatProtocol (headers, endpoint, nextBody, chatBody, initialContinuation, parse) and YouTubeChatConnector (its settings and its run loop over scripted answers), copied as they were; the event classes, DecodeContext, ConnectorBase and the transport cut down to recorders",
+  "value": {
+    "settings": {
+      "headers": {
+        "content-type": "application/json",
+        "origin": "https://www.youtube.com",
+        "cookie": "SOCS=CAI",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "endpoints": {
+        "next": "https://www.youtube.com/youtubei/v1/next?prettyPrint=false",
+        "chat": "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?prettyPrint=false"
+      },
+      "nextBody": {
+        "context": {
+          "client": {
+            "clientName": "WEB",
+            "clientVersion": "2.20260925.01.00",
+            "hl": "en",
+            "gl": "US"
+          }
+        },
+        "videoId": "VIDEO_ID_11"
+      },
+      "chatBody": {
+        "context": {
+          "client": {
+            "clientName": "WEB",
+            "clientVersion": "2.20260925.01.00",
+            "hl": "en",
+            "gl": "US"
+          }
+        },
+        "continuation": "TOKEN"
+      },
+      "maxFailures": 8,
+      "maximumDelayMs": 5000,
+      "minimumDelayMs": 1000,
+      "retryDelayMs": 2000,
+      "requestTimeoutMs": 15000
+    },
+    "frames": [
+      {
+        "frame": 0,
+        "initialContinuation": "0ofMyAOcARp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRDABggEMCAQYAiAAKAAwADgAiAEBoAGMroa3zY-XA6gBALIBAA%3D%3D"
+      },
+      {
+        "frame": 1,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLN085ZkhNajVjREZhU3A1UWNkM0l3Q2dB",
+            "sentAtMicros": 1790540966103179,
+            "userId": "HJSaeWWIXapzIWPmMnGpC-tc",
+            "userName": "@SfxIea95",
+            "text": "Terrible positioning on C9",
+            "action": 0
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNJZS0xdkxNajVjREZiOEdoQVFkdmQ4TEpB",
+            "sentAtMicros": 1790540967688767,
+            "userId": "QHAvlmB5163JGsVDJvAsSl9m",
+            "userName": "@Jeuihvtj",
+            "text": "gg clowns",
+            "action": 1
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPdmc2UExNajVjREZUSEV3Z1FkcVc4eWNn",
+            "sentAtMicros": 1790540967983209,
+            "userId": "YI-hkIeQc5C9_xm-pIz9xcCX",
+            "userName": "@BQovshueo",
+            "text": "You know your team bad when ka’sante dies",
+            "action": 2
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQV1Z5dlBNajVjREZXenRjZ2tkOXJValhR",
+            "sentAtMicros": 1790540969585096,
+            "userId": "GU1QSishaPTlyco5F57K89rX",
+            "userName": "@howepsytii437",
+            "text": "LETS GO ABUELO:old_man::old_man::old_man::old_man::old_man:",
+            "action": 3
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLYVpoX1RNajVjREZXN0Y1d01kay1vaG1R",
+            "sentAtMicros": 1790540970578709,
+            "userId": "DUY2fvtv01q1nDgc9K5Hg7gX",
+            "userName": "@udkt-tp1gm6ua8e",
+            "text": "ま、まずい",
+            "action": 4
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNJQ045ZlRNajVjREZSOXNxd0lkbVV3Mk1n",
+            "sentAtMicros": 1790540972384853,
+            "userId": "XFjcgxj_Y7zqLwGHu4fw2Fai",
+            "userName": "@Vfoozvc",
+            "text": "C9? More like FF20",
+            "action": 6
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNObWpsUFhNajVjREZUVENMUUFkOTRvRHdn",
+            "sentAtMicros": 1790540972902381,
+            "userId": "BDYDXZydCX69A9fWfMi3OvvJ",
+            "userName": "@JflkkvlgKhtymqrj0",
+            "text": "They didn’t need to contest the drake…",
+            "action": 7
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPV1N0dlhNajVjREZlX0N3Z1FkdS1vTXJn",
+            "sentAtMicros": 1790540973449368,
+            "userId": "VBDlAIRlvu968N-2P6D7cjGs",
+            "userName": "@SYMJVI-v7y",
+            "text": "GG Cows 9",
+            "action": 8
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNKekFpX2JNajVjREZmN1hMUUFkam1JZTJ3",
+            "sentAtMicros": 1790540974862310,
+            "userId": "QIvDGNWB4PDdPhyl7M-dI9fv",
+            "userName": "@wimqzva",
+            "text": "Equalizer didnt hit anyone and still killed them all lol",
+            "action": 9
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMeUt6UGJNajVjREZSdlB3Z1FkSlNrMjRn",
+            "sentAtMicros": 1790540975911277,
+            "userId": "NANays9JZXlzVs7Wn-IHTRVQ",
+            "userName": "@JqogKmobKouq-d1c",
+            "text": "how they win to lyon",
+            "action": 10
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNJbUJyUGZNajVjREZlV255d0VkbFJVV3Rn",
+            "sentAtMicros": 1790540977478169,
+            "userId": "QQ2_WJ8PhJfNlnfksIR4hBaV",
+            "userName": "@Viyrj588",
+            "text": ":frog:",
+            "action": 11
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNcXN2ZmZNajVjREZVdkV3Z1FkcjJZMVZB",
+            "sentAtMicros": 1790540977764615,
+            "userId": "XD30pFruu_uFWVGwbMpq5T7Y",
+            "userName": "@wimfiongb4169",
+            "text": "lmao c9 first team to lose to Jhin adc?",
+            "action": 12
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMdnhzZmpNajVjREZWX3p3Z1FkbWRRTzR3",
+            "sentAtMicros": 1790540979671279,
+            "userId": "DSnoEs8YyxE70rORpg1108zz",
+            "userName": "@udvblhnxas",
+            "text": "@howepsytii437 yo that statement of yours has me dead af, why do they call him this. please please explain so i can complete this laughter",
+            "action": 13
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNZTN6UG5NajVjREZWY0Rzd0FkOVd3TE5R",
+            "sentAtMicros": 1790540982207000,
+            "userId": "IVOO-R07bFX4KWIRySTLZSmk",
+            "userName": "@Glxrhl_ei",
+            "text": "2.7K gap:skull:",
+            "action": 14
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQbnhzZnpNajVjREZkbUR5d0VkNG1JYmJ3",
+            "sentAtMicros": 1790540988061967,
+            "userId": "SMTXj30F2KdQWZOSs2n9tvAF",
+            "userName": "@pvct6260",
+            "text": "\"This is C9 new level\" caster cursed",
+            "action": 15
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQakp3UHpNajVjREZlN1B3Z1FkVFc4YVBn",
+            "sentAtMicros": 1790540988296117,
+            "userId": "NZgAfJpOLpJ1UC2Duny-B-uj",
+            "userName": "@GftkhFfkf74",
+            "text": "qiyana ult is massive here",
+            "action": 16
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLQ2NrUF9NajVjREZadEtxd0lkOHdJbW9n",
+            "sentAtMicros": 1790540993799789,
+            "userId": "ZE3Nb21Xp8BrnDfciAKKX9Lj",
+            "userName": "@Ivyzclu",
+            "text": "loki so uselesss",
+            "action": 17
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLQzBnNEROajVjREZaZkdQd1FkTDU4MDR3",
+            "sentAtMicros": 1790540995689346,
+            "userId": "KSO3M36PJFT4G7WwVyLV4Rgj",
+            "userName": "@eugFtlcwtRvkz-j7u",
+            "text": "jungle gap",
+            "action": 18
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPU19rNEROajVjREZlaUQ1UWNkTlVNRmh3",
+            "sentAtMicros": 1790540995946655,
+            "userId": "TNLPkPMgwVUsXqR3MtcWlbOl",
+            "userName": "@mvgepooajpzy",
+            "text": "did the qiyana ult steal the drag?",
+            "action": 19
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMZVE3b0xOajVjREZkUkFUQWdkcXlZeGhB",
+            "sentAtMicros": 1790541001626459,
+            "userId": "HBpGjlw8Lwvt6qe0Dmlh2BoW",
+            "userName": "@esnsxyolzaz",
+            "text": "Blaber exhausted all his energy after gapping Inspired last series I guess",
+            "action": 20
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPZU5xb1BOajVjREZZWEg0d2Nka0YwdUpB",
+            "sentAtMicros": 1790541002615789,
+            "userId": "HACOax1hn_MRG78MkBWmnqeb",
+            "userName": "@tuecssugixi3603",
+            "text": "tactical lucian lol, put little bro on scaling adcs only pls",
+            "action": 21
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNORzI1WVROajVjREZXVE40d2NkLUhBc2dn",
+            "sentAtMicros": 1790541005681388,
+            "userId": "WM81LvEWdhejpUTOHCIGJozr",
+            "userName": "@dbebfepmyh7435",
+            "text": "baddie",
+            "action": 22
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMUHJoSVhOajVjREZhbElUQWdkLVJFOFBn",
+            "sentAtMicros": 1790541006201056,
+            "userId": "ZCxaGO_H-mVhr0K4oPtg3SXh",
+            "userName": "@yehvsmw",
+            "text": "fed jhin",
+            "action": 23
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNdnhySWJOajVjREZhak1GZ2tkMUNZVl9R",
+            "sentAtMicros": 1790541008948347,
+            "userId": "KIhgREMYJ-pkmSIutMdikNMi",
+            "userName": "@kcztv625",
+            "text": "WHAT WAS THAT SMITE",
+            "action": 24
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNJbkVzb2JOajVjREZZRVNkZ1lkSzV3R3Zn",
+            "sentAtMicros": 1790541009042103,
+            "userId": "VBDlAIRlvu968N-2P6D7cjGs",
+            "userName": "@SYMJVI-v7y",
+            "text": "Cow9",
+            "action": 25
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMUEh0NGZOajVjREZWMUVFZ0VkekkwOWV3",
+            "sentAtMicros": 1790541011219096,
+            "userId": "KEz4PKZQg7U1-fW9ImKhdtom",
+            "userName": "@L6PA6G5_W41V",
+            "text": "ayo how is there 2 Jhins in the studio",
+            "action": 26
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNOM08yb2ZOajVjREZXVHU0d2NkSUFBTnNn",
+            "sentAtMicros": 1790541011796128,
+            "userId": "LZ82qSv37OCZVpcbIwzFJnfb",
+            "userName": "@Raaet_4_6",
+            "text": "well Lyon did say TL was gonna win against C9",
+            "action": 27
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPZnlrSWpOajVjREZlNTlxd0lkc2lVVFNR",
+            "sentAtMicros": 1790541012687527,
+            "userId": "EMLw9gZg1ftZlL13NhT5Yadf",
+            "userName": "@UiroXzKwaDbUniwu-f4x",
+            "text": "Clown 9 still on a high after being gifted a series by LYON lmao",
+            "action": 28
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNZlVxWWpOajVjREZUaUJ3Z0VkS05Nenpn",
+            "sentAtMicros": 1790541013087909,
+            "userId": "AVCeEqIf4A4k7bm68UuoxOWs",
+            "userName": "@ZqrTqcyv5",
+            "text": "wait that cosplay is insane",
+            "action": 29
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLV255SWpOajVjREZTR3pyZ1VkVGtBSU53",
+            "sentAtMicros": 1790541013598150,
+            "userId": "ENOO02AMtjMZBM3fU8y1yQEg",
+            "userName": "@Pejqqybhx",
+            "text": "as a C9 fan we never had a chance in this series losing draft with a jhin",
+            "action": 30
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPMm11SXJOajVjREZmYmxjZ2tkY0JjNUl3",
+            "sentAtMicros": 1790541017548406,
+            "userId": "PXaSB8bgWTS1D39vJ6qkgZRi",
+            "userName": "@HhptlV4p",
+            "text": "they smited the dragon but I think qiyana Q kill it",
+            "action": 31
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLdnl0NHZOajVjREZWWFRjZ2tkMkNrbG9R",
+            "sentAtMicros": 1790541019611958,
+            "userId": "GOOooLlBNc4JQ27CC1t7LHHZ",
+            "userName": "@VzixEmybnfff",
+            "text": "qiyana didn't do any dmg, what is that chatter talking about",
+            "action": 32
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNKeTM3SXpOajVjREZSM0ljZ2tkZGdVVzl3",
+            "sentAtMicros": 1790541022569757,
+            "userId": "QQAPSyzoOa2uYBkipp5YFjBt",
+            "userName": "@IC_Bhwsxggbk",
+            "text": ":frog::frog::frog:LETS GOOO:frog::frog::frog:",
+            "action": 33
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMQ3V1WTdOajVjREZXQktUQWdkWHhRSWdB",
+            "sentAtMicros": 1790541025926624,
+            "userId": "TA2niANm-2NyTrnv6J23-weH",
+            "userName": "@ytdoadwy",
+            "text": "GULP",
+            "action": 34
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQcUhxSkROajVjREZaQzB5d0VkWHFZS2pR",
+            "sentAtMicros": 1790541029844234,
+            "userId": "GU1QSishaPTlyco5F57K89rX",
+            "userName": "@howepsytii437",
+            "text": "@udvblhnxas check jose streamings man",
+            "action": 35
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQUFV3cEROajVjREZkREtMUUFkeWZNaGZ3",
+            "sentAtMicros": 1790541030274620,
+            "userId": "WJ1mwFNr7rNFLLoj627rHDsH",
+            "userName": "@IJ20930",
+            "text": "fiesta in jungle",
+            "action": 36
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMdng1WkROajVjREZhak1GZ2tkMUNZVl9R",
+            "sentAtMicros": 1790541030850967,
+            "userId": "WL5--3CEFP_zqPIMDT3GU27L",
+            "userName": "@efuiro",
+            "text": "LETS GO TLAW",
+            "action": 37
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNOek96NUhOajVjREZWZnFjZ2tkUE5jNHFn",
+            "sentAtMicros": 1790541032583311,
+            "userId": "NYdrYuTwlpKe-uZa0nVeCgxI",
+            "userName": "@Ipttgggq_ih",
+            "text": "DALE ABUELOO",
+            "action": 38
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNT2t6NUhOajVjREZlTFJsQWtkQ1A0b3dn",
+            "sentAtMicros": 1790541032582790,
+            "userId": "JUvQcCo8PIQFEf5QPTy3bkvz",
+            "userName": "@kznjzrohw5279",
+            "text": "@mvgepooajpzy Qiyana Q's",
+            "action": 39
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNOV2h3SlBOajVjREZYTmNYZ01kVXdVd0RR",
+            "sentAtMicros": 1790541036528658,
+            "userId": "HJzy15FQNyjq4cSAaEHFzljq",
+            "userName": "@jxyopesvwtbydfvcutpbobuq690",
+            "text": "JOSEDEODO>>>>>BLABER",
+            "action": 40
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLZldfWlROajVjREZVMU9UQWdkUzJNSWZ3",
+            "sentAtMicros": 1790541039635598,
+            "userId": "KTbkA8HC3UTP7brchLP-WO6T",
+            "userName": "@yihfgsu",
+            "text": "TL is doing a really good job and just poking them down and not over commit",
+            "action": 41
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMZVcycGZOajVjREZYRGljZ2tkSTNnUWhR",
+            "sentAtMicros": 1790541045339246,
+            "userId": "GU1QSishaPTlyco5F57K89rX",
+            "userName": "@howepsytii437",
+            "text": "LETS GO ABUELO:old_man::old_man::old_man::old_man::old_man:",
+            "action": 42
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMV21ncG5OajVjREZZUlFUQWdkSXdnZm93",
+            "sentAtMicros": 1790541048100274,
+            "userId": "DSnoEs8YyxE70rORpg1108zz",
+            "userName": "@udvblhnxas",
+            "text": "@howepsytii437 okay I will tune in and watch",
+            "action": 43
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNKaXpfS0ROajVjREZWN0RMUUFkaTNrWlBn",
+            "sentAtMicros": 1790541064773676,
+            "userId": "TA2niANm-2NyTrnv6J23-weH",
+            "userName": "@ytdoadwy",
+            "text": "Im really loving what Im seeing from TL this first game they look solid",
+            "action": 44
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQN3U5YUxOajVjREZkdmxQd1FkOGFZR0pR",
+            "sentAtMicros": 1790541068866487,
+            "userId": "SWJi-IlHW84lvyWegDswnLGr",
+            "userName": "@Siktsimzt",
+            "text": "well I guess a mosquito can win if your enemy decides to throw the game?",
+            "action": 45
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQVFBycVhOajVjREZRakl3Z1FkNGdvTl9n",
+            "sentAtMicros": 1790541073985712,
+            "userId": "ENOO02AMtjMZBM3fU8y1yQEg",
+            "userName": "@Pejqqybhx",
+            "text": "TL won this in draft",
+            "action": 46
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPZlVpYWpOajVjREZVckg0d2NkMlB3M21B",
+            "sentAtMicros": 1790541079676263,
+            "userId": "WGwmUcoUnsT83Rrf2bvPCSVP",
+            "userName": "@znantvxv",
+            "text": "niceeee",
+            "action": 47
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNZTZ6NmpOajVjREZjdkx3Z1FkUGtzd2h3",
+            "sentAtMicros": 1790541080813839,
+            "userId": "KTbkA8HC3UTP7brchLP-WO6T",
+            "userName": "@yihfgsu",
+            "text": "ouch",
+            "action": 48
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNJT0RuNm5OajVjREZZWEg0d2Nka0YwdUpB",
+            "sentAtMicros": 1790541082122893,
+            "userId": "OIJEQ-PNIciapn3tvnpeLhTZ",
+            "userName": "@IAVDjwPV",
+            "text": "ouch",
+            "action": 49
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNTF82YXpOajVjREZTNnp5d0VkSmdFUWZ3",
+            "sentAtMicros": 1790541089642263,
+            "userId": "UPTCbERzZ_Dq22nNp2yVKIpc",
+            "userName": "@nqiypuz59",
+            "text": "lo que pega el abuelo",
+            "action": 50
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNKcXc4S3pOajVjREZiNFJkZ1lkLUhvbVp3",
+            "sentAtMicros": 1790541089749509,
+            "userId": "IZWJAZYCAj3140gj4Nwascdz",
+            "userName": "@yqpb-kb52",
+            "text": "82",
+            "action": 51
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNNjUtcXpOajVjREZacTJ5d0VkbUI4TWpn",
+            "sentAtMicros": 1790541089915539,
+            "userId": "WGwmUcoUnsT83Rrf2bvPCSVP",
+            "userName": "@znantvxv",
+            "text": "they are smurfing",
+            "action": 52
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMbXdnSzNOajVjREZVZkV3Z1Fkd09BRzlB",
+            "sentAtMicros": 1790541090004241,
+            "userId": "WJ1mwFNr7rNFLLoj627rHDsH",
+            "userName": "@IJ20930",
+            "text": "GG",
+            "action": 53
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQTFlyYTNOajVjREZlX0x3Z1FkMnI0VzRn",
+            "sentAtMicros": 1790541090747512,
+            "userId": "EIfdk5Q6hRde0sCZBXJN67Yh",
+            "userName": "@prh_",
+            "text": "omg",
+            "action": 54
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNcUF1NjNOajVjREZXdjg0d2NkRnR3UnNB",
+            "sentAtMicros": 1790541090969213,
+            "userId": "UCEuvQvckbh_Q7LLbordF6QW",
+            "userName": "@hLANRLChQVQ",
+            "text": "such an absolutely broken champ",
+            "action": 55
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLMkkzSzNOajVjREZlVGV3Z1FkTS1RS3lR",
+            "sentAtMicros": 1790541091510510,
+            "userId": "KTbkA8HC3UTP7brchLP-WO6T",
+            "userName": "@yihfgsu",
+            "text": "ouch x2",
+            "action": 56
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQUDRocTdOajVjREZYN25jZ2tkNlNBY1F3",
+            "sentAtMicros": 1790541092214992,
+            "userId": "GZh52k-G0-AlGvMKth0dvNov",
+            "userName": "@ktjjrqjwq",
+            "text": "gg",
+            "action": 57
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLLU51S19OajVjREZYeVQ1UWNkZWR3Qmxn",
+            "sentAtMicros": 1790541095116454,
+            "userId": "PM-5z5Et-THBMyHlbsoMZs2e",
+            "userName": "@qgwjwvj04",
+            "text": "HOLY MOLY",
+            "action": 58
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMbi05cV9OajVjREZlMTdUQWdkel9vYkhR",
+            "sentAtMicros": 1790541096148066,
+            "userId": "NAYWAlC3FKQtjIuGwtTZEM7T",
+            "userName": "@nvddpm6424",
+            "text": "lord morgan!!",
+            "action": 60
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNJLTczYkROajVjREZWM09jZ2tkZFI0c1BB",
+            "sentAtMicros": 1790541097829946,
+            "userId": "GU1QSishaPTlyco5F57K89rX",
+            "userName": "@howepsytii437",
+            "text": "LETS GO ABUELO:old_man::old_man::old_man::old_man::old_man:",
+            "action": 61
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNKWDQ2YkROajVjREZiUlFxd0lkTFJFVGhR",
+            "sentAtMicros": 1790541098031669,
+            "userId": "XFjcgxj_Y7zqLwGHu4fw2Fai",
+            "userName": "@Vfoozvc",
+            "text": "JFK'd",
+            "action": 62
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMNnI1YkhOajVjREZjTGpQd1FkWjZFWmh3",
+            "sentAtMicros": 1790541100051535,
+            "userId": "VLxdID-xPEAozlfOwf5Xgiyw",
+            "userName": "@VkdksoqJchw",
+            "text": "lets gooo",
+            "action": 63
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLU1A4ckhOajVjREZRSlpxd0lkMElRQjV3",
+            "sentAtMicros": 1790541100257200,
+            "userId": "TJSzJg4QYbGF-1FgP053_K6D",
+            "userName": "@iiaytgq0523",
+            "text": "RIP",
+            "action": 64
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNSzMyTFBOajVjREZWbUV5d0VkRnZ3Smpn",
+            "sentAtMicros": 1790541104036422,
+            "userId": "XN_VnV-nEDhjLy5QUZadeIHh",
+            "userName": "@elvbmkuag",
+            "text": "EL ABUELO",
+            "action": 65
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNKXzAyTFROajVjREZmX2NjZ2tkSVZBRVdB",
+            "sentAtMicros": 1790541106140353,
+            "userId": "PXaSB8bgWTS1D39vJ6qkgZRi",
+            "userName": "@HhptlV4p",
+            "text": "dear lord, the old gramps jose hits like a drunk dad",
+            "action": 66
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPeVQ0clROajVjREZhTjFUQWdkQVdNRnd3",
+            "sentAtMicros": 1790541106287121,
+            "userId": "ODIWbcM2Qjfl4klF2o3PvpWu",
+            "userName": "@KlzGiuoru1364",
+            "text": "draft diff, C9 will come back",
+            "action": 67
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNORGprclhOajVjREZTYkNsQWtkQXhJRVF3",
+            "sentAtMicros": 1790541107087830,
+            "userId": "NM4il33cnBvdGKlX8X94KE-L",
+            "userName": "@mhdrq94",
+            "text": "C9 disicion making is so suck",
+            "action": 68
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNOei1vYlhOajVjREZSRDhjZ2tkNmNFMkJB",
+            "sentAtMicros": 1790541107342709,
+            "userId": "GHowiFAVmYZc8GO0UUCw7blu",
+            "userName": "@hmtqmrzxnwyels",
+            "text": "Welp gg",
+            "action": 69
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLS3ZvcmJOajVjREZUN0tGZ2tkZXdBb19n",
+            "sentAtMicros": 1790541109441301,
+            "userId": "KIhgREMYJ-pkmSIutMdikNMi",
+            "userName": "@kcztv625",
+            "text": "BLABER BACK TO HIS USUAL SELF",
+            "action": 70
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQaTB0TGJOajVjREZWVGVQd1FkamdJUHF3",
+            "sentAtMicros": 1790541109737523,
+            "userId": "MI0eBMlSgle6vDTjXzanXqVB",
+            "userName": "@xwevojmeylo9574",
+            "text": "Genuinely this shit still kinda playable",
+            "action": 71
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNKemV2YmJOajVjREZWREFQd1FkeElJVnBB",
+            "sentAtMicros": 1790541109886077,
+            "userId": "LYud2c9Pfjd7gc8g-fHxw7rx",
+            "userName": "@kjgofpzgpsbx",
+            "text": "yeah, gg go next i think.",
+            "action": 72
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNT0cyN2JOajVjREZWdXV3Z0VkWWt3ZERR",
+            "sentAtMicros": 1790541110364996,
+            "userId": "XD30pFruu_uFWVGwbMpq5T7Y",
+            "userName": "@wimfiongb4169",
+            "text": "@Vfoozvc yikes",
+            "action": 73
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNKSEI2TGJOajVjREZkWmJxd0lkVUxvRHdn",
+            "sentAtMicros": 1790541110591489,
+            "userId": "MA-NvYv1l2HkX_nMz4xxgSYg",
+            "userName": "@dtfjziofhkpxqc2195",
+            "text": "TL WINS",
+            "action": 74
+          }
+        ],
+        "continuation": "0ofMyAOqAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCiBgOm2zY-XAzAAQAJKbAgBGAAgAEoIEAAYACAAMABQqo_mt82PlwNYA3gAogEAqgEMEAAaACIAKgQIABAAsAEAwAEAyAGqj-a3zY-XA-IBDAi4-uXVBhDthe-xAugBAPgBAIgCAJACAJoCDAi4-uXVBhDthe-xAogDAVCEmY-3zY-XA1jCkqudso-XA4IBBggEGAEwAIgBAKABoNrnt82PlwOyAQC6AQIICtABtvrl1QY%3D",
+        "delayMs": 10000
+      },
+      {
+        "frame": 2,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNOenc1YmpOajVjREZRdW93Z0VkTm9NTzR3",
+            "sentAtMicros": 1790541114736994,
+            "userId": "KVcQWcF7JhpL7SvQw0DHspRZ",
+            "userName": "@Tjcglbz-49",
+            "text": "not even close",
+            "action": 0
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNOMlpqcm5OajVjREZXbkN3Z1FkemVVelFR",
+            "sentAtMicros": 1790541115401785,
+            "userId": "TA2niANm-2NyTrnv6J23-weH",
+            "userName": "@ytdoadwy",
+            "text": "Syndra has 6 more stacks and Jose dies there GULP",
+            "action": 1
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPclltN25OajVjREZhN3VQd1FkR1E4WkpB",
+            "sentAtMicros": 1790541115626712,
+            "userId": "KSO3M36PJFT4G7WwVyLV4Rgj",
+            "userName": "@eugFtlcwtRvkz-j7u",
+            "text": "Team liquid completely LIQUIDATED Cow 9",
+            "action": 2
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPN3FnYnJOajVjREZkT0R3Z0VkMVhvSDNR",
+            "sentAtMicros": 1790541117301008,
+            "userId": "WUE2UIACAm3PYvEdhzHI7OQw",
+            "userName": "@OAsx___",
+            "text": "turtle for 30 minutes maybe",
+            "action": 3
+          }
+        ],
+        "continuation": "0ofMyAOqAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCiQwoK6zY-XAzAAQAJKbAgBGAAgAEoIEAAYACAAMABQqo_mt82PlwNYA3gAogEAqgEMEAAaACIAKgQIABAAsAEAwAEAyAGqj-a3zY-XA-IBDAi4-uXVBhDthe-xAugBAPgBAIgCAJACAJoCDAi4-uXVBhDthe-xAogDAVDiu7i6zY-XA1jCkqudso-XA4IBBggEGAEwAIgBAKABjNfTus2PlwOyAQC6AQIICtABtvrl1QY%3D",
+        "delayMs": 10000
+      },
+      {
+        "frame": 3,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNMTDY3cnJOajVjREZReUY1UWNkMEFjN2h3",
+            "sentAtMicros": 1790541119084081,
+            "userId": "ENOO02AMtjMZBM3fU8y1yQEg",
+            "userName": "@Pejqqybhx",
+            "text": "TL draft is better",
+            "action": 0
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNOVzdycnZOajVjREZYbU41UWNkc1FRWTdn",
+            "sentAtMicros": 1790541120124629,
+            "userId": "PM-5z5Et-THBMyHlbsoMZs2e",
+            "userName": "@qgwjwvj04",
+            "text": "this si like SR vs Lyon",
+            "action": 1
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQckR3N3ZOajVjREZTcHNxd0lkNGVJa1hR",
+            "sentAtMicros": 1790541120473510,
+            "userId": "ZE3Nb21Xp8BrnDfciAKKX9Lj",
+            "userName": "@Ivyzclu",
+            "text": "doeda ne la",
+            "action": 2
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNOX0JvcnpOajVjREZjbFpxd0lkOWdrRmt3",
+            "sentAtMicros": 1790541122027125,
+            "userId": "ETPOoVVGo722YzgI1oP7nLcx",
+            "userName": "@mgifcumedt",
+            "text": "@L6PA6G5_W41V you can pause for youself press space why do i get banned for saying core is supp tho?",
+            "action": 3
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPbnJ4THpOajVjREZlakhGZ2tkZllRQ0FR",
+            "sentAtMicros": 1790541122584881,
+            "userId": "FGr61H0jdw4p5AAVdcdOp-1C",
+            "userName": "@EhyknxrcQkqwro",
+            "text": ":old_man::old_man::old_man::old_man::old_man:",
+            "action": 4
+          }
+        ],
+        "continuation": "0ofMyAOqAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCixgsW8zY-XAzAAQAJKbAgBGAAgAEoIEAAYACAAMABQqo_mt82PlwNYA3gAogEAqgEMEAAaACIAKgQIABAAsAEAwAEAyAGqj-a3zY-XA-IBDAi4-uXVBhDthe-xAugBAPgBAIgCAJACAJoCDAi4-uXVBhDthe-xAogDAVCbhfO8zY-XA1jCkqudso-XA4IBBggEGAEwAIgBAKAB-_Gyvc2PlwOyAQC6AQIICtABwvrl1QY%3D",
+        "delayMs": 10000
+      },
+      {
+        "frame": 4,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNJWDR5cjNOajVjREZiSlVUQWdkSGNZVEh3",
+            "sentAtMicros": 1790541124782643,
+            "userId": "KTbkA8HC3UTP7brchLP-WO6T",
+            "userName": "@yihfgsu",
+            "text": "wait is a jhin just broken? lol",
+            "action": 0
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNJcUl0TF9OajVjREZSSDJjZ2tkUFBzMXFB",
+            "sentAtMicros": 1790541128604609,
+            "userId": "GU1QSishaPTlyco5F57K89rX",
+            "userName": "@howepsytii437",
+            "text": "LETS GO ABUELO:old_man::old_man::old_man::old_man::old_man:",
+            "action": 1
+          }
+        ],
+        "continuation": "0ofMyAOpAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCjBt7S_zY-XAzAAQAJKawgBGAAgAEoIEAAYACAAMABQqo_mt82PlwNYA3gAogEAqgEMEAAaACIAKgQIABAAsAEAwAEAyAGqj-a3zY-XA-IBDAi4-uXVBhDthe-xAugBAPgBAIgCAJACAJoCCwjK-uXVBhDU88JUiAMBUKuh27_Nj5cDWMKSq52yj5cDggEGCAQYATAAiAEAoAHtyJTAzY-XA7IBALoBAggK0AHI-uXVBg%3D%3D",
+        "delayMs": 10000
+      },
+      {
+        "frame": 5,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNNlg2c0ROajVjREZhOTVxd0lkMER3dmNB",
+            "sentAtMicros": 1790541131591026,
+            "userId": "ZE3Nb21Xp8BrnDfciAKKX9Lj",
+            "userName": "@Ivyzclu",
+            "text": "looking doeda",
+            "action": 0
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQNmktOEROajVjREZmN1hMUUFkam1JZTJ3",
+            "sentAtMicros": 1790541131868975,
+            "userId": "LVqUiDO7d57zJmsRcIQWSnuq",
+            "userName": "@Fbgvwvjo-n1p",
+            "text": "Dognatos",
+            "action": 1
+          }
+        ],
+        "continuation": "0ofMyAOpAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCiv1vvAzY-XAzAAQAJKawgBGAAgAEoIEAAYACAAMABQqo_mt82PlwNYA3gAogEAqgEMEAAaACIAKgQIABAAsAEAwAEAyAGqj-a3zY-XA-IBDAi4-uXVBhDthe-xAugBAPgBAIgCAJACAJoCCwjK-uXVBhDU88JUiAMBUKy0sMHNj5cDWMKSq52yj5cDggEGCAQYATAAiAEAoAHCyvfCzY-XA7IBALoBAggK0AHO-uXVBg%3D%3D",
+        "delayMs": 10000
+      },
+      {
+        "frame": 6,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNcjV3TVBOajVjREZUSEV3Z1FkcVc4eWNn",
+            "sentAtMicros": 1790541137206864,
+            "userId": "RD4mb4x129JqjG61QBbLByce",
+            "userName": "@upfeoxvsszxaw3016",
+            "text": "I said in the beginning of the game, Jose went 10/0/13 yesterday Quiyana",
+            "action": 0
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNKbVM3OFBOajVjREZiM19GZ2tkeHR3RWJn",
+            "sentAtMicros": 1790541137959869,
+            "userId": "TGtPR7HvOwkRqqxjZNNyfrvI",
+            "userName": "@CykzccTdwaggshp-bo5de",
+            "text": "GGS ABUELO",
+            "action": 1
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPampvY1ROajVjREZRc3gxZ0FkZC1nWDhn",
+            "sentAtMicros": 1790541138791616,
+            "userId": "LYud2c9Pfjd7gc8g-fHxw7rx",
+            "userName": "@kjgofpzgpsbx",
+            "text": "upside is that jose's squishy as all heck, if he gets picked off i think fights are winnable.",
+            "action": 2
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNQTEMxc1ROajVjREZhWFZjZ2tkbjZFWGRR",
+            "sentAtMicros": 1790541139658429,
+            "userId": "GHowiFAVmYZc8GO0UUCw7blu",
+            "userName": "@hmtqmrzxnwyels",
+            "text": "Someone remind C9 to actually respect TL and slow play like they did against Lyon",
+            "action": 4
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNPejE3c1ROajVjREZTd2gxZ0FkSm9BWWln",
+            "sentAtMicros": 1790541140060536,
+            "userId": "TJSzJg4QYbGF-1FgP053_K6D",
+            "userName": "@iiaytgq0523",
+            "text": "JG diff",
+            "action": 5
+          }
+        ],
+        "continuation": "0ofMyAOpAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCj40u_EzY-XAzAAQAJKawgBGAAgAEoIEAAYACAAMABQqo_mt82PlwNYA3gAogEAqgEMEAAaACIAKgQIABAAsAEAwAEAyAGqj-a3zY-XA-IBDAi4-uXVBhDthe-xAugBAPgBAIgCAJACAJoCCwjK-uXVBhDU88JUiAMBUIe2mcXNj5cDWMKSq52yj5cDggEGCAQYATAAiAEAoAGL39nFzY-XA7IBALoBAggK0AHT-uXVBg%3D%3D",
+        "delayMs": 10000
+      },
+      {
+        "frame": 7,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNNQ0g2Y2ZOajVjREZRLW55d0VkNU44dUtB",
+            "sentAtMicros": 1790541146259247,
+            "userId": "JZGSn2d1NDskCuD-knkk6a6u",
+            "userName": "@Iqi-k03w",
+            "text": "na",
+            "action": 0
+          }
+        ],
+        "continuation": "0ofMyAOsAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCiv_unHzY-XAzAAQAJKbggBGAAgAEoKCAEQABgAIAAwAFCqj-a3zY-XA1gDeACiAQCqAQwQABoAIgAqBAgAEACwAQDAAQDIAaqP5rfNj5cD4gEMCLj65dUGEO2F77EC6AEA-AEAiAIAkAIAmgIMCNv65dUGEMvYkaECiAMBUNCpmsjNj5cDWMKSq52yj5cDggEGCAQYATAAiAEAoAHJ-73IzY-XA7IBALoBAggK0AHZ-uXVBg%3D%3D",
+        "delayMs": 10000
+      },
+      {
+        "frame": 8,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLVE1uY2pOajVjREZiaERYZ01kejdNTFlR",
+            "sentAtMicros": 1790541147107671,
+            "userId": "KEz4PKZQg7U1-fW9ImKhdtom",
+            "userName": "@L6PA6G5_W41V",
+            "text": "@mgifcumedt i refuse to pause",
+            "action": 0
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkNLRHlwOHJOajVjREZaUnJxd0lkdFlnR2lB",
+            "sentAtMicros": 1790541151476064,
+            "userId": "ETPOoVVGo722YzgI1oP7nLcx",
+            "userName": "@mgifcumedt",
+            "text": "jhin is good under certain conditions",
+            "action": 1
+          }
+        ],
+        "continuation": "0ofMyAOsAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCjZhcjKzY-XAzAAQAJKbggBGAAgAEoKCAEQABgAIAAwAFCqj-a3zY-XA1gDeACiAQCqAQwQABoAIgAqBAgAEACwAQDAAQDIAaqP5rfNj5cD4gEMCLj65dUGEO2F77EC6AEA-AEAiAIAkAIAmgIMCNv65dUGEMvYkaECiAMBUPD208rNj5cDWMKSq52yj5cDggEGCAQYATAAiAEAoAGhqJ_LzY-XA7IBALoBAggK0AHZ-uXVBg%3D%3D",
+        "delayMs": 10000
+      }
+    ],
+    "session": [
+      {
+        "status": "connecting"
+      },
+      {
+        "request": "next",
+        "videoId": "xd_fJRWZuVI"
+      },
+      {
+        "wait": 0
+      },
+      {
+        "request": "live_chat/get_live_chat",
+        "continuation": "0ofMyAOcARp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRDABggEMCAQYAiAAKAAwADgAiAEBoAGMroa3zY-XA6gBALIBAA%3D%3D"
+      },
+      {
+        "status": "connected"
+      },
+      {
+        "joined": true
+      },
+      {
+        "wait": 5000
+      },
+      {
+        "request": "live_chat/get_live_chat",
+        "continuation": "0ofMyAOqAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCiBgOm2zY-XAzAAQAJKbAgBGAAgAEoIEAAYACAAMABQqo_mt82PlwNYA3gAogEAqgEMEAAaACIAKgQIABAAsAEAwAEAyAGqj-a3zY-XA-IBDAi4-uXVBhDthe-xAugBAPgBAIgCAJACAJoCDAi4-uXVBhDthe-xAogDAVCEmY-3zY-XA1jCkqudso-XA4IBBggEGAEwAIgBAKABoNrnt82PlwOyAQC6AQIICtABtvrl1QY%3D"
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNOenc1YmpOajVjREZRdW93Z0VkTm9NTzR3",
+          "sentAtMicros": 1790541114736994,
+          "userId": "KVcQWcF7JhpL7SvQw0DHspRZ",
+          "userName": "@Tjcglbz-49",
+          "text": "not even close"
+        },
+        "step": 2,
+        "action": 0
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNOMlpqcm5OajVjREZXbkN3Z1FkemVVelFR",
+          "sentAtMicros": 1790541115401785,
+          "userId": "TA2niANm-2NyTrnv6J23-weH",
+          "userName": "@ytdoadwy",
+          "text": "Syndra has 6 more stacks and Jose dies there GULP"
+        },
+        "step": 2,
+        "action": 1
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNPclltN25OajVjREZhN3VQd1FkR1E4WkpB",
+          "sentAtMicros": 1790541115626712,
+          "userId": "KSO3M36PJFT4G7WwVyLV4Rgj",
+          "userName": "@eugFtlcwtRvkz-j7u",
+          "text": "Team liquid completely LIQUIDATED Cow 9"
+        },
+        "step": 2,
+        "action": 2
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNPN3FnYnJOajVjREZkT0R3Z0VkMVhvSDNR",
+          "sentAtMicros": 1790541117301008,
+          "userId": "WUE2UIACAm3PYvEdhzHI7OQw",
+          "userName": "@OAsx___",
+          "text": "turtle for 30 minutes maybe"
+        },
+        "step": 2,
+        "action": 3
+      },
+      {
+        "wait": 5000
+      },
+      {
+        "request": "live_chat/get_live_chat",
+        "continuation": "0ofMyAOqAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCiQwoK6zY-XAzAAQAJKbAgBGAAgAEoIEAAYACAAMABQqo_mt82PlwNYA3gAogEAqgEMEAAaACIAKgQIABAAsAEAwAEAyAGqj-a3zY-XA-IBDAi4-uXVBhDthe-xAugBAPgBAIgCAJACAJoCDAi4-uXVBhDthe-xAogDAVDiu7i6zY-XA1jCkqudso-XA4IBBggEGAEwAIgBAKABjNfTus2PlwOyAQC6AQIICtABtvrl1QY%3D"
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNMTDY3cnJOajVjREZReUY1UWNkMEFjN2h3",
+          "sentAtMicros": 1790541119084081,
+          "userId": "ENOO02AMtjMZBM3fU8y1yQEg",
+          "userName": "@Pejqqybhx",
+          "text": "TL draft is better"
+        },
+        "step": 3,
+        "action": 0
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNOVzdycnZOajVjREZYbU41UWNkc1FRWTdn",
+          "sentAtMicros": 1790541120124629,
+          "userId": "PM-5z5Et-THBMyHlbsoMZs2e",
+          "userName": "@qgwjwvj04",
+          "text": "this si like SR vs Lyon"
+        },
+        "step": 3,
+        "action": 1
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNQckR3N3ZOajVjREZTcHNxd0lkNGVJa1hR",
+          "sentAtMicros": 1790541120473510,
+          "userId": "ZE3Nb21Xp8BrnDfciAKKX9Lj",
+          "userName": "@Ivyzclu",
+          "text": "doeda ne la"
+        },
+        "step": 3,
+        "action": 2
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNOX0JvcnpOajVjREZjbFpxd0lkOWdrRmt3",
+          "sentAtMicros": 1790541122027125,
+          "userId": "ETPOoVVGo722YzgI1oP7nLcx",
+          "userName": "@mgifcumedt",
+          "text": "@L6PA6G5_W41V you can pause for youself press space why do i get banned for saying core is supp tho?"
+        },
+        "step": 3,
+        "action": 3
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNPbnJ4THpOajVjREZlakhGZ2tkZllRQ0FR",
+          "sentAtMicros": 1790541122584881,
+          "userId": "FGr61H0jdw4p5AAVdcdOp-1C",
+          "userName": "@EhyknxrcQkqwro",
+          "text": ":old_man::old_man::old_man::old_man::old_man:"
+        },
+        "step": 3,
+        "action": 4
+      },
+      {
+        "wait": 5000
+      },
+      {
+        "request": "live_chat/get_live_chat",
+        "continuation": "0ofMyAOqAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCixgsW8zY-XAzAAQAJKbAgBGAAgAEoIEAAYACAAMABQqo_mt82PlwNYA3gAogEAqgEMEAAaACIAKgQIABAAsAEAwAEAyAGqj-a3zY-XA-IBDAi4-uXVBhDthe-xAugBAPgBAIgCAJACAJoCDAi4-uXVBhDthe-xAogDAVCbhfO8zY-XA1jCkqudso-XA4IBBggEGAEwAIgBAKAB-_Gyvc2PlwOyAQC6AQIICtABwvrl1QY%3D"
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNJWDR5cjNOajVjREZiSlVUQWdkSGNZVEh3",
+          "sentAtMicros": 1790541124782643,
+          "userId": "KTbkA8HC3UTP7brchLP-WO6T",
+          "userName": "@yihfgsu",
+          "text": "wait is a jhin just broken? lol"
+        },
+        "step": 4,
+        "action": 0
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNJcUl0TF9OajVjREZSSDJjZ2tkUFBzMXFB",
+          "sentAtMicros": 1790541128604609,
+          "userId": "GU1QSishaPTlyco5F57K89rX",
+          "userName": "@howepsytii437",
+          "text": "LETS GO ABUELO:old_man::old_man::old_man::old_man::old_man:"
+        },
+        "step": 4,
+        "action": 1
+      },
+      {
+        "wait": 5000
+      },
+      {
+        "request": "live_chat/get_live_chat",
+        "continuation": "0ofMyAOpAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCjBt7S_zY-XAzAAQAJKawgBGAAgAEoIEAAYACAAMABQqo_mt82PlwNYA3gAogEAqgEMEAAaACIAKgQIABAAsAEAwAEAyAGqj-a3zY-XA-IBDAi4-uXVBhDthe-xAugBAPgBAIgCAJACAJoCCwjK-uXVBhDU88JUiAMBUKuh27_Nj5cDWMKSq52yj5cDggEGCAQYATAAiAEAoAHtyJTAzY-XA7IBALoBAggK0AHI-uXVBg%3D%3D"
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNNNlg2c0ROajVjREZhOTVxd0lkMER3dmNB",
+          "sentAtMicros": 1790541131591026,
+          "userId": "ZE3Nb21Xp8BrnDfciAKKX9Lj",
+          "userName": "@Ivyzclu",
+          "text": "looking doeda"
+        },
+        "step": 5,
+        "action": 0
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNQNmktOEROajVjREZmN1hMUUFkam1JZTJ3",
+          "sentAtMicros": 1790541131868975,
+          "userId": "LVqUiDO7d57zJmsRcIQWSnuq",
+          "userName": "@Fbgvwvjo-n1p",
+          "text": "Dognatos"
+        },
+        "step": 5,
+        "action": 1
+      },
+      {
+        "wait": 5000
+      },
+      {
+        "request": "live_chat/get_live_chat",
+        "continuation": "0ofMyAOpAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCiv1vvAzY-XAzAAQAJKawgBGAAgAEoIEAAYACAAMABQqo_mt82PlwNYA3gAogEAqgEMEAAaACIAKgQIABAAsAEAwAEAyAGqj-a3zY-XA-IBDAi4-uXVBhDthe-xAugBAPgBAIgCAJACAJoCCwjK-uXVBhDU88JUiAMBUKy0sMHNj5cDWMKSq52yj5cDggEGCAQYATAAiAEAoAHCyvfCzY-XA7IBALoBAggK0AHO-uXVBg%3D%3D"
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNNcjV3TVBOajVjREZUSEV3Z1FkcVc4eWNn",
+          "sentAtMicros": 1790541137206864,
+          "userId": "RD4mb4x129JqjG61QBbLByce",
+          "userName": "@upfeoxvsszxaw3016",
+          "text": "I said in the beginning of the game, Jose went 10/0/13 yesterday Quiyana"
+        },
+        "step": 6,
+        "action": 0
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNKbVM3OFBOajVjREZiM19GZ2tkeHR3RWJn",
+          "sentAtMicros": 1790541137959869,
+          "userId": "TGtPR7HvOwkRqqxjZNNyfrvI",
+          "userName": "@CykzccTdwaggshp-bo5de",
+          "text": "GGS ABUELO"
+        },
+        "step": 6,
+        "action": 1
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNPampvY1ROajVjREZRc3gxZ0FkZC1nWDhn",
+          "sentAtMicros": 1790541138791616,
+          "userId": "LYud2c9Pfjd7gc8g-fHxw7rx",
+          "userName": "@kjgofpzgpsbx",
+          "text": "upside is that jose's squishy as all heck, if he gets picked off i think fights are winnable."
+        },
+        "step": 6,
+        "action": 2
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNQTEMxc1ROajVjREZhWFZjZ2tkbjZFWGRR",
+          "sentAtMicros": 1790541139658429,
+          "userId": "GHowiFAVmYZc8GO0UUCw7blu",
+          "userName": "@hmtqmrzxnwyels",
+          "text": "Someone remind C9 to actually respect TL and slow play like they did against Lyon"
+        },
+        "step": 6,
+        "action": 4
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNPejE3c1ROajVjREZTd2gxZ0FkSm9BWWln",
+          "sentAtMicros": 1790541140060536,
+          "userId": "TJSzJg4QYbGF-1FgP053_K6D",
+          "userName": "@iiaytgq0523",
+          "text": "JG diff"
+        },
+        "step": 6,
+        "action": 5
+      },
+      {
+        "wait": 5000
+      },
+      {
+        "request": "live_chat/get_live_chat",
+        "continuation": "0ofMyAOpAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCj40u_EzY-XAzAAQAJKawgBGAAgAEoIEAAYACAAMABQqo_mt82PlwNYA3gAogEAqgEMEAAaACIAKgQIABAAsAEAwAEAyAGqj-a3zY-XA-IBDAi4-uXVBhDthe-xAugBAPgBAIgCAJACAJoCCwjK-uXVBhDU88JUiAMBUIe2mcXNj5cDWMKSq52yj5cDggEGCAQYATAAiAEAoAGL39nFzY-XA7IBALoBAggK0AHT-uXVBg%3D%3D"
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNNQ0g2Y2ZOajVjREZRLW55d0VkNU44dUtB",
+          "sentAtMicros": 1790541146259247,
+          "userId": "JZGSn2d1NDskCuD-knkk6a6u",
+          "userName": "@Iqi-k03w",
+          "text": "na"
+        },
+        "step": 7,
+        "action": 0
+      },
+      {
+        "wait": 5000
+      },
+      {
+        "request": "live_chat/get_live_chat",
+        "continuation": "0ofMyAOsAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCiv_unHzY-XAzAAQAJKbggBGAAgAEoKCAEQABgAIAAwAFCqj-a3zY-XA1gDeACiAQCqAQwQABoAIgAqBAgAEACwAQDAAQDIAaqP5rfNj5cD4gEMCLj65dUGEO2F77EC6AEA-AEAiAIAkAIAmgIMCNv65dUGEMvYkaECiAMBUNCpmsjNj5cDWMKSq52yj5cDggEGCAQYATAAiAEAoAHJ-73IzY-XA7IBALoBAggK0AHZ-uXVBg%3D%3D"
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNLVE1uY2pOajVjREZiaERYZ01kejdNTFlR",
+          "sentAtMicros": 1790541147107671,
+          "userId": "KEz4PKZQg7U1-fW9ImKhdtom",
+          "userName": "@L6PA6G5_W41V",
+          "text": "@mgifcumedt i refuse to pause"
+        },
+        "step": 8,
+        "action": 0
+      },
+      {
+        "event": {
+          "kind": "chat",
+          "id": "youtube:ChwKGkNLRHlwOHJOajVjREZaUnJxd0lkdFlnR2lB",
+          "sentAtMicros": 1790541151476064,
+          "userId": "ETPOoVVGo722YzgI1oP7nLcx",
+          "userName": "@mgifcumedt",
+          "text": "jhin is good under certain conditions"
+        },
+        "step": 8,
+        "action": 1
+      },
+      {
+        "wait": 5000
+      },
+      {
+        "request": "live_chat/get_live_chat",
+        "continuation": "0ofMyAOsAhp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRCjZhcjKzY-XAzAAQAJKbggBGAAgAEoKCAEQABgAIAAwAFCqj-a3zY-XA1gDeACiAQCqAQwQABoAIgAqBAgAEACwAQDAAQDIAaqP5rfNj5cD4gEMCLj65dUGEO2F77EC6AEA-AEAiAIAkAIAmgIMCNv65dUGEMvYkaECiAMBUPD208rNj5cDWMKSq52yj5cDggEGCAQYATAAiAEAoAGhqJ_LzY-XA7IBALoBAggK0AHZ-uXVBg%3D%3D"
+      },
+      {
+        "wait": 5000
+      },
+      {
+        "request": "live_chat/get_live_chat",
+        "continuation": "0ofMyAOWARp2Q2lrcUp3b1lWVU5UUmw5aFJrZEpTVWx2VjFrek1FZFdWakU1VkV0QkVndDRaRjltU2xKWFduVldTUm9sNnFqZHVRRWZDZ3Q0WkY5bVNsSlhXblZXU1VvUU1HZGpTa05SYTBKWlIyTnNSMTh4YXlBQk1BQSUzRDABggEMCAQYAiAAKAAwADgAoAGLvdv9p5KXA6gBAA%3D%3D"
+      },
+      {
+        "terminal": "offline",
+        "detail": "chat ended"
+      }
+    ]
+  }
+}

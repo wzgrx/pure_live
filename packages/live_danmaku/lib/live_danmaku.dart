@@ -30,5 +30,6 @@ export 'src/sites/picarto.dart';
 export 'src/sites/soop.dart';
 export 'src/sites/twitcasting.dart';
 export 'src/sites/twitch.dart';
+export 'src/sites/youtube.dart';
 export 'src/sites/yy.dart';
 export 'src/socket_connection.dart';

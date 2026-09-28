@@ -1,0 +1,1134 @@
+{
+  "generator": "fixtures/youtube/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) YouTubeChatProtocol (headers, endpoint, nextBody, chatBody, initialContinuation, parse) and YouTubeChatConnector (its settings and its run loop over scripted answers), copied as they were; the event classes, DecodeContext, ConnectorBase and the transport cut down to recorders",
+  "value": {
+    "answers": {
+      "a text line with every field": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000001",
+            "sentAtMicros": 1790633001000000,
+            "userId": "UCsyntheticViewer0000001",
+            "userName": "@viewer1",
+            "text": "hello chat",
+            "action": 0
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "runs: text, a link, standard emoji with and without shortcuts, custom emoji with and without shortcuts": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000002",
+            "sentAtMicros": 1790633002000000,
+            "userId": "UCsyntheticViewer0000002",
+            "userName": "@viewer2",
+            "text": "gg example.com :face_with_tears_of_joy:🇹🇷:face-purple-crying:UCsyntheticChannel00000001/channel-badge !",
+            "action": 0
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "a Super Chat with a message": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkP00000000000000000001",
+            "sentAtMicros": 1790633001000000,
+            "userId": "UCsyntheticViewer0001001",
+            "userName": "@supporter1",
+            "text": "TRY 55.00 great show :clapping_hands:",
+            "action": 0
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "a Super Chat without a message": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkP00000000000000000002",
+            "sentAtMicros": 1790633002000000,
+            "userId": "UCsyntheticViewer0001002",
+            "userName": "@supporter2",
+            "text": "$5.00",
+            "action": 0
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "a Super Chat with neither amount nor message": {
+        "events": [],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "a Super Chat with only spaces for its message": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkP00000000000000000004",
+            "sentAtMicros": 1790633004000000,
+            "userId": "UCsyntheticViewer0001004",
+            "userName": "@supporter4",
+            "text": "₫1,000,000",
+            "action": 0
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "Super Stickers, memberships, gifted memberships, engagement messages and placeholders are not read": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000015",
+            "sentAtMicros": 1790633015000000,
+            "userId": "UCsyntheticViewer0000015",
+            "userName": "@viewer15",
+            "text": "after the others",
+            "action": 5
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "removals, a replacement and other actions are not read": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000017",
+            "sentAtMicros": 1790633017000000,
+            "userId": "UCsyntheticViewer0000017",
+            "userName": "@viewer17",
+            "text": "still read",
+            "action": 8
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "text that is only spaces, empty runs, runs that are not a list": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000024",
+            "sentAtMicros": 1790633024000000,
+            "userId": "UCsyntheticViewer0000024",
+            "userName": "@viewer24",
+            "text": "padded",
+            "action": 4
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "author, id and time missing": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": null,
+            "sentAtMicros": null,
+            "userId": "",
+            "userName": "",
+            "text": "anonymous",
+            "action": 0
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "fields of other types": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": null,
+            "sentAtMicros": 1790633030000000,
+            "userId": "67890",
+            "userName": "@viewer30",
+            "text": "numeric id",
+            "action": 0
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000031",
+            "sentAtMicros": 1790633031000000,
+            "userId": "UCsyntheticViewer0000031",
+            "userName": "",
+            "text": "author in runs",
+            "action": 1
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000032",
+            "sentAtMicros": 1790633032000000,
+            "userId": "UCsyntheticViewer0000032",
+            "userName": "",
+            "text": "author is text",
+            "action": 2
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000033",
+            "sentAtMicros": 1790633033000000,
+            "userId": "UCsyntheticViewer0000033",
+            "userName": "@viewer33",
+            "text": "run text is a number",
+            "action": 3
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "times: zero, negative, not a number, spaces, past int64": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000040",
+            "sentAtMicros": 0,
+            "userId": "UCsyntheticViewer0000040",
+            "userName": "@viewer40",
+            "text": "zero",
+            "action": 0
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000041",
+            "sentAtMicros": -1000000,
+            "userId": "UCsyntheticViewer0000041",
+            "userName": "@viewer41",
+            "text": "negative",
+            "action": 1
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000042",
+            "sentAtMicros": null,
+            "userId": "UCsyntheticViewer0000042",
+            "userName": "@viewer42",
+            "text": "not a number",
+            "action": 2
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000043",
+            "sentAtMicros": 1790633043000000,
+            "userId": "UCsyntheticViewer0000043",
+            "userName": "@viewer43",
+            "text": "spaces",
+            "action": 3
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000044",
+            "sentAtMicros": null,
+            "userId": "UCsyntheticViewer0000044",
+            "userName": "@viewer44",
+            "text": "past int64",
+            "action": 4
+          },
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000045",
+            "sentAtMicros": null,
+            "userId": "UCsyntheticViewer0000045",
+            "userName": "@viewer45",
+            "text": "a fraction",
+            "action": 5
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "a time past what DateTime holds": {
+        "throws": "ArgumentError"
+      },
+      "emoji: shortcuts that are not text, no emojiId, custom without shortcuts or id": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000050",
+            "sentAtMicros": 1790633050000000,
+            "userId": "UCsyntheticViewer0000050",
+            "userName": "@viewer50",
+            "text": "7:fire::star:end",
+            "action": 0
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "a timed continuation, 3 s": {
+        "events": [],
+        "continuation": "SYNTH-next",
+        "delayMs": 3000
+      },
+      "an invalidation continuation, 10 s": {
+        "events": [],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "timeoutMs 200": {
+        "events": [],
+        "continuation": "SYNTH-next",
+        "delayMs": 200
+      },
+      "timeoutMs 0": {
+        "events": [],
+        "continuation": "SYNTH-next",
+        "delayMs": 0
+      },
+      "timeoutMs missing": {
+        "events": [],
+        "continuation": "SYNTH-next",
+        "delayMs": null
+      },
+      "timeoutMs as text": {
+        "events": [],
+        "continuation": "SYNTH-next",
+        "delayMs": null
+      },
+      "timeoutMs negative": {
+        "events": [],
+        "continuation": "SYNTH-next",
+        "delayMs": null
+      },
+      "timeoutMs a fraction": {
+        "events": [],
+        "continuation": "SYNTH-next",
+        "delayMs": null
+      },
+      "a reload continuation": {
+        "events": [],
+        "continuation": "SYNTH-reload",
+        "delayMs": null
+      },
+      "a continuation kind not seen yet": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000060",
+            "sentAtMicros": 1790633060000000,
+            "userId": "UCsyntheticViewer0000060",
+            "userName": "@viewer60",
+            "text": "kept",
+            "action": 0
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 4000
+      },
+      "two continuation kinds in one entry": {
+        "events": [],
+        "continuation": "SYNTH-first",
+        "delayMs": 2000
+      },
+      "a continuation that is not text": {
+        "events": [],
+        "continuation": null,
+        "delayMs": 2000
+      },
+      "no continuations: the chat is over, its actions are still read": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000061",
+            "sentAtMicros": 1790633061000000,
+            "userId": "UCsyntheticViewer0000061",
+            "userName": "@viewer61",
+            "text": "last words",
+            "action": 0
+          }
+        ],
+        "continuation": null,
+        "delayMs": null
+      },
+      "no continuationContents, a message: the chat is over": {
+        "events": [],
+        "continuation": null,
+        "delayMs": null
+      },
+      "an empty object": {
+        "events": [],
+        "continuation": null,
+        "delayMs": null
+      },
+      "liveChatContinuation that is not an object": {
+        "events": [],
+        "continuation": null,
+        "delayMs": null
+      },
+      "actions that are not a list": {
+        "events": [],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "actions and items that are not objects": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000071",
+            "sentAtMicros": 1790633071000000,
+            "userId": "UCsyntheticViewer0000071",
+            "userName": "@viewer71",
+            "text": "the only line",
+            "action": 5
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "an action with its tracking before the item": {
+        "events": [
+          {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000072",
+            "sentAtMicros": 1790633072000000,
+            "userId": "UCsyntheticViewer0000072",
+            "userName": "@viewer72",
+            "text": "tracked",
+            "action": 0
+          }
+        ],
+        "continuation": "SYNTH-next",
+        "delayMs": 10000
+      },
+      "not JSON": {
+        "throws": "FormatException"
+      },
+      "a JSON array": {
+        "events": [],
+        "continuation": null,
+        "delayMs": null
+      },
+      "a JSON string": {
+        "events": [],
+        "continuation": null,
+        "delayMs": null
+      }
+    },
+    "nexts": {
+      "live, with the viewers in runs": {
+        "initialContinuation": "SYNTH-reload-0"
+      },
+      "live, with the viewers in simpleText": {
+        "initialContinuation": "SYNTH-reload-1"
+      },
+      "live, without a view count": {
+        "initialContinuation": "SYNTH-reload-0"
+      },
+      "no live chat: a conversation bar message": {
+        "initialContinuation": null
+      },
+      "a chat replay": {
+        "initialContinuation": "SYNTH-reload-0"
+      },
+      "isReplay false": {
+        "initialContinuation": "SYNTH-reload-2"
+      },
+      "continuations empty": {
+        "initialContinuation": null
+      },
+      "a continuation that is not text": {
+        "initialContinuation": null
+      },
+      "liveChatRenderer elsewhere in the answer": {
+        "initialContinuation": "SYNTH-elsewhere"
+      },
+      "a liveChatRenderer that is not an object, then one that is": {
+        "initialContinuation": "SYNTH-second"
+      },
+      "a view count that is not live": {
+        "initialContinuation": "SYNTH-reload-3"
+      },
+      "an empty object": {
+        "initialContinuation": null
+      },
+      "not JSON": {
+        "throws": "FormatException"
+      },
+      "a JSON array holding the chat": {
+        "initialContinuation": "SYNTH-in-array"
+      }
+    },
+    "sessions": {
+      "a chat: history, two answers, the end": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "wait": 0
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "status": "connected"
+        },
+        {
+          "joined": true
+        },
+        {
+          "wait": 5000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "event": {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000101",
+            "sentAtMicros": 1790633101000000,
+            "userId": "UCsyntheticViewer0000101",
+            "userName": "@viewer101",
+            "text": "first"
+          },
+          "step": 2,
+          "action": 0
+        },
+        {
+          "event": {
+            "kind": "chat",
+            "id": "youtube:ChwKGkP00000000000000000102",
+            "sentAtMicros": 1790633102000000,
+            "userId": "UCsyntheticViewer0001102",
+            "userName": "@supporter102",
+            "text": "$2.00 thanks"
+          },
+          "step": 2,
+          "action": 1
+        },
+        {
+          "wait": 3000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-2"
+        },
+        {
+          "event": {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000103",
+            "sentAtMicros": 1790633103000000,
+            "userId": "UCsyntheticViewer0000103",
+            "userName": "@viewer103",
+            "text": "second"
+          },
+          "step": 3,
+          "action": 0
+        },
+        {
+          "wait": 5000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-3"
+        },
+        {
+          "terminal": "offline",
+          "detail": "chat ended"
+        }
+      ],
+      "next fails once": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "terminal": "failed",
+          "detail": "FormatException: HTTP 503 next"
+        }
+      ],
+      "next fails three times": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "terminal": "failed",
+          "detail": "TransportFailure(youtube, timeout)"
+        }
+      ],
+      "the first poll fails twice, then answers": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "wait": 0
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "status": "reconnecting"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "status": "connected"
+        },
+        {
+          "joined": true
+        },
+        {
+          "wait": 5000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "event": {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000121",
+            "sentAtMicros": 1790633121000000,
+            "userId": "UCsyntheticViewer0000121",
+            "userName": "@viewer121",
+            "text": "shown"
+          },
+          "step": 4,
+          "action": 0
+        },
+        {
+          "terminal": "offline",
+          "detail": "chat ended"
+        }
+      ],
+      "the first poll fails three times": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "wait": 0
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "status": "reconnecting"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "terminal": "failed",
+          "detail": "FormatException: HTTP 403 live_chat/get_live_chat"
+        }
+      ],
+      "failures after joining, then recovery": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "wait": 0
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "status": "connected"
+        },
+        {
+          "joined": true
+        },
+        {
+          "wait": 1500
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "status": "reconnecting"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "status": "connected"
+        },
+        {
+          "event": {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000130",
+            "sentAtMicros": 1790633130000000,
+            "userId": "UCsyntheticViewer0000130",
+            "userName": "@viewer130",
+            "text": "back"
+          },
+          "step": 5,
+          "action": 0
+        },
+        {
+          "wait": 5000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-2"
+        },
+        {
+          "status": "reconnecting"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-2"
+        },
+        {
+          "status": "connected"
+        },
+        {
+          "event": {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000131",
+            "sentAtMicros": 1790633131000000,
+            "userId": "UCsyntheticViewer0000131",
+            "userName": "@viewer131",
+            "text": "back again"
+          },
+          "step": 7,
+          "action": 0
+        },
+        {
+          "terminal": "offline",
+          "detail": "chat ended"
+        }
+      ],
+      "eight failures in a row": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "wait": 0
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "status": "connected"
+        },
+        {
+          "joined": true
+        },
+        {
+          "wait": 5000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "status": "reconnecting"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "terminal": "maxRetries"
+        }
+      ],
+      "no live chat": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "terminal": "offline",
+          "detail": "no live chat"
+        }
+      ],
+      "a chat replay": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "wait": 0
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "status": "reconnecting"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "wait": 2000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "terminal": "failed",
+          "detail": "FormatException: HTTP 400 live_chat/get_live_chat"
+        }
+      ],
+      "the history answer has no continuation": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "wait": 0
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "status": "connected"
+        },
+        {
+          "joined": true
+        },
+        {
+          "terminal": "offline",
+          "detail": "chat ended"
+        }
+      ],
+      "a reload in the middle": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "wait": 0
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "status": "connected"
+        },
+        {
+          "joined": true
+        },
+        {
+          "wait": 5000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "event": {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000150",
+            "sentAtMicros": 1790633150000000,
+            "userId": "UCsyntheticViewer0000150",
+            "userName": "@viewer150",
+            "text": "before the reload"
+          },
+          "step": 2,
+          "action": 0
+        },
+        {
+          "wait": 5000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload"
+        },
+        {
+          "event": {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000151",
+            "sentAtMicros": 1790633151000000,
+            "userId": "UCsyntheticViewer0000151",
+            "userName": "@viewer151",
+            "text": "recent, again"
+          },
+          "step": 3,
+          "action": 0
+        },
+        {
+          "event": {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000150",
+            "sentAtMicros": 1790633150000000,
+            "userId": "UCsyntheticViewer0000150",
+            "userName": "@viewer150",
+            "text": "before the reload"
+          },
+          "step": 3,
+          "action": 1
+        },
+        {
+          "wait": 5000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-2"
+        },
+        {
+          "event": {
+            "kind": "chat",
+            "id": "youtube:ChwKGkN00000000000000000152",
+            "sentAtMicros": 1790633152000000,
+            "userId": "UCsyntheticViewer0000152",
+            "userName": "@viewer152",
+            "text": "after the reload"
+          },
+          "step": 4,
+          "action": 0
+        },
+        {
+          "terminal": "offline",
+          "detail": "chat ended"
+        }
+      ],
+      "server delays: 3 s, 10 s, 200 ms, none, 0": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "wait": 0
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "status": "connected"
+        },
+        {
+          "joined": true
+        },
+        {
+          "wait": 3000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-1"
+        },
+        {
+          "wait": 5000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-2"
+        },
+        {
+          "wait": 1000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-3"
+        },
+        {
+          "wait": 5000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-4"
+        },
+        {
+          "wait": 1000
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-5"
+        },
+        {
+          "terminal": "offline",
+          "detail": "chat ended"
+        }
+      ],
+      "the next answer has no chat renderer at all": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "Synth3tic_0"
+        },
+        {
+          "terminal": "offline",
+          "detail": "no live chat"
+        }
+      ],
+      "no video id": [
+        {
+          "terminal": "offline",
+          "detail": "no live video"
+        }
+      ],
+      "not a video id": [
+        {
+          "status": "connecting"
+        },
+        {
+          "request": "next",
+          "videoId": "not-a-video-id"
+        },
+        {
+          "wait": 0
+        },
+        {
+          "request": "live_chat/get_live_chat",
+          "continuation": "SYNTH-reload-0"
+        },
+        {
+          "status": "connected"
+        },
+        {
+          "joined": true
+        },
+        {
+          "terminal": "offline",
+          "detail": "chat ended"
+        }
+      ]
+    }
+  }
+}

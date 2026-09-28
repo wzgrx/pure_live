@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/color_tokens.dart';
+import 'package:live_ui/src/icons/live_icon.dart';
+import 'package:live_ui/src/icons/live_icons.dart';
 import 'package:live_ui/src/metrics.dart';
 
 /// The three appearances of spec/design/principles.md §2.2.
@@ -214,6 +216,11 @@ abstract final class PureTheme {
     // On TV the ring is near-white onSurface: ≥ 3:1 against every surface
     // and against the unfocused state (principles §5.3).
     final focusRing = tv ? scheme.onSurface : tokens.focusRing;
+    final dark = brightness == Brightness.dark;
+    // Principles §2.6: an icon beside a button's or chip's label is 20 dp,
+    // the smallest size Material Symbols draws for (Material's 18 would
+    // shrink the 20 dp design).
+    const labelIcons = ButtonStyle(iconSize: WidgetStatePropertyAll(Sizes.iconDense));
 
     final theme = ThemeData(
       useMaterial3: true,
@@ -228,6 +235,23 @@ abstract final class PureTheme {
       textTheme: text,
       scaffoldBackgroundColor: scheme.surface,
       visualDensity: desktop ? VisualDensity.compact : VisualDensity.standard,
+      // Principles §2.6: the variable axes every icon starts from (LiveIcon
+      // sets the optical size to the size shown). The colours are Material's
+      // defaults, the same objects, so icon buttons still see them as unset.
+      iconTheme: iconAxes(dark: dark).copyWith(color: dark ? kDefaultIconLightColor : kDefaultIconDarkColor),
+      // The buttons Material builds itself (an app bar's back button) show
+      // Symbols too.
+      actionIconTheme: ActionIconThemeData(
+        backButtonIconBuilder: (_) => const LiveIcon(LiveIcons.back),
+        closeButtonIconBuilder: (_) => const LiveIcon(LiveIcons.close),
+        drawerButtonIconBuilder: (_) => const LiveIcon(LiveIcons.railExpand),
+        endDrawerButtonIconBuilder: (_) => const LiveIcon(LiveIcons.railExpand),
+      ),
+      filledButtonTheme: const FilledButtonThemeData(style: labelIcons),
+      textButtonTheme: const TextButtonThemeData(style: labelIcons),
+      outlinedButtonTheme: const OutlinedButtonThemeData(style: labelIcons),
+      elevatedButtonTheme: const ElevatedButtonThemeData(style: labelIcons),
+      segmentedButtonTheme: const SegmentedButtonThemeData(style: labelIcons, selectedIcon: LiveIcon(LiveIcons.check)),
       materialTapTargetSize: desktop ? MaterialTapTargetSize.shrinkWrap : MaterialTapTargetSize.padded,
       splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
       appBarTheme: AppBarTheme(
@@ -262,6 +286,7 @@ abstract final class PureTheme {
         shape: const StadiumBorder(),
         labelStyle: text.labelLarge,
         side: BorderSide(color: scheme.outlineVariant),
+        iconTheme: const IconThemeData(size: Sizes.iconDense),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: scheme.surfaceContainerLow,
@@ -335,9 +360,13 @@ abstract final class PureTheme {
     final overlay = WidgetStateProperty.resolveWith<Color?>(
       (states) => states.contains(WidgetState.focused) ? focusFill : null,
     );
-    final buttons = ButtonStyle(side: side, overlayColor: overlay);
+    // Principles §2.6 and §5.3: icons are 32 dp at ten feet; beside a label
+    // (buttons, chips) 24 dp, one step above the 20 dp elsewhere, like the type.
+    const labelIcon = WidgetStatePropertyAll(Sizes.iconMd);
+    final buttons = ButtonStyle(side: side, overlayColor: overlay, iconSize: labelIcon);
     final outlined = ButtonStyle(
       overlayColor: overlay,
+      iconSize: labelIcon,
       side: WidgetStateProperty.resolveWith<BorderSide?>(
         (states) => states.contains(WidgetState.focused)
             ? BorderSide(color: ring, width: 3)
@@ -346,7 +375,7 @@ abstract final class PureTheme {
     );
     return theme.copyWith(
       focusColor: focusFill,
-      iconTheme: theme.iconTheme.copyWith(size: Sizes.iconLg),
+      iconTheme: theme.iconTheme.copyWith(size: Sizes.iconLg, opticalSize: Sizes.iconLg),
       iconButtonTheme: IconButtonThemeData(
         style: buttons.copyWith(iconSize: const WidgetStatePropertyAll(Sizes.iconLg)),
       ),
@@ -354,13 +383,16 @@ abstract final class PureTheme {
       filledButtonTheme: FilledButtonThemeData(style: buttons),
       elevatedButtonTheme: ElevatedButtonThemeData(style: buttons),
       outlinedButtonTheme: OutlinedButtonThemeData(style: outlined),
-      segmentedButtonTheme: SegmentedButtonThemeData(style: ButtonStyle(overlayColor: overlay)),
+      segmentedButtonTheme: theme.segmentedButtonTheme.copyWith(
+        style: const ButtonStyle(iconSize: labelIcon).copyWith(overlayColor: overlay),
+      ),
       chipTheme: theme.chipTheme.copyWith(
         side: WidgetStateBorderSide.resolveWith(
           (states) => states.contains(WidgetState.focused)
               ? BorderSide(color: ring, width: 3)
               : BorderSide(color: scheme.outlineVariant),
         ),
+        iconTheme: const IconThemeData(size: Sizes.iconMd),
       ),
       tabBarTheme: theme.tabBarTheme.copyWith(overlayColor: overlay),
       searchBarTheme: theme.searchBarTheme.copyWith(side: side, overlayColor: overlay),

@@ -11,6 +11,10 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+  # The icons (principles §2.6): Material Symbols Rounded, a variable font
+  # (FILL, wght, GRAD, opsz); only the Rounded glyphs are used, and release
+  # builds keep only the glyphs the app names.
+  material_symbols_icons: ^4.2960.0
   # Draws the empty-state and error illustrations (principles §3.3).
   vector_graphics: ^1.2.3
 

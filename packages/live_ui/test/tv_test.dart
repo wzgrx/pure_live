@@ -314,7 +314,7 @@ void main() {
               SwitchListTile(title: const Text('开关'), value: true, onChanged: (_) {}),
               ListTile(
                 title: const Text('带按钮'),
-                trailing: IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+                trailing: IconButton(icon: const LiveIcon(LiveIcons.more), onPressed: () {}),
                 onTap: () {},
               ),
               for (var i = 0; i < 20; i++) ListTile(title: Text('行 $i'), onTap: () {}),
@@ -350,7 +350,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
     expect(rings, ringOn('带按钮'));
-    Focus.of(tester.element(find.byIcon(Icons.more_vert))).requestFocus();
+    Focus.of(tester.element(_icon(LiveIcons.more))).requestFocus();
     await tester.pump();
     expect(FocusManager.instance.primaryFocus!.context!.findAncestorWidgetOfExactType<IconButton>(), isNotNull);
     expect(rings, isNot(ringOn('带按钮')), reason: 'the button shows its own ring');
@@ -391,8 +391,8 @@ void main() {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(focusNode: first, icon: const Icon(Icons.refresh), onPressed: () {}),
-                    IconButton(focusNode: second, icon: const Icon(Icons.more_vert), onPressed: () {}),
+                    IconButton(focusNode: first, icon: const LiveIcon(LiveIcons.refresh), onPressed: () {}),
+                    IconButton(focusNode: second, icon: const LiveIcon(LiveIcons.more), onPressed: () {}),
                   ],
                 ),
                 onTap: () {},
@@ -497,8 +497,8 @@ void main() {
 
   group('TvNavScaffold', () {
     const destinations = [
-      NavDestination(icon: Icons.favorite_border, selectedIcon: Icons.favorite, label: '关注'),
-      NavDestination(icon: Icons.explore_outlined, selectedIcon: Icons.explore, label: '发现'),
+      NavDestination(icon: LiveIcons.follows, label: '关注'),
+      NavDestination(icon: LiveIcons.discover, label: '发现'),
     ];
 
     testWidgets('the rail expands on focus; right enters the page where it left; left and back return', (tester) async {
@@ -580,3 +580,6 @@ void main() {
     });
   });
 }
+
+/// The [LiveIcon] showing [icon].
+Finder _icon(LiveIcons icon) => find.byWidgetPredicate((widget) => widget is LiveIcon && widget.icon == icon);

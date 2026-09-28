@@ -152,8 +152,8 @@ void main() {
 
   testWidgets('the shell switches between bar and rails with the width', (tester) async {
     const destinations = [
-      NavDestination(icon: Icons.favorite_border, selectedIcon: Icons.favorite, label: '关注'),
-      NavDestination(icon: Icons.explore_outlined, selectedIcon: Icons.explore, label: '发现'),
+      NavDestination(icon: LiveIcons.follows, label: '关注'),
+      NavDestination(icon: LiveIcons.discover, label: '发现'),
     ];
     Future<void> pumpAt(Size size) async {
       tester.view.physicalSize = size;
@@ -182,8 +182,8 @@ void main() {
 
   testWidgets('principles §5.2: the rail expands and collapses by hand from the expanded class on', (tester) async {
     const destinations = [
-      NavDestination(icon: Icons.favorite_border, selectedIcon: Icons.favorite, label: '关注'),
-      NavDestination(icon: Icons.explore_outlined, selectedIcon: Icons.explore, label: '发现'),
+      NavDestination(icon: LiveIcons.follows, label: '关注'),
+      NavDestination(icon: LiveIcons.discover, label: '发现'),
     ];
     bool? chosen;
     final changes = <bool>[];

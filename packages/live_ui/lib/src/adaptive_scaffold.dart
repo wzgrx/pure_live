@@ -1,19 +1,19 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/live_icon.dart';
+import 'package:live_ui/src/icons/live_icons.dart';
 import 'package:live_ui/src/window_class.dart';
 
 /// One top-level destination.
 @immutable
 final class NavDestination {
   /// Creates a destination.
-  const new({required this.icon, required this.selectedIcon, required this.label});
+  const new({required this.icon, required this.label});
 
-  /// Icon when not selected.
-  final IconData icon;
-
-  /// Icon when selected.
-  final IconData selectedIcon;
+  /// Icon; filled while the destination is current (principles §2.6: the
+  /// same glyph, only the fill changes).
+  final LiveIcons icon;
 
   /// Label, the same on every device (principles rule 4).
   final String label;
@@ -87,7 +87,11 @@ class AdaptiveNavScaffold extends StatelessWidget {
             onDestinationSelected: onSelected,
             destinations: [
               for (final d in destinations)
-                NavigationDestination(icon: Icon(d.icon), selectedIcon: Icon(d.selectedIcon), label: d.label),
+                NavigationDestination(
+                  icon: LiveIcon(d.icon),
+                  selectedIcon: LiveIcon(d.icon, filled: true),
+                  label: d.label,
+                ),
             ],
           ),
         );
@@ -101,7 +105,7 @@ class AdaptiveNavScaffold extends StatelessWidget {
         if (canToggle)
           _RailToggle(
             tooltip: extended ? collapseRailLabel : expandRailLabel,
-            icon: extended ? Icons.menu_open : Icons.menu,
+            icon: extended ? LiveIcons.railCollapse : LiveIcons.railExpand,
             onPressed: () => toggle(!extended),
           ),
         ?railLeading,
@@ -126,8 +130,8 @@ class AdaptiveNavScaffold extends StatelessWidget {
                 destinations: [
                   for (final d in destinations)
                     NavigationRailDestination(
-                      icon: Icon(d.icon),
-                      selectedIcon: Icon(d.selectedIcon),
+                      icon: LiveIcon(d.icon),
+                      selectedIcon: LiveIcon(d.icon, filled: true),
                       label: Text(d.label),
                     ),
                 ],
@@ -147,7 +151,7 @@ class _RailToggle extends StatelessWidget {
   const new({required this.tooltip, required this.icon, required this.onPressed});
 
   final String tooltip;
-  final IconData icon;
+  final LiveIcons icon;
   final VoidCallback onPressed;
 
   @override
@@ -162,7 +166,7 @@ class _RailToggle extends StatelessWidget {
       child: SizedBox(
         width: AdaptiveNavScaffold.railWidth,
         child: Center(
-          child: IconButton(tooltip: tooltip, icon: Icon(icon), onPressed: onPressed),
+          child: IconButton(tooltip: tooltip, icon: LiveIcon(icon), onPressed: onPressed),
         ),
       ),
     );

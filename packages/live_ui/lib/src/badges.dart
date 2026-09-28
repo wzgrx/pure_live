@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/color_tokens.dart';
+import 'package:live_ui/src/icons/live_icon.dart';
+import 'package:live_ui/src/icons/live_icons.dart';
 import 'package:live_ui/src/metrics.dart';
 import 'package:live_ui/src/theme.dart';
 import 'package:live_ui/src/ui_text.dart';
@@ -212,13 +214,13 @@ class StatusTag extends StatelessWidget {
 /// A figure on a cover (audience), on a scrim so it reads on any image.
 class CoverLabel extends StatelessWidget {
   /// Creates the label.
-  const new(this.text, {this.icon = Icons.person_outline, super.key});
+  const new(this.text, {this.icon = LiveIcons.audience, super.key});
 
   /// Formatted figure.
   final String text;
 
-  /// Leading icon.
-  final IconData icon;
+  /// Leading icon, sized to the figure beside it.
+  final LiveIcons icon;
 
   @override
   Widget build(BuildContext context) {
@@ -230,7 +232,7 @@ class CoverLabel extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 12, color: Colors.white),
+            LiveIcon(icon, size: 12, color: Colors.white),
             const SizedBox(width: 2),
             Text(text, style: style),
           ],

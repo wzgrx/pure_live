@@ -63,6 +63,14 @@ abstract final class Sizes {
   /// Control icons at expanded width and in fullscreen, TV icons.
   static const double iconLg = 32;
 
+  /// A state shown in the middle of a small picture (a paused multi-view
+  /// cell, an empty one).
+  static const double iconXl = 40;
+
+  /// The icon of a message view, a state shown in the middle of the picture
+  /// (audio only, offline).
+  static const double iconXxl = 48;
+
   /// Platform logo on a cover and beside dense text (principles §3.4: the
   /// smallest logo).
   static const double logoSmall = 16;

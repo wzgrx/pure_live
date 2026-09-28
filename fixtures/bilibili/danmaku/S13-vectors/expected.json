@@ -1,0 +1,1502 @@
+{
+  "generator": "3.x BiliBiliDanmaku.decodeMessage, one instance per sample or vector (fixtures/bilibili/danmaku/legacy_expected.dart)",
+  "value": {
+    "vectors": [
+      {
+        "vector": "zlib-nested-packets",
+        "frames": [
+          {
+            "line": 1,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "alice",
+                  "userId": "1000",
+                  "message": "first",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "bob",
+                  "userId": "1001",
+                  "message": "second",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "concatenated-packets",
+        "frames": [
+          {
+            "line": 2,
+            "effects": [
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "popularity",
+                    "value": 12345
+                  }
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "visible",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "send": "AAAAEAAQAAAAAAACAAAAAQ=="
+              },
+              {
+                "ready": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "zero-length-frame",
+        "frames": [
+          {
+            "line": 3,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "before malformed frame",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "log": "FormatException"
+              }
+            ]
+          },
+          {
+            "line": 4,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "next websocket message",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "truncated-tail",
+        "frames": [
+          {
+            "line": 5,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "before the tail",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "log": "FormatException"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "packet-past-the-end",
+        "frames": [
+          {
+            "line": 6,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "before the cut",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "log": "FormatException"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "header-length-too-small",
+        "frames": [
+          {
+            "line": 7,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "before the bad header",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "log": "FormatException"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "nesting-too-deep",
+        "frames": [
+          {
+            "line": 8,
+            "effects": [
+              {
+                "log": "FormatException"
+              }
+            ]
+          },
+          {
+            "line": 9,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "connection survives",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "nesting-at-the-limit",
+        "frames": [
+          {
+            "line": 10,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "two levels",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "corrupt-zlib",
+        "frames": [
+          {
+            "line": 11,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "before corrupt zlib",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "log": "FormatException"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "notice-versions",
+        "frames": [
+          {
+            "line": 12,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "protover 0",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "protover 1",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "protover 4",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "unknown-operations",
+        "frames": [
+          {
+            "line": 13,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "after",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "heartbeat-replies",
+        "frames": [
+          {
+            "line": 14,
+            "effects": [
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "popularity",
+                    "value": 1
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "line": 15,
+            "effects": [
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "popularity",
+                    "value": 0
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "line": 16,
+            "effects": [
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "popularity",
+                    "value": 4294967295
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "line": 17,
+            "effects": []
+          },
+          {
+            "line": 18,
+            "effects": [
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "popularity",
+                    "value": 9
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "auth-accepted-once",
+        "frames": [
+          {
+            "line": 19,
+            "effects": [
+              {
+                "send": "AAAAEAAQAAAAAAACAAAAAQ=="
+              },
+              {
+                "ready": true
+              }
+            ]
+          },
+          {
+            "line": 20,
+            "effects": []
+          },
+          {
+            "line": 21,
+            "effects": []
+          }
+        ]
+      },
+      {
+        "vector": "auth-empty-body",
+        "frames": [
+          {
+            "line": 22,
+            "effects": [
+              {
+                "send": "AAAAEAAQAAAAAAACAAAAAQ=="
+              },
+              {
+                "ready": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "auth-code-as-text",
+        "frames": [
+          {
+            "line": 23,
+            "effects": [
+              {
+                "send": "AAAAEAAQAAAAAAACAAAAAQ=="
+              },
+              {
+                "ready": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "auth-rejected",
+        "frames": [
+          {
+            "line": 24,
+            "effects": [
+              {
+                "refresh": true
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "after the rejection",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              }
+            ]
+          },
+          {
+            "line": 25,
+            "effects": []
+          }
+        ]
+      },
+      {
+        "vector": "auth-without-code",
+        "frames": [
+          {
+            "line": 26,
+            "effects": [
+              {
+                "refresh": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "auth-not-an-object",
+        "frames": [
+          {
+            "line": 27,
+            "effects": [
+              {
+                "refresh": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "auth-invalid-json",
+        "frames": [
+          {
+            "line": 28,
+            "effects": [
+              {
+                "log": "FormatException"
+              }
+            ]
+          },
+          {
+            "line": 29,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "next message",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "auth-after-rejection",
+        "frames": [
+          {
+            "line": 30,
+            "effects": [
+              {
+                "refresh": true
+              }
+            ]
+          },
+          {
+            "line": 31,
+            "effects": [
+              {
+                "send": "AAAAEAAQAAAAAAACAAAAAQ=="
+              },
+              {
+                "ready": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "chat-colors",
+        "frames": [
+          {
+            "line": 32,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "zero",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "six digits",
+                  "color": "#e33fff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "four digits",
+                  "color": "#00fffc",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "blue",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "five digits",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "eight digits",
+                  "color": "#ff8800",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "text colour",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "chat-times-and-ids",
+        "frames": [
+          {
+            "line": 33,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "milliseconds",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:-1942957414",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "seconds",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:abc",
+                  "sentAt": 1790519893000,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "time as text",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "no time",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "fraction",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "zero time",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1.5",
+                  "sentAt": 0,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "chat-shapes",
+        "frames": [
+          {
+            "line": 34,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "variant cmd",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "log": "RangeError"
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "",
+                  "userId": "",
+                  "message": "null user fields",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "log": "RangeError"
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "null",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "log": "RangeError"
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "last",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "chat-names",
+        "frames": [
+          {
+            "line": 35,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "完整用户名",
+                  "userId": "1000",
+                  "message": "rich beats masked legacy",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "完整旧用户名",
+                  "userId": "1000",
+                  "message": "legacy beats masked rich",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观***",
+                  "userId": "1000",
+                  "message": "rich as json text",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "原始名",
+                  "userId": "1000",
+                  "message": "origin name",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "直接",
+                  "userId": "1000",
+                  "message": "rich without user key",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观***",
+                  "userId": "1000",
+                  "message": "broken json text",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观***",
+                  "userId": "1000",
+                  "message": "all masked",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "用户",
+                  "userId": "1000",
+                  "message": "full-width mask",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "a*b",
+                  "userId": "1000",
+                  "message": "single star",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "顶层名",
+                  "userId": "1000",
+                  "message": "top-level uinfo",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "数据名",
+                  "userId": "1000",
+                  "message": "data uinfo",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观***",
+                  "userId": "1000",
+                  "message": "empty legacy, masked rich",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": " 空格 ",
+                  "userId": "1000",
+                  "message": "untrimmed legacy",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "watched-change",
+        "frames": [
+          {
+            "line": 36,
+            "effects": [
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "totalViewers",
+                    "value": 18342
+                  }
+                }
+              },
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "totalViewers",
+                    "value": 42
+                  }
+                }
+              },
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "totalViewers",
+                    "value": 0
+                  }
+                }
+              },
+              {
+                "log": "_TypeError"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "super-chat",
+        "frames": [
+          {
+            "line": 37,
+            "effects": [
+              {
+                "message": {
+                  "type": "superChat",
+                  "userName": "SUPER_CHAT_MESSAGE",
+                  "userId": "",
+                  "message": "SUPER_CHAT_MESSAGE",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "messageId": "",
+                    "userName": "醒目留言观众",
+                    "face": "https://i0.hdslb.com/bfs/face/member/noface.jpg@200w.jpg",
+                    "message": "现在在巴塞看上海冠军赛，还好西班牙还好",
+                    "price": 50,
+                    "startTime": 1790504135000,
+                    "endTime": 1790504255000,
+                    "backgroundColor": "#DBFFFD",
+                    "backgroundBottomColor": "#427D9E"
+                  }
+                }
+              },
+              {
+                "message": {
+                  "type": "superChat",
+                  "userName": "SUPER_CHAT_MESSAGE",
+                  "userId": "",
+                  "message": "SUPER_CHAT_MESSAGE",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "messageId": "",
+                    "userName": "醒目留言观众",
+                    "face": "//i0.hdslb.com/bfs/face/member/noface.jpg@200w.jpg",
+                    "message": "现在在巴塞看上海冠军赛，还好西班牙还好",
+                    "price": 50,
+                    "startTime": 1790504135000,
+                    "endTime": 1790504255000,
+                    "backgroundColor": "#DBFFFD",
+                    "backgroundBottomColor": "#427D9E"
+                  }
+                }
+              },
+              {
+                "log": "NoSuchMethodError"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "acknowledgements",
+        "frames": [
+          {
+            "line": 38,
+            "effects": [
+              {
+                "send": "AAAAUAAQAAAAAAAYAAAAAXsibXNnX2lkIjoiZml4dHVyZS1tZXNzYWdlLWlkIiwiY21kIjoiREFOTVVfTVNHIiwicF9tc2dfdHlwZSI6MX0="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "ack me",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "send": "AAAAQgAQAAAAAAAYAAAAAXsibXNnX2lkIjoiaWQtMiIsImNtZCI6IkRBTk1VX01TRyIsInBfbXNnX3R5cGUiOjJ9"
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "ack with text type",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "no msg_id",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "no p_msg_type",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "null p_msg_type",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "ack flag as text",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              },
+              {
+                "send": "AAAASgAQAAAAAAAYAAAAAXsibXNnX2lkIjoiaWQtNiIsImNtZCI6Ik9OTElORV9SQU5LX0NPVU5UIiwicF9tc2dfdHlwZSI6M30="
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "ignored-notices",
+        "frames": [
+          {
+            "line": 39,
+            "effects": [
+              {
+                "log": "_TypeError"
+              },
+              {
+                "log": "_TypeError"
+              },
+              {
+                "log": "FormatException"
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "viewer",
+                  "userId": "1000",
+                  "message": "still decoded",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "bilibili:1790519804",
+                  "sentAt": 1790519893202,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

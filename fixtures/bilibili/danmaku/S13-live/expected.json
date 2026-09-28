@@ -1,0 +1,1657 @@
+{
+  "generator": "3.x BiliBiliDanmaku.decodeMessage, one instance per sample or vector (fixtures/bilibili/danmaku/legacy_expected.dart)",
+  "value": {
+    "frames": [
+      {
+        "line": 2,
+        "effects": [
+          {
+            "send": "AAAAEAAQAAAAAAACAAAAAQ=="
+          },
+          {
+            "ready": true
+          }
+        ]
+      },
+      {
+        "line": 4,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "popularity",
+                "value": 1
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 6,
+        "effects": []
+      },
+      {
+        "line": 7,
+        "effects": []
+      },
+      {
+        "line": 8,
+        "effects": []
+      },
+      {
+        "line": 9,
+        "effects": []
+      },
+      {
+        "line": 10,
+        "effects": []
+      },
+      {
+        "line": 11,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:-1942957414",
+              "sentAt": 1790519893202,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 12,
+        "effects": []
+      },
+      {
+        "line": 13,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790519804",
+              "sentAt": 1790519895263,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "以后不知道改发什么弹幕流口水就对了",
+              "color": "#e33fff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790518858",
+              "sentAt": 1790519895928,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 14,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "找吴京种子",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1251329142",
+              "sentAt": 1790519895617,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1759616943",
+              "sentAt": 1790519895904,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:936206815",
+              "sentAt": 1790519896045,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 15,
+        "effects": []
+      },
+      {
+        "line": 16,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "totalViewers",
+                "value": 62143
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 17,
+        "effects": []
+      },
+      {
+        "line": 18,
+        "effects": []
+      },
+      {
+        "line": 19,
+        "effects": []
+      },
+      {
+        "line": 20,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "最后一张图早就转职了，估计埃德蒙会玩法师",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790517174",
+              "sentAt": 1790519897859,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:638902516",
+              "sentAt": 1790519898182,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 21,
+        "effects": []
+      },
+      {
+        "line": 22,
+        "effects": []
+      },
+      {
+        "line": 23,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:-1715725752",
+              "sentAt": 1790519900152,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 24,
+        "effects": []
+      },
+      {
+        "line": 25,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "怎么没树精啊",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:-214434336",
+              "sentAt": 1790519900278,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 26,
+        "effects": []
+      },
+      {
+        "line": 27,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "totalViewers",
+                "value": 62143
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 28,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:-35871497",
+              "sentAt": 1790519901997,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 29,
+        "effects": []
+      },
+      {
+        "line": 30,
+        "effects": []
+      },
+      {
+        "line": 31,
+        "effects": []
+      },
+      {
+        "line": 32,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "甚么事？",
+              "color": "#00fffc",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790519520",
+              "sentAt": 1790519902612,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 33,
+        "effects": []
+      },
+      {
+        "line": 34,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790505635",
+              "sentAt": 1790519903250,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 35,
+        "effects": []
+      },
+      {
+        "line": 36,
+        "effects": []
+      },
+      {
+        "line": 37,
+        "effects": []
+      },
+      {
+        "line": 38,
+        "effects": []
+      },
+      {
+        "line": 39,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "都是口水也太地狱了",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790503486",
+              "sentAt": 1790519904661,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 40,
+        "effects": []
+      },
+      {
+        "line": 41,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "totalViewers",
+                "value": 62143
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 42,
+        "effects": []
+      },
+      {
+        "line": 43,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790516352",
+              "sentAt": 1790519907181,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 44,
+        "effects": []
+      },
+      {
+        "line": 45,
+        "effects": []
+      },
+      {
+        "line": 46,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:465294882",
+              "sentAt": 1790519906857,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 47,
+        "effects": []
+      },
+      {
+        "line": 48,
+        "effects": []
+      },
+      {
+        "line": 49,
+        "effects": []
+      },
+      {
+        "line": 50,
+        "effects": []
+      },
+      {
+        "line": 51,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:-1973178115",
+              "sentAt": 1790519909518,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 52,
+        "effects": []
+      },
+      {
+        "line": 53,
+        "effects": []
+      },
+      {
+        "line": 54,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1317549473",
+              "sentAt": 1790519910764,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:359548887",
+              "sentAt": 1790519910821,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 55,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "totalViewers",
+                "value": 62143
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 56,
+        "effects": []
+      },
+      {
+        "line": 57,
+        "effects": []
+      },
+      {
+        "line": 58,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:448724583",
+              "sentAt": 1790519912660,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 59,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:-309592916",
+              "sentAt": 1790519912347,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 60,
+        "effects": []
+      },
+      {
+        "line": 61,
+        "effects": []
+      },
+      {
+        "line": 62,
+        "effects": []
+      },
+      {
+        "line": 63,
+        "effects": []
+      },
+      {
+        "line": 64,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790517944",
+              "sentAt": 1790519914137,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 65,
+        "effects": []
+      },
+      {
+        "line": 66,
+        "effects": []
+      },
+      {
+        "line": 67,
+        "effects": []
+      },
+      {
+        "line": 68,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:216078146",
+              "sentAt": 1790519915271,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 69,
+        "effects": []
+      },
+      {
+        "line": 70,
+        "effects": []
+      },
+      {
+        "line": 71,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "totalViewers",
+                "value": 62143
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 72,
+        "effects": []
+      },
+      {
+        "line": 73,
+        "effects": []
+      },
+      {
+        "line": 74,
+        "effects": []
+      },
+      {
+        "line": 75,
+        "effects": []
+      },
+      {
+        "line": 76,
+        "effects": []
+      },
+      {
+        "line": 77,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:141341372",
+              "sentAt": 1790519919476,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 78,
+        "effects": []
+      },
+      {
+        "line": 79,
+        "effects": []
+      },
+      {
+        "line": 80,
+        "effects": []
+      },
+      {
+        "line": 81,
+        "effects": []
+      },
+      {
+        "line": 82,
+        "effects": []
+      },
+      {
+        "line": 84,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "popularity",
+                "value": 1
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 85,
+        "effects": []
+      },
+      {
+        "line": 86,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "totalViewers",
+                "value": 62143
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 87,
+        "effects": []
+      },
+      {
+        "line": 88,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790519914",
+              "sentAt": 1790519923586,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 89,
+        "effects": []
+      },
+      {
+        "line": 90,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:132031819",
+              "sentAt": 1790519923852,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790519658",
+              "sentAt": 1790519924094,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 91,
+        "effects": []
+      },
+      {
+        "line": 92,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790519676",
+              "sentAt": 1790519924671,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 93,
+        "effects": []
+      },
+      {
+        "line": 94,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "原来都是弹幕的口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790511422",
+              "sentAt": 1790519925752,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:-495264640",
+              "sentAt": 1790519926190,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 95,
+        "effects": []
+      },
+      {
+        "line": 96,
+        "effects": []
+      },
+      {
+        "line": 97,
+        "effects": []
+      },
+      {
+        "line": 98,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "totalViewers",
+                "value": 62143
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 99,
+        "effects": []
+      },
+      {
+        "line": 100,
+        "effects": []
+      },
+      {
+        "line": 101,
+        "effects": []
+      },
+      {
+        "line": 102,
+        "effects": []
+      },
+      {
+        "line": 103,
+        "effects": []
+      },
+      {
+        "line": 104,
+        "effects": []
+      },
+      {
+        "line": 105,
+        "effects": []
+      },
+      {
+        "line": 106,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790519914",
+              "sentAt": 1790519929177,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 107,
+        "effects": []
+      },
+      {
+        "line": 108,
+        "effects": []
+      },
+      {
+        "line": 109,
+        "effects": []
+      },
+      {
+        "line": 110,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "不是要先去挖银吗",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790518661",
+              "sentAt": 1790519932069,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 111,
+        "effects": []
+      },
+      {
+        "line": 112,
+        "effects": []
+      },
+      {
+        "line": 113,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "totalViewers",
+                "value": 62143
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 114,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:-2085967725",
+              "sentAt": 1790519933413,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 115,
+        "effects": []
+      },
+      {
+        "line": 116,
+        "effects": []
+      },
+      {
+        "line": 117,
+        "effects": []
+      },
+      {
+        "line": 118,
+        "effects": []
+      },
+      {
+        "line": 119,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "祭品就是地牢里的大骨头，用不完的",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:-125021919",
+              "sentAt": 1790519932921,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 120,
+        "effects": []
+      },
+      {
+        "line": 121,
+        "effects": []
+      },
+      {
+        "line": 122,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:391656693",
+              "sentAt": 1790519935321,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 123,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:-315379795",
+              "sentAt": 1790519935392,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 124,
+        "effects": []
+      },
+      {
+        "line": 125,
+        "effects": []
+      },
+      {
+        "line": 126,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "预言一波，被团灭",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790517174",
+              "sentAt": 1790519935450,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790519914",
+              "sentAt": 1790519936500,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:-168899743",
+              "sentAt": 1790519936620,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 127,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#00fffc",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790510836",
+              "sentAt": 1790519937180,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 128,
+        "effects": []
+      },
+      {
+        "line": 129,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "totalViewers",
+                "value": 62143
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 130,
+        "effects": []
+      },
+      {
+        "line": 131,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790507682",
+              "sentAt": 1790519937933,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 132,
+        "effects": []
+      },
+      {
+        "line": 133,
+        "effects": []
+      },
+      {
+        "line": 134,
+        "effects": []
+      },
+      {
+        "line": 135,
+        "effects": []
+      },
+      {
+        "line": 136,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790519650",
+              "sentAt": 1790519940148,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 137,
+        "effects": []
+      },
+      {
+        "line": 138,
+        "effects": []
+      },
+      {
+        "line": 139,
+        "effects": []
+      },
+      {
+        "line": 140,
+        "effects": []
+      },
+      {
+        "line": 141,
+        "effects": []
+      },
+      {
+        "line": 142,
+        "effects": []
+      },
+      {
+        "line": 143,
+        "effects": []
+      },
+      {
+        "line": 144,
+        "effects": []
+      },
+      {
+        "line": 145,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "totalViewers",
+                "value": 62143
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 146,
+        "effects": []
+      },
+      {
+        "line": 147,
+        "effects": []
+      },
+      {
+        "line": 148,
+        "effects": []
+      },
+      {
+        "line": 149,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "V***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790519827",
+              "sentAt": 1790519943911,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 150,
+        "effects": []
+      },
+      {
+        "line": 151,
+        "effects": []
+      },
+      {
+        "line": 152,
+        "effects": []
+      },
+      {
+        "line": 153,
+        "effects": []
+      },
+      {
+        "line": 154,
+        "effects": [
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "totalViewers",
+                "value": 62143
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 155,
+        "effects": []
+      },
+      {
+        "line": 156,
+        "effects": [
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观***",
+              "userId": "0",
+              "message": "流口水",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "bilibili:1790518959",
+              "sentAt": 1790519946919,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 157,
+        "effects": []
+      },
+      {
+        "line": 158,
+        "effects": []
+      },
+      {
+        "line": 159,
+        "effects": []
+      },
+      {
+        "line": 160,
+        "effects": []
+      },
+      {
+        "line": 161,
+        "effects": []
+      },
+      {
+        "line": 162,
+        "effects": []
+      },
+      {
+        "line": 163,
+        "effects": []
+      },
+      {
+        "line": 164,
+        "effects": []
+      },
+      {
+        "line": 165,
+        "effects": []
+      }
+    ]
+  }
+}

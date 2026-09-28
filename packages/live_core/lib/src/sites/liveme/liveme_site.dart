@@ -26,7 +26,9 @@ const _site = 'liveme';
 /// - fresh media (recovery, or a room without stream data) is
 ///   `uid_vid_by_short_id` and `queryinfosimple` only.
 ///
-/// Failures are `SiteError`s; nothing is disguised as an offline room.
+/// A private or paid broadcast is live and marked with its restriction; its
+/// stream says why it is not played (M4.U). Failures are `SiteError`s;
+/// nothing is disguised as an offline room.
 final class LiveMeSite extends LiveSite
     with LiveSiteLinks
     implements
@@ -37,9 +39,8 @@ final class LiveMeSite extends LiveSite
         LiveSiteRecordRoomResolver,
         LivePlayUrlResolver,
         LivePlayRecoveryResolver {
-  /// Creates the adapter; [now] (the `_time` and signature clock, and the
-  /// media's issue time) and [random] (the signature's `vali`) are
-  /// injectable for tests.
+  /// Creates the adapter; [now] (the `_time` and signature clock) and
+  /// [random] (the signature's `vali`) are injectable for tests.
   new(this.http, {DateTime Function()? now, math.Random? random})
     : _now = now ?? DateTime.now,
       _signer = LiveMeSigner(random: random);
@@ -254,8 +255,8 @@ final class LiveMeSite extends LiveSite
   /// broadcast, in parallel; both must be this room's and this anchor's. A
   /// room id that is not a short id is `NotFound` without a request. With
   /// [media] the stream data comes along; a broadcast that cannot be played
-  /// (private or paid, not live, no media) is still returned, and its
-  /// stream says why.
+  /// (private or paid, not live, no media) is still returned, a private or
+  /// paid one live and marked, and its stream says why.
   Future<LiveRoom> _room(String roomId, {required bool media, CancelToken? cancel}) async {
     final shortId = LiveMeLink.normalizeShortId(roomId);
     if (shortId == null) throw NotFound(_site, 'not a short id: $roomId');
@@ -277,7 +278,7 @@ final class LiveMeSite extends LiveSite
       snapshot = LiveMeApi.withProfile(video, profile);
     }
     if (profile.shortId != shortId) throw ApiChanged(_site, 'getinfo: ${profile.shortId} for $shortId');
-    return LiveMeApi.room(snapshot, data: media ? LiveMeApi.roomData(snapshot, issuedAt: _now()) : null);
+    return LiveMeApi.room(snapshot, data: media ? LiveMeApi.roomData(snapshot) : null);
   }
 
   /// The room with its stream data.
@@ -306,11 +307,11 @@ final class LiveMeSite extends LiveSite
 
   // Streams -------------------------------------------------------------------
 
-  /// 3.x's qualities (see [LiveMeApi.qualities]) from the stream data room
+  /// The qualities (see [LiveMeApi.qualities]) from the stream data room
   /// entry brought: no request. A room without it (a list card, a refreshed
   /// follow) asks for the current broadcast first; one the platform called
-  /// offline or banned has no stream (`StreamUnavailable`, without a
-  /// request).
+  /// offline or banned, or marked private or paid, has no stream
+  /// (`StreamUnavailable`, without a request).
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
       LiveMeApi.qualities(await _stream(detail, fresh: false));
@@ -319,7 +320,8 @@ final class LiveMeSite extends LiveSite
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The lines of [quality] with the media headers and their leases.
+  /// The lines of [quality] with the media headers; 3.x's quality ids are
+  /// read as the new ones ([LiveMeApi.qualityIdFromLegacy]).
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
     required LiveRoom detail,
@@ -341,6 +343,7 @@ final class LiveMeSite extends LiveSite
       if (detail.isExplicitlyOfflineNow) {
         throw StreamUnavailable(_site, '${detail.roomId} is ${detail.effectiveLiveStatus.name}');
       }
+      if (LiveMeApi.restricted(detail.roomId, detail.restriction) case final error?) throw error;
     }
     return await _media(detail.roomId);
   }
@@ -355,7 +358,7 @@ final class LiveMeSite extends LiveSite
     if (mapping.videoId.isEmpty) throw StreamUnavailable(_site, '$shortId is not broadcasting');
     final video = await _video(mapping.videoId, shortId: shortId, media: true);
     if (video.userId != mapping.userId) throw ApiChanged(_site, 'queryinfosimple: not the anchor of $shortId');
-    return LiveMeApi.roomData(video, issuedAt: _now());
+    return LiveMeApi.roomData(video);
   }
 
   // Links ---------------------------------------------------------------------

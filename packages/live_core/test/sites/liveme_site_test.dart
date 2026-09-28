@@ -1,9 +1,10 @@
 // LiveMeSite over the recorded LiveMe responses (ReplayHttp) and a few
 // synthetic ones: the request headers, signature and counts (compared with
 // the requests 3.x sent, from expected.json), the featured list, keyword and
-// exact search, room details for entry, refresh and recording, streams with
-// their leases and recovery onto a new broadcast, cancellation, links
-// through the link parser and the error mapping.
+// exact search, room details for entry, refresh and recording, streams and
+// recovery onto a new broadcast, cancellation, links through the link parser
+// and the error mapping. The M4.U upgrades (21-1 to 21-8) are named where
+// they change what 3.x did.
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
@@ -415,8 +416,12 @@ void main() {
       expect(_described(setup.http.requests), _legacyRequests('S03-mapping-live', 'getRoomDetail'));
       expect((entered.roomId, entered.userId, entered.isLiveNow), (_shortId, _userId, true));
       final data = entered.data! as LiveMeRoomData;
-      expect((data.videoId, data.state, data.streams.length, data.issuedAt), (_videoId, LiveMeState.live, 3, _now));
-      expect(entered.danmakuData, isNull, reason: '3.x had no LiveMe danmaku');
+      expect(
+        (data.videoId, data.state, data.streams.length, data.restriction),
+        (_videoId, LiveMeState.live, 2, LiveRestriction.none),
+      );
+      expect((entered.startedAt, entered.restriction), (DateTime.utc(2026, 9, 26, 21, 31, 2), LiveRestriction.none));
+      expect(entered.danmakuData, isNull, reason: '3.x had no LiveMe danmaku; the chat room is data.videoId (M5)');
       for (final (key, call) in [
         ('getRoomDetailForRefresh', () => setup.site.getRoomDetailForRefresh(roomId: _shortId)),
         ('getRoomDetailForRecording', () => setup.site.getRoomDetailForRecording(roomId: _shortId)),
@@ -427,6 +432,7 @@ void main() {
         expect(_described(setup.http.requests), _legacyRequests('S03-mapping-live', key), reason: key);
         if (result is LiveRoom) {
           expect(result.data == null, key == 'getRoomDetailForRefresh', reason: key);
+          expect((result.startedAt, result.restriction), (entered.startedAt, LiveRestriction.none), reason: key);
         } else {
           expect(result, isTrue);
         }
@@ -500,18 +506,50 @@ void main() {
       expect((after.effectiveLiveStatus, after.title, after.introduction), (LiveStatus.offline, 'Fixture', 'hello'));
     });
 
+    test('21-5: a follow 3.x stored as banned reads back live and paid; the start and mark go when it ends', () async {
+      var current = _first;
+      final site = LiveMeSite(
+        _world(current: () => current, changes: {'livebptype': '7', 'vtime': '1790458262', 'title': 'Click for fun!'}),
+      );
+      final stored = LiveRoom.fromJson({
+        'roomId': _worldShortId,
+        'platform': 'liveme',
+        'title': 'Old title',
+        'nick': 'Fixture',
+        'liveStatus': LiveStatus.banned.index,
+        'status': false,
+        'isRecord': false,
+        'tagIds': const ['kept'],
+      });
+      final live = stored.mergeFrom(await site.getRoomDetailForRefresh(roomId: _worldShortId));
+      expect(
+        (live.effectiveLiveStatus, live.restriction, live.startedAt, live.followGroup),
+        (LiveStatus.live, LiveRestriction.paid, DateTime.utc(2026, 9, 26, 21, 31, 2), FollowGroup.live),
+      );
+      expect(live.title, 'Fixture', reason: "the app's default title names the room by the anchor");
+      expect(live.tagIds, ['kept']);
+      current = '';
+      final ended = live.mergeFrom(await site.getRoomDetailForRefresh(roomId: _worldShortId));
+      expect((ended.effectiveLiveStatus, ended.restriction, ended.startedAt), (LiveStatus.offline, null, null));
+    });
+
     test('a state the answer does not give stays unknown; the live status is then an error (3.x)', () async {
       final site = LiveMeSite(_world(changes: {'online': null, 'status': null, 'roomstate': null}));
       expect((await site.getRoomDetailForRefresh(roomId: _worldShortId)).isLiveStatusPending, isTrue);
       await expectLater(site.getLiveStatus(roomId: _worldShortId), throwsA(isA<ApiChanged>()));
     });
 
-    test('private, paid, ended or media-less broadcasts open; their stream says why (3.x: banned / failed)', () async {
-      for (final (changes, status) in [
-        (<String, Object?>{'ispvt': '1'}, LiveStatus.banned),
-        (<String, Object?>{'livebptype': '7'}, LiveStatus.banned),
-        (<String, Object?>{'online': '0'}, LiveStatus.offline),
-        (<String, Object?>{'videosource': 'https://example.com/1.flv', 'hlsvideosource': ''}, LiveStatus.live),
+    test('private, paid, ended or media-less broadcasts open; their stream says why (21-5; 3.x: banned)', () async {
+      for (final (changes, status, restriction) in [
+        (<String, Object?>{'ispvt': '1'}, LiveStatus.live, LiveRestriction.private),
+        (<String, Object?>{'livebptype': '7'}, LiveStatus.live, LiveRestriction.paid),
+        (<String, Object?>{'hot_label_v2': '{"text":"Paid broadcast"}'}, LiveStatus.live, LiveRestriction.paid),
+        (<String, Object?>{'online': '0'}, LiveStatus.offline, null),
+        (
+          <String, Object?>{'videosource': 'ftp://example.com/1.flv', 'hlsvideosource': ''},
+          LiveStatus.live,
+          LiveRestriction.none,
+        ),
       ]) {
         final http = _world(changes: changes);
         final site = LiveMeSite(http);
@@ -519,33 +557,56 @@ void main() {
           await site.getRoomDetail(roomId: _worldShortId),
           await site.getRoomDetailForRecording(roomId: _worldShortId),
         ]) {
-          expect(entered.effectiveLiveStatus, status, reason: '$changes');
+          expect((entered.effectiveLiveStatus, entered.restriction), (status, restriction), reason: '$changes');
+          final named = restriction == LiveRestriction.private || restriction == LiveRestriction.paid;
           await expectLater(
             site.getPlayQualities(detail: entered),
-            throwsA(isA<StreamUnavailable>()),
+            throwsA(
+              isA<StreamUnavailable>().having(
+                (error) => error.detail,
+                'detail',
+                named ? contains('(${restriction!.name})') : isNot(contains('restricted')),
+              ),
+            ),
             reason: '$changes',
           );
         }
-        expect(http.requests, hasLength(6), reason: 'the stream needs no further request');
+        expect(await site.getLiveStatus(roomId: _worldShortId), status == LiveStatus.live, reason: '$changes');
+        expect(http.requests, hasLength(9), reason: 'the stream needs no further request');
       }
     });
   });
 
   group('streams', () {
-    test('qualities and lines from room entry match 3.x: no request, headers and lease on the line', () async {
+    test("21-7: 原画 and 流畅 from room entry, no request; 3.x's URLs as lines with headers, no lease", () async {
       final setup = _setup(['S03-mapping-live', 'S04-profile-live', 'S05-query-live']);
       final room = await setup.site.getRoomDetail(roomId: _shortId);
       final qualities = await setup.site.getPlayQualities(detail: room);
-      final legacy = (_legacy('S03-mapping-live')['getPlayQualites'] as List).cast<Map<String, dynamic>>();
-      expect(qualities.map((quality) => quality.id), [for (final quality in legacy) quality['id']]);
-      for (final (index, quality) in qualities.indexed) {
+      expect([for (final quality in qualities) (quality.quality, quality.id)], [('原画', 'source'), ('流畅', 'smooth')]);
+      final legacy = {
+        for (final quality in (_legacy('S03-mapping-live')['getPlayQualites'] as List).cast<Map<String, dynamic>>())
+          quality['id'] as String: quality['getPlayUrls'] as List,
+      };
+      final expected = {
+        'source': [...legacy['source-flv']!, ...legacy['hls']!],
+        'smooth': legacy['smooth-flv'],
+      };
+      for (final quality in qualities) {
         final resolution = await setup.site.resolvePlayUrls(detail: room, quality: quality);
-        expect(resolution.urls, legacy[index]['getPlayUrls']);
+        expect(resolution.urls, expected[quality.id]);
         expect(resolution.appliedQualityData, quality.id);
-        final line = resolution.lines.single;
-        expect(line.headers, LiveMeApi.mediaHeaders(_shortId));
-        expect(line.lease!.expiresAt, DateTime.utc(2026, 9, 27, 21, 27, 38));
+        for (final line in resolution.lines) {
+          expect(line.headers, LiveMeApi.mediaHeaders(_shortId));
+          expect(line.lease, isNull, reason: '21-8');
+        }
         expect(await setup.site.getPlayUrls(detail: room, quality: quality), resolution.urls);
+      }
+      for (final old in legacy.keys) {
+        final resolution = await setup.site.resolvePlayUrls(
+          detail: room,
+          quality: LivePlayQuality(quality: 'x', id: old),
+        );
+        expect(resolution.urls, contains(legacy[old]!.single), reason: "3.x's $old still plays");
       }
       expect(setup.http.requests, hasLength(3));
     });
@@ -554,7 +615,7 @@ void main() {
       final setup = _setup(['S01-featurelist-p1', 'S03-mapping-live', 'S05-query-live']);
       final card = (await setup.site.getDirectoryPage()).rooms.first;
       expect(card.roomId, _shortId);
-      expect(await setup.site.getPlayQualities(detail: card), hasLength(3));
+      expect(await setup.site.getPlayQualities(detail: card), hasLength(2));
       expect(_paths(setup.http.requests), [
         '/live/featurelist',
         '/liveme_ent/v1/user/uid_vid_by_short_id',
@@ -564,6 +625,13 @@ void main() {
         final room = LiveRoom(roomId: _shortId, platform: 'liveme', liveStatus: status);
         await expectLater(setup.site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
       }
+      for (final kind in [LiveRestriction.private, LiveRestriction.paid]) {
+        await expectLater(
+          setup.site.getPlayQualities(detail: card.copyWith(restriction: kind)),
+          throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('(${kind.name})'))),
+          reason: 'a card marked restricted says why without a request',
+        );
+      }
       expect(setup.http.requests, hasLength(3));
     });
 
@@ -572,15 +640,19 @@ void main() {
       final http = _world(current: () => current);
       final site = LiveMeSite(http);
       final room = await site.getRoomDetail(roomId: _worldShortId);
-      final quality = (await site.getPlayQualities(detail: room)).first;
-      expect(quality.selectionId, 'source-flv');
+      final quality = (await site.getPlayQualities(detail: room)).single;
+      expect(quality.selectionId, 'source');
       expect(await site.getPlayUrls(detail: room, quality: quality), [
         'https://game.live11.linkv.fun/yolo/$_first.flv?wsSecret=a&wsABStime=6ab98a4a',
+        'https://game.live11.linkv.fun/yolo/$_first.m3u8?wsSecret=a&wsABStime=6ab98a4a',
       ]);
       current = _second;
       final recovered = await site.resolvePlayUrlsForRecovery(detail: room, quality: quality);
-      expect(recovered.urls, ['https://game.live11.linkv.fun/yolo/$_second.flv?wsSecret=a&wsABStime=6ab98a4a']);
-      expect(recovered.appliedQualityData, 'source-flv');
+      expect(recovered.urls, [
+        'https://game.live11.linkv.fun/yolo/$_second.flv?wsSecret=a&wsABStime=6ab98a4a',
+        'https://game.live11.linkv.fun/yolo/$_second.m3u8?wsSecret=a&wsABStime=6ab98a4a',
+      ]);
+      expect(recovered.appliedQualityData, 'source');
       expect(_paths(http.requests.sublist(3)), ['/liveme_ent/v1/user/uid_vid_by_short_id', '/live/queryinfosimple']);
       current = '';
       await expectLater(
@@ -598,7 +670,7 @@ void main() {
       );
     });
 
-    test("recovery of 3.x's source-flv matches its URLs", () async {
+    test("recovery of 3.x's source-flv plays 原画, its URL first (21-7)", () async {
       final setup = _setup(['S03-mapping-live', 'S04-profile-live', 'S05-query-live']);
       final room = await setup.site.getRoomDetail(roomId: _shortId);
       setup.http.requests.clear();
@@ -606,8 +678,9 @@ void main() {
       final recovered = await setup.site.resolvePlayUrlsForRecovery(detail: room, quality: quality);
       final legacy = _legacy('S03-mapping-live')['resolvePlayUrlsForRecoveryRaw(source-flv)'] as Map<String, dynamic>;
       final value = legacy['value'] as Map<String, dynamic>;
-      expect(recovered.urls, value['urls']);
-      expect(recovered.appliedQualityData, value['appliedQualityData']);
+      expect(recovered.urls.first, (value['urls'] as List).single);
+      expect(recovered.lines.map((line) => line.lineId), ['flv', 'hls']);
+      expect((value['appliedQualityData'], recovered.appliedQualityData), ('source-flv', 'source'));
       expect(_described(setup.http.requests), [
         (legacy['requests'] as List).first,
         (legacy['requests'] as List).last,

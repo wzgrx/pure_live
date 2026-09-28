@@ -1,0 +1,419 @@
+{
+  "generator": "archived v4 NiconicoChatProtocol.view and NiconicoChatProtocol.messages with its ProtoMessage (archive/v4 6ba709135) over every recorded view answer and window of S07-live (fixtures/niconico/danmaku/v4_expected.dart)",
+  "value": {
+    "room": "niconico:user/15119555",
+    "frames": [
+      {
+        "line": 1,
+        "kind": "view",
+        "at": "now",
+        "segments": [],
+        "previous": [],
+        "next": 1790541775
+      },
+      {
+        "line": 2,
+        "kind": "view",
+        "at": "1790541775",
+        "segments": [
+          {
+            "from": 1790541773000000,
+            "until": 1790541789000000,
+            "uri": "https://mpn.live.nicovideo.jp/data/segment/v4/JAon4gp79uqNsj2ISDs-h9JBsYzWH9yK-6xsMIONFPqx8iQMmguOfK8FgYwWXAml6xfe7ySWg9FWOiwCGhE2"
+          },
+          {
+            "from": 1790541789000000,
+            "until": 1790541805000000,
+            "uri": "https://mpn.live.nicovideo.jp/data/segment/v4/ZPda6IAr9EqCKxN7_3yTI55G5XuU3jIPKtGJ_gr0YTIl7d4lPsBnLl7MfzGeGiZZwbxqU0Je_hII0d2-pCby"
+          }
+        ],
+        "previous": [
+          {
+            "from": 1790541741000000,
+            "until": 1790541757000000,
+            "uri": "https://mpn.live.nicovideo.jp/data/segment/v4/IUcxO6_OAA9n46zlef7GQdZPkhkjQQr4q9nKT6A-TEkUkVZPytvY8nFJr8TsSCYNYLEYGeS13Y8LouxrEfpf"
+          },
+          {
+            "from": 1790541757000000,
+            "until": 1790541773000000,
+            "uri": "https://mpn.live.nicovideo.jp/data/segment/v4/XVp-11OYLABdZY_x-EIBo0Z6AZm6SUuS8KpB8UTFOQpUTD3Atnj3TO_nEwpeLwoyX2Gc8rmKl_TYF2M_yDys"
+          }
+        ],
+        "next": 1790541805
+      },
+      {
+        "line": 3,
+        "kind": "window",
+        "path": "/data/segment/v4/JAon4gp79uqNsj2ISDs-h9JBsYzWH9yK-6xsMIONFPqx8iQMmguOfK8FgYwWXAml6xfe7ySWg9FWOiwCGhE2",
+        "events": [
+          {
+            "at": 1790541774195402,
+            "type": "online",
+            "audience": "online",
+            "value": 9988
+          },
+          {
+            "at": 1790541774901642,
+            "type": "chat",
+            "id": "niconico:EhoKEgkofjVAm-SgARHM7xJ3DFNmlxCi5__RBQ",
+            "userId": "i:4DOy81S0YvW_oFoc",
+            "userName": "",
+            "text": "もうすでに眠いじゃん",
+            "sentAt": 1790541774901642
+          },
+          {
+            "at": 1790541775206503,
+            "type": "online",
+            "audience": "online",
+            "value": 9988
+          },
+          {
+            "at": 1790541776104559,
+            "type": "chat",
+            "id": "niconico:EhoKEglNcOhEm-SgARHWCYHSMyAEsRCi5__RBQ",
+            "userId": "l:E84Qh6K3sIrLDL7D",
+            "userName": "",
+            "text": "１２０分コースで寝るか",
+            "sentAt": 1790541776104559
+          },
+          {
+            "at": 1790541776170896,
+            "type": "chat",
+            "id": "niconico:EhoKEgmEfypFm-SgARH-OgIdlVe9sxCi5__RBQ",
+            "userId": "g:ULeATPS45vnfgeUk",
+            "userName": "",
+            "text": "スキンヘッド見たいやつの方が多いな",
+            "sentAt": 1790541776170896
+          },
+          {
+            "at": 1790541776217312,
+            "type": "online",
+            "audience": "online",
+            "value": 9989
+          },
+          {
+            "at": 1790541777227294,
+            "type": "online",
+            "audience": "online",
+            "value": 9990
+          },
+          {
+            "at": 1790541780452158,
+            "type": "chat",
+            "id": "niconico:EhoKEgndfeRVm-SgARFbSk3SOivUtxCi5__RBQ",
+            "userId": "o:RFNcmAJnyporv1qe",
+            "userName": "",
+            "text": "あーちゃんに頼め",
+            "sentAt": 1790541780452158
+          },
+          {
+            "at": 1790541780475178,
+            "type": "online",
+            "audience": "online",
+            "value": 9990
+          },
+          {
+            "at": 1790541785436004,
+            "type": "online",
+            "audience": "online",
+            "value": 9991
+          },
+          {
+            "at": 1790541786911057,
+            "type": "online",
+            "audience": "online",
+            "value": 9993
+          },
+          {
+            "at": 1790541787919512,
+            "type": "online",
+            "audience": "online",
+            "value": 9993
+          },
+          {
+            "at": 1790541788492484,
+            "type": "chat",
+            "id": "niconico:EhoKEgnWfkx1m-SgARH3ICIlxP7HghCi5__RBQ",
+            "userId": "a:DBUdSsW7xAkkc1X_",
+            "userName": "",
+            "text": "ヘッドスパもね",
+            "sentAt": 1790541788492484
+          },
+          {
+            "at": 1790541788931832,
+            "type": "online",
+            "audience": "online",
+            "value": 9994
+          }
+        ]
+      },
+      {
+        "line": 4,
+        "kind": "window",
+        "path": "/data/segment/v4/ZPda6IAr9EqCKxN7_3yTI55G5XuU3jIPKtGJ_gr0YTIl7d4lPsBnLl7MfzGeGiZZwbxqU0Je_hII0d2-pCby",
+        "events": [
+          {
+            "at": 1790541790343097,
+            "type": "online",
+            "audience": "online",
+            "value": 9995
+          },
+          {
+            "at": 1790541793666091,
+            "type": "chat",
+            "id": "niconico:EhoKEgmwfoKJm-SgARGY_6vsaB5nlhCi5__RBQ",
+            "userId": "u:TSgxg9vx0xBVxivz",
+            "userName": "",
+            "text": "寝たらすぐに剃るの",
+            "sentAt": 1790541793666091
+          },
+          {
+            "at": 1790541793688309,
+            "type": "online",
+            "audience": "online",
+            "value": 9995
+          },
+          {
+            "at": 1790541794695972,
+            "type": "online",
+            "audience": "online",
+            "value": 9996
+          },
+          {
+            "at": 1790541800099539,
+            "type": "chat",
+            "id": "niconico:EhoKEgkzcaOim-SgAREpFrhNIx0ypxCi5__RBQ",
+            "userId": "x:wOD6pdmW-ds3U2az",
+            "userName": "",
+            "text": "今のところ22時間中1時間半睡眠だもんな",
+            "sentAt": 1790541800099539
+          },
+          {
+            "at": 1790541800127110,
+            "type": "online",
+            "audience": "online",
+            "value": 9996
+          },
+          {
+            "at": 1790541802308012,
+            "type": "chat",
+            "id": "niconico:EhoKEgkEdESrm-SgARETszXCDwQ9txCi5__RBQ",
+            "userId": "d:Ei3BlPKnfkhhHAnh",
+            "userName": "",
+            "text": "ドラクエよりきついじゃんｗ",
+            "sentAt": 1790541802308012
+          },
+          {
+            "at": 1790541802324273,
+            "type": "online",
+            "audience": "online",
+            "value": 9996
+          },
+          {
+            "at": 1790541803331178,
+            "type": "online",
+            "audience": "online",
+            "value": 9997
+          }
+        ]
+      },
+      {
+        "line": 5,
+        "kind": "view",
+        "at": "1790541805",
+        "segments": [
+          {
+            "from": 1790541805000000,
+            "until": 1790541821000000,
+            "uri": "https://mpn.live.nicovideo.jp/data/segment/v4/QRgRGSrzRX_SKleDMqmG2U6nHkggZsth9OQe40ZzCJH_hRZuo4-GlV5fEQrZSrRpaugFy-41UH1E6WSDbVBX"
+          },
+          {
+            "from": 1790541821000000,
+            "until": 1790541837000000,
+            "uri": "https://mpn.live.nicovideo.jp/data/segment/v4/XVb_FZWxGPj4Q7NgYhB6a25LBU-eqcdXbwUGpd3WCZBwKypq9tkv68GppbbY6SxP9KjJvMryj6fhyh4OyLxU"
+          }
+        ],
+        "previous": [
+          {
+            "from": 1790541773000000,
+            "until": 1790541789000000,
+            "uri": "https://mpn.live.nicovideo.jp/data/segment/v4/JAon4gp79uqNsj2ISDs-h9JBsYzWH9yK-6xsMIONFPqx8iQMmguOfK8FgYwWXAml6xfe7ySWg9FWOiwCGhE2"
+          },
+          {
+            "from": 1790541789000000,
+            "until": 1790541805000000,
+            "uri": "https://mpn.live.nicovideo.jp/data/segment/v4/ZPda6IAr9EqCKxN7_3yTI55G5XuU3jIPKtGJ_gr0YTIl7d4lPsBnLl7MfzGeGiZZwbxqU0Je_hII0d2-pCby"
+          }
+        ],
+        "next": 1790541837
+      },
+      {
+        "line": 6,
+        "kind": "window",
+        "path": "/data/segment/v4/QRgRGSrzRX_SKleDMqmG2U6nHkggZsth9OQe40ZzCJH_hRZuo4-GlV5fEQrZSrRpaugFy-41UH1E6WSDbVBX",
+        "events": [
+          {
+            "at": 1790541805256878,
+            "type": "chat",
+            "id": "niconico:EhoKEglQdMi2m-SgARFffiPdPW38oBCi5__RBQ",
+            "userId": "n:-EKKveSZ3D52BXIH",
+            "userName": "",
+            "text": "画面外に出て2時間戻ってこないとかやめて",
+            "sentAt": 1790541805256878
+          },
+          {
+            "at": 1790541805280595,
+            "type": "online",
+            "audience": "online",
+            "value": 9997
+          },
+          {
+            "at": 1790541806505604,
+            "type": "chat",
+            "id": "niconico:EhoKEgmce6m7m-SgAREAi-URCVb9tRCi5__RBQ",
+            "userId": "g:ULeATPS45vnfgeUk",
+            "userName": "",
+            "text": "とろ～ん",
+            "sentAt": 1790541806505604
+          },
+          {
+            "at": 1790541806530181,
+            "type": "online",
+            "audience": "online",
+            "value": 9997
+          },
+          {
+            "at": 1790541806537122,
+            "type": "chat",
+            "id": "niconico:EhoKEgk-cMm7m-SgARHLlWT67HdMgRCi5__RBQ",
+            "userId": "o:RFNcmAJnyporv1qe",
+            "userName": "",
+            "text": "マッサージいったら寝るやろ",
+            "sentAt": 1790541806537122
+          },
+          {
+            "at": 1790541807541145,
+            "type": "online",
+            "audience": "online",
+            "value": 9997
+          },
+          {
+            "at": 1790541809823921,
+            "type": "online",
+            "audience": "online",
+            "value": 9998
+          },
+          {
+            "at": 1790541812261537,
+            "type": "chat",
+            "id": "niconico:EhoKEgk3eyXSm-SgARE7jxJ0x5C7vhCi5__RBQ",
+            "userId": "t:7E97SF0QyPs4l_du",
+            "userName": "",
+            "text": "このルールならギフター投げにくそうだな",
+            "sentAt": 1790541812261537
+          },
+          {
+            "at": 1790541812288043,
+            "type": "online",
+            "audience": "online",
+            "value": 9998
+          },
+          {
+            "at": 1790541816683580,
+            "type": "online",
+            "audience": "online",
+            "value": 9999
+          },
+          {
+            "at": 1790541818048466,
+            "type": "chat",
+            "id": "niconico:EhoKEgnxeMDom-SgARGjLzMIsHzMqhCi5__RBQ",
+            "userId": "i:n1fR1ac8cVTWPxpC",
+            "userName": "",
+            "text": "でも眠い時に運転大丈夫か",
+            "sentAt": 1790541818048466
+          },
+          {
+            "at": 1790541818075354,
+            "type": "online",
+            "audience": "online",
+            "value": 9999
+          },
+          {
+            "at": 1790541819088273,
+            "type": "online",
+            "audience": "online",
+            "value": 10000
+          }
+        ]
+      },
+      {
+        "line": 7,
+        "kind": "window",
+        "path": "/data/segment/v4/XVb_FZWxGPj4Q7NgYhB6a25LBU-eqcdXbwUGpd3WCZBwKypq9tkv68GppbbY6SxP9KjJvMryj6fhyh4OyLxU",
+        "events": [
+          {
+            "at": 1790541823251071,
+            "type": "online",
+            "audience": "online",
+            "value": 10001
+          },
+          {
+            "at": 1790541825772799,
+            "type": "chat",
+            "id": "niconico:EhoKEglpf-wGnOSgARHD7DYhtoY7lBCi5__RBQ",
+            "userId": "y:dtvk6YW42VgZScjJ",
+            "userName": "",
+            "text": "投げにくいと思う",
+            "sentAt": 1790541825772799
+          },
+          {
+            "at": 1790541825800481,
+            "type": "online",
+            "audience": "online",
+            "value": 10001
+          },
+          {
+            "at": 1790541826807108,
+            "type": "online",
+            "audience": "online",
+            "value": 10002
+          },
+          {
+            "at": 1790541827977182,
+            "type": "chat",
+            "id": "niconico:EhoKEgn8e4kPnOSgARHZtswzL9P8khCi5__RBQ",
+            "userId": "a:DBUdSsW7xAkkc1X_",
+            "userName": "",
+            "text": "いつシコるの？",
+            "sentAt": 1790541827977182
+          },
+          {
+            "at": 1790541828002471,
+            "type": "online",
+            "audience": "online",
+            "value": 10002
+          },
+          {
+            "at": 1790541831547697,
+            "type": "online",
+            "audience": "online",
+            "value": 10003
+          },
+          {
+            "at": 1790541832691941,
+            "type": "online",
+            "audience": "online",
+            "value": 10004
+          },
+          {
+            "at": 1790541836790367,
+            "type": "online",
+            "audience": "online",
+            "value": 10005
+          }
+        ]
+      }
+    ]
+  }
+}

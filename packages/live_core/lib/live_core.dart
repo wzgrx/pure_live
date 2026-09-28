@@ -23,6 +23,8 @@ export 'src/site_error.dart';
 export 'src/sites.dart';
 export 'src/sites/acfun/acfun_api.dart';
 export 'src/sites/acfun/acfun_site.dart';
+export 'src/sites/baidulive/baidulive_api.dart';
+export 'src/sites/baidulive/baidulive_site.dart';
 export 'src/sites/bigo/bigo_api.dart';
 export 'src/sites/bigo/bigo_site.dart';
 export 'src/sites/bilibili/bilibili_api.dart';

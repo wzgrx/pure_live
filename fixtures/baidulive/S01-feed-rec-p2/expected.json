@@ -1,0 +1,613 @@
+{
+  "generator": "BaiduLiveSite.getDirectoryPage(2) after page 1 (with S01-feed-rec-p1) + getRecommendRooms(2) + BaiduLiveApi.parseDirectoryJson + signFeedParameters",
+  "value": {
+    "getDirectoryPage(2)": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://tiebac.baidu.com/livefeed/feed",
+          "form": {
+            "appname": "pclive",
+            "sid": "",
+            "ua": "320_480_pc_1.0_0",
+            "uid": "<device>",
+            "timestamp": "<time>",
+            "source": "pclive",
+            "resource": "feed",
+            "scene": "pc_channel",
+            "session_id": "1790532543461",
+            "refresh_type": "1",
+            "refresh_index": "2",
+            "tab": "rec",
+            "channel_id": "570",
+            "sign": "<sign>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": {
+        "page": 2,
+        "hasMore": true,
+        "rooms": [
+          {
+            "roomId": "11584190279",
+            "userId": "5pfiMapjGd61P_ir0DtplQ",
+            "title": "档案陈列馆首次开馆！",
+            "nick": "孟董私藏茶",
+            "avatar": "https://avatar.bdstatic.com/it/u=1333163711,1925475630&fm=3012&app=3012&autime=1780678625&size=b200,200",
+            "cover": "https://p2.bdstatic.com/liveUpload/bd_client_26cd988e15e7cbba924c2bac6a7f741f.jpeg",
+            "area": "茶",
+            "watching": "954",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "954",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11584190279",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11584190279"
+          },
+          {
+            "roomId": "11577267079",
+            "userId": "UVwazmzA1W31H59LsEBTGg",
+            "title": "大家好，现在讲解的是抽动症、多动症、腺样体肥大中医观点",
+            "nick": "中医儿科孟牛安",
+            "avatar": "https://avatar.bdstatic.com/it/u=1501373140,2143296699&fm=3012&app=3012&autime=1780632488&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/008a6e6b85d64b36dcf005d56b3f04fe.png?x-bce-process=image/crop,x_0,y_0,w_853,h_480",
+            "area": "心理调节",
+            "watching": "2041",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2041",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11577267079",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11577267079"
+          },
+          {
+            "roomId": "11567732702",
+            "userId": "gZTRweNtRp12tLTicepV0w",
+            "title": "微米级电子水平仪 精度稳如泰山",
+            "nick": "苏州零零零传感",
+            "avatar": "https://avatar.bdstatic.com/it/u=3089373800,1188076449&fm=3012&app=3012&autime=1773664199&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/67853dd1f8438e75631526fc0cba16f0.jpeg?x-bce-process=image/crop,x_0,y_512,w_4096,h_2304",
+            "area": "智能硬件",
+            "watching": "364",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "364",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11567732702",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11567732702"
+          },
+          {
+            "roomId": "11550638818",
+            "userId": "vtA0w8yziqCmMJXE8VX8Jw",
+            "title": "2026年出国签证全攻略：从申请到过签，一篇讲透。",
+            "nick": "AI时代前沿",
+            "avatar": "https://avatar.bdstatic.com/it/u=2487906482,1484256912&fm=3012&app=3012&autime=1789545458&size=b200,200",
+            "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_80006282_80006282_1_-999_1789095066818013816.png?x-bce-process=image/crop,x_0,y_0,w_1080,h_608",
+            "area": "家庭游",
+            "watching": "295",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "295",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11550638818",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11550638818"
+          },
+          {
+            "roomId": "11542820571",
+            "userId": "a_wVumM26zdal2uVNoU6Pg",
+            "title": "内蒙额济纳旗胡杨林，6日豪华游，两人同行，一人免单！！",
+            "nick": "内蒙胡杨林VIP纯玩团",
+            "avatar": "https://avatar.bdstatic.com/it/u=596583676,639860926&fm=3012&app=3012&autime=1788507059&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/11378a0e1f7ea12cf8cfef135fd3ce57.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+            "area": "国内景点打卡",
+            "watching": "6979",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "6979",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11542820571",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11542820571"
+          },
+          {
+            "roomId": "11583602140",
+            "userId": "8LEmUKTID5fVu-H62ADusg",
+            "title": "浆乳肉芽肿性乳腺炎区别和治疗方法",
+            "nick": "乳腺专家林华",
+            "avatar": "https://avatar.bdstatic.com/it/u=2226268379,1602828591&fm=3012&app=3012&autime=1780634291&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/a70ce4237cd13e4373468e4444aa26ca.png?x-bce-process=image/crop,x_0,y_0,w_1600,h_900",
+            "area": "其他",
+            "watching": "21",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "21",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11583602140",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11583602140"
+          },
+          {
+            "roomId": "11569303895",
+            "userId": "BeblkNUwkXoy7Y_2ungN3g",
+            "title": "八字命理解惑 助你事业人际情绪顺遂",
+            "nick": "金炎老师讲国学",
+            "avatar": "https://avatar.bdstatic.com/it/u=3300022334,3366349618&fm=3012&app=3012&autime=1789778982&size=b200,200",
+            "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_42612607_42612607_1_-999_1775122160.png?x-bce-process=image/crop,x_51,y_154,w_955,h_537",
+            "area": "艺术",
+            "watching": "4946",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "4946",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11569303895",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11569303895"
+          },
+          {
+            "roomId": "11527736700",
+            "userId": "JkDG9KItcvQV3BxKjxRlqw",
+            "title": "发现孩子有强迫症、双相情感障碍、精神分裂怎么办？",
+            "nick": "神志科董永书主任",
+            "avatar": "https://avatar.bdstatic.com/it/u=815514708,2290483439&fm=3012&app=3012&autime=1786597253&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/aa716225c5c48be9960d10f707746e7a.png?x-bce-process=image/crop,x_0,y_0,w_1877,h_1056",
+            "area": "中医",
+            "watching": "2160",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "2160",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11527736700",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11527736700"
+          },
+          {
+            "roomId": "11574866740",
+            "userId": "RuQy2YeoLzj-ttgbKZ5VFg",
+            "title": "期权：投资皇冠上的明珠",
+            "nick": "正信期货有限公司",
+            "avatar": "https://avatar.bdstatic.com/it/u=1451401047,1203386933&fm=3012&app=3012&autime=1773654904&size=b200,200",
+            "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_49306776_49306776_1_-999_1785345407900987914.png?x-bce-process=image/crop,x_0,y_44,w_1080,h_608",
+            "area": "投资",
+            "watching": "11269",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "11269",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11574866740",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11574866740"
+          },
+          {
+            "roomId": "11573844771",
+            "userId": "s8VI4eIR9y0wg9AW2IlhjQ",
+            "title": "本田CR-V空间大安全高 优惠超值",
+            "nick": "北京亚鑫通顺",
+            "avatar": "https://avatar.bdstatic.com/it/u=2696245819,1814045041&fm=3012&app=3012&autime=1758112725&size=b200,200",
+            "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_54778885_54778885_1_-999_1781059405.png?x-bce-process=image/crop,x_0,y_0,w_1080,h_608",
+            "area": "新车",
+            "watching": "194",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "194",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11573844771",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11573844771"
+          }
+        ]
+      }
+    },
+    "getDirectoryPage(2) again": {
+      "requests": [],
+      "value": {
+        "page": 2,
+        "hasMore": false,
+        "rooms": []
+      }
+    },
+    "getRecommendRooms(2, pageSize 5)": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://tiebac.baidu.com/livefeed/feed",
+          "form": {
+            "appname": "pclive",
+            "sid": "",
+            "ua": "320_480_pc_1.0_0",
+            "uid": "<device>",
+            "timestamp": "<time>",
+            "source": "pclive",
+            "resource": "feed",
+            "scene": "pc_channel",
+            "session_id": "1790532543461",
+            "refresh_type": "1",
+            "refresh_index": "2",
+            "tab": "rec",
+            "channel_id": "570",
+            "sign": "<sign>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": [
+        {
+          "roomId": "11584190279",
+          "userId": "5pfiMapjGd61P_ir0DtplQ",
+          "title": "档案陈列馆首次开馆！",
+          "nick": "孟董私藏茶",
+          "avatar": "https://avatar.bdstatic.com/it/u=1333163711,1925475630&fm=3012&app=3012&autime=1780678625&size=b200,200",
+          "cover": "https://p2.bdstatic.com/liveUpload/bd_client_26cd988e15e7cbba924c2bac6a7f741f.jpeg",
+          "area": "茶",
+          "watching": "954",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "954",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11584190279",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11584190279"
+        },
+        {
+          "roomId": "11577267079",
+          "userId": "UVwazmzA1W31H59LsEBTGg",
+          "title": "大家好，现在讲解的是抽动症、多动症、腺样体肥大中医观点",
+          "nick": "中医儿科孟牛安",
+          "avatar": "https://avatar.bdstatic.com/it/u=1501373140,2143296699&fm=3012&app=3012&autime=1780632488&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/008a6e6b85d64b36dcf005d56b3f04fe.png?x-bce-process=image/crop,x_0,y_0,w_853,h_480",
+          "area": "心理调节",
+          "watching": "2041",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "2041",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11577267079",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11577267079"
+        },
+        {
+          "roomId": "11567732702",
+          "userId": "gZTRweNtRp12tLTicepV0w",
+          "title": "微米级电子水平仪 精度稳如泰山",
+          "nick": "苏州零零零传感",
+          "avatar": "https://avatar.bdstatic.com/it/u=3089373800,1188076449&fm=3012&app=3012&autime=1773664199&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/67853dd1f8438e75631526fc0cba16f0.jpeg?x-bce-process=image/crop,x_0,y_512,w_4096,h_2304",
+          "area": "智能硬件",
+          "watching": "364",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "364",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11567732702",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11567732702"
+        },
+        {
+          "roomId": "11550638818",
+          "userId": "vtA0w8yziqCmMJXE8VX8Jw",
+          "title": "2026年出国签证全攻略：从申请到过签，一篇讲透。",
+          "nick": "AI时代前沿",
+          "avatar": "https://avatar.bdstatic.com/it/u=2487906482,1484256912&fm=3012&app=3012&autime=1789545458&size=b200,200",
+          "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_80006282_80006282_1_-999_1789095066818013816.png?x-bce-process=image/crop,x_0,y_0,w_1080,h_608",
+          "area": "家庭游",
+          "watching": "295",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "295",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11550638818",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11550638818"
+        },
+        {
+          "roomId": "11542820571",
+          "userId": "a_wVumM26zdal2uVNoU6Pg",
+          "title": "内蒙额济纳旗胡杨林，6日豪华游，两人同行，一人免单！！",
+          "nick": "内蒙胡杨林VIP纯玩团",
+          "avatar": "https://avatar.bdstatic.com/it/u=596583676,639860926&fm=3012&app=3012&autime=1788507059&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/11378a0e1f7ea12cf8cfef135fd3ce57.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+          "area": "国内景点打卡",
+          "watching": "6979",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "6979",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11542820571",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11542820571"
+        }
+      ]
+    },
+    "parseDirectoryJson": {
+      "sessionId": "1790532543461",
+      "refreshIndex": 2,
+      "hasMore": true,
+      "categories": [],
+      "rooms": [
+        {
+          "roomId": "11584190279",
+          "userId": "5pfiMapjGd61P_ir0DtplQ",
+          "nick": "孟董私藏茶",
+          "title": "档案陈列馆首次开馆！",
+          "avatar": "https://avatar.bdstatic.com/it/u=1333163711,1925475630&fm=3012&app=3012&autime=1780678625&size=b200,200",
+          "cover": "https://p2.bdstatic.com/liveUpload/bd_client_26cd988e15e7cbba924c2bac6a7f741f.jpeg",
+          "category": "茶",
+          "currentViewers": 954,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11577267079",
+          "userId": "UVwazmzA1W31H59LsEBTGg",
+          "nick": "中医儿科孟牛安",
+          "title": "大家好，现在讲解的是抽动症、多动症、腺样体肥大中医观点",
+          "avatar": "https://avatar.bdstatic.com/it/u=1501373140,2143296699&fm=3012&app=3012&autime=1780632488&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/008a6e6b85d64b36dcf005d56b3f04fe.png?x-bce-process=image/crop,x_0,y_0,w_853,h_480",
+          "category": "心理调节",
+          "currentViewers": 2041,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11567732702",
+          "userId": "gZTRweNtRp12tLTicepV0w",
+          "nick": "苏州零零零传感",
+          "title": "微米级电子水平仪 精度稳如泰山",
+          "avatar": "https://avatar.bdstatic.com/it/u=3089373800,1188076449&fm=3012&app=3012&autime=1773664199&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/67853dd1f8438e75631526fc0cba16f0.jpeg?x-bce-process=image/crop,x_0,y_512,w_4096,h_2304",
+          "category": "智能硬件",
+          "currentViewers": 364,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11550638818",
+          "userId": "vtA0w8yziqCmMJXE8VX8Jw",
+          "nick": "AI时代前沿",
+          "title": "2026年出国签证全攻略：从申请到过签，一篇讲透。",
+          "avatar": "https://avatar.bdstatic.com/it/u=2487906482,1484256912&fm=3012&app=3012&autime=1789545458&size=b200,200",
+          "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_80006282_80006282_1_-999_1789095066818013816.png?x-bce-process=image/crop,x_0,y_0,w_1080,h_608",
+          "category": "家庭游",
+          "currentViewers": 295,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11542820571",
+          "userId": "a_wVumM26zdal2uVNoU6Pg",
+          "nick": "内蒙胡杨林VIP纯玩团",
+          "title": "内蒙额济纳旗胡杨林，6日豪华游，两人同行，一人免单！！",
+          "avatar": "https://avatar.bdstatic.com/it/u=596583676,639860926&fm=3012&app=3012&autime=1788507059&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/11378a0e1f7ea12cf8cfef135fd3ce57.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+          "category": "国内景点打卡",
+          "currentViewers": 6979,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11583602140",
+          "userId": "8LEmUKTID5fVu-H62ADusg",
+          "nick": "乳腺专家林华",
+          "title": "浆乳肉芽肿性乳腺炎区别和治疗方法",
+          "avatar": "https://avatar.bdstatic.com/it/u=2226268379,1602828591&fm=3012&app=3012&autime=1780634291&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/a70ce4237cd13e4373468e4444aa26ca.png?x-bce-process=image/crop,x_0,y_0,w_1600,h_900",
+          "category": "其他",
+          "currentViewers": 21,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11569303895",
+          "userId": "BeblkNUwkXoy7Y_2ungN3g",
+          "nick": "金炎老师讲国学",
+          "title": "八字命理解惑 助你事业人际情绪顺遂",
+          "avatar": "https://avatar.bdstatic.com/it/u=3300022334,3366349618&fm=3012&app=3012&autime=1789778982&size=b200,200",
+          "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_42612607_42612607_1_-999_1775122160.png?x-bce-process=image/crop,x_51,y_154,w_955,h_537",
+          "category": "艺术",
+          "currentViewers": 4946,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11527736700",
+          "userId": "JkDG9KItcvQV3BxKjxRlqw",
+          "nick": "神志科董永书主任",
+          "title": "发现孩子有强迫症、双相情感障碍、精神分裂怎么办？",
+          "avatar": "https://avatar.bdstatic.com/it/u=815514708,2290483439&fm=3012&app=3012&autime=1786597253&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/aa716225c5c48be9960d10f707746e7a.png?x-bce-process=image/crop,x_0,y_0,w_1877,h_1056",
+          "category": "中医",
+          "currentViewers": 2160,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11574866740",
+          "userId": "RuQy2YeoLzj-ttgbKZ5VFg",
+          "nick": "正信期货有限公司",
+          "title": "期权：投资皇冠上的明珠",
+          "avatar": "https://avatar.bdstatic.com/it/u=1451401047,1203386933&fm=3012&app=3012&autime=1773654904&size=b200,200",
+          "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_49306776_49306776_1_-999_1785345407900987914.png?x-bce-process=image/crop,x_0,y_44,w_1080,h_608",
+          "category": "投资",
+          "currentViewers": 11269,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11573844771",
+          "userId": "s8VI4eIR9y0wg9AW2IlhjQ",
+          "nick": "北京亚鑫通顺",
+          "title": "本田CR-V空间大安全高 优惠超值",
+          "avatar": "https://avatar.bdstatic.com/it/u=2696245819,1814045041&fm=3012&app=3012&autime=1758112725&size=b200,200",
+          "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_54778885_54778885_1_-999_1781059405.png?x-bce-process=image/crop,x_0,y_0,w_1080,h_608",
+          "category": "新车",
+          "currentViewers": 194,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        }
+      ]
+    },
+    "signature": {
+      "recorded": "8d5c1544f39d575dd42811978ce1495d",
+      "signFeedParameters": "8d5c1544f39d575dd42811978ce1495d"
+    }
+  }
+}

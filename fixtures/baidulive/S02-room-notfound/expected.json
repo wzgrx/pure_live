@@ -1,0 +1,179 @@
+{
+  "generator": "BaiduLiveSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + searchRooms + BaiduLiveApi.parseRoomJson",
+  "value": {
+    "getRoomDetail": {
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://mbd.baidu.com/searchbox",
+          "query": {
+            "cmd": "371",
+            "action": "star",
+            "service": "bdbox",
+            "osname": "pc",
+            "data": "{\"data\":{\"room_id\":\"99999999999\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"99999999999\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+            "ua": "360_740_ANDROID_0",
+            "bd_vid": "",
+            "uid": "<device>",
+            "_": "<time>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": {
+        "throws": "BaiduLiveException",
+        "message": "Baidu Live missing"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://mbd.baidu.com/searchbox",
+          "query": {
+            "cmd": "371",
+            "action": "star",
+            "service": "bdbox",
+            "osname": "pc",
+            "data": "{\"data\":{\"room_id\":\"99999999999\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"99999999999\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+            "ua": "360_740_ANDROID_0",
+            "bd_vid": "",
+            "uid": "<device>",
+            "_": "<time>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": {
+        "throws": "BaiduLiveException",
+        "message": "Baidu Live missing"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://mbd.baidu.com/searchbox",
+          "query": {
+            "cmd": "371",
+            "action": "star",
+            "service": "bdbox",
+            "osname": "pc",
+            "data": "{\"data\":{\"room_id\":\"99999999999\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"99999999999\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+            "ua": "360_740_ANDROID_0",
+            "bd_vid": "",
+            "uid": "<device>",
+            "_": "<time>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": {
+        "throws": "BaiduLiveException",
+        "message": "Baidu Live missing"
+      }
+    },
+    "getLiveStatus": {
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://mbd.baidu.com/searchbox",
+          "query": {
+            "cmd": "371",
+            "action": "star",
+            "service": "bdbox",
+            "osname": "pc",
+            "data": "{\"data\":{\"room_id\":\"99999999999\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"99999999999\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+            "ua": "360_740_ANDROID_0",
+            "bd_vid": "",
+            "uid": "<device>",
+            "_": "<time>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": {
+        "throws": "BaiduLiveException",
+        "message": "Baidu Live missing"
+      }
+    },
+    "searchRooms": {
+      "99999999999": {
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://mbd.baidu.com/searchbox",
+            "query": {
+              "cmd": "371",
+              "action": "star",
+              "service": "bdbox",
+              "osname": "pc",
+              "data": "{\"data\":{\"room_id\":\"99999999999\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"99999999999\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+              "ua": "360_740_ANDROID_0",
+              "bd_vid": "",
+              "uid": "<device>",
+              "_": "<time>"
+            },
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://live.baidu.com",
+              "Referer": "https://live.baidu.com/"
+            }
+          }
+        ],
+        "value": []
+      },
+      "https://live.baidu.com/m/room/99999999999": {
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://mbd.baidu.com/searchbox",
+            "query": {
+              "cmd": "371",
+              "action": "star",
+              "service": "bdbox",
+              "osname": "pc",
+              "data": "{\"data\":{\"room_id\":\"99999999999\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"99999999999\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+              "ua": "360_740_ANDROID_0",
+              "bd_vid": "",
+              "uid": "<device>",
+              "_": "<time>"
+            },
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://live.baidu.com",
+              "Referer": "https://live.baidu.com/"
+            }
+          }
+        ],
+        "value": []
+      }
+    },
+    "parseRoomJson": {
+      "throws": "BaiduLiveException",
+      "message": "Baidu Live missing"
+    }
+  }
+}

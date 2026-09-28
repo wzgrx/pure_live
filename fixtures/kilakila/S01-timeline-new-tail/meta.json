@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "platform": "kilakila",
+  "sample": "S01-timeline-new-tail",
+  "capturedAt": "2026-09-28T17:52:24.373887Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.kilakila.cn/pcLive/timeline?tag=0&type=107&genderType=0&pageNo=51&pageSize=10",
+    "headers": {
+      "User-Agent": "Mozilla/5.0",
+      "Referer": "https://live.kilakila.cn/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "openresty/1.9.15.1",
+      "date": "Mon, 28 Sep 2026 17:52:25 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "vary": "Accept-Encoding",
+      "x-powered-by": "PHP/5.6.40",
+      "set-cookie": "HDSESSION=36jxzadjdo6o9skppmqso6ubu7; expires=Mon, 05-Oct-2026 17:52:25 GMT; Max-Age=604800; path=/; domain=kilakila.cn",
+      "expires": "Thu, 19 Nov 1981 08:52:00 GMT",
+      "cache-control": "no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+      "pragma": "no-cache",
+      "access-control-allow-origin": "*",
+      "access-control-allow-methods": "GET,POST",
+      "access-control-allow-headers": "x-auth-token,DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,xAuthToken"
+    }
+  },
+  "raw": {
+    "sha256": "6e225cfda3222c5c874515c2dcf70080daee9eb5b1d166a0e8823e6bbec088c8",
+    "length": 470
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:HDSESSION",
+      "rule": "secret"
+    }
+  ],
+  "tool": "manual capture (M4.U.15): urllib, checked by hand as fixtures/README.md asks"
+}

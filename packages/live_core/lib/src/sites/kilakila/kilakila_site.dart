@@ -19,15 +19,19 @@ const _site = 'kilakila';
 /// [KilakilaApi.headers] and follows no redirect. Requests are 3.x's:
 /// - the catalog is two fixed timelines, without a request;
 /// - recommendations and the timelines are `pcLive/timeline` pages
-///   ([getDirectoryPage], ten a page);
+///   ([getDirectoryPage], ten a page), up to [KilakilaApi.maxPages] or
+///   [maxPagesWithoutNew] pages without a new anchor, an anchor listed on
+///   an earlier page left out (15-3);
 /// - search is the website's user search page (one request, the anchors'
-///   state unknown), or one profile request for a uid or anchor link;
+///   state unknown), one profile request for a uid or anchor link, or
+///   `getRoomInfo` and the profile for a broadcast link (15-4);
 /// - follow refreshes read the anchor's profile (`Tg/personalH5`) only;
 /// - room entry and recordings read the profile, then the current
 ///   broadcast's `getRoomInfo`, which also holds the pull URLs; recovery
 ///   reads both again.
 ///
-/// Failures are `SiteError`s; nothing is disguised as an offline room.
+/// Failures are `SiteError`s; an anchor is offline only when the platform
+/// says it has no broadcast or its broadcast ended (15-1).
 final class KilakilaSite extends LiveSite
     with LiveSiteLinks
     implements
@@ -47,6 +51,17 @@ final class KilakilaSite extends LiveSite
   final LiveHttp http;
 
   final DateTime Function() _now;
+
+  /// Timeline pages in a row without a new anchor after which the timeline
+  /// ends (15-3): the hot timeline lists its anchors within about ten
+  /// pages, then repeats them for dozens of pages before `isLastPage`
+  /// (2026-09-28: pages 12–41 of 42).
+  static const int maxPagesWithoutNew = 3;
+
+  /// Before a timeline page, by `<type>/<page size>/<page>`: the anchors
+  /// listed on the pages before it since page 1 of that timeline was last
+  /// read, and how many of those pages in a row brought no new one (15-3).
+  final Map<String, ({Set<String> listed, int idle})> _before = {};
 
   @override
   String get id => _site;
@@ -99,8 +114,8 @@ final class KilakilaSite extends LiveSite
 
   /// Native page [page] of [category]'s timeline, or of the hot timeline
   /// (the recommendations) when it is null; ten rows a page, as 3.x's
-  /// directory pager asked. The page's end is the platform's `isLastPage`,
-  /// not the number of rooms.
+  /// directory pager asked. The page's end is the platform's (see
+  /// [KilakilaApi.timelinePage]), not the number of rooms.
   @override
   Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel}) =>
       _timeline(page: page, pageSize: KilakilaApi.pageSize, category: category, cancel: cancel);
@@ -117,7 +132,17 @@ final class KilakilaSite extends LiveSite
 
   /// A page out of 1–100000, a [pageSize] out of 1–100 or an area that is
   /// not a KilaKila timeline is a caller error (`ArgumentError`), refused
-  /// before any request as in 3.x.
+  /// before any request as in 3.x. A page after [KilakilaApi.maxPages] is
+  /// empty and the last, without a request (15-3).
+  ///
+  /// An anchor listed on an earlier page of the same timeline and page
+  /// size, since its page 1 was last read, is left out, and
+  /// [maxPagesWithoutNew] pages in a row without a new anchor end the
+  /// timeline (15-3; the timelines repeat their anchors). The record goes
+  /// with the page: reading a page again gives the same rooms, reading page
+  /// 1 again (a pull to refresh) starts over, and a page reached without
+  /// the ones before it is only deduplicated within itself. No request is
+  /// added.
   Future<LiveDirectoryPage> _timeline({
     required int page,
     required int pageSize,
@@ -127,6 +152,7 @@ final class KilakilaSite extends LiveSite
     if (page < 1 || page > 100000) throw RangeError.range(page, 1, 100000, 'page');
     if (pageSize < 1 || pageSize > 100) throw RangeError.range(pageSize, 1, 100, 'pageSize');
     final type = KilakilaApi.timelineType(category);
+    if (page > KilakilaApi.maxPages) return LiveDirectoryPage(rooms: const [], page: page, hasMore: false);
     final response = await _get(
       Uri.https('live.kilakila.cn', '/pcLive/timeline', {
         'tag': '0',
@@ -137,7 +163,30 @@ final class KilakilaSite extends LiveSite
       }),
       cancel: cancel,
     );
-    return KilakilaApi.timelinePage(response.text, page: page, pageSize: pageSize, type: type, status: response.status);
+    final result = KilakilaApi.timelinePage(
+      response.text,
+      page: page,
+      pageSize: pageSize,
+      type: type,
+      status: response.status,
+    );
+    final chain = '$type/$pageSize/';
+    if (page == 1) _before.removeWhere((key, _) => key.startsWith(chain));
+    final before = _before['$chain$page'];
+    final listed = {...?before?.listed};
+    final rooms = [
+      for (final room in result.rooms)
+        if (listed.add(room.roomId)) room,
+    ];
+    final idle = rooms.isEmpty ? (before?.idle ?? 0) + 1 : 0;
+    final hasMore = result.hasMore && idle < maxPagesWithoutNew;
+    final next = '$chain${page + 1}';
+    _before.remove(next);
+    if (hasMore) _before[next] = (listed: Set.unmodifiable(listed), idle: idle);
+    while (_before.length > 64) {
+      _before.remove(_before.keys.first);
+    }
+    return LiveDirectoryPage(rooms: rooms, page: page, hasMore: hasMore);
   }
 
   // Search --------------------------------------------------------------------
@@ -146,19 +195,23 @@ final class KilakilaSite extends LiveSite
   Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) =>
       searchRoomsCancellable(keyword, page: page, pageSize: pageSize);
 
-  /// Anchors for [keyword] (3.x's rules):
+  /// Anchors for [keyword] (3.x's rules, with 15-4 and 15-5):
   /// - a page or [pageSize] below 1 is a caller error (`ArgumentError`);
   /// - a blank keyword finds nothing, without a request;
   /// - a uid or an anchor link finds that anchor on page 1 only (one
-  ///   profile request): its current broadcast's room, else the anchor with
-  ///   an unknown state; an unknown anchor finds nothing;
-  /// - a broadcast link, another link (`scheme://host`) or a number with a
-  ///   leading zero finds nothing, without a request;
+  ///   profile request): its current broadcast's room, else the anchor,
+  ///   offline; an unknown anchor finds nothing;
+  /// - a broadcast link (a live room's share link, 15-4) finds its anchor
+  ///   the same way on page 1 only, after one `getRoomInfo`: two requests.
+  ///   An unknown broadcast or a historical replay finds nothing;
+  /// - another link (`scheme://host`) or a number with a leading zero finds
+  ///   nothing, without a request;
   /// - anything else is a keyword of the website's user search, one page a
   ///   request; the anchors' state is unknown there, and no anchor is
-  ///   looked up one by one. A keyword over 100 characters, a page over
-  ///   10000 or a [pageSize] over 100 is refused (`ArgumentError`, no
-  ///   request), as 3.x refused them; [pageSize] is not sent (the site's
+  ///   looked up one by one. A keyword over [KilakilaApi.keywordLimit] is
+  ///   cut there ([KilakilaApi.searchKeyword], 15-5; 3.x refused it). A
+  ///   page over 10000 or a [pageSize] over 100 is refused (`ArgumentError`,
+  ///   no request), as 3.x refused them; [pageSize] is not sent (the site's
   ///   pages are fixed).
   @override
   Future<List<LiveRoom>> searchRoomsCancellable(
@@ -173,19 +226,34 @@ final class KilakilaSite extends LiveSite
     final link = _searchLink(input);
     if (link == null) {
       if (!supportsSearchPaginationFor(input)) return const [];
-      if (!KilakilaApi.isSearchable(input)) throw ArgumentError.value(keyword, 'keyword', 'not a KilaKila keyword');
       if (page > 10000) throw RangeError.range(page, 1, 10000, 'page');
       if (pageSize > 100) throw RangeError.range(pageSize, 1, 100, 'pageSize');
       final response = await _get(KilakilaApi.searchUrl(input, page), cancel: cancel);
       return KilakilaApi.searchPage(response.text, status: response.status);
     }
-    if (link.kind != KilakilaLinkKind.owner || page > 1) return const [];
+    if (page > 1) return const [];
     try {
-      final profile = await _profile(link.id, cancel: cancel);
+      final uid = switch (link.kind) {
+        KilakilaLinkKind.owner => link.id,
+        KilakilaLinkKind.broadcast => await _anchorOf(link.id, cancel: cancel),
+      };
+      final profile = await _profile(uid, cancel: cancel);
       final current = profile.current;
       return [if (current != null) KilakilaApi.room(current) else KilakilaApi.profileRoom(profile)];
     } on NotFound {
       return const [];
+    }
+  }
+
+  /// The anchor of the broadcast [broadcastId] (one `getRoomInfo`); an
+  /// unknown broadcast is `NotFound`, and so is a historical replay (5966),
+  /// whose answer names no anchor.
+  Future<String> _anchorOf(String broadcastId, {CancelToken? cancel}) async {
+    final response = await _get(_roomInfoUrl(broadcastId), cancel: cancel);
+    try {
+      return KilakilaApi.roomInfo(response.text, broadcastId: broadcastId, status: response.status).uid;
+    } on StreamUnavailable catch (error) {
+      throw NotFound(_site, 'no anchor for $broadcastId (${error.detail})');
     }
   }
 
@@ -221,12 +289,14 @@ final class KilakilaSite extends LiveSite
 
   /// Room entry (3.x's `_detail` with playback): the profile, then the
   /// current broadcast's `getRoomInfo` (which must be this anchor's) with
-  /// the pull URLs in [KilakilaRoomData]. An anchor without a current
-  /// broadcast is its profile with an unknown state (one request). A
-  /// broadcast that ended between the two requests (`getRoomInfo` says
-  /// unknown or a historical replay) cannot be played: `StreamUnavailable`,
-  /// as 3.x failed here too. A paid or not live broadcast is still entered;
-  /// its stream says why it cannot play.
+  /// the pull URLs in [KilakilaRoomData]; the room keeps the card's start,
+  /// listeners now and cover ([KilakilaApi.enteredRoom]). An anchor without
+  /// a current broadcast is its profile, offline (one request). A broadcast
+  /// that ended between the two requests (`getRoomInfo` says unknown or a
+  /// historical replay) cannot be played: `StreamUnavailable`, as 3.x
+  /// failed here too; one that says it ended (10) is entered offline. A
+  /// paid or not live broadcast is still entered; its stream says why it
+  /// cannot play.
   Future<LiveRoom> _entered(String uid, {bool withDanmaku = false}) async {
     final profile = await _profile(uid);
     final current = profile.current;
@@ -245,7 +315,7 @@ final class KilakilaSite extends LiveSite
     } on NotFound catch (error) {
       throw StreamUnavailable(_site, 'the current broadcast is gone (${error.detail})');
     }
-    return KilakilaApi.withProfile(KilakilaApi.room(broadcast), profile).copyWith(
+    return KilakilaApi.enteredRoom(profile, broadcast).copyWith(
       data: KilakilaRoomData(issuedAt: _now(), broadcast: broadcast),
       danmakuData: withDanmaku ? KilakilaDanmakuArgs(roomId: broadcast.broadcastId) : null,
     );
@@ -274,10 +344,12 @@ final class KilakilaSite extends LiveSite
 
   // Streams -------------------------------------------------------------------
 
-  /// 3.x's qualities, FLV and HLS (see [KilakilaApi.qualities]), from the
-  /// stream data room entry brought: no request. A room without it (a list
-  /// card, a refreshed follow) is entered first; one the platform called
-  /// offline has no stream (`StreamUnavailable`, without a request).
+  /// The one quality 原画 with its FLV and HLS lines (see
+  /// [KilakilaApi.qualities], 15-6), from the stream data room entry
+  /// brought: no request. A room without it (a list card, a refreshed
+  /// follow) is entered first; one the platform called offline (no
+  /// broadcast, or it ended) has no stream (`StreamUnavailable`, without a
+  /// request).
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
       KilakilaApi.qualities(await _stream(detail, fresh: false));
@@ -286,7 +358,8 @@ final class KilakilaSite extends LiveSite
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The line of [quality] with the media headers and its lease.
+  /// The lines of [quality] (FLV, then HLS) with the media headers and
+  /// their leases; 3.x's ids `flv` and `hls` name the same quality.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
     required LiveRoom detail,
@@ -294,7 +367,7 @@ final class KilakilaSite extends LiveSite
   }) async => KilakilaApi.resolution(await _stream(detail, fresh: false), quality);
 
   /// Room entry again: the anchor may be on a new broadcast, and the pull
-  /// URLs are signed. A quality the new broadcast lacks, or no broadcast, is
+  /// URLs are signed. No broadcast, or one without a pull URL, is
   /// `StreamUnavailable`; the old URLs are never reused.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({

@@ -208,6 +208,9 @@ final class KilakilaBroadcast {
     required this.goldPrice,
     this.cover = '',
     this.avatar = '',
+    this.startedAt,
+    this.online,
+    this.total,
     this.flv,
     this.hls,
   });
@@ -237,6 +240,19 @@ final class KilakilaBroadcast {
   /// Price of a paid broadcast; 0 when free.
   final int goldPrice;
 
+  /// When the broadcast went on air (`actualTime`, epoch milliseconds);
+  /// only an anchor's card has it. Its `liveStartTime` (also `createTime`)
+  /// is when the broadcast was set up, often a day before it went on air,
+  /// and is not used.
+  final DateTime? startedAt;
+
+  /// Listeners now (`onlineNumber`); only an anchor's card has it.
+  final int? online;
+
+  /// Listeners of this broadcast so far (`watchNumber`, only ever grows;
+  /// REG-KILAKILA-003).
+  final int? total;
+
   /// The FLV pull URL of `getRoomInfo` (null elsewhere, or when it is not a
   /// pull URL of this broadcast).
   final String? flv;
@@ -246,6 +262,34 @@ final class KilakilaBroadcast {
 
   /// Whether the platform says live (status 4).
   bool get isLive => status == 4;
+
+  /// Whether the platform says the broadcast is over (status 10; it may
+  /// keep a recording, which the anchor's room does not play).
+  bool get hasEnded => status == 10;
+
+  /// What keeps the broadcast from playing: [LiveRestriction.paid] when it
+  /// has a price, else [LiveRestriction.none].
+  LiveRestriction get restriction => goldPrice == 0 ? LiveRestriction.none : LiveRestriction.paid;
+
+  /// This broadcast (from `getRoomInfo`) with what only the anchor's
+  /// [card] of the same broadcast has: the start, the listeners now, and
+  /// its cover when it has one (the list's `backPic`, where `getRoomInfo`
+  /// only has the default background; 15-7).
+  KilakilaBroadcast withCard(KilakilaBroadcast card) => KilakilaBroadcast(
+    broadcastId: broadcastId,
+    uid: uid,
+    title: title,
+    nick: nick,
+    status: status,
+    goldPrice: goldPrice,
+    cover: card.cover.isNotEmpty ? card.cover : cover,
+    avatar: avatar,
+    startedAt: card.startedAt,
+    online: card.online,
+    total: total ?? card.total,
+    flv: flv,
+    hls: hls,
+  );
 }
 
 /// An anchor's public profile (`Tg/personalH5`, 3.x's
@@ -317,10 +361,13 @@ final class KilakilaDanmakuArgs {
 /// throws a `SiteError`.
 ///
 /// A room is an anchor: its id is the anchor's uid, and every broadcast has
-/// a new `roomIdStr` (REG-KILAKILA-001). 3.x checked every answer strictly
-/// and so does this: a page whose echo, identity or row shape does not
-/// match is `ApiChanged`, never a short page, and nothing unknown is taken
-/// for "offline".
+/// a new `roomIdStr` (REG-KILAKILA-001). Answers are checked as strictly as
+/// 3.x did, except that one broken row of a list only drops that row
+/// (docs/UPGRADES.md, "容错"): a page whose echo or identity does not
+/// match, or whose rows are all broken, is still `ApiChanged`. An anchor
+/// the platform says has no broadcast, or whose broadcast ended, is
+/// offline (15-1); any other state the platform does not name stays
+/// unknown.
 abstract final class KilakilaApi {
   /// The website: the API host of the timeline, `getRoomInfo` and search.
   static const String origin = 'https://live.kilakila.cn';
@@ -361,6 +408,33 @@ abstract final class KilakilaApi {
 
   /// Rows of a native directory page (3.x's directory pager).
   static const int pageSize = 10;
+
+  /// The last timeline page read (15-3, REG-KILAKILA-005): the timelines
+  /// repeat their anchors page after page (the hot one for dozens of pages
+  /// before `isLastPage`; the rising stars once ran past page 300), so
+  /// reading stops here.
+  static const int maxPages = 100;
+
+  /// Longest keyword sent to the user search, in UTF-16 code units (3.x's
+  /// limit; a longer one is cut there, 15-5).
+  static const int keywordLimit = 100;
+
+  /// The one quality (15-6): the broadcast's own stream, as FLV and HLS
+  /// lines that stand in for each other.
+  static const String qualityId = 'original';
+
+  /// See [qualityId].
+  static const String qualityName = '原画';
+
+  /// 3.x's quality ids, one per transport (named `FLV`, `HLS`), → the id
+  /// of the quality that now holds both transports as lines, for M9 to
+  /// migrate a stored quality once. The line of the old transport keeps
+  /// its name as `lineId`.
+  static const Map<String, String> legacyQualityIds = {'flv': qualityId, 'hls': qualityId};
+
+  /// The quality id for [id] as stored before 15-6 ([legacyQualityIds],
+  /// case-insensitive); any other id is kept.
+  static String qualityIdFromLegacy(String id) => legacyQualityIds[id.trim().toLowerCase()] ?? id.trim();
 
   static final RegExp _idPattern = RegExp(r'^[1-9][0-9]{0,31}$');
 
@@ -457,12 +531,21 @@ abstract final class KilakilaApi {
 
   /// A `pcLive/timeline` page (3.x's `directory`): the live rows of timeline
   /// [type] (`dataType` 8, and 2 on the rising stars 107), each broadcast
-  /// and each anchor once, and whether `isLastPage` is false.
+  /// and each anchor once, and whether another page follows.
   ///
   /// The answer is wrapped twice (`code`, then `data.body` with `{h, b}`);
-  /// `b` must echo [page] and [pageSize] and say `isLastPage`. Rows of other
-  /// types are skipped; an accepted row whose broadcast, anchor, title or
-  /// name is missing or does not match fails the page, as in 3.x.
+  /// `b` must echo [page] and [pageSize]. Rows of other types are skipped.
+  /// A row that is broken (not an object, no type, a broadcast whose
+  /// anchor, title or name is missing or does not match) is left out; a
+  /// page with a broken row and no usable one is `ApiChanged`, so a changed
+  /// API never reads as an empty timeline.
+  ///
+  /// The timeline ends at `isLastPage`, at a page without any row (the
+  /// rising stars end with `{pageNo, pageSize, data: []}` and no
+  /// `isLastPage`, which 3.x took for a changed API; S01-timeline-new-tail)
+  /// and at [maxPages] (15-3). A page whose rows are all of other types
+  /// does not end it (3.x). An `isLastPage` that is there must be a
+  /// boolean.
   static LiveDirectoryPage timelinePage(
     String body, {
     required int page,
@@ -476,39 +559,59 @@ abstract final class KilakilaApi {
     _header(envelope, 'timeline');
     final data = _object(envelope['b'], 'timeline.b');
     final last = data['isLastPage'];
-    if (_integer(data['pageNo']) != page || _integer(data['pageSize']) != pageSize || last is! bool) {
+    if (_integer(data['pageNo']) != page || _integer(data['pageSize']) != pageSize || (last != null && last is! bool)) {
       throw ApiChanged(
         _site,
         'timeline page $page: echo pageNo ${data['pageNo']}, pageSize ${data['pageSize']}, isLastPage $last',
       );
     }
+    final rows = data['data'];
+    if (rows is! List || rows.length > 1000) throw const ApiChanged(_site, 'timeline.b.data: expected a list');
     final broadcasts = <String>{};
     final anchors = <String>{};
     final rooms = <LiveRoom>[];
-    for (final row in _rows(data['data'], 'timeline.b.data')) {
-      final kind = _nonNegative(row['dataType'], 'timeline row dataType');
-      if (kind != 8 && !(type == 107 && kind == 2)) continue;
-      final broadcast = _broadcast(
-        _object(row['roomResq'], 'timeline row roomResq'),
-        _object(row['userResp'], 'timeline row userResp'),
-      );
+    var broken = 0;
+    for (final row in rows) {
+      final KilakilaBroadcast broadcast;
+      try {
+        final fields = _object(row, 'timeline row');
+        final kind = _nonNegative(fields['dataType'], 'timeline row dataType');
+        if (kind != 8 && !(type == 107 && kind == 2)) continue;
+        broadcast = _broadcast(
+          _object(fields['roomResq'], 'timeline row roomResq'),
+          _object(fields['userResp'], 'timeline row userResp'),
+        );
+      } on ApiChanged {
+        broken++;
+        continue;
+      }
       if (!broadcasts.add(broadcast.broadcastId) || !anchors.add(broadcast.uid)) continue;
       rooms.add(room(broadcast));
     }
-    return LiveDirectoryPage(rooms: rooms, page: page, hasMore: !last);
+    if (broken > 0 && rooms.isEmpty) throw ApiChanged(_site, 'timeline page $page: $broken broken rows, none usable');
+    return LiveDirectoryPage(rooms: rooms, page: page, hasMore: last != true && rows.isNotEmpty && page < maxPages);
   }
 
   // Search --------------------------------------------------------------------
 
-  /// Whether [keyword] is something 3.x searched for: 1–100 characters
-  /// once trimmed.
-  static bool isSearchable(String keyword) {
-    final text = keyword.trim();
-    return text.isNotEmpty && text.length <= 100;
+  /// The keyword sent for [keyword]: trimmed and cut to [keywordLimit]
+  /// UTF-16 code units, never inside a surrogate pair, then trimmed again
+  /// (15-5; 3.x refused a longer keyword and the search page showed a
+  /// failure). Empty when there is nothing to search for.
+  static String searchKeyword(String keyword) {
+    var text = keyword.trim();
+    if (text.length > keywordLimit) {
+      var end = keywordLimit;
+      final last = text.codeUnitAt(end - 1);
+      if (last >= 0xD800 && last <= 0xDBFF) end--;
+      text = text.substring(0, end).trim();
+    }
+    return text;
   }
 
-  /// The website's user search page of [keyword] (`serach` is the site's
-  /// spelling): `/aboutus/serach/kw/<keyword>`, `/p/<page>` after page 1.
+  /// The website's user search page of [keyword] ([searchKeyword]; `serach`
+  /// is the site's spelling): `/aboutus/serach/kw/<keyword>`, `/p/<page>`
+  /// after page 1.
   static Uri searchUrl(String keyword, int page) => Uri(
     scheme: 'https',
     host: 'live.kilakila.cn',
@@ -516,30 +619,36 @@ abstract final class KilakilaApi {
       'aboutus',
       'serach',
       'kw',
-      keyword.trim(),
+      searchKeyword(keyword),
       if (page > 1) ...['p', '$page'],
     ],
   );
 
   /// A user search page (3.x's `searchOwners`): the anchors of the
   /// `.userList` links `/zhubo/<uid>`, each once, as rooms with their name
-  /// (also the title) and avatar. The page says nothing about broadcasts,
-  /// so their state is unknown, as in 3.x. A page without the list, with
-  /// more than 100 entries, or with a link that is not an anchor page or has
-  /// no name is `ApiChanged`.
+  /// (also the title, 3.x's card) and avatar. The page says nothing about
+  /// broadcasts, so their state is unknown, as in 3.x. An entry whose link
+  /// is not an anchor page or that has no name is left out; a page without
+  /// the list, with more than 100 entries, or whose entries are all broken
+  /// is `ApiChanged`.
   static List<LiveRoom> searchPage(String html, {int status = 200}) {
     _checkBody(html, 'search', status);
     final list = _Html.parse(html).firstWithClass('userList');
     if (list == null || list.children.length > 100) throw const ApiChanged(_site, 'search: no user list');
     final rooms = <String, LiveRoom>{};
+    var broken = 0;
     for (final anchor in list.children.where((element) => element.name == 'a')) {
       final match = RegExp(r'^/zhubo/([1-9][0-9]{0,31})$').firstMatch(anchor.attributes['href'] ?? '');
       final nick = anchor.firstWithClass('anchor-name')?.text.trim() ?? '';
-      if (match == null || nick.isEmpty) throw ApiChanged(_site, 'search: entry ${anchor.attributes['href']}');
+      if (match == null || nick.isEmpty) {
+        broken++;
+        continue;
+      }
       final uid = match.group(1)!;
       final avatar = anchor.firstWithClass('anchorHeaderImg')?.first('img')?.attributes['src'];
       rooms.putIfAbsent(uid, () => _anchorRoom(uid, nick: nick, avatar: _picture(avatar), title: nick));
     }
+    if (broken > 0 && rooms.isEmpty) throw ApiChanged(_site, 'search: $broken broken entries, none usable');
     return rooms.values.toList();
   }
 
@@ -606,9 +715,11 @@ abstract final class KilakilaApi {
 
   /// A broadcast [room] of the anchor [owner] (3.x's `_snapshot`): ids,
   /// title, name, state and price are required, the cover is `backPic` or
-  /// `defaultBackgroundPicUrl`. The pull URLs are read only with [media].
-  /// The push address (`pushFlow`, the anchor's stream key) is never read
-  /// (REG-KILAKILA-004).
+  /// `defaultBackgroundPicUrl`. The start (`actualTime`), listeners now
+  /// (`onlineNumber`) and so far (`watchNumber`) are read where the answer
+  /// has them; a value that is not one is left out. The pull URLs are read
+  /// only with [media]. The push address (`pushFlow`, the anchor's stream
+  /// key) is never read (REG-KILAKILA-004).
   static KilakilaBroadcast _broadcast(Map<String, dynamic> room, Map<String, dynamic> owner, {bool media = false}) {
     final broadcastId = _id(room['roomIdStr'], 'roomIdStr');
     final uid = _id(room['uid'], 'broadcast $broadcastId uid');
@@ -629,45 +740,93 @@ abstract final class KilakilaApi {
       avatar: _picture(owner['headPortraitUrl']),
       status: status,
       goldPrice: price,
+      startedAt: startedAt(room['actualTime']),
+      online: _count(room['onlineNumber']),
+      total: _count(room['watchNumber']),
       flv: media ? mediaUrl(room['flvPlayUrl'], broadcastId: broadcastId, format: StreamFormat.flv) : null,
       hls: media ? mediaUrl(room['hlsPlayUrl'], broadcastId: broadcastId, format: StreamFormat.hls) : null,
     );
   }
 
+  /// A broadcast's start from `actualTime` (epoch milliseconds): null for
+  /// 0, negatives, fractions, values that are not milliseconds (before 2001
+  /// or after 2286, such as seconds) and anything that is not an integer.
+  static DateTime? startedAt(Object? value) => switch (_integer(value)) {
+    final int milliseconds when milliseconds >= 1000000000000 && milliseconds < 10000000000000 =>
+      DateTime.fromMillisecondsSinceEpoch(milliseconds, isUtc: true),
+    _ => null,
+  };
+
+  /// A listener count: an integer of 0 or more (or its text), else null.
+  static int? _count(Object? value) => switch (_integer(value)) {
+    final int count when count >= 0 => count,
+    _ => null,
+  };
+
   // Rooms ---------------------------------------------------------------------
 
   /// The room of [broadcast] (3.x's `KilakilaSite._room`): the anchor's uid
-  /// is the room id and the anchor page the link; live when the platform
-  /// says 4, else unknown (3.x never called a KilaKila room offline or a
-  /// replay). No audience: `watchNumber` is cumulative listeners and 3.x
-  /// showed none (REG-KILAKILA-003).
-  static LiveRoom room(KilakilaBroadcast broadcast) => LiveRoom(
-    roomId: broadcast.uid,
-    platform: _site,
-    userId: broadcast.uid,
-    link: ownerUrl(broadcast.uid),
-    title: broadcast.title,
-    nick: broadcast.nick,
-    cover: broadcast.cover,
-    avatar: broadcast.avatar,
-    watching: '',
-    audienceMetricType: AudienceMetricType.unknown,
-    liveStatus: broadcast.isLive ? LiveStatus.live : LiveStatus.unknown,
+  /// is the room id and the anchor page the link. The state is live when
+  /// the platform says 4, offline when the broadcast ended (10, 15-1), else
+  /// unknown. A live broadcast also has:
+  /// - its listeners now (`onlineNumber`, only an anchor's card has them)
+  ///   and so far (`watchNumber`, cumulative, never shown as online;
+  ///   REG-KILAKILA-003) (15-2);
+  /// - its start (`actualTime`, only an anchor's card has it);
+  /// - its restriction: [LiveRestriction.paid] when it has a price, else
+  ///   [LiveRestriction.none].
+  static LiveRoom room(KilakilaBroadcast broadcast) {
+    final live = broadcast.isLive;
+    return LiveRoom(
+      roomId: broadcast.uid,
+      platform: _site,
+      userId: broadcast.uid,
+      link: ownerUrl(broadcast.uid),
+      title: broadcast.title,
+      nick: broadcast.nick,
+      cover: broadcast.cover,
+      avatar: broadcast.avatar,
+      watching: '',
+      onlineViewers: live ? broadcast.online?.toString() ?? '' : '',
+      totalViewers: live ? broadcast.total?.toString() ?? '' : '',
+      audienceMetricType: live ? AudienceMetricType.onlineViewers : AudienceMetricType.unknown,
+      liveStatus: live ? LiveStatus.live : (broadcast.hasEnded ? LiveStatus.offline : LiveStatus.unknown),
+      startedAt: live ? broadcast.startedAt : null,
+      restriction: live ? broadcast.restriction : null,
+    );
+  }
+
+  /// The room of [profile] when searched for (3.x's `_profileRoom`, for an
+  /// anchor without a current broadcast): the name is also the title (3.x's
+  /// card); offline, since the platform says there is no broadcast (15-1).
+  static LiveRoom profileRoom(KilakilaProfile profile) => _anchorRoom(
+    profile.uid,
+    nick: profile.nick,
+    avatar: profile.avatar,
+    title: profile.nick,
+    liveStatus: LiveStatus.offline,
   );
 
-  /// The room of [profile] when searched for (3.x's `_profileRoom`): the
-  /// name is also the title; the state is unknown.
-  static LiveRoom profileRoom(KilakilaProfile profile) =>
-      _anchorRoom(profile.uid, nick: profile.nick, avatar: profile.avatar, title: profile.nick);
-
   /// The detail of [profile] (3.x's `KilakilaSite._detail` without the
-  /// broadcast lookup): its current broadcast's room, else the anchor with
-  /// an unknown state (no advertised broadcast is not the platform saying
-  /// offline). The introduction and follower count come along.
+  /// broadcast lookup): its current broadcast's room, else the anchor,
+  /// offline (the card says there is no broadcast; 15-1). The introduction
+  /// and follower count come along.
   static LiveRoom profileDetail(KilakilaProfile profile) {
     final current = profile.current;
-    final base = current == null ? _anchorRoom(profile.uid, nick: profile.nick, avatar: profile.avatar) : room(current);
+    final base = current == null
+        ? _anchorRoom(profile.uid, nick: profile.nick, avatar: profile.avatar, liveStatus: LiveStatus.offline)
+        : room(current);
     return withProfile(base, profile);
+  }
+
+  /// Room entry's room: [broadcast] from `getRoomInfo` with what the
+  /// anchor's card of the same broadcast adds (start, listeners now, and
+  /// the card's cover, 15-7; see [KilakilaBroadcast.withCard]), and
+  /// [profile]'s introduction and follower count.
+  static LiveRoom enteredRoom(KilakilaProfile profile, KilakilaBroadcast broadcast) {
+    final card = profile.current;
+    final merged = card != null && card.broadcastId == broadcast.broadcastId ? broadcast.withCard(card) : broadcast;
+    return withProfile(room(merged), profile);
   }
 
   /// [room] with [profile]'s introduction and follower count (3.x read
@@ -675,60 +834,73 @@ abstract final class KilakilaApi {
   static LiveRoom withProfile(LiveRoom room, KilakilaProfile profile) =>
       room.copyWith(introduction: profile.introduction, followers: profile.followers?.toString());
 
-  static LiveRoom _anchorRoom(String uid, {required String nick, required String avatar, String title = ''}) =>
-      LiveRoom(
-        roomId: uid,
-        platform: _site,
-        userId: uid,
-        link: ownerUrl(uid),
-        title: title,
-        nick: nick,
-        avatar: avatar,
-        watching: '',
-        audienceMetricType: AudienceMetricType.unknown,
-        liveStatus: LiveStatus.unknown,
-      );
+  static LiveRoom _anchorRoom(
+    String uid, {
+    required String nick,
+    required String avatar,
+    String title = '',
+    LiveStatus liveStatus = LiveStatus.unknown,
+  }) => LiveRoom(
+    roomId: uid,
+    platform: _site,
+    userId: uid,
+    link: ownerUrl(uid),
+    title: title,
+    nick: nick,
+    avatar: avatar,
+    watching: '',
+    audienceMetricType: AudienceMetricType.unknown,
+    liveStatus: liveStatus,
+  );
 
   // Streams -------------------------------------------------------------------
 
-  /// 3.x's qualities of the broadcast [data] holds: one per transport, FLV
-  /// (`flv`) then HLS (`hls`), labelled by it; a quality's data is its URL.
-  /// No broadcast, one that is not live (status other than 4) or without a
-  /// pull URL is `StreamUnavailable`; a paid one (`goldPrice` above 0)
-  /// `NeedsLogin`, checked first as in 3.x.
+  /// The qualities of the broadcast [data] holds: one, [qualityName]
+  /// ([qualityId]), whose data is the pull URLs, FLV then HLS (15-6; 3.x
+  /// listed the transports as two qualities `FLV`, `HLS`). No broadcast, one
+  /// that is not live (status other than 4) or without a pull URL is
+  /// `StreamUnavailable`; so is a paid one (`goldPrice` above 0), naming
+  /// [LiveRestriction.paid] and checked first as in 3.x (which called it
+  /// `NeedsLogin`, though KilaKila has no login).
   static List<LivePlayQuality> qualities(KilakilaRoomData data) {
     final broadcast = data.broadcast;
     if (broadcast == null) throw const StreamUnavailable(_site, 'no current broadcast');
-    if (broadcast.goldPrice != 0) throw NeedsLogin(_site, 'broadcast ${broadcast.broadcastId} is paid');
+    if (broadcast.restriction == LiveRestriction.paid) {
+      throw StreamUnavailable(_site, 'broadcast ${broadcast.broadcastId} is restricted (${LiveRestriction.paid.name})');
+    }
     if (!broadcast.isLive) {
       throw StreamUnavailable(_site, 'broadcast ${broadcast.broadcastId} has status ${broadcast.status}');
     }
-    final qualities = [
-      for (final (id, url) in [('flv', broadcast.flv), ('hls', broadcast.hls)])
-        if (url != null) LivePlayQuality(quality: id.toUpperCase(), id: id, data: List<String>.unmodifiable([url])),
-    ];
-    if (qualities.isEmpty) throw StreamUnavailable(_site, 'broadcast ${broadcast.broadcastId} has no pull URL');
-    return List.unmodifiable(qualities);
+    final urls = [?broadcast.flv, ?broadcast.hls];
+    if (urls.isEmpty) throw StreamUnavailable(_site, 'broadcast ${broadcast.broadcastId} has no pull URL');
+    return List.unmodifiable([
+      LivePlayQuality(quality: qualityName, id: qualityId, data: List<String>.unmodifiable(urls)),
+    ]);
   }
 
-  /// The line of [quality] (by its id) among [data]'s [qualities], with the
-  /// media [headers] and the lease of its `auth_key`; the quality is applied
-  /// as asked (one stream per transport). A quality the broadcast does not
+  /// The lines of [quality] (by its id; a 3.x id `flv` or `hls` is taken
+  /// for [qualityId], see [qualityIdFromLegacy]) among [data]'s
+  /// [qualities]: FLV then HLS, each with the media [headers], its format,
+  /// its transport as `lineId` and the lease of its `auth_key`. A bad or
+  /// missing URL only drops its line. A quality the broadcast does not
   /// offer is `StreamUnavailable`.
   static LivePlayUrlResolution resolution(KilakilaRoomData data, LivePlayQuality quality) {
-    final wanted = '${quality.selectionId}';
+    final wanted = qualityIdFromLegacy('${quality.selectionId}');
     final offered = qualities(data).where((option) => '${option.selectionId}' == wanted).firstOrNull;
-    if (offered == null) throw StreamUnavailable(_site, 'quality $wanted is not offered');
-    final format = wanted == 'hls' ? StreamFormat.hls : StreamFormat.flv;
+    if (offered == null) throw StreamUnavailable(_site, 'quality ${quality.selectionId} is not offered');
+    LivePlayLine line(String url) {
+      final format = Uri.parse(url).path.endsWith('.m3u8') ? StreamFormat.hls : StreamFormat.flv;
+      return LivePlayLine(
+        url,
+        headers: headers,
+        format: format,
+        lineId: format.name,
+        lease: lease(url, issuedAt: data.issuedAt),
+      );
+    }
+
     return LivePlayUrlResolution.lines([
-      for (final url in offered.data! as List<String>)
-        LivePlayLine(
-          url,
-          headers: headers,
-          format: format,
-          lineId: wanted,
-          lease: lease(url, issuedAt: data.issuedAt),
-        ),
+      for (final url in offered.data! as List<String>) line(url),
     ], appliedQualityData: offered.selectionId);
   }
 
@@ -792,11 +964,6 @@ abstract final class KilakilaApi {
   static Map<String, dynamic> _object(Object? value, String what) {
     if (value is Map<String, dynamic>) return value;
     throw ApiChanged(_site, '$what: expected an object');
-  }
-
-  static List<Map<String, dynamic>> _rows(Object? value, String what) {
-    if (value is! List || value.length > 1000) throw ApiChanged(_site, '$what: expected a list');
-    return [for (final row in value) _object(row, '$what row')];
   }
 
   /// 3.x's `_text`: a string trimmed, anything else empty.

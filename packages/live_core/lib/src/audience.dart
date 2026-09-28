@@ -250,6 +250,14 @@ const Map<String, AudiencePlatformCapability> audienceCapabilities = {
     hasTotalViewers: false,
     onlineAvailability: AudienceOnlineAvailability.roomList,
   ),
+  // KilaKila's anchor profile (follow refresh and room entry) has the
+  // broadcast's current onlineNumber; the timelines and getRoomInfo have only
+  // watchNumber, its cumulative listeners (REG-KILAKILA-003, M4.U 15-2).
+  'kilakila': AudiencePlatformCapability(
+    hasPopularity: false,
+    hasTotalViewers: true,
+    onlineAvailability: AudienceOnlineAvailability.roomRealtime,
+  ),
 };
 
 /// A sortable audience key for rooms whose platforms use different scales.

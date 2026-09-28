@@ -84,6 +84,7 @@ tools/live_cli（平台探针、样本录制）、tools/check_latest、tools/gat
 |---|---|---|---|---|
 | M0 | 工程底座 | 工具链、门禁、代码规范 | 根目录、`tools/` | 完成（2026-09-28，[记录](modules/M0-foundation.md)） |
 | M1 | 网络 | `core/common` 中的 HTTP 客户端、拦截器、请求头策略、代理路由、请求作用域和 WebSocket，`plugins/race_http`、`fake_useragent` | live_net | 完成（2026-09-28，[记录](modules/M1-network.md)） |
+| M1.1 | Brotli 解码（给猫耳弹幕、哔哩哔哩 protover 3 用） | — | live_net | 完成（2026-09-29，[记录](modules/M1.1-brotli.md)） |
 | M2 | 基础模型与接口 | `core/interface`、`common/models`（直播间、分区、弹幕消息）、`model/`、画质标签、HLS 查询策略 | live_core | 完成（2026-09-28，[记录](modules/M2-core.md)） |
 | M2.1 | 模型扩展（[升级决定](UPGRADES.md)）：开播时间、受限类型、轮播和“不可播放”状态、房间身份比较、合并时不被占位值覆盖 | `common/models` | live_core | 完成（2026-09-28，[记录](modules/M2.1-model.md)） |
 | M3 | 平台框架与链接解析 | `core/sites.dart`，站点注册，`common/utils` 中的链接工具和短链 | live_core | 完成（2026-09-28，[记录](modules/M3-sites-links.md)） |

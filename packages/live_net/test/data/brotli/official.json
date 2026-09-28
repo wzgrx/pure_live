@@ -1,0 +1,374 @@
+{
+ "note": "google/brotli tests/testdata (MIT licence): <name>.compressed[.NN] decompress to <name>",
+ "vectors": [
+  {
+   "name": "10x10y.compressed",
+   "offset": 0,
+   "size": 12,
+   "expect": {
+    "length": 20,
+    "sha256": "41bd4c895e9fb36d74bc97db5092872a24267e3b0455ff6152b0d262faa00d49"
+   }
+  },
+  {
+   "name": "64x.compressed",
+   "offset": 12,
+   "size": 10,
+   "expect": {
+    "length": 64,
+    "sha256": "be4d3ed1fc5f5cfa00735b28605a975f3293fa235d23abb1d9dea380fba0fb87"
+   }
+  },
+  {
+   "name": "alice29.txt.compressed",
+   "offset": 22,
+   "size": 50096,
+   "expect": {
+    "length": 152089,
+    "sha256": "7467306ee0feed4971260f3c87421154a05be571d944e9cb021a5713700c38f0"
+   }
+  },
+  {
+   "name": "backward65536.compressed",
+   "offset": 50118,
+   "size": 19,
+   "expect": {
+    "length": 65792,
+    "sha256": "a6dbac2165542001c574fe1d5ed6ca646203660c228cac57b47a9fec68c20217"
+   }
+  },
+  {
+   "name": "compressed_file.compressed",
+   "offset": 50137,
+   "size": 50100,
+   "expect": {
+    "length": 50096,
+    "sha256": "69e902ef5cd9247302e4f66c313271bcff32eeb38e5eec7ca7744cf98106d5c2"
+   }
+  },
+  {
+   "name": "compressed_repeated.compressed",
+   "offset": 100237,
+   "size": 50299,
+   "expect": {
+    "length": 144224,
+    "sha256": "9538e078cb2d9493befede2c004dafcfcbf5a3caf0329285e7d4d49b48da0734"
+   }
+  },
+  {
+   "name": "cp1251-utf16le.compressed",
+   "offset": 150536,
+   "size": 632,
+   "expect": {
+    "length": 1554,
+    "sha256": "0817dfe4fe7b6e29e63bbb048a785f7cbe67dc3188f96df5b5bc69826ca2a6e6"
+   }
+  },
+  {
+   "name": "cp852-utf8.compressed",
+   "offset": 151168,
+   "size": 362,
+   "expect": {
+    "length": 706,
+    "sha256": "37465d3004d504c3d4320de2f821fa42f79a10917421cf1872ace46cfb152c42"
+   }
+  },
+  {
+   "name": "empty.compressed",
+   "offset": 151530,
+   "size": 1,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.00",
+   "offset": 151531,
+   "size": 1,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.01",
+   "offset": 151532,
+   "size": 2,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.02",
+   "offset": 151534,
+   "size": 2,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.03",
+   "offset": 151536,
+   "size": 2,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.04",
+   "offset": 151538,
+   "size": 2,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.05",
+   "offset": 151540,
+   "size": 2,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.06",
+   "offset": 151542,
+   "size": 2,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.07",
+   "offset": 151544,
+   "size": 2,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.08",
+   "offset": 151546,
+   "size": 1,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.09",
+   "offset": 151547,
+   "size": 1,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.10",
+   "offset": 151548,
+   "size": 1,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.11",
+   "offset": 151549,
+   "size": 1,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.12",
+   "offset": 151550,
+   "size": 1,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.13",
+   "offset": 151551,
+   "size": 1,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.14",
+   "offset": 151552,
+   "size": 1,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.15",
+   "offset": 151553,
+   "size": 1,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.16",
+   "offset": 151554,
+   "size": 4,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "empty.compressed.17",
+   "offset": 151558,
+   "size": 65538,
+   "expect": {
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "name": "mapsdatazrh.compressed",
+   "offset": 217096,
+   "size": 161743,
+   "expect": {
+    "length": 285886,
+    "sha256": "bf076e57b5e6a8b648f1f0f1d7815cafcdf36c636ec08a547380b56685458101"
+   }
+  },
+  {
+   "name": "monkey.compressed",
+   "offset": 378839,
+   "size": 425,
+   "expect": {
+    "length": 843,
+    "sha256": "937ad127fe0e373e0e267d11905f2bca154f40fe6fd438b6ddcce40de2ddcd99"
+   }
+  },
+  {
+   "name": "quickfox.compressed",
+   "offset": 379264,
+   "size": 47,
+   "expect": {
+    "length": 43,
+    "sha256": "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592"
+   }
+  },
+  {
+   "name": "quickfox_repeated.compressed",
+   "offset": 379311,
+   "size": 58,
+   "expect": {
+    "length": 176128,
+    "sha256": "254fdc641d1a65d0b1e427e4b0a1e16a96a5242adb98af71833782ba99c3dd82"
+   }
+  },
+  {
+   "name": "random_org_10k.bin.compressed",
+   "offset": 379369,
+   "size": 10004,
+   "expect": {
+    "length": 10000,
+    "sha256": "3035553aebbac63be49232495f41022bd9de43c6818917f3865e12ce8808b39e"
+   }
+  },
+  {
+   "name": "ukkonooa.compressed",
+   "offset": 389373,
+   "size": 69,
+   "expect": {
+    "length": 119,
+    "sha256": "1fb2529b0c6fbf80a60d2bb4c20efba2fff6cecb0c52d42693d404501064f407"
+   }
+  },
+  {
+   "name": "x.compressed",
+   "offset": 389442,
+   "size": 5,
+   "expect": {
+    "length": 1,
+    "sha256": "4b68ab3847feda7d6c62c1fbcbeebfa35eab7351ed5e78f4ddadea5df64b8015"
+   }
+  },
+  {
+   "name": "x.compressed.00",
+   "offset": 389447,
+   "size": 5,
+   "expect": {
+    "length": 1,
+    "sha256": "4b68ab3847feda7d6c62c1fbcbeebfa35eab7351ed5e78f4ddadea5df64b8015"
+   }
+  },
+  {
+   "name": "x.compressed.01",
+   "offset": 389452,
+   "size": 8,
+   "expect": {
+    "length": 1,
+    "sha256": "4b68ab3847feda7d6c62c1fbcbeebfa35eab7351ed5e78f4ddadea5df64b8015"
+   }
+  },
+  {
+   "name": "x.compressed.02",
+   "offset": 389460,
+   "size": 5,
+   "expect": {
+    "length": 1,
+    "sha256": "4b68ab3847feda7d6c62c1fbcbeebfa35eab7351ed5e78f4ddadea5df64b8015"
+   }
+  },
+  {
+   "name": "x.compressed.03",
+   "offset": 389465,
+   "size": 10,
+   "expect": {
+    "length": 1,
+    "sha256": "4b68ab3847feda7d6c62c1fbcbeebfa35eab7351ed5e78f4ddadea5df64b8015"
+   }
+  },
+  {
+   "name": "xyzzy.compressed",
+   "offset": 389475,
+   "size": 9,
+   "expect": {
+    "length": 5,
+    "sha256": "7609128715518308672067aab169e24944ead24e3d732aab8a8f0b7013a65564"
+   }
+  },
+  {
+   "name": "zeros.compressed",
+   "offset": 389484,
+   "size": 13,
+   "expect": {
+    "length": 262144,
+    "sha256": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90"
+   }
+  },
+  {
+   "name": "zerosukkanooa.compressed",
+   "offset": 389497,
+   "size": 107,
+   "expect": {
+    "length": 262263,
+    "sha256": "3f54e9caa8aa46d5eafde978d92ab5ebff42bac1396327320430c3b02fdcb77a"
+   }
+  }
+ ]
+}

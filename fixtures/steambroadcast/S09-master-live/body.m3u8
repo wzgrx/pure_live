@@ -1,0 +1,12 @@
+#EXTM3U
+#EXT-X-VERSION:7
+#EXT-X-INDEPENDENT-SEGMENTS
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",NAME="Default",AUTOSELECT=YES,DEFAULT=YES,URI="https://cache3-lax2.steamcontent.com/broadcast/76561198843011284/5209904692917336552/hls_manifest/0/cache3-lax2.steamcontent.com/160000/audio.m3u8?broadcast_origin=ext1-fra1.steamserver.net"
+#EXT-X-STREAM-INF:BANDWIDTH=7160000,CODECS="avc1.64002a,mp4a.40.2",RESOLUTION=1920x1080,FRAME-RATE=60,AUDIO="aac"
+https://cache3-lax2.steamcontent.com/broadcast/76561198843011284/5209904692917336552/hls_manifest/0/cache3-lax2.steamcontent.com/7000000/video.m3u8?broadcast_origin=ext1-fra1.steamserver.net
+#EXT-X-STREAM-INF:BANDWIDTH=3660000,CODECS="avc1.64001f,mp4a.40.2",RESOLUTION=1280x720,FRAME-RATE=30,AUDIO="aac"
+https://cache3-lax2.steamcontent.com/broadcast/76561198843011284/5209904692917336552/hls_manifest/0/cache3-lax2.steamcontent.com/3500000/video.m3u8?broadcast_origin=ext1-fra1.steamserver.net
+#EXT-X-STREAM-INF:BANDWIDTH=1660000,CODECS="avc1.64001e,mp4a.40.2",RESOLUTION=854x480,FRAME-RATE=30,AUDIO="aac"
+https://cache3-lax2.steamcontent.com/broadcast/76561198843011284/5209904692917336552/hls_manifest/0/cache3-lax2.steamcontent.com/1500000/video.m3u8?broadcast_origin=ext1-fra1.steamserver.net
+#EXT-X-STREAM-INF:BANDWIDTH=660000,CODECS="avc1.64001e,mp4a.40.2",RESOLUTION=640x360,FRAME-RATE=30,AUDIO="aac"
+https://cache3-lax2.steamcontent.com/broadcast/76561198843011284/5209904692917336552/hls_manifest/0/cache3-lax2.steamcontent.com/500000/video.m3u8?broadcast_origin=ext1-fra1.steamserver.net

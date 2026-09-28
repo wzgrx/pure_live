@@ -1,0 +1,15 @@
+{
+  "success": 1,
+  "appid": "227300",
+  "app_title": "Euro Truck Simulator 2",
+  "title": "",
+  "viewer_count": 2483,
+  "permission": 3,
+  "is_rtmp": 1,
+  "seconds_delay": 8,
+  "is_publisher": 0,
+  "thumbnail_url": "https://steambroadcast.akamaized.net/broadcast/76561198843011284/7677968762198629065/thumbnail/?broadcast_origin=ext1-fra1.steamserver.net",
+  "update_interval": 60,
+  "is_online": true,
+  "is_replay": 0
+}

@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "platform": "steambroadcast",
+  "sample": "S10-vanity-missing",
+  "capturedAt": "2026-09-28T20:00:39.855821Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://steamcommunity.com/id/zzqx-no-such-vanity-27/?xml=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "text/xml, application/xml, */*; q=0.8",
+      "Accept-Language": "en-US,en;q=0.9"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "nginx",
+      "content-type": "text/xml;charset=UTF-8",
+      "x-frame-options": "SAMEORIGIN",
+      "content-security-policy": "default-src blob: data: https: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://community.fastly.steamstatic.com/ https://cdn.fastly.steamstatic.com/steamcommunity/public/assets/ https://api.steampowered.com/ https://recaptcha.net https://www.google.com/recaptcha/ https://www.gstatic.cn/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.youtube.com/ https://s.ytimg.com; object-src 'none'; connect-src 'self' https://community.fastly.steamstatic.com/ https://store.steampowered.com/ https://checkout.steampowered.com/ wss://community.steam-api.com/websocket/ https://api.steampowered.com/ https://login.steampowered.com/ https://help.steampowered.com/ https://steam.tv/ https://steamcommunity.com/ https://*.valvesoftware.com https://*.steambeta.net https://*.discovery.beta.steamserver.net https://*.steamcontent.com https://steambroadcast.akamaized.net https://steambroadcast-test.akamaized.net https://broadcast.st.dl.eccdnx.com https://lv.queniujq.cn https://steambroadcastchat.akamaized.net http://127.0.0.1:27060 ws://127.0.0.1:27060; frame-src 'self' steam: https://store.steampowered.com/ https://help.steampowered.com/ https://login.steampowered.com/ https://checkout.steampowered.com/ https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://sketchfab.com https://player.vimeo.com https://medal.tv https://www.google.com/recaptcha/ https://recaptcha.net/recaptcha/; frame-ancestors 'self' https://steamloopback.host ;",
+      "cache-control": "public,max-age=3600",
+      "expires": "Mon, 28 Sep 2026 21:00:41 GMT",
+      "last-modified": "Mon, 28 Sep 2026 20:00:00 GMT",
+      "vary": "Accept-Encoding",
+      "date": "Mon, 28 Sep 2026 20:00:41 GMT",
+      "content-length": "144",
+      "connection": "keep-alive"
+    }
+  },
+  "raw": {
+    "sha256": "f9a2bf3e9fb62ee0fe6f154cc043ff0c1c185dfa93b8829c7aabc28b6f05e78f",
+    "length": 144
+  },
+  "body": "body.xml",
+  "scrubbed": [],
+  "tool": "M4.U.27 recorder (schema 1): http.client, the adapter's headers, redirects not followed; Set-Cookie sessionid/steamCountry and viewertoken replaced by random same-shape values"
+}

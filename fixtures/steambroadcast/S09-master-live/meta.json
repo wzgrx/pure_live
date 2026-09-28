@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "platform": "steambroadcast",
+  "sample": "S09-master-live",
+  "capturedAt": "2026-09-28T20:00:36.546041Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://cache3-lax2.steamcontent.com/broadcast/76561198843011284/5209904692917336552/hls_manifest/0/cache3-lax2.steamcontent.com/master.m3u8?broadcast_origin=ext1-fra1.steamserver.net",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Origin": "https://steamcommunity.com",
+      "Referer": "https://steamcommunity.com/broadcast/watch/76561198843011284"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "nginx/1.29.8",
+      "date": "Mon, 28 Sep 2026 20:00:38 GMT",
+      "content-type": "application/x-mpegURL",
+      "content-length": "1543",
+      "connection": "keep-alive",
+      "access-control-allow-origin": "*",
+      "access-control-expose-headers": "Date",
+      "expires": "Mon, 28 Sep 2026 20:00:39 GMT",
+      "last-modified": "Mon, 28 Sep 2026 20:00:37 GMT",
+      "access-control-allow-headers": "",
+      "access-control-allow-methods": "GET,HEAD,OPTIONS",
+      "x-cache-status": "EXPIRED"
+    }
+  },
+  "raw": {
+    "sha256": "99b8a2a1dce1f41420ed92020872d35c3a3d8fa1ef55067d78ebd99fa2c58c76",
+    "length": 1543
+  },
+  "body": "body.m3u8",
+  "scrubbed": [],
+  "tool": "M4.U.27 recorder (schema 1): http.client, the adapter's headers, redirects not followed; Set-Cookie sessionid/steamCountry and viewertoken replaced by random same-shape values"
+}

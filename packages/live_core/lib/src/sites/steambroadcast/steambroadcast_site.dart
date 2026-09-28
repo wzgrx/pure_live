@@ -18,25 +18,34 @@ const _rememberLimit = 1000;
 /// `SteamBroadcastApi`; parsing in [SteamBroadcastApi]).
 ///
 /// Anonymous, like 3.x: no cookie, no account and no chat (3.x's Steam had
-/// `EmptyDanmaku`). Every request carries 3.x's headers, does not follow
-/// redirects and goes as `steambroadcast`, so the app routes the platform
-/// through its proxy setting. The requests are 3.x's:
+/// `EmptyDanmaku`; the chat is M5's, with [SteamBroadcastDanmakuArgs]).
+/// Every request carries 3.x's headers, does not follow redirects and goes
+/// as `steambroadcast`, so the app routes the platform through its proxy
+/// setting. The requests:
 /// - the catalog is one area, the trending broadcasts; its pages, the
 ///   recommendations and the keyword search are `allcontenthome` (10 a
-///   page, HTML);
-/// - a room is its watch page (the broadcaster's name) and
-///   `getbroadcastmpd` (state, viewers, HLS master); on room entry and for
-///   recording also the HLS master, checked against the account. A refresh
-///   loads no master;
+///   page, HTML; 3.x);
+/// - a room's name and avatar are its mini profile (27-2; the watch page,
+///   3.x's source of the name, when the profile fails);
+/// - a refresh reads `getbroadcastinfo` (state, title, game, cover,
+///   viewers; `getbroadcastmpd`, 3.x's, when it fails): two requests, as in
+///   3.x;
+/// - room entry and recording read `getbroadcastmpd` (state, restriction,
+///   viewers, master), then for a broadcast that is not offline
+///   `getbroadcastinfo` (title, game, cover; 27-2) and the HLS master,
+///   checked against the account (its variants are the qualities, 27-7);
+/// - recovery reads `getbroadcastmpd` and the master only;
 /// - each list or room call has one 25 s deadline (3.x's `_scope`).
 ///
 /// Like 3.x, the site remembers the broadcasters it listed and fills a room
-/// answer's missing name, title, game, cover, avatar and viewers from them.
+/// answer's missing name, title, game, cover, avatar and (while live)
+/// viewers from them.
 ///
-/// Rooms are identified by the broadcaster's 64-bit Steam id. Failures are
-/// `SiteError`s; nothing is disguised as an offline room, and a media
-/// problem never fails the room itself: it is reported when the stream is
-/// asked for.
+/// Rooms are identified by the broadcaster's 64-bit Steam id; watch and
+/// profile links are accepted as room ids, custom addresses resolve with
+/// one request (27-4). Failures are `SiteError`s; nothing is disguised as an
+/// offline room, and a media problem never fails the room itself: it is
+/// reported when the stream is asked for.
 final class SteamBroadcastSite extends LiveSite
     with LiveSiteLinks
     implements
@@ -67,7 +76,7 @@ final class SteamBroadcastSite extends LiveSite
   String get name => SteamBroadcastApi.siteName;
 
   /// 3.x's text key for the directory's scope note (ten a page; the search
-  /// filters the requested page, ids and watch links look the account up).
+  /// filters the requested page, ids and links look the account up).
   @override
   String get directoryNoticeKey => 'steambroadcast_directory_scope';
 
@@ -201,12 +210,14 @@ final class SteamBroadcastSite extends LiveSite
   Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) =>
       searchRoomsCancellable(keyword, page: page, pageSize: pageSize);
 
-  /// 3.x's search (Steam has no anonymous broadcast search): a Steam id or
-  /// watch link is the account's room (two requests, first page only; an
-  /// account without a watch page is no result); any other keyword filters
-  /// directory page [page] by id, name, title and game (case ignored), the
-  /// first [pageSize]. A blank keyword, a page below 1 or a page size
-  /// outside 1–100 gives nothing without a request.
+  /// 3.x's search (Steam has no anonymous broadcast search): a Steam id, a
+  /// watch link or a profile link (27-4) is the account's room (the
+  /// refresh's two requests, first page only); a custom address
+  /// `steamcommunity.com/id/<name>` is resolved first (one more request,
+  /// 27-4); an account without a page is no result. Any other keyword
+  /// filters directory page [page] by id, name, title and game (case
+  /// ignored), the first [pageSize]. A blank keyword, a page below 1 or a
+  /// page size outside 1–100 gives nothing without a request.
   @override
   Future<List<LiveRoom>> searchRoomsCancellable(
     String keyword, {
@@ -218,10 +229,15 @@ final class SteamBroadcastSite extends LiveSite
     final raw = keyword.trim();
     if (raw.isEmpty || page < 1 || pageSize < 1 || pageSize > SteamBroadcastApi.maxSearchSize) return const [];
     final steamId = SteamBroadcastApi.steamIdOf(raw);
-    if (steamId != null) {
+    final vanity = SteamBroadcastApi.vanityOf(raw);
+    if (steamId != null || vanity != null) {
       if (page != 1) return const [];
       try {
-        return [await _detail(steamId, media: false, cancel: cancel)];
+        return await _scoped(cancel, (token) async {
+          final id = steamId ?? await _resolveVanity(vanity!, token);
+          if (id == null) return const <LiveRoom>[];
+          return [_finish(await _read(id, media: false, cancel: token))];
+        });
       } on NotFound {
         return const [];
       }
@@ -233,76 +249,146 @@ final class SteamBroadcastSite extends LiveSite
     ];
   }
 
+  /// The Steam id at the custom address [vanity] (its profile XML), or null
+  /// when there is no such profile.
+  Future<String?> _resolveVanity(String vanity, CancelToken cancel) async {
+    final answer = await _get(SteamBroadcastApi.vanityUrl(vanity), SteamBroadcastApi.xmlHeaders, cancel: cancel);
+    return SteamBroadcastApi.steamIdOfProfileXml(answer.text, status: answer.status);
+  }
+
   // Rooms ---------------------------------------------------------------------
 
-  /// [roomId] as a Steam id (a bare id or a watch link, 3.x); anything else
-  /// is `NotFound` without a request.
+  /// [roomId] as a Steam id (a bare id, a watch link or, since 27-4, a
+  /// profile link); anything else is `NotFound` without a request.
   static String _steamId(String roomId) {
     final steamId = SteamBroadcastApi.steamIdOf(roomId);
     if (steamId == null) throw NotFound(_site, 'room id "${roomId.trim()}" is not a Steam id');
     return steamId;
   }
 
-  /// [steamId]'s broadcast (3.x's `room`) within one [deadline].
-  Future<SteamBroadcast> _broadcast(String steamId, {required bool media, CancelToken? cancel}) =>
-      _scoped(cancel, (token) => _read(steamId, media: media, cancel: token));
+  /// The broadcaster's name and avatar: the mini profile (27-2), or when it
+  /// fails the watch page's name (3.x's source; its failures are the
+  /// room's, a page without a broadcast config is `NotFound`).
+  Future<SteamBroadcastProfile> _profile(String steamId, CancelToken cancel) async {
+    try {
+      final answer = await _get(
+        SteamBroadcastApi.profileUrl(steamId),
+        SteamBroadcastApi.roomHeaders(steamId, json: true),
+        cancel: cancel,
+      );
+      return SteamBroadcastApi.profile(answer.text, steamId: steamId, status: answer.status);
+    } on SiteError {
+      final watch = await _get(
+        SteamBroadcastApi.watchUrl(steamId),
+        SteamBroadcastApi.roomHeaders(steamId),
+        cancel: cancel,
+      );
+      return (name: SteamBroadcastApi.broadcaster(watch.text, steamId: steamId, status: watch.status), avatar: '');
+    }
+  }
 
-  /// The watch page, `getbroadcastmpd` and, with [media] for a live one, the
-  /// HLS master checked against the account. Whatever goes wrong with the
-  /// master becomes the broadcast's media error (3.x failed the room).
-  Future<SteamBroadcast> _read(String steamId, {required bool media, required CancelToken cancel}) async {
-    final watch = await _get(
-      SteamBroadcastApi.watchUrl(steamId),
-      SteamBroadcastApi.roomHeaders(steamId),
-      cancel: cancel,
-    );
-    final name = SteamBroadcastApi.broadcaster(watch.text, steamId: steamId, status: watch.status);
+  /// `getbroadcastmpd` of [steamId] with [profile]'s name and avatar.
+  Future<SteamBroadcast> _mpd(String steamId, SteamBroadcastProfile profile, CancelToken cancel) async {
     final answer = await _get(
       SteamBroadcastApi.mpdUrl(steamId),
       SteamBroadcastApi.roomHeaders(steamId, json: true),
       cancel: cancel,
     );
-    final broadcast = SteamBroadcastApi.broadcast(
-      answer.text,
-      steamId: steamId,
-      broadcaster: name,
-      status: answer.status,
+    return SteamBroadcastApi.broadcast(answer.text, steamId: steamId, profile: profile, status: answer.status);
+  }
+
+  /// `getbroadcastinfo` of [steamId] with [profile]'s name and avatar.
+  Future<SteamBroadcast> _info(String steamId, SteamBroadcastProfile profile, CancelToken cancel) async {
+    final answer = await _get(
+      SteamBroadcastApi.infoUrl(steamId),
+      SteamBroadcastApi.roomHeaders(steamId, json: true),
+      cancel: cancel,
     );
+    return SteamBroadcastApi.info(answer.text, steamId: steamId, profile: profile, status: answer.status);
+  }
+
+  /// [broadcast] with its HLS master loaded and checked against the account
+  /// (3.x), and its variants read (27-7). Whatever goes wrong with the
+  /// master becomes the broadcast's media error (3.x failed the room).
+  Future<SteamBroadcast> _withMaster(SteamBroadcast broadcast, CancelToken cancel) async {
     final master = broadcast.master;
-    if (!media || master == null || broadcast.mediaError != null) return broadcast;
+    if (master == null || broadcast.mediaError != null) return broadcast;
+    final steamId = broadcast.steamId;
     try {
       final playlist = await _get(master, SteamBroadcastApi.mediaHeaders(steamId), cancel: cancel);
+      final codec = SteamBroadcastApi.checkMaster(
+        playlist.text,
+        master: master,
+        steamId: steamId,
+        status: playlist.status,
+      );
       return broadcast.withMaster(
-        codec: SteamBroadcastApi.checkMaster(playlist.text, master: master, steamId: steamId, status: playlist.status),
+        codec: codec,
+        variants: SteamBroadcastApi.variants(playlist.text, master: master),
       );
     } on SiteError catch (error) {
       return broadcast.withMaster(mediaError: error);
     }
   }
 
-  /// The room of [roomId] (3.x's `_detail`): its broadcast, filled from the
-  /// last one remembered of the broadcaster and then remembered itself.
-  Future<LiveRoom> _detail(String roomId, {required bool media, bool danmaku = false, CancelToken? cancel}) async {
-    final steamId = _steamId(roomId);
-    var broadcast = await _broadcast(steamId, media: media, cancel: cancel);
-    final known = _known[steamId];
-    if (known != null) broadcast = broadcast.enrich(known);
-    _remember(broadcast);
+  /// The room's answers. The name and avatar come from [_profile].
+  /// Without [media] (a refresh): `getbroadcastinfo`, or 3.x's
+  /// `getbroadcastmpd` when it fails (27-2). With [media] (entry,
+  /// recording): `getbroadcastmpd` (the state and restriction), then unless
+  /// it is offline or the account may not broadcast `getbroadcastinfo`
+  /// (title, game, cover; its failure is ignored) and the checked master.
+  Future<SteamBroadcast> _read(String steamId, {required bool media, required CancelToken cancel}) async {
+    final profile = await _profile(steamId, cancel);
+    if (!media) {
+      try {
+        return await _info(steamId, profile, cancel);
+      } on SiteError {
+        return await _mpd(steamId, profile, cancel);
+      }
+    }
+    var broadcast = await _mpd(steamId, profile, cancel);
+    if (broadcast.state != SteamBroadcastState.offline && broadcast.state != SteamBroadcastState.accountRestricted) {
+      try {
+        broadcast = broadcast.withInfo(await _info(steamId, profile, cancel));
+      } on SiteError {
+        // The title, game and cover stay those of getbroadcastmpd and the
+        // remembered card (3.x's).
+      }
+    }
+    return await _withMaster(broadcast, cancel);
+  }
+
+  /// [broadcast] filled from the last one remembered of the broadcaster,
+  /// then remembered itself, as a room.
+  LiveRoom _finish(SteamBroadcast broadcast, {bool danmaku = false}) {
+    final known = _known[broadcast.steamId];
+    final filled = known == null ? broadcast : broadcast.enrich(known);
+    _remember(filled);
     return SteamBroadcastApi.room(
-      broadcast,
-      data: SteamBroadcastApi.roomData(broadcast),
-      danmaku: danmaku ? SteamBroadcastDanmakuArgs(steamId) : null,
+      filled,
+      data: SteamBroadcastApi.roomData(filled),
+      danmaku: danmaku ? SteamBroadcastDanmakuArgs(filled.steamId, broadcastId: filled.broadcastId) : null,
     );
   }
 
-  /// The room: its watch page, `getbroadcastmpd` and the checked HLS master
-  /// (three requests for a live room, two otherwise; 3.x), with the danmaku
+  /// The room of [roomId] (3.x's `_detail`) within one [deadline].
+  Future<LiveRoom> _detail(String roomId, {required bool media, bool danmaku = false}) async {
+    final steamId = _steamId(roomId);
+    final broadcast = await _scoped(null, (token) => _read(steamId, media: media, cancel: token));
+    return _finish(broadcast, danmaku: danmaku);
+  }
+
+  /// The room: its profile, `getbroadcastmpd`, and unless offline
+  /// `getbroadcastinfo` and the checked HLS master (four requests for a
+  /// live room, 3.x three; two for an offline one), with the danmaku
   /// arguments.
   @override
   Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId, media: true, danmaku: true);
 
-  /// The watch page and `getbroadcastmpd` only (3.x): no master, so the
-  /// refreshed room cannot be played until it is entered.
+  /// The profile and `getbroadcastinfo` (27-2; two requests, as 3.x's
+  /// watch page and `getbroadcastmpd`): no master, so the refreshed room
+  /// cannot be played until it is entered, and no restriction (the answer
+  /// does not say).
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId, media: false);
 
@@ -310,15 +396,15 @@ final class SteamBroadcastSite extends LiveSite
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, media: true);
 
-  /// Whether the broadcast is live (the refresh's two requests, 3.x). A
-  /// restricted or unknown broadcast is `StreamUnavailable`, never
-  /// "offline".
+  /// Whether the broadcast is live (the refresh's two requests, 3.x's
+  /// count). Offline, a restricted account and a replay are not; an unknown
+  /// state is `StreamUnavailable`, never "offline".
   @override
   Future<bool> getLiveStatus({required String roomId}) async {
     final room = await getRoomDetailForRefresh(roomId: roomId);
     return switch (room.effectiveLiveStatus) {
       LiveStatus.live => true,
-      LiveStatus.offline => false,
+      LiveStatus.offline || LiveStatus.banned || LiveStatus.replay => false,
       _ => throw StreamUnavailable(_site, '${room.roomId}: broadcast state unknown'),
     };
   }
@@ -327,71 +413,115 @@ final class SteamBroadcastSite extends LiveSite
 
   /// The room data of [detail] when it can be played (3.x's `_snapshot`, no
   /// request): a Steam room, not offline, with the data of its own room
-  /// answer (a card has none) saying live with a checked master. Otherwise
-  /// the reason (see [SteamBroadcastRoomData.streamError]); another
+  /// answer saying live (or a replay) with a checked master. Otherwise the
+  /// reason (the data's first, see
+  /// [SteamBroadcastRoomData.streamError]; a card has no data); another
   /// platform's room is a caller error.
   SteamBroadcastRoomData _playable(LiveRoom detail) {
     if (detail.platform != _site) throw ArgumentError.value(detail.platform, 'detail', 'not a Steam broadcast');
     final steamId = _steamId(detail.roomId);
-    if (detail.isExplicitlyOfflineNow) throw StreamUnavailable(_site, '$steamId is offline');
     final data = detail.data;
-    if (data is! SteamBroadcastRoomData || data.steamId != steamId) {
-      throw StreamUnavailable(_site, '$steamId has no room answer; enter the room first');
-    }
-    final error = data.streamError;
-    if (error != null) throw error;
-    return data;
+    final own = data is SteamBroadcastRoomData && data.steamId == steamId ? data : null;
+    if (own?.streamError case final error?) throw error;
+    if (detail.isExplicitlyOfflineNow) throw StreamUnavailable(_site, '$steamId is offline');
+    if (own == null) throw StreamUnavailable(_site, '$steamId has no room answer; enter the room first');
+    return own;
   }
 
-  static void _checkQuality(LivePlayQuality quality) {
-    if ('${quality.selectionId}' != SteamBroadcastApi.qualityId) {
-      throw ArgumentError.value(quality, 'quality', 'not the Steam broadcast quality');
-    }
+  /// The quality of [data] with the id of [quality], or null.
+  static LivePlayQuality? _offered(SteamBroadcastRoomData data, LivePlayQuality quality) {
+    final wanted = '${quality.selectionId}';
+    return data.qualities.where((option) => '${option.selectionId}' == wanted).firstOrNull;
   }
 
-  /// 3.x's one quality, 自适应 HLS, when the room can be played (no
-  /// request).
+  /// The resolution of [offered] in [data]: the checked master as the one
+  /// line (a variant's quality plays it restricted to the variant, M7), the
+  /// variant's codec when it names one.
+  static LivePlayUrlResolution _resolution(SteamBroadcastRoomData data, LivePlayQuality offered) {
+    final variant = offered.data;
+    return LivePlayUrlResolution.lines([
+      SteamBroadcastApi.line(
+        data.master!,
+        codec: variant is SteamBroadcastVariant ? variant.codec ?? data.codec : data.codec,
+      ),
+    ], appliedQualityData: '${offered.selectionId}');
+  }
+
+  /// 3.x's adaptive quality, 自适应 HLS, then one per variant of the
+  /// checked master when it has several (27-7), when the room can be played
+  /// (no request).
   @override
-  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
-    _playable(detail);
-    return const [SteamBroadcastApi.quality];
-  }
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async => _playable(detail).qualities;
 
   @override
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The checked master of the room as its one line (no request, 3.x). A
-  /// room that cannot be played says why (see [getPlayQualities]); a quality
-  /// other than [SteamBroadcastApi.quality] is a caller error.
+  /// The checked master of the room as its one line (no request, 3.x),
+  /// applied as [quality] (a variant's selector is the quality's data,
+  /// [SteamBroadcastVariant]). A room that cannot be played says why (see
+  /// [getPlayQualities]); a quality the room does not offer is a caller
+  /// error.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
     final data = _playable(detail);
-    _checkQuality(quality);
-    return LivePlayUrlResolution.lines([
-      SteamBroadcastApi.line(data.master!, codec: data.codec),
-    ], appliedQualityData: SteamBroadcastApi.qualityId);
+    final offered = _offered(data, quality);
+    if (offered == null) throw ArgumentError.value(quality, 'quality', 'not a quality of this Steam broadcast');
+    return _resolution(data, offered);
   }
 
-  /// A fresh master (3.x): the room is asked again with its master (three
-  /// requests), never the one [detail] holds (REG-LEASE-005).
+  /// A fresh master (3.x: the room asked again, REG-LEASE-005): only
+  /// `getbroadcastmpd` and the master (two requests; 3.x three), never the
+  /// one [detail] holds. A variant the fresh master no longer has plays the
+  /// adaptive quality, and says so. A quality that is neither is a caller
+  /// error.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
     required LiveRoom detail,
     required LivePlayQuality quality,
   }) async {
     final steamId = _playable(detail).steamId;
-    _checkQuality(quality);
-    final data = _playable(await _detail(steamId, media: true));
-    return LivePlayUrlResolution.lines([
-      SteamBroadcastApi.line(data.master!, codec: data.codec),
-    ], appliedQualityData: SteamBroadcastApi.qualityId);
+    final wanted = '${quality.selectionId}';
+    if (wanted != SteamBroadcastApi.qualityId && !SteamBroadcastApi.isVariantId(wanted)) {
+      throw ArgumentError.value(quality, 'quality', 'not a Steam broadcast quality');
+    }
+    final broadcast = await _scoped(
+      null,
+      (token) async => await _withMaster(await _mpd(steamId, (name: '', avatar: ''), token), token),
+    );
+    final data = SteamBroadcastApi.roomData(broadcast);
+    if (data.streamError case final error?) throw error;
+    return _resolution(data, _offered(data, quality) ?? SteamBroadcastApi.quality);
   }
 
   // Links ---------------------------------------------------------------------
 
-  /// A watch link of `steamcommunity.com` (3.x's
-  /// `SteamBroadcastLink.parseSteamId`, see [SteamBroadcastApi.steamIdOf]).
+  /// A watch link or, since 27-4, a profile link of `steamcommunity.com`
+  /// (see [SteamBroadcastApi.steamIdOf]).
   @override
   String? roomIdFromUrl(String url) => SteamBroadcastApi.steamIdOf(url);
+
+  /// A custom address `steamcommunity.com/id/<name>` (27-4).
+  @override
+  bool needsResolving(String url) => SteamBroadcastApi.vanityOf(url) != null;
+
+  /// The Steam id of a custom address: one request for its profile XML;
+  /// null when there is no such profile or the answer cannot be read.
+  @override
+  Future<LinkResolution?> resolveUrl(String url, ShortLinkSession session) async {
+    final vanity = SteamBroadcastApi.vanityOf(url);
+    if (vanity == null) return null;
+    final response = await session.get(
+      SteamBroadcastApi.vanityUrl(vanity),
+      readBody: true,
+      headers: SteamBroadcastApi.xmlHeaders,
+    );
+    if (response == null) return null;
+    try {
+      final steamId = SteamBroadcastApi.steamIdOfProfileXml(response.text, status: response.status);
+      return steamId == null ? null : LinkRoom(steamId);
+    } on SiteError {
+      return null;
+    }
+  }
 }

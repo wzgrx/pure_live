@@ -1,0 +1,4529 @@
+{
+  "generator": "DouyuSite.getCategores",
+  "value": [
+    {
+      "id": "1",
+      "name": "网游竞技",
+      "children": [
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1",
+          "areaName": "英雄联盟",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/1de1ea5215b513cf4f5b3c326f5f9657.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "270",
+          "areaName": "热门游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e8d2f2deca2025ec12874d6d6792489a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4133",
+          "areaName": "三角洲行动",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/dea05a0997c94c6698f319f29da955da.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "33",
+          "areaName": "穿越火线",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/de31e9d475fdbdde59d3f0c4364f06f7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1554",
+          "areaName": "无畏契约",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/1ce37f9b81ca774c9b627528e371daac.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1997",
+          "areaName": "CFHD",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/fb26cc75b5d8777f287b2ca0947f5df6.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3528",
+          "areaName": "命运方舟",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/7d4f056c7a412ccec4643c4a4d8ff8b5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "40",
+          "areaName": "DNF",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/0cd803160cfc26acfd0831dfe7b3de92.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3",
+          "areaName": "DOTA2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/fe91c6e215d551081be647ff2bbb6fd5.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "472",
+          "areaName": "使命召唤",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/173794298470da9795c409fae7559412.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "2",
+          "areaName": "炉石传说",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/26d993d79c1daa53d1b083980e97559e.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "6",
+          "areaName": "CS2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/26116cb8187bd1bdc35cfdaf2dd71f8b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "917",
+          "areaName": "lol云顶之弈",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c6c1c602c5c1c1bac9181b53249b17f7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "55",
+          "areaName": "魔兽争霸",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/6aac4340f1c23cf9f6a6b5cd637f6527.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1055",
+          "areaName": "魔兽怀旧服",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/18568d09ee2bec4f7674af99951d3dd7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4043",
+          "areaName": "全民街篮",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/67cb13e199f03224e960506712dcc694.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "650",
+          "areaName": "自走棋",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/a1cabbaaff61d3cbbc15206627265beb.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "90",
+          "areaName": "跑跑卡丁车",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0afabf072e2e2c1a942528cb9808e592.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3567",
+          "areaName": "网易游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/7d7e6453aeb9c188822237b0c1e83b67.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4",
+          "areaName": "星际争霸",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/6db9044e2f8a5f9b4e8b9e3e82302828.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "148",
+          "areaName": "守望先锋",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/17dc1cd2164e3b50424ca0d9d80b2155.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "217",
+          "areaName": "DOTA",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/e7bbe8818f8da82e35e5b69c7c4321c7.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "5",
+          "areaName": "魔兽世界",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/b6ae05443687a28ab177e3ff17de1590.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "65",
+          "areaName": "剑网3",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/077062cd7d9c6c2b051eb863689361ac.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "44",
+          "areaName": "我的世界",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/95a7a48a57bf02b3f46d3afa23f1be89.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1133",
+          "areaName": "超激斗梦境",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/515de23b8c69610353befb9c91eb4db5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1588",
+          "areaName": "冒险岛",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/328031313cbe08550853b04bb4bf5e87.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "14",
+          "areaName": "三国杀",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/c3b0e07b2cdfbd9fc762232ea31594da.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "69",
+          "areaName": "梦幻西游",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/8d963c1b9f207bedbd7583d1d43833ee.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "59",
+          "areaName": "天涯明月刀",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/5a8f00f7c729644b0470ec08d101f6a8.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "155",
+          "areaName": "街头篮球",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/1899804b3e20111eb923deba2eeb605f.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "438",
+          "areaName": "NBA2KOL2",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/fb166e5852a3eec260fd8c475b83145a.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "375",
+          "areaName": "QQ飞车端游",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/301b7135d0eb2ee5c5bc97fd8f2ae635.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "255",
+          "areaName": "军事游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2b505a95cd020e4d67ca5874bb9addbb.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "113",
+          "areaName": "棋牌娱乐",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/1ba73805803186ac8bcbf1c044b53fd1.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "766",
+          "areaName": "FC ONLINE",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/821b429ae4bd60ebb9ef1bc496c25d2c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "203",
+          "areaName": "热门网游",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/801b8750f0a509fd0b0c43139c7ab20b.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3010",
+          "areaName": "卡拉彼丘",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/74e561dcf1f36a3ddc005c8a2a00b6f2.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3332",
+          "areaName": "诛仙世界",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6eb5f81e09f213c837154cdbe863db00.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "651",
+          "areaName": "APEX",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e69bad47c2f0d364e9192fc2eb6d60b6.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "79",
+          "areaName": "流放之路POE",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/176eb036de63f451b14696392cba5e45.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "434",
+          "areaName": "逆水寒",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/a2473b2f8bdd65db982c50550a92c128.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "35",
+          "areaName": "风暴英雄",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/04b83dc8bbdeef4cc04c04cea581a9c2.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "46",
+          "areaName": "逆战",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c814241f75fa0205fa579aaa895dbe3b.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "142",
+          "areaName": "坦克世界",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d7b585a4f11b565d9dea5e385e76e50c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "2847",
+          "areaName": "战舰世界",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/15b4ee9d12655f3750733fbe75620153.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "66",
+          "areaName": "反恐精英Online",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d5c9cd0e7151eaa8cd2deefed1dbcc87.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "32",
+          "areaName": "暗黑破坏神",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d1abf9cb82f9d5f3cc846fb0f4ea39b8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "83",
+          "areaName": "梦三国2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/42e02082c3a8cde3cb0342ea43577e95.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "251",
+          "areaName": "传奇世界",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/776a9ddf6ba43de4a8dfae759c60d594.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "382",
+          "areaName": "方舟：生存进化",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/4dc01ef53e9b17edadbd829b1d40f7bf.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1136",
+          "areaName": "神武4电脑版",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d7b42571ec75d3839fbdadd453d2093b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "87",
+          "areaName": "群雄逐鹿",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/1c2236089d48d979c07162a81160cd65.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "347",
+          "areaName": "堡垒之夜",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c9b812e16779902421e309129a9b8a93.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3404",
+          "areaName": "西山居游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/79ab77eb359b7473b992ffac23a34295.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "41",
+          "areaName": "最终幻想14",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b2ae331dad3cfc2eefced9a95eab394d.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "310",
+          "areaName": "战意",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/94822ab5ac7f02524162f0b6f65e6b95.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "13",
+          "areaName": "剑灵",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/5e3a49396165a34da44b4db3a258d399.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "126",
+          "areaName": "星际战甲",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/d14287da86a2dbf6856e319eeebd4cbd.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "106",
+          "areaName": "龙之谷",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/57cffd6b91721b08f604b7088f6a1cd3.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "669",
+          "areaName": "铁甲雄兵",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/778f6bc5ef6ba6d2782a7e94d607eb1a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "15",
+          "areaName": "激战2",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/a31fc7999cf06ab4167325fc4df5a74d.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "590",
+          "areaName": "高达文化区",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4ac60c834a2b9ea406b30fc2d95b88c0.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "397",
+          "areaName": "忍者村大战2",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/0328da75def991668567ce13ae907376.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "605",
+          "areaName": "RPG网游专区",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0c9aaa5e9fb89a10ef8c4d3fcbf214de.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "157",
+          "areaName": "诛仙3",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/a5f3d858c1c2440a42418be4a9a757e0.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "660",
+          "areaName": "笑傲江湖OL",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/17c61a635315e264c07d2fefd9c9d696.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "197",
+          "areaName": "无尽战区",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/171789b1c2b83a2347acba2f52483404.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "167",
+          "areaName": "永恒之塔",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/19306c36b462f2680a9d9b64dc871e6d.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1440",
+          "areaName": "FPS综合网游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2dedaa044d08f1ae348ddfa45375ecc5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "412",
+          "areaName": "劲舞团",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f83002c4e75218adba5db35b37f0bb12.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "280",
+          "areaName": "天下",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4d8b72956fa8a1d6c190a8d6dc350e62.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "54",
+          "areaName": "音乐游戏",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/0116342c283da46d09d631b9b3353765.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "277",
+          "areaName": "新倩女幽魂",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/0e8bce63baa3d89bb8d50d5e361c2e9e.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "105",
+          "areaName": "天谕",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/29109daa3a37e99130100af338d2fb91.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "710",
+          "areaName": "QQ炫舞",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4da522007b7969b96da15f923824d865.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "164",
+          "areaName": "怪物猎人ol",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/265691d8766854af6b9cf479513ed205.JPG",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "632",
+          "areaName": "手工星球",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c5e526fe46431f4610d703bfc328f33f.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1557",
+          "areaName": "星战前夜：晨曦",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/a8179f934595ee6f89730d98da215782.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "763",
+          "areaName": "射击游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0795cae3f358cfe82008fd42b5e0cae3.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1626",
+          "areaName": "热血传奇：本源",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/1cd46cc948124f467f0a4930cbc72106.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1898",
+          "areaName": "彩虹岛",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6daf91610021fad84df4368d8d2970c6.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1907",
+          "areaName": "洛奇英雄传",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/45b12cf39a4555872fa9a598c62e1689.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1909",
+          "areaName": "封印者",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/fcb6a29070332986cab63c99264295b0.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1929",
+          "areaName": "盛趣游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c72185581cab870c051d9b47c5266dc4.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1960",
+          "areaName": "新热血英豪",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/67f0700801ad10f077d16a51d3969342.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1963",
+          "areaName": "沙盒游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c5563db8dc66983be5ecc53a04d2302b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1964",
+          "areaName": "体育网游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/5d7b2f6026298ccbca0ced91ebde3077.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1910",
+          "areaName": "恐鬼症",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d451ca33c3adea645e1752d4a4351205.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "1971",
+          "areaName": "领地人生",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/1c62729ff52f99d339408dadf952bc41.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "2013",
+          "areaName": "大话西游2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4ef96bc56c65b48e82d3efba5507367d.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "2030",
+          "areaName": "虎豹骑",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/513f71028d8328ebb14443a9f31e1676.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "2282",
+          "areaName": "黑色沙漠",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/76874c3db39d1cd7efc68b231a547507.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "2343",
+          "areaName": "热血江湖online",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/1edd7f042978be1035b8d7b0f97f0fce.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "2371",
+          "areaName": "千年3",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e0cc4f47b4fd046fcc5747d602bde279.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "2526",
+          "areaName": "剑侠世界2电脑版",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c7c77f34cf9d9604a110b65ffd4eff39.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3351",
+          "areaName": "四国军棋",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d74eeff942a6aee3d676f4316182093b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3562",
+          "areaName": "装甲战争",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/01c640564da2c20b47c5bbd1245bfa51.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3613",
+          "areaName": "暴雪游戏综合",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8ca7fadaf953da6a0539ce81f26976e7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3775",
+          "areaName": "燕云十六声",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/48f1525e85c689938b64e8e773a99ca4.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3871",
+          "areaName": "NBA2K Online",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/813fdcbfc3071af0e52912b66a5e2fea.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3885",
+          "areaName": "跑跑卡丁车：漂移",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/ba2d8837efac61f1b1f18c84a2e18ae2.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3889",
+          "areaName": "传奇永恒",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2dba0c8046e58df3e9b74b31110634f9.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "3956",
+          "areaName": "全境封锁2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/714ee73e56621e806decb2c94a2afb59.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4152",
+          "areaName": "传奇3",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/88c61a2aff46aa5d1dc7f533d7eb8382.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4247",
+          "areaName": "暗区突围 无限",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8d661a2e2dc3e9a4e35c8f0573009747.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4248",
+          "areaName": "剑灵2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/25cce4fb75d62e250784d3d305d757f5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4250",
+          "areaName": "死锁(DeadLock)",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/198e054b6462bf879100cffcf882fe92.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4252",
+          "areaName": "漫威争锋",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/9b1f14170c662009167ca11f89f1231c.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4275",
+          "areaName": "彩虹六号",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/959658c67f335823ebcceff2f04ecb48.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4295",
+          "areaName": "和平精英模拟器",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/40295e247f176590a72c0128eab957ea.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4312",
+          "areaName": "人气新游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d490a44d943d9216da135fed6b218621.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4322",
+          "areaName": "逆战未来",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/3d616b39872463db22b460ddb1369e92.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4335",
+          "areaName": "永恒之塔2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/79da39d5127884cfd4865cd445c6d751.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "1",
+          "typeName": "网游竞技",
+          "areaId": "4342",
+          "areaName": "遗忘之海",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f63e4b46485d7e0675ce709e27d5f429.jpg",
+          "shortName": null
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "name": "娱乐天地",
+      "children": [
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "311",
+          "areaName": "颜值（横屏）",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/06d8d4d79ed2f444dd6d88e374c7cd42.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "4315",
+          "areaName": "新人",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6879ea55f815c24d757a31557fda99d5.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "1008",
+          "areaName": "星秀",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/13054bd5068b08d7716a207efe6e4b01.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "175",
+          "areaName": "才艺",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/05ab98bf4ca86475ad6c10489a019e3f.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "124",
+          "areaName": "户外",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/b24b716b2a13bc0b758632e5b20e0835.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "1191",
+          "areaName": "心动FM",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/fc75d6139460f578028b6d8ababfa4ba.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "1057",
+          "areaName": "娱乐推荐",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6def7235dc5e010575ec3254425cc2bf.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "4208",
+          "areaName": "竖屏美女",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/30c36803b074ac90f5fdda4453cedb6f.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "208",
+          "areaName": "一起看",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/af69eeb1943a9444d2362a7f06c22dc6.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "194",
+          "areaName": "美食",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/695949a51d22548a26880235cb6f9c13.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "183",
+          "areaName": "原创IP",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/1c4f9b3e0db24610879faf1e041d53d5.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "1555",
+          "areaName": "心动派对",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/19da1f24bc54c3fc5b5dca9af3993a85.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "2",
+          "typeName": "娱乐天地",
+          "areaId": "174",
+          "areaName": "二次元",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/346f48f437946cd2ef2a00bb0314e6f3.jpg",
+          "shortName": null
+        }
+      ]
+    },
+    {
+      "id": "8",
+      "name": "颜值",
+      "children": [
+        {
+          "platform": "douyu",
+          "areaType": "8",
+          "typeName": "颜值",
+          "areaId": "201",
+          "areaName": "颜值",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/d1546cfd3f7f985719f894496f2a7b2e.png",
+          "shortName": null
+        }
+      ]
+    },
+    {
+      "id": "9",
+      "name": "手游休闲",
+      "children": [
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1092",
+          "areaName": "DNF手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8ac838baa94b5932794c907c6c832aa3.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "181",
+          "areaName": "王者荣耀",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0d96d63ee9550728acd899d66eee3625.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1920",
+          "areaName": "LOL手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c7a594f559fdd8c719be22740166a9ea.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3379",
+          "areaName": "崩坏：星穹铁道",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2bf962e7e048f13e354812cbd8c76594.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "350",
+          "areaName": "和平精英",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8560eb4cba9e734a0d7408f6a9b9efb8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3133",
+          "areaName": "暗区突围",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2305358d1f547bc295c2b886892192e2.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3358",
+          "areaName": "蛋仔派对",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/fa0d1d86a8a5b892041cda4203b45efe.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2263",
+          "areaName": "幻塔",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2a33e1b7fa660da5d666faa671e2b5ed.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "196",
+          "areaName": "火影忍者",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0cba2f9de9e73fadf759f4b4604c3b59.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4290",
+          "areaName": "无畏契约：源能行动",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/17b1e3e21267ab00fe3005a3ae9f1c01.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "767",
+          "areaName": "COD手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/921102d7b802ecd561c2221c81cccd1f.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3561",
+          "areaName": "lol电竞经理",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/74a8c810b5ccecc86b8fe9b76ec8a794.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4149",
+          "areaName": "元梦之星",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/a89325fff5c4d539230b02ab2ddfe743.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2556",
+          "areaName": "金铲铲之战",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4594694d441d5723db9b2365c136b0d8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "911",
+          "areaName": "天刀手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/76e9dde9bfc60118e3e80a750496131d.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1223",
+          "areaName": "原神",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/587bbb22deacda90a98b2a55815b1e10.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1883",
+          "areaName": "航海王热血航线",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/eea83a1ec204421f0d159f3818abbadd.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2446",
+          "areaName": "逆水寒手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2e6cd09d6a56d8dbf8ed7a7d3a607778.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1816",
+          "areaName": "鸿图之下",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/01eda59fc398ff0e49f50e704e16a96f.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "451",
+          "areaName": "欢乐麻将",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/059ed7799be681f8c8d9aad81d322c4c.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1056",
+          "areaName": "王者模拟战",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/5c531f054bb3ca14d3951a2264f10f27.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "543",
+          "areaName": "中国象棋",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/1e6b3f263271fd678910f5532757cc69.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1509",
+          "areaName": "天谕手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/396ee3f8e65de398cf7da94e2dc4eea8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1858",
+          "areaName": "巅峰坦克",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/84102e5d5395ed083db3a736d970b123.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "229",
+          "areaName": "新游中心",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/b4fb71fbdedc3c4089616df87b535790.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "30",
+          "areaName": "热门手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/ed64ede702536cb0f495b09b71ff5bd2.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "179",
+          "areaName": "梦幻手游",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/27bc3ae8a92fb40f02bd9a71adbd9db9.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4022",
+          "areaName": "高能英雄",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4cab520503fc20f7b831275715d2a7ef.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "331",
+          "areaName": "QQ飞车",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/263c4b6fa8ffa181976433ad7b4dfb0d.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "356",
+          "areaName": "第五人格",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/eea057821f85467c16e2349bbc19d43a.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "416",
+          "areaName": "欢乐斗地主",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/41e36dfe32488f3cb5faa0c5177a379a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "625",
+          "areaName": "荒野乱斗",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/47ed2ac60bccaa2a29ab04ff092adde6.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "240",
+          "areaName": "阴阳师",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/58add83c479d4e47fc3a62a4be253934.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "260",
+          "areaName": "狼人杀",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/927eeab9dde1b7d185e4beec21362403.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "454",
+          "areaName": "JJ斗地主",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/1b94d9383b0aa518f9cb723543c75cc9.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1583",
+          "areaName": "梦幻新诛仙",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/3ec19af4c7b77940597c88f56dc70bee.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1947",
+          "areaName": "云游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/67da5ef47e2322041216e3c4359aa434.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "654",
+          "areaName": "跑跑手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/69730b2d8b2bf5bd72b38bc59197a529.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "376",
+          "areaName": "率土之滨",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/799b8f27fbacf8caf57340439a0a5fb2.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1098",
+          "areaName": "灌篮高手",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b50eb895835f624c4df6449e5a0aceb6.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "190",
+          "areaName": "皇室战争",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/d622d3e81bd1fd785184def6cf138fa3.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "566",
+          "areaName": "忍者必须死3",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/fa8f8af6531ce6ea509e1892559d7c20.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "500",
+          "areaName": "梦幻模拟战",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/8830f55ff818bf74196c2363564daf22.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "474",
+          "areaName": "实况足球",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/89a8f75fee3f2e689ad19d93a0ae24b8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "192",
+          "areaName": "球球大作战",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/d55ab0fa8a2c840f71123738e83fd088.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "448",
+          "areaName": "英雄杀",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/cd3c277eb0d66a1bca5719dcb28fcdf5.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "291",
+          "areaName": "精灵宝贝",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8be03f4f5791bbe7f76317631f078f0e.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "177",
+          "areaName": "部落冲突",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/eea39cd8b41bf91ab38fab338351c0f6.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "524",
+          "areaName": "猫和老鼠",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/1c37fb5ed79c7be77203d931880e7fcb.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "430",
+          "areaName": "明日之后",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/4d1c931a45332e0be29efcf7ec6448a7.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "344",
+          "areaName": "决战平安京",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/380c4a37a7352a6caf4309d1e19dcf85.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "508",
+          "areaName": "圣斗士星矢",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/caca1886b89a078035451fc90b2923f8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1192",
+          "areaName": "哈利波特：魔法觉醒",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/1948578f2982f156c67fa9f2046e0bb9.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "418",
+          "areaName": "手游推广",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/6e8d06ea04064ed5bb0e0223460fa159.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "273",
+          "areaName": "迷你世界",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/c08f4eee87f8ab91d58d7771e6ea3395.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "421",
+          "areaName": "FC足球世界",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/372db90707e454ffe6c0edd7a73f6643.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "244",
+          "areaName": "街篮",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/6ec677b6e8f52211b493c279d569c5fc.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "531",
+          "areaName": "明日方舟",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/aa6c7321d7903275778d63e130485758.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "366",
+          "areaName": "一梦江湖",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/93f9fd19098258f37d7f0b3f8f34c21d.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "214",
+          "areaName": "拳皇98OL",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/f29417f1e94417ecbce53778f3a4b832.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "339",
+          "areaName": "赛尔号",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4e22ae3c3ac3626fb9de922c25fc1010.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "362",
+          "areaName": "猎魂觉醒",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/d924255504a4b3d4c6639d5beded3c97.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "259",
+          "areaName": "仙境传说",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e10c93eb3d2a3f9a9417a5eba2e84979.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "556",
+          "areaName": "逃跑吧少年",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/48f7998e79f4150c6f4b4f6fb12ebba7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "639",
+          "areaName": "石器时代",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/9dc7524fc4ad835bf2a106bdb489c3cf.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "289",
+          "areaName": "英魂之刃口袋版",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/85ff021b3b740a6e7e2624b977baf10c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "648",
+          "areaName": "雀魂",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/21cc1f5209a3a792a51444fab7daac72.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "444",
+          "areaName": "武林外传",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/8895ff1ef9228647f8925c1e8a293556.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "536",
+          "areaName": "元气骑士",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/2fa243f088f382a2e713f14b6823aeef.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "298",
+          "areaName": "植物大战僵尸手游",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/7c2841c16fbaa204d9469261621ce2cf.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "359",
+          "areaName": "奇迹觉醒",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/d2af1637d7da73956c2674dc6516e4b9.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1132",
+          "areaName": "光遇",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/fa90906d331be8276a801399d2d3abed.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1137",
+          "areaName": "巅峰战舰",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/07037e0ae49053f78a34baa6e6781bc6.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "433",
+          "areaName": "天天象棋",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/228581580343edd6c678dc846ad4dd97.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "526",
+          "areaName": "王国纪元",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/4ad0252e99513e5d0e38fd50123f9b5e.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "972",
+          "areaName": "雪鹰领主",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d9c63600497282e044072440fbab435a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "630",
+          "areaName": "龙族幻想",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c2638fe6ac0b682a9940ef570690d60f.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "657",
+          "areaName": "三国杀移动版",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d68b7a1959974284755989d7688c93cf.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "513",
+          "areaName": "足球手游",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/d13a854a02da5d6e38ebb33bf83f846c.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "282",
+          "areaName": "天龙八部",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/96c40b071dcc6951b9c98ee36e77083c.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1148",
+          "areaName": "微乐棋牌",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/85299b7e77df67b6b8a077acfeafae79.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "918",
+          "areaName": "辐射：避难所Online",
+          "areaPic": "",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1763",
+          "areaName": "街篮2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/acad0aac17d49c1fbaedfd31716da274.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1504",
+          "areaName": "极光计划",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4059d09c7c36d71920f45f85a077a3a7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "511",
+          "areaName": "篮球手游",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/a588614b01988df22cab579751fd323a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "341",
+          "areaName": "射击类手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/ba29ac14d4f416bb1a20ad843ef41d28.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2846",
+          "areaName": "暗黑不朽",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4c78a5a5a0917889636376384985520c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1581",
+          "areaName": "三国志战略版",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/fee5d96470bf1f1f94dba4d585d1f683.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1593",
+          "areaName": "天地劫：幽城再临",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/cc360806ea57054ece38deb3dd397176.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1634",
+          "areaName": "天龙八部手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4d6d7e53e48446bd6791932e55f0c2e5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1692",
+          "areaName": "五子棋",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6c33876e7863d2261ea8850f43f2efe0.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1693",
+          "areaName": "围棋",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/ede21c659ac4da96b3d586011fc33a9c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1819",
+          "areaName": "黎明觉醒：生机",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/1832ac6838ad2796368ec695039f8b3d.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1911",
+          "areaName": "庆余年",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f14ef558061c8cf889a6b7694c764935.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1923",
+          "areaName": "大话西游手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e218e0457c96323cdb22dab0a68cf2f7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1962",
+          "areaName": "新剑侠情缘手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/20b7a62f83ea25bafc80eebf74d711be.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "1991",
+          "areaName": "海岛奇兵",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f2f7e294d1799529f6da1651f8ffac41.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2039",
+          "areaName": "西游女儿国",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0ea421dbeffccc263e46c94b654e6e57.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2049",
+          "areaName": "横扫千军",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/58e8f9582418b36cd645005580d0e091.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2124",
+          "areaName": "精灵之境",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6b7aaa960eec453c125e03b8739d7e09.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2159",
+          "areaName": "七战",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/a21797fc5f42ca79d179c24cf23be7f5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2172",
+          "areaName": "攻城掠地",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/90a6084904d6f87eaad16a746e0342a3.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2177",
+          "areaName": "盗墓笔记",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0d7369f1c483c6275aff1380a41e87ff.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2276",
+          "areaName": "斗罗大陆",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b81073c70c8ff0bf969a380ee2658535.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2286",
+          "areaName": "JJ象棋",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e57703f29ad4ff19d9df794141c835eb.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2299",
+          "areaName": "王者修仙",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/7bdc580b1b1a65e53c378f8b708ac535.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2312",
+          "areaName": "小小突击队",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/249e10a0034f267bdb0643840f8b2c13.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2336",
+          "areaName": "奥奇传说手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f22bbe78eec0b3cb6c3c3ac9ac520955.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2458",
+          "areaName": "少女前线",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e077e68b8f20aa185f5cebe0aa369a88.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2525",
+          "areaName": "先游云游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/9e6aad2a30ff4690691e9141e5ece677.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2600",
+          "areaName": "碧蓝航线手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e58b61c5ce6be659db7d6b72780f4567.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2602",
+          "areaName": "300大作战",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b778978daa42eb86fb3cfdf1bd4fbd3d.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2618",
+          "areaName": "第七史诗",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/a346b4821ce90d77d2d733cc587b49be.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2647",
+          "areaName": "少女前线2：追放",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/3aa33955477ba91104887e85c850834b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2667",
+          "areaName": "植物大战僵尸2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/39e7173a76b48515351008a86302cc74.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2693",
+          "areaName": "无悔华夏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d5da8b5a0557bd1c6142b7bf504ae649.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2870",
+          "areaName": "饥饿鲨：世界",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/7d4cc20639243deaca894784275b9a63.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2884",
+          "areaName": "诺亚之心",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/facc242da79c24665ccdab8e59636113.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2915",
+          "areaName": "重返帝国",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/52ffa5b6b23f9a92837c98ae7b818d4c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "2925",
+          "areaName": "火炬之光：无限",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/1ca48146310cbc0bd9501cc5366bf5a8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3028",
+          "areaName": "小小勇者",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0edbd170ec96c51b240c4d437c6c0ce5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3035",
+          "areaName": "三国战纪2手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/df51397fb75dd1a51b46570271814a3b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3041",
+          "areaName": "我是大东家",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/82d0fe50d5512edfdcd4efe07c922b7c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3089",
+          "areaName": "王国保卫战4",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b7a8d8a98e5dc1997934219d79487ddb.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3090",
+          "areaName": "半世界之旅",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/680444ada9c5a913427b8066343a020a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3099",
+          "areaName": "新三国杀",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/97f417a29224dd7a4a0e042a5a0d45b6.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3196",
+          "areaName": "超级改造家",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/909813aa4088b95d222b5841a6fac6ed.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3254",
+          "areaName": "钓鱼大对决",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/55bcb5005279783f1a3f75ed514470be.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3336",
+          "areaName": "完美世界：诸神之战",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b28f6d4b8070e263d82c021264a6f5ec.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3475",
+          "areaName": "武林闲侠",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6dbf70f552de715a6217a2ada265c376.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3483",
+          "areaName": "淘米游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d3732aed41b6ed68d8c82c295e211ea3.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3534",
+          "areaName": "暖雪",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/55c66a620bc6c152d9e9f73123842310.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3536",
+          "areaName": "永劫无间手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/20414077390b03417f4c2939fac173ec.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "178",
+          "areaName": "CF手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/014cdda9ddc47ee5d1a911ed40b605e6.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3586",
+          "areaName": "尘白禁区",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/51109d6523e93411fc64390b50e9a100.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3587",
+          "areaName": "明日方舟：终末地",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0cb809f5af75f885d1ba5e9877502ff5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3597",
+          "areaName": "原始征途",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/cc6b6d51e5c2cebccb94a24eeaabefae.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3601",
+          "areaName": "全民大灌篮",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/289a577cc5aaf483ff5c0d0738b873a3.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3614",
+          "areaName": "火影三国志",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/3d2f6950ad83e3a2ba046d62935dc1fe.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3615",
+          "areaName": "网易其它组",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f01f9722c54eb2ff0ce685945c01d57d.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3635",
+          "areaName": "三国战纪手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/bbd6eb1fc2da757c2ac566313dc17c86.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3670",
+          "areaName": "染·钟楼谜团",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/ff784b4ac10379c296aac126bf1be7ca.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3671",
+          "areaName": "绝区零",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6d21bd96900cef169e34ad15781b4abe.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3688",
+          "areaName": "重返CODM",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8a0fdc06c04d6f44d8e26c8d1175d593.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3690",
+          "areaName": "综合手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/67d52589db9544fefb80dae3392c2885.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3694",
+          "areaName": "IP游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/35e794eaf695a382ece91e63e4c6cf9a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3696",
+          "areaName": "鸣潮",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8554bd989466d7e4bbe189c9ada2d196.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3702",
+          "areaName": "棋牌游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/073ec59878a80af73f7d92cd003f3d1a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3785",
+          "areaName": "王者万象棋",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/fe501a69fae67a069f84ab431f683425.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3802",
+          "areaName": "SLG综合",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6fa4aee45a0303570fa8689b681e86fb.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "3877",
+          "areaName": "鹅鸭杀手游",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/80b3115d1720f4e4ba749b8ee6189e95.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4016",
+          "areaName": "冒险岛：枫之传说",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/bc95b11fbca8e5edf48fed3d74ddbb1a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4144",
+          "areaName": "二次元游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/dc4ecd04642b4b732ee4599fad54c5df.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4150",
+          "areaName": "剑侠世界：起源",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2bc7c5c305dd1900720bb5be8ddefa95.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4205",
+          "areaName": "三国：谋定天下",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/3bc4172dc4e408f6fb3b4e0a8feb3bbb.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4240",
+          "areaName": "掌心全民麻将",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/569baec95710e9024c1811e1384e05c1.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4249",
+          "areaName": "洛克王国：世界",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c41482869197440140c8257d3f96f8f5.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4251",
+          "areaName": "归龙潮",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/5997778192be6e303505fe3c28bc681f.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4269",
+          "areaName": "异人之下",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6e8f7e3b835f33505180f9b274b2ecfc.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4272",
+          "areaName": "异环",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6e26eca7a057265de3138788da8f83ca.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4298",
+          "areaName": "王者荣耀世界",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c0527c4deada7ddb2df0b8f519c202d5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "9",
+          "typeName": "手游休闲",
+          "areaId": "4314",
+          "areaName": "黑子的篮球：街头对决",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4dcb7ce1fd81dd9691b7a09906da3261.jpg",
+          "shortName": null
+        }
+      ]
+    },
+    {
+      "id": "11",
+      "name": "科技文化",
+      "children": [
+        {
+          "platform": "douyu",
+          "areaType": "11",
+          "typeName": "科技文化",
+          "areaId": "134",
+          "areaName": "数码科技",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/7d14c2a7e7e8c8f773d9d25c18f40ae9.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "11",
+          "typeName": "科技文化",
+          "areaId": "514",
+          "areaName": "纪录片",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/9cacf7ef8722f07008321591e691cb91.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "11",
+          "typeName": "科技文化",
+          "areaId": "1551",
+          "areaName": "成年教育",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/60f1992c7cc6e621e79fd3ebc43ffa7a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "11",
+          "typeName": "科技文化",
+          "areaId": "4137",
+          "areaName": "人文社科",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/a07d053d8379d7d864c0e9eb36d28bbd.jpg",
+          "shortName": null
+        }
+      ]
+    },
+    {
+      "id": "13",
+      "name": "正能量",
+      "children": [
+        {
+          "platform": "douyu",
+          "areaType": "13",
+          "typeName": "正能量",
+          "areaId": "250",
+          "areaName": "正能量",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/a5439515177f030622ddc83c86aba7d8.jpg",
+          "shortName": null
+        }
+      ]
+    },
+    {
+      "id": "15",
+      "name": "单机热游",
+      "children": [
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "19",
+          "areaName": "主机游戏",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/602c38f19a4fe9af40fdb64a00ce9ed5.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "469",
+          "areaName": "刺客信条:英灵殿",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/107001569adb35d0daafe7febdeca135.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "928",
+          "areaName": "马里奥制造",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8716342bc42de5fb5993d3f04d882a6f.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1024",
+          "areaName": "逃离塔科夫",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/450f45bb2aae46b8d6d234b94dfd6265.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "286",
+          "areaName": "命运2",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/d3f55728c3651a9f172a2c5921c1cd89.JPG",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "760",
+          "areaName": "恐怖游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/ad3d00ebcf88dd5a5956118464b7a0e4.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "475",
+          "areaName": "荒野大镖客",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/9dca013c40ba0c7f7a7cf861d4e9a478.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "461",
+          "areaName": "灵魂筹码",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/05681a45ef1310fec8e50da268d62295.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "491",
+          "areaName": "骑马与砍杀",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/05d31ff71112c44b27f9233399e51edc.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "658",
+          "areaName": "只狼",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6e6f6232f33d9ad61947fc717623a272.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "29",
+          "areaName": "格斗游戏",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/d014202049bb30994b1462714507cd8e.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "23",
+          "areaName": "饥荒",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/f7839d347329e7d4b3675af50c0e0b01.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "478",
+          "areaName": "全境封锁",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/b891f32f65328c34690f5c42dd671f39.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "26",
+          "areaName": "怀旧游戏",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/game_cate/568029e11adb524c778da572b578f2e3.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "473",
+          "areaName": "NBA2K",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/f144a61f5e8b9710d14bf2b26719c07b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "740",
+          "areaName": "八方旅人",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/cc044e76f74017753bd5f03191f60557.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "963",
+          "areaName": "人类一败涂地",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4d3bd558d254d39ca04b27ac1135a09f.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "721",
+          "areaName": "环世界",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/91d433c4b1ec702e19ac1844161fc37e.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "470",
+          "areaName": "古墓丽影",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c5a6a14e669fd4a5ca8e6740de1b56bb.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "725",
+          "areaName": "鬼泣",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/9982d0ae9b5133fe2f7ca6c7dd1ea669.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "690",
+          "areaName": "往日不再",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/fbeba3123aab48d3b21c238a21cec071.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "685",
+          "areaName": "仙剑奇侠传",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d4770f706e1670d51e67c9a8077d9cf2.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "699",
+          "areaName": "塞尔达系列",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2b9d04a00338691915e7cdeed056ea27.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "719",
+          "areaName": "僵尸世界大战",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0248f7b91d6b885fe0b52f06dc17c9b4.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "661",
+          "areaName": "足球游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e59aece530ef4a865b1d2be361947536.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "427",
+          "areaName": "橙光",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/63fcfb5abe9e2c3f00ad883d5869e228.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "713",
+          "areaName": "了不起的修仙模拟器",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/046cb8a25273113771d53739f88ac513.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "735",
+          "areaName": "超级马里奥",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/3551d2117bbc66177ad8dfe3585e5780.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "698",
+          "areaName": "三国志系列",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/073d3c7147548a0958488ea469522a7a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "805",
+          "areaName": "星际公民",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6c94b05206fb5475c269b24c47d34bc1.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "827",
+          "areaName": "最终幻想",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/677ccdc717b92c77c3afed6dc4c8eea8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "820",
+          "areaName": "中土世界：战争之影",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/48720bfeb2f9d412b5f8a3584feccd1a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "847",
+          "areaName": "流放者柯南",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/ce20796517f93d7668263c951f444e04.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "881",
+          "areaName": "三国群英传",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4808d23129da576c37b866aea52d6528.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "920",
+          "areaName": "无主之地",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/973da9803e911d96f65a126212654bcc.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "480",
+          "areaName": "辐射",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/1969d4857a0984949540f1febed8608a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "567",
+          "areaName": "SCUM",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/bacb2ba76374ce4b019c07f34a04643e.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "687",
+          "areaName": "文明",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2b41aad96c6800e16a4396ab7d370995.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "701",
+          "areaName": "仁王",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d85abd572c4efd3bfaa731e57fe6adc8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "702",
+          "areaName": "缺氧",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/7c45faa7afd889163e1d58ee246dd261.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "728",
+          "areaName": "古剑奇谭",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6ead5693c16ca18f048218a5b02c286c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "479",
+          "areaName": "皇牌空战",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/c149cc360198f8ba8a83fb54b235aad7.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "517",
+          "areaName": "体育游戏",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/a2977dda15f81de9faf714f98a084e6a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "482",
+          "areaName": "海岛大亨",
+          "areaPic": "https://cs-op.douyucdn.cn/dycatr/9cca6e87917bdd4d50d83c55c8e2a23e.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "673",
+          "areaName": "植物大战僵尸:花园战争系列",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/5b98d61373fdf6219592369f96d38a2b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "681",
+          "areaName": "遗迹：灰烬重生",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2ae814e412ab6a46da3a0cadc96b1c94.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "682",
+          "areaName": "血源",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/3af5fc8d1635808f2fcc493265ae744e.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "686",
+          "areaName": "侠客风云传",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8b29667554a5a6ab45675945fee4b752.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "706",
+          "areaName": "模拟人生",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/522c7ed9fc050fa9b3e96107289576f7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "715",
+          "areaName": "空洞骑士",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/bff106012bee9d9e5c30982bd47df0b7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "718",
+          "areaName": "精灵宝可梦Let's Go!",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/a9094d05029c78c0c745c3fe186cb7fe.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "732",
+          "areaName": "地铁:离去",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b2d45ec2fbaba88d8d55f5327a6d9508.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "733",
+          "areaName": "沉没之城",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/7755e82d3fb49446349b742f423219a6.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1781",
+          "areaName": "生死狙击2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/146dfc8dbbe13dc8b7938832e57fe519.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1795",
+          "areaName": "三国战纪",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/3cf899610618ebb6ab2e5cfde4064e68.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1796",
+          "areaName": "怀旧FC",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8e7544eee6d369ba9300480129ea39cd.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1801",
+          "areaName": "经典单机",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/ced078cdd181db258f933a26289577ad.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1797",
+          "areaName": "英雄无敌",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4fe86f3fe8473bd2df9a64b393382a35.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1798",
+          "areaName": "街机游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/968b3b578576261ad15f07116f4cf8ad.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "781",
+          "areaName": "合金装备",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d565479a2cb27d6bbc014ded348f4cd8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "816",
+          "areaName": "星露谷物语",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/09f2bb05db27b23ab1d651310f913e03.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "836",
+          "areaName": "赛博朋克2077",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/86cb65bfe00af77f508b0dc429048fb1.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "838",
+          "areaName": "中国式家长",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/427a797c6d41160cc9ab7269181b93cb.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "839",
+          "areaName": "勇者斗恶龙",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4e80b53d171947dcbdfc0c6a078d8202.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "532",
+          "areaName": "无人深空",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/24edf53e5f14307b584e7ca8211e97f8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "873",
+          "areaName": "GT赛车7",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/88db5e015418231ccf1db0c93a1086bd.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "877",
+          "areaName": "超级机器人大战",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b4da2e621abd32a70f41b2809aa62445.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "879",
+          "areaName": "信长之野望",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/bde497d368cac5167513aed596ce8315.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "880",
+          "areaName": "这是我的战争",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/9fb36df6941cffadc37e5c42fc5e38ff.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "390",
+          "areaName": "杀戮尖塔",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/595c95305fbafb7f0d5f2c0b2e474bcb.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "883",
+          "areaName": "冰汽时代",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/81d8a34229685659a1bfb7049ca394d5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "884",
+          "areaName": "帝国时代",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/588e4c373052e42201c8ecd8edd192df.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "977",
+          "areaName": "足球经理",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b0b9e9888e9ec1c33b8ff5487f0d80e7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "979",
+          "areaName": "亿万僵尸",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/06b6cbaf716d7d07527c8b70814f3c53.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "991",
+          "areaName": "欧洲卡车模拟器",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0681820ce3cc8107435fde62aca1c8e7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "994",
+          "areaName": "漫漫长夜",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/26df351d1152eaa6a328c28a63263bce.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "997",
+          "areaName": "永恒轮回",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4ebcb65c049e10742ed8c5d00843a98a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "391",
+          "areaName": "孤岛惊魂",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b4b7e231dbd6b380d7a9085e5338ea24.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "484",
+          "areaName": "都市：天际线",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/3578e12c134a5a7bda4fc40907979ceb.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "389",
+          "areaName": "盗贼之海",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e7b5f6ff4cf5f74c17c7a5bcb32f75f9.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1002",
+          "areaName": "raft",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/612d9789eb63dd7ae54aea327b4f4d5c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1004",
+          "areaName": "60秒",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/10c0605fe6ad2ef700b280f5cad7dd8d.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1022",
+          "areaName": "俄罗斯钓鱼",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/74c5f91f8e2a9dd69663e72107822a1f.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1026",
+          "areaName": "猎人：荒野的召唤",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d71e31c25d6d6deb6f60a80c2977da35.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1028",
+          "areaName": "恐怖黎明",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/44b53ed414193a68561c630cea7e6422.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1033",
+          "areaName": "看门狗",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/5c7440c22aa3aed43f304c35e13006f2.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1034",
+          "areaName": "真三国无双",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/ffd2b79b949b64d0e98eff0e090142dd.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1061",
+          "areaName": "底特律:变人",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/9dfebbcd669cc97908d6d22d7e43db4e.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1063",
+          "areaName": "恶魔城",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f8af5bcb139b957669ebebd05da22b4a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1074",
+          "areaName": "坎巴拉太空计划",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/892af27add2be8893ecf1370f3967439.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1078",
+          "areaName": "龙珠：超宇宙",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f4adf4b39a15c5fd3f217d663780506a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1079",
+          "areaName": "马里奥赛车",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/ccfaac1cccf5d45514075e80969cb53a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1084",
+          "areaName": "欧陆风云",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/564e716e1b7ac9b842337cd1da6efdb7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1089",
+          "areaName": "桌游模拟器",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/605e21266a2329c049cb614ac91d6e65.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1095",
+          "areaName": "逆转裁判",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/59a97eb9f20b28d3d085827692c9f184.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1101",
+          "areaName": "超越光速",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/54263b9cb41fb38da677a8bf69eb0fbf.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1105",
+          "areaName": "植物大战僵尸",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/489b2d32f9becbc98a0bb28e5200924c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1108",
+          "areaName": "游戏开发者",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/32c4267e32f5f427fa91a7eff952ab8b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1140",
+          "areaName": "大富翁",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/af519a409658f3fd04642e5472302445.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1174",
+          "areaName": "英雄连",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/7965e7fb60fcd7d12bfee28e700e7bd4.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1217",
+          "areaName": "死亡岛2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0e5347cb43f34dc3d13c25256a62be35.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1227",
+          "areaName": "永劫无间",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/295a70686fb367573ee20e36a4f694da.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1251",
+          "areaName": "幽灵行者",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/455242ed159334c9d835faac5ae1fd02.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1273",
+          "areaName": "一起开火车！",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f6f8024558038736756d5b1c33e01352.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1282",
+          "areaName": "主机其他游戏",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/50cfb9f01dd2fc1e087f64b050846141.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1300",
+          "areaName": "战场兄弟",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/15381f7accb664c0ece02339692e8063.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1340",
+          "areaName": "工作模拟器",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2259311660563fd1d239b349f20e45d3.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1370",
+          "areaName": "军团战争",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/198f33c11423485195960596af596fa3.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1382",
+          "areaName": "战术小队",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/ddb9324af457736599aac95b416cd114.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1407",
+          "areaName": "皇家美食",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c6ec678fa68192bdc6456c4e860211fe.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1410",
+          "areaName": "僵尸毁灭工程",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/be3ed9f0285764015182270be71e23d0.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1476",
+          "areaName": "超级兔子人",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/60a50ee169230db8a3a8ea6d0c67e171.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1536",
+          "areaName": "岛屿生存者",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6e01969a5b81f3ff708ba3e60843ae9b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1595",
+          "areaName": "冬日计划",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/30e68de0d1a74594a2634a6211382c5e.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1644",
+          "areaName": "四海兄弟",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2c7c4182a8d9bc76ded10e62df3b893b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1650",
+          "areaName": "创世理想乡",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/1703b1de40944b0cfbeace0d6f1ec4d0.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1673",
+          "areaName": "柯娜：精神之桥",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/044b4db891e2253b8b89873988c08f0e.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1674",
+          "areaName": "幽灵线：东京",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/5cae65fb1fc22cc930adf3fd8cd3045c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1680",
+          "areaName": "生化危机4重制版",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e53c42c0c5d7943e17b3e60cff106fcd.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1778",
+          "areaName": "糖豆人",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/9d15d73ff53349c2527631e98e35831c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1806",
+          "areaName": "渡神纪",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b7012143958a60137a6bb90581bbced6.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1837",
+          "areaName": "英灵神殿",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/700385b70931641d875c812e58ee1531.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1887",
+          "areaName": "阿尔比恩",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/982ab40a78bcb6e43635d5d5aed7e202.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "1889",
+          "areaName": "中世纪王朝",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/a24bec85cb2d737658fc01ee2b2f3313.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2046",
+          "areaName": "恐惧之间",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d128e6fa8fa2d6f3dbd6ac1594fd8edf.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2068",
+          "areaName": "怪物猎人",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b3f27021492417b122c2940389ae01f8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2075",
+          "areaName": "黑神话：悟空",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0cd4c36631be722be54f90fa6155a97c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2081",
+          "areaName": "仁王2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/6911502b917e748bef59133d82a0e757.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2087",
+          "areaName": "双人成行",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/95c8c6bef40fb0f82eef19c7f51bd6c8.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2231",
+          "areaName": "全面战争",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/80c54ae9a22ee9fa24e6ee15de51f2ed.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2348",
+          "areaName": "刺客信条：奥德赛",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/cd9bd21d9efa5fcf4003440dc171901d.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2353",
+          "areaName": "星球大战：前线",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f6b579ba16aa2697a242e2959d621abf.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2378",
+          "areaName": "俄罗斯方块效应：连接",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8cce4cc2dde347e5560e622b48ce5948.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2413",
+          "areaName": "Fate/EXTELLA",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f26aec44db13b4a08c0b8c66fd11795a.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2471",
+          "areaName": "热血物语：地下世界",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/59af97abfa9b14038cf22694bdac8cac.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2475",
+          "areaName": "银河护卫队",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e0b582c3ccceca9ade69fc374024b7a5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2497",
+          "areaName": "地下蚁国",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b8dd97968be7f704c6d847f0f82464eb.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2535",
+          "areaName": "大神：绝景版",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/19cda7adfc57e6785224c37cdabb9233.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2536",
+          "areaName": "寻找天堂",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8ddae4f148f5b53f88821648b09c4e74.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2544",
+          "areaName": "罪恶装备：STRIVE",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d567e8b98fe5d9b5bbbd3e0c3a94f7c9.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2547",
+          "areaName": "骑士精神2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/99a93391374acf26189fffcd9cd0bf45.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2552",
+          "areaName": "红至日2：幸存者",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8c2b273d8a33bfc467cf5170f03e3a57.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2592",
+          "areaName": "征服的荣耀：围城",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/09f91df1c53b394240a5735d72349860.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2686",
+          "areaName": "剑士",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/eba36b2f43fcd69a359136db8fe545fa.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2687",
+          "areaName": "GRIS",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/775dcf1bfd8622b3fb08b60893cc892c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2713",
+          "areaName": "嗜血印",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c34c951ecb2c7106ab5e9857fb50a003.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "2961",
+          "areaName": "DJMAX致敬",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/47f694c11989342775bb7aa19eef7aff.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3016",
+          "areaName": "PICO PARK",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c3d56f5eb188c3bc67a4c7de3cf48585.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3017",
+          "areaName": "光明记忆：无限",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/301b1848de1cfa472626762304ceb12e.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3192",
+          "areaName": "战地系列",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/9f0f01fa39cf0204222483c968e378c3.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3193",
+          "areaName": "塞尔达传说：天空之剑HD",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2d47c5290650b3434b9a161bb7d1fa27.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3280",
+          "areaName": "异形：火力小队精英",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/bcab981de56cb325794f1cbecaf7fee5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3281",
+          "areaName": "12分钟",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/197bca6d5c8d85460b55e6113b673657.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3369",
+          "areaName": "剑侠图",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/c57d7205199416e13b267b856ab90536.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3406",
+          "areaName": "艾尔登法环",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/008d00e89dcee5f2980eedd8c51f6c34.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3468",
+          "areaName": "极限竞速：地平线5",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d4c60fbde3389737a2076b1fc6a581d9.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3480",
+          "areaName": "酒馆带师",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/88ca4117907fdb871d8b6f46211f5f4d.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3487",
+          "areaName": "光环：无限",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/a7ceee7a9b3f131c88ffdd5ceb7a4eec.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3518",
+          "areaName": "网吧模拟器",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8727e4aba310c42f4b877fcca25a5881.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3529",
+          "areaName": "消逝的光芒2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/856b1ffb1503c01373334994b1e16064.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3530",
+          "areaName": "无主之地3",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/af64f6b065333c03d2d50f98a6945c3b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3556",
+          "areaName": "海上狼人杀",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/a6d4ed1cad0e125a654f4cff386ddf22.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3669",
+          "areaName": "森林之子",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/25abbaf058885bc61e68498b23ae123c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3682",
+          "areaName": "弈仙牌",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/0e3e443fc10f273c0170b2f6dd9b1a20.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3684",
+          "areaName": "夜族崛起",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f4a9442f3f61f90656bdb26a79255dc2.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3704",
+          "areaName": "罗马复兴",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/08c41fdebb17963da4a63d5b4b4b7373.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3710",
+          "areaName": "游戏王：大师决斗",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/32aff4e9d623511564596826505d605e.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3764",
+          "areaName": "沙丘：觉醒",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/75e16c441362ad13d9692cbcbcb69098.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3793",
+          "areaName": "塞尔达传说：王国之泪",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f73a4009c26b25180dd9a8109a7d1172.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3806",
+          "areaName": "原子之心",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2fc41a827e44ef371cf44860884c3ffc.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3809",
+          "areaName": "Brotato",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/06054c095b6de271e8ce76ccbdfe878d.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3820",
+          "areaName": "宝可梦：朱/紫",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/606ceccee5fef7ad2de68f1c6a10404b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3836",
+          "areaName": "灵魂石幸存者",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/2807234e0ccfc66f8d2de7fec2a8db07.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3848",
+          "areaName": "主机一起看",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/5cb6282affa762b952e7acd4a7123e26.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3912",
+          "areaName": "大航海时代：起源",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/1e2fcbfeaa8fdc4d169d63184000e2bb.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3935",
+          "areaName": "幻兽帕鲁",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b00b6b24eaaf8397372e218d5ba98253.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "3972",
+          "areaName": "明末：渊虚之羽",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/908ce6843784af49049ddeb13a14787b.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4023",
+          "areaName": "严阵以待",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f259186131c5ca02a4b837e7f5d409a7.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4050",
+          "areaName": "流放之路2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/01125196a5ebef6311baa1e9ed4d43d5.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4053",
+          "areaName": "最终幻想7：重生",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/bedc719b8426219ff5e43c06a720c371.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4078",
+          "areaName": "索利斯堡",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f9452d3aa34e65275e47885efe6a57f0.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4111",
+          "areaName": "王权与自由",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/51e97c022c934cadbb4f9fc8771ff814.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4112",
+          "areaName": "博德之门3",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/1ff7db05dd402a158cb73d48b1f95a63.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4188",
+          "areaName": "七日世界",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e49a9b1b05aa14579d1bac06cace7852.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4201",
+          "areaName": "红色沙漠",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/54bc5ec425c01ad22faa8f9832204c1c.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4265",
+          "areaName": "其他",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/7aae2d043d4665370e0f964d18240377.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4276",
+          "areaName": "怪物猎人：荒野",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/7764b3fe0d982479599fae455849bfde.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4279",
+          "areaName": "天国：拯救2",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/f6831986e86c217242099f5ac1851495.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4283",
+          "areaName": "双影奇境",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/3f57898bc5660bae7b0cfdbe5a77e684.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4297",
+          "areaName": "无主星渊",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/ebd55b33ad7dcc5c46f4f4169c872109.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4336",
+          "areaName": "足球经理26",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/8426e2780f8030e6a7660e4a1c04bc25.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4346",
+          "areaName": "竞拍之王",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e817a067a125e2e50c41583c0e946f84.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4347",
+          "areaName": "Subnautica2：异星水域",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b4685dba34cc4dfde04ed0f290c447e4.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "15",
+          "typeName": "单机热游",
+          "areaId": "4355",
+          "areaName": "控制：共振",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/01bf4486602d9a667225cdf212f0107b.png",
+          "shortName": null
+        }
+      ]
+    },
+    {
+      "id": "18",
+      "name": "语音直播",
+      "children": [
+        {
+          "platform": "douyu",
+          "areaType": "18",
+          "typeName": "语音直播",
+          "areaId": "1015",
+          "areaName": "娱乐开黑",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/e63ac8fca383de160b333c20848a2f2f.png",
+          "shortName": null
+        }
+      ]
+    },
+    {
+      "id": "20",
+      "name": "语音互动",
+      "children": [
+        {
+          "platform": "douyu",
+          "areaType": "20",
+          "typeName": "语音互动",
+          "areaId": "910",
+          "areaName": "唱歌",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/b2613bb2c1dfef85a6b0459025130cdb.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "20",
+          "typeName": "语音互动",
+          "areaId": "1221",
+          "areaName": "交友",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/02b572dd6b730b1a6e63750bcd67b9a1.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "20",
+          "typeName": "语音互动",
+          "areaId": "1556",
+          "areaName": "心动FM.",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/d8cd4a9bfd0425cba1739a6392c46215.png",
+          "shortName": null
+        },
+        {
+          "platform": "douyu",
+          "areaType": "20",
+          "typeName": "语音互动",
+          "areaId": "1575",
+          "areaName": "一起玩",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/347e7f92f8fe24629f7fbedcfce39f7a.png",
+          "shortName": null
+        }
+      ]
+    },
+    {
+      "id": "22",
+      "name": "赛车竞技",
+      "children": [
+        {
+          "platform": "douyu",
+          "areaType": "22",
+          "typeName": "赛车竞技",
+          "areaId": "2422",
+          "areaName": "赛车竞技",
+          "areaPic": "https://sta-op.douyucdn.cn/dycatr/4f58a6db4d2680c2ab833b4b42e2b7d0.png",
+          "shortName": null
+        }
+      ]
+    }
+  ]
+}

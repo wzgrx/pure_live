@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "platform": "douyu",
+  "sample": "S09-24422-r2-hw-h5",
+  "capturedAt": "2026-09-27T09:50:32.914799Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://www.douyu.com/lapi/live/getH5PlayV1/24422",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+      "Origin": "https://www.douyu.com",
+      "Referer": "https://www.douyu.com/24422",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Cookie": "dy_did=66606e0c93b344a830e40f79e0af1864; acf_did=66606e0c93b344a830e40f79e0af1864"
+    },
+    "body": "enc_data=rmUhvWpbypUtMbiiAYIuRHxxebTaFjjkEzV1VFOrGSqtVpXFIHtzAZdUQsJQQVA3HjfeItdpBnV5WjgxAATvSbPwqrCbw9TeZesuNtHxWFbsTvRLyIW7jPCVDXDaBmSsS735pD0cVvpsUNKfzMWqenNnJCVpGoJ1SHX2KFWgYKxpMhPkJ42yGdNuWFLdASBhBiUaBGY5RMFgYBF3Zjt8CgCyKdCmKTj1TeOzLl0eFcl6RlEyCFL8Hlo0CLzcJHRjTDTjAQo6Tve9XsB7OGAcAZWdAhMpLER6DcrepINbUtRiVXIxJLPuOuG4LY5hMDPqFFC2xqN5QTj8IDPwAtXhGPfzeAFmKmQHc1tleYwnLhOhSGZoO4siWF79rrLELKCsKA7iFwEHaN97DNypcIZ5NBWGgPSkZWknDlgkoQ51KmvjOhZuNElYLM3HWSJcqMrrOTeyF6nxEGCHtWPlyLZzOUGhKqSzPA8dRYFoMqNklE71FoziTzLbbGexR5VcKap1JjRpjx66Xhe7LoeqgA80XGCcFyHoLhWdBUGxLYizYgXVP2s0BAHWCIEgCC69Ece0X4EMZLH0SSSuAVJewSXaBUKoMrigd9C5P4HvxxN7IwCwNXDhHwbnhQP8BaY4gzQCk7izXBa2oMvVd0OAYCFCVo65fT%3D%3D&tt=7453926755&did=66606e0c93b344a830e40f79e0af1864&auth=398323187ef72083125e9364a0cc6ae5&cdn=hw-h5&rate=2&hevc=0&fa=0&ive=0&ver=Douyu_new&iar=0"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-ratelimit-limit": "10000",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 09:50:33 GMT",
+      "access-control-allow-origin": "https://www.douyu.com",
+      "content-encoding": "gzip",
+      "vary": [
+        "Accept-Encoding",
+        "Origin"
+      ],
+      "strict-transport-security": "max-age=86400",
+      "access-control-expose-headers": "*",
+      "x-ratelimit-remaining": "9998",
+      "content-type": "application/json; charset=utf-8",
+      "access-control-max-age": "5",
+      "server": "Tengine",
+      "c-via": "200",
+      "x-request-id": "52154736-049a-4e22-b13e-19188ab44ffd",
+      "timing-allow-origin": "*",
+      "access-control-allow-headers": "*",
+      "access-control-allow-methods": "*",
+      "via": "cache31.l2nm125-2[12,0], ens-cache1.cn9479[103,0]",
+      "eagleid": "76b7ae1517905026333226521e"
+    }
+  },
+  "raw": {
+    "sha256": "45278da49764217c62c7f7abd3689ec13b8edf3e24dfeb66f7bf0a70bb3a0e7b",
+    "length": 2309
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie:dy_did",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:acf_did",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.rtmp_live:wsAuth",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.rtmp_live:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.rtmp_live:did",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.client_ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.p2pMeta.stream_props[0].txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.p2pMeta.xp2p_txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "form:enc_data",
+      "rule": "secret"
+    },
+    {
+      "where": "form:tt",
+      "rule": "secret"
+    },
+    {
+      "where": "form:did",
+      "rule": "secret"
+    },
+    {
+      "where": "form:auth",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

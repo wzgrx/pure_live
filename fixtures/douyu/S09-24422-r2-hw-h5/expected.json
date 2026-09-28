@@ -1,0 +1,13 @@
+{
+  "generator": "DouyuSite.parsePlayUrl + DouyuSite.resolvePlayUrl",
+  "value": {
+    "parsePlayUrl": "https://hw1a.douyucdn2.cn/live/24422rykeUuFd2TN_900.flv?wsAuth=fc9e3c0b5c3a9570e89bc741b6b74115&token=irw-a7-3-30878-3z5h585m9i77062femrsa76298m9y0ex6u750279620m842t&logo=0&expire=0&did=66606e0c93b344a830e40f79e0af1864&ver=Douyu_new&pt=2&st=0&sid=436268004&mcid2=0&origin=dy&fcdn=hw&fo=0&mix=0&isp=",
+    "resolvePlayUrl": {
+      "urls": [
+        "https://hw1a.douyucdn2.cn/live/24422rykeUuFd2TN_900.flv?wsAuth=fc9e3c0b5c3a9570e89bc741b6b74115&token=irw-a7-3-30878-3z5h585m9i77062femrsa76298m9y0ex6u750279620m842t&logo=0&expire=0&did=66606e0c93b344a830e40f79e0af1864&ver=Douyu_new&pt=2&st=0&sid=436268004&mcid2=0&origin=dy&fcdn=hw&fo=0&mix=0&isp="
+      ],
+      "appliedQualityData": 2,
+      "qualityUnconfirmed": false
+    }
+  }
+}

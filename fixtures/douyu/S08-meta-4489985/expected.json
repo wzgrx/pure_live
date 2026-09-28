@@ -1,0 +1,85 @@
+{
+  "generator": "DouyuSite.parsePlayResponse + parseCdnCodes + parsePlayQualities + parsePlayUrl + getPlayQualites",
+  "value": {
+    "parseCdnCodes": [
+      "hw-h5"
+    ],
+    "parsePlayQualities": [
+      {
+        "quality": "原画1080P30",
+        "id": 0,
+        "sort": 4,
+        "rate": 0,
+        "cdns": [
+          "hw-h5"
+        ]
+      },
+      {
+        "quality": "蓝光4M",
+        "id": 4,
+        "sort": 3,
+        "rate": 4,
+        "cdns": [
+          "hw-h5"
+        ]
+      },
+      {
+        "quality": "超清",
+        "id": 3,
+        "sort": 2,
+        "rate": 3,
+        "cdns": [
+          "hw-h5"
+        ]
+      },
+      {
+        "quality": "高清",
+        "id": 2,
+        "sort": 1,
+        "rate": 2,
+        "cdns": [
+          "hw-h5"
+        ]
+      }
+    ],
+    "getPlayQualites": [
+      {
+        "quality": "原画1080P30",
+        "id": 0,
+        "sort": 4,
+        "rate": 0,
+        "cdns": [
+          "hw-h5"
+        ]
+      },
+      {
+        "quality": "蓝光4M",
+        "id": 4,
+        "sort": 3,
+        "rate": 4,
+        "cdns": [
+          "hw-h5"
+        ]
+      },
+      {
+        "quality": "超清",
+        "id": 3,
+        "sort": 2,
+        "rate": 3,
+        "cdns": [
+          "hw-h5"
+        ]
+      },
+      {
+        "quality": "高清",
+        "id": 2,
+        "sort": 1,
+        "rate": 2,
+        "cdns": [
+          "hw-h5"
+        ]
+      }
+    ],
+    "parsePlayUrl": "https://hwa.douyucdn2.cn/live/4489985rydkFESQN_4000.flv?wsAuth=b45e68700611a8eb0e04f9c8e7d432cd&token=rqv-d4-6-8114644-0mg743wc7s4to64a28m85l55ou8qm0p0s0x81qp5s6o8lb84&logo=0&expire=300&did=df365fcd98d3fdf89a4449677881e758&ver=Douyu_new&pt=2&st=0&sid=436727594&mcid2=0&origin=dy&fcdn=hw&fo=0&mix=0&isp="
+  }
+}

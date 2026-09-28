@@ -20,3 +20,5 @@ export 'src/site_error.dart';
 export 'src/sites.dart';
 export 'src/sites/bilibili/bilibili_api.dart';
 export 'src/sites/bilibili/bilibili_site.dart';
+export 'src/sites/douyu/douyu_api.dart';
+export 'src/sites/douyu/douyu_site.dart';

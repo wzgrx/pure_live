@@ -366,4 +366,34 @@ void main() {
     expect(await session.get(Uri.parse('https://x.test/c')), isNull);
     expect(http.requests, hasLength(2));
   });
+
+  test('a short-link session sends a signed POST under its own rules and budget', () async {
+    final http = _FakeHttp((request) async {
+      final status = request.url.path == '/gone' ? 404 : 200;
+      return LiveResponse(status: status, bytes: utf8.encode('{"a":1}'), url: request.url);
+    });
+    final session = ShortLinkSession(http, timeout: const Duration(seconds: 3));
+    final own = CancelToken();
+    final post = LiveRequest.form(
+      site: 'liveme',
+      url: Uri.parse('https://x.test/api#frag'),
+      fields: const {'videoid': '1'},
+      headers: const {'lm-s-sign': 'abc'},
+      cancel: own,
+    );
+    expect((await session.send(post))!.json, {'a': 1}, reason: 'the body is read');
+    final sent = http.requests.single;
+    expect((sent.method, sent.url.toString(), sent.site), ('POST', 'https://x.test/api', 'links'));
+    expect((sent.followRedirects, sent.timeout), (false, const Duration(seconds: 3)));
+    expect(sent.headers['lm-s-sign'], 'abc');
+    expect(utf8.decode(sent.body!), 'videoid=1');
+    expect(identical(sent.cancel, own), isFalse, reason: "the session's cancellation");
+    expect(await session.send(post), isNull, reason: 'the same method and URL once');
+    expect(await session.get(Uri.parse('https://x.test/api')), isNotNull, reason: 'a GET of it is another request');
+    expect(await session.send(LiveRequest(site: 'x', url: Uri.parse('https://x.test/gone'), method: 'POST')), isNull);
+    expect(session.requestCount, 3);
+    session.close();
+    expect(await session.send(LiveRequest(site: 'x', url: Uri.parse('https://x.test/other'), method: 'POST')), isNull);
+    expect(http.requests, hasLength(3));
+  });
 }

@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "platform": "liveme",
+  "sample": "S04-profile-live",
+  "capturedAt": "2026-09-27T17:25:25.030997Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&h5=1&thirdchannel=6&userid=932385543319330816",
+    "headers": {
+      "Origin": "https://www.liveme.com",
+      "Referer": "https://www.liveme.com/livehot/streaming/209683072",
+      "Accept": "application/json, text/plain, */*",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "access-control-allow-origin": "*",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 17:25:25 GMT",
+      "vary": "Accept-Encoding",
+      "content-encoding": "gzip",
+      "access-control-expose-headers": "*",
+      "content-type": "text/json;charset=UTF-8",
+      "access-control-max-age": "5",
+      "x-request-id": "10128866-50d6-4895-b88b-2851fd93b8d1",
+      "x-powered-by": "AtomCode v3.3.2",
+      "access-control-allow-headers": "*",
+      "access-control-allow-methods": "*"
+    }
+  },
+  "raw": {
+    "sha256": "5004990c4afc5647a3de01dc0a6f1644f7c087230c89cf3994b149a2088447b6",
+    "length": 10042
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -1,0 +1,12 @@
+{
+  "generator": "LiveMeSite.searchRooms (page size 30) + LiveMeApi.search hasMore",
+  "value": {
+    "searchRooms": {
+      "value": [],
+      "requests": [
+        "GET https://live.liveme.com/search/searchKeyword?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&type=1&page=1&pageSize=30&keyword=qzxqzxqzxpurelive&tuid&uid&token&androidid"
+      ]
+    },
+    "LiveMeApi.search.hasMore": false
+  }
+}

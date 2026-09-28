@@ -1,0 +1,192 @@
+{
+  "generator": "LiveMeSite.getRoomDetailForRefresh / getRoomDetail / getRoomDetailForRecording / getLiveStatus / searchRooms(17709377, its page 2 and its room link) + getPlayQualites + getPlayUrls + resolvePlayUrlsRaw + getPlayUrls / resolvePlayUrlsForRecoveryRaw of source-flv",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "value": {
+        "roomId": "17709377",
+        "userId": "560875115161059328",
+        "title": "🇺🇦👑AnDrEw❤",
+        "nick": "🇺🇦👑AnDrEw❤",
+        "avatar": "https://esx.esxscloud.com/liveme/poster/540x540/2a6f3da8d7a01a6bfd132adefdbbc9d9_icon.jpeg",
+        "cover": "",
+        "area": "US",
+        "watching": "",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "4648",
+        "platform": "liveme",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "LiveMe 远端聊天尚待接入；热度、当前观看和累计观看分别展示。",
+        "introduction": "👑 🐰 🇺🇦",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.liveme.com",
+          "referer": "https://www.liveme.com/livehot/streaming/17709377",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.liveme.com/livehot/streaming/17709377"
+      },
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=17709377",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=560875115161059328"
+      ]
+    },
+    "getRoomDetail": {
+      "value": {
+        "roomId": "17709377",
+        "userId": "560875115161059328",
+        "title": "🇺🇦👑AnDrEw❤",
+        "nick": "🇺🇦👑AnDrEw❤",
+        "avatar": "https://esx.esxscloud.com/liveme/poster/540x540/2a6f3da8d7a01a6bfd132adefdbbc9d9_icon.jpeg",
+        "cover": "",
+        "area": "US",
+        "watching": "",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "4648",
+        "platform": "liveme",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "LiveMe 远端聊天尚待接入；热度、当前观看和累计观看分别展示。",
+        "introduction": "👑 🐰 🇺🇦",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.liveme.com",
+          "referer": "https://www.liveme.com/livehot/streaming/17709377",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.liveme.com/livehot/streaming/17709377"
+      },
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=17709377",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=560875115161059328"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "value": {
+        "roomId": "17709377",
+        "userId": "560875115161059328",
+        "title": "🇺🇦👑AnDrEw❤",
+        "nick": "🇺🇦👑AnDrEw❤",
+        "avatar": "https://esx.esxscloud.com/liveme/poster/540x540/2a6f3da8d7a01a6bfd132adefdbbc9d9_icon.jpeg",
+        "cover": "",
+        "area": "US",
+        "watching": "",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "4648",
+        "platform": "liveme",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "LiveMe 远端聊天尚待接入；热度、当前观看和累计观看分别展示。",
+        "introduction": "👑 🐰 🇺🇦",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.liveme.com",
+          "referer": "https://www.liveme.com/livehot/streaming/17709377",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.liveme.com/livehot/streaming/17709377"
+      },
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=17709377",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=560875115161059328"
+      ]
+    },
+    "getLiveStatus": {
+      "value": false,
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=17709377",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=560875115161059328"
+      ]
+    },
+    "searchRooms(shortId)": {
+      "value": [
+        {
+          "roomId": "17709377",
+          "userId": "560875115161059328",
+          "title": "🇺🇦👑AnDrEw❤",
+          "nick": "🇺🇦👑AnDrEw❤",
+          "avatar": "https://esx.esxscloud.com/liveme/poster/540x540/2a6f3da8d7a01a6bfd132adefdbbc9d9_icon.jpeg",
+          "cover": "",
+          "area": "US",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "4648",
+          "platform": "liveme",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LiveMe 远端聊天尚待接入；热度、当前观看和累计观看分别展示。",
+          "introduction": "👑 🐰 🇺🇦",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.liveme.com",
+            "referer": "https://www.liveme.com/livehot/streaming/17709377",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.liveme.com/livehot/streaming/17709377"
+        }
+      ],
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=17709377",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=560875115161059328"
+      ]
+    },
+    "searchRooms(shortId, page 2)": {
+      "value": [],
+      "requests": []
+    },
+    "searchRooms(link)": {
+      "value": [
+        {
+          "roomId": "17709377",
+          "userId": "560875115161059328",
+          "title": "🇺🇦👑AnDrEw❤",
+          "nick": "🇺🇦👑AnDrEw❤",
+          "avatar": "https://esx.esxscloud.com/liveme/poster/540x540/2a6f3da8d7a01a6bfd132adefdbbc9d9_icon.jpeg",
+          "cover": "",
+          "area": "US",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "4648",
+          "platform": "liveme",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LiveMe 远端聊天尚待接入；热度、当前观看和累计观看分别展示。",
+          "introduction": "👑 🐰 🇺🇦",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.liveme.com",
+            "referer": "https://www.liveme.com/livehot/streaming/17709377",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.liveme.com/livehot/streaming/17709377"
+        }
+      ],
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=17709377",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=560875115161059328"
+      ]
+    },
+    "getPlayQualites": [],
+    "getPlayUrls(source-flv)": {
+      "throws": "LiveMeException",
+      "message": "LiveMe mediaUnavailable"
+    },
+    "resolvePlayUrlsForRecoveryRaw(source-flv)": {
+      "value": {
+        "throws": "LiveMeException",
+        "message": "LiveMe mediaUnavailable"
+      },
+      "requests": []
+    }
+  }
+}

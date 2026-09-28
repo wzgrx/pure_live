@@ -1,0 +1,61 @@
+{
+  "generator": "LiveMeSite.getRoomDetailForRefresh / getRoomDetail / getRoomDetailForRecording / getLiveStatus / searchRooms(999999999, its page 2 and its room link) + getPlayQualites",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "value": {
+        "throws": "LiveMeException",
+        "message": "LiveMe missing"
+      },
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=999999999"
+      ]
+    },
+    "getRoomDetail": {
+      "value": {
+        "throws": "LiveMeException",
+        "message": "LiveMe missing"
+      },
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=999999999"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "value": {
+        "throws": "LiveMeException",
+        "message": "LiveMe missing"
+      },
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=999999999"
+      ]
+    },
+    "getLiveStatus": {
+      "value": {
+        "throws": "LiveMeException",
+        "message": "LiveMe missing"
+      },
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=999999999"
+      ]
+    },
+    "searchRooms(shortId)": {
+      "value": [],
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=999999999"
+      ]
+    },
+    "searchRooms(shortId, page 2)": {
+      "value": [],
+      "requests": []
+    },
+    "searchRooms(link)": {
+      "value": [],
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=999999999"
+      ]
+    },
+    "getPlayQualites": {
+      "throws": "LiveMeException",
+      "message": "LiveMe missing"
+    }
+  }
+}

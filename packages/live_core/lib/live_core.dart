@@ -42,6 +42,8 @@ export 'src/sites/kilakila/kilakila_api.dart';
 export 'src/sites/kilakila/kilakila_site.dart';
 export 'src/sites/kuaishou/kuaishou_api.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
+export 'src/sites/liveme/liveme_api.dart';
+export 'src/sites/liveme/liveme_site.dart';
 export 'src/sites/missevan/missevan_api.dart';
 export 'src/sites/missevan/missevan_site.dart';
 export 'src/sites/niconico/niconico_api.dart';

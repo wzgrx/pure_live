@@ -1,0 +1,256 @@
+{
+  "generator": "LiveMeSite.getRoomDetailForRefresh / getRoomDetail / getRoomDetailForRecording / getLiveStatus / searchRooms(209683072, its page 2 and its room link) + getPlayQualites + getPlayUrls + resolvePlayUrlsRaw + getPlayUrls / resolvePlayUrlsForRecoveryRaw of source-flv",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "value": {
+        "roomId": "209683072",
+        "userId": "932385543319330816",
+        "title": ".",
+        "nick": "LIVEME-NIGHTCLUB 🔆⃤",
+        "avatar": "https://esx.esxscloud.com/liveme/poster/150x150/8897b857ee8969de85ceffa3721c1877_icon.jpeg",
+        "cover": "https://esx.esxscloud.com/liveme/540x540/cover-5a85aaa045d5ab779a16c25a62edbdf0_icon.jpeg",
+        "area": "US",
+        "watching": "885",
+        "audienceMetricType": "popularity",
+        "popularity": "885",
+        "onlineViewers": "201",
+        "totalViewers": "8681",
+        "followers": "33933",
+        "platform": "liveme",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "LiveMe 远端聊天尚待接入；热度、当前观看和累计观看分别展示。",
+        "introduction": "LIVEME-NIGHTCLUB 🔆⃤",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.liveme.com",
+          "referer": "https://www.liveme.com/livehot/streaming/209683072",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.liveme.com/livehot/streaming/209683072"
+      },
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=209683072",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=932385543319330816",
+        "POST https://live.liveme.com/live/queryinfosimple?alias=liveme&tongdun_black_box=1&os=web videoid=17904580585651396476"
+      ]
+    },
+    "getRoomDetail": {
+      "value": {
+        "roomId": "209683072",
+        "userId": "932385543319330816",
+        "title": ".",
+        "nick": "LIVEME-NIGHTCLUB 🔆⃤",
+        "avatar": "https://esx.esxscloud.com/liveme/poster/150x150/8897b857ee8969de85ceffa3721c1877_icon.jpeg",
+        "cover": "https://esx.esxscloud.com/liveme/540x540/cover-5a85aaa045d5ab779a16c25a62edbdf0_icon.jpeg",
+        "area": "US",
+        "watching": "885",
+        "audienceMetricType": "popularity",
+        "popularity": "885",
+        "onlineViewers": "201",
+        "totalViewers": "8681",
+        "followers": "33933",
+        "platform": "liveme",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "LiveMe 远端聊天尚待接入；热度、当前观看和累计观看分别展示。",
+        "introduction": "LIVEME-NIGHTCLUB 🔆⃤",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.liveme.com",
+          "referer": "https://www.liveme.com/livehot/streaming/209683072",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.liveme.com/livehot/streaming/209683072"
+      },
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=209683072",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=932385543319330816",
+        "POST https://live.liveme.com/live/queryinfosimple?alias=liveme&tongdun_black_box=1&os=web videoid=17904580585651396476"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "value": {
+        "roomId": "209683072",
+        "userId": "932385543319330816",
+        "title": ".",
+        "nick": "LIVEME-NIGHTCLUB 🔆⃤",
+        "avatar": "https://esx.esxscloud.com/liveme/poster/150x150/8897b857ee8969de85ceffa3721c1877_icon.jpeg",
+        "cover": "https://esx.esxscloud.com/liveme/540x540/cover-5a85aaa045d5ab779a16c25a62edbdf0_icon.jpeg",
+        "area": "US",
+        "watching": "885",
+        "audienceMetricType": "popularity",
+        "popularity": "885",
+        "onlineViewers": "201",
+        "totalViewers": "8681",
+        "followers": "33933",
+        "platform": "liveme",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "LiveMe 远端聊天尚待接入；热度、当前观看和累计观看分别展示。",
+        "introduction": "LIVEME-NIGHTCLUB 🔆⃤",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.liveme.com",
+          "referer": "https://www.liveme.com/livehot/streaming/209683072",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.liveme.com/livehot/streaming/209683072"
+      },
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=209683072",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=932385543319330816",
+        "POST https://live.liveme.com/live/queryinfosimple?alias=liveme&tongdun_black_box=1&os=web videoid=17904580585651396476"
+      ]
+    },
+    "getLiveStatus": {
+      "value": true,
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=209683072",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=932385543319330816",
+        "POST https://live.liveme.com/live/queryinfosimple?alias=liveme&tongdun_black_box=1&os=web videoid=17904580585651396476"
+      ]
+    },
+    "searchRooms(shortId)": {
+      "value": [
+        {
+          "roomId": "209683072",
+          "userId": "932385543319330816",
+          "title": ".",
+          "nick": "LIVEME-NIGHTCLUB 🔆⃤",
+          "avatar": "https://esx.esxscloud.com/liveme/poster/150x150/8897b857ee8969de85ceffa3721c1877_icon.jpeg",
+          "cover": "https://esx.esxscloud.com/liveme/540x540/cover-5a85aaa045d5ab779a16c25a62edbdf0_icon.jpeg",
+          "area": "US",
+          "watching": "885",
+          "audienceMetricType": "popularity",
+          "popularity": "885",
+          "onlineViewers": "201",
+          "totalViewers": "8681",
+          "followers": "33933",
+          "platform": "liveme",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LiveMe 远端聊天尚待接入；热度、当前观看和累计观看分别展示。",
+          "introduction": "LIVEME-NIGHTCLUB 🔆⃤",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.liveme.com",
+            "referer": "https://www.liveme.com/livehot/streaming/209683072",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.liveme.com/livehot/streaming/209683072"
+        }
+      ],
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=209683072",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=932385543319330816",
+        "POST https://live.liveme.com/live/queryinfosimple?alias=liveme&tongdun_black_box=1&os=web videoid=17904580585651396476"
+      ]
+    },
+    "searchRooms(shortId, page 2)": {
+      "value": [],
+      "requests": []
+    },
+    "searchRooms(link)": {
+      "value": [
+        {
+          "roomId": "209683072",
+          "userId": "932385543319330816",
+          "title": ".",
+          "nick": "LIVEME-NIGHTCLUB 🔆⃤",
+          "avatar": "https://esx.esxscloud.com/liveme/poster/150x150/8897b857ee8969de85ceffa3721c1877_icon.jpeg",
+          "cover": "https://esx.esxscloud.com/liveme/540x540/cover-5a85aaa045d5ab779a16c25a62edbdf0_icon.jpeg",
+          "area": "US",
+          "watching": "885",
+          "audienceMetricType": "popularity",
+          "popularity": "885",
+          "onlineViewers": "201",
+          "totalViewers": "8681",
+          "followers": "33933",
+          "platform": "liveme",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LiveMe 远端聊天尚待接入；热度、当前观看和累计观看分别展示。",
+          "introduction": "LIVEME-NIGHTCLUB 🔆⃤",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.liveme.com",
+            "referer": "https://www.liveme.com/livehot/streaming/209683072",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.liveme.com/livehot/streaming/209683072"
+        }
+      ],
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=209683072",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=932385543319330816",
+        "POST https://live.liveme.com/live/queryinfosimple?alias=liveme&tongdun_black_box=1&os=web videoid=17904580585651396476"
+      ]
+    },
+    "getPlayQualites": [
+      {
+        "quality": "原始画质 · FLV",
+        "id": "source-flv",
+        "sort": 300,
+        "getPlayUrls": [
+          "https://game.live11.linkv.fun/yolo/17904580585651396476.flv?wsSecret=a01f1912f57a1e829cc30b93fe7a2f48&wsABStime=6ab98a4a"
+        ],
+        "resolvePlayUrlsRaw": {
+          "urls": [
+            "https://game.live11.linkv.fun/yolo/17904580585651396476.flv?wsSecret=a01f1912f57a1e829cc30b93fe7a2f48&wsABStime=6ab98a4a"
+          ],
+          "appliedQualityData": "source-flv"
+        }
+      },
+      {
+        "quality": "流畅画质 · FLV",
+        "id": "smooth-flv",
+        "sort": 200,
+        "getPlayUrls": [
+          "https://game.live11.linkv.fun/yolo/17904580585651396476_360.flv?wsSecret=a01f1912f57a1e829cc30b93fe7a2f48&wsABStime=6ab98a4a"
+        ],
+        "resolvePlayUrlsRaw": {
+          "urls": [
+            "https://game.live11.linkv.fun/yolo/17904580585651396476_360.flv?wsSecret=a01f1912f57a1e829cc30b93fe7a2f48&wsABStime=6ab98a4a"
+          ],
+          "appliedQualityData": "smooth-flv"
+        }
+      },
+      {
+        "quality": "HLS 自动 · HLS",
+        "id": "hls",
+        "sort": 100,
+        "getPlayUrls": [
+          "https://hlslive.game.linkv.fun/yolo/17904580585651396476/playlist.m3u8?wsSecret=3b9c95ac0130313cb0139884f00b54ea&wsABStime=6ab98a4a"
+        ],
+        "resolvePlayUrlsRaw": {
+          "urls": [
+            "https://hlslive.game.linkv.fun/yolo/17904580585651396476/playlist.m3u8?wsSecret=3b9c95ac0130313cb0139884f00b54ea&wsABStime=6ab98a4a"
+          ],
+          "appliedQualityData": "hls"
+        }
+      }
+    ],
+    "getPlayUrls(source-flv)": [
+      "https://game.live11.linkv.fun/yolo/17904580585651396476.flv?wsSecret=a01f1912f57a1e829cc30b93fe7a2f48&wsABStime=6ab98a4a"
+    ],
+    "resolvePlayUrlsForRecoveryRaw(source-flv)": {
+      "value": {
+        "urls": [
+          "https://game.live11.linkv.fun/yolo/17904580585651396476.flv?wsSecret=a01f1912f57a1e829cc30b93fe7a2f48&wsABStime=6ab98a4a"
+        ],
+        "appliedQualityData": "source-flv"
+      },
+      "requests": [
+        "GET https://live.liveme.com/liveme_ent/v1/user/uid_vid_by_short_id?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&short_id=209683072",
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=932385543319330816",
+        "POST https://live.liveme.com/live/queryinfosimple?alias=liveme&tongdun_black_box=1&os=web videoid=17904580585651396476"
+      ]
+    }
+  }
+}

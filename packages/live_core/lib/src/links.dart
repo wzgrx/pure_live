@@ -72,7 +72,8 @@ mixin LiveSiteLinks on LiveSite {
 
 /// The requests one link parse may make: one budget of [maxRequests]
 /// distinct URLs, no redirect following by the transport, bodies not
-/// downloaded unless asked for, and one cancellation for all of them.
+/// downloaded unless asked for ([get]'s `readBody`, or [send]), and one
+/// cancellation for all of them.
 final class ShortLinkSession {
   /// A session on [http] whose requests each take at most [timeout].
   new(this.http, {required this.timeout, this.site = 'links'});
@@ -132,6 +133,35 @@ final class ShortLinkSession {
         await streamed.discard();
         response = LiveResponse(status: streamed.status, bytes: const [], url: streamed.url, headers: streamed.headers);
       }
+      if (_closed || response.status < 200 || response.status >= 400) return null;
+      return response;
+    } on TransportFailure {
+      return null;
+    }
+  }
+
+  /// Sends [request] (a signed form POST, say) under the rules of [get] and
+  /// reads the body: its method and URL count against the budget, redirects
+  /// are not followed, and the session's site, timeout and cancellation
+  /// replace the request's own. Returns null in the cases [get] does.
+  Future<LiveResponse?> send(LiveRequest request) async {
+    final target = request.url.removeFragment();
+    final method = request.method.toUpperCase();
+    final key = method == 'GET' ? '$target' : '$method $target';
+    if (_closed || !isHttpUri(target) || _visited.length >= maxRequests || !_visited.add(key)) return null;
+    try {
+      final response = await http.send(
+        LiveRequest(
+          site: site,
+          url: target,
+          method: method,
+          headers: request.headers,
+          body: request.body,
+          followRedirects: false,
+          timeout: timeout,
+          cancel: _cancel,
+        ),
+      );
       if (_closed || response.status < 200 || response.status >= 400) return null;
       return response;
     } on TransportFailure {

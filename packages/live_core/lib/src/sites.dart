@@ -212,7 +212,16 @@ abstract final class SiteIds {
   /// channel ids (case-sensitive), niconico programme ids, CHZZK channel ids
   /// (hex the adapter already lower-cases), and ids whose case rule the
   /// platform has not shown: Huya aliases, Bigo ids.
-  static const Set<String> caseInsensitiveRoomIds = {twitch, soop, picarto, twitcasting, tiktok, pandaLive, douyu, kuaishou};
+  static const Set<String> caseInsensitiveRoomIds = {
+    twitch,
+    soop,
+    picarto,
+    twitcasting,
+    tiktok,
+    pandaLive,
+    douyu,
+    kuaishou,
+  };
 
   /// Whether rooms of [platform] are identified without regard to the room
   /// id's case (see [caseInsensitiveRoomIds]).

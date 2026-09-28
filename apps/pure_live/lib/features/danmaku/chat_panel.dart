@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:live_danmaku/live_danmaku.dart';
-import 'package:live_ui/live_ui.dart' show MessageView, Radii, Space;
+import 'package:live_ui/live_ui.dart' show LiveIcon, LiveIcons, MessageView, Radii, Space;
 import 'package:pure_live_app/features/danmaku/danmaku_text.dart';
 import 'package:pure_live_app/features/danmaku/room_danmaku.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
@@ -47,7 +47,7 @@ class ChatPanel extends StatelessWidget {
     final danmaku = this.danmaku;
     if (!enabled) {
       return MessageView(
-        icon: Icons.subtitles_off_outlined,
+        icon: LiveIcons.danmaku,
         title: t.danmaku.off,
         message: t.danmaku.offHint,
         actionLabel: t.danmaku.turnOn,
@@ -55,7 +55,7 @@ class ChatPanel extends StatelessWidget {
       );
     }
     if (!live || danmaku == null) {
-      return MessageView(icon: Icons.subtitles_outlined, title: t.danmaku.offlineNoDanmaku);
+      return MessageView(icon: LiveIcons.danmaku, title: t.danmaku.offlineNoDanmaku);
     }
     return Column(
       children: [
@@ -116,7 +116,7 @@ class _LocalChatInputState extends State<LocalChatInput> {
         ),
         // The field's hint stays short enough for a 320 dp chat column; what
         // "local" means is on the button.
-        IconButton(tooltip: t.danmaku.localSend, icon: const Icon(Icons.send), onPressed: _send),
+        IconButton(tooltip: t.danmaku.localSend, icon: const LiveIcon(LiveIcons.send), onPressed: _send),
       ],
     ),
   );
@@ -162,7 +162,7 @@ class _StatusBar extends StatelessWidget {
               if (onOpenSettings != null)
                 IconButton(
                   tooltip: t.danmaku.settings,
-                  icon: const Icon(Icons.tune, size: 20),
+                  icon: const LiveIcon(LiveIcons.tune, size: 20),
                   onPressed: onOpenSettings,
                 ),
             ],
@@ -440,7 +440,7 @@ class ChatListState extends State<ChatList> {
             bottom: Space.s2,
             child: Center(
               child: FilledButton.tonalIcon(
-                icon: const Icon(Icons.arrow_downward, size: 18),
+                icon: const LiveIcon(LiveIcons.scrollToLatest),
                 label: Text(_unseen > 0 ? t.danmaku.newMessages(n: _unseen) : t.danmaku.jumpToLatest),
                 onPressed: follow,
               ),
@@ -481,7 +481,7 @@ class ChatLineTile extends StatelessWidget {
         children: [
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
-            child: Icon(Icons.card_giftcard, size: 16, color: theme.colorScheme.tertiary),
+            child: LiveIcon(LiveIcons.gift, size: 16, color: theme.colorScheme.tertiary),
           ),
           const TextSpan(text: ' '),
           TextSpan(text: '${gift.userName} ', style: nameStyle),

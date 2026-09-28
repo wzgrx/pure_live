@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -116,17 +117,17 @@ Future<void> showRoomCardMenu(
             if (followed && room.platform != 'iptv') RoomAlertSwitch(room: room),
             for (final action in actions)
               ListTile(
-                leading: Icon(switch (action) {
-                  RoomCardAction.select => Icons.checklist,
-                  RoomCardAction.follow => Icons.favorite_border,
-                  RoomCardAction.unfollow => Icons.heart_broken_outlined,
-                  RoomCardAction.groups => Icons.folder_outlined,
-                  RoomCardAction.multiview => Icons.grid_view,
-                  RoomCardAction.share => Icons.share_outlined,
-                  RoomCardAction.copyLink => Icons.link,
-                  RoomCardAction.streamLink => Icons.content_copy,
-                  RoomCardAction.newWindow => Icons.open_in_browser,
-                  RoomCardAction.openSite => Icons.open_in_new,
+                leading: LiveIcon(switch (action) {
+                  RoomCardAction.select => LiveIcons.multiSelect,
+                  RoomCardAction.follow => LiveIcons.follow,
+                  RoomCardAction.unfollow => LiveIcons.unfollow,
+                  RoomCardAction.groups => LiveIcons.folder,
+                  RoomCardAction.multiview => LiveIcons.multiview,
+                  RoomCardAction.share => LiveIcons.share,
+                  RoomCardAction.copyLink => LiveIcons.link,
+                  RoomCardAction.streamLink => LiveIcons.copy,
+                  RoomCardAction.newWindow => LiveIcons.newWindow,
+                  RoomCardAction.openSite => LiveIcons.openSite,
                 }),
                 title: Text(switch (action) {
                   RoomCardAction.select => t.follows.select,

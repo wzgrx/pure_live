@@ -46,13 +46,13 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    Widget option(IconData icon, String title, String subtitle, VoidCallback onTap) => Card(
+    Widget option(LiveIcons icon, String title, String subtitle, VoidCallback onTap) => Card(
       margin: const EdgeInsets.only(bottom: Space.s3),
       child: ListTile(
-        leading: Icon(icon),
+        leading: LiveIcon(icon),
         title: Text(title),
         subtitle: Text(subtitle),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: const LiveIcon(LiveIcons.subpage),
         onTap: _busy ? null : onTap,
       ),
     );
@@ -71,15 +71,15 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 const SizedBox(height: Space.s3),
                 Text(t.onboarding.intro),
                 const SizedBox(height: Space.s6),
-                option(Icons.upload_file, t.onboarding.fromFile, t.onboarding.fromFileSubtitle, _importFile),
+                option(LiveIcons.importFile, t.onboarding.fromFile, t.onboarding.fromFileSubtitle, _importFile),
                 option(
-                  Icons.cloud_outlined,
+                  LiveIcons.cloud,
                   t.onboarding.fromWebdav,
                   t.onboarding.fromWebdavSubtitle,
                   () => context.go('/me/backup/webdav'),
                 ),
                 option(
-                  Icons.devices_other_outlined,
+                  LiveIcons.lanSync,
                   t.onboarding.fromDevice,
                   t.onboarding.fromDeviceSubtitle,
                   () => context.go('/me/backup/lan?receive=1'),

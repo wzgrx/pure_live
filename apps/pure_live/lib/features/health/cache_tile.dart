@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pure_live_app/features/settings/settings_search.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
@@ -54,7 +55,7 @@ class _CacheTileState extends State<CacheTile> {
     return SettingAnchor(
       id: cacheAnchor,
       child: ListTile(
-        leading: const Icon(Icons.cleaning_services_outlined),
+        leading: const LiveIcon(LiveIcons.clearCache),
         title: Text(t.health.clearImageCache),
         subtitle: Text(
           bytes == null

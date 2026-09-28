@@ -56,7 +56,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                 leading: PlatformLogo(platformId: platform, size: Sizes.logoLarge),
                 title: Text(platformNames[platform] ?? platform),
                 subtitle: Text(accountSummary(platform, store, ref.watch(accountCheckProvider(platform)), now: now)),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const LiveIcon(LiveIcons.subpage),
                 onTap: () => context.push(accountLocation(platform)),
               ),
           ],

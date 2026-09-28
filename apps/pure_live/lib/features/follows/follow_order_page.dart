@@ -50,24 +50,30 @@ class _FollowOrderPageState extends ConsumerState<FollowOrderPage> {
     return Scaffold(
       appBar: PageAppBar(maxContentWidth: Sizes.readingWidth, title: Text(t.follows.reorder)),
       body: shown.isEmpty
-          ? MessageView(icon: Icons.favorite_border, title: t.follows.emptyTitle)
+          ? MessageView(icon: LiveIcons.follow, title: t.follows.emptyTitle)
           : PageBody(
               maxContentWidth: Sizes.readingWidth,
               child: ReorderableListView.builder(
+                // Own handles: Material's desktop handle is a Material Icons
+                // glyph (principles §2.6). A long press drags on touch.
+                buildDefaultDragHandles: false,
                 itemCount: shown.length,
                 onReorderItem: (from, to) => unawaited(_move(shown, from, to)),
                 itemBuilder: (context, index) {
                   final room = shown[index].room;
-                  return ListTile(
+                  return ReorderableDelayedDragStartListener(
                     key: ValueKey(room.ref.key),
-                    leading: InitialAvatar(
-                      name: room.anchorName,
-                      seed: room.ref.key,
-                      image: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
+                    index: index,
+                    child: ListTile(
+                      leading: InitialAvatar(
+                        name: room.anchorName,
+                        seed: room.ref.key,
+                        image: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
+                      ),
+                      title: Text(room.anchorName.isEmpty ? room.ref.roomId : room.anchorName),
+                      subtitle: Text(platformName(room.ref.platform)),
+                      trailing: ReorderableDragStartListener(index: index, child: const LiveIcon(LiveIcons.reorder)),
                     ),
-                    title: Text(room.anchorName.isEmpty ? room.ref.roomId : room.anchorName),
-                    subtitle: Text(platformName(room.ref.platform)),
-                    trailing: const Icon(Icons.drag_handle),
                   );
                 },
               ),

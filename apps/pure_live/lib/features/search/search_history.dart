@@ -161,12 +161,12 @@ class SearchHistoryList extends ConsumerWidget {
                 for (final entry in entries)
                   ListTile(
                     key: ValueKey(entry.folded),
-                    leading: const Icon(Icons.history),
+                    leading: const LiveIcon(LiveIcons.history),
                     title: Text(entry.keyword, maxLines: 1, overflow: TextOverflow.ellipsis),
                     contentPadding: EdgeInsetsDirectional.only(start: start, end: end),
                     trailing: IconButton(
                       tooltip: t.search.removeFromHistory,
-                      icon: const Icon(Icons.close),
+                      icon: const LiveIcon(LiveIcons.close),
                       onPressed: () => _remove(context, ref, entry),
                     ),
                     onTap: () => onPick(entry.keyword),

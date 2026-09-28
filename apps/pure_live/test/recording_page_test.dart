@@ -5,6 +5,8 @@ import 'package:live_record/live_record.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/features/recording/recording_page.dart';
 
+import 'icon_finder.dart';
+
 RecordTask _task(RecordState state, {RecordFailure? failure, bool session = false}) => RecordTask(
   room: RoomRef('douyu', '9999'),
   createdAt: DateTime(2026),
@@ -162,8 +164,8 @@ void main() {
       await pumpTile(tester, _task(RecordState.stopped));
       final start = find.widgetWithText(TextButton, '开始录制');
       expect(start, findsOneWidget);
-      expect(find.descendant(of: start, matching: find.byIcon(Icons.fiber_manual_record_outlined)), findsOneWidget);
-      expect(find.byIcon(Icons.fiber_manual_record), findsNothing);
+      expect(find.descendant(of: start, matching: findIcon(LiveIcons.record, filled: false)), findsOneWidget);
+      expect(findIcon(LiveIcons.record, filled: true), findsNothing);
       await tester.tap(start);
       await settle(tester);
       expect(actions, [RecordTaskAction.start]);

@@ -72,9 +72,9 @@ class _BilibiliQrPanelState extends ConsumerState<BilibiliQrPanel> {
                 : Center(
                     child: _login.phase == QrLoginPhase.loading || _login.phase == QrLoginPhase.verifying
                         ? const CircularProgressIndicator()
-                        : Icon(
-                            _login.phase == QrLoginPhase.done ? Icons.check_circle_outline : Icons.qr_code_2,
-                            size: 64,
+                        : LiveIcon(
+                            _login.phase == QrLoginPhase.done ? LiveIcons.success : LiveIcons.qrCode,
+                            size: Sizes.iconXxl,
                             color: theme.colorScheme.outline,
                           ),
                   ),

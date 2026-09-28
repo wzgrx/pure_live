@@ -125,7 +125,7 @@ class _RuleListState extends ConsumerState<_RuleList> {
               ];
               if (shown.isEmpty) {
                 return MessageView(
-                  icon: _keyword ? Icons.block : Icons.person_off_outlined,
+                  icon: _keyword ? LiveIcons.block : LiveIcons.blockUser,
                   title: _keyword ? t.danmaku.noBlockedKeywords : t.danmaku.noBlockedUsers,
                   message: t.danmaku.blockFromRoomHint,
                 );
@@ -138,7 +138,7 @@ class _RuleListState extends ConsumerState<_RuleList> {
                     title: Text(rule.value),
                     trailing: IconButton(
                       tooltip: t.common.remove,
-                      icon: const Icon(Icons.close),
+                      icon: const LiveIcon(LiveIcons.close),
                       onPressed: () => _remove(rule),
                     ),
                   );

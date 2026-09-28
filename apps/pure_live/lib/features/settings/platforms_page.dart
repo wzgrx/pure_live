@@ -69,6 +69,9 @@ class _PlatformsPageState extends ConsumerState<PlatformsPage> {
       appBar: PageAppBar(title: Text(t.settings.accounts.platforms)),
       body: PageBody(
         child: ReorderableListView.builder(
+          // Own handles: Material's desktop handle is a Material Icons glyph
+          // (principles §2.6). A long press drags on touch.
+          buildDefaultDragHandles: false,
           header: Padding(
             padding: const EdgeInsets.fromLTRB(Space.s4, Space.s3, Space.s4, Space.s2),
             child: Text(t.settings.platformsHint),
@@ -80,37 +83,40 @@ class _PlatformsPageState extends ConsumerState<PlatformsPage> {
           },
           itemBuilder: (context, index) {
             final (id, on) = _rows[index];
-            return ListTile(
+            return ReorderableDelayedDragStartListener(
               key: ValueKey(id),
-              leading: Checkbox(
-                value: on,
-                // At least one platform stays.
-                onChanged: on && shown == 1
-                    ? null
-                    : (value) {
-                        setState(() => _rows[index] = (id, value ?? false));
-                        _save();
-                      },
-              ),
-              title: Row(
-                children: [
-                  PlatformLogo(platformId: id, size: Sizes.logoMedium),
-                  const SizedBox(width: Space.s2),
-                  Text(platformNames[id] ?? id),
-                ],
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    tooltip: preferred == id ? t.settings.discoverDefault : t.settings.setDiscoverDefault,
-                    isSelected: preferred == id,
-                    icon: const Icon(Icons.star_border),
-                    selectedIcon: const Icon(Icons.star),
-                    onPressed: on ? () => unawaited(ref.read(catalogPreferredSetting.notifier).set(id)) : null,
-                  ),
-                  ReorderableDragStartListener(index: index, child: const Icon(Icons.drag_handle)),
-                ],
+              index: index,
+              child: ListTile(
+                leading: Checkbox(
+                  value: on,
+                  // At least one platform stays.
+                  onChanged: on && shown == 1
+                      ? null
+                      : (value) {
+                          setState(() => _rows[index] = (id, value ?? false));
+                          _save();
+                        },
+                ),
+                title: Row(
+                  children: [
+                    PlatformLogo(platformId: id, size: Sizes.logoMedium),
+                    const SizedBox(width: Space.s2),
+                    Text(platformNames[id] ?? id),
+                  ],
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      tooltip: preferred == id ? t.settings.discoverDefault : t.settings.setDiscoverDefault,
+                      isSelected: preferred == id,
+                      icon: const LiveIcon(LiveIcons.star),
+                      selectedIcon: const LiveIcon(LiveIcons.star, filled: true),
+                      onPressed: on ? () => unawaited(ref.read(catalogPreferredSetting.notifier).set(id)) : null,
+                    ),
+                    ReorderableDragStartListener(index: index, child: const LiveIcon(LiveIcons.reorder)),
+                  ],
+                ),
               ),
             );
           },

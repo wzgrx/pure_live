@@ -34,7 +34,7 @@ class HistoryPage extends ConsumerWidget {
           if (entries.isNotEmpty)
             IconButton(
               tooltip: t.common.clear,
-              icon: const Icon(Icons.delete_sweep_outlined),
+              icon: const LiveIcon(LiveIcons.clearAll),
               onPressed: () async {
                 final store = ref.read(storeProvider);
                 final removed = await store.history.clear(entries);

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
-import 'package:live_ui/live_ui.dart' show LiveTheme, PageMargin;
+import 'package:live_ui/live_ui.dart' show LiveIcon, LiveIcons, LiveTheme, PageMargin;
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/settings/settings_search.dart';
 
@@ -87,7 +87,7 @@ class ChoiceSettingTile<T extends Object> extends StatelessWidget {
     builder: (context, value, set) => ListTile(
       title: Text(title),
       subtitle: Text(labels[value] ?? '$value'),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: const LiveIcon(LiveIcons.subpage),
       onTap: () async {
         final chosen = await showDialog<T>(
           context: context,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
 import 'package:pure_live_app/features/settings/settings_search.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
@@ -99,7 +100,7 @@ class CloseBehaviourTile extends StatelessWidget {
         return ListTile(
           title: Text(t.system.onClose),
           subtitle: Text(_labels[current]!),
-          trailing: const Icon(Icons.chevron_right),
+          trailing: const LiveIcon(LiveIcons.subpage),
           onTap: () async {
             final chosen = await showDialog<({CloseAction? action})>(
               context: context,
@@ -109,7 +110,7 @@ class CloseBehaviourTile extends StatelessWidget {
                   for (final entry in _labels.entries)
                     ListTile(
                       title: Text(entry.value),
-                      trailing: entry.key == current ? const Icon(Icons.check) : null,
+                      trailing: entry.key == current ? const LiveIcon(LiveIcons.check) : null,
                       onTap: () => Navigator.pop(context, (action: entry.key)),
                     ),
                 ],

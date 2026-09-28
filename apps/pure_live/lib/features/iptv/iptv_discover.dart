@@ -21,7 +21,7 @@ class IptvDiscover extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (ref.watch(iptvPlaylistsProvider).value?.isEmpty ?? false) {
       return MessageView(
-        icon: Icons.live_tv_outlined,
+        icon: LiveIcons.liveTv,
         title: t.iptv.noPlaylists,
         message: t.iptv.noPlaylistsHint,
         actionLabel: t.iptv.importPlaylist,
@@ -45,7 +45,7 @@ class IptvDiscover extends ConsumerWidget {
               ),
               IconButton(
                 tooltip: t.iptv.managePlaylists,
-                icon: const Icon(Icons.playlist_add),
+                icon: const LiveIcon(LiveIcons.addPlaylist),
                 onPressed: () => context.push(iptvLocation),
               ),
             ],

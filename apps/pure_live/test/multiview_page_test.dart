@@ -26,6 +26,7 @@ import 'package:pure_live_app/features/multiview/multiview_sheets.dart';
 
 import 'danmaku/fake_danmaku.dart';
 import 'fakes.dart';
+import 'icon_finder.dart';
 import 'multiview_fakes.dart';
 
 /// The multiview page (spec/modules/multiview.md §2, §5, §9, §10) on fake
@@ -253,7 +254,7 @@ void main() {
     await settle(tester);
     expect(stateOf(container).cells[focus].paused, isTrue);
     expect(stateOf(container).cells[focus].session!.state.phase, PlaybackPhase.paused);
-    expect(find.descendant(of: cellAt(focus), matching: find.byIcon(Icons.pause_circle_outline)), findsOneWidget);
+    expect(find.descendant(of: cellAt(focus), matching: findIcon(LiveIcons.paused)), findsOneWidget);
 
     await tester.longPress(cellAt(focus));
     await settle(tester);
@@ -385,7 +386,7 @@ void main() {
     final container = await open(tester, rooms: [RoomRef('douyu', '1'), RoomRef('douyu', '2')]);
     await tester.tap(find.byTooltip('布局'));
     await settle(tester);
-    await tester.tap(find.widgetWithText(CheckedPopupMenuItem<MultiviewLayout>, '一大多小'));
+    await tester.tap(find.widgetWithText(CheckedMenuItem<MultiviewLayout>, '一大多小'));
     await settle(tester);
     final state = stateOf(container);
     expect(state.layout, MultiviewLayout.onePlusN);
@@ -415,7 +416,7 @@ void main() {
       await tester.pump();
     }
     expect(stateOf(container).cells, hasLength(multiviewCapacity()));
-    await tester.tap(find.byIcon(Icons.add));
+    await tester.tap(findIcon(LiveIcons.add));
     await settle(tester);
     expect(find.textContaining('最多同时播放'), findsOneWidget);
     await close(tester);

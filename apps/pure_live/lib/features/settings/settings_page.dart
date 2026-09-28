@@ -19,18 +19,18 @@ import 'package:pure_live_app/i18n/strings.g.dart';
 /// Settings groups of principles §4.4. Groups whose features are not in the
 /// preview yet say so instead of showing dead switches.
 enum SettingsGroup {
-  general(Icons.tune),
-  appearance(Icons.palette_outlined),
-  playback(Icons.play_circle_outline),
-  danmaku(Icons.subtitles_outlined),
-  recording(Icons.fiber_manual_record_outlined),
-  accounts(Icons.account_circle_outlined),
-  network(Icons.lan_outlined),
-  data(Icons.cloud_sync_outlined);
+  general(LiveIcons.tune),
+  appearance(LiveIcons.appearance),
+  playback(LiveIcons.playback),
+  danmaku(LiveIcons.danmaku),
+  recording(LiveIcons.recording),
+  accounts(LiveIcons.accounts),
+  network(LiveIcons.network),
+  data(LiveIcons.data);
 
   new(this.icon);
 
-  final IconData icon;
+  final LiveIcons icon;
 
   /// The group's name in the interface language.
   String get label => switch (this) {
@@ -106,10 +106,12 @@ class _SettingsPageState extends State<SettingsPage> {
           else
             for (final group in SettingsGroup.values)
               ListTile(
-                leading: Icon(group.icon),
+                // The current group of the two panes is a current
+                // destination: filled (principles §2.6).
+                leading: LiveIcon(group.icon, filled: twoPane && group == _selected),
                 title: Text(group.label),
                 selected: twoPane && group == _selected,
-                trailing: twoPane ? null : const Icon(Icons.chevron_right),
+                trailing: twoPane ? null : const LiveIcon(LiveIcons.subpage),
                 onFocusChange: tv
                     ? (focused) {
                         if (focused && _selected != group) _select(group);
@@ -328,7 +330,7 @@ class SettingsGroupBody extends StatelessWidget {
             child: ListTile(
               title: Text(t.settings.accounts.platforms),
               subtitle: Text(t.settings.accounts.platformsSubtitle),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const LiveIcon(LiveIcons.subpage),
               onTap: () => context.go('/me/platforms'),
             ),
           ),
@@ -337,7 +339,7 @@ class SettingsGroupBody extends StatelessWidget {
             child: ListTile(
               title: Text(t.settings.accounts.audience),
               subtitle: Text(t.settings.accounts.audienceSubtitle),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const LiveIcon(LiveIcons.subpage),
               onTap: () => context.go('/me/audience'),
             ),
           ),
@@ -346,7 +348,7 @@ class SettingsGroupBody extends StatelessWidget {
             child: ListTile(
               title: Text(t.app.accounts),
               subtitle: Text(t.settings.accounts.accountsSubtitle),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const LiveIcon(LiveIcons.subpage),
               onTap: () => context.go('/me/accounts'),
             ),
           ),
@@ -491,7 +493,7 @@ class _TvThemeNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) => TvScope.of(context).enabled
       ? ListTile(
-          leading: const Icon(Icons.tv),
+          leading: const LiveIcon(LiveIcons.tvMode),
           title: Text(t.settings.tvDarkOnly),
           subtitle: Text(t.settings.tvDarkOnlySubtitle),
         )
@@ -644,7 +646,7 @@ class FontsTile extends StatelessWidget {
     child: ListTile(
       title: Text(t.fonts.title),
       subtitle: Text(t.settings.appearance.fontsSubtitle),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: const LiveIcon(LiveIcons.subpage),
       onTap: () => context.go('/me/fonts'),
     ),
   );

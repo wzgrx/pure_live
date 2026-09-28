@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_store/live_store.dart' show BlockKind;
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_text.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
@@ -40,19 +41,19 @@ Future<void> showChatLineActions(
           const Divider(height: 1),
           if (line is DanmakuChat) ...[
             ListTile(
-              leading: const Icon(Icons.copy_outlined),
+              leading: const LiveIcon(LiveIcons.copy),
               title: Text(t.common.copy),
               onTap: () => Navigator.pop(context, _LineAction.copy),
             ),
             ListTile(
-              leading: const Icon(Icons.block),
+              leading: const LiveIcon(LiveIcons.block),
               title: Text(t.danmaku.blockKeyword),
               onTap: () => Navigator.pop(context, _LineAction.blockKeyword),
             ),
           ],
           if (user.isNotEmpty)
             ListTile(
-              leading: const Icon(Icons.person_off_outlined),
+              leading: const LiveIcon(LiveIcons.blockUser),
               title: Text(t.danmaku.blockUser),
               subtitle: Text(user),
               onTap: () => Navigator.pop(context, _LineAction.blockUser),

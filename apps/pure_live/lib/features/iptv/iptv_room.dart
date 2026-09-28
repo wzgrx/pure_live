@@ -208,7 +208,11 @@ class _IptvRoomPanelState extends ConsumerState<IptvRoomPanel> {
           children: [
             Row(
               children: [
-                Icon(replaying == null ? Icons.live_tv : Icons.history, size: 18, color: theme.colorScheme.primary),
+                LiveIcon(
+                  replaying == null ? LiveIcons.liveTv : LiveIcons.history,
+                  size: Sizes.iconDense,
+                  color: theme.colorScheme.primary,
+                ),
                 const SizedBox(width: Space.s2),
                 Text(replaying == null ? t.iptv.onAir : t.iptv.catchUp, style: theme.textTheme.labelLarge),
                 if ((channel?.sources.length ?? 0) > 1) ...[
@@ -253,13 +257,13 @@ class _IptvRoomPanelState extends ConsumerState<IptvRoomPanel> {
               children: [
                 if (matched)
                   FilledButton.tonalIcon(
-                    icon: const Icon(Icons.event_note, size: 18),
+                    icon: const LiveIcon(LiveIcons.guide),
                     label: Text(t.iptv.guide),
                     onPressed: switching ? null : () => _openGuide(session, replaying),
                   )
                 else if (channel != null)
                   OutlinedButton.icon(
-                    icon: const Icon(Icons.event_note_outlined, size: 18),
+                    icon: const LiveIcon(LiveIcons.guide),
                     label: Text(t.iptv.guideSources),
                     onPressed: () => context.push(iptvGuideLocation),
                   ),
@@ -267,7 +271,7 @@ class _IptvRoomPanelState extends ConsumerState<IptvRoomPanel> {
                   FilledButton.icon(
                     icon: switching
                         ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.live_tv, size: 18),
+                        : const LiveIcon(LiveIcons.liveTv),
                     label: Text(t.iptv.returnToLive),
                     onPressed: switching ? null : () => _backToLive(session),
                   ),
@@ -343,7 +347,11 @@ class _IptvGuideSheetState extends ConsumerState<IptvGuideSheet> {
         ),
         data: (programmes) {
           if (programmes.isEmpty) {
-            return MessageView(icon: Icons.event_busy, title: t.iptv.noProgrammes, message: t.iptv.noProgrammesHint);
+            return MessageView(
+              icon: LiveIcons.noProgrammes,
+              title: t.iptv.noProgrammes,
+              message: t.iptv.noProgrammesHint,
+            );
           }
           final rows = <Object>[];
           String? day;
@@ -392,7 +400,7 @@ class _IptvGuideSheetState extends ConsumerState<IptvGuideSheet> {
               final trailing = switch (phase) {
                 _ when replaying => Text(t.iptv.catchUp),
                 ProgrammePhase.live => const LiveBadge(),
-                ProgrammePhase.past when available => const Icon(Icons.replay, size: 20),
+                ProgrammePhase.past when available => const LiveIcon(LiveIcons.replay, size: 20),
                 ProgrammePhase.past => Text(t.iptv.noCatchUpTag, style: theme.textTheme.bodySmall),
                 // F-IPTV-09: a reminder 1 minute before the start.
                 ProgrammePhase.upcoming => Row(

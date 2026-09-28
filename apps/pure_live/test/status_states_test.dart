@@ -14,6 +14,7 @@ import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/search/search_empty.dart';
 
 import 'fakes.dart';
+import 'icon_finder.dart';
 
 /// Loading, empty and error states of the design review (principles §2.5,
 /// §3.3, §7.8).
@@ -52,7 +53,7 @@ void main() {
     testWidgets('compact error views in sheets keep the small icon', (tester) async {
       await tester.pumpWidget(themed(const ErrorView(NetworkFailure('douyu'), compact: true)));
       expect(find.byType(IllustrationView), findsNothing);
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      expect(findIcon(LiveIcons.error), findsOneWidget);
     });
   });
 

@@ -250,10 +250,10 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
         actions: [
           IconButton(
             tooltip: t.sync.webdav.help,
-            icon: const Icon(Icons.help_outline),
+            icon: const LiveIcon(LiveIcons.help),
             onPressed: () => _showHelp(context),
           ),
-          IconButton(tooltip: t.sync.webdav.addAccount, icon: const Icon(Icons.add), onPressed: _edit),
+          IconButton(tooltip: t.sync.webdav.addAccount, icon: const LiveIcon(LiveIcons.add), onPressed: _edit),
         ],
       ),
       body: PageBody(
@@ -262,7 +262,7 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
             ? const LoadingView()
             : current == null
             ? MessageView(
-                icon: Icons.cloud_off_outlined,
+                icon: LiveIcons.cloudOff,
                 title: t.sync.webdav.noAccounts,
                 message: t.sync.webdav.noAccountsHint,
                 actionLabel: t.sync.webdav.addAccount,
@@ -282,10 +282,11 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
         children: [
           if (_busy != null) const LinearProgressIndicator(),
           ListTile(
-            leading: const Icon(Icons.cloud_outlined),
+            leading: const LiveIcon(LiveIcons.cloud),
             title: Text(current.name),
             subtitle: Text('${current.baseUrl}${current.username.isEmpty ? '' : ' · ${current.username}'}'),
             trailing: PopupMenuButton<String>(
+              icon: const LiveIcon(LiveIcons.more),
               tooltip: t.sync.webdav.account,
               onSelected: (value) async {
                 switch (value) {
@@ -317,12 +318,12 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
               children: [
                 OutlinedButton.icon(
                   onPressed: _test,
-                  icon: const Icon(Icons.wifi_tethering),
+                  icon: const LiveIcon(LiveIcons.testConnection),
                   label: Text(t.sync.webdav.test),
                 ),
                 FilledButton.icon(
                   onPressed: _upload,
-                  icon: const Icon(Icons.cloud_upload_outlined),
+                  icon: const LiveIcon(LiveIcons.upload),
                   label: Text(t.sync.webdav.uploadBackup),
                 ),
               ],
@@ -334,11 +335,11 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
             dense: true,
             title: Text(t.sync.webdav.remoteFiles(path: path)),
             subtitle: Text(t.sync.webdav.remoteFilesHint),
-            trailing: IconButton(tooltip: t.common.refresh, icon: const Icon(Icons.refresh), onPressed: _list),
+            trailing: IconButton(tooltip: t.common.refresh, icon: const LiveIcon(LiveIcons.refresh), onPressed: _list),
           ),
           if (_directory.isNotEmpty)
             ListTile(
-              leading: const Icon(Icons.arrow_upward),
+              leading: const LiveIcon(LiveIcons.parentFolder),
               title: Text(t.sync.webdav.up),
               onTap: () => _open(_directory.sublist(0, _directory.length - 1)),
             ),
@@ -361,9 +362,9 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
   Widget _entryTile(WebDavEntry entry) {
     if (entry.isDirectory) {
       return ListTile(
-        leading: const Icon(Icons.folder_outlined),
+        leading: const LiveIcon(LiveIcons.folder),
         title: Text(entry.name),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: const LiveIcon(LiveIcons.subpage),
         onTap: () => _open(entry.path),
       );
     }
@@ -372,10 +373,11 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
       if (entry.size case final size?) formatBytes(size),
     ].join(' · ');
     return ListTile(
-      leading: const Icon(Icons.description_outlined),
+      leading: const LiveIcon(LiveIcons.file),
       title: Text(entry.name, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: details.isEmpty ? null : Text(details),
       trailing: PopupMenuButton<String>(
+        icon: const LiveIcon(LiveIcons.more),
         tooltip: t.sync.webdav.actions,
         onSelected: (value) => switch (value) {
           'full' => _restore(entry, RestoreMode.full),

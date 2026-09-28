@@ -215,27 +215,31 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
     final chosen = _chosen();
     final none = chosen.isEmpty;
     return PageAppBar(
-      leading: IconButton(tooltip: t.follows.cancelSelection, icon: const Icon(Icons.close), onPressed: _endSelection),
+      leading: IconButton(
+        tooltip: t.follows.cancelSelection,
+        icon: const LiveIcon(LiveIcons.close),
+        onPressed: _endSelection,
+      ),
       title: Text(t.follows.selectedCount(n: chosen.length)),
       actions: [
         IconButton(
           tooltip: t.follows.selectAll,
-          icon: const Icon(Icons.select_all),
+          icon: const LiveIcon(LiveIcons.selectAll),
           onPressed: chosen.length == _shown.length ? null : _selectAll,
         ),
         IconButton(
           tooltip: t.room.addToMultiview,
-          icon: const Icon(Icons.grid_view),
+          icon: const LiveIcon(LiveIcons.multiview),
           onPressed: none ? null : () => _toMultiview(chosen),
         ),
         IconButton(
           tooltip: t.rooms.setGroups,
-          icon: const Icon(Icons.folder_outlined),
+          icon: const LiveIcon(LiveIcons.folder),
           onPressed: none ? null : () => unawaited(_setGroups(chosen)),
         ),
         IconButton(
           tooltip: t.common.unfollow,
-          icon: const Icon(Icons.heart_broken_outlined),
+          icon: const LiveIcon(LiveIcons.unfollow),
           onPressed: none ? null : () => unawaited(_unfollow(chosen)),
         ),
       ],
@@ -247,7 +251,7 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
     actions: [
       PopupMenuButton<Object>(
         tooltip: t.follows.sortTooltip,
-        icon: const Icon(Icons.sort),
+        icon: const LiveIcon(LiveIcons.sort),
         onSelected: (choice) async {
           final setting = ref.read(followSortSetting.notifier);
           if (choice is FollowSort) {
@@ -260,14 +264,14 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
         },
         itemBuilder: (context) => [
           for (final MapEntry(key: option, value: label) in followSortLabels.entries)
-            CheckedPopupMenuItem<Object>(value: option, checked: option == sort, child: Text(label)),
+            CheckedMenuItem<Object>(value: option, checked: option == sort, child: Text(label)),
           const PopupMenuDivider(),
           PopupMenuItem<Object>(value: _editOrder, child: Text(t.follows.editCustomOrder)),
         ],
       ),
       IconButton(
         tooltip: t.follows.openMultiview,
-        icon: const Icon(Icons.grid_view),
+        icon: const LiveIcon(LiveIcons.multiview),
         // Live follows in their shown order fill the grid (ENT-1).
         onPressed: () => unawaited(context.push('/multiview', extra: [for (final entry in live) entry.follow.ref])),
       ),
@@ -279,7 +283,7 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
       else
         IconButton(
           tooltip: t.follows.refreshStatus,
-          icon: const Icon(Icons.refresh),
+          icon: const LiveIcon(LiveIcons.refresh),
           onPressed: () => ref.read(followRefreshProvider.notifier).refresh(),
         ),
     ],
@@ -680,7 +684,7 @@ class _FollowListState extends ConsumerState<_FollowList> {
                     onSelected: (_) => widget.onFilter(_Filter.group),
                   ),
                   ActionChip(
-                    avatar: const Icon(Icons.folder_outlined, size: 18),
+                    avatar: const LiveIcon(LiveIcons.folder),
                     label: Text(t.follows.manageGroups),
                     onPressed: () => context.push('/follows/groups'),
                   ),
@@ -752,7 +756,7 @@ class _FollowListState extends ConsumerState<_FollowList> {
     if (!widget.tagsShown)
       SliverToBoxAdapter(
         child: ListTile(
-          leading: const Icon(Icons.folder_outlined),
+          leading: const LiveIcon(LiveIcons.folder),
           title: Text(t.follows.noGroups),
           subtitle: Text(t.follows.noGroupsHint),
           onTap: () => context.push('/follows/groups'),
@@ -851,7 +855,7 @@ class SelectableCard extends StatelessWidget {
                       ),
                       child: SizedBox.square(
                         dimension: Sizes.iconLg,
-                        child: selected ? Icon(Icons.check, size: Sizes.iconMd, color: scheme.onPrimary) : null,
+                        child: selected ? LiveIcon(LiveIcons.check, size: Sizes.iconMd, color: scheme.onPrimary) : null,
                       ),
                     ),
                   ),
@@ -956,7 +960,7 @@ class PlatformAlertBanner extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: warning, size: Sizes.iconMd),
+                  LiveIcon(LiveIcons.warning, color: warning, size: Sizes.iconMd),
                   const SizedBox(width: Space.s3),
                   Expanded(
                     child: Text(

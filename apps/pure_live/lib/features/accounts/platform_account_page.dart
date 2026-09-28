@@ -162,14 +162,14 @@ class _PlatformAccountPageState extends ConsumerState<PlatformAccountPage> {
                 BilibiliQrPanel(key: const ValueKey('bilibili-qr'), onDone: () => _toast(t.accounts.signedInToast))
               else
                 ListTile(
-                  leading: const Icon(Icons.qr_code_2),
+                  leading: const LiveIcon(LiveIcons.qrCode),
                   title: Text(t.accounts.qrSignIn),
                   subtitle: Text(t.accounts.qrSignInSubtitle),
                   onTap: () => setState(() => _qr = true),
                 ),
               if (web != WebAvailability.unsupported)
                 ListTile(
-                  leading: const Icon(Icons.public),
+                  leading: const LiveIcon(LiveIcons.web),
                   title: Text(t.accounts.webSignIn),
                   subtitle: Text(t.accounts.webSignInSubtitle),
                   onTap: _webLogin,

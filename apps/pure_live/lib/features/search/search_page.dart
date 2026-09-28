@@ -170,15 +170,15 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           hintText: t.search.hint,
           elevation: const WidgetStatePropertyAll(0),
           constraints: const BoxConstraints(minHeight: _boxHeight, maxHeight: _boxHeight, maxWidth: _boxWidth),
-          leading: const Icon(Icons.search),
+          leading: const LiveIcon(LiveIcons.search),
           textInputAction: TextInputAction.search,
           onSubmitted: _submit,
           trailing: [
-            if (voice) IconButton(tooltip: t.search.voice, icon: const Icon(Icons.mic_none), onPressed: _voice),
+            if (voice) IconButton(tooltip: t.search.voice, icon: const LiveIcon(LiveIcons.voice), onPressed: _voice),
             if (_controller.text.isNotEmpty)
               IconButton(
                 tooltip: t.search.clear,
-                icon: const Icon(Icons.close),
+                icon: const LiveIcon(LiveIcons.close),
                 onPressed: () => setState(() {
                   _controller.clear();
                   _keyword = '';
@@ -205,7 +205,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   Widget _keywordResults() {
     final platforms = ref.watch(searchablePlatformsProvider);
     if (_keyword.isEmpty) {
-      return MessageView(icon: Icons.search, title: t.search.hint);
+      return MessageView(icon: LiveIcons.search, title: t.search.hint);
     }
     final size = MediaQuery.sizeOf(context);
     final layout = WindowLayout(size);
@@ -237,14 +237,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         onSelected: (value) => setState(() => _sort = value),
         itemBuilder: (context) => [
           for (final MapEntry(key: option, value: label) in searchSortLabels.entries)
-            CheckedPopupMenuItem(value: option, checked: option == sort, child: Text(label)),
+            CheckedMenuItem(value: option, checked: option == sort, child: Text(label)),
         ],
         child: Padding(
           padding: const EdgeInsets.all(Space.s2),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.sort, size: Sizes.iconDense),
+              const LiveIcon(LiveIcons.sort, size: Sizes.iconDense),
               const SizedBox(width: Space.s1),
               Text(searchSortLabels[sort]!),
             ],
@@ -315,7 +315,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.travel_explore, size: 18),
+                    const LiveIcon(LiveIcons.webSearch, size: Sizes.iconDense),
                     const SizedBox(width: Space.s2),
                     Text(t.search.all),
                   ],
@@ -389,7 +389,8 @@ class _PlatformRailState extends ConsumerState<_PlatformRail> {
         padding: const EdgeInsets.symmetric(vertical: Space.s2),
         children: [
           ListTile(
-            leading: const Icon(Icons.travel_explore, size: Sizes.iconDense),
+            // The current section is filled (principles §2.6).
+            leading: LiveIcon(LiveIcons.webSearch, size: Sizes.iconDense, filled: widget.selected == null),
             title: Text(t.search.all, maxLines: 1, overflow: TextOverflow.ellipsis),
             trailing: count('${combined?.items.length ?? 0}'),
             selected: widget.selected == null,
@@ -398,7 +399,7 @@ class _PlatformRailState extends ConsumerState<_PlatformRail> {
           for (final id in shown) platform(id),
           if (others.isNotEmpty)
             ListTile(
-              leading: Icon(open ? Icons.expand_less : Icons.expand_more, size: Sizes.iconDense),
+              leading: LiveIcon(open ? LiveIcons.collapse : LiveIcons.expand, size: Sizes.iconDense),
               title: Text(t.search.otherPlatforms(n: others.length), maxLines: 1, overflow: TextOverflow.ellipsis),
               onTap: () => setState(() => _othersOpen = !open),
             ),
@@ -435,7 +436,7 @@ class _LinkResult extends StatelessWidget {
               leading: PlatformLogo(platformId: room.platform, size: Sizes.logoLarge),
               title: Text(t.common.openRoom),
               subtitle: Text('${platformNames[room.platform] ?? room.platform} · ${room.roomId}'),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const LiveIcon(LiveIcons.subpage),
               onTap: () => context.push(roomLocation(room)),
             ),
           ),

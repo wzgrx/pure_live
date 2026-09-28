@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
 import 'package:pure_live_app/features/settings/settings_search.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
@@ -19,10 +20,10 @@ class RecordDirectoryTile extends StatelessWidget {
       title: Text(t.settings.record.directory),
       subtitle: Text(value.isEmpty ? t.settings.record.directoryDefault : '$value/PureLiveRecords'),
       trailing: value.isEmpty
-          ? const Icon(Icons.folder_open)
+          ? const LiveIcon(LiveIcons.folderOpen)
           : IconButton(
               tooltip: t.settings.record.directoryReset,
-              icon: const Icon(Icons.restore),
+              icon: const LiveIcon(LiveIcons.restore),
               onPressed: () => set(''),
             ),
       onTap: () async {

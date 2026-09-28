@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
-import 'package:live_ui/live_ui.dart' show PageMargin, Sizes, Space;
+import 'package:live_ui/live_ui.dart' show LiveIcon, LiveIcons, PageMargin, Sizes, Space;
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_presets.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
@@ -131,9 +131,9 @@ class DanmakuSettingsTiles extends StatelessWidget {
       SettingAnchor(
         id: blockListAnchor,
         child: ListTile(
-          leading: const Icon(Icons.block),
+          leading: const LiveIcon(LiveIcons.block),
           title: Text(t.danmaku.blockListTitle),
-          trailing: const Icon(Icons.chevron_right),
+          trailing: const LiveIcon(LiveIcons.subpage),
           onTap: () => context.push(blockListLocation),
         ),
       ),
@@ -367,7 +367,7 @@ class _DanmakuPresetRowState extends ConsumerState<DanmakuPresetRow> {
               },
             ),
           TextButton.icon(
-            icon: const Icon(Icons.bookmark_add_outlined, size: 18),
+            icon: const LiveIcon(LiveIcons.savePreset),
             label: Text(t.danmaku.saveMyStyle),
             onPressed: () async {
               await DanmakuTemplate.save(settings);
@@ -375,7 +375,7 @@ class _DanmakuPresetRowState extends ConsumerState<DanmakuPresetRow> {
             },
           ),
           TextButton.icon(
-            icon: const Icon(Icons.bookmark_outline, size: 18),
+            icon: const LiveIcon(LiveIcons.presets),
             label: Text(t.danmaku.restoreMyStyle),
             onPressed: DanmakuTemplate.exists(settings)
                 ? () async {

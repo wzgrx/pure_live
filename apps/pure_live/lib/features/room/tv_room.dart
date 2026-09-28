@@ -338,115 +338,124 @@ class _ControlBar extends ConsumerWidget {
     final position = entries.indexWhere((entry) => entry.ref == card.ref);
     final paused = state.phase == PlaybackPhase.paused;
     final numeric = LiveTheme.numeric(theme.textTheme.labelMedium!);
-    Widget button(IconData icon, String label, VoidCallback onPressed, {FocusNode? focusNode}) => Padding(
-      padding: const EdgeInsets.only(right: Space.s3),
-      child: Builder(
-        builder: (context) => FilledButton.tonalIcon(
-          focusNode: focusNode,
-          onFocusChange: (focused) {
-            if (focused) _reveal(context);
-          },
-          onPressed: onPressed,
-          icon: Icon(icon),
-          label: Text(label),
-        ),
-      ),
-    );
+    Widget button(LiveIcons icon, String label, VoidCallback onPressed, {FocusNode? focusNode, bool filled = false}) =>
+        Padding(
+          padding: const EdgeInsets.only(right: Space.s3),
+          child: Builder(
+            builder: (context) => FilledButton.tonalIcon(
+              focusNode: focusNode,
+              onFocusChange: (focused) {
+                if (focused) _reveal(context);
+              },
+              onPressed: onPressed,
+              icon: LiveIcon(icon, filled: filled),
+              label: Text(label),
+            ),
+          ),
+        );
     // The bar sits on 60% black to the bottom edge with a short fade above
     // (principles §2.2); its content keeps inside the safe area, and so does
     // the button row, which scrolls instead of running past the margin.
     return Align(
       alignment: Alignment.bottomCenter,
       child: VideoBarScrim(
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.only(top: Space.s2),
-            child: Column(
-              key: const ValueKey('tv-room-bar'),
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
+        // The controls on a picture (principles §2.6): weight 500; the
+        // buttons keep their colours and their label-sized icons.
+        child: VideoControlIcons(
+          size: Sizes.iconLg,
+          color: null,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.only(top: Space.s2),
+              child: Column(
+                key: const ValueKey('tv-room-bar'),
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            PlatformLogo(platformId: card.ref.platform, size: Sizes.logoLarge),
+                            const SizedBox(width: Space.s2),
+                            Flexible(
+                              child: Text(
+                                card.anchorName,
+                                style: theme.textTheme.titleLarge!.copyWith(color: ink),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: Space.s3),
+                            if (card.state == LiveState.live) const LiveBadge(),
+                            if (audience != null) ...[
+                              const SizedBox(width: Space.s3),
+                              Text(formatCount(audience), style: numeric.copyWith(color: ink)),
+                            ],
+                          ],
+                        ),
+                      ),
+                      // Where the room is in the list, at the right margin.
+                      if (position >= 0) ...[
+                        const SizedBox(width: Space.s3),
+                        Text(
+                          '${position + 1} / ${entries.length}',
+                          key: const ValueKey('tv-room-position'),
+                          style: numeric.copyWith(color: _secondary),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: Space.s1),
+                  Text(
+                    [card.title, platformNames[card.ref.platform] ?? card.ref.platform, ?card.area].join(' · '),
+                    style: theme.textTheme.bodyMedium!.copyWith(color: _secondary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: Space.s3),
+                  FocusTraversalGroup(
+                    child: SingleChildScrollView(
+                      key: const ValueKey('tv-room-buttons'),
+                      scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
-                          PlatformLogo(platformId: card.ref.platform, size: Sizes.logoLarge),
-                          const SizedBox(width: Space.s2),
-                          Flexible(
-                            child: Text(
-                              card.anchorName,
-                              style: theme.textTheme.titleLarge!.copyWith(color: ink),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                          button(
+                            paused ? LiveIcons.play : LiveIcons.pause,
+                            paused ? t.common.play : t.common.pause,
+                            () => player.currentState?.togglePlay(),
+                            focusNode: firstFocus,
                           ),
-                          const SizedBox(width: Space.s3),
-                          if (card.state == LiveState.live) const LiveBadge(),
-                          if (audience != null) ...[
-                            const SizedBox(width: Space.s3),
-                            Text(formatCount(audience), style: numeric.copyWith(color: ink)),
-                          ],
+                          button(LiveIcons.refresh, t.common.refresh, () => player.currentState?.refresh()),
+                          if (prefs.enabled && card.state == LiveState.live)
+                            button(
+                              LiveIcons.danmaku,
+                              prefs.hidden ? t.danmaku.turnOn : t.multiview.danmakuOff,
+                              () => player.currentState?.toggleDanmaku(),
+                              filled: !prefs.hidden,
+                            ),
+                          button(LiveIcons.quality, t.room.tv.qualityLine, () => onPanel(TvPanel.settings)),
+                          button(LiveIcons.roomList, t.room.tv.roomList, () => onPanel(TvPanel.rooms)),
+                          if (onFollow != null)
+                            button(
+                              LiveIcons.follow,
+                              followed ? t.common.followed : t.common.follow,
+                              onFollow!,
+                              filled: followed,
+                            ),
+                          button(
+                            LiveIcons.sleepTimer,
+                            t.room.sleepTimer,
+                            () => unawaited(player.currentState?.openSleepTimer()),
+                          ),
                         ],
                       ),
                     ),
-                    // Where the room is in the list, at the right margin.
-                    if (position >= 0) ...[
-                      const SizedBox(width: Space.s3),
-                      Text(
-                        '${position + 1} / ${entries.length}',
-                        key: const ValueKey('tv-room-position'),
-                        style: numeric.copyWith(color: _secondary),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: Space.s1),
-                Text(
-                  [card.title, platformNames[card.ref.platform] ?? card.ref.platform, ?card.area].join(' · '),
-                  style: theme.textTheme.bodyMedium!.copyWith(color: _secondary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: Space.s3),
-                FocusTraversalGroup(
-                  child: SingleChildScrollView(
-                    key: const ValueKey('tv-room-buttons'),
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        button(
-                          paused ? Icons.play_arrow : Icons.pause,
-                          paused ? t.common.play : t.common.pause,
-                          () => player.currentState?.togglePlay(),
-                          focusNode: firstFocus,
-                        ),
-                        button(Icons.refresh, t.common.refresh, () => player.currentState?.refresh()),
-                        if (prefs.enabled && card.state == LiveState.live)
-                          button(
-                            prefs.hidden ? Icons.subtitles_off_outlined : Icons.subtitles,
-                            prefs.hidden ? t.danmaku.turnOn : t.multiview.danmakuOff,
-                            () => player.currentState?.toggleDanmaku(),
-                          ),
-                        button(Icons.tune, t.room.tv.qualityLine, () => onPanel(TvPanel.settings)),
-                        button(Icons.format_list_bulleted, t.room.tv.roomList, () => onPanel(TvPanel.rooms)),
-                        if (onFollow != null)
-                          button(
-                            followed ? Icons.favorite : Icons.favorite_border,
-                            followed ? t.common.followed : t.common.follow,
-                            onFollow!,
-                          ),
-                        button(
-                          Icons.bedtime_outlined,
-                          t.room.sleepTimer,
-                          () => unawaited(player.currentState?.openSleepTimer()),
-                        ),
-                      ],
-                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -548,7 +557,7 @@ class _PlaybackSettings extends ConsumerWidget {
           autofocus: autofocus,
           selected: selected,
           title: Text(label),
-          trailing: selected ? const Icon(Icons.check) : null,
+          trailing: selected ? const LiveIcon(LiveIcons.check) : null,
           onTap: onTap,
         );
     return ListView(

@@ -248,14 +248,14 @@ class RecordingPage extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: t.recording.settings,
-            icon: const Icon(Icons.settings_outlined),
+            icon: const LiveIcon(LiveIcons.settings),
             onPressed: () => context.go('/me/settings/recording'),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _add(context, ref),
-        icon: const Icon(Icons.add),
+        icon: const LiveIcon(LiveIcons.add),
         label: Text(t.recording.add),
       ),
       body: StreamBuilder<List<RecordTask>>(
@@ -435,24 +435,25 @@ class RecordTaskTile extends StatelessWidget {
                 RecordState.queued => t.recording.cancelQueue,
                 _ => t.recording.stopTitle,
               },
-              icon: const Icon(Icons.stop_circle_outlined),
+              icon: const LiveIcon(LiveIcons.stopTask),
               onPressed: () => unawaited(_dispatch(context, RecordTaskAction.stop)),
             )
           // Starting is an outlined circle with words: the solid red dot
           // means "recording now" (principles §2.2).
           else if (button == RecordTaskAction.start && session == null)
             TextButton.icon(
-              icon: const Icon(Icons.fiber_manual_record_outlined, size: 18),
+              icon: const LiveIcon(LiveIcons.record),
               label: Text(t.recording.start),
               onPressed: () => unawaited(_dispatch(context, RecordTaskAction.start)),
             )
           else if (button == RecordTaskAction.start)
             IconButton(
               tooltip: t.recording.restart,
-              icon: const Icon(Icons.replay),
+              icon: const LiveIcon(LiveIcons.replay),
               onPressed: () => unawaited(_dispatch(context, RecordTaskAction.start)),
             ),
           PopupMenuButton<RecordTaskAction>(
+            icon: const LiveIcon(LiveIcons.more),
             tooltip: t.common.more,
             onSelected: (action) => unawaited(_dispatch(context, action)),
             itemBuilder: (context) => [
@@ -497,8 +498,9 @@ class _ScheduledTile extends ConsumerWidget {
     }
 
     return ListTile(
-      leading: Icon(
-        running ? Icons.fiber_manual_record : Icons.schedule,
+      leading: LiveIcon(
+        running ? LiveIcons.record : LiveIcons.schedule,
+        filled: running,
         // "录制中" follows in the subtitle: dot plus words, the live red.
         color: running ? FixedColors.live : null,
       ),
@@ -508,7 +510,7 @@ class _ScheduledTile extends ConsumerWidget {
       ),
       trailing: IconButton(
         tooltip: t.recording.cancelScheduled,
-        icon: const Icon(Icons.close),
+        icon: const LiveIcon(LiveIcons.close),
         onPressed: () => unawaited(ref.read(recordScheduleProvider.notifier).remove(item)),
       ),
     );

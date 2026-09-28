@@ -141,7 +141,7 @@ class _IptvGuidePageState extends ConsumerState<IptvGuidePage> {
             ),
             if (sources.value?.isEmpty ?? false)
               ListTile(
-                leading: const Icon(Icons.event_note_outlined),
+                leading: const LiveIcon(LiveIcons.guide),
                 title: Text(t.iptv.noGuides),
                 subtitle: Text(t.iptv.guideFormats),
               ),
@@ -149,7 +149,7 @@ class _IptvGuidePageState extends ConsumerState<IptvGuidePage> {
               SettingsHeader(t.iptv.playlistGuide),
               for (final url in offered)
                 ListTile(
-                  leading: const Icon(Icons.add_circle_outline),
+                  leading: const LiveIcon(LiveIcons.addEntry),
                   title: Text(url, maxLines: 2, overflow: TextOverflow.ellipsis),
                   onTap: _busy.contains('add') ? null : () => _addUrl(url: url),
                 ),
@@ -161,12 +161,12 @@ class _IptvGuidePageState extends ConsumerState<IptvGuidePage> {
                 runSpacing: Space.s2,
                 children: [
                   FilledButton.tonalIcon(
-                    icon: const Icon(Icons.link, size: 18),
+                    icon: const LiveIcon(LiveIcons.link),
                     label: Text(t.iptv.addFromUrl),
                     onPressed: _busy.contains('add') ? null : _addUrl,
                   ),
                   OutlinedButton.icon(
-                    icon: const Icon(Icons.folder_open, size: 18),
+                    icon: const LiveIcon(LiveIcons.folderOpen),
                     label: Text(t.iptv.addFromFile),
                     onPressed: _busy.contains('add') ? null : _addFile,
                   ),
@@ -209,17 +209,14 @@ class _GuideTile extends StatelessWidget {
       secondary: busy
           ? const SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2))
           : PopupMenuButton<_GuideAction>(
+              icon: const LiveIcon(LiveIcons.more),
               tooltip: t.common.more,
               onSelected: onAction,
               itemBuilder: (context) => [
                 PopupMenuItem(value: _GuideAction.sync, child: Text(t.common.sync)),
                 PopupMenuItem(value: _GuideAction.rename, child: Text(t.common.rename)),
                 if (source.isRemote) ...[
-                  CheckedPopupMenuItem(
-                    value: _GuideAction.autoSync,
-                    checked: source.autoSync,
-                    child: Text(t.iptv.autoSync),
-                  ),
+                  CheckedMenuItem(value: _GuideAction.autoSync, checked: source.autoSync, child: Text(t.iptv.autoSync)),
                   PopupMenuItem(value: _GuideAction.copySource, child: Text(t.iptv.copySource)),
                 ],
                 PopupMenuItem(value: _GuideAction.delete, child: Text(t.common.delete)),

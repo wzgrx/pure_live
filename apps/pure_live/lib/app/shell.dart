@@ -12,10 +12,10 @@ import 'package:pure_live_app/features/search/search_page.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
 List<NavDestination> get _destinations => [
-  NavDestination(icon: Icons.favorite_border, selectedIcon: Icons.favorite, label: t.app.tabs.follows),
-  NavDestination(icon: Icons.explore_outlined, selectedIcon: Icons.explore, label: t.app.tabs.discover),
-  NavDestination(icon: Icons.search, selectedIcon: Icons.saved_search, label: t.app.tabs.search),
-  NavDestination(icon: Icons.person_outline, selectedIcon: Icons.person, label: t.app.tabs.me),
+  NavDestination(icon: LiveIcons.follows, label: t.app.tabs.follows),
+  NavDestination(icon: LiveIcons.discover, label: t.app.tabs.discover),
+  NavDestination(icon: LiveIcons.search, label: t.app.tabs.search),
+  NavDestination(icon: LiveIcons.me, label: t.app.tabs.me),
 ];
 
 /// The four top-level destinations (principles §4.1) in the adaptive shell;
@@ -109,7 +109,7 @@ class OfflineBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s2),
           child: Row(
             children: [
-              Icon(Icons.wifi_off, size: Sizes.iconDense, color: colors.onErrorContainer),
+              LiveIcon(LiveIcons.offline, size: Sizes.iconDense, color: colors.onErrorContainer),
               const SizedBox(width: Space.s2),
               Expanded(
                 child: Text(t.app.offlineBanner, style: TextStyle(color: colors.onErrorContainer)),

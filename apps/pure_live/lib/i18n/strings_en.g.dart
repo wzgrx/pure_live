@@ -1196,6 +1196,8 @@ class _Translations$follows$en implements Translations$follows$zh_Hans {
   String refreshFailed({required Object platforms}) =>
       'Refreshing ${platforms} failed; those streamers\' status is unknown for now';
   @override
+  String get viewStatus => 'View status';
+  @override
   late final _Translations$follows$filter$en filter = _Translations$follows$filter$en._(_root);
   @override
   String get manageGroups => 'Manage groups';

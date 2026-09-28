@@ -5,7 +5,7 @@
   "all": "綜合",
   "failedTag": "失敗",
   "allFailed": "搜尋失敗，檢查網路後下拉重試",
-  "someFailed": "{platforms} 搜尋失敗，下拉可以重試",
+  "someFailed": "{platforms}搜尋失敗，下拉可以重試",
   "hint": "搜尋主播、直播間，或貼上直播間連結",
   "liveOnly": "只看開播",
   "resolvingLink": "正在辨識連結",

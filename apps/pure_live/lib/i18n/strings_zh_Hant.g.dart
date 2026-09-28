@@ -1159,7 +1159,9 @@ class Translations$follows$zh_Hant implements Translations$follows$zh_Hans {
   @override
   String get checking => '正在檢查開播狀態';
   @override
-  String refreshFailed({required Object platforms}) => '${platforms} 重新整理失敗，這些主播的狀態暫時未知';
+  String refreshFailed({required Object platforms}) => '${platforms}重新整理失敗，這些主播的狀態暫時未知';
+  @override
+  String get viewStatus => '查看狀態';
   @override
   late final Translations$follows$filter$zh_Hant filter = Translations$follows$filter$zh_Hant.internal(_root);
   @override
@@ -1989,7 +1991,7 @@ class Translations$search$zh_Hant implements Translations$search$zh_Hans {
   @override
   String get allFailed => '搜尋失敗，檢查網路後下拉重試';
   @override
-  String someFailed({required Object platforms}) => '${platforms} 搜尋失敗，下拉可以重試';
+  String someFailed({required Object platforms}) => '${platforms}搜尋失敗，下拉可以重試';
   @override
   String get hint => '搜尋主播、直播間，或貼上直播間連結';
   @override

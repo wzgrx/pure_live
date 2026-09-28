@@ -1574,8 +1574,11 @@ class Translations$follows$zh_Hans {
   /// zh-Hans: '正在检查开播状态'
   String get checking => '正在检查开播状态';
 
-  /// zh-Hans: '{platforms} 刷新失败，这些主播的状态暂时未知'
-  String refreshFailed({required Object platforms}) => '${platforms} 刷新失败，这些主播的状态暂时未知';
+  /// zh-Hans: '{platforms}刷新失败，这些主播的状态暂时未知'
+  String refreshFailed({required Object platforms}) => '${platforms}刷新失败，这些主播的状态暂时未知';
+
+  /// zh-Hans: '查看状态'
+  String get viewStatus => '查看状态';
 
   late final Translations$follows$filter$zh_Hans filter = Translations$follows$filter$zh_Hans.internal(_root);
 
@@ -2742,8 +2745,8 @@ class Translations$search$zh_Hans {
   /// zh-Hans: '搜索失败，检查网络后下拉重试'
   String get allFailed => '搜索失败，检查网络后下拉重试';
 
-  /// zh-Hans: '{platforms} 搜索失败，下拉可以重试'
-  String someFailed({required Object platforms}) => '${platforms} 搜索失败，下拉可以重试';
+  /// zh-Hans: '{platforms}搜索失败，下拉可以重试'
+  String someFailed({required Object platforms}) => '${platforms}搜索失败，下拉可以重试';
 
   /// zh-Hans: '搜索主播、直播间，或粘贴直播间链接'
   String get hint => '搜索主播、直播间，或粘贴直播间链接';

@@ -33,7 +33,8 @@
   "missingDetail": "平台找不到這個房間",
   "replayDetail": "正在輪播",
   "checking": "正在檢查開播狀態",
-  "refreshFailed": "{platforms} 重新整理失敗，這些主播的狀態暫時未知",
+  "refreshFailed": "{platforms}重新整理失敗，這些主播的狀態暫時未知",
+  "viewStatus": "查看狀態",
   "filter": {
     "live": "開播",
     "liveCount": "開播 {n}",

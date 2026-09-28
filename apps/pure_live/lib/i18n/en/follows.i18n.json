@@ -34,6 +34,7 @@
   "replayDetail": "Showing a rerun",
   "checking": "Checking live status",
   "refreshFailed": "Refreshing {platforms} failed; those streamers' status is unknown for now",
+  "viewStatus": "View status",
   "filter": {
     "live": "Live",
     "liveCount": "Live {n}",

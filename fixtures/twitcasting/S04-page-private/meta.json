@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "platform": "twitcasting",
+  "sample": "S04-page-private",
+  "capturedAt": "2026-09-28T17:34:09.784224Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://twitcasting.tv/g:117931547061051040135",
+    "headers": {
+      "Referer": "https://twitcasting.tv/",
+      "Origin": "https://twitcasting.tv",
+      "User-Agent": "Mozilla/5.0"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Mon, 28 Sep 2026 17:34:12 GMT",
+      "server": "Apache",
+      "expires": "Thu, 01 Dec 1994 16:00:00 GMT",
+      "cache-control": [
+        "no-store, no-cache, must-revalidate, max-age=0",
+        "post-check=0, pre-check=0"
+      ],
+      "pragma": "no-cache",
+      "vary": "Accept-Encoding",
+      "strict-transport-security": "max-age=0",
+      "content-type": "text/html; charset=utf-8",
+      "set-cookie": "did=7271731ea93208e9815ec4f4a8379b6a; expires=Thu, 25-Sep-2036 17:34:12 GMT; Max-Age=315360000; path=/; domain=.twitcasting.tv",
+      "connection": "close",
+      "transfer-encoding": "chunked"
+    }
+  },
+  "raw": {
+    "sha256": "ac0bb3068236d87e0530d6112e6d5a371851b96c489e71c45d7bb7c5746b4b43",
+    "length": 85919
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "text:csrf_token",
+      "rule": "secret"
+    },
+    {
+      "where": "text:/data-csrf-token=\"([0-9a-f]{16,})\"/",
+      "rule": "secret"
+    },
+    {
+      "where": "text:/data-token=\"([0-9a-f]{16,})\"/",
+      "rule": "secret"
+    },
+    {
+      "where": "text:/web-authorize-session-id&quot;:&quot;([^&]+)&quot;/",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:did",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratch capture script (urllib, schema 1, M4.U.12): adapter headers, redirects not followed; CSRF token, web session id and Set-Cookie values replaced by random same-shape values"
+}

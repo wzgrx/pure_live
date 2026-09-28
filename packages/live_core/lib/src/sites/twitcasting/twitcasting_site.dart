@@ -11,6 +11,17 @@ const _site = 'twitcasting';
 /// Where the pages and `streamserver.php` are answered.
 const _host = 'twitcasting.tv';
 
+/// How long a list or search snapshot serves the pages after the first (the
+/// unified paging rule: 20–30 s). The first page always fetches a new one.
+const _snapshotLifetime = Duration(seconds: 30);
+
+/// Snapshots kept (the oldest is dropped first).
+const _snapshotLimit = 16;
+
+/// One answer of a list (`top/category`) or a search, paged locally: one
+/// entry per row, null for a row left out, and when it arrived.
+typedef _Snapshot = ({DateTime fetchedAt, List<LiveRoom?> window});
+
 /// The TwitCasting adapter (3.x's `TwitcastingSite`; parsing in
 /// [TwitcastingApi]).
 ///
@@ -18,10 +29,12 @@ const _host = 'twitcasting.tv';
 /// `twitcasting`, so the app routes the platform through its proxy setting;
 /// each carries 3.x's headers. The catalog is the homepage's tabs, lists are
 /// the one `top/category` window, search is the website's text search, a
-/// room is its channel page plus `streamserver.php`, and a stream is the
-/// tier playlist that answer names. Room ids stay as the user asked for
-/// them; requests use the lower-case channel. Failures are `SiteError`s;
-/// nothing is disguised as an offline room.
+/// room is its channel page plus `streamserver.php` (a follow refresh is
+/// `streamserver.php` alone), and a stream is the tier playlist that answer
+/// names. A list or search answer is kept for 30 s and later pages are cut
+/// from it. Room ids stay as the user asked for them; requests use the
+/// lower-case channel. Failures are `SiteError`s; nothing is disguised as an
+/// offline room.
 final class TwitcastingSite extends LiveSite
     with LiveSiteLinks
     implements
@@ -30,11 +43,17 @@ final class TwitcastingSite extends LiveSite
         LiveCancellableSearch,
         LivePlayUrlResolver,
         LivePlayRecoveryResolver {
-  /// Creates the adapter.
-  new(this.http);
+  /// Creates the adapter; [now] (the lists' start times, the snapshots'
+  /// age) is injectable for tests.
+  new(this.http, {DateTime Function()? now}) : _now = now ?? DateTime.now;
 
   /// Transport.
   final LiveHttp http;
+
+  final DateTime Function() _now;
+
+  /// The list and search answers, by `top|<tab>` and `search|<keyword>`.
+  final Map<String, _Snapshot> _snapshots = {};
 
   @override
   String get id => _site;
@@ -71,6 +90,21 @@ final class TwitcastingSite extends LiveSite
     if (cancel?.isCancelled ?? false) throw const TransportFailure(_site, TransportReason.cancelled);
   }
 
+  /// The answer [key] for page [page]: page 1 always fetches a new one with
+  /// [fetch]; a later page uses the kept one while it is under 30 s old, so
+  /// the pages of one browse come from one answer (12-4, the unified paging
+  /// rule). A failed fetch keeps nothing.
+  Future<List<LiveRoom?>> _snapshot(String key, int page, Future<List<LiveRoom?>> Function() fetch) async {
+    final kept = _snapshots[key];
+    if (page > 1 && kept != null && _now().difference(kept.fetchedAt) < _snapshotLifetime) return kept.window;
+    final window = await fetch();
+    _snapshots
+      ..remove(key)
+      ..[key] = (fetchedAt: _now(), window: window);
+    if (_snapshots.length > _snapshotLimit) _snapshots.remove(_snapshots.keys.first);
+    return window;
+  }
+
   // Catalog and lists ---------------------------------------------------------
 
   /// One category ("TwitCasting") whose areas are the homepage's tabs; only
@@ -89,12 +123,14 @@ final class TwitcastingSite extends LiveSite
       _directory('', page: page, pageSize: pageSize);
 
   /// The window of a homepage tab. The site answers one window of 60
-  /// broadcasts; it is asked for whole every time and page [page] of
-  /// [pageSize] (1–60) is cut from it, so a page past it is empty without a
-  /// request. 3.x's popular and area pages ask for page 1 of 60 and page it
-  /// themselves. Another platform's area, a key that is not a tab key or a
-  /// page out of range is a caller error (`ArgumentError`) and sends
-  /// nothing, as in 3.x.
+  /// broadcasts; page 1 asks for it whole and page [page] of [pageSize]
+  /// (1–60) is cut from it as 3.x cut it. A later page is cut from the same
+  /// answer while it is under 30 s old (the unified paging rule; 3.x asked
+  /// again), and a page past the window is empty without a request. 3.x's
+  /// popular and area pages ask for page 1 of 60 and page it themselves.
+  /// Another platform's area, a key that is not a tab key or a page out of
+  /// range is a caller error (`ArgumentError`) and sends nothing, as in
+  /// 3.x.
   @override
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
     if (category.platform != _site ||
@@ -111,13 +147,16 @@ final class TwitcastingSite extends LiveSite
     }
     final offset = (page - 1) * pageSize;
     if (offset >= TwitcastingApi.directoryWindow) return const [];
-    final response = await _get(
-      Uri.https('frontendapi.twitcasting.tv', '/top/category', {
-        'id': category,
-        'count': '${TwitcastingApi.directoryWindow}',
-      }),
-    );
-    return TwitcastingApi.directory(response.text, offset: offset, pageSize: pageSize, status: response.status);
+    final window = await _snapshot('top|$category', page, () async {
+      final response = await _get(
+        Uri.https('frontendapi.twitcasting.tv', '/top/category', {
+          'id': category,
+          'count': '${TwitcastingApi.directoryWindow}',
+        }),
+      );
+      return TwitcastingApi.directoryRows(response.text, status: response.status, now: _now());
+    });
+    return TwitcastingApi.slice(window, offset: offset, pageSize: pageSize);
   }
 
   // Search --------------------------------------------------------------------
@@ -126,13 +165,16 @@ final class TwitcastingSite extends LiveSite
   Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) =>
       searchRoomsCancellable(keyword, page: page, pageSize: pageSize);
 
-  /// Live broadcasts matching [keyword] (3.x): the search page holds at
-  /// most 50 and is asked for again for each page of [pageSize] (1–50); a
-  /// page past 50 is empty without a request. A channel link finds that
-  /// channel, live or not, on page 1 (an unknown one finds nothing); other
-  /// TwitCasting links find nothing. A blank keyword gives nothing without a
-  /// request; a page out of range or a keyword over 100 characters is a
-  /// caller error (`ArgumentError`), as in 3.x.
+  /// Live broadcasts matching [keyword], private ones included and marked
+  /// (12-5): the search page holds at most 50. Page 1 asks for it and page
+  /// [page] of [pageSize] (1–50) is cut from it; a later page is cut from
+  /// the same answer while it is under 30 s old (12-4; 3.x asked again for
+  /// each page), and a page past 50 is empty without a request. A channel
+  /// link finds that channel, live or not, on page 1 (an unknown one finds
+  /// nothing); other TwitCasting links find nothing. A blank keyword gives
+  /// nothing without a request; a page out of range or a keyword over 100
+  /// characters is a caller error (`ArgumentError`), as in 3.x. A cancelled
+  /// [cancel] sends nothing and serves nothing.
   @override
   Future<List<LiveRoom>> searchRoomsCancellable(
     String keyword, {
@@ -155,31 +197,44 @@ final class TwitcastingSite extends LiveSite
         return const [];
       }
     }
-    final response = await _get(
-      Uri(
-        scheme: 'https',
-        host: 'search.twitcasting.tv',
-        pathSegments: ['search', 'text', query],
-        queryParameters: {'hl': 'en'},
-      ),
-      cancel: cancel,
-    );
-    return TwitcastingApi.searchRooms(response.text, page: page, pageSize: pageSize, status: response.status);
+    _checkCancelled(cancel);
+    final window = await _snapshot('search|$query', page, () async {
+      final response = await _get(
+        Uri(
+          scheme: 'https',
+          host: 'search.twitcasting.tv',
+          pathSegments: ['search', 'text', query],
+          queryParameters: {'hl': 'en'},
+        ),
+        cancel: cancel,
+      );
+      return TwitcastingApi.searchRows(response.text, status: response.status);
+    });
+    return TwitcastingApi.slice(window, offset: (page - 1) * pageSize, pageSize: pageSize);
   }
 
   // Rooms ---------------------------------------------------------------------
 
   /// The room of [roomId] (3.x's two requests): the channel page (not
   /// followed when it redirects: an unknown channel is sent home), then
-  /// `streamserver.php` for the state and the broadcast. An id that is not
-  /// a channel is `NotFound` without a request.
+  /// `streamserver.php` for the state and the broadcast. A page asking for
+  /// the secret word asks `streamserver.php` too (3.x stopped there), so a
+  /// protected broadcast shows as live. An id that is not a channel is
+  /// `NotFound` without a request.
   Future<LiveRoom> _detail(String roomId, {CancelToken? cancel}) async {
+    final (:requested, :channel) = _channel(roomId);
+    final page = await _get(Uri.https(_host, '/$channel'), followRedirects: false, cancel: cancel);
+    final parsed = TwitcastingApi.channelPage(page.text, roomId: requested, channel: channel, status: page.status);
+    return TwitcastingApi.roomDetail(parsed, await _stream(channel, cancel: cancel));
+  }
+
+  /// [roomId] trimmed, and its lower-case channel; `NotFound` when it is
+  /// not one.
+  static ({String requested, String channel}) _channel(String roomId) {
     final requested = roomId.trim();
     final channel = TwitcastingApi.channelName(requested);
     if (channel == null) throw NotFound(_site, 'room id "$requested" is not a TwitCasting channel');
-    final page = await _get(Uri.https(_host, '/$channel'), followRedirects: false, cancel: cancel);
-    final room = TwitcastingApi.channelPage(page.text, roomId: requested, channel: channel, status: page.status);
-    return TwitcastingApi.roomDetail(room, await _stream(channel, cancel: cancel));
+    return (requested: requested, channel: channel);
   }
 
   Future<TwitcastingRoomData> _stream(String channel, {CancelToken? cancel}) async {
@@ -190,30 +245,41 @@ final class TwitcastingSite extends LiveSite
     return TwitcastingApi.streamServer(response.text, status: response.status);
   }
 
-  /// The room with its broadcast. TwitCasting has no danmaku in 3.x, so
-  /// there are no danmaku arguments; the broadcast id is in the room's
-  /// [TwitcastingRoomData].
+  /// The room with its broadcast, its telop as the title (12-1) and, when
+  /// live, its start time and comment arguments ([TwitcastingDanmakuArgs],
+  /// for M5; 3.x had no TwitCasting comments).
   @override
   Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId);
 
-  /// Follow-card refresh: 3.x's two requests (the page refreshes the title,
-  /// name and pictures).
+  /// Follow-card refresh: `streamserver.php` alone, about 1 KB instead of
+  /// the 110 KB channel page (12-2; 3.x read both). The state and the
+  /// broadcast are new; the names, pictures and title stay as the follow
+  /// stored them until the room is entered.
   @override
-  Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId);
+  Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) async {
+    final (:requested, :channel) = _channel(roomId);
+    return TwitcastingApi.refreshRoom(await _stream(channel), roomId: requested, channel: channel);
+  }
 
-  /// The same answer: it holds everything the recorder's streams need.
+  /// The full room, as [getRoomDetail]: it holds everything the recorder's
+  /// streams need, and the title.
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId);
 
+  /// `streamserver.php` alone, as the follow refresh.
   @override
-  Future<bool> getLiveStatus({required String roomId}) async => (await _detail(roomId)).isLiveNow;
+  Future<bool> getLiveStatus({required String roomId}) async =>
+      (await getRoomDetailForRefresh(roomId: roomId)).isLiveNow;
 
   // Streams -------------------------------------------------------------------
 
   /// 3.x's `HLS high`, `HLS medium`, `HLS low` from the broadcast [detail]
   /// carries, without a request; a room without one (a list card) asks
   /// `streamserver.php`. A room that is not broadcasting has none
-  /// (`StreamUnavailable`, 3.x gave an empty list).
+  /// (`StreamUnavailable`, 3.x gave an empty list), and neither has a
+  /// restricted one (`StreamUnavailable` with the reason): a
+  /// password-protected broadcast, or a card marked private, protected or
+  /// unplayable, without a request.
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
       TwitcastingApi.qualities(await _broadcast(detail, fresh: false));
@@ -241,12 +307,15 @@ final class TwitcastingSite extends LiveSite
 
   /// The broadcast [detail] carries or, when it has none (or [fresh]), the
   /// one `streamserver.php` reports now. A room known to be offline has none
-  /// without a request (REG-TWITCASTING-001).
+  /// without a request (REG-TWITCASTING-001), and so has a card known to be
+  /// restricted. A carried broadcast decides over the card's restriction:
+  /// it is the newer answer (a refreshed follow).
   Future<TwitcastingRoomData> _broadcast(LiveRoom detail, {required bool fresh}) async {
     if (detail.platform != _site) throw ArgumentError.value(detail.platform, 'detail', 'not a TwitCasting room');
     if (!fresh) {
       if (detail.isExplicitlyOfflineNow) throw StreamUnavailable(_site, '${detail.roomId} is offline');
       if (detail.data case final TwitcastingRoomData data) return data;
+      if (TwitcastingApi.restricted(detail) case final SiteError error) throw error;
     }
     final channel = TwitcastingApi.channelName(detail.roomId);
     if (channel == null) throw StreamUnavailable(_site, 'room id "${detail.roomId}" is not a TwitCasting channel');

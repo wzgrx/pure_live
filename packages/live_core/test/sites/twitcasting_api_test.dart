@@ -110,10 +110,33 @@ ${List.generate(count, (i) => '''
 
 String _movies(List<Map<String, Object?>> rows) => jsonEncode({'movies': rows});
 
-LiveRoom _page(String html, {String channel = 'fixture_artist'}) =>
+/// [_row] of another channel [channel] (movie [movie]).
+Map<String, Object?> _rowOf(String channel, {int movie = 43}) => {
+  ..._row,
+  'id': '$movie',
+  'user_id': channel,
+  'live_url': '/$channel/movie/$movie',
+};
+
+TwitcastingChannelPage _parsed(String html, {String channel = 'fixture_artist'}) =>
     TwitcastingApi.channelPage(html, roomId: channel, channel: channel);
 
+LiveRoom _page(String html, {String channel = 'fixture_artist'}) => _parsed(html, channel: channel).room;
+
 TwitcastingRoomData _stream(Map<String, Object?> json) => TwitcastingApi.streamServer(jsonEncode(json));
+
+/// [_roomHtml] showing a live broadcast [movie] with [telop] under its
+/// title (the live page's markup, sample S04-page-live).
+String _livePage({String telop = '', int movie = 42, int startedAt = 1790519194000}) =>
+    _roomHtml.replaceFirst('</body>', '''
+<span id="updatetimer" class="tw-player-duration-time" aria-label="Duration:" data-live-type="live"
+  data-started-at="$startedAt" data-duration="12942000">00:00</span>
+<h2 id="player-title">Drawing &amp; music</h2>
+<span class="tw-player-page-title-description">
+  $telop <span class="tw-player-page-title-description-text"></span>
+  <a href="/search/tag/art" class="tag tag-info">art</a>
+</span>
+<div id="comment-list-app" data-movie-id="$movie" data-passcode=""></div></body>''');
 
 void main() {
   group('S01 catalog', () {
@@ -216,16 +239,78 @@ void main() {
       expect(room.effectiveLiveStatus, LiveStatus.live);
     });
 
-    test('locked, group, deleted, ended and repeated broadcasts are not cards (3.x)', () {
+    test('group, deleted, ended and repeated broadcasts are not cards (3.x)', () {
       final rows = [
         _row,
         _row,
-        {..._row, 'is_locked': true},
-        {..._row, 'is_group': true, 'current_viewer_count': null},
-        {..._row, 'is_deleted': true},
-        {..._row, 'is_live': false},
+        {..._rowOf('group'), 'is_group': true, 'current_viewer_count': null},
+        {..._rowOf('deleted'), 'is_deleted': true},
+        {..._rowOf('ended'), 'is_live': false},
       ];
-      expect(TwitcastingApi.directory(_movies(rows), offset: 0, pageSize: 60), hasLength(1));
+      expect(TwitcastingApi.directory(_movies(rows), offset: 0, pageSize: 60).map((room) => room.roomId), [
+        'fixture_artist',
+      ]);
+    });
+
+    test('a locked broadcast is a live card marked password-protected; the others have no restriction', () {
+      // Unified rule for restricted rooms: 3.x left locked broadcasts out.
+      final rooms = TwitcastingApi.directory(
+        _movies([
+          _row,
+          {..._rowOf('locked'), 'is_locked': true},
+        ]),
+        offset: 0,
+        pageSize: 60,
+      );
+      expect(rooms.map((room) => (room.roomId, room.restriction, room.isLiveNow)), [
+        ('fixture_artist', LiveRestriction.none, true),
+        ('locked', LiveRestriction.password, true),
+      ]);
+      expect(rooms.last.followGroup, FollowGroup.live);
+      for (final name in ['S02-top-all', 'S02-top-game']) {
+        final sample = TwitcastingApi.directory(_sample(name).body, offset: 0, pageSize: 60);
+        expect(sample.map((room) => room.restriction).toSet(), {LiveRestriction.none}, reason: name);
+      }
+    });
+
+    test('the start time is the answer time less elapsed_time, to the second', () {
+      final fixture = _sample('S02-top-all');
+      final rooms = {
+        for (final room in TwitcastingApi.directory(fixture.body, offset: 0, pageSize: 60, now: fixture.capturedAt))
+          room.roomId: room,
+      };
+      expect(fixture.capturedAt, DateTime.utc(2026, 9, 27, 18, 1, 57, 219, 2));
+      // 12923 s before 18:01:57: the channel page's data-started-at (S04).
+      expect(rooms['nabo66game']!.startedAt, DateTime.utc(2026, 9, 27, 14, 26, 34));
+      expect(
+        rooms['nabo66game']!.startedAt,
+        TwitcastingApi.channelPage(
+          _sample('S04-page-live').body,
+          roomId: 'nabo66game',
+          channel: 'nabo66game',
+        ).liveStartedAt,
+      );
+      expect(rooms.values.every((room) => room.startedAt!.isBefore(fixture.capturedAt)), isTrue);
+      expect(TwitcastingApi.directory(fixture.body, offset: 0, pageSize: 60).first.startedAt, isNull);
+      final now = DateTime.utc(2026, 9, 29, 12, 0, 0, 900);
+      for (final (elapsed, started) in [
+        (6584, DateTime.utc(2026, 9, 29, 10, 10, 16)),
+        (0, DateTime.utc(2026, 9, 29, 12)),
+        (-1, null),
+        ('60', DateTime.utc(2026, 9, 29, 11, 59)),
+        ('x', null),
+        (null, null),
+      ]) {
+        final room = TwitcastingApi.directory(
+          _movies([
+            {..._row, 'elapsed_time': elapsed},
+          ]),
+          offset: 0,
+          pageSize: 1,
+          now: now,
+        ).single;
+        expect(room.startedAt, started, reason: '$elapsed');
+      }
     });
 
     test('rows are sliced before they are filtered, as 3.x did', () {
@@ -260,13 +345,41 @@ void main() {
       'id',
       'user_id',
     ]) {
-      test('a row without $field is ApiChanged, not an empty list (3.x)', () {
+      test('a row without $field is skipped; a window of only such rows is ApiChanged', () {
+        // Unified fault-tolerance rule: 3.x failed the whole list.
         final row = Map<String, Object?>.of(_row)..remove(field);
+        expect(
+          TwitcastingApi.directory(_movies([row, _rowOf('good')]), offset: 0, pageSize: 30).map((room) => room.roomId),
+          ['good'],
+        );
+        expect(TwitcastingApi.directoryRows(_movies([row, _rowOf('good')])), [isNull, isNotNull]);
         expect(() => TwitcastingApi.directory(_movies([row]), offset: 0, pageSize: 30), throwsA(isA<ApiChanged>()));
       });
     }
 
-    test('a movie link of another channel, over 60 rows, no rows or not JSON are ApiChanged', () {
+    test('a malformed row among good ones only drops itself; left-out rows alone are an empty list', () {
+      final rows = [
+        {..._row, 'live_url': '/other/movie/42'},
+        {..._row, 'current_viewer_count': -1},
+        {..._row, 'is_live': 'yes'},
+        'not a row',
+        _rowOf('good'),
+      ];
+      expect(TwitcastingApi.directory(jsonEncode({'movies': rows}), offset: 0, pageSize: 60), hasLength(1));
+      expect(
+        TwitcastingApi.directory(
+          _movies([
+            {..._row, 'is_live': false},
+          ]),
+          offset: 0,
+          pageSize: 60,
+        ),
+        isEmpty,
+      );
+      expect(TwitcastingApi.directory(_movies([]), offset: 0, pageSize: 60), isEmpty);
+    });
+
+    test('rows that are all malformed, over 60 rows, no rows or not JSON are ApiChanged', () {
       for (final body in [
         _movies([
           {..._row, 'live_url': '/other/movie/42'},
@@ -285,25 +398,82 @@ void main() {
   });
 
   group('S03 search', () {
-    test('a private broadcast is left out where 3.x failed the whole page', () {
+    test('a private broadcast is a live card marked private (12-5), where 3.x failed the whole page', () {
       final fixture = _sample('S03-search');
       final legacy = _legacy('S03-search');
       expect(legacy['page1'], {'throws': 'TwitcastingException', 'message': 'TwitCasting schema'});
       final rooms = TwitcastingApi.searchRooms(fixture.body, page: 1, pageSize: 20, status: fixture.status);
+      expect(rooms, hasLength(15));
+      final private = rooms[2];
+      expect(private.roomId, 'g:107135074068699391720');
+      expect(private.restriction, LiveRestriction.private);
+      expect(private.isLiveNow, isTrue, reason: 'restricted broadcasts are still live (unified rule)');
+      expect(private.followGroup, FollowGroup.live);
+      expect(private.title, isEmpty);
+      expect(private.startedAt, DateTime.utc(2026, 9, 27, 14, 2, 4));
       // withoutPrivateRow: 3.x's answer to the same page without the private
-      // row (fixtures/twitcasting/legacy_expected.dart).
+      // row (fixtures/twitcasting/legacy_expected.dart), for every other row.
+      final others = [...rooms]..removeAt(2);
       final reference = _legacyRooms(legacy['withoutPrivateRow']);
-      expect(rooms.map((room) => room.roomId), reference.map((room) => room['roomId']));
-      for (final (index, room) in rooms.indexed) {
+      expect(others.map((room) => room.roomId), reference.map((room) => room['roomId']));
+      for (final (index, room) in others.indexed) {
         _expectParity(_projection(room), reference[index], reason: 'S03[$index]');
+        expect(room.restriction, LiveRestriction.none);
       }
-      expect(rooms, hasLength(14));
-      expect(rooms.map((room) => room.roomId), isNot(contains('g:107135074068699391720')));
       expect(rooms.first.title, 'クラッシュバンディクー３');
-      expect(rooms.first.watching, isEmpty, reason: 'the page shows comments, not viewers');
+      expect(rooms.first.watching, isEmpty, reason: 'the page shows viewers only on private rows');
       for (final page in [2, 3, 4]) {
         expect(TwitcastingApi.searchRooms(fixture.body, page: page, pageSize: 20), legacy['page$page']);
       }
+    });
+
+    test("the start time is each row's datetime (Japan time), the channel page's for the same broadcast", () {
+      final rooms = TwitcastingApi.searchRooms(_sample('S03-search').body, page: 1, pageSize: 50);
+      expect(rooms.first.roomId, 'nabo66game');
+      expect(rooms.first.startedAt, DateTime.utc(2026, 9, 27, 14, 26, 34));
+      expect(rooms.every((room) => room.startedAt != null), isTrue);
+      expect(rooms.every((room) => room.startedAt!.isBefore(_sample('S03-search').capturedAt)), isTrue);
+      expect(TwitcastingApi.pageDate('Sun, 27 Sep 2026 23:26:34 +0900'), DateTime.utc(2026, 9, 27, 14, 26, 34));
+      expect(TwitcastingApi.pageDate('Mon, 1 Jun 2026 01:02:03 -0130'), DateTime.utc(2026, 6, 1, 2, 32, 3));
+      expect(TwitcastingApi.pageDate(' Thu, 24 Sep 2026 13:33:45 +0000 '), DateTime.utc(2026, 9, 24, 13, 33, 45));
+      for (final text in [
+        '',
+        '2026/09/27 23:26:34',
+        'Sun, 31 Feb 2026 23:26:34 +0900',
+        'Sun, 27 Sep 2026 24:00:00 +0900',
+        'Sun, 27 Sop 2026 23:26:34 +0900',
+        'Thu, 01 Jan 1970 09:00:00 +0900',
+      ]) {
+        expect(TwitcastingApi.pageDate(text), isNull, reason: text);
+      }
+    });
+
+    test('a private row seen now: the card is private, the channel page and streamserver.php say offline', () {
+      // S03-search-private, S04-page-private and S05-stream-private were
+      // recorded within 5 s: to an anonymous client a private broadcast is
+      // live only in search.
+      final rooms = TwitcastingApi.searchRooms(_sample('S03-search-private').body, page: 1, pageSize: 50);
+      expect(rooms, hasLength(23));
+      final private = rooms.where((room) => room.isRestricted).single;
+      expect(private.roomId, 'g:117931547061051040135');
+      expect(private.restriction, LiveRestriction.private);
+      expect(private.startedAt, DateTime.utc(2026, 9, 28, 17, 3, 42));
+      expect(rooms.where((room) => room.restriction == LiveRestriction.none), hasLength(22));
+      final page = TwitcastingApi.channelPage(
+        _sample('S04-page-private').body,
+        roomId: private.roomId,
+        channel: private.roomId,
+      );
+      final stream = TwitcastingApi.streamServer(_sample('S05-stream-private').body);
+      expect(page.movieId, 841576546, reason: 'the private broadcast');
+      expect(stream.movieId, 841576546);
+      expect(stream.live, isFalse);
+      expect(page.liveStartedAt, isNull, reason: 'the page shows it as a recording');
+      final room = TwitcastingApi.roomDetail(page, stream);
+      expect(room.effectiveLiveStatus, LiveStatus.offline);
+      expect(room.restriction, isNull);
+      expect(room.startedAt, isNull);
+      expect(room.danmakuData, isNull);
     });
 
     test('live rows only, with no audience (3.x)', () {
@@ -327,19 +497,33 @@ void main() {
       expect(() => TwitcastingApi.searchRooms(_searchHtml(51), page: 1, pageSize: 20), throwsA(isA<ApiChanged>()));
     });
 
-    test('rows that are not live and playable are left out (3.x failed the page)', () {
+    test('a playable row without the LIVE badge is left out (3.x); one the site will not play is marked', () {
       expect(TwitcastingApi.searchRooms(_searchHtml(1, liveBadge: false), page: 1, pageSize: 20), isEmpty);
+      final notPlayable = _searchHtml(1).replaceFirst('data-can-play="true"', 'data-can-play="false"');
       expect(
-        TwitcastingApi.searchRooms(
-          _searchHtml(1).replaceFirst('data-can-play="true"', 'data-can-play="false"'),
-          page: 1,
-          pageSize: 20,
-        ),
-        isEmpty,
+        TwitcastingApi.searchRooms(notPlayable, page: 1, pageSize: 20).single.restriction,
+        LiveRestriction.unplayable,
+        reason: 'not private: the kind is unknown (M2.1)',
       );
+      final private = _searchHtml(1, liveBadge: false)
+          .replaceFirst('data-can-play="true"', 'data-can-play="false"')
+          .replaceFirst('</div><span class="tw-movie-thumbnail-title">', '''
+<span class="tw-movie-thumbnail2-badge" data-status="">
+  Private </span></div><span class="tw-movie-thumbnail-title">''');
+      final room = TwitcastingApi.searchRooms(private, page: 1, pageSize: 20).single;
+      expect((room.restriction, room.effectiveLiveStatus), (LiveRestriction.private, LiveStatus.live));
     });
 
-    test('a challenge page or a malformed live row is ApiChanged (3.x)', () {
+    test('a malformed live row only drops itself (unified fault tolerance; 3.x failed the page)', () {
+      final body = _searchHtml(3).replaceFirst('/c:artist1/movie/2', '/c:other/movie/2');
+      expect(TwitcastingApi.searchRooms(body, page: 1, pageSize: 20).map((room) => room.roomId), [
+        'c:artist0',
+        'c:artist2',
+      ]);
+      expect(TwitcastingApi.searchRows(body), [isNotNull, isNull, isNotNull]);
+    });
+
+    test('a challenge page or live rows that are all malformed are ApiChanged', () {
       for (final body in [
         '<html>challenge</html>',
         _searchHtml(1).replaceFirst('/c:artist0/movie/1', '/c:other/movie/1'),
@@ -363,26 +547,99 @@ void main() {
       TwitcastingApi.streamServer(_sample(stream).body),
     );
 
-    test("a live channel: 3.x's room, the channel as it was asked for", () {
+    test("a live channel: 3.x's room but the telop as title, the channel as it was asked for", () {
       final room = detail('S04-page-live', 'S05-stream-live', 'nabo66game');
       final legacy = _legacy('S04-page-live');
-      for (final key in ['getRoomDetail', 'getRoomDetailForRefresh']) {
-        _expectParity(_projection(room), legacy[key] as Map<String, dynamic>, reason: key);
-      }
-      _expectParity(_projection(room), _legacyRooms(legacy['searchRooms(link)']).single, reason: 'link search');
-      expect(room.title, 'Live #841525457', reason: "3.x's twitter:title, not the telop (REG-TWITCASTING-004 kept)");
+      // title: the broadcast's telop, 3.x showed twitter:title "Live #841525457" (12-1).
+      _expectParity(_projection(room), legacy['getRoomDetail'] as Map<String, dynamic>, changed: {'title'});
+      _expectParity(
+        _projection(room),
+        _legacyRooms(legacy['searchRooms(link)']).single,
+        changed: {'title'},
+        reason: 'link search',
+      );
+      expect((legacy['getRoomDetail'] as Map)['title'], 'Live #841525457');
+      expect(room.title, 'クラッシュバンディクー３', reason: '12-1, REG-TWITCASTING-004');
       final data = room.data! as TwitcastingRoomData;
       expect(data.movieId, 841525457);
       expect(data.live, isTrue);
+      expect(data.secretWord, isFalse);
+    });
+
+    test('a live channel has its start time, no restriction and the comment arguments (M2.1, 12-3)', () {
+      final room = detail('S04-page-live', 'S05-stream-live', 'nabo66game');
+      expect(room.startedAt, DateTime.utc(2026, 9, 27, 14, 26, 34), reason: 'data-started-at 1790519194000');
+      expect(room.startedAt!.isBefore(_sample('S04-page-live').capturedAt), isTrue);
+      expect(room.restriction, LiveRestriction.none, reason: 'a private broadcast is never live to this client');
+      final args = room.danmakuData! as TwitcastingDanmakuArgs;
+      expect((args.channel, args.movieId), ('nabo66game', 841525457));
+      expect('$args', 'TwitcastingDanmakuArgs(nabo66game, 841525457)');
+      expect(room.toJson()['startedAt'], '2026-09-27T14:26:34.000Z');
+      expect(room.toJson()['restriction'], 'none');
+    });
+
+    test('a start time of another broadcast than streamserver.php names is dropped', () {
+      final page = _parsed(_livePage(movie: 41));
+      expect(page.liveStartedAt, DateTime.utc(2026, 9, 27, 14, 26, 34));
+      final room = TwitcastingApi.roomDetail(page, _stream(_liveStream()));
+      expect(room.startedAt, isNull, reason: 'the page showed movie 41, the channel is live with 42');
+      expect(TwitcastingApi.roomDetail(_parsed(_livePage()), _stream(_liveStream())).startedAt, isNotNull);
+      final recording = _parsed(_livePage().replaceFirst('data-live-type="live"', 'data-live-type="movie"'));
+      expect(recording.liveStartedAt, isNull, reason: 'a recording');
+      expect(_parsed(_livePage(startedAt: 0)).liveStartedAt, isNull);
+    });
+
+    test('a follow refresh from streamserver.php alone: the state, no names (12-2)', () {
+      final legacy = _legacy('S04-page-live')['getRoomDetailForRefresh'] as Map<String, dynamic>;
+      final refresh = TwitcastingApi.refreshRoom(
+        TwitcastingApi.streamServer(_sample('S05-stream-live').body),
+        roomId: 'nabo66game',
+        channel: 'nabo66game',
+      );
+      // title, nick, avatar, cover: empty, a follow keeps the stored ones
+      // (3.x read the channel page again, 12-2).
+      _expectParity(_projection(refresh), legacy, changed: {'title', 'nick', 'avatar', 'cover'});
+      expect([refresh.title, refresh.nick, refresh.avatar, refresh.cover], everyElement(isEmpty));
+      expect(refresh.startedAt, isNull);
+      expect(refresh.restriction, isNull, reason: 'streamserver.php does not say');
+      expect(refresh.danmakuData, isNull);
+      expect((refresh.data! as TwitcastingRoomData).movieId, 841525457);
+      final stored = detail('S04-page-live', 'S05-stream-live', 'nabo66game');
+      final merged = stored.mergeFrom(refresh);
+      _expectParity(_projection(merged), legacy, changed: {'title'}, reason: 'merged');
+      expect(merged.title, stored.title);
+      expect(merged.startedAt, stored.startedAt, reason: 'the same broadcast keeps its start time (M2.1)');
+      final offline = TwitcastingApi.refreshRoom(
+        TwitcastingApi.streamServer(_sample('S05-stream-offline').body),
+        roomId: 'nabo66game',
+        channel: 'nabo66game',
+      );
+      final ended = stored.mergeFrom(offline);
+      expect(ended.effectiveLiveStatus, LiveStatus.offline);
+      expect(ended.startedAt, isNull, reason: 'the state changed');
+      expect(ended.restriction, isNull);
+      expect(ended.nick, '山本');
     });
 
     test('an offline channel keeps none of the stale URLs of another broadcast (REG-TWITCASTING-001)', () {
       final room = detail('S04-page-offline', 'S05-stream-offline', 'twitcasting_jp');
       final legacy = _legacy('S04-page-offline');
-      for (final key in ['getRoomDetail', 'getRoomDetailForRefresh']) {
-        _expectParity(_projection(room), legacy[key] as Map<String, dynamic>, reason: key);
-      }
+      _expectParity(_projection(room), legacy['getRoomDetail'] as Map<String, dynamic>);
+      final refresh = TwitcastingApi.refreshRoom(
+        TwitcastingApi.streamServer(_sample('S05-stream-offline').body),
+        roomId: 'twitcasting_jp',
+        channel: 'twitcasting_jp',
+      );
+      _expectParity(
+        _projection(refresh),
+        legacy['getRoomDetailForRefresh'] as Map<String, dynamic>,
+        changed: {'title', 'nick', 'avatar', 'cover'}, // 12-2
+      );
       expect(room.effectiveLiveStatus, LiveStatus.offline);
+      expect(room.startedAt, isNull);
+      expect(room.restriction, isNull);
+      expect(room.danmakuData, isNull);
+      expect(room.title, startsWith('映画'), reason: 'no telop on the page: twitter:title, as 3.x');
       final data = room.data! as TwitcastingRoomData;
       expect(data.live, isFalse);
       expect(data.streams, isEmpty);
@@ -447,22 +704,66 @@ void main() {
       expect(room.link, 'https://twitcasting.tv/fixture_artist');
       expect(room.watching, isEmpty);
       expect(room.liveStatus, isNull, reason: 'the state is streamserver.php');
-      final requested = TwitcastingApi.channelPage(_roomHtml, roomId: 'Fixture_Artist', channel: 'fixture_artist');
+      final requested = TwitcastingApi.channelPage(_roomHtml, roomId: 'Fixture_Artist', channel: 'fixture_artist').room;
       expect(requested.roomId, 'Fixture_Artist', reason: 'a follow keeps the id it was made with');
       expect(requested.userId, 'fixture_artist');
     });
 
-    test('the telop only fills an empty twitter:title', () {
-      final html = _roomHtml.replaceFirst(
-        'content="Drawing &amp; music">',
-        'content=" "><meta name="twitter:description" content="Tonight\'s telop">',
+    test('the title is the telop under the player title, without its hashtags; else twitter:title (12-1)', () {
+      expect(_page(_livePage(telop: 'Tonight &amp; later')).title, 'Tonight & later');
+      expect(_page(_livePage()).title, 'Drawing & music', reason: 'hashtags only: no telop');
+      expect(_page(_livePage(telop: '<!-- x -->  ')).title, 'Drawing & music');
+      final blank = _livePage().replaceFirst('content="Drawing &amp; music">', 'content="　">');
+      expect(_page(blank).title, isEmpty, reason: 'no stand-in title (M2.1); twitter:description is not a title');
+      final withProfile = _livePage().replaceFirst(
+        '</head>',
+        '<meta name="twitter:description" content="My profile"></head>',
       );
-      expect(_page(html).title, "Tonight's telop");
-      expect(_page(_sample('S04-page-offline').body, channel: 'twitcasting_jp').title, startsWith('映画'));
+      expect(_page(withProfile).title, 'Drawing & music');
     });
 
-    test('a secret word is NeedsLogin; another creator or header is ApiChanged (3.x)', () {
-      expect(() => _page('Enter the secret word to access'), throwsA(isA<NeedsLogin>()));
+    test('S04-page-live-tags: hashtags without a telop; twitter:description is the profile text', () {
+      final page = TwitcastingApi.channelPage(
+        _sample('S04-page-live-tags').body,
+        roomId: 'c:gooniegoogoogaga',
+        channel: 'c:gooniegoogoogaga',
+      );
+      final body = _sample('S04-page-live-tags').body;
+      expect(body, contains('<meta name="twitter:description" content="Rock;Star">'));
+      expect(body, contains('olivernorthCampaign!'));
+      expect(page.room.title, 'Goo Goo GaGa', reason: 'twitter:title, not the profile text');
+      expect(page.room.nick, isNotEmpty);
+      final room = TwitcastingApi.roomDetail(page, TwitcastingApi.streamServer(_sample('S05-stream-live-tags').body));
+      expect(room.isLiveNow, isTrue);
+      expect(room.startedAt, DateTime.utc(2026, 9, 28, 17, 22, 20), reason: 'data-started-at 1790616140000');
+      expect(room.startedAt!.isBefore(_sample('S04-page-live-tags').capturedAt), isTrue);
+      expect((room.danmakuData! as TwitcastingDanmakuArgs).movieId, 841577030);
+      expect(TwitcastingApi.qualities(room.data! as TwitcastingRoomData), isNotEmpty);
+    });
+
+    test('a secret word: a live room marked password-protected, not played (unified rule; 3.x NeedsLogin)', () {
+      final page = _parsed('<html>Enter the secret word to access</html>');
+      expect(page.secretWord, isTrue);
+      expect([page.room.title, page.room.nick, page.room.avatar, page.room.cover], everyElement(isEmpty));
+      expect(page.room.link, 'https://twitcasting.tv/fixture_artist');
+      final room = TwitcastingApi.roomDetail(page, _stream(_liveStream()));
+      expect((room.effectiveLiveStatus, room.restriction), (LiveStatus.live, LiveRestriction.password));
+      final data = room.data! as TwitcastingRoomData;
+      expect(data.secretWord, isTrue);
+      expect(
+        () => TwitcastingApi.qualities(data),
+        throwsA(isA<StreamUnavailable>().having((error) => '$error', 'text', contains('password-protected'))),
+      );
+      final offline = TwitcastingApi.roomDetail(
+        page,
+        _stream({
+          'movie': {'id': 42, 'live': false},
+        }),
+      );
+      expect((offline.effectiveLiveStatus, offline.restriction), (LiveStatus.offline, null));
+    });
+
+    test('another creator or header is ApiChanged (3.x)', () {
       for (final html in [
         _roomHtml.replaceFirst('content="fixture_artist"', 'content="other"'),
         _roomHtml.replaceFirst('data-user-id="fixture_artist"', 'data-user-id="other"'),
@@ -498,7 +799,7 @@ void main() {
       expect(() => TwitcastingApi.streamServer('', status: 404), throwsA(isA<NotFound>()));
     });
 
-    test('tiers are checked when played: no tier, a broken tc-hls or another URL is ApiChanged (3.x)', () {
+    test('tiers are checked when played: no tier, a broken tc-hls or no valid URL is ApiChanged (3.x)', () {
       final stale = _stream({
         'movie': {'id': 42, 'live': true},
         'tc-hls': 'stale',
@@ -530,6 +831,39 @@ void main() {
       }
       final withoutId = _liveStream()..['movie'] = {'live': true};
       expect(() => TwitcastingApi.qualities(_stream(withoutId)), throwsA(isA<ApiChanged>()));
+    });
+
+    test('a bad tier URL only drops that tier (unified fault tolerance; 3.x rejected the answer)', () {
+      final json = _liveStream();
+      ((json['tc-hls']! as Map)['streams']! as Map)['high'] =
+          'https://edge.twitcasting.tv/tc.livehls/v1/streams/999/hls/672.96/media.m3u8';
+      final data = _stream(json);
+      final qualities = TwitcastingApi.qualities(data);
+      expect(qualities.map((quality) => (quality.id, quality.quality, quality.sort)), [
+        ('medium', 'HLS medium', 3),
+        ('low', 'HLS low', 2),
+      ]);
+      expect(
+        () => TwitcastingApi.resolution(data, const LivePlayQuality(quality: 'HLS high', id: 'high')),
+        throwsA(isA<StreamUnavailable>()),
+      );
+    });
+
+    test('a card known to be restricted is not played, with the reason', () {
+      LiveRoom card(LiveRestriction? restriction) =>
+          LiveRoom(roomId: 'a', platform: 'twitcasting', liveStatus: LiveStatus.live, restriction: restriction);
+      expect(TwitcastingApi.restricted(card(null)), isNull);
+      expect(TwitcastingApi.restricted(card(LiveRestriction.none)), isNull);
+      for (final (restriction, reason) in [
+        (LiveRestriction.private, 'private broadcast'),
+        (LiveRestriction.password, 'password-protected'),
+        (LiveRestriction.unplayable, 'unplayable'),
+      ]) {
+        expect(
+          TwitcastingApi.restricted(card(restriction)),
+          isA<StreamUnavailable>().having((error) => '$error', 'text', contains(reason)),
+        );
+      }
     });
 
     test('a missing tier is left out; the rest keep their order', () {

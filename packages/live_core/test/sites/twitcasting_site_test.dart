@@ -1,8 +1,9 @@
 // TwitcastingSite over the recorded TwitCasting responses (ReplayHttp) and
 // a few synthetic ones: the catalog, the one-window lists and their paging
-// (3.x's test/twitcasting_directory_paging_test.dart, adapter part), search
-// and channel-link search, the two-step room, streams and recovery,
-// cancellation, links and the error mapping (3.x's
+// (3.x's test/twitcasting_directory_paging_test.dart, adapter part, and the
+// 30 s snapshots of M4.U), search and channel-link search, the two-step room
+// and the one-request refresh (12-2), restricted rooms, streams and
+// recovery, cancellation, links and the error mapping (3.x's
 // test/twitcasting_adapter_test.dart).
 import 'dart:convert';
 
@@ -47,9 +48,18 @@ final class _Failing implements LiveHttp {
 
 typedef _Setup = ({TwitcastingSite site, ReplayHttp http});
 
-_Setup _setup(List<String> samples, {List<ReplaySample> extra = const []}) {
+_Setup _setup(List<String> samples, {List<ReplaySample> extra = const [], DateTime Function()? now}) {
   final http = ReplayHttp([...extra, for (final name in samples) ReplaySample.load('$_root/$name')]);
-  return (site: TwitcastingSite(http), http: http);
+  return (site: TwitcastingSite(http, now: now), http: http);
+}
+
+/// A clock tests move by hand.
+final class _Clock {
+  DateTime now = DateTime.utc(2026, 9, 29, 12);
+
+  DateTime call() => now;
+
+  void advance(Duration by) => now = now.add(by);
 }
 
 List<String> _paths(ReplayHttp http) => [for (final request in http.requests) request.url.path];
@@ -196,12 +206,53 @@ void main() {
       );
     });
 
-    test('pages cut from the window: each asks for the whole window (3.x)', () async {
+    test('pages cut from the window: a later page without an answer asks for the whole window (3.x)', () async {
       final http = ReplayHttp([_synthetic('$_top?id=&count=60', _window())]);
       final site = TwitcastingSite(http);
       expect((await site.getRecommendRooms(page: 2)).first.roomId, 'artist0_30');
       expect(await site.getRecommendRooms(page: 3), isEmpty);
       expect(http.requests, hasLength(1));
+    });
+
+    test("later pages share page 1's answer for 30 s; page 1 always asks anew (unified paging rule)", () async {
+      final clock = _Clock();
+      var generation = 0;
+      final http = _SwappableHttp(
+        () => [
+          _synthetic('$_top?id=&count=60', _window(generation: generation)),
+          _synthetic('$_top?id=_system_channel_popular&count=60', _window(generation: generation)),
+        ],
+      );
+      final site = TwitcastingSite(http, now: clock.call);
+      expect((await site.getRecommendRooms()).first.roomId, 'artist0_1');
+      generation++;
+      clock.advance(const Duration(seconds: 29));
+      expect((await site.getRecommendRooms(page: 2)).first.roomId, 'artist0_30', reason: 'the same answer');
+      expect(http.paths, hasLength(1));
+      expect((await site.getCategoryRooms(_popular, page: 2)).first.roomId, 'artist1_30', reason: 'another list');
+      expect(http.paths, hasLength(2));
+      clock.advance(const Duration(seconds: 1));
+      expect((await site.getRecommendRooms(page: 2)).first.roomId, 'artist1_30', reason: '30 s old: asked again');
+      expect(http.paths, hasLength(3));
+      generation++;
+      expect((await site.getRecommendRooms()).first.roomId, 'artist2_1', reason: 'page 1 (a pull to refresh)');
+      expect(http.paths, hasLength(4));
+    });
+
+    test('a failed answer is not kept; list cards carry their start time and restriction', () async {
+      final clock = _Clock()..now = DateTime.utc(2026, 9, 27, 18, 1, 57, 219);
+      var samples = [_synthetic('$_top?id=&count=60', '', status: 503)];
+      final http = _SwappableHttp(() => samples);
+      final site = TwitcastingSite(http, now: clock.call);
+      await expectLater(site.getRecommendRooms(), throwsA(isA<NetworkFailure>()));
+      samples = [ReplaySample.load('$_root/S02-top-all')];
+      final rooms = await site.getRecommendRooms(page: 2, pageSize: 20);
+      expect(rooms, hasLength(20));
+      expect(http.paths, hasLength(2), reason: 'the failure kept nothing');
+      final all = await site.getRecommendRooms(pageSize: 60);
+      final nabo = all.singleWhere((room) => room.roomId == 'nabo66game');
+      expect(nabo.startedAt, DateTime.utc(2026, 9, 27, 14, 26, 34));
+      expect(all.map((room) => room.restriction).toSet(), {LiveRestriction.none});
     });
 
     test("another platform's area, a bad key or a bad page are caller errors without a request (3.x)", () async {
@@ -222,19 +273,45 @@ void main() {
   });
 
   group('search', () {
-    test("the website's text search in English, a request for each page of the 50 (3.x)", () async {
+    test("the website's text search in English, asked once; later pages are cut from it (12-4)", () async {
       final setup = _setup(['S03-search']);
       final rooms = await setup.site.searchRooms(' game ', pageSize: 20);
-      expect(rooms, hasLength(14));
+      expect(rooms, hasLength(15));
+      expect(rooms[2].restriction, LiveRestriction.private, reason: '12-5');
       final request = setup.http.requests.single;
       expect(request.url.host, 'search.twitcasting.tv');
       expect(request.url.pathSegments, ['search', 'text', 'game']);
       expect(request.url.queryParameters, {'hl': 'en'});
       expect(await setup.site.searchRooms('game', page: 2, pageSize: 20), isEmpty);
       expect(await setup.site.searchRooms('game', page: 3, pageSize: 20), isEmpty);
-      expect(setup.http.requests, hasLength(3));
+      expect(setup.http.requests, hasLength(1), reason: '3.x asked again for pages 2 and 3');
       expect(await setup.site.searchRooms('game', page: 4, pageSize: 20), isEmpty);
-      expect(setup.http.requests, hasLength(3), reason: 'past the 50 rows the page can hold');
+      expect(setup.http.requests, hasLength(1), reason: 'past the 50 rows the page can hold');
+    });
+
+    test('search pages share one answer for 30 s, per keyword; page 1 asks anew', () async {
+      final clock = _Clock();
+      final setup = _setup(
+        [],
+        extra: [
+          _synthetic('https://search.twitcasting.tv/search/text/game?hl=en', _searchPage(40)),
+          _synthetic('https://search.twitcasting.tv/search/text/talk?hl=en', _searchPage(3)),
+        ],
+        now: clock.call,
+      );
+      final page1 = await setup.site.searchRooms('game', pageSize: 10);
+      expect(page1.first.roomId, 'c:artist0');
+      clock.advance(const Duration(seconds: 20));
+      expect((await setup.site.searchRooms('game', page: 2, pageSize: 10)).first.roomId, 'c:artist10');
+      expect((await setup.site.searchRooms('game', page: 4, pageSize: 10)).last.roomId, 'c:artist39');
+      expect(setup.http.requests, hasLength(1));
+      expect(await setup.site.searchRooms('talk', page: 2, pageSize: 2), hasLength(1), reason: 'another keyword');
+      expect(setup.http.requests, hasLength(2));
+      clock.advance(const Duration(seconds: 10));
+      await setup.site.searchRooms('game', page: 3, pageSize: 10);
+      expect(setup.http.requests, hasLength(3), reason: '30 s old: asked again');
+      await setup.site.searchRooms('game', pageSize: 10);
+      expect(setup.http.requests, hasLength(4), reason: 'page 1 always asks');
     });
 
     test('keywords are one path segment, encoded', () async {
@@ -297,12 +374,17 @@ void main() {
     test('cancellation reaches the request; a cancelled search sends nothing (3.x)', () async {
       final setup = _setup(['S03-search']);
       final token = CancelToken();
-      expect(await setup.site.searchRoomsCancellable('game', pageSize: 20, cancel: token), hasLength(14));
+      expect(await setup.site.searchRoomsCancellable('game', pageSize: 20, cancel: token), hasLength(15));
       expect(setup.http.requests.single.cancel, same(token));
       token.cancel();
       await expectLater(
         setup.site.searchRoomsCancellable('game', cancel: token),
         throwsA(isA<TransportFailure>().having((failure) => failure.reason, 'reason', TransportReason.cancelled)),
+      );
+      await expectLater(
+        setup.site.searchRoomsCancellable('game', page: 2, pageSize: 5, cancel: token),
+        throwsA(isA<TransportFailure>()),
+        reason: 'not served from the kept answer either',
       );
       await expectLater(
         setup.site.searchRoomsCancellable('https://twitcasting.tv/twitcasting_jp', cancel: token),
@@ -323,25 +405,47 @@ void main() {
   });
 
   group('rooms', () {
-    test('the channel page (redirects not followed), then streamserver.php; the same room at every depth', () async {
+    test('room entry and recording: the channel page (redirects not followed), then streamserver.php', () async {
       final setup = _setup(['S04-page-live', 'S05-stream-live']);
       final rooms = [
         await setup.site.getRoomDetail(roomId: 'nabo66game'),
-        await setup.site.getRoomDetailForRefresh(roomId: 'nabo66game'),
         await setup.site.getRoomDetailForRecording(roomId: 'nabo66game'),
       ];
       expect(_paths(setup.http), [
-        for (var i = 0; i < 3; i++) ...['/nabo66game', '/streamserver.php'],
+        for (var i = 0; i < 2; i++) ...['/nabo66game', '/streamserver.php'],
       ]);
       final [page, stream, ...] = setup.http.requests;
       expect(page.followRedirects, isFalse);
       expect(stream.url.queryParameters, {'target': 'nabo66game', 'mode': 'client', 'player': 'pc_web'});
       for (final room in rooms) {
         expect(room.isLiveNow, isTrue);
-        expect(room.title, 'Live #841525457');
+        expect(room.title, 'クラッシュバンディクー３', reason: 'the telop (12-1)');
+        expect(room.startedAt, DateTime.utc(2026, 9, 27, 14, 26, 34));
+        expect(room.restriction, LiveRestriction.none);
         expect((room.data! as TwitcastingRoomData).movieId, 841525457);
+        expect(room.danmakuData, isA<TwitcastingDanmakuArgs>().having((args) => args.movieId, 'movie', 841525457));
       }
+    });
+
+    test('a follow refresh and the live state ask streamserver.php alone (12-2)', () async {
+      final setup = _setup(['S04-page-live', 'S05-stream-live']);
+      final refresh = await setup.site.getRoomDetailForRefresh(roomId: ' Nabo66game ');
+      expect(_paths(setup.http), ['/streamserver.php'], reason: 'about 1 KB instead of the 110 KB page');
+      expect(setup.http.requests.single.url.queryParameters['target'], 'nabo66game');
+      expect(refresh.roomId, 'Nabo66game');
+      expect(refresh.userId, 'nabo66game');
+      expect(refresh.link, 'https://twitcasting.tv/nabo66game');
+      expect(refresh.isLiveNow, isTrue);
+      expect([refresh.title, refresh.nick, refresh.avatar, refresh.cover], everyElement(isEmpty));
+      expect((refresh.data! as TwitcastingRoomData).movieId, 841525457);
       expect(await setup.site.getLiveStatus(roomId: 'nabo66game'), isTrue);
+      expect(_paths(setup.http), ['/streamserver.php', '/streamserver.php']);
+      final entered = await setup.site.getRoomDetail(roomId: 'nabo66game');
+      final follow = entered.mergeFrom(refresh);
+      expect((follow.title, follow.nick, follow.startedAt), (entered.title, '山本', entered.startedAt));
+      final qualities = await setup.site.getPlayQualities(detail: follow);
+      expect(qualities, hasLength(3));
+      expect(setup.http.requests, hasLength(4), reason: 'the refreshed broadcast plays without a request');
     });
 
     test('the room keeps the id it was asked for; requests use the lower-case channel', () async {
@@ -353,12 +457,59 @@ void main() {
       expect(_paths(setup.http), ['/nabo66game', '/streamserver.php']);
     });
 
-    test('an offline channel: offline, with the page filled in', () async {
+    test('an offline channel: offline, with the page filled in; the refresh is offline too', () async {
       final setup = _setup(['S04-page-offline', 'S05-stream-offline']);
-      final room = await setup.site.getRoomDetailForRefresh(roomId: 'twitcasting_jp');
+      final room = await setup.site.getRoomDetail(roomId: 'twitcasting_jp');
       expect(room.effectiveLiveStatus, LiveStatus.offline);
       expect(room.nick, 'ツイキャス公式');
+      expect((room.startedAt, room.restriction, room.danmakuData), (null, null, null));
+      final refresh = await setup.site.getRoomDetailForRefresh(roomId: 'twitcasting_jp');
+      expect(refresh.effectiveLiveStatus, LiveStatus.offline);
       expect(await setup.site.getLiveStatus(roomId: 'twitcasting_jp'), isFalse);
+    });
+
+    test('a private broadcast from search: offline in the room, not played from its card', () async {
+      final setup = _setup(['S03-search-private', 'S04-page-private', 'S05-stream-private']);
+      final card = (await setup.site.searchRooms('弾き語り', pageSize: 50)).singleWhere((room) => room.isRestricted);
+      expect(
+        (card.roomId, card.restriction, card.isLiveNow),
+        ('g:117931547061051040135', LiveRestriction.private, true),
+      );
+      await expectLater(
+        setup.site.getPlayQualities(detail: card),
+        throwsA(isA<StreamUnavailable>().having((error) => '$error', 'text', contains('private'))),
+      );
+      expect(setup.http.requests, hasLength(1), reason: 'no request for a card known to be private');
+      final room = await setup.site.getRoomDetail(roomId: card.roomId);
+      expect(room.effectiveLiveStatus, LiveStatus.offline, reason: 'anonymous clients see it as offline');
+      final follow = card.mergeFrom(await setup.site.getRoomDetailForRefresh(roomId: card.roomId));
+      expect((follow.effectiveLiveStatus, follow.restriction), (LiveStatus.offline, null));
+    });
+
+    test('a card marked private but refreshed live plays: the carried broadcast is the newer answer', () async {
+      final setup = _setup(['S05-stream-live']);
+      final card = LiveRoom(
+        roomId: 'nabo66game',
+        platform: 'twitcasting',
+        liveStatus: LiveStatus.live,
+        restriction: LiveRestriction.private,
+      );
+      final follow = card.mergeFrom(await setup.site.getRoomDetailForRefresh(roomId: 'nabo66game'));
+      expect(follow.restriction, LiveRestriction.private, reason: 'kept while the state is the same (M2.1)');
+      expect(await setup.site.getPlayQualities(detail: follow), hasLength(3));
+      expect(setup.http.requests, hasLength(1));
+    });
+
+    test('a locked list card is not played, without a request', () async {
+      final setup = _setup([]);
+      final card = LiveRoom(
+        roomId: 'locked',
+        platform: 'twitcasting',
+        liveStatus: LiveStatus.live,
+        restriction: LiveRestriction.password,
+      );
+      await expectLater(setup.site.getPlayQualities(detail: card), throwsA(isA<StreamUnavailable>()));
+      expect(setup.http.requests, isEmpty);
     });
 
     test('an unknown channel is NotFound after one request; a non-channel id without one', () async {
@@ -367,8 +518,11 @@ void main() {
       expect(setup.http.requests, hasLength(1));
       for (final id in ['', 'search', 'a/b', 'x:abc']) {
         await expectLater(setup.site.getRoomDetailForRefresh(roomId: id), throwsA(isA<NotFound>()), reason: id);
+        await expectLater(setup.site.getRoomDetail(roomId: id), throwsA(isA<NotFound>()), reason: id);
       }
       expect(setup.http.requests, hasLength(1));
+      await expectLater(setup.site.getRoomDetailForRefresh(roomId: 'zxqvnochannelfixture'), throwsA(isA<NotFound>()));
+      expect(_paths(setup.http).last, '/streamserver.php', reason: 'streamserver.php answers {}');
       final deleted = _setup(
         ['S05-stream-notfound'],
         extra: [_synthetic('https://twitcasting.tv/zxqvnochannelfixture', _pageOf('zxqvnochannelfixture'))],
@@ -376,15 +530,32 @@ void main() {
       await expectLater(deleted.site.getRoomDetail(roomId: 'zxqvnochannelfixture'), throwsA(isA<NotFound>()));
     });
 
-    test('a secret word or another channel stops before streamserver.php (3.x)', () async {
-      for (final (body, type) in [
-        ('Enter the secret word to access', isA<NeedsLogin>()),
-        (_pageOf('other'), isA<ApiChanged>()),
-      ]) {
-        final setup = _setup([], extra: [_synthetic('https://twitcasting.tv/fixture_artist', body)]);
-        await expectLater(setup.site.getRoomDetail(roomId: 'fixture_artist'), throwsA(type));
-        expect(setup.http.requests, hasLength(1));
-      }
+    test('another channel stops before streamserver.php (3.x)', () async {
+      final setup = _setup([], extra: [_synthetic('https://twitcasting.tv/fixture_artist', _pageOf('other'))]);
+      await expectLater(setup.site.getRoomDetail(roomId: 'fixture_artist'), throwsA(isA<ApiChanged>()));
+      expect(setup.http.requests, hasLength(1));
+    });
+
+    test('a secret word: live and marked password-protected, not played (3.x NeedsLogin)', () async {
+      // One more request than 3.x: streamserver.php says whether it is live.
+      final setup = _setup(
+        [],
+        extra: [
+          _synthetic('https://twitcasting.tv/fixture_artist', '<p>Enter the secret word to access</p>'),
+          _live('fixture_artist', 42),
+        ],
+      );
+      final room = await setup.site.getRoomDetail(roomId: 'fixture_artist');
+      expect(_paths(setup.http), ['/fixture_artist', '/streamserver.php']);
+      expect((room.effectiveLiveStatus, room.restriction), (LiveStatus.live, LiveRestriction.password));
+      expect(room.followGroup, FollowGroup.live);
+      await expectLater(
+        setup.site.getPlayQualities(detail: room),
+        throwsA(isA<StreamUnavailable>().having((error) => '$error', 'text', contains('password-protected'))),
+      );
+      final recording = await setup.site.getRoomDetailForRecording(roomId: 'fixture_artist');
+      expect(recording.restriction, LiveRestriction.password);
+      expect(setup.http.requests, hasLength(4));
     });
 
     test('failures are failures, never an offline-looking room', () async {
@@ -395,8 +566,16 @@ void main() {
         (429, isA<RateLimited>()),
         (503, isA<NetworkFailure>()),
       ]) {
-        final setup = _setup([], extra: [_synthetic('https://twitcasting.tv/fixture_artist', '', status: status)]);
+        final setup = _setup(
+          [],
+          extra: [
+            _synthetic('https://twitcasting.tv/fixture_artist', '', status: status),
+            _synthetic(_stream('fixture_artist'), '', status: status),
+          ],
+        );
+        await expectLater(setup.site.getRoomDetail(roomId: 'fixture_artist'), throwsA(type));
         await expectLater(setup.site.getRoomDetailForRefresh(roomId: 'fixture_artist'), throwsA(type));
+        await expectLater(setup.site.getLiveStatus(roomId: 'fixture_artist'), throwsA(type));
       }
       final broken = _setup(
         [],
@@ -580,6 +759,24 @@ void main() {
     });
   });
 }
+
+/// A search page with [count] live rows of `c:artist{i}` (3.x's
+/// `searchHtml`).
+String _searchPage(int count) =>
+    '''
+<div id="tw-search-result-live">
+${List.generate(count, (i) => '''
+<div class="tw-search-result-row">
+  <a class="tw-movie-thumbnail2" href="/c:artist$i/movie/${i + 1}">
+    <div class="tw-movie-thumbnail2-image-wrapper" data-can-play="true">
+      <span class="tw-movie-thumbnail2-badge" data-status="live">LIVE</span>
+    </div><span class="tw-movie-thumbnail-title">Stream $i</span>
+  </a>
+  <div class="tw-search-result-row-user-name">
+    <div class="usertext"><a href="/c:artist$i"><span class="username">Artist $i</span></a></div>
+  </div>
+</div>''').join()}
+</div><div id="tw-search-result-movie"></div>''';
 
 /// A channel page of [channel] with 3.x's selectors (its room.html).
 String _pageOf(String channel) =>

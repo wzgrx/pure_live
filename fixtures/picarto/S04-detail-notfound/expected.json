@@ -1,0 +1,29 @@
+{
+  "generator": "PicartoSite.getRoomDetailForRefresh / getRoomDetail / getRoomDetailForRecording / getLiveStatus(zxqvnochannelfixture), getPlayQualites and getPlayUrls of the entered room; 3.x's picarto adapter run verbatim over the sample (docs/modules/M4.11-picarto.md)",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "throws": "Picarto schema"
+    },
+    "refreshRequests": 1,
+    "getRoomDetail": {
+      "throws": "Picarto schema"
+    },
+    "roomEntryRequests": [
+      "https://ptvintern.picarto.tv/api/channel/detail/zxqvnochannelfixture"
+    ],
+    "getRoomDetailForRecording": {
+      "throws": "Picarto schema"
+    },
+    "getLiveStatus": {
+      "throws": "Picarto schema"
+    },
+    "request": {
+      "method": "GET",
+      "url": "https://ptvintern.picarto.tv/api/channel/detail/zxqvnochannelfixture",
+      "headers": {
+        "Referer": "https://picarto.tv/",
+        "Origin": "https://picarto.tv"
+      }
+    }
+  }
+}

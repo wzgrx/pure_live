@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "platform": "picarto",
+  "sample": "S02-explore-p1",
+  "capturedAt": "2026-09-27T17:42:42.372052Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://ptvintern.picarto.tv/api/explore?first=30&page=1&filter_params%5Badult%5D=false&order_by%5Bfield%5D=viewers&order_by%5Border%5D=DESC&type=stream",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://picarto.tv/",
+      "Origin": "https://picarto.tv"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "public, s-maxage=60",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 17:42:42 GMT",
+      "access-control-allow-origin": "*",
+      "vary": [
+        "Accept-Encoding",
+        "Accept-Encoding"
+      ],
+      "content-encoding": "gzip",
+      "cf-cache-status": "DYNAMIC",
+      "content-type": "application/json",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cf-ray": "a41c4e749e41f64e-SJC",
+      "x-cacheable": "1",
+      "x-cache": "EXPIRED",
+      "expires": "-1"
+    }
+  },
+  "raw": {
+    "sha256": "d94ebda4ba906fb3798cc98d2ce48d39133e8988a3ddd35a2798df0d5c123819",
+    "length": 22263
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data[0].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[1].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[2].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[3].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[4].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[5].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[6].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[7].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[8].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[9].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[10].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[11].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[12].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[13].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[14].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[15].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[16].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[17].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[18].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[19].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[20].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[21].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[22].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[23].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[24].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[25].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[26].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[27].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[28].origin",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data[29].origin",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

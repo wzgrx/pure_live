@@ -1,0 +1,502 @@
+{
+  "generator": "PicartoApi.categories(); PicartoSite.getCategores(1, 30) and (2, 30); 3.x's picarto adapter run verbatim over the sample (docs/modules/M4.11-picarto.md)",
+  "value": {
+    "areas": [
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "8",
+        "areaName": "Furry",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "1",
+        "areaName": "Creative",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "22",
+        "areaName": "Adult",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "23",
+        "areaName": "Hentai",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "33",
+        "areaName": "Drawing",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "25",
+        "areaName": "Illustration",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "55",
+        "areaName": "Gaming",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "9",
+        "areaName": "Music",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "6",
+        "areaName": "Anime",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "7",
+        "areaName": "Manga",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "10",
+        "areaName": "Comic",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "2",
+        "areaName": "Character Design",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "16",
+        "areaName": "Pony",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "57",
+        "areaName": "IRL",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "4",
+        "areaName": "Animation",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "53",
+        "areaName": "Nature & Landscape",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "3",
+        "areaName": "Concept Art",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "13",
+        "areaName": "Game Development",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "17",
+        "areaName": "Cartoon",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "60",
+        "areaName": "Podcast",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "56",
+        "areaName": "Education",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "34",
+        "areaName": "Design",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "54",
+        "areaName": "Video Editing",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "61",
+        "areaName": "Talkshow",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "12",
+        "areaName": "Creative Writing",
+        "areaPic": null,
+        "shortName": null
+      },
+      {
+        "platform": "picarto",
+        "areaType": "category",
+        "typeName": "Picarto",
+        "areaId": "18",
+        "areaName": "3D Modeling",
+        "areaPic": null,
+        "shortName": null
+      }
+    ],
+    "getCategores": [
+      {
+        "id": "picarto",
+        "name": "Picarto",
+        "children": [
+          {
+            "platform": "picarto",
+            "areaType": "directory",
+            "typeName": "Picarto",
+            "areaId": "live",
+            "areaName": "公开直播（不含成人内容）",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "8",
+            "areaName": "Furry",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "1",
+            "areaName": "Creative",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "22",
+            "areaName": "Adult",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "23",
+            "areaName": "Hentai",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "33",
+            "areaName": "Drawing",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "25",
+            "areaName": "Illustration",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "55",
+            "areaName": "Gaming",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "9",
+            "areaName": "Music",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "6",
+            "areaName": "Anime",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "7",
+            "areaName": "Manga",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "10",
+            "areaName": "Comic",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "2",
+            "areaName": "Character Design",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "16",
+            "areaName": "Pony",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "57",
+            "areaName": "IRL",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "4",
+            "areaName": "Animation",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "53",
+            "areaName": "Nature & Landscape",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "3",
+            "areaName": "Concept Art",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "13",
+            "areaName": "Game Development",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "17",
+            "areaName": "Cartoon",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "60",
+            "areaName": "Podcast",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "56",
+            "areaName": "Education",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "34",
+            "areaName": "Design",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "54",
+            "areaName": "Video Editing",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "61",
+            "areaName": "Talkshow",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "12",
+            "areaName": "Creative Writing",
+            "areaPic": null,
+            "shortName": null
+          },
+          {
+            "platform": "picarto",
+            "areaType": "category",
+            "typeName": "Picarto",
+            "areaId": "18",
+            "areaName": "3D Modeling",
+            "areaPic": null,
+            "shortName": null
+          }
+        ]
+      }
+    ],
+    "getCategoresPage2": 0,
+    "requests": 2,
+    "request": {
+      "method": "GET",
+      "url": "https://ptvintern.picarto.tv/api/languages-categories",
+      "headers": {
+        "Referer": "https://picarto.tv/",
+        "Origin": "https://picarto.tv"
+      }
+    }
+  }
+}

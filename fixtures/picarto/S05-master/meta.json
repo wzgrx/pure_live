@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "platform": "picarto",
+  "sample": "S05-master",
+  "capturedAt": "2026-09-27T17:44:07.308144Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://edge1-eu-west.picarto.tv/stream/hls/golive+allatir/index.m3u8",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://picarto.tv/",
+      "Origin": "https://picarto.tv"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "connection": "keep-alive",
+      "x-mst-path": "https://edge1-eu-west.picarto.tv/stream",
+      "cache-control": "no-cache, no-store, must-revalidate",
+      "x-real-ip": "203.0.113.7",
+      "date": "Sun, 27 Sep 2026 17:44:07 GMT",
+      "access-control-allow-origin": "*",
+      "accept-encoding": "gzip",
+      "access-control-expose-headers": "*",
+      "pragma": "no-cache",
+      "content-type": "application/vnd.apple.mpegurl",
+      "access-control-max-age": "600",
+      "server": "nginx",
+      "referer": "https://picarto.tv/",
+      "access-control-allow-headers": "*",
+      "access-control-allow-credentials": "true",
+      "origin": "https://picarto.tv",
+      "access-control-allow-methods": "GET, POST, OPTIONS, HEAD",
+      "content-length": "140",
+      "host": "edge1-eu-west.picarto.tv",
+      "access-control-request-headers": "*",
+      "access-control-request-method": "GET",
+      "expires": "0"
+    }
+  },
+  "raw": {
+    "sha256": "8363ef51552475517fdd631c288e5f11857e308905ac03e1cb0291d5f43b7cad",
+    "length": 140
+  },
+  "body": "body.m3u8",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

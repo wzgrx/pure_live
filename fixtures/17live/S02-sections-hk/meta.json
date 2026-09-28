@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "platform": "17live",
+  "sample": "S02-sections-hk",
+  "capturedAt": "2026-09-28T20:52:47Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://api-dsa.17app.co/api/v1/sections?count=20&typeTab=2&region=HK&cursor=",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "ja-JP,ja;q=0.9,en;q=0.8",
+      "Origin": "https://17.live",
+      "Referer": "https://17.live/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "https://17.live",
+      "content-type": "application/json",
+      "date": "Mon, 28 Sep 2026 20:52:47 GMT",
+      "trace-id": "4e964655f6a97eb52788a678bf578f24",
+      "vary": "Accept-Encoding",
+      "via": "1.1 google",
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    }
+  },
+  "raw": {
+    "sha256": "d28f65c05d7690a73e57967736d96fa5b747b68f55513ff188abb40b031e1b39",
+    "length": 390160
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.sections[*].grids[*].post.taggedOpenID[*]",
+      "rule": "person"
+    },
+    {
+      "where": "$.sections[*].grids[*].post.caption",
+      "rule": "person"
+    }
+  ],
+  "tool": "manual capture (M4.U.33): curl, checked by hand as fixtures/README.md asks"
+}

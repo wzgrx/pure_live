@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "platform": "17live",
+  "sample": "S04-live-army",
+  "capturedAt": "2026-09-28T20:53:08Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://api-dsa.17app.co/api/v1/lives/376827",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Origin": "https://17.live",
+      "Referer": "https://17.live/en/live/376827"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "https://17.live",
+      "content-type": "application/json",
+      "date": "Mon, 28 Sep 2026 20:53:08 GMT",
+      "trace-id": "25a30505a38231e161a5b4dce793e008",
+      "vary": "Accept-Encoding",
+      "via": "1.1 google",
+      "alt-svc": "h3=\":443\"; ma=2592000"
+    }
+  },
+  "raw": {
+    "sha256": "80435b73690081e19e2fa6f5fec6c3a22880be81041a86f260df78f5d5812ced",
+    "length": 33499
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.guardianUserID",
+      "rule": "person"
+    },
+    {
+      "where": "$.guardianPicture",
+      "rule": "secret"
+    }
+  ],
+  "tool": "manual capture (M4.U.33): curl, checked by hand as fixtures/README.md asks"
+}

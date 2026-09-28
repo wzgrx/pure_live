@@ -2,10 +2,11 @@
 // 3.x's frozen output (expected.json, written by
 // fixtures/17live/legacy_expected.dart from 3.x's SeventeenLiveApi,
 // SeventeenLiveLink and SeventeenLiveSite). Every intended difference is
-// listed with its reason; everything else must match. The synthetic cases
+// listed with its reason (M4.33 differences, and the M4.U rows 33-1 to 33-7
+// of docs/UPGRADES.md); everything else must match. The synthetic cases
 // port 3.x's seventeenlive_public_catalog_test.dart and cover the regression
 // entries of the archived spec (REG-17LIVE-001–004) and the shapes 3.x
-// refused.
+// refused. S02-sections-hk and S04-live-army (M4.U.33) have no 3.x output.
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
@@ -45,8 +46,40 @@ List<Map<String, dynamic>> _maps(Object? value) => (value! as List).cast<Map<Str
 /// they now travel on every line.
 const _headersMoved = {'httpHeaders'};
 
+/// Keys M4.U added to a live room: `startedAt` (33-7) and `restriction`
+/// (unified rule). 3.x wrote neither; they are written only when set.
+const _newKeys = {'startedAt', 'restriction'};
+
+/// Asserts that 3.x's [legacy] room has none of [_newKeys] and [room] has
+/// the given ones.
+void _expectNewKeys(LiveRoom room, Map<String, dynamic> legacy, {DateTime? startedAt, LiveRestriction? restriction}) {
+  for (final key in _newKeys) {
+    expect(legacy.containsKey(key), isFalse, reason: '3.x wrote no $key');
+  }
+  expect(room.startedAt, startedAt);
+  expect(room.restriction, restriction);
+}
+
+/// `beginTime` of S04-live-live (1790531684).
+final _liveSince = DateTime.utc(2026, 9, 27, 17, 54, 44);
+
+/// 3.x's quality ids → the current ones (33-2), as M9 migrates them.
+const _qualityIds = {'enhanced': 'enhanced', 'hd': 'hd', 'h264': 'h264', 'standard': 'source'};
+
+/// 3.x's quality names → the current ones (33-2: 标准 is 原画).
+const _qualityNames = {
+  '增强高清 · FLV': '增强高清 · FLV',
+  '高清 · FLV': '高清 · FLV',
+  'H.264 · FLV': 'H.264 · FLV',
+  '标准 · FLV': '原画 · FLV',
+};
+
+/// A 3.x pull URL as the current code gives it: always https (33-3).
+String _https(Object? url) => '$url'.replaceFirst(RegExp('^http://'), 'https://');
+
 const _live = '27484154';
 const _offline = '28371376';
+const _army = '376827';
 
 LiveRoom _entered(String sample, String roomId) {
   final fixture = _sample(sample);
@@ -126,6 +159,8 @@ void main() {
         _expectParity(_projection(room), rooms[index], changed: _headersMoved, reason: 'p1[$index]');
         expect(room.httpHeaders, isEmpty);
         expect(room.data, isNull, reason: 'list cards carry no playback (3.x)');
+        // Section rows have no beginTime; no premiumContent is no lock.
+        _expectNewKeys(room, rooms[index], restriction: LiveRestriction.none);
       }
       expect(page.nextCursor, legacy['nextCursor']);
       expect(page.hasMore, legacy['hasMore']);
@@ -160,8 +195,27 @@ void main() {
       expect(page.rooms, hasLength(20));
       for (final (index, room) in page.rooms.indexed) {
         _expectParity(_projection(room), rooms[index], changed: _headersMoved, reason: 'tw[$index]');
+        _expectNewKeys(room, rooms[index], restriction: LiveRestriction.none);
       }
       expect(page.nextCursor, legacy['nextCursor']);
+      // Its two army-only rows are offline: not listed, as in 3.x.
+      expect(fixture.body, contains('"premiumType": 2'));
+    });
+
+    test('33-1: the HK page (no 3.x output) through the same rules; a locked live row is listed and marked', () {
+      final fixture = _sample('S02-sections-hk');
+      expect(fixture.url.queryParameters['region'], 'HK');
+      final page = SeventeenLiveApi.sectionsPage(fixture.body, status: fixture.status);
+      expect(page.rooms, hasLength(32));
+      expect(page.nextCursor, '1790628721486100100:25:20:10-mrL5rBIVbWblU1v9gn-7T0M4StQ=');
+      expect(page.rooms.every((room) => room.isLiveNow), isTrue);
+      final army = page.rooms.singleWhere((room) => room.roomId == _army);
+      expect(army.liveStatus, LiveStatus.live, reason: 'a locked live stays live (unified rule)');
+      expect(army.restriction, LiveRestriction.subscribersOnly, reason: 'premiumType 2, ARMY');
+      expect(army.isRestricted, isTrue);
+      expect(army.followGroup, FollowGroup.live);
+      expect(page.rooms.where((room) => room.restriction != LiveRestriction.none), [army]);
+      expect(page.rooms.map((room) => room.startedAt).toSet(), {null}, reason: 'section rows have no beginTime');
     });
 
     test("cards as 3.x's _card: age notice, no owner roomID needed, current viewers only", () {
@@ -283,14 +337,55 @@ void main() {
       expect(() => SeventeenLiveApi.sectionsPage('{"sections":{}}'), throwsA(isA<ApiChanged>()));
     });
 
-    test("checkCursor and sectionsQuery: 3.x's request", () {
+    test("checkCursor and sectionsQuery: 3.x's request; a region's (33-1)", () {
       expect(SeventeenLiveApi.sectionsQuery(null), {'count': '20', 'typeTab': '2', 'region': 'JP', 'cursor': ''});
       expect(SeventeenLiveApi.sectionsQuery('c')['cursor'], 'c');
+      expect(SeventeenLiveApi.sectionsQuery(null, regionCode: 'TW'), {
+        'count': '20',
+        'typeTab': '2',
+        'region': 'TW',
+        'cursor': '',
+      });
       SeventeenLiveApi.checkCursor(null);
       SeventeenLiveApi.checkCursor('x' * 512);
       for (final cursor in ['', 'x' * 513, 'a\u0000b']) {
         expect(() => SeventeenLiveApi.checkCursor(cursor), throwsArgumentError, reason: cursor);
       }
+    });
+  });
+
+  group('catalog (33-1)', () {
+    test('one category of three regions; the areas are what the directory asks for', () {
+      final category = SeventeenLiveApi.category;
+      expect(category.id, 'region');
+      expect(category.name, '地区');
+      expect(category.children.map((area) => (area.areaId, area.areaName)), [('JP', '日本'), ('TW', '台湾'), ('HK', '香港')]);
+      for (final area in category.children) {
+        expect(area.platform, '17live');
+        expect(area.areaType, 'region');
+        expect(area.typeName, '地区');
+        expect(area.identityKey, isNotNull);
+        expect(SeventeenLiveApi.regionOf(area), area.areaId);
+        expect(SeventeenLiveApi.regionOf(LiveArea.fromJson(area.toJson())), area.areaId, reason: 'a stored area');
+      }
+      expect(SeventeenLiveApi.regionOf(null), 'JP', reason: 'the recommendations stay Japan (3.x)');
+      expect(SeventeenLiveApi.regionOf(const LiveArea(platform: '17LIVE', areaId: ' tw ')), 'TW');
+    });
+
+    test('an area that is not a region, or of another platform, is a caller error', () {
+      for (final area in [
+        const LiveArea(platform: '17live', areaId: 'US'),
+        const LiveArea(platform: '17live', areaId: ' '),
+        const LiveArea(platform: 'showroom', areaId: 'JP'),
+        const LiveArea(areaId: 'JP'),
+      ]) {
+        expect(() => SeventeenLiveApi.regionOf(area), throwsArgumentError, reason: '$area');
+      }
+    });
+
+    test('the directory notice is written for viewers (unified rule), naming the regions', () {
+      expect(SeventeenLiveApi.directoryScope, contains('日本、台湾、香港'));
+      expect(SeventeenLiveApi.directoryScope, isNot(contains('原生游标')));
     });
   });
 
@@ -302,6 +397,8 @@ void main() {
       expect(_ids(rooms), legacy.map((room) => room['roomId']));
       for (final (index, room) in rooms.indexed) {
         _expectParity(_projection(room), legacy[index], changed: _headersMoved, reason: 'search[$index]');
+        // Search rows carry beginTime (33-7) and premiumContent: null.
+        _expectNewKeys(room, legacy[index], startedAt: _liveSince, restriction: LiveRestriction.none);
       }
       expect(rooms.single.totalViewers, '1138');
       expect(rooms.single.followers, '2775');
@@ -335,25 +432,44 @@ void main() {
       expect(() => SeventeenLiveApi.searchRooms('{}'), throwsA(isA<ApiChanged>()));
       expect(() => SeventeenLiveApi.searchRooms('<html>'), throwsA(isA<ApiChanged>()));
     });
+
+    test('33-5: the keyword is trimmed and cut to 100 UTF-16 units, never inside a surrogate pair', () {
+      expect(SeventeenLiveApi.searchKeyword('  Re:Zero '), 'Re:Zero');
+      expect(SeventeenLiveApi.searchKeyword('x' * 101), 'x' * 100);
+      expect(SeventeenLiveApi.searchKeyword('x' * 100), 'x' * 100);
+      expect(SeventeenLiveApi.searchKeyword('${'x' * 99}😀tail'), 'x' * 99, reason: 'the pair is not split');
+      expect(SeventeenLiveApi.searchKeyword('${'x' * 98}😀tail'), '${'x' * 98}😀');
+      expect(SeventeenLiveApi.searchKeyword('${'x' * 99} tail'), 'x' * 99, reason: 'trimmed again');
+      expect(SeventeenLiveApi.searchKeyword('   '), '');
+    });
+
+    test('33-5: only a web address (<scheme>://) is not a keyword; a colon is (3.x: any URI scheme)', () {
+      for (final text in ['https://other.test/live/1', 'HTTP://17.live/', ' ftp://x ', 'app+x.y-z://open', 'a://']) {
+        expect(SeventeenLiveApi.isUrl(text), isTrue, reason: text);
+      }
+      for (final text in ['Re:Zero', 'mailto:someone', '12:30', 'https:/x', '1a://x', '花音']) {
+        expect(SeventeenLiveApi.isUrl(text), isFalse, reason: text);
+      }
+    });
   });
 
   group('S04 rooms', () {
-    test('live: entry, refresh and recording rooms as 3.x', () {
+    test('live: entry, refresh and recording rooms as 3.x, with the start time (33-7) and no lock', () {
       final fixture = _sample('S04-live-live');
       for (final key in ['getRoomDetail', 'getRoomDetailForRecording']) {
-        _expectParity(
-          _projection(_entered('S04-live-live', _live)),
-          _value('S04-live-live', key)! as Map<String, dynamic>,
-          changed: _headersMoved,
-          reason: key,
-        );
+        final legacy = _value('S04-live-live', key)! as Map<String, dynamic>;
+        final entered = _entered('S04-live-live', _live);
+        _expectParity(_projection(entered), legacy, changed: _headersMoved, reason: key);
+        _expectNewKeys(entered, legacy, startedAt: _liveSince, restriction: LiveRestriction.none);
+        expect(entered.danmakuData, const SeventeenLiveDanmakuArgs(roomId: _live), reason: '33-4');
       }
       final refreshed = SeventeenLiveApi.refreshRoom(fixture.body, roomId: _live);
-      _expectParity(
-        _projection(refreshed),
-        _value('S04-live-live', 'getRoomDetailForRefresh')! as Map<String, dynamic>,
-        changed: _headersMoved,
-      );
+      final legacyRefresh = _value('S04-live-live', 'getRoomDetailForRefresh')! as Map<String, dynamic>;
+      _expectParity(_projection(refreshed), legacyRefresh, changed: _headersMoved);
+      _expectNewKeys(refreshed, legacyRefresh, startedAt: _liveSince, restriction: LiveRestriction.none);
+      expect(refreshed.toJson()['startedAt'], '2026-09-27T17:54:44.000Z');
+      expect(refreshed.toJson()['restriction'], 'none');
+      expect(refreshed.danmakuData, isNull, reason: 'a refresh is a card');
       expect(refreshed.data, isNull);
       expect(refreshed.onlineViewers, '108');
       expect(refreshed.totalViewers, '1138');
@@ -362,24 +478,48 @@ void main() {
       expect(_value('S04-live-live', 'getLiveStatus'), isTrue);
     });
 
-    test('live: the qualities, their names, order and every URL as 3.x', () {
+    test("live: 3.x's four qualities renamed and reordered (33-2), every URL as 3.x's over https (33-3)", () {
       final data = _data(_entered('S04-live-live', _live));
       expect(data.roomId, _live);
       expect(data.userId, '20015b43-ab03-43d8-a37e-32250131d6bc');
       expect(data.unavailable, isNull);
       final legacy = _maps(_value('S04-live-live', 'getPlayQualites'));
-      expect(data.qualities.map((q) => q.quality), legacy.map((q) => q['quality']));
-      expect(data.qualities.map((q) => q.id), legacy.map((q) => q['id']));
-      expect(data.qualities.map((q) => q.sort), legacy.map((q) => q['sort']));
-      expect(data.qualities.map((q) => q.quality), ['增强高清 · FLV', '高清 · FLV', 'H.264 · FLV', '标准 · FLV']);
+      expect(legacy.map((q) => q['quality']), ['增强高清 · FLV', '高清 · FLV', 'H.264 · FLV', '标准 · FLV']);
+      // changed: names, ids, order and 原画's sort (33-2). Each of 3.x's
+      // qualities is one quality now, through the id and name maps.
+      expect(data.qualities.map((q) => q.quality), ['原画 · FLV', '增强高清 · FLV', '高清 · FLV', 'H.264 · FLV']);
+      expect(data.qualities.map((q) => q.id), ['source', 'enhanced', 'hd', 'h264']);
+      expect(data.qualities.map((q) => q.sort), [500, 400, 300, 200]);
+      for (final old in legacy) {
+        final id = SeventeenLiveApi.qualityIdFromLegacy('${old['id']}');
+        expect(id, _qualityIds[old['id']]);
+        final current = data.qualities.singleWhere((q) => q.id == id);
+        expect(current.quality, _qualityNames[old['quality']]);
+        expect(current.sort, id == 'source' ? 500 : old['sort'], reason: '3.x sorted 标准 last (100)');
+      }
+      expect(SeventeenLiveApi.playQualities(data).map((q) => q.id), ['h264', 'source', 'enhanced', 'hd']);
+      expect(SeventeenLiveApi.playQualities(data, preferH264: false).map((q) => q.id), [
+        'source',
+        'enhanced',
+        'hd',
+        'h264',
+      ]);
       final urls = _legacy('S04-live-live')['getPlayUrls'] as Map<String, dynamic>;
       final resolved = _legacy('S04-live-live')['resolvePlayUrlsRaw'] as Map<String, dynamic>;
-      for (final quality in data.qualities) {
+      for (final MapEntry(key: old, value: id) in _qualityIds.entries) {
+        final quality = data.qualities.singleWhere((q) => q.id == id);
         final resolution = SeventeenLiveApi.resolution(data, quality);
-        expect(resolution.urls, (urls['${quality.id}'] as Map)['value'], reason: '${quality.id}');
-        final applied = (resolved['${quality.id}'] as Map)['value'] as Map;
-        expect(resolution.appliedQualityData, applied['appliedQualityData']);
-        expect(resolution.urls, applied['urls']);
+        // changed: https (33-3); the same URLs otherwise.
+        expect(resolution.urls, [for (final url in (urls[old] as Map)['value'] as List) _https(url)], reason: old);
+        final applied = (resolved[old] as Map)['value'] as Map;
+        expect(applied['appliedQualityData'], old);
+        expect(resolution.appliedQualityData, id, reason: '33-2: the current id');
+        expect(resolution.urls, [for (final url in applied['urls'] as List) _https(url)]);
+        expect(resolution.urls.every((url) => url.startsWith('https://')), isTrue);
+        // 3.x's id still plays (a stored quality M9 did not migrate).
+        final byOldId = SeventeenLiveApi.resolution(data, LivePlayQuality(quality: 'x', id: old));
+        expect(byOldId.urls, resolution.urls);
+        expect(byOldId.appliedQualityData, id);
       }
     });
 
@@ -401,7 +541,10 @@ void main() {
         }
       }
       final tencent = (data.qualities.first.data! as List<LivePlayLine>).first.url;
-      expect(tencent, startsWith('http://'), reason: '3.x played the Tencent CDN as given');
+      final recorded = _sample('S04-live-live').body;
+      expect(recorded, contains(tencent.replaceFirst('https://', 'http://')), reason: 'recorded over http');
+      // changed: 3.x played the Tencent CDN over http, as given (33-3).
+      expect(tencent, startsWith('https://tencent-global-pull-rtmp.17app.co/'));
     });
 
     test('offline: rooms as 3.x; no stream (3.x gave an empty quality list)', () {
@@ -420,6 +563,13 @@ void main() {
       expect(entered.liveStatus, LiveStatus.offline);
       expect(entered.onlineViewers, '', reason: "the last broadcast's counts are not shown");
       expect(entered.totalViewers, '');
+      expect(fixture.body, contains('"beginTime": 1790508495'));
+      _expectNewKeys(
+        entered,
+        _value('S04-live-offline', 'getRoomDetail')! as Map<String, dynamic>,
+        // Neither is filled offline: beginTime is the last broadcast's.
+      );
+      expect(entered.danmakuData, const SeventeenLiveDanmakuArgs(roomId: _offline), reason: 'the channel stays');
       expect(_value('S04-live-offline', 'getPlayQualites'), isEmpty);
       expect(() => SeventeenLiveApi.playQualities(_data(entered)), throwsA(isA<StreamUnavailable>()));
       expect(_value('S04-live-offline', 'getLiveStatus'), isFalse);
@@ -511,6 +661,125 @@ void main() {
         '',
       );
     });
+
+    test('an army-only live (S04-live-army, no 3.x output): live and marked, its pull URLs not played', () {
+      final fixture = _sample('S04-live-army');
+      expect(fixture.body, contains('tencent-global-pull-rtmp'), reason: 'the answer carries pull URLs');
+      final entered = SeventeenLiveApi.enteredRoom(fixture.body, roomId: _army, status: fixture.status);
+      final refreshed = SeventeenLiveApi.refreshRoom(fixture.body, roomId: _army);
+      for (final room in [entered, refreshed]) {
+        expect(room.liveStatus, LiveStatus.live);
+        expect(room.restriction, LiveRestriction.subscribersOnly);
+        expect(room.followGroup, FollowGroup.live);
+        expect(room.startedAt, DateTime.utc(2026, 9, 28, 20, 46, 5), reason: 'beginTime 1790628365');
+        expect(room.onlineViewers, '1');
+      }
+      final data = _data(entered);
+      expect(data.qualities, isEmpty, reason: 'the website locks it; 3.x played it');
+      expect(
+        () => SeventeenLiveApi.playQualities(data),
+        throwsA(isA<StreamUnavailable>().having((e) => e.detail, 'detail', contains('army members'))),
+      );
+      expect(entered.danmakuData, const SeventeenLiveDanmakuArgs(roomId: _army));
+    });
+
+    test("restrictions: premiumContent by the website's isLocked rule, only while live", () {
+      Map<String, Object?> premium(Object? type, {bool paid = false}) => {
+        'premiumType': type,
+        'price': 0,
+        'paymentInfo': {'paid': paid},
+      };
+      for (final (content, expected) in <(Object?, LiveRestriction?)>[
+        (null, LiveRestriction.none),
+        (premium(0), LiveRestriction.none),
+        (premium(null), LiveRestriction.none),
+        (premium(1), LiveRestriction.paid),
+        (premium('1'), LiveRestriction.paid),
+        (premium(2), LiveRestriction.subscribersOnly),
+        (premium(3), LiveRestriction.unplayable),
+        (premium(9), LiveRestriction.unplayable),
+        (premium(2, paid: true), LiveRestriction.none),
+        ({'premiumType': 1}, LiveRestriction.paid),
+        ('locked', null),
+        (const [1], null),
+      ]) {
+        expect(SeventeenLiveApi.restrictionOf(content), expected, reason: '$content');
+        final answer = _stream(123, ownerRoomId: 123, changes: {'premiumContent': content});
+        expect(SeventeenLiveApi.refreshRoom(_room(answer), roomId: '123').restriction, expected, reason: '$content');
+        final row = SeventeenLiveApi.searchRooms(jsonEncode([answer])).single;
+        expect(row.restriction, expected, reason: 'a list row keeps its lock: $content');
+      }
+      final offline = _stream(123, ownerRoomId: 123, status: 0, changes: {'premiumContent': premium(2)});
+      expect(SeventeenLiveApi.refreshRoom(_room(offline), roomId: '123').restriction, isNull);
+      final unknown = _stream(123, ownerRoomId: 123, status: 1, changes: {'premiumContent': premium(2)});
+      expect(SeventeenLiveApi.refreshRoom(_room(unknown), roomId: '123').restriction, isNull);
+    });
+
+    test('a locked live names its lock when played; one that cannot be read plays, as 3.x', () {
+      for (final (type, text) in [(1, 'premium live'), (2, 'army members'), (3, 'locked live (unplayable)')]) {
+        final room = SeventeenLiveApi.enteredRoom(
+          _room(
+            _stream(
+              123,
+              ownerRoomId: 123,
+              userId: 'uid',
+              changes: {
+                'premiumContent': {'premiumType': type},
+                'pullURLsInfo': {
+                  'rtmpURLs': [_provider('tencent-global-pull-rtmp.17app.co', 'uid')],
+                },
+              },
+            ),
+          ),
+          roomId: '123',
+        );
+        expect(room.isLiveNow, isTrue);
+        expect(
+          () => SeventeenLiveApi.playQualities(_data(room)),
+          throwsA(isA<StreamUnavailable>().having((e) => e.detail, 'detail', contains(text))),
+          reason: '$type',
+        );
+      }
+      final unreadable = SeventeenLiveApi.enteredRoom(
+        _room(
+          _stream(
+            123,
+            ownerRoomId: 123,
+            userId: 'uid',
+            changes: {
+              'premiumContent': 'x',
+              'pullURLsInfo': {
+                'rtmpURLs': [_provider('tencent-global-pull-rtmp.17app.co', 'uid')],
+              },
+            },
+          ),
+        ),
+        roomId: '123',
+      );
+      expect(unreadable.restriction, isNull);
+      expect(SeventeenLiveApi.playQualities(_data(unreadable)), hasLength(4));
+    });
+
+    test('33-7: beginTime while live, Unix seconds in 2000–2100; nothing offline or unreadable', () {
+      DateTime? started(Object? begin, {int status = 2}) => SeventeenLiveApi.refreshRoom(
+        _room(_stream(123, ownerRoomId: 123, status: status, changes: {'beginTime': begin})),
+        roomId: '123',
+      ).startedAt;
+      expect(started(1790531684), _liveSince);
+      expect(started(1790531684, status: 0), isNull);
+      for (final begin in [null, 0, -1, '1790531684', 1790531684.0, 946684799, 4102444801, true]) {
+        expect(started(begin), isNull, reason: '$begin');
+      }
+      expect(SeventeenLiveApi.startTime(946684800), DateTime.utc(2000));
+      final row = SeventeenLiveApi.sectionsPage(
+        _sections([
+          _section('Label', [
+            _stream(5, changes: {'beginTime': 1790531684}),
+          ]),
+        ]),
+      ).rooms.single;
+      expect(row.startedAt, _liveSince, reason: 'a section row with beginTime has it too');
+    });
   });
 
   group('streams', () {
@@ -546,25 +815,58 @@ void main() {
       }
     });
 
-    test('pull data 3.x could not read fails the entry, as in 3.x; the refresh is not affected', () {
+    test('unified rule "容错": pull data 3.x could not read no longer fails the entry; a bad part loses itself', () {
+      // Nothing readable: the room is entered (3.x failed it), playing it is
+      // ApiChanged naming what was skipped; the refresh is not affected.
       for (final answer in [
         live(providers: 'x'),
-        live(providers: List.filled(17, _provider(tencent, 'uid'))),
         live(providers: ['x']),
         live(
           providers: [
-            _provider(tencent, 'uid', changes: {'url264': 5}),
+            {'provider': 17, 'url264': 5},
           ],
         ),
       ]) {
-        expect(() => SeventeenLiveApi.enteredRoom(_room(answer), roomId: '123'), throwsA(isA<ApiChanged>()));
+        final room = SeventeenLiveApi.enteredRoom(_room(answer), roomId: '123');
+        expect(room.isLiveNow, isTrue);
+        expect(() => SeventeenLiveApi.playQualities(_data(room)), throwsA(isA<ApiChanged>()), reason: '$answer');
         expect(SeventeenLiveApi.refreshRoom(_room(answer), roomId: '123').isLiveNow, isTrue);
       }
+      // A bad provider or field loses only itself (3.x: the whole room).
+      final skipped = <String>[];
+      final qualities = SeventeenLiveApi.qualities(
+        live(
+          providers: [
+            'x',
+            _provider(tencent, 'uid', changes: {'url264': 5}),
+            _provider(wansu, 'uid'),
+          ],
+        ),
+        roomId: '123',
+        skipped: skipped,
+      );
+      expect(skipped, ['provider 0 is not an object', 'provider 1: url264 is not text']);
+      expect(qualities.map((q) => q.id), ['source', 'enhanced', 'hd', 'h264']);
+      final h264 = qualities.last.data! as List<LivePlayLine>;
+      expect(h264.map((line) => line.lineId), ['wansu'], reason: "Tencent's H.264 field was bad");
+      final source = qualities.first.data! as List<LivePlayLine>;
+      expect(source.map((line) => line.lineId), ['tencent', 'wansu']);
+      // More than 16 providers: the first 16 are read (3.x refused them all).
+      final many = <String>[];
+      expect(
+        SeventeenLiveApi.qualities(
+          live(providers: List.filled(17, _provider(tencent, 'uid'))),
+          roomId: '123',
+          skipped: many,
+        ),
+        hasLength(4),
+      );
+      expect(many, ['1 providers over 16']);
     });
 
     test('rtmpUrls when there is no pullURLsInfo; an empty rtmpURLs list is not replaced (3.x)', () {
       final fallback = offered(live(withPull: false, fallback: [_provider(tencent, 'uid')]));
-      expect(fallback.map((q) => q.id), ['enhanced', 'hd', 'h264', 'standard']);
+      expect(fallback.map((q) => q.id), ['source', 'enhanced', 'hd', 'h264']);
       expect(() => offered(live(providers: const [], fallback: [_provider(tencent, 'uid')])), returnsNormally);
       expect(offered(live(providers: const [], fallback: [_provider(tencent, 'uid')])), isEmpty);
     });
@@ -585,15 +887,27 @@ void main() {
       );
       final hd = qualities.firstWhere((q) => q.id == 'hd').data! as List<LivePlayLine>;
       expect(hd.map((line) => line.url), [
-        'http://$tencent/live/uid_enhance003.flv',
-        'http://$tencent/live/uid_other.flv',
-        'http://$wansu/live/uid_enhance003.flv',
+        'https://$tencent/live/uid_enhance003.flv',
+        'https://$tencent/live/uid_other.flv',
+        'https://$wansu/live/uid_enhance003.flv',
       ]);
-      final standard = qualities.firstWhere((q) => q.id == 'standard').data! as List<LivePlayLine>;
-      expect(standard.map((line) => line.lineId), ['tencent', 'wansu']);
+      final source = qualities.firstWhere((q) => q.id == 'source').data! as List<LivePlayLine>;
+      expect(source.map((line) => line.lineId), ['tencent', 'wansu']);
     });
 
-    test("a quality with no URL is left out, 3.x's order kept", () {
+    test('an http and an https URL of the same stream are one line (33-3)', () {
+      final qualities = offered(
+        live(
+          providers: [
+            _provider(tencent, 'uid', changes: {'urlHighQuality': 'https://$tencent/live/uid.flv'}),
+          ],
+        ),
+      );
+      final source = qualities.first.data! as List<LivePlayLine>;
+      expect(source.map((line) => line.url), ['https://$tencent/live/uid.flv']);
+    });
+
+    test('a quality with no URL is left out, best first', () {
       final qualities = offered(
         live(
           providers: [
@@ -601,17 +915,42 @@ void main() {
           ],
         ),
       );
-      expect(qualities.map((q) => q.id), ['hd', 'standard']);
-      expect(qualities.map((q) => q.sort), [300, 100]);
+      expect(qualities.map((q) => q.id), ['source', 'hd']);
+      expect(qualities.map((q) => q.sort), [500, 300]);
+      final data = _data(
+        SeventeenLiveApi.enteredRoom(_room(live(providers: [_provider(tencent, 'uid')])), roomId: '123'),
+      );
+      expect(SeventeenLiveApi.playQualities(data).map((q) => q.id), ['h264', 'source', 'enhanced', 'hd']);
+      final noH264 = _data(
+        SeventeenLiveApi.enteredRoom(
+          _room(
+            live(
+              providers: [
+                _provider(tencent, 'uid', changes: {'url264': null}),
+              ],
+            ),
+          ),
+          roomId: '123',
+        ),
+      );
+      expect(SeventeenLiveApi.playQualities(noH264).map((q) => q.id), [
+        'source',
+        'enhanced',
+        'hd',
+      ], reason: 'without the transcode, 原画 is the default either way');
     });
 
-    test("pullUrl: an .flv on a *pull-rtmp*.17app.co host, kept as given (3.x's _mediaUri)", () {
-      for (final url in [
-        'http://tencent-global-pull-rtmp.17app.co/live/a.flv',
-        'https://wansu-global-pull-rtmp-latency.17app.co/vod/a.FLV',
-        'https://pull-rtmp.17app.co/a.flv?t=1',
+    test("pullUrl: an .flv on a *pull-rtmp*.17app.co host (3.x's _mediaUri), always https (33-3)", () {
+      for (final (url, expected) in [
+        ('http://tencent-global-pull-rtmp.17app.co/live/a.flv', 'https://tencent-global-pull-rtmp.17app.co/live/a.flv'),
+        ('HTTP://Tencent-Global-Pull-Rtmp.17app.co/live/a.flv', 'https://tencent-global-pull-rtmp.17app.co/live/a.flv'),
+        ('http://pull-rtmp.17app.co:80/a.flv?t=1&u=2', 'https://pull-rtmp.17app.co/a.flv?t=1&u=2'),
+        ('http://pull-rtmp.17app.co:8080/a.flv', 'http://pull-rtmp.17app.co:8080/a.flv'),
+        ('https://wansu-global-pull-rtmp-latency.17app.co/vod/a.FLV', null),
+        ('https://pull-rtmp.17app.co/a.flv?t=1', null),
+        ('https://pull-rtmp.17app.co:8443/a.flv', null),
       ]) {
-        expect(SeventeenLiveApi.pullUrl(url).toString(), url);
+        expect(SeventeenLiveApi.pullUrl(url).toString(), expected ?? url, reason: url);
       }
       for (final url in [
         '',
@@ -634,13 +973,33 @@ void main() {
       final resolution = SeventeenLiveApi.resolution(data, h264);
       expect(resolution.appliedQualityData, 'h264');
       expect(resolution.lines.every((line) => line.codec == 'avc'), isTrue);
-      expect(
-        () => SeventeenLiveApi.resolution(data, const LivePlayQuality(quality: 'x', id: 'source')),
-        throwsA(isA<StreamUnavailable>()),
-      );
+      for (final id in ['x', 'SOURCE ', '']) {
+        expect(
+          () => SeventeenLiveApi.resolution(data, LivePlayQuality(quality: 'x', id: id)),
+          throwsA(isA<StreamUnavailable>()),
+          reason: id,
+        );
+      }
+      // changed: 3.x's "unknown quality" was id `source`, which is 原画 now
+      // (33-2).
       expect((_value('S04-live-live', 'getPlayUrls(unknown quality)')! as Map)['message'], '17LIVE mediaUnavailable');
+      final source = SeventeenLiveApi.resolution(data, const LivePlayQuality(quality: 'x', id: 'source'));
+      expect(source.appliedQualityData, 'source');
+      expect(source.lines.map((line) => line.codec), [null, null], reason: 'the broadcaster may push HEVC');
       final byName = SeventeenLiveApi.resolution(data, const LivePlayQuality(quality: 'hd', id: 'hd'));
       expect(byName.urls, hasLength(2));
+    });
+
+    test('33-2: the id map for M9: standard is source, any case; other ids kept', () {
+      expect(SeventeenLiveApi.legacyQualityIds, {'standard': 'source'});
+      expect(SeventeenLiveApi.qualityIdFromLegacy('standard'), 'source');
+      expect(SeventeenLiveApi.qualityIdFromLegacy(' Standard '), 'source');
+      for (final id in ['source', 'enhanced', 'hd', 'h264', 'other']) {
+        expect(SeventeenLiveApi.qualityIdFromLegacy(id), id);
+        expect(SeventeenLiveApi.qualityIdFromLegacy(SeventeenLiveApi.qualityIdFromLegacy(id)), id);
+      }
+      expect(SeventeenLiveApi.qualityNames.keys, SeventeenLiveApi.qualityFields.keys);
+      expect(SeventeenLiveApi.qualitySorts.keys, SeventeenLiveApi.qualityFields.keys);
     });
   });
 
@@ -712,6 +1071,13 @@ void main() {
           expect(SeventeenLiveApi.roomIdFromUrl(link), isNull, reason: link);
           continue;
         }
+        if (link == 'https://www.17.live/ja/live/27484154') {
+          // changed: www.17.live is the website too (33-6).
+          expect(parse, isNull);
+          expect(legacy['parseOrId'], isNull);
+          expect(SeventeenLiveApi.roomIdFromUrl(link), _live);
+          continue;
+        }
         expect(SeventeenLiveApi.roomIdFromUrl(link), parse, reason: link);
         expect(SeventeenLiveApi.normalizeRoomId(link), legacy['normalizeRoomId'], reason: link);
         expect(
@@ -719,6 +1085,26 @@ void main() {
           legacy['parseOrId'],
           reason: link,
         );
+      }
+    });
+
+    test('33-6: www.17.live pages are rooms, in any case; other subdomains are not', () {
+      for (final link in [
+        'https://www.17.live/ja/live/$_live',
+        'http://WWW.17.LIVE/live/$_live',
+        'https://www.17.live/zh-Hant/profile/r/$_live',
+        'https://www.17.live:443/en/live/$_live?lang=en#chat',
+      ]) {
+        expect(SeventeenLiveApi.roomIdFromUrl(link), _live, reason: link);
+      }
+      for (final link in [
+        'https://m.17.live/ja/live/$_live',
+        'https://www.www.17.live/ja/live/$_live',
+        'https://www17.live/ja/live/$_live',
+        'https://user@www.17.live/ja/live/$_live',
+        'https://www.17.live/ja/profile/$_live',
+      ]) {
+        expect(SeventeenLiveApi.roomIdFromUrl(link), isNull, reason: link);
       }
     });
 

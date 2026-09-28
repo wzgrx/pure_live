@@ -1,0 +1,30 @@
+{
+  "code": 0,
+  "data": {
+    "sid": 2472221860,
+    "siteId": "",
+    "uid": 409742853,
+    "avatar": "",
+    "nick_name": "",
+    "country_code": "",
+    "gameTitle": "",
+    "gameId": 0,
+    "roomTopic": "",
+    "snapshot": "http://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_2.jpg?type=20&auth-token=D3Jc0DgysWe3S0uRgt_zlybStMttzKBTm5PgvtrPZ5S:kjZfGug7VNtfAzM0KoCchT2gVVO3ZMU7FwelZMO4TAc8KCu7AQV9ZuudznS1QnMpeW",
+    "alive": 0,
+    "roomId": "0",
+    "roomStatus": 0,
+    "covers": null,
+    "client_ip": "",
+    "hls_src": "",
+    "cdn_src": [],
+    "needLogin": false,
+    "passRoom": false,
+    "reserver": 0,
+    "clientBigoId": "qashia305",
+    "roomType": "0",
+    "isPaidShow": ""
+  },
+  "msg": "success",
+  "flag": null
+}

@@ -2,9 +2,12 @@
 // 3.x's frozen output (expected.json, written by
 // fixtures/bigo/legacy_expected.dart from 3.x's BigoApi, BigoSite, BigoLink,
 // BigoTokenCodec and BigoHlsProtection). Every intended difference is listed
-// with its reason; everything else must match. The synthetic cases port 3.x's
-// bigo_api_test.dart, bigo_media_test.dart and bigo_site_test.dart (link
-// rules) and pin 3.x's checks.
+// with its reason (M4.24 differences, M4.U items 24-1…24-7 and the unified
+// rules of docs/UPGRADES.md); everything else must match. The synthetic cases
+// port 3.x's bigo_api_test.dart, bigo_media_test.dart and bigo_site_test.dart
+// (link rules) and pin 3.x's checks where they still hold. The samples
+// S03-studio-reused, S03-studio-offline and S03-studio-unknown were recorded
+// for M4.U.24 and have no 3.x output.
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -40,7 +43,11 @@ List<Map<String, dynamic>> _maps(Object? value) => (value! as List).cast<Map<Str
 /// The `result` of a traced legacy call.
 Object? _result(Object? traced) => (traced! as Map<String, dynamic>)['result'];
 
-void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String reason = '', Set<String> changed = const {}}) {
+/// Keys every card differs in from 3.x: the notice, said for viewers (the
+/// unified rule on notices).
+const Set<String> _cardChanges = {'notice'};
+
+void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String reason = '', Set<String> changed = _cardChanges}) {
   final expected = _maps(legacy);
   expect(rooms.map((room) => room.roomId), expected.map((room) => room['roomId']), reason: reason);
   for (final (index, room) in rooms.indexed) {
@@ -112,13 +119,14 @@ void main() {
       expect(BigoApi.isArea(const LiveArea(platform: 'bilibili', areaType: 'public', areaId: '72')), isFalse);
     });
 
-    test('the 20 cards: ids, owners, topics or names, covers as avatars, viewers, notice and headers match 3.x', () {
+    test('the 20 cards: ids, owners, topics or names, covers as avatars, viewers and headers match 3.x', () {
       final pages = _legacy('S01-list')['getDirectoryPage'] as Map<String, dynamic>;
       final cards = _cards();
       expect(cards, hasLength(20));
       for (final page in [1, 2, 3]) {
         final legacy = _result(pages['recommend:$page'])! as Map<String, dynamic>;
         final directory = BigoApi.directoryPage(cards, page: page);
+        // notice: said for viewers (unified rule).
         _expectRooms(directory.rooms, legacy['rooms'], reason: 'page $page');
         expect(directory.page, legacy['page']);
         expect(directory.hasMore, legacy['hasMore']);
@@ -129,6 +137,36 @@ void main() {
       expect(qashia.effectiveOnlineViewers, '246');
       expect(qashia.data, isNull);
       expect(qashia.httpHeaders, BigoApi.headers);
+      expect(qashia.notice, BigoApi.chatNotice);
+      expect(qashia.notice, isNot(contains('user_count')), reason: 'no developer words');
+    });
+
+    test('added: every card has its start time (time_stamp) and restriction none (unified rules)', () {
+      final rows = ((jsonDecode(_sample('S01-list').body) as Map)['data'] as Map)['data'] as List;
+      final cards = _cards();
+      for (final (index, card) in cards.indexed) {
+        final seconds = (rows[index] as Map)['time_stamp'] as int;
+        expect(card.startedAt, DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true), reason: card.roomId);
+        expect(card.restriction, LiveRestriction.none, reason: 'is_locked 0');
+        expect(card.toJson(), containsPair('restriction', 'none'));
+        expect(card.startedAt!.isBefore(_sample('S01-list').capturedAt), isTrue);
+      }
+      final qashia = cards.firstWhere((card) => card.roomId == '414439909');
+      expect(qashia.startedAt, DateTime.utc(2026, 9, 27, 16, 42, 31));
+      expect(qashia.toJson()['startedAt'], '2026-09-27T16:42:31.000Z');
+    });
+
+    test('the start time: Unix seconds from 2000 to 2100; anything else drops only the start time', () {
+      expect(BigoApi.startedAt(1790527351), DateTime.utc(2026, 9, 27, 16, 42, 31));
+      for (final value in [null, 0, -1, 946684799, 4102444801, 1790527351000, 1790527351.5, '1790527351', true]) {
+        expect(BigoApi.startedAt(value), isNull, reason: '$value');
+      }
+      final list = _list();
+      _row(list)['time_stamp'] = 'soon';
+      final cards = BigoApi.directory(jsonEncode(list));
+      expect(cards, hasLength(20));
+      expect(cards.first.startedAt, isNull);
+      expect(cards[1].startedAt, isNotNull);
     });
 
     test("3.x's slices: a page or size below 1, a size over 100 or a page past the end give nothing", () {
@@ -167,7 +205,8 @@ void main() {
       expect(BigoApi.filter(twice, 'PK').map((room) => room.roomId), ['Fixture_A']);
     });
 
-    test('a locked room stays listed; missing viewers stay unknown (3.x)', () {
+    test('24-2: a locked room stays listed, live and marked password (3.x listed it unmarked); missing viewers '
+        'stay unknown (3.x)', () {
       final list = _list();
       _row(list)
         ..['is_locked'] = 1
@@ -177,48 +216,60 @@ void main() {
       expect(card.watching, '');
       expect(card.onlineViewers, '');
       expect(card.isLiveNow, isTrue);
+      expect(card.restriction, LiveRestriction.password);
+      expect(card.isRestricted, isTrue);
+      expect(card.followGroup, FollowGroup.live, reason: 'a restricted live room is live (M2.1)');
+      expect(card.toJson(), containsPair('restriction', 'password'));
     });
 
-    test('a null cover is no image; a cover that is not text fails the list (3.x)', () {
+    test('a null cover is no image; 24-6: a cover that is not text drops only its row (3.x: the whole list)', () {
       final list = _list();
       _row(list)['cover_m'] = null;
       final card = BigoApi.directory(jsonEncode(list)).first;
       expect(card.cover, isEmpty);
       expect(card.avatar, isEmpty);
       _row(list)['cover_m'] = 42;
-      expect(() => BigoApi.directory(jsonEncode(list)), throwsA(isA<ApiChanged>()));
+      final cards = BigoApi.directory(jsonEncode(list));
+      expect(cards.map((card) => card.roomId), _cards().skip(1).map((card) => card.roomId));
     });
 
-    for (final broken in [
-      'duplicate-site',
-      'duplicate-owner',
-      'wrong-wrapper',
-      'bad-resCode',
-      'missing-resCode',
-      'fractional-broadcast',
-      'negative-viewers',
-      'string-lock',
-      'bad-id',
-      'no-owner',
-      'topic-number',
-      'code',
-      'too-many',
-    ]) {
-      test('a list with $broken fails as a whole, never half-read (3.x)', () {
+    for (final broken in ['wrong-wrapper', 'bad-resCode', 'missing-resCode', 'code', 'too-many']) {
+      test('a list with $broken still fails as a whole (3.x): the envelope, not a row', () {
         final list = _list();
         final rows = (list['data'] as Map<String, dynamic>)['data'] as List;
         final row = _row(list);
         switch (broken) {
-          case 'duplicate-site':
-            rows.add({...row, 'owner': 1});
-          case 'duplicate-owner':
-            rows.add({...row, 'bigo_id': 'another'});
           case 'wrong-wrapper':
             list['data'] = <Object?>[];
           case 'bad-resCode':
             (list['data'] as Map<String, dynamic>)['resCode'] = '123';
           case 'missing-resCode':
             (list['data'] as Map<String, dynamic>).remove('resCode');
+          case 'code':
+            list['code'] = 1;
+          case 'too-many':
+            rows.addAll(List.filled(500, row));
+        }
+        expect(() => BigoApi.directory(jsonEncode(list)), throwsA(isA<ApiChanged>()));
+      });
+    }
+
+    for (final broken in [
+      'fractional-broadcast',
+      'negative-viewers',
+      'string-lock',
+      'bad-id',
+      'no-owner',
+      'topic-number',
+      'not-an-object',
+      'bad-flag',
+      'no-sid',
+    ]) {
+      test('24-6: a row with $broken is left out on its own (3.x failed the whole list)', () {
+        final list = _list();
+        final rows = (list['data'] as Map<String, dynamic>)['data'] as List;
+        final row = _row(list, 3);
+        switch (broken) {
           case 'fractional-broadcast':
             row['room_id'] = 1.5;
           case 'negative-viewers':
@@ -231,14 +282,46 @@ void main() {
             row.remove('owner');
           case 'topic-number':
             row['room_topic'] = 7;
-          case 'code':
-            list['code'] = 1;
-          case 'too-many':
-            rows.addAll(List.filled(500, row));
+          case 'not-an-object':
+            rows[3] = 'row';
+          case 'bad-flag':
+            row['room_flag'] = -2;
+          case 'no-sid':
+            row.remove('sid');
         }
-        expect(() => BigoApi.directory(jsonEncode(list)), throwsA(isA<ApiChanged>()));
+        final expected = [
+          for (final (index, card) in _cards().indexed)
+            if (index != 3) card.roomId,
+        ];
+        expect(BigoApi.directory(jsonEncode(list)).map((card) => card.roomId), expected);
       });
     }
+
+    test('24-6: a repeated id or owner leaves out the later row (3.x failed the whole list)', () {
+      final list = _list();
+      final rows = (list['data'] as Map<String, dynamic>)['data'] as List;
+      final row = _row(list);
+      rows
+        ..add({...row, 'owner': 1})
+        ..add({...row, 'bigo_id': 'another'})
+        ..add({..._row(list, 1), 'bigo_id': 'fresh_one', 'owner': 2});
+      final cards = BigoApi.directory(jsonEncode(list));
+      expect(cards, hasLength(21));
+      expect(cards.first.roomId, '858683693');
+      expect(cards.last.roomId, 'fresh_one');
+      expect(cards.where((card) => card.roomId == '858683693'), hasLength(1));
+      expect(cards.where((card) => card.roomId == 'another'), isEmpty, reason: 'the owner of the first row');
+    });
+
+    test('rows none of which can be read are ApiChanged, never an empty list; no rows is an empty list', () {
+      final list = _list();
+      for (final row in (list['data'] as Map<String, dynamic>)['data'] as List) {
+        (row as Map)['bigo_id'] = '../x';
+      }
+      expect(() => BigoApi.directory(jsonEncode(list)), throwsA(isA<ApiChanged>()));
+      (list['data'] as Map<String, dynamic>)['data'] = <Object?>[];
+      expect(BigoApi.directory(jsonEncode(list)), isEmpty);
+    });
   });
 
   group('S02 web token', () {
@@ -359,22 +442,29 @@ void main() {
       expect(studio.liveStatus, LiveStatus.live);
     });
 
-    test("the room: every field as 3.x's, the id the site's spelling; only the avatar differs as recorded", () {
+    test("the room: every field as 3.x's, the id the site's spelling; the cover is the snapshot (24-1)", () {
       final calls = legacyCalls('avatarHttps');
       for (final depth in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
         final legacy = _result(calls[depth])! as Map<String, dynamic>;
         final https = BigoApi.room(BigoApi.studio(_avatarHttps(), requestedSiteId: '414439909'));
-        _expectParity(_projection(https), legacy, reason: depth);
-        // avatar, cover: the recorded http avatar, which 3.x rejected.
+        // cover: the snapshot (24-1); notice: said for viewers (unified rule).
+        _expectParity(_projection(https), legacy, changed: {'cover', 'notice'}, reason: depth);
+        expect(https.avatar, legacy['avatar'], reason: 'the avatar stays the avatar');
+        expect(legacy['cover'], legacy['avatar'], reason: '3.x used the avatar as cover');
+        // avatar: the recorded http avatar, which 3.x rejected.
         final recorded = BigoApi.room(BigoApi.studio(_studioBody(), requestedSiteId: '414439909'));
-        _expectParity(_projection(recorded), legacy, changed: {'avatar', 'cover'}, reason: depth);
+        _expectParity(_projection(recorded), legacy, changed: {'avatar', 'cover', 'notice'}, reason: depth);
       }
       final room = BigoApi.room(BigoApi.studio(_studioBody(), requestedSiteId: '414439909'));
       expect(room.roomId, 'qashia305', reason: '3.x: clientBigoId, whatever id was asked');
       expect(room.link, 'https://www.bigo.tv/qashia305');
       expect(room.title, 'qashia');
       expect(room.area, 'Bigo Live');
+      expect(room.cover, startsWith('http://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_2.jpg?type=20'));
+      expect(room.avatar, startsWith('http://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_4.jpg?type=20'));
       expect(room.notice, BigoApi.chatNotice);
+      expect(room.restriction, LiveRestriction.none, reason: 'added: a complete live answer with a playlist');
+      expect(room.startedAt, isNull, reason: 'the studio has no start time');
       expect(room.effectiveAudienceMetricType, AudienceMetricType.unknown);
       expect(room.audienceValue(preferRealOnline: false, platformEnabled: false), isEmpty);
       final data = room.data! as BigoRoomData;
@@ -384,8 +474,104 @@ void main() {
       expect(data.access, BigoAccess.public);
       expect(data.alive, isTrue);
       expect(data.hasStream, isTrue);
+      expect(data.complete, isTrue);
+      expect(data.restriction, LiveRestriction.none);
       expect(data.streamError, isNull);
       expect(jsonEncode(room.toJson()), isNot(contains('cubetecn')), reason: 'no media address stored (REG-LEASE-017)');
+    });
+
+    test(
+      '24-1: without a snapshot the cover is the avatar (3.x); the snapshot is taken as leniently as the avatar',
+      () {
+        for (final snapshot in <Object?>[null, '', 'ftp://a.example/x.jpg', 42]) {
+          final room = BigoApi.room(BigoApi.studio(_studio({'snapshot': snapshot}), requestedSiteId: 'x'));
+          expect(room.cover, room.avatar, reason: '$snapshot');
+          expect(room.cover, isNotEmpty);
+        }
+        final https = BigoApi.room(
+          BigoApi.studio(_studio({'snapshot': 'https://a.example/s.jpg'}), requestedSiteId: 'x'),
+        );
+        expect(https.cover, 'https://a.example/s.jpg');
+        expect(https.avatar, isNot(https.cover));
+      },
+    );
+
+    test('S03-studio-offline: the snapshot is the last broadcast; no name, avatar or title (left empty, X-2)', () {
+      final studio = BigoApi.studio(_sample('S03-studio-offline').body, requestedSiteId: 'qashia305');
+      expect(studio.access, BigoAccess.public);
+      expect(studio.complete, isTrue);
+      expect(studio.liveStatus, LiveStatus.offline);
+      expect(studio.restriction, isNull, reason: 'offline: not filled (M2.1)');
+      final room = BigoApi.room(studio);
+      expect(room.roomId, 'qashia305');
+      expect(room.nick, isEmpty);
+      expect(room.title, isEmpty);
+      expect(room.avatar, isEmpty);
+      expect(room.cover, startsWith('http://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_2.jpg'));
+      expect(room.isExplicitlyOfflineNow, isTrue);
+      expect(room.restriction, isNull);
+      final stored = BigoApi.room(BigoApi.studio(_studioBody(), requestedSiteId: '414439909'));
+      final merged = stored.mergeFrom(room);
+      expect(merged.nick, 'qashia', reason: 'the empty name keeps the stored one');
+      expect(merged.title, 'qashia');
+      expect(merged.avatar, stored.avatar);
+      expect(merged.cover, room.cover, reason: 'the last snapshot');
+      expect(merged.isLiveNow, isFalse);
+      expect(merged.restriction, isNull, reason: 'the broadcast ended (M2.1)');
+      expect((room.data! as BigoRoomData).streamError, isA<StreamUnavailable>());
+    });
+
+    test('24-4, S03-studio-reused: a used token gives the state and names, no playlist and no password flag', () {
+      final studio = BigoApi.studio(_sample('S03-studio-reused').body, requestedSiteId: '1005503375');
+      expect(studio.complete, isFalse);
+      expect(studio.password, isNull);
+      expect(studio.hls, isNull);
+      expect(studio.access, BigoAccess.public);
+      expect(studio.liveStatus, LiveStatus.live, reason: 'alive 1');
+      expect(studio.restriction, isNull, reason: 'the lock is not said');
+      expect(studio.nickname, 'Lyrics');
+      final room = BigoApi.room(studio);
+      expect(room.isLiveNow, isTrue);
+      expect(room.restriction, isNull);
+      expect(room.cover, startsWith('https://esx.bigo.sg/as/live-enhancer/ls3/01vNrpWC8iiA.jpg'));
+      final data = room.data! as BigoRoomData;
+      expect(data.complete, isFalse);
+      expect(data.hasStream, isFalse);
+      expect(data.streamError, isNull, reason: 'the input asks again; a used token never has the playlist');
+      expect(data.broadcastId, '7367135243595402902');
+      // A used token of a paid show still says it is paid.
+      final paid = BigoApi.studio(
+        _sample('S03-studio-reused').body.replaceFirst('"isPaidShow": ""', '"isPaidShow": "1"'),
+        requestedSiteId: '1005503375',
+      );
+      expect(paid.restriction, LiveRestriction.paid);
+      expect(paid.liveStatus, LiveStatus.live);
+    });
+
+    test('S03-studio-unknown: an id the site does not know is NotFound (3.x failed it as schema)', () {
+      expect(
+        () => BigoApi.studio(_sample('S03-studio-unknown').body, requestedSiteId: 'zzqxnomatch'),
+        throwsA(isA<NotFound>()),
+      );
+      expect(() => BigoApi.studio(_studio({'uid': null}), requestedSiteId: 'x'), throwsA(isA<ApiChanged>()));
+      expect(() => BigoApi.studio(_studio({'clientBigoId': null}), requestedSiteId: 'x'), throwsA(isA<ApiChanged>()));
+    });
+
+    test("a login gate completed by a later answer: the gate stays, the state is the later answer's (24-4)", () {
+      final later = BigoApi.studio(_sample('S03-studio-reused').body, requestedSiteId: '1005503375');
+      final gated = later.gated();
+      expect(gated.access, BigoAccess.loginRequired);
+      expect(gated.liveStatus, LiveStatus.live);
+      expect(gated.restriction, LiveRestriction.needsLogin);
+      expect(gated.complete, isFalse);
+      final room = BigoApi.room(gated);
+      expect(room.isLiveNow, isTrue);
+      expect(room.followGroup, FollowGroup.live);
+      expect(room.notice, BigoApi.loginNotice);
+      expect(room.nick, 'Lyrics');
+      expect((room.data! as BigoRoomData).streamError, isA<NeedsLogin>());
+      final offline = BigoApi.studio(_sample('S03-studio-offline').body, requestedSiteId: 'qashia305').gated();
+      expect(offline.liveStatus, LiveStatus.offline);
     });
 
     test("S03 without a token: needLogin, as 3.x read it; the room's state stays unknown", () {
@@ -410,21 +596,53 @@ void main() {
       final calls = (legacy['asTokenAnswer'] as Map<String, dynamic>)['414439909'] as Map<String, dynamic>;
       final room = BigoApi.room(studio);
       for (final depth in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
-        _expectParity(_projection(room), _result(calls[depth])! as Map<String, dynamic>, reason: depth);
+        // cover: the snapshot (24-1; 3.x's cover was the empty avatar);
+        // notice: said for viewers (unified rule).
+        _expectParity(
+          _projection(room),
+          _result(calls[depth])! as Map<String, dynamic>,
+          changed: {'cover', 'notice'},
+          reason: depth,
+        );
+        expect((_result(calls[depth])! as Map)['cover'] ?? '', isEmpty);
       }
       expect(room.effectiveLiveStatus, LiveStatus.unknown);
       expect(room.notice, BigoApi.loginNotice);
+      expect(room.restriction, LiveRestriction.needsLogin, reason: 'added');
+      expect(room.cover, startsWith('http://esx.bigo.sg/'));
       expect((room.data! as BigoRoomData).streamError, isA<NeedsLogin>());
     });
 
-    test("3.x's states: public and alive with a playlist is live; public and not alive offline; else unknown", () {
-      LiveStatus state(Map<String, Object?> data) => BigoApi.studio(_studio(data), requestedSiteId: 'x').liveStatus;
-      expect(state(const {}), LiveStatus.live);
-      expect(state(const {'alive': 0, 'hls_src': ''}), LiveStatus.offline);
-      expect(state(const {'hls_src': ''}), LiveStatus.unknown, reason: 'live without a playlist');
-      expect(state(_gate), LiveStatus.unknown);
-      expect(state(const {'passRoom': true, 'hls_src': ''}), LiveStatus.unknown);
-      expect(state(const {'isPaidShow': '1', 'hls_src': ''}), LiveStatus.unknown);
+    test('states and restrictions: a restricted live room is live and marked (24-2, M2.1; 3.x: unknown)', () {
+      (LiveStatus, LiveRestriction?) state(Map<String, Object?> data) {
+        final studio = BigoApi.studio(_studio(data), requestedSiteId: 'x');
+        expect(BigoApi.room(studio).restriction, studio.restriction);
+        return (studio.liveStatus, studio.restriction);
+      }
+
+      expect(state(const {}), (LiveStatus.live, LiveRestriction.none));
+      expect(state(const {'alive': 0, 'hls_src': ''}), (LiveStatus.offline, null));
+      expect(state(const {'hls_src': ''}), (
+        LiveStatus.live,
+        LiveRestriction.unplayable,
+      ), reason: 'live without a playlist (3.x: unknown)');
+      expect(state(_gate), (LiveStatus.unknown, LiveRestriction.needsLogin), reason: 'the gate hides alive');
+      expect(state(const {'passRoom': true, 'hls_src': ''}), (LiveStatus.live, LiveRestriction.password));
+      expect(state(const {'isPaidShow': '1', 'hls_src': ''}), (LiveStatus.live, LiveRestriction.paid));
+      expect(state(const {'passRoom': true, 'isPaidShow': '1', 'hls_src': ''}), (
+        LiveStatus.live,
+        LiveRestriction.password,
+      ));
+      expect(state(const {'passRoom': true, 'alive': 0, 'hls_src': ''}), (
+        LiveStatus.unknown,
+        LiveRestriction.password,
+      ), reason: "a restricted room's alive 0 is no offline observation (3.x)");
+      expect(state(const {'passRoom': null, 'hls_src': ''}), (LiveStatus.live, null), reason: 'a used token');
+      expect(state(const {'passRoom': null, 'alive': 0, 'hls_src': ''}), (LiveStatus.offline, null));
+      final room = BigoApi.room(BigoApi.studio(_studio(const {'passRoom': true, 'hls_src': ''}), requestedSiteId: 'x'));
+      expect(room.notice, BigoApi.restrictedNotice);
+      expect(room.followGroup, FollowGroup.live);
+      expect(room.isPlayableNow, isTrue, reason: 'playback explains the restriction');
     });
 
     test('the login gate comes before password and paid flags and hides alive (3.x)', () {
@@ -434,14 +652,20 @@ void main() {
       );
       expect(studio.access, BigoAccess.loginRequired);
       expect(studio.alive, isNull);
-      for (final gate in [
-        {'passRoom': true},
-        {'isPaidShow': '1'},
+      for (final (gate, name) in [
+        ({'passRoom': true}, 'password room'),
+        ({'isPaidShow': '1'}, 'paid show'),
       ]) {
         final restricted = BigoApi.studio(_studio({...gate, 'hls_src': ''}), requestedSiteId: 'x');
         expect(restricted.access, BigoAccess.restricted, reason: '$gate');
-        expect(restricted.alive, isNull, reason: 'never shown as offline or playable');
-        expect(restricted.data.streamError, isA<StreamUnavailable>());
+        expect(restricted.alive, isTrue, reason: 'a restricted live room is live (M2.1; 3.x hid alive)');
+        expect(
+          restricted.data.streamError,
+          isA<StreamUnavailable>().having((error) => '$error', 'reason', contains(name)),
+          reason: 'playback says why',
+        );
+        final notAlive = BigoApi.studio(_studio({...gate, 'alive': 0, 'hls_src': ''}), requestedSiteId: 'x');
+        expect(notAlive.alive, isNull, reason: 'never shown as offline (3.x)');
       }
       final offline = BigoApi.studio(_studio(const {'alive': 0, 'hls_src': ''}), requestedSiteId: 'x');
       expect(offline.alive, isFalse);
@@ -450,16 +674,7 @@ void main() {
       expect(bare.data.streamError, isA<StreamUnavailable>());
     });
 
-    for (final field in [
-      'needLogin',
-      'passRoom',
-      'isPaidShow',
-      'alive',
-      'clientBigoId',
-      'roomStatus',
-      'roomType',
-      'uid',
-    ]) {
+    for (final field in ['needLogin', 'isPaidShow', 'alive', 'clientBigoId', 'roomStatus', 'roomType', 'uid']) {
       test('a missing $field is ApiChanged, never taken as false or offline (3.x)', () {
         expect(() => BigoApi.studio(_studio({field: null}), requestedSiteId: 'x'), throwsA(isA<ApiChanged>()));
       });
@@ -489,6 +704,8 @@ void main() {
         {..._gate, 'hls_src': 'https://h.example/list.m3u8'},
         {'alive': 0},
         {'passRoom': true},
+        {'passRoom': 'false'},
+        {'passRoom': 0},
       ]) {
         expect(() => BigoApi.studio(_studio(data), requestedSiteId: 'x'), throwsA(isA<ApiChanged>()), reason: '$data');
       }
@@ -504,10 +721,12 @@ void main() {
       expect(() => BigoApi.studio('private invalid body', requestedSiteId: 'x'), throwsA(isA<ApiChanged>()));
     });
 
-    test('an avatar never fails the room: http(s) kept, anything else left out', () {
+    test('an avatar or snapshot never fails the room: http(s) kept, anything else left out', () {
       String avatar(Object? value) => BigoApi.studio(_studio({'avatar': value}), requestedSiteId: 'x').avatar;
+      String snapshot(Object? value) => BigoApi.studio(_studio({'snapshot': value}), requestedSiteId: 'x').snapshot;
       expect(avatar('https://a.example/x.jpg'), 'https://a.example/x.jpg');
       expect(avatar('http://a.example/x.jpg'), 'http://a.example/x.jpg');
+      expect(snapshot('http://a.example/s.jpg'), 'http://a.example/s.jpg');
       for (final value in [
         'ftp://a.example/x',
         '//a.example/x.jpg',
@@ -517,6 +736,7 @@ void main() {
         'https://a.example/#x',
       ]) {
         expect(avatar(value), isEmpty, reason: '$value');
+        expect(snapshot(value), isEmpty, reason: '$value');
       }
       final studio = BigoApi.studio(
         _studio(const {'gameTitle': 'Music', 'roomTopic': 'Fixture live'}),
@@ -645,11 +865,36 @@ void main() {
   });
 
   group('links', () {
-    test("room links, reserved pages and malformed links as 3.x's BigoLink.parse", () {
+    test("room links, reserved pages and malformed links as 3.x's BigoLink.parse; 24-7: fragments and subdomains", () {
       final legacy = _legacy('S01-list')['BigoLink.parse'] as Map<String, dynamic>;
       expect(legacy, hasLength(23));
+      // 24-7: a fragment is ignored and any subdomain of bigo.tv is taken
+      // (3.x refused both).
+      const changed = {'https://www.bigo.tv/qashia305#x': 'qashia305', 'https://m.bigo.tv/qashia305': 'qashia305'};
       for (final MapEntry(:key, :value) in legacy.entries) {
-        expect(BigoApi.siteIdFromUrl(key), value, reason: key);
+        if (changed.containsKey(key)) {
+          expect(value, isNull, reason: '3.x: $key');
+          expect(BigoApi.siteIdFromUrl(key), changed[key], reason: key);
+        } else {
+          expect(BigoApi.siteIdFromUrl(key), value, reason: key);
+        }
+      }
+      for (final (link, id) in [
+        ('https://m.bigo.tv/en/ChrisPCritter78', 'ChrisPCritter78'),
+        ('http://BIGO.TV/qashia305#/live', 'qashia305'),
+        ('https://www.bigo.tv/cn/qashia305?from=share#top', 'qashia305'),
+        ('https://live.bigo.tv/414439909#', '414439909'),
+      ]) {
+        expect(BigoApi.siteIdFromUrl(link), id, reason: link);
+      }
+      for (final invalid in [
+        'https://mbigo.tv/qashia305',
+        'https://bigo.tv.m.example/qashia305',
+        'https://m.bigo.tv:8443/qashia305',
+        'https://www.bigo.tv/#qashia305',
+        'https://m.bigo.tv/search',
+      ]) {
+        expect(BigoApi.siteIdFromUrl(invalid), isNull, reason: invalid);
       }
       // 3.x's bigo_site_test.dart.
       expect(BigoApi.siteIdFromUrl('https://www.bigo.tv/fixture_101'), 'fixture_101');

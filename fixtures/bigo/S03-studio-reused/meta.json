@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "platform": "bigo",
+  "sample": "S03-studio-reused",
+  "capturedAt": "2026-09-28T19:55:24.166302Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "POST",
+    "url": "https://ta.bigo.tv/official_website/studio/getInternalStudioInfo?siteId=1005503375&verify=&token=eDVzKl85gY0kg79tcaKiGkQF7iIh3bDpnipiILiWmJ3TX0PqKUOvfR",
+    "headers": {
+      "Origin": "https://www.bigo.tv",
+      "Referer": "https://www.bigo.tv/",
+      "User-Agent": "Mozilla/5.0"
+    },
+    "body": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "nginx",
+      "date": "Mon, 28 Sep 2026 19:55:24 GMT",
+      "content-type": "application/json;charset=UTF-8",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "vary": [
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers",
+        "Origin"
+      ],
+      "access-control-allow-origin": "https://www.bigo.tv",
+      "otel-x-biz-code": "0",
+      "access-control-allow-credentials": "true",
+      "access-control-expose-headers": "*",
+      "x-kong-upstream-latency": "33",
+      "x-kong-proxy-latency": "1",
+      "via": "kong/2.2.2",
+      "strict-transport-security": "max-age=15768001"
+    }
+  },
+  "raw": {
+    "sha256": "128f0f093ae49afcc6cce364eb3b49e2f703c298e9485d141abfeb579c6b9cf0",
+    "length": 792
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.avatar:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.snapshot:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "url:token",
+      "rule": "secret"
+    }
+  ],
+  "tool": "manual capture (M4.U.24): urllib, checked by hand as fixtures/README.md asks"
+}

@@ -18,11 +18,14 @@ const _site = 'bigo';
 
 /// Who may watch a studio anonymously (3.x's `BigoAccess`).
 enum BigoAccess {
-  /// Anyone with the web token.
+  /// Anyone with the web token, as far as the answer says (a later use of a
+  /// token does not say whether the room has a password, see
+  /// [BigoStudio.complete]).
   public,
 
   /// `needLogin`: checked before everything else, as the official player
-  /// does. The anonymous web token normally clears it.
+  /// does. The anonymous web token normally clears it; the site also sends
+  /// it when it turns a token away (24-4, see `BigoSite`).
   loginRequired,
 
   /// `passRoom` (a password) or `isPaidShow` `"1"` (a paid show).
@@ -43,6 +46,8 @@ final class BigoRoomData {
     this.alive,
     this.broadcastId,
     this.hasStream = false,
+    this.complete = true,
+    this.restriction,
   });
 
   /// `clientBigoId`: the room's identity.
@@ -54,25 +59,40 @@ final class BigoRoomData {
   /// Who may watch.
   final BigoAccess access;
 
-  /// `alive` of a public studio; null when the access is gated (a gated
-  /// `alive: 0` is no offline observation, 3.x).
+  /// Whether the studio is live, or null when the answer hides it (see
+  /// [BigoStudio.alive]).
   final bool? alive;
 
-  /// `roomId`: the current broadcast's int64 id as written; null when there
-  /// is none (`"0"`). For the chat (M5).
+  /// `roomId`: the streamer's int64 room id as written (the same for every
+  /// broadcast: 7232856282170115001 in the list of 2026-09-27 and the
+  /// studio of 2026-09-28); null when the answer gives none (`"0"`, offline
+  /// or gated). For the chat (M5).
   final String? broadcastId;
 
   /// Whether the studio gave its media playlist (`hls_src`).
   final bool hasStream;
 
+  /// Whether the answer was a token's first use, which says whether the
+  /// room has a password and gives the playlist when there is one (see
+  /// [BigoStudio.complete]).
+  final bool complete;
+
+  /// The restriction of the answer (see [BigoStudio.restriction]).
+  final LiveRestriction? restriction;
+
   /// Why this studio's stream cannot be played, or null: a login gate is
-  /// `NeedsLogin`; a password or paid room, an offline one or a live one
-  /// without a playlist are `StreamUnavailable`.
+  /// `NeedsLogin`; a password or paid room (named), an offline one or a
+  /// live one whose complete answer gave no playlist are
+  /// `StreamUnavailable`. A live answer that says nothing about the lock
+  /// (a refresh, 24-4) is let through: the input asks the studio again.
   SiteError? get streamError => switch (access) {
     BigoAccess.loginRequired => NeedsLogin(_site, '$siteId: needLogin'),
-    BigoAccess.restricted => StreamUnavailable(_site, '$siteId: password or paid room'),
+    BigoAccess.restricted => StreamUnavailable(
+      _site,
+      '$siteId: ${restriction == LiveRestriction.paid ? 'paid show' : 'password room'}',
+    ),
     BigoAccess.public when alive != true => StreamUnavailable(_site, '$siteId is offline'),
-    BigoAccess.public when !hasStream => StreamUnavailable(_site, '$siteId: live without hls_src'),
+    BigoAccess.public when complete && !hasStream => StreamUnavailable(_site, '$siteId: live without hls_src'),
     BigoAccess.public => null,
   };
 }
@@ -95,7 +115,11 @@ final class BigoStudio {
     this.title = '',
     this.category = '',
     this.avatar = '',
+    this.snapshot = '',
     this.hls,
+    this.password,
+    this.paid = false,
+    this.complete = true,
   });
 
   /// The Bigo id the studio was asked for (a numeric id or the streamer's
@@ -112,7 +136,10 @@ final class BigoStudio {
   /// Who may watch.
   final BigoAccess access;
 
-  /// `alive` of a public studio; null when gated.
+  /// `alive`, or null when it is no observation: a login gate zeroes the
+  /// answer (3.x), and a password or paid room's `alive: 0` is not taken as
+  /// offline (3.x). A password or paid room that says `alive: 1` is live
+  /// (the unified rule: a restricted broadcast is still live).
   final bool? alive;
 
   /// `roomStatus`.
@@ -121,7 +148,8 @@ final class BigoStudio {
   /// `roomType`.
   final String roomType;
 
-  /// `roomId`: the broadcast id, or null.
+  /// `roomId`: the streamer's room id, or null (see
+  /// [BigoRoomData.broadcastId]).
   final String? broadcastId;
 
   /// `nick_name`.
@@ -136,17 +164,73 @@ final class BigoStudio {
   /// `avatar`; '' when there is none.
   final String avatar;
 
-  /// `hls_src`: the media playlist, given only for a public live studio.
+  /// `snapshot`: the broadcast's screenshot (the last one when offline);
+  /// '' when there is none (24-1).
+  final String snapshot;
+
+  /// `hls_src`: the media playlist, given only for a public live studio and
+  /// only on a token's first use.
   final Uri? hls;
 
-  /// 3.x's state: live when public, alive and with a playlist; offline when
-  /// public and not alive; unknown otherwise (gated, or live without a
-  /// playlist).
-  LiveStatus get liveStatus => switch ((access, alive, hls)) {
-    (BigoAccess.public, true, Uri()) => LiveStatus.live,
-    (BigoAccess.public, false, _) => LiveStatus.offline,
-    _ => LiveStatus.unknown,
+  /// `passRoom`; null when the answer does not say (a token's later use).
+  final bool? password;
+
+  /// `isPaidShow` is `"1"`.
+  final bool paid;
+
+  /// Whether this is a token's first use (`passRoom` given): only such an
+  /// answer says whether the room has a password and gives the playlist.
+  /// Every later use of the same token (a minute or hours later, sample
+  /// S03-studio-reused), and a login-gated answer completed by one, leaves
+  /// out `passRoom` and `hls_src` but still gives the state, names and
+  /// pictures (24-4).
+  final bool complete;
+
+  /// The state: live when `alive` says so, whatever the access (a restricted
+  /// live room is live, M2.1); offline when a public studio says not alive;
+  /// unknown when the answer hides it (a login gate, or a password or paid
+  /// room not alive, as 3.x). A complete public answer that is alive
+  /// without a playlist is live and [LiveRestriction.unplayable] (3.x:
+  /// unknown).
+  LiveStatus get liveStatus => switch (alive) {
+    true => LiveStatus.live,
+    false => LiveStatus.offline,
+    null => LiveStatus.unknown,
   };
+
+  /// What keeps a viewer out: `needsLogin` behind the login gate,
+  /// `password` or `paid` for a restricted room, `none` for a complete
+  /// public live answer with a playlist and `unplayable` without one. Null
+  /// when the answer cannot tell (offline, or a token's later use that is
+  /// neither gated nor paid).
+  LiveRestriction? get restriction => switch (access) {
+    BigoAccess.loginRequired => LiveRestriction.needsLogin,
+    BigoAccess.restricted => (password ?? false) ? LiveRestriction.password : LiveRestriction.paid,
+    BigoAccess.public when alive != true || !complete => null,
+    BigoAccess.public => hls == null ? LiveRestriction.unplayable : LiveRestriction.none,
+  };
+
+  /// This answer (a token's later use) behind the login gate that a first
+  /// use of the same token reported: the gate stays, the state is this
+  /// answer's (24-4).
+  BigoStudio gated() => BigoStudio(
+    requestedSiteId: requestedSiteId,
+    siteId: siteId,
+    ownerId: ownerId,
+    access: BigoAccess.loginRequired,
+    roomStatus: roomStatus,
+    roomType: roomType,
+    alive: alive,
+    broadcastId: broadcastId,
+    nickname: nickname,
+    title: title,
+    category: category,
+    avatar: avatar,
+    snapshot: snapshot,
+    password: password,
+    paid: paid,
+    complete: false,
+  );
 
   /// The room data of this answer.
   BigoRoomData get data => BigoRoomData(
@@ -156,6 +240,8 @@ final class BigoStudio {
     alive: alive,
     broadcastId: broadcastId,
     hasStream: hls != null,
+    complete: complete,
+    restriction: restriction,
   );
 }
 
@@ -223,14 +309,20 @@ abstract final class BigoApi {
   /// Largest slice 3.x served; a larger page size gives nothing.
   static const int maxPageSize = 100;
 
-  /// The notice of a public room (3.x's zh.json `bigo_chat_notice`).
-  static const String chatNotice = 'Bigo Live 远端聊天尚待接入；目录 user_count 仅作为当前直播在线人数，房间详情缺值时保持未知。';
+  /// The notice of a public room (the text of 3.x's key `bigo_chat_notice`,
+  /// said for viewers: 3.x wrote "Bigo Live 远端聊天尚待接入；目录 user_count
+  /// 仅作为当前直播在线人数，房间详情缺值时保持未知。").
+  static const String chatNotice = '这里暂时看不到 Bigo Live 直播间的聊天。列表里的人数是正在观看的人数，进入直播间后不显示人数。';
 
-  /// The notice of a login-gated room (`bigo_login_required`).
-  static const String loginNotice = '该房间当前要求登录，直播状态与媒体保持未知。';
+  /// The notice of a login-gated room (`bigo_login_required`; 3.x: "该房间
+  /// 当前要求登录，直播状态与媒体保持未知。", no longer true now that the state
+  /// is read again, 24-4).
+  static const String loginNotice = 'Bigo Live 现在要求登录才能观看这个直播间，暂时不能在这里播放。';
 
-  /// The notice of a password or paid room (`bigo_access_restricted`).
-  static const String restrictedNotice = '该房间受密码或付费访问限制，直播状态与媒体保持未知。';
+  /// The notice of a password or paid room (`bigo_access_restricted`; 3.x:
+  /// "该房间受密码或付费访问限制，直播状态与媒体保持未知。", no longer true now
+  /// that such a room shows live, 24-2).
+  static const String restrictedNotice = '这个直播间设置了密码或付费观看，暂时不能在这里播放。';
 
   /// Id of the one quality.
   static const String qualityId = 'live';
@@ -273,9 +365,13 @@ abstract final class BigoApi {
       category.platform == _site && category.areaType == areaType && category.areaId == areaId;
 
   /// `OInterfaceWeb/vedioList/72`: the public list (a finite snapshot of
-  /// about 20 live rooms, whatever `fetchNum` asks). Checked as 3.x did: any
-  /// irregular row, a repeated Bigo id or owner fails the whole list
-  /// (`ApiChanged`), not only the row. Locked rooms stay listed (3.x).
+  /// about 20 live rooms, whatever `fetchNum` asks). A row 3.x would not
+  /// read (see [_card]), and a later row repeating a Bigo id or an owner,
+  /// is left out on its own (24-6: 3.x failed the whole list). The answer's
+  /// envelope is still checked as 3.x did, and rows none of which can be
+  /// read are `ApiChanged`, so a changed API never shows as an empty list.
+  /// Locked rooms stay listed, live and marked [LiveRestriction.password]
+  /// (24-2; the discovery page hides them, M13).
   static List<LiveRoom> directory(String body, {int status = 200}) {
     final data = _success(body, status: status, what: 'vedioList');
     final code = data['resCode'];
@@ -286,19 +382,29 @@ abstract final class BigoApi {
       throw ApiChanged(_site, 'vedioList: data is ${rows is List ? '${rows.length} rows' : 'not a list'}');
     }
     final ids = <String>{};
-    final owners = <int>{};
-    return List.unmodifiable([for (final row in rows) _card(_object(row, 'vedioList row'), ids, owners)]);
+    final owners = <String?>{};
+    final cards = <LiveRoom>[];
+    for (final row in rows) {
+      final LiveRoom card;
+      try {
+        card = _card(_object(row, 'vedioList row'));
+      } on ApiChanged {
+        continue;
+      }
+      if (ids.add(card.roomId) && owners.add(card.userId)) cards.add(card);
+    }
+    if (rows.isNotEmpty && cards.isEmpty) throw ApiChanged(_site, 'vedioList: none of ${rows.length} rows is readable');
+    return List.unmodifiable(cards);
   }
 
-  /// A card of the list (3.x's `parseDirectory` and `_card`): the topic as
-  /// title, else the name; the cover as avatar too; `user_count` as
-  /// concurrent viewers; 3.x's chat notice and headers.
-  static LiveRoom _card(Map<String, dynamic> row, Set<String> ids, Set<int> owners) {
+  /// A card of the list (3.x's `parseDirectory` and `_card`), checked as
+  /// 3.x did (`ApiChanged` for an irregular field): the topic as title, else
+  /// the name; the cover as avatar too; `user_count` as concurrent viewers;
+  /// the chat notice and 3.x's headers. `time_stamp` is the broadcast's
+  /// start ([startedAt]); `is_locked` gives the restriction.
+  static LiveRoom _card(Map<String, dynamic> row) {
     final siteId = _bigoId(row['bigo_id'], 'bigo_id');
     final owner = _owner(row['owner'], 'owner of $siteId');
-    if (!ids.add(siteId) || !owners.add(owner)) {
-      throw ApiChanged(_site, 'vedioList: $siteId or owner $owner listed twice');
-    }
     final broadcast = row['room_id'];
     if (broadcast is! int || broadcast < 1) throw ApiChanged(_site, 'vedioList: room_id of $siteId is $broadcast');
     _owner(row['sid'], 'sid of $siteId');
@@ -306,7 +412,7 @@ abstract final class BigoApi {
     final nickname = _text(row['nick_name'], 'nick_name of $siteId');
     final cover = row['cover_m'] == null ? '' : normalizeImageUrl(_text(row['cover_m'], 'cover_m of $siteId'));
     final viewers = row['user_count'] == null ? '' : '${_count(row['user_count'], 'user_count of $siteId')}';
-    _binary(row['is_locked'], 'is_locked of $siteId');
+    final locked = _binary(row['is_locked'], 'is_locked of $siteId');
     _count(row['room_flag'], 'room_flag of $siteId');
     return LiveRoom(
       roomId: siteId,
@@ -322,9 +428,21 @@ abstract final class BigoApi {
       onlineViewers: viewers,
       audienceMetricType: AudienceMetricType.onlineViewers,
       liveStatus: LiveStatus.live,
+      startedAt: startedAt(row['time_stamp']),
+      restriction: locked ? LiveRestriction.password : LiveRestriction.none,
       notice: chatNotice,
       httpHeaders: headers,
     );
+  }
+
+  /// A list row's `time_stamp` (Unix seconds) as the broadcast's start, in
+  /// UTC: it stays the same while a room is listed, also when it drops out
+  /// of the list and comes back, and is new for the streamer's next
+  /// broadcast (checks of 2026-09-28/29). Null for anything that is not an
+  /// integer between 2000 and 2100; a bad value drops only the start time.
+  static DateTime? startedAt(Object? value) {
+    if (value is! int || value < 946684800 || value > 4102444800) return null;
+    return DateTime.fromMillisecondsSinceEpoch(value * 1000, isUtc: true);
   }
 
   /// Page [page] (from 1) of [cards], 20 a page (3.x's `getDirectoryPage`).
@@ -459,22 +577,32 @@ abstract final class BigoApi {
   /// `needLogin`/`passRoom`/`isPaidShow` gates, `alive` 0 or 1,
   /// `clientBigoId`, `roomStatus`, `roomType`, the broadcast id, the texts,
   /// and an https `.m3u8` playlist only for a public live studio; anything
-  /// else is `ApiChanged`. The avatar is the exception: 3.x took only https
-  /// and failed the whole room on the site's `http://` avatars (sample
-  /// S03-studio-live); now an http(s) avatar is kept and any other is left
-  /// out.
+  /// else is `ApiChanged`. The exceptions:
+  /// - the avatar and the snapshot: 3.x took only an https avatar and
+  ///   failed the whole room on the site's `http://` ones (sample
+  ///   S03-studio-live); now an http(s) picture is kept and any other is
+  ///   left out;
+  /// - `passRoom` may be null: every use of a web token after its first
+  ///   answers without it and without `hls_src` (24-4, sample
+  ///   S03-studio-reused), a [BigoStudio.complete] false answer;
+  /// - an id the site does not know is answered with `code` 0 and neither
+  ///   `uid` nor `clientBigoId` (sample S03-studio-unknown): `NotFound`
+  ///   (3.x failed on it, so a search for an unknown id failed).
   static BigoStudio studio(String body, {required String requestedSiteId, int status = 200}) {
     const what = 'getInternalStudioInfo';
     final data = _success(body, status: status, what: what);
+    if (data['uid'] == null && data['clientBigoId'] == null) {
+      throw NotFound(_site, '$what: no studio for "$requestedSiteId"');
+    }
     final owner = _owner(data['uid'], 'uid');
     final login = _boolean(data['needLogin'], 'needLogin');
-    final password = _boolean(data['passRoom'], 'passRoom');
+    final password = data['passRoom'] == null ? null : _boolean(data['passRoom'], 'passRoom');
     final paid = data['isPaidShow'];
     if (paid is! String || !const {'', '0', '1'}.contains(paid)) throw ApiChanged(_site, '$what: isPaidShow is $paid');
     final alive = _binary(data['alive'], 'alive');
     final access = login
         ? BigoAccess.loginRequired
-        : password || paid == '1'
+        : (password ?? false) || paid == '1'
         ? BigoAccess.restricted
         : BigoAccess.public;
     final siteId = _bigoId(data['clientBigoId'], 'clientBigoId');
@@ -489,32 +617,42 @@ abstract final class BigoApi {
     }
     final rawHls = data['hls_src'];
     final hls = rawHls == null || rawHls == '' ? null : _playlist(rawHls);
-    final reportedAlive = access == BigoAccess.public ? alive : null;
-    if (hls != null && reportedAlive != true) {
-      throw ApiChanged(_site, '$what: hls_src for a ${reportedAlive == false ? 'offline' : access.name} studio');
+    if (hls != null && (access != BigoAccess.public || !alive)) {
+      throw ApiChanged(_site, '$what: hls_src for a ${alive ? access.name : 'offline'} studio');
     }
     return BigoStudio(
       requestedSiteId: requestedSiteId,
       siteId: siteId,
       ownerId: owner,
       access: access,
-      alive: reportedAlive,
+      alive: switch (access) {
+        BigoAccess.loginRequired => null,
+        BigoAccess.restricted => alive ? true : null,
+        BigoAccess.public => alive,
+      },
       roomStatus: roomStatus,
       roomType: roomType,
       broadcastId: broadcastId,
       nickname: _optionalText(data['nick_name'], 'nick_name'),
       title: _optionalText(data['roomTopic'], 'roomTopic'),
       category: _optionalText(data['gameTitle'], 'gameTitle'),
-      avatar: _avatar(data['avatar']),
+      avatar: _picture(data['avatar']),
+      snapshot: _picture(data['snapshot']),
       hls: hls,
+      password: password,
+      paid: paid == '1',
+      complete: password != null,
     );
   }
 
   /// The room of [studio] (3.x's `_room`): the Bigo id as the site writes it
   /// (`clientBigoId`, whatever the room was asked for by); the topic as
-  /// title, else the name; the avatar as cover too; the game as area, else
-  /// `Bigo Live`; no audience (the studio has none); 3.x's notice for the
-  /// access and headers; [BigoRoomData].
+  /// title, else the name; the snapshot as cover (24-1: 3.x used the
+  /// avatar, which stays the fallback); the game as area, else `Bigo Live`;
+  /// no audience (the studio has none); the notice for the access; 3.x's
+  /// headers; the restriction; [BigoRoomData]. An offline studio names
+  /// nobody (`nick_name` and `avatar` are empty, sample S03-studio-offline):
+  /// they stay empty, so a follow keeps its stored name and picture.
   static LiveRoom room(BigoStudio studio) => LiveRoom(
     roomId: studio.siteId,
     platform: _site,
@@ -523,9 +661,10 @@ abstract final class BigoApi {
     title: studio.title.isEmpty ? studio.nickname : studio.title,
     nick: studio.nickname,
     avatar: studio.avatar,
-    cover: studio.avatar,
+    cover: studio.snapshot.isEmpty ? studio.avatar : studio.snapshot,
     area: studio.category.isEmpty ? siteName : studio.category,
     liveStatus: studio.liveStatus,
+    restriction: studio.restriction,
     notice: switch (studio.access) {
       BigoAccess.loginRequired => loginNotice,
       BigoAccess.restricted => restrictedNotice,
@@ -544,21 +683,23 @@ abstract final class BigoApi {
   // Links ---------------------------------------------------------------------
 
   /// The Bigo id of a room link (3.x's `BigoLink.parse`): http(s) on
-  /// `bigo.tv` or `www.bigo.tv` (default port, no user info, no fragment),
+  /// `bigo.tv` or any of its subdomains (`www.bigo.tv`, `m.bigo.tv`; 3.x
+  /// took only the first two), on the default port and without user info,
   /// `/<id>` or `/<two-letter language>/<id>`, not a site page
-  /// ([reservedPaths]); null for anything else.
+  /// ([reservedPaths]); null for anything else. A fragment (`#…`) is
+  /// ignored (3.x refused the link, 24-7).
   static String? siteIdFromUrl(String raw) {
     if (raw.length > 8192 || RegExp(r'[\x00-\x20\x7f]').hasMatch(raw)) return null;
-    final uri = Uri.tryParse(raw.trim());
-    if (uri == null ||
-        (!uri.isScheme('http') && !uri.isScheme('https')) ||
-        uri.userInfo.isNotEmpty ||
-        uri.hasFragment ||
-        (uri.hasPort && uri.port != (uri.isScheme('https') ? 443 : 80))) {
+    final parsed = Uri.tryParse(raw.trim());
+    if (parsed == null ||
+        (!parsed.isScheme('http') && !parsed.isScheme('https')) ||
+        parsed.userInfo.isNotEmpty ||
+        (parsed.hasPort && parsed.port != (parsed.isScheme('https') ? 443 : 80))) {
       return null;
     }
+    final uri = parsed.removeFragment();
     final host = uri.host.toLowerCase();
-    if (host != 'bigo.tv' && host != 'www.bigo.tv') return null;
+    if (host != 'bigo.tv' && !host.endsWith('.bigo.tv')) return null;
     final List<String> segments;
     try {
       segments = uri.pathSegments.where((segment) => segment.isNotEmpty).toList(growable: false);
@@ -627,9 +768,10 @@ abstract final class BigoHlsProtection {
   }
 }
 
-/// 3.x's avatar made lenient: an http(s) URL with a host, no user info and
-/// no fragment, as `Uri` writes it (3.x's form); '' for anything else.
-String _avatar(Object? value) {
+/// 3.x's avatar made lenient, also for the snapshot: an http(s) URL with a
+/// host, no user info and no fragment, as `Uri` writes it (3.x's form); ''
+/// for anything else.
+String _picture(Object? value) {
   if (value is! String || value.isEmpty) return '';
   final uri = Uri.tryParse(value);
   if (uri == null ||

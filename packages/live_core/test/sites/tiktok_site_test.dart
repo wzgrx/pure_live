@@ -110,8 +110,9 @@ final Matcher _cancelled = throwsA(
 );
 
 /// avatar, cover: pictures on tiktokcdn-us.com, which 3.x did not trust;
-/// httpHeaders: moved to the lines (see tiktok_api_test.dart).
-const _changed = {'avatar', 'cover', 'httpHeaders'};
+/// httpHeaders: moved to the lines; notice: said for viewers (the unified
+/// rule on notices, M4.U.22). See tiktok_api_test.dart.
+const _changed = {'avatar', 'cover', 'httpHeaders', 'notice'};
 
 void _expectParity(Map<String, Object?> actual, Map<String, dynamic> legacy, {String reason = ''}) {
   for (final MapEntry(:key, :value) in legacy.entries) {
@@ -217,7 +218,6 @@ void main() {
           '@$user',
           user.toUpperCase(),
           'https://www.tiktok.com/@$user/live',
-          'https://vm.tiktok.com/ZMabcdef/',
           'not a user!',
           '',
         ]) {
@@ -274,6 +274,117 @@ void main() {
       });
       await expectLater(TikTokSite(http).searchRoomsCancellable('qvc', cancel: answered), _cancelled);
     });
+
+    ReplaySample redirect(String from, String to, {int status = 301}) => _synthetic(
+      from,
+      '',
+      status: status,
+      headers: {
+        'location': [to],
+      },
+    );
+
+    test('changed (22-5): a short link is read to the user it leads to (3.x found nothing)', () async {
+      expect(_result(_legacy('S01-user-live')['searchRooms(https://vm.tiktok.com/ZMabcdef/)']), isEmpty);
+      expect(_requestsOf(_legacy('S01-user-live')['searchRooms(https://vm.tiktok.com/ZMabcdef/)']), isEmpty);
+      for (final (link, target) in [
+        ('https://vm.tiktok.com/ZMabcdef/', 'https://www.tiktok.com/@qvc/live?_r=1&_t=x'),
+        ('https://vt.tiktok.com/ZSabcdef/', 'https://m.tiktok.com/@QVC'),
+        ('https://www.tiktok.com/t/ZTabcdef/', '/@qvc/live'),
+      ]) {
+        final setup = _setup(['S01-user-live'], extra: [redirect(link, target, status: 302)]);
+        final rooms = await setup.site.searchRooms(' $link ');
+        final want = _result(_legacy('S01-user-live')['searchRooms(qvc)'])! as List;
+        _expectParity(_projection(rooms.single), want.single as Map<String, dynamic>, reason: link);
+        expect(_urls(setup.http.requests), [link, '${_userRoom}qvc'], reason: link);
+        final short = setup.http.requests.first;
+        expect((short.site, short.followRedirects), ('tiktok', false));
+        expect(short.headers, {'user-agent': TikTokApi.userAgent}, reason: "resolveUrl's headers");
+      }
+    });
+
+    test('22-5: a short link to a share/live link, or through another short link; three requests at most', () async {
+      final share = _setup(
+        ['S02-room-live', 'S01-user-live'],
+        extra: [redirect('https://vm.tiktok.com/ZMlive/', 'https://www.tiktok.com/share/live/$_liveRoomId?u=1')],
+      );
+      expect((await share.site.searchRooms('https://vm.tiktok.com/ZMlive/')).single.roomId, 'qvc');
+      expect(_urls(share.http.requests), [
+        'https://vm.tiktok.com/ZMlive/',
+        '$_roomInfo$_liveRoomId',
+        '${_userRoom}qvc',
+      ]);
+      final chain = _setup(
+        ['S01-user-live'],
+        extra: [
+          redirect('https://vm.tiktok.com/ZMa/', 'https://vt.tiktok.com/ZSb/'),
+          redirect('https://vt.tiktok.com/ZSb/', 'https://www.tiktok.com/t/ZTc/'),
+          redirect('https://www.tiktok.com/t/ZTc/', 'https://www.tiktok.com/@qvc'),
+        ],
+      );
+      expect((await chain.site.searchRooms('https://vm.tiktok.com/ZMa/')).single.roomId, 'qvc');
+      expect(chain.http.requests, hasLength(4));
+      final long = _setup(
+        [],
+        extra: [
+          redirect('https://vm.tiktok.com/ZM1/', 'https://vm.tiktok.com/ZM2/'),
+          redirect('https://vm.tiktok.com/ZM2/', 'https://vm.tiktok.com/ZM3/'),
+          redirect('https://vm.tiktok.com/ZM3/', 'https://vm.tiktok.com/ZM4/'),
+        ],
+      );
+      expect(await long.site.searchRooms('https://vm.tiktok.com/ZM1/'), isEmpty);
+      expect(long.http.requests, hasLength(TikTokApi.maxShortLinkHops));
+      final loop = _setup(
+        [],
+        extra: [
+          redirect('https://vm.tiktok.com/ZMx/', 'https://vt.tiktok.com/ZSy/'),
+          redirect('https://vt.tiktok.com/ZSy/', 'https://vm.tiktok.com/ZMx/#again'),
+        ],
+      );
+      expect(await loop.site.searchRooms('https://vm.tiktok.com/ZMx/'), isEmpty);
+      expect(loop.http.requests, hasLength(2));
+    });
+
+    test('22-5: a short link to a video, the home page, another site, or no redirect gives nothing', () async {
+      for (final sample in [
+        redirect('https://vm.tiktok.com/ZMv/', 'https://www.tiktok.com/@qvc/video/7300000000000000000'),
+        redirect('https://vm.tiktok.com/ZMv/', 'https://www.tiktok.com/'),
+        redirect('https://vm.tiktok.com/ZMv/', 'https://live.bilibili.com/1'),
+        redirect('https://vm.tiktok.com/ZMv/', 'ftp://www.tiktok.com/@qvc'),
+        _synthetic('https://vm.tiktok.com/ZMv/', '<html></html>'),
+        _synthetic('https://vm.tiktok.com/ZMv/', 'not found', status: 404),
+        _synthetic('https://vm.tiktok.com/ZMv/', '', status: 400),
+        _synthetic('https://vm.tiktok.com/ZMv/', '', status: 302),
+      ]) {
+        final setup = _setup([], extra: [sample]);
+        expect(await setup.site.searchRooms('https://vm.tiktok.com/ZMv/'), isEmpty, reason: '${sample.status}');
+        expect(setup.http.requests, hasLength(1));
+      }
+    });
+
+    test('22-5: refusals and failures of a short link are thrown; the cancellation goes with it', () async {
+      for (final (status, matcher) in [
+        (403, isA<RiskControl>()),
+        (429, isA<RateLimited>()),
+        (503, isA<NetworkFailure>()),
+      ]) {
+        final setup = _setup([], extra: [_synthetic('https://vm.tiktok.com/ZMe/', '', status: status)]);
+        await expectLater(setup.site.searchRooms('https://vm.tiktok.com/ZMe/'), throwsA(matcher), reason: '$status');
+      }
+      await expectLater(
+        TikTokSite(_Failing(TransportReason.timeout)).searchRooms('https://vm.tiktok.com/ZMe/'),
+        throwsA(isA<NetworkFailure>()),
+      );
+      final setup = _setup([], extra: [redirect('https://vm.tiktok.com/ZMe/', 'https://www.tiktok.com/')]);
+      final token = CancelToken();
+      await setup.site.searchRoomsCancellable('https://vm.tiktok.com/ZMe/', cancel: token);
+      expect(identical(setup.http.requests.single.cancel, token), isTrue);
+      await expectLater(
+        setup.site.searchRoomsCancellable('https://vm.tiktok.com/ZMe/', cancel: CancelToken()..cancel()),
+        _cancelled,
+      );
+      expect(setup.http.requests, hasLength(1));
+    });
   });
 
   group('rooms', () {
@@ -283,9 +394,9 @@ void main() {
       final refreshed = await setup.site.getRoomDetailForRefresh(roomId: 'qvc');
       final recorded = await setup.site.getRoomDetailForRecording(roomId: 'qvc');
       expect(setup.http.requests, hasLength(3));
-      expect((entered.data! as TikTokRoomData).streams, hasLength(14));
+      expect((entered.data! as TikTokRoomData).streams, hasLength(7));
       expect((entered.data! as TikTokRoomData).issuedAt, _issued);
-      expect((recorded.data! as TikTokRoomData).streams, hasLength(14));
+      expect((recorded.data! as TikTokRoomData).streams, hasLength(7));
       expect(refreshed.data, isNull);
       final want = _result(_legacy('S01-user-live')['getRoomDetailForRefresh(qvc)'])! as Map<String, dynamic>;
       _expectParity(_projection(refreshed), want);
@@ -342,7 +453,7 @@ void main() {
     });
 
     test(
-      'live status: live true, offline false (3.x); a restricted LIVE is not live; an unknown state no answer',
+      'live status: live true, offline false (3.x); a restricted LIVE is live (22-1); an unknown state no answer',
       () async {
         expect(
           await _setup(['S01-user-live']).site.getLiveStatus(roomId: 'qvc'),
@@ -353,36 +464,66 @@ void main() {
           _result(_legacy('S01-user-offline')['getLiveStatus']),
         );
         final restricted = _setup([], extra: [_liveAnswer((data) => _liveRoomOf(data)['liveSubOnly'] = 1)]);
-        expect(await restricted.site.getLiveStatus(roomId: 'qvc'), isFalse);
+        expect(await restricted.site.getLiveStatus(roomId: 'qvc'), isTrue, reason: '3.x: false');
         final unknown = _setup([], extra: [_liveAnswer((data) => _liveRoomOf(data)['status'] = 3)]);
         await expectLater(unknown.site.getLiveStatus(roomId: 'qvc'), throwsA(isA<StreamUnavailable>()));
       },
     );
 
-    test(
-      'recording: a live room without a stream is StreamUnavailable (3.x); offline and banned rooms return',
-      () async {
-        final noStream = _setup(
-          [],
-          extra: [
-            _liveAnswer(
-              (data) => _liveRoomOf(data)
-                ..remove('streamData')
-                ..remove('hevcStreamData'),
-            ),
-          ],
-        );
-        await expectLater(noStream.site.getRoomDetailForRecording(roomId: 'qvc'), throwsA(isA<StreamUnavailable>()));
-        final entered = await noStream.site.getRoomDetail(roomId: 'qvc');
-        expect(entered.liveStatus, LiveStatus.live, reason: 'room entry shows the room; playing it fails');
+    test('22-1: a restricted LIVE is live and marked at every depth; the refresh merges into a 3.x follow', () async {
+      final setup = _setup([], extra: [_liveAnswer((data) => (data['user'] as Map)['secret'] = true)]);
+      final follow = LiveRoom.fromJson(const {'roomId': 'qvc', 'platform': 'tiktok', 'liveStatus': 4});
+      expect(follow.liveStatus, LiveStatus.banned, reason: "3.x's word for a restricted LIVE");
+      for (final room in [
+        await setup.site.getRoomDetail(roomId: 'qvc'),
+        await setup.site.getRoomDetailForRefresh(roomId: 'qvc'),
+        await setup.site.getRoomDetailForRecording(roomId: 'qvc'),
+        (await setup.site.searchRooms('qvc')).single,
+        follow.mergeFrom(await setup.site.getRoomDetailForRefresh(roomId: 'qvc')),
+      ]) {
         expect(
-          (await _setup(['S01-user-offline']).site.getRoomDetailForRecording(roomId: 'cnn')).liveStatus,
-          LiveStatus.offline,
+          (room.liveStatus, room.restriction, room.followGroup),
+          (LiveStatus.live, LiveRestriction.private, FollowGroup.live),
         );
-        final restricted = _setup([], extra: [_liveAnswer((data) => (data['user'] as Map)['secret'] = true)]);
-        expect((await restricted.site.getRoomDetailForRecording(roomId: 'qvc')).liveStatus, LiveStatus.banned);
-      },
-    );
+        expect(room.startedAt, DateTime.utc(2026, 9, 27, 18, 12, 4));
+      }
+      expect(setup.http.requests, hasLength(5));
+    });
+
+    test('recording: an unrestricted live room without a stream is StreamUnavailable (3.x); offline and restricted '
+        'rooms return', () async {
+      final noStream = _setup(
+        [],
+        extra: [
+          _liveAnswer(
+            (data) => _liveRoomOf(data)
+              ..remove('streamData')
+              ..remove('hevcStreamData'),
+          ),
+        ],
+      );
+      await expectLater(noStream.site.getRoomDetailForRecording(roomId: 'qvc'), throwsA(isA<StreamUnavailable>()));
+      final entered = await noStream.site.getRoomDetail(roomId: 'qvc');
+      expect(entered.liveStatus, LiveStatus.live, reason: 'room entry shows the room; playing it fails');
+      final unreadable = _setup(
+        [],
+        extra: [
+          _liveAnswer(
+            (data) => _liveRoomOf(data)
+              ..['streamData'] = 'x'
+              ..remove('hevcStreamData'),
+          ),
+        ],
+      );
+      await expectLater(unreadable.site.getRoomDetailForRecording(roomId: 'qvc'), throwsA(isA<ApiChanged>()));
+      expect(
+        (await _setup(['S01-user-offline']).site.getRoomDetailForRecording(roomId: 'cnn')).liveStatus,
+        LiveStatus.offline,
+      );
+      final restricted = _setup([], extra: [_liveAnswer((data) => (data['user'] as Map)['secret'] = true)]);
+      final room = await restricted.site.getRoomDetailForRecording(roomId: 'qvc');
+      expect((room.liveStatus, room.restriction), (LiveStatus.live, LiveRestriction.private), reason: '3.x: banned');
+    });
   });
 
   group('streams', () {
@@ -392,21 +533,71 @@ void main() {
       setup.http.requests.clear();
       final qualities = await setup.site.getPlayQualities(detail: room);
       final legacy = _legacy('S01-user-live')['trustedHosts'] as Map<String, dynamic>;
+      // Changed (22-2, 22-3, 22-4): 3.x's 14 ids, one per protocol, are 7.
       expect(qualities.map((quality) => quality.id), [
-        for (final quality in _result(legacy['getPlayQualites'])! as List) (quality as Map)['id'],
+        'h264:origin',
+        'h264:hd',
+        'h265:uhd_60',
+        'h265:hd_60',
+        'h265:hd',
+        'h265:sd',
+        'h265:ld',
       ]);
+      expect(
+        {
+          for (final quality in _result(legacy['getPlayQualites'])! as List)
+            TikTokApi.qualityIdFromLegacy((quality as Map)['id'] as String),
+        },
+        {for (final quality in qualities) quality.id},
+      );
       final resolution = await setup.site.resolvePlayUrls(detail: room, quality: qualities.first);
       expect(resolution.urls, [
-        for (final url in _result((legacy['getPlayUrls'] as Map)['h264:origin:flv'])! as List)
-          (url as String).replaceAll('tiktokcdn.com', 'tiktokcdn-us.com'),
+        for (final id in ['h264:origin:flv', 'h264:origin:hls'])
+          for (final url in _result((legacy['getPlayUrls'] as Map)[id])! as List)
+            (url as String).replaceAll('tiktokcdn.com', 'tiktokcdn-us.com'),
       ]);
-      expect(resolution.lines.single.headers, TikTokApi.mediaHeaders('qvc'));
-      expect(await setup.site.getPlayUrls(detail: room, quality: qualities[2]), hasLength(1));
+      expect(resolution.lines.map((line) => line.headers), everyElement(TikTokApi.mediaHeaders('qvc')));
+      expect(await setup.site.getPlayUrls(detail: room, quality: qualities[2]), hasLength(2));
       expect(setup.http.requests, isEmpty, reason: '3.x played from the entered room');
       final recovered = await setup.site.resolvePlayUrlsForRecovery(detail: room, quality: qualities.first);
       expect(recovered.urls, resolution.urls);
-      expect(recovered.appliedQualityData, 'h264:origin:flv');
+      expect(recovered.appliedQualityData, 'h264:origin');
       expect(_urls(setup.http.requests), _requestsOf(legacy['resolvePlayUrlsForRecoveryRaw']));
+    });
+
+    test('22-3: "优先 H.264" is read at each call; off, 3.x\'s order (best tier first)', () async {
+      var preferH264 = true;
+      final http = ReplayHttp([ReplaySample.load('$_root/S01-user-live')]);
+      final site = TikTokSite(http, preferH264: () => preferH264, now: () => _issued);
+      final room = await site.getRoomDetail(roomId: 'qvc');
+      Future<List<String>> names() async => [
+        for (final quality in await site.getPlayQualities(detail: room)) quality.quality,
+      ];
+      expect(await names(), [
+        '原画',
+        '720p',
+        '1080p60 · H.265',
+        '720p60 · H.265',
+        '720p · H.265',
+        '540p · H.265',
+        '360p · H.265',
+      ]);
+      preferH264 = false;
+      expect(await names(), [
+        '原画',
+        '1080p60 · H.265',
+        '720p60 · H.265',
+        '720p',
+        '720p · H.265',
+        '540p · H.265',
+        '360p · H.265',
+      ]);
+      expect(http.requests, hasLength(1));
+      expect(
+        (await _setup(['S01-user-live']).site.getPlayQualities(detail: room)).first.id,
+        'h264:origin',
+        reason: 'on by default',
+      );
     });
 
     test('a card without streams (a follow, a search result) is entered first (3.x: identity error)', () async {
@@ -415,28 +606,25 @@ void main() {
       final trusted = _legacy('S01-user-live')['trustedHosts'] as Map<String, dynamic>;
       expect(trusted['getPlayQualites(refresh card)'], containsPair('message', 'TikTok identity'));
       setup.http.requests.clear();
-      expect(await setup.site.getPlayQualities(detail: card), hasLength(14));
+      expect(await setup.site.getPlayQualities(detail: card), hasLength(7));
       expect(setup.http.requests, hasLength(1));
       final stored = LiveRoom(roomId: 'qvc', platform: 'tiktok');
-      expect(
-        (await setup.site.resolvePlayUrls(
-          detail: stored,
-          quality: const LivePlayQuality(quality: '', id: 'h265:sd:hls'),
-        )).lines.single.format,
-        StreamFormat.hls,
+      final resolution = await setup.site.resolvePlayUrls(
+        detail: stored,
+        quality: const LivePlayQuality(quality: '', id: 'h265:sd:hls'),
       );
+      expect(resolution.lines.map((line) => line.format), [StreamFormat.flv, StreamFormat.hls], reason: '3.x id');
+      expect(resolution.appliedQualityData, 'h265:sd');
     });
 
-    test('a room known to be offline or banned is refused without a request (3.x listed nothing)', () async {
+    test('a room known to be offline is refused without a request (3.x listed nothing); banned asks again', () async {
       final setup = _setup(['S01-user-offline']);
       final offline = await setup.site.getRoomDetail(roomId: 'cnn');
       setup.http.requests.clear();
       await expectLater(setup.site.getPlayQualities(detail: offline), throwsA(isA<StreamUnavailable>()));
       final card = LiveRoom(roomId: 'cnn', platform: 'tiktok', liveStatus: LiveStatus.offline);
       await expectLater(setup.site.getPlayQualities(detail: card), throwsA(isA<StreamUnavailable>()));
-      final banned = LiveRoom(roomId: 'cnn', platform: 'tiktok', liveStatus: LiveStatus.banned);
-      await expectLater(setup.site.getPlayQualities(detail: banned), throwsA(isA<NeedsLogin>()));
-      const quality = LivePlayQuality(quality: '', id: 'h264:hd:flv');
+      const quality = LivePlayQuality(quality: '', id: 'h264:hd');
       await expectLater(
         setup.site.resolvePlayUrls(detail: offline, quality: quality),
         throwsA(isA<StreamUnavailable>()),
@@ -446,6 +634,11 @@ void main() {
         throwsA(isA<StreamUnavailable>()),
       );
       expect(setup.http.requests, isEmpty);
+      // 3.x stored a restricted LIVE as banned: no longer a state of its own
+      // (22-1), so the room is asked again (3.x refused it: NeedsLogin).
+      final banned = LiveRoom(roomId: 'cnn', platform: 'tiktok', liveStatus: LiveStatus.banned);
+      await expectLater(setup.site.getPlayQualities(detail: banned), throwsA(isA<StreamUnavailable>()));
+      expect(_urls(setup.http.requests), ['${_userRoom}cnn']);
     });
 
     test("an entered room that a refresh found offline plays nothing (3.x read the room's state first)", () async {
@@ -460,23 +653,31 @@ void main() {
 
     test('restricted, live without a stream, a state 3.x did not know: typed reasons, no further request', () async {
       for (final (edit, matcher) in <(void Function(Map<String, dynamic>), Matcher)>[
-        ((data) => _liveRoomOf(data)['liveSubOnly'] = 1, isA<NeedsLogin>()),
-        ((data) => (_liveRoomOf(data)['paidEvent'] as Map)['paid_type'] = 1, isA<NeedsLogin>()),
+        // 3.x's NeedsLogin-like "access": no TikTok login would help (22-1).
+        ((data) => _liveRoomOf(data)['liveSubOnly'] = 1, isA<StreamUnavailable>()),
+        ((data) => (_liveRoomOf(data)['paidEvent'] as Map)['paid_type'] = 1, isA<StreamUnavailable>()),
+        ((data) => (data['user'] as Map)['secret'] = true, isA<StreamUnavailable>()),
         (
           (data) => _liveRoomOf(data)
             ..remove('streamData')
             ..remove('hevcStreamData'),
           isA<StreamUnavailable>(),
         ),
+        ((data) => _liveRoomOf(data)['hevcStreamData'] = 'x', isA<StreamUnavailable>()),
         ((data) => _liveRoomOf(data)['status'] = 3, isA<StreamUnavailable>()),
       ]) {
         final setup = _setup([], extra: [_liveAnswer(edit)]);
         final room = await setup.site.getRoomDetail(roomId: 'qvc');
+        if ((room.data! as TikTokRoomData).streams.isNotEmpty) {
+          // hevcStreamData unreadable: streamData still plays.
+          expect(await setup.site.getPlayQualities(detail: room), hasLength(1));
+          continue;
+        }
         await expectLater(setup.site.getPlayQualities(detail: room), throwsA(matcher));
         await expectLater(
           setup.site.resolvePlayUrlsForRecovery(
             detail: room,
-            quality: const LivePlayQuality(quality: '', id: 'h264:hd:flv'),
+            quality: const LivePlayQuality(quality: '', id: 'h264:hd'),
           ),
           throwsA(matcher),
         );
@@ -487,7 +688,7 @@ void main() {
     test('recovery: the quality must still be offered; a LIVE that ended is StreamUnavailable (3.x)', () async {
       final ended = _setup([], extra: [_liveAnswer((data) => _liveRoomOf(data)['status'] = 4)]);
       final room = await _setup(['S01-user-live']).site.getRoomDetail(roomId: 'qvc');
-      const origin = LivePlayQuality(quality: '', id: 'h264:origin:flv');
+      const origin = LivePlayQuality(quality: '', id: 'h264:origin');
       await expectLater(
         ended.site.resolvePlayUrlsForRecovery(detail: room, quality: origin),
         throwsA(isA<StreamUnavailable>()),
@@ -498,11 +699,16 @@ void main() {
         fewer.site.resolvePlayUrlsForRecovery(detail: room, quality: origin),
         throwsA(isA<StreamUnavailable>()),
       );
-      const hd = LivePlayQuality(quality: '', id: 'h264:hd:flv');
-      expect(
-        (await fewer.site.resolvePlayUrlsForRecovery(detail: room, quality: hd)).appliedQualityData,
-        'h264:hd:flv',
-      );
+      for (final id in ['h264:hd', 'h264:hd:flv', 'h264:hd:hls']) {
+        expect(
+          (await fewer.site.resolvePlayUrlsForRecovery(
+            detail: room,
+            quality: LivePlayQuality(quality: '', id: id),
+          )).appliedQualityData,
+          'h264:hd',
+          reason: id,
+        );
+      }
       await expectLater(
         _setup([]).site.resolvePlayUrls(
           detail: room,

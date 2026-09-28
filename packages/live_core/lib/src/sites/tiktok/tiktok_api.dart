@@ -11,7 +11,8 @@ import 'package:meta/meta.dart';
 
 const _site = 'tiktok';
 
-/// A user's LIVE state (3.x's `TikTokState`).
+/// A user's LIVE state (3.x's `TikTokState`, without its `restricted`: a
+/// restricted LIVE is live now, with a [LiveRestriction], 22-1).
 enum TikTokState {
   /// `status` 2: broadcasting.
   live,
@@ -19,54 +20,41 @@ enum TikTokState {
   /// `status` 4: not broadcasting.
   offline,
 
-  /// A private account, a subscriber-only or a paid LIVE (see
-  /// [TikTokRestriction]); shown as banned, as in 3.x.
-  restricted,
-
   /// Any other `status`, or none.
   unknown,
 }
 
-/// Why a LIVE is [TikTokState.restricted], in 3.x's order of checks.
-enum TikTokRestriction {
-  /// `user.secret`: a private account.
-  privateAccount,
-
-  /// `liveRoom.liveSubOnly` 1: subscribers only.
-  subscriberOnly,
-
-  /// `liveRoom.paidEvent.paid_type` above 0: a paid LIVE.
-  paid,
-}
-
-/// One of 3.x's stream choices: a quality tier ([qualityId], the
-/// `stream_data` key) in one codec and one protocol, with its URLs. Its [id]
-/// `<codec>:<qualityId>:<protocol>` is the quality's id.
+/// One quality: a tier ([qualityId], the `stream_data` key) in one codec,
+/// with its FLV and HLS URLs as lines that stand in for each other (22-2).
+/// Its [id] `<codec>:<qualityId>` is the quality's id.
 @immutable
 final class TikTokStream {
   /// Creates the stream.
   const new({
     required this.id,
     required this.qualityId,
-    required this.protocol,
     required this.codec,
-    required this.urls,
+    this.flvUrls = const [],
+    this.hlsUrls = const [],
+    this.label = '',
     this.resolution = '',
     this.bitrate,
   });
 
-  /// `h264:hd:flv`.
+  /// `h264:origin`.
   final String id;
 
   /// `origin`, `uhd_60`, `hd_60`, `uhd`, `hd`, `sd`, `ld`, `auto` or another
   /// key the site sends, lower case.
   final String qualityId;
 
-  /// `flv` or `hls`.
-  final String protocol;
-
   /// `h264` or `h265`.
   final String codec;
+
+  /// The site's own name of the tier (`pull_data.options.qualities[].name`
+  /// of the container it came from: `720p`, `1080p60`, `Original`), else
+  /// empty. See [TikTokApi.qualityName].
+  final String label;
 
   /// `720x1280` or `720p` from `sdk_params`, else empty.
   final String resolution;
@@ -74,9 +62,15 @@ final class TikTokStream {
   /// `sdk_params.vbitrate`, bits per second.
   final int? bitrate;
 
-  /// The URLs, each once, in the order read (`streamData` before
+  /// The FLV URLs, each once, in the order read (`streamData` before
   /// `hevcStreamData`).
-  final List<Uri> urls;
+  final List<Uri> flvUrls;
+
+  /// The HLS URLs, likewise.
+  final List<Uri> hlsUrls;
+
+  /// Every URL, FLV first: the order of the lines.
+  List<Uri> get urls => [...flvUrls, ...hlsUrls];
 }
 
 /// What a room's entry knows besides its card: the user behind the
@@ -96,12 +90,14 @@ final class TikTokRoomData {
     this.liveRoomId = '',
     this.streamId = '',
     this.streams = const [],
+    this.skipped = const [],
   });
 
   /// `user.uniqueId`, lower case: the room id.
   final String username;
 
-  /// `user.id`, the account behind the username (the room's `userId`).
+  /// `user.id`, the account behind the username (the room's `userId`);
+  /// empty when the site sends none that is valid.
   final String userId;
 
   /// `user.secUid`.
@@ -114,18 +110,24 @@ final class TikTokRoomData {
   /// `liveRoom.streamId`.
   final String streamId;
 
-  /// The state 3.x derived.
+  /// The LIVE's state.
   final TikTokState state;
 
   /// `liveRoom.status` (else `user.status`) as sent.
   final int? status;
 
-  /// Why the LIVE is restricted, when it is.
-  final TikTokRestriction? restriction;
+  /// Who may watch a live LIVE ([LiveRestriction.none] for everyone, see
+  /// [TikTokApi.restrictionOf]); null unless live.
+  final LiveRestriction? restriction;
 
-  /// The streams of a live, unrestricted LIVE, best first (3.x's order);
-  /// empty otherwise.
+  /// The streams of a live, unrestricted LIVE, as read (see
+  /// [TikTokApi.qualities] for their order); empty otherwise.
   final List<TikTokStream> streams;
+
+  /// What of the stream containers was skipped as malformed (a container,
+  /// a tier or one URL, with the reason), for the error when nothing is
+  /// left to play; empty when everything was read.
+  final List<String> skipped;
 
   /// When the answer arrived: the start of the URLs' lifetime.
   final DateTime issuedAt;
@@ -259,11 +261,23 @@ abstract final class TikTokApi {
   /// 3.x's display name (`site_tiktok`), also every room's area.
   static const String siteName = 'TikTok LIVE';
 
-  /// The notice on every room (3.x's `tiktok_chat_notice`).
-  static const String chatNotice = 'TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。';
+  /// The notice on every room, 3.x's `tiktok_chat_notice` ("TikTok LIVE
+  /// 远端聊天尚待接入；当前观看与累计进房分别展示。") said for viewers (the
+  /// unified rule on notices). The key stays; M13 translates it.
+  static const String chatNotice = 'TikTok 直播的评论暂时不能在这里显示。在线人数是正在看的人数，累计是进过直播间的人数。';
 
-  /// 3.x's quality names by `stream_data` key (`tiktok_quality_*`); other
-  /// keys are shown upper case.
+  /// The name of the source tier `origin` (the unified rule on quality
+  /// names; the site calls it `Original`).
+  static const String originName = '原画';
+
+  /// Added to the name of an H.265 quality (`720p · H.265`), which is only
+  /// picked by hand while "优先 H.264" is on (22-3); it also keeps a stored
+  /// preference such as 3.x's "原画" from matching the H.265 twin of a tier.
+  static const String h265Suffix = ' · H.265';
+
+  /// 3.x's quality names by `stream_data` key (`tiktok_quality_*`), the last
+  /// resort of [qualityName] for a tier the site neither names nor gives a
+  /// resolution; other keys are shown upper case.
   static const Map<String, String> qualityNames = {
     'origin': '原始画质',
     'uhd_60': '超清 60 帧',
@@ -274,6 +288,10 @@ abstract final class TikTokApi {
     'ld': '流畅',
     'auto': '自动',
   };
+
+  /// Most requests a short link typed into search is read with, one per
+  /// redirect, each to a TikTok short link (22-5).
+  static const int maxShortLinkHops = 3;
 
   /// How long before `expire` a pull URL is renewed (at most a quarter of
   /// its lifetime; the site signs them for about 14 days).
@@ -322,16 +340,21 @@ abstract final class TikTokApi {
 
   /// `api-live/user/room` for [username] (normalized) as 3.x read it.
   ///
-  /// The answer must be that user (`uniqueId`), with 3.x's field checks
-  /// (see the helpers), or it is `ApiChanged`; `statusCode` 19881007 (or a
-  /// message saying so) is `NotFound`, any other code `ApiChanged`.
+  /// The answer must be that user (`uniqueId`), or it is `ApiChanged`;
+  /// `statusCode` 19881007 (or a message saying so) is `NotFound`, any
+  /// other code `ApiChanged`. The fields the state, the restriction and
+  /// the streams depend on keep 3.x's checks (`secret`, `paidEvent`); the
+  /// others no longer fail the answer when malformed (22-6: `verified` is
+  /// not read, and a bad `nickname`, `id`, `secUid`, `roomId`, `streamId`,
+  /// `title`, `signature`, `stats` or count is left empty).
   ///
   /// The card: the username as the room, `user.id` as `userId`, the title
   /// (the nickname when empty; offline it is the last LIVE's), avatar and
   /// cover from trusted https hosts (see [isTrustedHost]), the signature,
-  /// followers, the state (restricted is banned, as in 3.x) and, only while
-  /// live, `userCount` as concurrent viewers and `enterCount` as cumulative
-  /// entries. With [includeMedia] (room entry and recording) `data` is the
+  /// followers and the state. While live (restricted or not, 22-1) it also
+  /// has `userCount` as concurrent viewers, `enterCount` as cumulative
+  /// entries, the start ([startTime]) and who may watch ([restrictionOf]).
+  /// With [includeMedia] (room entry and recording) `data` is the
   /// [TikTokRoomData] and a live, unrestricted LIVE's streams are read;
   /// without it (follow refreshes, search) nothing of them is read, as in
   /// 3.x.
@@ -354,45 +377,28 @@ abstract final class TikTokApi {
     }
     final data = _object(root['data'], 'user/room.data');
     final user = _object(data['user'], 'user/room.data.user');
-    final stats = _optionalObject(data['stats'], 'user/room.data.stats');
     final live = _object(data['liveRoom'], 'user/room.data.liveRoom');
     final actual = _username(user['uniqueId'], 'user.uniqueId');
     if (actual != username) throw ApiChanged(_site, 'user/room: asked $username, got $actual');
 
     final liveStatus = _integer(live['status'] ?? user['status']);
-    final paidValue = live['paidEvent'];
-    final paid = paidValue == null || (paidValue is List && paidValue.isEmpty)
-        ? const <String, dynamic>{}
-        : _object(paidValue, 'liveRoom.paidEvent');
-    final secret = _optionalBool(user['secret'], 'user.secret') ?? false;
-    final restriction = secret
-        ? TikTokRestriction.privateAccount
-        : _integer(live['liveSubOnly']) == 1
-        ? TikTokRestriction.subscriberOnly
-        : (_integer(paid['paid_type']) ?? 0) > 0
-        ? TikTokRestriction.paid
-        : null;
-    final state = restriction != null
-        ? TikTokState.restricted
-        : switch (liveStatus) {
-            2 => TikTokState.live,
-            4 => TikTokState.offline,
-            _ => TikTokState.unknown,
-          };
-    final roomStats = _optionalObject(live['liveRoomStats'], 'liveRoom.liveRoomStats');
-    final nickname = _text(user['nickname'], 'user.nickname');
-    final title = _optionalText(live['title'], 'liveRoom.title');
-    final userId = _longId(user['id'], 'user.id');
-    final secUid = _optionalText(user['secUid'], 'user.secUid');
-    final liveRoomId = _optionalLongId(user['roomId'], 'user.roomId');
-    final streamId = _optionalLongId(live['streamId'], 'liveRoom.streamId');
-    final bio = _optionalText(user['signature'], 'user.signature');
-    final followers = _optionalCount(stats['followerCount'], 'stats.followerCount');
+    final state = switch (liveStatus) {
+      2 => TikTokState.live,
+      4 => TikTokState.offline,
+      _ => TikTokState.unknown,
+    };
     final isLive = state == TikTokState.live;
-    final online = isLive ? _optionalCount(roomStats['userCount'], 'liveRoomStats.userCount') : null;
-    final entered = isLive ? _optionalCount(roomStats['enterCount'], 'liveRoomStats.enterCount') : null;
-    _optionalBool(user['verified'], 'user.verified');
-    final streams = isLive && includeMedia ? _streams(live) : const <TikTokStream>[];
+    // Checked in every state, as 3.x did; kept only while live.
+    final restriction = restrictionOf(user, live);
+    final stats = _lenientObject(data['stats']);
+    final roomStats = _lenientObject(live['liveRoomStats']);
+    final nickname = _lenientText(user['nickname']);
+    final title = _lenientText(live['title']);
+    final userId = _lenientLongId(user['id']);
+    final followers = _lenientCount(stats['followerCount']);
+    final online = isLive ? _lenientCount(roomStats['userCount']) : null;
+    final entered = isLive ? _lenientCount(roomStats['enterCount']) : null;
+    final read = isLive && includeMedia && restriction == LiveRestriction.none ? _streams(live) : null;
     return LiveRoom(
       platform: _site,
       roomId: username,
@@ -403,14 +409,15 @@ abstract final class TikTokApi {
       cover: _image([live['coverUrl'], live['squareCoverImg']]),
       area: siteName,
       followers: followers?.toString() ?? '',
-      introduction: bio,
+      introduction: _lenientText(user['signature']),
       link: roomUrl(username),
       liveStatus: switch (state) {
         TikTokState.live => LiveStatus.live,
         TikTokState.offline => LiveStatus.offline,
-        TikTokState.restricted => LiveStatus.banned,
         TikTokState.unknown => LiveStatus.unknown,
       },
+      startedAt: isLive ? startTime(live['startTime']) : null,
+      restriction: isLive ? restriction : null,
       watching: online?.toString() ?? '',
       onlineViewers: online?.toString() ?? '',
       totalViewers: entered?.toString() ?? '',
@@ -420,17 +427,45 @@ abstract final class TikTokApi {
           ? TikTokRoomData(
               username: username,
               userId: userId,
-              secUid: secUid,
-              liveRoomId: liveRoomId,
-              streamId: streamId,
+              secUid: _lenientText(user['secUid']),
+              liveRoomId: _lenientLongId(user['roomId']),
+              streamId: _lenientLongId(live['streamId']),
               state: state,
               status: liveStatus,
-              restriction: restriction,
-              streams: streams,
+              restriction: isLive ? restriction : null,
+              streams: read?.streams ?? const [],
+              skipped: read?.skipped ?? const [],
               issuedAt: issuedAt,
             )
           : null,
     );
+  }
+
+  /// Who may watch the LIVE of [user] ([live] its `liveRoom`), in 3.x's
+  /// order of checks: a private account (`user.secret`) is for its
+  /// followers ([LiveRestriction.private]), `liveSubOnly` 1 for subscribers
+  /// ([LiveRestriction.subscribersOnly]), `paidEvent.paid_type` above 0 is
+  /// a paid LIVE ([LiveRestriction.paid]); else [LiveRestriction.none].
+  /// `secret` must be a boolean and `paidEvent` an object (or absent, null,
+  /// an empty list), as 3.x checked; anything else is `ApiChanged`.
+  static LiveRestriction restrictionOf(Map<String, dynamic> user, Map<String, dynamic> live) {
+    final paidValue = live['paidEvent'];
+    final paid = paidValue == null || (paidValue is List && paidValue.isEmpty)
+        ? const <String, dynamic>{}
+        : _object(paidValue, 'liveRoom.paidEvent');
+    final secret = _optionalBool(user['secret'], 'user.secret') ?? false;
+    if (secret) return LiveRestriction.private;
+    if (_integer(live['liveSubOnly']) == 1) return LiveRestriction.subscribersOnly;
+    if ((_integer(paid['paid_type']) ?? 0) > 0) return LiveRestriction.paid;
+    return LiveRestriction.none;
+  }
+
+  /// `liveRoom.startTime` (Unix seconds) as a UTC time; null when missing,
+  /// not an integer, or outside 2000–2100.
+  static DateTime? startTime(Object? value) {
+    final seconds = _integer(value);
+    if (seconds == null || seconds < 946684800 || seconds > 4102444800) return null;
+    return DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true);
   }
 
   /// `webcast/room/info`: the username owning LIVE room [liveRoomId]
@@ -446,37 +481,128 @@ abstract final class TikTokApi {
     return _username(_object(data['owner'], 'room/info.data.owner')['display_id'], 'owner.display_id');
   }
 
+  /// Where a short link answered with [status] and [locations] leads
+  /// (22-5, search): the one `Location` of a redirect, resolved against
+  /// [link], when it is http(s) without user info; null for an answer that
+  /// is no redirect (2xx), an unknown code (400, 404, 410) or a redirect
+  /// without a usable target. 401/403 is `RiskControl`, 420/429
+  /// `RateLimited`, anything else `NetworkFailure`.
+  static Uri? shortLinkTarget(Uri link, {required int status, List<String>? locations}) {
+    if (const {301, 302, 303, 307, 308}.contains(status)) {
+      if (locations == null || locations.length != 1 || locations.single.trim().isEmpty) return null;
+      try {
+        final target = link.resolve(locations.single.trim());
+        final web = target.scheme == 'https' || target.scheme == 'http';
+        return web && target.host.isNotEmpty && target.userInfo.isEmpty ? target : null;
+      } on FormatException {
+        return null;
+      }
+    }
+    return switch (status) {
+      >= 200 && < 300 || 400 || 404 || 410 => null,
+      401 || 403 => throw RiskControl(_site, detail: 'short link: HTTP $status'),
+      420 || 429 => throw RateLimited(_site, detail: 'short link: HTTP $status'),
+      _ => throw NetworkFailure(_site, 'short link: HTTP $status'),
+    };
+  }
+
   /// Why the LIVE [data] describes cannot be played, or null when it can:
-  /// - restricted: `NeedsLogin` (a follower, subscriber or buyer account;
-  ///   the app has no TikTok login);
-  /// - a state 3.x did not know, offline, or live without a stream:
-  ///   `StreamUnavailable`.
-  static SiteError? unplayable(TikTokRoomData data) => switch (data.state) {
-    TikTokState.restricted => NeedsLogin(_site, '@${data.username}: ${data.restriction?.name ?? 'restricted'}'),
-    TikTokState.unknown => StreamUnavailable(_site, '@${data.username}: status ${data.status} not known'),
-    TikTokState.offline => StreamUnavailable(_site, '@${data.username} is offline'),
-    TikTokState.live when data.streams.isEmpty => StreamUnavailable(_site, '@${data.username}: live without a stream'),
-    TikTokState.live => null,
-  };
+  /// - restricted (22-1): `StreamUnavailable` naming who may watch (the app
+  ///   has no TikTok account, so no login would help);
+  /// - a state 3.x did not know, or offline: `StreamUnavailable`;
+  /// - live without a stream: `StreamUnavailable`, or `ApiChanged` when
+  ///   streams were sent but none could be read ([TikTokRoomData.skipped]).
+  static SiteError? unplayable(TikTokRoomData data) {
+    final who = '@${data.username}';
+    return switch (data.state) {
+      TikTokState.unknown => StreamUnavailable(_site, '$who: status ${data.status} not known'),
+      TikTokState.offline => StreamUnavailable(_site, '$who is offline'),
+      TikTokState.live => switch (data.restriction ?? LiveRestriction.none) {
+        LiveRestriction.private => StreamUnavailable(_site, "$who: a private account's LIVE, for its followers only"),
+        LiveRestriction.subscribersOnly => StreamUnavailable(_site, '$who: a LIVE for subscribers only'),
+        LiveRestriction.paid => StreamUnavailable(_site, '$who: a paid LIVE'),
+        LiveRestriction.none when data.streams.isEmpty && data.skipped.isNotEmpty => ApiChanged(
+          _site,
+          '$who: no stream could be read (${data.skipped.join('; ')})',
+        ),
+        LiveRestriction.none when data.streams.isEmpty => StreamUnavailable(_site, '$who: live without a stream'),
+        LiveRestriction.none => null,
+        final other => StreamUnavailable(_site, '$who: ${other.name}'),
+      },
+    };
+  }
 
   // Streams -------------------------------------------------------------------
 
-  /// 3.x's qualities: one per stream, named by [qualityName]
-  /// (`高清 · 720x1280 · H264 · FLV`), best first ([qualitySort]).
-  static List<LivePlayQuality> qualities(TikTokRoomData data) => List.unmodifiable([
-    for (final stream in data.streams)
-      LivePlayQuality(quality: qualityName(stream), id: stream.id, sort: qualitySort(stream)),
-  ]);
-
-  /// A stream's quality name (3.x).
-  static String qualityName(TikTokStream stream) {
-    final resolution = stream.resolution.isEmpty ? '' : ' · ${stream.resolution}';
-    final tier = qualityNames[stream.qualityId] ?? stream.qualityId.toUpperCase();
-    return '$tier$resolution · ${stream.codec.toUpperCase()} · ${stream.protocol.toUpperCase()}';
+  /// The qualities of [data], one per tier and codec (22-2), named by
+  /// [qualityName] (22-4). With [preferH264] ("优先 H.264", on by default,
+  /// 22-3) every H.264 quality comes first, best first, then the H.265 ones,
+  /// so the default is H.264 and H.265 is only picked by hand; off, 3.x's
+  /// order: best tier first, H.264 before H.265 within a tier. The `sort`
+  /// is [qualitySort] either way. A name used twice gets its tier key.
+  static List<LivePlayQuality> qualities(TikTokRoomData data, {bool preferH264 = true}) {
+    final ordered = [...data.streams]
+      ..sort(
+        (a, b) => switch (qualitySort(b).compareTo(qualitySort(a))) {
+          0 => a.id.compareTo(b.id),
+          final rank => rank,
+        },
+      );
+    final streams = preferH264
+        ? [
+            for (final stream in ordered)
+              if (stream.codec == 'h264') stream,
+            for (final stream in ordered)
+              if (stream.codec != 'h264') stream,
+          ]
+        : ordered;
+    final names = [for (final stream in streams) qualityName(stream)];
+    return List.unmodifiable([
+      for (final (index, stream) in streams.indexed)
+        LivePlayQuality(
+          quality: names.where((name) => name == names[index]).length > 1
+              ? '${names[index]} (${stream.qualityId})'
+              : names[index],
+          id: stream.id,
+          sort: qualitySort(stream),
+        ),
+    ]);
   }
 
-  /// 3.x's rank: the tier (origin 10000 … auto 3000, others 1000), then
-  /// H.264 (+100) before H.265, then FLV (+20) before HLS (+10).
+  /// A stream's quality name (22-4): [originName] for `origin`, else the
+  /// site's own name ([TikTokStream.label]: `720p`, `1080p60`), else one
+  /// made the site's way from the resolution (`720x1280` → `720p`, and
+  /// `60` for a `_60` tier), else 3.x's [qualityNames], else the key upper
+  /// case; H.265 adds [h265Suffix].
+  static String qualityName(TikTokStream stream) {
+    final tier = stream.qualityId;
+    final base = tier == 'origin'
+        ? originName
+        : stream.label.isNotEmpty
+        ? stream.label
+        : _resolutionName(stream.resolution, frames60: tier.endsWith('_60')) ??
+              qualityNames[tier] ??
+              tier.toUpperCase();
+    return stream.codec == 'h264' ? base : '$base$h265Suffix';
+  }
+
+  /// `720x1280` or `720p` as the site names it (`720p`, `720p60`); null for
+  /// no resolution.
+  static String? _resolutionName(String resolution, {required bool frames60}) {
+    final String lines;
+    if (RegExp(r'^[0-9]+p$').hasMatch(resolution)) {
+      lines = resolution.substring(0, resolution.length - 1);
+    } else if (RegExp(r'^([0-9]+)x([0-9]+)$').firstMatch(resolution) case final match?) {
+      final (width, height) = (int.parse(match[1]!), int.parse(match[2]!));
+      lines = '${width < height ? width : height}';
+    } else {
+      return null;
+    }
+    return '${lines}p${frames60 ? '60' : ''}';
+  }
+
+  /// 3.x's rank of the tier (origin 10000 … auto 3000, others 1000), plus
+  /// 100 for H.264: best first, H.264 before H.265 within a tier.
   static int qualitySort(TikTokStream stream) {
     final tier = switch (stream.qualityId) {
       'origin' => 10000,
@@ -489,28 +615,48 @@ abstract final class TikTokApi {
       'auto' => 3000,
       _ => 1000,
     };
-    return tier + (stream.codec == 'h264' ? 100 : 0) + (stream.protocol == 'flv' ? 20 : 10);
+    return tier + (stream.codec == 'h264' ? 100 : 0);
   }
 
-  /// The lines of [quality] in [data] (one per URL, usually one), applied as
-  /// asked (3.x): the media headers of the room, the protocol's format, the
-  /// codec, the CDN host as the line id and the lease of the URL's
-  /// `expire`. A quality [data] does not offer is `StreamUnavailable`.
+  /// The quality id for a stored one: 3.x had one quality per protocol
+  /// (`<codec>:<tier>:<flv|hls>`, e.g. `h264:origin:flv`), which are now
+  /// the lines of `<codec>:<tier>` (22-2); M9 migrates a stored quality
+  /// with it once. Any other id is kept (trimmed); applying it twice
+  /// changes nothing.
+  static String qualityIdFromLegacy(String id) {
+    final value = id.trim();
+    final match = _legacyQualityId.firstMatch(value);
+    return match == null ? value : '${match[1]!.toLowerCase()}:${match[2]!.toLowerCase()}';
+  }
+
+  static final RegExp _legacyQualityId = RegExp(r'^(h26[45]):([a-z0-9_]{1,24}):(?:flv|hls)$', caseSensitive: false);
+
+  /// The lines of [quality] in [data] (a 3.x id is read through
+  /// [qualityIdFromLegacy]; the applied quality is the current id): FLV
+  /// then HLS (22-2), each with the media headers of the room, the
+  /// protocol's format, the codec, `flv` or `hls` as the line id (`flv#2`
+  /// for a second FLV URL) and the lease of the URL's `expire`. A quality
+  /// [data] does not offer is `StreamUnavailable`.
   static LivePlayUrlResolution resolution(TikTokRoomData data, LivePlayQuality quality) {
-    final id = '${quality.selectionId}';
+    final id = qualityIdFromLegacy('${quality.selectionId}');
     final stream = data.streams.where((stream) => stream.id == id).firstOrNull;
     if (stream == null) throw StreamUnavailable(_site, '@${data.username}: quality $id is not offered');
     final headers = mediaHeaders(data.username);
+    final codec = stream.codec == 'h264' ? 'avc' : 'hevc';
     return LivePlayUrlResolution.lines([
-      for (final url in stream.urls)
-        LivePlayLine(
-          '$url',
-          headers: headers,
-          format: stream.protocol == 'flv' ? StreamFormat.flv : StreamFormat.hls,
-          codec: stream.codec == 'h264' ? 'avc' : 'hevc',
-          lineId: url.host,
-          lease: lease(url, data.issuedAt),
-        ),
+      for (final (protocol, format, urls) in [
+        ('flv', StreamFormat.flv, stream.flvUrls),
+        ('hls', StreamFormat.hls, stream.hlsUrls),
+      ])
+        for (final (index, url) in urls.indexed)
+          LivePlayLine(
+            '$url',
+            headers: headers,
+            format: format,
+            codec: codec,
+            lineId: index == 0 ? protocol : '$protocol#${index + 1}',
+            lease: lease(url, data.issuedAt),
+          ),
     ], appliedQualityData: stream.id);
   }
 
@@ -548,64 +694,101 @@ abstract final class TikTokApi {
   /// 3.x's reading of `streamData` (codec H.264 unless `sdk_params` says)
   /// then `hevcStreamData` (H.265 unless it says): `pull_data.stream_data` is
   /// JSON in a string, its `data` maps at most 32 tier keys to `main` with
-  /// `flv` and `hls` URLs and `sdk_params` (JSON in a string again). The
-  /// audio-only `ao` is left out; streams of the same codec, tier and
-  /// protocol are merged. Sorted by [qualitySort], then by id.
-  static List<TikTokStream> _streams(Map<String, dynamic> live) {
+  /// `flv` and `hls` URLs and `sdk_params` (JSON in a string again); the
+  /// container's `pull_data.options.qualities` name the tiers
+  /// (`sdk_key` → `name`). The audio-only `ao` is left out; a tier of the
+  /// same codec in both containers is one stream.
+  ///
+  /// A malformed part only loses itself (the unified rule on bad data; 3.x
+  /// failed the whole room): a container that does not decode, a tier with
+  /// a bad key, `main`, `sdk_params` or codec, one URL that is no string or
+  /// not a TikTok media URL ([_mediaUrl]). Each is noted in `skipped`.
+  static ({List<TikTokStream> streams, List<String> skipped}) _streams(Map<String, dynamic> live) {
     final builders = <String, _StreamBuilder>{};
+    final skipped = <String>[];
     for (final (key, fallback) in const [('streamData', 'h264'), ('hevcStreamData', 'h265')]) {
       final value = live[key];
       if (value == null) continue;
-      final pull = _object(_object(value, 'liveRoom.$key')['pull_data'], '$key.pull_data');
-      final raw = _optionalText(pull['stream_data'], '$key.stream_data');
-      if (raw.isEmpty || raw.length > 4 * 1024 * 1024) continue;
-      final tiers = _object(_object(_decode(raw, '$key.stream_data'), '$key.stream_data')['data'], '$key.data');
-      if (tiers.length > 32) throw ApiChanged(_site, '$key: ${tiers.length} tiers');
+      final Map<String, dynamic> tiers;
+      final Map<String, String> labels;
+      try {
+        final pull = _object(_object(value, 'liveRoom.$key')['pull_data'], '$key.pull_data');
+        final raw = _optionalText(pull['stream_data'], '$key.stream_data');
+        if (raw.isEmpty || raw.length > 4 * 1024 * 1024) continue;
+        tiers = _object(_object(_decode(raw, '$key.stream_data'), '$key.stream_data')['data'], '$key.data');
+        if (tiers.length > 32) throw ApiChanged(_site, '$key: ${tiers.length} tiers');
+        labels = _labels(pull['options']);
+      } on ApiChanged catch (error) {
+        skipped.add(error.detail ?? key);
+        continue;
+      }
       for (final MapEntry(key: rawTier, :value) in tiers.entries) {
-        final tier = _tier(rawTier, key);
-        if (tier == 'ao') continue;
-        final main = _object(_object(value, '$key.$tier')['main'], '$key.$tier.main');
-        final sdkRaw = _optionalText(main['sdk_params'], '$key.$tier.sdk_params');
-        final sdk = sdkRaw.isEmpty
-            ? const <String, dynamic>{}
-            : _object(_decode(sdkRaw, '$key.$tier.sdk_params'), '$key.$tier.sdk_params');
-        final codec = _codec(sdk['VCodec'] ?? sdk['v_codec'], fallback, '$key.$tier');
-        final resolution = _resolution(sdk['resolution'], '$key.$tier');
-        final bitrate = _optionalCount(sdk['vbitrate'], '$key.$tier.vbitrate');
+        final String tier;
+        final String codec;
+        final Map<String, dynamic> main;
+        final Map<String, dynamic> sdk;
+        try {
+          tier = _tier(rawTier, key);
+          if (tier == 'ao') continue;
+          main = _object(_object(value, '$key.$tier')['main'], '$key.$tier.main');
+          final sdkRaw = _optionalText(main['sdk_params'], '$key.$tier.sdk_params');
+          sdk = sdkRaw.isEmpty
+              ? const <String, dynamic>{}
+              : _object(_decode(sdkRaw, '$key.$tier.sdk_params'), '$key.$tier.sdk_params');
+          codec = _codec(sdk['VCodec'] ?? sdk['v_codec'], fallback, '$key.$tier');
+        } on ApiChanged catch (error) {
+          skipped.add(error.detail ?? '$key.$rawTier');
+          continue;
+        }
         for (final protocol in const ['flv', 'hls']) {
-          final text = _optionalText(main[protocol], '$key.$tier.$protocol');
-          if (text.isEmpty) continue;
-          final url = _mediaUrl(text, '$key.$tier.$protocol');
-          final id = '$codec:$tier:$protocol';
-          final builder = builders.putIfAbsent(
-            id,
-            () => _StreamBuilder(id: id, tier: tier, protocol: protocol, codec: codec, resolution: resolution),
-          );
-          if (builder.resolution.isEmpty) builder.resolution = resolution;
-          builder.bitrate ??= bitrate;
-          if (!builder.urls.contains(url)) builder.urls.add(url);
+          final Uri url;
+          try {
+            final text = _optionalText(main[protocol], '$key.$tier.$protocol');
+            if (text.isEmpty) continue;
+            url = _mediaUrl(text, '$key.$tier.$protocol');
+          } on ApiChanged catch (error) {
+            skipped.add(error.detail ?? '$key.$tier.$protocol');
+            continue;
+          }
+          final id = '$codec:$tier';
+          final builder = builders.putIfAbsent(id, () => _StreamBuilder(id: id, tier: tier, codec: codec));
+          if (builder.label.isEmpty) builder.label = labels[tier] ?? '';
+          if (builder.resolution.isEmpty) builder.resolution = _resolution(sdk['resolution']);
+          builder.bitrate ??= _lenientCount(sdk['vbitrate']);
+          final urls = protocol == 'flv' ? builder.flv : builder.hls;
+          if (!urls.contains(url)) urls.add(url);
         }
       }
     }
-    final streams =
-        [
-          for (final builder in builders.values)
-            TikTokStream(
-              id: builder.id,
-              qualityId: builder.tier,
-              protocol: builder.protocol,
-              codec: builder.codec,
-              resolution: builder.resolution,
-              bitrate: builder.bitrate,
-              urls: List.unmodifiable(builder.urls),
-            ),
-        ]..sort(
-          (a, b) => switch (qualitySort(b).compareTo(qualitySort(a))) {
-            0 => a.id.compareTo(b.id),
-            final rank => rank,
-          },
-        );
-    return List.unmodifiable(streams);
+    final streams = [
+      for (final builder in builders.values)
+        TikTokStream(
+          id: builder.id,
+          qualityId: builder.tier,
+          codec: builder.codec,
+          label: builder.label,
+          resolution: builder.resolution,
+          bitrate: builder.bitrate,
+          flvUrls: List.unmodifiable(builder.flv),
+          hlsUrls: List.unmodifiable(builder.hls),
+        ),
+    ];
+    return (streams: List.unmodifiable(streams), skipped: List.unmodifiable(skipped));
+  }
+
+  /// A container's tier names: `options.qualities[]` as `sdk_key` (lower
+  /// case) → `name` (trimmed, at most 32 characters). Entries of another
+  /// shape are passed over.
+  static Map<String, String> _labels(Object? options) {
+    final listed = options is Map ? options['qualities'] : null;
+    return {
+      if (listed is List)
+        for (final item in listed)
+          if (item is Map)
+            if ((item['sdk_key'], item['name']) case (final String key, final String name)
+                when key.trim().isNotEmpty && name.trim().isNotEmpty && name.trim().length <= 32)
+              key.trim().toLowerCase(): name.trim(),
+    };
   }
 
   // Envelopes -----------------------------------------------------------------
@@ -641,15 +824,16 @@ abstract final class TikTokApi {
 }
 
 final class _StreamBuilder {
-  new({required this.id, required this.tier, required this.protocol, required this.codec, required this.resolution});
+  new({required this.id, required this.tier, required this.codec});
 
   final String id;
   final String tier;
-  final String protocol;
   final String codec;
-  String resolution;
+  String label = '';
+  String resolution = '';
   int? bitrate;
-  final List<Uri> urls = [];
+  final List<Uri> flv = [];
+  final List<Uri> hls = [];
 }
 
 // Helpers (3.x's checks; each failure is ApiChanged naming the field) ----------
@@ -668,8 +852,9 @@ Map<String, dynamic> _object(Object? value, String what) {
   throw ApiChanged(_site, '$what: expected an object');
 }
 
-Map<String, dynamic> _optionalObject(Object? value, String what) =>
-    value == null ? const <String, dynamic>{} : _object(value, what);
+/// An object, or none (empty) for anything else (22-6: `stats` and
+/// `liveRoomStats` only fill the card; 3.x failed the answer).
+Map<String, dynamic> _lenientObject(Object? value) => value is Map ? _object(value, '') : const <String, dynamic>{};
 
 /// 3.x's `_integer`: an int, an integral number or an integer string.
 int? _integer(Object? value) {
@@ -678,14 +863,12 @@ int? _integer(Object? value) {
   return int.tryParse(value?.toString() ?? '');
 }
 
-/// 3.x's `_optionalNonNegativeInt`: absent or blank is null; anything else
-/// must be an integer of zero or more.
-int? _optionalCount(Object? value, String what) {
-  if (value == null || value == '') return null;
-  final count = _integer(value);
-  if (count == null || count < 0) throw ApiChanged(_site, '$what: $value');
-  return count;
-}
+/// A count of zero or more (3.x's `_optionalNonNegativeInt`), else null
+/// (22-6: 3.x failed the answer for a malformed count).
+int? _lenientCount(Object? value) => switch (_integer(value)) {
+  final int count when count >= 0 => count,
+  _ => null,
+};
 
 bool? _optionalBool(Object? value, String what) {
   if (value == null || value is bool) return value as bool?;
@@ -705,13 +888,17 @@ String _longId(Object? value, String what) {
   return text;
 }
 
-String _optionalLongId(Object? value, String what) => value == null || value == '' ? '' : _longId(value, what);
-
-/// 3.x's `_text`: a non-blank string of at most 8192 characters, trimmed.
-String _text(Object? value, String what) {
-  if (value is String && value.trim().isNotEmpty && value.length <= 8192) return value.trim();
-  throw ApiChanged(_site, '$what: expected a name');
+/// A long id (see [_longId]), else empty (22-6: 3.x failed the answer for
+/// a malformed `id`, `roomId` or `streamId`).
+String _lenientLongId(Object? value) {
+  final text = value?.toString().trim() ?? '';
+  return RegExp(r'^[1-9][0-9]{14,24}$').hasMatch(text) ? text : '';
 }
+
+/// A string of at most 8192 characters, trimmed, else empty (22-6: 3.x
+/// failed the answer for a blank or malformed `nickname` and a malformed
+/// `title`, `signature` or `secUid`).
+String _lenientText(Object? value) => value is String && value.length <= 8192 ? value.trim() : '';
 
 /// 3.x's `_optionalText`: absent is empty; else a string of at most 4 MiB,
 /// trimmed.
@@ -738,9 +925,10 @@ String _codec(Object? value, String fallback, String what) =>
       final other => throw ApiChanged(_site, '$what: codec $other'),
     };
 
-/// 3.x's `_resolution`: `720x1280` or `720p`, else empty.
-String _resolution(Object? value, String what) {
-  final text = _optionalText(value, '$what.resolution').toLowerCase();
+/// 3.x's `_resolution`: `720x1280` or `720p`, else empty (also for a value
+/// that is no string, which 3.x refused).
+String _resolution(Object? value) {
+  final text = value is String ? value.trim().toLowerCase() : '';
   return RegExp(r'^(?:[1-9][0-9]{1,4}x[1-9][0-9]{1,4}|[1-9][0-9]{2,4}p)$').hasMatch(text) ? text : '';
 }
 

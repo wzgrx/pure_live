@@ -72,9 +72,9 @@ void main() {
   testWidgets("principles §3.4: an offline row's avatar is the shared initial avatar, toned by the room", (
     tester,
   ) async {
-      await tester.pumpWidget(
+    await tester.pumpWidget(
       host(const OfflineRoomRow(platformId: 'douyu', anchorName: 'kiri', seed: 'douyu:1'), width: 360),
-      );
+    );
     final avatar = tester.widget<InitialAvatar>(find.byType(InitialAvatar));
     expect(avatar.seed, 'douyu:1');
     expect(find.text('K'), findsOneWidget);

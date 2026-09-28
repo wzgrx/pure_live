@@ -9,6 +9,7 @@ environment:
 resolution: workspace
 
 dependencies:
+  crypto: ^3.0.7
   live_core: any
   live_net: any
   meta: ^1.19.0

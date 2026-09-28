@@ -1,0 +1,292 @@
+{
+  "note": "Synthetic Kuaishou feed answers (docs/modules/M5.5-kuaishou.md). An answer is `payload` JSON-encoded `layers` times (default 2, as the recorded feed: a JSON string holding the JSON object), or the literal body text `raw`. `feeds` are decoded one by one as the client gets them (the body decoded once, as dio did for a JSON content type, then 3.x parseFeedPayload). `sessions` replay one connection: each step answers one HTTP request in order (`error`: no response; `status`: that status; otherwise the answer with status 200); when the steps run out the next request never completes and the session ends. A feed with `skipEntry` is also decoded by 3.x without that entry of `liveStreamFeeds` (`v3WithoutEntry`): the new code skips an entry it cannot read, where 3.x failed the whole answer. All user ids, names and texts are made up.",
+  "feeds": [
+    {
+      "name": "recorded shape: two layers, a comment and a gift",
+      "payload": {
+        "result": 1,
+        "cursor": "c1",
+        "pullCycleSeconds": 3,
+        "currentWatchingCount": "1.2万",
+        "liveStreamFeeds": [
+          {"type": "comment", "content": "测试弹幕", "time": 1788278277492, "author": {"userName": "快手用户A", "userId": 4143159120}},
+          {"type": "gift", "content": "礼物", "author": {"userName": "礼物用户"}}
+        ]
+      }
+    },
+    {
+      "name": "one layer",
+      "layers": 1,
+      "payload": {"result": 1, "cursor": "c1", "liveStreamFeeds": [{"type": "comment", "content": "one", "time": 1000, "author": {"userName": "a", "userId": 1}}]}
+    },
+    {
+      "name": "three layers",
+      "layers": 3,
+      "payload": {"result": 1, "cursor": "c1", "liveStreamFeeds": [{"type": "comment", "content": "three", "time": 1000, "author": {"userName": "a", "userId": 1}}]}
+    },
+    {
+      "name": "four layers",
+      "layers": 4,
+      "payload": {"result": 1, "cursor": "c1", "liveStreamFeeds": [{"type": "comment", "content": "four", "time": 1000, "author": {"userName": "a", "userId": 1}}]}
+    },
+    {
+      "name": "five layers are too many",
+      "layers": 5,
+      "payload": {"result": 1, "cursor": "c1", "liveStreamFeeds": []}
+    },
+    {
+      "name": "wrapped in data",
+      "payload": {"data": {"result": 1, "cursor": "inner", "pullCycleSeconds": 4, "currentWatchingCount": "88", "liveStreamFeeds": [{"type": "comment", "content": "inside data", "time": 2000, "author": {"userName": "b", "userId": 2}}]}}
+    },
+    {
+      "name": "data that is not an object is ignored",
+      "payload": {"result": 1, "cursor": "outer", "data": "x", "liveStreamFeeds": [{"type": "comment", "content": "outside", "time": 3000, "author": {"userName": "c", "userId": 3}}]}
+    },
+    {"name": "not an object", "payload": [1, 2]},
+    {"name": "result as text", "payload": {"result": "1", "cursor": "t"}},
+    {"name": "result as a fraction", "payload": {"result": 1.0, "cursor": "f"}},
+    {"name": "result 2 is a refusal", "payload": {"result": 2, "cursor": "r", "liveStreamFeeds": [{"type": "comment", "content": "never shown", "time": 1, "author": {"userName": "r", "userId": 9}}]}},
+    {"name": "result missing", "payload": {"cursor": "m"}},
+    {"name": "result not a number", "payload": {"result": "ok"}},
+    {"name": "pull cycle 0 becomes 1 s", "payload": {"result": 1, "pullCycleSeconds": 0}},
+    {"name": "pull cycle 60 becomes 10 s", "payload": {"result": 1, "pullCycleSeconds": 60}},
+    {"name": "pull cycle as text", "payload": {"result": 1, "pullCycleSeconds": "5"}},
+    {"name": "pull cycle missing", "payload": {"result": 1}},
+    {"name": "pull cycle fraction", "payload": {"result": 1, "pullCycleSeconds": 2.9}},
+    {"name": "pull cycle negative", "payload": {"result": 1, "pullCycleSeconds": -4}},
+    {"name": "audience text", "payload": {"result": 1, "currentWatchingCount": "36"}},
+    {"name": "audience number", "payload": {"result": 1, "currentWatchingCount": 36}},
+    {"name": "audience empty", "payload": {"result": 1, "currentWatchingCount": ""}},
+    {"name": "audience blank", "payload": {"result": 1, "currentWatchingCount": "  "}},
+    {"name": "audience missing", "payload": {"result": 1}},
+    {"name": "audience in w", "payload": {"result": 1, "currentWatchingCount": "5.6w"}},
+    {"name": "audience without digits", "payload": {"result": 1, "currentWatchingCount": "abc"}},
+    {"name": "audience with a comma", "payload": {"result": 1, "currentWatchingCount": "1,234"}},
+    {"name": "feeds missing", "payload": {"result": 1, "cursor": "none"}},
+    {"name": "feeds not a list", "payload": {"result": 1, "liveStreamFeeds": {"type": "comment", "content": "x"}}},
+    {
+      "name": "only comments, in any case",
+      "payload": {
+        "result": 1,
+        "liveStreamFeeds": [
+          {"type": "COMMENT", "content": "upper", "time": 10, "author": {"userName": "u1", "userId": 11}},
+          {"type": "Comment", "content": "mixed", "time": 11, "author": {"userName": "u2", "userId": 12}},
+          {"type": "gift", "content": "gift", "time": 12, "author": {"userName": "u3", "userId": 13}},
+          {"type": "like", "content": "like", "time": 13, "author": {"userName": "u4", "userId": 14}},
+          {"content": "no type", "time": 14, "author": {"userName": "u5", "userId": 15}},
+          1,
+          null,
+          "comment",
+          ["comment"]
+        ]
+      }
+    },
+    {
+      "name": "content trimmed, empty dropped",
+      "payload": {
+        "result": 1,
+        "liveStreamFeeds": [
+          {"type": "comment", "content": "  hi  ", "time": 20, "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "content": "   ", "time": 21, "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "time": 22, "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "content": 42, "time": 23, "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "content": "", "time": 24, "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "content": "\n😀 emoji\n", "time": 25, "author": {"userName": "😀 fan", "userId": 1}}
+        ]
+      }
+    },
+    {
+      "name": "authors",
+      "payload": {
+        "result": 1,
+        "liveStreamFeeds": [
+          {"type": "comment", "content": "no author", "time": 30},
+          {"type": "comment", "content": "author not an object", "time": 31, "author": "x"},
+          {"type": "comment", "content": "blank name", "time": 32, "author": {"userName": "  ", "userId": 5}},
+          {"type": "comment", "content": "padded name", "time": 33, "author": {"userName": " name ", "userId": 6}},
+          {"type": "comment", "content": "text id", "time": 34, "author": {"userName": "t", "userId": "abc"}},
+          {"type": "comment", "content": "no id", "time": 35, "author": {"userName": "n"}}
+        ]
+      }
+    },
+    {
+      "name": "message ids",
+      "payload": {
+        "result": 1,
+        "liveStreamFeeds": [
+          {"type": "comment", "id": "abc", "content": "with id", "time": 40, "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "id": 123, "content": "numeric id", "time": 41, "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "id": "  ", "content": "blank id", "time": 42, "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "id": null, "content": "null id", "time": 43, "author": {"userName": "a", "userId": 1}}
+        ]
+      }
+    },
+    {
+      "name": "times",
+      "payload": {
+        "result": 1,
+        "liveStreamFeeds": [
+          {"type": "comment", "content": "text time", "time": "1790520023470", "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "content": "no time", "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "content": "zero time", "time": 0, "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "content": "negative time", "time": -5, "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "content": "fraction time", "time": 1790520023470.9, "author": {"userName": "a", "userId": 1}}
+        ]
+      }
+    },
+    {
+      "name": "a time out of range",
+      "skipEntry": 1,
+      "payload": {
+        "result": 1,
+        "cursor": "range",
+        "currentWatchingCount": "12",
+        "liveStreamFeeds": [
+          {"type": "comment", "content": "before", "time": 1000, "author": {"userName": "a", "userId": 1}},
+          {"type": "comment", "content": "far future", "time": 9000000000000000, "author": {"userName": "b", "userId": 2}},
+          {"type": "comment", "content": "after", "time": 1001, "author": {"userName": "c", "userId": 3}}
+        ]
+      }
+    },
+    {
+      "name": "an infinite time",
+      "skipEntry": 1,
+      "raw": "{\"result\":1,\"cursor\":\"inf\",\"liveStreamFeeds\":[{\"type\":\"comment\",\"content\":\"before\",\"time\":1000,\"author\":{\"userName\":\"a\",\"userId\":1}},{\"type\":\"comment\",\"content\":\"infinite\",\"time\":1e400,\"author\":{\"userName\":\"b\",\"userId\":2}},{\"type\":\"comment\",\"content\":\"after\",\"time\":1001,\"author\":{\"userName\":\"c\",\"userId\":3}}]}"
+    },
+    {"name": "cursor as a number", "payload": {"result": 1, "cursor": 12345}},
+    {"name": "cursor missing", "payload": {"result": 1}}
+  ],
+  "sessions": [
+    {
+      "name": "the first request succeeds",
+      "steps": [
+        {"payload": {"result": 1, "cursor": "a", "pullCycleSeconds": 3, "currentWatchingCount": "10", "liveStreamFeeds": [{"type": "comment", "content": "hello", "time": 1000, "author": {"userName": "viewer", "userId": 9}}]}}
+      ]
+    },
+    {
+      "name": "the fallback endpoint answers when the primary fails",
+      "steps": [
+        {"error": "connect"},
+        {"payload": {"result": 1, "cursor": "b", "liveStreamFeeds": [{"type": "comment", "content": "from the fallback", "time": 1000, "author": {"userName": "v", "userId": 1}}]}}
+      ]
+    },
+    {
+      "name": "a 503 from the primary goes to the fallback",
+      "steps": [
+        {"status": 503},
+        {"payload": {"result": 1, "cursor": "c"}}
+      ]
+    },
+    {
+      "name": "a body that is not JSON goes to the fallback",
+      "steps": [
+        {"raw": "<html>busy</html>"},
+        {"payload": {"result": 1, "cursor": "d"}}
+      ]
+    },
+    {
+      "name": "the start tries again after 600 ms",
+      "steps": [
+        {"error": "connect"},
+        {"error": "connect"},
+        {"error": "timeout"},
+        {"payload": {"result": 1, "cursor": "e", "currentWatchingCount": "3"}}
+      ]
+    },
+    {
+      "name": "a refusal is not retried on the fallback",
+      "steps": [
+        {"payload": {"result": 2}},
+        {"payload": {"result": 2}},
+        {"payload": {"result": 1, "cursor": "f"}}
+      ]
+    },
+    {
+      "name": "three failed starts throw the last failure",
+      "steps": [
+        {"error": "connect"},
+        {"error": "connect"},
+        {"error": "connect"},
+        {"error": "connect"},
+        {"error": "connect"},
+        {"status": 502}
+      ]
+    },
+    {
+      "name": "three refused starts throw the refusal",
+      "steps": [
+        {"payload": {"result": 2}},
+        {"payload": {"result": 2}},
+        {"payload": {"result": 3}}
+      ]
+    },
+    {
+      "name": "a body that is not JSON goes to the fallback, an answer of the wrong shape does not",
+      "steps": [
+        {"raw": "<html>"},
+        {"raw": "{"},
+        {"payload": [1]},
+        {"payload": "text"}
+      ]
+    },
+    {
+      "name": "polling gives up after the ninth failure in a row",
+      "steps": [
+        {"payload": {"result": 1, "cursor": "g", "pullCycleSeconds": 3, "currentWatchingCount": "5", "liveStreamFeeds": [{"type": "comment", "content": "only one", "time": 1000, "author": {"userName": "v", "userId": 1}}]}},
+        {"error": "connect"}, {"error": "connect"},
+        {"error": "connect"}, {"error": "connect"},
+        {"error": "connect"}, {"error": "connect"},
+        {"error": "connect"}, {"error": "connect"},
+        {"error": "connect"}, {"error": "connect"},
+        {"error": "connect"}, {"error": "connect"},
+        {"error": "connect"}, {"error": "connect"},
+        {"error": "connect"}, {"error": "connect"},
+        {"error": "connect"}, {"error": "connect"}
+      ]
+    },
+    {
+      "name": "a success resets the failures and joins again",
+      "steps": [
+        {"payload": {"result": 1, "cursor": "h1", "currentWatchingCount": "7"}},
+        {"error": "connect"}, {"error": "connect"},
+        {"error": "connect"}, {"error": "connect"},
+        {"payload": {"result": 1, "cursor": "h2", "currentWatchingCount": "8", "liveStreamFeeds": [{"type": "comment", "content": "back", "time": 5000, "author": {"userName": "v", "userId": 1}}]}},
+        {"payload": {"result": 2}},
+        {"payload": {"result": 1, "cursor": "h3"}}
+      ]
+    },
+    {
+      "name": "the cursor follows the answers and survives failures",
+      "steps": [
+        {"payload": {"result": 1, "cursor": "k1"}},
+        {"payload": {"result": 1, "cursor": ""}},
+        {"payload": {"result": 1}},
+        {"error": "connect"}, {"error": "connect"},
+        {"payload": {"result": 2, "cursor": "ignored"}},
+        {"payload": {"result": 1, "cursor": "k2"}},
+        {"payload": {"result": 1, "cursor": "k3"}}
+      ]
+    },
+    {
+      "name": "the server's pull cycle sets the next wait",
+      "steps": [
+        {"payload": {"result": 1, "cursor": "p1", "pullCycleSeconds": 7}},
+        {"payload": {"result": 1, "cursor": "p2", "pullCycleSeconds": 0}},
+        {"payload": {"result": 1, "cursor": "p3", "pullCycleSeconds": 30}},
+        {"payload": {"result": 1, "cursor": "p4"}}
+      ]
+    },
+    {
+      "name": "the cookie is sent trimmed",
+      "cookie": "  did=web_x; kpn=KUAISHOU  ",
+      "steps": [
+        {"payload": {"result": 1, "cursor": "q"}}
+      ]
+    },
+    {
+      "name": "a blank live stream id throws before any request",
+      "liveStreamId": "  ",
+      "steps": []
+    }
+  ]
+}

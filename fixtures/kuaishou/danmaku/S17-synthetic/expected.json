@@ -1,0 +1,2227 @@
+{
+  "generator": "fixtures/kuaishou/danmaku/legacy_expected.dart: 3.x KuaishouDanmaku.parseFeedPayload over each feed of cases.json (decoded once first, as dio did), and one 3.x session per session of cases.json (liveStreamId \"ls-synthetic\" unless the case gives one)",
+  "value": {
+    "feeds": [
+      {
+        "name": "recorded shape: two layers, a comment and a gift",
+        "cursor": "c1",
+        "pullDelayMs": 3000,
+        "onlineViewers": 12000,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "快手用户A",
+            "userId": "4143159120",
+            "message": "测试弹幕",
+            "color": "#ffffff",
+            "messageId": "kuaishou:7ae6f45e4b97d2a4e9dd353939ad41e07f881d9b",
+            "sentAt": 1788278277492,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "name": "one layer",
+        "cursor": "c1",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "one",
+            "color": "#ffffff",
+            "messageId": "kuaishou:9c963d3de4c485289314e838c08879af9a81ebb6",
+            "sentAt": 1000,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "name": "three layers",
+        "cursor": "c1",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "three",
+            "color": "#ffffff",
+            "messageId": "kuaishou:384dc6589e92717b4a60f87f9fe45a9bcd9f03b6",
+            "sentAt": 1000,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "name": "four layers",
+        "cursor": "c1",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "four",
+            "color": "#ffffff",
+            "messageId": "kuaishou:11c8cda222554b9712b5c99b757a058a66ed3c5b",
+            "sentAt": 1000,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "name": "five layers are too many",
+        "error": "FormatException"
+      },
+      {
+        "name": "wrapped in data",
+        "cursor": "inner",
+        "pullDelayMs": 4000,
+        "onlineViewers": 88,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "b",
+            "userId": "2",
+            "message": "inside data",
+            "color": "#ffffff",
+            "messageId": "kuaishou:c5ab02961d73d9e4413da7f23d341e77645f1ee5",
+            "sentAt": 2000,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "name": "data that is not an object is ignored",
+        "cursor": "outer",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "c",
+            "userId": "3",
+            "message": "outside",
+            "color": "#ffffff",
+            "messageId": "kuaishou:43b7ae8f31cef24d1aef8431efe7a62fd8b5aef9",
+            "sentAt": 3000,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "name": "not an object",
+        "error": "FormatException"
+      },
+      {
+        "name": "result as text",
+        "cursor": "t",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "result as a fraction",
+        "cursor": "f",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "result 2 is a refusal",
+        "error": "StateError"
+      },
+      {
+        "name": "result missing",
+        "error": "StateError"
+      },
+      {
+        "name": "result not a number",
+        "error": "StateError"
+      },
+      {
+        "name": "pull cycle 0 becomes 1 s",
+        "cursor": "",
+        "pullDelayMs": 1000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "pull cycle 60 becomes 10 s",
+        "cursor": "",
+        "pullDelayMs": 10000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "pull cycle as text",
+        "cursor": "",
+        "pullDelayMs": 5000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "pull cycle missing",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "pull cycle fraction",
+        "cursor": "",
+        "pullDelayMs": 2000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "pull cycle negative",
+        "cursor": "",
+        "pullDelayMs": 1000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "audience text",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": 36,
+        "messages": []
+      },
+      {
+        "name": "audience number",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": 36,
+        "messages": []
+      },
+      {
+        "name": "audience empty",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "audience blank",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "audience missing",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "audience in w",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": 56000,
+        "messages": []
+      },
+      {
+        "name": "audience without digits",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": 0,
+        "messages": []
+      },
+      {
+        "name": "audience with a comma",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": 1234,
+        "messages": []
+      },
+      {
+        "name": "feeds missing",
+        "cursor": "none",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "feeds not a list",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "only comments, in any case",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "u1",
+            "userId": "11",
+            "message": "upper",
+            "color": "#ffffff",
+            "messageId": "kuaishou:cbaf533b858df0c56eee6868120513602944ba7a",
+            "sentAt": 10,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "u2",
+            "userId": "12",
+            "message": "mixed",
+            "color": "#ffffff",
+            "messageId": "kuaishou:fd5da4999aae17b3df1636b40ec5dd04a4c95014",
+            "sentAt": 11,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "name": "content trimmed, empty dropped",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "hi",
+            "color": "#ffffff",
+            "messageId": "kuaishou:9e75eb2af3279ef5bccbfd8fc094d4bdf313db38",
+            "sentAt": 20,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "42",
+            "color": "#ffffff",
+            "messageId": "kuaishou:0deb38e7d1dcd42a4e656eb49db43978bba14d1f",
+            "sentAt": 23,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "😀 fan",
+            "userId": "1",
+            "message": "😀 emoji",
+            "color": "#ffffff",
+            "messageId": "kuaishou:d8237606b645395a85070ac3f523a9b829e0a4c5",
+            "sentAt": 25,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "name": "authors",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "快手用户",
+            "userId": "",
+            "message": "no author",
+            "color": "#ffffff",
+            "messageId": "kuaishou:3683b9364b0637da888e65e9e5adbe9763bd2540",
+            "sentAt": 30,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "快手用户",
+            "userId": "",
+            "message": "author not an object",
+            "color": "#ffffff",
+            "messageId": "kuaishou:64c631c455b3a7d2737191c3f1d9843122d46e67",
+            "sentAt": 31,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "快手用户",
+            "userId": "5",
+            "message": "blank name",
+            "color": "#ffffff",
+            "messageId": "kuaishou:c36b656299f9a9046a933eb4094fc18b0e4e35ff",
+            "sentAt": 32,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "name",
+            "userId": "6",
+            "message": "padded name",
+            "color": "#ffffff",
+            "messageId": "kuaishou:fd5649fe4e5e74d6784ee7a03050412857f6c21c",
+            "sentAt": 33,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "t",
+            "userId": "abc",
+            "message": "text id",
+            "color": "#ffffff",
+            "messageId": "kuaishou:f401f0612082eb0d6519f558e8af80c2871d994b",
+            "sentAt": 34,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "n",
+            "userId": "",
+            "message": "no id",
+            "color": "#ffffff",
+            "messageId": "kuaishou:d9c48d954660bd82aeb61d450a35334760421414",
+            "sentAt": 35,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "name": "message ids",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "with id",
+            "color": "#ffffff",
+            "messageId": "kuaishou:abc",
+            "sentAt": 40,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "numeric id",
+            "color": "#ffffff",
+            "messageId": "kuaishou:123",
+            "sentAt": 41,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "blank id",
+            "color": "#ffffff",
+            "messageId": "kuaishou:a8feb421bbc78ffe0e1e4ac5dd829e8f161d8fdb",
+            "sentAt": 42,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "null id",
+            "color": "#ffffff",
+            "messageId": "kuaishou:e0648f30dfb044775e7a4ab4b62dc4be11a7ea94",
+            "sentAt": 43,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "name": "times",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "text time",
+            "color": "#ffffff",
+            "messageId": "kuaishou:80d0944f53e62d3da5af51293c87fad4da1abaa0",
+            "sentAt": 1790520023470,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "no time",
+            "color": "#ffffff",
+            "messageId": "kuaishou:c727af24e6ff81ad38006da34c22fc6728af024f",
+            "sentAt": null,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "zero time",
+            "color": "#ffffff",
+            "messageId": "kuaishou:62f8b799372e0b02f505678893b0c543accc8a09",
+            "sentAt": 0,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "negative time",
+            "color": "#ffffff",
+            "messageId": "kuaishou:f9e63569df170499e2ed745110831b0ed4e5e607",
+            "sentAt": -5,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          },
+          {
+            "type": "chat",
+            "userName": "a",
+            "userId": "1",
+            "message": "fraction time",
+            "color": "#ffffff",
+            "messageId": "kuaishou:44dccc56cc7938516907ea2412f77539806ab0df",
+            "sentAt": 1790520023470,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ]
+      },
+      {
+        "name": "a time out of range",
+        "error": "RangeError",
+        "v3WithoutEntry": {
+          "cursor": "range",
+          "pullDelayMs": 3000,
+          "onlineViewers": 12,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "a",
+              "userId": "1",
+              "message": "before",
+              "color": "#ffffff",
+              "messageId": "kuaishou:8caf57a4ba277ec17d655708df18036cd9e5bf5d",
+              "sentAt": 1000,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            },
+            {
+              "type": "chat",
+              "userName": "c",
+              "userId": "3",
+              "message": "after",
+              "color": "#ffffff",
+              "messageId": "kuaishou:988e2de2ddc2336d85a7130b7189f134d8d2cd63",
+              "sentAt": 1001,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ]
+        }
+      },
+      {
+        "name": "an infinite time",
+        "error": "UnsupportedError",
+        "v3WithoutEntry": {
+          "cursor": "inf",
+          "pullDelayMs": 3000,
+          "onlineViewers": null,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "a",
+              "userId": "1",
+              "message": "before",
+              "color": "#ffffff",
+              "messageId": "kuaishou:8caf57a4ba277ec17d655708df18036cd9e5bf5d",
+              "sentAt": 1000,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            },
+            {
+              "type": "chat",
+              "userName": "c",
+              "userId": "3",
+              "message": "after",
+              "color": "#ffffff",
+              "messageId": "kuaishou:988e2de2ddc2336d85a7130b7189f134d8d2cd63",
+              "sentAt": 1001,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ]
+        }
+      },
+      {
+        "name": "cursor as a number",
+        "cursor": "12345",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": []
+      },
+      {
+        "name": "cursor missing",
+        "cursor": "",
+        "pullDelayMs": 3000,
+        "onlineViewers": null,
+        "messages": []
+      }
+    ],
+    "sessions": [
+      {
+        "name": "the first request succeeds",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "event": "message",
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 10
+              }
+            }
+          },
+          {
+            "event": "message",
+            "message": {
+              "type": "chat",
+              "userName": "viewer",
+              "userId": "9",
+              "message": "hello",
+              "color": "#ffffff",
+              "messageId": "kuaishou:1185782e50523b0da976afd7bf7a00b5bdd0344f",
+              "sentAt": 1000,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "start": "returned"
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "a"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "the fallback endpoint answers when the primary fails",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "event": "message",
+            "message": {
+              "type": "chat",
+              "userName": "v",
+              "userId": "1",
+              "message": "from the fallback",
+              "color": "#ffffff",
+              "messageId": "kuaishou:8e1758fb58c1e50a207c0c796320bbd85c69fecb",
+              "sentAt": 1000,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "start": "returned"
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "b"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "a 503 from the primary goes to the fallback",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "start": "returned"
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "c"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "a body that is not JSON goes to the fallback",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "start": "returned"
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "d"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "the start tries again after 600 ms",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 600
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "event": "message",
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 3
+              }
+            }
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "start": "returned"
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "e"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "a refusal is not retried on the fallback",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 600
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 1400
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "start": "returned"
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "f"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "three failed starts throw the last failure",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 600
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 1400
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "start": "threw",
+            "error": "CoreError"
+          }
+        ]
+      },
+      {
+        "name": "three refused starts throw the refusal",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 600
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 1400
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "start": "threw",
+            "error": "StateError"
+          }
+        ]
+      },
+      {
+        "name": "a body that is not JSON goes to the fallback, an answer of the wrong shape does not",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 600
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 1400
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "start": "threw",
+            "error": "FormatException"
+          }
+        ]
+      },
+      {
+        "name": "polling gives up after the ninth failure in a row",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "event": "message",
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 5
+              }
+            }
+          },
+          {
+            "event": "message",
+            "message": {
+              "type": "chat",
+              "userName": "v",
+              "userId": "1",
+              "message": "only one",
+              "color": "#ffffff",
+              "messageId": "kuaishou:17c34de6dbbcf54b78e54ca907b1fadb6b8cb8f9",
+              "sentAt": 1000,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "start": "returned"
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "reconnect",
+            "text": "与服务器断开连接，正在尝试重连"
+          },
+          {
+            "delay": 1000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 2000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 4000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 8000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 8000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 8000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 8000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 8000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "g"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "close",
+            "text": "服务器连接失败：快手弹幕重连超过最大次数"
+          }
+        ]
+      },
+      {
+        "name": "a success resets the failures and joins again",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "event": "message",
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 7
+              }
+            }
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "start": "returned"
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "h1"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "h1"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "reconnect",
+            "text": "与服务器断开连接，正在尝试重连"
+          },
+          {
+            "delay": 1000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "h1"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "h1"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 2000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "h1"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "event": "message",
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 8
+              }
+            }
+          },
+          {
+            "event": "message",
+            "message": {
+              "type": "chat",
+              "userName": "v",
+              "userId": "1",
+              "message": "back",
+              "color": "#ffffff",
+              "messageId": "kuaishou:8417d444dfcb39ddc5da58a16c3e2c90d2eaa4cf",
+              "sentAt": 5000,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "h2"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "reconnect",
+            "text": "与服务器断开连接，正在尝试重连"
+          },
+          {
+            "delay": 1000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "h2"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "h3"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "the cursor follows the answers and survives failures",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "start": "returned"
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "k1"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "k1"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "k1"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "request": {
+              "url": "https://m.gifshow.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "k1"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "reconnect",
+            "text": "与服务器断开连接，正在尝试重连"
+          },
+          {
+            "delay": 1000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "k1"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 2000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "k1"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "k2"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "k3"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "the server's pull cycle sets the next wait",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "delay": 7000
+          },
+          {
+            "start": "returned"
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "p1"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 1000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "p2"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 10000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "p3"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "p4"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "the cookie is sent trimmed",
+        "trace": [
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/",
+                "cookie": "did=web_x; kpn=KUAISHOU"
+              }
+            }
+          },
+          {
+            "event": "ready"
+          },
+          {
+            "delay": 3000
+          },
+          {
+            "start": "returned"
+          },
+          {
+            "request": {
+              "url": "https://livev.m.chenzhongtech.com/wap/live/feed",
+              "query": {
+                "liveStreamId": "ls-synthetic",
+                "cursor": "q"
+              },
+              "headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0 Mobile Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://livev.m.chenzhongtech.com/",
+                "cookie": "did=web_x; kpn=KUAISHOU"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "a blank live stream id throws before any request",
+        "trace": [
+          {
+            "start": "threw",
+            "error": "FormatException"
+          }
+        ]
+      }
+    ]
+  }
+}

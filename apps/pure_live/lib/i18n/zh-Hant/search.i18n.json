@@ -31,5 +31,11 @@
     "scanning": "正在辨識本頁的直播間",
     "noRooms": "本頁沒有辨識出直播間連結",
     "pageRoomsTitle": "本頁的直播間"
-  }
+  },
+  "recent": "最近搜尋",
+  "clearHistory": "清除",
+  "removeFromHistory": "從搜尋紀錄中刪除",
+  "historyRemoved": "已從搜尋紀錄中刪除「{keyword}」",
+  "historyCleared": "已清除搜尋紀錄",
+  "historyOffCleared": "已關閉並清除搜尋紀錄"
 }

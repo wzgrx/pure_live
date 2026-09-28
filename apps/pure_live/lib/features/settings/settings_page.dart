@@ -8,6 +8,7 @@ import 'package:pure_live_app/features/alerts/alert_tiles.dart';
 import 'package:pure_live_app/features/backup/data_settings.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_settings.dart';
 import 'package:pure_live_app/features/health/cache_tile.dart';
+import 'package:pure_live_app/features/search/search_history.dart';
 import 'package:pure_live_app/features/settings/network_settings.dart';
 import 'package:pure_live_app/features/settings/record_settings.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
@@ -316,6 +317,7 @@ class SettingsGroupBody extends StatelessWidget {
             divisions: 50,
             format: _historyLimit,
           ),
+          const SearchHistorySettingTile(),
           const DataSyncTiles(),
           const CacheTile(),
         ],

@@ -80,7 +80,9 @@
     "phoneVolume": "手机默认音量"
   },
   "data": {
-    "historyLimit": "观看历史最多保留"
+    "historyLimit": "观看历史最多保留",
+    "searchHistory": "记录搜索历史",
+    "searchHistorySubtitle": "搜索框为空时列出最近 20 个搜索词；关闭时清空"
   },
   "accounts": {
     "platforms": "首页平台",

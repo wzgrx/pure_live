@@ -2085,6 +2085,18 @@ class _Translations$search$en implements Translations$search$zh_Hans {
   late final _Translations$search$sort$en sort = _Translations$search$sort$en._(_root);
   @override
   late final _Translations$search$web$en web = _Translations$search$web$en._(_root);
+  @override
+  String get recent => 'Recent searches';
+  @override
+  String get clearHistory => 'Clear';
+  @override
+  String get removeFromHistory => 'Remove from search history';
+  @override
+  String historyRemoved({required Object keyword}) => 'Removed “${keyword}” from search history';
+  @override
+  String get historyCleared => 'Search history cleared';
+  @override
+  String get historyOffCleared => 'Search history turned off and cleared';
 }
 
 // Path: settings
@@ -2417,6 +2429,8 @@ class _Translations$backup$section$en implements Translations$backup$section$zh_
   String get recordTasks => 'Recording tasks';
   @override
   String get secrets => 'Platform sign-ins';
+  @override
+  String get searchHistory => 'Search history';
 }
 
 // Path: cast.failure
@@ -3131,6 +3145,11 @@ class _Translations$settings$data$en implements Translations$settings$data$zh_Ha
   // Translations
   @override
   String get historyLimit => 'Keep watch history up to';
+  @override
+  String get searchHistory => 'Keep search history';
+  @override
+  String get searchHistorySubtitle =>
+      'Lists your last 20 searches when the search box is empty; turning it off clears them';
 }
 
 // Path: settings.accounts

@@ -41,7 +41,8 @@
     "settings": "設定",
     "roomPrefs": "直播間偏好設定",
     "recordTasks": "錄製任務",
-    "secrets": "平台登入資訊"
+    "secrets": "平台登入資訊",
+    "searchHistory": "搜尋紀錄"
   },
   "format": "備份格式：{format}",
   "nothingToImport": "檔案裡沒有可以匯入的內容",

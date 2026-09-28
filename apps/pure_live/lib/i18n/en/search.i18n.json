@@ -31,5 +31,11 @@
     "scanning": "Looking for rooms on this page",
     "noRooms": "No room links found on this page",
     "pageRoomsTitle": "Rooms on this page"
-  }
+  },
+  "recent": "Recent searches",
+  "clearHistory": "Clear",
+  "removeFromHistory": "Remove from search history",
+  "historyRemoved": "Removed “{keyword}” from search history",
+  "historyCleared": "Search history cleared",
+  "historyOffCleared": "Search history turned off and cleared"
 }

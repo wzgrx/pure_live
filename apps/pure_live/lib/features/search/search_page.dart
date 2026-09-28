@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart' show SearchHistoryEntry;
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/error_text.dart';
@@ -12,6 +13,7 @@ import 'package:pure_live_app/core/tv.dart';
 import 'package:pure_live_app/features/discover/discover_page.dart' show platformTab;
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
+import 'package:pure_live_app/features/search/search_history.dart';
 import 'package:pure_live_app/features/search/search_results.dart';
 import 'package:pure_live_app/features/search/web_search_page.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
@@ -22,6 +24,7 @@ bool looksLikeLink(String input) =>
 
 /// Search: one box for keywords and links (principles §4.1). A recognised link
 /// shows "打开直播间" on top; keywords search every platform, grouped by platform.
+/// A focused, empty box lists the recent searches (F-SRC-06).
 class SearchPage extends ConsumerStatefulWidget {
   const new({this.initialQuery, super.key});
 
@@ -50,6 +53,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   final _controller = TextEditingController();
   final _focus = FocusNode(debugLabel: 'search box');
+
+  /// Holds the focus inside the recent searches, so moving there with the
+  /// keyboard or a remote keeps them open.
+  final _historyFocus = FocusNode(debugLabel: 'search history', skipTraversal: true);
   String _keyword = '';
   bool _liveOnly = false;
   SearchSort _sort = SearchSort.smart;
@@ -61,8 +68,28 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   @override
   void initState() {
     super.initState();
+    _focus.addListener(_focusChanged);
+    _historyFocus.addListener(_focusChanged);
     _applyInitial();
   }
+
+  void _focusChanged() {
+    if (mounted) setState(_reloadHistory);
+  }
+
+  bool _historyShown = false;
+
+  /// Reads the recent searches again as they come into view: a backup or
+  /// another device may have changed them.
+  void _reloadHistory() {
+    final wanted = _historyWanted;
+    if (wanted && !_historyShown) ref.invalidate(searchHistoryProvider);
+    _historyShown = wanted;
+  }
+
+  /// principles §4.1: the recent searches show while the box is empty and
+  /// the focus is in the box or in the list.
+  bool get _historyWanted => _controller.text.trim().isEmpty && (_focus.hasFocus || _historyFocus.hasFocus);
 
   @override
   void didUpdateWidget(SearchPage oldWidget) {
@@ -83,16 +110,31 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   void dispose() {
     _controller.dispose();
     _focus.dispose();
+    _historyFocus.dispose();
     super.dispose();
   }
 
   void _submit(String value) {
     final input = value.trim();
     if (input.isEmpty) return;
+    final link = looksLikeLink(input);
+    // F-SRC-06: keywords only; a link or share text is not a search.
+    if (!link) rememberSearch(ref, input);
     setState(() {
-      _link = looksLikeLink(input) ? ref.read(linkResolverProvider)(input) : null;
+      _link = link ? ref.read(linkResolverProvider)(input) : null;
       _keyword = _link == null ? input : '';
     });
+  }
+
+  /// Searches a recent keyword again and closes the list.
+  void _searchAgain(String keyword) {
+    _controller.value = TextEditingValue(
+      text: keyword,
+      selection: TextSelection.collapsed(offset: keyword.length),
+    );
+    _focus.unfocus();
+    _historyFocus.unfocus();
+    _submit(keyword);
   }
 
   /// TV search by voice (principles §5.3): the platform's recognizer, when it
@@ -111,6 +153,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       _focus.requestFocus();
       _controller.selection = TextSelection(baseOffset: 0, extentOffset: _controller.text.length);
     });
+    final history = _historyWanted && ref.watch(recordSearchHistorySetting)
+        ? ref.watch(searchHistoryProvider).value ?? const <SearchHistoryEntry>[]
+        : const <SearchHistoryEntry>[];
     return Scaffold(
       // The box keeps 8 dp above and below instead of filling the bar.
       appBar: PageAppBar(
@@ -134,14 +179,22 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   _controller.clear();
                   _keyword = '';
                   _link = null;
+                  _reloadHistory();
                 }),
               ),
           ],
-          onChanged: (_) => setState(() {}),
+          onChanged: (_) => setState(_reloadHistory),
         ),
         actions: [WebSearchButton(keyword: _controller)],
       ),
-      body: _link != null ? _LinkResult(future: _link!) : _keywordResults(),
+      body: history.isNotEmpty
+          ? Focus(
+              focusNode: _historyFocus,
+              child: SearchHistoryList(entries: history, onPick: _searchAgain),
+            )
+          : _link != null
+          ? _LinkResult(future: _link!)
+          : _keywordResults(),
     );
   }
 

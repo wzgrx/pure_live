@@ -379,6 +379,7 @@ Map<String, String> get _sectionNames => {
   'tags': t.backup.section.tags,
   'roomTags': t.backup.section.roomTags,
   'history': t.backup.section.history,
+  'searchHistory': t.backup.section.searchHistory,
   'blockRules': t.backup.section.blockRules,
   'settings': t.backup.section.settings,
   'roomPrefs': t.backup.section.roomPrefs,

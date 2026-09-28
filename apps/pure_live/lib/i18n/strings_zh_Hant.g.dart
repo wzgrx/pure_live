@@ -2012,6 +2012,18 @@ class Translations$search$zh_Hant implements Translations$search$zh_Hans {
   late final Translations$search$sort$zh_Hant sort = Translations$search$sort$zh_Hant.internal(_root);
   @override
   late final Translations$search$web$zh_Hant web = Translations$search$web$zh_Hant.internal(_root);
+  @override
+  String get recent => '最近搜尋';
+  @override
+  String get clearHistory => '清除';
+  @override
+  String get removeFromHistory => '從搜尋紀錄中刪除';
+  @override
+  String historyRemoved({required Object keyword}) => '已從搜尋紀錄中刪除「${keyword}」';
+  @override
+  String get historyCleared => '已清除搜尋紀錄';
+  @override
+  String get historyOffCleared => '已關閉並清除搜尋紀錄';
 }
 
 // Path: settings
@@ -2335,6 +2347,8 @@ class Translations$backup$section$zh_Hant implements Translations$backup$section
   String get recordTasks => '錄製任務';
   @override
   String get secrets => '平台登入資訊';
+  @override
+  String get searchHistory => '搜尋紀錄';
 }
 
 // Path: cast.failure
@@ -3037,6 +3051,10 @@ class Translations$settings$data$zh_Hant implements Translations$settings$data$z
   // Translations
   @override
   String get historyLimit => '觀看紀錄最多保留';
+  @override
+  String get searchHistory => '保留搜尋紀錄';
+  @override
+  String get searchHistorySubtitle => '搜尋框空白時列出最近 20 個搜尋字詞；關閉時清除';
 }
 
 // Path: settings.accounts

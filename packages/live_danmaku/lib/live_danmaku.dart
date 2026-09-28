@@ -1,0 +1,20 @@
+/// Danmaku (live chat) of Pure Live (docs/modules/M5.0-framework.md): the
+/// connection interface and its shared lifecycle, the WebSocket runtime on
+/// `live_net`'s `LiveSocket`, the platform table, binary tools, the message
+/// filters and the emoji model. Pure Dart; the platform protocols follow in
+/// M5.1–M5.8.
+library;
+
+export 'src/binary.dart';
+export 'src/connection.dart';
+export 'src/connection_base.dart';
+export 'src/emoji.dart';
+export 'src/filters/block_list.dart';
+export 'src/filters/message_filter.dart';
+export 'src/filters/message_gate.dart';
+export 'src/filters/notice_throttle.dart';
+export 'src/filters/partial_ratio.dart';
+export 'src/filters/repeated_filter.dart';
+export 'src/filters/similarity_filter.dart';
+export 'src/registry.dart';
+export 'src/socket_connection.dart';

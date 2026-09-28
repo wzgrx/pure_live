@@ -1,0 +1,207 @@
+{
+  "generator": "WeiboSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + searchRooms + getLiveStatus + WeiboLink.parse + WeiboLink.url + getPlayQualites + getPlayUrls + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw (with S03-recommend)",
+  "value": {
+    "getRoomDetail": {
+      "result": {
+        "roomId": "1022:2321325347904448757771",
+        "userId": "7359985941",
+        "title": "兴奋奋奋的直播间",
+        "nick": "兴奋奋奋",
+        "avatar": "https://tvax2.sinaimg.cn/crop.0.0.1080.1080.50/00825KyFly8igua9aat1rj30u00u00uw.jpg?KID=imgbed,tva&Expires=1790540361&ssig=qa%2Bt%2BlcnJ1",
+        "cover": "https://wx3.sinaimg.cn/large/00825KyFgy1ihcrcavo98j30mj0u0dh5.jpg",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "weibo",
+        "liveStatus": 3,
+        "isRecord": false,
+        "status": false,
+        "notice": "当前场次存在访问限制或播放已关闭；公开直播源不可用。\n收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+        "isCatchUp": false,
+        "link": "https://weibo.com/l/wblive/p/show/1022:2321325347904448757771"
+      },
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347904448757771"
+      ]
+    },
+    "getRoomDetailForRefresh": {
+      "result": {
+        "roomId": "1022:2321325347904448757771",
+        "userId": "7359985941",
+        "title": "兴奋奋奋的直播间",
+        "nick": "兴奋奋奋",
+        "avatar": "https://tvax2.sinaimg.cn/crop.0.0.1080.1080.50/00825KyFly8igua9aat1rj30u00u00uw.jpg?KID=imgbed,tva&Expires=1790540361&ssig=qa%2Bt%2BlcnJ1",
+        "cover": "https://wx3.sinaimg.cn/large/00825KyFgy1ihcrcavo98j30mj0u0dh5.jpg",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "weibo",
+        "liveStatus": 3,
+        "isRecord": false,
+        "status": false,
+        "notice": "当前场次存在访问限制或播放已关闭；公开直播源不可用。\n收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+        "isCatchUp": false,
+        "link": "https://weibo.com/l/wblive/p/show/1022:2321325347904448757771"
+      },
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347904448757771"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "roomId": "1022:2321325347904448757771",
+        "userId": "7359985941",
+        "title": "兴奋奋奋的直播间",
+        "nick": "兴奋奋奋",
+        "avatar": "https://tvax2.sinaimg.cn/crop.0.0.1080.1080.50/00825KyFly8igua9aat1rj30u00u00uw.jpg?KID=imgbed,tva&Expires=1790540361&ssig=qa%2Bt%2BlcnJ1",
+        "cover": "https://wx3.sinaimg.cn/large/00825KyFgy1ihcrcavo98j30mj0u0dh5.jpg",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "weibo",
+        "liveStatus": 3,
+        "isRecord": false,
+        "status": false,
+        "notice": "当前场次存在访问限制或播放已关闭；公开直播源不可用。\n收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+        "isCatchUp": false,
+        "link": "https://weibo.com/l/wblive/p/show/1022:2321325347904448757771"
+      },
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347904448757771"
+      ]
+    },
+    "searchRooms": {
+      "result": [
+        {
+          "roomId": "1022:2321325347904448757771",
+          "userId": "7359985941",
+          "title": "兴奋奋奋的直播间",
+          "nick": "兴奋奋奋",
+          "avatar": "https://tvax2.sinaimg.cn/crop.0.0.1080.1080.50/00825KyFly8igua9aat1rj30u00u00uw.jpg?KID=imgbed,tva&Expires=1790540361&ssig=qa%2Bt%2BlcnJ1",
+          "cover": "https://wx3.sinaimg.cn/large/00825KyFgy1ihcrcavo98j30mj0u0dh5.jpg",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "weibo",
+          "liveStatus": 3,
+          "isRecord": false,
+          "status": false,
+          "notice": "当前场次存在访问限制或播放已关闭；公开直播源不可用。\n收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+          "isCatchUp": false,
+          "link": "https://weibo.com/l/wblive/p/show/1022:2321325347904448757771"
+        }
+      ],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347904448757771"
+      ]
+    },
+    "searchRooms(link)": {
+      "result": [
+        {
+          "roomId": "1022:2321325347904448757771",
+          "userId": "7359985941",
+          "title": "兴奋奋奋的直播间",
+          "nick": "兴奋奋奋",
+          "avatar": "https://tvax2.sinaimg.cn/crop.0.0.1080.1080.50/00825KyFly8igua9aat1rj30u00u00uw.jpg?KID=imgbed,tva&Expires=1790540361&ssig=qa%2Bt%2BlcnJ1",
+          "cover": "https://wx3.sinaimg.cn/large/00825KyFgy1ihcrcavo98j30mj0u0dh5.jpg",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "weibo",
+          "liveStatus": 3,
+          "isRecord": false,
+          "status": false,
+          "notice": "当前场次存在访问限制或播放已关闭；公开直播源不可用。\n收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+          "isCatchUp": false,
+          "link": "https://weibo.com/l/wblive/p/show/1022:2321325347904448757771"
+        }
+      ],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347904448757771"
+      ]
+    },
+    "searchRooms(mobile link)": {
+      "result": [
+        {
+          "roomId": "1022:2321325347904448757771",
+          "userId": "7359985941",
+          "title": "兴奋奋奋的直播间",
+          "nick": "兴奋奋奋",
+          "avatar": "https://tvax2.sinaimg.cn/crop.0.0.1080.1080.50/00825KyFly8igua9aat1rj30u00u00uw.jpg?KID=imgbed,tva&Expires=1790540361&ssig=qa%2Bt%2BlcnJ1",
+          "cover": "https://wx3.sinaimg.cn/large/00825KyFgy1ihcrcavo98j30mj0u0dh5.jpg",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "weibo",
+          "liveStatus": 3,
+          "isRecord": false,
+          "status": false,
+          "notice": "当前场次存在访问限制或播放已关闭；公开直播源不可用。\n收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+          "isCatchUp": false,
+          "link": "https://weibo.com/l/wblive/p/show/1022:2321325347904448757771"
+        }
+      ],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347904448757771"
+      ]
+    },
+    "getLiveStatus": {
+      "result": {
+        "throws": "WeiboException",
+        "message": "Weibo access"
+      },
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347904448757771"
+      ]
+    },
+    "WeiboLink.parse": {
+      "1022:2321325347904448757771": "1022:2321325347904448757771",
+      "https://weibo.com/l/wblive/p/show/1022:2321325347904448757771": "1022:2321325347904448757771",
+      "https://weibo.com/l/wblive/m/show/1022%3A2321325347904448757771": "1022:2321325347904448757771"
+    },
+    "WeiboLink.url": "https://weibo.com/l/wblive/p/show/1022:2321325347904448757771",
+    "getPlayQualites": {
+      "throws": "WeiboException",
+      "message": "Weibo access"
+    },
+    "getPlayUrls": {
+      "result": {
+        "throws": "WeiboException",
+        "message": "Weibo access"
+      },
+      "requests": []
+    },
+    "resolvePlayUrlsRaw": {
+      "result": {
+        "throws": "WeiboException",
+        "message": "Weibo access"
+      },
+      "requests": []
+    },
+    "resolvePlayUrlsForRecoveryRaw": {
+      "result": {
+        "throws": "WeiboException",
+        "message": "Weibo access"
+      },
+      "requests": []
+    }
+  }
+}

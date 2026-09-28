@@ -1,0 +1,41 @@
+{
+  "code": 100000,
+  "msg": "success",
+  "error_code": 0,
+  "data": {
+    "liveId": "1022:2321325348206094712906",
+    "status": 1,
+    "cover": "https://wx1.sinaimg.cn/large/007coN0rly8ibvxq2uvhuj30dc0dcdgy.jpg",
+    "startTime": 1790595363000,
+    "endTime": 0,
+    "width": 720,
+    "height": 1280,
+    "mid": "5348206944192087",
+    "createType": 2,
+    "createSource": 2,
+    "title": "惑星VORTEX四周年吃播",
+    "watch_limit": 0,
+    "user": {
+      "uid": 6596154111,
+      "screenName": "惑星VORTEX",
+      "profileImageUrl": "https://tvax1.sinaimg.cn/crop.0.0.480.480.50/007coN0rly8ibvxq2uvhuj30dc0dcdgy.jpg?KID=imgbed,tva&Expires=1790606219&ssig=6%2FE0NDa%2B2%2F",
+      "verified": 1,
+      "verifiedType": 0,
+      "verifiedTypeExt": 2,
+      "userAuthType": 4,
+      "avatar": "https://tvax1.sinaimg.cn/crop.0.0.480.480.1024/007coN0rly8ibvxq2uvhuj30dc0dcdgy.jpg?KID=imgbed,tva&Expires=1790606219&ssig=J%2BQ4RZcpo8",
+      "gender": "f"
+    },
+    "following": 0,
+    "reposts_count": 0,
+    "comments_count": 0,
+    "attitudes_count": 0,
+    "friends_count": 93284,
+    "liked": false,
+    "live_origin_hls_url": "https://plwb00.live.weibo.com/alicdn/5348206091441132_wb720avc.flv",
+    "live_origin_flv_url": "https://plwb00.live.weibo.com/alicdn/5348206091441132_wb720avc.flv",
+    "replay_origin_url": "",
+    "pay_live_status": 1,
+    "play_switch": 1
+  }
+}

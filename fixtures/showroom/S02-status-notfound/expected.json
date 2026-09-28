@@ -1,0 +1,43 @@
+{
+  "generator": "ShowroomSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw (with S02-status-notfound)",
+  "value": {
+    "zxqvnoroomfixture": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "ShowroomException",
+          "message": "Showroom missing"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/status?room_url_key=zxqvnoroomfixture"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "ShowroomException",
+          "message": "Showroom missing"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/status?room_url_key=zxqvnoroomfixture"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "throws": "ShowroomException",
+          "message": "Showroom missing"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/status?room_url_key=zxqvnoroomfixture"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "ShowroomException",
+          "message": "Showroom missing"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/status?room_url_key=zxqvnoroomfixture"
+        ]
+      }
+    }
+  }
+}

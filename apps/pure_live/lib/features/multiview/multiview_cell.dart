@@ -104,22 +104,32 @@ class MultiviewCellView extends ConsumerWidget {
                 if (session != null && cell.status == CellStatus.playing)
                   LiveVideoView(key: GlobalObjectKey(session), session: session, occluded: covered),
                 ?danmaku,
-                _CellOverlay(
-                  cell: cell,
-                  focused: focused,
-                  targeted: targeted,
-                  muteAll: state.muteAll,
-                  big: big,
-                  label: controls == null,
-                  onRetry: () {
-                    if (cell.room != null) {
-                      unawaited(controller.refresh(index));
-                    } else {
-                      onPick();
-                    }
-                  },
+                // Labels and the bar over the picture grow at most 1.3×
+                // (principles §2.3).
+                OnVideoTextScale(
+                  child: _CellOverlay(
+                    cell: cell,
+                    focused: focused,
+                    targeted: targeted,
+                    muteAll: state.muteAll,
+                    big: big,
+                    label: controls == null,
+                    onRetry: () {
+                      if (cell.room != null) {
+                        unawaited(controller.refresh(index));
+                      } else {
+                        onPick();
+                      }
+                    },
+                  ),
                 ),
-                if (controls != null) Positioned(left: Space.s2, right: Space.s2, bottom: Space.s2, child: controls),
+                if (controls != null)
+                  Positioned(
+                    left: Space.s2,
+                    right: Space.s2,
+                    bottom: Space.s2,
+                    child: OnVideoTextScale(child: controls),
+                  ),
               ],
             ),
           ),

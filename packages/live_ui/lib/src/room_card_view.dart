@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/badges.dart';
 import 'package:live_ui/src/metrics.dart';
+import 'package:live_ui/src/text_scale.dart';
 import 'package:live_ui/src/tv/focus_frame.dart';
 import 'package:live_ui/src/ui_text.dart';
 
@@ -10,7 +11,17 @@ enum CardDensity {
   standard,
 
   /// "Streamer · title" on one line.
-  compact,
+  compact;
+
+  /// The density a card is laid out with at [scaler]: from 1.5× text a
+  /// compact card takes the standard two lines (streamer, then title), where
+  /// one line of "streamer · title" would leave only an ellipsis of the
+  /// title. Grids size their cells with the same answer.
+  CardDensity shownAt(TextScaler scaler) =>
+      this == compact && scaler.scale(_probe) >= _probe * _twoLinesFrom ? standard : this;
+
+  static const double _probe = 14;
+  static const double _twoLinesFrom = 1.5;
 }
 
 /// A live room card: 16:9 cover with platform logo, live badge and audience,
@@ -87,6 +98,7 @@ class RoomCardView extends StatelessWidget {
     final scheme = theme.colorScheme;
     final text = theme.textTheme;
     final words = LiveUiText.current;
+    final density = this.density.shownAt(MediaQuery.textScalerOf(context));
     final label = [
       anchorName,
       if (isLive) words.liveNow else words.offline,
@@ -131,33 +143,42 @@ class RoomCardView extends StatelessWidget {
                             gaplessPlayback: true,
                             errorBuilder: (_, _, _) => const SizedBox.shrink(),
                           ),
-                        Positioned(
-                          left: Space.s1 + 2,
-                          top: Space.s1 + 2,
-                          child: PlatformLogo(platformId: platformId),
-                        ),
-                        if (recording)
-                          const Positioned(right: Space.s1 + 2, top: Space.s1 + 2, child: RecordingBadge()),
-                        // One row, so large text shortens the badge instead
-                        // of drawing it under the audience.
-                        if (isLive || audience != null)
-                          Positioned(
-                            left: Space.s1 + 2,
-                            right: Space.s1 + 2,
-                            bottom: Space.s1 + 2,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: Align(
-                                    alignment: AlignmentDirectional.bottomStart,
-                                    child: isLive ? LiveBadge(duration: liveFor) : null,
+                        // Badges on the cover grow at most 1.3× (principles
+                        // §2.3), so large text never buries the picture.
+                        OnVideoTextScale(
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Positioned(
+                                left: Space.s1 + 2,
+                                top: Space.s1 + 2,
+                                child: PlatformLogo(platformId: platformId),
+                              ),
+                              if (recording)
+                                const Positioned(right: Space.s1 + 2, top: Space.s1 + 2, child: RecordingBadge()),
+                              // One row, so large text shortens the badge
+                              // instead of drawing it under the audience.
+                              if (isLive || audience != null)
+                                Positioned(
+                                  left: Space.s1 + 2,
+                                  right: Space.s1 + 2,
+                                  bottom: Space.s1 + 2,
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Expanded(
+                                        child: Align(
+                                          alignment: AlignmentDirectional.bottomStart,
+                                          child: isLive ? LiveBadge(duration: liveFor) : null,
+                                        ),
+                                      ),
+                                      if (audience != null) ...[const SizedBox(width: Space.s1), CoverLabel(audience!)],
+                                    ],
                                   ),
                                 ),
-                                if (audience != null) ...[const SizedBox(width: Space.s1), CoverLabel(audience!)],
-                              ],
-                            ),
+                            ],
                           ),
+                        ),
                       ],
                     ),
                   ),

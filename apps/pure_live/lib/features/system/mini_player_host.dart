@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
+import 'package:live_ui/live_ui.dart' show OnVideoTextScale;
 import 'package:pure_live_app/core/desktop_window.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/system/mini_player.dart';
@@ -142,30 +143,33 @@ class _MiniWindowState extends ConsumerState<_MiniWindow> {
             child: Material(
               color: Colors.black,
               elevation: 8,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (widget.surfaceReady)
-                    LiveVideoView(
-                      key: _videoKey,
-                      session: _session,
-                      // Offstage under a popup counts as covered (SURF-1, SURF-4).
-                      occluded: !widget.visible,
-                      wakelock: ref.watch(screenKeepOnSetting),
-                    ),
-                  if (_state.showsBuffering)
-                    const Center(
-                      child: SizedBox.square(
-                        dimension: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              // Text over the picture grows at most 1.3× (principles §2.3).
+              child: OnVideoTextScale(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (widget.surfaceReady)
+                      LiveVideoView(
+                        key: _videoKey,
+                        session: _session,
+                        // Offstage under a popup counts as covered (SURF-1, SURF-4).
+                        occluded: !widget.visible,
+                        wakelock: ref.watch(screenKeepOnSetting),
                       ),
-                    ),
-                  if (_state.phase == PlaybackPhase.error)
-                    Center(
-                      child: Text(t.system.playbackError, style: const TextStyle(color: Colors.white)),
-                    ),
-                  if (_controls) _overlay(),
-                ],
+                    if (_state.showsBuffering)
+                      const Center(
+                        child: SizedBox.square(
+                          dimension: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        ),
+                      ),
+                    if (_state.phase == PlaybackPhase.error)
+                      Center(
+                        child: Text(t.system.playbackError, style: const TextStyle(color: Colors.white)),
+                      ),
+                    if (_controls) _overlay(),
+                  ],
+                ),
               ),
             ),
           ),

@@ -77,14 +77,15 @@ class PureLiveApp extends ConsumerWidget {
         routerConfig: router,
         // TV mode: the 960×540 canvas, overscan margins and remote focus
         // (principles §5.3); off, only the scope that says so. The text scale
-        // applies inside, on top of the canvas' media query.
+        // applies inside, on top of the canvas' media query: the system's
+        // (non-linear on Android 14+) times the in-app size, at most 2×.
         builder: (context, child) => TvRoot(
           config: tv,
           child: Builder(
             builder: (context) {
               final media = MediaQuery.of(context);
               return MediaQuery(
-                data: media.copyWith(textScaler: TextScaler.linear(media.textScaler.scale(1) * textScale)),
+                data: media.copyWith(textScaler: CombinedTextScaler(media.textScaler, textScale)),
                 // The in-app mini window floats above every page (F-PIP-03).
                 // Touches drive the refresh-rate hint (F-SET-08).
                 child: DarkTheme(

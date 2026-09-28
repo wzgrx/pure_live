@@ -873,7 +873,9 @@ class Translations$danmaku$zh_Hant implements Translations$danmaku$zh_Hans {
   @override
   String get offlineNoDanmaku => '未開播時沒有彈幕';
   @override
-  String get localHint => '發一則本機彈幕（只在本機顯示）';
+  String get localHint => '發一則本機彈幕';
+  @override
+  String get localSend => '傳送（只在本機顯示）';
   @override
   String get reconnect => '重新連線';
   @override

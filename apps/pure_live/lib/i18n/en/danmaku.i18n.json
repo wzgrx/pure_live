@@ -23,7 +23,8 @@
   "offHint": "Turn it on to connect to the chat and show danmaku on the video",
   "turnOn": "Turn on danmaku",
   "offlineNoDanmaku": "No danmaku while the room is offline",
-  "localHint": "Post a local danmaku (shown on this device only)",
+  "localHint": "Post a local danmaku",
+  "localSend": "Send (shown on this device only)",
   "reconnect": "Reconnect",
   "settings": "Danmaku settings",
   "newMessages": "{n} new",
@@ -91,8 +92,8 @@
     "popularity": "Popularity",
     "cumulative": "Views"
   },
-  "giftMany": "Sent {gift} ×{count}",
-  "gift": "Sent {gift}",
+  "giftMany": "sent {gift} ×{count}",
+  "gift": "sent {gift}",
   "localSender": "Me",
   "chatName": "{name}: "
 }

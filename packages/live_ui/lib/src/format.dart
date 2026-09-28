@@ -1,16 +1,19 @@
 import 'package:live_ui/src/ui_text.dart';
 
 /// Short form of a count in the interface language ([LiveUiText.current]):
-/// `9876`, `355.1万`, `1.2亿` in Chinese; `987`, `9.9K`, `3.6M` in English.
-/// One decimal, dropped when it is zero; a value that rounds up to the next
-/// unit moves to it (`9999.99万` is `1亿`).
+/// `9876`, `35.5万`, `355万`, `1.2亿` in Chinese; `987`, `9.9K`, `355K`,
+/// `3.6M` in English (principles §2.3: “1.2万”, “12K”). One decimal below
+/// 100 of a unit, dropped when it is zero, none from 100 on, so an English
+/// figure has at most three significant digits and every figure at most
+/// four characters before its unit; a value that rounds up to the next unit
+/// moves to it (`9999.99万` is `1亿`, `999.6K` is `1M`).
 String formatCount(int value, {LiveUiText? text}) {
   final style = text ?? LiveUiText.current;
   final base = style.countBase;
   if (value < base) return '$value';
   var scale = base.toDouble();
   for (var i = 0; i < style.countUnits.length; i++) {
-    final shown = _oneDecimal(value / scale);
+    final shown = _short(value / scale);
     final last = i == style.countUnits.length - 1;
     if (last || double.parse(shown) < base) return '$shown${style.countUnits[i]}';
     scale *= base;
@@ -18,7 +21,8 @@ String formatCount(int value, {LiveUiText? text}) {
   return '$value';
 }
 
-String _oneDecimal(double value) {
+String _short(double value) {
+  if (value >= 99.95) return value.round().toString();
   final fixed = value.toStringAsFixed(1);
   return fixed.endsWith('.0') ? fixed.substring(0, fixed.length - 2) : fixed;
 }

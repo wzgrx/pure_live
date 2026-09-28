@@ -901,7 +901,9 @@ class _Translations$danmaku$en implements Translations$danmaku$zh_Hans {
   @override
   String get offlineNoDanmaku => 'No danmaku while the room is offline';
   @override
-  String get localHint => 'Post a local danmaku (shown on this device only)';
+  String get localHint => 'Post a local danmaku';
+  @override
+  String get localSend => 'Send (shown on this device only)';
   @override
   String get reconnect => 'Reconnect';
   @override
@@ -1019,9 +1021,9 @@ class _Translations$danmaku$en implements Translations$danmaku$zh_Hans {
   @override
   late final _Translations$danmaku$audience$en audience = _Translations$danmaku$audience$en._(_root);
   @override
-  String giftMany({required Object gift, required Object count}) => 'Sent ${gift} ×${count}';
+  String giftMany({required Object gift, required Object count}) => 'sent ${gift} ×${count}';
   @override
-  String gift({required Object gift}) => 'Sent ${gift}';
+  String gift({required Object gift}) => 'sent ${gift}';
   @override
   String get localSender => 'Me';
   @override
@@ -1954,7 +1956,7 @@ class _Translations$room$en implements Translations$room$zh_Hans {
   @override
   String platformLimited({required Object quality}) => 'Limited by the platform to ${quality}';
   @override
-  String qualityLine({required Object quality, required Object n}) => '${quality} · line ${n}';
+  String qualityLine({required Object quality, required Object n}) => '${quality} · Line ${n}';
   @override
   String get quickPanelHint => 'Long-press the video for the quick panel; long-press a danmaku to copy or block it';
   @override

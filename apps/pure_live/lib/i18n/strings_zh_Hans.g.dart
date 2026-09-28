@@ -1167,8 +1167,11 @@ class Translations$danmaku$zh_Hans {
   /// zh-Hans: '未开播时没有弹幕'
   String get offlineNoDanmaku => '未开播时没有弹幕';
 
-  /// zh-Hans: '发条本地弹幕（只在本机显示）'
-  String get localHint => '发条本地弹幕（只在本机显示）';
+  /// zh-Hans: '发条本地弹幕'
+  String get localHint => '发条本地弹幕';
+
+  /// zh-Hans: '发送（只在本机显示）'
+  String get localSend => '发送（只在本机显示）';
 
   /// zh-Hans: '重新连接'
   String get reconnect => '重新连接';

@@ -99,6 +99,14 @@ abstract final class YyApi {
   /// lifetime).
   static const Duration leaseLead = Duration(minutes: 1);
 
+  /// The `biz` of the recommendations, and of most live details: no area.
+  static const String otherBiz = 'other';
+
+  /// The words YY appends to the default title of a room without one
+  /// (`<nickname> 正在直播`; search's `channelName` and the lists' and
+  /// detail's `desc` carry the same value).
+  static const String liveSuffix = '正在直播';
+
   /// The room page, 3.x's `link`.
   static String roomUrl(String roomId) => '$_origin/${roomId.trim()}';
 
@@ -228,8 +236,9 @@ abstract final class YyApi {
   static bool hasListing(YyModule module) => module.moduleId != 0 && module.biz != 'null' && module.subBiz != 'null';
 
   /// `more/page.action`: live rooms of an area (area label [area]) or of the
-  /// recommendations (label from [areaNames] by `biz`, else the raw `biz`,
-  /// as 3.x did). `data: null` (an area without listing) is empty.
+  /// recommendations (label from [areaNames] by `biz`, else empty: 3.x
+  /// showed the raw `biz`, `other` for every recommendation). `data: null`
+  /// (an area without listing) is empty.
   static List<LiveRoom> roomList(
     String body, {
     String? area,
@@ -255,7 +264,7 @@ abstract final class YyApi {
       roomId: sid,
       platform: _site,
       userId: jsonString(item['uid']) ?? '',
-      title: jsonString(item['desc']) ?? '',
+      title: title(item['desc']),
       nick: jsonString(item['name']) ?? '',
       avatar: _image(item['avatar']),
       cover: _image(item['thumb2']).ifEmpty(() => _image(item['thumb'])),
@@ -264,15 +273,36 @@ abstract final class YyApi {
       popularity: users,
       audienceMetricType: AudienceMetricType.popularity,
       liveStatus: LiveStatus.live,
+      startedAt: startedAt(item['startTime']),
       data: YyRoomData(sid: sid, ssid: _channel(item['ssid']) ?? sid),
     );
   }
+
+  /// A room title without YY's default suffix: a room without a title of its
+  /// own is titled `<nickname> 正在直播` (also `<nickname>正在直播`), which
+  /// becomes `<nickname>`; other titles are kept as they are.
+  static String title(Object? value) {
+    final text = jsonString(value) ?? '';
+    if (!text.endsWith(liveSuffix)) return text;
+    return text.substring(0, text.length - liveSuffix.length).trim();
+  }
+
+  /// The broadcast's start from a list or detail `startTime` (Unix seconds);
+  /// 0, negative and implausible values are none.
+  static DateTime? startedAt(Object? value) => switch (jsonInt(value)) {
+    final int seconds when seconds > 0 && seconds < 100000000000 => DateTime.fromMillisecondsSinceEpoch(
+      seconds * 1000,
+      isUtc: true,
+    ),
+    _ => null,
+  };
 
   // Search --------------------------------------------------------------------
 
   /// `apiSearch/doSearch.json?t=120`: rooms matching the keyword. Live is
   /// `liveOn` 1 (every result seen so far); the title is `channelName`
-  /// (`<streamer> 正在直播`), as in 3.x.
+  /// without the default title's ` 正在直播` ([title]). Results carry no
+  /// start time.
   static List<LiveRoom> searchRooms(String body, {int status = 200}) => [
     for (final item in _docs(body, status: status, tab: '120'))
       if (_channel(item['sid']) case final sid?)
@@ -280,7 +310,7 @@ abstract final class YyApi {
           roomId: sid,
           platform: _site,
           userId: jsonString(item['uid']) ?? '',
-          title: jsonString(item['channelName']) ?? '',
+          title: title(item['channelName']),
           nick: jsonString(item['name']) ?? '',
           avatar: _image(item['headurl']),
           cover: _image(item['posterurl']),
@@ -296,8 +326,13 @@ abstract final class YyApi {
         ),
   ];
 
-  /// `apiSearch/doSearch.json?t=1`: streamers. Their `liveOn` is not
-  /// reliable (a live streamer can read 0); 3.x showed it as it is.
+  /// `apiSearch/doSearch.json?t=1`: streamers, live or not. `liveOn` is the
+  /// streamer's own state: it agreed with `liveInfoDetail` of the channel in
+  /// 59 of 60 checks (2026-09-29). The exception is a shared channel (a
+  /// guild's, `22490906`) live with another performer: the streamer is
+  /// offline while the channel is not. Neither `t=120` (it misses live
+  /// streamers whose room does not match the keyword) nor hiding the state
+  /// would be more accurate, so it is kept.
   static List<LiveAnchorItem> searchAnchors(String body, {int status = 200}) => [
     for (final item in _docs(body, status: status, tab: '1'))
       if (_channel(item['sid']) ?? _channel(item['ssid']) case final sid?)
@@ -327,7 +362,8 @@ abstract final class YyApi {
   /// identity of a follow must not change), or null when the channel is not
   /// broadcasting. Offline, unknown and short numbers all answer `data:
   /// null`; the room page tells them apart ([roomPage]). The area is
-  /// [areaNames] by `biz`, else the raw `biz`, as in 3.x.
+  /// [areaNames] by `biz`, else empty (3.x showed the raw `biz`, mostly
+  /// `other`). The start is `startTime`.
   static LiveRoom? liveDetail(
     String body, {
     required String requestedId,
@@ -347,7 +383,7 @@ abstract final class YyApi {
       roomId: id,
       platform: _site,
       userId: jsonString(item['uid']) ?? '',
-      title: jsonString(item['desc']) ?? '',
+      title: title(item['desc']),
       nick: jsonString(item['name']) ?? '',
       avatar: _image(item['avatar']),
       cover: _image(item['thumb2']).ifEmpty(() => _image(item['thumb'])),
@@ -356,9 +392,10 @@ abstract final class YyApi {
       popularity: users,
       audienceMetricType: AudienceMetricType.popularity,
       liveStatus: LiveStatus.live,
+      startedAt: startedAt(item['startTime']),
       link: roomUrl(id),
       data: YyRoomData(sid: sid, ssid: ssid),
-      danmakuData: YyDanmakuArgs(topSid: int.tryParse(sid) ?? 0, subSid: int.tryParse(ssid) ?? 0),
+      danmakuData: danmakuArgs(sid: sid, ssid: ssid),
     );
   }
 
@@ -393,10 +430,12 @@ abstract final class YyApi {
   }
 
   /// The room of a channel that is not broadcasting. Without its [page]
-  /// (follow refresh, recording) it is 3.x's room: the id and the state,
-  /// and the canonical [channel] when a short number was resolved before.
-  /// With the page (room entry) it also names the streamer, the channel
-  /// title and area; never a cover or an audience.
+  /// (a refresh of a room whose page was read before) it is 3.x's room: the
+  /// id and the state, and the canonical [channel]. With the page (room
+  /// entry, the first refresh) it also names the streamer, the channel
+  /// title and area, and carries the danmaku arguments of the canonical
+  /// channel (the chat stays open while nobody broadcasts); never a cover,
+  /// an audience or a start.
   static LiveRoom offlineRoom({required String requestedId, YyRoomPage? page, YyRoomData? channel}) {
     final id = requestedId.trim();
     if (page == null) return LiveRoom(roomId: id, platform: _site, liveStatus: LiveStatus.offline, data: channel);
@@ -412,19 +451,26 @@ abstract final class YyApi {
       liveStatus: LiveStatus.offline,
       link: roomUrl(id),
       data: YyRoomData(sid: page.sid, ssid: page.ssid),
+      danmakuData: danmakuArgs(sid: page.sid, ssid: page.ssid),
     );
   }
+
+  /// The danmaku arguments of a channel (3.x's, numbers).
+  static YyDanmakuArgs danmakuArgs({required String sid, required String ssid}) =>
+      YyDanmakuArgs(topSid: int.tryParse(sid) ?? 0, subSid: int.tryParse(ssid) ?? 0);
 
   // Streams -------------------------------------------------------------------
 
   /// The stream-manager request body for [gear] (3.x's, sent as JSON text:
   /// 3.x handed Dio the map with a `text/plain` type, and Dio form-encoded
-  /// it, which the server answers with HTTP 500).
+  /// it, which the server answers with HTTP 500). [line] is the CDN line
+  /// (`line_seq`) asked for; -1 lets the server choose, as 3.x did.
   static Map<String, Object> streamManagerBody({
     required String sid,
     required String ssid,
     required int gear,
     required int sequence,
+    int line = -1,
   }) => {
     'head': {
       'seq': sequence,
@@ -464,7 +510,7 @@ abstract final class YyApi {
       'service_type': 0,
       'imsi': 0,
       'send_time': sequence ~/ 1000,
-      'line_seq': -1,
+      'line_seq': line,
       'gear': gear,
       'ssl': 1,
       'stream_format': 0,
@@ -563,6 +609,63 @@ abstract final class YyApi {
       appliedQualityData: applied,
       qualityUnconfirmed: lines.isNotEmpty && applied == null,
     );
+  }
+
+  /// The other CDN lines (`line_seq`) the served stream is on, in server
+  /// order: `stream_line_list` of the served `stream_key`, without the lines
+  /// it was served on. One more request each (asking the served gear on
+  /// that line) gives the stream there; measured: line 10 is `tx-flv-web`,
+  /// 14 `ks-flv-web`.
+  static List<int> otherLines(Map<String, dynamic> streams) {
+    final avp = _object(streams['avp_info_res']);
+    final addresses = _object(avp?['stream_line_addr']);
+    if (addresses == null || addresses.isEmpty) return const [];
+    final served = {for (final value in addresses.values) ?jsonInt(_object(value)?['line_seq'])};
+    final infos = _object(_object(avp?['stream_line_list'])?[addresses.keys.first])?['line_infos'];
+    final lines = <int>[];
+    for (final raw in _list(infos)) {
+      final line = jsonInt(_object(raw)?['line_seq']);
+      if (line != null && line >= 0 && !served.contains(line) && !lines.contains(line)) lines.add(line);
+    }
+    return lines;
+  }
+
+  /// [first] followed by the lines of [others] (the answers on
+  /// [otherLines]) that serve the same gear, each with its own lease: one
+  /// quality, several CDN lines backing each other up. An answer serving
+  /// another gear, and a [first] whose gear is unknown, add nothing.
+  static LivePlayUrlResolution withLines(LivePlayUrlResolution first, Iterable<LivePlayUrlResolution> others) {
+    final applied = first.appliedQualityData;
+    if (applied == null) return first;
+    final seen = {for (final line in first.lines) line.url};
+    return LivePlayUrlResolution.lines(
+      [
+        ...first.lines,
+        for (final other in others)
+          if (other.appliedQualityData == applied)
+            for (final line in other.lines)
+              if (seen.add(line.url)) line,
+      ],
+      appliedQualityData: applied,
+      qualityUnconfirmed: first.qualityUnconfirmed,
+    );
+  }
+
+  /// The stream-manager quality that stands for the mobile HLS quality
+  /// [id] among a channel's stream-manager [qualities] (best first), for
+  /// moving a remembered choice when stream-manager lists the qualities
+  /// (`YySite.flvFirst`): `mobile-hls:4000` serves the channel's best
+  /// stream (`…_0_0_0`, 蓝光 or 高清 by channel), the first quality;
+  /// `mobile-hls:1200` its lowest, the last. Any other id is returned as it
+  /// is; null when [qualities] is empty.
+  static String? flvQualityId(String id, List<LivePlayQuality> qualities) {
+    if (qualities.isEmpty) return null;
+    final quality = switch (id) {
+      '${mobileHlsPrefix}4000' => qualities.first,
+      '${mobileHlsPrefix}1200' => qualities.last,
+      _ => null,
+    };
+    return quality == null ? id : '${quality.selectionId}';
   }
 
   /// The lease of a FLV URL received at [issuedAt]: `t` is the Unix second
@@ -676,9 +779,13 @@ abstract final class YyApi {
     return null;
   }
 
+  /// The area named by [biz], learnt from an area page, else empty: the raw
+  /// key (`dance`) is no name, and `other`, the key of every
+  /// recommendation, is no area.
   static String _areaOf(Object? biz, Map<String, String> areaNames) {
     final key = jsonString(biz) ?? '';
-    return areaNames[key] ?? key;
+    if (key == otherBiz) return '';
+    return areaNames[key] ?? '';
   }
 
   /// `liveOn` and friends: 1, true or `live` (3.x's `isLiveValue`).

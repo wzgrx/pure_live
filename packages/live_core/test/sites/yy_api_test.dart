@@ -1,7 +1,8 @@
 // YY parsing against the recorded samples, compared field by field with
 // 3.x's output (expected.json, written by the transcribed 3.x parser in
 // fixtures/yy/legacy_expected.dart: the 3.x app no longer builds). Every
-// intended difference is listed with its reason; everything else must match.
+// intended difference is listed with its reason (the M4.06 review, or the
+// upgrade number of docs/UPGRADES.md); everything else must match.
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
@@ -10,6 +11,19 @@ import 'package:test/test.dart';
 import 'fixture.dart';
 
 Fixture _sample(String name) => Fixture.load('yy', name);
+
+/// `startTime` (Unix seconds) as the room's start.
+DateTime _start(Object? seconds) => DateTime.fromMillisecondsSinceEpoch((seconds! as int) * 1000, isUtc: true);
+
+/// Asserts 6-2's title against 3.x's: YY's default title `<nickname> 正在直播`
+/// loses its suffix, any other title is 3.x's. Returns whether it changed.
+bool _expectTitle(String actual, Object? legacy, {String? reason}) {
+  final text = (legacy as String?) ?? '';
+  final changed = text.endsWith('正在直播');
+  expect(actual, changed ? text.substring(0, text.length - '正在直播'.length).trim() : text, reason: '$reason title');
+  if (changed) expect(actual, isNot(contains('正在直播')), reason: '$reason title');
+  return changed;
+}
 
 /// Asserts that [actual] (a `toJson`) equals 3.x's [legacy] projection on
 /// every key 3.x wrote, except [changed] (intended differences) and
@@ -132,36 +146,67 @@ void main() {
   });
 
   group('S02/S03 room lists', () {
-    for (final name in ['S02-dance-p1', 'S02-dance-p5', 'S02-dance-p6']) {
-      test('$name: the same live rooms as 3.x, named after the area', () {
+    for (final (name, defaultTitles) in [('S02-dance-p1', 7), ('S02-dance-p5', 2), ('S02-dance-p6', 0)]) {
+      test('$name: the same live rooms as 3.x, named after the area; start times; default titles (6-2)', () {
         final fixture = _sample(name);
         final rooms = YyApi.roomList(fixture.body, area: '舞蹈', status: fixture.status);
         final legacy = _legacyList(fixture, 'rooms');
         expect(rooms.map((room) => room.roomId), legacy.map((room) => room['roomId']));
         final raw = _rawCards(fixture);
+        var changed = 0;
         for (final (index, room) in rooms.indexed) {
-          _expectParity(room.toJson(), legacy[index], reason: '$name[$index]');
+          // title: 6-2 (the default title `<nickname> 正在直播` without its
+          // suffix; lists carry the same value as search's channelName).
+          _expectParity(room.toJson(), legacy[index], changed: {'title'}, reason: '$name[$index]');
+          if (_expectTitle(room.title, legacy[index]['title'], reason: '$name[$index]')) changed++;
           expect(room.audienceMetricType, AudienceMetricType.popularity, reason: '`users` is heat (REG-YY-006)');
           expect(room.onlineViewers, isEmpty);
           final data = room.data! as YyRoomData;
           expect((data.sid, data.ssid), ('${raw[index]['sid']}', '${raw[index]['ssid']}'));
+          // New key (M2.1): the start is the card's startTime.
+          expect(room.startedAt, _start(raw[index]['startTime']));
+          expect(room.toJson()['startedAt'], room.startedAt!.toIso8601String());
+          expect(room.restriction, isNull, reason: 'YY says nothing about restrictions');
         }
+        expect(changed, defaultTitles);
       });
     }
 
-    for (final name in ['S03-recommend-p1', 'S03-recommend-p2', 'S03-recommend-p3']) {
-      test('$name: the same rooms as 3.x; the area is the raw biz until an area page names it', () {
+    for (final (name, defaultTitles) in [('S03-recommend-p1', 1), ('S03-recommend-p2', 0), ('S03-recommend-p3', 0)]) {
+      test('$name: the same rooms as 3.x; no area instead of the raw biz `other` (6-3)', () {
         final fixture = _sample(name);
         final rooms = YyApi.roomList(fixture.body, status: fixture.status);
         final legacy = _legacyList(fixture, 'rooms');
         expect(rooms.map((room) => room.roomId), legacy.map((room) => room['roomId']));
+        final raw = _rawCards(fixture);
+        var changed = 0;
         for (final (index, room) in rooms.indexed) {
-          _expectParity(room.toJson(), legacy[index], reason: '$name[$index]');
+          // area: 6-3 (3.x wrote the raw biz `other`); title: 6-2.
+          _expectParity(room.toJson(), legacy[index], changed: {'area', 'title'}, reason: '$name[$index]');
+          expect(legacy[index]['area'], 'other');
+          expect(room.area, isEmpty);
+          if (_expectTitle(room.title, legacy[index]['title'], reason: '$name[$index]')) changed++;
+          expect(room.startedAt, _start(raw[index]['startTime']));
         }
+        expect(changed, defaultTitles);
         final named = YyApi.roomList(fixture.body, areaNames: const {'other': '推荐'});
-        expect(named.every((room) => room.area == '推荐'), isTrue);
+        expect(named.every((room) => room.area == ''), isTrue, reason: '`other` names no area');
       });
     }
+
+    test('an area page names a biz (6-3); an unknown biz is no name', () {
+      String page(String biz) => jsonEncode({
+        'resultCode': 0,
+        'data': {
+          'data': [
+            {'sid': 7, 'biz': biz},
+          ],
+        },
+      });
+      expect(YyApi.roomList(page('dance'), areaNames: const {'dance': '舞蹈'}).single.area, '舞蹈');
+      expect(YyApi.roomList(page('dance')).single.area, isEmpty, reason: '3.x showed `dance`');
+      expect(YyApi.roomList(page('dance'), area: '热舞').single.area, '热舞', reason: 'an area listing names its rooms');
+    });
 
     test('data null (an area without listing) is empty; another resultCode is ApiChanged', () {
       expect(YyApi.roomList('{"resultCode":0,"data":{"totalCount":0,"data":null}}'), isEmpty);
@@ -185,35 +230,61 @@ void main() {
       );
       expect(rooms.single.roomId, '7');
       expect(rooms.single.cover, 'https://img.yy.com/a.jpg');
+      expect(rooms.single.startedAt, isNull, reason: 'no startTime');
+    });
+
+    test('start times: Unix seconds, as numbers or strings; 0 and nonsense are none', () {
+      expect(YyApi.startedAt(1790527818), DateTime.utc(2026, 9, 27, 16, 50, 18));
+      expect(YyApi.startedAt('1790527818'), DateTime.utc(2026, 9, 27, 16, 50, 18));
+      for (final value in [0, -1, null, '', 'x', 1.5, 100000000000]) {
+        expect(YyApi.startedAt(value), isNull, reason: '$value');
+      }
     });
   });
 
   group('S04 search', () {
-    for (final name in ['S04-search-p1', 'S04-search-p50', 'S04-search-empty']) {
-      test('$name: the same rooms as 3.x', () {
+    for (final (name, defaultTitles) in [('S04-search-p1', 4), ('S04-search-p50', 0), ('S04-search-empty', 0)]) {
+      test('$name: the same rooms as 3.x; titles without ` 正在直播` (6-2)', () {
         final fixture = _sample(name);
         final rooms = YyApi.searchRooms(fixture.body, status: fixture.status);
         final legacy = _legacyList(fixture, 'rooms');
         expect(rooms.map((room) => room.roomId), legacy.map((room) => room['roomId']));
         final raw = _rawDocs(fixture, '120');
+        var changed = 0;
         for (final (index, room) in rooms.indexed) {
           // area: 3.x read `biz`, which search results do not have, and
-          // wrote ''; `category` is the area name.
-          _expectParity(room.toJson(), legacy[index], changed: {'area'}, reason: '$name[$index]');
+          // wrote ''; `category` is the area name. title: 6-2.
+          _expectParity(room.toJson(), legacy[index], changed: {'area', 'title'}, reason: '$name[$index]');
           expect(legacy[index]['area'], '');
           expect(room.area, raw[index]['category']);
+          if (_expectTitle(room.title, legacy[index]['title'], reason: '$name[$index]')) changed++;
+          expect(room.startedAt, isNull, reason: 'search results carry no start time');
         }
+        expect(changed, defaultTitles);
       });
     }
 
-    test('S04 the title stays channelName ("<streamer> 正在直播") as in 3.x', () {
-      final room = YyApi.searchRooms(_sample('S04-search-p1').body).first;
-      expect(room.title, '创艺灵珊 正在直播');
+    test('S04 6-2: the default title `<streamer> 正在直播` is the streamer; titles of their own stay', () {
+      final rooms = YyApi.searchRooms(_sample('S04-search-p1').body);
+      final room = rooms.first;
+      expect(room.title, '创艺灵珊', reason: '3.x: 创艺灵珊 正在直播');
       expect(room.isLiveNow, isTrue);
       expect(room.link, 'https://www.yy.com/93379291');
+      expect(rooms[1].title, '想你的风吹到了@8582');
+      expect(rooms.firstWhere((room) => room.roomId == '1354260427').title, '熊猫', reason: '3.x: 熊猫  正在直播');
+      for (final (raw, title) in [
+        ('【森宁】刘饱饱正在直播', '【森宁】刘饱饱'),
+        ('小书生{修身}正在直播', '小书生{修身}'),
+        ('正在直播', ''),
+        ('正在直播的舞蹈', '正在直播的舞蹈'),
+        ('  ', ''),
+        (null, ''),
+      ]) {
+        expect(YyApi.title(raw), title, reason: '$raw');
+      }
     });
 
-    test('S04 streamers match 3.x', () {
+    test('S04 streamers match 3.x; `liveOn` is kept (6-6)', () {
       final fixture = _sample('S04-search-anchors');
       final anchors = YyApi.searchAnchors(fixture.body, status: fixture.status);
       expect([
@@ -225,6 +296,36 @@ void main() {
             'liveStatus': anchor.liveStatus,
           },
       ], _legacyList(fixture, 'anchors'));
+      // The "unreliable" state (M4.06 candidate 6): 22490906 is a guild's
+      // channel. When both samples were recorded, 燃舞蹈-福星 (uid
+      // 107923068) performed there, while the streamer the search lists at
+      // 22490906 is 燃舞蹈-Chisato (uid 411865223): `liveOn` 0 is that
+      // streamer's own state.
+      final shared = _rawDocs(fixture, '1').firstWhere((doc) => doc['sid'] == '22490906');
+      final performer = (jsonDecode(_sample('S05-detail-live').body) as Map)['data'] as Map;
+      expect((shared['uid'], shared['liveOn']), ('411865223', '0'));
+      expect('${performer['uid']}', isNot(shared['uid']));
+      expect(
+        YyApi.searchAnchors(
+          jsonEncode({
+            'success': true,
+            'status': 0,
+            'data': {
+              'searchResult': {
+                'response': {
+                  '1': {
+                    'docs': [
+                      {'sid': '87016563', 'name': 'Kasy', 'liveOn': '1'},
+                      {'sid': '1355114567', 'name': 'kasy', 'liveOn': '0'},
+                    ],
+                  },
+                },
+              },
+            },
+          }),
+        ).map((anchor) => anchor.liveStatus),
+        [true, false],
+      );
     });
 
     test('a failed search is ApiChanged, not an empty result', () {
@@ -235,18 +336,35 @@ void main() {
   });
 
   group('S05 detail', () {
-    test('S05-detail-live matches 3.x: popularity, danmaku arguments, link', () {
+    test('S05-detail-live matches 3.x: popularity, danmaku arguments, link; start time; no `other` area', () {
       final fixture = _sample('S05-detail-live');
       final legacy = _legacy(fixture);
       final room = YyApi.liveDetail(fixture.body, requestedId: legacy['roomId'] as String, status: fixture.status)!;
       final expected = legacy['room'] as Map<String, dynamic>;
-      _expectParity(room.toJson(), expected);
+      // area: 6-3 (3.x wrote the raw biz `other`).
+      _expectParity(room.toJson(), expected, changed: {'area'});
+      expect(expected['area'], 'other');
+      expect(room.area, isEmpty);
+      _expectTitle(room.title, expected['title']);
       expect(room.danmakuData.toString(), expected['danmakuData']);
       expect(room.danmakuData, const YyDanmakuArgs(topSid: 22490906, subSid: 22490906));
       final data = room.data! as YyRoomData;
       expect((data.sid, data.ssid), ('22490906', '22490906'));
-      expect(room.area, 'other', reason: 'the raw biz, as 3.x wrote it before an area page named it');
-      expect(YyApi.liveDetail(fixture.body, requestedId: '22490906', areaNames: const {'other': '其他'})!.area, '其他');
+      // New keys (M2.1): the start is `startTime`; nothing says whether the
+      // room is restricted.
+      expect(room.startedAt, DateTime.utc(2026, 9, 27, 16, 50, 18));
+      expect(room.startedAt!.isBefore(fixture.capturedAt), isTrue);
+      expect(room.toJson()['startedAt'], '2026-09-27T16:50:18.000Z');
+      expect(room.restriction, isNull);
+      expect(room.toJson().containsKey('restriction'), isFalse);
+      expect(
+        YyApi.liveDetail(fixture.body, requestedId: '22490906', areaNames: const {'other': '其他'})!.area,
+        isEmpty,
+        reason: '`other` names no area',
+      );
+      final dance = fixture.body.replaceFirst('"biz": "other"', '"biz": "dance"');
+      expect(YyApi.liveDetail(dance, requestedId: '22490906', areaNames: const {'dance': '舞蹈'})!.area, '舞蹈');
+      expect(YyApi.liveDetail(dance, requestedId: '22490906')!.area, isEmpty, reason: '3.x showed `dance`');
     });
 
     test('offline and unknown channels both answer data: null', () {
@@ -285,7 +403,19 @@ void main() {
       expect(room.avatar, startsWith('https://downhdlogo.yy.com/'));
       expect(room.area, '段子手');
       expect(room.link, 'https://www.yy.com/85520900');
-      expect(room.danmakuData, isNull, reason: '3.x gave offline rooms no danmaku arguments');
+      expect(room.startedAt, isNull);
+      expect(room.restriction, isNull);
+      // 6-7: 3.x gave offline rooms no danmaku arguments; the page names the
+      // channel, and its chat is open while nobody broadcasts.
+      expect(legacy['danmakuData'], isNull);
+      expect(room.danmakuData, const YyDanmakuArgs(topSid: 85520900, subSid: 85520900));
+      final short = YyApi.offlineRoom(requestedId: '2149', page: YyApi.roomPage(_sample('S05-page-asid').body));
+      expect(
+        short.danmakuData,
+        const YyDanmakuArgs(topSid: 35340121, subSid: 35340121),
+        reason: 'the canonical channel',
+      );
+      expect(YyApi.offlineRoom(requestedId: '85520900').danmakuData, isNull, reason: 'without the page, 3.x’s room');
     });
 
     test('room pages: the 404 page is NotFound; a short number names its canonical channel', () {
@@ -399,6 +529,97 @@ void main() {
       final streams = YyApi.streams(fixture.body);
       expect(YyApi.qualities(streams), isEmpty);
       expect(YyApi.resolution(streams, issuedAt: fixture.capturedAt).hasSources, isFalse);
+      expect(YyApi.otherLines(streams), isEmpty);
+    });
+
+    test('6-4: the other CDN line of the served stream, from stream_line_list', () {
+      final lines = {
+        for (final name in ['S06-streams-g1', 'S06-streams-g2', 'S06-streams-g2-l10', 'S06-streams-g3'])
+          name: YyApi.otherLines(YyApi.streams(_sample(name).body)),
+      };
+      expect(lines, {
+        'S06-streams-g1': [10],
+        'S06-streams-g2': [10],
+        'S06-streams-g2-l10': [14],
+        'S06-streams-g3': [10],
+      });
+      expect(
+        YyApi.otherLines({
+          'avp_info_res': {
+            'stream_line_addr': {
+              'k': {'line_seq': 3},
+            },
+            'stream_line_list': {
+              'k': {
+                'line_infos': [
+                  {'line_seq': 3},
+                  {'line_seq': '5'},
+                  {'line_seq': 5},
+                  {'line_seq': -1},
+                  'bad',
+                ],
+              },
+            },
+          },
+        }),
+        [5],
+      );
+    });
+
+    test('6-4: the lines of one gear on both CDNs, each with its own lease; another gear is left out', () {
+      final g2 = _sample('S06-streams-g2');
+      final l10 = _sample('S06-streams-g2-l10');
+      final first = YyApi.resolution(YyApi.streams(g2.body), issuedAt: g2.capturedAt);
+      final other = YyApi.resolution(YyApi.streams(l10.body), issuedAt: l10.capturedAt);
+      final merged = YyApi.withLines(first, [other]);
+      expect(merged.lines.map((line) => (line.lineId, Uri.parse(line.url).host)), [
+        ('14', 'ks-flv-web.yy.com'),
+        ('10', 'tx-flv-web.yy.com'),
+      ]);
+      expect(merged.lines.map((line) => line.format), everyElement(StreamFormat.flv));
+      expect(merged.lines.last.lease!.expiresAt!.difference(l10.capturedAt).inSeconds, inInclusiveRange(599, 601));
+      expect(merged.appliedQualityData, '2');
+      expect(merged.qualityUnconfirmed, isFalse);
+      final g1 = _sample('S06-streams-g1');
+      final lower = YyApi.resolution(YyApi.streams(g1.body), issuedAt: g1.capturedAt);
+      expect(YyApi.withLines(first, [lower]).lines, hasLength(1), reason: 'gear 1 is another quality');
+      expect(YyApi.withLines(first, [first]).lines, hasLength(1), reason: 'the same URL once');
+      final unknown = LivePlayUrlResolution.lines(first.lines, qualityUnconfirmed: true);
+      expect(YyApi.withLines(unknown, [other]).lines, hasLength(1), reason: 'the served gear is unknown');
+    });
+
+    test('6-4: the request for another line is the recorded one (line_seq 10, the served gear)', () {
+      final fixture = _sample('S06-streams-g2-l10');
+      final recorded = jsonDecode((fixture.meta['request'] as Map)['body'] as String) as Map<String, dynamic>;
+      final body = YyApi.streamManagerBody(
+        sid: '22490906',
+        ssid: '22490906',
+        gear: 2,
+        sequence: (recorded['head'] as Map)['seq'] as int,
+        line: 10,
+      );
+      expect((jsonDecode(jsonEncode(body)) as Map)['avp_parameter'], recorded['avp_parameter']);
+      expect(
+        (YyApi.streamManagerBody(sid: '1', ssid: '1', gear: 1, sequence: 0)['avp_parameter']! as Map)['line_seq'],
+        -1,
+        reason: '3.x let the server choose',
+      );
+    });
+
+    test('quality ids once stream-manager lists the qualities (M9): 4000 is the best stream, 1200 the lowest', () {
+      final gears = YyApi.qualities(YyApi.streams(_sample('S06-streams-g1').body));
+      expect(gears.map((quality) => quality.id), ['2', '1']);
+      expect(YyApi.flvQualityId('mobile-hls:4000', gears), '2');
+      expect(YyApi.flvQualityId('mobile-hls:1200', gears), '1');
+      const bluRay = [
+        LivePlayQuality(quality: '蓝光', id: '4', data: '4', sort: 4000),
+        LivePlayQuality(quality: '高清', id: '2', data: '2', sort: 2300),
+        LivePlayQuality(quality: '流畅', id: '1', data: '1', sort: 600),
+      ];
+      expect(YyApi.flvQualityId('mobile-hls:4000', bluRay), '4', reason: '4000 serves …_0_0_0, 蓝光 there');
+      expect(YyApi.flvQualityId('mobile-hls:1200', bluRay), '1');
+      expect(YyApi.flvQualityId('2', bluRay), '2');
+      expect(YyApi.flvQualityId('mobile-hls:4000', const []), isNull);
     });
 
     test('3.x test: one quality per gear; a name used twice gets the gear; URLs validated', () {

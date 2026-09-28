@@ -1,0 +1,193 @@
+{
+  "generator": "Fc2Site.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + getPlayUrls + Fc2Api.controlGrant (with S03-control)",
+  "value": {
+    "getRoomDetail": {
+      "result": {
+        "roomId": "3024638",
+        "userId": "3024638",
+        "title": "[EN - 24/7] Electronica directly from Clubs, Events &amp; Festivals # Regular Live Sessions.",
+        "nick": "HotBeatsTV",
+        "avatar": "https://live-storage.fc2.com/thumb/3024638/thumb.png?1648755467",
+        "cover": "https://live-storage.fc2.com/thumb/3024638/thumb.png?1648755467",
+        "area": "その他",
+        "watching": "1",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "1",
+        "totalViewers": "326",
+        "followers": "0",
+        "platform": "fc2live",
+        "liveStatus": 3,
+        "isRecord": false,
+        "status": false,
+        "notice": "该 FC2 直播需要登录、积分、门票或付费；界面保留受限状态，不将其显示成未开播。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://live.fc2.com",
+          "referer": "https://live.fc2.com/3024638/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://live.fc2.com/3024638/"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=3024638"
+      ]
+    },
+    "getRoomDetailForRefresh": {
+      "result": {
+        "roomId": "3024638",
+        "userId": "3024638",
+        "title": "[EN - 24/7] Electronica directly from Clubs, Events &amp; Festivals # Regular Live Sessions.",
+        "nick": "HotBeatsTV",
+        "avatar": "https://live-storage.fc2.com/thumb/3024638/thumb.png?1648755467",
+        "cover": "https://live-storage.fc2.com/thumb/3024638/thumb.png?1648755467",
+        "area": "その他",
+        "watching": "1",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "1",
+        "totalViewers": "326",
+        "followers": "0",
+        "platform": "fc2live",
+        "liveStatus": 3,
+        "isRecord": false,
+        "status": false,
+        "notice": "该 FC2 直播需要登录、积分、门票或付费；界面保留受限状态，不将其显示成未开播。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://live.fc2.com",
+          "referer": "https://live.fc2.com/3024638/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://live.fc2.com/3024638/"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=3024638"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "roomId": "3024638",
+        "userId": "3024638",
+        "title": "[EN - 24/7] Electronica directly from Clubs, Events &amp; Festivals # Regular Live Sessions.",
+        "nick": "HotBeatsTV",
+        "avatar": "https://live-storage.fc2.com/thumb/3024638/thumb.png?1648755467",
+        "cover": "https://live-storage.fc2.com/thumb/3024638/thumb.png?1648755467",
+        "area": "その他",
+        "watching": "1",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "1",
+        "totalViewers": "326",
+        "followers": "0",
+        "platform": "fc2live",
+        "liveStatus": 3,
+        "isRecord": false,
+        "status": false,
+        "notice": "该 FC2 直播需要登录、积分、门票或付费；界面保留受限状态，不将其显示成未开播。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://live.fc2.com",
+          "referer": "https://live.fc2.com/3024638/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://live.fc2.com/3024638/"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=3024638"
+      ]
+    },
+    "getLiveStatus": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live access"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=3024638"
+      ]
+    },
+    "getRoomDetail(link)": {
+      "result": {
+        "roomId": "3024638",
+        "userId": "3024638",
+        "title": "[EN - 24/7] Electronica directly from Clubs, Events &amp; Festivals # Regular Live Sessions.",
+        "nick": "HotBeatsTV",
+        "avatar": "https://live-storage.fc2.com/thumb/3024638/thumb.png?1648755467",
+        "cover": "https://live-storage.fc2.com/thumb/3024638/thumb.png?1648755467",
+        "area": "その他",
+        "watching": "1",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "1",
+        "totalViewers": "326",
+        "followers": "0",
+        "platform": "fc2live",
+        "liveStatus": 3,
+        "isRecord": false,
+        "status": false,
+        "notice": "该 FC2 直播需要登录、积分、门票或付费；界面保留受限状态，不将其显示成未开播。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://live.fc2.com",
+          "referer": "https://live.fc2.com/3024638/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://live.fc2.com/3024638/"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=3024638"
+      ]
+    },
+    "getPlayQualites": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": []
+    },
+    "resolvePlayUrlsRaw(auto)": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": []
+    },
+    "resolvePlayUrlsRaw(original)": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": []
+    },
+    "resolvePlayUrlsForRecoveryRaw(auto)": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": []
+    },
+    "getPlayUrls(auto)": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": []
+    },
+    "getPlayQualites(refresh detail)": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": []
+    },
+    "Fc2Api.controlGrant": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live access"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=3024638"
+      ]
+    }
+  }
+}

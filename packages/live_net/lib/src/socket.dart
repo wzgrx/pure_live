@@ -56,13 +56,18 @@ HttpClient? webSocketClientFor(ProxyRoute route) => switch (route) {
       ..findProxy = (_) => route.directive,
 };
 
-/// [SocketConnector] on `dart:io`.
+/// [SocketConnector] on `dart:io`. With [pingInterval] the socket sends a
+/// WebSocket ping at that interval and closes itself when a pong does not
+/// come back before the next one (`WebSocket.pingInterval`), for servers
+/// that keep a session only while its socket is provably alive (FC2's media
+/// control socket, which 3.x pinged every 15 s).
 Future<SocketChannel> connectIoSocket(
   Uri endpoint, {
   required Map<String, String> headers,
   required Iterable<String>? protocols,
   required ProxyRoute route,
   required Duration connectTimeout,
+  Duration? pingInterval,
 }) async {
   final client = webSocketClientFor(route);
   try {
@@ -72,6 +77,7 @@ Future<SocketChannel> connectIoSocket(
       protocols: protocols,
       customClient: client,
     ).timeout(connectTimeout);
+    if (pingInterval != null) socket.pingInterval = pingInterval;
     return _IoSocketChannel(socket);
   } finally {
     // The client is only needed for the upgrade; closing it releases idle

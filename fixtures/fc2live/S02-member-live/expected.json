@@ -1,0 +1,230 @@
+{
+  "generator": "Fc2Site.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + getPlayUrls + Fc2Api.controlGrant (with S03-control) + Fc2Link + Fc2Api.mediaHeaders + Fc2InputRecipe",
+  "value": {
+    "getRoomDetail": {
+      "result": {
+        "roomId": "62996200",
+        "userId": "62996200",
+        "title": "FC2USER475160OCC",
+        "nick": "FC2USER475160OCC",
+        "avatar": "https://live-storage.fc2.com/thumb/62996200/thumb.png?1790407047",
+        "cover": "https://live-storage.fc2.com/thumb/62996200/thumb.png?1790407047",
+        "area": "その他",
+        "watching": "127",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "127",
+        "totalViewers": "9693",
+        "followers": "0",
+        "platform": "fc2live",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "FC2 远端聊天尚待接入；媒体控制 WebSocket 由播放或录制独占，并保持到原生输入完整释放。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://live.fc2.com",
+          "referer": "https://live.fc2.com/62996200/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://live.fc2.com/62996200/",
+        "data": "Fc2Room"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=62996200"
+      ]
+    },
+    "getRoomDetailForRefresh": {
+      "result": {
+        "roomId": "62996200",
+        "userId": "62996200",
+        "title": "FC2USER475160OCC",
+        "nick": "FC2USER475160OCC",
+        "avatar": "https://live-storage.fc2.com/thumb/62996200/thumb.png?1790407047",
+        "cover": "https://live-storage.fc2.com/thumb/62996200/thumb.png?1790407047",
+        "area": "その他",
+        "watching": "127",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "127",
+        "totalViewers": "9693",
+        "followers": "0",
+        "platform": "fc2live",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "FC2 远端聊天尚待接入；媒体控制 WebSocket 由播放或录制独占，并保持到原生输入完整释放。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://live.fc2.com",
+          "referer": "https://live.fc2.com/62996200/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://live.fc2.com/62996200/"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=62996200"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "roomId": "62996200",
+        "userId": "62996200",
+        "title": "FC2USER475160OCC",
+        "nick": "FC2USER475160OCC",
+        "avatar": "https://live-storage.fc2.com/thumb/62996200/thumb.png?1790407047",
+        "cover": "https://live-storage.fc2.com/thumb/62996200/thumb.png?1790407047",
+        "area": "その他",
+        "watching": "127",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "127",
+        "totalViewers": "9693",
+        "followers": "0",
+        "platform": "fc2live",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "FC2 远端聊天尚待接入；媒体控制 WebSocket 由播放或录制独占，并保持到原生输入完整释放。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://live.fc2.com",
+          "referer": "https://live.fc2.com/62996200/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://live.fc2.com/62996200/",
+        "data": "Fc2Room"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=62996200"
+      ]
+    },
+    "getLiveStatus": {
+      "result": true,
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=62996200"
+      ]
+    },
+    "getRoomDetail(link)": {
+      "result": {
+        "roomId": "62996200",
+        "userId": "62996200",
+        "title": "FC2USER475160OCC",
+        "nick": "FC2USER475160OCC",
+        "avatar": "https://live-storage.fc2.com/thumb/62996200/thumb.png?1790407047",
+        "cover": "https://live-storage.fc2.com/thumb/62996200/thumb.png?1790407047",
+        "area": "その他",
+        "watching": "127",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "127",
+        "totalViewers": "9693",
+        "followers": "0",
+        "platform": "fc2live",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "FC2 远端聊天尚待接入；媒体控制 WebSocket 由播放或录制独占，并保持到原生输入完整释放。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://live.fc2.com",
+          "referer": "https://live.fc2.com/62996200/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://live.fc2.com/62996200/",
+        "data": "Fc2Room"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=62996200"
+      ]
+    },
+    "getPlayQualites": {
+      "result": [
+        {
+          "quality": "自适应 HLS",
+          "id": "auto",
+          "sort": 0,
+          "data": null
+        }
+      ],
+      "requests": []
+    },
+    "resolvePlayUrlsRaw(auto)": {
+      "result": {
+        "urls": [],
+        "appliedQualityData": "auto",
+        "inputRecipe": "fc2live:62996200:auto"
+      },
+      "requests": []
+    },
+    "resolvePlayUrlsRaw(original)": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": []
+    },
+    "resolvePlayUrlsForRecoveryRaw(auto)": {
+      "result": {
+        "urls": [],
+        "appliedQualityData": "auto",
+        "inputRecipe": "fc2live:62996200:auto"
+      },
+      "requests": []
+    },
+    "getPlayUrls(auto)": {
+      "result": [],
+      "requests": []
+    },
+    "getPlayQualites(refresh detail)": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": []
+    },
+    "Fc2Api.controlGrant": {
+      "result": {
+        "channelId": "62996200",
+        "webSocket": "wss://us-west-1-media-worker1080.live.fc2.com/control/channels/62996200",
+        "controlToken": "wmU4pFOtUyLEX4KxKLGrkBowDePCClT6NpM4.voFrYVX0GzClTXVnCrZaGxJbVTX8WOrbZdZ1TFJiDqQ9GkHcYDyeIwkuAZDjQVQmXTPwIValJQYnYZBsbBTtroLlN7msNroeMmB8VQZzFNMmSYN8t9IaC1vbEefaOjHfH1N1AYI6IwMnTpY1F9BpHQQjBhLgPyzwPDJgHWE2eLDmF5snYibhIMTakkrfwX7qHX5lGoWdBIKgSgYwHXYgEXysRvWdHmDmKgJ6T7DyFFP6LUXgKYu5BNK9PgxiUaincLVkvSf8rCW1TBbdiD5bMVC9EhIzZZscGEJtRY4heZTwHFL8FsqzRbhgK1ejLW71Z0K4xWWvYmJlPsIfIeNasYVulX4tjUXjTlGkfb66z0QtV6mopwZpQnIwtPJodS83QCJcvK5cZglmEa3pPlXroiHkFV1yIQFcnNVxgQ2csRHooX9nJEmuOnKtWTOzcSVpefCoZ3OawvHff72nGsXFJcNjD8LCFnzlSZEKHykDv6XDNqsyYLWcsRO2LeHhKI9eYVXtJEUiYdW1EzZjQuejwxAtCfKnESUrq71gOD11SYQnLRK7WHxzfKVfdl5aKQ9oVivnGtyqDTH7kQRaJFOgSVBnMvckVPHlX0OraJ5jOGV4CEsuA514xqLykV3oo9YeJtfqHJYiUXZaBCtxmP2tOVG3OVxyKYrbHlmkHzgyVUA2VHm8wQ.0LQWRPxBEcxslGV7wfPBE6_qp3X_mCit_2egwAh7UDm",
+        "orz": "e2bcebc208d2741cdb70b92ecec38ed8936c921c"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=62996200",
+        "POST /api/getControlServer.php channel_id=62996200&mode=play&orz=&channel_version=AJQc7CD37hTVGbhUsPL6I&client_version=2.1.0\n [1]&client_type=pc&client_app=browser_hls&ipv6="
+      ]
+    },
+    "Fc2Link.parseChannelId": {
+      "10608314": "10608314",
+      " 10608314 ": "10608314",
+      "0": null,
+      "0123": null,
+      "1234567890123": null,
+      "https://live.fc2.com/10608314/": "10608314",
+      "https://live.fc2.com/10608314": "10608314",
+      "http://live.fc2.com/10608314/": "10608314",
+      "https://live.fc2.com/en/10608314/": "10608314",
+      "https://live.fc2.com/JA/10608314/": "10608314",
+      "https://live.fc2.com/xx/10608314/": null,
+      "https://live.fc2.com/10608314/?utm=share": "10608314",
+      "https://live.fc2.com/10608314/#chat": null,
+      "https://LIVE.FC2.COM/10608314/": "10608314",
+      "https://live.fc2.com/": null,
+      "https://live.fc2.com/rank/": null,
+      "https://live.fc2.com/10608314/archive": null,
+      "https://live.fc2.com.evil.test/10608314/": null,
+      "https://user@live.fc2.com/10608314/": null,
+      "https://m.live.fc2.com/10608314/": null,
+      "ftp://live.fc2.com/10608314/": null,
+      "https://live.fc2.com/%E3%81%82/": null
+    },
+    "Fc2Link.channelUrl": "https://live.fc2.com/62996200/",
+    "Fc2Api.mediaHeaders": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Origin": "https://live.fc2.com",
+      "Referer": "https://live.fc2.com/62996200/"
+    },
+    "Fc2InputRecipe.identity": "fc2live:62996200:auto"
+  }
+}

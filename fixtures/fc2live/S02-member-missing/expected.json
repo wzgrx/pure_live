@@ -1,0 +1,50 @@
+{
+  "generator": "Fc2Site.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + getPlayUrls",
+  "value": {
+    "getRoomDetail": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=99999999"
+      ]
+    },
+    "getRoomDetailForRefresh": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=99999999"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=99999999"
+      ]
+    },
+    "getLiveStatus": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=99999999"
+      ]
+    },
+    "getRoomDetail(link)": {
+      "result": {
+        "throws": "Fc2Exception",
+        "message": "FC2 Live schema"
+      },
+      "requests": [
+        "POST /api/memberApi.php channel=1&profile=1&user=1&streamid=99999999"
+      ]
+    }
+  }
+}

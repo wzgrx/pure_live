@@ -1,0 +1,777 @@
+// FC2 Live parsing against the recorded samples, compared field by field
+// with 3.x's frozen output (expected.json, written by
+// fixtures/fc2live/legacy_expected.dart from 3.x's Fc2Api, Fc2Link, Fc2Site
+// and Fc2ControlSession). Every intended difference is listed with its
+// reason; everything else must match. The synthetic cases port the payloads
+// of 3.x's fc2live_site_test.dart and pin 3.x's checks.
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:live_core/live_core.dart';
+import 'package:test/test.dart';
+
+import 'fixture.dart';
+
+Fixture _sample(String name) => Fixture.load('fc2live', name);
+
+Map<String, dynamic> _legacy(String name) => _sample(name).legacy as Map<String, dynamic>;
+
+/// The `result` of a traced legacy call.
+Object? _result(Object? traced) => (traced! as Map<String, dynamic>)['result'];
+
+List<Map<String, dynamic>> _maps(Object? value) => (value! as List).cast<Map<String, dynamic>>();
+
+/// 3.x wrote its media headers into every room; that field is IPTV's, and
+/// the headers now travel with the control session (差异 7).
+const _headers = {'httpHeaders'};
+
+/// Asserts that [actual] (a `toJson`) equals 3.x's [legacy] map on every key
+/// 3.x wrote, except [changed] (intended differences) and the projection's
+/// `data` (checked apart: 3.x kept its `Fc2Room` only in live entry
+/// details). 3.x wrote null where the immutable model writes ''.
+void _expectParity(
+  Map<String, Object?> actual,
+  Map<String, dynamic> legacy, {
+  Set<String> changed = _headers,
+  String? reason,
+}) {
+  for (final MapEntry(:key, :value) in legacy.entries) {
+    if (changed.contains(key) || key == 'data') continue;
+    expect(actual[key] ?? '', value ?? '', reason: '${reason ?? ''} $key');
+  }
+}
+
+/// 3.x's room projection: toJson plus `link`.
+Map<String, Object?> _projection(LiveRoom room) => {...room.toJson(), 'link': room.link};
+
+void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String reason = ''}) {
+  final expected = _maps(legacy);
+  expect(rooms.map((room) => room.roomId), expected.map((room) => room['roomId']), reason: reason);
+  for (final (index, room) in rooms.indexed) {
+    _expectParity(_projection(room), expected[index], reason: '$reason[$index]');
+  }
+}
+
+/// 3.x's error of a traced call.
+void _expectLegacyError(Object? traced, String kind, {String? reason}) =>
+    expect(_result(traced), {'throws': 'Fc2Exception', 'message': 'FC2 Live $kind'}, reason: reason);
+
+List<Fc2LiveChannel> _snapshot() => Fc2LiveApi.directory(_sample('S01-directory').body);
+
+Fc2LiveMember _member(String sample, String channelId) => Fc2LiveApi.member(_sample(sample).body, channelId: channelId);
+
+LiveArea _area(String id) => Fc2LiveApi.category().children.singleWhere((area) => area.areaId == id);
+
+const _userAgent =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
+
+// 3.x's test payloads (test/fc2live_site_test.dart) --------------------------
+
+Map<String, Object?> _directoryRow(
+  String id, {
+  Object? type = 1,
+  Object? category = 1,
+  Object? name = 'Fixture owner',
+  Object? title = 'Fixture game stream',
+  Object? image = 'https://live-storage.fc2.com/thumb/10608314/thumb.jpg?fixture=1',
+  Object? pay = 0,
+  Object? login = 0,
+  Object? tid = 0,
+  Object? count = 61,
+  Object? total = 1727,
+}) => {
+  'id': id,
+  'type': type,
+  'category': category,
+  'name': name,
+  'title': title,
+  'image': image,
+  'start_time': 1789885361806,
+  'pay': pay,
+  'login': login,
+  'tid': tid,
+  'count': count,
+  'total': total,
+};
+
+Map<String, Object?> _directoryPayload() => {
+  'time': 1789980977,
+  'channel': [
+    _directoryRow('10608314'),
+    _directoryRow(
+      '11916060',
+      category: 9,
+      name: 'Kitten radio',
+      title: '24/7 Kitten audio',
+      image: 'https://live-storage.fc2.com/thumb/11916060/thumb.png',
+      count: 3,
+      total: 1279,
+    ),
+    _directoryRow('12000001', category: 5, name: 'Ticket room', title: 'Ticket room', image: '', tid: 7),
+    _directoryRow('1', type: 0, title: '', image: ''),
+  ],
+};
+
+Map<String, Object?> _channelData({Map<String, Object?> set = const {}, Set<String> remove = const {}}) {
+  final data = <String, Object?>{
+    'channelid': '10608314',
+    'adult': 0,
+    'title': 'Fixture game stream',
+    'info': 'Fixture description',
+    'image': 'https://live-storage.fc2.com/thumb/10608314/thumb.jpg',
+    'login_only': 0,
+    'fee': 0,
+    'ticketid': 0,
+    'ticket_only': 0,
+    'is_limited': 0,
+    'category': 1,
+    'category_name': 'Idle Chat',
+    'count': 61,
+    'total': 1727,
+    'is_publish': 1,
+    'start': 1789885361806,
+    'version': 'fixture-version',
+    'tname': '',
+    ...set,
+  };
+  remove.forEach(data.remove);
+  return data;
+}
+
+String _memberPayload({
+  Map<String, Object?> set = const {},
+  Set<String> remove = const {},
+  Object? profile = const {'userid': 10608314, 'name': 'Fixture owner'},
+  Object? status = 1,
+}) => jsonEncode({
+  'status': status,
+  'data': {'channel_data': _channelData(set: set, remove: remove), 'profile_data': profile},
+});
+
+Map<String, Object?> _controlPayload({Map<String, Object?> set = const {}}) => {
+  'url': 'wss://us-west-1-media-worker1077.live.fc2.com/control/channels/10608314',
+  'orz_raw': 'fixture_orz-token',
+  'control_token': 'fixture-control-token',
+  'status': 0,
+  ...set,
+};
+
+const _master =
+    'https://us-west-1-media.live.fc2.com/a/stream/10608314/0/master_playlist?targets=10,20,30,90&c=cc&d=dd';
+
+Map<String, dynamic> _hlsAnswer({Object? status = 0, Object? playlists}) => {
+  'name': '_response_',
+  'id': 1,
+  'arguments': {
+    'status': status,
+    'playlists':
+        playlists ??
+        [
+          {'mode': 0, 'status': 0, 'url': _master},
+          {'mode': 10, 'status': 0, 'url': _master.replaceFirst('/0/master_playlist', '/10/playlist')},
+        ],
+  },
+};
+
+void main() {
+  group('S01 directory', () {
+    test('the catalog: one category FC2 Live with 3.x six areas (Chinese names)', () {
+      final category = Fc2LiveApi.category();
+      final legacy = _maps(_result(_legacy('S01-directory')['getCategores'])).single;
+      expect((category.id, category.name), (legacy['id'], legacy['name']));
+      final areas = _maps(legacy['children']);
+      expect(category.children, hasLength(areas.length));
+      for (final (index, area) in category.children.indexed) {
+        // areaPic and shortName: 3.x wrote null, the model writes ''.
+        _expectParity(area.toJson(), areas[index], changed: const {}, reason: 'area $index');
+      }
+      expect(category.children.map((area) => area.areaId), ['all', '1', '2', '4', '9', '5']);
+    });
+
+    test('every native directory page matches 3.x: 20 a page, restricted rooms kept, other rows skipped', () {
+      final channels = _snapshot();
+      final pages = _legacy('S01-directory')['getDirectoryPage'] as Map<String, dynamic>;
+      var compared = 0;
+      for (final MapEntry(:key, :value) in pages.entries) {
+        final want = _result(value);
+        if (want is! Map<String, dynamic> || !want.containsKey('rooms')) continue;
+        final [area, number] = key.split(':');
+        final filter = area == 'recommend' ? null : Fc2LiveApi.areaFilter(_area(area));
+        final page = Fc2LiveApi.directoryPage([
+          for (final channel in channels)
+            if (Fc2LiveApi.inArea(channel, filter)) channel,
+        ], page: int.parse(number));
+        expect((page.page, page.hasMore), (want['page'], want['hasMore']), reason: key);
+        _expectRooms(page.rooms, want['rooms'], reason: key);
+        compared++;
+      }
+      expect(compared, 4 + 6 * 2, reason: 'four pages of every channel and two pages of each of the six areas');
+      expect(channels, hasLength(61), reason: '63 rows, two of them two-shot rooms (type 2)');
+      expect(channels.where((channel) => channel.state == Fc2LiveState.restricted), hasLength(5));
+      // A page below 1 (3.x: schema) and an unknown area (3.x: identity) are
+      // caller errors now; the site tests them without a request.
+      _expectLegacyError(pages['recommend:0'], 'schema');
+      _expectLegacyError(pages['3:1'], 'identity');
+      _expectLegacyError(pages['otherPlatform:1'], 'identity');
+    });
+
+    test("3.x's slices of every channel and of an area", () {
+      final channels = _snapshot();
+      final legacy = _legacy('S01-directory');
+      for (final MapEntry(:key, :value) in (legacy['getRecommendRooms'] as Map<String, dynamic>).entries) {
+        final [_, page, _, size] = key.split(' ');
+        final rooms = [
+          for (final channel in Fc2LiveApi.slice(channels, page: int.parse(page), pageSize: int.parse(size)))
+            Fc2LiveApi.room(channel),
+        ];
+        _expectRooms(rooms, _result(value), reason: key);
+      }
+      for (final MapEntry(:key, :value) in (legacy['getCategoryRooms'] as Map<String, dynamic>).entries) {
+        final [id, _, page, _, size] = key.split(' ');
+        if (id == '3') {
+          _expectLegacyError(value, 'identity', reason: key);
+          expect(() => Fc2LiveApi.areaFilter(_area('2').copyWithId('3')), throwsArgumentError);
+          continue;
+        }
+        final filter = Fc2LiveApi.areaFilter(_area(id));
+        final rooms = [
+          for (final channel in Fc2LiveApi.slice(
+            [
+              for (final channel in channels)
+                if (Fc2LiveApi.inArea(channel, filter)) channel,
+            ],
+            page: int.parse(page),
+            pageSize: int.parse(size),
+          ))
+            Fc2LiveApi.room(channel),
+        ];
+        _expectRooms(rooms, _result(value), reason: key);
+      }
+      expect(Fc2LiveApi.validSlice(page: 1, pageSize: 100), isTrue);
+      for (final (page, size) in [(0, 30), (1, 0), (1, 101)]) {
+        expect(Fc2LiveApi.validSlice(page: page, pageSize: size), isFalse);
+        expect(Fc2LiveApi.slice([1, 2, 3], page: page, pageSize: size), isEmpty);
+      }
+    });
+
+    test("the keyword search over the snapshot matches 3.x: number, name, title and 3.x's area name", () {
+      final channels = _snapshot();
+      final search = _legacy('S01-directory')['searchRooms (pageSize 20)'] as Map<String, dynamic>;
+      var compared = 0;
+      for (final MapEntry(:key, :value) in search.entries) {
+        final match = RegExp(r'^(.+) page (\d+)(?: size (\d+))?$').firstMatch(key);
+        if (match == null || key.startsWith('exact ')) continue;
+        final keyword = match.group(1)!;
+        final page = int.parse(match.group(2)!);
+        final size = int.parse(match.group(3) ?? '20');
+        final rooms = [
+          for (final channel in Fc2LiveApi.slice(Fc2LiveApi.search(channels, keyword), page: page, pageSize: size))
+            Fc2LiveApi.room(channel),
+        ];
+        _expectRooms(rooms, _result(value), reason: key);
+        compared++;
+      }
+      expect(compared, 6 + 3);
+      expect(Fc2LiveApi.search(channels, '0200').single.channelId, '10200498', reason: 'a number with a leading 0');
+      expect(
+        Fc2LiveApi.search(channels, 'IDLE CHAT'),
+        hasLength(channels.where((channel) => channel.categoryId == 1).length),
+        reason: "3.x's English area names match whatever the case",
+      );
+      expect(Fc2LiveApi.search(channels, '  '), isEmpty);
+    });
+
+    test('cards: English area names, the cover as avatar, restricted rooms unknown with their notice', () {
+      final rooms = [for (final channel in _snapshot()) Fc2LiveApi.room(channel)];
+      final first = rooms.first;
+      expect(first.roomId, '10200498');
+      expect(first.title, '猫の居る風景♪');
+      expect(first.nick, 'ちゅうや');
+      expect(first.area, 'Idle Chat');
+      expect(first.avatar, first.cover);
+      expect(first.cover, 'https://live-storage.fc2.com/thumb/10200498/thumb.gif?1377734751');
+      expect(first.link, 'https://live.fc2.com/10200498/');
+      expect((first.onlineViewers, first.totalViewers, first.watching), ('3', '232', '3'));
+      expect(first.audienceMetricType, AudienceMetricType.onlineViewers);
+      expect(first.notice, Fc2LiveApi.noticeText['fc2live_chat_notice']);
+      expect(first.introduction, isNull);
+      expect(first.httpHeaders, isEmpty);
+      expect(
+        first.data,
+        isA<Fc2LiveRoomData>()
+            .having((data) => data.state, 'state', Fc2LiveState.live)
+            .having((data) => data.categoryId, 'categoryId', 1),
+      );
+      final restricted = rooms.singleWhere((room) => room.roomId == '3024638');
+      expect(restricted.liveStatus, LiveStatus.unknown);
+      expect(restricted.notice, Fc2LiveApi.noticeText['fc2live_access_restricted']);
+      expect(restricted.title, contains('Events &amp; Festivals'), reason: '3.x did not decode entities (升级候选)');
+      final nameless = rooms.singleWhere((room) => room.roomId == '5185474');
+      expect(nameless.nick, '5185474', reason: 'no name: the channel number');
+      final untitled = rooms.singleWhere((room) => room.roomId == '62996200');
+      expect(untitled.title, untitled.nick, reason: 'no title: the name');
+      expect(rooms.singleWhere((room) => room.roomId == '41168365').area, 'FC2 Live', reason: 'category 0');
+      expect(rooms.where((room) => room.cover.isEmpty), hasLength(5), reason: 'blank images stay blank');
+      expect(rooms.map((room) => room.roomId), isNot(contains(startsWith('2_'))));
+    });
+  });
+
+  group('S02 member', () {
+    test('a live channel at every depth matches 3.x (one room for entry, refresh and recording)', () {
+      final member = _member('S02-member-live', '62996200');
+      final room = Fc2LiveApi.room(member.channel);
+      final legacy = _legacy('S02-member-live');
+      for (final call in [
+        'getRoomDetail',
+        'getRoomDetailForRefresh',
+        'getRoomDetailForRecording',
+        'getRoomDetail(link)',
+      ]) {
+        _expectParity(_projection(room), _result(legacy[call])! as Map<String, dynamic>, reason: call);
+      }
+      expect(room.title, 'FC2USER475160OCC', reason: 'no title: the owner name');
+      expect(room.area, 'その他', reason: "a member answer's own category_name");
+      expect(room.introduction, isNull, reason: 'blank info');
+      expect(member.version, 'AJQc7CD37hTVGbhUsPL6I');
+      expect(room.data, isA<Fc2LiveRoomData>().having((data) => data.state, 'state', Fc2LiveState.live));
+      expect(_result(legacy['getLiveStatus']), isTrue);
+    });
+
+    test('a restricted channel matches 3.x: unknown state and the restriction notice', () {
+      final member = _member('S02-member-restricted', '3024638');
+      final room = Fc2LiveApi.room(member.channel);
+      final legacy = _legacy('S02-member-restricted');
+      for (final call in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
+        // introduction: 3.x parsed `info` but left it out (差异 3).
+        _expectParity(
+          _projection(room),
+          _result(legacy[call])! as Map<String, dynamic>,
+          changed: {..._headers, 'introduction'},
+          reason: call,
+        );
+      }
+      expect(room.introduction, 'live @ HotBeats.TV');
+      expect(room.liveStatus, LiveStatus.unknown);
+      expect(member.version, 'P4xXGxUm9kF6HMImKQdQd');
+      expect(room.data, isA<Fc2LiveRoomData>().having((data) => data.state, 'state', Fc2LiveState.restricted));
+      _expectLegacyError(legacy['getLiveStatus'], 'access');
+      _expectLegacyError(legacy['getPlayQualites'], 'schema');
+      _expectLegacyError(legacy['Fc2Api.controlGrant'], 'access');
+    });
+
+    test("an offline channel is offline (3.x failed on its empty version: 'schema')", () {
+      final legacy = _legacy('S02-member-offline');
+      for (final call in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording', 'getLiveStatus']) {
+        _expectLegacyError(legacy[call], 'schema', reason: call);
+      }
+      final member = _member('S02-member-offline', '10608314');
+      expect(member.version, isNull);
+      final room = Fc2LiveApi.room(member.channel);
+      expect(_projection(room), {
+        ..._projection(room),
+        'roomId': '10608314',
+        'userId': '10608314',
+        'title': '適当ゲーム配信',
+        'nick': '８リメイク',
+        'avatar': 'https://live-storage.fc2.com/thumb/10608314/thumb.jpg?1784857583',
+        'cover': 'https://live-storage.fc2.com/thumb/10608314/thumb.jpg?1784857583',
+        'area': '雑談',
+        'watching': '0',
+        'onlineViewers': '0',
+        'totalViewers': '0',
+        'audienceMetricType': 'onlineViewers',
+        'liveStatus': LiveStatus.offline.index,
+        'status': false,
+        'notice': Fc2LiveApi.noticeText['fc2live_chat_notice'],
+        'introduction': '今日はマイクオフ @sangokusi999',
+        'link': 'https://live.fc2.com/10608314/',
+      });
+      expect(
+        room.data,
+        isA<Fc2LiveRoomData>().having((data) => data.state, 'state', Fc2LiveState.offline),
+        reason: 'offline before restricted: is_limited is 1 here',
+      );
+    });
+
+    test("a channel that never existed is NotFound (3.x: 'schema', from its empty version)", () {
+      final legacy = _legacy('S02-member-missing');
+      for (final call in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording', 'getLiveStatus']) {
+        _expectLegacyError(legacy[call], 'schema', reason: call);
+      }
+      expect(() => _member('S02-member-missing', '99999999'), throwsA(isA<NotFound>()));
+    });
+
+    test('exact lookups of the search are the member rooms (3.x: the same room, or its failure)', () {
+      final search = _legacy('S01-directory')['searchRooms (pageSize 20)'] as Map<String, dynamic>;
+      final live = Fc2LiveApi.room(_member('S02-member-live', '62996200').channel);
+      _expectRooms([live], _result(search['exact 62996200']));
+      _expectRooms([live], _result(search['exact https://live.fc2.com/ja/62996200/']));
+      final restricted = Fc2LiveApi.room(_member('S02-member-restricted', '3024638').channel);
+      _expectParity(
+        _projection(restricted),
+        _maps(_result(search['exact 3024638'])).single,
+        changed: {..._headers, 'introduction'},
+      );
+      // 3.x's search failed on these (its `missing` never matched them); the
+      // site now finds nothing and the offline channel.
+      _expectLegacyError(search['exact 99999999'], 'schema');
+      _expectLegacyError(search['exact 10608314'], 'schema');
+      expect(_maps(_result(search['exact 62996200 page 2'])), isEmpty);
+    });
+  });
+
+  group('streams', () {
+    test("one quality, 3.x's auto, and the recipe 3.x resolved", () {
+      final legacy = _legacy('S02-member-live');
+      final quality = _maps(_result(legacy['getPlayQualites'])).single;
+      const auto = Fc2LiveApi.autoQuality;
+      expect((auto.quality, auto.id, auto.sort, auto.data), (quality['quality'], quality['id'], quality['sort'], null));
+      final resolved = _result(legacy['resolvePlayUrlsRaw(auto)'])! as Map<String, dynamic>;
+      expect(resolved, {'urls': <String>[], 'appliedQualityData': 'auto', 'inputRecipe': 'fc2live:62996200:auto'});
+      expect(Fc2LiveInputRecipe('62996200').identity, legacy['Fc2InputRecipe.identity']);
+      expect(_result(legacy['resolvePlayUrlsForRecoveryRaw(auto)']), resolved);
+      // A refreshed room had no entry data in 3.x, so it could not be
+      // played without entering it again; it can now (差异 5).
+      _expectLegacyError(legacy['getPlayQualites(refresh detail)'], 'schema');
+      _expectLegacyError(legacy['resolvePlayUrlsRaw(original)'], 'schema');
+    });
+
+    test("3.x's media headers, lower-cased", () {
+      final legacy = (_legacy('S02-member-live')['Fc2Api.mediaHeaders'] as Map<String, dynamic>).map(
+        (key, value) => MapEntry(key.toLowerCase(), value),
+      );
+      expect(Fc2LiveApi.mediaHeaders('62996200'), legacy);
+      expect(Fc2LiveApi.mediaHeaders('62996200'), {
+        'user-agent': _userAgent,
+        'origin': 'https://live.fc2.com',
+        'referer': 'https://live.fc2.com/62996200/',
+      });
+    });
+
+    test('S03 the control grant matches 3.x; another channel is refused', () {
+      final legacy = _legacy('S03-control');
+      final grant = Fc2LiveApi.grant(_sample('S03-control').body, channelId: '62996200');
+      expect({
+        'channelId': grant.channelId,
+        'webSocket': '${grant.socket}',
+        'controlToken': grant.controlToken,
+        'orz': grant.orz,
+      }, legacy['62996200']);
+      expect(_legacy('S02-member-live')['Fc2Api.controlGrant'], containsPair('result', legacy['62996200']));
+      expect(legacy['10608314'], {'throws': 'Fc2Exception', 'message': 'FC2 Live schema'});
+      expect(() => Fc2LiveApi.grant(_sample('S03-control').body, channelId: '10608314'), throwsA(isA<ApiChanged>()));
+      expect(grant.endpoint.queryParameters, {'control_token': grant.controlToken});
+      expect(grant.endpoint.path, '/control/channels/62996200');
+      expect(grant.handshakeHeaders, {
+        'origin': 'https://live.fc2.com',
+        'user-agent': _userAgent,
+        'cookie': 'l_ortkn=e2bcebc208d2741cdb70b92ecec38ed8936c921c',
+      });
+    });
+
+    test("S04 the control socket's HLS answer names 3.x's master; another channel is refused", () {
+      final legacy = _legacy('control/S04-control');
+      final answer = _sample('control/S04-control').frames
+          .map((frame) => jsonDecode(frame) as Map<String, dynamic>)
+          .firstWhere((message) => message['name'] == '_response_');
+      expect('${Fc2LiveApi.hlsMaster(answer, channelId: '62996200')}', legacy['62996200']);
+      expect(legacy['10608314'], {'throws': 'Fc2Exception', 'message': 'FC2 Live schema'});
+      expect(() => Fc2LiveApi.hlsMaster(answer, channelId: '10608314'), throwsA(isA<ApiChanged>()));
+      expect(legacy['sent'], [Fc2LiveControl.hlsRequest]);
+    });
+  });
+
+  group('links', () {
+    test("3.x's channel rules: numbers and channel links, with a language prefix or a query", () {
+      final legacy = _legacy('S02-member-live');
+      final table = legacy['Fc2Link.parseChannelId'] as Map<String, dynamic>;
+      for (final MapEntry(:key, :value) in table.entries) {
+        expect(Fc2LiveApi.channelId(key), value, reason: key);
+        final isLink = key.contains('://');
+        expect(Fc2LiveApi.channelIdFromUrl(key), isLink ? value : null, reason: key);
+      }
+      expect(table, hasLength(22));
+      expect(Fc2LiveApi.channelUrl('62996200'), legacy['Fc2Link.channelUrl']);
+    });
+  });
+
+  group("3.x's checks (synthetic)", () {
+    test("3.x's directory payload: open chats skipped, ticket rooms restricted, both audiences", () {
+      final channels = Fc2LiveApi.directory(jsonEncode(_directoryPayload()));
+      expect(channels.map((channel) => channel.channelId), ['10608314', '11916060', '12000001']);
+      final public = channels.first;
+      expect((public.currentViewers, public.totalViewers), (61, 1727));
+      expect(public.categoryName, 'Idle Chat');
+      expect(public.state, Fc2LiveState.live);
+      expect(channels.last.state, Fc2LiveState.restricted);
+      final audio = [
+        for (final channel in channels)
+          if (Fc2LiveApi.inArea(channel, 9)) channel.channelId,
+      ];
+      expect(audio, ['11916060']);
+      expect(Fc2LiveApi.search(channels, 'kitten').single.channelId, '11916060');
+    });
+
+    test('directory rows: strict fields fail the list, images and counts only drop', () {
+      String body(List<Object?> rows, {Object? time = 1789980977}) => jsonEncode({'time': time, 'channel': rows});
+      for (final (reason, text) in [
+        ('no time', body([], time: null)),
+        ('time 0', body([], time: 0)),
+        ('time text', body([], time: 'soon')),
+        ('no channel list', jsonEncode({'time': 1})),
+        ('1001 rows', body(List.filled(1001, _directoryRow('1', type: 2)))),
+        ('row not an object', body(['10608314'])),
+        ('type missing', body([_directoryRow('10608314', type: null)])),
+        ('id 0', body([_directoryRow('0')])),
+        ('id text', body([_directoryRow('abc')])),
+        ('pay missing', body([_directoryRow('10608314', pay: null)])),
+        ('login text', body([_directoryRow('10608314', login: 'no')])),
+        ('category 100', body([_directoryRow('10608314', category: 100)])),
+        ('category -1', body([_directoryRow('10608314', category: -1)])),
+        ('name not text', body([_directoryRow('10608314', name: 7)])),
+        ('count text', body([_directoryRow('10608314', count: 'many')])),
+      ]) {
+        expect(() => Fc2LiveApi.directory(text), throwsA(isA<ApiChanged>()), reason: reason);
+      }
+      Fc2LiveChannel one(Map<String, Object?> row) => Fc2LiveApi.directory(body([row])).single;
+      for (final image in [
+        'http://live-storage.fc2.com/a.png',
+        'https://evil.test/a.png',
+        'https://evilfc2.com/a.png',
+        'https://u@live-storage.fc2.com/a.png',
+        'https://live-storage.fc2.com/a.png#x',
+        '//live-storage.fc2.com/a.png',
+      ]) {
+        expect(one(_directoryRow('10608314', image: image)).cover, isEmpty, reason: image);
+      }
+      expect(one(_directoryRow('10608314', image: 'https://fc2.com/a.png')).cover, 'https://fc2.com/a.png');
+      final counted = one(_directoryRow('10608314', count: '-1', total: null));
+      expect((counted.currentViewers, counted.totalViewers), (null, null));
+      expect(Fc2LiveApi.room(counted).audienceMetricType, AudienceMetricType.unknown);
+      expect((Fc2LiveApi.room(counted).watching, Fc2LiveApi.room(counted).onlineViewers), ('', ''));
+      expect(one(_directoryRow('10608314', count: '5', category: '3')).categoryName, 'Game / Work');
+      expect(
+        one(_directoryRow('10608314', name: '  a   b ', title: '')).title,
+        'a b',
+        reason: 'whitespace collapsed',
+      );
+      expect(one(_directoryRow('10608314', count: 2.9)).currentViewers, 2, reason: '3.x truncated numbers');
+      final twice = Fc2LiveApi.directory(body([_directoryRow('10608314'), _directoryRow('10608314', title: 'again')]));
+      expect(twice.single.title, 'Fixture game stream', reason: 'the first row of a channel wins');
+      expect(Fc2LiveApi.directory(body([_directoryRow('2_5258776', type: 2)])), isEmpty);
+    });
+
+    test("3.x's member payload and its checks", () {
+      final member = Fc2LiveApi.member(_memberPayload(), channelId: '10608314');
+      expect(member.channel.userName, 'Fixture owner');
+      expect(member.channel.state, Fc2LiveState.live);
+      expect(member.channel.currentViewers, 61);
+      expect(member.version, 'fixture-version');
+      expect(Fc2LiveApi.room(member.channel).introduction, 'Fixture description');
+
+      Fc2LiveChannel channel({
+        Map<String, Object?> set = const {},
+        Object? profile = const {'userid': 10608314, 'name': 'Fixture owner'},
+      }) => Fc2LiveApi.member(
+        _memberPayload(set: set, profile: profile),
+        channelId: '10608314',
+      ).channel;
+      for (final flag in ['fee', 'login_only', 'ticketid', 'ticket_only', 'is_limited']) {
+        expect(channel(set: {flag: 1}).state, Fc2LiveState.restricted, reason: flag);
+        expect(channel(set: {flag: 1, 'is_publish': 0}).state, Fc2LiveState.offline, reason: '$flag offline');
+      }
+      expect(channel(set: {'is_publish': 2}).state, Fc2LiveState.offline, reason: 'only 1 is live (3.x)');
+      expect(channel(set: {'is_publish': '1'}).state, Fc2LiveState.live);
+      expect(channel(profile: null).userName, '10608314', reason: 'no profile, no tname: the number');
+      expect(channel(profile: null, set: {'tname': 'Owner'}).userName, 'Owner');
+      expect(channel(set: {'title': ''}).title, 'Fixture owner');
+      expect(channel(set: {'category': '0', 'category_name': ''}).categoryName, 'FC2 Live');
+      expect(channel(set: {'info': ' two\n\nlines '}).description, 'two lines');
+      expect(channel(set: {'adult': 1}).isAdult, isTrue);
+      expect(Fc2LiveApi.room(channel(set: {'adult': 1})).notice, Fc2LiveApi.noticeText['fc2live_adult_notice']);
+      expect(
+        Fc2LiveApi.room(channel(set: {'adult': 1, 'fee': 1})).notice,
+        Fc2LiveApi.noticeText['fc2live_access_restricted'],
+        reason: 'the restriction first (3.x)',
+      );
+      expect(Fc2LiveApi.member(_memberPayload(set: {'version': ''}), channelId: '10608314').version, isNull);
+
+      expect(() => Fc2LiveApi.member(_memberPayload(status: 0), channelId: '10608314'), throwsA(isA<NotFound>()));
+      expect(
+        () => Fc2LiveApi.member(_memberPayload(profile: {'userid': '', 'name': ''}), channelId: '10608314'),
+        throwsA(isA<NotFound>()),
+      );
+      for (final (reason, text) in [
+        ('another channel', _memberPayload(set: {'channelid': '10608315'})),
+        ('no status', _memberPayload(status: null)),
+        ('no channel_data', jsonEncode({'status': 1, 'data': <String, Object?>{}})),
+        ('data not an object', jsonEncode({'status': 1, 'data': <Object?>[]})),
+        ('profile not an object', _memberPayload(profile: 'owner')),
+        ('is_publish missing', _memberPayload(remove: {'is_publish'})),
+        ('fee missing', _memberPayload(remove: {'fee'})),
+        ('adult missing', _memberPayload(remove: {'adult'})),
+        ('category 100', _memberPayload(set: {'category': 100})),
+        ('title not text', _memberPayload(set: {'title': 5})),
+        ('version too long', _memberPayload(set: {'version': 'v' * 257})),
+        ('channelid a number', _memberPayload(set: {'channelid': 10608314})),
+      ]) {
+        expect(() => Fc2LiveApi.member(text, channelId: '10608314'), throwsA(isA<ApiChanged>()), reason: reason);
+      }
+    });
+
+    test("3.x's control payload and the grant's checks", () {
+      final grant = Fc2LiveApi.grant(jsonEncode(_controlPayload()), channelId: '10608314');
+      expect(grant.socket.host, 'us-west-1-media-worker1077.live.fc2.com');
+      expect(grant.socket.path, '/control/channels/10608314');
+      expect(grant.controlToken, 'fixture-control-token');
+      expect(grant.orz, 'fixture_orz-token');
+      expect(
+        () => Fc2LiveApi.grant(jsonEncode(_controlPayload(set: {'status': 1})), channelId: '10608314'),
+        throwsA(isA<StreamUnavailable>()),
+      );
+      for (final (reason, set) in <(String, Map<String, Object?>)>[
+        ('https', {'url': 'https://live.fc2.com/control/channels/10608314'}),
+        ('other host', {'url': 'wss://fc2.com/control/channels/10608314'}),
+        ('look-alike host', {'url': 'wss://live.fc2.com.evil.test/control/channels/10608314'}),
+        ('user info', {'url': 'wss://u@live.fc2.com/control/channels/10608314'}),
+        ('other channel', {'url': 'wss://live.fc2.com/control/channels/1'}),
+        ('query', {'url': 'wss://live.fc2.com/control/channels/10608314?x=1'}),
+        ('fragment', {'url': 'wss://live.fc2.com/control/channels/10608314#x'}),
+        ('url too long', {'url': 'wss://live.fc2.com/control/channels/10608314/${'x' * 2048}'}),
+        ('no token', {'control_token': ''}),
+        ('token too long', {'control_token': 't' * 4097}),
+        ('orz with a separator', {'orz_raw': 'a;b'}),
+        ('orz too long', {'orz_raw': 'o' * 257}),
+        ('no status', {'status': null}),
+      ]) {
+        expect(
+          () => Fc2LiveApi.grant(jsonEncode(_controlPayload(set: set)), channelId: '10608314'),
+          throwsA(isA<ApiChanged>()),
+          reason: reason,
+        );
+      }
+      expect(Fc2LiveApi.grant(jsonEncode(_controlPayload(set: {'status': '0'})), channelId: '10608314'), isNotNull);
+    });
+
+    test("the HLS answer's checks", () {
+      expect('${Fc2LiveApi.hlsMaster(_hlsAnswer(), channelId: '10608314')}', _master);
+      final skipped = _hlsAnswer(
+        playlists: [
+          {'mode': 0, 'status': 1, 'url': 'broken'},
+          {'mode': '0', 'status': '0', 'url': _master},
+        ],
+      );
+      expect('${Fc2LiveApi.hlsMaster(skipped, channelId: '10608314')}', _master, reason: 'unavailable rows skipped');
+      expect(
+        () => Fc2LiveApi.hlsMaster(_hlsAnswer(status: 1), channelId: '10608314'),
+        throwsA(isA<StreamUnavailable>()),
+      );
+      Map<String, dynamic> withMaster(String url) => _hlsAnswer(
+        playlists: [
+          {'mode': 0, 'status': 0, 'url': url},
+        ],
+      );
+      for (final (reason, answer) in [
+        ('not the answer', {..._hlsAnswer(), 'name': 'user_count'}),
+        ('another id', {..._hlsAnswer(), 'id': 2}),
+        ('no arguments', {'name': '_response_', 'id': 1}),
+        ('no status', _hlsAnswer(status: null)),
+        ('no playlists', _hlsAnswer(playlists: 'none')),
+        ('33 playlists', _hlsAnswer(playlists: List.filled(33, {'mode': 10, 'status': 0, 'url': _master}))),
+        (
+          'no master',
+          _hlsAnswer(
+            playlists: [
+              {'mode': 10, 'status': 0, 'url': _master},
+            ],
+          ),
+        ),
+        (
+          'mode missing',
+          _hlsAnswer(
+            playlists: [
+              {'status': 0, 'url': _master},
+            ],
+          ),
+        ),
+        (
+          'url missing',
+          _hlsAnswer(
+            playlists: [
+              {'mode': 0, 'status': 0},
+            ],
+          ),
+        ),
+        ('http', withMaster(_master.replaceFirst('https', 'http'))),
+        ('other host', withMaster(_master.replaceFirst('us-west-1-media.live.fc2.com', 'media.example'))),
+        ('user info', withMaster(_master.replaceFirst('https://', 'https://u@'))),
+        ('other channel', withMaster(_master.replaceFirst('10608314', '1'))),
+        ('a variant', withMaster(_master.replaceFirst('/0/master_playlist', '/30/playlist'))),
+        ('fragment', withMaster('$_master#x')),
+        ('extra parameter', withMaster('$_master&e=1')),
+        ('no c', withMaster(_master.replaceFirst('c=cc&', ''))),
+        ('long d', withMaster(_master.replaceFirst('d=dd', 'd=${'d' * 1025}'))),
+        ('targets not numbers', withMaster(_master.replaceFirst('10,20,30,90', 'all'))),
+        ('17 targets', withMaster(_master.replaceFirst('10,20,30,90', List.filled(17, '10').join(',')))),
+      ]) {
+        expect(() => Fc2LiveApi.hlsMaster(answer, channelId: '10608314'), throwsA(isA<ApiChanged>()), reason: reason);
+      }
+    });
+
+    test("3.x's status mapping, body limit and JSON checks", () {
+      for (final (status, matcher) in [
+        (400, isA<ApiChanged>()),
+        (422, isA<ApiChanged>()),
+        (401, isA<RiskControl>()),
+        (403, isA<RiskControl>()),
+        (404, isA<NotFound>()),
+        (429, isA<RateLimited>()),
+        (500, isA<NetworkFailure>()),
+        (503, isA<NetworkFailure>()),
+        (302, isA<NetworkFailure>()),
+        (204, isA<NetworkFailure>()),
+      ]) {
+        expect(
+          () => Fc2LiveApi.directory(jsonEncode(_directoryPayload()), status: status),
+          throwsA(matcher),
+          reason: '$status',
+        );
+        expect(() => Fc2LiveApi.member(_memberPayload(), channelId: '10608314', status: status), throwsA(matcher));
+        expect(
+          () => Fc2LiveApi.grant(jsonEncode(_controlPayload()), channelId: '10608314', status: status),
+          throwsA(matcher),
+        );
+      }
+      for (final body in ['<html>', '[]', '"text"', '']) {
+        expect(() => Fc2LiveApi.directory(body), throwsA(isA<ApiChanged>()), reason: body);
+      }
+      final large = jsonEncode({..._directoryPayload(), 'padding': 'あ' * (Fc2LiveApi.responseLimit ~/ 3 + 1)});
+      expect(() => Fc2LiveApi.directory(large), throwsA(isA<ApiChanged>()), reason: 'over 4 MiB in UTF-8');
+    });
+
+    test('recipes are the channel only; rooms carry no media headers', () {
+      expect(Fc2LiveInputRecipe('10608314'), Fc2LiveInputRecipe('10608314'));
+      expect(Fc2LiveInputRecipe('10608314').identity, 'fc2live:10608314:auto');
+      for (final bad in ['', '0', 'abc', 'https://live.fc2.com/10608314/']) {
+        expect(() => Fc2LiveInputRecipe(bad), throwsArgumentError, reason: bad);
+      }
+      final room = Fc2LiveApi.room(Fc2LiveApi.member(_memberPayload(), channelId: '10608314').channel);
+      expect(room.httpHeaders, isEmpty);
+      expect(room.toJson()['httpHeaders'], isEmpty);
+    });
+  });
+}
+
+extension on LiveArea {
+  LiveArea copyWithId(String id) =>
+      LiveArea(platform: platform, areaType: areaType, typeName: typeName, areaId: id, areaName: areaName);
+}
+
+extension on Fixture {
+  /// The text frames the server sent, in order (a `frames.jsonl` sample).
+  List<String> get frames => [
+    for (final line in File('${directory.path}/frames.jsonl').readAsLinesSync())
+      if (line.trim().isNotEmpty)
+        if (jsonDecode(line) case {'dir': 'in', 'text': final String text}) text,
+  ];
+}

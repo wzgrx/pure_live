@@ -100,13 +100,17 @@ Future<void> setSearchHistoryRecording(BuildContext context, WidgetRef ref, {req
 /// a tap searches again; each entry can be removed, and 清空 removes them
 /// all, both with undo. Taps here do not take the focus from the box.
 class SearchHistoryList extends ConsumerWidget {
-  const new({required this.entries, required this.onPick, super.key});
+  const new({required this.entries, required this.onPick, this.width = Sizes.readingWidth, super.key});
 
   /// Entries, newest first.
   final List<SearchHistoryEntry> entries;
 
   /// Searches the chosen keyword.
   final ValueChanged<String> onPick;
+
+  /// The widest the rows get between the page margins: the search box's
+  /// width, so the list lines up under it.
+  final double width;
 
   Future<void> _remove(BuildContext context, WidgetRef ref, SearchHistoryEntry entry) async {
     final messenger = ScaffoldMessenger.of(context);
@@ -136,10 +140,10 @@ class SearchHistoryList extends ConsumerWidget {
       child: PageBody(
         child: Align(
           alignment: AlignmentDirectional.topStart,
-          // Rows as wide as a reading column on the page's left line, under
-          // the search box (principles §4.3).
+          // Rows start on the page's left line and are no wider than the
+          // search box above them (principles §4.3).
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: Sizes.readingWidth + 2 * margin),
+            constraints: BoxConstraints(maxWidth: width + 2 * margin),
             child: ListView(
               padding: const EdgeInsets.only(bottom: Space.s4),
               children: [

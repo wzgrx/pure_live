@@ -760,11 +760,16 @@ class _FollowListState extends ConsumerState<_FollowList> {
   ];
 }
 
-/// A live card while multi-selecting (F-FAV-09): a round mark in the cover's
-/// top right corner, filled with a check when chosen, and a ring around the
-/// chosen card. Only decoration: taps still reach the card.
+/// A live card while multi-selecting (F-FAV-09): a round mark in the middle
+/// of the cover, filled with a check when chosen, and a ring around the
+/// chosen card. The corners keep the logo, the live badge, the audience and
+/// 录制中 in view. Only decoration: taps still reach the card.
 class SelectableCard extends StatelessWidget {
   const new({required this.selected, required this.child, super.key});
+
+  /// How far the ring lies outside the card: less than the smallest grid
+  /// gap (8 dp) minus its 3 dp width.
+  static const double _ring = 4;
 
   /// Whether the card is chosen.
   final bool selected;
@@ -778,34 +783,58 @@ class SelectableCard extends StatelessWidget {
     return Semantics(
       selected: selected,
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
           child,
-          if (selected)
+          if (selected) ...[
             Positioned.fill(
               child: IgnorePointer(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: scheme.primary.withValues(alpha: 0.12),
-                    border: Border.all(color: scheme.primary, width: 3),
                     borderRadius: BorderRadius.circular(Radii.r2),
                   ),
                 ),
               ),
             ),
-          Positioned(
-            top: Space.s1 + 2,
-            right: Space.s1 + 2,
-            child: IgnorePointer(
-              child: DecoratedBox(
-                // On the cover: the mark keeps a white ring on any picture.
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: selected ? scheme.primary : Colors.black.withValues(alpha: 0.4),
-                  border: Border.all(color: Colors.white, width: 2),
+            // The ring sits just outside the card, in the grid gap, so it
+            // never covers the name.
+            Positioned.fill(
+              left: -_ring,
+              top: -_ring,
+              right: -_ring,
+              bottom: -_ring,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: scheme.primary, width: 3),
+                    borderRadius: BorderRadius.circular(Radii.r2 + _ring),
+                  ),
                 ),
-                child: SizedBox.square(
-                  dimension: Sizes.iconMd,
-                  child: selected ? Icon(Icons.check, size: Sizes.iconDense - 4, color: scheme.onPrimary) : null,
+              ),
+            ),
+          ],
+          // The cover is the card's width at 16:9.
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Center(
+                    child: DecoratedBox(
+                      // On the cover: a white ring shows on any picture.
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: selected ? scheme.primary : Colors.black.withValues(alpha: 0.4),
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      child: SizedBox.square(
+                        dimension: Sizes.iconLg,
+                        child: selected ? Icon(Icons.check, size: Sizes.iconMd, color: scheme.onPrimary) : null,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),

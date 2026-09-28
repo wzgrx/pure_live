@@ -49,6 +49,9 @@ final searchFocusRequestProvider = NotifierProvider<SearchFocusRequest, int>(Sea
 
 class _SearchPageState extends ConsumerState<SearchPage> {
   static const double _boxHeight = 48;
+
+  /// The widest the search box gets; the recent searches match it.
+  static const double _boxWidth = 800;
   static const double _barHeight = _boxHeight + 2 * Space.s2;
 
   final _controller = TextEditingController();
@@ -165,7 +168,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           focusNode: _focus,
           hintText: t.search.hint,
           elevation: const WidgetStatePropertyAll(0),
-          constraints: const BoxConstraints(minHeight: _boxHeight, maxHeight: _boxHeight, maxWidth: 800),
+          constraints: const BoxConstraints(minHeight: _boxHeight, maxHeight: _boxHeight, maxWidth: _boxWidth),
           leading: const Icon(Icons.search),
           textInputAction: TextInputAction.search,
           onSubmitted: _submit,
@@ -190,7 +193,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       body: history.isNotEmpty
           ? Focus(
               focusNode: _historyFocus,
-              child: SearchHistoryList(entries: history, onPick: _searchAgain),
+              child: SearchHistoryList(entries: history, onPick: _searchAgain, width: _boxWidth),
             )
           : _link != null
           ? _LinkResult(future: _link!)

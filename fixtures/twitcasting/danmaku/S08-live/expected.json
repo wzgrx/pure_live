@@ -1,0 +1,167 @@
+{
+  "generator": "archived v4 TwitcastingProtocol.socket and TwitcastingProtocol.decode (archive/v4 6ba709135) over the recorded eventpubsuburl.php answer and every received socket frame (fixtures/twitcasting/danmaku/v4_expected.dart)",
+  "value": {
+    "socket": "wss://202-218-171-231.twitcasting.tv/event.pubsub/v1/streams/841529001/events?token=YYOtMPO0QZSt%3A%3A%3A9518659223%3A8wv2s1l90536tga8&n=1355jeu93o52m397",
+    "frames": [
+      {
+        "line": 2,
+        "events": [
+          {
+            "type": "chat",
+            "id": "twitcasting:85985946355",
+            "userId": "o:341590352719501524732",
+            "userName": "Umg",
+            "text": "え？",
+            "sentAt": 1790532456000
+          }
+        ]
+      },
+      {
+        "line": 3,
+        "events": [
+          {
+            "type": "chat",
+            "id": "twitcasting:45659692037",
+            "userId": "b:mm7",
+            "userName": "观众1",
+            "text": "らしいとは",
+            "sentAt": 1790532461000
+          }
+        ]
+      },
+      {
+        "line": 4,
+        "events": [
+          {
+            "type": "chat",
+            "id": "twitcasting:47359220866",
+            "userId": "j:ty2",
+            "userName": "观众2",
+            "text": "それ、色々混ざってるww",
+            "sentAt": 1790532464000
+          }
+        ]
+      },
+      {
+        "line": 5,
+        "events": [
+          {
+            "type": "chat",
+            "id": "twitcasting:34441336979",
+            "userId": "b:mm7",
+            "userName": "观众3",
+            "text": "え？",
+            "sentAt": 1790532465000
+          }
+        ]
+      },
+      {
+        "line": 6,
+        "events": [
+          {
+            "type": "chat",
+            "id": "twitcasting:44350501329",
+            "userId": "b:mm7",
+            "userName": "观众4",
+            "text": "手紙ね",
+            "sentAt": 1790532465000
+          }
+        ]
+      },
+      {
+        "line": 7,
+        "events": []
+      },
+      {
+        "line": 8,
+        "events": [
+          {
+            "type": "chat",
+            "id": "twitcasting:44743393560",
+            "userId": "u:812396140691650661342",
+            "userName": "观众5",
+            "text": "犯人コレコレさん所出てました",
+            "sentAt": 1790532468000
+          }
+        ]
+      },
+      {
+        "line": 9,
+        "events": [
+          {
+            "type": "chat",
+            "id": "twitcasting:72446305224",
+            "userId": "o:341590352719501524732",
+            "userName": "Umg",
+            "text": "あー",
+            "sentAt": 1790532478000
+          }
+        ]
+      },
+      {
+        "line": 10,
+        "events": [
+          {
+            "type": "chat",
+            "id": "twitcasting:51772147011",
+            "userId": "z:og2",
+            "userName": "观众6",
+            "text": "混ざってんな",
+            "sentAt": 1790532480000
+          },
+          {
+            "type": "chat",
+            "id": "twitcasting:49838124869",
+            "userId": "b:mm7",
+            "userName": "观众7",
+            "text": "お手紙来た？",
+            "sentAt": 1790532480000
+          }
+        ]
+      },
+      {
+        "line": 11,
+        "events": [
+          {
+            "type": "chat",
+            "id": "twitcasting:38419780235",
+            "userId": "z:og2",
+            "userName": "观众8",
+            "text": "kickへ",
+            "sentAt": 1790532485000
+          }
+        ]
+      },
+      {
+        "line": 12,
+        "events": [
+          {
+            "type": "chat",
+            "id": "twitcasting:81257681184",
+            "userId": "z:og2",
+            "userName": "观众9",
+            "text": "アンチだったっぽいよ",
+            "sentAt": 1790532491000
+          }
+        ]
+      },
+      {
+        "line": 13,
+        "events": [
+          {
+            "type": "chat",
+            "id": "twitcasting:67779014832",
+            "userId": "msqrj63957993",
+            "userName": "vcbvc",
+            "text": "おつかれ",
+            "sentAt": 1790532497000
+          }
+        ]
+      },
+      {
+        "line": 14,
+        "events": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "error": 0,
+  "msg": "ok",
+  "data": {
+    "room_id": 24422,
+    "is_mixed": false,
+    "mixed_live": "",
+    "mixed_url": "",
+    "rtmp_cdn": "hw-h5",
+    "rtmp_url": "https://hw1a.douyucdn2.cn/live",
+    "rtmp_live": "24422rykeUuFd2TN_4000.flv?wsAuth=e9df215abc924ef85140d4d434ee73fd&token=bzr-c4-0-63927-1g5x166r6b19957r25316di52zp8hx03v3l60mdp83181dpr&logo=0&expire=300&did=03543e9e40c049d839a28e48c4cc3883&ver=Douyu_new&pt=2&st=0&sid=436268004&mcid2=0&origin=dy&fcdn=hw&fo=0&mix=0&isp=",
+    "client_ip": "319.508.848.179",
+    "inNA": 0,
+    "rateSwitch": 1,
+    "rate": 4,
+    "cdnsWithName": [
+      {
+        "name": "线路7",
+        "cdn": "hw-h5",
+        "isH265": true,
+        "re-weight": 10009
+      },
+      {
+        "name": "线路13",
+        "cdn": "hs-h5",
+        "isH265": true,
+        "re-weight": 10010
+      }
+    ],
+    "multirates": [
+      {
+        "name": "原画2K60",
+        "rate": 0,
+        "highBit": 1,
+        "bit": 20150,
+        "diamondFan": 0
+      },
+      {
+        "name": "蓝光4M",
+        "rate": 4,
+        "highBit": 1,
+        "bit": 4000,
+        "diamondFan": 0
+      },
+      {
+        "name": "超清",
+        "rate": 3,
+        "highBit": 0,
+        "bit": 2000,
+        "diamondFan": 0
+      },
+      {
+        "name": "高清",
+        "rate": 2,
+        "highBit": 0,
+        "bit": 900,
+        "diamondFan": 0
+      }
+    ],
+    "isPassPlayer": 0,
+    "eticket": null,
+    "online": 0,
+    "mixedCDN": "",
+    "p2p": 9,
+    "streamStatus": 1,
+    "smt": 0,
+    "p2pMeta": {
+      "best_play_buffer_ms": 5000,
+      "fake_peer_factor": 1.0,
+      "max_play_buffer_ms": 6000,
+      "min_play_buffer_ms": 4000,
+      "min_play_delay_time_second": 10,
+      "pcdn_api_domain": "dy-ss-ppio.douyucdn.cn",
+      "pcdn_subs_domain": "slice.douyucdn.cn",
+      "play_fast_scale": 105,
+      "play_slow_scale": 100,
+      "stream_props": [
+        {
+          "sid": "24422rykeUuFd2TN_4000",
+          "txSecret": "732b1b3f9737debb4d050d6ba92a98d5"
+        }
+      ],
+      "ws_connect_timeout": 20000,
+      "xp2p_api_domain": "dyp2p-hw.douyucdn.cn",
+      "xp2p_domain": "dyp2p-hw.douyucdn.cn",
+      "xp2p_dont_exit_when_get_url_failed": 0,
+      "xp2p_emergency_wnd_ms": 2000,
+      "xp2p_enable_check_source_id": 1,
+      "xp2p_enable_repull_full_stream": 0,
+      "xp2p_enable_repull_full_stream_when_source_changed2": 0,
+      "xp2p_enable_websocket": 0,
+      "xp2p_full_out_buffer_ms": 0,
+      "xp2p_max_cache_slice_num": 2000,
+      "xp2p_subs_domain": "dyp2p-hw.douyucdn.cn",
+      "xp2p_txDelay": 5000,
+      "xp2p_txExpire": 21600,
+      "xp2p_txSecret": "732b1b3f9737debb4d050d6ba92a98d5",
+      "xp2p_txTime": "6ab93b43",
+      "xp2p_unity_api_domain": "sdkapi-unity.douyucdn.cn"
+    },
+    "p2pCid": 10040000000024422,
+    "p2pCids": "10040000000024422",
+    "player_1": "",
+    "h265_p2p": 0,
+    "h265_p2p_cid": 0,
+    "h265_p2p_cids": "",
+    "acdn": "",
+    "av1_url": "",
+    "rtc_stream_url": "",
+    "rtc_stream_config": "",
+    "pictureQualitySwitch": 1,
+    "show_id": "436268004",
+    "selected_cdn": "hw-h5"
+  }
+}

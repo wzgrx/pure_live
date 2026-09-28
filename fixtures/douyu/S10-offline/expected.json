@@ -1,0 +1,21 @@
+{
+  "generator": "DouyuSite.parsePlayResponse + DouyuSite.getPlayQualites",
+  "value": {
+    "parsePlayResponse": {
+      "throws": {
+        "type": "DouyuPlayApiException",
+        "message": "H5 play API error -5: 房间未开播"
+      }
+    },
+    "getPlayQualites": {
+      "throws": {
+        "type": "DouyuPlayApiException",
+        "message": "H5 play request failed after retry",
+        "cause": {
+          "type": "DouyuPlayApiException",
+          "message": "H5 play API error -5: 房间未开播"
+        }
+      }
+    }
+  }
+}

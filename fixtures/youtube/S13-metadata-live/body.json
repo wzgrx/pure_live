@@ -1,0 +1,132 @@
+{
+  "responseContext": {
+    "visitorData": "AmjURlk7iyCYW6QbFEyjqPlSIxWLMsXPBaGYWzGdMt%3D%3D",
+    "serviceTrackingParams": [
+      {
+        "service": "CSI",
+        "params": [
+          {
+            "key": "c",
+            "value": "WEB"
+          },
+          {
+            "key": "cver",
+            "value": "2.20260925.01.00"
+          },
+          {
+            "key": "yt_li",
+            "value": "0"
+          },
+          {
+            "key": "GetUpdatedMetadata_rid",
+            "value": "0x0762c360e30561ed"
+          }
+        ]
+      },
+      {
+        "service": "GFEEDBACK",
+        "params": [
+          {
+            "key": "logged_in",
+            "value": "0"
+          },
+          {
+            "key": "visitor_data",
+            "value": "AmjURlk7iyCYW6QbFEyjqPlSIxWLMsXPBaGYWzGdMt%3D%3D"
+          }
+        ]
+      },
+      {
+        "service": "GUIDED_HELP",
+        "params": [
+          {
+            "key": "logged_in",
+            "value": "0"
+          }
+        ]
+      },
+      {
+        "service": "ECATCHER",
+        "params": [
+          {
+            "key": "client.version",
+            "value": "2.20260925"
+          },
+          {
+            "key": "client.name",
+            "value": "WEB"
+          }
+        ]
+      }
+    ],
+    "mainAppWebResponseContext": {
+      "loggedOut": true
+    },
+    "responseId": "IhMI7_PssIGSlwMVO8gtAB1O3RDj",
+    "webResponseContextExtensionData": {
+      "webResponseContextPreloadData": {
+        "preloadMessageNames": [
+          "videoViewCountRenderer",
+          "merchandiseShelfRenderer",
+          "menuPopupRenderer",
+          "menuServiceItemRenderer",
+          "fancyDismissibleDialogRenderer",
+          "merchandiseItemRenderer",
+          "engagementPanelTitleHeaderRenderer",
+          "buttonRenderer",
+          "productListRenderer",
+          "productListHeaderRenderer",
+          "productListItemRenderer"
+        ]
+      },
+      "hasDecorated": true
+    }
+  },
+  "actions": [
+    {
+      "clickTrackingParams": "CAAQ35AMIhMI7_PssIGSlwMVO8gtAB1O3RDjygEEWDY8cw==",
+      "updateViewershipAction": {
+        "viewCount": {
+          "videoViewCountRenderer": {
+            "viewCount": {
+              "simpleText": "1,331 watching now"
+            },
+            "isLive": true,
+            "extraShortViewCount": {
+              "accessibility": {
+                "accessibilityData": {
+                  "label": "1.3K"
+                }
+              },
+              "simpleText": "1.3K"
+            },
+            "unlabeledViewCountValue": {
+              "simpleText": "1,331"
+            },
+            "originalViewCount": "1331"
+          }
+        }
+      }
+    },
+    {
+      "clickTrackingParams": "CAAQ35AMIhMI7_PssIGSlwMVO8gtAB1O3RDjygEEWDY8cw==",
+      "updateDateTextAction": {
+        "dateText": {
+          "simpleText": "Started streaming on Sep 23, 2026"
+        }
+      }
+    },
+    {
+      "clickTrackingParams": "CAAQ35AMIhMI7_PssIGSlwMVO8gtAB1O3RDjygEEWDY8cw==",
+      "updateTitleAction": {
+        "title": {
+          "runs": [
+            {
+              "text": "24/7 deep sleep music 🌌 calm ambient to sleep & dream to"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

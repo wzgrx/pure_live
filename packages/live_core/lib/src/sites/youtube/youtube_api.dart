@@ -13,7 +13,7 @@ const _site = 'youtube';
 
 /// What a YouTube link names (3.x's `YouTubeLinkKind`).
 enum YouTubeLinkKind {
-  /// One video (a broadcast): its 11-character id is the room id.
+  /// One video (a broadcast), named by its 11-character id.
   video,
 
   /// A channel, whose `/live` page names its current broadcast.
@@ -40,8 +40,18 @@ final class YouTubeLink {
     YouTubeLinkKind.channel => '${YouTubeApi.origin}/$id/live',
   };
 
+  /// The channel id a `channel/UC…` path names, when it has the shape of
+  /// one (`UC` and 22 characters); null for handles, custom names and
+  /// videos, which need a request.
+  String? get channelId {
+    if (kind != YouTubeLinkKind.channel || !id.startsWith('channel/')) return null;
+    final value = id.substring('channel/'.length);
+    return YouTubeApi.isChannelId(value) ? value : null;
+  }
+
   static final RegExp _videoId = RegExp(r'^[A-Za-z0-9_-]{11}$');
   static final RegExp _channelId = RegExp(r'^UC[A-Za-z0-9_-]{20,30}$');
+  static final RegExp _plainWord = RegExp(r'^[a-z]+$');
   static final RegExp _handle = RegExp(r'^[A-Za-z0-9_.-]+$');
   static final RegExp _legacyName = RegExp(r'^[A-Za-z0-9_.-]{1,100}$');
 
@@ -87,16 +97,25 @@ final class YouTubeLink {
     return path == null ? null : YouTubeLink(kind: YouTubeLinkKind.channel, id: path);
   }
 
-  /// A search keyword as 3.x read it: a link, else a bare video id, else a
-  /// bare handle (with or without `@`, 3 to 30 characters, so `lofi` is the
-  /// channel `@lofi`); null for anything else (`lofi girl`).
+  /// What a search keyword names exactly (23-2): a link, else a handle
+  /// written with its `@` (3 to 30 characters), else a bare channel id
+  /// (`UC` and 22 characters), else a bare video id; null for a keyword to
+  /// search for. 3.x also read a bare 3–30 character name as a handle (so
+  /// `lofi` was the channel `@lofi`); now it is a keyword, and so is an
+  /// 11-letter lower-case word (`programming`), which cannot be told from a
+  /// video id by its shape and practically never is one.
   static YouTubeLink? parseOrReference(String raw) {
     final parsed = parse(raw);
     if (parsed != null) return parsed;
-    final video = normalizeVideoId(raw);
-    if (video != null) return YouTubeLink(kind: YouTubeLinkKind.video, id: video);
-    final handle = normalizeHandle(raw);
-    return handle == null ? null : YouTubeLink(kind: YouTubeLinkKind.channel, id: '@$handle');
+    final text = raw.trim();
+    if (text.startsWith('@')) {
+      final handle = normalizeHandle(text);
+      return handle == null ? null : YouTubeLink(kind: YouTubeLinkKind.channel, id: '@$handle');
+    }
+    if (YouTubeApi.isChannelId(text)) return YouTubeLink(kind: YouTubeLinkKind.channel, id: 'channel/$text');
+    final video = normalizeVideoId(text);
+    if (video == null || _plainWord.hasMatch(video)) return null;
+    return YouTubeLink(kind: YouTubeLinkKind.video, id: video);
   }
 
   /// [raw] trimmed when it is an 11-character video id, else null.
@@ -196,22 +215,98 @@ final class YouTubeStream {
 }
 
 /// What room entry learned for playback (3.x kept its `YouTubeRoom` in
-/// `data`): the live room's sources in 3.x's order, or why they could not
-/// be read (the room opens anyway; the qualities report it).
+/// `data`): the live broadcast of a channel room and its sources in 3.x's
+/// order, or why they could not be read (the room opens anyway; the
+/// qualities report it).
 @immutable
 final class YouTubeRoomData {
   /// Creates the data.
-  new({required this.videoId, List<YouTubeStream> streams = const [], this.streamError})
+  new({required this.channelId, required this.videoId, List<YouTubeStream> streams = const [], this.streamError})
     : streams = List.unmodifiable(streams);
 
-  /// The video (room) the data belongs to.
+  /// The channel (the room) the data belongs to.
+  final String channelId;
+
+  /// The broadcast on air when the room was entered.
   final String videoId;
 
   /// The sources, best first; empty when the player answer had none.
   final List<YouTubeStream> streams;
 
-  /// Why the sources could not be read at room entry, if they could not.
+  /// Why the sources could not be read at room entry (a restricted
+  /// broadcast, 23-5, or an unreadable answer), if they could not.
   final SiteError? streamError;
+
+  /// Whether the data belongs to the room [roomId] (the channel, or the
+  /// broadcast a 3.x id names).
+  bool belongsTo(String roomId) => roomId == channelId || roomId == videoId;
+}
+
+/// What the chat connection (M5, 23-3) needs of a live channel room: the
+/// room, and the broadcast on air, whose chat `next` and
+/// `live_chat/get_live_chat` read. A channel that starts another broadcast
+/// needs a new room detail.
+@immutable
+final class YouTubeDanmakuArgs {
+  /// Creates the arguments.
+  const new({required this.roomId, required this.videoId});
+
+  /// The channel id.
+  final String roomId;
+
+  /// The broadcast on air.
+  final String videoId;
+
+  @override
+  bool operator ==(Object other) => other is YouTubeDanmakuArgs && other.roomId == roomId && other.videoId == videoId;
+
+  @override
+  int get hashCode => Object.hash(roomId, videoId);
+
+  @override
+  String toString() => 'YouTubeDanmakuArgs($roomId, $videoId)';
+}
+
+/// A channel as its page names it (`metadata.channelMetadataRenderer`).
+@immutable
+final class YouTubeChannel {
+  /// Creates the channel.
+  const new({required this.channelId, required this.name, this.avatar = '', this.description = ''});
+
+  /// `UC…`.
+  final String channelId;
+
+  /// The channel's name.
+  final String name;
+
+  /// The channel's avatar, or empty.
+  final String avatar;
+
+  /// The channel's description, or empty.
+  final String description;
+}
+
+/// The live cards of a browse or search answer (23-2), one per channel, and
+/// the continuation of a search page.
+@immutable
+final class YouTubeListing {
+  /// Creates the listing.
+  new({required List<LiveRoom> rooms, required List<String> videoIds, this.next, this.liveRows = 0})
+    : rooms = List.unmodifiable(rooms),
+      videoIds = List.unmodifiable(videoIds);
+
+  /// The cards: the room is the channel, the card shows its broadcast.
+  final List<LiveRoom> rooms;
+
+  /// The broadcast of each card, in the same order.
+  final List<String> videoIds;
+
+  /// The token of the next search page; null at the end.
+  final String? next;
+
+  /// Live rows in the answer, before the malformed ones and the channels
+  /// seen before were dropped.
+  final int liveRows;
 }
 
 /// A watch or channel page reduced to what 3.x read from it.
@@ -233,15 +328,38 @@ final class YouTubeWatchPage {
 
   /// The `<link rel="canonical">` target, if any.
   final String? canonical;
+
+  /// This page when it is the watch page of [videoId] (its player answer
+  /// names it); otherwise only its key, so that another video's details,
+  /// viewers and avatar are never read as [videoId]'s.
+  YouTubeWatchPage forVideo(String videoId) => jsonString(_object(player['videoDetails'])['videoId']) == videoId
+      ? this
+      : YouTubeWatchPage._(player: const {}, data: const {}, apiKey: apiKey);
 }
 
-/// A video as 3.x read it from its watch page and the ANDROID player answer.
+/// A video as 3.x read it from its watch page and the ANDROID player answer,
+/// as the broadcast of its channel's room (23-1).
 @immutable
 final class YouTubeVideo {
-  const new _({required this.room, required this.streamingData, required this.playability, required this.reason});
+  const new _({
+    required this.room,
+    required this.videoId,
+    required this.channelId,
+    required this.streamingData,
+    required this.playability,
+    required this.reason,
+    this.streamError,
+  });
 
-  /// The room (id, state, names, thumbnail, viewers), without playback data.
+  /// The channel's room showing this video (id, state, names, thumbnail,
+  /// viewers), without playback data.
   final LiveRoom room;
+
+  /// The video.
+  final String videoId;
+
+  /// Its channel: the room id.
+  final String channelId;
 
   /// The player answer's `streamingData` (read for playback only).
   final Map<String, dynamic> streamingData;
@@ -251,6 +369,10 @@ final class YouTubeVideo {
 
   /// `playabilityStatus.reason`, for diagnostics.
   final String reason;
+
+  /// Why a live broadcast gives this client no stream (23-5): its
+  /// restriction as a `SiteError`; null when it may be played.
+  final SiteError? streamError;
 }
 
 /// Pure parsing of YouTube's watch pages, player answers and HLS masters
@@ -271,8 +393,38 @@ abstract final class YouTubeApi {
   /// 3.x's room notice (`youtube_chat_notice`, zh.json).
   static const String chatNotice = 'YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。';
 
-  /// The area of a video without a category (3.x).
-  static const String defaultArea = 'YouTube Live';
+  /// The "Live" destination channel, whose page is the recommendations
+  /// (23-2).
+  static const String liveDestination = 'UC4R8DWoMoI7CAwX8_LjQHig';
+
+  /// The search filter "Live" (23-2).
+  static const String liveFilter = 'EgJAAQ%3D%3D';
+
+  /// The web client's InnerTube context of `navigation/resolve_url`,
+  /// `browse`, `search` and `updated_metadata` (and of the chat, M5).
+  static const Map<String, Object?> webContext = {
+    'client': {'clientName': 'WEB', 'clientVersion': '2.20260925.01.00', 'hl': 'en', 'gl': 'US'},
+  };
+
+  static final RegExp _channelIdPattern = RegExp(r'^UC[A-Za-z0-9_-]{22}$');
+
+  /// Whether [id] is a channel id (`UC` and 22 characters): the room id
+  /// (23-1).
+  static bool isChannelId(String id) => _channelIdPattern.hasMatch(id);
+
+  /// Whether [id] is an 11-character video id: one broadcast, as 3.x stored
+  /// it; still accepted as a room id and turned into its channel.
+  static bool isVideoId(String id) => YouTubeLink._videoId.hasMatch(id);
+
+  /// The page of [channelId] that shows its current broadcast (or the
+  /// channel when it has none): the link of a channel room that is not
+  /// live, and what room entry reads.
+  static String liveUrl(String channelId) => '$origin/channel/$channelId/live';
+
+  /// The link of a room: the watch page of its live broadcast, else the
+  /// channel's `/live` page.
+  static String roomLink(String channelId, {String? liveVideoId}) =>
+      liveVideoId == null ? liveUrl(channelId) : YouTubeLink.videoUrl(liveVideoId);
 
   /// How long before `expire` a media URL is renewed (3.x's
   /// `getPlayUrlRefreshAt`).
@@ -306,12 +458,42 @@ abstract final class YouTubeApi {
   };
 
   /// Media headers (3.x's `PlaybackHeaderResolver` for YouTube): UA, the
-  /// watch page as Referer, and Origin.
+  /// watch page as Referer (the site root without a video), and Origin.
   static Map<String, String> mediaHeaders(String videoId) => {
     'origin': origin,
-    'referer': YouTubeLink.videoUrl(videoId),
+    'referer': videoId.isEmpty ? '$origin/' : YouTubeLink.videoUrl(videoId),
     'user-agent': userAgent,
   };
+
+  /// Headers of the web client's InnerTube requests (the JSON content type
+  /// is added by the request): the page headers with the site root as
+  /// Referer, JSON and Origin.
+  static Map<String, String> get apiHeaders => playerHeaders('');
+
+  /// The web client's InnerTube endpoint [endpoint]
+  /// (`navigation/resolve_url`, `browse`, `search`, `updated_metadata`).
+  static Uri apiUrl(String endpoint) => Uri.parse('$origin/youtubei/v1/$endpoint?prettyPrint=false');
+
+  /// `navigation/resolve_url` for [url]: a channel path names its channel
+  /// id, a channel's `/live` path its current (or next) broadcast.
+  static Map<String, Object?> resolveBody(String url) => {'context': webContext, 'url': url};
+
+  /// `browse` of the "Live" destination (23-2).
+  static Map<String, Object?> browseBody() => {'context': webContext, 'browseId': liveDestination};
+
+  /// The first page of a live search for [query] (23-2).
+  static Map<String, Object?> searchBody(String query) => {'context': webContext, 'query': query, 'params': liveFilter};
+
+  /// A later page of a search: the previous page's continuation [token].
+  static Map<String, Object?> continuationBody(String token) => {'context': webContext, 'continuation': token};
+
+  /// `updated_metadata` of [videoId]: the live viewer count the watch page
+  /// shows (23-6).
+  static Map<String, Object?> metadataBody(String videoId) => {'context': webContext, 'videoId': videoId};
+
+  /// The RSS feed of [channelId]: its name when it is not live.
+  static Uri feedUrl(String channelId) =>
+      Uri.parse('$origin/feeds/videos.xml').replace(queryParameters: {'channel_id': channelId});
 
   /// The player endpoint with [apiKey].
   static Uri playerUrl(String apiKey) =>
@@ -384,17 +566,257 @@ abstract final class YouTubeApi {
   /// canonical link, else the page's player when it is live, else the first
   /// video in `ytInitialData` that looks live; null when there is none (the
   /// channel is not live).
-  static String? liveVideoOfPage(String html, {Uri? finalUrl, int status = 200}) {
+  static String? liveVideoOfPage(String html, {Uri? finalUrl, int status = 200}) =>
+      channelLive(html, finalUrl: finalUrl, status: status).videoId;
+
+  /// A channel's `/live` page: the page itself (the watch page of the
+  /// broadcast it names, or the channel page) and the broadcast, found as
+  /// [liveVideoOfPage] finds it.
+  static ({YouTubeWatchPage page, String? videoId}) channelLive(String html, {Uri? finalUrl, int status = 200}) {
     checkStatus(status, html, 'channel page');
-    final redirected = finalUrl == null ? null : YouTubeLink.parse(finalUrl.toString());
-    if (redirected?.kind == YouTubeLinkKind.video) return redirected!.id;
     final page = watchPage(html);
+    final redirected = finalUrl == null ? null : YouTubeLink.parse(finalUrl.toString());
+    if (redirected?.kind == YouTubeLinkKind.video) return (page: page, videoId: redirected!.id);
     final canonical = page.canonical == null ? null : YouTubeLink.parse(page.canonical!);
-    if (canonical?.kind == YouTubeLinkKind.video) return canonical!.id;
+    if (canonical?.kind == YouTubeLinkKind.video) return (page: page, videoId: canonical!.id);
     final details = _object(page.player['videoDetails']);
     final id = YouTubeLink.normalizeVideoId(jsonString(details['videoId']) ?? '');
-    if (id != null && details['isLive'] == true) return id;
-    return _findLiveVideo(page.data);
+    if (id != null && details['isLive'] == true) return (page: page, videoId: id);
+    return (page: page, videoId: _findLiveVideo(page.data));
+  }
+
+  /// The channel a channel page names (`metadata.channelMetadataRenderer`:
+  /// `externalId`, `title`, `avatar`, `description`); null when the page
+  /// names none (a watch page, or YouTube's "This channel does not exist.").
+  static YouTubeChannel? channel(YouTubeWatchPage page) {
+    final metadata = _object(_object(page.data['metadata'])['channelMetadataRenderer']);
+    final id = jsonString(metadata['externalId']) ?? '';
+    final name = jsonString(metadata['title']);
+    if (!isChannelId(id) || name == null) return null;
+    return YouTubeChannel(
+      channelId: id,
+      name: name,
+      avatar: _thumbnail(metadata['avatar'], avatar: true),
+      description: jsonString(metadata['description']) ?? '',
+    );
+  }
+
+  /// The room of a channel that is not live, from its page: the name,
+  /// avatar and description (23-1: "未开播时显示频道名"), no title.
+  static LiveRoom offlineRoom(YouTubeChannel channel) => LiveRoom(
+    roomId: channel.channelId,
+    platform: _site,
+    userId: channel.channelId,
+    nick: channel.name,
+    avatar: channel.avatar,
+    introduction: channel.description,
+    link: liveUrl(channel.channelId),
+    liveStatus: LiveStatus.offline,
+    notice: chatNotice,
+    httpHeaders: mediaHeaders(''),
+  );
+
+  /// The room of a channel that `navigation/resolve_url` called not live,
+  /// with its [name] when it was asked for (a search card); a follow keeps
+  /// the name it stored.
+  static LiveRoom offlineCard(String channelId, {String name = ''}) => LiveRoom(
+    roomId: channelId,
+    platform: _site,
+    userId: channelId,
+    nick: name,
+    link: liveUrl(channelId),
+    liveStatus: LiveStatus.offline,
+  );
+
+  // InnerTube (web client) -----------------------------------------------------
+
+  static Map<String, dynamic> _json(String body, int status, String what) {
+    checkStatus(status, body, what);
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) return decoded;
+    } on FormatException {
+      // Reported below.
+    }
+    throw ApiChanged(_site, '$what: not a JSON object (${_snippet(body)})');
+  }
+
+  /// `navigation/resolve_url`: a watch endpoint names a video (a channel's
+  /// `/live` path: its broadcast on air or next), a browse endpoint a
+  /// channel. A path YouTube does not know is 404 (`NotFound`); one naming
+  /// neither is `NotFound` too. An unknown `channel/UC…` is answered as a
+  /// channel all the same (checked 2026-09-29), so only the channel page or
+  /// the feed tells it apart.
+  static ({String? videoId, String? channelId}) resolved(String body, {int status = 200}) {
+    final endpoint = _object(_json(body, status, 'resolve_url')['endpoint']);
+    final video = YouTubeLink.normalizeVideoId(jsonString(_object(endpoint['watchEndpoint'])['videoId']) ?? '');
+    final channel = jsonString(_object(endpoint['browseEndpoint'])['browseId']) ?? '';
+    if (video == null && !isChannelId(channel)) throw const NotFound(_site, 'resolve_url: names no channel or video');
+    return (videoId: video, channelId: video == null ? channel : null);
+  }
+
+  /// The channel's name in its RSS feed (the feed's own `<title>`, before
+  /// the first entry); 404 is `NotFound` (no such channel).
+  static String feedName(String xml, {int status = 200}) {
+    checkStatus(status, xml, 'feed');
+    final end = xml.indexOf('<entry');
+    final head = end < 0 ? xml : xml.substring(0, end);
+    final title = RegExp('<title>([^<]*)</title>').firstMatch(head)?.group(1);
+    final name = title == null ? null : jsonString(decodeHtmlEntities(title));
+    if (name == null) throw ApiChanged(_site, 'feed: no title (${_snippet(xml)})');
+    return name;
+  }
+
+  /// The live viewer count of an `updated_metadata` answer (its
+  /// `videoViewCountRenderer`, "1,331 watching now"), or null (23-6).
+  static int? viewers(String body, {int status = 200}) => _currentViewers(_json(body, status, 'updated_metadata'));
+
+  /// The live cards of a `browse` ([search] false) or `search` answer
+  /// (23-2), each a channel's room showing one broadcast:
+  /// - a row is live with the live badge, the live time overlay or an
+  ///   "N watching" count (ended and upcoming rows are left out);
+  /// - the room is the owner's channel id, the link the broadcast's watch
+  ///   page, the avatar the channel's (23-4), the audience the "watching"
+  ///   count; a members-only badge marks it [LiveRestriction.subscribersOnly]
+  ///   (anything else is unknown on a card);
+  /// - a live row without a video id, channel id, title or name is skipped
+  ///   (every live row malformed is `ApiChanged`); a channel's later rows
+  ///   are left out, so a channel has one card (the first, the site's
+  ///   order);
+  /// - a search answer's last continuation is the next page, unless it had
+  ///   no live row. A `browse` answer without any video row is `ApiChanged`.
+  static YouTubeListing listing(String body, {required bool search, int status = 200}) {
+    final what = search ? 'search' : 'browse';
+    final root = _json(body, status, what);
+    final rows = _findAll(root, 'videoRenderer');
+    if (!search && rows.isEmpty) throw const ApiChanged(_site, 'browse: no video rows');
+    final rooms = <LiveRoom>[];
+    final videos = <String>[];
+    final seen = <String>{};
+    var live = 0;
+    var malformed = 0;
+    for (final row in rows) {
+      final renderer = _object(row);
+      if (!_rowLive(renderer)) continue;
+      live++;
+      final card = _card(renderer);
+      if (card == null) {
+        malformed++;
+      } else if (seen.add(card.room.roomId)) {
+        rooms.add(card.room);
+        videos.add(card.videoId);
+      }
+    }
+    if (live > 0 && malformed == live) throw ApiChanged(_site, '$what: all $live live rows malformed');
+    String? next;
+    if (search && live > 0) {
+      final items = _findAll(root, 'continuationItemRenderer');
+      if (items.isNotEmpty) {
+        final command = _object(_object(_object(items.last)['continuationEndpoint'])['continuationCommand']);
+        next = jsonString(command['token']);
+      }
+    }
+    return YouTubeListing(rooms: rooms, videoIds: videos, next: next, liveRows: live);
+  }
+
+  static bool _rowLive(Map<String, dynamic> renderer) {
+    if (renderer.containsKey('upcomingEventData')) return false;
+    final badges = renderer['badges'];
+    if (badges is List) {
+      for (final badge in badges) {
+        if (_object(_object(badge)['metadataBadgeRenderer'])['style'] == 'BADGE_STYLE_TYPE_LIVE_NOW') return true;
+      }
+    }
+    final overlays = renderer['thumbnailOverlays'];
+    if (overlays is List) {
+      for (final overlay in overlays) {
+        if (_object(_object(overlay)['thumbnailOverlayTimeStatusRenderer'])['style'] == 'LIVE') return true;
+      }
+    }
+    return _watching(renderer['viewCountText']) != null;
+  }
+
+  static final RegExp _watchingCount = RegExp(r'^(\d[\d,.]*)\s*watching', caseSensitive: false);
+
+  /// `10,366 watching` → 10366.
+  static int? _watching(Object? value) {
+    final match = _watchingCount.firstMatch(_text(value));
+    final digits = match?.group(1)?.replaceAll(RegExp(r'\D'), '');
+    return digits == null || digits.isEmpty ? null : int.tryParse(digits);
+  }
+
+  static ({LiveRoom room, String videoId})? _card(Map<String, dynamic> renderer) {
+    final videoId = YouTubeLink.normalizeVideoId(jsonString(renderer['videoId']) ?? '');
+    final owner = renderer['ownerText'] ?? renderer['longBylineText'] ?? renderer['shortBylineText'];
+    final avatar = _object(_object(renderer['channelThumbnailSupportedRenderers'])['channelThumbnailWithLinkRenderer']);
+    final channelId =
+        _browseId(owner) ??
+        _browseId({
+          'runs': [avatar],
+        }) ??
+        '';
+    final title = _text(renderer['title']);
+    final nick = _text(owner);
+    if (videoId == null || !isChannelId(channelId) || title.isEmpty || nick.isEmpty) return null;
+    final viewers = _watching(renderer['viewCountText']);
+    final badges = renderer['badges'];
+    final members =
+        badges is List &&
+        badges.any(
+          (badge) => _object(_object(badge)['metadataBadgeRenderer'])['style'] == 'BADGE_STYLE_TYPE_MEMBERS_ONLY',
+        );
+    return (
+      room: LiveRoom(
+        roomId: channelId,
+        platform: _site,
+        userId: channelId,
+        nick: nick,
+        title: title,
+        avatar: _thumbnail(avatar['thumbnail'], avatar: true),
+        cover: _thumbnail(renderer['thumbnail']),
+        link: YouTubeLink.videoUrl(videoId),
+        liveStatus: LiveStatus.live,
+        restriction: members ? LiveRestriction.subscribersOnly : null,
+        watching: viewers?.toString() ?? '',
+        onlineViewers: viewers?.toString() ?? '',
+        audienceMetricType: AudienceMetricType.onlineViewers,
+        httpHeaders: mediaHeaders(videoId),
+      ),
+      videoId: videoId,
+    );
+  }
+
+  /// The channel a `{runs: [...]}` owner text links to.
+  static String? _browseId(Object? value) {
+    final runs = _object(value)['runs'];
+    if (runs is! List) return null;
+    for (final run in runs) {
+      final endpoint = _object(_object(_object(run)['navigationEndpoint'])['browseEndpoint']);
+      final id = jsonString(endpoint['browseId']);
+      if (id != null && isChannelId(id)) return id;
+    }
+    return null;
+  }
+
+  /// Every value under [key] anywhere in [root], in document order (at most
+  /// [_walkBudget] nodes visited).
+  static List<Object?> _findAll(Object? root, String key) {
+    final found = <Object?>[];
+    var visited = 0;
+    void walk(Object? value) {
+      if (++visited > _walkBudget) throw ApiChanged(_site, 'answer too large looking for $key');
+      if (value is List) {
+        value.forEach(walk);
+      } else if (value is Map) {
+        for (final MapEntry(key: name, value: item) in value.entries) {
+          if (name == key) found.add(item);
+          walk(item);
+        }
+      }
+    }
+
+    walk(root);
+    return found;
   }
 
   static String? _findLiveVideo(Object? root) {
@@ -444,22 +866,34 @@ abstract final class YouTubeApi {
     throw ApiChanged(_site, 'player: not a JSON object (${_snippet(body)})');
   }
 
-  /// The room of [videoId] from its [page] and the ANDROID [player] answer,
-  /// merged as 3.x merged them (the player answer's fields win).
+  /// The channel's room showing [videoId], from the video's [page] (see
+  /// [YouTubeWatchPage.forVideo]) and the ANDROID [player] answer, merged
+  /// as 3.x merged them (the player answer's fields win).
   ///
   /// The answer must name [videoId]: one naming no video is `NotFound`
   /// (`ERROR`, a missing video), `NeedsLogin` (sign-in, age or content
   /// checks), `StreamUnavailable` (`UNPLAYABLE`) or `ApiChanged`; one naming
-  /// another video is `ApiChanged`. 3.x's states:
-  /// - private, sign-in, age or content checks: banned;
-  /// - `isLive` (or `liveBroadcastDetails.isLiveNow`) with status `OK`: live;
-  /// - other broadcasts (ended, upcoming, live but not playable) and
-  ///   `LIVE_STREAM_OFFLINE`: offline;
-  /// - no status at all: unknown;
-  /// - anything else (an ordinary video): `NotFound`, it is no live room.
+  /// another video, or no channel, is `ApiChanged`.
+  ///
+  /// The room is the video's channel (23-1): its id is the channel id, the
+  /// link the watch page while live and the channel's `/live` page
+  /// otherwise. States:
+  /// - `isLive` (or `liveBroadcastDetails.isLiveNow`), not
+  ///   `LIVE_STREAM_OFFLINE`: live, also when the client may not play it
+  ///   (23-5; 3.x showed a restricted broadcast as banned and an unplayable
+  ///   one as offline). The restriction is [restrictionOf] (none for `OK`),
+  ///   and [YouTubeVideo.streamError] says why there is no stream;
+  /// - private, sign-in, age or content checks on a video that is no
+  ///   broadcast: banned, with its restriction (3.x);
+  /// - anything else with a status (ended, upcoming, an ordinary video):
+  ///   offline, the channel is not on air (3.x: `NotFound` for an ordinary
+  ///   video, which was no room);
+  /// - no status at all: unknown.
   ///
   /// Title and author are required (`ApiChanged`). Concurrent viewers come
-  /// from the page's live `videoViewCountRenderer`, only while live.
+  /// from the page's live `videoViewCountRenderer` and the start from its
+  /// microformat, only while live; the avatar is the channel's from the
+  /// page (23-4), empty without one (the player answer has none).
   static YouTubeVideo video({
     required YouTubeWatchPage page,
     required Map<String, dynamic> player,
@@ -485,51 +919,131 @@ abstract final class YouTubeApi {
       ..._object(_object(page.player['microformat'])['playerMicroformatRenderer']),
       ..._object(_object(player['microformat'])['playerMicroformatRenderer']),
     };
+    final channelId = jsonString(details['channelId']) ?? jsonString(micro['externalChannelId']) ?? '';
+    if (!isChannelId(channelId)) throw ApiChanged(_site, 'player: $videoId names no channel');
     final broadcast = _object(micro['liveBroadcastDetails']);
-    final live = details['isLive'] == true || broadcast['isLiveNow'] == true;
+    final live = (details['isLive'] == true || broadcast['isLiveNow'] == true) && code != 'LIVE_STREAM_OFFLINE';
     final liveContent =
         live || details['isLiveContent'] == true || details['isUpcoming'] == true || broadcast.isNotEmpty;
     final lowerReason = reason.toLowerCase();
+    final private = details['isPrivate'] == true;
     final restricted =
-        details['isPrivate'] == true ||
+        private ||
         const {'LOGIN_REQUIRED', 'AGE_CHECK_REQUIRED', 'CONTENT_CHECK_REQUIRED'}.contains(code) ||
         lowerReason.contains('sign in') ||
         lowerReason.contains('private');
     final state = switch (code) {
-      _ when restricted => LiveStatus.banned,
-      'OK' when live => LiveStatus.live,
-      _ when liveContent || code == 'LIVE_STREAM_OFFLINE' => LiveStatus.offline,
-      '' => LiveStatus.unknown,
-      _ => throw NotFound(_site, 'player: $videoId is not a live broadcast ($code)'),
+      _ when live => LiveStatus.live,
+      _ when restricted && !liveContent => LiveStatus.banned,
+      '' when !liveContent => LiveStatus.unknown,
+      _ => LiveStatus.offline,
     };
+    final restriction = state == LiveStatus.live || state == LiveStatus.banned
+        ? restrictionOf(code: code, reason: reason, private: private)
+        : null;
     final title = _required(details['title'], 'title');
     final author = _required(details['author'], 'author');
     final thumbnail = _thumbnail(details['thumbnail'] ?? micro['thumbnail']);
-    final viewers = state == LiveStatus.live ? _currentViewers(page.data) : null;
-    final category = jsonString(micro['category']) ?? '';
+    final viewers = live ? _currentViewers(page.data) : null;
+    final category = jsonString(micro['category']);
+    final room = LiveRoom(
+      roomId: channelId,
+      platform: _site,
+      userId: channelId,
+      nick: author,
+      title: title,
+      avatar: _ownerAvatar(page.data),
+      cover: thumbnail,
+      area: category,
+      introduction: jsonString(details['shortDescription']) ?? '',
+      link: roomLink(channelId, liveVideoId: live ? videoId : null),
+      liveStatus: state,
+      startedAt: live ? _time(broadcast['startTimestamp']) : null,
+      restriction: restriction,
+      watching: viewers?.toString() ?? '',
+      onlineViewers: viewers?.toString() ?? '',
+      audienceMetricType: AudienceMetricType.onlineViewers,
+      notice: chatNotice,
+      danmakuData: live ? YouTubeDanmakuArgs(roomId: channelId, videoId: videoId) : null,
+      httpHeaders: mediaHeaders(videoId),
+    );
     return YouTubeVideo._(
-      room: LiveRoom(
-        roomId: videoId,
-        platform: _site,
-        userId: jsonString(details['channelId']) ?? '',
-        nick: author,
-        title: title,
-        avatar: thumbnail,
-        cover: thumbnail,
-        area: category.isEmpty ? defaultArea : category,
-        introduction: jsonString(details['shortDescription']) ?? '',
-        link: YouTubeLink.videoUrl(videoId),
-        liveStatus: state,
-        watching: viewers?.toString() ?? '',
-        onlineViewers: viewers?.toString() ?? '',
-        audienceMetricType: AudienceMetricType.onlineViewers,
-        notice: chatNotice,
-        httpHeaders: mediaHeaders(videoId),
-      ),
+      room: room,
+      videoId: videoId,
+      channelId: channelId,
       streamingData: _object(player['streamingData']),
       playability: code,
       reason: reason,
+      streamError: live && restriction != LiveRestriction.none
+          ? restrictionError(room, restriction ?? LiveRestriction.unplayable, reason: reason)
+          : null,
     );
+  }
+
+  /// What keeps a broadcast from this client, from the player answer's
+  /// status [code] and [reason] (23-5): `OK` is none; then private,
+  /// members only ([LiveRestriction.subscribersOnly]), an age check
+  /// ([LiveRestriction.adult]), a country or region
+  /// ([LiveRestriction.regionBlocked]), a payment or purchase
+  /// ([LiveRestriction.paid]), any other sign-in or content check
+  /// ([LiveRestriction.needsLogin]); anything else (`UNPLAYABLE`, `ERROR`)
+  /// is [LiveRestriction.unplayable]. The reasons are English (the requests
+  /// send `Accept-Language: en-US`); one not recognised falls back on the
+  /// status code.
+  static LiveRestriction restrictionOf({required String code, required String reason, bool private = false}) {
+    final lower = reason.toLowerCase();
+    if (private || lower.contains('private')) return LiveRestriction.private;
+    if (code == 'OK') return LiveRestriction.none;
+    if (lower.contains('member')) return LiveRestriction.subscribersOnly;
+    if (code == 'AGE_CHECK_REQUIRED' || _age.hasMatch(lower)) return LiveRestriction.adult;
+    if (_region.hasMatch(lower)) return LiveRestriction.regionBlocked;
+    if (_payment.hasMatch(lower)) return LiveRestriction.paid;
+    if (code == 'LOGIN_REQUIRED' || code == 'CONTENT_CHECK_REQUIRED' || lower.contains('sign in')) {
+      return LiveRestriction.needsLogin;
+    }
+    return LiveRestriction.unplayable;
+  }
+
+  static final RegExp _age = RegExp(r'\bage\b|age-restricted|inappropriate for some users');
+  static final RegExp _region = RegExp(r'\bcountry\b|\bregion\b|\blocation\b');
+  static final RegExp _payment = RegExp(r'\bpayment\b|\bpurchase\b|\bpaid\b');
+
+  /// The error playback reports for [room]'s [restriction] (M2.1's table):
+  /// `RegionBlocked` for a region, `NeedsLogin` for sign-in and age checks,
+  /// `StreamUnavailable` naming the kind (and YouTube's [reason]) for the
+  /// rest.
+  static SiteError restrictionError(LiveRoom room, LiveRestriction restriction, {String reason = ''}) {
+    final why = reason.isEmpty ? '' : ': $reason';
+    final detail = '${room.roomId} is ${restriction.name}$why';
+    return switch (restriction) {
+      LiveRestriction.regionBlocked => RegionBlocked(_site, detail),
+      LiveRestriction.needsLogin || LiveRestriction.adult => NeedsLogin(_site, detail),
+      _ => StreamUnavailable(_site, detail),
+    };
+  }
+
+  /// The channel id [player] (an ANDROID player answer for [videoId])
+  /// names, whether or not the video is a broadcast: the new room id of a
+  /// video id 3.x stored (23-1, M9). A missing video is `NotFound`, one
+  /// only signed-in viewers see `NeedsLogin`, as in [video].
+  static String channelOf(Map<String, dynamic> player, String videoId) {
+    final details = _object(player['videoDetails']);
+    final status = _object(player['playabilityStatus']);
+    final code = (jsonString(status['status']) ?? '').toUpperCase();
+    final actual = YouTubeLink.normalizeVideoId(jsonString(details['videoId']) ?? '');
+    if (actual == null) {
+      final detail = 'player: no video for $videoId ($code)';
+      throw switch (code) {
+        'ERROR' => NotFound(_site, detail),
+        'LOGIN_REQUIRED' || 'AGE_CHECK_REQUIRED' || 'CONTENT_CHECK_REQUIRED' => NeedsLogin(_site, detail),
+        'UNPLAYABLE' => StreamUnavailable(_site, detail),
+        _ => ApiChanged(_site, detail),
+      };
+    }
+    if (actual != videoId) throw ApiChanged(_site, 'player: asked for $videoId, answered $actual');
+    final channel = jsonString(details['channelId']) ?? '';
+    if (!isChannelId(channel)) throw ApiChanged(_site, 'player: $videoId names no channel');
+    return channel;
   }
 
   static String _required(Object? value, String name) {
@@ -538,18 +1052,38 @@ abstract final class YouTubeApi {
     return text;
   }
 
-  /// The last https thumbnail on `ytimg.com` or `ggpht.com` (3.x); empty
-  /// when there is none or the list has more than 64 entries.
-  static String _thumbnail(Object? value) {
+  /// An ISO 8601 time with an offset (`2026-09-23T16:47:51+00:00`) in UTC;
+  /// null for anything else or before 2005.
+  static DateTime? _time(Object? value) {
+    final text = jsonString(value);
+    if (text == null || !RegExp(r'(Z|[+-]\d\d:?\d\d)$').hasMatch(text)) return null;
+    final time = DateTime.tryParse(text)?.toUtc();
+    return time == null || time.year < 2005 || time.year > 2286 ? null : time;
+  }
+
+  /// The channel avatar of a watch page (`videoOwnerRenderer.thumbnail`,
+  /// 23-4); empty without one.
+  static String _ownerAvatar(Map<String, dynamic> data) {
+    final owners = data.isEmpty ? const <Object?>[] : _findAll(data, 'videoOwnerRenderer');
+    return owners.isEmpty ? '' : _thumbnail(_object(owners.first)['thumbnail'], avatar: true);
+  }
+
+  /// The last https thumbnail on `ytimg.com` or `ggpht.com` (3.x), or also
+  /// on `googleusercontent.com` for an [avatar] (channel pages serve them
+  /// there); empty when there is none or the list has more than 64
+  /// entries.
+  static String _thumbnail(Object? value, {bool avatar = false}) {
     final items = _object(value)['thumbnails'];
     if (items is! List || items.length > 64) return '';
     for (final item in items.reversed) {
       final uri = Uri.tryParse(jsonString(_object(item)['url']) ?? '');
+      final host = uri?.host.toLowerCase() ?? '';
       if (uri != null &&
           uri.scheme == 'https' &&
           uri.userInfo.isEmpty &&
           !uri.hasFragment &&
-          _imageHost(uri.host.toLowerCase())) {
+          (_imageHost(host) ||
+              (avatar && (host == 'googleusercontent.com' || host.endsWith('.googleusercontent.com'))))) {
         return uri.toString();
       }
     }
@@ -581,6 +1115,20 @@ abstract final class YouTubeApi {
     }
 
     return walk(root);
+  }
+
+  /// The text of a `{simpleText}` or `{runs: [...]}` object, the runs joined
+  /// as written (a run may start with its space), trimmed.
+  static String _text(Object? value) {
+    final map = _object(value);
+    final simple = map['simpleText'];
+    if (simple is String) return simple.trim();
+    final runs = map['runs'];
+    if (runs is! List) return '';
+    return [
+      for (final run in runs)
+        if (_object(run)['text'] case final String text) text,
+    ].join().trim();
   }
 
   static String _runsText(Object? value) {

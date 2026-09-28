@@ -33,6 +33,13 @@ final class CcRoomData {
 /// with the archived v4 parser's room page and `video_play_url` as the
 /// fallbacks where 3.x had nothing). Each function takes the response text
 /// and status and returns 3.x's models or throws a `SiteError`.
+///
+/// Approved upgrades (docs/UPGRADES.md, M4.U 9-1 to 9-7): qualities from
+/// `video_play_url`, the mobile catalog beside the official entries, areas
+/// on recommended cards, "【重播】" rebroadcasts as replays, live covers and
+/// heat on search cards, followers on details and unknown ids told apart
+/// on follow refreshes; start times and restrictions where the answers
+/// carry them.
 abstract final class CcApi {
   /// Desktop Chrome 140, the UA 3.x sent to CC and to its media CDN
   /// (`PlaybackHeaderResolver`).
@@ -44,15 +51,12 @@ abstract final class CcApi {
   /// media requests' `Origin`.
   static const String origin = 'https://cc.163.com';
 
-  /// Identity of the Dashen configuration whose "直播入口列表" is the
-  /// catalog (3.x's `CCCatalog.configurationId`).
+  /// Identity of the Dashen configuration whose "直播入口列表" holds the
+  /// official entries (3.x's `CCCatalog.configurationId`).
   static const String catalogConfigurationId = '67b32cdd1801fc391a6c2657';
 
-  /// Name of the catalog's first category: the numeric live areas.
-  static const String categoryLabel = '直播分类';
-
-  /// Name of the catalog's second category: official rooms and events,
-  /// opened on the website instead of listed (3.x's `official:` areas).
+  /// Name of the official rooms and events category, opened on the website
+  /// instead of listed (3.x's `official:` areas).
   static const String officialLabel = '官方房间/专题';
 
   /// Rows one directory page asks for (3.x's `_CCCategoryDirectory`).
@@ -65,19 +69,71 @@ abstract final class CcApi {
   /// A CC id (`ccid`, `cuteid`): a positive decimal number.
   static final RegExp ccidPattern = RegExp(r'^[1-9]\d{0,15}$');
 
-  static final RegExp _areaId = RegExp(r'^[1-9][0-9]{0,15}$');
+  /// A game type: a decimal number; 0 is "其他游戏".
+  static final RegExp _areaId = RegExp(r'^(?:0|[1-9][0-9]{0,15})$');
 
   // Catalog -------------------------------------------------------------------
 
-  /// The Dashen game registry ([gamesBody]) and live configuration
-  /// ([configBody]) as 3.x's `CCCatalog.parse` read them: only the entries of
-  /// the configuration's "直播入口列表" are areas, named and pictured by the
-  /// registry. `/n/ds_category/{gametype}/` entries are live areas (category
-  /// "1"), `/{ccid}/` entries official rooms (`official:{ccid}`, category
-  /// "official"). A hidden configuration or group is an empty catalog; any
-  /// other irregularity fails the whole catalog (`ApiChanged`), never a
-  /// partial one.
-  static List<LiveCategory> categories(
+  /// `wapcc/gamecategory?catetype=0`: the top-level categories (`cate_list`)
+  /// in the server's order, without 全部 (`cate_type` 0), as the mobile
+  /// site shows them (9-4; the archived v4's catalog). `code` other than 0
+  /// is `ApiChanged`; a row without a positive `cate_type` or a name is
+  /// skipped.
+  static List<({String id, String name})> categoryTypes(String body, {int status = 200}) {
+    final info = _categoryInfo(body, status: status);
+    final seen = <String>{};
+    return [
+      for (final raw in _list(info['cate_list']))
+        if (_object(raw) case final row?)
+          if ((jsonInt(row['cate_type']), decodeHtmlEntities(_text(row['name'])).trim()) case (final type?, final name)
+              when type > 0 && name.isNotEmpty && seen.add('$type'))
+            (id: '$type', name: name),
+    ];
+  }
+
+  /// `wapcc/gamecategory?catetype={id}`: the areas (`game_list`) of the
+  /// category [id] named [name], in the server's order. The area id is the
+  /// `gametype` the area rooms are listed by; the picture is `cover`. A row
+  /// without a game type or a name is skipped, a repeated game type listed
+  /// once.
+  static List<LiveArea> categoryAreas(String body, {required String id, required String name, int status = 200}) {
+    final info = _categoryInfo(body, status: status);
+    final seen = <String>{};
+    return [
+      for (final raw in _list(info['game_list']))
+        if (_object(raw) case final row?)
+          if ((jsonString(row['gametype']) ?? '', decodeHtmlEntities(_text(row['name'])).trim())
+              case (final gametype, final areaName)
+              when _areaId.hasMatch(gametype) && areaName.isNotEmpty && seen.add(gametype))
+            LiveArea(
+              platform: _site,
+              areaId: gametype,
+              areaType: id,
+              typeName: name,
+              areaName: areaName,
+              areaPic: normalizeImageUrl(row['cover']),
+            ),
+    ];
+  }
+
+  /// `data.category_info` of a `gamecategory` answer.
+  static Map<String, dynamic> _categoryInfo(String body, {required int status}) {
+    final root = _object(_decode(body, status: status, what: 'gamecategory'));
+    if (root == null || jsonInt(root['code']) != 0) throw ApiChanged(_site, 'gamecategory: code ${root?['code']}');
+    final info = _object(_object(root['data'])?['category_info']);
+    if (info == null) throw const ApiChanged(_site, 'gamecategory: no category_info');
+    return info;
+  }
+
+  /// 3.x's official rooms and events (`official:{ccid}`, category
+  /// "official"), kept beside the mobile catalog (9-4): the `/{ccid}/`
+  /// entries of the Dashen live configuration's "直播入口列表"
+  /// ([configBody]), named and pictured by the game registry ([gamesBody]).
+  /// Its live-area entries (`/n/ds_category/…`) are left to the mobile
+  /// catalog. A hidden configuration or group lists none; an entry that is
+  /// hidden, unknown to the registry, repeated or leads anywhere else is
+  /// skipped. An answer without the configuration is `ApiChanged`.
+  static List<LiveArea> officialAreas(
     String gamesBody,
     String configBody, {
     int gamesStatus = 200,
@@ -85,60 +141,55 @@ abstract final class CcApi {
   }) {
     final games = _catalogEnvelope(gamesBody, status: gamesStatus, what: 'game registry');
     final config = _catalogEnvelope(configBody, status: configStatus, what: 'live configuration');
-    final metadata = <String, Map<String, dynamic>>{};
-    for (final raw in _catalogList(games['result'], 2000)) {
-      final row = _catalogMap(raw);
-      final key = _catalogText(row['appKey'], 64);
-      if (metadata.containsKey(key)) throw ApiChanged(_site, 'game registry: duplicate appKey $key');
-      metadata[key] = row;
+    final registry = <String, ({String name, String icon})>{};
+    for (final raw in _list(games['result'])) {
+      if (_object(raw) case final row?) {
+        if ((_catalogText(row['appKey'], 64), _catalogText(row['name'], 200)) case (final key?, final name?)) {
+          registry.putIfAbsent(key, () => (name: name, icon: _httpsImage(row['icon'])));
+        }
+      }
     }
-    final root = _catalogMap(config['result']);
-    if (root['id'] != catalogConfigurationId) throw ApiChanged(_site, 'live configuration: id ${root['id']}');
+    final root = _object(config['result']);
+    if (root == null || root['id'] != catalogConfigurationId) {
+      throw ApiChanged(_site, 'live configuration: id ${root?['id']}');
+    }
     if (_hidden(root)) return const [];
     final groups = [
-      for (final raw in _catalogList(root['itemList'], 256))
-        if (_catalogMap(raw) case final group when group['name'] == '直播入口列表') group,
+      for (final raw in _list(root['itemList']))
+        if (_object(raw) case final group? when group['name'] == '直播入口列表') group,
     ];
     if (groups.length != 1) throw ApiChanged(_site, 'live configuration: ${groups.length} live entry groups');
     if (_hidden(groups.single)) return const [];
-    final areas = <LiveArea>[];
-    final official = <LiveArea>[];
     final identities = <String>{};
-    for (final raw in _catalogList(groups.single['itemList'], 256)) {
-      final entry = _catalogMap(raw);
-      if (_hidden(entry)) continue;
-      final key = _catalogText(entry['name'], 64);
-      final game = metadata[key];
-      if (game == null) throw ApiChanged(_site, 'live configuration: entry $key has no game');
-      final url = Uri.tryParse(_catalogText(entry['content'], 2048));
-      if (url == null ||
-          url.scheme != 'https' ||
-          url.host != 'cc.163.com' ||
-          url.userInfo.isNotEmpty ||
-          url.hasPort ||
-          url.hasFragment) {
-        throw ApiChanged(_site, 'live configuration: entry $key leads to ${entry['content']}');
-      }
-      final category = RegExp(r'^/n/ds_category/([1-9][0-9]{0,15})/$').firstMatch(url.path);
-      final room = RegExp(r'^/([1-9][0-9]{0,15})/$').firstMatch(url.path);
-      if (category == null && room == null) throw ApiChanged(_site, 'live configuration: unknown route ${url.path}');
-      final id = category != null ? category.group(1)! : 'official:${room!.group(1)}';
-      if (!identities.add(id)) throw ApiChanged(_site, 'live configuration: duplicate entry $id');
-      (category != null ? areas : official).add(
-        LiveArea(
-          platform: _site,
-          areaId: id,
-          areaType: category != null ? '1' : 'official',
-          typeName: category != null ? categoryLabel : officialLabel,
-          areaName: _catalogText(game['name'], 200),
-          areaPic: _httpsImage(game['icon']),
-        ),
-      );
-    }
     return [
-      if (areas.isNotEmpty) LiveCategory(id: '1', name: categoryLabel, children: areas),
-      if (official.isNotEmpty) LiveCategory(id: 'official', name: officialLabel, children: official),
+      for (final raw in _list(groups.single['itemList']))
+        if (_object(raw) case final entry? when !_hidden(entry))
+          if ((registry[_catalogText(entry['name'], 64)], _officialRoom(entry['content']))
+              case (final game?, final ccid?) when identities.add(ccid))
+            LiveArea(
+              platform: _site,
+              areaId: 'official:$ccid',
+              areaType: 'official',
+              typeName: officialLabel,
+              areaName: game.name,
+              areaPic: game.icon,
+            ),
     ];
+  }
+
+  /// The ccid of an official entry's `https://cc.163.com/{ccid}/` link, or
+  /// null for any other link.
+  static String? _officialRoom(Object? content) {
+    final url = Uri.tryParse(_catalogText(content, 2048) ?? '');
+    if (url == null ||
+        url.scheme != 'https' ||
+        url.host != 'cc.163.com' ||
+        url.userInfo.isNotEmpty ||
+        url.hasPort ||
+        url.hasFragment) {
+      return null;
+    }
+    return RegExp(r'^/([1-9][0-9]{0,15})/$').firstMatch(url.path)?.group(1);
   }
 
   /// Whether [area] is one of the catalog's official rooms or events.
@@ -151,12 +202,13 @@ abstract final class CcApi {
   static Uri? officialEntryUri(LiveArea area) {
     if (!isOfficialEntry(area)) return null;
     final id = area.areaId.trim().substring('official:'.length);
-    if (!_areaId.hasMatch(id)) return null;
+    if (!ccidPattern.hasMatch(id)) return null;
     return Uri.https('cc.163.com', '/$id/', {'open': 'blizzardtv', 'from': '8382', 'platform': 'ds'});
   }
 
   /// Whether [area] is a live area `CcSite.getCategoryRooms` can list: a
-  /// numeric game type of this platform, or of none (3.x's check).
+  /// numeric game type (0 included, "其他游戏" of the mobile catalog) of
+  /// this platform, or of none (3.x's check).
   static bool isListableArea(LiveArea area) {
     final platform = area.platform.trim().toLowerCase();
     return _areaId.hasMatch(area.areaId.trim()) && (platform.isEmpty || platform == _site);
@@ -164,11 +216,12 @@ abstract final class CcApi {
 
   // Lists ---------------------------------------------------------------------
 
-  /// `api/category/{gametype}/`: the area's `lives`, strictly as 3.x read
-  /// them. The answer must echo [gametype] and hold a `lives` list of at
-  /// most 1000 objects, each with a valid `cuteid`; otherwise the page is
-  /// `ApiChanged`, never a short one. `videos` are recordings, not rooms.
-  /// `status` 1 is live, 0 offline, anything else unknown.
+  /// `api/category/{gametype}/`: the area's `lives`. The answer must echo
+  /// [gametype] and hold a `lives` list of at most 1000 rows; otherwise the
+  /// page is `ApiChanged`, never a short one. A row without a valid
+  /// `cuteid` is skipped (3.x failed the page; the unified "容错" rule).
+  /// `videos` are recordings, not rooms. `status` 1 is live (a "【重播】"
+  /// rebroadcast a replay, 9-3), 0 offline, anything else unknown.
   static List<LiveRoom> categoryRooms(String body, {required String gametype, int status = 200}) {
     final root = _object(_decode(body, status: status, what: 'category $gametype'));
     if (root == null || root['gametype']?.toString() != gametype || root['lives'] is! List) {
@@ -178,22 +231,21 @@ abstract final class CcApi {
     if (rows.length > 1000) throw ApiChanged(_site, 'category $gametype: ${rows.length} rows');
     return [
       for (final row in rows)
-        switch (_object(row)) {
-          final item? when _cuteid(item['cuteid']) != null => _listRoom(
+        if (_object(row) case final item? when _cuteid(item['cuteid']) != null)
+          _listRoom(
             item,
             area: _text(item['game_name']).ifEmpty(() => _text(item['gamename'])),
-            liveStatus: _status(item['status']),
+            liveStatus: _onAirStatus(_status(item['status']), item['title']),
           ),
-          _ => throw ApiChanged(_site, 'category $gametype: a row without a valid cuteid'),
-        },
     ];
   }
 
   /// `api/category/live/`: every live room, by the site's heat order. The
-  /// endpoint lists live rooms only, so every card is live (3.x). The area
-  /// is `game_name` as 3.x read it: these rows carry only `gamename`, so
-  /// 3.x showed them without an area, and so does this. Rows without a
-  /// valid `cuteid` are skipped (3.x wrote the room id "null").
+  /// endpoint lists live rooms only, so every card is on air (3.x), a
+  /// "【重播】" rebroadcast as a replay (9-3). The area is `gamename`, the
+  /// only area field these rows carry (3.x read `game_name` and showed
+  /// none; 9-2). Rows without a valid `cuteid` are skipped (3.x wrote the
+  /// room id "null").
   static List<LiveRoom> recommendRooms(String body, {int status = 200}) {
     final root = _object(_decode(body, status: status, what: 'category/live'));
     final lives = root?['lives'];
@@ -201,12 +253,17 @@ abstract final class CcApi {
     return [
       for (final row in lives)
         if (_object(row) case final item? when _cuteid(item['cuteid']) != null)
-          _listRoom(item, area: _text(item['game_name']), liveStatus: LiveStatus.live),
+          _listRoom(
+            item,
+            area: _text(item['gamename']).ifEmpty(() => _text(item['game_name'])),
+            liveStatus: _onAirStatus(LiveStatus.live, item['title']),
+          ),
     ];
   }
 
   /// A room card of the directory lists: heat and concurrent viewers side by
-  /// side (3.x's `parseRoomAudience`), the heat shown when there is one.
+  /// side (3.x's `parseRoomAudience`), the heat shown when there is one. On
+  /// air, the start is `startat` and a tier list means no restriction.
   static LiveRoom _listRoom(Map<String, dynamic> item, {required String area, required LiveStatus liveStatus}) {
     final audience = _audience(item);
     return LiveRoom(
@@ -224,15 +281,18 @@ abstract final class CcApi {
           ? AudienceMetricType.popularity
           : AudienceMetricType.onlineViewers,
       liveStatus: liveStatus,
+      startedAt: _startedAt(item, liveStatus),
+      restriction: _restriction(item, liveStatus),
     );
   }
 
   // Search --------------------------------------------------------------------
 
-  /// `search/anchor/`: streamers, live or not, as 3.x showed them: the
-  /// portrait as both avatar and cover, the follower count as the audience,
-  /// `status` 1 live and anything else offline. Rows without a valid
-  /// `cuteid` are skipped.
+  /// `search/anchor/`: streamers, live or not. `status` 1 is on air (a
+  /// "【重播】" rebroadcast a replay, 9-3), anything else offline. On air,
+  /// the card shows the broadcast's cover and heat (9-5); otherwise, as in
+  /// 3.x, the portrait is the cover and the follower count the audience.
+  /// Rows without a valid `cuteid` are skipped.
   static List<LiveRoom> searchRooms(String body, {int status = 200}) {
     final root = _object(_decode(body, status: status, what: 'search/anchor'));
     final anchors = _object(root?['webcc_anchor']);
@@ -243,21 +303,34 @@ abstract final class CcApi {
     ];
   }
 
+  /// A search card. The heat is `hot_score` alone (search's `visitor` is
+  /// something else: offline streamers have it too, archived spec §3); an
+  /// on-air card without heat falls back to the follower count, and one
+  /// without a cover to the portrait.
   static LiveRoom _searchRoom(Map<String, dynamic> item) {
     final portrait = normalizeImageUrl(item['portrait']).ifEmpty(() => normalizeImageUrl(item['portraiturl']));
     final followers = _text(item['follower_num']);
+    final liveStatus = jsonInt(item['status']) == 1 ? _onAirStatus(LiveStatus.live, item['title']) : LiveStatus.offline;
+    final onAir = liveStatus != LiveStatus.offline;
+    final heat = switch (jsonInt(item['hot_score'])) {
+      final int value when onAir && value > 0 => '$value',
+      _ => '',
+    };
     return LiveRoom(
       roomId: _cuteid(item['cuteid']),
       platform: _site,
       title: _text(item['title']),
       nick: _text(item['nickname']),
       avatar: portrait,
-      cover: portrait,
+      cover: onAir ? _image(item['cover'], item['poster']).ifEmpty(() => portrait) : portrait,
       area: _text(item['game_name']),
-      watching: followers,
+      watching: heat.ifEmpty(() => followers),
+      popularity: heat,
       followers: followers.ifEmpty(() => '0'),
-      audienceMetricType: AudienceMetricType.followers,
-      liveStatus: jsonInt(item['status']) == 1 ? LiveStatus.live : LiveStatus.offline,
+      audienceMetricType: heat.isNotEmpty ? AudienceMetricType.popularity : AudienceMetricType.followers,
+      liveStatus: liveStatus,
+      startedAt: _startedAt(item, liveStatus),
+      restriction: _restriction(item, liveStatus),
     );
   }
 
@@ -279,11 +352,13 @@ abstract final class CcApi {
   /// `live/channel/?channelids=`: the room broadcasting in the channel, as
   /// 3.x's `_loadRoomDetail` read it, under the id [ccid] the user asked
   /// for. `status` 1 is live, anything else offline; an official "【重播】"
-  /// rebroadcast is live, as 3.x showed it. The audience is the heat, else
-  /// the viewers, else the follower count; the introduction and notice are
-  /// both the streamer's `personal_label`; `userId` is the channel (`cid`,
-  /// the app's `cc://join-room/{ccid}/{cid}/`). The tier list and redirect
-  /// playlist go into [CcRoomData].
+  /// rebroadcast is a replay (9-3; 3.x showed it live). The audience is the
+  /// heat, else the viewers, else the follower count; `followers` is
+  /// `follower_num` (9-6); the introduction and notice are both the
+  /// streamer's `personal_label`; `userId` is the channel (`cid`, the app's
+  /// `cc://join-room/{ccid}/{cid}/`). On air, the start is `startat` and a
+  /// tier list means no restriction. The tier list and redirect playlist go
+  /// into [CcRoomData].
   ///
   /// Null when the channel no longer broadcasts (`nolive`, or no rows: the
   /// broadcast ended between the two requests). A row for another anchor is
@@ -299,6 +374,10 @@ abstract final class CcApi {
     if (id != ccid) throw ApiChanged(_site, 'live/channel: answered ccid $id for $ccid');
     final audience = _audience(room);
     final label = _text(room['personal_label']);
+    final followers = _text(room['follower_num']);
+    final liveStatus = _status(room['status']) == LiveStatus.live
+        ? _onAirStatus(LiveStatus.live, room['title'])
+        : LiveStatus.offline;
     return LiveRoom(
       roomId: ccid,
       platform: _site,
@@ -309,15 +388,18 @@ abstract final class CcApi {
       avatar: normalizeImageUrl(room['purl']),
       cover: _image(room['cover'], room['poster']),
       area: jsonString(room['gamename']),
-      watching: audience.popularity.ifEmpty(() => audience.online.ifEmpty(() => _text(room['follower_num']))),
+      watching: audience.popularity.ifEmpty(() => audience.online.ifEmpty(() => followers)),
       popularity: audience.popularity,
       onlineViewers: audience.online,
+      followers: followers.ifEmpty(() => '0'),
       audienceMetricType: audience.popularity.isNotEmpty
           ? AudienceMetricType.popularity
           : audience.online.isNotEmpty
           ? AudienceMetricType.onlineViewers
           : AudienceMetricType.followers,
-      liveStatus: _status(room['status']) == LiveStatus.live ? LiveStatus.live : LiveStatus.offline,
+      liveStatus: liveStatus,
+      startedAt: _startedAt(room, liveStatus),
+      restriction: _restriction(room, liveStatus),
       introduction: label.isEmpty ? null : label,
       notice: label.isEmpty ? null : label,
       data: CcRoomData(
@@ -330,10 +412,24 @@ abstract final class CcApi {
   /// A room whose anchor has no live channel, for follow refreshes and
   /// recordings: only the identity and the offline state, every other field
   /// "not in this response" (a merge keeps the stored ones). `activitylives`
-  /// answers an unknown id the same way; only room entry asks the room page
-  /// ([pageRoom]) to tell them apart.
+  /// answers an unknown id the same way; room entry asks the room page
+  /// ([pageRoom]) and follow refreshes [anchorExists] to tell them apart.
   static LiveRoom offlineRoom(String ccid) =>
       LiveRoom(roomId: ccid, platform: _site, link: roomUrl(ccid), watching: '', liveStatus: LiveStatus.offline);
+
+  /// `wapcc/recommendbyccid?ccid=`: whether the id asked for is a CC
+  /// account (9-7). The mobile site asks it for rooms to recommend beside
+  /// an anchor's; an unknown id is `code` 4 ("没有对应的ccid") instead, for
+  /// the same ids whose room page says `no ccid` (2026-09-29, six ids
+  /// compared). `code` 0 is an account; any other answer is `ApiChanged`.
+  static bool anchorExists(String body, {int status = 200}) {
+    final root = _object(_decode(body, status: status, what: 'recommendbyccid'));
+    return switch (jsonInt(root?['code'])) {
+      0 => true,
+      4 => false,
+      _ => throw ApiChanged(_site, 'recommendbyccid: code ${root?['code']}'),
+    };
+  }
 
   static final RegExp _nextData = RegExp(r'<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)</script>');
 
@@ -343,7 +439,8 @@ abstract final class CcApi {
   /// (`no ccid`) is `NotFound`; anything else is the anchor's offline room.
   /// 3.x failed here and showed the room as unknown. Fields as in
   /// [channelRoom]: without heat or viewers the audience is the follower
-  /// count; the introduction and notice are the `announcement`.
+  /// count, which is also `followers` (9-6); the introduction and notice are
+  /// the `announcement`. Offline, so there is no start time or restriction.
   static LiveRoom pageRoom(String html, {required String ccid, int status = 200}) {
     _checkStatus(status, 'room page');
     final script = _nextData.firstMatch(html)?.group(1);
@@ -360,6 +457,7 @@ abstract final class CcApi {
     final nick = _text(anchor['nickname']).ifEmpty(() => _text(info['nickname']));
     if (nick.isEmpty) throw const ApiChanged(_site, 'room page: no nickname');
     final announcement = _text(info['announcement']);
+    final followers = _text(info['follower_num']).ifEmpty(() => _text(live['follower_num']));
     return LiveRoom(
       roomId: ccid,
       platform: _site,
@@ -369,7 +467,8 @@ abstract final class CcApi {
       nick: nick,
       avatar: _image(anchor['purl'], anchor['portraiturl']).ifEmpty(() => normalizeImageUrl(info['purl'])),
       area: jsonString(info['gamename']) ?? jsonString(live['gamename']),
-      watching: _text(info['follower_num']).ifEmpty(() => _text(live['follower_num'])),
+      watching: followers,
+      followers: followers.ifEmpty(() => '0'),
       audienceMetricType: AudienceMetricType.followers,
       liveStatus: LiveStatus.offline,
       introduction: announcement.isEmpty ? null : announcement,
@@ -382,17 +481,17 @@ abstract final class CcApi {
 
   // 3.x's streams -------------------------------------------------------------
 
-  /// 3.x's qualities of a live channel (`getPlayQualites`), what users pick
-  /// from: one per tier of [CcRoomData.streams] (`stream_list`: `original`,
-  /// `high`, `medium`, `low`), named by 3.x's table (原画, 高清, 标准,
-  /// 低清), best first. A quality's data is its URLs: the redirect playlist
-  /// with the tier's CDN signature appended (`hs`, `ks`, `ali`, `fws`, `wy`
-  /// first), or the tier's own URLs in a `quickplay` object.
+  /// 3.x's qualities of a live channel (`getPlayQualites`): one per tier of
+  /// [CcRoomData.streams] (`stream_list`: `original`, `high`, `medium`,
+  /// `low`), named by 3.x's table (原画, 高清, 标准, 低清), best first. A
+  /// quality's data is its URLs: the redirect playlist with the tier's CDN
+  /// signature appended (`hs`, `ks`, `ali`, `fws`, `wy` first), or the
+  /// tier's own URLs in a `quickplay` object.
   ///
   /// The site ignores the appended signature: every tier plays the same
-  /// 1 Mbps HLS stream, as in 3.x (REG-CC-004). [qualities] and
-  /// [resolution] (`video_play_url`) are the fallback for a room without a
-  /// tier list.
+  /// 1 Mbps HLS stream (REG-CC-004). Since 9-1 the qualities come from
+  /// `video_play_url` ([qualities], [resolution]); these are only the
+  /// fallback when that answer fails or cannot be read.
   static List<LivePlayQuality> legacyQualities(CcRoomData data) {
     final raw = data.streams;
     if (raw == null) return const [];
@@ -495,7 +594,34 @@ abstract final class CcApi {
     return text.startsWith('//') ? 'https:$text' : text;
   }
 
-  // Fallback streams: video_play_url ------------------------------------------
+  // Streams: video_play_url ---------------------------------------------------
+
+  /// 3.x's quality ids (the channel's `stream_list` tiers, also stored
+  /// before 9-1) → the `video_play_url` tier that plays the same stream, for
+  /// M9 to migrate a stored quality preference once. Matched by the stream
+  /// name suffix both answers give (2026-09-29, rooms 341438909 and
+  /// 732923115): `high` is `tc1` (2 Mbps, now 超清 `ultra`), `medium` `tc2`
+  /// (1 Mbps, now 高清 `high`), `low` `tc4` (600 kbps, now 标清 `standard`),
+  /// `blueray_20M` `tc1024` (5 Mbps, now 蓝光5M `blueray_5M_avc`). 3.x's
+  /// `original` was the best tier the channel listed (a 3 Mbps transcode in
+  /// one room); `original` is now the source itself. Note that `high` is an
+  /// id on both sides with different streams: apply this to old ids only.
+  static const Map<String, String> legacyQualityIds = {
+    'original': 'original',
+    'high': 'ultra',
+    'medium': 'high',
+    'low': 'standard',
+    'blueray_20M': 'blueray_5M_avc',
+  };
+
+  /// The `video_play_url` quality id for a 3.x one ([legacyQualityIds]);
+  /// an id not in the table is kept (it names the same tier on both sides
+  /// or none, and then the player's usual default applies).
+  static String qualityIdFromLegacy(String id) => legacyQualityIds[id.trim()] ?? id.trim();
+
+  /// The site's own names of its tier codes (`vbrname_mapping` in every
+  /// recorded answer), for an answer without the mapping.
+  static const Map<String, String> _siteNames = {'original': '原画', 'ultra': '超清', 'high': '高清', 'standard': '标清'};
 
   /// `vapi.cc.163.com/video_play_url/{ccid}` → its object. HTTP 410
   /// (`Gone`, "no live") and 404 are `StreamUnavailable`.
@@ -506,11 +632,13 @@ abstract final class CcApi {
     return data;
   }
 
-  /// Qualities of a play answer: `vbrname_list` in the server's order, best
-  /// first (`vbrname_sel` alone when the list is empty). The id and data are
-  /// the tier code (`original`, `ultra`, `high`, `standard`, …) sent as
-  /// `vbrname`; the label is the site's own name (`vbrname_mapping`), else
-  /// 3.x's name for the code.
+  /// The qualities users pick from (9-1): `vbrname_list` in the server's
+  /// order, best first (`vbrname_sel` alone when the list is empty), each a
+  /// different stream. The id and data are the tier code (`original`,
+  /// `blueray_5M_avc`, `ultra`, `high`, `standard`, …) sent as `vbrname`.
+  /// The label is the site's own name (`vbrname_mapping`: 原画, 蓝光5M,
+  /// 超清, 高清, 标清), else its usual name for the code; the source
+  /// `original` is always 原画 (the unified naming rule).
   static List<LivePlayQuality> qualities(Map<String, dynamic> data) {
     final codes = <String>[for (final raw in _list(data['vbrname_list'])) ?jsonString(raw)];
     if (codes.isEmpty) {
@@ -525,7 +653,7 @@ abstract final class CcApi {
         LivePlayQuality(
           quality: LiveQualityLabel.normalize(
             platform: _site,
-            rawLabel: jsonString(names[code]) ?? _legacyNames[code] ?? code,
+            rawLabel: code == 'original' ? '原画' : jsonString(names[code]) ?? _siteNames[code] ?? code,
             id: code,
           ),
           id: code,
@@ -645,31 +773,53 @@ abstract final class CcApi {
     _ => LiveStatus.unknown,
   };
 
+  /// [status], except that a live room titled "【重播】" is an official
+  /// rebroadcast of a recorded event: a replay, which plays like a live
+  /// stream (9-3). The site has no other field for it (archived spec §4:
+  /// `capture_type`, `mode` and the rest match real broadcasts).
+  static LiveStatus _onAirStatus(LiveStatus status, Object? title) =>
+      status == LiveStatus.live && _text(title).trimLeft().startsWith('【重播】') ? LiveStatus.replay : status;
+
+  static bool _onAir(LiveStatus status) => status == LiveStatus.live || status == LiveStatus.replay;
+
+  /// `startat` of a room on air: when this broadcast (or rebroadcast
+  /// channel) went on air. Off air it is the last broadcast's, so none.
+  static DateTime? _startedAt(Map<String, dynamic> row, LiveStatus status) =>
+      _onAir(status) ? _beijingTime(row['startat']) : null;
+
+  /// No restriction for a room on air whose answer carries its tier list
+  /// (`stream_list` or `quickplay`): the site hands the stream to anyone.
+  /// Otherwise the answer does not say (null); CC shows no paid, private or
+  /// password state on these answers.
+  static LiveRestriction? _restriction(Map<String, dynamic> row, LiveStatus status) =>
+      _onAir(status) && ((_object(row['stream_list'])?.isNotEmpty ?? false) || _object(row['quickplay']) != null)
+      ? LiveRestriction.none
+      : null;
+
+  static final RegExp _localTime = RegExp(r'^(\d{4})-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$');
+
+  /// `yyyy-MM-dd HH:mm:ss` in Beijing time (UTC+8, checked against the
+  /// channel's `liveMinute`), as UTC; none before 2000 or when malformed.
+  static DateTime? _beijingTime(Object? value) {
+    final match = _localTime.firstMatch(jsonString(value) ?? '');
+    if (match == null || int.parse(match.group(1)!) < 2000) return null;
+    return DateTime.tryParse('${match.group(0)!.replaceFirst(' ', 'T')}+08:00')?.toUtc();
+  }
+
   static Map<String, dynamic> _catalogEnvelope(String body, {required int status, required String what}) {
     final envelope = _object(_decode(body, status: status, what: what));
     if (envelope == null || envelope['code'] != 200) throw ApiChanged(_site, '$what: code ${envelope?['code']}');
     return envelope;
   }
 
-  static Map<String, dynamic> _catalogMap(Object? value) {
-    if (value is Map<String, dynamic>) return value;
-    throw const ApiChanged(_site, 'catalog: expected an object');
-  }
+  static String? _catalogText(Object? value, int limit) =>
+      value is String && value.trim().isNotEmpty && value.length <= limit ? value.trim() : null;
 
-  static List<Object?> _catalogList(Object? value, int limit) {
-    if (value is List && value.length <= limit) return value.cast<Object?>();
-    throw const ApiChanged(_site, 'catalog: expected a list');
-  }
-
-  static String _catalogText(Object? value, int limit) {
-    if (value is String && value.trim().isNotEmpty && value.length <= limit) return value.trim();
-    throw const ApiChanged(_site, 'catalog: expected a text');
-  }
-
+  /// Whether a Dashen configuration item is hidden; a `hidden` that is not
+  /// a bool hides it too.
   static bool _hidden(Map<String, dynamic> value) {
     final hidden = value['hidden'];
-    if (hidden != null && hidden is! bool) throw const ApiChanged(_site, 'catalog: hidden is not a bool');
-    return hidden == true;
+    return hidden == true || (hidden != null && hidden is! bool);
   }
 
   /// An https image with a host and no user info, else empty (3.x's catalog

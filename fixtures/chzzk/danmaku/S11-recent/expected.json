@@ -1,0 +1,1090 @@
+{
+  "generator": "fixtures/chzzk/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) ChzzkProtocol (tokenUrl, accessToken, endpoint, headers, join, recent, ping, pong, decode) over every received frame (copied as it was; the event classes cut down to their fields)",
+  "value": {
+    "frames": [
+      {
+        "frame": 0,
+        "chatChannelId": "N2l-x_",
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:882f9c5cb15b74ef97e89eb2fd744964:1790632554511",
+            "sentAt": 1790632554511,
+            "userId": "882f9c5cb15b74ef97e89eb2fd744964",
+            "userName": "观众74",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:595e0f6090a5f2db06f8e788e776f4fb:1790632556330",
+            "sentAt": 1790632556330,
+            "userId": "595e0f6090a5f2db06f8e788e776f4fb",
+            "userName": "观众75",
+            "text": "쑤나치미에요~"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:44b6807c85f798d99811baf0b12fa640:1790632556655",
+            "sentAt": 1790632556655,
+            "userId": "44b6807c85f798d99811baf0b12fa640",
+            "userName": "观众76",
+            "text": "오 세상에"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:6e1133e0a33a899a6b8e1946d951a941:1790632557626",
+            "sentAt": 1790632557626,
+            "userId": "6e1133e0a33a899a6b8e1946d951a941",
+            "userName": "观众77",
+            "text": "{:d_94:}{:d_62:}{:d_94:}{:d_62:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:46b425e0dbb34e3a6097d5737eaf9036:1790632558132",
+            "sentAt": 1790632558132,
+            "userId": "46b425e0dbb34e3a6097d5737eaf9036",
+            "userName": "观众78",
+            "text": "ㅅㅅ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:008d9ec6d721d8d1747ed8d647086b7e:1790632558303",
+            "sentAt": 1790632558303,
+            "userId": "008d9ec6d721d8d1747ed8d647086b7e",
+            "userName": "观众79",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:44b6807c85f798d99811baf0b12fa640:1790632560060",
+            "sentAt": 1790632560060,
+            "userId": "44b6807c85f798d99811baf0b12fa640",
+            "userName": "观众76",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:ab69df6db67d8838227803d05aa12144:1790632561638",
+            "sentAt": 1790632561638,
+            "userId": "ab69df6db67d8838227803d05aa12144",
+            "userName": "观众80",
+            "text": "출발~"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:b458683ac212e2731480da392c673abd:1790632561783",
+            "sentAt": 1790632561783,
+            "userId": "b458683ac212e2731480da392c673abd",
+            "userName": "观众81",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:bc2429bdd157e39ed4625326d822c41d:1790632564536",
+            "sentAt": 1790632564536,
+            "userId": "bc2429bdd157e39ed4625326d822c41d",
+            "userName": "观众82",
+            "text": "에휴 나평 ㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:1375783e218fc698a9be22c496bcdf46:1790632565132",
+            "sentAt": 1790632565132,
+            "userId": "1375783e218fc698a9be22c496bcdf46",
+            "userName": "观众83",
+            "text": "애한테 좋은거 가르친다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:44b6807c85f798d99811baf0b12fa640:1790632565316",
+            "sentAt": 1790632565316,
+            "userId": "44b6807c85f798d99811baf0b12fa640",
+            "userName": "观众76",
+            "text": "출발~!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:6e1133e0a33a899a6b8e1946d951a941:1790632565689",
+            "sentAt": 1790632565689,
+            "userId": "6e1133e0a33a899a6b8e1946d951a941",
+            "userName": "观众77",
+            "text": "{:d_94:}{:d_62:}{:d_94:}{:d_62:}{:d_94:}{:d_62:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:e03b57eac5330cc7ead1cfda5a83bcb8:1790632566833",
+            "sentAt": 1790632566833,
+            "userId": "e03b57eac5330cc7ead1cfda5a83bcb8",
+            "userName": "观众84",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:44b6807c85f798d99811baf0b12fa640:1790632567748",
+            "sentAt": 1790632567748,
+            "userId": "44b6807c85f798d99811baf0b12fa640",
+            "userName": "观众76",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:b9bf4a899ab83b88674f8be2958cf2ad:1790632567938",
+            "sentAt": 1790632567938,
+            "userId": "b9bf4a899ab83b88674f8be2958cf2ad",
+            "userName": "观众85",
+            "text": "딸인생 망했네 ㅇㅇ;';"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:2bcb30be67de9af53889975920dd63e0:1790632568094",
+            "sentAt": 1790632568094,
+            "userId": "2bcb30be67de9af53889975920dd63e0",
+            "userName": "观众86",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:cf8dfd3110d90180abef029121b2ca62:1790632568208",
+            "sentAt": 1790632568208,
+            "userId": "cf8dfd3110d90180abef029121b2ca62",
+            "userName": "观众87",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:c60e65dc0d6d067fffc33696965ca0a2:1790632568574",
+            "sentAt": 1790632568574,
+            "userId": "c60e65dc0d6d067fffc33696965ca0a2",
+            "userName": "观众88",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:44b6807c85f798d99811baf0b12fa640:1790632570941",
+            "sentAt": 1790632570941,
+            "userId": "44b6807c85f798d99811baf0b12fa640",
+            "userName": "观众76",
+            "text": "출발~!!!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:99da72f6c2f7de68f56cf1f147210e00:1790632571252",
+            "sentAt": 1790632571252,
+            "userId": "99da72f6c2f7de68f56cf1f147210e00",
+            "userName": "观众89",
+            "text": "망햇네.."
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:595e0f6090a5f2db06f8e788e776f4fb:1790632571787",
+            "sentAt": 1790632571787,
+            "userId": "595e0f6090a5f2db06f8e788e776f4fb",
+            "userName": "观众75",
+            "text": "캬 조졌다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:9eed5d208a07bf9b4592bdd98bc5346b:1790632571891",
+            "sentAt": 1790632571891,
+            "userId": "9eed5d208a07bf9b4592bdd98bc5346b",
+            "userName": "观众90",
+            "text": "{:d_126:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:e03b57eac5330cc7ead1cfda5a83bcb8:1790632572903",
+            "sentAt": 1790632572903,
+            "userId": "e03b57eac5330cc7ead1cfda5a83bcb8",
+            "userName": "观众84",
+            "text": "이건 ㄹㅇ 찐나평ㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:b66e05432a80ba5e75cc5608579e89da:1790632573933",
+            "sentAt": 1790632573933,
+            "userId": "b66e05432a80ba5e75cc5608579e89da",
+            "userName": "观众91",
+            "text": "개좋아하네"
+          },
+          {
+            "kind": "gift",
+            "id": "chzzk:051bd6110578d071125298b44ae89156:1790632575756:gift",
+            "sentAt": 1790632575756,
+            "userId": "051bd6110578d071125298b44ae89156",
+            "userName": "观众93",
+            "giftName": "치즈",
+            "count": 1000
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:051bd6110578d071125298b44ae89156:1790632575756",
+            "sentAt": 1790632575756,
+            "userId": "051bd6110578d071125298b44ae89156",
+            "userName": "观众93",
+            "text": "동후나 그게 무슨소리니"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:cf8dfd3110d90180abef029121b2ca62:1790632577517",
+            "sentAt": 1790632577517,
+            "userId": "cf8dfd3110d90180abef029121b2ca62",
+            "userName": "观众87",
+            "text": "미나야 넌 저런거 배우지 마라"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:44b6807c85f798d99811baf0b12fa640:1790632577601",
+            "sentAt": 1790632577601,
+            "userId": "44b6807c85f798d99811baf0b12fa640",
+            "userName": "观众76",
+            "text": "인생 조졌다"
+          },
+          {
+            "kind": "gift",
+            "id": "chzzk:anonymous:1790632580409:gift",
+            "sentAt": 1790632580409,
+            "userId": "",
+            "userName": "匿名",
+            "giftName": "치즈",
+            "count": 1000
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:anonymous:1790632580409",
+            "sentAt": 1790632580409,
+            "userId": "",
+            "userName": "匿名",
+            "text": "아이고 동훈아"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:9a7c48c2fc3ff0a574393d30ddd1b48f:1790632581915",
+            "sentAt": 1790632581915,
+            "userId": "9a7c48c2fc3ff0a574393d30ddd1b48f",
+            "userName": "观众104",
+            "text": "{:d_54:}{:d_54:}{:d_54:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:b66e05432a80ba5e75cc5608579e89da:1790632582517",
+            "sentAt": 1790632582517,
+            "userId": "b66e05432a80ba5e75cc5608579e89da",
+            "userName": "观众91",
+            "text": "동훈아"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:c5d4da866fbb9c18701e52e76fe5cedb:1790632583028",
+            "sentAt": 1790632583028,
+            "userId": "c5d4da866fbb9c18701e52e76fe5cedb",
+            "userName": "观众105",
+            "text": "드래곤도 주갤을 한다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:1816ce7561af5c02926c886ac167a7f2:1790632591342",
+            "sentAt": 1790632591342,
+            "userId": "1816ce7561af5c02926c886ac167a7f2",
+            "userName": "观众106",
+            "text": "양호섹출이라니"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:601addcfc0a44b395b58b80f308ec297:1790632592633",
+            "sentAt": 1790632592633,
+            "userId": "601addcfc0a44b395b58b80f308ec297",
+            "userName": "观众107",
+            "text": "ㅋㅋㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:2bcb30be67de9af53889975920dd63e0:1790632597600",
+            "sentAt": 1790632597600,
+            "userId": "2bcb30be67de9af53889975920dd63e0",
+            "userName": "观众86",
+            "text": "ㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:9eed5d208a07bf9b4592bdd98bc5346b:1790632608002",
+            "sentAt": 1790632608002,
+            "userId": "9eed5d208a07bf9b4592bdd98bc5346b",
+            "userName": "观众90",
+            "text": "음식 이름은 큰 의미가 없나보네 랜덤으로 나오는 느낌이군"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:bc2429bdd157e39ed4625326d822c41d:1790632647238",
+            "sentAt": 1790632647238,
+            "userId": "bc2429bdd157e39ed4625326d822c41d",
+            "userName": "观众82",
+            "text": "노엘생각나네 브금이"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:b66e05432a80ba5e75cc5608579e89da:1790632652239",
+            "sentAt": 1790632652239,
+            "userId": "b66e05432a80ba5e75cc5608579e89da",
+            "userName": "观众91",
+            "text": "느리구나"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:6e1133e0a33a899a6b8e1946d951a941:1790632673176",
+            "sentAt": 1790632673176,
+            "userId": "6e1133e0a33a899a6b8e1946d951a941",
+            "userName": "观众77",
+            "text": "템포 느린 jrpg느낌인가"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:823ce584c7a03dd67d5f6407f92ec370:1790632679591",
+            "sentAt": 1790632679591,
+            "userId": "823ce584c7a03dd67d5f6407f92ec370",
+            "userName": "观众108",
+            "text": "노엘 제작자 맞음"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:313282b13c963c36e82c2f1cc3022ae0:1790632681691",
+            "sentAt": 1790632681691,
+            "userId": "313282b13c963c36e82c2f1cc3022ae0",
+            "userName": "观众109",
+            "text": "{:d_59:}{:d_59:}{:d_59:}{:d_59:}{:d_59:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:6e1133e0a33a899a6b8e1946d951a941:1790632703818",
+            "sentAt": 1790632703818,
+            "userId": "6e1133e0a33a899a6b8e1946d951a941",
+            "userName": "观众77",
+            "text": "어어"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:b9bf4a899ab83b88674f8be2958cf2ad:1790632705989",
+            "sentAt": 1790632705989,
+            "userId": "b9bf4a899ab83b88674f8be2958cf2ad",
+            "userName": "观众85",
+            "text": "지는거에요?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:bc2429bdd157e39ed4625326d822c41d:1790632711435",
+            "sentAt": 1790632711435,
+            "userId": "bc2429bdd157e39ed4625326d822c41d",
+            "userName": "观众82",
+            "text": "ㅇㅎ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:e49bfda3e27a68c6245c52254635eca9:1790632715660",
+            "sentAt": 1790632715660,
+            "userId": "e49bfda3e27a68c6245c52254635eca9",
+            "userName": "观众110",
+            "text": "지나?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:882f9c5cb15b74ef97e89eb2fd744964:1790632734254",
+            "sentAt": 1790632734254,
+            "userId": "882f9c5cb15b74ef97e89eb2fd744964",
+            "userName": "观众74",
+            "text": "몹들도 스펙이 초반부터 좀 장난없구나"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:313282b13c963c36e82c2f1cc3022ae0:1790632774916",
+            "sentAt": 1790632774916,
+            "userId": "313282b13c963c36e82c2f1cc3022ae0",
+            "userName": "观众109",
+            "text": "동훈이 강하다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:a4e2b00b95686f841745276a256286e3:1790632801948",
+            "sentAt": 1790632801948,
+            "userId": "a4e2b00b95686f841745276a256286e3",
+            "userName": "观众111",
+            "text": "외형도 변하나요?"
+          }
+        ]
+      },
+      {
+        "frame": 1,
+        "chatChannelId": "N2lyvo",
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:9d98e1c05ca73933fe60109612375c11:1790632442678",
+            "sentAt": 1790632442678,
+            "userId": "9d98e1c05ca73933fe60109612375c11",
+            "userName": "观众112",
+            "text": "3주안에 너프없이 디피 21억으로 클리어하면 반포자이건다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:30e16338588f379d63f7a0ca6d8d5996:1790632473492",
+            "sentAt": 1790632473492,
+            "userId": "30e16338588f379d63f7a0ca6d8d5996",
+            "userName": "观众113",
+            "text": "누님 에스더 받고도.."
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:30e16338588f379d63f7a0ca6d8d5996:1790632477634",
+            "sentAt": 1790632477634,
+            "userId": "30e16338588f379d63f7a0ca6d8d5996",
+            "userName": "观众113",
+            "text": "라고 하면 안되겠죠"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:d4ecb1a93866ea38c21520f4cc0cab42:1790632512654",
+            "sentAt": 1790632512654,
+            "userId": "d4ecb1a93866ea38c21520f4cc0cab42",
+            "userName": "观众114",
+            "text": "에스더는 어제도 왔었음"
+          },
+          {
+            "kind": "gift",
+            "id": "chzzk:anonymous:1790632537718:gift",
+            "sentAt": 1790632537718,
+            "userId": "",
+            "userName": "匿名",
+            "giftName": "치즈",
+            "count": 1000
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:anonymous:1790632537718",
+            "sentAt": 1790632537718,
+            "userId": "",
+            "userName": "匿名",
+            "text": "스태프의 실수로 만들어진 역대급 무대 / 싸이 - 예술이야"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:9d98e1c05ca73933fe60109612375c11:1790632549052",
+            "sentAt": 1790632549052,
+            "userId": "9d98e1c05ca73933fe60109612375c11",
+            "userName": "观众112",
+            "text": "이번레이드는 죄악 맴버들 한명도 못깰거같은데"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:97faaf557acce48371affa77236380eb:1790632554745",
+            "sentAt": 1790632554745,
+            "userId": "97faaf557acce48371affa77236380eb",
+            "userName": "观众115",
+            "text": "2시간안에 자러가겠네 상태보니"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:30e16338588f379d63f7a0ca6d8d5996:1790632556348",
+            "sentAt": 1790632556348,
+            "userId": "30e16338588f379d63f7a0ca6d8d5996",
+            "userName": "观众113",
+            "text": "그러니까"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:30e16338588f379d63f7a0ca6d8d5996:1790632564255",
+            "sentAt": 1790632564255,
+            "userId": "30e16338588f379d63f7a0ca6d8d5996",
+            "userName": "观众113",
+            "text": "어제 에스더 소울에 만점바드받고 진도 못 뺐잖아"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:30e16338588f379d63f7a0ca6d8d5996:1790632574646",
+            "sentAt": 1790632574646,
+            "userId": "30e16338588f379d63f7a0ca6d8d5996",
+            "userName": "观众113",
+            "text": "눈물이납니다"
+          },
+          {
+            "kind": "gift",
+            "id": "chzzk:anonymous:1790632580596:gift",
+            "sentAt": 1790632580596,
+            "userId": "",
+            "userName": "匿名",
+            "giftName": "치즈",
+            "count": 1000
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:anonymous:1790632580596",
+            "sentAt": 1790632580596,
+            "userId": "",
+            "userName": "匿名",
+            "text": "그래서 계속 실수만 하는데 예술은 언제 보여주나요?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:30e16338588f379d63f7a0ca6d8d5996:1790632588640",
+            "sentAt": 1790632588640,
+            "userId": "30e16338588f379d63f7a0ca6d8d5996",
+            "userName": "观众113",
+            "text": "재밌음"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:5457bf3c5c184b1b135f373ec820f018:1790632592639",
+            "sentAt": 1790632592639,
+            "userId": "5457bf3c5c184b1b135f373ec820f018",
+            "userName": "观众116",
+            "text": "쩡니예플레이 예술이다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:9d98e1c05ca73933fe60109612375c11:1790632594453",
+            "sentAt": 1790632594453,
+            "userId": "9d98e1c05ca73933fe60109612375c11",
+            "userName": "观众112",
+            "text": "모르둠 콘서트 재밌는데요?"
+          },
+          {
+            "kind": "gift",
+            "id": "chzzk:anonymous:1790632611443:gift",
+            "sentAt": 1790632611443,
+            "userId": "",
+            "userName": "匿名",
+            "giftName": "치즈",
+            "count": 1000
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:anonymous:1790632611443",
+            "sentAt": 1790632611443,
+            "userId": "",
+            "userName": "匿名",
+            "text": "어휴 또 게임하다 밤샛니, 아빠 출근한다 나와서 인사해라"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:9d98e1c05ca73933fe60109612375c11:1790632624370",
+            "sentAt": 1790632624370,
+            "userId": "9d98e1c05ca73933fe60109612375c11",
+            "userName": "观众112",
+            "text": "피카츄 장전"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:30e16338588f379d63f7a0ca6d8d5996:1790632639724",
+            "sentAt": 1790632639724,
+            "userId": "30e16338588f379d63f7a0ca6d8d5996",
+            "userName": "观众113",
+            "text": "뮤직 페스티벌이랑 DJ 단콘 가봤었는데"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:30e16338588f379d63f7a0ca6d8d5996:1790632641848",
+            "sentAt": 1790632641848,
+            "userId": "30e16338588f379d63f7a0ca6d8d5996",
+            "userName": "观众113",
+            "text": "확실히 재밌음"
+          },
+          {
+            "kind": "gift",
+            "id": "chzzk:97faaf557acce48371affa77236380eb:1790632655370:gift",
+            "sentAt": 1790632655370,
+            "userId": "97faaf557acce48371affa77236380eb",
+            "userName": "观众115",
+            "giftName": "치즈",
+            "count": 1000
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:97faaf557acce48371affa77236380eb:1790632655370",
+            "sentAt": 1790632655370,
+            "userId": "97faaf557acce48371affa77236380eb",
+            "userName": "观众115",
+            "text": "이번주 토요일 콘서트에 가는데 넌 집에서 데이터쪼가리나 잡으세요라~"
+          },
+          {
+            "kind": "gift",
+            "id": "chzzk:anonymous:1790632676573:gift",
+            "sentAt": 1790632676573,
+            "userId": "",
+            "userName": "匿名",
+            "giftName": "치즈",
+            "count": 1000
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:anonymous:1790632676573",
+            "sentAt": 1790632676573,
+            "userId": "",
+            "userName": "匿名",
+            "text": "아 혹시 보여주신다는 예술이 폭발은 예술이다! 갈! 보여주신다는건가요?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:65e87bf54565fa8dfe2df88b36be9590:1790632721750",
+            "sentAt": 1790632721750,
+            "userId": "65e87bf54565fa8dfe2df88b36be9590",
+            "userName": "观众117",
+            "text": "예술이다!!!!!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:97faaf557acce48371affa77236380eb:1790632729903",
+            "sentAt": 1790632729903,
+            "userId": "97faaf557acce48371affa77236380eb",
+            "userName": "观众115",
+            "text": "이건 죽는게 맞았다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:30e16338588f379d63f7a0ca6d8d5996:1790632732899",
+            "sentAt": 1790632732899,
+            "userId": "30e16338588f379d63f7a0ca6d8d5996",
+            "userName": "观众113",
+            "text": "아까 서머너 찾아서"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:30e16338588f379d63f7a0ca6d8d5996:1790632734965",
+            "sentAt": 1790632734965,
+            "userId": "30e16338588f379d63f7a0ca6d8d5996",
+            "userName": "观众113",
+            "text": "둘이 손잡고 가라"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:65e87bf54565fa8dfe2df88b36be9590:1790632738610",
+            "sentAt": 1790632738610,
+            "userId": "65e87bf54565fa8dfe2df88b36be9590",
+            "userName": "观众117",
+            "text": "저게예술이지"
+          },
+          {
+            "kind": "gift",
+            "id": "chzzk:anonymous:1790632797338:gift",
+            "sentAt": 1790632797338,
+            "userId": "",
+            "userName": "匿名",
+            "giftName": "치즈",
+            "count": 1820
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:anonymous:1790632797338",
+            "sentAt": 1790632797338,
+            "userId": "",
+            "userName": "匿名",
+            "text": "싸이(PSY) - 예술이야 [가사/Lyrics]"
+          }
+        ]
+      },
+      {
+        "frame": 2,
+        "chatChannelId": "N2m13O",
+        "joined": false,
+        "rejected": false,
+        "replies": [],
+        "events": [
+          {
+            "kind": "chat",
+            "id": "chzzk:117fb2586095f6811f0e741801f0ccf9:1790632720243",
+            "sentAt": 1790632720243,
+            "userId": "117fb2586095f6811f0e741801f0ccf9",
+            "userName": "观众118",
+            "text": "나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0b934d5642ab95223c3bf0eb935b8d62:1790632720584",
+            "sentAt": 1790632720584,
+            "userId": "0b934d5642ab95223c3bf0eb935b8d62",
+            "userName": "观众119",
+            "text": "나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:daf67b28dff25b51f438852b3c0da357:1790632723078",
+            "sentAt": 1790632723078,
+            "userId": "daf67b28dff25b51f438852b3c0da357",
+            "userName": "观众120",
+            "text": "나하나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:b5c535a839a8b42768fa6692435096ca:1790632723088",
+            "sentAt": 1790632723088,
+            "userId": "b5c535a839a8b42768fa6692435096ca",
+            "userName": "观众121",
+            "text": "얼리모닝양"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:2d03f918c10e17c9b699f530be411036:1790632723189",
+            "sentAt": 1790632723189,
+            "userId": "2d03f918c10e17c9b699f530be411036",
+            "userName": "观众122",
+            "text": "나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:100223ec3442e9a941d6e71bb9fedb38:1790632725881",
+            "sentAt": 1790632725881,
+            "userId": "100223ec3442e9a941d6e71bb9fedb38",
+            "userName": "观众123",
+            "text": "ㄴㅏ하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4bb1dea323ce3bde05858e9402f68c81:1790632727036",
+            "sentAt": 1790632727036,
+            "userId": "4bb1dea323ce3bde05858e9402f68c81",
+            "userName": "观众124",
+            "text": "나하?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:c37c08ab746755fed2c7af6163143947:1790632729880",
+            "sentAt": 1790632729880,
+            "userId": "c37c08ab746755fed2c7af6163143947",
+            "userName": "观众125",
+            "text": "나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:834af00acf5309765f6252c5ac6e8aba:1790632731341",
+            "sentAt": 1790632731341,
+            "userId": "834af00acf5309765f6252c5ac6e8aba",
+            "userName": "观众126",
+            "text": "엥"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:75b6aa473e24b6c4b79ecd8b355dc92b:1790632732554",
+            "sentAt": 1790632732554,
+            "userId": "75b6aa473e24b6c4b79ecd8b355dc92b",
+            "userName": "观众127",
+            "text": "{:nanayangNA:}{:nanayangHA:}{:nanayangNA:}{:nanayangHA:}{:nanayangHurray:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:54c36da03b79ba8c51af809c0ac8095e:1790632732632",
+            "sentAt": 1790632732632,
+            "userId": "54c36da03b79ba8c51af809c0ac8095e",
+            "userName": "观众128",
+            "text": "{:nanayangNA:}{:nanayangHA:}{:nanayangHEY:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:68e4854565fbf7d7d15bc6e366c2e8a8:1790632734305",
+            "sentAt": 1790632734305,
+            "userId": "68e4854565fbf7d7d15bc6e366c2e8a8",
+            "userName": "观众129",
+            "text": "많이 빨리 왔는데"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:31d8f775ce3f340c6022f7285d9d7452:1790632738769",
+            "sentAt": 1790632738769,
+            "userId": "31d8f775ce3f340c6022f7285d9d7452",
+            "userName": "观众130",
+            "text": "쪼?끔빨리"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4e3d206238e5c888ca173ac7c5345dcb:1790632741134",
+            "sentAt": 1790632741134,
+            "userId": "4e3d206238e5c888ca173ac7c5345dcb",
+            "userName": "观众131",
+            "text": "2시간이 쪼끔????"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:27b600565084c7dfcf6e30b587f37ac7:1790632741812",
+            "sentAt": 1790632741812,
+            "userId": "27b600565084c7dfcf6e30b587f37ac7",
+            "userName": "观众132",
+            "text": "나하나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:1c2b0a16d42ad8bc79fe8cd086550370:1790632742194",
+            "sentAt": 1790632742194,
+            "userId": "1c2b0a16d42ad8bc79fe8cd086550370",
+            "userName": "观众133",
+            "text": "다시보기를누른거같은데 채팅이 써지네"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:7127051c876c85648494cfec39e27752:1790632743757",
+            "sentAt": 1790632743757,
+            "userId": "7127051c876c85648494cfec39e27752",
+            "userName": "观众134",
+            "text": "제법 빠른걸? ㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:1455ff0291e3d03de0e501c0915b00af:1790632744745",
+            "sentAt": 1790632744745,
+            "userId": "1455ff0291e3d03de0e501c0915b00af",
+            "userName": "观众135",
+            "text": "많이 빨리.."
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:d47a623824ccc4e15ed71abae0f8e802:1790632745027",
+            "sentAt": 1790632745027,
+            "userId": "d47a623824ccc4e15ed71abae0f8e802",
+            "userName": "观众136",
+            "text": "나하 엄청 빠르긴 하네"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4e3d206238e5c888ca173ac7c5345dcb:1790632745442",
+            "sentAt": 1790632745442,
+            "userId": "4e3d206238e5c888ca173ac7c5345dcb",
+            "userName": "观众131",
+            "text": "쪼끔???"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:68e4854565fbf7d7d15bc6e366c2e8a8:1790632746994",
+            "sentAt": 1790632746994,
+            "userId": "68e4854565fbf7d7d15bc6e366c2e8a8",
+            "userName": "观众129",
+            "text": "{:nanayangNA:}{:nanayangHA:}{:nanayangNA:}{:nanayangHA:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:26b5ddd19bc4caaa25451545eef8bdb5:1790632749014",
+            "sentAt": 1790632749014,
+            "userId": "26b5ddd19bc4caaa25451545eef8bdb5",
+            "userName": "观众137",
+            "text": "{:nanayangNA:}{:nanayangNA:}{:nanayangYANG:}{:nanayangHA:}{:nanayangYING:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:26c2fe0e4c0c788e4ae9c8a00f147a0a:1790632754713",
+            "sentAt": 1790632754713,
+            "userId": "26c2fe0e4c0c788e4ae9c8a00f147a0a",
+            "userName": "观众138",
+            "text": "나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4e3d206238e5c888ca173ac7c5345dcb:1790632756240",
+            "sentAt": 1790632756240,
+            "userId": "4e3d206238e5c888ca173ac7c5345dcb",
+            "userName": "观众131",
+            "text": "괘나 많이 엄청 빨리 왔구만"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:9df582d81a9b0c117a4c9aad9bd9ae17:1790632756240",
+            "sentAt": 1790632756240,
+            "userId": "9df582d81a9b0c117a4c9aad9bd9ae17",
+            "userName": "观众139",
+            "text": "하하ㅏㅏㅏㅏㅏㅏ잉ㅇ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:7f7c309d509f03e1221c9b9fa49ff930:1790632759478",
+            "sentAt": 1790632759478,
+            "userId": "7f7c309d509f03e1221c9b9fa49ff930",
+            "userName": "观众140",
+            "text": "ㅋㅋㅋㅋㅋ"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4e3d206238e5c888ca173ac7c5345dcb:1790632760276",
+            "sentAt": 1790632760276,
+            "userId": "4e3d206238e5c888ca173ac7c5345dcb",
+            "userName": "观众131",
+            "text": "오히려 좋아@"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:19aaa6608dd6008077eba7a1304517a5:1790632764944",
+            "sentAt": 1790632764944,
+            "userId": "19aaa6608dd6008077eba7a1304517a5",
+            "userName": "观众141",
+            "text": "{:nanayangNA:}{:nanayangHA:}{:nanayangNA:}{:nanayangHA:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:d9a177b440f9fb585ec6f2a0b8e3d77c:1790632773520",
+            "sentAt": 1790632773520,
+            "userId": "d9a177b440f9fb585ec6f2a0b8e3d77c",
+            "userName": "观众142",
+            "text": "{:nanayangHEY:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:6f4e252f1a9b80b0999b8a0985f0c10f:1790632773766",
+            "sentAt": 1790632773766,
+            "userId": "6f4e252f1a9b80b0999b8a0985f0c10f",
+            "userName": "观众143",
+            "text": "나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:15b8c6eec0d6edca612f93b131587361:1790632776685",
+            "sentAt": 1790632776685,
+            "userId": "15b8c6eec0d6edca612f93b131587361",
+            "userName": "观众144",
+            "text": "나하 굿모닝"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:d49d965e02a0259bf7fdc32c2d999b07:1790632785457",
+            "sentAt": 1790632785457,
+            "userId": "d49d965e02a0259bf7fdc32c2d999b07",
+            "userName": "观众145",
+            "text": "아 행복한 아침이야 {:nanayangNA:}{:nanayangHA:}{:nanayangNA:}{:nanayangHA:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4e3d206238e5c888ca173ac7c5345dcb:1790632790882",
+            "sentAt": 1790632790882,
+            "userId": "4e3d206238e5c888ca173ac7c5345dcb",
+            "userName": "观众131",
+            "text": "?! 아 우리가 보고싶어서 일찍 온건가???"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:2f50dbe8982ab81c3feb7e1b6113bd95:1790632791370",
+            "sentAt": 1790632791370,
+            "userId": "2f50dbe8982ab81c3feb7e1b6113bd95",
+            "userName": "观众146",
+            "text": "준비하면서 들으면 좋겠다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:f0d8aeb0d8179aa5233b5ef610414a52:1790632794330",
+            "sentAt": 1790632794330,
+            "userId": "f0d8aeb0d8179aa5233b5ef610414a52",
+            "userName": "观众147",
+            "text": "나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:5a2efadc2a40fa638e8b705545733eaa:1790632801456",
+            "sentAt": 1790632801456,
+            "userId": "5a2efadc2a40fa638e8b705545733eaa",
+            "userName": "观众148",
+            "text": "나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:91bb15ee56a22f618f9654dc7add157d:1790632801467",
+            "sentAt": 1790632801467,
+            "userId": "91bb15ee56a22f618f9654dc7add157d",
+            "userName": "观众149",
+            "text": "잘 쉬었어?"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:59a719d3cce332b4dc786183997b3320:1790632802720",
+            "sentAt": 1790632802720,
+            "userId": "59a719d3cce332b4dc786183997b3320",
+            "userName": "观众150",
+            "text": "왤케일찍와써??"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:4e3d206238e5c888ca173ac7c5345dcb:1790632802917",
+            "sentAt": 1790632802917,
+            "userId": "4e3d206238e5c888ca173ac7c5345dcb",
+            "userName": "观众131",
+            "text": "우리가 보고싶어서 일찍 온거였어🥹🥹💕"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:086e1ae3e521e3174ab961e907f895af:1790632810283",
+            "sentAt": 1790632810283,
+            "userId": "086e1ae3e521e3174ab961e907f895af",
+            "userName": "观众151",
+            "text": "{:nanayangAILEN3:}{:nanayangAILEN3:}{:nanayangAILEN3:}{:nanayangAILEN3:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:62677f64229319c59b9f54ab9092ac2f:1790632814986",
+            "sentAt": 1790632814986,
+            "userId": "62677f64229319c59b9f54ab9092ac2f",
+            "userName": "观众152",
+            "text": "나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:0d0ee7f7cb62d86473f70cbf02f31e75:1790632824911",
+            "sentAt": 1790632824911,
+            "userId": "0d0ee7f7cb62d86473f70cbf02f31e75",
+            "userName": "观众153",
+            "text": "엥 나나양이다"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:e8dcae4f3212b2f14d429924c2afbee5:1790632834282",
+            "sentAt": 1790632834282,
+            "userId": "e8dcae4f3212b2f14d429924c2afbee5",
+            "userName": "观众154",
+            "text": "{:nanayangNA:}{:nanayangHA:}{:nanayangNA:}{:nanayangHA:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:1eeef1c2066052f58054c6be7d2e1068:1790632837862",
+            "sentAt": 1790632837862,
+            "userId": "1eeef1c2066052f58054c6be7d2e1068",
+            "userName": "观众155",
+            "text": "나하나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:9abb617a1ccc7bb806fc1c18f9e6cb07:1790632839855",
+            "sentAt": 1790632839855,
+            "userId": "9abb617a1ccc7bb806fc1c18f9e6cb07",
+            "userName": "观众156",
+            "text": "나하나하! {:nanayangHEY:}{:nanayangHEY:}"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:6cbaeabd3ad51b23c8f1114841786a9f:1790632841233",
+            "sentAt": 1790632841233,
+            "userId": "6cbaeabd3ad51b23c8f1114841786a9f",
+            "userName": "观众157",
+            "text": "나하"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:1eeef1c2066052f58054c6be7d2e1068:1790632847182",
+            "sentAt": 1790632847182,
+            "userId": "1eeef1c2066052f58054c6be7d2e1068",
+            "userName": "观众155",
+            "text": "출근길 최고의 선택"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:469fc2e957be073e6ae4fedf157dd427:1790632849272",
+            "sentAt": 1790632849272,
+            "userId": "469fc2e957be073e6ae4fedf157dd427",
+            "userName": "观众158",
+            "text": "나나양이야!!!!"
+          },
+          {
+            "kind": "chat",
+            "id": "chzzk:d49d965e02a0259bf7fdc32c2d999b07:1790632859251",
+            "sentAt": 1790632859251,
+            "userId": "d49d965e02a0259bf7fdc32c2d999b07",
+            "userName": "观众145",
+            "text": "나나양이 외써어어{:nanayangAILEN3:}{:nanayangAILEN3:}{:nanayangAILEN3:}"
+          }
+        ]
+      }
+    ]
+  }
+}

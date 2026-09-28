@@ -1,0 +1,1071 @@
+{
+  "generator": "fixtures/chzzk/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) ChzzkProtocol (tokenUrl, accessToken, endpoint, headers, join, recent, ping, pong, decode) over every received frame (copied as it was; the event classes cut down to their fields)",
+  "value": {
+    "connector": {
+      "tokenUrl": "https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=N2lpu9&chatType=STREAMING",
+      "tokenHeaders": {
+        "origin": "https://chzzk.naver.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "endpoint": "wss://kr-ss1.chat.naver.com/chat",
+      "handshakeHeaders": {
+        "origin": "https://chzzk.naver.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "join": "{\"ver\":\"3\",\"cmd\":100,\"svcid\":\"game\",\"cid\":\"N2lpu9\",\"bdy\":{\"uid\":null,\"devType\":2001,\"accTkn\":\"<token>\",\"auth\":\"READ\"},\"tid\":1}",
+      "ping": "{\"ver\":\"3\",\"cmd\":0}",
+      "heartbeatSeconds": 20
+    },
+    "cases": {
+      "a chat line with every field": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000001:1790612400124",
+              "sentAt": 1790612400124,
+              "userId": "00000000000000000000000000000001",
+              "userName": "시청자1",
+              "text": "안녕"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        }
+      ],
+      "three lines in one frame, the member count changing": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000001:1790612400124",
+              "sentAt": 1790612400124,
+              "userId": "00000000000000000000000000000001",
+              "userName": "시청자1",
+              "text": "ㅋㅋㅋ"
+            },
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000002:1790612400125",
+              "sentAt": 1790612400125,
+              "userId": "00000000000000000000000000000002",
+              "userName": "viewer2",
+              "text": "gg"
+            },
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000003:1790612400126",
+              "sentAt": 1790612400126,
+              "userId": "00000000000000000000000000000003",
+              "userName": "观众3",
+              "text": "你好"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8830
+            }
+          ]
+        }
+      ],
+      "donations pushed live (93102): named, anonymous by user and by flag, without text, a video": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "gift",
+              "id": "chzzk:00000000000000000000000000000004:1790612400127:gift",
+              "sentAt": 1790612400127,
+              "userId": "00000000000000000000000000000004",
+              "userName": "후원자",
+              "giftName": "치즈",
+              "count": 1000
+            },
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000004:1790612400127",
+              "sentAt": 1790612400127,
+              "userId": "00000000000000000000000000000004",
+              "userName": "후원자",
+              "text": "응원해요"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "gift",
+              "id": "chzzk:anonymous:1790612400128:gift",
+              "sentAt": 1790612400128,
+              "userId": "",
+              "userName": "匿名",
+              "giftName": "치즈",
+              "count": 2000
+            },
+            {
+              "kind": "chat",
+              "id": "chzzk:anonymous:1790612400128",
+              "sentAt": 1790612400128,
+              "userId": "",
+              "userName": "匿名",
+              "text": "익명 후원"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "gift",
+              "id": "chzzk:00000000000000000000000000000006:1790612400129:gift",
+              "sentAt": 1790612400129,
+              "userId": "",
+              "userName": "匿名",
+              "giftName": "치즈",
+              "count": 3000
+            },
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000006:1790612400129",
+              "sentAt": 1790612400129,
+              "userId": "",
+              "userName": "匿名",
+              "text": "이름은 숨겨주세요"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "gift",
+              "id": "chzzk:00000000000000000000000000000007:1790612400130:gift",
+              "sentAt": 1790612400130,
+              "userId": "00000000000000000000000000000007",
+              "userName": "후원자2",
+              "giftName": "치즈",
+              "count": 5000
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "gift",
+              "id": "chzzk:00000000000000000000000000000008:1790612400131:gift",
+              "sentAt": 1790612400131,
+              "userId": "00000000000000000000000000000008",
+              "userName": "후원자3",
+              "giftName": "치즈",
+              "count": 1820
+            },
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000008:1790612400131",
+              "sentAt": 1790612400131,
+              "userId": "00000000000000000000000000000008",
+              "userName": "후원자3",
+              "text": "노래 제목 - 가수"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        }
+      ],
+      "subscriptions with and without a message, a subscription gift": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        }
+      ],
+      "system lines, images, stickers, parties and shop purchases show nothing": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "gift",
+              "id": "chzzk:0000000000000000000000000000003a:1790612400181:gift",
+              "sentAt": 1790612400181,
+              "userId": "0000000000000000000000000000003a",
+              "userName": "시청자1",
+              "giftName": "치즈",
+              "count": 500
+            },
+            {
+              "kind": "chat",
+              "id": "chzzk:0000000000000000000000000000003a:1790612400181",
+              "sentAt": 1790612400181,
+              "userId": "0000000000000000000000000000003a",
+              "userName": "시청자1",
+              "text": "스티커 후원"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        }
+      ],
+      "hidden lines: BLIND, CBOTBLIND, HIDDEN; a line without a status": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000014:1790612400143",
+              "sentAt": 1790612400143,
+              "userId": "00000000000000000000000000000014",
+              "userName": "시청자1",
+              "text": "상태 없음"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        }
+      ],
+      "the recent chat (15101): its field names; an answer that is not retCode 0": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000015:1790612400144",
+              "sentAt": 1790612400144,
+              "userId": "00000000000000000000000000000015",
+              "userName": "예전",
+              "text": "입장 전 채팅"
+            },
+            {
+              "kind": "gift",
+              "id": "chzzk:anonymous:1790612400145:gift",
+              "sentAt": 1790612400145,
+              "userId": "",
+              "userName": "匿名",
+              "giftName": "치즈",
+              "count": 1000
+            },
+            {
+              "kind": "chat",
+              "id": "chzzk:anonymous:1790612400145",
+              "sentAt": 1790612400145,
+              "userId": "",
+              "userName": "匿名",
+              "text": "익명 후원"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000019:1790612400148",
+              "sentAt": 1790612400148,
+              "userId": "00000000000000000000000000000019",
+              "userName": "실패",
+              "text": "보이면 안 됨"
+            }
+          ]
+        }
+      ],
+      "the answer to the join: accepted, without a session id, refused, to be retried, without a code": [
+        {
+          "joined": true,
+          "rejected": false,
+          "replies": [
+            {
+              "ver": "3",
+              "cmd": 5101,
+              "svcid": "game",
+              "cid": "N2lpu9",
+              "sid": "10_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "bdy": {
+                "recentMessageCount": 50
+              },
+              "tid": 2
+            }
+          ],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "replies": [],
+          "events": []
+        }
+      ],
+      "the server's ping, the pong, the end of the session": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [
+            {
+              "ver": "3",
+              "cmd": 10000
+            }
+          ],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        }
+      ],
+      "events, blind notices, notices, kicks and penalties show nothing": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        }
+      ],
+      "broken frames": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:0000000000000000000000000000001f:1790612400154",
+              "sentAt": 1790612400154,
+              "userId": "0000000000000000000000000000001f",
+              "userName": "시청자1",
+              "text": "남은 줄"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000020:1790612400155",
+              "sentAt": 1790612400155,
+              "userId": "00000000000000000000000000000020",
+              "userName": "시청자1",
+              "text": "바이너리"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000021:1790612400156",
+              "sentAt": 1790612400156,
+              "userId": "00000000000000000000000000000021",
+              "userName": "시청자1",
+              "text": "깨진��"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": []
+        }
+      ],
+      "fields of other types": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000022:1790612400157",
+              "sentAt": 1790612400157,
+              "userId": "00000000000000000000000000000022",
+              "userName": "시청자1",
+              "text": "42"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000023:1790612400158",
+              "sentAt": 1790612400158,
+              "userId": "00000000000000000000000000000023",
+              "userName": "시청자1",
+              "text": "[x]"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000024:1790612400159",
+              "sentAt": 1790612400159,
+              "userId": "00000000000000000000000000000024",
+              "userName": "시청자1",
+              "text": "{a: 1}"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:12345:1790612400124",
+              "sentAt": 1790612400124,
+              "userId": "12345",
+              "userName": "시청자1",
+              "text": "숫자 아이디"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000025:1790612400160",
+              "sentAt": 1790612400160,
+              "userId": "00000000000000000000000000000025",
+              "userName": "",
+              "text": "프로필 깨짐"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000026:1790612400161",
+              "sentAt": 1790612400161,
+              "userId": "00000000000000000000000000000026",
+              "userName": "객체이름",
+              "text": "프로필 객체"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000027:1790612400162",
+              "sentAt": 1790612400162,
+              "userId": "00000000000000000000000000000027",
+              "userName": "",
+              "text": "프로필 목록"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000028:1790612400163",
+              "sentAt": 1790612400163,
+              "userId": "00000000000000000000000000000028",
+              "userName": "7",
+              "text": "닉네임 숫자"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000029:1790612400164",
+              "sentAt": 1790612400164,
+              "userId": "00000000000000000000000000000029",
+              "userName": "시청자1",
+              "text": "익명 표시 깨짐"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:0000000000000000000000000000002a:1790612400165",
+              "sentAt": 1790612400165,
+              "userId": "0000000000000000000000000000002a",
+              "userName": "시청자1",
+              "text": "종류 문자"
+            },
+            {
+              "kind": "gift",
+              "id": "chzzk:0000000000000000000000000000002b:1790612400166:gift",
+              "sentAt": 1790612400166,
+              "userId": "0000000000000000000000000000002b",
+              "userName": "시청자1",
+              "giftName": "치즈",
+              "count": 1000
+            },
+            {
+              "kind": "chat",
+              "id": "chzzk:0000000000000000000000000000002b:1790612400166",
+              "sentAt": 1790612400166,
+              "userId": "0000000000000000000000000000002b",
+              "userName": "시청자1",
+              "text": "후원 문자"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:0000000000000000000000000000002c:1790612400167",
+              "sentAt": 1790612400167,
+              "userId": "0000000000000000000000000000002c",
+              "userName": "시청자1",
+              "text": "종류 없음"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:0000000000000000000000000000002d:1790612400168",
+              "sentAt": 1790612400168,
+              "userId": "0000000000000000000000000000002d",
+              "userName": "시청자1",
+              "text": "이상한 종류"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        }
+      ],
+      "times: milliseconds, zero, negative, beyond DateTime, text, a fraction": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:0000000000000000000000000000002e:1790612400123",
+              "sentAt": 1790612400123,
+              "userId": "0000000000000000000000000000002e",
+              "userName": "시청자1",
+              "text": "밀리초"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:0000000000000000000000000000002f:0",
+              "sentAt": null,
+              "userId": "0000000000000000000000000000002f",
+              "userName": "시청자1",
+              "text": "영"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000030:-5",
+              "sentAt": null,
+              "userId": "00000000000000000000000000000030",
+              "userName": "시청자1",
+              "text": "음수"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000032:1790612400123",
+              "sentAt": 1790612400123,
+              "userId": "00000000000000000000000000000032",
+              "userName": "시청자1",
+              "text": "문자 시간"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": null,
+              "sentAt": null,
+              "userId": "00000000000000000000000000000033",
+              "userName": "시청자1",
+              "text": "소수"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": null,
+              "sentAt": null,
+              "userId": "00000000000000000000000000000034",
+              "userName": "시청자1",
+              "text": "시간 없음"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        }
+      ],
+      "emoji placeholders and white space": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000035:1790612400176",
+              "sentAt": 1790612400176,
+              "userId": "00000000000000000000000000000035",
+              "userName": "시청자1",
+              "text": "{:d_45:}{:d_46:}"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000036:1790612400177",
+              "sentAt": 1790612400177,
+              "userId": "00000000000000000000000000000036",
+              "userName": "시청자1",
+              "text": "앞뒤 공백"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        }
+      ],
+      "a frame of another chat channel is read as it is (the site's client does not check)": [
+        {
+          "joined": false,
+          "rejected": false,
+          "replies": [],
+          "events": [
+            {
+              "kind": "chat",
+              "id": "chzzk:00000000000000000000000000000039:1790612400180",
+              "sentAt": 1790612400180,
+              "userId": "00000000000000000000000000000039",
+              "userName": "시청자1",
+              "text": "다른 채널"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 8826
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

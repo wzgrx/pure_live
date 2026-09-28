@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "platform": "chzzk",
+  "case": "S11-recent",
+  "rooms": [
+    "chzzk:a9ab391cdd3faef4ca2ee782e96e5c59",
+    "chzzk:18310fe936b08c9a92fa3f60bf209f0c",
+    "chzzk:80b36a0ae8e887e893ce0014dbfece4a"
+  ],
+  "danmakuKeys": [
+    {
+      "channelId": "a9ab391cdd3faef4ca2ee782e96e5c59",
+      "chatChannelId": "N2l-x_"
+    },
+    {
+      "channelId": "18310fe936b08c9a92fa3f60bf209f0c",
+      "chatChannelId": "N2lyvo"
+    },
+    {
+      "channelId": "80b36a0ae8e887e893ce0014dbfece4a",
+      "chatChannelId": "N2m13O"
+    }
+  ],
+  "capturedAt": "2026-09-28T22:00:15.090Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://kr-ss1.chat.naver.com/chat",
+      "headers": {
+        "origin": "https://chzzk.naver.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 3,
+  "raw": [
+    {
+      "chatChannelId": "N2l-x_",
+      "channelId": "a9ab391cdd3faef4ca2ee782e96e5c59",
+      "sha256": "24964716687445dd0e7852869226e337ddd8f100baeb09a565d5f4e0508220b7",
+      "length": 60664
+    },
+    {
+      "chatChannelId": "N2lyvo",
+      "channelId": "18310fe936b08c9a92fa3f60bf209f0c",
+      "sha256": "c95d3ff09b84247acaf2e98c9b3ffe8064e703b1a6d576bdc75e6fe9e79e77fa",
+      "length": 24825
+    },
+    {
+      "chatChannelId": "N2m13O",
+      "channelId": "80b36a0ae8e887e893ce0014dbfece4a",
+      "sha256": "c60df98f00e6a5dcb057b5a48c5ed1012a9f842445edccf9cfff2c59311b0b22",
+      "length": 64545
+    }
+  ],
+  "scrubbed": [
+    {
+      "where": "$..donationId",
+      "rule": "secret"
+    },
+    {
+      "where": "$..extraToken",
+      "rule": "secret"
+    },
+    {
+      "where": "$..nickName",
+      "rule": "person"
+    },
+    {
+      "where": "$..nickname",
+      "rule": "person"
+    },
+    {
+      "where": "$..userId",
+      "rule": "person"
+    },
+    {
+      "where": "$..userIdHash",
+      "rule": "person"
+    }
+  ],
+  "tool": "probe2.dart (dart:io; for each of the 30 most watched lives: access token, READ join, one recent-chat request, close) and scrub.py, M5.16; neither is in the repository",
+  "note": "Three answers to the recent-chat request (cmd 15101), one per line, each from another live (danmakuKeys in the same order), recorded 2026-09-28 22:00-22:01 UTC. Picked from 26 answers because they hold what S09 and S10 lack: donations (messageTypeCode 10: CHAT and VIDEO, anonymous and named), a subscription (11) and lines hidden by the clean bot (CBOTBLIND). `t` is the time since the first answer. User ids, nicknames (also in extras and weeklyRankList), tokens and donation ids are synthetic values of the same shape and length; the streamers' public channel ids and names, chat text and amounts are kept. The handshake headers are what the recorder gave dart:io, which sends the user-agent after its own (\"Dart/3.13 (dart:io), Mozilla/5.0 …\"); the server accepts it."
+}

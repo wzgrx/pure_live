@@ -1,0 +1,627 @@
+{
+  "generator": "fixtures/douyu/danmaku/legacy_expected.dart: 3.x DouyuDanmaku.decodeMessage over each case of cases.json (one server frame per case)",
+  "value": [
+    {
+      "name": "two chats coalesced in one frame (3.x test)",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "7",
+          "message": "one",
+          "color": "#ffffff",
+          "messageId": "douyu:c1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "B",
+          "userId": "8",
+          "message": "two",
+          "color": "#ffffff",
+          "messageId": "douyu:c2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "another room's chat is dropped; chat without rid is kept (3.x test)",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "7",
+          "message": "no rid",
+          "color": "#ffffff",
+          "messageId": "douyu:c2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "unmarked chat is kept by default (3.x test)",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "7",
+          "message": "ordinary",
+          "color": "#ffffff",
+          "messageId": "douyu:c1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "unmarked chat is filtered after opt-in (3.x test)",
+      "messages": []
+    },
+    {
+      "name": "chat with dms or if=1 passes the filter",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "7",
+          "message": "dms",
+          "color": "#ffffff",
+          "messageId": "douyu:c1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "B",
+          "userId": "8",
+          "message": "fan",
+          "color": "#ffffff",
+          "messageId": "douyu:c2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "D",
+          "userId": "10",
+          "message": "empty dms",
+          "color": "#ffffff",
+          "messageId": "douyu:c4",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "empty chat does not affect the next packet (3.x test)",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "B",
+          "userId": "8",
+          "message": "next",
+          "color": "#ffffff",
+          "messageId": "douyu:next",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "colours, timestamps and missing fields",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "U0",
+          "userId": "0",
+          "message": "c0",
+          "color": "#ffffff",
+          "messageId": "douyu:k0",
+          "sentAt": 1790519453000,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "U1",
+          "userId": "1",
+          "message": "c1",
+          "color": "#ff0000",
+          "messageId": "douyu:k1",
+          "sentAt": 1790519453000,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "U2",
+          "userId": "2",
+          "message": "c2",
+          "color": "#1e87f0",
+          "messageId": "douyu:k2",
+          "sentAt": 1790519453000,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "U3",
+          "userId": "3",
+          "message": "c3",
+          "color": "#7ac84b",
+          "messageId": "douyu:k3",
+          "sentAt": 1790519453000,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "U4",
+          "userId": "4",
+          "message": "c4",
+          "color": "#ff7f00",
+          "messageId": "douyu:k4",
+          "sentAt": 1790519453000,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "U5",
+          "userId": "5",
+          "message": "c5",
+          "color": "#9b39f4",
+          "messageId": "douyu:k5",
+          "sentAt": 1790519453000,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "U6",
+          "userId": "6",
+          "message": "c6",
+          "color": "#ff69b4",
+          "messageId": "douyu:k6",
+          "sentAt": 1790519453000,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "U7",
+          "userId": "7",
+          "message": "c7",
+          "color": "#ffffff",
+          "messageId": "douyu:k7",
+          "sentAt": 1790519453000,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "观众",
+          "userId": "20",
+          "message": "毫秒",
+          "color": "#ffffff",
+          "messageId": "douyu:ms",
+          "sentAt": 1790519453584,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "",
+          "userId": "",
+          "message": "bare",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "E",
+          "userId": "21",
+          "message": "zero time",
+          "color": "#ffffff",
+          "messageId": "douyu:z",
+          "sentAt": 0,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "chat and super chat coalesced in one frame (3.x test)",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "7",
+          "message": "hello",
+          "color": "#ffffff",
+          "messageId": "douyu:c1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "superChat",
+          "userName": "SUPER_CHAT_MESSAGE",
+          "userId": "",
+          "message": "SUPER_CHAT_MESSAGE",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "messageId": "",
+            "userName": "Supporter",
+            "face": "https://apic.douyucdn.cn/upload/avatar_small.jpg",
+            "message": "Great",
+            "price": 5,
+            "startTime": 1700000000000,
+            "endTime": 1700000060000,
+            "backgroundColor": "#c1c1ff",
+            "backgroundBottomColor": "#292a60"
+          }
+        }
+      ]
+    },
+    {
+      "name": "super chat with an avatar path",
+      "messages": [
+        {
+          "type": "superChat",
+          "userName": "SUPER_CHAT_MESSAGE",
+          "userId": "",
+          "message": "SUPER_CHAT_MESSAGE",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "messageId": "",
+            "userName": "付费观众",
+            "face": "https://apic.douyucdn.cn/upload/avatar_v3/202603/abc_small.jpg",
+            "message": "加油",
+            "price": 30,
+            "startTime": 1790519453000,
+            "endTime": 1790519513000,
+            "backgroundColor": "#c1c1ff",
+            "backgroundBottomColor": "#292a60"
+          }
+        },
+        {
+          "type": "superChat",
+          "userName": "SUPER_CHAT_MESSAGE",
+          "userId": "",
+          "message": "SUPER_CHAT_MESSAGE",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "messageId": "",
+            "userName": "NoFace",
+            "face": "",
+            "message": "hi",
+            "price": 19,
+            "startTime": 1790519453000,
+            "endTime": 1790519483000,
+            "backgroundColor": "#c1c1ff",
+            "backgroundBottomColor": "#292a60"
+          }
+        }
+      ]
+    },
+    {
+      "name": "incomplete super chats are ignored",
+      "messages": []
+    },
+    {
+      "name": "pandora box notice shares the super chat type (price and duration 0)",
+      "messages": [
+        {
+          "type": "superChat",
+          "userName": "SUPER_CHAT_MESSAGE",
+          "userId": "",
+          "message": "SUPER_CHAT_MESSAGE",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "messageId": "",
+            "userName": "开箱观众",
+            "face": "https://apic.douyucdn.cn/upload/x_small.jpg",
+            "message": "-",
+            "price": 0,
+            "startTime": 1790518114673,
+            "endTime": 1790518114673,
+            "backgroundColor": "#c1c1ff",
+            "backgroundBottomColor": "#292a60"
+          }
+        }
+      ]
+    },
+    {
+      "name": "voice super chat",
+      "messages": [
+        {
+          "type": "superChat",
+          "userName": "SUPER_CHAT_MESSAGE",
+          "userId": "",
+          "message": "SUPER_CHAT_MESSAGE",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "messageId": "",
+            "userName": "语音观众",
+            "face": "",
+            "message": "语音留言",
+            "price": 50,
+            "startTime": 1790519453000,
+            "endTime": 1790519513000,
+            "backgroundColor": "#ffffff",
+            "backgroundBottomColor": "#246488"
+          }
+        }
+      ]
+    },
+    {
+      "name": "chat text holding STT escapes, links and @=",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "1",
+          "message": "@lice 你好",
+          "color": "#ffffff",
+          "messageId": "douyu:e1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "/am",
+          "userId": "2",
+          "message": "/akura",
+          "color": "#ffffff",
+          "messageId": "douyu:e2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "C",
+          "userId": "3",
+          "message": "[https:, t.cn/x]",
+          "color": "#ffffff",
+          "messageId": "douyu:e3",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "D",
+          "userId": "4",
+          "message": "{a: b}",
+          "color": "#ffffff",
+          "messageId": "douyu:e4",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "E",
+          "userId": "5",
+          "message": "{x: y}",
+          "color": "#ffffff",
+          "messageId": "douyu:e5",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "F",
+          "userId": "6",
+          "message": "1/2 @ 3",
+          "color": "#ffffff",
+          "messageId": "douyu:e6",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "a packet that fails to decode does not lose the rest of the frame",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "1",
+          "message": "before",
+          "color": "#ffffff",
+          "messageId": "douyu:b1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "C",
+          "userId": "3",
+          "message": "after",
+          "color": "#ffffff",
+          "messageId": "douyu:b3",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "a truncated last packet is dropped",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "1",
+          "message": "kept",
+          "color": "#ffffff",
+          "messageId": "douyu:t1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "a length below 9 stops the frame",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "1",
+          "message": "kept",
+          "color": "#ffffff",
+          "messageId": "douyu:s1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "other packet types are ignored",
+      "messages": []
+    }
+  ]
+}

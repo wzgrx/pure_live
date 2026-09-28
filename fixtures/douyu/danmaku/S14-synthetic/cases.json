@@ -1,0 +1,167 @@
+{
+  "note": "Synthetic server frames for what the recording (S13-live) lacks: super chats, filter cases, other rooms, escaped text, broken packets. Each case is one WebSocket frame; every string is one packet body framed as the server does (type 690, little endian, UTF-8 length); {\"headerLength\": n} is a bare 12-byte header claiming length n; \"cut\" drops that many bytes from the end of the frame. \"filter\" turns on the suspected-automated filter.",
+  "cases": [
+    {
+      "name": "two chats coalesced in one frame (3.x test)",
+      "roomId": "100",
+      "packets": [
+        "type@=chatmsg/rid@=100/dms@=1/uid@=7/nn@=A/txt@=one/cid@=c1/col@=0/",
+        "type@=chatmsg/rid@=100/dms@=1/uid@=8/nn@=B/txt@=two/cid@=c2/col@=0/"
+      ]
+    },
+    {
+      "name": "another room's chat is dropped; chat without rid is kept (3.x test)",
+      "roomId": "100",
+      "packets": [
+        "type@=chatmsg/rid@=200/dms@=1/uid@=7/nn@=A/txt@=wrong/cid@=c1/",
+        "type@=chatmsg/dms@=1/uid@=7/nn@=A/txt@=no rid/cid@=c2/"
+      ]
+    },
+    {
+      "name": "unmarked chat is kept by default (3.x test)",
+      "roomId": "71415",
+      "packets": [
+        "type@=chatmsg/rid@=71415/uid@=7/nn@=A/txt@=ordinary/cid@=c1/col@=0/"
+      ]
+    },
+    {
+      "name": "unmarked chat is filtered after opt-in (3.x test)",
+      "roomId": "71415",
+      "filter": true,
+      "packets": [
+        "type@=chatmsg/rid@=71415/uid@=7/nn@=A/txt@=ordinary/cid@=c1/col@=0/"
+      ]
+    },
+    {
+      "name": "chat with dms or if=1 passes the filter",
+      "roomId": "71415",
+      "filter": true,
+      "packets": [
+        "type@=chatmsg/rid@=71415/uid@=7/nn@=A/txt@=dms/cid@=c1/dms@=4/",
+        "type@=chatmsg/rid@=71415/uid@=8/nn@=B/txt@=fan/cid@=c2/if@=1/",
+        "type@=chatmsg/rid@=71415/uid@=9/nn@=C/txt@=not a fan/cid@=c3/if@=0/",
+        "type@=chatmsg/rid@=71415/uid@=10/nn@=D/txt@=empty dms/cid@=c4/dms@=/"
+      ]
+    },
+    {
+      "name": "empty chat does not affect the next packet (3.x test)",
+      "roomId": "71415",
+      "packets": [
+        "type@=chatmsg/rid@=71415/uid@=7/nn@=A/txt@=/cid@=empty/",
+        "type@=chatmsg/rid@=71415/uid@=8/nn@=B/txt@=next/cid@=next/"
+      ]
+    },
+    {
+      "name": "colours, timestamps and missing fields",
+      "roomId": "9999",
+      "packets": [
+        "type@=chatmsg/rid@=9999/uid@=0/nn@=U0/txt@=c0/cid@=k0/col@=0/cst@=1790519453/",
+        "type@=chatmsg/rid@=9999/uid@=1/nn@=U1/txt@=c1/cid@=k1/col@=1/cst@=1790519453/",
+        "type@=chatmsg/rid@=9999/uid@=2/nn@=U2/txt@=c2/cid@=k2/col@=2/cst@=1790519453/",
+        "type@=chatmsg/rid@=9999/uid@=3/nn@=U3/txt@=c3/cid@=k3/col@=3/cst@=1790519453/",
+        "type@=chatmsg/rid@=9999/uid@=4/nn@=U4/txt@=c4/cid@=k4/col@=4/cst@=1790519453/",
+        "type@=chatmsg/rid@=9999/uid@=5/nn@=U5/txt@=c5/cid@=k5/col@=5/cst@=1790519453/",
+        "type@=chatmsg/rid@=9999/uid@=6/nn@=U6/txt@=c6/cid@=k6/col@=6/cst@=1790519453/",
+        "type@=chatmsg/rid@=9999/uid@=7/nn@=U7/txt@=c7/cid@=k7/col@=7/cst@=1790519453/",
+        "type@=chatmsg/rid@=9999/uid@=20/nn@=观众/txt@=毫秒/cid@=ms/col@=x/cst@=1790519453584/",
+        "type@=chatmsg/rid@=9999/txt@=bare/",
+        "type@=chatmsg/rid@=9999/uid@=21/nn@=E/txt@=zero time/cid@=z/cst@=0/"
+      ]
+    },
+    {
+      "name": "chat and super chat coalesced in one frame (3.x test)",
+      "roomId": "100",
+      "packets": [
+        "type@=chatmsg/rid@=100/dms@=1/uid@=7/nn@=A/txt@=hello/cid@=c1/",
+        "type@=comm_chatmsg/now@=1700000000000/cet@=60/cprice@=500/chatmsg@=nn@A=Supporter@Stxt@A=Great@Sic@A=avatar/"
+      ]
+    },
+    {
+      "name": "super chat with an avatar path",
+      "roomId": "9999",
+      "packets": [
+        "type@=comm_chatmsg/rid@=9999/btype@=superDanmu/chatmsg@=nn@A=付费观众@Stxt@A=加油@Sic@A=avatar_v3@AS202603@ASabc@S/cprice@=3000/cet@=60/now@=1790519453000/",
+        "type@=comm_chatmsg/now@=1790519453000/cet@=30/cprice@=1999/chatmsg@=nn@A=NoFace@Stxt@A=hi@S/"
+      ]
+    },
+    {
+      "name": "incomplete super chats are ignored",
+      "roomId": "9999",
+      "packets": [
+        "type@=comm_chatmsg/cprice@=3000/cet@=60/chatmsg@=nn@A=A@Stxt@A=x@S/",
+        "type@=comm_chatmsg/now@=1790519453000/cprice@=3000/cet@=60/chatmsg@=-/",
+        "type@=comm_chatmsg/now@=1790519453000/cprice@=3000/cet@=60/",
+        "type@=comm_chatmsg/now@=1790519453000/cprice@=abc/cet@=60/chatmsg@=nn@A=A@Stxt@A=x@S/"
+      ]
+    },
+    {
+      "name": "pandora box notice shares the super chat type (price and duration 0)",
+      "roomId": "9999",
+      "packets": [
+        "btype@=pandora/chatmsg@=nn@A=开箱观众@Stxt@A=-@Sic@A=x@S/range@=2/cprice@=0/type@=comm_chatmsg/cet@=0/now@=1790518114673/"
+      ]
+    },
+    {
+      "name": "voice super chat",
+      "roomId": "9999",
+      "packets": [
+        "type@=voice_trlt/rid@=9999/list@=acptime@AA=1790519453@ASetime@AA=1790519513@ASrealPrice@AA=5000@AScontent@AA=语音留言@ASun@AA=语音观众@ASuat@AA=a.jpg@AASapic.douyucdn.cn@AAASupload@AAASavatar_v3@AAASb_small.jpg@AAS@AS@S/",
+        "type@=voice_trlt/rid@=9999/list@=acptime@AA=1790519453@ASetime@AA=1790519513@AScontent@AA=x@ASun@AA=y@AS@S/",
+        "type@=voice_trlt/rid@=9999/list@=/"
+      ]
+    },
+    {
+      "name": "chat text holding STT escapes, links and @=",
+      "roomId": "9999",
+      "packets": [
+        "type@=chatmsg/rid@=9999/uid@=1/nn@=A/txt@=@AAlice 你好/cid@=e1/",
+        "type@=chatmsg/rid@=9999/uid@=2/nn@=@ASam/txt@=@ASakura/cid@=e2/",
+        "type@=chatmsg/rid@=9999/uid@=3/nn@=C/txt@=https:@S@St.cn@Sx/cid@=e3/",
+        "type@=chatmsg/rid@=9999/uid@=4/nn@=D/txt@=a@A=b/cid@=e4/",
+        "type@=chatmsg/rid@=9999/uid@=5/nn@=E/txt@=x@AA=y/cid@=e5/",
+        "type@=chatmsg/rid@=9999/uid@=6/nn@=F/txt@=1@S2 @A 3/cid@=e6/"
+      ]
+    },
+    {
+      "name": "a packet that fails to decode does not lose the rest of the frame",
+      "roomId": "9999",
+      "packets": [
+        "type@=chatmsg/rid@=9999/uid@=1/nn@=A/txt@=before/cid@=b1/",
+        "type@=chatmsg/rid@=9999/uid@=2/nn@=B/txt@=bad time/cid@=b2/cst@=99999999999999999/",
+        "type@=comm_chatmsg/now@=99999999999999999/cet@=60/cprice@=500/chatmsg@=nn@A=A@Stxt@A=x@S/",
+        "type@=chatmsg/rid@=9999/uid@=3/nn@=C/txt@=after/cid@=b3/"
+      ]
+    },
+    {
+      "name": "a truncated last packet is dropped",
+      "roomId": "9999",
+      "cut": 3,
+      "packets": [
+        "type@=chatmsg/rid@=9999/uid@=1/nn@=A/txt@=kept/cid@=t1/",
+        "type@=chatmsg/rid@=9999/uid@=2/nn@=B/txt@=cut/cid@=t2/"
+      ]
+    },
+    {
+      "name": "a length below 9 stops the frame",
+      "roomId": "9999",
+      "packets": [
+        "type@=chatmsg/rid@=9999/uid@=1/nn@=A/txt@=kept/cid@=s1/",
+        {
+          "headerLength": 8
+        },
+        "type@=chatmsg/rid@=9999/uid@=2/nn@=B/txt@=lost/cid@=s2/"
+      ]
+    },
+    {
+      "name": "other packet types are ignored",
+      "roomId": "9999",
+      "packets": [
+        "type@=loginres/userid@=0/",
+        "type@=mrkl/",
+        "type@=uenter/rid@=9999/uid@=1/nn@=A/",
+        "type@=dgb/rid@=9999/gfid@=824/gfn@=x/gfcnt@=1/uid@=1/nn@=A/",
+        "type@=oni/vn@=1/rid@=9999/list@=/"
+      ]
+    }
+  ]
+}

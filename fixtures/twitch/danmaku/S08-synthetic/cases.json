@@ -1,0 +1,268 @@
+{
+  "note": "Synthetic server frames for Twitch's chat decoder (docs/modules/M5.8-twitch.md). Each case is one or more WebSocket frames, in order: a string is a text frame as written; {\"lines\": [...]} is a text frame of those lines, each ended by CR LF as Twitch sends them; {\"b64\": ...} is a binary frame. The first two cases are 3.x's own tests (legacy/test/twitch_danmaku_protocol_test.dart). The login refusal is the answer Twitch gave on 2026-09-29 to a made-up token. Nicks, names and ids are made up.",
+  "cases": [
+    {
+      "name": "3.x: keeps messages whose user has no configured color",
+      "frames": [
+        "@color=;display-name=Viewer;id=m1;tmi-sent-ts=1700000000000;user-id=u1 :viewer!viewer@viewer.tmi.twitch.tv PRIVMSG #room :hello"
+      ]
+    },
+    {
+      "name": "3.x: decodes every line and IRC escaped display names",
+      "frames": [
+        "@color=#00FF7F;display-name=First\\sUser;id=m1 :first!first@first.tmi.twitch.tv PRIVMSG #room :one\r\n@color=#FF0000;display-name=;id=m2 :second!second@second.tmi.twitch.tv PRIVMSG #room :two"
+      ]
+    },
+    {
+      "name": "a blank or missing display name falls back to the nick of the prefix",
+      "frames": [
+        {
+          "lines": [
+            "@display-name=\\s\\s;id=a1 :spacey!spacey@spacey.tmi.twitch.tv PRIVMSG #room :blank name",
+            "@id=a2 :noname!noname@noname.tmi.twitch.tv PRIVMSG #room :no display-name tag",
+            "@display-name=\\sPadded\\s;id=a3 :padded!padded@padded.tmi.twitch.tv PRIVMSG #room :padded name"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "without a display name or a nick in the prefix the name is Twitch",
+      "frames": [
+        {
+          "lines": [
+            "@display-name=;id=b1 :tmi.twitch.tv PRIVMSG #room :server line"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a line without tags: 3.x's prefix pattern skips the leading nick",
+      "frames": [
+        {
+          "lines": [
+            ":viewer!viewer@viewer.tmi.twitch.tv PRIVMSG #room :hello",
+            ":viewer!viewer@viewer.tmi.twitch.tv PRIVMSG #room :hey! you",
+            "@ :bare!bare@bare.tmi.twitch.tv PRIVMSG #room :empty tag section"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "colours with 1-3, 5 or 7 hex digits were white in 3.x",
+      "frames": [
+        {
+          "lines": [
+            "@color=#0000FF;display-name=Blue;id=c1 :a!a@a.tmi.twitch.tv PRIVMSG #room :Twitch default Blue",
+            "@color=#000080;display-name=Navy;id=c2 :a!a@a.tmi.twitch.tv PRIVMSG #room :navy",
+            "@color=#0A0A0A;display-name=Grey;id=c3 :a!a@a.tmi.twitch.tv PRIVMSG #room :dark grey",
+            "@color=#000000;display-name=Black;id=c4 :a!a@a.tmi.twitch.tv PRIVMSG #room :black"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "colours 3.x and M2 read alike",
+      "frames": [
+        {
+          "lines": [
+            "@color=#1E90FF;display-name=A;id=d1 :a!a@a.tmi.twitch.tv PRIVMSG #room :DodgerBlue",
+            "@color=#008000;display-name=A;id=d2 :a!a@a.tmi.twitch.tv PRIVMSG #room :Green, four digits",
+            "@color=#00FF7F;display-name=A;id=d3 :a!a@a.tmi.twitch.tv PRIVMSG #room :SpringGreen, four digits",
+            "@color=#ff69b4;display-name=A;id=d4 :a!a@a.tmi.twitch.tv PRIVMSG #room :lower case",
+            "@color=FF4500;display-name=A;id=d5 :a!a@a.tmi.twitch.tv PRIVMSG #room :without #",
+            "@color=#80FF0000;display-name=A;id=d6 :a!a@a.tmi.twitch.tv PRIVMSG #room :eight digits",
+            "@color=#GGGGGG;display-name=A;id=d7 :a!a@a.tmi.twitch.tv PRIVMSG #room :unreadable",
+            "@display-name=A;id=d8 :a!a@a.tmi.twitch.tv PRIVMSG #room :no color tag"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tag escapes as 3.x reads them",
+      "frames": [
+        {
+          "lines": [
+            "@display-name=semi\\:colon;id=e1 :a!a@a.tmi.twitch.tv PRIVMSG #room :escaped semicolon",
+            "@display-name=back\\\\slash;id=e2 :a!a@a.tmi.twitch.tv PRIVMSG #room :escaped backslash",
+            "@display-name=a\\\\sb;id=e3 :a!a@a.tmi.twitch.tv PRIVMSG #room :3.x's order: an escaped backslash before s",
+            "@display-name=trailing\\;id=e4 :a!a@a.tmi.twitch.tv PRIVMSG #room :a lone backslash",
+            "@flag;display-name=x=y;id=e5 :a!a@a.tmi.twitch.tv PRIVMSG #room :an entry without = and = in a value",
+            "@display-name=line\\rbreak\\n;id=e6 :a!a@a.tmi.twitch.tv PRIVMSG #room :escaped CR and LF"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ids and times missing, empty or unreadable",
+      "frames": [
+        {
+          "lines": [
+            "@display-name=A;tmi-sent-ts=soon :a!a@a.tmi.twitch.tv PRIVMSG #room :no ids",
+            "@display-name=B;id=;user-id=;tmi-sent-ts= :a!a@a.tmi.twitch.tv PRIVMSG #room :empty tags",
+            "@display-name=C;id=f3;user-id=42;tmi-sent-ts=-1000 :a!a@a.tmi.twitch.tv PRIVMSG #room :before 1970"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a time beyond DateTime's range loses the whole frame in 3.x",
+      "frames": [
+        {
+          "lines": [
+            "@display-name=A;id=g1;tmi-sent-ts=1790534993943 :a!a@a.tmi.twitch.tv PRIVMSG #room :before",
+            "@display-name=B;id=g2;tmi-sent-ts=8640000000000001 :a!a@a.tmi.twitch.tv PRIVMSG #room :out of range",
+            "@display-name=C;id=g3;tmi-sent-ts=1790534993944 :a!a@a.tmi.twitch.tv PRIVMSG #room :after"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "/me lines (CTCP ACTION)",
+      "frames": [
+        {
+          "lines": [
+            "@display-name=A;id=h1 :a!a@a.tmi.twitch.tv PRIVMSG #room :\u0001ACTION waves\u0001",
+            "@display-name=A;id=h2 :a!a@a.tmi.twitch.tv PRIVMSG #room :\u0001ACTION without the closing byte",
+            "@display-name=A;id=h3 :a!a@a.tmi.twitch.tv PRIVMSG #room :\u0001ACTION\u0001",
+            "@display-name=A;id=h4 :a!a@a.tmi.twitch.tv PRIVMSG #room :\u0001ACTIONS is not an action\u0001",
+            "@display-name=A;id=h5 :a!a@a.tmi.twitch.tv PRIVMSG #room :\u0001VERSION\u0001",
+            "@display-name=A;id=h6 :a!a@a.tmi.twitch.tv PRIVMSG #room :not \u0001ACTION at the start\u0001"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a PRIVMSG without a text part is skipped; empty text is chat",
+      "frames": [
+        {
+          "lines": [
+            "@display-name=A;id=i1 :a!a@a.tmi.twitch.tv PRIVMSG #room",
+            "@display-name=A;id=i2 :a!a@a.tmi.twitch.tv PRIVMSG #room :"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "the line is trimmed; the text keeps ' :' and inner spaces",
+      "frames": [
+        "  @display-name=A;id=j1 :a!a@a.tmi.twitch.tv PRIVMSG #room :  two  spaces : colon  \t\r\n"
+      ]
+    },
+    {
+      "name": "other commands carry no chat",
+      "frames": [
+        {
+          "lines": [
+            ":tmi.twitch.tv CAP * ACK :twitch.tv/tags twitch.tv/commands twitch.tv/membership",
+            ":tmi.twitch.tv 001 justinfan39976 :Welcome, GLHF!",
+            ":justinfan39976!justinfan39976@justinfan39976.tmi.twitch.tv JOIN #room",
+            ":viewer!viewer@viewer.tmi.twitch.tv PART #room",
+            "@emote-only=0;followers-only=0;r9k=0;room-id=1;slow=0;subs-only=0 :tmi.twitch.tv ROOMSTATE #room",
+            "@badges=;color=;display-name=justinfan39976;emote-sets=0;mod=0;subscriber=0;user-type= :tmi.twitch.tv USERSTATE #room",
+            "@display-name=Sub;id=k1;msg-id=resub;system-msg=Sub\\ssubscribed :tmi.twitch.tv USERNOTICE #room :great stream",
+            "@ban-duration=60;room-id=1;target-user-id=2;tmi-sent-ts=1790618719773 :tmi.twitch.tv CLEARCHAT #room :viewer",
+            "@login=viewer;room-id=;target-msg-id=k2;tmi-sent-ts=1 :tmi.twitch.tv CLEARMSG #room :deleted text",
+            "@msg-id=followers_on :tmi.twitch.tv NOTICE #room :This room is now in followers-only mode.",
+            ":justinfan39976.tmi.twitch.tv 353 justinfan39976 = #room :justinfan39976",
+            ":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv",
+            ":tmi.twitch.tv RECONNECT"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a line of another command whose text holds ' PRIVMSG ' is chat to 3.x",
+      "frames": [
+        {
+          "lines": [
+            "@display-name=Sub;id=l1;msg-id=resub :tmi.twitch.tv USERNOTICE #room :quoting PRIVMSG #room :hello"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a binary frame is read as UTF-8, malformed bytes replaced",
+      "frames": [
+        {
+          "b64": "QGRpc3BsYXktbmFtZT1CO2lkPW0xIDpiIWJAYi50bWkudHdpdGNoLnR2IFBSSVZNU0cgI3Jvb20gOmNhZsOpIP8gb2sNCg=="
+        }
+      ]
+    },
+    {
+      "name": "lines broken by LF alone, blank lines",
+      "frames": [
+        "\n\n@display-name=A;id=n1 :a!a@a.tmi.twitch.tv PRIVMSG #room :one\n\r\n@display-name=B;id=n2 :a!a@a.tmi.twitch.tv PRIVMSG #room :two\n"
+      ]
+    },
+    {
+      "name": "PING alone is answered with PONG",
+      "frames": [
+        "PING :tmi.twitch.tv\r\n"
+      ]
+    },
+    {
+      "name": "PING with another argument",
+      "frames": [
+        "PING :irc-ws.chat.twitch.tv\r\n"
+      ]
+    },
+    {
+      "name": "PING first in a frame with chat: 3.x sends the whole frame back",
+      "frames": [
+        {
+          "lines": [
+            "PING :tmi.twitch.tv",
+            "@display-name=A;id=p1;user-id=1 :a!a@a.tmi.twitch.tv PRIVMSG #room :after the ping"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "PING after another line: 3.x does not answer it",
+      "frames": [
+        {
+          "lines": [
+            "@display-name=A;id=p2;user-id=1 :a!a@a.tmi.twitch.tv PRIVMSG #room :before the ping",
+            "PING :tmi.twitch.tv"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a refused login: NOTICE * and no chat",
+      "frames": [
+        {
+          "lines": [
+            ":tmi.twitch.tv NOTICE * :Login authentication failed",
+            ":tmi.twitch.tv CAP * ACK :twitch.tv/tags twitch.tv/commands twitch.tv/membership"
+          ]
+        },
+        {
+          "lines": [
+            ":tmi.twitch.tv NOTICE * :Improperly formatted auth"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Korean, Chinese and emoji",
+      "frames": [
+        {
+          "lines": [
+            "@color=#FF7F50;display-name=시청자;id=o1;user-id=5 :viewer5!viewer5@viewer5.tmi.twitch.tv PRIVMSG #room :안녕하세요 你好 😀"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a reply: only the message's own tags are read",
+      "frames": [
+        {
+          "lines": [
+            "@color=#7100FF;display-name=Replier;id=q1;reply-parent-display-name=Parent;reply-parent-msg-body=die\\sleute;reply-parent-msg-id=q0;reply-parent-user-id=7;reply-parent-user-login=parent;tmi-sent-ts=1790535030445;user-id=8 :replier!replier@replier.tmi.twitch.tv PRIVMSG #room :@Parent das ist doch das geile"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -24,5 +24,6 @@ export 'src/sites/douyu.dart';
 export 'src/sites/huya.dart';
 export 'src/sites/kuaishou.dart';
 export 'src/sites/soop.dart';
+export 'src/sites/twitch.dart';
 export 'src/sites/yy.dart';
 export 'src/socket_connection.dart';

@@ -1,0 +1,72 @@
+{
+  "generator": "NiconicoSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + NiconicoApi.room (lv351482791)",
+  "value": {
+    "getRoomDetail": {
+      "roomId": "lv351482791",
+      "title": "プログラミング",
+      "nick": "シューター",
+      "avatar": "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/13838/138383030.jpg?1739089287",
+      "cover": "https://nicolive.cdn.nimg.jp/tsthumb/thumbnail/260928/02/06/pg45865609724510_360_640.jpg",
+      "watching": "0",
+      "audienceMetricType": "totalViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "1",
+      "followers": "0",
+      "platform": "niconico",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "notice": "收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。",
+      "isCatchUp": false,
+      "link": "https://live.nicovideo.jp/watch/lv351482791"
+    },
+    "getRoomDetailForRefresh": {
+      "roomId": "lv351482791",
+      "title": "プログラミング",
+      "nick": "シューター",
+      "avatar": "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/13838/138383030.jpg?1739089287",
+      "cover": "https://nicolive.cdn.nimg.jp/tsthumb/thumbnail/260928/02/06/pg45865609724510_360_640.jpg",
+      "watching": "0",
+      "audienceMetricType": "totalViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "1",
+      "followers": "0",
+      "platform": "niconico",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "notice": "收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。",
+      "isCatchUp": false,
+      "link": "https://live.nicovideo.jp/watch/lv351482791"
+    },
+    "getRoomDetailForRecording": {
+      "roomId": "lv351482791",
+      "title": "プログラミング",
+      "nick": "シューター",
+      "avatar": "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/13838/138383030.jpg?1739089287",
+      "cover": "https://nicolive.cdn.nimg.jp/tsthumb/thumbnail/260928/02/06/pg45865609724510_360_640.jpg",
+      "watching": "0",
+      "audienceMetricType": "totalViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "1",
+      "followers": "0",
+      "platform": "niconico",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "notice": "收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。",
+      "isCatchUp": false,
+      "link": "https://live.nicovideo.jp/watch/lv351482791"
+    },
+    "getLiveStatus": false,
+    "watch": {
+      "status": "ended",
+      "access": "denied",
+      "reportedWatchCount": 1,
+      "webSocketUri": null
+    }
+  }
+}

@@ -183,10 +183,11 @@ const Map<String, AudiencePlatformCapability> audienceCapabilities = {
     onlineAvailability: AudienceOnlineAvailability.roomList,
   ),
   // PandaTV's `user` value is the concurrent audience in the official
-  // directory and play response. `playCnt` remains a separate session value.
+  // directory and play response; `playCnt`, the broadcast's entries so far,
+  // is its cumulative audience (M4.U 25-3; 3.x showed only `user`).
   'pandalive': AudiencePlatformCapability(
     hasPopularity: false,
-    hasTotalViewers: false,
+    hasTotalViewers: true,
     onlineAvailability: AudienceOnlineAvailability.roomList,
   ),
   // FC2 exposes current `count` and cumulative `total` independently in both

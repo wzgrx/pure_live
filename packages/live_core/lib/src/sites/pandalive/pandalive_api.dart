@@ -68,23 +68,44 @@ final class PandaLivePlay {
   bool get isLive => code == null && PandaLiveApi.flag(media?['isLive']) == true;
 }
 
+/// What a danmaku connection needs to join a live broadcast's chat (25-2;
+/// the connection itself is M5's). 3.x had no PandaTV chat
+/// (`EmptyDanmaku`).
+///
+/// The chat is a Centrifugo server ([PandaLiveApi.chatServer]) joined with
+/// the guest token of `live/play` and subscribed to [channel]. Room entry
+/// hands over the token its own `live/play` answer carried, without a
+/// request; the token lasts about 30 minutes, so a later connection asks
+/// `live/play` for broadcaster [userId] again ([PandaLiveApi.playForm]).
+@immutable
+final class PandaLiveDanmakuArgs {
+  /// Creates the arguments.
+  const new({required this.userId, required this.channel, this.token});
+
+  /// The broadcaster's login id: `live/play` issues a fresh token for it.
+  final String userId;
+
+  /// The chat channel: `live/play`'s `channel`, the broadcaster's number.
+  final String channel;
+
+  /// `live/play`'s chat `token` (a JWT of about 30 minutes); null when the
+  /// answer had none.
+  final String? token;
+
+  @override
+  String toString() => 'PandaLiveDanmakuArgs($userId, $channel)';
+}
+
 /// What room entry keeps for playback (3.x kept its `PandaLiveRoom`
 /// snapshot, streams included, in `data`): the qualities with their lines,
-/// or why there is nothing to play; and the chat channel and token of the
-/// `live/play` answer, which 3.x did not use (it had no PandaTV chat; kept
-/// for M5).
+/// or why there is nothing to play. The chat arguments travel in the room's
+/// `danmakuData` ([PandaLiveDanmakuArgs]).
 @immutable
 final class PandaLiveRoomData {
   /// Creates the data; [unavailable] is required when [qualities] is empty.
-  new({
-    required this.userId,
-    required this.userIndex,
-    List<LivePlayQuality> qualities = const [],
-    this.unavailable,
-    this.chatChannel,
-    this.chatToken,
-  }) : qualities = List.unmodifiable(qualities),
-       assert(qualities.isNotEmpty || unavailable != null, 'an empty playback needs its reason');
+  new({required this.userId, required this.userIndex, List<LivePlayQuality> qualities = const [], this.unavailable})
+    : qualities = List.unmodifiable(qualities),
+      assert(qualities.isNotEmpty || unavailable != null, 'an empty playback needs its reason');
 
   /// The broadcaster the data belongs to (compared without case, as 3.x).
   final String userId;
@@ -98,13 +119,6 @@ final class PandaLiveRoomData {
   /// Why there is nothing to play: not live, ended, adult, password, fans
   /// only, no HLS.
   final SiteError? unavailable;
-
-  /// `live/play`'s `channel` (the broadcaster's number), for M5.
-  final String? chatChannel;
-
-  /// `live/play`'s chat `token` (about 30 minutes; a reconnect asks
-  /// `live/play` again), for M5.
-  final String? chatToken;
 }
 
 /// Pure parsing of PandaTV (팬더티비) responses (3.x's `PandaLiveApi`,
@@ -158,27 +172,73 @@ abstract final class PandaLiveApi {
   /// Display name (3.x's `PandaLiveSite.name`).
   static const String categoryName = 'PandaTV';
 
-  /// The one area of 3.x's catalog (3.x's zh.json
-  /// `pandalive_public_directory`).
+  /// The id of 3.x's area, the public directory by popularity.
+  static const String publicAreaId = 'public';
+
+  /// The public area's name (3.x's zh.json `pandalive_public_directory`).
   static const String directoryAreaName = '公开直播';
 
-  /// 3.x's zh.json `pandalive_directory_scope`, the directory notice's text.
+  /// The id of the new-broadcaster area (25-1): the website's list of
+  /// broadcasters the platform marks as new (`onlyNewBj=Y`).
+  static const String newBroadcasterAreaId = 'newbj';
+
+  /// The new-broadcaster area's name (25-1).
+  static const String newBroadcasterAreaName = '新人主播';
+
+  /// The directory notice's text, key `pandalive_directory_scope` (25-7:
+  /// 3.x's text spoke of "native offsets" and a "BJ list").
   static const String directoryScope =
-      '官网公开直播目录支持原生分页；搜索同时读取当前直播标题/主播与含未开播主播的 BJ 列表，分别按官网原生 offset 翻页。精确频道 ID 和官方直播间/频道链接继续支持。';
+      '公开直播是 PandaTV 官网正在直播的公开房间，按人气排序；新人主播是平台标出的新主播。搜索会同时查找直播标题和主播，未开播的主播也会列出；也可以输入主播 ID，或粘贴 PandaTV 的直播间、频道链接。';
 
-  /// The notice of a public room (3.x's zh.json `pandalive_chat_notice`).
-  static const String chatNotice = 'PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。';
+  /// The notice of a public room, key `pandalive_chat_notice` (25-7: 3.x's
+  /// "remote chat pending; the user field is shown as ... playCnt is not
+  /// concurrency" was a development note; the audience now shows `user`
+  /// and `playCnt`, 25-3).
+  static const String chatNotice = '这里暂时看不到 PandaTV 直播间的聊天。人数分别是正在观看和本场累计观看。';
 
-  /// The notice of an adult room (3.x's zh.json `pandalive_adult_notice`).
-  static const String adultNotice = '该直播间需要平台成年验证。';
+  /// The notice of an adult room, key `pandalive_adult_notice` (25-7).
+  static const String adultNotice = '成人直播需要登录 PandaTV 并通过本人认证，本应用暂时无法播放。';
 
-  /// The notice of a password room (3.x's zh.json
-  /// `pandalive_password_notice`).
-  static const String passwordNotice = '该直播间需要平台房间密码。';
+  /// The notice of a password room, key `pandalive_password_notice` (25-7).
+  static const String passwordNotice = '这个直播间设了密码，本应用暂时无法播放。';
 
-  /// The notice of a room with other access conditions (3.x's zh.json
-  /// `pandalive_restricted_notice`).
-  static const String restrictedNotice = '该直播间存在平台访问条件。';
+  /// The notice of a fans-only room (`type` `fan`; new with the
+  /// restriction kinds of the unified rules).
+  static const String fansNotice = '这个直播间只对粉丝开放，本应用暂时无法播放。';
+
+  /// The notice of a room with other access conditions, key
+  /// `pandalive_restricted_notice` (25-7).
+  static const String restrictedNotice = '这个直播间有观看限制（例如需要登录），本应用暂时无法播放。';
+
+  /// Names of the platform's category codes (25-8). PandaTV has no name
+  /// service and its website shows no category, so these translate the
+  /// codes themselves; `ind` is its individual (개인방송) broadcasting,
+  /// which the site names itself for. Codes not listed are shown as sent.
+  static const Map<String, String> areaNames = {
+    'ind': '个人直播',
+    'talk': '聊天',
+    'music': '音乐',
+    'game': '游戏',
+    'sports': '体育',
+    'etc': '其他',
+  };
+
+  /// The name of category code [code] ([areaNames]; an unknown code as
+  /// sent, trimmed; empty for none).
+  static String areaNameOf(Object? code) {
+    final text = _text(code);
+    return areaNames[text.toLowerCase()] ?? text;
+  }
+
+  /// The name of a video variant that is the broadcast's source rendition
+  /// (`VIDEO="chunked"`; 25-5, the unified quality naming).
+  static const String originalQualityName = '原画';
+
+  /// Added to the source rendition's `sort`, so it ranks first (25-5).
+  static const int sourceRank = 10000000000000;
+
+  /// The chat server (the website's `newChat.node`), for M5 (25-2).
+  static final Uri chatServer = Uri.parse('wss://chat-ws.neolive.kr/connection/websocket');
 
   /// Rows of a directory page (3.x's `directory` size).
   static const int pageSize = 30;
@@ -217,9 +277,30 @@ abstract final class PandaLiveApi {
     return _userId.hasMatch(id) ? id : null;
   }
 
-  /// The live page of [userId] (3.x's `PandaLiveLink.url`, the room's
-  /// `link`; the website now redirects it to `/play/<id>`).
-  static String roomUrl(String userId) => Uri.https('www.pandalive.co.kr', '/live/play/$userId').toString();
+  /// The live page of [userId]: the room's `link`, what the room opens
+  /// outside the app and the Referer of its requests. The website's
+  /// current `/play/<id>` (25-4; 3.x's `/live/play/<id>` redirects there).
+  static String roomUrl(String userId) => Uri.https('www.pandalive.co.kr', '/play/$userId').toString();
+
+  static final RegExp _koreanTime = RegExp(r'^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$');
+
+  static const Duration _kst = Duration(hours: 9);
+
+  /// A PandaTV time (`startTime`, `2026-09-28 02:00:35`) in UTC (25-12,
+  /// REG-PANDALIVE-004): the platform writes Korean time (UTC+9) without a
+  /// zone. Null for `0000-00-00 00:00:00`, a malformed or impossible date,
+  /// and anything before 2000.
+  static DateTime? koreanTime(Object? value) {
+    final match = _koreanTime.firstMatch(_text(value));
+    if (match == null) return null;
+    final parts = [for (var i = 1; i <= 6; i++) int.parse(match.group(i)!)];
+    final local = DateTime.utc(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+    if (local.month != parts[1] || local.day != parts[2] || local.hour != parts[3] || local.minute != parts[4]) {
+      return null;
+    }
+    final utc = local.subtract(_kst);
+    return utc.year >= 2000 ? utc : null;
+  }
 
   // Answers -------------------------------------------------------------------
 
@@ -325,11 +406,61 @@ abstract final class PandaLiveApi {
       normalizeUserId(media['userId'])?.toLowerCase() == userId.toLowerCase() &&
       (index == null || _positive(media['userIdx']) == index);
 
+  // Restrictions --------------------------------------------------------------
+
+  /// The restriction a broadcast's flags show (the unified rules): adult
+  /// (`isAdult`), else a password (`isPw`), else fans only (`type` `fan`),
+  /// else none for a free broadcast (`type` `free`); null when its `type`
+  /// says neither (not known).
+  static LiveRestriction? restrictionOf(Map<String, Object?> media) {
+    if (flag(media['isAdult']) ?? false) return LiveRestriction.adult;
+    if (flag(media['isPw']) ?? false) return LiveRestriction.password;
+    return switch (_text(media['type'])) {
+      'fan' => LiveRestriction.subscribersOnly,
+      'free' => LiveRestriction.none,
+      _ => null,
+    };
+  }
+
+  /// The restriction of a `live/play` refusal with [code] (not `castEnd`)
+  /// of a broadcast listed with [media]: the code when it says (`needAdult`
+  /// adult, `needPassword`/`password` a password), else the broadcast's
+  /// flags (an anonymous viewer of a password room is refused `needLogin`,
+  /// 2026-09-29), else `needLogin` needs a login and any other code is
+  /// unplayable.
+  static LiveRestriction refusalRestriction(String code, Map<String, Object?>? media) {
+    switch (code) {
+      case 'needAdult':
+        return LiveRestriction.adult;
+      case 'needPassword' || 'password':
+        return LiveRestriction.password;
+    }
+    final flagged = media == null ? null : restrictionOf(media);
+    if (flagged != null && flagged != LiveRestriction.none) return flagged;
+    return code == 'needLogin' ? LiveRestriction.needsLogin : LiveRestriction.unplayable;
+  }
+
+  /// Why a broadcast with [restriction] cannot be played (M2.1's table):
+  /// adult and login `NeedsLogin`, the rest `StreamUnavailable` naming it.
+  static SiteError restrictionError(LiveRestriction restriction, String what) => switch (restriction) {
+    LiveRestriction.adult || LiveRestriction.needsLogin => NeedsLogin(_site, '$what (${restriction.name})'),
+    _ => StreamUnavailable(_site, '$what (${restriction.name})'),
+  };
+
+  /// The notice of a broadcast with [restriction]: adult, password, fans
+  /// only, other conditions, else (none, or not known) the chat notice.
+  static String noticeOf(LiveRestriction? restriction) => switch (restriction) {
+    LiveRestriction.adult => adultNotice,
+    LiveRestriction.password => passwordNotice,
+    LiveRestriction.subscribersOnly => fansNotice,
+    LiveRestriction.none || null => chatNotice,
+    _ => restrictedNotice,
+  };
+
   // Catalog and directory -----------------------------------------------------
 
-  /// 3.x's catalog: one category, PandaTV, with one area, the public
-  /// directory by popularity (the platform's new-broadcaster list is not
-  /// used; an upgrade candidate).
+  /// The catalog: one category, PandaTV, with 3.x's public directory by
+  /// popularity and the new broadcasters (25-1), both by popularity.
   static List<LiveCategory> categories() => [
     LiveCategory(
       id: _site,
@@ -339,20 +470,32 @@ abstract final class PandaLiveApi {
           platform: _site,
           areaType: 'directory',
           typeName: categoryName,
-          areaId: 'public',
+          areaId: publicAreaId,
           areaName: directoryAreaName,
+        ),
+        LiveArea(
+          platform: _site,
+          areaType: 'directory',
+          typeName: categoryName,
+          areaId: newBroadcasterAreaId,
+          areaName: newBroadcasterAreaName,
         ),
       ],
     ),
   ];
 
-  /// Checks that [area] is null or 3.x's public area; anything else is a
-  /// caller error (3.x refused it before any request).
-  static void checkArea(LiveArea? area) {
-    if (area == null) return;
-    if (area.platform != _site || area.areaType != 'directory' || area.areaId != 'public') {
-      throw ArgumentError.value(area, 'category', 'not the PandaTV public directory');
+  /// The area id of [area]: [publicAreaId] for null (the directory, as
+  /// 3.x) or the public area, [newBroadcasterAreaId] for the new
+  /// broadcasters; anything else is a caller error (3.x refused it before
+  /// any request).
+  static String checkArea(LiveArea? area) {
+    if (area == null) return publicAreaId;
+    if (area.platform != _site ||
+        area.areaType != 'directory' ||
+        (area.areaId != publicAreaId && area.areaId != newBroadcasterAreaId)) {
+      throw ArgumentError.value(area, 'category', 'not a PandaTV directory');
     }
+    return area.areaId;
   }
 
   /// Checks a page number as 3.x did before any request (1–[maxPage]).
@@ -368,12 +511,14 @@ abstract final class PandaLiveApi {
     }
   }
 
-  /// The form of `live/index` for directory page [page] (3.x): [pageSize]
-  /// rows by popularity.
-  static Map<String, String> directoryForm(int page) => {
+  /// The form of `live/index` for directory page [page] of area [areaId]
+  /// (3.x): [pageSize] rows by popularity; the new broadcasters add
+  /// `onlyNewBj=Y` (25-1, as the website and `S02-index-newbj`).
+  static Map<String, String> directoryForm(int page, {String areaId = publicAreaId}) => {
     'offset': '${(page - 1) * pageSize}',
     'limit': '$pageSize',
     'orderBy': 'hot',
+    if (areaId == newBroadcasterAreaId) 'onlyNewBj': 'Y',
   };
 
   /// The rows of a paged answer asked at [page] of [size] (3.x's
@@ -407,7 +552,7 @@ abstract final class PandaLiveApi {
   ///
   /// Unlike 3.x, a row that cannot be a live card (no broadcaster id, not
   /// live) is skipped instead of failing the page, an empty title is the
-  /// nick and an empty nick the id, and a field 3.x refused is left empty.
+  /// nick, and a field 3.x refused is left empty.
   static LiveDirectoryPage livePage(String body, {required int page, int size = pageSize, int status = 200}) {
     const what = 'live/index';
     final data = ok(body, what: what, status: status);
@@ -425,33 +570,40 @@ abstract final class PandaLiveApi {
   }
 
   /// A live card (3.x's `parseCard` and `_directoryCard`): the broadcast
-  /// title, the broadcaster's nick and avatar, the snapshot as cover, the
-  /// category code as area, concurrent viewers and fans; the notice says
-  /// adult, else password, else 3.x's chat notice. Null for a row without a
-  /// broadcaster id or that is not live.
+  /// title (else the nick), the broadcaster's nick, number and avatar, the
+  /// snapshot as cover, the category's name as area (25-8), concurrent
+  /// viewers, this broadcast's entries as cumulative viewers (`playCnt`,
+  /// 25-3), fans, the start (25-12) and the restriction its flags show,
+  /// with that restriction's notice. Null for a row without a broadcaster
+  /// id or that is not live.
+  ///
+  /// The card's `userId` is the broadcaster's number, as in room details
+  /// and the BJ search (25-10; 3.x wrote the login id here); empty without
+  /// a number. An empty nick stays empty (the unified rule on
+  /// placeholders; M4.25 wrote the id).
   static LiveRoom? liveCard(Map<String, Object?> row) {
     final id = normalizeUserId(row['userId']);
     if (id == null || flag(row['isLive']) != true) return null;
-    final nick = _firstText([row['userNick'], id]);
+    final nick = _text(row['userNick']);
+    final restriction = restrictionOf(row);
     return LiveRoom(
       platform: _site,
       roomId: id,
-      userId: id,
+      userId: _positive(row['userIdx'])?.toString() ?? '',
       title: _firstText([row['title'], nick]),
       nick: nick,
       avatar: image(row['userImg']),
       cover: image(row['thumbUrl'] ?? row['ivsThumbnail']),
-      area: _text(row['category']),
+      area: areaNameOf(row['category']),
       link: roomUrl(id),
       liveStatus: LiveStatus.live,
+      startedAt: koreanTime(row['startTime']),
+      restriction: restriction,
       onlineViewers: _count(row['user']),
+      totalViewers: _count(row['playCnt']),
       followers: _count(row['fanCnt']),
       audienceMetricType: AudienceMetricType.onlineViewers,
-      notice: flag(row['isAdult']) ?? false
-          ? adultNotice
-          : flag(row['isPw']) ?? false
-          ? passwordNotice
-          : chatNotice,
+      notice: noticeOf(restriction),
     );
   }
 
@@ -500,15 +652,18 @@ abstract final class PandaLiveApi {
   /// A broadcaster of the BJ search (see [broadcasterPage]): named by its
   /// nick, the avatar `thumbUrl`, 3.x's `userId` the broadcaster's number.
   /// Without `media` it is offline, titled by the nick; with it, the
-  /// broadcast's title, cover, category and fans, live by `isLive` (unknown
-  /// when it says neither), with viewers only while live, and the notice of
-  /// its access.
+  /// broadcast's title, cover, category name (25-8) and fans, live by
+  /// `isLive` (unknown when it says neither). Only while live: viewers,
+  /// cumulative viewers (25-3), the start (25-12) and the restriction the
+  /// flags show; the notice is the restriction's (3.x: adult, else
+  /// password). An empty nick stays empty (the unified rule on
+  /// placeholders).
   static LiveRoom? profileCard(Map<String, Object?> row) {
     if (flag(row['blockService']) == true) return null;
     final id = normalizeUserId(row['userId']);
     final index = _positive(row['userIdx']);
     if (id == null || index == null) return null;
-    final nick = _firstText([row['userNick'], id]);
+    final nick = _text(row['userNick']);
     final avatar = image(row['thumbUrl']);
     final raw = row['media'];
     if (raw == null) {
@@ -531,6 +686,8 @@ abstract final class PandaLiveApi {
     final media = _map(raw);
     if (media == null || !_owns(media, id, index)) return null;
     final live = flag(media['isLive']);
+    final isLive = live ?? false;
+    final restriction = restrictionOf(media);
     return LiveRoom(
       platform: _site,
       roomId: id,
@@ -539,32 +696,30 @@ abstract final class PandaLiveApi {
       nick: nick,
       avatar: avatar,
       cover: image(media['thumbUrl'] ?? media['ivsThumbnail']),
-      area: _text(media['category']),
+      area: areaNameOf(media['category']),
       link: roomUrl(id),
       liveStatus: switch (live) {
         true => LiveStatus.live,
         false => LiveStatus.offline,
         null => LiveStatus.unknown,
       },
-      onlineViewers: live ?? false ? _count(media['user']) : '',
+      startedAt: isLive ? koreanTime(media['startTime']) : null,
+      restriction: isLive ? restriction : null,
+      onlineViewers: isLive ? _count(media['user']) : '',
+      totalViewers: isLive ? _count(media['playCnt']) : '',
       followers: _count(media['fanCnt']),
       introduction: '',
       audienceMetricType: AudienceMetricType.onlineViewers,
-      notice: _accessNotice(media),
+      notice: noticeOf(restriction),
     );
   }
 
-  static String _accessNotice(Map<String, Object?> media) => flag(media['isAdult']) ?? false
-      ? adultNotice
-      : flag(media['isPw']) ?? false
-      ? passwordNotice
-      : chatNotice;
-
   // Rooms ---------------------------------------------------------------------
 
-  /// The form of `member/bj` (3.x asked for the fan grades too and never
-  /// read them).
-  static Map<String, String> memberForm(String userId) => {'userId': userId, 'info': 'media fanGrade'};
+  /// The form of `member/bj`: the broadcaster and its broadcast (25-9; 3.x
+  /// also asked for the fan grades, `info=media fanGrade`, and never read
+  /// them).
+  static Map<String, String> memberForm(String userId) => {'userId': userId, 'info': 'media'};
 
   /// The form of `live/play` (3.x; the website sends the same on each
   /// visit, which counts as a view).
@@ -601,8 +756,8 @@ abstract final class PandaLiveApi {
   /// `live/play` for [member]. A refusal (HTTP 400: ended, adult, fans
   /// only, password) is kept with its code for [playRoom]; an accepted
   /// answer must carry this broadcaster's `media` and, when live, a
-  /// `PlayList` whose first master is an IVS URL (`ApiChanged` otherwise;
-  /// none at all is null).
+  /// `PlayList` whose first usable master is an IVS URL (`ApiChanged` when
+  /// it has masters and none is usable; none at all is null).
   static PandaLivePlay play(String body, {required PandaLiveMember member, int status = 200}) {
     const what = 'live/play';
     final data = answer(body, what: what, status: status);
@@ -622,22 +777,34 @@ abstract final class PandaLiveApi {
     );
   }
 
-  /// The first master of `hls3`, `hls2`, `hls` in that order (3.x's
-  /// `_firstMaster`); null when none has a URL.
+  /// The first IVS master of `hls3`, `hls2`, `hls` in that order (3.x's
+  /// `_firstMaster`); null when none has a URL. Unlike 3.x, a list or entry
+  /// that is not usable (not a list, not an object, not an IVS playlist)
+  /// is passed over for the next one (the unified rule: one bad address
+  /// only loses itself); some and none usable is `ApiChanged`.
   static Uri? _master(Map<String, Object?> playlist) {
+    String? broken;
     for (final key in const ['hls3', 'hls2', 'hls']) {
       final entries = playlist[key];
       if (entries == null) continue;
-      if (entries is! List || entries.length > 16) throw ApiChanged(_site, 'live/play: PlayList.$key');
+      if (entries is! List || entries.length > 16) {
+        broken ??= 'PlayList.$key';
+        continue;
+      }
       for (final entry in entries) {
         final item = _map(entry);
-        if (item == null) throw ApiChanged(_site, 'live/play: PlayList.$key item');
+        if (item == null) {
+          broken ??= 'PlayList.$key item';
+          continue;
+        }
         final url = item['url'];
         if (url is String && url.isNotEmpty) {
-          return mediaUrl(url) ?? (throw ApiChanged(_site, 'live/play: $key is not an IVS playlist'));
+          if (mediaUrl(url) case final master?) return master;
+          broken ??= '$key is not an IVS playlist';
         }
       }
     }
+    if (broken != null) throw ApiChanged(_site, 'live/play: $broken');
     return null;
   }
 
@@ -661,10 +828,11 @@ abstract final class PandaLiveApi {
 
   /// The room of a broadcaster the platform lists as not live (3.x's
   /// `_profileRoom`): the channel title (else the nick), the banner as
-  /// cover, the channel description, fans, offline.
+  /// cover, the channel description, fans, offline. An empty nick stays
+  /// empty (the unified rule on placeholders; M4.25 wrote the id).
   static LiveRoom profileRoom(PandaLiveMember member) {
     final profile = member.profile;
-    final nick = _firstText([profile['nick'], member.userId]);
+    final nick = _text(profile['nick']);
     return LiveRoom(
       platform: _site,
       roomId: member.userId,
@@ -686,16 +854,19 @@ abstract final class PandaLiveApi {
   /// The room of a broadcast (3.x's `_restrictedRoom` and `_liveRoom`): the
   /// broadcast's nick, title (else the channel title, else the nick),
   /// avatar, cover (the snapshot, for a playable broadcast also
-  /// `ivsThumbnail`, else the banner), category, fans and viewers, with the
-  /// channel description; live, with [notice].
+  /// `ivsThumbnail`, else the banner), category name (25-8), fans, viewers
+  /// and cumulative viewers (25-3), its start (25-12), with the channel
+  /// description; live, with [notice] and [restriction]. An empty nick
+  /// stays empty (the unified rule on placeholders).
   static LiveRoom mediaRoom(
     PandaLiveMember member,
     Map<String, Object?> media, {
     required String notice,
+    LiveRestriction? restriction,
     bool playable = false,
   }) {
     final profile = member.profile;
-    final nick = _firstText([media['userNick'] ?? profile['nick'], profile['nick'], member.userId]);
+    final nick = _firstText([media['userNick'] ?? profile['nick'], profile['nick']]);
     final cover = playable
         ? media['thumbUrl'] ?? media['ivsThumbnail'] ?? profile['channelBannerUrl']
         : media['thumbUrl'] ?? profile['channelBannerUrl'];
@@ -707,10 +878,13 @@ abstract final class PandaLiveApi {
       nick: nick,
       avatar: image(media['userImg'] ?? profile['thumbUrl']),
       cover: image(cover),
-      area: _text(media['category']),
+      area: areaNameOf(media['category']),
       link: roomUrl(member.userId),
       liveStatus: LiveStatus.live,
+      startedAt: koreanTime(media['startTime']),
+      restriction: restriction,
       onlineViewers: _count(media['user']),
+      totalViewers: _count(media['playCnt']),
       followers: _count(media['fanCnt'] ?? profile['fanCnt']),
       introduction: _text(profile['channelDesc']),
       audienceMetricType: AudienceMetricType.onlineViewers,
@@ -718,46 +892,79 @@ abstract final class PandaLiveApi {
     );
   }
 
+  /// Whether `member/bj` lists [member]'s broadcast as live: it has a
+  /// `media` whose `isLive` is not false (25-6; 3.x took any `media` for a
+  /// live broadcast; one that says neither is still live, as 3.x).
+  static bool listedLive(PandaLiveMember member) => member.media != null && flag(member.media!['isLive']) != false;
+
   /// The room of a follow refresh and of the exact searches (3.x's `room`
-  /// without media): not listed as live is [profileRoom]; listed is the
-  /// `member/bj` broadcast, live with 3.x's chat notice (3.x did not look
-  /// at its `isLive`).
-  static LiveRoom refreshRoom(PandaLiveMember member) =>
-      member.media == null ? profileRoom(member) : mediaRoom(member, member.media!, notice: chatNotice);
+  /// without media): not listed as live ([listedLive]) is [profileRoom];
+  /// listed is the `member/bj` broadcast, live, with the restriction its
+  /// flags show and that restriction's notice (3.x: always the chat
+  /// notice).
+  static LiveRoom refreshRoom(PandaLiveMember member) {
+    if (!listedLive(member)) return profileRoom(member);
+    final restriction = restrictionOf(member.media!);
+    return mediaRoom(member, member.media!, notice: noticeOf(restriction), restriction: restriction);
+  }
 
   /// The room of room entry from [member] and its [play] (3.x's `room`),
   /// and why it cannot be played when so:
   /// - ended (`castEnd`), or accepted as not live: [profileRoom], offline,
   ///   `StreamUnavailable`;
-  /// - another refusal: the `member/bj` broadcast, live, with the notice of
-  ///   its code (adult, password, else "access conditions"); adult and fans
-  ///   only (`needLogin`) are `NeedsLogin`, the rest `StreamUnavailable`;
-  /// - accepted and live: the `live/play` broadcast with 3.x's chat notice;
-  ///   `StreamUnavailable` when it has no HLS master (3.x failed the entry),
-  ///   else nothing yet (the master decides).
+  /// - another refusal: the `member/bj` broadcast, live, with the
+  ///   restriction of [refusalRestriction], its notice and its error
+  ///   ([restrictionError]: adult and login `NeedsLogin`; password, fans
+  ///   only and anything else `StreamUnavailable`);
+  /// - accepted and live: the `live/play` broadcast with the chat notice,
+  ///   without restriction; unplayable (`StreamUnavailable`) when it has
+  ///   no HLS master (3.x failed the entry), else nothing yet (the master
+  ///   decides).
   static ({LiveRoom room, SiteError? unavailable}) playRoom(PandaLiveMember member, PandaLivePlay play) {
     final code = play.code;
     if (code == 'castEnd') {
       return (room: profileRoom(member), unavailable: const StreamUnavailable(_site, 'live/play: castEnd'));
     }
     if (code != null) {
-      final notice = switch (code) {
-        'needAdult' => adultNotice,
-        'needPassword' || 'password' => passwordNotice,
-        _ => restrictedNotice,
-      };
-      final unavailable = switch (code) {
-        'needAdult' || 'needLogin' => NeedsLogin(_site, 'live/play: $code'),
-        _ => StreamUnavailable(_site, 'live/play: ${code.isEmpty ? 'refused' : code}'),
-      };
-      return (room: mediaRoom(member, member.media ?? const {}, notice: notice), unavailable: unavailable);
+      final restriction = refusalRestriction(code, member.media);
+      return (
+        room: mediaRoom(member, member.media ?? const {}, notice: noticeOf(restriction), restriction: restriction),
+        unavailable: restrictionError(restriction, 'live/play: ${code.isEmpty ? 'refused' : code}'),
+      );
     }
     if (!play.isLive) {
       return (room: profileRoom(member), unavailable: const StreamUnavailable(_site, 'live/play: not live'));
     }
-    final room = mediaRoom(member, play.media!, notice: chatNotice, playable: true);
-    if (play.master == null) return (room: room, unavailable: const StreamUnavailable(_site, 'live/play: no HLS'));
-    return (room: room, unavailable: null);
+    if (play.master == null) {
+      return (
+        room: mediaRoom(
+          member,
+          play.media!,
+          notice: chatNotice,
+          restriction: LiveRestriction.unplayable,
+          playable: true,
+        ),
+        unavailable: const StreamUnavailable(_site, 'live/play: no HLS'),
+      );
+    }
+    return (
+      room: mediaRoom(member, play.media!, notice: chatNotice, restriction: LiveRestriction.none, playable: true),
+      unavailable: null,
+    );
+  }
+
+  /// The chat arguments of room entry (25-2): an accepted, live [play]'s
+  /// channel (the broadcaster's number when it has none, or one that is
+  /// not a number) and token; null for a refused or not live answer, which
+  /// has no token.
+  static PandaLiveDanmakuArgs? danmakuArgs(PandaLiveMember member, PandaLivePlay play) {
+    if (!play.isLive) return null;
+    final channel = play.chatChannel;
+    return PandaLiveDanmakuArgs(
+      userId: member.userId,
+      channel: channel != null && RegExp(r'^[0-9]{1,19}$').hasMatch(channel) ? channel : '${member.index}',
+      token: play.chatToken,
+    );
   }
 
   // Streams -------------------------------------------------------------------
@@ -775,19 +982,23 @@ abstract final class PandaLiveApi {
     return body;
   }
 
-  /// 3.x's qualities of an IVS master read once (`parseManifest`,
-  /// REG-PANDALIVE-002): one per variant, id `<height>p` plus `60` from 50
-  /// fps and `30` from 25 fps (a repeated id gets `_<n>`), named
-  /// `<id> · HLS`, ranked by height × 10⁷ + bandwidth; best first by height,
-  /// frame rate, bandwidth. Each quality holds one line (`data`): the
-  /// variant playlist, with [mediaHeaders], HLS, the codec of `CODECS`,
-  /// [lineId] and the lease of [issuedAt] (see [lease]).
+  /// The qualities of an IVS master read once (3.x's `parseManifest`,
+  /// REG-PANDALIVE-002): one per video variant, id `<height>p`, plus `60`
+  /// from 50 fps (25-5: 3.x also wrote `30` from 25 fps; a repeated id
+  /// still gets `_<n>`, n counting the video variants in the master's
+  /// order); the source rendition (`VIDEO="chunked"`) named
+  /// [originalQualityName], the others by their id (3.x: `<id> · HLS`).
+  /// Best first: the source, then by height, frame rate, bandwidth; `sort`
+  /// is height × 10⁷ + bandwidth, plus [sourceRank] for the source. Each
+  /// quality holds one line (`data`): the variant playlist, with
+  /// [mediaHeaders], HLS, the codec of `CODECS`, [lineId] and the lease of
+  /// [issuedAt] (see [lease]). [qualityIdFromLegacy] maps 3.x's ids.
   ///
-  /// As 3.x, a text that is not a master, a variant without its URI or with
-  /// a frame rate or bandwidth out of range, and a variant URL that is not
-  /// IVS are `ApiChanged`. Unlike 3.x, a variant without a resolution (audio
-  /// only) is left out instead of failing the room; none left is
-  /// `StreamUnavailable`.
+  /// As 3.x, a text that is not a master is `ApiChanged`, and a variant
+  /// without a resolution (audio only) is left out. Unlike 3.x, a variant
+  /// without its URI, with a frame rate or bandwidth out of range, or whose
+  /// URL is not IVS only loses itself (the unified rule); none left is
+  /// `ApiChanged` when some were such, else `StreamUnavailable`.
   static List<LivePlayQuality> qualities(
     String body, {
     required Uri master,
@@ -801,9 +1012,10 @@ abstract final class PandaLiveApi {
     }
     final lines = const LineSplitter().convert(body);
     final variants =
-        <({String id, String label, int height, double frameRate, int bandwidth, Uri url, String? codec})>[];
+        <({String id, bool source, int height, double frameRate, int bandwidth, Uri url, String? codec})>[];
     final ids = <String>{};
     var count = 0;
+    String? broken;
     for (var index = 0; index < lines.length; index++) {
       final line = lines[index].trim();
       if (!line.startsWith('#EXT-X-STREAM-INF:')) continue;
@@ -813,7 +1025,8 @@ abstract final class PandaLiveApi {
         next++;
       }
       if (next >= lines.length || lines[next].trim().startsWith('#')) {
-        throw const ApiChanged(_site, '$what: a variant without its URI');
+        broken ??= 'a variant without its URI';
+        continue;
       }
       index = next;
       final resolution = attributes['RESOLUTION'];
@@ -823,24 +1036,24 @@ abstract final class PandaLiveApi {
       final frameRate = double.tryParse(attributes['FRAME-RATE'] ?? '') ?? 0;
       final bandwidth = int.tryParse(attributes['BANDWIDTH'] ?? '') ?? 0;
       if (frameRate < 0 || frameRate > 240 || bandwidth < 0) {
-        throw ApiChanged(_site, '$what: frame rate $frameRate, bandwidth $bandwidth');
+        broken ??= 'frame rate $frameRate, bandwidth $bandwidth';
+        continue;
       }
-      final Uri url;
+      Uri? url;
       try {
-        url = mediaUrl('${master.resolve(lines[next].trim())}') ?? (throw const FormatException());
+        url = mediaUrl('${master.resolve(lines[next].trim())}');
       } on FormatException {
-        throw const ApiChanged(_site, '$what: a variant that is not an IVS playlist');
+        url = null;
       }
-      final fps = frameRate >= 50
-          ? '60'
-          : frameRate >= 25
-          ? '30'
-          : '';
-      final label = '${height}p$fps';
+      if (url == null) {
+        broken ??= 'a variant that is not an IVS playlist';
+        continue;
+      }
+      final label = '${height}p${frameRate >= 50 ? '60' : ''}';
       count++;
       variants.add((
         id: ids.add(label) ? label : '${label}_$count',
-        label: label,
+        source: attributes['VIDEO'] == 'chunked',
         height: height,
         frameRate: frameRate,
         bandwidth: bandwidth,
@@ -848,8 +1061,12 @@ abstract final class PandaLiveApi {
         codec: _codecOf(attributes['CODECS']),
       ));
     }
-    if (variants.isEmpty) throw const StreamUnavailable(_site, '$what: no video variant');
+    if (variants.isEmpty) {
+      if (broken != null) throw ApiChanged(_site, '$what: no usable variant ($broken)');
+      throw const StreamUnavailable(_site, '$what: no video variant');
+    }
     variants.sort((left, right) {
+      if (left.source != right.source) return left.source ? -1 : 1;
       final height = right.height.compareTo(left.height);
       if (height != 0) return height;
       final fps = right.frameRate.compareTo(left.frameRate);
@@ -859,9 +1076,9 @@ abstract final class PandaLiveApi {
     return List.unmodifiable([
       for (final variant in variants)
         LivePlayQuality(
-          quality: '${variant.label} · HLS',
+          quality: variant.source ? originalQualityName : variant.id,
           id: variant.id,
-          sort: variant.height * 10000000 + variant.bandwidth,
+          sort: (variant.source ? sourceRank : 0) + variant.height * 10000000 + variant.bandwidth,
           data: List<LivePlayLine>.unmodifiable([
             LivePlayLine(
               '${variant.url}',
@@ -909,11 +1126,24 @@ abstract final class PandaLiveApi {
     throw data.unavailable ?? const StreamUnavailable(_site, 'no quality');
   }
 
-  /// The line of [quality] (by its id) among [data]'s qualities, applied as
-  /// asked; a quality the broadcast does not offer is `StreamUnavailable`,
-  /// and a room with nothing to play says why.
+  static final RegExp _legacyQualityId = RegExp(r'^([1-9][0-9]{1,4})p30(_[0-9]+)?$');
+
+  /// The quality id for [id] as stored before 25-5: 3.x's `<height>p30`
+  /// (25 to 49 fps) is now `<height>p`, and its repeated `<height>p30_<n>`
+  /// `<height>p_<n>`; every other id (`<height>p60`, `<height>p`, …) is kept
+  /// as it is. Trimmed; applying it twice changes nothing.
+  static String qualityIdFromLegacy(String id) {
+    final text = id.trim();
+    final match = _legacyQualityId.firstMatch(text);
+    return match == null ? text : '${match.group(1)}p${match.group(2) ?? ''}';
+  }
+
+  /// The line of [quality] (by its id; a 3.x id is read as the new one,
+  /// [qualityIdFromLegacy]) among [data]'s qualities, applied as the new
+  /// id; a quality the broadcast does not offer is `StreamUnavailable`, and
+  /// a room with nothing to play says why.
   static LivePlayUrlResolution resolution(PandaLiveRoomData data, LivePlayQuality quality) {
-    final wanted = '${quality.selectionId}';
+    final wanted = qualityIdFromLegacy('${quality.selectionId}');
     final match = playQualities(data).where((option) => '${option.selectionId}' == wanted).firstOrNull;
     if (match == null) throw StreamUnavailable(_site, 'quality $wanted is not offered');
     return LivePlayUrlResolution.lines(match.data! as List<LivePlayLine>, appliedQualityData: match.selectionId);

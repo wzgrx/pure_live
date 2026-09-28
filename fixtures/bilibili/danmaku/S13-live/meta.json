@@ -106,6 +106,14 @@
       "rule": "person"
     },
     {
+      "where": "$.data.copy_writing,copy_writing_v2 <%name%> (ENTRY_EFFECT, by hand in M5.1)",
+      "rule": "person"
+    },
+    {
+      "where": "$.msg_common,msg_self <%sender%> (NOTICE_MSG, by hand in M5.1)",
+      "rule": "person"
+    },
+    {
       "where": "handshake.cookie",
       "rule": "secret"
     }

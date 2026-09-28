@@ -5,6 +5,7 @@
 ## 目录
 
 - `tools/gate/`：门禁（格式、依赖方向、分析、测试）。
+- `tools/brotli/`：Brotli 字典和测试向量的生成脚本（M1.1）。
 - `tools/timeshift/`：把系统时间往后推再跑测试，找出拿样本里的过期时间和“现在”比较的测试（时间炸弹）。
 - `tools/check_latest/`：对照官方渠道检查工具链和依赖是否最新。
 - `packages/`、`apps/pure_live`：按 docs/PLAN.md 第 6 节逐模块加入，分层见第 4 节。

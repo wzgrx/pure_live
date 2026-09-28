@@ -1,0 +1,23 @@
+{
+  "generator": "LiveUrlTool share import and LiveMeSite.searchRooms of https://www.liveme.com/u/1000000000000000001",
+  "value": {
+    "shareImport": {
+      "value": {
+        "throws": "LiveMeException",
+        "message": "LiveMe service"
+      },
+      "requests": [
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=1000000000000000001"
+      ]
+    },
+    "searchRooms(link)": {
+      "value": {
+        "throws": "LiveMeException",
+        "message": "LiveMe service"
+      },
+      "requests": [
+        "GET https://live.liveme.com/user/getinfo?alias=liveme&tongdun_black_box=1&os=web&_time=<time>&h5=1&thirdchannel=6&userid=1000000000000000001"
+      ]
+    }
+  }
+}

@@ -1,0 +1,343 @@
+{
+  "status": "200",
+  "msg": "",
+  "data": {
+    "user": {
+      "time": "1790529928",
+      "user_info": {
+        "face": "https://esx.esxscloud.com/liveme/poster/150x150/2a6f3da8d7a01a6bfd132adefdbbc9d9_icon.jpeg",
+        "addr": "",
+        "big_face": "https://esx.esxscloud.com/liveme/poster/540x540/2a6f3da8d7a01a6bfd132adefdbbc9d9_icon.jpeg",
+        "birthday": "",
+        "cl": "en-US",
+        "cm_openid": "560875115161059328",
+        "countryCode": "US",
+        "email": "",
+        "emotional_state": "1",
+        "ext_spoken_language": "English,Русский",
+        "h5_ttl": "1779965746",
+        "is_seller": "0",
+        "is_verified": "0",
+        "last_room_type": "0",
+        "lat": "404.0",
+        "lon": "404.0",
+        "mobile": "",
+        "model": "",
+        "reg_type": "102",
+        "salt": "",
+        "score": "0",
+        "shop_msg_interval": "0",
+        "short_id": "17709377",
+        "status": "5",
+        "suggest_name": "",
+        "uname": "🇺🇦👑AnDrEw❤",
+        "usign": "👑 🐰 🇺🇦",
+        "ver": "4.9.56",
+        "vercode": "49562719",
+        "verified_info": "",
+        "virsual_buff_ids": "20401017,10401016,20501015,10501013",
+        "virtual_current_dress": "10201001,10701001,10901001,11001001,11101001,11201002,11301001,11403001,10101001,10601002,10401002,10501001",
+        "virtual_last_cfg": "maleCfg",
+        "sex": "1",
+        "nickname": "🇺🇦👑AnDrEw❤",
+        "reg_time": "",
+        "uid": "560875115161059328",
+        "emails": "",
+        "mobiles": "",
+        "project": "liveme",
+        "h5_llt": "",
+        "finan_gold_ban": "",
+        "emojilist": "",
+        "setcode": "",
+        "filled": "0",
+        "room_info": "",
+        "appver": "",
+        "gold": "0",
+        "star": "14",
+        "currency": "1495104",
+        "currency_bal": "2803",
+        "dollar": "0",
+        "money": "0",
+        "virtual_cash_desc": "",
+        "praise": "99271",
+        "msgnum": "0",
+        "exchange": "1",
+        "level": "96",
+        "level_start_exp": "40119515",
+        "cur_exp": "43662634",
+        "next_exp": "45335055",
+        "anchor_level": "36",
+        "current_anchor_exp": "1300061",
+        "anchor_exp": "1548363",
+        "isbindthird": "0",
+        "has_replay": "0",
+        "new_is_seller": "0",
+        "isNewUser": "0",
+        "isNewUserIn7Day": "0",
+        "isNewTaskUser": "0",
+        "is_act_banner": "0",
+        "gamecover_type": "2",
+        "cover": "",
+        "big_cover": "",
+        "game_cover": "",
+        "big_game_cover": "",
+        "virtual_cover": "",
+        "virtual_big_cover": "",
+        "isAdmin": "0",
+        "isSuper": "0",
+        "forbid_admin": "0",
+        "position": {
+          "addr": "",
+          "location": {
+            "lat": "",
+            "lon": ""
+          }
+        },
+        "photo_album": [
+          {
+            "pic_url": "https://esxf.esxscloud.com/feedfile/20260731/b41ad9e52cd43783a1a43603bed6548d.png",
+            "thumbnail_url": "http://esxf.esxscloud.com/feedfile/20260731/197x88/b41ad9e52cd43783a1a43603bed6548d.png",
+            "image_type": "png",
+            "width": "1408",
+            "height": "635"
+          },
+          {
+            "pic_url": "https://esxf.esxscloud.com/feedfile/20260405/8eb05e14a3395a28d269af33b358d9ad.png",
+            "thumbnail_url": "http://esxf.esxscloud.com/feedfile/20260405/197x107/8eb05e14a3395a28d269af33b358d9ad.png",
+            "image_type": "png",
+            "width": "1408",
+            "height": "768"
+          },
+          {
+            "pic_url": "https://esxf.esxscloud.com/feedfile/20260307/9f3f69f6de0c4578e81dc07128e61bdb.png",
+            "thumbnail_url": "http://esxf.esxscloud.com/feedfile/20260307/197x107/9f3f69f6de0c4578e81dc07128e61bdb.png",
+            "image_type": "png",
+            "width": "1408",
+            "height": "768"
+          },
+          {
+            "pic_url": "https://esxf.esxscloud.com/feedfile/20251123/549c9a95ac4c50be4ffcab21b9a4ae8e.jpg",
+            "thumbnail_url": "http://esxf.esxscloud.com/feedfile/20251123/300x300/549c9a95ac4c50be4ffcab21b9a4ae8e.jpg",
+            "image_type": "jpg",
+            "width": "1440",
+            "height": "2839"
+          },
+          {
+            "pic_url": "https://esxf.esxscloud.com/feedfile/20251123/4c02a84a703c64f6bb2ae2a38202a517.jpg",
+            "thumbnail_url": "http://esxf.esxscloud.com/feedfile/20251123/300x300/4c02a84a703c64f6bb2ae2a38202a517.jpg",
+            "image_type": "jpg",
+            "width": "1440",
+            "height": "1067"
+          },
+          {
+            "pic_url": "https://esxf.esxscloud.com/feedfile/20251122/e617fe25dea5a07eb4dd0aadb89792fd.jpg",
+            "thumbnail_url": "http://esxf.esxscloud.com/feedfile/20251122/134x197/e617fe25dea5a07eb4dd0aadb89792fd.jpg",
+            "image_type": "jpg",
+            "width": "1440",
+            "height": "2117"
+          },
+          {
+            "pic_url": "https://esxf.esxscloud.com/feedfile/20251107/6f3380362006552462b009626ed5ee88.jpg",
+            "thumbnail_url": "https://esxf.esxscloud.com/feedfile/20251107/6f3380362006552462b009626ed5ee88.jpg",
+            "image_type": "jpg",
+            "width": "1024",
+            "height": "1024"
+          },
+          {
+            "pic_url": "http://esxf.esxscloud.com/feedfile/20250903/e8b2dc6fd374c45c98010b13376b9668.jpg",
+            "thumbnail_url": "http://esxf.esxscloud.com/feedfile/20250903/e8b2dc6fd374c45c98010b13376b9668.jpg",
+            "image_type": "jpg",
+            "width": "2048",
+            "height": "2048"
+          },
+          {
+            "pic_url": "http://esxf.esxscloud.com/feedfile/20250814/f023c6d8affe746b54f30d7c5a67dbf8.png",
+            "thumbnail_url": "http://esxf.esxscloud.com/feedfile/20250814/f023c6d8affe746b54f30d7c5a67dbf8.png",
+            "image_type": "png",
+            "width": "1024",
+            "height": "1024"
+          },
+          {
+            "pic_url": "http://esxf.esxscloud.com/feedfile/20250808/500ce3db6601082ed534434d8d18f774.png",
+            "thumbnail_url": "http://esxf.esxscloud.com/feedfile/20250808/131x197/500ce3db6601082ed534434d8d18f774.png",
+            "image_type": "png",
+            "width": "1024",
+            "height": "1536"
+          }
+        ],
+        "interest": "[]",
+        "age": "",
+        "profile_progress": "45",
+        "poster": [
+          {
+            "poster": "https://esx.esxscloud.com/liveme/poster/150x150/2a6f3da8d7a01a6bfd132adefdbbc9d9_icon.jpeg",
+            "big_poster": "https://esx.esxscloud.com/liveme/poster/540x540/2a6f3da8d7a01a6bfd132adefdbbc9d9_icon.jpeg",
+            "is_violation": "0"
+          }
+        ],
+        "cover_video": [],
+        "nft_subscribe_status": "1",
+        "nft_wallet_bind_status": "1",
+        "nft_show": "2",
+        "nft_id": "",
+        "nft_avatar": "",
+        "nft_avatar_frame": "",
+        "is_nft": "0",
+        "is_new_user": "0",
+        "is_new_liver": "0",
+        "is_new_user_upmai": "0",
+        "is_new_user_sendmsg": "0",
+        "is_new_user_sendgift": "0",
+        "is_reseller": "",
+        "showfont": "1",
+        "is_star": "0",
+        "star_is_verified": "0",
+        "area": "A_US",
+        "isVIP": "0",
+        "anchor_level_name": "",
+        "is_open": "0",
+        "is_show_shortvideo": "1",
+        "is_exchange": "2",
+        "levelRight": "1111111",
+        "game_live": "1",
+        "worn_badge": "",
+        "is_best": "1",
+        "issigning": "1",
+        "prime_family_id": "45778327",
+        "prime_family_name": "TheClub",
+        "prime_family_icon": "http://esx.esxscloud.com/big/liveme/familyicon/92eb57ae355b1014f5d788627147a0c6_icon.png",
+        "prime_family_level": "3",
+        "legion_id": "",
+        "legion_name": "",
+        "legion_icon": "",
+        "legion_level": "0",
+        "bubble_url": "{\"android\":\"https://esx.esxscloud.com/liveglb/202603031534/gifts/resource_manage/b80a9_md5_cc7709a6ffe2dcb42866344369f1b313.png\",\"ios\":\"https://esx.esxscloud.com/liveglb/202603031534/gifts/resource_manage/b80a9_md5_cc7709a6ffe2dcb42866344369f1b313.png\"}",
+        "bubble_font_color": "#FFFFFF",
+        "commonExt": {
+          "flashName": "1",
+          "marquee": {
+            "isFlash": "1",
+            "fBarUrl": "https://esx.esxscloud.com/liveglb/202209081636/gifts/resource_manage/e13e9_md5_95c2ac7786a7261262afbdd207e6804c_.png",
+            "fPointUrl": "https://esx.esxscloud.com/liveglb/202209081636/gifts/resource_manage/8ef8d_md5_bfcb75caabce6f0328fba0be208c2ab4_.png",
+            "fNormalColor": "#00A4FF",
+            "fAnimColor": "#020A79",
+            "fgrade": "1",
+            "fStartColor": "#00A4FF",
+            "fEndColor": "#000000",
+            "fLightUrl": "https://esx.esxscloud.com/liveglb/202209081636/gifts/resource_manage/e13e9_md5_95c2ac7786a7261262afbdd207e6804c_.png",
+            "fStarUrl": "https://esx.esxscloud.com/liveglb/202209081636/gifts/resource_manage/8ef8d_md5_bfcb75caabce6f0328fba0be208c2ab4_.png",
+            "fType": "4603"
+          },
+          "show_game_Send": "0",
+          "guarantor": {
+            "name": "",
+            "avatar": ""
+          }
+        },
+        "is_richer": "0",
+        "richer_servant": "",
+        "is_newanchor": "0",
+        "is_sign": "0",
+        "is_signer": "0",
+        "is_million": "0",
+        "isSer": "0",
+        "isVisibleVip": "0",
+        "isVisibleLevel": "1",
+        "isVipBlack": "0",
+        "is_online": "2",
+        "is_self_ban": "0",
+        "is_self_request_ban": "0",
+        "nvip_info": {
+          "badge": {
+            "nvip_color_start": "#E0B2B4",
+            "nvip_color_end": "#E0B2B4",
+            "nvip_boder_color": "#E0B2B4",
+            "nvip_level": "1",
+            "nvip_badge_url": "https://esx.esxscloud.com/liveglb/202209261406/content/resource_manage/md5_60509bbc8d5dbc74e2b5861d1f64b193_.png"
+          },
+          "entrance": {
+            "nvip_level": "1",
+            "nvip_type": "3",
+            "effective_level": "0",
+            "remaining_amount": "0",
+            "effective_date": "0",
+            "jump_url": "https://www.liveme.com/activity/2022/dist/nvip/index.html?country_code=us&actid=6314&source=5&source_type=featured&source_code=message_url",
+            "nvip_increase_exp_des": "VIP EXP x1.2",
+            "nvip_exp_addition_des": "https://esx.esxscloud.com/liveglb/202309131719/content/resource_manage/md5_6675aef11082d9dd6a46ab9fd59aa04b_.png"
+          },
+          "goods": {
+            "id": "2001058",
+            "effectNew": "1802",
+            "svgaUrl": "https://esx.esxscloud.com/liveglb/202211081253/gifts/resource_manage/540f7_md5_0f53ddd448c7491b4ef30f13ba0b3c72.svga",
+            "smallImg": "https://esx.esxscloud.com/liveglb/202211081253/gifts/resource_manage/cfda6_md5_92e476171813312a7a85944db9d61a31.webp",
+            "bagImg": "https://esx.esxscloud.com/liveglb/202211081253/gifts/resource_manage/540f7_md5_0f53ddd448c7491b4ef30f13ba0b3c72.svga"
+          }
+        },
+        "taillight": {},
+        "snvip_info": {
+          "status": "2",
+          "consecutive_month": "9",
+          "name": "S-NVIPX9 Months",
+          "icon": "https://esx.esxscloud.com/liveglb/202411261708/content/resource_manage/md5_c2eb557e51e3689a6a7840e330014d2f_.png",
+          "h5_url": "https://www.liveme.com/app/user-rights/dist/index.html",
+          "color": {
+            "snvipBoderColor": "#B1B1B1",
+            "snvipColorEnd": "#787878",
+            "snvipColorStart": "#5F5F5F",
+            "snvipTextColor": "#DCDCDC"
+          },
+          "hide": "1"
+        },
+        "screen_data": {
+          "horner_info": {
+            "icon": "https://esx.esxscloud.com/liveglb/202310181622/gifts/resource_manage/b7a53_md5_6384f3a587a9f776c50d63dc84a94f48.png",
+            "url": "",
+            "is_country": "0",
+            "country": ""
+          }
+        },
+        "shop_info": {
+          "uid": "560875115161059328",
+          "owner_shop_url": "",
+          "others_shop_url": "",
+          "show_switch": "0"
+        },
+        "speech_border": "https://esx.esxscloud.com/liveglb/202603270930/gifts/resource_manage/a01a0_md5_9efc8b28f032c9288eed6edffc56bf99.png",
+        "micpos_stype": "",
+        "beam_wave": "",
+        "is_nc_anchor": "1",
+        "light_nc_anchor_mark": "0",
+        "light_nc_url": "https://esx.esxscloud.com/liveglb/202306141239/content/resource_manage/md5_aba7683ea27def20bc2a08967e385bc5_.png",
+        "is_escrow_user": "0"
+      },
+      "following_list": [],
+      "follower_list": [],
+      "video_list": [],
+      "count_info": {
+        "following_count": "6",
+        "follower_count": "4648",
+        "black_count": "0",
+        "video_count": "0",
+        "live_count": "0",
+        "replay_count": "0",
+        "ad_num": "3",
+        "friends_count": "6",
+        "my_group_count": "1"
+      },
+      "usign": "👑 🐰 🇺🇦"
+    },
+    "isshowoff": "1",
+    "rating_info": {
+      "img": "",
+      "rank": "",
+      "description": ""
+    },
+    "theme_info_new": "{}",
+    "theme_info": "{}",
+    "sobotservice": "a8bb3612965b4f9287d109b2f5072d19",
+    "workid": "e71c900bd9b4469f9a22f5739b62f51b",
+    "customer_service": "1",
+    "angel_uid": "1920047792357501953"
+  },
+  "gdelay": "189"
+}

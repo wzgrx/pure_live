@@ -24,6 +24,7 @@ const _roomInfo = '/xlive/web-room/v1/index/getInfoByRoom';
 const _danmu = '/xlive/web-room/v1/index/getDanmuInfo';
 const _ranked = '/room/v1/Area/getListByAreaID';
 const _feed = '/xlive/web-interface/v1/webMain/getMoreRecList';
+const _playInfo = '/xlive/web-room/v2/index/getRoomPlayInfo';
 
 ReplaySample _synthetic(String url, Object body, {int status = 200, Map<String, List<String>> headers = const {}}) =>
     ReplaySample(
@@ -347,6 +348,37 @@ void main() {
       final qualities = await setup.site.getPlayQualities(detail: room);
       expect(qualities, isNotEmpty);
       expect(setup.http.requests.last.url.queryParameters['room_id'], '7734200');
+    });
+
+    test('1-1: a carousel room is its own state and its stream is still asked for', () async {
+      final setup = _setup(['S06-replay', 'S07-replay']);
+      final room = await setup.site.getRoomDetailForRefresh(roomId: '5440');
+      expect(room.effectiveLiveStatus, LiveStatus.carousel);
+      await expectLater(
+        setup.site.getPlayQualities(detail: room),
+        throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('carousel'))),
+      );
+      expect(_count(setup.http, _playInfo), 1, reason: 'the carousel is not refused before asking');
+    });
+
+    test('1-1: signed in, a carousel that comes with a stream plays', () async {
+      final vault = MemoryCookieVault()..set('bilibili', 'buvid3=own; SESSDATA=s');
+      addTearDown(vault.dispose);
+      final played = jsonDecode(Fixture.load('bilibili', 'S07-guest-qn0').body) as Map<String, dynamic>;
+      (played['data'] as Map<String, dynamic>)['live_status'] = 2;
+      final setup = _setup(
+        ['S06-replay'],
+        cookies: vault,
+        script: {
+          _playInfo: [_synthetic('https://api.live.bilibili.com$_playInfo', played)],
+        },
+      );
+      final room = await setup.site.getRoomDetailForRefresh(roomId: '5440');
+      expect(room.liveStatus, LiveStatus.carousel);
+      final qualities = await setup.site.getPlayQualities(detail: room);
+      expect(qualities, isNotEmpty);
+      expect(setup.http.requests.last.url.queryParameters['room_id'], '5440');
+      expect(setup.http.requests.last.headers['cookie'], 'buvid3=own; SESSDATA=s');
     });
 
     test('offline rooms have no stream: StreamUnavailable', () async {

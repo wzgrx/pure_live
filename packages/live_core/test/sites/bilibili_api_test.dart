@@ -25,6 +25,20 @@ void _expectParity(
   }
 }
 
+/// [body] with `data.room_info` (getInfoByRoom) changed by [change].
+String _editRoomInfo(String body, void Function(Map<String, dynamic> room) change) {
+  final root = jsonDecode(body) as Map<String, dynamic>;
+  change((root['data'] as Map<String, dynamic>)['room_info'] as Map<String, dynamic>);
+  return jsonEncode(root);
+}
+
+/// [body] with `data` (getRoomPlayInfo) changed by [change].
+String _editPlay(String body, void Function(Map<String, dynamic> data) change) {
+  final root = jsonDecode(body) as Map<String, dynamic>;
+  change(root['data'] as Map<String, dynamic>);
+  return jsonEncode(root);
+}
+
 void main() {
   test('S01 categories: ids, names and areas match 3.x', () {
     final fixture = _sample('S01-guest');
@@ -107,8 +121,39 @@ void main() {
           hasLength(legacy.length),
           reason: 'streamers on page 1 only',
         );
+        // 1-1: the streamers' live_status 2 is the carousel, 0 offline.
+        final liveUsers = (raw['live_user'] as List).cast<Map<String, dynamic>>();
+        for (final room in users) {
+          final user = liveUsers.firstWhere((item) => '${item['roomid']}' == room.roomId);
+          expect(
+            room.effectiveLiveStatus,
+            user['live_status'] == 2 ? LiveStatus.carousel : LiveStatus.offline,
+            reason: room.roomId,
+          );
+          expect(room.startedAt, isNull, reason: '0000-00-00 00:00:00 is no time');
+        }
+        expect(users.where((room) => room.liveStatus == LiveStatus.carousel).map((room) => room.roomId), [
+          '5440',
+          '22462095',
+        ]);
       });
     }
+
+    test("start time: a live room's live_time is Beijing time (UTC+8)", () {
+      final fixture = _sample('S05-live-results');
+      final rooms = BilibiliApi.searchRooms(fixture.body, page: 1).where((room) => room.isLiveNow).toList();
+      expect(rooms, hasLength(14));
+      // "2026-09-27 14:59:59"
+      expect(rooms.first.startedAt, DateTime.utc(2026, 9, 27, 6, 59, 59));
+      for (final room in rooms) {
+        expect(room.startedAt, isNotNull, reason: room.roomId);
+        expect(room.startedAt!.isAfter(fixture.capturedAt), isFalse, reason: 'started before the search');
+      }
+      // The latest start ("17:53:25") is 28 seconds before the capture, so the
+      // text is not UTC.
+      final latest = rooms.map((room) => room.startedAt!).reduce((a, b) => a.isAfter(b) ? a : b);
+      expect(fixture.capturedAt.difference(latest), lessThan(const Duration(minutes: 1)));
+    });
 
     test('no results and out of range are empty', () {
       for (final name in ['S05-no-results', 'S05-out-of-range']) {
@@ -130,24 +175,94 @@ void main() {
         final requested = fixture.url.queryParameters['room_id']!;
         final detail = BilibiliApi.roomDetail(fixture.body, requestedId: requested, status: fixture.status);
         final legacy = fixture.legacy as Map<String, dynamic>;
+        final json = detail.room.toJson();
+        final room = legacy['getRoomDetailForRefresh'] as Map<String, dynamic>;
         // introduction: HTML made plain text (3.x kept `<p>…</p>`);
-        // totalViewers: see recommend.
+        // totalViewers: see recommend;
+        // liveStatus: the carousel (live_status 2) is its own state, index 5
+        // instead of 3.x's offline (1-1). `status` and `isRecord` are unchanged,
+        // so 3.x still reads the room as offline.
         _expectParity(
-          detail.room.toJson(),
-          legacy['getRoomDetailForRefresh'] as Map<String, dynamic>,
-          changed: {'introduction', 'totalViewers'},
+          json,
+          room,
+          changed: {'introduction', 'totalViewers', if (name == 'S06-replay') 'liveStatus'},
           reason: name,
         );
+        // M2.1's keys, which 3.x never wrote: the start time of a live room
+        // and the restriction (none in every sample).
+        expect(json.containsKey('startedAt'), detail.room.isLiveNow, reason: name);
+        expect(json['restriction'], 'none', reason: name);
         expect(detail.longId, '${legacy['parseRoomInfoResponse.room_info.room_id']}');
         expect(detail.room.roomId, requested, reason: 'a follow keeps the id it was made with');
       });
     }
 
-    test('a loop (live_status 2) stays offline as in 3.x; its HTML description becomes text', () {
+    test('1-1: a carousel (live_status 2) is its own state, grouped with offline and not playable', () {
       final fixture = _sample('S06-replay');
       final room = BilibiliApi.roomDetail(fixture.body, requestedId: '5440').room;
-      expect(room.effectiveLiveStatus, LiveStatus.offline);
-      expect(room.introduction, '凡人线下嘉年华');
+      expect(room.effectiveLiveStatus, LiveStatus.carousel);
+      expect(room.isLiveNow, isFalse);
+      expect(room.isPlayableNow, isFalse);
+      expect(room.isExplicitlyOfflineNow, isTrue, reason: 'recording treats it as off air');
+      expect(room.followGroup, FollowGroup.offline);
+      expect(room.toJson(), containsPair('liveStatus', LiveStatus.carousel.index));
+      expect(room.toJson(), allOf(containsPair('status', false), containsPair('isRecord', false)));
+      expect(room.startedAt, isNull);
+      expect(room.introduction, '凡人线下嘉年华', reason: 'its HTML description becomes text');
+      final offline = BilibiliApi.roomDetail(_sample('S06-offline').body, requestedId: '22647871').room;
+      expect(offline.effectiveLiveStatus, LiveStatus.offline, reason: 'live_status 0 stays offline');
+    });
+
+    test("start time: a live room's live_start_time (Unix seconds) as UTC; none off air", () {
+      DateTime? started(String name) {
+        final fixture = _sample(name);
+        return BilibiliApi.roomDetail(
+          fixture.body,
+          requestedId: fixture.url.queryParameters['room_id']!,
+        ).room.startedAt;
+      }
+
+      expect(started('S06-live'), DateTime.utc(2026, 9, 27, 8, 56, 16));
+      expect(started('S06-short-id'), DateTime.utc(2026, 9, 7, 6, 22, 39));
+      expect(started('S06-short-id-long'), DateTime.utc(2026, 9, 7, 6, 22, 39));
+      expect(started('S06-offline'), isNull, reason: 'live_start_time 0');
+      expect(started('S06-replay'), isNull, reason: 'a carousel is not a broadcast');
+      final live = _sample('S06-live');
+      expect(
+        BilibiliApi.roomDetail(live.body, requestedId: '42062').room.toJson()['startedAt'],
+        '2026-09-27T08:56:16.000Z',
+      );
+      expect(started('S06-live')!.isBefore(live.capturedAt), isTrue);
+    });
+
+    test('restriction: special_type 1 on a live room is paid and still live; otherwise none', () {
+      final live = _sample('S06-live');
+      expect(BilibiliApi.roomDetail(live.body, requestedId: '42062').room.restriction, LiveRestriction.none);
+      final paid = BilibiliApi.roomDetail(
+        _editRoomInfo(live.body, (room) => room['special_type'] = 1),
+        requestedId: '42062',
+      ).room;
+      expect(paid.restriction, LiveRestriction.paid);
+      expect(paid.isLiveNow, isTrue);
+      expect(paid.isRestricted, isTrue);
+      expect(paid.followGroup, FollowGroup.live);
+      final offline = _sample('S06-offline');
+      expect(
+        BilibiliApi.roomDetail(
+          _editRoomInfo(offline.body, (room) => room['special_type'] = 1),
+          requestedId: '22647871',
+        ).room.restriction,
+        LiveRestriction.none,
+        reason: 'no broadcast to restrict',
+      );
+      expect(
+        BilibiliApi.roomDetail(
+          _editRoomInfo(live.body, (room) => room.remove('special_type')),
+          requestedId: '42062',
+        ).room.restriction,
+        isNull,
+        reason: 'without the field the response says nothing',
+      );
     });
 
     test('missing rooms are NotFound; -352 is RiskControl', () {
@@ -247,11 +362,40 @@ void main() {
       expect(resolution.lines.map((line) => line.url).toSet(), hasLength(resolution.lines.length));
     });
 
-    test('offline and loop rooms have no stream: StreamUnavailable (3.x threw FormatException)', () {
-      for (final name in ['S07-offline', 'S07-replay']) {
+    test('offline and carousel rooms give guests no stream: StreamUnavailable (3.x threw FormatException)', () {
+      for (final (name, state) in [('S07-offline', 'offline'), ('S07-replay', 'carousel')]) {
         final fixture = _sample(name);
-        expect(() => BilibiliApi.playData(fixture.body, status: fixture.status), throwsA(isA<StreamUnavailable>()));
+        expect(
+          () => BilibiliApi.playData(fixture.body, status: fixture.status),
+          throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains(state))),
+          reason: name,
+        );
       }
+    });
+
+    test('1-1: a carousel that comes with a stream (a signed-in user) is played', () {
+      final fixture = _sample('S07-guest-qn0');
+      final data = BilibiliApi.playData(_editPlay(fixture.body, (data) => data['live_status'] = 2));
+      expect(BilibiliApi.qualities(data), isNotEmpty);
+      final resolution = BilibiliApi.resolution(data, requestedQn: 0, roomId: '42062', issuedAt: fixture.capturedAt);
+      expect(resolution.lines, isNotEmpty);
+    });
+
+    test('a paid broadcast without a ticket (1 in all_special_types) says so', () {
+      final fixture = _sample('S07-offline');
+      final paid = _editPlay(fixture.body, (data) {
+        data['live_status'] = 1;
+        data['all_special_types'] = [1, 50];
+      });
+      expect(
+        () => BilibiliApi.playData(paid),
+        throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('paid broadcast'))),
+      );
+      final live = _editPlay(fixture.body, (data) => data['live_status'] = 1);
+      expect(
+        () => BilibiliApi.playData(live),
+        throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', isNot(contains('paid')))),
+      );
     });
   });
 
@@ -333,6 +477,7 @@ void main() {
     expect(() => BilibiliApi.liveStatus('<html>'), throwsA(isA<ApiChanged>()));
     expect(() => BilibiliApi.liveStatus('{"code":1}'), throwsA(isA<ApiChanged>()));
     expect(BilibiliApi.liveStatus('{"code":0,"data":{"live_status":1}}'), isTrue);
+    expect(BilibiliApi.liveStatus('{"code":0,"data":{"live_status":2}}'), isFalse, reason: 'a carousel is not live');
   });
 
   test('super chats: display window, sender and price; entries without a time are skipped', () {

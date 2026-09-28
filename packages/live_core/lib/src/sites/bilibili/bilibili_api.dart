@@ -173,9 +173,11 @@ abstract final class BilibiliApi {
 
   /// `search/type?search_type=live`: `live_room` entries are live rooms;
   /// `live_user` entries are streamers whose name matched, the only place
-  /// offline streamers appear (3.x ignored them). Those become cards after
-  /// the rooms, on page 1 only (every page repeats them), without title,
-  /// cover or audience, and only when their room is not listed yet.
+  /// offline and carousel streamers appear (3.x ignored them). Those become
+  /// cards after the rooms, on page 1 only (every page repeats them), without
+  /// title, cover or audience, and only when their room is not listed yet.
+  /// `live_status` is read as in [roomDetail]; a live entry's `live_time`
+  /// (Beijing time) is its start.
   static List<LiveRoom> searchRooms(String body, {required int page, int status = 200}) {
     final root = _checked(body, status: status, what: 'search');
     final result = _object(_object(root['data'])?['result']);
@@ -196,7 +198,8 @@ abstract final class BilibiliApi {
   static LiveRoom? _searchRoom(Map<String, dynamic> item) {
     final id = _roomId(item['roomid']);
     if (id == null) return null;
-    final live = _isLive(item['live_status']);
+    final state = _status(item['live_status']);
+    final live = state == LiveStatus.live;
     final online = jsonString(item['online']) ?? '';
     return LiveRoom(
       roomId: id,
@@ -213,13 +216,15 @@ abstract final class BilibiliApi {
       totalViewers: _watched(item['watched_show'], live: live),
       followers: jsonString(item['attentions']) ?? '',
       audienceMetricType: AudienceMetricType.popularity,
-      liveStatus: live ? LiveStatus.live : LiveStatus.offline,
+      liveStatus: state,
+      startedAt: live ? _beijingTime(item['live_time']) : null,
     );
   }
 
   static LiveRoom? _searchUser(Map<String, dynamic> item) {
     final id = _roomId(item['roomid']);
     if (id == null) return null;
+    final state = _status(item['live_status']);
     return LiveRoom(
       roomId: id,
       platform: _site,
@@ -229,7 +234,8 @@ abstract final class BilibiliApi {
       watching: '',
       followers: jsonString(item['attentions']) ?? '',
       audienceMetricType: AudienceMetricType.popularity,
-      liveStatus: _isLive(item['live_status']) ? LiveStatus.live : LiveStatus.offline,
+      liveStatus: state,
+      startedAt: state == LiveStatus.live ? _beijingTime(item['live_time']) : null,
     );
   }
 
@@ -254,9 +260,12 @@ abstract final class BilibiliApi {
   /// ([requestedId], which may be a short id: the identity of a follow must
   /// not change) and the canonical long id used for streams and danmaku.
   ///
-  /// `live_status` 1 (number or string) is live; 0 and 2 (a loop, which
-  /// guests cannot play) are offline, as in 3.x. Codes -404, 19002000 and
-  /// 60004 are `NotFound`. The description's HTML becomes plain text.
+  /// `live_status` 1 (number or string) is live, 2 is the carousel (old
+  /// videos looping while the streamer is off; 3.x showed it as offline) and
+  /// anything else is offline. A live room's `live_start_time` (Unix seconds)
+  /// is its start; `special_type` gives the restriction. Codes -404,
+  /// 19002000 and 60004 are `NotFound`. The description's HTML becomes plain
+  /// text.
   static ({LiveRoom room, String longId}) roomDetail(String body, {required String requestedId, int status = 200}) {
     final root = _checked(body, status: status, what: 'getInfoByRoom', notFound: const {-404, 19002000, 60004});
     final data = _object(root['data']);
@@ -267,7 +276,8 @@ abstract final class BilibiliApi {
     }
     final longId = _roomId(room['room_id']);
     if (longId == null) throw const ApiChanged(_site, 'getInfoByRoom: room_info.room_id missing');
-    final live = _isLive(room['live_status']);
+    final state = _status(room['live_status']);
+    final live = state == LiveStatus.live;
     final base = _object(anchor['base_info']);
     final online = jsonString(room['online']) ?? '';
     final notice = jsonString(_object(data['news_info'])?['content']);
@@ -286,7 +296,9 @@ abstract final class BilibiliApi {
         popularity: online,
         totalViewers: _watched(data['watched_show'], live: live),
         audienceMetricType: AudienceMetricType.popularity,
-        liveStatus: live ? LiveStatus.live : LiveStatus.offline,
+        liveStatus: state,
+        startedAt: live ? _unixTime(room['live_start_time']) : null,
+        restriction: _restriction(room['special_type'], live: live),
         link: 'https://live.bilibili.com/$id',
         introduction: _richText(room['description']) ?? '',
         notice: notice == null ? '' : decodeHtmlEntities(notice),
@@ -327,15 +339,26 @@ abstract final class BilibiliApi {
 
   // Streams -------------------------------------------------------------------
 
-  /// `getRoomPlayInfo` → its `data`. A `playurl_info` of null (offline, or a
-  /// loop for guests) is `StreamUnavailable`; one without `playurl` is
-  /// `ApiChanged`.
+  /// `getRoomPlayInfo` → its `data`, whatever the room's state: a carousel
+  /// that comes with a stream (possibly for a signed-in user) is played. A
+  /// `playurl_info` of null (offline, a carousel for guests, a paid broadcast
+  /// without a ticket) is `StreamUnavailable` naming the state; one without
+  /// `playurl` is `ApiChanged`. A paid broadcast has 1 in
+  /// `all_special_types` (what the web player checks before asking for a
+  /// ticket).
   static Map<String, dynamic> playData(String body, {int status = 200}) {
     final root = _checked(body, status: status, what: 'getRoomPlayInfo');
     final data = _object(root['data']);
     if (data == null) throw ApiChanged(_site, 'getRoomPlayInfo: no data (${_snippet(body)})');
     if (data['playurl_info'] == null) {
-      throw StreamUnavailable(_site, 'getRoomPlayInfo: playurl_info null, live_status ${data['live_status']}');
+      final paid = _list(data['all_special_types']).any((type) => jsonInt(type) == 1);
+      final state = switch (_status(data['live_status'])) {
+        LiveStatus.live when paid => 'paid broadcast without a ticket',
+        LiveStatus.live => 'live without a stream for this client',
+        LiveStatus.carousel => 'carousel without a stream for this client',
+        _ => 'offline',
+      };
+      throw StreamUnavailable(_site, 'getRoomPlayInfo: $state (live_status ${data['live_status']})');
     }
     _playurl(data);
     return data;
@@ -693,6 +716,40 @@ abstract final class BilibiliApi {
   /// `live_status` 1, as a number or a string (3.x once read `"1"` as
   /// offline).
   static bool _isLive(Object? value) => jsonInt(value) == 1;
+
+  /// `live_status` (number or string): 1 live, 2 the carousel, anything
+  /// else offline (3.x read 2 as offline too).
+  static LiveStatus _status(Object? value) => switch (jsonInt(value)) {
+    1 => LiveStatus.live,
+    2 => LiveStatus.carousel,
+    _ => LiveStatus.offline,
+  };
+
+  /// A positive Unix time in seconds as UTC; 0 (not live) is none.
+  static DateTime? _unixTime(Object? value) => switch (jsonInt(value)) {
+    final int seconds when seconds > 0 => DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true),
+    _ => null,
+  };
+
+  static final RegExp _localTime = RegExp(r'^(\d{4})-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$');
+
+  /// Search's `live_time`, `yyyy-MM-dd HH:mm:ss` in Beijing time (UTC+8), as
+  /// UTC; the `0000-00-00 00:00:00` of an offline streamer is none.
+  static DateTime? _beijingTime(Object? value) {
+    final match = _localTime.firstMatch(jsonString(value)?.trim() ?? '');
+    if (match == null || int.parse(match.group(1)!) < 2000) return null;
+    return DateTime.tryParse('${match.group(0)!.replaceFirst(' ', 'T')}+08:00')?.toUtc();
+  }
+
+  /// `room_info.special_type`: 1 is a paid room (a ticket), 0 an ordinary
+  /// room, 2 the New Year gala room. A paid room that is live is
+  /// [LiveRestriction.paid]; otherwise there is no restriction. Without the
+  /// field the response says nothing (null).
+  static LiveRestriction? _restriction(Object? specialType, {required bool live}) => switch (jsonInt(specialType)) {
+    null => null,
+    1 when live => LiveRestriction.paid,
+    _ => LiveRestriction.none,
+  };
 }
 
 typedef _Candidate = ({Uri url, int qn, String protocol, String format, String? codec, StreamFormat type});

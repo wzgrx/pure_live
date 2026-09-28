@@ -366,6 +366,59 @@ void main() {
     expect(rings, ringOn(text));
   });
 
+  testWidgets("the D-pad reaches a row's trailing buttons and comes back (principles §5.3)", (tester) async {
+    addTearDown(() => FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic);
+    final row = FocusNode(debugLabel: 'row');
+    final first = FocusNode(debugLabel: 'first');
+    final second = FocusNode(debugLabel: 'second');
+    final below = FocusNode(debugLabel: 'below');
+    addTearDown(() {
+      for (final node in [row, first, second, below]) {
+        node.dispose();
+      }
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: PureTheme.tv(Appearance.dark),
+        builder: (context, child) => TvRoot(config: const TvConfig(enabled: true), child: child!),
+        home: Scaffold(
+          body: ListView(
+            children: [
+              ListTile(
+                focusNode: row,
+                autofocus: true,
+                title: const Text('带两个按钮的行'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(focusNode: first, icon: const Icon(Icons.refresh), onPressed: () {}),
+                    IconButton(focusNode: second, icon: const Icon(Icons.more_vert), onPressed: () {}),
+                  ],
+                ),
+                onTap: () {},
+              ),
+              ListTile(focusNode: below, title: const Text('下一行'), onTap: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(row.hasPrimaryFocus, isTrue);
+    Future<FocusNode?> press(LogicalKeyboardKey key) async {
+      await tester.sendKeyEvent(key);
+      await tester.pump();
+      return FocusManager.instance.primaryFocus;
+    }
+
+    // The framework alone never left the row: its buttons lie inside it.
+    expect(await press(LogicalKeyboardKey.arrowRight), first);
+    expect(await press(LogicalKeyboardKey.arrowRight), second);
+    expect(await press(LogicalKeyboardKey.arrowLeft), first);
+    expect(await press(LogicalKeyboardKey.arrowLeft), row);
+    expect(await press(LogicalKeyboardKey.arrowDown), below, reason: 'up and down move by row as before');
+  });
+
   testWidgets('a focused segment of a segmented button gets the ring too', (tester) async {
     addTearDown(() => FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic);
     tester.view

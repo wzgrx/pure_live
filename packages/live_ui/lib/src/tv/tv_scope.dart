@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:live_ui/src/metrics.dart';
 import 'package:live_ui/src/tv/list_focus_ring.dart';
+import 'package:live_ui/src/tv/row_focus.dart';
 
 /// Sizes of the TV presentation (spec/design/principles.md §5.3).
 abstract final class TvMetrics {
@@ -224,12 +225,16 @@ class _TvRootState extends State<TvRoot> {
   Widget build(BuildContext context) {
     var child = widget.child;
     if (widget.config.enabled) {
-      child = Focus(
-        canRequestFocus: false,
-        skipTraversal: true,
-        onKeyEvent: _dropRepeats,
-        // List rows get the ring cards and buttons have (principles §5.3).
-        child: TvCanvas(child: TvListFocusRings(child: child)),
+      child = Actions(
+        // A row's trailing buttons are reachable with the D-pad.
+        actions: {DirectionalFocusIntent: TvRowFocusAction()},
+        child: Focus(
+          canRequestFocus: false,
+          skipTraversal: true,
+          onKeyEvent: _dropRepeats,
+          // List rows get the ring cards and buttons have (principles §5.3).
+          child: TvCanvas(child: TvListFocusRings(child: child)),
+        ),
       );
     }
     return TvScope(config: widget.config, child: child);

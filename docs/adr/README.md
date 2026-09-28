@@ -19,9 +19,9 @@
 | [0011](0011-live-net.md) | 网络层 live_net：dart:io 实现、按平台的代理与凭据、样本回放 | 已接受 |
 | [0012](0012-legacy-bridge.md) | 旧应用接入 v4：3.3.x 只接列表、搜索和链接，标识与旧版逐字段一致 | 已接受（发布 3.3.x 被 0014 取消） |
 | [0013](0013-legacy-folder.md) | 旧应用整体收进 `legacy/`，根目录只放 v4 和仓库级文件 | 已接受 |
-| [0014](0014-v4-first.md) | 停止构建 3.x，直接推进 v4；构建和门禁改在本机运行 | 已接受 |
-| [0015](0015-v4-app-structure.md) | v4 应用与播放层的包结构：live_media 纯 Dart + live_player，手写 Riverpod provider | 已接受 |
-| [0016](0016-archive-v3.md) | v3 全部归档：旧应用移出 workspace，3.x 的仓库级文件移进 legacy/ | 已接受 |
+| [0014](0014-v4-first.md) | 停止构建 3.x，直接推进 v4；构建和门禁改在本机运行 | 已接受（部分被 0039 取代） |
+| [0015](0015-v4-app-structure.md) | v4 应用与播放层的包结构：live_media 纯 Dart + live_player，手写 Riverpod provider | 已接受（应用结构被 0039 取代，包的划分仍有效） |
+| [0016](0016-archive-v3.md) | v3 全部归档：旧应用移出 workspace，3.x 的仓库级文件移进 legacy/ | 已接受（被 0039 取代） |
 | [0017](0017-live-store.md) | live_store 的实现选择：库结构、加密接口、设置常驻内存、备份细节 | 已接受（recordTasks 一项被 0030 取代） |
 | [0018](0018-playback-layer.md) | 播放层的实现方式：事件契约、回环中继与恢复分类 | 已接受 |
 | [0019](0019-danmaku-layer.md) | 弹幕包 live_danmaku 的结构与协议选择 | 已接受 |
@@ -42,8 +42,9 @@
 | [0034](0034-i18n.md) | 界面多语言：slang 按功能分命名空间，全局 t 加整树重建，live_ui 文案注入 | 已接受 |
 | [0035](0035-hls-record.md) | 录制 HLS：连续文件、内存解密、纯 Dart 的 TS / fMP4 转封装；修订：IPTV 连续 TS | 已接受 |
 | [0036](0036-icons.md) | 图标：Material Symbols Rounded 的语义目录（LiveIcons）、轴的落实、自绘弹幕图标、发布包裁剪的验证 | 已接受 |
-| [0037](0037-v3-ui-replica.md) | 界面先复刻 3.x，再逐项升级 | 已接受 |
-| [0038](0038-upstream-references.md) | 上游参考仓库：电视端照 pure_live_TV 复刻，flame_barrage、media_core、flv_lzc 作为长期参考 | 已接受 |
+| [0037](0037-v3-ui-replica.md) | 界面先复刻 3.x，再逐项升级 | 已接受（被 0039 取代） |
+| [0038](0038-upstream-references.md) | 上游参考仓库：电视端照 pure_live_TV 复刻，flame_barrage、media_core、flv_lzc 作为长期参考 | 已接受（第 1 条被 0039 修改） |
+| [0039](0039-v4-refactors-v3.md) | v4 改为在 v3 代码上重构：审查、优化、完善、增强；v4 的包按模块接入，电视端以 pure_live_TV 为基础 | 已接受 |
 
 ## 模板
 

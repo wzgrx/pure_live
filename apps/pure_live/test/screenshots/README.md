@@ -12,7 +12,7 @@ flutter test --update-goldens test/screenshots  # 界面有意改动后重新生
 flutter test --exclude-tags screenshots         # 只跑其余测试
 ```
 
-- 这组测试带 `@Tags(['screenshots'])`，标签在 `apps/pure_live/dart_test.yaml` 声明，**默认包含在 `flutter test` 和门禁里**：68 张在 WSL 上约 23 秒（连编译约 31 秒），低于 60 秒的门槛；整个应用的 `flutter test` 因此从约 49 秒变为约 85 秒（2026-09-28 实测）。
+- 这组测试带 `@Tags(['screenshots'])`，标签在 `apps/pure_live/dart_test.yaml` 声明，**默认包含在 `flutter test` 和门禁里**：73 张在 WSL 上约 23 秒（连编译约 31 秒），低于 60 秒的门槛；整个应用的 `flutter test` 因此从约 49 秒变为约 85 秒（2026-09-28 实测）。
 - 比较失败时，差异图写在 `test/screenshots/failures/`（`*_masterImage`、`*_testImage`、`*_isolatedDiff`、`*_maskedDiff`，已忽略，不提交）。
 - 更新后用图片查看器或 `git diff --stat` 检查哪些图变了；只改了一处界面却有很多图变化，通常说明改动波及了共用组件。
 - 找不到字体文件的机器（例如 Windows 主机）上整组跳过，不算失败，控制台打印 `screenshots skipped: …`。
@@ -52,14 +52,14 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 
 ## 画面里是什么
 
-- 数据全部是虚构的（`shot_world.dart`）：12 个开播直播间、4 个未开播的关注、搜索只有 B 站、斗鱼、虎牙有结果；标题故意有长有短，人数覆盖“523”到“128万”。
+- 数据全部是虚构的（`shot_world.dart`）：12 个开播直播间、4 个未开播的关注、搜索只有 B 站、斗鱼、虎牙有结果（斗鱼另有一个未开播的房间，以紧凑行显示）；标题故意有长有短，人数覆盖“523”到“128万”。“平台异常横幅”的截图里虎牙刷新失败，虎牙的关注显示“状态未知”。
 - 封面不加载网络图片，显示无封面时的占位；播放器用 `FakeEngine`，画面是黑的，控制层处于显示状态；聊天是一批固定的弹幕。
 - 录制中心只有“已完成”“失败”“已停止”三种任务：正在录制需要真的直播流。
 - 时间：时长和“3 小时前”相对测试开始时刻计算；全屏时钟读 `clockProvider`，固定为 20:30。
 - 已过首次启动：一次性提示不出现。阴影按真实方式绘制（测试框架默认把阴影画成黑边，这里关掉了）。
 - “出错”截图用应用的重试策略 `networkRetry`（网络错误重试两次，1 s、2 s），推进 4 秒假时间后截：错误必须在 4 秒内出现。
 
-## 页面清单（68 张）
+## 页面清单（73 张）
 
 | 文件 | 页面 | 尺寸 | 主题 | 语言 |
 |---|---|---|---|---|
@@ -78,6 +78,7 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 | `discover_phoneland_dark_zh-Hans.png` | 发现 | 手机横屏 | 深色 | 简体 |
 | `discover_xlarge_light_zh-Hans.png` | 发现 | 超大（Windows） | 浅色 | 简体 |
 | `follows-banner_medium_light_zh-Hans.png` | 关注（平台异常横幅） | 中等 | 浅色 | 简体 |
+| `follows-banner_phone_dark_zh-Hans.png` | 关注（平台异常横幅） | 手机竖屏 | 深色 | 简体 |
 | `follows-empty_phone_light_zh-Hans.png` | 关注（空） | 手机竖屏 | 浅色 | 简体 |
 | `follows_expanded_dark_zh-Hans.png` | 关注 | 展开 | 深色 | 简体 |
 | `follows_large_light_zh-Hans.png` | 关注 | 大（Windows） | 浅色 | 简体 |
@@ -109,8 +110,10 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 | `room_xlarge_dark_zh-Hans.png` | 直播间 | 超大（Windows） | 深色 | 简体 |
 | `search-empty_large_dark_zh-Hans.png` | 搜索（无结果） | 大（Windows） | 深色 | 简体 |
 | `search-empty_phone_light_zh-Hans.png` | 搜索（无结果） | 手机竖屏 | 浅色 | 简体 |
+| `search-link_phone_light_zh-Hans.png` | 搜索（识别到链接：打开直播间） | 手机竖屏 | 浅色 | 简体 |
 | `search_expanded_light_zh-Hans.png` | 搜索（有结果） | 展开 | 浅色 | 简体 |
 | `search_large_dark_zh-Hans.png` | 搜索（有结果） | 大（Windows） | 深色 | 简体 |
+| `search_medium_light_zh-Hant.png` | 搜索（有结果） | 中等 | 浅色 | 繁体 |
 | `search_phone_dark_en.png` | 搜索（有结果） | 手机竖屏 | 深色 | 英文 |
 | `search_phone_light_zh-Hans.png` | 搜索（有结果） | 手机竖屏 | 浅色 | 简体 |
 | `search_xlarge_light_zh-Hans.png` | 搜索（有结果） | 超大（Windows） | 浅色 | 简体 |
@@ -120,6 +123,8 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 | `settings-playback_phone_light_zh-Hans.png` | 设置 › 播放 | 手机竖屏 | 浅色 | 简体 |
 | `settings-playback_phone_light_zh-Hant_text2.0.png` | 设置 › 播放 | 手机竖屏 | 浅色 | 繁体 · 文字 ×2.0 |
 | `settings-playback_xlarge_light_zh-Hans.png` | 设置（两栏，选中播放） | 超大（Windows） | 浅色 | 简体 |
+| `settings-search_large_dark_en.png` | 设置搜索（两栏，打开结果并高亮） | 大（Windows） | 深色 | 英文 |
+| `settings-search_phone_light_zh-Hans.png` | 设置搜索（按 3.x 旧名找到） | 手机竖屏 | 浅色 | 简体 |
 | `settings_expanded_light_zh-Hans.png` | 设置首页（两栏） | 展开 | 浅色 | 简体 |
 | `settings_large_dark_en.png` | 设置首页（两栏） | 大（Windows） | 深色 | 英文 |
 | `settings_phone_dark_zh-Hans.png` | 设置首页 | 手机竖屏 | 深色 | 简体 |
@@ -137,4 +142,4 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 1. 在对应的 `*_screens_test.dart` 里写 `screenshot('<页面>', ShotScreen.<尺寸>, (app) => app.go('<路由>'), theme: …, locale: …)`；全屏路由用 `app.push`，需要等待的状态用 `app.frames()`。
 2. 页面要的数据放进 `ShotWorld`；需要的 provider 替换放进 `ShotApp.pump`。
 3. `flutter test --update-goldens test/screenshots --plain-name <文件名>` 生成，看过再提交，并把它加进上表。
-4. 总量控制在 8 MB 以内（现在约 6.2 MB）。
+4. 总量控制在 8 MB 以内（现在约 6.6 MB）。

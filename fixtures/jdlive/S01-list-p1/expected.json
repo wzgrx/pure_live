@@ -1,0 +1,3875 @@
+{
+  "generator": "JdLiveSite.getCategores + getDirectoryPage + getRecommendRooms + getCategoryRooms + searchRoomsCancellable (with S01-list-p2, S02-play-live, S02-play-old) + JdLiveApi.parseDirectoryJson + JdLiveLink; variants: parseDirectoryJson of edited copies",
+  "value": {
+    "headers": {
+      "apiHeaders": {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+        "Accept": "application/json, text/plain, */*",
+        "Origin": "https://lives.jd.com",
+        "Referer": "https://lives.jd.com/"
+      },
+      "mediaHeaders(48378944)": {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+        "Origin": "https://lives.jd.com",
+        "Referer": "https://lives.jd.com/#/48378944"
+      }
+    },
+    "getCategores": {
+      "result": [
+        {
+          "id": "jdlive",
+          "name": "JD Live",
+          "children": [
+            {
+              "platform": "jdlive",
+              "areaType": "official",
+              "typeName": "JD Live",
+              "areaId": "featured",
+              "areaName": "精选直播购物",
+              "areaPic": null,
+              "shortName": null
+            }
+          ]
+        }
+      ],
+      "requests": []
+    },
+    "getCategores(page: 2)": {
+      "result": 0,
+      "requests": []
+    },
+    "getCategores(pageSize: 0)": {
+      "result": 0,
+      "requests": []
+    },
+    "parseDirectoryJson": {
+      "rooms": [
+        {
+          "liveId": "48378944",
+          "authorId": "24304104",
+          "nick": "海信诚一恒专卖店",
+          "title": "有爱，科技也动情~~海信",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+          "totalViews": 37,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378908",
+          "authorId": "14252067",
+          "nick": "OBOX箱包旗舰店",
+          "title": "OBOX箱包，更便捷更专业",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+          "totalViews": 104,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378899",
+          "authorId": "724305",
+          "nick": "星河汽车用品专营店",
+          "title": "星河汽车轮胎秋季开学季",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/272760/36/21964/9289/67ff21a7Fd54d6333/efcbfe2543e8d38a.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/514805/37/1037/21169/6a8e853eFac9a138e/06033202584a6035.png",
+          "totalViews": 1063,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378859",
+          "authorId": "171412",
+          "nick": "两面针个护口腔京东自营旗舰店",
+          "title": "两面针新品首发 清新口气专场",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/50029/7/8585/10828/5d5fb3ddE69de2df5/3739edbefbf340bd.gif",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/331267/7/24935/144272/68f5e426F037159d7/a9defacb4eb341f6.png",
+          "totalViews": 575,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378856",
+          "authorId": "25292035",
+          "nick": "男人海洋医疗器械旗舰店",
+          "title": "男人海洋官方旗舰店",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/314435/12/5033/21033/6837feb6F4d5a6287/b3e49024cda75489.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/330489/17/8412/85217/68b7b12cF93413920/fef84c66eb49fab7.png",
+          "totalViews": 12,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378852",
+          "authorId": "497204",
+          "nick": "童葵（tongkui）京东自营旗舰店",
+          "title": "童葵母婴，为爱而生0821",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/49909/39/3554/69555/5d14543cE4bfd1e10/9af12ba16130e8c1.jpg",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/478731/37/6597/132385/6a5628ceFd3568d01/060332025861a233.png",
+          "totalViews": 47,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378826",
+          "authorId": "385475",
+          "nick": "神雕个护美容旗舰店",
+          "title": "好品质美容仪器",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t29476/177/16257934/24477/e9b34b42/5be55968Nfff6e0a5.jpg",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/413512/22/22126/38612/69d9f240F4ebb6876/06033202581a0be2.png",
+          "totalViews": 48,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378823",
+          "authorId": "481355",
+          "nick": "法优乐京东自营旗舰店",
+          "title": "法优乐京东自营直播间欢迎您！",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/55852/37/1067/68004/5cecff8fE50abca85/d9b66fe8eb812d86.jpg",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/473763/34/12885/95301/6a4f3cc9F2f3bc331/0603320258bdf078.png",
+          "totalViews": 73,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378814",
+          "authorId": "185433",
+          "nick": "利洁时旗舰店",
+          "title": "滴露消毒除菌开学季",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/418219/24/15265/14588/69e1c3bdF195c5700/001e12c12cdba534.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/476906/40/6277/122156/6a4f6542Fb5efda42/0603320258675081.png",
+          "totalViews": 37,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378810",
+          "authorId": "24197014",
+          "nick": "福口居京东自营旗舰店",
+          "title": "福口居即食海参",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/330401/2/16492/7256/68d23331F5e253da7/66695a6310264638.jpg",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/292649/11/18366/151163/6867332bF4846c558/c774cdab445f0d3f.png",
+          "totalViews": 441,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378795",
+          "authorId": "30806514",
+          "nick": "美的（Midea）庆点科技专卖店",
+          "title": "新品开播 新房装修",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/374799/8/4122/11834/69338437Fe8dcbff5/904add17a7967158.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/510899/16/3522/48372/6a8a6837F3cecc55c/06033202580dfd91.png",
+          "totalViews": 234,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378779",
+          "authorId": "18618658",
+          "nick": "MR. RASS男装旗舰店",
+          "title": "MR RASS潮牌、2件9折",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/424936/22/12473/6540/69f16693Fde0e02c9/001e12c12cf90a84.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/528189/24/5903/84252/6ab089f9F720983d4/0603320258307106.png",
+          "totalViews": 136,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378757",
+          "authorId": "25070247",
+          "nick": "电摩配改装车品店",
+          "title": "骑行装备秒杀，全场好物低价抢~",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/130780/37/30351/22241/63f77b47Faa69e5b7/ed3646c2e0e598d3.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/374039/8/14762/25096/694362ceFb80cf8f5/0603320258ddcaa5.png",
+          "totalViews": 675,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378756",
+          "authorId": "14055183",
+          "nick": "三角牌 TRIANGLE小家电旗舰店",
+          "title": "厨房小电器专场，直播间低价开抢",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/232047/26/24084/19844/66ae14ecF2f6ce245/e09823fd08461def.jpg",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/427581/22/16631/48412/69fd915aFde8a9677/0603320258b2bcb8.png",
+          "totalViews": 1105,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378735",
+          "authorId": "22419707",
+          "nick": "海康机器人旗舰店",
+          "title": "海康机器人福利大放送",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/108780/8/27597/11228/64f00220F5c234997/72819b070db16fb4.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/446874/21/14063/88308/6a2b6eaeFf7b44993/0603320258f82e7f.png",
+          "totalViews": 24,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378718",
+          "authorId": "22628054",
+          "nick": "荣事达嵌入式微蒸烤旗舰店",
+          "title": "荣事达国补真便宜",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/6398/39/30397/7743/651139ddF40b84c51/ddfbf316f0639b64.jpg",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/376244/28/8533/67537/693a27a2F7537245a/0603320258bfcee0.png",
+          "totalViews": 56,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378662",
+          "authorId": "14238368",
+          "nick": "乔山（JOHNSON）京东自营专区",
+          "title": "9月中秋国庆",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/146891/8/23173/45265/623a8ea2E52db686f/8a6146cc6b2ae7b7.jpg",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/473644/36/13000/77736/6a509e85F1cf1a354/06033202580f3330.png",
+          "totalViews": 80,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378648",
+          "authorId": "26011366",
+          "nick": "夏新极光专卖店",
+          "title": "夏新智能锁您安心的选择",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/271537/9/26542/16291/680de1edF70e89ef2/6b88386c2476bf3f.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/406039/40/16546/52542/69c09f92Fbbe4fd73/0603320258cd8b1d.png",
+          "totalViews": 65,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378631",
+          "authorId": "500236",
+          "nick": "普先生（Mr.PuTian）京东自营旗舰店",
+          "title": "国民品牌老花镜-普先生",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/131545/13/3314/474627/5efb0201Ead3b0e3c/39a55820033486e1.gif",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/307249/14/26650/57193/689e9efeF26d136f8/78b42ab4777f8719.png",
+          "totalViews": 1444,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378603",
+          "authorId": "27090084",
+          "nick": "匹克护理护具旗舰店",
+          "title": "久坐久站，请爱护你的腿",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/349180/15/6984/17596/68d4fe2fFfe404429/0447e0b2909bfc5d.jpg",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/479965/37/8142/46316/6a5adfa8F6b2d8ad4/0603320258fb7814.png",
+          "totalViews": 2,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378601",
+          "authorId": "526329",
+          "nick": "美的两季生活电器旗舰店",
+          "title": "美的秋日焕新季",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/25888/28/19529/4586/6312b483Ef41c9d2e/4d7748ee06299f3b.jpg",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/518674/1/2492/411836/6a98e023Fdfc06e71/060332025896e043.png",
+          "totalViews": 406,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378585",
+          "authorId": "28061429",
+          "nick": "观铜京东自营旗舰店",
+          "title": "官方立减12% 秋季来袭",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/414838/39/15509/6858/69e08e62F9bf4f96e/001e12c12c0c33b6.jpg",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/428846/24/7817/103139/69f56899F1cba7177/0603320258ee0a7d.png",
+          "totalViews": 93,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378584",
+          "authorId": "20397978",
+          "nick": "梵布伦斯官方旗舰店",
+          "title": "梵布伦斯中秋国庆大爆品直播中",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/197762/24/25781/15043/63341414Ed0f625a0/5f56e13985baf537.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/404735/16/18309/99069/69bce527F4177d811/0603320258c6850b.png",
+          "totalViews": 73,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378566",
+          "authorId": "30940469",
+          "nick": "沐扬数码专营店",
+          "title": "品胜手机壳膜专场",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/494387/38/12263/10030/6a7febceF3fa8784c/001e12c12c77bf28.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/515063/40/302/55619/6a8d2eeaF75cb6389/0603320258c95aa2.png",
+          "totalViews": 12,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378557",
+          "authorId": "28933062",
+          "nick": "黑帝斯京东自营旗舰店",
+          "title": "郭富城代言黑帝斯法国柔香型干邑",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/435989/31/13333/14043/6a0ffed9Fd40f4eef/001e12c12c4a5ef8.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/459389/30/10062/112884/6a3a4606F93bf6b6e/06033202581d1e8c.png",
+          "totalViews": 30,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378551",
+          "authorId": "27928250",
+          "nick": "倍益康（beoka）运动京东自营旗舰店",
+          "title": "运动放松专业筋膜枪",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/402974/40/2606/9221/69afb456Feded80ad/001e12c12c5d48d9.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/430449/16/10518/395739/69fdb491Fcb98a81b/0603320258bf1272.png",
+          "totalViews": 134,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378541",
+          "authorId": "19299575",
+          "nick": "平利绞股蓝滋补京东自营旗舰店",
+          "title": "绞股蓝滋补",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/254054/39/19471/32362/004ea201F7ca7b8ee/1e211e9159437d9e.gif",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/396419/19/19310/183976/69a7d7c3F93affa1d/060332025874d6ae.png",
+          "totalViews": 63,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378529",
+          "authorId": "23882265",
+          "nick": "海康机器人京东自营旗舰店",
+          "title": "海康机器人大放价",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/168107/13/45444/11228/6646c186F294ba61f/bbcc61c1e397768c.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/394721/38/5863/66052/6986e8d5F90b373e2/06033202589511d3.png",
+          "totalViews": 187,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378523",
+          "authorId": "34654",
+          "nick": "e-Rover烧烤世家官方旗舰店",
+          "title": "中秋专属户外露营专场",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/190689/38/13104/15020/60f16b88Ef435513b/5077b0562ec1aa68.jpg",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/517141/22/1821/115731/6a94e642F8671ca95/0603320258588bba.png",
+          "totalViews": 92,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        },
+        {
+          "liveId": "48378507",
+          "authorId": "684690",
+          "nick": "老中医旗舰店",
+          "title": "老中医化妆品官方直播间",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/308530/20/8069/18622/68467cb1F88545ff1/74d75471d0538cda.png",
+          "cover": "https://m.360buyimg.com/livecms/jfs/t1/421031/23/4183/71687/69e0a41cFdc24a78d/0603320258aa4b2a.png",
+          "totalViews": 125,
+          "state": "live",
+          "hls": null,
+          "flv": null
+        }
+      ],
+      "nextCount": 37,
+      "hasMore": true
+    },
+    "getDirectoryPage": {
+      "page 1": {
+        "result": {
+          "rooms": [
+            {
+              "roomId": "48378944",
+              "userId": "24304104",
+              "title": "有爱，科技也动情~~海信",
+              "nick": "海信诚一恒专卖店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "37",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378944",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378944"
+            },
+            {
+              "roomId": "48378908",
+              "userId": "14252067",
+              "title": "OBOX箱包，更便捷更专业",
+              "nick": "OBOX箱包旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "104",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378908",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378908"
+            },
+            {
+              "roomId": "48378899",
+              "userId": "724305",
+              "title": "星河汽车轮胎秋季开学季",
+              "nick": "星河汽车用品专营店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/272760/36/21964/9289/67ff21a7Fd54d6333/efcbfe2543e8d38a.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/514805/37/1037/21169/6a8e853eFac9a138e/06033202584a6035.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "1063",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378899",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378899"
+            },
+            {
+              "roomId": "48378859",
+              "userId": "171412",
+              "title": "两面针新品首发 清新口气专场",
+              "nick": "两面针个护口腔京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/50029/7/8585/10828/5d5fb3ddE69de2df5/3739edbefbf340bd.gif",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/331267/7/24935/144272/68f5e426F037159d7/a9defacb4eb341f6.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "575",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378859",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378859"
+            },
+            {
+              "roomId": "48378856",
+              "userId": "25292035",
+              "title": "男人海洋官方旗舰店",
+              "nick": "男人海洋医疗器械旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/314435/12/5033/21033/6837feb6F4d5a6287/b3e49024cda75489.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/330489/17/8412/85217/68b7b12cF93413920/fef84c66eb49fab7.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "12",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378856",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378856"
+            },
+            {
+              "roomId": "48378852",
+              "userId": "497204",
+              "title": "童葵母婴，为爱而生0821",
+              "nick": "童葵（tongkui）京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/49909/39/3554/69555/5d14543cE4bfd1e10/9af12ba16130e8c1.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/478731/37/6597/132385/6a5628ceFd3568d01/060332025861a233.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "47",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378852",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378852"
+            },
+            {
+              "roomId": "48378826",
+              "userId": "385475",
+              "title": "好品质美容仪器",
+              "nick": "神雕个护美容旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t29476/177/16257934/24477/e9b34b42/5be55968Nfff6e0a5.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/413512/22/22126/38612/69d9f240F4ebb6876/06033202581a0be2.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "48",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378826",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378826"
+            },
+            {
+              "roomId": "48378823",
+              "userId": "481355",
+              "title": "法优乐京东自营直播间欢迎您！",
+              "nick": "法优乐京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/55852/37/1067/68004/5cecff8fE50abca85/d9b66fe8eb812d86.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/473763/34/12885/95301/6a4f3cc9F2f3bc331/0603320258bdf078.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "73",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378823",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378823"
+            },
+            {
+              "roomId": "48378814",
+              "userId": "185433",
+              "title": "滴露消毒除菌开学季",
+              "nick": "利洁时旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/418219/24/15265/14588/69e1c3bdF195c5700/001e12c12cdba534.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/476906/40/6277/122156/6a4f6542Fb5efda42/0603320258675081.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "37",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378814",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378814"
+            },
+            {
+              "roomId": "48378810",
+              "userId": "24197014",
+              "title": "福口居即食海参",
+              "nick": "福口居京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/330401/2/16492/7256/68d23331F5e253da7/66695a6310264638.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/292649/11/18366/151163/6867332bF4846c558/c774cdab445f0d3f.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "441",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378810",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378810"
+            },
+            {
+              "roomId": "48378795",
+              "userId": "30806514",
+              "title": "新品开播 新房装修",
+              "nick": "美的（Midea）庆点科技专卖店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/374799/8/4122/11834/69338437Fe8dcbff5/904add17a7967158.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/510899/16/3522/48372/6a8a6837F3cecc55c/06033202580dfd91.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "234",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378795",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378795"
+            },
+            {
+              "roomId": "48378779",
+              "userId": "18618658",
+              "title": "MR RASS潮牌、2件9折",
+              "nick": "MR. RASS男装旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/424936/22/12473/6540/69f16693Fde0e02c9/001e12c12cf90a84.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/528189/24/5903/84252/6ab089f9F720983d4/0603320258307106.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "136",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378779",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378779"
+            },
+            {
+              "roomId": "48378757",
+              "userId": "25070247",
+              "title": "骑行装备秒杀，全场好物低价抢~",
+              "nick": "电摩配改装车品店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/130780/37/30351/22241/63f77b47Faa69e5b7/ed3646c2e0e598d3.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/374039/8/14762/25096/694362ceFb80cf8f5/0603320258ddcaa5.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "675",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378757",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378757"
+            },
+            {
+              "roomId": "48378756",
+              "userId": "14055183",
+              "title": "厨房小电器专场，直播间低价开抢",
+              "nick": "三角牌 TRIANGLE小家电旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/232047/26/24084/19844/66ae14ecF2f6ce245/e09823fd08461def.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/427581/22/16631/48412/69fd915aFde8a9677/0603320258b2bcb8.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "1105",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378756",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378756"
+            },
+            {
+              "roomId": "48378735",
+              "userId": "22419707",
+              "title": "海康机器人福利大放送",
+              "nick": "海康机器人旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/108780/8/27597/11228/64f00220F5c234997/72819b070db16fb4.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/446874/21/14063/88308/6a2b6eaeFf7b44993/0603320258f82e7f.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "24",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378735",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378735"
+            },
+            {
+              "roomId": "48378718",
+              "userId": "22628054",
+              "title": "荣事达国补真便宜",
+              "nick": "荣事达嵌入式微蒸烤旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/6398/39/30397/7743/651139ddF40b84c51/ddfbf316f0639b64.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/376244/28/8533/67537/693a27a2F7537245a/0603320258bfcee0.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "56",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378718",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378718"
+            },
+            {
+              "roomId": "48378662",
+              "userId": "14238368",
+              "title": "9月中秋国庆",
+              "nick": "乔山（JOHNSON）京东自营专区",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/146891/8/23173/45265/623a8ea2E52db686f/8a6146cc6b2ae7b7.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/473644/36/13000/77736/6a509e85F1cf1a354/06033202580f3330.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "80",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378662",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378662"
+            },
+            {
+              "roomId": "48378648",
+              "userId": "26011366",
+              "title": "夏新智能锁您安心的选择",
+              "nick": "夏新极光专卖店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/271537/9/26542/16291/680de1edF70e89ef2/6b88386c2476bf3f.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/406039/40/16546/52542/69c09f92Fbbe4fd73/0603320258cd8b1d.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "65",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378648",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378648"
+            },
+            {
+              "roomId": "48378631",
+              "userId": "500236",
+              "title": "国民品牌老花镜-普先生",
+              "nick": "普先生（Mr.PuTian）京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/131545/13/3314/474627/5efb0201Ead3b0e3c/39a55820033486e1.gif",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/307249/14/26650/57193/689e9efeF26d136f8/78b42ab4777f8719.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "1444",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378631",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378631"
+            },
+            {
+              "roomId": "48378603",
+              "userId": "27090084",
+              "title": "久坐久站，请爱护你的腿",
+              "nick": "匹克护理护具旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/349180/15/6984/17596/68d4fe2fFfe404429/0447e0b2909bfc5d.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/479965/37/8142/46316/6a5adfa8F6b2d8ad4/0603320258fb7814.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "2",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378603",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378603"
+            },
+            {
+              "roomId": "48378601",
+              "userId": "526329",
+              "title": "美的秋日焕新季",
+              "nick": "美的两季生活电器旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/25888/28/19529/4586/6312b483Ef41c9d2e/4d7748ee06299f3b.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/518674/1/2492/411836/6a98e023Fdfc06e71/060332025896e043.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "406",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378601",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378601"
+            },
+            {
+              "roomId": "48378585",
+              "userId": "28061429",
+              "title": "官方立减12% 秋季来袭",
+              "nick": "观铜京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/414838/39/15509/6858/69e08e62F9bf4f96e/001e12c12c0c33b6.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/428846/24/7817/103139/69f56899F1cba7177/0603320258ee0a7d.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "93",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378585",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378585"
+            },
+            {
+              "roomId": "48378584",
+              "userId": "20397978",
+              "title": "梵布伦斯中秋国庆大爆品直播中",
+              "nick": "梵布伦斯官方旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/197762/24/25781/15043/63341414Ed0f625a0/5f56e13985baf537.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/404735/16/18309/99069/69bce527F4177d811/0603320258c6850b.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "73",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378584",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378584"
+            },
+            {
+              "roomId": "48378566",
+              "userId": "30940469",
+              "title": "品胜手机壳膜专场",
+              "nick": "沐扬数码专营店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/494387/38/12263/10030/6a7febceF3fa8784c/001e12c12c77bf28.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/515063/40/302/55619/6a8d2eeaF75cb6389/0603320258c95aa2.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "12",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378566",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378566"
+            },
+            {
+              "roomId": "48378557",
+              "userId": "28933062",
+              "title": "郭富城代言黑帝斯法国柔香型干邑",
+              "nick": "黑帝斯京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/435989/31/13333/14043/6a0ffed9Fd40f4eef/001e12c12c4a5ef8.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/459389/30/10062/112884/6a3a4606F93bf6b6e/06033202581d1e8c.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "30",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378557",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378557"
+            },
+            {
+              "roomId": "48378551",
+              "userId": "27928250",
+              "title": "运动放松专业筋膜枪",
+              "nick": "倍益康（beoka）运动京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/402974/40/2606/9221/69afb456Feded80ad/001e12c12c5d48d9.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/430449/16/10518/395739/69fdb491Fcb98a81b/0603320258bf1272.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "134",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378551",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378551"
+            },
+            {
+              "roomId": "48378541",
+              "userId": "19299575",
+              "title": "绞股蓝滋补",
+              "nick": "平利绞股蓝滋补京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/254054/39/19471/32362/004ea201F7ca7b8ee/1e211e9159437d9e.gif",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/396419/19/19310/183976/69a7d7c3F93affa1d/060332025874d6ae.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "63",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378541",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378541"
+            },
+            {
+              "roomId": "48378529",
+              "userId": "23882265",
+              "title": "海康机器人大放价",
+              "nick": "海康机器人京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/168107/13/45444/11228/6646c186F294ba61f/bbcc61c1e397768c.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/394721/38/5863/66052/6986e8d5F90b373e2/06033202589511d3.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "187",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378529",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378529"
+            },
+            {
+              "roomId": "48378523",
+              "userId": "34654",
+              "title": "中秋专属户外露营专场",
+              "nick": "e-Rover烧烤世家官方旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/190689/38/13104/15020/60f16b88Ef435513b/5077b0562ec1aa68.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/517141/22/1821/115731/6a94e642F8671ca95/0603320258588bba.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "92",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378523",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378523"
+            },
+            {
+              "roomId": "48378507",
+              "userId": "684690",
+              "title": "老中医化妆品官方直播间",
+              "nick": "老中医旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/308530/20/8069/18622/68467cb1F88545ff1/74d75471d0538cda.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/421031/23/4183/71687/69e0a41cFdc24a78d/0603320258aa4b2a.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "125",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378507",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378507"
+            }
+          ],
+          "page": 1,
+          "hasMore": true
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "page 2": {
+        "result": {
+          "rooms": [
+            {
+              "roomId": "48378502",
+              "userId": "14235425",
+              "title": "口腔护理专场，优惠多多哦~",
+              "nick": "牙博士个护店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/314634/20/18776/14921/6883437bF70d5af6e/64e18d86ba0730ec.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/358744/28/15354/165978/6924f52dF560fa4f2/189b28d4297de141.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "292",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378502",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378502"
+            },
+            {
+              "roomId": "48378500",
+              "userId": "108729",
+              "title": "育泰体育秋尚新好物大促",
+              "nick": "育泰体育旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/1347/16/231/24176/5b908629Eb6b85c91/50c00cff3838cf55.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/533582/11/713/60447/6ab08651F3df98a37/06033202581dc754.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "363",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378500",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378500"
+            },
+            {
+              "roomId": "48378492",
+              "userId": "26956323",
+              "title": "猪尾不新鲜不要钱！品质看得见！",
+              "nick": "帅哈哈食品",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/362252/27/14218/5546/692fc682F8eab7658/d01a1f1c1a65fb8e.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/400276/21/13616/125912/69ad6960F59dfb1bc/0603320258bc0fd3.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "20",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378492",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378492"
+            },
+            {
+              "roomId": "48378485",
+              "userId": "21687484",
+              "title": "平利绞股蓝茗茶",
+              "nick": "平利绞股蓝京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/256066/16/19870/32362/004ea201Fe3577de7/e4661d62b05fdbf9.gif",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/403309/9/17882/175536/69c208b5F4accbdd5/0603320258291c72.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "59",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378485",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378485"
+            },
+            {
+              "roomId": "48378476",
+              "userId": "27395355",
+              "title": "狂欢开抢限时低价",
+              "nick": "旺热运动专营店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/299489/3/7999/1047/68628b64Fc42783c0/712f0f45229ea7f5.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/396655/9/17633/61468/69a7ef09F71b67428/0603320258cbcc41.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "81",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378476",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378476"
+            },
+            {
+              "roomId": "48378467",
+              "userId": "27190363",
+              "title": "今天不玩虚的！猪尾巴底价开抢",
+              "nick": "原味生鲜食品",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/348747/31/13755/4830/68f1ba38F11fc261d/1006cf9b92d7b4a9.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/398882/2/14849/111238/69ad6e53F39b2e16b/06033202582dd170.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "14",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378467",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378467"
+            },
+            {
+              "roomId": "48378465",
+              "userId": "19702760",
+              "title": "3M百年品牌居家好物更值得信赖",
+              "nick": "3M家装软饰旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/112929/21/30290/3951/6343c7e0E1081ac11/513559979a44b41b.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/465476/15/11461/130258/6a44a3a0F962e9b11/06033202583de747.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "353",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378465",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378465"
+            },
+            {
+              "roomId": "48378461",
+              "userId": "438755",
+              "title": "海尔壁挂炉热卖中",
+              "nick": "海尔壁挂炉旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/41066/19/22697/9107/669b0716Ffb435a27/55ef5fac0047c841.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/398596/3/17258/26263/69afd243Fb8d0fc6b/06033202582329d1.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "1921",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378461",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378461"
+            },
+            {
+              "roomId": "48378459",
+              "userId": "111018",
+              "title": "限时低价狂欢开抢",
+              "nick": "旺热运动装备专营店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/227581/31/3773/6305/65589586Fb3864368/38131b2bd1292705.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/399545/40/8269/41111/69a7ed3fF19f1f6b0/0603320258426465.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "536",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378459",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378459"
+            },
+            {
+              "roomId": "48378442",
+              "userId": "28042144",
+              "title": "安卓手机单机游戏galgame",
+              "nick": "酷玩工作室小店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/407620/33/13302/14126/69c3d3e8F009cde2f/028b12c12cdca935.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/517549/35/2496/76964/6a963b03Fea8b3efc/0603320258b5b26b.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "73",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378442",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378442"
+            },
+            {
+              "roomId": "48378438",
+              "userId": "26819664",
+              "title": "焕新家-超低价，方太官方直供",
+              "nick": "方太嵌入式厨房旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/339764/36/1839/5139/68ad298dF303b952e/23cc803fb8997dfa.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/510835/9/11561/91340/6aa11604F2b03d659/0603320258251cfb.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "104",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378438",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378438"
+            },
+            {
+              "roomId": "48378427",
+              "userId": "27395272",
+              "title": "限时低价狂欢开抢",
+              "nick": "NIKE米裕专卖店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/410971/14/16211/3926/69ce3a89Fabe09549/001e25825821e899.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/397976/32/11029/107845/69a7e31fFb28fe43d/06033202585a1a60.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "11",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378427",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378427"
+            },
+            {
+              "roomId": "48378422",
+              "userId": "23810040",
+              "title": "享久自营 热销中 直播抢购",
+              "nick": "享久成人用品京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/268894/26/11812/3887/678631adF1fa857ef/80a42b5890cc1f3a.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/518713/23/14277/36322/6ab08640F0aa8c4d9/0603320258d68c18.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "1467",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378422",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378422"
+            },
+            {
+              "roomId": "48378416",
+              "userId": "19050272",
+              "title": "商用豆浆机、认准九阳大品牌",
+              "nick": "九阳商用厨电旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/177343/2/24551/3885/62be55beEa19be494/d68200cfc68e1543.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/394045/10/5755/126801/6982c6e3Fa06171f9/06033202582b29fb.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "105",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378416",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378416"
+            },
+            {
+              "roomId": "48378400",
+              "userId": "25035205",
+              "title": "富迪冰淇淋，尽享超值优惠~",
+              "nick": "FUDILONG京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/261943/20/23924/13644/67bbd039F09a0c713/6b3fef69af19e97d.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/402248/35/11788/156913/69b77428Fa5038a1c/060332025862c860.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "40",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378400",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378400"
+            },
+            {
+              "roomId": "48378393",
+              "userId": "32727858",
+              "title": "BOOS TOI旗舰店上新日",
+              "nick": "BOOS TOI服饰旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/511931/23/10783/3859/6a98e4f2F8a5eabb6/001e12c12c4b9ed2.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/505499/17/15274/79664/6a9a6159F153f802d/0603320258a361df.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "5",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378393",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378393"
+            },
+            {
+              "roomId": "48378373",
+              "userId": "30817695",
+              "title": "微醺好时光 红酒直播专场",
+              "nick": "INFINITY BRAND SOLUTIONS海外专营店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/307144/21/12562/1162/685cdf9bFdd2b05ad/3ac893a2d650a7df.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/515025/2/14586/83830/6aa4ee99Fe5b0de1c/0603320258e3ee72.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "3",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378373",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378373"
+            },
+            {
+              "roomId": "48378319",
+              "userId": "18445679",
+              "title": "好猫一定要用好猫砂",
+              "nick": "天净NeoClean猫砂官方旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t27937/196/1204681566/45511/3cc7726/5cda1df7N4da193e1.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/391074/28/15668/25994/69841775F987c71c9/060332025837caf8.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "27",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378319",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378319"
+            },
+            {
+              "roomId": "48378308",
+              "userId": "27113395",
+              "title": "轻奢大牌双节礼遇",
+              "nick": "京东奢品精选自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/345647/35/16843/6812/68fa06a5Ffd295ef6/82d775782d99676d.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/496003/4/7553/83000/6a792901F883956ad/060332025881f886.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "2029",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378308",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378308"
+            },
+            {
+              "roomId": "48378281",
+              "userId": "21723600",
+              "title": "永冠胶带宠粉福利大放送",
+              "nick": "永冠京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/167754/38/993/10782/5ff3b4daE507929f3/6ea28a2ddc465906.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/403140/1/8760/83793/69b3c310F8310051c/0603320258ef7b5c.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "997",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378281",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378281"
+            },
+            {
+              "roomId": "48378270",
+              "userId": "27152319",
+              "title": "活动来咯，看看",
+              "nick": "开心元素营养健康旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/324648/13/27966/14531/68e9b492Fd0f4f523/1daa4a082b80ad41.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/526635/26/6748/574327/6aaf8886F8d1db01c/0603320258d587a4.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "31",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378270",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378270"
+            },
+            {
+              "roomId": "48378264",
+              "userId": "20477853",
+              "title": "凸凸棉自营直播间",
+              "nick": "凸凸棉京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/157606/26/41220/19214/66752e13F6ac58da6/322c2db08f88f6a9.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/488042/29/16883/89616/6a86aed9F416db252/0603320258e97847.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "306",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378264",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378264"
+            },
+            {
+              "roomId": "48378260",
+              "userId": "22564456",
+              "title": "高颜值便当盒，让午餐更有仪式感",
+              "nick": "昌木子（CAMUZ）京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/186735/18/36898/7372/64f05de0F518f9eee/378c474c37b96d9f.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/334644/25/3978/58412/68ac2b8dFacb50b60/86077e6a44bc90e8.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "56",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378260",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378260"
+            },
+            {
+              "roomId": "48378240",
+              "userId": "24233245",
+              "title": "中秋节送礼专场！",
+              "nick": "鼎芝毅旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/416738/31/3369/9874/69d5f795Fdf8c3636/001e0e10e1e315de.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/513801/10/5934/31676/6a9687a4Fa18f04df/0603320258029b77.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "16",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378240",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378240"
+            },
+            {
+              "roomId": "48378214",
+              "userId": "32710126",
+              "title": "催乳通乳无痛开奶",
+              "nick": "萌童时代产后护理专营店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/480149/5/14899/1472/6a696dbbFee22ca92/001e12c12c5326dd.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/506491/21/11873/83997/6a9629d4F35e5f95c/060332025880bae6.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "3",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378214",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378214"
+            },
+            {
+              "roomId": "48378194",
+              "userId": "27693398",
+              "title": "食治为本，智造为先",
+              "nick": "先食京东自营旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/396215/3/11661/5651/69a017cdF0228ae4a/001e12c12cfc6056.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/442062/40/7795/122268/6a193aa4Fe5434dba/06033202586a7886.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "13",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378194",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378194"
+            },
+            {
+              "roomId": "48378191",
+              "userId": "26486197",
+              "title": "老凤祥 品牌直降 正品保障",
+              "nick": "老凤祥金瑞轩专卖店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/315471/11/7378/16961/68429de6F554f7b10/0c7b0ef1775d0c5a.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/486568/1/1346/101484/6a5d69f0F3683cd31/060332025813dd3e.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "597",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378191",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378191"
+            },
+            {
+              "roomId": "48378189",
+              "userId": "32605023",
+              "title": "BOOS TOI秋冬新品大上新",
+              "nick": "BOOS TOI男装工作室",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/500878/39/13641/3859/6a8f9ea7F2ead421b/001e12c12cdc4421.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/524388/22/3420/82119/6aa61518Fbf4724c9/06033202583a33d0.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "0",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378189",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378189"
+            },
+            {
+              "roomId": "48378178",
+              "userId": "24387367",
+              "title": "浅野天琪开播啦！",
+              "nick": "TANCHJIM官方旗舰店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/1221/20/19661/32565/62df8d85E6d6b5161/7d5f1962a515f76e.jpg",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/403599/19/18875/76406/69ba697dF290fba1e/060332025869b0b5.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "6373",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378178",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378178"
+            },
+            {
+              "roomId": "48378175",
+              "userId": "24329357",
+              "title": "直播间优惠",
+              "nick": "林内进口热水器专卖店",
+              "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/323743/1/1184/6283/6891c262Fb20211a5/5de5a1ada76dee01.png",
+              "cover": "https://m.360buyimg.com/livecms/jfs/t1/402565/34/7604/21174/69b2316fF3b05c107/06033202585d1c13.png",
+              "area": "JD Live",
+              "watching": "0",
+              "audienceMetricType": "totalViewers",
+              "popularity": "",
+              "onlineViewers": "",
+              "totalViewers": "231",
+              "followers": "0",
+              "platform": "jdlive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://lives.jd.com",
+                "referer": "https://lives.jd.com/#/48378175",
+                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+              },
+              "link": "https://lives.jd.com/#/48378175"
+            }
+          ],
+          "page": 2,
+          "hasMore": true
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"37\",\"page\":2}"
+        ]
+      },
+      "page 3": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live transport"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"67\",\"page\":3}"
+        ],
+        "unmatched": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"67\",\"page\":3}"
+        ]
+      },
+      "timestamps": [
+        "t0",
+        "t0",
+        "t0"
+      ],
+      "featured page 1": {
+        "result": {
+          "roomIds": [
+            "48378944",
+            "48378908",
+            "48378899",
+            "48378859",
+            "48378856",
+            "48378852",
+            "48378826",
+            "48378823",
+            "48378814",
+            "48378810",
+            "48378795",
+            "48378779",
+            "48378757",
+            "48378756",
+            "48378735",
+            "48378718",
+            "48378662",
+            "48378648",
+            "48378631",
+            "48378603",
+            "48378601",
+            "48378585",
+            "48378584",
+            "48378566",
+            "48378557",
+            "48378551",
+            "48378541",
+            "48378529",
+            "48378523",
+            "48378507"
+          ],
+          "page": 1,
+          "hasMore": true
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "otherArea": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live identity"
+        },
+        "requests": []
+      },
+      "otherPlatform": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live identity"
+        },
+        "requests": []
+      },
+      "page 0": {
+        "result": {
+          "rooms": [],
+          "page": 0,
+          "hasMore": false
+        },
+        "requests": []
+      },
+      "page 2 first": {
+        "result": {
+          "rooms": [],
+          "page": 2,
+          "hasMore": false
+        },
+        "requests": []
+      }
+    },
+    "getRecommendRooms": {
+      "page 1 size 30": {
+        "result": [
+          "48378944",
+          "48378908",
+          "48378899",
+          "48378859",
+          "48378856",
+          "48378852",
+          "48378826",
+          "48378823",
+          "48378814",
+          "48378810",
+          "48378795",
+          "48378779",
+          "48378757",
+          "48378756",
+          "48378735",
+          "48378718",
+          "48378662",
+          "48378648",
+          "48378631",
+          "48378603",
+          "48378601",
+          "48378585",
+          "48378584",
+          "48378566",
+          "48378557",
+          "48378551",
+          "48378541",
+          "48378529",
+          "48378523",
+          "48378507"
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "page 2 size 30": {
+        "result": [
+          "48378502",
+          "48378500",
+          "48378492",
+          "48378485",
+          "48378476",
+          "48378467",
+          "48378465",
+          "48378461",
+          "48378459",
+          "48378442",
+          "48378438",
+          "48378427",
+          "48378422",
+          "48378416",
+          "48378400",
+          "48378393",
+          "48378373",
+          "48378319",
+          "48378308",
+          "48378281",
+          "48378270",
+          "48378264",
+          "48378260",
+          "48378240",
+          "48378214",
+          "48378194",
+          "48378191",
+          "48378189",
+          "48378178",
+          "48378175"
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"37\",\"page\":2}"
+        ]
+      },
+      "timestamps": [
+        "t0",
+        "t0"
+      ],
+      "fresh page 1 size 10": {
+        "result": [
+          "48378944",
+          "48378908",
+          "48378899",
+          "48378859",
+          "48378856",
+          "48378852",
+          "48378826",
+          "48378823",
+          "48378814",
+          "48378810"
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "fresh page 1 size 31": {
+        "result": [
+          "48378944",
+          "48378908",
+          "48378899",
+          "48378859",
+          "48378856",
+          "48378852",
+          "48378826",
+          "48378823",
+          "48378814",
+          "48378810",
+          "48378795",
+          "48378779",
+          "48378757",
+          "48378756",
+          "48378735",
+          "48378718",
+          "48378662",
+          "48378648",
+          "48378631",
+          "48378603",
+          "48378601",
+          "48378585",
+          "48378584",
+          "48378566",
+          "48378557",
+          "48378551",
+          "48378541",
+          "48378529",
+          "48378523",
+          "48378507"
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "fresh page 1 size 1": {
+        "result": [
+          "48378944"
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "fresh page 0 size 30": {
+        "result": [],
+        "requests": []
+      },
+      "fresh page 1 size 0": {
+        "result": [],
+        "requests": []
+      },
+      "fresh page 2 size 30": {
+        "result": [],
+        "requests": []
+      },
+      "page 2 after directory page 1": {
+        "result": [],
+        "requests": []
+      }
+    },
+    "getCategoryRooms": {
+      "featured page 1": {
+        "result": [
+          "48378944",
+          "48378908",
+          "48378899",
+          "48378859",
+          "48378856",
+          "48378852",
+          "48378826",
+          "48378823",
+          "48378814",
+          "48378810",
+          "48378795",
+          "48378779",
+          "48378757",
+          "48378756",
+          "48378735",
+          "48378718",
+          "48378662",
+          "48378648",
+          "48378631",
+          "48378603",
+          "48378601",
+          "48378585",
+          "48378584",
+          "48378566",
+          "48378557",
+          "48378551",
+          "48378541",
+          "48378529",
+          "48378523",
+          "48378507"
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "featured page 2": {
+        "result": [
+          "48378502",
+          "48378500",
+          "48378492",
+          "48378485",
+          "48378476",
+          "48378467",
+          "48378465",
+          "48378461",
+          "48378459",
+          "48378442",
+          "48378438",
+          "48378427",
+          "48378422",
+          "48378416",
+          "48378400",
+          "48378393",
+          "48378373",
+          "48378319",
+          "48378308",
+          "48378281",
+          "48378270",
+          "48378264",
+          "48378260",
+          "48378240",
+          "48378214",
+          "48378194",
+          "48378191",
+          "48378189",
+          "48378178",
+          "48378175"
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"37\",\"page\":2}"
+        ]
+      },
+      "featured page 1 size 5": {
+        "result": [
+          "48378944",
+          "48378908",
+          "48378899",
+          "48378859",
+          "48378856"
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "otherArea": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live identity"
+        },
+        "requests": []
+      }
+    },
+    "searchRoomsCancellable": {
+      "海信": {
+        "result": [
+          {
+            "roomId": "48378944",
+            "userId": "24304104",
+            "title": "有爱，科技也动情~~海信",
+            "nick": "海信诚一恒专卖店",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "area": "JD Live",
+            "watching": "0",
+            "audienceMetricType": "totalViewers",
+            "popularity": "",
+            "onlineViewers": "",
+            "totalViewers": "37",
+            "followers": "0",
+            "platform": "jdlive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://lives.jd.com",
+              "referer": "https://lives.jd.com/#/48378944",
+              "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+            },
+            "link": "https://lives.jd.com/#/48378944"
+          }
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "obox": {
+        "result": [
+          {
+            "roomId": "48378908",
+            "userId": "14252067",
+            "title": "OBOX箱包，更便捷更专业",
+            "nick": "OBOX箱包旗舰店",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "area": "JD Live",
+            "watching": "0",
+            "audienceMetricType": "totalViewers",
+            "popularity": "",
+            "onlineViewers": "",
+            "totalViewers": "104",
+            "followers": "0",
+            "platform": "jdlive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://lives.jd.com",
+              "referer": "https://lives.jd.com/#/48378908",
+              "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+            },
+            "link": "https://lives.jd.com/#/48378908"
+          }
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "OBOX": {
+        "result": [
+          {
+            "roomId": "48378908",
+            "userId": "14252067",
+            "title": "OBOX箱包，更便捷更专业",
+            "nick": "OBOX箱包旗舰店",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "area": "JD Live",
+            "watching": "0",
+            "audienceMetricType": "totalViewers",
+            "popularity": "",
+            "onlineViewers": "",
+            "totalViewers": "104",
+            "followers": "0",
+            "platform": "jdlive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://lives.jd.com",
+              "referer": "https://lives.jd.com/#/48378908",
+              "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+            },
+            "link": "https://lives.jd.com/#/48378908"
+          }
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "0821": {
+        "result": [
+          {
+            "roomId": "48378852",
+            "userId": "497204",
+            "title": "童葵母婴，为爱而生0821",
+            "nick": "童葵（tongkui）京东自营旗舰店",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/49909/39/3554/69555/5d14543cE4bfd1e10/9af12ba16130e8c1.jpg",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/478731/37/6597/132385/6a5628ceFd3568d01/060332025861a233.png",
+            "area": "JD Live",
+            "watching": "0",
+            "audienceMetricType": "totalViewers",
+            "popularity": "",
+            "onlineViewers": "",
+            "totalViewers": "47",
+            "followers": "0",
+            "platform": "jdlive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://lives.jd.com",
+              "referer": "https://lives.jd.com/#/48378852",
+              "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+            },
+            "link": "https://lives.jd.com/#/48378852"
+          }
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "旗舰店": {
+        "result": [
+          "48378908",
+          "48378859",
+          "48378856",
+          "48378852",
+          "48378826",
+          "48378823",
+          "48378814",
+          "48378810",
+          "48378779",
+          "48378756",
+          "48378735",
+          "48378718",
+          "48378631",
+          "48378603",
+          "48378601",
+          "48378585",
+          "48378584",
+          "48378557",
+          "48378551",
+          "48378541",
+          "48378529",
+          "48378523",
+          "48378507"
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      " 旗舰店 ": {
+        "result": [
+          "48378908",
+          "48378859",
+          "48378856",
+          "48378852",
+          "48378826",
+          "48378823",
+          "48378814",
+          "48378810",
+          "48378779",
+          "48378756",
+          "48378735",
+          "48378718",
+          "48378631",
+          "48378603",
+          "48378601",
+          "48378585",
+          "48378584",
+          "48378557",
+          "48378551",
+          "48378541",
+          "48378529",
+          "48378523",
+          "48378507"
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "zxqvnomatch": {
+        "result": [],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "48378944": {
+        "result": [
+          {
+            "roomId": "48378944",
+            "userId": "48378944",
+            "title": "JD Live",
+            "nick": "JD Live",
+            "avatar": "https://m.360buyimg.com/live/jfs/t1/523184/35/9717/8484/6ab08b9bFa75c804e/00292ee53616c658.jpg!q70.jpg",
+            "cover": "https://m.360buyimg.com/live/jfs/t1/523184/35/9717/8484/6ab08b9bFa75c804e/00292ee53616c658.jpg!q70.jpg",
+            "area": "JD Live",
+            "watching": "0",
+            "audienceMetricType": "unknown",
+            "popularity": "",
+            "onlineViewers": "",
+            "followers": "0",
+            "platform": "jdlive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://lives.jd.com",
+              "referer": "https://lives.jd.com/#/48378944",
+              "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+            },
+            "link": "https://lives.jd.com/#/48378944"
+          }
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "10000": {
+        "result": [
+          {
+            "roomId": "10000",
+            "userId": "10000",
+            "title": "JD Live",
+            "nick": "JD Live",
+            "avatar": "",
+            "cover": "",
+            "area": "JD Live",
+            "watching": "0",
+            "audienceMetricType": "unknown",
+            "popularity": "",
+            "onlineViewers": "",
+            "followers": "0",
+            "platform": "jdlive",
+            "liveStatus": 1,
+            "isRecord": false,
+            "status": false,
+            "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://lives.jd.com",
+              "referer": "https://lives.jd.com/#/10000",
+              "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+            },
+            "link": "https://lives.jd.com/#/10000"
+          }
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"10000\"}"
+        ]
+      },
+      "https://lives.jd.com/#/48378944?origin=0": {
+        "result": [
+          {
+            "roomId": "48378944",
+            "userId": "48378944",
+            "title": "JD Live",
+            "nick": "JD Live",
+            "avatar": "https://m.360buyimg.com/live/jfs/t1/523184/35/9717/8484/6ab08b9bFa75c804e/00292ee53616c658.jpg!q70.jpg",
+            "cover": "https://m.360buyimg.com/live/jfs/t1/523184/35/9717/8484/6ab08b9bFa75c804e/00292ee53616c658.jpg!q70.jpg",
+            "area": "JD Live",
+            "watching": "0",
+            "audienceMetricType": "unknown",
+            "popularity": "",
+            "onlineViewers": "",
+            "followers": "0",
+            "platform": "jdlive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://lives.jd.com",
+              "referer": "https://lives.jd.com/#/48378944",
+              "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+            },
+            "link": "https://lives.jd.com/#/48378944"
+          }
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "https://lives.jd.com/#/48378944/live": {
+        "result": [
+          {
+            "roomId": "48378944",
+            "userId": "48378944",
+            "title": "JD Live",
+            "nick": "JD Live",
+            "avatar": "https://m.360buyimg.com/live/jfs/t1/523184/35/9717/8484/6ab08b9bFa75c804e/00292ee53616c658.jpg!q70.jpg",
+            "cover": "https://m.360buyimg.com/live/jfs/t1/523184/35/9717/8484/6ab08b9bFa75c804e/00292ee53616c658.jpg!q70.jpg",
+            "area": "JD Live",
+            "watching": "0",
+            "audienceMetricType": "unknown",
+            "popularity": "",
+            "onlineViewers": "",
+            "followers": "0",
+            "platform": "jdlive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://lives.jd.com",
+              "referer": "https://lives.jd.com/#/48378944",
+              "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+            },
+            "link": "https://lives.jd.com/#/48378944"
+          }
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "https://example.com/x": {
+        "result": [],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "  ": {
+        "result": [],
+        "requests": []
+      },
+      "旗舰店 page 1 then 2": {
+        "page 1": {
+          "result": [
+            "48378908",
+            "48378859",
+            "48378856",
+            "48378852",
+            "48378826",
+            "48378823",
+            "48378814",
+            "48378810",
+            "48378779",
+            "48378756",
+            "48378735",
+            "48378718",
+            "48378631",
+            "48378603",
+            "48378601",
+            "48378585",
+            "48378584",
+            "48378557",
+            "48378551",
+            "48378541",
+            "48378529",
+            "48378523",
+            "48378507"
+          ],
+          "requests": [
+            "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+          ]
+        },
+        "page 2": {
+          "result": [
+            "48378500",
+            "48378485",
+            "48378465",
+            "48378461",
+            "48378438",
+            "48378422",
+            "48378416",
+            "48378400",
+            "48378393",
+            "48378319",
+            "48378308",
+            "48378281",
+            "48378270",
+            "48378264",
+            "48378260",
+            "48378240",
+            "48378194",
+            "48378178"
+          ],
+          "requests": [
+            "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"37\",\"page\":2}"
+          ]
+        },
+        "timestamps": [
+          "t0",
+          "t0"
+        ]
+      },
+      "旗舰店 page 2 first": {
+        "result": [],
+        "requests": []
+      },
+      "旗舰店 size 3": {
+        "result": [
+          "48378908",
+          "48378859",
+          "48378856"
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "旗舰店 size 100": {
+        "result": [
+          "48378908",
+          "48378859",
+          "48378856",
+          "48378852",
+          "48378826",
+          "48378823",
+          "48378814",
+          "48378810",
+          "48378779",
+          "48378756",
+          "48378735",
+          "48378718",
+          "48378631",
+          "48378603",
+          "48378601",
+          "48378585",
+          "48378584",
+          "48378557",
+          "48378551",
+          "48378541",
+          "48378529",
+          "48378523",
+          "48378507"
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "旗舰店 size 101": {
+        "result": [],
+        "requests": []
+      },
+      "48378944 page 2": {
+        "result": [],
+        "requests": []
+      },
+      "海信 without a token": {
+        "result": [
+          {
+            "roomId": "48378944",
+            "userId": "24304104",
+            "title": "有爱，科技也动情~~海信",
+            "nick": "海信诚一恒专卖店",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "area": "JD Live",
+            "watching": "0",
+            "audienceMetricType": "totalViewers",
+            "popularity": "",
+            "onlineViewers": "",
+            "totalViewers": "37",
+            "followers": "0",
+            "platform": "jdlive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://lives.jd.com",
+              "referer": "https://lives.jd.com/#/48378944",
+              "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+            },
+            "link": "https://lives.jd.com/#/48378944"
+          }
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      }
+    },
+    "known": {
+      "getRoomDetailForRefresh before the list": {
+        "result": {
+          "roomId": "48378944",
+          "userId": "48378944",
+          "title": "JD Live",
+          "nick": "JD Live",
+          "avatar": "https://m.360buyimg.com/live/jfs/t1/523184/35/9717/8484/6ab08b9bFa75c804e/00292ee53616c658.jpg!q70.jpg",
+          "cover": "https://m.360buyimg.com/live/jfs/t1/523184/35/9717/8484/6ab08b9bFa75c804e/00292ee53616c658.jpg!q70.jpg",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/48378944",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/48378944"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getDirectoryPage 1": {
+        "result": 30,
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+        ]
+      },
+      "getRoomDetailForRefresh after the list": {
+        "result": {
+          "roomId": "48378944",
+          "userId": "24304104",
+          "title": "有爱，科技也动情~~海信",
+          "nick": "海信诚一恒专卖店",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+          "cover": "https://m.360buyimg.com/live/jfs/t1/523184/35/9717/8484/6ab08b9bFa75c804e/00292ee53616c658.jpg!q70.jpg",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "37",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/48378944",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/48378944"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "searchRooms after the list": {
+        "result": [
+          {
+            "roomId": "48378944",
+            "userId": "24304104",
+            "title": "有爱，科技也动情~~海信",
+            "nick": "海信诚一恒专卖店",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/live/jfs/t1/523184/35/9717/8484/6ab08b9bFa75c804e/00292ee53616c658.jpg!q70.jpg",
+            "area": "JD Live",
+            "watching": "0",
+            "audienceMetricType": "totalViewers",
+            "popularity": "",
+            "onlineViewers": "",
+            "totalViewers": "37",
+            "followers": "0",
+            "platform": "jdlive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://lives.jd.com",
+              "referer": "https://lives.jd.com/#/48378944",
+              "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+            },
+            "link": "https://lives.jd.com/#/48378944"
+          }
+        ],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getRoomDetailForRefresh after a search": {
+        "result": {
+          "roomId": "48378944",
+          "userId": "24304104",
+          "title": "有爱，科技也动情~~海信",
+          "nick": "海信诚一恒专卖店",
+          "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+          "cover": "https://m.360buyimg.com/live/jfs/t1/523184/35/9717/8484/6ab08b9bFa75c804e/00292ee53616c658.jpg!q70.jpg",
+          "area": "JD Live",
+          "watching": "0",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "37",
+          "followers": "0",
+          "platform": "jdlive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://lives.jd.com",
+            "referer": "https://lives.jd.com/#/48378944",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+          },
+          "link": "https://lives.jd.com/#/48378944"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      }
+    },
+    "JdLiveLink.parseLiveId": {
+      "48378944": "48378944",
+      " 48378944 ": "48378944",
+      "1234": null,
+      "12345": "12345",
+      "0123456": null,
+      "123456789012345678": "123456789012345678",
+      "1234567890123456789": null,
+      "https://lives.jd.com/#/48378944": "48378944",
+      "https://lives.jd.com/#/48378944?origin=0": "48378944",
+      "https://lives.jd.com/#/48378944/live?origin=0": "48378944",
+      "https://lives.jd.com/#/48378944/notice": "48378944",
+      "https://lives.jd.com/#/48378944/closed": "48378944",
+      "https://lives.jd.com/#/48378944/replay": "48378944",
+      "https://lives.jd.com/#/48378944/other": null,
+      "https://lives.jd.com/#/48378944/live/extra": null,
+      "https://lives.jd.com/#48378944": "48378944",
+      "http://lives.jd.com/#/48378944": "48378944",
+      "HTTPS://LIVES.JD.COM/#/48378944": "48378944",
+      "https://lives.jd.com:443/#/48378944": "48378944",
+      "http://lives.jd.com:80/#/48378944": "48378944",
+      "https://lives.jd.com:8443/#/48378944": null,
+      "https://user@lives.jd.com/#/48378944": null,
+      "https://lives.jd.com/48378944": null,
+      "https://lives.jd.com/?origin=0#/48378944": "48378944",
+      "https://lives.jd.com/#/channel": null,
+      "https://lives.jd.com/": null,
+      "https://lives.jd.com.evil.test/#/48378944": null,
+      "https://m.jd.com/product/48378944.html": null,
+      "ftp://lives.jd.com/#/48378944": null,
+      "看直播 https://lives.jd.com/#/48378944 快来": null
+    },
+    "JdLiveLink.watchUrl": {
+      "48378944": "https://lives.jd.com/#/48378944",
+      " 48378944 ": "https://lives.jd.com/#/48378944",
+      "https://lives.jd.com/#/48378944/live": "https://lives.jd.com/#/48378944",
+      "abc": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid JD Live identity"
+      }
+    },
+    "variants": {
+      "userName null": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "JD Live",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "userName number": {
+        "throws": "JdLiveException",
+        "message": "JD Live schema"
+      },
+      "title blank": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "JD Live",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "title spaced": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "a b c",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "userPic http": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "userPic other host": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "userPic protocol-relative": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "userPic number": {
+        "throws": "JdLiveException",
+        "message": "JD Live schema"
+      },
+      "indexImage missing": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "",
+            "totalViews": 37,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "userPic missing": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "pv negative": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": null,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "pv text": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 12,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "pv missing": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": null,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "status 0": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "preview",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "status 2": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "offline",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "status 3": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "replay",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "status 10": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "paused",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "status 99": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "unknown",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "status missing": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "unknown",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "authorId missing": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "liveId differs from id": {
+        "rooms": [
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378899",
+            "authorId": "724305",
+            "nick": "星河汽车用品专营店",
+            "title": "星河汽车轮胎秋季开学季",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/272760/36/21964/9289/67ff21a7Fd54d6333/efcbfe2543e8d38a.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/514805/37/1037/21169/6a8e853eFac9a138e/06033202584a6035.png",
+            "totalViews": 1063,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": false
+      },
+      "liveId missing": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "id missing": {
+        "rooms": [
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378899",
+            "authorId": "724305",
+            "nick": "星河汽车用品专营店",
+            "title": "星河汽车轮胎秋季开学季",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/272760/36/21964/9289/67ff21a7Fd54d6333/efcbfe2543e8d38a.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/514805/37/1037/21169/6a8e853eFac9a138e/06033202584a6035.png",
+            "totalViews": 1063,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": false
+      },
+      "liveId short": {
+        "rooms": [
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378899",
+            "authorId": "724305",
+            "nick": "星河汽车用品专营店",
+            "title": "星河汽车轮胎秋季开学季",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/272760/36/21964/9289/67ff21a7Fd54d6333/efcbfe2543e8d38a.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/514805/37/1037/21169/6a8e853eFac9a138e/06033202584a6035.png",
+            "totalViews": 1063,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": false
+      },
+      "second card repeats the first": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378899",
+            "authorId": "724305",
+            "nick": "星河汽车用品专营店",
+            "title": "星河汽车轮胎秋季开学季",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/272760/36/21964/9289/67ff21a7Fd54d6333/efcbfe2543e8d38a.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/514805/37/1037/21169/6a8e853eFac9a138e/06033202584a6035.png",
+            "totalViews": 1063,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": false
+      },
+      "templateType text": {
+        "rooms": [
+          {
+            "liveId": "48378944",
+            "authorId": "24304104",
+            "nick": "海信诚一恒专卖店",
+            "title": "有爱，科技也动情~~海信",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/515069/33/6912/20789/6a9a3635Fbf0cb5fe/001e13b13bbe4c45.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/313457/5/15860/36451/686f1befF648963a1/f3548bc2b21bc82e.png",
+            "totalViews": 37,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "templateType 2": {
+        "rooms": [
+          {
+            "liveId": "48378908",
+            "authorId": "14252067",
+            "nick": "OBOX箱包旗舰店",
+            "title": "OBOX箱包，更便捷更专业",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/305085/29/22081/15099/68882090F16fcbdec/689fd28d72c4d585.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/473958/4/2411/85286/6a4771caFf39ea84a/0603320258c17a2e.png",
+            "totalViews": 104,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          },
+          {
+            "liveId": "48378899",
+            "authorId": "724305",
+            "nick": "星河汽车用品专营店",
+            "title": "星河汽车轮胎秋季开学季",
+            "avatar": "https://img30.360buyimg.com/popshop/jfs/t1/272760/36/21964/9289/67ff21a7Fd54d6333/efcbfe2543e8d38a.png",
+            "cover": "https://m.360buyimg.com/livecms/jfs/t1/514805/37/1037/21169/6a8e853eFac9a138e/06033202584a6035.png",
+            "totalViews": 1063,
+            "state": "live",
+            "hls": null,
+            "flv": null
+          }
+        ],
+        "nextCount": 37,
+        "hasMore": false
+      },
+      "data not an object": {
+        "throws": "JdLiveException",
+        "message": "JD Live schema"
+      },
+      "list item not an object": {
+        "throws": "JdLiveException",
+        "message": "JD Live schema"
+      },
+      "list not a list": {
+        "throws": "JdLiveException",
+        "message": "JD Live schema"
+      },
+      "list empty": {
+        "rooms": [],
+        "nextCount": 37,
+        "hasMore": false
+      },
+      "currentCount missing": {
+        "throws": "JdLiveException",
+        "message": "JD Live schema"
+      },
+      "currentCount text": {
+        "rooms": 30,
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "code 2": {
+        "throws": "JdLiveException",
+        "message": "JD Live service"
+      },
+      "code number 0": {
+        "rooms": 30,
+        "nextCount": 37,
+        "hasMore": true
+      },
+      "subCode 1": {
+        "throws": "JdLiveException",
+        "message": "JD Live missing"
+      },
+      "subCode missing": {
+        "throws": "JdLiveException",
+        "message": "JD Live missing"
+      },
+      "data missing": {
+        "throws": "JdLiveException",
+        "message": "JD Live schema"
+      }
+    }
+  }
+}

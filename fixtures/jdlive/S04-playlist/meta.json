@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "platform": "jdlive",
+  "sample": "S04-playlist",
+  "capturedAt": "2026-09-28T13:09:13.556781Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd.m3u8",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+      "Origin": "https://lives.jd.com",
+      "Referer": "https://lives.jd.com/#/48395626"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "public, max-age=1",
+      "last-modified": "Mon, 28 Sep 2026 13:09:15 GMT",
+      "date": "Mon, 28 Sep 2026 13:09:15 GMT",
+      "tracestate": "cdn=HS,server_ip=198.51.100.2",
+      "access-control-allow-origin": "*",
+      "access-control-expose-headers": "X-Server-Ip",
+      "content-type": "application/x-mpegurl",
+      "x-server-ip": "198.51.100.3",
+      "server": "Bytedance NSS",
+      "timing-allow-origin": "*",
+      "accept-ranges": "bytes",
+      "access-control-allow-methods": "GET,POST,OPTIONS",
+      "content-length": "256",
+      "via": "n198-051-100-003",
+      "x-cache": "HS",
+      "file-last-modified": "1790600955411342347"
+    }
+  },
+  "raw": {
+    "sha256": "06448026f408afc0286e4b82ac337c5c759264033e9585cdbfe1fa55330e523c",
+    "length": 256
+  },
+  "body": "body.m3u8",
+  "scrubbed": [
+    {
+      "where": "query:volcDst",
+      "rule": "ip"
+    },
+    {
+      "where": "header:tracestate",
+      "rule": "ip"
+    },
+    {
+      "where": "header:x-server-ip",
+      "rule": "ip"
+    },
+    {
+      "where": "header:via",
+      "rule": "ip"
+    }
+  ],
+  "tool": "M4.28 recorder (schema 1)"
+}

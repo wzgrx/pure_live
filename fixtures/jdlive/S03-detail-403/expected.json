@@ -1,0 +1,400 @@
+{
+  "generator": "JdLiveSite's detail, live status and search when the play request is answered with this sample's empty body and each status; the list request answered with 404 and with a body that is not JSON",
+  "value": {
+    "status 403": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live access"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live access"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live access"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live access"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      }
+    },
+    "status 401": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live access"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live access"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live access"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live access"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      }
+    },
+    "status 404": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live missing"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live missing"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live missing"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": [],
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      }
+    },
+    "status 429": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live rateLimited"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live rateLimited"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live rateLimited"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live rateLimited"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      }
+    },
+    "status 400": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live schema"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live schema"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live schema"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live schema"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      }
+    },
+    "status 422": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live schema"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live schema"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live schema"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live schema"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      }
+    },
+    "status 500": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live service"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live service"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live service"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live service"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      }
+    },
+    "status 503": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live service"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live service"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live service"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live service"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      }
+    },
+    "status 302": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live transport"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live transport"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live transport"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live transport"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      }
+    },
+    "status 204": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live transport"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live transport"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live transport"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "JdLiveException",
+          "message": "JD Live transport"
+        },
+        "requests": [
+          "GET https://api.m.jd.com/api?appid=h5-live&functionId=getImmediatePlayToM&body={\"liveId\":\"48378944\"}"
+        ]
+      }
+    },
+    "list status 404": {
+      "result": {
+        "throws": "JdLiveException",
+        "message": "JD Live missing"
+      },
+      "requests": [
+        "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+      ]
+    },
+    "list not JSON": {
+      "result": {
+        "throws": "JdLiveException",
+        "message": "JD Live schema"
+      },
+      "requests": [
+        "GET https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&body={\"tabId\":1,\"currentCount\":\"0\",\"page\":1}"
+      ]
+    }
+  }
+}

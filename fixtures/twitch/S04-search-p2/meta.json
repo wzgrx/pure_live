@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "platform": "twitch",
+  "sample": "S04-search-p2",
+  "capturedAt": "2026-09-27T18:42:00.546391Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "POST",
+    "url": "https://gql.twitch.tv/gql",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko",
+      "Device-Id": "1c682ab8f5071674669d5e9fb03bbb14",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+      "Origin": "https://www.twitch.tv",
+      "Referer": "https://www.twitch.tv/",
+      "Content-Type": "text/plain;charset=UTF-8"
+    },
+    "body": "{\"operationName\":\"SearchResultsPage_SearchResults\",\"variables\":{\"platform\":\"web\",\"query\":\"minecraft\",\"options\":{\"targets\":[{\"index\":\"CHANNEL\",\"cursor\":\"MTA=\"}],\"shouldSkipDiscoveryControl\":false},\"requestID\":\"808c9f2e-f52e-431c-8dc7-d2e3c1831d77\",\"includeIsDJ\":true},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"7f3580f6ac6cd8aa1424cff7c974a07143827d6fa36bba1b54318fe7f0b68dc5\"}}}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-served-by": "gateway",
+      "timing-allow-origin": "*",
+      "connection": "keep-alive",
+      "alt-svc": "h3=\":443\";ma=3600,\"h3-29\"=\":443\";ma=3600,\"h3-27\"=\":443\";ma=3600",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 18:42:01 GMT",
+      "access-control-allow-origin": "*",
+      "x-amzn-trace-id": "Self=1-6ab96378-364158552957cd0156fd991e;Root=1-6ab96379-53209470fb49032397e4f162",
+      "content-encoding": "gzip",
+      "content-type": "application/json; charset=utf-8",
+      "x-gateway-trace": "971f7118fdbeb5291f45385a9b5436db",
+      "x-router-config-version": "8bf4ae83-aec6-4ad1-9a79-f0e1c671027a"
+    }
+  },
+  "raw": {
+    "sha256": "91c72ba75dcce8a1782f74b66463bdf91de5f85666a9b5e924866aea2d4b9e31",
+    "length": 44343
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

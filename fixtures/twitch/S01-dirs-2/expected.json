@@ -1,0 +1,1655 @@
+{
+  "generator": "TwitchSite.getSubCategores per tag (twitch_site.dart:498-519)",
+  "value": {
+    "cad488fb-c95c-4be1-b197-5b851d3a12fa": {
+      "areas": [
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "1435206302",
+          "areaName": "Slay the Spire II",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1435206302_IGDB-285x380.jpg",
+          "shortName": "slay-the-spire-ii"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "1414860634",
+          "areaName": "The Binding of Isaac: Repentance",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1414860634_IGDB-285x380.jpg",
+          "shortName": "the-binding-of-isaac-repentance"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "33882",
+          "areaName": "FTL: Faster Than Light",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/33882_IGDB-285x380.jpg",
+          "shortName": "ftl-faster-than-light"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "982348888",
+          "areaName": "ELDEN RING NIGHTREIGN",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/982348888_IGDB-285x380.jpg",
+          "shortName": "elden-ring-nightreign"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "501762963",
+          "areaName": "Scrappage",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/501762963_IGDB-285x380.jpg",
+          "shortName": "scrappage"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "458353",
+          "areaName": "Darkest Dungeon",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/458353_IGDB-285x380.jpg",
+          "shortName": "darkest-dungeon"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "488634",
+          "areaName": "Don't Starve Together",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/488634_IGDB-285x380.jpg",
+          "shortName": "dont-starve-together"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "745589378",
+          "areaName": "Balatro",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/745589378_IGDB-285x380.jpg",
+          "shortName": "balatro"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "28834",
+          "areaName": "Realm of the Mad God",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/28834_IGDB-285x380.jpg",
+          "shortName": "realm-of-the-mad-god"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "22693",
+          "areaName": "Pokémon Mystery Dungeon: Explorers of Sky",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/22693_IGDB-285x380.jpg",
+          "shortName": "pokemon-mystery-dungeon-explorers-of-sky"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "415998825",
+          "areaName": "Guildrun",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/415998825_IGDB-285x380.jpg",
+          "shortName": "guildrun"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "767864507",
+          "areaName": "Dragon Quest Heroes: Torneko's Mystery Dungeon Classic HD",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/767864507_IGDB-285x380.jpg",
+          "shortName": "tornekos-mystery-dungeon-classic-hd"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "376500771",
+          "areaName": "Hades II",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/376500771_IGDB-285x380.jpg",
+          "shortName": "hades-ii"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "510590",
+          "areaName": "Hades",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/510590_IGDB-285x380.jpg",
+          "shortName": "hades"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "494839",
+          "areaName": "Deep Rock Galactic",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/494839_IGDB-285x380.jpg",
+          "shortName": "deep-rock-galactic"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "1557187997",
+          "areaName": "Elin",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1557187997_IGDB-285x380.jpg",
+          "shortName": "elin"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "505705",
+          "areaName": "Noita",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/505705_IGDB-285x380.jpg",
+          "shortName": "noita"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "5784346",
+          "areaName": "For the King II",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/5784346_IGDB-285x380.jpg",
+          "shortName": "for-the-king-ii"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "509110",
+          "areaName": "Risk of Rain 2",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/509110_IGDB-285x380.jpg",
+          "shortName": "risk-of-rain-2"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "340920845",
+          "areaName": "Backpack Battles",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/340920845_IGDB-285x380.jpg",
+          "shortName": "backpack-battles"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "496902",
+          "areaName": "Slay the Spire",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/496902_IGDB-285x380.jpg",
+          "shortName": "slay-the-spire"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "5492",
+          "areaName": "Diablo",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/5492_IGDB-285x380.jpg",
+          "shortName": "diablo"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "1427027827",
+          "areaName": "Ravenswatch",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1427027827_IGDB-285x380.jpg",
+          "shortName": "ravenswatch"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "369625",
+          "areaName": "Fushigi no Dungeon: Fuurai no Shiren Gaiden - Onna Kenshi Asuka Kenzan!",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/369625_IGDB-285x380.jpg",
+          "shortName": "fushigi-no-dungeon-fuurai-no-shiren-gaiden-onna-kenshi-asuka-kenzan"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "367627568",
+          "areaName": "Packed Lair",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/367627568_IGDB-285x380.jpg",
+          "shortName": "packed-lair"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "1021622343",
+          "areaName": "The Spell Brigade",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1021622343_IGDB-285x380.jpg",
+          "shortName": "the-spell-brigade"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "1805135588",
+          "areaName": "Pokémon Mystery Dungeon: Rescue Team DX",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1805135588_IGDB-285x380.jpg",
+          "shortName": "pokemon-mystery-dungeon-rescue-team-dx"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "12826",
+          "areaName": "Pokémon Mystery Dungeon: Blue/Red Rescue Team",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/12826-285x380.jpg",
+          "shortName": "pokemon-mystery-dungeon-blue-red-rescue-team"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "1771631982",
+          "areaName": "Dome Keeper",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1771631982_IGDB-285x380.jpg",
+          "shortName": "dome-keeper"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "cad488fb-c95c-4be1-b197-5b851d3a12fa",
+          "typeName": "类 Rogue",
+          "areaId": "1123251645",
+          "areaName": "Wyldernook",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1123251645_IGDB-285x380.jpg",
+          "shortName": "wyldernook"
+        }
+      ],
+      "nextCursor": "eyJzIjozMCwiZCI6ZmFsc2UsInQiOnRydWV9"
+    },
+    "0c99bf18-5a92-4257-8974-d7a60088d1e8": {
+      "areas": [
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "498592",
+          "areaName": "I'm Only Sleeping",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/498592_IGDB-285x380.jpg",
+          "shortName": "im-only-sleeping"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "497916",
+          "areaName": "The Walking Dead: The Final Season",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/497916_IGDB-285x380.jpg",
+          "shortName": "the-walking-dead-the-final-season"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "709941216",
+          "areaName": "Endacopia",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/709941216_IGDB-285x380.jpg",
+          "shortName": "endacopia"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "667598074",
+          "areaName": "Microscape",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/667598074_IGDB-285x380.jpg",
+          "shortName": "microscape"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "476339",
+          "areaName": "Randal's Monday",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/476339_IGDB-285x380.jpg",
+          "shortName": "randals-monday"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "602959317",
+          "areaName": "Dispatch",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/602959317_IGDB-285x380.jpg",
+          "shortName": "dispatch-2"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "859449729",
+          "areaName": "Neat!",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/859449729_IGDB-285x380.jpg",
+          "shortName": "neat"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "461246",
+          "areaName": "The Walking Dead: A New Frontier",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/461246_IGDB-285x380.jpg",
+          "shortName": "the-walking-dead-a-new-frontier"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "30740",
+          "areaName": "The Walking Dead",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/30740_IGDB-285x380.jpg",
+          "shortName": "the-walking-dead-season-one"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "512353",
+          "areaName": "Tails Noir",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/512353_IGDB-285x380.jpg",
+          "shortName": "backbone"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "29975",
+          "areaName": "Danganronpa: Trigger Happy Havoc",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/29975_IGDB-285x380.jpg",
+          "shortName": "danganronpa-trigger-happy-havoc"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "10599",
+          "areaName": "Scratches",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/10599_IGDB-285x380.jpg",
+          "shortName": "scratches"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "106662",
+          "areaName": "The Cat Lady",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/106662_IGDB-285x380.jpg",
+          "shortName": "the-cat-lady"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "190452030",
+          "areaName": "ZERO PARADES: For Dead Spies",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/190452030_IGDB-285x380.jpg",
+          "shortName": "zero-parades"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "1642629214",
+          "areaName": "lily's world XD",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1642629214_IGDB-285x380.jpg",
+          "shortName": "lilys-world-xd"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "521979070",
+          "areaName": "Slay the Princess",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/521979070_IGDB-285x380.jpg",
+          "shortName": "slay-the-princess"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "1274672891",
+          "areaName": "Spirit City: Lofi Sessions",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1274672891_IGDB-285x380.jpg",
+          "shortName": "spirit-city-lofi-sessions"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "1937092890",
+          "areaName": "Syberia: The World Before",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1937092890_IGDB-285x380.jpg",
+          "shortName": "syberia-the-world-before"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "1982820182",
+          "areaName": "Ghost Trick: Phantom Detective",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1982820182_IGDB-285x380.jpg",
+          "shortName": "ghost-trick-phantom-detective"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "200049774",
+          "areaName": "Servant of the Lake",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/200049774_IGDB-285x380.jpg",
+          "shortName": "servant-of-the-lake"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "1027255885",
+          "areaName": "Ace Attorney Investigations 2: Prosecutor's Gambit",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1027255885_IGDB-285x380.jpg",
+          "shortName": "ace-attorney-investigations-2-prosecutors-gambit"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "313272",
+          "areaName": "Mystery Case Files: Dire Grove",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/313272_IGDB-285x380.jpg",
+          "shortName": "mystery-case-files-dire-grove"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "311442593",
+          "areaName": "PARANORMASIGHT: The Seven Mysteries of Honjo",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/311442593_IGDB-285x380.jpg",
+          "shortName": "paranormasight-the-seven-mysteries-of-honjo"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "10895",
+          "areaName": "Professor Layton and the Curious Village",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/10895_IGDB-285x380.jpg",
+          "shortName": "professor-layton-and-the-curious-village"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "319652285",
+          "areaName": "The Secret of Monkey Island: Special Edition",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/319652285_IGDB-285x380.jpg",
+          "shortName": "the-secret-of-monkey-island-special-edition"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "514857",
+          "areaName": "Unpacking",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/514857_IGDB-285x380.jpg",
+          "shortName": "unpacking"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "459063",
+          "areaName": "Reksio i Czarodzieje",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/459063_IGDB-285x380.jpg",
+          "shortName": "reksio-i-czarodzieje"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "26428",
+          "areaName": "Professor Layton and the Last Specter",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/26428_IGDB-285x380.jpg",
+          "shortName": "professor-layton-and-the-last-specter"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "2769",
+          "areaName": "The Secret of Monkey Island",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/2769_IGDB-285x380.jpg",
+          "shortName": "the-secret-of-monkey-island"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0c99bf18-5a92-4257-8974-d7a60088d1e8",
+          "typeName": "指向与点选",
+          "areaId": "489164",
+          "areaName": "Danganronpa V3: Killing Harmony",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/489164_IGDB-285x380.jpg",
+          "shortName": "danganronpa-v3-killing-harmony"
+        }
+      ],
+      "nextCursor": "eyJzIjozMCwiZCI6ZmFsc2UsInQiOnRydWV9"
+    },
+    "5d289cf9-d75a-42b5-a635-0d117609e6a6": {
+      "areas": [
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "309493",
+          "areaName": "Happy Wheels",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/309493_IGDB-285x380.jpg",
+          "shortName": "happy-wheels"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "31376",
+          "areaName": "Terraria",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/31376_IGDB-285x380.jpg",
+          "shortName": "terraria"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "1081998272",
+          "areaName": "PEAK",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1081998272_IGDB-285x380.jpg",
+          "shortName": "peak-2025"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "998666707",
+          "areaName": "Garfield: Escape from Monday",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/998666707_IGDB-285x380.jpg",
+          "shortName": "garfield-escape-from-monday"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "23020",
+          "areaName": "ROBLOX",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/23020_IGDB-285x380.jpg",
+          "shortName": "roblox"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "511391",
+          "areaName": "Hollow Knight: Silksong",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/511391_IGDB-285x380.jpg",
+          "shortName": "hollow-knight-silksong"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "460316",
+          "areaName": "Brawlhalla",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/460316_IGDB-285x380.jpg",
+          "shortName": "brawlhalla"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "1675560685",
+          "areaName": "Unicycle Together",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1675560685_IGDB-285x380.jpg",
+          "shortName": "unicycle-together"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "19976",
+          "areaName": "MapleStory",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/19976_IGDB-285x380.jpg",
+          "shortName": "maplestory"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "504461",
+          "areaName": "Super Smash Bros. Ultimate",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/504461_IGDB-285x380.jpg",
+          "shortName": "super-smash-bros-ultimate"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "460951",
+          "areaName": "Geometry Dash",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/460951_IGDB-285x380.jpg",
+          "shortName": "geometry-dash"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "676802825",
+          "areaName": "Big Walk",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/676802825_IGDB-285x380.jpg",
+          "shortName": "big-walk"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "2692",
+          "areaName": "Super Mario 64",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/2692_IGDB-285x380.jpg",
+          "shortName": "super-mario-64"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "490147",
+          "areaName": "Hollow Knight",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/490147_IGDB-285x380.jpg",
+          "shortName": "hollow-knight"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "512980",
+          "areaName": "Fall Guys",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/512980-285x380.jpg",
+          "shortName": "fall-guys"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "8230",
+          "areaName": "Mega Man X5",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/8230_IGDB-285x380.jpg",
+          "shortName": "mega-man-x5"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "715052357",
+          "areaName": "Nine Sols",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/715052357_IGDB-285x380.jpg",
+          "shortName": "nine-sols"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "1158884259",
+          "areaName": "Splatoon 3",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1158884259_IGDB-285x380.jpg",
+          "shortName": "splatoon-3"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "1229",
+          "areaName": "Super Mario World",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1229_IGDB-285x380.jpg",
+          "shortName": "super-mario-world"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "518213",
+          "areaName": "It Takes Two",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/518213_IGDB-285x380.jpg",
+          "shortName": "it-takes-two"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "1354355809",
+          "areaName": "Split Fiction",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1354355809_IGDB-285x380.jpg",
+          "shortName": "split-fiction"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "856465807",
+          "areaName": "A Difficult Game About Climbing",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/856465807_IGDB-285x380.jpg",
+          "shortName": "a-difficult-game-about-climbing"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "7595",
+          "areaName": "Super Metroid",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/7595_IGDB-285x380.jpg",
+          "shortName": "super-metroid"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "492535",
+          "areaName": "Celeste",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/492535_IGDB-285x380.jpg",
+          "shortName": "celeste"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "601612659",
+          "areaName": "Well Dweller",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/601612659_IGDB-285x380.jpg",
+          "shortName": "well-dweller"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "15825",
+          "areaName": "Worms Armageddon",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/15825_IGDB-285x380.jpg",
+          "shortName": "worms-armageddon"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "278441117",
+          "areaName": "Assassin's Creed Black Flag Resynced",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/278441117-285x380.jpg",
+          "shortName": "assassins-creed-black-flag-resynced"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "22959",
+          "areaName": "Alice: Madness Returns",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/22959_IGDB-285x380.jpg",
+          "shortName": "alice-madness-returns"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "2014795392",
+          "areaName": "Infinity Nikki",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/2014795392_IGDB-285x380.jpg",
+          "shortName": "infinity-nikki"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "5d289cf9-d75a-42b5-a635-0d117609e6a6",
+          "typeName": "平台游戏",
+          "areaId": "493997",
+          "areaName": "Super Mario Odyssey",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/493997_IGDB-285x380.jpg",
+          "shortName": "super-mario-odyssey"
+        }
+      ],
+      "nextCursor": "eyJzIjozMCwiZCI6ZmFsc2UsInQiOnRydWV9"
+    },
+    "0d4233af-7ac6-49da-937d-e0f42b7db187": {
+      "areas": [
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "123184772",
+          "areaName": "EA Sports FC 27",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/123184772_IGDB-285x380.jpg",
+          "shortName": "ea-sports-fc-27"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "30921",
+          "areaName": "Rocket League",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/30921-285x380.jpg",
+          "shortName": "rocket-league"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "93798731",
+          "areaName": "F1 25",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/93798731_IGDB-285x380.jpg",
+          "shortName": "f1-25"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "602040818",
+          "areaName": "NBA 2K27",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/602040818_IGDB-285x380.jpg",
+          "shortName": "nba-2k27"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "687129551",
+          "areaName": "Trackmania",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/687129551-285x380.jpg",
+          "shortName": "trackmania"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "19554",
+          "areaName": "iRacing",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/19554_IGDB-285x380.jpg",
+          "shortName": "iracing"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "499003",
+          "areaName": "VRChat",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/499003_IGDB-285x380.jpg",
+          "shortName": "vrchat"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "670138298",
+          "areaName": "Madden NFL 27",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/670138298_IGDB-285x380.jpg",
+          "shortName": "madden-nfl-27"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "676313093",
+          "areaName": "WWE 2K26",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/676313093_IGDB-285x380.jpg",
+          "shortName": "wwe-2k26"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "518014",
+          "areaName": "Gran Turismo 7",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/518014_IGDB-285x380.jpg",
+          "shortName": "gran-turismo-7"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "497304",
+          "areaName": "Russian Fishing 4",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/497304_IGDB-285x380.jpg",
+          "shortName": "russian-fishing-4"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "1313351584",
+          "areaName": "Football Manager 26",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1313351584_IGDB-285x380.jpg",
+          "shortName": "football-manager-26"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "1991115310",
+          "areaName": "Forza Horizon 6",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1991115310_IGDB-285x380.jpg",
+          "shortName": "forza-horizon-6"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "624536948",
+          "areaName": "EA Sports FC 26",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/624536948_IGDB-285x380.jpg",
+          "shortName": "ea-sports-fc-26"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "518584827",
+          "areaName": "NHL 27",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/518584827_IGDB-285x380.jpg",
+          "shortName": "nhl-27"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "1331855755",
+          "areaName": "Darts",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1331855755_IGDB-285x380.jpg",
+          "shortName": "darts-2020"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "1678532194",
+          "areaName": "EA Sports College Football 27",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1678532194_IGDB-285x380.jpg",
+          "shortName": "ea-sports-college-football-27"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "1496435078",
+          "areaName": "Casino Simulator 2024",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1496435078_IGDB-285x380.jpg",
+          "shortName": "casino-simulator-2024"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "1362102608",
+          "areaName": "REMATCH",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1362102608_IGDB-285x380.jpg",
+          "shortName": "rematch"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "331373906",
+          "areaName": "eFootball",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/331373906_IGDB-285x380.jpg",
+          "shortName": "efootball"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "1832641890",
+          "areaName": "MLB The Show 26",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1832641890_IGDB-285x380.jpg",
+          "shortName": "mlb-the-show-26"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "493112",
+          "areaName": "NBA 2K17",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/493112_IGDB-285x380.jpg",
+          "shortName": "nba-2k17"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "519433",
+          "areaName": "Blood Bowl III",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/519433_IGDB-285x380.jpg",
+          "shortName": "blood-bowl-iii"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "1135492840",
+          "areaName": "Sonic Racing: CrossWorlds",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1135492840_IGDB-285x380.jpg",
+          "shortName": "sonic-racing-cross-worlds"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "491381",
+          "areaName": "Golf With Your Friends",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/491381_IGDB-285x380.jpg",
+          "shortName": "golf-with-your-friends"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "503116",
+          "areaName": "Beat Saber",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/503116_IGDB-285x380.jpg",
+          "shortName": "beat-saber"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "2112738408",
+          "areaName": "NBA 2K26",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/2112738408_IGDB-285x380.jpg",
+          "shortName": "nba-2k26"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "2099590881",
+          "areaName": "Out of the Park Baseball 27",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/2099590881_IGDB-285x380.jpg",
+          "shortName": "out-of-the-park-baseball-27"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "2128193047",
+          "areaName": "Super Battle Golf",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/2128193047_IGDB-285x380.jpg",
+          "shortName": "super-battle-golf"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "0d4233af-7ac6-49da-937d-e0f42b7db187",
+          "typeName": "运动",
+          "areaId": "1114400965",
+          "areaName": "NASCAR 26",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1114400965_IGDB-285x380.jpg",
+          "shortName": "nascar-26"
+        }
+      ],
+      "nextCursor": "eyJzIjozMCwiZCI6ZmFsc2UsInQiOnRydWV9"
+    },
+    "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a": {
+      "areas": [
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "16163",
+          "areaName": "Ar tonelico: Melody of Elemia",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/16163_IGDB-285x380.jpg",
+          "shortName": "ar-tonelico-melody-of-elemia"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "1280007947",
+          "areaName": "Limbus Company",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1280007947_IGDB-285x380.jpg",
+          "shortName": "limbus-company"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "505084",
+          "areaName": "Umamusume: Pretty Derby",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/505084_IGDB-285x380.jpg",
+          "shortName": "umamusume-pretty-derby"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "29975",
+          "areaName": "Danganronpa: Trigger Happy Havoc",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/29975_IGDB-285x380.jpg",
+          "shortName": "danganronpa-trigger-happy-havoc"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "364677525",
+          "areaName": "Date Everything!",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/364677525_IGDB-285x380.jpg",
+          "shortName": "date-everything"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "497527",
+          "areaName": "Doki Doki Literature Club!",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/497527_IGDB-285x380.jpg",
+          "shortName": "doki-doki-literature-club"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "1642629214",
+          "areaName": "lily's world XD",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1642629214_IGDB-285x380.jpg",
+          "shortName": "lilys-world-xd"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "493048",
+          "areaName": "Fate/Grand Order",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/493048_IGDB-285x380.jpg",
+          "shortName": "fate-grand-order"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "521979070",
+          "areaName": "Slay the Princess",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/521979070_IGDB-285x380.jpg",
+          "shortName": "slay-the-princess"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "1027255885",
+          "areaName": "Ace Attorney Investigations 2: Prosecutor's Gambit",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1027255885_IGDB-285x380.jpg",
+          "shortName": "ace-attorney-investigations-2-prosecutors-gambit"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "311442593",
+          "areaName": "PARANORMASIGHT: The Seven Mysteries of Honjo",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/311442593_IGDB-285x380.jpg",
+          "shortName": "paranormasight-the-seven-mysteries-of-honjo"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "107194810",
+          "areaName": "Phoenix Wright: Ace Attorney Trilogy",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/107194810_IGDB-285x380.jpg",
+          "shortName": "phoenix-wright-ace-attorney-trilogy-2014"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "595240160",
+          "areaName": "Sovereign Tower",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/595240160_IGDB-285x380.jpg",
+          "shortName": "sovereign-tower"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "10895",
+          "areaName": "Professor Layton and the Curious Village",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/10895_IGDB-285x380.jpg",
+          "shortName": "professor-layton-and-the-curious-village"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "472944250",
+          "areaName": "BanG Dream! Our Notes",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/472944250_IGDB-285x380.jpg",
+          "shortName": "bang-dream-our-notes"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "525700863",
+          "areaName": "Magical Girl Witch Trials",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/525700863_IGDB-285x380.jpg",
+          "shortName": "mahou-shoujo-no-majo-saiban"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "89297",
+          "areaName": "Danganronpa 2: Goodbye Despair",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/89297_IGDB-285x380.jpg",
+          "shortName": "danganronpa-2-goodbye-despair"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "26428",
+          "areaName": "Professor Layton and the Last Specter",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/26428_IGDB-285x380.jpg",
+          "shortName": "professor-layton-and-the-last-specter"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "489164",
+          "areaName": "Danganronpa V3: Killing Harmony",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/489164_IGDB-285x380.jpg",
+          "shortName": "danganronpa-v3-killing-harmony"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "279014883",
+          "areaName": "HATSUNE MIKU: COLORFUL STAGE!",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/279014883_IGDB-285x380.jpg",
+          "shortName": "hatsune-miku-colorful-stage"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "701776039",
+          "areaName": "Mixtape",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/701776039_IGDB-285x380.jpg",
+          "shortName": "mixtape-1"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "1625670105",
+          "areaName": "An Airport for Aliens Currently Run by Dogs",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1625670105_IGDB-285x380.jpg",
+          "shortName": "an-airport-for-aliens-currently-run-by-dogs"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "34222",
+          "areaName": "Home",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/34222_IGDB-285x380.jpg",
+          "shortName": "home"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "21647",
+          "areaName": "Higurashi When They Cry",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/21647_IGDB-285x380.jpg",
+          "shortName": "higurashi-when-they-cry"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "496008",
+          "areaName": "Chaos;Head Noah",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/496008_IGDB-285x380.jpg",
+          "shortName": "chaos-head-noah"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "637310646",
+          "areaName": "Sound Novel Evolution 2: Kamaitachi no Yoru Tokubetsu-hen",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/637310646_IGDB-285x380.jpg",
+          "shortName": "sound-novel-evolution-2-kamaitachi-no-yoru-tokubetsu-hen"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "25130",
+          "areaName": "Persona 3 Portable",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/25130_IGDB-285x380.jpg",
+          "shortName": "persona-3-portable"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "413791772",
+          "areaName": "DDinosaur with Double D's",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/413791772_IGDB-285x380.jpg",
+          "shortName": "ddinosaur-with-double-ds"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "424154938",
+          "areaName": "I'm Sleep!",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/424154938_IGDB-285x380.jpg",
+          "shortName": "im-sleep"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a",
+          "typeName": "视觉小说",
+          "areaId": "2085840267",
+          "areaName": "Coffee Talk: Tokyo",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/2085840267_IGDB-285x380.jpg",
+          "shortName": "coffee-talk-tokyo"
+        }
+      ],
+      "nextCursor": "eyJzIjozMCwiZCI6ZmFsc2UsInQiOnRydWV9"
+    },
+    "643fe658-c4fc-45f0-9aed-cbe54a7c1d10": {
+      "areas": [
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "18122",
+          "areaName": "World of Warcraft",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/18122-285x380.jpg",
+          "shortName": "world-of-warcraft"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "27471",
+          "areaName": "Minecraft",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/27471_IGDB-285x380.jpg",
+          "shortName": "minecraft"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "1282866981",
+          "areaName": "Delta Force",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1282866981_IGDB-285x380.jpg",
+          "shortName": "delta-force-hawk-ops"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "515024",
+          "areaName": "Diablo IV",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/515024-285x380.jpg",
+          "shortName": "diablo-iv"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "19619",
+          "areaName": "Tibia",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/19619_IGDB-285x380.jpg",
+          "shortName": "tibia"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "24241",
+          "areaName": "FINAL FANTASY XIV ONLINE",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/24241_IGDB-285x380.jpg",
+          "shortName": "final-fantasy-xiv-online"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "401587136",
+          "areaName": "Arena Breakout: Infinite",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/401587136_IGDB-285x380.jpg",
+          "shortName": "arena-breakout-infinite"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "386821",
+          "areaName": "Black Desert",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/386821_IGDB-285x380.jpg",
+          "shortName": "black-desert"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "1763263",
+          "areaName": "nanos world",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1763263_IGDB-285x380.jpg",
+          "shortName": "nanos-world"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "459931",
+          "areaName": "Old School RuneScape",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/459931_IGDB-285x380.jpg",
+          "shortName": "old-school-runescape"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "771448419",
+          "areaName": "AION 2",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/771448419_IGDB-285x380.jpg",
+          "shortName": "aion-2"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "491931",
+          "areaName": "Escape from Tarkov",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/491931_IGDB-285x380.jpg",
+          "shortName": "escape-from-tarkov"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "417528",
+          "areaName": "Albion Online",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/417528_IGDB-285x380.jpg",
+          "shortName": "albion-online"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "1413930024",
+          "areaName": "Active Matter",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1413930024_IGDB-285x380.jpg",
+          "shortName": "active-matter"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "19554",
+          "areaName": "iRacing",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/19554_IGDB-285x380.jpg",
+          "shortName": "iracing"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "1441208453",
+          "areaName": "Once Human",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1441208453_IGDB-285x380.jpg",
+          "shortName": "once-human"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "499003",
+          "areaName": "VRChat",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/499003_IGDB-285x380.jpg",
+          "shortName": "vrchat"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "497057",
+          "areaName": "Destiny 2",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/497057-285x380.jpg",
+          "shortName": "destiny-2"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "1702520304",
+          "areaName": "Path of Exile 2",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1702520304_IGDB-285x380.jpg",
+          "shortName": "path-of-exile-2"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "503932",
+          "areaName": "Last Epoch",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/503932_IGDB-285x380.jpg",
+          "shortName": "last-epoch"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "504463",
+          "areaName": "Tom Clancy's The Division 2",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/504463_IGDB-285x380.jpg",
+          "shortName": "tom-clancys-the-division-2"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "1987896617",
+          "areaName": "Dune: Awakening",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1987896617_IGDB-285x380.jpg",
+          "shortName": "dune-awakening"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "29056",
+          "areaName": "Knight Online",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/29056_IGDB-285x380.jpg",
+          "shortName": "knight-online"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "66366",
+          "areaName": "War Thunder",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/66366_IGDB-285x380.jpg",
+          "shortName": "war-thunder"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "1393304883",
+          "areaName": "Mir Tankov",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/1393304883_IGDB-285x380.jpg",
+          "shortName": "mir-tankov"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "509511",
+          "areaName": "Marbles on Stream",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/509511_IGDB-285x380.jpg",
+          "shortName": "marbles-on-stream"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "19976",
+          "areaName": "MapleStory",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/19976_IGDB-285x380.jpg",
+          "shortName": "maplestory"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "516588",
+          "areaName": "Rise Online",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/516588_IGDB-285x380.jpg",
+          "shortName": "rise-online"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "502829",
+          "areaName": "R2 Online: Reign of Revolution",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/502829_IGDB-285x380.jpg",
+          "shortName": "r2-online-reign-of-revolution"
+        },
+        {
+          "platform": "twitch",
+          "areaType": "643fe658-c4fc-45f0-9aed-cbe54a7c1d10",
+          "typeName": "MMO",
+          "areaId": "20596",
+          "areaName": "Dofus",
+          "areaPic": "https://i2.wp.com/static-cdn.jtvnw.net/ttv-boxart/20596_IGDB-285x380.jpg",
+          "shortName": "dofus"
+        }
+      ],
+      "nextCursor": "eyJzIjozMCwiZCI6ZmFsc2UsInQiOnRydWV9"
+    }
+  }
+}

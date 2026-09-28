@@ -1,0 +1,9 @@
+{
+  "generator": "TwitchSite.getPlayQualites token (twitch_site.dart:556-557)",
+  "value": {
+    "throws": {
+      "type": "NoSuchMethodError",
+      "at": "twitch_site.dart:556"
+    }
+  }
+}

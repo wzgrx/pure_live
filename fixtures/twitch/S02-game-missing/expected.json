@@ -1,0 +1,7 @@
+{
+  "generator": "TwitchSite.getCategoryRooms (twitch_site.dart:817-871)",
+  "value": {
+    "rooms": [],
+    "nextCursor": null
+  }
+}

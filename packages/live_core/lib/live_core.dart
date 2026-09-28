@@ -29,4 +29,6 @@ export 'src/sites/huya/huya_api.dart';
 export 'src/sites/huya/huya_site.dart';
 export 'src/sites/kuaishou/kuaishou_api.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
+export 'src/sites/twitch/twitch_api.dart';
+export 'src/sites/twitch/twitch_site.dart';
 export 'src/tars.dart';

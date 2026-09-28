@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "platform": "twitch",
+  "sample": "S06-pat-live",
+  "capturedAt": "2026-09-27T18:43:52.197276Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "POST",
+    "url": "https://gql.twitch.tv/gql",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko",
+      "Device-Id": "f489ab0806800b09956ba80ad722088c",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+      "Origin": "https://www.twitch.tv",
+      "Referer": "https://www.twitch.tv/",
+      "Content-Type": "text/plain;charset=UTF-8"
+    },
+    "body": "{\"operationName\":\"PlaybackAccessToken\",\"variables\":{\"isLive\":true,\"login\":\"zarbex\",\"isVod\":false,\"vodID\":\"\",\"playerType\":\"site\",\"isClip\":false,\"clipID\":\"\",\"platform\":\"site\"},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"ed230aa1e33e07eebb8928504583da78a5173989fadfb1ac94be06a04f3cdbe9\"}}}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-served-by": "gateway",
+      "timing-allow-origin": "*",
+      "connection": "keep-alive",
+      "alt-svc": "h3=\":443\";ma=3600,\"h3-29\"=\":443\";ma=3600,\"h3-27\"=\":443\";ma=3600",
+      "date": "Sun, 27 Sep 2026 18:43:52 GMT",
+      "access-control-allow-origin": "*",
+      "x-amzn-trace-id": "Self=1-6ab963e8-7066895d6a57a1c16466fc4f;Root=1-6ab963e9-2069209bfab1a8f7bc0fa113",
+      "content-length": "1371",
+      "content-type": "application/json; charset=utf-8",
+      "x-gateway-trace": "702484351d20a13dcfda284ce28f0ff5",
+      "x-router-config-version": "8bf4ae83-aec6-4ad1-9a79-f0e1c671027a"
+    }
+  },
+  "raw": {
+    "sha256": "1f5dabca8b4cfd1f3b2e66135c0edca3485839f29d513a597438b13c5a3aef03",
+    "length": 1371
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.streamPlaybackAccessToken.value.user_ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.streamPlaybackAccessToken.signature",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

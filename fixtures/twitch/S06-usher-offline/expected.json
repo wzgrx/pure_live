@@ -1,0 +1,9 @@
+{
+  "generator": "HttpClient.getText (core/common/http_client.dart:55-71, 198-214)",
+  "value": {
+    "throws": {
+      "type": "HttpError",
+      "statusCode": 404
+    }
+  }
+}

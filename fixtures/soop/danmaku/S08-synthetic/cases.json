@@ -1,0 +1,176 @@
+{
+  "note": "Synthetic server frames for SOOP's chat decoder (docs/modules/M5.7-soop.md), each case one binary frame. A packet with `fields` is framed as the server does: ESC TAB (1b 09), the service as 4 digits, the UTF-8 length of the fields joined by form feeds as 6 digits, `00`, the body. `prefix` (hex), `serviceText`, `lengthText` and `reserved` replace those parts as written; `bodyHex` replaces the body; a packet with only `hex` is raw bytes. `cut` drops that many bytes from the end of the frame. The first three cases are 3.x's own tests (legacy/test/soop_danmaku_test.dart). Nicks and ids are made up.",
+  "cases": [
+    {
+      "name": "3.x: only service 5 is chat",
+      "packets": [
+        {"service": 4, "fields": ["", "healeroflove", "", "", "", "", "fw=-1&afw=-1", ""]},
+        {"service": 5, "fields": ["", "hello", "", "", "", "", "viewer", ""]}
+      ]
+    },
+    {
+      "name": "3.x: several chat packets in one frame",
+      "packets": [
+        {"service": 5, "fields": ["", "first", "", "", "", "", "one", ""]},
+        {"service": 5, "fields": ["", "second", "", "", "", "", "two", ""]}
+      ]
+    },
+    {
+      "name": "3.x: a truncated packet emits nothing",
+      "packets": [
+        {"service": 5, "fields": ["", "partial", "", "", "", "", "viewer", ""]}
+      ],
+      "cut": 1
+    },
+    {
+      "name": "chat before a truncated packet",
+      "packets": [
+        {"service": 5, "fields": ["", "kept", "", "", "", "", "one", ""]},
+        {"service": 5, "fields": ["", "lost", "", "", "", "", "two", ""]}
+      ],
+      "cut": 3
+    },
+    {
+      "name": "a packet without the ESC TAB prefix ends the frame",
+      "packets": [
+        {"service": 5, "fields": ["", "before", "", "", "", "", "one", ""]},
+        {"service": 5, "prefix": "1b0a", "fields": ["", "bad prefix", "", "", "", "", "two", ""]},
+        {"service": 5, "fields": ["", "after", "", "", "", "", "three", ""]}
+      ]
+    },
+    {
+      "name": "a service that is not a number ends the frame",
+      "packets": [
+        {"service": 5, "fields": ["", "before", "", "", "", "", "one", ""]},
+        {"service": 5, "serviceText": "00-5", "fields": ["", "bad service", "", "", "", "", "two", ""]},
+        {"service": 5, "fields": ["", "after", "", "", "", "", "three", ""]}
+      ]
+    },
+    {
+      "name": "a length that is not a number ends the frame",
+      "packets": [
+        {"service": 5, "fields": ["", "before", "", "", "", "", "one", ""]},
+        {"service": 5, "lengthText": "0000z8", "fields": ["", "bad length", "", "", "", "", "two", ""]},
+        {"service": 5, "fields": ["", "after", "", "", "", "", "three", ""]}
+      ]
+    },
+    {
+      "name": "a negative length ends the frame",
+      "packets": [
+        {"service": 5, "fields": ["", "before", "", "", "", "", "one", ""]},
+        {"service": 5, "lengthText": "-00001", "fields": ["", "negative", "", "", "", "", "two", ""]}
+      ]
+    },
+    {
+      "name": "numbers are read leniently: spaces, a plus sign, 0x",
+      "packets": [
+        {"service": 5, "serviceText": " 005", "fields": ["", "space", "", "", "", "", "one", ""]},
+        {"service": 5, "serviceText": "+005", "fields": ["", "plus", "", "", "", "", "two", ""]},
+        {"service": 5, "serviceText": "0x05", "fields": ["", "hex", "", "", "", "", "three", ""]},
+        {"service": 5, "lengthText": " 00017", "fields": ["", "spaced", "", "", "", "", "four", ""]}
+      ]
+    },
+    {
+      "name": "the two bytes after the length are not checked",
+      "packets": [
+        {"service": 5, "reserved": "99", "fields": ["", "reserved", "", "", "", "", "viewer", ""]}
+      ]
+    },
+    {
+      "name": "fewer than 14 bytes after the last packet are ignored",
+      "packets": [
+        {"service": 5, "fields": ["", "last", "", "", "", "", "viewer", ""]},
+        {"hex": "1b093030303530"}
+      ]
+    },
+    {
+      "name": "a frame shorter than a header",
+      "packets": [
+        {"hex": "1b0930303035303030"}
+      ]
+    },
+    {
+      "name": "fields: six are too few, seven are enough",
+      "packets": [
+        {"service": 5, "fields": ["", "six fields", "", "", "", "viewer"]},
+        {"service": 5, "fields": ["", "seven fields", "", "", "", "", "viewer"]}
+      ]
+    },
+    {
+      "name": "an empty body",
+      "packets": [
+        {"service": 5, "fields": []},
+        {"service": 5, "fields": ["", "after empty", "", "", "", "", "viewer", ""]}
+      ]
+    },
+    {
+      "name": "empty or blank text and nick are dropped",
+      "packets": [
+        {"service": 5, "fields": ["", "", "", "", "", "", "viewer", ""]},
+        {"service": 5, "fields": ["", "   ", "", "", "", "", "viewer", ""]},
+        {"service": 5, "fields": ["", "no nick", "", "", "", "", "", ""]},
+        {"service": 5, "fields": ["", "blank nick", "", "", "", "", " \t ", ""]}
+      ]
+    },
+    {
+      "name": "the texts -1 and 1 are dropped, others with digits kept",
+      "packets": [
+        {"service": 5, "fields": ["", "-1", "", "", "", "", "a", ""]},
+        {"service": 5, "fields": ["", "1", "", "", "", "", "b", ""]},
+        {"service": 5, "fields": ["", " 1 ", "", "", "", "", "c", ""]},
+        {"service": 5, "fields": ["", "11", "", "", "", "", "d", ""]},
+        {"service": 5, "fields": ["", "+1", "", "", "", "", "e", ""]},
+        {"service": 5, "fields": ["", "2", "", "", "", "", "f", ""]}
+      ]
+    },
+    {
+      "name": "a text holding a bar is dropped",
+      "packets": [
+        {"service": 5, "fields": ["", "a|b", "", "", "", "", "a", ""]},
+        {"service": 5, "fields": ["", "|", "", "", "", "", "b", ""]},
+        {"service": 5, "fields": ["", "no bar", "", "", "", "", "c", "x|y"]}
+      ]
+    },
+    {
+      "name": "text and nick are trimmed",
+      "packets": [
+        {"service": 5, "fields": ["", "  hi there  ", "", "", "", "", " viewer\n", ""]}
+      ]
+    },
+    {
+      "name": "malformed UTF-8 becomes replacement characters",
+      "packets": [
+        {"service": 5, "bodyHex": "0c6f6bff0c69640c300c300c330c76c3280c"}
+      ]
+    },
+    {
+      "name": "Hangul and emoji",
+      "packets": [
+        {"service": 5, "fields": ["", "안녕하세요 🎉", "gvwxyz12(2)", "0", "0", "3", "시청자", "65568|163840", "-1", "E12E2E", "E04949", "-1", "-1", "", "-1", ""]}
+      ]
+    },
+    {
+      "name": "other services with chat-like fields are ignored",
+      "packets": [
+        {"service": 0, "fields": ["", "zero", "", "", "", "", "a", ""]},
+        {"service": 1, "fields": ["", "login", "", "", "", "", "b", ""]},
+        {"service": 2, "fields": ["", "join", "", "", "", "", "c", ""]},
+        {"service": 4, "fields": ["", "list", "", "", "", "", "d", ""]},
+        {"service": 12, "fields": ["", "twelve", "", "", "", "", "e", ""]},
+        {"service": 18, "fields": ["", "balloon", "", "", "", "", "f", ""]},
+        {"service": 127, "fields": ["", "flags", "", "", "", "", "g", ""]},
+        {"service": 50, "fields": ["", "fifty", "", "", "", "", "h", ""]}
+      ]
+    },
+    {
+      "name": "chat after empty viewer-list packets, as recorded",
+      "packets": [
+        {"service": 4, "fields": []},
+        {"service": 127, "fields": []},
+        {"service": 4, "fields": []},
+        {"service": 5, "fields": ["", "지금도", "mnopqr123", "0", "0", "3", "观众1", "805912608|557056", "2", "1915BF", "6F6DD6", "9", "-1", "", "-1", ""]},
+        {"service": 127, "fields": []}
+      ]
+    }
+  ]
+}

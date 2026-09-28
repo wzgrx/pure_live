@@ -1,0 +1,447 @@
+{
+  "generator": "fixtures/soop/danmaku/legacy_expected.dart: 3.x SoopDanmaku.decodeMessage over each case of cases.json (one server frame per case)",
+  "value": [
+    {
+      "name": "3.x: only service 5 is chat",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "viewer",
+          "userId": "",
+          "message": "hello",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "3.x: several chat packets in one frame",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "one",
+          "userId": "",
+          "message": "first",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "two",
+          "userId": "",
+          "message": "second",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "3.x: a truncated packet emits nothing",
+      "messages": []
+    },
+    {
+      "name": "chat before a truncated packet",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "one",
+          "userId": "",
+          "message": "kept",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "a packet without the ESC TAB prefix ends the frame",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "one",
+          "userId": "",
+          "message": "before",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "a service that is not a number ends the frame",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "one",
+          "userId": "",
+          "message": "before",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "a length that is not a number ends the frame",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "one",
+          "userId": "",
+          "message": "before",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "a negative length ends the frame",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "one",
+          "userId": "",
+          "message": "before",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "numbers are read leniently: spaces, a plus sign, 0x",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "one",
+          "userId": "",
+          "message": "space",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "two",
+          "userId": "",
+          "message": "plus",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "three",
+          "userId": "",
+          "message": "hex",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "four",
+          "userId": "",
+          "message": "spaced",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "the two bytes after the length are not checked",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "viewer",
+          "userId": "",
+          "message": "reserved",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "fewer than 14 bytes after the last packet are ignored",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "viewer",
+          "userId": "",
+          "message": "last",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "a frame shorter than a header",
+      "messages": []
+    },
+    {
+      "name": "fields: six are too few, seven are enough",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "viewer",
+          "userId": "",
+          "message": "seven fields",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "an empty body",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "viewer",
+          "userId": "",
+          "message": "after empty",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "empty or blank text and nick are dropped",
+      "messages": []
+    },
+    {
+      "name": "the texts -1 and 1 are dropped, others with digits kept",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "d",
+          "userId": "",
+          "message": "11",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "e",
+          "userId": "",
+          "message": "+1",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "f",
+          "userId": "",
+          "message": "2",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "a text holding a bar is dropped",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "c",
+          "userId": "",
+          "message": "no bar",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "text and nick are trimmed",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "viewer",
+          "userId": "",
+          "message": "hi there",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "malformed UTF-8 becomes replacement characters",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "v�(",
+          "userId": "",
+          "message": "ok�",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "Hangul and emoji",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "시청자",
+          "userId": "",
+          "message": "안녕하세요 🎉",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    },
+    {
+      "name": "other services with chat-like fields are ignored",
+      "messages": []
+    },
+    {
+      "name": "chat after empty viewer-list packets, as recorded",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "观众1",
+          "userId": "",
+          "message": "지금도",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ]
+    }
+  ]
+}

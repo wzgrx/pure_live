@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "sample": "S05-xingxiu",
+  "capturedAt": "2026-09-27T09:44:36.205740Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://mp.huya.com/cache.php?m=Live&do=profileRoom&roomid=880351&showSecret=1&_=1790502274964",
+    "headers": {
+      "Accept": "*/*",
+      "Origin": "https://www.huya.com",
+      "Referer": "https://www.huya.com/",
+      "Sec-Fetch-Dest": "empty",
+      "Sec-Fetch-Mode": "cors",
+      "Sec-Fetch-Site": "same-site",
+      "user-agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36 Edg/117.0.0.0",
+      "Cache-Control": "no-cache",
+      "Pragma": "no-cache"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 09:44:36 GMT",
+      "content-encoding": "gzip",
+      "content-type": "text/html; charset=utf-8",
+      "server": "HUYA/2.15.3",
+      "x-request-id": "49efbc0c2ff240fc011e7889d2260d06"
+    }
+  },
+  "raw": {
+    "sha256": "8e6b8c5960d9a9ede07054e79348fd57d9543151385f65cb18aae875910086b8",
+    "length": 10004
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.stream.baseSteamInfoList[0].sFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[0].sFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[0].sHlsAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[0].sHlsAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[0].newCFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[0].newCFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[1].sFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[1].sFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[1].sHlsAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[1].sHlsAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[1].newCFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[1].newCFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[2].sFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[2].sFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[2].sHlsAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[2].sHlsAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[2].newCFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[2].newCFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[0].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[0].url:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[1].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[1].url:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[0].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[0].url:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[1].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[1].url:fm",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:live_net/src/live_http.dart';
 import 'package:live_net/src/request.dart';
+import 'package:meta/meta.dart';
 
 /// Runs [task] for every one of [urls] at once and returns the first non-null
 /// result; the others are cancelled through their [CancelToken]. Returns null
@@ -81,3 +82,59 @@ Future<Uri?> fastestUrl(
   await response.discard();
   return response.status == 200 || response.status == 206 ? url : null;
 }, timeout: timeout);
+
+/// The download mirrors of one file in a GitHub repository, in the order
+/// they are listed (3.x's `GitHubMirror`): the raw URL, the ghproxy-style
+/// prefixes in front of it, kkgithub, then jsDelivr and its Fastly node.
+/// The update check, font downloads and Huya's player configuration race
+/// them with [raceJson] or [fastestUrl].
+@immutable
+final class GitHubMirror {
+  /// Mirrors of [owner]/[repo] at [branch].
+  const new({required this.owner, required this.repo, this.branch = 'master'});
+
+  /// Repository owner.
+  final String owner;
+
+  /// Repository name.
+  final String repo;
+
+  /// Branch the files are read from.
+  final String branch;
+
+  /// Prefixes put in front of the raw URL, steadiest first (3.x's order:
+  /// the first six serve ranged requests, the last four only raw files).
+  static const List<String> rawPrefixes = [
+    'https://cdn.gh-proxy.org/',
+    'https://edgeone.gh-proxy.org/',
+    'https://hk.gh-proxy.org/',
+    'https://gh.noki.eu.org/',
+    'https://gh-proxy.com/',
+    'https://slink.ltd/',
+    'https://ghproxy.link/',
+    'https://gh-proxy.net/',
+    'https://gitproxy.click/',
+    'https://v6.gh-proxy.org/',
+    'https://ghproxy.net/',
+    'https://wget.la/',
+    'https://gh.catmak.name/',
+    'https://g.blfrp.cn/',
+  ];
+
+  /// The `raw.githubusercontent.com` URL of [path].
+  Uri raw(String path) => Uri.parse('https://raw.githubusercontent.com/$owner/$repo/$branch/$path');
+
+  /// Every mirror of [path], without duplicates.
+  List<Uri> mirrors(String path) {
+    final raw = this.raw(path).toString();
+    return List.unmodifiable(
+      {
+        raw,
+        for (final prefix in rawPrefixes) '$prefix$raw',
+        'https://raw.kkgithub.com/$owner/$repo/$branch/$path',
+        'https://cdn.jsdelivr.net/gh/$owner/$repo@$branch/$path',
+        'https://fastly.jsdelivr.net/gh/$owner/$repo@$branch/$path',
+      }.map(Uri.parse),
+    );
+  }
+}

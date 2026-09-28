@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "sample": "S03-cold-page2",
+  "capturedAt": "2026-09-27T09:50:27.129297Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.huya.com/cache.php?m=LiveList&do=getLiveListByPage&tagAll=0&gameId=1579&page=2",
+    "headers": {
+      "user-agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36 Edg/117.0.0.0"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "no-cache",
+      "date": "Sun, 27 Sep 2026 09:50:27 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "ali-swift-global-savetime": "1790502627",
+      "content-type": "text/html; charset=utf-8",
+      "x-swift-cachetime": "30",
+      "server": "Tengine",
+      "x-request-id": "de499d103d756d7c016904cd4dd1ccfc",
+      "timing-allow-origin": "*",
+      "x-swift-savetime": "Sun, 27 Sep 2026 09:50:27 GMT",
+      "via": "ens-cache56.l2su121-10[143,142,200-0,M], ens-cache15.l2su121-10[144,0], cache16.cn2530[241,240,200-0,M], cache6.cn2530[244,0]",
+      "x-cache": "MISS TCP_REFRESH_MISS dirn:-2:-2",
+      "eagleid": "7754369a17905026273834386e"
+    }
+  },
+  "raw": {
+    "sha256": "c008302de5d35809ed272903a9ba4cfc8f94108a1165c0a8db4420589bcdaffd",
+    "length": 118
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

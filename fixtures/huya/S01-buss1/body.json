@@ -1,0 +1,988 @@
+{
+  "msg": "",
+  "status": 200,
+  "data": [
+    {
+      "gid": 1,
+      "totalCount": 49275316,
+      "profileNum": 532,
+      "gameFullName": "英雄联盟",
+      "gameHostName": "lol",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 862,
+      "totalCount": 1727251,
+      "profileNum": 35,
+      "gameFullName": "CS2",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 5937,
+      "totalCount": 21600446,
+      "profileNum": 83,
+      "gameFullName": "无畏契约",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 5485,
+      "totalCount": 16801697,
+      "profileNum": 390,
+      "gameFullName": "lol云顶之弈",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 4,
+      "totalCount": 4735926,
+      "profileNum": 61,
+      "gameFullName": "穿越火线",
+      "gameHostName": "cf",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 393,
+      "totalCount": 3038710,
+      "profileNum": 38,
+      "gameFullName": "炉石传说",
+      "gameHostName": "hearthstone",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 7,
+      "totalCount": 4245930,
+      "profileNum": 34,
+      "gameFullName": "DOTA2",
+      "gameHostName": "dota2",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 6,
+      "totalCount": 877641,
+      "profileNum": 16,
+      "gameFullName": "DOTA1",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 8,
+      "totalCount": 1436483,
+      "profileNum": 34,
+      "gameFullName": "魔兽世界",
+      "gameHostName": "wow",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 2174,
+      "totalCount": 82634,
+      "profileNum": 2,
+      "gameFullName": "守望先锋",
+      "gameHostName": "overwatch",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 100023,
+      "totalCount": 92678687,
+      "profileNum": 1324,
+      "gameFullName": "网游竞技",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 100141,
+      "totalCount": 22138993,
+      "profileNum": 99,
+      "gameFullName": "射击综合游戏",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 100043,
+      "totalCount": 7733873,
+      "profileNum": 143,
+      "gameFullName": "暴雪专区",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 2243,
+      "totalCount": 5272896,
+      "profileNum": 145,
+      "gameFullName": "冒险岛",
+      "gameHostName": "mxd",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 100133,
+      "totalCount": 3773139,
+      "profileNum": 72,
+      "gameFullName": "军事游戏",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 983,
+      "totalCount": 3283586,
+      "profileNum": 14,
+      "gameFullName": "传奇",
+      "gameHostName": "Mir2",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 100301,
+      "totalCount": 3206253,
+      "profileNum": 64,
+      "gameFullName": "棋牌休闲",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 802,
+      "totalCount": 3128637,
+      "profileNum": 59,
+      "gameFullName": "坦克世界",
+      "gameHostName": "worldoftanks",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 2,
+      "totalCount": 2923478,
+      "profileNum": 47,
+      "gameFullName": "地下城与勇士",
+      "gameHostName": "dnf",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 100305,
+      "totalCount": 2453769,
+      "profileNum": 57,
+      "gameFullName": "桌游",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 4615,
+      "totalCount": 2034197,
+      "profileNum": 46,
+      "gameFullName": "魔兽争霸3",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 5751,
+      "totalCount": 1842729,
+      "profileNum": 15,
+      "gameFullName": "炉石战棋",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 683,
+      "totalCount": 1706654,
+      "profileNum": 53,
+      "gameFullName": "彩虹岛Online",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 9,
+      "totalCount": 1588218,
+      "profileNum": 23,
+      "gameFullName": "QQ飞车",
+      "gameHostName": "qqfc",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 897,
+      "totalCount": 1422607,
+      "profileNum": 43,
+      "gameFullName": "剑灵",
+      "gameHostName": "bns",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1830,
+      "totalCount": 1169359,
+      "profileNum": 21,
+      "gameFullName": "英魂之刃",
+      "gameHostName": "yhzr",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1646,
+      "totalCount": 1161261,
+      "profileNum": 35,
+      "gameFullName": "诛仙3",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 135,
+      "totalCount": 766863,
+      "profileNum": 17,
+      "gameFullName": "逆战",
+      "gameHostName": "nz",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 107,
+      "totalCount": 599625,
+      "profileNum": 13,
+      "gameFullName": "问道",
+      "gameHostName": "wd",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 489,
+      "totalCount": 480308,
+      "profileNum": 12,
+      "gameFullName": "梦三国",
+      "gameHostName": "m3guo",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 779,
+      "totalCount": 416365,
+      "profileNum": 7,
+      "gameFullName": "天翼决",
+      "gameHostName": "tyj",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1661,
+      "totalCount": 395710,
+      "profileNum": 12,
+      "gameFullName": "武林外传一世琴缘",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 387,
+      "totalCount": 386003,
+      "profileNum": 11,
+      "gameFullName": "热血江湖",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1947,
+      "totalCount": 282169,
+      "profileNum": 6,
+      "gameFullName": "战舰世界",
+      "gameHostName": "zjsj",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 6079,
+      "totalCount": 269512,
+      "profileNum": 7,
+      "gameFullName": "CFHD",
+      "gameHostName": "cfhd",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1612,
+      "totalCount": 266501,
+      "profileNum": 6,
+      "gameFullName": "起凡：群雄逐鹿",
+      "gameHostName": "qfsgqxzl",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 2765,
+      "totalCount": 246586,
+      "profileNum": 4,
+      "gameFullName": "铁甲雄兵",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 71827,
+      "totalCount": 244568,
+      "profileNum": 7,
+      "gameFullName": "和平精英模拟器",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 5901,
+      "totalCount": 229629,
+      "profileNum": 7,
+      "gameFullName": "全面战争：竞技场",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 900,
+      "totalCount": 200875,
+      "profileNum": 6,
+      "gameFullName": "剑网3",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 100135,
+      "totalCount": 198474,
+      "profileNum": 6,
+      "gameFullName": "体育游戏",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 5,
+      "totalCount": 188064,
+      "profileNum": 5,
+      "gameFullName": "星际争霸",
+      "gameHostName": "starcraft",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 3058,
+      "totalCount": 184364,
+      "profileNum": 3,
+      "gameFullName": "命运方舟",
+      "gameHostName": "lostark",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 496,
+      "totalCount": 183630,
+      "profileNum": 3,
+      "gameFullName": "枪神纪",
+      "gameHostName": "tps",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 624,
+      "totalCount": 178577,
+      "profileNum": 5,
+      "gameFullName": "战争雷霆",
+      "gameHostName": "wt",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 939,
+      "totalCount": 177289,
+      "profileNum": 7,
+      "gameFullName": "全球使命",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1877,
+      "totalCount": 171730,
+      "profileNum": 5,
+      "gameFullName": "黑色沙漠",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 10963,
+      "totalCount": 156243,
+      "profileNum": 4,
+      "gameFullName": "暗区突围：无限",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1966,
+      "totalCount": 135474,
+      "profileNum": 4,
+      "gameFullName": "天堂",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 446,
+      "totalCount": 122243,
+      "profileNum": 4,
+      "gameFullName": "永恒之塔",
+      "gameHostName": "aion",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 4359,
+      "totalCount": 108937,
+      "profileNum": 3,
+      "gameFullName": "坦克大战",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 100299,
+      "totalCount": 107718,
+      "profileNum": 3,
+      "gameFullName": "格斗游戏",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 2715,
+      "totalCount": 106950,
+      "profileNum": 3,
+      "gameFullName": "征途",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 2420,
+      "totalCount": 104040,
+      "profileNum": 3,
+      "gameFullName": "劲舞团",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 734,
+      "totalCount": 103499,
+      "profileNum": 3,
+      "gameFullName": "寻仙",
+      "gameHostName": "xx",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 3959,
+      "totalCount": 98492,
+      "profileNum": 3,
+      "gameFullName": "NBA2KOL系列",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1111,
+      "totalCount": 98084,
+      "profileNum": 3,
+      "gameFullName": "FF14",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 2471,
+      "totalCount": 93431,
+      "profileNum": 2,
+      "gameFullName": "生死狙击",
+      "gameHostName": "ssjj",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1123,
+      "totalCount": 76867,
+      "profileNum": 2,
+      "gameFullName": "暗黑破坏神",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 7749,
+      "totalCount": 72941,
+      "profileNum": 2,
+      "gameFullName": "诛仙世界",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 618,
+      "totalCount": 67100,
+      "profileNum": 2,
+      "gameFullName": "战地之王",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 3227,
+      "totalCount": 66639,
+      "profileNum": 2,
+      "gameFullName": "神武4电脑版",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1090,
+      "totalCount": 64758,
+      "profileNum": 2,
+      "gameFullName": "QQ三国",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 2952,
+      "totalCount": 63769,
+      "profileNum": 2,
+      "gameFullName": "逆水寒",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 8239,
+      "totalCount": 63479,
+      "profileNum": 1,
+      "gameFullName": "大话西游：归来",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 8019,
+      "totalCount": 62530,
+      "profileNum": 2,
+      "gameFullName": "燕云十六声",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 3683,
+      "totalCount": 60384,
+      "profileNum": 2,
+      "gameFullName": "FC Online",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 440,
+      "totalCount": 58264,
+      "profileNum": 2,
+      "gameFullName": "泡泡堂",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 100079,
+      "totalCount": 53767,
+      "profileNum": 2,
+      "gameFullName": "FIFA Online系列",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 5911,
+      "totalCount": 52332,
+      "profileNum": 1,
+      "gameFullName": "使命召唤：战区",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 324,
+      "totalCount": 44959,
+      "profileNum": 1,
+      "gameFullName": "真·三国无双OL",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 591,
+      "totalCount": 42477,
+      "profileNum": 1,
+      "gameFullName": "斗战神",
+      "gameHostName": "dzs",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 514,
+      "totalCount": 42137,
+      "profileNum": 1,
+      "gameFullName": "极光世界 弑神传",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1579,
+      "totalCount": 42104,
+      "profileNum": 1,
+      "gameFullName": "新倩女幽魂",
+      "gameHostName": "qnyh2",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 915,
+      "totalCount": 41032,
+      "profileNum": 1,
+      "gameFullName": "刀剑英雄",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 2282,
+      "totalCount": 40896,
+      "profileNum": 1,
+      "gameFullName": "领地人生",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 586,
+      "totalCount": 39142,
+      "profileNum": 1,
+      "gameFullName": "新剑侠情缘",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1026,
+      "totalCount": 38954,
+      "profileNum": 1,
+      "gameFullName": "丝路传说2",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1918,
+      "totalCount": 38271,
+      "profileNum": 1,
+      "gameFullName": "反恐精英Online",
+      "gameHostName": "CSOL",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 3185,
+      "totalCount": 38001,
+      "profileNum": 1,
+      "gameFullName": "荒野行动PC版",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 5023,
+      "totalCount": 37902,
+      "profileNum": 1,
+      "gameFullName": "全境封锁2",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 6091,
+      "totalCount": 33499,
+      "profileNum": 1,
+      "gameFullName": "生死狙击2",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 8261,
+      "totalCount": 33489,
+      "profileNum": 1,
+      "gameFullName": "KARDS",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 15,
+      "totalCount": 33301,
+      "profileNum": 1,
+      "gameFullName": "龙之谷",
+      "gameHostName": "dn",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 2369,
+      "totalCount": 33047,
+      "profileNum": 1,
+      "gameFullName": "忍者村大战2",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 861,
+      "totalCount": 32895,
+      "profileNum": 1,
+      "gameFullName": "反恐行动online",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 878,
+      "totalCount": 32641,
+      "profileNum": 1,
+      "gameFullName": "千年3",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 65907,
+      "totalCount": 32621,
+      "profileNum": 1,
+      "gameFullName": "虎牙全明星",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 766,
+      "totalCount": 32589,
+      "profileNum": 1,
+      "gameFullName": "奇迹世界2",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 73095,
+      "totalCount": 32458,
+      "profileNum": 1,
+      "gameFullName": "命运扳机",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 334,
+      "totalCount": 32382,
+      "profileNum": 1,
+      "gameFullName": "疾风之刃",
+      "gameHostName": "jfzr",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 42,
+      "totalCount": 32371,
+      "profileNum": 1,
+      "gameFullName": "黄易群侠传2",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 526,
+      "totalCount": 31991,
+      "profileNum": 1,
+      "gameFullName": "机战",
+      "gameHostName": "",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1878,
+      "totalCount": 31867,
+      "profileNum": 1,
+      "gameFullName": "QQ华夏",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 1009,
+      "totalCount": 31696,
+      "profileNum": 1,
+      "gameFullName": "九阴真经",
+      "gameHostName": "jyzj",
+      "gameType": 4,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 2953,
+      "totalCount": 31692,
+      "profileNum": 1,
+      "gameFullName": "全球使命3",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 11051,
+      "totalCount": 27439,
+      "profileNum": 1,
+      "gameFullName": "漫威争锋",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    },
+    {
+      "gid": 75359,
+      "totalCount": 26307,
+      "profileNum": 1,
+      "gameFullName": "PUBG：黑域撤离",
+      "gameHostName": "",
+      "gameType": 0,
+      "bussType": 1,
+      "isHide": 0
+    }
+  ],
+  "updateTime": 1790501948,
+  "type": 1
+}

@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "sample": "S03-hot-page2",
+  "capturedAt": "2026-09-27T09:50:20.922823Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.huya.com/cache.php?m=LiveList&do=getLiveListByPage&tagAll=0&gameId=1&page=2",
+    "headers": {
+      "user-agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36 Edg/117.0.0.0"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "no-cache",
+      "date": "Sun, 27 Sep 2026 09:50:21 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "ali-swift-global-savetime": "1790502621",
+      "content-type": "text/html; charset=utf-8",
+      "x-swift-cachetime": "30",
+      "server": "Tengine",
+      "x-request-id": "46fb22f3c4ec89da016a7ed650949e63",
+      "timing-allow-origin": "*",
+      "x-swift-savetime": "Sun, 27 Sep 2026 09:50:21 GMT",
+      "via": "ens-cache32.l2su121-10[270,270,200-0,M], ens-cache10.l2su121-10[271,0], cache4.cn2530[304,303,200-0,M], cache8.cn2530[305,0]",
+      "x-cache": "MISS TCP_REFRESH_MISS dirn:-2:-2",
+      "eagleid": "7754369c17905026210772433e"
+    }
+  },
+  "raw": {
+    "sha256": "0b511d8c142f7c5a004c8f8440680145fc0b9fe6a4f87d8909a3b269f25ba48a",
+    "length": 122841
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.datas[1].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[4].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[7].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[8].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[11].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[17].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[18].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[19].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[24].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[25].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[28].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[29].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[38].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[39].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[40].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[45].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[48].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[51].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[58].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[59].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[60].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[63].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[65].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[66].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[68].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[69].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[70].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[73].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[75].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[77].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[81].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[83].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[86].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[87].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[88].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[94].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[101].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[105].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[108].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[110].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[115].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[116].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[117].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[118].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[119].screenshot:sign",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

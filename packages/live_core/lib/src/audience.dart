@@ -240,10 +240,13 @@ const Map<String, AudiencePlatformCapability> audienceCapabilities = {
     hasTotalViewers: false,
     onlineAvailability: AudienceOnlineAvailability.roomList,
   ),
+  // Missevan's lists and room detail carry the heat `score` and an `online`
+  // that is always 0; the listeners in the room come only with the chat's
+  // `room/statistics` (M5.12), about every two minutes.
   'missevan': AudiencePlatformCapability(
     hasPopularity: true,
     hasTotalViewers: false,
-    onlineAvailability: AudienceOnlineAvailability.unsupported,
+    onlineAvailability: AudienceOnlineAvailability.roomRealtime,
   ),
   // Inke's app answers (the hot list, the current broadcast) carry
   // numbers.real, the "N人在看" the app shows, and online_users, a larger

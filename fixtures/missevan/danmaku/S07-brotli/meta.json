@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "platform": "missevan",
+  "case": "S07-brotli",
+  "room": "missevan:180370487",
+  "danmakuKeys": {
+    "roomId": "180370487",
+    "websocket": "wss://im.missevan.com/ws?room_id=180370487"
+  },
+  "capturedAt": "2026-09-28T20:35:19.259367Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://im.missevan.com/ws?room_id=180370487",
+      "headers": {
+        "referer": "https://fm.missevan.com/",
+        "origin": "https://fm.missevan.com",
+        "user-agent": "Mozilla/5.0",
+        "cookie": "<redacted>"
+      }
+    }
+  ],
+  "frames": 25,
+  "raw": {
+    "sha256": "6cce40cf38d2db738e03268e86230f241f1ff44b5c40f5b4c803a89c875d7ac6",
+    "length": 6681
+  },
+  "scrubbed": [
+    {
+      "where": "$..user_id",
+      "rule": "person"
+    },
+    {
+      "where": "$..username",
+      "rule": "person"
+    },
+    {
+      "where": "$..iconurl",
+      "rule": "secret"
+    },
+    {
+      "where": "handshake.cookie",
+      "rule": "secret"
+    }
+  ],
+  "reencoded": [
+    4,
+    5,
+    6,
+    7,
+    10,
+    12,
+    16,
+    19,
+    20,
+    21,
+    24
+  ],
+  "tool": "record.dart (dart:io WebSocket, anonymous guest session, join and a heartbeat every 30 s; nothing else sent) and scrub.py (python3-brotli 1.2.0), M5.12; neither is in the repository",
+  "note": "Recorded 2026-09-29 for M5.12: the server now compresses its frames (S06-live, 2026-09-27, has only uncompressed meta-blocks). Frames that name a user were decoded, scrubbed (ids to other digits of the same length, names to 观众N, avatar paths to same-shape letters) and encoded again with the reference encoder at the window the server declared; their indexes are in `reencoded`. Every other frame is the server's bytes. The join uuid was chosen by the recorder (00000000-0000-4000-8000-000000000001), not drawn at random."
+}

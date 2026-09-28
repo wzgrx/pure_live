@@ -346,8 +346,11 @@ void main() {
       expect((room.popularity, room.watching), ('88900', '88900'));
       expect(room.effectiveAudienceMetricType, AudienceMetricType.popularity);
       expect(room.effectiveOnlineViewers, isEmpty, reason: 'statistics.online is always 0');
-      expect(room.supportsRealOnlineCount, isFalse);
-      expect(room.audienceValue(preferRealOnline: true, platformEnabled: true), '88900');
+      // The listeners come only with the chat's room/statistics (M5.12): the
+      // count is pending on a list card.
+      expect(room.supportsRealOnlineCount, isTrue);
+      expect(room.audienceValue(preferRealOnline: false, platformEnabled: true), '88900');
+      expect(room.audienceValue(preferRealOnline: true, platformEnabled: true), isEmpty);
     });
 
     test('a page that does not echo its request is ApiChanged, not a short page (3.x)', () {

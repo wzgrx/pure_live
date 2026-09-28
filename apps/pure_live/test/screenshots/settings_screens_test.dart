@@ -55,6 +55,12 @@ void main() {
     screenshot('recording', ShotScreen.phone, recordings, recorder: _recorder, theme: ShotTheme.dark);
     screenshot('recording', ShotScreen.large, recordings, recorder: _recorder, locale: AppLocale.en);
     screenshot('recording-empty', ShotScreen.phone, recordings);
+    // Before the stored tasks are read: a static skeleton (principles §2.5).
+    screenshot('recording-loading', ShotScreen.phone, recordings, recorder: () async => ShotApp.unreadRecorder());
+  });
+
+  group('history', () {
+    screenshot('history-empty', ShotScreen.phone, (app) => app.go('/me/history'));
   });
 
   group('iptv', () {

@@ -23,6 +23,20 @@ void main() {
     screenshot('follows', ShotScreen.large, follows);
     screenshot('follows', ShotScreen.extraLarge, follows, theme: ShotTheme.dark);
     screenshot('follows-empty', ShotScreen.phone, follows, world: () => ShotWorld(follows: false));
+    // principles §3.3: nobody live under 开播, and a failed read.
+    screenshot(
+      'follows-nonelive',
+      ShotScreen.phone,
+      (app) => app.go(followsLiveLocation),
+      world: () => ShotWorld(anyoneLive: false),
+    );
+    screenshot(
+      'follows-error',
+      ShotScreen.phone,
+      follows,
+      world: () => ShotWorld(followsFail: true),
+      theme: ShotTheme.dark,
+    );
   });
 
   group('discover', () {
@@ -68,5 +82,6 @@ void main() {
     screenshot('search', ShotScreen.extraLarge, search);
     screenshot('search-empty', ShotScreen.phone, search, world: nothing);
     screenshot('search-empty', ShotScreen.large, search, world: nothing, theme: ShotTheme.dark);
+    screenshot('search-empty', ShotScreen.phone, search, world: nothing, theme: ShotTheme.dark, locale: AppLocale.en);
   });
 }

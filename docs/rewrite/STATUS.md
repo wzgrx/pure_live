@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 0 诊断与基线 | **完成**（2026-09-27） | `docs/rewrite/DIAGNOSIS.md`、`docs/rewrite/BASELINE.md` | 诊断报告和基线数据落档 |
 | 1 规格与样本 | 进行中：规格已写完，样本未开始 | `spec/`、`spec/regressions.md`、`fixtures/` | 每条结论附旧代码位置；待确认项清零 |
-| 2 设计方向与设计系统 | 进行中：原则、设计系统、页面稿完成；独立复核已做（2026-09-28，对照 88 张截图，3 项阻塞、14 项重要、14 项次要），除 R4 图标换成 Material Symbols 外都已修复；图标替换在做 | `spec/design/`、设计系统、页面稿 | 独立复核通过 |
+| 2 设计方向与设计系统 | 进行中：原则、设计系统、页面稿完成；独立复核已做（2026-09-28，对照 88 张截图，3 项阻塞、14 项重要、14 项次要），全部修复：R4 图标已换成 Material Symbols Rounded（ADR 0036，93 张截图重做）；待统一构建在 release 包和真机上确认图标裁剪与实心 / 空心切换 | `spec/design/`、设计系统、页面稿 | 独立复核通过 |
 | 3 工程底座 | 完成：workspace、本机门禁、hooks、`live_cli`、`check_latest`；旧应用收进 `legacy/` | workspace、门禁、hooks、`live_cli`、`check_latest` | 本机门禁全绿（ADR 0014：构建和门禁在本机运行） |
 | 4 平台与网络层 | **完成**：5 个平台的解析器、适配器、`live_net` 和真实网络探针全部完成；3.x 不再发布（ADR 0014） | `live_net`、`live_core`（5 个主力平台） | 样本测试和探针全过 |
 | 5 播放、弹幕、录制层 | 代码完成，待真机：`live_media`、`live_player`（ADR 0018）、`live_danmaku`（ADR 0019，现 17 个平台有弹幕）、弹幕渲染（ADR 0020）、`live_record`（ADR 0021，纯 Dart FLV→MP4、后台录制 ADR 0029）、`live_cast`（ADR 0027）；HLS 录制完成（ADR 0035） | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |

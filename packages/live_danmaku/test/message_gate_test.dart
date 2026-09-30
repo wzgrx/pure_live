@@ -9,6 +9,8 @@ LiveMessage _message({
   String messageId = '',
   DateTime? sentAt,
   LiveMessageType type = LiveMessageType.chat,
+  bool replayed = false,
+  Object? data,
 }) => LiveMessage(
   type: type,
   userName: userName,
@@ -17,6 +19,27 @@ LiveMessage _message({
   messageId: messageId,
   sentAt: sentAt,
   color: LiveMessageColor.white,
+  replayed: replayed,
+  data: data,
+);
+
+/// A super chat sent at [sentAt], shown until [endTime].
+LiveMessage _superChat(DateTime sentAt, DateTime endTime, {String id = '', bool replayed = false}) => _message(
+  type: LiveMessageType.superChat,
+  messageId: id,
+  sentAt: sentAt,
+  replayed: replayed,
+  data: LiveSuperChatMessage(
+    messageId: id,
+    userName: 'viewer',
+    face: '',
+    message: 'hello',
+    price: 30,
+    startTime: sentAt,
+    endTime: endTime,
+    backgroundColor: '',
+    backgroundBottomColor: '',
+  ),
 );
 
 void main() {
@@ -198,6 +221,158 @@ void main() {
       final gate = DanmakuMessageGate();
       expect(gate.accepts(_message(messageId: 'm1'), now: now), isTrue);
       expect(gate.accepts(retraction(const LiveRetraction.message('m1')), now: now), isTrue);
+    });
+  });
+
+  // M5.F: messages the platform replays (B-26: 17LIVE's resume backlog; B-22:
+  // YouTube's pinned Super Chats on joining) and super chats.
+  group('replayed messages and super chats (M5.F)', () {
+    test('a replayed message may be 135 s old, inclusive; one more millisecond is too old', () {
+      final gate = DanmakuMessageGate();
+      expect(gate.maxReplayAge, const Duration(seconds: 135));
+      expect(gate.maxMessageAge, const Duration(seconds: 45));
+      Duration ago(int seconds, [int millis = 0]) => Duration(seconds: seconds, milliseconds: millis);
+      expect(
+        gate.accepts(
+          _message(text: 'a', sentAt: now.subtract(ago(46))),
+          now: now,
+        ),
+        isFalse,
+      );
+      expect(
+        gate.accepts(
+          _message(text: 'a', sentAt: now.subtract(ago(46)), replayed: true),
+          now: now,
+        ),
+        isTrue,
+      );
+      expect(
+        gate.accepts(
+          _message(text: 'b', sentAt: now.subtract(ago(135)), replayed: true),
+          now: now,
+        ),
+        isTrue,
+      );
+      expect(
+        gate.accepts(
+          _message(text: 'c', sentAt: now.subtract(ago(135, 1)), replayed: true),
+          now: now,
+        ),
+        isFalse,
+      );
+      expect(
+        gate.accepts(_message(text: 'd', replayed: true), now: now),
+        isTrue,
+        reason: 'no time: no age',
+      );
+    });
+
+    test('the replay limit can be set; the future limit is the same for a replayed message', () {
+      final gate = DanmakuMessageGate(maxReplayAge: const Duration(seconds: 60));
+      expect(
+        gate.accepts(
+          _message(text: 'a', sentAt: now.subtract(const Duration(seconds: 60)), replayed: true),
+          now: now,
+        ),
+        isTrue,
+      );
+      expect(
+        gate.accepts(
+          _message(text: 'b', sentAt: now.subtract(const Duration(seconds: 61)), replayed: true),
+          now: now,
+        ),
+        isFalse,
+      );
+      expect(
+        gate.accepts(
+          _message(text: 'c', sentAt: now.add(const Duration(minutes: 10)), replayed: true),
+          now: now,
+        ),
+        isTrue,
+      );
+      expect(
+        gate.accepts(
+          _message(text: 'd', sentAt: now.add(const Duration(minutes: 10, seconds: 1)), replayed: true),
+          now: now,
+        ),
+        isFalse,
+      );
+    });
+
+    test('a super chat is not dropped for its age before its end time; at the end time the age counts', () {
+      final gate = DanmakuMessageGate();
+      final twoHours = now.subtract(const Duration(hours: 2));
+      expect(gate.accepts(_superChat(twoHours, now.add(const Duration(milliseconds: 1)), id: 'a'), now: now), isTrue);
+      expect(
+        gate.accepts(_superChat(twoHours, now.add(const Duration(hours: 3)), id: 'b', replayed: true), now: now),
+        isTrue,
+      );
+      expect(
+        gate.accepts(_superChat(twoHours, now, id: 'c'), now: now),
+        isFalse,
+        reason: 'its end time is reached',
+      );
+      expect(gate.accepts(_superChat(twoHours, now.subtract(const Duration(seconds: 1)), id: 'd'), now: now), isFalse);
+      // Ended, the usual limits: 45 s, or 135 s when replayed.
+      final minute = now.subtract(const Duration(minutes: 1));
+      final ended = now.subtract(const Duration(seconds: 1));
+      expect(gate.accepts(_superChat(minute, ended, id: 'e'), now: now), isFalse);
+      expect(gate.accepts(_superChat(minute, ended, id: 'f', replayed: true), now: now), isTrue);
+      // A time far in the future is malformed, on display or not.
+      final future = now.add(const Duration(minutes: 11));
+      expect(gate.accepts(_superChat(future, future.add(const Duration(minutes: 5)), id: 'g'), now: now), isFalse);
+      // Without ids the text key applies as before.
+      expect(gate.accepts(_superChat(twoHours, now.add(const Duration(hours: 1))), now: now), isTrue);
+      expect(gate.accepts(_superChat(twoHours, now.add(const Duration(hours: 1))), now: now), isFalse);
+    });
+
+    test('only the super chat of the data counts: a super chat message without one keeps the age limit', () {
+      final gate = DanmakuMessageGate();
+      final old = now.subtract(const Duration(minutes: 1));
+      expect(
+        gate.accepts(
+          _message(type: LiveMessageType.superChat, sentAt: old),
+          now: now,
+        ),
+        isFalse,
+      );
+      expect(
+        gate.accepts(
+          _message(type: LiveMessageType.superChat, sentAt: old, data: 30),
+          now: now,
+        ),
+        isFalse,
+      );
+    });
+
+    test('ids are compared as before: a replayed copy of a message passes once, whichever comes first', () {
+      final gate = DanmakuMessageGate();
+      final sent = now.subtract(const Duration(seconds: 90));
+      expect(
+        gate.accepts(
+          _message(messageId: 'm1', sentAt: sent, replayed: true),
+          now: now,
+        ),
+        isTrue,
+      );
+      expect(
+        gate.accepts(
+          _message(messageId: 'm1', sentAt: sent, replayed: true),
+          now: now,
+        ),
+        isFalse,
+      );
+      expect(gate.accepts(_message(messageId: 'm2'), now: now), isTrue);
+      expect(gate.accepts(_message(messageId: 'm2', replayed: true), now: now), isFalse);
+      // A pinned super chat reported on joining, then the same one live.
+      final start = now.subtract(const Duration(minutes: 5));
+      final end = now.add(const Duration(minutes: 25));
+      expect(gate.accepts(_superChat(start, end, id: 'sc', replayed: true), now: now), isTrue);
+      expect(gate.accepts(_superChat(start, end, id: 'sc'), now: now), isFalse);
+      // Too old even so: dropped before it is remembered.
+      final stale = _message(messageId: 'm3', sentAt: now.subtract(const Duration(minutes: 3)), replayed: true);
+      expect(gate.accepts(stale, now: now), isFalse);
+      expect(gate.accepts(_message(messageId: 'm3'), now: now), isTrue);
     });
   });
 }

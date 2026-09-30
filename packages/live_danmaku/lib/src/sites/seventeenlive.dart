@@ -117,11 +117,26 @@ final class SeventeenLiveConnectionDetails {
 @immutable
 final class SeventeenLiveEntry {
   /// Creates the entry.
-  const new({this.id = '', this.messages = const [], this.muted, this.ended = false});
+  const new({
+    this.id = '',
+    this.messages = const [],
+    this.muted,
+    this.ended = false,
+    this.publishedAt,
+    this.replayed = false,
+  });
 
   /// Ably's message id (or the frame's id and the index): a message the
   /// server sends again after a resume has the same one.
   final String id;
+
+  /// When Ably published it: the message's `timestamp`, else its frame's
+  /// (milliseconds, as ably-js fills it in); null when neither is a time.
+  final DateTime? publishedAt;
+
+  /// Whether it is part of the backlog an `ATTACHED` announced (B-26): its
+  /// [messages] are [LiveMessage.replayed].
+  final bool replayed;
 
   /// What it shows, in order: a comment's chat line, then a paid barrage's
   /// super chat; the viewers now.
@@ -145,6 +160,7 @@ final class SeventeenLiveDanmakuFrame {
     this.connection,
     this.channelSerial,
     this.resumed = false,
+    this.backlog = false,
   });
 
   /// What the frame asks of the connection.
@@ -172,6 +188,11 @@ final class SeventeenLiveDanmakuFrame {
   /// Whether an `ATTACHED` has the `RESUMED` flag: the channel went on from
   /// the serial the attach gave, missing nothing.
   final bool resumed;
+
+  /// Whether an `ATTACHED` has the `HAS_BACKLOG` flag: messages sent before
+  /// the attach follow it (what a resume missed, or the recent ones when it
+  /// could not resume; B-26).
+  final bool backlog;
 }
 
 /// `messenger/auth` answered with another push service than Ably: the chat
@@ -208,7 +229,8 @@ final class SeventeenLiveChatRefusal implements Exception {
 ///   the last `CONNECTED`'s key ([withToken]), and an `ATTACH` with the
 ///   last `channelSerial` and the `ATTACH_RESUME` flag ([attach]); the
 ///   server answers `ATTACHED` with `RESUMED` and sends the messages missed
-///   meanwhile.
+///   meanwhile. An `ATTACHED` with `HAS_BACKLOG` announces them; the
+///   messages published before it are replayed (B-26).
 abstract final class SeventeenLiveDanmakuProtocol {
   /// The token source; the website's ably-js asks it in its `authCallback`.
   static final Uri authUrl = Uri.https(SeventeenLiveApi.apiHost, '/api/v1/messenger/auth');
@@ -279,6 +301,10 @@ abstract final class SeventeenLiveDanmakuProtocol {
 
   /// `ATTACHED`'s `RESUMED` flag.
   static const int resumedFlag = 4;
+
+  /// `ATTACHED`'s `HAS_BACKLOG` flag: a backlog follows (ably-js hands it to
+  /// the attached state change as `hasBacklog`; it marks no message).
+  static const int hasBacklogFlag = 2;
 
   /// How long a paid barrage stays a super chat: the website flies it once
   /// over the player, 1 px a frame from the right edge until it leaves the
@@ -375,20 +401,28 @@ abstract final class SeventeenLiveDanmakuProtocol {
   /// - 9 `ERROR`: of the room's channel when it names it
   ///   ([SeventeenLiveSignal.channelError]), of the connection when it names
   ///   none ([SeventeenLiveSignal.connectionError]);
-  /// - 11 `ATTACHED` (its `channelSerial`, the `RESUMED` flag and an
-  ///   error), 13 `DETACHED` of the room's channel;
+  /// - 11 `ATTACHED` (its `channelSerial`, the `RESUMED` and `HAS_BACKLOG`
+  ///   flags and an error), 13 `DETACHED` of the room's channel;
   /// - 15 `MESSAGE` of the room's channel: its `channelSerial` and its
   ///   `messages` ([entry]); a message's id is its `id`, or the frame's `id`
   ///   and its index (Ably's rule for messages without one). A comment
   ///   without its own time gets [now] (default: the current time) as its
-  ///   super chat's start;
+  ///   super chat's start. With [backlogBefore] (when the `ATTACHED` that
+  ///   announced a backlog came), the messages Ably published before it are
+  ///   the backlog, replayed, up to the first that was published at it or
+  ///   later (B-26);
   /// - 14 `PRESENCE` of the room's channel: its `channelSerial` only (ably-js
   ///   keeps it as the channel's).
   ///
   /// Anything else (the heartbeat 0, a presence `SYNC` 16, another
   /// channel, a frame that is not a JSON object) holds nothing. A field of
   /// the wrong type costs only that field or that message.
-  static SeventeenLiveDanmakuFrame decode(Object? data, {required String roomId, DateTime? now}) {
+  static SeventeenLiveDanmakuFrame decode(
+    Object? data, {
+    required String roomId,
+    DateTime? now,
+    DateTime? backlogBefore,
+  }) {
     final text = switch (data) {
       final String text => text,
       final List<int> bytes => utf8.decode(bytes, allowMalformed: true),
@@ -432,10 +466,17 @@ abstract final class SeventeenLiveDanmakuProtocol {
           final int flags => (flags & resumedFlag) != 0,
           _ => false,
         },
+        backlog: switch (root['flags']) {
+          final int flags => (flags & hasBacklogFlag) != 0,
+          _ => false,
+        },
       ),
       13 when ours => SeventeenLiveDanmakuFrame(signal: SeventeenLiveSignal.detached, error: error),
       14 when ours => SeventeenLiveDanmakuFrame(channelSerial: serial),
-      15 when ours => SeventeenLiveDanmakuFrame(entries: _entries(root, now ?? DateTime.now()), channelSerial: serial),
+      15 when ours => SeventeenLiveDanmakuFrame(
+        entries: _entries(root, now ?? DateTime.now(), backlogBefore),
+        channelSerial: serial,
+      ),
       17 => const SeventeenLiveDanmakuFrame(signal: SeventeenLiveSignal.reauthorize),
       _ => const SeventeenLiveDanmakuFrame(),
     };
@@ -469,24 +510,41 @@ abstract final class SeventeenLiveDanmakuProtocol {
     );
   }
 
-  static List<SeventeenLiveEntry> _entries(Map<Object?, Object?> root, DateTime now) {
+  static List<SeventeenLiveEntry> _entries(Map<Object?, Object?> root, DateTime now, DateTime? backlogBefore) {
     final messages = root['messages'];
     if (messages is! List) return const [];
     final frameId = root['id'];
-    return [
-      for (final (index, item) in messages.indexed)
-        if (item is Map)
-          if (payload(item['data']) case final decoded?)
-            entry(
-              decoded,
-              id: switch (item['id']) {
-                final String id when id.isNotEmpty => id,
-                _ => frameId is String && frameId.isNotEmpty ? '$frameId:$index' : '',
-              },
-              now: now,
-            ),
-    ];
+    final frameTime = _millis(root['timestamp']);
+    var backlog = backlogBefore != null;
+    final entries = <SeventeenLiveEntry>[];
+    for (final (index, item) in messages.indexed) {
+      if (item is! Map) continue;
+      final decoded = payload(item['data']);
+      if (decoded == null) continue;
+      final published = _millis(item['timestamp']) ?? frameTime;
+      // The backlog ends at the first message published at the attach or
+      // later; one without a time cannot tell.
+      if (backlog && published != null && !published.isBefore(backlogBefore!)) backlog = false;
+      entries.add(
+        entry(
+          decoded,
+          id: switch (item['id']) {
+            final String id when id.isNotEmpty => id,
+            _ => frameId is String && frameId.isNotEmpty ? '$frameId:$index' : '',
+          },
+          now: now,
+          publishedAt: published,
+          replayed: backlog && published != null,
+        ),
+      );
+    }
+    return entries;
   }
+
+  /// A time in milliseconds from the epoch, above zero and within
+  /// [DateTime]'s range, or null.
+  static DateTime? _millis(Object? value) =>
+      value is int && value > 0 && value <= _maxMillis ? DateTime.fromMillisecondsSinceEpoch(value) : null;
 
   /// A decoded [payload] with the Ably message [id] (B-14):
   ///
@@ -497,26 +555,39 @@ abstract final class SeventeenLiveDanmakuProtocol {
   ///   when it is a boolean;
   /// - the stream end ([streamEndType]): [SeventeenLiveEntry.ended];
   /// - anything else: nothing.
-  static SeventeenLiveEntry entry(Map<Object?, Object?> payload, {String id = '', DateTime? now}) {
-    final shown = message(payload, id: id);
+  ///
+  /// [publishedAt] is when Ably published it; a [replayed] one (a backlog,
+  /// B-26) has its messages marked so.
+  static SeventeenLiveEntry entry(
+    Map<Object?, Object?> payload, {
+    String id = '',
+    DateTime? now,
+    DateTime? publishedAt,
+    bool replayed = false,
+  }) {
+    final shown = message(payload, id: id, replayed: replayed);
     return switch (payload['type']) {
       commentType => SeventeenLiveEntry(
         id: id,
+        publishedAt: publishedAt,
+        replayed: replayed,
         messages: [
           ?shown,
-          ?superChat(payload, id: id, now: now),
+          ?superChat(payload, id: id, now: now, replayed: replayed),
         ],
       ),
       liveType => SeventeenLiveEntry(
         id: id,
+        publishedAt: publishedAt,
+        replayed: replayed,
         messages: [?shown],
         muted: switch (payload['liveinfo']) {
           {'mute': final bool muted} => muted,
           _ => null,
         },
       ),
-      streamEndType => SeventeenLiveEntry(id: id, ended: true),
-      _ => SeventeenLiveEntry(id: id),
+      streamEndType => SeventeenLiveEntry(id: id, publishedAt: publishedAt, replayed: replayed, ended: true),
+      _ => SeventeenLiveEntry(id: id, publishedAt: publishedAt, replayed: replayed),
     };
   }
 
@@ -542,7 +613,8 @@ abstract final class SeventeenLiveDanmakuProtocol {
   /// - The face is the sender's `picture` as the website shows it
   ///   (`https://cdn.17app.co/THUMBNAIL_<file>`, or its own URL on the
   ///   platform's hosts; `SeventeenLiveApi.image`).
-  static LiveMessage? superChat(Map<Object?, Object?> payload, {String id = '', DateTime? now}) {
+  /// - It is [replayed] as its chat line is (B-26).
+  static LiveMessage? superChat(Map<Object?, Object?> payload, {String id = '', DateTime? now, bool replayed = false}) {
     if (payload['type'] != commentType) return null;
     final chat = message(payload, id: id);
     final comment = payload['commentMsg'];
@@ -565,6 +637,7 @@ abstract final class SeventeenLiveDanmakuProtocol {
       color: LiveMessageColor.white,
       messageId: id,
       sentAt: chat.sentAt,
+      replayed: replayed,
       data: LiveSuperChatMessage(
         messageId: id,
         userName: chat.userName,
@@ -585,14 +658,16 @@ abstract final class SeventeenLiveDanmakuProtocol {
   }
 
   /// The system notice of the live figures' `liveinfo.mute` turning [muted]
-  /// (B-14: [mutedNotice], [unmutedNotice]), with the Ably message [id].
-  static LiveMessage muteNotice({required bool muted, String id = ''}) => LiveMessage(
+  /// (B-14: [mutedNotice], [unmutedNotice]), with the Ably message [id];
+  /// [replayed] when that message was (B-26).
+  static LiveMessage muteNotice({required bool muted, String id = '', bool replayed = false}) => LiveMessage(
     type: LiveMessageType.notice,
     userName: '',
     message: muted ? mutedNotice : unmutedNotice,
     color: LiveMessageColor.white,
     messageId: id,
     data: LiveNoticeKind.system,
+    replayed: replayed,
   );
 
   /// A message's `data`: base64 of gzipped UTF-8 JSON, as the website reads
@@ -622,7 +697,9 @@ abstract final class SeventeenLiveDanmakuProtocol {
   ///   is chat as well; a paid one also has a super chat ([superChat]).
   /// - The live figures ([liveType]) carry `liveinfo.liveViewerCount`, the
   ///   viewers now, which the website shows: an audience update.
-  static LiveMessage? message(Map<Object?, Object?> payload, {String id = ''}) {
+  ///
+  /// [replayed] marks a message of a backlog (B-26).
+  static LiveMessage? message(Map<Object?, Object?> payload, {String id = '', bool replayed = false}) {
     switch (payload['type']) {
       case commentType:
         final comment = payload['commentMsg'];
@@ -637,7 +714,6 @@ abstract final class SeventeenLiveDanmakuProtocol {
         final user = comment['displayUser'];
         final name = user is Map ? _string(user['displayName']) : '';
         final level = _level(user is Map ? user['level'] : null) ?? _level(comment['level']);
-        final time = comment['sendTime'];
         return LiveMessage(
           type: LiveMessageType.chat,
           userName: name.isNotEmpty || user is! Map ? name : _string(user['openID']),
@@ -646,7 +722,8 @@ abstract final class SeventeenLiveDanmakuProtocol {
           color: color(body is Map ? body['textColor'] : null),
           userLevel: level == null ? '' : '$level',
           messageId: id,
-          sentAt: time is int && time > 0 && time <= _maxMillis ? DateTime.fromMillisecondsSinceEpoch(time) : null,
+          sentAt: _millis(comment['sendTime']),
+          replayed: replayed,
         );
       case liveType:
         final info = payload['liveinfo'];
@@ -658,6 +735,7 @@ abstract final class SeventeenLiveDanmakuProtocol {
           message: '',
           color: LiveMessageColor.white,
           data: LiveAudienceUpdate(kind: LiveAudienceMetricKind.onlineViewers, value: viewers),
+          replayed: replayed,
         );
       default:
         return null;
@@ -731,7 +809,14 @@ abstract final class SeventeenLiveDanmakuProtocol {
 ///   (`Broadcast ended`), as the website leaves the channel then (B-14). The
 ///   live figures' `liveinfo.mute` turning true (the streamer paused the
 ///   stream), or false again after that, is a system notice
-///   ([SeventeenLiveDanmakuProtocol.muteNotice]).
+///   ([SeventeenLiveDanmakuProtocol.muteNotice]). While paused, and in the
+///   figures that end the pause, a count of 0 viewers is not reported: the
+///   last count stays (B-25).
+/// - The messages of a backlog an `ATTACHED` announces (`HAS_BACKLOG`: after
+///   a resume, what was missed; when it could not resume, the recent ones)
+///   are [LiveMessage.replayed], up to the first message Ably published at
+///   the attach or later, so the duplicate gate shows them for as long as a
+///   resume reaches back (B-26).
 ///
 /// [SeventeenLiveDanmakuArgs.roomId] is the channel. The app registers it
 /// as `SiteIds.seventeenLive: () => SeventeenLiveDanmakuConnection(http: …,
@@ -806,7 +891,12 @@ final class SeventeenLiveDanmakuConnection extends DanmakuSocketConnection<Seven
     if (chat == null) return;
     final now = _handshake.now();
     chat.lastActivity = now;
-    final frame = SeventeenLiveDanmakuProtocol.decode(data, roomId: chat.roomId, now: now);
+    final frame = SeventeenLiveDanmakuProtocol.decode(
+      data,
+      roomId: chat.roomId,
+      now: now,
+      backlogBefore: chat.backlogBefore,
+    );
     if (frame.channelSerial case final serial?) chat.channelSerial = serial;
     switch (frame.signal) {
       case SeventeenLiveSignal.none:
@@ -820,6 +910,8 @@ final class SeventeenLiveDanmakuConnection extends DanmakuSocketConnection<Seven
           ..attachPending = false
           ..attachedBefore = true
           ..reattaching = false
+          // A backlog follows: what Ably published before now (B-26).
+          ..backlogBefore = frame.backlog ? now : null
           ..reattachWatch?.cancel();
         if (session.isConnected) {
           session.cancelJoinTimeout();
@@ -846,16 +938,25 @@ final class SeventeenLiveDanmakuConnection extends DanmakuSocketConnection<Seven
       case SeventeenLiveSignal.reauthorize:
         unawaited(_reauthorize(session, chat));
     }
+    // The backlog is over once a message published at the attach or later
+    // came (B-26).
+    if (frame.entries.any((entry) => entry.publishedAt != null && !entry.replayed)) chat.backlogBefore = null;
     for (final entry in frame.entries) {
       if (!session.isActive) return;
       // A message sent again after a resume, or twice: reported once.
       if (entry.id.isNotEmpty && !chat.firstSight(entry.id)) continue;
+      // While the stream is paused (and in the figures that end the pause)
+      // the viewers are 0; the last count stays (B-25).
+      final paused = chat.muted == true || entry.muted == true;
       for (final message in entry.messages) {
         if (!session.isActive) return;
+        if (message.data case LiveAudienceUpdate(value: 0) when paused) continue;
         session.message(message);
       }
       if (entry.muted case final muted?) {
-        if (chat.muteNotice(muted: muted, id: entry.id) case final notice?) session.message(notice);
+        if (chat.muteNotice(muted: muted, id: entry.id, replayed: entry.replayed) case final notice?) {
+          session.message(notice);
+        }
       }
       if (entry.ended) {
         session.run.closed(DanmakuCloseReason.connectionFailed, detail: broadcastEnded);
@@ -1053,6 +1154,10 @@ final class _Chat {
   /// The live figures' last `liveinfo.mute`, or null before the first.
   bool? muted;
 
+  /// When the `ATTACHED` that announced a backlog came, until a message
+  /// published at it or later ends the backlog (B-26); null otherwise.
+  DateTime? backlogBefore;
+
   final LinkedHashSet<String> _seen = LinkedHashSet();
 
   /// Token refusals and detaches since the channel was last attached.
@@ -1092,17 +1197,18 @@ final class _Chat {
 
   /// The notice for the live figures' `liveinfo.mute` being [muted], or null
   /// when it did not change (or is false the first time).
-  LiveMessage? muteNotice({required bool muted, required String id}) {
+  LiveMessage? muteNotice({required bool muted, required String id, bool replayed = false}) {
     final before = this.muted;
     this.muted = muted;
     if (before == muted || (before == null && !muted)) return null;
-    return SeventeenLiveDanmakuProtocol.muteNotice(muted: muted, id: id);
+    return SeventeenLiveDanmakuProtocol.muteNotice(muted: muted, id: id, replayed: replayed);
   }
 
-  /// A new socket: nothing attached, no attach pending.
+  /// A new socket: nothing attached, no attach pending, no backlog.
   void socketReset() {
     attachPending = false;
     reattaching = false;
+    backlogBefore = null;
     reattachWatch?.cancel();
     reattachWatch = null;
   }

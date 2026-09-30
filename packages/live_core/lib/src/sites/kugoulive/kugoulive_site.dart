@@ -242,7 +242,10 @@ final class KugouLiveSite extends LiveSite
   /// A live room carries what the stream answer tells
   /// ([KugouLiveApi.withRestriction]): `none` with a stream, `needsLogin`,
   /// `unplayable` without a stream. A stream answer that fails otherwise
-  /// fails the entry, as in 3.x.
+  /// fails the entry, as in 3.x. A live room also carries its chat
+  /// arguments in `danmakuData` ([KugouLiveDanmakuArgs], 29-5, M5.25; no
+  /// request: the chat connection asks the website's scheduler itself),
+  /// whatever its stream answer said.
   Future<LiveRoom> _entered(String roomId) async {
     final id = _checkedId(roomId);
     final (:room, :state) = await _info(id);
@@ -254,7 +257,10 @@ final class KugouLiveSite extends LiveSite
     }
     final response = await _get(KugouLiveApi.streamUrl(id, millis: _now().millisecondsSinceEpoch));
     final (restriction, data) = _playback(id, response);
-    return KugouLiveApi.withRestriction(room, restriction).copyWith(data: data);
+    return KugouLiveApi.withRestriction(room, restriction).copyWith(
+      data: data,
+      danmakuData: KugouLiveDanmakuArgs(roomId: id),
+    );
   }
 
   static (LiveRestriction, KugouLiveRoomData) _playback(String roomId, LiveResponse response) {

@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "platform": "kugoulive",
+  "case": "S07-live",
+  "room": "kugoulive:51049168",
+  "danmakuKeys": {
+    "roomId": "51049168"
+  },
+  "capturedAt": "2026-09-30T12:31:25.827593Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://fx1.service.kugou.com/socket_scheduler/pc/binary/v2/address.jsonp?_p=0&_v=7.0.0&pv=20240801&rid=51049168&clienttime=1790771485827&cid=100&at=102&sign=2391560a2d8b300a",
+    "headers": {
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "accept": "application/json, text/plain, */*",
+      "origin": "https://fanxing.kugou.com",
+      "referer": "https://fanxing.kugou.com/51049168"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "access-control-allow-credentials": "true",
+      "x-envoy-upstream-service-time": "3",
+      "date": "Wed, 30 Sep 2026 12:31:26 GMT",
+      "transfer-encoding": "chunked",
+      "access-control-allow-origin": "https://fanxing.kugou.com",
+      "content-encoding": "gzip",
+      "x-via": "1.1 PS-ZHY-01BNR40:0 (Cdn Cache Server V2.0)",
+      "content-type": "application/json;charset=utf-8",
+      "x-ws-request-id": "6abd011e_PS-ZHY-01BNR40_11549-10372",
+      "server": "openresty"
+    }
+  },
+  "handshakes": [
+    {
+      "url": "wss://chatwss146107.kugou.com/acksocket",
+      "headers": {
+        "origin": "https://fanxing.kugou.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "status": 101
+    }
+  ],
+  "frames": 227,
+  "raw": {
+    "sha256": "30713686b35e7833373f13122f87477e8cc588a0896c802f4d36154fdf338074",
+    "length": 255583
+  },
+  "scrubbed": [
+    {
+      "where": "dispatch $.data.soctoken, $.data.backsoctoken",
+      "rule": "secret"
+    },
+    {
+      "where": "out 201 LoginRequest.soctoken (15)",
+      "rule": "secret"
+    },
+    {
+      "where": "out 201 LoginRequest.deviceNo (10), sid (18)",
+      "rule": "device"
+    },
+    {
+      "where": "in 901 ErrorResponse.socsid (7)",
+      "rule": "session"
+    },
+    {
+      "where": "in 501 ContentMessage.senderid/senderkugouid (6, 7); ChatResponse.senderid/senderkugouid/receiverid/receiverkugouid (2, 3, 6, 7)",
+      "rule": "person"
+    },
+    {
+      "where": "in 501 ChatResponse.sendername/receivername (4, 8)",
+      "rule": "person"
+    },
+    {
+      "where": "in 501 ChatResponse.senderLogo (24), the image id",
+      "rule": "person"
+    },
+    {
+      "where": "in 501 ChatResponse.mac, kidSign (19, 23)",
+      "rule": "device"
+    },
+    {
+      "where": "in 501 ChatResponse.chatmsg (1): names in 『』 and of other chatters",
+      "rule": "person"
+    }
+  ],
+  "dropped": {
+    "in 201 (someone entered)": 37,
+    "in 602 (gift broadcasts)": 16,
+    "in 400002 (headlines)": 43,
+    "in 400004 (headlines)": 71,
+    "in 400303 (site notices)": 42,
+    "in 100 (a user's level-up broadcast)": 2,
+    "in 618 (a follow)": 1,
+    "in 615 (a follow)": 1,
+    "in 300626 (a performance card)": 1,
+    "in 302314 (another room's message)": 1
+  },
+  "tool": "M5.25 recorder: a dart:io program (no packages but crypto) that asks the scheduler as the room page does, opens its first host with the page's Origin and the adapter's UA, sends the anonymous login (201) and the binary heartbeat every 10 s, and records every frame; the scheduler answer is the first line. Scrubbed and reduced afterwards by a Python script that decodes each protobuf level and re-encodes it with the same field order and wire types, so what was not replaced is byte for byte the recording.",
+  "note": "Direct, anonymous, read-only, 300 s in the busiest room of the recommendations (about 98 viewers). Kept: the scheduler answer, the login, both status frames (901), every heartbeat both ways, the 37 chats (501; most from the room's welcome account, 3 from two viewers, two addressed to someone in public), the five audience frames (301005, about one a minute) and the system frames without personal data (300361, 616, 315, 304303, 300622, 1901 and one 100, gzipped). The frames about other people are dropped (counts above). One person keeps one set of synthetic values (ids of the same digit count, names 观众N of the same length, image ids and device hashes of the same hex length); the broadcaster (51049168: 2454242816, 姜拾七er) is public and kept, as are Kugou's default avatars (/v2/kugouicon/). The ext (badges, plates, mounts) and sinfo carry no ids and are kept. The server's own hosts and times are kept."
+}

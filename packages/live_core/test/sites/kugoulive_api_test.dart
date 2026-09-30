@@ -52,7 +52,8 @@ List<Map<String, dynamic>> _maps(Object? value) => (value! as List).cast<Map<Str
 /// What every room 3.x wrote changes: `httpHeaders` (M4.29: 3.x wrote its
 /// media headers into every room, where only IPTV's are read; they travel
 /// on every line) and `notice` (29-6: written for users; 29-2 puts the room
-/// info's announcements before it).
+/// info's announcements before it; M5.25: the chat is shown, so it no longer
+/// says the chat cannot be seen).
 const _roomChanged = {'httpHeaders', 'notice'};
 
 /// What a room from the room info changes besides [_roomChanged]: its

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "platform": "kugoulive",
+  "case": "S09-pk-chat",
+  "room": "kugoulive:1073619",
+  "danmakuKeys": {
+    "roomId": "1073619"
+  },
+  "capturedAt": "2026-09-30T12:13:24.344688Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://chatwss140058.kugou.com/acksocket",
+      "headers": {
+        "origin": "https://fanxing.kugou.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "status": 101
+    }
+  ],
+  "frames": 1,
+  "raw": {
+    "sha256": "41e86cb1213828337f7a49da0c18a47a2ea9671ded7a432d8db5c76778478935",
+    "length": 27298
+  },
+  "scrubbed": [
+    {
+      "where": "in 400305 ContentMessage.senderid/senderkugouid (6, 7); ChatResponse.senderid/senderkugouid (2, 3)",
+      "rule": "person"
+    },
+    {
+      "where": "in 400305 ChatResponse.sendername (4), senderLogo (24), mac and kidSign (19, 23)",
+      "rule": "person"
+    },
+    {
+      "where": "in 400305 ChatResponse.chatmsg (1): the name in 『』",
+      "rule": "person"
+    }
+  ],
+  "dropped": {
+    "out 201 (the login)": 1,
+    "in 901": 2,
+    "heartbeats (both ways)": 4,
+    "in 301005": 1,
+    "in 300361": 10,
+    "in 400002, 400004 (headlines)": 12,
+    "in 602 (gift broadcasts)": 5,
+    "in 613 (PK)": 3,
+    "in 616, 315 (songs)": 4,
+    "in 100": 1,
+    "in 400303": 1
+  },
+  "tool": "M5.25 recorder: a dart:io program (no packages but crypto) that asks the scheduler as the room page does, opens its first host with the page's Origin and the adapter's UA, sends the anonymous login (201) and the binary heartbeat every 10 s, and records every frame; the scheduler answer is the first line. Scrubbed and reduced afterwards by a Python script that decodes each protobuf level and re-encodes it with the same field order and wire types, so what was not replaced is byte for byte the recording.",
+  "note": "25 s in room 1073619 during a PK: one chat of the partner room relayed as OTHERMESSAGE (400305). Its ContentMessage names this room (roomid 1073619) and carries source {roomid 5138284, tags 3}, the room it was said in. The page shows such a chat marked as the other side's; this implementation does not report it."
+}

@@ -1,5 +1,5 @@
 {
- "generator": "fixtures/kugoulive/danmaku/web_expected.py: the website room page's own reading (index_5e7bbee.js modules 1374/80965 and RoomSocket, socket_51738e4.js RoomSocket.callback, roomBase dealWithNickName, ViewerHeat), reimplemented in Python over the recorded frames",
+ "generator": "fixtures/kugoulive/danmaku/web_expected.py: the website room page's own reading (index_5e7bbee.js modules 1374/80965 and RoomSocket, socket_51738e4.js RoomSocket.callback, roomBase dealWithNickName and dealWithChatContentColor, ViewerHeat), reimplemented in Python over the recorded frames",
  "value": {
   "frames": [
    {
@@ -22,6 +22,7 @@
      "toName": null,
      "richLevel": 13,
      "fanBadge": null,
+     "contentColor": "#ff9900",
      "seq": 1790770414326,
      "time": 1790770415,
      "msgId": "",

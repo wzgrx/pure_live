@@ -500,8 +500,13 @@ abstract final class KugouLiveDanmakuProtocol {
   /// senderid 6, senderkugouid 7, time 11, ext 14, sinfo 15, codec 16}`; the
   /// `content` of a chat whose `codec` is 1 read as `Chat.ChatResponse`
   /// ([_chatResponse]), its `ext` (`Ext.Extension`) for the fan badge
-  /// (`intimacyVo` 39) and its `sinfo` (`ck` 5, `ckid` 8). Other messages
-  /// keep only the envelope.
+  /// (`intimacyVo` 39) and the text's colour (`intimacyVo.level`,
+  /// `userGuard` 8 `{g 1}`, `littleGuard` 9 `{l 1}`), and its `sinfo` (`ck`
+  /// 5, `ckid` 8). Other messages keep only the envelope.
+  ///
+  /// The page decodes `ext` even when the message has none (an empty
+  /// `Extension`), so a chat always has one here; a sub-message it lacks
+  /// is left out, as protobufjs leaves it null.
   static Map<String, Object?> _content(ProtoMessage message, int command) {
     final packet = <String, Object?>{
       'roomid': message.integer(3) ?? 0,
@@ -512,20 +517,25 @@ abstract final class KugouLiveDanmakuProtocol {
     };
     if (command != chatCommand || (message.integer(16) ?? 0) != 1) return packet;
     final chat = ProtoMessage.decode(message.bytes(2) ?? Uint8List(0));
-    final intimacy = ProtoMessage.decode(message.bytes(14) ?? Uint8List(0)).message(39);
+    final ext = ProtoMessage.decode(message.bytes(14) ?? Uint8List(0));
+    final intimacy = ext.message(39);
+    final userGuard = ext.message(8);
+    final littleGuard = ext.message(9);
     final sinfo = message.message(15);
     return {
       ...packet,
       'content': _chatResponse(chat),
-      if (intimacy != null)
-        'ext': {
+      'ext': {
+        if (intimacy != null)
           'intimacyVo': {
             'level': intimacy.integer(1) ?? 0,
             'nameplate': intimacy.string(2) ?? '',
             'type': intimacy.integer(3) ?? 0,
             'lightUp': intimacy.integer(5) ?? 0,
           },
-        },
+        if (userGuard != null) 'userGuard': {'g': userGuard.string(1) ?? ''},
+        if (littleGuard != null) 'littleGuard': {'l': littleGuard.integer(1) ?? 0},
+      },
       if (sinfo != null) 'sinfo': {'ck': sinfo.integer(5) ?? 0, 'ckid': sinfo.string(8) ?? ''},
     };
   }
@@ -546,7 +556,7 @@ abstract final class KugouLiveDanmakuProtocol {
   };
 
   /// A chat message (`RoomSocket.callback`, case `MESSAGE`) of room
-  /// [roomId] as white chat, or null when the page would not show it in the
+  /// [roomId] as chat, or null when the page would not show it in the
   /// public chat:
   ///
   /// - the message goes to someone (`receiverid` of the envelope not 0: a
@@ -565,7 +575,8 @@ abstract final class KugouLiveDanmakuProtocol {
   /// `ext.intimacyVo`'s `nameplate` and `level` when the page shows it
   /// (level above 0, `type` 1 to 4, `lightUp` 1). The id is the envelope's
   /// `msgId`, else `<sender>:<seq>` (the sender's own counter); the time is
-  /// the envelope's `time` (seconds, milliseconds above 10^11).
+  /// the envelope's `time` (seconds, milliseconds above 10^11). The colour
+  /// is the page's for the text ([textColor], M5.F B-15).
   static LiveMessage? chat(Map<String, Object?> packet, {required String roomId}) {
     if ((jsonInt(packet['receiverid']) ?? 0) != 0 || (jsonInt(packet['senderid']) ?? 0) < 0) return null;
     final content = packet['content'];
@@ -576,9 +587,11 @@ abstract final class KugouLiveDanmakuProtocol {
     if (text.isEmpty) return null;
     final sender = _id(packet['senderid']) ?? _id(content['senderid']);
     final sinfo = packet['sinfo'];
-    final alias = sinfo is Map && jsonInt(sinfo['ck']) == 1 ? _text(sinfo['ckid']) : null;
+    final mystery = sinfo is Map && jsonInt(sinfo['ck']) == 1;
+    final alias = mystery ? _text(sinfo['ckid']) : null;
     final level = _positive(content['senderrichlevelV2']) ?? _positive(content['senderrichlevel']);
-    final badge = _badge(packet['ext']);
+    final ext = _extension(packet['ext']);
+    final badge = _badge(ext);
     final messageId = _text(packet['msgId']);
     final seq = jsonInt(content['seq']) ?? 0;
     return LiveMessage(
@@ -586,7 +599,7 @@ abstract final class KugouLiveDanmakuProtocol {
       userName: _clean(content['sendername']),
       userId: alias ?? sender ?? '',
       message: text,
-      color: LiveMessageColor.white,
+      color: textColor(ext, mystery: mystery),
       userLevel: level == null ? '' : '$level',
       fansName: badge?.name ?? '',
       fansLevel: badge == null ? '' : '${badge.level}',
@@ -627,11 +640,66 @@ abstract final class KugouLiveDanmakuProtocol {
     ];
   }
 
-  /// The fan badge the page shows (`dealWithNickName`): `intimacyVo` of the
-  /// `ext` (a map, or the URL-encoded JSON of a JSON message).
-  static ({String name, int level})? _badge(Object? ext) {
+  /// The orange of a chat text the page highlights (`#ff9900`).
+  static const LiveMessageColor highlightColor = LiveMessageColor(0xff, 0x99, 0x00);
+
+  /// The gold of a mystery guest's chat text (`#CC9900`).
+  static const LiveMessageColor mysteryColor = LiveMessageColor(0xcc, 0x99, 0x00);
+
+  /// The colour the page gives a chat text (`Fx.dealWithChatContentColor`
+  /// of roomBase_a2fb4ce.js, called by the PublicChat module with the
+  /// message's [ext]), with the fan-club switch on, as for every room this
+  /// connects (`getCurSwitch()`: the room page's `new_fandom_club_switch` is
+  /// `1,1` and the room is neither a channel nor a live room):
+  ///
+  /// - [highlightColor] when the fan-club level (`intimacyVo.level`) is
+  ///   above 7, or the sender is a little guard (`littleGuard.l`) or a
+  ///   guard (`userGuard.g`), read with JavaScript's truthiness;
+  /// - [mysteryColor], over that, for a mystery guest ([mystery]: the page
+  ///   sets `starvip.mysticUser` from `sinfo.ck`);
+  /// - white otherwise, and whenever the message has no `ext` (the page
+  ///   then has nothing to colour by).
+  static LiveMessageColor textColor(Map<Object?, Object?>? ext, {required bool mystery}) {
+    if (ext == null) return LiveMessageColor.white;
+    if (mystery) return mysteryColor;
+    final intimacy = ext['intimacyVo'];
+    final littleGuard = ext['littleGuard'];
+    final userGuard = ext['userGuard'];
+    if ((intimacy is Map && _jsNumber(intimacy['level']) > 7) ||
+        (littleGuard is Map && _jsTruthy(littleGuard['l'])) ||
+        (userGuard is Map && _jsTruthy(userGuard['g']))) {
+      return highlightColor;
+    }
+    return LiveMessageColor.white;
+  }
+
+  /// JavaScript's truthiness of a JSON value.
+  static bool _jsTruthy(Object? value) => switch (value) {
+    null => false,
+    final bool flag => flag,
+    final num number => number != 0 && !number.isNaN,
+    final String text => text.isNotEmpty,
+    _ => true,
+  };
+
+  /// A JSON value as JavaScript's `>` compares it with a number: numbers,
+  /// numeric text (empty text is 0), booleans as 0 and 1; anything else
+  /// never compares true (NaN).
+  static double _jsNumber(Object? value) => switch (value) {
+    null => 0,
+    final num number => number.toDouble(),
+    final bool flag => flag ? 1 : 0,
+    final String text when text.trim().isEmpty => 0,
+    final String text => double.tryParse(text.trim()) ?? double.nan,
+    _ => double.nan,
+  };
+
+  /// The message's `ext` as the page reads it: a map, or the URL-encoded
+  /// JSON of a JSON message. Null when it is missing or cannot be read.
+  static Map<Object?, Object?>? _extension(Object? ext) {
     var value = ext;
     if (value is String) {
+      if (value.isEmpty) return null;
       // decodeComponent throws an ArgumentError on a bad escape.
       if (_badEscape.hasMatch(value)) return null;
       try {
@@ -640,7 +708,13 @@ abstract final class KugouLiveDanmakuProtocol {
         return null;
       }
     }
-    final intimacy = value is Map ? value['intimacyVo'] : null;
+    return value is Map<Object?, Object?> ? value : null;
+  }
+
+  /// The fan badge the page shows (`dealWithNickName`): `intimacyVo` of the
+  /// message's [ext].
+  static ({String name, int level})? _badge(Map<Object?, Object?>? ext) {
+    final intimacy = ext?['intimacyVo'];
     if (intimacy is! Map) return null;
     final level = jsonInt(intimacy['level']) ?? 0;
     final type = jsonInt(intimacy['type']) ?? 0;

@@ -1,0 +1,164 @@
+{
+ "generator": "fixtures/kugoulive/danmaku/web_expected.py: the website room page's own reading (index_5e7bbee.js modules 1374/80965 and RoomSocket, socket_51738e4.js RoomSocket.callback, roomBase dealWithNickName and dealWithChatContentColor, ViewerHeat), reimplemented in Python over the recorded frames",
+ "value": {
+  "frames": [
+   {
+    "line": 1,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 1570369,
+     "senderid": 3855080741,
+     "senderkugouid": 3855080741,
+     "operationUserId": 3855080741,
+     "userName": "观众0001",
+     "text": "主播唱歌时比较专注，不能及时回复公屏内容，多多谅解~",
+     "toName": null,
+     "richLevel": 120,
+     "fanBadge": {
+      "clubName": "猪薇",
+      "level": 33
+     },
+     "contentColor": "#ff9900",
+     "seq": 1790781832186,
+     "time": 1790781833,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 2,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 1570369,
+     "senderid": 7116768372,
+     "senderkugouid": 7116768372,
+     "operationUserId": 7116768372,
+     "userName": "观众00002",
+     "text": "现在在那明天不该放假了",
+     "toName": null,
+     "richLevel": 14,
+     "fanBadge": {
+      "clubName": "猪薇",
+      "level": 8
+     },
+     "contentColor": "#ff9900",
+     "seq": 331727890,
+     "time": 1790781863,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 3,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 1570369,
+     "senderid": 317048628,
+     "senderkugouid": 784176591,
+     "operationUserId": 317048628,
+     "userName": "观众00003",
+     "text": "真的吗？我今晚真蹲到四点",
+     "toName": null,
+     "richLevel": 23,
+     "fanBadge": null,
+     "contentColor": "#ff9900",
+     "seq": 507347603,
+     "time": 1790782075,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 4,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 1570369,
+     "senderid": 3147423206,
+     "senderkugouid": 3147423206,
+     "operationUserId": 3147423206,
+     "userName": "观众004",
+     "text": "发什么内容？",
+     "toName": null,
+     "richLevel": 110,
+     "fanBadge": {
+      "clubName": "猪薇",
+      "level": 30
+     },
+     "contentColor": "#ff9900",
+     "seq": 812475231,
+     "time": 1790782431,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 5,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 1570369,
+     "senderid": 5290775737,
+     "senderkugouid": 5290775737,
+     "operationUserId": 5290775737,
+     "userName": "观众5",
+     "text": "[/哈哈哈v]",
+     "toName": null,
+     "richLevel": 23,
+     "fanBadge": null,
+     "contentColor": null,
+     "seq": 1790782493467,
+     "time": 1790782499,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 6,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 1570369,
+     "senderid": 122505970,
+     "senderkugouid": 7357491952,
+     "operationUserId": 122505970,
+     "userName": "观众06",
+     "text": "变调，闲暇的时候，唱个音阶，熟了就变快。",
+     "toName": null,
+     "richLevel": 13,
+     "fanBadge": {
+      "clubName": "猪薇",
+      "level": 3
+     },
+     "contentColor": null,
+     "seq": 1790782545548,
+     "time": 1790782556,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   }
+  ],
+  "heartbeat": "ZAABAA=="
+ }
+}

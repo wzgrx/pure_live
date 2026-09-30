@@ -19,7 +19,7 @@ const _origin = 'https://live.douyin.com';
 @immutable
 final class DouyinDanmakuArgs {
   /// Creates the arguments.
-  const new({required this.webRid, required this.roomId, required this.userId, required this.cookie});
+  const new({required this.webRid, required this.roomId, required this.userId, required this.cookie, this.refresh});
 
   /// The room page id (the Referer of the handshake).
   final String webRid;
@@ -34,6 +34,12 @@ final class DouyinDanmakuArgs {
   /// The cookie of the API requests (the user's, else the anonymous ttwid);
   /// empty when there is none.
   final String cookie;
+
+  /// The arguments of the room's broadcast now, from a new detail request;
+  /// null when the room is not live. The danmaku connection asks when it
+  /// went quiet or gave up, to follow a streamer who went live again under
+  /// a new [roomId] (M5.F B-5).
+  final Future<DouyinDanmakuArgs?> Function()? refresh;
 
   /// The handshake headers 3.x sent: UA, the cookie when there is one,
   /// Origin and the room's Referer (REG-DOUYIN-003).

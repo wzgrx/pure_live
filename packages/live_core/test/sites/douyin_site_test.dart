@@ -638,6 +638,22 @@ void main() {
       expect(await site.getLiveStatus(roomId: '745964462470'), isFalse);
     });
 
+    test("danmaku refresh (M5.F B-5): the broadcast's arguments now when live, null when offline", () async {
+      final (:site, :http) = _replay(['S01-home', 'S04-enter-live', 'S04-enter-offline']);
+      final room = await site.getRoomDetail(roomId: _webRid);
+      final refreshed = await (room.danmakuData! as DouyinDanmakuArgs).refresh!();
+      expect(
+        (refreshed!.webRid, refreshed.roomId, refreshed.userId, refreshed.cookie),
+        (_webRid, _roomId, site.visitorId, _anonymousCookie()),
+      );
+      expect(refreshed.refresh, isNotNull, reason: 'the next check asks again');
+      expect(_paths(http), [_home, _enter, _enter], reason: 'a new detail request');
+      final offline = await site.getRoomDetail(roomId: '745964462470');
+      expect(offline.danmakuData, isA<DouyinDanmakuArgs>());
+      expect(await (offline.danmakuData! as DouyinDanmakuArgs).refresh!(), isNull);
+      expect(await site.danmakuArgs(_webRid), isNotNull);
+    });
+
     test('offline: a room state, not a failure; no stream', () async {
       final (:site, :http) = _replay(['S01-home', 'S04-enter-offline']);
       final room = await site.getRoomDetail(roomId: '745964462470');

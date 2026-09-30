@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "platform": "douyin",
+  "case": "S13-audience",
+  "room": "douyin:658383822680 877527888749 30825165932 616273302951 720889562552",
+  "rooms": [
+    {
+      "webRid": "658383822680",
+      "roomId": "7691289999559445282",
+      "capturedAt": "2026-09-30T15:18:59.594293Z",
+      "detailWatching": "2",
+      "frames": 10,
+      "chats": 3,
+      "audience": 7
+    },
+    {
+      "webRid": "877527888749",
+      "roomId": "7691290788722789160",
+      "capturedAt": "2026-09-30T15:18:59.513165Z",
+      "detailWatching": "5",
+      "frames": 4,
+      "chats": 0,
+      "audience": 4
+    },
+    {
+      "webRid": "30825165932",
+      "roomId": "7691333262836239145",
+      "capturedAt": "2026-09-30T15:18:59.616272Z",
+      "detailWatching": "2013",
+      "frames": 39,
+      "chats": 27,
+      "audience": 13
+    },
+    {
+      "webRid": "616273302951",
+      "roomId": "7691343210859694848",
+      "capturedAt": "2026-09-30T15:18:59.566158Z",
+      "detailWatching": "9812",
+      "frames": 85,
+      "chats": 169,
+      "audience": 33
+    },
+    {
+      "webRid": "720889562552",
+      "roomId": "7691286302494771968",
+      "capturedAt": "2026-09-30T15:18:59.602571Z",
+      "detailWatching": "77726",
+      "frames": 73,
+      "chats": 134,
+      "audience": 10
+    }
+  ],
+  "capturedAt": "2026-09-30T15:18:59.513165Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://webcast100-ws-web-lq.douyin.com/webcast/im/push/v2/ (DouyinDanmakuProtocol.endpoints of each room's DouyinDanmakuArgs; the signature and the visitor id are not kept)",
+      "headers": {
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+        "cookie": "<redacted>",
+        "origin": "https://live.douyin.com",
+        "referer": "https://live.douyin.com/<webRid>"
+      }
+    }
+  ],
+  "frames": 211,
+  "raw": [
+    {
+      "room": "658383822680",
+      "sha256": "1866a1780a2a203eaa99cf1358992d0d689e11f4c445a4a8b6dbc38a04acf585",
+      "length": 102369
+    },
+    {
+      "room": "877527888749",
+      "sha256": "9b6d061653490526696e1561198949183da165eb051ccf3fdd4467057b0d6bdb",
+      "length": 396680
+    },
+    {
+      "room": "30825165932",
+      "sha256": "77daedd0925f6c116e56708c556bd98774b6e86347a091b58ddf60abf3623beb",
+      "length": 676265
+    },
+    {
+      "room": "616273302951",
+      "sha256": "820abd1ac99d8f5d343a4e5668535cf8929800b1f7adf57941b927a825e9cb28",
+      "length": 727791
+    },
+    {
+      "room": "720889562552",
+      "sha256": "857a46cae4aacbfe19fa0b2a833f342b11f07de745bdb13b6b8ff4b147e4d4db",
+      "length": 1605990
+    }
+  ],
+  "scrubbed": [
+    {
+      "where": "ChatMessage.user",
+      "rule": "person"
+    },
+    {
+      "where": "ChatMessage.content @-mentions",
+      "rule": "person"
+    },
+    {
+      "where": "ChatMessage fields other than common, user, content, eventTime (badges, images, tags, rich text)",
+      "rule": "dropped"
+    },
+    {
+      "where": "Common.user",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastRoomUserSeqMessage.ranks, .seats and fields other than common, total, totalUser, totalUserStr, totalStr, onlineUserForAnchor, totalPvForAnchor",
+      "rule": "dropped"
+    },
+    {
+      "where": "every other method, and frames without a chat or audience message (heartbeat answers)",
+      "rule": "dropped"
+    },
+    {
+      "where": "handshake.signature, handshake.user_unique_id, handshake.cookie",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M5.F recorder: DouyinSite(IoLiveHttp()).getRoomDetail for each room (anonymous), then DouyinDanmakuConnection with a connector that logs every frame; five rooms at once for 150 s",
+  "note": "Anonymous and read-only, direct. Five live rooms of the 聊天 and 音乐 partitions picked by size (the detail's exact audience 2, 5, 2013, 9812 and 77726), recorded at the same time. Kept: the frames of each room's first 60 s that carry a chat (WebcastChatMessage) or an audience message (WebcastRoomUserSeqMessage), with only those messages; t is milliseconds since that room's capturedAt, the room is the line's `room` (web_rid). Each message was reduced to the fields the decoder reads (chat: common without its user, user, content, eventTime; audience: common, total 3, totalUser 7, totalUserStr 8, totalStr 9, onlineUserForAnchor 10, totalPvForAnchor 11); PushFrame fields (headers, logId, encoding) and Response fields (cursor, now, internalExt, needAck) are as recorded, and a gzip payload is gzipped again. Senders became synthetic: a random id of the same length and 观众N, one per id and name in a room; Douyin's placeholder id 111111, which it gives viewers shown with a masked name (敏***), is kept. @-mentions in chat text became @观众. What it shows (docs/modules/M5.4-douyin.md, 后续升级): in every room total is the exact number the text rounds (2 and '2', 5 and '5', 1986 and '1986', 10371 and '1.0万', 77918 and '7.8万'); no chat has common.createTime, every chat has eventTime, 0.8 to 14.2 s before it arrived; 8 of the 333 chats came again about 0.6 s later with the same msgId."
+}

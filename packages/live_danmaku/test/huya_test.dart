@@ -33,8 +33,28 @@ final Map<String, Object?> _recorded =
 
 final int _uid = _recorded['uid']! as int;
 
-List<Map<String, Object?>> get _recordedMessages => [
+/// 3.x's messages for S11-live, with the frame each came from.
+List<Map<String, Object?>> get _legacyMessages => [
   for (final message in _recorded['messages']! as List<Object?>) Map.of(message! as Map<String, Object?>),
+];
+
+/// The `lMsgId` (tag 5) of a single push (command 7); null for other frames.
+int? _pushId(List<int> frame) {
+  final outer = TarsStruct.decode(frame);
+  if (outer.integer(0) != HuyaDanmakuProtocol.pushCommand) return null;
+  return TarsStruct.decode(outer.bytes(1) ?? const []).integer(5);
+}
+
+final Map<int, Uint8List> _frameAt = {for (final frame in _frames) frame.index: frame.bytes};
+
+/// M5.F B-4: 3.x's messages with the upgrade applied, a single push's
+/// message carrying its `lMsgId` as `huya:{id}` (3.x left it without one).
+List<Map<String, Object?>> get _recordedMessages => [
+  for (final message in _legacyMessages)
+    if (_pushId(_frameAt[message['frame']]!) case final id? when id > 0)
+      {...message, 'messageId': 'huya:$id'}
+    else
+      message,
 ];
 
 List<Map<String, Object?>> get _recordedWithoutFrames => [
@@ -288,6 +308,74 @@ LiveSuperChatMessage _entry(String message, {String messageId = '', Duration sta
 /// The retry waits after a notice: 0.6, 1.8 and 4 s.
 const List<Duration> _retryWaits = [Duration(milliseconds: 600), Duration(milliseconds: 1800), Duration(seconds: 4)];
 
+/// The M5.F recording (S17-reconnect): the chats of two connections to one
+/// room, A and B, A closing and opening again as A2; `t` is milliseconds
+/// since the recorder started, and open and close markers have no bytes.
+final List<({String conn, String dir, int t, Uint8List? bytes})> _s17 = [
+  for (final line in File('$_root/S17-reconnect/frames.jsonl').readAsLinesSync())
+    if (jsonDecode(line)
+        case {'conn': final String conn, 'dir': final String dir, 't': final int t} && final Map<String, Object?> frame)
+      (conn: conn, dir: dir, t: t, bytes: frame['b64'] is String ? base64Decode(frame['b64']! as String) : null),
+];
+
+/// When the S17 recorder started: "now" for its frames.
+final DateTime _s17Start = DateTime.parse(
+  (_json('S17-reconnect/meta.json')! as Map<String, Object?>)['capturedAt']! as String,
+);
+
+/// S17's chats of connection [conn], decoded, with their time.
+List<({int t, LiveMessage message})> _s17Chats(String conn) => [
+  for (final frame in _s17)
+    if (frame.conn == conn && frame.bytes != null)
+      for (final message in HuyaDanmakuProtocol.decode(frame.bytes!).messages) (t: frame.t, message: message),
+];
+
+/// The `sMessageId` (tag 20) of the chat in a single push.
+String? _chatMessageId(Uint8List frame) {
+  final push = TarsStruct.decode(TarsStruct.decode(frame).bytes(1)!);
+  return TarsStruct.decode(push.bytes(2)!).string(20);
+}
+
+/// A single push (command 7) of [uri] whose tag 5 (`lMsgId`) is [lMsgId]:
+/// an int, a string (the wrong type) or null (left out).
+Uint8List _single(int uri, Uint8List body, {Object? lMsgId}) {
+  final push = TarsWriter()
+    ..writeInt(0, 5)
+    ..writeInt(1, uri)
+    ..writeBytes(2, body)
+    ..writeInt(3, 2)
+    ..writeString(4, 'chat:$_uid');
+  switch (lMsgId) {
+    case final int id:
+      push.writeInt(5, id);
+    case final String id:
+      push.writeString(5, id);
+  }
+  push.writeInt(6, 0);
+  return (TarsWriter()
+        ..writeInt(0, HuyaDanmakuProtocol.pushCommand)
+        ..writeBytes(1, push.toBytes()))
+      .toBytes();
+}
+
+/// A chat as a single push with an `lMsgId`.
+Uint8List _chatWithId(String text, int lMsgId, {int uid = 7, String nick = 'A'}) => _single(
+  HuyaDanmakuProtocol.chatUri,
+  _body({
+    'chat': {'uid': uid, 'nick': nick, 'content': text},
+  }),
+  lMsgId: lMsgId,
+);
+
+/// [message] without its id: what 3.x reported for a single push.
+LiveMessage _withoutId(LiveMessage message) => LiveMessage(
+  type: message.type,
+  userName: message.userName,
+  userId: message.userId,
+  message: message.message,
+  color: message.color,
+);
+
 void main() {
   group('protocol', () {
     test("client frames are byte for byte 3.x's and the recorded ones", () {
@@ -359,10 +447,18 @@ void main() {
       expect(notices, _recorded['superChatNotices']);
       expect(decoded.where((message) => message['type'] == 'chat'), hasLength(110));
       expect(
-        decoded.where((message) => message['type'] == 'chat').every((message) => message['messageId'] == ''),
+        _legacyMessages.where((message) => message['type'] == 'chat').every((message) => message['messageId'] == ''),
         isTrue,
-        reason: 'every recorded chat came as a single push (command 7), which has no event id in 3.x',
+        reason: 'every recorded chat came as a single push (command 7), which had no id in 3.x',
       );
+      // B-4: each now carries the push's lMsgId, unique in the recording.
+      final ids = [
+        for (final message in decoded)
+          if (message['type'] == 'chat') message['messageId']! as String,
+      ];
+      expect(ids.every((id) => RegExp(r'^huya:[1-9][0-9]{18}$').hasMatch(id)), isTrue);
+      expect(ids.toSet(), hasLength(110));
+      expect(ids.first, 'huya:2048912839150912514');
     });
   });
 
@@ -464,6 +560,164 @@ void main() {
     }
   });
 
+  group('M5.F B-4: message ids of single pushes', () {
+    test('S17: a chat has the same id on every connection; none repeats; no replay after the reconnect', () {
+      final a = _s17Chats('A');
+      final b = _s17Chats('B');
+      final a2 = _s17Chats('A2');
+      expect((a.length, b.length, a2.length), (124, 189, 61));
+      for (final chats in [a, b, a2]) {
+        final ids = [for (final chat in chats) chat.message.messageId];
+        expect(ids.every((id) => id.startsWith('huya:') && id.length > 'huya:'.length), isTrue);
+        expect(ids.toSet(), hasLength(ids.length), reason: 'no id repeats on one connection');
+      }
+      final onB = {for (final chat in b) chat.message.messageId: chat};
+      for (final chat in [...a, ...a2]) {
+        final same = onB[chat.message.messageId];
+        expect(same, isNotNull, reason: 'B saw every chat A and A2 saw');
+        expect(
+          (same!.message.userId, same.message.userName, same.message.message),
+          (chat.message.userId, chat.message.userName, chat.message.message),
+        );
+      }
+      final reopenedAt = _s17.firstWhere((frame) => frame.conn == 'A2' && frame.dir == 'open').t;
+      expect(reopenedAt, 55514);
+      expect(
+        a2.where((chat) => onB[chat.message.messageId]!.t < reopenedAt),
+        isEmpty,
+        reason: 'registering again replays nothing',
+      );
+      // The chat's own sMessageId (tag 20) is just as stable; lMsgId is the
+      // one the web client deduplicates by, and batch items carry it too.
+      final chatIds = <String, String?>{
+        for (final frame in _s17)
+          if (frame.conn == 'B' && frame.bytes != null) '${_pushId(frame.bytes!)}': _chatMessageId(frame.bytes!),
+      };
+      for (final frame in _s17) {
+        if (frame.conn == 'B' || frame.bytes == null) continue;
+        expect(_chatMessageId(frame.bytes!), chatIds['${_pushId(frame.bytes!)}']);
+      }
+    });
+
+    test('the gate lets one copy of a chat through, whichever connection brought it', () {
+      final gate = DanmakuMessageGate();
+      final arrivals = [
+        for (final conn in ['A', 'B', 'A2']) ..._s17Chats(conn),
+      ]..sort((x, y) => x.t.compareTo(y.t));
+      final passed = [
+        for (final chat in arrivals)
+          if (gate.accepts(chat.message, now: _s17Start.add(Duration(milliseconds: chat.t)))) chat.message.messageId,
+      ];
+      expect(passed, hasLength(189));
+      expect(passed.toSet(), {for (final chat in _s17Chats('B')) chat.message.messageId});
+      // B's chats again later (a replay): all dropped within the id window.
+      final late = _s17Start.add(const Duration(minutes: 5));
+      expect(_s17Chats('B').where((chat) => gate.accepts(chat.message, now: late)), isEmpty);
+    });
+
+    test("a viewer repeating a line within 2.5 s is shown every time; 3.x's text rule hid the repeats", () {
+      final chats = _s17Chats('B');
+      List<int> shown(Iterable<({int t, LiveMessage message})> chats, LiveMessage Function(LiveMessage) form) {
+        final gate = DanmakuMessageGate();
+        return [
+          for (final chat in chats)
+            if (gate.accepts(form(chat.message), now: _s17Start.add(Duration(milliseconds: chat.t)))) chat.t,
+        ];
+      }
+
+      expect(shown(chats, (message) => message), hasLength(189));
+      expect(shown(chats, _withoutId).length, lessThan(189));
+      // One viewer sent this line three times within 2.5 s (another one sent
+      // it later).
+      final line = chats.where((chat) => chat.message.message == '不小心购买此产品998').toList();
+      expect(line.map((chat) => chat.t), [14256, 15567, 16703, 20976]);
+      final repeated = line.where((chat) => chat.message.userId == line.first.message.userId).toList();
+      expect(repeated.map((chat) => chat.t), [14256, 15567, 16703]);
+      expect(shown(repeated, (message) => message), [14256, 15567, 16703]);
+      expect(shown(repeated, _withoutId), [14256], reason: 'without ids: once per 2.5 s from the first one');
+    });
+
+    test('tag 5 gives the id; zero, negative, missing or not an integer gives none', () {
+      final body = _body({
+        'chat': {'uid': 7, 'nick': 'A', 'content': 'x'},
+      });
+      String id(Object? lMsgId) =>
+          HuyaDanmakuProtocol.decode(_single(HuyaDanmakuProtocol.chatUri, body, lMsgId: lMsgId))
+              .messages
+              .single
+              .messageId;
+      expect(id(int.parse('2048912839150912514')), 'huya:2048912839150912514');
+      expect(id(77), 'huya:77');
+      expect(id(0), '');
+      expect(id(-1), '');
+      expect(id(null), '');
+      expect(id('77'), '');
+      // A single push of popularity carries it too, as batch items did.
+      final popularity = HuyaDanmakuProtocol.decode(
+        _single(HuyaDanmakuProtocol.popularityUri, (TarsWriter()..writeInt(0, 5413644)).toBytes(), lMsgId: 78),
+      ).messages.single;
+      expect(popularity.messageId, 'huya:78');
+      expect((popularity.data! as LiveAudienceUpdate).value, 5413644);
+      // Batch items keep their tag 2.
+      final batch = _serverFrame({
+        'command': 22,
+        'group': 'live:$_uid',
+        'items': [
+          {
+            'uri': HuyaDanmakuProtocol.chatUri,
+            'id': 93,
+            'chat': {'uid': 7, 'nick': 'A', 'content': 'x'},
+          },
+        ],
+      });
+      expect(HuyaDanmakuProtocol.decode(batch).messages.single.messageId, 'huya:93');
+      // A body that is not Tars is still skipped, id or not.
+      expect(
+        HuyaDanmakuProtocol.decode(_single(HuyaDanmakuProtocol.chatUri, Uint8List.fromList([0x0F]), lMsgId: 79))
+            .messages,
+        isEmpty,
+      );
+      expect(
+        HuyaDanmakuProtocol.decode(_single(HuyaDanmakuProtocol.superChatUri, Uint8List(0), lMsgId: 80))
+            .superChatNotices,
+        1,
+      );
+    });
+
+    test('after a reconnect, a chat delivered again keeps its id, and the gate drops the copy', () async {
+      final delays = <Duration>[];
+      final connector = _Connector();
+      final connection = HuyaDanmakuConnection(connector: connector.call);
+      final events = _record(connection);
+      await _fastBackoff(delays, () async {
+        await connection.connect(_args());
+        connector.channels.single.incoming
+          ..add(_chatWithId('before the drop', 41))
+          ..add(_chatWithId('same line', 42));
+        await _until(() => _messages(events).length == 2);
+        await connector.channels.single.incoming.close();
+        await _until(() => connector.channels.length == 2 && connection.isConnected);
+        connector.channels.last.incoming
+          ..add(_chatWithId('same line', 42))
+          ..add(_chatWithId('same line', 43));
+        await _until(() => _messages(events).length == 4);
+      });
+      final messages = _messages(events);
+      expect(messages.map((message) => message.messageId), ['huya:41', 'huya:42', 'huya:42', 'huya:43']);
+      final gate = DanmakuMessageGate();
+      final now = DateTime.utc(2026, 9, 30, 15, 8);
+      expect(
+        [
+          for (final message in messages)
+            if (gate.accepts(message, now: now)) message.messageId,
+        ],
+        ['huya:41', 'huya:42', 'huya:43'],
+        reason: 'the copy is dropped; the same line under a new id is shown',
+      );
+      await connection.close();
+    });
+  });
+
   group('connection', () {
     test('opens the one endpoint without headers, is ready at once, registers and sends a heartbeat', () async {
       final connector = _Connector();
@@ -519,6 +773,7 @@ void main() {
     });
 
     test('replaying the recording reports what 3.x decoded, in order', () async {
+      // B-4: with the single pushes' ids (_recordedMessages).
       final connector = _Connector();
       final connection = HuyaDanmakuConnection(connector: connector.call);
       final events = _record(connection);
@@ -842,6 +1097,7 @@ void main() {
     });
 
     test('a local WebSocket server: the recorded session end to end', () async {
+      // B-4: with the single pushes' ids (_recordedMessages).
       final received = <List<int>>[];
       final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
       server.listen((request) async {

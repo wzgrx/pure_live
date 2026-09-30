@@ -34,8 +34,14 @@ final class _FakeChannel implements SocketChannel {
 
 /// Hands out fake channels and records every handshake.
 final class _Connector {
-  new({this.fail = false, this.stall = false, this.failures = const [], this.gate, _FakeChannel Function()? make})
-    : make = make ?? _FakeChannel.new;
+  new({
+    this.fail = false,
+    this.stall = false,
+    this.failures = const [],
+    this.gate,
+    this.refuse,
+    _FakeChannel Function()? make,
+  }) : make = make ?? _FakeChannel.new;
 
   final bool fail;
   final bool stall;
@@ -45,6 +51,9 @@ final class _Connector {
 
   /// Thrown by the first handshakes, one each, in order.
   final List<Exception> failures;
+
+  /// Endpoints refused on top of [fail].
+  final bool Function(Uri endpoint)? refuse;
   final _FakeChannel Function() make;
   final List<Uri> endpoints = [];
   final List<Map<String, String>> headers = [];
@@ -63,7 +72,7 @@ final class _Connector {
     this.headers.add(headers);
     this.protocols.add(protocols);
     await gate;
-    if (fail) throw const SocketException('refused');
+    if (fail || (refuse?.call(endpoint) ?? false)) throw const SocketException('refused');
     if (endpoints.length <= failures.length) throw failures[endpoints.length - 1];
     if (stall) await _never.future;
     final channel = make();
@@ -147,6 +156,14 @@ final class _Platform extends DanmakuSocketConnection<DanmakuSocketTarget> {
     final answer = renew;
     return answer == null ? super.onHandshakeFailure(session, failure) : answer(failure);
   }
+
+  /// What the platform does when the reconnects run out; null keeps the
+  /// runtime's default.
+  bool Function(DanmakuSocketSession session, String lastFailure)? exhausted;
+
+  @override
+  bool onReconnectsExhausted(DanmakuSocketSession session, String lastFailure) =>
+      exhausted?.call(session, lastFailure) ?? super.onReconnectsExhausted(session, lastFailure);
 }
 
 final Uri _primary = Uri.parse('wss://primary.example/ws');
@@ -381,6 +398,67 @@ void main() {
     );
     expect((events.last as DanmakuClosed).detail, contains('refused'));
     expect(connection.status, DanmakuStatus.closed);
+  });
+
+  group('onReconnectsExhausted (added for M5.F B-5, Douyin)', () {
+    final fresh = DanmakuSocketTarget(endpoints: [Uri.parse('wss://fresh.example/ws')]);
+
+    /// Runs [body] with every backoff wait (a second or more) fired at once.
+    Future<void> fast(Future<void> Function() body) => runZoned(
+      body,
+      zoneSpecification: ZoneSpecification(
+        createTimer: (self, parent, zone, duration, callback) =>
+            parent.createTimer(zone, duration < const Duration(seconds: 1) ? duration : Duration.zero, callback),
+      ),
+    );
+
+    test('a platform that takes over can reopen elsewhere: no close, fresh reconnects', () async {
+      final connector = _Connector(refuse: (endpoint) => endpoint != fresh.endpoints.single);
+      final connection = _Platform(
+        policy: const DanmakuSocketPolicy(heartbeatInterval: Duration.zero),
+        connector: connector,
+      );
+      final failures = <String>[];
+      connection.exhausted = (session, lastFailure) {
+        failures.add(lastFailure);
+        unawaited(session.reopen(fresh));
+        return true;
+      };
+      final events = _record(connection);
+      await fast(() async {
+        await connection.connect(_target);
+        await _until(() => connection.isConnected);
+      });
+      expect(failures, [contains('refused')], reason: 'asked once, after the ninth failure');
+      expect(connector.endpoints, hasLength(10));
+      expect(connector.endpoints.last, fresh.endpoints.single);
+      expect(events, [const DanmakuReconnecting(DanmakuInterruption.disconnected), const DanmakuReady()]);
+      await connection.close();
+    });
+
+    test('a platform that takes over can end the run itself', () async {
+      final connector = _Connector(fail: true);
+      final connection =
+          _Platform(
+              policy: const DanmakuSocketPolicy(heartbeatInterval: Duration.zero),
+              connector: connector,
+            )
+            ..exhausted = (session, lastFailure) {
+              session.run.closed(DanmakuCloseReason.connectionFailed, detail: 'gone');
+              return true;
+            };
+      final events = _record(connection);
+      await fast(() async {
+        await connection.connect(_target);
+        await _until(() => events.whereType<DanmakuClosed>().isNotEmpty);
+      });
+      expect(events, [
+        const DanmakuReconnecting(DanmakuInterruption.disconnected),
+        const DanmakuClosed(DanmakuCloseReason.connectionFailed, detail: 'gone'),
+      ]);
+      expect(connector.endpoints, hasLength(9));
+      expect(connection.status, DanmakuStatus.closed);
+    });
   });
 
   test('a message resets the reconnect count', () async {

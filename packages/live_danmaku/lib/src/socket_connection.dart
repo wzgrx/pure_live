@@ -111,7 +111,7 @@ final class DanmakuSocketTarget {
 ///   [DanmakuReconnecting] once per streak of failures (3.x `onReconnect`),
 ///   [DanmakuReady] whenever the platform confirms the join again,
 ///   [DanmakuClosed] with [DanmakuCloseReason.reconnectsExhausted] when the
-///   policy's reconnects run out;
+///   policy's reconnects run out, unless [onReconnectsExhausted] takes over;
 /// - heartbeats every [DanmakuSocketPolicy.heartbeatInterval] while the socket
 ///   is open, a silent socket replaced, endpoints rotated with the policy's
 ///   backoff;
@@ -181,6 +181,15 @@ abstract base class DanmakuSocketConnection<A extends Object> extends DanmakuCon
   @protected
   FutureOr<Map<String, String>?> onHandshakeFailure(DanmakuSocketSession session, DanmakuHandshakeFailure failure) =>
       null;
+
+  /// The socket gave up after [DanmakuSocketPolicy.maxReconnects] failures
+  /// in a row, [lastFailure] the last one. Returns whether the platform
+  /// takes over: it then [DanmakuSocketSession.reopen]s or ends the run
+  /// itself (Douyin first checks whether the broadcast moved to a new
+  /// room). The default ends the run with
+  /// [DanmakuCloseReason.reconnectsExhausted], as 3.x did.
+  @protected
+  bool onReconnectsExhausted(DanmakuSocketSession session, String lastFailure) => false;
 
   /// Opens the socket of [args]'s [target]. A target without endpoints ends
   /// with [DanmakuCloseReason.connectionFailed] (3.x stayed "connecting").
@@ -378,7 +387,8 @@ final class DanmakuSocketSession {
         }
       },
       onClosed: (reason) {
-        if (current()) run.closed(DanmakuCloseReason.reconnectsExhausted, detail: reason);
+        if (!current() || _connection.onReconnectsExhausted(this, reason)) return;
+        run.closed(DanmakuCloseReason.reconnectsExhausted, detail: reason);
       },
     );
     _socket = socket;

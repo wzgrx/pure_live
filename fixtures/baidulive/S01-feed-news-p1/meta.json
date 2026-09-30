@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "platform": "baidulive",
+  "sample": "S01-feed-news-p1",
+  "capturedAt": "2026-09-28T21:02:08.260365Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://tiebac.baidu.com/livefeed/feed",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Origin": "https://live.baidu.com",
+      "Referer": "https://live.baidu.com/",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": "appname=pclive&sid=&ua=320_480_pc_1.0_0&uid=pc-purelivefixturedevice01&timestamp=1790629327&source=pclive&resource=banner%2Ctab%2Cfeed&scene=pc_channel&session_id=&refresh_type=0&refresh_index=1&tab=news&channel_id=575&sign=4837c54b665ca46f5885866d27582f37"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range",
+      "access-control-allow-methods": "GET, POST, HEAD, OPTIONS",
+      "access-control-allow-origin": "https://live.baidu.com",
+      "access-control-max-age": "1728000",
+      "content-length": "23995",
+      "content-type": "application/json; charset=utf-8",
+      "date": "Mon, 28 Sep 2026 21:02:09 GMT",
+      "connection": "close"
+    }
+  },
+  "raw": {
+    "sha256": "be25b1b449c90b71e5200f9fd516a6d95727c7b16753c1ed6c9c9c516c0965ed",
+    "length": 23995
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "M4.U.30 record.py (fixture schema 1)"
+}

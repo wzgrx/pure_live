@@ -1,0 +1,320 @@
+{
+  "errno": "0",
+  "timestamp": "1790629326000",
+  "data": {
+    "371": {
+      "request_id": "3549026539",
+      "error_code": "0",
+      "host": {
+        "fans": "5142270",
+        "follows": "4",
+        "gender": "0",
+        "image": {
+          "image_33": "https://avatar.bdstatic.com/it/u=1709890002,4280156500&fm=3012&app=3012&autime=1786950360&size=b200,200",
+          "image_42": ""
+        },
+        "name": "长江新闻号",
+        "nick_name": "长江新闻号",
+        "app_id": "",
+        "is_anchor": "1",
+        "vip": "1",
+        "verified_title": "2",
+        "is_fans_anonymous": false,
+        "is_self": false,
+        "uk": "L_1I3edUWLEF2k_m8ahSQg"
+      },
+      "video": {
+        "cover": {
+          "cover_100": "https://pic.rmb.bdstatic.com/bjh/3f031d6894e/260928/4452bfadc0432729bdc030546f4f89e0.jpeg",
+          "vertical_cover": "https://pic.rmb.bdstatic.com/bjh/742952b19dd3c8acd43b7be3a60d2cc0_cut_1790604592.JPEG"
+        },
+        "title": "《长江新闻号》正在播出",
+        "label": "",
+        "screen": "1",
+        "live_hls_url_origin": "http://hls.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983.m3u8",
+        "live_flv_url_origin": "https://flv-live.bdstatic.com/live/stream_bduid_836143438_11586212983.flv",
+        "live_hls_url": "http://hls.liveshow.bdstatic.com/live/stream_bduid_836143438_11586212983-L1.m3u8",
+        "live_flv_url": "https://hls-live.bdstatic.com/live/stream_bduid_836143438_11586212983-mid-LV720.flv?kabr_spts=-3000&logid=3549026539&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+        "play_hls": "",
+        "play_flv": "",
+        "avc_hls_url": "",
+        "msg_hls_url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11586212983.m3u8?authorization=opv-apuy-r9/6u7289ir39df733m649781k43un6a3v8/2226-87-99C70:97:03X/85816547/fqgn/82v56al37cq0n7w3pki1e5x1x7986s66h8yfwem2082xid63p1zmla744362z1sx",
+        "msg_hls_pull_internal_in_second": 5,
+        "url_list": [
+          {
+            "resolution": 720,
+            "description": "画质720p:",
+            "urls": [
+              {
+                "rtmp": "rtmp://rtmp.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-L1",
+                "hls": "http://hls.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-L1.m3u8",
+                "flv": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-L1.flv"
+              },
+              {
+                "rtmp": "rtmp://rtmp2.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-L1",
+                "hls": "http://hls2.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-L1/playlist.m3u8",
+                "flv": "http://flv2.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-L1.flv"
+              }
+            ]
+          },
+          {
+            "resolution": 480,
+            "description": "画质480p:",
+            "urls": [
+              {
+                "rtmp": "rtmp://rtmp.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-L2",
+                "hls": "http://hls.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-L2.m3u8",
+                "flv": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-L2.flv"
+              },
+              {
+                "rtmp": "rtmp://rtmp2.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-L2",
+                "hls": "http://hls2.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-L2/playlist.m3u8",
+                "flv": "http://flv2.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-L2.flv"
+              }
+            ]
+          }
+        ],
+        "description": "1、中美俄接连重磅发声 日本为何瑟瑟发抖？2、谈判还是开战 美伊为何“举棋不定”？3、胡塞武装越攻越猛 沙特何去何从？",
+        "url_clarity_list": [
+          {
+            "description": "蓝光",
+            "resolution": 1080,
+            "avc_default": "0",
+            "urls": {
+              "flv": "https://hls-live.bdstatic.com/live/stream_bduid_836143438_11586212983-LV1080.flv?kabr_spts=-3000&logid=3549026539&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+              "avc_flv": "https://hls-live.bdstatic.com/live/stream_bduid_836143438_11586212983-LV1080.flv?kabr_spts=-3000&logid=3549026539&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+              "asr": ""
+            }
+          },
+          {
+            "description": "超清",
+            "resolution": 720,
+            "avc_default": "1",
+            "urls": {
+              "flv": "https://hls-live.bdstatic.com/live/stream_bduid_836143438_11586212983-mid-LV720.flv?kabr_spts=-3000&logid=3549026539&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+              "avc_flv": "https://hls-live.bdstatic.com/live/stream_bduid_836143438_11586212983-mid-LV720.flv?kabr_spts=-3000&logid=3549026539&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+              "asr": ""
+            }
+          },
+          {
+            "description": "标清",
+            "resolution": 540,
+            "avc_default": "0",
+            "urls": {
+              "flv": "https://hls-live.bdstatic.com/live/stream_bduid_836143438_11586212983-LV540.flv?kabr_spts=-3000&logid=3549026539&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+              "avc_flv": "https://hls-live.bdstatic.com/live/stream_bduid_836143438_11586212983-LV540.flv?kabr_spts=-3000&logid=3549026539&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+              "asr": ""
+            }
+          }
+        ],
+        "play_url": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-mid-LV720.flv?kabr_spts=-3000&logid=3549026539&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+        "avc_url": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-mid-LV720.flv?kabr_spts=-3000&logid=3549026539&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+        "kabr_spts": -1800,
+        "flv_avc_high": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_836143438_11586212983-enhance-LV1080.flv?logid=3549026539&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+        "stream": 1
+      },
+      "feedbacks": "4954",
+      "user_feedback": "0",
+      "location": "未知地区",
+      "status": "0",
+      "share_url": "https://live.baidu.com/m/media/multipage/liveshow/index/ukofm?room_id=11586212983",
+      "warning": "官方提醒：欢迎来到直播间！我们提倡绿色文明直播，禁止未成年人直播或充值消费。如直播间内出现反动、违法违规、色情低俗、吸烟酗酒、网络乞讨等内容，经举报或巡查发现将严肃处理。如主播在直播过程中以推广服务，交友等方式诱导打赏、私下交易，请谨慎判断，以防人身或财产损失。",
+      "online_users": "1391",
+      "real_online_users": "1395",
+      "online_user_list": [
+        {
+          "uid": 7200771446,
+          "avatar": "opwuh://zrxf.sylep.jgz/wuc/ikosdnkf/qqde/eacf.1.4y47038j.U-nmfoIShw1Xn5FkVJK6Jc.syv?tmgs=3313&zsnpu_yaovkclt_zgjo=2156",
+          "name": "观众1",
+          "nick_name": "观众1",
+          "gender": "2",
+          "rank": 1,
+          "score": 354
+        },
+        {
+          "uid": 7555985355,
+          "avatar": "lhpso://gepk.pooim.evs/jku/okhgofby/womi/sbdy.9.46m6my53.byJCuHfYHvVfQE7vS-iIan.grb?jpxa=3083&hrbvf_lgolaaxj_cczu=6496",
+          "name": "观众2",
+          "nick_name": "观众2",
+          "gender": "2",
+          "rank": 2,
+          "score": 354
+        },
+        {
+          "uid": 7934455779,
+          "avatar": "uedho://qkuf.dqndj.jnk/baz/yzjfgemu/aybt/ddom.5.3egxc34d.v5C4f6uuxdjbpSEWqV01AN.zjj?qjgt=24936&ppbpq_nukfbzdr_votv=18261",
+          "name": "观众3",
+          "nick_name": "观众3",
+          "gender": "2",
+          "rank": 3,
+          "score": 353
+        },
+        {
+          "uid": 8125777540,
+          "avatar": "ocaou://sdbt.jpzgi.hyg/sub/vvutdcxa/bhej/qvvo.2.5m4qcv82.ftY9Fz49oeHu5nggVl66lq.roc?tspe=53421&ifkpz_soljcumf_wnxm=67155",
+          "name": "观众4",
+          "nick_name": "观众4",
+          "gender": "2",
+          "rank": 4,
+          "score": 353
+        },
+        {
+          "uid": 8875710694,
+          "avatar": "urhcx://zsrk.qahfz.ker/bis/gnkeqdzy/fsap/qziv.7.9n0s61h0.QvZy1Au4RTRE3cuztanj6w.wpl?xgps=22197&pwlbw_bhcqfcus_lizr=28155",
+          "name": "观众5",
+          "nick_name": "观众5",
+          "gender": "2",
+          "rank": 5,
+          "score": 353
+        },
+        {
+          "uid": 5053166331,
+          "avatar": "yther://qena.uaqhm.tfr/iir/qpgtbctn/xjza/jnwn.9.gd97ebx2.zG-8_ChJWIPUc-HD9IbHSw.uoh?rgbs=02425&oxyxf_umjylyxl_ikha=05298",
+          "name": "观众6",
+          "nick_name": "观众6",
+          "gender": "2",
+          "rank": 6,
+          "score": 352
+        },
+        {
+          "uid": 2861748704,
+          "avatar": "creia://apah.qormh.kxa/fts/rrupaqaz/migz/vgew.3.y35fd3e4.c4-0bPMkCHAyXlfmmVhtJa.hkg?gzke=5031&tbtdo_hcyhwoqm_hyqt=1730",
+          "name": "观众7",
+          "nick_name": "观众7",
+          "gender": "2",
+          "rank": 7,
+          "score": 328
+        },
+        {
+          "uid": 9931362637,
+          "avatar": "ffeqr://dkio.xbioe.wuz/ucr/olroqtbi/jfgm/wbnx.5.184i0580.wU_J1H7ZplvE6BWJRlEFvJ.czm?dbpw=3508&anejp_jkkhzoda_pfvz=2927",
+          "name": "观众8",
+          "nick_name": "观众8",
+          "gender": "2",
+          "rank": 8,
+          "score": 0
+        },
+        {
+          "uid": 8462181906,
+          "avatar": "mmnzy://grqr.onhws.yvy/kjs/yorecqmk/yugp/fgpq.4.9659pt46.ws6g7sBeW7msTSBbp8koxw.dik?xahp=1280&cdnpy_iqjwwwzf_vxlx=3331",
+          "name": "观众9",
+          "nick_name": "观众9",
+          "gender": "2",
+          "rank": 9,
+          "score": 0
+        },
+        {
+          "uid": 4011109493,
+          "avatar": "kzyiu://tqiq.evigm.kef/xlw/yzvpxtfs/elvo/fgmm.3.3w63768d.GH-FDVNcKJqFYJUZo9vWWl.jpx?vgca=045&lzsno_mvxkofra_spre=652",
+          "name": "观众10",
+          "nick_name": "观众10",
+          "gender": "2",
+          "rank": 10,
+          "score": 0
+        }
+      ],
+      "is_admin": "0",
+      "role": "0",
+      "role_name": "",
+      "role_display_name": "",
+      "chat_mcast_id": "11586212983",
+      "host_mcast_id": "11586212985",
+      "reliable_mcast_id": "11586212986",
+      "has_host_room": "0",
+      "has_chat_room": "1",
+      "has_recommend": 1,
+      "enable_robot": "0",
+      "show_host": "1",
+      "has_feedbacks": "1",
+      "has_userlist": "0",
+      "has_comment": "1",
+      "has_video": "1",
+      "ext_params": "{\"ak\":\"baijiahao\",\"create_from_liveshow\":1,\"follow_type\":\"media\"}",
+      "stick_msgs": "",
+      "authorities": null,
+      "chat_msg_hls_url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11586212983.m3u8?authorization=duj-bxzl-q0/2x6862dm09eh099p550326r40qw3i3r6/3481-36-16B52:51:68N/00746222/bhis/17m07yd31gh6b0a0swe3d2d2e2516b24y0hbgxq4155gra73n0qnhx487207r7mk",
+      "host_msg_hls_url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11586212985.m3u8?authorization=hnh-qxjz-y5/4i3498ee70hg677h084580o97ky8y7c3/7887-60-44T45:89:16R/31767821/yelc/i01fnde12i76a24o48sc5w51168gb7742048ze6ia7e785186qsyol4w2p9e286s",
+      "reliable_msg_hls_url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11586212986.m3u8?authorization=elj-rdbz-h6/7y1320jr85uu531m229714c14cc9m1r6/4929-05-01C67:31:99M/52359145/cdts/0573619g662ezx7w6l5v02s509i93d9bkg6b6m1e28956463n73le455g768zs1g",
+      "msg_hls_pull_internal_in_second": "5",
+      "total_users_count": "1395",
+      "source": 0,
+      "caller_flag": "0",
+      "lss_account": 0,
+      "group_list": [
+        {
+          "group_ids": "4580538655,7171799338,8314255850",
+          "group_type": 37
+        }
+      ],
+      "total_users": "0",
+      "room_template": "2",
+      "show_times": "0",
+      "replay_list": [],
+      "replay_list_whole": [],
+      "replay_list_clips": [],
+      "comment_block_ts": "5",
+      "video_block_ts": "1",
+      "has_pay_service": "0",
+      "pay_service_type": "0",
+      "watch_free_duration_second": "300",
+      "has_sales_service": "0",
+      "create_time": 1790604800,
+      "has_speech_connect": "0",
+      "speech_connect": null,
+      "has_reflow_bar": 1,
+      "has_mission_activity": 1,
+      "mission_activity_version": 1,
+      "room_switch_info": "{\"descriptionTab\":1,\"hasChatScript\":1,\"hasDescriptionTab\":1}",
+      "ad_place": {
+        "h5_ad_status": "",
+        "h5_compulsory_display": "",
+        "h5_image": "",
+        "h5_skip": "",
+        "h5_position": 0,
+        "h5_skip_type": 0,
+        "h5_screen": 0,
+        "h5_title": ""
+      },
+      "is_forbidden_url": 0,
+      "is_clubhouse": 0,
+      "template_id": 1,
+      "nid": "17429622813935163989",
+      "category": "时事",
+      "star_id": "0",
+      "cmd": "",
+      "follow_id": "1588754674509461",
+      "follow_type": "media",
+      "follow": "0",
+      "isLogin": false,
+      "users": {
+        "nick_name": null,
+        "avatar": null
+      },
+      "real_fans_num": 5142270,
+      "template": "live",
+      "screen": "1",
+      "use_new_version": 1,
+      "show_im_tags": 1,
+      "user_info": {
+        "is_login": 0
+      },
+      "room_type": 0,
+      "visual_id": 0,
+      "watch_video_duration": 5,
+      "slide_status": 1,
+      "share": {
+        "main_title": "【百度直播】《长江新闻号》正在播出",
+        "sub_title": "直播正在进行，邀请你速来观看",
+        "share_url": "https://live.baidu.com/m/media/multipage/liveshow/index/tfavz?room_id=11586212983",
+        "cover": "https://avatar.bdstatic.com/it/u=1709890002,4280156500&fm=3012&app=3012&autime=1786950360&size=b200,200"
+      },
+      "background_url": "",
+      "ban_status": 0,
+      "emergency_controller": {
+        "stream_cut": 0,
+        "chat_disable": 0,
+        "share_disable": 0
+      }
+    }
+  }
+}

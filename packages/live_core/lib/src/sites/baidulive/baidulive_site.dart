@@ -22,7 +22,9 @@ const _site = 'baidulive';
 /// - the catalog is the feed's channel list (3.x's fixed list until the
 ///   first feed page brings the platform's), without a request;
 /// - a directory page is one signed feed POST; pages follow one feed
-///   session per channel, and a page repeats no room of the session;
+///   session for the recommendations and one per channel (30-6), a page
+///   repeats no room of the session, and the page a session served last is
+///   replayed without a request;
 /// - search is one room command for a room id or link, on page 1;
 /// - room entry, follow refreshes, recordings, the live state and recovery
 ///   are one room command each.
@@ -30,7 +32,9 @@ const _site = 'baidulive';
 /// The adapter remembers the cards and rooms it saw (3.x's `_known`), to
 /// fill what a later answer for the same room leaves out.
 ///
-/// Failures are `SiteError`s; nothing is disguised as an offline room.
+/// Failures are `SiteError`s; nothing is disguised as an offline room. A
+/// paid, forbidden or banned broadcast keeps its state and is marked
+/// (30-5); an ended one plays its recording when there is one (30-4).
 final class BaiduLiveSite extends LiveSite
     with LiveSiteLinks
     implements
@@ -44,14 +48,23 @@ final class BaiduLiveSite extends LiveSite
   /// Creates the adapter. Like 3.x, the feed names this client
   /// `pc-<clock>purelivedev` and every room command a new
   /// `pc-<clock>baidulive`; `deviceId` replaces both (tests), [now] the
-  /// clock.
-  new(this.http, {DateTime Function()? now, this._deviceId}) : _now = now ?? DateTime.now;
+  /// clock. [preferH264] reads "优先 H.264" (on by default, the setting
+  /// shared with 8-8, 14-5, 22-3 and 33-2) at each call: on, a room's
+  /// H.264 qualities come before the others, so the default is H.264 and
+  /// H.265 is only picked by hand; off, the best tier comes first (30-2,
+  /// see [BaiduLiveApi.ordered]).
+  new(this.http, {DateTime Function()? now, this._deviceId, bool Function()? preferH264})
+    : _now = now ?? DateTime.now,
+      _preferH264 = preferH264 ?? _on;
 
   /// Transport.
   final LiveHttp http;
 
   final DateTime Function() _now;
   final String? _deviceId;
+  final bool Function() _preferH264;
+
+  static bool _on() => true;
 
   /// The feed's device id, made once per adapter (3.x).
   late final String _feedDevice = _deviceId ?? 'pc-${_now().microsecondsSinceEpoch.toRadixString(36)}purelivedev';
@@ -59,8 +72,13 @@ final class BaiduLiveSite extends LiveSite
   /// Rooms remembered, by room id, oldest first.
   final LinkedHashMap<String, BaiduLiveRoom> _known = LinkedHashMap();
 
-  /// The feed session of each channel.
+  /// The feed session of the recommendations ([_recommendations]) and of
+  /// each channel, by its id (30-6: the recommendations and the "推荐"
+  /// channel no longer share one).
   final Map<String, _Sequence> _sequences = {};
+
+  /// The session key of the recommendations (no channel id is empty).
+  static const String _recommendations = '';
 
   /// The platform's channels, once a first feed page brought them.
   List<BaiduLiveCategory>? _channels;
@@ -195,17 +213,26 @@ final class BaiduLiveSite extends LiveSite
   }
 
   /// Page [page] of [category]'s feed (3.x): page 1 starts a new feed
-  /// session of the channel, and each later page must be the next of that
-  /// session (any other page is empty, without a request). A page keeps the
-  /// rooms the session has not shown yet and has more while it was full,
-  /// brought a new room and moved the session on. The first page's channel
-  /// list replaces the catalog. A page below 1 is empty.
+  /// session, and each later page must be the next of that session (any
+  /// other page is empty, without a request). A page keeps the rooms the
+  /// session has not shown yet and has more while it was full, brought a
+  /// new room and moved the session on. The first page's channel list
+  /// replaces the catalog. A page below 1 is empty.
+  ///
+  /// 30-6: the recommendations (no [category]) have a session of their own,
+  /// apart from the "推荐" channel's; asking again for the page a session
+  /// served last replays it without a request (3.x answered it empty and
+  /// ended the list).
   @override
   Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel}) async {
     if (page < 1) return LiveDirectoryPage(rooms: const [], page: page, hasMore: false);
     final channel = _channel(category);
-    if (page == 1) _sequences[channel.id] = _Sequence();
-    final sequence = _sequences[channel.id];
+    final key = category == null ? _recommendations : channel.id;
+    if (page == 1) _sequences[key] = _Sequence();
+    final sequence = _sequences[key];
+    if (sequence != null && page == sequence.lastPage) {
+      if (sequence.last case final last?) return last;
+    }
     if (sequence == null || page != sequence.nextPage) {
       return LiveDirectoryPage(rooms: const [], page: page, hasMore: false);
     }
@@ -224,20 +251,23 @@ final class BaiduLiveSite extends LiveSite
         if (sequence.seen.add(room.roomId)) room,
     ];
     final hasMore = result.hasMore && fresh.isNotEmpty && (page == 1 || result.refreshIndex > previous);
-    sequence
-      ..sessionId = result.sessionId
-      ..refreshIndex = result.refreshIndex
-      ..nextPage = hasMore ? page + 1 : page;
     fresh.forEach(_remember);
-    return LiveDirectoryPage(
+    final served = LiveDirectoryPage(
       rooms: [for (final room in fresh) BaiduLiveApi.liveRoom(room)],
       page: page,
       hasMore: hasMore,
     );
+    sequence
+      ..sessionId = result.sessionId
+      ..refreshIndex = result.refreshIndex
+      ..nextPage = hasMore ? page + 1 : page
+      ..lastPage = page
+      ..last = served;
+    return served;
   }
 
   /// The first [pageSize] rooms of page [page] of the recommendations (the
-  /// first channel).
+  /// first channel, in a session of their own, 30-6).
   @override
   Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async {
     if (page < 1 || pageSize < 1) return const [];
@@ -293,37 +323,37 @@ final class BaiduLiveSite extends LiveSite
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => getRoomDetail(roomId: roomId);
 
-  /// Whether the room command says live. A state 3.x showed as unknown is
-  /// an error, never "offline" (3.x: `access`): forbidden or banned
-  /// `StreamUnavailable`, paid `NeedsLogin`, a state 3.x did not know
-  /// `ApiChanged`.
+  /// Whether the room command says live: a live broadcast is live whether
+  /// or not it is paid or blocked (30-5; playback says why it cannot be
+  /// played); preview, offline and ended are not; a state 3.x did not know
+  /// is `ApiChanged`, never "offline".
   @override
   Future<bool> getLiveStatus({required String roomId}) async {
     final room = await _room(_checkedId(roomId));
     return switch (room.state) {
-      BaiduLiveState.restricted when room.blocked => throw StreamUnavailable(_site, '${room.roomId} is blocked'),
-      BaiduLiveState.restricted => throw NeedsLogin(_site, '${room.roomId} is a paid broadcast'),
       BaiduLiveState.unknown => throw ApiChanged(_site, 'searchbox 371: unknown state of ${room.roomId}'),
-      _ => room.state == BaiduLiveState.live,
+      final state => state == BaiduLiveState.live,
     };
   }
 
   // Streams -------------------------------------------------------------------
 
-  /// 3.x's qualities (see [BaiduLiveApi.qualities]) from the data room
-  /// entry brought: no request. A room without it (a list card, a refreshed
-  /// follow) is fetched first; one the platform called offline has no
-  /// stream (`StreamUnavailable`, without a request). A room that cannot be
-  /// played says why.
+  /// The qualities (see [BaiduLiveApi.qualities]: 原画 and the heights of a
+  /// live broadcast, the recording of an ended one; H.264 first while
+  /// "优先 H.264" is on) from the data room entry brought: no request. A
+  /// room without it (a list card, a refreshed follow) is fetched first;
+  /// one the platform called offline has no stream (`StreamUnavailable`,
+  /// without a request). A room that cannot be played says why.
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
-      BaiduLiveApi.qualities(await _stream(detail, fresh: false));
+      BaiduLiveApi.qualities(await _stream(detail, fresh: false), preferH264: _preferH264());
 
   @override
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The lines of [quality], with the media headers.
+  /// The lines of [quality] (a 3.x quality id too, see
+  /// [BaiduLiveApi.qualityIdFromLegacy]), with the media headers.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
     required LiveRoom detail,
@@ -359,10 +389,13 @@ final class BaiduLiveSite extends LiveSite
   String? roomIdFromUrl(String url) => BaiduLiveApi.roomIdFromUrl(url);
 }
 
-/// One channel's feed session (3.x's `_BaiduDirectorySequence`).
+/// One feed session (3.x's `_BaiduDirectorySequence`), with the page it
+/// served last (30-6).
 final class _Sequence {
   String sessionId = '';
   int refreshIndex = 0;
   int nextPage = 1;
+  int lastPage = 0;
+  LiveDirectoryPage? last;
   final Set<String> seen = {};
 }

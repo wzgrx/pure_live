@@ -1,0 +1,221 @@
+{
+  "schema": 1,
+  "platform": "baidulive",
+  "sample": "S02-room-hevc",
+  "capturedAt": "2026-09-28T21:02:07.484664Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://mbd.baidu.com/searchbox?cmd=371&action=star&service=bdbox&osname=pc&data=%7B%22data%22%3A%7B%22room_id%22%3A%2211586291324%22%2C%22device_id%22%3A%22pc-purelivefixturedevice01%22%2C%22source_type%22%3A0%7D%2C%22replay_slice%22%3A0%2C%22nid%22%3A%22%22%2C%22schemeParams%22%3A%7B%22src_pre%22%3A%22pc%22%2C%22src_suf%22%3A%22other%22%2C%22bd_vid%22%3A%22%22%2C%22share_uid%22%3A%22%22%2C%22share_cuk%22%3A%22%22%2C%22share_ecid%22%3A%22%22%2C%22zb_tag%22%3A%22%22%2C%22shareTaskInfo%22%3A%22%7B%5C%22room_id%5C%22%3A%5C%2211586291324%5C%22%7D%22%2C%22share_from%22%3A%22%22%2C%22ext_params%22%3A%22%22%2C%22nid%22%3A%22%22%7D%7D&ua=360_740_ANDROID_0&bd_vid=&uid=pc-purelivefixturedevice01&_=1790629326891",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Origin": "https://live.baidu.com",
+      "Referer": "https://live.baidu.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-length": "10935",
+      "content-type": "application/json",
+      "date": "Mon, 28 Sep 2026 21:02:08 GMT",
+      "server": "nginx/1.9.1",
+      "set-cookie": "MBD_AT=0; expires=Sat, 17-Nov-2108 21:02:08 GMT; path=/; domain=.baidu.com",
+      "tracecode": "24657950293843546122092905",
+      "x-bd-api": "star_371",
+      "x-bd-status": "200",
+      "x-bfe-svbbrers": "MjAzLjAuMTEzLjc=,1.0",
+      "x-logic-no": "null",
+      "connection": "close"
+    }
+  },
+  "raw": {
+    "sha256": "14046956fc7f6110c7166c8457ccca730e6ad82275e796c390ad8575639cb7cf",
+    "length": 10935
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.371.online_user_list[0].uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[0].avatar",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[0].name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[0].nick_name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[1].uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[1].avatar",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[1].name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[1].nick_name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[2].uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[2].avatar",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[2].name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[2].nick_name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[3].uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[3].avatar",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[3].name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[3].nick_name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[4].uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[4].avatar",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[4].name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[4].nick_name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[5].uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[5].avatar",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[5].name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[5].nick_name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[6].uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[6].avatar",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[6].name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[6].nick_name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[7].uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[7].avatar",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[7].name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[7].nick_name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[8].uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[8].avatar",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[8].name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[8].nick_name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[9].uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[9].avatar",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[9].name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.online_user_list[9].nick_name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.371.video.msg_hls_url:authorization",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.371.chat_msg_hls_url:authorization",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.371.host_msg_hls_url:authorization",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.371.reliable_msg_hls_url:authorization",
+      "rule": "secret"
+    },
+    {
+      "where": "header:x-bfe-svbbrers",
+      "rule": "ip"
+    }
+  ],
+  "tool": "M4.U.30 record.py (fixture schema 1)"
+}

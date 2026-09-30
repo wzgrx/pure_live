@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "platform": "baidulive",
+  "sample": "S02-room-preview",
+  "capturedAt": "2026-09-28T21:02:07.873197Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://mbd.baidu.com/searchbox?cmd=371&action=star&service=bdbox&osname=pc&data=%7B%22data%22%3A%7B%22room_id%22%3A%2211586142356%22%2C%22device_id%22%3A%22pc-purelivefixturedevice01%22%2C%22source_type%22%3A0%7D%2C%22replay_slice%22%3A0%2C%22nid%22%3A%22%22%2C%22schemeParams%22%3A%7B%22src_pre%22%3A%22pc%22%2C%22src_suf%22%3A%22other%22%2C%22bd_vid%22%3A%22%22%2C%22share_uid%22%3A%22%22%2C%22share_cuk%22%3A%22%22%2C%22share_ecid%22%3A%22%22%2C%22zb_tag%22%3A%22%22%2C%22shareTaskInfo%22%3A%22%7B%5C%22room_id%5C%22%3A%5C%2211586142356%5C%22%7D%22%2C%22share_from%22%3A%22%22%2C%22ext_params%22%3A%22%22%2C%22nid%22%3A%22%22%7D%7D&ua=360_740_ANDROID_0&bd_vid=&uid=pc-purelivefixturedevice01&_=1790629327534",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Origin": "https://live.baidu.com",
+      "Referer": "https://live.baidu.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-length": "4353",
+      "content-type": "application/json",
+      "date": "Mon, 28 Sep 2026 21:02:08 GMT",
+      "server": "nginx/1.9.1",
+      "set-cookie": "MBD_AT=0; expires=Sat, 17-Nov-2108 21:02:08 GMT; path=/; domain=.baidu.com",
+      "tracecode": "41616071561695079434092905",
+      "x-bd-api": "star_371",
+      "x-bd-status": "200",
+      "x-bfe-svbbrers": "MjAzLjAuMTEzLjc=,1.0",
+      "x-logic-no": "null",
+      "connection": "close"
+    }
+  },
+  "raw": {
+    "sha256": "bb9429c261a7950e929c266840820056a1f1e186607b336f9ec060157904defc",
+    "length": 4353
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "header:x-bfe-svbbrers",
+      "rule": "ip"
+    }
+  ],
+  "tool": "M4.U.30 record.py (fixture schema 1)"
+}

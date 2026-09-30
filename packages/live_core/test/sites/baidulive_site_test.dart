@@ -5,7 +5,9 @@
 // room-id search, room details for entry, refresh and recording, what
 // earlier cards fill in, streams with their lines and recovery,
 // cancellation, links through the link parser and the error mapping. Ports
-// the orchestration parts of 3.x's baidu_live_site_test.dart.
+// the orchestration parts of 3.x's baidu_live_site_test.dart. The M4.U
+// items (30-1…30-10) are asserted where they change 3.x's answers, and in
+// the "M4.U" group.
 import 'dart:async';
 import 'dart:convert';
 
@@ -24,6 +26,9 @@ const _device = 'pc-purelivefixturedevice01';
 const _liveRoom = '11560887291';
 const _endedRoom = '11583715413';
 const _missingRoom = '99999999999';
+const _clarityRoom = '11586212983';
+const _hevcRoom = '11586291324';
+const _previewRoom = '11586142356';
 
 /// Answers every request with [answer].
 final class _Scripted implements LiveHttp {
@@ -164,20 +169,38 @@ void _expectLegacyRequests(List<LiveRequest> requests, Map<String, dynamic> outc
   }
 }
 
-void _expectParity(Map<String, Object?> actual, Map<String, dynamic> legacy, {String? reason}) {
+/// Keys of every room that differ from 3.x on purpose: `httpHeaders`
+/// (M4.30 difference 1: the media headers travel on the lines) and
+/// `notice` (30-10: written for users).
+const _changed = {'httpHeaders', 'notice'};
+
+/// A live room's keys that differ besides [_changed]: `introduction` (30-7).
+const Set<String> _changedLive = {..._changed, 'introduction'};
+
+/// An ended room's keys that differ besides [_changed]: `liveStatus` and
+/// `isRecord` (30-4: the ended broadcast is a replay).
+const Set<String> _changedEnded = {..._changed, 'liveStatus', 'isRecord'};
+
+void _expectParity(
+  Map<String, Object?> actual,
+  Map<String, dynamic> legacy, {
+  Set<String> changed = _changed,
+  String? reason,
+}) {
   for (final MapEntry(:key, :value) in legacy.entries) {
-    if (key == 'httpHeaders') continue;
+    if (changed.contains(key)) continue;
     expect(actual[key] ?? '', value ?? '', reason: '${reason ?? ''} $key');
   }
 }
 
 Map<String, Object?> _projection(LiveRoom room) => {...room.toJson(), 'link': room.link};
 
-void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String? reason}) {
+void _expectRooms(List<LiveRoom> rooms, Object? legacy, {Set<String> changed = _changed, String? reason}) {
   final expected = _maps(legacy);
   expect(rooms.map((room) => room.roomId), expected.map((room) => room['roomId']), reason: reason);
   for (final (index, room) in rooms.indexed) {
-    _expectParity(_projection(room), expected[index], reason: '${reason ?? ''}[$index]');
+    _expectParity(_projection(room), expected[index], changed: changed, reason: '${reason ?? ''}[$index]');
+    expect(room.notice, contains(BaiduLiveApi.chatNotice), reason: '30-10');
   }
 }
 
@@ -363,15 +386,18 @@ void main() {
       final legacy = _legacyValue('S01-feed-rec-p2', 'getDirectoryPage(2)')! as Map<String, dynamic>;
       _expectRooms(page.rooms, legacy['rooms'], reason: 'p2');
       expect(page.hasMore, legacy['hasMore']);
-      // 3.x: only the next page of the session; any other page is empty.
-      final again = await site.getDirectoryPage(page: 2);
-      expect(again.rooms, isEmpty);
-      expect(again.hasMore, isFalse);
+      // 30-6: the same page again replays it without a request (3.x
+      // answered it empty and the list ended there).
       expect(_legacyValue('S01-feed-rec-p2', 'getDirectoryPage(2) again'), {
         'page': 2,
         'hasMore': false,
         'rooms': <Object?>[],
       });
+      final again = await site.getDirectoryPage(page: 2);
+      expect(again, same(page));
+      expect(again.rooms, hasLength(10));
+      expect(again.hasMore, legacy['hasMore']);
+      // 3.x: any page other than the next of the session is empty.
       expect(await site.getDirectoryPage(page: 5), isA<LiveDirectoryPage>().having((p) => p.rooms, 'rooms', isEmpty));
       expect(http.requests, hasLength(2));
     });
@@ -487,6 +513,53 @@ void main() {
       }
     });
 
+    test('the recommendations and the "推荐" channel each have a session (30-6; 3.x shared one)', () async {
+      var sessions = 0;
+      final http = _Scripted((request) {
+        final form = Uri.splitQueryString(utf8.decode(request.body!));
+        final index = int.parse(form['refresh_index']!);
+        final session = form['session_id']!.isEmpty ? 'session-${++sessions}' : form['session_id']!;
+        return _response(request, _feedAnswer(_ids(sessions * 1000 + index * 10), session: session, index: index));
+      });
+      final site = BaiduLiveSite(http);
+      final rec = (await site.getCategories(1, 30)).single.children.first;
+      expect(rec.areaId, 'rec');
+      await site.getDirectoryPage();
+      final recommended = await site.getDirectoryPage(page: 2);
+      await site.getDirectoryPage(category: rec);
+      // 3.x: page 1 of the channel restarted the recommendations' session,
+      // so their page 2 again and page 3 were empty.
+      expect(await site.getDirectoryPage(page: 2), same(recommended), reason: 'the same page again, no request');
+      final third = await site.getDirectoryPage(page: 3);
+      expect(third.rooms, hasLength(10), reason: "the recommendations' session goes on");
+      final forms = [for (final request in http.requests) Uri.splitQueryString(utf8.decode(request.body!))];
+      expect(
+        [for (final form in forms) (form['tab'], form['refresh_index'], form['session_id'])],
+        [('rec', '1', ''), ('rec', '2', 'session-1'), ('rec', '1', ''), ('rec', '3', 'session-1')],
+      );
+      expect((await site.getDirectoryPage(page: 2, category: rec)).rooms, hasLength(10));
+      expect(Uri.splitQueryString(utf8.decode(http.requests.last.body!))['session_id'], 'session-2');
+      expect(http.requests, hasLength(5));
+    });
+
+    test('the page a session served last is replayed (30-6); a later page is still asked for', () async {
+      final http = _Scripted((request) {
+        final index = int.parse(Uri.splitQueryString(utf8.decode(request.body!))['refresh_index']!);
+        return _response(request, _feedAnswer(_ids(index * 10, index == 3 ? 4 : 10), index: index));
+      });
+      final site = BaiduLiveSite(http);
+      final first = await site.getDirectoryPage();
+      expect(await site.getDirectoryPage(), isNot(same(first)), reason: 'page 1 always starts anew (a refresh)');
+      final second = await site.getDirectoryPage(page: 2);
+      expect(await site.getDirectoryPage(page: 2), same(second));
+      expect(await site.getRecommendRooms(page: 2, pageSize: 3), second.rooms.take(3));
+      final last = await site.getDirectoryPage(page: 3);
+      expect(last.hasMore, isFalse, reason: 'four items');
+      expect(await site.getDirectoryPage(page: 3), same(last), reason: 'also after the session ended');
+      expect(await site.getDirectoryPage(page: 2), isA<LiveDirectoryPage>().having((p) => p.rooms, 'rooms', isEmpty));
+      expect(http.requests, hasLength(4));
+    });
+
     test('each channel keeps its own session; the recommendations are the first channel', () async {
       final http = _Scripted((request) {
         final form = Uri.splitQueryString(utf8.decode(request.body!));
@@ -547,17 +620,21 @@ void main() {
         http.requests.clear();
         final rooms = await site.searchRooms(key);
         _expectLegacyRequests(http.requests, value as Map<String, dynamic>);
-        _expectRooms(rooms, value['value'], reason: key);
+        _expectRooms(rooms, value['value'], changed: _changedLive, reason: key);
         expect(rooms.single.data, isNull, reason: 'no playback data');
+        expect(rooms.single.restriction, LiveRestriction.none);
       }
       http.requests.clear();
       expect(await site.searchRooms(_liveRoom, page: 2), isEmpty);
       expect(await site.searchRooms(_liveRoom, pageSize: 0), isEmpty);
       expect(await site.searchRooms('锦尚书画'), isEmpty);
       expect(_legacyValue('S01-feed-rec-p1', 'searchRooms(nickname)'), isEmpty);
-      expect(await site.searchRooms('http://live.baidu.com/m/room/$_liveRoom'), isEmpty);
       expect(await site.searchRooms('https://live.baidu.com/search?room_id=$_liveRoom'), isEmpty);
       expect(http.requests, isEmpty);
+      // 30-8: an http room link is a room (3.x found nothing).
+      final found = await site.searchRooms('http://live.baidu.com/m/room/$_liveRoom');
+      expect(found.single.roomId, _liveRoom);
+      expect(_askedRoom(http.requests.single), _liveRoom);
     });
 
     test('an ended room is found, offline; a room that does not exist finds nothing', () async {
@@ -565,10 +642,16 @@ void main() {
       for (final (sample, id) in [('S02-room-ended', _endedRoom), ('S02-room-notfound', _missingRoom)]) {
         final searches = _legacy(sample)['searchRooms'] as Map<String, dynamic>;
         for (final MapEntry(:key, :value) in searches.entries) {
-          _expectRooms(await site.searchRooms(key), (value as Map<String, dynamic>)['value'], reason: key);
+          _expectRooms(
+            await site.searchRooms(key),
+            (value as Map<String, dynamic>)['value'],
+            changed: _changedEnded,
+            reason: key,
+          );
         }
         expect(searches.keys, contains(id));
       }
+      expect((await site.searchRooms(_endedRoom)).single.liveStatus, LiveStatus.replay, reason: '30-4');
     });
 
     test('other failures are thrown; cancellation too', () async {
@@ -593,14 +676,23 @@ void main() {
         _expectLegacyRequests(http.requests, _outcome('S02-room-live', key));
         expect(http.requests.single.url.toString(), _bare(_recorded('S02-room-live')['url'] as String));
         expect(http.requests.single.url.query, contains('&bd_vid&'), reason: "3.x's encoding of an empty field");
-        _expectParity(_projection(room), _legacyValue('S02-room-live', key)! as Map<String, dynamic>, reason: key);
+        _expectParity(
+          _projection(room),
+          _legacyValue('S02-room-live', key)! as Map<String, dynamic>,
+          changed: _changedLive,
+          reason: key,
+        );
         expect(room.data, key == 'getRoomDetailForRefresh' ? isNull : isA<BaiduLiveRoom>(), reason: key);
         expect(room.httpHeaders, isEmpty);
+        expect(room.startedAt, DateTime.utc(2026, 9, 16, 15, 59, 58), reason: 'create_time ($key)');
+        expect(room.restriction, LiveRestriction.none, reason: key);
+        expect(room.introduction, startsWith('传承易经智慧的奥秘'), reason: '30-7 ($key)');
+        expect(room.notice, BaiduLiveApi.chatNotice, reason: '30-10');
       }
       expect(await site.getLiveStatus(roomId: _liveRoom), _legacyValue('S02-room-live', 'getLiveStatus'));
     });
 
-    test('ended: offline and not live; a room that does not exist is NotFound (3.x: missing)', () async {
+    test('ended: a replay (30-4) and not live; a room that does not exist is NotFound (3.x: missing)', () async {
       final (:site, :http) = _setup(['S02-room-ended', 'S02-room-notfound']);
       for (final key in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
         final room = await switch (key) {
@@ -608,8 +700,15 @@ void main() {
           'getRoomDetailForRefresh' => site.getRoomDetailForRefresh(roomId: _endedRoom),
           _ => site.getRoomDetailForRecording(roomId: _endedRoom),
         };
-        _expectParity(_projection(room), _legacyValue('S02-room-ended', key)! as Map<String, dynamic>, reason: key);
-        expect(room.liveStatus, LiveStatus.offline);
+        _expectParity(
+          _projection(room),
+          _legacyValue('S02-room-ended', key)! as Map<String, dynamic>,
+          changed: _changedEnded,
+          reason: key,
+        );
+        // 3.x: offline.
+        expect(room.liveStatus, LiveStatus.replay);
+        expect([room.restriction, room.followGroup, room.startedAt], [LiveRestriction.none, FollowGroup.replay, null]);
       }
       expect(await site.getLiveStatus(roomId: _endedRoom), isFalse);
       for (final key in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording', 'getLiveStatus']) {
@@ -626,30 +725,32 @@ void main() {
       expect(room.roomId, _liveRoom);
       expect(_askedRoom(http.requests.single), _liveRoom);
       http.requests.clear();
-      for (final id in ['12345', '012345678', 'abc', 'http://live.baidu.com/m/room/$_liveRoom']) {
+      for (final id in ['12345', '012345678', 'abc', 'ftp://live.baidu.com/m/room/$_liveRoom']) {
         await expectLater(site.getRoomDetail(roomId: id), throwsA(isA<NotFound>()), reason: id);
       }
       expect(http.requests, isEmpty);
+      // 30-8: http room links too (3.x: NotFound).
+      expect((await site.getRoomDetail(roomId: 'http://live.baidu.com/m/room/$_liveRoom')).roomId, _liveRoom);
+      expect(_askedRoom(http.requests.single), _liveRoom);
     });
 
-    test(
-      'the live state: paid NeedsLogin, forbidden or banned StreamUnavailable, unknown ApiChanged (3.x: access)',
-      () async {
-        for (final (changes, matcher) in [
-          ({'has_pay_service': '1'}, throwsA(isA<NeedsLogin>())),
-          ({'ban_status': 1}, throwsA(isA<StreamUnavailable>())),
-          ({'is_forbidden_url': 1, 'has_pay_service': 1}, throwsA(isA<StreamUnavailable>())),
-          ({'status': '9'}, throwsA(isA<ApiChanged>())),
-        ]) {
-          final http = _Scripted((request) => _response(request, _liveAnswer(changes: changes)));
-          await expectLater(BaiduLiveSite(http).getLiveStatus(roomId: _liveRoom), matcher, reason: '$changes');
-        }
-        for (final (status, live) in [('0', true), ('1', false), ('20', false), ('3', false)]) {
-          final http = _Scripted((request) => _response(request, _liveAnswer(changes: {'status': status})));
-          expect(await BaiduLiveSite(http).getLiveStatus(roomId: _liveRoom), live, reason: status);
-        }
-      },
-    );
+    test('the live state (30-5): paid, forbidden and banned broadcasts are live; unknown ApiChanged', () async {
+      for (final (changes, live) in [
+        ({'has_pay_service': '1'}, true),
+        ({'ban_status': 1}, true),
+        ({'is_forbidden_url': 1, 'has_pay_service': 1}, true),
+        ({'status': '0'}, true),
+        ({'status': '1'}, false),
+        ({'status': '20'}, false),
+        ({'status': '3'}, false),
+        ({'status': '3', 'has_pay_service': 1}, false),
+      ]) {
+        final http = _Scripted((request) => _response(request, _liveAnswer(changes: changes)));
+        expect(await BaiduLiveSite(http).getLiveStatus(roomId: _liveRoom), live, reason: '$changes');
+      }
+      final http = _Scripted((request) => _response(request, _liveAnswer(changes: {'status': '9'})));
+      await expectLater(BaiduLiveSite(http).getLiveStatus(roomId: _liveRoom), throwsA(isA<ApiChanged>()));
+    });
 
     test('a card seen before fills what the command leaves out; an ended room drops the card viewers', () async {
       final (:site, :http) = _setup(['S01-feed-rec-p1', 'S02-room-live'], now: () => _feedClock('S01-feed-rec-p1'));
@@ -657,6 +758,7 @@ void main() {
       _expectParity(
         _projection(await site.getRoomDetail(roomId: _liveRoom)),
         _legacyValue('S02-room-live', 'getRoomDetail after the directory')! as Map<String, dynamic>,
+        changed: _changedLive,
       );
       final cards = _Scripted((request) {
         if (request.method == 'POST') return _response(request, _feedAnswer([11560887291, 11583715413]));
@@ -688,22 +790,34 @@ void main() {
   });
 
   group('streams', () {
-    test("room entry brings 3.x's qualities and URLs: no further request; lines with the media headers", () async {
+    test('room entry brings the tiers (30-1): no further request; lines with the media headers', () async {
       final (:site, :http) = _setup(['S02-room-live']);
       final detail = await site.getRoomDetail(roomId: _liveRoom);
       http.requests.clear();
       final qualities = await site.getPlayQualities(detail: detail);
-      expect([
-        for (final quality in qualities) {'quality': quality.quality, 'id': quality.id, 'sort': quality.sort},
-      ], _legacyValue('S02-room-live', 'getPlayQualites'));
-      final urls = _legacy('S02-room-live')['getPlayUrls'] as Map<String, dynamic>;
+      // 3.x: HLS 720P · AVC (hls:720:avc) and FLV 原始线路 · AVC (flv:0:avc).
+      expect(
+        [for (final quality in qualities) (quality.quality, quality.id)],
+        [('原画', 'source'), ('720p', '720p'), ('480p', '480p')],
+      );
       final raw = _legacy('S02-room-live')['resolvePlayUrlsRaw'] as Map<String, dynamic>;
-      for (final quality in qualities) {
-        expect(await site.getPlayUrls(detail: detail, quality: quality), (urls['${quality.id}'] as Map)['value']);
+      final urls = _legacy('S02-room-live')['getPlayUrls'] as Map<String, dynamic>;
+      for (final old in _maps(_legacyValue('S02-room-live', 'getPlayQualites'))) {
+        // A quality stored by 3.x still plays: the tier's first lines are
+        // 3.x's URLs (30-9: flv-live.bdstatic.com over http).
+        final quality = LivePlayQuality(quality: old['quality'] as String, id: old['id']);
         final resolution = await site.resolvePlayUrls(detail: detail, quality: quality);
-        final legacy = (raw['${quality.id}'] as Map<String, dynamic>)['value'] as Map<String, dynamic>;
-        expect(resolution.urls, legacy['urls']);
-        expect(resolution.appliedQualityData, legacy['appliedQualityData']);
+        final legacy = ((raw['${old['id']}'] as Map)['value'] as Map)['urls'] as List;
+        expect(resolution.urls.take(legacy.length), [
+          for (final url in legacy.cast<String>()) url.replaceFirst('https://flv-live.', 'http://flv-live.'),
+        ]);
+        expect((urls['${old['id']}'] as Map)['value'], legacy);
+        expect(resolution.appliedQualityData, BaiduLiveApi.qualityIdFromLegacy(old['id'] as String));
+      }
+      for (final quality in qualities) {
+        final resolution = await site.resolvePlayUrls(detail: detail, quality: quality);
+        expect(await site.getPlayUrls(detail: detail, quality: quality), resolution.urls);
+        expect(resolution.appliedQualityData, quality.id);
         expect(
           resolution.lines.every((line) => line.headers['referer'] == 'https://live.baidu.com/m/room/$_liveRoom'),
           isTrue,
@@ -716,23 +830,34 @@ void main() {
       final (:site, :http) = _setup(['S02-room-live']);
       final detail = await site.getRoomDetail(roomId: _liveRoom);
       final recovery = _legacy('S02-room-live')['resolvePlayUrlsForRecoveryRaw'] as Map<String, dynamic>;
+      for (final MapEntry(key: id, value: outcome as Map<String, dynamic>) in recovery.entries) {
+        http.requests.clear();
+        final resolution = await site.resolvePlayUrlsForRecovery(
+          detail: detail,
+          quality: LivePlayQuality(quality: id, id: id),
+        );
+        _expectLegacyRequests(http.requests, outcome);
+        final urls = ((outcome['value'] as Map<String, dynamic>)['urls'] as List).cast<String>();
+        expect(resolution.urls.take(urls.length), [
+          for (final url in urls) url.replaceFirst('https://flv-live.', 'http://flv-live.'),
+        ]);
+        expect(resolution.appliedQualityData, BaiduLiveApi.qualityIdFromLegacy(id));
+      }
       for (final quality in await site.getPlayQualities(detail: detail)) {
         http.requests.clear();
         final resolution = await site.resolvePlayUrlsForRecovery(detail: detail, quality: quality);
-        final outcome = recovery['${quality.id}'] as Map<String, dynamic>;
-        _expectLegacyRequests(http.requests, outcome);
-        expect(resolution.urls, (outcome['value'] as Map<String, dynamic>)['urls']);
+        expect(http.requests, hasLength(1));
         expect(resolution.appliedQualityData, quality.id);
       }
       final changed = _Scripted(
-        (request) => _response(request, _liveAnswer(video: {'live_hls_url': '', 'url_clarity_list': <Object?>[]})),
+        (request) => _response(request, _liveAnswer(video: {'url_list': <Object?>[], 'live_hls_url': ''})),
       );
       final other = BaiduLiveSite(changed);
       final entered = await other.getRoomDetail(roomId: _liveRoom);
       await expectLater(
         other.resolvePlayUrlsForRecovery(
           detail: entered,
-          quality: const LivePlayQuality(quality: 'HLS 720P · AVC', id: 'hls:720:avc'),
+          quality: const LivePlayQuality(quality: '720p', id: '720p'),
         ),
         throwsA(isA<StreamUnavailable>()),
       );
@@ -754,7 +879,7 @@ void main() {
           containsPair('message', 'Baidu Live identity'),
         );
         final qualities = await site.getPlayQualities(detail: card);
-        expect(qualities.map((quality) => quality.id), ['hls:720:avc', 'flv:0:avc']);
+        expect(qualities.map((quality) => quality.id), ['source', '720p', '480p']);
         expect(http.requests, hasLength(1));
         http.requests.clear();
         final offline = LiveRoom(platform: 'baidulive', roomId: _endedRoom, liveStatus: LiveStatus.offline);
@@ -773,23 +898,29 @@ void main() {
       },
     );
 
-    test('rooms that cannot be played are entered and say why when streamed', () async {
-      final (:site, :http) = _setup(['S02-room-ended']);
-      final ended = await site.getRoomDetail(roomId: _endedRoom);
-      expect(_legacyValue('S02-room-ended', 'getPlayQualites'), isEmpty, reason: '3.x: an empty list');
-      await expectLater(site.getPlayQualities(detail: ended), throwsA(isA<StreamUnavailable>()));
-      for (final (changes, matcher) in [
-        ({'has_pay_service': 1}, throwsA(isA<NeedsLogin>())),
-        ({'is_forbidden_url': 1}, throwsA(isA<StreamUnavailable>())),
-        ({'status': '9'}, throwsA(isA<StreamUnavailable>())),
+    test('restricted broadcasts (30-5) and live ones without a stream are entered and say why', () async {
+      for (final (changes, restriction, reason) in [
+        ({'has_pay_service': 1}, LiveRestriction.paid, '(paid)'),
+        ({'is_forbidden_url': 1}, LiveRestriction.unplayable, '(unplayable: forbidden or banned)'),
+        ({'ban_status': '1'}, LiveRestriction.unplayable, '(unplayable: forbidden or banned)'),
       ]) {
         final http = _Scripted((request) => _response(request, _liveAnswer(changes: changes)));
         final restricted = BaiduLiveSite(http);
         final room = await restricted.getRoomDetail(roomId: _liveRoom);
-        expect(room.liveStatus, LiveStatus.unknown, reason: '$changes');
-        await expectLater(restricted.getPlayQualities(detail: room), matcher, reason: '$changes');
+        // 3.x: unknown, and a paid room was NeedsLogin (no sign-in here).
+        expect([room.liveStatus, room.restriction], [LiveStatus.live, restriction], reason: '$changes');
+        expect(room.notice, '${BaiduLiveApi.restrictedNotice}\n${BaiduLiveApi.chatNotice}');
+        await expectLater(
+          restricted.getPlayQualities(detail: room),
+          throwsA(isA<StreamUnavailable>().having((error) => '$error', 'message', contains(reason))),
+          reason: '$changes',
+        );
         expect(http.requests, hasLength(1), reason: 'the snapshot says why');
       }
+      final unknown = _Scripted((request) => _response(request, _liveAnswer(changes: {'status': '9'})));
+      final room = await BaiduLiveSite(unknown).getRoomDetail(roomId: _liveRoom);
+      expect(room.liveStatus, LiveStatus.unknown);
+      await expectLater(BaiduLiveSite(unknown).getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
       final noStream = _Scripted(
         (request) => _response(
           request,
@@ -807,7 +938,7 @@ void main() {
         ),
       );
       final live = await BaiduLiveSite(noStream).getRoomDetail(roomId: _liveRoom);
-      expect(live.liveStatus, LiveStatus.live, reason: '3.x failed the entry');
+      expect([live.liveStatus, live.restriction], [LiveStatus.live, LiveRestriction.unplayable], reason: '3.x failed');
       await expectLater(BaiduLiveSite(noStream).getPlayQualities(detail: live), throwsA(isA<StreamUnavailable>()));
     });
 
@@ -819,17 +950,137 @@ void main() {
       final site = BaiduLiveSite(http);
       final detail = await site.getRoomDetail(roomId: _liveRoom);
       final qualities = await site.getPlayQualities(detail: detail);
-      expect(qualities.map((quality) => quality.quality), [
-        'FLV 720P · AVC',
-        'HLS 720P · AVC',
-        'FLV 480P · AVC',
-        'HLS 480P · AVC',
-        'FLV 原始线路 · AVC',
-        'HLS 原始线路 · AVC',
+      expect(qualities.map((quality) => quality.quality), ['原画', '720p', '480p']);
+      final lines = (await site.resolvePlayUrls(detail: detail, quality: qualities[1])).lines;
+      expect(lines.map((line) => line.url), everyElement(startsWith('http://')));
+      expect(lines.map((line) => line.lineId), [
+        'flv.liveshow.lss-user.baidubce.com',
+        'flv2.liveshow.lss-user.baidubce.com',
+        'hls.liveshow.lss-user.baidubce.com',
+        'hls2.liveshow.lss-user.baidubce.com',
       ]);
-      final lines = (await site.resolvePlayUrls(detail: detail, quality: qualities.first)).lines;
-      expect(lines.map((line) => line.url), everyElement(startsWith('http://flv')));
-      expect(lines.map((line) => line.format), everyElement(StreamFormat.flv));
+    });
+  });
+
+  group('M4.U', () {
+    test('"优先 H.264" (30-2) is read at each call, on by default', () async {
+      final (:site, :http) = _setup(['S02-room-hevc']);
+      final detail = await site.getRoomDetail(roomId: _hevcRoom);
+      expect((await site.getPlayQualities(detail: detail)).map((quality) => quality.id), [
+        '720p',
+        '480p',
+        'source:hevc',
+      ]);
+      var prefer = true;
+      final switching = BaiduLiveSite(http, deviceId: _device, preferH264: () => prefer);
+      final entered = await switching.getRoomDetail(roomId: _hevcRoom);
+      expect((await switching.getPlayQualities(detail: entered)).first.id, '720p');
+      prefer = false;
+      expect((await switching.getPlayQualities(detail: entered)).map((quality) => quality.quality), [
+        '原画 · H.265',
+        '720p',
+        '480p',
+      ]);
+      final hevc = await switching.resolvePlayUrls(
+        detail: entered,
+        quality: const LivePlayQuality(quality: '原画 · H.265', id: 'source:hevc'),
+      );
+      expect(hevc.lines.map((line) => line.codec), everyElement('hevc'));
+    });
+
+    test('the clarity sample (S02-room-clarity): one request, 1080p first while "优先 H.264" is on', () async {
+      final (:site, :http) = _setup(['S02-room-clarity']);
+      final detail = await site.getRoomDetail(roomId: _clarityRoom);
+      expect(http.requests, hasLength(1));
+      expect(
+        [detail.liveStatus, detail.restriction, detail.startedAt],
+        [LiveStatus.live, LiveRestriction.none, DateTime.utc(2026, 9, 28, 14, 13, 20)],
+      );
+      expect((await site.getPlayQualities(detail: detail)).map((quality) => quality.quality), [
+        '1080p',
+        '720p',
+        '540p',
+        '480p',
+        '原画',
+      ]);
+      expect(http.requests, hasLength(1));
+    });
+
+    test('an ended broadcast plays its recording (30-4): entry, a list card, recovery', () async {
+      final (:site, :http) = _setup(['S02-room-ended']);
+      final detail = await site.getRoomDetail(roomId: _endedRoom);
+      http.requests.clear();
+      final qualities = await site.getPlayQualities(detail: detail);
+      expect(
+        [for (final quality in qualities) (quality.quality, quality.id)],
+        [('标清', 'replay:sd'), ('720p · H.265', 'replay:720p:hevc')],
+      );
+      final resolution = await site.resolvePlayUrls(detail: detail, quality: qualities.first);
+      expect(resolution.lines.single.format, StreamFormat.hls);
+      expect(resolution.urls.single, endsWith('/merged_1790528530185_939700_24_36096.m3u8'));
+      expect(http.requests, isEmpty);
+      final card = LiveRoom(platform: 'baidulive', roomId: _endedRoom, liveStatus: LiveStatus.replay);
+      expect((await site.getPlayQualities(detail: card)).length, 2);
+      expect(http.requests, hasLength(1), reason: 'a card without playback data asks once');
+      http.requests.clear();
+      final recovered = await site.resolvePlayUrlsForRecovery(detail: detail, quality: qualities.last);
+      expect(recovered.appliedQualityData, 'replay:720p:hevc');
+      expect(http.requests, hasLength(1));
+      expect(await site.getLiveStatus(roomId: _endedRoom), isFalse);
+    });
+
+    test('an announced broadcast (S02-room-preview) opens as offline (3.x: ApiChanged); no stream', () async {
+      final (:site, :http) = _setup(['S02-room-preview']);
+      final room = await site.getRoomDetail(roomId: _previewRoom);
+      expect([room.liveStatus, room.nick, room.startedAt, room.restriction], [LiveStatus.offline, '向东传媒', null, null]);
+      expect(room.title, startsWith('听！号声穿越90年'));
+      expect(await site.getLiveStatus(roomId: _previewRoom), isFalse);
+      expect(await site.searchRooms(_previewRoom), hasLength(1));
+      http.requests.clear();
+      await expectLater(site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
+      expect(http.requests, isEmpty, reason: 'offline: no request');
+    });
+
+    test(
+      'the news channel (S01-feed-news-p1): its request, an ended card as a replay, announced ones offline',
+      () async {
+        final (:site, :http) = _setup(['S01-feed-news-p1'], now: () => _feedClock('S01-feed-news-p1'));
+        const news = LiveArea(platform: 'baidulive', areaType: 'official', areaId: 'news');
+        final page = await site.getDirectoryPage(category: news);
+        expect(utf8.decode(http.requests.single.body!), _bare(_recorded('S01-feed-news-p1')['body'] as String));
+        final rooms = {for (final room in page.rooms) room.roomId: room};
+        expect(
+          [rooms['11562145409']!.liveStatus, rooms['11562145409']!.restriction],
+          [LiveStatus.replay, LiveRestriction.none],
+        );
+        expect(rooms['11586142356']!.liveStatus, LiveStatus.offline);
+        expect(page.rooms.where((room) => room.isLiveNow), hasLength(6));
+      },
+    );
+
+    test('a follow refresh brings no stand-in name (30-10): the stored one is kept', () async {
+      final http = _Scripted(
+        (request) => _response(
+          request,
+          _liveAnswer(
+            changes: {
+              'host': {'uk': 'u'},
+            },
+            video: {'title': ''},
+          ),
+        ),
+      );
+      final refreshed = await BaiduLiveSite(http).getRoomDetailForRefresh(roomId: _liveRoom);
+      expect([refreshed.nick, refreshed.title], ['', ''], reason: '3.x: "Baidu Live"');
+      final stored = LiveRoom(
+        platform: 'baidulive',
+        roomId: _liveRoom,
+        nick: '方塘国学讲堂',
+        title: '奇门排盘分析讲堂',
+        liveStatus: LiveStatus.live,
+      );
+      final merged = stored.mergeFrom(refreshed);
+      expect([merged.nick, merged.title], ['方塘国学讲堂', '奇门排盘分析讲堂']);
     });
   });
 
@@ -859,7 +1110,7 @@ void main() {
   group('links', () {
     LinkParser parser(LiveHttp http) => LinkParser(SiteRegistry({'baidulive': () => BaiduLiveSite(http)}), http);
 
-    test('room pages, the PC player and share pages in a share text, without a request', () async {
+    test('room pages, the PC player and share pages in a share text, without a request; http too (30-8)', () async {
       final http = ReplayHttp(const []);
       for (final (text, id) in [
         ('百度直播 https://live.baidu.com/m/room/11560887291。快来', '11560887291'),
@@ -868,19 +1119,21 @@ void main() {
           '【百度直播】奇门排盘分析讲堂 https://live.baidu.com/m/media/multipage/liveshow/index/wpdwl?room_id=11560887291',
           '11560887291',
         ),
+        ('http://live.baidu.com/m/room/11572411040', '11572411040'),
       ]) {
         expect(await parser(http).parse(text), RoomLink('baidulive', id), reason: text);
       }
       expect(parser(http).containsSupportedLink('百度 https://live.baidu.com/m/room/11572411040'), isTrue);
+      expect(parser(http).containsSupportedLink('百度 http://live.baidu.com/m/room/11572411040'), isTrue);
       expect(http.requests, isEmpty);
     });
 
-    test('other pages, hosts and http are not rooms (3.x); there are no short links', () async {
+    test('other pages and hosts are not rooms (3.x); there are no short links', () async {
       final http = ReplayHttp(const []);
       for (final text in [
         'https://live.baidu.com/search?room_id=11572411040',
         'https://live.baidu.com.evil.test/m/room/11572411040',
-        'http://live.baidu.com/m/room/11572411040',
+        'http://live.baidu.com:8080/m/room/11572411040',
         'https://live.baidu.com/',
       ]) {
         expect(await parser(http).parse(text), isNull, reason: text);

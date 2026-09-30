@@ -142,7 +142,6 @@ List<String> _paths(ReplayHttp http) => [for (final request in http.requests) re
 LiveRoom _room(String sid) => LiveRoom(platform: 'yy', roomId: sid);
 
 const _dance = LiveArea(platform: 'yy', areaType: '1', typeName: '娱乐', areaId: '4', areaName: '舞蹈');
-const _lol = LiveArea(platform: 'yy', areaType: '2', typeName: '游戏', areaId: '23', areaName: '英雄联盟');
 const _categorySamples = ['S01-category-ent', 'S01-category-game', 'S01-category-other'];
 
 void main() {
@@ -233,30 +232,36 @@ void main() {
       expect(_paths(setup.http).skip(3), ['/more/page.action'], reason: 'the module is kept');
     });
 
-    test('a module-less area (moduleId 0) is empty without asking page.action', () async {
+    test('a module-less area (moduleId 0) lists the cards of its page, without asking page.action (M4.D)', () async {
       final shortName = (Fixture.load('yy', 'S02-area-page-lol').legacy as Map)['shortName'] as String;
-      final stored = _setup([]);
+      final stored = _setup(['S01-category-game', 'S02-area-page-lol']);
       final area = LiveArea(platform: 'yy', areaType: '2', areaId: '23', areaName: '英雄联盟', shortName: shortName);
-      expect(await stored.site.getCategoryRooms(area), isEmpty);
-      expect(stored.http.requests, isEmpty, reason: '3.x asked and got data: null');
-      final read = _setup(['S01-category-game', 'S02-area-page-lol']);
-      expect(await read.site.getCategoryRooms(_lol), isEmpty);
-      expect(_paths(read.http), ['/c/yycom/category/getCategory.action', '/chicken/lol']);
+      expect(await stored.site.getCategoryRooms(area), isEmpty, reason: 'the page renders no card');
+      expect(_paths(stored.http), ['/c/yycom/category/getCategory.action', '/chicken/lol']);
+      final read = _setup(['S01-category-other', 'S02-area-page-mobilelive']);
+      const mobile = LiveArea(platform: 'yy', areaType: '3', typeName: '其他', areaId: '27', areaName: '手机直播');
+      final rooms = await read.site.getCategoryRooms(mobile);
+      expect(rooms, hasLength(18), reason: '3.x and M4.6 listed nothing; the site shows these');
+      expect(rooms.every((room) => room.area == '手机直播' && room.isLiveNow), isTrue);
+      expect(_paths(read.http), [
+        '/c/yycom/category/getCategory.action',
+        '/others/mobilelive/',
+      ], reason: 'one page read');
+      expect(await read.site.getCategoryRooms(mobile, page: 2), isEmpty);
+      expect(await read.site.getCategoryRooms(mobile), hasLength(18));
+      expect(_paths(read.http).skip(2), ['/others/mobilelive/'], reason: 'page 1 again reads the page again');
     });
 
-    test('an area missing from its category is NotFound; a page without pageInfo is ApiChanged', () async {
-      final setup = _setup(
-        ['S01-category-ent', 'S01-category-other'],
-        extra: [_synthetic('https://www.yy.com/sv/', '<html></html>')],
-      );
+    test('an area missing from its category is NotFound; a page without pageInfo (小视频) is empty', () async {
+      final setup = _setup(['S01-category-ent', 'S01-category-other', 'S02-area-page-sv']);
       await expectLater(
         setup.site.getCategoryRooms(const LiveArea(platform: 'yy', areaType: '1', areaId: '999')),
         throwsA(isA<NotFound>()),
       );
-      await expectLater(
-        setup.site.getCategoryRooms(const LiveArea(platform: 'yy', areaType: '3', areaId: '34', areaName: '小视频')),
-        throwsA(isA<ApiChanged>()),
-        reason: '3.x sent page.action without a module and got HTTP 400',
+      expect(
+        await setup.site.getCategoryRooms(const LiveArea(platform: 'yy', areaType: '3', areaId: '34', areaName: '小视频')),
+        isEmpty,
+        reason: 'a short-video page; 3.x sent page.action without a module and got HTTP 400, M4.6 said ApiChanged',
       );
     });
   });

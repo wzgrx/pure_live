@@ -240,6 +240,25 @@ void main() {
         expect(YyApi.startedAt(value), isNull, reason: '$value');
       }
     });
+
+    test('M4.D: an area without JSON listing lists the cards its page renders', () {
+      final rooms = YyApi.pageRooms(_sample('S02-area-page-mobilelive').body, area: '手机直播');
+      expect(rooms, hasLength(18));
+      expect(rooms.map((room) => room.roomId).toSet(), hasLength(18));
+      final first = rooms.first;
+      expect(first.toJson(), containsPair('roomId', '1414821761'));
+      expect(
+        (first.title, first.nick, first.userId, first.area, first.popularity, first.liveStatus),
+        ('每天直播就是凑活活着', '朵朵公主（瞅你咋地）、', '3067162903', '手机直播', '21000', LiveStatus.live),
+      );
+      expect(first.cover, startsWith('https://mobilelivephoto.bs2dl.yy.com/live/'));
+      expect(first.avatar, startsWith('https://downhdlogo.yy.com/hdlogo/'));
+      expect(first.startedAt, _start(1790789171), reason: 'data-pid carries startTime');
+      expect((first.data! as YyRoomData).ssid, '1414821761');
+      expect(rooms.where((room) => room.nick == YyApi.placeholderName), isEmpty);
+      expect(YyApi.pageRooms(_sample('S02-area-page-sv').body, area: '小视频'), isEmpty, reason: 'short videos');
+      expect(YyApi.pageRooms(_sample('S02-area-page-lol').body, area: '英雄联盟'), isEmpty);
+    });
   });
 
   group('S04 search', () {
@@ -427,6 +446,14 @@ void main() {
       expect(live.nick, '燃舞蹈-福星', reason: 'the performer, as liveInfoDetail names it');
       expect(() => YyApi.roomPage('<html></html>'), throwsA(isA<ApiChanged>()));
       expect(() => YyApi.roomPage('', status: 503), throwsA(isA<NetworkFailure>()));
+    });
+
+    test('M4.D: a page naming its streamer YY用户 with the default portrait names nobody', () {
+      final page = YyApi.roomPage(_sample('S05-page-placeholder').body);
+      expect((page.sid, page.nick, page.avatar), ('1454853871', '', ''));
+      expect(page.title, startsWith('8042~心儿'), reason: 'the channel title is real');
+      final room = YyApi.offlineRoom(requestedId: '1454853871', page: page);
+      expect((room.nick, room.avatar), ('', ''), reason: 'mergeFrom keeps a stored name and avatar');
     });
 
     test('another resultCode is ApiChanged (3.x threw FormatException)', () {

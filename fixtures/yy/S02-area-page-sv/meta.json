@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "platform": "yy",
+  "sample": "S02-area-page-sv",
+  "capturedAt": "2026-09-30T20:36:32.641133Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.yy.com/sv/",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.yy.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "nginx",
+      "date": "Wed, 30 Sep 2026 20:36:33 GMT",
+      "content-type": "text/html; charset=utf-8",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "x-powered-by": "Express",
+      "etag": "W/\"3f8f-keLY3oWSaO12d4BmCnNIcFdIRcQ\"",
+      "content-encoding": "gzip"
+    }
+  },
+  "raw": {
+    "sha256": "728716825409708312fb8449996db1ca22d18c7af7006aff0c2f6b55324ad366",
+    "length": 16271
+  },
+  "body": "body.html",
+  "scrubbed": [],
+  "tool": "M4.D capture script (schema 1)"
+}

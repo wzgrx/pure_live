@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:live_core/src/audience.dart';
+import 'package:live_core/src/html.dart';
 import 'package:live_core/src/json.dart';
 import 'package:live_core/src/live_area.dart';
 import 'package:live_core/src/live_room.dart';
@@ -106,6 +107,14 @@ abstract final class YyApi {
   /// (`<nickname> 正在直播`; search's `channelName` and the lists' and
   /// detail's `desc` carry the same value).
   static const String liveSuffix = '正在直播';
+
+  /// The name YY shows for a user without one: a room page or card that
+  /// names its streamer so names nobody (a placeholder, never stored).
+  static const String placeholderName = 'YY用户';
+
+  /// YY's default portraits (`yystatic.com/pc/images/portrait/person/1.jpg`,
+  /// `…/default_portrait-….png`): no avatar.
+  static final RegExp _defaultPortrait = RegExp(r'yystatic\.com/.*portrait', caseSensitive: false);
 
   /// The room page, 3.x's `link`.
   static String roomUrl(String roomId) => '$_origin/${roomId.trim()}';
@@ -399,10 +408,61 @@ abstract final class YyApi {
     );
   }
 
+  /// The live rooms an area page renders itself. Areas without a JSON
+  /// listing (`moduleId: 0`: 手机直播, 综合, 英雄联盟) show their rooms as
+  /// `li[data-sid]` cards in the page; 3.x listed nothing there. Each card
+  /// gives the title (`data-title`, cut by the server), cover, streamer,
+  /// the audience text (`2.1万`) and the start (the fourth part of
+  /// `data-pid`, `startTime`). A page without cards (小视频, a short-video
+  /// page) is empty.
+  static List<LiveRoom> pageRooms(String html, {required String area}) => [
+    for (final card in HtmlElement.parseFragment(
+      html,
+    ).queryAll((element) => element.tag == 'li' && element.attributes.containsKey('data-sid')))
+      ?_pageCard(card, area: area),
+  ];
+
+  static LiveRoom? _pageCard(HtmlElement card, {required String area}) {
+    final sid = _channel(card.attributes['data-sid']);
+    if (sid == null) return null;
+    HtmlElement? part(String name) => card.query((element) => element.hasClass(name));
+    String picture(HtmlElement? box) =>
+        _image(box?.query((element) => element.tag == 'img')?.attributes['data-original']);
+    final users = parseChineseCount(part('usr')?.text.trim());
+    final pid = (card.attributes['data-pid'] ?? '').split('_');
+    return LiveRoom(
+      roomId: sid,
+      platform: _site,
+      userId: _channel(card.attributes['data-uid']) ?? '',
+      title: title(card.query((element) => element.hasClass('box'))?.attributes['data-title'] ?? part('title')?.text),
+      nick: _name(part('intro')?.text),
+      avatar: _avatar(picture(part('avt'))),
+      cover: picture(part('cover')),
+      area: area,
+      watching: users == null ? '' : '$users',
+      popularity: users == null ? '' : '$users',
+      audienceMetricType: AudienceMetricType.popularity,
+      liveStatus: LiveStatus.live,
+      startedAt: startedAt(pid.length > 3 ? pid[3] : null),
+      data: YyRoomData(sid: sid, ssid: _channel(card.attributes['data-ssid']) ?? sid),
+    );
+  }
+
+  /// A streamer name, empty for YY's [placeholderName].
+  static String _name(String? value) {
+    final name = value?.trim() ?? '';
+    return name == placeholderName ? '' : name;
+  }
+
+  /// An avatar, empty for YY's default portraits.
+  static String _avatar(String url) => _defaultPortrait.hasMatch(url) ? '' : url;
+
   /// The room page `www.yy.com/<sid or short number>`: the canonical channel
   /// (`pageInfo.sid`, `ssid`), the streamer (`nick`, `logo`), the channel
-  /// title (`roomName`) and the area name (`owInfo.stringBiz`). The 404 page
-  /// (it loads `yycom_404`, with status 200) is `NotFound`.
+  /// title (`roomName`) and the area name (`owInfo.stringBiz`). A streamer
+  /// named [placeholderName] with a default portrait is none (M4.D: the
+  /// page of a channel whose owner has no name). The 404 page (it loads
+  /// `yycom_404`, with status 200) is `NotFound`.
   static YyRoomPage roomPage(String html, {int status = 200}) {
     if (status == 404 || html.contains('yycom_404')) throw const NotFound(_site, 'room page is the 404 page');
     if (status >= 500) throw NetworkFailure(_site, 'room page: HTTP $status');
@@ -422,8 +482,8 @@ abstract final class YyApi {
       sid: sid,
       ssid: _channel(field('ssid')) ?? sid,
       uid: field('uid') ?? '',
-      nick: field('nick') ?? '',
-      avatar: _image(field('logo')),
+      nick: _name(field('nick')),
+      avatar: _avatar(_image(field('logo'))),
       title: field('roomName') ?? '',
       area: field('stringBiz') ?? '',
     );

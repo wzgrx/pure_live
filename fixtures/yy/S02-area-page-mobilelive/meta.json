@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "platform": "yy",
+  "sample": "S02-area-page-mobilelive",
+  "capturedAt": "2026-09-30T20:36:32.065678Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.yy.com/others/mobilelive/",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.yy.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "nginx",
+      "date": "Wed, 30 Sep 2026 20:36:32 GMT",
+      "content-type": "text/html; charset=utf-8",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "last-modified": "Wed, 30 Sep 2026 20:36:31 GMT",
+      "etag": "W/\"6abd72cf-f344\"",
+      "expires": "Wed, 30 Sep 2026 20:36:42 GMT",
+      "cache-control": "max-age=10",
+      "x-frame-options": "SAMEORIGIN",
+      "content-encoding": "gzip"
+    }
+  },
+  "raw": {
+    "sha256": "747a6af86ab58856a5f6b1f462589b02c8de0721fa4b8662711b961f246d98b1",
+    "length": 62276
+  },
+  "body": "body.html",
+  "scrubbed": [],
+  "tool": "M4.D capture script (schema 1)"
+}

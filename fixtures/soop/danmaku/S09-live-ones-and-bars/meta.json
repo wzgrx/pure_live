@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "platform": "soop",
+  "case": "S09-live-ones-and-bars",
+  "capturedAt": "2026-09-30T15:33:19.655246Z",
+  "route": "direct",
+  "frames": 5,
+  "sources": [
+    {
+      "room": "ecvhao",
+      "at": "2026-09-30T15:33:19.655246Z",
+      "sha256": "385c6026f4a3a60e515477b98a7a1a4b0a2b30aef910d1b1ceabbe1eed3ba1e4",
+      "length": 1569435
+    },
+    {
+      "room": "chanhaee",
+      "at": "2026-09-30T15:33:20.009232Z",
+      "sha256": "6da1b1e11842ac294f67b7a80de67ec7b2fcf6820c9a80abca77ef0d8b236eec",
+      "length": 478226
+    },
+    {
+      "room": "khm11903",
+      "at": "2026-09-30T15:45:04.299597Z",
+      "sha256": "42f445b1655426b1a4aa7309f5528acdb6184069d6e0ff38388eb20343e73d6a",
+      "length": 2197189
+    },
+    {
+      "room": "khm11903",
+      "at": "2026-09-30T15:45:04.299841Z",
+      "sha256": "42f445b1655426b1a4aa7309f5528acdb6184069d6e0ff38388eb20343e73d6a",
+      "length": 2197189
+    },
+    {
+      "room": "khm11903",
+      "at": "2026-09-30T15:45:06.953505Z",
+      "sha256": "42f445b1655426b1a4aa7309f5528acdb6184069d6e0ff38388eb20343e73d6a",
+      "length": 2197189
+    }
+  ],
+  "scrubbed": [
+    {
+      "where": "chat field 2 (the sender id)",
+      "rule": "same-shape synthetic id, the (n) of a second session kept"
+    },
+    {
+      "where": "chat field 6 (the nick)",
+      "rule": "观众N, keeping the | the nick held"
+    }
+  ],
+  "dropped": "every other packet of these frames (other chats, viewer lists, flags, balloons); each kept chat packet is framed alone with its own header",
+  "tool": "M5.F recorder: a Dart program on this repository's ExactWebSocket and SoopDanmakuProtocol that joined the 10 busiest live rooms of the main list anonymously on the plain port (login, join, keep-alive; no chat) for 30 minutes on 2026-09-30 15:19-15:49 UTC and kept every frame holding a chat packet. Cut and scrubbed by a Python script: only the fields named in scrubbed changed.",
+  "note": "39,209 chat packets recorded: 4 with the text 1 (all with field 5 -1), none with -1, none with a | in the text; every packet has 16 fields and a | in field 7 (the flags, n|n); one viewer's nick ends in |. Kept here: the four 1 chats and one chat of the viewer whose nick holds |."
+}

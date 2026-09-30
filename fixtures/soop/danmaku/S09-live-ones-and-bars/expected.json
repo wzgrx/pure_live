@@ -1,0 +1,22 @@
+{
+  "generator": "fixtures/soop/danmaku/legacy_expected.dart: 3.x SoopDanmaku.decodeMessage over every frame",
+  "value": {
+    "messages": [
+      {
+        "frame": 0,
+        "type": "chat",
+        "userName": "观众2|",
+        "userId": "",
+        "message": "저번에 한다던 낚시겜은 안해?",
+        "color": "#ffffff",
+        "messageId": "",
+        "sentAt": null,
+        "userLevel": "",
+        "fansLevel": "",
+        "fansName": "",
+        "isLocal": false,
+        "data": null
+      }
+    ]
+  }
+}

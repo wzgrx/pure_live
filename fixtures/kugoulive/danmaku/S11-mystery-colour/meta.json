@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "platform": "kugoulive",
+  "case": "S11-mystery-colour",
+  "room": "kugoulive:1528949",
+  "danmakuKeys": {
+    "roomId": "1528949"
+  },
+  "capturedAt": "2026-09-30T15:21:16.258344Z",
+  "route": "direct",
+  "frames": 2,
+  "raw": {
+    "sha256": "1b64a6f2764c497f5107b1da982b58237d06b72bd58aff368258df7730718207",
+    "length": 283257
+  },
+  "scrubbed": [
+    {
+      "where": "in 501 ContentMessage.senderid/senderkugouid (6, 7); ChatResponse.senderid/senderkugouid (2, 3)",
+      "rule": "person: synthetic numbers of the same digit count, one set per person"
+    },
+    {
+      "where": "in 501 ChatResponse.sendername (4): same-length 观众N",
+      "rule": "person"
+    },
+    {
+      "where": "in 501 ChatResponse.mac and kidSign (19, 23), the image id of senderLogo (24)",
+      "rule": "person: same-length random hex"
+    },
+    {
+      "where": "in 501 Ext.defaultPlate.kid (10.1), Ext.fancyNumInfo number (52.1)",
+      "rule": "person: synthetic numbers of the same digit count"
+    },
+    {
+      "where": "in 501 sinfo.ckname (6): the digits of the mystery name; sinfo.ckid (8): same shape",
+      "rule": "person"
+    }
+  ],
+  "dropped": {
+    "in 501 of this room (other chats)": 337,
+    "the scheduler answer, the login, status frames, heartbeats, acknowledgements and every other command": "not kept by the recorder"
+  },
+  "tool": "M5.F recorder: a dart:io program using this repository's KugouLiveDanmakuProtocol (dispatch URL, anonymous login, heartbeat, gift acknowledgements as the page sends them) that joined the 15 busiest rooms of the recommend list for 30 minutes and kept every chat frame (501) with the colour flags the page reads. Cut and scrubbed afterwards by a Python script that decodes each protobuf level into its field list and encodes it back with the same order and wire types (so what was not replaced is byte for byte the recording) and fixes the header length; the header, envelope and room are untouched.",
+  "note": "Two chats of room 1528949 (2026-09-30 15:21-15:45 UTC) for the text colour (M5.F B-15): a mystery guest (sinfo.ck 1) at fan club level 22, and fan club level 7 (just below the page's threshold)."
+}

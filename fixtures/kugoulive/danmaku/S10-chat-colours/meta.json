@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "platform": "kugoulive",
+  "case": "S10-chat-colours",
+  "room": "kugoulive:1570369",
+  "danmakuKeys": {
+    "roomId": "1570369"
+  },
+  "capturedAt": "2026-09-30T15:23:53.478744Z",
+  "route": "direct",
+  "frames": 6,
+  "raw": {
+    "sha256": "701cf85f8bdb8ac97896f5ee952742b846ad94ad48200d4f148f2321b647758e",
+    "length": 188206
+  },
+  "scrubbed": [
+    {
+      "where": "in 501 ContentMessage.senderid/senderkugouid (6, 7); ChatResponse.senderid/senderkugouid (2, 3)",
+      "rule": "person: synthetic numbers of the same digit count, one set per person"
+    },
+    {
+      "where": "in 501 ChatResponse.sendername (4): same-length 观众N",
+      "rule": "person"
+    },
+    {
+      "where": "in 501 ChatResponse.mac and kidSign (19, 23), the image id of senderLogo (24)",
+      "rule": "person: same-length random hex"
+    },
+    {
+      "where": "in 501 Ext.defaultPlate.kid (10.1), Ext.fancyNumInfo number (52.1)",
+      "rule": "person: synthetic numbers of the same digit count"
+    }
+  ],
+  "dropped": {
+    "in 501 of this room (other chats)": 140,
+    "the scheduler answer, the login, status frames, heartbeats, acknowledgements and every other command": "not kept by the recorder"
+  },
+  "tool": "M5.F recorder: a dart:io program using this repository's KugouLiveDanmakuProtocol (dispatch URL, anonymous login, heartbeat, gift acknowledgements as the page sends them) that joined the 15 busiest rooms of the recommend list for 30 minutes and kept every chat frame (501) with the colour flags the page reads. Cut and scrubbed afterwards by a Python script that decodes each protobuf level into its field list and encodes it back with the same order and wire types (so what was not replaced is byte for byte the recording) and fixes the header length; the header, envelope and room are untouched.",
+  "note": "Six chats of room 1570369 (2026-09-30 15:23-15:35 UTC) for the page's text colour (dealWithChatContentColor, M5.F B-15): fan club level 33 with a little guard (littleGuard.l 1), level 8, a guard (userGuard.g \"1\") without a fan club, a guard (g \"6\") at level 30, the plate owner without a fan club (empty userGuard and littleGuard), level 3. No mention of anyone in the texts; none is addressed to anyone."
+}

@@ -6,6 +6,60 @@ import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:meta/meta.dart';
 
+/// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`): a gift
+/// line (10004), or a gift animation (220) that is not a combo hit
+/// ([KilakilaDanmakuProtocol.gift]).
+@immutable
+final class KilakilaGift {
+  /// Creates the gift.
+  const new({
+    required this.id,
+    required this.name,
+    required this.count,
+    required this.price,
+    this.receiverName = '',
+    this.icon,
+  });
+
+  /// `c.id`, or empty.
+  final String id;
+
+  /// `c.name` (`念念相守`).
+  final String name;
+
+  /// `c.doubleCount`, at least 1.
+  final int count;
+
+  /// Red beans (红豆) for all [count] gifts.
+  final int price;
+
+  /// `c.giftReceiverName`: the broadcaster, or a guest on the microphone;
+  /// empty when missing.
+  final String receiverName;
+
+  /// `c.pic` when it is an https URL.
+  final Uri? icon;
+
+  /// A gift that costs nothing (price 0: 克拉之星, 守护灯牌…).
+  bool get free => price == 0;
+
+  @override
+  bool operator ==(Object other) =>
+      other is KilakilaGift &&
+      other.id == id &&
+      other.name == name &&
+      other.count == count &&
+      other.price == price &&
+      other.receiverName == receiverName &&
+      other.icon == icon;
+
+  @override
+  int get hashCode => Object.hash(id, name, count, price, receiverName, icon);
+
+  @override
+  String toString() => 'KilakilaGift($name ×$count, $price)';
+}
+
 /// What one KilaKila chat frame held ([KilakilaDanmakuProtocol.decode]).
 @immutable
 final class KilakilaDanmakuFrame {
@@ -73,6 +127,33 @@ abstract final class KilakilaDanmakuProtocol {
   /// URL-encoded `c` holds `watchNumber`, the listeners now.
   static const int roomStateType = 637;
 
+  /// `content.t` of a gift animation (the page's gift bar). A combo sends
+  /// one per hit with the count so far; see [gift].
+  static const int giftType = 220;
+
+  /// `content.t` of a gift line (the page's chat list: “我送了…”), sent
+  /// when a combo ends, with its total.
+  static const int giftLineType = 10004;
+
+  /// `content.t` of a paid question being asked (the asker and the price,
+  /// not the text). The page ignores it; not reported.
+  static const int questionAskedType = 241;
+
+  /// `content.t` of the messages that change the broadcast's board (room
+  /// image, question card, microphone list): the page's `dealData` reads
+  /// `uc.uiType` and `uc.question` of all of them.
+  static const Set<int> boardTypes = {240, 300, 301, 532, 534, 706};
+
+  /// `uc.uiType` values with which the page shows `uc.question` on the
+  /// board (`updateQuestion(t.uc.question)`); 8, 12 and 13 clear it.
+  static const Set<int> questionUiTypes = {2, 3, 6, 7, 10, 11, 14, 15};
+
+  /// How long a paid question stays a super chat. The page shows the card
+  /// until the broadcaster takes it off the board; in 40 minutes of the 30
+  /// busiest broadcasts (2026-09-30) paid questions stayed on the board
+  /// 11–865 s, half of them under 4.5 minutes.
+  static const Duration questionDisplay = Duration(minutes: 5);
+
   /// Largest time [DateTime] can hold, in milliseconds.
   static const int _maxMillis = 8640000000000000;
 
@@ -96,20 +177,21 @@ abstract final class KilakilaDanmakuProtocol {
   ///   0, a refusal otherwise) or `text_message` ([textMessage]).
   ///
   /// Other namespaces, other events, binary frames and anything malformed
-  /// give nothing.
-  static KilakilaDanmakuFrame decode(Object? data, {required String roomId}) {
+  /// give nothing. [now] stands for the time of reception where a message
+  /// has none of its own (tests).
+  static KilakilaDanmakuFrame decode(Object? data, {required String roomId, DateTime? now}) {
     if (data is! String || data.isEmpty) return KilakilaDanmakuFrame.empty;
     switch (data[0]) {
       case '1':
         return const KilakilaDanmakuFrame(dropped: true);
       case '4':
-        return _packet(data.substring(1), roomId: roomId);
+        return _packet(data.substring(1), roomId: roomId, now: now);
       default:
         return KilakilaDanmakuFrame.empty;
     }
   }
 
-  static KilakilaDanmakuFrame _packet(String packet, {required String roomId}) {
+  static KilakilaDanmakuFrame _packet(String packet, {required String roomId, DateTime? now}) {
     if (packet.isEmpty) return KilakilaDanmakuFrame.empty;
     final rest = packet.substring(1);
     if (!rest.startsWith(namespace)) return KilakilaDanmakuFrame.empty;
@@ -123,7 +205,7 @@ abstract final class KilakilaDanmakuProtocol {
       case '1':
         return const KilakilaDanmakuFrame(dropped: true);
       case '2':
-        return _event(body, roomId: roomId);
+        return _event(body, roomId: roomId, now: now);
       case '4':
         return KilakilaDanmakuFrame(refusal: _errorText(body));
       default:
@@ -131,7 +213,7 @@ abstract final class KilakilaDanmakuProtocol {
     }
   }
 
-  static KilakilaDanmakuFrame _event(String body, {required String roomId}) {
+  static KilakilaDanmakuFrame _event(String body, {required String roomId, DateTime? now}) {
     final Object? event;
     try {
       event = jsonDecode(body);
@@ -149,7 +231,9 @@ abstract final class KilakilaDanmakuProtocol {
           final message = payload['message'];
           return KilakilaDanmakuFrame(refusal: message is String && message.isNotEmpty ? message : 'code $code');
         case 'text_message':
-          return KilakilaDanmakuFrame(messages: [?textMessage(payload, roomId: roomId)]);
+          return KilakilaDanmakuFrame(
+            messages: [?textMessage(payload, roomId: roomId, now: now)],
+          );
       }
     }
     return KilakilaDanmakuFrame.empty;
@@ -177,13 +261,18 @@ abstract final class KilakilaDanmakuProtocol {
   ///
   /// - [chatType]: a chat line ([chat]);
   /// - [roomStateType]: the room state, whose `watchNumber` is the listeners
-  ///   now ([audience]).
+  ///   now ([audience]);
+  /// - [giftType], [giftLineType]: a gift ([gift], M5.F B-10; not shown
+  ///   yet);
+  /// - [boardTypes]: a paid question put on the board, as a super chat
+  ///   ([question], M5.F B-10).
   ///
-  /// Everything else holds nothing to show here: gifts (220 and the gift
-  /// line 10004), entries (101, 603), leaves (102), likes (210, 211), rank
-  /// and activity updates (635, 636, 654, 663…), the broadcast's end (103,
-  /// or `msg_type` 11).
-  static LiveMessage? textMessage(Map<Object?, Object?> payload, {required String roomId}) {
+  /// Everything else holds nothing to show here: a question being asked
+  /// (241), entries (101, 603), leaves (102), likes (210) and the first
+  /// light-up (211) (M5.F: not shown, as on every platform), rank and
+  /// activity updates (635, 636, 654, 663…), the broadcast's end (103, or
+  /// `msg_type` 11).
+  static LiveMessage? textMessage(Map<Object?, Object?> payload, {required String roomId, DateTime? now}) {
     if (payload case {'body': {'response': final Map<Object?, Object?> response}}) {
       final room = response['room_id'];
       if (room != null && '$room' != roomId) return null;
@@ -191,10 +280,147 @@ abstract final class KilakilaDanmakuProtocol {
       return switch (content?['t']) {
         chatType => chat(content!, response),
         roomStateType => audience(content!),
+        giftType || giftLineType => gift(content!, response),
+        final int type when boardTypes.contains(type) => question(content!, response, now: now),
         _ => null,
       };
     }
     return null;
+  }
+
+  /// A gift (M5.F B-10), reported once per gift sent:
+  ///
+  /// - a gift line (10004): the page's chat line for a combo that ended,
+  ///   with its total count (`c.doubleCount`) and the price of one gift
+  ///   (`c.price`);
+  /// - a gift animation (220) that is not a combo hit (`c.isDoubleHit` not
+  ///   true): a gift sent at once, `c.price` for all of it; nothing else
+  ///   follows it.
+  ///
+  /// Combo hits (220 with `isDoubleHit` true) are not reported: their
+  /// counts run up (1, 2, 3…) and some are skipped when hits come fast; the
+  /// line that ends the combo has the total (2026-09-30: all 1,932 lines of
+  /// 30 broadcasts ended a combo, none followed a gift sent at once).
+  ///
+  /// The text is the page's line (`SEND_TEXT`):
+  /// `我送了{receiver}{count}个{gift}`, with “豆咖” for a missing receiver;
+  /// the sender is `n` and `u`, the level `l`, the id and time the
+  /// response's `mid` and `created_at`. Null without a `c` object or a gift
+  /// name.
+  static LiveMessage? gift(Map<Object?, Object?> content, Map<Object?, Object?> response) {
+    final item = content['c'];
+    if (item is! Map<Object?, Object?>) return null;
+    final line = content['t'] == giftLineType;
+    if (!line && item['isDoubleHit'] == true) return null;
+    final name = item['name'];
+    if (name is! String || name.trim().isEmpty) return null;
+    final count = switch (jsonInt(item['doubleCount'])) {
+      final int value when value > 0 => value,
+      _ => 1,
+    };
+    final price = switch (jsonInt(item['price'])) {
+      final int value when value > 0 => value,
+      _ => 0,
+    };
+    final receiver = item['giftReceiverName'];
+    final receiverName = receiver is String ? receiver.trim() : '';
+    final icon = jsonUrl(item['pic']);
+    final present = KilakilaGift(
+      id: _id(item['id']),
+      name: name.trim(),
+      count: count,
+      price: line ? price * count : price,
+      receiverName: receiverName,
+      icon: icon != null && icon.scheme == 'https' ? icon : null,
+    );
+    final sender = content['n'];
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: sender is String ? sender : '',
+      userId: _id(content['u']),
+      message: '我送了${receiverName.isEmpty ? '豆咖' : receiverName}$count个${present.name}',
+      color: LiveMessageColor.white,
+      userLevel: _level(content['l']),
+      messageId: _id(response['mid']),
+      sentAt: _time(response['created_at']),
+      data: present,
+    );
+  }
+
+  /// A paid question the broadcaster put on the board, as a super chat
+  /// (M5.F B-10): a [boardTypes] message whose `uc.uiType` shows
+  /// `uc.question` ([questionUiTypes]) and whose `goldPrice` is above 0.
+  /// Free questions (`goldPrice` 0) and boards without a question give
+  /// nothing.
+  ///
+  /// The page URL-decodes every text field of the question first (and loses
+  /// the message when one does not decode) and trims `content`. The super
+  /// chat is the asker (`questionNickname`, `questionHeadUrl` when https,
+  /// `questionUid`), the text `content`, the price `goldPrice` in red beans
+  /// with the page's writing of it (“1,000红豆”), the id `questionId` (the
+  /// same question shown again is the same super chat), from `created_at`
+  /// (else [now], else the time of reading) for [questionDisplay]; no
+  /// colours. Null without a text.
+  static LiveMessage? question(Map<Object?, Object?> content, Map<Object?, Object?> response, {DateTime? now}) {
+    final board = content['uc'];
+    if (board is! Map<Object?, Object?> || !questionUiTypes.contains(jsonInt(board['uiType']))) return null;
+    final raw = board['question'];
+    if (raw is! Map<Object?, Object?>) return null;
+    final fields = <Object?, Object?>{};
+    for (final MapEntry(:key, :value) in raw.entries) {
+      if (value is String) {
+        final decoded = _decodeUriComponent(value);
+        if (decoded == null) return null;
+        fields[key] = decoded;
+      } else {
+        fields[key] = value;
+      }
+    }
+    final price = jsonInt(fields['goldPrice']);
+    if (price == null || price <= 0) return null;
+    final body = fields['content'];
+    final text = body is String ? body.trim() : '';
+    if (text.isEmpty) return null;
+    final asker = fields['questionNickname'];
+    final name = asker is String ? asker : '';
+    final face = jsonUrl(fields['questionHeadUrl']);
+    final id = _id(fields['questionId']);
+    final sentAt = _time(response['created_at']);
+    final start = sentAt ?? now ?? DateTime.now();
+    final superChat = LiveSuperChatMessage(
+      messageId: id,
+      userName: name,
+      face: face != null && face.scheme == 'https' ? '$face' : '',
+      message: text,
+      price: price,
+      priceText: '${amount(price)}红豆',
+      startTime: start,
+      endTime: start.add(questionDisplay),
+      backgroundColor: '',
+      backgroundBottomColor: '',
+    );
+    return LiveMessage(
+      type: LiveMessageType.superChat,
+      userName: name,
+      userId: _id(fields['questionUid']),
+      message: text,
+      color: LiveMessageColor.white,
+      messageId: id,
+      sentAt: sentAt,
+      data: superChat,
+    );
+  }
+
+  /// [value] as the page writes an amount (`amountRule`): thousands
+  /// separated by commas (6000 → `6,000`).
+  static String amount(int value) {
+    final digits = value.abs().toString();
+    final text = StringBuffer(value < 0 ? '-' : '');
+    for (var index = 0; index < digits.length; index++) {
+      if (index > 0 && (digits.length - index) % 3 == 0) text.write(',');
+      text.write(digits[index]);
+    }
+    return text.toString();
   }
 
   /// A chat line (`t` 200) as white chat, or null when its text (`c`) is
@@ -212,7 +438,6 @@ abstract final class KilakilaDanmakuProtocol {
     final text = content['c'];
     if (text is! String || text.trim().isEmpty) return null;
     final name = content['n'];
-    final created = response['created_at'];
     return LiveMessage(
       type: LiveMessageType.chat,
       userName: name is String ? name : '',
@@ -221,11 +446,14 @@ abstract final class KilakilaDanmakuProtocol {
       color: LiveMessageColor.white,
       userLevel: _level(content['l']),
       messageId: _id(response['mid']),
-      sentAt: created is int && created > 0 && created <= _maxMillis
-          ? DateTime.fromMillisecondsSinceEpoch(created)
-          : null,
+      sentAt: _time(response['created_at']),
     );
   }
+
+  /// `created_at`: a positive whole number of milliseconds within
+  /// `DateTime`'s range, else null.
+  static DateTime? _time(Object? created) =>
+      created is int && created > 0 && created <= _maxMillis ? DateTime.fromMillisecondsSinceEpoch(created) : null;
 
   /// The listeners now of a room state (`t` 637): its `c` is URL-encoded
   /// JSON (the live page runs `decodeURIComponent` and `JSON.parse`) whose
@@ -248,14 +476,32 @@ abstract final class KilakilaDanmakuProtocol {
   static final RegExp _badEscape = RegExp('%(?![0-9A-Fa-f]{2})');
 
   /// JavaScript's `decodeURIComponent`, or null where it throws (a `%`
-  /// without two hex digits, bytes that are not UTF-8).
+  /// without two hex digits, bytes that are not UTF-8). Characters that are
+  /// not escapes stay as they are, whatever they are: `Uri.decodeComponent`
+  /// throws an `ArgumentError` on any character above U+007F (question
+  /// texts are plain Chinese and emoji).
   static String? _decodeUriComponent(String text) {
+    if (!text.contains('%')) return text;
     if (_badEscape.hasMatch(text)) return null;
-    try {
-      return Uri.decodeComponent(text);
-    } on FormatException {
-      return null;
+    final decoded = StringBuffer();
+    var index = 0;
+    while (index < text.length) {
+      if (text.codeUnitAt(index) != 0x25) {
+        decoded.writeCharCode(text.codeUnitAt(index++));
+        continue;
+      }
+      final bytes = <int>[];
+      while (index < text.length && text.codeUnitAt(index) == 0x25) {
+        bytes.add(int.parse(text.substring(index + 1, index + 3), radix: 16));
+        index += 3;
+      }
+      try {
+        decoded.write(utf8.decode(bytes));
+      } on FormatException {
+        return null;
+      }
     }
+    return decoded.toString();
   }
 
   static Map<Object?, Object?>? _object(Object? value) {

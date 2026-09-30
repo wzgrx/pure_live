@@ -30,7 +30,10 @@ What it follows (scripts of https://fanxing.kugou.com/<room>, 2026-09-30):
   U+202E become a space, then every space is removed).
 - `/pub2/room/js/roomBase_a2fb4ce.js`, `dealWithNickName`: the fan badge is
   `ext.intimacyVo` (`nameplate`, `level`) when `level > 0`, `type` is 1 to 4
-  and `lightUp` is 1.
+  and `lightUp` is 1; `dealWithChatContentColor` (M5.F B-15, called by
+  `/pub2/room/modules/PublicChat/index_d44b8e9.js` with the message's ext):
+  `#ff9900` for `intimacyVo.level > 7`, a little guard or a guard, `#CC9900`
+  over that for a mystery guest, with the fan-club switch on.
 - `/pub2/room/modules/ViewerHeat/index_fe0bfcb.js`: `HEAT_NUM` (301005) with
   `actionId` `roomAuNumber` gives `data.hot` (热度) and `data.visited`;
   `/pub2/room/modules/viewerList/index_36b2784.js` shows `visited` as
@@ -58,7 +61,8 @@ import urllib.parse
 ROOT = pathlib.Path(__file__).resolve().parent
 GENERATOR = ('fixtures/kugoulive/danmaku/web_expected.py: the website room page\'s own reading '
              '(index_5e7bbee.js modules 1374/80965 and RoomSocket, socket_51738e4.js RoomSocket.callback, '
-             'roomBase dealWithNickName, ViewerHeat), reimplemented in Python over the recorded frames')
+             'roomBase dealWithNickName and dealWithChatContentColor, ViewerHeat), reimplemented in Python over the '
+             'recorded frames')
 
 # --- protobuf (protobufjs reads the last value of a singular field) ----------
 
@@ -127,8 +131,10 @@ CONTENT = {1: 'cmd', 3: 'roomid', 4: 'receiverid', 5: 'receiverkugouid', 6: 'sen
            11: 'time', 16: 'codec'}
 CHAT = {1: 'chatmsg', 2: 'senderid', 3: 'senderkugouid', 4: 'sendername', 5: 'senderrichlevel', 6: 'receiverid',
         7: 'receiverkugouid', 8: 'receivername', 10: 'issecrect', 13: 'seq', 25: 'senderrichlevelV2'}
-STRINGS = {'msg', 'socsid', 'chatmsg', 'sendername', 'receivername'}
+STRINGS = {'msg', 'socsid', 'chatmsg', 'sendername', 'receivername', 'g'}
 INTIMACY = {1: 'level', 2: 'nameplate', 3: 'type', 5: 'lightUp'}
+USER_GUARD = {1: 'g'}
+LITTLE_GUARD = {1: 'l'}
 SINFO = {5: 'ck', 8: 'ckid'}
 SOURCE = {1: 'roomid', 2: 'tags'}
 
@@ -174,9 +180,16 @@ def decode_pb(raw):
             message, fields = _read(content, CONTENT)
             if message['codec'] == 1 and cmd in (501, 400305):
                 message['content'], _ = _read(fields.get(2, b''), CHAT)
+                # decodePb decodes ext even when it is missing (an empty
+                # Extension); sub-messages it lacks stay null.
                 ext = _fields(fields.get(14, b''))
+                message['ext'] = {}
                 if 39 in ext:
-                    message['ext'] = {'intimacyVo': _read(ext[39], INTIMACY)[0]}
+                    message['ext']['intimacyVo'] = _read(ext[39], INTIMACY)[0]
+                if 8 in ext:
+                    message['ext']['userGuard'] = _read(ext[8], USER_GUARD)[0]
+                if 9 in ext:
+                    message['ext']['littleGuard'] = _read(ext[9], LITTLE_GUARD)[0]
                 if 15 in fields:
                     message['sinfo'] = _read(fields[15], SINFO)[0]
                 if 18 in fields:
@@ -195,6 +208,41 @@ def replace_unicode(text):
     """String.prototype.replaceUnicode of index_5e7bbee.js."""
     out = ''.join(' ' if 8231 <= ord(ch) <= 8238 else ch for ch in text)
     return out.replace(' ', '')
+
+
+def _truthy(value):
+    """JavaScript's truthiness of a decoded value."""
+    return value not in (None, False, 0, '') and value == value
+
+
+def content_color(k):
+    """Fx.dealWithChatContentColor (roomBase_a2fb4ce.js) as PublicChat calls
+    it with the message's ext (`L` of RoomSocket.callback), the fan-club switch
+    on (`getCurSwitch()`: ApolloConfig.new_fandom_club_switch "1,1" on the room
+    page, not a channel or live room). None is the page's default class
+    (`user-msg`, no colour of its own)."""
+    ext = k.get('ext')
+    if isinstance(ext, str):
+        try:
+            ext = json.loads(urllib.parse.unquote(ext, errors='strict'))
+        except ValueError:
+            return None
+    if not isinstance(ext, dict):
+        return None
+    # callback: L.starvip from sinfo, then L.starvip.mysticUser = sinfo.ck === 1
+    starvip = ext.get('starvip')
+    if k.get('sinfo'):
+        starvip = {'starvipType': k['sinfo'].get('svip', 0), 'starvipLevel': k['sinfo'].get('svipl', 0)}
+    if starvip:
+        starvip['mysticUser'] = bool(k.get('sinfo')) and k['sinfo'].get('ck') == 1
+    color = None
+    intimacy, little, guard = ext.get('intimacyVo'), ext.get('littleGuard'), ext.get('userGuard')
+    if (intimacy and intimacy.get('level', 0) > 7) or (little and _truthy(little.get('l'))) or (
+            guard and _truthy(guard.get('g'))):
+        color = '#ff9900'
+    if starvip and starvip.get('mysticUser'):
+        color = '#CC9900'
+    return color
 
 
 def chat(cmd, k):
@@ -225,6 +273,7 @@ def chat(cmd, k):
         'toName': replace_unicode(content['receivername']) if content['receiverid'] != 0 else None,
         'richLevel': content['senderrichlevelV2'] or content['senderrichlevel'],
         'fanBadge': badge,
+        'contentColor': content_color(k),
         'seq': content['seq'],
         'time': k['time'],
         'msgId': k['msgId'],
@@ -309,5 +358,5 @@ def sample(case):
 
 
 if __name__ == '__main__':
-    for case in ('S07-live', 'S08-refused', 'S09-pk-chat'):
+    for case in ('S07-live', 'S08-refused', 'S09-pk-chat', 'S10-chat-colours', 'S11-mystery-colour'):
         sample(case)

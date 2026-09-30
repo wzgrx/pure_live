@@ -1,0 +1,62 @@
+{
+ "generator": "fixtures/kugoulive/danmaku/web_expected.py: the website room page's own reading (index_5e7bbee.js modules 1374/80965 and RoomSocket, socket_51738e4.js RoomSocket.callback, roomBase dealWithNickName and dealWithChatContentColor, ViewerHeat), reimplemented in Python over the recorded frames",
+ "value": {
+  "frames": [
+   {
+    "line": 1,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 1528949,
+     "senderid": 1639024208,
+     "senderkugouid": 1639024208,
+     "operationUserId": "3gboN1168657",
+     "userName": "观众000001",
+     "text": "这样非常好",
+     "toName": null,
+     "richLevel": 130,
+     "fanBadge": {
+      "clubName": "灰呔狼",
+      "level": 22
+     },
+     "contentColor": "#CC9900",
+     "seq": 378529210,
+     "time": 1790781676,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 2,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 1528949,
+     "senderid": 677846026,
+     "senderkugouid": 677846026,
+     "operationUserId": 677846026,
+     "userName": "观众000002",
+     "text": "众筹过下任务啦",
+     "toName": null,
+     "richLevel": 16,
+     "fanBadge": {
+      "clubName": "灰呔狼",
+      "level": 7
+     },
+     "contentColor": null,
+     "seq": 2660659989,
+     "time": 1790783107,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   }
+  ],
+  "heartbeat": "ZAABAA=="
+ }
+}

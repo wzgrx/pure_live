@@ -108,36 +108,62 @@ abstract final class SoopDanmakuProtocol {
   ];
 
   /// A chat line (3.x `_decodeChatPacket`): text in field 1, nick in field
-  /// 6, both trimmed, in white. Null with fewer than seven fields, an empty
-  /// text or nick, a text of `-1` or `1`, or a text holding `|`.
+  /// 6, both trimmed, in white, and the sender's id from field 2 ([userId]).
+  /// Null with fewer than seven fields or an empty text or nick.
+  ///
+  /// 3.x also dropped the texts `1` and `-1` and every text holding `|`;
+  /// the web player shows them (`SVC_CHATMESG` in LivePlayer.js takes the
+  /// text field whole; `|` only separates the two flags of field 7), and so
+  /// does this since M5.F B-6.
   static LiveMessage? chat(List<int> body) {
     final fields = [for (final part in ListUtil.splitList(body, 0x0c)) utf8.decode(part, allowMalformed: true)];
     if (fields.length <= 6) return null;
     final text = fields[1].trim();
     final name = fields[6].trim();
-    if (text.isEmpty || name.isEmpty || text == '-1' || text == '1' || text.contains('|')) return null;
-    return LiveMessage(type: LiveMessageType.chat, userName: name, message: text, color: LiveMessageColor.white);
+    if (text.isEmpty || name.isEmpty) return null;
+    return LiveMessage(
+      type: LiveMessageType.chat,
+      userName: name,
+      userId: userId(fields[2]),
+      message: text,
+      color: LiveMessageColor.white,
+    );
   }
+
+  /// The sender's id of a chat line's field 2, without the `(n)` a second
+  /// session of the same account gets (`loo3672(2)` → `loo3672`), as the
+  /// web player's `realID` reads it: the run of word characters followed
+  /// only by digits and parentheses up to the end; the trimmed field itself
+  /// when there is no such run.
+  static String userId(String field) {
+    final id = field.trim();
+    return _realId.firstMatch(id)?.group(1) ?? id;
+  }
+
+  static final RegExp _realId = RegExp(r'(\w+)[()0-9]*$');
 }
 
 /// SOOP's danmaku connection (3.x `SoopDanmaku`): a WebSocket with the
 /// `chat` subprotocol and the room's handshake headers, opened by a
-/// connector that keeps the header spelling ([connectExactWebSocket]). An
-/// open socket counts as joined; the login packet follows at once, the join
-/// packet 200 ms later, a keep-alive every 20 s, and a socket silent for
-/// 90 s is replaced. The TLS port comes first, the plain port second.
+/// connector that keeps the header spelling
+/// ([connectExactWebSocketViaRoute]). An open socket counts as joined; the
+/// login packet follows at once, the join packet 200 ms later, a keep-alive
+/// every 20 s, and a socket silent for 90 s is replaced. The TLS port comes
+/// first, the plain port second.
 ///
-/// The app registers it as `SiteIds.soop: SoopDanmakuConnection.new`: the
-/// cookie and the headers come with [SoopDanmakuArgs], and the socket opens
-/// directly, as in 3.x, whatever the proxy setting.
+/// The app registers it as `SiteIds.soop: () =>
+/// SoopDanmakuConnection(proxy: …)`: the cookie and the headers come with
+/// [SoopDanmakuArgs]. The socket takes the platform's proxy route (M5.F
+/// B-6; 3.x always dialled the edge directly).
 final class SoopDanmakuConnection extends DanmakuSocketConnection<SoopDanmakuArgs> {
-  /// Creates the connection; `connector` replaces the case-sensitive
+  /// Creates the connection; [proxy] routes the socket (an HTTP proxy is
+  /// asked for a `CONNECT` tunnel), `connector` replaces the case-sensitive
   /// handshake (tests). Either way the cookie never goes to the plain port.
-  new({SocketConnector? connector})
+  new({super.proxy, SocketConnector? connector})
     : super(
         site: SiteIds.soop,
         policy: socketPolicy,
-        connector: _withoutPlainCookie(connector ?? connectExactWebSocket),
+        connector: _withoutPlainCookie(connector ?? connectExactWebSocketViaRoute),
       );
 
   /// Socket timing: 3.x's `WebScoketUtils` defaults with a 20 s heartbeat,

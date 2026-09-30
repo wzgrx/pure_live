@@ -61,6 +61,8 @@ final class _Sample {
 final _Sample _s07 = _Sample('S07-live');
 final _Sample _s08 = _Sample('S08-refused');
 final _Sample _s09 = _Sample('S09-pk-chat');
+final _Sample _s10 = _Sample('S10-chat-colours');
+final _Sample _s11 = _Sample('S11-mystery-colour');
 
 const String _room = '51049168';
 final DateTime _now = _s07.recordedAt;
@@ -446,8 +448,15 @@ void _expectChat(LiveMessage message, Map<String, Object?> page, {required Strin
     reason: reason,
   );
   expect(message.sentAt, DateTime.fromMillisecondsSinceEpoch((page['time']! as int) * 1000), reason: reason);
-  expect(message.color, LiveMessageColor.white, reason: reason);
+  // B-15: the page's text colour (dealWithChatContentColor); white where
+  // the page leaves its default (3.x-style white before B-15).
+  expect(message.color, _pageColor(page['contentColor'] as String?), reason: reason);
 }
+
+/// The `#rrggbb` the page writes, as a colour; null (the page's default
+/// class) is white.
+LiveMessageColor _pageColor(String? css) =>
+    css == null ? LiveMessageColor.white : LiveMessageColor.numberToColor(int.parse(css.substring(1), radix: 16));
 
 void main() {
   group('protocol', () {
@@ -859,6 +868,254 @@ void main() {
       expect(read(json(receiver: '7')), isNull);
       expect(read(json(sinfo: {'ck': 1, 'ckid': 'alias'}))!.userId, 'alias');
       expect(read({...json(), 'content': 'text'}), isNull);
+    });
+
+    group('B-15: the text colour of the page', () {
+      const orange = KugouLiveDanmakuProtocol.highlightColor;
+      const gold = KugouLiveDanmakuProtocol.mysteryColor;
+      const white = LiveMessageColor.white;
+
+      test('the colours: #ff9900 and #CC9900', () {
+        expect('$orange', '#ff9900');
+        expect('$gold', '#cc9900');
+      });
+
+      test('recorded chats (S10, S11) against the page: level 8 and above, guards, little guards, a mystery guest', () {
+        final colours = <LiveMessageColor>[];
+        for (final sample in [_s10, _s11]) {
+          for (final line in sample.socket) {
+            final message = KugouLiveDanmakuProtocol.decode(line.bytes, roomId: sample.room).messages.single;
+            final page = sample.expectedAt(line.line)['chat']! as Map<String, Object?>;
+            expect(page['shown'], isTrue);
+            _expectChat(message, page, reason: '${sample.name} line ${line.line}');
+            colours.add(message.color);
+          }
+        }
+        expect(colours, [
+          orange, // S10: fan club 33 and a little guard
+          orange, // fan club 8, the lowest highlighted
+          orange, // a guard (userGuard.g "1") without a fan club
+          orange, // a guard at fan club 30
+          white, // the plate owner: empty guard entries, no fan club
+          white, // fan club 3
+          gold, // S11: a mystery guest at fan club 22
+          white, // fan club 7, just below
+        ]);
+      });
+
+      test('the recorded frames hold what the colour is read from', () {
+        List<int?> levels(_Sample sample) => [
+          for (final line in sample.socket)
+            ((sample.expectedAt(line.line)['chat']! as Map)['fanBadge'] as Map?)?['level'] as int?,
+        ];
+        // Fan clubs lit (lightUp 1, type 1 to 4) show as badges; the level
+        // counts whether lit or not.
+        expect(levels(_s10), [33, 8, null, 30, null, 3]);
+        expect(levels(_s11), [22, 7]);
+        expect(
+          _s07.expectedFrames.where((frame) => frame['chat'] != null).map((frame) => frame['chat']),
+          everyElement(containsPair('contentColor', null)),
+        );
+      });
+
+      test('synthetic chats: the thresholds and JavaScript truthiness of the page', () {
+        LiveMessageColor colour({List<int>? ext, List<int>? sinfo}) => KugouLiveDanmakuProtocol.decode(
+          _chat(ext: ext, sinfo: sinfo),
+          roomId: _room,
+        ).messages.single.color;
+        List<int> ext({int? level, List<int>? userGuard, List<int>? littleGuard}) {
+          final writer = ProtoWriter();
+          if (userGuard != null) writer.bytes(8, userGuard);
+          if (littleGuard != null) writer.bytes(9, littleGuard);
+          if (level != null) writer.bytes(39, (ProtoWriter()..integer(1, level)).toBytes());
+          return writer.toBytes();
+        }
+
+        List<int> guard(String g) => (ProtoWriter()..string(1, g)).toBytes();
+        List<int> little(int l) => (ProtoWriter()..integer(1, l)).toBytes();
+        final mystery =
+            (ProtoWriter()
+                  ..integer(5, 1)
+                  ..string(8, 'alias'))
+                .toBytes();
+
+        for (final (label, value, expected) in [
+          ('level 7', ext(level: 7), white),
+          ('level 8', ext(level: 8), orange),
+          ('level 0', ext(level: 0), white),
+          ('level -9', ext(level: -9), white),
+          ('no fan club', ext(), white),
+          ('an empty ext', <int>[], white),
+          ('an empty guard entry', ext(userGuard: const []), white),
+          ('guard g ""', ext(userGuard: guard('')), white),
+          ('guard g "0" (a non-empty string)', ext(userGuard: guard('0')), orange),
+          ('guard g "6"', ext(userGuard: guard('6')), orange),
+          ('little guard l 0', ext(littleGuard: little(0)), white),
+          ('little guard l 1', ext(littleGuard: little(1)), orange),
+          ('little guard l -1', ext(littleGuard: little(-1)), orange),
+          ('little guard entry, g only', ext(littleGuard: (ProtoWriter()..integer(2, 1)).toBytes()), white),
+          ('level 3 with a guard', ext(level: 3, userGuard: guard('1')), orange),
+        ]) {
+          expect(colour(ext: value), expected, reason: label);
+        }
+        // A mystery guest is gold over everything, also without an ext.
+        expect(
+          colour(
+            ext: ext(level: 30, userGuard: guard('6')),
+            sinfo: mystery,
+          ),
+          gold,
+        );
+        expect(colour(ext: ext(level: 2), sinfo: mystery), gold);
+        expect(colour(ext: const [], sinfo: mystery), gold);
+        expect(
+          colour(ext: ext(level: 9), sinfo: (ProtoWriter()..integer(5, 2)).toBytes()),
+          orange,
+          reason: 'ck 2',
+        );
+        expect(
+          colour(ext: ext(level: 9), sinfo: (ProtoWriter()..integer(1, 1)).toBytes()),
+          orange,
+          reason: 'no ck',
+        );
+      });
+
+      test('chat in JSON: the URL-encoded ext read as JSON, JavaScript comparisons; no ext, no colour', () {
+        LiveMessageColor? colour({Object? ext, Object? sinfo}) {
+          final message = {
+            'cmd': 501,
+            'roomid': 51049168,
+            'receiverid': 0,
+            'senderid': 5847998728,
+            'time': 1790771498,
+            'ext': ?ext,
+            'sinfo': ?sinfo,
+            'content': {'chatmsg': '你好', 'sendername': '观众001', 'senderid': 5847998728, 'seq': 7},
+          };
+          final messages = KugouLiveDanmakuProtocol.decode(_json(501, message), roomId: _room).messages;
+          return messages.isEmpty ? null : messages.single.color;
+        }
+
+        String encoded(Map<String, Object?> ext) => Uri.encodeComponent(jsonEncode(ext));
+        for (final (label, ext, expected) in [
+          (
+            'level 8',
+            encoded({
+              'intimacyVo': {'level': 8},
+            }),
+            orange,
+          ),
+          (
+            'level "8" (text compares as a number)',
+            encoded({
+              'intimacyVo': {'level': '8'},
+            }),
+            orange,
+          ),
+          (
+            'level 7.5',
+            encoded({
+              'intimacyVo': {'level': 7.5},
+            }),
+            orange,
+          ),
+          (
+            'level "7"',
+            encoded({
+              'intimacyVo': {'level': '7'},
+            }),
+            white,
+          ),
+          (
+            'level "abc"',
+            encoded({
+              'intimacyVo': {'level': 'abc'},
+            }),
+            white,
+          ),
+          (
+            'level true',
+            encoded({
+              'intimacyVo': {'level': true},
+            }),
+            white,
+          ),
+          (
+            'little guard l "0" (a non-empty string)',
+            encoded({
+              'littleGuard': {'l': '0'},
+            }),
+            orange,
+          ),
+          (
+            'little guard l 0',
+            encoded({
+              'littleGuard': {'l': 0},
+            }),
+            white,
+          ),
+          (
+            'little guard l false',
+            encoded({
+              'littleGuard': {'l': false},
+            }),
+            white,
+          ),
+          (
+            'guard g 0',
+            encoded({
+              'userGuard': {'g': 0},
+            }),
+            white,
+          ),
+          (
+            'guard g {}',
+            encoded({
+              'userGuard': {'g': <String, Object?>{}},
+            }),
+            orange,
+          ),
+          (
+            'guard g null',
+            encoded({
+              'userGuard': {'g': null},
+            }),
+            white,
+          ),
+          ('guard not an object', encoded({'userGuard': 'yes'}), white),
+          ('not an object', encoded({'intimacyVo': 9}), white),
+          ('a bad escape', '%E0%A4%A', white),
+          ('not JSON', 'not json', white),
+          ('JSON null', 'null', white),
+          ('an empty string', '', white),
+        ]) {
+          expect(colour(ext: ext), expected, reason: label);
+        }
+        // The page colours mystery guests only through the ext it parsed.
+        expect(colour(ext: encoded({}), sinfo: {'ck': 1, 'ckid': 'alias'}), gold);
+        expect(colour(sinfo: {'ck': 1, 'ckid': 'alias'}), white, reason: 'no ext');
+        expect(
+          colour(ext: '%E0%A4%A', sinfo: {'ck': 1}),
+          white,
+          reason: 'an ext the page cannot read',
+        );
+        expect(
+          colour(
+            ext: encoded({
+              'intimacyVo': {'level': 9},
+            }),
+            sinfo: {'ck': 0},
+          ),
+          orange,
+        );
+      });
+
+      test('what is not a public chat keeps no colour: the PK partner room (400305) is not reported', () {
+        final pk = _s09.socket.single;
+        final page = _s09.expectedAt(pk.line)['chat']! as Map<String, Object?>;
+        expect(page['contentColor'], '#ff9900', reason: 'the page would colour it (fan club 10)');
+        expect(KugouLiveDanmakuProtocol.decode(pk.bytes, roomId: '1073619').messages, isEmpty);
+      });
     });
 
     test('the audience: viewers now and of the broadcast; nothing else', () {

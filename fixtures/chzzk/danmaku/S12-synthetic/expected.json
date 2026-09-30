@@ -254,7 +254,7 @@
           ]
         }
       ],
-      "system lines, images, stickers, parties and shop purchases show nothing": [
+      "a system line (a notice since B-12); images, stickers, parties and shop purchases show nothing": [
         {
           "joined": false,
           "rejected": false,
@@ -461,7 +461,7 @@
           "events": []
         }
       ],
-      "events, blind notices, notices, kicks and penalties show nothing": [
+      "a blind (a retraction since B-12), a pinned notice (a notice since B-12); events, kicks and penalties show nothing": [
         {
           "joined": false,
           "rejected": false,

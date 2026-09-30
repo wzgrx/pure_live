@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "platform": "chzzk",
+  "case": "S13-recent",
+  "rooms": [
+    "chzzk:27d40a129cc99e8dcddb0be21ed9a050",
+    "chzzk:034449b176b163a705b9c0e81f7a51c2",
+    "chzzk:c5ae83384bcd9e6b23a3cf7f4a058957"
+  ],
+  "danmakuKeys": [
+    {
+      "channelId": "27d40a129cc99e8dcddb0be21ed9a050",
+      "chatChannelId": "N2mCoI"
+    },
+    {
+      "channelId": "034449b176b163a705b9c0e81f7a51c2",
+      "chatChannelId": "N2mDSZ"
+    },
+    {
+      "channelId": "c5ae83384bcd9e6b23a3cf7f4a058957",
+      "chatChannelId": "N2mDDF"
+    }
+  ],
+  "capturedAt": "2026-09-30T15:20:40.653008Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://kr-ss3.chat.naver.com/chat",
+      "headers": {
+        "origin": "https://chzzk.naver.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 3,
+  "raw": [
+    {
+      "chatChannelId": "N2mCoI",
+      "channelId": "27d40a129cc99e8dcddb0be21ed9a050",
+      "sha256": "c337bf11c5fee70ea205e8ed685cc5389ada1f69d3392bf458704ada9efa0221",
+      "length": 49510
+    },
+    {
+      "chatChannelId": "N2mDSZ",
+      "channelId": "034449b176b163a705b9c0e81f7a51c2",
+      "sha256": "5a6fffea4c9c4867a9e18b945b629f13b6c5ced3e0cafbc0163adb641e36e1f0",
+      "length": 53191
+    },
+    {
+      "chatChannelId": "N2mDDF",
+      "channelId": "c5ae83384bcd9e6b23a3cf7f4a058957",
+      "sha256": "603a754ceafbcd6a668debd9604785dc7f7c949768170b4a5567ed02996edce5",
+      "length": 52878
+    }
+  ],
+  "scrubbed": [
+    {
+      "where": "$..anonymousToken",
+      "rule": "secret"
+    },
+    {
+      "where": "$..description (viewer names)",
+      "rule": "person"
+    },
+    {
+      "where": "$..donationId",
+      "rule": "secret"
+    },
+    {
+      "where": "$..extraToken",
+      "rule": "secret"
+    },
+    {
+      "where": "$..missionDonationId",
+      "rule": "secret"
+    },
+    {
+      "where": "$..nickName",
+      "rule": "person"
+    },
+    {
+      "where": "$..nickname",
+      "rule": "person"
+    },
+    {
+      "where": "$..registerNickname",
+      "rule": "person"
+    },
+    {
+      "where": "$..relatedMissionDonationId",
+      "rule": "secret"
+    },
+    {
+      "where": "$..targetNickname",
+      "rule": "person"
+    },
+    {
+      "where": "$..userId",
+      "rule": "person"
+    },
+    {
+      "where": "$..userIdHash",
+      "rule": "person"
+    }
+  ],
+  "tool": "scan.dart (dart:io; for each of the 150 most watched lives: live-status for the chat channel, access token, READ join, one recent-chat request, close; nothing else sent) and scrub.py, M5.F; neither is in the repository",
+  "note": "Three answers to the recent-chat request (cmd 15101), one per line, each from another live (danmakuKeys in the same order), recorded 2026-09-30 15:20-15:30 UTC (00:20-00:30 KST). Picked from 138 answers for what S09-S11 lack: pinned notices (bdy.notice) pinned by their author (a streamer, a chat manager) and by the streamer for a viewer's line (N2mDSZ), a system line visible to managers only (a restriction: extras.visibleRoles), and donations of kinds MISSION and MISSION_PARTICIPATION (anonymous, with an anonymousToken) beside CHAT ones. No answer of the 138 held a subscription gift (see S15-live). `t` is the time since the first answer. User ids, nicknames (also in extras, weeklyRankList and the restriction's params and description), tokens and donation and mission ids are synthetic values of the same shape and length; the streamers' public channel ids and names, chat text and amounts are kept. The handshake headers are what the recorder gave dart:io, which sends the user-agent after its own (\"Dart/3.13 (dart:io), Mozilla/5.0 …\"); the server accepts it."
+}

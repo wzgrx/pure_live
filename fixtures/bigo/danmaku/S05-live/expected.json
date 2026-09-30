@@ -1,0 +1,723 @@
+{
+  "generator": "fixtures/bigo/danmaku/web_expected.py: the chat reading and frames of the Bigo website (scripts 14.37bf41.js, 97.929aaf.js and app.2a1a24.js of 2026-09-30), restated",
+  "value": {
+    "roomId": "6309489689319799326",
+    "ownerId": 1515772556,
+    "link": {
+      "url": "https://ta.bigo.tv/official_website/studio/getWebSocketLink",
+      "visitor": {
+        "userId": "1000000001",
+        "userName": "0",
+        "deviceId": "web_0123456789abcdef0123456789abcdef_Sample_1790771602072"
+      },
+      "form": "deviceId=web_0123456789abcdef0123456789abcdef_Sample_1790771602072"
+    },
+    "client": [
+      {
+        "line": 4,
+        "text": "79108{\"appId\":\"60\",\"osType\":\"4\",\"clientVersion\":\"5\",\"timeStamp\":\"1790771604\",\"nonce\":\"1\",\"reservedForSecurity\":\"1\",\"appSign\":\"1\",\"redundancy\":\"1\",\"sign\":\"880e63bddfc6f3fef333d12b67149308\"}"
+      },
+      {
+        "line": 5,
+        "text": "512279{\"uid\":\"1000000001\",\"cookie\":\"OmUXHVjUqwXu6aBswyi7y9NabP1ftrlcm5Zcz6BHAQiOQzrd3X+YTRx2Iy5Yrnqi22BmBpvUS8ii0qkx3ku/+4KfCEltInoi5PubrJI1BjFIyMNW+Bb4CtKLAB3qbVCmmMS6ejkV9WbZsuLwLlyaudic7trf5rtQ\",\"secret\":\"0\",\"userName\":\"0\",\"deviceId\":\"web_0123456789abcdef0123456789abcdef_Sample_1790771602072\",\"userFlag\":\"0\",\"status\":\"0\",\"password\":\"0\",\"sdkVersion\":\"0\",\"displayType\":\"0\",\"pbVersion\":\"0\",\"lang\":\"cn\",\"loginLevel\":\"0\",\"clientVersionCode\":\"0\",\"clientType\":\"7\",\"clientOsVer\":\"0\",\"netConf\":{\"clientIp\":\"0\",\"proxySwitch\":\"0\",\"proxyTimestamp\":\"0\",\"mcc\":\"0\",\"mnc\":\"0\",\"countryCode\":\"CN\"}}"
+      },
+      {
+        "line": 7,
+        "text": "1304{\"secretKey\":\"0\",\"seqId\":\"1790771605735\",\"roomId\":\"6309489689319799326\",\"reserver\":\"1\",\"clientVersion\":\"0\",\"clientType\":\"7\",\"version\":\"15\",\"deviceid\":\"web_0123456789abcdef0123456789abcdef_Sample_1790771602072\",\"other\":[]}"
+      },
+      {
+        "line": 9,
+        "text": "10776{\"uid\":\"1515772556\",\"seqId\":\"1790771605967\",\"roomid\":\"6309489689319799326\",\"contribution\":\"0\",\"enterTimestamp\":\"0\",\"number\":\"0\",\"ident\":\"0\",\"userGrade\":\"0\",\"version\":\"0\",\"lastUserBeanGrade\":\"0\",\"lastUserId\":\"0\",\"others\":[]}"
+      },
+      {
+        "line": 14,
+        "text": "791{\"status\":\"0\",\"seqid\":\"1790771615559\",\"flag\":\"0\",\"roomId\":\"0\",\"ownerStatus\":\"0\",\"micUid\":\"0\"}"
+      },
+      {
+        "line": 23,
+        "text": "791{\"status\":\"0\",\"seqid\":\"1790771625548\",\"flag\":\"0\",\"roomId\":\"0\",\"ownerStatus\":\"0\",\"micUid\":\"0\"}"
+      },
+      {
+        "line": 39,
+        "text": "791{\"status\":\"0\",\"seqid\":\"1790771635546\",\"flag\":\"0\",\"roomId\":\"0\",\"ownerStatus\":\"0\",\"micUid\":\"0\"}"
+      },
+      {
+        "line": 48,
+        "text": "791{\"status\":\"0\",\"seqid\":\"1790771645546\",\"flag\":\"0\",\"roomId\":\"0\",\"ownerStatus\":\"0\",\"micUid\":\"0\"}"
+      },
+      {
+        "line": 55,
+        "text": "791{\"status\":\"0\",\"seqid\":\"1790771655546\",\"flag\":\"0\",\"roomId\":\"0\",\"ownerStatus\":\"0\",\"micUid\":\"0\"}"
+      },
+      {
+        "line": 69,
+        "text": "791{\"status\":\"0\",\"seqid\":\"1790771665539\",\"flag\":\"0\",\"roomId\":\"0\",\"ownerStatus\":\"0\",\"micUid\":\"0\"}"
+      }
+    ],
+    "frames": [
+      {
+        "line": 3,
+        "eid": 256,
+        "page": {
+          "answer": true
+        },
+        "events": []
+      },
+      {
+        "line": 6,
+        "eid": 512535,
+        "page": {
+          "login": "200"
+        },
+        "events": []
+      },
+      {
+        "line": 8,
+        "eid": 1560,
+        "page": {
+          "enterRoom": "200",
+          "sid": "2112191006"
+        },
+        "events": []
+      },
+      {
+        "line": 10,
+        "eid": 11032,
+        "page": {
+          "nums": "481"
+        },
+        "events": [
+          {
+            "type": "online",
+            "value": 481
+          }
+        ]
+      },
+      {
+        "line": 11,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 12,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 34,
+            "grade": "6",
+            "n": "观众1",
+            "m": "https://static-comm.bigolive.tv/as/pgc-live-manage/4hc/21sauFyCg5Zq.png",
+            "a": "1",
+            "b": "0"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 13,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 15,
+        "eid": 791,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 16,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 17,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 18,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 134,
+            "grade": "0",
+            "level": 1,
+            "n": "ID:6170250159"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 19,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 20,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 21,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 1,
+            "grade": "18",
+            "n": "观众2",
+            "m": "hahaha",
+            "a": "0",
+            "b": "0",
+            "sticker": 1
+          },
+          "comment": true
+        },
+        "events": [
+          {
+            "type": "chat",
+            "userId": "900000022",
+            "userName": "观众2",
+            "text": "hahaha",
+            "level": "18",
+            "id": "900000022:4061689174"
+          }
+        ]
+      },
+      {
+        "line": 22,
+        "eid": 10264,
+        "page": {
+          "nums": "467"
+        },
+        "events": [
+          {
+            "type": "online",
+            "value": 467
+          }
+        ]
+      },
+      {
+        "line": 24,
+        "eid": 791,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 25,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 134,
+            "grade": "0",
+            "level": 25,
+            "n": "观众3"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 26,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 37,
+            "grade": "0",
+            "level": 25,
+            "n": "观众3"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 27,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 28,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 29,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 1,
+            "grade": "6",
+            "n": "观众1",
+            "m": "padahal depan rmh ku itu konser wkwkw",
+            "a": "1",
+            "b": "0",
+            "sticker": 1
+          },
+          "comment": true
+        },
+        "events": [
+          {
+            "type": "chat",
+            "userId": "900000011",
+            "userName": "观众1",
+            "text": "padahal depan rmh ku itu konser wkwkw",
+            "level": "6",
+            "id": "900000011:4062331098"
+          }
+        ]
+      },
+      {
+        "line": 30,
+        "eid": 10264,
+        "page": {
+          "nums": "467"
+        },
+        "events": [
+          {
+            "type": "online",
+            "value": 467
+          }
+        ]
+      },
+      {
+        "line": 31,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 134,
+            "grade": "0",
+            "level": 23,
+            "n": "观众4"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 32,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 37,
+            "grade": "0",
+            "level": 23,
+            "n": "观众4"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 33,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 134,
+            "grade": "0",
+            "level": 13,
+            "n": "观众5"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 34,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 35,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 134,
+            "grade": "0",
+            "level": 16,
+            "n": "观众6"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 36,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 37,
+            "grade": "0",
+            "level": 16,
+            "n": "观众6"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 37,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 134,
+            "grade": "0",
+            "level": 28,
+            "n": "观众7"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 38,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 37,
+            "grade": "0",
+            "level": 28,
+            "n": "观众7"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 40,
+        "eid": 791,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 41,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 134,
+            "grade": "0",
+            "level": 8,
+            "n": "观众8"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 42,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 43,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 134,
+            "grade": "0",
+            "level": 13,
+            "n": "观众9"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 44,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 37,
+            "grade": "0",
+            "level": 13,
+            "n": "观众9"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 45,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 46,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 47,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 134,
+            "grade": "0",
+            "level": 1,
+            "n": "观众10"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 49,
+        "eid": 791,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 50,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 51,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 1,
+            "grade": "18",
+            "n": "观众2",
+            "m": "sesi potret ka ",
+            "a": "0",
+            "b": "0",
+            "sticker": 1
+          },
+          "comment": true
+        },
+        "events": [
+          {
+            "type": "chat",
+            "userId": "900000022",
+            "userName": "观众2",
+            "text": "sesi potret ka",
+            "level": "18",
+            "id": "900000022:4061689193"
+          }
+        ]
+      },
+      {
+        "line": 52,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 1,
+            "grade": "25",
+            "n": "观众3",
+            "m": "buset udah diyogya lagi aja, kaya turis",
+            "a": "0",
+            "b": "0",
+            "sticker": 1
+          },
+          "comment": true
+        },
+        "events": [
+          {
+            "type": "chat",
+            "userId": "9000000023",
+            "userName": "观众3",
+            "text": "buset udah diyogya lagi aja, kaya turis",
+            "level": "25",
+            "id": "9000000023:4065143956"
+          }
+        ]
+      },
+      {
+        "line": 53,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 54,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 56,
+        "eid": 791,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 57,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 1,
+            "grade": "6",
+            "n": "观众1",
+            "m": "km yg sabtu apa minggu",
+            "a": "1",
+            "b": "0",
+            "sticker": 1
+          },
+          "comment": true
+        },
+        "events": [
+          {
+            "type": "chat",
+            "userId": "900000011",
+            "userName": "观众1",
+            "text": "km yg sabtu apa minggu",
+            "level": "6",
+            "id": "900000011:4062331145"
+          }
+        ]
+      },
+      {
+        "line": 58,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 59,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 60,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 134,
+            "grade": "0",
+            "level": 17,
+            "n": "ID:183038085"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 61,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 37,
+            "grade": "0",
+            "level": 17,
+            "n": "ID:183038085"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 62,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 134,
+            "grade": "0",
+            "level": 13,
+            "n": "观众11"
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 63,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 64,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 6,
+            "grade": "25",
+            "a": "0",
+            "b": "0",
+            "c": "1",
+            "k": "",
+            "m": "1",
+            "n": "观众3",
+            "t": "♎️ ✨KARTIKA🤹",
+            "u": ""
+          },
+          "comment": false
+        },
+        "events": []
+      },
+      {
+        "line": 65,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 66,
+        "eid": 10264,
+        "page": {
+          "nums": "468"
+        },
+        "events": [
+          {
+            "type": "online",
+            "value": 468
+          }
+        ]
+      },
+      {
+        "line": 67,
+        "eid": 2584,
+        "page": {
+          "chat": {
+            "type": 1,
+            "grade": "18",
+            "n": "观众2",
+            "m": "sedih lagunya teringat ayah aku",
+            "a": "0",
+            "b": "0",
+            "sticker": 1
+          },
+          "comment": true
+        },
+        "events": [
+          {
+            "type": "chat",
+            "userId": "900000022",
+            "userName": "观众2",
+            "text": "sedih lagunya teringat ayah aku",
+            "level": "18",
+            "id": "900000022:4061689205"
+          }
+        ]
+      },
+      {
+        "line": 68,
+        "eid": 2584,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 70,
+        "eid": 791,
+        "page": null,
+        "events": []
+      }
+    ]
+  }
+}

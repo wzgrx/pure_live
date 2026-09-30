@@ -179,6 +179,9 @@ const Map<String, AudiencePlatformCapability> audienceCapabilities = {
   ),
   // The finite public directory exposes user_count for current broadcasts.
   // Room detail has no verified concurrent field and therefore keeps it unknown.
+  // In the room, the chat's audience frames (NUMS `totalUserCount`, and the
+  // user-list answer's `total`) are the same concurrent count; the danmaku
+  // connection reports them as online viewers (M5.20).
   'bigo': AudiencePlatformCapability(
     hasPopularity: false,
     hasTotalViewers: false,

@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "platform": "bigo",
+  "case": "S05-live",
+  "room": "bigo:tikaa12",
+  "danmakuKeys": {
+    "siteId": "tikaa12",
+    "ownerId": 1515772556,
+    "roomId": "6309489689319799326"
+  },
+  "capturedAt": "2026-09-30T12:33:22.060000Z",
+  "route": "proxy:127.0.0.1:7897",
+  "link": {
+    "url": "https://ta.bigo.tv/official_website/studio/getWebSocketLink",
+    "method": "POST",
+    "headers": {
+      "origin": "https://www.bigo.tv",
+      "referer": "https://www.bigo.tv/",
+      "user-agent": "Mozilla/5.0",
+      "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+    },
+    "followRedirects": false
+  },
+  "handshakes": [
+    {
+      "url": "wss://wss.bigolive.tv/live/official/web",
+      "headers": {
+        "origin": "https://www.bigo.tv",
+        "user-agent": "Mozilla/5.0"
+      }
+    }
+  ],
+  "frames": 70,
+  "raw": {
+    "sha256": "f15c940554eaae104583f4dae8d3f31ac21936a2e461bca2d368c2dcb1b7e534",
+    "length": 155041
+  },
+  "kept": {
+    "of": 218,
+    "lines": "0-70"
+  },
+  "scrubbed": [
+    {
+      "where": "$.admins[*]",
+      "rule": "person"
+    },
+    {
+      "where": "$.challenge",
+      "rule": "secret"
+    },
+    {
+      "where": "$.clientIp (the caller address as a little-endian uint32)",
+      "rule": "address"
+    },
+    {
+      "where": "$.data.deviceId, form deviceId, login deviceId, enter deviceid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.seqId",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.uidToken, login cookie",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.userId, login uid, reply uid, 1560 other[fromUid], 11032 uid (the visitor)",
+      "rule": "person"
+    },
+    {
+      "where": "$.other[from_client_model]",
+      "rule": "secret"
+    },
+    {
+      "where": "$.other[owner_uuid]",
+      "rule": "secret"
+    },
+    {
+      "where": "$.payload.content.n",
+      "rule": "person"
+    },
+    {
+      "where": "$.payload.content.n (ID:<Bigo id>)",
+      "rule": "person"
+    },
+    {
+      "where": "2584 from_uid, payload.uid, 760969 from_uid (viewers; the streamer kept)",
+      "rule": "person"
+    },
+    {
+      "where": "79108 sign (recomputed for the synthetic challenge)",
+      "rule": "derived"
+    }
+  ],
+  "reduced": [
+    "11032 users: [] (viewer profiles with avatar tokens)",
+    "10264 addUser, delUser: [] (viewer profiles with avatar tokens)",
+    "2584 payload.others: chat keeps the numeric flags only; other kinds []",
+    "2584 oriUri 760969 (gift animation): only the gift fields, no names, avatars or tokens"
+  ],
+  "tool": "rec.dart (dart:io and crypto: getWebSocketLink, then the frames the website sends for a visitor: the challenge answer, the login a second later, the entry, the audience request and a ping every 10 s; nothing else) and scrub.py, M5.20; neither is in the repository",
+  "note": "Recorded 2026-09-30 for M5.20 through the local proxy: 240 s and 218 lines of tikaa12 (list id 23382904, live, 557 viewers in the list), of which the first 71 (about 63 s) are kept: the visitor request and answer, the challenge, answer, login, entry and audience request with their answers, six pings with their answers, six comments, three NUMS, a gift (tag 6, its animation and the streamer's bean total), a sticker, entrance notices, heat and likes. The lines after are more of the same kinds. The open and close of the socket are not lines (the handshake is under handshakes)."
+}

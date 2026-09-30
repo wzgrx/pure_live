@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "platform": "bigo",
+  "case": "S06-idle",
+  "room": "bigo:qashia305",
+  "danmakuKeys": {
+    "siteId": "qashia305",
+    "ownerId": 409742853,
+    "roomId": "6812312308570332324"
+  },
+  "capturedAt": "2026-09-30T12:38:10.682000Z",
+  "route": "proxy:127.0.0.1:7897",
+  "link": {
+    "url": "https://ta.bigo.tv/official_website/studio/getWebSocketLink",
+    "method": "POST",
+    "headers": {
+      "origin": "https://www.bigo.tv",
+      "referer": "https://www.bigo.tv/",
+      "user-agent": "Mozilla/5.0",
+      "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+    },
+    "followRedirects": false
+  },
+  "handshakes": [
+    {
+      "url": "wss://wss.bigolive.tv/live/official/web",
+      "headers": {
+        "origin": "https://www.bigo.tv",
+        "user-agent": "Mozilla/5.0"
+      }
+    }
+  ],
+  "frames": 12,
+  "raw": {
+    "sha256": "ce8fbb5941cce52de184155b57ce50a21023a5a4b7bd5e671be494184f449dd3",
+    "length": 3388
+  },
+  "scrubbed": [
+    {
+      "where": "$.challenge",
+      "rule": "secret"
+    },
+    {
+      "where": "$.clientIp (the caller address as a little-endian uint32)",
+      "rule": "address"
+    },
+    {
+      "where": "$.data.deviceId, form deviceId, login deviceId, enter deviceid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.seqId",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.uidToken, login cookie",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.userId, login uid, reply uid, 1560 other[fromUid], 11032 uid (the visitor)",
+      "rule": "person"
+    },
+    {
+      "where": "2584 from_uid, payload.uid, 760969 from_uid (viewers; the streamer kept)",
+      "rule": "person"
+    },
+    {
+      "where": "79108 sign (recomputed for the synthetic challenge)",
+      "rule": "derived"
+    }
+  ],
+  "reduced": [
+    "11032 users: [] (viewer profiles with avatar tokens)",
+    "10264 addUser, delUser: [] (viewer profiles with avatar tokens)",
+    "2584 payload.others: chat keeps the numeric flags only; other kinds []",
+    "2584 oriUri 760969 (gift animation): only the gift fields, no names, avatars or tokens"
+  ],
+  "tool": "rec.dart (dart:io and crypto: getWebSocketLink, then the frames the website sends for a visitor: the challenge answer, the login a second later, the entry, the audience request and a ping every 10 s; nothing else) and scrub.py, M5.20; neither is in the repository",
+  "note": "Recorded 2026-09-30 for M5.20 through the local proxy: the whole session with qashia305 (the streamer of S03, room 6812312308570332324) after the broadcast ended. The entry is answered 200 with sid 0; the audience answer is all zeros; the ping is answered."
+}

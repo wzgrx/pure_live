@@ -1,0 +1,77 @@
+{
+  "generator": "fixtures/bigo/danmaku/web_expected.py: the chat reading and frames of the Bigo website (scripts 14.37bf41.js, 97.929aaf.js and app.2a1a24.js of 2026-09-30), restated",
+  "value": {
+    "roomId": "6812312308570332324",
+    "ownerId": 409742853,
+    "link": {
+      "url": "https://ta.bigo.tv/official_website/studio/getWebSocketLink",
+      "visitor": {
+        "userId": "1000000001",
+        "userName": "0",
+        "deviceId": "web_0123456789abcdef0123456789abcdef_Sample_1790771890695"
+      },
+      "form": "deviceId=web_0123456789abcdef0123456789abcdef_Sample_1790771890695"
+    },
+    "client": [
+      {
+        "line": 4,
+        "text": "79108{\"appId\":\"60\",\"osType\":\"4\",\"clientVersion\":\"5\",\"timeStamp\":\"1790771893\",\"nonce\":\"1\",\"reservedForSecurity\":\"1\",\"appSign\":\"1\",\"redundancy\":\"1\",\"sign\":\"bbb68d7c5dc0662e2dff2684a3094e07\"}"
+      },
+      {
+        "line": 5,
+        "text": "512279{\"uid\":\"1000000001\",\"cookie\":\"FNZNRXZkhNZntUsxTSs32DOXsTTqQ0O6r2sVEvDvY1PA+PlL26Q/oGqCSNNqnbQzZ5VMfH9yE0PBtN79qfLT1eSeQy58mvuW9XZIe3duyQhKnKhkAm6D/4fxNGiEp9PXwgQ9WdKzDDT+NRnA5K8toyQlQ1txYzsG\",\"secret\":\"0\",\"userName\":\"0\",\"deviceId\":\"web_0123456789abcdef0123456789abcdef_Sample_1790771890695\",\"userFlag\":\"0\",\"status\":\"0\",\"password\":\"0\",\"sdkVersion\":\"0\",\"displayType\":\"0\",\"pbVersion\":\"0\",\"lang\":\"cn\",\"loginLevel\":\"0\",\"clientVersionCode\":\"0\",\"clientType\":\"7\",\"clientOsVer\":\"0\",\"netConf\":{\"clientIp\":\"0\",\"proxySwitch\":\"0\",\"proxyTimestamp\":\"0\",\"mcc\":\"0\",\"mnc\":\"0\",\"countryCode\":\"CN\"}}"
+      },
+      {
+        "line": 7,
+        "text": "1304{\"secretKey\":\"0\",\"seqId\":\"1790771895192\",\"roomId\":\"6812312308570332324\",\"reserver\":\"1\",\"clientVersion\":\"0\",\"clientType\":\"7\",\"version\":\"15\",\"deviceid\":\"web_0123456789abcdef0123456789abcdef_Sample_1790771890695\",\"other\":[]}"
+      },
+      {
+        "line": 9,
+        "text": "10776{\"uid\":\"409742853\",\"seqId\":\"1790771895390\",\"roomid\":\"6812312308570332324\",\"contribution\":\"0\",\"enterTimestamp\":\"0\",\"number\":\"0\",\"ident\":\"0\",\"userGrade\":\"0\",\"version\":\"0\",\"lastUserBeanGrade\":\"0\",\"lastUserId\":\"0\",\"others\":[]}"
+      },
+      {
+        "line": 11,
+        "text": "791{\"status\":\"0\",\"seqid\":\"1790771905013\",\"flag\":\"0\",\"roomId\":\"0\",\"ownerStatus\":\"0\",\"micUid\":\"0\"}"
+      }
+    ],
+    "frames": [
+      {
+        "line": 3,
+        "eid": 256,
+        "page": {
+          "answer": true
+        },
+        "events": []
+      },
+      {
+        "line": 6,
+        "eid": 512535,
+        "page": {
+          "login": "200"
+        },
+        "events": []
+      },
+      {
+        "line": 8,
+        "eid": 1560,
+        "page": {
+          "enterRoom": "200",
+          "sid": "0"
+        },
+        "events": []
+      },
+      {
+        "line": 10,
+        "eid": 11032,
+        "page": null,
+        "events": []
+      },
+      {
+        "line": 12,
+        "eid": 791,
+        "page": null,
+        "events": []
+      }
+    ]
+  }
+}

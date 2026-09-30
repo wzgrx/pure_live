@@ -65,7 +65,9 @@ final class _RawServer {
 
     _waiters.add(attempt);
     attempt();
-    return result.future.whenComplete(() => _waiters.remove(attempt)).timeout(const Duration(seconds: 5));
+    // Generous: a gate run at load 24 failed the first socket test once
+    // (M5.F), not reproduced in 84 runs at load 41; only a hang waits this.
+    return result.future.whenComplete(() => _waiters.remove(attempt)).timeout(const Duration(seconds: 20));
   }
 
   /// The request head, without its blank line.
@@ -168,6 +170,75 @@ Future<(ExactWebSocket, String)> _open(
   final head = await server.head();
   await server.accept(head, fields: fields, extra: extra);
   return (await socket, head);
+}
+
+/// A local HTTP proxy for the tunnel tests (SOOP's B-6): reads each
+/// client's request head, then leaves the client to [answer] (with the
+/// bytes that came after the head, and the client's later bytes).
+final class _Proxy {
+  new _(this._server, this.answer) {
+    _server.listen(_accept);
+  }
+
+  static Future<_Proxy> start(
+    void Function(_Proxy proxy, Socket client, String head, Stream<List<int>> later) answer,
+  ) async {
+    final proxy = _Proxy._(await ServerSocket.bind(InternetAddress.loopbackIPv4, 0), answer);
+    addTearDown(proxy.close);
+    return proxy;
+  }
+
+  final ServerSocket _server;
+  final void Function(_Proxy proxy, Socket client, String head, Stream<List<int>> later) answer;
+  final List<String> heads = [];
+  final List<Socket> sockets = [];
+
+  int get port => _server.port;
+
+  HttpProxyRoute get route => HttpProxyRoute('127.0.0.1', port);
+
+  void _accept(Socket client) {
+    sockets.add(client);
+    client.done.ignore();
+    final later = StreamController<List<int>>();
+    var buffer = <int>[];
+    var answered = false;
+    client.listen(
+      (data) {
+        if (answered) {
+          later.add(data);
+          return;
+        }
+        buffer = [...buffer, ...data];
+        final text = latin1.decode(buffer);
+        final end = text.indexOf('\r\n\r\n');
+        if (end < 0) return;
+        answered = true;
+        heads.add(text.substring(0, end));
+        if (end + 4 < buffer.length) later.add(buffer.sublist(end + 4));
+        answer(this, client, text.substring(0, end), later.stream);
+      },
+      onDone: () => unawaited(later.close()),
+      onError: (Object _) => unawaited(later.close()),
+    );
+  }
+
+  /// Answers `200` and pipes [client] to 127.0.0.1:[upstream].
+  Future<void> tunnel(Socket client, Stream<List<int>> later, int upstream) async {
+    final socket = await Socket.connect(InternetAddress.loopbackIPv4, upstream);
+    sockets.add(socket);
+    socket.done.ignore();
+    socket.listen(client.add, onDone: client.destroy, onError: (Object _) => client.destroy());
+    later.listen(socket.add, onDone: socket.destroy);
+    client.add(latin1.encode('HTTP/1.1 200 Connection established\r\nProxy-Agent: test\r\n\r\n'));
+  }
+
+  Future<void> close() async {
+    for (final socket in sockets) {
+      socket.destroy();
+    }
+    await _server.close();
+  }
 }
 
 void main() {
@@ -527,6 +598,147 @@ void main() {
     ]);
     await channel.close(1000);
     expect(await closeCodes.future.timeout(const Duration(seconds: 2)), 1000);
+  });
+
+  group('through an HTTP proxy (SOOP B-6)', () {
+    test('the tunnel request names the host and port, default or not, IPv6 bracketed', () {
+      expect(
+        ExactWebSocket.tunnelRequest(Uri.parse('wss://chat-6e0a4c63.sooplive.com:9001/Websocket/khm11903')),
+        'CONNECT chat-6e0a4c63.sooplive.com:9001 HTTP/1.1\r\nHost: chat-6e0a4c63.sooplive.com:9001\r\n\r\n',
+      );
+      expect(ExactWebSocket.tunnelRequest(Uri.parse('wss://example.com/chat')), startsWith('CONNECT example.com:443 '));
+      expect(ExactWebSocket.tunnelRequest(Uri.parse('ws://example.com/chat')), startsWith('CONNECT example.com:80 '));
+      expect(
+        ExactWebSocket.tunnelRequest(Uri.parse('ws://[::1]:9000/chat')),
+        'CONNECT [::1]:9000 HTTP/1.1\r\nHost: [::1]:9000\r\n\r\n',
+      );
+    });
+
+    test('a dart:io server through the tunnel: CONNECT first, then the handshake as written', () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final closeCodes = Completer<int?>();
+      final requests = <HttpHeaders>[];
+      server.listen((request) async {
+        requests.add(request.headers);
+        final socket = await WebSocketTransformer.upgrade(request, protocolSelector: (protocols) => protocols.last);
+        socket.listen(socket.add, onDone: () => closeCodes.complete(socket.closeCode));
+      });
+      addTearDown(() => server.close(force: true));
+      final proxy = await _Proxy.start((proxy, client, head, later) => proxy.tunnel(client, later, server.port));
+      final channel = await connectExactWebSocketViaRoute(
+        Uri.parse('ws://127.0.0.1:${server.port}/chat'),
+        headers: const {'Origin': 'https://play.sooplive.co.kr'},
+        protocols: const ['binary', 'chat'],
+        route: proxy.route,
+        connectTimeout: const Duration(seconds: 2),
+      );
+      expect(proxy.heads, ['CONNECT 127.0.0.1:${server.port} HTTP/1.1\r\nHost: 127.0.0.1:${server.port}']);
+      expect((channel as ExactWebSocket).protocol, 'chat');
+      expect(requests.single.value('origin'), 'https://play.sooplive.co.kr');
+      final echoes = channel.stream.take(2).toList();
+      channel
+        ..add('text')
+        ..add([1, 2, 3]);
+      expect(await echoes, [
+        'text',
+        [1, 2, 3],
+      ]);
+      await channel.close(1000);
+      expect(await closeCodes.future.timeout(const Duration(seconds: 2)), 1000);
+    });
+
+    test('the direct connector still ignores the route (YY, 3.x)', () async {
+      final proxy = await _Proxy.start((proxy, client, head, later) => fail('the proxy was used'));
+      final server = await _RawServer.start();
+      addTearDown(server.close);
+      final connecting = connectExactWebSocket(
+        server.url,
+        headers: const {},
+        protocols: null,
+        route: proxy.route,
+        connectTimeout: const Duration(seconds: 2),
+      );
+      await server.accept(await server.head());
+      await (await connecting).close();
+      expect(proxy.heads, isEmpty);
+    });
+
+    Future<void> refused(
+      Matcher matcher,
+      void Function(_Proxy proxy, Socket client, String head, Stream<List<int>> later) answer, {
+      String url = 'ws://chat.example/chat',
+      Duration timeout = const Duration(seconds: 2),
+    }) async {
+      final proxy = await _Proxy.start(answer);
+      await expectLater(
+        ExactWebSocket.connect(Uri.parse(url), connectTimeout: timeout, route: proxy.route),
+        throwsA(matcher),
+      );
+    }
+
+    test('a refused tunnel fails with the status line', () async {
+      await refused(
+        isA<WebSocketException>().having(
+          (error) => error.message,
+          'message',
+          'Proxy refused CONNECT: HTTP/1.1 407 Proxy Authentication Required',
+        ),
+        (proxy, client, head, later) =>
+            client.add(latin1.encode('HTTP/1.1 407 Proxy Authentication Required\r\nContent-Length: 0\r\n\r\n')),
+      );
+      await refused(
+        isA<WebSocketException>(),
+        (proxy, client, head, later) => client.add(latin1.encode('HTTP/1.1 2000 Nope\r\n\r\n')),
+      );
+    });
+
+    test('a proxy that closes, answers nothing, or answers a head over 32 KiB', () async {
+      await refused(isA<WebSocketException>(), (proxy, client, head, later) => client.destroy());
+      await refused(
+        isA<TimeoutException>(),
+        (proxy, client, head, later) {},
+        timeout: const Duration(milliseconds: 200),
+      );
+      await refused(
+        isA<WebSocketException>(),
+        (proxy, client, head, later) => client.add(latin1.encode('HTTP/1.1 200 ${'x' * 40000}')),
+      );
+    });
+
+    test('the timeout covers the answer to CONNECT and the upgrade', () async {
+      final started = DateTime.now();
+      await refused(
+        isA<TimeoutException>(),
+        (proxy, client, head, later) => client.add(latin1.encode('HTTP/1.1 200 Connection established\r\n\r\n')),
+        timeout: const Duration(milliseconds: 300),
+      );
+      expect(DateTime.now().difference(started), lessThan(const Duration(seconds: 5)));
+    });
+
+    test('wss: TLS starts inside the tunnel, naming the host; data before TLS is refused', () async {
+      final hello = Completer<List<int>>();
+      await refused(
+        anyOf(isA<HandshakeException>(), isA<SocketException>(), isA<TlsException>(), isA<WebSocketException>()),
+        (proxy, client, head, later) {
+          client.add(latin1.encode('HTTP/1.1 200 Connection established\r\n\r\n'));
+          unawaited(
+            later.first.then((bytes) {
+              hello.complete(bytes);
+              client.destroy();
+            }, onError: (Object _) {}),
+          );
+        },
+        url: 'wss://chat-6e0a4c63.sooplive.com:9001/Websocket/khm11903',
+      );
+      final bytes = await hello.future.timeout(const Duration(seconds: 5));
+      expect(bytes.take(2), [0x16, 0x03], reason: 'a TLS handshake record');
+      expect(latin1.decode(bytes, allowInvalid: true), contains('chat-6e0a4c63.sooplive.com'), reason: 'SNI');
+      await refused(
+        isA<WebSocketException>().having((error) => error.message, 'message', 'Proxy sent data before TLS'),
+        (proxy, client, head, later) => client.add(latin1.encode('HTTP/1.1 200 Connection established\r\n\r\nearly')),
+        url: 'wss://chat.example/chat',
+      );
+    });
   });
 }
 

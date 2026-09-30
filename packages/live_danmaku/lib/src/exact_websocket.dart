@@ -17,6 +17,7 @@ import 'package:live_net/live_net.dart';
 ///
 /// The connection is always direct and `route` is ignored, as in 3.x: its
 /// connector released the proxy client it was handed and dialled the edge.
+/// [connectExactWebSocketViaRoute] is the same handshake through the route.
 Future<SocketChannel> connectExactWebSocket(
   Uri endpoint, {
   required Map<String, String> headers,
@@ -24,6 +25,24 @@ Future<SocketChannel> connectExactWebSocket(
   required ProxyRoute route,
   required Duration connectTimeout,
 }) => ExactWebSocket.connect(endpoint, headers: headers, protocols: protocols, connectTimeout: connectTimeout);
+
+/// [connectExactWebSocket] through the platform's proxy [route]: an
+/// [HttpProxyRoute] is asked for a `CONNECT` tunnel to the edge, and TLS
+/// (for `wss`) runs inside it, as `HttpClient` does; a [DirectRoute] dials
+/// the edge (SOOP since M5.F B-6, docs/modules/M5.7-soop.md).
+Future<SocketChannel> connectExactWebSocketViaRoute(
+  Uri endpoint, {
+  required Map<String, String> headers,
+  required Iterable<String>? protocols,
+  required ProxyRoute route,
+  required Duration connectTimeout,
+}) => ExactWebSocket.connect(
+  endpoint,
+  headers: headers,
+  protocols: protocols,
+  connectTimeout: connectTimeout,
+  route: route,
+);
 
 /// A WebSocket client (RFC 6455) whose opening handshake is sent exactly as
 /// [handshake] writes it: the caller's headers in order and as spelled, then
@@ -36,19 +55,26 @@ Future<SocketChannel> connectExactWebSocket(
 /// by the server closes the socket with an error on [stream]. Messages are
 /// limited to 16 MiB and the response head to 32 KiB.
 final class ExactWebSocket implements SocketChannel {
-  new _(this._endpoint, this._connectTimeout, this._protocols, this._headers, this._random);
+  new _(this._endpoint, this._connectTimeout, this._protocols, this._headers, this._random, this._route);
 
   /// Opens [endpoint] (`ws` or `wss`) and completes once the server accepted
   /// the upgrade. The TCP (and TLS) connection and then the upgrade answer
   /// each have [connectTimeout], as in 3.x. Throws [WebSocketException] when
   /// the server does not upgrade, [TimeoutException] or [SocketException]
   /// otherwise; [random] makes the key and the masks (tests).
+  ///
+  /// Through an [HttpProxyRoute] the TCP connection goes to the proxy, which
+  /// is asked for a tunnel (`CONNECT host:port`); TLS for `wss` runs inside
+  /// it. The proxy's answer, TLS and the upgrade answer then share one
+  /// [connectTimeout]. A proxy that does not answer `200` fails the
+  /// connection with a [WebSocketException].
   static Future<ExactWebSocket> connect(
     Uri endpoint, {
     Map<String, String> headers = const {},
     Iterable<String>? protocols,
     Duration connectTimeout = const Duration(seconds: 10),
     Random? random,
+    ProxyRoute route = const DirectRoute(),
   }) async {
     if (endpoint.scheme != 'ws' && endpoint.scheme != 'wss') {
       throw WebSocketException('Unsupported WebSocket scheme: ${endpoint.scheme}');
@@ -59,6 +85,7 @@ final class ExactWebSocket implements SocketChannel {
       List.unmodifiable(protocols ?? const <String>[]),
       Map.unmodifiable(headers),
       random ?? Random.secure(),
+      route,
     );
     unawaited(socket._open());
     await socket._ready.future;
@@ -139,6 +166,15 @@ final class ExactWebSocket implements SocketChannel {
   /// The `Sec-WebSocket-Accept` value for the key [nonce] (RFC 6455 §4.2.2).
   static String acceptKey(String nonce) => base64.encode(_sha1(ascii.encode('$nonce$_acceptGuid')));
 
+  /// The request asking an HTTP proxy for a tunnel to [endpoint]: `CONNECT`
+  /// and `Host` with the host (bracketed when IPv6) and the port, default
+  /// or not.
+  static String tunnelRequest(Uri endpoint) {
+    final port = endpoint.hasPort ? endpoint.port : (endpoint.scheme == 'wss' ? 443 : 80);
+    final host = endpoint.host.contains(':') ? '[${endpoint.host}]' : endpoint.host;
+    return 'CONNECT $host:$port HTTP/1.1\r\nHost: $host:$port\r\n\r\n';
+  }
+
   static const String _acceptGuid = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
   static const int _maxHandshakeBytes = 32 * 1024;
   static const int _maxMessageBytes = 16 * 1024 * 1024;
@@ -166,6 +202,7 @@ final class ExactWebSocket implements SocketChannel {
   final List<String> _protocols;
   final Map<String, String> _headers;
   final Random _random;
+  final ProxyRoute _route;
   final Completer<void> _ready = Completer();
   final Completer<void> _done = Completer();
   final StreamController<Object?> _incoming = StreamController(sync: true);
@@ -178,6 +215,9 @@ final class ExactWebSocket implements SocketChannel {
   BytesBuilder? _fragment;
   int _fragmentOpcode = 0;
   String _nonce = '';
+
+  /// Waiting for the proxy's answer to `CONNECT`.
+  bool _tunnelling = false;
   bool _upgraded = false;
   bool _closed = false;
   bool _closeSent = false;
@@ -226,6 +266,18 @@ final class ExactWebSocket implements SocketChannel {
     try {
       final secure = _endpoint.scheme == 'wss';
       final port = _endpoint.hasPort ? _endpoint.port : (secure ? 443 : 80);
+      if (_route case HttpProxyRoute(host: final proxyHost, port: final proxyPort)) {
+        final socket = await Socket.connect(proxyHost, proxyPort, timeout: _connectTimeout);
+        if (_closed) {
+          socket.destroy();
+          return;
+        }
+        _attach(socket);
+        _tunnelling = true;
+        socket.add(latin1.encode(tunnelRequest(_endpoint)));
+        _startHandshakeTimer();
+        return;
+      }
       final socket = secure
           ? await SecureSocket.connect(
               _endpoint.host,
@@ -238,19 +290,83 @@ final class ExactWebSocket implements SocketChannel {
         socket.destroy();
         return;
       }
-      _socket = socket;
-      // Write failures surface as a closed stream; the sink's own future
-      // must not raise them again.
-      socket.done.ignore();
-      _subscription = socket.listen(_receive, onError: _fail, onDone: _remoteDone, cancelOnError: true);
+      _attach(socket);
+      await _sendUpgrade();
+    } on Object catch (error, stackTrace) {
+      _fail(error, stackTrace);
+    }
+  }
+
+  void _attach(Socket socket) {
+    _socket = socket;
+    // Write failures surface as a closed stream; the sink's own future
+    // must not raise them again.
+    socket.done.ignore();
+    _subscription = socket.listen(_receive, onError: _fail, onDone: _remoteDone, cancelOnError: true);
+  }
+
+  /// Sends the opening handshake; the answer is due within [_connectTimeout]
+  /// (through a proxy, the timer started with the tunnel keeps running).
+  Future<void> _sendUpgrade() async {
+    try {
+      final socket = _socket!;
       _nonce = base64.encode([for (var i = 0; i < 16; i++) _random.nextInt(256)]);
       socket.add(utf8.encode(handshake(_endpoint, nonce: _nonce, protocols: _protocols, headers: _headers)));
       await socket.flush();
       if (_closed || _upgraded) return;
-      _handshakeTimer = Timer(
-        _connectTimeout,
-        () => _fail(TimeoutException('WebSocket handshake timed out', _connectTimeout)),
-      );
+      _startHandshakeTimer();
+    } on Object catch (error, stackTrace) {
+      _fail(error, stackTrace);
+    }
+  }
+
+  void _startHandshakeTimer() => _handshakeTimer ??= Timer(
+    _connectTimeout,
+    () => _fail(TimeoutException('WebSocket handshake timed out', _connectTimeout)),
+  );
+
+  /// Reads the proxy's answer to `CONNECT` from [_buffer]; once the tunnel
+  /// stands, the handshake (after TLS for `wss`) follows.
+  void _tunnelAnswer() {
+    if (_buffer.length > _maxHandshakeBytes) {
+      _fail(const WebSocketException('Proxy response head is too large'));
+      return;
+    }
+    final end = _headEnd(_buffer);
+    if (end < 0) return;
+    final status = latin1.decode(Uint8List.sublistView(_buffer, 0, end)).split('\r\n').first;
+    _buffer = Uint8List.sublistView(_buffer, end + 4);
+    if (!RegExp(r'^HTTP/1\.[01] 200(?:\s|$)').hasMatch(status)) {
+      _fail(WebSocketException('Proxy refused CONNECT: $status'));
+      return;
+    }
+    _tunnelling = false;
+    if (_endpoint.scheme != 'wss') {
+      unawaited(_sendUpgrade());
+    } else if (_buffer.isNotEmpty) {
+      _fail(const WebSocketException('Proxy sent data before TLS'));
+    } else {
+      unawaited(_startTls());
+    }
+  }
+
+  /// TLS inside the tunnel. The plain socket is handed over to
+  /// [SecureSocket.secure] (its subscription paused first, as `dart:io`
+  /// asks), which detaches it; the secure socket is then listened to.
+  Future<void> _startTls() async {
+    final plain = _socket!;
+    final subscription = _subscription!..pause();
+    try {
+      final socket = await SecureSocket.secure(plain, host: _endpoint.host, supportedProtocols: const ['http/1.1']);
+      // The plain socket is detached: cancelling its subscription only
+      // drops the listener.
+      unawaited(subscription.cancel());
+      if (_closed) {
+        socket.destroy();
+        return;
+      }
+      _attach(socket);
+      await _sendUpgrade();
     } on Object catch (error, stackTrace) {
       _fail(error, stackTrace);
     }
@@ -264,6 +380,10 @@ final class ExactWebSocket implements SocketChannel {
                 ..add(_buffer)
                 ..add(data))
               .takeBytes();
+    if (_tunnelling) {
+      _tunnelAnswer();
+      return;
+    }
     if (!_upgraded) {
       if (_buffer.length > _maxHandshakeBytes) {
         _fail(const WebSocketException('WebSocket response head is too large'));

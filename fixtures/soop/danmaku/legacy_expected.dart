@@ -20,6 +20,8 @@
 // S08-synthetic: every case of cases.json is one frame, framed as described
 // in its note.
 //
+// S09-live-ones-and-bars (M5.F B-6): every frame of frames.jsonl, as S07.
+//
 // Run from the repository root: dart run fixtures/soop/danmaku/legacy_expected.dart
 // Review the diff of every expected.json before committing it.
 // ignore_for_file: type=lint
@@ -32,6 +34,25 @@ const _root = 'fixtures/soop/danmaku';
 Future<void> main() async {
   await _recorded();
   _synthetic();
+  _recordedB6();
+}
+
+void _recordedB6() {
+  const sample = '$_root/S09-live-ones-and-bars';
+  final messages = <Map<String, Object?>>[];
+  final lines = File('$sample/frames.jsonl').readAsLinesSync();
+  for (var index = 0; index < lines.length; index++) {
+    final frame = jsonDecode(lines[index]) as Map<String, dynamic>;
+    final danmaku = SoopDanmaku();
+    danmaku.decodeMessage(base64Decode(frame['b64'] as String));
+    for (final message in danmaku.received) {
+      messages.add({'frame': index, ..._project(message)});
+    }
+  }
+  _write('$sample/expected.json', {
+    'generator': 'fixtures/soop/danmaku/legacy_expected.dart: 3.x SoopDanmaku.decodeMessage over every frame',
+    'value': {'messages': messages},
+  });
 }
 
 Future<void> _recorded() async {

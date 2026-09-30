@@ -34,6 +34,30 @@ List<Map<String, Object?>> get _recordedWithoutFrames => [
   for (final message in _recordedMessages) message..remove('frame'),
 ];
 
+/// The chat packets of S07, in order, as their fields.
+final List<List<String>> _recordedChatFields = [
+  for (final frame in _frames)
+    if (frame.dir == 'in')
+      for (final packet in SoopDanmakuProtocol.packets(frame.bytes))
+        if (packet.service == SoopDanmakuProtocol.chatService) utf8.decode(packet.body).split('\f'),
+];
+
+/// B-6: 3.x left the sender's id empty; it is field 2 without the `(n)` of
+/// a second session. Read here independently of the decoder, in the order
+/// of 3.x's messages (every recorded chat packet gives one).
+List<Map<String, Object?>> _withSenderIds(List<Map<String, Object?>> messages) {
+  expect(messages, hasLength(_recordedChatFields.length));
+  return [
+    for (final (index, message) in messages.indexed)
+      {...message, 'userId': _recordedChatFields[index][2].replaceFirst(RegExp(r'\(\d+\)$'), '')},
+  ];
+}
+
+/// S07 as decoded since B-6: 3.x's messages with the sender's id.
+List<Map<String, Object?>> get _recordedB6 => _withSenderIds(_recordedMessages);
+
+List<Map<String, Object?>> get _recordedB6WithoutFrames => _withSenderIds(_recordedWithoutFrames);
+
 String _packetText(Object? base64) => utf8.decode(base64Decode(base64! as String));
 
 /// The arguments M4.7 builds for the recorded room, with a synthetic cookie.
@@ -363,6 +387,80 @@ SocketConnector _local(_ChatServer server, List<Uri> endpoints, List<Map<String,
       );
     };
 
+/// A local HTTP proxy (B-6): answers `CONNECT` for [port] and pipes the
+/// tunnel to 127.0.0.1:[upstream]; every other port is refused with 502.
+/// It never dials out.
+final class _ConnectProxy {
+  new _(this._server, this.port, this.upstream) {
+    _server.listen(_accept);
+  }
+
+  static Future<_ConnectProxy> start({required int port, required int upstream}) async {
+    final proxy = _ConnectProxy._(await ServerSocket.bind(InternetAddress.loopbackIPv4, 0), port, upstream);
+    addTearDown(proxy.close);
+    return proxy;
+  }
+
+  final ServerSocket _server;
+
+  /// The tunnelled port.
+  final int port;
+
+  /// Where the tunnel leads.
+  final int upstream;
+
+  /// The request heads, in order.
+  final List<String> requests = [];
+  final List<Socket> _sockets = [];
+
+  int get localPort => _server.port;
+
+  void _accept(Socket client) {
+    _sockets.add(client);
+    client.done.ignore();
+    var head = <int>[];
+    Socket? tunnel;
+    client.listen(
+      (data) {
+        if (tunnel case final upstream?) {
+          upstream.add(data);
+          return;
+        }
+        head = [...head, ...data];
+        final text = latin1.decode(head);
+        final end = text.indexOf('\r\n\r\n');
+        if (end < 0) return;
+        requests.add(text.substring(0, end));
+        final rest = head.sublist(end + 4);
+        if (!text.startsWith('CONNECT ') || !text.split('\r\n').first.contains(':$port ')) {
+          client.add(latin1.encode('HTTP/1.1 502 Bad Gateway\r\n\r\n'));
+          unawaited(client.close());
+          return;
+        }
+        unawaited(
+          Socket.connect(InternetAddress.loopbackIPv4, upstream).then((socket) {
+            _sockets.add(socket);
+            socket.done.ignore();
+            tunnel = socket;
+            socket.listen(client.add, onDone: () => client.destroy(), onError: (Object _) => client.destroy());
+            client.add(latin1.encode('HTTP/1.1 200 Connection established\r\n\r\n'));
+            if (rest.isNotEmpty) socket.add(rest);
+          }),
+        );
+      },
+      onDone: () => tunnel?.destroy(),
+      onError: (Object _) => tunnel?.destroy(),
+    );
+  }
+
+  Future<void> close() async {
+    for (final socket in _sockets) {
+      socket.destroy();
+    }
+    await _server.close();
+  }
+}
+
 void main() {
   group('protocol', () {
     test("client packets are 3.x's and the recorded ones", () {
@@ -431,12 +529,13 @@ void main() {
       expect(SoopDanmakuProtocol.plainHeaders({'Origin': 'o', 'COOKIE': 'c', 'cookie': 'd'}), {'Origin': 'o'});
     });
 
-    test('decodes chat only: text, nick, white; no id, time or level (3.x)', () {
+    test('decodes chat only: text, nick, white, the sender (B-6); no message id, time or level (3.x)', () {
       final message = SoopDanmakuProtocol.decode(_chat(' 안녕 ', ' 시청자 ')).single;
       expect(_project(message), {
         'type': 'chat',
         'userName': '시청자',
-        'userId': '',
+        // B-6: 3.x left it empty.
+        'userId': 'abc123',
         'message': '안녕',
         'color': '#ffffff',
         'messageId': '',
@@ -453,7 +552,7 @@ void main() {
   });
 
   group('recorded frames (S07) against 3.x', () {
-    test('the 3586 incoming frames give the same 144 chat lines, in the same frames', () {
+    test('the 3586 incoming frames give the same 144 chat lines, in the same frames, now with the sender (B-6)', () {
       final decoded = <Map<String, Object?>>[];
       for (var index = 0; index < _frames.length; index++) {
         final frame = _frames[index];
@@ -463,7 +562,19 @@ void main() {
         ]);
       }
       expect(decoded, hasLength(144));
-      expect(decoded, _recordedMessages);
+      // B-6: 3.x had no sender id; everything else is 3.x's.
+      expect(_recordedMessages.map((message) => message['userId']).toSet(), {''});
+      expect(
+        [
+          for (final message in decoded) {...message}..remove('userId'),
+        ],
+        [
+          for (final message in _recordedMessages) {...message}..remove('userId'),
+        ],
+      );
+      expect(decoded, _recordedB6);
+      expect(decoded.take(3).map((message) => message['userId']), ['loo3672', 'ztmanwb269', 'pwxzbx779']);
+      expect(_recordedChatFields.take(3).map((fields) => fields[2]), ['loo3672(2)', 'ztmanwb269', 'pwxzbx779(2)']);
     });
   });
 
@@ -479,13 +590,192 @@ void main() {
       expect(expected.keys, [for (final testCase in cases) (testCase! as Map<String, Object?>)['name']]);
     });
 
+    /// B-6: what changed against 3.x, by case (3.x's output is asserted
+    /// first).
+    Map<String, Object?> chat(String userName, String message, [String userId = '']) => {
+      'type': 'chat',
+      'userName': userName,
+      'userId': userId,
+      'message': message,
+      'color': '#ffffff',
+      'messageId': '',
+      'sentAt': null,
+      'userLevel': '',
+      'fansLevel': '',
+      'fansName': '',
+      'isLocal': false,
+      'data': null,
+    };
+    final b6 = <String, (List<Object?>, List<Object?>)>{
+      'the texts -1 and 1 are dropped, others with digits kept': (
+        [chat('d', '11'), chat('e', '+1'), chat('f', '2')],
+        [chat('a', '-1'), chat('b', '1'), chat('c', '1'), chat('d', '11'), chat('e', '+1'), chat('f', '2')],
+      ),
+      'a text holding a bar is dropped': (
+        [chat('c', 'no bar')],
+        [chat('a', 'a|b'), chat('b', '|'), chat('c', 'no bar')],
+      ),
+      'malformed UTF-8 becomes replacement characters': (
+        [chat('v\u{FFFD}(', 'ok\u{FFFD}')],
+        [chat('v\u{FFFD}(', 'ok\u{FFFD}', 'id')],
+      ),
+      'Hangul and emoji': ([chat('시청자', '안녕하세요 🎉')], [chat('시청자', '안녕하세요 🎉', 'gvwxyz12')]),
+      'chat after empty viewer-list packets, as recorded': ([chat('观众1', '지금도')], [chat('观众1', '지금도', 'mnopqr123')]),
+    };
+
+    test('every B-6 change names a case', () {
+      expect(expected.keys, containsAll(b6.keys));
+    });
+
     for (final item in cases) {
       final testCase = item! as Map<String, Object?>;
       final name = testCase['name']! as String;
       test(name, () {
-        expect(SoopDanmakuProtocol.decode(_serverFrame(testCase)).map(_project).toList(), expected[name]);
+        final decoded = SoopDanmakuProtocol.decode(_serverFrame(testCase)).map(_project).toList();
+        if (b6[name] case (final legacy, final now)) {
+          expect(expected[name], legacy, reason: "3.x's output");
+          expect(decoded, now, reason: 'B-6');
+        } else {
+          expect(decoded, expected[name]);
+        }
       });
     }
+  });
+
+  group('B-6: chat texts, the sender and the separators', () {
+    test('the recorded chat packets: 16 fields split by form feeds; a bar only between the two flags of field 7', () {
+      expect(_recordedChatFields, hasLength(144));
+      for (final fields in _recordedChatFields) {
+        expect(fields, hasLength(16));
+        for (final (index, field) in fields.indexed) {
+          if (index == 7) {
+            expect(field, matches(RegExp(r'^\d+\|\d+$')));
+          } else {
+            expect(field, isNot(contains('|')), reason: 'field $index');
+          }
+        }
+      }
+    });
+
+    test('recorded (S09): four chats of 1, dropped by 3.x, and a nick holding a bar', () {
+      final frames = [
+        for (final line in File('$_root/S09-live-ones-and-bars/frames.jsonl').readAsLinesSync())
+          base64Decode((jsonDecode(line) as Map<String, Object?>)['b64']! as String),
+      ];
+      final legacy =
+          ((_json('S09-live-ones-and-bars/expected.json')! as Map<String, Object?>)['value']!
+                  as Map<String, Object?>)['messages']!
+              as List<Object?>;
+      expect(
+        [for (final message in legacy) (message! as Map<String, Object?>)['message']],
+        ['저번에 한다던 낚시겜은 안해?'],
+        reason: "3.x's output: every 1 dropped",
+      );
+      final decoded = [
+        for (final (index, frame) in frames.indexed)
+          for (final message in SoopDanmakuProtocol.decode(frame)) {'frame': index, ..._project(message)},
+      ];
+      expect(
+        [for (final message in decoded) (message['frame'], message['message'], message['userId'], message['userName'])],
+        [
+          (0, '저번에 한다던 낚시겜은 안해?', 'onubqa3484', '观众2|'),
+          (1, '1', 'ocwyyo7379', '观众1'),
+          (2, '1', 'y7i0u6s1qt', '观众3'),
+          (3, '1', 'tsoplt5114', '观众4'),
+          (4, '1', 'jslq08', '观众5'),
+        ],
+      );
+      // B-6: the one chat 3.x showed is 3.x's with the sender.
+      expect(decoded.first, {...legacy.single! as Map<String, Object?>, 'userId': 'onubqa3484'});
+      for (final frame in frames) {
+        final fields = utf8.decode(SoopDanmakuProtocol.packets(frame).single.body).split('\f');
+        expect(fields, hasLength(16));
+        expect(fields[7], matches(RegExp(r'^\d+\|\d+$')));
+      }
+    });
+
+    test('texts 1 and -1 and texts with a bar are chat like any other (the web player shows them)', () {
+      List<String> fields(String text, String id, String nick) => [
+        '',
+        text,
+        id,
+        '0',
+        '0',
+        '3',
+        nick,
+        '589856|163840',
+        '-1',
+        'C25111',
+        'CF8362',
+        '-1',
+        '-1',
+        '',
+        '-1',
+        '',
+      ];
+      final frame = _serverFrame({
+        'packets': [
+          {'service': 5, 'fields': fields('1', 'voter01(2)', '观众1')},
+          {'service': 5, 'fields': fields('-1', 'voter02', '观众2')},
+          {'service': 5, 'fields': fields(' 1|2|3 ', 'voter03', '观众3')},
+          {'service': 5, 'fields': fields('|', 'voter04', '观众4')},
+          {'service': 5, 'fields': fields('ㅋㅋ | ㅋㅋ', 'voter05', '观众5')},
+        ],
+      });
+      expect(
+        [
+          for (final message in SoopDanmakuProtocol.decode(frame))
+            (message.message, message.userId, message.userName, message.type, message.color),
+        ],
+        [
+          ('1', 'voter01', '观众1', LiveMessageType.chat, LiveMessageColor.white),
+          ('-1', 'voter02', '观众2', LiveMessageType.chat, LiveMessageColor.white),
+          ('1|2|3', 'voter03', '观众3', LiveMessageType.chat, LiveMessageColor.white),
+          ('|', 'voter04', '观众4', LiveMessageType.chat, LiveMessageColor.white),
+          ('ㅋㅋ | ㅋㅋ', 'voter05', '观众5', LiveMessageType.chat, LiveMessageColor.white),
+        ],
+      );
+    });
+
+    test("the sender's id: field 2 without the (n) of a second session, as the web's realID reads it", () {
+      for (final (field, id) in [
+        ('loo3672(2)', 'loo3672'),
+        ('ztmanwb269', 'ztmanwb269'),
+        ('abc_12(13)', 'abc_12'),
+        (' spaced(3) ', 'spaced'),
+        ('user99', 'user99'),
+        ('(2)', '2'),
+        ('', ''),
+        ('   ', ''),
+        ('한글', '한글'),
+        ('a-b(2)', 'b'),
+      ]) {
+        expect(SoopDanmakuProtocol.userId(field), id, reason: field);
+      }
+      // Seven fields are enough; the id is read.
+      expect(SoopDanmakuProtocol.chat(utf8.encode('\fhi\fid(2)\f\f\f\fnick'))?.userId, 'id');
+    });
+
+    test('the dedup gate tells two viewers with the same nick and text apart by their ids', () {
+      final now = DateTime.utc(2026, 9, 27, 17, 38, 40);
+      final gate = DanmakuMessageGate();
+      final [first, second, again] = [
+        for (final id in ['alpha01', 'beta02', 'alpha01(2)'])
+          SoopDanmakuProtocol.decode(
+            _serverFrame({
+              'packets': [
+                {
+                  'service': 5,
+                  'fields': ['', '1', id, '0', '0', '3', '같은닉', '65568|163840', '-1', '', '', '-1', '-1', '', '-1', ''],
+                },
+              ],
+            }),
+          ).single,
+      ];
+      expect(gate.accepts(first, now: now), isTrue);
+      expect(gate.accepts(second, now: now), isTrue, reason: 'another viewer with the same nick');
+      expect(gate.accepts(again, now: now), isFalse, reason: "the first viewer's second session repeating itself");
+    });
   });
 
   group('connection', () {
@@ -564,19 +854,23 @@ void main() {
       expect(periods, [const Duration(seconds: 20)]);
     });
 
-    test('replaying the recording reports what 3.x decoded, in order; text frames are ignored', () async {
-      final connector = _Connector();
-      final connection = SoopDanmakuConnection(connector: connector.call);
-      final events = _record(connection);
-      await connection.connect(_args);
-      final channel = connector.channels.single..incoming.add(utf8.decode(_chat('as text')));
-      for (final frame in _frames) {
-        if (frame.dir == 'in') channel.incoming.add(frame.bytes);
-      }
-      await _until(() => _messages(events).length == 144);
-      expect(_messages(events).map(_project), _recordedWithoutFrames);
-      await connection.close();
-    });
+    test(
+      'replaying the recording reports what 3.x decoded (with the sender, B-6), in order; text frames are ignored',
+      () async {
+        final connector = _Connector();
+        final connection = SoopDanmakuConnection(connector: connector.call);
+        final events = _record(connection);
+        await connection.connect(_args);
+        final channel = connector.channels.single..incoming.add(utf8.decode(_chat('as text')));
+        for (final frame in _frames) {
+          if (frame.dir == 'in') channel.incoming.add(frame.bytes);
+        }
+        await _until(() => _messages(events).length == 144);
+        // B-6: 3.x's messages with the sender.
+        expect(_messages(events).map(_project), _recordedB6WithoutFrames);
+        await connection.close();
+      },
+    );
 
     test('where the TLS port drops the handshake, the plain port follows after 1 s, without the cookie', () async {
       final delays = <Duration>[];
@@ -604,6 +898,64 @@ void main() {
       expect(connector.channels.single.sent, [SoopDanmakuProtocol.login, _join]);
       await connection.close();
     });
+
+    test("B-6: the socket takes soop's proxy route (3.x always dialled directly)", () async {
+      final connector = _Connector();
+      const route = HttpProxyRoute('127.0.0.1', 7897);
+      final proxied = SoopDanmakuConnection(
+        proxy: const FixedProxyPolicy(perSite: {SiteIds.soop: route}),
+        connector: connector.call,
+      );
+      await proxied.connect(_args);
+      expect(connector.routes, [route]);
+      await proxied.close();
+      final other = SoopDanmakuConnection(
+        proxy: const FixedProxyPolicy(perSite: {SiteIds.chzzk: route}),
+        connector: connector.call,
+      );
+      await other.connect(_args);
+      expect(connector.routes.last, const DirectRoute(), reason: 'another platform');
+      await other.close();
+      final unset = SoopDanmakuConnection(connector: connector.call);
+      await unset.connect(_args);
+      expect(connector.routes.last, const DirectRoute(), reason: 'no proxy given');
+      await unset.close();
+    });
+
+    test(
+      'B-6: through an HTTP proxy end to end: the TLS port refused, the plain port tunnelled without the cookie',
+      () async {
+        final server = await _ChatServer.start();
+        server.onMessage = (server, socket, message) {
+          if (message == _join) {
+            for (final frame in _frames) {
+              if (frame.dir == 'in') _ChatServer.send(socket, 2, frame.bytes);
+            }
+          }
+        };
+        final proxy = await _ConnectProxy.start(port: _args.plainUrl.port, upstream: server.port);
+        final connection = SoopDanmakuConnection(
+          proxy: FixedProxyPolicy(perSite: {SiteIds.soop: HttpProxyRoute('127.0.0.1', proxy.localPort)}),
+        );
+        final events = _record(connection);
+        await connection.connect(_args);
+        await _until(() => _messages(events).length == 144);
+        final host = _args.url.host;
+        expect(proxy.requests, [
+          'CONNECT $host:${_args.url.port} HTTP/1.1\r\nHost: $host:${_args.url.port}',
+          'CONNECT $host:${_args.plainUrl.port} HTTP/1.1\r\nHost: $host:${_args.plainUrl.port}',
+        ]);
+        final head = server.requests.single;
+        expect(head, startsWith('GET /Websocket/${_keys['bj']} HTTP/1.1\r\nHost: $host:${_args.plainUrl.port}\r\n'));
+        expect(head, contains('\r\nOrigin: https://play.sooplive.co.kr\r\n'));
+        expect(head.toLowerCase(), isNot(contains('cookie')));
+        expect(server.texts, [SoopDanmakuProtocol.login, _join]);
+        expect(events.whereType<DanmakuReady>(), hasLength(1));
+        expect(events.first, const DanmakuReconnecting(DanmakuInterruption.disconnected));
+        expect(_messages(events).map(_project), _recordedB6WithoutFrames);
+        await connection.close();
+      },
+    );
 
     test('a room whose CHIP names the chat host connects to chat-<hex>.sooplive.com (7-6)', () async {
       final args = SoopApi.danmakuArgs({
@@ -774,7 +1126,8 @@ void main() {
       for (final MapEntry(:key, :value) in SoopDanmakuProtocol.handshakeHeaders(_args.headers).entries) {
         expect(head, contains('\r\n$key: $value\r\n'));
       }
-      expect(_messages(events).map(_project), _recordedWithoutFrames);
+      // B-6: 3.x's messages with the sender.
+      expect(_messages(events).map(_project), _recordedB6WithoutFrames);
       connection.heartbeat();
       await _until(() => server.texts.length == 3);
       expect(server.texts.last, SoopDanmakuProtocol.heartbeat);

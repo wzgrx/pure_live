@@ -1,18 +1,27 @@
+import 'dart:async';
 import 'dart:io' show gzip;
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/src/codec/protobuf.dart';
+import 'package:live_danmaku/src/connection.dart';
 import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:meta/meta.dart';
 
 /// What one received Douyin frame asks for ([DouyinDanmakuProtocol.decode]):
-/// the acknowledgement to send first, then the messages to report. `errors`
-/// are the parts that could not be read: an unreadable frame has no ack and
-/// no messages; an unreadable message only loses itself.
-typedef DouyinDanmakuFrame = ({Uint8List? ack, List<LiveMessage> messages, List<FormatException> errors});
+/// the acknowledgement to send first, then the messages to report.
+/// `envelopes` counts the messages the frame carried, of any method (a
+/// heartbeat answer carries none). `errors` are the parts that could not be
+/// read: an unreadable frame has no ack and no messages; an unreadable
+/// message only loses itself.
+typedef DouyinDanmakuFrame = ({
+  Uint8List? ack,
+  List<LiveMessage> messages,
+  int envelopes,
+  List<FormatException> errors,
+});
 
 /// Douyin's danmaku protocol (the codec of 3.x `DouyinDanmaku`,
 /// docs/modules/M5.4-douyin.md), without I/O.
@@ -35,6 +44,18 @@ abstract final class DouyinDanmakuProtocol {
 
   /// Silence after which the socket is replaced (3.x's `inactivityTimeout`).
   static const Duration inactivityTimeout = Duration(seconds: 45);
+
+  /// How often a connection with `DouyinDanmakuArgs.refresh` looks whether
+  /// any message came (M5.F B-5; heartbeat answers do not count).
+  static const Duration quietTick = Duration(minutes: 1);
+
+  /// Quiet ticks in a row before each check of the room's broadcast: the
+  /// first after 2 minutes without any message, then after 4 and 8 more,
+  /// then every 16 while the room stays quiet. A message starts over.
+  static const List<int> quietChecks = [2, 4, 8, 16];
+
+  /// Longest wait for one check of the room's broadcast.
+  static const Duration refreshTimeout = Duration(seconds: 10);
 
   static const int _maxEpochMilliseconds = 8640000000000000;
 
@@ -115,7 +136,7 @@ abstract final class DouyinDanmakuProtocol {
       envelopes = response.messages(1);
       response.messages(7);
     } on FormatException catch (error) {
-      return (ack: null, messages: const [], errors: [error]);
+      return (ack: null, messages: const [], envelopes: 0, errors: [error]);
     }
     final messages = <LiveMessage>[];
     final errors = <FormatException>[];
@@ -136,16 +157,18 @@ abstract final class DouyinDanmakuProtocol {
     return (
       ack: response.flag(9) ? ack(push.integer(2) ?? 0, response.string(5) ?? '') : null,
       messages: messages,
+      envelopes: envelopes.length,
       errors: errors,
     );
   }
 
-  /// `ChatMessage{common 1, user 2, content 3}`, `Common{msgId 2, roomId 3,
-  /// createTime 4}`, `User{id 1, nickName 3}`: another broadcast's chat is
-  /// dropped (a room id of 0 or none is kept); the id is `common.msgId`, else
-  /// the envelope's `msgId`; `createTime` above 10^11 is milliseconds,
-  /// otherwise seconds, and 0 means none. Ids are unsigned (3.x printed
-  /// uint64 signed).
+  /// `ChatMessage{common 1, user 2, content 3, eventTime 15}`,
+  /// `Common{msgId 2, roomId 3, createTime 4}`, `User{id 1, nickName 3}`:
+  /// another broadcast's chat is dropped (a room id of 0 or none is kept);
+  /// the id is `common.msgId`, else the envelope's `msgId`. The time is
+  /// `createTime`, else `eventTime` (M5.F B-5: the recorded chats carry
+  /// only that); above 10^11 is milliseconds, otherwise seconds, and 0
+  /// means none. Ids are unsigned (3.x printed uint64 signed).
   static LiveMessage? _chat(Uint8List payload, int envelopeId, String roomId) {
     final chat = ProtoMessage.decode(payload);
     final common = chat.message(1);
@@ -155,12 +178,16 @@ abstract final class DouyinDanmakuProtocol {
     final commonId = common == null ? '' : ProtoMessage.unsigned(common.integer(2) ?? 0);
     final messageId = commonId.isNotEmpty && commonId != '0' ? commonId : (envelopeId == 0 ? '' : '$envelopeId');
     final createTime = common?.integer(4) ?? 0;
+    final eventTime = chat.integer(15) ?? 0;
     DateTime? sentAt;
     if (createTime > 0) {
-      final milliseconds = createTime > 100000000000 ? createTime : createTime * 1000;
+      final milliseconds = _milliseconds(createTime);
       // 3.x's DateTime threw here, and the chat was lost.
       if (milliseconds > _maxEpochMilliseconds) throw FormatException('Douyin chat time out of range: $createTime');
       sentAt = DateTime.fromMillisecondsSinceEpoch(milliseconds);
+    } else if (eventTime > 0 && _milliseconds(eventTime) <= _maxEpochMilliseconds) {
+      // B-5; a fallback out of range leaves the chat without a time.
+      sentAt = DateTime.fromMillisecondsSinceEpoch(_milliseconds(eventTime));
     }
     return LiveMessage(
       type: LiveMessageType.chat,
@@ -173,18 +200,30 @@ abstract final class DouyinDanmakuProtocol {
     );
   }
 
-  /// `RoomUserSeqMessage`: the concurrent audience is the display text
-  /// `onlineUserForAnchor` (10, `30.6万`), when it has a digit. `totalUser`
-  /// (7) is cumulative and `total` (3) is not read, as in 3.x.
+  /// A platform time: above 10^11 milliseconds, otherwise seconds.
+  static int _milliseconds(int time) => time > 100000000000 ? time : time * 1000;
+
+  /// `RoomUserSeqMessage`: the concurrent audience is `total` (3), the exact
+  /// number the display text rounds (M5.F B-5; recorded in rooms of 2 to
+  /// 305 503 viewers); without it, `onlineUserForAnchor` (10, `30.6万`) when
+  /// it has a digit, as 3.x read it. `totalUser` (7) is cumulative.
   static LiveMessage? _online(Uint8List payload) {
-    final text = ProtoMessage.decode(payload).string(10) ?? '';
-    if (!text.contains(RegExp('[0-9]'))) return null;
+    final message = ProtoMessage.decode(payload);
+    final total = message.integer(3) ?? 0;
+    final int value;
+    if (total > 0) {
+      value = total;
+    } else {
+      final text = message.string(10) ?? '';
+      if (!text.contains(RegExp('[0-9]'))) return null;
+      value = parseAudienceNumber(text);
+    }
     return LiveMessage(
       type: LiveMessageType.online,
       userName: '',
       message: '',
       color: LiveMessageColor.white,
-      data: LiveAudienceUpdate(kind: LiveAudienceMetricKind.onlineViewers, value: parseAudienceNumber(text)),
+      data: LiveAudienceUpdate(kind: LiveAudienceMetricKind.onlineViewers, value: value),
     );
   }
 }
@@ -200,6 +239,12 @@ abstract final class DouyinDanmakuProtocol {
 ///   10 s; a socket silent for 45 s is replaced.
 /// - Frames that ask for it are acknowledged before their messages are
 ///   reported; chat of another broadcast is dropped.
+/// - With `DouyinDanmakuArgs.refresh` (M5.F B-5), the room's broadcast is
+///   checked after [DouyinDanmakuProtocol.quietChecks] minutes without any
+///   message, and when the reconnects run out: a streamer who went live
+///   again has a new room_id, and the socket moves there without a notice.
+///   The same broadcast (or no answer) changes nothing: a quiet socket
+///   stays, an exhausted one ends as before.
 ///
 /// The app registers it as `SiteIds.douyin: () => DouyinDanmakuConnection(
 /// proxy: …)`; the room's `DouyinDanmakuArgs` bring the rest.
@@ -222,12 +267,18 @@ final class DouyinDanmakuConnection extends DanmakuSocketConnection<DouyinDanmak
 
   final DouyinSigner _signer;
   final DateTime Function() _now;
-  String _roomId = '';
+  _Broadcast? _broadcast;
 
   @override
   @protected
   Future<DanmakuSocketTarget> target(DouyinDanmakuArgs args, DanmakuRun run) async {
-    _roomId = args.roomId;
+    final broadcast = _broadcast = _Broadcast(run, args);
+    if (args.refresh != null) unawaited(_watch(broadcast));
+    return _target(args);
+  }
+
+  /// The endpoints of [args]'s broadcast, signed now.
+  DanmakuSocketTarget _target(DouyinDanmakuArgs args) {
     final signature = _signer.danmakuSignature(roomId: args.roomId, userUniqueId: args.userId);
     return DanmakuSocketTarget(
       endpoints: DouyinDanmakuProtocol.endpoints(args, signature: signature, now: _now()),
@@ -235,9 +286,15 @@ final class DouyinDanmakuConnection extends DanmakuSocketConnection<DouyinDanmak
     );
   }
 
+  _Broadcast? _of(DanmakuSocketSession session) {
+    final broadcast = _broadcast;
+    return broadcast != null && identical(broadcast.run, session.run) ? broadcast : null;
+  }
+
   @override
   @protected
   void onOpen(DanmakuSocketSession session) {
+    _of(session)?.session = session;
     // 3.x: ready as soon as the socket opens, then a heartbeat as the join.
     session
       ..ready()
@@ -248,13 +305,112 @@ final class DouyinDanmakuConnection extends DanmakuSocketConnection<DouyinDanmak
   @protected
   void onData(DanmakuSocketSession session, Object? data) {
     // Douyin only sends binary frames.
-    if (data is! List<int>) return;
-    final frame = DouyinDanmakuProtocol.decode(data, roomId: _roomId);
+    final broadcast = _of(session);
+    if (data is! List<int> || broadcast == null) return;
+    final frame = DouyinDanmakuProtocol.decode(data, roomId: broadcast.args.roomId);
+    if (frame.envelopes > 0) broadcast.heard = true;
     if (frame.ack case final ack?) session.send(ack);
     frame.messages.forEach(session.message);
+  }
+
+  /// B-5: before giving up, one check of the room's broadcast; a new one is
+  /// joined with fresh reconnects, anything else ends the run as before.
+  @override
+  @protected
+  bool onReconnectsExhausted(DanmakuSocketSession session, String lastFailure) {
+    final broadcast = _of(session);
+    if (broadcast == null || broadcast.args.refresh == null) return false;
+    broadcast.session = session;
+    unawaited(() async {
+      if (!await _follow(broadcast, session)) {
+        session.run.closed(DanmakuCloseReason.reconnectsExhausted, detail: lastFailure);
+      }
+    }());
+    return true;
+  }
+
+  /// B-5: counts the quiet ticks of [broadcast] and checks its room after
+  /// [DouyinDanmakuProtocol.quietChecks] of them in a row; ends with the run.
+  Future<void> _watch(_Broadcast broadcast) async {
+    var quiet = 0;
+    var round = 0;
+    while (await broadcast.run.delay(DouyinDanmakuProtocol.quietTick)) {
+      if (broadcast.heard) {
+        broadcast.heard = false;
+        quiet = 0;
+        round = 0;
+        continue;
+      }
+      if (++quiet < DouyinDanmakuProtocol.quietChecks[round]) continue;
+      quiet = 0;
+      round = min(round + 1, DouyinDanmakuProtocol.quietChecks.length - 1);
+      final session = broadcast.session;
+      if (session != null && await _follow(broadcast, session)) round = 0;
+    }
+  }
+
+  /// Asks for the room's broadcast now and moves the socket to it when its
+  /// room_id changed. True when the broadcast moved meanwhile, through this
+  /// call or another one.
+  Future<bool> _follow(_Broadcast broadcast, DanmakuSocketSession session) async {
+    final moves = broadcast.moves;
+    final next = await broadcast.check();
+    if (!session.isActive) return false;
+    if (broadcast.moves != moves) return true;
+    if (next == null || next.roomId.isEmpty || next.roomId == broadcast.args.roomId) return false;
+    broadcast
+      ..args = next
+      ..moves += 1
+      ..heard = false;
+    await session.reopen(_target(next));
+    return true;
+  }
+
+  @override
+  @protected
+  Future<void> stop() async {
+    _broadcast = null;
+    await super.stop();
   }
 
   @override
   @protected
   Object? heartbeatFrame(DanmakuSocketSession session) => DouyinDanmakuProtocol.heartbeat();
+}
+
+/// One run's broadcast (M5.F B-5): the arguments in use, whether a message
+/// came since the last quiet tick, and the check of the room in flight.
+final class _Broadcast {
+  new(this.run, this.args);
+
+  final DanmakuRun run;
+  DouyinDanmakuArgs args;
+  DanmakuSocketSession? session;
+  bool heard = false;
+  int moves = 0;
+  Future<DouyinDanmakuArgs?>? _checking;
+
+  /// The room's broadcast now, or null (not live, failed, or slower than
+  /// [DouyinDanmakuProtocol.refreshTimeout]); one request at a time.
+  Future<DouyinDanmakuArgs?> check() {
+    final refresh = args.refresh;
+    if (refresh == null) return Future.value();
+    final pending = _checking;
+    if (pending != null) return pending;
+    final checking = _checking = _ask(refresh);
+    unawaited(
+      checking.whenComplete(() {
+        if (identical(_checking, checking)) _checking = null;
+      }),
+    );
+    return checking;
+  }
+
+  static Future<DouyinDanmakuArgs?> _ask(Future<DouyinDanmakuArgs?> Function() refresh) async {
+    try {
+      return await refresh().timeout(DouyinDanmakuProtocol.refreshTimeout);
+    } on Object {
+      return null;
+    }
+  }
 }

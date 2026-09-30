@@ -545,9 +545,19 @@ final class DouyinSite extends LiveSite
               roomId: room.roomId ?? '',
               userId: room.userUniqueId ?? visitorId,
               cookie: cookie,
+              refresh: () => danmakuArgs(webRid),
             )
           : null,
     );
+  }
+
+  /// The danmaku arguments of room [webRid]'s broadcast now (a new detail
+  /// request), or null when the room is not live or names no broadcast:
+  /// `DouyinDanmakuArgs.refresh` (M5.F B-5).
+  Future<DouyinDanmakuArgs?> danmakuArgs(String webRid) async {
+    final room = await getRoomDetail(roomId: webRid);
+    final args = room.danmakuData;
+    return room.isLiveNow && args is DouyinDanmakuArgs && args.roomId.isNotEmpty ? args : null;
   }
 
   /// The room with its stream description and danmaku arguments. The

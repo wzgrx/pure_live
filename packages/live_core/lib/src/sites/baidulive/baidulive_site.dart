@@ -309,7 +309,9 @@ final class BaiduLiveSite extends LiveSite
 
   // Rooms ---------------------------------------------------------------------
 
-  /// The room with its playback data (see [BaiduLiveApi.liveRoom]).
+  /// The room with its playback data and, while live, its chat arguments
+  /// (`BaiduLiveDanmakuArgs`, M5.26), from the same room command (see
+  /// [BaiduLiveApi.liveRoom]).
   @override
   Future<LiveRoom> getRoomDetail({required String roomId}) async =>
       BaiduLiveApi.liveRoom(await _room(_checkedId(roomId)), withData: true);

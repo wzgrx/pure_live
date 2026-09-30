@@ -1,0 +1,288 @@
+{
+  "errno": "0",
+  "timestamp": "1790770983000",
+  "data": {
+    "371": {
+      "request_id": "868238776",
+      "error_code": "0",
+      "host": {
+        "fans": "24964",
+        "follows": "46",
+        "gender": "0",
+        "image": {
+          "image_33": "https://avatar.bdstatic.com/it/u=3446857200,2600483636&fm=3012&app=3012&autime=1790732246&size=b200,200",
+          "image_42": ""
+        },
+        "name": "奇门国学文化大讲堂",
+        "nick_name": "奇门国学文化大讲堂",
+        "app_id": "",
+        "is_anchor": "1",
+        "vip": "1",
+        "verified_title": "0",
+        "is_fans_anonymous": true,
+        "is_self": false,
+        "uk": "9mXc7p_JktT537XEQuxMwA"
+      },
+      "video": {
+        "cover": {
+          "cover_100": "https://huibo-data.cdn.bcebos.com/upload/c1545e21c1ba6506f0a34a43e1b3900f.jpeg",
+          "vertical_cover": "https://huibo-data.cdn.bcebos.com/upload/50c7a2ea660c2ff07dd5d3d482698103.jpeg?x-bce-process=image/crop,x_68,y_0,w_1763,h_2204"
+        },
+        "title": "奇门遁甲入门直播课，看财运，断姻缘",
+        "label": "",
+        "screen": "0",
+        "live_hls_url_origin": "http://hls.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172.m3u8",
+        "live_flv_url_origin": "https://flv-live.bdstatic.com/live/stream_bduid_767881611_11548522172.flv",
+        "live_hls_url": "http://hls.liveshow.bdstatic.com/live/stream_bduid_767881611_11548522172-L3.m3u8",
+        "live_flv_url": "https://hls-live.bdstatic.com/live/stream_bduid_767881611_11548522172.flv?kabr_spts=-3000&logid=868238776&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+        "play_hls": "",
+        "play_flv": "",
+        "avc_hls_url": "",
+        "msg_hls_url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11548522172.m3u8?authorization=bce-auth-v1/d1c31b35ee7bff0c6a8c31b8f5e83f1d/2026-09-30T12:23:03Z/15768000/host/18b2a6414120813dd6454f5e89f9abab5b3a3f328d4d90fe0004b5a7fe6c303d",
+        "msg_hls_pull_internal_in_second": 5,
+        "url_list": [
+          {
+            "resolution": 720,
+            "description": "画质720p:",
+            "urls": [
+              {
+                "rtmp": "rtmp://rtmp.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172-L3",
+                "hls": "http://hls.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172-L3.m3u8",
+                "flv": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172-L3.flv"
+              },
+              {
+                "rtmp": "rtmp://rtmp2.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172-L3",
+                "hls": "http://hls2.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172-L3/playlist.m3u8",
+                "flv": "http://flv2.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172-L3.flv"
+              }
+            ]
+          },
+          {
+            "resolution": 480,
+            "description": "画质480p:",
+            "urls": [
+              {
+                "rtmp": "rtmp://rtmp.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172-L4",
+                "hls": "http://hls.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172-L4.m3u8",
+                "flv": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172-L4.flv"
+              },
+              {
+                "rtmp": "rtmp://rtmp2.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172-L4",
+                "hls": "http://hls2.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172-L4/playlist.m3u8",
+                "flv": "http://flv2.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172-L4.flv"
+              }
+            ]
+          }
+        ],
+        "description": "奇门遁甲以九宫八卦为基础，结合天干地支、八门、九星、八神等元素，构建出一个复杂而精妙的时空模型。它通过对这些元素的组合与变化进行推演，来预测事物的发展趋势，包括财运走向!",
+        "url_clarity_list": [],
+        "play_url": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172.flv?kabr_spts=-3000&logid=868238776&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+        "avc_url": "http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_767881611_11548522172.flv?kabr_spts=-3000&logid=868238776&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+        "kabr_spts": -1800,
+        "stream": 1
+      },
+      "feedbacks": "367823",
+      "user_feedback": "0",
+      "location": "未知地区",
+      "status": "0",
+      "share_url": "https://live.baidu.com/m/media/multipage/liveshow/index/rzlezd?room_id=11548522172",
+      "warning": "官方提醒：欢迎来到直播间！我们提倡绿色文明直播，禁止未成年人直播或充值消费。如直播间内出现反动、违法违规、色情低俗、吸烟酗酒、网络乞讨等内容，经举报或巡查发现将严肃处理。如主播在直播过程中以推广服务，交友等方式诱导打赏、私下交易，请谨慎判断，以防人身或财产损失。",
+      "online_users": "147144",
+      "real_online_users": "147148",
+      "online_user_list": [
+        {
+          "uid": 8634860094,
+          "avatar": "https://himg.bdimg.com/sys/portrait/item/oysn.0.0p1f9rlc.MVKZCzmb3a8iOqZrdg9R2I.yly?rnqi=220&mbpvu_sriiwaqk_xgku=452",
+          "name": "慈芳玲T4",
+          "nick_name": "慈芳玲T4",
+          "gender": "2",
+          "rank": 1,
+          "score": 24473
+        },
+        {
+          "uid": 7745708441,
+          "avatar": "https://himg.bdimg.com/sys/portrait/item/bjfi.6.6w0041t5.L-0bXGQBVCmm6SNEJkvxwS.wbz?sulw=5501&iczpt_rflrtqgm_yzdc=1489",
+          "name": "宇灯梦p",
+          "nick_name": "宇灯梦p",
+          "gender": "2",
+          "rank": 2,
+          "score": 24473
+        },
+        {
+          "uid": 3590617025,
+          "avatar": "https://himg.bdimg.com/sys/portrait/item/bcly.9.183ag808.KfnznrXZK3nznT_9xTsShf.dox?sttq=8076&rfsve_vdvycpap_llfm=8738",
+          "name": "2树蒙敏",
+          "nick_name": "2树蒙敏",
+          "gender": "1",
+          "rank": 3,
+          "score": 24473
+        },
+        {
+          "uid": 9608562392,
+          "avatar": "https://himg.bdimg.com/sys/portrait/item/bpbt.6.79825t12.seqyLq6v9xziEhdUYQHkNK.hka?mndj=2634&epzsp_xwgqtwdk_zddt=6860",
+          "name": "英良可uvQt",
+          "nick_name": "英良可uvQt",
+          "gender": "2",
+          "rank": 4,
+          "score": 24473
+        },
+        {
+          "uid": 8858199382,
+          "avatar": "https://himg.bdimg.com/sys/portrait/item/uzge.1.161r366g.9uBfxDD5Yx4MjSMh4vZ7qG.rsa?kfnh=33777&ldttz_ozgatxtb_etgi=29189",
+          "name": "凌双4y8",
+          "nick_name": "凌双4y8",
+          "gender": "2",
+          "rank": 5,
+          "score": 24473
+        },
+        {
+          "uid": 2358424029,
+          "avatar": "https://himg.bdimg.com/sys/portrait/item/npjr.9.8c71f9og.VDTrcIc1Jo-n9cCSFWzBSs.rvx?wvob=2999&paszb_dhetpuqy_kwur=1070",
+          "name": "悦草雪永7w",
+          "nick_name": "悦草雪永7w",
+          "gender": "2",
+          "rank": 6,
+          "score": 24473
+        },
+        {
+          "uid": 9287483131,
+          "avatar": "https://himg.bdimg.com/sys/portrait/item/ykkm.5.96i11v17.afiDUTYfyqRsct6T1N7Nsh.wie?shkc=867&xudhs_qcnydcvx_kkje=205",
+          "name": "新瑾阳949",
+          "nick_name": "新瑾阳949",
+          "gender": "0",
+          "rank": 7,
+          "score": 24197
+        },
+        {
+          "uid": 7987336229,
+          "avatar": "https://himg.bdimg.com/sys/portrait/item/myau.4.r1wk6688.pIMuoqov36tXuOWxChLXTd.igf?fnvn=9282&jzvqk_gnusvtyn_lste=9643",
+          "name": "叶蒙聪宗卓春溪溪2Y",
+          "nick_name": "叶蒙聪宗卓春溪溪2Y",
+          "gender": "2",
+          "rank": 8,
+          "score": 24194
+        },
+        {
+          "uid": 4015949492,
+          "avatar": "https://himg.bdimg.com/sys/portrait/item/oovj.1.u6gjkgcg.OwMmlAsnGQjb-dh26yJI_J.hqe?phmj=9025&rvqgl_yndfrutj_mqjg=7463",
+          "name": "慈路溪Q",
+          "nick_name": "慈路溪Q",
+          "gender": "2",
+          "rank": 9,
+          "score": 24079
+        },
+        {
+          "uid": 1051128637,
+          "avatar": "https://himg.bdimg.com/sys/portrait/item/jhhc.8.v97gy1gu.oHMJPn-1dhwtD8as_SCNQy.rxs?hwxs=79846&zwqiz_bbfhikiu_wclb=67623",
+          "name": "万福凯57o",
+          "nick_name": "万福凯57o",
+          "gender": "2",
+          "rank": 10,
+          "score": 24077
+        }
+      ],
+      "is_admin": "0",
+      "role": "0",
+      "role_name": "",
+      "role_display_name": "",
+      "chat_mcast_id": "11548522172",
+      "host_mcast_id": "11548522174",
+      "reliable_mcast_id": "11548522173",
+      "has_host_room": "0",
+      "has_chat_room": "1",
+      "has_recommend": 1,
+      "enable_robot": "0",
+      "show_host": "1",
+      "has_feedbacks": "1",
+      "has_userlist": "0",
+      "has_comment": "1",
+      "has_video": "1",
+      "ext_params": "{\"ak\":\"pc_client\",\"create_from_liveshow\":1,\"follow_type\":\"media\"}",
+      "stick_msgs": "",
+      "authorities": null,
+      "chat_msg_hls_url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11548522172.m3u8?authorization=bce-auth-v1/d1c31b35ee7bff0c6a8c31b8f5e83f1d/2026-09-30T12:23:03Z/15768000/host/18b2a6414120813dd6454f5e89f9abab5b3a3f328d4d90fe0004b5a7fe6c303d",
+      "host_msg_hls_url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11548522174.m3u8?authorization=bce-auth-v1/d1c31b35ee7bff0c6a8c31b8f5e83f1d/2026-09-30T12:23:03Z/15768000/host/2605c8483df98f2272bcf355fb27bcae935fd001d1df84759fca5605cb96f9fa",
+      "reliable_msg_hls_url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11548522173.m3u8?authorization=bce-auth-v1/d1c31b35ee7bff0c6a8c31b8f5e83f1d/2026-09-30T12:23:03Z/15768000/host/bbaf61cf702ee8b1f49b388acce6d984b0e399f7229d94b147b2e741797c6c12",
+      "msg_hls_pull_internal_in_second": "5",
+      "total_users_count": "147148",
+      "source": 1,
+      "caller_flag": "0",
+      "lss_account": 0,
+      "group_list": [
+        {
+          "group_ids": "8314255850,7171799338",
+          "group_type": 37
+        }
+      ],
+      "total_users": "0",
+      "room_template": "1",
+      "show_times": "0",
+      "replay_list": [],
+      "replay_list_whole": [],
+      "replay_list_clips": [],
+      "comment_block_ts": "5",
+      "video_block_ts": "1",
+      "has_pay_service": "0",
+      "pay_service_type": "0",
+      "watch_free_duration_second": "300",
+      "has_sales_service": "0",
+      "create_time": 1789013977,
+      "has_speech_connect": "0",
+      "speech_connect": null,
+      "has_reflow_bar": 1,
+      "has_mission_activity": 1,
+      "mission_activity_version": 1,
+      "room_switch_info": "{\"descriptionTab\":1,\"hasChatScript\":1}",
+      "ad_place": {
+        "h5_ad_status": "",
+        "h5_compulsory_display": "",
+        "h5_image": "",
+        "h5_skip": "",
+        "h5_position": 0,
+        "h5_skip_type": 0,
+        "h5_screen": 0,
+        "h5_title": ""
+      },
+      "is_forbidden_url": 0,
+      "is_clubhouse": 0,
+      "template_id": 0,
+      "nid": "17080007201773459293",
+      "category": "教育",
+      "star_id": "0",
+      "cmd": "",
+      "follow_id": "1818126311407646",
+      "follow_type": "media",
+      "follow": "0",
+      "isLogin": false,
+      "users": {
+        "nick_name": null,
+        "avatar": null
+      },
+      "real_fans_num": 24965,
+      "template": "live",
+      "screen": "0",
+      "use_new_version": 1,
+      "show_im_tags": 1,
+      "user_info": {
+        "is_login": 0
+      },
+      "room_type": 0,
+      "visual_id": 0,
+      "watch_video_duration": 5,
+      "slide_status": 1,
+      "share": {
+        "main_title": "【百度直播】奇门遁甲入门直播课，看财运，断姻缘",
+        "sub_title": "直播正在进行，邀请你速来观看",
+        "share_url": "https://live.baidu.com/m/media/multipage/liveshow/index/ygykl?room_id=11548522172",
+        "cover": "https://avatar.bdstatic.com/it/u=3446857200,2600483636&fm=3012&app=3012&autime=1790732246&size=b200,200"
+      },
+      "background_url": "",
+      "ban_status": 0,
+      "emergency_controller": {
+        "stream_cut": 0,
+        "chat_disable": 0,
+        "share_disable": 0
+      }
+    }
+  }
+}

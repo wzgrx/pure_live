@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "platform": "baidulive",
+  "case": "S06-ended",
+  "room": "baidulive:11583715413",
+  "capturedAt": "2026-09-30T12:25:47.445260Z",
+  "route": "direct",
+  "frames": 6,
+  "scrubbed": [
+    {
+      "where": "every URL: authorization=bce-auth-v1/<access key id>/<time>/<seconds>/host/<signature>",
+      "rule": "secret: the access key id and the signature replaced by same-length hex, one value per original; the signing time and validity kept"
+    },
+    {
+      "where": "kept",
+      "rule": "the broadcaster (the room command's host and the chat lines it sends: name, uk, uid, sender, portrait) and the system sender 百度网友 (852517826) are public; message ids, times, room ids and badge or gift images are not personal"
+    },
+    {
+      "where": "segments",
+      "rule": "inflated, scrubbed, written as compact JSON and gzipped again (mtime 0); `encoding: gzip` marks a segment served with Content-Encoding: gzip (all were)"
+    }
+  ],
+  "note": "Lists of ended broadcasts, read once on 2026-09-30 12:25 UTC with the lists of fresh room commands: the chat list of S02-room-ended's broadcast (11583715413, ended 2026-09-27), whose three segments are its last mix_room_close notices, none naming the room itself; and the reliable list of 11562145409 (started 2026-09-16), whose only segment was signed on 09-16 for 7 days and now answers 403.",
+  "tool": "M5.26 scratch Python recorder (urllib, direct, anonymous, read-only; fixture schema 1)"
+}

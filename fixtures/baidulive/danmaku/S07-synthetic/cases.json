@@ -1,0 +1,305 @@
+{
+ "roomId": "11500000001",
+ "segments": [
+  {
+   "name": "chat",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VSsU7DMBD9l5szJNCqkN9ATARFbmJaqySO7EtpVEVCTB07ICGYWBBMrCz0b9oCf8HFVHbT0jiy7nzvnd/5bgpjrrSQOYSBBygyTkbv1O/1/O3Pg7RUDA2OnGuhEcKLKbCiECmEHb97fNLxIEuYxrg5CYLuhkppM641G3BtKAlDPpCqIpYHicyRJcjVDqM55zndAdMIkE8wgjAiO4qgn8blqDHCZjurchxyFMn5aEtuE/GaLRkyZfJbQuD73f1wnLOMW8z68f3n9unr/m09+3DYP0kWtFw8r14WNrypMe7LtDIYIxYn6JwbqdJ/6HXdSoBV4ZS4SloCV/PZejb/fr1bfj5YRCEVKiacQhtRUmbUFfcG7qkt5sC15RbtyN9jjUXRJtX0A/VPcWpzvDtPHlwpklJq03DXbqFjIqRmtg7NkB7EI05TA2AcA2gPKqEKJaQSWJnsnimKktaXtH4BdbqxGOoCAAA=",
+   "note": ""
+  },
+  {
+   "name": "chat plain (no gzip)",
+   "roomId": "11500000001",
+   "b64": "eyJ2ZXJzaW9uIjoxLCJ0aW1lIjoxNzkwNzcwMDAwMDAwMDAwMDAwLCJkdXJhdGlvbiI6MCwibGlzdCI6W3siYXBwaWQiOjQwNTM4NCwibWNhc3RfaWQiOjExNTAwMDAwMDAxLCJtZXNzYWdlcyI6W3siY2F0ZWdvcnkiOjQsImNvbnRhY3RlciI6MTE1MDAwMDAwMDEsImNvbnRlbnQiOiJ7XCJ0ZXh0XCI6XCJ7XFxcImJkX3VrXFxcIjpcXFwiU3ludGhldGljVWswMDAwMDAwMDAwMFxcXCIsXFxcImNoYXJhY3RlclxcXCI6XFxcIjEwMDVcXFwiLFxcXCJjaGFyYWN0ZXJfbmFtZVxcXCI6XFxcIuaZrumAmueUqOaIt1xcXCIsXFxcImNvbnRlbnRcXFwiOlxcXCLkvaDlpb1cXFwiLFxcXCJtZXNzYWdlX2JvZHlcXFwiOntcXFwidHh0XFxcIjp7XFxcIndvcmRcXFwiOlxcXCLkvaDlpb1cXFwifX0sXFxcIm1lc3NhZ2VfdHlwZVxcXCI6XFxcIjBcXFwiLFxcXCJuYW1lXFxcIjpcXFwi5ZCI5oiQ6KeC5LyXXFxcIixcXFwicG9ydHJhaXRcXFwiOlxcXCJcXFwiLFxcXCJyb29tX2lkXFxcIjpcXFwiMTE1MDAwMDAwMDFcXFwiLFxcXCJ0eXBlXFxcIjpcXFwiMFxcXCIsXFxcInVpZFxcXCI6XFxcIjIwMDAwMDAwMDFcXFwiLFxcXCJ2aXBcXFwiOlxcXCIwXFxcIn1cIn0iLCJjcmVhdGVfdGltZSI6MTc5MDc3MDAwMCwiZnJvbV91c2VyIjoxMDAwMDAwMDEsImlzX3JlYWQiOjAsIm1jYXN0X2lkIjoxMTUwMDAwMDAwMSwibXNnX2tleSI6IiIsIm1zZ2lkIjoxNzkwNzcwMDAwMDAwMDAxLCJwcmlvcml0eSI6MTAwLCJ0eXBlIjowfV19XX0=",
+   "note": ""
+  },
+  {
+   "name": "chat gzipped twice",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACAwFwAY/+H4sIAAAAAAACA3VSsU7DMBD9l5szJNCqkN9ATARFbmJaqySO7EtpVEVCTB07ICGYWBBMrCz0b9oCf8HFVHbT0jiy7nzvnd/5bgpjrrSQOYSBBygyTkbv1O/1/O3Pg7RUDA2OnGuhEcKLKbCiECmEHb97fNLxIEuYxrg5CYLuhkppM641G3BtKAlDPpCqIpYHicyRJcjVDqM55zndAdMIkE8wgjAiO4qgn8blqDHCZjurchxyFMn5aEtuE/GaLRkyZfJbQuD73f1wnLOMW8z68f3n9unr/m09+3DYP0kWtFw8r14WNrypMe7LtDIYIxYn6JwbqdJ/6HXdSoBV4ZS4SloCV/PZejb/fr1bfj5YRCEVKiacQhtRUmbUFfcG7qkt5sC15RbtyN9jjUXRJtX0A/VPcWpzvDtPHlwpklJq03DXbqFjIqRmtg7NkB7EI05TA2AcA2gPKqEKJaQSWJnsnimKktaXtH4BdbqxGOoCAACIBSpDcAEAAA==",
+   "note": ""
+  },
+  {
+   "name": "chat content empty: the words",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VSsU7DMBD9l5szJEBVyG8gJoIiNzGtVRJH9qU0qiIhFspEBwQCsTGAkGBl4XNogL/gYqq4aWkcWXe+987vfDeBEVdayBR8zwEUCSeju+d2u+7y50CcK4YGR86J0Aj+4QRYlokY/B23s72740ASMY1hfeJ5nQWV0iZca9bn2lAihrwvVUEsByKZIouQqxVGfc5TugMmASAfYwB+QHYQQC8O82Ft+PW2X6Q44Ciig+GS3Dri1Fs0YMrkbwie63bWw2HKEt5gqru3n7P7r+vnavpusX+SGlATWFQX9mRcmKiRiWO0zqlUcUOcX71UD5fV62N1c1H7ZdlKg0VmldhKWgLns2k1nX0/nX9+3DaITCpUTPyjUEmZUFfsG9inbjAbrs2XaFvuGmsksjappB+of4pTm8PVeXLgWJGUXJuG23YLHRIhNrO1aYZ0PxxymhoA4xhAe1AJlSkhlcDCZHdMUZS0PKL1C8Wd5yPqAgAA",
+   "note": ""
+  },
+  {
+   "name": "chat content missing: the words",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VSsU7DMBD9l5szJNAqkN9ATARFbmJaqySO7EshqiIhFspEBwQCsTGAkGBl4XNogL/gYlVO06pxZN353rt79t0UJlxpITMIPAdQpJwMf9/1fXf1cyApFEODI+dUaITgaAosz0UCQc/t7+71HEhjpjFqTjyvv6RS2pRrzYZcG0rMkA+lKonlQCwzZDFytcZoznlGNWAaAvJzDCEIyQ5DGCRRMW6MoNkOygxHHEV8OF6R20ScZotHTJn8luC5bn8zHGUs5RZTP3z8XTz+3L7Ws0+LXV4iGsikNEijBkmadc6kSmySxc1b/XRdvz/Xd1eNX1WdNFjmbcFWcEfHYj6rZ/Pfl8vvr3uLyKVCxQRalI0oKVN6/Paq7YtazJayxQptx91gTUTeJVX0A7VJcepmtD42DpwoklJo09e2q0JHREjMCG0bFT2MxpyGA8A4BtCdR0LlSkglsDTZHXMpSlod0/oHz26Pb9ECAAA=",
+   "note": ""
+  },
+  {
+   "name": "chat type 0 as a number",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VSsU7DMBD9l5szJNCqkN9ATARFbmJaqySO7EtpVEVCTJVYOoAqGFhhAcHEAJ9DW/gLzm6VNC3EkeXzvXf3zndjGHKlhUzB9xxAkXA6dA7dTsfd/ByIc8XQ4sg4FxrBPxkDyzIRg99y2/sHLQeSiGkMzY3ntddUCptwrVmPa0uJGPKeVAWxHIhkiixCrrYY5p6nlAPGASAfYQB+QOcggG4c5gNz8M12VKTY5yii48GGXONxzBb1mbLxK4Lnuu1dd5iyhFeYxd3Lz+X98uZpMXmvsStJFahyrKsLuzIurNfKxBHWxoVUcR399nX+PFu+fcwfro1dlo0wWGQrJa69bgibTyeLyfT78errc1blz6RCxcQfypSUCXWjrr1+4gpTpTNb/XD5Bm3P3WENRdYklfQD9U1xam+4PUcOnCmSkmvb6LrNQodEiO1M/Tc7uhcOOE0LgDUsoDmghMqUkEpgYaM7tigKWp7S+gXM+PTa4gIAAA==",
+   "note": ""
+  },
+  {
+   "name": "chat type 3: the link title",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VSzUrDQBB+lznnkNiWal5DPBkJ22RtlzbZsDsphhIQL/YkBQV/TiKInrx6EZ9Go30LJ2vJNq1mwzKz830z3+7MDKZcaSFT8D0HUCScjP6e2++7658Dca4YGhw5E6ER/MMZsCwTMfhdt9fZ7TqQRExjWJ94Xm9FpbQJ15oNuTaUiCEfSlUQy4FIpsgi5GqDUZ/zlGrALADkJxiAH5AdBDCIw3xcG3697RcpjjiK6GC8JreOOPUWjZgy+RuC57q97XCYsoQ3mOr2ZXl693X1XM1fLfZXUgNqAqvbhQMZFyZqZE5EOrYeCpzY/MvL9+risbo/Xz7c1H5ZthJhkVlsp6nTkvi5mFfzxffT2cfbdYPIpELFxB8alZQJ9cW+gn3sBtMqa58wX6PtuFusqcjapJJ+oA4qTo0ONyfKgWNFUnJtWm4bLnRIhNhM139TpIfhmNPcABjHANqjSqhMCakEFia7Yy5FScsjWj+UZxkZ7AIAAA==",
+   "note": ""
+  },
+  {
+   "name": "chat types 1, 2, 4, 5 have no text",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA+2Sv07DMBDG3+VmD0nbqJDXQEwERW5iWqskjmynNKoiIRbK1gEJAQsLgomVBXia/oG3wDGV07SqVKSOSSLLzn3f+ez7jWBAuKAsBtdGIGlE1KR9aLXb1uqDIEw5llqnFudUSHBPRoCThIbgtiynedBCEAVYSL/4Y9vO0qrSRkQI3CVCWwIsSZfxTLkQBCyWOJCErzmK/yRWe8DIA0mG0gPXU3PPg07op/1i4hbDURbLHpE0OO6vlFtEUDEEPcx1fmOwLcvZDPsxjojRzO/ffi4fFrev8/F7qf0ryYhmj1+Lm2sTXp7R77Aw0xpdrBzKcnHBeGjs08+n2fNnMcvzSgKZJWUltslfKXA2Gc/Hk++Xq+nHnVEkjEuOaVmhiXDGItWVMmt51UZT2ba8wHTF1rA2XAOaVE25+kD1jxPVZn+dJwRnXJWSCt3wst1U+MoQara2MSS6fp8oagD0QgsqoNrKnHDKOJWZzo70oVTSHNXY/Qu7Ro3d7tjZNXZ7wq5VY7c7do0auz1h59TY7Y5dcyt2p+r9BdKBvdpPCgAA",
+   "note": ""
+  },
+  {
+   "name": "chat unknown type: the content",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VS0UrDMBT9l/vch1Ydc/0N8clKydq4hdmmJNlcGQURwYEvexDFIerLUAQFn3zQ/c3W6V94G0ezbtiUcJN7zslJ7h1AjwrJeAyuY4FiEcWg3rDrdXv1syDsCqI0DhfHTCpwDwZAkoSF4O7Yte3dHQuigEjlFzuOU1tSUTaiUpIWlZoSEEVbXKTIsiDgsSKBomKNUezTGM+AgQeK9pUHroex50Ez9LudInCLaS+NVZsqFux3VuwWGauYgjYRWr8kOLZd20z7MYloiclv335Ox4ur53z4YbB/lgzo7mXxMFm8f87vLxfj8/z6Yv56U6KXV/abPEw1RXtXfWUWJ1yEpdps+jifTIsoyyoCKk2MsUapX/E7Hw3z4ej76Wz2ZRwkXChBmDFcZgTnERbJPIl5+RJTOda8Z3eFtmVvsHosqZIy/AHLKShW3V9vLwuOBFrpSl1/U30mfSSEutX+aynZ8jsUmwhALzSg2reISgTjgqlUq1v6UiiaHeL4BVkaMi/5AgAA",
+   "note": ""
+  },
+  {
+   "name": "chat without a type: the content",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VSzUrDQBB+lznnkKqlmtcQT0bCNlnbpSYbdie1oQTEU8VLD4IoInoQPQl68aB9mzbVt3Cylmx/MBuWmZ3v+3ZmZ4bQ50oLmYDXcABFzMlo7bmtlrv8ORBliqHBkXMiNIJ3OASWpiICb8dtbu/uOBCHTGNQnTQazQWVZGOuNetwbSghQ96RKieWA6FMkIXI1RqjOucJ3QFDH5AP0AfPJ9v3oR0FWa8yvGrbzxPschThQW8p3SriVFvYZcro14SG6zY3w0HCYl5jypvXn7Pb+dVLOfqw2L+ULOj9sby7mL99zu4va9Ci0qAto9wgTco4QOucShXVItPJw+xpUllFYQRW8piNR+Vo/P18Pv26rq9IpULFhE2kjigpY3p8W6p90RqDeWr17TtlS7Qtd4PVF+kqqaAfqE2KUzeD9bFx4FhRKpk2fbVdFTogQmRG6L9R0Z2gx2k4AIxjAKvzSKhUCakE5kbdMUWRaHFE6xdAGvKp0QIAAA==",
+   "note": ""
+  },
+  {
+   "name": "chat reply: its own words",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA41TQUvDMBj9K/Kde2h1Y9qT/0E8WSlZG7cw25Tk61wZAxEPuwg7COJEDyIoDPQoDH/Ous1/YZqNttsc2kJI8r338uX1tQttKiTjIdiWAcgCqia1A7NWM8uPAX4sCGqcWpwziWCfdIFEEfPBrpjVvf2KAYFHJLrZjmVVl1QlG1ApSYNKTfEI0gYXiWIZ4PEQiYdUrDGyfRqqM6DrANIOOmA7au44UPfduJVN7Gw4SkJsUmTecavUblYxssFrEqH1c4JlmtXNshuSgOaY6f379+Vwdvs27X8W2EVLOegw7Y8m4/FO+vCUvtzMhtfzj8ccvLyxW+d+ohm6dexgsbjgws/F1kV6vRUZTKKiu+J2K02ng/60P5i/Xk2+7nJExAUKwoqu84rgPFBfqvClsD/HbDk2LtF2zQ1Wm0W/kAiuerxwr1z+47IlxH9dnT+PNo3tqQFUwgRVQXTXE2/AmVDGxFJHsggkk64i+Dr921IuG26LqlwD6IUGrP5KChUJxgXDRKsb2mIl2jtV7w+J03J+jAMAAA==",
+   "note": ""
+  },
+  {
+   "name": "chat reply without the quoted words: the content",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VSwUrDQBD9FZlzDom2VHPyH8STkbBN1napyYbdSW0oAREPuQg9CGJFT4KCoEeh+DlNW//CzbYkTWuTsMzuvPd2ZvKG0KdCMh6CbRmALKAqaB2ZrZa5/hjgx4KgxqnNJZMI9tkQSBQxH+yG2Tw4bBgQeESiW5xYVnNFVbIBlZJ0qNQUjyDtcJEolgEeD5F4SMUGozinoboDhg4gHaADtqNix4G278a9IrCL5SQJsUuReae9tXKLjFEsXpcIrV8SLNNsbqfdkAS0xMweP3+vx/P791n2XWGXJZWg4zz7mE4me/nTS/56Nx/fLr6eS/CqY7fN/UQzdOk4wGpzxYVfim2KpGlNBpOoqq7qrlZ0Pspm2WjxdjP9eSgRERcoCKuqLjOC80D9qWou1fhLzI5r4zXavrnF6rPoHxLB+oyX01tP7242VR8oUwiqvONumtSAC6F6iaV2UeUhJl1F8LVhdxlTdtweVVYE0BsNqLtfoSLBuGCYaHVDT0WJpufq/QNupc1fPwMAAA==",
+   "note": ""
+  },
+  {
+   "name": "chat reply to a non-text: the content",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA41TTUvDQBD9KzLnHBJtqebkfxBPRsI2WdulJht2J7WhBMRTLkIPgqjgSVAQvAoi/pqm6r9wsy3Z9AtMYNjdeW925uVlDEMqJOMxuI4FyCKqFp0Du9Oxm48FYSoIapzanDOJ4J6MgSQJC8Ft2e29/ZYFUUAk+tWJ47QXVFU2olKSHpWaEhCkPS4yxbIg4DGSAKlYYVTnNFZ3wNgDpCP0wPXU2vOgG/rpoFq4VTjKYuxTZMHxoNFulbGqEPSJ0PVrgmPb7fW0H5OI1pjZ3dvv5f33zcuseDfYeUs16LAsXqcfHzvlw2P5dF3DFrP6XR5mGqubxhGazQUXYV3G0PN8qQBmienITLTUaDkpZsXk5/lq+nlbIxIuUBBmOq0zgvNIfR2jhZG8xmy5Nm3Qdu011pAlG0gEl3WdK9ZMbxzW2YT4v55fczFzFUA5SVBlOH/V2RacCSVGKrX1jPGY9BUh1C7f5mbZ8wdU+RdAbzRg+ZdRqEQwLhhmurqlZVVF81P1/gES7O2GdAMAAA==",
+   "note": ""
+  },
+  {
+   "name": "chat blank text is dropped",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VSwU7DMAz9lcnnHlrYNOhvIE4URVkbRjTaVIk7Vk2VEKcdd0BC8ANw4sqFz4EBf4EbpqTdtKay7Pg95yX2EuZCG6kKiKMAUOaCnPFpOB6H3S+ArNIcLY6CG2kQ4osl8LKUGcTDcHR8MgwgT7lB1u5E0WhLpbK5MIZPhbGUlKOYKl0TK4BUFchTFHqH0e6Lgs6AZQIoFphAnJCfJDDJWDVrnbg1Z3WB1wJlej7ryG0zQWvSa65tfUeIwnC0n2YFz4XDbJ7efu+evx9eN6t3j/2X5ECDAdmkGDjA9pZsorLaoqxcXKAPbpXOOgUst2l6bKxLL8RfpKfva73arNY/L/efH48OUSqNmksv0GW0Ujk1xT+Bf2mHOXBs1aEdhXusuSz7pIZ+oPZpQV1mu+MUwJUmKZWx/fbdloYRIbOjdWiEzJTNBA0NgA0soD+nhCq1VFpibasH9lJUtLmk9QfytMbo6QIAAA==",
+   "note": ""
+  },
+  {
+   "name": "chat text and name trimmed",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VSvU7DMBB+lejmDAm0KuQ1EBNBkZuY1iqJI9spjapIiKlsHZAQiKEDCFhY+VHL07RpeQsupkqaosaRdef7vvN3vhtCnwrJeASObYJiIUWjdWi1WtbmZ0KQCKI0Dp1zJhU4J0MgccwCcBpWc/+gYULoE6m84sS2m2sqpg2plKRDpab4RNEOFymyTPB5pIivqNhiFOc0wjtg6IKiA+WC46LtutAOvKRXGE6xHaWR6lLF/OPehtwiYhab3yVC5y8JtmU1/4e9iIS0xOR3bz+X98ubl3z0XmH/JJUgw5h/PK6+P/OH6+XrVz6ZGkaJXRfstXmQaoJWrgaqci64CMpc89lk8TQrrCyrJVBpXMmqyqqpNYzFeJSPxqvnq/n0dkNFzIUShFWSy4jgPMQ2VY9SvX2J2XF1skHbs/6x+iyukzL8ARsqKPbd2x4wE84ESkmknoCq/0x6SAj0sO0aKtnxehTHCEA7GlCfXETFgnHBVKqzm7ooTJqd4voFweEevvsCAAA=",
+   "note": ""
+  },
+  {
+   "name": "chat of another room is dropped; no room id is kept",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA91SMU7DMBS9y589JKVVIddATARFbmJaqySObKc0qiohpjDRAakCMcCAYGJASF2ouEwb6C1wTHGaQg9A48j69n/v+9n/DaBHuKAsAsdGIGlIVNDcs5pNa/VDECQcS41TixMqJDiHA8BxTANw6lZjZ7eOIPSxkF6xY9uNJVWVDYkQuE2EpvhYkjbjqWIh8FkksS8JX2MU+yRSZ8DABUn60gXHVbHrQivwkm4ROMW0n0ayQyT1D7orcosMKia/g7mubwi2ZTV+p70Ih8Rg8uvnxdnNx9VTnk1K7LckA5pN7+YPU5Ne3tFrsSDVGC1W9mW5OGU8+IM+HFYKyDQulZQ3qQicj7I8G30+ns/exgYRMy45pqVCk+GMhaor5RuYp64ZzIZjkxVa7ed5bZPu0bhKGqofVP84UW321v2E4JgrKYnQDS/bTYWnCIH21iYPibbXJco1AHqhAVWjKlTMKeNUpro60pdSRYdoe2yXv9zntxd59r4Yv84vJ//Cf1vgrdpGbx2p8QXtISK4RgUAAA==",
+   "note": ""
+  },
+  {
+   "name": "chat room id as a number",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VSsU7DMBD9l5szJEBVyG8gJoIiNzGtVRJH9qU0qiIhpmx0AFUwsSBYQAxILFT8TBPoX+CYEjcF4si68713fue7CYyokIzH4DoWIIuoMrp7drdrr38WhKkgqHHKOWESwT2cAEkSFoK7Y3e2d3csiAIi0a9PHKezoqq0EZWS9KnUlIAg7XORKZYFAY+RBEjFBqM+p7G6AyYeIB2jB66nbM+DXuinw9pw620/i3FAkQUHwzW5dcSqt2BAhM7fEBzb7vwO+zGJaIOprp+WZzcflw9V8Wqw35IM6Oq5fJxVxfty9lJeGNyqWL/Hw0yDtWoco3FOuQibPIv5bXk3r608byXALDGSTEktpeW0qIrp5/354m3WIBIuUBBmpDYRwXmk2qMD6++tFf59XcqM1K2f93Wa8IglbVKuflANFFT12d8cKAuOhZKQSt1x028mfUUI9XD9N0Sy7w+pGhsA7WhAe1IVKhGMC4aZzm7polTS/EitL5OT0PvrAgAA",
+   "note": ""
+  },
+  {
+   "name": "chat ids: numbers, text, missing",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA+1UwU7CMBh+l//cmE0g6F7DeHJmKVvFBrcubUEWQqKe8AQHjdF40IPRkxIPcpG3YVPfwq7iBihnDLguTdv/+/5+7f+lLWgQLigLwDIRSOoTNShvGuWyMfkh8OocS41TkwMqJFg7LcBhSD2wikapsFFE4LtYSCddMc3SmKrS+kQIXCVCU1wsSZXxSLEQuCyQ2JWEzzDSdRKoPaBlgyRNaYNlq7FtQ8Vz6rV0YKXdVhTIfSKpu12bkJtGUNq5+5jr/BnBNIzSz7ATYJ9kmOTy8ePo6u3sIekMcuyXpAw0Gt7Ed8MsPD6jU2FepDFarGzKfHLIuPcLvd2eSiCjMFeSn2RKYNzrJJ3e+/3J6PUiQ4SMS45prjCLcMZ8VZX8DvKrzjBztq2PaevfV1vQyw0aToPb6gdVN05UeZ1ZHyHY40pCXehC52WmwlEET3tqnndE1akR5RYAPdGAaYMWEIScMk5lpLMjfRiVtI2Wx27J821yfToDWlLTLdZdMGOvIqyOv5KXTnL8FHcHq/KupV32tpmLduDy2yzud5Pz/r/N/sJDZ66V5lpuV7VPsBUJFhwKAAA=",
+   "note": ""
+  },
+  {
+   "name": "chat name missing",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VSzU7DMAx+F59zaGHToK+BOFEUZW3YotGmctyxaqrEkQfgAicuSJy4ctrbwBBvgRumZj+sqSI7/r4vduwlzDU6Y0tIYgFkCs3G6DwajaLtT0BeoyKPY+fWOILkagmqqkwOySAanp4NBBSZciS7kzgebqgsW2jn1EQ7T8kU6YnFhlkCMluSykjjHqM71yXfAcsUSC8ohSRlO01hnMt61hlJt100JU01mexytpVuFxHdlk0Vev2eEEfR8DAsS1XoHrN+ev+5f/5+fFs/fATsX0o96HP18vW66sObGuXY5o3H+GRpQcG5s5j/Q2/bHQFqqpBJqKSySKhMuL+PoLUFv3moMDxkjzkiWm/RTqID1txUu6SWf+DuoOYmyv1pEXCDnErtfDtDM42TTMj95BybEDeRM80zAeAdD9gdQ0ZVaCwaary68EWxaHvN6xffJIcNyAIAAA==",
+   "note": ""
+  },
+  {
+   "name": "chat times: text, zero, negative, missing, too far, fraction",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA+2WQU/bMBTHv8s7ZyihDWX5GtNOyxSZxBSrSxzZLiOqKk1c6E7jMKgYSAxpiAmJCU2ou6ziy9Cs/RZzDLLboVIOOa1JIsuO//+X57yf4nRgGzNOaAKeY4EgMZadxku70bCnDwuiNkNC6eTgHeECvDcdQGlKIvDqtltbr1sQh4iLoLjjOO6DVYaNMeeoibmyhEjgJmWZdFkQ0kSgUGD2j6O4jxP5DOj4IPCO8MHzZd/3YSMK2q2i4xXNqywRW1iQ8HVrKt1ixiqacAsxFV8bHNt2H08HCYqx1uRHPyYfvvz5/D3v/TLa+5SM6HBvdNXP+4NJ/0aLHlYabNAoU0qVstgRZvCeskgHuRt+HZ0Pi163OxNAZKnJx6xnJs3Rfi/v7Y8vdu9+97UipUwwREyeeoZRGsvamDdhXrjWzHlse8q2aj9ybZN01tSVF8gqMiyLHdxTBRorR05tMplMm6vCm7ITHkhLpBibxxJvBi0s6QFQAyWwIGWEMiIyFc5S65BRutb/w9vkeFBhthgzu2S2VpeBrfHNaX5wXeG1GK8Xbsl81ZaBr/znWX7ysdorn6CsVKjqywDV6Nvl+PakwmnxR2t9ra4r45SMmrsUqF1/qvbHZ6FmfvJXyt4p1+aS9laefwFwXq8MyQ4AAA==",
+   "note": ""
+  },
+  {
+   "name": "content and text as objects",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VSu07DMBT9lztncKBVIb+BmBCy3MS0VkkcXTuFqKqEmDp2QEIwwYBgAjEhJPo3bSh/wbVbqKmEMzj3cc65D49gKNEoXUASR2BVLumns886HRaeCLIKhfV5ZJwqYyE5GoEoS5VB0mLt3b1WBHkqjOXOE8ftNZRoc2mM6EnjIamwsqexJlQEqS6sSK3ELYTzy4I0RmDlub+7Ga8GkMBBXdi+tCo9HAQFAmH6AtdcEDPWDl28EK4zaG6evy5uP6+emskbBDKweHlfvt7Db628q7Pay6/UzzRSVzCf3S0eZjAebxJtXTpmV8FaZDGdNJPp8vFy/nFN3lKjRaGcClmode4nBEHD5A9oKh/eYUF0qEofdMIpShoh395VBCdI1JXxw9yMUhlOgMzv7b/9mB4fyHpVIBk+4e8joKwSlUZla8/+UzAbH9P3DczpPN9GAgAA",
+   "note": ""
+  },
+  {
+   "name": "content not JSON, text not JSON, text missing",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA91TPU/DMBD9K+jmDClQFfITGGComAiKTGKKVRJHtluIqkiIqQuiAxIfEhIMCCY6ggSIP5OG8i+4mMpJizqwMJBI1tl+7927s92DLhWS8QicmgWKhRSDxqrdaNjVz4KgI4jSOJzsM6nA2eoBiWMWgLNs15dWli0IfSKVV6zUavUJFWVDKiVpUakpPlG0xUWCLAt8HiniKypmGMU6jTAHZM8n+cVwYa25sQ64LijSvVmfFuwKHnodqYVKGSY9JATa8zxvsuW1KboB0BMNmG4AomLBuGAq0erYpyTG/HZq/bqcnguKHioXHLdamgvpP6mOqz0qsLxa+t+Oq+e6LuwEXqddBE4xNJMIy1XM32xXHkuxYxWDv0eE1jcEtFP/ue1FJKQGk18+fh5dfZw95P2nEvttyYDG75f59e3odJi93BnQ5J15OzxINFJbVoeqnBxwERiR7O1mdPdWRGk6JVA0zKDKeqZsjgb9vD8Y3x9nr+cGEXOhBGGlT7MjOJ44K3NXGm4wc9J2KrRF+wery+JpUvqXr6kx97Zt4/8FXTRTrF8FAAA=",
+   "note": ""
+  },
+  {
+   "name": "outer type not 0 is skipped",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA+1SPU/DMBD9K+hmDwm0asnfQEwERW5iWqskjuxraVRFQkyVWDogIRgQC4IJiYkB+m/6Af8Cx63iplVXBoQTWWffe+dn3xtCn0nFRQKeSwB5zHTQOHQaDWd9EIh6kqLB6cU5VwjeyRBomvIIvJpTP2jWCMQhVRgUO65bX1F12ZgpRdtMGUpIkbWFzDSLQCgSpCEyucEo9lmiz4ChD8gG6IPn69j3oRUFvW4ReMV0lCXYYcjD4+6a3CJDiinsUGnqlwTXcerb6SChMSsx87vX78v7xc3LfPRusUtJJWjx9jF7uN5zS8DqlkFLRJlBGbk4QLu4EDIqC0wnj7OnSRHleaUAZqnVYu9SkTgbj+aj8dfz1fTztkSkQqKk3GosM1KIWPfFvoJ97BKz49jeGm3f2WL1eVol5foH3UHJdKODTUcROJNaSk+ZltuGcxVoQmTctctFqh10mfYNgFkYQNWqGpVKLiTHzFQn5lI6zMmfM56/HObR/Uqz/434+0Zs7nAeOJCf6u8HA4QThWgFAAA=",
+   "note": ""
+  },
+  {
+   "name": "inner type as text",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VR0W7DIAz8Fz/zENZE2fiVZUIocSO0BCLjVoui/PsMqpq1WkEYbO4OODa4IiUfAxitgP2Msmg/qrat/jYFw4UcF5wkk08M5nMDtyx+AFNXzem9VjD3LrHNFa2bG1VkZ0zJjZgKpXeMY6RVWAr6GNj1jPTEyHUMcgZsHTD+cAemk3Un2bpgnk0OutJ5UjlQjLOcfewdgnfM4NgVQJGKYfIBLwmpD3zw3k51c2dwZDdlyIv9Bw2b+B/cvssAeRShvN0+m6zgTHLzLCHlwwOfrBCGYvgrY9Nov1GsBChJATz+nqAW8pE8r0VdFQNFdP+S/gsfJqGG/wEAAA==",
+   "note": ""
+  },
+  {
+   "name": "online count",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VR0WqFMAz9lzz3wbJe3PyVOaTUTMq0lTT3MhH/fWk2tnuFWbRJes5JetzhhlRiTtBZAxwXlKB9adq2uX8MjFfyrDhJ5lgYutcd/LrGETrXXJ6enYEl+MJDrVh7+aGK7IKl+AmLUoJnnDJtwjIQcmIfGOnEqHVM0gP2Hhg/uYeul7iXbFux7p0VYA0o50V6aq1+7oRqqpjRs1eASuQ0x4TXghQSf2u51jqnUM7s53p2PnhgDYXpr6OCanQc8oLMTyjXHM5+GngnGbZq1Pl/rxvLIIRRvf3PwzINHyiuAWiigMcfJaiVYqbIm6ob9UpEjzdZX8anHl3qAQAA",
+   "note": ""
+  },
+  {
+   "name": "online counts: text, zero, negative, fraction, missing, other room",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA+2WwW6DMAyG38XndEq6MlpeZUwoAq+KBgQl7rSq6rvPiSrUVqFdd+qBICA2vw3+ghEH+Ebnje2hUALIdMiTfCPzXJ4PAc3OaYo6NlrjCYr3A+hhMA0UK5m9rlcCulp7qoJHqewUymk79F5v0ceQWhNurdtzlIDa9qRrQncVEfzY8z3gUALhD5VQlDwv2doPGM6FYmGYOGs7vmf0hcNZomBGTaNJR0FMYfvW9Ljz6OqexrjNOn/LxgiypNsgmbh+kaPylNAdj7wDF+OQa66u4Qr4dPzkIUUoZqzd+IoDmgh6CqjfVl/ICAGiEQWXq8aqwRnrDO1jdhHBcdKjeNI1kAnu8g5rOXN+mPNCJUCfnNOkF2pG/TBqtXzJErBH9zTuIJmB/we4TAOX94HPH5NbwGcwPJZ/fhNTfX+v6eeOf7zjN4mRQD8pu/EflxhPvEAfvP0Cc5ErCc4LAAA=",
+   "note": ""
+  },
+  {
+   "name": "gift",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VTXU7jMBC+i5+t1m6LCrkKQZFxp6lFHEf2pKKqKgGviGcugLSX4DgrYG+xY9OkTQtJ5Izn++bHnpktW4MPxtUsk5yhsUDC/ErM5+L44WzReoWJR5vKBGTZ9ZappjELls3ExfRyxpnVKmARNVJe7E3JrYUQVAkhmWiFUDq/ISvOtKtRaQR/YhH1UFMMts0Zwj3mLMtJzmm3aSD+MynmPAoLhSopEhzAr42GoqfFRQoxmUWBH1NMvXQHQ1XrlfOUfFJNRZ/MN+jqjTW4SaBIun2OfZDoJU/ASnlbaNcmMO8ISej+fEheq6qFnix6tDRLPPEkh2DKdxhDSjm9PAuU2LWycMb/eH6h72eD1ldn/BViE7LxGO6VbSoY3Wq4dWGknR1Hm1FTl2fOTCiWHuCHU6BDVZ1ewK4vlg3lsJZHhWycR6/MoQQ94p2zXSmPGysqWqp/h026Mk8O0P6Ovj3+e3j8fHv/+vP09/017ne7HS2MOtQDNXJxOjGcLT2Fjo5ih/YNTecng0Want+mhE56BzQXjKVNIgxHkViNN85TIybvPE1DvK8bev8Da3YbJ8wDAAA=",
+   "note": ""
+  },
+  {
+   "name": "gift content as an object; numbers as text",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VTWU7DMBC9i7+tNumiQq5CUeS609QijiN7UjWqIgG/iG8ugMQlehzEcgvGps1SQRbHM2/e2DN+ObAdWKdMwZKYM1QaaLK4jhaLqH9xtq6swBBHRq4csuTmwERZqjVLZtF8ejXjTEvhMPWeOJ6fqJRWg3MiAxcoUiBkxtbE4kyaAoVEsBcM74eC1mCHJUPY45IlS5ovyapL8N8kjhbcT9YCRXAE2IHdKQlpLyyazHgfUsXGdARRyK2xtOngmkbtJn5BU9RaYR3AKPhOe+syyK2wOpWmOjn94F/egTuRV9DLkakNXjCmLSWAp/3EcTy97ryF0NAyPp6e6RnSKpu3+BaxdMl4DHuhyxxGKwkr40bS6LGPHZVF1pKVSzcWutxRi6BBkfcLaIJbu6zrsR8ms5ZSGotWqD+6YY3RXWnzQa8rOp8zNjkfw6SDBrV/3z98vh6/3h7fjy/ebpqGBkbKsUACSy+VzNnG0tI+UZDEWWhUNxHWQdX/qZcqvQPSK2PBCAHDX4SiSquMJaGE7Dyo1Pfqlu4f/5L/a2QDAAA=",
+   "note": ""
+  },
+  {
+   "name": "gift count missing or zero is 1; http icon dropped",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA+1TS47bMAy9C9fCREoyyNRXqQtDcBhHqGUZEh1MEARouy267gUK9BJznKKfW5RSYuXXWRQo0M3YhkzxPT59SO5ggz4Y10GhBJCxyMbilVws5PkjYDl4TYnHk9YEguL1DnTfmyUUc3k/e5gLsLUOVEWPUvfHUJa1GIJuMKSQWhM2zm85SkDtOtI1ob+KiH7seA3YlUD4SCUUJdslz7Y9xn+h5EJEY6lJJ0eCA/qNqbHKtDgoKafzaIhziulW7hSou3rtPG8+uWYyb+YAum5rDW0TKJPvuMe8SFQpE7DW3la1GxJYjoRkjH9xSd7odsBMlhltzIoOW7qUUUrNHm60ErvTFm/43z9+4u/PAYNvb/hror6YTPBR277Fu9rZib7ru+ZGwYRq5fG0oMoIOdLt9cH2OQk2NJc5OktQ7zx5bU5XmxHvnB1TdF4w0TFwXkdsOqZveoKOF3NQ/PXu/Y8vTz+/fvj29DnO9/s9D8CV55ELtLruBAErz0tHoVh5uVD5/BywTF3xXPXzSd8i1ztAmhwIAnpvnOeSSnoi1XW8IfHSIn/fIpdK/79/XvrkH/XJ9Nk+ecPvb2wIiK2+BgAA",
+   "note": ""
+  },
+  {
+   "name": "gift without a name, of another room, another service",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA+1VsW7bMBD9FYMzYZO2A6f6hA7N0LEqBIY+y0RFUSApI4ZhoO1aZG4/oEDHrh3yOUHa/EWPjCVbdjIU6NAikgSJvPfujuTdgzZkBdYpU5KEU+KVBhzMXrDZjB1elMxrK3zk4aRQzpPkzYaIqlJzkkzZ2eR8SomWwvksWDg/27liWA3OiRxcdJHCQ27sGr0okab0QnqwRx7BDiXmIJuUeLjyKUlSHKc4W1cQvglnMxoGc+FFNETYgV0pCVlLCy/O2HgaBvSQosqF2TuKUi6NxcVH04S1i3kATbnWyq8jyKJtt8Y2SYiSRmAprM6kqSOYNoQ4aL60S16JooaWzFo0Vwt/FIl3wbjebg7O+eT8JFFkl0LDCX8weJxc2+KEu/S+csloBFdCVwUMLyVcGjeURo+Cz7Aq85NgymULC/DIDrzxojje/LYtlHZ5t44HRayM9Vao/fG3iDVGN2U8bKpgqLH2DTZuSjzeQ7vzeYh4//7Dz683v759vL35HObb7RZfBLvTAjZxdqwWShYWU4dAoTvbZsb9o8M8KucpheBO3wFqgpA4iYSuDJFVWWUsNmGMTqMSwnnRXlT/nqjuPl3j8wyENe6F9feFxSe9sJ67sPo/1n/5x7r9cX335fvg5euLV31b/FlbvMX7NyfIhzmRDAAA",
+   "note": ""
+  },
+  {
+   "name": "notices are not reported",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA+VTS27CMBC9y6y9iIE0IVchyHITQ60mcWQbBEI5QRdVl71AD1GpvQ3iGh0bSAL9rCuSSM78x2/eZAdroY1UFSSUgJWlQCGaBlEU9B8C+Upz6+NQKaSxkMx2wOta5pBMgnAcTwiUGTeWOQul4SkVy5bCGL4Uxqdk3Iql0lvMIpCpyvLMCn2V4eyiwh6wS8GKjU0hSVFOUdvWwn0TGkTECTm33Bu82wi9lplgbZg7KBYdO4H0Q2S1UF3iqeU3w2WlUm6YVqpkWaGMaEt6k8yNj5t1UKbzpu8/3rsH1BlWeJ+zLw5HIY3i0V3nqXjZtT+8fu7f3w4fL/vnJ6c3TYMH4MC0wLmyawIJLDR2doXcwNr5SsMwIfdk/kaaWbJHgTQBeMUHXG4GRtVaKi3t1lcnnhws2pCB8Uz/5nkYNI2vaBoE6MkPu1nItWAPhWErXbQbtTn+rwMYSXz7IN3B7zNP6a2CrVQL9Yz7f2Kd4/sFQ2UNjMgIAAA=",
+   "note": ""
+  },
+  {
+   "name": "broadcast stopped (102)",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA71SvU7DMBB+l5szJIWqkNdATARFbmJaqySO7EtpVEWqmDpBByQEYmCpYGKFgb5NU+AtcExl90eVkJCII+vs+77zdz9D6FMhGU/B9xxAllBltA7dVstd/RyIc0FQ49ThnEkE/2QIJMtYDP6+29w72HcgiYjEsL7xvOaSqsImVErSoVJTIoK0w0WhWA5EPEUSIRUbjPqepuoNGAaAdIAB+IGygwDacZj3asOvt6MixS5FFh33VuTWHqfeoi4ROr4heK7b3HaHKUmowSzuXr5G9x83z4vxq8X+SLKgh1E1uZq/jarrqQEtMw3bPC40UkvGAdrDBRexCTKfPVbTWW2V5VoALDKrx+azJrOajBfjyefT5fz91iAyLlAQZnUaj+A8Ub2xlbAFN5gdz+YrtIa7xeqzbJ1Uqh9UFwVVzQ43p8qBM6Gk5FK33TadyVARYj1huyZJdsIeVbMDoA8asD6uCpUJxgXDQkd3dFIqaOn8ffhMfTy38Zui/mshGrtTP1XrG2HnACjrAwAA",
+   "note": ""
+  },
+  {
+   "name": "102 without a room id",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VQ22rDMAz9l/Psh2RryeZfmYcxiRrMljhYalkI+fcporCtMPvBR+JcJG+4UeVcZvjWQfJECrrXpuua38dhuNYkxtPiM7PAv21Iy5IH+FNzfn45OUx9YolHp23Pd6naTsScRmKT9EloLHVVlUNfZkm9UH1QHH2aNQNbgNCXBPigOGi1LnS8vm2e3AGGJMka274H7FB1JQ2Jj9s4XGqZ4pUt7icsc1TBYJv9twGP8YN0ZsAKI/z9JmUtNZeaZTV3Z5Oq6f6u9xsitNL6aAEAAA==",
+   "note": ""
+  },
+  {
+   "name": "102 of another room is not the end",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA3VQ226DMAz9Fz/nAbpWrPmVZkIReChqIcg20xDi32e8qjep8UNs55xjnyzwg8QpD+BLB5J61KQ6FlVVPB4H7URRDKfFJbGAPy0QxzG14PfF4eNz76BvIku9dcrycKWqbI/MsUM2ShMFu0yzshw0eZDYCNILY+vjoDNgCSD4KwF80DxoNY+43b4sdm5L2ijRGvZMOfe6wT/iJrlb1wArqDChzq9fjTr4JuVNbJvc90hcK6E10+/McVefUe0AWGGA5x9U1EgpU5LZ1J2ZUNH1S+MPnO6PFoMBAAA=",
+   "note": ""
+  },
+  {
+   "name": "several items and messages keep their order",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA+1U3YoTMRR+lZLroZ1pu1T7GuKVswxpJm1jO8mQZGqHMlC9KqiwF4LolReKXizeKrL7Nt3WfQszmU4y03ZlQagglqEkOd85OT/flwWYYS4Io6DvOUCSCKtF76Hb67nVnwPChEOpcWozJUKC/pMFiLAQcISF3iAo8YjxFPS7DkCMSogk5iqed7YL4xXnmCpvsPCBxHPpg76v1r4PBmGQTPJFP/97lFI5xpKgx5NKIrnFyf/QGHId3zh4rnt2aA4ojLDBbN59vV2+3775sll9s9giJQPaXl6uvy+NeVdjMGBhqjE6WTmXdvOM8dC4r68/3Hy6zldZVgsg09hmYiupJXhzsdqsLn5+frG+emsQMeOSQ2IzNBbOWBQQe3el1QZzx7VJxa3tHnjNSFx3ytQH1Pw4VmMO9pnigCFXqSRCD9yOm4hAOYSaNRGCQqps9xgRiVEwwYo1AOhNDuio85gTxolMdTxHl6HCZM6fE810xFPA+7YxhBLaiTM6JRTn5aIdczy36DaTcJqfVw9r6EDIKmkLopy0ue07m3uet9eKGlAmG7Ch5Z45xY422OApRhI4/7D8f7z6L/+/Kf/OieTfOyJtVcOMoL15qRzaXdOdEkLokFlHSNGY8XIeHdNUpzAymkaqHm10jzIvj+KX9I0CxBJt9EuAvxu+XyZSAc/Uq4MN2DXWERnKvUhe3ajzrd/heV7nwcFFGr2jax2/eflafccdEj49wI+ljEW/1cJzGMVT3BwgPGCiiVjUyn2aMR0dBFNUGnKMj1Shn9z9BmRWwIpgtVlWBnk/aVWJpbWj5l/ajHba1lST9O3y+fbjlZV0duLHvvubx/48+wXknUwfAAoAAA==",
+   "note": ""
+  },
+  {
+   "name": "list missing",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA6tWKkstKs7Mz1OyMqwFADOaMHENAAAA",
+   "note": ""
+  },
+  {
+   "name": "list not a list",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA6tWKkstKs7Mz1OyMtRRysksLlGyqlbKTS0uTkxPLVayio6trQUA8doFfCQAAAA=",
+   "note": ""
+  },
+  {
+   "name": "root is an array",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA4s21DGKBQC/UIsIBQAAAA==",
+   "note": ""
+  },
+  {
+   "name": "root is a string",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA1MqSa0oUQIAXoDdPwYAAAA=",
+   "note": ""
+  },
+  {
+   "name": "not JSON",
+   "roomId": "11500000001",
+   "b64": "H4sIAAAAAAACA6tWysksLlGyUogGALOSUBMKAAAA",
+   "note": ""
+  },
+  {
+   "name": "not UTF-8",
+   "roomId": "11500000001",
+   "b64": "eyJsaXN0IjogIv/+In0=",
+   "note": ""
+  },
+  {
+   "name": "broken gzip",
+   "roomId": "11500000001",
+   "b64": "H4sIAGJyb2tlbg==",
+   "note": ""
+  },
+  {
+   "name": "empty body",
+   "roomId": "11500000001",
+   "b64": "",
+   "note": ""
+  }
+ ],
+ "playlists": [
+  {
+   "name": "recorded shape",
+   "url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11500000001.m3u8?authorization=bce-auth-v1/0123456789abcdef0123456789abcdef/2026-09-30T12:00:00Z/15768000/host/abababababababababababababababababababababababababababababababab",
+   "text": "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:15\n#EXT-X-MEDIA-SEQUENCE:0\n#EXT-X-PROGRAM-DATE-TIME:2026-09-30T20:17:30.304489115+08:00\n#EXTINF:0.955,\n/v1/liveshowstatic/11500000001_1790770669156884044.ts?authorization=bce-auth-v1/x/2026-09-30T12:17:49Z/604800/host/y\n#EXT-X-PROGRAM-DATE-TIME:2026-09-30T20:17:39.895909882+08:00\n#EXTINF:9.189,\n/v1/liveshowstatic/11500000001_1790770677944333002.ts?authorization=bce-auth-v1/x/2026-09-30T12:17:57Z/604800/host/z\n"
+  },
+  {
+   "name": "empty list",
+   "url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11500000001.m3u8?authorization=bce-auth-v1/0123456789abcdef0123456789abcdef/2026-09-30T12:00:00Z/15768000/host/abababababababababababababababababababababababababababababababab",
+   "text": "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:15\n#EXT-X-MEDIA-SEQUENCE:0\n"
+  },
+  {
+   "name": "CRLF, blank lines, spaces, a media sequence",
+   "url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11500000001.m3u8?authorization=bce-auth-v1/0123456789abcdef0123456789abcdef/2026-09-30T12:00:00Z/15768000/host/abababababababababababababababababababababababababababababababab",
+   "text": "  #EXTM3U  \r\n\r\n#EXT-X-MEDIA-SEQUENCE: 42 \r\n#EXTINF:1,\r\n  /v1/liveshowstatic/a.ts  \r\n"
+  },
+  {
+   "name": "relative and absolute segments; other hosts and schemes skipped",
+   "url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11500000001.m3u8?authorization=bce-auth-v1/0123456789abcdef0123456789abcdef/2026-09-30T12:00:00Z/15768000/host/abababababababababababababababababababababababababababababababab",
+   "text": "#EXTM3U\nb.ts\n../c.ts?x=1\nhttp://liveshowstatic.baidu.com/v1/d.ts\nhttps://liveshowstatic.baidu.com/v1/e.ts\nhttp://evil.example.com/v1/f.ts\nhttp://user@liveshowstatic.baidu.com/v1/g.ts\n"
+  },
+  {
+   "name": "not a playlist (an error page)",
+   "url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11500000001.m3u8?authorization=bce-auth-v1/0123456789abcdef0123456789abcdef/2026-09-30T12:00:00Z/15768000/host/abababababababababababababababababababababababababababababababab",
+   "text": "<html>busy</html>"
+  },
+  {
+   "name": "a JSON error",
+   "url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11500000001.m3u8?authorization=bce-auth-v1/0123456789abcdef0123456789abcdef/2026-09-30T12:00:00Z/15768000/host/abababababababababababababababababababababababababababababababab",
+   "text": "{\"code\":\"NoSuchKey\",\"message\":\"The specified key does not exist.\"}"
+  },
+  {
+   "name": "empty text",
+   "url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11500000001.m3u8?authorization=bce-auth-v1/0123456789abcdef0123456789abcdef/2026-09-30T12:00:00Z/15768000/host/abababababababababababababababababababababababababababababababab",
+   "text": ""
+  },
+  {
+   "name": "EXTM3U not first",
+   "url": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11500000001.m3u8?authorization=bce-auth-v1/0123456789abcdef0123456789abcdef/2026-09-30T12:00:00Z/15768000/host/abababababababababababababababababababababababababababababababab",
+   "text": "#EXT-X-VERSION:3\n#EXTM3U\n/v1/a.ts\n"
+  }
+ ]
+}

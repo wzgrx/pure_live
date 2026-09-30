@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/src/connection.dart';
@@ -52,6 +53,36 @@ final class DanmakuSocketPolicy {
   final Duration shutdownTimeout;
 }
 
+/// An opening handshake of a [DanmakuSocketConnection] that failed, for
+/// [DanmakuSocketConnection.onHandshakeFailure].
+@immutable
+final class DanmakuHandshakeFailure {
+  /// Creates the failure.
+  const new({required this.endpoint, required this.error});
+
+  /// The endpoint of the handshake.
+  final Uri endpoint;
+
+  /// What the connector threw: a [WebSocketException] when the server
+  /// answered without upgrading, a [TimeoutException], [SocketException] or
+  /// TLS error when no answer came.
+  final Object error;
+
+  /// Whether the server answered but refused the upgrade (an HTTP status
+  /// other than 101, or an answer that failed the upgrade's checks), rather
+  /// than the connection failing or timing out.
+  bool get refused => error is WebSocketException;
+
+  /// The HTTP status of the refusal (403 for a session the server no longer
+  /// accepts), when the connector reports one: `dart:io`'s handshake does
+  /// (`WebSocketException.httpStatusCode`); `connectExactWebSocket` only
+  /// names the status line in its message.
+  int? get statusCode => switch (error) {
+    WebSocketException(:final httpStatusCode) => httpStatusCode,
+    _ => null,
+  };
+}
+
 /// Where one connection goes; built from the platform's arguments.
 @immutable
 final class DanmakuSocketTarget {
@@ -85,7 +116,9 @@ final class DanmakuSocketTarget {
 ///   is open, a silent socket replaced, endpoints rotated with the policy's
 ///   backoff;
 /// - the join timer of [DanmakuSocketPolicy.joinTimeout] restarted at every
-///   open.
+///   open;
+/// - a failed handshake reported to [onHandshakeFailure], which may renew
+///   the handshake headers before the next attempt.
 abstract base class DanmakuSocketConnection<A extends Object> extends DanmakuConnectionBase<A> {
   /// Creates the connection for platform [site] (it selects the [proxy]
   /// route); `connector` replaces `dart:io`'s handshake (the case-sensitive
@@ -134,6 +167,20 @@ abstract base class DanmakuSocketConnection<A extends Object> extends DanmakuCon
   /// socket failure; empty, as 3.x showed it only for YY.
   @protected
   String reconnectDetail(String lastFailure) => '';
+
+  /// An opening handshake failed ([failure]): the server refused the upgrade
+  /// (for example HTTP 403 for a session it no longer accepts) or no answer
+  /// came. The socket reconnects through the policy's backoff as after any
+  /// failure; this is where a platform renews what the handshake carries.
+  ///
+  /// Headers returned here, at once or through a future, replace the
+  /// target's for the following handshakes of this socket (a fresh session
+  /// cookie); the next handshake waits for the future. Null, the default,
+  /// changes nothing and waits for nothing; so does a future that fails.
+  /// Called only while the run is current.
+  @protected
+  FutureOr<Map<String, String>?> onHandshakeFailure(DanmakuSocketSession session, DanmakuHandshakeFailure failure) =>
+      null;
 
   /// Opens the socket of [args]'s [target]. A target without endpoints ends
   /// with [DanmakuCloseReason.connectionFailed] (3.x stayed "connecting").
@@ -243,8 +290,61 @@ final class DanmakuSocketSession {
 
   Future<void> _open(DanmakuSocketTarget target) async {
     final policy = _connection.policy;
+    final connector = _connection._connector ?? connectIoSocket;
     late final LiveSocket socket;
     bool current() => run.isActive && identical(_socket, socket);
+    // The target's headers until a failed handshake renews them.
+    var handshakeHeaders = target.headers;
+    Future<void>? renewing;
+    void failed(Uri endpoint, Object error) {
+      final FutureOr<Map<String, String>?> renewed;
+      try {
+        renewed = _connection.onHandshakeFailure(this, DanmakuHandshakeFailure(endpoint: endpoint, error: error));
+      } on Object {
+        return;
+      }
+      if (renewed is Map<String, String>) {
+        handshakeHeaders = renewed;
+      } else if (renewed is Future<Map<String, String>?>) {
+        final wait = renewing = renewed.then<void>((headers) {
+          if (headers != null && current()) handshakeHeaders = headers;
+        }, onError: (Object _) {});
+        unawaited(
+          wait.whenComplete(() {
+            if (identical(renewing, wait)) renewing = null;
+          }),
+        );
+      }
+    }
+
+    // Every handshake of this socket goes through here: it waits for renewed
+    // headers and reports a failure to the platform.
+    Future<SocketChannel> handshake(
+      Uri endpoint, {
+      required Map<String, String> headers,
+      required Iterable<String>? protocols,
+      required ProxyRoute route,
+      required Duration connectTimeout,
+    }) async {
+      final pending = renewing;
+      if (pending != null) {
+        await pending;
+        if (!current()) throw StateError('Danmaku socket closed while its handshake headers were renewed');
+      }
+      try {
+        return await connector(
+          endpoint,
+          headers: handshakeHeaders,
+          protocols: protocols,
+          route: route,
+          connectTimeout: connectTimeout,
+        );
+      } on Object catch (error) {
+        if (current()) failed(endpoint, error);
+        rethrow;
+      }
+    }
+
     socket = LiveSocket(
       endpoints: target.endpoints,
       site: _connection.site,
@@ -257,7 +357,7 @@ final class DanmakuSocketSession {
       reconnectBaseDelay: policy.reconnectBaseDelay,
       connectTimeout: policy.connectTimeout,
       shutdownTimeout: policy.shutdownTimeout,
-      connector: _connection._connector,
+      connector: handshake,
       onReady: () {
         if (current()) _opened();
       },

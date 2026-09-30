@@ -34,10 +34,17 @@ final class _FakeChannel implements SocketChannel {
 
 /// Hands out fake channels and records every handshake.
 final class _Connector {
-  new({this.fail = false, this.stall = false, _FakeChannel Function()? make}) : make = make ?? _FakeChannel.new;
+  new({this.fail = false, this.stall = false, this.failures = const [], this.gate, _FakeChannel Function()? make})
+    : make = make ?? _FakeChannel.new;
 
   final bool fail;
   final bool stall;
+
+  /// Every handshake waits for it first.
+  final Future<void>? gate;
+
+  /// Thrown by the first handshakes, one each, in order.
+  final List<Exception> failures;
   final _FakeChannel Function() make;
   final List<Uri> endpoints = [];
   final List<Map<String, String>> headers = [];
@@ -55,13 +62,18 @@ final class _Connector {
     endpoints.add(endpoint);
     this.headers.add(headers);
     this.protocols.add(protocols);
+    await gate;
     if (fail) throw const SocketException('refused');
+    if (endpoints.length <= failures.length) throw failures[endpoints.length - 1];
     if (stall) await _never.future;
     final channel = make();
     channels.add(channel);
     return channel;
   }
 }
+
+/// B-1: what a test platform answers a failed handshake with.
+typedef _Renew = FutureOr<Map<String, String>?> Function(DanmakuHandshakeFailure failure);
 
 /// A platform that joins with a text frame and reads text frames:
 /// `joined` confirms the join, `fail` is a protocol failure, anything else is
@@ -123,6 +135,18 @@ final class _Platform extends DanmakuSocketConnection<DanmakuSocketTarget> {
 
   @override
   String reconnectDetail(String lastFailure) => showFailureDetail ? lastFailure : super.reconnectDetail(lastFailure);
+
+  /// B-1: the failed handshakes reported, and what to answer them with
+  /// (the default hook when null).
+  final List<DanmakuHandshakeFailure> handshakeFailures = [];
+  _Renew? renew;
+
+  @override
+  FutureOr<Map<String, String>?> onHandshakeFailure(DanmakuSocketSession session, DanmakuHandshakeFailure failure) {
+    handshakeFailures.add(failure);
+    final answer = renew;
+    return answer == null ? super.onHandshakeFailure(session, failure) : answer(failure);
+  }
 }
 
 final Uri _primary = Uri.parse('wss://primary.example/ws');
@@ -494,6 +518,180 @@ void main() {
     await connection.close();
   });
 
+  group('handshake failures (B-1)', () {
+    const policy = DanmakuSocketPolicy(heartbeatInterval: Duration.zero, reconnectBaseDelay: Duration(milliseconds: 5));
+    const refused = WebSocketException(
+      "Connection to 'https://primary.example:0/ws#' was not upgraded to websocket",
+      403,
+    );
+    const renewed = {'Origin': 'https://www.douyu.com', 'Cookie': 'session=new'};
+
+    test('a refused handshake is reported; renewed headers go with the next one, after the backoff', () async {
+      final connector = _Connector(failures: [refused]);
+      final connection = _Platform(policy: policy, connector: connector)..renew = (_) async => renewed;
+      final events = _record(connection);
+      await connection.connect(_target);
+      await _until(() => connection.isConnected);
+      final failure = connection.handshakeFailures.single;
+      expect(failure.endpoint, _primary);
+      expect(failure.error, same(refused));
+      expect(failure.refused, isTrue);
+      expect(failure.statusCode, 403);
+      expect(connector.endpoints, [_primary, _backup], reason: 'the backoff moved on as for any failure');
+      expect(connector.headers, [_target.headers, renewed]);
+      expect(connector.protocols, everyElement(['chat']));
+      expect(events, [const DanmakuReconnecting(DanmakuInterruption.disconnected), const DanmakuReady()]);
+      await connection.close();
+    });
+
+    test('the next handshake waits for the renewal', () async {
+      final renewal = Completer<Map<String, String>?>();
+      final connector = _Connector(failures: [refused]);
+      final connection = _Platform(policy: policy, connector: connector)..renew = (_) => renewal.future;
+      await connection.connect(_target);
+      await _wait(const Duration(milliseconds: 60));
+      expect(connector.endpoints, hasLength(1), reason: 'the backoff is over; the handshake waits');
+      renewal.complete(renewed);
+      await _until(() => connection.isConnected);
+      expect(connector.headers.last, renewed);
+      await connection.close();
+    });
+
+    test('headers given at once apply at once; null, the default and a failed renewal keep them', () async {
+      for (final (name, renew, expected) in <(String, _Renew?, Map<String, String>)>[
+        ('at once', (_) => renewed, renewed),
+        ('null', (_) => null, _target.headers),
+        ('a future of null', (_) async => null, _target.headers),
+        ('the default', null, _target.headers),
+        ('a failed future', (_) => Future<Map<String, String>?>.error(StateError('no session')), _target.headers),
+        ('a throwing hook', (_) => throw StateError('no session'), _target.headers),
+      ]) {
+        final connector = _Connector(failures: [refused]);
+        final connection = _Platform(policy: policy, connector: connector)..renew = renew;
+        await connection.connect(_target);
+        await _until(() => connection.isConnected);
+        expect(connection.handshakeFailures, hasLength(1), reason: name);
+        expect(connector.headers.last, expected, reason: name);
+        await connection.close();
+      }
+    });
+
+    test('failures without an answer are reported too, as no refusal and without a status', () async {
+      final timeout = TimeoutException('handshake', const Duration(seconds: 10));
+      final connector = _Connector(failures: [const SocketException('refused'), timeout, refused]);
+      var renewals = 0;
+      final connection = _Platform(policy: policy, connector: connector)
+        ..renew = (failure) => failure.refused ? {...renewed, 'Round': '${++renewals}'} : null;
+      await connection.connect(_target);
+      await _until(() => connection.isConnected);
+      expect(
+        [for (final failure in connection.handshakeFailures) (failure.refused, failure.statusCode)],
+        [(false, null), (false, null), (true, 403)],
+      );
+      expect(connection.handshakeFailures.map((failure) => failure.endpoint), [_primary, _backup, _primary]);
+      expect(connector.headers, [
+        _target.headers,
+        _target.headers,
+        _target.headers,
+        {...renewed, 'Round': '1'},
+      ]);
+      // An upgrade that fails its checks is a refusal without a status.
+      expect(
+        DanmakuHandshakeFailure(
+          endpoint: _primary,
+          error: const WebSocketException('WebSocket was not upgraded: HTTP/1.1 403 Forbidden'),
+        ),
+        isA<DanmakuHandshakeFailure>()
+            .having((failure) => failure.refused, 'refused', isTrue)
+            .having((failure) => failure.statusCode, 'statusCode', isNull),
+      );
+      await connection.close();
+    });
+
+    test('closed while renewing: no handshake, header change or event afterwards', () async {
+      final renewal = Completer<Map<String, String>?>();
+      final connector = _Connector(failures: [refused]);
+      final connection = _Platform(policy: policy, connector: connector)..renew = (_) => renewal.future;
+      final events = _record(connection);
+      await connection.connect(_target);
+      await _wait(const Duration(milliseconds: 30));
+      await connection.close().timeout(const Duration(seconds: 2));
+      renewal.complete(renewed);
+      await _wait(const Duration(milliseconds: 60));
+      expect(connector.endpoints, hasLength(1));
+      expect(events, [const DanmakuReconnecting(DanmakuInterruption.disconnected)]);
+      expect(connection.status, DanmakuStatus.idle);
+    });
+
+    test("renewed headers belong to the socket: reopen and another room start from their own target's", () async {
+      final connector = _Connector(failures: [refused]);
+      final connection = _Platform(policy: policy, connector: connector)..renew = (_) => renewed;
+      await connection.connect(_target);
+      await _until(() => connection.isConnected);
+      final refreshed = DanmakuSocketTarget(
+        endpoints: [Uri.parse('wss://refreshed.example/sub')],
+        headers: const {'Origin': 'https://refreshed.example'},
+      );
+      await connection.opens.last.reopen(refreshed);
+      final other = DanmakuSocketTarget(endpoints: [Uri.parse('wss://other.example/ws')]);
+      await connection.connect(other);
+      expect(connector.headers, [_target.headers, renewed, refreshed.headers, other.headers]);
+      await connection.close();
+    });
+
+    test('a failure of a socket already closed is not reported', () async {
+      final gate = Completer<void>();
+      final connector = _Connector(failures: [refused], gate: gate.future);
+      final connection = _Platform(policy: policy, connector: connector)..renew = (_) => renewed;
+      final connecting = connection.connect(_target);
+      await _until(() => connector.endpoints.isNotEmpty);
+      await connection.close().timeout(const Duration(seconds: 2));
+      await connecting.timeout(const Duration(seconds: 2));
+      gate.complete();
+      await _wait(const Duration(milliseconds: 30));
+      expect(connection.handshakeFailures, isEmpty);
+      expect(connector.endpoints, hasLength(1));
+    });
+
+    test("a real server's 403: dart:io's status, then the renewed cookie is accepted", () async {
+      final cookies = <String?>[];
+      final sockets = <WebSocket>[];
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      addTearDown(() async {
+        await Future.wait([for (final socket in sockets) socket.close()]);
+        await server.close(force: true);
+      });
+      server.listen((request) async {
+        final cookie = request.headers.value('cookie');
+        cookies.add(cookie);
+        if (cookie != 'session=new') {
+          request.response.statusCode = HttpStatus.forbidden;
+          await request.response.close();
+          return;
+        }
+        final socket = await WebSocketTransformer.upgrade(request);
+        sockets.add(socket);
+        socket.listen((frame) {
+          if (frame == 'join') socket.add('弹幕');
+        });
+      });
+      final connection = _RealPlatform(policy: policy)..renew = (_) async => {'Cookie': 'session=new'};
+      final events = _record(connection);
+      await connection.connect(
+        DanmakuSocketTarget(
+          endpoints: [Uri.parse('ws://127.0.0.1:${server.port}/')],
+          headers: const {'Cookie': 'session=old'},
+        ),
+      );
+      await _until(() => _texts(events).isNotEmpty);
+      expect(cookies, ['session=old', 'session=new']);
+      expect(connection.handshakeFailures.single.statusCode, 403);
+      expect(connection.handshakeFailures.single.refused, isTrue);
+      expect(events.first, const DanmakuReconnecting(DanmakuInterruption.disconnected));
+      await connection.close();
+    });
+  });
+
   test('a real WebSocket server: join, messages and heartbeats', () async {
     final received = <Object?>[];
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
@@ -536,4 +734,14 @@ final class _RealPlatform extends DanmakuSocketConnection<DanmakuSocketTarget> {
 
   @override
   Object? heartbeatFrame(DanmakuSocketSession session) => 'hb';
+
+  final List<DanmakuHandshakeFailure> handshakeFailures = [];
+  _Renew? renew;
+
+  @override
+  FutureOr<Map<String, String>?> onHandshakeFailure(DanmakuSocketSession session, DanmakuHandshakeFailure failure) {
+    handshakeFailures.add(failure);
+    final answer = renew;
+    return answer == null ? super.onHandshakeFailure(session, failure) : answer(failure);
+  }
 }

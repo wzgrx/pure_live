@@ -551,6 +551,37 @@ void main() {
     });
   });
 
+  group('audience (S10-audience, M4.D)', () {
+    final frames = [
+      for (final line in File('$_root/S10-audience/frames.jsonl').readAsLinesSync())
+        base64Decode((jsonDecode(line) as Map<String, Object?>)['b64']! as String),
+    ];
+
+    List<LiveMessage> heard(int topSid) {
+      final session = YyDanmakuSession(topSid: topSid, subSid: topSid, uuid: _recordedUuid)..beginHandshake();
+      [_loginAnswer, _apAnswer, _joinAnswer(topSid)].forEach(session.consume);
+      expect(session.phase, YyDanmakuPhase.joined);
+      final batches = [for (final frame in frames) session.consume(frame)];
+      expect(batches.expand((batch) => batch.warnings), isEmpty);
+      return [for (final batch in batches) ...batch.messages];
+    }
+
+    test("app 103's 3139586 reports the channel's heat as popularity; 3165186 and other channels are not read", () {
+      final messages = heard(22490906);
+      expect(messages.map((message) => message.type), everyElement(LiveMessageType.online));
+      expect(
+        [for (final message in messages) (message.data! as LiveAudienceUpdate).value],
+        [1459372, 1459371],
+        reason: 'the users of liveInfoDetail were 1459360 then',
+      );
+      expect(
+        messages.map((message) => (message.data! as LiveAudienceUpdate).kind),
+        everyElement(LiveAudienceMetricKind.popularity),
+      );
+      expect([for (final message in heard(1414787911)) (message.data! as LiveAudienceUpdate).value], [42057]);
+    });
+  });
+
   group('synthetic frames (S09-synthetic) against 3.x', () {
     final doc = _json('S09-synthetic/cases.json')! as Map<String, Object?>;
     final cases = doc['cases']! as List<Object?>;

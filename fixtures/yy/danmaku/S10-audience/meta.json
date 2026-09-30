@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "platform": "yy",
+  "case": "S10-audience",
+  "rooms": [
+    "yy:22490906",
+    "yy:1414787911"
+  ],
+  "capturedAt": "2026-09-30T20:35:00Z",
+  "route": "direct",
+  "note": "M4.D: app 103 user group messages (533080) picked from a 120 s anonymous recording of two channels; the handshake is left out (S08-live has one). 3139586 carries the channel heat, 3165186 a smaller count.",
+  "frames": 6,
+  "raw": {
+    "sha256": "4f9fc4d0ccdca3229fef9b932916e9e9278d7402af61d04105d754deef1ecc5c",
+    "length": 1343
+  },
+  "scrubbed": [
+    {
+      "where": "app.103.properties[1,2,5]",
+      "rule": "secret"
+    },
+    {
+      "where": "app.103.properties[6].id",
+      "rule": "secret"
+    }
+  ]
+}

@@ -124,36 +124,50 @@ final class YySite extends LiveSite
     return areas;
   }
 
-  /// Reads the listing module of area [areaId] from its [page].
-  Future<YyModule?> _pageModule(String areaId, Uri page) async {
+  /// The page of [area] (found in its category's `getCategory` when the
+  /// catalog was not loaded).
+  Future<Uri> _areaPage(LiveArea area) async {
+    final id = area.areaId.trim();
+    if (!_areaPages.containsKey(id) && area.areaType.trim().isNotEmpty) {
+      await _areas(area.areaType.trim(), area.typeName);
+    }
+    return _areaPages[id] ?? (throw NotFound(_site, 'area $id is not in category ${area.areaType}'));
+  }
+
+  /// The HTML of an area [page].
+  Future<String> _readPage(Uri page) async {
     final response = await _get(page);
     if (response.status >= 500) throw NetworkFailure(_site, 'area page ${page.path}: HTTP ${response.status}');
     if (response.status < 200 || response.status >= 300) {
       throw ApiChanged(_site, 'area page ${page.path}: HTTP ${response.status}');
     }
-    return _modules[areaId] = YyApi.pageInfo(response.text);
+    return response.text;
   }
 
+  /// An area without a JSON listing: a page whose `pageInfo` has none, or
+  /// no `pageInfo` at all (小视频, a short-video page; 3.x sent `page.action`
+  /// without a module and got HTTP 400).
+  static const YyModule _noListing = (moduleId: 0, biz: 'null', subBiz: 'null');
+
   /// The listing module of [area]: its stored `shortName` (3.x's areas and
-  /// follows), else the one read from its page, else its page is read now
-  /// (found in its category's `getCategory` when the catalog was not
-  /// loaded).
+  /// follows), else the one read from its page, else its page is read now.
+  /// The page of an area without listing is kept for its first page of
+  /// rooms ([_pages]).
   Future<YyModule> _module(LiveArea area) async {
     final stored = YyApi.moduleOf(area.shortName);
     if (stored != null) return _learn(stored, area);
     final id = area.areaId.trim();
-    var module = _modules[id];
     if (!_modules.containsKey(id)) {
-      if (!_areaPages.containsKey(id) && area.areaType.trim().isNotEmpty) {
-        await _areas(area.areaType.trim(), area.typeName);
-      }
-      final page = _areaPages[id];
-      if (page == null) throw NotFound(_site, 'area $id is not in category ${area.areaType}');
-      module = await _pageModule(id, page);
+      final html = await _readPage(await _areaPage(area));
+      final module = _modules[id] = YyApi.pageInfo(html);
+      if (module == null || !YyApi.hasListing(module)) _pages[id] = html;
     }
-    if (module == null) throw ApiChanged(_site, 'area $id: its page has no pageInfo');
-    return _learn(module, area);
+    return _learn(_modules[id] ?? _noListing, area);
   }
+
+  /// Area pages just read for their module whose rooms are in the page;
+  /// taken by the next [getCategoryRooms].
+  final Map<String, String> _pages = {};
 
   /// [module], its `biz` now naming [area] for recommendations and details
   /// (the first area of a `biz` wins).
@@ -164,13 +178,19 @@ final class YySite extends LiveSite
   }
 
   /// `more/page.action` with the area's module (for an area without one 3.x
-  /// sent the page alone and got HTTP 400). An area whose module lists
-  /// nothing (`moduleId: 0`, server-rendered) is empty without a request:
-  /// the server answers `data: null` there.
+  /// sent the page alone and got HTTP 400). An area without a JSON listing
+  /// (`moduleId: 0`: 手机直播, 综合, 英雄联盟) renders its rooms in its page:
+  /// the first page lists those cards (the page read for the module, else
+  /// read again), later pages are empty. 3.x (and M4.6) listed nothing
+  /// there although the site shows the rooms.
   @override
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
     final module = await _module(category);
-    if (!YyApi.hasListing(module)) return const [];
+    if (!YyApi.hasListing(module)) {
+      if (page > 1) return const [];
+      final html = _pages.remove(category.areaId.trim()) ?? await _readPage(await _areaPage(category));
+      return YyApi.pageRooms(html, area: category.areaName);
+    }
     final response = await _get(
       Uri.https(_host, '/more/page.action', {
         'page': '${page < 1 ? 1 : page}',

@@ -156,8 +156,9 @@ final class YyDanmakuBatch {
 /// `512011` carrying `2048514`) together with the app subscription
 /// (`538456`), and after the join the two user group subscriptions
 /// (`537944`). Chat is app 31's `3104600` inside user group messages
-/// (`533080`, also routed) and by-sid messages (`28760`). Packets are little
-/// endian ([YyPacketReader]); one frame can hold several.
+/// (`533080`, also routed) and by-sid messages (`28760`); the channel's heat
+/// is app 103's `3139586` in the same messages. Packets are little endian
+/// ([YyPacketReader]); one frame can hold several.
 final class YyDanmakuSession {
   /// Creates the session for channel [topSid]/[subSid] of connection [uuid].
   new({required this.topSid, required this.subSid, required this.uuid});
@@ -179,6 +180,8 @@ final class YyDanmakuSession {
   static const int _textChatUri = 3104600;
   static const int _subscribeAppIdsUri = 538456;
   static const int _chatAppId = 31;
+  static const int _audienceAppId = 103;
+  static const int _popularityUri = 3139586;
   static const int _joinedStatus = 4;
   static const String _deviceId = 'B8-97-5A-17-AD-4D';
 
@@ -376,15 +379,40 @@ final class YyDanmakuSession {
   }
 
   void _readService(int appId, Uint8List message, YyDanmakuBatch batch) {
-    if (_phase != YyDanmakuPhase.joined || appId != _chatAppId) return;
+    if (_phase != YyDanmakuPhase.joined || (appId != _chatAppId && appId != _audienceAppId)) return;
+    // App 103 also carries gifts and entries, unread; a body shorter than a
+    // header (S08-live's, emptied when scrubbed) is nothing to read.
+    if (appId == _audienceAppId && message.length < 10) return;
     try {
       final reader = YyPacketReader(message, hasHeader: true);
-      if (reader.uri != _textChatUri) return;
-      final chat = _readChat(reader);
-      if (chat != null) batch.messages.add(chat);
+      final received = switch ((appId, reader.uri)) {
+        (_chatAppId, _textChatUri) => _readChat(reader),
+        (_audienceAppId, _popularityUri) => _readPopularity(reader),
+        _ => null,
+      };
+      if (received != null) batch.messages.add(received);
     } on FormatException catch (error) {
-      batch.warnings.add('YY chat message shape is unexpected: $error');
+      batch.warnings.add('YY ${appId == _chatAppId ? 'chat' : 'audience'} message shape is unexpected: $error');
     }
+  }
+
+  /// App 103's `3139586`, about twice a second in a busy channel: `u32` the
+  /// channel's heat (the `users` of the lists and details, 热度), `u32` 1,
+  /// `u32` top channel (another channel's is dropped), `u32` a slightly
+  /// lower figure. Reported as popularity (M4.D). Its companion `3165186`
+  /// carries a far smaller count (2 050 against 1 459 372), likely the
+  /// viewers online; it is not read (a candidate: another number).
+  LiveMessage? _readPopularity(YyPacketReader reader) {
+    final heat = reader.readUint32();
+    reader.readUint32();
+    if (reader.readUint32() != topSid) return null;
+    return LiveMessage(
+      type: LiveMessageType.online,
+      data: LiveAudienceUpdate(kind: LiveAudienceMetricKind.popularity, value: heat),
+      color: LiveMessageColor.white,
+      message: '',
+      userName: '',
+    );
   }
 
   /// `u32` sender, `u32` top and sub channel (another channel's chat is

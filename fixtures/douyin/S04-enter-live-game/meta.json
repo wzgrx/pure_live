@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "platform": "douyin",
+  "sample": "S04-enter-live-game",
+  "capturedAt": "2026-09-30T20:39:00.881840Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.douyin.com/webcast/room/web/enter/?app_name=douyin_web&enter_from=web_live&live_id=1&web_rid=128200725053&is_need_double_stream=false&aid=6383&compress=gzip&device_platform=web&browser_language=zh-CN&browser_platform=Win32&browser_name=Edge&browser_version=125.0.0.0&msToken=MWnK4qPBxnS9b90UQfaNCSWPe76tuKDeebw0pliKjngw61Zuq%6WIBzj7XYcRAGyJs3d1PLD9mpED%2XOlS6eXGFInFd2yukNzBn158uF9gd3%8QyRC8x3fgxfg1lVUwidyfj8U5L50wVL3wNAYtYWmojYv2W51L9Or8UHyJLS09EClXSJPCJkohQPYkST&a_bogus=vsKiR8ibj5LboMxD24fAsD4q9ab0XxnD7EKuVJ7uHn6a9w39KEQS1pywY9kwxlgoSadmXUDfv8fbQL0fbMTr96YRMB3TytO8ggcoQf1W9eVPu0sgmP8LkWUO-VM7ZM-4IrH5bH7bgi5NL9QHR0UNteC3plynN4J9s5fnIo==",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+      "Referer": "https://live.douyin.com",
+      "Authority": "live.douyin.com",
+      "Cookie": "ttwid=7%5B2frSLc7eQyCcJIDV6qn1xA5sZ0fFaFkRWz3L7NJm99e%4P4624236636%3K4c74l868581ar2fn5142cu51xjx74944f78cvz779d61rv40e6672674tb0709c8; UIFID_TEMP=3df1fd2c1e92e6f1a5dddd634887c1dc92e957b0394528d33b74aebe8ddd194193c01292d52b396a9ccbb38b0fe7702a7b17961036a44d9984a14e1298309e8706f2177192fe320a24de652f0d672cce"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": [
+        "Wed, 30 Sep 2026 20:39:01 GMT"
+      ],
+      "vary": [
+        "Accept-Encoding"
+      ],
+      "content-encoding": [
+        "gzip"
+      ],
+      "server": [
+        "TLB"
+      ],
+      "content-type": [
+        "application/json; charset=utf-8"
+      ]
+    }
+  },
+  "raw": {
+    "sha256": "a624e257e1d7a48933761d40a610aec23d4f027ac8332ce28ed94a94f91cc9e1",
+    "length": 597881
+  },
+  "body": "body.json",
+  "trimmed": "Only the fields DouyinApi.enter reads are kept: data.data[0].{id_str, status, status_str, title, owner, cover, room_view_stats, stats, game_data, stream_url, user_count_str, paid_live_data, live_room_mode}, data.partition_road_map, data.room_status, data.user (streamer), extra.now. The recorded answer also had similar_rooms (other live rooms), login_lead, qrcode_url, admin ids and more.",
+  "scrubbed": [
+    {
+      "where": "$.data.data[0].owner.id_str",
+      "rule": "synthetic"
+    },
+    {
+      "where": "$.data.data[0].owner.sec_uid",
+      "rule": "synthetic"
+    },
+    {
+      "where": "$.data.data[0].owner.nickname",
+      "rule": "synthetic"
+    },
+    {
+      "where": "$.data.data[0].owner.avatar_thumb",
+      "rule": "synthetic"
+    },
+    {
+      "where": "$.data.data[0].cover.url_list",
+      "rule": "synthetic"
+    },
+    {
+      "where": "$.data.user",
+      "rule": "synthetic (same as owner)"
+    },
+    {
+      "where": "$.data.data[0].stream_url.*:sign",
+      "rule": "synthetic",
+      "count": 47
+    },
+    {
+      "where": "$.data.data[0].stream_url.*:volcSecret",
+      "rule": "synthetic",
+      "count": 47
+    },
+    {
+      "where": "$.data.data[0].stream_url.*:unique_id",
+      "rule": "synthetic",
+      "count": 30
+    },
+    {
+      "where": "$.data.data[0].stream_url.*:t_id",
+      "rule": "synthetic",
+      "count": 47
+    },
+    {
+      "where": "query:msToken",
+      "rule": "synthetic"
+    },
+    {
+      "where": "query:a_bogus",
+      "rule": "synthetic"
+    },
+    {
+      "where": "cookie:ttwid",
+      "rule": "synthetic"
+    },
+    {
+      "where": "cookie:UIFID_TEMP",
+      "rule": "synthetic"
+    },
+    {
+      "where": "response headers",
+      "rule": "only content-type, date, server, vary, content-encoding kept"
+    }
+  ],
+  "tool": "M4.D scratch recorder (DouyinSite over IoLiveHttp, anonymous, direct) + mkfix.py"
+}

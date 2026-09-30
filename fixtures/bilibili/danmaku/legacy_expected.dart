@@ -12,22 +12,29 @@
 // - `WebScoketUtils` by a stub that records `close`: the decoder reaches the
 //   socket only through `_sendPacket` (taken over by the injected
 //   `packetSender`, as 3.x's own tests did) and through the credential refresh;
-// - `package:brotli` by a stub that throws: brotli 0.6.0 does not resolve on
-//   Dart 3 (SDK constraint <3.0.0), and no sample holds a protover 3 packet
-//   (S13-live was recorded with protover 2, and the vectors leave it out);
+// - `package:brotli` (0.6.0, SDK constraint <3.0.0, so it does not resolve on
+//   Dart 3) by live_net's `brotliDecode`, the RFC 7932 decoder of M1.1, behind
+//   the same chunked sink: the packet is buffered and decoded at `close`, the
+//   output handed on in 16 KiB pieces (M5.F, B-3). Both decoders give the same
+//   bytes for every valid stream; for corrupt ones the verdict here is M1.1's
+//   (docs/modules/M5.1-bilibili.md, "后续升级");
 // - `CoreLog` by the harness's log; `@visibleForTesting` by a local constant;
 // - `start`, `_connect` and `stop` (the socket's lifecycle) by a `_connect`
 //   stub that records the call.
 //
-// One 3.x instance replays one sample (S13-live) or one vector (S13-vectors),
-// like one connection, with `danmakuArgs` set to the room's arguments and a
+// One 3.x instance replays one recording (S13-live, S13-protover3,
+// S13-protover2-paired) or one vector (S13-vectors, S13-brotli-vectors), like
+// one connection, with `danmakuArgs` set to the room's arguments and a
 // `refresh` that records the call and never completes (so a later rejection
 // finds the refresh still running, and no frame's effects depend on how it
 // ends). For every received binary message, in order, the harness records
 // the effects: messages (projected), packets sent (Base64), `onReady`,
 // refreshes and logged errors (their type).
 //
-// S13-vectors is synthetic: this file writes its frames.jsonl as well.
+// S13-vectors and S13-brotli-vectors are synthetic: this file writes their
+// frames.jsonl as well. The brotli vectors use uncompressed meta-blocks
+// (`_brotliStream`), the smallest valid encoder; the recordings hold the
+// server's compressed ones.
 //
 // Run from the repository root:
 //
@@ -41,13 +48,18 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:live_net/live_net.dart' show brotliDecode;
+
 const _root = 'fixtures/bilibili/danmaku';
 const _generator =
     '3.x BiliBiliDanmaku.decodeMessage, one instance per sample or vector (fixtures/bilibili/danmaku/legacy_expected.dart)';
 
 Future<void> main() async {
-  await _live();
-  await _vectors();
+  for (final sample in ['S13-live', 'S13-protover3', 'S13-protover2-paired']) {
+    await _live(sample);
+  }
+  await _vectors('S13-vectors', _vectorList());
+  await _vectors('S13-brotli-vectors', _brotliVectorList());
 }
 
 // Harness --------------------------------------------------------------------
@@ -117,8 +129,7 @@ void _write(String sample, Object? value) {
   );
 }
 
-Future<void> _live() async {
-  const sample = 'S13-live';
+Future<void> _live(String sample) async {
   final danmaku = _instance();
   final frames = <Map<String, Object?>>[];
   final lines = File('$_root/$sample/frames.jsonl').readAsLinesSync();
@@ -130,11 +141,10 @@ Future<void> _live() async {
   _write(sample, {'frames': frames});
 }
 
-Future<void> _vectors() async {
-  const sample = 'S13-vectors';
+Future<void> _vectors(String sample, List<(String, List<Uint8List>)> list) async {
   final lines = <String>[];
   final vectors = <Map<String, Object?>>[];
-  for (final (name, messages) in _vectorList()) {
+  for (final (name, messages) in list) {
     final danmaku = _instance();
     final frames = <Map<String, Object?>>[];
     for (final message in messages) {
@@ -168,6 +178,47 @@ Uint8List _notice(Object? json, {int protocolVersion = 0}) =>
 Uint8List _zlib(List<int> inner) => _packet(zlib.encode(inner), operation: 5, protocolVersion: 2);
 
 Uint8List _join(List<List<int>> packets) => Uint8List.fromList([for (final packet in packets) ...packet]);
+
+/// A brotli stream of [data] in uncompressed meta-blocks of at most [block]
+/// bytes (RFC 7932 section 9.2): window bits 16, then per block ISLAST 0,
+/// MNIBBLES 4, MLEN - 1, ISUNCOMPRESSED 1, padding and the bytes, then an
+/// empty last meta-block.
+Uint8List _brotliStream(List<int> data, {int block = 65536}) {
+  final out = BytesBuilder();
+  var bits = 0;
+  var count = 0;
+  void put(int value, int width) {
+    bits |= value << count;
+    count += width;
+    while (count >= 8) {
+      out.addByte(bits & 0xff);
+      bits >>= 8;
+      count -= 8;
+    }
+  }
+
+  void align() {
+    if (count > 0) put(0, 8 - count);
+  }
+
+  put(0, 1);
+  for (var offset = 0; offset < data.length; offset += block) {
+    final end = offset + block < data.length ? offset + block : data.length;
+    put(0, 1);
+    put(0, 2);
+    put(end - offset - 1, 16);
+    put(1, 1);
+    align();
+    out.add(data.sublist(offset, end));
+  }
+  put(1, 1);
+  put(1, 1);
+  align();
+  return out.takeBytes();
+}
+
+Uint8List _brotli(List<int> inner, {int block = 65536}) =>
+    _packet(_brotliStream(inner, block: block), operation: 5, protocolVersion: 3);
 
 Uint8List _auth(String body) => _packet(utf8.encode(body), operation: 8);
 
@@ -437,6 +488,57 @@ List<(String, List<Uint8List>)> _vectorList() => [
   ]),
 ];
 
+/// Protover 3 (brotli) vectors, M5.F B-3: the framing around brotli packets
+/// and the faults of the stream itself.
+List<(String, List<Uint8List>)> _brotliVectorList() => [
+  ('brotli-nested-packets', [
+    _brotli(_join([_notice(_danmu('first', user: [1000, 'alice'])), _notice(_danmu('second', user: [1001, 'bob']))])),
+  ]),
+  ('brotli-meta-blocks', [
+    // Seven-byte meta-blocks: packet headers and JSON cross the borders.
+    _brotli(_join([_notice(_danmu('split')), _notice({'cmd': 'WATCHED_CHANGE', 'data': {'num': 18342}})]), block: 7),
+  ]),
+  ('brotli-and-plain-packets', [
+    _join([_online(1), _brotli(_notice(_danmu('compressed'))), _notice(_danmu('plain')), _auth('{"code":0}')]),
+  ]),
+  ('brotli-acknowledgement', [
+    _brotli(_notice({..._danmu('ack me'), 'msg_id': 'fixture-message-id', 'p_is_ack': true, 'p_msg_type': 1})),
+  ]),
+  ('brotli-empty-stream', [
+    _join([_brotli(const []), _notice(_danmu('after the empty stream'))]),
+  ]),
+  ('brotli-corrupt', [
+    _join([
+      _notice(_danmu('before corrupt brotli')),
+      _packet([1, 2, 3, 4, 5], operation: 5, protocolVersion: 3),
+      _notice(_danmu('dropped with the rest')),
+    ]),
+    _notice(_danmu('next websocket message')),
+  ]),
+  ('brotli-truncated', [
+    () {
+      final stream = _brotliStream(_notice(_danmu('cut off')));
+      return _join([
+        _notice(_danmu('before the truncated stream')),
+        _packet(stream.sublist(0, stream.length - 2), operation: 5, protocolVersion: 3),
+      ]);
+    }(),
+    _notice(_danmu('next websocket message')),
+  ]),
+  ('brotli-not-a-packet-stream', [
+    _join([_brotli(utf8.encode('{"cmd":"DANMU_MSG"}')), _notice(_danmu('dropped with the rest'))]),
+  ]),
+  ('brotli-nesting-at-the-limit', [
+    _brotli(_zlib(_notice(_danmu('brotli around zlib')))),
+    _zlib(_brotli(_notice(_danmu('zlib around brotli')))),
+    _brotli(_brotli(_notice(_danmu('brotli around brotli')))),
+  ]),
+  ('brotli-nesting-too-deep', [
+    _brotli(_brotli(_brotli(_notice(_danmu('too deep'))))),
+    _notice(_danmu('connection survives')),
+  ]),
+];
+
 // 3.x ------------------------------------------------------------------------
 
 const visibleForTesting = Object();
@@ -452,9 +554,40 @@ final class WebScoketUtils {
   void sendMessage(List<int> message) => throw StateError('packetSender takes the packets');
 }
 
-/// `package:brotli` does not resolve on Dart 3; no sample reaches it.
+/// `package:brotli` does not resolve on Dart 3: its decoder, answered by
+/// live_net's `brotliDecode` behind the same chunked sink (input buffered,
+/// decoded at `close`, output in 16 KiB pieces).
 abstract final class brotli {
-  static Converter<List<int>, List<int>> get decoder => throw UnsupportedError('brotli');
+  static Converter<List<int>, List<int>> get decoder => const _BrotliDecoder();
+}
+
+final class _BrotliDecoder extends Converter<List<int>, List<int>> {
+  const _BrotliDecoder();
+
+  @override
+  List<int> convert(List<int> input) => brotliDecode(input);
+
+  @override
+  Sink<List<int>> startChunkedConversion(Sink<List<int>> sink) => _BrotliSink(sink);
+}
+
+final class _BrotliSink implements Sink<List<int>> {
+  _BrotliSink(this.sink);
+
+  final Sink<List<int>> sink;
+  final BytesBuilder _buffer = BytesBuilder(copy: false);
+
+  @override
+  void add(List<int> data) => _buffer.add(data);
+
+  @override
+  void close() {
+    final output = brotliDecode(_buffer.takeBytes());
+    for (var offset = 0; offset < output.length || offset == 0; offset += 16384) {
+      sink.add(output.sublist(offset, offset + 16384 < output.length ? offset + 16384 : output.length));
+    }
+    sink.close();
+  }
 }
 
 T? asT<T>(dynamic value) {

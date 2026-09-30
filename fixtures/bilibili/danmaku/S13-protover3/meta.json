@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "platform": "bilibili",
+  "case": "S13-protover3",
+  "room": "bilibili:1700301235",
+  "danmakuKeys": {
+    "roomId": "1700301235"
+  },
+  "capturedAt": "2026-09-30T15:16:27.618386Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://broadcastlv.chat.bilibili.com/sub",
+      "headers": {
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+        "origin": "https://live.bilibili.com",
+        "referer": "https://live.bilibili.com/1700301235",
+        "cookie": "<redacted>"
+      }
+    }
+  ],
+  "frames": 80,
+  "kept": {
+    "of": 996,
+    "lines": "0-19, 358-377, 613-623, 668-687, 789-795, 993-994"
+  },
+  "raw": {
+    "sha256": "00b866498b2624de96cb140a63bd9dd4bb8adecc62180e3e5cf577a0fc2166a0",
+    "length": 1405692
+  },
+  "scrubbed": [
+    {
+      "where": "$.buvid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.key",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info[0][7]",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info[0][15].user.base.name",
+      "rule": "person"
+    },
+    {
+      "where": "$.info[0][15].user.base.face",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info[0][15].user.base.origin_info.name",
+      "rule": "person"
+    },
+    {
+      "where": "$.info[0][15].user.base.origin_info.face",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info[0][15].extra(json).user_hash",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info[2][0,1]",
+      "rule": "person"
+    },
+    {
+      "where": "$ except cmd (ONLINE_RANK_V3)",
+      "rule": "dropped"
+    },
+    {
+      "where": "$ except cmd (INTERACT_WORD_V2)",
+      "rule": "dropped"
+    },
+    {
+      "where": "$ except cmd (ENTRY_EFFECT)",
+      "rule": "dropped"
+    },
+    {
+      "where": "$ except cmd (LIKE_INFO_V3_CLICK)",
+      "rule": "dropped"
+    },
+    {
+      "where": "$.data.uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.user_info.uname",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.user_info.face",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.uinfo.uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.uinfo.base.name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.uinfo.base.face",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.uinfo.base.origin_info.name",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.uinfo.base.origin_info.face",
+      "rule": "secret"
+    },
+    {
+      "where": "$ except cmd (SEND_GIFT_V2)",
+      "rule": "dropped"
+    },
+    {
+      "where": "$ except cmd (DM_INTERACTION)",
+      "rule": "dropped"
+    },
+    {
+      "where": "handshake.cookie",
+      "rule": "secret"
+    }
+  ],
+  "tool": "record.dart (two BilibiliDanmakuConnection with a recording connector; the paired one rewrites the auth packet to protover 2) and build.py (windows, scrubbing, repacking), not in the repository (docs/modules/M5.1-bilibili.md, M5.F)"
+}

@@ -1,0 +1,1514 @@
+{
+  "generator": "archived v4 SteamBroadcastProtocol.broadcastId, chatTemplate, messagesUrl and parse (archive/v4 6ba709135) over the recorded getbroadcastmpd, getchatinfo and chat log answers (fixtures/steambroadcast/danmaku/v4_expected.dart)",
+  "value": {
+    "broadcastUrl": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199799018508&viewertoken=0&sessionid",
+    "broadcastId": "3718707516587165478",
+    "chatInfoUrl": "https://steamcommunity.com/broadcast/getchatinfo/?steamid=76561199799018508&broadcastid=3718707516587165478&viewertoken=0&sessionid",
+    "template": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/{0}?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+    "windows": [
+      {
+        "line": 3,
+        "time": 0,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/0?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414148761,
+        "initialDelay": 491,
+        "events": [
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:0",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:1",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:2",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:3",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:4",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssssgive me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:5",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:6",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssssgive me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:7",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:8",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:9",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:10",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:11",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:12",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:13",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:14",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:15",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:16",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:17",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:18",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:19",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:20",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:21",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:22",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:23",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:24",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:25",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:26",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:27",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssss"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:28",
+            "userId": "50153914850215721",
+            "userName": "Coh",
+            "text": "give me the game plsssssv"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:29",
+            "userId": "34743967044764831",
+            "userName": "EGFES",
+            "text": "when is the official date of the release of this game?"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:30",
+            "userId": "47442803929982788",
+            "userName": "incfz0472",
+            "text": "november 5th"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:31",
+            "userId": "37071495501108468",
+            "userName": "Jfbdc",
+            "text": "can i get early acesssssdsssddsssd"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:32",
+            "userId": "37071495501108468",
+            "userName": "Jfbdc",
+            "text": "can i have early access"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:33",
+            "userId": "60135345658336249",
+            "userName": "Ykcfb",
+            "text": "Brother is persistent"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:34",
+            "userId": "23461234014488024",
+            "userName": "HFLE",
+            "text": "how to get early access"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:35",
+            "userId": "87836118430095502",
+            "userName": "uthdvmwmga90",
+            "text": "can you invite me pls!!!"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:36",
+            "userId": "52882075192473181",
+            "userName": "tlpgejymb",
+            "text": "how do  you get ealy access"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:37",
+            "userId": "23461234014488024",
+            "userName": "HFLE",
+            "text": "How to get early access?"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:38",
+            "userId": "31400204612090193",
+            "userName": "Xjzvrfzgtezsd8",
+            "text": "Can i play plz"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:39",
+            "userId": "32521610583667461",
+            "userName": "Lbod",
+            "text": "how do i play"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:40",
+            "userId": "46259101193352660",
+            "userName": "PIFOHC",
+            "text": "how can u get early access"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:41",
+            "userId": "22910323527994750",
+            "userName": "dmcly76",
+            "text": "can you make a demo"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:42",
+            "userId": "77678568719136993",
+            "userName": "1V1241",
+            "text": "pls key"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:43",
+            "userId": "77678568719136993",
+            "userName": "1V1241",
+            "text": "pls invit me iam a german old grown men"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:44",
+            "userId": "27328248130837225",
+            "userName": "derfcn",
+            "text": "can i get early access ːsteamhappyː"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:45",
+            "userId": "21209478331798239",
+            "userName": "XqnbVrokr5",
+            "text": "ːsteamhappyː"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:46",
+            "userId": "77678568719136993",
+            "userName": "1V1241",
+            "text": "ːsteamhappyː"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:47",
+            "userId": "19304208765666567",
+            "userName": "Ngbd",
+            "text": "HOW CAN I PLAY"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:48",
+            "userId": "21209478331798239",
+            "userName": "XqnbVrokr5",
+            "text": "Do i have to buy the early acces"
+          },
+          {
+            "type": "chat",
+            "id": "steambroadcast:0:49",
+            "userId": "19304208765666567",
+            "userName": "Ngbd",
+            "text": "How much will the game be?"
+          }
+        ]
+      },
+      {
+        "line": 4,
+        "time": 414148761,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414148761?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414149276,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 5,
+        "time": 414149276,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414149276?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414149801,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 6,
+        "time": 414149801,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414149801?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414150368,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 7,
+        "time": 414150368,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414150368?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414150957,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 8,
+        "time": 414150957,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414150957?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414151584,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 9,
+        "time": 414151584,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414151584?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414152104,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 10,
+        "time": 414152104,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414152104?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414152680,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 11,
+        "time": 414152680,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414152680?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414153276,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 12,
+        "time": 414153276,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414153276?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414153812,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 13,
+        "time": 414153812,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414153812?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414154412,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 14,
+        "time": 414154412,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414154412?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414154975,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 15,
+        "time": 414154975,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414154975?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414155531,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 16,
+        "time": 414155531,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414155531?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414156108,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 17,
+        "time": 414156108,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414156108?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414156681,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 18,
+        "time": 414156681,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414156681?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414157242,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 19,
+        "time": 414157242,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414157242?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414157810,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 20,
+        "time": 414157810,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414157810?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414158379,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 21,
+        "time": 414158379,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414158379?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414158946,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 22,
+        "time": 414158946,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414158946?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414159454,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 23,
+        "time": 414159454,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414159454?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414159974,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 24,
+        "time": 414159974,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414159974?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414160475,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 25,
+        "time": 414160475,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414160475?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414160998,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 26,
+        "time": 414160998,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414160998?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414161583,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 27,
+        "time": 414161583,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414161583?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414162101,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 28,
+        "time": 414162101,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414162101?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414162632,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 29,
+        "time": 414162632,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414162632?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414163203,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 30,
+        "time": 414163203,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414163203?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414163711,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 31,
+        "time": 414163711,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414163711?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414164270,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 32,
+        "time": 414164270,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414164270?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414164833,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 33,
+        "time": 414164833,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414164833?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414165377,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 34,
+        "time": 414165377,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414165377?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414165881,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 35,
+        "time": 414165881,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414165881?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414166419,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 36,
+        "time": 414166419,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414166419?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414166994,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 37,
+        "time": 414166994,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414166994?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414167578,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 38,
+        "time": 414167578,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414167578?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414168086,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 39,
+        "time": 414168086,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414168086?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414168627,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 40,
+        "time": 414168627,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414168627?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414169174,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 41,
+        "time": 414169174,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414169174?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414169758,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 42,
+        "time": 414169758,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414169758?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414170277,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 43,
+        "time": 414170277,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414170277?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414170838,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 44,
+        "time": 414170838,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414170838?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414171412,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 45,
+        "time": 414171412,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414171412?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414171949,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 46,
+        "time": 414171949,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414171949?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414172508,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 47,
+        "time": 414172508,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414172508?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414173028,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 48,
+        "time": 414173028,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414173028?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414173588,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 49,
+        "time": 414173588,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414173588?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414174097,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 50,
+        "time": 414174097,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414174097?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414174635,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 51,
+        "time": 414174635,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414174635?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414175185,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 52,
+        "time": 414175185,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414175185?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414175766,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 53,
+        "time": 414175766,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414175766?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414176283,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 54,
+        "time": 414176283,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414176283?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414176854,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 55,
+        "time": 414176854,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414176854?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414177369,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 56,
+        "time": 414177369,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414177369?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414177925,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 57,
+        "time": 414177925,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414177925?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414178489,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 58,
+        "time": 414178489,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414178489?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414178999,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 59,
+        "time": 414178999,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414178999?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414179504,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 60,
+        "time": 414179504,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414179504?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414180008,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 61,
+        "time": 414180008,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414180008?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414180610,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 62,
+        "time": 414180610,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414180610?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414181113,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 63,
+        "time": 414181113,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414181113?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414181623,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 64,
+        "time": 414181623,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414181623?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414182191,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 65,
+        "time": 414182191,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414182191?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414182765,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 66,
+        "time": 414182765,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414182765?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414183353,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 67,
+        "time": 414183353,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414183353?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414183990,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 68,
+        "time": 414183990,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414183990?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414184553,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 69,
+        "time": 414184553,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414184553?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414185071,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 70,
+        "time": 414185071,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414185071?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414185608,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 71,
+        "time": 414185608,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414185608?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414186192,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 72,
+        "time": 414186192,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414186192?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414186761,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 73,
+        "time": 414186761,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414186761?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414187264,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 74,
+        "time": 414187264,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414187264?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414187782,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 75,
+        "time": 414187782,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414187782?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414188343,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 76,
+        "time": 414188343,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414188343?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414188870,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 77,
+        "time": 414188870,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414188870?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414189427,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 78,
+        "time": 414189427,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414189427?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414189963,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 79,
+        "time": 414189963,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414189963?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414190472,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 80,
+        "time": 414190472,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414190472?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414190980,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 81,
+        "time": 414190980,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414190980?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414191492,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 82,
+        "time": 414191492,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414191492?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414192014,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 83,
+        "time": 414192014,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414192014?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414192583,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 84,
+        "time": 414192583,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414192583?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414193098,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 85,
+        "time": 414193098,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414193098?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414193667,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 86,
+        "time": 414193667,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414193667?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414194247,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 87,
+        "time": 414194247,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414194247?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414194800,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 88,
+        "time": 414194800,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414194800?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414195370,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 89,
+        "time": 414195370,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414195370?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414195942,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 90,
+        "time": 414195942,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414195942?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414196531,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 91,
+        "time": 414196531,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414196531?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414197096,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 92,
+        "time": 414197096,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414197096?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414197670,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 93,
+        "time": 414197670,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414197670?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414198241,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 94,
+        "time": 414198241,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414198241?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414198768,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 95,
+        "time": 414198768,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414198768?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414199338,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 96,
+        "time": 414199338,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414199338?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414199856,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 97,
+        "time": 414199856,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414199856?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414200358,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 98,
+        "time": 414200358,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414200358?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414200934,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 99,
+        "time": 414200934,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414200934?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414201511,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 100,
+        "time": 414201511,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414201511?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414202015,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 101,
+        "time": 414202015,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414202015?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414202552,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 102,
+        "time": 414202552,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414202552?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414203112,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 103,
+        "time": 414203112,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414203112?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414203653,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 104,
+        "time": 414203653,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414203653?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414204187,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 105,
+        "time": 414204187,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414204187?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414204723,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 106,
+        "time": 414204723,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414204723?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414205268,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 107,
+        "time": 414205268,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414205268?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414205851,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 108,
+        "time": 414205851,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414205851?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414206379,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 109,
+        "time": 414206379,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414206379?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414206907,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 110,
+        "time": 414206907,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414206907?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414207438,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 111,
+        "time": 414207438,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414207438?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414207944,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 112,
+        "time": 414207944,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414207944?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414208476,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 113,
+        "time": 414208476,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414208476?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414208998,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 114,
+        "time": 414208998,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414208998?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414209559,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 115,
+        "time": 414209559,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414209559?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414210100,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 116,
+        "time": 414210100,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414210100?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414210669,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 117,
+        "time": 414210669,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414210669?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414211238,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 118,
+        "time": 414211238,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414211238?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414211859,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 119,
+        "time": 414211859,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414211859?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414212439,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 120,
+        "time": 414212439,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414212439?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414212998,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 121,
+        "time": 414212998,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414212998?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414213560,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 122,
+        "time": 414213560,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414213560?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414214106,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 123,
+        "time": 414214106,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414214106?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414214609,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 124,
+        "time": 414214609,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414214609?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414215163,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 125,
+        "time": 414215163,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414215163?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414215691,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 126,
+        "time": 414215691,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414215691?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414216193,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 127,
+        "time": 414216193,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414216193?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414216765,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 128,
+        "time": 414216765,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414216765?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414217266,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 129,
+        "time": 414217266,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414217266?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414217785,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 130,
+        "time": 414217785,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414217785?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414218358,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 131,
+        "time": 414218358,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414218358?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414218879,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 132,
+        "time": 414218879,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414218879?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414219388,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 133,
+        "time": 414219388,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414219388?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414219938,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 134,
+        "time": 414219938,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414219938?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414220506,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 135,
+        "time": 414220506,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414220506?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414221007,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 136,
+        "time": 414221007,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414221007?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414221565,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 137,
+        "time": 414221565,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414221565?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414222099,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 138,
+        "time": 414222099,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414222099?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414222665,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 139,
+        "time": 414222665,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414222665?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414223261,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 140,
+        "time": 414223261,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414223261?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414223834,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 141,
+        "time": 414223834,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414223834?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414224404,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 142,
+        "time": 414224404,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414224404?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414224935,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 143,
+        "time": 414224935,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414224935?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414225493,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 144,
+        "time": 414225493,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414225493?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414226019,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 145,
+        "time": 414226019,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414226019?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414226555,
+        "initialDelay": null,
+        "events": []
+      },
+      {
+        "line": 146,
+        "time": 414226555,
+        "url": "https://steambroadcastchat.akamaized.net/chat/11141709997120935823/messages/414226555?chat_origin=broadcastchat7.discovery.steamserver.net:8071",
+        "next": 414227100,
+        "initialDelay": null,
+        "events": []
+      }
+    ]
+  }
+}

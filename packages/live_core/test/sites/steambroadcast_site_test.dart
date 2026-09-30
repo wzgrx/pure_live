@@ -38,7 +38,8 @@ const _scsRoom = ['S09-profile-live', 'S09-mpd-live', 'S09-info-live', 'S09-mast
 
 const LivePlayQuality _auto = SteamBroadcastApi.quality;
 
-/// 3.x's notice, rewritten for viewers ("说明文字").
+/// 3.x's notice ([SteamBroadcastApi.legacyChatNotice]), rewritten for viewers
+/// ("说明文字"), without its chat sentence since the chat is shown (M5.23).
 const _notice = {'notice'};
 
 Map<String, dynamic> _legacy(String sample) => Fixture.load('steambroadcast', sample).legacy as Map<String, dynamic>;

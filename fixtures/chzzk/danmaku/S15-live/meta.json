@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "platform": "chzzk",
+  "case": "S15-live",
+  "room": "chzzk:8fd39bb8de623317de90654718638b10",
+  "danmakuKeys": {
+    "channelId": "8fd39bb8de623317de90654718638b10",
+    "chatChannelId": "N2mCT0"
+  },
+  "capturedAt": "2026-09-30T15:30:45.592905Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://kr-ss5.chat.naver.com/chat",
+      "headers": {
+        "origin": "https://chzzk.naver.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 18,
+  "kept": {
+    "of": 993,
+    "lines": "0-11, 493-497, 858"
+  },
+  "raw": {
+    "sha256": "8389c215cb7b499c359c67b7d955ffdc27fd675182a9426765fb5a753945a748",
+    "length": 3554515
+  },
+  "scrubbed": [
+    {
+      "where": "$..accTkn",
+      "rule": "secret"
+    },
+    {
+      "where": "$..accessToken",
+      "rule": "secret"
+    },
+    {
+      "where": "$..anonymousToken",
+      "rule": "secret"
+    },
+    {
+      "where": "$..donationId",
+      "rule": "secret"
+    },
+    {
+      "where": "$..extraToken",
+      "rule": "secret"
+    },
+    {
+      "where": "$..giftId",
+      "rule": "secret"
+    },
+    {
+      "where": "$..liveTokenList[*]",
+      "rule": "secret"
+    },
+    {
+      "where": "$..nickname",
+      "rule": "person"
+    },
+    {
+      "where": "$..receiverNickname",
+      "rule": "person"
+    },
+    {
+      "where": "$..receiverUserIdHash",
+      "rule": "person"
+    },
+    {
+      "where": "$..sid",
+      "rule": "secret"
+    },
+    {
+      "where": "$..uid",
+      "rule": "person"
+    },
+    {
+      "where": "$..userId",
+      "rule": "person"
+    },
+    {
+      "where": "$..userIdHash",
+      "rule": "person"
+    },
+    {
+      "where": "$..uuid",
+      "rule": "secret"
+    }
+  ],
+  "tool": "listen.dart (dart:io; live-status, routing, access token, READ join, recent chat, a ping every 20 s, a pong to server pings; nothing else sent; 16 lives at once for 900 s) and scrub.py, M5.F; neither is in the repository",
+  "note": "Recorded 2026-09-30 15:30-15:45 UTC (00:30 KST) for M5.F: 900 s and 993 lines of a live of about 2 800 viewers, of which the lines listed in `kept` are kept: the live-status, routing and token answers, the join, the recent chat (with a pinned notice), the first chat, and at 467 s an anonymous subscription gift of two passes to chosen viewers: the gift event (93006 SUBSCRIPTION_GIFT) and, per receiver, a line (93102, msgTypeCode 12, SUBSCRIPTION_GIFT_RECEIVER, uid anonymous, profile null) and its event (93006 SUBSCRIPTION_GIFT_RECEIVER); at 740 s a donation pushed live (93102). The lines between and after are more plain chat, an ad event and pongs. User ids, nicknames (receivers too), tokens, the session id, uuid, gift and donation ids are synthetic values of the same shape and length; chat text and the streamer's public channel id and name are kept. The handshake headers are what the recorder gave dart:io, which sends the user-agent after its own (\"Dart/3.13 (dart:io), Mozilla/5.0 …\"); the server accepts it."
+}

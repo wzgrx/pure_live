@@ -55,7 +55,7 @@
       ]
     },
     {
-      "name": "system lines, images, stickers, parties and shop purchases show nothing",
+      "name": "a system line (a notice since B-12); images, stickers, parties and shop purchases show nothing",
       "frames": [
         {
           "text": "{\"svcid\":\"game\",\"ver\":\"1\",\"bdy\":[{\"svcid\":\"game\",\"cid\":\"N2lpu9\",\"mbrCnt\":8826,\"uid\":\"SYSTEM_MESSAGE\",\"profile\":\"{}\",\"msg\":\"이모티콘 모드 ON\",\"msgTypeCode\":30,\"msgStatusType\":\"NORMAL\",\"extras\":\"{\\\"description\\\":\\\"텍스트 대신 이모티콘만 전송할 수 있어요.\\\",\\\"styleType\\\":1,\\\"params\\\":{}}\",\"ctime\":1790612400124,\"utime\":1790612400124,\"msgTid\":null,\"cuid\":null,\"msgTime\":1790612400124}],\"cmd\":93102,\"tid\":null,\"cid\":\"N2lpu9\"}"
@@ -130,7 +130,7 @@
       ]
     },
     {
-      "name": "events, blind notices, notices, kicks and penalties show nothing",
+      "name": "a blind (a retraction since B-12), a pinned notice (a notice since B-12); events, kicks and penalties show nothing",
       "frames": [
         {
           "text": "{\"svcid\":\"game\",\"ver\":\"1\",\"bdy\":{\"type\":\"CHANGE_CHAT_MODE\",\"chatAvailableGroup\":\"ALL\"},\"cmd\":93006,\"tid\":null,\"cid\":\"N2lpu9\"}"

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Writes fixtures/chzzk/danmaku/S12-synthetic/cases.json (docs/modules/M5.16-chzzk.md).
+"""Writes fixtures/chzzk/danmaku/S12-synthetic/cases.json (docs/modules/M5.16-chzzk.md)
+and fixtures/chzzk/danmaku/S16-synthetic/cases.json (M5.F, appendix B-12).
 
-Synthetic frames of a CHZZK chat socket, for what the recordings (S09-live,
+S12: synthetic frames of a CHZZK chat socket, for what the recordings (S09-live,
 S10-live, S11-recent) do not show: donations and subscriptions pushed live
 (cmd 93102), hidden lines, refused joins, the server's ping and its end of the
 session, every way a frame can be broken and fields of the wrong type. Field
@@ -9,11 +10,18 @@ names and shapes follow the recordings and the site's chat client (NAVER's
 chat SDK 4.11.0 and chzzk.naver.com's index-*.js, 2026-09-29); names, ids,
 tokens and times are made up.
 
+S16: the edges of B-12 that the recordings (S13-recent, S14-live) do not
+reach: donation amounts at the site's tiers and fields of odd types,
+subscription gifts of every kind, system lines, pinned notices and blinds,
+each with broken fields. Shapes follow S13, S14 and index-*.js (2026-09-30).
+
 Run from the repository root:
 
     python3 fixtures/chzzk/danmaku/synthetic_cases.py
 
-The output depends only on this file.
+The output depends only on this file. After a change to S12, run
+fixtures/chzzk/danmaku/v4_expected.dart too (its expected.json names the
+cases).
 """
 
 import base64
@@ -45,11 +53,11 @@ def user_id(n):
     return f'{n:032x}'
 
 
-def profile(n, name):
+def profile(n, name, image=''):
     return dumps({
         'userIdHash': user_id(n),
         'nickname': name,
-        'profileImageUrl': '',
+        'profileImageUrl': image,
         'userRoleCode': 'common_user',
         'badge': None,
         'title': None,
@@ -172,7 +180,7 @@ cases = [
         text(push([line(11, '선물자', '구독권 선물', kind=12,
                         extras=dumps({'giftType': 'SUBSCRIPTION_GIFT', 'quantity': 5}))], 93102)),
     ]),
-    ('system lines, images, stickers, parties and shop purchases show nothing', [
+    ('a system line (a notice since B-12); images, stickers, parties and shop purchases show nothing', [
         text(push([line(uid='SYSTEM_MESSAGE', the_profile='{}', msg='이모티콘 모드 ON', kind=30,
                         extras=dumps({'description': '텍스트 대신 이모티콘만 전송할 수 있어요.', 'styleType': 1,
                                       'params': {}}))], 93102)),
@@ -213,7 +221,8 @@ cases = [
         text({'ver': '2', 'cmd': 10000}),
         text({'ver': '2', 'cmd': 90102, 'bdy': {}}),
     ]),
-    ('events, blind notices, notices, kicks and penalties show nothing', [
+    ('a blind (a retraction since B-12), a pinned notice (a notice since B-12); events, kicks and penalties '
+     'show nothing', [
         text({'svcid': 'game', 'ver': '1', 'bdy': {'type': 'CHANGE_CHAT_MODE', 'chatAvailableGroup': 'ALL'},
               'cmd': 93006, 'tid': None, 'cid': CHAT}),
         text({'svcid': 'game', 'ver': '1', 'bdy': {'messageTime': T, 'blindType': 'BLIND', 'blindUserId': None,
@@ -288,3 +297,162 @@ document = {
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text(json.dumps(document, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 print(f'wrote {OUT} ({len(cases)} cases, {sum(len(frames) for _, frames in cases)} frames)')
+
+# ---- S16-synthetic (M5.F, B-12) ----
+
+OUT_B12 = pathlib.Path(__file__).parent / 'S16-synthetic' / 'cases.json'
+FACE = 'https://nng-phinf.pstatic.net/MjAyNjA5MzBfMSAg/MDAxNzkwNzgwMDAwMDAw.AAAAAAAA.png'
+
+
+def gift_extras(kind, tier='팬', quantity=None, receiver=None, anonymous=False):
+    extras = {'giftId': 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'selectionType': 'MANUAL', 'giftTierNo': 1}
+    if receiver is not None:
+        extras.update({'receiverUserIdHash': user_id(99), 'receiverVerifiedMark': False,
+                       'receiverNickname': receiver})
+    if quantity is not None:
+        extras['quantity'] = quantity
+    if anonymous:
+        extras['anonymousToken'] = 'a' * 40
+    extras['giftType'] = kind
+    if tier is not None:
+        extras['giftTierName'] = tier
+    return dumps(extras)
+
+
+def system_extras(description, style=1, roles=None):
+    extras = {'description': description, 'styleType': style}
+    if roles is not None:
+        extras['visibleRoles'] = roles
+    extras['params'] = {}
+    return dumps(extras)
+
+
+def pinned_body(n, name, content, time=None, register=None, the_profile=DEFAULT):
+    extras = {'chatType': 'STREAMING', 'osType': 'PC', 'streamingChannelId': STREAMER}
+    if register is not None:
+        extras['registerProfile'] = json.loads(profile(*register))
+    return {
+        'serviceId': 'game',
+        'channelId': CHAT,
+        'messageTime': T + n if time is None else time,
+        'userId': user_id(n),
+        'profile': profile(n, name) if the_profile is DEFAULT else the_profile,
+        'content': content,
+        'extras': dumps(extras),
+        'messageTypeCode': 1,
+        'createTime': T + n,
+    }
+
+
+def event(cmd, body):
+    return {'svcid': 'game', 'ver': '1', 'bdy': body, 'cmd': cmd, 'tid': None, 'cid': CHAT}
+
+
+def blind_body(n=1, time=None, kind='BLIND', uid=None, drop=()):
+    body = {'messageTime': T + n if time is None else time, 'blindType': kind, 'blindUserId': None,
+            'serviceId': 'game', 'message': None, 'userId': user_id(n) if uid is None else uid, 'channelId': CHAT}
+    for key in drop:
+        body.pop(key, None)
+    return body
+
+
+def system_line(n, msg, extras, status='NORMAL'):
+    return line(uid='SYSTEM_MESSAGE', the_profile='{}', msg=msg, kind=30, time=T + n, extras=extras, status=status)
+
+
+b12_cases = [
+    ("donations at the site's amount tiers", [
+        text(push([line(60 + index, f'후원자{index}', f'{amount} 치즈', kind=10, extras=donation_extras(amount))
+                   for index, amount in enumerate([1, 9999, 10000, 99999, 100000, 499999, 500000, 999999, 1000000,
+                                                   1234567])], 93102)),
+    ]),
+    ('donations with odd fields: an amount as text, a negative amount, no amount, neither text nor amount, no time, '
+     'a face, a face off NAVER, extras not JSON', [
+        text(push([line(71, '문자금액', '금액이 문자', kind=10,
+                        extras=donation_extras(1000).replace('"payAmount":1000', '"payAmount":"2000"'))], 93102)),
+        text(push([line(72, '음수', '음수 금액', kind=10, extras=donation_extras(-5))], 93102)),
+        text(push([line(73, '금액없음', '금액 없음', kind=10,
+                        extras=donation_extras(1000).replace(',"payAmount":1000', ''))], 93102)),
+        text(push([line(74, '빈후원', '', kind=10, extras=donation_extras(0))], 93102)),
+        text(push([line(75, '시간없음', '시간 없는 후원', kind=10, extras=donation_extras(3000),
+                        drop=('msgTime', 'ctime', 'utime'))], 93102)),
+        text(push([line(76, '얼굴', '얼굴 있음', kind=10, extras=donation_extras(1000),
+                        the_profile=profile(76, '얼굴', FACE))], 93102)),
+        text(push([line(77, '남의얼굴', '다른 곳 얼굴', kind=10, extras=donation_extras(1000),
+                        the_profile=profile(77, '남의얼굴', 'https://evil.example.com/face.png'))], 93102)),
+        text(push([line(78, '깨진', '엑스트라 깨짐', kind=10, extras='{not json')], 93102)),
+    ]),
+    ('subscription gifts: to the channel (named, anonymous), to viewers (named, anonymous), without tier or '
+     'quantity, without a type, blinded, extras not JSON, from the user anonymous', [
+        text(push([line(80, '선물왕', '', kind=12, extras=gift_extras('SUBSCRIPTION_GIFT', quantity=5))], 93102)),
+        text(push([line(81, msg='', kind=12, uid='anonymous', the_profile=None,
+                        extras=gift_extras('SUBSCRIPTION_GIFT', tier='치코', quantity=2, anonymous=True))], 93102)),
+        text(push([line(82, '보내는이', '', kind=12,
+                        extras=gift_extras('SUBSCRIPTION_GIFT_RECEIVER', receiver='받는이'))], 93102)),
+        text(push([line(83, msg='', kind=12, uid='anonymous', the_profile=None,
+                        extras=gift_extras('SUBSCRIPTION_GIFT_RECEIVER', tier='치코', receiver='13 파스텔'))], 93102),
+             note='as S14-live records a gift to a viewer'),
+        text(push([line(84, '빈선물', '', kind=12, extras=gift_extras('SUBSCRIPTION_GIFT', tier=None, quantity=0))],
+                  93102)),
+        text(push([line(85, '종류없음', '', kind=12, extras=dumps({'giftTierName': '팬'}))], 93102)),
+        text(push([line(86, '가려진선물', '', kind=12, status='BLIND',
+                        extras=gift_extras('SUBSCRIPTION_GIFT', quantity=1))], 93102)),
+        text(push([line(87, '깨진선물', '', kind=12, extras='{not json')], 93102)),
+        text(push([line(88, msg='', kind=12, uid='anonymous', the_profile=None,
+                        extras=gift_extras('SUBSCRIPTION_GIFT', quantity=3))], 93102),
+             note='the user anonymous, though without an anonymousToken'),
+    ]),
+    ('system lines: a title and a description, only a title, only a description, for managers, an empty role '
+     'list, blank, blinded', [
+        text(push([system_line(90, '이모티콘 모드 OFF', system_extras('이제 텍스트도 전송할 수 있어요.'))], 93102)),
+        text(push([system_line(91, '팔로워 전용 모드 ON', dumps({'styleType': 1, 'params': {}}))], 93102)),
+        text(push([system_line(92, '', system_extras('설명만 있는 줄'))], 93102)),
+        text(push([system_line(93, '채팅 참여가 제한되었습니다.',
+                               system_extras('운영자님이 시청자님을 임시 제한 처리했습니다.', style=3,
+                                             roles=['STREAMING_CHANNEL_MANAGER', 'STREAMING_CHAT_MANAGER',
+                                                    'STREAMER', 'MANAGER']))], 93102),
+             note='as S13-recent and S14-live record a restriction'),
+        text(push([system_line(94, '역할 목록 비어 있음', system_extras('', roles=[]))], 93102)),
+        text(push([system_line(95, '  ', system_extras(' '))], 93102)),
+        text(push([system_line(96, '가려진 시스템', system_extras(''), status='BLIND')], 93102)),
+    ]),
+    ('pinned notices: by the author, by someone else, without a profile, unpinned, in the recent chat, broken', [
+        text(event(94010, pinned_body(100, '스트리머', '방송 규칙입니다', register=(100, '스트리머')))),
+        text(event(94010, pinned_body(101, '시청자101', '고정된 시청자 채팅', register=(102, '매니저')))),
+        text(event(94010, pinned_body(103, '', '프로필 없는 공지', the_profile=None))),
+        text(event(94010, pinned_body(104, '스트리머', '해제됨', time=0)), note='the site then shows no notice'),
+        text({'svcid': 'game', 'bdy': {'messageList': [], 'userCount': 8826,
+                                       'notice': pinned_body(105, '매니저', '최근 채팅의 공지', register=(105, '매니저'))},
+              'cmd': 15101, 'retCode': 0, 'retMsg': 'SUCCESS', 'tid': '2', 'cid': CHAT}),
+        text(event(94010, None)),
+        text(event(94010, pinned_body(106, '스트리머', '   ', register=(106, '스트리머')))),
+        text(event(94010, pinned_body(107, '스트리머', '너무 큰 시간', time=8640000000000001))),
+    ]),
+    ('blinds (94008): BLIND, CBOTBLIND, HIDDEN, CANCEL, an anonymous donor, without user or time, without a kind, '
+     'not an object', [
+        text(event(94008, blind_body(110))),
+        text(event(94008, blind_body(111, kind='CBOTBLIND'))),
+        text(event(94008, blind_body(112, kind='HIDDEN', time=T - 3600000)),
+             note="a restricted viewer's older line, as S14-live records them"),
+        text(event(94008, blind_body(113, kind='CANCEL')), note='the site shows the line again'),
+        text(event(94008, blind_body(114, uid='anonymous'))),
+        text(event(94008, blind_body(115, drop=('userId',)))),
+        text(event(94008, blind_body(116, time=0))),
+        text(event(94008, blind_body(117, drop=('blindType',)))),
+        text(event(94008, [blind_body(118)])),
+    ]),
+]
+
+b12_document = {
+    'note': 'Synthetic frames of a CHZZK chat socket for M5.F (docs/modules/M5.16-chzzk.md, appendix B-12), read for '
+            'chat channel chatChannelId: the edges of donations, subscription gifts, system lines, pinned notices '
+            'and blinds that the recordings S13-recent and S14-live do not reach. Each case is one or more frames '
+            'in order; "note" says what a frame is for. Written by fixtures/chzzk/danmaku/synthetic_cases.py; '
+            'names, ids, tokens and times are made up.',
+    'chatChannelId': CHAT,
+    'cases': [{'name': name, 'frames': frames} for name, frames in b12_cases],
+}
+
+OUT_B12.parent.mkdir(parents=True, exist_ok=True)
+OUT_B12.write_text(json.dumps(b12_document, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+print(f'wrote {OUT_B12} ({len(b12_cases)} cases, {sum(len(frames) for _, frames in b12_cases)} frames)')

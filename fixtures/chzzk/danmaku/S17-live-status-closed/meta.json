@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "platform": "chzzk",
+  "sample": "S17-live-status-closed",
+  "capturedAt": "2026-09-30T15:49:45Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.chzzk.naver.com/polling/v3.1/channels/12bba8d480ba0ffaf85656afd76fa792/live-status",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Origin": "https://chzzk.naver.com",
+      "Referer": "https://chzzk.naver.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Wed, 30 Sep 2026 15:49:44 GMT",
+      "content-type": "application/json",
+      "vary": [
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers"
+      ],
+      "access-control-allow-origin": "https://chzzk.naver.com",
+      "access-control-allow-credentials": "true",
+      "x-content-type-options": "nosniff",
+      "x-xss-protection": "0",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "pragma": "no-cache",
+      "expires": "0",
+      "x-frame-options": "DENY",
+      "referrer-policy": "unsafe-url",
+      "server": "nfront"
+    }
+  },
+  "raw": {
+    "sha256": "f6afb54b029837ce89297b2ba2950bbbeb230631a25df865bb0d78e9f422e3b5",
+    "length": 1687
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$..liveTokenList[*]",
+      "rule": "secret"
+    }
+  ],
+  "tool": "curl (the headers above; nothing else sent) and scrub.py, M5.F; scrub.py is not in the repository",
+  "note": "The live-status answer of a channel whose live had closed (S05-channel-offline's channel): status CLOSE, chatChannelId null. Pretty-printed; the values are the server's."
+}

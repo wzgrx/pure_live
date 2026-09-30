@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "platform": "sixroom",
+  "case": "S07-live",
+  "room": "sixroom:80518",
+  "danmakuKeys": {
+    "roomId": "80518",
+    "userId": "57401078"
+  },
+  "capturedAt": "2026-09-30T12:31:42.077815Z",
+  "route": "direct",
+  "requests": [
+    {
+      "method": "GET",
+      "url": "https://v.6.cn/room/getChat.php?rid=57401078",
+      "headers": {
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "accept": "application/json, text/javascript, */*; q=0.01",
+        "accept-language": "zh-CN,zh;q=0.9,en;q=0.7",
+        "referer": "https://v.6.cn/80518",
+        "x-requested-with": "XMLHttpRequest"
+      },
+      "status": 200,
+      "responseHeaders": {
+        "connection": "keep-alive",
+        "cache-control": "no-cache",
+        "last-modified": "Wed, 30 Sep 2026 12:31:42 GMT",
+        "transfer-encoding": "chunked",
+        "date": "Wed, 30 Sep 2026 12:31:42 GMT",
+        "content-encoding": "gzip",
+        "content-type": "text/html; charset=UTF-8",
+        "x-xss-protection": "1; mode=block",
+        "content-security-policy-report-only": "default-src 'self' 'unsafe-inline' *.6rooms.com *.xiu123.cn *.6.cn; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.6rooms.com *.xiu123.cn *.6.cn www.googletagmanager.com www.google-analytics.com *.fengkongcloud.cn *.qq.com *.alicdn.com *.ronghub.com lf3-data.volccdn.com static.portal101.cn fp-it.portal101.cn *.fengkongcloud.com blob: ; img-src *.6rooms.com *.xiu123.cn *.6.cn  *.rco.hk data: blob: http://127.0.0.1:* *.aliyuncs.com *.fengkongcloud.cn stcms.beisen.com *.alicdn.com *.ronghub.com; media-src *.6rooms.com *.xiu123.cn *.6.cn *.tencentmusic.com *.ronghub.com blob: *.100ycdn.com; connect-src blob: *.6rooms.com *.xiu123.cn *.6.cn *.rongcfg.com *.fengkongcloud.cn analytics.google.com stats.g.doubleclick.net www.google-analytics.com http://127.0.0.1:* *.huafang.com *.aliyuncs.com *.alicdn.com *.ronghub.com *.rongnav.com upload.qiniup.com *.rong-edge.com https://*.ourdvsssvip.com:20443 *.ourdvsssvip.com *.100ycdn.com wss://*.6rooms.com:5190 wss://*.6rooms.com:5290 wss://*.6rooms.com:5390 wss://*.6rooms.com:5490 wss://*.6rooms.com:5590 wss://*.6rooms.com:5690 wss://*.ronghub.com wss://*.rong-edge.com web.openinstall.io *.opstatistics.cn ws://127.0.0.1:* ; frame-src *.6rooms.com *.xiu123.cn *.6.cn cdn.lxbj.xyhy.asia *.rco.hk www.qianzhao888.com game.ibucoin.com *.7moor.com *.qq.com *.alipay.com m.so.com *.qianzhao666.com *.qianzhao777.com qianzhao888.com qianzhao999.com *.changuang360.cn ; style-src-elem 'self' data: 'unsafe-inline' *.6rooms.com *.xiu123.cn *.6.cn *.alicdn.com *.fengkongcloud.cn ; font-src *.6rooms.com *.xiu123.cn *.6.cn data: *.fengkongcloud.cn; worker-src data: blob: 'self'; report-uri https://v.6.cn/api/ops/csp_report.php",
+        "x-via": "1.1 PSbjwjBGP2iv39:0 (Cdn Cache Server V2.0), 1.1 PS-CZX-01YeT143:10 (Cdn Cache Server V2.0), 1.1 PS-ZHY-019D151:17 (Cdn Cache Server V2.0)",
+        "x-ws-request-id": "6abd012e_PS-ZHY-019D151_19687-56260",
+        "x-content-type-options": "nosniff",
+        "expires": "Wed, 30 Sep 2026 12:30:02 GMT"
+      }
+    }
+  ],
+  "handshakes": [
+    {
+      "url": "wss://snbjh2.6rooms.com:5390",
+      "headers": {
+        "origin": "https://v.6.cn",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "status": 101
+    }
+  ],
+  "frames": 211,
+  "raw": {
+    "sha256": "cd3d4f44c49e2542eb4fc43d70255d07f539e1832d6be77f58ae378ed8ae22fe",
+    "length": 166521
+  },
+  "scrubbed": [
+    {
+      "where": "login uid= (the guest id)",
+      "rule": "session"
+    },
+    {
+      "where": "$.content[101].fid, toid; $.content[1413].content[101].fid, toid",
+      "rule": "person"
+    },
+    {
+      "where": "$.content[101].frid, torid (viewers' room numbers)",
+      "rule": "person"
+    },
+    {
+      "where": "$.content[101].from, to, and the same names inside content",
+      "rule": "person"
+    },
+    {
+      "where": "$.content[101] (fields other than typeID, tm, fid, frid, from, to, toid, torid, content, supremeMystery, picEmoji, at, danmaku, anonym, vest, fpriv, tpriv, cli, limitLevel, newLimitLevel, starLimitLevel)",
+      "rule": "reduced"
+    },
+    {
+      "where": "$.content[other types], $.content[1413].content[other types] (typeID and tm kept)",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "M5.27 recorder (a dart:io program; anonymous and read-only: GET getChat.php, a WebSocket to its first server with the page's Origin and UA, the guest login with an empty encpass, and the page's noop heartbeat at login.success and every 16 s; nothing else is sent)",
+  "note": "Direct, 180 s, room 80518 (broadcaster 57401078, 心动ぐつ媚儿), one of the hottest rooms at 20:31 Beijing time. 12 public chat lines: 9 alone (typeID 101) and 3 of the broadcaster's greetings inside lists (1413); faces written as /窃笑; replies with an addressee (to). The broadcaster's id, room number and name are public and kept. Viewers' user ids and room numbers became same-length synthetic numbers (10000001…, 200001…; a number stays a number), their names 观众1…观众6, also where the broadcaster's greetings name them. Every other message (entries 123, gifts 201, rankings, PK and room state) keeps only typeID and tm; the signals 413–416 (a timestamp only), the results and flag 205 are unchanged. Each changed message was re-encoded as the server writes it (PHP json_encode with non-ASCII written as \\u escapes and slashes as \\/, raw DEFLATE level 6, the site's Base64, a new length line); unchanged messages re-encode to the recorded bytes (checked for all 184), so what was not scrubbed is the recording byte for byte. The recording's close (our own, after 180 s) is not kept. No IPv4 address, cookie, token, avatar path or device id was in the recording."
+}

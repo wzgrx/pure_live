@@ -51,7 +51,8 @@ const _lists = [
 const LivePlayQuality _source = LivePlayQuality(quality: 'FLV 原始线路', id: 'flv:source');
 
 /// Room keys every room changed: the notice is in words for users now
-/// (unified rule "说明文字").
+/// (unified rule "说明文字"), and since M5.27 (chat is shown) it only says
+/// what the audience number is.
 const _notice = {'notice'};
 
 /// Room keys of a room read from inroom with no card seen: the title is the

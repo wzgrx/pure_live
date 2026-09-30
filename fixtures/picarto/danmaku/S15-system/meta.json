@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "platform": "picarto",
+  "case": "S15-system",
+  "room": "picarto:LOITER",
+  "danmakuKeys": {
+    "channelName": "LOITER",
+    "channelId": "1450655"
+  },
+  "capturedAt": "2026-09-30T16:21:10.636361Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://chat.picarto.tv/chat/token=<an anonymous token, not kept>",
+      "headers": {
+        "origin": "https://picarto.tv",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "status": 101
+    }
+  ],
+  "frames": 1,
+  "raw": {
+    "sha256": "b3944e64273931fc293f2b69342ed8f85d4aeafc67e62241307667bb6eeff91b",
+    "length": 239
+  },
+  "scrubbed": [],
+  "tool": "M5.F recorder (dart:io WebSocket, anonymous, direct; sends only the site's keep-alive ping every 50 s)",
+  "note": "One frame out of a 150-minute watch of the 45 busiest channels on 2026-09-30 (read-only, anonymous, nothing written): the channel joined a multistream and the server announced the merged chat with a system line: an icon placeholder with its list (ic), no links (l null) and a line break. It names only the four channels of the group (public), so nothing is replaced. The frames that followed it (the group's whitelists and ban list) are not kept."
+}

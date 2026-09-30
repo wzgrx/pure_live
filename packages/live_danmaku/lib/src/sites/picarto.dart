@@ -73,29 +73,48 @@ abstract final class PicartoDanmakuProtocol {
   /// The refusal code of a token the chat server does not accept.
   static const String refusedCode = 'JWT_TOKEN';
 
+  /// How long a chip tip stays in the super chat bar. The site shows a tip
+  /// as a framed line in the chat and never takes it out, so it names no
+  /// time; 60 s is bilibili's shortest super chat (the bar was made for
+  /// it), and a Kudo is worth a cent to the streamer, so tips are small.
+  static const Duration tipDuration = Duration(seconds: 60);
+
+  /// Where avatar paths of chat lines (`i`) live (the site's
+  /// `https://images.picarto.tv/` prefix).
+  static const String imageBase = 'https://images.picarto.tv/';
+
+  /// The name the site gives the chips of a tip (`{count} Kudos`).
+  static const String tipUnit = 'Kudos';
+
   /// Largest time [DateTime] can hold, in milliseconds.
   static const int _maxMillis = 8640000000000000;
 
   static final RegExp _hex6 = RegExp(r'^[0-9a-fA-F]{6}$');
   static final RegExp _hex3 = RegExp(r'^[0-9a-fA-F]{3}$');
 
-  /// Reads one text frame of [channelId]'s chat socket.
+  /// Reads one text frame of [channelId]'s chat socket, received [now]
+  /// (default: the current time); [channelName] is the room's channel.
   ///
   /// Frames are JSON objects named by `type` or `t`, with their payload in
   /// `messages` or `m` (the site's client reads both spellings):
   ///
-  /// - `c`: chat, a list of lines ([chat]); a page of history (`paginated`
-  ///   or `p` set) is skipped, as the site's client skips it;
+  /// - `c` and `ct` (chat, chip tips) and `system`: a list of lines, each
+  ///   read by its own type ([line]); a `system` frame for moderators
+  ///   (`c` is `b`) is skipped, as the site shows it only to them, and so
+  ///   are its lines without a type;
+  /// - `raid` ([raid]), `ns` ([subscription]): one notice;
+  /// - `rm` ([deletion]), `cm` ([clearance]): a retraction;
   /// - `stream`: the channel's state, whose `viewers` is the concurrent
   ///   audience ([audience]);
   /// - `{"success":false,"code":"JWT_TOKEN"}`: the token was refused.
   ///
-  /// Everything else (joins and leaves `un`/`ur`, the user list, whispers,
-  /// chip tips, polls, raffles, the answer to [heartbeat]) holds nothing to
-  /// show; so does a frame that is not a JSON object. A field of the wrong
-  /// type costs only that field (a time out of range, a colour that is not
-  /// text) or that line (text that is not text), never the frame.
-  static PicartoDanmakuFrame decode(String text, {required int channelId}) {
+  /// A page of history (`paginated` or `p` set) is skipped, as the site's
+  /// client skips it. Everything else (joins and leaves `un`/`ur`, the user
+  /// list, whispers, polls, raffles, the answer to [heartbeat]) holds nothing
+  /// to show; so does a frame that is not a JSON object. A field of the
+  /// wrong type costs only that field (a time out of range, a colour that is
+  /// not text) or that line (text that is not text), never the frame.
+  static PicartoDanmakuFrame decode(String text, {required int channelId, String channelName = '', DateTime? now}) {
     final Object? root;
     try {
       root = jsonDecode(text);
@@ -105,14 +124,50 @@ abstract final class PicartoDanmakuProtocol {
     if (root is! Map) return const PicartoDanmakuFrame();
     if (root['success'] == false && root['code'] == refusedCode) return const PicartoDanmakuFrame(tokenRefused: true);
     final payload = root['messages'] ?? root['m'];
-    switch (root['type'] ?? root['t']) {
-      case 'stream':
-        return PicartoDanmakuFrame(messages: [?audience(payload, channelId: channelId)]);
-      case 'c' when !_truthy(root['paginated'] ?? root['p']) && payload is List:
-        return PicartoDanmakuFrame(messages: [for (final line in payload) ?chat(line)]);
-      default:
-        return const PicartoDanmakuFrame();
-    }
+    final type = root['type'] ?? root['t'];
+    if (type == 'stream') return PicartoDanmakuFrame(messages: [?audience(payload, channelId: channelId)]);
+    if (_truthy(root['paginated'] ?? root['p'])) return const PicartoDanmakuFrame();
+    final receivedAt = now ?? DateTime.now();
+    List<LiveMessage> lines(List<Object?> lines) => [
+      for (final entry in lines) ?line(entry, receivedAt: receivedAt, channelName: channelName),
+    ];
+    return PicartoDanmakuFrame(
+      messages: switch (type) {
+        'c' || 'ct' when payload is List => lines(payload),
+        // The site shows no line without a type; only a chat frame's are
+        // taken as chat (M5.10).
+        'system' when payload is List && root['c'] != 'b' => lines([
+          for (final entry in payload)
+            if (entry is Map && entry['t'] != null) entry,
+        ]),
+        'raid' => [?raid(payload)],
+        'ns' => [?subscription(payload)],
+        'rm' => [?deletion(payload)],
+        'cm' => [?clearance(payload)],
+        _ => const [],
+      },
+    );
+  }
+
+  /// One line of a `c`, `ct` or `system` frame, by its type `t` (the site
+  /// maps `c` to chat, `ct` to a chip tip, `system` to a notice):
+  ///
+  /// - a chip tip ([tip]): a chat line whose `v` (the site's `tipping`) is
+  ///   set, as recorded (with `x`, `mc`, `mk`), or a `ct` line;
+  /// - chat ([chat]): `c`, or no type;
+  /// - a system notice ([system]): `system`.
+  ///
+  /// Other types (whispers, polls, raffles) are not shown. [receivedAt] is
+  /// the start of a tip without a time; [channelName] is the room's channel.
+  static LiveMessage? line(Object? line, {required DateTime receivedAt, String channelName = ''}) {
+    if (line is! Map) return null;
+    return switch (line['t']) {
+      null || 'c' when _truthy(line['v']) => tip(line, receivedAt: receivedAt, channelName: channelName),
+      'ct' => tip(line, receivedAt: receivedAt, channelName: channelName),
+      null || 'c' => chat(line),
+      'system' => system(line),
+      _ => null,
+    };
   }
 
   /// One chat line, or null when it is not a chat line (`t` other than `c`)
@@ -129,17 +184,192 @@ abstract final class PicartoDanmakuProtocol {
     if (type != null && type != 'c') return null;
     final text = line['m'];
     if (text is! String || text.trim().isEmpty) return null;
-    final id = line['id'] ?? line['_id'];
-    final sent = line['d'];
     return LiveMessage(
       type: LiveMessageType.chat,
       userName: _scalar(line['n']),
       userId: _scalar(line['u']),
       message: text.trim(),
       color: color(line['k']),
-      messageId: id is String ? id : '',
-      sentAt: sent is int && sent.abs() <= _maxMillis ? DateTime.fromMillisecondsSinceEpoch(sent) : null,
+      messageId: _messageId(line),
+      sentAt: _time(line['d']),
     );
+  }
+
+  /// A chip tip as a super chat, or null without a whole number of chips
+  /// above zero (`x`).
+  ///
+  /// The site shows "<`n`> tipped <`rn`> <`x`>" and the text `m` below, in a
+  /// framed line. The super chat's price is `x` chips, shown as `x Kudos`
+  /// ([tipUnit]); the sender `n` and avatar `i` ([imageBase]); the text `m`
+  /// (trimmed; chipmotes such as `kudo100` stay as text, like emotes); from
+  /// `d` (else [receivedAt]) for [tipDuration]. The frame names no colours.
+  /// A tip to another channel of a multistream (`rn` is not [channelName])
+  /// says so before its text: `打赏给 <rn>：<text>`.
+  ///
+  /// The message around it follows the other platforms' super chats (name
+  /// and text `SUPER_CHAT_MESSAGE`, white) and carries the line's id, user
+  /// id and time, so `rm` and `cm` take it back like a chat line.
+  static LiveMessage? tip(Map<Object?, Object?> line, {required DateTime receivedAt, String channelName = ''}) {
+    final chips = line['x'];
+    if (chips is! int || chips <= 0) return null;
+    final id = _messageId(line);
+    final sentAt = _time(line['d']);
+    final start = sentAt ?? receivedAt;
+    final text = switch (line['m']) {
+      final String text => text.trim(),
+      _ => '',
+    };
+    final receiver = _scalar(line['rn']).trim();
+    final elsewhere =
+        receiver.isNotEmpty && channelName.isNotEmpty && receiver.toLowerCase() != channelName.toLowerCase();
+    return LiveMessage(
+      type: LiveMessageType.superChat,
+      userName: 'SUPER_CHAT_MESSAGE',
+      userId: _scalar(line['u']),
+      message: 'SUPER_CHAT_MESSAGE',
+      color: LiveMessageColor.white,
+      messageId: id,
+      sentAt: sentAt,
+      data: LiveSuperChatMessage(
+        messageId: id,
+        userName: _scalar(line['n']),
+        face: avatar(line['i']),
+        message: !elsewhere
+            ? text
+            : text.isEmpty
+            ? '打赏给 $receiver'
+            : '打赏给 $receiver：$text',
+        price: chips,
+        priceText: '$chips $tipUnit',
+        startTime: start,
+        endTime: start.add(tipDuration),
+        backgroundColor: '',
+        backgroundBottomColor: '',
+      ),
+    );
+  }
+
+  /// The URL of an avatar path (`i`), as the site builds it: a path gets
+  /// [imageBase] before it, a full URL stays; anything else is empty.
+  static String avatar(Object? path) {
+    if (path is! String || path.trim().isEmpty) return '';
+    final value = path.trim();
+    if (value.contains('http://') || value.contains('https://') || value.contains('data:image/')) return value;
+    return '$imageBase$value';
+  }
+
+  /// A system line as a notice, or null when it has no text.
+  ///
+  /// The text `m` is the site's own; the site replaces each `{link}` with
+  /// the text of a link of `l` and each `{icon}` with an icon of `ic`, and
+  /// breaks lines at `\n`. Here an icon is left out, a link is its text, and
+  /// lines are joined with a space. As on the site, a placeholder stays
+  /// when its list is missing, and the k-th link is `l[2k + 1]`, else `l[0]`
+  /// (the site counts the pieces around the placeholders).
+  static LiveMessage? system(Map<Object?, Object?> line) {
+    var text = line['m'];
+    if (text is! String) return null;
+    if (line['ic'] is List) text = text.replaceAll('{icon}', '');
+    if (line['l'] case final List<Object?> links) {
+      var index = 0;
+      text = text.replaceAllMapped('{link}', (_) {
+        final position = 2 * index++ + 1;
+        final link = position < links.length ? links[position] : links.firstOrNull;
+        return switch (link) {
+          {'text': final String text} => text,
+          _ => '',
+        };
+      });
+    }
+    final sentence = [
+      for (final part in text.split('\n'))
+        if (part.trim().isNotEmpty) part.trim(),
+    ].join(' ');
+    return sentence.isEmpty ? null : _notice(LiveNoticeKind.system, sentence);
+  }
+
+  /// A `raid` frame's [raid] as a notice, or null.
+  ///
+  /// The site shows "RAID!" over the text `m` (the server's own sentence);
+  /// without one the notice is `<n> 突袭了 <rn>` (the raiding channel `n`,
+  /// the raided `rn`). The site also takes the raiding channel's viewers to
+  /// the raided one after 10 s; that is not done here.
+  static LiveMessage? raid(Object? raid) {
+    if (raid is! Map) return null;
+    final text = switch (raid['m']) {
+      final String text => text.trim(),
+      _ => '',
+    };
+    if (text.isNotEmpty) return _notice(LiveNoticeKind.raid, text);
+    final (from, to) = (_scalar(raid['n']).trim(), _scalar(raid['rn']).trim());
+    if (from.isEmpty || to.isEmpty) return null;
+    return _notice(LiveNoticeKind.raid, '$from 突袭了 $to');
+  }
+
+  /// An `ns` frame's [subscription] as a notice, or null when a name the
+  /// sentence needs is missing.
+  ///
+  /// The site builds an English sentence from the fields: `sn` the
+  /// subscriber or gifter, `n` the channel, `md` months (1 when missing),
+  /// `sg` gifted, `gn` the one who received a gift, `ag` anonymous, `sc` the
+  /// community gift's recipients (`k` of them), `slvl` the level. The notice
+  /// says the same in Chinese (site → notice):
+  ///
+  /// - `sn subscribed to n for md month/s` → `sn 订阅了 n，md 个月`;
+  /// - `sn activated a Level slvl subscription to n` → `sn 开通了 n 的 slvl
+  ///   级订阅`;
+  /// - `sn gifted md month/s subscription to gn` → `sn 赠送给 gn md 个月订阅`;
+  /// - `sn gifted k subscriptions to the Picarto Community for n` →
+  ///   `sn 向 Picarto 社区赠送了 k 份 n 的订阅`;
+  /// - `gn received anonymous gift of md month/s subscription for n` →
+  ///   `gn 收到匿名赠送的 md 个月 n 订阅`;
+  /// - `An anonymous gift of k subscriptions to the Picarto Community for n`
+  ///   → `有人匿名向 Picarto 社区赠送了 k 份 n 的订阅`.
+  static LiveMessage? subscription(Object? subscription) {
+    if (subscription is! Map) return null;
+    String name(String key) => _scalar(subscription[key]).trim();
+    final (sender, channel, receiver) = (name('sn'), name('n'), name('gn'));
+    final months = _truthy(subscription['md']) && name('md').isNotEmpty ? name('md') : '1';
+    final recipients = switch (subscription['sc']) {
+      final List<Object?> list => list.length,
+      _ => 0,
+    };
+    final level = _truthy(subscription['slvl']) ? name('slvl') : '';
+    final String? text;
+    if (_truthy(subscription['sg'])) {
+      text = switch ((_truthy(subscription['ag']), recipients > 0)) {
+        (true, true) when channel.isNotEmpty => '有人匿名向 Picarto 社区赠送了 $recipients 份 $channel 的订阅',
+        (true, false) when receiver.isNotEmpty && channel.isNotEmpty => '$receiver 收到匿名赠送的 $months 个月 $channel 订阅',
+        (false, true) when sender.isNotEmpty && channel.isNotEmpty =>
+          '$sender 向 Picarto 社区赠送了 $recipients 份 $channel 的订阅',
+        (false, false) when sender.isNotEmpty && receiver.isNotEmpty => '$sender 赠送给 $receiver $months 个月订阅',
+        _ => null,
+      };
+    } else if (sender.isEmpty || channel.isEmpty) {
+      text = null;
+    } else {
+      text = level.isNotEmpty ? '$sender 开通了 $channel 的 $level 级订阅' : '$sender 订阅了 $channel，$months 个月';
+    }
+    return text == null ? null : _notice(LiveNoticeKind.subscription, text);
+  }
+
+  /// An `rm` frame's [deletion] (a moderator deleted a message): takes back
+  /// the message whose id is `id`, or null. The site replaces that line's
+  /// text with the frame's `m` and marks it deleted.
+  static LiveMessage? deletion(Object? deletion) {
+    if (deletion case {'id': final String id} when id.trim().isNotEmpty) {
+      return _retraction(LiveRetraction.message(id));
+    }
+    return null;
+  }
+
+  /// A `cm` frame's [clearance] (a moderator cleared a user's messages):
+  /// takes back every message of the user `u`, or null. The site removes
+  /// that user's lines.
+  static LiveMessage? clearance(Object? clearance) {
+    if (clearance is! Map) return null;
+    final user = _scalar(clearance['u']);
+    return user.trim().isEmpty ? null : _retraction(LiveRetraction.user(user));
   }
 
   /// The concurrent audience of a `stream` frame's [state], or null. A
@@ -172,6 +402,30 @@ abstract final class PicartoDanmakuProtocol {
     return LiveMessageColor.numberToColor(int.parse(hex, radix: 16));
   }
 
+  static LiveMessage _notice(LiveNoticeKind kind, String text) =>
+      LiveMessage(type: LiveMessageType.notice, userName: '', message: text, color: LiveMessageColor.white, data: kind);
+
+  /// A retraction carries no id of its own: the target's would collide with
+  /// the target in the duplicate gate.
+  static LiveMessage _retraction(LiveRetraction retraction) => LiveMessage(
+    type: LiveMessageType.retraction,
+    userName: '',
+    message: '',
+    color: LiveMessageColor.white,
+    data: retraction,
+  );
+
+  /// A line's id: `id`, else `_id` (the site's `id || _id`), when it is text.
+  static String _messageId(Map<Object?, Object?> line) => switch (line['id'] ?? line['_id']) {
+    final String id => id,
+    _ => '',
+  };
+
+  /// A time in milliseconds (`d`), or null when it is not a whole number
+  /// [DateTime] can hold.
+  static DateTime? _time(Object? millis) =>
+      millis is int && millis.abs() <= _maxMillis ? DateTime.fromMillisecondsSinceEpoch(millis) : null;
+
   static String _scalar(Object? value) => value is String || value is num ? '$value' : '';
 
   /// JavaScript truthiness, as the site's client tests `paginated || p`.
@@ -197,21 +451,27 @@ abstract final class PicartoDanmakuProtocol {
 /// - A refused token (`JWT_TOKEN`) is replaced by a new one and the socket
 ///   reopened without a notice, at most three times per [connect]; then the
 ///   run ends with [DanmakuCloseReason.credentialsUnavailable].
+/// - Chat, chip tips (as super chats), system, raid and subscription notices,
+///   deleted and cleared messages (as retractions) and the audience are
+///   reported ([PicartoDanmakuProtocol.decode]).
 ///
 /// The app registers it as `SiteIds.picarto: () =>
 /// PicartoDanmakuConnection(http: …, proxy: …)`, with the `LiveHttp` it
 /// gives `PicartoSite` and its proxy policy.
 final class PicartoDanmakuConnection extends DanmakuSocketConnection<PicartoDanmakuArgs> {
   /// Creates the connection; `http` asks for the chat tokens and [proxy]
-  /// routes the socket. `connector` replaces `dart:io`'s handshake and
-  /// `tokenRetryDelay` the step between token attempts (tests); handshake
-  /// failures are reported without the token.
+  /// routes the socket. `connector` replaces `dart:io`'s handshake,
+  /// `tokenRetryDelay` the step between token attempts and `now` the clock
+  /// that dates a chip tip without a time (tests); handshake failures are
+  /// reported without the token.
   new({
     required this._http,
     super.proxy,
     SocketConnector? connector,
     this._tokenRetryDelay = const Duration(milliseconds: 500),
-  }) : super(site: SiteIds.picarto, policy: socketPolicy, connector: _withoutToken(connector ?? connectIoSocket));
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now,
+       super(site: SiteIds.picarto, policy: socketPolicy, connector: _withoutToken(connector ?? connectIoSocket));
 
   /// Socket timing: the defaults of the shared runtime with the site's 50 s
   /// keep-alive. No join timer: an open socket counts as joined.
@@ -230,6 +490,7 @@ final class PicartoDanmakuConnection extends DanmakuSocketConnection<PicartoDanm
 
   final LiveHttp _http;
   final Duration _tokenRetryDelay;
+  final DateTime Function() _now;
   _Chat? _chat;
 
   static final RegExp _tokenInText = RegExp('token=[A-Za-z0-9_.-]+');
@@ -316,7 +577,12 @@ final class PicartoDanmakuConnection extends DanmakuSocketConnection<PicartoDanm
       _ => null,
     };
     if (text == null) return;
-    final frame = PicartoDanmakuProtocol.decode(text, channelId: chat.channelId);
+    final frame = PicartoDanmakuProtocol.decode(
+      text,
+      channelId: chat.channelId,
+      channelName: chat.channel,
+      now: _now(),
+    );
     frame.messages.forEach(session.message);
     if (frame.tokenRefused) unawaited(_refused(session, chat));
   }

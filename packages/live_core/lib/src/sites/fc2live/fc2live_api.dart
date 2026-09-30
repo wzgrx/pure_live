@@ -136,10 +136,10 @@ final class Fc2LiveRoomData {
   final bool isAdult;
 }
 
-/// What the comment connection needs (26-3, M5): the channel. Comments
-/// travel on a control socket of their own: the connection takes a grant
-/// with `Fc2LiveSite.controlGrant` (again after every
-/// `control_disconnection`), connects [Fc2LiveGrant.endpoint] with
+/// What the comment connection needs (26-3; `Fc2LiveDanmakuConnection` in
+/// `live_danmaku`, M5.22): the channel. Comments travel on a control socket
+/// of their own: for every socket the connection takes a grant with
+/// `Fc2LiveSite.controlGrant`, connects [Fc2LiveGrant.endpoint] with
 /// [Fc2LiveGrant.handshakeHeaders] and reads `comment` and `user_count`
 /// messages (archive spec §7).
 @immutable
@@ -293,12 +293,20 @@ abstract final class Fc2LiveApi {
     '5': '其他',
   };
 
-  /// 3.x's zh.json text of the notices, by key.
+  /// 3.x's zh.json text of the notices, by key. 3.x's third notice,
+  /// `fc2live_chat_notice`, is gone ([legacyChatNotice]).
   static const Map<String, String> noticeText = {
-    'fc2live_chat_notice': 'FC2 远端聊天尚待接入；媒体控制 WebSocket 由播放或录制独占，并保持到原生输入完整释放。',
     'fc2live_access_restricted': '该 FC2 直播需要登录、积分、门票或付费；界面保留受限状态，不将其显示成未开播。',
     'fc2live_adult_notice': '该房间由平台标记为成人内容，不进入普通公开目录。',
   };
+
+  /// 3.x's notice of every other room (`fc2live_chat_notice`): that
+  /// comments were not connected, then a note for developers. Comments are
+  /// connected now (M5.22) and the rest tells viewers nothing, so those
+  /// rooms have no notice. Kept for the comparison with 3.x's output and
+  /// for M9, which clears it from stored rooms (an empty notice does not
+  /// replace a stored one).
+  static const String legacyChatNotice = 'FC2 远端聊天尚待接入；媒体控制 WebSocket 由播放或录制独占，并保持到原生输入完整释放。';
 
   /// Id of [autoQuality].
   static const String autoQualityId = 'auto';
@@ -682,11 +690,12 @@ abstract final class Fc2LiveApi {
   /// `totalViewers`, both only while on air (26-8; 3.x wrote an offline
   /// channel's 0); the start time while on air; the owner's picture as the
   /// avatar, else the cover (26-5; 3.x always the cover); the link is the
-  /// channel page; 3.x's notice ([notice]); the introduction from a member
-  /// answer's `info` (3.x parsed it but left it out); [Fc2LiveRoomData]
-  /// for the interface and the streams; with [danmaku] (room entry and
-  /// recording) the comment arguments (26-3, M5). No `httpHeaders`: that
-  /// field is IPTV's, the media headers travel with the control session.
+  /// channel page; 3.x's notice where one applies ([notice]); the
+  /// introduction from a member answer's `info` (3.x parsed it but left it
+  /// out); [Fc2LiveRoomData] for the interface and the streams; with
+  /// [danmaku] (room entry and recording) the comment arguments (26-3, M5).
+  /// No `httpHeaders`: that field is IPTV's, the media headers travel with
+  /// the control session.
   static LiveRoom room(Fc2LiveChannel channel, {bool danmaku = false}) {
     final live = channel.state != Fc2LiveState.offline;
     final viewers = live ? channel.currentViewers?.toString() : null;
@@ -722,14 +731,14 @@ abstract final class Fc2LiveApi {
     );
   }
 
-  /// 3.x's notice in its zh.json text: the restriction of a restricted
-  /// channel, else the adult mark, else that comments are not connected.
-  static String notice(Fc2LiveChannel channel) =>
-      noticeText[switch (channel) {
-        Fc2LiveChannel(state: Fc2LiveState.restricted) => 'fc2live_access_restricted',
-        Fc2LiveChannel(isAdult: true) => 'fc2live_adult_notice',
-        _ => 'fc2live_chat_notice',
-      }]!;
+  /// 3.x's notice in its zh.json text ([noticeText]): the restriction of a
+  /// restricted channel, else the adult mark; else none (3.x: that
+  /// comments were not connected, [legacyChatNotice]; M5.22).
+  static String? notice(Fc2LiveChannel channel) => switch (channel) {
+    Fc2LiveChannel(state: Fc2LiveState.restricted) => noticeText['fc2live_access_restricted'],
+    Fc2LiveChannel(isAdult: true) => noticeText['fc2live_adult_notice'],
+    _ => null,
+  };
 
   // Control -------------------------------------------------------------------
 

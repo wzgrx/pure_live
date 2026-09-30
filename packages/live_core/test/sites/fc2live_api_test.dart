@@ -74,9 +74,23 @@ String _rowRestriction(String roomId) => switch (_rows[roomId]!) {
   final row => fail('S01 has no row like $row'),
 };
 
+/// 3.x gave every room that is neither restricted nor adult its chat
+/// notice ([Fc2LiveApi.legacyChatNotice]: comments not connected yet, and a
+/// note for developers); comments are connected since M5.22 and those rooms
+/// have no notice. [_expectNoChatNotice] checks both sides.
+const _notice = {'notice'};
+
+/// [room] has no notice where 3.x's [legacy] room had the chat notice
+/// (M5.22).
+void _expectNoChatNotice(LiveRoom room, Map<String, dynamic> legacy, {String? reason}) {
+  expect(legacy['notice'], Fc2LiveApi.legacyChatNotice, reason: reason);
+  expect(room.notice, isNull, reason: reason);
+}
+
 /// What changed from 3.x on the card of [legacy] (3.x's room map), by row:
 /// - `area`: every card is named in the catalog's Chinese (26-6);
-/// - `liveStatus`, `status`: a restricted room is live (26-9);
+/// - `liveStatus`, `status`: a restricted room is live (26-9); the other
+///   rooms had the chat notice and now have none ([_notice], M5.22);
 /// - `title`, `nick`: HTML entities decoded (26-4); a missing name stays
 ///   empty instead of the channel number (placeholder rule, M2.1 X-2).
 Set<String> _cardChanged(Map<String, dynamic> legacy) {
@@ -84,7 +98,7 @@ Set<String> _cardChanged(Map<String, dynamic> legacy) {
   return {
     ..._headers,
     'area',
-    if (legacy['liveStatus'] == LiveStatus.unknown.index) ...{'liveStatus', 'status'},
+    if (legacy['liveStatus'] == LiveStatus.unknown.index) ...{'liveStatus', 'status'} else ..._notice,
     if ('${row['title']}'.contains('&')) 'title',
     if ('${row['name']}'.contains('&') || '${row['name']}'.isEmpty) 'nick',
   };
@@ -108,6 +122,9 @@ void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String reason = ''}) {
       added: _cardAdded(room.roomId),
       reason: '$reason[$index]',
     );
+    if (_cardChanged(expected[index]).contains('notice')) {
+      _expectNoChatNotice(room, expected[index], reason: '$reason[$index]');
+    }
   }
 }
 
@@ -373,7 +390,7 @@ void main() {
       expect(first.link, 'https://live.fc2.com/10200498/');
       expect((first.onlineViewers, first.totalViewers, first.watching), ('3', '232', '3'));
       expect(first.audienceMetricType, AudienceMetricType.onlineViewers);
-      expect(first.notice, Fc2LiveApi.noticeText['fc2live_chat_notice']);
+      expect(first.notice, isNull, reason: "3.x's chat notice is gone: comments are connected (M5.22)");
       expect(first.introduction, isNull);
       expect(first.httpHeaders, isEmpty);
       expect(first.startedAt, DateTime.utc(2026, 9, 27, 4, 51, 54, 285), reason: 'start_time (JST 13:51:54)');
@@ -443,10 +460,11 @@ void main() {
           _projection(room),
           _result(legacy[call])! as Map<String, dynamic>,
           // area: the catalog's Chinese, not the site's その他 (26-6).
-          changed: {..._headers, 'area'},
+          changed: {..._headers, ..._notice, 'area'},
           added: {'startedAt': _iso(1790407066410), 'restriction': 'none'},
           reason: call,
         );
+        _expectNoChatNotice(room, _result(legacy[call])! as Map<String, dynamic>, reason: call);
       }
       expect(room.area, '其他');
       expect(room.title, 'FC2USER475160OCC', reason: 'no title: the owner name');
@@ -538,7 +556,7 @@ void main() {
         'audienceMetricType': 'onlineViewers',
         'liveStatus': LiveStatus.offline.index,
         'status': false,
-        'notice': Fc2LiveApi.noticeText['fc2live_chat_notice'],
+        'notice': null, // 3.x's chat notice is gone (M5.22)
         'introduction': '今日はマイクオフ @sangokusi999',
         'link': 'https://live.fc2.com/10608314/',
       });
@@ -568,10 +586,11 @@ void main() {
         _expectParity(
           _projection(live),
           _maps(_result(search[key])).single,
-          changed: {..._headers, 'area'}, // 26-6
+          changed: {..._headers, ..._notice, 'area'}, // M5.22; 26-6
           added: liveAdded,
           reason: key,
         );
+        _expectNoChatNotice(live, _maps(_result(search[key])).single, reason: key);
       }
       final restricted = Fc2LiveApi.room(_member('S02-member-restricted', '3024638').channel);
       _expectParity(

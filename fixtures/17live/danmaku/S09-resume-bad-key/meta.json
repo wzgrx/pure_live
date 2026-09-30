@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "platform": "17live",
+  "case": "S09-resume-bad-key",
+  "room": "17live:29790476",
+  "danmakuKeys": {
+    "roomId": "29790476"
+  },
+  "capturedAt": "2026-09-30T15:25:30Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://17media.realtime.ably.net/?access_token=xti42T.rbdz9kTL9122_Dk6t6Ps3J9hZoNlwWP6gT2fDCe2-1rD91ZDxYS643DL6X4_2AUa5R9dms20a9GOgN1ZPVAB74ZhhnfV6ZPBMl7z6tlwqaQU6JOm_xFZ_Eqw68152xUgy&resume=4abAAAAAAAAAAA%21AAAAAAAAAAAAAAAAAAAAAAAAAAA-000000&format=json&heartbeats=true&v=3",
+      "headers": {
+        "origin": "https://17.live",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 5,
+  "raw": {
+    "sha256": "84190911e75d7fcbebab3a24ebbf3da9e5ba71f2808765643f2fb9ba9a64c883",
+    "length": 3567
+  },
+  "scrubbed": [
+    {
+      "where": "$.token",
+      "rule": "secret"
+    },
+    {
+      "where": "handshake.access_token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.connectionId",
+      "rule": "secret"
+    },
+    {
+      "where": "$.connectionDetails.connectionKey",
+      "rule": "secret"
+    },
+    {
+      "where": "$.connectionDetails.serverId",
+      "rule": "secret"
+    },
+    {
+      "where": "$.messages[*].data..userID, ..*UserID",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..displayName, ..openID",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..picture",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..userInfo.name",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data (names in any text)",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data[type not 3, 5, 38]",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "badresume.dart (dart:io; messenger/auth, then a socket with a made-up resume key; sends only ATTACH) and b14_scrub.py, M5.F; neither is in the repository",
+  "note": "Recorded 2026-09-30 15:25 UTC for M5.F (B-14), anonymous and direct, in the room of S08-resume with the same token (the same synthetic value). One socket whose handshake resumes a made-up key of the right shape (the probe's own value, kept): the server opens a new connection and says so in CONNECTED's error (80018 invalid connection key, statusCode 400); the probe then sent a plain ATTACH. Two more sockets of that probe are not kept: resume=nonsense got the same 80018, an empty resume a plain new connection. Scrubbed as S08-resume."
+}

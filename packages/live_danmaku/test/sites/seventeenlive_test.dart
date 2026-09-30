@@ -1,7 +1,9 @@
 // 17LIVE danmaku (docs/modules/M5.29-17live.md): the protocol and the
 // connection against the archived v4's output for the recordings (S05-live,
 // S06-live) and the synthetic frames (S07-synthetic), written by
-// fixtures/17live/danmaku/v4_expected.dart.
+// fixtures/17live/danmaku/v4_expected.dart; the M5.F follow-ups (B-14: paid
+// barrages, resume, stream end, mute) against the recordings S08-resume,
+// S09-resume-bad-key and S10-events and synthetic frames.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -46,6 +48,24 @@ List<String> _sent(String name) => [
 ];
 
 Map<String, Object?> _meta(String name) => _json('$name/meta.json')! as Map<String, Object?>;
+
+/// The lines of a recording as they are (S08-resume: `socket`, `mark`;
+/// S10-events: `room`).
+List<Map<String, Object?>> _lines(String name) => [
+  for (final line in File('$_root/$name/frames.jsonl').readAsLinesSync()) jsonDecode(line)! as Map<String, Object?>,
+];
+
+/// S10-events: one frame of some room per line.
+List<({String room, String text})> _events10() => [
+  for (final line in _lines('S10-events')) (room: line['room']! as String, text: line['text']! as String),
+];
+
+/// The payload of a `MESSAGE` frame holding one message.
+Map<Object?, Object?>? _payloadOf(String frame) => SeventeenLiveDanmakuProtocol.payload(
+  ((jsonDecode(frame)! as Map<String, Object?>)['messages']! as List<Object?>)
+      .cast<Map<String, Object?>>()
+      .single['data'],
+);
 
 String _roomOf(String name) => (_meta(name)['danmakuKeys']! as Map<String, Object?>)['roomId']! as String;
 
@@ -97,6 +117,13 @@ Map<String, Object?> _asV4(LiveMessage message) => switch (message.type) {
     'audience': 'online',
     'value': (message.data! as LiveAudienceUpdate).value,
   },
+  // B-14: a paid barrage's super chat; v4 had none.
+  LiveMessageType.superChat => {
+    'kind': 'superChat',
+    'id': message.messageId,
+    'price': (message.data! as LiveSuperChatMessage).price,
+    'text': message.message,
+  },
   _ => throw StateError('unexpected ${message.type}'),
 };
 
@@ -143,6 +170,23 @@ const Map<String, Object?> _nothing = {'joined': false, 'events': <Object?>[]};
 /// [_shared] (docs/modules/M5.29-17live.md, "与归档 v4 的差异"): v4's reading →
 /// the new one, per case. Cases not listed read as v4 read them.
 final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
+  // B-14: the paid barrage (barrageStyle, barrage.point 30) is a super chat
+  // besides its chat line; v4 had the chat line only.
+  'comments: a coloured one, a barrage, a name only in openID, no display user': (v4) {
+    expect(_events(v4[1]).single['text'], '弾幕です');
+    return [
+      _shared(v4[0]),
+      {
+        'joined': false,
+        'events': [
+          ..._events(v4[1]),
+          {'kind': 'superChat', 'id': 'case01b:0', 'price': 30, 'text': '弾幕です'},
+        ],
+      },
+      _shared(v4[2]),
+      _shared(v4[3]),
+    ];
+  },
   // Difference 4: the website hides these comments; v4 showed them.
   'hidden comments: isDirty, isDirtyWord, isDirtyUser': (v4) {
     expect([for (final reading in v4.take(3)) _events(reading).single['text']], ['見えない1', '見えない2', '見えない3']);
@@ -281,12 +325,12 @@ final class _Channel implements SocketChannel {
   }
 }
 
-/// Hands out fake sockets and records every handshake; [fail] throws for
-/// an endpoint.
+/// Hands out fake sockets and records every handshake; [fail] gives the
+/// error to throw for an endpoint, or null to open it.
 final class _Connector {
   new({this.fail});
 
-  final Exception Function(Uri endpoint)? fail;
+  final Exception? Function(Uri endpoint)? fail;
   final List<Uri> endpoints = [];
   final List<Map<String, String>> headers = [];
   final List<ProxyRoute> routes = [];
@@ -303,7 +347,7 @@ final class _Connector {
     this.headers.add(headers);
     routes.add(route);
     final failure = fail;
-    if (failure != null) throw failure(endpoint);
+    if (failure?.call(endpoint) case final error?) throw error;
     final channel = _Channel();
     channels.add(channel);
     return channel;
@@ -396,6 +440,15 @@ Future<void> _until(bool Function() condition) async {
 }
 
 String _attach([String room = _room]) => '{"action":10,"channel":"$room"}';
+
+/// B-14: the attach of a channel attached before, from [serial].
+String _resumeAttach(String? serial, [String room = _room]) => serial == null
+    ? '{"action":10,"channel":"$room","flags":32}'
+    : '{"action":10,"channel":"$room","channelSerial":"$serial","flags":32}';
+
+/// The serial of [_attachedFrame] and the key of [_connectedFrame].
+const String _joinedSerial = '01790636303769-000@4ab3ylSkAC7Jsb05105702';
+const String _connectedKey = 'KMHu-BpmDaCyjV!aAkFypXTcZHBDW_PeCuyrh-sUc2qJ';
 
 void main() {
   group('protocol', () {
@@ -950,7 +1003,9 @@ void main() {
       await _until(() => connector.channels.length == 2);
       final second = connector.channels.last;
       await second.join();
-      expect(second.sent, [_attach()]);
+      // B-14: the new socket resumes the connection and the channel.
+      expect(second.sent, [_resumeAttach(_joinedSerial)]);
+      expect(connector.endpoints.last.queryParameters['resume'], _connectedKey);
       expect(connector.tokens, ['AAAAAA.token-1', 'AAAAAA.token-1']);
       expect(http.requests, hasLength(1));
       expect(events, [
@@ -1159,18 +1214,22 @@ void main() {
       final channel = connector.channels.single;
       await channel.join();
       await channel.receive('{"action":13,"channel":"$_room","error":{"code":90198,"message":"Channel detached"}}');
-      expect(channel.sent, [_attach(), _attach()]);
+      // B-14: attached again from the last serial, as ably-js does.
+      expect(channel.sent, [_attach(), _resumeAttach(_joinedSerial)]);
       expect(connection.isConnected, isTrue);
       await channel.receive(_attachedFrame(_room));
       await channel.receive(_ablyMessage([_comment('戻った')]));
       expect(events.whereType<DanmakuReady>(), hasLength(1));
       expect(_messages(events).single.message, '戻った');
-      // Detached twice before the attach is answered: a new socket.
+      // Detached twice before the attach is answered: a new socket, which
+      // attaches without the serial (B-14: ably-js suspends the channel).
       await channel.receive('{"action":13,"channel":"$_room"}');
       await channel.receive('{"action":13,"channel":"$_room"}');
       await _until(() => connector.channels.length == 2);
-      expect(channel.sent, [_attach(), _attach(), _attach()]);
+      expect(channel.sent, [_attach(), _resumeAttach(_joinedSerial), _resumeAttach(_joinedSerial)]);
       expect(connector.tokens, ['AAAAAA.token-1', 'AAAAAA.token-1']);
+      await connector.channels.last.receive(_connectedFrame);
+      expect(connector.channels.last.sent, [_resumeAttach(null)]);
       await connection.close();
     });
 
@@ -1445,6 +1504,861 @@ void main() {
       connection.heartbeat();
       await _wait(const Duration(milliseconds: 20));
       expect(received, [_attach()], reason: 'the client sends no heartbeat');
+      await connection.close();
+    });
+  });
+
+  group('B-14: paid barrages', () {
+    test('S10-events: a paid barrage (barrageStyle, 79 points) is its chat line and a super chat', () {
+      final line = _events10().firstWhere((line) => line.room == '26541295');
+      final frame = SeventeenLiveDanmakuProtocol.decode(line.text, roomId: line.room);
+      final entry = frame.entries.single;
+      expect(entry.id, 'vE0tLXZYxKNU:0');
+      final [chat, paid] = entry.messages;
+      const text = 'マリス殿のリスナーの皆様もお疲れ様にござる(*´ω｀*) おめでとうにござる！ 良かったら、一緒に乾杯しませんか？にござる(*´ω｀*)';
+      expect((chat.type, chat.message, chat.userName, chat.messageId), (LiveMessageType.chat, text, '观众1', entry.id));
+      expect(paid.type, LiveMessageType.superChat);
+      expect((paid.userName, paid.userId, paid.message, paid.messageId), ('观众1', _user(1), text, entry.id));
+      expect(paid.sentAt, DateTime.fromMillisecondsSinceEpoch(1790782366575));
+      final data = paid.data! as LiveSuperChatMessage;
+      expect(data.messageId, 'vE0tLXZYxKNU:0');
+      expect(data.userName, '观众1');
+      expect(data.face, 'https://cdn.17app.co/THUMBNAIL_00000001-0000-4000-8000-000000000001.jpg');
+      expect(data.message, text);
+      expect((data.price, data.priceText), (79, '79 coins'));
+      expect(data.startTime, DateTime.fromMillisecondsSinceEpoch(1790782366575));
+      expect(data.endTime, DateTime.fromMillisecondsSinceEpoch(1790782366575 + 20000));
+      expect((data.backgroundColor, data.backgroundBottomColor), ('#F518CC', '#F518CC'));
+    });
+
+    test('S10-events: free barrages (inventory 14 and 12, army 5, assistant 4, all 0 points) stay chat only', () {
+      // Every recorded comment that flies (barrageStyle), with its entry.
+      final barrages = [
+        for (final line in _events10())
+          if (_payloadOf(line.text) case {'type': 3, 'commentMsg': {'barrageStyle': true}} && final payload)
+            (payload, SeventeenLiveDanmakuProtocol.decode(line.text, roomId: line.room).entries.single),
+      ];
+      expect(barrages, hasLength(5));
+      final free = barrages.skip(1).map((barrage) => barrage.$2).toList();
+      expect({for (final entry in free) entry.messages.single.type}, {LiveMessageType.chat});
+      expect(
+        [for (final entry in free) entry.messages.single.message],
+        ['こんばんワン🐶', 'ライオンにしてもらった🤩', '戰隊成員們來支持 观众4 了，目前成就值戰隊加成為 1000！', '凌凌晚上好🌇'],
+      );
+      for (final (payload, entry) in barrages) {
+        final comment = payload['commentMsg']! as Map<String, Object?>;
+        final paid = ((comment['barrage']! as Map<String, Object?>)['point']! as int) > 0;
+        expect(SeventeenLiveDanmakuProtocol.superChat(payload, id: 'x') != null, paid);
+        expect(entry.messages.length, paid ? 2 : 1);
+      }
+    });
+
+    test('the super chat field by field: what makes one, text, time, face, colour; bad data', () {
+      final now = DateTime.utc(2026, 9, 30, 12);
+      Map<String, Object?> paid({Map<String, Object?> more = const {}, Map<String, Object?> user = const {}}) =>
+          _comment(
+            '本文',
+            more: {
+              'barrageStyle': true,
+              'barrage': {'type': 1, 'point': 79},
+              'backgroundColor': '#B3F518CC',
+              'displayUser': {'userID': _user(1), 'displayName': '观众1', 'picture': 'ab-cd.jpg', ...user},
+              ...more,
+            },
+          );
+      LiveMessage? read(Map<String, Object?> payload) =>
+          SeventeenLiveDanmakuProtocol.superChat(payload, id: 'f:0', now: now);
+      LiveSuperChatMessage data(Map<String, Object?> payload) => read(payload)!.data! as LiveSuperChatMessage;
+      expect(read(paid()), isNotNull);
+      // What makes one: barrageStyle true and a point above zero, shown.
+      for (final more in <Map<String, Object?>>[
+        {'barrageStyle': false},
+        {'barrageStyle': 'true'},
+        {'barrageStyle': null},
+        {
+          'barrage': {'type': 1, 'point': 0},
+        },
+        {
+          'barrage': {'type': 1, 'point': -5},
+        },
+        {
+          'barrage': {'type': 1, 'point': '79'},
+        },
+        {
+          'barrage': {'type': 1, 'point': 7.9},
+        },
+        {
+          'barrage': {'type': 1},
+        },
+        {'barrage': 'x'},
+        {'isDirty': true},
+        {'isDirtyUser': true},
+        {'content': '', 'comment': <String, Object?>{}},
+      ]) {
+        expect(read(paid(more: more)), isNull, reason: '$more');
+      }
+      expect(read(const {'type': 38, 'liveinfo': <String, Object?>{}}), isNull);
+      expect(read({...paid(), 'type': 13}), isNull);
+      // The text is comment.text with line breaks as spaces; content without it.
+      expect(
+        data(
+          paid(
+            more: {
+              'content': '一\n二',
+              'comment': {'text': '\n一\n二\n'},
+            },
+          ),
+        ).message,
+        '一 二',
+      );
+      expect(
+        read(
+          paid(
+            more: {
+              'content': '内容',
+              'comment': {'text': '  '},
+            },
+          ),
+        )!.message,
+        '内容',
+      );
+      // The time: sendTime, else now; 20 s.
+      expect(data(paid()).startTime, DateTime.fromMillisecondsSinceEpoch(_t + 1));
+      final untimed = data(paid(more: {'sendTime': null}));
+      expect((untimed.startTime, untimed.endTime), (now, now.add(const Duration(seconds: 20))));
+      expect(read(paid(more: {'sendTime': null}))!.sentAt, isNull);
+      // The face as the website builds it; a URL of its own is kept when it is
+      // the platform's.
+      expect(data(paid()).face, 'https://cdn.17app.co/THUMBNAIL_ab-cd.jpg');
+      expect(data(paid(user: {'picture': 'http://cdn.17app.co/a.jpg'})).face, 'https://cdn.17app.co/a.jpg');
+      expect(data(paid(user: {'picture': 'https://evil.example/a.jpg'})).face, isEmpty);
+      expect(data(paid(user: {'picture': '../x.jpg'})).face, isEmpty);
+      expect(data(paid(user: {'picture': ''})).face, isEmpty);
+      expect(data(paid(user: {'picture': 5})).face, isEmpty);
+      // The colour is the comment's own background, #RRGGBB.
+      final colours = <Object?, String>{
+        '#B3F518CC': '#F518CC',
+        'ff69b4': '#FF69B4',
+        ' #FFff69b4 ': '#FF69B4',
+        '#FFF': '',
+        'red': '',
+        '': '',
+        0xF518CC: '',
+        null: '',
+      };
+      for (final MapEntry(key: value, value: colour) in colours.entries) {
+        expect(SeventeenLiveDanmakuProtocol.backgroundColor(value), colour, reason: '$value');
+        final fill = data(paid(more: {'backgroundColor': value}));
+        expect((fill.backgroundColor, fill.backgroundBottomColor), (colour, colour), reason: '$value');
+      }
+      // The price text is the website's, the price the point.
+      final big = data(
+        paid(
+          more: {
+            'barrage': {'type': 2, 'point': 12000},
+          },
+        ),
+      );
+      expect((big.price, big.priceText), (12000, '12000 coins'));
+      // The chat line comes first and stays as it was (M5.29).
+      final entry = SeventeenLiveDanmakuProtocol.entry(paid(), id: 'f:0', now: now);
+      expect([for (final message in entry.messages) message.type], [LiveMessageType.chat, LiveMessageType.superChat]);
+      expect(
+        [for (final message in entry.messages) message.messageId],
+        ['f:0', 'f:0'],
+        reason: 'one Ably message: the super chat equals itself by id, the chat line passes the gate by id',
+      );
+    });
+  });
+
+  group('B-14: stream end and mute', () {
+    test('S10-events: the stream end (5) is an ended entry, whatever it holds', () {
+      final ends = [
+        for (final line in _events10())
+          for (final entry in SeventeenLiveDanmakuProtocol.decode(line.text, roomId: line.room).entries)
+            if (entry.ended) (line.room, entry.id),
+      ];
+      expect(ends, [('29648148', 'zdKdlmh20KsD:0'), ('14786082', '6q2XGMQ8l51z:0')]);
+      for (final payload in <Map<String, Object?>>[
+        const {'type': 5},
+        const {'type': 5, 'endStreamMsg': 'x'},
+        const {
+          'type': 5,
+          'endStreamMsg': {'closeBy': 'KillBySkyeye', 'reason': 'x'},
+        },
+      ]) {
+        final entry = SeventeenLiveDanmakuProtocol.entry(payload, id: 'e:0');
+        expect((entry.ended, entry.messages.length, entry.muted), (true, 0, null), reason: '$payload');
+      }
+      for (final type in <Object?>['5', 5.5, 6, null]) {
+        expect(SeventeenLiveDanmakuProtocol.entry({'type': type}).ended, isFalse, reason: '$type');
+      }
+      // A JSON 5.0 is the website's 5 as well (a JavaScript number).
+      expect(SeventeenLiveDanmakuProtocol.entry(const {'type': 5.0}).ended, isTrue);
+    });
+
+    test('the live figures carry liveinfo.mute when it is a boolean; the notice fills the model', () {
+      Map<String, Object?> live(Object? mute) => {
+        'type': 38,
+        'liveinfo': {'mute': mute, 'liveViewerCount': 10},
+      };
+      expect(SeventeenLiveDanmakuProtocol.entry(live(true)).muted, isTrue);
+      expect(SeventeenLiveDanmakuProtocol.entry(live(false)).muted, isFalse);
+      for (final mute in <Object?>['true', 1, null]) {
+        expect(SeventeenLiveDanmakuProtocol.entry(live(mute)).muted, isNull, reason: '$mute');
+      }
+      expect(SeventeenLiveDanmakuProtocol.entry(const {'type': 38, 'liveinfo': 'x'}).muted, isNull);
+      expect(SeventeenLiveDanmakuProtocol.entry(live(true)).messages.single.type, LiveMessageType.online);
+      final on = SeventeenLiveDanmakuProtocol.muteNotice(muted: true, id: 'm:0');
+      expect(on.type, LiveMessageType.notice);
+      expect(on.data, LiveNoticeKind.system);
+      expect(on.message, SeventeenLiveDanmakuProtocol.mutedNotice);
+      // What the stream does while muted (measured): a still picture, no sound.
+      expect(SeventeenLiveDanmakuProtocol.mutedNotice, '主播暂停了直播（画面静止、没有声音）');
+      expect(SeventeenLiveDanmakuProtocol.unmutedNotice, '主播恢复了直播');
+      expect(
+        (on.userName, on.userId, on.messageId, on.color, on.sentAt),
+        ('', '', 'm:0', LiveMessageColor.white, null),
+      );
+      final off = SeventeenLiveDanmakuProtocol.muteNotice(muted: false);
+      expect(
+        (off.message, off.data, off.messageId),
+        (SeventeenLiveDanmakuProtocol.unmutedNotice, LiveNoticeKind.system, ''),
+      );
+      expect(on.message, isNot(off.message));
+    });
+
+    test('the stream end ends the run with connectionFailed: what came before it is shown, nothing after', () async {
+      final http = _Http([_granted('AAAAAA.token-1')]);
+      final connector = _Connector();
+      final connection = _connection(connector, http);
+      final events = _record(connection);
+      await connection.connect(_args);
+      final channel = connector.channels.single;
+      await channel.join();
+      await channel.receive(
+        _ablyMessage([
+          _comment('前'),
+          const {'type': 5, 'endStreamMsg': <String, Object?>{}},
+          _comment('後', n: 2),
+        ]),
+      );
+      expect(events, [
+        const DanmakuReady(),
+        isA<DanmakuReceived>().having((event) => event.message.message, 'text', '前'),
+        const DanmakuClosed(DanmakuCloseReason.connectionFailed, detail: 'Broadcast ended'),
+      ]);
+      expect(SeventeenLiveDanmakuConnection.broadcastEnded, 'Broadcast ended');
+      expect(channel.closed, isTrue);
+      await channel.receive(_ablyMessage([_comment('遅い')], id: 'later'));
+      await _wait(const Duration(milliseconds: 30));
+      expect(events, hasLength(3));
+      expect(connector.channels, hasLength(1), reason: 'no reconnect');
+      expect(connection.status, DanmakuStatus.closed);
+    });
+
+    test("S10-events: the recorded stream end ends its room's run", () async {
+      final line = _events10().firstWhere((line) => line.room == '29648148');
+      final connector = _Connector();
+      final connection = _connection(connector, _Http([_granted('AAAAAA.token-1')]));
+      final events = _record(connection);
+      await connection.connect(SeventeenLiveDanmakuArgs(roomId: line.room));
+      await connector.channels.single.join(line.room);
+      await connector.channels.single.receive(line.text);
+      expect(events.last, const DanmakuClosed(DanmakuCloseReason.connectionFailed, detail: 'Broadcast ended'));
+    });
+
+    test('mute: a notice when it turns true, and when it turns false again; once per change; per run', () async {
+      Map<String, Object?> live(Object? mute) => {
+        'type': 38,
+        'liveinfo': {'mute': mute, 'liveViewerCount': 10},
+      };
+      final http = _Http([_granted('AAAAAA.token-1')]);
+      final connector = _Connector();
+      final connection = _connection(connector, http);
+      final events = _record(connection);
+      await connection.connect(_args);
+      final channel = connector.channels.single;
+      await channel.join();
+      var n = 0;
+      Future<void> send(Object? mute) => channel.receive(_ablyMessage([live(mute)], id: 'live${n++}'));
+      List<String> notices() => [
+        for (final message in _messages(events))
+          if (message.type == LiveMessageType.notice) '${message.messageId} ${message.message}',
+      ];
+      await send(false);
+      await send(null);
+      expect(notices(), isEmpty, reason: 'false at first is the usual state');
+      await send(true);
+      await send(true);
+      await send('true');
+      await send(false);
+      await send(false);
+      await send(true);
+      expect(notices(), [
+        'live2:0 ${SeventeenLiveDanmakuProtocol.mutedNotice}',
+        'live5:0 ${SeventeenLiveDanmakuProtocol.unmutedNotice}',
+        'live7:0 ${SeventeenLiveDanmakuProtocol.mutedNotice}',
+      ]);
+      // Each live figure is still the viewers now, before its notice.
+      expect(_messages(events).where((message) => message.type == LiveMessageType.online), hasLength(8));
+      expect(_messages(events)[2].type, LiveMessageType.online);
+      expect(_messages(events)[3].type, LiveMessageType.notice);
+      // The same message again (a resume): nothing.
+      await channel.receive(_ablyMessage([live(false)], id: 'live5'));
+      expect(notices(), hasLength(3));
+      // Another run starts afresh.
+      await connection.connect(const SeventeenLiveDanmakuArgs(roomId: _archivedRoom));
+      await connector.channels.last.join(_archivedRoom);
+      await connector.channels.last.receive(_ablyMessage([live(true)], room: _archivedRoom, id: 'other'));
+      expect(notices().last, 'other:0 ${SeventeenLiveDanmakuProtocol.mutedNotice}');
+      await connection.close();
+    });
+
+    test('S10-events: the recorded mute on and off (liveinfo type 0), viewers writing between', () async {
+      const room = '29802206';
+      final lines = [
+        for (final line in _events10())
+          if (line.room == room) line.text,
+      ];
+      expect(lines, hasLength(4));
+      final connector = _Connector();
+      final connection = _connection(connector, _Http([_granted('AAAAAA.token-1')]));
+      final events = _record(connection);
+      await connection.connect(const SeventeenLiveDanmakuArgs(roomId: room));
+      await connector.channels.single.join(room);
+      for (final line in lines) {
+        await connector.channels.single.receive(line);
+      }
+      expect(
+        [
+          for (final message in _messages(events))
+            switch (message.type) {
+              LiveMessageType.online => 'online ${(message.data! as LiveAudienceUpdate).value}',
+              LiveMessageType.notice => 'notice ${message.message}',
+              _ => '${message.type.name} ${message.message}',
+            },
+        ],
+        [
+          // The mute messages are live figures of type 0 with every figure 0;
+          // the website shows those zeros as well (M5.29 unchanged).
+          'online 0',
+          'notice ${SeventeenLiveDanmakuProtocol.mutedNotice}',
+          'chat みんなコメントしなければ行く説',
+          'chat また帰ってきたらコメント追うのに忙しくなってそう笑',
+          'online 0',
+          'notice ${SeventeenLiveDanmakuProtocol.unmutedNotice}',
+        ],
+      );
+      await connection.close();
+    });
+
+    test('a paid barrage through the connection: its chat line, then its super chat', () async {
+      final line = _events10().firstWhere((line) => line.room == '26541295');
+      final connector = _Connector();
+      final connection = _connection(connector, _Http([_granted('AAAAAA.token-1')]));
+      final events = _record(connection);
+      await connection.connect(SeventeenLiveDanmakuArgs(roomId: line.room));
+      await connector.channels.single.join(line.room);
+      await connector.channels.single.receive(line.text);
+      expect(
+        [for (final message in _messages(events)) message.type],
+        [LiveMessageType.chat, LiveMessageType.superChat],
+      );
+      await connection.close();
+    });
+
+    test('a super chat without its own time starts at the connection clock', () async {
+      final clock = DateTime.utc(2026, 9, 30, 15, 32, 46);
+      final connector = _Connector();
+      final connection = SeventeenLiveDanmakuConnection(
+        http: _Http([_granted('AAAAAA.token-1')]),
+        connector: connector.call,
+        policy: _quiet,
+        now: () => clock,
+      );
+      final events = _record(connection);
+      await connection.connect(_args);
+      await connector.channels.single.join();
+      await connector.channels.single.receive(
+        _ablyMessage([
+          _comment(
+            '時間なし',
+            more: {
+              'sendTime': null,
+              'barrageStyle': true,
+              'barrage': {'type': 0, 'point': 10},
+            },
+          ),
+        ]),
+      );
+      final paid = _messages(events).last.data! as LiveSuperChatMessage;
+      expect((paid.startTime, paid.endTime), (clock, clock.add(SeventeenLiveDanmakuProtocol.superChatDuration)));
+      await connection.close();
+    });
+  });
+
+  group('B-14: resume', () {
+    test('the resume query, the resuming ATTACH and the frames that carry a serial', () {
+      final endpoint = SeventeenLiveDanmakuProtocol.endpoints.first;
+      expect(
+        '${SeventeenLiveDanmakuProtocol.withToken(endpoint, 'app.tok', resume: 'KEY!abc-12')}',
+        'wss://17media.realtime.ably.net/?access_token=app.tok&resume=KEY%21abc-12&format=json&heartbeats=true&v=3',
+      );
+      expect(
+        '${SeventeenLiveDanmakuProtocol.withToken(endpoint, 'app.tok')}',
+        'wss://17media.realtime.ably.net/?access_token=app.tok&format=json&heartbeats=true&v=3',
+      );
+      expect(SeventeenLiveDanmakuProtocol.attach('1'), '{"action":10,"channel":"1"}');
+      expect(SeventeenLiveDanmakuProtocol.attach('1', resume: true), '{"action":10,"channel":"1","flags":32}');
+      expect(
+        SeventeenLiveDanmakuProtocol.attach('1', channelSerial: 's', resume: true),
+        '{"action":10,"channel":"1","channelSerial":"s","flags":32}',
+      );
+      expect(
+        SeventeenLiveDanmakuProtocol.attach('1', channelSerial: 's'),
+        '{"action":10,"channel":"1","channelSerial":"s"}',
+      );
+      expect((SeventeenLiveDanmakuProtocol.attachResumeFlag, SeventeenLiveDanmakuProtocol.resumedFlag), (32, 4));
+      expect(SeventeenLiveDanmakuProtocol.defaultConnectionStateTtl, const Duration(seconds: 120));
+      expect(SeventeenLiveDanmakuProtocol.superChatDuration, const Duration(seconds: 20));
+      SeventeenLiveDanmakuFrame read(Object data) => SeventeenLiveDanmakuProtocol.decode(data, roomId: _room);
+      expect(read(_attachedFrame(_room)).channelSerial, _joinedSerial);
+      expect(read(_ablyMessage([_comment('x')])).channelSerial, isNull, reason: 'the helper sends none');
+      expect(read('{"action":15,"channel":"$_room","channelSerial":"m1","messages":[]}').channelSerial, 'm1');
+      expect(read('{"action":14,"channel":"$_room","channelSerial":"p1","presence":[]}').channelSerial, 'p1');
+      expect(read('{"action":16,"channel":"$_room","channelSerial":"s1"}').channelSerial, isNull);
+      expect(read('{"action":15,"channel":"1","channelSerial":"o1","messages":[]}').channelSerial, isNull);
+      for (final serial in <Object?>['', 5, null]) {
+        expect(
+          read(jsonEncode({'action': 11, 'channel': _room, 'channelSerial': serial})).channelSerial,
+          isNull,
+          reason: '$serial',
+        );
+      }
+      for (final (flags, resumed) in <(Object?, bool)>[
+        (786438, true),
+        (4, true),
+        (786432, false),
+        (786434, false),
+        ('786438', false),
+        (null, false),
+      ]) {
+        expect(read(jsonEncode({'action': 11, 'channel': _room, 'flags': flags})).resumed, resumed, reason: '$flags');
+      }
+    });
+
+    test('CONNECTED: the connection id, key and times; missing or bad fields', () {
+      final connected = SeventeenLiveDanmakuProtocol.decode(_connectedFrame, roomId: _room);
+      expect(connected.connection, const SeventeenLiveConnectionDetails(id: 'pa6jde0UNT', key: _connectedKey));
+      expect(connected.error, isNull);
+      String frame(Map<String, Object?> details, {Object? id = 'id1'}) =>
+          jsonEncode({'action': 4, 'connectionId': ?id, 'connectionDetails': details});
+      SeventeenLiveConnectionDetails? read(String text) =>
+          SeventeenLiveDanmakuProtocol.decode(text, roomId: _room).connection;
+      expect(
+        read(frame({'connectionKey': 'k', 'connectionStateTtl': 60000, 'maxIdleInterval': 5000})),
+        const SeventeenLiveConnectionDetails(
+          id: 'id1',
+          key: 'k',
+          stateTtl: Duration(seconds: 60),
+          maxIdleInterval: Duration(seconds: 5),
+        ),
+      );
+      for (final bad in <Object?>[0, -1, '60000', 86400001, null]) {
+        final details = read(frame({'connectionKey': 'k', 'connectionStateTtl': bad, 'maxIdleInterval': bad}))!;
+        expect(
+          (details.stateTtl, details.maxIdleInterval),
+          (const Duration(seconds: 120), const Duration(seconds: 15)),
+          reason: '$bad',
+        );
+      }
+      expect(read(frame({'connectionKey': 'k', 'connectionStateTtl': 86400000}))!.stateTtl, const Duration(days: 1));
+      expect(read(frame({'connectionKey': 'k'}, id: null)), isNull);
+      expect(read(frame({'connectionKey': 'k'}, id: '')), isNull);
+      expect(read(frame({'connectionKey': 'k'}, id: 7)), isNull);
+      expect(read(frame({'connectionKey': ''})), isNull);
+      expect(read(frame({})), isNull);
+      expect(read('{"action":4,"connectionId":"x","connectionDetails":"k"}'), isNull);
+      expect(SeventeenLiveDanmakuProtocol.decode('{"action":4}', roomId: _room).signal, SeventeenLiveSignal.connected);
+    });
+
+    test('S09-resume-bad-key: a key that names no connection gets a new one and 80018', () {
+      final lines = _lines('S09-resume-bad-key');
+      final frames = [
+        for (final line in lines)
+          if (line['dir'] == 'in' && line['url'] == null)
+            SeventeenLiveDanmakuProtocol.decode(line['text'], roomId: '29790476'),
+      ];
+      final connected = frames.first;
+      expect(connected.signal, SeventeenLiveSignal.connected);
+      expect(connected.connection!.id, 'LvPs1M0e80');
+      expect(
+        connected.error,
+        const SeventeenLiveAblyError(
+          code: 80018,
+          statusCode: 400,
+          message: 'invalid connection key: 4abAAAAAAAAAAA!AAAAAAAAAAAAAAAAAAAAAAAAAAA-000000',
+        ),
+      );
+      expect(connected.error!.isTokenError, isFalse);
+      expect((frames[1].signal, frames[1].resumed), (SeventeenLiveSignal.attached, false));
+    });
+
+    test(
+      'S08-resume: every later socket resumes; the missed messages come once; 150 s of silence starts afresh',
+      () async {
+        const name = 'S08-resume';
+        const room = '29790476';
+        final lines = _lines(name);
+        final start = DateTime.parse(_meta(name)['capturedAt']! as String);
+        final handshakes = [
+          for (final handshake in (_meta(name)['handshakes']! as List<Object?>).cast<Map<String, Object?>>())
+            handshake['url']! as String,
+        ];
+        var clock = start;
+        final connector = _Connector();
+        final connection = SeventeenLiveDanmakuConnection(
+          http: _Http([
+            LiveResponse(
+              status: 200,
+              url: SeventeenLiveDanmakuProtocol.authUrl,
+              bytes: utf8.encode(lines.first['text']! as String),
+            ),
+          ]),
+          connector: connector.call,
+          policy: _quiet,
+          now: () => clock,
+        );
+        final events = _record(connection);
+        await connection.connect(const SeventeenLiveDanmakuArgs(roomId: room));
+        List<Map<String, Object?>> of(int socket, String dir) => [
+          for (final line in lines)
+            if (line['socket'] == socket && line['dir'] == dir) line,
+        ];
+        final keys = <String>[];
+        for (var socket = 1; socket <= 5; socket++) {
+          await _until(() => connector.channels.length == socket);
+          final channel = connector.channels.last;
+          for (final line in of(socket, 'in')) {
+            clock = start.add(Duration(milliseconds: line['t']! as int));
+            await channel.receive(line['text']!);
+            if (jsonDecode(line['text']! as String) case {
+              'action': 4,
+              'connectionDetails': {'connectionKey': final String key},
+            }) {
+              keys.add(key);
+            }
+          }
+          final recorded = [for (final line in of(socket, 'out')) line['text']];
+          switch (socket) {
+            case 1 || 2 || 3 || 4:
+              // The ATTACH is the recorder's, byte for byte: from the last
+              // serial with ATTACH_RESUME after the first.
+              expect(channel.sent, recorded, reason: 'socket $socket');
+            case 5:
+              // 150 s after the last frame (more than 120 s + 15 s): ably-js
+              // forgets the connection and the channel's serial; the recorder
+              // did not, and the server answered 90003 with its backlog.
+              expect(channel.sent, ['{"action":10,"channel":"$room","flags":32}']);
+          }
+          if (socket < 5) {
+            // The next socket opens at the recorded time.
+            final next = lines.firstWhere((line) => line['socket'] == socket + 1);
+            clock = start.add(Duration(milliseconds: next['t']! as int));
+            await channel.incoming.close();
+          }
+        }
+        final resumes = [for (final endpoint in connector.endpoints) endpoint.queryParameters['resume']];
+        expect(resumes, [null, keys[0], keys[1], keys[2], null]);
+        // The recorder's first two handshakes, byte for byte; the third
+        // resumed a key with its end changed and the fourth none (probes).
+        expect('${connector.endpoints[0]}', handshakes[0]);
+        expect('${connector.endpoints[1].replace(host: '17media.realtime.ably.net')}', handshakes[1]);
+        expect(Uri.parse(handshakes[2]).queryParameters['resume'], isNot(keys[1]));
+        expect(Uri.parse(handshakes[3]).queryParameters['resume'], isNull);
+        expect(Uri.parse(handshakes[4]).queryParameters['resume'], keys[3]);
+        // The same connection went on (the recorder's C and B), then a new one.
+        expect({for (final key in keys) key.split('!').last.substring(0, 10)}, {'X-E5s1H2ZI', '3iJ42NoCkm'});
+        final messages = _messages(events);
+        final ids = [
+          for (final message in messages)
+            if (message.messageId.isNotEmpty) message.messageId,
+        ];
+        expect(ids.toSet(), hasLength(ids.length));
+        expect(messages.where((message) => message.type == LiveMessageType.chat), hasLength(8));
+        expect(messages.where((message) => message.type == LiveMessageType.online), hasLength(6));
+        expect(events.whereType<DanmakuReady>(), hasLength(5));
+        expect(events.whereType<DanmakuReconnecting>(), hasLength(4));
+        expect(events.whereType<DanmakuClosed>(), isEmpty);
+        // The channel went on at sockets 2 to 4 (RESUMED, the missed
+        // messages first); at 5 the server could not (90003) and sent its
+        // backlog instead.
+        final attached = [
+          for (final line in lines)
+            if (line['dir'] == 'in' && line['url'] == null)
+              if (SeventeenLiveDanmakuProtocol.decode(line['text'], roomId: room) case final frame
+                  when frame.signal == SeventeenLiveSignal.attached)
+                (frame.resumed, frame.error?.code),
+        ];
+        expect(attached, [(false, null), (true, null), (true, null), (true, null), (false, 90003)]);
+        await connection.close();
+      },
+    );
+
+    test('a message sent again (after a resume, or twice) is reported once; one without an id each time', () async {
+      final connector = _Connector();
+      final connection = _connection(connector, _Http([_granted('AAAAAA.token-1')]));
+      final events = _record(connection);
+      await connection.connect(_args);
+      final first = connector.channels.single;
+      await first.join();
+      await first.receive(_ablyMessage([_comment('一'), _comment('二', n: 2)], id: 'a'));
+      await first.receive(_ablyMessage([_comment('一'), _comment('二', n: 2)], id: 'a'));
+      await first.incoming.close();
+      await _until(() => connector.channels.length == 2);
+      final second = connector.channels.last;
+      await second.join();
+      // The backlog repeats a message already shown, then a new one.
+      await second.receive(
+        jsonEncode({
+          'action': 15,
+          'channel': _room,
+          'messages': [
+            {'id': 'a:1', 'data': base64Encode(gzip.encode(utf8.encode(jsonEncode(_comment('二', n: 2)))))},
+            {'id': 'b:0', 'data': base64Encode(gzip.encode(utf8.encode(jsonEncode(_comment('三', n: 3)))))},
+          ],
+        }),
+      );
+      // Neither the message nor the frame has an id: nothing to compare.
+      for (var n = 0; n < 2; n++) {
+        await second.receive(
+          jsonEncode({
+            'action': 15,
+            'channel': _room,
+            'messages': [
+              {'data': base64Encode(gzip.encode(utf8.encode(jsonEncode(_comment('四', n: 4)))))},
+            ],
+          }),
+        );
+      }
+      expect(_messages(events).map((message) => '${message.messageId}=${message.message}'), [
+        'a:0=一',
+        'a:1=二',
+        'b:0=三',
+        '=四',
+        '=四',
+      ]);
+      await connection.close();
+    });
+
+    test('a resume that fails (S09: a new connection, 80018) attaches from the serial all the same', () async {
+      final lines = _lines('S09-resume-bad-key');
+      final connector = _Connector();
+      final connection = _connection(connector, _Http([_granted('AAAAAA.token-1')]));
+      final events = _record(connection);
+      await connection.connect(const SeventeenLiveDanmakuArgs(roomId: '29790476'));
+      final first = connector.channels.single;
+      await first.receive(_connectedFrame);
+      await first.receive(_attachedFrame('29790476'));
+      await first.incoming.close();
+      await _until(() => connector.channels.length == 2);
+      expect(connector.endpoints.last.queryParameters['resume'], _connectedKey);
+      final second = connector.channels.last;
+      for (final line in lines.where((line) => line['dir'] == 'in' && line['url'] == null)) {
+        await second.receive(line['text']!);
+      }
+      expect(second.sent, [_resumeAttach(_joinedSerial, '29790476')]);
+      expect(events.whereType<DanmakuReady>(), hasLength(2));
+      // The next socket resumes the new connection.
+      await second.incoming.close();
+      await _until(() => connector.channels.length == 3);
+      expect(connector.endpoints.last.queryParameters['resume'], startsWith('4abPf7l3YM04ZY!LvPs1M0e80'));
+      await connection.close();
+    });
+
+    test(
+      'silence: at 135 s after the last frame the key is resumed, 1 ms later it and the serial are forgotten',
+      () async {
+        final start = DateTime.utc(2026, 9, 30, 15);
+        var clock = start;
+        final connector = _Connector();
+        final connection = SeventeenLiveDanmakuConnection(
+          http: _Http([_granted('AAAAAA.token-1')]),
+          connector: connector.call,
+          policy: _quiet,
+          now: () => clock,
+        );
+        await connection.connect(_args);
+        await connector.channels.single.join();
+        clock = start.add(const Duration(seconds: 135));
+        await connector.channels.single.incoming.close();
+        await _until(() => connector.channels.length == 2);
+        expect(connector.endpoints.last.queryParameters['resume'], _connectedKey);
+        await connector.channels.last.receive(_connectedFrame);
+        expect(connector.channels.last.sent, [_resumeAttach(_joinedSerial)]);
+        clock = clock.add(const Duration(seconds: 135, milliseconds: 1));
+        await connector.channels.last.incoming.close();
+        await _until(() => connector.channels.length == 3);
+        expect(connector.endpoints.last.queryParameters.containsKey('resume'), isFalse);
+        await connector.channels.last.receive(_connectedFrame);
+        expect(connector.channels.last.sent, [_resumeAttach(null)]);
+        await connection.close();
+      },
+    );
+
+    test("silence: the limit is the CONNECTED's own connectionStateTtl + maxIdleInterval", () async {
+      final start = DateTime.utc(2026, 9, 30, 15);
+      var clock = start;
+      final connector = _Connector();
+      final connection = SeventeenLiveDanmakuConnection(
+        http: _Http([_granted('AAAAAA.token-1')]),
+        connector: connector.call,
+        policy: _quiet,
+        now: () => clock,
+      );
+      String connected(String key) => jsonEncode({
+        'action': 4,
+        'connectionId': 'short',
+        'connectionDetails': {'connectionKey': key, 'connectionStateTtl': 60000, 'maxIdleInterval': 5000},
+      });
+      await connection.connect(_args);
+      await connector.channels.single.receive(connected('short!1'));
+      await connector.channels.single.receive(_attachedFrame(_room));
+      clock = start.add(const Duration(seconds: 65));
+      await connector.channels.single.incoming.close();
+      await _until(() => connector.channels.length == 2);
+      expect(connector.endpoints.last.queryParameters['resume'], 'short!1');
+      await connector.channels.last.receive(connected('short!2'));
+      clock = clock.add(const Duration(seconds: 65, milliseconds: 1));
+      await connector.channels.last.incoming.close();
+      await _until(() => connector.channels.length == 3);
+      expect(connector.endpoints.last.queryParameters['resume'], isNull);
+      await connection.close();
+    });
+
+    test('a token error keeps the resume: a new token, the same key', () async {
+      final http = _Http([_granted('AAAAAA.token-1'), _granted('AAAAAA.token-2')]);
+      final connector = _Connector();
+      final connection = _connection(connector, http);
+      await connection.connect(_args);
+      await connector.channels.single.join();
+      await connector.channels.single.receive(_error(6, 40142, 'Token expired'));
+      await _until(() => connector.channels.length == 2);
+      expect(connector.tokens, ['AAAAAA.token-1', 'AAAAAA.token-2']);
+      expect(connector.endpoints.last.queryParameters['resume'], _connectedKey);
+      await connector.channels.last.receive(_connectedFrame);
+      expect(connector.channels.last.sent, [_resumeAttach(_joinedSerial)]);
+      await connection.close();
+    });
+
+    test('an ATTACH unanswered in time forgets the serial; a socket that never said CONNECTED keeps it', () async {
+      final connector = _Connector();
+      final connection = _connection(
+        connector,
+        _Http([_granted('AAAAAA.token-1')]),
+        policy: const DanmakuSocketPolicy(
+          heartbeatInterval: Duration.zero,
+          joinTimeout: Duration(milliseconds: 1000),
+          reconnectBaseDelay: Duration(milliseconds: 5),
+        ),
+      );
+      await connection.connect(_args);
+      await connector.channels.single.join();
+      await connector.channels.single.incoming.close();
+      // No CONNECTED within the limit: the serial is kept.
+      await _until(() => connector.channels.length == 2);
+      await _until(() => connector.channels.length == 3);
+      await connector.channels.last.receive(_connectedFrame);
+      expect(connector.channels.last.sent, [_resumeAttach(_joinedSerial)]);
+      // That ATTACH unanswered within the limit: the serial is forgotten.
+      await _until(() => connector.channels.length == 4);
+      expect(connector.endpoints.last.queryParameters['resume'], _connectedKey);
+      await connector.channels.last.receive(_connectedFrame);
+      expect(connector.channels.last.sent, [_resumeAttach(null)]);
+      await connection.close();
+    });
+
+    test('a failed resuming handshake: neither the token nor the key in the detail', () async {
+      const key = 'AbC!de/f+g-1';
+      final connector = _Connector(
+        fail: (endpoint) => endpoint.queryParameters.containsKey('resume')
+            ? WebSocketException("Connection to '${endpoint.replace(scheme: 'https')}' was not upgraded ($key)")
+            : null,
+      );
+      final connection = _connection(connector, _Http([_granted('AAAAAA.token/1+')]));
+      final events = _record(connection);
+      await connection.connect(_args);
+      await connector.channels.single.receive(
+        jsonEncode({
+          'action': 4,
+          'connectionId': 'id',
+          'connectionDetails': {'connectionKey': key},
+        }),
+      );
+      await connector.channels.single.incoming.close();
+      await _until(() => events.whereType<DanmakuClosed>().isNotEmpty);
+      final detail = events.whereType<DanmakuClosed>().single.detail;
+      expect(detail, contains('resume=<key>'));
+      expect(detail, contains('access_token=<token>'));
+      expect(detail, endsWith('(<key>)'));
+      for (final secret in [key, Uri.encodeQueryComponent(key), 'token/1', 'token%2F1']) {
+        expect(detail, isNot(contains(secret)), reason: secret);
+      }
+    });
+
+    test('a local WebSocket server: the dropped socket comes back with resume and the resuming ATTACH', () async {
+      final queries = <String>[];
+      final received = <String>[];
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final sockets = <WebSocket>[];
+      addTearDown(() async {
+        await Future.wait([for (final socket in sockets) socket.close()]);
+        await server.close(force: true);
+      });
+      server.listen((request) async {
+        queries.add(request.uri.query);
+        final socket = await WebSocketTransformer.upgrade(request);
+        sockets.add(socket);
+        final number = sockets.length;
+        socket
+          ..add(_connectedFrame)
+          ..listen((frame) {
+            received.add(frame as String);
+            socket
+              ..add(
+                jsonEncode({
+                  'action': 11,
+                  'channel': _room,
+                  'channelSerial': 'serial-$number',
+                  'flags': number == 1 ? 786432 : 786438,
+                }),
+              )
+              ..add(_ablyMessage([_comment('第$number')], id: 'm$number'));
+            if (number == 1) unawaited(socket.close(1011));
+          });
+      });
+      final connection = SeventeenLiveDanmakuConnection(
+        http: _Http([_granted('AAAAAA.token-1')]),
+        policy: _quiet,
+        connector: (endpoint, {required headers, required protocols, required route, required connectTimeout}) =>
+            connectIoSocket(
+              endpoint.replace(scheme: 'ws', host: '127.0.0.1', port: server.port),
+              headers: headers,
+              protocols: protocols,
+              route: route,
+              connectTimeout: connectTimeout,
+            ),
+      );
+      final events = _record(connection);
+      await connection.connect(_args);
+      await _until(() => _messages(events).length == 2);
+      expect(queries, [
+        'access_token=AAAAAA.token-1&format=json&heartbeats=true&v=3',
+        'access_token=AAAAAA.token-1&resume=KMHu-BpmDaCyjV%21aAkFypXTcZHBDW_PeCuyrh-sUc2qJ&format=json&heartbeats=true&v=3',
+      ]);
+      expect(received, [_attach(), _resumeAttach('serial-1')]);
+      expect(_messages(events).map((message) => message.message), ['第1', '第2']);
       await connection.close();
     });
   });

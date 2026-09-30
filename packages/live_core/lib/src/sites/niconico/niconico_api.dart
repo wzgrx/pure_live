@@ -1019,6 +1019,11 @@ abstract final class NiconicoApi {
   static SiteError seatDisconnect(Object? data) =>
       StreamUnavailable(_site, 'seat disconnect ${data is Map ? data['reason'] : ''}'.trim());
 
+  /// Whether a seat ended with [reason] because its program ended: the
+  /// [seatDisconnect] of `END_PROGRAM` (for the danmaku connection, M5.F).
+  static bool isProgramEnd(Object? reason) =>
+      reason is StreamUnavailable && reason.site == _site && reason.detail == 'seat disconnect END_PROGRAM';
+
   // Qualities -----------------------------------------------------------------
 
   /// The qualities of [programId] in the master at [source] (3.x's

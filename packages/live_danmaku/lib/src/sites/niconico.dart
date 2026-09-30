@@ -73,6 +73,186 @@ final class NiconicoViewEntry {
   final int? next;
 }
 
+/// A gift (`NicoliveMessage.gift`): the [LiveMessage.data] of a
+/// [LiveMessageType.gift] message (not shown yet), whose user is the giver
+/// (`advertiser_name`, `advertiser_user_id`).
+@immutable
+final class NiconicoGift {
+  /// Creates the gift.
+  const new({required this.itemId, required this.name, required this.point, this.message = '', this.contributionRank});
+
+  /// `item_id`, or empty.
+  final String itemId;
+
+  /// `item_name`, or empty.
+  final String name;
+
+  /// `point`: what it cost, in niconico points (0 or more).
+  final int point;
+
+  /// `message`, or empty.
+  final String message;
+
+  /// `contribution_rank`: the giver's place among the program's givers, or
+  /// null.
+  final int? contributionRank;
+
+  @override
+  bool operator ==(Object other) =>
+      other is NiconicoGift &&
+      other.itemId == itemId &&
+      other.name == name &&
+      other.point == point &&
+      other.message == message &&
+      other.contributionRank == contributionRank;
+
+  @override
+  int get hashCode => Object.hash(itemId, name, point, message, contributionRank);
+
+  @override
+  String toString() => 'NiconicoGift($name, ${point}pt)';
+}
+
+/// Who may comment (`NicoliveState.comment_lock`), as the web player reads
+/// it: everyone, nobody (`Locked`), or followers only (`Restricted` with a
+/// follow restriction; `Restricted` without one is everyone).
+@immutable
+final class NiconicoCommentLock {
+  const new _(this.isLocked, this.followersOnly);
+
+  /// Followers only, once they have followed for [minimumFollow].
+  const new followers(Duration minimumFollow) : isLocked = false, followersOnly = minimumFollow;
+
+  /// Everyone may comment.
+  static const NiconicoCommentLock none = NiconicoCommentLock._(false, null);
+
+  /// Comments are locked.
+  static const NiconicoCommentLock locked = NiconicoCommentLock._(true, null);
+
+  /// Whether comments are locked.
+  final bool isLocked;
+
+  /// How long only followers must have followed to comment; null when not
+  /// only followers may.
+  final Duration? followersOnly;
+
+  /// The notice for a change from [previous] to this, or null when it is no
+  /// change:
+  ///
+  /// - followers only, and the lift of it, in the web player's own lines
+  ///   (`FollowerOnlyMode.generateSystemMessage`, usecase.cb7efc6a32.js);
+  /// - locked: what the web player's comment field says meanwhile
+  ///   (`現在コメントできません`, vc.c3c6c95a6a.js); the web player adds no
+  ///   line for the lock, so its lift is a sentence of ours.
+  String? noticeFrom(NiconicoCommentLock previous) {
+    if (this == previous) return null;
+    if (isLocked) return NiconicoDanmakuProtocol.commentLockedNotice;
+    if (followersOnly case final minimum?) {
+      final seconds = minimum.inSeconds;
+      return seconds == 0
+          ? '【コメント制限】フォロワーに限定されます'
+          : '【コメント制限】${NiconicoDanmakuProtocol.followDuration(seconds)}フォローを継続したユーザーに限定されます';
+    }
+    return previous.isLocked
+        ? NiconicoDanmakuProtocol.commentUnlockedNotice
+        : NiconicoDanmakuProtocol.followersOnlyLiftedNotice;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is NiconicoCommentLock && other.isLocked == isLocked && other.followersOnly == followersOnly;
+
+  @override
+  int get hashCode => Object.hash(isLocked, followersOnly);
+
+  @override
+  String toString() => isLocked
+      ? 'NiconicoCommentLock.locked'
+      : followersOnly == null
+      ? 'NiconicoCommentLock.none'
+      : 'NiconicoCommentLock.followers(${followersOnly!.inSeconds} s)';
+}
+
+/// Reads the window messages of one connection, in order, into
+/// [LiveMessage]s ([NiconicoDanmakuProtocol.message] reads one alone). It
+/// remembers who may comment, so that only changes of the comment lock are
+/// reported, as the web player does; it starts from "everyone", the web
+/// player's default before its state snapshot (which is not read here).
+final class NiconicoMessageReader {
+  /// Creates a reader.
+  new();
+
+  NiconicoCommentLock _commentLock = NiconicoCommentLock.none;
+  bool _endedProgram = false;
+
+  /// Who may comment, by the last comment lock read.
+  NiconicoCommentLock get commentLock => _commentLock;
+
+  /// Whether the last message read said that the program ended
+  /// (`program_status` `Ended`).
+  bool get endedProgram => _endedProgram;
+
+  /// One window message (`ChunkedMessage`: 1 meta, then one of 2 message,
+  /// 4 state, 5 signal) as a [LiveMessage], or null when it is none of the
+  /// reported kinds. Throws [FormatException] when it is not protobuf.
+  LiveMessage? read(List<int> bytes) {
+    _endedProgram = false;
+    final chunk = ProtoMessage.decode(bytes);
+    final meta = chunk.message(1);
+    return switch (NiconicoDanmakuProtocol._lastPayload(chunk)) {
+      2 => NiconicoDanmakuProtocol._nicoliveMessage(chunk.message(2)!, meta),
+      4 => _state(chunk.message(4)!, meta),
+      _ => null,
+    };
+  }
+
+  /// `NicoliveState`: its fields are not a oneof, though every state
+  /// recorded carries one. The web player takes the first it knows in its
+  /// order (`subscribeUpdate`, usecase.cb7efc6a32.js); of the reported ones
+  /// that is 5 comment_lock, 4 marquee, 9 program_status, 1 statistics. A
+  /// field that is not protobuf counts as absent.
+  LiveMessage? _state(ProtoMessage state, ProtoMessage? meta) {
+    final lock = _readable(() => state.message(5));
+    if (lock != null) {
+      if (_readable(() => NiconicoDanmakuProtocol.commentLockOf(lock)) case final next?) {
+        final notice = next.noticeFrom(_commentLock);
+        _commentLock = next;
+        if (notice != null) return NiconicoDanmakuProtocol._notice(notice, meta);
+      }
+    }
+    final marquee = _readable(() => state.message(4));
+    if (marquee != null) {
+      if (_readable(() => NiconicoDanmakuProtocol._operatorComment(marquee, meta)) case final notice?) return notice;
+    }
+    if (_readable(() => state.message(9)?.integer(1)) == 1) {
+      _endedProgram = true;
+      return NiconicoDanmakuProtocol.programEnded(
+        messageId: meta?.string(1)?.trim() ?? '',
+        sentAt: NiconicoDanmakuProtocol.time(meta?.message(2)),
+      );
+    }
+    // NicoliveState.statistics.viewers.
+    final viewers = _readable(() => state.message(1)?.integer(1));
+    if (viewers == null || viewers < 0) return null;
+    return LiveMessage(
+      type: LiveMessageType.online,
+      userName: '',
+      message: '',
+      data: LiveAudienceUpdate(kind: LiveAudienceMetricKind.totalViewers, value: viewers),
+      color: LiveMessageColor.white,
+    );
+  }
+
+  /// What [read] gives, or null when it meets bytes that are not protobuf.
+  static T? _readable<T>(T? Function() read) {
+    try {
+      return read();
+    } on FormatException {
+      return null;
+    }
+  }
+}
+
 /// Splits a varint-length-delimited protobuf stream (the comment server's
 /// answers) into its messages as the bytes arrive.
 final class NiconicoDelimitedReader {
@@ -148,10 +328,141 @@ final class NiconicoDelimitedReader {
 ///
 /// Chats (`chat`, and `overflowed_chat`, the chats that overflowed the
 /// display) become chat messages; `statistics.viewers`, the program's
-/// cumulative visitors (the watch page's `watchCount`), an audience update.
-/// Gifts, ads, notifications, forwarded chats, the other states and the
-/// signals are not reported.
+/// cumulative visitors (the watch page's `watchCount`), an audience update;
+/// gifts, gift messages ([NiconicoGift]); the operator's comments
+/// (`marquee`), changes of who may comment (`comment_lock`) and the end of
+/// the program (`program_status`), system notices (M5.F, B-11). Ads,
+/// notifications (visits, rankings), forwarded chats, the other states and
+/// the signals are not reported.
 abstract final class NiconicoDanmakuProtocol {
+  /// The notice of the program's end: the web player's announcement once it
+  /// ended (`この番組は終了しました`, nicolib.37f1064f38.js).
+  static const String programEndedNotice = 'この番組は終了しました';
+
+  /// The notice of a comment lock: what the web player's comment field says
+  /// while comments are locked.
+  static const String commentLockedNotice = '現在コメントできません';
+
+  /// The notice of a lock's lift: the web player only enables its comment
+  /// field again, so the sentence is ours.
+  static const String commentUnlockedNotice = '评论锁定已解除';
+
+  /// The web player's line when comments are no longer for followers only.
+  static const String followersOnlyLiftedNotice = 'フォロワー限定コメントが解除されました';
+
+  /// The most seconds a follow restriction is read as (about 136 years).
+  static const int maxFollowSeconds = 1 << 32;
+
+  /// A follow restriction's duration of [seconds] (0 or more) as the web
+  /// player writes it: whole days (`2日`, `1日と3時間`) from a day on, else
+  /// hours and minutes (`1時間`, `1時間30分`) from an hour on, else minutes
+  /// (`10分`, and `0分` under a minute).
+  static String followDuration(int seconds) {
+    if (seconds >= 86400) {
+      final days = '${seconds ~/ 86400}日';
+      return seconds % 86400 < 3600 ? days : '$daysと${seconds % 86400 ~/ 3600}時間';
+    }
+    if (seconds < 3600) return '${seconds ~/ 60}分';
+    final hours = '${seconds ~/ 3600}時間';
+    return seconds % 3600 < 60 ? hours : '$hours${seconds % 3600 ~/ 60}分';
+  }
+
+  /// A system notice of [text], with the window message's id and time.
+  static LiveMessage _notice(String text, ProtoMessage? meta, {String userName = '', LiveMessageColor? color}) =>
+      LiveMessage(
+        type: LiveMessageType.notice,
+        data: LiveNoticeKind.system,
+        userName: userName,
+        message: text,
+        messageId: meta?.string(1)?.trim() ?? '',
+        sentAt: time(meta?.message(2)),
+        color: color ?? LiveMessageColor.white,
+      );
+
+  /// The notice that the program ended ([programEndedNotice]), with the
+  /// platform's [messageId] and [sentAt] when it has them.
+  static LiveMessage programEnded({String messageId = '', DateTime? sentAt}) => LiveMessage(
+    type: LiveMessageType.notice,
+    data: LiveNoticeKind.system,
+    userName: '',
+    message: programEndedNotice,
+    messageId: messageId,
+    sentAt: sentAt,
+    color: LiveMessageColor.white,
+  );
+
+  /// Who may comment by a `CommentLock` (1 status: 0 Unrestricted,
+  /// 1 Locked, 2 Restricted; 2 follow_restriction {1 minimum_follow_duration
+  /// {1 seconds}}); null for a status this does not know, which changes
+  /// nothing. A follow duration below zero is zero; over
+  /// [maxFollowSeconds], that.
+  static NiconicoCommentLock? commentLockOf(ProtoMessage lock) {
+    switch (lock.integer(1) ?? 0) {
+      case 0:
+        return NiconicoCommentLock.none;
+      case 1:
+        return NiconicoCommentLock.locked;
+      case 2:
+        final restriction = lock.message(2);
+        if (restriction == null) return NiconicoCommentLock.none;
+        final seconds = restriction.message(1)?.integer(1) ?? 0;
+        return NiconicoCommentLock.followers(Duration(seconds: seconds.clamp(0, maxFollowSeconds)));
+      default:
+        return null;
+    }
+  }
+
+  /// `Marquee` (1 display {1 operator_comment, 3 duration}): the operator's
+  /// comment (`OperatorComment`: 1 content, 2 name, 3 modifier, 4 link) as
+  /// a notice, in its colour; null for a cleared marquee or an empty
+  /// comment. The web player pins it and adds it to its comment list; the
+  /// link is not kept.
+  static LiveMessage? _operatorComment(ProtoMessage marquee, ProtoMessage? meta) {
+    final comment = marquee.message(1)?.message(1);
+    final text = comment?.string(1)?.trim() ?? '';
+    if (comment == null || text.isEmpty) return null;
+    return _notice(text, meta, userName: comment.string(2)?.trim() ?? '', color: color(comment.message(3)));
+  }
+
+  /// `NicoliveMessage`: one field of its oneof; 1 chat and 20
+  /// overflowed_chat are chats, 8 gift a gift, the rest not reported.
+  static LiveMessage? _nicoliveMessage(ProtoMessage data, ProtoMessage? meta) =>
+      switch (_lastMessage(data, const {1, 7, 8, 9, 13, 17, 18, 19, 20, 22, 23, 24, 25, 26})) {
+        final kind? when kind == 1 || kind == 20 => _chat(data.message(kind)!, meta),
+        8 => _gift(data.message(8)!, meta),
+        _ => null,
+      };
+
+  /// `Gift`: 1 item_id, 2 advertiser_user_id, 3 advertiser_name, 4 point,
+  /// 5 message, 6 item_name, 7 contribution_rank. The text is the web
+  /// player's line for it (`eF`, domain.ce2c3387de.js); like the web player,
+  /// a gift of negative points is dropped, and so is one without an item.
+  static LiveMessage? _gift(ProtoMessage gift, ProtoMessage? meta) {
+    final itemId = gift.string(1)?.trim() ?? '';
+    final name = gift.string(6)?.trim() ?? '';
+    final point = gift.integer(4) ?? 0;
+    if ((itemId.isEmpty && name.isEmpty) || point < 0) return null;
+    final giver = gift.string(3)?.trim() ?? '';
+    final giverId = gift.integer(2);
+    final rank = gift.integer(7)?.toSigned(32);
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: giver,
+      userId: giverId != null && giverId > 0 ? '$giverId' : '',
+      message: '${rank == null ? '' : '【ギフト貢献$rank位】'}$giverさんがギフト「$name（${point}pt）」を贈りました',
+      messageId: meta?.string(1)?.trim() ?? '',
+      sentAt: time(meta?.message(2)),
+      data: NiconicoGift(
+        itemId: itemId,
+        name: name,
+        point: point,
+        message: gift.string(5)?.trim() ?? '',
+        contributionRank: rank,
+      ),
+      color: LiveMessageColor.white,
+    );
+  }
+
   /// Request headers: the adapter's (referer, user agent) and the site's
   /// origin, as the web player sends from it.
   static const Map<String, String> headers = {...NiconicoApi.headers, 'origin': NiconicoApi.origin};
@@ -296,31 +607,10 @@ abstract final class NiconicoDanmakuProtocol {
 
   /// One window message (`ChunkedMessage`: 1 meta, then one of 2 message,
   /// 4 state, 5 signal) as a [LiveMessage], or null when it is none of the
-  /// reported kinds. Throws [FormatException] when it is not protobuf.
-  static LiveMessage? message(List<int> bytes) {
-    final chunk = ProtoMessage.decode(bytes);
-    switch (_lastPayload(chunk)) {
-      case 2:
-        // NicoliveMessage: one field of its oneof; 1 chat, 20 overflowed_chat.
-        final data = chunk.message(2)!;
-        final kind = _lastMessage(data, const {1, 7, 8, 9, 13, 17, 18, 19, 20, 22, 23, 24, 25, 26});
-        if (kind != 1 && kind != 20) return null;
-        return _chat(data.message(kind!)!, chunk.message(1));
-      case 4:
-        // NicoliveState.statistics.viewers.
-        final viewers = chunk.message(4)?.message(1)?.integer(1);
-        if (viewers == null || viewers < 0) return null;
-        return LiveMessage(
-          type: LiveMessageType.online,
-          userName: '',
-          message: '',
-          data: LiveAudienceUpdate(kind: LiveAudienceMetricKind.totalViewers, value: viewers),
-          color: LiveMessageColor.white,
-        );
-      default:
-        return null;
-    }
-  }
+  /// reported kinds; a comment lock as a change from "everyone" (a
+  /// connection reads its messages with one [NiconicoMessageReader]).
+  /// Throws [FormatException] when it is not protobuf.
+  static LiveMessage? message(List<int> bytes) => NiconicoMessageReader().read(bytes);
 
   /// The payload of a `ChunkedMessage`: 2 or 4 (messages), 5 (a varint).
   static int? _lastPayload(ProtoMessage chunk) {
@@ -411,6 +701,9 @@ abstract final class NiconicoDanmakuProtocol {
 ///   does a seat that ends (the program ended, the server closed it). A new
 ///   seat reads the watch page again, so a broadcaster's next program is
 ///   followed, and a room that went offline ends the connection.
+/// - The program's end (a window's `program_status`, or the seat's
+///   `END_PROGRAM`) is reported once as a notice; the next seat is then
+///   taken at once, without a reconnection notice (M5.F, B-11).
 /// - Failures in a row wait 1, 2, 4, 8, 8… s; the first reports
 ///   [DanmakuReconnecting], the ninth ends with
 ///   [DanmakuCloseReason.reconnectsExhausted]. A room that cannot be
@@ -464,6 +757,14 @@ final class NiconicoDanmakuConnection extends DanmakuConnectionBase<NiconicoDanm
   }
 }
 
+/// A window said that the program ended.
+final class _ProgramEnded implements Exception {
+  const new();
+
+  @override
+  String toString() => 'the program ended';
+}
+
 /// The comment server answered a request with [status].
 final class _Refused implements Exception {
   const new(this.status);
@@ -486,9 +787,15 @@ final class _NiconicoComments {
   final CancelToken _cancel = CancelToken();
   final Completer<void> _firstAttempt = Completer();
   NiconicoSeat? _seat;
+  NiconicoMessageReader _reader = NiconicoMessageReader();
   int _failures = 0;
   int _openWindows = 0;
   int? _lastViewers;
+
+  /// A program ended and no `view` of a later seat answered yet: another
+  /// end now is a seat that could not follow (the watch page still showed
+  /// the ended program), a failure like any other.
+  bool _programJustEnded = false;
 
   /// Starts following; completes once the first attempt joined or failed.
   Future<void> start() {
@@ -529,11 +836,31 @@ final class _NiconicoComments {
           _seat = null;
           await seat.close();
         }
-        if (end == null || !await _failed(end)) return;
+        if (end == null) return;
+        if (_endsProgram(end)) continue;
+        if (!await _failed(end)) return;
       }
     } finally {
       _settle();
     }
+  }
+
+  /// Whether [end], why a seat stopped, is its program's end (a window's
+  /// `program_status`, or the seat's `END_PROGRAM`, which come within
+  /// milliseconds of each other): the notice is reported once, and the next
+  /// seat is taken at once without a reconnection notice. Its watch page
+  /// ends the connection when the room is offline, as other platforms end
+  /// theirs when the broadcast ends, and follows the broadcaster's next
+  /// program if one already started (M5.14 difference 14). An end before a
+  /// later seat answered is not one (see [_programJustEnded]).
+  bool _endsProgram(Object end) {
+    if (end is! _ProgramEnded && !NiconicoApi.isProgramEnd(end)) return false;
+    if (_programJustEnded) return false;
+    if (end is! _ProgramEnded) _run.message(NiconicoDanmakuProtocol.programEnded());
+    _programJustEnded = true;
+    _reader = NiconicoMessageReader();
+    _lastViewers = null;
+    return true;
   }
 
   /// What `openSeat` throws for a room that cannot be watched now: it is
@@ -564,13 +891,14 @@ final class _NiconicoComments {
   /// The comment server answered: the failures in a row are over.
   void _joined() {
     _failures = 0;
+    _programJustEnded = false;
     if (!_run.isConnected) _run.ready();
     _settle();
   }
 
   /// Follows the comment server while [seat] lasts. Returns why it stopped
-  /// (the seat ended, the server refused the view, no comment server), or
-  /// null when the run ended.
+  /// (the seat ended, a window said the program ended, the server refused
+  /// the view, no comment server), or null when the run ended.
   Future<Object?> _read(NiconicoSeat seat) async {
     final view = await _messageServer(seat);
     if (!_run.isActive) return null;
@@ -584,19 +912,22 @@ final class _NiconicoComments {
     }
     final cancel = CancelToken();
     Object? seatEnd;
+    void end(Object reason) {
+      seatEnd ??= reason;
+      cancel.cancel();
+    }
+
     unawaited(_cancel.whenCancelled.then((_) => cancel.cancel()));
     unawaited(
-      seat.done.then((reason) {
-        seatEnd ??= reason ?? const StreamUnavailable(SiteIds.niconico, 'the seat was closed');
-        cancel.cancel();
-      }),
+      seat.done.then((reason) => end(reason ?? const StreamUnavailable(SiteIds.niconico, 'the seat was closed'))),
     );
     final windows = <String>{};
     var at = 'now';
     try {
       while (_run.isActive) {
+        if (seatEnd case final reason?) return reason;
         try {
-          at = '${await _view(view, at, cancel, windows)}';
+          at = '${await _view(view, at, cancel, windows, end)}';
         } on Object catch (error) {
           if (!_run.isActive) return null;
           if (seatEnd case final reason?) return reason;
@@ -621,9 +952,9 @@ final class _NiconicoComments {
     }
   }
 
-  /// Reads one `view` answer for [at], opening each new window it announces;
-  /// returns its `next`.
-  Future<int> _view(Uri view, String at, CancelToken cancel, Set<String> windows) async {
+  /// Reads one `view` answer for [at], opening each new window it announces
+  /// (a window that says the program ended calls [end]); returns its `next`.
+  Future<int> _view(Uri view, String at, CancelToken cancel, Set<String> windows, void Function(Object) end) async {
     final response = await _owner._http.open(
       NiconicoDanmakuProtocol.request(
         NiconicoDanmakuProtocol.viewUrl(view, at),
@@ -647,7 +978,7 @@ final class _NiconicoComments {
       _joined();
       switch (entry.kind) {
         case NiconicoViewEntryKind.segment:
-          if (entry.window case final window?) _open(window, cancel, windows);
+          if (entry.window case final window?) _open(window, cancel, windows, end);
         case NiconicoViewEntryKind.next:
           next = entry.next ?? next;
         case NiconicoViewEntryKind.previous || NiconicoViewEntryKind.backward || NiconicoViewEntryKind.unknown:
@@ -659,18 +990,19 @@ final class _NiconicoComments {
   }
 
   /// Reads [window] unless it was read on this seat or too many are open.
-  void _open(NiconicoCommentWindow window, CancelToken cancel, Set<String> windows) {
+  void _open(NiconicoCommentWindow window, CancelToken cancel, Set<String> windows, void Function(Object) end) {
     final key = '${window.uri}';
     if (windows.contains(key) || _openWindows >= NiconicoDanmakuProtocol.maxOpenWindows) return;
     windows.add(key);
     if (windows.length > NiconicoDanmakuProtocol.rememberedWindows) windows.remove(windows.first);
     _openWindows++;
-    unawaited(_window(window, cancel).whenComplete(() => _openWindows--));
+    unawaited(_window(window, cancel, end).whenComplete(() => _openWindows--));
   }
 
   /// Reports the messages of [window] as they stream; a failure loses only
-  /// the rest of this window.
-  Future<void> _window(NiconicoCommentWindow window, CancelToken cancel) async {
+  /// the rest of this window. The program's end is reported, then ends the
+  /// seat ([end]).
+  Future<void> _window(NiconicoCommentWindow window, CancelToken cancel, void Function(Object) end) async {
     try {
       final response = await _owner._http.open(
         NiconicoDanmakuProtocol.request(
@@ -685,13 +1017,18 @@ final class _NiconicoComments {
       }
       await for (final bytes in NiconicoDanmakuProtocol.delimited(response.body)) {
         if (!_run.isActive || cancel.isCancelled) return;
+        final reader = _reader;
         final LiveMessage? message;
         try {
-          message = NiconicoDanmakuProtocol.message(bytes);
+          message = reader.read(bytes);
         } on FormatException {
           continue;
         }
         if (message != null) _report(message);
+        if (reader.endedProgram) {
+          end(const _ProgramEnded());
+          return;
+        }
       }
     } on Object {
       // A lost window only loses its comments.

@@ -1337,6 +1337,22 @@ void main() {
       expect(NiconicoApi.seatError(null), isA<StreamUnavailable>());
       expect(NiconicoApi.seatDisconnect({'reason': 'END_PROGRAM'}).detail, contains('END_PROGRAM'));
     });
+
+    test("a seat that ended with its program (M5.F): END_PROGRAM's disconnect only", () {
+      expect(NiconicoApi.isProgramEnd(NiconicoApi.seatDisconnect({'reason': 'END_PROGRAM'})), isTrue);
+      for (final other in [
+        NiconicoApi.seatDisconnect({'reason': 'TAKEOVER'}),
+        NiconicoApi.seatDisconnect({'reason': 'END_PROGRAMME'}),
+        NiconicoApi.seatDisconnect(null),
+        NiconicoApi.seatError({'code': 'END_PROGRAM'}),
+        const StreamUnavailable('twitch', 'seat disconnect END_PROGRAM'),
+        const NetworkFailure('niconico', 'seat disconnect END_PROGRAM'),
+        'seat disconnect END_PROGRAM',
+        null,
+      ]) {
+        expect(NiconicoApi.isProgramEnd(other), isFalse, reason: '$other');
+      }
+    });
   });
 
   group("3.x's quality catalog", () {

@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "platform": "niconico",
+  "case": "S10-gift",
+  "room": "niconico:lv351499074",
+  "danmakuKeys": {
+    "programId": "lv351499074"
+  },
+  "capturedAt": "2026-09-30T15:40:08.356996Z",
+  "route": "proxy",
+  "handshakes": [],
+  "frames": 2,
+  "raw": {
+    "sha256": "004faa16f48f85d17fa9d207ad8c50c4fb26fc9fc91be133c32b162886f20bda",
+    "length": 259262
+  },
+  "scrubbed": [
+    {
+      "where": "frame",
+      "rule": "dropped"
+    },
+    {
+      "where": "comment server path token",
+      "rule": "secret"
+    },
+    {
+      "where": "message.chat.hashed_user_id",
+      "rule": "person"
+    },
+    {
+      "where": "message.gift.advertiser_name",
+      "rule": "person"
+    },
+    {
+      "where": "message.gift.advertiser_user_id",
+      "rule": "person"
+    },
+    {
+      "where": "answers other than the first gift window and the view that named it",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "M5.F rec.dart (read-only, anonymous; schema 1)"
+}

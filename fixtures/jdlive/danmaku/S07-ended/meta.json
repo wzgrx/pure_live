@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "platform": "jdlive",
+  "case": "S07-ended",
+  "room": "jdlive:48431089",
+  "danmakuKeys": {
+    "liveId": "48431089"
+  },
+  "capturedAt": "2026-09-30T12:07:39.888156Z",
+  "route": "direct",
+  "requests": [
+    {
+      "url": "https://api.m.jd.com/api",
+      "method": "POST",
+      "headers": {
+        "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+        "accept": "application/json, text/plain, */*",
+        "origin": "https://lives.jd.com",
+        "referer": "https://lives.jd.com/",
+        "content-type": "application/x-www-form-urlencoded"
+      }
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "connection": "keep-alive",
+        "access-control-allow-credentials": "true",
+        "x-api-request-id": "10105444940-103900-1790770060405",
+        "date": "Wed, 30 Sep 2026 12:07:40 GMT",
+        "transfer-encoding": "chunked",
+        "access-control-allow-origin": "https://lives.jd.com",
+        "content-encoding": "gzip",
+        "vary": "accept-encoding",
+        "access-control-expose-headers": "X-Rp-Sdtoken,X-API-Request-Id,Date,X-MLaas-At",
+        "content-type": "application/json",
+        "x-rp-sdtoken": "set;1800;FHdZrKfENVUmbNJOVNceFd72-tiayHHGrke0HlVM8UCpZHX5MhX7CGTJFzQpMVIlrDz2eN2XMJBNGd72CBLV7xXsQXS9wApcHodPOGpojz4WWGbvHVsjEbv3d-1DTUiB9dMUGBgLbl",
+        "server": "jfe"
+      }
+    }
+  ],
+  "handshakes": [
+    {
+      "url": "wss://live-ws4.jd.com?token=amQubWFsbF_muLjlrqJfODQwNjQ5MTY1NzZfMTc5MDc3MDA1OTg4ODg0MTI4Mw==",
+      "headers": {
+        "origin": "https://lives.jd.com",
+        "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+      }
+    }
+  ],
+  "frames": 22,
+  "kept": {
+    "of": 258,
+    "lines": "0-3, 240-258"
+  },
+  "raw": {
+    "sha256": "a0c8d943193cbb6542194101252a7371e15f3030faa7b6ea0339fc74498f3af4",
+    "length": 263808
+  },
+  "scrubbed": [
+    {
+      "where": "$.from.pinmd5",
+      "rule": "person"
+    },
+    {
+      "where": "$.from.secretPin",
+      "rule": "person"
+    },
+    {
+      "where": "answer $.data.secretPin",
+      "rule": "secret"
+    },
+    {
+      "where": "answer $.data.token (guest id)",
+      "rule": "secret"
+    },
+    {
+      "where": "answer header x-rp-sdtoken",
+      "rule": "secret"
+    },
+    {
+      "where": "handshake url token",
+      "rule": "secret"
+    }
+  ],
+  "tool": "record.dart (dart:io; liveauth as a guest, then the socket; nothing sent on it) and scrub.py, M5.24; neither is in the repository",
+  "note": "Recorded 2026-09-30 12:07-12:17 UTC (20:07 Beijing time) for M5.24, as a guest, nothing sent on the socket: broadcast 48431089 ended 380 s in. Kept: frames 0-3 (the first statistics and likes) and 240-258: the last statistics, stop_live_broadcast at 380.3 s, three more product frames the server still pushed within 5 s, then nothing until the server dropped the socket without a close frame (1006) 180 s after the last frame. The frames between are statistics, likes and product cards. Account hashes and encrypted pins, the liveauth answer's secretPin, the guest id inside the token and the x-rp-sdtoken header are synthetic values of the same shape and length; everything else is kept."
+}

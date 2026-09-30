@@ -170,6 +170,23 @@ final class JdLivePage {
   final bool hasMore;
 }
 
+/// What the chat connection of a live JD broadcast needs (M5.24; 3.x had
+/// none): the broadcast, which the website's `liveauth` takes as the chat
+/// group (`groupId`). A room entry (and a recording detail) of a live
+/// broadcast that is not app-only hands it over in `danmakuData`, without a
+/// request; a follow refresh does not.
+@immutable
+final class JdLiveDanmakuArgs {
+  /// Creates the arguments.
+  const new({required this.liveId});
+
+  /// The broadcast (`liveId`).
+  final String liveId;
+
+  @override
+  String toString() => 'JdLiveDanmakuArgs($liveId)';
+}
+
 /// Pure parsing of JD Live answers (3.x's `JdLiveApi`, `JdLiveLink` and the
 /// room mapping of its `JdLiveSite`). Each function takes the answer and its
 /// status and returns 3.x's models or throws a `SiteError`.
@@ -247,7 +264,9 @@ abstract final class JdLiveApi {
 
   /// The notice of a room (text key `jdlive_chat_notice`), in words for
   /// users (M4.U; 3.x: "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。").
-  static const String chatNotice = '这里暂时看不到京东直播的聊天。人数是累计观看，不是正在观看的人数。';
+  /// Chat is shown since M5.24, so it only explains the number now (M4.U
+  /// began with "这里暂时看不到京东直播的聊天。").
+  static const String chatNotice = '人数是累计观看，不是正在观看的人数。';
 
   /// The notice of an app-only room (`jdlive_restricted_notice`; M4.U,
   /// 3.x: "该京东直播仅限京东应用访问，界面保持未知状态，不将其显示成未开播。").
@@ -545,7 +564,8 @@ abstract final class JdLiveApi {
   /// ended, replay for a replay (unplayable without a recording), unknown
   /// for paused and unknown; the notice and 3.x's media headers.
   /// [withData] (room entry and recording) keeps [room] as the room's
-  /// data, with its media and background.
+  /// data, with its media and background, and gives a live broadcast that
+  /// is not app-only its [JdLiveDanmakuArgs] (M5.24).
   static LiveRoom room(JdLiveRoom room, {bool withData = false}) {
     final total = room.totalViews;
     return LiveRoom(
@@ -570,6 +590,9 @@ abstract final class JdLiveApi {
       notice: room.appOnly ? restrictedNotice : chatNotice,
       httpHeaders: mediaHeaders(room.liveId),
       data: withData ? room : null,
+      danmakuData: withData && room.state == JdLiveState.live && !room.appOnly
+          ? JdLiveDanmakuArgs(liveId: room.liveId)
+          : null,
     );
   }
 

@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "platform": "jdlive",
+  "case": "S06-live",
+  "room": "jdlive:48399381",
+  "danmakuKeys": {
+    "liveId": "48399381"
+  },
+  "capturedAt": "2026-09-28T22:57:28.615157Z",
+  "route": "direct",
+  "requests": [
+    {
+      "url": "https://api.m.jd.com/api",
+      "method": "POST",
+      "headers": {
+        "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+        "accept": "application/json, text/plain, */*",
+        "origin": "https://lives.jd.com",
+        "referer": "https://lives.jd.com/",
+        "content-type": "application/x-www-form-urlencoded"
+      }
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "connection": "keep-alive",
+        "access-control-allow-credentials": "true",
+        "x-api-request-id": "10106524275-116202-1790636249698",
+        "date": "Mon, 28 Sep 2026 22:57:29 GMT",
+        "transfer-encoding": "chunked",
+        "access-control-allow-origin": "https://lives.jd.com",
+        "content-encoding": "gzip",
+        "vary": "accept-encoding",
+        "access-control-expose-headers": "X-Rp-Sdtoken,X-API-Request-Id,Date,X-MLaas-At",
+        "content-type": "application/json",
+        "x-rp-sdtoken": "set;1800;NDgGlNyXWTRogGICFAcxDi67MhZH2vJTmebK5xPcklKTchPMPG-TvPX9LnSYrYGW0e-bfnVLSn7tFlAUazrMOpd10w47kzot0aHamWDLq4b0CtkTcGzzynHAm082PGcnkwgXrCWxrU",
+        "server": "jfe"
+      }
+    }
+  ],
+  "handshakes": [
+    {
+      "url": "wss://live-ws4.jd.com?token=amQubWFsbF_muLjlrqJfNDQ2NjkwMzcyNzJfMTc5MDYzNjI0ODYxODM0NzA1MA==",
+      "headers": {
+        "origin": "https://lives.jd.com",
+        "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+      }
+    }
+  ],
+  "frames": 44,
+  "kept": {
+    "of": 1898,
+    "lines": "0-11, 46-59, 1183-1200"
+  },
+  "raw": {
+    "sha256": "58a07f535886614354c10fdd978ef5032c3bc623a8c57607b2a0f6359851eedd",
+    "length": 1807065
+  },
+  "scrubbed": [
+    {
+      "where": "$.body.anchorAvatarUrl",
+      "rule": "secret"
+    },
+    {
+      "where": "$.body.content (names in it)",
+      "rule": "person"
+    },
+    {
+      "where": "$.body.joinUser",
+      "rule": "person"
+    },
+    {
+      "where": "$.body.nickName",
+      "rule": "person"
+    },
+    {
+      "where": "$.body.pin",
+      "rule": "person"
+    },
+    {
+      "where": "$.body.reNickName",
+      "rule": "person"
+    },
+    {
+      "where": "$.body.rePin",
+      "rule": "person"
+    },
+    {
+      "where": "$.from.pinmd5",
+      "rule": "person"
+    },
+    {
+      "where": "$.from.secretPin",
+      "rule": "person"
+    },
+    {
+      "where": "answer $.data.secretPin",
+      "rule": "secret"
+    },
+    {
+      "where": "answer $.data.token (guest id)",
+      "rule": "secret"
+    },
+    {
+      "where": "answer header x-rp-sdtoken",
+      "rule": "secret"
+    },
+    {
+      "where": "handshake url token",
+      "rule": "secret"
+    }
+  ],
+  "tool": "record.dart (dart:io; liveauth as a guest, then the socket; nothing sent on it) and scrub.py, M5.24; neither is in the repository",
+  "note": "Recorded 2026-09-28 22:57-23:42 UTC (06:57-07:42 Beijing time, a quiet hour) for M5.24: broadcast 48399381 of the featured list, 45 minutes and 1898 socket frames, as a guest (liveauth without pin or eid), nothing sent on the socket. Kept: frames 0-11 (the first statistics, likes and cart count), 46-59 (product cards and cart refreshes) and 1183-1200 (a viewer from the Android app joins, the shop's automatic public reply to that viewer, the viewer's only message and the streamer's answer, with the statistics around them: current_viewer goes 0 -> 1 as the viewer joins). The other frames are more of the same kinds; this was the only viewer message in eight rooms over 45 minutes. Account hashes (pinmd5), encrypted pins (secretPin, joinUser), nicknames and account names (also inside the join text), the shop's reply account and the reply icon's path are synthetic values of the same shape and length, one original always by the same value; the liveauth answer's secretPin and the guest id inside the token are synthetic too (the token's time and random part kept), and so is the answer's x-rp-sdtoken header. Message ids, times, chat text, product cards and statistics are kept. The liveauth content is kept in plain text (group, time, nonce: nothing personal) with the form it was sent in."
+}

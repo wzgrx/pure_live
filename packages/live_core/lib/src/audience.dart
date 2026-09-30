@@ -207,11 +207,14 @@ const Map<String, AudiencePlatformCapability> audienceCapabilities = {
     onlineAvailability: AudienceOnlineAvailability.roomList,
   ),
   // JD labels the public-directory `pv` value as views rather than current
-  // concurrency, so it remains a cumulative audience field.
+  // concurrency, so it remains a cumulative audience field. In the room, the
+  // guest chat's get_statistics_result (about every 3.5 s while most rooms
+  // are live) carries current_viewer, which rises and falls as viewers join
+  // and leave, and total_viwer, the same cumulative views (M5.24).
   'jdlive': AudiencePlatformCapability(
     hasPopularity: false,
     hasTotalViewers: true,
-    onlineAvailability: AudienceOnlineAvailability.unsupported,
+    onlineAvailability: AudienceOnlineAvailability.roomRealtime,
   ),
   // Kugou keeps directory viewerNum/getViewerNum, platform hot and
   // broadcaster fansCount as three independent metrics.

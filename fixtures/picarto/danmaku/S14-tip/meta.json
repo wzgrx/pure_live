@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "platform": "picarto",
+  "case": "S14-tip",
+  "room": "picarto:Sparkythechu",
+  "danmakuKeys": {
+    "channelName": "Sparkythechu",
+    "channelId": "71159"
+  },
+  "capturedAt": "2026-09-30T16:11:18.101230Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://chat.picarto.tv/chat/token=<an anonymous token, not kept>",
+      "headers": {
+        "origin": "https://picarto.tv",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "status": 101
+    }
+  ],
+  "frames": 1,
+  "raw": {
+    "sha256": "6d203108f597611ea4f3bcd40f918d0057223dc5146d97df515488203b17e1c6",
+    "length": 554
+  },
+  "scrubbed": [
+    {
+      "where": "$.m[0].u",
+      "rule": "person"
+    },
+    {
+      "where": "$.m[0].n",
+      "rule": "person"
+    },
+    {
+      "where": "$.m[0].i",
+      "rule": "secret"
+    },
+    {
+      "where": "$.m[0].g",
+      "rule": "person"
+    }
+  ],
+  "tool": "M5.F recorder (dart:io WebSocket, anonymous, direct; sends only the site's keep-alive ping every 50 s)",
+  "note": "One frame out of a 150-minute watch of the 45 busiest channels on 2026-09-30 (read-only, anonymous, nothing written): a viewer tipped the channel 100 Kudos with a message. It is a chat frame (t c) whose line is a chat line (t c) with v true (the site's tipping), x the chips, mc and mk the largest chipmote (kudo100, also at the start of the text). The tipper's user id, name, avatar path and ignore list (g) are replaced by made-up values of the same shape; the channel's public name, id and the text stay."
+}

@@ -1,7 +1,10 @@
 // Picarto danmaku (docs/modules/M5.10-picarto.md): the protocol and the
 // connection against the archived v4's output for the recorded sessions
 // (S07-live, S09-keepalive, S10-token-refused) and the synthetic frames
-// (S11-synthetic), written by fixtures/picarto/danmaku/v4_expected.dart.
+// (S11-synthetic), written by fixtures/picarto/danmaku/v4_expected.dart;
+// the chip tips, notices and retractions of M5.F (appendix B-8) against the
+// recorded deletion (S13-removed), tip (S14-tip) and system line (S15-system)
+// and synthetic frames (S12-b8-synthetic).
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -44,6 +47,9 @@ Map<int, Object?> _v4Frames(String name) => {
 
 final Map<String, Object?> _cases = _json('S11-synthetic/cases.json')! as Map<String, Object?>;
 
+/// The synthetic chip tips, notices and retractions of B-8.
+final Map<String, Object?> _b8Cases = _json('S12-b8-synthetic/cases.json')! as Map<String, Object?>;
+
 final int _channelId = _cases['channelId']! as int;
 
 /// The v4 output for every synthetic case: a list per frame, or
@@ -64,26 +70,67 @@ String _text(Object frame) => frame is String ? frame : utf8.decode(frame as Lis
 /// A message in the projection v4_expected.dart writes for v4's events. v4
 /// prefixed message ids with `picarto:`; the new ids are the platform's own
 /// (difference 1), so the projection adds the prefix back.
+///
+/// B-8: v4 had no super chats, notices or retractions; they are projected
+/// with every field, after checking the fields their kind leaves fixed.
 Map<String, Object?> _asV4(LiveMessage message) {
-  if (message.type == LiveMessageType.online) {
-    final data = message.data! as LiveAudienceUpdate;
-    expect(data.kind, LiveAudienceMetricKind.onlineViewers);
-    return {'kind': 'online', 'audience': 'online', 'value': data.value};
+  switch (message.type) {
+    case LiveMessageType.online:
+      final data = message.data! as LiveAudienceUpdate;
+      expect(data.kind, LiveAudienceMetricKind.onlineViewers);
+      return {'kind': 'online', 'audience': 'online', 'value': data.value};
+    case LiveMessageType.superChat:
+      final data = message.data! as LiveSuperChatMessage;
+      expect([message.userName, message.message], ['SUPER_CHAT_MESSAGE', 'SUPER_CHAT_MESSAGE']);
+      expect(message.color, LiveMessageColor.white);
+      expect(data.messageId, message.messageId);
+      expect(data.endTime.difference(data.startTime), PicartoDanmakuProtocol.tipDuration);
+      expect(data.priceText, '${data.price} Kudos');
+      expect([data.backgroundColor, data.backgroundBottomColor], ['', ''], reason: 'the frame names no colours');
+      return {
+        'kind': 'superChat',
+        'id': message.messageId,
+        'userId': message.userId,
+        'sentAt': message.sentAt?.millisecondsSinceEpoch,
+        'userName': data.userName,
+        'face': data.face,
+        'text': data.message,
+        'price': data.price,
+        'start': data.startTime.millisecondsSinceEpoch,
+      };
+    case LiveMessageType.notice:
+      expect([message.userName, message.userId, message.messageId], ['', '', '']);
+      expect(message.color, LiveMessageColor.white);
+      expect(message.sentAt, isNull);
+      return {'kind': 'notice', 'notice': (message.data! as LiveNoticeKind).name, 'text': message.message};
+    case LiveMessageType.retraction:
+      expect([message.userName, message.userId, message.message, message.messageId], ['', '', '', '']);
+      return {'kind': 'retraction', 'target': '${message.data! as LiveRetraction}'};
+    case LiveMessageType.chat || LiveMessageType.gift:
+      expect(message.type, LiveMessageType.chat);
+      return {
+        'kind': 'chat',
+        'id': message.messageId.isEmpty ? null : 'picarto:${message.messageId}',
+        'sentAt': message.sentAt?.millisecondsSinceEpoch,
+        'userId': message.userId,
+        'userName': message.userName,
+        'text': message.message,
+        'color': message.color.toString(),
+      };
   }
-  expect(message.type, LiveMessageType.chat);
-  return {
-    'kind': 'chat',
-    'id': message.messageId.isEmpty ? null : 'picarto:${message.messageId}',
-    'sentAt': message.sentAt?.millisecondsSinceEpoch,
-    'userId': message.userId,
-    'userName': message.userName,
-    'text': message.message,
-    'color': message.color.toString(),
-  };
 }
 
+/// When the synthetic frames are received: the "now" that dates a tip
+/// without a time (B-8).
+final DateTime _receivedAt = DateTime.parse(_b8Cases['receivedAt']! as String);
+
 List<Map<String, Object?>> _decodedAsV4(Object frame, {int? channelId}) => [
-  for (final message in PicartoDanmakuProtocol.decode(_text(frame), channelId: channelId ?? _channelId).messages)
+  for (final message in PicartoDanmakuProtocol.decode(
+    _text(frame),
+    channelId: channelId ?? _channelId,
+    channelName: _args.channelName,
+    now: _receivedAt,
+  ).messages)
     _asV4(message),
 ];
 
@@ -309,11 +356,15 @@ final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
       {..._chatAt(v4, 0, 2), 'userId': '', 'userName': ''},
     ],
   ],
-  // Difference 7: lines of another type (`system`, `w`) are not chat.
+  // Difference 7: lines of another type (`w`) are not chat. B-8: a `system`
+  // line is a system notice, as the site shows it.
   'lines of another type in a chat frame, and lines that are not objects': (v4) => [
     [
       for (final chat in (v4.single! as List<Object?>).cast<Map<String, Object?>>())
-        if (chat['text'] != 'system line' && chat['text'] != 'whisper line') chat,
+        if (chat['text'] == 'system line')
+          _notice('system', 'system line')
+        else if (chat['text'] != 'whisper line')
+          chat,
     ],
   ],
   // Difference 8: history pages are skipped, as the site's client skips
@@ -332,6 +383,26 @@ final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
   },
   // Difference 10: another channel's state is not this room's audience.
   "stream: another channel's state, no id, an id as text": (v4) => [const <Object?>[], v4[1], v4[2]],
+  // B-8: system, raid and subscription frames are notices; joins, leaves,
+  // the user list and whispers still show nothing.
+  'joins, leaves and other notices show nothing': (v4) {
+    expect(v4, List.filled(8, isEmpty));
+    return [
+      for (var frame = 0; frame < 4; frame++) const <Object?>[],
+      [_notice('system', 'Stream is live')],
+      [_notice('raid', 'raid!')],
+      [_notice('subscription', 'Gifter 订阅了 Receiver，3 个月')],
+      const <Object?>[],
+    ];
+  },
+  // B-8: a chip tip is a super chat (the case keeps the name it had while
+  // tips were not shown).
+  "a chip tip is not shown (no sample of it; its fields come from the site's client)": (v4) {
+    expect(v4, [isEmpty]);
+    return [
+      [_tip('aaaaaaaa-0000-11f1-8000-000000000070', face: '', text: 'for you')],
+    ];
+  },
 };
 
 Map<String, Object?> _chatAt(List<Object?> v4, int frame, int index) =>
@@ -346,6 +417,137 @@ Map<String, Object?> _chat(String text, String id, {int? sentAt = 1790531380528,
   'userName': 'ViewerOne',
   'text': text,
   'color': color,
+};
+
+/// The time of the synthetic lines.
+const int _sent = 1790531380528;
+
+/// The avatar of the synthetic lines, under the site's image host.
+const String _face = 'https://images.picarto.tv/abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png';
+
+/// A synthetic chip tip (B-8) as the projection shows it; it starts at its
+/// time, or when it was received when it has none.
+Map<String, Object?> _tip(
+  String id, {
+  String userId = '7300007',
+  String userName = 'Tipper',
+  String face = _face,
+  String text = 'thanks',
+  int price = 100,
+  int? sentAt = _sent,
+}) => {
+  'kind': 'superChat',
+  'id': id,
+  'userId': userId,
+  'sentAt': sentAt,
+  'userName': userName,
+  'face': face,
+  'text': text,
+  'price': price,
+  'start': sentAt ?? _receivedAt.millisecondsSinceEpoch,
+};
+
+/// A notice (B-8) as the projection shows it.
+Map<String, Object?> _notice(String kind, String text) => {'kind': 'notice', 'notice': kind, 'text': text};
+
+/// A retraction (B-8) as the projection shows it.
+Map<String, Object?> _retraction(String target) => {'kind': 'retraction', 'target': target};
+
+String _b8Id(int number) => 'bbbbbbbb-0000-11f1-8000-${'$number'.padLeft(12, '0')}';
+
+/// What every case of S12-b8-synthetic shows, frame by frame (B-8).
+final Map<String, List<List<Map<String, Object?>>>> _b8Expected = {
+  'tip: a ct line with every field the site reads': [
+    [_tip(_b8Id(1), text: 'kudo100 thanks for the stream')],
+  ],
+  'tip: a chat line with v set, without time, text or avatar; a line without a type': [
+    [
+      _tip(_b8Id(2), userId: '7300008', userName: 'TipperTwo', face: '', text: '', price: 5, sentAt: null),
+      _tip(_b8Id(3), userId: '7300009', userName: 'TipperThree', face: '', text: 'no type', price: 1, sentAt: null),
+    ],
+  ],
+  'tip: to another channel of the multistream, it says whom it went to': [
+    [
+      _tip(_b8Id(4), text: '打赏给 OtherChannel：go go', price: 50),
+      _tip(_b8Id(5), text: '打赏给 OtherChannel', price: 50),
+      _tip(_b8Id(6), text: 'same room', price: 50),
+      _tip(_b8Id(7), text: 'no receiver', price: 50),
+    ],
+  ],
+  'tip: the avatar is a path under images.picarto.tv, or a full URL as it is': [
+    [
+      _tip(_b8Id(8), face: 'https://images.picarto.tv/ptvimages/1/23/4567890/avatars/abcdefghij.png'),
+      _tip(_b8Id(9), face: 'https://images.picarto.tv/ptvimages/1/23/4567890/avatars/abcdefghij.png'),
+      _tip(_b8Id(10), face: ''),
+      _tip(_b8Id(11), face: ''),
+      _tip(_b8Id(12), face: ''),
+    ],
+  ],
+  'tip: a ct line without v is still a tip; a chat line with chips but without v is chat': [
+    [_tip(_b8Id(13), text: 'no flag', price: 10), _tip(_b8Id(14), text: 'false flag', price: 10)],
+    [_chat('chips but no flag', _b8Id(15))],
+  ],
+  'tip: bad chips cost only that line': [
+    [_tip(_b8Id(22), text: 'valid', price: 2)],
+  ],
+  'tip: text that is not text, and the id from _id': [
+    [_tip('5f0000000000000000000002', text: ''), _tip('', text: '')],
+  ],
+  'rm: takes back one message by its id (the shape recorded on 2026-09-30)': [
+    [_retraction('LiveRetraction.message(aaaaaaaa-0000-11f1-8000-000000000001)')],
+    [_retraction('LiveRetraction.message(aaaaaaaa-0000-11f1-8000-000000000002)')],
+  ],
+  'cm: takes back every message of a user, the id as text or a number': [
+    [_retraction('LiveRetraction.user(7300001)')],
+    [_retraction('LiveRetraction.user(7300002)')],
+  ],
+  'rm and cm without a usable target show nothing': List.filled(13, const []),
+  "system: the server's text; a link becomes its text, an icon is left out, lines are joined": [
+    [_notice('system', 'Welcome to the chat!')],
+    [_notice('system', 'Read the rules: picarto.tv/rules')],
+    [_notice('system', 'Slow mode is on. Wait 5 seconds between messages.')],
+    [_notice('system', 'first'), _notice('system', 'second')],
+  ],
+  'system: placeholders as the site fills them': [
+    [_notice('system', 'see {link} and {icon}')],
+    [_notice('system', 'go  now')],
+    // The site gives the k-th placeholder the link 2k + 1, else the first.
+    [_notice('system', 'second or first')],
+    [_notice('system', '!')],
+  ],
+  'system: a frame for moderators (c is b) is not shown; the other lines of a system frame': [
+    const [],
+    [_chat('chat in a system frame', _b8Id(23)), _notice('system', 'a notice')],
+  ],
+  'system: a system line in a chat frame is a notice (the site reads each line by its type)': [
+    [_chat('before', _b8Id(24)), _notice('system', 'Stream is live'), _chat('after', _b8Id(25))],
+  ],
+  'system: bad lines cost only themselves; a frame without a list shows nothing': [
+    [_notice('system', 'valid')],
+    const [],
+    const [],
+  ],
+  "raid: the server's sentence, else who raided whom": [
+    [_notice('raid', 'Raider is raiding with 12 viewers!')],
+    [_notice('raid', 'Raider 突袭了 allatir')],
+    [_notice('raid', 'Raider 突袭了 allatir')],
+  ],
+  'raid: nothing to say': List.filled(4, const []),
+  'ns: subscriptions and gifts, worded as the site words them': [
+    [_notice('subscription', 'Subscriber 订阅了 allatir，3 个月')],
+    [_notice('subscription', 'Subscriber 订阅了 allatir，1 个月')],
+    [_notice('subscription', 'Subscriber 开通了 allatir 的 2 级订阅')],
+    [_notice('subscription', 'Gifter 赠送给 Lucky 1 个月订阅')],
+    [_notice('subscription', 'Gifter 向 Picarto 社区赠送了 3 份 allatir 的订阅')],
+    [_notice('subscription', 'Lucky 收到匿名赠送的 6 个月 allatir 订阅')],
+    [_notice('subscription', '有人匿名向 Picarto 社区赠送了 2 份 allatir 的订阅')],
+    [_notice('subscription', 'Gifter 赠送给 Lucky 2 个月订阅')],
+  ],
+  'ns: a name the sentence needs is missing': List.filled(7, const []),
+  'a page of history (paginated or p) is skipped for every kind': [
+    for (var frame = 0; frame < 6; frame++) const [],
+    [_retraction('LiveRetraction.message(aaaaaaaa-0000-11f1-8000-000000000007)')],
+  ],
 };
 
 void main() {
@@ -507,6 +709,255 @@ void main() {
         expect(refused, [for (final frame in frames) frame == _refusal]);
       });
     }
+  });
+
+  group('B-8 (M5.F): chip tips, notices, retractions', () {
+    final cases = [
+      for (final entry in _b8Cases['cases']! as List<Object?>)
+        if (entry case {'name': final String name, 'frames': final List<Object?> frames})
+          (name: name, frames: frames.cast<String>()),
+    ];
+
+    test('S12-b8-synthetic is read on this room, and every case has an expectation', () {
+      expect(_b8Cases['channelId'], _args.channelId);
+      expect(_b8Cases['channelName'], _args.channelName);
+      expect(cases.map((entry) => entry.name), _b8Expected.keys);
+    });
+
+    for (final (:name, :frames) in cases) {
+      test(name, () {
+        expect([for (final frame in frames) _decodedAsV4(frame)], _b8Expected[name]);
+        for (final frame in frames) {
+          expect(PicartoDanmakuProtocol.decode(frame, channelId: _channelId).tokenRefused, isFalse);
+        }
+      });
+    }
+
+    test('a chip tip is a super chat, field by field', () {
+      final frame = cases.first.frames.single;
+      final message = PicartoDanmakuProtocol.decode(
+        frame,
+        channelId: _channelId,
+        channelName: 'allatir',
+        now: _receivedAt,
+      ).messages.single;
+      expect(message.type, LiveMessageType.superChat);
+      expect(message.userName, 'SUPER_CHAT_MESSAGE');
+      expect(message.message, 'SUPER_CHAT_MESSAGE');
+      expect(message.color, LiveMessageColor.white);
+      expect(message.userId, '7300007');
+      expect(message.messageId, 'bbbbbbbb-0000-11f1-8000-000000000001');
+      expect(message.sentAt, DateTime.fromMillisecondsSinceEpoch(_sent));
+      final data = message.data! as LiveSuperChatMessage;
+      expect(data.messageId, 'bbbbbbbb-0000-11f1-8000-000000000001');
+      expect(data.userName, 'Tipper');
+      expect(data.face, _face);
+      expect(data.message, 'kudo100 thanks for the stream');
+      expect(data.price, 100);
+      expect(data.priceText, '100 Kudos');
+      expect(data.startTime, DateTime.fromMillisecondsSinceEpoch(_sent));
+      expect(data.endTime, DateTime.fromMillisecondsSinceEpoch(_sent).add(const Duration(seconds: 60)));
+      expect(data.backgroundColor, '');
+      expect(data.backgroundBottomColor, '');
+      // Without a time it starts when received (the injected clock).
+      final undated = PicartoDanmakuProtocol.decode(
+        cases[1].frames.single,
+        channelId: _channelId,
+        now: _receivedAt,
+      ).messages.first;
+      expect(undated.sentAt, isNull);
+      expect((undated.data! as LiveSuperChatMessage).startTime, _receivedAt);
+      expect((undated.data! as LiveSuperChatMessage).endTime, _receivedAt.add(PicartoDanmakuProtocol.tipDuration));
+    });
+
+    test('retractions and notices, field by field', () {
+      final removal = PicartoDanmakuProtocol.decode(
+        '{"t":"rm","m":{"id":"aaaaaaaa-0000-11f1-8000-000000000001","m":"Chat Message Removed by allatir"}}',
+        channelId: _channelId,
+      ).messages.single;
+      expect(removal.type, LiveMessageType.retraction);
+      expect(removal.data, const LiveRetraction.message('aaaaaaaa-0000-11f1-8000-000000000001'));
+      expect((removal.data! as LiveRetraction).isAll, isFalse);
+      expect(removal.messageId, '', reason: "the target's id would collide with it in the duplicate gate");
+      expect([removal.userName, removal.userId, removal.message], ['', '', '']);
+      final clearance = PicartoDanmakuProtocol.decode('{"t":"cm","m":{"u":7300002}}', channelId: _channelId);
+      expect(clearance.messages.single.type, LiveMessageType.retraction);
+      expect(clearance.messages.single.data, const LiveRetraction.user('7300002'));
+      for (final (frame, kind, text) in [
+        ('{"t":"system","m":[{"t":"system","m":"Welcome!"}]}', LiveNoticeKind.system, 'Welcome!'),
+        ('{"t":"raid","m":{"rn":"allatir","n":"Raider","m":"Raider raids!"}}', LiveNoticeKind.raid, 'Raider raids!'),
+        ('{"t":"ns","m":{"sn":"S","n":"allatir","md":2}}', LiveNoticeKind.subscription, 'S 订阅了 allatir，2 个月'),
+      ]) {
+        final notice = PicartoDanmakuProtocol.decode(frame, channelId: _channelId).messages.single;
+        expect(notice.type, LiveMessageType.notice);
+        expect(notice.data, kind);
+        expect(notice.message, text);
+        expect([notice.userName, notice.userId, notice.messageId], ['', '', '']);
+        expect(notice.color, LiveMessageColor.white);
+        expect(notice.sentAt, isNull);
+      }
+    });
+
+    test("S13-removed: the streamer's deleted line is taken back by its id, and cm would take the user's", () {
+      final meta = _meta('S13-removed');
+      final keys = meta['danmakuKeys']! as Map<String, Object?>;
+      final channelId = int.parse(keys['channelId']! as String);
+      final frames = _frames('S13-removed');
+      expect(frames.map((frame) => frame.dir), ['in', 'in']);
+      final chat = PicartoDanmakuProtocol.decode(frames[0].text, channelId: channelId).messages.single;
+      expect(chat.type, LiveMessageType.chat);
+      expect(chat.userName, keys['channelName']);
+      expect(chat.messageId, '573b53e0-bce3-11f1-8b7e-a3860776556d');
+      expect(chat.sentAt, DateTime.fromMillisecondsSinceEpoch(1790782003230));
+      expect(chat.color, const LiveMessageColor(0xBE, 0xFF, 0x00));
+      final removal = PicartoDanmakuProtocol.decode(frames[1].text, channelId: channelId).messages.single;
+      expect(removal.type, LiveMessageType.retraction);
+      expect(removal.data, LiveRetraction.message(chat.messageId));
+      expect(removal.messageId, isEmpty);
+      // The line's user id is what a cm names (the site compares `u`).
+      final line = jsonDecode(frames[0].text);
+      if (line case {'m': [{'u': final String user}]}) {
+        final clearance = PicartoDanmakuProtocol.decode(
+          jsonEncode({
+            't': 'cm',
+            'm': {'u': user},
+          }),
+          channelId: channelId,
+        ).messages.single;
+        expect(clearance.data, LiveRetraction.user(chat.userId));
+      } else {
+        fail('no user id in $line');
+      }
+      // The deletion came about 4 s later; the gate lets both through.
+      final gate = DanmakuMessageGate();
+      final now = chat.sentAt!.add(const Duration(seconds: 4));
+      expect(gate.accepts(chat, now: now), isTrue);
+      expect(gate.accepts(removal, now: now), isTrue);
+    });
+
+    test('S14-tip: a recorded tip (a chat line with v, x and the chipmote) is a super chat, field by field', () {
+      final meta = _meta('S14-tip');
+      final keys = meta['danmakuKeys']! as Map<String, Object?>;
+      final channelName = keys['channelName']! as String;
+      final frame = _frames('S14-tip').single;
+      final decoded = PicartoDanmakuProtocol.decode(
+        frame.text,
+        channelId: int.parse(keys['channelId']! as String),
+        channelName: channelName,
+        now: DateTime.parse(meta['capturedAt']! as String),
+      );
+      expect(decoded.tokenRefused, isFalse);
+      final message = decoded.messages.single;
+      expect(message.type, LiveMessageType.superChat);
+      expect([message.userName, message.message], ['SUPER_CHAT_MESSAGE', 'SUPER_CHAT_MESSAGE']);
+      expect(message.color, LiveMessageColor.white);
+      expect(message.userId, '76348');
+      expect(message.messageId, '90e821d0-bce9-11f1-a839-8d3d4e5dbfb3');
+      expect(message.sentAt, DateTime.fromMillisecondsSinceEpoch(1790784676973));
+      final data = message.data! as LiveSuperChatMessage;
+      expect(data.messageId, message.messageId);
+      expect(data.userName, 'Tip0bdKTWr');
+      expect(
+        data.face,
+        'https://images.picarto.tv/ptvimages/7/76/76348/avatars/D63WLBb0cF3flNIwe7yRuY1eY47z5cp7aGrC3GYI.png',
+      );
+      expect(data.message, 'kudo100 Sparky is shrinking? Smaller than you think', reason: 'to this channel: no prefix');
+      expect(data.price, 100);
+      expect(data.priceText, '100 Kudos');
+      expect(data.startTime, DateTime.fromMillisecondsSinceEpoch(1790784676973));
+      expect(data.endTime, data.startTime.add(const Duration(seconds: 60)));
+      expect([data.backgroundColor, data.backgroundBottomColor], ['', '']);
+      // Before B-8 the line was plain chat (M5.10, v4): the chip count was lost.
+      final line = (jsonDecode(frame.text)! as Map<String, Object?>)['m']! as List<Object?>;
+      expect(PicartoDanmakuProtocol.chat(line.single)!.message, data.message);
+      // In another channel of a multistream it names the channel it went to.
+      final elsewhere = PicartoDanmakuProtocol.decode(frame.text, channelId: 1, channelName: 'OtherChannel');
+      expect(
+        (elsewhere.messages.single.data! as LiveSuperChatMessage).message,
+        '打赏给 $channelName：kudo100 Sparky is shrinking? Smaller than you think',
+      );
+    });
+
+    test('S15-system: a recorded system line (an icon, no links, a line break) is one system notice', () {
+      final keys = _meta('S15-system')['danmakuKeys']! as Map<String, Object?>;
+      final frame = _frames('S15-system').single;
+      final decoded = PicartoDanmakuProtocol.decode(
+        frame.text,
+        channelId: int.parse(keys['channelId']! as String),
+        channelName: keys['channelName']! as String,
+      );
+      expect(decoded.tokenRefused, isFalse);
+      final notice = decoded.messages.single;
+      expect(notice.type, LiveMessageType.notice);
+      expect(notice.data, LiveNoticeKind.system);
+      expect(notice.message, 'Multistream Chat has been merged: ItsDraconix,allatir,LOITER,belosha');
+      expect([notice.userName, notice.userId, notice.messageId], ['', '', '']);
+      expect(notice.color, LiveMessageColor.white);
+      expect(notice.sentAt, isNull);
+      // Before B-8 (M5.10, v4) a system frame showed nothing.
+      expect(frame.text, startsWith('{"t":"system","m":[{"t":"system","m":"{icon} Multistream'));
+    });
+
+    test('the connection reports tips, notices and retractions in order; an undated tip gets its clock', () async {
+      final connector = _Connector();
+      final connection = PicartoDanmakuConnection(
+        http: _TokenHttp([_answer(_tokenA)]),
+        connector: connector.call,
+        now: () => _receivedAt,
+      );
+      final events = _record(connection);
+      await connection.connect(_args);
+      final frames = [
+        cases[0].frames.single,
+        cases[1].frames.single,
+        '{"t":"c","m":[{"t":"c","u":"7300001","n":"ViewerOne","m":"hello","id":"aaaaaaaa-0000-11f1-8000-000000000001"}]}',
+        '{"t":"rm","m":{"id":"aaaaaaaa-0000-11f1-8000-000000000001","m":"Chat Message Removed by allatir"}}',
+        '{"t":"cm","m":{"u":"7300001"}}',
+        '{"t":"system","m":[{"t":"system","m":"Welcome!"}]}',
+        '{"t":"raid","m":{"rn":"allatir","n":"Raider","m":"Raider raids!"}}',
+        '{"t":"ns","m":{"sn":"S","n":"allatir","md":2}}',
+      ];
+      var binary = false;
+      for (final frame in frames) {
+        connector.channels.single.incoming.add((binary = !binary) ? utf8.encode(frame) : frame);
+      }
+      await _until(() => _messages(events).length == 9);
+      await _wait(const Duration(milliseconds: 10));
+      expect(_messages(events).map(_asV4), [
+        _tip(_b8Id(1), text: 'kudo100 thanks for the stream'),
+        ..._b8Expected[cases[1].name]!.single,
+        {
+          'kind': 'chat',
+          'id': 'picarto:aaaaaaaa-0000-11f1-8000-000000000001',
+          'sentAt': null,
+          'userId': '7300001',
+          'userName': 'ViewerOne',
+          'text': 'hello',
+          'color': '#ffffff',
+        },
+        _retraction('LiveRetraction.message(aaaaaaaa-0000-11f1-8000-000000000001)'),
+        _retraction('LiveRetraction.user(7300001)'),
+        _notice('system', 'Welcome!'),
+        _notice('raid', 'Raider raids!'),
+        _notice('subscription', 'S 订阅了 allatir，2 个月'),
+      ]);
+      expect(connector.channels.single.sent, isEmpty);
+      await connection.close();
+    });
+
+    test("a tip to another channel is named by the arguments' channel", () async {
+      final connector = _Connector();
+      final connection = _connection(_TokenHttp([_answer(_tokenA)]), connector);
+      final events = _record(connection);
+      await connection.connect(const PicartoDanmakuArgs(channelName: 'OtherChannel', channelId: 122866));
+      connector.channels.single.incoming.add(cases[2].frames.single);
+      await _until(() => _messages(events).length == 4);
+      expect(
+        [for (final message in _messages(events)) (message.data! as LiveSuperChatMessage).message],
+        ['go go', '', '打赏给 ALLATIR：same room', 'no receiver'],
+      );
+      await connection.close();
+    });
   });
 
   group('connection', () {

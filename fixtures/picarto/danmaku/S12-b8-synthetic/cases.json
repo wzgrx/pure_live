@@ -1,0 +1,176 @@
+{
+  "note": "Synthetic frames for Picarto's chip tips, notices and retractions (docs/modules/M5.10-picarto.md, section M5.F, appendix B-8), read on the chat socket of channelId (channelName) and received at receivedAt. rm (S13-removed), a tip (S14-tip: a chat line with v, x, mc and mk) and a system line (S15-system) were recorded; the other shapes (ct, cm, raid, ns) follow the site's chat client (picarto.tv/static/js/6572.9e565331.chunk.js: the frame switch and the ChipTipMessage, SubscriberMessage, RaidMessage and NotificationMessage components; chatworker.min.js: the line mapping). Each case is a list of text frames in order; names, ids and times are made up.",
+  "channelId": 942670,
+  "channelName": "allatir",
+  "receivedAt": "2026-09-30T15:30:00.000Z",
+  "cases": [
+    {
+      "name": "tip: a ct line with every field the site reads",
+      "frames": [
+        "{\"t\":\"ct\",\"m\":[{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\" kudo100 thanks for the stream \",\"x\":100,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"66AFFF\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000001\",\"d\":1790531380528}]}"
+      ]
+    },
+    {
+      "name": "tip: a chat line with v set, without time, text or avatar; a line without a type",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"u\":7300008,\"n\":\"TipperTwo\",\"m\":\"\",\"x\":5,\"v\":1,\"rn\":\"allatir\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000002\"},{\"u\":\"7300009\",\"n\":\"TipperThree\",\"m\":\"no type\",\"x\":1,\"v\":true,\"id\":\"bbbbbbbb-0000-11f1-8000-000000000003\",\"d\":\"1790531380528\"}]}"
+      ]
+    },
+    {
+      "name": "tip: to another channel of the multistream, it says whom it went to",
+      "frames": [
+        "{\"t\":\"ct\",\"m\":[{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"go go\",\"x\":50,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"OtherChannel\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000004\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"\",\"x\":50,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"OtherChannel\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000005\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"same room\",\"x\":50,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"ALLATIR\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000006\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"no receiver\",\"x\":50,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000007\",\"d\":1790531380528}]}"
+      ]
+    },
+    {
+      "name": "tip: the avatar is a path under images.picarto.tv, or a full URL as it is",
+      "frames": [
+        "{\"t\":\"ct\",\"m\":[{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"ptvimages/1/23/4567890/avatars/abcdefghij.png\",\"y\":\"P\",\"m\":\"thanks\",\"x\":100,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000008\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"https://images.picarto.tv/ptvimages/1/23/4567890/avatars/abcdefghij.png\",\"y\":\"P\",\"m\":\"thanks\",\"x\":100,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000009\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"\",\"y\":\"P\",\"m\":\"thanks\",\"x\":100,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000010\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":5,\"y\":\"P\",\"m\":\"thanks\",\"x\":100,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000011\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"y\":\"P\",\"m\":\"thanks\",\"x\":100,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000012\",\"d\":1790531380528}]}"
+      ]
+    },
+    {
+      "name": "tip: a ct line without v is still a tip; a chat line with chips but without v is chat",
+      "frames": [
+        "{\"t\":\"ct\",\"m\":[{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"no flag\",\"x\":10,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000013\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"false flag\",\"x\":10,\"v\":false,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000014\",\"d\":1790531380528}]}",
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"chips but no flag\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000015\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\",\"x\":10}]}"
+      ]
+    },
+    {
+      "name": "tip: bad chips cost only that line",
+      "frames": [
+        "{\"t\":\"ct\",\"m\":[{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"thanks\",\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000016\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"thanks\",\"x\":0,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000017\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"thanks\",\"x\":-5,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000018\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"thanks\",\"x\":1.5,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000019\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"thanks\",\"x\":\"100\",\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000020\",\"d\":1790531380528},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"thanks\",\"x\":null,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000021\",\"d\":1790531380528},\"not a line\",null,{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"valid\",\"x\":2,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000022\",\"d\":1790531380528}]}"
+      ]
+    },
+    {
+      "name": "tip: text that is not text, and the id from _id",
+      "frames": [
+        "{\"t\":\"ct\",\"m\":[{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":7,\"x\":100,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"d\":1790531380528,\"_id\":\"5f0000000000000000000002\"},{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":null,\"x\":100,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":5,\"d\":1790531380528}]}"
+      ]
+    },
+    {
+      "name": "rm: takes back one message by its id (the shape recorded on 2026-09-30)",
+      "frames": [
+        "{\"t\":\"rm\",\"m\":{\"id\":\"aaaaaaaa-0000-11f1-8000-000000000001\",\"m\":\"Chat Message Removed by allatir\"}}",
+        "{\"type\":\"rm\",\"messages\":{\"id\":\"aaaaaaaa-0000-11f1-8000-000000000002\"}}"
+      ]
+    },
+    {
+      "name": "cm: takes back every message of a user, the id as text or a number",
+      "frames": [
+        "{\"t\":\"cm\",\"m\":{\"u\":\"7300001\"}}",
+        "{\"t\":\"cm\",\"m\":{\"u\":7300002}}"
+      ]
+    },
+    {
+      "name": "rm and cm without a usable target show nothing",
+      "frames": [
+        "{\"t\":\"rm\"}",
+        "{\"t\":\"rm\",\"m\":[{\"id\":\"aaaaaaaa-0000-11f1-8000-000000000003\"}]}",
+        "{\"t\":\"rm\",\"m\":{\"id\":\"\"}}",
+        "{\"t\":\"rm\",\"m\":{\"id\":\"  \"}}",
+        "{\"t\":\"rm\",\"m\":{\"id\":123}}",
+        "{\"t\":\"rm\",\"m\":{\"_id\":\"aaaaaaaa-0000-11f1-8000-000000000004\"}}",
+        "{\"t\":\"rm\",\"m\":\"aaaaaaaa-0000-11f1-8000-000000000005\"}",
+        "{\"t\":\"cm\"}",
+        "{\"t\":\"cm\",\"m\":{\"u\":\"\"}}",
+        "{\"t\":\"cm\",\"m\":{\"u\":null}}",
+        "{\"t\":\"cm\",\"m\":{\"u\":{\"id\":1}}}",
+        "{\"t\":\"cm\",\"m\":{\"u\":true}}",
+        "{\"t\":\"cm\",\"m\":[\"7300001\"]}"
+      ]
+    },
+    {
+      "name": "system: the server's text; a link becomes its text, an icon is left out, lines are joined",
+      "frames": [
+        "{\"t\":\"system\",\"m\":[{\"t\":\"system\",\"m\":\"Welcome to the chat!\"}]}",
+        "{\"t\":\"system\",\"m\":[{\"t\":\"system\",\"m\":\"Read the rules: {link}\",\"l\":[{\"text\":\"picarto.tv/rules\",\"href\":\"https://picarto.tv/site/rules\"}]}]}",
+        "{\"t\":\"system\",\"m\":[{\"t\":\"system\",\"m\":\"{icon} Slow mode is on.\\n Wait 5 seconds between messages. \",\"ic\":[\"clock\"]}]}",
+        "{\"t\":\"system\",\"z\":true,\"w\":true,\"m\":[{\"t\":\"system\",\"m\":\"first\"},{\"t\":\"system\",\"m\":\"second\"}]}"
+      ]
+    },
+    {
+      "name": "system: placeholders as the site fills them",
+      "frames": [
+        "{\"t\":\"system\",\"m\":[{\"t\":\"system\",\"m\":\"see {link} and {icon}\"}]}",
+        "{\"t\":\"system\",\"m\":[{\"t\":\"system\",\"m\":\"go {link} now\",\"l\":[]}]}",
+        "{\"t\":\"system\",\"m\":[{\"t\":\"system\",\"m\":\"{link} or {link}\",\"l\":[{\"text\":\"first\",\"href\":\"https://picarto.tv/a\"},{\"text\":\"second\",\"href\":\"https://picarto.tv/b\"}]}]}",
+        "{\"t\":\"system\",\"m\":[{\"t\":\"system\",\"m\":\"{link}!\",\"l\":[{\"href\":\"https://picarto.tv/c\"}]}]}"
+      ]
+    },
+    {
+      "name": "system: a frame for moderators (c is b) is not shown; the other lines of a system frame",
+      "frames": [
+        "{\"t\":\"system\",\"c\":\"b\",\"m\":[{\"t\":\"system\",\"m\":\"ViewerOne was banned\"}]}",
+        "{\"t\":\"system\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"chat in a system frame\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000023\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"m\":\"no type\"},{\"t\":\"w\",\"m\":\"a whisper\"},{\"t\":\"system\",\"m\":\"a notice\"}]}"
+      ]
+    },
+    {
+      "name": "system: a system line in a chat frame is a notice (the site reads each line by its type)",
+      "frames": [
+        "{\"t\":\"c\",\"m\":[{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"before\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000024\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"},{\"t\":\"system\",\"m\":\"Stream is live\"},{\"t\":\"c\",\"c\":\"942670\",\"u\":\"7300001\",\"n\":\"ViewerOne\",\"rn\":\"allatir\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"after\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000025\",\"d\":1790531380528,\"cb\":true,\"k\":\"ffffff\",\"rc\":\"a357ee\"}]}"
+      ]
+    },
+    {
+      "name": "system: bad lines cost only themselves; a frame without a list shows nothing",
+      "frames": [
+        "{\"t\":\"system\",\"m\":[{\"t\":\"system\"},{\"t\":\"system\",\"m\":7},{\"t\":\"system\",\"m\":\"   \"},{\"t\":\"system\",\"m\":\"\\n \\n\"},{\"t\":\"system\",\"m\":\"{icon}\",\"ic\":[]},\"text\",null,{\"t\":\"system\",\"m\":\"valid\"}]}",
+        "{\"t\":\"system\",\"m\":{\"t\":\"system\",\"m\":\"an object\"}}",
+        "{\"t\":\"system\"}"
+      ]
+    },
+    {
+      "name": "raid: the server's sentence, else who raided whom",
+      "frames": [
+        "{\"t\":\"raid\",\"m\":{\"rn\":\"allatir\",\"ry\":\"P\",\"ri\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"u\":\"942670\",\"m\":\"Raider is raiding with 12 viewers!\",\"n\":\"Raider\",\"y\":\"P\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"c\":\"7300010\"}}",
+        "{\"t\":\"raid\",\"m\":{\"rn\":\"allatir\",\"n\":\"Raider\",\"m\":\"  \"}}",
+        "{\"type\":\"raid\",\"messages\":{\"rn\":\"allatir\",\"n\":\"Raider\"}}"
+      ]
+    },
+    {
+      "name": "raid: nothing to say",
+      "frames": [
+        "{\"t\":\"raid\"}",
+        "{\"t\":\"raid\",\"m\":[{\"m\":\"a list\"}]}",
+        "{\"t\":\"raid\",\"m\":{\"m\":\"\"}}",
+        "{\"t\":\"raid\",\"m\":{\"n\":\"Raider\",\"m\":5}}"
+      ]
+    },
+    {
+      "name": "ns: subscriptions and gifts, worded as the site words them",
+      "frames": [
+        "{\"t\":\"ns\",\"m\":{\"sn\":\"Subscriber\",\"n\":\"allatir\",\"md\":3}}",
+        "{\"t\":\"ns\",\"m\":{\"sn\":\"Subscriber\",\"n\":\"allatir\"}}",
+        "{\"t\":\"ns\",\"m\":{\"sn\":\"Subscriber\",\"n\":\"allatir\",\"md\":0,\"slvl\":2}}",
+        "{\"t\":\"ns\",\"m\":{\"sn\":\"Gifter\",\"n\":\"allatir\",\"md\":1,\"sg\":true,\"gn\":\"Lucky\"}}",
+        "{\"t\":\"ns\",\"m\":{\"sn\":\"Gifter\",\"n\":\"allatir\",\"md\":1,\"sg\":true,\"sc\":[{\"channel_name\":\"A\"},{\"channel_name\":\"B\"},{\"channel_name\":\"C\"}]}}",
+        "{\"t\":\"ns\",\"m\":{\"n\":\"allatir\",\"md\":6,\"sg\":1,\"ag\":true,\"gn\":\"Lucky\"}}",
+        "{\"t\":\"ns\",\"m\":{\"n\":\"allatir\",\"sg\":true,\"ag\":true,\"sc\":[{\"channel_name\":\"A\"},{\"channel_name\":\"B\"}]}}",
+        "{\"t\":\"ns\",\"m\":{\"sn\":\"Gifter\",\"n\":\"allatir\",\"md\":2,\"sg\":true,\"sc\":[],\"gn\":\"Lucky\"}}"
+      ]
+    },
+    {
+      "name": "ns: a name the sentence needs is missing",
+      "frames": [
+        "{\"t\":\"ns\",\"m\":{\"n\":\"allatir\",\"md\":3}}",
+        "{\"t\":\"ns\",\"m\":{\"sn\":\"Subscriber\"}}",
+        "{\"t\":\"ns\",\"m\":{\"sn\":\"Gifter\",\"n\":\"allatir\",\"sg\":true}}",
+        "{\"t\":\"ns\",\"m\":{\"n\":\"allatir\",\"sg\":true,\"ag\":true}}",
+        "{\"t\":\"ns\",\"m\":{\"sn\":\"Gifter\",\"sg\":true,\"sc\":[{\"channel_name\":\"A\"}]}}",
+        "{\"t\":\"ns\",\"m\":[{\"sn\":\"Subscriber\",\"n\":\"allatir\"}]}",
+        "{\"t\":\"ns\"}"
+      ]
+    },
+    {
+      "name": "a page of history (paginated or p) is skipped for every kind",
+      "frames": [
+        "{\"t\":\"ct\",\"p\":1,\"m\":[{\"t\":\"ct\",\"c\":\"942670\",\"u\":\"7300007\",\"n\":\"Tipper\",\"i\":\"abcdefghi/1/23/4567890/abcdefg/0123456789abcdefghij.png\",\"y\":\"P\",\"m\":\"thanks\",\"x\":100,\"v\":true,\"mc\":100,\"mk\":\"kudo\",\"rn\":\"allatir\",\"k\":\"ffffff\",\"rc\":\"1da456\",\"id\":\"bbbbbbbb-0000-11f1-8000-000000000026\",\"d\":1790531380528}]}",
+        "{\"t\":\"system\",\"paginated\":true,\"m\":[{\"t\":\"system\",\"m\":\"old notice\"}]}",
+        "{\"t\":\"raid\",\"p\":1,\"m\":{\"rn\":\"allatir\",\"n\":\"Raider\",\"m\":\"old raid\"}}",
+        "{\"t\":\"ns\",\"p\":1,\"m\":{\"sn\":\"Subscriber\",\"n\":\"allatir\",\"md\":3}}",
+        "{\"t\":\"rm\",\"p\":1,\"m\":{\"id\":\"aaaaaaaa-0000-11f1-8000-000000000006\"}}",
+        "{\"t\":\"cm\",\"p\":1,\"m\":{\"u\":\"7300001\"}}",
+        "{\"t\":\"rm\",\"p\":0,\"m\":{\"id\":\"aaaaaaaa-0000-11f1-8000-000000000007\"}}"
+      ]
+    }
+  ]
+}

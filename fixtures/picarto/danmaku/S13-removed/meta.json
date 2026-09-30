@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "platform": "picarto",
+  "case": "S13-removed",
+  "room": "picarto:syugyobeya",
+  "danmakuKeys": {
+    "channelName": "syugyobeya",
+    "channelId": "1461703"
+  },
+  "capturedAt": "2026-09-30T15:26:43.041203Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://chat.picarto.tv/chat/token=<an anonymous token, not kept>",
+      "headers": {
+        "origin": "https://picarto.tv",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "status": 101
+    }
+  ],
+  "frames": 2,
+  "raw": {
+    "sha256": "3dccd0d79d2685b1bc0f9b1ad1513f5b89a4789ca8ede74b98c64388e7132f25",
+    "length": 738
+  },
+  "scrubbed": [
+    {
+      "where": "$.m[0].m",
+      "rule": "content"
+    }
+  ],
+  "tool": "M5.F recorder (dart:io WebSocket, anonymous, direct; sends only the site's keep-alive ping every 50 s)",
+  "note": "Two frames out of a 150-minute watch of the 45 busiest channels on 2026-09-30 (read-only, anonymous, nothing written): the streamer wrote a line in their own chat and deleted it about 4 s later; the server sent rm with the line's id and the text the site puts in its place. The line and the rm keep the channel's public name, id and avatar (as S09 keeps the streams' state); the deleted text is replaced by a made-up text of the same length. The token was not kept."
+}

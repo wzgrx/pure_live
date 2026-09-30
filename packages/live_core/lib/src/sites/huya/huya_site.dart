@@ -95,12 +95,24 @@ final class HuyaSite extends LiveSite
         LivePlayLeaseMetadata {
   /// Creates the adapter. [_cookies] holds the user's login cookie, if any.
   /// [playConfigUrls] are raced for the player configuration (3.x read it
-  /// from the GitHub mirrors of the upstream repository). [now] and
-  /// [random] are injectable for tests.
-  new(this.http, {this._cookies, Iterable<Uri>? playConfigUrls, DateTime Function()? now, Random? random})
-    : playConfigUrls = List.unmodifiable(playConfigUrls ?? _playConfigMirrors),
-      _now = now ?? DateTime.now,
-      _random = random ?? Random.secure();
+  /// from the GitHub mirrors of the upstream repository). [preferH264]
+  /// reads "优先 H.264" (on by default): on, every line asks for H.264 as
+  /// 3.x did; off, FLV lines ask for HEVC (`codec=265`), which a room
+  /// without an HEVC transcode answers with H.264. [now] and [random] are
+  /// injectable for tests.
+  new(
+    this.http, {
+    this._cookies,
+    Iterable<Uri>? playConfigUrls,
+    bool Function()? preferH264,
+    DateTime Function()? now,
+    Random? random,
+  }) : playConfigUrls = List.unmodifiable(playConfigUrls ?? _playConfigMirrors),
+       _preferH264 = preferH264 ?? _on,
+       _now = now ?? DateTime.now,
+       _random = random ?? Random.secure();
+
+  static bool _on() => true;
 
   static final List<Uri> _playConfigMirrors = const GitHubMirror(
     owner: 'liuchuancong',
@@ -114,6 +126,7 @@ final class HuyaSite extends LiveSite
   final List<Uri> playConfigUrls;
 
   final CookieVault? _cookies;
+  final bool Function() _preferH264;
   final DateTime Function() _now;
   final Random _random;
   final HuyaSignClock _clock = HuyaSignClock();
@@ -178,7 +191,10 @@ final class HuyaSite extends LiveSite
       Future.wait([for (final top in HuyaApi.topCategories) _category(top.id, top.name)]);
 
   Future<LiveCategory> _category(String id, String name) async {
-    final response = await _get(Uri.https('live.cdn.huya.com', '/liveconfig/game/bussLive', {'bussType': id}));
+    final response = await _get(
+      Uri.https('live.cdn.huya.com', '/liveconfig/game/bussLive', {'bussType': id}),
+      headers: const {'user-agent': HuyaApi.userAgent},
+    );
     return LiveCategory(
       id: id,
       name: name,
@@ -223,7 +239,10 @@ final class HuyaSite extends LiveSite
     if (text.isEmpty) return const [];
     final rows = pageSize.clamp(1, 50);
     final start = ((page < 1 ? 1 : page) - 1) * rows;
-    final response = await _get(_searchUrl(text, version: 4, rows: rows, start: start));
+    final response = await _get(
+      _searchUrl(text, version: 4, rows: rows, start: start),
+      headers: _searchHeaders,
+    );
     return HuyaApi.searchRooms(response.text, start: start, rows: rows, status: response.status);
   }
 
@@ -233,9 +252,17 @@ final class HuyaSite extends LiveSite
     final text = keyword.trim();
     if (text.isEmpty) return const [];
     final rows = pageSize < 1 ? 1 : pageSize;
-    final response = await _get(_searchUrl(text, version: 1, rows: rows, start: ((page < 1 ? 1 : page) - 1) * rows));
+    final response = await _get(
+      _searchUrl(text, version: 1, rows: rows, start: ((page < 1 ? 1 : page) - 1) * rows),
+      headers: _searchHeaders,
+    );
     return HuyaApi.searchAnchors(response.text, status: response.status);
   }
+
+  /// Search answers a request without a User-Agent with HTTP 403 `Not
+  /// allowed` (2026-10-01); 3.x's Dio sent its own UA, this transport sends
+  /// none unless asked.
+  static const Map<String, String> _searchHeaders = {'user-agent': HuyaApi.userAgent};
 
   static Uri _searchUrl(String keyword, {required int version, required int rows, required int start}) =>
       Uri.https('search.cdn.huya.com', '/', {
@@ -575,7 +602,7 @@ final class HuyaSite extends LiveSite
   Future<_Opened> _open(HuyaLine line, int bitRate, String roomId, Future<int> Function() viewer) async {
     try {
       final signed = await _sign(line, viewer);
-      final url = HuyaApi.mediaUrl(line, antiCode: signed.antiCode, bitRate: bitRate);
+      final url = HuyaApi.mediaUrl(line, antiCode: signed.antiCode, bitRate: bitRate, hevc: !_preferH264());
       final lease = HuyaApi.lease(url, builtAt: _now(), token: signed.window);
       final text = url.toString();
       _rememberLease(text, lease);

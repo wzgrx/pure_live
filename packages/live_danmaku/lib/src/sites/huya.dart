@@ -4,6 +4,47 @@ import 'dart:typed_data';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
+import 'package:meta/meta.dart';
+
+/// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from uri
+/// 6501 (`SendItemSubBroadcastPacket`, a gift sent in this room).
+@immutable
+final class HuyaGift {
+  /// Creates the gift.
+  const new({required this.id, required this.name, required this.count, required this.combo, required this.payTotal});
+
+  /// `iItemType`, the gift's id (`4` is 虎粮).
+  final int id;
+
+  /// `sPropsName` (`虎粮`, `粉丝通行证`).
+  final String name;
+
+  /// `iItemCount`, at least 1: how many this send gave.
+  final int count;
+
+  /// `iItemGroup`, at least 1: the combo counter. A combo sends one packet
+  /// per hit with the same `lComboSeqId`, counting 1, 2, 3…
+  final int combo;
+
+  /// `lPayTotal` as the platform gives it (0 for a free gift such as 虎粮;
+  /// the unit is not documented).
+  final int payTotal;
+
+  @override
+  bool operator ==(Object other) =>
+      other is HuyaGift &&
+      other.id == id &&
+      other.name == name &&
+      other.count == count &&
+      other.combo == combo &&
+      other.payTotal == payTotal;
+
+  @override
+  int get hashCode => Object.hash(id, name, count, combo, payTotal);
+
+  @override
+  String toString() => 'HuyaGift($name ×$count, combo $combo)';
+}
 
 /// What one Huya server frame held: its messages in order, and how many
 /// headline (super chat) notices (uri 2001314) it carried.
@@ -16,8 +57,8 @@ typedef HuyaDanmakuFrame = ({List<LiveMessage> messages, int superChatNotices});
 /// heartbeats (command 20); the server pushes single messages (command 7:
 /// tag 1 uri, tag 2 body, tag 5 message id) and batches (command 22: tag 0
 /// group, tag 1 items of tag 0 uri, tag 1 body, tag 2 message id). Chat is
-/// uri 1400, popularity uri 8006, and uri 2001314 announces a new headline
-/// on the message board.
+/// uri 1400, popularity uri 8006, a gift uri 6501, and uri 2001314 announces
+/// a new headline on the message board.
 abstract final class HuyaDanmakuProtocol {
   /// The only endpoint (3.x `serverUrl`).
   static final Uri endpoint = Uri.parse('wss://wsapi.huya.com');
@@ -43,6 +84,10 @@ abstract final class HuyaDanmakuProtocol {
   /// Popularity (`AttendeeCountNotice`): a heat figure, not concurrent
   /// viewers (REG-HUYA-014).
   static const int popularityUri = 8006;
+
+  /// A gift sent in this room (`SendItemSubBroadcastPacket`); 3.x ignored
+  /// it.
+  static const int giftUri = 6501;
 
   /// A new headline (super chat) on the room's message board; the body is
   /// not read, the board is fetched instead.
@@ -87,8 +132,9 @@ abstract final class HuyaDanmakuProtocol {
             ..writeBytes(1, const []))
           .toBytes();
 
-  /// The messages of one server [frame] (3.x `decodeMessage`): chat and
-  /// popularity from commands 7 and 22, and the count of headline notices.
+  /// The messages of one server [frame] (3.x `decodeMessage`): chat,
+  /// popularity and (M4.D) gifts from commands 7 and 22, and the count of
+  /// headline notices.
   /// Other commands and uris are ignored; a frame that is not Tars gives
   /// nothing, and an item whose body fails to decode is skipped without
   /// losing the others.
@@ -104,6 +150,7 @@ abstract final class HuyaDanmakuProtocol {
         final message = switch (uri) {
           chatUri => _chat(body, eventId),
           popularityUri => _popularity(body, eventId),
+          giftUri => gift(body, eventId),
           _ => null,
         };
         if (message != null) messages.add(message);
@@ -166,6 +213,37 @@ abstract final class HuyaDanmakuProtocol {
       userName: sender?.string(2) ?? '',
       userId: '${sender?.integer(0) ?? 0}',
       messageId: _messageId(eventId),
+    );
+  }
+
+  /// uri 6501 (`SendItemSubBroadcastPacket`, the web client's field names):
+  /// tag 0 `iItemType`, 2 `iItemCount`, 4 `lSenderUid`, 6 `sSenderNick`, 9
+  /// `iItemGroup` (the combo counter), 20 `sPropsName`, 41 `lPayTotal`. A
+  /// gift without a name is not reported (the web client names it from a
+  /// gift table this client does not load). Reported as a gift (not shown
+  /// yet, appendix B-21); the text is `虎粮 ×1`.
+  static LiveMessage? gift(Uint8List? body, int eventId) {
+    final packet = TarsStruct.decode(body ?? const []);
+    final name = (packet.string(20) ?? '').trim();
+    if (name.isEmpty) return null;
+    final count = packet.integer(2) ?? 0;
+    final combo = packet.integer(9) ?? 0;
+    final payTotal = packet.integer(41) ?? 0;
+    final data = HuyaGift(
+      id: packet.integer(0) ?? 0,
+      name: name,
+      count: count > 0 ? count : 1,
+      combo: combo > 0 ? combo : 1,
+      payTotal: payTotal > 0 ? payTotal : 0,
+    );
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: packet.string(6) ?? '',
+      userId: '${packet.integer(4) ?? 0}',
+      message: '${data.name} ×${data.count}',
+      color: LiveMessageColor.white,
+      messageId: _messageId(eventId),
+      data: data,
     );
   }
 

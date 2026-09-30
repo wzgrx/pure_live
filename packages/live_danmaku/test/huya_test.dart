@@ -560,6 +560,56 @@ void main() {
     }
   });
 
+  group('M4.D: gifts (uri 6501)', () {
+    test('S18: every recorded gift push is a gift with its name, count, combo, sender and id', () {
+      final gifts = [
+        for (final line in File('$_root/S18-gift/frames.jsonl').readAsLinesSync())
+          ...HuyaDanmakuProtocol.decode(base64Decode((jsonDecode(line) as Map<String, Object?>)['b64']! as String))
+              .messages,
+      ];
+      expect(gifts, hasLength(27));
+      expect(gifts.every((message) => message.type == LiveMessageType.gift), isTrue);
+      expect(gifts.map((message) => message.messageId).toSet(), hasLength(27));
+      expect(gifts.every((message) => RegExp(r'^huya:[1-9][0-9]+$').hasMatch(message.messageId)), isTrue);
+      final first = gifts.first;
+      expect((first.userName, first.userId, first.message), ('观众1', '9540329646482', '粉丝通行证 ×1'));
+      expect(first.data, const HuyaGift(id: 22225, name: '粉丝通行证', count: 1, combo: 1, payTotal: 10));
+      // One viewer's 虎粮 combo: a packet per hit, counting up.
+      final combo = [
+        for (final message in gifts.skip(1).take(5)) (message.userName, (message.data! as HuyaGift).combo),
+      ];
+      expect(combo, [for (var hit = 1; hit <= 5; hit++) ('观众2', hit)]);
+      expect((gifts[1].data! as HuyaGift).payTotal, 0, reason: '虎粮 is free');
+    });
+
+    test('a gift without a name, or a body that is not Tars, gives no message; the frame goes on', () {
+      Uint8List push(Uint8List body) {
+        final payload =
+            (TarsWriter()
+                  ..writeInt(1, HuyaDanmakuProtocol.giftUri)
+                  ..writeBytes(2, body)
+                  ..writeInt(5, 7))
+                .toBytes();
+        return (TarsWriter()
+              ..writeInt(0, HuyaDanmakuProtocol.pushCommand)
+              ..writeBytes(1, payload))
+            .toBytes();
+      }
+
+      final unnamed =
+          (TarsWriter()
+                ..writeInt(0, 4)
+                ..writeInt(2, 0))
+              .toBytes();
+      expect(HuyaDanmakuProtocol.decode(push(unnamed)).messages, isEmpty);
+      expect(HuyaDanmakuProtocol.decode(push(Uint8List.fromList([0]))).messages, isEmpty);
+      final named = (TarsWriter()..writeString(20, ' 虎粮 ')).toBytes();
+      final gift = HuyaDanmakuProtocol.decode(push(named)).messages.single;
+      expect((gift.message, gift.userId, gift.messageId), ('虎粮 ×1', '0', 'huya:7'));
+      expect(gift.data, const HuyaGift(id: 0, name: '虎粮', count: 1, combo: 1, payTotal: 0));
+    });
+  });
+
   group('M5.F B-4: message ids of single pushes', () {
     test('S17: a chat has the same id on every connection; none repeats; no replay after the reconnect', () {
       final a = _s17Chats('A');

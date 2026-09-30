@@ -789,10 +789,15 @@ abstract final class HuyaApi {
   }
 
   /// The media query for [bitRate] (3.x `getPlayUrl`): `codec=264` added
-  /// when absent; `ratio` set to the rate, or removed for the source (0),
-  /// never the one captured with the page (REG-HUYA-012).
-  static String mediaQuery(String antiCode, {required int bitRate}) {
-    final query = RegExp('(^|&)codec=').hasMatch(antiCode) ? antiCode : '$antiCode&codec=264';
+  /// when absent (`codec=265` with [hevc]); `ratio` set to the rate, or
+  /// removed for the source (0), never the one captured with the page
+  /// (REG-HUYA-012).
+  ///
+  /// `codec=265` is what the web player adds when it can decode HEVC; a room
+  /// without an HEVC transcode still answers H.264 (2026-10-01: two of three
+  /// rooms sent HEVC, the third H.264).
+  static String mediaQuery(String antiCode, {required int bitRate, bool hevc = false}) {
+    final query = RegExp('(^|&)codec=').hasMatch(antiCode) ? antiCode : '$antiCode&codec=${hevc ? 265 : 264}';
     return replaceQueryParameter(query, 'ratio', bitRate > 0 ? '$bitRate' : null);
   }
 
@@ -816,17 +821,21 @@ abstract final class HuyaApi {
     return output.join('&');
   }
 
-  /// `{base}/{streamName}.{flv|m3u8}?{mediaQuery}`.
-  static Uri mediaUrl(HuyaLine line, {required String antiCode, required int bitRate}) {
+  /// `{base}/{streamName}.{flv|m3u8}?{mediaQuery}`. [hevc] asks an FLV line
+  /// for HEVC; HLS always asks for H.264 (the web player's HEVC HLS is a
+  /// separate URL).
+  static Uri mediaUrl(HuyaLine line, {required String antiCode, required int bitRate, bool hevc = false}) {
     final base = line.base.endsWith('/') ? line.base.substring(0, line.base.length - 1) : line.base;
     final extension = line.format == StreamFormat.hls ? 'm3u8' : 'flv';
-    return Uri.parse('$base/${line.streamName}.$extension?${mediaQuery(antiCode, bitRate: bitRate)}');
+    final query = mediaQuery(antiCode, bitRate: bitRate, hevc: hevc && line.format == StreamFormat.flv);
+    return Uri.parse('$base/${line.streamName}.$extension?$query');
   }
 
-  /// The video codec a media URL asks for: `codec=264` is AVC, `265` HEVC.
+  /// The video codec a media URL is known to deliver: `codec=264` is AVC.
+  /// `codec=265` only asks for HEVC (a room without an HEVC transcode
+  /// answers H.264), so it is unknown (null).
   static String? codecOf(Uri url) => switch (_parseMap(url.query)['codec']) {
     '264' => 'avc',
-    '265' => 'hevc',
     _ => null,
   };
 

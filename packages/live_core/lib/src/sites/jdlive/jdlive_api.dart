@@ -264,9 +264,10 @@ abstract final class JdLiveApi {
 
   /// The notice of a room (text key `jdlive_chat_notice`), in words for
   /// users (M4.U; 3.x: "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。").
-  /// Chat is shown since M5.24, so it only explains the number now (M4.U
-  /// began with "这里暂时看不到京东直播的聊天。").
-  static const String chatNotice = '人数是累计观看，不是正在观看的人数。';
+  /// Chat is shown since M5.24, so it only explains the numbers now (M4.U
+  /// began with "这里暂时看不到京东直播的聊天。"): cards and details carry
+  /// cumulative viewers, the chat connection concurrent ones.
+  static const String chatNotice = '列表里的人数是累计观看；直播中连上弹幕后，显示的是正在观看的人数。';
 
   /// The notice of an app-only room (`jdlive_restricted_notice`; M4.U,
   /// 3.x: "该京东直播仅限京东应用访问，界面保持未知状态，不将其显示成未开播。").

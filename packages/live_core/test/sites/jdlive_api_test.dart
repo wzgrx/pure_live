@@ -886,7 +886,7 @@ void main() {
     });
 
     test('the notice only explains the number now; the chat gives the viewers in the room', () {
-      expect(JdLiveApi.chatNotice, '人数是累计观看，不是正在观看的人数。');
+      expect(JdLiveApi.chatNotice, '列表里的人数是累计观看；直播中连上弹幕后，显示的是正在观看的人数。');
       expect(JdLiveApi.chatNotice, isNot(contains('聊天')), reason: 'M5.24: chat is shown');
       final capability = AudiencePlatformCapability.of('jdlive');
       expect(capability.onlineAvailability, AudienceOnlineAvailability.roomRealtime);

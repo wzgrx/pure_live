@@ -26,6 +26,13 @@ const _bootstrapRetry = Duration(minutes: 5);
 /// Search asks at most this many name-matched partitions for rooms.
 const _searchPartitions = 3;
 
+/// How long entering a room waits for its start time (one reflow request,
+/// M4.D); a later answer still serves the next detail of the broadcast.
+const _startLookupWait = Duration(seconds: 3);
+
+/// Broadcasts whose start time is remembered.
+const _startTimesKept = 64;
+
 final RegExp _controlCharacters = RegExp(r'[\u0000-\u001F\u007F]');
 final RegExp _reflowPath = RegExp(r'(?:^|/)reflow/(\d+)(?:/|$)');
 final Uri _homeUrl = Uri.https(_live, '/', {'from_nav': '1'});
@@ -101,6 +108,12 @@ final class DouyinSite extends LiveSite
 
   /// Rooms the recommendation draws already delivered since page 1.
   final Set<String> _recommended = {};
+
+  /// Start times by broadcast room_id (reflow's `start_time`), oldest first.
+  final Map<String, DateTime> _startTimes = {};
+
+  /// Start-time lookups in flight by broadcast room_id.
+  final Map<String, Future<DateTime?>> _startLookups = {};
 
   @override
   String get id => _site;
@@ -534,10 +547,14 @@ final class DouyinSite extends LiveSite
     );
   }
 
+  /// The room of [fetched]. A live broadcast whose answer has no start time
+  /// takes one remembered from an earlier lookup ([_withStart]).
   LiveRoom _detail(_Fetched fetched, {required bool danmaku}) {
     final (:room, :issuedAt, :cookie) = fetched;
     final webRid = room.room.roomId;
+    final broadcast = room.roomId;
     return room.room.copyWith(
+      startedAt: room.room.startedAt ?? (room.room.isLiveNow && broadcast != null ? _startTimes[broadcast] : null),
       data: DouyinRoomData(webRid: webRid, roomId: room.roomId, streamUrl: room.streamUrl, issuedAt: issuedAt),
       danmakuData: danmaku
           ? DouyinDanmakuArgs(
@@ -555,15 +572,56 @@ final class DouyinSite extends LiveSite
   /// request), or null when the room is not live or names no broadcast:
   /// `DouyinDanmakuArgs.refresh` (M5.F B-5).
   Future<DouyinDanmakuArgs?> danmakuArgs(String webRid) async {
-    final room = await getRoomDetail(roomId: webRid);
+    final room = _detail(await _fetch(webRid), danmaku: true);
     final args = room.danmakuData;
     return room.isLiveNow && args is DouyinDanmakuArgs && args.roomId.isNotEmpty ? args : null;
   }
 
-  /// The room with its stream description and danmaku arguments. The
-  /// identity is the web_rid: as requested, or the owner's for a room_id.
+  /// Entering a room: the room with its stream description and danmaku
+  /// arguments. The identity is the web_rid: as requested, or the owner's
+  /// for a room_id. A live room entered by web_rid gets its start time from
+  /// one more request ([_withStart]); nothing else asks for it.
   @override
-  Future<LiveRoom> getRoomDetail({required String roomId}) async => _detail(await _fetch(roomId), danmaku: true);
+  Future<LiveRoom> getRoomDetail({required String roomId}) async =>
+      await _withStart(_detail(await _fetch(roomId), danmaku: true));
+
+  /// [room] with its broadcast's start time (M4.D, decided in M4.U): enter
+  /// and the room page have none, so a live room without one asks reflow
+  /// for its room_id, waiting at most [_startLookupWait]. Best effort: a
+  /// failure, a slow answer or another broadcast leaves the room as it is;
+  /// a late answer is remembered for the next detail of the broadcast
+  /// (follow refresh included, which makes no request of its own).
+  Future<LiveRoom> _withStart(LiveRoom room) async {
+    final data = room.data;
+    final broadcast = data is DouyinRoomData ? data.roomId : null;
+    if (!room.isLiveNow || room.startedAt != null || broadcast == null || broadcast.isEmpty) return room;
+    final lookup = _startLookups[broadcast] ??= _lookUpStart(broadcast, room.roomId);
+    final DateTime? startedAt;
+    try {
+      startedAt = await lookup.timeout(_startLookupWait);
+    } on TimeoutException {
+      return room;
+    }
+    return startedAt == null ? room : room.copyWith(startedAt: startedAt);
+  }
+
+  Future<DateTime?> _lookUpStart(String broadcast, String webRid) async {
+    try {
+      final (:room, issuedAt: _, cookie: _) = await _reflow(broadcast);
+      final startedAt = room.room.startedAt;
+      if (startedAt == null || room.roomId != broadcast || room.room.roomId != webRid) return null;
+      _startTimes.remove(broadcast);
+      _startTimes[broadcast] = startedAt;
+      if (_startTimes.length > _startTimesKept) _startTimes.remove(_startTimes.keys.first);
+      return startedAt;
+    } on SiteError {
+      return null;
+    } on TransportFailure {
+      return null;
+    } finally {
+      unawaited(_startLookups.remove(broadcast));
+    }
+  }
 
   /// Follow-card refresh: the same lookup without danmaku arguments
   /// (pure_live_TV).
@@ -572,9 +630,10 @@ final class DouyinSite extends LiveSite
       _detail(await _fetch(roomId), danmaku: false);
 
   /// The detail already holds the streams; failures are thrown, never an
-  /// offline-looking room (REG-DOUYIN-018).
+  /// offline-looking room (REG-DOUYIN-018). No start-time request.
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => getRoomDetail(roomId: roomId);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) async =>
+      _detail(await _fetch(roomId), danmaku: true);
 
   @override
   Future<bool> getLiveStatus({required String roomId}) async =>

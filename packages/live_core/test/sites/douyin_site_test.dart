@@ -49,6 +49,15 @@ ReplaySample _moved(String sample, Uri url) {
   );
 }
 
+/// The reflow request for [roomId] refused with a captcha.
+ReplaySample _reflowRefused(String roomId) => _fake(
+  'https://webcast.amemv.com/webcast/room/reflow/info/?type_id=0&live_id=1&room_id=$roomId&sec_user_id='
+  '&version_code=99.99.99&app_id=6383',
+  headers: {
+    'bdturing-verify': ['1'],
+  },
+);
+
 /// The home page without Set-Cookie: no anonymous session.
 final ReplaySample _homeWithoutTtwid = _fake('https://live.douyin.com/?from_nav=1', body: '<html></html>');
 
@@ -333,13 +342,13 @@ void main() {
 
   group('anonymous session', () {
     test('one bootstrap for concurrent requests; only ttwid and UIFID_TEMP are kept', () async {
-      final (:site, :http) = _replay(['S01-home', 'S02-feed', 'S04-enter-live']);
+      final (:site, :http) = _replay(['S01-home', 'S02-feed', 'S04-enter-live', 'S05-reflow-live']);
       await Future.wait([site.getRecommendRooms(), site.getRoomDetail(roomId: _webRid)]);
       expect(_paths(http).where((path) => path == _home), hasLength(1));
       expect(http.requests.first.headers.containsKey('cookie'), isFalse);
       final cookie = _anonymousCookie();
       expect(cookie, matches(RegExp(r'^ttwid=[^;]+; UIFID_TEMP=[^;]+$')));
-      expect([for (final request in http.requests.skip(1)) request.headers['cookie']], [cookie, cookie]);
+      expect([for (final request in http.requests.skip(1)) request.headers['cookie']], [cookie, cookie, cookie]);
     });
 
     test('categories start the session themselves (one home page request, 3.x made two)', () async {
@@ -608,7 +617,7 @@ void main() {
 
   group('rooms', () {
     test('enter: signed like the recording; the requested web_rid is the identity; danmaku arguments', () async {
-      final (:site, :http) = _replay(['S01-home', 'S04-enter-live']);
+      final (:site, :http) = _replay(['S01-home', 'S04-enter-live', 'S05-reflow-live']);
       final room = await site.getRoomDetail(roomId: ' $_webRid ');
       expect(room.roomId, _webRid);
       expect(room.isLiveNow, isTrue);
@@ -621,13 +630,47 @@ void main() {
       final data = room.data! as DouyinRoomData;
       expect((data.webRid, data.roomId, data.issuedAt), (_webRid, _roomId, _capturedAt));
       expect(data.streamUrl, isNotNull);
-      // enter has no start time; no extra request is made for one (M4.U).
-      expect((room.startedAt, room.restriction), (null, LiveRestriction.none));
-      expect(_paths(http), [_home, _enter]);
-      final enter = http.requests.last;
+      // enter has no start time: entering asks reflow for it (M4.D).
+      expect((room.startedAt, room.restriction), (DateTime.utc(2026, 9, 20, 22, 10, 48), LiveRestriction.none));
+      expect(_paths(http), [_home, _enter, _reflow]);
+      expect(http.requests.last.url.queryParameters['room_id'], _roomId);
+      final enter = http.requests[1];
       expect(enter.url.queryParameters.keys, Fixture.load('douyin', 'S04-enter-live').url.queryParameters.keys);
       expect(enter.url.query, matches(RegExp(r'&a_bogus=[^&]+$')));
       expect(enter.headers['user-agent'], DouyinApi.userAgent);
+    });
+
+    test('start time on entry only (M4.D): refresh and recording ask nothing more but reuse it', () async {
+      final (:site, :http) = _replay(['S01-home', 'S04-enter-live', 'S05-reflow-live', 'S04-enter-offline']);
+      expect((await site.getRoomDetailForRefresh(roomId: _webRid)).startedAt, isNull);
+      expect(_paths(http), [_home, _enter], reason: 'a follow refresh makes no extra request');
+      final entered = await site.getRoomDetail(roomId: _webRid);
+      expect(entered.startedAt, DateTime.utc(2026, 9, 20, 22, 10, 48));
+      expect(_paths(http).skip(2), [_enter, _reflow]);
+      expect((await site.getRoomDetailForRefresh(roomId: _webRid)).startedAt, entered.startedAt);
+      expect((await site.getRoomDetailForRecording(roomId: _webRid)).startedAt, entered.startedAt);
+      expect((await site.getRoomDetail(roomId: _webRid)).startedAt, entered.startedAt);
+      expect(_paths(http).skip(4), [_enter, _enter, _enter], reason: 'remembered for the broadcast');
+      final offline = await site.getRoomDetail(roomId: '745964462470');
+      expect((offline.isLiveNow, offline.startedAt), (false, null));
+      expect(_paths(http).last, _enter, reason: 'no lookup for an offline room');
+    });
+
+    test('start time: another broadcast in the reflow answer is not taken', () async {
+      final (:site, :http) = _replay([
+        'S01-home',
+        'S04-enter-live-game',
+        _moved(
+          'S05-reflow-live',
+          Uri.parse(
+            'https://webcast.amemv.com/webcast/room/reflow/info/?type_id=0&live_id=1&room_id=7691363078381833000'
+            '&sec_user_id=&version_code=99.99.99&app_id=6383',
+          ),
+        ),
+      ]);
+      final other = await site.getRoomDetail(roomId: '128200725053');
+      expect((other.isLiveNow, other.area, other.startedAt), (true, '英雄联盟手游', null));
+      expect(_paths(http), [_home, _enter, _reflow]);
     });
 
     test('refresh: the same lookup without danmaku arguments; live status from it', () async {
@@ -639,7 +682,7 @@ void main() {
     });
 
     test("danmaku refresh (M5.F B-5): the broadcast's arguments now when live, null when offline", () async {
-      final (:site, :http) = _replay(['S01-home', 'S04-enter-live', 'S04-enter-offline']);
+      final (:site, :http) = _replay(['S01-home', 'S04-enter-live', 'S05-reflow-live', 'S04-enter-offline']);
       final room = await site.getRoomDetail(roomId: _webRid);
       final refreshed = await (room.danmakuData! as DouyinDanmakuArgs).refresh!();
       expect(
@@ -647,7 +690,7 @@ void main() {
         (_webRid, _roomId, site.visitorId, _anonymousCookie()),
       );
       expect(refreshed.refresh, isNotNull, reason: 'the next check asks again');
-      expect(_paths(http), [_home, _enter, _enter], reason: 'a new detail request');
+      expect(_paths(http), [_home, _enter, _reflow, _enter], reason: 'a new detail request, no start time lookup');
       final offline = await site.getRoomDetail(roomId: '745964462470');
       expect(offline.danmakuData, isA<DouyinDanmakuArgs>());
       expect(await (offline.danmakuData! as DouyinDanmakuArgs).refresh!(), isNull);
@@ -726,22 +769,23 @@ void main() {
             ..remove('status')
             ..remove('status_str'),
         ),
+        'S05-reflow-live',
       ]);
       final detail = await site.getRoomDetail(roomId: _webRid);
       expect((detail.isLiveNow, detail.restriction), (true, LiveRestriction.none));
       expect((await site.getPlayQualities(detail: detail)).first.id, 'origin');
-      expect(_paths(http), [_home, _enter]);
+      expect(_paths(http), [_home, _enter, _reflow]);
     });
 
     test('live without a stream: shown live and unplayable; playback says why (unified principle)', () async {
-      final (:site, :http) = _replay(['S01-home', editedEnter((room) => room.remove('stream_url'))]);
+      final (:site, :http) = _replay(['S01-home', editedEnter((room) => room.remove('stream_url')), 'S05-reflow-live']);
       final detail = await site.getRoomDetail(roomId: _webRid);
       expect(
         (detail.isLiveNow, detail.restriction, detail.followGroup),
         (true, LiveRestriction.unplayable, FollowGroup.live),
       );
       await expectLater(site.getPlayQualities(detail: detail), throwsA(isA<StreamUnavailable>()));
-      expect(_paths(http), [_home, _enter], reason: 'no request for the refusal');
+      expect(_paths(http), [_home, _enter, _reflow], reason: 'no request for the refusal');
     });
 
     test('a missing room is NotFound without the page fallback (3.x ended in a failed HEAD)', () async {
@@ -752,9 +796,15 @@ void main() {
     });
 
     test('enter refused (empty 200 without ttwid): the room page answers, with its own visitor id', () async {
-      final (:site, :http) = _replay([_homeWithoutTtwid, 'S04-enter-no-cookie', 'S06-room-html-live']);
+      final (:site, :http) = _replay([
+        _homeWithoutTtwid,
+        'S04-enter-no-cookie',
+        'S06-room-html-live',
+        'S05-reflow-live',
+      ]);
       final room = await site.getRoomDetail(roomId: _webRid);
-      expect(_paths(http), [_home, _enter, 'GET live.douyin.com/$_webRid']);
+      expect(_paths(http), [_home, _enter, 'GET live.douyin.com/$_webRid', _reflow]);
+      expect(room.startedAt, DateTime.utc(2026, 9, 20, 22, 10, 48), reason: 'the page has none either');
       expect(room.roomId, _webRid);
       expect(room.isLiveNow, isTrue);
       final legacy = (Fixture.load('douyin', 'S06-room-html-live').legacy as Map)['room'] as Map;
@@ -762,7 +812,7 @@ void main() {
       expect((room.danmakuData! as DouyinDanmakuArgs).roomId, _roomId);
       final qualities = await site.getPlayQualities(detail: room);
       expect(qualities.map((quality) => quality.id), ['origin', 'hd', 'sd', 'ld', 'md']);
-      expect(http.requests, hasLength(3), reason: 'the streams come with the detail');
+      expect(http.requests, hasLength(4), reason: 'the streams come with the detail');
     });
 
     test('enter refused and a page without the room state: the refusal is reported', () async {
@@ -778,8 +828,9 @@ void main() {
 
   group('streams', () {
     test('qualities and lines come with the detail: media headers with the cookie, leases, codec', () async {
-      final (:site, :http) = _replay(['S01-home', 'S04-enter-live-portrait']);
+      final (:site, :http) = _replay(['S01-home', 'S04-enter-live-portrait', _reflowRefused('7690129480030980906')]);
       final room = await site.getRoomDetail(roomId: '153806988623');
+      expect(room.startedAt, isNull, reason: 'the lookup was refused: the room is entered all the same');
       final qualities = await site.getPlayQualities(detail: room);
       final legacy = (Fixture.load('douyin', 'S04-enter-live-portrait').legacy as Map)['qualities'] as List;
       expect(qualities.map((quality) => quality.id), [for (final quality in legacy) (quality as Map)['id']]);
@@ -797,19 +848,19 @@ void main() {
         expect(line.lease!.expiresAt!.isAfter(_capturedAt), isTrue);
       }
       expect(await site.getPlayUrls(detail: room, quality: qualities.last), qualities.last.data);
-      expect(_paths(http), [_home, _enter]);
+      expect(_paths(http), [_home, _enter, _reflow]);
     });
 
     test("a signed-in cookie goes to the media requests too, as 3.x's player sent it", () async {
       final vault = MemoryCookieVault()..set('douyin', 'sessionid=abc');
       addTearDown(vault.dispose);
-      final (:site, :http) = _replay(['S04-enter-live'], cookies: vault);
+      final (:site, :http) = _replay(['S04-enter-live', 'S05-reflow-live'], cookies: vault);
       final room = await site.getRoomDetail(roomId: _webRid);
       final resolution = await site.resolvePlayUrls(
         detail: room,
         quality: (await site.getPlayQualities(detail: room)).first,
       );
-      expect(http.requests.single.headers['cookie'], 'sessionid=abc');
+      expect([for (final request in http.requests) request.headers['cookie']], ['sessionid=abc', 'sessionid=abc']);
       expect(resolution.lines.every((line) => line.headers['cookie'] == 'sessionid=abc'), isTrue);
     });
 
@@ -823,7 +874,7 @@ void main() {
     });
 
     test('recovery fetches the detail again; a quality no longer offered falls back to the best', () async {
-      final (:site, :http) = _replay(['S01-home', 'S04-enter-live']);
+      final (:site, :http) = _replay(['S01-home', 'S04-enter-live', 'S05-reflow-live']);
       final room = await site.getRoomDetail(roomId: _webRid);
       final qualities = await site.getPlayQualities(detail: room);
       final fresh = await site.resolvePlayUrlsForRecovery(detail: room, quality: qualities[1]);
@@ -835,7 +886,7 @@ void main() {
       );
       expect(gone.appliedQualityData, 'origin');
       expect(gone.urls, isNot(contains('https://stale.test/x.flv')));
-      expect(_paths(http), [_home, _enter, _enter, _enter]);
+      expect(_paths(http), [_home, _enter, _reflow, _enter, _enter]);
     });
 
     test('recovery of an offline room is StreamUnavailable', () async {

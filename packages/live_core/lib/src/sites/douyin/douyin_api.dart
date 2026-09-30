@@ -363,6 +363,7 @@ abstract final class DouyinApi {
       room: room,
       person: _map(data['user']),
       live: _isLive(room, roomStatus: data['room_status']),
+      roadMap: _map(data['partition_road_map']),
     );
   }
 
@@ -437,12 +438,14 @@ abstract final class DouyinApi {
   ///   `basis.secret_room`) were 0 or absent in every recorded room, so they
   ///   are not read.
   ///
-  /// An offline room has neither.
+  /// An offline room has neither. The area is the room's game or partition
+  /// ([_detailArea]); 3.x left it empty.
   static DouyinRoom _room({
     required String webRid,
     required Map<String, dynamic> room,
     required bool live,
     Map<String, dynamic>? person,
+    Map<String, dynamic>? roadMap,
     String? userUniqueId,
     bool sessionEnded = false,
   }) {
@@ -464,7 +467,7 @@ abstract final class DouyinApi {
             ? _firstImage([owner?['avatar_thumb'], person?['avatar_thumb']])
             : _firstImage([person?['avatar_thumb'], owner?['avatar_thumb']]),
         cover: live ? _firstImage([room['cover']]) : '',
-        area: '',
+        area: _detailArea(room, roadMap),
         watching: total.ifEmpty(() => online),
         totalViewers: total,
         onlineViewers: online,
@@ -483,6 +486,21 @@ abstract final class DouyinApi {
       userUniqueId: userUniqueId,
       sessionEnded: sessionEnded,
     );
+  }
+
+  /// The area a detail answer names, as the room page shows it (M4.D): the
+  /// game (`game_data.game_tag_info.game_tag_name`, 英雄联盟手游), else the
+  /// most specific title of enter's `partition_road_map` (sub-partition,
+  /// then partition: 竞技游戏). Rooms outside the game partitions name none
+  /// (an empty map, `game_tag_name` ""), and the area stays empty as in 3.x.
+  static String _detailArea(Map<String, dynamic> room, Map<String, dynamic>? roadMap) {
+    Object? title(Map<String, dynamic>? node) => _map(node?['partition'])?['title'];
+    return _firstText([
+          _map(_map(room['game_data'])?['game_tag_info'])?['game_tag_name'],
+          title(_map(roadMap?['sub_partition'])),
+          title(roadMap),
+        ]) ??
+        '';
   }
 
   /// `status` 2 (number or string) is live and any other status offline

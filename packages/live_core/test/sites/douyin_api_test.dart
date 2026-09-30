@@ -960,6 +960,55 @@ void main() {
     });
   });
 
+  group('M4.D', () {
+    test('S04-enter-live-game (2026-10-01): the detail names the game; 3.x left the area empty', () {
+      final fixture = _sample('S04-enter-live-game');
+      final parsed = DouyinApi.enter(fixture.body, webRid: '128200725053');
+      expect(
+        (parsed.room.area, parsed.room.isLiveNow, parsed.room.restriction),
+        ('英雄联盟手游', true, LiveRestriction.none),
+      );
+      expect(parsed.roomId, '7691363078381833000');
+      expect(DouyinApi.qualities(parsed.streamUrl).map((quality) => quality.id), isNotEmpty);
+    });
+
+    test('area: the game, else the road map (sub-partition, then partition); none stays empty', () {
+      final data = (jsonDecode(_sample('S04-enter-live-game').body) as Map<String, dynamic>)['data'] as Map;
+      final road = data['partition_road_map'];
+      String? area(Map<String, Object?> extra, Map<String, Object?> room) => DouyinApi.enter(
+        jsonEncode({
+          'status_code': 0,
+          'data': {
+            ...extra,
+            'data': [
+              {'id_str': '7000000000000000001', 'status': 2, ...room},
+            ],
+          },
+        }),
+        webRid: '1',
+      ).room.area;
+      const noGame = {
+        'game_data': {
+          'game_tag_info': {'is_game': 2, 'game_tag_id': 0, 'game_tag_name': ''},
+        },
+      };
+      expect(area({'partition_road_map': road}, noGame), '竞技游戏', reason: 'the sub-partition has no title');
+      expect(
+        area({
+          'partition_road_map': {
+            'partition': {'title': '竞技游戏'},
+            'sub_partition': {
+              'partition': {'title': '英雄联盟'},
+            },
+          },
+        }, noGame),
+        '英雄联盟',
+      );
+      expect(area({'partition_road_map': <String, Object?>{}}, noGame), '', reason: 'S04-enter-live, a chat room');
+      expect(DouyinApi.enter(_sample('S04-enter-live').body, webRid: '547977714661').room.area, '');
+    });
+  });
+
   group('danmaku arguments', () {
     const args = DouyinDanmakuArgs(webRid: '5479', roomId: '7687', userId: '7312345678901234567', cookie: 'ttwid=s');
 

@@ -221,7 +221,9 @@ const Map<String, AudiencePlatformCapability> audienceCapabilities = {
     onlineAvailability: AudienceOnlineAvailability.roomList,
   ),
   // Baidu's PC feed audience_count and room online_users are live audience
-  // values. Fan counts stay in the independent follower field.
+  // values. Fan counts stay in the independent follower field. The chat's
+  // message list carries the same figure (payload 101's onlineusercnt),
+  // which the danmaku connection reports as it changes (M5.26).
   'baidulive': AudiencePlatformCapability(
     hasPopularity: false,
     hasTotalViewers: false,

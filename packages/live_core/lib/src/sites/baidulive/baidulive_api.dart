@@ -86,6 +86,73 @@ final class BaiduLiveVariant {
   final List<BaiduLiveSource> sources;
 }
 
+/// What the danmaku connection (M5.26, 30-3) needs of a live broadcast: the
+/// message lists the room command 371 names. 3.x had no Baidu Live chat
+/// (`EmptyDanmaku`).
+///
+/// Each list is an HLS-style playlist on `liveshowstatic.baidu.com` whose
+/// segments are JSON message batches: [chatList] carries chat, the online
+/// count and notices, [reliableList] gifts and notices, [hostList] (404
+/// when recorded) the host's. The playlist URLs are signed (a
+/// `bce-auth-v1` authorization, recorded valid 182.5 days, [expiresAt]);
+/// room entry hands them over without a request, and a later connection
+/// after they expired needs a new room command (the room detail).
+@immutable
+final class BaiduLiveDanmakuArgs {
+  /// Creates the arguments.
+  const new({
+    required this.roomId,
+    required this.chatList,
+    this.reliableList,
+    this.hostList,
+    this.pullInterval = BaiduLiveApi.defaultPullInterval,
+    this.expiresAt,
+  });
+
+  /// The room (one broadcast); messages naming another room are dropped.
+  final String roomId;
+
+  /// `chat_msg_hls_url` (else `video.msg_hls_url`, the same list).
+  final Uri chatList;
+
+  /// `reliable_msg_hls_url`, when given.
+  final Uri? reliableList;
+
+  /// `host_msg_hls_url`, when given.
+  final Uri? hostList;
+
+  /// `msg_hls_pull_internal_in_second`: the wait between two polls, 1–10 s
+  /// ([BaiduLiveApi.defaultPullInterval] when missing).
+  final Duration pullInterval;
+
+  /// When the signature of [chatList] runs out (its `bce-auth-v1` time plus
+  /// validity), or null when it does not say.
+  final DateTime? expiresAt;
+
+  /// Whether [expiresAt] has passed at [now].
+  bool isExpiredAt(DateTime now) => switch (expiresAt) {
+    final DateTime expiry => !now.isBefore(expiry),
+    null => false,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      other is BaiduLiveDanmakuArgs &&
+      other.roomId == roomId &&
+      other.chatList == chatList &&
+      other.reliableList == reliableList &&
+      other.hostList == hostList &&
+      other.pullInterval == pullInterval &&
+      other.expiresAt == expiresAt;
+
+  @override
+  int get hashCode => Object.hash(roomId, chatList, reliableList, hostList, pullInterval, expiresAt);
+
+  /// The room only: the list URLs carry signatures.
+  @override
+  String toString() => 'BaiduLiveDanmakuArgs($roomId)';
+}
+
 /// A room as read from a feed card or from the room command 371 (3.x's
 /// `BaiduLiveRoom`). Room entry keeps it in `LiveRoom.data` for playback,
 /// as 3.x did; a room is one broadcast, so its id is the only platform id
@@ -110,6 +177,7 @@ final class BaiduLiveRoom {
     this.paid = false,
     this.blocked = false,
     Iterable<BaiduLiveVariant> variants = const [],
+    this.danmaku,
   }) : variants = List.unmodifiable(variants);
 
   /// The room id as asked for (a card's `room_id`).
@@ -170,6 +238,10 @@ final class BaiduLiveRoom {
   /// recording's when ended; empty otherwise and on cards.
   final List<BaiduLiveVariant> variants;
 
+  /// The chat's message lists while live (M5.26); null otherwise and on
+  /// cards.
+  final BaiduLiveDanmakuArgs? danmaku;
+
   /// This room with what [known] (an earlier card or detail of the same
   /// room) had where this one has nothing (3.x's `enrich`). Unlike 3.x, a
   /// known audience is kept only while the room is live: an ended room no
@@ -191,6 +263,7 @@ final class BaiduLiveRoom {
     paid: paid,
     blocked: blocked,
     variants: variants,
+    danmaku: danmaku,
   );
 
   /// Why this room cannot be played, or null. Not live and not ended, or an
@@ -323,8 +396,12 @@ abstract final class BaiduLiveApi {
   static const String directoryScope = '这里是百度直播官网的推荐和各个频道，往下翻会继续加载。搜索只能输入房间号，或粘贴百度直播的直播间、分享链接，还不能按主播名字搜索。';
 
   /// The notice of every room (3.x's zh.json key `baidulive_chat_notice`),
-  /// written for users (30-10).
-  static const String chatNotice = '这里暂时看不到百度直播间的聊天。人数是正在观看的人数，主播的粉丝数另外显示。';
+  /// written for users (30-10). 30-10's text began with
+  /// "这里暂时看不到百度直播间的聊天。"; chat is shown since M5.26.
+  static const String chatNotice = '人数是正在观看的人数，主播的粉丝数另外显示。';
+
+  /// 3.x's room notice, kept for the parity tests and the 3.x migration.
+  static const String legacyChatNotice = '百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。';
 
   /// The first notice line of a paid, forbidden or banned room (3.x's
   /// zh.json key `baidulive_restricted_notice`), written for users (30-10):
@@ -339,6 +416,14 @@ abstract final class BaiduLiveApi {
 
   /// Items of a full feed page (3.x: fewer ends the directory).
   static const int fullPage = 10;
+
+  /// The host of the chat's message lists (M5.26).
+  static const String messageListHost = 'liveshowstatic.baidu.com';
+
+  /// The wait between two polls of the message lists when the room command
+  /// names none (`msg_hls_pull_internal_in_second` was 5 in every recorded
+  /// answer).
+  static const Duration defaultPullInterval = Duration(seconds: 5);
 
   // Links and ids --------------------------------------------------------------
 
@@ -688,7 +773,7 @@ abstract final class BaiduLiveApi {
   ///   `vertical_cover`), `description` (30-7); `category`; while live
   ///   `online_users` and `create_time` (the start); `real_fans_num` (else
   ///   `host.fans`); the [liveVariants] while live, the [replayVariants]
-  ///   when ended.
+  ///   when ended; the chat's [danmakuArgs] while live (M5.26).
   static BaiduLiveRoom room(String body, {required String expectedRoomId, int status = 200}) {
     const what = 'searchbox 371';
     final data = _map(_answer(body, what: what, status: status)['data']) ?? const {};
@@ -748,6 +833,62 @@ abstract final class BaiduLiveApi {
       paid: paid,
       blocked: blocked,
       variants: variants,
+      danmaku: live ? danmakuArgs(command, expectedRoomId) : null,
+    );
+  }
+
+  /// A message list of the room command (M5.26): an http or https URL on
+  /// [messageListHost] whose path ends in `.m3u8`; null otherwise. http
+  /// becomes https, as the room page rewrites it to its own protocol
+  /// (pchome.live.fcb2dc0e.js); the signed query is kept as given.
+  static Uri? messageList(Object? value) {
+    final uri = Uri.tryParse(_text(value));
+    if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) return null;
+    if (uri.host.toLowerCase() != messageListHost || uri.userInfo.isNotEmpty || uri.hasFragment) return null;
+    if (!uri.path.endsWith('.m3u8')) return null;
+    return uri.scheme == 'http' ? uri.replace(scheme: 'https') : uri;
+  }
+
+  /// When the signature of [list] runs out: its `authorization`
+  /// (`bce-auth-v1/<key>/<UTC time>/<seconds>/<headers>/<signature>`) time
+  /// plus its validity; null when the URL has no such signature.
+  static DateTime? signatureExpiry(Uri list) {
+    const name = 'authorization=';
+    final field = list.query.split('&').where((field) => field.startsWith(name)).firstOrNull ?? '';
+    // Recorded answers wrote the separators both plain and escaped.
+    final parts = field
+        .substring(field.isEmpty ? 0 : name.length)
+        .replaceAll(RegExp('%2F', caseSensitive: false), '/')
+        .replaceAll(RegExp('%3A', caseSensitive: false), ':')
+        .split('/');
+    if (parts.length < 4 || parts[0] != 'bce-auth-v1') return null;
+    final time = parts[2];
+    final signed = RegExp(r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$').hasMatch(time) ? DateTime.tryParse(time) : null;
+    final seconds = RegExp(r'^\d{1,10}$').hasMatch(parts[3]) ? int.parse(parts[3]) : null;
+    // DateTime rolls a 13th month or a 45th day over; such a time is no time.
+    if (signed == null || signed.toIso8601String().substring(0, 19) != time.substring(0, 19)) return null;
+    return seconds == null || seconds == 0 ? null : signed.add(Duration(seconds: seconds));
+  }
+
+  /// The chat arguments of a live room command (M5.26): the chat list
+  /// (`chat_msg_hls_url`, else `video.msg_hls_url`), the reliable and host
+  /// lists when valid ([messageList]), the poll interval
+  /// (`msg_hls_pull_internal_in_second`, else the video's; a positive
+  /// number of seconds within 1–10, else [defaultPullInterval]) and when
+  /// the chat list's signature runs out ([signatureExpiry]). Null without a
+  /// valid chat list.
+  static BaiduLiveDanmakuArgs? danmakuArgs(Map<String, Object?> command, String roomId) {
+    final video = _map(command['video']) ?? const {};
+    final chat = messageList(command['chat_msg_hls_url']) ?? messageList(video['msg_hls_url']);
+    if (chat == null) return null;
+    final seconds = jsonInt(command['msg_hls_pull_internal_in_second'] ?? video['msg_hls_pull_internal_in_second']);
+    return BaiduLiveDanmakuArgs(
+      roomId: roomId,
+      chatList: chat,
+      reliableList: messageList(command['reliable_msg_hls_url']),
+      hostList: messageList(command['host_msg_hls_url']),
+      pullInterval: seconds != null && seconds > 0 ? Duration(seconds: seconds.clamp(1, 10)) : defaultPullInterval,
+      expiresAt: signatureExpiry(chat),
     );
   }
 
@@ -757,7 +898,8 @@ abstract final class BaiduLiveApi {
   /// or unknown; the start and the restriction; the introduction (30-7);
   /// viewers while live; the restriction notice (paid or blocked) and
   /// [chatNotice]. [withData] keeps [room] for playback (room entry and
-  /// recordings).
+  /// recordings), and its chat arguments ([BaiduLiveRoom.danmaku]) for the
+  /// danmaku connection (M5.26).
   ///
   /// Unlike 3.x, no `httpHeaders`: the media headers travel on the lines;
   /// and no stand-in name or title (30-10): the UI shows the platform's
@@ -789,6 +931,7 @@ abstract final class BaiduLiveApi {
       introduction: room.introduction.isEmpty ? null : room.introduction,
       notice: [if (room.paid || room.blocked) restrictedNotice, chatNotice].join('\n'),
       data: withData ? room : null,
+      danmakuData: withData ? room.danmaku : null,
     );
   }
 

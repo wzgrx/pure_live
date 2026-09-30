@@ -171,7 +171,8 @@ void _expectLegacyRequests(List<LiveRequest> requests, Map<String, dynamic> outc
 
 /// Keys of every room that differ from 3.x on purpose: `httpHeaders`
 /// (M4.30 difference 1: the media headers travel on the lines) and
-/// `notice` (30-10: written for users).
+/// `notice` (30-10: written for users; M5.26: the chat is shown, so it no
+/// longer says it cannot be seen).
 const _changed = {'httpHeaders', 'notice'};
 
 /// A live room's keys that differ besides [_changed]: `introduction` (30-7).
@@ -1104,6 +1105,37 @@ void main() {
         await expectLater(BaiduLiveSite(http).getRoomDetail(roomId: _liveRoom), throwsA(type), reason: '$status');
         await expectLater(BaiduLiveSite(http).getDirectoryPage(), throwsA(type), reason: '$status');
       }
+    });
+  });
+
+  group('M5.26', () {
+    test(
+      'room entry and recordings carry the chat lists of the same room command; refresh and search do not',
+      () async {
+        const room = '11548522172';
+        final body = Fixture.load('baidulive', 'S02-room-chat').body;
+        final http = _Scripted((request) => _response(request, body));
+        final site = BaiduLiveSite(http, deviceId: _device, now: () => _captured('S02-room-chat'));
+        final entered = await site.getRoomDetail(roomId: room);
+        final args = entered.danmakuData! as BaiduLiveDanmakuArgs;
+        expect(args.roomId, room);
+        expect(args.chatList.path, '/v1/liveshowstatic/live_11548522172.m3u8');
+        expect(args.reliableList!.path, '/v1/liveshowstatic/live_11548522173.m3u8');
+        expect(args.hostList!.path, '/v1/liveshowstatic/live_11548522174.m3u8');
+        expect(args.isExpiredAt(_captured('S02-room-chat')), isFalse);
+        expect(http.requests, hasLength(1), reason: 'no request of its own');
+        expect((await site.getRoomDetailForRecording(roomId: room)).danmakuData, args);
+        expect((await site.getRoomDetailForRefresh(roomId: room)).danmakuData, isNull);
+        expect((await site.searchRooms(room)).single.danmakuData, isNull);
+        expect(http.requests, hasLength(4));
+        expect(entered.notice, BaiduLiveApi.chatNotice);
+      },
+    );
+
+    test('not live, no lists', () async {
+      final (:site, http: _) = _setup(['S02-room-ended', 'S02-room-preview']);
+      expect((await site.getRoomDetail(roomId: _endedRoom)).danmakuData, isNull);
+      expect((await site.getRoomDetail(roomId: _previewRoom)).danmakuData, isNull);
     });
   });
 

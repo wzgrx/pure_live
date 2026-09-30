@@ -1,0 +1,524 @@
+{
+ "generator": "fixtures/baidulive/danmaku/web_expected.py: an independent Python port of the Baidu Live PC room page's message-list reading (pchome.live.fcb2dc0e.js, classes Se and Te) and the archived spec's section 7 (online count 101, gift 107/10024)",
+ "value": {
+  "playlists": [
+   {
+    "frame": 0,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790770938990251096.ts",
+     "/v1/liveshowstatic/11548522172_1790770959628655719.ts",
+     "/v1/liveshowstatic/11548522172_1790770971196560234.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 4,
+    "segments": [
+     "/v1/liveshowstatic/11548522173_1790767459780885360.ts",
+     "/v1/liveshowstatic/11548522173_1790768232960270002.ts",
+     "/v1/liveshowstatic/11548522173_1790768922827129569.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 36,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790770971196560234.ts",
+     "/v1/liveshowstatic/11548522172_1790770985827993539.ts",
+     "/v1/liveshowstatic/11548522172_1790770995599276860.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 59,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790771018122701420.ts",
+     "/v1/liveshowstatic/11548522172_1790771022826958127.ts",
+     "/v1/liveshowstatic/11548522172_1790771045408795840.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 63,
+    "segments": [
+     "/v1/liveshowstatic/11548522173_1790768232960270002.ts",
+     "/v1/liveshowstatic/11548522173_1790768922827129569.ts",
+     "/v1/liveshowstatic/11548522173_1790771042583441301.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 93,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790771045408795840.ts",
+     "/v1/liveshowstatic/11548522172_1790771078378934257.ts",
+     "/v1/liveshowstatic/11548522172_1790771084139364102.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 108,
+    "segments": [
+     "/v1/liveshowstatic/11548522173_1790768922827129569.ts",
+     "/v1/liveshowstatic/11548522173_1790771042583441301.ts",
+     "/v1/liveshowstatic/11548522173_1790771096616463049.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 111,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790771084139364102.ts",
+     "/v1/liveshowstatic/11548522172_1790771092010833858.ts",
+     "/v1/liveshowstatic/11548522172_1790771100167612652.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 131,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790771132207145704.ts",
+     "/v1/liveshowstatic/11548522172_1790771139901049830.ts",
+     "/v1/liveshowstatic/11548522172_1790771150471326318.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 164,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790771150471326318.ts",
+     "/v1/liveshowstatic/11548522172_1790771177345333683.ts",
+     "/v1/liveshowstatic/11548522172_1790771180398724131.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 196,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790771177345333683.ts",
+     "/v1/liveshowstatic/11548522172_1790771180398724131.ts",
+     "/v1/liveshowstatic/11548522172_1790771191501024587.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 212,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790771215246248057.ts",
+     "/v1/liveshowstatic/11548522172_1790771224684594253.ts",
+     "/v1/liveshowstatic/11548522172_1790771236178706971.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 242,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790771224684594253.ts",
+     "/v1/liveshowstatic/11548522172_1790771236178706971.ts",
+     "/v1/liveshowstatic/11548522172_1790771257192519314.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 276,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790771236178706971.ts",
+     "/v1/liveshowstatic/11548522172_1790771257192519314.ts",
+     "/v1/liveshowstatic/11548522172_1790771290475493412.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 325,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790771257192519314.ts",
+     "/v1/liveshowstatic/11548522172_1790771290475493412.ts",
+     "/v1/liveshowstatic/11548522172_1790771344966727713.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 332,
+    "segments": [
+     "/v1/liveshowstatic/11548522172_1790771367472856646.ts",
+     "/v1/liveshowstatic/11548522172_1790771369729055032.ts",
+     "/v1/liveshowstatic/11548522172_1790771386229618830.ts"
+    ],
+    "mediaSequence": 0
+   }
+  ],
+  "segments": [
+   {
+    "frame": 1,
+    "path": "/v1/liveshowstatic/11548522172_1790770938990251096.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 2,
+    "path": "/v1/liveshowstatic/11548522172_1790770959628655719.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 147144
+     },
+     {
+      "type": "chat",
+      "userName": "奇门国学文化大讲堂",
+      "userId": "767881611",
+      "message": "云伦DoN 欢迎你，咱们直播间正分享奇门遁甲的案例呢，学会了这个，看事业、看别人都门儿清，家人们快来听听。",
+      "messageId": "1790770947255058",
+      "sentAt": 1790770947
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 3,
+    "path": "/v1/liveshowstatic/11548522172_1790770971196560234.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 5,
+    "path": "/v1/liveshowstatic/11548522173_1790767459780885360.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 6,
+    "path": "/v1/liveshowstatic/11548522173_1790768232960270002.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 7,
+    "path": "/v1/liveshowstatic/11548522173_1790768922827129569.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 37,
+    "path": "/v1/liveshowstatic/11548522172_1790770985827993539.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 38,
+    "path": "/v1/liveshowstatic/11548522172_1790770995599276860.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 60,
+    "path": "/v1/liveshowstatic/11548522172_1790771018122701420.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 147150
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 61,
+    "path": "/v1/liveshowstatic/11548522172_1790771022826958127.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "奇门国学文化大讲堂",
+      "userId": "767881611",
+      "message": "亚华安 来了啊，咱们直播间正分享奇门遁甲的精髓呢，这可是易学里的瑰宝，想学的家人们别错过，快来互动学习。",
+      "messageId": "1790771009218254",
+      "sentAt": 1790771009
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 62,
+    "path": "/v1/liveshowstatic/11548522172_1790771045408795840.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "tpzhrwsww3500",
+      "userId": "6125842360",
+      "message": "房门对墙角怎么化解",
+      "messageId": "1790771030447678",
+      "sentAt": 1790771030
+     },
+     {
+      "type": "chat",
+      "userName": "思东培露sak525l",
+      "userId": "9161447612",
+      "message": "隔壁家门对准我家窗户",
+      "messageId": "1790771035579770",
+      "sentAt": 1790771035
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 64,
+    "path": "/v1/liveshowstatic/11548522173_1790771042583441301.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 94,
+    "path": "/v1/liveshowstatic/11548522172_1790771078378934257.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 147160
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 95,
+    "path": "/v1/liveshowstatic/11548522172_1790771084139364102.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "奇门国学文化大讲堂",
+      "userId": "767881611",
+      "message": "各位家人欢迎来到咱们直播间，咱们正讲奇门遁甲的实用案例呢，学会了它，看事业、看人生都轻松，家人们快来互动交流。",
+      "messageId": "1790771074520323",
+      "sentAt": 1790771074
+     },
+     {
+      "type": "chat",
+      "userName": "婷辉灯1Z",
+      "userId": "8060110189",
+      "message": "周易参同契修炼方法",
+      "messageId": "1790771075478502",
+      "sentAt": 1790771075
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 109,
+    "path": "/v1/liveshowstatic/11548522173_1790771096616463049.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 112,
+    "path": "/v1/liveshowstatic/11548522172_1790771092010833858.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "柳慈桐S",
+      "userId": "3879228282",
+      "message": "天选之人的八字",
+      "messageId": "1790771081631232",
+      "sentAt": 1790771081
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 113,
+    "path": "/v1/liveshowstatic/11548522172_1790771100167612652.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 132,
+    "path": "/v1/liveshowstatic/11548522172_1790771132207145704.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 147174
+     },
+     {
+      "type": "chat",
+      "userName": "宁康龙中",
+      "userId": "3361411027",
+      "message": "奇门遁甲60条必背口诀",
+      "messageId": "1790771126547731",
+      "sentAt": 1790771126
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 133,
+    "path": "/v1/liveshowstatic/11548522172_1790771139901049830.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 134,
+    "path": "/v1/liveshowstatic/11548522172_1790771150471326318.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "奇门国学文化大讲堂",
+      "userId": "767881611",
+      "message": "欢迎各位家人进入直播间，家人们，咱们这可是官方认证的易学直播间，专门教大家奇门遁甲，想提升自己的，赶紧来参与。",
+      "messageId": "1790771145597633",
+      "sentAt": 1790771145
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 165,
+    "path": "/v1/liveshowstatic/11548522172_1790771177345333683.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "xecqxjbnmaqkg",
+      "userId": "3805646619",
+      "message": "张秩也金锁玉关实战课",
+      "messageId": "1790771161241019",
+      "sentAt": 1790771161
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 166,
+    "path": "/v1/liveshowstatic/11548522172_1790771180398724131.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 197,
+    "path": "/v1/liveshowstatic/11548522172_1790771191501024587.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 147180
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 213,
+    "path": "/v1/liveshowstatic/11548522172_1790771215246248057.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "天彤朝91486",
+      "userId": "9669948938",
+      "message": "金木水火土相生相克表",
+      "messageId": "1790771203711477",
+      "sentAt": 1790771203
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 214,
+    "path": "/v1/liveshowstatic/11548522172_1790771224684594253.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "奇门国学文化大讲堂",
+      "userId": "767881611",
+      "message": "峰晴6j 来了啊，咱们直播间正分享奇门遁甲的精髓呢，这可是易学里的瑰宝，想学的家人们别错过，快来互动学习。",
+      "messageId": "1790771213414172",
+      "sentAt": 1790771213
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 215,
+    "path": "/v1/liveshowstatic/11548522172_1790771236178706971.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 243,
+    "path": "/v1/liveshowstatic/11548522172_1790771257192519314.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 147189
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 277,
+    "path": "/v1/liveshowstatic/11548522172_1790771290475493412.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "奇门国学文化大讲堂",
+      "userId": "767881611",
+      "message": "欢迎来灯翔8hB 加入咱们易学大家庭，咱们直播间可是专门教奇门遁甲的，这可是易学里的宝贝，想学的家人们快来互动。",
+      "messageId": "1790771288430701",
+      "sentAt": 1790771288
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 326,
+    "path": "/v1/liveshowstatic/11548522172_1790771344966727713.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "宁千良rt",
+      "userId": "2654040173",
+      "message": "玄学治病",
+      "messageId": "1790771329424140",
+      "sentAt": 1790771329
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 333,
+    "path": "/v1/liveshowstatic/11548522172_1790771367472856646.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "奇门国学文化大讲堂",
+      "userId": "767881611",
+      "message": "欢迎各位家人加入咱们易学大家庭，咱们直播间可是专门教奇门遁甲的，这可是易学里的宝贝，想学的家人们快来互动。",
+      "messageId": "1790771351687086",
+      "sentAt": 1790771351
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 334,
+    "path": "/v1/liveshowstatic/11548522172_1790771369729055032.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "菊泉远月B9",
+      "userId": "6734576867",
+      "message": "奇门遁甲终身局四害化解方法",
+      "messageId": "1790771362418283",
+      "sentAt": 1790771362
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 335,
+    "path": "/v1/liveshowstatic/11548522172_1790771386229618830.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "成顺星3y",
+      "userId": "1368822547",
+      "message": "福气好的人有哪些表现",
+      "messageId": "1790771373803583",
+      "sentAt": 1790771373
+     }
+    ],
+    "ended": false
+   }
+  ]
+ }
+}

@@ -1,0 +1,43 @@
+{
+ "generator": "fixtures/baidulive/danmaku/web_expected.py: an independent Python port of the Baidu Live PC room page's message-list reading (pchome.live.fcb2dc0e.js, classes Se and Te) and the archived spec's section 7 (online count 101, gift 107/10024)",
+ "value": {
+  "playlists": [
+   {
+    "frame": 0,
+    "segments": [
+     "/v1/liveshowstatic/11583715413_1790528741013566556.ts",
+     "/v1/liveshowstatic/11583715413_1790528770021636088.ts",
+     "/v1/liveshowstatic/11583715413_1790528796579897015.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 4,
+    "segments": [
+     "/v1/liveshowstatic/11562145411_1789558739931006804.ts"
+    ],
+    "mediaSequence": 0
+   }
+  ],
+  "segments": [
+   {
+    "frame": 1,
+    "path": "/v1/liveshowstatic/11583715413_1790528741013566556.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 2,
+    "path": "/v1/liveshowstatic/11583715413_1790528770021636088.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 3,
+    "path": "/v1/liveshowstatic/11583715413_1790528796579897015.ts",
+    "messages": [],
+    "ended": false
+   }
+  ]
+ }
+}

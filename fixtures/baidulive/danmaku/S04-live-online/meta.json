@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "platform": "baidulive",
+  "case": "S04-live-online",
+  "room": "baidulive:11588562681",
+  "danmakuKeys": {
+    "roomId": "11588562681",
+    "chatList": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11588562681.m3u8?authorization=bce-auth-v1/d1c31b35ee7bff0c6a8c31b8f5e83f1d/2026-09-30T12:23:03Z/15768000/host/840e60b28b51196835b472402494ba3aefd84ada5333dfdeb1d92196e2350de0",
+    "reliableList": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11588562682.m3u8?authorization=bce-auth-v1/d1c31b35ee7bff0c6a8c31b8f5e83f1d/2026-09-30T12:23:03Z/15768000/host/730dfd99a3ae3316987a0437fa32b32757d2d243f20dee89b22f571e66d1e0b6",
+    "hostList": "http://liveshowstatic.baidu.com/v1/liveshowstatic/live_11588562683.m3u8?authorization=bce-auth-v1/d1c31b35ee7bff0c6a8c31b8f5e83f1d/2026-09-30T12:23:03Z/15768000/host/9fd1dafaeeb9a49bac8e08aec2adb4ce61a1739dfa85e0cc2043efb56b629b90",
+    "pullIntervalSeconds": 5
+  },
+  "capturedAt": "2026-09-30T12:23:03.665912Z",
+  "route": "direct",
+  "frames": 316,
+  "raw": {
+    "sha256": "bfb0fcfef391ec79c0cb68af0f5c7be630057852dffbd9b5a15436b8318fdeb5",
+    "length": 750792
+  },
+  "scrubbed": [
+    {
+      "where": "every URL: authorization=bce-auth-v1/<access key id>/<time>/<seconds>/host/<signature>",
+      "rule": "secret: the access key id and the signature replaced by same-length hex, one value per original; the signing time and validity kept"
+    },
+    {
+      "where": "segments: $..uid, $..user_id, $..from_user, $..lastestuid[*], $..to_user[*], $..enable_user_list[*]",
+      "rule": "person: same-length digits, one value per person across all frames"
+    },
+    {
+      "where": "segments: $..name, $..nick_name, $..user_name, $..lastestuser[*]",
+      "rule": "person: same-shaped synthetic name, one per person; the same names inside chat text too (and 4 viewer names the broadcaster's greeting bot quoted)"
+    },
+    {
+      "where": "segments: $..bd_uk, $..uk",
+      "rule": "person: same-shaped value, one per person"
+    },
+    {
+      "where": "segments: $..portrait, $..avatar",
+      "rule": "person: the part after the host's portrait path replaced by a same-shaped value"
+    },
+    {
+      "where": "segments: $..clueLiveContent",
+      "rule": "person: the masked name before ** replaced"
+    },
+    {
+      "where": "kept",
+      "rule": "the broadcaster (the room command's host and the chat lines it sends: name, uk, uid, sender, portrait) and the system sender 百度网友 (852517826) are public; message ids, times, room ids and badge or gift images are not personal"
+    },
+    {
+      "where": "segments",
+      "rule": "inflated, scrubbed, written as compact JSON and gzipped again (mtime 0); `encoding: gzip` marks a segment served with Content-Encoding: gzip (all were)"
+    },
+    {
+      "where": "playlists",
+      "rule": "a 200 answer equal to the list's previous one is written as `same: true`"
+    }
+  ],
+  "note": "The news channel's busiest broadcast (11588562681, 看看新闻Knews, 98,000 shown online), 7 minutes: 105 online counts (every 3-60 s), no chat, mix_room_close and like notices; 2 segments and 8 playlist requests timed out.",
+  "tool": "M5.26 scratch Python recorder: urllib, direct, anonymous, read-only; every 2 s the chat, reliable and host playlists, and each segment not fetched before (fixture schema 1)"
+}

@@ -1,0 +1,854 @@
+{
+ "generator": "fixtures/baidulive/danmaku/web_expected.py: an independent Python port of the Baidu Live PC room page's message-list reading (pchome.live.fcb2dc0e.js, classes Se and Te) and the archived spec's section 7 (online count 101, gift 107/10024)",
+ "value": {
+  "playlists": [
+   {
+    "frame": 0,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790770957149940149.ts",
+     "/v1/liveshowstatic/11588562681_1790770964517860681.ts",
+     "/v1/liveshowstatic/11588562681_1790770982893602829.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 4,
+    "segments": [
+     "/v1/liveshowstatic/11588562682_1790735965799589567.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 34,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790770982893602829.ts",
+     "/v1/liveshowstatic/11588562681_1790770984669176266.ts",
+     "/v1/liveshowstatic/11588562681_1790770993977233030.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 57,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771010413470497.ts",
+     "/v1/liveshowstatic/11588562681_1790771019584949756.ts",
+     "/v1/liveshowstatic/11588562681_1790771027497040933.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 63,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771041414229214.ts",
+     "/v1/liveshowstatic/11588562681_1790771052468830550.ts",
+     "/v1/liveshowstatic/11588562681_1790771061656961070.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 93,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771061656961070.ts",
+     "/v1/liveshowstatic/11588562681_1790771069859422281.ts",
+     "/v1/liveshowstatic/11588562681_1790771083173281585.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 116,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771083173281585.ts",
+     "/v1/liveshowstatic/11588562681_1790771092181984619.ts",
+     "/v1/liveshowstatic/11588562681_1790771100510627862.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 124,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771141361919802.ts",
+     "/v1/liveshowstatic/11588562681_1790771146135702765.ts",
+     "/v1/liveshowstatic/11588562681_1790771153412161211.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 157,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771146135702765.ts",
+     "/v1/liveshowstatic/11588562681_1790771153412161211.ts",
+     "/v1/liveshowstatic/11588562681_1790771164065699766.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 173,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771153412161211.ts",
+     "/v1/liveshowstatic/11588562681_1790771164065699766.ts",
+     "/v1/liveshowstatic/11588562681_1790771182142981674.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 192,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771164065699766.ts",
+     "/v1/liveshowstatic/11588562681_1790771182142981674.ts",
+     "/v1/liveshowstatic/11588562681_1790771192370376541.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 205,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771208905443179.ts",
+     "/v1/liveshowstatic/11588562681_1790771214863049873.ts",
+     "/v1/liveshowstatic/11588562681_1790771225681332492.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 235,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771225681332492.ts",
+     "/v1/liveshowstatic/11588562681_1790771242954987290.ts",
+     "/v1/liveshowstatic/11588562681_1790771249579285887.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 240,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771249579285887.ts",
+     "/v1/liveshowstatic/11588562681_1790771261100532243.ts",
+     "/v1/liveshowstatic/11588562681_1790771267165958027.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 266,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771281877534516.ts",
+     "/v1/liveshowstatic/11588562681_1790771292242908086.ts",
+     "/v1/liveshowstatic/11588562681_1790771308942392954.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 287,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771318012199830.ts",
+     "/v1/liveshowstatic/11588562681_1790771327119657103.ts",
+     "/v1/liveshowstatic/11588562681_1790771335047542128.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 293,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771335047542128.ts",
+     "/v1/liveshowstatic/11588562681_1790771352422949477.ts",
+     "/v1/liveshowstatic/11588562681_1790771360336017532.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 304,
+    "segments": [
+     "/v1/liveshowstatic/11588562681_1790771371071949543.ts",
+     "/v1/liveshowstatic/11588562681_1790771379501693269.ts",
+     "/v1/liveshowstatic/11588562681_1790771390693117857.ts"
+    ],
+    "mediaSequence": 0
+   }
+  ],
+  "segments": [
+   {
+    "frame": 1,
+    "path": "/v1/liveshowstatic/11588562681_1790770957149940149.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98136
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 2,
+    "path": "/v1/liveshowstatic/11588562681_1790770964517860681.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98158
+     },
+     {
+      "type": "online",
+      "online": 98159
+     },
+     {
+      "type": "online",
+      "online": 98177
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 3,
+    "path": "/v1/liveshowstatic/11588562681_1790770982893602829.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98180
+     },
+     {
+      "type": "online",
+      "online": 98185
+     },
+     {
+      "type": "online",
+      "online": 98193
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 5,
+    "path": "/v1/liveshowstatic/11588562682_1790735965799589567.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 35,
+    "path": "/v1/liveshowstatic/11588562681_1790770984669176266.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98208
+     },
+     {
+      "type": "online",
+      "online": 98208
+     },
+     {
+      "type": "online",
+      "online": 98229
+     },
+     {
+      "type": "online",
+      "online": 98234
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 36,
+    "path": "/v1/liveshowstatic/11588562681_1790770993977233030.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98235
+     },
+     {
+      "type": "online",
+      "online": 98235
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 58,
+    "path": "/v1/liveshowstatic/11588562681_1790771010413470497.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98254
+     },
+     {
+      "type": "online",
+      "online": 98254
+     },
+     {
+      "type": "online",
+      "online": 98270
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 59,
+    "path": "/v1/liveshowstatic/11588562681_1790771019584949756.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98288
+     },
+     {
+      "type": "online",
+      "online": 98288
+     },
+     {
+      "type": "online",
+      "online": 98292
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 64,
+    "path": "/v1/liveshowstatic/11588562681_1790771041414229214.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98362
+     },
+     {
+      "type": "online",
+      "online": 98372
+     },
+     {
+      "type": "online",
+      "online": 98372
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 65,
+    "path": "/v1/liveshowstatic/11588562681_1790771052468830550.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98372
+     },
+     {
+      "type": "online",
+      "online": 98374
+     },
+     {
+      "type": "online",
+      "online": 98375
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 66,
+    "path": "/v1/liveshowstatic/11588562681_1790771061656961070.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98389
+     },
+     {
+      "type": "online",
+      "online": 98400
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 94,
+    "path": "/v1/liveshowstatic/11588562681_1790771069859422281.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98402
+     },
+     {
+      "type": "online",
+      "online": 98417
+     },
+     {
+      "type": "online",
+      "online": 98417
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 95,
+    "path": "/v1/liveshowstatic/11588562681_1790771083173281585.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98420
+     },
+     {
+      "type": "online",
+      "online": 98438
+     },
+     {
+      "type": "online",
+      "online": 98450
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 117,
+    "path": "/v1/liveshowstatic/11588562681_1790771092181984619.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98471
+     },
+     {
+      "type": "online",
+      "online": 98471
+     },
+     {
+      "type": "online",
+      "online": 98495
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 118,
+    "path": "/v1/liveshowstatic/11588562681_1790771100510627862.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98496
+     },
+     {
+      "type": "online",
+      "online": 98496
+     },
+     {
+      "type": "online",
+      "online": 98496
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 125,
+    "path": "/v1/liveshowstatic/11588562681_1790771141361919802.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98545
+     },
+     {
+      "type": "online",
+      "online": 98545
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 126,
+    "path": "/v1/liveshowstatic/11588562681_1790771146135702765.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98558
+     },
+     {
+      "type": "online",
+      "online": 98558
+     },
+     {
+      "type": "online",
+      "online": 98561
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 127,
+    "path": "/v1/liveshowstatic/11588562681_1790771153412161211.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98575
+     },
+     {
+      "type": "online",
+      "online": 98589
+     },
+     {
+      "type": "online",
+      "online": 98590
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 158,
+    "path": "/v1/liveshowstatic/11588562681_1790771164065699766.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98596
+     },
+     {
+      "type": "online",
+      "online": 98599
+     },
+     {
+      "type": "online",
+      "online": 98603
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 174,
+    "path": "/v1/liveshowstatic/11588562681_1790771182142981674.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98620
+     },
+     {
+      "type": "online",
+      "online": 98620
+     },
+     {
+      "type": "online",
+      "online": 98636
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 193,
+    "path": "/v1/liveshowstatic/11588562681_1790771192370376541.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98656
+     },
+     {
+      "type": "online",
+      "online": 98661
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 206,
+    "path": "/v1/liveshowstatic/11588562681_1790771208905443179.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98695
+     },
+     {
+      "type": "online",
+      "online": 98715
+     },
+     {
+      "type": "online",
+      "online": 98716
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 207,
+    "path": "/v1/liveshowstatic/11588562681_1790771214863049873.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98722
+     },
+     {
+      "type": "online",
+      "online": 98725
+     },
+     {
+      "type": "online",
+      "online": 98725
+     },
+     {
+      "type": "online",
+      "online": 98757
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 208,
+    "path": "/v1/liveshowstatic/11588562681_1790771225681332492.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98758
+     },
+     {
+      "type": "online",
+      "online": 98769
+     },
+     {
+      "type": "online",
+      "online": 98775
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 236,
+    "path": "/v1/liveshowstatic/11588562681_1790771242954987290.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98780
+     },
+     {
+      "type": "online",
+      "online": 98787
+     },
+     {
+      "type": "online",
+      "online": 98789
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 237,
+    "path": "/v1/liveshowstatic/11588562681_1790771249579285887.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98789
+     },
+     {
+      "type": "online",
+      "online": 98791
+     },
+     {
+      "type": "online",
+      "online": 98794
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 241,
+    "path": "/v1/liveshowstatic/11588562681_1790771261100532243.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98799
+     },
+     {
+      "type": "online",
+      "online": 98804
+     },
+     {
+      "type": "online",
+      "online": 98831
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 242,
+    "path": "/v1/liveshowstatic/11588562681_1790771267165958027.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98831
+     },
+     {
+      "type": "online",
+      "online": 98831
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 267,
+    "path": "/v1/liveshowstatic/11588562681_1790771281877534516.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98868
+     },
+     {
+      "type": "online",
+      "online": 98868
+     },
+     {
+      "type": "online",
+      "online": 98872
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 268,
+    "path": "/v1/liveshowstatic/11588562681_1790771292242908086.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98873
+     },
+     {
+      "type": "online",
+      "online": 98873
+     },
+     {
+      "type": "online",
+      "online": 98889
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 269,
+    "path": "/v1/liveshowstatic/11588562681_1790771308942392954.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98911
+     },
+     {
+      "type": "online",
+      "online": 98913
+     },
+     {
+      "type": "online",
+      "online": 98937
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 288,
+    "path": "/v1/liveshowstatic/11588562681_1790771318012199830.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98939
+     },
+     {
+      "type": "online",
+      "online": 98949
+     },
+     {
+      "type": "online",
+      "online": 98952
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 289,
+    "path": "/v1/liveshowstatic/11588562681_1790771327119657103.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 98952
+     },
+     {
+      "type": "online",
+      "online": 98967
+     },
+     {
+      "type": "online",
+      "online": 98973
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 294,
+    "path": "/v1/liveshowstatic/11588562681_1790771352422949477.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 99012
+     },
+     {
+      "type": "online",
+      "online": 99012
+     },
+     {
+      "type": "online",
+      "online": 99015
+     },
+     {
+      "type": "online",
+      "online": 99035
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 295,
+    "path": "/v1/liveshowstatic/11588562681_1790771360336017532.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 99047
+     },
+     {
+      "type": "online",
+      "online": 99050
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 305,
+    "path": "/v1/liveshowstatic/11588562681_1790771371071949543.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 99056
+     },
+     {
+      "type": "online",
+      "online": 99060
+     },
+     {
+      "type": "online",
+      "online": 99061
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 306,
+    "path": "/v1/liveshowstatic/11588562681_1790771379501693269.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 99069
+     },
+     {
+      "type": "online",
+      "online": 99078
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 307,
+    "path": "/v1/liveshowstatic/11588562681_1790771390693117857.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 99080
+     },
+     {
+      "type": "online",
+      "online": 99084
+     },
+     {
+      "type": "online",
+      "online": 99085
+     }
+    ],
+    "ended": false
+   }
+  ]
+ }
+}

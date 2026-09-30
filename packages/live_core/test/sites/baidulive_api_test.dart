@@ -46,7 +46,9 @@ List<Map<String, dynamic>> _maps(Object? value) => (value! as List).cast<Map<Str
 /// - `httpHeaders` (M4.30 difference 1): 3.x put the media headers on every
 ///   room, where only IPTV's are read (3.x's PlaybackHeaderResolver had no
 ///   Baidu branch, so playback sent none); they travel on every line;
-/// - `notice` (30-10): the notices are written for users.
+/// - `notice` (30-10): the notices are written for users; M5.26 shows the
+///   chat, so the notice no longer says it cannot be seen (3.x's text is
+///   [BaiduLiveApi.legacyChatNotice]).
 const _changed = {'httpHeaders', 'notice'};
 
 /// A live room's keys that differ besides [_changed]: `introduction`
@@ -1476,6 +1478,185 @@ void main() {
       ]) {
         expect(BaiduLiveApi.parseRoomId(value), isNull, reason: value);
       }
+    });
+  });
+
+  group('danmaku arguments (M5.26)', () {
+    const chatRoom = '11548522172';
+
+    Map<String, dynamic> command(String sample) =>
+        ((jsonDecode(_sample(sample).body) as Map<String, dynamic>)['data'] as Map<String, dynamic>)['371']
+            as Map<String, dynamic>;
+
+    /// An http URL as https.
+    String https(Object? url) => (url! as String).replaceFirst('http://', 'https://');
+
+    /// A live command with [changes] applied, as a room of [chatRoom].
+    BaiduLiveDanmakuArgs? argsOf(Map<String, Object?> changes, {Map<String, Object?> video = const {}}) {
+      final base = command('S02-room-chat')..addAll(changes);
+      base['video'] = {...base['video'] as Map<String, dynamic>, ...video};
+      return BaiduLiveApi.danmakuArgs(base, chatRoom);
+    }
+
+    test('S02-room-chat: the three lists, 5 s, and when the signature runs out; room entry carries them', () {
+      final body = command('S02-room-chat');
+      final room = _room('S02-room-chat', chatRoom);
+      final args = room.danmaku!;
+      expect(args.roomId, chatRoom);
+      // The page asks over its own protocol (https); the query is kept.
+      expect(args.chatList.toString(), https(body['chat_msg_hls_url']));
+      expect(args.reliableList.toString(), https(body['reliable_msg_hls_url']));
+      expect(args.hostList.toString(), https(body['host_msg_hls_url']));
+      expect(args.chatList.path, '/v1/liveshowstatic/live_11548522172.m3u8');
+      expect(args.pullInterval, const Duration(seconds: 5));
+      // Signed at the recording (12:23:03 UTC) for 15768000 s (182.5 days).
+      final signed = RegExp(r'/(\d{4}-\d\d-\d\dT[\d:]+Z)/15768000/').firstMatch(body['chat_msg_hls_url'] as String)!;
+      expect(args.expiresAt, DateTime.parse(signed.group(1)!).add(const Duration(seconds: 15768000)));
+      expect(args.expiresAt, DateTime.utc(2027, 4, 1, 0, 23, 3));
+      final captured = _sample('S02-room-chat').capturedAt;
+      expect(args.expiresAt!.difference(captured).inDays, 182);
+      expect(args.isExpiredAt(captured), isFalse);
+      expect(args.isExpiredAt(args.expiresAt!.subtract(const Duration(seconds: 1))), isFalse);
+      expect(args.isExpiredAt(args.expiresAt!), isTrue);
+      expect(args.toString(), 'BaiduLiveDanmakuArgs(11548522172)', reason: 'no signature in logs');
+      expect(BaiduLiveApi.liveRoom(room, withData: true).danmakuData, same(args));
+      expect(BaiduLiveApi.liveRoom(room).danmakuData, isNull, reason: 'lists and follow refreshes');
+    });
+
+    test('the older samples: lists whose signatures were scrubbed say no expiry; not live has none', () {
+      for (final (sample, id) in [
+        ('S02-room-live', _liveRoom),
+        ('S02-room-clarity', _clarityRoom),
+        ('S02-room-hevc', _hevcRoom),
+      ]) {
+        final body = command(sample);
+        final args = _room(sample, id).danmaku!;
+        expect(args.chatList.toString(), https(body['chat_msg_hls_url']), reason: sample);
+        expect(args.hostList.toString(), https(body['host_msg_hls_url']), reason: sample);
+        expect(args.expiresAt, isNull, reason: '$sample: the whole authorization was scrubbed');
+        expect(args.isExpiredAt(DateTime.utc(2100)), isFalse);
+      }
+      expect(_room('S02-room-ended', _endedRoom).danmaku, isNull, reason: 'ended: the replay has no chat to poll');
+      expect(_room('S02-room-preview', _previewRoom).danmaku, isNull);
+      expect(BaiduLiveApi.liveRoom(_room('S02-room-ended', _endedRoom), withData: true).danmakuData, isNull);
+    });
+
+    test('the chat list falls back to video.msg_hls_url; lists must be m3u8 on liveshowstatic.baidu.com', () {
+      final video = command('S02-room-chat')['video'] as Map<String, dynamic>;
+      expect(argsOf({'chat_msg_hls_url': null})!.chatList.toString(), https(video['msg_hls_url']));
+      expect(argsOf({'chat_msg_hls_url': ''}, video: {'msg_hls_url': null}), isNull);
+      const base = 'liveshowstatic.baidu.com/v1/liveshowstatic/live_1.m3u8';
+      for (final valid in [
+        'http://$base',
+        'https://$base',
+        'HTTP://LIVESHOWSTATIC.baidu.com/v1/a.m3u8?authorization=x',
+      ]) {
+        expect(BaiduLiveApi.messageList(valid)?.scheme, 'https', reason: valid);
+      }
+      const escaped = '$base?authorization=bce-auth-v1%2Fak%2F2026-09-30T12%3A00%3A00Z%2F60%2Fhost%2Fsig';
+      expect(BaiduLiveApi.messageList('http://$escaped').toString(), 'https://$escaped', reason: 'query kept as given');
+      for (final invalid in [
+        'ftp://$base',
+        'http://evil.example.com/v1/live_1.m3u8',
+        'http://liveshowstatic.baidu.com.evil.test/v1/live_1.m3u8',
+        'http://user@$base',
+        'http://$base#fragment',
+        'http://liveshowstatic.baidu.com/v1/live_1.ts',
+        '/v1/liveshowstatic/live_1.m3u8',
+        '',
+        42,
+        null,
+      ]) {
+        expect(BaiduLiveApi.messageList(invalid), isNull, reason: '$invalid');
+      }
+      final args = argsOf({'reliable_msg_hls_url': 'http://evil.example.com/a.m3u8', 'host_msg_hls_url': null})!;
+      expect(args.reliableList, isNull);
+      expect(args.hostList, isNull);
+    });
+
+    test('the poll interval: positive seconds within 1–10, else 5 s; the video one when the room has none', () {
+      for (final (value, seconds) in [
+        (3, 3),
+        ('7', 7),
+        (' 2 ', 2),
+        (1, 1),
+        (30, 10),
+        (0, 5),
+        (-2, 5),
+        ('x', 5),
+        (2.5, 5),
+        (null, 5),
+      ]) {
+        expect(
+          argsOf({'msg_hls_pull_internal_in_second': value})!.pullInterval,
+          Duration(seconds: seconds),
+          reason: '$value',
+        );
+      }
+      expect(
+        argsOf(
+          {'msg_hls_pull_internal_in_second': null},
+          video: {'msg_hls_pull_internal_in_second': '4'},
+        )!.pullInterval,
+        const Duration(seconds: 4),
+      );
+    });
+
+    test('the signature: bce-auth-v1 time plus validity, plain or escaped; anything else says nothing', () {
+      Uri list(String authorization) =>
+          Uri.parse('http://liveshowstatic.baidu.com/v1/liveshowstatic/live_1.m3u8?x=1&authorization=$authorization');
+      expect(
+        BaiduLiveApi.signatureExpiry(list('bce-auth-v1/ak/2026-09-30T12:00:00Z/3600/host/sig')),
+        DateTime.utc(2026, 9, 30, 13),
+      );
+      expect(
+        BaiduLiveApi.signatureExpiry(list('bce-auth-v1%2Fak%2F2026-09-30T12%3A00%3A00Z%2F60%2Fhost%2Fsig')),
+        DateTime.utc(2026, 9, 30, 12, 1),
+      );
+      for (final authorization in [
+        'gze-sqpv-e3%2F8e9557sx16od118v726720u25xa2w6p9%2F4540-82-83D49%3A89%3A54B%2F09756953%2Fqdme%2Fz8n',
+        'bce-auth-v2/ak/2026-09-30T12:00:00Z/3600/host/sig',
+        'bce-auth-v1/ak/2026-09-30T12:00:00/3600/host/sig',
+        'bce-auth-v1/ak/2026-13-45T12:00:00Z/3600/host/sig',
+        'bce-auth-v1/ak/2026-09-30T12:00:00Z/0/host/sig',
+        'bce-auth-v1/ak/2026-09-30T12:00:00Z/-1/host/sig',
+        'bce-auth-v1/ak/2026-09-30T12:00:00Z/12345678901/host/sig',
+        'bce-auth-v1/ak/2026-09-30T12:00:00Z',
+        '',
+      ]) {
+        expect(BaiduLiveApi.signatureExpiry(list(authorization)), isNull, reason: authorization);
+      }
+      expect(BaiduLiveApi.signatureExpiry(Uri.parse('http://liveshowstatic.baidu.com/v1/a.m3u8')), isNull);
+    });
+
+    test("enrich keeps this answer's lists; equality and hash", () {
+      final room = _room('S02-room-chat', chatRoom);
+      final card = BaiduLiveRoom(
+        roomId: chatRoom,
+        userId: 'uk',
+        nick: 'nick',
+        title: 'title',
+        avatar: '',
+        cover: '',
+        category: '',
+        currentViewers: 1,
+        followers: null,
+        state: BaiduLiveState.live,
+      );
+      expect(room.enrich(card).danmaku, same(room.danmaku));
+      expect(card.enrich(room).danmaku, isNull, reason: 'a card has no lists of its own');
+      final again = _room('S02-room-chat', chatRoom).danmaku!;
+      expect(again, room.danmaku);
+      expect(again.hashCode, room.danmaku.hashCode);
+      expect(again == argsOf({'msg_hls_pull_internal_in_second': 6}), isFalse);
+    });
+
+    test('the room notice no longer says the chat cannot be seen; 3.x text kept (M5.26)', () {
+      expect(BaiduLiveApi.chatNotice, '人数是正在观看的人数，主播的粉丝数另外显示。');
+      expect(BaiduLiveApi.chatNotice, isNot(contains('聊天')));
+      final legacy = _legacy('S02-room-live')['getRoomDetail'] as Map<String, dynamic>;
+      expect((legacy['value'] as Map<String, dynamic>)['notice'], BaiduLiveApi.legacyChatNotice);
+      expect(BaiduLiveApi.liveRoom(_room('S02-room-chat', chatRoom)).notice, BaiduLiveApi.chatNotice);
     });
   });
 }

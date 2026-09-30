@@ -1,0 +1,596 @@
+{
+ "generator": "fixtures/baidulive/danmaku/web_expected.py: an independent Python port of the Baidu Live PC room page's message-list reading (pchome.live.fcb2dc0e.js, classes Se and Te) and the archived spec's section 7 (online count 101, gift 107/10024)",
+ "value": {
+  "segments": {
+   "chat": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "你好",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat plain (no gzip)": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "你好",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat gzipped twice": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "你好",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat content empty: the words": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "只有正文",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat content missing: the words": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "只有正文",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat type 0 as a number": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "数字类型",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat type 3: the link title": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "链接标题",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat types 1, 2, 4, 5 have no text": {
+    "messages": [],
+    "ended": false
+   },
+   "chat unknown type: the content": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "未知类型的文字",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat without a type: the content": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "没有类型",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat reply: its own words": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "回复的话",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat reply without the quoted words: the content": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "@别人 回复的话",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat reply to a non-text: the content": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "@别人 回复",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat blank text is dropped": {
+    "messages": [],
+    "ended": false
+   },
+   "chat text and name trimmed": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "两边有空格",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat of another room is dropped; no room id is kept": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "没有房间号",
+      "messageId": "1790770000000002",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat room id as a number": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "数字房间号",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat ids: numbers, text, missing": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000003",
+      "message": "你好",
+      "messageId": "1790770000000003",
+      "sentAt": 1790770000
+     },
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "",
+      "message": "没有用户",
+      "messageId": "1790770000000004",
+      "sentAt": 1790770000
+     },
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "没有消息号",
+      "messageId": "",
+      "sentAt": 1790770000
+     },
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "小数消息号",
+      "messageId": "",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat name missing": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "",
+      "userId": "2000000001",
+      "message": "你好",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "chat times: text, zero, negative, missing, too far, fraction": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "文字时间",
+      "messageId": "1",
+      "sentAt": 1790770001
+     },
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "零",
+      "messageId": "2",
+      "sentAt": null
+     },
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "负数",
+      "messageId": "3",
+      "sentAt": null
+     },
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "没有时间",
+      "messageId": "4",
+      "sentAt": null
+     },
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "太远",
+      "messageId": "5",
+      "sentAt": null
+     },
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "小数",
+      "messageId": "6",
+      "sentAt": null
+     }
+    ],
+    "ended": false
+   },
+   "content and text as objects": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "对象",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "content not JSON, text not JSON, text missing": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "这条可以",
+      "messageId": "7",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "outer type not 0 is skipped": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "类型 \"0\"",
+      "messageId": "8",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": false
+   },
+   "inner type as text": {
+    "messages": [
+     {
+      "type": "online",
+      "online": 12345
+     }
+    ],
+    "ended": false
+   },
+   "online count": {
+    "messages": [
+     {
+      "type": "online",
+      "online": 147144
+     }
+    ],
+    "ended": false
+   },
+   "online counts: text, zero, negative, fraction, missing, other room": {
+    "messages": [
+     {
+      "type": "online",
+      "online": 98765
+     },
+     {
+      "type": "online",
+      "online": 0
+     },
+     {
+      "type": "online",
+      "online": 12
+     }
+    ],
+    "ended": false
+   },
+   "gift": {
+    "messages": [
+     {
+      "type": "gift",
+      "userName": "送礼观众",
+      "userId": "2000000002",
+      "message": "拍拍 ×1",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000,
+      "gift": {
+       "id": "11138",
+       "name": "拍拍",
+       "count": 1,
+       "free": true,
+       "icon": "https://example.bcebos.com/gift.png"
+      }
+     }
+    ],
+    "ended": false
+   },
+   "gift content as an object; numbers as text": {
+    "messages": [
+     {
+      "type": "gift",
+      "userName": "送礼观众",
+      "userId": "2000000002",
+      "message": "拍拍 ×3",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000,
+      "gift": {
+       "id": "11139",
+       "name": "拍拍",
+       "count": 3,
+       "free": false,
+       "icon": "https://example.bcebos.com/gift.png"
+      }
+     }
+    ],
+    "ended": false
+   },
+   "gift count missing or zero is 1; http icon dropped": {
+    "messages": [
+     {
+      "type": "gift",
+      "userName": "送礼观众",
+      "userId": "2000000002",
+      "message": "拍拍 ×1",
+      "messageId": "11",
+      "sentAt": 1790770000,
+      "gift": {
+       "id": "11138",
+       "name": "拍拍",
+       "count": 1,
+       "free": true,
+       "icon": null
+      }
+     },
+     {
+      "type": "gift",
+      "userName": "送礼观众",
+      "userId": "2000000002",
+      "message": "拍拍 ×1",
+      "messageId": "12",
+      "sentAt": 1790770000,
+      "gift": {
+       "id": "11138",
+       "name": "拍拍",
+       "count": 1,
+       "free": true,
+       "icon": null
+      }
+     }
+    ],
+    "ended": false
+   },
+   "gift without a name, of another room, another service": {
+    "messages": [],
+    "ended": false
+   },
+   "notices are not reported": {
+    "messages": [],
+    "ended": false
+   },
+   "broadcast stopped (102)": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "最后一句",
+      "messageId": "1790770000000001",
+      "sentAt": 1790770000
+     }
+    ],
+    "ended": true
+   },
+   "102 without a room id": {
+    "messages": [],
+    "ended": true
+   },
+   "102 of another room is not the end": {
+    "messages": [],
+    "ended": false
+   },
+   "several items and messages keep their order": {
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "第一",
+      "messageId": "31",
+      "sentAt": 1790770000
+     },
+     {
+      "type": "online",
+      "online": 10
+     },
+     {
+      "type": "chat",
+      "userName": "合成观众",
+      "userId": "2000000001",
+      "message": "第二",
+      "messageId": "33",
+      "sentAt": 1790770000
+     },
+     {
+      "type": "gift",
+      "userName": "送礼观众",
+      "userId": "2000000002",
+      "message": "拍拍 ×1",
+      "messageId": "34",
+      "sentAt": 1790770000,
+      "gift": {
+       "id": "11138",
+       "name": "拍拍",
+       "count": 1,
+       "free": true,
+       "icon": "https://example.bcebos.com/gift.png"
+      }
+     }
+    ],
+    "ended": false
+   },
+   "list missing": {
+    "messages": [],
+    "ended": false
+   },
+   "list not a list": {
+    "messages": [],
+    "ended": false
+   },
+   "root is an array": {
+    "throws": "FormatException"
+   },
+   "root is a string": {
+    "throws": "FormatException"
+   },
+   "not JSON": {
+    "throws": "FormatException"
+   },
+   "not UTF-8": {
+    "throws": "FormatException"
+   },
+   "broken gzip": {
+    "throws": "FormatException"
+   },
+   "empty body": {
+    "throws": "FormatException"
+   }
+  },
+  "playlists": {
+   "recorded shape": {
+    "segments": [
+     "/v1/liveshowstatic/11500000001_1790770669156884044.ts",
+     "/v1/liveshowstatic/11500000001_1790770677944333002.ts"
+    ],
+    "mediaSequence": 0
+   },
+   "empty list": {
+    "segments": [],
+    "mediaSequence": 0
+   },
+   "CRLF, blank lines, spaces, a media sequence": {
+    "segments": [
+     "/v1/liveshowstatic/a.ts"
+    ],
+    "mediaSequence": 42
+   },
+   "relative and absolute segments; other hosts and schemes skipped": {
+    "segments": [
+     "/v1/liveshowstatic/b.ts",
+     "/v1/c.ts",
+     "/v1/d.ts"
+    ],
+    "mediaSequence": null
+   },
+   "not a playlist (an error page)": {
+    "throws": "FormatException"
+   },
+   "a JSON error": {
+    "throws": "FormatException"
+   },
+   "empty text": {
+    "throws": "FormatException"
+   },
+   "EXTM3U not first": {
+    "throws": "FormatException"
+   }
+  }
+ }
+}

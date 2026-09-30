@@ -1,0 +1,356 @@
+{
+ "generator": "fixtures/baidulive/danmaku/web_expected.py: an independent Python port of the Baidu Live PC room page's message-list reading (pchome.live.fcb2dc0e.js, classes Se and Te) and the archived spec's section 7 (online count 101, gift 107/10024)",
+ "value": {
+  "playlists": [
+   {
+    "frame": 0,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790770892152920738.ts",
+     "/v1/liveshowstatic/11542685348_1790770951002210304.ts",
+     "/v1/liveshowstatic/11542685348_1790770978865845609.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 4,
+    "segments": [
+     "/v1/liveshowstatic/11542685351_1790644743043585382.ts",
+     "/v1/liveshowstatic/11542685351_1790645556898789075.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 56,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790770951002210304.ts",
+     "/v1/liveshowstatic/11542685348_1790770978865845609.ts",
+     "/v1/liveshowstatic/11542685348_1790771007316854566.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 72,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790771007316854566.ts",
+     "/v1/liveshowstatic/11542685348_1790771020075486449.ts",
+     "/v1/liveshowstatic/11542685348_1790771038167602080.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 98,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790771020075486449.ts",
+     "/v1/liveshowstatic/11542685348_1790771038167602080.ts",
+     "/v1/liveshowstatic/11542685348_1790771071367176146.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 126,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790771038167602080.ts",
+     "/v1/liveshowstatic/11542685348_1790771071367176146.ts",
+     "/v1/liveshowstatic/11542685348_1790771087044718259.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 148,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790771071367176146.ts",
+     "/v1/liveshowstatic/11542685348_1790771087044718259.ts",
+     "/v1/liveshowstatic/11542685348_1790771099947205791.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 164,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790771087044718259.ts",
+     "/v1/liveshowstatic/11542685348_1790771099947205791.ts",
+     "/v1/liveshowstatic/11542685348_1790771129755950048.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 168,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790771099947205791.ts",
+     "/v1/liveshowstatic/11542685348_1790771129755950048.ts",
+     "/v1/liveshowstatic/11542685348_1790771164708437077.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 229,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790771129755950048.ts",
+     "/v1/liveshowstatic/11542685348_1790771164708437077.ts",
+     "/v1/liveshowstatic/11542685348_1790771189023486035.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 233,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790771164708437077.ts",
+     "/v1/liveshowstatic/11542685348_1790771189023486035.ts",
+     "/v1/liveshowstatic/11542685348_1790771222744933099.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 273,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790771189023486035.ts",
+     "/v1/liveshowstatic/11542685348_1790771222744933099.ts",
+     "/v1/liveshowstatic/11542685348_1790771253315543763.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 310,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790771253315543763.ts",
+     "/v1/liveshowstatic/11542685348_1790771323526640598.ts",
+     "/v1/liveshowstatic/11542685348_1790771335930733062.ts"
+    ],
+    "mediaSequence": 0
+   },
+   {
+    "frame": 330,
+    "segments": [
+     "/v1/liveshowstatic/11542685348_1790771323526640598.ts",
+     "/v1/liveshowstatic/11542685348_1790771335930733062.ts",
+     "/v1/liveshowstatic/11542685348_1790771369414029043.ts"
+    ],
+    "mediaSequence": 0
+   }
+  ],
+  "segments": [
+   {
+    "frame": 1,
+    "path": "/v1/liveshowstatic/11542685348_1790770892152920738.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 100637
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 2,
+    "path": "/v1/liveshowstatic/11542685348_1790770951002210304.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 100638
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 3,
+    "path": "/v1/liveshowstatic/11542685348_1790770978865845609.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 5,
+    "path": "/v1/liveshowstatic/11542685351_1790644743043585382.ts",
+    "messages": [
+     {
+      "type": "gift",
+      "userName": "秀元6ZK",
+      "userId": "7756595393",
+      "message": "拍拍 ×1",
+      "messageId": "1790644725984999",
+      "sentAt": 1790644725,
+      "gift": {
+       "id": "11138",
+       "name": "拍拍",
+       "count": 1,
+       "free": true,
+       "icon": "https://internal-amis-res.cdn.bcebos.com/images/2019-10/1572240170823/f00d908f8926.png"
+      }
+     },
+     {
+      "type": "gift",
+      "userName": "秀元6ZK",
+      "userId": "7756595393",
+      "message": "拍拍 ×1",
+      "messageId": "1790644727092218",
+      "sentAt": 1790644727,
+      "gift": {
+       "id": "11138",
+       "name": "拍拍",
+       "count": 1,
+       "free": true,
+       "icon": "https://internal-amis-res.cdn.bcebos.com/images/2019-10/1572240170823/f00d908f8926.png"
+      }
+     },
+     {
+      "type": "gift",
+      "userName": "秀元6ZK",
+      "userId": "7756595393",
+      "message": "拍拍 ×1",
+      "messageId": "1790644728544028",
+      "sentAt": 1790644728,
+      "gift": {
+       "id": "11138",
+       "name": "拍拍",
+       "count": 1,
+       "free": true,
+       "icon": "https://internal-amis-res.cdn.bcebos.com/images/2019-10/1572240170823/f00d908f8926.png"
+      }
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 6,
+    "path": "/v1/liveshowstatic/11542685351_1790645556898789075.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 57,
+    "path": "/v1/liveshowstatic/11542685348_1790771007316854566.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 100638
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 73,
+    "path": "/v1/liveshowstatic/11542685348_1790771020075486449.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "RV6NCGH",
+      "userId": "2735140760",
+      "message": "领到了感谢老师！",
+      "messageId": "1790771013524143",
+      "sentAt": 1790771013
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 74,
+    "path": "/v1/liveshowstatic/11542685348_1790771038167602080.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 99,
+    "path": "/v1/liveshowstatic/11542685348_1790771071367176146.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 100638
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 127,
+    "path": "/v1/liveshowstatic/11542685348_1790771087044718259.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 149,
+    "path": "/v1/liveshowstatic/11542685348_1790771099947205791.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 165,
+    "path": "/v1/liveshowstatic/11542685348_1790771129755950048.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 100639
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 169,
+    "path": "/v1/liveshowstatic/11542685348_1790771164708437077.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "广金航迪夏",
+      "userId": "2153830554",
+      "message": "全网就你讲的最好，给票准",
+      "messageId": "1790771150540173",
+      "sentAt": 1790771150
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 230,
+    "path": "/v1/liveshowstatic/11542685348_1790771189023486035.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 100639
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 234,
+    "path": "/v1/liveshowstatic/11542685348_1790771222744933099.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 274,
+    "path": "/v1/liveshowstatic/11542685348_1790771253315543763.ts",
+    "messages": [
+     {
+      "type": "online",
+      "online": 100639
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 311,
+    "path": "/v1/liveshowstatic/11542685348_1790771323526640598.ts",
+    "messages": [
+     {
+      "type": "chat",
+      "userName": "润燕泽万ZRN",
+      "userId": "9453182465",
+      "message": "想要",
+      "messageId": "1790771310615971",
+      "sentAt": 1790771310
+     }
+    ],
+    "ended": false
+   },
+   {
+    "frame": 312,
+    "path": "/v1/liveshowstatic/11542685348_1790771335930733062.ts",
+    "messages": [],
+    "ended": false
+   },
+   {
+    "frame": 331,
+    "path": "/v1/liveshowstatic/11542685348_1790771369414029043.ts",
+    "messages": [],
+    "ended": false
+   }
+  ]
+ }
+}

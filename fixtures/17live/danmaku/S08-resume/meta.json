@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "platform": "17live",
+  "case": "S08-resume",
+  "room": "17live:29790476",
+  "danmakuKeys": {
+    "roomId": "29790476"
+  },
+  "capturedAt": "2026-09-30T15:21:28.081613Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://17media.realtime.ably.net/?access_token=xti42T.rbdz9kTL9122_Dk6t6Ps3J9hZoNlwWP6gT2fDCe2-1rD91ZDxYS643DL6X4_2AUa5R9dms20a9GOgN1ZPVAB74ZhhnfV6ZPBMl7z6tlwqaQU6JOm_xFZ_Eqw68152xUgy&format=json&heartbeats=true&v=3",
+      "headers": {
+        "origin": "https://17.live",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    },
+    {
+      "url": "wss://17media.realtime.ably.net/?access_token=xti42T.rbdz9kTL9122_Dk6t6Ps3J9hZoNlwWP6gT2fDCe2-1rD91ZDxYS643DL6X4_2AUa5R9dms20a9GOgN1ZPVAB74ZhhnfV6ZPBMl7z6tlwqaQU6JOm_xFZ_Eqw68152xUgy&resume=4abPf7l3YM04ZY%21X-E5s1H2ZIDwdE8rN92Q17-62062k&format=json&heartbeats=true&v=3",
+      "headers": {
+        "origin": "https://17.live",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    },
+    {
+      "url": "wss://17media.realtime.ably.net/?access_token=xti42T.rbdz9kTL9122_Dk6t6Ps3J9hZoNlwWP6gT2fDCe2-1rD91ZDxYS643DL6X4_2AUa5R9dms20a9GOgN1ZPVAB74ZhhnfV6ZPBMl7z6tlwqaQU6JOm_xFZ_Eqw68152xUgy&resume=4abdFF2nAtXc1I%21X-E5s1H2ZIBWdE6fL6MD3N-583YBE&format=json&heartbeats=true&v=3",
+      "headers": {
+        "origin": "https://17.live",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    },
+    {
+      "url": "wss://17media.realtime.ably.net/?access_token=xti42T.rbdz9kTL9122_Dk6t6Ps3J9hZoNlwWP6gT2fDCe2-1rD91ZDxYS643DL6X4_2AUa5R9dms20a9GOgN1ZPVAB74ZhhnfV6ZPBMl7z6tlwqaQU6JOm_xFZ_Eqw68152xUgy&format=json&heartbeats=true&v=3",
+      "headers": {
+        "origin": "https://17.live",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    },
+    {
+      "url": "wss://17media.realtime.ably.net/?access_token=xti42T.rbdz9kTL9122_Dk6t6Ps3J9hZoNlwWP6gT2fDCe2-1rD91ZDxYS643DL6X4_2AUa5R9dms20a9GOgN1ZPVAB74ZhhnfV6ZPBMl7z6tlwqaQU6JOm_xFZ_Eqw68152xUgy&resume=4abPf7l3YM04ZY%213iJ42NoCkmUGn_wCVeexCL-47460K&format=json&heartbeats=true&v=3",
+      "headers": {
+        "origin": "https://17.live",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 91,
+  "raw": {
+    "sha256": "3cde4a5ec500962a9b5d068d19308c41e80de06e44b0357b8b9c9c66662845b7",
+    "length": 72325
+  },
+  "scrubbed": [
+    {
+      "where": "$.token",
+      "rule": "secret"
+    },
+    {
+      "where": "handshake.access_token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.connectionId",
+      "rule": "secret"
+    },
+    {
+      "where": "$.connectionDetails.connectionKey",
+      "rule": "secret"
+    },
+    {
+      "where": "$.connectionDetails.serverId",
+      "rule": "secret"
+    },
+    {
+      "where": "$.messages[*].data..userID, ..*UserID",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..displayName, ..openID",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..picture",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..userInfo.name",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data (names in any text)",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data[type not 3, 5, 38]",
+      "rule": "dropped"
+    },
+    {
+      "where": "handshake.resume",
+      "rule": "secret"
+    }
+  ],
+  "tool": "resume.dart (dart:io; messenger/auth, then one socket after another to the room; sends only ATTACH; a socket is dropped by destroying its TCP socket) and b14_scrub.py, M5.F; neither is in the repository",
+  "note": "Recorded 2026-09-30 15:21 UTC for M5.F (B-14), anonymous and direct, in the room 29790476, then the most watched of the Japanese recommendations (about 750 viewers): one token, five sockets one after another, each sending only an ATTACH. The probe drops sockets 1 to 4 after 20 s by destroying the TCP socket (a network break; the recorded close is 1006) and waits 10 s. Socket 2 resumes with the key of socket 1's CONNECTED and attaches from the last channelSerial with the ATTACH_RESUME flag (32): the same connection id, ATTACHED with RESUMED (786438) and first the 5 messages sent meanwhile. Socket 3 resumes with socket 2's key with its last four characters reversed: the server still took it for the same connection. Socket 4 sends no resume, only the serial: a new connection id, the channel RESUMED all the same with the 2 messages it missed. Socket 5 comes 145 s after socket 4 dropped (150 s after its last frame) with socket 4's key and serial: the same connection, but ATTACHED without RESUMED (786434) and with error 90003 (Unable to recover channel (messages expired)), then the backlog of about the last two minutes; the probe closes it with 1000 after 20 s. Every line has its socket number; mark lines are the probe's drop and close marks, not frames. The payloads of types other than comments (3), live figures (38) and the stream end (5) keep only their type. Every user (the streamer too) is synthetic (user N: id N-0000-4000-8000-N in hex, name 观众N, the avatar name of the same shape and case); names are replaced in any text too. The token, connection ids, connection keys (site prefix, connection id and rest mapped separately, so a resumed key still names the same synthetic connection) and server ids are synthetic values of the same shape and length. Frames are compact JSON rewritten field by field (each round-trips byte for byte), so what holds nothing scrubbed keeps its bytes. No IPv4 address anywhere."
+}

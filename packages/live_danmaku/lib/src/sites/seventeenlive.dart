@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io' show gzip;
 
@@ -72,20 +73,105 @@ final class SeventeenLiveAblyError {
   String toString() => '$code $message'.trim();
 }
 
+/// The connection a `CONNECTED` names ([SeventeenLiveDanmakuFrame.connection]):
+/// what a later socket resumes (Ably's `resume`, docs/modules/M5.29-17live.md,
+/// B-14).
+@immutable
+final class SeventeenLiveConnectionDetails {
+  /// Creates the details.
+  const new({
+    required this.id,
+    required this.key,
+    this.stateTtl = SeventeenLiveDanmakuProtocol.defaultConnectionStateTtl,
+    this.maxIdleInterval = SeventeenLiveDanmakuProtocol.heartbeatInterval,
+  });
+
+  /// `connectionId`: the same one after a resume means the connection went
+  /// on.
+  final String id;
+
+  /// `connectionDetails.connectionKey`: a socket's `resume` query parameter.
+  final String key;
+
+  /// `connectionDetails.connectionStateTtl`: how long the server keeps the
+  /// connection after the socket dropped.
+  final Duration stateTtl;
+
+  /// `connectionDetails.maxIdleInterval`: the server's heartbeat period.
+  final Duration maxIdleInterval;
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeventeenLiveConnectionDetails &&
+      other.id == id &&
+      other.key == key &&
+      other.stateTtl == stateTtl &&
+      other.maxIdleInterval == maxIdleInterval;
+
+  @override
+  int get hashCode => Object.hash(id, key, stateTtl, maxIdleInterval);
+}
+
+/// One Ably message of a `MESSAGE` frame, read
+/// ([SeventeenLiveDanmakuProtocol.entry]).
+@immutable
+final class SeventeenLiveEntry {
+  /// Creates the entry.
+  const new({this.id = '', this.messages = const [], this.muted, this.ended = false});
+
+  /// Ably's message id (or the frame's id and the index): a message the
+  /// server sends again after a resume has the same one.
+  final String id;
+
+  /// What it shows, in order: a comment's chat line, then a paid barrage's
+  /// super chat; the viewers now.
+  final List<LiveMessage> messages;
+
+  /// The live figures' (38) `liveinfo.mute`, when it is a boolean.
+  final bool? muted;
+
+  /// A stream end (`LIVE_STREAM_END`, 5).
+  final bool ended;
+}
+
 /// What one 17LIVE chat frame held ([SeventeenLiveDanmakuProtocol.decode]).
 @immutable
 final class SeventeenLiveDanmakuFrame {
   /// Creates the result.
-  const new({this.signal = SeventeenLiveSignal.none, this.error, this.messages = const []});
+  const new({
+    this.signal = SeventeenLiveSignal.none,
+    this.error,
+    this.entries = const [],
+    this.connection,
+    this.channelSerial,
+    this.resumed = false,
+  });
 
   /// What the frame asks of the connection.
   final SeventeenLiveSignal signal;
 
-  /// The error a `DISCONNECTED`, `DETACHED` or `ERROR` carried, or null.
+  /// The error a `DISCONNECTED`, `DETACHED` or `ERROR` carried, or that a
+  /// `CONNECTED` (a resume that failed: 80018 an invalid key) or an
+  /// `ATTACHED` (90003: the channel's messages since the serial expired)
+  /// came with; null otherwise.
   final SeventeenLiveAblyError? error;
 
-  /// Chat and audience figures of a `MESSAGE`, in order.
-  final List<LiveMessage> messages;
+  /// The Ably messages of a `MESSAGE`, in order.
+  final List<SeventeenLiveEntry> entries;
+
+  /// Chat, super chats and audience figures of a `MESSAGE`, in order.
+  List<LiveMessage> get messages => [for (final entry in entries) ...entry.messages];
+
+  /// A `CONNECTED`'s connection, when it names its id and key.
+  final SeventeenLiveConnectionDetails? connection;
+
+  /// The room channel's `channelSerial` of an `ATTACHED`, `MESSAGE` or
+  /// `PRESENCE`: where an attach resumes from.
+  final String? channelSerial;
+
+  /// Whether an `ATTACHED` has the `RESUMED` flag: the channel went on from
+  /// the serial the attach gave, missing nothing.
+  final bool resumed;
 }
 
 /// `messenger/auth` answered with another push service than Ably: the chat
@@ -116,7 +202,13 @@ final class SeventeenLiveChatRefusal implements Exception {
 ///   every 15 s; the client sends none.
 /// - A `MESSAGE` (15) holds messages whose `data` is JSON, gzipped and
 ///   base64-encoded (the website's `gzip_base64`); its `type` is the
-///   website's message enum: 3 a comment, 38 the live figures ([message]).
+///   website's message enum: 3 a comment, 38 the live figures, 5 the stream
+///   end ([entry]).
+/// - A later socket resumes as ably-js 2.21.0 does (B-14): `resume` with
+///   the last `CONNECTED`'s key ([withToken]), and an `ATTACH` with the
+///   last `channelSerial` and the `ATTACH_RESUME` flag ([attach]); the
+///   server answers `ATTACHED` with `RESUMED` and sends the messages missed
+///   meanwhile.
 abstract final class SeventeenLiveDanmakuProtocol {
   /// The token source; the website's ably-js asks it in its `authCallback`.
   static final Uri authUrl = Uri.https(SeventeenLiveApi.apiHost, '/api/v1/messenger/auth');
@@ -173,8 +265,41 @@ abstract final class SeventeenLiveDanmakuProtocol {
   /// The live figures' type (`LIVE`): `liveinfo.liveViewerCount`.
   static const int liveType = 38;
 
+  /// The stream end's type (`LIVE_STREAM_END`): the website leaves the
+  /// channel.
+  static const int streamEndType = 5;
+
+  /// How long the server keeps a dropped connection when `CONNECTED` does
+  /// not say (`connectionStateTtl`, 120 000 ms in every recording and in
+  /// ably-js's defaults).
+  static const Duration defaultConnectionStateTtl = Duration(seconds: 120);
+
+  /// `ATTACH`'s `ATTACH_RESUME` flag: the channel was attached before.
+  static const int attachResumeFlag = 32;
+
+  /// `ATTACHED`'s `RESUMED` flag.
+  static const int resumedFlag = 4;
+
+  /// How long a paid barrage stays a super chat: the website flies it once
+  /// over the player, 1 px a frame from the right edge until it leaves the
+  /// left one (`7953` chunk, `KV`): (player width + barrage width) / 60 s,
+  /// about 20 s for a 900 px player and a 300 px barrage.
+  static const Duration superChatDuration = Duration(seconds: 20);
+
+  /// The notice when the live figures' `liveinfo.mute` turns true: the
+  /// streamer paused the stream, which then shows a still picture without
+  /// sound (measured 2026-09-30; viewers can still write). The website shows
+  /// nothing for it.
+  static const String mutedNotice = '主播暂停了直播（画面静止、没有声音）';
+
+  /// The notice when it turns false again.
+  static const String unmutedNotice = '主播恢复了直播';
+
   /// Largest time [DateTime] can hold, in milliseconds.
   static const int _maxMillis = 8640000000000000;
+
+  /// Largest `connectionStateTtl` or `maxIdleInterval` taken: a day.
+  static const int _maxDetailMillis = 86400000;
 
   static final RegExp _token = RegExp('^[\\x21-\\x7e]{1,$maxTokenLength}\$');
   static final RegExp _hexColor = RegExp(r'^(?:[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$');
@@ -216,12 +341,21 @@ abstract final class SeventeenLiveDanmakuProtocol {
     return token;
   }
 
-  /// [endpoint] with the `access_token` [token] first, as ably-js orders it.
-  static Uri withToken(Uri endpoint, String token) =>
-      endpoint.replace(queryParameters: {'access_token': token, ...endpoint.queryParameters});
+  /// [endpoint] with the `access_token` [token] first, as ably-js orders it,
+  /// and with a [resume] key the `resume` of the connection it names (B-14).
+  static Uri withToken(Uri endpoint, String token, {String? resume}) =>
+      endpoint.replace(queryParameters: {'access_token': token, 'resume': ?resume, ...endpoint.queryParameters});
 
-  /// The `ATTACH` (10) of the channel [roomId], as the recordings sent it.
-  static String attach(String roomId) => jsonEncode({'action': 10, 'channel': roomId});
+  /// The `ATTACH` (10) of the channel [roomId]: as the recordings sent it,
+  /// or, for a channel attached before ([resume]), with ably-js's
+  /// `ATTACH_RESUME` flag and the last [channelSerial], from which the
+  /// server sends what was missed (B-14).
+  static String attach(String roomId, {String? channelSerial, bool resume = false}) => jsonEncode({
+    'action': 10,
+    'channel': roomId,
+    'channelSerial': ?channelSerial,
+    if (resume) 'flags': attachResumeFlag,
+  });
 
   /// The `AUTH` (17) answering a server's request with [token] (ably-js's
   /// in-place reauthorisation).
@@ -235,19 +369,26 @@ abstract final class SeventeenLiveDanmakuProtocol {
   /// protocol message, named by `action`:
   ///
   /// - 4 `CONNECTED`, 6 `DISCONNECTED`, 17 `AUTH`: [SeventeenLiveSignal]'s
-  ///   `connected`, `disconnected` (with its `error`), `reauthorize`;
+  ///   `connected` (with its connection id, key and times, and the error of
+  ///   a resume that failed), `disconnected` (with its `error`),
+  ///   `reauthorize`;
   /// - 9 `ERROR`: of the room's channel when it names it
   ///   ([SeventeenLiveSignal.channelError]), of the connection when it names
   ///   none ([SeventeenLiveSignal.connectionError]);
-  /// - 11 `ATTACHED`, 13 `DETACHED` of the room's channel;
-  /// - 15 `MESSAGE` of the room's channel: its `messages` ([message]); a
-  ///   message's id is its `id`, or the frame's `id` and its index (Ably's
-  ///   rule for messages without one).
+  /// - 11 `ATTACHED` (its `channelSerial`, the `RESUMED` flag and an
+  ///   error), 13 `DETACHED` of the room's channel;
+  /// - 15 `MESSAGE` of the room's channel: its `channelSerial` and its
+  ///   `messages` ([entry]); a message's id is its `id`, or the frame's `id`
+  ///   and its index (Ably's rule for messages without one). A comment
+  ///   without its own time gets [now] (default: the current time) as its
+  ///   super chat's start;
+  /// - 14 `PRESENCE` of the room's channel: its `channelSerial` only (ably-js
+  ///   keeps it as the channel's).
   ///
   /// Anything else (the heartbeat 0, a presence `SYNC` 16, another
   /// channel, a frame that is not a JSON object) holds nothing. A field of
   /// the wrong type costs only that field or that message.
-  static SeventeenLiveDanmakuFrame decode(Object? data, {required String roomId}) {
+  static SeventeenLiveDanmakuFrame decode(Object? data, {required String roomId, DateTime? now}) {
     final text = switch (data) {
       final String text => text,
       final List<int> bytes => utf8.decode(bytes, allowMalformed: true),
@@ -264,8 +405,16 @@ abstract final class SeventeenLiveDanmakuProtocol {
     final channel = root['channel'];
     final ours = channel == roomId;
     final error = _error(root['error']);
+    final serial = switch (root['channelSerial']) {
+      final String serial when serial.isNotEmpty => serial,
+      _ => null,
+    };
     return switch (root['action']) {
-      4 => const SeventeenLiveDanmakuFrame(signal: SeventeenLiveSignal.connected),
+      4 => SeventeenLiveDanmakuFrame(
+        signal: SeventeenLiveSignal.connected,
+        error: error,
+        connection: _connection(root),
+      ),
       6 => SeventeenLiveDanmakuFrame(signal: SeventeenLiveSignal.disconnected, error: error),
       9 when channel == null => SeventeenLiveDanmakuFrame(
         signal: SeventeenLiveSignal.connectionError,
@@ -275,12 +424,37 @@ abstract final class SeventeenLiveDanmakuProtocol {
         signal: SeventeenLiveSignal.channelError,
         error: error ?? const SeventeenLiveAblyError(code: 0),
       ),
-      11 when ours => const SeventeenLiveDanmakuFrame(signal: SeventeenLiveSignal.attached),
+      11 when ours => SeventeenLiveDanmakuFrame(
+        signal: SeventeenLiveSignal.attached,
+        error: error,
+        channelSerial: serial,
+        resumed: switch (root['flags']) {
+          final int flags => (flags & resumedFlag) != 0,
+          _ => false,
+        },
+      ),
       13 when ours => SeventeenLiveDanmakuFrame(signal: SeventeenLiveSignal.detached, error: error),
-      15 when ours => SeventeenLiveDanmakuFrame(messages: _messages(root)),
+      14 when ours => SeventeenLiveDanmakuFrame(channelSerial: serial),
+      15 when ours => SeventeenLiveDanmakuFrame(entries: _entries(root, now ?? DateTime.now()), channelSerial: serial),
       17 => const SeventeenLiveDanmakuFrame(signal: SeventeenLiveSignal.reauthorize),
       _ => const SeventeenLiveDanmakuFrame(),
     };
+  }
+
+  static SeventeenLiveConnectionDetails? _connection(Map<Object?, Object?> root) {
+    final id = root['connectionId'];
+    final details = root['connectionDetails'];
+    if (id is! String || id.isEmpty || details is! Map) return null;
+    final key = details['connectionKey'];
+    if (key is! String || key.isEmpty) return null;
+    Duration? millis(Object? value) =>
+        value is int && value > 0 && value <= _maxDetailMillis ? Duration(milliseconds: value) : null;
+    return SeventeenLiveConnectionDetails(
+      id: id,
+      key: key,
+      stateTtl: millis(details['connectionStateTtl']) ?? defaultConnectionStateTtl,
+      maxIdleInterval: millis(details['maxIdleInterval']) ?? heartbeatInterval,
+    );
   }
 
   static SeventeenLiveAblyError? _error(Object? value) {
@@ -295,7 +469,7 @@ abstract final class SeventeenLiveDanmakuProtocol {
     );
   }
 
-  static List<LiveMessage> _messages(Map<Object?, Object?> root) {
+  static List<SeventeenLiveEntry> _entries(Map<Object?, Object?> root, DateTime now) {
     final messages = root['messages'];
     if (messages is! List) return const [];
     final frameId = root['id'];
@@ -303,15 +477,123 @@ abstract final class SeventeenLiveDanmakuProtocol {
       for (final (index, item) in messages.indexed)
         if (item is Map)
           if (payload(item['data']) case final decoded?)
-            ?message(
+            entry(
               decoded,
               id: switch (item['id']) {
                 final String id when id.isNotEmpty => id,
                 _ => frameId is String && frameId.isNotEmpty ? '$frameId:$index' : '',
               },
+              now: now,
             ),
     ];
   }
+
+  /// A decoded [payload] with the Ably message [id] (B-14):
+  ///
+  /// - a comment: its chat line ([message]), then, for a paid barrage, its
+  ///   super chat ([superChat]), which starts at [now] when the comment has
+  ///   no time of its own;
+  /// - the live figures: the viewers now ([message]) and `liveinfo.mute`
+  ///   when it is a boolean;
+  /// - the stream end ([streamEndType]): [SeventeenLiveEntry.ended];
+  /// - anything else: nothing.
+  static SeventeenLiveEntry entry(Map<Object?, Object?> payload, {String id = '', DateTime? now}) {
+    final shown = message(payload, id: id);
+    return switch (payload['type']) {
+      commentType => SeventeenLiveEntry(
+        id: id,
+        messages: [
+          ?shown,
+          ?superChat(payload, id: id, now: now),
+        ],
+      ),
+      liveType => SeventeenLiveEntry(
+        id: id,
+        messages: [?shown],
+        muted: switch (payload['liveinfo']) {
+          {'mute': final bool muted} => muted,
+          _ => null,
+        },
+      ),
+      streamEndType => SeventeenLiveEntry(id: id, ended: true),
+      _ => SeventeenLiveEntry(id: id),
+    };
+  }
+
+  /// The super chat of a paid barrage (B-14): a comment the website shows
+  /// ([message]) whose `barrageStyle` is true and whose `barrage.point`, the
+  /// baby coins it cost, is above zero. The website flies such a comment
+  /// over the player besides its chat line; the ones that cost no coins
+  /// (`point` 0: the platform's army and welcome lines, type 5, the
+  /// streamer assistant's, type 4, and barrages from the sender's stock,
+  /// with a `count`) stay chat only. Null for anything else.
+  ///
+  /// - The text is what the website flies: `comment.text` with line breaks
+  ///   as spaces, trimmed (`content` without it); the name, user id and
+  ///   message id are the chat line's.
+  /// - [LiveSuperChatMessage.price] is the point, [LiveSuperChatMessage.priceText]
+  ///   the website's `{point} coins` (`barrage_send_point` in English and
+  ///   Japanese).
+  /// - It starts at `sendTime` ([now], default the current time, without
+  ///   one) and lasts [superChatDuration].
+  /// - Both colours are the comment's own `backgroundColor`, the background
+  ///   the website paints its chat line with (`#AARRGGBB`, given as
+  ///   `#RRGGBB`; empty when it has none that reads, [backgroundColor]).
+  /// - The face is the sender's `picture` as the website shows it
+  ///   (`https://cdn.17app.co/THUMBNAIL_<file>`, or its own URL on the
+  ///   platform's hosts; `SeventeenLiveApi.image`).
+  static LiveMessage? superChat(Map<Object?, Object?> payload, {String id = '', DateTime? now}) {
+    if (payload['type'] != commentType) return null;
+    final chat = message(payload, id: id);
+    final comment = payload['commentMsg'];
+    if (chat == null || comment is! Map) return null;
+    final barrage = comment['barrage'];
+    final point = barrage is Map ? barrage['point'] : null;
+    if (comment['barrageStyle'] != true || point is! int || point <= 0) return null;
+    final body = comment['comment'];
+    var text = (body is Map ? _string(body['text']) : '').replaceAll('\n', ' ').trim();
+    if (text.isEmpty) text = chat.message;
+    final fill = backgroundColor(comment['backgroundColor']);
+    final user = comment['displayUser'];
+    final picture = user is Map ? _string(user['picture']) : '';
+    final start = chat.sentAt ?? now ?? DateTime.now();
+    return LiveMessage(
+      type: LiveMessageType.superChat,
+      userName: chat.userName,
+      userId: chat.userId,
+      message: text,
+      color: LiveMessageColor.white,
+      messageId: id,
+      sentAt: chat.sentAt,
+      data: LiveSuperChatMessage(
+        messageId: id,
+        userName: chat.userName,
+        face: picture.isEmpty
+            ? ''
+            : SeventeenLiveApi.image(
+                picture.startsWith('http://') || picture.startsWith('https://') ? picture : 'THUMBNAIL_$picture',
+              ),
+        message: text,
+        price: point,
+        priceText: '$point coins',
+        startTime: start,
+        endTime: start.add(superChatDuration),
+        backgroundColor: fill,
+        backgroundBottomColor: fill,
+      ),
+    );
+  }
+
+  /// The system notice of the live figures' `liveinfo.mute` turning [muted]
+  /// (B-14: [mutedNotice], [unmutedNotice]), with the Ably message [id].
+  static LiveMessage muteNotice({required bool muted, String id = ''}) => LiveMessage(
+    type: LiveMessageType.notice,
+    userName: '',
+    message: muted ? mutedNotice : unmutedNotice,
+    color: LiveMessageColor.white,
+    messageId: id,
+    data: LiveNoticeKind.system,
+  );
 
   /// A message's `data`: base64 of gzipped UTF-8 JSON, as the website reads
   /// it (`gzip_base64`); null when it is not that or not a JSON object.
@@ -336,8 +618,8 @@ abstract final class SeventeenLiveDanmakuProtocol {
   ///   `displayUser.userID`, the level `displayUser.level` (`commentMsg`'s
   ///   without one), the colour `comment.textColor` ([color]) and the time
   ///   `sendTime` (milliseconds; not above zero or beyond [DateTime]: none).
-  ///   A barrage (a paid comment that also flies over the video on the
-  ///   website) is chat as well.
+  ///   A barrage (a comment that also flies over the video on the website)
+  ///   is chat as well; a paid one also has a super chat ([superChat]).
   /// - The live figures ([liveType]) carry `liveinfo.liveViewerCount`, the
   ///   viewers now, which the website shows: an audience update.
   static LiveMessage? message(Map<Object?, Object?> payload, {String id = ''}) {
@@ -393,6 +675,16 @@ abstract final class SeventeenLiveDanmakuProtocol {
     return LiveMessageColor.numberToColor(int.parse(hex.substring(hex.length - 6), radix: 16));
   }
 
+  /// A comment's `backgroundColor` as `#RRGGBB` (upper case; the alpha of
+  /// `#AARRGGBB` dropped, the `#` optional), or empty for anything else.
+  static String backgroundColor(Object? value) {
+    if (value is! String) return '';
+    var hex = value.trim();
+    if (hex.startsWith('#')) hex = hex.substring(1);
+    if (!_hexColor.hasMatch(hex)) return '';
+    return '#${hex.substring(hex.length - 6).toUpperCase()}';
+  }
+
   static int? _level(Object? value) => value is int && value > 0 ? value : null;
 
   static String _string(Object? value) => value is String ? value : '';
@@ -410,6 +702,18 @@ abstract final class SeventeenLiveDanmakuProtocol {
 ///   hosts, rotated on failure. At `CONNECTED` the room's channel is
 ///   attached; `ATTACHED` joins it, and an attach unanswered for 10 s drops
 ///   the socket.
+/// - A later socket of the run resumes as ably-js does (B-14): its
+///   handshake has `resume` with the last `CONNECTED`'s key, and its
+///   `ATTACH` the last `channelSerial` and the `ATTACH_RESUME` flag, so the
+///   server sends the messages missed meanwhile. A resume that fails (a new
+///   connection id, 80018) or a channel that cannot go on from the serial
+///   (90003) is attached all the same and shows what the server sends. A
+///   message whose Ably id was already reported in the run is not reported
+///   again. After more than `connectionStateTtl` + `maxIdleInterval` (135 s)
+///   without a frame the key and the serial are forgotten, as ably-js
+///   forgets a stale connection, and the next socket starts afresh; an
+///   attach unanswered in time forgets the serial (ably-js suspends the
+///   channel).
 /// - The server sends heartbeats every 15 s and the client none; a socket
 ///   silent for 25 s is replaced.
 /// - A token error (`ERROR` or `DISCONNECTED`, 40140 to 40149) drops the
@@ -419,9 +723,15 @@ abstract final class SeventeenLiveDanmakuProtocol {
 ///   a channel `ERROR` ends it as well (ably-js fails the connection or the
 ///   channel); another `DISCONNECTED` reconnects.
 /// - A server-sent `DETACHED` attaches the channel again on the same
-///   socket; a second one before it is attached, or no answer within 10 s,
-///   drops the socket. It counts as a refusal like a token error. A
-///   server-sent `AUTH` asks a new token and sends it on the same socket.
+///   socket, from the last serial; a second one before it is attached, or no
+///   answer within 10 s, drops the socket. It counts as a refusal like a
+///   token error. A server-sent `AUTH` asks a new token and sends it on the
+///   same socket.
+/// - The stream end (5) ends the run with [DanmakuCloseReason.connectionFailed]
+///   (`Broadcast ended`), as the website leaves the channel then (B-14). The
+///   live figures' `liveinfo.mute` turning true (the streamer paused the
+///   stream), or false again after that, is a system notice
+///   ([SeventeenLiveDanmakuProtocol.muteNotice]).
 ///
 /// [SeventeenLiveDanmakuArgs.roomId] is the channel. The app registers it
 /// as `SiteIds.seventeenLive: () => SeventeenLiveDanmakuConnection(http: …,
@@ -429,14 +739,19 @@ abstract final class SeventeenLiveDanmakuProtocol {
 /// proxy policy.
 final class SeventeenLiveDanmakuConnection extends DanmakuSocketConnection<SeventeenLiveDanmakuArgs> {
   /// Creates the connection. [http] asks `messenger/auth` for tokens;
-  /// [proxy] routes the socket; [connector] replaces `dart:io`'s handshake
-  /// and [policy] the timing (tests).
+  /// [proxy] routes the socket; [connector] replaces `dart:io`'s handshake,
+  /// [policy] the timing and [now] the clock (tests).
   factory({
     required LiveHttp http,
     ProxyPolicy proxy = const FixedProxyPolicy(),
     SocketConnector? connector,
     DanmakuSocketPolicy policy = defaultPolicy,
-  }) => SeventeenLiveDanmakuConnection._(_Handshake(http, connector ?? connectIoSocket), proxy: proxy, policy: policy);
+    DateTime Function()? now,
+  }) => SeventeenLiveDanmakuConnection._(
+    _Handshake(http, connector ?? connectIoSocket, now ?? DateTime.now),
+    proxy: proxy,
+    policy: policy,
+  );
 
   new _(this._handshake, {required super.proxy, required super.policy})
     : super(site: SiteIds.seventeenLive, connector: _handshake.call);
@@ -449,6 +764,9 @@ final class SeventeenLiveDanmakuConnection extends DanmakuSocketConnection<Seven
     inactivityTimeout: SeventeenLiveDanmakuProtocol.inactivityTimeout,
     joinTimeout: SeventeenLiveDanmakuProtocol.joinTimeout,
   );
+
+  /// The detail of the run's end at the stream end.
+  static const String broadcastEnded = 'Broadcast ended';
 
   static final DanmakuSocketTarget _target = DanmakuSocketTarget(
     endpoints: SeventeenLiveDanmakuProtocol.endpoints,
@@ -486,15 +804,21 @@ final class SeventeenLiveDanmakuConnection extends DanmakuSocketConnection<Seven
   void onData(DanmakuSocketSession session, Object? data) {
     final chat = _of(session);
     if (chat == null) return;
-    final frame = SeventeenLiveDanmakuProtocol.decode(data, roomId: chat.roomId);
+    final now = _handshake.now();
+    chat.lastActivity = now;
+    final frame = SeventeenLiveDanmakuProtocol.decode(data, roomId: chat.roomId, now: now);
+    if (frame.channelSerial case final serial?) chat.channelSerial = serial;
     switch (frame.signal) {
       case SeventeenLiveSignal.none:
         break;
       case SeventeenLiveSignal.connected:
-        session.send(SeventeenLiveDanmakuProtocol.attach(chat.roomId));
+        if (frame.connection case final connection?) chat.connection = connection;
+        _attach(session, chat);
       case SeventeenLiveSignal.attached:
         chat
           ..refusals = 0
+          ..attachPending = false
+          ..attachedBefore = true
           ..reattaching = false
           ..reattachWatch?.cancel();
         if (session.isConnected) {
@@ -522,16 +846,48 @@ final class SeventeenLiveDanmakuConnection extends DanmakuSocketConnection<Seven
       case SeventeenLiveSignal.reauthorize:
         unawaited(_reauthorize(session, chat));
     }
-    for (final message in frame.messages) {
+    for (final entry in frame.entries) {
       if (!session.isActive) return;
-      session.message(message);
+      // A message sent again after a resume, or twice: reported once.
+      if (entry.id.isNotEmpty && !chat.firstSight(entry.id)) continue;
+      for (final message in entry.messages) {
+        if (!session.isActive) return;
+        session.message(message);
+      }
+      if (entry.muted case final muted?) {
+        if (chat.muteNotice(muted: muted, id: entry.id) case final notice?) session.message(notice);
+      }
+      if (entry.ended) {
+        session.run.closed(DanmakuCloseReason.connectionFailed, detail: broadcastEnded);
+        return;
+      }
     }
+  }
+
+  /// Attaches the room's channel: after an earlier attach of the run, from
+  /// the last serial with the `ATTACH_RESUME` flag (ably-js).
+  void _attach(DanmakuSocketSession session, _Chat chat) {
+    chat.attachPending = true;
+    session.send(
+      SeventeenLiveDanmakuProtocol.attach(chat.roomId, channelSerial: chat.channelSerial, resume: chat.attachedBefore),
+    );
+  }
+
+  /// The attach went unanswered (or the socket never said `CONNECTED`):
+  /// a new socket. An attach sent and not answered forgets the serial, as
+  /// ably-js suspends the channel.
+  @override
+  @protected
+  void onJoinTimeout(DanmakuSocketSession session) {
+    final chat = _of(session);
+    if (chat != null && chat.attachPending) chat.channelSerial = null;
+    super.onJoinTimeout(session);
   }
 
   /// The server detached the channel: attach it again on this socket, as
   /// ably-js does; a detach while that attach is pending, or no answer
-  /// within the join limit, drops the socket. A detach is a refusal: one
-  /// too many ends the run.
+  /// within the join limit, drops the socket and the serial. A detach is a
+  /// refusal: one too many ends the run.
   void _detached(DanmakuSocketSession session, _Chat chat, SeventeenLiveAblyError? error) {
     if (++chat.refusals > SeventeenLiveDanmakuProtocol.maxRefusals) {
       session.run.closed(
@@ -541,15 +897,19 @@ final class SeventeenLiveDanmakuConnection extends DanmakuSocketConnection<Seven
       return;
     }
     if (chat.reattaching) {
+      chat.channelSerial = null;
       session.reconnect();
       return;
     }
     chat.reattaching = true;
     final sockets = chat.sockets;
     chat.reattachWatch = Timer(policy.joinTimeout ?? SeventeenLiveDanmakuProtocol.joinTimeout, () {
-      if (session.isActive && chat.reattaching && chat.sockets == sockets) session.reconnect();
+      if (session.isActive && chat.reattaching && chat.sockets == sockets) {
+        chat.channelSerial = null;
+        session.reconnect();
+      }
     });
-    session.send(SeventeenLiveDanmakuProtocol.attach(chat.roomId));
+    _attach(session, chat);
   }
 
   /// The server refused the token: drop it (the next handshake asks a new
@@ -588,12 +948,16 @@ final class SeventeenLiveDanmakuConnection extends DanmakuSocketConnection<Seven
 
 /// The handshake of a [SeventeenLiveDanmakuConnection]: asks
 /// `messenger/auth` for a token first when the run has none, then connects
-/// with it. A failed handshake's message has the token blanked out.
+/// with it, resuming the run's connection while it is fresh (B-14). A
+/// failed handshake's message has the token and the key blanked out.
 final class _Handshake {
-  new(this._http, this._connect);
+  new(this._http, this._connect, this.now);
 
   final LiveHttp _http;
   final SocketConnector _connect;
+
+  /// The clock.
+  final DateTime Function() now;
 
   /// The current run's chat.
   _Chat? chat;
@@ -608,18 +972,21 @@ final class _Handshake {
     final chat = this.chat;
     if (chat == null || !chat.run.isActive) throw StateError('The chat was closed');
     final token = chat.token ?? await renew(chat, timeout: connectTimeout);
+    final resume = chat.resumeKey(now());
     try {
       return await _connect(
-        SeventeenLiveDanmakuProtocol.withToken(endpoint, token),
+        SeventeenLiveDanmakuProtocol.withToken(endpoint, token, resume: resume),
         headers: headers,
         protocols: protocols,
         route: route,
         connectTimeout: connectTimeout,
       );
     } on Object catch (error) {
-      throw _HandshakeFailure(
-        '$error'.replaceAll(Uri.encodeQueryComponent(token), '<token>').replaceAll(token, '<token>'),
-      );
+      var message = '$error';
+      for (final (secret, mark) in [(token, '<token>'), if (resume != null) (resume, '<key>')]) {
+        message = message.replaceAll(Uri.encodeQueryComponent(secret), mark).replaceAll(secret, mark);
+      }
+      throw _HandshakeFailure(message);
     }
   }
 
@@ -649,11 +1016,15 @@ final class _HandshakeFailure implements Exception {
   String toString() => message;
 }
 
-/// One run's chat: the room, its token and the state of the current socket.
+/// One run's chat: the room, its token, what a later socket resumes and the
+/// state of the current socket.
 final class _Chat {
   new(this.run, this.roomId) {
     unawaited(run.ended.then((_) => dispose()));
   }
+
+  /// Ably message ids remembered to report each message once.
+  static const int maxSeen = 4096;
 
   final DanmakuRun run;
 
@@ -663,6 +1034,26 @@ final class _Chat {
 
   /// The token of the next handshake; null asks a new one.
   String? token;
+
+  /// The last `CONNECTED`'s connection: what the next socket resumes.
+  SeventeenLiveConnectionDetails? connection;
+
+  /// The room channel's last serial: where the next attach resumes from.
+  String? channelSerial;
+
+  /// When the last frame came.
+  DateTime? lastActivity;
+
+  /// Whether the channel was attached in this run (`ATTACH_RESUME`).
+  bool attachedBefore = false;
+
+  /// Whether an attach of the current socket awaits its `ATTACHED`.
+  bool attachPending = false;
+
+  /// The live figures' last `liveinfo.mute`, or null before the first.
+  bool? muted;
+
+  final LinkedHashSet<String> _seen = LinkedHashSet();
 
   /// Token refusals and detaches since the channel was last attached.
   int refusals = 0;
@@ -676,8 +1067,41 @@ final class _Chat {
   /// The limit of that attach.
   Timer? reattachWatch;
 
+  /// The key the next handshake resumes at [now], or null. A connection
+  /// silent for longer than its `connectionStateTtl` + `maxIdleInterval` is
+  /// forgotten with the channel's serial, as ably-js discards stale state
+  /// and suspends the channel.
+  String? resumeKey(DateTime now) {
+    final connection = this.connection;
+    final last = lastActivity;
+    if (connection == null || last == null) return null;
+    if (now.difference(last) > connection.stateTtl + connection.maxIdleInterval) {
+      this.connection = null;
+      channelSerial = null;
+      return null;
+    }
+    return connection.key;
+  }
+
+  /// Whether the message [id] is new in this run; remembers it.
+  bool firstSight(String id) {
+    if (!_seen.add(id)) return false;
+    if (_seen.length > maxSeen) _seen.remove(_seen.first);
+    return true;
+  }
+
+  /// The notice for the live figures' `liveinfo.mute` being [muted], or null
+  /// when it did not change (or is false the first time).
+  LiveMessage? muteNotice({required bool muted, required String id}) {
+    final before = this.muted;
+    this.muted = muted;
+    if (before == muted || (before == null && !muted)) return null;
+    return SeventeenLiveDanmakuProtocol.muteNotice(muted: muted, id: id);
+  }
+
   /// A new socket: nothing attached, no attach pending.
   void socketReset() {
+    attachPending = false;
     reattaching = false;
     reattachWatch?.cancel();
     reattachWatch = null;

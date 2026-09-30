@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "platform": "17live",
+  "case": "S10-events",
+  "room": "17live:26541295,7433403,189603,8026961,29648148,14786082,29802206",
+  "danmakuKeys": {
+    "roomId": "each line has its room"
+  },
+  "capturedAt": "2026-09-30T15:21:20Z",
+  "route": "direct",
+  "handshakes": [],
+  "frames": 11,
+  "raw": [
+    {
+      "sha256": "022f9eef08331288dbc83f4a9bbb9f3b6d84f8c27bf93e634bc7c92ea8161a14",
+      "length": 592111
+    },
+    {
+      "sha256": "cb3056c59bc024d3164db808f74deda6ed3285bad2a72d493ffebcc7cde00c8d",
+      "length": 717646
+    }
+  ],
+  "scrubbed": [
+    {
+      "where": "$.messages[*].data..userID, ..*UserID",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..displayName, ..openID",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..picture",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..userInfo.name",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data (names in any text)",
+      "rule": "person"
+    }
+  ],
+  "tool": "scan.dart (dart:io; messenger/auth, then one socket attaching the channels of 100 (and, in the second scan, 150) live rooms of the JP, TW and HK sections; sends only ATTACH; keeps the frames of stream ends, barrages and liveinfo.mute changes) and b14_scrub.py, M5.F; neither is in the repository",
+  "note": "Frames picked from two read-only scans of 2026-09-30 for M5.F (B-14), anonymous and direct: one socket attached the channels of the 100 most watched live rooms of the JP, TW and HK recommendations for 45 minutes (15:21 to 16:06 UTC), another those of the next 150 for 60 minutes (15:55 to 16:55 UTC); each sent only ATTACH frames and kept only the frames of stream ends, barrages and liveinfo.mute changes. Each line has its room (the channel); t is the time since the start of its scan. Kept: the only paid barrage seen (barrageStyle, barrage type 1 ノーマル, point 79, backgroundColor #B3F518CC); barrages that fly as well but cost no coins: from the sender's stock, types 14 (count 148) and 12 (count 34), an army line (type 5, isInfinite) and a streamer assistant's line (type 4, 場控彈幕, isInfinite); two stream ends (LIVE_STREAM_END, closeBy normalEnd); in the room 29802206 the start of a mute (a LIVE of liveinfo type 0 with mute true and every figure 0), two viewers' comments written while it lasted (78 s) and its end (type 0, mute false). Users scrubbed as in S08-resume (the streamer of the army line too, also in its text)."
+}

@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "platform": "missevan",
+  "case": "S09-events",
+  "rooms": [
+    "missevan:134922686",
+    "missevan:134929597",
+    "missevan:138394231",
+    "missevan:258058950",
+    "missevan:869048238",
+    "missevan:869111077",
+    "missevan:869132267"
+  ],
+  "batches": {
+    "1": {
+      "capturedAt": "2026-09-30T15:14:25Z",
+      "seconds": 900,
+      "rooms": 30
+    },
+    "2": {
+      "capturedAt": "2026-09-30T15:26:41Z",
+      "seconds": 840,
+      "rooms": 30
+    }
+  },
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://im.missevan.com/ws?room_id=<room>",
+      "headers": {
+        "referer": "https://fm.missevan.com/",
+        "origin": "https://fm.missevan.com",
+        "user-agent": "Mozilla/5.0",
+        "cookie": "<redacted>"
+      }
+    }
+  ],
+  "frames": 26,
+  "kinds": [
+    "question/answer",
+    "message/new",
+    "question/ask",
+    "message/new",
+    "gift/send",
+    "global_pk/finish",
+    "pk/finish",
+    "pk/punish_finish",
+    "pk/close",
+    "pk/match_start",
+    "pk/match_success",
+    "pk/update",
+    "pk/update",
+    "global_pk/update",
+    "global_pk/finish",
+    "global_pk/match_ready",
+    "gift/send",
+    "gift/send",
+    "gift/send",
+    "super_fan/renewal",
+    "global_pk/match_skip",
+    "global_pk/match_start",
+    "global_pk/match_success",
+    "global_pk/finish",
+    "gift/cross_send",
+    "noble/renewal"
+  ],
+  "raw": {
+    "sha256": "a19324087185bbc8fd19780a76bed75c434539f22b0be745236f52559726bd12",
+    "length": 21835
+  },
+  "scrubbed": [
+    {
+      "where": "$..user_id",
+      "rule": "person"
+    },
+    {
+      "where": "$..creator_id",
+      "rule": "person"
+    },
+    {
+      "where": "$..username",
+      "rule": "person"
+    },
+    {
+      "where": "$..creator_username",
+      "rule": "person"
+    },
+    {
+      "where": "$..creator_name",
+      "rule": "person"
+    },
+    {
+      "where": "$..iconurl",
+      "rule": "secret"
+    },
+    {
+      "where": "$..creator_iconurl",
+      "rule": "secret"
+    },
+    {
+      "where": "the same names inside any text (message_tip, chat)",
+      "rule": "person"
+    },
+    {
+      "where": "handshake.cookie",
+      "rule": "secret"
+    }
+  ],
+  "reencoded": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25
+  ],
+  "tool": "record_many.dart (dart:io WebSockets to the 30 first rooms of chatroom/open/list, one anonymous guest session, the join and a heartbeat every 30 s; nothing else sent) and make_s09.py (python3-brotli 1.2.0), M5.F; neither is in the repository",
+  "note": "Recorded 2026-09-30 (23:14 and 23:26 Beijing time) for M5.F B-9: frames picked from 10 room sessions (7 rooms) of two batches, each line naming its batch and room (`t` is milliseconds since that socket opened): paid questions (question/ask, question/answer), a random PK from matching to its end with the 花神赐福 lines (pk/*), 幻影 PK from ready to finish (global_pk/*), gifts (a combo, a lucky gift, a gift to another room of a team live), a noble title renewed, a super fan renewal and chat lines around them. Every frame was decoded, scrubbed (ids to other digits of the same length, names to 观众N also inside text, avatar paths to same-shape letters after the host and first directory; the platform account PK小助手 kept) and encoded again with the reference encoder at the window the server declared. No noble registration nor admin/message_clear was seen in the 60 room sessions; those are synthetic in the tests."
+}

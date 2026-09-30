@@ -1,7 +1,8 @@
 // Missevan danmaku (docs/modules/M5.12-missevan.md): the protocol and the
 // connection against the archived v4's output for the recorded sessions
 // (S06-live, S07-brotli) and the synthetic frames (S08-synthetic), written by
-// fixtures/missevan/danmaku/v4_expected.dart.
+// fixtures/missevan/danmaku/v4_expected.dart; the follow-ups of M5.F (B-1, B-9)
+// against the recorded S09-events and synthetic frames.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -71,6 +72,19 @@ Map<String, Object?> _asV4(LiveMessage message) {
         LiveAudienceMetricKind.totalViewers => 'cumulative',
       },
       'value': data.value,
+    };
+  }
+  if (message.data case final MissevanGift gift) {
+    // B-9: gifts are reported again, as v4 reported them.
+    return {
+      'kind': 'gift',
+      'sentAt': message.sentAt?.millisecondsSinceEpoch,
+      'userId': message.userId,
+      'userName': message.userName,
+      'giftId': gift.id,
+      'giftName': gift.name,
+      'count': gift.count,
+      'icon': gift.icon?.toString(),
     };
   }
   expect(message.type, LiveMessageType.chat);
@@ -188,8 +202,9 @@ final class _SessionHttp implements LiveHttp {
 
   final List<Object> answers;
 
-  /// Keeps every request pending until it completes.
-  final Completer<void>? hold;
+  /// Keeps every request pending until it completes; set later to hold only
+  /// the later requests.
+  Completer<void>? hold;
   final List<LiveRequest> requests = [];
 
   @override
@@ -247,10 +262,14 @@ final class _FakeChannel implements SocketChannel {
 
 /// Hands out fake channels and records every handshake.
 final class _Connector {
-  new({this.fail});
+  new({this.fail, this.failures = const []});
 
   /// Thrown for every handshake, with the endpoint.
   final Exception Function(Uri endpoint)? fail;
+
+  /// Thrown by the next handshakes, one each, in order (B-1); more can be
+  /// added later.
+  final List<Exception> failures;
   final List<Uri> endpoints = [];
   final List<Map<String, String>> headers = [];
   final List<ProxyRoute> routes = [];
@@ -268,14 +287,24 @@ final class _Connector {
     routes.add(route);
     final failure = fail;
     if (failure != null) throw failure(endpoint);
+    if (failures.isNotEmpty) throw failures.removeAt(0);
     final channel = _FakeChannel();
     channels.add(channel);
     return channel;
   }
 }
 
-MissevanDanmakuConnection _connection(_SessionHttp http, _Connector connector, {ProxyPolicy? proxy}) =>
-    MissevanDanmakuConnection(http: http, connector: connector.call, proxy: proxy ?? const FixedProxyPolicy());
+MissevanDanmakuConnection _connection(
+  _SessionHttp http,
+  _Connector connector, {
+  ProxyPolicy? proxy,
+  DateTime Function()? now,
+}) => MissevanDanmakuConnection(
+  http: http,
+  connector: connector.call,
+  proxy: proxy ?? const FixedProxyPolicy(),
+  now: now,
+);
 
 List<DanmakuEvent> _record(DanmakuConnection connection) {
   final events = <DanmakuEvent>[];
@@ -366,13 +395,12 @@ Future<void> _fastTimers(List<Duration> delays, Future<void> Function() body) =>
 /// The differences of the new decoder from v4 in the synthetic cases
 /// (docs/modules/M5.12-missevan.md, "与归档 v4 的差异"): v4's reading → the
 /// new one, per case. Cases not listed read as v4 read them.
+///
+/// Difference 2 (gifts not reported) is gone with B-9: gifts are reported
+/// again (not shown yet), and the two cases with a gift read as v4 read them.
+/// That case's paid question has the shape of the site's store (`content`),
+/// not the server's (`question`, S09-events), so it still shows nothing.
 final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
-  // Difference 2: gifts are not reported (v3 showed none on any platform).
-  'an array: two chat lines, a gift, a cross-room gift and the statistics': (v4) => [_withoutGifts(v4.single)],
-  'connects, entries, ranks, global notices and gifts show nothing': (v4) {
-    expect((_reading(v4[4])['events']! as List<Object?>).single, containsPair('kind', 'gift'));
-    return [for (final reading in v4) _withoutGifts(reading)];
-  },
   // Difference 3: only the answer to this socket's join (its uuid) counts;
   // v4 took any room/join as the answer.
   'the answer to the join: accepted, refused, another uuid, no uuid, no code': (v4) => [
@@ -424,14 +452,6 @@ final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
 
 Map<String, Object?> _reading(Object? reading) => reading! as Map<String, Object?>;
 
-Map<String, Object?> _withoutGifts(Object? reading) => {
-  ..._reading(reading),
-  'events': [
-    for (final event in _reading(reading)['events']! as List<Object?>)
-      if (_reading(event)['kind'] != 'gift') event,
-  ],
-};
-
 /// A synthetic chat line of the default user as the v4 projection shows it.
 Map<String, Object?> _chat(
   String text,
@@ -450,6 +470,88 @@ Map<String, Object?> _chat(
   'userLevel': userLevel,
   'medalLevel': medalLevel,
   'medalName': medalName,
+};
+
+typedef _Recorded = ({int index, String room, Object data});
+
+/// The frames of S09-events (B-9), recorded in several rooms; each line names
+/// its room.
+List<_Recorded> _events() {
+  var index = 0;
+  return [
+    for (final line in File('$_root/S09-events/frames.jsonl').readAsLinesSync())
+      if (jsonDecode(line) case {'room': final String room, 'b64': final String b64})
+        (index: index++, room: room, data: base64Decode(b64)),
+  ];
+}
+
+/// When S09-events' second batch began: "now" for the tests that need one.
+final DateTime _recordedAt = DateTime.utc(2026, 9, 30, 15, 26, 41);
+
+/// A message in a short form for comparing whole frames.
+String _short(LiveMessage message) => switch (message.data) {
+  final LiveSuperChatMessage paid =>
+    'superChat ${paid.userName}: ${paid.message} (${paid.priceText}) #${message.messageId}',
+  final LiveNoticeKind kind => 'notice ${kind.name} ${message.message}',
+  final LiveRetraction target => 'retraction $target',
+  MissevanGift() => 'gift ${message.userName}: ${message.message} #${message.messageId}',
+  final LiveAudienceUpdate update => 'online ${update.kind.name} ${update.value}',
+  _ => '${message.type.name} ${message.userName}: ${message.message} #${message.messageId}',
+};
+
+/// What one frame of room [roomId] shows, in the short form.
+List<String> _read(Object data, {String roomId = _roomId}) => [
+  for (final message in MissevanDanmakuProtocol.decode(
+    data,
+    roomId: roomId,
+    uuid: 'u',
+    receivedAt: _recordedAt,
+  ).messages)
+    _short(message),
+];
+
+/// A synthetic item of this room, as the server would send it.
+List<int> _item(String type, String event, [Map<String, Object?> fields = const {}]) =>
+    _frame({'type': type, 'event': event, 'room_id': int.parse(_roomId), ...fields});
+
+/// A synthetic `message_tip` in the site's markup around [text].
+String _tip(String text) => [
+  "<img src='https://static.maoercdn.com/live/pk/notification/win.png' width='15' height='15' /> ",
+  "<font color='#ffffff'>$text</font><font color='#BDBDBD'>详情</font>",
+  "<img src='https://static.maoercdn.com/live/pk/notification/arrow.png' width='15' height='15' />",
+].join();
+
+/// What each S09-events frame shows (B-9), by frame.
+const Map<int, List<String>> _s09 = {
+  0: [], // question/answer: the site moves the question within its panel
+  1: ['chat 观众3: 是呀 #2e2dcc2b-7ae3-4aed-a7da-ef7183f07003'],
+  2: ['superChat 观众4: 那我要听【告白气球】 (50 钻) #6abd2844d7d16a8779a983a0'],
+  3: ['chat 观众3: 都开始减肥了，那就是快了） #21a91e30-3b4d-4937-82e9-70af5aabc6ae'],
+  4: ['gift 观众5: 喵喵耳机 ×1 #6abd28483bf59b1727913799'],
+  5: ['notice system 恭喜胜利！你在幻影PK中击败 观众7 实力出众！'],
+  6: [
+    'notice system 观众9 与 观众8 心意共鸣，获花神赐福！誓约次数 +1，请继续缔结誓约，增加誓约次数，共登 [誓约榜] 榜首，瓜分终极奖池。',
+    'notice system 恭喜主播获得 PK 胜利，继续支持主播吧',
+  ],
+  7: [], // pk/punish_finish
+  8: [], // pk/close without a result
+  9: ['notice system 主播正在匹配 PK 对手，请耐心等候'],
+  10: ['notice system PK 已开始，快送礼支持主播吧'],
+  11: [], // pk/update without a 花神赐福 tip
+  12: ['notice system 【祈福开启】PK双方合力凝聚 60000 祈福值，祈福值最高者将获得花神的赐福！'],
+  13: [], // global_pk/update without a tip
+  14: ['notice system 恭喜胜利！你在幻影PK中击败 观众18 实力出众！', 'notice system 祈福未达，花神隐去。羁绊仍在，期待下次唤醒......'],
+  15: ['notice system 幻影PK即将开启，2分钟后自动匹配对手，迎接挑战吧！'],
+  16: ['gift 观众25: 幻彩礼炮 ×1 #6abd2807a625be764d218212'],
+  17: ['gift 观众25: 幻彩礼炮 ×1 #'], // a later send of the combo: its oid is all zeros
+  18: ['gift 观众26: 书写星辰 ×1 #6abd2756de6d323fb1c9caa3'],
+  19: [], // super_fan/renewal
+  20: ['notice system 已选择跳过本场幻影PK，等待再次开启。'],
+  21: ['notice system 雷达启动！正在召唤你的对手...'],
+  22: ['notice system 匹配成功！与 观众28 的对决正式展开--PK开始！'],
+  23: ['notice system 我方已逃跑，本场PK判定失败'],
+  24: [], // gift/cross_send: to another room of the team live
+  25: ['notice system 观众9 续费了大咖贵族'],
 };
 
 void main() {
@@ -1117,10 +1219,10 @@ void main() {
     test('reconnects wait 2, 3, 4, 5, 6, 6, 6, 6 s, then give up with reconnectsExhausted', () async {
       final delays = <Duration>[];
       final connector = _Connector(
-        fail: (endpoint) =>
-            WebSocketException("Connection to '$endpoint' was not upgraded to websocket, HTTP status code: 403"),
+        fail: (endpoint) => WebSocketException("Connection to '$endpoint' was not upgraded to websocket", 403),
       );
-      final connection = _connection(_SessionHttp([_guest(_sessionA)]), connector);
+      final http = _SessionHttp([_guest(_sessionA)]);
+      final connection = _connection(http, connector);
       final events = _record(connection);
       await _fastTimers(delays, () async {
         await connection.connect(_args);
@@ -1130,6 +1232,10 @@ void main() {
         for (final seconds in [2, 3, 4, 5, 6, 6, 6, 6]) Duration(seconds: seconds),
       ]);
       expect(connector.endpoints, hasLength(9));
+      // B-1: the first 403 (dart:io's exception carries the status) asked a
+      // new session (the same answer here); the rest of the streak does not
+      // ask again.
+      expect(http.requests, hasLength(2));
       expect(events.first, const DanmakuReconnecting(DanmakuInterruption.disconnected));
       expect(
         events.last,
@@ -1261,6 +1367,633 @@ void main() {
       expect(received.last, MissevanDanmakuProtocol.heartbeat);
       await _wait(const Duration(milliseconds: 20));
       expect(_messages(events), hasLength(11), reason: 'the echo shows nothing');
+      await connection.close();
+    });
+  });
+
+  group('paid questions, clears, notices and gifts (B-9)', () {
+    test('S09-events: every recorded frame reads as the site shows it', () {
+      final frames = _events();
+      expect(frames.map((frame) => frame.index), _s09.keys);
+      for (final frame in frames) {
+        expect(_read(frame.data, roomId: frame.room), _s09[frame.index], reason: 'frame ${frame.index}');
+      }
+      // Read in another room, none of them shows anything.
+      for (final frame in frames.where((frame) => frame.index != 11 && frame.index != 12)) {
+        expect(_read(frame.data, roomId: '1'), isEmpty, reason: 'frame ${frame.index}');
+      }
+    });
+
+    test('a paid question is a super chat: every field', () {
+      final frame = _events()[2];
+      final message = MissevanDanmakuProtocol.decode(
+        frame.data,
+        roomId: frame.room,
+        uuid: 'u',
+        receivedAt: _recordedAt,
+      ).messages.single;
+      final created = DateTime.fromMillisecondsSinceEpoch(1790781508650);
+      expect(message.type, LiveMessageType.superChat);
+      expect([message.userName, message.message], ['SUPER_CHAT_MESSAGE', 'SUPER_CHAT_MESSAGE']);
+      expect(message.userId, '46699999');
+      expect(message.messageId, '6abd2844d7d16a8779a983a0');
+      expect(message.sentAt, created);
+      expect(message.color, LiveMessageColor.white);
+      final paid = message.data! as LiveSuperChatMessage;
+      expect(paid.messageId, '6abd2844d7d16a8779a983a0');
+      expect(paid.userName, '观众4');
+      expect(paid.face, 'https://static.maoercdn.com/avatars/321799/98/80o6r29211p0pl526q73819n68n08zz5623920.pbt');
+      expect(paid.message, '那我要听【告白气球】');
+      expect(paid.price, 50);
+      expect(paid.priceText, '50 钻');
+      expect(paid.startTime, created);
+      expect(paid.endTime, created.add(const Duration(seconds: 60)));
+      expect(MissevanDanmakuProtocol.questionDuration, const Duration(seconds: 60));
+      expect([paid.backgroundColor, paid.backgroundBottomColor], ['', '']);
+    });
+
+    test('questions: the asker from either place, time and price fallbacks, bad data', () {
+      Map<String, Object?> question([Map<String, Object?> fields = const {}]) => {
+        'question_id': 'q-1',
+        'user_id': 7300001,
+        'username': '观众甲',
+        'iconurl': '//static.maoercdn.com/avatars/a.png',
+        'question': ' 唱首歌吧 ',
+        'price': 30,
+        ...fields,
+      };
+      LiveMessage? read(Object? question, [Map<String, Object?> user = const {}]) => MissevanDanmakuProtocol.decode(
+        _item('question', 'ask', {'question': question, 'user': user}),
+        roomId: _roomId,
+        uuid: 'u',
+        receivedAt: _recordedAt,
+      ).messages.singleOrNull;
+      // No created_time: it starts when it arrived. The asker comes from the
+      // question when `user` lacks it; a protocol-relative avatar gets https.
+      final paid = read(question())!.data! as LiveSuperChatMessage;
+      expect([paid.userName, paid.message, paid.price, paid.priceText], ['观众甲', '唱首歌吧', 30, '30 钻']);
+      expect(paid.face, 'https://static.maoercdn.com/avatars/a.png');
+      expect(paid.startTime, _recordedAt);
+      expect(paid.endTime, _recordedAt.add(MissevanDanmakuProtocol.questionDuration));
+      expect(read(question())!.sentAt, isNull, reason: 'the platform gave no time');
+      // `user` wins over the question's copy; a price as text counts.
+      final fromUser = read(question({'price': '52', 'created_time': 1790781508650}), {
+        'user_id': 7300002,
+        'username': '观众乙',
+        'iconurl': 'https://static.maoercdn.com/avatars/b.png',
+      })!;
+      expect(fromUser.userId, '7300002');
+      expect((fromUser.data! as LiveSuperChatMessage).userName, '观众乙');
+      expect((fromUser.data! as LiveSuperChatMessage).face, 'https://static.maoercdn.com/avatars/b.png');
+      expect((fromUser.data! as LiveSuperChatMessage).price, 52);
+      expect(fromUser.sentAt, DateTime.fromMillisecondsSinceEpoch(1790781508650));
+      // A free question still shows; an avatar that is not https does not.
+      final free = read(question({'price': 0, 'iconurl': 'http://static.maoercdn.com/a.png'}))!;
+      expect((free.data! as LiveSuperChatMessage).price, 0);
+      expect((free.data! as LiveSuperChatMessage).face, '');
+      // Times out of range fall back to the arrival.
+      for (final time in [0, -1, 8640000000000001, '1790781508650', 1.5]) {
+        expect((read(question({'created_time': time}))!.data! as LiveSuperChatMessage).startTime, _recordedAt);
+      }
+      for (final (reason, value) in <(String, Object?)>[
+        ('blank text', question({'question': '  '})),
+        (
+          'text of another type',
+          question({
+            'question': ['x'],
+          }),
+        ),
+        ('no price', question({'price': null})),
+        ('negative price', question({'price': -1})),
+        ('price not whole', question({'price': 1.5})),
+        ('not an object', 'question'),
+        ('missing', null),
+      ]) {
+        expect(read(value), isNull, reason: reason);
+      }
+      // The site's other question events show nothing.
+      for (final event in ['answer', 'like', 'cancel']) {
+        expect(_read(_item('question', event, {'question': question()})), isEmpty, reason: event);
+      }
+    });
+
+    test('admin clears (synthetic, not seen live): the ids the chat carries, or all of it', () {
+      // The chat carries the platform's id the clear names (S09-events frame 1).
+      final chat = MissevanDanmakuProtocol.decode(_events()[1].data, roomId: '258058950', uuid: 'u').messages.single;
+      expect(chat.messageId, '2e2dcc2b-7ae3-4aed-a7da-ef7183f07003');
+      final clear = MissevanDanmakuProtocol.decode(
+        _frame({
+          'type': 'admin',
+          'event': 'message_clear',
+          'room_id': 258058950,
+          'opt': 2,
+          'msg_ids': [chat.messageId, 'm-2', chat.messageId, '', ' ', 12345, null, true],
+        }),
+        roomId: '258058950',
+        uuid: 'u',
+      ).messages;
+      expect(clear.map((message) => message.data), [
+        LiveRetraction.message(chat.messageId),
+        const LiveRetraction.message('m-2'),
+        const LiveRetraction.message('12345'),
+      ]);
+      for (final retraction in clear) {
+        expect(retraction.type, LiveMessageType.retraction);
+        expect([retraction.messageId, retraction.message, retraction.userName, retraction.userId], ['', '', '', '']);
+        expect(retraction.sentAt, isNull);
+      }
+      expect(_read(_item('admin', 'message_clear', {'opt': 1})), ['retraction LiveRetraction.all()']);
+      expect(
+        _read(
+          _item('admin', 'message_clear', {
+            'opt': '2',
+            'msg_ids': ['a'],
+          }),
+        ),
+        ['retraction LiveRetraction.message(a)'],
+      );
+      for (final (reason, fields) in <(String, Map<String, Object?>)>[
+        (
+          'no opt',
+          {
+            'msg_ids': ['a'],
+          },
+        ),
+        (
+          'another opt',
+          {
+            'opt': 3,
+            'msg_ids': ['a'],
+          },
+        ),
+        ('ids not a list', {'opt': 2, 'msg_ids': 'a'}),
+        ('no ids', {'opt': 2}),
+        ('empty ids', {'opt': 2, 'msg_ids': <Object?>[]}),
+      ]) {
+        expect(_read(_item('admin', 'message_clear', fields)), isEmpty, reason: reason);
+      }
+      expect(_read(_item('admin', 'other', {'opt': 1})), isEmpty);
+      expect(
+        _read(_frame({'type': 'admin', 'event': 'message_clear', 'room_id': 1, 'opt': 1})),
+        isEmpty,
+        reason: 'another room',
+      );
+    });
+
+    test('noble titles: the recorded renewal, and registration and team-live ones (synthetic)', () {
+      final renewal = MissevanDanmakuProtocol.decode(_events()[25].data, roomId: '869048238', uuid: 'u');
+      final notice = renewal.messages.single;
+      expect(notice.type, LiveMessageType.notice);
+      expect(notice.data, LiveNoticeKind.system);
+      expect(notice.message, '观众9 续费了大咖贵族');
+      expect([notice.userName, notice.userId, notice.messageId], ['观众9', '34192889', '']);
+      expect(notice.sentAt, DateTime.fromMillisecondsSinceEpoch(1790782768531));
+      expect(notice.color, LiveMessageColor.white);
+      List<String> noble(String event, [Map<String, Object?> fields = const {}]) => _read(
+        _item('noble', event, {
+          'user': {'user_id': 7300001, 'username': '观众甲'},
+          'noble': {'name': '神话', 'level': 7},
+          'room': {'room_id': 100000001, 'creator_username': '主播乙'},
+          ...fields,
+        }),
+      );
+      expect(noble('registration'), ['notice system 观众甲 开通了神话贵族']);
+      expect(noble('renewal'), ['notice system 观众甲 续费了神话贵族']);
+      expect(noble('cross_registration'), ['notice system 观众甲 开通了主播乙的神话贵族']);
+      expect(noble('cross_renewal'), ['notice system 观众甲 续费了主播乙的神话贵族']);
+      expect(noble('cross_renewal', {'room': null}), ['notice system 观众甲 续费了神话贵族']);
+      expect(noble('registration', {'user': null}), ['notice system 开通了神话贵族']);
+      expect(noble('registration', {'user': 'x'}), ['notice system 开通了神话贵族']);
+      for (final (reason, lines) in [
+        ('another event', noble('update')),
+        (
+          'no name',
+          noble('registration', {
+            'noble': {'level': 7},
+          }),
+        ),
+        (
+          'blank name',
+          noble('registration', {
+            'noble': {'name': ' '},
+          }),
+        ),
+        ('noble not an object', noble('registration', {'noble': '神话'})),
+      ]) {
+        expect(lines, isEmpty, reason: reason);
+      }
+    });
+
+    test('random PKs: the site lines a viewer sees (synthetic results and invitations)', () {
+      List<String> pk(String event, [Map<String, Object?> pk = const {}, Map<String, Object?> fields = const {}]) =>
+          _read(_item('pk', event, {'pk': pk, ...fields}));
+      expect(pk('finish', {'result': 0}), ['notice system 主播 PK 失败，再接再厉哦']);
+      expect(pk('finish', {'result': 2}), ['notice system 主播 PK 平局，再接再厉哦']);
+      expect(pk('close', {'result': '1'}), ['notice system 恭喜主播获得 PK 胜利，继续支持主播吧']);
+      expect(pk('finish', {'result': 3}), isEmpty);
+      expect(pk('finish'), isEmpty);
+      expect(pk('invite_refuse'), ['notice system 对方未接受邀请']);
+      expect(pk('invite_timeout', {'from_room_id': int.parse(_roomId)}), ['notice system 对方未接受邀请']);
+      expect(pk('invite_timeout', {'from_room_id': 100000001}), isEmpty, reason: 'invited by another room');
+      expect(pk('invite_timeout'), isEmpty);
+      for (final event in ['match_fail', 'match_stop', 'update', 'mute', 'rank_invite_request', 'other']) {
+        expect(pk(event), isEmpty, reason: event);
+      }
+      expect(_read(_item('pk', 'match_start')), ['notice system 主播正在匹配 PK 对手，请耐心等候'], reason: 'no pk');
+      expect(_read(_item('pk', 'finish', {'pk': 'x', 'raid': 'x'})), isEmpty);
+      // The 花神赐福 line comes first, only for the site's events.
+      final raid = {
+        'progress': {'message_tip': _tip('祈福达成')},
+      };
+      expect(pk('finish', {'result': 1}, {'raid': raid}), ['notice system 祈福达成', 'notice system 恭喜主播获得 PK 胜利，继续支持主播吧']);
+      expect(pk('match_start', const {}, {'raid': raid}), ['notice system 主播正在匹配 PK 对手，请耐心等候']);
+      expect(pk('update', const {}, {'raid': raid}), ['notice system 祈福达成']);
+      expect(
+        pk('update', const {}, {
+          'raid': {'progress': <String, Object?>{}},
+        }),
+        isEmpty,
+      );
+    });
+
+    test('幻影 PKs: the tip, else the site line for the event (synthetic)', () {
+      List<String> global(String event, [Map<String, Object?> pk = const {}, Map<String, Object?> fields = const {}]) =>
+          _read(_item('global_pk', event, {'pk': pk, ...fields}));
+      expect(global('match_start'), ['notice system 幻影 PK 匹配中，敬请期待……']);
+      expect(global('match_ready'), ['notice system 幻影 PK 即将开启，准备迎战！']);
+      expect(global('match_skip'), ['notice system 本场幻影 PK 已跳过']);
+      expect(global('match_fail'), ['notice system 本场幻影 PK 未匹配到合适的对手']);
+      expect(global('match_success'), ['notice system 匹配成功！幻影 PK 正式开战！']);
+      expect(global('finish', {'result': 1}), ['notice system 恭喜胜利！']);
+      expect(global('finish', {'result': 0}), ['notice system 本场幻影 PK 遗憾落败']);
+      expect(global('finish', {'result': 2}), ['notice system 本场幻影 PK 战成平局']);
+      expect(global('finish'), ['notice system 幻影 PK 已结束']);
+      expect(global('update', {'message_tip': _tip('对战更新')}), ['notice system 对战更新']);
+      expect(global('match_start', {'message_tip': _tip('雷达启动')}), ['notice system 雷达启动']);
+      expect(global('match_start', {'message_tip': '<img src="x" />'}), ['notice system 幻影 PK 匹配中，敬请期待……']);
+      // The site writes a bare "PK 小助手提示" for these: nothing to show.
+      for (final event in ['update', 'close', 'punish_finish', 'mute', 'match_stop']) {
+        expect(global(event), isEmpty, reason: event);
+      }
+      expect(global('other', {'message_tip': _tip('x')}), isEmpty, reason: 'an event the site does not read');
+      expect(_read(_item('global_pk', 'match_start')), isEmpty, reason: 'no pk');
+      expect(
+        global(
+          'close',
+          {'message_tip': _tip('结束')},
+          {
+            'raid': {
+              'progress': {'message_tip': _tip('花神')},
+            },
+          },
+        ),
+        ['notice system 结束', 'notice system 花神'],
+      );
+    });
+
+    test('team PKs (synthetic, not seen live): the tip only', () {
+      expect(
+        _read(
+          _item('team_pk', 'update', {
+            'pk': {'message_tip': _tip('团播 PK')},
+          }),
+        ),
+        ['notice system 团播 PK'],
+      );
+      expect(_read(_item('team_pk', 'update', {'pk': <String, Object?>{}})), isEmpty);
+      expect(_read(_item('team_pk', 'update')), isEmpty);
+    });
+
+    test("a tip's words: links, images and tags left out, entities decoded, white space folded", () {
+      expect(MissevanDanmakuProtocol.plainText(_tip(' 你好 ')), '你好');
+      expect(
+        MissevanDanmakuProtocol.plainText(
+          [
+            '<font color="#FFD643"> A </font><FONT COLOR=#bdbdbd>详情</FONT>',
+            "<font color='#ffffff'>&amp;&lt;b&gt;&quot;&apos;&#39;&#20320;&#x597D;&nbsp;x&copy;&#0;&#xD800;</font>",
+            '<br>下一行<br/>又一行\n\t末尾',
+          ].join(),
+        ),
+        'A &<b>"\'\'你好 x&copy;&#0;&#xD800; 下一行 又一行 末尾',
+      );
+      expect(MissevanDanmakuProtocol.plainText('<font>甲</font><font>乙</font>'), '甲乙', reason: 'no space added');
+      expect(MissevanDanmakuProtocol.plainText(null), '');
+      expect(MissevanDanmakuProtocol.plainText(12), '');
+    });
+
+    test('gifts: the recorded ones (a combo, a lucky gift) and bad data', () {
+      final frames = _events();
+      LiveMessage read(int index) =>
+          MissevanDanmakuProtocol.decode(frames[index].data, roomId: frames[index].room, uuid: 'u').messages.single;
+      final first = read(16);
+      expect(first.type, LiveMessageType.gift);
+      expect([first.userName, first.userId, first.message], ['观众25', '2891648', '幻彩礼炮 ×1']);
+      expect(first.messageId, '6abd2807a625be764d218212');
+      expect(first.sentAt, DateTime.fromMillisecondsSinceEpoch(1790781447947));
+      expect(
+        first.data,
+        MissevanGift(
+          id: '30087',
+          name: '幻彩礼炮',
+          count: 1,
+          price: 0,
+          icon: Uri.parse('https://static.maoercdn.com/live/gifts/icons/30087.png'),
+        ),
+      );
+      expect(read(17).messageId, '', reason: 'a later send of the combo');
+      expect(read(17).data, first.data);
+      final lucky = read(18).data! as MissevanGift;
+      expect(
+        lucky,
+        MissevanGift(
+          id: '92398',
+          name: '书写星辰',
+          count: 1,
+          price: 28,
+          icon: Uri.parse('https://static.maoercdn.com/live/gifts/icons/91611.png'),
+          luckyGift: MissevanGift(
+            id: '80171',
+            name: '悠闲假日',
+            count: 1,
+            price: 52,
+            icon: Uri.parse('https://static.maoercdn.com/live/gifts/icons/80171.png'),
+          ),
+        ),
+      );
+      expect('$lucky', 'MissevanGift(书写星辰 ×1)');
+      expect(lucky.hashCode, isNot(first.data.hashCode));
+      final odd = MissevanDanmakuProtocol.gift({
+        'gift': {'name': ' 花 ', 'num': 0, 'price': -3, 'icon_url': 'http://static.maoercdn.com/g.png'},
+        'user': 'x',
+        'oid': 7,
+        'lucky': {'num': 1},
+      })!;
+      expect(odd.data, const MissevanGift(id: '', name: '花', count: 1, price: 0));
+      expect([odd.userName, odd.userId, odd.messageId, odd.message], ['', '', '7', '花 ×1']);
+      expect(odd.sentAt, isNull);
+      expect(
+        (MissevanDanmakuProtocol.gift({
+                  'gift': {'name': '花', 'num': '3', 'price': '10', 'icon_url': '//static.maoercdn.com/g.png'},
+                })!.data!
+                as MissevanGift)
+            .icon,
+        Uri.parse('https://static.maoercdn.com/g.png'),
+      );
+      for (final gift in [
+        null,
+        'x',
+        <String, Object?>{},
+        {'name': ' '},
+      ]) {
+        expect(MissevanDanmakuProtocol.gift({'gift': gift}), isNull, reason: '$gift');
+      }
+    });
+
+    test(
+      'the connection reports them in order, with the question dated by the clock only when it has no time',
+      () async {
+        final connector = _Connector();
+        final connection = _connection(_SessionHttp([_guest(_sessionA)]), connector, now: () => _recordedAt);
+        final events = _record(connection);
+        await connection.connect(
+          MissevanDanmakuArgs(roomId: '258058950', url: Uri.parse('wss://im.missevan.com/ws?room_id=258058950')),
+        );
+        final channel = connector.channels.single;
+        for (final frame in _events().where((frame) => frame.room == '258058950')) {
+          channel.incoming.add(frame.data);
+        }
+        channel.incoming
+          ..add(
+            _frame({
+              'type': 'question',
+              'event': 'ask',
+              'room_id': 258058950,
+              'question': {'question_id': 'q-2', 'question': '没有时间', 'price': 30},
+            }),
+          )
+          ..add(
+            _frame({
+              'type': 'admin',
+              'event': 'message_clear',
+              'room_id': 258058950,
+              'opt': 2,
+              'msg_ids': ['21a91e30-3b4d-4937-82e9-70af5aabc6ae'],
+            }),
+          );
+        await _until(() => _messages(events).length == 7);
+        await _wait(const Duration(milliseconds: 10));
+        expect(_messages(events).map(_short), [
+          for (final index in [0, 1, 2, 3, 4, 5]) ..._s09[index]!,
+          'superChat : 没有时间 (30 钻) #q-2',
+          'retraction LiveRetraction.message(21a91e30-3b4d-4937-82e9-70af5aabc6ae)',
+        ]);
+        final undated = _messages(events)[5].data! as LiveSuperChatMessage;
+        expect(undated.startTime, _recordedAt);
+        await connection.close();
+      },
+    );
+  });
+
+  group('a refused handshake asks a new session (B-1)', () {
+    WebSocketException refused(int status) =>
+        WebSocketException("Connection to 'https://im.missevan.com:0/ws?room_id=$_roomId#' was not upgraded", status);
+
+    test('a 403 asks a new session at once; the reconnect after the backoff carries it', () async {
+      final held = <_HeldTimer>[];
+      final http = _SessionHttp([_guest(_sessionA), _guest(_sessionB)]);
+      final connector = _Connector(failures: [refused(403)]);
+      final connection = _connection(http, connector);
+      final events = _record(connection);
+      await _heldTimers(held, () async {
+        await connection.connect(_args);
+        await _until(() => http.requests.length == 2);
+        expect(connector.endpoints, hasLength(1), reason: 'the backoff still waits');
+        await _fire(held, const Duration(seconds: 2));
+        await _until(() => connector.channels.isNotEmpty);
+        connector.channels.single.answer();
+        await _until(() => connection.isConnected);
+      });
+      expect(http.requests.map((request) => request.url), List.filled(2, MissevanApi.guestSession));
+      expect(http.requests.last.followRedirects, isFalse);
+      expect(connector.headers.map((headers) => headers['cookie']), ['FM_SESS=$_sessionA', 'FM_SESS=$_sessionB']);
+      expect(connector.headers.last, {...MissevanApi.headers, 'cookie': 'FM_SESS=$_sessionB'});
+      expect(connector.endpoints, List.filled(2, _args.url));
+      expect(events, [const DanmakuReconnecting(DanmakuInterruption.disconnected), const DanmakuReady()]);
+      expect(connector.channels.single.joins.single.containsKey('reconnect'), isFalse, reason: 'never joined before');
+      await connection.close();
+    });
+
+    test('401 too; once per streak of failures, again after a socket opened', () async {
+      final held = <_HeldTimer>[];
+      final http = _SessionHttp([_guest(_sessionA), _guest(_sessionB), _guest(_sessionC)]);
+      final connector = _Connector(failures: [refused(401), refused(403)]);
+      final connection = _connection(http, connector);
+      final events = _record(connection);
+      await _heldTimers(held, () async {
+        await connection.connect(_args);
+        await _until(() => http.requests.length == 2);
+        // One endpoint: 1 s × (failures + 1).
+        await _fire(held, const Duration(seconds: 2));
+        await _until(() => connector.endpoints.length == 2);
+        await _fire(held, const Duration(seconds: 3));
+        await _until(() => connector.channels.length == 1);
+        expect(http.requests, hasLength(2), reason: 'the second refusal of the streak asks nothing');
+        connector.channels.single.answer();
+        await _until(() => connection.isConnected);
+        // The server drops the socket, then refuses the session: a new streak.
+        connector.failures.add(refused(403));
+        await connector.channels.single.incoming.close();
+        await _fire(held, const Duration(seconds: 2));
+        await _until(() => http.requests.length == 3);
+        await _fire(held, const Duration(seconds: 3));
+        await _until(() => connector.channels.length == 2);
+        connector.channels.last.answer();
+        await _until(() => events.whereType<DanmakuReady>().length == 2);
+      });
+      expect(connector.headers.map((headers) => headers['cookie']), [
+        'FM_SESS=$_sessionA',
+        'FM_SESS=$_sessionB',
+        'FM_SESS=$_sessionB',
+        'FM_SESS=$_sessionB',
+        'FM_SESS=$_sessionC',
+      ]);
+      expect(connector.channels.last.joins.single['reconnect'], 1);
+      expect(events, [
+        const DanmakuReconnecting(DanmakuInterruption.disconnected),
+        const DanmakuReady(),
+        const DanmakuReconnecting(DanmakuInterruption.disconnected),
+        const DanmakuReady(),
+      ]);
+      await connection.close();
+    });
+
+    test('other failures ask nothing: no answer, 400, 404, 500, a failed upgrade', () async {
+      final delays = <Duration>[];
+      final http = _SessionHttp([_guest(_sessionA)]);
+      final connector = _Connector(
+        failures: [
+          const SocketException('refused'),
+          refused(400),
+          refused(404),
+          refused(500),
+          const WebSocketException('WebSocket was not upgraded: HTTP/1.1 403 Forbidden'),
+        ],
+      );
+      final connection = _connection(http, connector);
+      await _fastTimers(delays, () async {
+        await connection.connect(_args);
+        await _until(() => connector.channels.isNotEmpty);
+      });
+      expect(http.requests, hasLength(1));
+      expect(connector.headers.map((headers) => headers['cookie']), everyElement('FM_SESS=$_sessionA'));
+      await connection.close();
+    });
+
+    test('no new session: the run ends with credentialsUnavailable and opens nothing more', () async {
+      final delays = <Duration>[];
+      final http = _SessionHttp([_guest(_sessionA), const TransportFailure(SiteIds.missevan, TransportReason.connect)]);
+      final connector = _Connector(failures: [refused(403)]);
+      final connection = _connection(http, connector);
+      final events = _record(connection);
+      await _fastTimers(delays, () async {
+        await connection.connect(_args);
+        await _until(() => events.whereType<DanmakuClosed>().isNotEmpty);
+      });
+      await _wait(const Duration(milliseconds: 20));
+      expect(http.requests, hasLength(4), reason: 'the first session, then three attempts');
+      expect(delays, containsAllInOrder([const Duration(milliseconds: 500), const Duration(seconds: 1)]));
+      expect(connector.endpoints, hasLength(1));
+      expect(events.first, const DanmakuReconnecting(DanmakuInterruption.disconnected));
+      expect(
+        events.last,
+        isA<DanmakuClosed>()
+            .having((event) => event.reason, 'reason', DanmakuCloseReason.credentialsUnavailable)
+            .having((event) => event.detail, 'detail', isNotEmpty),
+      );
+      expect(connection.status, DanmakuStatus.closed);
+    });
+
+    test('close while the session is asked: the request is cancelled, nothing opens or is reported', () async {
+      final held = <_HeldTimer>[];
+      final hold = Completer<void>();
+      final http = _SessionHttp([_guest(_sessionA), _guest(_sessionB)]);
+      final connector = _Connector(failures: [refused(403)]);
+      final connection = _connection(http, connector);
+      final events = _record(connection);
+      await _heldTimers(held, () async {
+        await connection.connect(_args);
+        http.hold = hold;
+        await _until(() => http.requests.length == 2);
+        await connection.close();
+        hold.complete();
+        await _wait(const Duration(milliseconds: 20));
+      });
+      expect(http.requests.last.cancel!.isCancelled, isTrue);
+      expect(connector.endpoints, hasLength(1));
+      expect(events, [const DanmakuReconnecting(DanmakuInterruption.disconnected)]);
+      expect(connection.status, DanmakuStatus.idle);
+    });
+
+    test("a local server that refuses the stale session: dart:io's 403, then the new cookie joins", () async {
+      final cookies = <String?>[];
+      final sockets = <WebSocket>[];
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      addTearDown(() async {
+        await Future.wait([for (final socket in sockets) socket.close()]);
+        await server.close(force: true);
+      });
+      server.listen((request) async {
+        final cookie = request.headers.value('cookie');
+        cookies.add(cookie);
+        if (cookie != 'FM_SESS=$_sessionB') {
+          request.response.statusCode = HttpStatus.forbidden;
+          await request.response.close();
+          return;
+        }
+        final socket = await WebSocketTransformer.upgrade(request);
+        sockets.add(socket);
+        socket.listen((frame) {
+          if (frame == MissevanDanmakuProtocol.heartbeat) return;
+          final join = jsonDecode(frame as String) as Map<String, Object?>;
+          socket
+            ..add(_frame(_answer(join['uuid']! as String)))
+            ..add(_frame(_chatLine('新会话')));
+        });
+      });
+      final http = _SessionHttp([_guest(_sessionA), _guest(_sessionB)]);
+      final connection = MissevanDanmakuConnection(
+        http: http,
+        connector: (endpoint, {required headers, required protocols, required route, required connectTimeout}) =>
+            connectIoSocket(
+              endpoint.replace(scheme: 'ws', host: '127.0.0.1', port: server.port),
+              headers: headers,
+              protocols: protocols,
+              route: route,
+              connectTimeout: connectTimeout,
+            ),
+      );
+      final events = _record(connection);
+      final backoff = <Duration>[];
+      // The reconnect waits 2 s: run it at once (the handshake's own
+      // timeout stays real).
+      await runZoned(
+        () async {
+          await connection.connect(_args);
+          await _until(() => _messages(events).isNotEmpty);
+        },
+        zoneSpecification: ZoneSpecification(
+          createTimer: (self, parent, zone, duration, callback) {
+            if (duration != const Duration(seconds: 2)) return parent.createTimer(zone, duration, callback);
+            backoff.add(duration);
+            return parent.createTimer(zone, Duration.zero, callback);
+          },
+        ),
+      );
+      expect(backoff, isNotEmpty);
+      expect(cookies, ['FM_SESS=$_sessionA', 'FM_SESS=$_sessionB']);
+      expect(http.requests, hasLength(2));
+      expect(events.whereType<DanmakuReady>(), hasLength(1));
+      expect(_messages(events).single.message, '新会话');
       await connection.close();
     });
   });

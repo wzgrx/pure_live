@@ -10,13 +10,64 @@ import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
 
+/// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from
+/// `gift`/`send` ([MissevanDanmakuProtocol.gift]).
+@immutable
+final class MissevanGift {
+  /// Creates the gift.
+  const new({
+    required this.id,
+    required this.name,
+    required this.count,
+    required this.price,
+    this.icon,
+    this.luckyGift,
+  });
+
+  /// `gift_id`, or empty.
+  final String id;
+
+  /// `name` (`幻彩礼炮`).
+  final String name;
+
+  /// `num`, at least 1.
+  final int count;
+
+  /// `price` of one, in diamonds (钻石, ten to a yuan); 0 for a free gift.
+  final int price;
+
+  /// `icon_url` when it is an https URL.
+  final Uri? icon;
+
+  /// The lucky gift sent when this one was drawn from it (`lucky`; the site
+  /// writes "送给主播 {lucky} ×n，抽出 {gift} ×n"), or null.
+  final MissevanGift? luckyGift;
+
+  @override
+  bool operator ==(Object other) =>
+      other is MissevanGift &&
+      other.id == id &&
+      other.name == name &&
+      other.count == count &&
+      other.price == price &&
+      other.icon == icon &&
+      other.luckyGift == luckyGift;
+
+  @override
+  int get hashCode => Object.hash(id, name, count, price, icon, luckyGift);
+
+  @override
+  String toString() => 'MissevanGift($name ×$count)';
+}
+
 /// What one Missevan chat frame held ([MissevanDanmakuProtocol.decode]).
 @immutable
 final class MissevanDanmakuFrame {
   /// Creates the result.
   const new({this.messages = const [], this.joined, this.refusal = ''});
 
-  /// Chat and audience updates, in order.
+  /// Chat, super chats (paid questions), retractions, notices, gifts and
+  /// audience updates, in order.
   final List<LiveMessage> messages;
 
   /// The answer to this socket's join: true when the room was joined
@@ -59,6 +110,62 @@ abstract final class MissevanDanmakuProtocol {
 
   /// Bytes before a frame's Brotli stream: the flag and the length.
   static const int headerLength = 4;
+
+  /// How long a paid question shows as a super chat. The site has no such
+  /// time (a question waits in the room's question panel until the host
+  /// answers or cancels it); 60 s is Bilibili's shortest super chat, and a
+  /// question costs a few yuan (tens of diamonds), below its lowest tier.
+  static const Duration questionDuration = Duration(seconds: 60);
+
+  /// `admin`/`message_clear` `opt`: every chat line (the site's `All`).
+  static const int clearAll = 1;
+
+  /// `admin`/`message_clear` `opt`: the lines of `msg_ids` (`Specific`).
+  static const int clearSpecific = 2;
+
+  /// The site's lines for a `pk` (random or invited PK) event, as a viewer
+  /// sees them (`addLocalSystemMsg` with the `PK` type).
+  static const Map<String, String> pkLines = {
+    'match_start': '主播正在匹配 PK 对手，请耐心等候',
+    'match_success': 'PK 已开始，快送礼支持主播吧',
+    'invite_refuse': '对方未接受邀请',
+    'invite_timeout': '对方未接受邀请',
+  };
+
+  /// The site's line for a finished `pk` by `pk.result` (0 lost, 1 won,
+  /// 2 drawn), as a viewer sees it.
+  static const Map<int, String> pkResults = {1: '恭喜主播获得 PK 胜利，继续支持主播吧', 0: '主播 PK 失败，再接再厉哦', 2: '主播 PK 平局，再接再厉哦'};
+
+  /// The `global_pk` (幻影 PK) events the site reads, and its line for each
+  /// when the event carries no `message_tip`.
+  static const Map<String, String?> globalPkLines = {
+    'match_ready': '幻影 PK 即将开启，准备迎战！',
+    'match_skip': '本场幻影 PK 已跳过',
+    'match_start': '幻影 PK 匹配中，敬请期待……',
+    'match_fail': '本场幻影 PK 未匹配到合适的对手',
+    'match_success': '匹配成功！幻影 PK 正式开战！',
+    'update': null,
+    'finish': '幻影 PK 已结束',
+    'match_stop': null,
+    'close': null,
+    'punish_finish': null,
+    'mute': null,
+    'forced_mute': null,
+    'unmute': null,
+    'forced_unmute': null,
+    'invite_request': null,
+    'rank_invite_request': null,
+    'invite_cancel': null,
+    'invite_refuse': null,
+    'invite_timeout': null,
+  };
+
+  /// The site's line for a finished `global_pk` by `pk.result` without a
+  /// `message_tip`.
+  static const Map<int, String> globalPkResults = {1: '恭喜胜利！', 2: '本场幻影 PK 战成平局', 0: '本场幻影 PK 遗憾落败'};
+
+  /// The events whose `raid.progress.message_tip` (花神赐福) the site shows.
+  static const Set<String> raidEvents = {'match_success', 'update', 'finish', 'close'};
 
   /// Largest time [DateTime] can hold, in milliseconds.
   static const int _maxMillis = 8640000000000000;
@@ -164,14 +271,25 @@ abstract final class MissevanDanmakuProtocol {
   /// - `message`/`new`, and `message`/`danmaku` (a paid danmaku, a chat
   ///   line the site flies in a bubble): chat ([chat]);
   /// - `room`/`statistics`: heat and the listeners in the room now
-  ///   ([audience]).
+  ///   ([audience]);
+  /// - `question`/`ask`, a paid question: a super chat ([question]), which
+  ///   starts at [receivedAt] (default now) when the question has no time;
+  /// - `admin`/`message_clear`: retractions ([retractions]);
+  /// - `noble` (a noble title bought or renewed), `pk`, `global_pk` (幻影
+  ///   PK) and `team_pk`: notices ([noble], [pk], [globalPk], [teamPk]);
+  /// - `gift`/`send`: a gift ([gift]).
   ///
   /// An object naming another room (`room_id`) is skipped, as the site's
-  /// client skips it; so is everything else (gifts, entries, ranks, global
-  /// notices, the heartbeat's echo), a frame that is not JSON, and an item
-  /// that is not an object. A field of the wrong type costs only that field
-  /// or that line, never the frame.
-  static MissevanDanmakuFrame decode(Object? data, {required String roomId, required String uuid}) {
+  /// client skips it; so is everything else (entries, ranks, global
+  /// notices, gifts to another room of a team live, the heartbeat's echo),
+  /// a frame that is not JSON, and an item that is not an object. A field of
+  /// the wrong type costs only that field or that line, never the frame.
+  static MissevanDanmakuFrame decode(
+    Object? data, {
+    required String roomId,
+    required String uuid,
+    DateTime? receivedAt,
+  }) {
     final text = MissevanDanmakuProtocol.text(data);
     if (text == null || text == heartbeat) return const MissevanDanmakuFrame();
     final Object? root;
@@ -201,11 +319,280 @@ abstract final class MissevanDanmakuProtocol {
           if (chat(item) case final message?) messages.add(message);
         case ('room', 'statistics'):
           messages.addAll(audience(item['statistics']));
+        case ('question', 'ask'):
+          if (question(item, receivedAt: receivedAt ?? DateTime.now()) case final message?) messages.add(message);
+        case ('admin', 'message_clear'):
+          messages.addAll(retractions(item));
+        case ('noble', _):
+          if (noble(item) case final message?) messages.add(message);
+        case ('pk', _):
+          messages.addAll(pk(item, roomId: roomId));
+        case ('global_pk', _):
+          messages.addAll(globalPk(item));
+        case ('team_pk', _):
+          if (teamPk(item) case final message?) messages.add(message);
+        case ('gift', 'send'):
+          if (gift(item) case final message?) messages.add(message);
         default:
           break;
       }
     }
     return MissevanDanmakuFrame(messages: messages, joined: joined, refusal: refusal);
+  }
+
+  /// A paid question (`question`/`ask`) as a super chat, or null when its
+  /// text is blank or its price is not a whole number of zero or more.
+  ///
+  /// The server sends the asker as `user` and the question as `question`:
+  /// `question_id`, the text `question`, `price` in diamonds (the site
+  /// writes "50 钻"), `created_time` in milliseconds (the start; else
+  /// [receivedAt]), and the asker again (`user_id`, `username`, `iconurl`)
+  /// for a `user` that lacks them. It shows for [questionDuration]; the
+  /// platform gives no colours.
+  static LiveMessage? question(Map<Object?, Object?> item, {required DateTime receivedAt}) {
+    final question = item['question'];
+    if (question is! Map) return null;
+    final text = _scalar(question['question']).trim();
+    final price = _int(question['price']);
+    if (text.isEmpty || price == null || price < 0) return null;
+    final user = item['user'] is Map ? item['user']! as Map : const <Object?, Object?>{};
+    String field(String key) => _scalar(user[key]).isNotEmpty ? _scalar(user[key]) : _scalar(question[key]);
+    final id = _scalar(question['question_id']).trim();
+    final created = _time(question['created_time']);
+    final start = created ?? receivedAt;
+    return LiveMessage(
+      type: LiveMessageType.superChat,
+      userName: 'SUPER_CHAT_MESSAGE',
+      userId: field('user_id'),
+      message: 'SUPER_CHAT_MESSAGE',
+      color: LiveMessageColor.white,
+      messageId: id,
+      sentAt: created,
+      data: LiveSuperChatMessage(
+        messageId: id,
+        userName: field('username'),
+        face: _https(user['iconurl']) ?? _https(question['iconurl']) ?? '',
+        message: text,
+        price: price,
+        priceText: '$price 钻',
+        startTime: start,
+        endTime: start.add(questionDuration),
+        backgroundColor: '',
+        backgroundBottomColor: '',
+      ),
+    );
+  }
+
+  /// The retractions of an `admin`/`message_clear`, as the site's chat list
+  /// applies it: `opt` [clearAll] takes back every chat line
+  /// ([LiveRetraction.all]); [clearSpecific] the lines whose `msg_id` is in
+  /// `msg_ids`, once each; any other `opt` nothing.
+  static List<LiveMessage> retractions(Map<Object?, Object?> item) {
+    LiveMessage retraction(LiveRetraction target) => LiveMessage(
+      type: LiveMessageType.retraction,
+      userName: '',
+      message: '',
+      color: LiveMessageColor.white,
+      data: target,
+    );
+    switch (_int(item['opt'])) {
+      case clearAll:
+        return [retraction(const LiveRetraction.all())];
+      case clearSpecific:
+        final ids = item['msg_ids'];
+        if (ids is! List) return const [];
+        final seen = <String>{};
+        return [
+          for (final id in ids.map(_scalar))
+            if (id.trim().isNotEmpty && seen.add(id)) retraction(LiveRetraction.message(id)),
+        ];
+      default:
+        return const [];
+    }
+  }
+
+  /// A noble title bought (`registration`) or renewed (`renewal`), in this
+  /// room or, in a team live, for another host (`cross_…`, naming
+  /// `room.creator_username`), as a notice in the words of the site's chat
+  /// line ("我开通了神话贵族"): `观众甲 开通了神话贵族`. Null for other events
+  /// or without `noble.name`.
+  static LiveMessage? noble(Map<Object?, Object?> item) {
+    final event = item['event'];
+    final action = switch (event) {
+      'registration' || 'cross_registration' => '开通',
+      'renewal' || 'cross_renewal' => '续费',
+      _ => null,
+    };
+    final noble = item['noble'];
+    if (action == null || noble is! Map) return null;
+    final name = _scalar(noble['name']).trim();
+    if (name.isEmpty) return null;
+    final user = item['user'] is Map ? item['user']! as Map : const <Object?, Object?>{};
+    final userName = _scalar(user['username']).trim();
+    final room = item['room'];
+    final host = '$event'.startsWith('cross_') && room is Map ? _scalar(room['creator_username']).trim() : '';
+    return _notice(
+      '${userName.isEmpty ? '' : '$userName '}$action了${host.isEmpty ? '' : '$host的'}$name贵族',
+      userName: userName,
+      userId: _scalar(user['user_id']),
+      sentAt: _time(item['time']),
+    );
+  }
+
+  /// The notices of a `pk` event (a random or invited PK of two hosts), as
+  /// a viewer sees them on the site: the 花神赐福 line of `raid` first
+  /// ([raid]), then the PK line ([pkLines]; a finished PK by `pk.result`,
+  /// [pkResults]; an unanswered invitation only in the inviting room,
+  /// `pk.from_room_id`).
+  static List<LiveMessage> pk(Map<Object?, Object?> item, {required String roomId}) {
+    final pk = item['pk'] is Map ? item['pk']! as Map : const <Object?, Object?>{};
+    final event = item['event'];
+    final line = switch (event) {
+      'finish' || 'close' => pkResults[_int(pk['result'])],
+      'invite_timeout' when _scalar(pk['from_room_id']) != roomId => null,
+      final String event => pkLines[event],
+      _ => null,
+    };
+    return [?raid(item), if (line != null) _notice(line)];
+  }
+
+  /// The notices of a `global_pk` event (幻影 PK, matched by the platform),
+  /// as the site's PK assistant writes them: `pk.message_tip` ([plainText])
+  /// or else the site's line for the event ([globalPkLines]; a finish by
+  /// `pk.result`, [globalPkResults]); an `update` only with a tip, and an
+  /// event without either shows no line (the site shows a bare "PK 小助手提示").
+  /// The 花神赐福 line of `raid` follows ([raid]).
+  static List<LiveMessage> globalPk(Map<Object?, Object?> item) {
+    final event = item['event'];
+    final pk = item['pk'];
+    if (event is! String || !globalPkLines.containsKey(event) || pk is! Map) return const [];
+    final tip = plainText(pk['message_tip']);
+    final line = tip.isNotEmpty
+        ? tip
+        : event == 'finish'
+        ? globalPkResults[_int(pk['result'])] ?? globalPkLines[event]
+        : globalPkLines[event];
+    return [if (line != null) _notice(line), ?raid(item)];
+  }
+
+  /// A `team_pk` event's `pk.message_tip` ([plainText]) as a notice, as the
+  /// site's team PK assistant shows it; null without one.
+  static LiveMessage? teamPk(Map<Object?, Object?> item) {
+    final pk = item['pk'];
+    final tip = pk is Map ? plainText(pk['message_tip']) : '';
+    return tip.isEmpty ? null : _notice(tip);
+  }
+
+  /// The 花神赐福 line of a PK event ([raidEvents]): `raid.progress.message_tip`
+  /// ([plainText]) as a notice, or null.
+  static LiveMessage? raid(Map<Object?, Object?> item) {
+    if (!raidEvents.contains(item['event'])) return null;
+    final raid = item['raid'];
+    final progress = raid is Map ? raid['progress'] : null;
+    final tip = progress is Map ? plainText(progress['message_tip']) : '';
+    return tip.isEmpty ? null : _notice(tip);
+  }
+
+  /// The words of a `message_tip`, which the site shows as HTML: the grey
+  /// (`#BDBDBD`) parts are the links it adds ("详情", "结算详情", "去祈福")
+  /// and are left out, as are images and every other tag (a line break
+  /// becomes a space); entities are decoded, runs of white space become one
+  /// space. Empty for anything but text.
+  static String plainText(Object? html) {
+    if (html is! String) return '';
+    final text = html
+        .replaceAll(_linkHint, '')
+        .replaceAll(_lineBreak, ' ')
+        .replaceAll(_tag, '')
+        .replaceAllMapped(_entity, (match) => _decodeEntity(match) ?? match[0]!);
+    return text.replaceAll(_space, ' ').trim();
+  }
+
+  /// One gift of `gift`/`send`, or null without a `gift` that has a name.
+  ///
+  /// Fields: `gift` (`gift_id`, `name`, `num`, `price` in diamonds each,
+  /// `icon_url`), the sender `user`, `time` in milliseconds, `oid` the
+  /// order (all zeros for the later sends of a combo; then no message id),
+  /// and `lucky`, the lucky gift sent when `gift` was drawn from it. The
+  /// text is `幻彩礼炮 ×1`.
+  static LiveMessage? gift(Map<Object?, Object?> item) {
+    final data = _gift(item['gift'], luckyGift: _gift(item['lucky']));
+    if (data == null) return null;
+    final user = item['user'] is Map ? item['user']! as Map : const <Object?, Object?>{};
+    final order = _scalar(item['oid']).trim();
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: _scalar(user['username']),
+      userId: _scalar(user['user_id']),
+      message: '${data.name} ×${data.count}',
+      color: LiveMessageColor.white,
+      messageId: order.contains(_nonZero) ? order : '',
+      sentAt: _time(item['time']),
+      data: data,
+    );
+  }
+
+  static MissevanGift? _gift(Object? gift, {MissevanGift? luckyGift}) {
+    if (gift is! Map) return null;
+    final name = _scalar(gift['name']).trim();
+    if (name.isEmpty) return null;
+    final count = _int(gift['num']);
+    final price = _int(gift['price']);
+    final icon = _https(gift['icon_url']);
+    return MissevanGift(
+      id: _scalar(gift['gift_id']).trim(),
+      name: name,
+      count: count != null && count > 0 ? count : 1,
+      price: price != null && price >= 0 ? price : 0,
+      icon: icon == null ? null : Uri.parse(icon),
+      luckyGift: luckyGift,
+    );
+  }
+
+  static LiveMessage _notice(String text, {String userName = '', String userId = '', DateTime? sentAt}) => LiveMessage(
+    type: LiveMessageType.notice,
+    userName: userName,
+    userId: userId,
+    message: text,
+    color: LiveMessageColor.white,
+    sentAt: sentAt,
+    data: LiveNoticeKind.system,
+  );
+
+  /// A positive time in milliseconds that [DateTime] can hold, or null.
+  static DateTime? _time(Object? value) =>
+      value is int && value > 0 && value <= _maxMillis ? DateTime.fromMillisecondsSinceEpoch(value) : null;
+
+  /// [value] as an https URL (protocol-relative ones get `https:`), or
+  /// null.
+  static String? _https(Object? value) {
+    if (value is! String) return null;
+    final text = value.trim();
+    final url = text.startsWith('//') ? 'https:$text' : text;
+    final uri = Uri.tryParse(url);
+    return uri != null && uri.scheme == 'https' && uri.host.isNotEmpty ? url : null;
+  }
+
+  static final RegExp _linkHint = RegExp(
+    r'''<font\s+color\s*=\s*['"]?#bdbdbd['"]?\s*>.*?</font\s*>''',
+    caseSensitive: false,
+    dotAll: true,
+  );
+  static final RegExp _nonZero = RegExp('[^0]');
+  static final RegExp _lineBreak = RegExp(r'<br\s*/?>', caseSensitive: false);
+  static final RegExp _tag = RegExp('<[^>]*>');
+  static final RegExp _entity = RegExp('&(#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6}|[a-zA-Z]+);');
+  static final RegExp _space = RegExp(r'\s+');
+
+  static String? _decodeEntity(Match match) {
+    final name = match[1]!;
+    final code = name.startsWith('#x') || name.startsWith('#X')
+        ? int.tryParse(name.substring(2), radix: 16)
+        : name.startsWith('#')
+        ? int.tryParse(name.substring(1))
+        : null;
+    if (code == null) return const {'amp': '&', 'lt': '<', 'gt': '>', 'quot': '"', 'apos': "'", 'nbsp': ' '}[name];
+    return code > 0 && code <= 0x10FFFF && (code < 0xD800 || code > 0xDFFF) ? String.fromCharCode(code) : null;
   }
 
   /// One chat line, or null when its `message` is blank or neither text nor
@@ -287,6 +674,10 @@ abstract final class MissevanDanmakuProtocol {
 /// - A refused join asks a new guest session and reopens the socket without
 ///   a notice, at most three times per [connect]; the next refusal ends the
 ///   run with [DanmakuCloseReason.connectionFailed].
+/// - A handshake refused with HTTP 401 or 403 (the session expired, B-1)
+///   asks a new guest session, once per streak of failures, and the socket
+///   reconnects with it through the backoff; without one the run ends with
+///   [DanmakuCloseReason.credentialsUnavailable].
 /// - The heartbeat goes out every 30 s and the server echoes it, so a
 ///   socket silent for max(3 × 30 s, 90 s) = 90 s is replaced.
 ///
@@ -296,15 +687,18 @@ abstract final class MissevanDanmakuProtocol {
 final class MissevanDanmakuConnection extends DanmakuSocketConnection<MissevanDanmakuArgs> {
   /// Creates the connection; `http` asks for the guest sessions and [proxy]
   /// routes the socket. `connector` replaces `dart:io`'s handshake,
-  /// `sessionRetryDelay` the step between session attempts and `random`
-  /// the source of the join's `uuid` (tests).
+  /// `sessionRetryDelay` the step between session attempts, `random` the
+  /// source of the join's `uuid` and `now` the clock that dates a question
+  /// without a time (tests).
   new({
     required this._http,
     super.proxy,
     super.connector,
     this._sessionRetryDelay = const Duration(milliseconds: 500),
     Random? random,
+    DateTime Function()? now,
   }) : _random = random ?? Random.secure(),
+       _now = now ?? DateTime.now,
        super(site: SiteIds.missevan, policy: socketPolicy);
 
   /// Socket timing: the site's 30 s heartbeat and 5 s for the join's answer;
@@ -323,9 +717,15 @@ final class MissevanDanmakuConnection extends DanmakuSocketConnection<MissevanDa
   /// Refused joins answered with a new session and socket, per [connect].
   static const int maxRejoins = 3;
 
+  /// Handshake statuses that mean the session cookie was not accepted: the
+  /// server answers a missing or made-up `FM_SESS` with 403 (2026-09-29);
+  /// 401 is taken the same way.
+  static const Set<int> sessionRefusals = {401, 403};
+
   final LiveHttp _http;
   final Duration _sessionRetryDelay;
   final Random _random;
+  final DateTime Function() _now;
   _Room? _room;
 
   @override
@@ -383,6 +783,8 @@ final class MissevanDanmakuConnection extends DanmakuSocketConnection<MissevanDa
   void onOpen(DanmakuSocketSession session) {
     final room = _of(session);
     if (room == null) return;
+    // A socket opened: a later refused handshake starts a new streak.
+    room.sessionRenewed = false;
     final uuid = room.uuid = MissevanDanmakuProtocol.uuid(_random);
     session.send(MissevanDanmakuProtocol.join(room.roomId, uuid: uuid, reconnect: room.joinedBefore));
   }
@@ -392,7 +794,7 @@ final class MissevanDanmakuConnection extends DanmakuSocketConnection<MissevanDa
   void onData(DanmakuSocketSession session, Object? data) {
     final room = _of(session);
     if (room == null) return;
-    final frame = MissevanDanmakuProtocol.decode(data, roomId: room.roomId, uuid: room.uuid);
+    final frame = MissevanDanmakuProtocol.decode(data, roomId: room.roomId, uuid: room.uuid, receivedAt: _now());
     frame.messages.forEach(session.message);
     switch (frame.joined) {
       case true when !session.isConnected:
@@ -435,6 +837,30 @@ final class MissevanDanmakuConnection extends DanmakuSocketConnection<MissevanDa
     await session.reopen(room.target(fresh));
   }
 
+  /// A handshake refused with a [sessionRefusals] status (the session
+  /// expired; B-1): asks a new guest session, once per streak of failures,
+  /// and hands its cookie to the next handshake, which the backoff opens as
+  /// after any failure. Without a session the run ends with
+  /// [DanmakuCloseReason.credentialsUnavailable], as after a refused join.
+  @override
+  @protected
+  Future<Map<String, String>?>? onHandshakeFailure(DanmakuSocketSession session, DanmakuHandshakeFailure failure) {
+    final room = _of(session);
+    if (room == null || !sessionRefusals.contains(failure.statusCode) || room.sessionRenewed) return null;
+    room.sessionRenewed = true;
+    return _renew(session, room);
+  }
+
+  Future<Map<String, String>?> _renew(DanmakuSocketSession session, _Room room) async {
+    final fresh = await _session(room);
+    if (!session.isActive) return null;
+    if (fresh == null) {
+      session.run.closed(DanmakuCloseReason.credentialsUnavailable, detail: room.lastFailure);
+      return null;
+    }
+    return room.target(fresh).headers;
+  }
+
   @override
   @protected
   Object? heartbeatFrame(DanmakuSocketSession session) => MissevanDanmakuProtocol.heartbeat;
@@ -469,6 +895,10 @@ final class _Room {
   String lastFailure = '';
   int rejoins = 0;
   bool refreshing = false;
+
+  /// Whether a refused handshake asked a new session since a socket last
+  /// opened (B-1: once per streak of failures).
+  bool sessionRenewed = false;
 
   DanmakuSocketTarget target(String session) =>
       DanmakuSocketTarget(endpoints: [endpoint], headers: MissevanDanmakuProtocol.handshakeHeaders(headers, session));

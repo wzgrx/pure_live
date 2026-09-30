@@ -14,9 +14,10 @@ typedef HuyaDanmakuFrame = ({List<LiveMessage> messages, int superChatNotices});
 /// Every frame is a Tars structure: tag 0 the command, tag 1 its payload
 /// bytes. The client registers the streamer's groups (command 16) and sends
 /// heartbeats (command 20); the server pushes single messages (command 7:
-/// tag 1 uri, tag 2 body) and batches (command 22: tag 0 group, tag 1 items
-/// of tag 0 uri, tag 1 body, tag 2 event id). Chat is uri 1400, popularity
-/// uri 8006, and uri 2001314 announces a new headline on the message board.
+/// tag 1 uri, tag 2 body, tag 5 message id) and batches (command 22: tag 0
+/// group, tag 1 items of tag 0 uri, tag 1 body, tag 2 message id). Chat is
+/// uri 1400, popularity uri 8006, and uri 2001314 announces a new headline
+/// on the message board.
 abstract final class HuyaDanmakuProtocol {
   /// The only endpoint (3.x `serverUrl`).
   static final Uri endpoint = Uri.parse('wss://wsapi.huya.com');
@@ -117,7 +118,8 @@ abstract final class HuyaDanmakuProtocol {
       switch (outer.integer(0)) {
         case pushCommand:
           final push = TarsStruct.decode(payload ?? const []);
-          item(push.integer(1) ?? 0, push.bytes(2), 0);
+          // M5.F B-4: 3.x left single pushes without an id.
+          item(push.integer(1) ?? 0, push.bytes(2), push.integer(5) ?? 0);
         case batchCommand:
           final batch = TarsStruct.decode(payload ?? const []);
           for (final entry in batch.list(1)) {
@@ -145,8 +147,10 @@ abstract final class HuyaDanmakuProtocol {
     data: data,
   );
 
-  /// The message id of a batch item's [eventId] (`huya:{id}`); single pushes
-  /// have none, as in 3.x.
+  /// The message id of a push (`huya:{id}`): its `lMsgId`, tag 5 of a single
+  /// push and tag 2 of a batch item. It is the same on every connection to
+  /// the room, and the web client drops a push whose `lMsgId` it has seen
+  /// (taf-signal `filterMessage`); 0 or less means none.
   static String _messageId(int eventId) => eventId > 0 ? 'huya:$eventId' : '';
 
   /// uri 1400 (`MessageNotice`): tag 0 the sender (tag 0 uid, tag 2 nick),

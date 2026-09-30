@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "case": "S17-reconnect",
+  "room": "huya:998",
+  "danmakuKeys": {
+    "uid": "294636272"
+  },
+  "capturedAt": "2026-09-30T15:07:55Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "conn": "A",
+      "url": "wss://wsapi.huya.com",
+      "headers": {}
+    },
+    {
+      "conn": "B",
+      "url": "wss://wsapi.huya.com",
+      "headers": {}
+    },
+    {
+      "conn": "A2",
+      "url": "wss://wsapi.huya.com",
+      "headers": {}
+    }
+  ],
+  "frames": 378,
+  "connections": {
+    "A": "opened at t=288, closed by the client at t=50402; 124 chats",
+    "B": "opened at t=398, open to the end; 189 chats",
+    "A2": "A again: opened at t=55514 (5 s after A closed), open to the end; 61 chats"
+  },
+  "raw": {
+    "sha256": "87b657d621f92f5a8e74e9f3453fc246666185895910118456dd07452b8400e6",
+    "length": 727107
+  },
+  "scrubbed": [
+    {
+      "where": "1400.sender",
+      "rule": "person"
+    },
+    {
+      "where": "1400 tags 8, 9, 10, 12, 13, 15, 16, 17 (decorations, @-mentions, icon, tags, scene format)",
+      "rule": "dropped"
+    },
+    {
+      "where": "every frame but the chat pushes (868: other uris, batch pushes, register and heartbeat answers)",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "M5.F recorder (dart:io WebSocket.connect without extra headers; each connection sends only HuyaDanmakuProtocol.register and heartbeat at open, and a heartbeat every 30 s)",
+  "note": "Anonymous and read-only, direct, about 105 s in room 998 (live, streamer uid 294636272). Two connections to the same room at once (A and B); A closes at 50.4 s and opens again 5 s later as A2, as a reconnect would. t is milliseconds since the recorder started, shared by the connections; capturedAt is that start, from the file time (to the second). Only the chats (command 7, uri 1400) and the open and close markers are kept. Each chat's sender became a synthetic one (a random uid of the same length and 观众N, one viewer keeping one set across frames and connections; gender kept), and its decorations (fan badges, noble marks), @-mentions, icon, tags and scene format were emptied; everything else, the push's tag 5 (lMsgId) and the chat's tag 20 (sMessageId) included, is re-encoded byte for byte as recorded (the Tars codec round trips all 374 recorded chats exactly). What it shows (docs/modules/M5.3-huya.md, 后续升级): the same chat carries the same tag 5 and tag 20 on both connections; neither repeats within a connection; A2 got no chat sent before it opened (no replay on register)."
+}

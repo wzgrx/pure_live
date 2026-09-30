@@ -996,9 +996,13 @@ void main() {
       final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
       addTearDown(() => server.close(force: true));
       server.listen((request) async {
+        // Read the body before counting the request: the test closes the
+        // connection once it sees the fifth, and a body still in flight
+        // then would be cut off.
+        final body = jsonDecode(await utf8.decodeStream(request)) as Map<String, Object?>;
         seen.add(request.headers);
         paths.add('${request.method} ${request.uri}');
-        bodies.add(jsonDecode(await utf8.decodeStream(request)) as Map<String, Object?>);
+        bodies.add(body);
         final response = request.response..headers.contentType = ContentType('application', 'json', charset: 'utf-8');
         switch (paths.length) {
           case 1:

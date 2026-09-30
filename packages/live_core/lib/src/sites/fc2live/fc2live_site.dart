@@ -15,9 +15,10 @@ const _host = 'live.fc2.com';
 /// The FC2 Live adapter (3.x's `Fc2Site` and `Fc2Api`; parsing in
 /// [Fc2LiveApi], the control socket in [Fc2LiveControl]).
 ///
-/// Anonymous, like 3.x: no cookie and no account. Comments (M5) take their
-/// own control socket from the arguments of room entry and recording
-/// ([Fc2LiveDanmakuArgs], 26-3); `getDanmaku` stays `EmptyDanmaku`. Every
+/// Anonymous, like 3.x: no cookie and no account. Comments take their own
+/// control socket from the arguments of room entry and recording
+/// ([Fc2LiveDanmakuArgs], 26-3), in `live_danmaku`'s
+/// `Fc2LiveDanmakuConnection` (M5.22); `getDanmaku` stays `EmptyDanmaku`. Every
 /// request is a form POST with 3.x's headers that does not follow
 /// redirects and goes as `fc2live`, so the app routes the platform through
 /// its proxy setting. The requests are 3.x's:

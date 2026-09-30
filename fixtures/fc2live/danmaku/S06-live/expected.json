@@ -1,0 +1,647 @@
+{
+  "generator": "archived v4 Fc2LiveProtocol.command and Fc2LiveProtocol.decode (archive/v4 6ba709135) over every received socket frame of the recording, one counts map throughout (fixtures/fc2live/danmaku/v4_expected.dart)",
+  "value": {
+    "heartbeats": [
+      "{\"name\":\"heartbeat\",\"arguments\":{},\"id\":1}",
+      "{\"name\":\"heartbeat\",\"arguments\":{},\"id\":2}",
+      "{\"name\":\"heartbeat\",\"arguments\":{},\"id\":3}",
+      "{\"name\":\"heartbeat\",\"arguments\":{},\"id\":4}"
+    ],
+    "frames": [
+      {
+        "line": 3,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 4,
+        "joined": true,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 6,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 7,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 111
+          },
+          {
+            "type": "online",
+            "audience": "cumulative",
+            "value": 1220
+          }
+        ]
+      },
+      {
+        "line": 8,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 9,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 10,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 11,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 12,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 112
+          },
+          {
+            "type": "online",
+            "audience": "cumulative",
+            "value": 1221
+          }
+        ]
+      },
+      {
+        "line": 13,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 111
+          }
+        ]
+      },
+      {
+        "line": 14,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:8o957c2t57w91w9jzg9e5qs3149rhqf5",
+            "userId": "95qd731y54bl90no1t9605t972",
+            "userName": "[anonymous]",
+            "text": "あ",
+            "sentAt": 1790539323311,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 15,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 110
+          }
+        ]
+      },
+      {
+        "line": 16,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:4978v4b3049ccwt61kf6j7v4041xzm3f",
+            "userId": "cr15649146j721i8126jqz36l4",
+            "userName": "[anonymous]",
+            "text": "wwww",
+            "sentAt": 1790539327535,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 17,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:51u0m4495zksq06m3mme2629d61e89s3",
+            "userId": "mo30os8n56t1308s5gdd41g040",
+            "userName": "[anonymous]",
+            "text": "よわいなぁ",
+            "sentAt": 1790539328062,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 18,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:8o957c2t57w91w9jzg9e5qs3149rhqf5",
+            "userId": "95qd731y54bl90no1t9605t972",
+            "userName": "[anonymous]",
+            "text": "ごーーーーーーーーーる",
+            "sentAt": 1790539330355,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 19,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:nr3pf4gx84j1u63s8867364120e3062t",
+            "userId": "4w7740854n81n93o6386x9469n",
+            "userName": "[anonymous]",
+            "text": "草",
+            "sentAt": 1790539330864,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 20,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:44h23176r94vs3gwi7nmfjxz1ip850u5",
+            "userId": "a9m79d7007z805e7875cuu3q72",
+            "userName": "[anonymous]",
+            "text": "冷静",
+            "sentAt": 1790539334244,
+            "color": 16777215
+          },
+          {
+            "type": "chat",
+            "id": "fc2live:8o957c2t57w91w9jzg9e5qs3149rhqf5",
+            "userId": "95qd731y54bl90no1t9605t972",
+            "userName": "[anonymous]",
+            "text": "ｗｗｗ",
+            "sentAt": 1790539334305,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 21,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 109
+          }
+        ]
+      },
+      {
+        "line": 22,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:a1cqsgptt51060qv5pv7569110m6f526",
+            "userId": "150gm50uip8243018m5bp4e4uj",
+            "userName": "[anonymous]",
+            "text": "まじか",
+            "sentAt": 1790539335460,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 24,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 25,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:161c4375607k867i965lyvvdz2823818",
+            "userId": "r6C>??[YTC",
+            "userName": "[anonymous]",
+            "text": "ザルウェー",
+            "sentAt": 1790539340811,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 26,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:8o957c2t57w91w9jzg9e5qs3149rhqf5",
+            "userId": "95qd731y54bl90no1t9605t972",
+            "userName": "[anonymous]",
+            "text": "えーｗ",
+            "sentAt": 1790539342212,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 27,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:8o957c2t57w91w9jzg9e5qs3149rhqf5",
+            "userId": "95qd731y54bl90no1t9605t972",
+            "userName": "[anonymous]",
+            "text": "パスしたよね",
+            "sentAt": 1790539353740,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 28,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:k1ub11z9an4nw0976g720941ud59p30c",
+            "userId": "0964b167vy5o8ab3y549466158",
+            "userName": "[anonymous]",
+            "text": "守備は相変わらずかｗ",
+            "sentAt": 1790539356808,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 29,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:161c4375607k867i965lyvvdz2823818",
+            "userId": "e1YSILwVRK",
+            "userName": "[anonymous]",
+            "text": "キーパーｗ",
+            "sentAt": 1790539360058,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 30,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 110
+          },
+          {
+            "type": "online",
+            "audience": "cumulative",
+            "value": 1222
+          }
+        ]
+      },
+      {
+        "line": 32,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 33,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 111
+          },
+          {
+            "type": "online",
+            "audience": "cumulative",
+            "value": 1223
+          }
+        ]
+      },
+      {
+        "line": 34,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:4g5we6f154v27jf0y3k70f3334y48777",
+            "userId": "76i0429ad014x5m1d5855unlu7",
+            "userName": "[anonymous]",
+            "text": "カリウスみがある",
+            "sentAt": 1790539374845,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 35,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 110
+          }
+        ]
+      },
+      {
+        "line": 36,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 111
+          },
+          {
+            "type": "online",
+            "audience": "cumulative",
+            "value": 1224
+          }
+        ]
+      },
+      {
+        "line": 37,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:8o957c2t57w91w9jzg9e5qs3149rhqf5",
+            "userId": "95qd731y54bl90no1t9605t972",
+            "userName": "[anonymous]",
+            "text": "ｗ",
+            "sentAt": 1790539382684,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 38,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:161c4375607k867i965lyvvdz2823818",
+            "userId": "e3UVFXjAIK",
+            "userName": "[anonymous]",
+            "text": "まあ上手くやられたな",
+            "sentAt": 1790539391857,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 39,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "cumulative",
+            "value": 1225
+          }
+        ]
+      },
+      {
+        "line": 40,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 110
+          }
+        ]
+      },
+      {
+        "line": 41,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:2d74472s8438n5lod599i65xz714m5t3",
+            "userId": "5c170x9186x86k634k508n3b1e",
+            "userName": "[anonymous]",
+            "text": "早川リスペクト",
+            "sentAt": 1790539395943,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 42,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 109
+          }
+        ]
+      },
+      {
+        "line": 43,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:k1ub11z9an4nw0976g720941ud59p30c",
+            "userId": "0964b167vy5o8ab3y549466158",
+            "userName": "[anonymous]",
+            "text": "早川なら",
+            "sentAt": 1790539397901,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 45,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 46,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 110
+          },
+          {
+            "type": "online",
+            "audience": "cumulative",
+            "value": 1226
+          }
+        ]
+      },
+      {
+        "line": 47,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:8twn0e0l12a4ps6344p939uyq950u4r3",
+            "userId": "f9@?IK^CqM",
+            "userName": "[anonymous]",
+            "text": "ハーランドいるあと10年ぐらいは強いんだろうな",
+            "sentAt": 1790539405034,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 48,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 109
+          }
+        ]
+      },
+      {
+        "line": 49,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 110
+          },
+          {
+            "type": "online",
+            "audience": "cumulative",
+            "value": 1227
+          }
+        ]
+      },
+      {
+        "line": 50,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 111
+          },
+          {
+            "type": "online",
+            "audience": "cumulative",
+            "value": 1228
+          }
+        ]
+      },
+      {
+        "line": 51,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "cumulative",
+            "value": 1229
+          }
+        ]
+      },
+      {
+        "line": 52,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "fc2live:8o957c2t57w91w9jzg9e5qs3149rhqf5",
+            "userId": "95qd731y54bl90no1t9605t972",
+            "userName": "[anonymous]",
+            "text": "クリ金髪",
+            "sentAt": 1790539420363,
+            "color": 16777215
+          }
+        ]
+      },
+      {
+        "line": 53,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "online",
+            "audience": "online",
+            "value": 112
+          },
+          {
+            "type": "online",
+            "audience": "cumulative",
+            "value": 1230
+          }
+        ]
+      }
+    ]
+  }
+}

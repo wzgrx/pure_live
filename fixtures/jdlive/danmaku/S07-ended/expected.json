@@ -1,0 +1,105 @@
+{
+  "generator": "the JD Live page script of 2026-09-29 (app-c714bc7b.340fdd69.js: cf45 j, b2eb h/I/j/y, the store's pushMessage; live-f71cff67.44dc43c4.js: the chat list agreementList and pushChat), restated in fixtures/jdlive/danmaku/web_expected.mjs, over the recorded liveauth request and answer and every received frame",
+  "value": {
+    "content": "tbV8seY199tCdw6GllmkW/osOzqSVpE6i4y3FoKHmtsjCjWmWoOtEaD/sqW0pwr2TEFzlsY9YZjoUmnGLfGcvOlY+i/Zr7VNJXyYgmTFtUdSEbB4lSfqzUQyS00ZvgkZgZfusyrvPLDPFCLKC5I847qej5mKYgLtW+Y7Qrr0Ui3Tgo5qeZO30Xemedqi39dQ9iga4BT6gAf6hGjaar2Nt3WVD6/PG7tJxB+RiKPZUDk=",
+    "socket": "wss://live-ws4.jd.com?token=amQubWFsbF_muLjlrqJfODQwNjQ5MTY1NzZfMTc5MDc3MDA1OTg4ODg0MTI4Mw==",
+    "mask": null,
+    "frames": [
+      {
+        "line": 3,
+        "chat": [],
+        "viewer": "276"
+      },
+      {
+        "line": 4,
+        "chat": []
+      },
+      {
+        "line": 5,
+        "chat": [],
+        "viewer": "276"
+      },
+      {
+        "line": 6,
+        "chat": []
+      },
+      {
+        "line": 7,
+        "chat": []
+      },
+      {
+        "line": 8,
+        "chat": [],
+        "viewer": "276"
+      },
+      {
+        "line": 9,
+        "chat": [],
+        "viewer": "276"
+      },
+      {
+        "line": 10,
+        "chat": []
+      },
+      {
+        "line": 11,
+        "chat": []
+      },
+      {
+        "line": 12,
+        "chat": []
+      },
+      {
+        "line": 13,
+        "chat": [],
+        "viewer": "276"
+      },
+      {
+        "line": 14,
+        "chat": []
+      },
+      {
+        "line": 15,
+        "chat": []
+      },
+      {
+        "line": 16,
+        "chat": []
+      },
+      {
+        "line": 17,
+        "chat": [],
+        "viewer": "276"
+      },
+      {
+        "line": 18,
+        "chat": []
+      },
+      {
+        "line": 19,
+        "chat": []
+      },
+      {
+        "line": 20,
+        "chat": []
+      },
+      {
+        "line": 21,
+        "chat": [],
+        "status": 2
+      },
+      {
+        "line": 22,
+        "chat": []
+      },
+      {
+        "line": 23,
+        "chat": []
+      },
+      {
+        "line": 24,
+        "chat": []
+      }
+    ]
+  }
+}

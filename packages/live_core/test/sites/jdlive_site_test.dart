@@ -34,7 +34,8 @@ const _archived = ['S01-list-p1', 'S01-list-p2', 'S02-play-live', 'S02-play-old'
 const _recorded = ['S04-list', 'S04-play-live', 'S04-playlist'];
 
 /// Room keys every room changed: the notice is in words for users now (the
-/// unified rule for developer notes, M4.U).
+/// unified rule for developer notes, M4.U), and since M5.24 (chat is shown)
+/// it only explains the number.
 const _notice = {'notice'};
 
 /// Room keys a play answer without a list card changed: 28-2 (no `JD Live`
@@ -607,6 +608,13 @@ void main() {
         _expectParity(room, _result(legacy[depth]), changed: _playOnly, reason: depth);
         expect(_sent(setup.http.requests), _legacyRequests(legacy[depth]), reason: depth);
         expect(room.data, depth == 'getRoomDetailForRefresh' ? isNull : isA<JdLiveRoom>(), reason: depth);
+        expect(
+          room.danmakuData,
+          depth == 'getRoomDetailForRefresh'
+              ? isNull
+              : isA<JdLiveDanmakuArgs>().having((args) => args.liveId, 'liveId', _live),
+          reason: 'M5.24: the chat arguments come with the room, without a request ($depth)',
+        );
         expect(room.roomId, _live);
         expect((room.restriction, room.startedAt), (LiveRestriction.none, null), reason: 'JD gives no start time');
       }

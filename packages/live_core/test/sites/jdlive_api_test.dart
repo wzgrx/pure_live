@@ -23,7 +23,8 @@ Object? _result(Object? traced) => (traced! as Map<String, dynamic>)['result'];
 List<Map<String, dynamic>> _maps(Object? value) => (value! as List).cast<Map<String, dynamic>>();
 
 /// Room keys every room changed: the notice is in words for users now (the
-/// unified rule for developer notes, M4.U).
+/// unified rule for developer notes, M4.U), and since M5.24 (chat is shown)
+/// it only explains the number.
 const _notice = {'notice'};
 
 /// Room keys a play answer without a list card changed: 28-2 (no `JD Live`
@@ -853,6 +854,43 @@ void main() {
           .map((entry) => (entry as Map)['liveId'])
           .toList();
       expect(listed, isNot(contains(card.liveId)), reason: "the shop's current broadcast is not in it");
+    });
+  });
+
+  group('M5.24 chat', () {
+    test('a live room entry carries its chat arguments; refresh, app-only and not live rooms do not', () {
+      final live = JdLiveApi.play(_sample('S04-play-live').body, liveId: _live);
+      final args = JdLiveApi.room(live, withData: true).danmakuData;
+      expect(args, isA<JdLiveDanmakuArgs>().having((args) => args.liveId, 'liveId', _live));
+      expect('$args', 'JdLiveDanmakuArgs($_live)');
+      expect(JdLiveApi.room(live).danmakuData, isNull, reason: 'a refresh or a card: no request, no chat');
+      final withoutData = [
+        ('app-only', JdLiveApi.play(_editedPlay({'secret': 1}), liveId: _archivedLive)),
+        ('ended', JdLiveApi.play(_sample('S05-play-ended').body, liveId: '48378908')),
+        ('replay', JdLiveApi.play(_sample('S05-play-replay').body, liveId: _live)),
+        ('paused', JdLiveApi.play(_editedPlay({'status': 10}), liveId: _archivedLive)),
+        ('preview', JdLiveApi.play(_editedPlay({'status': 0}), liveId: _archivedLive)),
+      ];
+      for (final (name, broadcast) in withoutData) {
+        expect(JdLiveApi.room(broadcast, withData: true).danmakuData, isNull, reason: name);
+      }
+      final unplayable = JdLiveApi.play(
+        _editedPlay({'h5VideoUrl': 1, 'videoUrl': null, 'pcVideoUrl': 'x'}, sample: 'S04-play-live'),
+        liveId: _live,
+      );
+      expect(
+        JdLiveApi.room(unplayable, withData: true).danmakuData,
+        isA<JdLiveDanmakuArgs>(),
+        reason: 'live without an address: its chat still runs',
+      );
+    });
+
+    test('the notice only explains the number now; the chat gives the viewers in the room', () {
+      expect(JdLiveApi.chatNotice, '人数是累计观看，不是正在观看的人数。');
+      expect(JdLiveApi.chatNotice, isNot(contains('聊天')), reason: 'M5.24: chat is shown');
+      final capability = AudiencePlatformCapability.of('jdlive');
+      expect(capability.onlineAvailability, AudienceOnlineAvailability.roomRealtime);
+      expect((capability.hasTotalViewers, capability.hasPopularity), (true, false));
     });
   });
 }

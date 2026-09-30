@@ -20,9 +20,10 @@ const _searchLimit = 32;
 /// The JD Live adapter (3.x's `JdLiveSite` and `JdLiveApi`; parsing in
 /// [JdLiveApi]).
 ///
-/// Anonymous, like 3.x: no cookie, no account and no chat (3.x's JD Live
-/// had `EmptyDanmaku`). Every request carries 3.x's headers, does not
-/// follow redirects and goes as `jdlive`, so the app routes the platform
+/// Anonymous, like 3.x: no cookie and no account. The room entry of a live
+/// broadcast carries the arguments of its chat ([JdLiveDanmakuArgs], M5.24;
+/// 3.x's JD Live had `EmptyDanmaku`). Every request carries 3.x's headers,
+/// does not follow redirects and goes as `jdlive`, so the app routes the platform
 /// through its proxy setting. The requests are 3.x's:
 /// - the featured list `liveListWithTabToM` (the one area, the directory,
 ///   the recommendations and the search filter), paged natively: page 1

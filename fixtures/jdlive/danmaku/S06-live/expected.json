@@ -1,0 +1,213 @@
+{
+  "generator": "the JD Live page script of 2026-09-29 (app-c714bc7b.340fdd69.js: cf45 j, b2eb h/I/j/y, the store's pushMessage; live-f71cff67.44dc43c4.js: the chat list agreementList and pushChat), restated in fixtures/jdlive/danmaku/web_expected.mjs, over the recorded liveauth request and answer and every received frame",
+  "value": {
+    "content": "tbV8seY199tCdw6GllmkW/osOzqSVpE6i4y3FoKHmtsjCjWmWoOtEaD/sqW0pwr2Ax4bdcz20Mb0Ga93uktsibkvmOgAAbGcgTPeO0MohFVB3j/O8WuPkd2mKqKRQemCPACjteeoVApEj3jDBkB2p4t7dPWTTlRJtwO7o9pD9PZZnpkieRPV14Lohkopfd6bAcBhikX6Zca/YLKh3sE9bGQWU0SMnHbcXKf/J0SBPHg=",
+    "socket": "wss://live-ws4.jd.com?token=amQubWFsbF_muLjlrqJfNDQ2NjkwMzcyNzJfMTc5MDYzNjI0ODYxODM0NzA1MA==",
+    "mask": null,
+    "frames": [
+      {
+        "line": 3,
+        "chat": []
+      },
+      {
+        "line": 4,
+        "chat": [],
+        "viewer": "1741"
+      },
+      {
+        "line": 5,
+        "chat": []
+      },
+      {
+        "line": 6,
+        "chat": [],
+        "viewer": "1741"
+      },
+      {
+        "line": 7,
+        "chat": []
+      },
+      {
+        "line": 8,
+        "chat": [],
+        "viewer": "1741"
+      },
+      {
+        "line": 9,
+        "chat": []
+      },
+      {
+        "line": 10,
+        "chat": [],
+        "viewer": "1741"
+      },
+      {
+        "line": 11,
+        "chat": []
+      },
+      {
+        "line": 12,
+        "chat": [],
+        "viewer": "1741"
+      },
+      {
+        "line": 13,
+        "chat": []
+      },
+      {
+        "line": 14,
+        "chat": []
+      },
+      {
+        "line": 15,
+        "chat": []
+      },
+      {
+        "line": 16,
+        "chat": []
+      },
+      {
+        "line": 17,
+        "chat": [],
+        "viewer": "1741"
+      },
+      {
+        "line": 18,
+        "chat": []
+      },
+      {
+        "line": 19,
+        "chat": []
+      },
+      {
+        "line": 20,
+        "chat": []
+      },
+      {
+        "line": 21,
+        "chat": [],
+        "viewer": "1741"
+      },
+      {
+        "line": 22,
+        "chat": []
+      },
+      {
+        "line": 23,
+        "chat": []
+      },
+      {
+        "line": 24,
+        "chat": []
+      },
+      {
+        "line": 25,
+        "chat": [],
+        "viewer": "1741"
+      },
+      {
+        "line": 26,
+        "chat": []
+      },
+      {
+        "line": 27,
+        "chat": []
+      },
+      {
+        "line": 28,
+        "chat": []
+      },
+      {
+        "line": 29,
+        "chat": [],
+        "viewer": "1743"
+      },
+      {
+        "line": 30,
+        "chat": []
+      },
+      {
+        "line": 31,
+        "chat": []
+      },
+      {
+        "line": 32,
+        "chat": [],
+        "viewer": "1743"
+      },
+      {
+        "line": 33,
+        "chat": []
+      },
+      {
+        "line": 34,
+        "chat": []
+      },
+      {
+        "line": 35,
+        "chat": []
+      },
+      {
+        "line": 36,
+        "chat": [],
+        "viewer": "1743"
+      },
+      {
+        "line": 37,
+        "chat": []
+      },
+      {
+        "line": 38,
+        "chat": [
+          {
+            "type": "viewer_send_message",
+            "nickName": "hq_290537adwg",
+            "content": "多重"
+          }
+        ]
+      },
+      {
+        "line": 39,
+        "chat": [],
+        "viewer": "1743"
+      },
+      {
+        "line": 40,
+        "chat": []
+      },
+      {
+        "line": 41,
+        "chat": [
+          {
+            "type": "anchor_send_message",
+            "nickName": "主播",
+            "content": "老铁，您说的“多重”是指多重优惠还是多重款式呢？"
+          }
+        ]
+      },
+      {
+        "line": 42,
+        "chat": [],
+        "viewer": "1744"
+      },
+      {
+        "line": 43,
+        "chat": []
+      },
+      {
+        "line": 44,
+        "chat": [],
+        "viewer": "1744"
+      },
+      {
+        "line": 45,
+        "chat": []
+      },
+      {
+        "line": 46,
+        "chat": [],
+        "viewer": "1744"
+      }
+    ]
+  }
+}

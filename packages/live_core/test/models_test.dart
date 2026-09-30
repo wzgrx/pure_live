@@ -71,6 +71,36 @@ void main() {
     expect({chat(), chat()}, hasLength(1));
   });
 
+  test('a super chat can carry the price as the platform shows it', () {
+    final at = DateTime.utc(2026, 9, 30);
+    LiveSuperChatMessage chat(String text) => LiveSuperChatMessage(
+      userName: 'a',
+      face: '',
+      message: 'hi',
+      price: 500,
+      startTime: at,
+      endTime: at,
+      backgroundColor: '',
+      backgroundBottomColor: '',
+      priceText: text,
+    );
+    expect(chat(r'$5.00').priceText, r'$5.00');
+    expect(
+      LiveSuperChatMessage(
+        userName: 'a',
+        face: '',
+        message: 'hi',
+        price: 500,
+        startTime: at,
+        endTime: at,
+        backgroundColor: '',
+        backgroundBottomColor: '',
+      ).priceText,
+      isEmpty,
+    );
+    expect(chat(r'$5.00'), chat(r'NT$5'), reason: 'equality is unchanged: sender, text and price');
+  });
+
   group('LiveRetraction', () {
     test('one message, one sender or the whole chat; equal by target', () {
       const one = LiveRetraction.message('m1');

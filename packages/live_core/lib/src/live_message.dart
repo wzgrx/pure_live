@@ -296,6 +296,7 @@ final class LiveSuperChatMessage {
     required this.backgroundColor,
     required this.backgroundBottomColor,
     this.messageId = '',
+    this.priceText = '',
   });
 
   /// The platform's id for the event, when it has one. Some message-board
@@ -314,6 +315,10 @@ final class LiveSuperChatMessage {
 
   /// Price in the platform's unit.
   final int price;
+
+  /// The price as the platform shows it (`$5.00`, `1,000 치즈`), when
+  /// [price] alone cannot say it (several currencies); empty otherwise.
+  final String priceText;
 
   /// Start of display.
   final DateTime startTime;

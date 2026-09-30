@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "platform": "twitch",
+  "case": "S10-live",
+  "room": "twitch:caedrel",
+  "danmakuKeys": {
+    "login": "caedrel",
+    "channelId": "92038375"
+  },
+  "capturedAt": "2026-09-30T15:13:46.536752Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://irc-ws.chat.twitch.tv",
+      "headers": {}
+    }
+  ],
+  "frames": 92,
+  "raw": {
+    "sha256": "dc1e1ad4f1bce2e7530e316eb455aeb8464ac329dfee6485ecf8b9a551d79d46",
+    "length": 991436,
+    "frames": 2496
+  },
+  "scrubbed": [
+    {
+      "where": "privmsg.client-nonce",
+      "rule": "secret"
+    },
+    {
+      "where": "privmsg.display-name",
+      "rule": "person"
+    },
+    {
+      "where": "privmsg.user-id",
+      "rule": "digits"
+    },
+    {
+      "where": "privmsg.prefix",
+      "rule": "person"
+    },
+    {
+      "where": "privmsg.text",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.display-name",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.login",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.system-msg",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.user-id",
+      "rule": "digits"
+    },
+    {
+      "where": "usernotice.msg-param-community-gift-id",
+      "rule": "secret"
+    },
+    {
+      "where": "usernotice.msg-param-origin-id",
+      "rule": "secret"
+    },
+    {
+      "where": "usernotice.msg-param-recipient-display-name",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.msg-param-recipient-id",
+      "rule": "digits"
+    },
+    {
+      "where": "usernotice.msg-param-recipient-user-name",
+      "rule": "person"
+    },
+    {
+      "where": "irc.PRIVMSG",
+      "rule": "dropped",
+      "count": 2404
+    }
+  ],
+  "tool": "anonymous read-only recorder (M5.F B-7, scratch): justinfan nick, 3.x join lines, no messages sent"
+}

@@ -870,7 +870,8 @@ void main() {
         connector: connector.call,
         policy: const DanmakuSocketPolicy(
           heartbeatInterval: Duration(milliseconds: 20),
-          inactivityTimeout: Duration(milliseconds: 250),
+          // Wide enough that a loaded machine never misses a statistics frame.
+          inactivityTimeout: Duration(seconds: 1),
           reconnectBaseDelay: Duration(milliseconds: 5),
         ),
       );

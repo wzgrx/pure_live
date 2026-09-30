@@ -431,13 +431,15 @@ void main() {
     });
 
     test('the handshake timer ends with the upgrade', () async {
-      final connecting = ExactWebSocket.connect(server.url, connectTimeout: const Duration(milliseconds: 100));
+      // A timeout a loaded machine cannot hit during a local handshake, and
+      // a wait past it: the socket must outlive the timer.
+      final connecting = ExactWebSocket.connect(server.url, connectTimeout: const Duration(seconds: 1));
       await server.accept(await server.head());
       final socket = await connecting;
       final received = <Object?>[];
       final errors = <Object>[];
       socket.stream.listen(received.add, onError: errors.add);
-      await _wait(const Duration(milliseconds: 250));
+      await _wait(const Duration(milliseconds: 1300));
       server.send(_serverFrame(1, utf8.encode('still open')));
       await _until(() => received.isNotEmpty);
       expect(received, ['still open']);

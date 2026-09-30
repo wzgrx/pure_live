@@ -1,0 +1,310 @@
+{
+  "generator": "fixtures/17live/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) SeventeenliveProtocol (auth, heartbeatInterval, headers, token, endpoint, attach, payload, decode) over every received socket frame (copied as it was; the event classes cut down to their fields)",
+  "value": {
+    "roomId": "29046769",
+    "token": "siDwOI.CID5-qCfhi1lkfTOMVxLWQ3yMG2Y3yL4_b4vGC-UHhw_iuxl2nYSN0xi-hI8Z1XNZRVJ9qWcccMOGf9ho3OkOnCCuGJXzIeRMNcQCAiBJhDYc5cTuQmUFUNsM84TkJvRm",
+    "connector": {
+      "authUrl": "https://api-dsa.17app.co/api/v1/messenger/auth",
+      "authMethod": "POST",
+      "authHeaders": {
+        "origin": "https://17.live",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "referer": "https://17.live/"
+      },
+      "authBody": "{}",
+      "endpoint": "wss://17media.realtime.ably.net/?access_token=siDwOI.CID5-qCfhi1lkfTOMVxLWQ3yMG2Y3yL4_b4vGC-UHhw_iuxl2nYSN0xi-hI8Z1XNZRVJ9qWcccMOGf9ho3OkOnCCuGJXzIeRMNcQCAiBJhDYc5cTuQmUFUNsM84TkJvRm&format=json&heartbeats=true&v=3",
+      "handshakeHeaders": {
+        "origin": "https://17.live",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "attach": "{\"action\":10,\"channel\":\"29046769\"}",
+      "heartbeatSeconds": 15
+    },
+    "frames": [
+      {
+        "frame": 2,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 3,
+        "joined": true,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 4,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 5,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 6,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 7,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 8,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:6Do04M3cWw6i:0",
+            "sentAt": 1790539305272,
+            "userId": "0m4aa907-2487-360i-612y-o2737v5u2b09",
+            "userName": "rqvk_gpndai.Hqxbwt",
+            "text": "だまれ"
+          }
+        ]
+      },
+      {
+        "frame": 9,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:aH1JRjMmgwUL:0",
+            "sentAt": 1790539310976,
+            "userId": "0m4aa907-2487-360i-612y-o2737v5u2b09",
+            "userName": "rqvk_gpndai.Hqxbwt",
+            "text": "まちがえた"
+          }
+        ]
+      },
+      {
+        "frame": 10,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 11,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:UfKh9bDhwxSZ:0",
+            "sentAt": 1790539322000,
+            "userId": "0m4aa907-2487-360i-612y-o2737v5u2b09",
+            "userName": "rqvk_gpndai.Hqxbwt",
+            "text": "ただの打ち間違えだよみかささん🥹"
+          }
+        ]
+      },
+      {
+        "frame": 12,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:+GP21vKQYuac:0",
+            "sentAt": 1790539326709,
+            "userId": "0m4aa907-2487-360i-612y-o2737v5u2b09",
+            "userName": "rqvk_gpndai.Hqxbwt",
+            "text": "皆さん、どうもこんちゃ！僕を見つけてくれてありがとう！\n世界の色んなとこ歩き回ってる黒ベンガルです！　\n猫じゃないよ、ベンガル！でも猫科だから猫舌だけど、あつ〜い話は大好物！\nたまに変なこと言うけどそれも味ってことで〜。\n風の吹くまま、気の向くまま、ゆる〜く話しているから、気軽に遊びに来てね！"
+          }
+        ]
+      },
+      {
+        "frame": 13,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 14,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 15,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 16,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 17,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 18,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 19,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:wrlf1p3x+w/K:0",
+            "sentAt": 1790539351318,
+            "userId": "77oaqik6-21i4-005s-akq2-b8f4i419w1h5",
+            "userName": "观众1",
+            "text": "しんだ"
+          }
+        ]
+      },
+      {
+        "frame": 20,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 21,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 22,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 23,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 24,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:DadueCP+qeKB:0",
+            "sentAt": 1790539377824,
+            "userId": "0m4aa907-2487-360i-612y-o2737v5u2b09",
+            "userName": "rqvk_gpndai.Hqxbwt",
+            "text": "しんだって言う度さｺﾛした✌️っていったらやばいよね"
+          }
+        ]
+      },
+      {
+        "frame": 25,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 26,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:EIqYczX2J8Wl:0",
+            "sentAt": 1790539380375,
+            "userId": "77oaqik6-21i4-005s-akq2-b8f4i419w1h5",
+            "userName": "观众1",
+            "text": "くろねゆずずっとこっちみてる 見んな"
+          }
+        ]
+      },
+      {
+        "frame": 27,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:osY4P689WIiB:0",
+            "sentAt": 1790539380879,
+            "userId": "0m4aa907-2487-360i-612y-o2737v5u2b09",
+            "userName": "rqvk_gpndai.Hqxbwt",
+            "text": "自制"
+          }
+        ]
+      },
+      {
+        "frame": 28,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 29,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 30,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 31,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 32,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 33,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 34,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 35,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 36,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      }
+    ]
+  }
+}

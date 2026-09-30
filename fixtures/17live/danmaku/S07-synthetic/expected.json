@@ -1,0 +1,637 @@
+{
+  "generator": "fixtures/17live/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) SeventeenliveProtocol (auth, heartbeatInterval, headers, token, endpoint, attach, payload, decode) over every received socket frame (copied as it was; the event classes cut down to their fields)",
+  "value": {
+    "roomId": "27484154",
+    "cases": {
+      "comments: a coloured one, a barrage, a name only in openID, no display user": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case01a:0",
+              "sentAt": 1790636400124,
+              "userId": "00000001-0000-4000-8000-000000000001",
+              "userName": "观众1",
+              "text": "こんばんは"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case01b:0",
+              "sentAt": 1790636400125,
+              "userId": "00000002-0000-4000-8000-000000000002",
+              "userName": "观众2",
+              "text": "弾幕です"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case01c:0",
+              "sentAt": 1790636400126,
+              "userId": "00000003-0000-4000-8000-000000000003",
+              "userName": "viewer_three",
+              "text": "openIDだけ"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case01d:0",
+              "sentAt": 1790636400127,
+              "userId": "",
+              "userName": "",
+              "text": "匿名"
+            }
+          ]
+        }
+      ],
+      "hidden comments: isDirty, isDirtyWord, isDirtyUser": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case02a:0",
+              "sentAt": 1790636400128,
+              "userId": "00000005-0000-4000-8000-000000000005",
+              "userName": "观众5",
+              "text": "見えない1"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case02b:0",
+              "sentAt": 1790636400129,
+              "userId": "00000006-0000-4000-8000-000000000006",
+              "userName": "观众6",
+              "text": "見えない2"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case02c:0",
+              "sentAt": 1790636400130,
+              "userId": "00000007-0000-4000-8000-000000000007",
+              "userName": "观众7",
+              "text": "見えない3"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case02d:0",
+              "sentAt": 1790636400131,
+              "userId": "00000008-0000-4000-8000-000000000008",
+              "userName": "观众8",
+              "text": "見える"
+            }
+          ]
+        }
+      ],
+      "comment text: content first, comment.text without it, blank, not text": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case03a:0",
+              "sentAt": 1790636400132,
+              "userId": "00000009-0000-4000-8000-000000000009",
+              "userName": "观众9",
+              "text": "別の本文"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case03b:0",
+              "sentAt": 1790636400133,
+              "userId": "0000000a-0000-4000-8000-00000000000a",
+              "userName": "观众10",
+              "text": "本文だけ"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case03d:0",
+              "sentAt": 1790636400135,
+              "userId": "0000000c-0000-4000-8000-00000000000c",
+              "userName": "观众12",
+              "text": "前後の空白"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case03e:0",
+              "sentAt": 1790636400136,
+              "userId": "0000000d-0000-4000-8000-00000000000d",
+              "userName": "观众13",
+              "text": "12345"
+            }
+          ]
+        }
+      ],
+      "comment times and colours": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case04a:0",
+              "sentAt": null,
+              "userId": "0000000e-0000-4000-8000-00000000000e",
+              "userName": "观众14",
+              "text": "時間ゼロ"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case04b:0",
+              "sentAt": null,
+              "userId": "0000000f-0000-4000-8000-00000000000f",
+              "userName": "观众15",
+              "text": "時間が文字"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case04c:0",
+              "sentAt": 1790636400139,
+              "userId": "00000010-0000-4000-8000-000000000010",
+              "userName": "观众16",
+              "text": "色なし"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case04d:0",
+              "sentAt": 1790636400140,
+              "userId": "00000011-0000-4000-8000-000000000011",
+              "userName": "观众17",
+              "text": "六桁の色"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case04e:0",
+              "sentAt": 1790636400141,
+              "userId": "00000012-0000-4000-8000-000000000012",
+              "userName": "观众18",
+              "text": "壊れた色"
+            }
+          ]
+        }
+      ],
+      "a time beyond DateTime": [
+        {
+          "throws": "RangeError"
+        }
+      ],
+      "message ids: the message id, else the frame id and index, else none": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:own:7",
+              "sentAt": 1790636400143,
+              "userId": "00000014-0000-4000-8000-000000000014",
+              "userName": "观众20",
+              "text": "自分のid"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": null,
+              "sentAt": 1790636400144,
+              "userId": "00000015-0000-4000-8000-000000000015",
+              "userName": "观众21",
+              "text": "idなし"
+            },
+            {
+              "kind": "chat",
+              "id": null,
+              "sentAt": 1790636400145,
+              "userId": "00000016-0000-4000-8000-000000000016",
+              "userName": "观众22",
+              "text": "idなし2"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": null,
+              "sentAt": 1790636400146,
+              "userId": "00000017-0000-4000-8000-000000000017",
+              "userName": "观众23",
+              "text": "どちらもなし"
+            }
+          ]
+        }
+      ],
+      "live figures (38)": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 95
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "gifts and the other types show nothing": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "gift",
+              "id": "17live:case08a:0",
+              "userId": "00000018-0000-4000-8000-000000000018",
+              "userName": "观众24",
+              "giftId": "2609_jp_cp_akanya",
+              "giftName": "2609_jp_cp_akanya",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "payloads that are not gzip + base64": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case09a:0",
+              "sentAt": 1790636400152,
+              "userId": "0000001d-0000-4000-8000-00000000001d",
+              "userName": "观众29",
+              "text": "そのままのJSON"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case09b:0",
+              "sentAt": 1790636400153,
+              "userId": "0000001e-0000-4000-8000-00000000001e",
+              "userName": "观众30",
+              "text": "オブジェクト"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "several messages in one frame; broken items are skipped": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case10a:0",
+              "sentAt": 1790636400154,
+              "userId": "0000001f-0000-4000-8000-00000000001f",
+              "userName": "观众31",
+              "text": "一つ目"
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 120
+            },
+            {
+              "kind": "gift",
+              "id": "17live:case10a:2",
+              "userId": "00000020-0000-4000-8000-000000000020",
+              "userName": "观众32",
+              "giftId": "2609_jp_cp_akanya",
+              "giftName": "2609_jp_cp_akanya",
+              "count": 1
+            },
+            {
+              "kind": "chat",
+              "id": "17live:case10a:3",
+              "sentAt": 1790636400156,
+              "userId": "00000021-0000-4000-8000-000000000021",
+              "userName": "观众33",
+              "text": "四つ目"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case10b:2",
+              "sentAt": 1790636400157,
+              "userId": "00000022-0000-4000-8000-000000000022",
+              "userName": "观众34",
+              "text": "残る"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "protocol messages: connection, attach, heartbeats and other channels": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": true,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "17live:case11b:0",
+              "sentAt": 1790636400159,
+              "userId": "00000024-0000-4000-8000-000000000024",
+              "userName": "观众36",
+              "text": "バイナリ"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "protocol messages: refusals, detaches and re-authorisation": [
+        {
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ]
+    }
+  }
+}

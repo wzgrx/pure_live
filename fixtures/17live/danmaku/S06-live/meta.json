@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "platform": "17live",
+  "case": "S06-live",
+  "room": "17live:27484154",
+  "danmakuKeys": {
+    "roomId": "27484154"
+  },
+  "capturedAt": "2026-09-28T22:58:20.649286Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://17media.realtime.ably.net/?access_token=qfFN0x.5uyLVut3OmtAx7lB1eD7XgY2Cs0QF9GQvB1sES4JvGXGCc7m1ZKUwuAWKjR0_a34qpM8I93zVxYOvWOoW1b1hFWWkfLG5IWDXP404XrXrH0TVPSoWMQIcv4HrTWwI7qwI&format=json&heartbeats=true&v=3",
+      "headers": {
+        "origin": "https://17.live",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 114,
+  "raw": {
+    "sha256": "89141b6febc0b0f9e9e89a3cd8a8ba6c45affee1da4b1d6347ea23215a314499",
+    "length": 140741
+  },
+  "scrubbed": [
+    {
+      "where": "$.token",
+      "rule": "secret"
+    },
+    {
+      "where": "handshake.access_token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.connectionId",
+      "rule": "secret"
+    },
+    {
+      "where": "$.connectionDetails.connectionKey",
+      "rule": "secret"
+    },
+    {
+      "where": "$.connectionDetails.serverId",
+      "rule": "secret"
+    },
+    {
+      "where": "$.messages[*].data..userID",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..displayName",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..openID",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..picture",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data..userInfo.name",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data.commentMsg.name.text",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data.missionRemind.targetUserID",
+      "rule": "person"
+    },
+    {
+      "where": "$.messages[*].data.commentMsg.content, comment.text (quoted viewer names)",
+      "rule": "person"
+    }
+  ],
+  "tool": "record.dart (dart:io; messenger/auth, then ATTACH of the room channel sent at open; nothing else sent) and scrub.py, M5.29; neither is in the repository",
+  "note": "Recorded 2026-09-28 22:58 UTC (07:58 JST) for M5.29, anonymous and direct, in the room of S04-live-live (27484154), then the most watched in the Japanese recommendations (about 1150 viewers). 225 s and 114 lines: the messenger/auth answer, the ATTACH (the recorder sent it at open, before CONNECTED, as v4 did) and every frame received until the socket dropped (1006 without a DISCONNECTED at 225 s, a local network break during the session; not in the frames). 96 messages: 26 comments (9 of them the streamer's), 18 gifts (13), 11 stream info (6), 9 live figures (38), 8 lucky bags (32), 8 of type 74, 6 labour rewards (79), 5 reactions (28), 2 entries (18), 2 mission reminders (80), 1 rock-viewer list (54); 14 heartbeats, 15 s apart. Viewers' user ids, names, openIDs, avatar file names and profile texts are synthetic (user N: id N-0000-4000-8000-N in hex, name 观众N, the avatar name of the same shape and case), the same person keeping the same values; names quoted in chat are replaced too. The streamer's id, name and avatar are public (S04-live-live) and kept; badge, level and gift assets are public CDN files and kept. The token, connection id, connection key and server id are synthetic values of the same shape and length. Payloads were decoded, scrubbed and re-encoded (compact JSON, gzip with mtime 0, base64); the rest of every frame keeps its bytes. No IPv4 address anywhere. The handshake headers are what the recorder gave dart:io, which sends the user-agent after its own (\"Dart/3.13 (dart:io), Mozilla/5.0 ...\")."
+}

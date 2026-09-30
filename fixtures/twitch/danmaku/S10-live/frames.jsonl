@@ -1,0 +1,92 @@
+{"dir":"out","t":4314,"text":"PASS SCHMOOPIIE"}
+{"dir":"out","t":4314,"text":"NICK justinfan59865"}
+{"dir":"out","t":4314,"text":"CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership"}
+{"dir":"out","t":4314,"text":"JOIN #caedrel"}
+{"dir":"in","t":4534,"text":":tmi.twitch.tv 001 justinfan59865 :Welcome, GLHF!\r\n:tmi.twitch.tv 002 justinfan59865 :Your host is tmi.twitch.tv\r\n:tmi.twitch.tv 003 justinfan59865 :This server is rather new\r\n:tmi.twitch.tv 004 justinfan59865 :-\r\n:tmi.twitch.tv 375 justinfan59865 :-\r\n:tmi.twitch.tv 372 justinfan59865 :You are in a maze of twisty passages, all alike.\r\n:tmi.twitch.tv 376 justinfan59865 :>\r\n:tmi.twitch.tv CAP * ACK :twitch.tv/tags twitch.tv/commands twitch.tv/membership\r\n"}
+{"dir":"in","t":4535,"text":":justinfan59865!justinfan59865@justinfan59865.tmi.twitch.tv JOIN #caedrel\r\n@emote-only=0;followers-only=60;r9k=0;room-id=92038375;slow=0;subs-only=0 :tmi.twitch.tv ROOMSTATE #caedrel\r\n"}
+{"dir":"in","t":4546,"text":":justinfan59865.tmi.twitch.tv 353 justinfan59865 = #caedrel :justinfan59865\r\n:justinfan59865.tmi.twitch.tv 366 justinfan59865 #caedrel :End of /NAMES list\r\n"}
+{"dir":"in","t":7065,"text":"@badge-info=subscriber/26;badges=subscriber/24;client-nonce=oc820k6uu7e57t3jq364797xp0985l0u;color=;display-name=HtqjlK;emotes=;first-msg=0;flags=;id=c5a630b5-c823-47f6-b643-12de9a7ec668;mod=0;returning-chatter=0;room-id=92038375;subscriber=1;tmi-sent-ts=1790781232857;turbo=0;user-id=697071962;user-type= :htqjlk!htqjlk@htqjlk.tmi.twitch.tv PRIVMSG #caedrel :MODS take him out\r\n"}
+{"dir":"in","t":7065,"text":"@badge-info=;badges=moderator/1,bot-badge/1;color=#54BC75;display-name=Nljrni;emotes=;first-msg=0;flags=;id=bc6222a8-9e93-4033-8aef-5238e89f586f;mod=1;returning-chatter=0;room-id=92038375;subscriber=0;tmi-sent-ts=1790781233080;turbo=0;user-id=9804250;user-type=mod :nljrni!nljrni@nljrni.tmi.twitch.tv PRIVMSG #caedrel :VOD Channel has been setup : https://caedrel.com/ ! You can also check them out on YouTube: https://www.youtube.com/@UvnbvqrIAHW-pw6iq\r\n"}
+{"dir":"in","t":14803,"text":"@badge-info=subscriber/2;badges=subscriber/2;client-nonce=v1247y35pvng2y4w8z126531uis0503p;color=;display-name=qstxgbtn_wooh;emotes=;first-msg=0;flags=;id=2485d846-8309-423b-9139-d88427663de6;mod=0;returning-chatter=0;room-id=92038375;subscriber=1;tmi-sent-ts=1790781233349;turbo=0;user-id=8421012431;user-type= :qstxgbtn_wooh!qstxgbtn_wooh@qstxgbtn_wooh.tmi.twitch.tv PRIVMSG #caedrel :wheres ur queen\r\n"}
+{"dir":"out","t":44307,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":44519,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":84263,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":85044,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":124307,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":124764,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"in","t":130345,"text":"@badge-info=;badges=first-stand-2026-viewer/1;color=#2E8B57;display-name=V7_BP;emotes=;flags=;id=6ac45be7-4f6b-4c4e-b7f1-f1e47a476d01;login=v7_bp;mod=0;msg-id=viewermilestone;msg-param-category=watch-streak;msg-param-copoReward=450;msg-param-id=dc9c6473-b5db-40ee-92cd-53dbd8f3608b;msg-param-value=85;room-id=92038375;subscriber=0;system-msg=V7_BP\\swatched\\s85\\sconsecutive\\sstreams\\sand\\ssparked\\sa\\swatch\\sstreak!;tmi-sent-ts=1790781357120;user-id=808764097;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel :W\r\n"}
+{"dir":"in","t":147242,"text":"@badge-info=subscriber/12;badges=moderator/1,subscriber/12,squirtle/1;color=#9ACD32;display-name=ttvt316;emotes=;flags=;id=4c3bd006-c5cc-40f3-8da1-42b737ccc6ac;login=ttvt316;mod=1;msg-id=viewermilestone;msg-param-category=watch-streak;msg-param-copoReward=450;msg-param-id=b687e1ba-1e0f-473c-b6c2-89f5611d1105;msg-param-value=95;room-id=92038375;subscriber=1;system-msg=ttvt316\\swatched\\s95\\sconsecutive\\sstreams\\sand\\ssparked\\sa\\swatch\\sstreak!;tmi-sent-ts=1790781374019;user-id=42952915;user-type=mod;vip=0 :tmi.twitch.tv USERNOTICE #caedrel :im a rat xddConga im a rat xddConga im a rat xddConga im a rat xddConga\r\n"}
+{"dir":"out","t":164304,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":164501,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"in","t":177745,"text":"@badge-info=subscriber/33;badges=subscriber/30;color=#008000;display-name=agr_dsfhcyd;emotes=;flags=;id=b4196989-341b-4d62-88ff-594fa88b5e06;login=agr_dsfhcyd;mod=0;msg-id=resub;msg-param-cumulative-months=33;msg-param-months=0;msg-param-multimonth-duration=2;msg-param-multimonth-tenure=1;msg-param-should-share-streak=0;msg-param-sub-plan-name=Channel\\sSubscription\\s(caedrel);msg-param-sub-plan=1000;msg-param-was-gifted=false;room-id=92038375;subscriber=1;system-msg=agr_dsfhcyd\\ssubscribed\\sat\\sTier\\s1.\\sThey've\\ssubscribed\\sfor\\s33\\smonths!;tmi-sent-ts=1790781404228;user-id=63788658;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel :worth\r\n"}
+{"dir":"in","t":181381,"text":"@badge-info=subscriber/9;badges=subscriber/9,pichu/1;color=#B22222;display-name=layfsauqat_kggegr;emotes=;flags=;id=7c506910-0139-4e68-958e-65cad989525e;login=layfsauqat_kggegr;mod=0;msg-id=viewermilestone;msg-param-category=watch-streak;msg-param-copoReward=450;msg-param-id=48f9b349-da8a-4fa4-9126-dcae49483c6c;msg-param-value=15;room-id=92038375;subscriber=1;system-msg=layfsauqat_kggegr\\swatched\\s15\\sconsecutive\\sstreams\\sand\\ssparked\\sa\\swatch\\sstreak!;tmi-sent-ts=1790781407772;user-id=335157773;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel :shdd\r\n"}
+{"dir":"out","t":204303,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":204501,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":244298,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":244496,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"in","t":259986,"text":"@badge-info=subscriber/26;badges=subscriber/24,premium/1;color=#8556C2;display-name=Vimzjlsa;emotes=;flags=;id=ff5822b0-148e-4a0f-aace-b77728f5b996;login=vimzjlsa;mod=0;msg-id=resub;msg-param-cumulative-months=26;msg-param-months=0;msg-param-multimonth-duration=1;msg-param-multimonth-tenure=0;msg-param-should-share-streak=0;msg-param-sub-plan-name=Channel\\sSubscription\\s(caedrel);msg-param-sub-plan=Prime;msg-param-was-gifted=false;room-id=92038375;subscriber=1;system-msg=Vimzjlsa\\ssubscribed\\swith\\sPrime.\\sThey've\\ssubscribed\\sfor\\s26\\smonths!;tmi-sent-ts=1790781485944;user-id=306402510;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel :xddO\r\n"}
+{"dir":"in","t":265916,"text":"@badge-info=subscriber/4;badges=subscriber/3,ewc-2026-ultraviolet/1;color=#1E90FF;display-name=aupdooo_;emotes=;flags=;id=87477d50-4916-4db1-a896-412c870041b0;login=aupdooo_;mod=0;msg-id=viewermilestone;msg-param-category=watch-streak;msg-param-copoReward=450;msg-param-id=7843084d-ee2f-4ff8-aec4-08751f3658ae;msg-param-value=40;room-id=92038375;subscriber=1;system-msg=aupdooo_\\swatched\\s40\\sconsecutive\\sstreams\\sand\\ssparked\\sa\\swatch\\sstreak!;tmi-sent-ts=1790781491875;user-id=3644366353;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel :40x rat\r\n"}
+{"dir":"out","t":284296,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":284495,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"in","t":288153,"text":"PING :tmi.twitch.tv\r\n"}
+{"dir":"out","t":288153,"text":"PONG :tmi.twitch.tv"}
+{"dir":"out","t":324294,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":324491,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":364290,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":367312,"text":"@badge-info=subscriber/33;badges=subscriber/30,first-stand-2026-viewer/1;color=#9ACD32;display-name=hshks;emotes=;flags=;id=717791b9-9037-4c88-b775-aac18ad6ca3b;login=hshks;mod=0;msg-id=resub;msg-param-cumulative-months=33;msg-param-months=0;msg-param-multimonth-duration=30;msg-param-multimonth-tenure=29;msg-param-should-share-streak=0;msg-param-sub-plan-name=Channel\\sSubscription\\s(caedrel);msg-param-sub-plan=1000;msg-param-was-gifted=false;room-id=92038375;subscriber=1;system-msg=hshks\\ssubscribed\\sat\\sTier\\s1.\\sThey've\\ssubscribed\\sfor\\s33\\smonths!;tmi-sent-ts=1790781590454;user-id=744595235;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel\r\n"}
+{"dir":"in","t":367334,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":404287,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":404487,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"in","t":437586,"text":"@badge-info=subscriber/12;badges=moderator/1,subscriber/3012,mootivation/1;color=#00FFBB;display-name=Jryscg_Fdq;emotes=;flags=;id=404ceb9f-b1ad-46b2-8a7e-efb5a2b2287b;login=jryscg_fdq;mod=1;msg-id=announcement;msg-param-color=BLUE;room-id=92038375;subscriber=1;system-msg=;tmi-sent-ts=1790781660797;user-id=877360506;user-type=mod;vip=0 :tmi.twitch.tv USERNOTICE #caedrel :For the rats that have not seen pinned; The third ep of \"Will the West Win\" is out, link in pinned\r\n"}
+{"dir":"out","t":444285,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":444929,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"in","t":465633,"text":"@badge-info=subscriber/29;badges=subscriber/24;color=#8A2BE2;display-name=Zygyvnj;emotes=;flags=;id=ab9add60-b149-4fcb-afeb-27025e54adee;login=zygyvnj;mod=0;msg-id=resub;msg-param-cumulative-months=29;msg-param-months=0;msg-param-multimonth-duration=1;msg-param-multimonth-tenure=0;msg-param-should-share-streak=0;msg-param-sub-plan-name=Channel\\sSubscription\\s(caedrel);msg-param-sub-plan=Prime;msg-param-was-gifted=false;room-id=92038375;subscriber=1;system-msg=Zygyvnj\\ssubscribed\\swith\\sPrime.\\sThey've\\ssubscribed\\sfor\\s29\\smonths!;tmi-sent-ts=1790781692019;user-id=117661460;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel :Is this what peaks look like?\r\n"}
+{"dir":"out","t":484281,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":484482,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":524279,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":524721,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":564276,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":564476,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"in","t":583812,"text":"PING :tmi.twitch.tv\r\n"}
+{"dir":"out","t":583812,"text":"PONG :tmi.twitch.tv"}
+{"dir":"out","t":604271,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":604949,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":644269,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":644468,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":684267,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":685094,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":724263,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":726468,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":764260,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":764458,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":804259,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":804502,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":844254,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":845293,"text":"PING :tmi.twitch.tv\r\n"}
+{"dir":"out","t":845293,"text":"PONG :tmi.twitch.tv"}
+{"dir":"in","t":845920,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":884251,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":884449,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"in","t":895035,"text":"@badge-info=subscriber/26;badges=subscriber/24,marathon-silkworm/1;color=#008000;display-name=OogOwjp;emotes=;flags=;id=51799ab5-205b-43e1-a19b-3c4f18c9e3ae;login=oogowjp;mod=0;msg-id=resub;msg-param-cumulative-months=26;msg-param-months=0;msg-param-multimonth-duration=10;msg-param-multimonth-tenure=9;msg-param-should-share-streak=0;msg-param-sub-plan-name=Channel\\sSubscription\\s(caedrel);msg-param-sub-plan=1000;msg-param-was-gifted=false;room-id=92038375;subscriber=1;system-msg=OogOwjp\\ssubscribed\\sat\\sTier\\s1.\\sThey've\\ssubscribed\\sfor\\s26\\smonths!;tmi-sent-ts=1790782121637;user-id=334630448;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel :hey @caedrel can you learn to play Deadlock just so you can play the Rat King\r\n"}
+{"dir":"in","t":914226,"text":"@badge-info=subscriber/36;badges=subscriber/36,twitch-recap-2025/1;color=#8A2BE2;display-name=kqiofoekkod655;emotes=;flags=;id=4f5eba4b-7c2d-49f4-9cff-1d3e6251ae09;login=kqiofoekkod655;mod=0;msg-id=resub;msg-param-cumulative-months=36;msg-param-months=0;msg-param-multimonth-duration=1;msg-param-multimonth-tenure=0;msg-param-should-share-streak=1;msg-param-streak-months=16;msg-param-sub-plan-name=Channel\\sSubscription\\s(caedrel);msg-param-sub-plan=Prime;msg-param-was-gifted=false;room-id=92038375;subscriber=1;system-msg=kqiofoekkod655\\ssubscribed\\swith\\sPrime.\\sThey've\\ssubscribed\\sfor\\s36\\smonths,\\scurrently\\son\\sa\\s16\\smonth\\sstreak!;tmi-sent-ts=1790782140601;user-id=635570510;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel\r\n"}
+{"dir":"out","t":924250,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":924448,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"in","t":932326,"text":"@badge-info=subscriber/1;badges=subscriber/0,meltan/1;color=#0000FF;display-name=ynfwaamlfwplxlb;emotes=;flags=;id=bad15e4a-a66e-47ee-830c-9ef59b1a2c9c;login=ynfwaamlfwplxlb;mod=0;msg-id=sub;msg-param-cumulative-months=1;msg-param-months=0;msg-param-multimonth-duration=1;msg-param-multimonth-tenure=0;msg-param-should-share-streak=0;msg-param-sub-plan-name=Channel\\sSubscription\\s(caedrel);msg-param-sub-plan=1000;msg-param-was-gifted=false;room-id=92038375;subscriber=1;system-msg=ynfwaamlfwplxlb\\ssubscribed\\sat\\sTier\\s1.;tmi-sent-ts=1790782159087;user-id=332120587;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel\r\n"}
+{"dir":"out","t":964246,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":964444,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":1004243,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":1004442,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":1044242,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":1044440,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"out","t":1084238,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":1084886,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"in","t":1102783,"text":"PING :tmi.twitch.tv\r\n"}
+{"dir":"out","t":1102783,"text":"PONG :tmi.twitch.tv"}
+{"dir":"out","t":1124235,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":1124434,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"in","t":1148588,"text":"@badge-info=subscriber/10;badges=subscriber/9,first-stand-2026-viewer/1;color=#2E8B57;display-name=fljmubyg;emotes=;flags=;id=1b7f3b92-7598-4ae9-aab3-cb7759c31b34;login=fljmubyg;mod=0;msg-id=resub;msg-param-cumulative-months=10;msg-param-months=0;msg-param-multimonth-duration=1;msg-param-multimonth-tenure=0;msg-param-should-share-streak=0;msg-param-sub-plan-name=Channel\\sSubscription\\s(caedrel);msg-param-sub-plan=Prime;msg-param-was-gifted=false;room-id=92038375;subscriber=1;system-msg=fljmubyg\\ssubscribed\\swith\\sPrime.\\sThey've\\ssubscribed\\sfor\\s10\\smonths!;tmi-sent-ts=1790782375348;user-id=431002129;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel\r\n"}
+{"dir":"in","t":1163754,"text":"@badge-info=;badges=blossom-badge/4;color=#FF4500;display-name=yotcuckql;emotes=;flags=;id=58c08a87-f69b-43b1-8030-2a43379fd25f;login=yotcuckql;mod=0;msg-id=viewermilestone;msg-param-category=watch-streak;msg-param-copoReward=450;msg-param-id=723f5c85-f60a-4940-bef6-3907ca88982e;msg-param-value=60;room-id=92038375;subscriber=0;system-msg=yotcuckql\\swatched\\s60\\sconsecutive\\sstreams\\sand\\ssparked\\sa\\swatch\\sstreak!;tmi-sent-ts=1790782390426;user-id=147496924;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel :Aware\r\n"}
+{"dir":"out","t":1164234,"text":"PING :tmi.twitch.tv"}
+{"dir":"in","t":1164610,"text":":tmi.twitch.tv PONG tmi.twitch.tv :tmi.twitch.tv\r\n"}
+{"dir":"in","t":1185772,"text":"@badge-info=subscriber/5;badges=subscriber/3;color=#FF0000;display-name=jguftmnrip3;emotes=;flags=;id=abab4a9b-8325-4719-82b2-a46ef9a98822;login=jguftmnrip3;mod=0;msg-id=submysterygift;msg-param-community-gift-id=3918641243089153208;msg-param-mass-gift-count=1;msg-param-origin-id=8781140874465101292;msg-param-sender-count=2;msg-param-sub-plan=1000;room-id=92038375;subscriber=1;system-msg=jguftmnrip3\\sis\\sgifting\\s1\\sTier\\s1\\sSubs\\sto\\sCaedrel's\\scommunity!\\sThey've\\sgifted\\sa\\stotal\\sof\\s2\\sin\\sthe\\schannel!;tmi-sent-ts=1790782412534;user-id=667743933;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel\r\n"}
+{"dir":"in","t":1186893,"text":"@badge-info=subscriber/5;badges=subscriber/3;color=#FF0000;display-name=jguftmnrip3;emotes=;flags=;id=5c8b85d4-ff36-42ad-b121-318da4720848;login=jguftmnrip3;mod=0;msg-id=subgift;msg-param-community-gift-id=6440838733942187621;msg-param-gift-months=1;msg-param-months=1;msg-param-origin-id=3090844909032267296;msg-param-recipient-display-name=sdo_skt;msg-param-recipient-id=162774939;msg-param-recipient-user-name=sdo_skt;msg-param-sender-count=0;msg-param-sub-plan-name=Channel\\sSubscription\\s(caedrel);msg-param-sub-plan=1000;room-id=92038375;subscriber=1;system-msg=jguftmnrip3\\sgifted\\sa\\sTier\\s1\\ssub\\sto\\ssdo_skt!;tmi-sent-ts=1790782413128;user-id=667743933;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #caedrel\r\n"}

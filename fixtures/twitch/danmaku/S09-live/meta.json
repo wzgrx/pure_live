@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "platform": "twitch",
+  "case": "S09-live",
+  "room": "twitch:ironmouse",
+  "danmakuKeys": {
+    "login": "ironmouse",
+    "channelId": "175831187"
+  },
+  "capturedAt": "2026-09-30T15:13:46.539731Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://irc-ws.chat.twitch.tv",
+      "headers": {}
+    }
+  ],
+  "frames": 94,
+  "raw": {
+    "sha256": "a63e2d19ca53d6318a332493a83be611d973e2d3513b0c20ed31a51a45445aba",
+    "length": 496299,
+    "frames": 1045
+  },
+  "scrubbed": [
+    {
+      "where": "privmsg.client-nonce",
+      "rule": "secret"
+    },
+    {
+      "where": "privmsg.display-name",
+      "rule": "person"
+    },
+    {
+      "where": "privmsg.user-id",
+      "rule": "digits"
+    },
+    {
+      "where": "privmsg.prefix",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.display-name",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.login",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.system-msg",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.user-id",
+      "rule": "digits"
+    },
+    {
+      "where": "usernotice.msg-param-community-gift-id",
+      "rule": "secret"
+    },
+    {
+      "where": "usernotice.msg-param-origin-id",
+      "rule": "secret"
+    },
+    {
+      "where": "usernotice.msg-param-recipient-display-name",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.msg-param-recipient-id",
+      "rule": "digits"
+    },
+    {
+      "where": "usernotice.msg-param-recipient-user-name",
+      "rule": "person"
+    },
+    {
+      "where": "privmsg.text",
+      "rule": "person"
+    },
+    {
+      "where": "clearmsg.login",
+      "rule": "person"
+    },
+    {
+      "where": "clearmsg.text",
+      "rule": "person"
+    },
+    {
+      "where": "clearchat.target-user-id",
+      "rule": "digits"
+    },
+    {
+      "where": "clearchat.login",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.msg-param-displayName",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.msg-param-login",
+      "rule": "person"
+    },
+    {
+      "where": "usernotice.msg-param-profileImageURL",
+      "rule": "secret"
+    },
+    {
+      "where": "irc.PRIVMSG",
+      "rule": "dropped",
+      "count": 951
+    }
+  ],
+  "tool": "anonymous read-only recorder (M5.F B-7, scratch): justinfan nick, 3.x join lines, no messages sent"
+}

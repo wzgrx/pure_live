@@ -34,7 +34,8 @@ const _offlineAvatar = 'https://vi3.6rooms.com/live/2016/06/01/14/1003v146476235
 final _liveStart = DateTime.utc(2026, 9, 28, 11, 25, 29);
 
 /// Room keys every room changed: the notice is in words for users now
-/// (unified rule "说明文字").
+/// (unified rule "说明文字"), and since M5.27 (chat is shown) it only says
+/// what the audience number is.
 const _notice = {'notice'};
 
 /// Room keys of a room read from inroom: the title is the broadcaster's
@@ -1213,6 +1214,7 @@ void main() {
       );
       expect(room.notice, '${SixRoomApi.restrictedNotice}\n${SixRoomApi.chatNotice}');
       expect(SixRoomApi.liveRoom(live).notice, SixRoomApi.chatNotice);
+      expect(SixRoomApi.chatNotice, '人数是平台的热度，不是正在观看的人数。', reason: 'M5.27: chat is shown, so no "chat not shown" part');
     });
 
     test("enrich takes what the answer lacks from the earlier card; a broadcast's numbers only while it goes on", () {

@@ -1,0 +1,705 @@
+{
+  "generator": "fixtures/sixroom/danmaku/page_expected.py: the v.6.cn room page scripts of 2026-09-30 (PCWebSocket, module 54418, Room.Socket, Room.Msg.get for a guest, handlers 101/110/1413/108, parsePub, parseErr) ported to Python, over every received socket frame",
+  "value": {
+    "servers": [
+      "wss://snbjh2.6rooms.com:5390",
+      "wss://snbjg1.6rooms.com:5390",
+      "wss://snbjh1.6rooms.com:5390",
+      "wss://snbjg2.6rooms.com:5390"
+    ],
+    "login": "command=login\r\nuid=1855555555\r\nencpass=\r\nroomid=57401078\r\n",
+    "heartbeat": "command=sendmessage\r\ncontent=y8vPLwAA\r\n",
+    "heartbeatSeconds": 16,
+    "loginTimeoutSeconds": 6,
+    "frames": [
+      {
+        "line": 3,
+        "joined": true
+      },
+      {
+        "line": 5
+      },
+      {
+        "line": 6
+      },
+      {
+        "line": 7
+      },
+      {
+        "line": 8
+      },
+      {
+        "line": 9,
+        "chats": [
+          {
+            "userName": "观众1",
+            "userId": "10000001",
+            "text": "/来吧",
+            "tm": 1790771511
+          }
+        ]
+      },
+      {
+        "line": 10
+      },
+      {
+        "line": 11
+      },
+      {
+        "line": 12,
+        "chats": [
+          {
+            "userName": "心动ぐつ媚儿",
+            "userId": "57401078",
+            "text": "欢迎观众3！记得点赞收藏关注哦～",
+            "tm": 1790771518
+          }
+        ]
+      },
+      {
+        "line": 14
+      },
+      {
+        "line": 15
+      },
+      {
+        "line": 16
+      },
+      {
+        "line": 17
+      },
+      {
+        "line": 18
+      },
+      {
+        "line": 19
+      },
+      {
+        "line": 20
+      },
+      {
+        "line": 21
+      },
+      {
+        "line": 22
+      },
+      {
+        "line": 24
+      },
+      {
+        "line": 25
+      },
+      {
+        "line": 26
+      },
+      {
+        "line": 27
+      },
+      {
+        "line": 28,
+        "chats": [
+          {
+            "userName": "观众2",
+            "userId": "10000002",
+            "text": "给我充值100 我再去试试/发怒/发怒/发怒",
+            "tm": 1790771546
+          }
+        ]
+      },
+      {
+        "line": 29
+      },
+      {
+        "line": 31
+      },
+      {
+        "line": 32
+      },
+      {
+        "line": 33
+      },
+      {
+        "line": 34
+      },
+      {
+        "line": 35
+      },
+      {
+        "line": 36
+      },
+      {
+        "line": 37,
+        "chats": [
+          {
+            "userName": "观众1",
+            "userId": "10000001",
+            "text": "我没币玩，他坑我毛线啊/窃笑",
+            "tm": 1790771562
+          }
+        ]
+      },
+      {
+        "line": 38
+      },
+      {
+        "line": 39
+      },
+      {
+        "line": 41
+      },
+      {
+        "line": 42
+      },
+      {
+        "line": 43
+      },
+      {
+        "line": 44
+      },
+      {
+        "line": 45
+      },
+      {
+        "line": 46
+      },
+      {
+        "line": 47
+      },
+      {
+        "line": 48
+      },
+      {
+        "line": 49
+      },
+      {
+        "line": 50
+      },
+      {
+        "line": 51
+      },
+      {
+        "line": 52
+      },
+      {
+        "line": 54
+      },
+      {
+        "line": 55
+      },
+      {
+        "line": 56
+      },
+      {
+        "line": 57
+      },
+      {
+        "line": 58
+      },
+      {
+        "line": 59
+      },
+      {
+        "line": 60
+      },
+      {
+        "line": 61
+      },
+      {
+        "line": 62
+      },
+      {
+        "line": 63
+      },
+      {
+        "line": 64
+      },
+      {
+        "line": 65
+      },
+      {
+        "line": 66,
+        "chats": [
+          {
+            "userName": "心动ぐつ媚儿",
+            "userId": "57401078",
+            "text": "欢迎观众4！记得点赞收藏关注哦～",
+            "tm": 1790771591
+          }
+        ]
+      },
+      {
+        "line": 67
+      },
+      {
+        "line": 68
+      },
+      {
+        "line": 69
+      },
+      {
+        "line": 70
+      },
+      {
+        "line": 71
+      },
+      {
+        "line": 72,
+        "chats": [
+          {
+            "userName": "观众2",
+            "userId": "10000002",
+            "text": "/发怒/发怒不要  你给我拿回去",
+            "tm": 1790771594
+          }
+        ]
+      },
+      {
+        "line": 73
+      },
+      {
+        "line": 74
+      },
+      {
+        "line": 75
+      },
+      {
+        "line": 76
+      },
+      {
+        "line": 77
+      },
+      {
+        "line": 78
+      },
+      {
+        "line": 80
+      },
+      {
+        "line": 81
+      },
+      {
+        "line": 82
+      },
+      {
+        "line": 83
+      },
+      {
+        "line": 84
+      },
+      {
+        "line": 85
+      },
+      {
+        "line": 86
+      },
+      {
+        "line": 87
+      },
+      {
+        "line": 88
+      },
+      {
+        "line": 89,
+        "chats": [
+          {
+            "userName": "观众5",
+            "userId": "10000005",
+            "text": "/调戏《在他乡》会唱不",
+            "tm": 1790771603
+          }
+        ]
+      },
+      {
+        "line": 90
+      },
+      {
+        "line": 91
+      },
+      {
+        "line": 92
+      },
+      {
+        "line": 93
+      },
+      {
+        "line": 94
+      },
+      {
+        "line": 95
+      },
+      {
+        "line": 96
+      },
+      {
+        "line": 97
+      },
+      {
+        "line": 98
+      },
+      {
+        "line": 99
+      },
+      {
+        "line": 100
+      },
+      {
+        "line": 101
+      },
+      {
+        "line": 102
+      },
+      {
+        "line": 103
+      },
+      {
+        "line": 104
+      },
+      {
+        "line": 106
+      },
+      {
+        "line": 107
+      },
+      {
+        "line": 108
+      },
+      {
+        "line": 109
+      },
+      {
+        "line": 110
+      },
+      {
+        "line": 111
+      },
+      {
+        "line": 112
+      },
+      {
+        "line": 113
+      },
+      {
+        "line": 114
+      },
+      {
+        "line": 115
+      },
+      {
+        "line": 116
+      },
+      {
+        "line": 117
+      },
+      {
+        "line": 118
+      },
+      {
+        "line": 119
+      },
+      {
+        "line": 120
+      },
+      {
+        "line": 121
+      },
+      {
+        "line": 122
+      },
+      {
+        "line": 123
+      },
+      {
+        "line": 124,
+        "chats": [
+          {
+            "userName": "观众2",
+            "userId": "10000002",
+            "text": "我要跟班给我充值",
+            "tm": 1790771626
+          }
+        ]
+      },
+      {
+        "line": 125
+      },
+      {
+        "line": 126
+      },
+      {
+        "line": 127
+      },
+      {
+        "line": 128
+      },
+      {
+        "line": 129
+      },
+      {
+        "line": 131
+      },
+      {
+        "line": 132
+      },
+      {
+        "line": 133,
+        "chats": [
+          {
+            "userName": "观众1",
+            "userId": "10000001",
+            "text": "点歌请走系统/窃笑/窃笑",
+            "tm": 1790771630
+          }
+        ]
+      },
+      {
+        "line": 134
+      },
+      {
+        "line": 135
+      },
+      {
+        "line": 136
+      },
+      {
+        "line": 137
+      },
+      {
+        "line": 138
+      },
+      {
+        "line": 139
+      },
+      {
+        "line": 140
+      },
+      {
+        "line": 141
+      },
+      {
+        "line": 142
+      },
+      {
+        "line": 143
+      },
+      {
+        "line": 144
+      },
+      {
+        "line": 145
+      },
+      {
+        "line": 146
+      },
+      {
+        "line": 147
+      },
+      {
+        "line": 148
+      },
+      {
+        "line": 149
+      },
+      {
+        "line": 150
+      },
+      {
+        "line": 151
+      },
+      {
+        "line": 152
+      },
+      {
+        "line": 153
+      },
+      {
+        "line": 154
+      },
+      {
+        "line": 156
+      },
+      {
+        "line": 157
+      },
+      {
+        "line": 158
+      },
+      {
+        "line": 159
+      },
+      {
+        "line": 160
+      },
+      {
+        "line": 161
+      },
+      {
+        "line": 162
+      },
+      {
+        "line": 163
+      },
+      {
+        "line": 164
+      },
+      {
+        "line": 165
+      },
+      {
+        "line": 166
+      },
+      {
+        "line": 167
+      },
+      {
+        "line": 168,
+        "chats": [
+          {
+            "userName": "观众5",
+            "userId": "10000005",
+            "text": "/窃笑你是看到了，就像用手指怼一下吧",
+            "tm": 1790771652
+          }
+        ]
+      },
+      {
+        "line": 169
+      },
+      {
+        "line": 170
+      },
+      {
+        "line": 171
+      },
+      {
+        "line": 172
+      },
+      {
+        "line": 173
+      },
+      {
+        "line": 174
+      },
+      {
+        "line": 175
+      },
+      {
+        "line": 176
+      },
+      {
+        "line": 177
+      },
+      {
+        "line": 179,
+        "chats": [
+          {
+            "userName": "观众2",
+            "userId": "10000002",
+            "text": "不行  坑的就是跟班/发怒/发怒",
+            "tm": 1790771662
+          }
+        ]
+      },
+      {
+        "line": 180
+      },
+      {
+        "line": 181
+      },
+      {
+        "line": 182
+      },
+      {
+        "line": 183
+      },
+      {
+        "line": 184
+      },
+      {
+        "line": 185
+      },
+      {
+        "line": 186
+      },
+      {
+        "line": 187
+      },
+      {
+        "line": 188
+      },
+      {
+        "line": 189
+      },
+      {
+        "line": 190
+      },
+      {
+        "line": 191,
+        "chats": [
+          {
+            "userName": "心动ぐつ媚儿",
+            "userId": "57401078",
+            "text": "观众6闪现成功！直播间温度+1℃～",
+            "tm": 1790771668
+          }
+        ]
+      },
+      {
+        "line": 192
+      },
+      {
+        "line": 193
+      },
+      {
+        "line": 194
+      },
+      {
+        "line": 195
+      },
+      {
+        "line": 196
+      },
+      {
+        "line": 197
+      },
+      {
+        "line": 198
+      },
+      {
+        "line": 199
+      },
+      {
+        "line": 200
+      },
+      {
+        "line": 201
+      },
+      {
+        "line": 202
+      },
+      {
+        "line": 204
+      },
+      {
+        "line": 205
+      },
+      {
+        "line": 206
+      },
+      {
+        "line": 207
+      },
+      {
+        "line": 208
+      },
+      {
+        "line": 209
+      },
+      {
+        "line": 210
+      },
+      {
+        "line": 211
+      }
+    ]
+  }
+}

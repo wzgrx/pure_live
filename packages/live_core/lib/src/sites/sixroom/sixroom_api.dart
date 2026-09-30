@@ -242,9 +242,10 @@ typedef SixRoomListPage = ({List<SixRoomRoom> rooms, bool hasMore});
 
 /// What the danmaku module needs for a room (M5): the room number and the
 /// broadcaster's user id. 3.x had no Six Rooms chat (`EmptyDanmaku`); the
-/// room page's chat is a private WebSocket (archive spec §7). Whether the
-/// app shows it is the danmaku module's decision; room entry only hands the
-/// ids over, without a request.
+/// room page's chat is a private WebSocket (archive spec §7), which M5.27
+/// joins as a guest: the user id picks the chat servers and is the login's
+/// `roomid`, the room number is the Referer of the server list request. Room
+/// entry only hands the ids over, without a request.
 @immutable
 final class SixRoomDanmakuArgs {
   /// Creates the arguments.
@@ -312,8 +313,9 @@ abstract final class SixRoomApi {
   static const int maxKeywordLength = 80;
 
   /// The notice of every room (`sixroom_chat_notice`, in words for users
-  /// since M4.U.31; 3.x's was a developer's note).
-  static const String chatNotice = '这里暂时看不到六间房的聊天。人数是平台的热度，不是正在观看的人数。';
+  /// since M4.U.31; 3.x's was a developer's note). Chat is shown since M5.27,
+  /// so it only says what the audience number is.
+  static const String chatNotice = '人数是平台的热度，不是正在观看的人数。';
 
   /// The notice of a private or black-screen room, before [chatNotice]
   /// (`sixroom_restricted_notice`, in words for users since M4.U.31).

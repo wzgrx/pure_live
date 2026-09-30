@@ -71,6 +71,38 @@ void main() {
     expect({chat(), chat()}, hasLength(1));
   });
 
+  group('LiveRetraction', () {
+    test('one message, one sender or the whole chat; equal by target', () {
+      const one = LiveRetraction.message('m1');
+      const sender = LiveRetraction.user('u1');
+      const all = LiveRetraction.all();
+      expect((one.messageId, one.userId, one.isAll), ('m1', null, false));
+      expect((sender.messageId, sender.userId, sender.isAll), (null, 'u1', false));
+      expect(all.isAll, isTrue);
+      expect(one, const LiveRetraction.message('m1'));
+      expect(one, isNot(const LiveRetraction.message('m2')));
+      expect(one, isNot(const LiveRetraction.user('m1')));
+      expect(one.hashCode, const LiveRetraction.message('m1').hashCode);
+      expect([one, sender, all].map((r) => r.toString()), [
+        'LiveRetraction.message(m1)',
+        'LiveRetraction.user(u1)',
+        'LiveRetraction.all()',
+      ]);
+    });
+
+    test('the new message kinds come after the 3.x ones', () {
+      expect(LiveMessageType.values.map((t) => t.name), [
+        'chat',
+        'gift',
+        'online',
+        'superChat',
+        'retraction',
+        'notice',
+      ]);
+      expect(LiveNoticeKind.values.map((k) => k.name), ['system', 'subscription', 'raid']);
+    });
+  });
+
   group('quality labels', () {
     test('Douyin SDK names become Chinese; Chinese labels stay', () {
       expect(LiveQualityLabel.normalize(platform: 'douyin', rawLabel: 'ORIGION', id: 'origion'), '原画');

@@ -13,6 +13,62 @@ enum LiveMessageType {
 
   /// Super chat.
   superChat,
+
+  /// Takes back messages shown earlier (a moderator deleted one, or cleared
+  /// a user's or the whole chat); [LiveMessage.data] holds a
+  /// [LiveRetraction].
+  retraction,
+
+  /// A platform notice shown as a line of its own; [LiveMessage.data] holds
+  /// its [LiveNoticeKind], [LiveMessage.message] the text.
+  notice,
+}
+
+/// What a [LiveMessageType.retraction] takes back.
+@immutable
+final class LiveRetraction {
+  /// The message whose [LiveMessage.messageId] is [messageId].
+  const new message(String this.messageId) : userId = null;
+
+  /// Every message of the sender whose [LiveMessage.userId] is [userId].
+  const new user(String this.userId) : messageId = null;
+
+  /// Every message shown so far.
+  const new all() : messageId = null, userId = null;
+
+  /// The message taken back, for [LiveRetraction.message].
+  final String? messageId;
+
+  /// The sender whose messages are taken back, for [LiveRetraction.user].
+  final String? userId;
+
+  /// Whether the whole chat is taken back.
+  bool get isAll => messageId == null && userId == null;
+
+  @override
+  bool operator ==(Object other) => other is LiveRetraction && other.messageId == messageId && other.userId == userId;
+
+  @override
+  int get hashCode => Object.hash(messageId, userId);
+
+  @override
+  String toString() => messageId != null
+      ? 'LiveRetraction.message($messageId)'
+      : userId != null
+      ? 'LiveRetraction.user($userId)'
+      : 'LiveRetraction.all()';
+}
+
+/// Kind of a [LiveMessageType.notice].
+enum LiveNoticeKind {
+  /// A message from the platform or the room (rules, announcements).
+  system,
+
+  /// A viewer subscribed, renewed or gifted subscriptions.
+  subscription,
+
+  /// Another channel brought its viewers over.
+  raid,
 }
 
 /// Which audience number an update carries.

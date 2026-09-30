@@ -175,4 +175,29 @@ void main() {
       expect(gate.accepts(message, now: now), isTrue);
     });
   });
+
+  group('retractions', () {
+    LiveMessage retraction(LiveRetraction target) => LiveMessage(
+      type: LiveMessageType.retraction,
+      userName: '',
+      message: '',
+      color: LiveMessageColor.white,
+      data: target,
+    );
+
+    test('different targets are different messages; the same target is a duplicate', () {
+      final gate = DanmakuMessageGate();
+      expect(gate.accepts(retraction(const LiveRetraction.message('m1')), now: now), isTrue);
+      expect(gate.accepts(retraction(const LiveRetraction.message('m2')), now: now), isTrue);
+      expect(gate.accepts(retraction(const LiveRetraction.user('m1')), now: now), isTrue);
+      expect(gate.accepts(retraction(const LiveRetraction.all()), now: now), isTrue);
+      expect(gate.accepts(retraction(const LiveRetraction.message('m1')), now: now), isFalse);
+    });
+
+    test('a retraction does not collide with the message it takes back', () {
+      final gate = DanmakuMessageGate();
+      expect(gate.accepts(_message(messageId: 'm1'), now: now), isTrue);
+      expect(gate.accepts(retraction(const LiveRetraction.message('m1')), now: now), isTrue);
+    });
+  });
 }

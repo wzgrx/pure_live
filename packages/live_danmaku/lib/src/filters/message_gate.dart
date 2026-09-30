@@ -10,8 +10,9 @@ import 'package:live_core/live_core.dart';
 /// - A message with a [LiveMessage.messageId] passes once per
 ///   [stableIdWindow].
 /// - Without an id the key is the type, the user id and name (trimmed, lower
-///   case) and the trimmed text, once per [fallbackDuplicateWindow]: short on
-///   purpose, so a viewer who repeats a line is still seen.
+///   case) and the trimmed text (and a retraction's target), once per
+///   [fallbackDuplicateWindow]: short on purpose, so a viewer who repeats a
+///   line is still seen.
 /// - A rejected duplicate keeps its first time: the window does not slide.
 /// - Keys older than [stableIdWindow] are forgotten; at most [maxEntries]
 ///   are kept.
@@ -53,7 +54,9 @@ final class DanmakuMessageGate {
     final key = hasStableId
         ? 'id:$stableId'
         : 'text:${message.type.index}:${message.userId.trim().toLowerCase()}:'
-              '${message.userName.trim().toLowerCase()}:${message.message.trim()}';
+              '${message.userName.trim().toLowerCase()}:${message.message.trim()}'
+              // A retraction's target is its content.
+              '${message.data is LiveRetraction ? ':${message.data}' : ''}';
     final window = hasStableId ? stableIdWindow : fallbackDuplicateWindow;
     final previous = _seen.remove(key);
     if (previous != null && receivedAt.difference(previous) <= window) {

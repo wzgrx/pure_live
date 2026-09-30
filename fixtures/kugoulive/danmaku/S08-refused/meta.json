@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "platform": "kugoulive",
+  "case": "S08-refused",
+  "room": "kugoulive:1073619",
+  "danmakuKeys": {
+    "roomId": "1073619"
+  },
+  "capturedAt": "2026-09-30T12:23:57.879025Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://fx1.service.kugou.com/socket_scheduler/pc/binary/v2/address.jsonp?_p=0&_v=7.0.0&pv=20240801&rid=1073619&clienttime=1790771037879&cid=100&at=102&sign=8e95b61d50eb3f91",
+    "headers": {
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "accept": "application/json, text/plain, */*",
+      "origin": "https://fanxing.kugou.com",
+      "referer": "https://fanxing.kugou.com/1073619"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "access-control-allow-credentials": "true",
+      "x-envoy-upstream-service-time": "7",
+      "date": "Wed, 30 Sep 2026 12:23:58 GMT",
+      "transfer-encoding": "chunked",
+      "access-control-allow-origin": "https://fanxing.kugou.com",
+      "content-encoding": "gzip",
+      "x-via": "1.1 PS-ZHY-01BNR40:18 (Cdn Cache Server V2.0)",
+      "content-type": "application/json;charset=utf-8",
+      "x-ws-request-id": "6abcff5e_PS-ZHY-01BNR40_15179-12715",
+      "server": "openresty"
+    }
+  },
+  "handshakes": [
+    {
+      "url": "wss://chatwss140045.kugou.com/acksocket",
+      "headers": {
+        "origin": "https://fanxing.kugou.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "status": 101
+    }
+  ],
+  "frames": 4,
+  "raw": {
+    "sha256": "a6260551e338118a62e347db117df3ce5b2dfd6843fa66236b8689668c763573",
+    "length": 3336
+  },
+  "scrubbed": [
+    {
+      "where": "dispatch $.data.soctoken, $.data.backsoctoken",
+      "rule": "secret"
+    },
+    {
+      "where": "out 201 LoginRequest.soctoken (15)",
+      "rule": "secret"
+    },
+    {
+      "where": "out 201 LoginRequest.deviceNo (10), sid (18)",
+      "rule": "device"
+    }
+  ],
+  "dropped": {
+    "in 400002 (headlines)": 1,
+    "in 400004 (headlines)": 2
+  },
+  "tool": "M5.25 recorder: a dart:io program (no packages but crypto) that asks the scheduler as the room page does, opens its first host with the page's Origin and the adapter's UA, sends the anonymous login (201) and the binary heartbeat every 10 s, and records every frame; the scheduler answer is the first line. Scrubbed and reduced afterwards by a Python script that decodes each protobuf level and re-encodes it with the same field order and wire types, so what was not replaced is byte for byte the recording.",
+  "note": "A refused login on purpose: the login carries the scheduler's backsoctoken (the page's token for its fallback host) instead of soctoken. The server answers 901 type 4 status 1, then type 1 with errorno 622 and no status, and keeps the socket open without the room (only site-wide headlines followed, dropped). Recorded for 6 s."
+}

@@ -1,0 +1,83 @@
+{
+ "generator": "fixtures/kugoulive/danmaku/web_expected.py: the website room page's own reading (index_5e7bbee.js modules 1374/80965 and RoomSocket, socket_51738e4.js RoomSocket.callback, roomBase dealWithNickName, ViewerHeat), reimplemented in Python over the recorded frames",
+ "value": {
+  "frames": [
+   {
+    "line": 2,
+    "dir": "out",
+    "cmd": 201
+   },
+   {
+    "line": 3,
+    "dir": "in",
+    "cmd": 901,
+    "status": {
+     "type": 4,
+     "status": 1,
+     "errorno": 0,
+     "socsid": ""
+    },
+    "entered": true,
+    "sessionSet": false,
+    "askSchedulerAgain": false
+   },
+   {
+    "line": 4,
+    "dir": "in",
+    "cmd": 901,
+    "status": {
+     "type": 1,
+     "status": 0,
+     "errorno": 622,
+     "socsid": ""
+    },
+    "entered": false,
+    "sessionSet": false,
+    "askSchedulerAgain": true
+   }
+  ],
+  "dispatch": {
+   "sign": {
+    "params": {
+     "_p": "0",
+     "_v": "7.0.0",
+     "pv": "20240801",
+     "rid": "1073619",
+     "clienttime": "1790771037879",
+     "cid": "100",
+     "at": "102"
+    },
+    "sign": "8e95b61d50eb3f91",
+    "recorded": "8e95b61d50eb3f91"
+   },
+   "hosts": [
+    "wss://chatwss140045.kugou.com/acksocket",
+    "wss://chatwss140058.kugou.com/acksocket",
+    "wss://chatwss146107.kugou.com/acksocket"
+   ],
+   "soctoken": "ec79d018ed01f25b2ca2c1708e3658bd8451c1f880a6a8a524b",
+   "age": 300000
+  },
+  "login": {
+   "object": {
+    "cmd": 201,
+    "roomid": 1073619,
+    "kugouid": 0,
+    "token": "",
+    "appid": 1010,
+    "referer": 0,
+    "clientid": 100,
+    "v": 20240801,
+    "soctoken": "8de8af19821958cd1182ab01612cccd49a1bbb0382f",
+    "sid": "7dd753e0-ed54-42f0-9bb5-ce62ddd1bc57",
+    "socsid": "",
+    "deviceNo": "5b6c3238-3df5-41c2-a15a-12b27061a5dd",
+    "screen": 0,
+    "platid": 7,
+    "dfid": "-"
+   },
+   "b64": "ZAADAQAMAAAAyQAAAKAAAAAAOp0BCMkBENPDQRgAIgAw8gc4B1IkNWI2YzMyMzgtM2RmNS00MWMyLWExNWEtMTJiMjcwNjFhNWRkYKGz0wloAHBkeis4ZGU4YWYxOTgyMTk1OGNkMTE4MmFiMDE2MTJjY2NkNDlhMWJiYjAzODJmkgEkN2RkNzUzZTAtZWQ1NC00MmYwLTliYjUtY2U2MmRkZDFiYzU3ugEA6AEAsgIBLQ=="
+  },
+  "heartbeat": "ZAABAA=="
+ }
+}

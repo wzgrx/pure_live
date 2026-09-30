@@ -117,8 +117,10 @@ void _expectLegacyRequests(List<LiveRequest> requests, Map<String, dynamic> outc
 
 /// What every room changes against 3.x: `httpHeaders` (3.x's media headers
 /// on the room, now on the lines, M4.29) and `notice` (29-6; 29-2 for the
-/// room info's announcements). The new keys (`startedAt`, `restriction`)
-/// are not in 3.x's output; kugoulive_api_test.dart checks them.
+/// room info's announcements; M5.25: the chat is shown, so the notice no
+/// longer says it cannot be seen). The new keys (`startedAt`,
+/// `restriction`) are not in 3.x's output; kugoulive_api_test.dart checks
+/// them.
 const _roomChanged = {'httpHeaders', 'notice'};
 
 /// A room from the room info also leaves its title empty (29-2).
@@ -711,6 +713,47 @@ void main() {
       expect(http.requests, hasLength(2));
       await expectLater(site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
       expect(http.requests, hasLength(2));
+    });
+
+    test('chat arguments (29-5, M5.25): live entry and recording carry the room, nothing else', () async {
+      final (:site, :http) = _setup(_liveSamples);
+      for (final room in [
+        await site.getRoomDetail(roomId: 'https://fanxing.kugou.com/3197156'),
+        await site.getRoomDetailForRecording(roomId: '3197156'),
+      ]) {
+        expect(room.danmakuData, isA<KugouLiveDanmakuArgs>().having((args) => args.roomId, 'roomId', '3197156'));
+      }
+      expect((await site.getRoomDetailForRefresh(roomId: '3197156')).danmakuData, isNull, reason: 'not an entry');
+      expect(http.requests, hasLength(5), reason: 'no request for the chat');
+      expect(const KugouLiveDanmakuArgs(roomId: '3197156').toString(), 'KugouLiveDanmakuArgs(3197156)');
+      // Offline and without a live session: none; live without a stream or
+      // asking for a login: the chat works all the same.
+      expect((await _setup(['S04-room-offline']).site.getRoomDetail(roomId: '1014306')).danmakuData, isNull);
+      final unknown = KugouLiveSite(_Scripted((request) => _response(request, _roomInfo(data: {'liveSessionId': ''}))));
+      expect((await unknown.getRoomDetail(roomId: '5085706')).danmakuData, isNull);
+      final login = KugouLiveSite(
+        _roomThenStream(jsonEncode({'code': KugouLiveApi.loginRequiredCode, 'msg': '', 'data': null})),
+      );
+      expect(
+        (await login.getRoomDetail(roomId: '5085706')).danmakuData,
+        isA<KugouLiveDanmakuArgs>().having((args) => args.roomId, 'roomId', '5085706'),
+      );
+      final noStream = _setup(
+        ['S04-room-live'],
+        extra: [
+          _answer(
+            'S05-stream-live',
+            jsonEncode({
+              'code': 0,
+              'data': {'status': 0, 'roomId': 3197156, 'lines': <Object?>[]},
+            }),
+          ),
+        ],
+      );
+      expect((await noStream.site.getRoomDetail(roomId: '3197156')).danmakuData, isA<KugouLiveDanmakuArgs>());
+      // The chat's audience brings the broadcast's cumulative viewers.
+      expect(AudiencePlatformCapability.of('kugoulive').hasTotalViewers, isTrue);
+      expect(KugouLiveApi.chatNotice, isNot(contains('聊天')), reason: 'M5.25: the chat is shown');
     });
 
     test('a stream answer that fails otherwise fails the entry, as in 3.x', () async {

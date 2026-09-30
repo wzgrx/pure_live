@@ -214,10 +214,14 @@ const Map<String, AudiencePlatformCapability> audienceCapabilities = {
     onlineAvailability: AudienceOnlineAvailability.unsupported,
   ),
   // Kugou keeps directory viewerNum/getViewerNum, platform hot and
-  // broadcaster fansCount as three independent metrics.
+  // broadcaster fansCount as three independent metrics. In the room, the
+  // chat's roomAuNumber (301005) pushes about every minute the viewers now
+  // (count, the lists' viewerNum) and the broadcast's cumulative viewers
+  // (visited, the website's "本场累计"); its hot is the page's own heat, not the
+  // lists' hot (M5.25).
   'kugoulive': AudiencePlatformCapability(
     hasPopularity: true,
-    hasTotalViewers: false,
+    hasTotalViewers: true,
     onlineAvailability: AudienceOnlineAvailability.roomList,
   ),
   // Baidu's PC feed audience_count and room online_users are live audience

@@ -1,0 +1,1894 @@
+{
+ "generator": "fixtures/kugoulive/danmaku/web_expected.py: the website room page's own reading (index_5e7bbee.js modules 1374/80965 and RoomSocket, socket_51738e4.js RoomSocket.callback, roomBase dealWithNickName, ViewerHeat), reimplemented in Python over the recorded frames",
+ "value": {
+  "frames": [
+   {
+    "line": 2,
+    "dir": "out",
+    "cmd": 201
+   },
+   {
+    "line": 3,
+    "dir": "in",
+    "cmd": 901,
+    "status": {
+     "type": 4,
+     "status": 1,
+     "errorno": 0,
+     "socsid": ""
+    },
+    "entered": true,
+    "sessionSet": false,
+    "askSchedulerAgain": false
+   },
+   {
+    "line": 4,
+    "dir": "in",
+    "cmd": 901,
+    "status": {
+     "type": 1,
+     "status": 1,
+     "errorno": 0,
+     "socsid": "1f1de5b344bc84737ada7a0cd395d68"
+    },
+    "entered": true,
+    "sessionSet": true,
+    "askSchedulerAgain": false
+   },
+   {
+    "line": 5,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 6,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 7,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 8,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 9,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "第1天来了，欢迎~，『观众002』来了，欢迎您哦！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771498671,
+     "time": 1790771498,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 10,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 11,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 12,
+    "dir": "in",
+    "cmd": 301005,
+    "audience": {
+     "count": 100,
+     "visited": 2594,
+     "hot": 1389,
+     "roomid": 51049168
+    }
+   },
+   {
+    "line": 13,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 7331759460,
+     "senderkugouid": 7331759460,
+     "operationUserId": 7331759460,
+     "userName": "观众03",
+     "text": "跳个舞看看",
+     "toName": null,
+     "richLevel": 1,
+     "fanBadge": null,
+     "seq": 3321129,
+     "time": 1790771500,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 14,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "第1天来了，欢迎~，欢迎『观众00004』，夹道鞠躬、大哥威风！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771504343,
+     "time": 1790771504,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 15,
+    "dir": "in",
+    "cmd": 304303
+   },
+   {
+    "line": 16,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 17,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 18,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 19,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 20,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 21,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 22,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 23,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 24,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 25,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 26,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 27,
+    "dir": "in",
+    "cmd": 100
+   },
+   {
+    "line": 28,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "通过推荐来了，欢迎『观众000005』，给您捶捶背！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771523511,
+     "time": 1790771523,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 29,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 30,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 31,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 32,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 33,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 34,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 35,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 36,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 37,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 38,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "通过推荐来了，欢迎『观众006』，请坐沙发！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771527890,
+     "time": 1790771528,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 39,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "第1天来了，欢迎~，欢迎『观众0000007』入座，请喝茶~[/咖啡]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771531907,
+     "time": 1790771532,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 40,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 41,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过推荐来了，欢迎『观众008』来了，欢迎欢迎、掌声不停！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771534632,
+     "time": 1790771535,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 42,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 43,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 44,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 45,
+    "dir": "in",
+    "cmd": 304303
+   },
+   {
+    "line": 46,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过「才艺头条推荐」进房了，欢迎『观众0009』入座，欢迎光临！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771538617,
+     "time": 1790771539,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 47,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过上下滑来了，欢迎『观众00010』，welcome！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771540620,
+     "time": 1790771542,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 48,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 49,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 50,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 51,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过推荐来了，欢迎『观众0011』来了，欢迎欢迎！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771546868,
+     "time": 1790771547,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 52,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 53,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过上下滑来了，欢迎『观众00012』来了，列队欢迎、大哥英明！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771548870,
+     "time": 1790771549,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 54,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 55,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 56,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 57,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 58,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 59,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 60,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 61,
+    "dir": "in",
+    "cmd": 301005,
+    "audience": {
+     "count": 100,
+     "visited": 2615,
+     "hot": 1387,
+     "roomid": 51049168
+    }
+   },
+   {
+    "line": 62,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过「才艺头条推荐」进房了，欢迎『观众0000013』，欢迎欢迎、久仰威名！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771563664,
+     "time": 1790771564,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 63,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 64,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 65,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5856175035,
+     "senderkugouid": 5856175035,
+     "operationUserId": 5856175035,
+     "userName": "观众008",
+     "text": "好奶的粉子",
+     "toName": null,
+     "richLevel": 11,
+     "fanBadge": null,
+     "seq": 319578774,
+     "time": 1790771567,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 66,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 67,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 68,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 69,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 70,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 71,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 72,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 73,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 74,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 75,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 76,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 77,
+    "dir": "in",
+    "cmd": 304303
+   },
+   {
+    "line": 78,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 79,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 80,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 81,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 82,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过上下滑来了，欢迎『观众14』，大哥隆重登场，里边包厢欣赏！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771593628,
+     "time": 1790771593,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 83,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 84,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 85,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 86,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 87,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过推荐来了，欢迎『观众15』，夹道鞠躬、大哥威风！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771600785,
+     "time": 1790771600,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 88,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过关注来了，欢迎『观众016』，阿尼哈撒哟~[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771603174,
+     "time": 1790771603,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 89,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过上下滑来了，欢迎『观众017』来了，欢迎欢迎、掌声不停！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771605175,
+     "time": 1790771605,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 90,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 91,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 92,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 93,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 94,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 95,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 96,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 97,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过上下滑来了，欢迎『观众000018』，欢迎捧场、喝啥你讲！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771616252,
+     "time": 1790771616,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 98,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 99,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 100,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 101,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 102,
+    "dir": "in",
+    "cmd": 304303
+   },
+   {
+    "line": 103,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "第8天来了，欢迎~，欢迎『观众19』，欢迎欢迎、久仰威名！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771618943,
+     "time": 1790771619,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 104,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "通过推荐来了，欢迎『观众020』，欢迎入座、看到日落！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771620944,
+     "time": 1790771621,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 105,
+    "dir": "in",
+    "cmd": 301005,
+    "audience": {
+     "count": 95,
+     "visited": 2629,
+     "hot": 1329,
+     "roomid": 51049168
+    }
+   },
+   {
+    "line": 106,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 107,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 108,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 109,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 110,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 111,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 112,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "通过推荐来了，欢迎『观众1』常来看看哦！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771624862,
+     "time": 1790771625,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 113,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 114,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 115,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 116,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "第1天来了，欢迎~，『观众022』来了，欢迎您哦！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771628428,
+     "time": 1790771628,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 117,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 118,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 119,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "第1天来了，欢迎~，欢迎『观众0023』来了，起立鼓掌！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771634814,
+     "time": 1790771635,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 120,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 121,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 122,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过推荐来了，欢迎『观众00000024』，大哥隆重登场，里边包厢欣赏！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771641139,
+     "time": 1790771641,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 123,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 124,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 125,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 126,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 127,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "发现一名神秘嘉宾偷偷进入房间，名字：未知，等级：国王，繁星ID：未知",
+     "toName": "姜拾七er",
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771646585,
+     "time": 1790771646,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 128,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 446974472,
+     "senderkugouid": 523432820,
+     "operationUserId": 446974472,
+     "userName": "观众19",
+     "text": "我吗？",
+     "toName": null,
+     "richLevel": 23,
+     "fanBadge": null,
+     "seq": 539752054,
+     "time": 1790771650,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 129,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 130,
+    "dir": "in",
+    "cmd": 300622
+   },
+   {
+    "line": 131,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 132,
+    "dir": "in",
+    "cmd": 1901
+   },
+   {
+    "line": 133,
+    "dir": "in",
+    "cmd": 304303
+   },
+   {
+    "line": 134,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过推荐来了，欢迎『观众000025』，夹道鞠躬、大哥威风！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771655421,
+     "time": 1790771655,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 135,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 136,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 137,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 138,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 139,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 140,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 141,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 142,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 143,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 144,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "第1天来了，欢迎~，欢迎『观众000026』，请坐沙发！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771668299,
+     "time": 1790771668,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 145,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 146,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 147,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 148,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 149,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 150,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 151,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 152,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 153,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 154,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 155,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 156,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "通过推荐来了，欢迎『观众00027』入座，欢迎光临！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771683647,
+     "time": 1790771683,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 157,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 158,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 159,
+    "dir": "in",
+    "cmd": 301005,
+    "audience": {
+     "count": 95,
+     "visited": 2648,
+     "hot": 1323,
+     "roomid": 51049168
+    }
+   },
+   {
+    "line": 160,
+    "dir": "in",
+    "cmd": 304303
+   },
+   {
+    "line": 161,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "感谢『观众0009』的关注，记得常来哦！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771687834,
+     "time": 1790771688,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 162,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 163,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 164,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎新来的宝宝，点点关注不迷路，刷刷礼物真情露，真心告白求守护，花花草草都是爱~[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771691100,
+     "time": 1790771691,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 165,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 166,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 167,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 446974472,
+     "senderkugouid": 523432820,
+     "operationUserId": 446974472,
+     "userName": "观众19",
+     "text": "不是，新认识的",
+     "toName": null,
+     "richLevel": 23,
+     "fanBadge": null,
+     "seq": 539802348,
+     "time": 1790771700,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 168,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 169,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 170,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 171,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 172,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 173,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 174,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 175,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 176,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 177,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 178,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 179,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 180,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 181,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 182,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 183,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 184,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 185,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 186,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 187,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 188,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 189,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 190,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "第1天来了，欢迎~，欢迎『观众0028』，welcome！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771726280,
+     "time": 1790771726,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 191,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "欢迎通过推荐来了，欢迎『观众0029』来了，欢迎欢迎、掌声不停！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771730298,
+     "time": 1790771730,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 192,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 193,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 194,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 195,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 196,
+    "dir": "in",
+    "cmd": 304303
+   },
+   {
+    "line": 197,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 446974472,
+     "senderkugouid": 523432820,
+     "operationUserId": 446974472,
+     "userName": "观众19",
+     "text": "我想爱你。你也不给机会啊[/偷笑]",
+     "toName": null,
+     "richLevel": 23,
+     "fanBadge": null,
+     "seq": 539845899,
+     "time": 1790771744,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 198,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 199,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 200,
+    "dir": "in",
+    "cmd": 301005,
+    "audience": {
+     "count": 87,
+     "visited": 2659,
+     "hot": 1212,
+     "roomid": 51049168
+    }
+   },
+   {
+    "line": 201,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 202,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 203,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 204,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 205,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "发现一名神秘嘉宾偷偷进入房间，名字：未知，等级：亲王，繁星ID：未知",
+     "toName": "姜拾七er",
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771757130,
+     "time": 1790771757,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 206,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 207,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 208,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 209,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 210,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 211,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 212,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 213,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 214,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 215,
+    "dir": "in",
+    "cmd": 501,
+    "chat": {
+     "shown": true,
+     "otherRoom": false,
+     "source": null,
+     "roomid": 51049168,
+     "senderid": 5847998728,
+     "senderkugouid": 5847998728,
+     "operationUserId": 5847998728,
+     "userName": "观众001",
+     "text": "通过推荐来了，欢迎『观众030』来了，欢迎欢迎！[/抱抱]",
+     "toName": null,
+     "richLevel": 0,
+     "fanBadge": null,
+     "seq": 1790771774239,
+     "time": 1790771774,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   },
+   {
+    "line": 216,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 217,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 218,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 219,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 220,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 221,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 222,
+    "dir": "in",
+    "cmd": 300361
+   },
+   {
+    "line": 223,
+    "dir": "out",
+    "heartbeat": "64000100"
+   },
+   {
+    "line": 224,
+    "dir": "in",
+    "heartbeat": "64000300"
+   },
+   {
+    "line": 225,
+    "dir": "in",
+    "cmd": 616
+   },
+   {
+    "line": 226,
+    "dir": "in",
+    "cmd": 315
+   },
+   {
+    "line": 227,
+    "dir": "out",
+    "heartbeat": "64000100"
+   }
+  ],
+  "dispatch": {
+   "sign": {
+    "params": {
+     "_p": "0",
+     "_v": "7.0.0",
+     "pv": "20240801",
+     "rid": "51049168",
+     "clienttime": "1790771485827",
+     "cid": "100",
+     "at": "102"
+    },
+    "sign": "2391560a2d8b300a",
+    "recorded": "2391560a2d8b300a"
+   },
+   "hosts": [
+    "wss://chatwss146107.kugou.com/acksocket",
+    "wss://chatwss140058.kugou.com/acksocket",
+    "wss://chatwss140045.kugou.com/acksocket"
+   ],
+   "soctoken": "ec79d018ed01f25b2ca2c1708e3658bd8451c1f880a6a8a524b",
+   "age": 300000
+  },
+  "login": {
+   "object": {
+    "cmd": 201,
+    "roomid": 51049168,
+    "kugouid": 0,
+    "token": "",
+    "appid": 1010,
+    "referer": 0,
+    "clientid": 100,
+    "v": 20240801,
+    "soctoken": "ec79d018ed01f25b2ca2c1708e3658bd8451c1f880a6a8a524b",
+    "sid": "7dd753e0-ed54-42f0-9bb5-ce62ddd1bc57",
+    "socsid": "",
+    "deviceNo": "5b6c3238-3df5-41c2-a15a-12b27061a5dd",
+    "screen": 0,
+    "platid": 7,
+    "dfid": "-"
+   },
+   "b64": "ZAADAQAMAAAAyQAAAKkAAAAAOqYBCMkBENDlqxgYACIAMPIHOAdSJDViNmMzMjM4LTNkZjUtNDFjMi1hMTVhLTEyYjI3MDYxYTVkZGChs9MJaABwZHozZWM3OWQwMThlZDAxZjI1YjJjYTJjMTcwOGUzNjU4YmQ4NDUxYzFmODgwYTZhOGE1MjRikgEkN2RkNzUzZTAtZWQ1NC00MmYwLTliYjUtY2U2MmRkZDFiYzU3ugEA6AEAsgIBLQ=="
+  },
+  "heartbeat": "ZAABAA=="
+ }
+}

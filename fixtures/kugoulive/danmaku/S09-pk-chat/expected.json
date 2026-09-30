@@ -1,0 +1,34 @@
+{
+ "generator": "fixtures/kugoulive/danmaku/web_expected.py: the website room page's own reading (index_5e7bbee.js modules 1374/80965 and RoomSocket, socket_51738e4.js RoomSocket.callback, roomBase dealWithNickName, ViewerHeat), reimplemented in Python over the recorded frames",
+ "value": {
+  "frames": [
+   {
+    "line": 1,
+    "dir": "in",
+    "cmd": 400305,
+    "chat": {
+     "shown": true,
+     "otherRoom": true,
+     "source": {
+      "roomid": 5138284,
+      "tags": 3
+     },
+     "roomid": 1073619,
+     "senderid": 596913040,
+     "senderkugouid": 535386448,
+     "operationUserId": 596913040,
+     "userName": "观众00001",
+     "text": "欢迎通过关注来了，我家管理从手机霸气登场，『观众02』，欢迎回家！[/抱抱]",
+     "toName": null,
+     "richLevel": 13,
+     "fanBadge": null,
+     "seq": 1790770414326,
+     "time": 1790770415,
+     "msgId": "",
+     "chatLimitCheck": "judgeShowChatMes not applied (needs the room limit and admin list)"
+    }
+   }
+  ],
+  "heartbeat": "ZAABAA=="
+ }
+}

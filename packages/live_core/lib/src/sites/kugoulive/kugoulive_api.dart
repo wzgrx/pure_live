@@ -92,6 +92,25 @@ final class KugouLiveRoomData {
   final SiteError? unavailable;
 }
 
+/// What a danmaku connection needs to join a live room's chat (29-5, M5.25;
+/// 3.x had no Kugou chat, `EmptyDanmaku`): the room number.
+///
+/// The chat is the website's room socket: the connection asks the website's
+/// scheduler (`socket_scheduler`) for the socket addresses and a login token
+/// of the room itself, so room entry hands over nothing else and sends no
+/// request for it. Room entry gives it for a live room.
+@immutable
+final class KugouLiveDanmakuArgs {
+  /// Creates the arguments.
+  const new({required this.roomId});
+
+  /// The room number (3 to 11 digits).
+  final String roomId;
+
+  @override
+  String toString() => 'KugouLiveDanmakuArgs($roomId)';
+}
+
 /// Pure parsing of Kugou Live (繁星, fanxing.kugou.com) responses and links
 /// (3.x's `KugouLiveApi`, `KugouLiveLink` and the card rules of
 /// `KugouLiveSite`). Each function takes the response text and status and
@@ -149,8 +168,10 @@ abstract final class KugouLiveApi {
 
   /// The last notice line of every room, key `kugoulive_chat_notice`,
   /// written for users (29-6; 3.x: “酷狗远端聊天尚待接入；viewerNum/getViewerNum
-  /// 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。”).
-  static const String chatNotice = '这里暂时看不到酷狗直播间的聊天。人数是正在观看的人数，没有时显示热度；粉丝数单独显示。';
+  /// 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。”). The chat is
+  /// shown since M5.25, so the notice only explains the numbers (29-6 began
+  /// with “这里暂时看不到酷狗直播间的聊天。”).
+  static const String chatNotice = '人数是正在观看的人数，没有时显示热度；粉丝数单独显示。';
 
   /// The first notice line of a room whose stream answer asks for a login
   /// ([LiveRestriction.needsLogin]), key `kugoulive_restricted_notice`

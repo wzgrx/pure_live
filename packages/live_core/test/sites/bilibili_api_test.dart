@@ -91,7 +91,35 @@ void main() {
     });
   });
 
+  test('M4.D S17 area rooms (room/v1/area/getRoomList): live rooms by popularity, all fields read', () {
+    final fixture = _sample('S17-area-page1');
+    final result = BilibiliApi.roomList(fixture.body, status: fixture.status);
+    expect(result.rooms, hasLength(30));
+    expect(result.hasMore, isTrue);
+    final first = result.rooms.first;
+    expect(first.roomId, '545068', reason: 'the long id; `link` has the short one');
+    expect(first.liveStatus, LiveStatus.live);
+    expect(first.area, '英雄联盟');
+    expect(first.popularity, '526382');
+    expect(first.cover, endsWith('.jpg@400w.jpg'));
+    for (final room in result.rooms) {
+      expect([room.title, room.nick, room.avatar, room.cover, room.popularity], everyElement(isNotEmpty));
+    }
+    final popularity = [for (final room in result.rooms) int.parse(room.popularity)];
+    expect(popularity, [...popularity]..sort((a, b) => b.compareTo(a)));
+    expect(BilibiliApi.roomList('{"code":0,"data":[]}').hasMore, isFalse, reason: 'past the last page');
+  });
+
   group('S05 search', () {
+    test('M4.D: an area named by the keyword comes without the highlight tags', () {
+      final fixture = _sample('S05-area-keyword');
+      expect(fixture.body, contains(r'"cate_name":"<em class=\"keyword\">英雄联盟</em>"'));
+      final rooms = BilibiliApi.searchRooms(fixture.body, page: 1, status: fixture.status);
+      expect(rooms, hasLength(36));
+      expect(rooms.where((room) => room.area!.contains('<')), isEmpty);
+      expect(rooms.first.area, '英雄联盟');
+    });
+
     for (final name in ['S05-live-results', 'S05-no-buvid3']) {
       test('$name: 3.x rooms first, then the matching streamers 3.x never showed', () {
         final fixture = _sample(name);

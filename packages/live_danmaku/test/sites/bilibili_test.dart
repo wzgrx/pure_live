@@ -490,6 +490,74 @@ void main() {
       expect(BilibiliDanmakuConnection.isMaskedName('a*b*c'), isFalse);
       expect(BilibiliDanmakuConnection.isMaskedName('观众'), isFalse);
     });
+
+    group('M4.D', () {
+      List<LiveMessage> messages(Object? notice) => [
+        for (final item in BilibiliDanmakuProtocol.decode(_notice(notice)).items)
+          if (item case BilibiliDanmakuMessage(:final message)) message,
+      ];
+
+      test('a super chat carries its id; SUPER_CHAT_MESSAGE_DELETE takes each listed id back', () {
+        final chat = messages({
+          'cmd': 'SUPER_CHAT_MESSAGE',
+          'data': {
+            'id': 19298954,
+            'message': 'hi',
+            'price': 30,
+            'start_time': 1790781481,
+            'end_time': 1790781541,
+            'user_info': {'uname': '观众', 'face': ''},
+          },
+        }).single;
+        expect(chat.messageId, '19298954');
+        expect((chat.data! as LiveSuperChatMessage).messageId, '19298954');
+
+        final deleted = messages({
+          'cmd': 'SUPER_CHAT_MESSAGE_DELETE',
+          'data': {
+            'ids': [19298954, '19298955', null],
+          },
+          'roomid': 5050,
+        });
+        expect([for (final message in deleted) message.type], [LiveMessageType.retraction, LiveMessageType.retraction]);
+        expect(
+          [for (final message in deleted) message.data],
+          [const LiveRetraction.message('19298954'), const LiveRetraction.message('19298955')],
+        );
+        expect(deleted.first.messageId, isEmpty);
+        expect(messages({'cmd': 'SUPER_CHAT_MESSAGE_DELETE', 'data': <String, Object?>{}}), isEmpty);
+      });
+
+      test("RECALL_DANMU_MSG: type 2 takes back a user's chats, 3 the whole chat; uid 0 and other types nothing", () {
+        Object? recall(Map<String, Object?> data) {
+          final result = messages({'cmd': 'RECALL_DANMU_MSG', 'data': data});
+          expect(result.every((message) => message.type == LiveMessageType.retraction), isTrue);
+          return result.isEmpty ? null : result.single.data;
+        }
+
+        expect(
+          recall({
+            'recall_type': 2,
+            'target_id': 1,
+            'uinfo': {'uid': 12345},
+          }),
+          const LiveRetraction.user('12345'),
+        );
+        expect(recall({'recall_type': 2, 'target_id': 678}), const LiveRetraction.user('678'));
+        expect(recall({'recall_type': 3}), const LiveRetraction.all());
+        expect(recall({'recall_type': 2, 'target_id': 0}), isNull, reason: 'guests see every uid as 0');
+        expect(recall({'recall_type': 1, 'target_id': 678}), isNull);
+        expect(recall({'recall_type': 0}), isNull);
+      });
+
+      test('WARNING and CUT_OFF are system notices with the reason', () {
+        final warning = messages({'cmd': 'WARNING', 'msg': '违反直播规范', 'roomid': 5050}).single;
+        expect(warning.type, LiveMessageType.notice);
+        expect(warning.data, LiveNoticeKind.system);
+        expect(warning.message, '直播间收到警告：违反直播规范');
+        expect(messages({'cmd': 'CUT_OFF', 'msg': ' ', 'roomid': 5050}).single.message, '直播被切断');
+      });
+    });
   });
 
   group("3.x's frozen output", () {
@@ -543,12 +611,15 @@ void main() {
       final differences = <String, Map<String, Object?> Function(Map<String, Object?> message)>{
         'chat-colors/blue': (message) => {...message, 'color': '#0000ff'},
         'chat-colors/five digits': (message) => {...message, 'color': '#0a0a0a'},
+        // M4.D: the message carries the super chat's id too.
         'super-chat/0': (message) => {
           ...message,
+          'messageId': '19298954',
           'data': {...message['data']! as Map<String, Object?>, 'messageId': '19298954'},
         },
         'super-chat/1': (message) => {
           ...message,
+          'messageId': '19298954',
           'data': {
             ...message['data']! as Map<String, Object?>,
             'messageId': '19298954',
@@ -598,17 +669,20 @@ void main() {
       final frames = (_expectedValue('S13-protover3')['frames'] as List<dynamic>).cast<Map<String, dynamic>>();
       expect({for (final frame in frames) frame['line']}, replay.effects.keys.toSet());
       // M5.1 difference 3: super chats carry `data.id` as their messageId
-      // (3.x left it empty). The ids are public: the snapshot lists them.
+      // (3.x left it empty), the message itself too since M4.D. The ids are
+      // public: the snapshot lists them.
       const ids = ['19367477', '19367516', '19367528', '19367530', '19367547', '19367548'];
       var superChats = 0;
       Object? adjust(Object? effect) {
         if (effect case {'message': final Map<String, dynamic> message} when message['type'] == 'superChat') {
           final data = message['data']! as Map<String, dynamic>;
           expect(data['messageId'], '');
+          final id = ids[superChats++];
           return {
             'message': {
               ...message,
-              'data': {...data, 'messageId': ids[superChats++]},
+              'messageId': id,
+              'data': {...data, 'messageId': id},
             },
           };
         }
@@ -654,7 +728,7 @@ void main() {
         'fansLevel': '',
         'fansName': '',
         'isLocal': false,
-        'messageId': '',
+        'messageId': '19367477',
         'sentAt': null,
         'data': {
           'messageId': '19367477',

@@ -118,9 +118,10 @@ abstract final class BilibiliApi {
     ];
   }
 
-  /// `second/getList` (area rooms, WBI signed), `getListByAreaID` (ranked
-  /// recommendations, list in `data`) and `getMoreRecList` (the fallback
-  /// feed, list in `data.recommend_room_list`). Every room is live; the page
+  /// `area/getRoomList` (area rooms, list in `data`), `second/getList` (its
+  /// signed fallback), `getListByAreaID` (ranked recommendations, list in
+  /// `data`) and `getMoreRecList` (the fallback feed, list in
+  /// `data.recommend_room_list`). Every room is live; the page
   /// is sorted by popularity with identity ties, because neither list is
   /// reliably ordered. The page ends when `has_more` says so, else when it
   /// is empty.
@@ -177,7 +178,8 @@ abstract final class BilibiliApi {
   /// cards after the rooms, on page 1 only (every page repeats them), without
   /// title, cover or audience, and only when their room is not listed yet.
   /// `live_status` is read as in [roomDetail]; a live entry's `live_time`
-  /// (Beijing time) is its start.
+  /// (Beijing time) is its start. `cate_name` is highlighted like the title
+  /// when the keyword names the area (`<em class="keyword">英雄联盟</em>`).
   static List<LiveRoom> searchRooms(String body, {required int page, int status = 200}) {
     final root = _checked(body, status: status, what: 'search');
     final result = _object(_object(root['data'])?['result']);
@@ -210,7 +212,7 @@ abstract final class BilibiliApi {
       // `cover` is a keyframe screenshot; the room cover (what 3.x asked for
       // with cover_type=user_cover) is `user_cover`.
       cover: _image(item['user_cover'], '@400w.jpg').ifEmpty(() => _image(item['cover'], '@400w.jpg')),
-      area: jsonString(item['cate_name']) ?? '',
+      area: _highlighted(item['cate_name']),
       watching: online,
       popularity: online,
       totalViewers: _watched(item['watched_show'], live: live),
@@ -230,7 +232,7 @@ abstract final class BilibiliApi {
       platform: _site,
       nick: _highlighted(item['uname']),
       avatar: _image(item['uface'], '@400w.jpg'),
-      area: jsonString(item['cate_name']) ?? '',
+      area: _highlighted(item['cate_name']),
       watching: '',
       followers: jsonString(item['attentions']) ?? '',
       audienceMetricType: AudienceMetricType.popularity,

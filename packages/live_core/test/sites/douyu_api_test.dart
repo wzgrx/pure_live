@@ -46,9 +46,30 @@ void main() {
       final areas = (legacy[index]['children'] as List).cast<Map<String, dynamic>>();
       expect(category.children, hasLength(areas.length));
       for (final (position, area) in category.children.indexed) {
-        _expectParity(area.toJson(), areas[position], reason: 'S01[$index][$position]');
+        // areaPic: an empty `icon` falls back to `smallIcon` (M4.D); 3.x
+        // showed no picture.
+        final fallback = areas[position]['areaPic'] == '';
+        _expectParity(
+          area.toJson(),
+          areas[position],
+          changed: {if (fallback) 'areaPic'},
+          reason: 'S01[$index][$position]',
+        );
+        if (fallback) expect(area.areaPic, startsWith('https://'));
       }
     }
+  });
+
+  test('S01 2026-10: an area with an empty icon takes its smallIcon (M4.D)', () {
+    final fixture = _sample('S01-cate-list-2026-10');
+    final categories = DouyuApi.categories(fixture.body, status: fixture.status);
+    final areas = categories.expand((category) => category.children).toList();
+    expect(categories, hasLength(10));
+    expect(areas, hasLength(485));
+    final fallout = areas.singleWhere((area) => area.areaId == '918');
+    expect(fallout.areaName, '辐射：避难所Online');
+    expect(fallout.areaPic, 'https://sta-op.douyucdn.cn/dycatr/8ae25a2f8d3e0e987a3ef889f6e7eb56.png');
+    expect(areas.where((area) => area.areaPic.isEmpty), isEmpty);
   });
 
   group('S02/S03 room lists', () {

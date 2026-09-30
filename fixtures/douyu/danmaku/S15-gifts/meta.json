@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "platform": "douyu",
+  "case": "S15-gifts",
+  "room": "douyu:9263298",
+  "capturedAt": "2026-09-30T20:32:06.086909Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://danmuproxy.douyu.com:8506",
+      "headers": {}
+    }
+  ],
+  "note": "The dgb (gift) packet bodies of a 120 s anonymous session, in order; the other packets are left out.",
+  "packets": 57,
+  "raw": {
+    "sha256": "e50e85e1105f0867e19b89ec28a883992482104d836d67e1188965787a675dee",
+    "length": 65664
+  },
+  "scrubbed": [
+    {
+      "where": "dgb.uid",
+      "rule": "person"
+    },
+    {
+      "where": "dgb.nn",
+      "rule": "person"
+    },
+    {
+      "where": "dgb.ic",
+      "rule": "secret"
+    },
+    {
+      "where": "dgb.hc",
+      "rule": "secret"
+    },
+    {
+      "where": "dgb.pma",
+      "rule": "secret"
+    },
+    {
+      "where": "dgb.mss",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.D probe (DouyuDanmakuConnection with a recording connector)"
+}

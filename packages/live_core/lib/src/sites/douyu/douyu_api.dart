@@ -203,7 +203,8 @@ abstract final class DouyuApi {
 
   /// `m.douyu.com/api/cate/list`: `cate1Info` sorted by id, each with the
   /// `cate2Info` areas of that id in platform order. The area picture is
-  /// `icon`.
+  /// `icon`, else `smallIcon`, else `pic` (an area can come with an empty
+  /// `icon`: 辐射：避难所Online, 2026-09-30).
   static List<LiveCategory> categories(String body, {int status = 200}) {
     final data = _object(_checked(body, status: status, what: 'cate/list')['data']);
     final groups = data?['cate1Info'];
@@ -226,12 +227,20 @@ abstract final class DouyuApi {
                     typeName: decodeHtmlEntities(jsonString(group['cate1Name']) ?? ''),
                     areaId: jsonString(area['cate2Id'])!,
                     areaName: decodeHtmlEntities(jsonString(area['cate2Name']) ?? ''),
-                    areaPic: normalizeImageUrl(area['icon']),
+                    areaPic: _areaPicture(area),
                   ),
             ],
           ),
     ];
     return categories..sort((a, b) => (int.tryParse(a.id) ?? 0).compareTo(int.tryParse(b.id) ?? 0));
+  }
+
+  static String _areaPicture(Map<String, dynamic> area) {
+    for (final key in const ['icon', 'smallIcon', 'pic']) {
+      final url = normalizeImageUrl(area[key]);
+      if (url.isNotEmpty) return url;
+    }
+    return '';
   }
 
   /// `gapi/rkc/directory/mixList/2_<area>/<page>` (area rooms, 120 a page)

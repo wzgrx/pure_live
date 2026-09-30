@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "platform": "douyu",
+  "sample": "S01-cate-list-2026-10",
+  "capturedAt": "2026-09-30T20:30:12.573277Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://m.douyu.com/api/cate/list",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "max-age=60",
+      "date": "Wed, 30 Sep 2026 20:30:12 GMT",
+      "transfer-encoding": "chunked",
+      "vary": "Accept-Encoding",
+      "x-gw-cache-status": "BYPASS",
+      "content-encoding": "gzip",
+      "ali-swift-global-savetime": "1790800212",
+      "content-type": "application/json; charset=utf-8",
+      "x-swift-cachetime": "60",
+      "server": "Tengine",
+      "c-via": "200",
+      "x-request-id": "73d2dbae-ad0a-4c8f-be16-2db679a7a246",
+      "timing-allow-origin": "*",
+      "x-swift-savetime": "Wed, 30 Sep 2026 20:30:12 GMT",
+      "via": "cache3.l2nm125-2[69,68,200-0,M], cache30.l2nm125-2[70,0], ens-cache12.cn9479[180,180,200-0,M], ens-cache10.cn9479[183,0]",
+      "x-cache": "MISS TCP_MISS dirn:13:781825335",
+      "eagleid": "76b7ae1e17908002127372501e"
+    }
+  },
+  "raw": {
+    "sha256": "8452eabe2afdf406ed97d152b32821a47beda7d7a750494aa98509545d4e2800",
+    "length": 169695
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "M4.D probe (DouyuSite through a recording LiveHttp, schema 1)"
+}

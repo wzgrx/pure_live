@@ -6,6 +6,7 @@
 // must match. The synthetic cases are the edited copies the generator ran
 // through 3.x (`variants`) and 3.x's look_live_site_test.dart.
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:live_core/live_core.dart';
 import 'package:test/test.dart';
@@ -22,7 +23,8 @@ Object? _result(Object? traced) => (traced! as Map<String, dynamic>)['result'];
 List<Map<String, dynamic>> _maps(Object? value) => (value! as List).cast<Map<String, dynamic>>();
 
 /// Changed on every room: the notices are in words for users (M4.U, the
-/// unified rule on notices); asserted by their own tests.
+/// unified rule on notices), and M5.28 shows LOOK chat, so the chat notice
+/// no longer says it is missing; asserted by their own tests.
 const _notice = {'notice'};
 
 /// Changed for an ended or banned room after a list card of the same
@@ -1234,8 +1236,9 @@ void main() {
       }
     });
 
-    test('notices in words for users (M4.U); the text keys stay', () {
-      expect(LookLiveApi.chatNotice, '这里暂时看不到 LOOK 直播的聊天。人数是正在观看的人数，热度另外显示。');
+    test('notices in words for users (M4.U); the chat notice only explains the numbers (M5.28)', () {
+      // M5.28 shows LOOK chat: "这里暂时看不到 LOOK 直播的聊天。" is gone.
+      expect(LookLiveApi.chatNotice, '人数是正在观看的人数，热度另外显示。');
       expect(LookLiveApi.appOnlyNotice, '这场 LOOK 直播只能在 LOOK App 里观看。');
       expect(LookLiveApi.bannedNotice, '这个 LOOK 直播间被平台禁播或正在违规整改，现在不能观看。');
       expect(LookLiveApi.paidNotice, '这场 LOOK 直播要购票才能观看。');
@@ -1245,8 +1248,148 @@ void main() {
         LookLiveApi.bannedNotice,
         LookLiveApi.paidNotice,
       ]) {
-        expect(notice, isNot(matches(RegExp('popularity|onlineNumber|尚待接入|未知状态|官网|房型'))));
+        expect(notice, isNot(matches(RegExp('popularity|onlineNumber|尚待接入|暂时看不到|未知状态|官网|房型'))));
       }
+    });
+  });
+
+  group('chat (M5.28)', () {
+    test('room entry and recording carry the chat of a live room: its Yunxin chatroom (roomInfo.roomId)', () {
+      for (final (sample, roomId, chatroomId) in [
+        ('S03-room-video', _video, '462192286'),
+        ('S03-room-audio', _audio, '16272838887'),
+        ('S04-room-apponly', _appOnly, '15148749147'),
+      ]) {
+        final room = LookLiveApi.room(_body(sample), roomId: roomId);
+        expect((room.chatroomId, room.anonymousMode), (chatroomId, false), reason: sample);
+        final args = LookLiveDanmakuArgs(roomId: roomId, chatroomId: chatroomId);
+        expect(room.danmakuArgs, args, reason: sample);
+        expect(LookLiveApi.liveRoom(room, withData: true).danmakuData, args, reason: sample);
+        // A refresh keeps no data, as for the streams.
+        final refresh = LookLiveApi.room(_body(sample), roomId: roomId, withMedia: false);
+        expect(refresh.danmakuArgs, args, reason: sample);
+        expect(LookLiveApi.liveRoom(refresh).danmakuData, isNull, reason: sample);
+      }
+      expect(
+        '${LookLiveApi.room(_body('S03-room-video'), roomId: _video).danmakuArgs}',
+        'LookLiveDanmakuArgs(21623631, chatroom 462192286)',
+      );
+    });
+
+    test('no chat for a room that is not live, a list card or an answer without a chatroom', () {
+      final offline = LookLiveApi.room(_body('S04-room-offline'), roomId: _offline);
+      expect(offline.chatroomId, '909690154');
+      expect(offline.danmakuArgs, isNull);
+      expect(LookLiveApi.liveRoom(offline, withData: true).danmakuData, isNull);
+      for (final status in [-10, -4, 0, 7]) {
+        final room = LookLiveApi.room(
+          _editedRoom('S03-room-video', (data, info, anchor) => data['liveStatus'] = status),
+          roomId: _video,
+        );
+        expect(room.danmakuArgs, isNull, reason: '$status');
+      }
+      expect(_videoCard().chatroomId, '');
+      expect(_videoCard().danmakuArgs, isNull);
+      for (final value in [null, '', 0, -1, '0462192286', 'room', 1.5, true, '12345678901234567890']) {
+        final room = LookLiveApi.room(
+          _editedRoom('S03-room-video', (data, info, anchor) => info['roomId'] = value),
+          roomId: _video,
+        );
+        expect(room.chatroomId, '', reason: '$value');
+        expect(LookLiveApi.liveRoom(room, withData: true).danmakuData, isNull, reason: '$value');
+      }
+      final text = LookLiveApi.room(
+        _editedRoom('S03-room-video', (data, info, anchor) => info['roomId'] = ' 462192286 '),
+        roomId: _video,
+      );
+      expect(text.chatroomId, '462192286');
+    });
+
+    test("anonymousMode (the room page masks the viewers' names) is read as true only", () {
+      for (final (value, expected) in [(true, true), (false, false), (null, false), ('true', false), (1, false)]) {
+        final room = LookLiveApi.room(
+          _editedRoom('S03-room-video', (data, info, anchor) => data['anonymousMode'] = value),
+          roomId: _video,
+        );
+        expect(room.anonymousMode, expected, reason: '$value');
+        expect(room.danmakuArgs?.anonymousMode, expected, reason: '$value');
+      }
+    });
+
+    test("the chat stays the answer's when a card of the same broadcast completes it", () {
+      final room = LookLiveApi.room(_body('S03-room-video'), roomId: _video).enrich(_videoCard());
+      expect(room.danmakuArgs, const LookLiveDanmakuArgs(roomId: _video, chatroomId: '462192286'));
+      final card = _videoCard().enrich(LookLiveApi.room(_body('S03-room-video'), roomId: _video));
+      expect(card.danmakuArgs, isNull);
+    });
+
+    test('chat servers: the request of the website and the recorded answer (S05-live)', () {
+      expect(LookLiveApi.chatAddressPath, '/weapi/livestream/chat/address');
+      expect(LookLiveApi.chatAddressPayload('447365581'), {'liveRoomNo': '447365581', 'os': 0});
+      expect(jsonEncode(LookLiveApi.chatAddressPayload('447365581')), '{"liveRoomNo":"447365581","os":0}');
+      final recorded =
+          (jsonDecode(File('../../fixtures/looklive/danmaku/S05-live/frames.jsonl').readAsLinesSync().first)
+                  as Map<String, dynamic>)['text']
+              as String;
+      expect(LookLiveApi.chatAddresses(recorded), [
+        'chatwl01.yunxinfw.com:443',
+        'chatwl01-bgp.yunxinfw.com:443',
+        'chatwl02-bgp.yunxinfw.com:443',
+        'chatwl02.yunxinfw.com:443',
+      ]);
+    });
+
+    test('chat servers: host:port entries only, in order, once; a room that is not live is NotFound', () {
+      String answer(Object? address, {Object? code = 200}) => jsonEncode({
+        'code': code,
+        'msg': null,
+        'message': code == 404 ? '无资源' : null,
+        'data': code == 200 ? {'address': address} : null,
+        'success': code == 200,
+      });
+      expect(
+        LookLiveApi.chatAddresses(
+          answer([
+            ' CHATWL01.yunxinfw.com:443 ',
+            'chatwl01.yunxinfw.com:443',
+            'chatwl02.yunxinfw.com:8443',
+            '127.0.0.1:9000',
+            'chatwl03.yunxinfw.com',
+            'chatwl04.yunxinfw.com:0',
+            'chatwl05.yunxinfw.com:65536',
+            'chatwl06.yunxinfw.com:443/path',
+            'https://chatwl07.yunxinfw.com:443',
+            'user@chatwl08.yunxinfw.com:443',
+            'localhost:443',
+            '-bad.yunxinfw.com:443',
+            'chatwl09.yunxinfw.com:65535',
+            443,
+            null,
+            {'host': 'chatwl10.yunxinfw.com'},
+          ]),
+        ),
+        ['chatwl01.yunxinfw.com:443', 'chatwl02.yunxinfw.com:8443', '127.0.0.1:9000', 'chatwl09.yunxinfw.com:65535'],
+      );
+      expect(() => LookLiveApi.chatAddresses(answer(null, code: 404)), throwsA(isA<NotFound>()));
+      for (final address in [
+        <Object?>[],
+        ['nothing'],
+        'chatwl01.yunxinfw.com:443',
+        null,
+        {'a': 1},
+      ]) {
+        expect(() => LookLiveApi.chatAddresses(answer(address)), throwsA(isA<ApiChanged>()), reason: '$address');
+      }
+      expect(() => LookLiveApi.chatAddresses(answer(null, code: 500)), throwsA(isA<ApiChanged>()));
+      expect(() => LookLiveApi.chatAddresses('not json'), throwsA(isA<ApiChanged>()));
+      expect(
+        () => LookLiveApi.chatAddresses(answer(['chatwl01.yunxinfw.com:443']), status: 503),
+        throwsA(isA<NetworkFailure>()),
+      );
+      expect(
+        () => LookLiveApi.chatAddresses(answer(['chatwl01.yunxinfw.com:443']), status: 403),
+        throwsA(isA<RiskControl>()),
+      );
     });
   });
 }

@@ -27,6 +27,7 @@ export 'src/sites/fc2live.dart';
 export 'src/sites/huya.dart';
 export 'src/sites/kilakila.dart';
 export 'src/sites/kuaishou.dart';
+export 'src/sites/looklive.dart';
 export 'src/sites/missevan.dart';
 export 'src/sites/niconico.dart';
 export 'src/sites/pandalive.dart';

@@ -18,9 +18,11 @@ const _knownLimit = 2000;
 /// The LOOK Live (NetEase) adapter (3.x's `LookLiveSite` and `LookLiveApi`;
 /// parsing in [LookLiveApi]).
 ///
-/// Anonymous, like 3.x: no cookie, no account and no chat (3.x's LOOK Live
-/// had `EmptyDanmaku`). Every request is a form POST of NetEase's `weapi`
-/// envelope with 3.x's headers, does not follow redirects, goes as
+/// Anonymous, like 3.x: no cookie and no account (3.x's LOOK Live also had
+/// no chat, `EmptyDanmaku`; since M5.28 room entry and recording hand the
+/// chat's [LookLiveDanmakuArgs] from the room answer to `live_danmaku`,
+/// without a request of their own). Every request is a form POST of
+/// NetEase's `weapi` envelope with 3.x's headers, does not follow redirects, goes as
 /// `looklive` (so the app routes the platform through its proxy setting)
 /// and has 3.x's 20 s deadline. The requests are 3.x's:
 /// - the video and voice recommendation lists, 20 rooms a page, paged

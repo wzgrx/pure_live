@@ -62,6 +62,43 @@ final class LookLiveVariant {
   final Uri uri;
 }
 
+/// The danmaku (chat) of a live LOOK room (M5.28; 3.x had none): room
+/// entry and recording give it (`LiveRoom.danmakuData`) from the room
+/// answer they already asked for, without another request.
+///
+/// LOOK's chat is a NetEase Yunxin (网易云信) chatroom: the website asks
+/// `LookLiveApi.chatAddressPath` for the room's chat servers and joins the
+/// chatroom `roomInfo.roomId` anonymously.
+@immutable
+final class LookLiveDanmakuArgs {
+  /// Creates the arguments.
+  const new({required this.roomId, required this.chatroomId, this.anonymousMode = false});
+
+  /// The room number (`liveRoomNo`): the chat servers are asked for it.
+  final String roomId;
+
+  /// The Yunxin chatroom of the room (`roomInfo.roomId`; not the room
+  /// number).
+  final String chatroomId;
+
+  /// Whether the room hides its viewers' names (`anonymousMode`): LOOK's
+  /// room page then shows a name's first character and `***`.
+  final bool anonymousMode;
+
+  @override
+  bool operator ==(Object other) =>
+      other is LookLiveDanmakuArgs &&
+      other.roomId == roomId &&
+      other.chatroomId == chatroomId &&
+      other.anonymousMode == anonymousMode;
+
+  @override
+  int get hashCode => Object.hash(roomId, chatroomId, anonymousMode);
+
+  @override
+  String toString() => 'LookLiveDanmakuArgs($roomId, chatroom $chatroomId${anonymousMode ? ', anonymous' : ''})';
+}
+
 /// A LOOK room (3.x's `LookLiveRoom`): a list card, or the room answer
 /// (`room/get/v3`), completed from what was seen before ([enrich]).
 ///
@@ -88,6 +125,8 @@ final class LookLiveRoom {
     this.hasAddress = false,
     this.mediaChecked = false,
     this.paid,
+    this.chatroomId = '',
+    this.anonymousMode = false,
     Iterable<LookLiveVariant> variants = const [],
   }) : variants = List.unmodifiable(variants);
 
@@ -154,6 +193,20 @@ final class LookLiveRoom {
   /// left out (upgrade 32-6).
   final List<LookLiveVariant> variants;
 
+  /// The room's Yunxin chatroom (`roomInfo.roomId` of the room answer,
+  /// M5.28); '' for a list card or an answer without one.
+  final String chatroomId;
+
+  /// Whether the room answer says the room hides its viewers' names
+  /// (`anonymousMode`, M5.28); false for a list card.
+  final bool anonymousMode;
+
+  /// The chat of this room (M5.28): a live room answer with a chatroom;
+  /// null otherwise (a list card, a room that is not live).
+  LookLiveDanmakuArgs? get danmakuArgs => state == LookLiveState.live && chatroomId.isNotEmpty
+      ? LookLiveDanmakuArgs(roomId: roomId, chatroomId: chatroomId, anonymousMode: anonymousMode)
+      : null;
+
   /// Whether this room is watchable in LOOK's app only: stream type 50
   /// without streams (3.x), and without any address in the answer, so a
   /// refresh (which reads no streams) tells it too (3.x's refresh took
@@ -179,7 +232,7 @@ final class LookLiveRoom {
   /// same broadcast while this answer is live (upgrade 32-5; 3.x also gave
   /// an ended room its last heat and viewers); and that broadcast's streams
   /// while this live answer has none (unless the stream type is 50). State,
-  /// kind, start, addresses and ticket stay this answer's.
+  /// kind, start, addresses, ticket and chat stay this answer's.
   LookLiveRoom enrich(LookLiveRoom known) {
     final sameSession = sessionId.isNotEmpty && sessionId == known.sessionId;
     final live = state == LookLiveState.live;
@@ -203,6 +256,8 @@ final class LookLiveRoom {
       hasAddress: hasAddress,
       mediaChecked: mediaChecked,
       paid: paid,
+      chatroomId: chatroomId,
+      anonymousMode: anonymousMode,
       variants: keepKnownVariants ? known.variants : variants,
     );
   }
@@ -318,7 +373,9 @@ abstract final class LookLiveApi {
 
   /// The notice of every room (text key `looklive_chat_notice`), in words
   /// for users (M4.U; 3.x: "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。").
-  static const String chatNotice = '这里暂时看不到 LOOK 直播的聊天。人数是正在观看的人数，热度另外显示。';
+  /// Chat is shown since M5.28, so the notice only explains the numbers
+  /// (M4.U began it with "这里暂时看不到 LOOK 直播的聊天。").
+  static const String chatNotice = '人数是正在观看的人数，热度另外显示。';
 
   /// The notice line of a banned room (text key `looklive_restricted_notice`;
   /// M4.U, 3.x: "该 LOOK 直播受私密房或账号访问条件限制，界面保持未知状态。", upgrade 32-2).
@@ -352,6 +409,12 @@ abstract final class LookLiveApi {
 
   /// Path of the room answer.
   static const String roomPath = '/weapi/livestream/room/get/v3';
+
+  /// Path of the chat servers of a live room (M5.28): LOOK's web client
+  /// posts `/api/livestream/chat/address` (the Live chunk's chat service,
+  /// module `qKXv`), which its request helper sends as this `weapi` path
+  /// (app chunk, modules `jzhw` and `0CZ9`).
+  static const String chatAddressPath = '/weapi/livestream/chat/address';
 
   static final RegExp _roomNumber = RegExp(r'^[1-9][0-9]{1,17}$');
   static final RegExp _identifier = RegExp(r'^[1-9][0-9]{0,18}$');
@@ -449,6 +512,36 @@ abstract final class LookLiveApi {
 
   /// The room request of [roomId].
   static Map<String, String> roomPayload(String roomId) => {'liveRoomNo': roomId};
+
+  /// The chat server request of [roomId], as LOOK's web client sends it
+  /// (`{liveRoomNo, os: 0}`).
+  static Map<String, Object> chatAddressPayload(String roomId) => {'liveRoomNo': roomId, 'os': 0};
+
+  static final RegExp _chatAddress = RegExp(
+    r'^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+:([0-9]{1,5})$',
+  );
+
+  /// The chat servers of a [chatAddressPath] answer: `data.address`, each a
+  /// `host:port` of NetEase Yunxin's chatroom service
+  /// (`chatwl01.yunxinfw.com:443`), in the answer's order, lower-cased;
+  /// entries that are not a host name and a port (1 to 65535) are left out.
+  /// The envelope is the other answers' ([room]'s status and `code`
+  /// mapping): `code` 404 ("无资源", for a room that is not live) is
+  /// `NotFound`. No `address` list, or none usable, is `ApiChanged`.
+  static List<String> chatAddresses(String body, {int status = 200}) {
+    const what = 'chat/address';
+    final data = _data(body, status: status, what: what);
+    final raw = data['address'];
+    if (raw is! List) throw ApiChanged(_site, '$what: address is ${_kind(raw)}');
+    final addresses = <String>{
+      for (final entry in raw)
+        if (_text(entry).toLowerCase() case final address)
+          if (_chatAddress.firstMatch(address) case final match?)
+            if (int.parse(match.group(4)!) case final port when port >= 1 && port <= 65535) address,
+    };
+    if (addresses.isEmpty) throw ApiChanged(_site, '$what: no usable address in ${_snippet(jsonEncode(raw))}');
+    return addresses.toList();
+  }
 
   /// The list path of [kind].
   static String listPath(LookLiveKind kind) => kind == LookLiveKind.audio ? audioListPath : videoListPath;
@@ -613,6 +706,8 @@ abstract final class LookLiveApi {
       hasAddress: _hasAddress(urls),
       mediaChecked: withMedia && live,
       paid: _paid(data['feeInfo']),
+      chatroomId: _optionalId(info['roomId']),
+      anonymousMode: data['anonymousMode'] == true,
       variants: withMedia && live ? _variants(urls) : const [],
     );
   }
@@ -714,8 +809,9 @@ abstract final class LookLiveApi {
   /// unknown); the start and the restriction ([LookLiveRoom.restriction]);
   /// the notice lines (banned, app-only, ticket, chat); 3.x's media
   /// headers. [withData] (room entry and recording) keeps [room] as the
-  /// room's data, with its streams. A number that is not 2 to 18 digits is
-  /// `ApiChanged`, as 3.x's link failed on it.
+  /// room's data, with its streams, and its chat as the danmaku data
+  /// ([LookLiveRoom.danmakuArgs], M5.28). A number that is not 2 to 18
+  /// digits is `ApiChanged`, as 3.x's link failed on it.
   static LiveRoom liveRoom(LookLiveRoom room, {bool withData = false}) {
     if (!isRoomNumber(room.roomId)) throw ApiChanged(_site, 'room number ${room.roomId} is not 2 to 18 digits');
     final online = room.currentViewers?.toString();
@@ -755,6 +851,7 @@ abstract final class LookLiveApi {
       ].join('\n'),
       httpHeaders: mediaHeaders(room.roomId),
       data: withData ? room : null,
+      danmakuData: withData ? room.danmakuArgs : null,
     );
   }
 }
@@ -813,6 +910,17 @@ String _id(Object? value, String what) {
   };
   if (!LookLiveApi._identifier.hasMatch(text)) throw ApiChanged(_site, '$what is ${_kind(value)}');
   return text;
+}
+
+/// An id as [_id] reads it, or '' when missing or not one (the chatroom,
+/// which only the chat needs: M5.28).
+String _optionalId(Object? value) {
+  final text = switch (value) {
+    final int number => '$number',
+    final String text => text.trim(),
+    _ => '',
+  };
+  return LookLiveApi._identifier.hasMatch(text) ? text : '';
 }
 
 /// 3.x's pictures: http(s) with a host, no user info, port or fragment,

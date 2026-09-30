@@ -1,0 +1,1755 @@
+{
+  "generator": "fixtures/looklive/danmaku/web_expected.js: LOOK website code of 2026-09-30 (socket.io 0.9.11 parser and Yunxin web SDK 5.0.1 from Chatroom.e3d6b7d6edc11115bba6.js; ignoreMsgs, parseIM and onmsgs from app.437aa9a876c6e88708b1.js; getMsgElement from Live.f58eedd602695ad4f195.js) over every incoming frame of S05-live/frames.jsonl, and the SDK's createCmd for the recorded login",
+  "value": {
+    "login": {
+      "line": 4,
+      "assembled": "3:::{\"SID\":13,\"CID\":2,\"SER\":1,\"Q\":[{\"t\":\"byte\",\"v\":1},{\"t\":\"Property\",\"v\":{\"1\":\"3a6a3e48f6854dfa4e4464f3bdaec3b4\",\"2\":\"nimanon_00000000000000000000000000000001\",\"3\":\"00000000000000000000000000000002\",\"5\":9902460973,\"8\":0,\"20\":\"匿名用户\",\"21\":\" \",\"26\":\"00000000000000000000000000000003\",\"38\":1}},{\"t\":\"Property\",\"v\":{\"4\":\"Windows 10 64-bit\",\"6\":\"47\",\"8\":1,\"9\":1,\"13\":\"00000000000000000000000000000002\",\"18\":\"3a6a3e48f6854dfa4e4464f3bdaec3b4\",\"19\":\"nimanon_00000000000000000000000000000001\",\"24\":\"Chrome 140.0.0.0\",\"26\":\"00000000000000000000000000000003\",\"1000\":\"\"}}]}"
+    },
+    "frames": [
+      {
+        "line": 3,
+        "packets": [
+          "connect"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 5,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": true,
+        "chat": [],
+        "online": "26"
+      },
+      {
+        "line": 6,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 7,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 8,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "10c26e48bb784704b7a10c83c35868e7",
+            "time": 1790770789087,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "哇～ @观众4 出现了！一定是特别的缘分让我们相聚在这里",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 9,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "8878bc5ff6cc45dead8734cd26b0f3b8",
+            "time": 1790770791719,
+            "from": "1000000002",
+            "kind": "text",
+            "nick": "观众2",
+            "text": "那我这端着的形象往哪放",
+            "userId": 1000000002,
+            "liveLevel": 21,
+            "fanClubLevel": 11,
+            "fanClubName": "偏爱离"
+          }
+        ]
+      },
+      {
+        "line": 10,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 11,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "a8102d74dde749efb0743466c83aaba8",
+            "time": 1790770794578,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "哇~@观众5 来了！今天真开心，因为遇见了你~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 12,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 13,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "3f97540e6bda48f28e479b9ff1ff30b0",
+            "time": 1790770799163,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎@观众6,总有些惊奇得际遇,比方说当我遇见你!",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 14,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 15,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "2adc0baab4cd4fa798525e44d8b5460c",
+            "time": 1790770803911,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎光临~@观众7,缘分让我们在这相聚,感谢有你~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 16,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "e783c684a06d43ceb0cc71c9abdf3f12",
+            "time": 1790770804169,
+            "from": "1000000002",
+            "kind": "text",
+            "nick": "观众2",
+            "text": "1",
+            "userId": 1000000002,
+            "liveLevel": 21,
+            "fanClubLevel": 11,
+            "fanClubName": "偏爱离"
+          }
+        ]
+      },
+      {
+        "line": 17,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 18,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 19,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 20,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "5c2f38d674564da7956340aff428d37a",
+            "time": 1790770806133,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众8 欢迎进来！真是太幸运了，能在这里遇见你~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 21,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "01c2dc097d864d399a59fdcdeface4a5",
+            "time": 1790770809264,
+            "from": "1000000002",
+            "kind": "text",
+            "nick": "观众2",
+            "text": "666",
+            "userId": 1000000002,
+            "liveLevel": 21,
+            "fanClubLevel": 11,
+            "fanClubName": "偏爱离"
+          }
+        ]
+      },
+      {
+        "line": 22,
+        "packets": [
+          "heartbeat"
+        ],
+        "replies": [
+          "2::"
+        ],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 24,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 25,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 26,
+        "packets": [
+          "heartbeat"
+        ],
+        "replies": [
+          "2::"
+        ],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 28,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "20372df41cb649119c9a56fc79b19ad1",
+            "time": 1790770839238,
+            "from": "100000003",
+            "kind": "text",
+            "nick": "观众3",
+            "text": "也是被抽象的世界驯服了",
+            "userId": 100000003,
+            "liveLevel": 12,
+            "fanClubLevel": 8,
+            "fanClubName": "偏爱离"
+          }
+        ]
+      },
+      {
+        "line": 29,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 30,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 31,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "4d4762380d2a44b59d94099b479517e6",
+            "time": 1790770845036,
+            "from": "100000003",
+            "kind": "text",
+            "nick": "观众3",
+            "text": "就乐意搞点抽象",
+            "userId": 100000003,
+            "liveLevel": 12,
+            "fanClubLevel": 8,
+            "fanClubName": "偏爱离"
+          }
+        ]
+      },
+      {
+        "line": 32,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 33,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 34,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "40015cf99eed437082913e90ed9eb616",
+            "time": 1790770848238,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众9 来了呀～ 今天的快乐因为你而加倍！欢迎",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 35,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 36,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 37,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 38,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "8e1d9ec438914ca4a7bf881ca2f09637",
+            "time": 1790770851253,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎光临~@观众10,缘分让我们在这相聚,感谢有你~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 39,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 40,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "5b558ac54caf411390cb68e85853480c",
+            "time": 1790770854268,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎 @观众11～ 茫茫人海，能在这里见到你，真好呀",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 41,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 42,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "867e6e8fcfcc4151a6e46962bb913f28",
+            "time": 1790770856995,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎@观众12！每一次的相遇都是上天安排，很高兴认识你~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 43,
+        "packets": [
+          "heartbeat"
+        ],
+        "replies": [
+          "2::"
+        ],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 45,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 46,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 47,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "d5429ce671dc4ba2b48e98e6fa4611bc",
+            "time": 1790770879071,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎 @观众13！缘分像风，把你吹到了我身边",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 48,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 49,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "33d3dcbd2c0b4a85b69a7d8a0ea6aaba",
+            "time": 1790770882019,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "哇～ @观众14 出现了！一定是特别的缘分让我们相聚在这里",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 50,
+        "packets": [
+          "heartbeat"
+        ],
+        "replies": [
+          "2::"
+        ],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 52,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "e39b2a49f10a41e0a41e3a168c221d4a",
+            "time": 1790770896324,
+            "from": "1000000002",
+            "kind": "text",
+            "nick": "观众2",
+            "text": "国庆快乐，阿離",
+            "userId": 1000000002,
+            "liveLevel": 21,
+            "fanClubLevel": 11,
+            "fanClubName": "偏爱离"
+          }
+        ]
+      },
+      {
+        "line": 53,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 54,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "097942cc855b498eac255c378ca1f1fb",
+            "time": 1790770899719,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎 @观众15！缘分像风，把你吹到了我身边",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 55,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 56,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 57,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "2badc0cd4f684aceb5dcee1a617f1ad6",
+            "time": 1790770907035,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众16 你好呀~欢迎来到我的直播间，这是缘分呢！",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 58,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 59,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "a374ed5bd2d4406d94e2b3856b1f12d5",
+            "time": 1790770909678,
+            "from": "100000003",
+            "kind": "text",
+            "nick": "观众3",
+            "text": "学呗",
+            "userId": 100000003,
+            "liveLevel": 12,
+            "fanClubLevel": 8,
+            "fanClubName": "偏爱离"
+          }
+        ]
+      },
+      {
+        "line": 60,
+        "packets": [
+          "heartbeat"
+        ],
+        "replies": [
+          "2::"
+        ],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 62,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "7ce9c7a09d934a9580002697168bed83",
+            "time": 1790770918618,
+            "from": "100000003",
+            "kind": "text",
+            "nick": "观众3",
+            "text": "虽然唱起来要命",
+            "userId": 100000003,
+            "liveLevel": 12,
+            "fanClubLevel": 8,
+            "fanClubName": "偏爱离"
+          }
+        ]
+      },
+      {
+        "line": 63,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 64,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 65,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "eb75069ffb024285a9d665d67b3939e1",
+            "time": 1790770925792,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎@观众17！每一次的相遇都是上天安排，很高兴认识你~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 66,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 67,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 68,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "3b73ae65f27b4a21aadca943a267156c",
+            "time": 1790770927806,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众18 欢迎你～ 遇见你是我的小幸运，一起开心玩耍吧",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 69,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 70,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 71,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "a772e3812d404d28a587d29d173af190",
+            "time": 1790770930849,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众19 欢迎进来！真是太幸运了，能在这里遇见你~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 72,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 73,
+        "packets": [
+          "heartbeat"
+        ],
+        "replies": [
+          "2::"
+        ],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 75,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "b4c3fa6565f84cae9e95142baf50e455",
+            "time": 1790770936815,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众20 来了呀！欢迎欢迎，希望能给你带来快乐~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 76,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "f84d1cea1c0943babf7e01f7d27b5204",
+            "time": 1790770942343,
+            "from": "100000003",
+            "kind": "text",
+            "nick": "观众3",
+            "text": "明天就国庆了 不早了",
+            "userId": 100000003,
+            "liveLevel": 12,
+            "fanClubLevel": 8,
+            "fanClubName": "偏爱离"
+          }
+        ]
+      },
+      {
+        "line": 77,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 78,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "a4f6464fb972450f9d4e398f64eb24b3",
+            "time": 1790770948255,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎光临~@观众21,缘分让我们在这相聚,感谢有你~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 79,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "476648b041d146c28d239b182bbbcb3e",
+            "time": 1790770949866,
+            "from": "1000000002",
+            "kind": "text",
+            "nick": "观众2",
+            "text": "明天就国庆了 不早了",
+            "userId": 1000000002,
+            "liveLevel": 21,
+            "fanClubLevel": 11,
+            "fanClubName": "偏爱离"
+          }
+        ]
+      },
+      {
+        "line": 80,
+        "packets": [
+          "heartbeat"
+        ],
+        "replies": [
+          "2::"
+        ],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 83,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [],
+        "heartbeatAck": true
+      },
+      {
+        "line": 84,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 85,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "13622aef3a254941ab20b026c7e9f109",
+            "time": 1790770969567,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎 @观众22！每一次相遇都是礼物，谢谢你出现在这里",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 86,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 87,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "e3c76ed6d6614a34bef7bdd146f9e830",
+            "time": 1790770977068,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎@观众23，世界那么大，我们却在这里相遇，真是不可思议~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 88,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "994dd0fbccbf4c54bfb42cb603f1732e",
+            "time": 1790770979198,
+            "from": "100000003",
+            "kind": "text",
+            "nick": "观众3",
+            "text": "g调啊",
+            "userId": 100000003,
+            "liveLevel": 12,
+            "fanClubLevel": 8,
+            "fanClubName": "偏爱离"
+          }
+        ]
+      },
+      {
+        "line": 89,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 90,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "03126487a3894400816031ad128013db",
+            "time": 1790770980404,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎 @观众16～ 美好的相遇从这一刻开始，很高兴认识你！",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 91,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 92,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "74450598fdac448b8320c5738ab7c9f0",
+            "time": 1790770983931,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "惊喜！@观众24 光临了~欢迎你，让我们一起度过美好时光~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 93,
+        "packets": [
+          "heartbeat"
+        ],
+        "replies": [
+          "2::"
+        ],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 95,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 96,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 97,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "f7d8b88c507b4f05837a81374201b913",
+            "time": 1790771006787,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众25 你来啦！遇见你就是今天最大的惊喜",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 98,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 99,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "02586477bf15493f92723aeb31cbeeeb",
+            "time": 1790771009802,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众26 欢迎光临～ 缘分让我们相遇，今天一定会很美好",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 100,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 101,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "433118df6fb0462880a4b857d00afe1b",
+            "time": 1790771011803,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "哇~@观众12 来了！今天真开心，因为遇见了你~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 102,
+        "packets": [
+          "heartbeat"
+        ],
+        "replies": [
+          "2::"
+        ],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 104,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 105,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "86fb731a463844079c2c31a48e8730ae",
+            "time": 1790771016892,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众18 欢迎你～ 遇见你是我的小幸运，一起开心玩耍吧",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 106,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 107,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "bc6f284a33874a67b9edc6fa905d54c0",
+            "time": 1790771027828,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众27 欢迎你～ 遇见你是我的小幸运，一起开心玩耍吧",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 108,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 109,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 110,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "644a3efb1af345db906447cfedaa9ced",
+            "time": 1790771036063,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众28 来啦！世界很大，幸好有你～ 欢迎欢迎",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 111,
+        "packets": [
+          "heartbeat"
+        ],
+        "replies": [
+          "2::"
+        ],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 113,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 114,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 115,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "d9e8298ae5024fa08c20f53c6a6e65c8",
+            "time": 1790771040355,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "叮咚～ @观众13 来了！欢迎欢迎，请随意坐，就像回家一样",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 116,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 117,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "7ecc6cb5a02040428938ae5ce7570310",
+            "time": 1790771051024,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "欢迎@观众29！每一次的相遇都是上天安排，很高兴认识你~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 118,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 119,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "eb0b5435fd414284b3289e81d868bd7e",
+            "time": 1790771061749,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众16 欢迎你～ 遇见你是我的小幸运，一起开心玩耍吧",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 120,
+        "packets": [
+          "heartbeat"
+        ],
+        "replies": [
+          "2::"
+        ],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 122,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "8746188c340243ea93a1d6e19039ceb2",
+            "time": 1790771066038,
+            "from": "100000003",
+            "kind": "text",
+            "nick": "观众3",
+            "text": "女生不算高",
+            "userId": 100000003,
+            "liveLevel": 12,
+            "fanClubLevel": 8,
+            "fanClubName": "偏爱离"
+          }
+        ]
+      },
+      {
+        "line": 123,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 124,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 125,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 126,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "198bd18b4ab143f08488c21510aa1d3f",
+            "time": 1790771076575,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众2 欢迎光临～ 缘分让我们相遇，今天一定会很美好",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 127,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 128,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 129,
+        "packets": [
+          "heartbeat"
+        ],
+        "replies": [
+          "2::"
+        ],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 131,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 132,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "f4510f7152ef41e1926922ab715be630",
+            "time": 1790771090714,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "惊喜！@观众30 光临了~欢迎你，让我们一起度过美好时光~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 133,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 134,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 135,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "19ad2e4056e94647926040dfd5acbb9b",
+            "time": 1790771092715,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众31 来了呀！欢迎欢迎，希望能给你带来快乐~",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      },
+      {
+        "line": 136,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 137,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 138,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": []
+      },
+      {
+        "line": 139,
+        "packets": [
+          "message"
+        ],
+        "replies": [],
+        "joined": false,
+        "chat": [
+          {
+            "idClient": "b62daf82d895411fb73e7512c3c7a26b",
+            "time": 1790771103947,
+            "from": "1000000001",
+            "kind": "text",
+            "nick": "观众1",
+            "text": "@观众32 你好呀～ 欢迎加入，希望这里能带给你快乐",
+            "userId": 1000000001,
+            "liveLevel": 9,
+            "fanClubLevel": 1,
+            "fanClubName": "级偷懒"
+          }
+        ]
+      }
+    ]
+  }
+}

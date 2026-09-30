@@ -417,9 +417,14 @@ abstract final class SteamBroadcastApi {
   static const String legacyBroadcaster = 'Steam broadcaster';
 
   /// The notice of a room (3.x's zh.json key `steambroadcast_chat_notice`,
-  /// rewritten for viewers; M13 translates it). Drop its first sentence
-  /// once the chat is shown (M5).
-  static const String chatNotice = 'Steam 直播的聊天暂时不能在这里显示。人数是正在观看的人数。';
+  /// rewritten for viewers; M13 translates it). The chat is shown since
+  /// M5.23, so it only explains the viewers (M4.U's text began with
+  /// "Steam 直播的聊天暂时不能在这里显示。").
+  static const String chatNotice = '人数是正在观看的人数。';
+
+  /// 3.x's text of `steambroadcast_chat_notice`, which its rooms and follows
+  /// carry; kept for the parity tests and the 3.x migration (M9).
+  static const String legacyChatNotice = 'Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。';
 
   /// The notice of a broadcaster whose account may not broadcast (key
   /// `steambroadcast_restricted_notice`, rewritten: 3.x said the broadcast

@@ -20,7 +20,8 @@ const _offline = '76561197960287930';
 const _scs = '76561198843011284';
 const _unknown = '76561199999999990';
 
-/// 3.x's notice, rewritten for viewers ("说明文字").
+/// 3.x's notice ([SteamBroadcastApi.legacyChatNotice]), rewritten for viewers
+/// ("说明文字"), without its chat sentence since the chat is shown (M5.23).
 const _notice = {'notice'};
 
 /// Asserts that [actual] (a `toJson` plus `link`) equals 3.x's [legacy] map
@@ -1064,6 +1065,25 @@ void main() {
       expect(args.toString(), _live);
       expect(args, const SteamBroadcastDanmakuArgs(_live, broadcastId: '4005242549293303728'));
       expect(args, isNot(const SteamBroadcastDanmakuArgs(_live)));
+    });
+
+    test('changed: the notice only explains the viewers since the chat is shown (M5.23)', () {
+      expect(SteamBroadcastApi.chatNotice, '人数是正在观看的人数。');
+      expect(SteamBroadcastApi.chatNotice, isNot(contains('聊天')), reason: 'no "chat cannot be shown" left');
+      final notices = <Object?>[];
+      void collect(Object? value) {
+        if (value is Map) {
+          value.forEach((key, item) => key == 'notice' ? notices.add(item) : collect(item));
+        } else if (value is List) {
+          value.forEach(collect);
+        }
+      }
+
+      for (final sample in ['S01-directory-p1', 'S01-directory-p2', 'S05-watch-live', 'S05-watch-offline']) {
+        collect(_legacy(sample));
+      }
+      expect(notices, isNotEmpty);
+      expect(notices.toSet(), {SteamBroadcastApi.legacyChatNotice}, reason: "every 3.x room carried 3.x's text");
     });
   });
 

@@ -158,6 +158,49 @@ void main() {
     return Uri.parse('http://127.0.0.1:${raw.port}/stall');
   }
 
+  test('a GET on a kept-alive connection the server closed is sent once more; a POST is not', () async {
+    // Answers the first request of each connection and keeps it alive, then
+    // closes that connection when the next request arrives on it, as a
+    // server whose keep-alive ran out does.
+    final raw = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    final peers = <Socket>[];
+    var connections = 0;
+    addTearDown(() async {
+      for (final peer in peers) {
+        peer.destroy();
+      }
+      await raw.close();
+    });
+    raw.listen((peer) {
+      peers.add(peer);
+      connections++;
+      var requests = 0;
+      peer.listen((data) async {
+        if (!latin1.decode(data).contains('\r\n\r\n')) return;
+        if (++requests == 1) {
+          peer.add(latin1.encode('HTTP/1.1 200 OK\r\ncontent-length: 2\r\nconnection: keep-alive\r\n\r\nok'));
+          await peer.flush();
+        } else {
+          peer.destroy();
+        }
+      });
+    });
+    final url = Uri.parse('http://127.0.0.1:${raw.port}/hls');
+    final client = IoLiveHttp();
+    addTearDown(client.close);
+    LiveRequest get() => LiveRequest(site: 'yy', url: url, timeout: const Duration(seconds: 5));
+    expect((await client.send(get())).text, 'ok');
+    expect((await client.send(get())).text, 'ok', reason: 'the stale connection was dropped and the GET sent again');
+    expect(connections, 2);
+    await expectLater(
+      client.send(
+        LiveRequest(site: 'yy', url: url, method: 'POST', body: const [1], timeout: const Duration(seconds: 5)),
+      ),
+      throwsA(isA<TransportFailure>()),
+      reason: 'a POST may have reached the server: not repeated',
+    );
+  });
+
   group('open', () {
     test('streams the body chunk by chunk with the declared length', () async {
       final response = await http.open(get('/chunks'));

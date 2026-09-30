@@ -32,7 +32,9 @@ final class IoLiveHttp implements LiveHttp {
       ..connectionTimeout = connectTimeout
       ..idleTimeout = const Duration(seconds: 30)
       ..autoUncompress = true
-      ..userAgent = null
+      // dart:io's own User-Agent stays for requests that set none, as under
+      // 3.x's Dio; a request's User-Agent replaces it (headers are `set`).
+      // Without any, Huya's search answers 403 (M4.D).
       ..findProxy = (_) => route.directive,
   );
 
@@ -162,8 +164,21 @@ final class _Exchange {
   /// Set once the whole body was read; the connection may then be reused.
   bool done = false;
 
-  /// Sends the request and waits for the response headers.
+  /// Sends the request and waits for the response headers. A GET or HEAD
+  /// whose connection closes before any response header came is sent once
+  /// more: the pool may hand out a kept-alive connection the server has
+  /// already closed (seen on YY's HLS host, M4.D).
   Future<HttpClientResponse> start() async {
+    try {
+      return await _start();
+    } on HttpException catch (error) {
+      final idempotent = request.method == 'GET' || request.method == 'HEAD';
+      if (!idempotent || _abandoned || !error.message.contains('before full header was received')) rethrow;
+      return await _start();
+    }
+  }
+
+  Future<HttpClientResponse> _start() async {
     final outgoing = _outgoing = await client.openUrl(request.method, request.url);
     // Timed out or cancelled while the connection (or its TLS handshake) was
     // still being made: drop it instead of sending a request nobody waits for.

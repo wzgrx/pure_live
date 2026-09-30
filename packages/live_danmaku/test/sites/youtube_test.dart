@@ -5,7 +5,8 @@
 // fixtures/youtube/danmaku/v4_expected.dart; and the M5.F follow-ups (B-13:
 // super chats, notices, retractions, the viewer count of updated_metadata,
 // the "Live chat" view) against the recordings S10-live-all-chat and
-// S11-metadata-ended and synthetic answers.
+// S11-metadata-ended and synthetic answers; B-22 (the Super Chats still
+// pinned on joining, S10) and B-23 (gifts, S12-gifts).
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -192,6 +193,8 @@ Map<String, Object?> _line(LiveMessage message) => {
   'text': message.message,
   'color': '${message.color}',
   'extras': [message.userLevel, message.fansLevel, message.fansName, message.isLocal],
+  // B-22: a Super Chat still pinned on joining.
+  if (message.replayed) 'replayed': true,
 };
 
 /// Every field of a super chat and of its message.
@@ -1533,10 +1536,16 @@ void main() {
           ('S1', '@sticker 送出 Super Sticker'),
           ('S2', '@sticker 送出 Super Sticker：A cat waving'),
           ('S3', '送出 Super Sticker €2.00'),
+          // B-23: the gift item is read now, as a gift (was not read).
+          ('X2', 'sent Donut'),
         ],
       );
       final messages = YouTubeDanmakuProtocol.chat(answer).messages;
-      expect(messages.every((message) => message.data == LiveNoticeKind.subscription), isTrue);
+      expect(messages.last.type, LiveMessageType.gift);
+      expect(
+        messages.take(messages.length - 1).every((message) => message.data == LiveNoticeKind.subscription),
+        isTrue,
+      );
       expect(
         [messages[0].userId, messages[0].userName, messages[0].sentAt?.microsecondsSinceEpoch],
         ['UCsyntheticReceiver00001', '@receiver', 1790781300000000],
@@ -1739,6 +1748,9 @@ void main() {
         {'request': 'live_chat/get_live_chat', 'continuation': _asked(frames[1])},
         {'event': 'ready'},
         count(15163),
+        // B-22: the Super Chats the first answer's ticker still pins.
+        for (final message in YouTubeDanmakuProtocol.chat(_answer(frames[1]), now: _recordedAt).pinned)
+          _project(message),
         {'wait': 5000},
         {'wait': 30000},
         {'request': 'live_chat/get_live_chat', 'continuation': continuation},
@@ -1970,10 +1982,11 @@ void main() {
       int count(String event, [String? type]) =>
           ours.where((entry) => entry['event'] == event && (type == null || entry['type'] == type)).length;
       expect([count('ready'), count('viewers'), count('reconnecting'), count('closed')], [1, 1, 0, 0]);
-      // The first answer (history) is not reported.
+      // The first answer (history) is not reported, but for the 50 Super
+      // Chats its ticker still pins (B-22; was 4 super chats).
       expect(
         [count('chat', 'chat'), count('chat', 'superChat'), count('notice'), count('retraction')],
-        [303 + 80 + 84 + 166, 4, 2, 0],
+        [303 + 80 + 84 + 166, 4 + 50, 2, 0],
       );
     });
 
@@ -2269,9 +2282,461 @@ void main() {
       expect(events.map(_shown).toList(), [
         'DanmakuReady()',
         {'event': 'viewers', 'kind': 'onlineViewers', 'value': 15163},
+        // B-22: the Super Chats the first answer's ticker still pins.
+        for (final message in YouTubeDanmakuProtocol.chat(_answer(s10[1]), now: _recordedAt).pinned) _project(message),
         for (final line in lines) _project(line),
       ]);
       expect(lines.where((line) => line.type == LiveMessageType.superChat), hasLength(3));
+    });
+  });
+
+  group('B-22: Super Chats still pinned on joining', () {
+    final s10 = _frames('S10-live-all-chat');
+    // When the first answer came: the start of the recording and its time.
+    final received = DateTime.parse(
+      (_json('S10-live-all-chat/meta.json')! as Map<String, Object?>)['capturedAt']! as String,
+    ).add(Duration(milliseconds: s10[1]['t']! as int));
+
+    test("S10: the first answer's ticker pins 50 Super Chats: replayed, oldest first, ending when the ticker does", () {
+      final answer = _answer(s10[1]);
+      final poll = YouTubeDanmakuProtocol.chat(answer, now: received);
+      final tickers = <String, Map<String, Object?>>{
+        for (final action in _actions(answer))
+          if (action case {
+            'addLiveChatTickerItemAction': {
+              'item': {'liveChatTickerPaidMessageItemRenderer': final Map<String, Object?> item},
+            },
+          })
+            item['id']! as String: item,
+      };
+      expect([tickers.length, poll.pinned.length], [50, 50]);
+      expect({for (final message in poll.pinned) message.messageId}, tickers.keys.toSet());
+      final lags = <int>[];
+      for (final (index, message) in poll.pinned.indexed) {
+        final data = message.data! as LiveSuperChatMessage;
+        final ticker = tickers[message.messageId]!;
+        expect([message.type, message.replayed, message.sentAt], [LiveMessageType.superChat, true, data.startTime]);
+        // The page counts durationSec down from when the answer comes.
+        final left = Duration(seconds: ticker['durationSec']! as int);
+        expect(data.endTime, received.add(left));
+        // durationSec is the time left when the server answered:
+        // fullDurationSec less the time since the Super Chat was sent, a few
+        // seconds less still (the answer took them).
+        final full = Duration(seconds: ticker['fullDurationSec']! as int);
+        lags.add((full - received.difference(data.startTime) - left).inMilliseconds);
+        if (index > 0) {
+          final before = poll.pinned[index - 1].data! as LiveSuperChatMessage;
+          expect(before.startTime.isAfter(data.startTime), isFalse, reason: 'oldest first');
+        }
+      }
+      expect(lags.every((lag) => lag >= 4000 && lag <= 7000), isTrue, reason: '$lags');
+      String brief(LiveMessage message) =>
+          '${(message.data! as LiveSuperChatMessage).priceText} ${message.userName} ${message.sentAt!.microsecondsSinceEpoch}';
+      expect(brief(poll.pinned.first), '¥5,630 @bqd09s0 1790780442679248');
+      expect(brief(poll.pinned.last), '¥500 @9gv95q4s 1790781209749568');
+      // The dearest: NT$5,633.00, pinned for three hours, 10043 s left.
+      final dearest = poll.pinned.singleWhere(
+        (message) => message.messageId == 'ChwKGkNLX1Y2WUxKbHBjREZRakl3Z1FkSjlnaE1n',
+      );
+      expect(_superChat(dearest)..remove('seconds'), {
+        'id': 'ChwKGkNLX1Y2WUxKbHBjREZRakl3Z1FkSjlnaE1n',
+        'userName': '@7l4x53pi',
+        'userId': 'UCcX9fFIssJoxHJaO5W_Uhqy',
+        'face': '',
+        'message': startsWith('ころさんお誕生日おめでとう～～～！'),
+        'price': 0,
+        'priceText': r'NT$5,633.00',
+        'startMicros': 1790780459957613,
+        'colors': ['#d00000', '#e62117'],
+      });
+      expect((dearest.data! as LiveSuperChatMessage).endTime, received.add(const Duration(seconds: 10043)));
+    });
+
+    test('S10: the history holds 7 of them as messages; the pinned ones are the same but for their end', () {
+      final poll = YouTubeDanmakuProtocol.chat(_answer(s10[1]), now: received);
+      final history = [
+        for (final message in poll.messages)
+          if (message.type == LiveMessageType.superChat) message,
+      ];
+      expect(history, hasLength(7));
+      for (final message in history) {
+        final pinned = poll.pinned.singleWhere((other) => other.messageId == message.messageId);
+        expect(message.replayed, isFalse);
+        expect(_superChat(pinned)..remove('seconds'), _superChat(message)..remove('seconds'));
+        expect(_project(pinned), {..._project(message), 'replayed': true});
+        expect(pinned.data, message.data, reason: 'a super chat is the same one by its id');
+      }
+      // The duplicate gate: every pinned one passes (the oldest was sent
+      // 13 minutes before, but is still on display); the same ones again,
+      // as the history or live, do not.
+      final gate = DanmakuMessageGate();
+      expect([for (final message in poll.pinned) gate.accepts(message, now: received)], everyElement(isTrue));
+      expect([for (final message in history) gate.accepts(message, now: received)], everyElement(isFalse));
+      // The Top chat recording kept no ticker items (scrubbed to {}).
+      expect(YouTubeDanmakuProtocol.chat(_answer(_frames('S07-live-paid')[1])).pinned, isEmpty);
+    });
+
+    test('which ticker items count: time left a whole number above zero, a paid message inside; one per id', () {
+      final received = DateTime.utc(2026, 9, 30, 15, 13, 30);
+      Map<String, Object?> renderer(
+        int n, {
+        Object? time = 'default',
+        String? id,
+        Object? amount = r'$5.00',
+        String? text = 'thanks',
+      }) {
+        final item =
+            (_paid(n, time: time, amount: amount, text: text)['addChatItemAction']! as Map<String, Object?>)['item']!
+                as Map<String, Object?>;
+        final paid = {...item['liveChatPaidMessageRenderer']! as Map<String, Object?>};
+        if (id != null) paid['id'] = id;
+        return {'liveChatPaidMessageRenderer': paid};
+      }
+
+      Map<String, Object?> ticker(
+        String id,
+        Object? left, {
+        Map<String, Object?>? inside,
+        String kind = 'liveChatTickerPaidMessageItemRenderer',
+        bool endpoint = true,
+      }) => {
+        'addLiveChatTickerItemAction': {
+          'item': {
+            kind: {
+              'id': id,
+              'durationSec': ?left,
+              'fullDurationSec': 3600,
+              if (endpoint)
+                'showItemEndpoint': {
+                  'showLiveChatItemEndpoint': {'renderer': inside},
+                },
+            },
+          },
+          'durationSec': '$left',
+        },
+      };
+
+      final poll = YouTubeDanmakuProtocol.chat(
+        _chatAnswer([
+          ticker('P1', 600, inside: renderer(1)),
+          ticker('P2', 0, inside: renderer(2)),
+          ticker('P3', -5, inside: renderer(3)),
+          ticker('P4', '300', inside: renderer(4)),
+          ticker('P5', null, inside: renderer(5)),
+          ticker('P6', 60, endpoint: false),
+          ticker('P7', 60, inside: renderer(7), kind: 'liveChatTickerPaidStickerItemRenderer'),
+          ticker(
+            'M8',
+            60,
+            inside: {
+              'liveChatMembershipItemRenderer': {
+                'id': 'M8',
+                'headerSubtext': {'simpleText': 'Welcome!'},
+              },
+            },
+          ),
+          ticker('P9', 60, inside: renderer(9, amount: null, text: null)),
+          ticker('P1', 500, inside: renderer(1)),
+          ticker(
+            'E1',
+            30,
+            inside: renderer(10, id: '', time: '1790781150000000'),
+          ),
+          ticker(
+            'E2',
+            40,
+            inside: renderer(11, id: '', time: '1790781150000000'),
+          ),
+          ticker('P12', 120, inside: renderer(12, time: null)),
+          ticker('P13', 60, inside: renderer(13, time: '1790781100000000')),
+          ticker('P14', 60, inside: {'liveChatPaidMessageRenderer': 'not a map'}),
+        ]),
+        now: received,
+      );
+      expect(poll.messages, isEmpty, reason: 'ticker items are not messages');
+      expect(
+        [
+          for (final message in poll.pinned)
+            (
+              message.messageId,
+              message.userName,
+              message.sentAt?.microsecondsSinceEpoch,
+              (message.data! as LiveSuperChatMessage).endTime.difference(received).inSeconds,
+              message.replayed,
+            ),
+        ],
+        [
+          ('P13', '@payer13', 1790781100000000, 60, true),
+          // No id: nothing to tell them apart by; the same time keeps their order.
+          ('', '@payer10', 1790781150000000, 30, true),
+          ('', '@payer11', 1790781150000000, 40, true),
+          // P1 once, with the first item's time left.
+          ('P1', '@payer1', 1790781200000001, 600, true),
+          // No time of its own: it starts when the answer came.
+          ('P12', '@payer12', null, 120, true),
+        ],
+      );
+      expect((poll.pinned.last.data! as LiveSuperChatMessage).startTime, received);
+      // The ticker's time left is not the message's display time: a Super
+      // Chat of the same answer is shown for fullDurationSec as before.
+      final live = YouTubeDanmakuProtocol.chat(
+        _chatAnswer([_paid(1), ticker('P1', 600, inside: renderer(1))]),
+        now: received,
+      ).messages.single;
+      expect([live.replayed, _superChat(live)['seconds']], [false, 3600]);
+    });
+
+    test('the connection reports them once joined, after the viewers; later answers and reloads do not', () async {
+      Map<String, Object?> pin(int n, int left) => {
+        'addLiveChatTickerItemAction': {
+          'item': {
+            'liveChatTickerPaidMessageItemRenderer': {
+              'id': 'P$n',
+              'durationSec': left,
+              'fullDurationSec': left,
+              'showItemEndpoint': {
+                'showLiveChatItemEndpoint': {
+                  'renderer': (_paid(n)['addChatItemAction']! as Map<String, Object?>)['item'],
+                },
+              },
+            },
+          },
+        },
+      };
+      final trace = await _session('Synth3tic_0', [
+        {'answer': _watchAnswer(viewers: 1234)},
+        // The history: its lines and Super Chats are not reported; the two it
+        // pins are, oldest first.
+        {
+          'answer': _chatAnswer(['history', _paid(2), pin(2, 60), pin(1, 600)], token: 'T-1'),
+        },
+        // A new Super Chat and its ticker item: the Super Chat once, live.
+        {
+          'answer': _chatAnswer([_paid(3), pin(3, 120), 'live'], token: 'T-2', kind: 'reloadContinuationData'),
+        },
+        // History again after a reload: nothing, the pinned one neither.
+        {
+          'answer': _chatAnswer(['again', pin(4, 60)], token: 'T-3'),
+        },
+        {
+          'answer': _chatAnswer(['last'], token: null),
+        },
+      ]);
+      expect(
+        [
+          for (final entry in trace)
+            if (entry['event'] == 'chat')
+              '${entry['type']} ${entry['id']}${entry['replayed'] == true ? ' replayed' : ''}'
+            else if (entry['event'] case final String event)
+              event
+            else if (entry['request'] case final String request)
+              '$request ${entry['continuation'] ?? entry['videoId']}'
+            else
+              'wait ${entry['wait']}',
+        ],
+        [
+          'next Synth3tic_0',
+          'live_chat/get_live_chat T-reload',
+          'ready',
+          'viewers',
+          'superChat P1 replayed',
+          'superChat P2 replayed',
+          'wait 5000',
+          'live_chat/get_live_chat T-1',
+          'superChat P3',
+          'chat id-live',
+          'wait 5000',
+          'live_chat/get_live_chat T-2',
+          'wait 5000',
+          'live_chat/get_live_chat T-3',
+          'chat id-last',
+          'closed',
+        ],
+      );
+    });
+
+    test('S10 through the connection: the 50 pinned Super Chats pass the message filter and the gate', () async {
+      final events = <LiveMessage>[];
+      final http = _ScriptedHttp([_step(s10[0]), _step(s10[1])]);
+      final connection = YouTubeDanmakuConnection(http: http, now: () => received);
+      connection.events.listen((event) {
+        if (event case DanmakuReceived(:final message)) events.add(message);
+      });
+      await connection.connect(const YouTubeDanmakuArgs(roomId: 'UChAnqc_AY5_I3Px5dig3X1Q', videoId: 'lNPh7CdwkWk'));
+      await connection.close();
+      expect(events.first.type, LiveMessageType.online);
+      final pinned = events.skip(1).toList();
+      expect(pinned, hasLength(50));
+      expect(pinned.every((message) => message.type == LiveMessageType.superChat && message.replayed), isTrue);
+      final filter = DanmakuMessageFilter(clock: () => received);
+      expect(pinned.every(filter.accepts), isTrue);
+      final gate = DanmakuMessageGate();
+      expect(pinned.every((message) => gate.accepts(message, now: received)), isTrue);
+    });
+  });
+
+  group('B-23: gifts', () {
+    final s12 = _frames('S12-gifts').single;
+
+    test('S12: the three gifts of the recording, field by field', () {
+      final poll = YouTubeDanmakuProtocol.chat(_answer(s12), now: _recordedAt);
+      expect(poll.messages, hasLength(3));
+      expect(poll.pinned, isEmpty);
+      expect(
+        [
+          for (final message in poll.messages)
+            [
+              message.type,
+              message.userName,
+              message.userId,
+              message.message,
+              message.messageId,
+              message.sentAt,
+              message.color,
+              message.replayed,
+              message.data,
+            ],
+        ],
+        [
+          for (final (id, name, gift, file) in [
+            ('ChwKGkNKR0sydXUtbHBjREZYb1UxZ0FkUHRBUlJ3', '@b2tm11fb1ixskbc', 'Donut', 'donut'),
+            ('ChwKGkNNaW1oS1NfbHBjREZaYVN3Z0VkRkhzRXpn', '@rmkwwr2ljd', 'Ramen', 'ramen_jp'),
+            ('ChwKGkNMR29sNHZEbHBjREZiNHoxZ0FkYTJvOFZB', '@sddw613ul0fh', 'Heart', 'heart'),
+          ])
+            [
+              LiveMessageType.gift,
+              name,
+              '',
+              'sent $gift',
+              id,
+              null,
+              LiveMessageColor.white,
+              false,
+              YouTubeGift(
+                name: gift,
+                text: 'sent $gift',
+                image: Uri.parse('https://www.gstatic.com/youtube/img/pdg/gift/assets/$file.png=w640-h640'),
+              ),
+            ],
+        ],
+      );
+      final gift = poll.messages.first.data! as YouTubeGift;
+      expect('$gift', 'YouTubeGift(sent Donut)');
+      expect(gift.hashCode, poll.messages.first.data.hashCode);
+    });
+
+    test('fields: the text, the name, the image; channel id and time when present; items without text', () {
+      Map<String, Object?> gift(Map<String, Object?> fields) => {
+        'addChatItemAction': {
+          'item': {'giftMessageViewModel': fields},
+        },
+      };
+      Map<String, Object?> sources(List<String> urls) => {
+        'sources': [
+          for (final url in urls) {'url': url, 'width': 480, 'height': 480},
+        ],
+      };
+      final messages = YouTubeDanmakuProtocol.chat(
+        _chatAnswer([
+          gift({
+            'id': 'G1',
+            'text': {'content': '  sent Cake  '},
+            'authorName': {'content': ' @giver '},
+            'authorExternalChannelId': 'UCsyntheticGiver00000001',
+            'timestampUsec': '1790781300000000',
+            'giftImage': sources(['https://www.gstatic.com/a.png=w480', 'https://www.gstatic.com/a.png=w640']),
+          }),
+          gift({
+            'id': 'G2',
+            'text': {'content': 'a gift in another wording'},
+            'giftImage': sources(['http://insecure.example/a.png']),
+          }),
+          gift({
+            'text': {'content': 'sent '},
+            'giftImage': 'not a map',
+          }),
+          gift({
+            'id': 'G4',
+            'text': {'content': 'sent Tea'},
+            'authorName': 'not a map',
+            'authorExternalChannelId': 7,
+            'timestampUsec': '-1',
+            'giftImage': sources([]),
+          }),
+          gift({
+            'id': 'X1',
+            'text': {'content': '   '},
+          }),
+          gift({'id': 'X2', 'text': 'sent Donut'}),
+          gift({'id': 'X3'}),
+          gift({
+            'id': 'X4',
+            'text': {'content': 7},
+          }),
+        ]),
+      ).messages;
+      expect(
+        [
+          for (final message in messages)
+            (
+              message.messageId,
+              message.userName,
+              message.userId,
+              message.message,
+              message.sentAt?.microsecondsSinceEpoch,
+              message.data,
+            ),
+        ],
+        [
+          (
+            'G1',
+            '@giver',
+            'UCsyntheticGiver00000001',
+            'sent Cake',
+            1790781300000000,
+            YouTubeGift(name: 'Cake', text: 'sent Cake', image: Uri.parse('https://www.gstatic.com/a.png=w640')),
+          ),
+          (
+            'G2',
+            '',
+            '',
+            'a gift in another wording',
+            null,
+            const YouTubeGift(name: '', text: 'a gift in another wording'),
+          ),
+          ('', '', '', 'sent', null, const YouTubeGift(name: '', text: 'sent')),
+          ('G4', '', '', 'sent Tea', null, const YouTubeGift(name: 'Tea', text: 'sent Tea')),
+        ],
+      );
+      expect(messages.every((message) => message.type == LiveMessageType.gift), isTrue);
+      expect(const YouTubeGift(name: 'a', text: 'b'), isNot(const YouTubeGift(name: 'a', text: 'c')));
+    });
+
+    test('through the connection: a gift in a later answer is a gift; in the first answer it is history', () async {
+      final filter = DanmakuMessageFilter(clock: () => _recordedAt);
+      final trace = await _session('aGHE6jSxncw', [
+        {'answer': _watchAnswer()},
+        _step(s12),
+        {'answer': _chatAnswer(_actions(_answer(s12)).cast<Object>(), token: null)},
+      ]);
+      expect(
+        [
+          for (final entry in trace)
+            if (entry['event'] == 'chat') '${entry['type']} ${entry['userName']} ${entry['text']}',
+        ],
+        ['gift @b2tm11fb1ixskbc sent Donut', 'gift @rmkwwr2ljd sent Ramen', 'gift @sddw613ul0fh sent Heart'],
+      );
+      // Gifts pass the message filter (it filters chat only); the gate
+      // tells a gift sent again by its id.
+      final gifts = YouTubeDanmakuProtocol.chat(_answer(s12)).messages;
+      expect(gifts.every(filter.accepts), isTrue);
+      final gate = DanmakuMessageGate();
+      expect(
+        [
+          for (final gift in [...gifts, ...gifts]) gate.accepts(gift, now: _recordedAt),
+        ],
+        [true, true, true, false, false, false],
+      );
     });
   });
 

@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "case": "S12-gifts",
+  "room": "youtube:UCl69AEx4MdqMZH7Jtsm7Tig",
+  "danmakuKeys": {
+    "videoId": "aGHE6jSxncw",
+    "channelId": "UCl69AEx4MdqMZH7Jtsm7Tig"
+  },
+  "capturedAt": "2026-09-30T15:35:53Z",
+  "route": "proxy",
+  "handshakes": [],
+  "frames": 1,
+  "raw": {
+    "sha256": "e912dd1d9cfd6bcf485db337071f20663e6dab6eb7c3b5dcb8c4c9254eac84b1",
+    "length": 1325648
+  },
+  "scrubbed": [
+    {
+      "where": "the recording but its first get_live_chat answer (next, 31 later polls, updated_metadata)",
+      "rule": "dropped"
+    },
+    {
+      "where": "that answer: all but $.continuationContents.liveChatContinuation.continuations and the giftMessageViewModel items of .actions",
+      "rule": "dropped (responseContext with the visitor id, 75 text messages, an engagement message, a moderation state command, the ticker, header and panels)"
+    },
+    {
+      "where": "$..clickTrackingParams, $..rendererContext (logging directives), $.actions[*].addChatItemAction.clientId",
+      "rule": "dropped"
+    },
+    {
+      "where": "$..giftMessageViewModel.authorAvatar",
+      "rule": "dropped (the senders' photos)"
+    },
+    {
+      "where": "$..giftMessageViewModel.authorName.content (the trailing space kept) and the handle that starts giftImageA11yLabel",
+      "rule": "person: same-length synthetic handle, one per person"
+    },
+    {
+      "where": "continuations, request.continuation",
+      "rule": "kept as recorded: decoded they hold only the broadcaster's channel id, the video id, times and the view (field 119693434.16.1 is 1, Live chat)"
+    }
+  ],
+  "note": "M5.F (B-23). Raora Panthera Ch. hololive (the broadcaster, public), broadcast aGHE6jSxncw (about 3,300 watching), read in the \"Live chat\" view, anonymous and read-only through the local proxy, on 2026-09-30 for B-13. Its first get_live_chat answer (the history, not reported) held three items of YouTube's newer gift kind, giftMessageViewModel (\"sent Donut\", \"sent Ramen\", \"sent Heart\"): text and authorName as {content, styleRuns}, the item id, the sender's avatar, giftImage (www.gstatic.com gift assets) and giftImageA11yLabel; no channel id, no timestamp, no price or count. None came in the 31 later polls (about 267 s). The live_chat_polymer.js of 2026-09-30 renders it as yt-gift-message-view-model: avatar, authorName, text and giftImage.",
+  "tool": "scratch Python scripts (not in the repository): the B-13 recorder (read-only anonymous InnerTube requests, WEB context of YouTubeApi.webContext, YouTubeApi.apiHeaders, prettyPrint=false, through the local proxy 127.0.0.1:7897; no login, nothing posted) and scrub_s12.py, which refuses to write while an original handle or avatar path can be found plainly, percent-decoded or in (nested) Base64"
+}

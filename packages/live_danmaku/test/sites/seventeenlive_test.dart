@@ -3,7 +3,9 @@
 // S06-live) and the synthetic frames (S07-synthetic), written by
 // fixtures/17live/danmaku/v4_expected.dart; the M5.F follow-ups (B-14: paid
 // barrages, resume, stream end, mute) against the recordings S08-resume,
-// S09-resume-bad-key and S10-events and synthetic frames.
+// S09-resume-bad-key and S10-events and synthetic frames; B-25 (no count of
+// 0 while the stream is paused) and B-26 (the backlog after a resume is
+// replayed).
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -1841,12 +1843,12 @@ void main() {
         ],
         [
           // The mute messages are live figures of type 0 with every figure 0;
-          // the website shows those zeros as well (M5.29 unchanged).
-          'online 0',
+          // the website shows those zeros as well. B-25: they are not
+          // reported (were 'online 0' before each notice); the last count
+          // stays.
           'notice ${SeventeenLiveDanmakuProtocol.mutedNotice}',
           'chat みんなコメントしなければ行く説',
           'chat また帰ってきたらコメント追うのに忙しくなってそう笑',
-          'online 0',
           'notice ${SeventeenLiveDanmakuProtocol.unmutedNotice}',
         ],
       );
@@ -2361,5 +2363,431 @@ void main() {
       expect(_messages(events).map((message) => message.message), ['第1', '第2']);
       await connection.close();
     });
+  });
+
+  group('B-25: the viewers while the stream is paused', () {
+    Map<String, Object?> live(Object? mute, int viewers) => {
+      'type': 38,
+      'liveinfo': {'mute': ?mute, 'liveViewerCount': viewers},
+    };
+    String shown(LiveMessage message) => switch (message.data) {
+      LiveAudienceUpdate(:final value) => 'online $value',
+      _ =>
+        message.message == SeventeenLiveDanmakuProtocol.mutedNotice
+            ? 'paused'
+            : message.message == SeventeenLiveDanmakuProtocol.unmutedNotice
+            ? 'resumed'
+            : message.message,
+    };
+
+    test('while paused, and in the figures that end the pause, a count of 0 is not reported; others are', () async {
+      final connector = _Connector();
+      final connection = _connection(connector, _Http([_granted('AAAAAA.token-1')]));
+      final events = _record(connection);
+      await connection.connect(_args);
+      final channel = connector.channels.single;
+      await channel.join();
+      var n = 0;
+      Future<void> send(Map<String, Object?> payload) => channel.receive(_ablyMessage([payload], id: 'live${n++}'));
+      await send(live(false, 100));
+      await send(live(true, 0));
+      // Without mute, while paused.
+      await send(live(null, 0));
+      // Not 0: a count.
+      await send(live(true, 50));
+      await send(_comment('まだかな'));
+      // The pause ends with figures of 0 as well.
+      await send(live(false, 0));
+      // Not paused: a 0 is a 0.
+      await send(live(false, 0));
+      await send(live(null, 120));
+      expect(_messages(events).map(shown), [
+        'online 100',
+        'paused',
+        'online 50',
+        'まだかな',
+        'resumed',
+        'online 0',
+        'online 120',
+      ]);
+      // Another run that starts paused: nothing to keep, nothing reported.
+      await connection.connect(const SeventeenLiveDanmakuArgs(roomId: _archivedRoom));
+      await connector.channels.last.join(_archivedRoom);
+      final before = _messages(events).length;
+      await connector.channels.last.receive(_ablyMessage([live(true, 0)], room: _archivedRoom, id: 'other'));
+      expect(_messages(events).skip(before).map(shown), ['paused']);
+      await connection.close();
+    });
+
+    test('S10-events: the recorded pause of 29802206 reports no 0; the next count after it is reported', () async {
+      const room = '29802206';
+      final connector = _Connector();
+      final connection = _connection(connector, _Http([_granted('AAAAAA.token-1')]));
+      final events = _record(connection);
+      await connection.connect(const SeventeenLiveDanmakuArgs(roomId: room));
+      await connector.channels.single.join(room);
+      await connector.channels.single.receive(_ablyMessage([live(false, 612)], room: room, id: 'before'));
+      for (final line in _events10()) {
+        if (line.room == room) await connector.channels.single.receive(line.text);
+      }
+      await connector.channels.single.receive(_ablyMessage([live(false, 598)], room: room, id: 'after'));
+      expect(_messages(events).map(shown), [
+        'online 612',
+        'paused',
+        'みんなコメントしなければ行く説',
+        'また帰ってきたらコメント追うのに忙しくなってそう笑',
+        'resumed',
+        'online 598',
+      ]);
+      // Both recorded figures are 0 (liveinfo type 0), the second not paused.
+      final figures = [
+        for (final line in _events10())
+          if (line.room == room)
+            for (final entry in SeventeenLiveDanmakuProtocol.decode(line.text, roomId: room).entries)
+              if (entry.muted != null) (entry.muted, (entry.messages.single.data! as LiveAudienceUpdate).value),
+      ];
+      expect(figures, [(true, 0), (false, 0)]);
+      await connection.close();
+    });
+  });
+
+  group('B-26: the backlog after a resume is replayed', () {
+    /// A `MESSAGE` whose messages have their own times (null: none), the
+    /// frame [frameTime] (null: none).
+    String timed(
+      List<(Map<String, Object?>, int?)> items, {
+      int? frameTime,
+      String id = 'frame',
+      String room = _room,
+    }) => jsonEncode({
+      'action': 15,
+      'id': id,
+      'channel': room,
+      'timestamp': ?frameTime,
+      'messages': [
+        for (final (index, (payload, time)) in items.indexed)
+          {'id': '$id:$index', 'timestamp': ?time, 'data': base64Encode(gzip.encode(utf8.encode(jsonEncode(payload))))},
+      ],
+    });
+
+    String attached(int flags) =>
+        jsonEncode({'action': 11, 'channel': _room, 'channelSerial': _joinedSerial, 'flags': flags});
+
+    test('ATTACHED: the HAS_BACKLOG flag, apart from RESUMED', () {
+      expect(SeventeenLiveDanmakuProtocol.hasBacklogFlag, 2);
+      for (final (flags, backlog, resumed) in <(Object?, bool, bool)>[
+        (786438, true, true),
+        (786434, true, false),
+        (786436, false, true),
+        (786432, false, false),
+        (2, true, false),
+        ('786438', false, false),
+        (null, false, false),
+      ]) {
+        final frame = SeventeenLiveDanmakuProtocol.decode(
+          jsonEncode({'action': 11, 'channel': _room, 'flags': flags}),
+          roomId: _room,
+        );
+        expect((frame.backlog, frame.resumed), (backlog, resumed), reason: '$flags');
+      }
+      // The recordings: the first attach has none; every resume (S08 2 to 4)
+      // and the one that could not resume (S08 5, 90003) have one.
+      final flags = [
+        for (final line in _lines('S08-resume'))
+          if (line['dir'] == 'in' && line['url'] == null)
+            if (SeventeenLiveDanmakuProtocol.decode(line['text'], roomId: '29790476') case final frame
+                when frame.signal == SeventeenLiveSignal.attached)
+              frame.backlog,
+      ];
+      expect(flags, [false, true, true, true, true]);
+    });
+
+    test('decode: what Ably published before the attach is replayed, up to the first published at it or later', () {
+      final attach = DateTime.fromMillisecondsSinceEpoch(_t);
+      final frame = SeventeenLiveDanmakuProtocol.decode(
+        timed([
+          (_comment('前'), _t - 5000),
+          (
+            _comment(
+              '付き',
+              more: {
+                'barrageStyle': true,
+                'barrage': {'type': 1, 'point': 79},
+              },
+            ),
+            _t - 3000,
+          ),
+          (
+            const {
+              'type': 38,
+              'liveinfo': {'mute': true, 'liveViewerCount': 5},
+            },
+            _t - 1,
+          ),
+          // No time of its own, the frame has none: it cannot tell.
+          (_comment('不明'), null),
+          (_comment('今'), _t),
+          (_comment('順不同'), _t - 10),
+        ]),
+        roomId: _room,
+        backlogBefore: attach,
+      );
+      expect(
+        [for (final entry in frame.entries) (entry.id, entry.publishedAt?.millisecondsSinceEpoch, entry.replayed)],
+        [
+          ('frame:0', _t - 5000, true),
+          ('frame:1', _t - 3000, true),
+          ('frame:2', _t - 1, true),
+          ('frame:3', null, false),
+          ('frame:4', _t, false),
+          ('frame:5', _t - 10, false),
+        ],
+      );
+      expect(
+        [for (final message in frame.messages) (message.type, message.replayed)],
+        [
+          (LiveMessageType.chat, true),
+          (LiveMessageType.chat, true),
+          (LiveMessageType.superChat, true),
+          (LiveMessageType.online, true),
+          (LiveMessageType.chat, false),
+          (LiveMessageType.chat, false),
+          (LiveMessageType.chat, false),
+        ],
+      );
+      // The frame's time stands for a message without its own.
+      final framed = SeventeenLiveDanmakuProtocol.decode(
+        timed([(_comment('a'), null), (_comment('b'), _t + 1)], frameTime: _t - 1),
+        roomId: _room,
+        backlogBefore: attach,
+      );
+      expect([for (final entry in framed.entries) entry.replayed], [true, false]);
+      // Without a backlog nothing is replayed; a time that is not one is none.
+      final plain = SeventeenLiveDanmakuProtocol.decode(timed([(_comment('a'), _t - 5000)]), roomId: _room);
+      expect(plain.entries.single.replayed, isFalse);
+      for (final bad in <Object?>['1790636400123', 0, -5, 8640000000000001, 1.5]) {
+        final entry = SeventeenLiveDanmakuProtocol.decode(
+          jsonEncode({
+            'action': 15,
+            'channel': _room,
+            'messages': [
+              {'id': 'x', 'timestamp': bad, 'data': base64Encode(gzip.encode(utf8.encode(jsonEncode(_comment('x')))))},
+            ],
+          }),
+          roomId: _room,
+          backlogBefore: attach,
+        ).entries.single;
+        expect((entry.publishedAt, entry.replayed), (null, false), reason: '$bad');
+      }
+      // The builders mark what they are told.
+      expect(SeventeenLiveDanmakuProtocol.muteNotice(muted: true, replayed: true).replayed, isTrue);
+      expect(SeventeenLiveDanmakuProtocol.muteNotice(muted: true).replayed, isFalse);
+    });
+
+    test('S08-resume: the backlog after each resume is replayed, what came live is not; the gate shows more', () async {
+      const name = 'S08-resume';
+      const room = '29790476';
+      final lines = _lines(name);
+      final start = DateTime.parse(_meta(name)['capturedAt']! as String);
+      var clock = start;
+      final connector = _Connector();
+      final connection = SeventeenLiveDanmakuConnection(
+        http: _Http([
+          LiveResponse(
+            status: 200,
+            url: SeventeenLiveDanmakuProtocol.authUrl,
+            bytes: utf8.encode(lines.first['text']! as String),
+          ),
+        ]),
+        connector: connector.call,
+        policy: _quiet,
+        now: () => clock,
+      );
+      final received = <(DateTime, LiveMessage)>[];
+      connection.events.listen((event) {
+        if (event case DanmakuReceived(:final message)) received.add((clock, message));
+      });
+      await connection.connect(const SeventeenLiveDanmakuArgs(roomId: room));
+      for (var socket = 1; socket <= 5; socket++) {
+        await _until(() => connector.channels.length == socket);
+        for (final line in lines.where((line) => line['socket'] == socket && line['dir'] == 'in')) {
+          clock = start.add(Duration(milliseconds: line['t']! as int));
+          await connector.channels.last.receive(line['text']!);
+        }
+        if (socket < 5) {
+          clock = start.add(
+            Duration(milliseconds: lines.firstWhere((line) => line['socket'] == socket + 1)['t']! as int),
+          );
+          await connector.channels.last.incoming.close();
+        }
+      }
+      await connection.close();
+      // Live figures have no id of their own: their count stands for them.
+      String brief(LiveMessage message) => switch (message.data) {
+        LiveAudienceUpdate(:final value) => 'online $value',
+        _ => '${message.type.name} ${message.messageId}',
+      };
+      expect(
+        [
+          for (final (_, message) in received)
+            if (message.replayed) brief(message),
+        ],
+        [
+          // Socket 2 (RESUMED): the comment of the 5 missed messages.
+          'chat +9dXlGTJdRSM:0',
+          // Socket 4 (RESUMED): the live figures of the 2 missed.
+          'online 912',
+          // Socket 5 (90003): the last two minutes.
+          'chat qBmo/PznWibX:0',
+          'chat MvCAun3OuB5m:0',
+          'online 873',
+          'online 881',
+          'chat WY2mw3r3/CyG:0',
+          'chat p/aDIrzaPU3F:0',
+          'online 911',
+        ],
+      );
+      expect(
+        [
+          for (final (_, message) in received)
+            if (!message.replayed) brief(message),
+        ],
+        ['online 1016', 'chat XfeouXxQPVVs:0', 'chat yvoP/nj3Zynh:0', 'online 982', 'chat SZjM1vusrGLb:0'],
+      );
+      // The duplicate gate, as the app runs it when each came: every comment
+      // shows. Without the flag three of socket 5's backlog, 66 to 92 s old,
+      // would not (3.x's 45 s).
+      final gate = DanmakuMessageGate();
+      final plain = DanmakuMessageGate();
+      final shown = <String>[];
+      final shownBefore = <String>[];
+      for (final (at, message) in received) {
+        if (message.type != LiveMessageType.chat) continue;
+        if (gate.accepts(message, now: at)) shown.add(message.messageId);
+        final unflagged = LiveMessage(
+          type: message.type,
+          userName: message.userName,
+          userId: message.userId,
+          message: message.message,
+          color: message.color,
+          messageId: message.messageId,
+          sentAt: message.sentAt,
+        );
+        if (plain.accepts(unflagged, now: at)) shownBefore.add(message.messageId);
+      }
+      expect(shown, hasLength(8));
+      expect(shown.toSet().difference(shownBefore.toSet()), {'qBmo/PznWibX:0', 'MvCAun3OuB5m:0', 'WY2mw3r3/CyG:0'});
+    });
+
+    test(
+      'a backlog ends at the first message published at the attach; a socket or an attach without one has none',
+      () async {
+        final attachAt = DateTime.fromMillisecondsSinceEpoch(_t + 60000);
+        var clock = attachAt;
+        final connector = _Connector();
+        final connection = SeventeenLiveDanmakuConnection(
+          http: _Http([_granted('AAAAAA.token-1')]),
+          connector: connector.call,
+          policy: _quiet,
+          now: () => clock,
+        );
+        final events = _record(connection);
+        await connection.connect(_args);
+        final first = connector.channels.single;
+        await first.join();
+        // The first attach has no backlog flag: an old message is not replayed.
+        await first.receive(timed([(_comment('一'), _t)], id: 'a'));
+        await first.incoming.close();
+        await _until(() => connector.channels.length == 2);
+        final second = connector.channels.last;
+        await second.receive(_connectedFrame);
+        await second.receive(attached(786438));
+        const at = _t + 60000;
+        await second.receive(timed([(_comment('二'), at - 3000)], id: 'b'));
+        await second.receive(
+          timed([(_comment('三'), at - 1000), (_comment('四'), at + 5), (_comment('五'), at - 500)], id: 'c'),
+        );
+        await second.receive(timed([(_comment('六'), at - 2000)], id: 'd'));
+        // A server-sent DETACHED and an attach without the flag: none.
+        await second.receive('{"action":13,"channel":"$_room"}');
+        clock = clock.add(const Duration(seconds: 5));
+        await second.receive(attached(786436));
+        await second.receive(timed([(_comment('七'), at - 4000)], id: 'e'));
+        // An attach with the flag, then the socket drops before the backlog
+        // ends: the next socket's attach without one has none.
+        await second.receive('{"action":13,"channel":"$_room"}');
+        await second.receive(attached(786438));
+        await second.receive(timed([(_comment('八'), at - 100)], id: 'f'));
+        await second.incoming.close();
+        await _until(() => connector.channels.length == 3);
+        final third = connector.channels.last;
+        await third.receive(_connectedFrame);
+        await third.receive(attached(786436));
+        await third.receive(timed([(_comment('九'), at - 100)], id: 'g'));
+        expect(
+          [for (final message in _messages(events)) '${message.message}${message.replayed ? ' replayed' : ''}'],
+          ['一', '二 replayed', '三 replayed', '四', '五', '六', '七', '八 replayed', '九'],
+        );
+        await connection.close();
+      },
+    );
+
+    test(
+      'a replayed paid barrage and mute notice are marked as well; a message seen before is still not shown',
+      () async {
+        final clock = DateTime.fromMillisecondsSinceEpoch(_t + 60000);
+        final connector = _Connector();
+        final connection = SeventeenLiveDanmakuConnection(
+          http: _Http([_granted('AAAAAA.token-1')]),
+          connector: connector.call,
+          policy: _quiet,
+          now: () => clock,
+        );
+        final events = _record(connection);
+        await connection.connect(_args);
+        final first = connector.channels.single;
+        await first.join();
+        await first.receive(timed([(_comment('既に'), _t)], id: 'seen'));
+        await first.incoming.close();
+        await _until(() => connector.channels.length == 2);
+        final second = connector.channels.last;
+        await second.receive(_connectedFrame);
+        await second.receive(attached(786438));
+        // The backlog repeats the message shown before (its id), then new ones.
+        await second.receive(timed([(_comment('既に'), _t)], id: 'seen'));
+        await second.receive(
+          timed([
+            (
+              _comment(
+                '付き',
+                more: {
+                  'barrageStyle': true,
+                  'barrage': {'type': 1, 'point': 79},
+                },
+              ),
+              _t + 1000,
+            ),
+            (
+              const {
+                'type': 38,
+                'liveinfo': {'mute': true, 'liveViewerCount': 7},
+              },
+              _t + 2000,
+            ),
+          ], id: 'new'),
+        );
+        expect(
+          [for (final message in _messages(events)) (message.type, message.message, message.replayed)],
+          [
+            (LiveMessageType.chat, '既に', false),
+            (LiveMessageType.chat, '付き', true),
+            (LiveMessageType.superChat, '付き', true),
+            (LiveMessageType.online, '', true),
+            (LiveMessageType.notice, SeventeenLiveDanmakuProtocol.mutedNotice, true),
+          ],
+        );
+        await connection.close();
+      },
+    );
   });
 }

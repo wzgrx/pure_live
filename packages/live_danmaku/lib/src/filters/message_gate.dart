@@ -6,7 +6,12 @@ import 'package:live_core/live_core.dart';
 /// `DanmakuMessageGate`).
 ///
 /// - A message with a platform time older than [maxMessageAge], or more than
-///   10 minutes in the future (a malformed time), is dropped.
+///   10 minutes in the future (a malformed time), is dropped. A
+///   [LiveMessage.replayed] one (sent again after a resume, or a backlog
+///   given on joining) may be up to [maxReplayAge] old instead; a super chat
+///   ([LiveMessage.data] a [LiveSuperChatMessage]) is not dropped for its
+///   age before its [LiveSuperChatMessage.endTime], since it is shown for
+///   its own time (M5.F, B-26, B-22).
 /// - A message with a [LiveMessage.messageId] passes once per
 ///   [stableIdWindow].
 /// - Without an id the key is the type, the user id and name (trimmed, lower
@@ -17,11 +22,13 @@ import 'package:live_core/live_core.dart';
 /// - Keys older than [stableIdWindow] are forgotten; at most [maxEntries]
 ///   are kept.
 final class DanmakuMessageGate {
-  /// Creates the gate with 3.x's windows.
+  /// Creates the gate with 3.x's windows; [maxReplayAge] is 17LIVE's resume
+  /// window (its `connectionStateTtl` + `maxIdleInterval`, 120 s + 15 s).
   new({
     this.fallbackDuplicateWindow = const Duration(milliseconds: 2500),
     this.stableIdWindow = const Duration(minutes: 10),
     this.maxMessageAge = const Duration(seconds: 45),
+    this.maxReplayAge = const Duration(seconds: 135),
     this.maxEntries = 4096,
   });
 
@@ -33,6 +40,9 @@ final class DanmakuMessageGate {
 
   /// Oldest platform time accepted.
   final Duration maxMessageAge;
+
+  /// Oldest platform time accepted for a [LiveMessage.replayed] message.
+  final Duration maxReplayAge;
 
   /// Most keys kept.
   final int maxEntries;
@@ -47,7 +57,8 @@ final class DanmakuMessageGate {
     final sentAt = message.sentAt;
     if (sentAt != null) {
       final age = receivedAt.difference(sentAt);
-      if (age > maxMessageAge || age < _maxFutureSkew) return false;
+      final limit = message.replayed ? maxReplayAge : maxMessageAge;
+      if (age < _maxFutureSkew || (age > limit && !_onDisplay(message, receivedAt))) return false;
     }
     final stableId = message.messageId.trim();
     final hasStableId = stableId.isNotEmpty;
@@ -73,6 +84,12 @@ final class DanmakuMessageGate {
     }
     return true;
   }
+
+  /// Whether [message] is a super chat still on display at [now].
+  static bool _onDisplay(LiveMessage message, DateTime now) => switch (message.data) {
+    LiveSuperChatMessage(:final endTime) => now.isBefore(endTime),
+    _ => false,
+  };
 
   /// Forgets every key (another room).
   void clear() => _seen.clear();

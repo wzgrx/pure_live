@@ -31,15 +31,57 @@ final class YouTubeChatEntry {
   bool get live => continuation != null && !replay;
 }
 
+/// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`): YouTube's
+/// newer gift item, `giftMessageViewModel` ("sent Donut"; M5.F, B-23). The
+/// item names no price, count, channel or time.
+@immutable
+final class YouTubeGift {
+  /// Creates the gift.
+  const new({required this.name, required this.text, this.image});
+
+  /// The gift's name: [text] without its leading `sent ` (`Donut`), the
+  /// requests asking for English; empty when [text] is not written so.
+  final String name;
+
+  /// `text.content`, trimmed: what the page shows after the sender's name
+  /// (`sent Donut`).
+  final String text;
+
+  /// The largest `giftImage` source as an https URL, or null.
+  final Uri? image;
+
+  @override
+  bool operator ==(Object other) =>
+      other is YouTubeGift && other.name == name && other.text == text && other.image == image;
+
+  @override
+  int get hashCode => Object.hash(name, text, image);
+
+  @override
+  String toString() => 'YouTubeGift($text)';
+}
+
 /// One `live_chat/get_live_chat` answer ([YouTubeDanmakuProtocol.chat]).
 @immutable
 final class YouTubeChatPoll {
   /// Creates the answer.
-  const new({this.messages = const [], this.continuation, this.reload = false, this.timeout, this.notice = ''});
+  const new({
+    this.messages = const [],
+    this.pinned = const [],
+    this.continuation,
+    this.reload = false,
+    this.timeout,
+    this.notice = '',
+  });
 
-  /// Chat lines, Super Chats, notices and retractions, in the order of the
-  /// actions.
+  /// Chat lines, Super Chats, notices, gifts and retractions, in the order
+  /// of the actions.
   final List<LiveMessage> messages;
+
+  /// The Super Chats the ticker still pins (B-22), as replayed super chats,
+  /// oldest first. The connection reports them from the first answer only,
+  /// whose other items are the history it does not report.
+  final List<LiveMessage> pinned;
 
   /// The continuation of the next request; null when the chat is over.
   final String? continuation;
@@ -75,8 +117,10 @@ final class YouTubeChatPoll {
 /// Read from each answer (M5.F, B-13):
 /// text messages as chat lines; paid messages as super chats; Super
 /// Stickers, memberships and gifted memberships as notices; removals as
-/// retractions. Placeholders, replacements, polls, tickers and banners are
-/// not read (a ticker only names how long the page pins a Super Chat).
+/// retractions; gifts (`giftMessageViewModel`) as gifts (B-23).
+/// Placeholders, replacements, polls and banners are not read. A ticker item
+/// names how long the page pins a Super Chat and, in the first answer, the
+/// Super Chats still pinned (B-22).
 abstract final class YouTubeDanmakuProtocol {
   /// The watch page's `next`.
   static final Uri nextEndpoint = YouTubeApi.apiUrl('next');
@@ -359,8 +403,10 @@ abstract final class YouTubeDanmakuProtocol {
   /// Reads a decoded `get_live_chat` answer. Without
   /// `continuationContents.liveChatContinuation` the chat is over (the
   /// `contents` message, when there is one, is the notice). A Super Chat
-  /// without a platform time starts [now] (default: the current time).
-  /// Throws [FormatException] when [answer] is not a JSON object.
+  /// without a platform time starts [now] (default: the current time), the
+  /// time the answer came; a pinned one ([YouTubeChatPoll.pinned]) ends the
+  /// ticker's time left after it. Throws [FormatException] when [answer] is
+  /// not a JSON object.
   static YouTubeChatPoll chat(Object? answer, {DateTime? now}) {
     if (answer is! Map<String, Object?>) throw const FormatException('YouTube get_live_chat: not a JSON object');
     final contents = answer['continuationContents'];
@@ -375,10 +421,61 @@ abstract final class YouTubeDanmakuProtocol {
     final next = _continuation(chat['continuations']);
     return YouTubeChatPoll(
       messages: List.unmodifiable([for (final action in actions) ?_message(action, pinned, received)]),
+      pinned: List.unmodifiable(_stillPinned(actions, received)),
       continuation: next?.token,
       reload: next?.kind == 'reloadContinuationData',
       timeout: next?.timeout,
     );
+  }
+
+  /// The Super Chats the ticker items in [actions] still pin (B-22), as the
+  /// page shows them when it opens: each `liveChatTickerPaidMessageItemRenderer`
+  /// with time left (`durationSec`, a whole number above zero) carries the
+  /// paid message it stands for (`showItemEndpoint.showLiveChatItemEndpoint
+  /// .renderer.liveChatPaidMessageRenderer`, the same id as the message).
+  ///
+  /// Each is a replayed super chat ([_superChat]) from its own time to
+  /// `durationSec` after [received]: `durationSec` is the time left when the
+  /// server answered (S10: `fullDurationSec` less the time since
+  /// `timestampUsec`, a few seconds less still), which the page counts down
+  /// from when it gets the answer (`startCountdown(durationSec,
+  /// fullDurationSec)`; `fullDurationSec` only scales its bar). Oldest first,
+  /// the order they were sent in; an id seen before is left out.
+  static List<LiveMessage> _stillPinned(List<Object?> actions, DateTime received) {
+    final ids = <String>{};
+    final found = <LiveMessage>[];
+    for (final action in actions) {
+      if (action case {
+        'addLiveChatTickerItemAction': {
+          'item': {'liveChatTickerPaidMessageItemRenderer': final Map<Object?, Object?> item},
+        },
+      }) {
+        final left = item['durationSec'];
+        if (left is! int || left <= 0) continue;
+        if (item['showItemEndpoint'] case {
+          'showLiveChatItemEndpoint': {'renderer': {'liveChatPaidMessageRenderer': final Map<Object?, Object?> paid}},
+        }) {
+          final message = _superChat(
+            paid,
+            const {},
+            received,
+            end: received.add(Duration(seconds: left)),
+            replayed: true,
+          );
+          if (message == null || (message.messageId.isNotEmpty && !ids.add(message.messageId))) continue;
+          found.add(message);
+        }
+      }
+    }
+    DateTime start(LiveMessage message) => (message.data! as LiveSuperChatMessage).startTime;
+    final order = [...found.indexed]
+      ..sort(
+        (a, b) => switch (start(a.$2).compareTo(start(b.$2))) {
+          0 => a.$1.compareTo(b.$1),
+          final by => by,
+        },
+      );
+    return [for (final (_, message) in order) message];
   }
 
   /// The first continuation of `continuations[0]`: its kind, token and
@@ -450,13 +547,14 @@ abstract final class YouTubeDanmakuProtocol {
 
   /// One added item: a text message as a chat line; a paid message as a
   /// super chat; a Super Sticker, a membership (joined, a milestone), gifted
-  /// memberships and a received gift as a notice. Null for anything else
-  /// and for items without text.
+  /// memberships and a received gift membership as a notice; a gift as a
+  /// gift (B-23). Null for anything else and for items without text.
   static LiveMessage? _item(Map<Object?, Object?> item, Map<String, Duration> pinned, DateTime received) {
     if (item['liveChatTextMessageRenderer'] case final Map<Object?, Object?> text) return _chatLine(text);
     if (item['liveChatPaidMessageRenderer'] case final Map<Object?, Object?> paid) {
       return _superChat(paid, pinned, received);
     }
+    if (item['giftMessageViewModel'] case final Map<Object?, Object?> gift) return _gift(gift);
     if (item['liveChatPaidStickerRenderer'] case final Map<Object?, Object?> sticker) return _sticker(sticker);
     if (item['liveChatMembershipItemRenderer'] case final Map<Object?, Object?> member) return _membership(member);
     if (item['liveChatSponsorshipsGiftPurchaseAnnouncementRenderer'] case final Map<Object?, Object?> gift) {
@@ -489,8 +587,15 @@ abstract final class YouTubeDanmakuProtocol {
   /// that text); the header and body colours; shown from the platform time
   /// (or [received]) for as long as the page pins it: the ticker item's
   /// `fullDurationSec`, else [tierDisplay] by the header colour, else
-  /// [unpinnedDisplay]. Null without amount and text.
-  static LiveMessage? _superChat(Map<Object?, Object?> paid, Map<String, Duration> pinned, DateTime received) {
+  /// [unpinnedDisplay]; or until [end] when given (a Super Chat still pinned
+  /// on joining, [replayed]: B-22). Null without amount and text.
+  static LiveMessage? _superChat(
+    Map<Object?, Object?> paid,
+    Map<String, Duration> pinned,
+    DateTime received, {
+    DateTime? end,
+    bool replayed = false,
+  }) {
     final amount = _plain(paid['purchaseAmountText']).trim();
     final text = _runs(paid['message']);
     if (amount.isEmpty && text.isEmpty) return null;
@@ -508,6 +613,7 @@ abstract final class YouTubeDanmakuProtocol {
       messageId: id,
       sentAt: time,
       color: LiveMessageColor.white,
+      replayed: replayed,
       data: LiveSuperChatMessage(
         messageId: id,
         userName: name,
@@ -516,7 +622,7 @@ abstract final class YouTubeDanmakuProtocol {
         price: 0,
         priceText: amount,
         startTime: start,
-        endTime: start.add(display),
+        endTime: end ?? start.add(display),
         backgroundColor: _color(paid['headerBackgroundColor']),
         backgroundBottomColor: _color(paid['bodyBackgroundColor']),
       ),
@@ -547,6 +653,40 @@ abstract final class YouTubeDanmakuProtocol {
     final text = _runs(member['message']);
     return _notice(member, _plain(member['authorName']), text.isEmpty ? header : '$header：$text');
   }
+
+  /// A gift (`giftMessageViewModel`, B-23) as the page shows it: the
+  /// sender's name (`authorName.content`, trimmed) and the text after it
+  /// (`text.content`, trimmed: `sent Donut`), with the gift's image
+  /// (`giftImage.sources`); the item's id. The recorded items have no
+  /// channel id or time; they are read when present. Null without text.
+  static LiveMessage? _gift(Map<Object?, Object?> gift) {
+    final text = _content(gift['text']);
+    if (text.isEmpty) return null;
+    final image = _largest(_map(gift['giftImage'])['sources']);
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: _content(gift['authorName']),
+      userId: _string(gift['authorExternalChannelId']),
+      message: text,
+      messageId: _string(gift['id']),
+      sentAt: _time(gift['timestampUsec']),
+      color: LiveMessageColor.white,
+      data: YouTubeGift(
+        name: text.startsWith(_giftVerb) ? text.substring(_giftVerb.length).trim() : '',
+        text: text,
+        image: image.isEmpty ? null : Uri.tryParse(image),
+      ),
+    );
+  }
+
+  /// How the page's English text starts a gift's name (`sent Donut`).
+  static const String _giftVerb = 'sent ';
+
+  /// The `content` of a view model's text, trimmed, or empty.
+  static String _content(Object? node) => switch (node) {
+    {'content': final String content} => content.trim(),
+    _ => '',
+  };
 
   /// A notice of kind [LiveNoticeKind.subscription]: [name] and [text] as
   /// one line, the item's id, time and sender. Null without [text].
@@ -610,10 +750,13 @@ abstract final class YouTubeDanmakuProtocol {
 
   /// The last (largest) thumbnail of an `authorPhoto` as an https URL (a
   /// protocol-relative one made https), or empty.
-  static String _photo(Object? photo) {
-    final thumbnails = photo is Map ? photo['thumbnails'] : null;
-    if (thumbnails is! List || thumbnails.isEmpty) return '';
-    final url = switch (thumbnails.last) {
+  static String _photo(Object? photo) => _largest(photo is Map ? photo['thumbnails'] : null);
+
+  /// The last (largest) of [images] (`[{url, width, height}]`) as an https
+  /// URL (a protocol-relative one made https), or empty.
+  static String _largest(Object? images) {
+    if (images is! List || images.isEmpty) return '';
+    final url = switch (images.last) {
       {'url': final String url} => url.trim(),
       _ => '',
     };
@@ -652,8 +795,9 @@ abstract final class YouTubeDanmakuProtocol {
 ///   A failed request is tried again 2 s later; the third failure while
 ///   joining ends the run with [DanmakuCloseReason.connectionFailed], as
 ///   does a broadcast without a live chat (not live, chat off, a replay) or
-///   an argument that is not a video id. Joined, it reports [DanmakuReady]
-///   and then the viewers of `next`.
+///   an argument that is not a video id. Joined, it reports [DanmakuReady],
+///   the viewers of `next` and the Super Chats the first answer's ticker
+///   still pins, replayed (B-22).
 /// - With `allChat`, the chat is read in the page's "Live chat" view (every
 ///   message) instead of "Top chat" (B-13): the first continuation, and any
 ///   reload continuation later, is asked for rewritten
@@ -727,6 +871,9 @@ final class YouTubeDanmakuConnection extends DanmakuConnectionBase<YouTubeDanmak
     if (history.ended) throw DanmakuStartFailure(DanmakuCloseReason.connectionFailed, detail: _ended(history));
     run.ready();
     if (entry?.viewers case final viewers?) run.message(YouTubeDanmakuProtocol.audience(viewers));
+    // The history is not reported, but the Super Chats still pinned are, as
+    // the page shows them on opening (B-22).
+    history.pinned.forEach(run.message);
     unawaited(chat.follow(history));
     unawaited(chat.viewers(videoId));
   }

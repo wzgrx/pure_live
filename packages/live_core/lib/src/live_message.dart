@@ -238,6 +238,7 @@ final class LiveMessage {
     this.messageId = '',
     this.sentAt,
     this.style,
+    this.replayed = false,
   });
 
   /// Kind.
@@ -280,6 +281,11 @@ final class LiveMessage {
 
   /// Presentation of a local message.
   final LiveMessageStyle? style;
+
+  /// Not something that just happened: sent again after a reconnect resumed
+  /// the chat, or a backlog the platform gives on joining (such as super
+  /// chats still on display). The duplicate gate accepts it for longer.
+  final bool replayed;
 }
 
 /// A super chat (paid message).

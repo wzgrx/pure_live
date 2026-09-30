@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "platform": "bigo",
+  "case": "S07-unsigned",
+  "room": "bigo:tikaa12",
+  "danmakuKeys": {
+    "siteId": "tikaa12",
+    "ownerId": 1515772556,
+    "roomId": "6309489689319799326"
+  },
+  "capturedAt": "2026-09-30T12:38:36.466000Z",
+  "route": "proxy:127.0.0.1:7897",
+  "link": {
+    "url": "https://ta.bigo.tv/official_website/studio/getWebSocketLink",
+    "method": "POST",
+    "headers": {
+      "origin": "https://www.bigo.tv",
+      "referer": "https://www.bigo.tv/",
+      "user-agent": "Mozilla/5.0",
+      "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+    },
+    "followRedirects": false
+  },
+  "handshakes": [
+    {
+      "url": "wss://wss.bigolive.tv/live/official/web",
+      "headers": {
+        "origin": "https://www.bigo.tv",
+        "user-agent": "Mozilla/5.0"
+      }
+    }
+  ],
+  "frames": 7,
+  "raw": {
+    "sha256": "e83cbd49bbb56a533c98f10f2d88b7dae76901d6fefc0fd04ebd7c0ac776364e",
+    "length": 2106
+  },
+  "scrubbed": [
+    {
+      "where": "$.challenge",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.deviceId, form deviceId, login deviceId, enter deviceid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.seqId",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.uidToken, login cookie",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.userId, login uid, reply uid, 1560 other[fromUid], 11032 uid (the visitor)",
+      "rule": "person"
+    },
+    {
+      "where": "2584 from_uid, payload.uid, 760969 from_uid (viewers; the streamer kept)",
+      "rule": "person"
+    },
+    {
+      "where": "79108 sign (recomputed for the synthetic challenge)",
+      "rule": "derived"
+    }
+  ],
+  "reduced": [
+    "11032 users: [] (viewer profiles with avatar tokens)",
+    "10264 addUser, delUser: [] (viewer profiles with avatar tokens)",
+    "2584 payload.others: chat keeps the numeric flags only; other kinds []",
+    "2584 oriUri 760969 (gift animation): only the gift fields, no names, avatars or tokens"
+  ],
+  "tool": "rec.dart (dart:io and crypto: getWebSocketLink, then the frames the website sends for a visitor: the challenge answer, the login a second later, the entry, the audience request and a ping every 10 s; nothing else) and scrub.py, M5.20; neither is in the repository",
+  "note": "Recorded 2026-09-30 for M5.20 through the local proxy: the login was sent as the socket opened, before the challenge was answered (on purpose; the website waits for the challenge). The server answered 'unsigned' with the head '0', NUL and spaces, and did not answer the ping after it."
+}

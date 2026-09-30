@@ -44,7 +44,7 @@ List<Map<String, dynamic>> _maps(Object? value) => (value! as List).cast<Map<Str
 Object? _result(Object? traced) => (traced! as Map<String, dynamic>)['result'];
 
 /// Keys every card differs in from 3.x: the notice, said for viewers (the
-/// unified rule on notices).
+/// unified rule on notices; M5.20 drops "chat pending" from it).
 const Set<String> _cardChanges = {'notice'};
 
 void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String reason = '', Set<String> changed = _cardChanges}) {
@@ -126,7 +126,7 @@ void main() {
       for (final page in [1, 2, 3]) {
         final legacy = _result(pages['recommend:$page'])! as Map<String, dynamic>;
         final directory = BigoApi.directoryPage(cards, page: page);
-        // notice: said for viewers (unified rule).
+        // notice: said for viewers (unified rule; M5.20 drops "chat pending").
         _expectRooms(directory.rooms, legacy['rooms'], reason: 'page $page');
         expect(directory.page, legacy['page']);
         expect(directory.hasMore, legacy['hasMore']);
@@ -447,7 +447,7 @@ void main() {
       for (final depth in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
         final legacy = _result(calls[depth])! as Map<String, dynamic>;
         final https = BigoApi.room(BigoApi.studio(_avatarHttps(), requestedSiteId: '414439909'));
-        // cover: the snapshot (24-1); notice: said for viewers (unified rule).
+        // cover: the snapshot (24-1); notice: said for viewers (unified rule; M5.20 drops "chat pending").
         _expectParity(_projection(https), legacy, changed: {'cover', 'notice'}, reason: depth);
         expect(https.avatar, legacy['avatar'], reason: 'the avatar stays the avatar');
         expect(legacy['cover'], legacy['avatar'], reason: '3.x used the avatar as cover');
@@ -597,7 +597,7 @@ void main() {
       final room = BigoApi.room(studio);
       for (final depth in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
         // cover: the snapshot (24-1; 3.x's cover was the empty avatar);
-        // notice: said for viewers (unified rule).
+        // notice: said for viewers (unified rule; M5.20 drops "chat pending").
         _expectParity(
           _projection(room),
           _result(calls[depth])! as Map<String, dynamic>,
@@ -765,6 +765,39 @@ void main() {
       }
       final large = '{"code":0,"data":{"x":"${'一' * (BigoApi.responseLimit ~/ 3)}"}}';
       expect(() => BigoApi.directory(large), throwsA(isA<ApiChanged>()));
+    });
+
+    test('M5.20: the chat arguments of a studio the website opens its chat for', () {
+      BigoDanmakuArgs? args(Map<String, Object?> data) =>
+          BigoApi.danmakuArgs(BigoApi.studio(_studio(data), requestedSiteId: '414439909'));
+      final live = args(const {})!;
+      expect((live.siteId, live.ownerId, live.roomId), ('qashia305', 409742853, '6812312308570332324'));
+      expect('$live', 'BigoDanmakuArgs(qashia305, 409742853, 6812312308570332324)');
+      expect(args(const {'isPaidShow': '1', 'hls_src': ''}), isNotNull, reason: "the page opens a paid show's chat");
+      expect(args(const {'passRoom': null, 'hls_src': ''}), isNotNull, reason: "a used token's answer");
+      for (final (label, data) in <(String, Map<String, Object?>)>[
+        ('offline', {'alive': 0, 'hls_src': ''}),
+        ('login gate', _gate),
+        ('login gate while live', {'needLogin': true, 'hls_src': ''}),
+        ('password', {'passRoom': true, 'hls_src': ''}),
+        ('roomType 1', {'roomType': '1'}),
+        ('no room id', {'roomId': '0'}),
+        ('empty room id', {'roomId': ''}),
+      ]) {
+        expect(args(data), isNull, reason: label);
+      }
+      final studio = BigoApi.studio(_studioBody(), requestedSiteId: '414439909');
+      expect(BigoApi.room(studio).danmakuData, isNull, reason: 'a room carries them only when asked (entries)');
+      final entry = BigoApi.room(studio, danmaku: true);
+      expect(entry.danmakuData, isA<BigoDanmakuArgs>());
+      expect(entry.toJson().keys, isNot(contains('danmakuData')), reason: 'never stored');
+      expect(
+        BigoApi.room(
+          BigoApi.studio(_studio(const {'alive': 0, 'hls_src': ''}), requestedSiteId: 'x'),
+          danmaku: true,
+        ).danmakuData,
+        isNull,
+      );
     });
   });
 

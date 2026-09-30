@@ -36,10 +36,11 @@ enum _Use {
 /// The Bigo Live adapter (3.x's `BigoSite` and `BigoApi`; parsing in
 /// [BigoApi]).
 ///
-/// Anonymous, like 3.x: no cookie, no account and no chat (3.x's Bigo had
-/// `EmptyDanmaku`). Every request carries 3.x's headers, does not follow
-/// redirects and goes as `bigo`, so the app routes the platform through its
-/// proxy setting. The requests:
+/// Anonymous, like 3.x: no cookie and no account. 3.x's Bigo had no chat
+/// (`EmptyDanmaku`); room entry and recording details now hand the chat
+/// connection its arguments (`BigoDanmakuArgs`, M5.20). Every request
+/// carries 3.x's headers, does not follow redirects and goes as `bigo`, so
+/// the app routes the platform through its proxy setting. The requests:
 /// - the catalog, the directory, the recommendations and the search filter
 ///   are all the public list `vedioList/72` (about 20 live rooms), paged
 ///   locally. Page 1 of the directory (the pull to refresh) fetches it anew;
@@ -473,12 +474,16 @@ final class BigoSite extends LiveSite
     return use == _Use.refresh ? again : again.gated();
   });
 
+  /// A room entry and a recording detail also carry the chat arguments
+  /// (`BigoDanmakuArgs` in `danmakuData`, M5.20); a refresh does not.
   Future<LiveRoom> _detail(String roomId, _Use use) async =>
-      BigoApi.room(await _studio(_siteId(roomId), null, use: use));
+      BigoApi.room(await _studio(_siteId(roomId), null, use: use), danmaku: use == _Use.entry);
 
   /// The room: a fresh web token and the studio (three requests, 3.x; four
   /// behind a login gate). Its id is the site's `clientBigoId`, whatever id
-  /// it was asked for by. The cover is the broadcast's snapshot (24-1).
+  /// it was asked for by. The cover is the broadcast's snapshot (24-1). A
+  /// live studio whose chat the website opens carries its chat arguments
+  /// ([BigoApi.danmakuArgs], M5.20), without another request.
   @override
   Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId, _Use.entry);
 

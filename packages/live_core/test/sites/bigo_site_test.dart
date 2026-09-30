@@ -186,7 +186,7 @@ final Matcher _cancelled = throwsA(
 
 /// Asserts [room] equals 3.x's [legacy] projection on every key 3.x wrote,
 /// except [changed]. Every room differs in its notice, said for viewers (the
-/// unified rule on notices).
+/// unified rule on notices; M5.20 drops "chat pending" from it).
 void _expectParity(LiveRoom room, Object? legacy, {Set<String> changed = const {'notice'}, String reason = ''}) {
   final actual = {...room.toJson(), 'link': room.link};
   for (final MapEntry(:key, :value) in (legacy! as Map<String, dynamic>).entries) {
@@ -547,7 +547,7 @@ void main() {
         expect(rooms.single.isLiveNow, isTrue);
         final twin = https[keyword] ?? https[_room];
         // avatar: the recorded http avatar (3.x failed on it); cover: the
-        // snapshot (24-1); notice: said for viewers.
+        // snapshot (24-1); notice: said for viewers (M5.20 drops "chat pending").
         _expectParity(
           rooms.single,
           (_result(twin)! as List).single,
@@ -613,7 +613,7 @@ void main() {
         final room = await detail(setup.site);
         expect(room.roomId, _canonical, reason: depth);
         // avatar: the recorded http avatar (3.x failed the room on it);
-        // cover: the snapshot (24-1); notice: said for viewers.
+        // cover: the snapshot (24-1); notice: said for viewers (M5.20 drops "chat pending").
         _expectParity(room, _result(calls[depth]), changed: {'avatar', 'cover', 'notice'}, reason: depth);
         expect(room.avatar, startsWith('http://esx.bigo.sg/'));
         expect(room.cover, contains('1wgYlS00y4dZTiM2B5Tdq_2.jpg'), reason: 'the snapshot (24-1)');
@@ -630,6 +630,33 @@ void main() {
       }
       final recorded = (_legacy('S03-studio-live')['recorded'] as Map<String, dynamic>)[_room] as Map<String, dynamic>;
       expect(_result(recorded['getRoomDetail']), containsPair('message', 'Bigo schema'));
+    });
+
+    test('M5.20: entries and recording details carry the chat arguments without a request; refreshes and '
+        'lookups do not', () async {
+      for (final (depth, detail, carries) in <(String, Future<LiveRoom> Function(BigoSite), bool)>[
+        ('getRoomDetail', (site) => site.getRoomDetail(roomId: _room), true),
+        ('getRoomDetailForRecording', (site) => site.getRoomDetailForRecording(roomId: _room), true),
+        ('getRoomDetailForRefresh', (site) => site.getRoomDetailForRefresh(roomId: _room), false),
+        (
+          'searchRoomsCancellable',
+          (site) async => (await site.searchRoomsCancellable(_room, pageSize: 20, cancel: CancelToken())).single,
+          false,
+        ),
+      ]) {
+        final setup = _setup([..._list, ..._live]);
+        final room = await detail(setup.site);
+        expect(setup.http.requests, hasLength(3), reason: '$depth: no request for the chat');
+        if (carries) {
+          final args = room.danmakuData! as BigoDanmakuArgs;
+          expect((args.siteId, args.ownerId, args.roomId), (_canonical, 409742853, '6812312308570332324'));
+        } else {
+          expect(room.danmakuData, isNull, reason: depth);
+        }
+      }
+      final gated = _Bigo(gateEveryUse: true);
+      final entry = await BigoSite(gated.http, now: () => _now).getRoomDetail(roomId: _room);
+      expect(entry.danmakuData, isNull, reason: 'the page opens no chat behind the login gate');
     });
 
     test('asked by the site spelling, the room is the same', () async {
@@ -696,7 +723,7 @@ void main() {
       final calls = (_legacy('S03-studio-notoken')['asTokenAnswer'] as Map<String, dynamic>)[_room] as Map;
       final setup = _setup(_live.take(2).toList(), extra: [_studioAnswer(_room, notoken)]);
       final room = await setup.site.getRoomDetail(roomId: _room);
-      // cover: the snapshot (24-1); notice: said for viewers.
+      // cover: the snapshot (24-1); notice: said for viewers (M5.20 drops "chat pending").
       _expectParity(room, _result(calls['getRoomDetail']), changed: {'cover', 'notice'});
       expect(room.effectiveLiveStatus, LiveStatus.unknown);
       expect(room.restriction, LiveRestriction.needsLogin);

@@ -245,6 +245,32 @@ final class BigoStudio {
   );
 }
 
+/// What a chat connection needs to join one Bigo studio's chat (24-3, M5.20):
+/// the room the website's chat socket enters (`roomId`) and the streamer
+/// whose audience it asks for (`uid`), both from the studio answer.
+///
+/// 3.x had no Bigo chat (`EmptyDanmaku`). Room entry and recording details
+/// of a studio the website would open its chat for hand these over in
+/// `danmakuData` ([BigoApi.danmakuArgs]), without a request; the connection
+/// itself is the danmaku module's.
+@immutable
+final class BigoDanmakuArgs {
+  /// Creates the arguments.
+  const new({required this.siteId, required this.ownerId, required this.roomId});
+
+  /// `clientBigoId`: the room's identity.
+  final String siteId;
+
+  /// `uid`: the streamer's account.
+  final int ownerId;
+
+  /// `roomId`: the streamer's int64 room id, as written.
+  final String roomId;
+
+  @override
+  String toString() => 'BigoDanmakuArgs($siteId, $ownerId, $roomId)';
+}
+
 /// The public recipe of a Bigo input (3.x's `BigoInputRecipe`): the room's
 /// Bigo id. There is no URL to export: playback and recording each ask the
 /// studio for a fresh web token and playlist (`BigoSite.resolveInput`) and
@@ -311,8 +337,9 @@ abstract final class BigoApi {
 
   /// The notice of a public room (the text of 3.x's key `bigo_chat_notice`,
   /// said for viewers: 3.x wrote "Bigo Live 远端聊天尚待接入；目录 user_count
-  /// 仅作为当前直播在线人数，房间详情缺值时保持未知。").
-  static const String chatNotice = '这里暂时看不到 Bigo Live 直播间的聊天。列表里的人数是正在观看的人数，进入直播间后不显示人数。';
+  /// 仅作为当前直播在线人数，房间详情缺值时保持未知。"). Chat is shown since
+  /// M5.20, whose connection also reports the room's viewers.
+  static const String chatNotice = '列表里的人数是正在观看的人数；进入直播间后，人数随弹幕更新。';
 
   /// The notice of a login-gated room (`bigo_login_required`; 3.x: "该房间
   /// 当前要求登录，直播状态与媒体保持未知。", no longer true now that the state
@@ -652,8 +679,10 @@ abstract final class BigoApi {
   /// no audience (the studio has none); the notice for the access; 3.x's
   /// headers; the restriction; [BigoRoomData]. An offline studio names
   /// nobody (`nick_name` and `avatar` are empty, sample S03-studio-offline):
-  /// they stay empty, so a follow keeps its stored name and picture.
-  static LiveRoom room(BigoStudio studio) => LiveRoom(
+  /// they stay empty, so a follow keeps its stored name and picture. With
+  /// [danmaku] (a room entry or recording detail) the room also carries its
+  /// chat arguments ([danmakuArgs]) in `danmakuData`.
+  static LiveRoom room(BigoStudio studio, {bool danmaku = false}) => LiveRoom(
     roomId: studio.siteId,
     platform: _site,
     userId: '${studio.ownerId}',
@@ -672,7 +701,26 @@ abstract final class BigoApi {
     },
     httpHeaders: headers,
     data: studio.data,
+    danmakuData: danmaku ? danmakuArgs(studio) : null,
   );
+
+  /// The chat arguments of [studio] (M5.20), or null where the website does
+  /// not open its chat (`startLive`, `startWs` and `handleNeedLogin` of its
+  /// player, script `14.37bf41.js` of 2026-09-30): a studio that is not live,
+  /// behind the login gate, a password room (its chat needs the password),
+  /// `roomType` "1" (the page ends the live), or one without a room id. A
+  /// paid show's chat is opened, as the website does.
+  static BigoDanmakuArgs? danmakuArgs(BigoStudio studio) {
+    final roomId = studio.broadcastId;
+    if (roomId == null ||
+        studio.alive != true ||
+        studio.access == BigoAccess.loginRequired ||
+        (studio.password ?? false) ||
+        studio.roomType == '1') {
+      return null;
+    }
+    return BigoDanmakuArgs(siteId: studio.siteId, ownerId: studio.ownerId, roomId: roomId);
+  }
 
   /// The media playlist of a studio as a line: 3.x's headers, HLS, the CDN
   /// host as line id. The address carries no expiry (so no lease); its

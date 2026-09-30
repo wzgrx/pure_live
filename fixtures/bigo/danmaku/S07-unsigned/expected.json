@@ -1,0 +1,48 @@
+{
+  "generator": "fixtures/bigo/danmaku/web_expected.py: the chat reading and frames of the Bigo website (scripts 14.37bf41.js, 97.929aaf.js and app.2a1a24.js of 2026-09-30), restated",
+  "value": {
+    "roomId": "6309489689319799326",
+    "ownerId": 1515772556,
+    "link": {
+      "url": "https://ta.bigo.tv/official_website/studio/getWebSocketLink",
+      "visitor": {
+        "userId": "1000000001",
+        "userName": "0",
+        "deviceId": "web_0123456789abcdef0123456789abcdef_Sample_1790771916471"
+      },
+      "form": "deviceId=web_0123456789abcdef0123456789abcdef_Sample_1790771916471"
+    },
+    "client": [
+      {
+        "line": 3,
+        "text": "512279{\"uid\":\"1000000001\",\"cookie\":\"RfUZGE1d6D+rHmnGtUBFxDDl4Mjsm3IVZPqGrsa5FNhHg7PYpLdtT7ZGa9xtB2tgi2su1rtlsJyqCgzKqJejawfvTnp48s81wpXDFsoG1TRciCd4oN91CsfWZBSsrVXwVoBeT997Asz0DHeTPuqY5w8CBPXBZAWY\",\"secret\":\"0\",\"userName\":\"0\",\"deviceId\":\"web_0123456789abcdef0123456789abcdef_Sample_1790771916471\",\"userFlag\":\"0\",\"status\":\"0\",\"password\":\"0\",\"sdkVersion\":\"0\",\"displayType\":\"0\",\"pbVersion\":\"0\",\"lang\":\"cn\",\"loginLevel\":\"0\",\"clientVersionCode\":\"0\",\"clientType\":\"7\",\"clientOsVer\":\"0\",\"netConf\":{\"clientIp\":\"0\",\"proxySwitch\":\"0\",\"proxyTimestamp\":\"0\",\"mcc\":\"0\",\"mnc\":\"0\",\"countryCode\":\"CN\"}}"
+      },
+      {
+        "line": 5,
+        "text": "79108{\"appId\":\"60\",\"osType\":\"4\",\"clientVersion\":\"5\",\"timeStamp\":\"1790771923\",\"nonce\":\"1\",\"reservedForSecurity\":\"1\",\"appSign\":\"1\",\"redundancy\":\"1\",\"sign\":\"78fda423994340cd1f654591e8ccd741\"}"
+      },
+      {
+        "line": 7,
+        "text": "791{\"status\":\"0\",\"seqid\":\"1790771933607\",\"flag\":\"0\",\"roomId\":\"0\",\"ownerStatus\":\"0\",\"micUid\":\"0\"}"
+      }
+    ],
+    "frames": [
+      {
+        "line": 4,
+        "eid": 256,
+        "page": {
+          "answer": true
+        },
+        "events": []
+      },
+      {
+        "line": 6,
+        "eid": null,
+        "page": {
+          "loginFail": true
+        },
+        "events": []
+      }
+    ]
+  }
+}

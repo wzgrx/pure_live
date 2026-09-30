@@ -20,6 +20,7 @@ export 'src/filters/similarity_filter.dart';
 export 'src/registry.dart';
 export 'src/sites/acfun.dart';
 export 'src/sites/baidulive.dart';
+export 'src/sites/bigo.dart';
 export 'src/sites/bilibili.dart';
 export 'src/sites/chzzk.dart';
 export 'src/sites/douyin.dart';

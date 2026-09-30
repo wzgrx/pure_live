@@ -131,7 +131,8 @@ final Matcher _cancelled = throwsA(
 );
 
 /// Changed on every room: the notices are in words for users (M4.U, the
-/// unified rule on notices).
+/// unified rule on notices), and M5.28 shows LOOK chat, so the chat notice
+/// no longer says it is missing.
 const _notice = {'notice'};
 
 /// Changed for an ended room after a list card of the same broadcast: the
@@ -274,7 +275,11 @@ void main() {
       expect(_line(room), 'POST https://api.look.163.com/weapi/livestream/room/get/v3 {"liveRoomNo":"21623631"}');
       expect((setup.site.id, setup.site.name), ('looklive', 'LOOK 直播'));
       expect(setup.site.directoryNoticeKey, 'looklive_directory_scope');
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no LOOK chat');
+      expect(
+        setup.site.getDanmaku(),
+        isA<EmptyDanmaku>(),
+        reason: "3.x had no LOOK chat; since M5.28 it is live_danmaku's, from the room entry's danmakuData",
+      );
       expect(setup.site.deadline, const Duration(seconds: 20));
     });
 
@@ -999,6 +1004,25 @@ void main() {
         throwsA(isA<StreamUnavailable>()),
       );
       expect((await setup.site.resolvePlayUrlsRaw(detail: detail, quality: LookLiveApi.hlsQuality)).urls, hasLength(1));
+    });
+
+    test('room entry and recording carry the chat (M5.28) from the one room request; a refresh does not', () async {
+      final setup = _setup();
+      const chat = LookLiveDanmakuArgs(roomId: _video, chatroomId: '462192286');
+      expect((await setup.site.getRoomDetail(roomId: _video)).danmakuData, chat);
+      expect((await setup.site.getRoomDetailForRecording(roomId: _video)).danmakuData, chat);
+      expect((await setup.site.getRoomDetailForRefresh(roomId: _video)).danmakuData, isNull);
+      expect(_sent(setup.http.requests), [
+        for (var i = 0; i < 3; i++)
+          'POST https://api.look.163.com/weapi/livestream/room/get/v3 {"liveRoomNo":"21623631"}',
+      ]);
+      expect(
+        (await setup.site.getRoomDetail(roomId: _audio)).danmakuData,
+        const LookLiveDanmakuArgs(roomId: _audio, chatroomId: '16272838887'),
+      );
+      expect((await setup.site.getRoomDetail(roomId: _offline)).danmakuData, isNull, reason: 'not live');
+      final rooms = await setup.site.getRecommendRooms();
+      expect(rooms.map((room) => room.danmakuData), everyElement(isNull), reason: 'list cards');
     });
 
     test('the rooms kept are bounded: the oldest of more than 2000 is forgotten', () async {

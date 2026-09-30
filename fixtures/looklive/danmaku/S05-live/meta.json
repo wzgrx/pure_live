@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "platform": "looklive",
+  "case": "S05-live",
+  "room": "looklive:447365581",
+  "danmakuKeys": {
+    "roomId": "447365581",
+    "chatroomId": "9902460973",
+    "anonymousMode": false
+  },
+  "capturedAt": "2026-09-30T12:19:45.477819Z",
+  "route": "direct",
+  "requests": [
+    {
+      "method": "POST",
+      "url": "https://api.look.163.com/weapi/livestream/chat/address",
+      "payload": {
+        "liveRoomNo": "447365581",
+        "os": 0
+      },
+      "headers": {
+        "accept": "application/json, text/plain, */*",
+        "origin": "https://look.163.com",
+        "referer": "https://look.163.com/",
+        "user-agent": "Mozilla/5.0",
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "https://chatwl01.yunxinfw.com:443/socket.io/1/?t=1790770785968",
+      "headers": {
+        "origin": "https://look.163.com",
+        "referer": "https://look.163.com/live?id=447365581",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "status": 200
+    }
+  ],
+  "handshakes": [
+    {
+      "url": "wss://chatwl01.yunxinfw.com:443/socket.io/1/websocket/00000000-0000-4000-8000-000000000001",
+      "headers": {
+        "origin": "https://look.163.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "status": 101
+    }
+  ],
+  "frames": 140,
+  "raw": {
+    "sha256": "002b44374bda6d74fe68e1f657be63bd32f54813168fb4b9b43ac728aed7bbd3",
+    "length": 209833
+  },
+  "scrubbed": [
+    {
+      "where": "socket.io handshake answer, socket URL (session id)",
+      "rule": "session"
+    },
+    {
+      "where": "$.Q[1].v.2, $.Q[2].v.19, $.r[1].2 (the anonymous nimanon_ account)",
+      "rule": "session"
+    },
+    {
+      "where": "$.Q[1].v.3, $.Q[2].v.13, $.r[1].107 (device id)",
+      "rule": "device"
+    },
+    {
+      "where": "$.Q[1].v.26, $.Q[2].v.26, $.r[1].108 (SDK session)",
+      "rule": "session"
+    },
+    {
+      "where": "$.r[1].body[text].21 and custom/fromCustom user.userId",
+      "rule": "person"
+    },
+    {
+      "where": "custom/fromCustom user.nickname; @names in the text (3, 13, content.text)",
+      "rule": "person"
+    },
+    {
+      "where": "custom/fromCustom user.avatarUrl",
+      "rule": "person"
+    },
+    {
+      "where": "custom/fromCustom user.liveRoomNo (the viewer's own room)",
+      "rule": "person"
+    },
+    {
+      "where": "$.r[1].body[custom].4 (types 114, 303, 55000, 200067)",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "M5.28 recorder (a raw WebSocket client in Python; posts chat/address, the socket.io 0.9 handshake, then sends only the anonymous chatroom login, the socket.io heartbeat echo and one link heartbeat 180 s after the login, as the website's NIM SDK does)",
+  "note": "Direct, 320 s, the voice room with the most viewers in the voice recommendations (onlineNumber 79 a few minutes before). The first two lines are the answers to the chat server request and to the socket.io handshake; then every socket frame: the session opening (1::), the anonymous login and its answer (the chatroom's onlineMemberNum 26), 12 socket.io heartbeats and their echoes, one link heartbeat 180 s after the login and its answer, 47 chat lines (35 of the room's assistant account, 12 of two viewers) and 61 other chatroom messages (114 x43, 303 x4, 55000 x6, 200067 x8) whose custom JSON was cut to its id and type. Viewers' ids, names (also as @mentions in the texts), avatar paths and own room numbers became synthetic values (one person keeps one set across frames; the anchor 564597113 is kept); the guest account, device id, SDK session and socket.io session id became synthetic values of the same form. Every frame was decoded and re-encoded as the server writes it (compact, characters not escaped; nested JSON texts edited in place), so everything else is byte for byte the recording. The recorder said 0:: when it left."
+}

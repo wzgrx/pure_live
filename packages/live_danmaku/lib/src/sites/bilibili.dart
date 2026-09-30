@@ -9,6 +9,7 @@ import 'package:live_danmaku/src/binary.dart';
 import 'package:live_danmaku/src/connection.dart';
 import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
+import 'package:live_net/live_net.dart' show brotliDecode;
 import 'package:meta/meta.dart';
 
 /// Bilibili's danmaku connection (3.x `BiliBiliDanmaku`,
@@ -254,14 +255,15 @@ abstract final class BilibiliDanmakuProtocol {
   /// Acknowledgement (sent).
   static const int opAck = 24;
 
-  /// Protocol version the auth packet asks for: 2 (zlib). 3.x asked for 3
-  /// (brotli); `dart:io` has no brotli decoder.
-  static const int protocolVersion = 2;
+  /// Protocol version the auth packet asks for: 3 (brotli), as 3.x and the
+  /// web player do. M5.1 asked for 2 (zlib) while there was no brotli
+  /// decoder; zlib packets are still decoded.
+  static const int protocolVersion = 3;
 
   /// Largest WebSocket message and packet.
   static const int maxMessageBytes = 8 * 1024 * 1024;
 
-  /// Largest inflated packet stream.
+  /// Largest inflated packet stream (zlib or brotli).
   static const int maxInflatedBytes = 16 * 1024 * 1024;
 
   /// Most packets in one stream.
@@ -329,9 +331,9 @@ abstract final class BilibiliDanmakuProtocol {
   /// A malformed message keeps the items decoded before the fault, which is
   /// returned as `error`: a message over [maxMessageBytes], a bad or
   /// truncated header, trailing bytes, too many packets, too deep nesting,
-  /// corrupt or oversized zlib, an auth reply that is not JSON. A notice that
-  /// is not JSON, or not a message this decoder knows, is skipped on its
-  /// own. Brotli packets are skipped: the auth packet asks for zlib.
+  /// corrupt or oversized zlib or brotli, an auth reply that is not JSON. A
+  /// notice that is not JSON, or not a message this decoder knows, is skipped
+  /// on its own.
   static ({List<BilibiliDanmakuItem> items, FormatException? error}) decode(List<int> message) {
     final items = <BilibiliDanmakuItem>[];
     try {
@@ -381,8 +383,7 @@ abstract final class BilibiliDanmakuProtocol {
           case 2:
             _stream(_inflate(body), depth + 1, items);
           case 3:
-            // Brotli: never asked for.
-            return;
+            _stream(brotliDecode(body, maxOutput: maxInflatedBytes), depth + 1, items);
           default:
             final text = utf8.decode(body, allowMalformed: true).trim();
             if (text.isNotEmpty) _notice(text, items);

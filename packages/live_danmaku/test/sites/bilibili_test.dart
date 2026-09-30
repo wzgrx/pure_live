@@ -132,6 +132,51 @@ Uint8List _auth(String body) => _packet(8, utf8.encode(body));
 
 Uint8List _notice(Object? json, {int version = 0}) => _packet(5, utf8.encode(jsonEncode(json)), version: version);
 
+/// A brotli stream of [data] in uncompressed meta-blocks of at most [block]
+/// bytes (RFC 7932 section 9.2), as fixtures/bilibili/danmaku/legacy_expected.dart
+/// writes them: the smallest valid encoder.
+Uint8List _brotliStream(List<int> data, {int block = 65536}) {
+  final out = BytesBuilder();
+  var bits = 0;
+  var count = 0;
+  void put(int value, int width) {
+    bits |= value << count;
+    count += width;
+    while (count >= 8) {
+      out.addByte(bits & 0xff);
+      bits >>= 8;
+      count -= 8;
+    }
+  }
+
+  void align() {
+    if (count > 0) put(0, 8 - count);
+  }
+
+  put(0, 1);
+  for (var offset = 0; offset < data.length; offset += block) {
+    final end = min(offset + block, data.length);
+    put(0, 1);
+    put(0, 2);
+    put(end - offset - 1, 16);
+    put(1, 1);
+    align();
+    out.add(data.sublist(offset, end));
+  }
+  put(1, 1);
+  put(1, 1);
+  align();
+  return out.takeBytes();
+}
+
+/// A protover 3 notice holding [inner] (a packet stream).
+Uint8List _brotli(List<int> inner, {int block = 65536}) => _packet(5, _brotliStream(inner, block: block), version: 3);
+
+Iterable<String> _decoded(List<int> message) =>
+    BilibiliDanmakuProtocol.decode(message).items
+        .whereType<BilibiliDanmakuMessage>()
+        .map((item) => item.message.message);
+
 Map<String, Object?> _danmu(String text) => {
   'cmd': 'DANMU_MSG',
   'info': [
@@ -198,14 +243,16 @@ Map<String, Object?> _project(LiveMessage message) => {
 /// order, as the generator recorded 3.x's: messages, packets sent, ready,
 /// credential refreshes.
 final class _Replay {
-  new();
+  new({this.queueUuid = 'e2f61841'});
 
+  /// The auth packet's `queue_uuid`, as recorded.
+  final String queueUuid;
   final _Connector connector = _Connector();
   final List<Map<String, Object?>> effects = [];
   late final BilibiliDanmakuConnection connection = BilibiliDanmakuConnection(
     connector: connector.call,
     policy: _quiet,
-    random: _Hex('e2f61841'),
+    random: _Hex(queueUuid),
   );
 
   Future<void> open(BilibiliDanmakuArgs args) async {
@@ -220,8 +267,8 @@ final class _Replay {
     await connection.connect(args);
   }
 
-  BilibiliDanmakuArgs args({String token = 'token', String buvid = 'buvid'}) => BilibiliDanmakuArgs(
-    roomId: 5050,
+  BilibiliDanmakuArgs args({String token = 'token', String buvid = 'buvid', int roomId = 5050}) => BilibiliDanmakuArgs(
+    roomId: roomId,
     uid: 0,
     token: token,
     servers: [_gateway],
@@ -252,6 +299,56 @@ List<Map<String, Object?>> _lines(String sample) => [
   for (final line in File('$_root/$sample/frames.jsonl').readAsLinesSync()) jsonDecode(line) as Map<String, Object?>,
 ];
 
+/// Replays a recording's received messages through a new connection that
+/// uses the recorded credentials and `queue_uuid`: the auth packet it sent,
+/// and the effects of each received line (1-based).
+Future<({Uint8List auth, Map<int, List<Map<String, Object?>>> effects})> _replayRecording(String sample) async {
+  final lines = _lines(sample);
+  final recorded = _body(base64.decode(lines.first['b64']! as String))! as Map<String, dynamic>;
+  final replay = _Replay(queueUuid: recorded['queue_uuid'] as String);
+  await replay.open(
+    replay.args(
+      token: recorded['key'] as String,
+      buvid: recorded['buvid'] as String,
+      roomId: recorded['roomid'] as int,
+    ),
+  );
+  final auth = base64.decode(replay.effects.single['send']! as String);
+  final effects = <int, List<Map<String, Object?>>>{};
+  for (var index = 0; index < lines.length; index++) {
+    final line = lines[index];
+    if (line['dir'] != 'in' || line['b64'] == null) continue;
+    effects[index + 1] = await replay.receive(base64.decode(line['b64']! as String));
+  }
+  await replay.connection.close();
+  return (auth: auth, effects: effects);
+}
+
+/// The protocol versions of the packets at the top of [message].
+List<int> _versions(List<int> message) {
+  final view = ByteData.sublistView(Uint8List.fromList(message));
+  return [
+    for (var offset = 0; offset + 16 <= message.length; offset += view.getUint32(offset)) view.getUint16(offset + 6),
+  ];
+}
+
+/// Every notice's JSON text in [message], compressed packets unpacked.
+List<String> _notices(List<int> message) {
+  final data = Uint8List.fromList(message);
+  final view = ByteData.sublistView(data);
+  final texts = <String>[];
+  for (var offset = 0; offset + 16 <= data.length; offset += view.getUint32(offset)) {
+    if (view.getUint32(offset + 8) != 5) continue;
+    final body = data.sublist(offset + view.getUint16(offset + 4), offset + view.getUint32(offset));
+    texts.addAll(switch (view.getUint16(offset + 6)) {
+      2 => _notices(zlib.decode(body)),
+      3 => _notices(brotliDecode(body)),
+      _ => [utf8.decode(body)],
+    });
+  }
+  return texts;
+}
+
 Map<String, dynamic> _expectedValue(String sample) =>
     (jsonDecode(File('$_root/$sample/expected.json').readAsStringSync()) as Map<String, dynamic>)['value']
         as Map<String, dynamic>;
@@ -265,7 +362,7 @@ void main() {
       expect(base64.encode(BilibiliDanmakuProtocol.heartbeat()), 'AAAAEAAQAAAAAAACAAAAAQ==');
     });
 
-    test('the auth packet: 3.x fields and order, protover 2, a fresh queue_uuid', () {
+    test('the auth packet: 3.x fields and order, protover 3 (B-3), a fresh queue_uuid', () {
       final args = _args();
       final payload = BilibiliDanmakuProtocol.authPayload(args, queueUuid: '0a1b2c3d');
       expect(payload.keys, [
@@ -283,7 +380,8 @@ void main() {
       expect(payload, {
         'uid': 0,
         'roomid': 5050,
-        'protover': 2,
+        // B-3: brotli, as 3.x and the web player; M5.1 asked for 2 (zlib).
+        'protover': 3,
         'buvid': 'buvid-fixture',
         'support_ack': true,
         'queue_uuid': '0a1b2c3d',
@@ -292,6 +390,7 @@ void main() {
         'type': 2,
         'key': 'token-1',
       });
+      expect(BilibiliDanmakuProtocol.protocolVersion, 3);
       final packet = BilibiliDanmakuProtocol.auth(args, queueUuid: '0a1b2c3d');
       expect(_operation(packet), 7);
       expect(_body(packet), payload);
@@ -308,13 +407,65 @@ void main() {
       expect(BilibiliDanmakuProtocol.decode(_notice(_danmu('fine'))).error, isNull);
     });
 
-    test('brotli packets (protover 3) are skipped, the rest of the message is decoded', () {
-      final result = BilibiliDanmakuProtocol.decode([
-        ..._packet(5, [0x1b, 0x03, 0x00], version: 3),
-        ..._notice(_danmu('after brotli')),
+    test('B-3: brotli packets (protover 3) are decoded like zlib ones, nested and next to other packets', () {
+      final stream = [..._notice(_danmu('first')), ..._notice(_danmu('second'))];
+      expect(_decoded(_brotli(stream)), ['first', 'second']);
+      expect(_decoded(_brotli(stream, block: 5)), ['first', 'second'], reason: 'meta-blocks split the packets');
+      expect(_decoded([..._brotli(_notice(_danmu('compressed'))), ..._notice(_danmu('plain'))]), [
+        'compressed',
+        'plain',
       ]);
-      expect(result.error, isNull);
-      expect(result.items.map((item) => (item as BilibiliDanmakuMessage).message.message), ['after brotli']);
+      expect(_decoded(_brotli(_packet(5, zlib.encode(_notice(_danmu('zlib inside'))), version: 2))), ['zlib inside']);
+      expect(_decoded(_packet(5, zlib.encode(_brotli(_notice(_danmu('brotli inside')))), version: 2)), [
+        'brotli inside',
+      ]);
+      final empty = BilibiliDanmakuProtocol.decode([..._brotli(const []), ..._notice(_danmu('after empty'))]);
+      expect(empty.error, isNull);
+      expect(empty.items, hasLength(1));
+      final ack = BilibiliDanmakuProtocol.decode(
+        _brotli(_notice({..._danmu('ack me'), 'msg_id': 'id-1', 'p_is_ack': true, 'p_msg_type': 1})),
+      ).items;
+      expect(ack.first, isA<BilibiliDanmakuAck>());
+      expect(_body((ack.first as BilibiliDanmakuAck).packet), {'msg_id': 'id-1', 'cmd': 'DANMU_MSG', 'p_msg_type': 1});
+      expect((ack.last as BilibiliDanmakuMessage).message.message, 'ack me');
+    });
+
+    test('B-3: a bad brotli packet ends its message: what came before is kept, the fault is returned', () {
+      final valid = _brotliStream(_notice(_danmu('lost')));
+      final bad = {
+        'corrupt': [1, 2, 3, 4, 5],
+        'truncated': valid.sublist(0, valid.length - 2),
+        'trailing bytes': [...valid, 0],
+        'not a packet stream': _brotliStream(utf8.encode('{"cmd":"DANMU_MSG"}')),
+      };
+      for (final MapEntry(key: name, value: body) in bad.entries) {
+        final result = BilibiliDanmakuProtocol.decode([
+          ..._notice(_danmu('before')),
+          ..._packet(5, body, version: 3),
+          ..._notice(_danmu('after')),
+        ]);
+        expect(result.items.map((item) => (item as BilibiliDanmakuMessage).message.message), ['before'], reason: name);
+        expect(result.error, isA<FormatException>(), reason: name);
+      }
+      expect(_decoded(_notice(_danmu('next message'))), ['next message'], reason: 'nothing is carried over');
+
+      final tooDeep = BilibiliDanmakuProtocol.decode(_brotli(_brotli(_brotli(_notice(_danmu('too deep'))))));
+      expect(tooDeep.error?.message, contains('nesting'));
+      expect(_decoded(_brotli(_brotli(_notice(_danmu('two levels'))))), ['two levels']);
+    });
+
+    test('B-3: brotli output is limited like zlib output', () {
+      // The reference encoder's streams of 16 MiB + 1 and 16 MiB zero bytes.
+      final bomb = _packet(5, base64.decode('y///P/gnAOKxQCD3/o///3/wTwDEYRGA7v0fAAACAAM='), version: 3);
+      final result = BilibiliDanmakuProtocol.decode([..._notice(_danmu('kept')), ...bomb]);
+      expect(result.error?.message, contains('limit of ${BilibiliDanmakuProtocol.maxInflatedBytes} bytes'));
+      expect(result.items, hasLength(1));
+      final full = _packet(5, base64.decode('y///P/gnAOKxQCD3/o///3/wTwDEYRGA7v3f'), version: 3);
+      expect(
+        BilibiliDanmakuProtocol.decode(full).error?.message,
+        startsWith('Invalid Bilibili danmaku frame'),
+        reason: 'inflated in full: its zero bytes are no packet',
+      );
     });
 
     test("3.x's limits: message size, packet count, inflated size", () {
@@ -350,9 +501,17 @@ void main() {
       await replay.open(replay.args(token: auth['key'] as String, buvid: auth['buvid'] as String));
       expect(replay.connector.endpoints, [_gateway]);
       expect(replay.connector.headers.single, _headers);
+      // B-3: the auth packet asks for protover 3 now; S13-live was recorded
+      // with 2. Otherwise the same bytes.
+      final protover3 = [
+        ...recordedAuth.take(16),
+        ...utf8.encode(utf8.decode(recordedAuth.sublist(16)).replaceFirst('"protover":2,', '"protover":3,')),
+      ];
+      expect(protover3, hasLength(recordedAuth.length));
+      expect(protover3, isNot(recordedAuth));
       expect(replay.effects, [
-        {'send': base64.encode(recordedAuth)},
-      ], reason: 'the same bytes as the recorded auth packet');
+        {'send': base64.encode(protover3)},
+      ], reason: 'the recorded auth packet with protover 3');
 
       final frames = (_expectedValue('S13-live')['frames'] as List<dynamic>).cast<Map<String, dynamic>>();
       final byLine = {for (final frame in frames) frame['line'] as int: frame};
@@ -428,6 +587,164 @@ void main() {
       }
       expect(applied, differences.keys.toSet(), reason: 'every difference is still needed');
       expect(vectors, hasLength(28));
+    });
+
+    test('B-3 S13-protover3: the recorded auth packet, then every received message as 3.x handled it', () async {
+      final lines = _lines('S13-protover3');
+      final replay = await _replayRecording('S13-protover3');
+      expect(replay.auth, base64.decode(lines.first['b64']! as String), reason: 'the bytes this connection sent');
+      expect((_body(replay.auth)! as Map)['protover'], 3);
+
+      final frames = (_expectedValue('S13-protover3')['frames'] as List<dynamic>).cast<Map<String, dynamic>>();
+      expect({for (final frame in frames) frame['line']}, replay.effects.keys.toSet());
+      // M5.1 difference 3: super chats carry `data.id` as their messageId
+      // (3.x left it empty). The ids are public: the snapshot lists them.
+      const ids = ['19367477', '19367516', '19367528', '19367530', '19367547', '19367548'];
+      var superChats = 0;
+      Object? adjust(Object? effect) {
+        if (effect case {'message': final Map<String, dynamic> message} when message['type'] == 'superChat') {
+          final data = message['data']! as Map<String, dynamic>;
+          expect(data['messageId'], '');
+          return {
+            'message': {
+              ...message,
+              'data': {...data, 'messageId': ids[superChats++]},
+            },
+          };
+        }
+        return effect;
+      }
+
+      for (final frame in frames) {
+        final line = frame['line'] as int;
+        expect(replay.effects[line], [for (final effect in _expected(frame)) adjust(effect)], reason: 'line $line');
+      }
+      expect(superChats, 6);
+
+      final effects = replay.effects.values.expand((effects) => effects).toList();
+      final messages = [for (final effect in effects) ?effect['message'] as Map<String, Object?>?];
+      final online = [
+        for (final message in messages)
+          if (message['type'] == 'online') (message['data']! as Map<String, Object?>)['kind'],
+      ];
+      expect(messages.where((message) => message['type'] == 'chat'), hasLength(66));
+      expect(online.where((kind) => kind == 'popularity'), hasLength(4));
+      expect(online.where((kind) => kind == 'totalViewers'), hasLength(3));
+      expect(messages.firstWhere((message) => message['type'] == 'chat'), {
+        'type': 'chat',
+        'userName': '观***',
+        'userId': '0',
+        'message': '我吗',
+        'color': '#ffffff',
+        'userLevel': '',
+        'fansLevel': '',
+        'fansName': '',
+        'isLocal': false,
+        'messageId': 'bilibili:1790780343',
+        'sentAt': 1790781387263,
+        'data': null,
+      });
+      expect(messages.firstWhere((message) => message['type'] == 'superChat'), {
+        'type': 'superChat',
+        'userName': 'SUPER_CHAT_MESSAGE',
+        'userId': '',
+        'message': 'SUPER_CHAT_MESSAGE',
+        'color': '#ffffff',
+        'userLevel': '',
+        'fansLevel': '',
+        'fansName': '',
+        'isLocal': false,
+        'messageId': '',
+        'sentAt': null,
+        'data': {
+          'messageId': '19367477',
+          'userName': '森水戊花曦众书茶星',
+          'face': 'https://i2.hdslb.com/bfs/face/ba351cfd2b32b0d23d5696db1d097b1fe1a2f75d.jpg@200w.jpg',
+          'message': '假期最后一天的小路：玩完了；回来后统计工作量的小路：玩完了',
+          'price': 30,
+          'startTime': 1790781481000,
+          'endTime': 1790781541000,
+          'backgroundColor': '#EDF5FF',
+          'backgroundBottomColor': '#2A60B2',
+        },
+      });
+
+      // The recorded client packets after the auth: heartbeats and the
+      // acknowledgement every super chat asks for, as this connection sends
+      // them.
+      final acks = [
+        for (final effect in effects)
+          if (effect['send'] case final String packet when _operation(base64.decode(packet)) == 24) packet,
+      ];
+      expect(acks, hasLength(6));
+      final out = [
+        for (final line in lines.skip(1))
+          if (line['dir'] == 'out') line['b64']! as String,
+      ];
+      expect(out.where((packet) => _operation(base64.decode(packet)) == 24), acks);
+      expect(
+        out.where((packet) => _operation(base64.decode(packet)) != 24),
+        everyElement(base64.encode(BilibiliDanmakuProtocol.heartbeat())),
+      );
+      expect(_body(base64.decode(acks.first)), {
+        'msg_id': '214386819788254208:1000:1000',
+        'cmd': 'SUPER_CHAT_MESSAGE',
+        'p_msg_type': 1,
+      });
+    });
+
+    test(
+      'B-3 S13-protover2-paired: the zlib connection of the same moment gives the same notices and effects',
+      () async {
+        final brotli = _lines('S13-protover3');
+        final zlib = _lines('S13-protover2-paired');
+        expect(zlib.map((line) => line['dir']), brotli.map((line) => line['dir']));
+        var compressed = 0;
+        for (var index = 0; index < brotli.length; index++) {
+          if (brotli[index]['dir'] != 'in') continue;
+          final a = base64.decode(brotli[index]['b64']! as String);
+          final b = base64.decode(zlib[index]['b64']! as String);
+          expect(_notices(a), _notices(b), reason: 'line ${index + 1}');
+          // One packet per message: a bad brotli packet costs only itself.
+          expect(_versions(a), hasLength(1));
+          if (_operation(a) == 5 && _versions(a).single != 0) {
+            compressed++;
+            expect(_versions(a).single, 3);
+            expect(_versions(b).single, 2);
+          }
+        }
+        expect(compressed, greaterThan(50));
+        final replayed = await _replayRecording('S13-protover2-paired');
+        expect((_body(replayed.auth)! as Map)['protover'], 3, reason: 'this connection asks for 3');
+        expect(replayed.effects, (await _replayRecording('S13-protover3')).effects);
+        expect(
+          File('$_root/S13-protover2-paired/expected.json').readAsStringSync(),
+          File('$_root/S13-protover3/expected.json').readAsStringSync(),
+          reason: '3.x handled both the same way',
+        );
+      },
+    );
+
+    test('B-3 S13-brotli-vectors: every vector as 3.x handled it', () async {
+      final lines = _lines('S13-brotli-vectors');
+      final vectors = (_expectedValue('S13-brotli-vectors')['vectors'] as List<dynamic>).cast<Map<String, dynamic>>();
+      var messages = 0;
+      for (final vector in vectors) {
+        final name = vector['vector'] as String;
+        final replay = _Replay();
+        await replay.open(replay.args());
+        replay.effects.clear();
+        for (final frame in (vector['frames'] as List<dynamic>).cast<Map<String, dynamic>>()) {
+          final line = lines[(frame['line'] as int) - 1];
+          expect(line['vector'], name);
+          final effects = await replay.receive(base64.decode(line['b64']! as String));
+          expect(effects, _expected(frame), reason: '$name, line ${frame['line']}');
+          messages += effects.where((effect) => effect.containsKey('message')).length;
+        }
+        await replay.connection.close();
+      }
+      expect(vectors, hasLength(10));
+      expect(messages, greaterThan(10));
     });
   });
 
@@ -747,31 +1064,43 @@ void main() {
       });
     });
 
-    test('a real WebSocket server: auth, reply, zlib notice, heartbeat', () async {
+    test('a real WebSocket server: auth (protover 3), reply, brotli and zlib notices, heartbeat', () async {
       final operations = <int>[];
+      final protocols = <Object?>[];
+      final sockets = <WebSocket>[];
       final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
       server.listen((request) async {
         final socket = await WebSocketTransformer.upgrade(request);
+        sockets.add(socket);
         socket.listen((frame) {
           final packet = frame as List<int>;
           operations.add(_operation(packet));
           if (_operation(packet) == 7) {
+            protocols.add((_body(packet)! as Map)['protover']);
             socket
               ..add(_auth('{"code":0}'))
-              ..add(_packet(5, zlib.encode([..._notice(_danmu('弹幕')), ..._notice(_danmu('第二条'))]), version: 2));
+              // B-3: what the server answers to protover 3; zlib still works.
+              ..add(_brotli([..._notice(_danmu('弹幕')), ..._notice(_danmu('第二条'))]))
+              ..add(_packet(5, zlib.encode(_notice(_danmu('zlib'))), version: 2));
           }
         });
       });
-      addTearDown(() => server.close(force: true));
+      addTearDown(() async {
+        for (final socket in sockets) {
+          await socket.close();
+        }
+        await server.close(force: true);
+      });
       final connection = BilibiliDanmakuConnection(
         policy: const DanmakuSocketPolicy(heartbeatInterval: Duration(milliseconds: 20)),
       );
       final events = _record(connection);
       await connection.connect(_args(servers: [Uri.parse('ws://127.0.0.1:${server.port}/sub')], headers: const {}));
-      await _until(() => _texts(events).length == 2 && operations.where((operation) => operation == 2).length >= 2);
+      await _until(() => _texts(events).length == 3 && operations.where((operation) => operation == 2).length >= 2);
       expect(events.first, const DanmakuReady());
-      expect(_texts(events), ['弹幕', '第二条']);
+      expect(_texts(events), ['弹幕', '第二条', 'zlib']);
       expect(operations.take(2), [7, 2]);
+      expect(protocols, [3]);
       await connection.close();
     });
   });

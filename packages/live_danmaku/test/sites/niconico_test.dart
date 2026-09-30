@@ -5,6 +5,8 @@
 // connection over a real NiconicoSite with a fake seat socket (the recorded
 // seat conversation seat/S04-seat) and a fake comment server streaming the
 // recorded answers; one test streams through IoLiveHttp from a local server.
+// M5.F (B-11): notices and gifts against danmaku/S08-marquee, S09-ended and
+// S10-gift, and synthetic frames for what was not seen live.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -19,12 +21,46 @@ import 'package:test/test.dart';
 
 const _root = '../../fixtures/niconico';
 
+/// A recording of the comment server (`fixtures/niconico/danmaku/<name>`):
+/// its answers (line, URL, body), its `view` address (without `at`), its
+/// `view` answers by `at`, its windows by path, and when it was recorded.
+final class _Tape {
+  new(String name)
+    : answers = [
+        for (final (index, line) in File('$_root/danmaku/$name/frames.jsonl').readAsLinesSync().indexed)
+          if (jsonDecode(line) case {'dir': 'in', 'url': final String url, 'b64': final String b64})
+            (line: index + 1, url: Uri.parse(url), bytes: base64.decode(b64)),
+      ],
+      recordedAt = DateTime.parse(
+        (jsonDecode(File('$_root/danmaku/$name/meta.json').readAsStringSync()) as Map)['capturedAt'] as String,
+      );
+
+  final List<({int line, Uri url, Uint8List bytes})> answers;
+  final DateTime recordedAt;
+
+  Uri get view => answers.firstWhere((frame) => frame.url.path.startsWith('/api/view/')).url.replace(query: '');
+
+  Map<String, Uint8List> get views => {
+    for (final frame in answers)
+      if (frame.url.path.startsWith('/api/view/')) frame.url.queryParameters['at']!: frame.bytes,
+  };
+
+  Map<String, Uint8List> get windows => {
+    for (final frame in answers)
+      if (frame.url.path.startsWith('/data/segment/')) frame.url.path: frame.bytes,
+  };
+
+  /// Every window's messages, decoded alone, in order.
+  List<LiveMessage> get messages => [
+    for (final bytes in windows.values)
+      for (final message in NiconicoDanmakuProtocol.split(bytes)) ?NiconicoDanmakuProtocol.message(message),
+  ];
+}
+
+final _s07 = _Tape('S07-live');
+
 /// The recorded answers of S07-live: line, URL and body.
-final List<({int line, Uri url, Uint8List bytes})> _recording = [
-  for (final (index, line) in File('$_root/danmaku/S07-live/frames.jsonl').readAsLinesSync().indexed)
-    if (jsonDecode(line) case {'dir': 'in', 'url': final String url, 'b64': final String b64})
-      (line: index + 1, url: Uri.parse(url), bytes: base64.decode(b64)),
-];
+final List<({int line, Uri url, Uint8List bytes})> _recording = _s07.answers;
 
 /// The archived v4's output for S07-live, by line.
 final Map<int, Map<String, Object?>> _v4 = {
@@ -36,24 +72,16 @@ final Map<int, Map<String, Object?>> _v4 = {
 };
 
 /// When S07-live was recorded: the windows' waits are timed from it.
-final DateTime _recordedAt = DateTime.parse(
-  (jsonDecode(File('$_root/danmaku/S07-live/meta.json').readAsStringSync()) as Map)['capturedAt'] as String,
-);
+final DateTime _recordedAt = _s07.recordedAt;
 
 /// The recorded `view` address (its token scrubbed), without `at`.
-final Uri _view = _recording.first.url.replace(query: '');
+final Uri _view = _s07.view;
 
 /// The recorded `view` answers by `at`.
-final Map<String, Uint8List> _views = {
-  for (final frame in _recording)
-    if (frame.url.path.startsWith('/api/view/')) frame.url.queryParameters['at']!: frame.bytes,
-};
+final Map<String, Uint8List> _views = _s07.views;
 
 /// The recorded windows by path, in the order they were read.
-final Map<String, Uint8List> _windows = {
-  for (final frame in _recording)
-    if (frame.url.path.startsWith('/data/segment/')) frame.url.path: frame.bytes,
-};
+final Map<String, Uint8List> _windows = _s07.windows;
 
 /// The room and program of the recording (its meta.json).
 const _args = NiconicoDanmakuArgs(roomId: 'user/15119555', programId: 'lv351482215');
@@ -95,10 +123,84 @@ Uint8List _message(int kind, Uint8List data, {Uint8List? meta}) => _pb((w) {
 });
 
 /// A `ChunkedMessage` whose payload is the state [state].
-Uint8List _state(Uint8List state) => _pb((w) {
+Uint8List _state(Uint8List state, {Uint8List? meta}) => _pb((w) {
   w
-    ..bytes(1, _meta())
+    ..bytes(1, meta ?? _meta())
     ..bytes(4, state);
+});
+
+/// A `NicoliveState` of a `CommentLock` (B-11): [status], and a follow
+/// restriction of [followSeconds] when given (an empty one for -1).
+Uint8List _lock(int status, {int? followSeconds}) => _pb(
+  (s) => s.bytes(
+    5,
+    _pb((l) {
+      if (status != 0) l.integer(1, status);
+      if (followSeconds == -1) {
+        l.bytes(2, Uint8List(0));
+      } else if (followSeconds != null) {
+        l.bytes(2, _pb((r) => r.bytes(1, _pb((d) => d.integer(1, followSeconds)))));
+      }
+    }),
+  ),
+);
+
+/// A `NicoliveState` of a `Marquee` (B-11): a display of an operator comment
+/// unless [display] or [comment] is false.
+Uint8List _marquee({
+  String content = '運営コメント',
+  String? name,
+  Uint8List? modifier,
+  String? link,
+  int? duration,
+  bool display = true,
+  bool comment = true,
+}) => _pb(
+  (s) => s.bytes(
+    4,
+    _pb((m) {
+      if (!display) return;
+      m.bytes(
+        1,
+        _pb((d) {
+          if (comment) {
+            d.bytes(
+              1,
+              _pb((c) {
+                c.string(1, content);
+                if (name != null) c.string(2, name);
+                if (modifier != null) c.bytes(3, modifier);
+                if (link != null) c.string(4, link);
+              }),
+            );
+          }
+          if (duration != null) d.bytes(3, _pb((t) => t.integer(1, duration)));
+        }),
+      );
+    }),
+  ),
+);
+
+/// A `NicoliveState` of a `ProgramStatus` of [state] (B-11).
+Uint8List _programStatus(int state) => _pb((s) => s.bytes(9, _pb((p) => p.integer(1, state))));
+
+/// A `Gift` (B-11); a null field is left out.
+Uint8List _gift({
+  String? itemId = 'nicoko',
+  int? giverId = 12345,
+  String? giver = 'ギフト太郎',
+  int? point = 500,
+  String? message,
+  String? name = 'ニコ子',
+  int? rank,
+}) => _pb((g) {
+  if (itemId != null) g.string(1, itemId);
+  if (giverId != null) g.integer(2, giverId);
+  if (giver != null) g.string(3, giver);
+  if (point != null) g.integer(4, point);
+  if (message != null) g.string(5, message);
+  if (name != null) g.string(6, name);
+  if (rank != null) g.integer(7, rank);
 });
 
 Uint8List _statistics(int viewers) => _pb(
@@ -291,11 +393,16 @@ final class _Manual {
 /// one before it was fully sent. An answer is bytes (sent in [chunk]-byte
 /// pieces), a status, an exception to throw or [_hold].
 final class _Http implements LiveHttp {
-  new({List<Object>? pages, this.view, this.window}) : pages = pages ?? [_page()];
+  new({List<Object>? pages, this.view, this.window, _Tape? tape})
+    : pages = pages ?? [_page()],
+      _viewAnswers = tape?.views ?? _views,
+      _windowAnswers = tape?.windows ?? _windows;
 
   final List<Object> pages;
-  final Object Function(LiveRequest request)? view;
-  final Object Function(LiveRequest request)? window;
+  final Object? Function(LiveRequest request)? view;
+  final Object? Function(LiveRequest request)? window;
+  final Map<String, Uint8List> _viewAnswers;
+  final Map<String, Uint8List> _windowAnswers;
 
   /// Size of the pieces an answer is sent in.
   static const int chunk = 7;
@@ -335,8 +442,8 @@ final class _Http implements LiveHttp {
     opened.add(request);
     final isView = request.url.path.startsWith('/api/view/');
     final answer = isView
-        ? (view?.call(request) ?? _views[request.url.queryParameters['at']] ?? _hold)
-        : (window?.call(request) ?? _windows[request.url.path] ?? 404);
+        ? (view?.call(request) ?? _viewAnswers[request.url.queryParameters['at']] ?? _hold)
+        : (window?.call(request) ?? _windowAnswers[request.url.path] ?? 404);
     if (answer case final Exception error) throw error;
     if (answer case final _Manual manual) {
       return LiveStreamedResponse(status: 200, body: manual.controller.stream, url: request.url);
@@ -409,13 +516,14 @@ _Setup _setup({
   _Connector? seats,
   Duration messageServerTimeout = const Duration(milliseconds: 200),
   ProxyPolicy proxy = const FixedProxyPolicy(),
+  DateTime? now,
 }) {
   final server = http ?? _Http();
   final connector = seats ?? _Connector();
   final site = NiconicoSite(server, connector: connector.call, proxy: proxy);
   final connection = NiconicoDanmakuConnection(
     site: site,
-    now: () => _recordedAt,
+    now: () => now ?? _recordedAt,
     retryDelay: const Duration(milliseconds: 1),
     messageServerTimeout: messageServerTimeout,
   );
@@ -756,13 +864,14 @@ void main() {
       }
     });
 
-    test('an overflowed chat is a chat; gifts, ads, notices and the rest are not reported', () {
+    test('an overflowed chat is a chat; ads, notices and the rest are not reported', () {
       expect(NiconicoDanmakuProtocol.message(_message(20, _chat(content: 'あふれ')))!.message, 'あふれ');
-      for (final kind in [7, 8, 9, 13, 17, 18, 19, 22, 23, 24, 25, 26, 99]) {
+      // B-11: gifts (8) are reported now (see the B-11 group).
+      for (final kind in [7, 9, 13, 17, 18, 19, 22, 23, 24, 25, 26, 99]) {
         final data = kind == 22 ? _pb((w) => w.bytes(1, _chat())) : _pb((w) => w.string(2, 'x'));
         expect(NiconicoDanmakuProtocol.message(_message(kind, data)), isNull, reason: 'NicoliveMessage.$kind');
       }
-      // A oneof: the last field wins.
+      // A oneof: the last field wins (B-11: a gift last is a gift).
       final both = _pb((w) {
         w
           ..bytes(1, _meta())
@@ -775,7 +884,7 @@ void main() {
             ),
           );
       });
-      expect(NiconicoDanmakuProtocol.message(both), isNull);
+      expect(NiconicoDanmakuProtocol.message(both)!.type, LiveMessageType.gift);
       final chatLast = _pb((w) {
         w
           ..bytes(1, _meta())
@@ -1119,12 +1228,37 @@ void main() {
       final first = setup.seats.handed.single..server('disconnect', {'reason': 'END_PROGRAM'});
       await _until(() => setup.seats.handed.length == 2 && setup.http.views.length >= 6);
       expect(first.closed, isTrue);
+      // B-11: the program's end is a notice, and the next program is taken
+      // without a reconnection (the connection stays joined).
+      expect(setup.events.whereType<DanmakuReconnecting>(), isEmpty);
+      final notices = _messages(setup.events).where((message) => message.type == LiveMessageType.notice).toList();
+      expect(notices.map((notice) => notice.message), [NiconicoDanmakuProtocol.programEndedNotice]);
+      expect(notices.single.messageId, isEmpty, reason: 'from the seat, which gives no id');
+      expect(setup.events.whereType<DanmakuReady>(), hasLength(1));
+      expect(setup.http.views.skip(4).first, 'now', reason: "the new seat's comment server from now");
+      expect(setup.http.sent, hasLength(2), reason: 'the watch page read again');
+      expect(setup.connection.isConnected, isTrue);
+      await setup.connection.close();
+    });
+
+    test('a seat that ends for another reason is a reconnection', () async {
+      final setup = _setup(
+        http: _Http(
+          pages: [
+            _page(),
+            _page(program: 'lv351482999'),
+          ],
+        ),
+      );
+      await setup.connection.connect(_args);
+      await _until(() => setup.http.views.length == 4);
+      setup.seats.handed.single.server('disconnect', {'reason': 'TAKEOVER'});
+      await _until(() => setup.seats.handed.length == 2 && setup.http.views.length >= 6);
       final reconnecting = setup.events.whereType<DanmakuReconnecting>().single;
       expect(reconnecting.reason, DanmakuInterruption.disconnected);
-      expect(reconnecting.detail, contains('END_PROGRAM'));
+      expect(reconnecting.detail, contains('TAKEOVER'));
       expect(setup.events.whereType<DanmakuReady>(), hasLength(2));
-      expect(setup.http.views.skip(4).first, 'now', reason: "the new seat's comment server from now");
-      expect(setup.connection.isConnected, isTrue);
+      expect(_messages(setup.events).where((message) => message.type == LiveMessageType.notice), isEmpty);
       await setup.connection.close();
     });
 
@@ -1145,7 +1279,10 @@ void main() {
       await _until(() => setup.http.views.length == 4);
       setup.seats.handed.single.server('disconnect', {'reason': 'END_PROGRAM'});
       await _until(() => setup.events.last is DanmakuClosed);
-      expect(_outline(setup.events), ['ready', 'message', 'reconnecting:disconnected', 'closed:connectionFailed']);
+      // B-11: the end is a notice, then the connection ends, without a
+      // reconnection in between.
+      expect(_outline(setup.events), ['ready', 'message', 'closed:connectionFailed']);
+      expect(_messages(setup.events).last.message, NiconicoDanmakuProtocol.programEndedNotice);
       expect((setup.events.last as DanmakuClosed).detail, startsWith('StreamUnavailable(niconico'));
       expect(setup.connection.status, DanmakuStatus.closed);
       expect(setup.seats.handed, hasLength(1), reason: 'no seat for an ended program');
@@ -1262,7 +1399,8 @@ void main() {
       await _until(() => late.controller.hasListener);
       late.controller.add(_delimit([_message(1, _chat(content: 'before'))]));
       await _until(() => _messages(setup.events).any((message) => message.message == 'before'));
-      setup.seats.handed.single.server('disconnect', {'reason': 'END_PROGRAM'});
+      // B-11: END_PROGRAM no longer reports a reconnection; another reason does.
+      setup.seats.handed.single.server('disconnect', {'reason': 'TAKEOVER'});
       await _until(() => setup.events.any((event) => event is DanmakuReconnecting));
       late.controller.add(_delimit([_message(1, _chat(content: 'after'))]));
       await _until(() => !late.controller.hasListener, reason: 'the late window given up');
@@ -1355,6 +1493,603 @@ void main() {
       }
       expect([for (final message in got) ?message].map(_asV4).toList(), _v4Events(3));
       expect(requests, hasLength(1));
+    });
+  });
+
+  // M5.F, appendix B-11: the operator's comments, comment locks and the
+  // program's end are system notices; gifts are gift messages. Recorded:
+  // S08-marquee (operator comments), S09-ended (the program's end), S10-gift
+  // (one gift); comment locks, and a gift's message and rank, were not seen
+  // live, so they are synthetic.
+  group('B-11: notices and gifts', () {
+    final s08 = _Tape('S08-marquee');
+    final s09 = _Tape('S09-ended');
+    final s10 = _Tape('S10-gift');
+
+    /// A broadcaster whose program ends: live, then offline (S03's page).
+    const endingArgs = NiconicoDanmakuArgs(roomId: 'user/138383030', programId: 'lv351501491');
+    LiveResponse offlinePage() => LiveResponse(
+      status: 200,
+      bytes: File('$_root/S03-watch-user-ended/body.html').readAsBytesSync(),
+      url: Uri.parse('https://live.nicovideo.jp/watch/user/138383030'),
+    );
+
+    /// The operator comments of S08, read straight from the recording.
+    List<String> recordedOperatorComments() => [
+      for (final bytes in s08.windows.values)
+        for (final message in NiconicoDanmakuProtocol.split(bytes))
+          ?ProtoMessage.decode(message).message(4)?.message(4)?.message(1)?.message(1)?.string(1),
+    ];
+
+    void expectNotice(LiveMessage notice, String text, {String messageId = 'm1'}) {
+      expect(notice.type, LiveMessageType.notice);
+      expect(notice.data, LiveNoticeKind.system);
+      expect(notice.message, text);
+      expect(notice.messageId, messageId);
+      expect(notice.userId, isEmpty);
+      expect(notice.isLocal, isFalse);
+    }
+
+    test('S08: the operator comments are system notices, in order, with their ids and times', () {
+      final texts = recordedOperatorComments();
+      expect(texts, hasLength(4));
+      expect(texts.first, startsWith('いつも一緒にいる為か'));
+      final messages = s08.messages;
+      final notices = [
+        for (final message in messages)
+          if (message.type == LiveMessageType.notice) message,
+      ];
+      expect(notices.map((notice) => notice.message), texts);
+      for (final notice in notices) {
+        expect(notice.data, LiveNoticeKind.system);
+        expect(notice.userName, isEmpty, reason: 'no name in the recording');
+        expect(notice.color, LiveMessageColor.white, reason: 'no modifier in the recording');
+        expect(notice.messageId, isNotEmpty);
+        expect(notice.sentAt, isNotNull);
+      }
+      expect(notices.map((notice) => notice.messageId).toSet(), hasLength(4));
+      // Their times fall inside the windows that carried them, in order.
+      for (var i = 1; i < notices.length; i++) {
+        expect(notices[i].sentAt!.isBefore(notices[i - 1].sentAt!), isFalse);
+      }
+      expect(notices.first.sentAt!.isAfter(s08.recordedAt), isTrue);
+      // The rest reads as before: four chats, viewer figures.
+      expect(messages.where((message) => message.type == LiveMessageType.chat), hasLength(4));
+      expect(messages.where((message) => message.type == LiveMessageType.online), hasLength(7));
+      expect(messages.map((message) => message.type).toSet(), {
+        LiveMessageType.chat,
+        LiveMessageType.online,
+        LiveMessageType.notice,
+      });
+    });
+
+    test("S09: the program's end is one notice with its id and time; the windows after it hold only signals", () {
+      final reader = NiconicoMessageReader();
+      final read = <(LiveMessage?, bool)>[];
+      final windows = s09.windows.values.toList();
+      for (final bytes in windows) {
+        for (final message in NiconicoDanmakuProtocol.split(bytes)) {
+          read.add((reader.read(message), reader.endedProgram));
+        }
+      }
+      final ends = [
+        for (final (message, ended) in read)
+          if (ended) message!,
+      ];
+      expect(ends, hasLength(1));
+      final end = ends.single;
+      expectNotice(end, NiconicoDanmakuProtocol.programEndedNotice, messageId: end.messageId);
+      expect(end.messageId, isNotEmpty);
+      expect(end.userName, isEmpty);
+      expect(end.color, LiveMessageColor.white);
+      // The end came 23 s after the recording started (the seat's
+      // disconnect frame, 25 ms before it, is in the recording too).
+      expect(end.sentAt!.difference(s09.recordedAt).inSeconds, inInclusiveRange(20, 30));
+      final disconnect = File('$_root/danmaku/S09-ended/frames.jsonl').readAsLinesSync().where((line) {
+        return line.contains('"text"');
+      }).single;
+      expect(jsonDecode(disconnect), containsPair('text', '{"type":"disconnect","data":{"reason":"END_PROGRAM"}}'));
+      // Its window, and every window after it: nothing but the end.
+      final endWindow = windows.indexWhere(
+        (bytes) =>
+            NiconicoDanmakuProtocol.split(bytes)
+                .any((m) => NiconicoDanmakuProtocol.message(m)?.type == LiveMessageType.notice),
+      );
+      for (final bytes in windows.skip(endWindow + 1)) {
+        expect(NiconicoDanmakuProtocol.split(bytes).map(NiconicoDanmakuProtocol.message).nonNulls, isEmpty);
+      }
+      // Before it, a named commenter's chats (raw user id, synthetic).
+      final chats = [
+        for (final (message, _) in read)
+          if (message?.type == LiveMessageType.chat) message!,
+      ];
+      expect(chats, hasLength(3));
+      for (final chat in chats) {
+        expect(chat.userId, matches(RegExp(r'^[1-9][0-9]{4,6}$')), reason: 'raw_user_id, there is no hashed id');
+        expect(chat.userName, matches(RegExp(r'^[a-z]{8}$')), reason: 'the scrubbed name');
+      }
+    });
+
+    test(
+      'operator comments: name, colour, trimmed text; no link; a cleared marquee or an empty comment is nothing',
+      () {
+        LiveMessage? read(Uint8List state) => NiconicoDanmakuProtocol.message(_state(state, meta: _meta(id: 'op1')));
+        final full = read(
+          _marquee(
+            content: '  /info 延長しました  ',
+            name: ' 放送者 ',
+            modifier: _pb((w) => w.integer(3, 1)),
+            link: 'https://example.com/x',
+            duration: 15,
+          ),
+        )!;
+        expectNotice(full, '/info 延長しました', messageId: 'op1');
+        expect(full.userName, '放送者');
+        expect(full.color, const LiveMessageColor(0xFF, 0x00, 0x00));
+        expect(full.message, isNot(contains('example.com')), reason: 'the link is not kept');
+        expect(full.sentAt, DateTime.fromMillisecondsSinceEpoch(1790541800000));
+        final coloured = read(
+          _marquee(
+            modifier: _pb(
+              (w) => w.bytes(
+                4,
+                _pb(
+                  (c) => c
+                    ..integer(1, 0x12)
+                    ..integer(2, 0x34)
+                    ..integer(3, 0x56),
+                ),
+              ),
+            ),
+          ),
+        )!;
+        expect('${coloured.color}', '#123456');
+        expect(read(_marquee())!.color, LiveMessageColor.white);
+        expect(read(_marquee())!.userName, isEmpty);
+        for (final (reason, state) in [
+          ('cleared (no display)', _marquee(display: false)),
+          ('a display without a comment', _marquee(comment: false, duration: 15)),
+          ('an empty comment', _marquee(content: '')),
+          ('a blank comment', _marquee(content: ' \n ')),
+          ('not protobuf', _pb((s) => s.bytes(4, [0xFF]))),
+          ('a display that is not protobuf', _pb((s) => s.bytes(4, _pb((m) => m.bytes(1, [0xFF]))))),
+        ]) {
+          expect(read(state), isNull, reason: reason);
+        }
+      },
+    );
+
+    test('comment locks: only changes are notices, in the web player lines', () {
+      final reader = NiconicoMessageReader();
+      expect(reader.commentLock, NiconicoCommentLock.none);
+      var n = 0;
+      LiveMessage? read(Uint8List state) => reader.read(_state(state, meta: _meta(id: 'lock${++n}')));
+      final steps = <(Uint8List, String?, NiconicoCommentLock)>[
+        (_lock(0), null, NiconicoCommentLock.none),
+        (_lock(2), null, NiconicoCommentLock.none),
+        (
+          _lock(2, followSeconds: 600),
+          '【コメント制限】10分フォローを継続したユーザーに限定されます',
+          const NiconicoCommentLock.followers(Duration(minutes: 10)),
+        ),
+        (_lock(2, followSeconds: 600), null, const NiconicoCommentLock.followers(Duration(minutes: 10))),
+        (_lock(2, followSeconds: -1), '【コメント制限】フォロワーに限定されます', const NiconicoCommentLock.followers(Duration.zero)),
+        (_lock(1), '現在コメントできません', NiconicoCommentLock.locked),
+        (_lock(1), null, NiconicoCommentLock.locked),
+        (_lock(9), null, NiconicoCommentLock.locked),
+        (_lock(0), '评论锁定已解除', NiconicoCommentLock.none),
+        (
+          _lock(2, followSeconds: 5400),
+          '【コメント制限】1時間30分フォローを継続したユーザーに限定されます',
+          const NiconicoCommentLock.followers(Duration(minutes: 90)),
+        ),
+        (_lock(2), 'フォロワー限定コメントが解除されました', NiconicoCommentLock.none),
+        (_lock(2, followSeconds: 0), '【コメント制限】フォロワーに限定されます', const NiconicoCommentLock.followers(Duration.zero)),
+        (_lock(1), '現在コメントできません', NiconicoCommentLock.locked),
+        (_lock(2, followSeconds: -30), '【コメント制限】フォロワーに限定されます', const NiconicoCommentLock.followers(Duration.zero)),
+        (_lock(0), 'フォロワー限定コメントが解除されました', NiconicoCommentLock.none),
+      ];
+      for (final (index, (state, text, after)) in steps.indexed) {
+        final notice = read(state);
+        if (text == null) {
+          expect(notice, isNull, reason: 'step $index');
+        } else {
+          expectNotice(notice!, text, messageId: 'lock${index + 1}');
+          expect(notice.userName, isEmpty);
+          expect(notice.color, LiveMessageColor.white);
+          expect(notice.sentAt, DateTime.fromMillisecondsSinceEpoch(1790541800000));
+        }
+        expect(reader.commentLock, after, reason: 'step $index');
+      }
+      // Alone, a lock is a change from "everyone".
+      expect(NiconicoDanmakuProtocol.message(_state(_lock(1)))!.message, '現在コメントできません');
+      expect(NiconicoDanmakuProtocol.message(_state(_lock(0))), isNull);
+      // A huge restriction is capped; a lock that is not protobuf is absent.
+      final huge = NiconicoMessageReader()..read(_state(_lock(2, followSeconds: 1 << 50)));
+      expect(huge.commentLock.followersOnly, const Duration(seconds: NiconicoDanmakuProtocol.maxFollowSeconds));
+      final bad = NiconicoMessageReader();
+      expect(bad.read(_state(_pb((s) => s.bytes(5, [0xFF])))), isNull);
+      expect(bad.commentLock, NiconicoCommentLock.none);
+      expect(
+        bad.read(
+          _state(
+            _pb(
+              (s) => s.bytes(
+                5,
+                _pb(
+                  (l) => l
+                    ..integer(1, 2)
+                    ..bytes(2, [0xFF]),
+                ),
+              ),
+            ),
+          ),
+        ),
+        isNull,
+      );
+      expect(bad.commentLock, NiconicoCommentLock.none);
+      // The value type.
+      expect(
+        const NiconicoCommentLock.followers(Duration(seconds: 3)),
+        const NiconicoCommentLock.followers(Duration(seconds: 3)),
+      );
+      expect(const NiconicoCommentLock.followers(Duration.zero), isNot(NiconicoCommentLock.none));
+      expect(NiconicoCommentLock.locked.isLocked, isTrue);
+      expect('${const NiconicoCommentLock.followers(Duration(seconds: 3))}', 'NiconicoCommentLock.followers(3 s)');
+      expect('${NiconicoCommentLock.locked}', 'NiconicoCommentLock.locked');
+      expect('${NiconicoCommentLock.none}', 'NiconicoCommentLock.none');
+    });
+
+    test('follow durations as the web player writes them', () {
+      for (final (seconds, text) in [
+        (1, '0分'),
+        (59, '0分'),
+        (60, '1分'),
+        (599, '9分'),
+        (3599, '59分'),
+        (3600, '1時間'),
+        (3659, '1時間'),
+        (3660, '1時間1分'),
+        (5400, '1時間30分'),
+        (86399, '23時間59分'),
+        (86400, '1日'),
+        (89999, '1日'),
+        (90000, '1日と1時間'),
+        (7 * 86400 + 5 * 3600 + 59 * 60, '7日と5時間'),
+        (NiconicoDanmakuProtocol.maxFollowSeconds, '${NiconicoDanmakuProtocol.maxFollowSeconds ~/ 86400}日と6時間'),
+      ]) {
+        expect(NiconicoDanmakuProtocol.followDuration(seconds), text, reason: '$seconds s');
+      }
+    });
+
+    test("the program's end: Ended only; the web player's order when a state holds several fields", () {
+      final reader = NiconicoMessageReader();
+      final end = reader.read(_state(_programStatus(1), meta: _meta(id: 'end1', nanos: 5000)))!;
+      expectNotice(end, 'この番組は終了しました', messageId: 'end1');
+      expect(end.sentAt, DateTime.fromMicrosecondsSinceEpoch(1790541800000005));
+      expect(reader.endedProgram, isTrue);
+      expect(reader.read(_state(_statistics(3))), isNotNull);
+      expect(reader.endedProgram, isFalse, reason: 'only the message that said it');
+      for (final state in [0, 2, -1]) {
+        expect(reader.read(_state(_programStatus(state))), isNull, reason: 'state $state');
+        expect(reader.endedProgram, isFalse);
+      }
+      final bare = NiconicoDanmakuProtocol.programEnded();
+      expectNotice(bare, 'この番組は終了しました', messageId: '');
+      expect(bare.sentAt, isNull);
+      // Several fields: comment_lock, marquee, program_status, statistics.
+      Uint8List all({int lock = 1}) =>
+          Uint8List.fromList([..._statistics(7), ..._programStatus(1), ..._marquee(content: 'm'), ..._lock(lock)]);
+      final several = NiconicoMessageReader();
+      expect(several.read(_state(all()))!.message, '現在コメントできません');
+      expect(several.read(_state(all()))!.message, 'm', reason: 'the lock did not change');
+      expect(several.endedProgram, isFalse);
+      expect(
+        several
+            .read(_state(Uint8List.fromList([..._statistics(7), ..._programStatus(1), ..._marquee(display: false)])))!
+            .message,
+        'この番組は終了しました',
+      );
+      final figure = several.read(
+        _state(
+          Uint8List.fromList([
+            ..._statistics(7),
+            ..._programStatus(0),
+            ..._pb((s) => s.bytes(4, [0xFF])),
+          ]),
+        ),
+      )!;
+      expect((figure.data! as LiveAudienceUpdate).value, 7, reason: 'an unreadable marquee does not hide the figure');
+    });
+
+    test('S10: a recorded gift is a gift message with the web player line; its gift bar is not kept', () {
+      final gifts = [
+        for (final message in s10.messages)
+          if (message.type == LiveMessageType.gift) message,
+      ];
+      expect(gifts, hasLength(1));
+      final gift = gifts.single;
+      expect(gift.data, const NiconicoGift(itemId: 'user15119555_26', name: 'ぶんぶんみゅーと', point: 100));
+      expect(gift.userName, matches(RegExp(r'^[a-z]{9}$')), reason: 'the scrubbed giver');
+      expect(gift.userId, matches(RegExp(r'^[1-9][0-9]{6,8}$')), reason: 'the scrubbed advertiser_user_id');
+      expect(gift.message, '${gift.userName}さんがギフト「ぶんぶんみゅーと（100pt）」を贈りました');
+      expect(gift.messageId, isNotEmpty);
+      expect(gift.sentAt, isNotNull);
+      expect(gift.color, LiveMessageColor.white);
+      // The recorded gift carries a gift bar update (8), which is not read.
+      final raw = [
+        for (final bytes in s10.windows.values)
+          for (final message in NiconicoDanmakuProtocol.split(bytes))
+            ?ProtoMessage.decode(message).message(2)?.message(8),
+      ].single;
+      expect(raw.message(8), isNotNull);
+      expect(raw.integer(7), isNull, reason: 'no contribution rank in the recording');
+      // The rest of the window reads as before.
+      expect(s10.messages.map((message) => message.type).toSet(), {
+        LiveMessageType.chat,
+        LiveMessageType.online,
+        LiveMessageType.gift,
+      });
+    });
+
+    test('gifts: the giver, the web player line and the gift; none without an item or with negative points', () {
+      final gift = NiconicoDanmakuProtocol.message(
+        _message(
+          8,
+          _gift(message: ' ありがとう ', rank: 3),
+          meta: _meta(id: 'g1', nanos: 250000000),
+        ),
+      )!;
+      expect(gift.type, LiveMessageType.gift);
+      expect(gift.userName, 'ギフト太郎');
+      expect(gift.userId, '12345');
+      expect(gift.message, '【ギフト貢献3位】ギフト太郎さんがギフト「ニコ子（500pt）」を贈りました');
+      expect(gift.messageId, 'g1');
+      expect(gift.sentAt, DateTime.fromMillisecondsSinceEpoch(1790541800250));
+      expect(gift.color, LiveMessageColor.white);
+      expect(
+        gift.data,
+        const NiconicoGift(itemId: 'nicoko', name: 'ニコ子', point: 500, message: 'ありがとう', contributionRank: 3),
+      );
+      expect('${gift.data}', 'NiconicoGift(ニコ子, 500pt)');
+      LiveMessage? read(Uint8List data) => NiconicoDanmakuProtocol.message(_message(8, data));
+      final plain = read(_gift())!;
+      expect(plain.message, 'ギフト太郎さんがギフト「ニコ子（500pt）」を贈りました');
+      expect((plain.data! as NiconicoGift).contributionRank, isNull);
+      expect((plain.data! as NiconicoGift).message, isEmpty);
+      expect(read(_gift(rank: 0))!.message, startsWith('【ギフト貢献0位】'));
+      expect(read(_gift(point: 0))!.message, contains('（0pt）'));
+      expect(read(_gift(point: null))!.message, contains('（0pt）'));
+      expect(read(_gift(name: null))!.message, 'ギフト太郎さんがギフト「（500pt）」を贈りました');
+      expect((read(_gift(itemId: null))!.data! as NiconicoGift).itemId, isEmpty);
+      for (final (reason, id) in [('absent', null), ('zero', 0), ('negative', -5)]) {
+        expect(read(_gift(giverId: id))!.userId, isEmpty, reason: reason);
+      }
+      expect(read(_gift(giver: null))!.userName, isEmpty);
+      expect(read(_gift(point: -1)), isNull, reason: 'the web player drops negative points');
+      expect(read(_gift(itemId: null, name: null)), isNull, reason: 'no item');
+      expect(
+        read(_gift(itemId: ' ', name: ' ')),
+        isNull,
+        reason: 'blank item',
+      );
+      expect(() => read(Uint8List.fromList([0x0A, 0x05, 0x01])), throwsFormatException);
+      expect(
+        const NiconicoGift(itemId: 'a', name: 'b', point: 1),
+        isNot(const NiconicoGift(itemId: 'a', name: 'b', point: 2)),
+      );
+      expect(
+        const NiconicoGift(itemId: 'a', name: 'b', point: 1).hashCode,
+        const NiconicoGift(itemId: 'a', name: 'b', point: 1).hashCode,
+      );
+    });
+
+    test('S08 through the connection: the operator comments among the chats; the snapshot is never read', () async {
+      final setup = _setup(
+        http: _Http(
+          tape: s08,
+          pages: [_page(program: 'lv351501141')],
+        ),
+        seats: _Connector([_Channel(_seatFrames(view: s08.view))]),
+        now: s08.recordedAt,
+      );
+      await setup.connection.connect(_args);
+      await _until(() => setup.http.views.length == s08.views.length + 1, reason: 'every view, then the held one');
+      await _until(() => setup.http.open_ == 1, reason: 'every window read');
+      final messages = _messages(setup.events);
+      expect(
+        messages.where((message) => message.type == LiveMessageType.notice).map((notice) => notice.message),
+        recordedOperatorComments(),
+      );
+      expect(messages.where((message) => message.type == LiveMessageType.chat), hasLength(4));
+      // In the order of the windows: each notice where the recording has it.
+      expect(
+        [
+          for (final message in messages)
+            if (message.type != LiveMessageType.online) message.type,
+        ],
+        [
+          for (final message in s08.messages)
+            if (message.type != LiveMessageType.online) message.type,
+        ],
+      );
+      expect(setup.http.opened.where((request) => request.url.path.contains('/snapshot/')), isEmpty);
+      expect(_kinds(setup.events).where((kind) => kind != 'message'), ['ready']);
+      await setup.connection.close();
+      await _until(() => setup.http.open_ == 0);
+    });
+
+    test(
+      "S09 through the connection: the program's end, once, then the connection ends without a reconnection",
+      () async {
+        final setup = _setup(
+          http: _Http(
+            tape: s09,
+            pages: [
+              _page(user: '138383030', program: 'lv351501491'),
+              offlinePage(),
+            ],
+          ),
+          seats: _Connector([_Channel(_seatFrames(view: s09.view))]),
+          now: s09.recordedAt,
+        );
+        await setup.connection.connect(endingArgs);
+        await _until(() => setup.events.last is DanmakuClosed);
+        expect(_outline(setup.events), ['ready', 'message', 'closed:connectionFailed']);
+        expect((setup.events.last as DanmakuClosed).detail, startsWith('StreamUnavailable(niconico'));
+        final messages = _messages(setup.events);
+        final notices = [
+          for (final message in messages)
+            if (message.type == LiveMessageType.notice) message,
+        ];
+        expect(notices, hasLength(1));
+        expect(notices.single, same(messages.last), reason: 'nothing after the end');
+        expectNotice(notices.single, NiconicoDanmakuProtocol.programEndedNotice, messageId: notices.single.messageId);
+        expect(notices.single.messageId, isNotEmpty, reason: "the window's, which came first here");
+        expect(messages.where((message) => message.type == LiveMessageType.chat), hasLength(3));
+        // Every request of the seat is given up at the end (the replay runs
+        // ahead of the recording, so later views may have been asked); the
+        // seat is closed.
+        expect(setup.http.windows.take(2), s09.windows.keys.take(2));
+        await _until(() => setup.http.open_ == 0);
+        expect(setup.http.opened.every((request) => request.cancel!.isCancelled), isTrue);
+        expect(setup.seats.handed.single.closed, isTrue);
+        expect(setup.http.sent, hasLength(2), reason: 'the watch page read again');
+        // The seat's own END_PROGRAM, 25 ms later when recorded, adds nothing.
+        setup.seats.handed.single.server('disconnect', {'reason': 'END_PROGRAM'});
+        await _wait(const Duration(milliseconds: 20));
+        expect(_messages(setup.events), hasLength(messages.length));
+        await _until(() => setup.http.open_ == 0);
+      },
+    );
+
+    test("the seat's END_PROGRAM first: one notice, the window's end after it is dropped", () async {
+      final late = _Manual();
+      final setup = _setup(
+        http: _Http(
+          tape: s09,
+          window: (request) => request.url.path == s09.windows.keys.elementAt(1) ? late : null,
+          pages: [
+            _page(program: 'lv351501491'),
+            _page(program: 'lv351501999'),
+          ],
+        ),
+        seats: _Connector([_Channel(_seatFrames(view: s09.view))]),
+        now: s09.recordedAt,
+      );
+      await setup.connection.connect(_args);
+      await _until(() => late.controller.hasListener);
+      setup.seats.handed.first.server('disconnect', {'reason': 'END_PROGRAM'});
+      await _until(() => setup.seats.handed.length == 2, reason: "the next program's seat");
+      late.controller.add(_delimit([NiconicoDanmakuProtocol.split(s09.windows.values.elementAt(1)).first]));
+      await _wait(const Duration(milliseconds: 20));
+      final notices = _messages(setup.events).where((message) => message.type == LiveMessageType.notice).toList();
+      expect(notices.map((notice) => notice.message), [NiconicoDanmakuProtocol.programEndedNotice]);
+      expect(notices.single.messageId, isEmpty);
+      expect(setup.events.whereType<DanmakuReconnecting>(), isEmpty);
+      expect(setup.connection.isConnected, isTrue);
+      await setup.connection.close();
+      unawaited(late.controller.close());
+    });
+
+    test('an end right after an end (the watch page still showed the ended program) is a failure', () async {
+      final stale = _Channel([
+        for (final frame in _seatFrames(messageServer: false)) frame,
+        jsonEncode({
+          'type': 'disconnect',
+          'data': {'reason': 'END_PROGRAM'},
+        }),
+      ]);
+      final setup = _setup(
+        http: _Http(
+          pages: [
+            _page(user: '138383030'),
+            _page(user: '138383030'),
+            offlinePage(),
+          ],
+        ),
+        seats: _Connector([_Channel(), stale]),
+      );
+      await setup.connection.connect(endingArgs);
+      await _until(() => setup.http.views.length == 4);
+      setup.seats.handed.first.server('disconnect', {'reason': 'END_PROGRAM'});
+      await _until(() => setup.events.last is DanmakuClosed);
+      expect(_outline(setup.events), ['ready', 'message', 'reconnecting:disconnected', 'closed:connectionFailed']);
+      expect(setup.events.whereType<DanmakuReconnecting>().single.detail, contains('END_PROGRAM'));
+      expect(_messages(setup.events).where((message) => message.type == LiveMessageType.notice).map((m) => m.message), [
+        NiconicoDanmakuProtocol.programEndedNotice,
+      ], reason: 'reported once');
+      expect(setup.seats.handed, hasLength(2));
+      expect(setup.http.sent, hasLength(3));
+    });
+
+    test('comment locks through the connection: changes only, across windows and seats', () async {
+      final first = _windows.keys.first;
+      final second = _windows.keys.elementAt(1);
+      Uint8List lock(String id, Uint8List state) => _state(state, meta: _meta(id: id));
+      final setup = _setup(
+        http: _Http(
+          window: (request) => switch (request.url.path) {
+            final path when path == first => _delimit([
+              lock('l1', _lock(2, followSeconds: 600)),
+              lock('l2', _lock(2, followSeconds: 600)),
+              _state(_statistics(10)),
+              lock('l3', _lock(1)),
+            ]),
+            final path when path == second => _delimit([
+              lock('l4', _lock(1)),
+              lock('l5', _lock(0)),
+              lock('l6', _lock(0)),
+            ]),
+            _ => _hold,
+          },
+          pages: [_page(), _page()],
+        ),
+      );
+      await setup.connection.connect(_args);
+      await _until(() => _messages(setup.events).where((m) => m.type == LiveMessageType.notice).length == 3);
+      // Another seat (taken over) reads the window under way again, as it
+      // does for chats: the same ids come again, and the gate drops them.
+      setup.seats.handed.single.server('disconnect', {'reason': 'TAKEOVER'});
+      await _until(() => setup.seats.handed.length == 2 && setup.http.windows.length >= 6);
+      await _until(() => _messages(setup.events).where((m) => m.type == LiveMessageType.notice).length == 6);
+      await _wait(const Duration(milliseconds: 20));
+      final notices = [
+        for (final message in _messages(setup.events))
+          if (message.type == LiveMessageType.notice) message,
+      ];
+      const once = [('l1', '【コメント制限】10分フォローを継続したユーザーに限定されます'), ('l3', '現在コメントできません'), ('l5', '评论锁定已解除')];
+      expect([for (final notice in notices) (notice.messageId, notice.message)], [...once, ...once]);
+      final gate = DanmakuMessageGate();
+      expect(
+        [
+          for (final notice in notices)
+            if (gate.accepts(notice, now: notice.sentAt)) notice.messageId,
+        ],
+        ['l1', 'l3', 'l5'],
+      );
+      for (final notice in notices) {
+        expect(notice.data, LiveNoticeKind.system);
+      }
+      await setup.connection.close();
+    });
+
+    test('a gift through the connection is a gift message', () async {
+      final setup = _setup(
+        http: _Http(
+          window: (request) => request.url.path == _windows.keys.first
+              ? _delimit([_message(8, _gift(), meta: _meta(id: 'gift1')), _message(1, _chat(content: 'after'))])
+              : _hold,
+        ),
+      );
+      await setup.connection.connect(_args);
+      await _until(() => _messages(setup.events).length == 2);
+      final gift = _messages(setup.events).first;
+      expect(gift.type, LiveMessageType.gift);
+      expect(gift.messageId, 'gift1');
+      expect(gift.data, isA<NiconicoGift>());
+      expect(_messages(setup.events).last.message, 'after');
+      await setup.connection.close();
     });
   });
 }

@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "platform": "niconico",
+  "case": "S08-marquee",
+  "room": "niconico:lv351501141",
+  "danmakuKeys": {
+    "programId": "lv351501141"
+  },
+  "capturedAt": "2026-09-30T15:22:56.628819Z",
+  "route": "proxy",
+  "handshakes": [],
+  "frames": 28,
+  "raw": {
+    "sha256": "cb768adf80bcdb766c620e311651d6e88c6bdc087a9801961c2efbf0fc208fcd",
+    "length": 19622
+  },
+  "scrubbed": [
+    {
+      "where": "frame",
+      "rule": "dropped"
+    },
+    {
+      "where": "comment server path token",
+      "rule": "secret"
+    },
+    {
+      "where": "state snapshot answer",
+      "rule": "dropped"
+    },
+    {
+      "where": "message.chat.hashed_user_id",
+      "rule": "person"
+    }
+  ],
+  "tool": "M5.F rec.dart (read-only, anonymous; schema 1)"
+}

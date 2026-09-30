@@ -149,6 +149,9 @@ const Map<String, AudiencePlatformCapability> audienceCapabilities = {
     onlineAvailability: AudienceOnlineAvailability.roomList,
   ),
   // The room detail keeps current liveViewerCount separate from cumulative viewerCount.
+  // In the room, the chat's LIVE message (type 38) pushes liveViewerCount
+  // again, the figure the website shows; the danmaku connection reports it
+  // (M5.29).
   '17live': AudiencePlatformCapability(
     hasPopularity: false,
     hasTotalViewers: true,

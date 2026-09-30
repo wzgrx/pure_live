@@ -1,0 +1,288 @@
+{
+  "roomId": "27484154",
+  "cases": [
+    {
+      "name": "comments: a coloured one, a barrage, a name only in openID, no display user",
+      "frames": [
+        {
+          "text": "{\"action\":15,\"id\":\"case01a\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRzVLCMBB+l/XaOmlTfo+AdXBGhxnEe2hDJ06b1iR1QIYDvAIHH8GjPoBvgwcfw6QtBdSD5rBJvt39dvfbJahFRqGLLQjSJKFcXcsIuktIiHjIKTXPMgJZkKWMK/1aWTAlQpDo1B2keeG2gMkhnzHOlHbMSCzpIdcCThINA1hAOEuIYikfDkqAzjMm6C0zAaYKkwMm1KImqf4TScUR5guSh/Vf0Egzar6rkWasm5OUhyWx0+qgJm56CDmuZ0FMH2msUWffmZ6IznWr8Pmy+Xh/dgyLBvppnOqqcOb7nYtWz/dhVWt2lLRbb3eb7W79VtjXn8kY9we9XoWP2ZPpyCuouCqofqEITHo/DSvdKvHHahEfBA6ZzGJSabOEXN+FrKg8jm2s7RnTNgYdjhmxSr8pl3MYPWOBygX9I9H5fRbBiaZM3g1HR8u6zIkIGeFH0FgJqsuK72v+x9q1frJimewHd3U/jamHbTJF2PZw2LYJblEbu24DOdgJm9MAVqsv+aSKDQIDAAA=\",\"id\":\"case01a:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case01b\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRS07DMBC9y7BNUBKn3yUtQUUCVZSydxO3MiROcBxEqbIod0CIE/QMSBWXKZU4BuM2TUPZgBdj+83Mm5k3M1DThEGbGODHUcSEukgn0J5BROV9xph+biMsA5KYC4Wv3IARlZJOKm5HE2TabRvA054Yc8EVOsY0TFmZS5BG0AhxuIr9O6Yg1+FdLtW0jC3+w5TJCuZJmgXlX7IJjwXSnPfB2LeYMhFcc81vN1pWndRdy7KdmgEhe2Ahos6uPjbOHrEj+Fo8fy5fHc2CQCcOY6wKR57XOm2ceJ5usJCmkrRefqzfX1bzxWr+9jtzewp8wJ90O+6GR6gNz2G+r3M7caB1gVLdgZqGiCiZ4cABT5OQFqLMIMO718Vwa3scU1vT1aapjbU/erYi/XKr/X7mhPsqk+yPRMe3yQR+iMnTm16/sqWzjMqAU1GBBkoyLCsP9/uPfaN2acEy3A3u4GZrI5eYdGQR0yVB06SkwUziODXLJnZQH/mQ59+8Kcx24gIAAA==\",\"id\":\"case01b:0\"}]}",
+          "note": "a barrage: a paid comment that also flies over the video"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case01c\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA2VRzU7DMAx+F3Ntpbbpup8jG5WGhIQ0dkZp641IbVrSdGxMPYw34MSVGy/B24wDj4HTdj+AD07y2f5sf9mC3hQII2ZBnGcZSn1TLmG0hYyrxwrRXNsMx4IiF1LTrbYg4krx5e9wnFdN2AJRTuVCSKEpsOBpiadaCyTPCAawgEuRcS1yOZ20AK4LofBOmATTRZQTofTmSNK95yWqMyxUvEqOb4VLYiS+61tiPA5XokxaYrc/dAIW+I7jeoEFKa4wJZQdJqONcE2jwvfHy9fnGzMsBIzzNKeucBGGw6v+ZRhCfdTsrCgvkNbZ7973u9f/la11+Ew8m3H8hkfqhudvfWxqx3nSKdbJPtOb9CRtIsoi5Z0qW6jobAR1WmO28bZv3MA452RmubYj5a8EPqG61w+K/v1MGJqv1ApJHDU/cHukXi/ymc0jauCzZGBz1kebeV7PcZmbBFEMdf0DBQmJl18CAAA=\",\"id\":\"case01c:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case01d\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA2VQQU7DMBD8SrVcHSmJ04b2SEukIiEhFR7gJNvKKLGD7aKWKhfOIHHjCXwCic9Qqc/ATkJahE/rmZ3Z3dmB2VYIE0ogk2WJwlzrFUx2UDL1sEZ0ZdvhE6gkF8ZWNYGUKcVWf+lMrhuaANdzseSCG0ssWaHxqCUgWGlhAAJM8JIZLsV81gK4qbjCW+4a3BSuZ1yZbW/S/e80qhMsUWyd93+FK+to/a5urGO/nEaRt8ZBPPZHdBT5fhDGBAp8xMKi0e9m9iLc2FXh8PH8/fkeORcLTGUh7VQ4S5LxZXyRJFD3mZ2I9i9f+7fX/5r2dfiCP7lFosZBmMbhqMycairzLqUu6oXZFsc4c66rgnVJgJBmwMRApveYGSvRRqG9RTm6yTa0xw7TiHos9akX0fzcYzRGj4bh0A9okI/SDOr6B+vG+KUOAgAA\",\"id\":\"case01d:0\"}]}"
+        }
+      ]
+    },
+    {
+      "name": "hidden comments: isDirty, isDirtyWord, isDirtyUser",
+      "frames": [
+        {
+          "text": "{\"action\":15,\"id\":\"case02a\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA41RS07DMBC9y7BNUL79LWkJKhKoUil7N5lGRokTbAe1VF0UsUDiANwAJM7AbcqCY2A3aZqqEsKLsWfG82bmvSXIRY7Qcw0IszRFJq9EDL0lpITfF4j6Wf6wDMgzyqR6rQyYEs5JfJgOs2KbNoCKIZtRRqVKzEgicF9rACOpCgMYQBhNiaQZGw7KAM5zyvGG6g+6CxUDyuUCepIXWLsTgbzGpSLgpIhqn2OsABXc5UgB1rMJZFGJa7e7VstteZZlOx0DEnzAREX93WBqIZyrSeHn4+n7683XKCrQz5JMdYWTIOiet8+CAFY1Zc2i99fN+mWz/tysn+3j0vJU8TF91PN4WyAmt0BHAKEu7mdRRVnF+1gukj23ERV5QipellCoe8uoVR7f1Nb0tOloY+2PXq8qvy512a+d01AWHP8JdHqXx3DAJxW3w1FDqIuC8IgS1giNJUfVtilnpfih/4fkij1RoUx2iztKXH/quSaZWq7puVHHJG4bTddxfMt27ag1DWG1+gUWHnfx/QIAAA==\",\"id\":\"case02a:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case02b\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5WRS07DMBCG7zJsE5QmafpY0hJUJFClUli7ybQySpxgO6il6qKIBRIH4AYgcQZuUxYcA7tJk5RuwAs/fns+z/yzBLlIEbqOAUESx8jkhZhBdwkx4XcZot7mLywD0oQyqXYrAyaEczLbvw6SbHttABUDNqWMSnUxJZHAKtYARmIlAxhAGI2JpAkb9HMB5ynleEX1A/0LFX3K5aKEFOexQF7TfE6ysDxznCmi4p0PFbFMTiALc3Cj1bE8x3Mtq2F3DIjwHiOlervMVEU4V6nC9/vj1+erpylK6CVRon6FI9/vnLZOfB9WpWf1oLeXzfp5s/7YrJ/sw9B8FPqIPuh83C2IyS3oABDo4F4SFp4Vxo/kIqrMDalII1L4soRMrVtLrXx4pp5NV09tPVnV0OUV4Zd5Y6qyUxrIjOMfQce36Qz2/KTiejCsNeosIzykhNWkkeSovuW/W/yPliv3REEZ7wq3VXObE9cxycRyTNcJ2yZxWmg6tt20Gk4j9CYBlPCbhCuY5BmuVj9ASZjgEQMAAA==\",\"id\":\"case02b:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case02c\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA41RwU6DQBD9l/EKhnZpqT3aiqmJpkmt9wW2ZA0suLuY1oZDjQcTP8A/0MRv8G/qwc9wFyhQ68E5DMubnbcz761BrlICQ2SAn8QxYfJShDBcQ4z5XUaIPpY3LAPShDKpTrkBHuYch/tlP8mKsgFUTNiCMipVYYEjQZpeAxiOFQxgAGY0xpImbDIuAbJMKSfXVF/Qr1AxplyuapLqfy4Ih6HkWQG5HGdBfYWTUBEquoupIqxnE4QFJW/HObH6qG9bVgepQkTuSaTR3WBqIbJUk8L3++PX56ujWRQwSqJEPQpHrnty5py6LuS1ZO2mt5ft5nm7+dhuntBhaxkVPqMPeh67IGKyIDog8HXzKAkqySrdZ3IVNdoGVKQRrmRZQ6a+haJWGY6ps2nrNNDJakKvV7Vflb40a6fUlxkn/yQ6vk1D2NOTipvJtOXdeYZ5QDFrQTPJiXqW/3b4b8drrG25Uk9ULPPd4l1lbs+zkYk9C5k2CgYmRg4xUbfbU7Z3gr7nQ57/AAjvItT9AgAA\",\"id\":\"case02c:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case02d\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA41RwU7CQBD9l/HamkILFI6CNZhoSBDv23Zo1rTburs1IOlBTiZ8gH+gP+Hf4MHPcLcttOjFPczuvNl5M/NmA3KdIYxsA4I0SZDJGxHBaAMJ4Y85on5WPywDspQyqV6FAT7hnESn4SDNy7ABVEzZkjIqVWBJYoFNrgGMJAoGMIAwmhBJUzadVACuMsrxjuoPugoVE8rl+khS+wuBvIV5nOQhjCTPlcsxUoSK7nqmCI+9CWRhxdsZDK2+3Xcsq2N3DIjxCWOFuofG1EC4Up3C98f26/PN1SwKGKdxqorCmecNLwcXngfFUbJ20vtu//K63+7+plWnxuf0WffilCRMliQnyYFOHKdhLVWt91yu40bTkIosJrUcG8jVXSppVcc1tTUdbVxtrOboser022ofzbgZDWTO8Z9E5w9ZBCc6UnE/nbX2c5UTHlLCWtBcclRl+e/N/m/Tpa+UEzXL4jB4Vy215zu2SXzLNh07dE1iD9C0u92eXnfY9wMoih+4xnmo9QIAAA==\",\"id\":\"case02d:0\"}]}",
+          "note": "isFraud does not hide"
+        }
+      ]
+    },
+    {
+      "name": "comment text: content first, comment.text without it, blank, not text",
+      "frames": [
+        {
+          "text": "{\"action\":15,\"id\":\"case03a\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRzU7CQBB+l/HamkL5K0fBGkw0JIj3bbuQNe227m4NhHCAiyZ6VS9eTDR6MD6A8W1Q5DHcpaUUvegcZndn9vtm5psRiGGEoW5q4IZBgKk44H2ojyBA7DTGWF2TH4YGUUiokLexBg5iDPU3024YL9MaEN6iPUKJkIke8jleYzWgKJBhAA0QJQESJKStZhLAg4gwfETUB1WF8CZhYpiRpO8uxywXsxmKvezNcF8ySr79tmTMmuOYeglxoWoZFbNSMoyCWdTAx2fYl1Fr1ZmcCA9kq7B4mn6831qKRQYaoR/KqrBl29Zudce2YZxplgN9XjzOJq/zu5f5zflvZGIJkoolEhb3z18Pb7PJ9Wx6NZteZlBXwRqhl4qVKt4RQ3+tqkd45KNUkBHE8lxqaSRm6crrJeVqyhlrU3Ol8MNkI+t5I+KKmOE/Em2fRH3YEJLw41Y7t6G9GDGPIJoLdQTDsiz7udt/7FqqyFOW7mrwotxq2SmZOnIMUy+ZXk1HZhXrZrFYlvsueBXHhfH4GwDJgxD3AgAA\",\"id\":\"case03a:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case03b\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRvU7DMBB+l2NNUJqkv1tpCSoSqFIpu9O4lVHiBNtBLVWHsjCzwMLAxsIj8DZFFY/BOQlpChISHs6+O993d9+3BLVIKHQcAyZxFFGuzuQMOkuIiLhOKdXP/IdlQBIzrvC1MsAnQpDZfnoSp1naACYHfMo4U5iYklDSXa0BnEQYBjCAcBYRxWI+6OcBOk+YoBdMf9BdmOwzoRYlSOGPJRWVmCdIGpS+oDNERLzTISKWw0nKgxy41mxbDafhWlbNwbVDekND6NjlZLgRneOo8Pl69/H+VLM0DEZ6cRhjWzjwvPZx88jzYFWSVqnaPr9tH+8365fN+uF3ZX6K+Ijd6nncDIerDIenYahdrOjFQUFUwfZILcIdowGTSUgKMpaQ4p3xaOWHmNqarjYtbazdIVCWn+dqVHZN2ESlgu6Qun8gdQ+vkhnsscjk5WBYkeckJSJghFdCIyUo9hU/hf2H0MiZLFDG35vbKGnddx2T+JZjuk7QMonTpKZj23UUuxY0/AmsVl9WASQ99AIAAA==\",\"id\":\"case03b:0\"}]}",
+          "note": "content is null"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case03c\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRS07DMBC9SjVsE5TE6XfZlqAigSoV2DvJNDJKnGA7qFWVDZfgCFyC47DgGNhNmqQgIeHF2J5582bmzQHUvkCYEQuiPMuQq1uZwOwAGRXPJaJ51gjHgiJnXOlXZUFIhaDJeTjKy2PYAiZXfMs4UzqwpanELtcCTjPtBrCAcpZRxXK+WtYO3BVM4D0zAFOFySUTat+SNP8HiaLnCwQt4/YvMNGMmu9mrRnb5iTyuCZ2x1NnREa+47jEtyDFF0xh5rmnzvREuNOtwtf76+fHm+saGu1Z5Gmuy8JFEEyvxvMggKoVrZc1+A2vTw3n6giHgcFFBrPI40aPRtSN2qedcDGTRUqbmQ9Q6vsol1Of0DbW9o2ZGON0J4Q2/a4WvTdSwSJVCuyY5n8wzS+figTOxGLycbXubeG6pCJmlPdcGyVQ1xU/9/ePfWrNZMPycJrc05sbhj6xaegQ2yfxxKZkjDbxvKHeqRuPwgiq6hvox32M2wIAAA==\",\"id\":\"case03c:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case03d\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5WSS07DMBCGr1IN2wTl1eeSlKAigSoV2LuJGxklTrAd1FJ1ATskWCNOgNhwAARcBqpyDOwmTVMQSHgxtseeb8b/eApikmLo2Br4SRxjKg54CJ0pxIidZRirZX7D0CBNCBVyNdNgiBhD4eaxn2TLYw0I79ERoUTIgxGKOF7HakBRLN0AGiBKYiRIQnvd3IHHKWH4iKgLKgvhXcLEpIQU+2OOWcXnMZQF5Z7hUBIlb78viWVxHNMgB5vNttGwG45hmHZdgwif4wg6lrWqTL4Ij2Wp8Plw9fFyZ1oKIz1uEiUyLWx5Xnu3ueN5MCtFq0TVavPr2/nbzfvl0+LxeXH/Wqv9BOSj8A/IhSrLWeKoWOJ+wfgK4SZBIWDRhYGYRGulA8LTCBUiTSGT81JfIx++rqzuKNNSxlgPH8rww7xLFQ1S4ouM4TXJ/YPkbp+mIWyoS/hJr19p216GWEAQrbgGgmGZl31v+D8+gBSRF5Tj1cst2er60LF1NDRs3bGDlo7sJtZty6rLT2AGjaEPs9kXusyzCAwDAAA=\",\"id\":\"case03d:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case03e\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRQU7DMBD8y3JNUBKnaemRhqAigSqVcndiNzJynGA7qFXVC5/gCXyC53DgGdhJmqQckPBh7Z31zu7OHkDvKwpz5EBWFgUV+l7lMD9AgeVLTal9tj88B6qSCW1eRwdSLCXOz8NZWTdhB5haii0TTJvAFnNFh1wHBC4MDOAAFqzAmpViGbcA3VVM0kdmP9gqTMVM6n1P0vkbReUISySuSe9LmhtGw3e3Mox9c4oK0hL70ysvQlHoeT6KHOD0lXKYB+jUmZmI7kyr8P3x9vX57iNLY5BFyUtTFi6S5Opmep0kcOxFG7JEzXmDC93gfoDCifVN8qIk3eSdfGu954NEhKmK4266A9TmboTx2kNca93Qmpk13nAI9OkPrbyj5iuW6VrSgSn+gym+fK5yOJOFqaflaqT3bY0lYViMoLWW1NSVvzf1j80Z0VTHsjlNHpgdTdIQuTj1kBsiMnMxmlIXBcHEbM8nUZrB8fgDUPFzEMUCAAA=\",\"id\":\"case03e:0\"}]}",
+          "note": "content is a number"
+        }
+      ]
+    },
+    {
+      "name": "comment times and colours",
+      "frames": [
+        {
+          "text": "{\"action\":15,\"id\":\"case04a\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRzU7CQBB+l/Hamv4hyFGgBhMNCeJ92w5kTbutu1sDEi74CCYan8CTb8DbYIy+hbu0lIKJiXOY3Z3Z75uZb+YgZxlC2zUgTJMEmbwUE2jPISH8LkfU1+KHZUCWUibVbWFAQDgnk/10mOabtAFU9NmYMipVYkxigTusAYwkKgxgAGE0IZKmrN8tAjjNKMdrqj/oKlR0KZeziqR8jwTyWsznJI+qN8eJYlR8FwPFWDUnkEUlsQEx3mMMbcfbdqOmwKlqD77elh+rF9vTUBXppHGqSsGR75/2mme+D4tKqBrq83X5/fy0Xq7Wj++/kYWV8SF9UPVsb8PD5IbnEB9qbCeNSplKrYdyFu/0jKjIYlJKMYdcnRsVrcLQ1N70tGtpZ+0MoYJfFbuoTZ3RUOYcd0y9P5h6x7fZBPb0pOKmP6gt5zwnPKKE1UJDyVHV5Ydr/cealXqiZBltJ3csy24EnmuSwHJNz41aJnGbaLqO07Bs145OghAWix/J0VAa8gIAAA==\",\"id\":\"case04a:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case04b\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRS07DMBC9y7BNUBKn3yUtQUUCVSpl7yRuZZQ4wXZQS9UF3bBhh9SKE7DiBtwGqOAWOJ8m4SMkvBjbb2bezLxZgJzHBLpIAy8KQ8LkiZhCdwEh5pcJIekzjzA0iCPKpHotNXAx53j61e1FSebWgIoBm1BGpXJMcCBIlasBw6GCATTAjIZY0ogN+jlAZjHl5IymAWkVKvqUy3lJUvzHgvAa5nCc+OWfk6liVHzHQ8VYNicI83NiMFsdo4matmGYFlIxAbkiAXStxq43NROZqWbh/XH1+rwxGymRQnpREKnCsOc4ncPWgePAspStlrV9WH2s719u7rbr27enzc/k/BT4iF6rkqadUTGZUf1C4aXpvcgvpCv0H8l5UGnsUxEHuJBnAYm6M2WN/Ez01Op2atqpMaozgTL9NN9PbfaYejLhpGJy/mBy9i/i6VdVqTgfDGsLO0ow9ylmNWgkOVF1+fdV/2P1SkBRsIx3k1tqxw3XRjp2DaTbyG/rGLWIjiyrYZjI9JuuB8vlJ8HfQ4cGAwAA\",\"id\":\"case04b:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case04c\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRS07DMBC9y7BNkPNp+lnSElQkUKUCeydxI6PECbaDWqosyo4T9AhILFlzm7LgGNhJmqZdgRe25/PezLxZg1zlBEaOAWGWpoTJGxHDaA0p5k8FIfpbZyAD8owyqX6lAQHmHMfH4TArqrABVEzZgjIqVWCBE0EOWAMYTpUbwADMaIolzdh0UjvIMqec3FGdoKtQMaFcrlqSxr4XhHd8PsdF1NqcxIpR8V3PFGPbnCAsqomt/hB5juciZDlDAxLyTBIY2d6+MzURWapW4ef99ftra3maRnnGWZKpsnDm+8PL/oXvQ9mK1kW9fe42H7vN9gTWmHP6ontwKyyTFfYIE+r8cRY1GjVCz+UqOYgZUZEnuNFhDYV6KwlRdSxk6sd09TXQF2qPhaCF39aL6IyZ01AWnPyR6fwxj+FIQCoeprPOZq4KzCOKWcc1l5youvx0p//YsZJONCz3+8lt1VAvcB0TB8gxXScamNjpE9Ox7Z7asxV5QQhl+Qs9pnG27wIAAA==\",\"id\":\"case04c:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case04d\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRu07DMBT9l8uaoLhOk9KRlqAigSqVsruJWxklTrAd1FJ1KBIDX8DMxAQDM3/DQ/0M7DRN007gwY9zfc6999w5qFlGoY0tCNMkoVydywm055AQcZNTaq7rH44FWcq40reFBSMiBJnshsM0L8IWMNnjY8aZ0oExiSXdci3gJNEwgAWEs4QolvJedw3QacYEvWTmg8nCZJcJNatEyvdQUlHDAkHyqHoLOtGKWu+srxWr4iTl0VoY+UeOhz3XcZCrAzG9pTG0G/6mMt0RnepSYfVy//XxhHwjo5FOGqc6LRwEwdGJfxwEsKhMq7G+H15/npefy7fV4/s+E2PP63RKdMDuTDVuocJVobLPDg2zk0alYaXrAzWLt85GTGYxKU2ZQ67Pwk+nWAjZ5rBds7XM5lQLIajoF+up1HrOWKhyQf+odHidTWDHTSavev3amE5zIiJGeA0aKEF1XrE/4H8MXLsnS5XhpvOGLqg5crFNRg62XRy1bIJ9auNGo+kgjCJvFMJi8QuzQSrE/AIAAA==\",\"id\":\"case04d:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case04e\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRu07DMBT9l8uaoLz6HGkJKhKoUim7k7iRUeIE20EtVQa6gdgZGRjYmfmbgtTPwE7SNC0LePDjXJ9z7z13CWKRYujbGvhJHGMqLngI/SXEiN1mGKtr+cPQIE0IFfKWa+AhxlC4H/aTrAhrQPiIzgglQgZmKOJ4x9WAoljCABogSmIkSEJHwxLA85QwfEXUB5WF8CFhYlGLVO8px6yBuQxlQf1mOJSKUu98LBXr4jimQSlsdnpG2247hmE6pgYRvsMR9K3utjLZEZ7LUmHzvvr6fDG7SkYigyRKZFo4ct3eaefEdSGvTWuwvt+e1qvn9cPr5vHjN9OtoAm5V6U4hQQVhcQh1Ve0QRJUblWWT8Qi2tkaEJ5GqHJkCZk8CzONYpmWrg7dUVtXbUa9TAtq+mU5kkbDKfFFxvAflY5v0hD2rCT8ejRuzOgsQywgiDagiWBY5mWH0/3HtKV7vFKZbju3ZEEtz7F15Bm27thBV0d2B+u2ZbUM0zaDtudDnv8A5KIVLfkCAAA=\",\"id\":\"case04e:0\"}]}"
+        }
+      ]
+    },
+    {
+      "name": "a time beyond DateTime",
+      "frames": [
+        {
+          "text": "{\"action\":15,\"id\":\"case05a\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRS07DMBC9y7BNUBun3yUtQUUCVSpl7yRuZJQ4wXZQS5VFEXdgAxIbhMQZuA2ogltgJ2malg144c8bz5t5b5YgFwmBPjLAi6OIMHkmAugvIcL8OiVEX4sfDQOSmDKpbpkBLuYcB7thL07zsAFUjNiMMipVYIZDQba5BjAcKRjAAMxohCWN2WhYAGSeUE4uqP6gq1AxpFwuKpLyPRWE1zCH49Sv3pwEilHxnY4VY9WcIMwviLttu1FbTQNCckNC6Fu9TXNKFJmrbuHr9e7z/aHZ00wKGcRhrCrDgeP0jjtHjgNZ5Vst63v1/LG6Xz++rZ9efmcWq8Qn9FbVa9o5D5M5z36+p3MHsV+6Vlo/kYtwa69PRRLi0pklpOrMTS01IlMfphZudvVW04+gSj8vRlNTnVBPppz8kenwKglgx08qLkfj2qxOUsx9ilkNmkhOVF2+P+V/TF25J0qW6Ua5pRpquTYysdtApo38rolRh5jIslqq1abfdj3Ish97hA0GAQMAAA==\",\"id\":\"case05a:0\"}]}"
+        }
+      ]
+    },
+    {
+      "name": "message ids: the message id, else the frame id and index, else none",
+      "frames": [
+        {
+          "text": "{\"action\":15,\"id\":\"case06a\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"id\":\"own:7\",\"data\":\"H4sIAAAAAAACA5VRS07DMBC9y7BNkBOn3yUtQUUCVSpl7yRuZJQ4wXZQS9UFLIAbcAQkFpyA2wASx8BOQprCBrzw543fm5k3a1CrnMIQWxBmaUq5OpExDNeQEnFZUGqu1Q9kQZ4xrvRtY0FAhCDxbjjMijJsAZMTvmCcKR1YkETSLdcCTlINA1hAOEuJYhmfjCuALnMm6BkzH0wWJsdMqFUjUr/nkooW5gtSRM1b0Fgrar3jqVZsipOUR5Ww0xugLu56CDmebjuhVzTRBjSV6Y7oUpcKn0+376+PLjIyGhllSabTwp7vDw57B74Pm8a0Nuv++ePh7u3mhUW/idWq8Rm7NuV4pQxXpcwPemiooyyqDatdn6lVsnU2YjJPSG3KGgp9ln6icjmebQ7bM1vfbKhZjgcN/bSaSqvnnIWqEPSPSvsXeQw7bjJ5Ppm2xnRUEBExwlvQTAmq84qfA/7HwLV5slaZf3fu6oI6gYdtEiBsezjq2wT3qI1dt4Mc7ETdIITN5gvB/x+t/AIAAA==\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case06b\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRS07DMBC9y7BNkJ2k3yUtQUUCVSpl7yRuZJQ4wXZQS5VFuUSPgMQZuA0sOAZ2kqYpbMALf974vZl5swW1ySmMXQvCLE0pVzcyhvEWUiIeC0rNtf6BLMgzxpW+lRYERAgSn4bDrKjCFjA54yvGmdKBFUkkPXIt4CTVMIAFhLOUKJbx2bQG6Dpngt4x88FkYXLKhNq0Is17KanoYL4gRdS+BY21ota7nmvFtjhJeVQL48EI9d2+hxD2PAsS+kQTbQA+VKY7omtdKny9vny+7x1sZDQyyZJMp4Uz3x9dDi58H8rWtA6LRR+7t4/d/jerXg2+YM+mFq/S4KrS6HJDw5tkUWNV4/dCbZKjpxGTeUIaO7ZQ6LNyElUL92xz2J7ZhmZD7cI9aOm39Tw63eYsVIWgf1Q6f8hjOPGRyfvZvDOgq4KIiBHegRZKUJ1X/BztP0atnZONyvLQuWMKCjzXJgFybc+NhjZxB9R2HaeHsIujfhBCWX4DH/hdEfYCAAA=\"},{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRS07DMBC9y7BNkPNp+lnSElQkUKVS9k7sRkaJE2wHtVRdlEv0CEicgdvAgmNgJ2maIhbghT9v/N7MvNmAWhcURp4FcZ5llKsbmcBoAxkWjyWl5lr/QBYUOeNK37YWRFgInJyG47yswhYwOeVLxpnSgSVOJT1yLeA40zCABZizDCuW8+mkBuiqYILeMfPBZGFywoRatyLNeyGp6GChwCVp34ImWlHrXc+0YlucpJzUwk5/iAIv8BFy/J4FKX2iqTbAPVSmO6IrXSp8vb58vu9d18hoZJynuU4LZ2E4vOxfhCFsW9M6LEY+dm8fu/0vtHo1+Jw9m2L8SoSrSuSEHBviOCeNWY3jc7VOj64SJosUN4ZsoNRn5SWqlhPY5rB9sw3MhtrlBNDSb+uJdPotWKxKQf+odP5QJHDiJJP301lnRFclFoRh3oHmSlCdV/wc7j+Gra2Tjcri0LmrC+pFvmfjCHm275GBjb0+tT3X7SHHc0gQxbDdfgN6H1Ad+AIAAA==\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"channel\":\"27484154\",\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5WRzVLCMBDH32W9tk5LCgWOgnVwRocZxHvaBiZOm9YkdUCGA9x8As6eHH0G36YefAyTtpSiHnQP+djN/nbz3xXIZUqgjwwIkjgmTF6JOfRXEGN+nxGij+ULy4A0oUyq09oAH3OO58fhIMmKsAFUjNiMMipVYIYjQQ65BjAcKzeAAZjRGEuasNGwdJBFSjm5ofqBrkLFkHK5rCHVfSoIb/g8jrOwvnMyV0TFuxwrYt2cICwswbbbszqo41iW7XQMiMgDiZQAaN+Z+hFZqFbh82X78b5rIY1RnkESJaosnHhe79w98zxY16I1svLNa755zrdP+Xabb97yze5nfmmVf0IfdVdOQWOyoP1OCTRhkISVfNUMJnIZHXQOqUgjXEm0gkzthbpWYbZr6s109NLVi1Wb7UKdfl3OqKFASgOZcfJH0uldOocjbam4HY0bQ7vIMA8pZg3XRHKi6vLv4/7H+JWGoqJM9z9vqYbavoNM7FvIdFDYNTFyiYlarbZlIzvs+AGs11+1JmnJCgMAAA==\"}]}",
+          "note": "neither the message nor the frame has an id"
+        }
+      ]
+    },
+    {
+      "name": "live figures (38)",
+      "frames": [
+        {
+          "text": "{\"action\":15,\"id\":\"case07a\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACAy2MMQqAMAwA/5K5i4igXX2A4OBeJNVgmoqmioh/V9HtOLg7QY8ZwealAaYNSXwEe/42MxCSPuAdr2hgIK+tk6mRx0li/qKOcMeljkkUbFUYcP1IuGFA0c5xek/XdQOfgkqaawAAAA==\",\"id\":\"case07a:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case07b\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACAy2MMQqAMAwA/5K5g+IiXX2A4OBeJNVgmoqmihT/rqLbcXCXQc8FwVa1AaYdSXwEm39bGghJH/CONzQwktfOydzK4yQxf1FPeODaxCQKtjDgholwx4CiveP0jq7rBl+BHudqAAAA\",\"id\":\"case07b:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case07c\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACAy2MMQqAMAwA/5K5DuIiXX2A4NC9SKrBmIqmioh/t6LbcXB3gZ4Lgq1qA0w7koQI9vptaWBOmiF43tDAQEE7L1Mr2Uli/iJHeODaxCQKtsiR70fCHWcUdZ7Te7rvB1Vx5lBrAAAA\",\"id\":\"case07c:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case07d\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA6tWKqksSFWyMrbQUcrJLEvNzEvLV7Kqhooa6ijllpYAGWmJOcWpOkrpmWklQYl52f55QLG80pwciKawzNTy1CLn/NK8EiUrJUtTJR2lxOSMzNSy1NzUvJKwxJxSkFm1tQAqxLh2bQAAAA==\",\"id\":\"case07d:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case07e\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA6tWKqksSFWyMraoBQAEb7xsCwAAAA==\",\"id\":\"case07e:0\"}]}"
+        }
+      ]
+    },
+    {
+      "name": "gifts and the other types show nothing",
+      "frames": [
+        {
+          "text": "{\"action\":15,\"id\":\"case08a\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA41RS2rDMBC9y6ydYiemuFqHhixaAqHZhGKm9sQodWwhjQLGaJNL9Ai9RI/TRY9RKT9CKSGzmOG90bxhnnrgThGIZBRBJVf8ZCoQPZTSqBq7F0M6QOvrdAwC4n0k2SCUQRpSFlJ8jiSD6DT+jBsvDT+fu++vj2HqG0oWbDXdqHS3VpUfqmlLNYhRGoE0i+kMxAprQwFNLOpSYnNBzVmT36svqLHU3P3Fh9vO3KNGWx6xO3ixv3h4Hz/ka5UXKsd3bDqEU9OAWP7Tfj0aSYzhRQ+MuiKeXBMs2s1bG4wuWtuw/w3nvIxqZQCxc7/KRx35pgEAAA==\",\"id\":\"case08a:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case08b\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA6tWKqksSFWyMjbSUUrPTCvxLU5XsqpWSsksLshJrAwtTi0CcUuBtKeLkpWSARgYWuqCKF0TEGEBIgzgwNBSSQem3S8xF2i00ovlTU/2TDcyBUoUZCaXlBalEmmSXlZBOlBTTmpZag7QiaY6SpnFYZ4BSlZpiTnFqSCee2liUUpmYh6SUHBJUSrQ3iIkIZfMopJKdD7Eb3Axt6LE0hQovxYSFmAfJyWmxxsCHZFaAecr1dYCAL88baM3AQAA\",\"id\":\"case08b:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case08c\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA6tWKqksSFWyMrTQUUrOz81NzSvxLU5XsqoG8vJKgDwlK6XHjT1P+5uedi143Dj9ceM+MDn//Z5GJbgWkPqS1Aq8imt1lFIyiwtyEitDi1OLQDpKgbSnC1CPARgYJuqCKF0TEGEBIgzgwDBRCa7dLzEX6GClF8ubnuyZbmQGlCjITC4pLUpFmOSIxyRHvayCdKCmnNSy1BwlK2MzHaXM4jDPACWrtMSc4lQQz700sSglMzEPSSi4pCgVaG8RkpBLZlFJJTof4je4mFtRYmkKlF9bWwsAQO4OUm4BAAA=\",\"id\":\"case08c:0\"}]}",
+          "note": "JOIN_ROOM: shown to the streamer only"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case08d\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA6tWKqksSFWyMrLQUSpKTUwu8S1OV7KqhonqKOUXpOZ5uihZKb1Y3vRkz3QjcyUdpZTM4oKcxMrQ4tQikNpSIA1WYgAGhkm6IErXBERYgAgDODBMQmj3S8xNRTW3IDO5pLQoFWGSEx6TnPSyCtKBmnJSy1JzlKyMzXWUMovDPAOUrNISc4pTQTz30sSilMzEPCSh4BKgL3NB7oYLuWQWlVSi8yF+g4u5FSWWpkD5tbW1AKZSbBY2AQAA\",\"id\":\"case08d:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case08e\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA6tWKqksSFWyMtVRSs1LCS4pSk3M9S1OV7KqVkrOyS9OdapUsjKorQUAogRy7ScAAAA=\",\"id\":\"case08e:0\"}]}",
+          "note": "LIVE_STREAM_END"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case08f\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA6tWKqksSFWyMtNRysksS83MS8t3zkjMSwcKVSsVlxSlJuZ6uihZKRkq6SillBYllmTm5ylZGdbWAgCBX7pWOQAAAA==\",\"id\":\"case08f:0\"},{\"action\":0,\"data\":\"H4sIAAAAAAACA6tWKqksSFWyMjepBQDUiADHCwAAAA==\",\"id\":\"case08f:1\"},{\"action\":0,\"data\":\"H4sIAAAAAAACA6tWKqksSFWyMresBQCZ9q5yCwAAAA==\",\"id\":\"case08f:2\"},{\"action\":0,\"data\":\"H4sIAAAAAAACA6tWKqksSFWysjCoBQDtCjCoCwAAAA==\",\"id\":\"case08f:3\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case08g\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRzU7CQBB+l/HampYtUDgK1mCiIUG8L+1C1rTburs1IOlBLx70LDevnnwD30YxPoa7bSkFExPnsD8z830z880S5CIh0AUEBvhxFBEmz8QMukuIML9OCdHPIscyIIkpk+qVGTDBnOPZbtiP0zxsABUDNqWMShWY4lCQLdYAhiNdUlXEjEZY0pgN+oWDzBPKyQXVCboKFX3K5aIiKf9jQXjN53GcBtWfk5liVHynQ8VYNScICwpiu92xWqjlWJbdtA0IyQ0JoYvcTWdqIjJXrcL36/3n+6rhahrl6cVhrMrCged1jttHngdZJVoNtX55/Lh7+np+WL+tfiMLK/0jeqv7cXIeJnOefbyvsb04KCUrdR/JRbjVNqAiCXEpyxJSdeeKWrnZvqkv09GHqw+rMtuHCn5e7KU2dUJ9mXKyZer9wdQ7vEpmsKMnFZeDYW1RJynmAcWs5hpJTlRdvr/if6xcqSdKlvFm8oZe7sRBJp5YyHRQ4JoYtYmJGo2mZSM7aE18yLIfOHHA0QADAAA=\",\"id\":\"case08g:0\"}]}",
+          "note": "type as text"
+        }
+      ]
+    },
+    {
+      "name": "payloads that are not gzip + base64",
+      "frames": [
+        {
+          "text": "{\"action\":15,\"id\":\"case09a\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"{\\\"type\\\":3,\\\"commentMsg\\\":{\\\"marquee\\\":{\\\"type\\\":0,\\\"point\\\":0},\\\"barrage\\\":{\\\"type\\\":0,\\\"count\\\":0,\\\"isInfinite\\\":false,\\\"point\\\":0,\\\"name\\\":\\\"\\\",\\\"animationID\\\":\\\"\\\",\\\"expireTime\\\":0},\\\"isDirty\\\":false,\\\"isDirtyUser\\\":false,\\\"isFraud\\\":false,\\\"region\\\":\\\"JP\\\",\\\"type\\\":0,\\\"sendTime\\\":1790636400152,\\\"level\\\":39,\\\"name\\\":{\\\"text\\\":\\\"观众29\\\",\\\"textColor\\\":\\\"#FF9E7BFF\\\"},\\\"comment\\\":{\\\"text\\\":\\\"そのままのJSON\\\",\\\"textColor\\\":\\\"#FFFFFFFF\\\",\\\"textSize\\\":14},\\\"content\\\":\\\"そのままのJSON\\\",\\\"colorCode\\\":\\\"\\\",\\\"barrageStyle\\\":false,\\\"displayUser\\\":{\\\"userID\\\":\\\"0000001d-0000-4000-8000-00000000001d\\\",\\\"displayName\\\":\\\"观众29\\\",\\\"picture\\\":\\\"0000001D-0000-4000-8000-00000000001D.jpg\\\",\\\"level\\\":39,\\\"isVIP\\\":false,\\\"isGuardian\\\":false,\\\"isStreamer\\\":false,\\\"isDirty\\\":false,\\\"isDirtyUser\\\":false,\\\"isFraud\\\":false},\\\"streamerUserID\\\":\\\"20015b43-ab03-43d8-a37e-32250131d6bc\\\"}}\",\"id\":\"case09a:0\"}]}",
+          "note": "plain JSON text"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case09b\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":{\"type\":3,\"commentMsg\":{\"marquee\":{\"type\":0,\"point\":0},\"barrage\":{\"type\":0,\"count\":0,\"isInfinite\":false,\"point\":0,\"name\":\"\",\"animationID\":\"\",\"expireTime\":0},\"isDirty\":false,\"isDirtyUser\":false,\"isFraud\":false,\"region\":\"JP\",\"type\":0,\"sendTime\":1790636400153,\"level\":40,\"name\":{\"text\":\"观众30\",\"textColor\":\"#FF9E7BFF\"},\"comment\":{\"text\":\"オブジェクト\",\"textColor\":\"#FFFFFFFF\",\"textSize\":14},\"content\":\"オブジェクト\",\"colorCode\":\"\",\"barrageStyle\":false,\"displayUser\":{\"userID\":\"0000001e-0000-4000-8000-00000000001e\",\"displayName\":\"观众30\",\"picture\":\"0000001E-0000-4000-8000-00000000001E.jpg\",\"level\":40,\"isVIP\":false,\"isGuardian\":false,\"isStreamer\":false,\"isDirty\":false,\"isDirtyUser\":false,\"isFraud\":false},\"streamerUserID\":\"20015b43-ab03-43d8-a37e-32250131d6bc\"}},\"id\":\"case09b:0\"}]}",
+          "note": "a JSON object"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case09c\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sInotgzip\",\"id\":\"case09c:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case09d\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"bm90IGd6aXAgYXQgYWxs\",\"id\":\"case09d:0\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case09e\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA4s21DGKBQC/UIsIBQAAAA==\",\"id\":\"case09e:0\"}]}",
+          "note": "an array"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case09f\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA6tWKqksSFWyMtZRqlCyUvqvVAsA9Ju7ChIAAAA=\",\"id\":\"case09f:0\"}]}",
+          "note": "malformed UTF-8"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case09g\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"\",\"id\":\"case09g:0\"}]}"
+        }
+      ]
+    },
+    {
+      "name": "several messages in one frame; broken items are skipped",
+      "frames": [
+        {
+          "text": "{\"action\":15,\"id\":\"case10a\",\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRy07DMBD8l+WaoKROn0dagooEqlTK3UmcyChxgu2glioS8BMcuCJx48yBv6ESfAZ2kqYpSEj44MesZ3Z3dg1ylREYIQP8NEkIk2cigtEaEsyvc0L0tfphGZCllEl1KwzwMOc42g/7aV6GDaBiykLKqFSBEMeC7LgGMJwoGMAAzGiCJU3ZdFIBZJlRTi6o/qCzUDGhXK4akfq9EIS3MJfjPGjenERKUemdzpRiU5wgLKiE7f7Q6qGeY1l21zEgJjckhpFjbytTHZGlKhW+Xh4274/I1jIKGadxqtLCgesOj/tHrgtFY1qLtXm7+7h//nx6/U2rVo3P6a0uxilFmCxF9si+Jo7ToDardnwuV/HO1YCKLMa1IWvI1Vl6aZXLDk19mI7eBnqzmmWH0NDPq4m0+s2oL3NOdkruH0ru4VUWwZ6TVFxOZ60RneSYBxSzFjSXnKi8/Odw/zFsZZ2oVRbbzjt6rJ6DTOxZyHRQMDAx6hMTdTpdy0Z20PN8KIpvfGB5rvgCAAA=\",\"id\":\"case10a:0\"},{\"action\":0,\"data\":\"H4sIAAAAAAACAy2MuwqAMAwA/yVzBx+LuPoBgoN7kVSDaSqaKiL+uxXdjoO7C/RcEOqyMsC0I4kLUF+/zQ34qAmc5Q0NjOS0szK3kpxE5i/qCQ9cmxBFU1NkBuwwEe7oUbS3HN/VfT/5PYn7bAAAAA==\",\"id\":\"case10a:1\"},{\"action\":0,\"data\":\"H4sIAAAAAAACA41RS2oDMQy9i9aT4DqhtF6HhiwaCqXZlDKoM8rgdDJjbDkwDN7kEjlCL9HjdNFj1M6PUEqpFhLvyXpCzz1wZwjU1SiDSi/53lWgeii1MzV2T45sgj7W2QQUiH1IMUhlME7pJiVxDikgO43PcR2l4et9+/mxG8nYMLpgb+mfSsOVqeJQTRuqQY1lBtotZg+gllg7Smjq0ZYamwvqkS3FvfaCmmjL3U98uO3M3Vn05RGHgxf7i+W1uM1XJi9Mjm/YdAinpgP1/Ev75WgkMaYXPTDainj6l2DRrl/bZHTR+objb4QQZUyrExAhfANnBV+UpgEAAA==\",\"id\":\"case10a:2\"},{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRS07DMBC9y7BNUBKnaemSlqAigSqVsncSNzJKnGA7qKXKAi7BolskdpyA2wCCY2AnaZrCBrzw543fm5k3a5CrnMAQGRBmaUqYPBcxDNeQYn5TEKKv9Q/LgDyjTKpbaUCAOcfxfjjMiipsABUTtqCMShVY4ESQHdcAhlMFAxiAGU2xpBmbjGuALHPKySXVH3QWKsaUy1Ur0rzngvAO5nNcRO2bk1gpKr2zqVJsixOERbWw3T+yPOS5lmX3PAMScksSGLpoW5nqiCxVqfD1/PD++oiQllHIKEsylRYOfP/opH/s+1C2pnVYH5vN2/3T5+blN61eDT6jd7oYtxJhshLZI4eaOMqixqzG8ZlcJTtXIyryBDeGrKFQZ+WlVS3HNvVhunob6M1ql2NDS7+oJ9LpN6ehLDj5o9LhdR7DnpNUXE2mnRGdFphHFLMONJOcqLz853D/MWxlnWhU5tvOHT3WwEUmDixkuigamBj1iYkcp2fZyI68IISy/AYIFKRp+AIAAA==\",\"id\":\"case10a:3\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case10b\",\"channel\":\"27484154\",\"messages\":[\"not an object\",{\"id\":\"case10b:1\"},{\"id\":\"case10b:2\",\"data\":\"H4sIAAAAAAACA5VRS07DMBC9y7BNkBunTemSlqAigSqVsncSNzJKnGA7qKXKptsegCOw4wTcBoQ4BnaSpilswAt/3vi9mXmzAbXOKYywBWGWppSraxnDaAMpEQ8FpeZa/0AW5BnjSt9KCwIiBImPw2FWVGELmJzyJeNM6cCSJJIeuBZwkmoYwALCWUoUy/h0UgN0lTNBb5n5YLIwOWFCrVuR5r2QVHQwX5Aiat+CxlpR613NtGJbnKQ8qoV73hka4IGLUK/vWZDQR5rAyHX3lemO6EqXCl8v24+3Z+waGY2MsyTTaeHE988uvHPfh7I1rcP6fN29b3e/OfVq8Dl7MpW4lQJXlcKBGRrWOIsamxqv52qdHPyMmMwT0lixgUKflYuoWo5jm8N2zTY0G2qX40BLv6ln0ek0Z6EqBP2j0ul9HsORh0zeTWed4VwWRESM8A40V4LqvOLnWP8xZu2bbFQW+84dM9DAxTYJELZdHA1tgj1qY8fpox7uRYMghLL8Bkm3PeDyAgAA\"}]}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case10c\",\"channel\":\"27484154\",\"messages\":\"not a list\"}"
+        }
+      ]
+    },
+    {
+      "name": "protocol messages: connection, attach, heartbeats and other channels",
+      "frames": [
+        {
+          "text": "{\"action\":4,\"connectionId\":\"AAAAAAAAAA\",\"connectionDetails\":{\"connectionKey\":\"aaaaaaaaaaaaaa!AAAAAAAAAA-aaaaaa\",\"maxIdleInterval\":15000}}"
+        },
+        {
+          "text": "{\"action\":11,\"channel\":\"27484154\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"flags\":786432}"
+        },
+        {
+          "text": "{\"action\":11,\"channel\":\"999999999999\",\"flags\":786433}",
+          "note": "another channel"
+        },
+        {
+          "text": "{\"action\":16,\"channel\":\"27484154\",\"channelSerial\":\"aaaaaaaa:\",\"presence\":[]}",
+          "note": "SYNC"
+        },
+        {
+          "text": "{\"action\":0}"
+        },
+        {
+          "text": "{\"action\":15,\"id\":\"case11a\",\"channel\":\"999999999999\",\"channelSerial\":\"01790636400123-000@4abSYNTHETIC000000000\",\"timestamp\":1790636400123,\"messages\":[{\"action\":0,\"data\":\"H4sIAAAAAAACA5VRS07DMBC9y7BNUBon/S1pCSoSqFIpezdxK6PECbaDWqosgA0SB+AECFZI7LkNVIJbYCdpmpYNeOHPG783M2+WIBcJgS4ywI+jiDB5ImbQXUKE+WVKiL4WPywDkpgyqW6ZARPMOZ5th/04zcMGUDFgU8qoVIEpDgXZcA1gOFIwgAGY0QhLGrNBvwDIPKGcnFH9QWehok+5XFQi5XssCK9hHsdpUL05mSlFpXc8VIpVcYKwoBButDpWEzUdy2q4bQNCckVC6DruujLVEZmrUuHr+fbz/RG5WkYhvTiMVVrY87zOYevA8yCrTKuxVvdPHzev33cvq7eH38xilfiIXut6nFyHyVxnl+9rbi8OSstK30dyEW68DahIQlzasoRUnbmjVr5sZOrDdPTW1ptVLRtBRT8t5lLrOqG+TDn5o9L+RTKDLT+pOB8Ma4M6SjEPKGY1aCQ5UXn57oj/MXLlnihVxuvObT3ciYNMPLGQ6aCgbWLUIiaybddqoEbQnPiQZT9BW/nj/gIAAA==\",\"id\":\"case11a:0\"}]}",
+          "note": "another channel"
+        },
+        {
+          "b64": "eyJhY3Rpb24iOjE1LCJpZCI6ImNhc2UxMWIiLCJjaGFubmVsIjoiMjc0ODQxNTQiLCJjaGFubmVsU2VyaWFsIjoiMDE3OTA2MzY0MDAxMjMtMDAwQDRhYlNZTlRIRVRJQzAwMDAwMDAwMCIsInRpbWVzdGFtcCI6MTc5MDYzNjQwMDEyMywibWVzc2FnZXMiOlt7ImFjdGlvbiI6MCwiZGF0YSI6Ikg0c0lBQUFBQUFBQ0E1VlJTMDdETUJDOXk3Qk5VQktuNldkSlMxQ1JRSlVLN04zRXJZd1NKOWdPYXFteWFYZXMySEVCSkNUT3dHM0NnbU5nSjJtYWxnMTQ0YzhidnpjemI5WWdWeW1CQVRJZ1NPS1lNSGtsRmpCWVE0ejVRMGFJdmxZL0xBUFNoREtwYnJrQk04dzVYaHlHZ3lRcnd3WlFNV1p6eXFoVWdUbU9CTmx6RFdBNFZqQ0FBWmpSR0V1YXNQR29Bc2d5cFp6Y1VQMUJaNkZpUkxsY05TTDErMVlRM3NKOGpyT3dlWE95VUlwSzczS2lGSnZpQkdGaEpXeDMrNWFIUE5leTdFN2ZnSWc4a2dnR3JyZXJUSFZFbHFwVStIN2ZmSDIrSWsvTEtHU1lSSWxLQ3llKzN6L3ZudmsrNUkxcExWYXhmU2syYjhYMnVkaCsvR1pXcThhbjlFblg0NVk2VEpZNngveEFjNGRKV0Z0Vyt6NlZxMmp2YlVoRkd1SGFsalZrNml3ZHRjcmx1S1krVEZkdlBiMVp6WEpjYU9qWDFWeGFYYWMwa0JrbmYxUTZ2VThYY09BbkZYZmpTV3RRRnhubUljV3NCVTBsSnlvdlB4N3hQMGF1M0JPMXl1MnVjMGNQZCtZaUU4OHNaTG9vN0prWWRZbUpIS2RqMmNnT3ZWa0FlZjRENjNmVlZQNENBQUE9IiwiaWQiOiJjYXNlMTFiOjAifV19",
+          "note": "a binary frame of UTF-8 JSON"
+        },
+        {
+          "text": "not json"
+        },
+        {
+          "text": "[1,2,3]"
+        }
+      ]
+    },
+    {
+      "name": "protocol messages: refusals, detaches and re-authorisation",
+      "frames": [
+        {
+          "text": "{\"action\":9,\"error\":{\"message\":\"Key/token status changed (expire)\",\"code\":40142,\"statusCode\":401}}",
+          "note": "a token error of the connection"
+        },
+        {
+          "text": "{\"action\":9,\"error\":{\"message\":\"token invalid - could not decode legacy token: invalid token size\",\"href\":\"https://help.ably.io/error/40101\",\"code\":40101,\"statusCode\":401},\"timestamp\":1790636400123}",
+          "note": "a made-up token (probe of 2026-09-28)"
+        },
+        {
+          "text": "{\"action\":9,\"error\":{\"message\":\"No application found with id AAAAAA\",\"code\":40400,\"statusCode\":404}}",
+          "note": "a made-up app id (probe of 2026-09-28)"
+        },
+        {
+          "text": "{\"action\":9,\"channel\":\"27484154\",\"error\":{\"message\":\"Channel denied\",\"code\":40160,\"statusCode\":401}}"
+        },
+        {
+          "text": "{\"action\":9,\"channel\":\"999999999999\",\"error\":{\"code\":40160}}",
+          "note": "another channel's error"
+        },
+        {
+          "text": "{\"action\":6,\"error\":{\"message\":\"Token expired\",\"code\":40142,\"statusCode\":401}}"
+        },
+        {
+          "text": "{\"action\":6}",
+          "note": "DISCONNECTED without an error"
+        },
+        {
+          "text": "{\"action\":6,\"error\":{\"message\":\"Connection disconnected\",\"code\":80003,\"statusCode\":400}}"
+        },
+        {
+          "text": "{\"action\":13,\"channel\":\"27484154\"}",
+          "note": "DETACHED without an error"
+        },
+        {
+          "text": "{\"action\":13,\"channel\":\"27484154\",\"error\":{\"code\":90198,\"message\":\"Channel detached\"}}"
+        },
+        {
+          "text": "{\"action\":17}",
+          "note": "AUTH"
+        },
+        {
+          "text": "{\"action\":9}",
+          "note": "ERROR without an error object"
+        },
+        {
+          "text": "{\"action\":7}",
+          "note": "CLOSED"
+        }
+      ]
+    }
+  ]
+}

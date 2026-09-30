@@ -1,0 +1,1168 @@
+{
+  "generator": "fixtures/17live/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) SeventeenliveProtocol (auth, heartbeatInterval, headers, token, endpoint, attach, payload, decode) over every received socket frame (copied as it was; the event classes cut down to their fields)",
+  "value": {
+    "roomId": "27484154",
+    "token": "qfFN0x.5uyLVut3OmtAx7lB1eD7XgY2Cs0QF9GQvB1sES4JvGXGCc7m1ZKUwuAWKjR0_a34qpM8I93zVxYOvWOoW1b1hFWWkfLG5IWDXP404XrXrH0TVPSoWMQIcv4HrTWwI7qwI",
+    "connector": {
+      "authUrl": "https://api-dsa.17app.co/api/v1/messenger/auth",
+      "authMethod": "POST",
+      "authHeaders": {
+        "origin": "https://17.live",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "referer": "https://17.live/"
+      },
+      "authBody": "{}",
+      "endpoint": "wss://17media.realtime.ably.net/?access_token=qfFN0x.5uyLVut3OmtAx7lB1eD7XgY2Cs0QF9GQvB1sES4JvGXGCc7m1ZKUwuAWKjR0_a34qpM8I93zVxYOvWOoW1b1hFWWkfLG5IWDXP404XrXrH0TVPSoWMQIcv4HrTWwI7qwI&format=json&heartbeats=true&v=3",
+      "handshakeHeaders": {
+        "origin": "https://17.live",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "attach": "{\"action\":10,\"channel\":\"27484154\"}",
+      "heartbeatSeconds": 15
+    },
+    "frames": [
+      {
+        "frame": 2,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 3,
+        "joined": true,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 4,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 5,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:wT5HvK9EYA1S:0",
+            "userId": "00000001-0000-4000-8000-000000000001",
+            "userName": "观众1",
+            "giftId": "2609_jp_cp_akanya",
+            "giftName": "2609_jp_cp_akanya",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 6,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:80YGf7B4aMCp:0",
+            "userId": "00000002-0000-4000-8000-000000000002",
+            "userName": "观众2",
+            "giftId": "2609_jp_cp_akanya",
+            "giftName": "2609_jp_cp_akanya",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 7,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:gdRUIOaDZ19f:0",
+            "userId": "00000002-0000-4000-8000-000000000002",
+            "userName": "观众2",
+            "giftId": "2609_jp_cp_akanya",
+            "giftName": "2609_jp_cp_akanya",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 8,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:JZ7GkCZqiWdf:0",
+            "userId": "00000001-0000-4000-8000-000000000001",
+            "userName": "观众1",
+            "giftId": "2305_jp_virtual_ticket",
+            "giftName": "2305_jp_virtual_ticket",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 9,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:FgO5/2HUshsa:0",
+            "userId": "00000002-0000-4000-8000-000000000002",
+            "userName": "观众2",
+            "giftId": "2609_jp_cp_akanya",
+            "giftName": "2609_jp_cp_akanya",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 10,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:MliWpcwybhW9:0",
+            "userId": "00000002-0000-4000-8000-000000000002",
+            "userName": "观众2",
+            "giftId": "2305_jp_virtual_ticket",
+            "giftName": "2305_jp_virtual_ticket",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 11,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 12,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 1196
+          }
+        ]
+      },
+      {
+        "frame": 13,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 14,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 15,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 16,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 17,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 18,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:K8j+ad+c7Sfq:0",
+            "sentAt": 1790636340129,
+            "userId": "00000004-0000-4000-8000-000000000004",
+            "userName": "观众4",
+            "text": "おはようございます"
+          }
+        ]
+      },
+      {
+        "frame": 19,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 20,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:rZ7zVy/+r9cD:0",
+            "sentAt": 1790636342063,
+            "userId": "00000006-0000-4000-8000-000000000006",
+            "userName": "观众6",
+            "text": "@观众1 安静にしてゆっくりして下さいね🥺💕︎💕︎"
+          }
+        ]
+      },
+      {
+        "frame": 21,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 22,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:nDJ7+Pa43VZl:0",
+            "sentAt": 1790636351145,
+            "userId": "00000001-0000-4000-8000-000000000001",
+            "userName": "观众1",
+            "text": "全治3ヶ月です"
+          }
+        ]
+      },
+      {
+        "frame": 23,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:LAEwEosRtkIJ:0",
+            "sentAt": 1790636354562,
+            "userId": "00000005-0000-4000-8000-000000000005",
+            "userName": "观众5",
+            "text": "花音ちゃん仕事行くわまた後で😆"
+          }
+        ]
+      },
+      {
+        "frame": 24,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:0AXqtocQmDSM:0",
+            "sentAt": 1790636358257,
+            "userId": "00000002-0000-4000-8000-000000000002",
+            "userName": "观众2",
+            "text": "(❁ᴗ͈ˬᴗ͈)"
+          }
+        ]
+      },
+      {
+        "frame": 25,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 26,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 1186
+          }
+        ]
+      },
+      {
+        "frame": 27,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:4+kRcVe3k4Qw:0",
+            "sentAt": 1790636361080,
+            "userId": "20015b43-ab03-43d8-a37e-32250131d6bc",
+            "userName": "🌷花音🦋💜🐝Kanon🌺",
+            "text": "@观众4 ~~~ヾ(＾∇＾)おはよー♪"
+          }
+        ]
+      },
+      {
+        "frame": 28,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 29,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 30,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 1153
+          }
+        ]
+      },
+      {
+        "frame": 31,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 32,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:cqJJn9jyhdl9:0",
+            "sentAt": 1790636373682,
+            "userId": "00000008-0000-4000-8000-000000000008",
+            "userName": "观众8",
+            "text": "あ"
+          }
+        ]
+      },
+      {
+        "frame": 33,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 34,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:c6jJMELi1KAs:0",
+            "sentAt": 1790636375980,
+            "userId": "20015b43-ab03-43d8-a37e-32250131d6bc",
+            "userName": "🌷花音🦋💜🐝Kanon🌺",
+            "text": "@观众5 ~~~ヾ(＾∇＾)おはよー♪"
+          }
+        ]
+      },
+      {
+        "frame": 35,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 36,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 37,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 38,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:s5tdZXpG0Gwq:0",
+            "sentAt": 1790636384868,
+            "userId": "20015b43-ab03-43d8-a37e-32250131d6bc",
+            "userName": "🌷花音🦋💜🐝Kanon🌺",
+            "text": "@观众3 ~~~ヾ(＾∇＾)おはよー♪"
+          }
+        ]
+      },
+      {
+        "frame": 39,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 40,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 41,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:fOk1v2zK00u4:0",
+            "sentAt": 1790636388463,
+            "userId": "00000007-0000-4000-8000-000000000007",
+            "userName": "观众7",
+            "text": "👏"
+          }
+        ]
+      },
+      {
+        "frame": 42,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 43,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 44,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 45,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 1188
+          }
+        ]
+      },
+      {
+        "frame": 46,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 47,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 48,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 49,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 50,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:L6AGaOJEvihx:0",
+            "sentAt": 1790636394552,
+            "userId": "00000007-0000-4000-8000-000000000007",
+            "userName": "观众7",
+            "text": "👏"
+          }
+        ]
+      },
+      {
+        "frame": 51,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:dXSNr3uSYsyE:0",
+            "sentAt": 1790636394982,
+            "userId": "20015b43-ab03-43d8-a37e-32250131d6bc",
+            "userName": "🌷花音🦋💜🐝Kanon🌺",
+            "text": "@观众7 ~~~ヾ(＾∇＾)おはよー♪"
+          }
+        ]
+      },
+      {
+        "frame": 52,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 53,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 54,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 55,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 1235
+          }
+        ]
+      },
+      {
+        "frame": 56,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 57,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 1127
+          }
+        ]
+      },
+      {
+        "frame": 58,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:evV2B4/jJUc8:0",
+            "sentAt": 1790636403476,
+            "userId": "00000009-0000-4000-8000-000000000009",
+            "userName": "观众9",
+            "text": "おはようございます😊"
+          }
+        ]
+      },
+      {
+        "frame": 59,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 60,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:Uo8BWCawq5xA:0",
+            "sentAt": 1790636404758,
+            "userId": "00000007-0000-4000-8000-000000000007",
+            "userName": "观众7",
+            "text": "👏"
+          }
+        ]
+      },
+      {
+        "frame": 61,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:cetZHJ2uiAXh:0",
+            "sentAt": 1790636406820,
+            "userId": "20015b43-ab03-43d8-a37e-32250131d6bc",
+            "userName": "🌷花音🦋💜🐝Kanon🌺",
+            "text": "（チビ花音）\n✨🍨♪⑅💛*⋆｡🍨✨˚✩.💛*･✨🍨♪⑅💛*⋆｡˚🍨✨✩.💛*･🍨✨♪⑅💛*⋆｡✨🍨˚✩.💛*･🍨✨"
+          }
+        ]
+      },
+      {
+        "frame": 62,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 63,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:1FycD9zt35rN:0",
+            "userId": "00000009-0000-4000-8000-000000000009",
+            "userName": "观众9",
+            "giftId": "daily_signin_gift3",
+            "giftName": "daily_signin_gift3",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 64,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:ZelWRY3ebLw4:0",
+            "userId": "00000009-0000-4000-8000-000000000009",
+            "userName": "观众9",
+            "giftId": "daily_signin_gift3",
+            "giftName": "daily_signin_gift3",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 65,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:yzSgrsWHt9iw:0",
+            "userId": "00000008-0000-4000-8000-000000000008",
+            "userName": "观众8",
+            "giftId": "2609_jp_cp_akanya",
+            "giftName": "2609_jp_cp_akanya",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 66,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:qX0zx/2h0RHB:0",
+            "userId": "00000001-0000-4000-8000-000000000001",
+            "userName": "观众1",
+            "giftId": "2011_jp_flash_diamond",
+            "giftName": "2011_jp_flash_diamond",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 67,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:FjKY20bPIkf3:0",
+            "userId": "00000008-0000-4000-8000-000000000008",
+            "userName": "观众8",
+            "giftId": "2609_jp_cp_akanya",
+            "giftName": "2609_jp_cp_akanya",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 68,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:M7TIJZzayBcJ:0",
+            "userId": "00000008-0000-4000-8000-000000000008",
+            "userName": "观众8",
+            "giftId": "gift_cat_2_ops",
+            "giftName": "gift_cat_2_ops",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 69,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:6kbXqGY2QeP0:0",
+            "userId": "00000001-0000-4000-8000-000000000001",
+            "userName": "观众1",
+            "giftId": "gift_rabbit_ops_1_pt",
+            "giftName": "gift_rabbit_ops_1_pt",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 70,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:5GwcwSCcZyJW:0",
+            "userId": "00000008-0000-4000-8000-000000000008",
+            "userName": "观众8",
+            "giftId": "2305_jp_virtual_ticket",
+            "giftName": "2305_jp_virtual_ticket",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 71,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 72,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 73,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:tWM6t46UUjfs:0",
+            "sentAt": 1790636421948,
+            "userId": "20015b43-ab03-43d8-a37e-32250131d6bc",
+            "userName": "🌷花音🦋💜🐝Kanon🌺",
+            "text": "@观众9 ~~~ヾ(＾∇＾)おはよー♪"
+          }
+        ]
+      },
+      {
+        "frame": 74,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 75,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 76,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 77,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 78,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:SFAmcUiauiw2:0",
+            "sentAt": 1790636435804,
+            "userId": "00000009-0000-4000-8000-000000000009",
+            "userName": "观众9",
+            "text": "@🌷花音🦋💜🐝Kanon🌺 おはようございます😊"
+          }
+        ]
+      },
+      {
+        "frame": 79,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 80,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:Ab+AZE/AdvuC:0",
+            "sentAt": 1790636440890,
+            "userId": "20015b43-ab03-43d8-a37e-32250131d6bc",
+            "userName": "🌷花音🦋💜🐝Kanon🌺",
+            "text": "@观众1 ~~~ヾ(＾∇＾)おはよー♪"
+          }
+        ]
+      },
+      {
+        "frame": 81,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 82,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 1153
+          }
+        ]
+      },
+      {
+        "frame": 83,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 84,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 85,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 86,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 87,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:u4Ox10ur+LCi:0",
+            "userId": "00000015-0000-4000-8000-000000000015",
+            "userName": "观众21",
+            "giftId": "2609_jp_cp_akanya",
+            "giftName": "2609_jp_cp_akanya",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 88,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:Ri41ZwyfWKge:0",
+            "userId": "00000015-0000-4000-8000-000000000015",
+            "userName": "观众21",
+            "giftId": "2609_jp_cp_akanya",
+            "giftName": "2609_jp_cp_akanya",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 89,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:1yNcfbxKgKCY:0",
+            "userId": "00000015-0000-4000-8000-000000000015",
+            "userName": "观众21",
+            "giftId": "2609_jp_cp_akanya",
+            "giftName": "2609_jp_cp_akanya",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 90,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:v4qJSyMxhdHc:0",
+            "sentAt": 1790636459113,
+            "userId": "00000009-0000-4000-8000-000000000009",
+            "userName": "观众9",
+            "text": "@🌷花音🦋💜🐝Kanon🌺 おはようございます😊✨"
+          }
+        ]
+      },
+      {
+        "frame": 91,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 92,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:otPcQCVmIznS:0",
+            "sentAt": 1790636460838,
+            "userId": "00000006-0000-4000-8000-000000000006",
+            "userName": "观众6",
+            "text": "ないふる👏🏻🩵👏🏻👏🏻🩷️👏🏻👏🏻🩵👏🏻( 'ω'ﾉﾉ"
+          }
+        ]
+      },
+      {
+        "frame": 93,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:H6Qgqqpz7Wew:0",
+            "sentAt": 1790636461524,
+            "userId": "00000001-0000-4000-8000-000000000001",
+            "userName": "观众1",
+            "text": "おはようございます"
+          }
+        ]
+      },
+      {
+        "frame": 94,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 1161
+          }
+        ]
+      },
+      {
+        "frame": 95,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 96,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 97,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:90hHqeXsJhhb:0",
+            "sentAt": 1790636475771,
+            "userId": "20015b43-ab03-43d8-a37e-32250131d6bc",
+            "userName": "🌷花音🦋💜🐝Kanon🌺",
+            "text": "@观众21 ~~~ヾ(＾∇＾)おはよー♪"
+          }
+        ]
+      },
+      {
+        "frame": 98,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 99,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 100,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 101,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:e8Lgk83ivkCO:0",
+            "sentAt": 1790636489374,
+            "userId": "00000015-0000-4000-8000-000000000015",
+            "userName": "观众21",
+            "text": "@🌷花音🦋💜🐝Kanon🌺 ヤッホー👋😃"
+          }
+        ]
+      },
+      {
+        "frame": 102,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 103,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 1048
+          }
+        ]
+      },
+      {
+        "frame": 104,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 105,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 106,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 107,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:YKTjE6GIsyP8:0",
+            "sentAt": 1790636509839,
+            "userId": "00000008-0000-4000-8000-000000000008",
+            "userName": "观众8",
+            "text": "お疲れさまでした"
+          }
+        ]
+      },
+      {
+        "frame": 108,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:xx4bgS84tLd5:0",
+            "sentAt": 1790636513523,
+            "userId": "00000009-0000-4000-8000-000000000009",
+            "userName": "观众9",
+            "text": "お疲れ様でした🙇🏼‍♀️"
+          }
+        ]
+      },
+      {
+        "frame": 109,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 110,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "17live:wOPxdIDS3NgI:0",
+            "userId": "00000004-0000-4000-8000-000000000004",
+            "userName": "观众4",
+            "giftId": "2305_jp_virtual_ticket",
+            "giftName": "2305_jp_virtual_ticket",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "frame": 111,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 112,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 113,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "17live:qJy6U6tBpZMA:0",
+            "sentAt": 1790636526712,
+            "userId": "20015b43-ab03-43d8-a37e-32250131d6bc",
+            "userName": "🌷花音🦋💜🐝Kanon🌺",
+            "text": "（チビ花音）\n✨🩵✨ ♬︎.*·̩͙•*🩷¨*✨¸¸♬💜花音🐬•*¨*•.¸¸☆*･ﾟ🌟•*¨*•.¸¸☆💓✩.*˚💓✩.*˚💓✩.*カノン♬*°♪.•*かのん✨.ﾟ･*..☆.｡.:*✨🩵✨ ♬︎.*·̩͙•*🩷¨*✨¸¸♬💜"
+          }
+        ]
+      }
+    ]
+  }
+}

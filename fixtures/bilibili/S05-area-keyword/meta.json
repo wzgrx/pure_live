@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "platform": "bilibili",
+  "sample": "S05-area-keyword",
+  "capturedAt": "2026-09-30T20:33:08.796251Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/web-interface/search/type?context&search_type=live&cover_type=user_cover&order&keyword=%E8%8B%B1%E9%9B%84%E8%81%94%E7%9B%9F&category_id&__refresh__&_extra&highlight=0&single_column=0&page=1&page_size=30",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://live.bilibili.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-bili-trace-id": "45df5d7638c3bcea4e3aa485e76abd72",
+      "cache-control": "no-cache",
+      "transfer-encoding": "chunked",
+      "date": "Wed, 30 Sep 2026 20:33:09 GMT",
+      "content-encoding": "gzip",
+      "access-control-expose-headers": "X-Cache-Webcdn",
+      "content-type": "application/json; charset=utf-8",
+      "bili-trace-id": "4e3aa485e76abd72",
+      "x-bili-metadata-ip-region": "CN",
+      "x-cache-webcdn": "BYPASS from blzone02",
+      "bili-status-code": "0",
+      "cpu_usage": "83",
+      "expires": "Wed, 30 Sep 2026 20:33:08 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "672fff2e4684f3be6f3a3adf99c416eff6e4bc6de012157f4d01053aca0c0821",
+    "length": 33516
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "data.seid",
+      "rule": "synthetic, same shape"
+    }
+  ],
+  "tool": "M4.D live check (scratch recorder), 2026-10-01"
+}

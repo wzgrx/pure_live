@@ -197,7 +197,8 @@ sealed class BilibiliDanmakuItem {
   const new();
 }
 
-/// A message to report: chat, super chat or an audience figure.
+/// A message to report: chat, super chat, audience figure, retraction or
+/// notice.
 final class BilibiliDanmakuMessage extends BilibiliDanmakuItem {
   /// Creates the item.
   const new(this.message);
@@ -415,14 +416,85 @@ abstract final class BilibiliDanmakuProtocol {
     final ack = acknowledgement(notice);
     if (ack != null) items.add(BilibiliDanmakuAck(ack));
     final cmd = '${notice['cmd']}';
-    final message = cmd.contains('DANMU_MSG')
-        ? _chat(notice)
-        : switch (cmd) {
-            'WATCHED_CHANGE' => _watched(notice),
-            'SUPER_CHAT_MESSAGE' => _superChat(notice),
-            _ => null,
-          };
-    if (message != null) items.add(BilibiliDanmakuMessage(message));
+    // RECALL_DANMU_MSG contains DANMU_MSG: match it before the chat.
+    final messages = switch (cmd) {
+      'RECALL_DANMU_MSG' => [?_recall(notice)],
+      _ when cmd.contains('DANMU_MSG') => [?_chat(notice)],
+      'WATCHED_CHANGE' => [?_watched(notice)],
+      'SUPER_CHAT_MESSAGE' => [?_superChat(notice)],
+      'SUPER_CHAT_MESSAGE_DELETE' => _superChatDeleted(notice),
+      'WARNING' => [_notify(notice, warningNotice)],
+      'CUT_OFF' => [_notify(notice, cutOffNotice)],
+      _ => const <LiveMessage>[],
+    };
+    for (final message in messages) {
+      items.add(BilibiliDanmakuMessage(message));
+    }
+  }
+
+  /// Start of the notice of `WARNING` (a moderator warned the room), before
+  /// the platform's reason.
+  static const String warningNotice = '直播间收到警告';
+
+  /// Start of the notice of `CUT_OFF` (a moderator cut the stream off),
+  /// before the platform's reason.
+  static const String cutOffNotice = '直播被切断';
+
+  /// `RECALL_DANMU_MSG` (the web player's `withdrawUserDanmaku`):
+  /// `recall_type` 2 takes back every chat of `data.uinfo.uid` (else
+  /// `data.target_id`), 3 the whole chat. Other types (0 nothing, 1 a single
+  /// chat the web player does not handle here) and a uid of 0 (guests see
+  /// every uid as 0) give nothing.
+  static LiveMessage? _recall(Map<String, dynamic> notice) {
+    final data = notice['data'];
+    if (data is! Map) return null;
+    final LiveRetraction target;
+    switch (jsonInt(data['recall_type'])) {
+      case 2:
+        final uinfo = data['uinfo'];
+        final uid = (uinfo is Map ? jsonInt(uinfo['uid']) : null) ?? jsonInt(data['target_id']);
+        if (uid == null || uid <= 0) return null;
+        target = LiveRetraction.user('$uid');
+      case 3:
+        target = const LiveRetraction.all();
+      default:
+        return null;
+    }
+    return _retraction(target);
+  }
+
+  /// `SUPER_CHAT_MESSAGE_DELETE`: the super chats of `data.ids` were taken
+  /// down (refunded or removed); one retraction each, by the id
+  /// [_superChat] gives them.
+  static List<LiveMessage> _superChatDeleted(Map<String, dynamic> notice) {
+    final data = notice['data'];
+    if (data is! Map) return const [];
+    return [
+      for (final raw in data['ids'] is List ? data['ids'] as List : const [])
+        if (jsonString(raw) case final id?) _retraction(LiveRetraction.message(id)),
+    ];
+  }
+
+  /// A retraction: no id of its own, no sender.
+  static LiveMessage _retraction(LiveRetraction target) => LiveMessage(
+    type: LiveMessageType.retraction,
+    userName: '',
+    message: '',
+    color: LiveMessageColor.white,
+    data: target,
+  );
+
+  /// A system notice: [lead], then the platform's reason `msg` when there is
+  /// one.
+  static LiveMessage _notify(Map<String, dynamic> notice, String lead) {
+    final reason = jsonString(notice['msg'])?.trim() ?? '';
+    return LiveMessage(
+      type: LiveMessageType.notice,
+      userName: '',
+      message: reason.isEmpty ? lead : '$lead：$reason',
+      color: LiveMessageColor.white,
+      data: LiveNoticeKind.system,
+    );
   }
 
   /// `DANMU_MSG`: text `info[1]`, colour `info[0][3]` (0 is white), time
@@ -510,7 +582,8 @@ abstract final class BilibiliDanmakuProtocol {
   /// `SUPER_CHAT_MESSAGE`: `data` read like an item of the snapshot
   /// `BilibiliApi.superChats` (M4.1) reads, so both give the same
   /// [LiveSuperChatMessage.messageId] (`data.id`) and the room page merges
-  /// them.
+  /// them. The message carries the same id, which a later
+  /// `SUPER_CHAT_MESSAGE_DELETE` takes back.
   static LiveMessage? _superChat(Map<String, dynamic> notice) {
     final data = notice['data'];
     if (data is! Map<String, dynamic>) return null;
@@ -523,13 +596,15 @@ abstract final class BilibiliDanmakuProtocol {
     final user = data['user_info'];
     final userInfo = user is Map<String, dynamic> ? user : null;
     final face = normalizeImageUrl(userInfo?['face']);
+    final id = jsonString(data['id']) ?? '';
     return LiveMessage(
       type: LiveMessageType.superChat,
       userName: 'SUPER_CHAT_MESSAGE',
       message: 'SUPER_CHAT_MESSAGE',
       color: LiveMessageColor.white,
+      messageId: id,
       data: LiveSuperChatMessage(
-        messageId: jsonString(data['id']) ?? '',
+        messageId: id,
         userName: jsonString(userInfo?['uname']) ?? '',
         face: face.isEmpty ? '' : '$face@200w.jpg',
         message: jsonString(data['message']) ?? '',

@@ -25,6 +25,7 @@ const _danmu = '/xlive/web-room/v1/index/getDanmuInfo';
 const _ranked = '/room/v1/Area/getListByAreaID';
 const _feed = '/xlive/web-interface/v1/webMain/getMoreRecList';
 const _playInfo = '/xlive/web-room/v2/index/getRoomPlayInfo';
+const _areaRooms = '/room/v1/area/getRoomList';
 
 ReplaySample _synthetic(String url, Object body, {int status = 200, Map<String, List<String>> headers = const {}}) =>
     ReplaySample(
@@ -261,13 +262,33 @@ void main() {
       expect(await setup.site.getCategories(1, 20), isNotEmpty);
     });
 
-    test('area rooms are signed with w_webid; a guest -352 surfaces as RiskControl after one renewal', () async {
-      final setup = _setup(['S02-signed-risk352']);
+    test('M4.D area rooms: the unsigned getRoomList answers, nothing is signed', () async {
+      final setup = _setup(['S17-area-page1']);
+      final rooms = await setup.site.getCategoryRooms(
+        const LiveArea(platform: 'bilibili', areaType: '2', areaId: '86'),
+        pageSize: 99,
+      );
+      expect(rooms, hasLength(30));
+      expect(_paths(setup.http), [_spi, _areaRooms], reason: 'the guest buvid, then no nav, lol or signed list');
+      expect(setup.http.requests.last.url.queryParameters['page_size'], '30');
+    });
+
+    test('area rooms fall back to the signed list with w_webid; both failing report the first error', () async {
+      const url =
+          'https://api.live.bilibili.com$_areaRooms?platform=web&parent_area_id=2&area_id=86&sort_type=online&page=1&page_size=30';
+      final setup = _setup(
+        ['S02-signed-risk352'],
+        script: {
+          _areaRooms: [
+            _synthetic(url, {'code': 1, 'message': 'gone'}),
+          ],
+        },
+      );
       await expectLater(
         setup.site.getCategoryRooms(const LiveArea(platform: 'bilibili', areaType: '2', areaId: '86')),
-        throwsA(isA<RiskControl>()),
+        throwsA(isA<ApiChanged>()),
       );
-      expect(_count(setup.http, _lol), 2, reason: 'the access id is renewed too');
+      expect(_count(setup.http, _lol), 2, reason: 'the signed list renewed its access id after -352');
       expect(
         setup.http.requests.firstWhere((r) => r.url.path.endsWith('second/getList')).url.queryParameters,
         contains('w_webid'),

@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "platform": "bilibili",
+  "sample": "S17-area-page1",
+  "capturedAt": "2026-09-30T20:37:14.576159Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.live.bilibili.com/room/v1/area/getRoomList?platform=web&parent_area_id=2&area_id=86&sort_type=online&page_size=30&page=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://live.bilibili.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    }
+  },
+  "raw": {
+    "sha256": "91cbc9790135489b311a76e2d9bf1f73abefd5da18cf24daf05e1d4b1629361c",
+    "length": 25239
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "data[].session_id",
+      "rule": "synthetic, same shape"
+    }
+  ],
+  "tool": "M4.D live check (scratch recorder), 2026-10-01"
+}

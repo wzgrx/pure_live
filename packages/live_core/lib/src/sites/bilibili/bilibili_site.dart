@@ -237,23 +237,50 @@ final class BilibiliSite extends LiveSite
     return BilibiliApi.categories(response.text, status: response.status);
   }
 
-  /// Signed, with `w_webid`. Guests currently get -352 on every page, which
-  /// surfaces as `RiskControl` after the one renewal.
+  /// The unsigned `room/v1/area/getRoomList` ([pageSize] limited to 1–30),
+  /// then the signed `second/getList` (with `w_webid`) as a fallback. The
+  /// signed list is what 3.x used, but guests get -352 on every page of it
+  /// (seen since M4.1), so an area page never opened (M4.D). `RateLimited` is
+  /// not retried; when the fallback fails too, the first list's error is
+  /// reported.
   @override
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
-    final result = await _signed(
-      '/xlive/web-interface/v1/second/getList',
-      {
-        'platform': 'web',
-        'parent_area_id': category.areaType,
-        'area_id': category.areaId,
-        'sort_type': 'online',
-        'page': '${page < 1 ? 1 : page}',
-      },
-      (response) => BilibiliApi.roomList(response.text, status: response.status),
-      webId: true,
-    );
-    return result.value.rooms;
+    final number = '${page < 1 ? 1 : page}';
+    try {
+      final response = await _unsigned(
+        Uri.https(_liveApi, '/room/v1/area/getRoomList', {
+          'platform': 'web',
+          'parent_area_id': category.areaType,
+          'area_id': category.areaId,
+          'sort_type': 'online',
+          'page': number,
+          'page_size': '${pageSize.clamp(1, 30)}',
+        }),
+      );
+      return BilibiliApi.roomList(response.text, status: response.status).rooms;
+    } on RateLimited {
+      rethrow;
+    } on SiteError catch (first) {
+      try {
+        final result = await _signed(
+          '/xlive/web-interface/v1/second/getList',
+          {
+            'platform': 'web',
+            'parent_area_id': category.areaType,
+            'area_id': category.areaId,
+            'sort_type': 'online',
+            'page': number,
+          },
+          (response) => BilibiliApi.roomList(response.text, status: response.status),
+          webId: true,
+        );
+        return result.value.rooms;
+      } on RateLimited {
+        rethrow;
+      } on SiteError {
+        throw first;
+      }
+    }
   }
 
   /// The anonymous ranked list (`sort=online`), tried twice 180 ms apart,

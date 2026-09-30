@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "case": "S18-gift",
+  "room": "huya:60066",
+  "danmakuKeys": {
+    "uid": "1867489698"
+  },
+  "capturedAt": "2026-09-30T20:35:57Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "conn": "A",
+      "url": "wss://wsapi.huya.com",
+      "headers": {}
+    }
+  ],
+  "frames": 27,
+  "raw": {
+    "sha256": "799c91ecc4628f5b203a987232c0dd5cb5e7c495617efd8ff5e387a4c3045c5c",
+    "length": 272297
+  },
+  "scrubbed": [
+    {
+      "where": "6501 tag 4 (lSenderUid), tag 6 (sSenderNick)",
+      "rule": "person"
+    },
+    {
+      "where": "6501 every tag but 0, 2, 3, 5, 6, 8, 9, 20, 24, 25, 39, 41 (pay id, icons, user and noble structs, effects, expand data)",
+      "rule": "dropped"
+    },
+    {
+      "where": "every frame but the gift pushes (433 frames: chats, other uris, batch pushes, register and heartbeat answers, the client's frames)",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "M4.D check (HuyaDanmakuConnection with a connector that tees the frames; no extra handshake headers)",
+  "note": "Anonymous and read-only, direct, 120 s in room 60066 (live, streamer uid 1867489698). Only the gift pushes (command 7, uri 6501 SendItemSubBroadcastPacket) are kept, re-encoded with the fields the parser reads: 0 iItemType, 2 iItemCount, 3 lPresenterUid, 5 sPresenterNick, 6 sSenderNick, 8 iItemCountByGroup, 9 iItemGroup (the combo counter), 20 sPropsName, 24 lRoomId, 25 lHomeOwnerUid, 39 lComboSeqId, 41 lPayTotal; the push keeps tag 0 and tag 5 (lMsgId). Each sender became a synthetic one (a random uid of the same length and 观众N, one sender keeping one set). t is milliseconds since the check started; capturedAt is the danmaku start (to the second)."
+}

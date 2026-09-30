@@ -229,8 +229,19 @@ final class _Failing implements LiveHttp {
   void close() {}
 }
 
-HuyaSite _site(LiveHttp http, {CookieVault? cookies, List<Uri> playConfigUrls = const []}) =>
-    HuyaSite(http, cookies: cookies, now: () => _now, random: Random(1), playConfigUrls: playConfigUrls);
+HuyaSite _site(
+  LiveHttp http, {
+  CookieVault? cookies,
+  List<Uri> playConfigUrls = const [],
+  bool Function()? preferH264,
+}) => HuyaSite(
+  http,
+  cookies: cookies,
+  now: () => _now,
+  random: Random(1),
+  playConfigUrls: playConfigUrls,
+  preferH264: preferH264,
+);
 
 MemoryCookieVault _vault(String cookie) {
   final vault = MemoryCookieVault()..set('huya', cookie);
@@ -276,6 +287,7 @@ void main() {
         expect(category.children.every((area) => area.areaType == category.id), isTrue);
       }
       expect(http.requests.map((request) => request.url.queryParameters['bussType']), ['1', '2', '8', '3']);
+      expect(http.requests.map((request) => request.headers), everyElement({'user-agent': HuyaApi.userAgent}));
     });
 
     test('one failed category fails the whole tree', () async {
@@ -342,6 +354,8 @@ void main() {
         'rows': '20',
         'start': '0',
       });
+      // Search answers a request without a User-Agent with HTTP 403 (M4.D).
+      expect(http.requests.map((request) => request.headers), everyElement({'user-agent': HuyaApi.userAgent}));
     });
 
     test('streamers: getSearchContent v=1', () async {
@@ -360,6 +374,7 @@ void main() {
         ),
       ]);
       final anchors = await _site(http).searchAnchors('lpl');
+      expect(http.requests.single.headers, {'user-agent': HuyaApi.userAgent});
       expect(anchors.single.roomId, '660000');
       expect(anchors.single.liveStatus, isTrue);
     });
@@ -618,6 +633,27 @@ void main() {
   });
 
   group('streams', () {
+    test('优先 H.264 off: FLV lines ask for HEVC (codec unknown), HLS stays on H.264; read on every open', () async {
+      var preferH264 = false;
+      final http = _Http(
+        [_patched('S05-multicdn', antiCode: _withTemplate)],
+        wup: (request, _) => _wupAnswer(request, token: _nativeToken, expireTime: 300),
+        login: (request) => _loginAnswer(request, _viewer),
+      );
+      final site = _site(http, preferH264: () => preferH264);
+      final room = await site.getRoomDetail(roomId: '660000');
+      final quality = (await site.getPlayQualities(detail: room)).first;
+      final hevc = await site.resolvePlayUrls(detail: room, quality: quality);
+      for (final line in hevc.lines) {
+        final flv = line.format == StreamFormat.flv;
+        expect(Uri.parse(line.url).queryParameters['codec'], flv ? '265' : '264');
+        expect(line.codec, flv ? isNull : 'avc');
+      }
+      preferH264 = true;
+      final avc = await site.resolvePlayUrls(detail: room, quality: quality);
+      expect(avc.lines.map((line) => Uri.parse(line.url).queryParameters['codec']), everyElement('264'));
+    });
+
     test('S05-multicdn: native FLV on every CDN, then web-signed HLS, in server order', () async {
       final http = _Http(
         [_patched('S05-multicdn', antiCode: _withTemplate)],

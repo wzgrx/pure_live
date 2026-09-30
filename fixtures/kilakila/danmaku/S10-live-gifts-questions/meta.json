@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "platform": "kilakila",
+  "case": "S10-live-gifts-questions",
+  "room": "kilakila:3152613118014",
+  "danmakuKeys": {
+    "roomId": "2269881372866773302"
+  },
+  "capturedAt": "2026-09-30T15:35:18.974688Z",
+  "route": "direct",
+  "frames": 10,
+  "raw": {
+    "sha256": "212c3ba488b0ff406a1db49b8935c7efc7c793c615a29946f1e5f3d92428234b",
+    "length": 20335279
+  },
+  "scrubbed": [
+    {
+      "where": "$.body.response.sender_info.uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.body.response.user_agent (uxid=, imei=)",
+      "rule": "device"
+    },
+    {
+      "where": "$.content.u",
+      "rule": "person"
+    },
+    {
+      "where": "$.content.n",
+      "rule": "person"
+    },
+    {
+      "where": "$.content.a",
+      "rule": "person"
+    },
+    {
+      "where": "$.content.s",
+      "rule": "secret"
+    },
+    {
+      "where": "$.content.c.giftReceiverID / giftReceiverName / receiverHeadImageUrl (when not the broadcaster)",
+      "rule": "person"
+    },
+    {
+      "where": "$.content.uc.question and $.content.c: questionUid, questionNickname, questionHeadUrl",
+      "rule": "person"
+    }
+  ],
+  "dropped": "every other frame of the broadcast (chat, room state, entries, likes, pings and pongs); the frames kept are complete",
+  "tool": "M5.F recorder: a dart:io program that joined the guest namespace of the 30 busiest broadcasts of the hot timeline for 40 minutes (2026-09-30 15:18-15:58 UTC), sent only the join and the Engine.IO ping 2 every 25 s, and kept every frame. Cut and scrubbed by a Python script that decodes each level and encodes it back as the server writes it (event: characters outside the BMP as surrogate escapes; content: slashes escaped when the recorded content escaped them), checked to give each recorded frame byte for byte before replacing anything.",
+  "note": "Ten text_message frames of one broadcast (the anchor uid 3152613118014 and its nick are public and kept): a gift of several items that is not a combo (220, isDoubleHit false, 7 x 100 red beans, price the whole send), a free combo (220 hit then its gift line 10004 with the same count), a free guard badge (220, isDoubleHit false), a paid question asked (241: price 10, goldPrice 1000; the web page ignores 241), the board cleared (301, uiType 0), a paid combo (220 hit, 3 x, price 204 = 3 x 68; its line 10004 says price 68, the price of one), the question on the board (240, uiType 2, goldPrice 1000, amount 10), and a gift without isDoubleHit from a promotion account (220). 40 minutes of this broadcast held 2,093 chats, 109 combo hits, 106 gift lines, 44 single gifts, 3 paid questions asked and 4 put on the board."
+}

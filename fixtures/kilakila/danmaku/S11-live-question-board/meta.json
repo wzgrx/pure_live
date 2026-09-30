@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "platform": "kilakila",
+  "case": "S11-live-question-board",
+  "room": "kilakila:3986696237096",
+  "danmakuKeys": {
+    "roomId": "2269530736031694969"
+  },
+  "capturedAt": "2026-09-30T15:20:07.243101Z",
+  "route": "direct",
+  "frames": 6,
+  "raw": {
+    "sha256": "6836a4f42fbf45dd192d87f21c028f548e62c8cf3c7a64f5361f1a3fe356a550",
+    "length": 3901540
+  },
+  "scrubbed": [
+    {
+      "where": "$.body.response.sender_info.uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.body.response.user_agent (uxid=, imei=)",
+      "rule": "device"
+    },
+    {
+      "where": "$.content.u",
+      "rule": "person"
+    },
+    {
+      "where": "$.content.n",
+      "rule": "person"
+    },
+    {
+      "where": "$.content.a",
+      "rule": "person"
+    },
+    {
+      "where": "$.content.s",
+      "rule": "secret"
+    },
+    {
+      "where": "$.content.c.giftReceiverID / giftReceiverName / receiverHeadImageUrl (when not the broadcaster)",
+      "rule": "person"
+    },
+    {
+      "where": "$.content.uc.question and $.content.c: questionUid, questionNickname, questionHeadUrl",
+      "rule": "person"
+    }
+  ],
+  "dropped": "every other frame of the broadcast (chat, room state, entries, likes, pings and pongs); the frames kept are complete",
+  "tool": "M5.F recorder: a dart:io program that joined the guest namespace of the 30 busiest broadcasts of the hot timeline for 40 minutes (2026-09-30 15:18-15:58 UTC), sent only the join and the Engine.IO ping 2 every 25 s, and kept every frame. Cut and scrubbed by a Python script that decodes each level and encodes it back as the server writes it (event: characters outside the BMP as surrogate escapes; content: slashes escaped when the recorded content escaped them), checked to give each recorded frame byte for byte before replacing anything.",
+  "note": "The question board of one broadcast (uiType 10: the question without the room image): a free question (goldPrice 0), the board cleared (301, uiType 8), a paid question (goldPrice 100, amount 1), another free one, cleared again, and the same paid question shown a second time (same questionId, a new message id and time). The anchor uid 3986696237096 and its nick are public and kept."
+}

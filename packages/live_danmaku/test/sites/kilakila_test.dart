@@ -64,6 +64,21 @@ Map<String, Object?> _eventAsV4(LiveMessage message) {
     expect(data.kind, LiveAudienceMetricKind.onlineViewers);
     return {'kind': 'online', 'value': data.value};
   }
+  if (message.type == LiveMessageType.gift) {
+    // B-10: gifts are reported again (v4 reported every 220), in v4's shape.
+    final gift = message.data! as KilakilaGift;
+    return {
+      'kind': 'gift',
+      'id': message.messageId.isEmpty ? null : 'kilakila:${message.messageId}',
+      'sentAt': message.sentAt?.millisecondsSinceEpoch,
+      'userId': message.userId,
+      'userName': message.userName,
+      'giftId': gift.id,
+      'giftName': gift.name,
+      'count': gift.count,
+      'icon': gift.icon?.toString(),
+    };
+  }
   expect(message.type, LiveMessageType.chat);
   expect(message.color, LiveMessageColor.white);
   expect([message.fansLevel, message.fansName], ['', '']);
@@ -175,10 +190,30 @@ final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
       },
     ];
   },
-  // Difference 2: gifts are not reported.
+  // Difference 2 until M5.F; B-10: a 220 that is not a combo hit is a gift
+  // as v4 reported it, and the gift line 10004 (which v4 ignored) is one too.
   'gifts are not shown: 220 and the gift line 10004': (v4) {
     expect(_events(v4[0]).single, containsPair('kind', 'gift'));
-    return [_nothing, _nothing];
+    expect(v4[1], _nothing);
+    return [
+      v4[0],
+      {
+        ..._nothing,
+        'events': [
+          {
+            'kind': 'gift',
+            'id': 'kilakila:1047000000000000035',
+            'sentAt': 1790629525534,
+            'userId': '7300000000003',
+            'userName': 'Viewer Three',
+            'giftId': '',
+            'giftName': '克拉应援棒',
+            'count': 1,
+            'icon': null,
+          },
+        ],
+      },
+    ];
   },
   // Difference 3: the room state's watchNumber is the audience.
   'the room state 637: watchNumber is the listeners now': (v4) {
@@ -375,25 +410,28 @@ void main() {
   });
 
   group('recordings against v4', () {
-    test('S07-live: joins where v4 joined; chats as v4 decoded them, gifts left out', () {
+    test('S07-live: joins where v4 joined; chats and gifts as v4 decoded them, but no combo hit (B-10)', () {
       final v4 = _v4Frames('S07-live');
       final roomId = _roomOf('S07-live');
       final received = _frames('S07-live').where((frame) => frame.dir == 'in').toList();
       expect(received, hasLength(v4.length));
       var chats = 0;
-      var gifts = 0;
+      final gifts = <int>[];
       for (final frame in received) {
         final expected = _v4Result(v4[frame.index]);
         final v4Events = expected['events']! as List<Object?>;
-        gifts += v4Events.where((event) => (event! as Map<String, Object?>)['kind'] == 'gift').length;
-        final kept = [
-          for (final event in v4Events)
-            if ((event! as Map<String, Object?>)['kind'] != 'gift') event,
-        ];
-        chats += kept.length;
+        for (final event in v4Events.cast<Map<String, Object?>>()) {
+          if (event['kind'] == 'gift') gifts.add(frame.index);
+        }
+        chats += v4Events.where((event) => (event! as Map<String, Object?>)['kind'] == 'chat').length;
+        // B-10: frame 15 is a combo hit (isDoubleHit true, count 1 so far):
+        // v4 reported it, the combo's line (not recorded) would.
+        final kept = frame.index == 15 ? const <Object?>[] : v4Events;
         expect(_decoded(frame.text, roomId: roomId), {...expected, 'events': kept}, reason: 'frame ${frame.index}');
       }
-      expect((chats, gifts), (5, 3));
+      expect(chats, 5);
+      expect(gifts, [15, 44, 54]);
+      expect(_frames('S07-live')[15].text, contains(r'\\\"isDoubleHit\\\":true'));
     });
 
     test('S08-live-full: chats as v4 decoded them, and the listeners of every room state', () {
@@ -463,6 +501,352 @@ void main() {
         expect([for (final frame in frames) _decoded(_serverFrame(frame))], expected);
       });
     }
+  });
+
+  group('B-10: gifts and paid questions', () {
+    final s10Room = _roomOf('S10-live-gifts-questions');
+    final s11Room = _roomOf('S11-live-question-board');
+    final recorded = DateTime.parse(_meta('S10-live-gifts-questions')['capturedAt']! as String);
+
+    List<LiveMessage> read(String frame, {String? roomId, DateTime? now}) =>
+        KilakilaDanmakuProtocol.decode(frame, roomId: roomId ?? s10Room, now: now ?? recorded).messages;
+
+    /// A `text_message` of broadcast [room] with [content].
+    String message(
+      Map<String, Object?> content, {
+      String? room,
+      Object? created = 1790782866386,
+      Object? mid = '1047671760008977409',
+    }) {
+      final payload = jsonEncode({
+        'body': {
+          'response': {'room_id': room ?? s10Room, 'mid': ?mid, 'created_at': ?created, 'content': jsonEncode(content)},
+        },
+      });
+      return '42$_namespace,${jsonEncode(['text_message', payload])}';
+    }
+
+    Map<String, Object?> giftContent({
+      int type = KilakilaDanmakuProtocol.giftType,
+      Object? hit = false,
+      Object? count = 2,
+      Object? price = 200,
+      Object? name = '草莓项链',
+      Object? receiver = '主播',
+      Object? pic = 'https://img.hongrenshuo.com.cn/gift.png',
+      bool withItem = true,
+    }) => {
+      't': type,
+      'u': 7300000000003,
+      'n': '观众3',
+      'l': 46,
+      'c': withItem
+          ? {
+              'name': ?name,
+              'doubleCount': ?count,
+              'price': ?price,
+              'isDoubleHit': ?hit,
+              'giftReceiverName': ?receiver,
+              'id': 415356,
+              'pic': ?pic,
+            }
+          : 'gift',
+    };
+
+    Map<String, Object?> board({
+      int type = 240,
+      Object? uiType = 2,
+      Object? goldPrice = 3000,
+      Object? content = '藏于流年的抱憾 辛苦啦',
+      Object? head = 'https://img.hongrenshuo.com.cn/7300000000004.png?t=1',
+      Object? nickname = '观众4',
+      bool withQuestion = true,
+    }) => {
+      't': type,
+      'u': 3152613118014,
+      'n': '主播',
+      'uc': {
+        'uiType': uiType,
+        if (withQuestion)
+          'question': {
+            'questionId': '2269910643068895305',
+            'questionUid': '7300000000004',
+            'questionHeadUrl': ?head,
+            'questionNickname': ?nickname,
+            'content': ?content,
+            'goldPrice': ?goldPrice,
+            'amount': 30,
+            'avatarFrame': <Object?>[],
+          },
+      },
+    };
+
+    test('recorded (S10): once per gift sent, the paid question on the board a super chat, the asking not', () {
+      final frames = _frames('S10-live-gifts-questions');
+      expect(frames, hasLength(10));
+      final decoded = [for (final frame in frames) read(frame.text)];
+      final kinds = [
+        for (final messages in decoded) [for (final message in messages) message.type],
+      ];
+      expect(kinds, [
+        [LiveMessageType.gift], // 220, not a combo: 7 gifts at once
+        <LiveMessageType>[], // 220, a combo hit
+        [LiveMessageType.gift], // 10004: that combo's line
+        [LiveMessageType.gift], // 220, not a combo: a free guard badge
+        <LiveMessageType>[], // 241: a question asked (the page ignores it)
+        <LiveMessageType>[], // 301, uiType 0: the board cleared
+        <LiveMessageType>[], // 220, a combo hit
+        [LiveMessageType.gift], // 10004: that combo's line
+        [LiveMessageType.superChat], // 240, uiType 2: the paid question
+        [LiveMessageType.gift], // 220 without isDoubleHit
+      ]);
+      List<Object?> gift(LiveMessage message) {
+        final gift = message.data! as KilakilaGift;
+        return [
+          message.userName,
+          message.userId,
+          message.message,
+          gift.id,
+          gift.name,
+          gift.count,
+          gift.price,
+          gift.free,
+          gift.receiverName,
+          gift.icon?.host,
+        ];
+      }
+
+      const host = '嘟子〰️琅声雅集ᰔᩚ';
+      expect(gift(decoded[0].single), [
+        '观众1',
+        '3794368537419',
+        '我送了${host}7个桃花风车',
+        '411690',
+        '桃花风车',
+        7,
+        700,
+        false,
+        host,
+        'img.hongrenshuo.com.cn',
+      ]);
+      expect(gift(decoded[2].single), [
+        '观众2',
+        '2248408448274',
+        '我送了${host}6个克拉之星',
+        '60355',
+        '克拉之星',
+        6,
+        0,
+        true,
+        host,
+        'img.hongrenshuo.com.cn',
+      ]);
+      expect(gift(decoded[3].single), [
+        '观众3',
+        '7877897429571',
+        '我送了豆咖1个守护灯牌',
+        '404769',
+        '守护灯牌',
+        1,
+        0,
+        true,
+        '',
+        'img.kilamanbo.com',
+      ]);
+      // The line gives the price of one (68); the hit gave the send's (204).
+      expect(gift(decoded[7].single).sublist(2, 7), ['我送了${host}3个飞天小猪', '15545', '飞天小猪', 3, 204]);
+      expect(frames[6].text, contains(r'\\\"price\\\":204'));
+      expect(frames[7].text, contains(r'\\\"price\\\":68'));
+      expect(gift(decoded[9].single).sublist(2, 8), ['我送了${host}1个天空之城', '72', '天空之城', 1, 10000, false]);
+      final line = decoded[2].single;
+      expect(
+        (line.messageId, line.sentAt, line.userLevel, line.color),
+        ('1047671317728008192', DateTime.fromMillisecondsSinceEpoch(1790782760938), '47', LiveMessageColor.white),
+      );
+
+      final question = decoded[8].single;
+      expect(
+        (question.userName, question.userId, question.message, question.messageId, question.sentAt),
+        (
+          '观众4',
+          '1210544661531',
+          'bgm 从前说 小阿七 谢谢',
+          '2269922853660917911',
+          DateTime.fromMillisecondsSinceEpoch(1790782866386),
+        ),
+      );
+      final superChat = question.data! as LiveSuperChatMessage;
+      expect(superChat.messageId, '2269922853660917911');
+      expect(superChat.userName, '观众4');
+      expect(
+        superChat.face,
+        'https://img.hongrenshuo.com.cn/1210544661531.png?t=1786707713000&x-oss-process=image/resize,m_fill,h_96,w_96',
+      );
+      expect(superChat.message, 'bgm 从前说 小阿七 谢谢');
+      expect(superChat.price, 1000);
+      expect(superChat.priceText, '1,000红豆');
+      expect(superChat.startTime, DateTime.fromMillisecondsSinceEpoch(1790782866386));
+      expect(superChat.endTime, DateTime.fromMillisecondsSinceEpoch(1790782866386 + 5 * 60 * 1000));
+      expect((superChat.backgroundColor, superChat.backgroundBottomColor), ('', ''));
+      // The asking (241) was by the same viewer at the same price.
+      expect(frames[4].text, allOf(contains('1210544661531'), contains(r'\\\"goldPrice\\\":1000')));
+    });
+
+    test('recorded (S11): free questions give nothing; the same paid question shown twice is the same super chat', () {
+      final frames = _frames('S11-live-question-board');
+      final decoded = [for (final frame in frames) read(frame.text, roomId: s11Room)];
+      expect(decoded.map((messages) => messages.length), [0, 0, 1, 0, 0, 1]);
+      final [first, again] = [decoded[2].single, decoded[5].single];
+      final one = first.data! as LiveSuperChatMessage;
+      final two = again.data! as LiveSuperChatMessage;
+      expect(one, two, reason: 'one questionId');
+      expect(one.hashCode, two.hashCode);
+      expect(two.startTime.isAfter(one.startTime), isTrue);
+      expect((one.price, one.priceText, one.userName), (100, '100红豆', '观众2'));
+      expect(one.message, startsWith('点歌规则：点问答板提问👇\n有灯牌2990🫘/无灯牌4990🫘'));
+      expect(one.message, endsWith('🏠灯牌7级戳管理进群'));
+      expect((first.messageId, again.messageId), ('2269901091061629225', '2269901091061629225'));
+    });
+
+    test('synthetic gifts: the rules and bad data', () {
+      LiveMessage? one(Map<String, Object?> content, {String? room}) {
+        final messages = read(message(content, room: room));
+        return messages.isEmpty ? null : messages.single;
+      }
+
+      KilakilaGift? gift(Map<String, Object?> content) => one(content)?.data as KilakilaGift?;
+
+      expect(
+        gift(giftContent()),
+        KilakilaGift(
+          id: '415356',
+          name: '草莓项链',
+          count: 2,
+          price: 200,
+          receiverName: '主播',
+          icon: Uri.parse('https://img.hongrenshuo.com.cn/gift.png'),
+        ),
+      );
+      expect(gift(giftContent(hit: true)), isNull, reason: 'a combo hit');
+      expect(gift(giftContent(hit: 'true')), isNotNull, reason: 'only true is a hit');
+      expect(gift(giftContent(hit: null))!.price, 200);
+      expect(gift(giftContent(type: KilakilaDanmakuProtocol.giftLineType, hit: true))!.price, 400, reason: '2 × 200');
+      expect(gift(giftContent(type: KilakilaDanmakuProtocol.giftLineType, count: '3', price: '68'))!.price, 204);
+      for (final count in [0, -1, null, 'x', 1.5]) {
+        expect(gift(giftContent(count: count))!.count, 1, reason: '$count');
+      }
+      for (final price in [-5, null, 'x']) {
+        expect(gift(giftContent(price: price))!.price, 0, reason: '$price');
+      }
+      for (final name in [null, '', '  ', 42]) {
+        expect(gift(giftContent(name: name)), isNull, reason: '$name');
+      }
+      expect(gift(giftContent(name: ' 草莓项链 '))!.name, '草莓项链');
+      expect(gift(giftContent(pic: 'http://img.hongrenshuo.com.cn/gift.png'))!.icon, isNull);
+      expect(gift(giftContent(pic: 7))!.icon, isNull);
+      expect(one(giftContent(receiver: null))!.message, '我送了豆咖2个草莓项链');
+      expect(one(giftContent(receiver: ' '))!.message, '我送了豆咖2个草莓项链');
+      expect(gift(giftContent(withItem: false)), isNull);
+      expect(one(giftContent(), room: '2260000000000000009'), isNull, reason: 'another broadcast');
+      expect(one({...giftContent(), 't': '220'}), isNull, reason: 'the page switches on the number');
+      final full = one(giftContent())!;
+      expect(
+        (full.type, full.userName, full.userId, full.userLevel, full.messageId, full.color),
+        (LiveMessageType.gift, '观众3', '7300000000003', '46', '1047671760008977409', LiveMessageColor.white),
+      );
+      expect(full.sentAt, DateTime.fromMillisecondsSinceEpoch(1790782866386));
+      expect(read(message(giftContent(), created: null)).single.sentAt, isNull);
+      expect(const KilakilaGift(id: '1', name: 'a', count: 1, price: 0).free, isTrue);
+      expect('${gift(giftContent())}', 'KilakilaGift(草莓项链 ×2, 200)');
+    });
+
+    test('synthetic questions: every board type, the uiTypes that show a question, prices, text, decoding, time', () {
+      LiveSuperChatMessage? superChat(Map<String, Object?> content, {Object? created = 1790782866386}) {
+        final messages = read(message(content, created: created));
+        return messages.isEmpty ? null : messages.single.data! as LiveSuperChatMessage;
+      }
+
+      for (final type in [240, 300, 301, 532, 534, 706]) {
+        expect(superChat(board(type: type))?.price, 3000, reason: '$type');
+      }
+      for (final type in [241, 302, 230, 250]) {
+        expect(superChat(board(type: type)), isNull, reason: '$type');
+      }
+      for (final uiType in [2, 3, 6, 7, 10, 11, 14, 15, '2', 10.0]) {
+        expect(superChat(board(uiType: uiType)), isNotNull, reason: '$uiType');
+      }
+      for (final uiType in [0, 1, 4, 5, 8, 9, 12, 13, 16, null, 'x']) {
+        expect(superChat(board(uiType: uiType)), isNull, reason: '$uiType');
+      }
+      expect(superChat(board(withQuestion: false)), isNull);
+      for (final price in [0, -5, null, 'free', 2.5]) {
+        expect(superChat(board(goldPrice: price)), isNull, reason: '$price');
+      }
+      expect(superChat(board(goldPrice: '300'))!.price, 300, reason: 'the page decodes every field to text');
+      expect(superChat(board(goldPrice: 1234567))!.priceText, '1,234,567红豆');
+      expect(superChat(board(goldPrice: 999))!.priceText, '999红豆');
+      for (final text in [null, '', ' \n ', 42]) {
+        expect(superChat(board(content: text)), isNull, reason: '$text');
+      }
+      expect(superChat(board(content: '  你好\n世界  '))!.message, '你好\n世界');
+      expect(superChat(board(content: '%E4%BD%A0%E5%A5%BD'))!.message, '你好', reason: 'decodeURIComponent');
+      expect(superChat(board(nickname: '%E8%A7%82%E4%BC%97'))!.userName, '观众');
+      expect(superChat(board(content: '100%')), isNull, reason: 'a bad escape loses the message, as on the page');
+      expect(superChat(board(nickname: '%E0%A4%A')), isNull);
+      expect(superChat(board(head: 'http://img.hongrenshuo.com.cn/a.png'))!.face, '');
+      expect(superChat(board(head: null))!.face, '');
+      expect(superChat(board(nickname: null))!.userName, '');
+      final noTime = superChat(board(), created: null)!;
+      expect(noTime.startTime, recorded, reason: 'the time of reading');
+      expect(noTime.endTime, recorded.add(const Duration(minutes: 5)));
+      expect(superChat(board(), created: 'soon')!.startTime, recorded);
+      final withTime = read(message(board())).single;
+      expect(withTime.userId, '7300000000004');
+      expect(withTime.color, LiveMessageColor.white);
+      expect(KilakilaDanmakuProtocol.amount(0), '0');
+      expect(KilakilaDanmakuProtocol.amount(1000), '1,000');
+      expect(KilakilaDanmakuProtocol.amount(-12345), '-12,345');
+      expect(KilakilaDanmakuProtocol.questionDisplay, const Duration(minutes: 5));
+    });
+
+    test("decodeURIComponent keeps what is not an escape (Dart's decoder threw on any non-ASCII character)", () {
+      // A room state whose URL-encoded JSON also holds plain Chinese: before
+      // M5.F the ArgumentError escaped decode().
+      final state = message({'t': 637, 'c': '%7B%22watchNumber%22%3A5%2C%22title%22%3A%22中文%22%7D'});
+      final online = read(state).single.data! as LiveAudienceUpdate;
+      expect(online.value, 5);
+      expect(read(message({'t': 637, 'c': '%7B%22watchNumber%22%3A5%7D%E4'})), isEmpty, reason: 'a cut UTF-8 escape');
+      expect(read(message(board(content: '已有🫘 %E4%BD%A0 50%25'))).single.message, '已有🫘 你 50%');
+    });
+
+    test('not reported: the asking (241), entries, leaves, likes and the first light-up', () {
+      for (final type in [241, 101, 603, 102, 210, 211]) {
+        expect(read(message({'t': type, 'u': 1, 'n': 'x', 'c': 'y'})), isEmpty, reason: '$type');
+      }
+    });
+
+    test('the connection reports the gifts and the super chat of S10 in order', () async {
+      final connector = _Connector();
+      final connection = _connection(connector);
+      final events = _record(connection);
+      await connection.connect(KilakilaDanmakuArgs(roomId: s10Room));
+      final channel = connector.channels.single;
+      _accept(channel);
+      for (final frame in _frames('S10-live-gifts-questions')) {
+        channel.incoming.add(frame.text);
+      }
+      await _until(() => _messages(events).length == 6);
+      await _wait(const Duration(milliseconds: 10));
+      expect(_messages(events).map((message) => message.type), [
+        LiveMessageType.gift,
+        LiveMessageType.gift,
+        LiveMessageType.gift,
+        LiveMessageType.gift,
+        LiveMessageType.superChat,
+        LiveMessageType.gift,
+      ]);
+      await connection.close();
+    });
   });
 
   group('connection', () {

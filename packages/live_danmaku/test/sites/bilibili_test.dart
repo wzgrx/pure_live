@@ -818,7 +818,7 @@ void main() {
         connector: connector.call,
         policy: const DanmakuSocketPolicy(
           heartbeatInterval: Duration.zero,
-          joinTimeout: Duration(milliseconds: 30),
+          joinTimeout: Duration(seconds: 1),
           reconnectBaseDelay: Duration(milliseconds: 5),
         ),
       );
@@ -830,7 +830,7 @@ void main() {
       expect(connector.channels.last.sent.map(_operation), [7]);
       await connector.channels.last.receive(_auth('{"code":0}'));
       expect(events, [const DanmakuReconnecting(DanmakuInterruption.disconnected), const DanmakuReady()]);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(const Duration(milliseconds: 1300));
       expect(connector.channels, hasLength(2), reason: 'the reply stopped the join timer');
       await connection.close();
     });

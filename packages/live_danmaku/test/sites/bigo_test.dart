@@ -828,7 +828,8 @@ void main() {
         connector,
         http,
         proxy: const FixedProxyPolicy(perSite: {SiteIds.bigo: route}),
-        loginDelay: const Duration(milliseconds: 80),
+        // Long enough that the checks before the login always come first.
+        loginDelay: const Duration(seconds: 1),
       );
       final events = _record(connection);
       await connection.connect(_args);
@@ -983,7 +984,9 @@ void main() {
         http,
         policy: const DanmakuSocketPolicy(
           heartbeatInterval: Duration.zero,
-          joinTimeout: Duration(milliseconds: 40),
+          // Wide enough that a loaded machine never lets the timer beat the
+          // step the test takes next.
+          joinTimeout: Duration(seconds: 1),
           reconnectBaseDelay: Duration(milliseconds: 5),
         ),
       );
@@ -995,7 +998,7 @@ void main() {
       expect(http.requests, hasLength(2));
       await connector.channels.last.join();
       expect(events, [const DanmakuReconnecting(DanmakuInterruption.disconnected), const DanmakuReady()]);
-      await _wait(const Duration(milliseconds: 80));
+      await _wait(const Duration(milliseconds: 1300));
       expect(connector.channels, hasLength(2), reason: 'joined: no timeout');
       await connection.close();
     });

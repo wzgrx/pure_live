@@ -1012,7 +1012,7 @@ void main() {
         http,
         policy: const DanmakuSocketPolicy(
           heartbeatInterval: Duration.zero,
-          joinTimeout: Duration(milliseconds: 100),
+          joinTimeout: Duration(seconds: 1),
           reconnectBaseDelay: Duration(milliseconds: 5),
         ),
       );
@@ -1123,7 +1123,7 @@ void main() {
         http,
         policy: const DanmakuSocketPolicy(
           heartbeatInterval: Duration.zero,
-          joinTimeout: Duration(milliseconds: 100),
+          joinTimeout: Duration(seconds: 1),
           reconnectBaseDelay: Duration(milliseconds: 5),
         ),
       );

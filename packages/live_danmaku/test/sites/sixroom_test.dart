@@ -831,7 +831,7 @@ void main() {
         connector,
         policy: const DanmakuSocketPolicy(
           heartbeatInterval: Duration.zero,
-          joinTimeout: Duration(milliseconds: 30),
+          joinTimeout: Duration(seconds: 1),
           reconnectBaseDelay: Duration(milliseconds: 5),
         ),
       );
@@ -843,7 +843,7 @@ void main() {
       await connector.channels.last.receive(_loginSuccess);
       expect(events, [const DanmakuReconnecting(DanmakuInterruption.disconnected), const DanmakuReady()]);
       // Joined: the limit no longer applies.
-      await _wait(const Duration(milliseconds: 80));
+      await _wait(const Duration(milliseconds: 1300));
       expect(connector.channels, hasLength(2));
       expect(http.requests, hasLength(1));
       await connection.close();

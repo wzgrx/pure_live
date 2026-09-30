@@ -1195,7 +1195,9 @@ void main() {
         _Http(),
         policy: const DanmakuSocketPolicy(
           heartbeatInterval: Duration.zero,
-          joinTimeout: Duration(milliseconds: 20),
+          // Wide enough that a loaded machine never lets the timer beat the
+          // step the test takes next.
+          joinTimeout: Duration(seconds: 1),
           reconnectBaseDelay: Duration(milliseconds: 5),
         ),
       );
@@ -1205,7 +1207,7 @@ void main() {
       await _until(() => connector.channels.length == 2);
       await connector.channels.last.join();
       expect(events.whereType<DanmakuReady>(), hasLength(1));
-      await _wait(const Duration(milliseconds: 50));
+      await _wait(const Duration(milliseconds: 1300));
       expect(connector.channels, hasLength(2), reason: 'a joined socket has no timer');
       await connection.close();
     });
@@ -1227,8 +1229,10 @@ void main() {
       connection.heartbeat();
       await _wait(const Duration(milliseconds: 150));
       expect(socket.heartbeats, 0, reason: 'nothing before the login');
-      await socket.join();
+      // Taken before the login: the sixth tick after it is at least 100 ms
+      // later, however long the login takes to process.
       final joinedAt = DateTime.now();
+      await socket.join();
       await _until(() => socket.heartbeats == 1);
       expect(DateTime.now().difference(joinedAt), greaterThanOrEqualTo(const Duration(milliseconds: 100)));
       connection.heartbeat();

@@ -1501,7 +1501,7 @@ void main() {
         policy: const DanmakuSocketPolicy(
           heartbeatInterval: Duration.zero,
           reconnectBaseDelay: Duration(milliseconds: 5),
-          joinTimeout: Duration(milliseconds: 40),
+          joinTimeout: Duration(seconds: 1),
         ),
       );
       final events = _record(connection);

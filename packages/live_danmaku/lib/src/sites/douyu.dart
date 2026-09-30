@@ -5,6 +5,47 @@ import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/src/binary.dart';
 import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
+import 'package:meta/meta.dart';
+
+/// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from a
+/// `dgb` packet ([DouyuDanmakuProtocol.gift]). Reported, not shown yet
+/// (M5 appendix B-21).
+@immutable
+final class DouyuGift {
+  /// Creates the gift.
+  const new({required this.id, required this.name, required this.count, this.combo = 0, this.receiverName = ''});
+
+  /// `gfid`; empty when missing or 0 (a backpack prop such as 陪伴印章, whose
+  /// id is `pid`).
+  final String id;
+
+  /// `gfn` (`粉丝荧光棒`).
+  final String name;
+
+  /// `gfcnt`, at least 1.
+  final int count;
+
+  /// `hits`, the combo so far including this send; 0 when missing.
+  final int combo;
+
+  /// `receive_nn`: the broadcaster, or a guest; empty when missing.
+  final String receiverName;
+
+  @override
+  bool operator ==(Object other) =>
+      other is DouyuGift &&
+      other.id == id &&
+      other.name == name &&
+      other.count == count &&
+      other.combo == combo &&
+      other.receiverName == receiverName;
+
+  @override
+  int get hashCode => Object.hash(id, name, count, combo, receiverName);
+
+  @override
+  String toString() => 'DouyuGift($name ×$count, combo $combo)';
+}
 
 /// Douyu's STT text format (3.x `sttToJObject`, docs/modules/M5.2-douyu.md):
 /// `key@=value/` pairs; a list is its items, each followed by `/`; inside a
@@ -110,8 +151,9 @@ abstract final class DouyuDanmakuProtocol {
   }
 
   /// The messages of one server [frame] for room [roomId] (3.x
-  /// `decodeMessage`): chat (`chatmsg`) and super chats (`comm_chatmsg`,
-  /// `voice_trlt`); other packets are ignored. A packet that fails to decode
+  /// `decodeMessage`): chat (`chatmsg`), super chats (`comm_chatmsg`,
+  /// `voice_trlt`) and gifts (`dgb`, M4.D; 3.x ignored them); other packets
+  /// are ignored. A packet that fails to decode
   /// is skipped without losing the others. [filterSuspectedAutomated] is read
   /// for each suspected chat, so a changed setting applies at once.
   static List<LiveMessage> decode(
@@ -127,6 +169,7 @@ abstract final class DouyuDanmakuProtocol {
           'chatmsg' => _chat(fields, roomId, filterSuspectedAutomated),
           'comm_chatmsg' => _superChat(fields),
           'voice_trlt' => _voiceSuperChat(fields),
+          'dgb' => gift(fields, roomId),
           _ => null,
         };
         if (message != null) messages.add(message);
@@ -227,6 +270,36 @@ abstract final class DouyuDanmakuProtocol {
         backgroundColor: '#ffffff',
         backgroundBottomColor: '#246488',
       ),
+    );
+  }
+
+  /// `dgb`: a gift sent in this room, reported as a [LiveMessageType.gift]
+  /// holding a [DouyuGift] (not shown yet, M5 appendix B-21; the archived v4
+  /// read the same fields). The sender is `nn`/`uid`, the text
+  /// `<gfn> ×<gfcnt>`. Another room's packet and a gift without a name give
+  /// nothing. The packet has no id and no time.
+  static LiveMessage? gift(Map<String, String> fields, String roomId) {
+    final packetRoomId = fields['rid'] ?? '';
+    if (packetRoomId.isNotEmpty && roomId.isNotEmpty && packetRoomId != roomId) return null;
+    final name = (fields['gfn'] ?? '').trim();
+    if (name.isEmpty) return null;
+    final id = fields['gfid'] ?? '';
+    final count = int.tryParse(fields['gfcnt'] ?? '') ?? 0;
+    final combo = int.tryParse(fields['hits'] ?? '') ?? 0;
+    final present = DouyuGift(
+      id: id == '0' ? '' : id,
+      name: name,
+      count: count > 0 ? count : 1,
+      combo: combo > 0 ? combo : 0,
+      receiverName: fields['receive_nn'] ?? '',
+    );
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: fields['nn'] ?? '',
+      userId: fields['uid'] ?? '',
+      message: '${present.name} ×${present.count}',
+      color: LiveMessageColor.white,
+      data: present,
     );
   }
 

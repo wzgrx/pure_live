@@ -55,6 +55,8 @@ Map<String, Object?> _project(LiveMessage message) {
             'backgroundColor': data.backgroundColor,
             'backgroundBottomColor': data.backgroundBottomColor,
           }
+        : data is DouyuGift
+        ? {'id': data.id, 'name': data.name, 'count': data.count, 'combo': data.combo, 'receiver': data.receiverName}
         : data,
   };
 }
@@ -138,9 +140,10 @@ List<DanmakuEvent> _record(DanmakuConnection connection) {
   return events;
 }
 
+/// The messages of [events] of the kinds 3.x reported (gifts are new, M4.D).
 List<LiveMessage> _messages(List<DanmakuEvent> events) => [
   for (final event in events)
-    if (event is DanmakuReceived) event.message,
+    if (event is DanmakuReceived && event.message.type != LiveMessageType.gift) event.message,
 ];
 
 Future<void> _wait(Duration duration) => Future<void>.delayed(duration);
@@ -260,7 +263,7 @@ void main() {
                 return false;
               },
             ))
-              {'frame': index, ..._project(message)},
+              if (message.type != LiveMessageType.gift) {'frame': index, ..._project(message)},
       ];
       final expected = _recordedMessages;
       expect(decoded, hasLength(147));
@@ -277,7 +280,7 @@ void main() {
               roomId: _roomId,
               filterSuspectedAutomated: () => true,
             ))
-              message.messageId,
+              if (message.type != LiveMessageType.gift) message.messageId,
       ];
       expect(kept, _recorded['keptWithFilter']);
     });
@@ -287,7 +290,62 @@ void main() {
         for (final frame in _frames)
           if (frame.dir == 'in') ...DouyuDanmakuProtocol.decode(frame.bytes, roomId: '1'),
       ];
-      expect(decoded, isEmpty, reason: 'every recorded chatmsg carries rid 9999');
+      expect(decoded, isEmpty, reason: 'every recorded chatmsg and dgb carries rid 9999');
+    });
+
+    test('the 125 recorded dgb packets are gifts (M4.D; 3.x ignored them)', () {
+      final gifts = [
+        for (final frame in _frames)
+          if (frame.dir == 'in')
+            ...DouyuDanmakuProtocol.decode(frame.bytes, roomId: _roomId).where((m) => m.type == LiveMessageType.gift),
+      ];
+      expect(gifts, hasLength(125));
+      expect(_project(gifts.first), {
+        'type': 'gift',
+        'userName': '观众3',
+        'userId': '5413638',
+        'message': '粉丝荧光棒 ×10',
+        'color': '#ffffff',
+        'messageId': '',
+        'sentAt': null,
+        'userLevel': '',
+        'fansLevel': '',
+        'fansName': '',
+        'isLocal': false,
+        'data': {'id': '824', 'name': '粉丝荧光棒', 'count': 10, 'combo': 10, 'receiver': 'yyfyyf'},
+      });
+    });
+  });
+
+  group('gifts (S15-gifts, 2026-09-30)', () {
+    final sample = _json('S15-gifts/packets.json')! as Map<String, Object?>;
+    final roomId = sample['roomId']! as String;
+    final frame = [
+      for (final body in sample['packets']! as List<Object?>)
+        ...DouyuDanmakuProtocol.packet(body! as String, type: DouyuDanmakuProtocol.serverPacketType),
+    ];
+
+    test('every recorded dgb is a gift with its name, count, combo and receiver', () {
+      final gifts = DouyuDanmakuProtocol.decode(frame, roomId: roomId);
+      expect(gifts, hasLength(57));
+      expect(gifts.every((m) => m.type == LiveMessageType.gift && m.userName.isNotEmpty), isTrue);
+      final first = gifts.first.data! as DouyuGift;
+      expect(first, const DouyuGift(id: '22171', name: '精英宝典', count: 1, combo: 1, receiverName: '若若跑的贼快'));
+      expect(gifts.first.message, '精英宝典 ×1');
+      // A backpack prop has gfid 0: no gift id.
+      final prop = gifts.map((m) => m.data! as DouyuGift).firstWhere((gift) => gift.name == '陪伴印章');
+      expect(prop.id, isEmpty);
+      final names = {for (final m in gifts) (m.data! as DouyuGift).name};
+      expect(names, containsAll(['陪伴印章', '粉丝荧光棒', '精英宝典', '精英令', '国庆快乐']));
+    });
+
+    test("another room's gift and a gift without a name give nothing", () {
+      expect(DouyuDanmakuProtocol.decode(frame, roomId: '1'), isEmpty);
+      final unnamed = DouyuDanmakuProtocol.packet(
+        'type@=dgb/rid@=$roomId/gfid@=1/gfcnt@=1/nn@=a/uid@=1/',
+        type: DouyuDanmakuProtocol.serverPacketType,
+      );
+      expect(DouyuDanmakuProtocol.decode(unnamed, roomId: roomId), isEmpty);
     });
   });
 
@@ -302,6 +360,26 @@ void main() {
     /// The intentional differences (docs/modules/M5.2-douyu.md), applied to
     /// 3.x's output of the case they concern.
     final differences = <String, List<Map<String, Object?>> Function(List<Map<String, Object?>>)>{
+      // 3.x ignored gifts (`dgb`); they are reported now (M4.D).
+      'other packet types are ignored': (legacy) {
+        expect(legacy, isEmpty);
+        return [
+          {
+            'type': 'gift',
+            'userName': 'A',
+            'userId': '1',
+            'message': 'x ×1',
+            'color': '#ffffff',
+            'messageId': '',
+            'sentAt': null,
+            'userLevel': '',
+            'fansLevel': '',
+            'fansName': '',
+            'isLocal': false,
+            'data': {'id': '824', 'name': 'x', 'count': 1, 'combo': 0, 'receiver': ''},
+          },
+        ];
+      },
       // 3.x turned a pandora box notice into a super chat of 0 yuan.
       'pandora box notice shares the super chat type (price and duration 0)': (legacy) {
         expect(legacy.single['type'], 'superChat');

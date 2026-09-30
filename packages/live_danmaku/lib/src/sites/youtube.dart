@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:live_core/live_core.dart';
+import 'package:live_danmaku/src/codec/protobuf.dart';
 import 'package:live_danmaku/src/connection.dart';
 import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_net/live_net.dart';
@@ -34,7 +37,8 @@ final class YouTubeChatPoll {
   /// Creates the answer.
   const new({this.messages = const [], this.continuation, this.reload = false, this.timeout, this.notice = ''});
 
-  /// Chat lines, in order.
+  /// Chat lines, Super Chats, notices and retractions, in the order of the
+  /// actions.
   final List<LiveMessage> messages;
 
   /// The continuation of the next request; null when the chat is over.
@@ -65,17 +69,23 @@ final class YouTubeChatPoll {
 /// 2. `live_chat/get_live_chat` is polled with the continuation of the
 ///    previous answer. The first answer is the recent history; later answers
 ///    carry what was said since. Each answer names the next continuation
-///    and the wait (`timeoutMs`); an answer without one ends the chat.
+///    and the wait (`timeoutMs`); an answer without one ends the chat;
+/// 3. `updated_metadata` gives the viewer count again (M5.F, B-13).
 ///
-/// Text messages and paid messages (Super Chat, as a chat line prefixed with
-/// the amount) are read; everything else (stickers, memberships, removals,
-/// placeholders, polls, tickers) is not.
+/// Read from each answer (M5.F, B-13):
+/// text messages as chat lines; paid messages as super chats; Super
+/// Stickers, memberships and gifted memberships as notices; removals as
+/// retractions. Placeholders, replacements, polls, tickers and banners are
+/// not read (a ticker only names how long the page pins a Super Chat).
 abstract final class YouTubeDanmakuProtocol {
   /// The watch page's `next`.
   static final Uri nextEndpoint = YouTubeApi.apiUrl('next');
 
   /// The chat's `live_chat/get_live_chat`.
   static final Uri chatEndpoint = YouTubeApi.apiUrl('live_chat/get_live_chat');
+
+  /// The watch page's `updated_metadata`: the live viewer count (B-13).
+  static final Uri metadataEndpoint = YouTubeApi.apiUrl('updated_metadata');
 
   /// Request headers: the adapter's for the web client's InnerTube calls (UA,
   /// JSON, English, `SOCS=CAI`, the site as Referer and Origin); the JSON
@@ -103,6 +113,34 @@ abstract final class YouTubeDanmakuProtocol {
   /// Failed polls in a row, once joined, before the connection ends.
   static const int maxFailures = 8;
 
+  /// How often `updated_metadata` is asked for once joined (B-13). The page
+  /// asks every 5 s (its `timeoutMs`); a number on screen needs less, and
+  /// each answer is about 8 KB.
+  static const Duration viewerInterval = Duration(seconds: 30);
+
+  /// How long a Super Chat the page does not pin stays in the super chat
+  /// list: the two lowest tiers (blue, light blue: under US$5) are only
+  /// highlighted in the chat, and an unknown colour says no tier. A minute,
+  /// less than the shortest pin (2 minutes), so a dearer tier never ends
+  /// sooner.
+  static const Duration unpinnedDisplay = Duration(minutes: 1);
+
+  /// How long the page pins a Super Chat by its tier, the tier told by
+  /// `headerBackgroundColor` (ARGB); used when the answer has no ticker item
+  /// (`fullDurationSec`) for the message. YouTube's table, in US dollars:
+  /// under 2 blue, under 5 light blue (neither pinned), under 10 green
+  /// 2 min, under 20 yellow 5 min, under 50 orange 10 min, under 100 magenta
+  /// 30 min, from 100 red 1 h (to 5 h at 500; only the ticker tells).
+  static const Map<int, Duration> tierDisplay = {
+    0xFF1565C0: Duration.zero,
+    0xFF00B8D4: Duration.zero,
+    0xFF00BFA5: Duration(minutes: 2),
+    0xFFFFB300: Duration(minutes: 5),
+    0xFFE65100: Duration(minutes: 10),
+    0xFFC2185B: Duration(minutes: 30),
+    0xFFD00000: Duration(hours: 1),
+  };
+
   /// The largest time `DateTime` holds, in microseconds from the epoch.
   static const int _maxMicros = 8640000000000000000;
 
@@ -116,6 +154,15 @@ abstract final class YouTubeDanmakuProtocol {
     'context': YouTubeApi.webContext,
     'continuation': continuation,
   };
+
+  /// The first `updated_metadata` request body: [videoId], as the adapter
+  /// asks.
+  static Map<String, Object?> metadataBody(String videoId) => YouTubeApi.metadataBody(videoId);
+
+  /// A later `updated_metadata` request body: the previous answer's
+  /// [continuation].
+  static Map<String, Object?> metadataContinuationBody(String continuation) =>
+      YouTubeApi.continuationBody(continuation);
 
   /// The wait before the next poll: [timeout] within [minimumDelay] and
   /// [maximumDelay], and [maximumDelay] when there is none.
@@ -135,6 +182,105 @@ abstract final class YouTubeDanmakuProtocol {
     color: LiveMessageColor.white,
   );
 
+  // The chat's view (B-13) -----------------------------------------------------
+
+  static const int _chatField = 119693434;
+  static const int _viewField = 16;
+  static const int _viewKind = 1;
+  static const int _topChat = 4;
+  static const int _liveChat = 1;
+
+  /// [continuation] in the "Live chat" view (every message) instead of the
+  /// default "Top chat" (B-13). The token is a protobuf message in base64url
+  /// (`=` written `%3D`); the view is field 1 of field 16 of its field
+  /// 119693434: 4 for "Top chat", 1 for "Live chat". The two short
+  /// continuations of `next`'s `viewSelector` differ only there, and they
+  /// are refused on their own (400), so the chat's own continuation is
+  /// rewritten; the server keeps the view in the continuations it answers
+  /// with.
+  ///
+  /// Returns [continuation] itself when it already names "Live chat", and
+  /// null when it cannot be rewritten: not such a message (a replay's
+  /// continuation, a broken token), another view, the field more than once,
+  /// or a fixed-width field or group on the way (not copied here).
+  static String? allChatContinuation(String continuation) {
+    final Uint8List bytes;
+    try {
+      bytes = base64Url.decode(base64Url.normalize(continuation.replaceAll('%3D', '=')));
+    } on FormatException {
+      return null;
+    }
+    final chat = _single(bytes, _chatField);
+    final viewMessage = chat == null ? null : _single(chat, _viewField);
+    final view = viewMessage == null ? null : _viewOf(viewMessage);
+    if (view == _liveChat) return continuation;
+    if (view != _topChat) return null;
+    final rewritten = _rewrite(bytes, const [_chatField, _viewField, _viewKind], _topChat, _liveChat);
+    return rewritten == null ? null : base64Url.encode(rewritten).replaceAll('=', '%3D');
+  }
+
+  /// The view (field 1, a varint) of a view message, or null.
+  static int? _viewOf(Uint8List view) {
+    final fields = _decode(view)?.where((field) => field.number == _viewKind).toList();
+    if (fields == null || fields.length != 1 || fields.single.wireType != ProtoMessage.varintType) return null;
+    return fields.single.value as int;
+  }
+
+  /// The only length-delimited field [number] of [bytes], or null.
+  static Uint8List? _single(Uint8List bytes, int number) {
+    final fields = _decode(bytes)?.where((field) => field.number == number).toList();
+    if (fields == null || fields.length != 1 || fields.single.wireType != ProtoMessage.lengthDelimitedType) {
+      return null;
+    }
+    return fields.single.value as Uint8List;
+  }
+
+  static List<ProtoField>? _decode(Uint8List bytes) {
+    try {
+      return ProtoMessage.decode(bytes).fields;
+    } on FormatException {
+      return null;
+    }
+  }
+
+  /// [bytes] with the varint at [path] (field numbers, outermost first)
+  /// changed from [from] to [to]; the other fields are copied as they were.
+  /// Null when a message on the path holds the field more than once, a
+  /// field that is not a varint or length-delimited, or the varint is not
+  /// [from].
+  static Uint8List? _rewrite(Uint8List bytes, List<int> path, int from, int to) {
+    final fields = _decode(bytes);
+    if (fields == null) return null;
+    final [number, ...rest] = path;
+    if (fields.where((field) => field.number == number).length != 1) return null;
+    final writer = ProtoWriter();
+    for (final ProtoField(number: current, :wireType, :value) in fields) {
+      switch (wireType) {
+        case ProtoMessage.varintType:
+          if (current == number) {
+            if (rest.isNotEmpty || value != from) return null;
+            writer.integer(current, to);
+          } else {
+            writer.integer(current, value as int);
+          }
+        case ProtoMessage.lengthDelimitedType:
+          if (current == number) {
+            if (rest.isEmpty) return null;
+            final inner = _rewrite(value as Uint8List, rest, from, to);
+            if (inner == null) return null;
+            writer.bytes(current, inner);
+          } else {
+            writer.bytes(current, value as Uint8List);
+          }
+        default:
+          return null;
+      }
+    }
+    return writer.toBytes();
+  }
+
+  // Answers ---------------------------------------------------------------------
+
   /// Reads a decoded `next` answer: the first `liveChatRenderer` in it (its
   /// `isReplay` and its first continuation) and the first live
   /// `videoViewCountRenderer` (the digits of "1,250 watching now", as the
@@ -143,14 +289,12 @@ abstract final class YouTubeDanmakuProtocol {
   static YouTubeChatEntry watch(Object? answer) {
     if (answer is! Map<String, Object?>) throw const FormatException('YouTube next: not a JSON object');
     Map<Object?, Object?>? chat;
-    int? viewers;
     void walk(Object? node) {
-      if (chat != null && viewers != null) return;
+      if (chat != null) return;
       if (node is Map) {
-        if (node['liveChatRenderer'] case final Map<Object?, Object?> renderer when chat == null) chat = renderer;
-        if (node['videoViewCountRenderer'] case final Map<Object?, Object?> count
-            when viewers == null && count['isLive'] == true) {
-          viewers = _viewers(count['viewCount']);
+        if (node['liveChatRenderer'] case final Map<Object?, Object?> renderer) {
+          chat = renderer;
+          return;
         }
         node.values.forEach(walk);
       } else if (node is List) {
@@ -163,8 +307,48 @@ abstract final class YouTubeDanmakuProtocol {
     return YouTubeChatEntry(
       continuation: renderer == null ? null : _continuation(renderer['continuations'])?.token,
       replay: renderer?['isReplay'] == true,
-      viewers: viewers,
+      viewers: _liveViewers(answer),
     );
+  }
+
+  /// Reads a decoded `updated_metadata` answer (B-13): the live viewers, as
+  /// [watch] reads them (null once the broadcast is over: "N views"), and
+  /// the continuation of the next request (`continuation`'s first entry
+  /// with a text `continuation`, a `timedContinuationData`). Throws
+  /// [FormatException] when [answer] is not a JSON object.
+  static ({int? viewers, String? continuation}) metadata(Object? answer) {
+    if (answer is! Map<String, Object?>) throw const FormatException('YouTube updated_metadata: not a JSON object');
+    String? token;
+    if (answer['continuation'] case final Map<Object?, Object?> next) {
+      for (final value in next.values) {
+        if (value case {'continuation': final String continuation}) {
+          token = continuation;
+          break;
+        }
+      }
+    }
+    return (viewers: _liveViewers(answer), continuation: token);
+  }
+
+  /// The digits of the first `videoViewCountRenderer` with `isLive` true.
+  static int? _liveViewers(Object? root) {
+    int? walk(Object? node) {
+      if (node is Map) {
+        if (node['videoViewCountRenderer'] case final Map<Object?, Object?> count when count['isLive'] == true) {
+          if (_viewers(count['viewCount']) case final viewers?) return viewers;
+        }
+        for (final value in node.values) {
+          if (walk(value) case final viewers?) return viewers;
+        }
+      } else if (node is List) {
+        for (final value in node) {
+          if (walk(value) case final viewers?) return viewers;
+        }
+      }
+      return null;
+    }
+
+    return walk(root);
   }
 
   static int? _viewers(Object? text) {
@@ -174,9 +358,10 @@ abstract final class YouTubeDanmakuProtocol {
 
   /// Reads a decoded `get_live_chat` answer. Without
   /// `continuationContents.liveChatContinuation` the chat is over (the
-  /// `contents` message, when there is one, is the notice). Throws
-  /// [FormatException] when [answer] is not a JSON object.
-  static YouTubeChatPoll chat(Object? answer) {
+  /// `contents` message, when there is one, is the notice). A Super Chat
+  /// without a platform time starts [now] (default: the current time).
+  /// Throws [FormatException] when [answer] is not a JSON object.
+  static YouTubeChatPoll chat(Object? answer, {DateTime? now}) {
     if (answer is! Map<String, Object?>) throw const FormatException('YouTube get_live_chat: not a JSON object');
     final contents = answer['continuationContents'];
     final chat = contents is Map ? contents['liveChatContinuation'] : null;
@@ -184,13 +369,12 @@ abstract final class YouTubeDanmakuProtocol {
       final message = answer['contents'];
       return YouTubeChatPoll(notice: message is Map ? _plain(_map(message['messageRenderer'])['text']) : '');
     }
-    final actions = chat['actions'];
+    final actions = chat['actions'] is List ? chat['actions'] as List : const <Object?>[];
+    final pinned = _pinned(actions);
+    final received = now ?? DateTime.now();
     final next = _continuation(chat['continuations']);
     return YouTubeChatPoll(
-      messages: List.unmodifiable([
-        if (actions is List)
-          for (final action in actions) ?_message(action),
-      ]),
+      messages: List.unmodifiable([for (final action in actions) ?_message(action, pinned, received)]),
       continuation: next?.token,
       reload: next?.kind == 'reloadContinuationData',
       timeout: next?.timeout,
@@ -216,24 +400,77 @@ abstract final class YouTubeDanmakuProtocol {
     return null;
   }
 
-  /// One action as a chat line: an added text message, or an added paid
-  /// message with its amount before its text; null for anything else and
-  /// for lines without text.
-  static LiveMessage? _message(Object? action) {
-    final add = action is Map ? action['addChatItemAction'] : null;
-    final item = add is Map ? add['item'] : null;
-    if (item is! Map) return null;
-    final Map<Object?, Object?> renderer;
-    final String text;
-    if (item['liveChatTextMessageRenderer'] case final Map<Object?, Object?> message) {
-      renderer = message;
-      text = _runs(message['message']);
-    } else if (item['liveChatPaidMessageRenderer'] case final Map<Object?, Object?> paid) {
-      renderer = paid;
-      text = '${_plain(paid['purchaseAmountText'])} ${_runs(paid['message'])}'.trim();
-    } else {
-      return null;
+  /// How long the page pins each item of the ticker items in [actions]
+  /// (`addLiveChatTickerItemAction`): the item's `id` (the message's) and
+  /// its `fullDurationSec`, when positive. The ticker item of a Super Chat
+  /// follows it in the same answer.
+  static Map<String, Duration> _pinned(List<Object?> actions) => {
+    for (final action in actions)
+      if (action case {'addLiveChatTickerItemAction': {'item': final Map<Object?, Object?> item}})
+        for (final ticker in item.values)
+          if (ticker case {'id': final String id, 'fullDurationSec': final int seconds}
+              when id.isNotEmpty && seconds > 0)
+            id: Duration(seconds: seconds),
+  };
+
+  /// One action as a message: an added item ([_item]), or a removal as a
+  /// retraction; null for anything else.
+  ///
+  /// The page takes a message out of the list for `removeChatItemAction`
+  /// and hides its text for `markChatItemAsDeletedAction` (both name it by
+  /// `targetItemId`); `removeChatItemByAuthorAction` and
+  /// `markChatItemsByAuthorAsDeletedAction` do so for every item whose
+  /// `authorExternalChannelId` is their `externalChannelId`.
+  static LiveMessage? _message(Object? action, Map<String, Duration> pinned, DateTime received) {
+    if (action is! Map) return null;
+    if (action['addChatItemAction'] case {'item': final Map<Object?, Object?> item}) {
+      return _item(item, pinned, received);
     }
+    for (final kind in const ['removeChatItemAction', 'markChatItemAsDeletedAction']) {
+      if (action[kind] case {'targetItemId': final String id} when id.isNotEmpty) {
+        return _retraction(LiveRetraction.message(id));
+      }
+    }
+    for (final kind in const ['removeChatItemByAuthorAction', 'markChatItemsByAuthorAsDeletedAction']) {
+      if (action[kind] case {'externalChannelId': final String id} when id.isNotEmpty) {
+        return _retraction(LiveRetraction.user(id));
+      }
+    }
+    return null;
+  }
+
+  /// A retraction: no id of its own (the removal has none), no sender.
+  static LiveMessage _retraction(LiveRetraction target) => LiveMessage(
+    type: LiveMessageType.retraction,
+    userName: '',
+    message: '',
+    color: LiveMessageColor.white,
+    data: target,
+  );
+
+  /// One added item: a text message as a chat line; a paid message as a
+  /// super chat; a Super Sticker, a membership (joined, a milestone), gifted
+  /// memberships and a received gift as a notice. Null for anything else
+  /// and for items without text.
+  static LiveMessage? _item(Map<Object?, Object?> item, Map<String, Duration> pinned, DateTime received) {
+    if (item['liveChatTextMessageRenderer'] case final Map<Object?, Object?> text) return _chatLine(text);
+    if (item['liveChatPaidMessageRenderer'] case final Map<Object?, Object?> paid) {
+      return _superChat(paid, pinned, received);
+    }
+    if (item['liveChatPaidStickerRenderer'] case final Map<Object?, Object?> sticker) return _sticker(sticker);
+    if (item['liveChatMembershipItemRenderer'] case final Map<Object?, Object?> member) return _membership(member);
+    if (item['liveChatSponsorshipsGiftPurchaseAnnouncementRenderer'] case final Map<Object?, Object?> gift) {
+      final header = _map(_map(gift['header'])['liveChatSponsorshipsHeaderRenderer']);
+      return _notice(gift, _plain(header['authorName']), _plain(header['primaryText']).trim());
+    }
+    if (item['liveChatSponsorshipsGiftRedemptionAnnouncementRenderer'] case final Map<Object?, Object?> gift) {
+      return _notice(gift, _plain(gift['authorName']), _runs(gift['message']));
+    }
+    return null;
+  }
+
+  static LiveMessage? _chatLine(Map<Object?, Object?> renderer) {
+    final text = _runs(renderer['message']);
     if (text.isEmpty) return null;
     return LiveMessage(
       type: LiveMessageType.chat,
@@ -243,6 +480,87 @@ abstract final class YouTubeDanmakuProtocol {
       messageId: _string(renderer['id']),
       sentAt: _time(renderer['timestampUsec']),
       color: LiveMessageColor.white,
+    );
+  }
+
+  /// A paid message (Super Chat) as a super chat: the amount as the page
+  /// shows it (`purchaseAmountText`, in the buyer's currency, not
+  /// converted) and a price of 0 (the answer has no number for it, only
+  /// that text); the header and body colours; shown from the platform time
+  /// (or [received]) for as long as the page pins it: the ticker item's
+  /// `fullDurationSec`, else [tierDisplay] by the header colour, else
+  /// [unpinnedDisplay]. Null without amount and text.
+  static LiveMessage? _superChat(Map<Object?, Object?> paid, Map<String, Duration> pinned, DateTime received) {
+    final amount = _plain(paid['purchaseAmountText']).trim();
+    final text = _runs(paid['message']);
+    if (amount.isEmpty && text.isEmpty) return null;
+    final id = _string(paid['id']);
+    final name = _plain(paid['authorName']);
+    final time = _time(paid['timestampUsec']);
+    final start = time ?? received;
+    final tier = tierDisplay[paid['headerBackgroundColor']] ?? Duration.zero;
+    final display = pinned[id] ?? (tier > Duration.zero ? tier : unpinnedDisplay);
+    return LiveMessage(
+      type: LiveMessageType.superChat,
+      userName: name,
+      userId: _string(paid['authorExternalChannelId']),
+      message: text,
+      messageId: id,
+      sentAt: time,
+      color: LiveMessageColor.white,
+      data: LiveSuperChatMessage(
+        messageId: id,
+        userName: name,
+        face: _photo(paid['authorPhoto']),
+        message: text,
+        price: 0,
+        priceText: amount,
+        startTime: start,
+        endTime: start.add(display),
+        backgroundColor: _color(paid['headerBackgroundColor']),
+        backgroundBottomColor: _color(paid['bodyBackgroundColor']),
+      ),
+    );
+  }
+
+  /// A Super Sticker as a notice: the page shows the name, the amount and
+  /// the sticker, whose description (`sticker.accessibility`) stands for it.
+  /// The page has no sentence for it, so the words joining them are the
+  /// app's (Chinese); the amount and description are the platform's.
+  static LiveMessage? _sticker(Map<Object?, Object?> sticker) {
+    final amount = _plain(sticker['purchaseAmountText']).trim();
+    final label = _accessibility(sticker['sticker']);
+    final text = ['送出 Super Sticker${amount.isEmpty ? '' : ' $amount'}', if (label.isNotEmpty) label].join('：');
+    return _notice(sticker, _plain(sticker['authorName']), text);
+  }
+
+  /// A membership as a notice: a new member's `headerSubtext` ("Welcome to
+  /// …!"), or a milestone's `headerPrimaryText` ("Member for 15 months")
+  /// with the level (`headerSubtext`, in full-width brackets) and the
+  /// member's message (after a full-width colon), all as the platform wrote
+  /// them. Null without a header.
+  static LiveMessage? _membership(Map<Object?, Object?> member) {
+    final primary = _plain(member['headerPrimaryText']).trim();
+    final subtext = _plain(member['headerSubtext']).trim();
+    final header = primary.isEmpty ? subtext : (subtext.isEmpty ? primary : '$primary（$subtext）');
+    if (header.isEmpty) return null;
+    final text = _runs(member['message']);
+    return _notice(member, _plain(member['authorName']), text.isEmpty ? header : '$header：$text');
+  }
+
+  /// A notice of kind [LiveNoticeKind.subscription]: [name] and [text] as
+  /// one line, the item's id, time and sender. Null without [text].
+  static LiveMessage? _notice(Map<Object?, Object?> renderer, String name, String text) {
+    if (text.isEmpty) return null;
+    return LiveMessage(
+      type: LiveMessageType.notice,
+      userName: name,
+      userId: _string(renderer['authorExternalChannelId']),
+      message: name.trim().isEmpty ? text : '${name.trim()} $text',
+      messageId: _string(renderer['id']),
+      sentAt: _time(renderer['timestampUsec']),
+      color: LiveMessageColor.white,
+      data: LiveNoticeKind.subscription,
     );
   }
 
@@ -284,6 +602,30 @@ abstract final class YouTubeDanmakuProtocol {
     ].join();
   }
 
+  /// `accessibility.accessibilityData.label`, trimmed, or empty.
+  static String _accessibility(Object? node) => switch (node) {
+    {'accessibility': {'accessibilityData': {'label': final String label}}} => label.trim(),
+    _ => '',
+  };
+
+  /// The last (largest) thumbnail of an `authorPhoto` as an https URL (a
+  /// protocol-relative one made https), or empty.
+  static String _photo(Object? photo) {
+    final thumbnails = photo is Map ? photo['thumbnails'] : null;
+    if (thumbnails is! List || thumbnails.isEmpty) return '';
+    final url = switch (thumbnails.last) {
+      {'url': final String url} => url.trim(),
+      _ => '',
+    };
+    if (url.startsWith('https://')) return url;
+    if (url.startsWith('//')) return 'https:$url';
+    return '';
+  }
+
+  /// An ARGB colour (a whole number of 32 bits) as `#rrggbb`, or empty.
+  static String _color(Object? value) =>
+      value is int && value >= 0 && value <= 0xFFFFFFFF ? '${LiveMessageColor.numberToColor(value)}' : '';
+
   static String _string(Object? value) => value is String ? value : '';
 
   static Map<Object?, Object?> _map(Object? value) => value is Map<Object?, Object?> ? value : const {};
@@ -312,6 +654,13 @@ abstract final class YouTubeDanmakuProtocol {
 ///   does a broadcast without a live chat (not live, chat off, a replay) or
 ///   an argument that is not a video id. Joined, it reports [DanmakuReady]
 ///   and then the viewers of `next`.
+/// - With `allChat`, the chat is read in the page's "Live chat" view (every
+///   message) instead of "Top chat" (B-13): the first continuation, and any
+///   reload continuation later, is asked for rewritten
+///   ([YouTubeDanmakuProtocol.allChatContinuation]). A continuation that
+///   cannot be rewritten is asked for as it came; one the server refuses
+///   (a 4xx, or an answer without a chat) is asked for again as it came,
+///   and the run stays with "Top chat". Neither is a failure.
 /// - Each poll waits for the previous one, then the wait the answer asked
 ///   for (`timeoutMs`, within 1–5 s, 5 s when none). An answer to a reload
 ///   continuation is history again and is not reported.
@@ -322,15 +671,24 @@ abstract final class YouTubeDanmakuProtocol {
 /// - An answer without a continuation ends with
 ///   [DanmakuCloseReason.connectionFailed] (the chat is over: the broadcast
 ///   ended); the room detail names the channel's next broadcast.
+/// - Every 30 s once joined, `updated_metadata` gives the viewer count
+///   again (B-13): first by video id, then with the continuation of the
+///   previous answer. A failed request is not reported (the next turn asks
+///   by video id again) and does not touch the chat.
 ///
 /// The app registers it as `SiteIds.youtube: () =>
-/// YouTubeDanmakuConnection(http: …)`, with the `LiveHttp` it gives
-/// `YouTubeSite` (the `youtube` proxy route and throttle).
+/// YouTubeDanmakuConnection(http: …, allChat: …)`, with the `LiveHttp` it
+/// gives `YouTubeSite` (the `youtube` proxy route and throttle) and the
+/// "show all chat" setting (default off, as the page).
 final class YouTubeDanmakuConnection extends DanmakuConnectionBase<YouTubeDanmakuArgs> {
-  /// Creates the connection; `http` sends the chat requests.
-  new({required this._http});
+  /// Creates the connection; `http` sends the chat requests, `allChat` reads
+  /// the "Live chat" view instead of "Top chat" (default off, as the page),
+  /// [now] is the clock a Super Chat without a platform time starts at.
+  new({required this._http, this._allChat = false, DateTime Function()? now}) : _now = now ?? DateTime.now;
 
   final LiveHttp _http;
+  final bool _allChat;
+  final DateTime Function() _now;
 
   @override
   @protected
@@ -339,7 +697,7 @@ final class YouTubeDanmakuConnection extends DanmakuConnectionBase<YouTubeDanmak
     if (!YouTubeApi.isVideoId(videoId)) {
       throw const DanmakuStartFailure(DanmakuCloseReason.connectionFailed, detail: 'No broadcast');
     }
-    final chat = _YouTubeChat(_http, run);
+    final chat = _YouTubeChat(_http, run, allChat: _allChat, now: _now);
     YouTubeChatEntry? entry;
     YouTubeChatPoll? history;
     for (var failures = 0; history == null;) {
@@ -354,9 +712,7 @@ final class YouTubeDanmakuConnection extends DanmakuConnectionBase<YouTubeDanmak
             detail: watch.replay ? 'Chat replay only' : 'No live chat',
           );
         }
-        history = YouTubeDanmakuProtocol.chat(
-          await chat.post(YouTubeDanmakuProtocol.chatEndpoint, YouTubeDanmakuProtocol.chatBody(watch.continuation!)),
-        );
+        history = await chat.poll(watch.continuation!, restart: true);
       } on DanmakuStartFailure {
         rethrow;
       } on Object catch (error) {
@@ -372,6 +728,7 @@ final class YouTubeDanmakuConnection extends DanmakuConnectionBase<YouTubeDanmak
     run.ready();
     if (entry?.viewers case final viewers?) run.message(YouTubeDanmakuProtocol.audience(viewers));
     unawaited(chat.follow(history));
+    unawaited(chat.viewers(videoId));
   }
 
   static String _ended(YouTubeChatPoll poll) => poll.notice.isEmpty ? 'Chat ended' : 'Chat ended: ${poll.notice}';
@@ -379,13 +736,18 @@ final class YouTubeDanmakuConnection extends DanmakuConnectionBase<YouTubeDanmak
 
 /// The chat of one run: its requests, cancelled when the run ends.
 final class _YouTubeChat {
-  new(this._http, this._run) {
+  new(this._http, this._run, {required this._allChat, required this._now}) {
     unawaited(_run.ended.then((_) => _cancel.cancel()));
   }
 
   final LiveHttp _http;
   final DanmakuRun _run;
+  final DateTime Function() _now;
   final CancelToken _cancel = CancelToken();
+
+  /// Whether a continuation that starts the chat over is asked for in the
+  /// "Live chat" view; off once the server refused it.
+  bool _allChat;
 
   /// Sends [body] to [url] and returns the answer decoded; throws
   /// `HttpStatusFailure`, `TransportFailure` or [FormatException].
@@ -398,6 +760,32 @@ final class _YouTubeChat {
     cancel: _cancel,
   );
 
+  /// Asks for [continuation]. One that starts the chat over ([restart]: the
+  /// first, or a reload) is asked for in the "Live chat" view first when
+  /// that is on; a refusal (a 4xx, or an answer without a chat) turns it off
+  /// and asks for [continuation] as it came.
+  Future<YouTubeChatPoll> poll(String continuation, {required bool restart}) async {
+    if (_allChat && restart) {
+      final live = YouTubeDanmakuProtocol.allChatContinuation(continuation);
+      if (live != null && live != continuation) {
+        try {
+          final answer = await _chat(live);
+          if (!answer.ended) return answer;
+        } on HttpStatusFailure catch (failure) {
+          if (failure.status < 400 || failure.status >= 500) rethrow;
+        }
+        _allChat = false;
+        if (!_run.isActive) throw const TransportFailure(SiteIds.youtube, TransportReason.cancelled);
+      }
+    }
+    return await _chat(continuation);
+  }
+
+  Future<YouTubeChatPoll> _chat(String continuation) async {
+    final answer = await post(YouTubeDanmakuProtocol.chatEndpoint, YouTubeDanmakuProtocol.chatBody(continuation));
+    return YouTubeDanmakuProtocol.chat(answer, now: _now());
+  }
+
   /// Polls after [previous] until the chat is over, the failures run out or
   /// the run ends.
   Future<void> follow(YouTubeChatPoll previous) async {
@@ -407,9 +795,7 @@ final class _YouTubeChat {
     while (await _run.delay(wait)) {
       final YouTubeChatPoll poll;
       try {
-        poll = YouTubeDanmakuProtocol.chat(
-          await post(YouTubeDanmakuProtocol.chatEndpoint, YouTubeDanmakuProtocol.chatBody(last.continuation!)),
-        );
+        poll = await this.poll(last.continuation!, restart: last.reload);
       } on Object catch (error) {
         if (!_run.isActive) return;
         if (++failures >= YouTubeDanmakuProtocol.maxFailures) {
@@ -433,6 +819,32 @@ final class _YouTubeChat {
       }
       last = poll;
       wait = YouTubeDanmakuProtocol.pollDelay(poll.timeout);
+    }
+  }
+
+  /// Every [YouTubeDanmakuProtocol.viewerInterval] until the run ends, the
+  /// live viewer count of `updated_metadata` (B-13): first by [videoId],
+  /// then with the previous answer's continuation. A failure is not
+  /// reported; the next turn asks by [videoId] again.
+  Future<void> viewers(String videoId) async {
+    String? continuation;
+    while (await _run.delay(YouTubeDanmakuProtocol.viewerInterval)) {
+      try {
+        final update = YouTubeDanmakuProtocol.metadata(
+          await post(
+            YouTubeDanmakuProtocol.metadataEndpoint,
+            continuation == null
+                ? YouTubeDanmakuProtocol.metadataBody(videoId)
+                : YouTubeDanmakuProtocol.metadataContinuationBody(continuation),
+          ),
+        );
+        if (!_run.isActive) return;
+        continuation = update.continuation;
+        if (update.viewers case final viewers?) _run.message(YouTubeDanmakuProtocol.audience(viewers));
+      } on Object {
+        if (!_run.isActive) return;
+        continuation = null;
+      }
     }
   }
 }

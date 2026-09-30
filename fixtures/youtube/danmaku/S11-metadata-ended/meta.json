@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "case": "S11-metadata-ended",
+  "room": "youtube:n4eqMMG3mYE",
+  "danmakuKeys": {
+    "videoId": "n4eqMMG3mYE"
+  },
+  "capturedAt": "2026-09-30T15:29:40Z",
+  "route": "proxy",
+  "handshakes": [],
+  "frames": 2,
+  "raw": {
+    "sha256": "5fea17d66f53f7055b3cc1eee4c0069da46214df261ec2a1fb386e47e40c8ded",
+    "length": 515905
+  },
+  "scrubbed": [
+    {
+      "where": "updated_metadata: all but $.continuation and the updateViewershipAction actions",
+      "rule": "dropped (title, description, date text, responseContext with the visitor id, frameworkUpdates)"
+    },
+    {
+      "where": "the recording's next and the other seven updated_metadata frames",
+      "rule": "dropped"
+    }
+  ],
+  "note": "M5.F (B-13). updated_metadata of a broadcast that had just ended (Subaru Ch. n4eqMMG3mYE, listed as live minutes before): by video id, then with its continuation. The count is \"102,275 views\" without isLive (no live viewers), timeoutMs 20000. The recording's next named a chat replay (op2w0wR… continuation, not the 119693434 message the Live chat view is written into).",
+  "tool": "scratch Python scripts (not in the repository): read-only anonymous InnerTube requests through the local proxy 127.0.0.1:7897; no login, nothing posted"
+}

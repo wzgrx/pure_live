@@ -943,4 +943,53 @@ void main() {
       _expectLines(data.playUrls, roomId: room.roomId, issuedAt: fixture.capturedAt);
     });
   });
+
+  group('M4.D H.265 qualities (优先 H.264)', () {
+    // S10: a room page whose H.265 set has 4K and 蓝光 质臻 that H.264 lacks
+    // (2026-09-30, anonymous session); both FLV with codec id 12.
+    final fixture = _sample('S10-room-live-hevc');
+    final room = KuaishouApi.roomDetail(fixture.body, requestedId: 'KPL704668133', issuedAt: fixture.capturedAt);
+    final playUrls = (room.data! as KuaishouRoomData).playUrls;
+
+    test('S10: H.264 qualities first as before, the H.265-only ones after with “ · H.265”', () {
+      expect((room.isLiveNow, room.restriction), (true, LiveRestriction.none));
+      final on = KuaishouApi.qualities(playUrls);
+      expect(on.map((quality) => quality.quality), ['蓝光 4M', '超清', '高清', '4K · H.265', '蓝光 质臻 · H.265']);
+      expect(on.map((quality) => quality.id), [
+        '蓝光 4M\u000070',
+        '超清\u000050',
+        '高清\u000030',
+        '4K · H.265\u0000490',
+        '蓝光 质臻 · H.265\u0000130',
+      ]);
+      for (final quality in on.take(3)) {
+        expect((quality.data! as List).single, contains('SportAvc'), reason: 'H.264 tiers keep only their H.264 URL');
+      }
+      final off = KuaishouApi.qualities(playUrls, preferH264: false);
+      expect(off.map((quality) => quality.sort), [490, 130, 70, 50, 30], reason: 'off: by sort (3.x order)');
+    });
+
+    test('S10: an H.265 quality plays its HEVC FLV line; a missing quality falls to H.264', () {
+      final qualities = KuaishouApi.qualities(playUrls);
+      final uhd = KuaishouApi.resolution(
+        playUrls,
+        quality: qualities[3],
+        roomId: room.roomId,
+        issuedAt: fixture.capturedAt,
+      );
+      final line = uhd.lines.single;
+      expect((line.codec, line.format, uhd.appliedQualityData), ('hevc', StreamFormat.flv, '4K · H.265\u0000490'));
+      expect(line.url, contains('SportHevcUltra4kL2Promax.flv'));
+      expect(line.headers, KuaishouApi.mediaHeaders(room.roomId));
+      expect(line.lease!.expiresAt!.difference(fixture.capturedAt).inHours, 24);
+      String? fallback(int sort) => KuaishouApi.resolution(
+        playUrls,
+        quality: LivePlayQuality(quality: '蓝光 质臻', id: '蓝光 质臻\u0000$sort', sort: sort),
+        roomId: room.roomId,
+        issuedAt: fixture.capturedAt,
+      ).appliedQualityData?.toString();
+      expect(fallback(130), '蓝光 4M\u000070', reason: 'a saved H.264 preference never lands on H.265');
+      expect(fallback(10), '高清\u000030');
+    });
+  });
 }

@@ -642,6 +642,18 @@ void main() {
       expect(setup.http.requests, hasLength(before));
     });
 
+    test('M4.D “优先 H.264” is read at each call: H.265-only qualities last, or by sort when off', () async {
+      final fixture = Fixture.load('kuaishou', 'S10-room-live-hevc');
+      final room = KuaishouApi.roomDetail(fixture.body, requestedId: 'KPL704668133', issuedAt: fixture.capturedAt);
+      var preferH264 = true;
+      final http = ReplayHttp(const []);
+      final site = KuaishouSite(http, preferH264: () => preferH264, now: () => fixture.capturedAt);
+      expect((await site.getPlayQualities(detail: room)).map((quality) => quality.sort), [70, 50, 30, 490, 130]);
+      preferH264 = false;
+      expect((await site.getPlayQualities(detail: room)).map((quality) => quality.sort), [490, 130, 70, 50, 30]);
+      expect(http.requests, isEmpty);
+    });
+
     test('recovery reads a fresh page; a room without streams (a refreshed follow) reads one too', () async {
       final setup = _setup(['S09-room-live']);
       final room = await setup.site.getRoomDetailForRefresh(roomId: _live);

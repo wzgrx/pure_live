@@ -42,18 +42,24 @@ final RegExp _roomIdPattern = RegExp(r'^[a-zA-Z0-9_-]+$');
 final class KuaishouSite extends LiveSite
     with LiveSiteLinks
     implements LiveSiteRoomRefresher, LiveSiteRecordRoomResolver, LivePlayUrlResolver, LivePlayRecoveryResolver {
-  /// Creates the adapter. [_cookies] holds the user's cookie, if any; [now]
-  /// and [random] (the browser identity, the report's counter) are
-  /// injectable for tests.
-  new(this.http, {this._cookies, DateTime Function()? now, Random? random})
-    : _now = now ?? DateTime.now,
+  /// Creates the adapter. [_cookies] holds the user's cookie, if any;
+  /// [preferH264] reads "优先 H.264" (on by default, the setting shared with
+  /// 22-3) at each call: on, the H.265-only qualities of a room page come
+  /// after its H.264 ones; off, every quality by sort. [now] and [random]
+  /// (the browser identity, the report's counter) are injectable for tests.
+  new(this.http, {this._cookies, bool Function()? preferH264, DateTime Function()? now, Random? random})
+    : _preferH264 = preferH264 ?? _on,
+      _now = now ?? DateTime.now,
       _random = random ?? Random();
 
   /// Transport.
   final LiveHttp http;
 
   final CookieVault? _cookies;
+  final bool Function() _preferH264;
   final DateTime Function() _now;
+
+  static bool _on() => true;
   final Random _random;
   late BrowserUserAgent _browser = BrowserUserAgent.random(_random);
   _Session? _session;
@@ -365,7 +371,7 @@ final class KuaishouSite extends LiveSite
   /// refreshed follow, fetches its page).
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
-    final qualities = KuaishouApi.qualities((await _streams(detail, fresh: false)).playUrls);
+    final qualities = KuaishouApi.qualities((await _streams(detail, fresh: false)).playUrls, preferH264: _preferH264());
     if (qualities.isEmpty) throw const StreamUnavailable(_site, 'playUrls: no playable representation');
     return qualities;
   }

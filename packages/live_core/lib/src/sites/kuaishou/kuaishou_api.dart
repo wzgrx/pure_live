@@ -311,11 +311,17 @@ abstract final class KuaishouApi {
   ///   `shortName`, else `qualityType`, else `清晰度 {sort}`;
   /// - one quality per (name, sort), its URLs merged in order without
   ///   repeats (descriptors are CDN lines); [LivePlayQuality.data] holds
-  ///   them, [LivePlayQuality.id] is `name\u0000sort`.
-  static List<LivePlayQuality> qualities(Object? playUrls) => [
-    for (final tier in _tiers(playUrls))
+  ///   them, [LivePlayQuality.id] is `name\u0000sort`;
+  /// - a room page's H.265 qualities the H.264 set lacks (4K, 蓝光 质臻)
+  ///   are added with “ · H.265” after the name and in the id; with
+  ///   [preferH264] ("优先 H.264", on by default) they come after every
+  ///   H.264 quality, else by sort. Their FLV is codec id 12.
+  static List<LivePlayQuality> qualities(Object? playUrls, {bool preferH264 = true}) => [
+    for (final tier in _tiers(playUrls, preferH264: preferH264))
       LivePlayQuality(
-        quality: LiveQualityLabel.normalize(platform: _site, rawLabel: tier.name, id: tier.key),
+        quality:
+            LiveQualityLabel.normalize(platform: _site, rawLabel: tier.name, id: tier.key) +
+            (tier.hevcOnly ? _hevcSuffix : ''),
         id: tier.key,
         sort: tier.sort,
         data: List<String>.unmodifiable([for (final line in tier.lines) line.url]),
@@ -631,8 +637,11 @@ abstract final class KuaishouApi {
     return _list(set == null ? map['representation'] : set['representation']);
   }
 
-  static List<_Tier> _tiers(Object? playUrls) {
+  /// The tiers of [playUrls], best first; with [preferH264] the H.265 tiers
+  /// (`hevcOnly`) follow every other tier.
+  static List<_Tier> _tiers(Object? playUrls, {bool preferH264 = true}) {
     final merged = <String, _Tier>{};
+    final hevc = <Object?>[];
     for (final raw in playUrls is List ? playUrls : [playUrls]) {
       final descriptor = _object(raw);
       if (descriptor == null) continue;
@@ -645,28 +654,54 @@ abstract final class KuaishouApi {
           break;
         }
       }
-      for (final value in _representations(chosen)) {
-        final item = _object(value);
-        if (item == null) continue;
-        final url = item['url']?.toString().trim() ?? '';
-        final uri = _mediaUri(url);
-        if (uri == null) continue;
-        final sort = jsonInt(item['level']) ?? jsonInt(item['bitrate']) ?? 0;
-        final name =
-            jsonString(item['name']) ?? jsonString(item['shortName']) ?? jsonString(item['qualityType']) ?? '清晰度 $sort';
-        final key = '$name\u0000$sort';
-        final tier = merged.putIfAbsent(key, () => (key: key, name: name, sort: sort, lines: <_Line>[]));
-        if (tier.lines.every((line) => line.url != url)) {
-          tier.lines.add((url: url, uri: uri, codec: keyCodec ?? _codecOf(uri)));
-        }
+      _addTiers(merged, _representations(chosen), keyCodec);
+      if (keyCodec == 'avc') {
+        hevc.addAll(
+          _representations(_representations(descriptor['hevc']).isNotEmpty ? descriptor['hevc'] : descriptor['h265']),
+        );
       }
     }
-    final ordered = merged.values.indexed.toList()
+    // H.265 qualities the H.264 set lacks (4K, 蓝光 质臻 on some rooms), apart
+    // from the H.264 names so a saved preference never lands on them.
+    final extra = <String, _Tier>{};
+    _addTiers(extra, hevc, 'hevc', hevcOnly: true);
+    extra.removeWhere((_, tier) => merged.containsKey('${tier.name}\u0000${tier.sort}'));
+    final ordered = [...merged.values, ...extra.values].indexed.toList()
       ..sort((a, b) {
+        if (preferH264 && a.$2.hevcOnly != b.$2.hevcOnly) return a.$2.hevcOnly ? 1 : -1;
         final bySort = b.$2.sort.compareTo(a.$2.sort);
         return bySort != 0 ? bySort : a.$1.compareTo(b.$1);
       });
     return [for (final (_, tier) in ordered) tier];
+  }
+
+  /// Adds [representations] to [tiers] by (name, sort); [codec] is the
+  /// descriptor's, else read from each URL. [hevcOnly] tiers are keyed by
+  /// their name with “ · H.265”.
+  static void _addTiers(
+    Map<String, _Tier> tiers,
+    List<Object?> representations,
+    String? codec, {
+    bool hevcOnly = false,
+  }) {
+    for (final value in representations) {
+      final item = _object(value);
+      if (item == null) continue;
+      final url = item['url']?.toString().trim() ?? '';
+      final uri = _mediaUri(url);
+      if (uri == null) continue;
+      final sort = jsonInt(item['level']) ?? jsonInt(item['bitrate']) ?? 0;
+      final name =
+          jsonString(item['name']) ?? jsonString(item['shortName']) ?? jsonString(item['qualityType']) ?? '清晰度 $sort';
+      final key = hevcOnly ? '$name$_hevcSuffix\u0000$sort' : '$name\u0000$sort';
+      final tier = tiers.putIfAbsent(
+        key,
+        () => (key: key, name: name, sort: sort, lines: <_Line>[], hevcOnly: hevcOnly),
+      );
+      if (tier.lines.every((line) => line.url != url)) {
+        tier.lines.add((url: url, uri: uri, codec: codec ?? _codecOf(uri)));
+      }
+    }
   }
 
   /// An absolute `http://` or `https://` URL (3.x's check: the prefix, and
@@ -690,15 +725,19 @@ abstract final class KuaishouApi {
     };
   }
 
+  /// The tier with [wanted]'s id, else the next lower one (H.265-only tiers
+  /// only when there is nothing else), else the lowest.
   static _Tier _choose(List<_Tier> tiers, LivePlayQuality wanted) {
     final id = wanted.id?.toString();
     for (final tier in tiers) {
       if (tier.key == id) return tier;
     }
-    for (final tier in tiers) {
+    final pool = tiers.where((tier) => !tier.hevcOnly).toList();
+    final candidates = pool.isEmpty ? tiers : pool;
+    for (final tier in candidates) {
       if (tier.sort <= wanted.sort) return tier;
     }
-    return tiers.last;
+    return candidates.last;
   }
 
   /// The CDN host, numbered when a quality has two URLs on it.
@@ -723,7 +762,11 @@ abstract final class KuaishouApi {
 
 typedef _Line = ({String url, Uri uri, String? codec});
 
-typedef _Tier = ({String key, String name, int sort, List<_Line> lines});
+/// One quality: `hevcOnly` for an H.265 quality of a room page whose H.264
+/// set lacks it.
+typedef _Tier = ({String key, String name, int sort, List<_Line> lines, bool hevcOnly});
+
+const _hevcSuffix = ' · H.265';
 
 /// `data` of a `live_api` answer. List answers carry no `result`; a
 /// `result` other than 1 is 2 `RateLimited` (“操作太快了”), 10

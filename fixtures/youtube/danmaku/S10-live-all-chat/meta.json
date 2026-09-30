@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "case": "S10-live-all-chat",
+  "room": "youtube:UChAnqc_AY5_I3Px5dig3X1Q",
+  "danmakuKeys": {
+    "videoId": "lNPh7CdwkWk",
+    "channelId": "UChAnqc_AY5_I3Px5dig3X1Q"
+  },
+  "capturedAt": "2026-09-30T15:12:57Z",
+  "route": "proxy",
+  "handshakes": [],
+  "frames": 8,
+  "raw": {
+    "sha256": "4559fa0efe7b4db6175b53a79d308feb3a03ed69049b86ca11724be0b24818ab",
+    "length": 6440469
+  },
+  "scrubbed": [
+    {
+      "where": "frames of the Top chat chain recorded alongside (view=top), and every frame after 102 s",
+      "rule": "dropped (the raw recording ran 161 s with both views)"
+    },
+    {
+      "where": "$..clickTrackingParams, $..trackingParams, $..loggingDirectives",
+      "rule": "dropped"
+    },
+    {
+      "where": "next: all but $.contents.twoColumnWatchNextResults.conversationBar and .results.results.contents[*].videoPrimaryInfoRenderer.viewCount",
+      "rule": "dropped"
+    },
+    {
+      "where": "get_live_chat: all but $.continuationContents.liveChatContinuation.continuations and .actions",
+      "rule": "dropped"
+    },
+    {
+      "where": "get_live_chat frame 1 (the first answer, history, never reported): its 73 liveChatTextMessageRenderer items",
+      "rule": "dropped (size); its Super Chats, memberships, placeholders and 58 ticker items are kept"
+    },
+    {
+      "where": "updated_metadata: all but $.continuation and the updateViewershipAction actions",
+      "rule": "dropped (title, description, date text, responseContext, frameworkUpdates)"
+    },
+    {
+      "where": "$..authorName.simpleText, $..authorUsername.simpleText",
+      "rule": "person: same-length synthetic handle, one per person"
+    },
+    {
+      "where": "@handles inside any text (message runs, ticker accessibility labels such as '@x sent 50 gift memberships')",
+      "rule": "person: the same synthetic handle as the author"
+    },
+    {
+      "where": "$..authorExternalChannelId, $..externalChannelId",
+      "rule": "person: synthetic UC + 22 characters, one per person; the broadcaster (UChAnqc_AY5_I3Px5dig3X1Q, public) kept"
+    },
+    {
+      "where": "$..authorPhoto, $..sponsorPhoto, $..tickerThumbnails",
+      "rule": "dropped"
+    },
+    {
+      "where": "$..contextMenuEndpoint, $..contextMenuAccessibility, $..replyButton, $..beforeContentButtons, $..creatorHeartButton, $..pdgLikeButton, $..openEngagementPanelCommand, $..dynamicStateData, $..engagementStateKey",
+      "rule": "dropped (their params and keys hold channel ids)"
+    },
+    {
+      "where": "$.actions[*].addChatItemAction.clientId, $..leaderboardBadge, $..authorBadges",
+      "rule": "dropped"
+    },
+    {
+      "where": "$..emoji",
+      "rule": "only emojiId, shortcuts and isCustomEmoji kept (image and searchTerms dropped: size)"
+    },
+    {
+      "where": "actions other than add, remove, mark-as-deleted, replace and ticker items",
+      "rule": "content dropped, the action type kept as {}"
+    },
+    {
+      "where": "continuations",
+      "rule": "kept as recorded: decoded they hold only the broadcaster's channel id, the video id, times and the view (field 119693434.16.1 is 1, Live chat); request 1's continuation is next's with that field rewritten from 4 to 1, as YouTubeDanmakuProtocol.allChatContinuation does"
+    }
+  ],
+  "note": "M5.F (B-13). Korone Ch.'s birthday broadcast lNPh7CdwkWk (about 16,000 watching), read in the \"Live chat\" view: `next`, the first get_live_chat with next's continuation rewritten to the Live chat view (accepted: 200, answers keep field 16.1 = 1), four later polls, and updated_metadata by video id then with its continuation (30 s apart; each answer about 7.8 KB raw, timeoutMs 5000). 11 Super Chats (7 in the first answer), each followed in the same answer by its ticker item with fullDurationSec by tier (green 120, yellow 300, orange 600, magenta 1800, red 3600 and 7200); a light blue ¥320 one has no ticker. Memberships: a new member (Welcome to …!) and milestones. The first answer's ticker holds 3 Super Stickers and one purchase of 50 gifted memberships as embedded renderers (58 ticker items: 50 Super Chats, 4 memberships, 3 stickers, 1 gift). Recorded alongside the Top chat view: in the same 150 s, 1200 text messages in Live chat against 778 in Top chat.",
+  "tool": "scratch Python scripts (not in the repository): read-only anonymous InnerTube requests (WEB context of YouTubeApi.webContext, YouTubeApi.apiHeaders, prettyPrint=false) through the local proxy 127.0.0.1:7897; no login, nothing posted. Scrubbing refuses to write while an original author name, channel id or photo path can be found plainly, percent-encoded or in (nested) Base64"
+}

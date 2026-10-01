@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
+import 'package:pure_live/features/live_play/logic/room_layout.dart';
 
 /// The icon of a gesture's [level] (3.x `BrightnessVolumnDargArea`: none,
 /// under half, half and more).
@@ -39,7 +40,7 @@ enum GestureLevel {
 /// the room's. A level bar shows while it changes.
 class PlayerGestureLayer extends StatefulWidget {
   /// Wraps [child].
-  const new({required this.controller, required this.child, this.enabled = true, super.key});
+  const new({required this.controller, required this.child, this.enabled = true, this.onSwipeUp, super.key});
 
   /// The room.
   final LiveRoomController controller;
@@ -49,6 +50,11 @@ class PlayerGestureLayer extends StatefulWidget {
 
   /// Off while the controls are locked.
   final bool enabled;
+
+  /// The portrait fullscreen: an upward swipe from the lowest
+  /// [portraitRestoreZone] brings the panel back (3.x
+  /// `BrightnessVolumnDargArea._onVerticalDragStart`).
+  final VoidCallback? onSwipeUp;
 
   @override
   State<PlayerGestureLayer> createState() => PlayerGestureLayerState();
@@ -61,6 +67,7 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
   Timer? _hide;
   Timer? _save;
   GestureLevel? _dragging;
+  double? _restoring;
 
   bool get _systemVolume => DeviceControls.available;
 
@@ -114,13 +121,33 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
   }
 
   void _onDragStart(DragStartDetails details) {
-    final width = context.size?.width ?? 0;
-    final kind = details.localPosition.dx < width / 2 ? GestureLevel.brightness : GestureLevel.volume;
+    final size = context.size ?? Size.zero;
+    _restoring = null;
+    _dragging = null;
+    if (widget.onSwipeUp != null && details.localPosition.dy >= size.height - portraitRestoreZone) {
+      _restoring = 0;
+      return;
+    }
+    if (!DeviceControls.available) return;
+    final kind = details.localPosition.dx < size.width / 2 ? GestureLevel.brightness : GestureLevel.volume;
     _dragging = kind;
     unawaited(_current(kind).then((value) => _level = value));
   }
 
+  void _onDragEnd(DragEndDetails details) {
+    final restoring = _restoring;
+    _restoring = null;
+    _dragging = null;
+    if (restoring != null && swipeRestoresPanel(upward: restoring, velocity: details.primaryVelocity ?? 0)) {
+      widget.onSwipeUp?.call();
+    }
+  }
+
   void _onDragUpdate(DragUpdateDetails details) {
+    if (_restoring case final upward?) {
+      _restoring = (upward - details.delta.dy).clamp(0.0, double.infinity);
+      return;
+    }
     final kind = _dragging;
     final height = context.size?.height ?? 0;
     if (kind == null || height <= 0) return;
@@ -133,12 +160,16 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
   Widget build(BuildContext context) {
     final mobile = DeviceControls.available;
     var content = widget.child;
-    if (widget.enabled && mobile) {
+    if (widget.enabled && (mobile || widget.onSwipeUp != null)) {
       content = GestureDetector(
         behavior: HitTestBehavior.translucent,
         onVerticalDragStart: _onDragStart,
         onVerticalDragUpdate: _onDragUpdate,
-        onVerticalDragEnd: (_) => _dragging = null,
+        onVerticalDragEnd: _onDragEnd,
+        onVerticalDragCancel: () {
+          _dragging = null;
+          _restoring = null;
+        },
         child: content,
       );
     }

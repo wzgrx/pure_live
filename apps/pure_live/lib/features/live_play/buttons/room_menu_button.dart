@@ -132,13 +132,19 @@ List<List<RoomMenuEntry>> roomMenuGroups({required bool iptv, required bool wind
 /// with 3.x's icons.
 class RoomMenuButton extends ConsumerWidget {
   /// Creates the menu.
-  const new({required this.controller, this.windows = false, super.key});
+  const new({required this.controller, this.windows = false, this.onVideo = false, this.onMenu, super.key});
 
   /// The room.
   final LiveRoomController controller;
 
   /// Windows entries (new window).
   final bool windows;
+
+  /// On the picture (the fullscreen bars, U.2c change 2): a white icon.
+  final bool onVideo;
+
+  /// Told when the menu opens (true) and closes: the controls stay up.
+  final ValueChanged<bool>? onMenu;
 
   /// Runs [entry] for [controller].
   static Future<void> run(
@@ -231,7 +237,13 @@ class RoomMenuButton extends ConsumerWidget {
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       icon: const Icon(AppIcons.roomMenu),
-      onSelected: (entry) => unawaited(run(context, ref, controller, entry)),
+      iconColor: onVideo ? OnVideoColors.foreground : null,
+      onOpened: () => onMenu?.call(true),
+      onCanceled: () => onMenu?.call(false),
+      onSelected: (entry) {
+        onMenu?.call(false);
+        unawaited(run(context, ref, controller, entry));
+      },
       // Read when the menu opens: the bar does not rebuild for the room's
       // changes.
       itemBuilder: (context) {

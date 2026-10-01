@@ -183,58 +183,16 @@ class StreamMenuButton extends StatefulWidget {
 class _StreamMenuButtonState extends State<StreamMenuButton> {
   bool _open = false;
 
-  /// Below the button unless only the space above takes the menu (or the
-  /// button prefers above and the menu fits there).
-  RelativeRect _position(int count) {
-    final button = context.findRenderObject()! as RenderBox;
-    final overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
-    final rect = button.localToGlobal(Offset.zero, ancestor: overlay) & button.size;
-    final padding = MediaQuery.paddingOf(context);
-    // Rows of 48 and the menu's own 8 above and below (Material's menu).
-    final height = count * kMinInteractiveDimension + 16;
-    const gap = 4.0;
-    final below = overlay.size.height - padding.bottom - rect.bottom - gap;
-    final above = rect.top - padding.top - gap;
-    final up = widget.preferAbove ? height <= above || above > below : height > below && above > below;
-    final top = up ? rect.top - gap - height : rect.bottom + gap;
-    return RelativeRect.fromLTRB(rect.left, top, overlay.size.width - rect.right, overlay.size.height - top);
-  }
-
   Future<void> _show() async {
     if (_open || widget.entries.isEmpty) return;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final text = theme.textTheme.bodyMedium?.copyWith(fontSize: 14);
     setState(() => _open = true);
     widget.onMenu?.call(true);
-    final chosen = await showMenu<int>(
-      context: context,
-      position: _position(widget.entries.length),
-      color: scheme.surfaceContainerHighest,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      constraints: const BoxConstraints(minWidth: streamMenuMinWidth, maxWidth: 280),
-      items: [
-        for (final (index, entry) in widget.entries.indexed)
-          PopupMenuItem<int>(
-            key: ValueKey('${widget.entryKey}-$index'),
-            value: index,
-            child: Row(
-              children: [
-                Text(
-                  entry,
-                  style: index == widget.current
-                      ? text?.emphasis.copyWith(color: scheme.primary)
-                      : text?.regular.copyWith(color: scheme.onSurface),
-                ),
-                if (index == widget.current) ...[
-                  const SizedBox(width: 16),
-                  const Spacer(),
-                  Icon(AppIcons.selected, size: 18, color: scheme.primary),
-                ],
-              ],
-            ),
-          ),
-      ],
+    final chosen = await showSmallMenu(
+      context,
+      entries: widget.entries,
+      current: widget.current,
+      entryKey: widget.entryKey,
+      preferAbove: widget.preferAbove,
     );
     if (mounted) setState(() => _open = false);
     widget.onMenu?.call(false);
@@ -298,6 +256,123 @@ class _StreamMenuButtonState extends State<StreamMenuButton> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// The small menu of the room (docs/ui/compare/U.2f): next to the button of
+/// [anchor], below it unless only the space above takes the menu (or
+/// [preferAbove] and it fits there); 14-point [entries] on rows of at least
+/// 48, an optional line of [descriptions] under each and a [title] row on
+/// top; `surfaceContainerHighest`, 8-point corners; the [current] entry in
+/// the primary colour, bold, with a tick. The picture is not dimmed. Returns
+/// the chosen index, or null.
+Future<int?> showSmallMenu(
+  BuildContext anchor, {
+  required List<String> entries,
+  required int current,
+  List<String>? descriptions,
+  String? title,
+  String entryKey = 'stream-menu-item',
+  bool preferAbove = false,
+  double? width,
+}) {
+  final theme = Theme.of(anchor);
+  final scheme = theme.colorScheme;
+  final text = theme.textTheme.bodyMedium?.copyWith(fontSize: 14);
+  final small = theme.textTheme.bodySmall?.regular.copyWith(fontSize: 12, color: scheme.onSurfaceVariant);
+  final rowHeight = descriptions == null ? kMinInteractiveDimension : 64.0;
+  final height = entries.length * rowHeight + (title == null ? 0 : _SmallMenuTitle.rowHeight) + 16;
+  return showMenu<int>(
+    context: anchor,
+    position: _menuPosition(anchor, height, preferAbove: preferAbove),
+    color: scheme.surfaceContainerHighest,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    constraints: width == null
+        ? const BoxConstraints(minWidth: streamMenuMinWidth, maxWidth: 280)
+        : BoxConstraints.tightFor(width: width),
+    items: [
+      if (title != null) _SmallMenuTitle(title),
+      for (final (index, entry) in entries.indexed)
+        PopupMenuItem<int>(
+          key: ValueKey('$entryKey-$index'),
+          value: index,
+          height: rowHeight,
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entry,
+                      style: index == current
+                          ? text?.emphasis.copyWith(color: scheme.primary)
+                          : text?.regular.copyWith(color: scheme.onSurface),
+                    ),
+                    if (descriptions case final lines? when index < lines.length) ...[
+                      const SizedBox(height: 2),
+                      Text(lines[index], style: small),
+                    ],
+                  ],
+                ),
+              ),
+              if (index == current) ...[
+                const SizedBox(width: 16),
+                Icon(AppIcons.selected, size: 18, color: scheme.primary),
+              ],
+            ],
+          ),
+        ),
+    ],
+  );
+}
+
+/// Where a menu [height] high goes next to the button of [anchor].
+RelativeRect _menuPosition(BuildContext anchor, double height, {required bool preferAbove}) {
+  final button = anchor.findRenderObject()! as RenderBox;
+  final overlay = Navigator.of(anchor).overlay!.context.findRenderObject()! as RenderBox;
+  final rect = button.localToGlobal(Offset.zero, ancestor: overlay) & button.size;
+  final padding = MediaQuery.paddingOf(anchor);
+  const gap = 4.0;
+  final below = overlay.size.height - padding.bottom - rect.bottom - gap;
+  final above = rect.top - padding.top - gap;
+  final up = preferAbove ? height <= above || above > below : height > below && above > below;
+  final top = up ? rect.top - gap - height : rect.bottom + gap;
+  return RelativeRect.fromLTRB(rect.left, top, overlay.size.width - rect.right, overlay.size.height - top);
+}
+
+/// The title row of a small menu ("竖屏全屏画面模式"): 13 points, semi-bold,
+/// the secondary ink; not a choice.
+class _SmallMenuTitle extends PopupMenuEntry<int> {
+  const new(this.title);
+
+  static const double rowHeight = 36;
+
+  final String title;
+
+  @override
+  double get height => rowHeight;
+
+  @override
+  bool represents(int? value) => false;
+
+  @override
+  State<_SmallMenuTitle> createState() => _SmallMenuTitleState();
+}
+
+class _SmallMenuTitleState extends State<_SmallMenuTitle> {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+      child: Text(
+        widget.title,
+        key: const ValueKey('small-menu-title'),
+        style: theme.textTheme.labelLarge?.emphasis.copyWith(fontSize: 13, color: theme.colorScheme.onSurfaceVariant),
       ),
     );
   }

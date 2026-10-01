@@ -19,7 +19,7 @@ import 'package:pure_live/routes/app_navigator.dart';
 /// dialog of five actions. Hidden where this build cannot record.
 class RecordButton extends ConsumerStatefulWidget {
   /// Creates the button for [room].
-  const new({required this.room, this.latest, this.compact = false, super.key});
+  const new({required this.room, this.latest, this.compact = false, this.onVideo = false, super.key});
 
   /// The room.
   final LiveRoom room;
@@ -30,6 +30,10 @@ class RecordButton extends ConsumerStatefulWidget {
 
   /// The narrow bar's form: "自动录" as its timer alone.
   final bool compact;
+
+  /// On the picture (the fullscreen bars, U.2c change 2): white, and
+  /// "自动录" as its timer alone.
+  final bool onVideo;
 
   @override
   ConsumerState<RecordButton> createState() => _RecordButtonState();
@@ -86,6 +90,15 @@ class _RecordButtonState extends ConsumerState<RecordButton> {
     }
     if (autoRecordOn(task)) {
       final label = i18n('live_play_auto_record');
+      if (widget.onVideo) {
+        return IconButton(
+          key: const ValueKey('live-play-record'),
+          tooltip: label,
+          color: OnVideoColors.foreground,
+          onPressed: onPressed,
+          icon: const Icon(AppIcons.autoRecord, size: 22),
+        );
+      }
       if (widget.compact) {
         return IconButton.filledTonal(
           key: const ValueKey('live-play-record'),
@@ -115,7 +128,7 @@ class _RecordButtonState extends ConsumerState<RecordButton> {
       key: const ValueKey('live-play-record'),
       tooltip: i18n('record'),
       onPressed: onPressed,
-      icon: const RecordGlyph(state: RecordGlyphState.idle),
+      icon: RecordGlyph(state: RecordGlyphState.idle, ringColor: widget.onVideo ? OnVideoColors.foreground : null),
     );
   }
 }

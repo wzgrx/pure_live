@@ -788,10 +788,11 @@ void main() {
     expect(find.text('打开直播间'), findsNothing);
     // Windows adds "在新窗口打开" at the end of the second group; the local
     // interaction is the third group only while it is on (U.2k).
-    expect(roomMenuGroups(iptv: false, windows: true)[1].last, RoomMenuEntry.newWindow);
-    expect(roomMenuGroups(iptv: false, windows: false)[2], isEmpty);
-    expect(roomMenuGroups(iptv: false, windows: false, local: true)[2], [RoomMenuEntry.localInteraction]);
-    expect(roomMenuGroups(iptv: true, windows: false)[1], [RoomMenuEntry.cast, RoomMenuEntry.streamLink]);
+    expect(roomMenuGroups(iptv: false, windows: true, cast: false)[1].last, RoomMenuEntry.newWindow);
+    expect(roomMenuGroups(iptv: false, windows: false, cast: true)[2], isEmpty);
+    expect(roomMenuGroups(iptv: false, windows: false, cast: true, local: true)[2], [RoomMenuEntry.localInteraction]);
+    expect(roomMenuGroups(iptv: true, windows: false, cast: true)[1], [RoomMenuEntry.cast, RoomMenuEntry.streamLink]);
+    expect(roomMenuGroups(iptv: true, windows: false, cast: false)[1], [RoomMenuEntry.streamLink]);
     await _close(tester, room);
   });
 

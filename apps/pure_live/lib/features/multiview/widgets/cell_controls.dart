@@ -12,14 +12,36 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 /// live room).
 String qualityLabel(LivePlayQuality quality) => quality.isPlaybackUnconfirmed ? '${quality.quality}?' : quality.quality;
 
+/// The visible size of a control button (docs/ui/compare/U.8, `.sr2 .ib`).
+const double _buttonSize = 40;
+
+/// How far a button's 48-point tap target reaches past its circle on each
+/// side (UI_PLAN 5.4): the padding next to the buttons is shorter by this
+/// much so the circles keep their places.
+const double _buttonInset = (kMinInteractiveDimension - _buttonSize) / 2;
+
+/// The five buttons side by side.
+const double _buttonsWidth = 5 * kMinInteractiveDimension;
+
+/// The controls' padding at the start: the room, the menus and the volume
+/// start 12 in, the first button's circle too.
+const double _start = 12 - _buttonInset;
+
+/// The narrowest slider (with its padding) kept after the buttons on the
+/// portrait row: a 40-point track, the narrowest the row had with the
+/// smaller targets (360 wide). Narrower, the volume takes a row of its own.
+const double _minInlineSlider = 64;
+
 /// The selected cell's controls, all in one place and the same in every
 /// layout (docs/ui/compare/U.8 c4): the room with the cell's number; the
 /// quality and line buttons with their small menus (U.2f); pause, refresh,
 /// change room, open the live room, close the cell; the room volume.
 ///
 /// Under the picture in portrait ([compact] false: the quality and line on
-/// the room's row, the buttons and the volume on one row); in the right
-/// column and the fullscreen panel each on a row of its own ([compact]).
+/// the room's row, the buttons and the volume on one row, the volume on its
+/// own row when the phone is too narrow for both); in the right column and
+/// the fullscreen panel each on a row of its own ([compact]). The buttons
+/// are 40 in 48-point tap targets (UI_PLAN 5.4).
 /// Rebuilds only when this cell changes.
 class MultiviewCellControls extends StatelessWidget {
   /// Creates the controls of cell [index].
@@ -87,42 +109,67 @@ class MultiviewCellControls extends StatelessWidget {
         onChangeRoom: onChangeRoom,
         onEnterRoom: () => onEnterRoom(room),
       );
-      final volume = _VolumeRow(
+      _VolumeRow volume({required double lead}) => _VolumeRow(
         key: ValueKey('multiview-volume-${cell.id}'),
+        lead: lead,
         value: cell.volume,
         onChanged: (value) => unawaited(controller.setVolume(index, value)),
         onChangeEnd: (value) => unawaited(controller.setVolume(index, value, save: true)),
       );
+      // On a row of its own the volume's icon lines up with the room's
+      // avatar, as before.
+      final volumeRow = volume(lead: 20 - _start);
+      const indent = EdgeInsetsDirectional.only(start: _buttonInset);
       return Padding(
         key: ValueKey('multiview-cell-controls-${index + 1}'),
-        padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
+        padding: const EdgeInsetsDirectional.fromSTEB(_start, 6, 8, 6),
         child: compact
             ? Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  header,
-                  Align(alignment: AlignmentDirectional.centerStart, child: streams),
+                  Padding(padding: indent, child: header),
+                  Padding(
+                    padding: indent,
+                    child: Align(alignment: AlignmentDirectional.centerStart, child: streams),
+                  ),
                   Align(alignment: AlignmentDirectional.centerStart, child: buttons),
-                  volume,
+                  volumeRow,
                 ],
               )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
+            : LayoutBuilder(
+                builder: (context, box) {
+                  // The volume after the buttons while its slider keeps a
+                  // usable track (8 between the last circle and its icon).
+                  final inline =
+                      box.maxWidth - _buttonsWidth - _VolumeRow.chrome(lead: 8 - _buttonInset) >= _minInlineSlider;
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(child: header),
-                      streams,
+                      Padding(
+                        padding: indent,
+                        child: Row(
+                          children: [
+                            Expanded(child: header),
+                            streams,
+                          ],
+                        ),
+                      ),
+                      if (inline)
+                        Row(
+                          children: [
+                            buttons,
+                            Expanded(child: volume(lead: 8 - _buttonInset)),
+                          ],
+                        )
+                      else ...[
+                        Align(alignment: AlignmentDirectional.centerStart, child: buttons),
+                        volumeRow,
+                      ],
                     ],
-                  ),
-                  Row(
-                    children: [
-                      buttons,
-                      Expanded(child: volume),
-                    ],
-                  ),
-                ],
+                  );
+                },
               ),
       );
     },
@@ -272,13 +319,22 @@ class _Buttons extends StatelessWidget {
   final VoidCallback onChangeRoom;
   final VoidCallback onEnterRoom;
 
+  /// A 40-point button in a 48-point tap target (UI_PLAN 5.4; it looks the
+  /// same), on every platform.
+  static final ButtonStyle _target = IconButton.styleFrom(
+    fixedSize: const Size.square(_buttonSize),
+    minimumSize: const Size.square(_buttonSize),
+    visualDensity: VisualDensity.standard,
+    tapTargetSize: MaterialTapTargetSize.padded,
+  );
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     Widget button(String key, IconData icon, String tooltip, VoidCallback? onPressed, {Color? color}) => IconButton(
       key: ValueKey('multiview-control-$key'),
       tooltip: tooltip,
-      visualDensity: VisualDensity.compact,
+      style: _target,
       color: color ?? scheme.onSurfaceVariant,
       iconSize: 22,
       onPressed: onPressed,
@@ -300,9 +356,9 @@ class _Buttons extends StatelessWidget {
               );
             },
           );
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      spacing: 2,
+    // Side by side: the targets leave 8 between the circles. A column too
+    // narrow for five wraps rather than overflows.
+    return Wrap(
       children: [
         play,
         button(
@@ -328,7 +384,16 @@ class _Buttons extends StatelessWidget {
 /// The room volume: the slider follows the finger, the room keeps the value
 /// when the finger lifts (3.x `_showVolumeSheet`).
 class _VolumeRow extends StatefulWidget {
-  const new({required this.value, required this.onChanged, required this.onChangeEnd, super.key});
+  const new({required this.lead, required this.value, required this.onChanged, required this.onChangeEnd, super.key});
+
+  /// The width of everything but the slider after [lead].
+  static double chrome({required double lead}) => lead + _iconSize + _valueWidth;
+
+  static const double _iconSize = 20;
+  static const double _valueWidth = 40;
+
+  /// The space before the icon.
+  final double lead;
 
   final double value;
   final ValueChanged<double> onChanged;
@@ -350,8 +415,8 @@ class _VolumeRowState extends State<_VolumeRow> {
       constraints: const BoxConstraints(minHeight: 48),
       child: Row(
         children: [
-          const SizedBox(width: 8),
-          Icon(AppIcons.cellVolume, size: 20, color: scheme.onSurfaceVariant),
+          SizedBox(width: widget.lead),
+          Icon(AppIcons.cellVolume, size: _VolumeRow._iconSize, color: scheme.onSurfaceVariant),
           Expanded(
             child: Slider(
               key: const ValueKey('multiview-volume-slider'),
@@ -369,7 +434,7 @@ class _VolumeRowState extends State<_VolumeRow> {
             ),
           ),
           SizedBox(
-            width: 40,
+            width: _VolumeRow._valueWidth,
             child: Text(
               '${(value * 100).round()}%',
               key: const ValueKey('multiview-volume-value'),

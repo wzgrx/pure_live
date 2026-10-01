@@ -54,8 +54,10 @@ final class AccountPlatform {
   /// The platform's own instructions; null uses the generic ones.
   final String? tipKey;
 
-  /// The name on the account pages when it differs from the platform list's
-  /// (`site_<id>`): "SOOP", "网易 CC" (docs/ui/compare/U.10a c5).
+  /// The account pages' own name key (docs/ui/compare/U.10a c5: "SOOP",
+  /// "网易CC"); null uses the platform list's `site_<id>`. The words are the
+  /// same as the list's since both were unified on 3.x's and the platforms'
+  /// own spelling.
   final String? nameKey;
 
   /// Where the user signs in on the web.

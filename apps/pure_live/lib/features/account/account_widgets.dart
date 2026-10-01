@@ -216,20 +216,12 @@ Future<bool> confirmAccountAction(
   return confirmed ?? false;
 }
 
-/// The list's sign-out question for [name] (3.x `account_page.dart:244`,
-/// words unchanged).
+/// The sign-out question for [name], the list's and a platform page's alike
+/// (3.x `account_page.dart:244`, words unchanged; UI_PLAN 3.7: one action,
+/// one dialog, one set of words).
 Future<bool> confirmSignOut(BuildContext context, String name) => confirmAccountAction(
   context,
   title: i18n('logout'),
   message: i18n('confirm_logout_named', args: {'name': name}),
-  action: i18n('logout'),
-);
-
-/// The sign-out question on a platform's page, which also says the cookie
-/// is deleted (docs/ui/compare/U.10b c7: "退出虎牙？").
-Future<bool> confirmPageSignOut(BuildContext context, String name) => confirmAccountAction(
-  context,
-  title: i18n('account_sign_out_title', args: {'name': name}),
-  message: i18n('account_sign_out_message', args: {'name': name}),
   action: i18n('logout'),
 );

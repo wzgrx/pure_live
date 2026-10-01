@@ -9,7 +9,7 @@ import 'package:pure_live/i18n/i18n.dart';
 /// words alone on phones, with 3.x's icons on wide screens ([icons]).
 class LayoutSegments extends StatelessWidget {
   /// Creates the segments.
-  const new({required this.controller, required this.onChanged, this.icons = false, super.key});
+  const new({required this.controller, required this.onChanged, this.icons = false, this.dense = false, super.key});
 
   /// The page's controller.
   final MultiviewController controller;
@@ -19,6 +19,15 @@ class LayoutSegments extends StatelessWidget {
 
   /// Show 3.x's icons before the words.
   final bool icons;
+
+  /// Narrower segments (48 instead of 56 each): on a phone whose row is
+  /// shorter than [width] the words keep about their size instead of
+  /// shrinking below 12.
+  final bool dense;
+
+  /// The width of the four segments without [icons] and not [dense]: each
+  /// is a text button's 64 less the density's 8 (the words fit inside).
+  static const double width = 4 * (64.0 - 8);
 
   static const List<(MultiviewLayout, IconData, String)> _layouts = [
     (MultiviewLayout.single, AppIcons.layoutSingle, '1×1'),
@@ -37,7 +46,9 @@ class LayoutSegments extends StatelessWidget {
         key: const ValueKey('multiview-layouts'),
         showSelectedIcon: false,
         style: SegmentedButton.styleFrom(
-          visualDensity: const VisualDensity(horizontal: -2, vertical: -1),
+          // Dense: each segment 48 wide instead of 56 (the segments' buttons
+          // keep the text buttons' 64 less the density).
+          visualDensity: VisualDensity(horizontal: dense ? VisualDensity.minimumDensity : -2, vertical: -1),
           padding: const EdgeInsets.symmetric(horizontal: 10),
           textStyle: text,
           selectedForegroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
@@ -82,9 +93,9 @@ class ToolbarToggles extends StatelessWidget {
     ),
     builder: (context, value, _) {
       final (danmaku, muted, focus, saver) = value;
+      // Side by side: the 48-point targets leave 10 between the circles.
       return Row(
         mainAxisSize: MainAxisSize.min,
-        spacing: 2,
         children: [
           ToolbarToggle(
             key: const ValueKey('multiview-danmaku'),
@@ -121,7 +132,16 @@ class ToolbarToggles extends StatelessWidget {
   );
 }
 
-/// A round 38-point switch of the toolbar; [on] fills it with the primary
+/// The visible size of a toolbar switch (docs/ui/compare/U.8, `.tg`).
+const double toolbarToggleSize = 38;
+
+/// How far a switch's 48-point tap target reaches past its circle on each
+/// side; the toolbar's padding next to the switches is shorter by this much
+/// so the circles keep their places.
+const double toolbarToggleInset = (kMinInteractiveDimension - toolbarToggleSize) / 2;
+
+/// A round 38-point switch of the toolbar in a 48-point tap target
+/// (UI_PLAN 5.4; it looks the same); [on] fills it with the primary
 /// container colour.
 class ToolbarToggle extends StatelessWidget {
   /// Creates the switch.
@@ -147,10 +167,13 @@ class ToolbarToggle extends StatelessWidget {
       isSelected: on,
       onPressed: onPressed,
       style: IconButton.styleFrom(
-        fixedSize: const Size.square(38),
-        minimumSize: const Size.square(38),
+        fixedSize: const Size.square(toolbarToggleSize),
+        minimumSize: const Size.square(toolbarToggleSize),
         padding: EdgeInsets.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        // The target is padded to 48 on every platform (the theme shrinks
+        // it on desktops and its density would make it 40).
+        visualDensity: VisualDensity.standard,
+        tapTargetSize: MaterialTapTargetSize.padded,
         backgroundColor: on ? scheme.primaryContainer : null,
         foregroundColor: on ? scheme.onPrimaryContainer : scheme.onSurfaceVariant,
       ),

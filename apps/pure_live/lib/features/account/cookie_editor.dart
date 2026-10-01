@@ -241,7 +241,7 @@ class _CookieEditorScaffoldState extends State<CookieEditorScaffold> {
 
   Future<void> _signOut() async {
     if (_busy) return;
-    if (!await confirmPageSignOut(context, widget.platform.name) || !mounted) return;
+    if (!await confirmSignOut(context, widget.platform.name) || !mounted) return;
     setState(() => _busy = true);
     try {
       await widget.onSignOut();

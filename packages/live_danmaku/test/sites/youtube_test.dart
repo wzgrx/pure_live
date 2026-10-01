@@ -752,8 +752,7 @@ void main() {
     expect(crying.emotes, [
       const LiveEmote(
         code: ':face-purple-crying:',
-        url:
-            'https://yt3.ggpht.com/g6_km98AfdHbN43gvEuNdZ2I07MmzVpArLwEvNBwwPqpZYzszqhRzU_DXALl11TchX5_xFE=w48-h48-c-k-nd',
+        url: 'https://yt3.ggpht.com/g6_km98AfdHbN43gvEuNdZ2I07MmzVpArLwEvNBwwPqpZYzszqhRzU_DXALl11TchX5_xFE=w48-h48-c-k-nd',
       ),
     ], reason: 'the larger thumbnail, once although the line repeats it');
     for (final line in lines) {

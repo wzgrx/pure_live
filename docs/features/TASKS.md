@@ -25,9 +25,9 @@
 | 编号 | 名称 | 功能点 | 涉及代码 | 依赖 | 档位 | 规模 | 来源 | 状态 |
 |---|---|---|---|---|---|---|---|---|
 | [F.1a](F.1a/README.md) | **屏幕常亮跟随设置** | F-ROOM-13 | `features/live_play/`、`packages/live_player`（`LiveVideoView` 的常亮） | — | 必须 | 小 | M13.17 第 8 项 | 完成（2026-10-02，[记录](records/F.1a.md)） |
-| [F.1b](F.1b/README.md) | **竖屏流的画面比例预判**（抖音竖屏起播不跳） | F-ROOM-22 | `packages/live_core`（抖音数据带宽高）、`packages/live_player`、`features/live_play/logic/` | — | 应该 | 中 | M7.1、M7.2、M13.17 第 8 项 | 未开始 |
-| [F.1c](F.1c/README.md) | **直播间小项**：快手 App 跳转、切换直播间的刷新按钮、预测返回手势 | F-RT-05、F-RT-07、F-AND-08 | `features/live_play/buttons/room_menu_button.dart`、`dialogs/room_switcher.dart`、`live_play_page.dart`（`pure_live/predictive_back` 通道已有） | — | 应该 | 小 | M13.14、M13.17 第 4、6、8 项 | 未开始 |
-| [F.1d](F.1d/README.md) | **冷门的播放设置**：退出时销毁播放器（先问用户）、小窗跟随竖屏源、竖屏诊断、小窗弹幕预览、内存紧张清图片缓存、键盘媒体键 | F-ROOM-21、F-PORT-05、F-PORT-06、F-MINI-04、F-APP-17、F-ROOM-25 | `features/live_play/`（`logic/room_runtime.dart`、`mini/`）、`features/settings/`、`app/app.dart` | U.6c 合并后 | 可以以后 | 中 | M12.4、M13.7、M13.17 第 5、8、9 项 | 未开始 |
+| [F.1b](F.1b/README.md) | **竖屏流的画面比例预判**（抖音竖屏起播不跳） | F-ROOM-22 | `packages/live_core`（抖音数据带宽高）、`packages/live_player`、`features/live_play/logic/` | — | 应该 | 中 | M7.1、M7.2、M13.17 第 8 项 | 完成（2026-10-02，[记录](records/F.1b.md)） |
+| [F.1c](F.1c/README.md) | **直播间小项**：快手 App 跳转、切换直播间的刷新按钮、预测返回手势 | F-RT-05、F-RT-07、F-AND-08 | `features/live_play/buttons/room_menu_button.dart`、`dialogs/room_switcher.dart`、`live_play_page.dart`（`pure_live/predictive_back` 通道已有） | — | 应该 | 小 | M13.14、M13.17 第 4、6、8 项 | 完成（2026-10-02，[记录](records/F.1c.md)） |
+| [F.1d](F.1d/README.md) | **冷门的播放设置**：退出时销毁播放器（先问用户）、小窗跟随竖屏源、竖屏诊断、小窗弹幕预览、内存紧张清图片缓存、键盘媒体键 | F-ROOM-21、F-PORT-05、F-PORT-06、F-MINI-04、F-APP-17、F-ROOM-25 | `features/live_play/`（`logic/room_runtime.dart`、`mini/`）、`features/settings/`、`app/app.dart` | U.6c 合并后 | 可以以后 | 中 | M12.4、M13.7、M13.17 第 5、8、9 项 | 完成（2026-10-02，[记录](records/F.1d.md)） |
 
 ### F.2 弹幕
 

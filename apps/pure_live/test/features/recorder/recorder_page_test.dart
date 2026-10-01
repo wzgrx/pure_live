@@ -217,7 +217,12 @@ void main() {
         ),
       ),
       tasks: [_task('2', RecordStatus.stopped), _task('3', RecordStatus.stopped)],
-      prepare: (recording) => recording.taskFor(rooms[2])!.status = RecordStatus.running,
+      // U.2f: "自动录" means the task waits for the room ("开播自动录"); a
+      // stopped one is a plain ring now.
+      prepare: (recording) {
+        recording.taskFor(rooms[1])!.status = RecordStatus.waitingLive;
+        recording.taskFor(rooms[2])!.status = RecordStatus.running;
+      },
     );
     Finder inside(String key, Finder finder) => find.descendant(of: find.byKey(ValueKey(key)), matching: finder);
     expect(inside('idle', find.byKey(const ValueKey('record-glyph-idle'))), findsOneWidget);

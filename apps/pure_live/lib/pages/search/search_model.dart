@@ -84,6 +84,7 @@ final class SearchModel extends ChangeNotifier {
   final int pageSize;
 
   int _selected = 0;
+  Set<String> _excluded = const {};
   SearchMode _mode = SearchMode.rooms;
   bool _includeOffline = true;
   SearchSortMode _sort = SearchSortMode.smart;
@@ -177,7 +178,34 @@ final class SearchModel extends ChangeNotifier {
     return site != null && SearchCapabilities.of(site.id).webSearch;
   }
 
-  List<LiveSite> get _chosen => _selected == 0 ? sites : [sites[_selected - 1]];
+  List<LiveSite> get _chosen => _selected == 0 ? allScope : [sites[_selected - 1]];
+
+  /// The platforms left out of "all" (M13.16: the user's search scope).
+  Set<String> get excluded => _excluded;
+
+  /// The platforms "all" searches: [sites] without [excluded], or every one
+  /// when that would leave none.
+  List<LiveSite> get allScope {
+    final kept = [
+      for (final site in sites)
+        if (!_excluded.contains(site.id)) site,
+    ];
+    return kept.isEmpty ? sites : kept;
+  }
+
+  /// Leaves [ids] out of "all"; after a search on "all", searches [draft]
+  /// again like [select].
+  void setExcluded(Set<String> ids, {String draft = ''}) {
+    final next = Set<String>.unmodifiable(ids);
+    if (_disposed || setEquals(next, _excluded)) return;
+    _excluded = next;
+    if (_selected != 0) {
+      _notify();
+      return;
+    }
+    _invalidate();
+    _rerunOrReset(draft);
+  }
 
   /// Chooses platform [index] (0 for all). After a search, searches
   /// [draft] there (3.x searched the text field's current words); an empty

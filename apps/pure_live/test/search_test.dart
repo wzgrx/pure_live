@@ -11,6 +11,7 @@ import 'package:pure_live/pages/search/search_capability.dart';
 import 'package:pure_live/pages/search/search_history.dart';
 import 'package:pure_live/pages/search/search_model.dart';
 import 'package:pure_live/pages/search/search_ranking.dart';
+import 'package:pure_live/pages/search/search_scope.dart';
 import 'package:pure_live/pages/search/search_view.dart';
 import 'package:pure_live/pages/search/web_search_view.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -211,6 +212,36 @@ void main() {
       expect(model.results, isEmpty);
     });
 
+    test('M13.16: "all" leaves out the excluded platforms and searches again; leaving out all keeps all', () async {
+      final bili = FakeSite(
+        'bilibili',
+        pages: {
+          1: [_room('bilibili', '1')],
+        },
+      );
+      final twitch = FakeSite('twitch', fail: true);
+      final model = _model([bili, twitch]);
+      addTearDown(model.dispose);
+      await model.search('x');
+      expect(model.failed, ['twitch']);
+
+      model.setExcluded({'twitch'}, draft: 'x');
+      await pumpEventQueue();
+      expect(model.allScope, [bili]);
+      expect(model.failed, isEmpty);
+      expect(twitch.calls, [('x', 1)], reason: 'not asked again');
+      expect(bili.calls, [('x', 1), ('x', 1)]);
+
+      model.setExcluded({'twitch', 'bilibili'});
+      expect(model.allScope, [bili, twitch]);
+      // Choosing a left-out platform on its own still searches it.
+      model.setExcluded({'twitch'});
+      await model.search('x');
+      model.select(2, draft: 'y');
+      await pumpEventQueue();
+      expect(twitch.calls.last, ('y', 1));
+    });
+
     test('streamers: only platforms with streamer search; a single one without it is named', () async {
       final bili = FakeSite(
         'bilibili',
@@ -311,7 +342,15 @@ void main() {
       await submit(tester, 'hello');
       expect(find.text('Hello'), findsOneWidget);
       expect(find.byKey(const ValueKey('search-failure-banner')), findsOneWidget);
-      expect(find.textContaining('虎牙'), findsWidgets);
+      // A quiet count; the names on request (M13.16).
+      expect(find.text('有 1 个平台连接失败'), findsOneWidget);
+      expect(find.byKey(const ValueKey('search-failure-proxy')), findsNothing, reason: 'Huya is no overseas platform');
+      await tester.tap(find.byKey(const ValueKey('search-failure-details')));
+      await tester.pump();
+      expect(
+        find.descendant(of: find.byKey(const ValueKey('search-failure-names')), matching: find.text('虎牙')),
+        findsOneWidget,
+      );
 
       await tester.tap(find.text('Hello'));
       expect(opened.single.roomId, '42');
@@ -336,6 +375,65 @@ void main() {
       await tester.pump();
       expect(find.byKey(const ValueKey('search-history')), findsOneWidget);
       expect(find.widgetWithText(InputChip, 'hello'), findsOneWidget);
+    });
+
+    testWidgets('M13.16: overseas failures suggest a proxy; the scope leaves them out and is remembered', (
+      tester,
+    ) async {
+      final twitch = FakeSite('twitch', fail: true);
+      final youtube = FakeSite('youtube', fail: true);
+      final sites = [
+        FakeSite(
+          'bilibili',
+          pages: {
+            1: [_room('bilibili', '42', title: 'Hello')],
+          },
+        ),
+        twitch,
+        youtube,
+      ];
+      await pump(tester, sites);
+      await submit(tester, 'hello');
+      expect(find.text('有 2 个平台连接失败，海外平台可能需要在设置里配置代理'), findsOneWidget);
+      expect(find.byKey(const ValueKey('search-failure-proxy')), findsOneWidget);
+      expect(find.text('搜索范围 3/3'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('search-failure-scope')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('search-scope-domestic')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('search-scope-save')));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('search-failure-banner')), findsNothing);
+      expect(find.text('Hello'), findsOneWidget);
+      expect(find.text('搜索范围 1/3'), findsOneWidget);
+      expect((twitch.calls.length, youtube.calls.length), (1, 1), reason: 'not searched again');
+      expect(await tester.runAsync(() => SearchScopeStore(services.store.meta).load()), {'twitch', 'youtube'});
+
+      // The next search page starts with the remembered scope.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            appServicesProvider.overrideWithValue(services),
+            sitesProvider.overrideWithValue(SiteRegistry({for (final site in sites) site.id: () => site})),
+          ],
+          child: MaterialApp(
+            theme: const LiveTheme(primaryColor: Colors.indigo).light,
+            home: const LiveUiScope(
+              config: LiveUiConfig(),
+              child: SearchView(initialKeyword: 'again'),
+            ),
+          ),
+        ),
+      );
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pump();
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pump();
+      expect(find.text('搜索范围 1/3'), findsOneWidget);
+      expect(twitch.calls, [('hello', 1)], reason: 'the first search of the new page leaves it out');
     });
 
     testWidgets('a pasted room link opens the room without a search', (tester) async {

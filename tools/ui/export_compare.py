@@ -34,7 +34,7 @@ def main(src, out):
     with tempfile.TemporaryDirectory() as tmp:
         for i, part in enumerate(parts, 1):
             title = re.search(r'<h2>(.*?)</h2>', part)
-            name = re.sub(r'[^\w一-鿿]+', '-', title.group(1) if title else '对比').strip('-')
+            name = re.sub(r'[^\w一-鿿]+', '-', title.group(1) if title else '说明').strip('-')
             html = os.path.join(tmp, f'{i}.html')
             with open(html, 'w', encoding='utf-8') as f:
                 f.write('<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0">' + head + '<div class="wrap">' + part + '</div></body></html>')

@@ -5,9 +5,11 @@ A UI file is a Dart file that declares a widget class or opens a dialog,
 sheet or menu. RULES maps path prefixes to task ids, first match wins; a UI
 file no rule matches is printed as unassigned and the script exits 1.
 
-usage: python3 tools/ui/inventory.py [--v3 ~/ref/v3ref] [--tv ~/ref/pure_live_TV] [--files]
+usage: python3 tools/ui/inventory.py [--v3 ~/ref/v3ref] [--tv ~/ref/pure_live_TV] [--files | --items]
   default output: per-task counts as a Markdown table
   --files: Markdown list of files per task (docs/ui/TASK_FILES.md)
+  --items: every page, dialog, sheet, menu and overlay per task, with the
+           Chinese title found next to it (docs/ui/INVENTORY.md)
 """
 import argparse, os, re, sys
 from collections import Counter, defaultdict
@@ -16,10 +18,16 @@ WIDGET = re.compile(r'^class\s+(\w+)\s+extends\s+(?:StatelessWidget|StatefulWidg
 DIALOG = re.compile(r'\b(?:showDialog|Get\.dialog|showGeneralDialog|showAdaptiveDialog)\b|\b(?:TvDialog|TvConfirmDialog|TvInputDialog|TvSelectDialog|TvMultiSelectDialog|TvMenuDialog)\(')
 SHEET = re.compile(r'\b(?:showModalBottomSheet|Get\.bottomSheet|showBottomSheet)\b')
 MENU = re.compile(r'\b(?:PopupMenuButton|showMenu|MenuAnchor|DropdownButton|DropdownMenu)\b')
+TOAST = re.compile(r'\b(?:ToastUtil\.show|SmartDialog\.showToast|showSnackBar|Get\.snackbar|showToast)\b')
+I18N = re.compile(r"""\bi18n\(\s*['"]([a-zA-Z0-9_]+)['"]""")
+METHOD = re.compile(r'^\s*(?:static\s+)?(?:Future<[^>]*>|void|Widget|bool|[A-Z]\w*(?:<[^>]*>)?\??)\s+(\w+)\s*\(', re.M)
+SKIP_KEYS = {'cancel', 'confirm', 'close', 'ok', 'done', 'save', 'delete', 'remove', 'retry', 'clear', 'reset', 'back'}
+KINDS = (('对话框', DIALOG), ('底部面板', SHEET), ('菜单', MENU))
+COMPONENT = re.compile(r'^class\s+(_?\w*?(Page|Screen|View|Dialog|Sheet|Panel|Overlay))\s+extends\s+', re.M)
 
 V3 = [
     ('get/', None), ('gen/', None),
-    ('main.dart', 'U.1'), ('plugins/utils.dart', 'U.1'), ('plugins/update.dart', 'U.3d'), ('core/iptv/', 'U.9'),
+    ('main.dart', 'U.1a'), ('plugins/utils.dart', 'U.1d'), ('plugins/update.dart', 'U.3d'), ('core/iptv/', 'U.9'),
     ('common/base/desktop_components.dart', 'U.13'), ('common/global/platform/', 'U.13'),
     ('common/widgets/adaptive_refresh_rate_scope.dart', 'U.2i'),
     ('common/widgets/common_appbar_actions.dart', 'U.3a'), ('common/widgets/menu_button.dart', 'U.3a'),
@@ -27,7 +35,7 @@ V3 = [
     ('common/widgets/download_apk_dialog.dart', 'U.3d'), ('common/widgets/download_directory_dialog.dart', 'U.3d'),
     ('common/widgets/share_command_import_dialog.dart', 'U.3d'),
     ('common/widgets/room_card', 'U.4a'),
-    ('common/', 'U.1'),
+    ('common/', 'U.1c'),
     ('modules/home/tablet_view.dart', 'U.3b'), ('modules/home/', 'U.3a'), ('modules/splash/', 'U.3c'),
     ('modules/popular/', 'U.4b'), ('modules/favorite/', 'U.4c'),
     ('modules/areas/favorite_areas_page.dart', 'U.4f'), ('modules/hot_areas/', 'U.4f'),
@@ -69,6 +77,13 @@ V3 = [
     ('modules/live_play/', 'U.2a'), ('player/', 'U.2a'),
 ]
 
+# Single popups that live in a shared file but belong to another task:
+# (file, enclosing method or class) -> task. Only the item list uses it.
+ITEM_TASK = {
+    ('v3:plugins/utils.dart', '_showExitDialog'): 'U.13',
+    ('v3:plugins/utils.dart', '_ExitDecisionDialog'): 'U.13',
+}
+
 TV = [
     ('app/', 'U.15a'), ('core/', 'U.15a'), ('domains/', 'U.15a'),
     ('features/home/', 'U.15b'), ('features/agreement/', 'U.15b'),
@@ -86,16 +101,60 @@ def assign(rel, rules):
     return None
 
 
-def scan(lib, rules, label):
-    """Returns ({task: Counter}, {task: [files]}, [unassigned])."""
+def load_zh(root):
+    path = os.path.join(root, 'assets', 'translations', 'zh.json')
+    try:
+        import json
+        return json.load(open(path, encoding='utf-8'))
+    except (OSError, ValueError):
+        return {}
+
+
+def title_near(text, start, zh, span=2400):
+    """The first meaningful translated string after [start]."""
+    for key in I18N.findall(text[start:start + span]):
+        if key not in SKIP_KEYS and key in zh:
+            return zh[key]
+    return ''
+
+
+def method_at(text, pos):
+    names = [m.group(1) for m in METHOD.finditer(text[:pos])]
+    names = [n for n in names if n not in ('build', 'if', 'switch', 'return')]
+    return names[-1] if names else ''
+
+
+def items_of(rel, raw, text, label, zh):
+    """Pages, popups and overlays in one file: (kind, name, line)."""
+    found = []
+    line = lambda pos: text.count('\n', 0, pos) + 1
+    for m in COMPONENT.finditer(text):
+        name, suffix = m.group(1), m.group(2)
+        kind = {'Page': '页面', 'Screen': '页面', 'View': '页面'}.get(suffix, {'Dialog': '对话框', 'Sheet': '底部面板'}.get(suffix, '覆盖层'))
+        if name.startswith('_') and kind == '页面':
+            continue
+        found.append((kind, f'{name}' + (f'（{t}）' if (t := title_near(text, m.start(), zh)) else ''), line(m.start()), name))
+    if not (label == 'tv' and rel.startswith('core/dialog/')):
+        for kind, rx in KINDS:
+            for m in rx.finditer(text):
+                where = method_at(text, m.start())
+                t = title_near(text, m.start(), zh)
+                found.append((kind, (t or where or '（无标题）') + (f' · `{where}`' if where and t else ''), line(m.start()), where))
+    return sorted(found, key=lambda f: f[2])
+
+
+def scan(lib, rules, label, zh=None):
+    """Returns ({task: Counter}, {task: [files]}, [unassigned], {task: [items]})."""
     counts, files, missing = defaultdict(Counter), defaultdict(list), []
+    items = defaultdict(list)
     for root, _, names in os.walk(lib):
         for name in sorted(names):
             if not name.endswith('.dart') or name.endswith(('.g.dart', '.freezed.dart')):
                 continue
             path = os.path.join(root, name)
             rel = os.path.relpath(path, lib).replace(os.sep, '/')
-            text = re.sub(r'//[^\n]*', '', open(path, encoding='utf-8', errors='ignore').read())
+            raw = open(path, encoding='utf-8', errors='ignore').read()
+            text = re.sub(r'//[^\n]*', lambda m: ' ' * len(m.group(0)), raw)
             widgets = WIDGET.findall(text)
             pops = [len(DIALOG.findall(text)), len(SHEET.findall(text)), len(MENU.findall(text))]
             if label == 'tv' and rel.startswith('core/dialog/'):
@@ -114,8 +173,11 @@ def scan(lib, rules, label):
             c['dialogs'] += pops[0]
             c['sheets'] += pops[1]
             c['menus'] += pops[2]
+            c['toasts'] += len(TOAST.findall(text))
             files[task].append(f'{label}:{rel}')
-    return counts, files, missing
+            for kind, name, ln, owner in items_of(rel, raw, text, label, zh or {}):
+                items[ITEM_TASK.get((f'{label}:{rel}', owner), task)].append((kind, name, f'{label}:{rel}:{ln}'))
+    return counts, files, missing, items
 
 
 def order(task):
@@ -128,16 +190,35 @@ def main():
     ap.add_argument('--v3', default=os.path.expanduser('~/ref/v3ref'))
     ap.add_argument('--tv', default=os.path.expanduser('~/ref/pure_live_TV'))
     ap.add_argument('--files', action='store_true')
+    ap.add_argument('--items', action='store_true')
     args = ap.parse_args()
-    counts, files, missing = defaultdict(Counter), defaultdict(list), []
-    for lib, rules, label in ((os.path.join(args.v3, 'lib'), V3, 'v3'), (os.path.join(args.tv, 'lib'), TV, 'tv')):
-        c, f, m = scan(lib, rules, label)
+    counts, files, missing, items = defaultdict(Counter), defaultdict(list), [], defaultdict(list)
+    for root, rules, label in ((args.v3, V3, 'v3'), (args.tv, TV, 'tv')):
+        c, f, m, it = scan(os.path.join(root, 'lib'), rules, label, load_zh(root))
         for k, v in c.items():
             counts[k].update(v)
         for k, v in f.items():
             files[k] += v
+        for k, v in it.items():
+            items[k] += v
         missing += m
-    if args.files:
+    if args.items:
+        print('# 界面清单（逐项，生成）\n\n由 `tools/ui/inventory.py --items` 生成，不要手改。每个任务列出 v3（`v3.2.11`）和 pure_live_TV 代码里的页面、对话框、底部面板、菜单和覆盖层，名称取代码旁边的中文文案（取不到时用方法名或类名），位置是“文件:行”。同一个弹窗可能在两处出现（组件类和调用处），设计时按实际界面合并。\n')
+        kinds = ('页面', '对话框', '底部面板', '菜单', '覆盖层')
+        print('| 任务 | ' + ' | '.join(kinds) + ' | 提示条 |')
+        print('|---|' + '---:|' * (len(kinds) + 1))
+        for task in sorted(items, key=order):
+            n = Counter(k for k, _, _ in items[task])
+            print(f'| [{task}](#{task.lower().replace(".", "")}) | ' + ' | '.join(str(n[k]) for k in kinds) + f' | {counts[task]["toasts"]} |')
+        print()
+        for task in sorted(items, key=order):
+            print(f'## {task}\n')
+            print('| 编号 | 类型 | 名称 | 位置 |')
+            print('|---|---|---|---|')
+            for i, (kind, name, where) in enumerate(items[task], 1):
+                print(f'| {task}-{i:02d} | {kind} | {name} | `{where}` |')
+            print()
+    elif args.files:
         print('# 界面文件对照（生成）\n\n由 `tools/ui/inventory.py --files` 生成，不要手改。`v3:` 是 `v3.2.11` 的 `lib/`，`tv:` 是 pure_live_TV 的 `lib/`。\n')
         for task in sorted(files, key=order):
             print(f'## {task}\n')

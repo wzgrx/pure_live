@@ -1,0 +1,22 @@
+# Sample pictures for mockups (picsum.photos, Unsplash licence). id	width	height	what
+65	256	256	avatar
+158	1280	720	concert (portrait room video)
+274	1920	1080	city at night (fullscreen video)
+1	640	360	cover
+111	640	360	cover
+133	640	360	cover
+169	640	360	cover
+183	640	360	cover
+206	640	360	cover
+219	640	360	cover
+225	640	360	cover
+237	640	360	cover
+250	640	360	cover
+287	640	360	cover
+292	640	360	cover
+304	640	360	cover
+319	640	360	cover
+338	640	360	cover
+342	640	360	cover
+360	640	360	cover
+367	640	360	cover

@@ -13,6 +13,9 @@ __pycache__/
 # The recorder's FFmpeg bundles (tools/ffmpeg_kit/fetch.sh links them here)
 /.ffmpeg_kit/
 
+# Fonts and sample pictures for UI mockups (tools/ui/mock/fetch.sh links them here)
+/tools/ui/mock/.cache/
+
 # Dart and Flutter, in every workspace member
 .dart_tool/
 .flutter-plugins

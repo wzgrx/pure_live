@@ -2,9 +2,12 @@
 
 由 `tools/ui/inventory.py --files` 生成，不要手改。`v3:` 是 `v3.2.11` 的 `lib/`，`tv:` 是 pure_live_TV 的 `lib/`。
 
-## U.1
+## U.1a
 
 - `v3:main.dart`
+
+## U.1c
+
 - `v3:common/widgets/app_status_view.dart`
 - `v3:common/widgets/common_avatar.dart`
 - `v3:common/widgets/count_button.dart`
@@ -15,6 +18,9 @@
 - `v3:common/widgets/scrollable_tab_bar.dart`
 - `v3:common/widgets/section_listtile.dart`
 - `v3:common/widgets/widget_extensions.dart`
+
+## U.1d
+
 - `v3:plugins/utils.dart`
 
 ## U.2a

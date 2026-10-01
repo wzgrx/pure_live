@@ -25,6 +25,9 @@ dependencies:
   media_kit_video:
     path: ../../third_party/media_kit_video
   meta: ^1.19.0
+  # Keeps the screen on while a view plays (F.1a; media_kit_video uses the
+  # same plugin for its own keep-on, which the view turns off).
+  wakelock_plus: ^1.8.1
 
 dev_dependencies:
   fake_async: ^1.3.3

@@ -6,6 +6,7 @@ import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 import 'package:pure_live/tv/tv_theme.dart';
+import 'package:pure_live/tv/widgets/tv_button.dart';
 import 'package:pure_live/tv/widgets/tv_focusable.dart';
 
 /// The room's state over the picture: entering, buffering, offline, failed
@@ -26,17 +27,11 @@ class TvRoomStatus extends StatelessWidget {
     final restricted = room.isRestricted && room.isLiveNow;
     final (busy, icon, title, subtitle, action) = switch (controller.stage) {
       RoomStage.loading => (true, null, i18n('live_play_entering'), null, null),
-      RoomStage.failed => (
-        false,
-        Icons.error_outline_rounded,
-        failureText(controller.failure),
-        null,
-        i18n('tv_ok_retry'),
-      ),
-      RoomStage.offline => (false, Icons.nightlight_round, offlineText(room), null, i18n('tv_ok_refresh')),
+      RoomStage.failed => (false, AppIcons.playbackError, failureText(controller.failure), null, i18n('tv_ok_retry')),
+      RoomStage.offline => (false, TvIcons.offAir, offlineText(room), null, i18n('tv_ok_refresh')),
       RoomStage.unplayable => (
         false,
-        restricted ? Icons.lock_outline_rounded : Icons.videocam_off_outlined,
+        restricted ? AppIcons.restricted : AppIcons.noStream,
         restricted ? restrictionReason(room.effectiveRestriction) : failureText(controller.failure),
         restricted ? failureText(controller.failure) : null,
         i18n('tv_ok_retry'),
@@ -45,7 +40,7 @@ class TvRoomStatus extends StatelessWidget {
         PlaybackStatus.idle || PlaybackStatus.opening || PlaybackStatus.buffering => (true, null, '', null, null),
         PlaybackStatus.error => (
           false,
-          Icons.error_outline_rounded,
+          AppIcons.playbackError,
           i18n('playback_failure_title'),
           failureText(playback.error),
           i18n('tv_ok_retry'),
@@ -57,7 +52,7 @@ class TvRoomStatus extends StatelessWidget {
     final scale = TvScale.of(context);
     return IgnorePointer(
       child: ColoredBox(
-        color: busy ? Colors.transparent : Colors.black54,
+        color: busy ? OnVideoColors.clear : OnVideoColors.dim,
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -65,17 +60,17 @@ class TvRoomStatus extends StatelessWidget {
               if (busy)
                 SizedBox.square(
                   dimension: scale(56),
-                  child: CircularProgressIndicator(color: Colors.white70, strokeWidth: scale(5)),
+                  child: CircularProgressIndicator(color: OnVideoColors.secondary, strokeWidth: scale(5)),
                 )
               else if (icon != null)
-                Icon(icon, color: Colors.white70, size: scale(72)),
+                Icon(icon, color: OnVideoColors.secondary, size: scale(72)),
               if (title != null && title.isNotEmpty) ...[
                 SizedBox(height: scale(16)),
                 Text(
                   title,
                   key: const ValueKey('tv-room-status'),
                   textAlign: TextAlign.center,
-                  style: scale.style(28, weight: FontWeight.w600, color: Colors.white),
+                  style: scale.style(28, weight: FontWeight.w600, color: OnVideoColors.foreground),
                 ),
               ],
               if (subtitle != null && subtitle.isNotEmpty && subtitle != title) ...[
@@ -83,14 +78,14 @@ class TvRoomStatus extends StatelessWidget {
                 Text(
                   subtitle,
                   textAlign: TextAlign.center,
-                  style: scale.style(20, color: Colors.white70),
+                  style: scale.style(20, color: OnVideoColors.secondary),
                 ),
               ],
               if (action != null) ...[
                 SizedBox(height: scale(20)),
                 Text(
                   action,
-                  style: scale.style(20, weight: FontWeight.w600, color: Colors.white70),
+                  style: scale.style(20, weight: FontWeight.w600, color: OnVideoColors.secondary),
                 ),
               ],
             ],
@@ -124,16 +119,13 @@ class TvChannelBanner extends StatelessWidget {
       key: const ValueKey('tv-room-banner'),
       margin: EdgeInsets.all(scale(32)),
       padding: EdgeInsets.symmetric(horizontal: scale.text(24), vertical: scale.text(16)),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.65),
-        borderRadius: BorderRadius.circular(scale(20)),
-      ),
+      decoration: BoxDecoration(color: OnVideoColors.coverDim, borderRadius: BorderRadius.circular(scale(20))),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             '${index + 1}',
-            style: scale.style(44, weight: FontWeight.w800, color: Colors.white),
+            style: scale.style(44, weight: FontWeight.w800, color: OnVideoColors.foreground),
           ),
           SizedBox(width: scale(20)),
           ConstrainedBox(
@@ -146,13 +138,13 @@ class TvChannelBanner extends StatelessWidget {
                   room.displayNick(platformName(room.platform)),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: scale.style(26, weight: FontWeight.w700, color: Colors.white),
+                  style: scale.style(26, weight: FontWeight.w700, color: OnVideoColors.foreground),
                 ),
                 Text(
                   '${platformName(room.platform)} · ${title.isEmpty ? i18n('untitled_room') : title} · ${index + 1}/$count',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: scale.style(19, color: Colors.white70),
+                  style: scale.style(19, color: OnVideoColors.secondary),
                 ),
               ],
             ),
@@ -228,13 +220,7 @@ class TvRoomControls extends StatelessWidget {
     return Container(
       key: const ValueKey('tv-room-controls'),
       padding: EdgeInsets.fromLTRB(scale(48), scale(80), scale(48), scale(36)),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.transparent, Color(0xDD000000)],
-        ),
-      ),
+      decoration: BoxDecoration(gradient: OnVideoColors.shade(edge: VerticalDirection.down)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -251,7 +237,7 @@ class TvRoomControls extends StatelessWidget {
                       title.isEmpty ? i18n('untitled_room') : title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: scale.style(30, weight: FontWeight.w700, color: Colors.white),
+                      style: scale.style(30, weight: FontWeight.w700, color: OnVideoColors.foreground),
                     ),
                     Text(
                       [
@@ -262,7 +248,7 @@ class TvRoomControls extends StatelessWidget {
                       ].join(' · '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: scale.style(20, color: Colors.white70),
+                      style: scale.style(20, color: OnVideoColors.secondary),
                     ),
                   ],
                 ),
@@ -280,7 +266,7 @@ class TvRoomControls extends StatelessWidget {
                   TvButton(
                     key: const ValueKey('tv-room-quality'),
                     focusNode: firstButton,
-                    icon: Icons.high_quality_rounded,
+                    icon: TvIcons.quality,
                     label: quality == null ? i18n('tv_quality') : '${i18n('tv_quality')} ${quality.quality}',
                     onTap: qualities.length > 1 ? onQuality : null,
                   ),
@@ -290,7 +276,7 @@ class TvRoomControls extends StatelessWidget {
                     scale,
                     TvButton(
                       key: const ValueKey('tv-room-line'),
-                      icon: Icons.alt_route_rounded,
+                      icon: AppIcons.switchLine,
                       label: i18n('toolbox_line', args: {'index': '${playback.lineIndex + 1}'}),
                       onTap: onLine,
                     ),
@@ -299,7 +285,7 @@ class TvRoomControls extends StatelessWidget {
                   scale,
                   TvButton(
                     key: const ValueKey('tv-room-danmaku'),
-                    icon: danmakuOn ? Icons.subtitles_rounded : Icons.subtitles_off_rounded,
+                    icon: danmakuOn ? TvIcons.danmakuOn : TvIcons.danmakuOff,
                     label: i18n(danmakuOn ? 'tv_danmaku_on' : 'tv_danmaku_off'),
                     selected: danmakuOn,
                     onTap: onDanmaku,
@@ -309,7 +295,7 @@ class TvRoomControls extends StatelessWidget {
                   scale,
                   TvButton(
                     key: const ValueKey('tv-room-follow'),
-                    icon: followed ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                    icon: followed ? AppIcons.followedHeart : AppIcons.followHeart,
                     label: i18n(followed ? 'followed' : 'follow'),
                     selected: followed,
                     onTap: onFollow,
@@ -319,14 +305,14 @@ class TvRoomControls extends StatelessWidget {
                   scale,
                   TvButton(
                     key: const ValueKey('tv-room-refresh'),
-                    icon: Icons.refresh_rounded,
+                    icon: AppIcons.refresh,
                     label: i18n('refresh'),
                     onTap: onRefresh,
                   ),
                 ),
                 TvButton(
                   key: const ValueKey('tv-room-list'),
-                  icon: Icons.format_list_bulleted_rounded,
+                  icon: TvIcons.roomList,
                   label: i18n('tv_room_list'),
                   onTap: onList,
                 ),
@@ -334,7 +320,7 @@ class TvRoomControls extends StatelessWidget {
             ),
           ),
           SizedBox(height: scale(16)),
-          Text(i18n('tv_room_keys_hint'), style: scale.style(17, color: Colors.white54)),
+          Text(i18n('tv_room_keys_hint'), style: scale.style(17, color: OnVideoColors.secondary)),
         ],
       ),
     );
@@ -424,14 +410,14 @@ class _TvRoomListState extends State<TvRoomList> {
                   child: TvFocusable(
                     key: ValueKey('tv-room-list-$index'),
                     focusNode: index == current ? _current : null,
-                    scale: 1.02,
+                    zoom: false,
                     onTap: () => widget.onPick(index),
                     builder: (context, focused) {
-                      final color = focused ? palette.onFocusedCard : palette.text;
+                      final color = index == current ? palette.onSelected : palette.text;
                       return Container(
                         padding: EdgeInsets.symmetric(horizontal: scale.text(16)),
                         decoration: BoxDecoration(
-                          color: focused ? palette.focusedCard : (index == current ? palette.subtleFill : null),
+                          color: index == current ? palette.selected : (focused ? palette.highest : null),
                           borderRadius: BorderRadius.circular(scale(14)),
                         ),
                         child: Row(
@@ -465,8 +451,7 @@ class _TvRoomListState extends State<TvRoomList> {
                                 ],
                               ),
                             ),
-                            if (index == current)
-                              Icon(Icons.play_arrow_rounded, color: palette.focus, size: scale.text(28)),
+                            if (index == current) Icon(AppIcons.play, color: palette.onSelected, size: scale.text(28)),
                           ],
                         ),
                       );

@@ -13,8 +13,22 @@ bool isTvConfirmKey(LogicalKeyboardKey key) =>
     key == LogicalKeyboardKey.gameButtonA ||
     key == LogicalKeyboardKey.space;
 
+/// The remote's menu key (Android `KEYCODE_MENU`): the same as a held OK
+/// (UI_PLAN §5.4, docs/ui/compare/U.15a c10).
+bool isTvMenuKey(LogicalKeyboardKey key) => key == LogicalKeyboardKey.contextMenu;
+
 /// How long OK must be held to count as a long press.
 const Duration tvLongPressDelay = Duration(milliseconds: 500);
+
+/// How much a focused card, button or tab grows (U.15a c2).
+const double tvFocusZoom = 1.05;
+
+/// How much a held OK shrinks the target (pure_live_TV's press, kept by
+/// U.15a c1).
+const double tvPressScale = 0.97;
+
+/// The width of the focus ring, in canvas pixels (UI_PLAN §5.5).
+const double tvFocusRingWidth = 3;
 
 /// How a focusable answers a key before the default handling; return
 /// [KeyEventResult.handled] to keep it (a grid moving by index, a row that
@@ -26,11 +40,17 @@ typedef TvKeyHandler = KeyEventResult Function(FocusNode node, KeyEvent event);
 // ignore: avoid_positional_boolean_parameters
 typedef TvFocusBuilder = Widget Function(BuildContext context, bool focused);
 
-/// One remote-control target (pure_live_TV `TvFocusable` and `TvFocusStyle`):
-/// a focus node, OK as tap, a held OK as long press, and the shared focus
-/// look — it grows a little ([scale]), gets an accent ring and, on dark
-/// palettes, a soft glow. Gaining focus animates (120 ms), losing it snaps,
-/// so a held arrow never leaves a trail of half-lit items.
+/// One remote-control target with the TV's single focus look
+/// (docs/ui/compare/U.15a c2): a near-white 3 px ring outside the target and,
+/// for cards, buttons, tabs and menu items ([zoom]), 5 % growth; no glow.
+/// Whole rows (settings rows, dialog options, input fields) pass
+/// `zoom: false`: growing a full-width row would push it off the screen.
+/// Gaining focus animates (120 ms), losing it snaps, so a held arrow never
+/// leaves a trail of half-lit items; a held OK shrinks the target a little.
+/// The `tvFocusZoom` setting turns the growth off on slow boxes.
+///
+/// OK is a tap, a held OK (at least [tvLongPressDelay]) or the menu key is
+/// the long press, and the release of a long press never also taps.
 ///
 /// Built on Flutter's own focus system (no dpad package): arrows move by
 /// geometry through the app's `DirectionalFocusIntent`, widgets with their
@@ -46,10 +66,10 @@ class TvFocusable extends StatefulWidget {
     this.onFocusChange,
     this.focusNode,
     this.autofocus = false,
-    this.radius = 16,
-    this.scale = 1.05,
+    this.enabled = true,
+    this.radius = TvRadius.card,
+    this.zoom = true,
     this.ring = true,
-    this.glow = true,
     super.key,
   });
 
@@ -59,7 +79,7 @@ class TvFocusable extends StatefulWidget {
   /// OK, Enter or a tap.
   final VoidCallback? onTap;
 
-  /// A held OK (at least [tvLongPressDelay]), a long press or a right click.
+  /// A held OK, the menu key, a long press or a right click.
   final VoidCallback? onLongPress;
 
   /// Keys before the default handling.
@@ -74,17 +94,17 @@ class TvFocusable extends StatefulWidget {
   /// Takes the focus when first built.
   final bool autofocus;
 
-  /// The corner radius of the ring and glow, in design pixels.
+  /// False skips the target when moving the focus (a disabled button).
+  final bool enabled;
+
+  /// The corner radius of the ring, in canvas pixels.
   final double radius;
 
-  /// How much the target grows when focused (1 for none).
-  final double scale;
+  /// Grows by [tvFocusZoom] when focused (cards, buttons, tabs, menu items).
+  final bool zoom;
 
-  /// Draws the accent ring when focused.
+  /// Draws the focus ring when focused.
   final bool ring;
-
-  /// Draws the glow when focused (dark palettes).
-  final bool glow;
 
   @override
   State<TvFocusable> createState() => _TvFocusableState();
@@ -106,10 +126,20 @@ class _TvFocusableState extends State<TvFocusable> {
     super.dispose();
   }
 
+  void _setPressed(bool pressed) {
+    if (_pressed == pressed) return;
+    if (mounted) setState(() => _pressed = pressed);
+  }
+
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     final custom = widget.onKey?.call(node, event);
     if (custom == KeyEventResult.handled) return custom!;
-    if (!isTvConfirmKey(event.logicalKey)) return custom ?? KeyEventResult.ignored;
+    final key = event.logicalKey;
+    if (isTvMenuKey(key) && widget.onLongPress != null) {
+      if (event is KeyDownEvent) widget.onLongPress?.call();
+      return KeyEventResult.handled;
+    }
+    if (!isTvConfirmKey(key)) return custom ?? KeyEventResult.ignored;
     if (widget.onTap == null && widget.onLongPress == null) return KeyEventResult.ignored;
     switch (event) {
       case KeyDownEvent():
@@ -118,12 +148,13 @@ class _TvFocusableState extends State<TvFocusable> {
           widget.onTap?.call();
           return KeyEventResult.handled;
         }
-        _pressed = true;
+        _setPressed(true);
         _longFired = false;
         _hold?.cancel();
         _hold = Timer(tvLongPressDelay, () {
           if (!_pressed || !mounted) return;
           _longFired = true;
+          _setPressed(false);
           widget.onLongPress?.call();
         });
         return KeyEventResult.handled;
@@ -132,13 +163,14 @@ class _TvFocusableState extends State<TvFocusable> {
         // button does not fire again.
         return KeyEventResult.handled;
       case KeyUpEvent():
-        if (!_pressed) return KeyEventResult.ignored;
-        _pressed = false;
+        final fired = _longFired;
+        _longFired = false;
         _hold?.cancel();
+        if (!_pressed && !fired) return KeyEventResult.ignored;
+        _setPressed(false);
         // The release of a long press never also taps (pure_live_TV
         // `DpadLongPressGate`).
-        if (!_longFired) widget.onTap?.call();
-        _longFired = false;
+        if (!fired) widget.onTap?.call();
         return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
@@ -167,138 +199,42 @@ class _TvFocusableState extends State<TvFocusable> {
   Widget build(BuildContext context) {
     final palette = TvTheme.of(context);
     final scale = TvScale.of(context);
-    final radius = BorderRadius.circular(scale(widget.radius));
-    final duration = _focused ? const Duration(milliseconds: 120) : Duration.zero;
-    final shadows = _focused && widget.glow
-        ? [
-            BoxShadow(
-              color: palette.focus.withValues(alpha: palette.isLight ? 1 : 0.75),
-              blurRadius: palette.isLight ? 0 : scale(18),
-              spreadRadius: scale(palette.isLight ? 2 : 1.5),
-            ),
-          ]
-        : const <BoxShadow>[];
+    final zoom = widget.zoom && TvTheme.zoomOf(context) ? tvFocusZoom : 1.0;
+    final target = _focused ? (_pressed ? zoom * tvPressScale : zoom) : (_pressed ? tvPressScale : 1.0);
+    final ringOn = _focused && widget.ring;
+    final content = widget.builder(context, _focused);
     return Focus(
       focusNode: _node,
       autofocus: widget.autofocus,
+      canRequestFocus: widget.enabled,
+      skipTraversal: !widget.enabled,
       onKeyEvent: _onKey,
       onFocusChange: _focusChanged,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: widget.onTap == null ? null : _tap,
-        onLongPress: widget.onLongPress == null ? null : _longPress,
-        onSecondaryTap: widget.onLongPress == null ? null : _longPress,
+        onTap: widget.onTap == null || !widget.enabled ? null : _tap,
+        onLongPress: widget.onLongPress == null || !widget.enabled ? null : _longPress,
+        onSecondaryTap: widget.onLongPress == null || !widget.enabled ? null : _longPress,
         child: AnimatedScale(
-          scale: _focused ? widget.scale : 1,
-          duration: duration,
+          scale: target,
+          duration: _focused ? tvFocusDuration : Duration.zero,
           curve: Curves.easeOutCubic,
-          child: AnimatedContainer(
-            duration: duration,
-            curve: Curves.easeOutCubic,
-            foregroundDecoration: _focused && widget.ring
+          child: DecoratedBox(
+            position: DecorationPosition.foreground,
+            decoration: ringOn
                 ? BoxDecoration(
-                    borderRadius: radius,
-                    border: Border.all(color: palette.focus, width: scale(3)),
+                    borderRadius: BorderRadius.circular(scale.px(widget.radius)),
+                    border: Border.all(
+                      color: palette.focusRing,
+                      width: scale.px(tvFocusRingWidth),
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                    ),
                   )
-                : BoxDecoration(borderRadius: radius),
-            decoration: BoxDecoration(borderRadius: radius, boxShadow: shadows),
-            child: widget.builder(context, _focused),
+                : const BoxDecoration(),
+            child: content,
           ),
         ),
       ),
-    );
-  }
-}
-
-/// A pill button of the TV interface: icon and label, filled with the accent
-/// when focused, tinted when [selected].
-class TvButton extends StatelessWidget {
-  /// Creates the button.
-  const new({
-    required this.label,
-    this.icon,
-    this.onTap,
-    this.onLongPress,
-    this.onKey,
-    this.focusNode,
-    this.autofocus = false,
-    this.selected = false,
-    this.expand = false,
-    this.fontSize = 22,
-    super.key,
-  });
-
-  /// The text.
-  final String label;
-
-  /// The icon before the text.
-  final IconData? icon;
-
-  /// OK.
-  final VoidCallback? onTap;
-
-  /// A held OK.
-  final VoidCallback? onLongPress;
-
-  /// Keys before the default handling.
-  final TvKeyHandler? onKey;
-
-  /// The node.
-  final FocusNode? focusNode;
-
-  /// Takes the focus when first built.
-  final bool autofocus;
-
-  /// Marked as the current choice.
-  final bool selected;
-
-  /// Fills the width.
-  final bool expand;
-
-  /// The text size in design pixels.
-  final double fontSize;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = TvTheme.of(context);
-    final scale = TvScale.of(context);
-    return TvFocusable(
-      focusNode: focusNode,
-      autofocus: autofocus,
-      onTap: onTap,
-      onLongPress: onLongPress,
-      onKey: onKey,
-      radius: 40,
-      builder: (context, focused) {
-        final background = focused
-            ? palette.focus
-            : selected
-            ? palette.focus.withValues(alpha: 0.22)
-            : palette.card.withValues(alpha: 0.9);
-        final foreground = focused ? palette.onFocus : (selected ? palette.focus : palette.text);
-        return AnimatedContainer(
-          duration: focused ? const Duration(milliseconds: 120) : Duration.zero,
-          padding: EdgeInsets.symmetric(horizontal: scale.text(22), vertical: scale.text(10)),
-          decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(scale(40))),
-          child: Row(
-            mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: scale.text(fontSize + 4), color: foreground),
-                SizedBox(width: scale.text(10)),
-              ],
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: scale.style(fontSize, weight: FontWeight.w600, color: foreground),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

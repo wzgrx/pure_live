@@ -4,15 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
-import 'package:pure_live/shared/rooms/room_texts.dart';
 import 'package:pure_live/tv/tv_theme.dart';
-import 'package:pure_live/tv/widgets/tv_dialogs.dart';
-import 'package:pure_live/tv/widgets/tv_focusable.dart';
+import 'package:pure_live/tv/widgets/tv_button.dart';
+import 'package:pure_live/tv/widgets/tv_nav_item.dart';
 import 'package:pure_live/tv/widgets/tv_room_grid.dart';
+import 'package:pure_live/tv/widgets/tv_status.dart';
 
 /// One playlist of the IPTV pane: its name and its channels as rooms.
 typedef TvPlaylist = ({String id, String name, List<LiveRoom> channels});
@@ -92,36 +93,36 @@ class _TvIptvPaneState extends ConsumerState<TvIptvPane> {
   @override
   Widget build(BuildContext context) {
     final playlists = _playlists;
-    if (playlists == null) return TvMessage(icon: Icons.live_tv_rounded, title: i18n('tv_iptv_unavailable'));
+    if (playlists == null) return TvStatusView(icon: TvIcons.menuIptv, title: i18n('tv_iptv_unavailable'));
     return FutureBuilder<List<TvPlaylist>>(
       future: playlists,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return TvMessage(
-            icon: Icons.error_outline_rounded,
-            title: describeLoadError(snapshot.error),
-            action: i18n('retry'),
-            onAction: () => setState(_load),
-          );
+          return TvStatusView.failure(snapshot.error, onRetry: () => setState(_load));
         }
         final lists = snapshot.data;
-        if (lists == null) return TvMessage(busy: true, title: i18n('tv_loading'));
+        if (lists == null) return const TvSkeletonGrid();
         if (lists.isEmpty) {
-          return TvMessage(
-            icon: Icons.playlist_add_rounded,
+          return TvStatusView(
+            icon: TvIcons.noPlaylists,
             title: i18n('tv_iptv_empty'),
-            action: i18n('iptv_manage'),
-            onAction: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kIptv)),
+            actions: [
+              TvStatusAction(
+                icon: TvIcons.manage,
+                label: i18n('iptv_manage'),
+                onTap: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kIptv)),
+              ),
+            ],
           );
         }
         final current = lists.firstWhere((list) => list.id == _current, orElse: () => lists.first);
         return Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(width: TvScale.of(context).text(300), child: _playlistColumn(lists, current)),
+            SizedBox(width: TvScale.of(context).pxText(150), child: _playlistColumn(lists, current)),
             Expanded(
               child: current.channels.isEmpty
-                  ? TvMessage(icon: Icons.live_tv_rounded, title: i18n('tv_no_rooms'))
+                  ? TvStatusView(icon: TvIcons.menuIptv, title: i18n('tv_no_rooms'))
                   : TvRoomGrid(key: _grid(current.id), rooms: current.channels, numbered: true),
             ),
           ],
@@ -131,18 +132,19 @@ class _TvIptvPaneState extends ConsumerState<TvIptvPane> {
   }
 
   Widget _playlistColumn(List<TvPlaylist> lists, TvPlaylist current) {
-    final palette = TvTheme.of(context);
     final scale = TvScale.of(context);
     return ListView(
-      padding: EdgeInsets.all(scale(20)),
+      padding: EdgeInsets.all(scale.px(12)),
       children: [
         for (final list in lists)
           Padding(
-            padding: EdgeInsets.only(bottom: scale(10)),
-            child: TvFocusable(
+            padding: EdgeInsets.only(bottom: scale.px(6)),
+            child: TvNavItem(
               key: ValueKey('tv-playlist-${list.id}'),
               focusNode: _listNode(list.id),
-              scale: 1.03,
+              label: list.name,
+              subtitle: i18n('iptv_channel_count', args: {'count': '${list.channels.length}'}),
+              selected: list.id == current.id,
               onTap: () => setState(() => _current = list.id),
               onKey: (node, event) {
                 if (event is KeyUpEvent || event.logicalKey != LogicalKeyboardKey.arrowRight) {
@@ -153,43 +155,15 @@ class _TvIptvPaneState extends ConsumerState<TvIptvPane> {
                 WidgetsBinding.instance.addPostFrameCallback((_) => grid.currentState?.enter());
                 return KeyEventResult.handled;
               },
-              builder: (context, focused) {
-                final selected = list.id == current.id;
-                final color = focused ? palette.onFocus : (selected ? palette.focus : palette.text);
-                return Container(
-                  padding: EdgeInsets.symmetric(horizontal: scale.text(18), vertical: scale.text(12)),
-                  decoration: BoxDecoration(
-                    color: focused
-                        ? palette.focus
-                        : (selected ? palette.focus.withValues(alpha: 0.2) : palette.card.withValues(alpha: 0.6)),
-                    borderRadius: BorderRadius.circular(scale(16)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        list.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: scale.style(21, weight: FontWeight.w600, color: color),
-                      ),
-                      Text(
-                        i18n('iptv_channel_count', args: {'count': '${list.channels.length}'}),
-                        style: scale.style(16, color: color.withValues(alpha: 0.7)),
-                      ),
-                    ],
-                  ),
-                );
-              },
             ),
           ),
         Padding(
-          padding: EdgeInsets.only(top: scale(10)),
+          padding: EdgeInsets.only(top: scale.px(6)),
           child: TvButton(
             key: const ValueKey('tv-iptv-manage'),
-            icon: Icons.tune_rounded,
+            icon: TvIcons.manage,
             label: i18n('iptv_manage'),
-            fontSize: 19,
+            small: true,
             expand: true,
             onTap: () async {
               await AppNavigator.toNamed<void>(RoutePath.kIptv);

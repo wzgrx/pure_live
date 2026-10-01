@@ -11,9 +11,9 @@ import 'package:pure_live/features/areas/areas_common.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 import 'package:pure_live/tv/tv_theme.dart';
-import 'package:pure_live/tv/widgets/tv_dialogs.dart';
-import 'package:pure_live/tv/widgets/tv_focusable.dart';
+import 'package:pure_live/tv/widgets/tv_area_card.dart';
 import 'package:pure_live/tv/widgets/tv_grid.dart';
+import 'package:pure_live/tv/widgets/tv_status.dart';
 import 'package:pure_live/tv/widgets/tv_tabs.dart';
 
 /// The tab of the followed areas.
@@ -90,7 +90,7 @@ class _TvAreasPaneState extends ConsumerState<TvAreasPane> {
           tabs: [
             for (final id in tabs)
               if (id == _followedTab)
-                TvTab(id: id, label: i18n('tv_followed_areas'), icon: Icons.favorite_rounded)
+                TvTab(id: id, label: i18n('tv_followed_areas'), icon: TvIcons.followedArea)
               else
                 TvTab(
                   id: id,
@@ -109,7 +109,13 @@ class _TvAreasPaneState extends ConsumerState<TvAreasPane> {
   }
 
   Widget _followedAreas(List<LiveArea> areas) {
-    if (areas.isEmpty) return TvMessage(icon: Icons.favorite_border_rounded, title: i18n('tv_no_followed_areas'));
+    if (areas.isEmpty) {
+      return TvStatusView(
+        icon: TvIcons.followArea,
+        title: i18n('empty_areas_title'),
+        subtitle: i18n('tv_no_followed_areas'),
+      );
+    }
     return _AreaGrid(
       gridKey: _grid(_followedTab),
       areas: areas,
@@ -125,12 +131,16 @@ class _TvAreasPaneState extends ConsumerState<TvAreasPane> {
       builder: (context, _) {
         final categories = catalog.categories;
         if (categories.isEmpty) {
-          if (!catalog.hasLoaded || catalog.isLoading) return TvMessage(busy: true, title: i18n('tv_loading'));
-          return TvMessage(
-            icon: catalog.error == null ? Icons.grid_view_rounded : Icons.error_outline_rounded,
-            title: catalog.error == null ? i18n('tv_no_areas') : describeLoadError(catalog.error),
-            action: i18n('retry'),
-            onAction: () => unawaited(catalog.refresh()),
+          if (!catalog.hasLoaded || catalog.isLoading) return const TvSkeletonGrid(columns: 6);
+          if (catalog.error != null) {
+            return TvStatusView.failure(catalog.error, onRetry: () => unawaited(catalog.refresh()));
+          }
+          return TvStatusView(
+            icon: TvIcons.noAreas,
+            title: i18n('tv_no_areas'),
+            actions: [
+              TvStatusAction(icon: AppIcons.refresh, label: i18n('retry'), onTap: () => unawaited(catalog.refresh())),
+            ],
           );
         }
         final selected = catalog.selected;
@@ -141,7 +151,7 @@ class _TvAreasPaneState extends ConsumerState<TvAreasPane> {
           children: [
             TvTabBar(
               key: _categoryTabs,
-              fontSize: 19,
+              small: true,
               tabs: [
                 for (final (index, category) in categories.indexed)
                   TvTab(id: '$index:${category.id}', label: category.name),
@@ -154,7 +164,7 @@ class _TvAreasPaneState extends ConsumerState<TvAreasPane> {
             ),
             Expanded(
               child: areas.isEmpty
-                  ? TvMessage(icon: Icons.grid_view_rounded, title: i18n('tv_no_areas'))
+                  ? TvStatusView(icon: TvIcons.noAreas, title: i18n('tv_no_areas'))
                   : _AreaGrid(
                       key: ValueKey(gridKey),
                       gridKey: gridKey,
@@ -169,8 +179,8 @@ class _TvAreasPaneState extends ConsumerState<TvAreasPane> {
   }
 }
 
-/// Areas in a [TvGrid] (pure_live_TV `TvAreaCard`): six columns (fewer as
-/// the text grows), the picture over the name.
+/// Areas in a [TvGrid] (U.15a c6 `TvAreaCard`): six columns (fewer as the
+/// text grows), the picture over the name, a heart on the followed ones.
 class _AreaGrid extends ConsumerWidget {
   const new({required this.gridKey, required this.areas, this.showPlatform = false, this.onLeaveUp, super.key});
 
@@ -182,78 +192,30 @@ class _AreaGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scale = TvScale.of(context);
-    final palette = TvTheme.of(context);
     final pictures = ref.watch(areaPicturesProvider);
+    final followed = ref.watch(followedAreaKeysProvider).value ?? const <String>{};
     final columns = tvRoomColumns(watchSetting(ref, Settings.textScaleFactor), base: 6);
     return TvGrid(
       key: gridKey,
       itemCount: areas.length,
       columns: columns,
-      aspectRatio: 0.82,
-      crossSpacing: scale(24),
-      mainSpacing: scale(24),
+      aspectRatio: showPlatform ? 0.7 : 0.78,
+      crossSpacing: scale.px(16),
+      mainSpacing: scale.px(16),
       onLeaveUp: onLeaveUp,
       itemBuilder: (context, index, node, onKey) {
         final area = areas[index];
         final picture = pictures.pictureFor(area);
-        return TvFocusable(
+        return TvAreaCard(
           key: ValueKey('tv-area-$index'),
           focusNode: node,
           onKey: onKey,
-          radius: 20,
+          name: areaDisplayName(area),
+          picture: picture.isEmpty ? null : picture,
+          subtitle: showPlatform ? platformName(area.platform) : null,
+          followed: !showPlatform && followed.contains(area.identityKey),
           onTap: () => openArea(ref, area),
           onLongPress: () => unawaited(toggleAreaFollow(context, ref, area)),
-          builder: (context, focused) {
-            final color = focused ? palette.onFocusedCard : palette.text;
-            return Container(
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: focused ? palette.focusedCard : palette.card,
-                borderRadius: BorderRadius.circular(scale(20)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.all(scale(12)),
-                      child: picture.isEmpty
-                          ? Icon(Icons.grid_view_rounded, size: scale(56), color: palette.textSecondary)
-                          : LiveNetworkImage(
-                              url: picture,
-                              fit: BoxFit.contain,
-                              memCacheWidth: 360,
-                              placeholder: (_) => const SizedBox.shrink(),
-                              error: (_) =>
-                                  Icon(Icons.grid_view_rounded, size: scale(56), color: palette.textSecondary),
-                            ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(scale(10), 0, scale(10), scale(12)),
-                    child: Column(
-                      children: [
-                        Text(
-                          areaDisplayName(area),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: scale.style(20, weight: FontWeight.w600, color: color),
-                        ),
-                        if (showPlatform)
-                          Text(
-                            platformName(area.platform),
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            style: scale.style(16, color: color.withValues(alpha: 0.7)),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
         );
       },
     );

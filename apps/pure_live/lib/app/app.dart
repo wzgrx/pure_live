@@ -60,6 +60,8 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   final _refreshRate = AdaptiveRefreshRateController(applyHighRefreshRate);
   late AppStrings _strings = widget.strings;
+  String? _lastToast;
+  DateTime _lastToastAt = DateTime.fromMillisecondsSinceEpoch(0);
   late final FontLibrary _fonts;
 
   @override
@@ -70,6 +72,12 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
     AppNavigator.toast = (message) {
       final messenger = _messenger.currentState;
       if (messenger == null) return;
+      // The TV does not repeat the same words within the 3 s a toast shows
+      // (pure_live_TV `ToastUtil`, docs/ui/compare/U.15a).
+      final now = DateTime.now();
+      if (_tv && message == _lastToast && now.difference(_lastToastAt) < const Duration(seconds: 3)) return;
+      _lastToast = message;
+      _lastToastAt = now;
       messenger
         ..hideCurrentSnackBar()
         ..showSnackBar(
@@ -183,7 +191,8 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
           scrollBehavior: const AppScrollBehavior(),
           theme: light.light,
           darkTheme: dark.dark,
-          themeMode: themeMode,
+          // The TV is dark only (docs/ui/compare/U.15a A2, U.6b → U.15i).
+          themeMode: tv ? ThemeMode.dark : themeMode,
           locale: language.locale,
           supportedLocales: [for (final value in AppLanguage.values) value.locale],
           localizationsDelegates: GlobalMaterialLocalizations.delegates,

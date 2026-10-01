@@ -74,20 +74,20 @@
 
 | 编号 | 内容 | 要出图的形态 | 界面（页面 / 弹窗 / 覆盖层 / 提示条） | 依赖 | 状态 |
 |---|---|---|---|---|---|
-| [U.4a](compare/U.4a/README.md) | **房间卡片**：卡片（各尺寸的列数）、长按菜单、关注、加标签 | 竖屏、横屏、宽屏 | [0 / 4 / 0 / 5](INVENTORY.md#u4a) | U.1 | 设计已确认，开发中 |
-| [U.4b](compare/U.4b/README.md) | **热门**：平台标签、房间网格 | 竖屏、横屏、宽屏 | [2 / 0 / 0 / 0](INVENTORY.md#u4b) | U.4a | 设计已确认，开发中 |
-| [U.4c](compare/U.4c/README.md) | **关注**：分组、筛选、房间网格 | 竖屏、横屏、宽屏 | [2 / 0 / 0 / 0](INVENTORY.md#u4c) | U.4a | 设计已确认，开发中 |
-| [U.4d](compare/U.4d/README.md) | **分区**：分区网格、分区卡片 | 竖屏、横屏、宽屏 | [2 / 0 / 0 / 0](INVENTORY.md#u4d) | U.4a | 设计已确认，开发中 |
-| [U.4e](compare/U.4e/README.md) | **分区房间**：一个分区里的房间 | 竖屏、横屏、宽屏 | [1 / 1 / 0 / 1](INVENTORY.md#u4e) | U.4a | 设计已确认，开发中 |
-| [U.4f](compare/U.4f/README.md) | **热门分区、关注的分区** | 竖屏、横屏、宽屏 | [2 / 0 / 0 / 0](INVENTORY.md#u4f) | U.4d | 设计已确认，开发中 |
+| [U.4a](compare/U.4a/README.md) | **房间卡片**：卡片（各尺寸的列数）、长按菜单、关注、加标签 | 竖屏、横屏、宽屏 | [0 / 4 / 0 / 5](INVENTORY.md#u4a) | U.1 | 完成（2026-10-01，[记录](records/U.4a.md)） |
+| [U.4b](compare/U.4b/README.md) | **热门**：平台标签、房间网格 | 竖屏、横屏、宽屏 | [2 / 0 / 0 / 0](INVENTORY.md#u4b) | U.4a | 完成（2026-10-01，[记录](records/U.4b.md)） |
+| [U.4c](compare/U.4c/README.md) | **关注**：分组、筛选、房间网格 | 竖屏、横屏、宽屏 | [2 / 0 / 0 / 0](INVENTORY.md#u4c) | U.4a | 完成（2026-10-01，[记录](records/U.4c.md)） |
+| [U.4d](compare/U.4d/README.md) | **分区**：分区网格、分区卡片 | 竖屏、横屏、宽屏 | [2 / 0 / 0 / 0](INVENTORY.md#u4d) | U.4a | 完成（2026-10-01，[记录](records/U.4d.md)） |
+| [U.4e](compare/U.4e/README.md) | **分区房间**：一个分区里的房间 | 竖屏、横屏、宽屏 | [1 / 1 / 0 / 1](INVENTORY.md#u4e) | U.4a | 完成（2026-10-01，[记录](records/U.4e.md)） |
+| [U.4f](compare/U.4f/README.md) | **热门分区、关注的分区** | 竖屏、横屏、宽屏 | [2 / 0 / 0 / 0](INVENTORY.md#u4f) | U.4d | 完成（2026-10-01，[记录](records/U.4f.md)） |
 
 ### U.5 搜索和历史
 
 | 编号 | 内容 | 要出图的形态 | 界面（页面 / 弹窗 / 覆盖层 / 提示条） | 依赖 | 状态 |
 |---|---|---|---|---|---|
-| [U.5a](compare/U.5a/README.md) | **搜索**：搜索框、平台筛选、结果 | 竖屏、横屏、宽屏 | [1 / 2 / 0 / 7](INVENTORY.md#u5a) | U.4a | 设计已确认，等 U.4a 卡片后开发 |
-| [U.5b](compare/U.5b/README.md) | **网页搜索** | 竖屏、横屏、宽屏 | [1 / 0 / 0 / 0](INVENTORY.md#u5b) | U.5a | 设计已确认，等 U.4a 卡片后开发 |
-| [U.5c](compare/U.5c/README.md) | **观看历史**：列表、条数上限、清空 | 竖屏、横屏、宽屏 | [1 / 3 / 0 / 4](INVENTORY.md#u5c) | U.4a | 设计已确认，等 U.4a 卡片后开发 |
+| [U.5a](compare/U.5a/README.md) | **搜索**：搜索框、平台筛选、结果 | 竖屏、横屏、宽屏 | [1 / 2 / 0 / 7](INVENTORY.md#u5a) | U.4a | 设计已确认，开发中 |
+| [U.5b](compare/U.5b/README.md) | **网页搜索** | 竖屏、横屏、宽屏 | [1 / 0 / 0 / 0](INVENTORY.md#u5b) | U.5a | 设计已确认，开发中 |
+| [U.5c](compare/U.5c/README.md) | **观看历史**：列表、条数上限、清空 | 竖屏、横屏、宽屏 | [1 / 3 / 0 / 4](INVENTORY.md#u5c) | U.4a | 设计已确认，开发中 |
 
 ### U.6 设置
 
@@ -151,7 +151,7 @@ Windows、Linux
 
 | 编号 | 内容 | 要出图的形态 | 界面（页面 / 弹窗 / 覆盖层 / 提示条） | 依赖 | 状态 |
 |---|---|---|---|---|---|
-| [U.13](compare/U.13/README.md) | **桌面窗口**：标题栏、窗口大小和位置、托盘、关闭时的选择（退出还是到托盘）、在新窗口打开、桌面小窗置顶；Windows、Linux（macOS 的差异在 U.17b） | 宽屏 | [0 / 3 / 0 / 2](INVENTORY.md#u13) | U.3b | 设计已确认，待开发 |
+| [U.13](compare/U.13/README.md) | **桌面窗口**：标题栏、窗口大小和位置、托盘、关闭时的选择（退出还是到托盘）、在新窗口打开、桌面小窗置顶；Windows、Linux（macOS 的差异在 U.17b） | 宽屏 | [0 / 3 / 0 / 2](INVENTORY.md#u13) | U.3b | 设计已确认，开发中 |
 
 ### U.14 系统界面
 
@@ -301,3 +301,6 @@ Android TV，遥控器操作，以 pure_live_TV 为基线（不是 v3），1920�
 | U.3d | M12.5（暂停中） | 剪贴板识别改调 U.3d 的 `showRoomPrompt`（`shared/rooms/room_prompt.dart` 同名，用 U.3d 的）；不加“不再识别”按钮——v3 只有“取消 / 进入直播间”（`common/widgets/share_command_import_dialog.dart:58-66`） |
 | U.3a、U.3b | U.4c | 360 宽的手机上关注页带数字的状态标签缩到约 0.8（右上从一个按钮变成两个），要不要调随 U.4c |
 | U.3b | U.2d、U.4、U.6、U.8 等 | 首页分界改成 600（`homeTabletBreakpoint`，原 680）；各页面里还写着 680 的分界随各自任务改到计划书第 5 节的分档 |
+| U.4a | U.5a、U.5b、U.6、U.15 | 搜索、观看记录、设置里的卡片预览、电视还在用旧的 `RoomCard`，各自开发时换成 live_ui 的 `LiveRoomCard`（同一个组件） |
+| U.4a | 全部页面 | live_ui `AppStatusView` 的按钮已按 U.1c C1 改为“第一个浅色实心、第二个文字按钮”，全应用的状态页都跟着变 |
+| U.4d | — | 抖音分区不再合成一个网格，改为分类标签（C-12 后“游戏”下约 156 个分区），见 records/U.4d.md |

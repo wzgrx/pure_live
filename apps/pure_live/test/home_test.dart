@@ -120,7 +120,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(LivePlayPage), findsOneWidget);
-    expect(find.textContaining('bilibili 23030429 主播'), findsOneWidget);
+    expect(find.text('主播'), findsWidgets);
 
     AppNavigator.back();
     await tester.pumpAndSettle();

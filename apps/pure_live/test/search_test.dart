@@ -8,13 +8,13 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/pages/search/search_capability.dart';
-import 'package:pure_live/pages/search/search_cards.dart';
 import 'package:pure_live/pages/search/search_history.dart';
 import 'package:pure_live/pages/search/search_model.dart';
 import 'package:pure_live/pages/search/search_ranking.dart';
 import 'package:pure_live/pages/search/search_view.dart';
 import 'package:pure_live/pages/search/web_search_view.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/rooms/room_cards.dart';
 
 import 'support.dart';
 
@@ -128,7 +128,7 @@ void main() {
     });
 
     test('cards: audience in short form, restriction label, protocol-relative images', () {
-      final data = roomCardData(
+      final data = const AudiencePolicy(preferRealOnline: false, realOnlinePlatforms: {}).cardOf(
         LiveRoom(
           platform: 'twitcasting',
           roomId: 'c',
@@ -138,9 +138,6 @@ void main() {
           audienceMetricType: AudienceMetricType.popularity,
           restriction: LiveRestriction.private,
         ),
-        platformName: 'TwitCasting',
-        preferRealOnline: false,
-        realOnlineEnabled: (_) => false,
       );
       expect(data.anchorName, 'TwitCasting');
       expect(data.coverUrl, 'https://img.test/a.jpg');
@@ -322,16 +319,15 @@ void main() {
       // Long press: the room menu follows the room.
       await tester.longPress(find.text('Hello'));
       await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey('search-room-sheet')), findsOneWidget);
+      expect(find.byKey(const ValueKey('room-menu')), findsOneWidget);
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('search-room-follow')));
+      await tester.tap(find.byKey(const ValueKey('room-menu-follow')));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+      await tester.pumpAndSettle();
       expect(await tester.runAsync(() => services.store.follows.contains(_room('bilibili', '42'))), isTrue);
-      expect(toasts, contains('已关注'));
-      await tester.pumpAndSettle();
-      Navigator.of(tester.element(find.byKey(const ValueKey('search-room-sheet')))).pop();
-      await tester.pumpAndSettle();
+      expect(toasts.where((text) => text.startsWith('已关注')), isNotEmpty);
+      expect(find.byKey(const ValueKey('room-menu')), findsNothing);
 
       // The word is in the history once the platform is chosen afresh.
       await tester.tap(find.byKey(const ValueKey('search-platform-1')));

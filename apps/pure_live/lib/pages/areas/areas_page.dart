@@ -15,6 +15,7 @@ import 'package:pure_live/pages/areas/platform_areas_view.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Areas and followed areas (3.x `lib/modules/areas`).
 ///
@@ -160,7 +161,9 @@ class _AreasViewState extends ConsumerState<AreasView> with TickerProviderStateM
                 isScrollable: true,
                 tabAlignment: TabAlignment.center,
                 physics: const PureLiveBoundedScrollPhysics(),
-                tabs: [for (final id in ids) Tab(text: platformLabel(id, ref.read(sitesProvider).of(id).name))],
+                tabs: [
+                  for (final id in ids) Tab(text: platformName(id, fallback: ref.read(sitesProvider).of(id).name)),
+                ],
               ),
       ),
       body: tabs == null

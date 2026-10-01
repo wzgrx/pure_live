@@ -10,7 +10,8 @@ import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/pages/live_play/room_texts.dart';
+import 'package:pure_live/shared/rooms/play_quality.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The arrangements of the multi-view grid (3.x `MultiviewLayout`).
 enum MultiviewLayout {
@@ -532,7 +533,7 @@ class MultiviewController extends ChangeNotifier {
   }
 
   int _normalQuality(MultiviewCell cell) =>
-      defaultMultiviewQuality(cell.qualities, store.settings.get(Settings.preferResolution));
+      defaultQualityIndex(cell.qualities, store.settings.get(Settings.preferResolution));
 
   void _fail(MultiviewCell cell, Object error) {
     cell
@@ -916,18 +917,4 @@ List<LivePlayQuality> _normalizeQualities(List<LivePlayQuality> qualities) {
     for (final quality in qualities)
       if (quality.quality.trim().isNotEmpty && seen.add('${quality.selectionId}')) quality,
   ];
-}
-
-/// The quality a cell starts with: the one named like the preference, else
-/// the same relative position among 3.x's five names (the live room's
-/// rule; 3.x's multi-view always took the best one).
-int defaultMultiviewQuality(List<LivePlayQuality> qualities, String preferred) {
-  if (qualities.isEmpty) return 0;
-  final exact = qualities.indexWhere((q) => q.quality == preferred);
-  if (exact >= 0) return exact;
-  const names = ['原画', '蓝光8M', '蓝光4M', '超清', '流畅'];
-  final level = names.indexOf(preferred);
-  if (level < 0) return 0;
-  final ratio = level / (names.length - 1);
-  return (ratio * (qualities.length - 1)).round().clamp(0, qualities.length - 1);
 }

@@ -1,6 +1,6 @@
 import 'package:live_core/live_core.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/pages/history/history_cards.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// When a history entry was last watched, by calendar day.
 enum HistorySection {
@@ -66,7 +66,7 @@ List<LiveRoom> filterHistory(List<LiveRoom> rooms, String query) {
         room.nick,
         room.roomId,
         room.platform,
-        historyPlatformName(room.platform),
+        platformName(room.platform),
       ].any((text) => text.toLowerCase().contains(needle)))
         room,
   ];

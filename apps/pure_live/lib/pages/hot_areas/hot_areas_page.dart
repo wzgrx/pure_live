@@ -4,9 +4,9 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/pages/areas/areas_common.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The platform list after showing ([show]) or hiding platform [id] in
 /// [visible]; null when hiding the last one (3.x kept at least one).
@@ -92,7 +92,7 @@ class HotAreasPage extends ConsumerWidget {
       for (final id in sites.ids)
         if (!visible.contains(id)) id,
     ];
-    String name(String id) => platformLabel(id, sites.maybeOf(id)?.name);
+    String name(String id) => platformName(id, fallback: sites.maybeOf(id)?.name);
 
     Widget row(String id, {required bool shown, int? index}) {
       final controls = Row(

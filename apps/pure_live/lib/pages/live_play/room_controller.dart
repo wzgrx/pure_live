@@ -9,7 +9,8 @@ import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/live_play/chat_feed.dart';
-import 'package:pure_live/pages/live_play/room_texts.dart';
+import 'package:pure_live/shared/rooms/play_quality.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Where the room page is (3.x kept `isLoading`, `success`, `isLiving` and
 /// `loadError` as four flags that could contradict each other).
@@ -615,19 +616,4 @@ List<LivePlayQuality> _normalizeQualities(List<LivePlayQuality> qualities) {
     for (final quality in qualities)
       if (quality.quality.trim().isNotEmpty && seen.add('${quality.selectionId}')) quality,
   ];
-}
-
-/// The quality to start with (3.x `_setDefaultResolution`): the one named
-/// like the preference, else the same relative position in the list (3.x's
-/// five names from best to worst).
-@visibleForTesting
-int defaultQualityIndex(List<LivePlayQuality> qualities, String preferred) {
-  if (qualities.isEmpty) return 0;
-  final exact = qualities.indexWhere((q) => q.quality == preferred);
-  if (exact >= 0) return exact;
-  const names = ['原画', '蓝光8M', '蓝光4M', '超清', '流畅'];
-  final level = names.indexOf(preferred);
-  if (level < 0) return 0;
-  final ratio = level / (names.length - 1);
-  return (ratio * (qualities.length - 1)).round().clamp(0, qualities.length - 1);
 }

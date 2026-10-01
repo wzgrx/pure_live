@@ -5,7 +5,8 @@ import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/pages/live_play/chat_feed.dart';
 import 'package:pure_live/pages/live_play/room_controller.dart';
-import 'package:pure_live/pages/live_play/room_texts.dart';
+import 'package:pure_live/shared/rooms/play_quality.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 import 'live_play_support.dart';
 import 'support.dart';

@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
-import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -17,10 +16,6 @@ final Provider<AreaPictures> areaPicturesProvider = Provider((ref) {
   pictures.load().ignore();
   return pictures;
 });
-
-/// The name of platform [id] in the interface language (3.x `Site.name`,
-/// the `site_<id>` strings), else [fallback], else the id.
-String platformLabel(String id, [String? fallback]) => i18nOr('site_$id', fallback ?? id);
 
 /// The name of [area] to show: its name, else "unnamed area" (3.x).
 String areaDisplayName(LiveArea area) {
@@ -39,20 +34,6 @@ double areaCardExtent(BuildContext context, double itemWidth) {
   final subtitleHeight = scaler.scale(11) * 1.25;
   return itemWidth + math.max(72, titleHeight + subtitleHeight + 32);
 }
-
-/// Words for a failed request: what went wrong in terms the user can act on.
-String describeLoadError(Object error) => switch (error) {
-  NeedsLogin() => i18n('areas_error_login'),
-  RateLimited() => i18n('areas_error_rate_limited'),
-  RiskControl() => i18n('areas_error_risk'),
-  RegionBlocked() => i18n('areas_error_region'),
-  ApiChanged() => i18n('areas_error_changed'),
-  NetworkFailure() || TransportFailure() => i18n('areas_error_network'),
-  _ => i18n('areas_error_unknown'),
-};
-
-/// Whether [error] asks the user to sign in (3.x showed the login page).
-bool isLoginError(Object? error) => error is NeedsLogin || error is RiskControl;
 
 /// Opens [area]: IPTV channels play directly, CC's official entries open in
 /// the browser, other areas open their rooms (3.x `AreaCard.onTap`).

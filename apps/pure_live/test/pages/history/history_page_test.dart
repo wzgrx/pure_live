@@ -6,13 +6,14 @@ import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
-import 'package:pure_live/pages/history/history_cards.dart';
 import 'package:pure_live/pages/history/history_page.dart';
 import 'package:pure_live/pages/history/history_refresh.dart';
 import 'package:pure_live/pages/history/history_sections.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/room_cards.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 import '../../support.dart';
 
@@ -283,19 +284,19 @@ void main() {
     expect(find.textContaining('房间号: 7'), findsOneWidget);
     expect(find.textContaining('今天 19:55'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('history-menu-follow')));
+    await tester.tap(find.byKey(const ValueKey('room-menu-follow')));
     await _settle(tester);
     expect(await tester.runAsync(() => h.services.store.follows.contains(_room('7'))), isTrue);
-    expect(h.toasts, ['已关注']);
+    expect(h.toasts, ['已关注 Streamer']);
     expect(find.byType(AlertDialog), findsNothing);
 
     // Unfollowing asks first.
     await tester.longPress(find.byType(RoomCard));
     await _settle(tester);
     expect(find.text('取消关注'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('history-menu-follow')));
+    await tester.tap(find.byKey(const ValueKey('room-menu-follow')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('确认'));
+    await tester.tap(find.byKey(const ValueKey('unfollow-confirm')));
     await _settle(tester);
     expect(await tester.runAsync(() => h.services.store.follows.contains(_room('7'))), isFalse);
 
@@ -320,17 +321,16 @@ void main() {
       onlineViewers: '320',
       restriction: LiveRestriction.paid,
     );
-    final data = historyCardData(room, preferRealOnline: false, realOnlinePlatforms: const []);
+    final data = const AudiencePolicy(preferRealOnline: false, realOnlinePlatforms: {}).cardOf(room);
     expect(data.title, '未命名直播间');
     expect(data.anchorName, '京东直播');
     expect(data.coverUrl, 'https://img.example.com/a.jpg');
     expect(data.audience, const RoomAudience(kind: RoomAudienceKind.popularity, value: '1500'));
     expect(data.restrictionLabel, '付费');
-    final real = historyCardData(room, preferRealOnline: true, realOnlinePlatforms: const ['jdlive']);
+    final real = const AudiencePolicy(preferRealOnline: true, realOnlinePlatforms: {'jdlive'}).cardOf(room);
     expect(real.audience?.kind, RoomAudienceKind.onlineViewers);
-    expect(readableAudience('15000', chinese: false), '15.0k');
-    expect(historyImageUrl('"null"'), '');
-    expect(historyCardAppearance(preset: 'compact', config: const {}), RoomCardAppearance.compact);
+    expect(readableAudience('15000'), '1.5万');
+    expect(normalizeImageUrl('"null"'), '');
   });
 
   test('refresh runs at most the given number of requests at once and stops when cancelled', () async {

@@ -4,9 +4,9 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/areas/area_card.dart';
 import 'package:pure_live/pages/areas/area_catalog.dart';
-import 'package:pure_live/pages/areas/areas_common.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// One platform's areas (3.x `AreaGridView`): a tab per category, swiped
 /// horizontally, each a grid of areas with pull to refresh; a filter that

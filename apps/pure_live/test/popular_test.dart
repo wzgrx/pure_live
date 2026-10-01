@@ -11,10 +11,10 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/app.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/pages/live_play/live_play_page.dart';
-import 'package:pure_live/pages/popular/popular_feed.dart';
-import 'package:pure_live/pages/popular/popular_rooms.dart';
-import 'package:pure_live/pages/popular/share_command.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/rooms/room_cards.dart';
+import 'package:pure_live/shared/rooms/room_feed.dart';
+import 'package:pure_live/shared/rooms/share_code.dart';
 
 import 'support.dart';
 
@@ -146,7 +146,7 @@ void main() {
   setUp(toasts.clear);
 
   group('feed', () {
-    PopularFeed feed(RoomSource source, {bool Function(LiveRoom)? visible}) => PopularFeed(
+    RoomFeed feed(RoomSource source, {bool Function(LiveRoom)? visible}) => RoomFeed(
       platform: 'x',
       source: source,
       rank: (_, rooms) => const AudiencePolicy(preferRealOnline: false, realOnlinePlatforms: {}).rank(rooms),
@@ -377,7 +377,7 @@ void main() {
 
     await tester.longPress(find.text('title 7'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('分享'));
+    await tester.tap(find.byKey(const ValueKey('room-menu-share')));
     await tester.pumpAndSettle();
     expect(copied, encodeRoomShareCode(_room('huya', 7)));
     expect(toasts.last, '已复制到剪贴板');

@@ -99,11 +99,3 @@ final class ChatFeed {
   /// Removes everything.
   void clear() => _lines.clear();
 }
-
-/// Whether [message] is taken back by [retraction] (the flying layer).
-bool retracts(LiveRetraction retraction, LiveMessage message) {
-  if (retraction.isAll) return true;
-  final messageId = retraction.messageId;
-  if (messageId != null) return message.messageId == messageId;
-  return retraction.userId != null && message.userId == retraction.userId;
-}

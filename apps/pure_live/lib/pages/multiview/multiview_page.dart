@@ -10,16 +10,15 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/pages/live_play/chat_panel.dart';
-import 'package:pure_live/pages/live_play/danmaku_overlay.dart';
-import 'package:pure_live/pages/live_play/player_view.dart';
-import 'package:pure_live/pages/live_play/room_texts.dart';
 import 'package:pure_live/pages/multiview/multiview_cell_view.dart';
 import 'package:pure_live/pages/multiview/multiview_controller.dart';
 import 'package:pure_live/pages/multiview/multiview_picker.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
+import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Multi-view (3.x `lib/modules/multiview`): several rooms at once, one of
 /// them audible, in a 1×1, 1×2, 2×2 or one-large grid.

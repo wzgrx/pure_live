@@ -9,11 +9,12 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/home/home_menu.dart';
 import 'package:pure_live/home/menu_button.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/pages/popular/popular_catalog.dart';
 import 'package:pure_live/pages/popular/popular_grid.dart';
-import 'package:pure_live/pages/popular/popular_rooms.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Popular rooms (3.x `lib/modules/popular`): one tab per platform of the
 /// "platform display" setting, each with its recommended rooms.
@@ -184,7 +185,7 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
                         isScrollable: true,
                         tabAlignment: TabAlignment.start,
                         physics: const PureLiveBoundedScrollPhysics(),
-                        tabs: [for (final id in ids) Tab(text: platformDisplayName(id, fallback: sites.of(id).name))],
+                        tabs: [for (final id in ids) Tab(text: platformName(id, fallback: sites.of(id).name))],
                       ),
                     ),
                     IconButton(
@@ -256,7 +257,7 @@ class _PlatformSheet extends StatelessWidget {
                     ChoiceChip(
                       key: ValueKey('popular-platform-$id'),
                       avatar: PlatformLogo(id, size: 20),
-                      label: Text(platformDisplayName(id)),
+                      label: Text(platformName(id, fallback: id.toUpperCase())),
                       selected: index == current,
                       selectedColor: theme.colorScheme.primaryContainer,
                       onSelected: (_) => Navigator.pop(context, index),

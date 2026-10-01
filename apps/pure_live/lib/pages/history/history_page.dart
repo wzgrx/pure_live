@@ -8,13 +8,14 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/pages/history/history_cards.dart';
 import 'package:pure_live/pages/history/history_limit_dialog.dart';
 import 'package:pure_live/pages/history/history_refresh.dart';
-import 'package:pure_live/pages/history/history_room_menu.dart';
 import 'package:pure_live/pages/history/history_sections.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/shared/rooms/room_cards.dart';
+import 'package:pure_live/shared/rooms/room_menu.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The history, newest first, again after every change.
 final StreamProvider<List<LiveRoom>> historyRoomsProvider = StreamProvider.autoDispose<List<LiveRoom>>(
@@ -165,7 +166,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
   Future<void> _remove(LiveRoom room) => _mutate(() async {
     final confirmed = await _confirm(
       title: i18n('delete'),
-      message: i18n('remove_history_confirm_named', args: {'title': historyRoomLabel(room)}),
+      message: i18n('remove_history_confirm_named', args: {'title': roomLabel(room)}),
       action: i18n('delete'),
     );
     if (!confirmed) return false;
@@ -210,13 +211,20 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
   }
 
   void _openMenu(LiveRoom room) => unawaited(
-    showHistoryRoomMenu(
+    showRoomMenu(
       context,
+      store: _store,
       room: room,
-      follows: _store.follows,
-      now: ref.read(historyClockProvider)(),
-      onOpen: () => unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room)),
-      onRemove: () => unawaited(_remove(room)),
+      detail: historyWatchedLabel(room.lastWatchedAt, ref.read(historyClockProvider)()),
+      actions: [
+        RoomMenuAction(
+          key: const ValueKey('history-menu-remove'),
+          icon: Icons.delete_outline_rounded,
+          label: i18n('remove_history_entry_named', args: {'title': roomLabel(room)}),
+          danger: true,
+          onSelected: () => unawaited(_remove(room)),
+        ),
+      ],
     ),
   );
 
@@ -324,16 +332,10 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
   );
 
   Widget _grid(BuildContext context, List<LiveRoom> rooms) {
-    final mobile = isMobileCardPlatform(Theme.of(context).platform);
-    final appearance = historyCardAppearance(
-      preset: watchSetting(ref, mobile ? Settings.roomCardMobilePreset : Settings.roomCardDesktopPreset),
-      config: watchSetting(ref, mobile ? Settings.roomCardMobileConfig : Settings.roomCardDesktopConfig),
-    );
-    final preferRealOnline = watchSetting(ref, Settings.preferRealOnlineCounts);
-    final realOnlinePlatforms = watchSetting(ref, Settings.realOnlinePlatforms);
+    final appearance = watchCardAppearance(ref);
+    final policy = watchAudiencePolicy(ref);
     final crossSpacing = watchSetting(ref, Settings.crossAxisSpacing);
     final mainSpacing = watchSetting(ref, Settings.mainAxisSpacing);
-    final chinese = currentStrings?.language != AppLanguage.en;
     final sections = historySections(rooms, ref.read(historyClockProvider)());
     final textScaler = MediaQuery.textScalerOf(context);
     final fontSizes = LiveFontSizes.of(Theme.of(context).textTheme);
@@ -381,15 +383,10 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                     itemCount: sectionRooms.length,
                     itemBuilder: (context, index) {
                       final room = sectionRooms[index];
-                      final label = historyRoomLabel(room);
+                      final label = roomLabel(room);
                       return RoomCard(
                         key: ValueKey('history-card-${room.identityKey}'),
-                        data: historyCardData(
-                          room,
-                          preferRealOnline: preferRealOnline,
-                          realOnlinePlatforms: realOnlinePlatforms,
-                          chinese: chinese,
-                        ),
+                        data: policy.cardOf(room),
                         appearance: appearance,
                         dense: true,
                         showDelete: true,

@@ -16,6 +16,7 @@ import 'package:pure_live/pages/settings/settings_dialogs.dart';
 import 'package:pure_live/pages/settings/settings_model.dart';
 import 'package:pure_live/pages/settings/settings_tiles.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The three expert mpv options.
 enum MpvOptionKind {
@@ -425,14 +426,14 @@ class PreferPlatformTile extends ConsumerWidget {
         subtitle: entry.descriptionText,
         isLong: true,
         stackTrailingOnNarrow: true,
-        trailing: SettingValueText(platformName(current, sites.maybeOf(current))),
+        trailing: SettingValueText(platformName(current, fallback: sites.maybeOf(current)?.name)),
         onTap: () async {
           final picked = await showDialog<String>(
             context: context,
             builder: (context) => _PlatformPicker(
               title: entry.titleText,
               ids: choices,
-              names: {for (final id in choices) id: platformName(id, sites.maybeOf(id))},
+              names: {for (final id in choices) id: platformName(id, fallback: sites.maybeOf(id)?.name)},
               selected: current,
             ),
           );
@@ -540,7 +541,7 @@ class AudiencePlatformsPage extends ConsumerWidget {
                 key: ValueKey('settings-audience-$id'),
                 child: SwitchListTile(
                   secondary: PlatformLogo(id, size: 24),
-                  title: Text(platformName(id, sites.maybeOf(id))),
+                  title: Text(platformName(id, fallback: sites.maybeOf(id)?.name)),
                   subtitle: Text(i18nOr('audience_${id}_detail', ''), style: context.textStyles.t12),
                   value: selected.contains(id),
                   onChanged: (on) => writeSetting(ref, Settings.realOnlinePlatforms, [

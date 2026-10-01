@@ -3,6 +3,14 @@ import 'dart:typed_data';
 
 import 'package:live_core/live_core.dart';
 
+/// The system share sheet (3.x `share_plus` on phones), or null where the
+/// app has none yet: then a share copies the text (M12.3 adds the plugin
+/// and sets `sheet` in `main`).
+abstract final class SystemShare {
+  /// Hands the text to the share sheet; completes with whether it was shown.
+  static Future<bool> Function(String text)? sheet;
+}
+
 /// 3.x's room share code (`ShareCommandCodec.encodeShort`): a MessagePack map
 /// `{m: pure_live, p, r, ti, n, l, c, a}` in URL-safe Base64 without
 /// padding, which 3.x and the link page read back. Empty when the room has

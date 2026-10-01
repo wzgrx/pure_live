@@ -10,12 +10,13 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/search/search_capability.dart';
-import 'package:pure_live/pages/search/search_cards.dart';
 import 'package:pure_live/pages/search/search_history.dart';
 import 'package:pure_live/pages/search/search_model.dart';
-import 'package:pure_live/pages/search/search_room_sheet.dart';
 import 'package:pure_live/pages/search/search_widgets.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/rooms/room_cards.dart';
+import 'package:pure_live/shared/rooms/room_menu.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The search page (3.x `SearchPage` with `SearchController`): a search
 /// field that also takes room links, the platform row, rooms or streamers
@@ -151,7 +152,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
 
   String _siteName(String platform) {
     final site = ref.read(sitesProvider).maybeOf(platform);
-    return searchPlatformName(platform, site?.name ?? platform);
+    return platformName(platform, fallback: site?.name ?? platform);
   }
 
   /// Searches the field's words; a room link opens the room instead.
@@ -256,7 +257,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
     watchSetting(ref, Settings.roomCardDesktopPreset);
     watchSetting(ref, Settings.roomCardMobileConfig);
     watchSetting(ref, Settings.roomCardDesktopConfig);
-    final appearance = roomCardAppearance(_store.settings);
+    final appearance = cardAppearanceOf(_store.settings);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -477,28 +478,13 @@ class _SearchViewState extends ConsumerState<SearchView> {
   }
 
   Widget _card(BuildContext context, LiveRoom room, RoomCardAppearance appearance) {
-    final name = _siteName(room.platform);
     return RoomCard(
       key: ValueKey('room-${room.identityKey}'),
-      data: roomCardData(
-        room,
-        platformName: name,
-        preferRealOnline: _preferRealOnline,
-        realOnlineEnabled: _realOnline.contains,
-      ),
+      data: AudiencePolicy(preferRealOnline: _preferRealOnline, realOnlinePlatforms: _realOnline).cardOf(room),
       appearance: appearance,
       dense: true,
       onTap: () => _openRoom(room),
-      onLongPress: () => unawaited(
-        showSearchRoomSheet(
-          context,
-          room: room,
-          platformName: name,
-          follows: _store.follows,
-          onOpen: _openRoom,
-          toast: _toast,
-        ),
-      ),
+      onLongPress: () => unawaited(showRoomMenu(context, store: _store, room: room, onOpen: () => _openRoom(room))),
     );
   }
 

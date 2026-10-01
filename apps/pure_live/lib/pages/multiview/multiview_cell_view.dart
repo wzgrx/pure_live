@@ -4,8 +4,8 @@ import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/pages/live_play/room_texts.dart';
 import 'package:pure_live/pages/multiview/multiview_controller.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// One cell on screen (3.x `_MultiviewCellView`): the video with its name
 /// chip, sound mark and playback state, or the empty, loading, offline and

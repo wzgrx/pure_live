@@ -532,6 +532,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
             ? i18n('search_anchor_unsupported', args: {'site': name})
             : searchCoverageText(SearchCapabilities.of(unsupported.id), name),
         buttonText: _model.canOpenWebSearch ? i18n('continue_web_search') : null,
+        buttonIcon: Icons.open_in_browser_rounded,
         onButtonPressed: _model.canOpenWebSearch ? () => unawaited(_openWebSearch()) : null,
       );
     }
@@ -542,6 +543,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
         title: i18n('search_no_live_results'),
         subtitle: i18n('search_offline_hidden_desc'),
         buttonText: i18n('search_show_offline'),
+        buttonIcon: Icons.visibility_rounded,
         onButtonPressed: () => _model.setIncludeOffline(value: true),
       );
     }
@@ -561,6 +563,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
       title: i18n('search_no_results'),
       subtitle: i18n('search_no_results_desc'),
       buttonText: _model.canOpenWebSearch ? i18n('continue_web_search') : null,
+      buttonIcon: Icons.open_in_browser_rounded,
       onButtonPressed: _model.canOpenWebSearch ? () => unawaited(_openWebSearch()) : null,
     );
   }

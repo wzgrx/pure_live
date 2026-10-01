@@ -205,6 +205,7 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
               title: i18n('popular_no_platforms'),
               subtitle: i18n('popular_no_platforms_hint'),
               buttonText: i18n('platform_display'),
+              buttonIcon: Icons.tune_rounded,
               onButtonPressed: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kSettingsHotAreas)),
             )
           : TabBarView(

@@ -115,6 +115,7 @@ class _FavoritePageState extends ConsumerState<FavoritePage> with SingleTickerPr
         title: i18n('empty_favorite_title'),
         subtitle: i18n('empty_favorite_subtitle'),
         buttonText: i18n('search_live'),
+        buttonIcon: Icons.search_rounded,
         onButtonPressed: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kSearch)),
       );
     } else {
@@ -431,7 +432,8 @@ class _FollowGrid extends ConsumerWidget {
       subtitle: total == 0
           ? i18n('favorite_empty_platform_subtitle')
           : i18n('favorite_empty_filter_subtitle', args: {'count': '$total'}),
-      buttonText: canShowOffline ? i18n('favorite_show_offline') : i18n('retry'),
+      buttonText: canShowOffline ? i18n('favorite_show_offline') : i18n('refresh'),
+      buttonIcon: canShowOffline ? Icons.visibility_rounded : null,
       onButtonPressed: canShowOffline ? () => controller.showGroup(FollowGroup.offline) : () => unawaited(onRefresh()),
     );
   }

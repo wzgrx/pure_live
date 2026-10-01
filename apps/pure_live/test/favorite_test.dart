@@ -292,10 +292,12 @@ void main() {
       return (services, controller, douyu);
     }
 
-    testWidgets('no follows: the empty page leads to search', (tester) async {
+    testWidgets('no follows: the empty page leads to search, with a search icon', (tester) async {
       final (services, _, _) = await pumpPage(tester);
       expect(find.text(i18n('empty_favorite_title')), findsOneWidget);
       expect(find.text(i18n('search_live')), findsOneWidget);
+      expect(find.widgetWithIcon(TextButton, Icons.search_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.refresh_rounded), findsNothing);
       await tester.runAsync(services.close);
     });
 

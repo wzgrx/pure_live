@@ -19,9 +19,10 @@ enum AppStatusType {
 /// `AppStatusView`).
 ///
 /// The empty and error states show an icon in a circle that pops in, a title,
-/// a text and, with [onButtonPressed], a retry button. Missing texts fall back
-/// to the words of [LiveUiScope]. [isMini] is the small form for a card cover:
-/// a small icon, no button, and a title or text only when given non-empty.
+/// a text and, with [onButtonPressed], a button (retry unless [buttonText]
+/// and [buttonIcon] say otherwise). Missing texts fall back to the words of
+/// [LiveUiScope]. [isMini] is the small form for a card cover: a small icon,
+/// no button, and a title or text only when given non-empty.
 class AppStatusView extends StatelessWidget {
   /// Creates the view.
   const new({
@@ -30,6 +31,7 @@ class AppStatusView extends StatelessWidget {
     this.subtitle,
     this.icon,
     this.buttonText,
+    this.buttonIcon,
     this.onButtonPressed,
     this.isMini = false,
     this.iconColor,
@@ -53,6 +55,10 @@ class AppStatusView extends StatelessWidget {
 
   /// Button label; null takes "retry".
   final String? buttonText;
+
+  /// Button icon, matching what [buttonText] does; null takes the retry
+  /// icon (3.x showed it on every button, also "search" and "log in").
+  final IconData? buttonIcon;
 
   /// Shows the button (not in [isMini]).
   final VoidCallback? onButtonPressed;
@@ -141,7 +147,7 @@ class AppStatusView extends StatelessWidget {
             const SizedBox(height: 16),
             TextButton.icon(
               onPressed: onButtonPressed,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
+              icon: Icon(buttonIcon ?? Icons.refresh_rounded, size: 18),
               label: Text(buttonText ?? words.retry),
             ),
           ],
@@ -160,6 +166,7 @@ class EmptyView extends StatelessWidget {
     this.subtitle,
     this.icon,
     this.buttonText,
+    this.buttonIcon,
     this.onButtonPressed,
     this.isMini = false,
     this.iconColor,
@@ -179,6 +186,9 @@ class EmptyView extends StatelessWidget {
 
   /// See [AppStatusView.buttonText].
   final String? buttonText;
+
+  /// See [AppStatusView.buttonIcon].
+  final IconData? buttonIcon;
 
   /// See [AppStatusView.onButtonPressed].
   final VoidCallback? onButtonPressed;
@@ -203,6 +213,7 @@ class EmptyView extends StatelessWidget {
       subtitle: subtitle,
       icon: icon,
       buttonText: buttonText,
+      buttonIcon: buttonIcon,
       onButtonPressed: onButtonPressed,
       isMini: isMini,
       iconColor: iconColor,

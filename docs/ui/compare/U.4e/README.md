@@ -1,6 +1,6 @@
 # U.4e 分区房间：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：完成（2026-10-01，[记录](../../records/U.4e.md)）
 - 范围：点分区卡片打开的“一个分区里的房间”页：顶栏、房间网格、关注分区、取消关注确认框、各种状态
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u4e)、[TASK_FILES.md](../../TASK_FILES.md#u4e)
 - 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（`python3 docs/ui/compare/U.4e/src/gen.py && python3 tools/ui/mock/render.py docs/ui/compare/U.4e/src/ --annotate`）

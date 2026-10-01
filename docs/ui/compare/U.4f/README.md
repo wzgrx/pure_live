@@ -1,6 +1,6 @@
 # U.4f 热门分区、关注的分区：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：完成（2026-10-01，[记录](../../records/U.4f.md)）
 - 范围：两个页面。**关注分区**（v3 `FavoriteAreasPage`，分区页右下角“关注分区”打开）和**平台显示**（v3 `HotAreasPage`，任务名里的“热门分区”：代码叫 hot_areas，界面标题是“平台显示”，从“设置 → 平台显示与授权 → 平台显示”打开，管理热门、分区等页面显示哪些平台和顺序）
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u4f)、[TASK_FILES.md](../../TASK_FILES.md#u4f)
 - 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（`python3 docs/ui/compare/U.4f/src/gen.py && python3 tools/ui/mock/render.py docs/ui/compare/U.4f/src/ --annotate`）

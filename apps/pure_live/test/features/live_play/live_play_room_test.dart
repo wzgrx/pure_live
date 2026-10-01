@@ -268,6 +268,7 @@ void main() {
         'live-play-orientation',
         'live-play-fullscreen',
       ]),
+      // U.2c: the orientation before the fit (3.x's order).
       [
         'live-play-pause',
         'live-play-refresh',
@@ -276,19 +277,20 @@ void main() {
         'live-play-danmaku-settings',
         'live-play-quality',
         'live-play-line',
-        'live-play-video-fit',
         'live-play-orientation',
+        'live-play-video-fit',
         'live-play-fullscreen',
       ],
     );
     expect(_in('live-play-video-follow', find.text('关注')), findsOneWidget);
-    expect(_in('live-play-video-fit', find.text('默认比例')), findsOneWidget);
+    // U.2c change 6: the fit is the "画面比例" icon with a small menu.
+    expect(_in('live-play-video-fit', find.byIcon(AppIcons.aspectRatio)), findsOneWidget);
     expect(_in('live-play-fullscreen', find.byIcon(AppIcons.exitFullscreen)), findsOneWidget);
-    // The fit button moves to the next fit (3.x `VideoFitSetting`).
     await tester.tap(find.byKey(const ValueKey('live-play-video-fit')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('video-fit-1')));
     await _settle(tester);
     expect(room.services.store.settings.get(Settings.videoFitIndex), 1);
-    expect(_in('live-play-video-fit', find.text('居中裁剪')), findsOneWidget);
     await _close(tester, room);
   });
 
@@ -612,8 +614,11 @@ void main() {
       expect(startedText(DateTime(2026, 10, 1, 19, 18), now), '今天 19:18 开播');
       expect(startedText(DateTime(2026, 9, 30, 23, 5), now), '昨天 23:05 开播');
       expect(startedText(DateTime(2026, 9, 2, 8), now), '09-02 08:00 开播');
-      expect(topBarSlots(android: true), [TopBarSlot.audioOnly, TopBarSlot.cast, TopBarSlot.pip]);
-      expect(topBarSlots(android: false), [TopBarSlot.audioOnly]);
+      expect(topBarSlots(platform: TargetPlatform.android), [TopBarSlot.audioOnly, TopBarSlot.cast, TopBarSlot.pip]);
+      // U.2j change 5: picture-in-picture on every client but the TV.
+      for (final platform in [TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.macOS, TargetPlatform.iOS]) {
+        expect(topBarSlots(platform: platform), [TopBarSlot.audioOnly, TopBarSlot.pip], reason: '$platform');
+      }
       expect(videoFits, hasLength(6));
     });
   });

@@ -384,12 +384,45 @@ class RemoteSyncService extends ChangeNotifier {
 
   /// Takes the settings of `ip:port` with [code] and applies them here;
   /// true on success (3.x `getRemoteSettings` + import).
-  Future<bool> receive(String ip, int port, String code) => _busy(() async {
-    final answer = await _request('GET', ip, port, code, null);
-    if (answer is! Map || answer['code'] != 200 || answer['data'] is! Map) return false;
-    await BackupService(store).restoreAll((answer['data']! as Map).cast<String, Object?>());
+  Future<bool> receive(String ip, int port, String code) async {
+    final settings = await fetch(ip, port, code);
+    return settings != null && await apply(settings);
+  }
+
+  /// Reads the settings of `ip:port` with [code] without applying them (the
+  /// page previews what they change first, docs/ui/compare/U.11c S1); null
+  /// when the other device refused or did not answer.
+  Future<Map<String, Object?>?> fetch(String ip, int port, String code) async {
+    Map<String, Object?>? settings;
+    await _busy(() async {
+      final answer = await _request('GET', ip, port, code, null);
+      if (answer is! Map || answer['code'] != 200 || answer['data'] is! Map) return false;
+      settings = (answer['data']! as Map).cast<String, Object?>();
+      return true;
+    });
+    return settings;
+  }
+
+  /// Applies settings [fetch] read; true on success.
+  Future<bool> apply(Map<String, Object?> settings) => _busy(() async {
+    await BackupService(store).restoreAll(settings);
     return true;
   });
+
+  /// Lists [device] as heard on the network (tests).
+  @visibleForTesting
+  void heard(RemoteSyncDevice device) {
+    _devices[device.id] = device;
+    _changed();
+  }
+
+  /// The name of the device at [ip] when it was heard on the network.
+  String? nameOf(String ip) {
+    for (final device in _devices.values) {
+      if (device.ip == ip) return device.name;
+    }
+    return null;
+  }
 
   Future<bool> _busy(Future<bool> Function() work) async {
     if (_disposed || syncing) return false;

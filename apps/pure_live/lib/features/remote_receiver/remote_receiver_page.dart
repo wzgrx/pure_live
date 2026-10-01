@@ -10,6 +10,8 @@ import 'package:pure_live/features/remote_receiver/remote_sync_service.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/shared/backup/backup_data.dart';
+import 'package:pure_live/shared/backup/backup_preview_dialog.dart';
 import 'package:pure_live/shared/qr_scan.dart';
 
 /// Makes the page's sync service (tests replace it).
@@ -18,7 +20,13 @@ final Provider<RemoteSyncService Function()> remoteSyncServiceProvider = Provide
   return () => RemoteSyncService(store);
 });
 
-/// Device sync (3.x `lib/modules/remote_receiver`).
+/// The width from which the page lays out two columns (U.11c S2).
+const double remoteSyncTwoColumns = 840;
+
+/// Who another device is: its name and the line under it.
+typedef _Peer = ({String name, String ip, int port, String detail});
+
+/// Device sync (3.x `lib/modules/remote_receiver`, docs/ui/compare/U.11c).
 ///
 /// Routes: `RoutePath.kRemoteSync`.
 ///
@@ -26,7 +34,7 @@ final Provider<RemoteSyncService Function()> remoteSyncServiceProvider = Provide
 /// know the pairing code (shown with the address and a QR code) and that the
 /// user lets in; it can also send its settings to, or take them from,
 /// another device found on the network or typed in (address or the QR
-/// code's text).
+/// code's text). Taking settings shows what they change first.
 class RemoteReceiverPage extends ConsumerStatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -41,6 +49,7 @@ class RemoteReceiverPage extends ConsumerStatefulWidget {
 class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
   late final RemoteSyncService _service = ref.read(remoteSyncServiceProvider)()..confirm = _confirmIncoming;
   final _address = TextEditingController();
+  final _addressFocus = FocusNode();
 
   @override
   void initState() {
@@ -54,30 +63,46 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
       ..confirm = null
       ..dispose();
     _address.dispose();
+    _addressFocus.dispose();
     super.dispose();
   }
 
-  /// Another device asks to read or replace this device's settings.
+  /// Another device asks to read or replace this device's settings; the
+  /// page cannot be left until the user answers (3.x).
   Future<bool> _confirmIncoming(String action, String remoteAddress) async {
     if (!mounted) return false;
+    final name = _service.nameOf(remoteAddress);
     final allowed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
         key: const ValueKey('remote-sync-incoming'),
-        title: Text(i18n('remote_sync')),
-        content: Text(
-          i18n(
-            action == 'import' ? 'remote_sync_incoming_import' : 'remote_sync_incoming_export',
-            args: {'address': remoteAddress},
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(i18n('remote_sync'), style: const TextStyle(fontWeight: FontWeight.w600)),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Text(
+            i18n(
+              switch ((action == 'import', name == null)) {
+                (true, true) => 'remote_sync_incoming_import',
+                (true, false) => 'remote_sync_incoming_import_named',
+                (false, true) => 'remote_sync_incoming_export',
+                (false, false) => 'remote_sync_incoming_export_named',
+              },
+              args: {'address': remoteAddress, 'name': name ?? ''},
+            ),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(i18n('cancel'))),
+          TextButton(
+            key: const ValueKey('remote-sync-reject'),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(i18n('remote_sync_reject')),
+          ),
           FilledButton(
             key: const ValueKey('remote-sync-allow'),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(i18n('confirm')),
+            child: Text(i18n('remote_sync_allow')),
           ),
         ],
       ),
@@ -85,80 +110,163 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
     return allowed ?? false;
   }
 
-  /// The code shown on the other device; null when cancelled or invalid.
-  Future<String?> _askPairingCode() async {
-    final controller = TextEditingController();
-    try {
-      final code = await showDialog<String>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(i18n('remote_sync_pairing_code')),
-          content: TextField(
-            key: const ValueKey('remote-sync-code-field'),
-            controller: controller,
-            autofocus: true,
-            keyboardType: TextInputType.number,
-            maxLength: RemoteSyncProtocol.pairingCodeLength,
-            decoration: InputDecoration(hintText: i18n('remote_sync_pairing_code_hint')),
-            onSubmitted: (value) => Navigator.of(dialogContext).pop(value),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(i18n('cancel'))),
-            FilledButton(
-              key: const ValueKey('remote-sync-code-ok'),
-              onPressed: () => Navigator.of(dialogContext).pop(controller.text),
-              child: Text(i18n('confirm')),
-            ),
-          ],
-        ),
-      );
-      if (code == null) return null;
-      final normalized = RemoteSyncProtocol.normalizePairingCode(code);
-      if (normalized.length != RemoteSyncProtocol.pairingCodeLength || int.tryParse(normalized) == null) {
-        AppNavigator.toast(i18n('remote_sync_pairing_code_invalid'));
-        return null;
-      }
-      return normalized;
-    } finally {
-      controller.dispose();
+  /// The code shown on [peer]; null when cancelled or invalid.
+  Future<String?> _askPairingCode(_Peer peer) async {
+    final code = await showDialog<String>(
+      context: context,
+      builder: (_) => _PairingCodeDialog(name: peer.name),
+    );
+    if (code == null) return null;
+    final normalized = RemoteSyncProtocol.normalizePairingCode(code);
+    if (normalized.length != RemoteSyncProtocol.pairingCodeLength || int.tryParse(normalized) == null) {
+      AppNavigator.toast(i18n('remote_sync_pairing_code_invalid'));
+      return null;
     }
+    return normalized;
   }
 
-  Future<void> _send(String ip, int port, {String? code}) async {
-    final confirmed = await _confirm(i18n('remote_sync_send'), i18n('remote_sync_confirm_send'));
+  /// Send: say to whom and what it does (c3), the code, then send.
+  Future<void> _send(_Peer peer, {String? code}) async {
+    final confirmed = await _confirm(
+      title: i18n('remote_sync_send'),
+      message: i18n('remote_sync_confirm_send_named', args: {'name': peer.name}),
+      action: i18n('remote_sync_send_action'),
+    );
     if (!confirmed || !mounted) return;
-    final pairing = code ?? await _askPairingCode();
+    final pairing = code ?? await _askPairingCode(peer);
     if (pairing == null) return;
-    final ok = await _service.send(ip, port, pairing);
+    final ok = await _service.send(peer.ip, peer.port, pairing);
     AppNavigator.toast(i18n(ok ? 'remote_sync_send_success' : 'remote_sync_send_failed'));
   }
 
-  Future<void> _receive(String ip, int port, {String? code}) async {
-    final confirmed = await _confirm(i18n('remote_sync_receive'), i18n('remote_sync_confirm_receive'));
-    if (!confirmed || !mounted) return;
-    final pairing = code ?? await _askPairingCode();
-    if (pairing == null) return;
-    final ok = await _service.receive(ip, port, pairing);
+  /// Receive: the code, then what the other device's settings change, then
+  /// apply them (c2, S1).
+  Future<void> _receive(_Peer peer, {String? code}) async {
+    final pairing = code ?? await _askPairingCode(peer);
+    if (pairing == null || !mounted) return;
+    final settings = await _service.fetch(peer.ip, peer.port, pairing);
+    if (settings == null) {
+      AppNavigator.toast(i18n('remote_sync_receive_failed'));
+      return;
+    }
+    final RestorePreview preview;
+    try {
+      preview = await previewRestore(ref.read(storeProvider), settings, BackupScope.all);
+    } on FormatException {
+      AppNavigator.toast(i18n('remote_sync_receive_failed'));
+      return;
+    }
+    if (!mounted || !await _confirmReceive(peer, preview)) return;
+    final ok = await _service.apply(settings);
     AppNavigator.toast(i18n(ok ? 'remote_sync_receive_success' : 'remote_sync_receive_failed'));
   }
 
-  Future<bool> _confirm(String title, String message) async =>
+  Future<bool> _confirmReceive(_Peer peer, RestorePreview preview) async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          final styles = dialogContext.textStyles;
+          final colors = Theme.of(dialogContext).colorScheme;
+          Widget line(String text) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 18,
+                  height: 20,
+                  child: Center(child: Icon(AppIcons.bullet, size: 6, color: colors.primary)),
+                ),
+                const SizedBox(width: 6),
+                Expanded(child: Text(text, style: styles.t13)),
+              ],
+            ),
+          );
+          return AlertDialog(
+            scrollable: true,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            title: Text(i18n('remote_sync_receive'), style: const TextStyle(fontWeight: FontWeight.w600)),
+            content: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Column(
+                key: const ValueKey('remote-sync-preview'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(i18n('remote_sync_from', args: {'name': peer.name}), style: styles.t14SemiBold),
+                  const SizedBox(height: 2),
+                  Text(peer.detail, style: styles.t12.copyWith(color: colors.onSurfaceVariant)),
+                  const SizedBox(height: 12),
+                  Text(i18n('remote_sync_preview_title'), style: styles.t13SemiBold),
+                  const SizedBox(height: 4),
+                  if (preview.settingsInFile > 0)
+                    line(
+                      i18n(
+                        'remote_sync_preview_settings',
+                        args: {'count': '${preview.settingsInFile}', 'changed': '${preview.settingsChanged}'},
+                      ),
+                    ),
+                  for (final part in preview.parts) line(restorePartText(part)),
+                  line(
+                    preview.accounts > 0
+                        ? i18n('backup_preview_accounts', args: {'count': '${preview.accounts}'})
+                        : i18n('remote_sync_preview_no_accounts'),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(i18n('remote_sync_preview_warning'), style: styles.t12.copyWith(color: colors.onSurfaceVariant)),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('cancel'))),
+              FilledButton(
+                key: const ValueKey('remote-sync-receive-confirm'),
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(i18n('remote_sync_receive_action')),
+              ),
+            ],
+          );
+        },
+      ) ??
+      false;
+
+  Future<bool> _confirm({required String title, required String message, required String action}) async =>
       await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: Text(title),
-          content: Text(message),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+          content: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 400), child: Text(message)),
           actions: [
             TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(i18n('cancel'))),
             FilledButton(
               key: const ValueKey('remote-sync-confirm'),
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(i18n('confirm')),
+              child: Text(action),
             ),
           ],
         ),
       ) ??
       false;
+
+  _Peer _peerOf(RemoteSyncDevice device) => (
+    name: device.name,
+    ip: device.ip,
+    port: device.port,
+    detail: [
+      device.address,
+      // 3.x announces a fixed "1.0.0"; say which app it is instead.
+      if (device.viaMdns) i18n('remote_sync_legacy_device') else if (device.version.isNotEmpty) 'v${device.version}',
+    ].join(' · '),
+  );
+
+  /// A typed or scanned address: the device's name when it was heard.
+  _Peer _peerAt(String ip, int port) {
+    for (final device in _service.devices) {
+      if (device.ip == ip && device.port == port) return _peerOf(device);
+    }
+    return (name: '$ip:$port', ip: ip, port: port, detail: '$ip:$port');
+  }
 
   /// The typed target: an address, or the text of a sync QR code (which
   /// carries the pairing code).
@@ -173,234 +281,379 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
     return parsed;
   }
 
+  /// The bar's scan: the other device's code, then which way (3.x).
+  Future<void> _scan() async {
+    final text = await scanQrCode(
+      context,
+      hint: i18n('remote_sync_scan_other'),
+      unavailableHint: i18n('remote_sync_camera_unavailable'),
+      onManual: _addressFocus.requestFocus,
+    );
+    if (text == null || !mounted) return;
+    final target = RemoteSyncProtocol.parseQr(text);
+    if (target == null) {
+      AppNavigator.toast(i18n('remote_sync_invalid_qr'));
+      return;
+    }
+    final peer = _peerAt(target.ip, target.port);
+    final send = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        key: const ValueKey('remote-sync-direction'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(i18n('remote_sync_select_action'), style: const TextStyle(fontWeight: FontWeight.w600)),
+        content: Text(peer.name == peer.detail ? peer.detail : '${peer.name} · ${target.ip}:${target.port}'),
+        actions: [
+          TextButton(
+            key: const ValueKey('remote-sync-direction-receive'),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(i18n('remote_sync_receive')),
+          ),
+          FilledButton(
+            key: const ValueKey('remote-sync-direction-send'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(i18n('remote_sync_send')),
+          ),
+        ],
+      ),
+    );
+    if (send == null || !mounted) return;
+    await (send ? _send(peer, code: target.code) : _receive(peer, code: target.code));
+  }
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: _service,
     builder: (context, _) => Scaffold(
-      appBar: AppBar(
-        title: Text(i18n('remote_sync')),
+      appBar: settingsPageAppBar(
+        context,
+        title: i18n('remote_sync'),
         actions: [
+          if (QrScan.available)
+            IconButton(
+              key: const ValueKey('remote-sync-scan-bar'),
+              tooltip: i18n('remote_sync_scan_qr'),
+              onPressed: () => unawaited(_scan()),
+              icon: const Icon(AppIcons.scanQr),
+            ),
           IconButton(
             key: const ValueKey('remote-sync-toggle'),
             onPressed: _service.running ? _service.stop : _service.start,
-            icon: Icon(_service.running ? Icons.stop_circle_outlined : Icons.play_circle_outline_rounded),
+            icon: Icon(_service.running ? AppIcons.syncStop : AppIcons.syncStart),
             tooltip: i18n(_service.running ? 'stop' : 'start'),
           ),
-          const SizedBox(width: 8),
         ],
         bottom: _service.syncing
-            ? const PreferredSize(preferredSize: Size.fromHeight(2), child: LinearProgressIndicator(minHeight: 2))
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(2),
+                child: LinearProgressIndicator(key: ValueKey('remote-sync-progress'), minHeight: 2),
+              )
             : null,
       ),
-      body: ListView(
-        physics: const PureLiveScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        children: [
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: settingsContentMaxWidth),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(i18n('remote_sync_description'), style: context.textStyles.t12Muted),
-                  const SizedBox(height: 12),
-                  _localDevice(),
-                  const SizedBox(height: 16),
-                  _discovered(),
-                  const SizedBox(height: 16),
-                  _manual(),
-                ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Two columns on wide windows; a phone held sideways (short)
+          // keeps one (UI_PLAN §5.1).
+          final two = constraints.maxWidth >= remoteSyncTwoColumns && constraints.maxHeight >= 480 - kToolbarHeight;
+          final note = Padding(
+            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+            child: Text(
+              i18n('remote_sync_description'),
+              style: context.textStyles.t12.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+          );
+          final local = _group(i18n('remote_sync_my_device'), _localDevice(), first: true);
+          final others = [
+            _group(i18n('remote_sync_devices'), _discovered(), first: two, trailing: _searching()),
+            _group(i18n('remote_sync_manual'), _manual()),
+          ];
+          return SingleChildScrollView(
+            physics: const PureLiveScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: two ? 1120 : readableContentMaxWidth),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    note,
+                    if (two)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: local),
+                          const SizedBox(width: 32),
+                          Expanded(
+                            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: others),
+                          ),
+                        ],
+                      )
+                    else ...[
+                      local,
+                      ...others,
+                    ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     ),
   );
 
-  Widget _localDevice() {
-    final theme = Theme.of(context);
-    final service = _service;
-    return context.buildModernCard([
-      Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Text(i18n('remote_sync_my_device'), style: context.textStyles.t16Bold),
-            const SizedBox(height: 16),
-            if (service.qrData.isNotEmpty)
-              QrCodeWidget(key: const ValueKey('remote-sync-qr'), data: service.qrData)
-            else
-              SizedBox.square(
-                dimension: 180,
-                child: Icon(Icons.wifi_off_rounded, size: 56, color: theme.hintColor.withValues(alpha: 0.4)),
+  /// A titled card (the settings groups' look; titles outside, c10).
+  Widget _group(String title, Widget child, {bool first = false, Widget? trailing}) {
+    final colors = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(16, first ? 12 : 18, 8, 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    title,
+                    style: context.textStyles.t13.copyWith(fontWeight: FontWeight.w600, color: colors.primary),
+                  ),
+                ),
               ),
+              ?trailing,
+            ],
+          ),
+        ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.surfaceContainerLow,
+            borderRadius: const BorderRadius.all(Radius.circular(16)),
+          ),
+          child: child,
+        ),
+      ],
+    );
+  }
+
+  Widget? _searching() {
+    if (!_service.running) return null;
+    final colors = Theme.of(context).colorScheme;
+    return Row(
+      key: const ValueKey('remote-sync-searching'),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox.square(dimension: 14, child: CircularProgressIndicator(strokeWidth: 2)),
+        const SizedBox(width: 6),
+        Text(
+          i18n('remote_sync_searching_short'),
+          style: context.textStyles.t12.copyWith(color: colors.onSurfaceVariant),
+        ),
+      ],
+    );
+  }
+
+  Widget _localDevice() {
+    final colors = Theme.of(context).colorScheme;
+    final styles = context.textStyles;
+    final service = _service;
+    final noAddress = service.address.isEmpty;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+      child: Column(
+        children: [
+          if (noAddress) ...[
+            Container(
+              key: const ValueKey('remote-sync-no-address'),
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(color: colors.surfaceContainerHigh, shape: BoxShape.circle),
+              child: Icon(AppIcons.networkError, size: 48, color: colors.onSurfaceVariant),
+            ),
+            const SizedBox(height: 12),
+            Text(i18n('remote_sync_no_address'), style: styles.t16.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text(
+              i18n('remote_sync_no_address_hint'),
+              textAlign: TextAlign.center,
+              style: styles.t13.copyWith(color: colors.onSurfaceVariant),
+            ),
+          ] else ...[
+            if (service.qrData.isNotEmpty) QrCodeWidget(key: const ValueKey('remote-sync-qr'), data: service.qrData),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Flexible(
                   child: SelectableText(
-                    service.address.isEmpty ? i18n('remote_sync_no_address') : service.address,
+                    service.address,
                     key: const ValueKey('remote-sync-address'),
-                    style: context.textStyles.t16Bold,
+                    style: styles.t18.copyWith(fontWeight: FontWeight.w600).tabular,
                   ),
                 ),
-                if (service.address.isNotEmpty)
-                  IconButton(
-                    tooltip: i18n('remote_sync_copy_address'),
-                    icon: const Icon(Icons.copy_rounded, size: 18),
-                    onPressed: () async {
-                      await Clipboard.setData(ClipboardData(text: service.address));
-                      AppNavigator.toast(i18n('remote_sync_address_copied'));
-                    },
-                  ),
+                IconButton(
+                  key: const ValueKey('remote-sync-copy'),
+                  tooltip: i18n('remote_sync_copy_address'),
+                  icon: const Icon(AppIcons.copy, size: 20),
+                  onPressed: () async {
+                    await Clipboard.setData(ClipboardData(text: service.address));
+                    AppNavigator.toast(i18n('remote_sync_address_copied'));
+                  },
+                ),
               ],
             ),
             if (service.pairingCode.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(i18n('remote_sync_pairing_code'), style: context.textStyles.t12Muted),
+              const SizedBox(height: 4),
+              Text(i18n('remote_sync_pairing_code'), style: styles.t12.copyWith(color: colors.onSurfaceVariant)),
               SelectableText(
                 service.pairingCode,
                 key: const ValueKey('remote-sync-code'),
-                style: context.textStyles.t20.copyWith(fontWeight: FontWeight.bold, letterSpacing: 6),
+                style: styles.t20.copyWith(fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: 6).tabular,
+              ),
+              const SizedBox(height: 4),
+              Text(i18n('remote_sync_scan_hint'), style: styles.t13.copyWith(color: colors.onSurfaceVariant)),
+            ],
+          ],
+          const SizedBox(height: 8),
+          SettingsSwitchRow(
+            key: const ValueKey('remote-sync-accounts'),
+            title: i18n('remote_sync_include_accounts'),
+            subtitle: i18n('remote_sync_include_accounts_hint'),
+            subtitleMaxLines: null,
+            value: service.includeAccounts,
+            onChanged: (value) => setState(() => service.includeAccounts = value),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            key: const ValueKey('remote-sync-status'),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                service.running ? AppIcons.syncRunning : AppIcons.syncNotRunning,
+                size: 18,
+                color: service.running ? colors.primary : colors.error,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                i18n(service.running ? 'remote_sync_running' : 'remote_sync_not_running'),
+                style: styles.t14.copyWith(color: service.running ? colors.onSurface : colors.error),
               ),
             ],
-            const SizedBox(height: 8),
-            Text(i18n('remote_sync_scan_hint'), textAlign: TextAlign.center, style: context.textStyles.t12Muted),
-            const SizedBox(height: 8),
-            SwitchListTile(
-              key: const ValueKey('remote-sync-accounts'),
-              contentPadding: EdgeInsets.zero,
-              title: Text(i18n('remote_sync_include_accounts'), style: context.textStyles.t14),
-              subtitle: Text(i18n('remote_sync_include_accounts_hint'), style: context.textStyles.t12Muted),
-              value: service.includeAccounts,
-              onChanged: (value) => setState(() => service.includeAccounts = value),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  service.running ? Icons.check_circle_rounded : Icons.error_outline_rounded,
-                  size: 18,
-                  color: service.running ? theme.colorScheme.primary : theme.colorScheme.error,
-                ),
-                const SizedBox(width: 6),
-                Text(i18n(service.running ? 'remote_sync_running' : 'remote_sync_not_running')),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ]);
+    );
   }
 
   Widget _discovered() {
     final devices = _service.devices;
-    return context.buildModernCard([
-      Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(child: Text(i18n('remote_sync_devices'), style: context.textStyles.t16Bold)),
-                if (_service.running)
-                  const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (devices.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Center(
-                  child: Text(
-                    i18n(_service.running ? 'remote_sync_searching' : 'remote_sync_no_devices'),
-                    style: context.textStyles.t13Muted,
-                  ),
-                ),
-              )
-            else
-              for (final device in devices) _device(device),
-          ],
-        ),
-      ),
-    ]);
-  }
-
-  Widget _device(RemoteSyncDevice device) => Padding(
-    key: ValueKey('remote-sync-device-${device.id}'),
-    padding: const EdgeInsets.only(top: 8),
-    child: Column(
-      children: [
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Icon(device.platform == 'android' ? Icons.phone_android_rounded : Icons.computer_rounded),
-          title: Text(device.name, style: context.textStyles.t14SemiBold),
-          subtitle: Text(
-            [
-              device.address,
-              // 3.x announces a fixed "1.0.0"; say which app it is instead.
-              if (device.viaMdns)
-                i18n('remote_sync_legacy_device')
-              else if (device.version.isNotEmpty)
-                'v${device.version}',
-            ].join(' · '),
-            key: ValueKey('remote-sync-device-detail-${device.id}'),
-            style: context.textStyles.t12Muted,
+    final colors = Theme.of(context).colorScheme;
+    if (devices.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        child: Center(
+          child: Text(
+            i18n(_service.running ? 'remote_sync_searching' : 'remote_sync_no_devices'),
+            key: const ValueKey('remote-sync-no-devices'),
+            style: context.textStyles.t14.copyWith(color: colors.onSurfaceVariant),
           ),
         ),
+      );
+    }
+    return Column(
+      children: [
+        for (final (index, device) in devices.indexed) ...[
+          if (index > 0) Divider(height: 1, indent: 16, endIndent: 16, color: colors.outlineVariant),
+          _device(device),
+        ],
+      ],
+    );
+  }
+
+  Widget _device(RemoteSyncDevice device) {
+    final colors = Theme.of(context).colorScheme;
+    final peer = _peerOf(device);
+    final icon = switch (device.platform) {
+      'android' || 'ios' => AppIcons.devicePhone,
+      'windows' || 'macos' || 'linux' => AppIcons.deviceComputer,
+      _ => AppIcons.deviceOther,
+    };
+    return Padding(
+      key: ValueKey('remote-sync-device-${device.id}'),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 24, color: colors.onSurfaceVariant),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(device.name, style: context.textStyles.t15.copyWith(fontWeight: FontWeight.w600)),
+                    Text(
+                      peer.detail,
+                      key: ValueKey('remote-sync-device-detail-${device.id}'),
+                      style: context.textStyles.t12.copyWith(color: colors.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _buttons(onReceive: () => unawaited(_receive(peer)), onSend: () => unawaited(_send(peer))),
+        ],
+      ),
+    );
+  }
+
+  Widget _manual() => Padding(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          i18n('remote_sync_manual_hint'),
+          style: context.textStyles.t13.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          key: const ValueKey('remote-sync-target'),
+          controller: _address,
+          focusNode: _addressFocus,
+          keyboardType: TextInputType.url,
+          decoration: InputDecoration(
+            hintText: '192.168.1.100:39888',
+            prefixIcon: const Icon(AppIcons.lanAddress),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            // The other device's QR code carries its address and pairing
+            // code (3.x scanned it).
+            suffixIcon: qrScanButton(
+              context,
+              key: const ValueKey('remote-sync-scan'),
+              hint: i18n('remote_sync_scan_other'),
+              onText: (text) => _address.text = text,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
         _buttons(
-          onReceive: () => unawaited(_receive(device.ip, device.port)),
-          onSend: () => unawaited(_send(device.ip, device.port)),
+          onReceive: () {
+            if (_typed() case final target?) unawaited(_receive(_peerAt(target.ip, target.port), code: target.code));
+          },
+          onSend: () {
+            if (_typed() case final target?) unawaited(_send(_peerAt(target.ip, target.port), code: target.code));
+          },
         ),
       ],
     ),
   );
 
-  Widget _manual() => context.buildModernCard([
-    Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(i18n('remote_sync_manual'), style: context.textStyles.t16Bold),
-          const SizedBox(height: 4),
-          Text(i18n('remote_sync_manual_hint'), style: context.textStyles.t12Muted),
-          const SizedBox(height: 12),
-          TextField(
-            key: const ValueKey('remote-sync-target'),
-            controller: _address,
-            keyboardType: TextInputType.url,
-            decoration: InputDecoration(
-              hintText: '192.168.1.100:39888',
-              prefixIcon: const Icon(Icons.lan_outlined),
-              border: const OutlineInputBorder(),
-              // The other device's QR code carries its address and pairing
-              // code (3.x scanned it).
-              suffixIcon: qrScanButton(
-                context,
-                key: const ValueKey('remote-sync-scan'),
-                onText: (text) => _address.text = text,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          _buttons(
-            onReceive: () {
-              if (_typed() case final target?) unawaited(_receive(target.ip, target.port, code: target.code));
-            },
-            onSend: () {
-              if (_typed() case final target?) unawaited(_send(target.ip, target.port, code: target.code));
-            },
-          ),
-        ],
-      ),
-    ),
-  ]);
-
+  /// "接收配置" (outlined) then "发送配置" (filled), everywhere (c4).
   Widget _buttons({required VoidCallback onReceive, required VoidCallback onSend}) {
     final busy = _service.syncing;
     return Row(
@@ -409,18 +662,130 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
           child: OutlinedButton.icon(
             key: const ValueKey('remote-sync-receive'),
             onPressed: busy ? null : onReceive,
-            icon: const Icon(Icons.download_rounded),
+            style: OutlinedButton.styleFrom(minimumSize: const Size(48, 48)),
+            icon: const Icon(AppIcons.receive),
             label: Text(i18n('remote_sync_receive')),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 12),
         Expanded(
           child: FilledButton.icon(
             key: const ValueKey('remote-sync-send'),
             onPressed: busy ? null : onSend,
-            icon: const Icon(Icons.upload_rounded),
+            style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
+            icon: const Icon(AppIcons.send),
             label: Text(i18n('remote_sync_send')),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The pairing code of [name]: six boxes over one field (U.11c c3).
+class _PairingCodeDialog extends StatefulWidget {
+  const new({required this.name});
+
+  final String name;
+
+  @override
+  State<_PairingCodeDialog> createState() => _PairingCodeDialogState();
+}
+
+class _PairingCodeDialogState extends State<_PairingCodeDialog> {
+  final _code = TextEditingController();
+  final _focus = FocusNode();
+
+  @override
+  void dispose() {
+    _code.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    const length = RemoteSyncProtocol.pairingCodeLength;
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: Text(i18n('remote_sync_pairing_code'), style: const TextStyle(fontWeight: FontWeight.w600)),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              i18n('remote_sync_pairing_code_for', args: {'name': widget.name}),
+              style: context.textStyles.t14.copyWith(color: colors.onSurfaceVariant),
+            ),
+            const SizedBox(height: 16),
+            Stack(
+              children: [
+                // Six boxes up to 44 wide, narrower on a narrow dialog.
+                ValueListenableBuilder(
+                  valueListenable: _code,
+                  builder: (context, value, _) => Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (var i = 0; i < length; i++)
+                        Flexible(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 44),
+                              child: Container(
+                                height: 52,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: i == value.text.length ? colors.primary : colors.outline,
+                                    width: i == value.text.length ? 2 : 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  i < value.text.length ? value.text[i] : '',
+                                  style: context.textStyles.t20.copyWith(fontWeight: FontWeight.w600).tabular,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                // The field takes the typing, the paste and the taps; the
+                // boxes show it.
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: 0,
+                    child: TextField(
+                      key: const ValueKey('remote-sync-code-field'),
+                      controller: _code,
+                      focusNode: _focus,
+                      autofocus: true,
+                      showCursor: false,
+                      keyboardType: TextInputType.number,
+                      maxLength: length,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: const InputDecoration(counterText: '', border: InputBorder.none),
+                      onSubmitted: (value) => Navigator.of(context).pop(value),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
+        FilledButton(
+          key: const ValueKey('remote-sync-code-ok'),
+          onPressed: () => Navigator.of(context).pop(_code.text),
+          child: Text(i18n('confirm')),
         ),
       ],
     );

@@ -241,7 +241,7 @@ class _QrScanPageState extends State<QrScanPage> {
             ),
             IconButton(
               key: const ValueKey('qr-switch-camera'),
-              tooltip: i18n('qr_scan_switch_camera'),
+              tooltip: i18n('scanner_switch_camera'),
               onPressed: () => unawaited(camera.switchCamera()),
               icon: const Icon(AppIcons.switchCamera),
             ),

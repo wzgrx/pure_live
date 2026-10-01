@@ -122,13 +122,6 @@ Future<void> _settle(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-Future<void> _tap(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
-  await tester.pumpAndSettle();
-  await tester.tap(finder);
-  await _settle(tester);
-}
-
 void main() {
   group('RecordSettingsStore', () {
     test('moves the values kept before M8.1 into the store once: v4 meta first, then 3.x parked values', () async {

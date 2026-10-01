@@ -140,10 +140,10 @@
 
 | 编号 | 内容 | 要出图的形态 | 界面（页面 / 弹窗 / 覆盖层 / 提示条） | 依赖 | 状态 |
 |---|---|---|---|---|---|
-| [U.12a](compare/U.12a/README.md) | **工具箱** | 竖屏、横屏、宽屏 | [1 / 0 / 0 / 0](INVENTORY.md#u12a) | U.1 | 设计已确认，等 U.6a-b 开发合并后开发 |
-| [U.12b](compare/U.12b/README.md) | **关于和版本**：关于、版本、版本历史 | 竖屏、横屏、宽屏 | [3 / 5 / 1 / 4](INVENTORY.md#u12b) | U.1 | 设计已确认，等 U.6a-b 开发合并后开发 |
-| [U.12c](compare/U.12c/README.md) | **标签管理** | 竖屏、横屏、宽屏 | [1 / 4 / 0 / 2](INVENTORY.md#u12c) | U.1 | 设计已确认，等 U.6a-b 开发合并后开发 |
-| [U.12d](compare/U.12d/README.md) | **弹幕屏蔽** | 竖屏、横屏、宽屏 | [1 / 0 / 0 / 0](INVENTORY.md#u12d) | U.1 | 设计已确认，等 U.6a-b 开发合并后开发 |
+| [U.12a](compare/U.12a/README.md) | **工具箱** | 竖屏、横屏、宽屏 | [1 / 0 / 0 / 0](INVENTORY.md#u12a) | U.1 | 完成（2026-10-02，[记录](records/U.12a.md)） |
+| [U.12b](compare/U.12b/README.md) | **关于和版本**：关于、版本、版本历史 | 竖屏、横屏、宽屏 | [3 / 5 / 1 / 4](INVENTORY.md#u12b) | U.1 | 完成（2026-10-02，[记录](records/U.12b.md)） |
+| [U.12c](compare/U.12c/README.md) | **标签管理** | 竖屏、横屏、宽屏 | [1 / 4 / 0 / 2](INVENTORY.md#u12c) | U.1 | 完成（2026-10-02，[记录](records/U.12c.md)） |
+| [U.12d](compare/U.12d/README.md) | **弹幕屏蔽** | 竖屏、横屏、宽屏 | [1 / 0 / 0 / 0](INVENTORY.md#u12d) | U.1 | 完成（2026-10-02，[记录](records/U.12d.md)） |
 
 ### U.13 桌面窗口
 
@@ -329,3 +329,6 @@ Android TV，遥控器操作，以 pure_live_TV 为基线（不是 v3），1920�
 | U.15a | — | 电视设置页的选择行不再用 ←→ 直接换值（M14.1 加的），按设计只有 OK 弹选择框，←→ 移动焦点 |
 | U.2-followups | — | 投屏只在 Android；多画面点击区域 48（393 宽时音量滑轨变短、窄于 384 换行，横屏右栏最窄 256）；账号退出统一用 v3 文字；平台名统一为 SOOP、网易CC（v3 多数写法和官方写法），见 records/U.2-followups.md |
 | U.5a～U.5c | 共用组件（U.1c） | 页面的 Esc 返回用 `CallbackShortcuts` 加 `FocusScope`（`Scaffold` 自带的 Esc 会挡住外层），可做成共用组件 |
+| U.12b | — | 新版本提示用 U.3d 的同一个对话框（“其他下载方式 / 取消 / 下载并安装”，带“不再提醒这个版本”），不再按 U.12b c14 另做一个（原则 7）；启动检查改为下载本机架构的包 |
+| U.12d | — | v4 原来能手动输入用户名来屏蔽，v3 没有（只能在直播间长按弹幕），随设计去掉 |
+| U.12a～d | 收尾 | 不再使用的翻译键（`shield_tab_*`、`shield_clear*`、`version_history_desc`、`about_installed_version`、`version_file_size` 等）在最后统一清理 |

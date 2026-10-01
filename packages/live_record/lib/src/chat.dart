@@ -154,6 +154,7 @@ final class _TaskChat {
   RecordChatWriter? writer;
   Future<RecordChatWriter?>? opening;
   String? writerKey;
+  String? preparing;
   bool released = false;
 }
 
@@ -166,7 +167,8 @@ final class _TaskChat {
 /// reconnecting keeps one chat connection (across its attempts); each
 /// attempt's chat goes to `<prefix>.xml` beside the attempt's
 /// `<prefix>.mp4`, timed from the moment the attempt's video started (3.x
-/// timed from before the stream was resolved, a few seconds early). A
+/// timed from before the stream was resolved, a few seconds early; an
+/// attempt already running when the setting is switched on still is). A
 /// reconnect gap has no video, so its chat is not written. A connection
 /// that fails or ends is tried again after [retryDelay].
 final class RecordChatRecorder {
@@ -260,6 +262,7 @@ final class RecordChatRecorder {
 
   void _syncWriter(RecordTask task, _TaskChat state) {
     final directory = task.outputDir?.trim() ?? '';
+    if (task.status == RecordStatus.preparing) state.preparing = task.recordingFilePrefix;
     if (task.status != RecordStatus.running || directory.isEmpty) {
       // Preparing or reconnecting: the previous attempt's video has ended.
       unawaited(_closeWriter(state));
@@ -270,9 +273,13 @@ final class RecordChatRecorder {
     if (state.writerKey == key) return;
     unawaited(_closeWriter(state));
     state.writerKey = key;
+    // The video starts as the attempt turns from preparing to running; an
+    // attempt already running when chat was switched on is timed from its
+    // creation (3.x's base, a few seconds early).
+    final startedAt = state.preparing == prefix ? clock.now() : task.createTime;
     final opening = RecordChatWriter.open(
       File(p.join(directory, '$prefix.xml')),
-      startedAt: clock.now(),
+      startedAt: startedAt,
     ).then<RecordChatWriter?>((writer) => writer, onError: (Object _) => null);
     state.opening = opening;
     unawaited(

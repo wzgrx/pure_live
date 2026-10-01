@@ -53,6 +53,8 @@ void main() {
         RoutePath.kKuaishouCookie, RoutePath.kWebDavPage, RoutePath.kSplash, RoutePath.kVersionPage,
         RoutePath.kRecordPage, RoutePath.kRecordSettings, RoutePath.kWebSearch, RoutePath.kSettingsTags,
         RoutePath.kRemoteSync,
+        // U.2k: the local interaction settings (3.x pushed the page directly).
+        RoutePath.kLocalInteraction,
       },
     );
   });

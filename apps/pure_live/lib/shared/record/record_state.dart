@@ -96,6 +96,11 @@ String recordDefaultQuality(List<LivePlayQuality> roomQualities, String preferen
   return ordered.isEmpty ? preference : ordered.first.quality;
 }
 
+/// The whole percent of a join's [progress] (`RecordTask.mergeProgress`),
+/// or null before FFmpeg reports.
+int? recordMergePercent(double? progress) =>
+    progress == null || progress.isNaN ? null : (progress.clamp(0.0, 1.0) * 100).floor();
+
 /// The segment being written: segments are cut every [segmentSeconds].
 int recordSegmentNumber(int recordedSeconds, int segmentSeconds) =>
     segmentSeconds <= 0 ? 1 : recordedSeconds ~/ segmentSeconds + 1;

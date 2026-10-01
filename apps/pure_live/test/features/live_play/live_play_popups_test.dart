@@ -471,6 +471,17 @@ void main() {
       await _refresh(tester);
       expectCard('processing', [], absent: ['record-panel-stop', 'record-panel-start']);
       expect(find.text('把 3 段合成一个 MP4，完成后就能播放。可以关掉这里，不影响整理。'), findsOneWidget);
+      // F.3a: the bar moves until FFmpeg reports, then the join's percent.
+      LinearProgressIndicator bar() =>
+          tester.widget<LinearProgressIndicator>(find.byKey(const ValueKey('record-card-merge-progress')));
+      Text percent() => tester.widget<Text>(find.byKey(const ValueKey('record-card-merge-percent')));
+      expect(bar().value, isNull);
+      expect(percent().data, '');
+      task.mergeProgress = 0.376;
+      recording.recorder!.setTaskOptions(task);
+      await _refresh(tester);
+      expect(bar().value, 0.37);
+      expect(percent().data, '37%');
     });
 
     testWidgets('saved: duration, size, quality; play, the recording centre, record again', (tester) async {
@@ -880,6 +891,9 @@ void main() {
       expect(recordShortSize(356 * 1024 * 1024), '356 MB');
       expect(recordShortSize(1288490189), '1.2 GB');
       expect(groupedNumber(1284), '1,284');
+      expect(recordMergePercent(null), isNull);
+      expect(recordMergePercent(0.999), 99);
+      expect(recordMergePercent(1), 100);
       expect(resolvedDanmakuFps(automatic: false, configured: 90, mode: 'balanced'), 90);
       expect(resolvedDanmakuFps(automatic: true, configured: 90, mode: 'balanced', maxRefreshRate: 120), 60);
       expect(resolvedDanmakuFps(automatic: true, configured: 90, mode: 'performance', maxRefreshRate: 120), 120);

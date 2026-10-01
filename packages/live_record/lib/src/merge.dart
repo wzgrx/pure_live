@@ -64,6 +64,9 @@ final class RecordMerger {
   /// Joins attempt [filePrefix] in [directory]. [recordedSeconds] scales the
   /// timeout; [allowLegacy] admits 3.x schema-1 segments (crash recovery);
   /// [damaged] refuses the join; [cancelled] is checked between steps.
+  /// [onProgress] gets the join's progress from FFmpeg's statistics
+  /// ([mergeProgress]): rising only, at most 0.99 while FFmpeg runs, and 1
+  /// once the MP4 is committed.
   Future<MergeResult> merge({
     required String directory,
     required String filePrefix,
@@ -72,6 +75,7 @@ final class RecordMerger {
     bool damaged = false,
     bool deleteSources = true,
     bool Function()? cancelled,
+    void Function(double progress)? onProgress,
   }) async {
     bool isCancelled() => cancelled?.call() ?? false;
     if (damaged) return const MergeResult.failed(MergeFailure.inputIntegrity);
@@ -131,11 +135,26 @@ final class RecordMerger {
       execution = await runner.start(FfmpegCommand.merge(manifest: list.path, output: partial.path));
       final logs = StringBuffer();
       final subscription = execution.logs.listen(logs.writeln);
+      var progress = 0.0;
+      final statistics = onProgress == null
+          ? null
+          : execution.statistics.listen((sample) {
+              final next = mergeProgress(
+                elapsedMilliseconds: sample.time,
+                recordedSeconds: recordedSeconds,
+                outputBytes: sample.size,
+                inputBytes: inputBytes,
+              );
+              if (next <= progress || isCancelled()) return;
+              progress = next;
+              onProgress(next);
+            });
       final int code;
       try {
         code = await execution.exitCode.timeout(mergeTimeout(inputBytes: inputBytes, recordedSeconds: recordedSeconds));
       } finally {
         await subscription.cancel();
+        await statistics?.cancel();
       }
       if (isCancelled()) return const MergeResult.failed(MergeFailure.cancelled);
       if ((code != 0 && code != ffmpegEndOfFile) ||
@@ -145,6 +164,7 @@ final class RecordMerger {
         return const MergeResult.failed(MergeFailure.ffmpeg);
       }
       await partial.rename(output.path);
+      onProgress?.call(1);
       if (deleteSources) {
         var removedAll = true;
         for (final segment in segments) {
@@ -172,6 +192,30 @@ final class RecordMerger {
         }
       }
     }
+  }
+
+  /// The progress of a join from one FFmpeg statistics sample (3.x
+  /// `VideoProcessorService.mergeProgress`): output bytes over the
+  /// segments' [inputBytes] (a stream copy writes about as much as it
+  /// reads), else media time over [recordedSeconds] when it is plausible
+  /// (copy-remux statistics can carry a no-timestamp value); 0 to 0.99, the
+  /// commit alone is 1.
+  static double mergeProgress({
+    required num elapsedMilliseconds,
+    required int recordedSeconds,
+    required num outputBytes,
+    required int inputBytes,
+  }) {
+    var progress = 0.0;
+    if (inputBytes > 0 && outputBytes.isFinite && outputBytes > 0 && outputBytes <= inputBytes * 2) {
+      progress = outputBytes / inputBytes;
+    } else if (recordedSeconds > 0 &&
+        elapsedMilliseconds.isFinite &&
+        elapsedMilliseconds > 0 &&
+        elapsedMilliseconds <= recordedSeconds * 1000 + 15000) {
+      progress = elapsedMilliseconds / (recordedSeconds * 1000);
+    }
+    return progress.clamp(0.0, 0.99);
   }
 
   /// Join timeout (3.x `mergeTimeout`): 30 s to an hour, scaled by bytes

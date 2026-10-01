@@ -815,11 +815,40 @@ final class Recorder {
     _update(task);
   }
 
+  /// Joins [task]'s attempts. [RecordTask.mergeProgress] follows the join,
+  /// the attempts weighted by their source bytes; the interface hears of
+  /// the first value and of each whole percent after it, never the store.
   Future<bool> _mergePending(RecordTask task, {bool allowLegacy = false}) async {
+    final attempts = List.of(task.pendingAttempts);
+    final sizes = [for (final attempt in attempts) SegmentMeter.measure(attempt.directoryPath, attempt.filePrefix)];
+    final total = sizes.fold(0, (sum, size) => sum + size);
+    var joined = 0.0;
+    void progress(int index, double value) {
+      final weight = total > 0 ? sizes[index] / total : 1 / attempts.length;
+      if (value >= 1) joined += weight;
+      final before = task.mergeProgress;
+      final now = task.mergeProgress = (value >= 1 ? joined : joined + weight * value).clamp(0.0, 1.0);
+      if (before == null || (now * 100).floor() != (before * 100).floor()) _update(task, persist: false);
+    }
+
+    try {
+      return await _mergeAttempts(task, attempts, sizes, allowLegacy: allowLegacy, onProgress: progress);
+    } finally {
+      task.mergeProgress = null;
+    }
+  }
+
+  Future<bool> _mergeAttempts(
+    RecordTask task,
+    List<PendingRecordingAttempt> attempts,
+    List<int> sizes, {
+    required bool allowLegacy,
+    required void Function(int index, double progress) onProgress,
+  }) async {
     var ok = true;
-    for (final attempt in List.of(task.pendingAttempts)) {
+    for (final (index, attempt) in attempts.indexed) {
       if (!_owns(task)) return false;
-      final sourceBytes = SegmentMeter.measure(attempt.directoryPath, attempt.filePrefix);
+      final sourceBytes = sizes[index];
       storage.protect(attempt.directoryPath);
       try {
         final result = await _merger.merge(
@@ -829,6 +858,7 @@ final class Recorder {
           allowLegacy: allowLegacy,
           damaged: attempt.inputIntegrityError,
           cancelled: () => _closing,
+          onProgress: (progress) => onProgress(index, progress),
         );
         if (!_owns(task)) return false;
         if (result.ok) {

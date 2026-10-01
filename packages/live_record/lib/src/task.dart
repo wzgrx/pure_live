@@ -303,6 +303,10 @@ final class RecordTask {
   /// Attempts waiting to be joined into MP4.
   final List<PendingRecordingAttempt> pendingAttempts;
 
+  /// How far joining [pendingAttempts] into MP4 is, 0 to 1, while it runs;
+  /// null otherwise. Runtime only, never persisted.
+  double? mergeProgress;
+
   /// Seconds recorded in this session.
   int recordedSeconds;
 

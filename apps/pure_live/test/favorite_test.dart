@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
@@ -250,9 +251,11 @@ void main() {
       WidgetTester tester, {
       List<LiveRoom> follows = const [],
       Map<String, LiveRoom> details = const {},
+      bool inHome = false,
+      double width = 400,
     }) async {
       tester.view
-        ..physicalSize = const Size(400, 900)
+        ..physicalSize = Size(width, 900)
         ..devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       final douyu = FakeSite('douyu', details);
@@ -283,7 +286,7 @@ void main() {
             theme: const LiveTheme(primaryColor: Colors.blue).light,
             home: LiveUiScope(
               config: LiveUiConfig(strings: strings.ui),
-              child: const FavoritePage(route: RouteArgs(RoutePath.kFavorite)),
+              child: FavoritePage(route: RouteArgs(RoutePath.kFavorite, inHome: inHome)),
             ),
           ),
         ),
@@ -343,6 +346,37 @@ void main() {
       await tester.pumpAndSettle();
       expect(controller.group, FollowGroup.offline);
       expect(find.text('主播三'), findsOneWidget);
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets('the status tabs show their whole label and count on a phone', (tester) async {
+      final (services, _, _) = await pumpPage(
+        tester,
+        inHome: true,
+        width: 360,
+        follows: [for (var i = 1; i <= 12; i++) room('douyu', '$i', nick: '主播$i', status: LiveStatus.live)],
+        details: {for (var i = 1; i <= 12; i++) '$i': room('douyu', '$i', status: LiveStatus.live)},
+      );
+      final bar = find.byKey(const ValueKey('favorite-status-tabs'));
+      for (final label in [i18n('online_room_title'), i18n('recording_room_title'), i18n('offline_room_title')]) {
+        final text = find.descendant(of: bar, matching: find.text(label));
+        expect(text, findsOneWidget);
+        final paragraph = tester.renderObject<RenderParagraph>(text);
+        expect(paragraph.didExceedMaxLines, isFalse, reason: '$label is cut');
+        expect(paragraph.size.width, greaterThanOrEqualTo(paragraph.getMaxIntrinsicWidth(double.infinity) - 0.5));
+      }
+      final count = find.descendant(of: bar, matching: find.text('12'));
+      expect(count, findsOneWidget);
+      final tab = find.ancestor(of: count, matching: find.byType(Tab));
+      final tabRect = tester.getRect(tab);
+      final countRect = tester.getRect(count);
+      expect(countRect.right, lessThanOrEqualTo(tabRect.right + 0.5));
+      expect(countRect.left, greaterThanOrEqualTo(tabRect.left - 0.5));
+      // The label and the count fit without shrinking much (the test font's
+      // digits are as wide as a CJK character, twice a real font's).
+      final content = find.descendant(of: tab, matching: find.byType(Row)).first;
+      final box = find.descendant(of: tab, matching: find.byType(FittedBox));
+      expect(tester.getSize(box).width / tester.getSize(content).width, greaterThan(0.9));
       await tester.runAsync(services.close);
     });
 

@@ -74,7 +74,7 @@ class _FavoritePageState extends ConsumerState<FavoritePage> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
-    final phoneTab = widget.route.inHome && MediaQuery.sizeOf(context).width <= homeTabletBreakpoint;
+    final phoneTab = showsHomeBarButtons(context, inHome: widget.route.inHome);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,

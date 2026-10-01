@@ -246,6 +246,7 @@ class _Details extends ConsumerWidget {
                               file: file,
                               sources: downloadSources(file.url, githubOrigin: githubOrigin),
                               githubOrigin: githubOrigin,
+                              version: info.version,
                             ),
                           ],
                         ],
@@ -351,12 +352,19 @@ class _StatusCard extends StatelessWidget {
 }
 
 class _PackageSources extends StatelessWidget {
-  const new({required this.title, required this.file, required this.sources, required this.githubOrigin});
+  const new({
+    required this.title,
+    required this.file,
+    required this.sources,
+    required this.githubOrigin,
+    required this.version,
+  });
 
   final String title;
   final ReleaseFile file;
   final List<String> sources;
   final bool githubOrigin;
+  final String version;
 
   @override
   Widget build(BuildContext context) {
@@ -378,7 +386,7 @@ class _PackageSources extends StatelessWidget {
             const SizedBox(width: 8),
             FilledButton.tonalIcon(
               key: ValueKey('version-download-${file.name}'),
-              onPressed: () => unawaited(showUpdateDownload(context, file: file, sources: sources)),
+              onPressed: () => unawaited(showUpdateDownload(context, file: file, sources: sources, version: version)),
               icon: const Icon(Icons.download_rounded, size: 18),
               label: Text(i18n('update_download_install')),
             ),
@@ -460,7 +468,7 @@ class _PackageSources extends StatelessWidget {
                 key: const ValueKey('version-source-download'),
                 onPressed: () {
                   Navigator.of(dialogContext).pop();
-                  unawaited(showUpdateDownload(pageContext, file: file, sources: [url]));
+                  unawaited(showUpdateDownload(pageContext, file: file, sources: [url], version: version));
                 },
                 icon: const Icon(Icons.download_rounded, size: 20),
                 label: Text(i18n('update_download_in_app')),

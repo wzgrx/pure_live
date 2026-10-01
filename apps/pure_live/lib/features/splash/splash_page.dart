@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/startup.dart';
@@ -15,14 +16,18 @@ import 'package:pure_live/routes/route_path.dart';
 String splashInitialLocation(SettingsStore settings) =>
     settings.get(Settings.showSplashPage) ? RoutePath.kSplash : RoutePath.kInitial;
 
-/// Splash page (3.x `lib/modules/splash` and its route in `app_pages.dart`).
+/// Splash page (3.x `lib/modules/splash` and its route in `app_pages.dart`,
+/// docs/ui/compare/U.3c).
 ///
 /// Routes: `RoutePath.kSplash`.
 ///
-/// The logo fades and grows in over the theme's colours with "welcome" and a
-/// progress bar; home replaces it after [duration] (3.x: one second), or at
-/// once on a tap, after waiting at most [splashFollowWait] for the first
-/// follow check.
+/// The app's icon and "欢迎使用" fade and grow in over [animation] (0.4 s,
+/// no overshoot, so they are whole when the page leaves; 3.x's 2 s fade left
+/// at a third), 16 apart, over the theme's surface with a touch of the
+/// primary container at the lower right (3.x: a fixed cyan gradient), and a
+/// progress bar in the primary colour. Home replaces it after [duration]
+/// (3.x: one second), or at once on a tap or any key, after waiting at most
+/// [splashFollowWait] for the first follow check.
 class SplashPage extends StatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, this.duration = const Duration(seconds: 1), super.key});
@@ -33,20 +38,21 @@ class SplashPage extends StatefulWidget {
   /// How long the page stays.
   final Duration duration;
 
+  /// How long the icon and the text take to appear.
+  static const Duration animation = Duration(milliseconds: 400);
+
   @override
   State<SplashPage> createState() => _SplashPageState();
 }
 
 class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateMixin {
-  late final AnimationController _animation = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 900),
-  )..forward();
-  late final Animation<double> _fade = CurvedAnimation(parent: _animation, curve: Curves.easeIn);
+  late final AnimationController _animation = AnimationController(vsync: this, duration: SplashPage.animation)
+    ..forward();
+  late final Animation<double> _fade = CurvedAnimation(parent: _animation, curve: Curves.decelerate);
   late final Animation<double> _scale = Tween<double>(
-    begin: 0.8,
+    begin: 0.9,
     end: 1,
-  ).animate(CurvedAnimation(parent: _animation, curve: Curves.easeOutBack));
+  ).animate(CurvedAnimation(parent: _animation, curve: Curves.decelerate));
   Timer? _timer;
   bool _left = false;
 
@@ -75,60 +81,91 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     if (mounted) AppNavigator.offAllNamed(RoutePath.kInitial);
   }
 
+  KeyEventResult _onKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    unawaited(_leave());
+    return KeyEventResult.handled;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final dark = theme.brightness == Brightness.dark;
-    return Scaffold(
-      body: GestureDetector(
-        key: const ValueKey('splash'),
-        behavior: HitTestBehavior.opaque,
-        onTap: () => unawaited(_leave()),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: dark
-                  ? [colors.surface, colors.surfaceContainer, colors.primaryContainer.withValues(alpha: 0.35)]
-                  : [colors.surface, colors.primaryContainer.withValues(alpha: 0.6), colors.primaryContainer],
-            ),
-          ),
-          child: SizedBox.expand(
-            child: SafeArea(
-              child: FadeTransition(
-                opacity: _fade,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ScaleTransition(
-                      scale: _scale,
-                      child: Image.asset('assets/icons/icon.png', width: 132, height: 132),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      i18n('welcome_use'),
-                      style: context.textStyles.t20.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colors.onSurface.withValues(alpha: 0.75),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // A see-through status bar with icons for the page's brightness.
+      value: (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark).copyWith(
+        statusBarColor: colors.surface.withValues(alpha: 0),
+      ),
+      child: Scaffold(
+        backgroundColor: colors.surface,
+        body: Focus(
+          autofocus: true,
+          onKeyEvent: _onKey,
+          child: GestureDetector(
+            key: const ValueKey('splash'),
+            behavior: HitTestBehavior.opaque,
+            onTap: () => unawaited(_leave()),
+            child: DecoratedBox(
+              key: const ValueKey('splash-background'),
+              decoration: BoxDecoration(
+                // The mockup's 160°: from the top, slightly left, to the
+                // bottom, slightly right.
+                gradient: LinearGradient(
+                  begin: const Alignment(-0.36, -1),
+                  end: const Alignment(0.36, 1),
+                  stops: const [0, 0.45, 1],
+                  colors: [
+                    colors.surface,
+                    colors.surface,
+                    Color.alphaBlend(colors.primaryContainer.withValues(alpha: dark ? 0.45 : 0.7), colors.surface),
+                  ],
+                ),
+              ),
+              child: SizedBox.expand(
+                child: SafeArea(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FadeTransition(
+                        opacity: _fade,
+                        child: ScaleTransition(
+                          scale: _scale,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                'assets/icons/icon.png',
+                                key: const ValueKey('splash-logo'),
+                                width: 150,
+                                height: 150,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                i18n('welcome_use'),
+                                style: context.textStyles.t20.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.onSurface,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(i18n('app_name'), style: context.textStyles.t13.copyWith(color: colors.onSurfaceVariant)),
-                    const SizedBox(height: 32),
-                    SizedBox(
-                      width: 180,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        key: const ValueKey('splash-progress'),
+                        width: 200,
                         child: LinearProgressIndicator(
                           minHeight: 4,
+                          borderRadius: BorderRadius.circular(2),
                           color: colors.primary,
                           backgroundColor: colors.primary.withValues(alpha: 0.15),
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 30),
+                    ],
+                  ),
                 ),
               ),
             ),

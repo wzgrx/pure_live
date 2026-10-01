@@ -10,6 +10,77 @@ import 'package:remixicon/remixicon.dart';
 /// Danmaku on, off and settings are pictures, see `DanmakuIcon`; the record
 /// button's ring and dot are drawn by `RecordGlyph`.
 abstract final class AppIcons {
+  // ---- the home shell (docs/ui/compare/U.3a, U.3b) ----
+
+  /// The home destination "关注".
+  static const IconData homeFavorites = Remix.heart_3_line;
+
+  /// The home destination "关注", selected.
+  static const IconData homeFavoritesSelected = Remix.heart_3_fill;
+
+  /// The home destination "热门".
+  static const IconData homePopular = Remix.fire_line;
+
+  /// The home destination "热门", selected.
+  static const IconData homePopularSelected = Remix.fire_fill;
+
+  /// The home destination "分区": three shapes (U.3a c7; 3.x's four squares
+  /// stay the room menu's).
+  static const IconData homeAreas = Remix.shapes_line;
+
+  /// The home destination "分区", selected.
+  static const IconData homeAreasSelected = Remix.shapes_fill;
+
+  /// The home destination "录制中心".
+  static const IconData homeRecord = Remix.download_2_line;
+
+  /// The home destination "录制中心", selected.
+  static const IconData homeRecordSelected = Remix.download_2_fill;
+
+  /// The app menu (3.x `MenuButton`).
+  static const IconData appMenu = Icons.menu_rounded;
+
+  /// Search for rooms (3.x's wide rail, `CustomIcons.search`).
+  static const IconData search = CustomIcons.search;
+
+  /// More actions ("更多").
+  static const IconData more = Remix.more_2_fill;
+
+  /// The watch history ("观看记录").
+  static const IconData watchHistory = Remix.history_line;
+
+  /// Open a shared link ("链接解析").
+  static const IconData openLink = Remix.link;
+
+  /// Multi-view.
+  static const IconData multiview = Remix.layout_grid_line;
+
+  /// The settings.
+  static const IconData settings = Remix.settings_5_line;
+
+  /// About the app.
+  static const IconData about = Remix.information_line;
+
+  /// Backup and restore.
+  static const IconData backup = Remix.cloud_line;
+
+  /// An independent player window (Windows, 3.x's menu).
+  static const IconData newPlayerWindow = Icons.add_to_photos_outlined;
+
+  // ---- the global dialogs (docs/ui/compare/U.3d) ----
+
+  /// A finished download.
+  static const IconData downloadDone = Icons.check_circle_rounded;
+
+  /// A download or an opening that failed.
+  static const IconData downloadFailed = Icons.error_outline_rounded;
+
+  /// Install a downloaded package (3.x's download dialog).
+  static const IconData install = Icons.install_mobile_rounded;
+
+  /// Try again.
+  static const IconData retry = Icons.refresh_rounded;
+
   // ---- the live room's app bar (3.x live_play_header.dart, widgets/button) ----
 
   /// Back (3.x fullscreen `BackButton`).

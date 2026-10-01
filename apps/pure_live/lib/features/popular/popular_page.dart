@@ -163,7 +163,7 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
     final sites = ref.read(sitesProvider);
     final ids = sites.availableIds(watchSetting(ref, Settings.hotAreasList));
     _syncTabs(ids);
-    final phoneTab = widget.route.inHome && MediaQuery.sizeOf(context).width <= homeTabletBreakpoint;
+    final phoneTab = showsHomeBarButtons(context, inHome: widget.route.inHome);
     final tabs = _tabs;
     return Scaffold(
       appBar: AppBar(

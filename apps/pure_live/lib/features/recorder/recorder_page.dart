@@ -152,7 +152,7 @@ class _RecorderPageState extends ConsumerState<RecorderPage> with SingleTickerPr
   Widget build(BuildContext context) {
     final recording = ref.watch(recordingProvider);
     final recorder = recording?.recorder;
-    final phoneTab = widget.route.inHome && MediaQuery.sizeOf(context).width <= homeTabletBreakpoint;
+    final phoneTab = showsHomeBarButtons(context, inHome: widget.route.inHome);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -173,7 +173,8 @@ class _RecorderPageState extends ConsumerState<RecorderPage> with SingleTickerPr
             icon: const Icon(Remix.settings_5_line, size: 22),
             onPressed: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kRecordSettings)),
           ),
-          const SizedBox(width: 8),
+          // As a phone tab, search and "more" as on every home tab (U.3a c6).
+          if (phoneTab) const CommonAppBarActions() else const SizedBox(width: 8),
         ],
       ),
       body: recording == null || recorder == null

@@ -373,10 +373,12 @@ void main() {
       expect(countRect.right, lessThanOrEqualTo(tabRect.right + 0.5));
       expect(countRect.left, greaterThanOrEqualTo(tabRect.left - 0.5));
       // The label and the count fit without shrinking much (the test font's
-      // digits are as wide as a CJK character, twice a real font's).
+      // digits are as wide as a CJK character, twice a real font's). The
+      // bar's right side has two buttons since U.3a c4 (search, more), so on
+      // a 360 phone the tabs have 48 less than with 3.x's one search menu.
       final content = find.descendant(of: tab, matching: find.byType(Row)).first;
       final box = find.descendant(of: tab, matching: find.byType(FittedBox));
-      expect(tester.getSize(box).width / tester.getSize(content).width, greaterThan(0.9));
+      expect(tester.getSize(box).width / tester.getSize(content).width, greaterThan(0.7));
       await tester.runAsync(services.close);
     });
 

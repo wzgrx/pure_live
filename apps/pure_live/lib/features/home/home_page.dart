@@ -23,14 +23,16 @@ import 'package:pure_live/routes/route_path.dart';
 /// `RecorderPage`).
 typedef HomeTabBuilder = Widget Function(BuildContext context, HomeMenu menu);
 
-/// The home shell (3.x `HomePage`): a bottom bar on phones, a side rail
-/// above 680 px, the destinations of the `savedMenuIds` setting.
+/// The home shell (3.x `HomePage`): a bottom bar on phones, a side rail from
+/// [homeTabletBreakpoint] (600, U.3b c6; 3.x: above 680), the destinations of
+/// the `savedMenuIds` setting on both (U.3b c3).
 ///
 /// Kept from 3.x: selecting follows again refreshes them; back sends the app
 /// to the background on Android; after 15 s or more in the background the
 /// visible tab refreshes; a room given on the command line opens once the
 /// page is up; the main window checks for an update
-/// [startupUpdateCheckDelay] after its first frame.
+/// [startupUpdateCheckDelay] after its first frame. The update prompt opens
+/// only while home is on top, after any other prompt (U.3c c7).
 class HomePage extends ConsumerStatefulWidget {
   /// Creates the page.
   const new({this.tabBuilder = buildHomeTab, super.key});
@@ -58,7 +60,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
       if (Platform.isAndroid) {
         SystemChrome.setSystemUIOverlayStyle(
           SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
+            statusBarColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0),
             systemNavigationBarColor: Theme.of(context).navigationBarTheme.backgroundColor,
           ),
         );
@@ -128,8 +130,10 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
     }
   }
 
+  // A global key per page, so a page keeps its state when the window
+  // crosses the rail width (UI_PLAN §5.1).
   Widget _page(HomeMenu menu) => _pages[menu] ??= KeyedSubtree(
-    key: ValueKey(menu),
+    key: GlobalKey(debugLabel: menu.id),
     child: Builder(builder: (context) => widget.tabBuilder(context, menu)),
   );
 
@@ -141,20 +145,14 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
       onPopInvokedWithResult: _onBack,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final tablet = constraints.maxWidth > homeTabletBreakpoint;
-          final menus = visibleHomeMenus(saved, tablet: tablet);
+          final rail = isHomeRailWidth(constraints.maxWidth);
+          final menus = visibleHomeMenus(saved);
           // A removed or hidden destination falls back to the first one (3.x).
-          final selected = menus.contains(_selected) ? _selected : menus.firstOrNull;
+          final selected = menus.contains(_selected) ? _selected! : menus.first;
           _selected = selected;
-          final body = selected == null ? const SizedBox.shrink() : _page(selected);
-          return tablet
-              ? HomeTabletView(
-                  menus: menus,
-                  selected: selected,
-                  showRecord: HomeMenu.fromIds(saved).contains(HomeMenu.record),
-                  onSelected: _select,
-                  body: body,
-                )
+          final body = HomeLayoutScope(phone: !rail, child: _page(selected));
+          return rail
+              ? HomeTabletView(menus: menus, selected: selected, onSelected: _select, body: body)
               : HomeMobileView(menus: menus, selected: selected, onSelected: _select, body: body);
         },
       ),

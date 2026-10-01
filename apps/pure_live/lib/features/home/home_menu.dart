@@ -5,16 +5,16 @@ import 'package:live_ui/live_ui.dart';
 /// setting stores.
 enum HomeMenu {
   /// Follows.
-  favorites('favorites', 'favorites_title', Remix.heart_3_line, Remix.heart_3_fill),
+  favorites('favorites', 'favorites_title', AppIcons.homeFavorites, AppIcons.homeFavoritesSelected),
 
   /// Popular.
-  popular('popular', 'popular_title', Remix.fire_line, Remix.fire_fill),
+  popular('popular', 'popular_title', AppIcons.homePopular, AppIcons.homePopularSelected),
 
-  /// Areas.
-  areas('areas', 'areas_title', Remix.apps_2_line, Remix.apps_2_fill),
+  /// Areas (three shapes, U.3a c7).
+  areas('areas', 'areas_title', AppIcons.homeAreas, AppIcons.homeAreasSelected),
 
   /// Recording centre.
-  record('record', 'record_center', Remix.download_2_line, Remix.download_2_fill);
+  record('record', 'record_center', AppIcons.homeRecord, AppIcons.homeRecordSelected);
 
   new(this.id, this.titleKey, this.icon, this.selectedIcon);
 
@@ -37,15 +37,46 @@ enum HomeMenu {
   static List<HomeMenu> fromIds(Iterable<String> ids) => [for (final menu in ids.map(fromId).nonNulls.toSet()) menu];
 }
 
-/// Widths above this use the side rail (3.x `Get.width > 680`).
-const double homeTabletBreakpoint = 680;
+/// Widths from this up use the side rail (Android's medium window class,
+/// docs/ui/compare/U.3b c6; 3.x switched above 680).
+const double homeTabletBreakpoint = 600;
 
-/// The destinations shown for [saved] at [tablet] width: the rail leaves
-/// out the recording centre, which it offers as an action instead (3.x).
-List<HomeMenu> visibleHomeMenus(Iterable<String> saved, {required bool tablet}) => [
-  for (final menu in HomeMenu.fromIds(saved))
-    if (!tablet || menu != HomeMenu.record) menu,
-];
+/// Whether a home of [width] uses the side rail ([homeTabletBreakpoint]).
+bool isHomeRailWidth(double width) => width >= homeTabletBreakpoint;
+
+/// The destinations shown for [saved]: the bottom bar and the side rail
+/// show the same ones, the recording centre included (U.3b c3; 3.x made it
+/// a button on the rail that covered the window). Nothing usable saved
+/// shows them all (3.x showed an empty page on the rail).
+List<HomeMenu> visibleHomeMenus(Iterable<String> saved) {
+  final menus = HomeMenu.fromIds(saved);
+  return menus.isEmpty ? HomeMenu.values : menus;
+}
+
+/// Tells the home tabs which layout the shell chose (the shell decides from
+/// its own width; the tabs used to read the whole screen, 3.x `Get.width`).
+class HomeLayoutScope extends InheritedWidget {
+  /// Marks [child] as laid out with the bottom bar ([phone]) or the rail.
+  const new({required this.phone, required super.child, super.key});
+
+  /// Whether the bottom bar layout is used.
+  final bool phone;
+
+  /// The scope above [context], or null outside the home shell.
+  static HomeLayoutScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<HomeLayoutScope>();
+
+  @override
+  bool updateShouldNotify(HomeLayoutScope oldWidget) => oldWidget.phone != phone;
+}
+
+/// Whether a page shows the home buttons in its bar (menu at the left,
+/// search and more at the right): only as a home tab ([inHome]) of the
+/// phone layout; on the rail the rail has them (3.x).
+bool showsHomeBarButtons(BuildContext context, {required bool inHome}) {
+  if (!inHome) return false;
+  return HomeLayoutScope.maybeOf(context)?.phone ?? !isHomeRailWidth(MediaQuery.sizeOf(context).width);
+}
 
 /// Signals from the home shell to its pages (3.x reached the pages'
 /// controllers through GetX).

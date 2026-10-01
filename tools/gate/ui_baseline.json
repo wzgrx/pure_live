@@ -34,7 +34,6 @@
     "backup": 22,
     "favorite": 7,
     "history": 11,
-    "home": 23,
     "hot_areas": 3,
     "iptv": 38,
     "live_play": 8,
@@ -49,7 +48,7 @@
     "tags": 13,
     "toolbox": 7,
     "tv": 102,
-    "version": 15,
+    "version": 11,
     "web_dav": 36
   }
 }

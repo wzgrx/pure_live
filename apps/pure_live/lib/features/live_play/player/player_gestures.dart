@@ -2,9 +2,26 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:pure_live/features/live_play/dialogs/room_dialogs.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
+
+/// The icon of a gesture's [level] (3.x `BrightnessVolumnDargArea`: none,
+/// under half, half and more).
+IconData gestureLevelIcon(GestureLevel gesture, double level) => switch (gesture) {
+  GestureLevel.volume =>
+    level <= 0
+        ? AppIcons.volumeMute
+        : level < 0.5
+        ? AppIcons.volumeDown
+        : AppIcons.volumeUp,
+  GestureLevel.brightness =>
+    level <= 0
+        ? AppIcons.brightnessLow
+        : level < 0.5
+        ? AppIcons.brightnessMedium
+        : AppIcons.brightnessHigh,
+};
 
 /// What a gesture changes.
 enum GestureLevel {
@@ -145,22 +162,13 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
             child: Center(
               child: DecoratedBox(
                 key: ValueKey('gesture-level-${showing.name}'),
-                decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(color: OnVideoColors.panel, borderRadius: BorderRadius.circular(10)),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        showing == GestureLevel.volume
-                            ? volumeIcon(_level)
-                            : _level < 0.34
-                            ? Icons.brightness_low_rounded
-                            : _level < 0.67
-                            ? Icons.brightness_medium_rounded
-                            : Icons.brightness_high_rounded,
-                        color: Colors.white,
-                      ),
+                      Icon(gestureLevelIcon(showing, _level), color: OnVideoColors.foreground),
                       const SizedBox(width: 8),
                       SizedBox(
                         width: 100,
@@ -169,15 +177,16 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
                           child: LinearProgressIndicator(
                             value: _level,
                             minHeight: 6,
-                            backgroundColor: Colors.white24,
-                            color: Colors.white,
+                            backgroundColor: OnVideoColors.track,
+                            color: OnVideoColors.foreground,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         '${(_level * 100).round()}%',
-                        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.bodyMedium?.emphasis.tabular
+                            .copyWith(color: OnVideoColors.foreground),
                       ),
                     ],
                   ),

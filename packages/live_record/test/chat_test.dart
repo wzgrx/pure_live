@@ -123,4 +123,50 @@ void main() {
     await pumpEventQueue();
     expect(attempts, 2);
   });
+
+  test("a task's own choice wins over the setting; the session's count spans its attempts (U.2f)", () async {
+    void Function(LiveMessage message)? deliver;
+    final chat = RecordChatRecorder(
+      enabled: () => false,
+      connect: (task, {required onMessage, required onEnded}) async {
+        deliver = onMessage;
+        return RecordChatConnection(stop: () async {});
+      },
+    );
+    addTearDown(chat.dispose);
+    final session = DateTime(2026, 10, 1, 20);
+    final first = _task(folder.path)
+      ..recordDanmakuOverride = true
+      ..recordingStartedAt = session;
+    chat.sync([first]);
+    await _until(() => chat.fileOf('bilibili_1') != null && deliver != null);
+    deliver!(_chat('one'));
+    deliver!(_chat('two'));
+    expect(chat.countOf(first), 2);
+
+    final second = _task(folder.path, attempt: DateTime(2026, 10, 1, 20, 5))
+      ..recordDanmakuOverride = true
+      ..recordingStartedAt = session;
+    chat.sync([second]);
+    await _until(() => chat.fileOf('bilibili_1')?.path.contains(second.recordingFilePrefix) ?? false);
+    deliver!(_chat('three'));
+    expect(chat.countOf(second), 3);
+    chat.sync([second..status = RecordStatus.completed]);
+    await _until(() => chat.fileOf('bilibili_1') == null);
+    await pumpEventQueue();
+    expect(chat.countOf(second), 3, reason: 'kept for the saved summary');
+
+    final declined = _task(folder.path, attempt: DateTime(2026, 10, 1, 21))
+      ..recordDanmakuOverride = false
+      ..recordingStartedAt = DateTime(2026, 10, 1, 21);
+    final quiet = RecordChatRecorder(
+      enabled: () => true,
+      connect: (task, {required onMessage, required onEnded}) async => fail('the task said no'),
+    );
+    addTearDown(quiet.dispose);
+    quiet.sync([declined]);
+    await pumpEventQueue();
+    expect(quiet.fileOf('bilibili_1'), isNull);
+    expect(chat.countOf(declined), 0, reason: 'another session');
+  });
 }

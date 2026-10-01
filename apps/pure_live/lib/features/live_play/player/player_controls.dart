@@ -8,12 +8,13 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/buttons/follow_button.dart';
-import 'package:pure_live/features/live_play/danmaku/chat_panel.dart';
+import 'package:pure_live/features/live_play/buttons/stream_menu.dart';
+import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
 import 'package:pure_live/features/live_play/dialogs/iptv_guide.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
 import 'package:pure_live/features/live_play/dialogs/room_switcher.dart';
 import 'package:pure_live/features/live_play/dialogs/stream_dialogs.dart';
-import 'package:pure_live/features/live_play/layout/room_info_bar.dart';
+import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/features/live_play/player/recording_badge.dart';
@@ -147,7 +148,13 @@ class PlayerTopBar extends StatelessWidget {
                   )
                 else
                   const SizedBox(width: 12),
-                RoomRecordingBadge(room: controller.room, gap: 8),
+                // U.2f: the mark opens the record panel (fullscreen too).
+                GestureDetector(
+                  key: const ValueKey('live-play-recording-mark'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => RoomPanelScope.maybeOf(context)?.open(RoomPanelKind.record),
+                  child: RoomRecordingBadge(room: controller.room, gap: 8),
+                ),
                 Expanded(
                   child: ListenableSelector<(String, String)>(
                     listenable: controller,
@@ -272,7 +279,9 @@ class _AudioOnlyButton extends StatelessWidget {
 /// change 4): play or pause, refresh, the danmaku switch and settings (3.x's
 /// pictures) on the left; the orientation and fullscreen on the right.
 /// Fullscreen adds "已关注" after refresh, and the quality, line and fit
-/// before the orientation (changes 4 and 5, choice C).
+/// before the orientation (changes 4 and 5, choice C). The quality and line
+/// are two buttons with the strip's menus (U.2f), not 3.x's "原画 · 线路1"
+/// and its dialog.
 class PlayerBottomBar extends ConsumerWidget {
   /// Creates the bar.
   const new({
@@ -285,6 +294,7 @@ class PlayerBottomBar extends ConsumerWidget {
     required this.onInteract,
     this.onReopen,
     this.onLock,
+    this.onMenu,
     super.key,
   });
 
@@ -314,6 +324,10 @@ class PlayerBottomBar extends ConsumerWidget {
 
   /// Locks the controls (phones in fullscreen).
   final VoidCallback? onLock;
+
+  /// Told when the quality or line menu opens and closes (the controls stay
+  /// up meanwhile).
+  final ValueChanged<bool>? onMenu;
 
   Future<void> _toggleDanmaku(LiveStore store) async {
     final hide = showDanmaku;
@@ -378,7 +392,7 @@ class PlayerBottomBar extends ConsumerWidget {
         VideoIconButton(
           key: const ValueKey('live-play-danmaku-settings'),
           tooltip: i18n('danmaku_settings'),
-          onPressed: () => unawaited(showRoomDanmakuSettings(context, controller)),
+          onPressed: () => showRoomDanmakuSettings(context, controller),
           icon: const DanmakuIcon(DanmakuIconKind.settings),
         ),
       ],
@@ -426,7 +440,15 @@ class PlayerBottomBar extends ConsumerWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              StreamPickers(controller: controller, onVideo: true, onReopen: onReopen),
+                              // U.2f: the strip's two buttons and menus, above the
+                              // buttons when they fit (FQ1-FQ4).
+                              StreamPickers(
+                                controller: controller,
+                                onVideo: true,
+                                preferAbove: true,
+                                onReopen: onReopen,
+                                onMenu: onMenu,
+                              ),
                               const _VideoFitButton(),
                             ],
                           ),

@@ -9,6 +9,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
+import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
@@ -81,6 +82,11 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   bool _controls = true;
   bool _locked = false;
   Timer? _hide;
+
+  /// Menus of the bars that are open, and the room's panels: the controls
+  /// do not hide by themselves meanwhile (U.2f, 统一规则).
+  int _menus = 0;
+  RoomPanelController? _panels;
   late final Future<bool> _pipSupported = widget.android ? PictureInPicture.supported() : Future.value(false);
 
   /// The picture keeps its element (and its texture) when picture-in-picture
@@ -128,13 +134,31 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final panels = RoomPanelScope.maybeOf(context);
+    if (identical(panels, _panels)) return;
+    _panels?.removeListener(_scheduleHide);
+    _panels = panels?..addListener(_scheduleHide);
+  }
+
+  @override
   void dispose() {
     _hide?.cancel();
+    _panels?.removeListener(_scheduleHide);
     super.dispose();
+  }
+
+  bool get _holding => _menus > 0 || _panels?.value != null;
+
+  void _onMenu(bool open) {
+    _menus = (_menus + (open ? 1 : -1)).clamp(0, 8);
+    _scheduleHide();
   }
 
   void _scheduleHide() {
     _hide?.cancel();
+    if (_holding) return;
     _hide = Timer(const Duration(seconds: 4), () {
       if (mounted) setState(() => _controls = false);
     });
@@ -310,6 +334,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                                   onInteract: _scheduleHide,
                                   onReopen: widget.reconnect.expectReopen,
                                   onLock: widget.mobile && widget.fullscreen ? _toggleLock : null,
+                                  onMenu: _onMenu,
                                 ),
                               ],
                             ),

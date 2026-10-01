@@ -183,4 +183,48 @@ abstract final class AppIcons {
 
   /// The picture is paused.
   static const IconData pausedOverlay = Icons.pause_circle_outline_rounded;
+
+  // ---- the live room's popups (docs/ui/compare/U.2f) ----
+
+  /// Close a panel or a sheet (✕).
+  static const IconData close = Icons.close_rounded;
+
+  /// The sleep timer (3.x's room menu).
+  static const IconData sleepTimer = Remix.time_line;
+
+  /// The room's own volume (3.x's room menu).
+  static const IconData roomVolume = Remix.volume_up_line;
+
+  /// Copy a stream address ("获取直链", 3.x's room menu).
+  static const IconData streamLink = Remix.link_m;
+
+  /// The room in a new window (Windows, 3.x's room menu).
+  static const IconData newWindow = Icons.open_in_new_rounded;
+
+  /// The local interaction sheet (3.x's room menu).
+  static const IconData localInteraction = Icons.auto_awesome_rounded;
+
+  /// Save the danmaku look as the user's template (3.x's danmaku settings).
+  static const IconData templateSave = Icons.save_outlined;
+
+  /// Apply the user's danmaku template (3.x's danmaku settings).
+  static const IconData templateRestore = Icons.restore_rounded;
+
+  /// A recording waits for a free slot.
+  static const IconData recordQueued = Remix.hourglass_line;
+
+  /// A recording reconnects.
+  static const IconData recordReconnecting = Remix.loop_right_line;
+
+  /// A recording is saved.
+  static const IconData recordSaved = Icons.check_circle_rounded;
+
+  /// A recording failed.
+  static const IconData recordFailed = Icons.error_outline_rounded;
+
+  /// Stop a recording (■).
+  static const IconData stopRecording = Icons.stop_rounded;
+
+  /// Something will not work as the user expects (a switched-off setting).
+  static const IconData warning = Icons.warning_amber_rounded;
 }

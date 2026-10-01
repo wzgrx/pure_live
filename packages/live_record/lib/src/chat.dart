@@ -148,6 +148,9 @@ final class RecordChatWriter {
 }
 
 final class _TaskChat {
+  new(this.taskId);
+
+  final String taskId;
   RecordChatConnection? connection;
   bool connecting = false;
   DateTime? failedAt;
@@ -155,6 +158,7 @@ final class _TaskChat {
   Future<RecordChatWriter?>? opening;
   String? writerKey;
   String? preparing;
+  DateTime? session;
   bool released = false;
 }
 
@@ -170,7 +174,8 @@ final class _TaskChat {
 /// timed from before the stream was resolved, a few seconds early; an
 /// attempt already running when the setting is switched on still is). A
 /// reconnect gap has no video, so its chat is not written. A connection
-/// that fails or ends is tried again after [retryDelay].
+/// that fails or ends is tried again after [retryDelay]. A task's own
+/// choice (`RecordTask.recordDanmakuOverride`) wins over [enabled].
 final class RecordChatRecorder {
   /// Creates the recorder; [enabled] reads the setting.
   new({
@@ -195,6 +200,10 @@ final class RecordChatRecorder {
   final Duration flushInterval;
 
   final _tasks = <String, _TaskChat>{};
+
+  /// Entries of the closed files of each task's session (keyed by the
+  /// session's start), kept after the task stops for its summary.
+  final _written = <String, ({DateTime? session, int count})>{};
   late final Timer _flushTimer;
   var _disposed = false;
 
@@ -202,6 +211,16 @@ final class RecordChatRecorder {
 
   /// The chat file of [taskId]'s current attempt (tests, diagnostics).
   File? fileOf(String taskId) => _tasks[taskId]?.writer?.file;
+
+  /// Chat messages saved in [task]'s current or last session, over all its
+  /// attempts (the live room's "弹幕 N 条").
+  int countOf(RecordTask task) {
+    final written = _written[task.taskId];
+    final closed = written != null && written.session == task.recordingStartedAt ? written.count : 0;
+    final state = _tasks[task.taskId];
+    final open = state != null && state.session == task.recordingStartedAt ? state.writer?.count ?? 0 : 0;
+    return closed + open;
+  }
 
   /// Follows [tasks] (the recorder's list after a change, or after the
   /// setting changed).
@@ -211,11 +230,11 @@ final class RecordChatRecorder {
     final wanted = enabled();
     for (final task in tasks) {
       seen.add(task.taskId);
-      if (!wanted || !_connected.contains(task.status)) {
+      if (!task.recordsChat(fallback: wanted) || !_connected.contains(task.status)) {
         unawaited(_release(task.taskId));
         continue;
       }
-      final state = _tasks.putIfAbsent(task.taskId, _TaskChat.new);
+      final state = _tasks.putIfAbsent(task.taskId, () => _TaskChat(task.taskId));
       _ensureConnection(task, state);
       _syncWriter(task, state);
     }
@@ -261,6 +280,7 @@ final class RecordChatRecorder {
   }
 
   void _syncWriter(RecordTask task, _TaskChat state) {
+    state.session = task.recordingStartedAt;
     final directory = task.outputDir?.trim() ?? '';
     if (task.status == RecordStatus.preparing) state.preparing = task.recordingFilePrefix;
     if (task.status != RecordStatus.running || directory.isEmpty) {
@@ -319,6 +339,11 @@ final class RecordChatRecorder {
       ..writerKey = null;
     final writer = state.writer ?? await opening;
     state.writer = null;
+    if (writer != null && writer.count > 0) {
+      final previous = _written[state.taskId];
+      final base = previous != null && previous.session == state.session ? previous.count : 0;
+      _written[state.taskId] = (session: state.session, count: base + writer.count);
+    }
     await writer?.close().catchError((Object _) {});
   }
 

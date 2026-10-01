@@ -1,0 +1,268 @@
+"""TV mockup pieces shared by U.15d and U.15e (960x540 logical, rendered @2).
+
+Two looks:
+  p-*  pure_live_TV as its code draws it (sizes are its 1920x1080 design pixels
+       halved; palette `darkTvTheme`: #121212, focus #00A1FF, card #1F1F1F)
+  t-*  the new design: the phone components (U.2a/U.2c/U.2e/U.2f/U.2g) in TV
+       style - one size up (body text 14 at least), 48/28 safe margins, the
+       focus as a 3 px near-white ring (cards and buttons also scale 1.05),
+       dark roles only (kit.css [data-theme=dark]).
+"""
+
+IMG_ROOM = '.cache/img/158.jpg'   # 晚风's room (U.2a, U.2d)
+IMG_AV = '.cache/img/65.jpg'
+IMG_CITY = '.cache/img/274.jpg'
+IMG_TV = '.cache/img/287.jpg'     # an IPTV channel picture (U.2g)
+COVERS = ['.cache/img/%s.jpg' % n for n in (111, 133, 169, 183, 206, 219, 225, 237, 250, 292, 304, 319)]
+
+mi = lambda n, s=24, st='': f'<span class="mi" style="font-size:{s}px;{st}">{n}</span>'
+mr = lambda n, s=24, st='': f'<span class="mr" style="font-size:{s}px;{st}">{n}</span>'
+mo = lambda n, s=24, st='': f'<span class="mo" style="font-size:{s}px;{st}">{n}</span>'
+rx = lambda c, s=24, st='': f'<span class="rx" style="font-size:{s}px;{st}">&#x{c};</span>'
+dmk = lambda kind, s=24: f'<span class="dmk {kind}" style="width:{s}px;height:{s}px"></span>'
+
+
+def attrs(n=None, tag=None, at=None):
+    return ((f' data-n="{n}"' if n is not None else '') + (f' data-tag="{tag}"' if tag else '')
+            + (f' data-at="{at}"' if at else ''))
+
+
+CSS = r'''
+html,body{background:#000}
+.fs{background:#000 center/cover}
+.syn{top:8px;font-size:9px}
+.cap{font-feature-settings:'tnum'}
+/* ================= pure_live_TV (design px / 2) ================= */
+.p{--pbg:#121212;--pfoc:#00A1FF;--pcard:#1F1F1F;--pfcard:#1E3948;color:#fff;font-family:'Noto Sans SC'}
+.p-info{position:absolute;left:0;right:0;top:0;padding:6px 10px 9px;background:linear-gradient(180deg,rgba(0,0,0,.72),transparent);z-index:8}
+.p-info .card{display:flex;align-items:center;padding:6px 8px;background:rgba(0,0,0,.42);border-radius:9px;border:.5px solid rgba(255,255,255,.1)}
+.p-av{border-radius:50%;background:center/cover;flex:none}
+.p-info .tx{flex:1;min-width:0;margin-left:7px}
+.p-info .t{font:600 14px/1.25 'Noto Sans SC';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-info .m{display:flex;align-items:center;gap:5px;margin-top:4px}
+.p-pill{display:inline-flex;align-items:center;gap:2px;padding:1.5px 5px;border-radius:4px;font:600 8px/1.3 'Noto Sans SC';background:rgba(255,255,255,.1);border:.5px solid rgba(255,255,255,.16);color:rgba(255,255,255,.7)}
+.p-pill.f{background:rgba(0,161,255,.22);border-color:rgba(0,161,255,.75);color:#fff}
+.p-info .nk{font:500 9px 'Noto Sans SC';color:rgba(255,255,255,.7)}
+.p-info .dv{width:.5px;height:22px;background:rgba(255,255,255,.14);margin:0 9px}
+.p-info .clk{display:flex;align-items:center;gap:4px;font:600 14px 'Noto Sans SC';font-feature-settings:'tnum'}
+.p-toast{position:absolute;left:50%;transform:translateX(-50%);padding:6px 12px;border-radius:6px;background:rgba(0,0,0,.7);border:.5px solid rgba(0,161,255,.6);font:600 12px 'Noto Sans SC';white-space:nowrap;z-index:9}
+.p-ctl{position:absolute;left:0;right:0;bottom:0;z-index:8;display:flex;flex-direction:column;align-items:center;background:linear-gradient(0deg,rgba(0,0,0,.82),transparent 72%)}
+.p-bar{align-self:stretch;height:42px;background:rgba(0,0,0,.55);padding:8px 10px;display:flex;gap:6px;overflow:hidden;white-space:nowrap}
+.p-pl{height:26px;padding:0 9px;border-radius:8.7px;display:flex;align-items:center;gap:4px;font:400 10px 'Noto Sans SC';color:#fff;flex:none}
+.p-pl.s{background:var(--pfoc);font-weight:600}
+.p-pl .dmk{width:12px;height:12px}
+.p-opts{width:190px;max-height:280px;background:rgba(0,0,0,.92);border-radius:8px;box-shadow:0 2px 9px rgba(0,0,0,.4);margin-bottom:6px;padding-bottom:6px}
+.p-opts .h{padding:7px 12px 3px;font:600 10px 'Noto Sans SC'}
+.p-opts .r{margin:2px 8px}.p-opts .r .p-pl{justify-content:flex-start}.p-opts .r .p-pl span.l{flex:1}
+.p-side{position:absolute;top:12px;bottom:12px;right:12px;width:200px;background:rgba(18,18,18,.92);border-radius:10px;border:.5px solid rgba(0,161,255,.35);z-index:10;display:flex;flex-direction:column;overflow:hidden}
+.p-side .h{padding:7px 10px 3px;font:600 10px 'Noto Sans SC';flex:none}
+.p-side .ls{flex:1;overflow:hidden;padding:2px 6px}
+.p-row{height:30px;margin:1.5px 0;padding:0 8px;border-radius:5px;background:rgba(255,255,255,.06);display:flex;align-items:center;gap:5px;font:600 8px 'Noto Sans SC'}
+.p-row.s{background:var(--pfoc)}.p-row.a{background:rgba(0,161,255,.22)}
+.p-row .l{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p-row .v{font-weight:500}
+.p-row .mi,.p-row .mr,.p-row .mo{font-size:12px}
+.p-row .dmk{width:12px;height:12px}
+.p-hint{padding:0 10px 6px;font:500 7px 'Noto Sans SC';color:rgba(255,255,255,1);flex:none}
+.p-hint2{padding:5px 8px;font:500 7px 'Noto Sans SC';color:#fff;flex:none}
+.p-room{height:44px;margin:2px 0;padding:0 9px;border-radius:7px;background:rgba(255,255,255,.06);display:flex;align-items:center;gap:8px}
+.p-room.s{background:var(--pfoc)}.p-room.a{background:rgba(0,161,255,.22)}
+.p-room .tx{flex:1;min-width:0}.p-room .t{display:flex;align-items:center;gap:4px;font:600 10px 'Noto Sans SC'}
+.p-room .t span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-room .n{font:500 8px 'Noto Sans SC';color:#fff;margin-top:1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-room .r{text-align:right;flex:none;font:600 7.5px 'Noto Sans SC'}.p-room .r b{display:block;font-weight:500;color:var(--pfoc);margin-top:1.5px}
+.p-room.s .r b{color:#fff}
+.p-fl{flex:none;padding:1px 4px;border-radius:3px;font:500 7px 'Noto Sans SC';color:var(--pfoc);background:rgba(0,161,255,.1);border:.5px solid rgba(0,161,255,.35)}
+.p-fl.on{background:rgba(0,161,255,.22);border-color:rgba(0,161,255,.75);font-weight:600}
+.p-room.s .p-fl{color:#fff;background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.75)}
+.p-dlg{position:absolute;z-index:20;background:var(--pcard);border-radius:12px;border:.5px solid var(--pfoc);box-shadow:0 0 6px .5px rgba(0,161,255,.75);padding:16px;color:#fff}
+.p-dlg .h{font:700 16px 'Noto Sans SC';padding-bottom:12px}
+.p-scrim{position:absolute;inset:0;background:rgba(0,0,0,.54);z-index:19}
+.p-tab{padding:4.5px 11px;border-radius:10px;font:400 10px/1.15 'Noto Sans SC';color:rgba(255,255,255,.7);background:rgba(255,255,255,.035);border:.5px solid rgba(255,255,255,.14)}
+.p-tab.s{color:#A0CAFD;font-weight:600;background:rgba(160,202,253,.16);border:.75px solid rgba(160,202,253,.9)}
+.p-cen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:6}
+.p-btn{display:flex;align-items:center;gap:4px;padding:6px 11px;border-radius:6px;font:600 8px 'Noto Sans SC';border:.5px solid transparent}
+.p-btn.s{border-color:rgba(255,255,255,.85);box-shadow:0 0 7px .5px rgba(0,161,255,.55)}
+.p-spin{border-radius:50%;background:conic-gradient(var(--pfoc) 0 70%,transparent 70%);-webkit-mask:radial-gradient(circle closest-side,transparent calc(100% - 2.5px),#000 calc(100% - 2px));mask:radial-gradient(circle closest-side,transparent calc(100% - 2.5px),#000 calc(100% - 2px))}
+.p-qr{background:var(--pcard);border-radius:12px;padding:4px;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center}
+.qr{background:#fff;border-radius:8px;padding:4px;display:grid;place-items:center}
+.qr i{display:block;background:
+ linear-gradient(#101014,#101014) 0 0/28% 28% no-repeat,linear-gradient(#101014,#101014) 100% 0/28% 28% no-repeat,linear-gradient(#101014,#101014) 0 100%/28% 28% no-repeat,
+ repeating-conic-gradient(#101014 0 25%,#fff 0 50%) 0 0/12.5% 12.5%;image-rendering:pixelated}
+/* settings pages */
+.p-app{height:33px;display:flex;align-items:center;gap:10px;padding:0 8px}
+.p-back{display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:6px;background:var(--pcard);font:500 9px 'Noto Sans SC'}
+.p-app .t{font:700 12px 'Noto Sans SC'}
+.p-gt{padding:0 4px 4px;font:400 8px 'Noto Sans SC';color:rgba(0,161,255,.85)}
+.p-card{border-radius:10px;background:rgba(31,31,31,.05);border:.5px solid rgba(31,31,31,.1);padding:2px}
+.p-set{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;border:1px solid transparent}
+.p-set.s{background:var(--pfcard);border-color:var(--pfoc);box-shadow:0 0 9px .75px rgba(0,161,255,.75)}
+.p-set .ic{font-size:15px;color:#fff;flex:none}
+.p-set .tx{flex:1;min-width:0}.p-set .a{font:600 11px 'Noto Sans SC'}.p-set .b{font:400 8px/1.35 'Noto Sans SC';color:#fff;margin-top:2px;white-space:pre-line}
+.p-mb{display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:6px;background:var(--pcard);font:500 7px 'Noto Sans SC';flex:none}
+.p-mb.on{background:var(--pfoc)}
+.p-in{height:24px;border-radius:6px;background:var(--pcard);border:.5px solid rgba(255,255,255,.12);display:flex;align-items:center;padding:0 8px;font:400 9px 'Noto Sans SC';color:rgba(255,255,255,.5)}
+.p-psw{width:31px;height:17px;border-radius:3px;border:1px solid #fff;padding:1.5px;display:flex;flex:none}.p-psw i{width:12px;border-radius:1.5px;background:#fff}
+.p-psw.on{border-color:var(--pfoc);background:rgba(0,161,255,.22);justify-content:flex-end}.p-psw.on i{background:var(--pfoc)}
+
+/* ================= new design (TV style of the phone components) ================= */
+.t{--fr:#F5F7FA;color:#fff}
+.t-gt{position:absolute;left:0;right:0;top:0;height:170px;background:linear-gradient(180deg,rgba(0,0,0,.6),rgba(0,0,0,.25) 60%,transparent);z-index:5}
+.t-gb{position:absolute;left:0;right:0;bottom:0;height:170px;background:linear-gradient(0deg,rgba(0,0,0,.6),rgba(0,0,0,.25) 60%,transparent);z-index:5}
+.t-info{position:absolute;left:48px;right:48px;top:28px;z-index:7;display:flex;align-items:flex-start;gap:14px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.t-av{border-radius:50%;background:center/cover;flex:none;box-shadow:0 0 0 2px rgba(255,255,255,.28)}
+.t-info .tx{flex:1;min-width:0}
+.t-info .l1{display:flex;align-items:baseline;gap:10px;white-space:nowrap}
+.t-info .nm{font:600 17px/24px 'Noto Sans SC'}.t-info .pf{font:400 14px 'Noto Sans SC';color:rgba(255,255,255,.8)}
+.t-info .ti{font:600 18px/26px 'Noto Sans SC';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-info .l3{display:flex;align-items:center;gap:16px;margin-top:4px;font:400 14px 'Noto Sans SC';color:rgba(255,255,255,.85);white-space:nowrap}
+.t-fg{display:flex;align-items:center;gap:4px}.t-fg b{font-weight:600;color:#fff;font-feature-settings:'tnum'}.t-fg .mr{font-size:17px}
+.t-info .rt{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none}
+.t-clk{font:600 24px/28px 'Geist','Noto Sans SC';font-feature-settings:'tnum'}
+.t-tag{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 9px;border-radius:12px;font:600 14px 'Noto Sans SC';white-space:nowrap;text-shadow:none}
+.t-tag.live{background:#D92D20;color:#fff}.t-tag.g{background:rgba(255,255,255,.18);color:#fff}.t-tag.rec{background:#D92D20;color:#fff}.t-tag.rec i{width:7px;height:7px;border-radius:4px;background:#fff}
+.t-tag.pos{background:rgba(0,0,0,.45);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}
+.t-bar{position:absolute;left:48px;right:48px;bottom:28px;height:52px;z-index:7;display:flex;align-items:center;justify-content:space-between}
+.t-bar .g{display:flex;align-items:center;gap:6px}
+.t-ib{width:48px;height:48px;border-radius:24px;display:grid;place-items:center;color:#fff;flex:none;position:relative;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.t-ib .dmk{color:#fff}
+.t-ib.yel{color:#FFD166}
+.fo{box-shadow:0 0 0 3px var(--fr),0 4px 14px rgba(0,0,0,.45)!important;transform:scale(1.05);filter:none}
+.t-ib.fo{background:rgba(255,255,255,.22)}
+.t-tip{position:absolute;left:50%;bottom:58px;transform:translateX(-50%);padding:4px 10px;border-radius:8px;background:rgba(0,0,0,.78);color:#fff;font:400 14px/20px 'Noto Sans SC';white-space:nowrap;z-index:9;text-shadow:none}
+.t-chip{height:40px;display:flex;align-items:center;gap:2px;padding:0 10px 0 14px;border-radius:20px;background:rgba(0,0,0,.35);box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);color:#fff;font:600 15px 'Noto Sans SC';flex:none;position:relative;white-space:nowrap}
+.t-chip .rx{font-size:20px}
+.t-chip.fo{background:rgba(255,255,255,.22)}
+.t-fol{height:40px;display:flex;align-items:center;gap:4px;padding:0 14px 0 11px;border-radius:20px;background:rgba(255,255,255,.18);color:#fff;font:500 15px 'Noto Sans SC';flex:none;position:relative;white-space:nowrap}
+.t-fol.off{background:var(--primary);color:var(--onPrimary);font-weight:600}
+.t-ring{width:24px;height:24px;border-radius:12px;border:2px solid #fff;display:grid;place-items:center}.t-ring i{width:10px;height:10px;border-radius:5px;background:#FF5449}
+.t-recon{width:28px;height:28px;border-radius:14px;background:#D92D20;display:grid;place-items:center;box-shadow:0 0 0 4px rgba(217,45,32,.25)}.t-recon i{width:9px;height:9px;border-radius:5px;background:#fff}
+.t-sep{width:1px;height:28px;background:rgba(255,255,255,.3);margin:0 4px}
+/* popups: same components as the phone, TV size */
+.t-menu{position:absolute;z-index:21;background:var(--schh);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.45);padding:8px 0;min-width:168px;color:var(--on)}
+.t-menu .it{height:52px;display:flex;align-items:center;gap:14px;padding:0 18px 0 20px;font:400 16px 'Noto Sans SC';position:relative;margin:0 6px;border-radius:8px}
+.t-menu .it>span:first-child{flex:1}.t-menu .it.on{color:var(--primary);font-weight:600}.t-menu .it .rx{font-size:20px}
+.t-menu .it.fo{transform:none;background:rgba(255,255,255,.1)}
+.t-menu .sep{height:1px;background:var(--ov);margin:6px 0}
+.t-side{position:absolute;top:0;bottom:0;right:0;width:400px;z-index:21;background:var(--surface);color:var(--on);border-radius:16px 0 0 16px;box-shadow:-8px 0 24px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column;padding:28px 48px 20px 24px}
+.t-side.l{right:auto;left:0;width:424px;border-radius:0 16px 16px 0;box-shadow:8px 0 24px rgba(0,0,0,.45);padding:28px 24px 20px 48px}
+.t-ph{display:flex;align-items:center;gap:10px;flex:none;margin-bottom:6px}.t-ph .t1{font:600 20px 'Noto Sans SC';flex:1;white-space:nowrap}
+.t-ph .bk{width:32px;height:32px;display:grid;place-items:center;color:var(--onv);margin-left:-6px}
+.t-ph .lk{font:400 14px 'Noto Sans SC';color:var(--onv)}
+.t-body{flex:1;min-height:0;overflow:hidden;margin:0 -8px;padding:4px 8px 0;-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(180deg,#000 calc(100% - 36px),transparent)}
+.t-sec{padding:14px 4px 6px;font:600 14px 'Noto Sans SC';color:var(--primary)}
+.t-row{min-height:52px;display:flex;align-items:center;gap:14px;padding:6px 12px;border-radius:12px;position:relative}
+.t-row .ic{color:var(--onv);flex:none}
+.t-row .x{flex:1;min-width:0}.t-row .a{font:400 17px/1.35 'Noto Sans SC';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-row .b{font:400 14px/1.45 'Noto Sans SC';color:var(--onv);margin-top:1px}
+.t-row .v{font:400 15px 'Noto Sans SC';color:var(--onv);white-space:nowrap;display:flex;align-items:center;gap:2px}
+.t-row .v .rx{font-size:20px}
+.t-row.fo{transform:none;background:rgba(255,255,255,.08)}
+.t-row.dis{opacity:.38}
+.t-grp{background:var(--scl);border-radius:16px;padding:4px}
+.t-hint{flex:none;padding-top:10px;font:400 14px 'Noto Sans SC';color:var(--onv);white-space:nowrap;border-top:1px solid var(--ov);margin-top:8px}
+.t-sw{width:56px;height:32px;border-radius:16px;position:relative;flex:none;border:2px solid var(--outline);background:var(--schh)}
+.t-sw::after{content:'';position:absolute;left:6px;top:6px;width:16px;height:16px;border-radius:8px;background:var(--outline)}
+.t-sw.on{background:var(--primary);border-color:var(--primary)}.t-sw.on::after{left:auto;right:2px;top:2px;width:24px;height:24px;border-radius:12px;background:var(--onPrimary)}
+.t-vp{padding:3px 10px;border-radius:14px;background:rgba(160,202,253,.14);font:600 14px 'Noto Sans SC';color:var(--primary);font-feature-settings:'tnum';white-space:nowrap}
+.t-tr{height:4px;border-radius:2px;background:rgba(160,202,253,.2);margin:16px 6px 10px 2px;position:relative}.t-tr i{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:var(--primary)}.t-tr u{position:absolute;top:-8px;width:20px;height:20px;border-radius:10px;background:var(--primary)}
+.t-lr{display:flex;align-items:center;gap:6px;font:400 14px 'Noto Sans SC';color:var(--onv)}
+.t-tg2{height:38px;padding:0 14px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--ov);font:400 15px 'Noto Sans SC';display:inline-flex;align-items:center;gap:4px;white-space:nowrap;position:relative}
+.t-tg2.on{background:var(--sc);box-shadow:none;color:var(--osc);font-weight:600}
+.t-tg2.fo{transform:scale(1.05)}
+.t-btn{height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;gap:8px;font:600 17px 'Noto Sans SC';position:relative}
+.t-btn.go{background:#D92D20;color:#fff}.t-btn.go i{width:11px;height:11px;border-radius:6px;background:#fff}
+.t-btn.fill{background:var(--primary);color:var(--onPrimary)}
+.t-btn.ton{background:var(--sc);color:var(--osc)}
+.t-btn.out{box-shadow:inset 0 0 0 1px var(--outline);color:var(--primary)}
+.t-btn.fo{transform:scale(1.05)}
+.t-tabs{display:flex;gap:6px;flex:none;margin:2px 0 8px}
+.t-tab{height:36px;padding:0 12px;border-radius:18px;display:flex;align-items:center;gap:4px;font:400 15px 'Noto Sans SC';color:var(--onv);white-space:nowrap;position:relative}
+.t-tab.on{background:var(--sc);color:var(--osc);font-weight:600}
+.t-tab .c{font-size:14px;font-feature-settings:'tnum';opacity:.85}
+.t-room{height:62px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:12px;position:relative}
+.t-room .x{flex:1;min-width:0}
+.t-room .a{font:600 16px/1.35 'Noto Sans SC';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-room .b{font:400 14px/1.35 'Noto Sans SC';color:var(--onv);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-room .r{flex:none;text-align:right;font:400 14px/1.4 'Noto Sans SC';color:var(--onv);font-feature-settings:'tnum'}
+.t-room.cur{background:rgba(160,202,253,.1)}
+.t-room.fo{transform:none;background:rgba(255,255,255,.08)}
+.t-now{display:inline-flex;align-items:center;gap:3px;height:22px;padding:0 7px;border-radius:6px;background:var(--pc);color:var(--opc);font:600 13px 'Noto Sans SC'}
+.t-toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);z-index:30;background:#E1E2E8;color:#191C20;font:400 16px 'Noto Sans SC';padding:12px 20px;border-radius:8px;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.t-toast b{font-weight:600}
+/* state layer (U.2g component, TV size) */
+.t-st{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;z-index:4;padding:28px 48px}
+.t-st .ic{color:rgba(255,255,255,.8);line-height:1}
+.t-st .stt{font:600 18px/1.4 'Noto Sans SC';margin-top:12px;text-shadow:0 1px 3px rgba(0,0,0,.6);max-width:560px}
+.t-st .ss{font:400 15px/1.45 'Noto Sans SC';color:rgba(255,255,255,.78);margin-top:4px;max-width:560px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.t-st .acts{display:flex;gap:14px;margin-top:20px}
+.t-st .kh{position:absolute;left:0;right:0;bottom:28px;font:400 14px 'Noto Sans SC';color:rgba(255,255,255,.7)}
+.t-vb{height:44px;padding:0 20px;border-radius:22px;display:flex;align-items:center;gap:8px;font:600 16px 'Noto Sans SC';white-space:nowrap;flex:none;position:relative}
+.t-vb .rx,.t-vb .mr{font-size:20px}
+.t-vb.p{background:#fff;color:#191C20}
+.t-vb.o{background:rgba(0,0,0,.35);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.45)}
+.t-vb.o.fo{box-shadow:0 0 0 3px var(--fr)!important}
+.t-cov{position:absolute;inset:0;background:#000 center/cover}.t-cov::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.72)}
+.t-dim{position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:3}.t-dim.l{background:rgba(0,0,0,.45)}
+.t-spin{border-radius:50%;background:conic-gradient(from 0deg,#fff,rgba(255,255,255,.1) 85%,#fff);-webkit-mask:radial-gradient(circle closest-side,transparent calc(100% - 4px),#000 calc(100% - 3.6px));mask:radial-gradient(circle closest-side,transparent calc(100% - 4px),#000 calc(100% - 3.6px))}
+/* sheets of several 960x540 frames */
+.x-sheet{position:relative;width:960px;background:#F4F5F7;padding:12px 12px 16px;color:#191C20}
+.x-sheet .gridx{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.x-sheet .cell .cp{font:600 13px 'Noto Sans SC';margin:0 0 5px 2px}.x-sheet .cell .cp small{font-weight:400;color:#5C6066;margin-left:6px;font-size:12px}
+.x-sheet .fr{width:462px;height:260px;overflow:hidden;position:relative;border-radius:6px}
+.x-sheet .fr>.fs{transform:scale(.48125);transform-origin:0 0}
+.x-sheet .hd{font:600 15px 'Noto Sans SC';margin:2px 2px 10px}
+/* page shell (settings, link page) */
+.t-page{position:absolute;inset:0;background:var(--surface);color:var(--on)}
+.t-appbar{position:absolute;left:48px;right:48px;top:28px;height:44px;display:flex;align-items:center;gap:12px}
+.t-appbar .bk{height:40px;padding:0 14px 0 10px;border-radius:20px;display:flex;align-items:center;gap:4px;font:400 15px 'Noto Sans SC';color:var(--onv);position:relative;box-shadow:inset 0 0 0 1px var(--ov)}
+.t-appbar .t1{font:600 22px 'Noto Sans SC'}
+.t-card{background:var(--scl);border-radius:16px;padding:4px}
+.t-qr{background:var(--scl);border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.t-qr .qr{border-radius:10px;padding:6px}
+.t-qr .h{font:600 16px 'Noto Sans SC';margin-bottom:10px}
+.t-qr .u{font:400 14px 'Noto Sans SC';color:var(--onv);margin-top:10px;word-break:break-all;line-height:1.4}
+.t-in{height:48px;border-radius:12px;background:var(--scl);box-shadow:inset 0 0 0 1px var(--outline);display:flex;align-items:center;padding:0 14px;font:400 16px 'Noto Sans SC';color:var(--onv);position:relative}
+.t-in.fo{transform:none;box-shadow:inset 0 0 0 2px var(--primary),0 0 0 3px var(--fr)!important}
+.t-rail{position:absolute;left:0;top:0;bottom:0;width:88px;background:var(--scl);display:flex;flex-direction:column;align-items:center;padding:28px 0;gap:6px;z-index:2}
+.t-rail .ri{width:64px;height:56px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--onv);font:400 13px 'Noto Sans SC'}
+.t-rail .ri.on{background:var(--sc);color:var(--osc);font-weight:600}
+'''
+
+
+def page(w, h, scale, body, css='', crop=False, theme='dark'):
+    return (f'<!doctype html><html data-theme="{theme}"><head><meta charset="utf-8">'
+            f'<meta name="mock-size" content="{w}x{h}@{scale}{" crop" if crop else ""}">'
+            f'<link rel="stylesheet" href="kit/kit.css"><style>{CSS}{css}</style></head><body>{body}</body></html>')
+
+
+def frame(inner, img=IMG_ROOM, cls='t', pos='center 55%', syn=True, extra_style=''):
+    bg = f'background-image:url({img});background-position:{pos};' if img else ''
+    return (f'<div class="fs {cls}" style="--w:960px;--h:540px;{bg}{extra_style}">'
+            + ('<div class="syn">示意图片</div>' if syn and img else '') + inner + '</div>')
+
+
+def tv(inner, img=IMG_ROOM, cls='t', pos='center 55%', css='', syn=True):
+    return page(960, 540, 2, frame(inner, img, cls, pos, syn), css)
+
+
+DMS = [(0.30, 0.30, '前排支持！'), (0.06, 0.40, '这首好好听'), (0.56, 0.47, '晚风今天状态好好'), (0.20, 0.57, '晚上好～'),
+       (0.62, 0.22, '点一首《晴天》')]
+
+
+def danmaku(size=20, rows=DMS, w=960, h=540, cls='dm'):
+    return ''.join(f'<div class="{cls}" style="left:{x * w:.0f}px;top:{y * h:.0f}px;font-size:{size}px">{t}</div>' for x, y, t in rows)
+
+
+def qr(size):
+    return f'<div class="qr"><i style="width:{size}px;height:{size}px"></i></div>'
+
+
+def sheet(title, cells, w=960):
+    """A grid of 960x540 frames at half size: cells = [(caption, sub, frame_html)]."""
+    out = []
+    for cap, sub, fr in cells:
+        out.append(f'<div class="cell"><div class="cp">{cap}<small>{sub}</small></div><div class="fr">{fr}</div></div>')
+    rows = (len(cells) + 1) // 2
+    h = rows * 300 + 120
+    body = f'<div class="win x-sheet" style="--w:{w}px;--h:{h}px;height:auto"><div class="hd">{title}</div><div class="gridx">{"".join(out)}</div></div>'
+    return page(w, h, 2, body, css='html,body{background:#000}', crop=True)

@@ -33,12 +33,12 @@
 | 5 房间卡片 CARD | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
 | 6 关注 FAV | 8 | 8 | 0 | 0 | 0 | 0 | 0 |
 | 7 搜索和历史 SRC、HIS | 7 | 6 | 0 | 0 | 0 | 1 | 0 |
-| 8 直播间 ROOM、RT、PORT、MINI | 46 | 34 | 1 | 7 | 1 | 2 | 1 |
+| 8 直播间 ROOM、RT、PORT、MINI | 46 | 35 | 1 | 6 | 1 | 2 | 1 |
 | 9 弹幕和本地互动 DM、LOC | 20 | 15 | 0 | 3 | 2 | 0 | 0 |
 | 10 多画面 MV | 6 | 5 | 0 | 0 | 0 | 1 | 0 |
 | 11 录制 REC | 13 | 7 | 0 | 1 | 0 | 5 | 0 |
 | 12 网络电视、账号、备份、工具、标签 | 25 | 18 | 1 | 0 | 0 | 5 | 1 |
-| **合计** | **176** | **126** | **3** | **16** | **3** | **26** | **2** |
+| **合计** | **176** | **127** | **3** | **15** | **3** | **26** | **2** |
 
 另：第 13 节 Windows 专属 14 项（以后）；第 14 节 35 个平台（33 个 v3 平台、Kick、网络电视）的能力表；第 15 节设置项核对。
 
@@ -213,7 +213,7 @@ v3 没有的、不在清点里的：开播提醒（v3 没有通知开播的功�
 | F-MINI-01 | 后台播放（离开应用 1.5 秒后暂停；开关打开时继续，持有唤醒锁和 Wi-Fi 锁） | `player/core/playback_lifecycle_coordinator.dart:25`、`player/core/background_playback_policy.dart:11` | 是 | 没验证 | `features/live_play/logic/background_playback.dart`（M13.14） | |
 | F-MINI-02 | 离开直播间时应用内悬浮小窗 | `player/core/player_manager.dart:2970` | 是 | 完成 | `features/live_play/mini/floating_window.dart`、`logic/room_runtime.dart`（U.2j） | |
 | F-MINI-03 | 小窗弹幕（13 项设置） | `modules/live_play/widgets/danmaku/compact_danmaku_overlay.dart:6`、`modules/settings/pages/pip_danmaku_settings_page.dart:12` | 是 | 完成 | `features/live_play/mini/compact_danmaku.dart`（U.2j） | |
-| F-MINI-04 | 小窗弹幕设置的实时预览 | `modules/settings/pages/pip_danmaku_settings_page.dart:31` | 是 | 缺失 | M13.7 留给后续 | |
+| F-MINI-04 | 小窗弹幕设置的实时预览 | `modules/settings/pages/pip_danmaku_settings_page.dart:31` | 是 | 完成 | `features/settings/playback_tiles.dart` 的 `PipDanmakuPreviewBinding`、`packages/live_ui` 的 `PipDanmakuPreview`（U.6c） | 清点时 U.6c 还没合并，F.1d 核对后改 |
 
 ## 9 弹幕（DM）和本地互动（LOC）
 

@@ -1,0 +1,60 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="393x852@3"><link rel="stylesheet" href="kit/kit.css"><style>
+.col{display:flex;flex-direction:column}
+.fill{flex:1;min-height:0;position:relative;overflow:hidden}
+.row{display:flex;align-items:center}
+.ab{height:56px;flex:none;display:flex;align-items:center;background:var(--surface);position:relative}
+.ab .lead{width:56px;height:56px;display:grid;place-items:center;flex:none}
+.ab .ttl{position:absolute;left:72px;right:72px;top:0;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.ab .ttl .a{font-size:20px;line-height:26px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ab .ttl .b{font-size:12px;line-height:16px;color:var(--onv);white-space:nowrap}
+.ab .trail{margin-left:auto;height:48px;display:flex;align-items:center;padding:0 12px 0 4px}
+.grid{position:absolute;left:0;right:0;top:0;padding:6px;display:grid;gap:6px;align-content:start}
+/* v3 RoomCard, standard preset, dense (room_card.dart:1054-1229) */
+.rc{background:#fff;border-radius:20px;overflow:hidden;display:flex;flex-direction:column}
+.rc .cv{aspect-ratio:16/9;border-radius:20px;background:#F5F5F5 center/cover;position:relative}
+.rc .aud{position:absolute;right:8px;bottom:8px;height:22px;padding:0 6px;border-radius:10px;background:rgba(0,0,0,.48);border:.6px solid rgba(54,97,142,.12);color:#fff;display:flex;align-items:center;gap:4px;font:700 11px 'Geist','Noto Sans SC';letter-spacing:.1px}
+.rc .cap{height:72px;display:flex;align-items:center;gap:8px;padding:4px 10px}
+.rc .av{width:34px;height:34px;border-radius:17px;background:center/cover;flex:none}
+.rc .tx{flex:1;min-width:0}
+.rc .t{font-size:13px;line-height:18px;font-weight:600;color:rgba(0,0,0,.87);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc .nk{font-size:12px;line-height:17px;font-weight:500;color:#616161;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc.sk .cv{background:var(--sch)}.rc.sk .av{background:var(--sch)}
+.rc .bar{height:10px;border-radius:5px;background:var(--sch)}
+/* v3 follow pill (area_rooms_page.dart:204-283) */
+.afab{position:absolute;right:16px;min-height:48px;padding:8px 12px;border-radius:16px;z-index:8;background:color-mix(in srgb,var(--surface) 95%,transparent);
+ border:1px solid color-mix(in srgb,var(--primary) 15%,transparent);box-shadow:0 4px 12px rgba(0,0,0,.06);display:flex;align-items:center;gap:8px}
+.afab.on{border-radius:24px;border-color:color-mix(in srgb,var(--ov) 50%,transparent)}
+.afab .pic{width:32px;height:32px;border-radius:16px;background:var(--pc) center/cover;flex:none}
+.afab .k{font-size:12px;line-height:13px;color:rgba(0,0,0,.6)}
+.afab .nm{font-size:12px;line-height:15px;font-weight:700;color:var(--primary);max-width:80px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* mini FABs: back to top / bottom (base_page_view_extension.dart:64-99) */
+.mfab{position:absolute;right:16px;width:40px;height:40px;border-radius:12px;background:#fff;color:var(--opc);display:grid;place-items:center;z-index:7;
+ box-shadow:0 2px 4px rgba(0,0,0,.18),0 3px 8px rgba(0,0,0,.12)}
+.sbar{height:24px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:600 12px 'Geist','Noto Sans SC'}
+.sbar .mi{font-size:14px}
+.pager{height:68px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--surface);border-top:1px solid color-mix(in srgb,var(--on) 6%,transparent);font-size:13px;position:relative;z-index:3}
+.pager .ob{height:36px;padding:0 12px;border-radius:6px;border:1px solid var(--outline);color:var(--primary);display:flex;align-items:center;gap:6px;font-weight:500}
+.pager .tbn{height:40px;padding:0 12px;display:flex;align-items:center;gap:6px;color:var(--primary);font-weight:500}
+.pager .tbn.dis{color:color-mix(in srgb,var(--on) 38%,transparent)}
+.pager .pg{min-width:48px;height:48px;margin:0 3px;border-radius:6px;border:1px solid color-mix(in srgb,var(--on) 10%,transparent);display:grid;place-items:center}
+.pager .pg.on{background:var(--primary);border-color:var(--primary);color:var(--onPrimary);font-weight:700}
+.pager .mut{color:color-mix(in srgb,var(--on) 60%,transparent)}
+.pager .sel{height:30px;padding:0 6px 0 10px;border-radius:6px;background:color-mix(in srgb,var(--on) 5%,transparent);display:flex;align-items:center;margin:0 24px 0 6px}
+.pager .inp{width:50px;height:32px;border-radius:6px;border:1px solid var(--outline);margin:0 6px}
+.sv{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:40px}
+.sv .c{width:86px;height:86px;border-radius:43px;display:grid;place-items:center;background:color-mix(in srgb,var(--schh) 25%,transparent);border:1px solid color-mix(in srgb,var(--primary) 6%,transparent);color:color-mix(in srgb,var(--primary) 60%,transparent)}
+.sv .h{margin-top:20px;font-size:15px;font-weight:600}
+.sv .p{margin-top:6px;max-width:320px;padding:0 28px;text-align:center;font-size:13px;line-height:1.5;color:color-mix(in srgb,var(--on) 60%,transparent)}
+.sv .a{margin-top:16px;height:40px;padding:0 12px;display:flex;align-items:center;gap:8px;color:var(--primary);font-size:14px;font-weight:500}
+.spin{width:24px;height:24px;border-radius:12px;border:3.5px solid var(--primary);border-right-color:color-mix(in srgb,var(--primary) 15%,transparent)}
+.multi{display:flex;gap:28px;padding:56px 28px 28px;background:#E9EBF0}
+.multi .cell{position:relative}
+.multi .lab{position:absolute;left:0;right:0;top:-40px;text-align:center;font:600 20px 'Noto Sans SC';color:#191C20}
+/* v3 AlertDialog (theme.dart:177-183) */
+.adlg{position:absolute;z-index:21;left:50%;top:50%;transform:translate(-50%,-50%);width:280px;background:var(--sch);border-radius:24px;padding:24px 24px 16px}
+.adlg .h{font-size:20px;font-weight:600;line-height:28px}
+.adlg .p{font-size:13px;line-height:1.5;margin:16px 0 20px}
+.adlg .acts{display:flex;justify-content:flex-end;gap:8px}
+.adlg .tb{height:48px;padding:0 12px;display:flex;align-items:center;color:var(--primary);font-size:13px;font-weight:500}
+.adlg .eb{height:48px;padding:0 24px;border-radius:12px;display:flex;align-items:center;background:var(--scl);color:var(--primary);font-size:13px;font-weight:600}
+</style></head><body><div class="ph col"><div class="status"><span>21:36</span><span class="r"><span class="mi">signal_cellular_alt</span><span class="mi">wifi</span><span class="mi">battery_full</span></span></div><div class="ab"><div class="lead"><span class="mi" style="font-size:24px">arrow_back</span></div><div class="ttl"><div class="a">英雄联盟</div></div></div><div class="fill"><div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));top:0px"><div class="rc"><div class="cv" style="background-image:url(.cache/img/158.jpg)"><div class="aud"><span class="mr" style="font-size:14px">whatshot</span>312.5万</div></div><div class="cap"><span class="av" style="background-image:url(.cache/img/65.jpg)"></span><div class="tx"><div class="t">LPL 春季赛 BLG vs TES 第二局</div><div class="nk">哔哩哔哩英雄联盟赛事</div></div></div></div><div class="rc"><div class="cv" style="background-image:url(.cache/img/274.jpg)"><div class="aud"><span class="mr" style="font-size:14px">whatshot</span>8.6万</div></div><div class="cap"><span class="av" style="background-image:url(.cache/img/360.jpg)"></span><div class="tx"><div class="t">峡谷之巅王者局，冲分中</div><div class="nk">小明不是小明</div></div></div></div><div class="rc"><div class="cv" style="background-image:url(.cache/img/1.jpg)"><div class="aud"><span class="mr" style="font-size:14px">whatshot</span>5.2万</div></div><div class="cap"><span class="av" style="background-image:url(.cache/img/338.jpg)"></span><div class="tx"><div class="t">新版本卡莎上分教学</div><div class="nk">下路小卡</div></div></div></div><div class="rc"><div class="cv" style="background-image:url(.cache/img/111.jpg)"><div class="aud"><span class="mr" style="font-size:14px">whatshot</span>2.1万</div></div><div class="cap"><span class="av" style="background-image:url(.cache/img/225.jpg)"></span><div class="tx"><div class="t">深夜排位，来聊天</div><div class="nk">夜猫子打野</div></div></div></div><div class="rc"><div class="cv" style="background-image:url(.cache/img/133.jpg)"><div class="aud"><span class="mr" style="font-size:14px">whatshot</span>1.8万</div></div><div class="cap"><span class="av" style="background-image:url(.cache/img/169.jpg)"></span><div class="tx"><div class="t">大乱斗一起玩</div><div class="nk">阿狸今天也很甜</div></div></div></div><div class="rc"><div class="cv" style="background-image:url(.cache/img/169.jpg)"><div class="aud"><span class="mr" style="font-size:14px">whatshot</span>1.3万</div></div><div class="cap"><span class="av" style="background-image:url(.cache/img/206.jpg)"></span><div class="tx"><div class="t">黄金局教学，一个月上钻</div><div class="nk">教练小王</div></div></div></div><div class="rc"><div class="cv" style="background-image:url(.cache/img/183.jpg)"><div class="aud"><span class="mr" style="font-size:14px">whatshot</span>9864</div></div><div class="cap"><span class="av" style="background-image:url(.cache/img/287.jpg)"></span><div class="tx"><div class="t">云顶之弈新赛季阵容</div><div class="nk">棋手阿杰</div></div></div></div><div class="rc"><div class="cv" style="background-image:url(.cache/img/206.jpg)"><div class="aud"><span class="mr" style="font-size:14px">whatshot</span>7210</div></div><div class="cap"><span class="av" style="background-image:url(.cache/img/319.jpg)"></span><div class="tx"><div class="t">辅助位视野教学</div><div class="nk">宝石骑士</div></div></div></div><div class="rc"><div class="cv" style="background-image:url(.cache/img/219.jpg)"><div class="aud"><span class="mr" style="font-size:14px">whatshot</span>6533</div></div><div class="cap"><span class="av" style="background-image:url(.cache/img/1.jpg)"></span><div class="tx"><div class="t">单排上分，不开黑</div><div class="nk">孤独的中单</div></div></div></div><div class="rc"><div class="cv" style="background-image:url(.cache/img/225.jpg)"><div class="aud"><span class="mr" style="font-size:14px">whatshot</span>5120</div></div><div class="cap"><span class="av" style="background-image:url(.cache/img/111.jpg)"></span><div class="tx"><div class="t">新英雄首玩</div><div class="nk">版本答案</div></div></div></div></div></div><div class="afab on" style="bottom:40px"><span class="pic" style="background-image:url(.cache/img/1.jpg)"></span></div><div class="scrim"></div><div class="adlg"><div class="h">取消关注</div><div class="p">确定要取消关注英雄联盟吗？</div><div class="acts"><div class="tb">取消</div><div class="eb">确认</div></div></div><div class="gesture"></div><div class="syn">示意图片</div></div></body></html>

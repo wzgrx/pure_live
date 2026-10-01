@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:ffmpeg_kit_extended_flutter/ffmpeg_kit_extended_flutter.dart' as kit;
 import 'package:flutter/services.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
@@ -279,6 +280,7 @@ AppRecording platformAppRecording({
   required ProxyPolicy proxy,
   required Directory dataRoot,
   required String Function(String key) words,
+  DanmakuRegistry? danmaku,
 }) {
   final caBundle = RecordCaBundle(Directory(p.join(dataRoot.path, 'certificates')));
   unawaited(caBundle.prepare(rootBundle));
@@ -296,6 +298,7 @@ AppRecording platformAppRecording({
     proxy: proxy,
     dataRoot: dataRoot,
     ffmpeg: platformHasFfmpeg ? FfmpegKitRunner() : null,
+    danmaku: danmaku,
     keepAlive: keepAlive,
     storageAccess: androidStorageAccess,
     caFile: () => caBundle.path,

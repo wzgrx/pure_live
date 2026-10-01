@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:live_core/live_core.dart';
+import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_record/live_record.dart';
@@ -22,6 +23,57 @@ List<RecipeOpener> recipeOpeners(SiteRegistry sites) => [
   Fc2RecipeOpener(sites.of(SiteIds.fc2Live) as Fc2LiveSite),
   NiconicoRecipeOpener(sites.of(SiteIds.niconico) as NiconicoSite),
 ];
+
+/// Opens a room's chat for recording (M8.1, 3.x
+/// `RecorderController._connectRecordingDanmaku`) over live_danmaku: the
+/// platform's connection, the duplicate and backlog gate and the user's
+/// block lists. The display-only filters (repeated text, similarity) stay
+/// off: the file keeps what was said.
+RecordChatConnector recordChatConnector({
+  required SiteRegistry sites,
+  required DanmakuRegistry danmaku,
+  required LiveStore store,
+  Duration timeout = const Duration(seconds: 20),
+}) => (task, {required onMessage, required onEnded}) async {
+  if (!danmaku.supports(task.platform)) return null;
+  final site = sites.maybeOf(task.platform);
+  if (site == null) return null;
+  final room = await site.getRoomDetail(roomId: task.roomId).timeout(timeout);
+  final filter = DanmakuMessageFilter(
+    settings: DanmakuFilterSettings(
+      blockedUsers: await store.blockLists.list(BlockKind.user),
+      blockedKeywords: await store.blockLists.list(BlockKind.keyword),
+    ),
+  );
+  final connection = danmaku.connectionFor(task.platform);
+  var joined = false;
+  final events = connection.events.listen((event) {
+    switch (event) {
+      case DanmakuReceived(:final message) when message.type == LiveMessageType.chat && filter.accepts(message):
+        onMessage(message);
+      case DanmakuClosed() when joined:
+        onEnded();
+      case _:
+    }
+  });
+  Future<void> stop() async {
+    await events.cancel();
+    await connection.close();
+  }
+
+  try {
+    await connection.connect(room.danmakuData).timeout(timeout);
+  } on Object {
+    await stop();
+    rethrow;
+  }
+  if (connection.status == DanmakuStatus.closed) {
+    await stop();
+    return null;
+  }
+  joined = true;
+  return RecordChatConnection(stop: stop);
+};
 
 /// The default recording folder: Android's app folder on external storage
 /// (no permission needed), else `Records` in the data folder.
@@ -200,7 +252,15 @@ abstract interface class RecordingKeepAlive implements RecordKeepAlive {
 /// `removeTask`.
 final class AppRecording {
   /// Creates recording over its parts; [start] loads and restores.
-  new({required this.settings, required this.storage, this.recorder, this.keepAlive, this._store, this._storageAccess});
+  new({
+    required this.settings,
+    required this.storage,
+    this.recorder,
+    this.keepAlive,
+    this.chat,
+    this._store,
+    this._storageAccess,
+  });
 
   /// Settings.
   final RecordSettingsStore settings;
@@ -215,9 +275,14 @@ final class AppRecording {
   /// The platform keep-alive (Android's foreground service).
   final RecordingKeepAlive? keepAlive;
 
+  /// Saves the chat beside recordings when the setting is on (M8.1); null
+  /// without a recorder or without danmaku.
+  final RecordChatRecorder? chat;
+
   final LiveStore? _store;
   final Future<bool> Function({required bool interactive})? _storageAccess;
   StreamSubscription<RecordSettings>? _settingsChanges;
+  StreamSubscription<List<RecordTask>>? _taskChanges;
   Future<void>? _loaded;
   Future<void>? _started;
 
@@ -235,7 +300,12 @@ final class AppRecording {
     await loadSettings();
     final recorder = this.recorder;
     if (recorder == null) return;
-    _settingsChanges = settings.changes.listen((_) => recorder.settingsChanged());
+    final chat = this.chat;
+    _settingsChanges = settings.changes.listen((_) {
+      recorder.settingsChanged();
+      chat?.sync(recorder.tasks);
+    });
+    if (chat != null) _taskChanges = recorder.changes.listen(chat.sync);
     final store = _store;
     if (store != null) await recorder.restore(await savedRecorderTasks(store));
   }
@@ -275,17 +345,22 @@ final class AppRecording {
     } on Object catch (error, stack) {
       log('Recorder shutdown failed', name: 'AppRecording', error: error, stackTrace: stack);
     }
+    await _taskChanges?.cancel();
+    await chat?.dispose();
   }
 }
 
 /// Recording over the app's parts. Without [ffmpeg] there is no recorder
-/// (tests, platforms without the FFmpeg bundle).
+/// (tests, platforms without the FFmpeg bundle); without [danmaku] no chat
+/// is saved.
 AppRecording buildAppRecording({
   required LiveStore store,
   required SiteRegistry sites,
   required ProxyPolicy proxy,
   required Directory dataRoot,
   FfmpegRunner? ffmpeg,
+  DanmakuRegistry? danmaku,
+  RecordChatConnector? chatConnector,
   RecordingKeepAlive? keepAlive,
   Future<bool> Function(RecordStorage storage, {required bool interactive})? storageAccess,
   String? Function()? caFile,
@@ -311,11 +386,16 @@ AppRecording buildAppRecording({
           storageAccess: access,
           caFile: caFile,
         );
+  final connect =
+      chatConnector ?? (danmaku == null ? null : recordChatConnector(sites: sites, danmaku: danmaku, store: store));
   return AppRecording(
     settings: settings,
     storage: storage,
     recorder: recorder,
     keepAlive: keepAlive,
+    chat: recorder == null || connect == null
+        ? null
+        : RecordChatRecorder(enabled: () => settings.current.recordDanmaku, connect: connect),
     store: store,
     storageAccess: access,
   );

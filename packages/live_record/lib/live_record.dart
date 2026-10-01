@@ -8,6 +8,7 @@ library;
 import 'package:live_record/src/ffmpeg.dart';
 
 export 'src/capture.dart';
+export 'src/chat.dart';
 export 'src/diagnostics.dart';
 export 'src/ffmpeg.dart';
 export 'src/input.dart';

@@ -130,7 +130,14 @@ abstract final class AppBootstrap {
     // Recording (M13.15): FFmpeg, the foreground service and storage access
     // only in the running app; tests get the settings and the directory.
     final recording = background
-        ? platformAppRecording(store: store, sites: sites, proxy: proxy, dataRoot: dataRoot, words: i18n)
+        ? platformAppRecording(
+            store: store,
+            sites: sites,
+            proxy: proxy,
+            dataRoot: dataRoot,
+            words: i18n,
+            danmaku: danmaku,
+          )
         : buildAppRecording(store: store, sites: sites, proxy: proxy, dataRoot: dataRoot);
     if (background) {
       unawaited(_warmUp(sites));

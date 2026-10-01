@@ -1666,7 +1666,6 @@
     "record_running": "Recording",
     "record_settings": "Recording Settings",
     "record_settings_apply_failed": "The recording setting was not saved. Try again.",
-    "record_settings_danmaku_pending": "Chat recording is being rebuilt and cannot be turned on yet; your choice is kept",
     "record_settings_directory_default": "Use default folder",
     "record_settings_directory_help": "Recordings go into a PureLiveRecords folder inside the folder you choose; cleanup only touches that subfolder. Leave empty for the default folder. On Android, folders outside the app's own need the \"All files access\" permission.",
     "record_settings_directory_parent": "Folder path",

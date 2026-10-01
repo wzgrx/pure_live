@@ -272,10 +272,9 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
           context.buildSwitchTile(
             icon: Remix.chat_3_line,
             title: i18n('record_danmaku'),
-            subtitle: i18n('record_settings_danmaku_pending'),
+            subtitle: i18n('record_danmaku_desc'),
             value: settings.recordDanmaku,
-            enabled: false,
-            onChanged: null,
+            onChanged: (value) => _setNow(Settings.recordDanmaku, value),
           ),
         ]),
         const SizedBox(height: 20),

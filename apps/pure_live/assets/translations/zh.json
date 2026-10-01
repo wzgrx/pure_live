@@ -1665,7 +1665,6 @@
     "record_running": "录制中",
     "record_settings": "录制设置",
     "record_settings_apply_failed": "录制设置未保存，请重试",
-    "record_settings_danmaku_pending": "录制弹幕正在重做，暂时不能开启；之前的选择会保留",
     "record_settings_directory_default": "使用默认目录",
     "record_settings_directory_help": "录像保存在所选文件夹里的 PureLiveRecords 子文件夹中，清理时只动这个子文件夹。留空则使用默认目录。Android 上选择应用目录以外的文件夹需要授予“所有文件访问权限”。",
     "record_settings_directory_parent": "文件夹路径",

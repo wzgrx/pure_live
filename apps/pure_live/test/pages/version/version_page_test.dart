@@ -4,13 +4,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/downloads.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/pages/about/about_page.dart';
 import 'package:pure_live/pages/version/app_version.dart';
+import 'package:pure_live/pages/version/update_download.dart';
 import 'package:pure_live/pages/version/update_feed.dart';
 import 'package:pure_live/pages/version/update_prompt.dart';
 import 'package:pure_live/pages/version/version_page.dart';
@@ -74,6 +78,7 @@ Future<(AppServices, List<String>)> _pump(
   Widget page,
   _FakeFeed feed, {
   double width = 420,
+  List<Override> overrides = const [],
 }) async {
   tester.view
     ..physicalSize = Size(width, 900)
@@ -103,7 +108,11 @@ Future<(AppServices, List<String>)> _pump(
   addTearDown(() => AppNavigator.router = null);
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [appServicesProvider.overrideWithValue(services), updateFeedProvider.overrideWithValue(feed)],
+      overrides: [
+        appServicesProvider.overrideWithValue(services),
+        updateFeedProvider.overrideWithValue(feed),
+        ...overrides,
+      ],
       child: LiveUiScope(
         config: LiveUiConfig(strings: strings.ui),
         child: MaterialApp.router(
@@ -187,6 +196,47 @@ void main() {
     expect(toasts.last, '已复制到剪贴板');
   });
 
+  testWidgets('downloads a package in the app and opens the installer', (tester) async {
+    final temp = Directory.systemTemp.createTempSync('update_');
+    addTearDown(() => temp.deleteSync(recursive: true));
+    final http = _BytesHttp(List.generate(3000, (i) => i % 13));
+    final opened = <String>[];
+    final previousOpen = AppNavigator.openFile;
+    AppNavigator.openFile = (path) async {
+      opened.add(path);
+      return true;
+    };
+    addTearDown(() => AppNavigator.openFile = previousOpen);
+    final feed = _FakeFeed(info: _newer(), history: _historyWith9());
+    await _pump(
+      tester,
+      const VersionPage(route: RouteArgs(RoutePath.kVersionPage)),
+      feed,
+      overrides: [
+        updateDownloadToolsProvider.overrideWithValue(
+          UpdateDownloadTools(downloader: FileDownloader(http), folder: () async => temp, pickFastest: false),
+        ),
+      ],
+    );
+    final download = find.byKey(const ValueKey('version-download-PureLive-9.0.0-android-arm64-v8a-release.apk'));
+    await tester.ensureVisible(download);
+    await tester.tap(download);
+    // The download writes real files: let the IO run between frames.
+    final install = find.byKey(const ValueKey('update-download-install'));
+    for (var i = 0; i < 50 && install.evaluate().isEmpty; i++) {
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+      await tester.pump();
+    }
+    expect(install, findsOneWidget);
+    final file = File('${temp.path}/PureLive-9.0.0-android-arm64-v8a-release.apk');
+    expect(file.lengthSync(), 3000);
+    expect(http.urls.single, startsWith('https://cdn.gh-proxy.org/'));
+    await tester.tap(find.byKey(const ValueKey('update-download-install')));
+    await tester.pumpAndSettle();
+    expect(opened, [file.path]);
+    expect(find.byKey(const ValueKey('update-download-dialog')), findsNothing);
+  });
+
   testWidgets('shows the failure and checks again on retry', (tester) async {
     final feed = _FakeFeed();
     await _pump(tester, const VersionPage(route: RouteArgs(RoutePath.kVersionPage)), feed);
@@ -251,4 +301,29 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('release-history-detail-3.2.10')), findsOneWidget);
   });
+}
+
+/// Answers every URL with [bytes].
+final class _BytesHttp implements LiveHttp {
+  new(this.bytes);
+
+  final List<int> bytes;
+  final List<String> urls = [];
+
+  @override
+  Future<LiveResponse> send(LiveRequest request) async => await (await open(request)).collect();
+
+  @override
+  Future<LiveStreamedResponse> open(LiveRequest request) async {
+    urls.add(request.url.toString());
+    return LiveStreamedResponse(
+      status: 200,
+      body: Stream.fromIterable([bytes.sublist(0, 1000), bytes.sublist(1000)]),
+      url: request.url,
+      contentLength: bytes.length,
+    );
+  }
+
+  @override
+  void close() {}
 }

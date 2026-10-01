@@ -353,6 +353,25 @@ Map<String, dynamic> _expectedValue(String sample) =>
     (jsonDecode(File('$_root/$sample/expected.json').readAsStringSync()) as Map<String, dynamic>)['value']
         as Map<String, dynamic>;
 
+/// Whether [effect] reports online viewers: `ONLINE_RANK_COUNT`, which 3.x
+/// ignored (M4.D2, appendix C-1).
+bool _isOnlineViewers(Map<String, Object?> effect) => switch (effect) {
+  {'message': {'type': 'online', 'data': {'kind': 'onlineViewers'}}} => true,
+  _ => false,
+};
+
+/// [effects] as 3.x had them: without the online viewers (C-1).
+List<Map<String, Object?>> _as3x(List<Map<String, Object?>> effects) => [
+  for (final effect in effects)
+    if (!_isOnlineViewers(effect)) effect,
+];
+
+/// The online viewers [effects] report (C-1).
+List<Object?> _onlineViewers(Iterable<Map<String, Object?>> effects) => [
+  for (final effect in effects)
+    if (_isOnlineViewers(effect)) ((effect['message']! as Map)['data']! as Map)['value'],
+];
+
 void main() {
   group('protocol', () {
     test("client packets are 3.x's: big-endian header, version 0, sequence 1", () {
@@ -558,6 +577,125 @@ void main() {
         expect(messages({'cmd': 'CUT_OFF', 'msg': ' ', 'roomid': 5050}).single.message, '直播被切断');
       });
     });
+
+    group('M4.D2', () {
+      List<LiveMessage> messages(Object? notice) => [
+        for (final item in BilibiliDanmakuProtocol.decode(_notice(notice)).items)
+          if (item case BilibiliDanmakuMessage(:final message)) message,
+      ];
+
+      test('C-1: ONLINE_RANK_COUNT is the online viewers: online_count, else count', () {
+        Object? online(Map<String, Object?> data) {
+          final result = messages({'cmd': 'ONLINE_RANK_COUNT', 'data': data});
+          if (result.isEmpty) return null;
+          final update = result.single.data! as LiveAudienceUpdate;
+          expect(result.single.type, LiveMessageType.online);
+          expect(update.kind, LiveAudienceMetricKind.onlineViewers);
+          return update.value;
+        }
+
+        // As recorded (545068, 2026-10-01).
+        expect(online({'count': 1738, 'count_text': '1738', 'online_count': 1739, 'online_count_text': '1739'}), 1739);
+        expect(online({'count': '42'}), 42);
+        expect(online({'count': -1}), isNull);
+        expect(online({}), isNull);
+      });
+
+      test('C-2: SEND_GIFT, COMBO_SEND and GUARD_BUY are gifts holding a BilibiliGift', () {
+        final gift = messages({
+          'cmd': 'SEND_GIFT',
+          'data': {
+            'giftName': '小心心',
+            'giftId': 30607,
+            'num': 3,
+            'uname': '观众',
+            'uid': 1,
+            'coin_type': 'gold',
+            'total_coin': 3000,
+            'tid': '1790814397120300001',
+            'timestamp': 1790814397,
+            'batch_combo_id': 'batch:gift:combo_id:1',
+          },
+        }).single;
+        expect(gift.type, LiveMessageType.gift);
+        expect((gift.userName, gift.userId, gift.message), ('观众', '1', '小心心 ×3'));
+        expect(gift.messageId, 'bilibili:gift:1790814397120300001');
+        expect(gift.sentAt, DateTime.fromMillisecondsSinceEpoch(1790814397000));
+        expect(
+          gift.data,
+          const BilibiliGift(id: '30607', name: '小心心', count: 3, goldCoins: 3000, comboId: 'batch:gift:combo_id:1'),
+        );
+        final silver = messages({
+          'cmd': 'SEND_GIFT',
+          'data': {'giftName': '辣条', 'num': 0, 'coin_type': 'silver', 'total_coin': 100},
+        }).single;
+        expect(silver.data, const BilibiliGift(id: '', name: '辣条', count: 1));
+
+        final combo = messages({
+          'cmd': 'COMBO_SEND',
+          'data': {
+            'gift_name': '小心心',
+            'gift_id': 30607,
+            'total_num': 20,
+            'combo_total_coin': 20000,
+            'uname': '观众',
+            'uid': 1,
+            'batch_combo_id': 'batch:gift:combo_id:1',
+          },
+        }).single;
+        expect(combo.message, '小心心 ×20');
+        expect(combo.messageId, isEmpty);
+        expect((combo.data! as BilibiliGift).goldCoins, 20000);
+
+        // As recorded (1775719573, 2026-10-01), with a synthetic user.
+        final guard = messages({
+          'cmd': 'GUARD_BUY',
+          'data': {
+            'uid': 1000001,
+            'username': '观众',
+            'guard_level': 3,
+            'num': 1,
+            'price': 198000,
+            'gift_id': 10003,
+            'gift_name': '舰长',
+            'start_time': 1790813934,
+            'end_time': 1790813934,
+          },
+        }).single;
+        expect((guard.userName, guard.userId, guard.message), ('观众', '1000001', '舰长 ×1'));
+        expect(guard.data, const BilibiliGift(id: '10003', name: '舰长', count: 1, goldCoins: 198000));
+        expect(messages({'cmd': 'SEND_GIFT', 'data': <String, Object?>{}}), isEmpty);
+      });
+
+      test('C-2: a combo is reported once per connect', () async {
+        Uint8List send(String combo, {String cmd = 'SEND_GIFT'}) => _notice({
+          'cmd': cmd,
+          'data': {
+            if (cmd == 'SEND_GIFT') 'giftName': '小心心' else 'gift_name': '小心心',
+            'num': 1,
+            'total_num': 5,
+            'uname': '观众',
+            'batch_combo_id': combo,
+          },
+        });
+        final replay = _Replay();
+        await replay.open(replay.args());
+        Future<List<String>> gifts(List<int> frame) async => [
+          for (final effect in await replay.receive(frame))
+            if (effect case {'message': {'type': 'gift', 'message': final String text}}) text,
+        ];
+
+        expect(await gifts(send('a')), ['小心心 ×1']);
+        expect(await gifts(send('a')), isEmpty);
+        expect(await gifts(send('a', cmd: 'COMBO_SEND')), isEmpty);
+        expect(await gifts(send('b', cmd: 'COMBO_SEND')), ['小心心 ×5'], reason: 'joined during the combo');
+        expect(await gifts(send('')), ['小心心 ×1']);
+        expect(await gifts(send('')), ['小心心 ×1'], reason: 'no combo id: every message');
+        await replay.connection.connect(replay.args());
+        expect(await gifts(send('a')), ['小心心 ×1'], reason: 'a new connect forgets the combos');
+        await replay.connection.close();
+      });
+    });
   });
 
   group("3.x's frozen output", () {
@@ -584,17 +722,20 @@ void main() {
       final frames = (_expectedValue('S13-live')['frames'] as List<dynamic>).cast<Map<String, dynamic>>();
       final byLine = {for (final frame in frames) frame['line'] as int: frame};
       var messages = 0;
+      final online = <Object?>[];
       for (var index = 0; index < lines.length; index++) {
         final line = lines[index];
         if (line['dir'] != 'in' || line['b64'] == null) continue;
         final expected = byLine[index + 1];
         expect(expected, isNotNull, reason: 'line ${index + 1} has 3.x output');
         final effects = await replay.receive(base64.decode(line['b64']! as String));
-        expect(effects, _expected(expected!), reason: 'line ${index + 1}');
-        messages += effects.where((effect) => effect.containsKey('message')).length;
+        expect(_as3x(effects), _expected(expected!), reason: 'line ${index + 1}');
+        messages += _as3x(effects).where((effect) => effect.containsKey('message')).length;
+        online.addAll(_onlineViewers(effects));
       }
       expect(byLine, hasLength(161));
       expect(messages, 57, reason: '44 chats, 11 watched counts, 2 heartbeat replies');
+      expect(online, hasLength(20), reason: 'C-1: every ONLINE_RANK_COUNT');
       expect(
         lines.where((line) => line['dir'] == 'out').skip(1).map((line) => line['b64']),
         everyElement(base64.encode(BilibiliDanmakuProtocol.heartbeat())),
@@ -628,6 +769,7 @@ void main() {
         },
       };
       final applied = <String>{};
+      final online = <Object?>[];
       Object? adjust(String vector, int index, Object? effect) {
         if (effect is! Map<String, dynamic> || !effect.containsKey('message')) return effect;
         final message = effect['message'] as Map<String, dynamic>;
@@ -652,11 +794,13 @@ void main() {
             for (final effect in _expected(frame))
               adjust(name, (effect! as Map<String, dynamic>).containsKey('message') ? index++ : -1, effect),
           ];
-          expect(effects, expected, reason: '$name, line ${frame['line']}');
+          expect(_as3x(effects), expected, reason: '$name, line ${frame['line']}');
+          online.addAll(_onlineViewers(effects));
         }
         await replay.connection.close();
       }
       expect(applied, differences.keys.toSet(), reason: 'every difference is still needed');
+      expect(online, [1], reason: "C-1: the acknowledgement vector's ONLINE_RANK_COUNT");
       expect(vectors, hasLength(28));
     });
 
@@ -691,9 +835,18 @@ void main() {
 
       for (final frame in frames) {
         final line = frame['line'] as int;
-        expect(replay.effects[line], [for (final effect in _expected(frame)) adjust(effect)], reason: 'line $line');
+        expect(_as3x(replay.effects[line]!), [
+          for (final effect in _expected(frame)) adjust(effect),
+        ], reason: 'line $line');
       }
       expect(superChats, 6);
+      expect(_onlineViewers(replay.effects.values.expand((effects) => effects)), [
+        3795,
+        3805,
+        3846,
+        3831,
+        3856,
+      ], reason: "C-1: every ONLINE_RANK_COUNT's online_count");
 
       final effects = replay.effects.values.expand((effects) => effects).toList();
       final messages = [for (final effect in effects) ?effect['message'] as Map<String, Object?>?];

@@ -1,0 +1,118 @@
+<!doctype html><html data-theme="dark"><head><meta charset="utf-8"><meta name="mock-size" content="960x900@2 crop"><link rel="stylesheet" href="kit/kit.css"><style>
+body{background:#000}
+.ftag{position:absolute;z-index:40;background:#E8590C;color:#fff;font:700 11px/16px 'Noto Sans SC';padding:0 6px;border-radius:4px;white-space:nowrap;box-shadow:0 0 0 1.5px #fff}
+.syn2{position:absolute;z-index:40;font:500 9px 'Noto Sans SC';padding:1px 5px;border-radius:4px;background:rgba(0,0,0,.55);color:rgba(255,255,255,.85)}
+/* ---------------- pure_live_TV (halved design pixels) ---------------- */
+.o{position:relative;width:960px;height:540px;overflow:hidden;background:#121212;color:#fff;font-family:'Noto Sans SC'}
+.o.long{height:auto}
+.o-bar{height:33px;display:flex;align-items:center;padding:0 8px;flex:none}
+.o-btn{position:relative;display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:6px;background:rgba(31,31,31,.75);font-size:7px;font-weight:500;color:#fff;white-space:nowrap}
+.o-btn .mr,.o-btn .rx,.o-btn .mi{font-size:10px}
+.o-btn.foc{background:rgba(0,161,255,.65)}.o-btn.sel{background:#00A1FF}.o-btn.sec{background:rgba(31,31,31,.45)}
+.o-btn.md{padding:5px 12px;font-size:9px;gap:5px}.o-btn.md .rx,.o-btn.md .mr{font-size:12px}
+.o-btn.sm{padding:4px 9px;font-size:8px;gap:4px}.o-btn.sm .mr,.o-btn.sm .rx{font-size:11px}
+.o-h{font-size:12px;font-weight:700;margin-left:8px;flex:1}
+.o-body{padding:8px}
+.o-gt{padding:0 0 4px 4px;font-size:8px;font-weight:600;color:rgba(0,161,255,.85);letter-spacing:.25px}
+.o-card{background:rgba(31,31,31,.05);border:.5px solid rgba(31,31,31,.1);border-radius:10px;padding:2px}
+.o-gap{height:10px}.o-gap4{height:4px}
+.o-row{position:relative;display:flex;align-items:center;padding:7px 8px;border-radius:7px;border:1px solid transparent;min-height:42px}
+.o-row .ic{font-size:15px;margin-right:8px;flex:none;width:15px;text-align:center}
+.o-row .x{flex:1;min-width:0}
+.o-row .a{font-size:11px;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.o-row .b{font-size:8px;font-weight:500;margin-top:2px;line-height:1.35}
+.o-row .t{margin-left:6px;display:flex;align-items:center;gap:4px;flex:none}
+.o-row .chev{font-size:15px}.o-row .exp{font-size:14px}
+.o-row .val{font-size:10px;font-weight:600;white-space:nowrap}
+.o-row .txt{font-size:8px;font-weight:600}
+.o-row.foc{background:#1E3948;border-color:#00A1FF;box-shadow:0 0 9px .75px rgba(0,161,255,.75)}
+.o-row.col{flex-direction:column;align-items:stretch}.o-row.col .r1{display:flex;align-items:center}
+.o-sw{width:31px;height:17px;border:1px solid rgba(255,255,255,.6);border-radius:3px;padding:1.5px;display:flex;flex:none}
+.o-sw i{width:12px;border-radius:1.5px;background:rgba(255,255,255,.6)}
+.o-sw.on{background:rgba(0,161,255,.22);border-color:#00A1FF;justify-content:flex-end}.o-sw.on i{background:#00A1FF}
+.o-trk{height:4px;border-radius:2px;background:rgba(255,255,255,.22);margin-top:5px;position:relative}
+.o-trk i{position:absolute;left:0;top:0;bottom:0;background:#00A1FF;border-radius:2px}
+.o-scrim{position:absolute;inset:0;background:rgba(0,0,0,.54);z-index:20}
+.o-dlg{position:absolute;z-index:21;left:50%;top:50%;transform:translate(-50%,-50%);width:400px;padding:16px;background:#1F1F1F;border-radius:12px;border:.5px solid #00A1FF;box-shadow:0 0 6px .5px rgba(0,161,255,.75)}
+.o-dlg .h{font-size:12px;font-weight:700;padding-bottom:12px}
+.o-opt{position:relative;display:flex;align-items:center;min-height:30px;padding:5px 10px;border-radius:6px;background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.25);font-size:10px;font-weight:500;margin:1px 0}
+.o-opt.hl{background:#00A1FF;color:#fff}.o-opt.foc{border-color:#00A1FF}
+.o-opt .ck{margin-left:auto;font-size:13px}
+.o-dlg .acts{display:flex;justify-content:flex-end;padding-top:12px}
+.o-qr{background:#1F1F1F;border-radius:12px;padding:4px;box-shadow:0 2px 6px rgba(0,0,0,.3);display:inline-block}
+.o-qr svg{display:block;border-radius:8px}
+/* ---------------- new: TV style of the phone settings components ---------------- */
+.tv{position:relative;width:960px;height:540px;overflow:hidden;background:var(--surface);color:var(--on);font-family:'Noto Sans SC'}
+.tv.long{height:auto;padding-bottom:28px}
+.t-col{position:relative;width:720px;margin:0 auto;padding-top:28px}
+.t-col.wide{width:864px}
+.t-head{height:48px;display:flex;align-items:center;gap:16px;margin-bottom:4px}
+.t-btn{position:relative;height:40px;padding:0 16px;border-radius:20px;display:inline-flex;align-items:center;gap:6px;font-size:16px;color:var(--on);background:var(--scc);white-space:nowrap;flex:none}
+.t-btn .mr,.t-btn .rx,.t-btn .mo{font-size:20px;color:var(--onv)}
+.t-btn.pri{background:var(--primary);color:var(--onPrimary)}.t-btn.pri .mr,.t-btn.pri .rx{color:var(--onPrimary)}
+.t-btn.foc{box-shadow:0 0 0 3px #F1F3F7,0 6px 16px rgba(0,0,0,.5);transform:scale(1.05)}
+.t-h1{font-size:24px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-path{font-size:14px;color:var(--onv);font-weight:400;margin-right:8px}
+.t-gt{font-size:15px;font-weight:600;color:var(--primary);padding:10px 4px 6px}
+.t-card{background:var(--scc);border-radius:16px;padding:4px}
+.t-row{position:relative;display:flex;align-items:center;gap:16px;min-height:60px;padding:8px 16px;border-radius:12px}
+.t-row.two{min-height:64px}
+.t-row .ic{font-size:24px;color:var(--primary);width:24px;flex:none;text-align:center}
+.t-row .x{flex:1;min-width:0}
+.t-row .a{font-size:18px;font-weight:600;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-row .b{font-size:14px;color:var(--onv);line-height:1.45;margin-top:2px}
+.t-row .v{font-size:16px;color:var(--onv);white-space:nowrap;flex:none;font-feature-settings:'tnum'}
+.t-row .v.pri{color:var(--primary);font-weight:600}
+.t-row .chev{font-size:24px;color:var(--onv);margin-left:-10px;flex:none}
+.t-row+.t-row::before{content:'';position:absolute;left:56px;right:16px;top:0;height:1px;background:rgba(255,255,255,.07)}
+.t-row.noic+.t-row::before,.t-row.noic::before{left:16px}
+.t-row.foc{background:#3A3F47;box-shadow:0 0 0 3px #F1F3F7,0 8px 20px rgba(0,0,0,.55);transform:scale(1.02);z-index:3}
+.t-row.foc::before,.t-row.foc+.t-row::before{display:none}
+.t-row.dis .a,.t-row.dis .b,.t-row.dis .v,.t-row.dis .ic,.t-row.dis .chev,.t-row.dis .sw,.t-row.dis .pill,.t-row.dis .t-trk,.t-row.dis .t-pos{opacity:.38}
+.t-row .why{font-size:13px;color:#E8B04B;margin-top:2px}
+.t-row.danger .a{color:var(--error)}
+.t-row .sw{transform:scale(1.08)}
+.t-row.lift{background:#2C4A6B;box-shadow:0 0 0 3px #F1F3F7,0 14px 30px rgba(0,0,0,.6);transform:scale(1.03) translateY(-2px);z-index:4}
+.t-pos{display:flex;align-items:center;gap:2px;font-size:16px;color:var(--onv);font-feature-settings:'tnum';flex:none}
+.t-pos .mr{font-size:22px}
+.t-sl .h{display:flex;align-items:center;gap:12px}
+.t-sl .pill{padding:3px 12px;border-radius:14px;background:rgba(160,202,253,.14);font-size:15px;font-weight:700;color:var(--primary);font-feature-settings:'tnum';flex:none}
+.t-trk{position:relative;height:6px;border-radius:3px;background:rgba(160,202,253,.18);margin:14px 6px 6px 0}
+.t-trk i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--primary)}
+.t-trk u{position:absolute;top:-7px;width:20px;height:20px;border-radius:10px;background:var(--primary);margin-left:-10px}
+.t-row.foc .t-trk u{box-shadow:0 0 0 4px rgba(160,202,253,.3)}
+.t-note{font-size:14px;color:var(--onv);padding:10px 8px 0;line-height:1.55}
+.t-note b{color:var(--primary);font-weight:600}
+.t-keys{position:absolute;right:48px;bottom:28px;z-index:30;display:flex;gap:16px;font-size:13px;color:var(--onv);background:rgba(17,20,24,.92);padding:6px 12px;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.t-keys b{color:var(--on);font-weight:600;margin-right:4px}
+.t-fade{position:absolute;left:0;right:0;bottom:0;height:48px;background:linear-gradient(rgba(17,20,24,0),var(--surface));z-index:5}
+.t-fold{position:absolute;left:0;right:0;top:540px;border-top:2px dashed rgba(232,89,12,.8);z-index:50}
+.t-fold span{position:absolute;left:8px;top:-18px;font:600 11px 'Noto Sans SC';color:#F08C4C}
+.t-chip{position:relative;height:44px;padding:0 16px;border-radius:12px;display:inline-flex;align-items:center;gap:6px;font-size:16px;box-shadow:inset 0 0 0 1px var(--ov);white-space:nowrap}
+.t-chip.on{background:var(--sc);box-shadow:none;color:var(--osc);font-weight:600}
+.t-chip.foc{box-shadow:0 0 0 3px #F1F3F7,0 6px 16px rgba(0,0,0,.5);transform:scale(1.05);z-index:3}
+.t-link{position:relative;display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 10px;border-radius:10px;font-size:16px;color:var(--primary)}
+.t-scrim{position:absolute;inset:0;background:rgba(0,0,0,.62);z-index:20}
+.t-dlg{position:absolute;z-index:21;left:50%;top:50%;transform:translate(-50%,-50%);width:480px;background:var(--sch);border-radius:24px;padding:24px 16px 12px;box-shadow:0 14px 36px rgba(0,0,0,.55)}
+.t-dlg .h{font-size:22px;font-weight:600;padding:0 12px 12px}
+.t-dlg .d{font-size:15px;color:var(--onv);padding:0 12px 12px;line-height:1.5}
+.t-opt{position:relative;display:flex;align-items:center;gap:12px;min-height:56px;padding:0 16px;border-radius:12px;font-size:18px}
+.t-opt.on{color:var(--primary);font-weight:600}
+.t-opt .ck{margin-left:auto;font-size:24px;color:var(--primary)}
+.t-opt.foc{background:#454A53;box-shadow:0 0 0 3px #F1F3F7;transform:scale(1.02);z-index:2}
+.t-dlg .acts{display:flex;justify-content:flex-end;gap:8px;padding:8px 4px 4px}
+.t-tb{position:relative;height:44px;padding:0 20px;border-radius:22px;display:grid;place-items:center;font-size:17px;color:var(--primary);font-weight:500}
+.t-qrbox{display:flex;gap:28px;align-items:center;background:var(--scc);border-radius:16px;padding:20px 24px}
+.t-qr{background:#fff;border-radius:12px;padding:8px;flex:none;position:relative}
+.t-qr svg{display:block}
+.t-qrbox .x{flex:1;min-width:0}
+.t-qrbox .tt{font-size:20px;font-weight:600}
+.t-qrbox .st{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:14px;font-size:14px;font-weight:600;margin-top:10px}
+.t-qrbox .st.ok{background:var(--okbg);color:#7CD992}.t-qrbox .st.wait{background:rgba(160,202,253,.14);color:var(--primary)}
+.t-qrbox .st.err{background:rgba(255,180,171,.14);color:var(--error)}
+.t-steps{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.t-steps div{display:flex;gap:10px;font-size:15px;line-height:1.5;color:var(--on)}
+.t-steps i{font-style:normal;flex:none;width:22px;height:22px;border-radius:11px;background:rgba(160,202,253,.16);color:var(--primary);font:700 13px/22px 'Geist','Noto Sans SC';text-align:center;margin-top:1px}
+.t-addr{margin-top:14px;font:600 17px 'Geist','Noto Sans SC';color:var(--on);letter-spacing:.2px}
+.t-addr small{display:block;font:400 13px 'Noto Sans SC';color:var(--onv);margin-bottom:2px;letter-spacing:0}
+</style></head><body><div class="tv long"><div class="t-col"><div class="t-head"><span class="t-btn" data-n="1"><span class="mr">arrow_back</span>返回</span><div class="t-h1">刷新设置</div></div><div class="t-gt">主页缓存</div><div class="t-card"><div class="t-row two foc" data-n="2"><span class="ic"><span class="mr">cached</span></span><div class="x"><div class="a">主页缓存</div><div class="b">开启后主页各页面保持状态，切换不重新加载；关闭后每次进入都重新加载</div></div><span class="sw on"></span><span class="ftag" style="top:-10px;right:14px">焦点</span></div></div><div class="t-gt">自动刷新设置</div><div class="t-card"><div class="t-row two" data-n="3" data-tag="chg"><span class="ic"><span class="rx">&#xf064;</span></span><div class="x"><div class="a">开启关注自动刷新</div><div class="b">定时自动拉取关注直播间状态</div></div><span class="sw on"></span></div><div class="t-row two" data-n="4" data-tag="add"><span class="ic"><span class="rx">&#xf064;</span></span><div class="x"><div class="a">返回应用时刷新收藏</div><div class="b">从后台返回应用时自动刷新收藏列表</div></div><span class="sw on"></span></div><div class="t-row" data-n="5" data-tag="chg"><span class="ic"><span class="rx">&#xf20f;</span></span><div class="x"><div class="a">刷新间隔时间</div></div><span class="v">10 分钟</span><span class="chev mr">chevron_right</span></div><div class="t-row two" data-n="6" data-tag="chg"><span class="ic"><span class="rx">&#xf0e0;</span></span><div class="x"><div class="a">首页并发刷新任务</div><div class="b">完成一个任务后立即领取下一个，避免慢接口拖住整批刷新</div></div><span class="v">4 个任务</span><span class="chev mr">chevron_right</span></div><div class="t-row two" data-n="7" data-tag="add"><span class="ic"><span class="rx">&#xee45;</span></span><div class="x"><div class="a">自动刷新直播缩略图</div><div class="b">按设定周期清理旧封面并重新请求当前缩略图</div></div><span class="sw"></span></div><div class="t-row dis" data-n="8" data-tag="add"><span class="ic"><span class="rx">&#xf20f;</span></span><div class="x"><div class="a">缩略图刷新间隔</div><div class="why">打开“自动刷新直播缩略图”后生效</div></div><span class="v">30 分钟</span><span class="chev mr">chevron_right</span></div></div></div><div class="t-fold"><span>一屏到这里</span></div></div></body></html>

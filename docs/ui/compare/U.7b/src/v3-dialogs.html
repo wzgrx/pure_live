@@ -1,0 +1,88 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="393x4000@2 crop"><link rel="stylesheet" href="kit/kit.css"><style>
+.col{display:flex;flex-direction:column}
+.ab{height:56px;display:flex;align-items:center;position:relative;flex:none;background:var(--surface)}
+.ab .ttl{position:absolute;left:0;right:0;text-align:center;font-size:20px;font-weight:600;pointer-events:none}
+.ab .ib.lead{color:var(--on);margin-left:4px}
+.body{flex:1;min-height:0;overflow:hidden;position:relative}
+.lst{padding:0 16px 16px;margin:0 auto;min-width:0;width:100%}
+/* ---------- v3 rows (widget_extensions.dart) ---------- */
+.gt{padding:0 0 8px 8px;font-size:12px;font-weight:700;letter-spacing:.5px;color:rgba(54,97,142,.65)}
+.gt.row2{display:flex;align-items:center;justify-content:space-between;padding-bottom:0}
+.gt .act{display:flex;align-items:center;gap:6px;height:48px;padding-right:8px;font-size:14px;font-weight:600;letter-spacing:0;color:var(--primary)}
+.cd{background:rgba(225,226,232,.15);border:.5px solid rgba(0,0,0,.05);border-radius:20px;overflow:hidden;margin-bottom:20px}
+.tl{display:flex;align-items:flex-start;gap:12px;padding:8px 16px;min-height:56px}
+.tl.sw2{padding:6px 8px 6px 16px;align-items:center}
+.tl .ic{color:var(--primary);padding-top:2px;flex:none;width:22px}
+.tl .x{flex:1;min-width:0;align-self:center}
+.tl .a{font-size:15px;font-weight:600;line-height:1.35}
+.tl .b{font-size:12px;color:rgba(0,0,0,.45);margin-top:2px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl .b.long{white-space:normal}
+.tl .ch{color:rgba(0,0,0,.24);padding-top:4px;flex:none}
+.tl .sp2{width:20px;height:20px;border-radius:10px;border:2px solid rgba(54,97,142,.25);border-top-color:var(--primary);flex:none;margin-top:4px}
+.sdr{display:flex;gap:12px;padding:10px 16px}
+.sdr .ic{color:var(--primary);padding-top:2px;width:24px;flex:none}
+.sdr .x{flex:1;min-width:0}
+.sdr .h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.sdr .a{font-size:15px;font-weight:600}
+.sdr .v{padding:2px 8px;border-radius:6px;background:rgba(54,97,142,.1);font-size:13px;font-weight:700;color:var(--primary);font-feature-settings:'tnum';white-space:nowrap}
+.trk{height:4px;border-radius:2px;background:rgba(54,97,142,.15);position:relative;margin:20px 6px 12px 2px}
+.trk i{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:var(--primary)}
+.trk u{position:absolute;top:-8px;width:20px;height:20px;border-radius:10px;background:var(--primary);margin-left:-10px}
+/* ---------- dialogs ---------- */
+.sheetbg{background:var(--scc)}
+.cap{padding:20px 16px 8px;font-size:13px;font-weight:600;color:var(--onv)}
+.dl{margin:0 16px 8px;background:var(--sch);border-radius:24px;padding:24px 0 0;overflow:hidden}
+.dl .h{padding:0 24px;font-size:20px;font-weight:700;line-height:1.35}
+.dl .c{padding:16px 24px 0;font-size:13px;line-height:1.6;color:var(--onv)}
+.dl .rl{padding:8px 12px 16px}
+.rr{display:flex;align-items:center;gap:16px;padding:10px 16px;border-radius:16px;min-height:56px}
+.rr .rd{width:20px;height:20px;border-radius:10px;border:2px solid var(--onv);flex:none;display:grid;place-items:center}
+.rr.on{background:rgba(54,97,142,.05)}
+.rr.on .rd{border-color:var(--primary)}.rr.on .rd::after{content:'';width:10px;height:10px;border-radius:5px;background:var(--primary)}
+.rr .t{font-size:15px;font-weight:600}.rr .d{font-size:12px;margin-top:2px;color:var(--onv)}
+.rr.on .t{color:var(--primary)}
+.dl .acts{display:flex;justify-content:flex-end;gap:8px;padding:24px 24px 24px}
+.dl .acts span{height:40px;padding:0 16px;border-radius:20px;display:flex;align-items:center;font-size:13px;font-weight:600;color:var(--primary)}
+.dl .acts .f{background:var(--primary);color:var(--onPrimary)}
+.dl .acts .e{background:var(--scl);color:var(--primary);border-radius:12px;padding:0 24px}
+.dl .acts .r{background:var(--error);color:#fff}
+.inp{margin:16px 24px 0;height:56px;border-radius:12px;border:1px solid var(--outline);background:var(--scl);position:relative;display:flex;align-items:center;padding:0 16px;font-size:20px}
+.inp .lb{position:absolute;left:12px;top:-9px;padding:0 4px;background:var(--sch);font-size:12px;color:var(--onv)}
+.qs{padding:16px 24px 0;font-size:14px;font-weight:600}
+.qc{display:flex;flex-wrap:wrap;gap:8px;padding:8px 24px 0}
+.qc span{height:32px;min-width:40px;padding:0 12px;border-radius:8px;border:1px solid var(--outline);display:grid;place-items:center;font-size:14px}
+.qc span.on{background:rgba(54,97,142,.2);border-color:transparent}
+/* ---------- new ---------- */
+.ng{padding:16px 8px 8px;font-size:13px;font-weight:600;color:var(--primary)}
+.ng:first-child{padding-top:8px}
+.nc{background:var(--scl);border-radius:20px;overflow:hidden}
+.nt{display:flex;align-items:center;gap:14px;padding:10px 12px 10px 16px;min-height:56px;position:relative}
+.nt+.nt::before{content:'';position:absolute;left:52px;right:16px;top:0;height:1px;background:var(--ov);opacity:.5}
+.nt .ic{color:var(--primary);flex:none;width:22px;align-self:flex-start;padding-top:3px}
+.nt .x{flex:1;min-width:0}
+.nt .a{font-size:15px;font-weight:600;line-height:1.4}
+.nt .b{font-size:12px;color:var(--onv);margin-top:2px;line-height:1.45;overflow-wrap:anywhere}
+.nt .v{font-size:14px;color:var(--onv);white-space:nowrap;font-feature-settings:'tnum'}
+.nt .ch{color:var(--onv);margin-left:-8px}
+.nt.dis .ic,.nt.dis .x,.nt.dis .v,.nt.dis .ch,.nt.dis .sw,.nt.dis .stp{opacity:.38}
+.nt .ib2{width:40px;height:40px;border-radius:20px;display:grid;place-items:center;color:var(--primary);flex:none}
+.stp{display:flex;align-items:center;gap:4px;flex:none}
+.stp b{width:36px;height:36px;border-radius:18px;box-shadow:inset 0 0 0 1px var(--ov);display:grid;place-items:center;color:var(--primary);font-weight:400}
+.stp em{font-style:normal;min-width:28px;text-align:center;font-size:16px;font-weight:600;font-feature-settings:'tnum'}
+.ns{padding:10px 12px 12px 16px;position:relative}
+.ns+.nt::before,.nt+.ns::before{content:'';position:absolute;left:52px;right:16px;top:0;height:1px;background:var(--ov);opacity:.5}
+.ns .h{display:flex;align-items:center;gap:14px}
+.ns .ic{color:var(--primary);width:22px;flex:none}
+.ns .a{flex:1;font-size:15px;font-weight:600}
+.ns .vv{font-size:14px;color:var(--primary);font-weight:600;font-feature-settings:'tnum'}
+.ns .trk{margin:18px 6px 10px 38px}
+.ns.dis .ic,.ns.dis .a,.ns.dis .vv,.ns.dis .trk{opacity:.38}
+.ns .tk{display:flex;justify-content:space-between;margin:0 0 0 36px;font-size:11px;color:var(--onv)}
+.nd .rr .rd{display:none}
+.nd .rr{padding:10px 16px 10px 20px}
+.nd .rr .ck{margin-left:auto;color:var(--primary)}
+.nd .rr .t{font-size:16px;font-weight:500}.nd .rr.on .t{font-weight:600}
+.nd .rr .d{font-size:14px;line-height:1.45}
+.hl{box-shadow:inset 0 0 0 2px var(--primary);border-radius:12px;background:rgba(54,97,142,.06)}
+.toast{bottom:40px}
+</style></head><body><div class="ph col" style="--w:393px;--h:4000px;width:393px;height:auto"><div class="sheetbg"><div class="cap">默认录制清晰度（选了就关）</div><div class="dl"><div class="h">默认录制清晰度</div><div class="rl"><div class="rr on"><span class="rd"></span><div><div class="t">原画</div></div></div><div class="rr"><span class="rd"></span><div><div class="t">蓝光8M</div></div></div><div class="rr"><span class="rd"></span><div><div class="t">蓝光4M</div></div></div><div class="rr"><span class="rd"></span><div><div class="t">超清</div></div></div><div class="rr"><span class="rd"></span><div><div class="t">流畅</div></div></div></div></div><div class="cap">录制读写超时</div><div class="dl"><div class="h">录制读写超时</div><div class="rl"><div class="rr on"><span class="rd"></span><div><div class="t">15s</div><div class="d">响应迅速 (推荐，适合稳定网络)</div></div></div><div class="rr"><span class="rd"></span><div><div class="t">30s</div><div class="d">平衡模式 (兼顾稳定与重连速度)</div></div></div><div class="rr"><span class="rd"></span><div><div class="t">60s</div><div class="d">保守模式 (适合极端弱网环境)</div></div></div></div></div><div class="cap">输入缓冲队列</div><div class="dl"><div class="h">输入缓冲队列</div><div class="rl"><div class="rr"><span class="rd"></span><div><div class="t">512</div><div class="d">省电模式</div></div></div><div class="rr"><span class="rd"></span><div><div class="t">1024</div><div class="d">标清/高清推荐</div></div></div><div class="rr on"><span class="rd"></span><div><div class="t">2048</div><div class="d">原画推荐 (1080P)</div></div></div><div class="rr"><span class="rd"></span><div><div class="t">4096</div><div class="d">极致性能 (适用于 4K 录制/高负载环境)</div></div></div><div class="rr"><span class="rd"></span><div><div class="t">8192</div><div class="d">极致性能 (适用于 4K 录制/高负载环境)</div></div></div></div></div><div class="cap">最大同时录制任务数</div><div class="dl"><div class="h">最大同时录制任务数</div><div class="inp"><span class="lb">手动输入</span>3</div><div class="qs">快速选择</div><div class="qc"><span class="">1</span><span class="">2</span><span class="on">3</span><span class="">4</span><span class="">5</span><span class="">6</span><span class="">7</span><span class="">8</span><span class="">9</span><span class="">10</span></div><div class="acts"><span>取消</span><span class="f">确认</span></div></div><div class="cap">缓存限制</div><div class="dl"><div class="h">设置最大缓存 (MB)</div><div class="inp"><span class="lb">手动输入</span>1024</div><div class="acts"><span>取消</span><span class="f">确认</span></div></div><div class="cap">清空录制文件目录</div><div class="dl"><div class="h">确认清空录制文件目录？</div><div class="c">仅删除当前显示的 Pure Live 专用录制目录内容；所选父目录中的其他文件不受影响。</div><div class="acts"><span>取消</span><span class="e">清除</span></div></div><div style="height:16px"></div></div></div></body></html>

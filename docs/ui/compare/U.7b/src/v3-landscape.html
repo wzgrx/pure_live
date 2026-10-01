@@ -1,0 +1,88 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="852x393@2"><link rel="stylesheet" href="kit/kit.css"><style>
+.col{display:flex;flex-direction:column}
+.ab{height:56px;display:flex;align-items:center;position:relative;flex:none;background:var(--surface)}
+.ab .ttl{position:absolute;left:0;right:0;text-align:center;font-size:20px;font-weight:600;pointer-events:none}
+.ab .ib.lead{color:var(--on);margin-left:4px}
+.body{flex:1;min-height:0;overflow:hidden;position:relative}
+.lst{padding:0 16px 16px;margin:0 auto;min-width:0;width:100%}
+/* ---------- v3 rows (widget_extensions.dart) ---------- */
+.gt{padding:0 0 8px 8px;font-size:12px;font-weight:700;letter-spacing:.5px;color:rgba(54,97,142,.65)}
+.gt.row2{display:flex;align-items:center;justify-content:space-between;padding-bottom:0}
+.gt .act{display:flex;align-items:center;gap:6px;height:48px;padding-right:8px;font-size:14px;font-weight:600;letter-spacing:0;color:var(--primary)}
+.cd{background:rgba(225,226,232,.15);border:.5px solid rgba(0,0,0,.05);border-radius:20px;overflow:hidden;margin-bottom:20px}
+.tl{display:flex;align-items:flex-start;gap:12px;padding:8px 16px;min-height:56px}
+.tl.sw2{padding:6px 8px 6px 16px;align-items:center}
+.tl .ic{color:var(--primary);padding-top:2px;flex:none;width:22px}
+.tl .x{flex:1;min-width:0;align-self:center}
+.tl .a{font-size:15px;font-weight:600;line-height:1.35}
+.tl .b{font-size:12px;color:rgba(0,0,0,.45);margin-top:2px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl .b.long{white-space:normal}
+.tl .ch{color:rgba(0,0,0,.24);padding-top:4px;flex:none}
+.tl .sp2{width:20px;height:20px;border-radius:10px;border:2px solid rgba(54,97,142,.25);border-top-color:var(--primary);flex:none;margin-top:4px}
+.sdr{display:flex;gap:12px;padding:10px 16px}
+.sdr .ic{color:var(--primary);padding-top:2px;width:24px;flex:none}
+.sdr .x{flex:1;min-width:0}
+.sdr .h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.sdr .a{font-size:15px;font-weight:600}
+.sdr .v{padding:2px 8px;border-radius:6px;background:rgba(54,97,142,.1);font-size:13px;font-weight:700;color:var(--primary);font-feature-settings:'tnum';white-space:nowrap}
+.trk{height:4px;border-radius:2px;background:rgba(54,97,142,.15);position:relative;margin:20px 6px 12px 2px}
+.trk i{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:var(--primary)}
+.trk u{position:absolute;top:-8px;width:20px;height:20px;border-radius:10px;background:var(--primary);margin-left:-10px}
+/* ---------- dialogs ---------- */
+.sheetbg{background:var(--scc)}
+.cap{padding:20px 16px 8px;font-size:13px;font-weight:600;color:var(--onv)}
+.dl{margin:0 16px 8px;background:var(--sch);border-radius:24px;padding:24px 0 0;overflow:hidden}
+.dl .h{padding:0 24px;font-size:20px;font-weight:700;line-height:1.35}
+.dl .c{padding:16px 24px 0;font-size:13px;line-height:1.6;color:var(--onv)}
+.dl .rl{padding:8px 12px 16px}
+.rr{display:flex;align-items:center;gap:16px;padding:10px 16px;border-radius:16px;min-height:56px}
+.rr .rd{width:20px;height:20px;border-radius:10px;border:2px solid var(--onv);flex:none;display:grid;place-items:center}
+.rr.on{background:rgba(54,97,142,.05)}
+.rr.on .rd{border-color:var(--primary)}.rr.on .rd::after{content:'';width:10px;height:10px;border-radius:5px;background:var(--primary)}
+.rr .t{font-size:15px;font-weight:600}.rr .d{font-size:12px;margin-top:2px;color:var(--onv)}
+.rr.on .t{color:var(--primary)}
+.dl .acts{display:flex;justify-content:flex-end;gap:8px;padding:24px 24px 24px}
+.dl .acts span{height:40px;padding:0 16px;border-radius:20px;display:flex;align-items:center;font-size:13px;font-weight:600;color:var(--primary)}
+.dl .acts .f{background:var(--primary);color:var(--onPrimary)}
+.dl .acts .e{background:var(--scl);color:var(--primary);border-radius:12px;padding:0 24px}
+.dl .acts .r{background:var(--error);color:#fff}
+.inp{margin:16px 24px 0;height:56px;border-radius:12px;border:1px solid var(--outline);background:var(--scl);position:relative;display:flex;align-items:center;padding:0 16px;font-size:20px}
+.inp .lb{position:absolute;left:12px;top:-9px;padding:0 4px;background:var(--sch);font-size:12px;color:var(--onv)}
+.qs{padding:16px 24px 0;font-size:14px;font-weight:600}
+.qc{display:flex;flex-wrap:wrap;gap:8px;padding:8px 24px 0}
+.qc span{height:32px;min-width:40px;padding:0 12px;border-radius:8px;border:1px solid var(--outline);display:grid;place-items:center;font-size:14px}
+.qc span.on{background:rgba(54,97,142,.2);border-color:transparent}
+/* ---------- new ---------- */
+.ng{padding:16px 8px 8px;font-size:13px;font-weight:600;color:var(--primary)}
+.ng:first-child{padding-top:8px}
+.nc{background:var(--scl);border-radius:20px;overflow:hidden}
+.nt{display:flex;align-items:center;gap:14px;padding:10px 12px 10px 16px;min-height:56px;position:relative}
+.nt+.nt::before{content:'';position:absolute;left:52px;right:16px;top:0;height:1px;background:var(--ov);opacity:.5}
+.nt .ic{color:var(--primary);flex:none;width:22px;align-self:flex-start;padding-top:3px}
+.nt .x{flex:1;min-width:0}
+.nt .a{font-size:15px;font-weight:600;line-height:1.4}
+.nt .b{font-size:12px;color:var(--onv);margin-top:2px;line-height:1.45;overflow-wrap:anywhere}
+.nt .v{font-size:14px;color:var(--onv);white-space:nowrap;font-feature-settings:'tnum'}
+.nt .ch{color:var(--onv);margin-left:-8px}
+.nt.dis .ic,.nt.dis .x,.nt.dis .v,.nt.dis .ch,.nt.dis .sw,.nt.dis .stp{opacity:.38}
+.nt .ib2{width:40px;height:40px;border-radius:20px;display:grid;place-items:center;color:var(--primary);flex:none}
+.stp{display:flex;align-items:center;gap:4px;flex:none}
+.stp b{width:36px;height:36px;border-radius:18px;box-shadow:inset 0 0 0 1px var(--ov);display:grid;place-items:center;color:var(--primary);font-weight:400}
+.stp em{font-style:normal;min-width:28px;text-align:center;font-size:16px;font-weight:600;font-feature-settings:'tnum'}
+.ns{padding:10px 12px 12px 16px;position:relative}
+.ns+.nt::before,.nt+.ns::before{content:'';position:absolute;left:52px;right:16px;top:0;height:1px;background:var(--ov);opacity:.5}
+.ns .h{display:flex;align-items:center;gap:14px}
+.ns .ic{color:var(--primary);width:22px;flex:none}
+.ns .a{flex:1;font-size:15px;font-weight:600}
+.ns .vv{font-size:14px;color:var(--primary);font-weight:600;font-feature-settings:'tnum'}
+.ns .trk{margin:18px 6px 10px 38px}
+.ns.dis .ic,.ns.dis .a,.ns.dis .vv,.ns.dis .trk{opacity:.38}
+.ns .tk{display:flex;justify-content:space-between;margin:0 0 0 36px;font-size:11px;color:var(--onv)}
+.nd .rr .rd{display:none}
+.nd .rr{padding:10px 16px 10px 20px}
+.nd .rr .ck{margin-left:auto;color:var(--primary)}
+.nd .rr .t{font-size:16px;font-weight:500}.nd .rr.on .t{font-weight:600}
+.nd .rr .d{font-size:14px;line-height:1.45}
+.hl{box-shadow:inset 0 0 0 2px var(--primary);border-radius:12px;background:rgba(54,97,142,.06)}
+.toast{bottom:40px}
+</style></head><body><div class="win col" style="--w:852px;--h:393px;width:852px;height:393px"><div class="status" style="height:24px;font-size:12px;padding:0 24px"><span>21:36</span><span class="r"><span class="mi">wifi</span><span class="mi">battery_full</span></span></div><div class="ab"><div class="ib lead"><span class="mr" style="font-size:24px">arrow_back</span></div><div class="ttl">录制设置</div></div><div class="body"><div class="lst" style="max-width:960px"><div class="gt">基础配置</div><div class="cd"><div class="tl"><span class="ic"><span class="rx" style="font-size:22px">&#xee02;</span></span><div class="x"><div class="a">默认录制清晰度</div><div class="b">原画</div></div><span class="ch"><span class="mr" style="font-size:20px">chevron_right</span></span></div><div class="tl sw2"><span class="ic" style="align-self:flex-start;padding-top:4px"><span class="rx" style="font-size:22px">&#xf226;</span></span><div class="x"><div class="a">使用拼音文件夹名</div><div class="b">开启后使用主播拼音命名录制文件夹，关闭则使用主播原名</div></div><span class="sw"></span></div><div class="tl sw2"><span class="ic" style="align-self:flex-start;padding-top:4px"><span class="rx" style="font-size:22px">&#xeb51;</span></span><div class="x"><div class="a">同时录制弹幕</div><div class="b">在录像旁保存同名 .xml 弹幕文件（B 站格式，可用 DanmakuFactory、PotPlayer 等加载）；需要平台已接入远端弹幕</div></div><span class="sw"></span></div></div><div class="gt row2"><span>缓存管理</span><span class="act"><span class="rx" style="font-size:18px">&#xed70;</span>打开文件夹</span></div><div style="height:8px"></div><div class="cd"><div class="tl"><span class="ic"><span class="rx" style="font-size:22px">&#xf3cc;</span></span><div class="x"><div class="a">Pure Live 录制文件目录</div><div class="b">/storage/emulated/0/Download/PureLiveRecords</div></div><span class="ch"><span class="mr" style="font-size:20px">chevron_right</span></span></div><div class="tl sw2"><span class="ic" style="align-self:flex-start;padding-top:4px"><span class="rx" style="font-size:22px">&#xeca5;</span></span><div class="x"><div class="a">启用缓存限制</div><div class="b">超过限制后自动清理旧录制</div></div><span class="sw"></span></div><div class="tl"><span class="ic"><span class="rx" style="font-size:22px">&#xf572;</span></span><div class="x"><div class="a">当前缓存大小</div><div class="b">3584.25 MB</div></div></div><div class="tl"><span class="ic"><span class="rx" style="font-size:22px">&#xec22;</span></span><div class="x"><div class="a">清空录制文件目录</div><div class="b">仅删除上方 Pure Live 专用目录内的录制文件</div></div><span class="ch"><span class="mr" style="font-size:20px">chevron_right</span></span></div></div><div class="gt">录制性能与画质</div><div class="cd"><div class="tl sw2"><span class="ic" style="align-self:flex-start;padding-top:4px"><span class="rx" style="font-size:22px">&#xf280;</span></span><div class="x"><div class="a">优先录制原画轨道</div><div class="b">强制选择最高清晰度流 (0:v:0)</div></div><span class="sw on"></span></div><div class="tl"><span class="ic"><span class="rx" style="font-size:22px">&#xf214;</span></span><div class="x"><div class="a">录制读写超时</div><div class="b">15s</div></div><span class="ch"><span class="mr" style="font-size:20px">chevron_right</span></span></div><div class="tl"><span class="ic"><span class="rx" style="font-size:22px">&#xf179;</span></span><div class="x"><div class="a">输入缓冲队列</div><div class="b">2048</div></div><span class="ch"><span class="mr" style="font-size:20px">chevron_right</span></span></div><div class="sdr"><span class="ic"><span class="rx" style="font-size:22px">&#xed21;</span></span><div class="x"><div class="h"><span class="a">视频切片时长</span><span class="v">5m</span></div><div class="trk"><i style="width:6.8%"></i><u style="left:6.8%"></u></div></div></div><div class="tl"><span class="ic"><span class="rx" style="font-size:22px">&#xf1e8;</span></span><div class="x"><div class="a">最大同时录制任务数</div><div class="b">3</div></div><span class="ch"><span class="mr" style="font-size:20px">chevron_right</span></span></div></div><div class="gt">自动重连</div><div class="cd"><div class="tl sw2"><span class="ic" style="align-self:flex-start;padding-top:4px"><span class="rx" style="font-size:22px">&#xf064;</span></span><div class="x"><div class="a">自动断线重连</div><div class="b">录制异常时尝试恢复</div></div><span class="sw on"></span></div><div class="sdr"><span class="ic"><span class="rx" style="font-size:22px">&#xf33d;</span></span><div class="x"><div class="h"><span class="a">最大重试次数</span><span class="v">5</span></div><div class="trk"><i style="width:21.1%"></i><u style="left:21.1%"></u></div></div></div><div class="sdr"><span class="ic"><span class="rx" style="font-size:22px">&#xf20f;</span></span><div class="x"><div class="h"><span class="a">重连间隔时间</span><span class="v">30s</span></div><div class="trk"><i style="width:21.7%"></i><u style="left:21.7%"></u></div></div></div></div><div class="gt">挂机轮询检测</div><div class="cd"><div class="tl sw2"><span class="ic" style="align-self:flex-start;padding-top:4px"><span class="rx" style="font-size:22px">&#xf04c;</span></span><div class="x"><div class="a">启用开播检测</div><div class="b">主播未开播时自动轮询</div></div><span class="sw"></span></div><div class="tl sw2"><span class="ic" style="align-self:flex-start;padding-top:4px"><span class="rx" style="font-size:22px">&#xf080;</span></span><div class="x"><div class="a">应用启动时恢复待录任务</div><div class="b long">恢复上次录制中、排队、重连或等待开播的任务；保留已停止、已完成和失败状态。关闭自动检测时，仅检查一次。</div></div><span class="sw"></span></div></div><div style="height:60px"></div></div></div></div></body></html>

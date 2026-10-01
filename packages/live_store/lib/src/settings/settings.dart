@@ -328,6 +328,10 @@ abstract final class Settings {
   /// Per-room portrait layout, `{"platform:roomId": "<layout>"}`.
   static const portraitRoomOverrides = JsonSetting('portraitRoomOverrides', section: 'player', defaultValue: {});
 
+  /// The wide room's chat column is folded away (docs/ui/compare/U.2d
+  /// change 7; new in v4, remembered for the next room).
+  static const livePlayChatCollapsed = BoolSetting('livePlayChatCollapsed', section: 'player', defaultValue: false);
+
   // ---- danmaku (danmaku_settings_controller.dart:58-111) ----
 
   /// Hide danmaku.
@@ -1111,6 +1115,7 @@ abstract final class Settings {
     rememberPortraitRoomOverride,
     showPortraitDiagnostics,
     portraitRoomOverrides,
+    livePlayChatCollapsed,
     hideDanmaku,
     noEmojiMode,
     danmakuTopArea,

@@ -1,0 +1,292 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:live_core/live_core.dart';
+import 'package:live_media/live_media.dart';
+import 'package:live_record/live_record.dart';
+import 'package:test/test.dart';
+
+import 'support/fakes.dart';
+
+void main() {
+  group('resolver', () {
+    test('quality order uses the platform rank and the preference, without duplicates', () {
+      const qualities = [
+        LivePlayQuality(quality: '流畅', id: 1, sort: 1),
+        LivePlayQuality(quality: '原画', id: 4, sort: 4),
+        LivePlayQuality(quality: '超清', id: 2, sort: 2),
+        LivePlayQuality(quality: '超清', id: 2, sort: 2),
+      ];
+      expect(RecordStreamResolver.orderQualities(qualities, '原画').map((q) => q.id), [4, 2, 1]);
+      expect(RecordStreamResolver.orderQualities(qualities, '超清').map((q) => q.id), [2, 4, 1]);
+      expect(RecordStreamResolver.orderQualities(qualities, '流畅').map((q) => q.id), [1, 4, 2]);
+    });
+
+    test('a retry moves to the next line, a renewal keeps the line', () async {
+      final site = FakeSite(
+        lines: {
+          'origin': const [LivePlayLine('rtmp://a.example/live?sign=1'), LivePlayLine('rtmp://b.example/live?sign=1')],
+        },
+      );
+      final resolver = RecordStreamResolver((_) => site);
+      final first = await resolver.resolve(roomId: '1', platform: 'fake', preferredQuality: '原画');
+      expect(first.line!.url, startsWith('rtmp://a.'));
+      final next = await resolver.resolve(
+        roomId: '1',
+        platform: 'fake',
+        preferredQuality: '原画',
+        previousQualityId: first.qualityCursorId,
+        previousLineIndex: first.lineIndex,
+      );
+      expect(next.line!.url, startsWith('rtmp://b.'));
+      expect(next.lineLabel, '线路2');
+      final renewed = await resolver.resolve(
+        roomId: '1',
+        platform: 'fake',
+        preferredQuality: '原画',
+        previousQualityId: next.qualityCursorId,
+        previousLineIndex: next.lineIndex,
+        renewCurrent: true,
+      );
+      expect(renewed.line!.url, startsWith('rtmp://b.'));
+    });
+
+    test('offline, banned and unknown rooms stop before FFmpeg; transport failures stay retryable', () async {
+      final site = FakeSite(status: LiveStatus.offline);
+      final resolver = RecordStreamResolver((id) => id == 'fake' ? site : null);
+      Future<RecordStreamException> failure() async {
+        try {
+          await resolver.resolve(roomId: '1', platform: 'fake', preferredQuality: '原画');
+        } on RecordStreamException catch (error) {
+          return error;
+        }
+        fail('resolved');
+      }
+
+      expect((await failure()).type, RecordStreamErrorType.notLive);
+      site.status = LiveStatus.unknown;
+      expect((await failure()).retryable, isTrue);
+      site
+        ..status = LiveStatus.live
+        ..detailError = const NetworkFailure('fake');
+      expect((await failure()).type, RecordStreamErrorType.networkError);
+      site.detailError = const NotFound('fake');
+      expect((await failure()).retryable, isFalse);
+      await expectLater(
+        resolver.resolve(roomId: '1', platform: 'other', preferredQuality: '原画'),
+        throwsA(isA<RecordStreamException>().having((e) => e.retryable, 'retryable', isFalse)),
+      );
+    });
+
+    test('a paid room without a stream says so instead of retrying (22-1)', () async {
+      final site = FakeSite(restriction: LiveRestriction.paid, lines: {});
+      final resolver = RecordStreamResolver((_) => site);
+      await expectLater(
+        resolver.resolve(roomId: '1', platform: 'fake', preferredQuality: '原画'),
+        throwsA(
+          isA<RecordStreamException>()
+              .having((e) => e.type, 'type', RecordStreamErrorType.restricted)
+              .having((e) => e.restriction, 'restriction', LiveRestriction.paid)
+              .having((e) => e.retryable, 'retryable', isFalse),
+        ),
+      );
+    });
+
+    test('a lease travels with the selected line', () async {
+      final refreshAt = DateTime.utc(2026, 10, 1, 12);
+      final site = FakeSite(
+        lines: {
+          'origin': [
+            LivePlayLine(
+              'rtmp://a.example/live',
+              lease: PlayLease(refreshAt: refreshAt, expiresAt: refreshAt),
+            ),
+          ],
+        },
+      );
+      // getPlayUrls drops metadata; a LivePlayUrlResolver keeps it.
+      final stream = await RecordStreamResolver((_) => _LineSite(site))
+          .resolve(roomId: '1', platform: 'fake', preferredQuality: '原画');
+      expect(stream.refreshAt, refreshAt);
+      expect(stream.usableAt(refreshAt), isFalse);
+    });
+  });
+
+  test('live FLV and HLS lines are recorded through the loopback relay, other schemes directly', () async {
+    final opener = RecordInputOpener();
+    addTearDown(opener.close);
+    const quality = LivePlayQuality(quality: '原画');
+    Future<MediaInput> open(String url) => opener.open(
+      ResolvedRecordStream(source: LineSource(LivePlayLine(url)), quality: quality, qualityCursorId: '1', lineIndex: 0),
+      site: 'fake',
+    );
+    final flv = await open('https://cdn.example/live/1.flv?sign=a');
+    expect(flv.private, isTrue);
+    expect(flv.uri.host, '127.0.0.1');
+    expect(flv.headers, isEmpty);
+    final hls = await open('https://cdn.example/live/1.m3u8');
+    expect(hls.private, isTrue);
+    expect(hls.uri.path, isNot(flv.uri.path));
+    final rtmp = await open('rtmp://cdn.example/live/1');
+    expect(rtmp.private, isFalse);
+    await flv.close();
+    expect(flv.isUsable, isFalse);
+  });
+
+  group('recorder', () {
+    late Directory root;
+    late FakeSite site;
+    late FakeFfmpeg ffmpeg;
+    late Recorder recorder;
+    late List<String> persisted;
+    var settings = RecordSettings();
+
+    setUp(() {
+      root = Directory.systemTemp.createTempSync('live_record');
+      site = FakeSite();
+      ffmpeg = FakeFfmpeg();
+      persisted = [];
+      settings = RecordSettings();
+      recorder = Recorder(
+        sites: (id) => id == 'fake' ? site : null,
+        ffmpeg: ffmpeg,
+        storage: RecordStorage(defaultDirectory: () async => root.path, configuredPath: () => ''),
+        settings: () => settings,
+        persist: (json) async => persisted.add(json),
+        outputSampleInterval: const Duration(milliseconds: 20),
+        startGap: Duration.zero,
+      );
+    });
+
+    tearDown(() async {
+      await recorder.dispose();
+      root.deleteSync(recursive: true);
+    });
+
+    Future<void> until(bool Function() condition) async {
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      while (!condition()) {
+        if (DateTime.now().isAfter(deadline)) fail('timed out');
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    }
+
+    LiveRoom room() => LiveRoom(roomId: '1', platform: 'fake', nick: '主播', liveStatus: LiveStatus.live);
+
+    test('records, stops at the user request and joins the attempt into MP4', () async {
+      final task = (await recorder.addTask(room()))!;
+      await until(() => task.status == RecordStatus.running);
+      expect(ffmpeg.runs.single, containsAllInOrder(['-i', 'rtmp://cdn-a.example/live/1?sign=a']));
+      expect(task.selectedQuality, '原画');
+      await until(() => task.fileSize > 0 && task.bitrate >= 0);
+      final directory = task.outputDir!;
+      expect(directory, contains('fake${Platform.pathSeparator}主播'));
+      await recorder.stopTask(task);
+      expect(task.status, RecordStatus.stopped);
+      expect(task.pendingAttempts, isEmpty);
+      final files = Directory(directory).listSync().map((entity) => entity.path.split(Platform.pathSeparator).last);
+      expect(files, ['${task.recordingFilePrefix}.mp4']);
+      expect(ffmpeg.executions.first.cancelled, isTrue);
+      await recorder.flush();
+      expect(persisted.last, isNot(contains('rtmp://')));
+    });
+
+    test('a live EOF reconnects quickly with a new attempt and joins both at the end', () async {
+      ffmpeg
+        ..captureExit = 0
+        ..captureSeconds = const Duration(milliseconds: 50);
+      final task = (await recorder.addTask(room()))!;
+      await until(() => task.status == RecordStatus.reconnecting);
+      expect(task.lastErrorStage, 'ffmpeg.unexpectedeof');
+      expect(task.pendingAttempts, hasLength(1));
+      ffmpeg.captureExit = null;
+      await until(() => ffmpeg.runs.length == 2 && task.status == RecordStatus.running);
+      await recorder.stopTask(task);
+      expect(task.status, RecordStatus.stopped);
+      expect(task.pendingAttempts, isEmpty);
+      expect(ffmpeg.runs.where((run) => run.contains('concat')), hasLength(2));
+    }, timeout: const Timeout(Duration(seconds: 20)));
+
+    test('an offline room waits for the live check', () async {
+      site.status = LiveStatus.offline;
+      final task = (await recorder.addTask(room()))!;
+      await until(() => task.status == RecordStatus.waitingLive);
+      expect(ffmpeg.runs, isEmpty);
+      expect(task.lastError, isNull);
+    });
+
+    test('a damaged attempt keeps its source and fails the join', () async {
+      final task = (await recorder.addTask(room()))!;
+      await until(() => task.status == RecordStatus.running);
+      ffmpeg.executions.single.log('[h264 @ 0x1] Packet corrupt (stream = 0, dts = 1)');
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await recorder.stopTask(task);
+      expect(task.status, RecordStatus.failed);
+      expect(task.lastErrorStage, 'ffmpeg.inputintegrity');
+      expect(task.pendingAttempts.single.inputIntegrityError, isTrue);
+      expect(Directory(task.outputDir!).listSync().where((file) => file.path.endsWith('.ts')), hasLength(1));
+    });
+
+    test('restore joins an interrupted recording and drops unsupported platforms', () async {
+      final directory = Directory('${root.path}/fake/a/2026-10-01/10-00-00')..createSync(recursive: true);
+      const prefix = '20261001_100000_000';
+      File('${directory.path}/${prefix}_000000.clock-v1.ts').writeAsBytesSync(List.filled(10, 1));
+      File('${directory.path}/$prefix.clock-v1.csv').writeAsStringSync('${prefix}_000000.clock-v1.ts,0.0,4.0\n');
+      final stored = RecordTask(
+        taskId: 'fake_1',
+        roomId: '1',
+        platform: 'fake',
+        title: '',
+        nick: 'a',
+        avatar: '',
+        cover: '',
+        createTime: DateTime(2026, 10, 1, 10),
+        status: RecordStatus.running,
+        outputDir: directory.path,
+      );
+      final other = RecordTask.fromJson({...stored.toJson(), 'taskId': 'gone_1', 'platform': 'gone'});
+      await recorder.restore(jsonEncode([stored.toJson(), other.toJson()]));
+      final task = recorder.tasks.single;
+      expect(task.status, RecordStatus.stopped);
+      expect(File('${directory.path}/$prefix.mp4').existsSync(), isTrue);
+    });
+
+    test('the queue holds tasks above the concurrency limit', () async {
+      settings = RecordSettings(maxTaskCount: 1);
+      final first = (await recorder.addTask(room()))!;
+      final second = (await recorder.addTask(
+        LiveRoom(roomId: '2', platform: 'fake', nick: 'b', liveStatus: LiveStatus.live),
+      ))!;
+      await until(() => first.status == RecordStatus.running);
+      expect(second.status, RecordStatus.queued);
+      await recorder.stopTask(first);
+      await until(() => second.status == RecordStatus.running);
+      await recorder.removeTask(second);
+      expect(recorder.tasks, [first]);
+    });
+  });
+}
+
+final class _LineSite extends LiveSite implements LivePlayUrlResolver {
+  new(this.inner);
+
+  final FakeSite inner;
+
+  @override
+  String get id => inner.id;
+
+  @override
+  String get name => inner.name;
+
+  @override
+  Future<LiveRoom> getRoomDetail({required String roomId}) => inner.getRoomDetail(roomId: roomId);
+
+  @override
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) => inner.getPlayQualities(detail: detail);
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async => LivePlayUrlResolution.lines(inner.lines['${quality.selectionId}'] ?? const []);
+}

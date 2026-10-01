@@ -1,0 +1,22 @@
+name: live_record
+description: Recording core of Pure Live — record tasks and their scheduling, stream selection through live_media's relay, FFmpeg capture and MP4 finalization behind an injected runner, segment naming, retry and status.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.0
+
+resolution: workspace
+
+dependencies:
+  clock: ^1.1.3
+  live_core: any
+  live_media: any
+  live_net: any
+  meta: ^1.19.0
+  path: ^1.9.1
+  pinyindart: ^0.0.1
+
+dev_dependencies:
+  test: ^1.32.0
+  very_good_analysis: ^11.0.0

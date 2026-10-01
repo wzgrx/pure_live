@@ -26,9 +26,10 @@ ALLOWED = {
     'packages/live_store': {'live_core'},
     'packages/live_cast': set(),
     'packages/live_ui': set(),
+    'packages/live_vod': {'live_core', 'live_net'},
     'apps/pure_live': {
         'live_ui', 'live_media', 'live_player', 'live_record', 'live_danmaku', 'live_iptv', 'live_store', 'live_core',
-        'live_net', 'live_cast',
+        'live_net', 'live_cast', 'live_vod',
     },
     'tools/live_cli': {'live_core', 'live_net', 'live_danmaku', 'live_media', 'live_record'},
     'tools/check_latest': set(),
@@ -37,7 +38,8 @@ ALLOWED = {
 # Must run under plain `dart test` and be callable from live_cli.
 PURE_DART = {
     'packages/live_net', 'packages/live_core', 'packages/live_danmaku', 'packages/live_iptv', 'packages/live_media',
-    'packages/live_record', 'packages/live_cast', 'packages/live_store', 'tools/live_cli', 'tools/check_latest',
+    'packages/live_record', 'packages/live_cast', 'packages/live_store', 'packages/live_vod', 'tools/live_cli',
+    'tools/check_latest',
 }
 
 IMPORT = re.compile(r"""^\s*(?:import|export)\s+['"]package:([a-z0-9_]+)/""", re.M)

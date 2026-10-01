@@ -1,0 +1,18 @@
+name: live_vod
+description: Bilibili video on demand and music of Pure Live's TV mode — UGC and PGC APIs, on-demand danmaku, subtitles, playlist import, track matching, lyrics, the play queue and the audio cache rules.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.0
+
+resolution: workspace
+
+dependencies:
+  live_core: any
+  live_net: any
+  meta: ^1.19.0
+
+dev_dependencies:
+  test: ^1.32.0
+  very_good_analysis: ^11.0.0

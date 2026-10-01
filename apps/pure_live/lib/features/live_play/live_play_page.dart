@@ -18,14 +18,19 @@ import 'package:pure_live/features/live_play/layout/room_header.dart';
 import 'package:pure_live/features/live_play/layout/room_info_bar.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
+import 'package:pure_live/features/live_play/logic/mini_window.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
+import 'package:pure_live/features/live_play/logic/room_runtime.dart';
+import 'package:pure_live/features/live_play/mini/room_mini_window.dart';
 import 'package:pure_live/features/live_play/player/player_view.dart';
 import 'package:pure_live/features/live_play/record/record_panel.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/routes/route_observer.dart';
+import 'package:pure_live/routes/route_path.dart';
 
 /// The live room (argument: the `LiveRoom`) (3.x `lib/modules/live_play`).
 ///
@@ -38,6 +43,13 @@ import 'package:pure_live/routes/route_args.dart';
 /// on the right otherwise, never over the picture's left half. Back and Esc
 /// close a panel first, then leave fullscreen, then close the details, then
 /// the room.
+///
+/// U.2j: the room's player, danmaku and logic live in a [RoomRuntime]. When
+/// the page closes with "退出小窗播放" on and the room playing, the in-app
+/// floating window takes it over ([FloatingRoom]); opening the same room
+/// again takes it back, so nothing is built twice. The picture's mini window
+/// button ([RoomMiniWindow]) enters Android's picture-in-picture or shrinks a
+/// desktop window to the mini window; the page then shows only the picture.
 class LivePlayPage extends ConsumerStatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -84,11 +96,17 @@ double portraitVideoHeight({
 }
 
 class _LivePlayPageState extends ConsumerState<LivePlayPage> {
+  RoomRuntime? _runtime;
+  RoomMiniWindow? _mini;
+
+  /// The page closes on purpose (the desktop mini window's ✕): no floating
+  /// window.
+  bool _closingOnPurpose = false;
+  late final SettingsStore _settings;
   LiveRoomController? _controller;
   PlaybackSession? _session;
-  RoomBackgroundPolicy? _background;
   RoomOrientationChoice? _orientation;
-  ReconnectWatch? _reconnect;
+  late final ReconnectWatch _reconnect;
   StreamSubscription<PlaybackState>? _autoFullscreen;
   bool _fullscreen = false;
   bool _pip = false;
@@ -113,27 +131,60 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       return;
     }
     final store = ref.read(storeProvider);
-    final danmaku = ref.read(danmakuProvider);
-    final session = _session = ref.read(playbackSessionFactoryProvider)(config: _engineConfig(store.settings));
-    final controller = _controller = LiveRoomController(
-      room: room,
-      site: site,
-      session: session,
-      danmaku: danmaku.connectionFor(site.id),
-      danmakuSupported: danmaku.supports(site.id),
-      store: store,
-      mobile: _mobile,
-      toast: (message) => AppNavigator.toast(message),
-      // 3.x's automatic ASMR mode: Android only.
-      sleepSessionOnStart: _android && store.settings.get(Settings.enableAsmrSleepMode),
-      network: ref.read(networkProbeProvider),
-    );
-    _orientation = RoomOrientationChoice(settings: store.settings, room: room);
+    _settings = store.settings;
+    // The same room still playing in the floating window plays on here; any
+    // other floating room stops (3.x `toLiveRoomDetail`).
+    final adopted = FloatingRoom.instance.claim(room);
+    final RoomRuntime runtime;
+    if (adopted != null) {
+      runtime = adopted;
+    } else {
+      final danmaku = ref.read(danmakuProvider);
+      final session = ref.read(playbackSessionFactoryProvider)(config: _engineConfig(store.settings));
+      final controller = LiveRoomController(
+        room: room,
+        site: site,
+        session: session,
+        danmaku: danmaku.connectionFor(site.id),
+        danmakuSupported: danmaku.supports(site.id),
+        store: store,
+        mobile: _mobile,
+        toast: (message) => AppNavigator.toast(message),
+        // 3.x's automatic ASMR mode: Android only.
+        sleepSessionOnStart: _android && store.settings.get(Settings.enableAsmrSleepMode),
+        network: ref.read(networkProbeProvider),
+      );
+      runtime = RoomRuntime(
+        controller: controller,
+        session: session,
+        orientation: RoomOrientationChoice(settings: store.settings, room: room),
+        reconnect: ReconnectWatch(session.states, now: controller.now),
+        background: RoomBackgroundPolicy(controller: controller, settings: store.settings)..start(),
+      );
+    }
+    _runtime = runtime;
+    final session = _session = runtime.session;
+    final controller = _controller = runtime.controller;
+    _orientation = runtime.orientation;
+    _reconnect = runtime.reconnect;
     _panels.addListener(_onPanel);
-    _reconnect = ReconnectWatch(session.states, now: controller.now);
-    _background = RoomBackgroundPolicy(controller: controller, settings: store.settings)..start();
-    PictureInPicture.active.addListener(_onPip);
-    if (store.settings.get(Settings.enableFullScreenDefault)) {
+    _mini =
+        RoomMiniWindow(
+            controller: controller,
+            settings: store.settings,
+            leaveFullscreen: () => _setFullscreen(false),
+            closeRoom: _closeOnPurpose,
+          )
+          ..addListener(_onMini)
+          ..startAutoPip();
+    if (adopted != null &&
+        session.state.status == PlaybackStatus.playing &&
+        store.settings.get(Settings.enableFullScreenDefault)) {
+      // Back from the floating window the stream already plays.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_fullscreen) unawaited(_setFullscreen(true));
+      });
+    } else if (store.settings.get(Settings.enableFullScreenDefault)) {
       // 3.x entered fullscreen once the stream played.
       _autoFullscreen = session.states.listen((state) {
         if (state.status != PlaybackStatus.playing) return;
@@ -142,7 +193,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
         if (mounted && !_fullscreen) unawaited(_setFullscreen(true));
       });
     }
-    unawaited(controller.start());
+    if (adopted == null) unawaited(controller.start());
   }
 
   /// The player settings (M9) as the engine's configuration.
@@ -157,8 +208,23 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     rtxVideoSuperResolution: settings.get(Settings.enableRtxVsr),
   );
 
-  void _onPip() {
-    if (mounted) setState(() => _pip = PictureInPicture.active.value);
+  /// Picture-in-picture or the desktop mini window began or ended.
+  void _onMini() {
+    final mini = _mini;
+    if (mounted && mini != null) setState(() => _pip = mini.compact);
+  }
+
+  /// The desktop mini window's ✕ (J3): the room closes without the floating
+  /// window, back to the page before it.
+  void _closeOnPurpose() {
+    if (!mounted) return;
+    _closingOnPurpose = true;
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop();
+    } else {
+      AppNavigator.offAllNamed(RoutePath.kInitial);
+    }
   }
 
   void _onPanel() {
@@ -171,20 +237,36 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   @override
   void dispose() {
     unawaited(_autoFullscreen?.cancel());
-    PictureInPicture.active.removeListener(_onPip);
+    final mini = _mini;
+    if (mini != null) {
+      mini.removeListener(_onMini);
+      // A room leaving while the window is its mini window gives the window
+      // back first.
+      if (mini.desktop) unawaited(DesktopWindow.exitMini());
+      mini.dispose();
+    }
     if (_fullscreen && _mobile) unawaited(_restoreSystemUi());
-    _background?.dispose();
     // The brightness gesture overrides the window's only inside the room.
     unawaited(DeviceControls.resetBrightness());
     if (_fullscreen && !_mobile) unawaited(DesktopWindow.setFullScreen(on: false));
-    _reconnect?.dispose();
-    _orientation?.dispose();
     _panels
       ..removeListener(_onPanel)
       ..dispose();
-    _controller?.dispose();
-    final session = _session;
-    if (session != null) unawaited(session.dispose());
+    final runtime = _runtime;
+    if (runtime != null) {
+      final floating = FloatingRoom.instance;
+      final float = shouldFloatOnLeave(
+        enabled: _settings.get(Settings.floatPlay),
+        stage: runtime.controller.stage,
+        suppressed: _closingOnPurpose,
+        topRoute: liveRouteObserver.currentRoute.value,
+      );
+      if (float && floating.canShow) {
+        floating.show(runtime);
+      } else {
+        unawaited(runtime.dispose());
+      }
+    }
     super.dispose();
   }
 
@@ -236,9 +318,12 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   }
 
   /// Back and Esc: a panel first, then the fullscreen, then the details,
-  /// then the room.
+  /// then the room. The desktop mini window goes back to the room (c4).
   void _back() {
-    if (_panels.value != null) {
+    final mini = _mini;
+    if (mini != null && mini.desktop) {
+      unawaited(mini.backToRoom());
+    } else if (_panels.value != null) {
       _panels.close();
     } else if (_fullscreen) {
       _toggleFullscreen();
@@ -256,19 +341,24 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
         body: AppStatusView(type: AppStatusType.error, title: _problem, subtitle: ''),
       );
     }
-    return RoomPanelScope(notifier: _panels, child: _page(context, controller));
+    return RoomMiniScope(
+      notifier: _mini!,
+      child: RoomPanelScope(notifier: _panels, child: _page(context, controller)),
+    );
   }
 
   Widget _page(BuildContext context, LiveRoomController controller) {
     return PopScope(
-      canPop: !_fullscreen && !_details && _panels.value == null,
+      canPop: !_fullscreen && !_details && _panels.value == null && !(_mini?.desktop ?? false),
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _back();
       },
       child: CallbackShortcuts(
         bindings: {
           const SingleActivator(LogicalKeyboardKey.escape): _back,
-          const SingleActivator(LogicalKeyboardKey.keyF): _toggleFullscreen,
+          const SingleActivator(LogicalKeyboardKey.keyF): () {
+            if (!(_mini?.desktop ?? false)) _toggleFullscreen();
+          },
           const SingleActivator(LogicalKeyboardKey.space): () => unawaited(controller.session.togglePlayPause()),
           // 3.x `VideoKeyboard`: arrows change the room's volume, R reloads.
           const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
@@ -302,7 +392,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     mobile: _mobile,
     android: _android,
     orientation: _orientation!,
-    reconnect: _reconnect!,
+    reconnect: _reconnect,
     onToggleFullscreen: _toggleFullscreen,
     onBack: () => unawaited(_setFullscreen(false)),
   );
@@ -386,7 +476,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     controller: controller,
     detailsOpen: _details,
     onToggleDetails: _toggleDetails,
-    onReopen: _reconnect!.expectReopen,
+    onReopen: _reconnect.expectReopen,
   );
 
   /// The details over [below] (the chat), sliding in unless the system asks

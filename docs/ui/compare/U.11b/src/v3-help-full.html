@@ -1,0 +1,198 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="393x4000@2 crop"><link rel="stylesheet" href="kit/kit.css"><style>
+body{position:relative}
+.ph{display:flex;flex-direction:column}
+.ph>.status,.ph>.bar{flex:none}
+.win{display:flex;flex-direction:column}
+.sb24{height:24px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:600 12px 'Geist','Noto Sans SC';background:var(--surface);flex:none}
+.sb24 .mi{font-size:13px}
+.bar{height:56px;display:flex;align-items:center;background:var(--surface);position:relative;flex:none;z-index:3}
+.bar .b{width:56px;height:56px;display:grid;place-items:center;flex:none}
+.bar .b .mi,.bar .b .mr{font-size:24px}
+.bar .ct{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:20px;font-weight:600;white-space:nowrap;max-width:60%;overflow:hidden;text-overflow:ellipsis}
+.bar .lt{flex:1;min-width:0;padding-left:4px;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .tt{flex:1;min-width:0;padding-left:4px}
+.bar .tt .n{font-size:17px;font-weight:600;line-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .tt .s{font-size:12px;color:var(--onv);line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .ib2{width:48px;height:48px;display:grid;place-items:center;flex:none;color:var(--on)}
+.bar .ib2 .mi,.bar .ib2 .mr,.bar .ib2 .rx{font-size:24px}
+.body{flex:1;min-height:0;overflow:hidden;position:relative}
+.fill{position:absolute;inset:0}
+/* ---------- v3 settings list ---------- */
+.l3{padding:12px 16px 32px}
+.l3>.w{max-width:960px;margin:0 auto}
+.g3{padding:0 0 8px 8px;font-size:12px;font-weight:700;color:rgba(54,97,142,.65);letter-spacing:.5px}
+.cd3{background:#F5F6FC;border-radius:20px;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.05);margin-bottom:20px;overflow:hidden}
+.t3{display:flex;align-items:center;gap:12px;padding:8px 16px;min-height:72px}
+.t3.one{min-height:56px}
+.t3 .ic{color:var(--primary);font-size:22px;flex:none;align-self:center;padding-top:2px}
+.t3 .x{flex:1;min-width:0}
+.t3 .t{font-size:15px;font-weight:600;color:rgba(0,0,0,.87);line-height:20px}
+.t3 .s{font-size:12px;color:rgba(0,0,0,.45);margin-top:2px;line-height:17px;word-break:break-all}
+.t3 .s.err{color:rgba(186,26,26,.8)}
+.t3 .ch{color:rgba(0,0,0,.24);font-size:20px;flex:none}
+.t3 .tr3{flex:none;display:flex;align-items:center}
+/* ---------- new settings list (U.2f / U.2e component rows) ---------- */
+.ln{padding:4px 0 32px}
+.ln>.w{max-width:720px;margin:0 auto}
+.ns{padding:18px 20px 8px;font-size:13px;font-weight:600;color:var(--primary);display:flex;align-items:center;gap:8px}
+.ns .r{margin-left:auto;font-size:13px;font-weight:400;color:var(--onv);display:flex;align-items:center;gap:4px}
+.ns .r.lk{color:var(--primary);font-weight:600}
+.ncd{margin:0 12px;background:var(--scl);border-radius:16px;overflow:hidden}
+.nr{display:flex;align-items:center;gap:16px;padding:10px 12px 10px 16px;min-height:56px;position:relative}
+.nr .ic{color:var(--primary);font-size:22px;flex:none}
+.nr .ic.mute{color:var(--onv)}
+.nr .x{flex:1;min-width:0}
+.nr .t{font-size:15px;line-height:21px}
+.nr .t b{font-weight:600}
+.nr .s{font-size:12px;color:var(--onv);line-height:17px;margin-top:2px;word-break:break-all}
+.nr .s.err{color:var(--error)}
+.nr .ch{color:var(--onv);font-size:20px;flex:none}
+.nr .more{width:48px;height:48px;display:grid;place-items:center;color:var(--onv);flex:none;margin:-8px -4px -8px 0}
+.nr.hov{background:rgba(127,127,127,.10)}
+.nr+.nr.sep{border-top:1px solid color-mix(in srgb,var(--ov) 60%,transparent)}
+.dis{opacity:.38}
+.spin{width:20px;height:20px;border-radius:10px;border:2.5px solid color-mix(in srgb,var(--primary) 22%,transparent);border-top-color:var(--primary);transform:rotate(45deg);flex:none}
+.spin.big{width:40px;height:40px;border-radius:20px;border-width:4px}
+.prog{height:4px;background:color-mix(in srgb,var(--primary) 18%,transparent);position:relative;border-radius:2px}.prog i{position:absolute;left:0;top:0;bottom:0;width:40%;background:var(--primary);border-radius:2px}
+.hint{padding:8px 20px 0;font-size:12px;color:var(--onv);line-height:1.5}
+/* ---------- status view ---------- */
+.sv{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;height:100%;padding:24px}
+.svc{width:86px;height:86px;border-radius:43px;background:rgba(225,226,232,.15);border:1px solid rgba(54,97,142,.05);display:grid;place-items:center}
+.svc .mr,.svc .mi,.svc .rx{font-size:42px;color:rgba(54,97,142,.6)}
+.sv h4{margin-top:20px;font-size:15px;font-weight:600}
+.sv p{padding:6px 28px 0;max-width:376px;font-size:13px;line-height:1.5;color:var(--onv)}
+.sv .acts{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+/* ---------- buttons, fields ---------- */
+.fb{height:40px;padding:0 20px;border-radius:20px;background:var(--primary);color:var(--onPrimary);font-size:14px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.fb.big{height:48px;border-radius:24px}
+.fb.err{background:var(--error);color:#fff}
+.tb{height:40px;padding:0 12px;border-radius:20px;color:var(--primary);font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.ob{height:40px;padding:0 18px;border-radius:20px;box-shadow:inset 0 0 0 1px var(--outline);color:var(--primary);font-size:14px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.ob.big,.tb.big{height:48px;border-radius:24px}
+.tonal{height:40px;padding:0 18px;border-radius:20px;background:var(--sc);color:var(--osc);font-size:14px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.fb .mr,.tb .mr,.ob .mr,.tonal .mr,.fb .mi,.ob .mi,.tb .mi,.tonal .mi,.fb .rx,.ob .rx,.tb .rx,.tonal .rx{font-size:18px}
+.fld{height:52px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--outline);display:flex;align-items:center;gap:10px;padding:0 12px;font-size:15px;position:relative;background:var(--surface)}
+.fld .ph2{color:var(--onv);opacity:.8}
+.fld .mr,.fld .mi,.fld .rx{font-size:20px;color:var(--onv);flex:none}
+.fld .x{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fld.foc{box-shadow:inset 0 0 0 2px var(--primary)}
+.fld.bad{box-shadow:inset 0 0 0 2px var(--error)}
+.fld .lab{position:absolute;left:10px;top:-8px;padding:0 4px;font-size:12px;color:var(--onv);background:inherit;line-height:16px}
+.fld.foc .lab{color:var(--primary)}.fld.bad .lab{color:var(--error)}
+.fh{font-size:12px;color:var(--onv);padding:4px 16px 0;line-height:1.4}.fh.err{color:var(--error)}
+/* ---------- dialogs (AlertDialog: surfaceContainerHigh, radius 24) ---------- */
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:20}
+.dlg2{position:absolute;z-index:21;left:16px;right:16px;background:var(--sch);border-radius:24px;padding:24px 24px 14px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.dlg2 h3{font-size:20px;font-weight:600;line-height:1.35;display:flex;align-items:center;gap:12px}
+.dlg2 h3 .rx,.dlg2 h3 .mr{font-size:24px;color:var(--primary)}
+.dlg2 .c{margin-top:16px;font-size:14px;line-height:1.55;color:rgba(0,0,0,.87)}
+.dlg2 .c.v4{color:var(--onv)}
+.dlg2 .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;align-items:center;flex-wrap:wrap}
+.dlg2 .acts>span{height:40px;display:inline-flex;align-items:center;padding:0 12px;font-size:14px;font-weight:500;color:var(--primary);border-radius:20px}
+.dlg2 .acts>span.fb2{background:var(--primary);color:var(--onPrimary);padding:0 20px;font-weight:600}
+.dlg2 .acts>span.err{background:var(--error);color:#fff;padding:0 20px;font-weight:600}
+.dlg2 .acts>span.big{height:48px;border-radius:24px}
+.dlg2 .acts>span.ol{box-shadow:inset 0 0 0 1px var(--outline);border-radius:8px;padding:0 20px;height:48px}
+.dlg2 .acts>span.sq{background:var(--primary);color:var(--onPrimary);border-radius:8px;padding:0 20px;height:48px}
+.dlg2 .li{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.5;padding:2px 0}
+.dlg2 .li i{width:6px;height:6px;border-radius:3px;background:var(--primary);margin:8px 6px 0 6px;flex:none}
+/* ---------- menus (PopupMenu) ---------- */
+.pm{position:absolute;z-index:21;background:var(--sc2,#ECEEF4);border-radius:4px;box-shadow:0 4px 14px rgba(0,0,0,.2);padding:8px 0;min-width:112px;color:var(--on)}
+.pm.r8{border-radius:8px}
+.pm .it{height:48px;display:flex;align-items:center;gap:12px;padding:0 16px 0 12px;font-size:13px;white-space:nowrap}
+.pm .it .mi,.pm .it .mr,.pm .it .rx{font-size:24px;color:var(--onv)}
+.pm .it.lab12{font-size:12px}
+.pm .it.dis{opacity:.38}
+.pm .sep{height:1px;background:var(--ov);margin:6px 0}
+.menu2{position:absolute;z-index:21;background:var(--schh);border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.2);padding:8px 0;min-width:160px;color:var(--on)}
+.menu2 .it{height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;font-size:14px;white-space:nowrap}
+.menu2 .it .mr,.menu2 .it .mi,.menu2 .it .rx{font-size:20px;color:var(--onv)}
+.menu2 .it.danger{color:var(--error)}.menu2 .it.danger .mr,.menu2 .it.danger .rx{color:var(--error)}
+.menu2 .sep{height:1px;background:var(--ov);margin:6px 0}
+/* ---------- toasts ---------- */
+.stoast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);z-index:30;background:rgba(0,0,0,.75);color:#fff;font-size:14px;padding:8px 14px;border-radius:8px;white-space:nowrap}
+.toast2{position:absolute;left:12px;right:12px;bottom:20px;z-index:30;background:#2E3135;color:#EFF0F7;font-size:14px;padding:0 4px 0 16px;min-height:48px;border-radius:4px;display:flex;align-items:center;box-shadow:0 3px 8px rgba(0,0,0,.25);line-height:1.4}
+.toast2 span{flex:1;padding:12px 0}.toast2 b{color:#A0CAFD;font-weight:600;padding:0 12px;height:48px;display:flex;align-items:center;white-space:nowrap}
+.tip{position:absolute;z-index:30;background:rgba(25,28,32,.9);color:#fff;font-size:12px;padding:6px 8px;border-radius:4px;white-space:nowrap}
+/* ---------- composite sheets ---------- */
+.multi{display:flex;gap:24px;background:#E9EBF0;padding:0}
+.multi .col{display:flex;flex-direction:column;gap:8px}
+.multi .cap{min-height:34px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#191C20;text-align:center;line-height:1.3}
+.multi .ph{box-shadow:0 0 0 1px #C3C7CF}
+.multi .win{box-shadow:0 0 0 1px #C3C7CF}
+.long{position:relative;width:393px;background:var(--surface)}
+.syn2{position:absolute;z-index:45;font:500 9px 'Noto Sans SC';padding:2px 5px;border-radius:4px;background:rgba(0,0,0,.5);color:rgba(255,255,255,.85)}
+
+.crumb{height:50px;display:flex;align-items:center;padding-left:8px;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;flex:none;background:var(--surface)}
+.crumb .c{height:48px;display:flex;align-items:center;padding:0 8px}
+.crumb .c.on{color:var(--primary)}
+.crumb .mi{font-size:24px;margin:0 4px}
+.fr3{display:flex;align-items:center;gap:16px;min-height:88px;padding:8px 8px 8px 16px}
+.fr3 .ic{font-size:28px;color:var(--primary);flex:none}
+.fr3 .x{flex:1;min-width:0}
+.fr3 .t{font-size:15px;font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-all}
+.fr3 .s{font-size:13px;color:var(--onv);margin-top:2px}
+.fr3 .mv{width:48px;height:48px;display:grid;place-items:center;flex:none}
+.fr4{display:flex;align-items:center;gap:16px;min-height:72px;padding:8px 4px 8px 16px}
+.fr4 .ic{font-size:28px;color:var(--primary);flex:none}
+.fr4 .x{flex:1;min-width:0}
+.fr4 .t{font-size:15px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-all}
+.fr4 .s{font-size:12px;color:var(--onv);margin-top:2px;font-feature-settings:'tnum'}
+.fr4 .mv{width:48px;height:48px;display:grid;place-items:center;flex:none;color:var(--onv)}
+.fr4.dis{opacity:.38}
+.fab{position:absolute;right:16px;bottom:24px;z-index:6;width:56px;height:56px;border-radius:16px;background:var(--pc);color:var(--opc);display:grid;place-items:center;box-shadow:0 3px 8px rgba(0,0,0,.2)}
+.fab .mi,.fab .mr{font-size:24px}
+.efab{position:absolute;right:16px;bottom:24px;z-index:6;height:56px;border-radius:16px;background:var(--pc);color:var(--opc);display:flex;align-items:center;gap:10px;padding:0 20px 0 16px;font-size:14px;font-weight:600;box-shadow:0 3px 8px rgba(0,0,0,.2)}
+.efab .mi,.efab .mr{font-size:24px}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:304px;z-index:21;background:var(--scc);box-shadow:-4px 0 16px rgba(0,0,0,.2);display:flex;flex-direction:column}
+.drawer.r16{border-radius:16px 0 0 16px;width:320px}
+.dr3{padding:12px 16px}
+.dr3 .n{font-size:15px;font-weight:500}
+.dr3 .r{display:flex;justify-content:flex-end}
+.dr3 .r span{width:48px;height:48px;display:grid;place-items:center}
+.dr3.sel{background:rgba(54,97,142,.06);color:var(--primary)}
+.dr3.sel .r{color:var(--onv)}
+.dadd{display:flex;align-items:center;gap:16px;height:56px;padding:0 16px;font-size:15px}
+.dh{padding:20px 20px 8px;font-size:16px;font-weight:700}
+.dr4{display:flex;align-items:center;gap:12px;padding:8px 4px 8px 16px;min-height:64px;margin:0 8px;border-radius:12px}
+.dr4.sel{background:var(--sc);color:var(--osc)}
+.dr4 .ic{font-size:22px;flex:none;color:var(--onv)}.dr4.sel .ic{color:var(--osc)}
+.dr4 .x{flex:1;min-width:0}.dr4 .t{font-size:15px;font-weight:600}.dr4 .s{font-size:12px;color:var(--onv);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dr4 .b2{width:44px;height:48px;display:grid;place-items:center;color:var(--onv);flex:none}
+.dr4 .b2.e{color:var(--error)}
+.statusrow{padding:8px 16px 12px;text-align:center;font-size:13px;flex:none}
+.statusrow .lp{height:4px;background:color-mix(in srgb,var(--primary) 18%,transparent);margin-top:6px;position:relative}.statusrow .lp i{position:absolute;left:20%;width:35%;top:0;bottom:0;background:var(--primary)}
+.snack{position:absolute;left:12px;right:12px;bottom:20px;z-index:30;border-radius:4px;padding:14px 16px;font-size:14px;box-shadow:0 3px 8px rgba(0,0,0,.2)}
+.snack.v3{background:var(--schh);color:var(--onv)}
+.snack.v3e{background:#FFDAD6;color:#410002}
+.st3{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;height:100%;padding:24px 24px 96px;font-size:14px}
+.st3 .tb{margin-top:4px}
+.v3f{height:52px;border-radius:4px;box-shadow:inset 0 0 0 1px var(--outline);background:var(--scl);display:flex;align-items:center;gap:12px;padding:0 12px;font-size:15px;color:var(--onv);margin-bottom:16px}
+.v3f .rx{font-size:20px}
+.v3f.dis{opacity:.5}
+/* help page */
+.hp{padding:12px 16px 40px}
+.hp>.w{max-width:960px;margin:0 auto}
+.hs{padding:0 0 10px 4px;font-size:16px;font-weight:600;line-height:1.2}
+.hc{padding:16px;border-radius:20px;background:#F5F6FC;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.08);font-size:13.5px;line-height:1.6;white-space:pre-line}
+.hc.n4{background:var(--scl);border-radius:16px;box-shadow:none;font-size:14px;color:var(--on)}
+.prm{display:flex;align-items:center;gap:16px;padding:12px 8px 12px 16px;min-height:64px}
+.prm .ic{color:var(--primary);font-size:22px;flex:none}
+.prm .x{flex:1}.prm .t{font-size:14px;font-weight:600}.prm .s{font-size:12px;margin-top:2px}
+.prm .a{color:var(--primary);text-decoration:underline;font-size:13px}
+.prm .cp{width:48px;height:48px;display:grid;place-items:center;color:rgba(0,0,0,.6)}
+.shot{margin-top:14px;height:200px;border-radius:8px;background:repeating-linear-gradient(135deg,#E6E8EE 0 12px,#ECEEF4 12px 24px);display:grid;place-items:center;color:var(--onv);font-size:12px}
+.hdiv{height:.6px;background:var(--ov);margin:0 16px}
+</style></head><body><div class="long" style=""><div class="bar"><div class="b"><span class="mi" style="">arrow_back</span></div><div class="ct">WebDAV 设置帮助</div><div style="flex:1"></div><div style="width:4px"></div></div><div class="hp"><div class="w"><div class="hs">开始前说明</div><div class="hc">坚果云支持通过 WebDAV 备份和管理文件。本页以坚果云个人账号为示例。
+免费版当前每月上传流量 1 GB、下载流量 3 GB，空间随上传的数据增长。套餐规则可能调整，依赖额度前请查看官方页面。</div><div style="height:22px"></div><div class="hs">连接参数</div><div class="hc" style="padding:0;white-space:normal"><div class="prm"><span class="ic"><span class="rx" style="">&#xeeb8;</span></span><div class="x"><div class="t">WebDAV 服务器地址</div><div class="s a">https://dav.example.com/dav/</div></div><span class="cp"><span class="rx" style="font-size:18px;">&#xecd5;</span></span></div><div class="hdiv"></div><div class="prm"><span class="ic"><span class="rx" style="">&#xeef6;</span></span><div class="x"><div class="t">用户名</div><div class="s">坚果云账号邮箱</div></div></div><div class="hdiv"></div><div class="prm"><span class="ic"><span class="rx" style="">&#xeed0;</span></span><div class="x"><div class="t">WebDAV 应用密码</div><div class="s">使用独立的应用密码，不是账号登录密码</div></div></div></div><div style="height:24px"></div><div class="hs">注册坚果云账号</div><div class="hc">1. 在浏览器打开坚果云官网。
+2. 选择注册并使用邮箱创建账号。
+3. 按页面提示完成账号验证。<div class="shot">坚果云网页截图 1（示意）</div></div><div style="height:16px"></div><div class="hc">在注册页面完成要求的账号信息。<div class="shot">坚果云网页截图 2（示意）</div></div><div style="height:24px"></div><div class="hs">在网页端登录</div><div class="hc">1. 应用密码需要在坚果云网页端管理。
+2. 使用已注册账号和账号密码登录。<div class="shot">坚果云网页截图 3（示意）</div></div><div style="height:24px"></div><div class="hs">生成独立应用密码</div><div class="hc">1. 打开账号菜单并选择“账户信息”。<div class="shot">坚果云网页截图 4（示意）</div></div><div style="height:16px"></div><div class="hc">2. 打开“安全选项”。<div class="shot">坚果云网页截图 5（示意）</div></div><div style="height:16px"></div><div class="hc">3. 找到“第三方应用管理”。
+4. 添加应用密码，使用 Pure Live 等易识别名称，然后生成密码。<div class="shot">坚果云网页截图 6（示意）</div></div><div style="height:16px"></div><div class="hc">5. 立即复制并妥善保存生成的密码；密码丢失或被撤销后重新创建。<div class="shot">坚果云网页截图 7（示意）</div></div><div style="height:24px"></div><div class="hs">在 Pure Live 中填写配置</div><div class="hc">名称：用于识别此配置的任意名称
+地址：https://dav.example.com/dav/ 或已存在的子目录地址
+用户名：坚果云账号邮箱
+密码：独立的应用密码
+
+使用其他 WebDAV 服务时，请填写对应服务商的目录地址和凭据；Pure Live 会分别保存每项配置。</div><div style="height:24px"></div><div class="hs">常见问题</div><div class="hc" style="white-space:normal"><div style="padding:7px 0"><div style="font-weight:600;color:var(--primary)">1. 服务器拒绝账号或密码</div><div style="font-size:12.5px;color:var(--onv);line-height:1.5;margin-top:5px">核对账号邮箱并使用独立应用密码；应用密码被撤销后需要重新生成。</div></div><div style="padding:7px 0"><div style="font-weight:600;color:var(--primary)">2. 浏览器打开地址时显示异常</div><div style="font-size:12.5px;color:var(--onv);line-height:1.5;margin-top:5px">WebDAV 地址用于 WebDAV 客户端，普通浏览器可能显示认证提示或错误；请在 Pure Live 内验证。</div></div><div style="padding:7px 0"><div style="font-weight:600;color:var(--primary)">3. 上传或恢复失败</div><div style="font-size:12.5px;color:var(--onv);line-height:1.5;margin-top:5px">检查账号额度、目录写入权限、当前网络连接，以及远端文件是否仍然存在。</div></div><div style="padding:7px 0"><div style="font-weight:600;color:var(--primary)">4. 连接超时</div><div style="font-size:12.5px;color:var(--onv);line-height:1.5;margin-top:5px">重新核对完整的 HTTPS 目录地址和当前网络或代理路径，再使用页面内的重试操作。</div></div><div style="padding:7px 0"><div style="font-weight:600;color:var(--primary)">5. 撤销访问或重置密码</div><div style="font-size:12.5px;color:var(--onv);line-height:1.5;margin-top:5px">在“第三方应用管理”中删除对应条目，生成新应用密码，并更新 Pure Live 配置。</div></div></div><div style="height:24px"></div><div class="hs">当前服务限制</div><div class="hc">坚果云官方 WebDAV 帮助目前列出：默认单文件上传上限 500 MB；免费账号每 30 分钟最多 600 次请求，付费账号 1500 次；单次目录响应最多 750 项。服务规则可能调整，请以最新官方帮助为准。</div><div style="height:24px"></div><div class="hs">快速参考</div><div class="hc">地址：https://dav.example.com/dav/
+用户名：坚果云账号邮箱
+密码：坚果云生成的独立应用密码</div><div style="height:20px"></div><div class="ob" style="width:100%;height:48px;border-radius:24px">打开官方 WebDAV 帮助</div></div></div></div></body></html>

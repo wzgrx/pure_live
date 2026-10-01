@@ -148,6 +148,9 @@ void main() {
 
       await store.settings.set(Settings.enableLocalLog, true);
       await pumpEventQueue();
+      // Opening the file is real I/O: wait for it rather than for a fixed
+      // number of event-loop turns (it lost the race on a loaded machine).
+      await log.flush();
       expect(log.writing, isTrue);
       log.info('t', 'Cookie: SESSDATA=zzz');
       await log.flush();

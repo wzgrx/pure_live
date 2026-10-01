@@ -155,6 +155,10 @@ final class AppLog extends ChangeNotifier {
   final Queue<LogEntry> _entries = Queue();
   SettingsStore? _settings;
   final List<StreamSubscription<Object>> _watches = [];
+
+  /// The file switch the last settings change started; [flush] waits for it,
+  /// so a caller never sees a half-opened file.
+  Future<void>? _fileChange;
   Directory? _directory;
   IOSink? _sink;
   File? _file;
@@ -185,7 +189,7 @@ final class AppLog extends ChangeNotifier {
     _watches
       ..clear()
       ..add(settings.watch(Settings.logLevel).listen((_) => _applyLevel()))
-      ..add(settings.watch(Settings.enableLocalLog).listen((_) => unawaited(_applyFile())));
+      ..add(settings.watch(Settings.enableLocalLog).listen((_) => _fileChange = _applyFile()));
     _applyLevel();
     await _applyFile();
   }
@@ -304,7 +308,10 @@ final class AppLog extends ChangeNotifier {
   }
 
   /// Flushes the file.
-  Future<void> flush() async => await _sink?.flush();
+  Future<void> flush() async {
+    await _fileChange;
+    await _sink?.flush();
+  }
 
   /// Routes Flutter's framework errors, uncaught errors and `debugPrint`
   /// here; each keeps its previous behaviour too (the console). Call once in

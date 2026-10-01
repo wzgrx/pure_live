@@ -241,7 +241,7 @@ void main() {
     });
 
     test('refuses ids that are not platforms, or given twice', () {
-      expect(() => DanmakuRegistry({'kick': _Fake.new}), throwsArgumentError);
+      expect(() => DanmakuRegistry({'huajiao': _Fake.new}), throwsArgumentError);
       expect(() => DanmakuRegistry({'huya': _Fake.new, 'Huya': _Fake.new}), throwsArgumentError);
     });
 

@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "platform": "kick",
+  "sample": "S05-channel-offline",
+  "capturedAt": "2026-10-01T05:40:59.846498Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://kick.com/api/v2/channels/xqcisoffline",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Origin": "https://kick.com",
+      "Referer": "https://kick.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 01 Oct 2026 05:41:01 GMT",
+      "content-type": "application/json",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "https://kick.com",
+      "cache-control": "public, max-age=15",
+      "last-modified": "Thu, 01 Oct 2026 05:41:01 GMT",
+      "vary": "Origin",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.01,\"max_age\":604800}",
+      "cf-cache-status": "MISS",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=ytYGlv52TfjFUih0ceIkOxoDlgL50uaiEPisurWT4Jz40aUX%2FnSSn3S7%2By1IaxZWySPBXm2bn3Rj5In6UfmEUTP314tBIMiwBz8HlOd9%2Bw3Y4DE5XL00EPEX\"}]}",
+      "content-encoding": "br",
+      "server": "cloudflare",
+      "cf-ray": "a43922c91de12083-SJC",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    }
+  },
+  "raw": {
+    "sha256": "6361b2ccaa06c2a6507d44a11442ab6447be39a7dc028d67e7582111f66343e9",
+    "length": 1749
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.playback_url token",
+      "rule": "secret (JWT signature; header and payload kept)"
+    },
+    {
+      "where": "response.headers.set-cookie",
+      "rule": "removed (Cloudflare cookies)"
+    }
+  ],
+  "tool": "curl 8 (dart:io is refused by Kick's Cloudflare) + scratch scrub.py (schema 1)"
+}

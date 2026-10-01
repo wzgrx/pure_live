@@ -47,6 +47,8 @@ export 'src/sites/inke/inke_api.dart';
 export 'src/sites/inke/inke_site.dart';
 export 'src/sites/jdlive/jdlive_api.dart';
 export 'src/sites/jdlive/jdlive_site.dart';
+export 'src/sites/kick/kick_api.dart';
+export 'src/sites/kick/kick_site.dart';
 export 'src/sites/kilakila/kilakila_api.dart';
 export 'src/sites/kilakila/kilakila_site.dart';
 export 'src/sites/kuaishou/kuaishou_api.dart';

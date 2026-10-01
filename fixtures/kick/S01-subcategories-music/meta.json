@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "platform": "kick",
+  "sample": "S01-subcategories-music",
+  "capturedAt": "2026-10-01T05:40:05.529818Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://kick.com/api/v1/subcategories?category=music&limit=32&page=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Origin": "https://kick.com",
+      "Referer": "https://kick.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 01 Oct 2026 05:40:07 GMT",
+      "content-type": "application/json",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "https://kick.com",
+      "cache-control": "public, max-age=60",
+      "vary": "Origin",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.01,\"max_age\":604800}",
+      "last-modified": "Thu, 01 Oct 2026 05:40:07 GMT",
+      "expires": "Thu, 01 Oct 2026 05:41:07 GMT",
+      "cf-cache-status": "MISS",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=g2G1oX7IzSne%2B5PoJN4HUyHcYymCpvPKbIS1VtHjX%2Fdc3l24Ap4BKiNOtZkAIUKhY2xZNeo4TcqmrfiLikCA0gJVlzPeYOnal9Ha0BrYk0Lt65%2BDOLpuCTHU\"}]}",
+      "content-encoding": "br",
+      "server": "cloudflare",
+      "cf-ray": "a4392175ff25e965-SJC",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    }
+  },
+  "raw": {
+    "sha256": "e7cef5008f41b94a6d5bb469000c983497a9bf76e22d0dae101ca602eb0394ec",
+    "length": 6913
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "response.headers.set-cookie",
+      "rule": "removed (Cloudflare cookies)"
+    }
+  ],
+  "tool": "curl 8 (dart:io is refused by Kick's Cloudflare) + scratch scrub.py (schema 1)"
+}

@@ -241,6 +241,7 @@ void main() {
         'douyu',
         'kuaishou',
         'bigo',
+        'kick',
       });
       expect(SiteIds.supported.toSet().containsAll(SiteIds.caseInsensitiveRoomIds), isTrue);
       for (final platform in SiteIds.supported) {
@@ -406,7 +407,9 @@ void main() {
     test('cover every platform', () {
       expect(rooms.length, greaterThan(1000));
       final platforms = {for (final (_, json) in rooms) '${json['platform']}'.toLowerCase()};
-      expect(platforms, containsAll(SiteIds.supported.where((id) => id != SiteIds.iptv)));
+      // Kick has no 3.x output: 3.2.11 retired it before the parsers were
+      // recorded (M4.34).
+      expect(platforms, containsAll(SiteIds.supported.where((id) => id != SiteIds.iptv && id != SiteIds.kick)));
     });
 
     test('read without the new fields and write the same keys and state as before', () {

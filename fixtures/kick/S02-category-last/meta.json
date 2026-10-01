@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "platform": "kick",
+  "sample": "S02-category-last",
+  "capturedAt": "2026-10-01T05:40:12.903920Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://kick.com/stream/livestreams/en?page=2&limit=30&subcategory=chess&sort=desc",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Origin": "https://kick.com",
+      "Referer": "https://kick.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 01 Oct 2026 05:40:17 GMT",
+      "content-type": "application/json",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "https://kick.com",
+      "cache-control": "public, max-age=60",
+      "vary": "Origin",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.01,\"max_age\":604800}",
+      "last-modified": "Thu, 01 Oct 2026 05:40:17 GMT",
+      "expires": "Thu, 01 Oct 2026 05:41:17 GMT",
+      "cf-cache-status": "MISS",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=kE5DTvetZ5YkhW5n4IORmCmrfTck9%2BRtRVk1seEkwK6DJ9ZkQoHTfPF9G6rZyyRLKiC%2BNtx7H10zEvzSa2UQ74epzVBhcqzc65%2BBjm6rSivUDVyUtwnRUrz9\"}]}",
+      "content-encoding": "br",
+      "server": "cloudflare",
+      "cf-ray": "a43921b47f4cf9d8-SJC",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    }
+  },
+  "raw": {
+    "sha256": "3f76eba4f0d533b17d9664fb0532cca1f3c680cc1c0e0c76c7b84631ea2c3b25",
+    "length": 277
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "response.headers.set-cookie",
+      "rule": "removed (Cloudflare cookies)"
+    }
+  ],
+  "tool": "curl 8 (dart:io is refused by Kick's Cloudflare) + scratch scrub.py (schema 1)"
+}

@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "platform": "kick",
+  "sample": "S01-categories",
+  "capturedAt": "2026-10-01T05:40:01.654564Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://kick.com/api/v1/categories",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Origin": "https://kick.com",
+      "Referer": "https://kick.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 01 Oct 2026 05:40:03 GMT",
+      "content-type": "application/json",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "https://kick.com",
+      "cache-control": "public, max-age=60",
+      "vary": "Origin",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.01,\"max_age\":604800}",
+      "last-modified": "Thu, 01 Oct 2026 05:40:03 GMT",
+      "expires": "Thu, 01 Oct 2026 05:41:03 GMT",
+      "cf-cache-status": "MISS",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=uRPYtisxp4UNhq38Cb7E7M72%2FUzeRPZ1%2B9l2ATO49SjiBA5oRjA26urhrZ2%2Btzoots1O6gI3P18pJNkjI%2BhGw%2Fb2GU0%2FlCbfNRjZS%2FG6PdwG7vOKL%2BgCVHYR\"}]}",
+      "content-encoding": "br",
+      "server": "cloudflare",
+      "cf-ray": "a4392160ee0003c2-SJC",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    }
+  },
+  "raw": {
+    "sha256": "424ceac1c9c9e44f363422c9ad84a2983ea454e6df790b361004a57f8b61a60a",
+    "length": 399
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "response.headers.set-cookie",
+      "rule": "removed (Cloudflare cookies)"
+    }
+  ],
+  "tool": "curl 8 (dart:io is refused by Kick's Cloudflare) + scratch scrub.py (schema 1)"
+}

@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "platform": "kick",
+  "sample": "S06-master",
+  "capturedAt": "2026-10-01T05:41:01.786916Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://fa723fc1b171.us-west-2.playback.live-video.net/api/video/v1/us-west-2.196233775518.channel.DsuAwCgUc9Bh.m3u8?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzM4NCJ9.eyJhd3M6Y2hhbm5lbC1hcm4iOiJhcm46YXdzOml2czp1cy13ZXN0LTI6MTk2MjMzNzc1NTE4OmNoYW5uZWwvRHN1QXdDZ1VjOUJoIiwiYXdzOmFjY2Vzcy1jb250cm9sLWFsbG93LW9yaWdpbiI6Imh0dHBzOi8va2ljay5jb20saHR0cHM6Ly93d3cuZ3N0YXRpYy5jb20saHR0cHM6Ly8qLmtpY2subGl2ZSxodHRwczovL3BsYXllci5raWNrLmNvbSxodHRwczovL2FkbWluLmtpY2suY29tLGh0dHBzOi8vYmV0YS5raWNrLmNvbSxodHRwczovL25leHQua2ljay5jb20saHR0cHM6Ly9kYXNoYm9hcmQua2ljay5jb20saHR0cHM6Ly8qLnByZXZpZXcua2ljay5jb20saHR0cHM6Ly94Ym94LmtpY2suY29tLGh0dHBzOi8vcGxheXN0YXRpb24ua2ljay5jb20saHR0cHM6Ly90aXplbi5raWNrLmNvbSxodHRwczovL3dlYm9zLmtpY2suY29tLGh0dHBzOi8vKi5raWNrLXByZXByb2R1Y3Rpb24uY29tLGh0dHBzOi8vKi5raWNrLWRldmVsb3BtZW50LmNvbSIsImF3czpzdHJpY3Qtb3JpZ2luLWVuZm9yY2VtZW50IjpmYWxzZSwiYXdzOmFkcy1vcHQtb3V0Ijp0cnVlLCJleHAiOjE3OTA4MzM4NjB9.GSSiF4VYIcI-CvWr0dFA3_PMOyZAPh12Y2ImP2pe0wosUdcLgXZI3plsuEfgJ-xASIcsvc3MSmU4oJK7mrTOvV1wA0NMdV5GK68ab4bsy-aekrQZsLNWnbXcgSTstzjO",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Origin": "https://kick.com",
+      "Referer": "https://kick.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/vnd.apple.mpegurl",
+      "date": "Thu, 01 Oct 2026 05:41:05 GMT",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "access-control-allow-origin": "https://kick.com",
+      "x-amzn-trace-id": "Root=1-6abdf271-0cd1dfbe488189be7bb5ca18",
+      "x-cache": "Miss from cloudfront",
+      "via": "1.1 af63429cca0caf23ac2ab7e13afc8ebc.cloudfront.net (CloudFront)",
+      "x-amz-cf-pop": "SFO53-P10",
+      "x-amz-cf-id": "RKXvGTg-Ir7msqjXTfAKwZrEx9bpatE29Cigx_6WOtDVGW4C9rXVDQ=="
+    }
+  },
+  "raw": {
+    "sha256": "6bc61ffc402fb72ccd44eccfac5ed727383b6b217c4a9e54d647e8051e6dffc1",
+    "length": 10046
+  },
+  "body": "body.m3u8",
+  "scrubbed": [
+    {
+      "where": "request.url token",
+      "rule": "secret (JWT signature; header and payload kept)"
+    },
+    {
+      "where": "body #EXT-X-SESSION-DATA USER-IP",
+      "rule": "address → 203.0.113.7"
+    },
+    {
+      "where": "body #EXT-X-SESSION-DATA SERVING-ID",
+      "rule": "session"
+    },
+    {
+      "where": "body #EXT-X-SESSION-DATA VIDEO-SESSION-ID",
+      "rule": "session"
+    },
+    {
+      "where": "body #EXT-X-SESSION-DATA C",
+      "rule": "session (Base64 segment URL token)"
+    },
+    {
+      "where": "body #EXT-X-SESSION-DATA E",
+      "rule": "session (Base64 segment URL token)"
+    },
+    {
+      "where": "body variant URIs",
+      "rule": "session (playlist tokens, 5)"
+    }
+  ],
+  "tool": "curl 8 (dart:io is refused by Kick's Cloudflare) + scratch scrub.py (schema 1)"
+}

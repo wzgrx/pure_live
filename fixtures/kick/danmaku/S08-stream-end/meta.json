@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "platform": "kick",
+  "case": "S08-stream-end",
+  "room": "kick:xqc",
+  "danmakuKeys": {
+    "chatroomId": 668,
+    "channelId": 668,
+    "slug": "xqc"
+  },
+  "capturedAt": "2026-10-01T05:41:58Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false",
+      "headers": {
+        "origin": "https://kick.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "subscribed": [
+    "chatrooms.668.v2",
+    "chatrooms.668",
+    "channel.668"
+  ],
+  "frames": 26,
+  "raw": {
+    "sha256": "97c33a38065324b10ea9e25bf3d33ced304a8b20dc42942e47034f46cc920d6c",
+    "length": 18810,
+    "note": "the recording had 26 frames; the first 26 kept"
+  },
+  "scrubbed": [
+    {
+      "where": "$.data.metadata.original_sender.{id,username}",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.sender.{id,username,slug}",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.socket_id",
+      "rule": "session"
+    }
+  ],
+  "tool": "scratch pusher_rec.dart (dart:io WebSocket, 75 s) + scrub.py (schema 1)"
+}

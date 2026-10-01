@@ -148,6 +148,14 @@ const Map<String, AudiencePlatformCapability> audienceCapabilities = {
     hasTotalViewers: false,
     onlineAvailability: AudienceOnlineAvailability.roomList,
   ),
+  // Kick lists and channel answers carry viewer_count, the concurrent
+  // viewers; a streamer may hide it (show_view_count false), then it stays
+  // unknown (M4.34).
+  'kick': AudiencePlatformCapability(
+    hasPopularity: false,
+    hasTotalViewers: false,
+    onlineAvailability: AudienceOnlineAvailability.roomList,
+  ),
   // The room detail keeps current liveViewerCount separate from cumulative viewerCount.
   // In the room, the chat's LIVE message (type 38) pushes liveViewerCount
   // again, the figure the website shows; the danmaku connection reports it

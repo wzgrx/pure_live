@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "platform": "kick",
+  "sample": "S01-subcategories-gambling",
+  "capturedAt": "2026-10-01T05:40:06.815763Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://kick.com/api/v1/subcategories?category=gambling&limit=32&page=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Origin": "https://kick.com",
+      "Referer": "https://kick.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 01 Oct 2026 05:40:08 GMT",
+      "content-type": "application/json",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "https://kick.com",
+      "cache-control": "public, max-age=60",
+      "vary": "Origin",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.01,\"max_age\":604800}",
+      "last-modified": "Thu, 01 Oct 2026 05:40:08 GMT",
+      "expires": "Thu, 01 Oct 2026 05:41:08 GMT",
+      "cf-cache-status": "MISS",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=7M66FDKSAiOHikghOvUSzD%2FUfdPaqpUp6BbzmpM57TW6NfFERzCF5z8jg7jn5Vk%2Fmg47fLNTWJe3tvlgkBZ0%2B2s82nF0mYAJviSJpaUJsQdeiSt4ymXtcD%2Bx\"}]}",
+      "content-encoding": "br",
+      "server": "cloudflare",
+      "cf-ray": "a439217dcee9c52e-SJC",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    }
+  },
+  "raw": {
+    "sha256": "62b566c30173303f7696f1265dd59bd737dd0102917d9a4d64f15babdfda46d8",
+    "length": 18327
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "response.headers.set-cookie",
+      "rule": "removed (Cloudflare cookies)"
+    }
+  ],
+  "tool": "curl 8 (dart:io is refused by Kick's Cloudflare) + scratch scrub.py (schema 1)"
+}

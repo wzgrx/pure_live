@@ -140,3 +140,18 @@ v4 现在（偏差最大）：
 | `widgets/resolution_selector/*` | `features/live_play/layout/room_panels.dart`、`stream_dialogs.dart` |
 | `widgets/danmaku/*`、`pages/danmaku_settings_page.dart`、`keyword_block_page.dart`、`super_chat_page.dart` | `features/live_play/danmaku/chat_panel.dart`、`chat_feed.dart`、`lib/shared/danmaku/*` |
 | `dialogs/*` | `features/live_play/dialogs/room_dialogs.dart`、`room_switcher.dart`、`stream_dialogs.dart` |
+
+## 6. 直播间（横屏全屏，U.2c）
+
+**v3 的样子**（`lib/modules/live_play/widgets/video_player/video_controller_panel.dart`）
+
+- 进入：画面下栏全屏按钮、自动方向时把手机横过来、双击画面。退出：返回、全屏按钮、Esc、双击。
+- 顶栏（高 56，渐变透明 → 45% 黑）：返回；Android 上紧跟时间（14 号白字）和电量（35×15 的电池框，9 号数字）；标题（16 号粗体，网络电视多一行“正在播放：节目名”）；网络电视的节目单 `Icons.assignment_outlined`；切换直播间 `Icons.swap_horiz_outlined`（带 26% 黑圆底）；非 Android 平台时间和电量在这里；纯音频 `Remix.headphone_line/fill`；投屏 `Remix.tv_2_line`（Android）；小窗 `CustomIcons.float_window`（Android、Windows）。顺序由 `resolveTopActionLeadingSlots` / `resolveTopActionTrailingSlots`（:42-66）固定。
+- 下栏（高 56）：左组 播放/暂停、刷新、“✓ 已关注”文字、弹幕开关、弹幕设置（后两个在弹幕显示打开时才有）；中间本地弹幕输入框（最宽 420，左边 ✨ 改样式，右边发送）；右组 “⚙ 原画 · 线路1”合并按钮（打开半屏两栏对话框）、方向（移动端）、“默认比例”文字按钮、Windows 音量条、Windows 窗口内全屏（非真全屏时）、退出全屏。宽度不到 760 时左组去掉刷新和已关注、右组去掉画面比例（:1439-1441、:1546-1578）。
+- 右侧中间锁定按钮 `Icons.lock_open_rounded / lock_rounded`（所有平台的全屏都有，:1009）。
+- 手势：左半边上下滑调亮度、右半边调音量（中间显示黑色进度卡片），单击显示或隐藏控制栏（触屏播放中第二次点击隐藏），双击退出全屏，长按画面上的弹幕打开屏蔽操作；控制栏范围内的点击不当作点弹幕（`shouldHandleVideoSurfaceTap`）。
+- 键盘（`widgets/keyboard/video_keyboard.dart`）：Esc 退出全屏、空格暂停或继续、R 刷新、上下键音量、媒体键。
+
+**v3 的问题**：F1 全屏时没有录制入口、打不开右上角菜单；F2 宽度不到 760 时三个按钮消失；F3 时间电量位置随平台变；F4 切换直播间带深色圆底，样式不统一；F5 画面比例和已关注是文字，和图标混排；F6 渐变 45% 黑偏淡；F7 清晰度线路合并按钮和半屏对话框（U.2f 已改）。
+
+**对比和设计**：见 [compare/U.2c](compare/U.2c/README.md)。

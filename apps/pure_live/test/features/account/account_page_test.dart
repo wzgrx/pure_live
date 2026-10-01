@@ -183,6 +183,23 @@ Future<void> _tap(WidgetTester tester, Finder finder) async {
 
 double _top(WidgetTester tester, Finder finder) => tester.getTopLeft(finder).dy;
 
+/// The sign-out question for [name] (3.x `account_page.dart:244`): "退出登录",
+/// "确定退出“[name]”账号吗？", "取消" and a red "退出登录".
+void _expectSignOutQuestion(String name) {
+  final dialog = find.byType(AlertDialog);
+  expect(dialog, findsOneWidget);
+  expect(find.descendant(of: dialog, matching: find.text('退出登录')), findsNWidgets(2));
+  expect(find.descendant(of: dialog, matching: find.text('确定退出“$name”账号吗？')), findsOneWidget);
+  expect(
+    find.descendant(of: find.byKey(const ValueKey('account-confirm-cancel')), matching: find.text('取消')),
+    findsOneWidget,
+  );
+  expect(
+    find.descendant(of: find.byKey(const ValueKey('account-confirm-ok')), matching: find.text('退出登录')),
+    findsOneWidget,
+  );
+}
+
 bool _enabled(WidgetTester tester, Key key) => tester.widget<ButtonStyleButton>(find.byKey(key)).enabled;
 
 void main() {
@@ -275,7 +292,7 @@ void main() {
     testWidgets('signs out from the list after asking with 3.x words', (tester) async {
       final harness = await _pump(tester, cookies: {SiteIds.soop: 'x=y'});
       await _tap(tester, find.byKey(const ValueKey('account-soop-sign-out')));
-      expect(find.text('确定退出“SOOP”账号吗？'), findsOneWidget);
+      _expectSignOutQuestion('SOOP');
       await _tap(tester, find.byKey(const ValueKey('account-confirm-cancel')));
       expect(harness.store.secrets.cookieFor(SiteIds.soop), 'x=y');
 
@@ -369,17 +386,20 @@ void main() {
       expect(harness.store.secrets.cookieFor(SiteIds.huya), 'udb_uid=1; yyuid=99');
     });
 
-    testWidgets('signing out on the page asks with its own words; clearing and saving is signing out', (tester) async {
+    testWidgets('signing out on the page asks the same 3.x question as the list; clearing and saving is signing out', (
+      tester,
+    ) async {
       final harness = await _pump(tester, path: RoutePath.kHuyaCookie, cookies: {SiteIds.huya: 'yyuid=7'});
       await _tap(tester, find.byKey(const ValueKey('account-cookie-sign-out')));
-      expect(find.text('退出虎牙？'), findsOneWidget);
-      expect(find.text('将删除本机保存的虎牙 Cookie。确定退出“虎牙”账号吗？'), findsOneWidget);
+      // UI_PLAN 3.7: one action, one dialog, one set of words (U.10a c8).
+      _expectSignOutQuestion('虎牙');
+      expect(find.text('退出虎牙？'), findsNothing);
       await _tap(tester, find.byKey(const ValueKey('account-confirm-cancel')));
       expect(harness.store.secrets.cookieFor(SiteIds.huya), 'yyuid=7');
 
       await _tap(tester, find.byKey(const ValueKey('account-cookie-clear-input')));
       await _tap(tester, find.byKey(const ValueKey('account-cookie-save')));
-      expect(find.text('退出虎牙？'), findsOneWidget);
+      _expectSignOutQuestion('虎牙');
       await _tap(tester, find.byKey(const ValueKey('account-confirm-ok')));
       expect(harness.store.secrets.cookieFor(SiteIds.huya), isNull);
       expect(harness.toasts.last, '已退出虎牙');
@@ -503,7 +523,7 @@ void main() {
       expect(harness.store.settings.get(Settings.douyuForceRenew), isTrue);
 
       await _tap(tester, find.byKey(const ValueKey('account-cookie-sign-out')));
-      expect(find.text('退出斗鱼？'), findsOneWidget);
+      _expectSignOutQuestion('斗鱼');
       await _tap(tester, find.byKey(const ValueKey('account-confirm-ok')));
       expect(harness.store.secrets.cookieFor(SiteIds.douyu), isNull);
       expect(harness.store.secrets.read(SecretRefs.douyuLtp0), isNull);

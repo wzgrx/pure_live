@@ -113,7 +113,7 @@ abstract final class YyApi {
   ///
   /// The module-less areas (`biz` `null` in their page) list their rooms
   /// in the page, and those rooms' details carry a `biz` of their own
-  /// (M13.16, 2026-10-01: 82 live details from the 11 areas with rooms):
+  /// (M13.16, 2026-10-01: 82 live details from the 10 areas with rooms):
   /// 综合's rooms say `zonghe` (the area's path, `/others/zonghe`), which no
   /// other area uses; 手机直播's rooms carry the `biz` of their content area
   /// (`talk`, `dance`, …). 英雄联盟 had no live room to read.

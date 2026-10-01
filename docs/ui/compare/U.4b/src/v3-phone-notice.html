@@ -1,0 +1,136 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="393x852@3"><link rel="stylesheet" href="kit/kit.css"><style>
+.col{display:flex;flex-direction:column}
+.ph.col,.win.col,.fs.col{display:flex;flex-direction:column}
+.fill{flex:1;min-height:0;position:relative;overflow:hidden}
+.row{display:flex;align-items:center}
+/* ---- home shell (v3, U.3 decides the new one) ---- */
+.nav{height:100px;background:var(--scc);display:flex;padding-top:12px;flex:none}
+.nav .d{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--onv)}
+.nav .d i{width:64px;height:32px;border-radius:16px;display:grid;place-items:center;font-style:normal}
+.nav .d.on{color:var(--on);font-weight:600}.nav .d.on i{background:var(--sc);color:var(--osc)}
+.rail{width:80px;flex:none;background:var(--surface);display:flex;flex-direction:column;align-items:center;padding-top:8px;overflow:hidden;color:var(--onv)}
+.rail .lead{width:48px;height:48px;display:grid;place-items:center;margin:0 0 12px;flex:none}.rail .lead:first-child{margin-top:12px}
+.rail .gap{height:8px;flex:none}
+.rail .d{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;height:64px;justify-content:center;flex:none;width:80px}
+.rail .d i{width:56px;height:32px;border-radius:16px;display:grid;place-items:center;font-style:normal}
+.rail .d.on{color:var(--on);font-weight:600}.rail .d.on i{background:var(--sc);color:var(--osc)}
+.vdiv{width:1px;background:var(--ov);flex:none}
+.hbar{height:56px;display:flex;align-items:center;flex:none;background:var(--surface)}
+.hbar .lead{width:56px;height:56px;display:grid;place-items:center;flex:none;color:var(--on)}
+.hbar .act{width:48px;height:48px;display:grid;place-items:center;flex:none;margin-right:4px;color:var(--on)}
+.hbar .mid{flex:1;min-width:0;height:56px;display:flex;align-items:center;justify-content:center;padding:0 16px;overflow:hidden}
+/* ---- tab bars (v3 theme: 15, selected primary 600, unselected onSurfaceVariant 80%) ---- */
+.tb{display:flex;height:46px;align-items:stretch;flex:none;white-space:nowrap;overflow:hidden;max-width:100%;min-width:0}
+.tb.start,.tb.fillw{width:100%}
+.tb.start{justify-content:flex-start}.tb.center{justify-content:center}
+.tb .t{padding:0 16px;display:flex;align-items:center;font-size:15px;color:rgba(67,71,78,.8);position:relative;flex:none}
+.tb.fillw .t{flex:1;justify-content:center;padding:0 4px}
+.tb .t.on{color:var(--primary);font-weight:600}
+.tb .t.on b{font-weight:600;position:relative;display:inline-flex;align-items:center;height:100%}
+.tb .t.on b::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--primary)}
+.tb .t b{font-weight:inherit}
+.tb .cnt{font-size:12px;font-weight:500;margin-left:4px;color:var(--onv);font-feature-settings:'tnum'}
+.tb .t.on .cnt{color:var(--primary)}
+[data-theme=dark] .tb .t{color:rgba(195,199,207,.8)}
+/* ---- grids ---- */
+.grid{display:grid;align-content:start}
+/* ---- v3 card (room_card.dart) ---- */
+.c3{background:#fff;border-radius:20px;overflow:hidden;position:relative}
+[data-theme=dark] .c3{background:#212121}
+.cv{position:relative;aspect-ratio:16/9;border-radius:20px;background:#F5F5F5 center/cover;overflow:hidden}
+.cap{display:flex;align-items:center;gap:8px;padding:0 10px}
+.cap .av{width:34px;height:34px;border-radius:17px;background:center/cover;flex:none}
+.cap .tx{flex:1;min-width:0}
+.cap .t{font-size:13px;font-weight:600;line-height:18px;color:rgba(0,0,0,.87);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cap .s{font-size:12px;font-weight:500;line-height:17px;color:#616161;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.big .cap{gap:12px;padding:0 12px}.big .cap .av{width:40px;height:40px;border-radius:20px}
+.big .cap .t{font-size:15px;line-height:21px}.big .cap .s{font-size:13px;line-height:18px}
+.aud3{position:absolute;right:8px;bottom:8px;display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:10px;background:rgba(0,0,0,.48);color:#fff;font-size:11px;font-weight:700;line-height:14px}
+.aud3 .mr{font-size:14px!important}
+.big .aud3{padding:5px 8px;border-radius:12px;font-size:12px}.big .aud3 .mr{font-size:16px!important}
+.rep3{position:absolute;right:8px;top:8px;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:14px;background:var(--primary);color:#fff;font-size:12px;font-weight:600;line-height:17px}
+.rep3 .mr{font-size:16px!important}
+.plat3{position:absolute;left:8px;top:8px;padding:3px 6px;border-radius:8px;background:rgba(0,0,0,.58);color:#fff;font-size:10px;font-weight:700;line-height:14px}
+.ptag3{flex:none;padding:4px 8px;border-radius:8px;background:#F5F5F5;color:#424242;font-size:12px;font-weight:600}
+.del3{position:absolute;right:10px;top:10px;width:28px;height:28px;border-radius:14px;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center}
+.ph0{position:absolute;inset:0;display:grid;place-items:center;color:rgba(0,0,0,.12)}
+.err0{position:absolute;inset:0;display:grid;place-items:center}
+.err0 i{width:32px;height:32px;border-radius:16px;background:rgba(225,226,232,.15);border:1px solid rgba(54,97,142,.05);display:grid;place-items:center;color:rgba(54,97,142,.6)}
+.cmp3{display:flex;align-items:center;gap:8px;padding:8px;height:56px}
+.cmp3 .av{width:34px;height:34px;border-radius:17px;background:center/cover;flex:none}
+/* ---- new card ---- */
+.c4{background:#fff;border-radius:20px;overflow:hidden;position:relative}
+[data-theme=dark] .c4{background:var(--scc)}
+.c4 .cap .t{color:var(--on)}.c4 .cap .s{color:var(--onv)}
+.c4.hov{background:var(--sch)}
+.c4.foc{box-shadow:0 0 0 3px var(--primary)}
+.chipc{position:absolute;display:flex;align-items:center;gap:4px;height:22px;padding:0 7px;border-radius:11px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;font-weight:600;line-height:1;white-space:nowrap}
+.chipc .mr{font-size:14px!important}
+.chipc.tl{left:8px;top:8px;padding-left:3px}.chipc.tr{right:8px;top:8px}.chipc.br{right:8px;bottom:8px}.chipc.bl{left:8px;bottom:8px}
+.chipc img{width:16px;height:16px;border-radius:4px}
+.chipc.pri{background:var(--primary);color:var(--onPrimary)}
+.chipc .n{font-feature-settings:'tnum'}
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.38)}
+.sk,.cap .av.sk{background:var(--sch)}
+.c4.skel .cv{background:var(--sch)}
+.bar{height:10px;border-radius:5px;background:var(--sch)}
+.row4{display:flex;align-items:center;gap:12px;padding:0 12px;height:64px;background:#fff;border-radius:12px;position:relative}
+[data-theme=dark] .row4{background:var(--scc)}
+.row4 .av{width:40px;height:40px;border-radius:20px;background:center/cover;flex:none;position:relative}
+.row4 .av img{position:absolute;right:-3px;bottom:-3px;width:18px;height:18px;border-radius:5px;border:2px solid #fff}
+.row4 .tx{flex:1;min-width:0}
+.row4 .t{font-size:15px;font-weight:600;line-height:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row4 .s{font-size:13px;line-height:18px;color:var(--onv);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row4 .st{flex:none;font-size:12px;color:var(--onv);padding:3px 8px;border-radius:10px;background:var(--scc)}
+.tipx{position:absolute;z-index:30;background:rgba(25,28,32,.92);color:#fff;font-size:12px;line-height:1.4;padding:6px 8px;border-radius:4px;max-width:260px}
+/* ---- v3 desktop pagination bar ---- */
+.pager{height:68px;flex:none;display:flex;align-items:center;justify-content:center;border-top:1px solid rgba(115,119,127,.15);background:var(--surface);font-size:13px;color:var(--on);white-space:nowrap}
+.pager .ob{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border:1px solid var(--outline);border-radius:6px;color:var(--primary);font-size:14px;font-weight:500}
+.pager .tbn{display:flex;align-items:center;gap:6px;padding:0 12px;height:40px;color:var(--primary);font-size:14px;font-weight:500}
+.pager .tbn.dis{color:rgba(25,28,32,.38)}
+.pager .pn{min-width:48px;height:48px;margin:0 3px;border-radius:6px;display:grid;place-items:center;border:1px solid rgba(115,119,127,.1);font-size:13px}
+.pager .pn.on{background:var(--primary);color:var(--onPrimary);font-weight:700;border-color:var(--primary)}
+.pager .mut{color:#6B6E75}
+.pager .sel{min-width:48px;height:48px;padding:0 6px 0 10px;border:1px solid rgba(115,119,127,.2);border-radius:6px;display:flex;align-items:center;gap:4px}
+.pager .fld{width:50px;height:36px;border:1px solid var(--outline);border-radius:6px;margin:0 6px}
+/* ---- floating to-top buttons (v3 mini FAB) ---- */
+.fab{position:absolute;right:16px;width:40px;height:40px;border-radius:12px;background:var(--surface);box-shadow:0 2px 6px rgba(0,0,0,.25);display:grid;place-items:center;color:var(--opc);z-index:8}
+/* ---- status views (AppStatusView) ---- */
+.stv{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 28px}
+.stv .ic{width:86px;height:86px;border-radius:43px;background:rgba(225,226,232,.15);border:1px solid rgba(54,97,142,.05);display:grid;place-items:center;color:rgba(54,97,142,.6)}
+.stv .h{margin-top:20px;font-size:15px;font-weight:600}
+.stv .p{margin-top:6px;font-size:13px;line-height:1.5;color:#6B6E75;max-width:320px}
+.stv .b{margin-top:16px;display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;color:var(--primary);font-size:13px;font-weight:500}
+.stv4 .ic{background:var(--scc);border:0;color:var(--primary)}
+.stv4 .p{color:var(--onv)}
+.stv4 .b.filled{background:var(--primary);color:var(--onPrimary);border-radius:20px;padding:0 20px}
+/* ---- tag chips (favorite_page.dart FavoriteTagStrip) ---- */
+.tags3{height:60px;display:flex;align-items:center;gap:6px;padding:0 16px;flex:none;overflow:hidden;white-space:nowrap}
+.tags3 .ch{height:32px;padding:0 16px;border-radius:10px;display:flex;align-items:center;font-size:12px;color:var(--onv);background:rgba(225,226,232,.15);box-shadow:inset 0 0 0 .5px rgba(115,119,127,.04);flex:none}
+.tags3 .ch.on{background:var(--primary);color:var(--onPrimary);font-weight:700}
+.tags4{height:48px;display:flex;align-items:center;gap:8px;padding:0 12px;flex:none;overflow:hidden;white-space:nowrap}
+.tags4 .ch{height:32px;padding:0 12px;border-radius:8px;display:flex;align-items:center;gap:4px;font-size:13px;color:var(--onv);box-shadow:inset 0 0 0 1px var(--ov);flex:none}
+.tags4 .ch.on{background:var(--sc);color:var(--osc);font-weight:600;box-shadow:none}
+.tags4 .ch .cnt{font-size:12px;font-feature-settings:'tnum';opacity:.8}
+/* ---- notices ---- */
+.ntc{padding:8px 12px 4px;font-size:12px;line-height:1.45;color:var(--on)}
+.cell{margin:12px 16px 4px;padding:10px 14px 4px;border-radius:12px;background:rgba(209,228,255,.25);border:1px solid rgba(54,97,142,.15)}
+.cell .row{align-items:flex-start;gap:12px}.cell .ico{width:34px;height:34px;border-radius:17px;background:rgba(54,97,142,.1);display:grid;place-items:center;color:var(--primary);flex:none}
+.cell .m{font-size:13px;font-weight:500;color:var(--onv);line-height:1.3;padding-top:2px}
+.cell .nb{text-align:right;font-size:13px;font-weight:700;color:var(--primary);padding:10px 4px 6px}
+.note4{display:flex;align-items:flex-start;gap:8px;margin:6px 12px 2px;padding:8px 10px;border-radius:12px;background:var(--scl);font-size:12px;line-height:1.5;color:var(--onv)}
+.note4 .mr{font-size:16px;color:var(--primary);margin-top:1px}
+.prog{position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--primary) 0 38%,transparent 38%);z-index:6}
+
+.pkg{display:grid;gap:4px;padding:4px 12px 16px}
+.pk{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 2px 8px;border-radius:12px;font-size:12px;line-height:1.3;text-align:center;color:var(--on);position:relative}
+.pk img{width:36px;height:36px;border-radius:9px}
+.pk.on{background:var(--sc);color:var(--osc);font-weight:600}
+.pk .ck{position:absolute;top:6px;right:calc(50% - 26px);width:16px;height:16px;border-radius:8px;background:var(--primary);color:var(--onPrimary);display:grid;place-items:center;box-shadow:0 0 0 2px var(--sc)}
+.handle{width:32px;height:4px;border-radius:2px;background:var(--outline);opacity:.5;margin:12px auto 4px}
+.pkh{display:flex;align-items:center;padding:0 4px 4px 20px}.pkh .t{flex:1;font-size:17px;font-weight:600}
+.pkh .lk{display:flex;align-items:center;gap:4px;font-size:14px;color:var(--primary);padding:0 8px;height:48px}
+.pkh .x{width:48px;height:48px;display:grid;place-items:center;color:var(--onv)}
+.pks{padding:0 20px 8px;font-size:12px;color:var(--onv)}
+.errmsg{font-family:'Geist','Noto Sans SC';word-break:break-all}
+</style></head><body><div class="ph col" style=""><div class="status" style="flex:none"><span>21:36</span><span class="r"><span class="mi">signal_cellular_alt</span><span class="mi">wifi</span><span class="mi">battery_full</span></span></div><div class="hbar"><div class="lead"><span class="mr" style="font-size:24px">menu</span></div><div class="mid"><div class="tb start"><div class="t">微博直播</div><div class="t">SHOWROOM</div><div class="t on"><b>CHZZK</b></div><div class="t">LiveMe</div><div class="t">TikTok LIVE</div><div class="t">YouTube Live</div><div class="t">Bigo Live</div><div class="t">PandaTV</div><div class="t">FC2 Live</div><div class="t">Steam Broadcasts</div><div class="t">京东直播</div><div class="t">酷狗直播</div><div class="t">百度直播</div><div class="t">六间房直播</div><div class="t">LOOK 直播</div><div class="t">17LIVE</div><div class="t">网络</div></div></div><div class="act"><span class="rx" style="font-size:24px">&#xf3d0;</span></div></div><div class="ntc">官方公开热门直播目录，使用包含边界项的游标分页；原生频道搜索同时返回开播和未开播频道。仅在 cvExposure 允许时展示 concurrentUserCount。</div><div class="cell"><div class="row"><span class="ico"><span class="mr" style="font-size:18px">signal_cellular_alt</span></span><span class="m">您当前正在使用移动蜂窝流量，请注意流量消耗。</span></div><div class="nb">不再显示</div></div><div class="fill"><div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:6px;"><div class="c3"><div class="cv" style="background-image:url(.cache/img/1.jpg)"><div class="aud3"><span class="mr" style="font-size:24px">whatshot</span><span>84.7万</span></div></div><div class="cap" style="height:64px"><span class="av" style="background-image:url(.cache/img/65.jpg)"></span><div class="tx"><div class="t">深夜电台 · 点歌接龙到天亮，今晚聊聊你的故事</div><div class="s">晚风</div></div></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/111.jpg)"><div class="aud3"><span class="mr" style="font-size:24px">whatshot</span><span>12.3万</span></div></div><div class="cap" style="height:64px"><span class="av" style="background-image:url(.cache/img/111.jpg)"></span><div class="tx"><div class="t">【原神】深渊满星挑战，萌新也能看懂的配队思路</div><div class="s">一只小熊</div></div></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/133.jpg)"><div class="aud3"><span class="mr" style="font-size:24px">whatshot</span><span>3.6万</span></div></div><div class="cap" style="height:64px"><span class="av" style="background-image:url(.cache/img/133.jpg)"></span><div class="tx"><div class="t">手绘板绘练习｜今天画一只橘猫</div><div class="s">清欢画画</div></div></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/169.jpg)"><div class="aud3"><span class="mr" style="font-size:24px">whatshot</span><span>2.1万</span></div></div><div class="cap" style="height:64px"><span class="av" style="background-image:url(.cache/img/169.jpg)"></span><div class="tx"><div class="t">周末露营直播，带你看山里的星空</div><div class="s">山野</div></div></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/183.jpg)"><div class="aud3"><span class="mr" style="font-size:24px">whatshot</span><span>1.8万</span></div></div><div class="cap" style="height:64px"><span class="av" style="background-image:url(.cache/img/183.jpg)"></span><div class="tx"><div class="t">英语口语陪练，零基础也能开口</div><div class="s">Aki老师</div></div></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/206.jpg)"><div class="aud3"><span class="mr" style="font-size:24px">whatshot</span><span>9812</span></div></div><div class="cap" style="height:64px"><span class="av" style="background-image:url(.cache/img/206.jpg)"></span><div class="tx"><div class="t">复古游戏通关：魂斗罗一命通关挑战</div><div class="s">像素老王</div></div></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/219.jpg)"><div class="aud3"><span class="mr" style="font-size:24px">whatshot</span><span>5.2万</span></div></div><div class="cap" style="height:64px"><span class="av" style="background-image:url(.cache/img/219.jpg)"></span><div class="tx"><div class="t">古筝弹唱｜点歌请发弹幕</div><div class="s">弦月</div></div></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/225.jpg)"><div class="aud3"><span class="mr" style="font-size:24px">whatshot</span><span>7301</span></div></div><div class="cap" style="height:64px"><span class="av" style="background-image:url(.cache/img/225.jpg)"></span><div class="tx"><div class="t">城市夜跑直播，今天挑战十公里</div><div class="s">风吹麦浪</div></div></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/292.jpg)"><div class="aud3"><span class="mr" style="font-size:24px">whatshot</span><span>6188</span></div></div><div class="cap" style="height:64px"><span class="av" style="background-image:url(.cache/img/292.jpg)"></span><div class="tx"><div class="t">读书会：一起读《额尔古纳河右岸》</div><div class="s">月亮邮差</div></div></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/338.jpg)"><div class="aud3"><span class="mr" style="font-size:24px">whatshot</span><span>4521</span></div></div><div class="cap" style="height:64px"><span class="av" style="background-image:url(.cache/img/338.jpg)"></span><div class="tx"><div class="t">编程直播：从零写一个小游戏</div><div class="s">小林同学</div></div></div></div></div></div><div class="nav"><div class="d"><i><span class="rx" style="font-size:24px">&#xee0b;</span></i>关注</div><div class="d on"><i><span class="rx" style="font-size:24px">&#xed32;</span></i>热门</div><div class="d"><i><span class="rx" style="font-size:24px">&#xea42;</span></i>分区</div><div class="d"><i><span class="rx" style="font-size:24px">&#xec54;</span></i>录制中心</div><div class="gesture"></div></div><div class="syn">示意图片</div></div></body></html>

@@ -823,6 +823,29 @@ abstract final class Settings {
     scope: SettingScope.internal,
   );
 
+  /// Where update packages are downloaded (3.x `CacheController`'s
+  /// `downloadDirectoryPath`); empty is the platform default. A path of this
+  /// device, so backups do not carry it.
+  static const downloadDirectoryPath = StringSetting(
+    'downloadDirectoryPath',
+    section: 'cache',
+    defaultValue: '',
+    scope: SettingScope.internal,
+  );
+
+  // ---- log (new; 3.x's switch lasted one session) ----
+
+  /// Write the app log to a file.
+  static const enableLocalLog = BoolSetting('enableLocalLog', section: 'log', defaultValue: false);
+
+  /// The lowest level the log keeps: `debug`, `info`, `warning` or `error`.
+  static const logLevel = StringSetting(
+    'logLevel',
+    section: 'log',
+    defaultValue: 'info',
+    allowed: {'debug', 'info', 'warning', 'error'},
+  );
+
   // ---- accounts, outside the cookie secrets ----
 
   /// Bilibili user id of the stored cookie (not secret).
@@ -1003,6 +1026,9 @@ abstract final class Settings {
     enableAutoShutDownTime,
     enableStartUp,
     backupDirectory,
+    downloadDirectoryPath,
+    enableLocalLog,
+    logLevel,
     bilibiliUid,
     douyuCookieSavedAt,
     remoteSyncDeviceId,

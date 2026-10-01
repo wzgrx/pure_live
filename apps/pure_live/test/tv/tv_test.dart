@@ -8,9 +8,9 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/app.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/app/ui_mode.dart';
-import 'package:pure_live/home/home_page.dart';
-import 'package:pure_live/pages/live_play/room_controller.dart';
-import 'package:pure_live/pages/settings/settings_catalog.dart';
+import 'package:pure_live/features/home/home_page.dart';
+import 'package:pure_live/features/live_play/logic/room_controller.dart';
+import 'package:pure_live/features/settings/settings_catalog.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/tv/home/tv_home_page.dart';
 import 'package:pure_live/tv/room/tv_live_play_page.dart';
@@ -18,7 +18,7 @@ import 'package:pure_live/tv/tv_theme.dart';
 import 'package:pure_live/tv/widgets/tv_dialogs.dart';
 import 'package:pure_live/tv/widgets/tv_focusable.dart';
 
-import '../live_play_support.dart';
+import '../features/live_play/live_play_support.dart';
 import '../support.dart';
 
 /// A platform with [count] recommended rooms that all play.

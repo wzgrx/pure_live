@@ -262,6 +262,20 @@ List<SettingsEntry> _build() {
       settings: [Settings.language],
       keywords: ['language', '语言', 'English', '中文'],
     )
+    // M14.1: the TV interface. The app follows a change at once (it builds
+    // the other interface's routes), so no restart is needed.
+    ..choice(
+      'ui_mode',
+      'ui_mode',
+      Settings.uiMode,
+      Remix.tv_2_line,
+      () => _keyed(
+        const {'auto': 'ui_mode_auto', 'phone': 'ui_mode_phone', 'tv': 'ui_mode_tv'},
+        const {'auto': 'ui_mode_auto_desc'},
+      ),
+      desc: 'ui_mode_desc',
+      keywords: ['TV', '电视', '遥控器', 'remote', 'phone', '手机', '界面'],
+    )
     ..group = 'settings_group_text'
     ..slider(
       'text_scale',

@@ -155,6 +155,16 @@ void main() {
       expect(reopened.get(Settings.autoRefreshInterval), 5);
     });
 
+    test('interface mode: auto by default, three choices, kept on this device (M14.1)', () async {
+      expect(store.settings.get(Settings.uiMode), 'auto');
+      await store.settings.set(Settings.uiMode, 'tv');
+      expect(store.settings.get(Settings.uiMode), 'tv');
+      await store.settings.set(Settings.uiMode, 'watch');
+      expect(store.settings.get(Settings.uiMode), 'auto');
+      expect(Settings.uiMode.scope, SettingScope.internal);
+      expect(Settings.byKey('uiMode'), Settings.uiMode);
+    });
+
     test('watch emits the current value and changes', () async {
       final values = <bool>[];
       final sub = store.settings.watch(Settings.hideDanmaku).listen(values.add);

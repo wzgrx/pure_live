@@ -14,17 +14,24 @@ import 'package:pure_live/app/desktop/title_bar.dart';
 import 'package:pure_live/app/fonts.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/app/startup.dart';
+import 'package:pure_live/app/ui_mode.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/splash/splash_page.dart';
 import 'package:pure_live/platform/platform_services.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/app_router.dart';
+import 'package:pure_live/routes/tv_router.dart';
 import 'package:pure_live/shared/images.dart';
+import 'package:pure_live/tv/tv_app.dart';
 
 /// The app (3.x `MyApp`): theme, language, text size and the shared
 /// widgets' configuration from the settings, the route table (from the
 /// splash page when it is on), Android's adaptive refresh rate, and the
 /// start-up work after the first frame ([AppStartup]).
+///
+/// The interface follows `uiMode` (M14.1): on a television (or when chosen)
+/// the TV routes and frame ([buildTvRouter], [TvAppFrame]), else the phone
+/// and desktop ones. A change of the setting rebuilds the routes at once.
 class PureLiveApp extends ConsumerStatefulWidget {
   /// Creates the app with the words loaded before the first frame.
   const new({required this.strings, this.router, this.bundle, super.key});
@@ -32,7 +39,8 @@ class PureLiveApp extends ConsumerStatefulWidget {
   /// The words of the starting language.
   final AppStrings strings;
 
-  /// The router; null builds [buildAppRouter] from [splashInitialLocation].
+  /// The router; null builds [buildAppRouter] (or [buildTvRouter] for the
+  /// TV interface) from [splashInitialLocation].
   final GoRouter? router;
 
   /// Where translations load from (tests); null is the root bundle.
@@ -43,9 +51,11 @@ class PureLiveApp extends ConsumerStatefulWidget {
 }
 
 class _PureLiveAppState extends ConsumerState<PureLiveApp> {
-  late final GoRouter _router =
-      widget.router ??
-      buildAppRouter(initialLocation: splashInitialLocation(ref.read(appServicesProvider).store.settings));
+  late bool _tv = showsTvInterface(
+    ref.read(appServicesProvider).store.settings,
+    television: ref.read(televisionDeviceProvider),
+  );
+  late GoRouter _router = widget.router ?? _buildRouter(tv: _tv);
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   final _refreshRate = AdaptiveRefreshRateController(applyHighRefreshRate);
   late AppStrings _strings = widget.strings;
@@ -84,6 +94,22 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
 
   void _imagesCleared() {
     if (mounted) setState(() {});
+  }
+
+  GoRouter _buildRouter({required bool tv}) {
+    final location = splashInitialLocation(ref.read(appServicesProvider).store.settings);
+    return tv ? buildTvRouter(initialLocation: location) : buildAppRouter(initialLocation: location);
+  }
+
+  /// Switches the interface (the `uiMode` setting changed): new routes from
+  /// home, the old router released once the new one is in.
+  void _switchInterface({required bool tv}) {
+    _tv = tv;
+    if (widget.router != null) return;
+    final old = _router;
+    _router = tv ? buildTvRouter() : buildAppRouter();
+    AppNavigator.router = _router;
+    WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
   }
 
   /// Loads the words when the language changes (3.x `context.setLocale`).
@@ -125,6 +151,9 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
       customFonts: _fonts.registered,
       isWindows: Platform.isWindows,
     );
+    final tv = UiMode.parse(watchSetting(ref, Settings.uiMode))
+        .showsTv(television: ref.watch(televisionDeviceProvider));
+    if (tv != _tv) _switchInterface(tv: tv);
     final textScale = watchSetting(ref, Settings.textScaleFactor);
     final refreshMode = RefreshRateMode.values.asNameMap()[watchSetting(ref, Settings.refreshRateMode)];
     final uiConfig = LiveUiConfig(
@@ -162,11 +191,13 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
             if (Platform.isAndroid && refreshMode != null) {
               result = AdaptiveRefreshRateScope(controller: _refreshRate, mode: refreshMode, child: result);
             }
+            Widget framed = DesktopFrame(enabled: DesktopShell.current != null, child: result);
+            if (tv) framed = TvAppFrame(child: framed);
             return LiveUiScope(
               config: uiConfig,
               child: MediaQuery(
                 data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
-                child: DesktopFrame(enabled: DesktopShell.current != null, child: result),
+                child: framed,
               ),
             );
           },

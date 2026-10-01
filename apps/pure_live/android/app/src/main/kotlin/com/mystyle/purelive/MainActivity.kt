@@ -1,6 +1,8 @@
 package com.mystyle.purelive
 
+import android.app.AlertDialog
 import android.app.PictureInPictureParams
+import android.app.UiModeManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -12,9 +14,15 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.text.InputType
 import android.util.Rational
+import android.util.TypedValue
 import android.view.Display
 import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.FrameLayout
 import android.window.BackEvent
 import android.window.OnBackAnimationCallback
 import android.window.OnBackInvokedCallback
@@ -33,6 +41,8 @@ import io.flutter.plugin.common.MethodChannel
  * - `pure_live/display_mode`: the refresh-rate hint of AdaptiveRefreshRateScope;
  * - `pure_live/background_playback`: wake and Wi-Fi locks while playing in the background;
  * - `pure_live/predictive_back`: the live room's back arbitration;
+ * - `pure_live/app`: back to the background, whether this is a television
+ *   (the TV interface, M14.1) and a native one-line text input for the remote;
  * - `pure_live/secret_cipher`, `pure_live/native_http`, `pure_live/multicast_lock`
  *   (registered by [AppChannelsPlugin], so they also work on an engine without
  *   an activity);
@@ -168,10 +178,21 @@ class MainActivity : AudioServiceActivity() {
             }
         }
         // Back on the home page sends the app to the background instead of
-        // closing it (3.x used the move_to_desktop plugin).
+        // closing it (3.x used the move_to_desktop plugin). The TV interface
+        // (M14.1) asks whether this is a television and types text through a
+        // native dialog: the system keyboard opens reliably from an EditText,
+        // where Flutter's text input stays closed on some TV boxes.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, APP_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "moveToBack" -> result.success(moveTaskToBack(true))
+                "isTelevision" -> result.success(isTelevision())
+                "inputText" -> showTextInput(
+                    call.argument<String>("title") ?: "",
+                    call.argument<String>("hint") ?: "",
+                    call.argument<String>("text") ?: "",
+                    result,
+                )
+
                 else -> result.notImplemented()
             }
         }
@@ -225,6 +246,70 @@ class MainActivity : AudioServiceActivity() {
             }
         }
         applyPreferredDisplayMode(highRefreshRateEnabled)
+    }
+
+    /** A television: the TV UI mode, or a device with the leanback feature (Android TV, Google TV, most boxes). */
+    private fun isTelevision(): Boolean {
+        val uiModeManager = getSystemService(Context.UI_MODE_SERVICE) as? UiModeManager
+        if (uiModeManager?.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION) return true
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+    }
+
+    /**
+     * One line of text from the system keyboard: [text] to edit, null when
+     * cancelled. Done or search on the keyboard confirms, like OK.
+     */
+    private fun showTextInput(title: String, hint: String, text: String, result: MethodChannel.Result) {
+        var answered = false
+        fun answer(value: String?) {
+            if (answered) return
+            answered = true
+            result.success(value)
+        }
+        val input = EditText(this).apply {
+            setText(text)
+            setSelection(text.length)
+            this.hint = hint
+            isSingleLine = true
+            inputType = InputType.TYPE_CLASS_TEXT
+            imeOptions = EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+        }
+        val padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20f, resources.displayMetrics).toInt()
+        val frame = FrameLayout(this).apply {
+            setPadding(padding, padding / 2, padding, 0)
+            addView(input)
+        }
+        val dialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle(title.ifEmpty { null })
+            .setView(frame)
+            .setPositiveButton(android.R.string.ok) { _, _ -> answer(input.text.toString()) }
+            .setNegativeButton(android.R.string.cancel) { _, _ -> answer(null) }
+            .create()
+        dialog.setOnDismissListener { answer(null) }
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH ||
+                actionId == EditorInfo.IME_ACTION_GO
+            ) {
+                answer(input.text.toString())
+                dialog.dismiss()
+                true
+            } else {
+                false
+            }
+        }
+        dialog.setOnShowListener {
+            input.requestFocus()
+            input.postDelayed({
+                (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
+                    ?.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT)
+            }, 120)
+        }
+        dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+        try {
+            dialog.show()
+        } catch (_: RuntimeException) {
+            answer(null)
+        }
     }
 
     private fun pictureInPictureSupported(): Boolean =

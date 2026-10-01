@@ -362,14 +362,14 @@ def row4(rid, n=None, tag=None, status='未开播'):
 
 
 # ---------- v3 desktop pagination bar (desktop_components.dart:44-185) ----------
-def pager3(pages=(1, 2, 3), current=1, more=True, size=20):
+def pager3(pages=(1, 2, 3), current=1, more=True, size=20, has_next=True):
     nodes = ''.join(f'<div class="pn{" on" if p == current else ""}">{p}</div>' for p in pages)
     if more:
         nodes += '<span class="mut" style="padding:0 4px">...</span>'
     return ('<div class="pager">'
             f'<div class="ob">{mr("refresh", 16)}刷新</div>'
             f'<div class="tbn dis">{mr("arrow_back_ios_new", 12)}上一页</div><div style="width:8px"></div>{nodes}<div style="width:8px"></div>'
-            f'<div class="tbn">下一页{mr("arrow_forward_ios", 12)}</div>'
+            f'<div class="tbn{"" if has_next else " dis"}">下一页{mr("arrow_forward_ios", 12)}</div>'
             f'<span class="mut">每页: </span><div style="width:6px"></div><div class="sel">{size}{mr("arrow_drop_down", 18)}</div><div style="width:24px"></div>'
             '<span class="mut">跳转至</span><div class="fld"></div><span class="mut">页</span></div>')
 

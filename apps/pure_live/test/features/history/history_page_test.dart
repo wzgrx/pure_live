@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -47,9 +49,10 @@ Future<_Harness> _pump(
   List<(LiveRoom, DateTime)> rooms = const [],
   HistoryRoomLoader? load,
   double width = 400,
+  double height = 900,
 }) async {
   tester.view
-    ..physicalSize = Size(width, 900)
+    ..physicalSize = Size(width, height)
     ..devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final services = (await tester.runAsync(() async {
@@ -119,7 +122,7 @@ Future<List<String>> _ids(WidgetTester tester, HistoryStore history) async => [
 void main() {
   testWidgets('shows the empty state', (tester) async {
     await _pump(tester);
-    expect(find.text('历史记录 (0/50)'), findsOneWidget);
+    expect(find.text('0 / 50 条'), findsOneWidget);
     expect(find.text('无观看历史记录'), findsOneWidget);
     expect(find.byKey(const ValueKey('history-clear')), findsNothing);
   });
@@ -134,12 +137,12 @@ void main() {
         (_room('4'), _now.subtract(const Duration(days: 30))),
       ],
     );
-    expect(find.text('历史记录 (4/50)'), findsOneWidget);
+    expect(find.text('4 / 50 条'), findsOneWidget);
     for (final section in HistorySection.values) {
       expect(find.byKey(ValueKey('history-section-${section.name}')), findsOneWidget);
     }
     expect(find.text('今天 · 1'), findsOneWidget);
-    expect(find.byType(RoomCard), findsNWidgets(4));
+    expect(find.byType(LiveRoomCard), findsNWidgets(4));
     expect(find.text('Title 1'), findsOneWidget);
 
     // A tap opens the live room with the stored room.
@@ -165,7 +168,7 @@ void main() {
     await _settle(tester);
     expect(await _ids(tester, h.history), ['1', '3']);
     expect(h.toasts, ['已从观看记录删除']);
-    expect(find.text('历史记录 (2/50)'), findsOneWidget);
+    expect(find.text('2 / 50 条'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('history-clear')));
     await tester.pumpAndSettle();
@@ -189,13 +192,13 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('history-filter-field')), 'FOOTBALL');
     await tester.pumpAndSettle();
-    expect(find.byType(RoomCard), findsNWidgets(2));
+    expect(find.byType(LiveRoomCard), findsNWidgets(2));
     expect(find.text('2 条'), findsOneWidget);
 
     // The platform's display name matches too.
     await tester.enterText(find.byKey(const ValueKey('history-filter-field')), '哔哩');
     await tester.pumpAndSettle();
-    expect(find.byType(RoomCard), findsOneWidget);
+    expect(find.byType(LiveRoomCard), findsOneWidget);
 
     await tester.enterText(find.byKey(const ValueKey('history-filter-field')), 'nothing like this');
     await tester.pumpAndSettle();
@@ -266,19 +269,19 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
     expect(h.services.store.settings.get(Settings.historyLimit), 22);
     expect(await _ids(tester, h.history), [for (var i = 1; i <= 22; i++) '$i']);
-    expect(find.text('历史记录 (22/22)'), findsOneWidget);
+    expect(find.text('22 / 22 条'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('history-limit')));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ChoiceChip, '不限'));
     await tester.tap(find.text('确认'));
     await _settle(tester);
-    expect(find.text('历史记录 (22/不限)'), findsOneWidget);
+    expect(find.text('22 条 / 不限'), findsOneWidget);
   });
 
   testWidgets('long press opens the menu: follow, unfollow after asking, remove', (tester) async {
     final h = await _pump(tester, rooms: [(_room('7', nick: 'Streamer'), _now.subtract(const Duration(minutes: 5)))]);
-    await tester.longPress(find.byType(RoomCard));
+    await tester.longPress(find.byType(LiveRoomCard));
     await tester.pumpAndSettle();
     expect(find.text('Streamer'), findsWidgets);
     expect(find.textContaining('房间号 7'), findsOneWidget);
@@ -291,7 +294,7 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
 
     // Unfollowing asks first.
-    await tester.longPress(find.byType(RoomCard));
+    await tester.longPress(find.byType(LiveRoomCard));
     await _settle(tester);
     expect(find.text('已关注'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('room-menu-follow')));
@@ -300,13 +303,125 @@ void main() {
     await _settle(tester);
     expect(await tester.runAsync(() => h.services.store.follows.contains(_room('7'))), isFalse);
 
-    await tester.longPress(find.byType(RoomCard));
+    await tester.longPress(find.byType(LiveRoomCard));
     await _settle(tester);
     await tester.tap(find.byKey(const ValueKey('history-menu-remove')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('history-confirm')));
     await _settle(tester);
     expect(await _ids(tester, h.history), isEmpty);
+  });
+
+  testWidgets('U.5c: "观看记录" with the count under it on the left; filter, refresh, limit, clear in order', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      rooms: [
+        (_room('1', platform: 'bilibili'), _now),
+        (_room('2'), _now),
+      ],
+    );
+    final title = tester.getRect(find.byKey(const ValueKey('page-title')));
+    final count = tester.getRect(find.byKey(const ValueKey('page-subtitle')));
+    expect(find.text('观看记录'), findsOneWidget);
+    expect(find.text('2 / 50 条'), findsOneWidget);
+    expect(title.left, lessThan(40), reason: 'left-aligned, not centred like 3.x');
+    expect(count.left, title.left);
+    expect(count.top, greaterThanOrEqualTo(title.bottom - 1));
+
+    const buttons = [
+      ('history-filter', AppIcons.filter, '筛选'),
+      ('history-refresh', AppIcons.refresh, '刷新开播状态'),
+      ('history-limit', AppIcons.historyLimit, '观看记录保留数量'),
+      ('history-clear', AppIcons.clearHistory, '清空历史'),
+    ];
+    var left = title.right;
+    for (final (key, icon, tooltip) in buttons) {
+      final button = find.byKey(ValueKey(key));
+      expect(
+        find.descendant(of: button, matching: find.byIcon(icon)),
+        findsOneWidget,
+        reason: key,
+      );
+      expect(tester.widget<IconButton>(button).tooltip, tooltip);
+      final rect = tester.getRect(button);
+      expect(rect.left, greaterThanOrEqualTo(left), reason: '$key comes after the one before');
+      expect(rect.width, greaterThanOrEqualTo(48));
+      left = rect.right;
+    }
+
+    // The cards: 3.x's delete button, and the platform for a mixed list.
+    final card = tester.widget<LiveRoomCard>(find.byType(LiveRoomCard).first);
+    expect(card.showDelete, isTrue);
+    expect(card.mixedPlatforms, isTrue);
+    expect(find.byTooltip('从观看记录删除Title 1'), findsOneWidget);
+  });
+
+  for (final (width, height, columns) in [(393.0, 852.0, 2), (852.0, 393.0, 4), (1280.0, 800.0, 6)]) {
+    testWidgets('U.5c c8: ${width.toInt()}×${height.toInt()} has $columns columns', (tester) async {
+      await _pump(tester, width: width, height: height, rooms: [for (var i = 1; i <= 8; i++) (_room('$i'), _now)]);
+      final tops = [
+        for (final element in find.byType(LiveRoomCard).evaluate()) tester.getTopLeft(find.byWidget(element.widget)).dy,
+      ];
+      expect(tops.where((top) => top == tops.first).length, columns);
+      // The day's heading lines up with the grid's edge.
+      expect(tester.getTopLeft(find.byKey(const ValueKey('history-section-today'))).dx, 12);
+      expect(tester.getTopLeft(find.byType(LiveRoomCard).first).dx, 6);
+    });
+  }
+
+  testWidgets('U.5c: Esc and Back close the filter before leaving', (tester) async {
+    await _pump(tester, rooms: [(_room('1'), _now), (_room('2'), _now)]);
+    await tester.tap(find.byKey(const ValueKey('history-filter')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('history-filter-field')), findsOneWidget);
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('history-filter')), matching: find.byIcon(AppIcons.filterOff)),
+      findsOneWidget,
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('history-filter-field')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('history-filter')));
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('history-filter-field')), findsNothing);
+    expect(find.byType(HistoryPage), findsOneWidget);
+  });
+
+  testWidgets('Appendix A 14: a right click on a card opens the dialog a long press opens', (tester) async {
+    await _pump(tester, rooms: [(_room('7', nick: 'Streamer'), _now)]);
+    await tester.tap(find.byType(LiveRoomCard), buttons: kSecondaryMouseButton, kind: PointerDeviceKind.mouse);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('room-menu')), findsOneWidget);
+    expect(find.byKey(const ValueKey('history-menu-remove')), findsOneWidget);
+  });
+
+  testWidgets('U.5c: the empty page says what comes here and has no clear button', (tester) async {
+    await _pump(tester);
+    expect(find.byKey(const ValueKey('history-empty')), findsOneWidget);
+    expect(find.text('看过的直播间会按观看时间出现在这里'), findsOneWidget);
+    expect(find.byIcon(AppIcons.historyEmpty), findsOneWidget);
+    expect(find.byKey(const ValueKey('history-clear')), findsNothing);
+    expect(tester.widget<IconButton>(find.byKey(const ValueKey('history-refresh'))).onPressed, isNull);
+  });
+
+  testWidgets("U.5c: the limit dialog keeps 3.x's whole-width apply button", (tester) async {
+    await _pump(tester, rooms: [(_room('1'), _now)]);
+    await tester.tap(find.byKey(const ValueKey('history-limit')));
+    await tester.pumpAndSettle();
+    final apply = find.byKey(const ValueKey('history-limit-apply'));
+    final field = tester.getRect(find.byKey(const ValueKey('history-limit-custom')));
+    expect(tester.getRect(apply).width, closeTo(field.width, 1));
+    expect(tester.getRect(apply).height, 48);
+    await tester.enterText(find.byKey(const ValueKey('history-limit-custom')), '30');
+    await tester.tap(apply);
+    await tester.pumpAndSettle();
+    expect(find.text('当前值: 30'), findsOneWidget);
+    expect(tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '30')).selected, isTrue);
   });
 
   test('card data: audience settings, restriction, platform name for a missing streamer', () async {

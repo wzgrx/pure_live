@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
@@ -14,6 +15,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
+import 'package:pure_live/shared/rooms/room_grid.dart';
 import 'package:pure_live/shared/rooms/room_menu.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -30,13 +32,16 @@ final Provider<HistoryRoomLoader> historyLoaderProvider = Provider<HistoryRoomLo
 /// The page's clock, for the day sections (tests replace it).
 final Provider<DateTime Function()> historyClockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
-/// Watch history (3.x `lib/modules/history`).
+/// Watch history (3.x `lib/modules/history`, docs/ui/compare/U.5c).
 ///
 /// Routes: `RoutePath.kHistory`.
 ///
-/// The rooms come from `LiveStore.history` (the live room records them);
-/// the page shows them by day, refreshes their state, removes one or all
-/// of them, filters them and sets how many are kept.
+/// The rooms come from `LiveStore.history` (the live room records them).
+/// The app bar: "观看记录" with "18 / 50 条" under it (c2), filter, refresh,
+/// the limit and clear (Z2 A); the rooms by day (c3) in a grid whose columns
+/// follow the width (c8), each card with 3.x's delete button. The page
+/// refreshes their state (button or pull, c4), removes one or all of them,
+/// filters them (c5) and sets how many are kept (c6).
 class HistoryPage extends ConsumerStatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -210,6 +215,15 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     if (_filtering) _queryFocus.requestFocus();
   }
 
+  /// Back and Esc close the filter first (button 1).
+  void _back() {
+    if (_filtering) {
+      _toggleFilter();
+    } else {
+      Navigator.of(context).maybePop();
+    }
+  }
+
   void _openMenu(LiveRoom room) => unawaited(
     showRoomMenu(
       context,
@@ -219,7 +233,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
       actions: [
         RoomMenuAction(
           key: const ValueKey('history-menu-remove'),
-          icon: Icons.delete_outline_rounded,
+          icon: AppIcons.delete,
           label: i18n('remove_history_entry_named', args: {'title': roomLabel(room)}),
           danger: true,
           onSelected: () => unawaited(_remove(room)),
@@ -234,163 +248,203 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     final limit = watchSetting(ref, Settings.historyLimit);
     final all = rooms.value ?? const <LiveRoom>[];
     final shown = filterHistory(all, _filtering ? _query.text : '');
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('${i18n('history')} (${all.length}/${historyLimitLabel(limit)})'),
-        actions: [
-          IconButton(
-            key: const ValueKey('history-filter'),
-            tooltip: i18n(_filtering ? 'history_filter_close' : 'history_filter'),
-            icon: Icon(_filtering ? Icons.search_off_rounded : Icons.search_rounded),
-            onPressed: all.isEmpty && !_filtering ? null : _toggleFilter,
-          ),
-          ValueListenableBuilder(
-            valueListenable: _progress,
-            builder: (context, progress, _) => IconButton(
-              key: const ValueKey('history-refresh'),
-              tooltip: i18n('refresh'),
-              icon: const Icon(Icons.refresh_rounded),
-              onPressed: shown.isEmpty || progress != null ? null : () => _refreshIndicator.currentState?.show(),
+    return PopScope(
+      canPop: !_filtering,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _filtering) _toggleFilter();
+      },
+      child: CallbackShortcuts(
+        // Esc is Back: the filter closes first.
+        bindings: {const SingleActivator(LogicalKeyboardKey.escape): _back},
+        child: FocusScope(
+          autofocus: true,
+          child: Scaffold(
+            appBar: AppBar(
+              centerTitle: false,
+              titleSpacing: 4,
+              // "观看记录" with "18 / 50 条" under it (c2, Z1 A).
+              title: PageTitle(
+                title: i18n('watch_history'),
+                subtitle: limit == unlimitedHistoryLimit
+                    ? i18n('history_count_unlimited', args: {'count': '${all.length}'})
+                    : i18n('history_count_of_limit', args: {'count': '${all.length}', 'limit': '$limit'}),
+              ),
+              // Filter and refresh, then 3.x's limit and clear (Z2 A).
+              actions: [
+                IconButton(
+                  key: const ValueKey('history-filter'),
+                  tooltip: i18n(_filtering ? 'history_filter_close' : 'history_filter'),
+                  icon: Icon(_filtering ? AppIcons.filterOff : AppIcons.filter),
+                  onPressed: all.isEmpty && !_filtering ? null : _toggleFilter,
+                ),
+                ValueListenableBuilder(
+                  valueListenable: _progress,
+                  builder: (context, progress, _) => IconButton(
+                    key: const ValueKey('history-refresh'),
+                    tooltip: i18n('history_refresh_status'),
+                    icon: const Icon(AppIcons.refresh),
+                    onPressed: shown.isEmpty || progress != null ? null : () => _refreshIndicator.currentState?.show(),
+                  ),
+                ),
+                IconButton(
+                  key: const ValueKey('history-limit'),
+                  tooltip: i18n('history_limit'),
+                  icon: const Icon(AppIcons.historyLimit),
+                  onPressed: () => unawaited(_editLimit()),
+                ),
+                if (shown.isNotEmpty)
+                  IconButton(
+                    key: const ValueKey('history-clear'),
+                    tooltip: i18n('clear_history'),
+                    icon: const Icon(AppIcons.clearHistory),
+                    onPressed: _mutating ? null : () => unawaited(_clear()),
+                  ),
+                const SizedBox(width: 4),
+              ],
+              bottom: _filtering ? _filterBar(context, shown.length) : null,
+            ),
+            body: Stack(
+              children: [
+                Positioned.fill(
+                  child: switch (rooms) {
+                    AsyncValue(value: final _?) when all.isEmpty => AppStatusView(
+                      key: const ValueKey('history-empty'),
+                      type: AppStatusType.empty,
+                      icon: AppIcons.historyEmpty,
+                      title: i18n('empty_history'),
+                      subtitle: i18n('history_empty_hint'),
+                    ),
+                    AsyncValue(value: final _?) when shown.isEmpty => AppStatusView(
+                      key: const ValueKey('history-filter-empty'),
+                      type: AppStatusType.empty,
+                      icon: AppIcons.noResults,
+                      title: i18n('history_filter_empty'),
+                      subtitle: '',
+                    ),
+                    AsyncValue(value: final _?) => _grid(context, shown, mixed: mixesPlatforms(all)),
+                    AsyncValue(error: final _?) => AppStatusView(
+                      type: AppStatusType.error,
+                      buttonText: i18n('status_retry_button'),
+                      onButtonPressed: () => ref.invalidate(historyRoomsProvider),
+                    ),
+                    _ => const AppStatusView(type: AppStatusType.loading),
+                  },
+                ),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: ValueListenableBuilder(
+                    valueListenable: _progress,
+                    builder: (context, progress, _) => progress == null
+                        ? const SizedBox.shrink()
+                        : LinearProgressIndicator(
+                            key: const ValueKey('history-progress'),
+                            value: progress,
+                            minHeight: 2,
+                          ),
+                  ),
+                ),
+              ],
             ),
           ),
-          IconButton(
-            key: const ValueKey('history-limit'),
-            tooltip: i18n('history_limit'),
-            icon: const Icon(Icons.settings_rounded),
-            onPressed: () => unawaited(_editLimit()),
-          ),
-          if (shown.isNotEmpty)
-            IconButton(
-              key: const ValueKey('history-clear'),
-              tooltip: i18n('clear_history'),
-              icon: const Icon(Icons.delete_forever),
-              onPressed: _mutating ? null : () => unawaited(_clear()),
-            ),
-        ],
-        bottom: _filtering ? _filterBar(context, shown.length) : null,
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: switch (rooms) {
-              AsyncValue(value: final _?) when all.isEmpty => EmptyView(
-                icon: Icons.history_rounded,
-                title: i18n('empty_history'),
-                subtitle: i18n('history_empty_hint'),
-              ),
-              AsyncValue(value: final _?) when shown.isEmpty => EmptyView(
-                icon: Icons.search_off_rounded,
-                title: i18n('history_filter_empty'),
-                subtitle: '',
-              ),
-              AsyncValue(value: final _?) => _grid(context, shown),
-              AsyncValue(error: final _?) => AppStatusView(
-                type: AppStatusType.error,
-                buttonText: i18n('status_retry_button'),
-                onButtonPressed: () => ref.invalidate(historyRoomsProvider),
-              ),
-              _ => const AppStatusView(type: AppStatusType.loading),
-            },
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: ValueListenableBuilder(
-              valueListenable: _progress,
-              builder: (context, progress, _) => progress == null
-                  ? const SizedBox.shrink()
-                  : LinearProgressIndicator(key: const ValueKey('history-progress'), value: progress, minHeight: 2),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  PreferredSizeWidget _filterBar(BuildContext context, int matches) => PreferredSize(
-    preferredSize: const Size.fromHeight(60),
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-      child: TextField(
-        key: const ValueKey('history-filter-field'),
-        controller: _query,
-        focusNode: _queryFocus,
-        textInputAction: TextInputAction.search,
-        onChanged: (_) => setState(() {}),
-        style: context.textStyles.t14,
-        decoration: InputDecoration(
-          isDense: true,
-          hintText: i18n('history_filter_hint'),
-          prefixIcon: const Icon(Icons.search_rounded, size: 20),
-          suffixText: _query.text.isEmpty ? null : i18n('history_filter_matches', args: {'count': '$matches'}),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+  /// The filter under the app bar (c5): outlined in the primary colour
+  /// while open, the number of matches at its end.
+  PreferredSizeWidget _filterBar(BuildContext context, int matches) {
+    final scheme = Theme.of(context).colorScheme;
+    final styles = context.textStyles;
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(22),
+      borderSide: BorderSide(color: scheme.primary, width: 2),
+    );
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(56),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+        child: TextField(
+          key: const ValueKey('history-filter-field'),
+          controller: _query,
+          focusNode: _queryFocus,
+          textInputAction: TextInputAction.search,
+          onChanged: (_) => setState(() {}),
+          style: styles.t14,
+          decoration: InputDecoration(
+            isDense: true,
+            filled: true,
+            fillColor: scheme.surfaceContainerLow,
+            hintText: i18n('history_filter_hint'),
+            hintStyle: styles.t14.copyWith(color: scheme.onSurfaceVariant),
+            prefixIcon: Icon(AppIcons.filter, size: 20, color: scheme.onSurfaceVariant),
+            suffixText: _query.text.isEmpty ? null : i18n('history_filter_matches', args: {'count': '$matches'}),
+            suffixStyle: styles.t12.copyWith(color: scheme.onSurfaceVariant),
+            border: border,
+            enabledBorder: border,
+            focusedBorder: border,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 
-  Widget _grid(BuildContext context, List<LiveRoom> rooms) {
+  /// The rooms by day (c3): each day's heading with its count, then a grid
+  /// whose columns follow the width (c8, docs/ui/UI_PLAN.md §5.3).
+  Widget _grid(BuildContext context, List<LiveRoom> rooms, {required bool mixed}) {
     final appearance = watchCardAppearance(ref);
+    final fontSizes = watchFontSizes(ref);
     final policy = watchAudiencePolicy(ref);
-    final crossSpacing = watchSetting(ref, Settings.crossAxisSpacing);
+    final spacing = watchSetting(ref, Settings.crossAxisSpacing);
     final mainSpacing = watchSetting(ref, Settings.mainAxisSpacing);
     final sections = historySections(rooms, ref.read(historyClockProvider)());
-    final textScaler = MediaQuery.textScalerOf(context);
-    final fontSizes = LiveFontSizes.of(Theme.of(context).textTheme);
-    const padding = 6.0;
+    final scheme = Theme.of(context).colorScheme;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        // 3.x's dense grid: 2 to 5 columns by width.
-        final columns = width > 1280 ? 5 : (width > 960 ? 4 : (width > 640 ? 3 : 2));
-        final itemWidth = (width - padding * 2 - crossSpacing * (columns - 1)) / columns;
-        final extent = RoomCardLayoutMetrics.gridMainAxisExtent(
-          itemWidth: itemWidth,
+        final geometry = RoomGridGeometry.of(
+          context,
+          width: constraints.maxWidth,
+          spacing: spacing,
           appearance: appearance,
-          dense: true,
-          textScaler: textScaler,
           fontSizes: fontSizes,
         );
         return RefreshIndicator(
           key: _refreshIndicator,
           onRefresh: _refresh,
           child: CustomScrollView(
+            key: const ValueKey('history-grid'),
             physics: const AlwaysScrollableScrollPhysics(parent: PureLiveScrollPhysics()),
             slivers: [
               for (final (section, sectionRooms) in sections) ...[
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(padding + 6, 12, padding + 6, 6),
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
                     child: Text(
                       '${historySectionTitle(section)} · ${sectionRooms.length}',
                       key: ValueKey('history-section-${section.name}'),
-                      style: context.textStyles.t13SemiBold.copyWith(color: Theme.of(context).colorScheme.primary),
+                      style: context.textStyles.t13SemiBold.copyWith(color: scheme.primary).tabular,
                     ),
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: padding),
+                  padding: const EdgeInsets.symmetric(horizontal: roomGridPadding),
                   sliver: SliverGrid.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: columns,
-                      crossAxisSpacing: crossSpacing,
-                      mainAxisSpacing: mainSpacing,
-                      mainAxisExtent: extent,
-                    ),
+                    gridDelegate: geometry.delegate(spacing: spacing, mainSpacing: mainSpacing),
                     itemCount: sectionRooms.length,
                     itemBuilder: (context, index) {
                       final room = sectionRooms[index];
-                      final label = roomLabel(room);
-                      return RoomCard(
+                      return LiveRoomCard(
                         key: ValueKey('history-card-${room.identityKey}'),
                         data: policy.cardOf(room),
                         appearance: appearance,
-                        dense: true,
+                        // The history mixes platforms: an automatic badge shows (U.4a c2).
+                        mixedPlatforms: mixed,
                         showDelete: true,
-                        deleteTooltip: i18n('remove_history_entry_named', args: {'title': label}),
+                        deleteTooltip: i18n('remove_history_entry_named', args: {'title': roomLabel(room)}),
                         onDelete: _mutating ? null : () => unawaited(_remove(room)),
                         onTap: () => unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room)),
                         onLongPress: () => _openMenu(room),
@@ -399,7 +453,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                   ),
                 ),
               ],
-              const SliverToBoxAdapter(child: SizedBox(height: padding + 12)),
+              const SliverToBoxAdapter(child: SizedBox(height: roomGridPadding + 12)),
             ],
           ),
         );

@@ -215,9 +215,3 @@ final class ToolboxController extends ChangeNotifier {
     if (cancel.isCancelled || _disposed) throw const ToolboxCancelled();
   }
 }
-
-/// Platforms whose links the toolbox reads, in display order.
-List<LiveSite> linkPlatforms(SiteRegistry registry) => [
-  for (final site in registry.sites)
-    if (site is LiveSiteLinks && site.id != SiteIds.iptv) site,
-];

@@ -138,22 +138,38 @@ class _RecordButtonState extends ConsumerState<RecordButton> {
           : 'record',
     );
     final color = active ? Colors.red : null;
+    // M13.16: a hollow circle alone did not read as "record". Idle is the
+    // record glyph (a dot in a ring); a monitored room adds an orange dot;
+    // a recording one is a red dot with "录制中", on narrow bars too.
     final icon = _busy
         ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-        : Icon(active ? Icons.fiber_manual_record_rounded : Icons.fiber_manual_record_outlined, color: color);
-    if (widget.compact) {
-      return IconButton(
-        key: const ValueKey('live-play-record'),
-        tooltip: label,
-        onPressed: _busy ? null : () => unawaited(_pressed()),
-        icon: icon,
-      );
+        : active
+        ? const Icon(Icons.fiber_manual_record_rounded, color: Colors.red, size: 14)
+        : Badge(
+            isLabelVisible: task != null,
+            smallSize: 7,
+            backgroundColor: Colors.orange,
+            child: const Icon(Icons.radio_button_checked_rounded),
+          );
+    final onPressed = _busy ? null : () => unawaited(_pressed());
+    if (widget.compact && !active) {
+      return IconButton(key: const ValueKey('live-play-record'), tooltip: label, onPressed: onPressed, icon: icon);
     }
     return TextButton.icon(
       key: const ValueKey('live-play-record'),
-      onPressed: _busy ? null : () => unawaited(_pressed()),
+      style: widget.compact
+          ? TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              visualDensity: VisualDensity.compact,
+              backgroundColor: Colors.red.withValues(alpha: 0.1),
+            )
+          : null,
+      onPressed: onPressed,
       icon: icon,
-      label: Text(label, style: TextStyle(color: color)),
+      label: Text(
+        label,
+        style: TextStyle(color: color, fontSize: widget.compact ? 12 : null),
+      ),
     );
   }
 }

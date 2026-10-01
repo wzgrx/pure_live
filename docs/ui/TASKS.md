@@ -295,3 +295,6 @@ Android TV，遥控器操作，以 pure_live_TV 为基线（不是 v3），1920�
 | U.15c | U.4d | 不分分类、平铺显示的平台用同一份配置（pure_live_TV 是 20 个，手机只有抖音），开发时核对数据层 |
 | U.15a | U.3d | 电视“手机推送直播间”用 U.3d 口令导入的同一个对话框（U.15a c15）；电视新版本也用 U.3d 的对话框（U.15b c9） |
 | U.15a～c | tools/ui | `strings.py` 支持 `i18nOr(`；`render.py` 出图宽度上限 1704，电视图应是 1920×1080 |
+| U.2k | U.16（真机） | Windows 上礼物 emoji（COLRv1 子集字体）是否空白，Windows 10 可能不支持；有问题就在 `local_interaction_scope.dart` 的 `_bundledEmoji` 里让 Windows 用系统 emoji |
+| U.2j | U.16（真机） | Windows：无标题栏小窗能否拉边改大小、关闭后最小化到任务栏、置顶切换、记住位置；K90：“去设置”能否直接打开画中画设置页，Android 8～11 离开触发是否误触发自动画中画 |
+| U.2g | U.16（真机） | 播放器不报告第一帧，“正在恢复实时画面”最多显示 3 秒；对照真机看是否合适 |

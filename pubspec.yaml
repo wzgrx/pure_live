@@ -14,6 +14,7 @@ workspace:
   - packages/live_iptv
   - packages/live_media
   - packages/live_net
+  - packages/live_record
   - packages/live_store
   - packages/live_ui
   - tools/check_latest

@@ -100,16 +100,17 @@ const double inAppMiniMargin = 16;
 /// The height of the home page's bottom navigation bar (Material 3).
 const double bottomNavigationHeight = 80;
 
-/// The home page puts its destinations in a bottom bar up to this width (and
-/// in a side rail beyond, 3.x's breakpoint).
-const double bottomNavigationMaxWidth = 680;
+/// The home page puts its destinations in a bottom bar below this width and
+/// in a side rail from it on (the home's `homeTabletBreakpoint`, U.3b c6;
+/// copied, as features do not import each other).
+const double homeRailMinWidth = 600;
 
 /// What the bottom-right corner of the floating window keeps clear below it:
 /// the bottom navigation bar on the home page of a narrow window (above it
 /// by [inAppMiniMargin]), else only the margin (c6; 3.x always lifted it by
 /// the bar's height).
 double inAppMiniBottomClearance({required String route, required double width, required double safeBottom}) {
-  final bar = route == RoutePath.kInitial && width <= bottomNavigationMaxWidth;
+  final bar = route == RoutePath.kInitial && width < homeRailMinWidth;
   return safeBottom + (bar ? bottomNavigationHeight : 0) + inAppMiniMargin;
 }
 

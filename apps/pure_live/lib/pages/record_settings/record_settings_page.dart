@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_record/live_record.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
@@ -92,18 +93,19 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
     });
   }
 
-  Future<void> _set(String key, Object value) async {
+  Future<void> _set<T extends Object>(Setting<T> setting, T value) async {
     final recording = _recording;
     if (recording == null) return;
     try {
-      await recording.settings.set(key, value);
+      await recording.settings.set(setting, value);
     } on Object {
       AppNavigator.toast(i18n('record_settings_apply_failed'));
       rethrow;
     }
   }
 
-  void _setNow(String key, Object value) => unawaited(_set(key, value).catchError((Object _) {}));
+  void _setNow<T extends Object>(Setting<T> setting, T value) =>
+      unawaited(_set(setting, value).catchError((Object _) {}));
 
   Future<void> _applyCacheLimit() async {
     final recording = _recording;
@@ -129,7 +131,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
         if (!Platform.isAndroid || !await recording.ensureStorageAccess()) rethrow;
         await recording.storage.prepare(path);
       }
-      await _set(RecordSettingsStore.savePath, path);
+      await _set(Settings.recordSavePath, path);
     } on Object {
       return i18n('path_or_permission_error');
     }
@@ -256,7 +258,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
                 options: [
                   for (final value in recordQualityPreferences) RecordOption(value: value, label: _qualityLabel(value)),
                 ],
-                onSelected: (value) => _set(RecordSettingsStore.defaultQuality, value),
+                onSelected: (value) => _set(Settings.recordDefaultQuality, value),
               ),
             ),
           ),
@@ -265,15 +267,14 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
             title: i18n('use_pinyin_folder'),
             subtitle: i18n('use_pinyin_folder_desc'),
             value: settings.usePinyinForFolder,
-            onChanged: (value) => _setNow(RecordSettingsStore.usePinyinForFolder, value),
+            onChanged: (value) => _setNow(Settings.recordPinyinFolders, value),
           ),
           context.buildSwitchTile(
             icon: Remix.chat_3_line,
             title: i18n('record_danmaku'),
-            subtitle: i18n('record_settings_danmaku_pending'),
+            subtitle: i18n('record_danmaku_desc'),
             value: settings.recordDanmaku,
-            enabled: false,
-            onChanged: null,
+            onChanged: (value) => _setNow(Settings.recordDanmaku, value),
           ),
         ]),
         const SizedBox(height: 20),
@@ -292,7 +293,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
             subtitle: i18n('enable_cache_limit_desc'),
             value: settings.enableCacheLimit,
             onChanged: (value) => unawaited(
-              _set(RecordSettingsStore.enableCacheLimit, value).then((_) => _applyCacheLimit(), onError: (Object _) {}),
+              _set(Settings.recordEnableCacheLimit, value).then((_) => _applyCacheLimit(), onError: (Object _) {}),
             ),
           ),
           if (settings.enableCacheLimit)
@@ -313,7 +314,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
                     errorText: i18n('record_cache_limit_invalid'),
                     quickValues: const [512, 1024, 2048, 5120, 10240, 20480],
                     onSubmitted: (value) async {
-                      await _set(RecordSettingsStore.maxCacheMB, value);
+                      await _set(Settings.recordMaxCacheMB, value);
                       unawaited(_applyCacheLimit());
                     },
                   ),
@@ -352,7 +353,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
             title: i18n('prefer_best_stream'),
             subtitle: i18n('prefer_best_stream_desc'),
             value: settings.preferBestStream,
-            onChanged: (value) => _setNow(RecordSettingsStore.preferBestStream, value),
+            onChanged: (value) => _setNow(Settings.recordPreferBestStream, value),
           ),
           context.buildTile(
             icon: Remix.timer_flash_line,
@@ -375,7 +376,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
                       }),
                     ),
                 ],
-                onSelected: (value) => _set(RecordSettingsStore.rwTimeout, value),
+                onSelected: (value) => _set(Settings.recordRwTimeout, value),
               ),
             ),
           ),
@@ -401,7 +402,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
                       }),
                     ),
                 ],
-                onSelected: (value) => _set(RecordSettingsStore.threadQueueSize, value),
+                onSelected: (value) => _set(Settings.recordThreadQueueSize, value),
               ),
             ),
           ),
@@ -412,7 +413,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
             min: 60,
             max: 3600,
             displayValue: recordSecondsText(settings.segmentTime),
-            onChanged: (value) => _setNow(RecordSettingsStore.segmentTime, (value / 30).round() * 30),
+            onChanged: (value) => _setNow(Settings.recordSegmentTime, (value / 30).round() * 30),
           ),
           context.buildTile(
             icon: Remix.task_line,
@@ -430,7 +431,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
                   hintText: i18n('input_range'),
                   errorText: i18n('record_max_tasks_invalid'),
                   quickValues: [for (var value = 1; value <= 10; value++) value],
-                  onSubmitted: (value) => _set(RecordSettingsStore.maxTaskCount, value),
+                  onSubmitted: (value) => _set(Settings.recordMaxTaskCount, value),
                 ),
               ),
             ),
@@ -444,7 +445,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
             title: i18n('auto_reconnect_switch'),
             subtitle: i18n('auto_reconnect_desc'),
             value: settings.autoReconnect,
-            onChanged: (value) => _setNow(RecordSettingsStore.autoReconnect, value),
+            onChanged: (value) => _setNow(Settings.recordAutoReconnect, value),
           ),
           if (settings.autoReconnect)
             context.buildSliderTile(
@@ -454,7 +455,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
               min: 1,
               max: 20,
               displayValue: '${settings.maxRetryCount}',
-              onChanged: (value) => _setNow(RecordSettingsStore.maxRetryCount, value.round()),
+              onChanged: (value) => _setNow(Settings.recordMaxRetryCount, value.round()),
             ),
           context.buildSliderTile(
             icon: Remix.time_line,
@@ -463,7 +464,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
             min: 5,
             max: 120,
             displayValue: '${settings.retryDelay}s',
-            onChanged: (value) => _setNow(RecordSettingsStore.retryDelay, value.round()),
+            onChanged: (value) => _setNow(Settings.recordRetryDelay, value.round()),
           ),
         ]),
         const SizedBox(height: 20),
@@ -474,7 +475,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
             title: i18n('enable_polling'),
             subtitle: i18n('enable_polling_desc'),
             value: settings.enablePolling,
-            onChanged: (value) => _setNow(RecordSettingsStore.enablePolling, value),
+            onChanged: (value) => _setNow(Settings.recordEnablePolling, value),
           ),
           if (settings.enablePolling) ...[
             context.buildSliderTile(
@@ -484,14 +485,14 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
               min: 10,
               max: 300,
               displayValue: '${settings.liveCheckInterval}s',
-              onChanged: (value) => _setNow(RecordSettingsStore.liveCheckInterval, value.round()),
+              onChanged: (value) => _setNow(Settings.recordLiveCheckInterval, value.round()),
             ),
             context.buildSwitchTile(
               icon: Remix.line_chart_line,
               title: i18n('enable_backoff'),
               subtitle: i18n('enable_backoff_desc'),
               value: settings.enableBackoff,
-              onChanged: (value) => _setNow(RecordSettingsStore.enableBackoff, value),
+              onChanged: (value) => _setNow(Settings.recordEnableBackoff, value),
             ),
             if (settings.enableBackoff)
               context.buildSliderTile(
@@ -501,7 +502,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
                 min: 300,
                 max: 3600,
                 displayValue: recordSecondsText(settings.maxCheckInterval),
-                onChanged: (value) => _setNow(RecordSettingsStore.maxCheckInterval, (value / 60).round() * 60),
+                onChanged: (value) => _setNow(Settings.recordMaxCheckInterval, (value / 60).round() * 60),
               ),
           ],
           context.buildSwitchTile(
@@ -510,7 +511,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
             subtitle: i18n('auto_start_boot_desc'),
             value: settings.autoStartOnBoot,
             isLong: true,
-            onChanged: (value) => _setNow(RecordSettingsStore.autoStartOnBoot, value),
+            onChanged: (value) => _setNow(Settings.recordAutoStartOnBoot, value),
           ),
         ]),
         const SizedBox(height: 60),

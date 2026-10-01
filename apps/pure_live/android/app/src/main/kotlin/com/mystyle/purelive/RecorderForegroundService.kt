@@ -5,8 +5,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.ServiceInfo
 import android.net.wifi.WifiManager
 import android.os.Build
@@ -22,6 +24,16 @@ import android.os.PowerManager
  * runs. [RecorderPlugin] starts and stops it and learns when Android ends it
  * early: the Android 15 data-sync time limit ([onTimeout]) or an unexpected
  * destroy.
+ *
+ * Recording after the app is swiped away (M8.1): the recorder runs in the
+ * Flutter engine that [MainActivity] (an AudioServiceActivity) keeps cached,
+ * so it outlives the activity while this service keeps the process. The one
+ * thing that destroys that engine without the activity is audio_service
+ * itself: when its media service ends (background playback stopped) and no
+ * activity is attached, `AudioServicePlugin.disposeFlutterEngine` destroys
+ * the engine, and the recordings with it. While recording, this service
+ * therefore binds to the media service (without creating it), so it is not
+ * destroyed before the recordings end.
  */
 class RecorderForegroundService : Service() {
     internal interface Listener {
@@ -69,6 +81,12 @@ class RecorderForegroundService : Service() {
 
     private var foreground = false
     private var stoppedOnRequest = false
+    private var holdingMediaService = false
+    private val mediaServiceHold = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) = Unit
+
+        override fun onServiceDisconnected(name: ComponentName?) = Unit
+    }
     private var wakeLock: PowerManager.WakeLock? = null
     private var wifiLock: WifiManager.WifiLock? = null
 
@@ -100,6 +118,7 @@ class RecorderForegroundService : Service() {
             }
             foreground = true
             acquireLocks()
+            holdMediaService()
             post { it.onReady() }
         } catch (exception: Exception) {
             stoppedOnRequest = true
@@ -122,6 +141,7 @@ class RecorderForegroundService : Service() {
     }
 
     override fun onDestroy() {
+        releaseMediaService()
         releaseLocks()
         if (running === this) running = null
         if (foreground && !stoppedOnRequest) post { it.onEnded("service_stopped") }
@@ -147,6 +167,30 @@ class RecorderForegroundService : Service() {
         }
     }
 
+    // Flags 0: binds when audio_service's media service runs (or once it
+    // starts), never starts it.
+    private fun holdMediaService() {
+        if (holdingMediaService) return
+        val intent = Intent("android.media.browse.MediaBrowserService")
+            .setClassName(this, "com.ryanheise.audioservice.AudioService")
+        holdingMediaService = try {
+            bindService(intent, mediaServiceHold, 0)
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun releaseMediaService() {
+        if (!holdingMediaService) return
+        holdingMediaService = false
+        try {
+            unbindService(mediaServiceHold)
+        } catch (_: Exception) {
+            // Never bound.
+        }
+    }
+
     private fun releaseLocks() {
         wifiLock?.let { if (it.isHeld) it.release() }
         wifiLock = null
@@ -155,9 +199,13 @@ class RecorderForegroundService : Service() {
     }
 
     private fun buildNotification(title: String, text: String): Notification {
-        val openApp = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
+        // Like the launcher: back to the running task, or a new activity on
+        // the cached engine after the app was swiped away (the recording
+        // centre shows the tasks as they are).
+        val openApp = (packageManager.getLaunchIntentForPackage(packageName) ?: Intent(this, MainActivity::class.java))
+            .apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+            }
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,

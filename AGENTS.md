@@ -8,6 +8,7 @@
 - `tools/brotli/`：Brotli 字典和测试向量的生成脚本（M1.1）。
 - `tools/timeshift/`：把系统时间往后推再跑测试，找出拿样本里的过期时间和“现在”比较的测试（时间炸弹）。
 - `tools/check_latest/`：对照官方渠道检查工具链和依赖是否最新。
+- `tools/ffmpeg_kit/`：录制用的 FFmpeg 原生包（`fetch.sh`，Windows 用 `fetch.ps1`）：缓存到 `~/.cache/pure_live/ffmpeg_kit/` 并链接到 `.ffmpeg_kit/`，克隆或新建工作树后先跑一次，之后离线也能构建和测试（M8.1）。
 - `packages/`、`apps/pure_live`：按 docs/PLAN.md 第 6 节逐模块加入，分层见第 4 节。
 - `assets/version.json`、`assets/releases.json`：已安装的 3.x 检查更新时从 master 读取。只在发布新版本时修改，不能删。
 

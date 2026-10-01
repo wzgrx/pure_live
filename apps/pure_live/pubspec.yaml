@@ -11,6 +11,9 @@ environment:
 resolution: workspace
 
 dependencies:
+  # Opens the recording folder in the system file manager on Android (a
+  # document-folder intent, as 3.x did; M8.1).
+  android_intent_plus: ^6.1.0
   # The live room's system media notification and media buttons while it
   # plays in the background (3.x's engine; the Android activity is its
   # AudioServiceActivity, which keeps the engine cached).

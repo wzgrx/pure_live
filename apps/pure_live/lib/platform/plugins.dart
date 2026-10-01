@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -10,6 +11,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/backup/backup_page.dart';
 import 'package:pure_live/pages/iptv/iptv_import.dart';
 import 'package:pure_live/pages/record_settings/record_settings_dialogs.dart';
+import 'package:pure_live/pages/recorder/recorder_page.dart';
 import 'package:pure_live/pages/settings/data_tools.dart';
 import 'package:pure_live/pages/settings/log_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -26,6 +28,8 @@ import 'package:share_plus/share_plus.dart';
 ///   flutter_cache_manager's default manager, which cached_network_image
 ///   and live_ui's images use);
 /// - opening local files ([AppNavigator.openFile], open_filex on Android);
+/// - opening the recording folder in Android's file manager
+///   ([RecordFolderOpener.android], android_intent_plus);
 /// - the QR scanner of device sync and TV sync on phones ([QrScan.scan],
 ///   mobile_scanner with the bundled ML Kit model, no Play services);
 /// - the in-app browser ([InAppWeb.available], flutter_inappwebview;
@@ -34,6 +38,7 @@ void installPluginHooks() {
   SystemShare.sheet = shareText;
   ImageCacheTools.clearDisk = () => DefaultCacheManager().emptyCache();
   AppNavigator.openFile = openLocalFile;
+  if (Platform.isAndroid) RecordFolderOpener.android = openAndroidFolder;
   if (Platform.isAndroid || Platform.isIOS) QrScan.scan = scanQrCode;
   unawaited(InAppWeb.detect().then((value) => InAppWeb.available = value));
 }
@@ -57,6 +62,33 @@ Future<bool> shareFile(File file) async {
 
 /// The update download folder (3.x `FileUtils.pickDirectory`).
 Future<String?> pickDownloadDirectory() => FilePicker.getDirectoryPath(dialogTitle: i18n('download_directory'));
+
+/// Opens [path] in the system file manager (DocumentsUI) with a document
+/// folder intent (3.x `FileUtils.openDirectory`); false when the folder has
+/// no document address ([androidDocumentFolderUri]) or nothing handles it.
+///
+/// android_intent_plus rather than open_filex: open_filex sends a
+/// `content://` address of its own file provider with a type taken from the
+/// file name, which file managers cannot browse as a folder; the system
+/// file manager opens a folder only from an `externalstorage.documents`
+/// address typed `vnd.android.document/directory`, a raw intent.
+Future<bool> openAndroidFolder(String path) async {
+  final uri = androidDocumentFolderUri(path);
+  if (uri == null) return false;
+  final intent = AndroidIntent(
+    action: 'android.intent.action.VIEW',
+    data: uri.toString(),
+    type: 'vnd.android.document/directory',
+    flags: const [0x10000000], // FLAG_ACTIVITY_NEW_TASK
+  );
+  try {
+    if (await intent.canResolveActivity() != true) return false;
+    await intent.launch();
+    return true;
+  } on Object {
+    return false;
+  }
+}
 
 /// The system share sheet with [text] (share_plus); true once it was shown.
 Future<bool> shareText(String text) async {

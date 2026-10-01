@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:live_core/live_core.dart';
 import 'package:live_media/src/relay/flv_splicer.dart';
 import 'package:live_media/src/relay/hls_relay.dart';
+import 'package:live_media/src/relay/hls_window.dart';
 import 'package:live_media/src/relay/upstream.dart';
 import 'package:live_net/live_net.dart';
 
@@ -34,12 +35,13 @@ abstract interface class RelayInput {
 /// Playback and recording can share it. Upstream requests go out with TLS
 /// verification ([MediaTlsExemptions] aside) and the [proxy] policy's route.
 final class LoopbackRelay {
-  new _(this._server, this.proxy, this._opener, this._hlsUpstream, this.timings);
+  new _(this._server, this.proxy, this._opener, this._hlsUpstream, this.timings, {this.hlsPrefetch});
 
   /// Starts a relay on an ephemeral loopback port. [opener] and
   /// [hlsUpstream] replace the HTTP upstreams (tests); by default
   /// [openHttpFlv] and [IoHlsUpstream] with [proxy]'s route and
-  /// [idleTimeout].
+  /// [idleTimeout]. With [hlsPrefetch] every HLS input keeps a retained
+  /// window and prefetches its segments (recording, M8.1).
   static Future<LoopbackRelay> start({
     ProxyPolicy proxy = const FixedProxyPolicy(),
     Duration idleTimeout = const Duration(seconds: 15),
@@ -47,6 +49,7 @@ final class LoopbackRelay {
     MediaTlsExemptions tls = MediaTlsExemptions.known,
     FlvSourceOpener Function(String site, {required bool rewriteLegacyHevc})? opener,
     HlsUpstream Function(String site)? hlsUpstream,
+    HlsPrefetchOptions? hlsPrefetch,
   }) async {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     final relay = LoopbackRelay._(
@@ -71,6 +74,7 @@ final class LoopbackRelay {
             tls: tls,
           ),
       timings,
+      hlsPrefetch: hlsPrefetch,
     );
     relay._requests = server.listen(relay._handle);
     return relay;
@@ -85,6 +89,9 @@ final class LoopbackRelay {
 
   /// Splice limits.
   final SpliceTimings timings;
+
+  /// Prefetch of the HLS inputs; null serves them on demand.
+  final HlsPrefetchOptions? hlsPrefetch;
   late final StreamSubscription<HttpRequest> _requests;
   final _routes = <String, _FlvRoute>{};
   final _hlsRoutes = <String, _HlsInput>{};
@@ -140,7 +147,15 @@ final class LoopbackRelay {
     final input = _HlsInput(
       this,
       secret,
-      HlsRoute(prefix: '/$secret/', port: port, line: line, upstream: _hlsUpstream(site), recipe: recipe, renew: renew),
+      HlsRoute(
+        prefix: '/$secret/',
+        port: port,
+        line: line,
+        upstream: _hlsUpstream(site),
+        recipe: recipe,
+        renew: renew,
+        prefetch: hlsPrefetch,
+      ),
     );
     _hlsRoutes[secret] = input;
     return input;

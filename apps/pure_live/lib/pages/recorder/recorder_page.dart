@@ -18,15 +18,43 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 
+/// How the recording folder opens on Android (M8.1); `main` installs the
+/// system file manager (android_intent_plus).
+abstract final class RecordFolderOpener {
+  /// Opens a folder in the system file manager; false when it cannot.
+  static Future<bool> Function(String path) android = (_) async => false;
+}
+
+/// The system file manager's address of [path] (`content://` of
+/// `com.android.externalstorage.documents`, `primary:<relative>`), or null
+/// outside the shared storage and inside `Android/data` and `Android/obb`,
+/// which Android 11+'s file manager refuses to show.
+Uri? androidDocumentFolderUri(String path) {
+  final normalized = path.trim().replaceAll(r'\', '/');
+  const roots = ['/storage/emulated/0/', '/sdcard/', '/storage/self/primary/'];
+  final root = roots.where((root) => '$normalized/'.startsWith(root)).firstOrNull;
+  if (root == null) return null;
+  final relative = '$normalized/'.substring(root.length).replaceAll(RegExp(r'^/+|/+$'), '');
+  if (relative.isEmpty || RegExp(r'^android/(data|obb)(/|$)', caseSensitive: false).hasMatch(relative)) return null;
+  return Uri.parse(
+    'content://com.android.externalstorage.documents/document/${Uri.encodeComponent('primary:$relative')}',
+  );
+}
+
 /// Opens the managed recording folder (3.x `openFileDir`): the file manager
-/// on the desktop; on Android, where no file manager accepts a folder, the
-/// path is copied instead.
+/// on the desktop and, for a folder in the shared storage, on Android; for
+/// the app's own folder (Android 11+'s file manager cannot enter it) or
+/// without a file manager the path is copied and the toast says why.
 Future<void> openRecordFolder(AppRecording recording) async {
   try {
     final directory = await recording.storage.recordDirectory();
     if (Platform.isAndroid) {
+      if (await RecordFolderOpener.android(directory.path)) return;
       await Clipboard.setData(ClipboardData(text: directory.path));
-      AppNavigator.toast(i18n('recorder_folder_copied', args: {'path': directory.path}));
+      final private = androidDocumentFolderUri(directory.path) == null;
+      AppNavigator.toast(
+        i18n(private ? 'recorder_folder_private_copied' : 'recorder_folder_copied', args: {'path': directory.path}),
+      );
       return;
     }
     if (!await AppNavigator.openExternal(Uri.directory(directory.path))) {

@@ -106,7 +106,7 @@
 | 编号 | 内容 | 要出图的形态 | 界面（页面 / 弹窗 / 覆盖层 / 提示条） | 依赖 | 状态 |
 |---|---|---|---|---|---|
 | [U.7a](compare/U.7a/README.md) | **录制中心**：录制和监控的房间、文件 | 竖屏、横屏、宽屏 | [1 / 1 / 0 / 0](INVENTORY.md#u7a) | U.4a | 完成（2026-10-01，[记录](records/U.7a.md)） |
-| [U.7b](compare/U.7b/README.md) | **录制设置** | 竖屏、横屏、宽屏 | [1 / 5 / 0 / 4](INVENTORY.md#u7b) | U.6a | 设计已确认，等 U.6a-b 开发合并后开发 |
+| [U.7b](compare/U.7b/README.md) | **录制设置** | 竖屏、横屏、宽屏 | [1 / 5 / 0 / 4](INVENTORY.md#u7b) | U.6a | 完成（2026-10-02，[记录](records/U.7b.md)） |
 
 ### U.8 多画面
 
@@ -132,9 +132,9 @@
 
 | 编号 | 内容 | 要出图的形态 | 界面（页面 / 弹窗 / 覆盖层 / 提示条） | 依赖 | 状态 |
 |---|---|---|---|---|---|
-| [U.11a](compare/U.11a/README.md) | **备份与恢复**：备份文件、扫码 | 竖屏、横屏、宽屏 | [2 / 0 / 0 / 9](INVENTORY.md#u11a) | U.1 | 设计已确认，等 U.6a-b 开发合并后开发 |
-| [U.11b](compare/U.11b/README.md) | **WebDAV**：配置、文件列表、帮助 | 竖屏、横屏、宽屏 | [2 / 5 / 0 / 2](INVENTORY.md#u11b) | U.1 | 设计已确认，等 U.6a-b 开发合并后开发 |
-| [U.11c](compare/U.11c/README.md) | **设备同步**：局域网配对、收发 | 竖屏、横屏、宽屏 | [1 / 4 / 0 / 7](INVENTORY.md#u11c) | U.1 | 设计已确认，等 U.6a-b 开发合并后开发 |
+| [U.11a](compare/U.11a/README.md) | **备份与恢复**：备份文件、扫码 | 竖屏、横屏、宽屏 | [2 / 0 / 0 / 9](INVENTORY.md#u11a) | U.1 | 完成（2026-10-02，[记录](records/U.11a.md)） |
+| [U.11b](compare/U.11b/README.md) | **WebDAV**：配置、文件列表、帮助 | 竖屏、横屏、宽屏 | [2 / 5 / 0 / 2](INVENTORY.md#u11b) | U.1 | 完成（2026-10-02，[记录](records/U.11b.md)） |
+| [U.11c](compare/U.11c/README.md) | **设备同步**：局域网配对、收发 | 竖屏、横屏、宽屏 | [1 / 4 / 0 / 7](INVENTORY.md#u11c) | U.1 | 完成（2026-10-02，[记录](records/U.11c.md)） |
 
 ### U.12 其他页面
 
@@ -334,3 +334,6 @@ Android TV，遥控器操作，以 pure_live_TV 为基线（不是 v3），1920�
 | U.12a～d | 收尾 | 不再使用的翻译键（`shield_tab_*`、`shield_clear*`、`version_history_desc`、`about_installed_version`、`version_file_size` 等）在最后统一清理 |
 | U.6c | — | 视频页不放“小窗弹幕”一行，只留总览入口（照 U.6a）；“内核切换”固定显示“Mpv播放器”（v4 只用 mpv）；去掉 v4 自加的“恢复全部默认设置”“复制全部”；选项对话框统一“主色 + 勾” |
 | U.6e | U.11a | 日志页加路由后，`SettingsSection.log` 改走路由 |
+| U.11a | — | 日志页在 `features/backup/log_page.dart`，路由 `RoutePath.kLogs`；设置总览“数据”组最后一行走路由（U.6e） |
+| U.11a～c | — | 备份数据、恢复预览、备份文件移到 `shared/backup/`（设备同步也用）；扫码页做成共用 `shared/qr_scan.dart`；“WebDav”统一写“WebDAV” |
+| U.11c | 以后（macOS） | v4 还没有 macOS 工程；以后建工程时 `Release.entitlements` 要加 `com.apple.security.network.server` |

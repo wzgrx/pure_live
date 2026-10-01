@@ -551,6 +551,12 @@ void main() {
       }
       expect(recording.recorder!.tasks, isEmpty);
       expectCard('idle', ['record-panel-start']);
+
+      // The recorder's 2 s write-behind timer is a fake one when the last
+      // change landed on a pump, but a real one when an earlier change in
+      // runAsync armed it less than 2 s of wall time ago; flutter_test checks
+      // fake timers before the tear-downs run, so end the recorder here.
+      await tester.runAsync(recording.recorder!.dispose);
     });
   });
 

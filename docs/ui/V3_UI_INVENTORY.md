@@ -155,3 +155,17 @@ v4 现在（偏差最大）：
 **v3 的问题**：F1 全屏时没有录制入口、打不开右上角菜单；F2 宽度不到 760 时三个按钮消失；F3 时间电量位置随平台变；F4 切换直播间带深色圆底，样式不统一；F5 画面比例和已关注是文字，和图标混排；F6 渐变 45% 黑偏淡；F7 清晰度线路合并按钮和半屏对话框（U.2f 已改）。
 
 **对比和设计**：见 [compare/U.2c](compare/U.2c/README.md)。
+
+## 7. 直播间（宽屏左右分栏，U.2d）
+
+**v3 的样子**（`lib/modules/live_play/widgets/layout/live_play_content.dart`、`live_play_header.dart`、`video_controller_panel.dart`）
+
+- 宽度 ≤680 用竖屏排法，>680 左右分栏（`resolveLivePlayNormalLayout`，:20-22）：左边画面（黑底，16:9 居中），右边聊天栏，宽度是可用宽度的 34%，夹在 300–400（:94）；聊天栏从上到下是 `ResolutionsRow`（人数、原画、线路，11 号字）、分隔线、四个标签和弹幕列表（卡片样式）。网络电视不显示聊天栏（`showPanel`）。
+- 顶栏：宽度 ≥600 时关注是文字按钮（`FilledButton`，圆角 6，12 号字，“关注”主色底、“已关注”半透明主色底），录制是带字的按钮（图标 14 + 11 号字：录制 / 已监控 / 录制中）；<600 时是心形图标按钮和圆圈图标（`favorite_floating_button.dart:62-93`、`record_action_content.dart`）。主播名和“平台 / 分区”都是 `labelSmall`（:42-55）。
+- 画面上栏：标题、纯音频、投屏（Android）、小窗（Android、Windows）。下栏（不是全屏时）：左 播放/暂停、刷新、“✓ 已关注”、弹幕开关、弹幕设置；右 方向（移动端）、“默认比例”文字按钮、Windows 音量条、Windows 窗口内全屏（`unfold_more`，:1882-1905）、全屏。
+- 窗口内全屏（Windows）：画面占满窗口，顶栏和聊天栏藏起来，Esc 退出（`video_keyboard.dart`）。
+- 鼠标：移动时显示控制栏，静止后隐藏，鼠标指针也隐藏（`ControlHoverRegion`）。
+
+**v3 的问题**：W1 680–839 时画面只剩一小块；W2 顶栏名字和分区同字号；W3 关注和录制按钮随宽度换样子；W4 “默认比例”文字按钮、窗口内全屏图标看不出意思；W5 聊天栏顶上没有标题和信息；W6 窄栏里卡片样式弹幕；W7 没有只收起聊天栏的办法。
+
+**对比和设计**：见 [compare/U.2d](compare/U.2d/README.md)。

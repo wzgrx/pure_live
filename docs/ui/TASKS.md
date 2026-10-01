@@ -65,10 +65,10 @@
 
 | 编号 | 内容 | 要出图的形态 | 界面（页面 / 弹窗 / 覆盖层 / 提示条） | 依赖 | 状态 |
 |---|---|---|---|---|---|
-| [U.3a](compare/U.3a/README.md) | **手机首页**：底部导航、顶栏菜单按钮、搜索按钮和它们弹出的菜单 | 竖屏 | [2 / 3 / 0 / 1](INVENTORY.md#u3a) | U.1 | 设计已确认，开发中 |
-| [U.3b](compare/U.3b/README.md) | **宽屏首页**：侧边导航、顶部按钮（多画面、工具箱、搜索、录制中心） | 宽屏 | [1 / 0 / 0 / 0](INVENTORY.md#u3b) | U.3a | 设计已确认，开发中 |
-| [U.3c](compare/U.3c/README.md) | **启动页**：启动页和启动时的检查 | 竖屏、宽屏 | [1 / 0 / 0 / 0](INVENTORY.md#u3c) | U.1 | 设计已确认，开发中 |
-| [U.3d](compare/U.3d/README.md) | **全局弹窗**：新版本、下载安装包、下载目录、口令导入 | 竖屏、横屏、宽屏 | [0 / 5 / 0 / 7](INVENTORY.md#u3d) | U.1 | 设计已确认，开发中 |
+| [U.3a](compare/U.3a/README.md) | **手机首页**：底部导航、顶栏菜单按钮、搜索按钮和它们弹出的菜单 | 竖屏 | [2 / 3 / 0 / 1](INVENTORY.md#u3a) | U.1 | 完成（2026-10-01，[记录](records/U.3a.md)） |
+| [U.3b](compare/U.3b/README.md) | **宽屏首页**：侧边导航、顶部按钮（多画面、工具箱、搜索、录制中心） | 宽屏 | [1 / 0 / 0 / 0](INVENTORY.md#u3b) | U.3a | 完成（2026-10-01，[记录](records/U.3b.md)） |
+| [U.3c](compare/U.3c/README.md) | **启动页**：启动页和启动时的检查 | 竖屏、宽屏 | [1 / 0 / 0 / 0](INVENTORY.md#u3c) | U.1 | 完成（2026-10-01，[记录](records/U.3c.md)） |
+| [U.3d](compare/U.3d/README.md) | **全局弹窗**：新版本、下载安装包、下载目录、口令导入 | 竖屏、横屏、宽屏 | [0 / 5 / 0 / 7](INVENTORY.md#u3d) | U.1 | 完成（2026-10-01，[记录](records/U.3d.md)） |
 
 ### U.4 浏览
 
@@ -298,3 +298,6 @@ Android TV，遥控器操作，以 pure_live_TV 为基线（不是 v3），1920�
 | U.2k | U.16（真机） | Windows 上礼物 emoji（COLRv1 子集字体）是否空白，Windows 10 可能不支持；有问题就在 `local_interaction_scope.dart` 的 `_bundledEmoji` 里让 Windows 用系统 emoji |
 | U.2j | U.16（真机） | Windows：无标题栏小窗能否拉边改大小、关闭后最小化到任务栏、置顶切换、记住位置；K90：“去设置”能否直接打开画中画设置页，Android 8～11 离开触发是否误触发自动画中画 |
 | U.2g | U.16（真机） | 播放器不报告第一帧，“正在恢复实时画面”最多显示 3 秒；对照真机看是否合适 |
+| U.3d | M12.5（暂停中） | 剪贴板识别改调 U.3d 的 `showRoomPrompt`（`shared/rooms/room_prompt.dart` 同名，用 U.3d 的）；不加“不再识别”按钮——v3 只有“取消 / 进入直播间”（`common/widgets/share_command_import_dialog.dart:58-66`） |
+| U.3a、U.3b | U.4c | 360 宽的手机上关注页带数字的状态标签缩到约 0.8（右上从一个按钮变成两个），要不要调随 U.4c |
+| U.3b | U.2d、U.4、U.6、U.8 等 | 首页分界改成 600（`homeTabletBreakpoint`，原 680）；各页面里还写着 680 的分界随各自任务改到计划书第 5 节的分档 |

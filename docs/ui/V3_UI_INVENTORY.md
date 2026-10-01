@@ -222,3 +222,6 @@ v4 现在（偏差最大）：
 | U.15a 电视设计系统和通用组件 | [compare/U.15a](compare/U.15a/README.md) |
 | U.15b 电视外壳 | [compare/U.15b](compare/U.15b/README.md) |
 | U.15c 电视直播浏览 | [compare/U.15c](compare/U.15c/README.md) |
+| U.3b 宽屏首页 | [compare/U.3b](compare/U.3b/README.md) |
+| U.3c 启动页 | [compare/U.3c](compare/U.3c/README.md) |
+| U.3d 全局弹窗 | [compare/U.3d](compare/U.3d/README.md) |

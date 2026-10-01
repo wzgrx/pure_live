@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "case": "S20-end",
+  "rooms": {
+    "31189969": {
+      "uid": "1199660762435"
+    },
+    "154971": {
+      "uid": "1199657691316"
+    },
+    "520299": {
+      "uid": "62265692"
+    }
+  },
+  "capturedAt": "2026-10-01T00:14:17Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "conn": "each room",
+      "url": "wss://wsapi.huya.com",
+      "headers": {}
+    }
+  ],
+  "frames": 3,
+  "raw": {
+    "sha256": "845eca3e5d71cc23d300750db7586f7ca50797a2244fd29e7ae4b2904548695c",
+    "length": 584,
+    "of": "the recorder's own output, which kept only the frames carrying uris 2001314, 8001, 1001, 1002, 1005 or 1006 (it counted the rest)"
+  },
+  "scrubbed": [
+    {
+      "where": "the recorder's room and uid keys of each line",
+      "rule": "renamed: conn is the room, its uid is under rooms"
+    }
+  ],
+  "tool": "M4.D2 recorder: one dart:io WebSocket per room, the RegisterGroupReq and heartbeat of HuyaDanmakuProtocol; no extra handshake headers",
+  "note": "Anonymous and read-only, direct, 480 s (2026-10-01 08:14-08:22 Beijing time) on 55 live rooms of the recommend list's first two pages. Three of them ended their stream; each sent one stream end notice (command 7, uri 8001 EndLiveNotice, group live:<uid>), kept byte for byte: 0 lPresenterUid (the room's streamer), 1 iReason 0, 2 lLiveId, 3 sReason 主播结束直播. They hold no viewer data. The server did not close the socket after it (31189969 stayed open the remaining 6.5 min). No other notice the recorder kept (2001314, 1001 NobleNotice, 1002, 1005, 1006) came in that time. conn is the room; t is milliseconds since the recorder started; capturedAt is its start (to the second)."
+}

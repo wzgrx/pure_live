@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "case": "S19-headline",
+  "room": "huya:60066",
+  "danmakuKeys": {
+    "uid": "1867489698"
+  },
+  "capturedAt": "2026-09-30T20:35:57Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "conn": "A",
+      "url": "wss://wsapi.huya.com",
+      "headers": {}
+    }
+  ],
+  "frames": 1,
+  "raw": {
+    "sha256": "799c91ecc4628f5b203a987232c0dd5cb5e7c495617efd8ff5e387a4c3045c5c",
+    "length": 272297
+  },
+  "scrubbed": [
+    {
+      "where": "every frame but the headline notice (459 frames: chats, gifts, other uris, batch pushes, register and heartbeat answers, the client's frames)",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "M4.D check (HuyaDanmakuConnection with a connector that tees the frames; no extra handshake headers); the same recording as S18-gift",
+  "note": "Anonymous and read-only, direct, 120 s in room 60066 (live, streamer uid 1867489698). The one headline notice of the recording (command 7, uri 2001314, group live:1867489698), byte for byte: its body is the message board's panel (GameEventMessageBoardPanel: tag 0 a header of blank fields, tag 1 an empty entry list, tag 2 0), the board being empty then (a fetch of the board at that time was empty as well). It holds no viewer data. t is milliseconds since the check started; capturedAt is the danmaku start (to the second)."
+}

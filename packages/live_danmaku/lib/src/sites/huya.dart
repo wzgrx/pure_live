@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:live_core/live_core.dart';
+import 'package:live_danmaku/src/connection.dart';
 import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:meta/meta.dart';
@@ -46,9 +47,12 @@ final class HuyaGift {
   String toString() => 'HuyaGift($name ×$count, combo $combo)';
 }
 
-/// What one Huya server frame held: its messages in order, and how many
-/// headline (super chat) notices (uri 2001314) it carried.
-typedef HuyaDanmakuFrame = ({List<LiveMessage> messages, int superChatNotices});
+/// What one Huya server frame held: its messages in order (with the super
+/// chats that headline notices carried), how many headline notices (uri
+/// 2001314) had a body that was not a board panel, so the board must be
+/// fetched, and the streamer uids of its stream end notices (uri 8001; 0
+/// when the notice names none).
+typedef HuyaDanmakuFrame = ({List<LiveMessage> messages, int superChatNotices, List<int> ended});
 
 /// Huya's danmaku protocol (the codec of 3.x `HuyaDanmaku`), without I/O.
 ///
@@ -57,8 +61,8 @@ typedef HuyaDanmakuFrame = ({List<LiveMessage> messages, int superChatNotices});
 /// heartbeats (command 20); the server pushes single messages (command 7:
 /// tag 1 uri, tag 2 body, tag 5 message id) and batches (command 22: tag 0
 /// group, tag 1 items of tag 0 uri, tag 1 body, tag 2 message id). Chat is
-/// uri 1400, popularity uri 8006, a gift uri 6501, and uri 2001314 announces
-/// a new headline on the message board.
+/// uri 1400, popularity uri 8006, a gift uri 6501, and uri 2001314 carries
+/// the headline message board after a change.
 abstract final class HuyaDanmakuProtocol {
   /// The only endpoint (3.x `serverUrl`).
   static final Uri endpoint = Uri.parse('wss://wsapi.huya.com');
@@ -89,8 +93,18 @@ abstract final class HuyaDanmakuProtocol {
   /// it.
   static const int giftUri = 6501;
 
-  /// A new headline (super chat) on the room's message board; the body is
-  /// not read, the board is fetched instead.
+  /// The stream ended (`EndLiveNotice`: 0 lPresenterUid, 1 iReason, 2
+  /// lLiveId, 3 sReason such as `主播结束直播`); 3.x ignored it (C-10).
+  static const int endUri = 8001;
+
+  /// The detail of the run's end at the stream end (C-10, as 17LIVE's
+  /// B-14).
+  static const String broadcastEnded = 'Broadcast ended';
+
+  /// The room's headline (super chat) message board after a change: the
+  /// body is the board's panel (`GameEventMessageBoardPanel`, C-9). 3.x did
+  /// not read it and fetched the board; that is now the fallback for a body
+  /// that is not a panel.
   static const int superChatUri = 2001314;
 
   /// Waits before each board fetch after a headline notice (3.x
@@ -133,17 +147,34 @@ abstract final class HuyaDanmakuProtocol {
           .toBytes();
 
   /// The messages of one server [frame] (3.x `decodeMessage`): chat,
-  /// popularity and (M4.D) gifts from commands 7 and 22, and the count of
-  /// headline notices.
+  /// popularity and (M4.D) gifts from commands 7 and 22; (C-9) the board
+  /// entries of each headline notice whose body is a panel, as
+  /// [superChatMessage]s timed from [now] (default the clock), and the
+  /// count of the other headline notices; (C-10) the streamer uid of each
+  /// stream end notice.
   /// Other commands and uris are ignored; a frame that is not Tars gives
   /// nothing, and an item whose body fails to decode is skipped without
   /// losing the others.
-  static HuyaDanmakuFrame decode(List<int> frame) {
+  static HuyaDanmakuFrame decode(List<int> frame, {DateTime? now}) {
     final messages = <LiveMessage>[];
+    final ended = <int>[];
     var notices = 0;
     void item(int uri, Uint8List? body, int eventId) {
+      if (uri == endUri) {
+        try {
+          ended.add(TarsStruct.decode(body ?? const []).integer(0) ?? 0);
+        } on FormatException {
+          // Not an end notice.
+        }
+        return;
+      }
       if (uri == superChatUri) {
-        notices++;
+        final board = HuyaApi.headlineNotice(body, now: now ?? DateTime.now());
+        if (board == null) {
+          notices++;
+        } else {
+          messages.addAll(board.map(superChatMessage));
+        }
         return;
       }
       try {
@@ -177,7 +208,7 @@ abstract final class HuyaDanmakuProtocol {
     } on FormatException {
       // A frame that is not Tars: 3.x logged it and dropped the frame.
     }
-    return (messages: messages, superChatNotices: notices);
+    return (messages: messages, superChatNotices: notices, ended: ended);
   }
 
   /// The colour of a chat's `iFontColor`: 0 or less (-1 is the default) is
@@ -267,17 +298,26 @@ abstract final class HuyaDanmakuProtocol {
 /// counts as joined; the group registration and one heartbeat follow, a
 /// heartbeat goes out every 60 s, and a socket silent for 180 s is replaced.
 ///
-/// A headline notice fetches the room's message board in the background
+/// A headline notice carries the room's message board (C-9): every entry not
+/// seen before on this connection is reported once. A notice whose body is
+/// not a board panel fetches the board in the background instead (3.x)
 /// through `HuyaDanmakuArgs.superChats` (the `HuyaSite` that built the
 /// arguments owns the HTTP client): at once, then after 0.6, 1.8 and 4 more
-/// seconds; every entry not seen before on this connection is reported once.
+/// seconds, with the same once-only rule.
+///
+/// A stream end notice for this streamer (C-10) ends the run with
+/// [DanmakuCloseReason.connectionFailed] (`Broadcast ended`), after the
+/// other messages of its frame.
 ///
 /// The app registers it as `SiteIds.huya: () => HuyaDanmakuConnection(proxy:
 /// …)`.
 final class HuyaDanmakuConnection extends DanmakuSocketConnection<HuyaDanmakuArgs> {
   /// Creates the connection. [proxy] routes the handshake; `connector`
-  /// replaces `dart:io`'s handshake (tests).
-  new({super.proxy, super.connector}) : super(site: SiteIds.huya, policy: socketPolicy);
+  /// replaces `dart:io`'s handshake and [now] the clock that times board
+  /// entries (tests).
+  new({super.proxy, super.connector, DateTime Function()? now})
+    : _now = now ?? DateTime.now,
+      super(site: SiteIds.huya, policy: socketPolicy);
 
   /// Socket timing: 3.x's `WebScoketUtils` defaults with a 60 s heartbeat,
   /// so a socket silent for max(3 × 60 s, 90 s) = 180 s is replaced. No join
@@ -286,6 +326,7 @@ final class HuyaDanmakuConnection extends DanmakuSocketConnection<HuyaDanmakuArg
     heartbeatInterval: HuyaDanmakuProtocol.heartbeatInterval,
   );
 
+  final DateTime Function() _now;
   int _uid = 0;
   _HuyaSuperChats? _superChats;
 
@@ -310,10 +351,21 @@ final class HuyaDanmakuConnection extends DanmakuSocketConnection<HuyaDanmakuArg
   void onData(DanmakuSocketSession session, Object? data) {
     // Huya only sends binary frames.
     if (data is! List<int>) return;
-    final frame = HuyaDanmakuProtocol.decode(data);
-    frame.messages.forEach(session.message);
+    final frame = HuyaDanmakuProtocol.decode(data, now: _now());
+    for (final message in frame.messages) {
+      if (message.data case final LiveSuperChatMessage entry) {
+        _superChats?.report(entry);
+      } else {
+        session.message(message);
+      }
+    }
     for (var notice = 0; notice < frame.superChatNotices; notice++) {
       _superChats?.schedule();
+    }
+    // C-10: the web client leaves the room at the stream end; a notice that
+    // names another streamer is not this room's.
+    if (frame.ended.any((uid) => uid == _uid || uid <= 0)) {
+      session.run.closed(DanmakuCloseReason.connectionFailed, detail: HuyaDanmakuProtocol.broadcastEnded);
     }
   }
 
@@ -323,8 +375,8 @@ final class HuyaDanmakuConnection extends DanmakuSocketConnection<HuyaDanmakuArg
 
 /// The headline board of one run (3.x `_scheduleSuperChatRefresh` and
 /// `_refreshSuperChats`): one fetch sequence at a time, a notice during it
-/// queues one more, and entries are reported once per run by their event
-/// id. Everything stops with the run.
+/// queues one more, and entries, fetched or carried by a notice, are
+/// reported once per run by their event id. Everything stops with the run.
 final class _HuyaSuperChats {
   new(this._run, this._fetch);
 
@@ -366,9 +418,7 @@ final class _HuyaSuperChats {
         final hadReported = _reported.isNotEmpty;
         var reportedNew = false;
         for (final entry in entries) {
-          if (!_remember(entry)) continue;
-          reportedNew = true;
-          _run.message(HuyaDanmakuProtocol.superChatMessage(entry));
+          if (report(entry)) reportedNew = true;
         }
         if (hadReported && reportedNew) return;
       } on Object {
@@ -377,8 +427,10 @@ final class _HuyaSuperChats {
     }
   }
 
-  bool _remember(LiveSuperChatMessage entry) {
-    if (!_reported.add(entry)) return false;
+  /// Reports [entry] unless this run already did; whether it did now.
+  bool report(LiveSuperChatMessage entry) {
+    if (!_run.isActive || !_reported.add(entry)) return false;
+    _run.message(HuyaDanmakuProtocol.superChatMessage(entry));
     while (_reported.length > HuyaDanmakuProtocol.maxRememberedSuperChats) {
       _reported.remove(_reported.first);
     }

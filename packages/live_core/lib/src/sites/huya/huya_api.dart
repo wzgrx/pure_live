@@ -1100,19 +1100,42 @@ abstract final class HuyaApi {
   ).encode();
 
   /// The headline message board (3.x `getHuyaSuperChatMessageList` with
-  /// `first: true`, the only form 3.x called): `tRsp` tag 1 is the panel,
-  /// whose tag 1 lists entries (0 user: 1 nick, 2 avatar; 1 content; 2
-  /// iCost; 4 iTotalSec; 5 iCountDown; 9 lMessageId; 12 iCostPay).
+  /// `first: true`, the only form 3.x called): `tRsp` tag 1 is the panel
+  /// (`GameEventMessageBoardPanel`), read as [_panel] reads it. A non-zero
+  /// return code is `ApiChanged`.
+  static List<LiveSuperChatMessage> superChats(List<int> bytes, {required DateTime now, int status = 200}) {
+    final packet = _wup(bytes, status: status, what: 'getHeadLineMessageBoard');
+    if (packet.code != 0) throw ApiChanged(_site, 'getHeadLineMessageBoard code ${packet.code}');
+    return _panel(_decoded(() => packet.struct('tRsp'), 'getHeadLineMessageBoard')?.struct(1), now: now);
+  }
+
+  /// The body of a headline notice (danmaku uri 2001314), which is the
+  /// board's panel itself (`GameEventMessageBoardPanel` in the web client's
+  /// uri table; appendix C-9): its entries as [superChats] reads them, an
+  /// empty list for an empty board. Null when [body] is not a panel
+  /// (missing, empty, not Tars, or without the entry list at tag 1): the
+  /// caller then fetches the board.
+  static List<LiveSuperChatMessage>? headlineNotice(List<int>? body, {required DateTime now}) {
+    if (body == null || body.isEmpty) return null;
+    final TarsStruct panel;
+    try {
+      panel = TarsStruct.decode(body);
+    } on FormatException {
+      return null;
+    }
+    return panel.fields[1] is List ? _panel(panel, now: now) : null;
+  }
+
+  /// The entries of a board panel: tag 1 lists them (0 user: 1 nick, 2
+  /// avatar; 1 content; 2 iCost; 4 iTotalSec; 5 iCountDown; 9 lMessageId;
+  /// 12 iCostPay).
   ///
   /// Entries without text or time left are dropped. Time left is the
   /// countdown, else the total; the window ends that long after [now] and
   /// starts the total before. The price is iCost, else iCostPay / 100 (at
   /// least 1). The id is `huya:{lMessageId}`, so an event rebuilt on every
-  /// poll stays one message. A non-zero return code is `ApiChanged`.
-  static List<LiveSuperChatMessage> superChats(List<int> bytes, {required DateTime now, int status = 200}) {
-    final packet = _wup(bytes, status: status, what: 'getHeadLineMessageBoard');
-    if (packet.code != 0) throw ApiChanged(_site, 'getHeadLineMessageBoard code ${packet.code}');
-    final panel = _decoded(() => packet.struct('tRsp'), 'getHeadLineMessageBoard')?.struct(1);
+  /// poll stays one message.
+  static List<LiveSuperChatMessage> _panel(TarsStruct? panel, {required DateTime now}) {
     final messages = <LiveSuperChatMessage>[];
     for (final raw in panel?.list(1) ?? const <Object?>[]) {
       if (raw is! TarsStruct) continue;

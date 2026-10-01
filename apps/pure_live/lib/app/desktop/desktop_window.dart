@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/desktop/mini_window.dart';
 import 'package:pure_live/app/desktop/startup_entry.dart';
 import 'package:pure_live/app/desktop/tray.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -12,9 +13,12 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
 
+export 'package:pure_live/app/desktop/mini_window.dart' show MiniWindowHost;
+
 /// What the pages ask of the desktop window (the live room's and
-/// multi-view's full screen). Without a desktop shell (phones, tests) only
-/// [fullScreen] changes.
+/// multi-view's full screen, the room's mini window). Without a desktop
+/// shell (phones, tests) only [fullScreen] changes and there is no mini
+/// window.
 abstract final class DesktopWindow {
   /// Whether the window fills the screen; the title bar hides meanwhile
   /// (3.x `GlobalPlayerState.isWindowFullscreen`).
@@ -25,6 +29,85 @@ abstract final class DesktopWindow {
   /// The window's size while the user drags its edge (the title bar shows
   /// it, 3.x `WindowSizeController.isTracking`); null otherwise.
   static final ValueNotifier<Size?> resizing = ValueNotifier(null);
+
+  /// The room's desktop mini window (U.2j): the shell's, null without a
+  /// desktop shell; tests set their own.
+  static MiniWindowHost? miniHost;
+
+  /// Whether the window is the room's mini window now; the title bar hides
+  /// meanwhile.
+  static final ValueNotifier<bool> mini = ValueNotifier(false);
+
+  /// Whether this window can become a mini window.
+  static bool get miniAvailable => miniHost != null;
+
+  /// Shrinks the window to the mini window for a picture of [aspectRatio]
+  /// (3.x `WindowHelper.enterPiP`); false when the window system refused.
+  static Future<bool> enterMini({required double aspectRatio, required bool onTop}) async {
+    final host = miniHost;
+    if (host == null || mini.value) return false;
+    try {
+      await host.enter(aspectRatio: aspectRatio, onTop: onTop);
+      mini.value = true;
+      return true;
+    } on Object catch (error, stack) {
+      log('Mini window failed', name: 'Desktop', error: error, stackTrace: stack);
+      return false;
+    }
+  }
+
+  /// Gives the window back its size and place; [hidden] hides it first (the
+  /// mini window's ✕: the room closes unseen, then [minimize]). False when
+  /// the window system refused (3.x "恢复主窗口失败，请重试").
+  static Future<bool> exitMini({bool hidden = false}) async {
+    final host = miniHost;
+    if (host == null || !mini.value) return false;
+    try {
+      if (hidden) await host.hide();
+      await host.exit();
+      mini.value = false;
+      return true;
+    } on Object catch (error, stack) {
+      log('Leaving the mini window failed', name: 'Desktop', error: error, stackTrace: stack);
+      return false;
+    }
+  }
+
+  /// Keeps the mini window on top or not; false when the window system
+  /// refused.
+  static Future<bool> setMiniOnTop({required bool onTop}) async {
+    final host = miniHost;
+    if (host == null || !mini.value) return false;
+    try {
+      await host.setOnTop(onTop: onTop);
+      return true;
+    } on Object catch (error, stack) {
+      log('Mini window layer failed', name: 'Desktop', error: error, stackTrace: stack);
+      return false;
+    }
+  }
+
+  /// Minimizes the window to the taskbar.
+  static Future<void> minimize() async {
+    try {
+      await miniHost?.minimize();
+    } on Object catch (error, stack) {
+      log('Minimize failed', name: 'Desktop', error: error, stackTrace: stack);
+    }
+  }
+
+  /// Moves the window with the pointer that is down.
+  static Future<void> startDragging() async {
+    try {
+      await miniHost?.startDragging();
+    } on Object {
+      // The pointer went up before the window system took it.
+    }
+  }
+
+  /// The child with edges that resize the mini window (3.x
+  /// `PureLivePipWidget`); the shell sets it, elsewhere the child as it is.
+  static Widget Function(Widget child) resizeArea = (child) => child;
 
   /// Puts the window into ([on]) or out of full screen (3.x `WindowHelper`).
   static Future<void> setFullScreen({required bool on}) async {
@@ -55,6 +138,7 @@ final class DesktopShell with WindowListener {
   final bool primary;
 
   DesktopTray? _tray;
+  WindowManagerMiniHost? _mini;
   Timer? _saveTimer;
   StreamSubscription<Setting<Object>>? _settings;
   Future<void>? _closing;
@@ -93,6 +177,8 @@ final class DesktopShell with WindowListener {
     });
     windowManager.addListener(this);
     DesktopWindow._setFullScreen = ({required on}) => windowManager.setFullScreen(on);
+    DesktopWindow.miniHost = _mini = WindowManagerMiniHost(_prefs, normalMinimum: minimumSize);
+    DesktopWindow.resizeArea = (child) => DragToResizeArea(child: child);
     if (primary) {
       try {
         _tray = DesktopTray.create(onShow: show, onHide: windowManager.hide, onExit: exit);
@@ -230,9 +316,14 @@ final class DesktopShell with WindowListener {
   }
 
   /// Remembers the normal window's size (3.x) and place (new): not while
-  /// maximized, minimized or full screen.
+  /// maximized, minimized or full screen. The mini window remembers its own
+  /// (`rememberPipPosition`, U.2j).
   Future<void> _saveGeometry() async {
     _saveTimer?.cancel();
+    if (DesktopWindow.mini.value) {
+      await _mini?.saveGeometry();
+      return;
+    }
     try {
       if (await windowManager.isMaximized() ||
           await windowManager.isMinimized() ||
@@ -259,6 +350,10 @@ final class DesktopShell with WindowListener {
     _saveTimer?.cancel();
     await _settings?.cancel();
     _tray?.dispose();
+    if (identical(DesktopWindow.miniHost, _mini)) {
+      DesktopWindow.miniHost = null;
+      DesktopWindow.resizeArea = (child) => child;
+    }
     if (identical(current, this)) current = null;
   }
 }

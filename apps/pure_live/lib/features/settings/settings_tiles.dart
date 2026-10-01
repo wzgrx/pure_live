@@ -16,6 +16,34 @@ import 'package:pure_live/routes/app_navigator.dart';
 void writeSetting<T extends Object>(WidgetRef ref, Setting<T> setting, T value) =>
     unawaited(ref.read(storeProvider).settings.set(setting, value));
 
+/// A condition for a row to apply (U.6c c5): `setting` must be `value`;
+/// otherwise the row is greyed out and `reason` replaces its explanation
+/// ("打开“自定义驱动与硬件加速”后生效").
+typedef SettingRequirement = ({BoolSetting setting, bool value, String reason});
+
+/// "打开“[titleKey]”后生效": [setting] must be on.
+SettingRequirement needsOn(BoolSetting setting, String titleKey) =>
+    (setting: setting, value: true, reason: i18n('settings_needs_on', args: {'name': i18n(titleKey)}));
+
+/// "关闭“[titleKey]”后可选": [setting] must be off.
+SettingRequirement needsOff(BoolSetting setting, String titleKey) =>
+    (setting: setting, value: false, reason: i18n('settings_needs_off', args: {'name': i18n(titleKey)}));
+
+/// Why the row cannot be used now: the reason of the first unmet
+/// requirement (watched, so the row follows), '' when [enabledBy] is off,
+/// or null when it can be used.
+String? watchUnmet(WidgetRef ref, Iterable<SettingRequirement> requires, {BoolSetting? enabledBy}) {
+  String? unmet;
+  if (enabledBy != null && !watchSetting(ref, enabledBy)) unmet = '';
+  for (final requirement in requires) {
+    if (watchSetting(ref, requirement.setting) != requirement.value) unmet ??= requirement.reason;
+  }
+  return unmet;
+}
+
+/// The reason to show for [unmet] (none for an empty one).
+String? unmetReason(String? unmet) => unmet == null || unmet.isEmpty ? null : unmet;
+
 /// The search results: a row that opens another page goes to its own page
 /// instead and is highlighted there (U.6a c8).
 class SettingsReveal extends InheritedWidget {
@@ -52,6 +80,7 @@ class SettingToggleTile extends ConsumerWidget {
     required this.icon,
     this.inverted = false,
     this.enabledBy,
+    this.requires = const [],
     this.onChanged,
     super.key,
   });
@@ -62,8 +91,11 @@ class SettingToggleTile extends ConsumerWidget {
   /// The stored switch.
   final BoolSetting setting;
 
-  /// The icon.
-  final IconData icon;
+  /// The icon; none in rows that had none in 3.x.
+  final IconData? icon;
+
+  /// Conditions for it to apply.
+  final List<SettingRequirement> requires;
 
   /// Shows and stores the opposite value.
   final bool inverted;
@@ -77,14 +109,15 @@ class SettingToggleTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stored = watchSetting(ref, setting);
-    final enabled = enabledBy == null || watchSetting(ref, enabledBy!);
+    final unmet = watchUnmet(ref, requires, enabledBy: enabledBy);
     return SettingsSwitchRow(
       key: entry.rowKey,
       title: entry.titleText,
       subtitle: entry.descriptionText,
       icon: icon,
       value: inverted ? !stored : stored,
-      enabled: enabled,
+      enabled: unmet == null,
+      disabledReason: unmetReason(unmet),
       onChanged: (value) {
         writeSetting(ref, setting, inverted ? !value : value);
         onChanged?.call(value);
@@ -107,8 +140,10 @@ class SettingSliderTile extends ConsumerStatefulWidget {
     required this.format,
     this.step,
     this.enabledBy,
+    this.requires = const [],
     this.marks = const [],
     this.below,
+    this.shown,
     super.key,
   });
 
@@ -118,8 +153,15 @@ class SettingSliderTile extends ConsumerStatefulWidget {
   /// A [DoubleSetting] or [IntSetting].
   final Setting<Object> setting;
 
-  /// The icon.
-  final IconData icon;
+  /// The icon; none in rows that had none in 3.x.
+  final IconData? icon;
+
+  /// Conditions for it to apply.
+  final List<SettingRequirement> requires;
+
+  /// The value shown while the row cannot be used (the frame rate the
+  /// automatic policy picks); null shows the stored one.
+  final double? shown;
 
   /// The slider's range.
   final double min;
@@ -186,8 +228,9 @@ class _SettingSliderTileState extends ConsumerState<SettingSliderTile> {
       final num value => value.toDouble(),
       _ => widget.min,
     };
-    final value = _dragging ?? stored;
-    final enabled = widget.enabledBy == null || watchSetting(ref, widget.enabledBy!);
+    final unmet = watchUnmet(ref, widget.requires, enabledBy: widget.enabledBy);
+    final enabled = unmet == null;
+    final value = _dragging ?? (enabled ? null : widget.shown) ?? stored;
     return SettingsSliderRow(
       key: widget.entry.rowKey,
       icon: widget.icon,
@@ -198,6 +241,7 @@ class _SettingSliderTileState extends ConsumerState<SettingSliderTile> {
       max: widget.max,
       marks: widget.marks,
       enabled: enabled,
+      disabledReason: unmetReason(unmet),
       label: widget.format(value),
       below: widget.below?.call(context, value),
       onChanged: (raw) {
@@ -222,7 +266,13 @@ class SettingChoiceTile<T extends Object> extends ConsumerWidget {
     required this.options,
     this.hint,
     this.enabledBy,
+    this.requires = const [],
     this.subtitle,
+    this.valueBelow = false,
+    this.leadingOf,
+    this.valueText,
+    this.valueWidget,
+    this.action,
     super.key,
   });
 
@@ -236,7 +286,25 @@ class SettingChoiceTile<T extends Object> extends ConsumerWidget {
   final Setting<T> setting;
 
   /// The icon.
-  final IconData icon;
+  final IconData? icon;
+
+  /// Conditions for it to apply.
+  final List<SettingRequirement> requires;
+
+  /// Shows the current value under the explanation (long values, U.6c c6).
+  final bool valueBelow;
+
+  /// A picture before each option (platform logos).
+  final Widget? Function(T value)? leadingOf;
+
+  /// The row's value for the current option; its label when null.
+  final String Function(SettingsChoice<T>? current, T value)? valueText;
+
+  /// A picture before the row's value (the platform's logo).
+  final Widget? Function(T value)? valueWidget;
+
+  /// A button at the bottom start of the dialog ("重新检测").
+  final SettingsDialogAction? action;
 
   /// The options (built when drawn, so labels follow the language).
   final List<SettingsChoice<T>> Function() options;
@@ -252,14 +320,17 @@ class SettingChoiceTile<T extends Object> extends ConsumerWidget {
     final value = watchSetting(ref, setting);
     final choices = options();
     final current = choices.where((choice) => choice.value == value).firstOrNull;
-    final enabled = enabledBy == null || watchSetting(ref, enabledBy!);
+    final unmet = watchUnmet(ref, requires, enabledBy: enabledBy);
     return SettingsLinkRow(
       key: entry.rowKey,
       icon: icon,
       title: entry.titleText,
       subtitle: subtitle ?? entry.descriptionText,
-      value: current?.label ?? '$value',
-      enabled: enabled,
+      value: valueText?.call(current, value) ?? current?.label ?? '$value',
+      valueWidget: valueWidget?.call(value),
+      valueBelow: valueBelow,
+      enabled: unmet == null,
+      disabledReason: unmetReason(unmet),
       onTap: () async {
         final picked = await showChoiceDialog<T>(
           context: context,
@@ -267,6 +338,8 @@ class SettingChoiceTile<T extends Object> extends ConsumerWidget {
           options: choices,
           selected: value,
           hint: hint,
+          leadingOf: leadingOf,
+          action: action,
         );
         if (picked != null && context.mounted) writeSetting(ref, setting, picked);
       },
@@ -286,8 +359,16 @@ class SettingNumberTile extends ConsumerWidget {
     this.unit,
     this.hint,
     this.enabledBy,
+    this.requires = const [],
+    this.inputLabel,
+    this.rangeText,
+    this.subtitle,
     super.key,
   });
+
+  /// The line under the title; the entry's description when null (the
+  /// time left of the exit countdown).
+  final String? subtitle;
 
   /// The entry drawn.
   final SettingsEntry entry;
@@ -297,6 +378,15 @@ class SettingNumberTile extends ConsumerWidget {
 
   /// The icon.
   final IconData icon;
+
+  /// Conditions for it to apply.
+  final List<SettingRequirement> requires;
+
+  /// The custom field's label ("自定义时长").
+  final String? inputLabel;
+
+  /// The allowed range in words ("输入 1～525600 分钟").
+  final String? rangeText;
 
   /// Quick picks.
   final List<int> presets;
@@ -316,14 +406,15 @@ class SettingNumberTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final value = watchSetting(ref, setting);
-    final enabled = enabledBy == null || watchSetting(ref, enabledBy!);
+    final unmet = watchUnmet(ref, requires, enabledBy: enabledBy);
     return SettingsLinkRow(
       key: entry.rowKey,
       icon: icon,
       title: entry.titleText,
-      subtitle: entry.descriptionText,
+      subtitle: subtitle ?? entry.descriptionText,
       value: label(value),
-      enabled: enabled,
+      enabled: unmet == null,
+      disabledReason: unmetReason(unmet),
       onTap: () async {
         final picked = await showNumberDialog(
           context: context,
@@ -335,6 +426,8 @@ class SettingNumberTile extends ConsumerWidget {
           label: label,
           unit: unit,
           hint: hint ?? entry.descriptionText,
+          inputLabel: inputLabel,
+          rangeText: rangeText,
         );
         if (picked != null && context.mounted) writeSetting(ref, setting, picked);
       },
@@ -342,43 +435,105 @@ class SettingNumberTile extends ConsumerWidget {
   }
 }
 
-/// The current value at the end of a row, in the secondary text colour
-/// (rows that draw their own end, such as the proxy and refresh rate).
-class SettingValueText extends StatelessWidget {
-  /// Creates the text.
-  const new(this.text, {super.key});
+/// A whole number changed one step at a time (− and +, held to repeat; a
+/// tap on the number types it): the parallel refresh tasks, the mini
+/// windows' danmaku count (U.6d d12, U.6c).
+class SettingCounterTile extends ConsumerWidget {
+  /// Creates the row.
+  const new({
+    required this.entry,
+    required this.setting,
+    required this.min,
+    required this.max,
+    this.icon,
+    this.requires = const [],
+    this.label,
+    super.key,
+  });
 
-  /// The value.
-  final String text;
+  /// The entry drawn.
+  final SettingsEntry entry;
+
+  /// The stored number.
+  final IntSetting setting;
+
+  /// The range.
+  final int min;
+
+  /// The range.
+  final int max;
+
+  /// The icon.
+  final IconData? icon;
+
+  /// Conditions for it to apply.
+  final List<SettingRequirement> requires;
+
+  /// How a value reads; the number when null.
+  final String Function(int value)? label;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 180),
-      child: Text(
-        text,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        textAlign: TextAlign.end,
-        style: context.textStyles.t14.copyWith(color: theme.colorScheme.onSurfaceVariant),
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final value = watchSetting(ref, setting).clamp(min, max);
+    final unmet = watchUnmet(ref, requires);
+    final settings = ref.read(storeProvider).settings;
+    // A held button repeats: read the stored value on every step, not the
+    // one this row was built with.
+    void step(int delta) => unawaited(settings.set(setting, (settings.get(setting) + delta).clamp(min, max)));
+    return SettingsCounterRow(
+      key: entry.rowKey,
+      icon: icon,
+      title: entry.titleText,
+      subtitle: entry.descriptionText,
+      value: label?.call(value) ?? '$value',
+      enabled: unmet == null,
+      disabledReason: unmetReason(unmet),
+      decreaseTooltip: settingsDecrease,
+      increaseTooltip: settingsIncrease,
+      valueKey: ValueKey('${entry.rowKey.value}-value'),
+      decreaseKey: ValueKey('${entry.rowKey.value}-decrease'),
+      increaseKey: ValueKey('${entry.rowKey.value}-increase'),
+      onDecrease: value > min ? () => step(-1) : null,
+      onIncrease: value < max ? () => step(1) : null,
+      onValueTap: () async {
+        final picked = await showNumberDialog(
+          context: context,
+          title: entry.titleText,
+          current: value,
+          presets: const [],
+          min: min,
+          max: max,
+          label: (value) => '$value',
+        );
+        if (picked != null && context.mounted) writeSetting(ref, setting, picked.clamp(min, max));
+      },
     );
   }
 }
 
 /// A row that opens another page: a route of the app (accounts, block list)
 /// or a settings page.
-class SettingLinkTile extends StatelessWidget {
+class SettingLinkTile extends ConsumerWidget {
   /// Creates the row; give [route], [page] or [subpage].
-  const new({required this.entry, required this.icon, this.route, this.page, this.subpage, this.value, super.key})
-    : assert(route != null || page != null || subpage != null, 'a link needs a target');
+  const new({
+    required this.entry,
+    required this.icon,
+    this.route,
+    this.page,
+    this.subpage,
+    this.value,
+    this.requires = const [],
+    super.key,
+  }) : assert(route != null || page != null || subpage != null, 'a link needs a target');
+
+  /// Conditions for it to apply.
+  final List<SettingRequirement> requires;
 
   /// The entry drawn.
   final SettingsEntry entry;
 
   /// The icon.
-  final IconData icon;
+  final IconData? icon;
 
   /// The app route opened.
   final String? route;
@@ -393,22 +548,27 @@ class SettingLinkTile extends StatelessWidget {
   final String? value;
 
   @override
-  Widget build(BuildContext context) => SettingsLinkRow(
-    key: entry.rowKey,
-    icon: icon,
-    title: entry.titleText,
-    subtitle: entry.descriptionText,
-    value: value,
-    onTap: () => openOrReveal(context, entry, () {
-      if (subpage case final subpage?) {
-        unawaited(openSettingsSubpage(context, subpage));
-      } else if (page case final page?) {
-        Navigator.of(context).push(MaterialPageRoute<void>(builder: page));
-      } else {
-        unawaited(AppNavigator.toNamed<void>(route!));
-      }
-    }),
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unmet = watchUnmet(ref, requires);
+    return SettingsLinkRow(
+      key: entry.rowKey,
+      icon: icon,
+      title: entry.titleText,
+      subtitle: entry.descriptionText,
+      value: value,
+      enabled: unmet == null,
+      disabledReason: unmetReason(unmet),
+      onTap: () => openOrReveal(context, entry, () {
+        if (subpage case final subpage?) {
+          unawaited(openSettingsSubpage(context, subpage));
+        } else if (page case final page?) {
+          Navigator.of(context).push(MaterialPageRoute<void>(builder: page));
+        } else {
+          unawaited(AppNavigator.toNamed<void>(route!));
+        }
+      }),
+    );
+  }
 }
 
 /// Opens [subpage], with the row [highlight] (an entry id) highlighted.
@@ -431,6 +591,7 @@ class SettingActionTile extends StatelessWidget {
     this.trailing,
     this.subtitle,
     this.destructive = false,
+    this.disabledReason,
     super.key,
   });
 
@@ -438,7 +599,10 @@ class SettingActionTile extends StatelessWidget {
   final SettingsEntry entry;
 
   /// The icon.
-  final IconData icon;
+  final IconData? icon;
+
+  /// Why the row cannot be used while [onTap] is null.
+  final String? disabledReason;
 
   /// The action; null disables the row.
   final VoidCallback? onTap;
@@ -460,74 +624,18 @@ class SettingActionTile extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     return SettingsRow(
       key: entry.rowKey,
-      leading: destructive ? Icon(icon, size: 22, color: colors.error) : null,
       icon: icon,
+      titleColor: destructive ? colors.error : null,
       title: entry.titleText,
       subtitle: subtitle ?? entry.descriptionText,
       trailing: trailing,
       busy: busy,
+      busyColor: destructive ? colors.error : null,
       enabled: onTap != null || busy,
+      disabledReason: disabledReason,
       onTap: onTap,
     );
   }
-}
-
-/// 3.x's row builders (`buildTile`, `buildSwitchTile`) drawn with the shared
-/// settings row, for the rows that draw their own end (proxy, window size,
-/// refresh rate, folders).
-extension SettingsRowBuilders on BuildContext {
-  /// A row: icon, title, explanation, [trailing] (a chevron when there is
-  /// none and the row opens something).
-  Widget settingsTile({
-    required String title,
-    Key? key,
-    IconData? icon,
-    Widget? iconWidget,
-    String? subtitle,
-    Color? subtitleColor,
-    Widget? trailing,
-    VoidCallback? onTap,
-    bool busy = false,
-    bool enabled = true,
-  }) => SettingsRow(
-    key: key,
-    title: title,
-    icon: icon,
-    leading: iconWidget,
-    subtitle: subtitle,
-    subtitleColor: subtitleColor,
-    busy: busy,
-    enabled: enabled,
-    trailing:
-        trailing ??
-        (onTap == null
-            ? null
-            : Icon(Icons.chevron_right_rounded, size: 22, color: Theme.of(this).colorScheme.onSurfaceVariant)),
-    onTap: onTap,
-  );
-
-  /// A switch row.
-  Widget settingsSwitch({
-    required String title,
-    required bool value,
-    required ValueChanged<bool>? onChanged,
-    Key? key,
-    IconData? icon,
-    String? subtitle,
-    Color? subtitleColor,
-    bool enabled = true,
-    bool busy = false,
-  }) => SettingsSwitchRow(
-    key: key,
-    title: title,
-    value: value,
-    onChanged: onChanged,
-    icon: icon,
-    subtitle: subtitle,
-    subtitleColor: subtitleColor,
-    enabled: enabled,
-    busy: busy,
-  );
 }
 
 /// The app bar of the settings pages: the title centred on phones (3.x

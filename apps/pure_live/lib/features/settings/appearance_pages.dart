@@ -388,13 +388,17 @@ class TextScaleTile extends StatelessWidget {
 class FontFamilyTile extends ConsumerWidget {
   /// Creates the row for [setting] (`fontFamilyName` or
   /// `danmakuFontFamilyName`).
-  const new({required this.entry, required this.setting, super.key});
+  const new({required this.entry, required this.setting, this.icon = AppIcons.appFont, super.key});
 
   /// The entry drawn.
   final SettingsEntry entry;
 
   /// The stored font name.
   final StringSetting setting;
+
+  /// The icon (the danmaku font's row on the video page has 3.x's
+  /// `font_size`).
+  final IconData icon;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -411,7 +415,7 @@ class FontFamilyTile extends ConsumerWidget {
           final missing = !isDefault && !library.isDownloaded(id);
           return SettingsLinkRow(
             key: entry.rowKey,
-            icon: AppIcons.appFont,
+            icon: icon,
             title: entry.titleText,
             subtitle: missing ? i18n('settings_font_not_installed', args: {'name': name}) : entry.descriptionText,
             subtitleColor: missing ? Theme.of(context).colorScheme.error : null,

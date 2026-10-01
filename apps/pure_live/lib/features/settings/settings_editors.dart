@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,6 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
-import 'package:pure_live/features/settings/appearance_pages.dart';
-import 'package:pure_live/features/settings/settings_catalog.dart';
 import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
 import 'package:pure_live/features/settings/settings_tiles.dart';
@@ -111,8 +110,7 @@ List<String> mpvOptionsFor(MpvOptionKind kind, TargetPlatform platform) => switc
     'nvdec', 'nvdec-copy', 'cuda', 'cuda-copy', 'vulkan', 'vulkan-copy',
   ],
   (MpvOptionKind.decoder, TargetPlatform.android) => [
-    'auto', 'auto-safe', 'auto-copy', 'yes', 'no', 'mediacodec', 'mediacodec-copy', 'vulkan', 'vulkan-copy', //
-    'rkmpp',
+    'no', 'auto', 'auto-safe', 'yes', 'auto-copy', 'vulkan', 'vulkan-copy', 'mediacodec', 'mediacodec-copy', //
   ],
   (MpvOptionKind.decoder, TargetPlatform.iOS || TargetPlatform.macOS) => [
     'auto', 'auto-safe', 'auto-copy', 'no', 'videotoolbox', 'videotoolbox-copy', //
@@ -131,39 +129,18 @@ String mpvOptionLabel(String key) {
   return label == key ? key : '$label · $key';
 }
 
-/// One expert mpv option; usable only with "custom output" on.
-class MpvOptionTile extends StatelessWidget {
-  /// Creates the row.
-  const new({required this.entry, required this.kind, super.key});
-
-  /// The entry drawn.
-  final SettingsEntry entry;
-
-  /// Which option.
-  final MpvOptionKind kind;
-
-  @override
-  Widget build(BuildContext context) {
-    final (setting, icon) = switch (kind) {
-      MpvOptionKind.video => (Settings.videoOutputDriver, Remix.tv_line),
-      MpvOptionKind.audio => (Settings.audioOutputDriver, Remix.volume_up_line),
-      MpvOptionKind.decoder => (Settings.videoHardwareDecoder, Remix.cpu_line),
-    };
-    return SettingChoiceTile<String>(
-      entry: entry,
-      setting: setting,
-      icon: icon,
-      enabledBy: Settings.customPlayerOutput,
-      hint: i18n('settings_mpv_hint'),
-      options: () => [
-        for (final key in mpvOptionsFor(kind, defaultTargetPlatform))
-          (value: key, label: mpvOptionLabel(key), description: null),
-      ],
-    );
+/// The readable name of an mpv option without its key (U.6c 驱动选项页);
+/// "auto" of the decoder reads "启用任意可用解码器" (3.x).
+String mpvOptionName(String key, {MpvOptionKind? kind}) {
+  if (kind == MpvOptionKind.decoder && key == 'auto') {
+    return currentStrings?.language == AppLanguage.en ? 'Any available decoder' : '启用任意可用解码器';
   }
+  final names = _mpvLabels[key];
+  if (names == null) return key;
+  return currentStrings?.language == AppLanguage.en ? names.$2 : names.$1;
 }
 
-/// Forget the remembered picture-in-picture window (Windows).
+/// Forget the remembered mini window (computers).
 class PipPositionResetTile extends ConsumerWidget {
   /// Creates the row.
   const new({required this.entry, super.key});
@@ -174,13 +151,14 @@ class PipPositionResetTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => SettingActionTile(
     entry: entry,
-    icon: Remix.drag_drop_line,
+    icon: AppIcons.settingsPipReset,
     onTap: () async {
       final confirmed = await showConfirmDialog(
         context: context,
         title: entry.titleText,
-        message: i18n('windows_pip_reset_position_confirm'),
+        message: '${i18n('windows_pip_reset_position_confirm')}${i18n('settings_pip_reset_next')}',
         confirmLabel: i18n('reset'),
+        destructive: true,
       );
       if (!confirmed) return;
       final settings = ref.read(storeProvider).settings;
@@ -198,209 +176,9 @@ class PipPositionResetTile extends ConsumerWidget {
   );
 }
 
-/// The picture-in-picture danmaku style (3.x `PipDanmakuSettingsPage`).
-class PipDanmakuPage extends ConsumerWidget {
-  /// Creates the page.
-  const new({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final originalColor = watchSetting(ref, Settings.pipDanmakuUseOriginalColor);
-    final color = Color(watchSetting(ref, Settings.pipDanmakuColor));
-    Widget slider(
-      String id,
-      String title,
-      Setting<Object> setting,
-      IconData icon,
-      double min,
-      double max,
-      String Function(double) format, {
-      double? step,
-      BoolSetting? enabledBy,
-    }) => CardTile(
-      child: SettingSliderTile(
-        entry: subEntry(id, title),
-        setting: setting,
-        icon: icon,
-        min: min,
-        max: max,
-        step: step,
-        format: format,
-        enabledBy: enabledBy,
-      ),
-    );
-    Widget toggle(String id, String title, BoolSetting setting, IconData icon, {String? description}) => CardTile(
-      child: SettingToggleTile(
-        entry: subEntry(id, title, description: description),
-        setting: setting,
-        icon: icon,
-      ),
-    );
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(i18n('pip_danmaku')),
-        actions: [
-          IconButton(
-            key: const ValueKey('settings-pip-danmaku-reset'),
-            tooltip: i18n('pip_danmaku_reset'),
-            icon: const Icon(Icons.restart_alt_rounded),
-            onPressed: () async {
-              final confirmed = await showConfirmDialog(
-                context: context,
-                title: i18n('pip_danmaku_reset'),
-                message: i18n('pip_danmaku_reset_confirm'),
-                confirmLabel: i18n('reset'),
-              );
-              if (!confirmed) return;
-              final settings = ref.read(storeProvider).settings;
-              for (final setting in pipDanmakuSettings) {
-                await settings.reset(setting);
-              }
-              AppNavigator.toast(i18n('settings_reset_done'));
-            },
-          ),
-        ],
-      ),
-      body: SettingsListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
-            child: Text(i18n('pip_danmaku_desc'), style: Theme.of(context).textTheme.bodySmall),
-          ),
-          context.buildModernCard([
-            toggle('pip_no_emoji', 'danmaku_no_emoji', Settings.pipDanmakuNoEmojiMode, Remix.emotion_unhappy_line),
-            toggle('pip_auto_scale', 'pip_danmaku_auto_scale', Settings.pipDanmakuAutoScale, Remix.aspect_ratio_line),
-            toggle(
-              'pip_original_color',
-              'pip_danmaku_original_color',
-              Settings.pipDanmakuUseOriginalColor,
-              Remix.palette_line,
-            ),
-            context.settingsTile(
-              enabled: !originalColor,
-              icon: Remix.paint_brush_line,
-              title: i18n('pip_danmaku_color'),
-              subtitle: '#${colorHex(color).substring(2)}',
-              trailing: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-                ),
-              ),
-              onTap: () async {
-                final picked = await showColorDialog(
-                  context: context,
-                  title: i18n('pip_danmaku_color'),
-                  current: color,
-                );
-                if (picked != null && context.mounted) {
-                  writeSetting(ref, Settings.pipDanmakuColor, picked.toARGB32());
-                }
-              },
-            ),
-          ]),
-          const SizedBox(height: 16),
-          context.buildModernCard([
-            slider(
-              'pip_size',
-              'font_size',
-              Settings.pipDanmakuFontSize,
-              Remix.font_size_2,
-              8,
-              24,
-              (v) => '${v.round()}',
-              step: 1,
-            ),
-            slider(
-              'pip_weight',
-              'font_weight',
-              Settings.pipDanmakuFontWeight,
-              Remix.bold,
-              100,
-              900,
-              (v) => '${v.round()}',
-              step: 100,
-            ),
-            slider(
-              'pip_speed',
-              'speed',
-              Settings.pipDanmakuSpeed,
-              Remix.speed_line,
-              20,
-              400,
-              (v) => '${v.round()}',
-              step: 1,
-            ),
-            slider(
-              'pip_opacity',
-              'opacity',
-              Settings.pipDanmakuOpacity,
-              Remix.contrast_drop_line,
-              0.1,
-              1,
-              (v) => '${(v * 100).round()}%',
-              step: 0.05,
-            ),
-            slider(
-              'pip_area',
-              'danmaku_area',
-              Settings.pipDanmakuArea,
-              Remix.layout_top_line,
-              0.1,
-              1,
-              (v) => '${(v * 100).round()}%',
-              step: 0.05,
-            ),
-            slider(
-              'pip_max_visible',
-              'pip_danmaku_max_visible',
-              Settings.pipDanmakuMaxVisibleCount,
-              Remix.stack_line,
-              1,
-              20,
-              (v) => '${v.round()}',
-            ),
-            slider(
-              'pip_interval',
-              'pip_danmaku_interval',
-              Settings.pipDanmakuEmitInterval,
-              Remix.timer_line,
-              0.05,
-              2,
-              (v) => '${v.toStringAsFixed(2)} s',
-              step: 0.05,
-            ),
-          ]),
-          const SizedBox(height: 16),
-          context.buildModernCard([
-            toggle(
-              'pip_auto_fps',
-              'settings_danmaku_auto_fps',
-              Settings.pipDanmakuAutoFps,
-              Remix.speed_up_line,
-              description: 'pip_danmaku_fps_policy_desc',
-            ),
-            slider(
-              'pip_fps',
-              'danmaku_fps',
-              Settings.pipDanmakuFps,
-              Remix.dashboard_3_line,
-              15,
-              240,
-              (v) => '${v.round()} FPS',
-            ),
-          ]),
-        ],
-      ),
-    );
-  }
-}
-
-/// The platform opened first, chosen from the shown platforms with a filter
-/// (3.x `PlatformSettingsPage`).
+/// The platform opened first (3.x `PlatformSettingsPage`): its logo and
+/// name on the row; the choice dialog with logos and a filter over the
+/// platforms shown (U.6d d8, d9).
 class PreferPlatformTile extends ConsumerWidget {
   /// Creates the row.
   const new({required this.entry, super.key});
@@ -417,26 +195,26 @@ class PreferPlatformTile extends ConsumerWidget {
     ];
     final current = watchSetting(ref, Settings.preferPlatform);
     final choices = shown.isEmpty ? sites.ids : shown;
-    return KeyedSubtree(
+    String name(String id) => platformName(id, fallback: sites.maybeOf(id)?.name);
+    return SettingsLinkRow(
       key: entry.rowKey,
-      child: context.settingsTile(
-        icon: Remix.star_line,
-        title: entry.titleText,
-        subtitle: entry.descriptionText,
-        trailing: SettingValueText(platformName(current, fallback: sites.maybeOf(current)?.name)),
-        onTap: () async {
-          final picked = await showDialog<String>(
-            context: context,
-            builder: (context) => _PlatformPicker(
-              title: entry.titleText,
-              ids: choices,
-              names: {for (final id in choices) id: platformName(id, fallback: sites.maybeOf(id)?.name)},
-              selected: current,
-            ),
-          );
-          if (picked != null && context.mounted) writeSetting(ref, Settings.preferPlatform, picked);
-        },
-      ),
+      icon: AppIcons.settingsPreferPlatform,
+      title: entry.titleText,
+      subtitle: entry.descriptionText,
+      valueWidget: PlatformLogo(current, size: 24),
+      value: name(current),
+      onTap: () async {
+        final picked = await showDialog<String>(
+          context: context,
+          builder: (context) => _PlatformPicker(
+            title: entry.titleText,
+            ids: choices,
+            names: {for (final id in choices) id: name(id)},
+            selected: current,
+          ),
+        );
+        if (picked != null && context.mounted) writeSetting(ref, Settings.preferPlatform, picked);
+      },
     );
   }
 }
@@ -468,92 +246,36 @@ class _PlatformPickerState extends State<_PlatformPicker> {
       actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel')))],
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: TextField(
+              key: const ValueKey('settings-platform-filter'),
               onChanged: (value) => setState(() => _filter = value),
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search_rounded),
+                prefixIcon: const Icon(AppIcons.search),
                 hintText: i18n('prefer_platform_filter_hint'),
                 isDense: true,
-                border: const OutlineInputBorder(),
+                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
               ),
             ),
           ),
           const SizedBox(height: 8),
           if (visible.isEmpty)
-            Padding(padding: const EdgeInsets.all(16), child: Text(i18n('prefer_platform_filter_empty')))
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(i18n('prefer_platform_filter_empty'), textAlign: TextAlign.center),
+            )
           else
-            RadioGroup<String>(
-              groupValue: widget.selected,
-              onChanged: (value) {
-                if (value != null) Navigator.of(context).pop(value);
-              },
-              child: Column(
-                children: [
-                  for (final id in visible)
-                    RadioListTile<String>(
-                      key: ValueKey('settings-platform-$id'),
-                      value: id,
-                      secondary: PlatformLogo(id, size: 24),
-                      title: Text(widget.names[id]!),
-                    ),
-                ],
+            for (final id in visible)
+              SettingsChoiceRow(
+                key: ValueKey('settings-platform-$id'),
+                leading: PlatformLogo(id, size: 24),
+                label: widget.names[id]!,
+                selected: id == widget.selected,
+                onTap: () => Navigator.of(context).pop(id),
               ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Platforms whose real online count is preferred, one switch each, with
-/// what each platform reports (3.x `AudienceMetricSettingsPage`).
-class AudiencePlatformsPage extends ConsumerWidget {
-  /// Creates the page.
-  const new({super.key});
-
-  /// 3.x's list (platforms that report both figures).
-  static const platforms = [
-    'bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'cc', 'twitch', 'soop', 'yy', 'acfun', 'picarto', //
-    'twitcasting', 'missevan', 'inke', 'kilakila', 'xiaohongshu', 'niconico', 'weibo', 'looklive',
-  ];
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selected = watchSetting(ref, Settings.realOnlinePlatforms);
-    final sites = ref.read(sitesProvider);
-    return Scaffold(
-      appBar: AppBar(title: Text(i18n('audience_online_platforms'))),
-      body: SettingsListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
-            child: Text(i18n('audience_ranking_rule_desc'), style: Theme.of(context).textTheme.bodySmall),
-          ),
-          context.buildModernCard([
-            for (final id in platforms)
-              CardTile(
-                key: ValueKey('settings-audience-$id'),
-                child: SwitchListTile(
-                  secondary: PlatformLogo(id, size: 24),
-                  title: Text(platformName(id, fallback: sites.maybeOf(id)?.name)),
-                  subtitle: Text(i18nOr('audience_${id}_detail', ''), style: context.textStyles.t12),
-                  value: selected.contains(id),
-                  onChanged: (on) => writeSetting(ref, Settings.realOnlinePlatforms, [
-                    for (final value in selected)
-                      if (value != id) value,
-                    if (on) id,
-                  ]),
-                ),
-              ),
-          ]),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(i18n('audience_metric_fallback_desc'), style: Theme.of(context).textTheme.bodySmall),
-          ),
         ],
       ),
     );
@@ -578,23 +300,19 @@ class TwitchLanguagesTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = watchSetting(ref, Settings.twitchLanguages);
-    return KeyedSubtree(
+    return SettingsLinkRow(
       key: entry.rowKey,
-      child: context.settingsTile(
-        icon: Remix.twitch_line,
-        title: entry.titleText,
-        subtitle: entry.descriptionText,
-        trailing: SettingValueText(
-          selected.isEmpty ? i18n('settings_twitch_languages_all') : selected.map(languageName).join('、'),
-        ),
-        onTap: () async {
-          final result = await showDialog<List<String>>(
-            context: context,
-            builder: (context) => _TwitchLanguagesDialog(initial: selected),
-          );
-          if (result != null && context.mounted) writeSetting(ref, Settings.twitchLanguages, result);
-        },
-      ),
+      icon: AppIcons.settingsTwitchLanguages,
+      title: entry.titleText,
+      subtitle: entry.descriptionText,
+      value: selected.isEmpty ? i18n('settings_twitch_languages_all') : selected.map(languageName).join('、'),
+      onTap: () async {
+        final result = await showDialog<List<String>>(
+          context: context,
+          builder: (context) => _TwitchLanguagesDialog(initial: selected),
+        );
+        if (result != null && context.mounted) writeSetting(ref, Settings.twitchLanguages, result);
+      },
     );
   }
 }
@@ -636,13 +354,13 @@ class _TwitchLanguagesDialogState extends State<_TwitchLanguagesDialog> {
             children: [
               ActionChip(
                 key: const ValueKey('settings-twitch-all'),
-                avatar: const Icon(Icons.public_rounded, size: 18),
+                avatar: const Icon(AppIcons.allLanguages, size: 18),
                 label: Text(i18n('settings_twitch_languages_all')),
                 onPressed: () => setState(_selected.clear),
               ),
               ActionChip(
                 key: const ValueKey('settings-twitch-legacy'),
-                avatar: const Icon(Icons.history_rounded, size: 18),
+                avatar: const Icon(AppIcons.legacyPreset, size: 18),
                 label: Text(i18n('settings_twitch_languages_legacy')),
                 onPressed: () => setState(
                   () => _selected
@@ -675,12 +393,12 @@ class _TwitchLanguagesDialogState extends State<_TwitchLanguagesDialog> {
 /// One proxy's three settings.
 enum ProxySettings {
   /// The requests of the app (lists, rooms, danmaku).
-  app(Settings.enableAppProxy, Settings.appProxyHost, Settings.appProxyPort),
+  app(Settings.enableAppProxy, Settings.appProxyHost, Settings.appProxyPort, AppIcons.settingsAppProxy),
 
   /// The player's stream requests.
-  player(Settings.enableProxy, Settings.proxyHost, Settings.proxyPort);
+  player(Settings.enableProxy, Settings.proxyHost, Settings.proxyPort, AppIcons.settingsStreamProxy);
 
-  new(this.enabled, this.host, this.port);
+  new(this.enabled, this.host, this.port, this.icon);
 
   /// On or off.
   final BoolSetting enabled;
@@ -690,12 +408,18 @@ enum ProxySettings {
 
   /// Port.
   final IntSetting port;
+
+  /// The switch's icon (3.x `apps_line`, `video_line`).
+  final IconData icon;
 }
 
-/// A proxy: a switch on the row, the address in a dialog (3.x put the
-/// fields on the page, saved as typed, and accepted an empty host).
-class ProxyTile extends ConsumerWidget {
-  /// Creates the row.
+/// A proxy on the network page (3.x `NetworkProxySettingsPage`, U.6d d13):
+/// the switch, then the address and port, which stay (greyed out) while it
+/// is off; side by side 3:2 from 420 wide. Typed values are stored half a
+/// second after the last key (3.x stored every key); a port outside
+/// 1–65535 is shown in red and not stored.
+class ProxyEditorTile extends ConsumerStatefulWidget {
+  /// Creates the rows.
   const new({required this.entry, required this.proxy, super.key});
 
   /// The entry drawn.
@@ -704,125 +428,111 @@ class ProxyTile extends ConsumerWidget {
   /// Which proxy.
   final ProxySettings proxy;
 
-  Future<bool> _edit(BuildContext context, WidgetRef ref) async {
-    final settings = ref.read(storeProvider).settings;
-    final result = await showDialog<(String, int)>(
-      context: context,
-      builder: (context) =>
-          _ProxyDialog(title: entry.titleText, host: settings.get(proxy.host), port: settings.get(proxy.port)),
-    );
-    if (result == null) return false;
-    await settings.setAll({proxy.host: result.$1, proxy.port: result.$2});
-    return true;
-  }
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enabled = watchSetting(ref, proxy.enabled);
-    final host = watchSetting(ref, proxy.host);
-    final port = watchSetting(ref, proxy.port);
-    final address = host.trim().isEmpty ? i18n('settings_proxy_not_set') : '$host:$port';
-    return KeyedSubtree(
-      key: entry.rowKey,
-      child: context.settingsTile(
-        icon: Remix.global_line,
-        title: entry.titleText,
-        subtitle: '${entry.descriptionText}\n${i18n('settings_proxy_address')}: $address',
-        trailing: Switch(
-          key: ValueKey('settings-proxy-${proxy.name}-switch'),
-          value: enabled,
-          onChanged: (on) async {
-            if (on && host.trim().isEmpty && !await _edit(context, ref)) return;
-            if (context.mounted) writeSetting(ref, proxy.enabled, on);
-          },
-        ),
-        onTap: () => unawaited(_edit(context, ref)),
-      ),
-    );
-  }
+  ConsumerState<ProxyEditorTile> createState() => _ProxyEditorTileState();
 }
 
-class _ProxyDialog extends StatefulWidget {
-  const new({required this.title, required this.host, required this.port});
-
-  final String title;
-  final String host;
-  final int port;
-
-  @override
-  State<_ProxyDialog> createState() => _ProxyDialogState();
-}
-
-class _ProxyDialogState extends State<_ProxyDialog> {
-  late final _host = TextEditingController(text: widget.host);
-  late final _port = TextEditingController(text: '${widget.port}');
-  String? _hostError;
+class _ProxyEditorTileState extends ConsumerState<ProxyEditorTile> {
+  late final SettingsStore _settings = ref.read(storeProvider).settings;
+  late final TextEditingController _host = TextEditingController(text: _settings.get(widget.proxy.host));
+  late final TextEditingController _port = TextEditingController(text: '${_settings.get(widget.proxy.port)}');
+  Timer? _save;
   String? _portError;
 
   @override
   void dispose() {
+    _flush();
     _host.dispose();
     _port.dispose();
     super.dispose();
   }
 
-  void _save() {
-    final host = _host.text.trim().replaceFirst(RegExp('^https?://'), '').replaceFirst(RegExp(r'/+$'), '');
+  void _changed() {
     final port = int.tryParse(_port.text.trim());
-    setState(() {
-      _hostError = host.isEmpty || host.contains(RegExp(r'[\s/]')) ? i18n('settings_proxy_host_invalid') : null;
-      _portError = port == null || port < 1 || port > 65535 ? i18n('proxy_port_invalid') : null;
-    });
-    if (_hostError == null && _portError == null) Navigator.of(context).pop((host, port!));
+    final error = port == null || port < 1 || port > 65535 ? i18n('proxy_port_invalid') : null;
+    if (error != _portError) setState(() => _portError = error);
+    _save?.cancel();
+    _save = Timer(const Duration(milliseconds: 500), _flush);
+  }
+
+  void _flush() {
+    final pending = _save;
+    if (pending == null) return;
+    pending.cancel();
+    _save = null;
+    final host = _host.text.trim();
+    final port = int.tryParse(_port.text.trim());
+    unawaited(
+      _settings.setAll({
+        widget.proxy.host: host,
+        if (port != null && port >= 1 && port <= 65535) widget.proxy.port: port,
+      }),
+    );
   }
 
   @override
-  Widget build(BuildContext context) => SettingsDialogFrame(
-    title: widget.title,
-    actions: [
-      TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-      FilledButton(key: const ValueKey('settings-proxy-save'), onPressed: _save, child: Text(i18n('save'))),
-    ],
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            key: const ValueKey('settings-proxy-host'),
-            controller: _host,
-            keyboardType: TextInputType.url,
-            decoration: InputDecoration(
-              labelText: i18n('proxy_address_label'),
-              hintText: '127.0.0.1',
-              errorText: _hostError,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            key: const ValueKey('settings-proxy-port'),
-            controller: _port,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(5)],
-            onSubmitted: (_) => _save(),
-            decoration: InputDecoration(
-              labelText: i18n('proxy_port_label'),
-              hintText: '7897',
-              errorText: _portError,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(i18n('settings_proxy_hint'), style: Theme.of(context).textTheme.bodySmall),
-        ],
+  Widget build(BuildContext context) {
+    final enabled = watchSetting(ref, widget.proxy.enabled);
+    final name = widget.proxy.name;
+    Widget field(TextEditingController controller, String label, {required bool port}) => TextField(
+      key: ValueKey('settings-proxy-$name-${port ? 'port' : 'host'}'),
+      controller: controller,
+      enabled: enabled,
+      keyboardType: port ? TextInputType.number : TextInputType.url,
+      inputFormatters: port ? [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(5)] : null,
+      onChanged: (_) => _changed(),
+      onSubmitted: (_) => _flush(),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: port ? '7897' : '127.0.0.1',
+        errorText: port ? _portError : null,
+        border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
       ),
-    ),
-  );
+    );
+    return Column(
+      key: widget.entry.rowKey,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsSwitchRow(
+          key: ValueKey('settings-proxy-$name-switch'),
+          icon: widget.proxy.icon,
+          title: widget.entry.titleText,
+          subtitle: widget.entry.descriptionText,
+          value: enabled,
+          onChanged: (on) => writeSetting(ref, widget.proxy.enabled, on),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+          child: Opacity(
+            opacity: enabled ? 1 : 0.6,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final host = field(_host, i18n('proxy_address_label'), port: false);
+                final port = field(_port, i18n('proxy_port_label'), port: true);
+                if (constraints.maxWidth >= 420) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(flex: 3, child: host),
+                      const SizedBox(width: 12),
+                      Expanded(flex: 2, child: port),
+                    ],
+                  );
+                }
+                return Column(mainAxisSize: MainAxisSize.min, children: [host, const SizedBox(height: 12), port]);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
-/// The window size (Windows): presets or a checked size, applied to the
-/// window at once and used at the next start (3.x).
+/// The window size at start (Windows; 3.x applied it to the window at
+/// once): the size on the row; the dialog's presets (the current one
+/// highlighted) and a checked size; "应用" sizes the window now (U.6d d7).
 class WindowSizeTile extends ConsumerWidget {
   /// Creates the row.
   const new({required this.entry, super.key});
@@ -834,35 +544,40 @@ class WindowSizeTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final width = watchSetting(ref, Settings.windowWidth).round();
     final height = watchSetting(ref, Settings.windowHeight).round();
-    return KeyedSubtree(
+    return SettingsLinkRow(
       key: entry.rowKey,
-      child: context.settingsTile(
-        icon: Remix.aspect_ratio_line,
-        title: entry.titleText,
-        subtitle: entry.descriptionText,
-        trailing: SettingValueText('$width × $height'),
-        onTap: () async {
-          final size = await showDialog<Size>(
-            context: context,
-            builder: (context) => _WindowSizeDialog(width: width, height: height),
-          );
-          if (size == null || !context.mounted) return;
-          await ref.read(storeProvider).settings.setAll({
-            Settings.windowWidth: size.width,
-            Settings.windowHeight: size.height,
-          });
-          // The window takes the size at once (3.x), not only next start.
-          final shell = DesktopShell.current;
-          if (shell != null && !await shell.resize(size)) {
-            AppNavigator.toast(i18n('window_size_apply_failed'));
-            return;
-          }
-          AppNavigator.toast(i18n('save_success'));
-        },
-      ),
+      icon: AppIcons.settingsWindowSize,
+      title: entry.titleText,
+      subtitle: entry.descriptionText,
+      value: '$width × $height',
+      onTap: () async {
+        final size = await showDialog<Size>(
+          context: context,
+          builder: (context) => _WindowSizeDialog(width: width, height: height),
+        );
+        if (size == null || !context.mounted) return;
+        await ref.read(storeProvider).settings.setAll({
+          Settings.windowWidth: size.width,
+          Settings.windowHeight: size.height,
+        });
+        // The window takes the size at once (3.x), not only next start.
+        final shell = DesktopShell.current;
+        if (shell != null && !await shell.resize(size)) {
+          AppNavigator.toast(i18n('window_size_apply_failed'));
+          return;
+        }
+        AppNavigator.toast(i18n('save_success'));
+      },
     );
   }
 }
+
+/// The smallest window size the dialog accepts: the stored setting's and
+/// the window's own minimum, whichever is larger (U.13).
+Size windowSizeMinimum() => Size(
+  math.max(Settings.windowWidth.min!, DesktopShell.minimumSize.width),
+  math.max(Settings.windowHeight.min!, DesktopShell.minimumSize.height),
+);
 
 class _WindowSizeDialog extends StatefulWidget {
   const new({required this.width, required this.height});
@@ -879,7 +594,14 @@ class _WindowSizeDialogState extends State<_WindowSizeDialog> {
   late final _height = TextEditingController(text: '${widget.height}');
   String? _error;
 
-  static const _presets = [(1080, 720), (1280, 720), (1600, 900), (1920, 1080), (2560, 1440)];
+  /// 3.x's presets; the default (1280 × 720) is marked.
+  static const List<(int, int, String?)> _presets = [
+    (1080, 720, null),
+    (1280, 720, '720P'),
+    (1600, 900, null),
+    (1920, 1080, '1080P'),
+    (2560, 1440, '2K'),
+  ];
 
   @override
   void dispose() {
@@ -891,11 +613,12 @@ class _WindowSizeDialogState extends State<_WindowSizeDialog> {
   void _apply() {
     final width = int.tryParse(_width.text.trim());
     final height = int.tryParse(_height.text.trim());
+    final minimum = windowSizeMinimum();
     final maxSide = Settings.windowWidth.max!;
     if (width == null ||
         height == null ||
-        width < Settings.windowWidth.min! ||
-        height < Settings.windowHeight.min! ||
+        width < minimum.width ||
+        height < minimum.height ||
         width > maxSide ||
         height > maxSide) {
       setState(() => _error = i18n('window_size_out_of_range'));
@@ -904,63 +627,143 @@ class _WindowSizeDialogState extends State<_WindowSizeDialog> {
     Navigator.of(context).pop(Size(width.toDouble(), height.toDouble()));
   }
 
-  Widget _field(TextEditingController controller, String label) => TextField(
+  Widget _field(TextEditingController controller, String label, Key key) => TextField(
+    key: key,
     controller: controller,
     keyboardType: TextInputType.number,
     inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(5)],
-    onChanged: (_) {
-      if (_error != null) setState(() => _error = null);
-    },
-    decoration: InputDecoration(labelText: label, border: const OutlineInputBorder(), isDense: true),
+    onChanged: (_) => setState(() => _error = null),
+    onSubmitted: (_) => _apply(),
+    decoration: InputDecoration(
+      labelText: label,
+      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+      isDense: true,
+    ),
   );
 
   @override
-  Widget build(BuildContext context) => SettingsDialogFrame(
-    title: i18n('window_size'),
-    actions: [
-      TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-      FilledButton(onPressed: _apply, child: Text(i18n('confirm'))),
-    ],
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final (width, height) in _presets)
-                ActionChip(
-                  label: Text('$width × $height'),
-                  onPressed: () => setState(() {
-                    _width.text = '$width';
-                    _height.text = '$height';
-                    _error = null;
-                  }),
-                ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(child: _field(_width, i18n('width'))),
-              const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('×')),
-              Expanded(child: _field(_height, i18n('height'))),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _error ?? i18n('window_size_range_hint'),
-            style: context.textStyles.t12.copyWith(
-              color: _error == null ? Theme.of(context).hintColor : Theme.of(context).colorScheme.error,
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final minimum = windowSizeMinimum();
+    final caption = (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
+      fontSize: 13,
+      color: colors.onSurfaceVariant,
+    );
+    final defaultWidth = Settings.windowWidth.defaultValue.round();
+    final defaultHeight = Settings.windowHeight.defaultValue.round();
+    return SettingsDialogFrame(
+      title: i18n('window_size'),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
+        FilledButton(key: const ValueKey('settings-window-size-apply'), onPressed: _apply, child: Text(i18n('apply'))),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(i18n('preset_options'), style: caption),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final (width, height, tag) in _presets)
+                  ChoiceChip(
+                    key: ValueKey('settings-window-size-$width'),
+                    label: Text(
+                      '$width × $height${_tag(tag, isDefault: width == defaultWidth && height == defaultHeight)}',
+                    ),
+                    selected: _width.text == '$width' && _height.text == '$height',
+                    showCheckmark: false,
+                    selectedColor: colors.primaryContainer,
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+                    onSelected: (_) => setState(() {
+                      _width.text = '$width';
+                      _height.text = '$height';
+                      _error = null;
+                    }),
+                  ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Text(i18n('custom_input'), style: caption),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(child: _field(_width, i18n('width'), const ValueKey('settings-window-width'))),
+                const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('×')),
+                Expanded(child: _field(_height, i18n('height'), const ValueKey('settings-window-height'))),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _error ??
+                  i18n(
+                    'settings_window_size_hint',
+                    args: {
+                      'minWidth': '${minimum.width.round()}',
+                      'minHeight': '${minimum.height.round()}',
+                      'max': '${Settings.windowWidth.max!.round()}',
+                    },
+                  ),
+              style: caption.copyWith(fontSize: 12, color: _error == null ? colors.onSurfaceVariant : colors.error),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
+
+  static String _tag(String? tag, {required bool isDefault}) {
+    final parts = [?tag, if (isDefault) i18n('default_option')];
+    return parts.isEmpty ? '' : ' (${parts.join(' · ')})';
+  }
+}
+
+/// What closing the window does (U.6d d5, U.13): ask each time, minimize
+/// to the tray, or quit. Stored in 3.x's keys: "ask" is `dontAskExit` off;
+/// the other two turn it on and remember the action in `exitChoose`.
+class CloseWindowTile extends ConsumerWidget {
+  /// Creates the row.
+  const new({required this.entry, super.key});
+
+  /// The entry drawn.
+  final SettingsEntry entry;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ask = !watchSetting(ref, Settings.dontAskExit);
+    final action = watchSetting(ref, Settings.exitChoose);
+    final current = ask ? 'ask' : action;
+    final options = <SettingsChoice<String>>[
+      (value: 'ask', label: i18n('settings_close_ask'), description: i18n('settings_close_ask_desc')),
+      (value: 'minimize', label: i18n('settings_close_minimize'), description: i18n('settings_close_minimize_desc')),
+      (value: 'exit', label: i18n('settings_close_exit'), description: null),
+    ];
+    return SettingsLinkRow(
+      key: entry.rowKey,
+      icon: AppIcons.settingsCloseWindow,
+      title: entry.titleText,
+      subtitle: entry.descriptionText,
+      value: options.firstWhere((option) => option.value == current, orElse: () => options.first).label,
+      onTap: () async {
+        final picked = await showChoiceDialog<String>(
+          context: context,
+          title: entry.titleText,
+          options: options,
+          selected: current,
+        );
+        if (picked == null || !context.mounted) return;
+        final settings = ref.read(storeProvider).settings;
+        await settings.setAll(
+          picked == 'ask' ? {Settings.dontAskExit: false} : {Settings.dontAskExit: true, Settings.exitChoose: picked},
+        );
+      },
+    );
+  }
 }
 
 /// The app's exit countdown (3.x `ExitSettingsController`'s stopwatch): runs
@@ -1050,7 +853,7 @@ String formatCountdown(Duration duration) {
   return '${two(duration.inHours)}:${two(duration.inMinutes % 60)}:${two(duration.inSeconds % 60)}';
 }
 
-/// The exit countdown's switch, showing the time left while it runs.
+/// The exit countdown's switch (3.x); switching it on starts the countdown.
 class AutoExitTile extends ConsumerWidget {
   /// Creates the row.
   const new({required this.entry, super.key});
@@ -1059,40 +862,72 @@ class AutoExitTile extends ConsumerWidget {
   final SettingsEntry entry;
 
   @override
+  Widget build(BuildContext context, WidgetRef ref) => SettingToggleTile(
+    entry: entry,
+    setting: Settings.enableAutoShutDownTime,
+    icon: AppIcons.settingsExitTimer,
+    onChanged: (_) => AutoExitTimer.instance.attach(ref.read(storeProvider).settings),
+  );
+}
+
+/// How long before the app exits (3.x "退出前等待时间"): the time left while
+/// the countdown runs (updated every second, only this row), the duration
+/// dialog shared with the sleep timer (U.6d d6).
+class AutoExitMinutesTile extends ConsumerWidget {
+  /// Creates the row.
+  const new({required this.entry, super.key});
+
+  /// The entry drawn.
+  final SettingsEntry entry;
+
+  @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final enabled = watchSetting(ref, Settings.enableAutoShutDownTime);
-    return KeyedSubtree(
-      key: entry.rowKey,
-      child: ValueListenableBuilder<Duration?>(
-        valueListenable: AutoExitTimer.instance.remaining,
-        builder: (context, left, _) => context.settingsSwitch(
-          title: entry.titleText,
-          subtitle: enabled && left != null
-              ? '${i18n('remaining_time')}: ${formatCountdown(left)}'
-              : entry.descriptionText,
-          icon: Remix.timer_flash_line,
-          value: enabled,
-          onChanged: (on) => writeSetting(ref, Settings.enableAutoShutDownTime, on),
-        ),
+    final running = watchSetting(ref, Settings.enableAutoShutDownTime);
+    return ValueListenableBuilder<Duration?>(
+      valueListenable: AutoExitTimer.instance.remaining,
+      builder: (context, left, _) => SettingNumberTile(
+        entry: entry,
+        setting: Settings.autoShutDownTime,
+        icon: AppIcons.settingsExitMinutes,
+        presets: const [15, 30, 45, 60, 90, 120, 180],
+        label: (value) => '$value ${i18n('minute')}',
+        unit: i18n('minute'),
+        hint: i18n('settings_exit_timer_hint'),
+        inputLabel: i18n('custom_duration'),
+        rangeText: i18n('app_exit_timer_custom_hint'),
+        subtitle: running && left != null ? '${i18n('remaining_time')}: ${formatCountdown(left)}' : null,
       ),
     );
   }
 }
 
-/// The refresh-rate policy (Android) with the display's current and highest
-/// rate and the rates it offers (3.x showed "· 60 / 120 Hz" after the mode).
+/// The refresh-rate policy (3.x "界面刷新率", U.6d d3, d4): the policy on
+/// the right, the display's rates as the explanation (on Windows the
+/// monitor's mode, updated when the window moves to another monitor; 3.x's
+/// "Windows 动态刷新率" row); the dialog explains each policy and can read
+/// the display again.
 class RefreshRateTile extends StatefulWidget {
-  /// Creates the row with the policy's [options].
-  const new({required this.entry, required this.options, this.hint, super.key});
+  /// Creates the row.
+  const new({required this.entry, super.key});
 
   /// The entry drawn.
   final SettingsEntry entry;
 
-  /// The policies.
-  final List<SettingsChoice<String>> Function() options;
+  /// The policies, with their energy use (3.x).
+  static List<SettingsChoice<String>> options() => [
+    for (final (mode, energy) in const [
+      ('powerSaving', 'refresh_rate_energy_low'),
+      ('balanced', 'refresh_rate_energy_medium'),
+      ('performance', 'refresh_rate_energy_high'),
+    ])
+      (value: mode, label: '${i18n(_labels[mode]!)} · ${i18n(energy)}', description: i18n('${_labels[mode]!}_desc')),
+  ];
 
-  /// A line above the options.
-  final String? hint;
+  static const Map<String, String> _labels = {
+    'powerSaving': 'refresh_rate_power_saving',
+    'balanced': 'refresh_rate_balanced',
+    'performance': 'refresh_rate_performance',
+  };
 
   @override
   State<RefreshRateTile> createState() => _RefreshRateTileState();
@@ -1105,72 +940,54 @@ class _RefreshRateTileState extends State<RefreshRateTile> {
     unawaited(DisplayMode.refresh());
   }
 
-  @override
-  Widget build(BuildContext context) => ValueListenableBuilder<DisplayModeInfo?>(
-    valueListenable: DisplayMode.info,
-    builder: (context, info, _) {
-      final description = widget.entry.descriptionText ?? '';
-      final rates = info == null
-          ? ''
-          : '\n${i18n('settings_display_rates', args: {'current': info.rateLabel, 'supported': info.supportedLabel})}';
-      return SettingChoiceTile<String>(
-        entry: widget.entry,
-        setting: Settings.refreshRateMode,
-        icon: Remix.speed_up_line,
-        options: widget.options,
-        hint: widget.hint,
-        subtitle: '$description$rates',
+  String _rates(DisplayModeInfo? info, double fallback) {
+    if (info == null) {
+      if (DisplayMode.supported) return i18n('display_mode_detecting');
+      final rate = '${fallback.round()}';
+      return i18n('settings_refresh_rate_rates', args: {'current': rate, 'max': rate});
+    }
+    final current = '${info.currentRefreshRate.round()}';
+    final max = '${info.maxRefreshRate.round()}';
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      return i18n(
+        'settings_refresh_rate_monitor',
+        args: {'width': '${info.width ?? '?'}', 'height': '${info.height ?? '?'}', 'current': current, 'max': max},
       );
-    },
-  );
-}
-
-/// Windows' display (3.x "Windows 动态刷新率"): the monitor the window is on,
-/// its current and highest rate; updates when the window moves to another
-/// monitor or the mode changes; a tap reads it again. Windows picks the
-/// rate itself, the app cannot change it.
-class WindowsDisplayTile extends StatefulWidget {
-  /// Creates the row.
-  const new({required this.entry, super.key});
-
-  /// The entry drawn.
-  final SettingsEntry entry;
-
-  @override
-  State<WindowsDisplayTile> createState() => _WindowsDisplayTileState();
-}
-
-class _WindowsDisplayTileState extends State<WindowsDisplayTile> {
-  @override
-  void initState() {
-    super.initState();
-    unawaited(DisplayMode.refresh());
+    }
+    return i18n('settings_refresh_rate_rates', args: {'current': current, 'max': max});
   }
 
   @override
-  Widget build(BuildContext context) => ValueListenableBuilder<DisplayModeInfo?>(
-    valueListenable: DisplayMode.info,
-    builder: (context, info, _) {
-      final mode = info == null
-          ? i18n('display_mode_detecting')
-          : '${info.width} × ${info.height} · ${info.currentRefreshRate.round()} Hz '
-                '(${i18n('display_mode_max')} ${info.maxRefreshRate.round()} Hz)';
-      return KeyedSubtree(
-        key: widget.entry.rowKey,
-        child: context.settingsTile(
-          icon: Remix.computer_line,
-          title: widget.entry.titleText,
-          subtitle: '${widget.entry.descriptionText ?? ''}\n$mode',
-          trailing: const Icon(Icons.refresh_rounded),
-          onTap: () => unawaited(DisplayMode.refresh()),
-        ),
-      );
-    },
-  );
+  Widget build(BuildContext context) {
+    final fallback = View.maybeOf(context)?.display.refreshRate ?? 60;
+    return ValueListenableBuilder<DisplayModeInfo?>(
+      valueListenable: DisplayMode.info,
+      builder: (context, info, _) {
+        final rates = _rates(info, fallback);
+        return SettingChoiceTile<String>(
+          entry: widget.entry,
+          setting: Settings.refreshRateMode,
+          icon: AppIcons.settingsRefreshRate,
+          options: RefreshRateTile.options,
+          subtitle: rates,
+          hint: '${i18n('refresh_rate_mode_hint')}\n$rates',
+          valueText: (current, value) => i18n('settings_refresh_rate_short_$value'),
+          action: DisplayMode.supported
+              ? (
+                  label: i18n('settings_display_recheck'),
+                  key: const ValueKey('settings-display-recheck'),
+                  onPressed: () => unawaited(DisplayMode.refresh()),
+                )
+              : null,
+        );
+      },
+    );
+  }
 }
 
-/// Start with Windows (3.x): the switch, and while the entry is written
-/// "applying", or in red when writing it failed.
+/// Start with Windows (3.x): while the entry is written the switch cannot
+/// be used ("正在更新 Windows 启动项…"); when writing failed the
+/// explanation turns red.
 class StartupTile extends ConsumerWidget {
   /// Creates the row.
   const new({required this.entry, super.key});
@@ -1183,28 +1000,20 @@ class StartupTile extends ConsumerWidget {
     final enabled = watchSetting(ref, Settings.enableStartUp);
     return ValueListenableBuilder<StartupEntryState>(
       valueListenable: DesktopShell.startupState,
-      builder: (context, state, _) {
-        final applying = state == StartupEntryState.applying;
-        return KeyedSubtree(
-          key: entry.rowKey,
-          child: context.settingsTile(
-            icon: Remix.windows_line,
-            title: entry.titleText,
-            subtitle: switch (state) {
-              StartupEntryState.applying => i18n('startup_applying'),
-              StartupEntryState.failed => i18n('settings_startup_failed'),
-              StartupEntryState.idle => entry.descriptionText,
-            },
-            subtitleColor: state == StartupEntryState.failed ? Theme.of(context).colorScheme.error : null,
-            trailing: Switch(
-              key: const ValueKey('settings-startup-switch'),
-              value: enabled,
-              onChanged: applying ? null : (value) => writeSetting(ref, Settings.enableStartUp, value),
-            ),
-            onTap: applying ? null : () => writeSetting(ref, Settings.enableStartUp, !enabled),
-          ),
-        );
-      },
+      builder: (context, state, _) => SettingsSwitchRow(
+        key: entry.rowKey,
+        icon: AppIcons.settingsStartup,
+        title: entry.titleText,
+        subtitle: switch (state) {
+          StartupEntryState.applying => i18n('startup_applying'),
+          StartupEntryState.failed => i18n('settings_startup_failed'),
+          StartupEntryState.idle => entry.descriptionText,
+        },
+        subtitleColor: state == StartupEntryState.failed ? Theme.of(context).colorScheme.error : null,
+        value: enabled,
+        busy: state == StartupEntryState.applying,
+        onChanged: (value) => writeSetting(ref, Settings.enableStartUp, value),
+      ),
     );
   }
 }

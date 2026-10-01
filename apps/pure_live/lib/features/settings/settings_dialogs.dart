@@ -6,13 +6,17 @@ import 'package:pure_live/i18n/i18n.dart';
 /// One option of [showChoiceDialog].
 typedef SettingsChoice<T> = ({T value, String label, String? description});
 
+/// A button at the bottom start of a dialog that does something without
+/// closing it ("重新检测").
+typedef SettingsDialogAction = ({String label, VoidCallback onPressed, Key? key});
+
 /// The dialog frame of the settings: at most 420 wide, scrolls when the
 /// screen is short, tighter margins on narrow or large-text screens (3.x
 /// `ThemeChoiceDialog`); 24 px corners like every other dialog (3.x used 16
 /// here, U.6b Q14).
 class SettingsDialogFrame extends StatelessWidget {
   /// Creates the frame.
-  const new({required this.title, required this.child, this.actions = const [], super.key});
+  const new({required this.title, required this.child, this.actions = const [], this.leadingAction, super.key});
 
   /// The title.
   final String title;
@@ -22,6 +26,9 @@ class SettingsDialogFrame extends StatelessWidget {
 
   /// Buttons under the content.
   final List<Widget> actions;
+
+  /// A button at the bottom start ("重新检测").
+  final Widget? leadingAction;
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +54,17 @@ class SettingsDialogFrame extends StatelessWidget {
                 child: child,
               ),
             ),
-            if (actions.isNotEmpty)
+            if (actions.isNotEmpty || leadingAction != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                child: OverflowBar(alignment: MainAxisAlignment.end, spacing: 8, children: actions),
+                child: Row(
+                  children: [
+                    ?leadingAction,
+                    Expanded(
+                      child: OverflowBar(alignment: MainAxisAlignment.end, spacing: 8, children: actions),
+                    ),
+                  ],
+                ),
               )
             else
               const SizedBox(height: 12),
@@ -61,10 +75,94 @@ class SettingsDialogFrame extends StatelessWidget {
   }
 }
 
+/// One option of a choice dialog: an optional picture, the label, a line of
+/// explanation; the current one in the primary colour with a tick (UI_PLAN
+/// §7, U.6c c7). A tap picks it.
+class SettingsChoiceRow extends StatelessWidget {
+  /// Creates the row.
+  const new({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.description,
+    this.leading,
+    super.key,
+  });
+
+  /// The option's name.
+  final String label;
+
+  /// Its explanation.
+  final String? description;
+
+  /// A picture before the name (a platform's logo).
+  final Widget? leading;
+
+  /// Whether it is the current option.
+  final bool selected;
+
+  /// Picks it.
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final base = theme.textTheme.bodyMedium ?? const TextStyle();
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              children: [
+                if (leading case final leading?) ...[leading, const SizedBox(width: 12)],
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: base.copyWith(
+                          fontSize: 15,
+                          fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                          color: selected ? colors.primary : colors.onSurface,
+                        ),
+                      ),
+                      if (description case final description?)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            description,
+                            style: base.copyWith(fontSize: 12, height: 1.45, color: colors.onSurfaceVariant),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(width: 24, child: selected ? Icon(AppIcons.selected, size: 22, color: colors.primary) : null),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// A single-choice list; picking an option closes it with that value (3.x
-/// `ThemeChoiceDialog`, plus a line of explanation per option). Without
-/// [showCancel] (theme mode, language: 3.x had no buttons) it closes by a
-/// tap outside, back or Esc.
+/// `ThemeChoiceDialog`, plus a line of explanation per option); the current
+/// one in the primary colour with a tick (U.6c c7). "取消", a tap outside,
+/// back or Esc close it unchanged. Without [showCancel] (theme mode,
+/// language: 3.x had no buttons) there is no button. [action] adds a button
+/// at the bottom start that keeps the dialog open ("重新检测").
 Future<T?> showChoiceDialog<T>({
   required BuildContext context,
   required String title,
@@ -72,10 +170,15 @@ Future<T?> showChoiceDialog<T>({
   required T selected,
   String? hint,
   bool showCancel = true,
+  Widget? Function(T value)? leadingOf,
+  SettingsDialogAction? action,
 }) => showDialog<T>(
   context: context,
   builder: (context) => SettingsDialogFrame(
     title: title,
+    leadingAction: action == null
+        ? null
+        : TextButton(key: action.key, onPressed: action.onPressed, child: Text(action.label)),
     actions: [if (showCancel) TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel')))],
     child: Column(
       mainAxisSize: MainAxisSize.min,
@@ -84,27 +187,21 @@ Future<T?> showChoiceDialog<T>({
         if (hint != null)
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-            child: Text(hint, style: Theme.of(context).textTheme.bodySmall),
+            child: Text(
+              hint,
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
           ),
-        RadioGroup<T>(
-          groupValue: selected,
-          onChanged: (value) {
-            if (value != null) Navigator.of(context).pop(value);
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final option in options)
-                RadioListTile<T>(
-                  key: ValueKey('settings-choice-${option.value}'),
-                  value: option.value,
-                  title: Text(option.label),
-                  subtitle: option.description == null ? null : Text(option.description!),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                ),
-            ],
+        for (final option in options)
+          SettingsChoiceRow(
+            key: ValueKey('settings-choice-${option.value}'),
+            label: option.label,
+            description: option.description,
+            leading: leadingOf?.call(option.value),
+            selected: option.value == selected,
+            onTap: () => Navigator.of(context).pop(option.value),
           ),
-        ),
       ],
     ),
   ),
@@ -153,6 +250,8 @@ Future<int?> showNumberDialog({
   required String Function(int value) label,
   String? hint,
   String? unit,
+  String? inputLabel,
+  String? rangeText,
 }) => showDialog<int>(
   context: context,
   builder: (context) => _NumberDialog(
@@ -164,6 +263,8 @@ Future<int?> showNumberDialog({
     label: label,
     hint: hint,
     unit: unit,
+    inputLabel: inputLabel,
+    rangeText: rangeText,
   ),
 );
 
@@ -177,6 +278,8 @@ class _NumberDialog extends StatefulWidget {
     required this.label,
     required this.hint,
     required this.unit,
+    required this.inputLabel,
+    required this.rangeText,
   });
 
   final String title;
@@ -187,16 +290,21 @@ class _NumberDialog extends StatefulWidget {
   final String Function(int value) label;
   final String? hint;
   final String? unit;
+  final String? inputLabel;
+  final String? rangeText;
 
   @override
   State<_NumberDialog> createState() => _NumberDialogState();
 }
 
 class _NumberDialogState extends State<_NumberDialog> {
-  late final TextEditingController _input = TextEditingController(
-    text: widget.presets.contains(widget.current) ? '' : '${widget.current}',
-  );
+  // The current value is in the field (U.6c 对话框 2), so typing starts
+  // from it.
+  late final TextEditingController _input = TextEditingController(text: '${widget.current}');
   String? _error;
+
+  String get _range =>
+      widget.rangeText ?? i18n('settings_number_range', args: {'min': '${widget.min}', 'max': '${widget.max}'});
 
   @override
   void dispose() {
@@ -207,7 +315,7 @@ class _NumberDialogState extends State<_NumberDialog> {
   void _save() {
     final value = int.tryParse(_input.text.trim());
     if (value == null || value < widget.min || value > widget.max) {
-      setState(() => _error = i18n('settings_number_range', args: {'min': '${widget.min}', 'max': '${widget.max}'}));
+      setState(() => _error = _range);
       return;
     }
     Navigator.of(context).pop(value);
@@ -229,24 +337,32 @@ class _NumberDialogState extends State<_NumberDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.hint case final hint?) ...[
-              Text(hint, style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                hint,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 13, color: colors.onSurfaceVariant),
+              ),
               const SizedBox(height: 12),
             ],
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final value in widget.presets)
-                  ChoiceChip(
-                    key: ValueKey('settings-number-$value'),
-                    label: Text(widget.label(value)),
-                    selected: value == widget.current,
-                    selectedColor: colors.primaryContainer,
-                    onSelected: (_) => Navigator.of(context).pop(value),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
+            if (widget.presets.isNotEmpty) ...[
+              // A quick pick takes effect at once and closes (U.6d Y2).
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final value in widget.presets)
+                    ChoiceChip(
+                      key: ValueKey('settings-number-$value'),
+                      label: Text(widget.label(value)),
+                      selected: value == widget.current,
+                      showCheckmark: false,
+                      selectedColor: colors.primaryContainer,
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+                      onSelected: (_) => Navigator.of(context).pop(value),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
             TextField(
               key: const ValueKey('settings-number-input'),
               controller: _input,
@@ -257,9 +373,9 @@ class _NumberDialogState extends State<_NumberDialog> {
               },
               onSubmitted: (_) => _save(),
               decoration: InputDecoration(
-                labelText: i18n('custom_input'),
+                labelText: widget.inputLabel ?? i18n('settings_custom_value'),
                 suffixText: widget.unit,
-                helperText: i18n('settings_number_range', args: {'min': '${widget.min}', 'max': '${widget.max}'}),
+                helperText: _range,
                 errorText: _error,
                 border: const OutlineInputBorder(),
               ),
@@ -335,21 +451,5 @@ Future<Color?> showColorDialog({
         ),
       ),
     ),
-  );
-}
-
-/// The section of a settings sub-page: a padded, width-limited list.
-class SettingsListView extends StatelessWidget {
-  /// Creates the list.
-  const new({required this.children, super.key});
-
-  /// The rows.
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) => ListView(
-    physics: const PureLiveScrollPhysics(),
-    padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-    children: children,
   );
 }

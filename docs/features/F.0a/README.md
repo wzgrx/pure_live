@@ -1,6 +1,6 @@
 # F.0a 接回 M12.5 半成品：权限、分享接收、剪贴板口令、播放代理
 
-- 状态：开发中（2026-10-02，和 U.14 的 Android 部分一起做）
+- 状态：完成（2026-10-02，[记录](../records/F.0a.md)）
 - 档位：必须；规模：中
 - 功能点：F-AND-01、F-AND-02、F-AND-03、F-NET-02（见 [INVENTORY.md](../INVENTORY.md)）；界面照 [U.14](../../ui/compare/U.14/README.md)（已确认）和 U.3d 的 `showRoomPrompt`
 - 涉及代码：`apps/pure_live/lib/app/`（新 `app/intake/`）、`platform/`、`shared/`、`features/settings/`（剪贴板开关、接上权限）、`features/toolbox/`（粘贴口令）、`android/`；`packages/live_store`（只添加）
@@ -67,3 +67,4 @@ U.14 的 Android 部分（c1～c15）一起做，逐条见 [records/U.14](../../
 |---|---|
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比；发现清点 F-NET-02“播放和录制走它”与 v3 不符（录制走应用代理），改成 X1 |
+| 2026-10-02 | 开发完成（和 U.14 的 Android 部分一起），等合并和 K90 验证 |

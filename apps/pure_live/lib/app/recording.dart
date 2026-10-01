@@ -20,7 +20,8 @@ const String recorderTasksKey = 'recorder.tasks';
 /// window; an extra desktop window shares the data (docs/ui/compare/U.13
 /// c14) but records on its own, so its list is kept apart (each list is
 /// written whole) and dropped when the window closes.
-String recorderTasksKeyFor(String instanceId) => instanceId.isEmpty ? recorderTasksKey : '$recorderTasksKey.$instanceId';
+String recorderTasksKeyFor(String instanceId) =>
+    instanceId.isEmpty ? recorderTasksKey : '$recorderTasksKey.$instanceId';
 
 /// How many of [tasks] hold a recording (preparing, writing, reconnecting
 /// or joining the file).

@@ -125,7 +125,7 @@ U.6d（设置 → 通用）：
 
 ## 门禁
 
-- `check_ui_structure.py` 通过；功能目录直接写的颜色和图标没有变化（`home` 仍是 0），基线不用改。`app/desktop/` 不在门禁范围里，这次也把原来的 `Colors.*`、`Icons.*`、`Color(0xFFE81123)` 换成了 `live_ui` 的角色和 `AppIcons`（标题栏 11 处 → 0）。
+- `check_ui_structure.py` 通过；功能目录直接写的颜色和图标没有变化（`home` 仍是 0），基线不用改。`app/desktop/` 不在门禁范围里，这次也把原来的 `Colors.*`、`Icons.*`、`Color(0xFFE81123)` 换成了 `live_ui` 的角色和 `AppIcons`（`app/desktop/` 10 处 → 0）。
 - 没有新增功能之间的引用；首页引用 `app/desktop/desktop_window.dart`（外壳，不是功能目录）。
 
 ## 测试

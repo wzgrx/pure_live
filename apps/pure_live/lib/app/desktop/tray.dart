@@ -38,9 +38,8 @@ String trayRowLabel(TrayRow row, {required bool visible, required int recording}
 };
 
 /// The tray icon's hint: "纯粹直播", and how many rooms record (T4).
-String trayTooltip({required int recording}) => recording > 0
-    ? i18n('tray_tooltip_recording', args: {'count': '$recording'})
-    : i18nOr('app_name', 'PureLive');
+String trayTooltip({required int recording}) =>
+    recording > 0 ? i18n('tray_tooltip_recording', args: {'count': '$recording'}) : i18nOr('app_name', 'PureLive');
 
 /// The tray icon of the main window (3.x `DesktopTrayService`): a click
 /// shows the window, the menu shows or hides it and exits; while recording

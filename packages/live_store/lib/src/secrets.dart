@@ -88,7 +88,9 @@ final class SecretStore {
     for (var attempt = 0; attempt < 5; attempt++) {
       final generation = _generation;
       final rows = await _db.rows('SELECT ref, sealed FROM secrets');
-      final stored = <String, Uint8List>{for (final row in rows) row.read<String>('ref'): row.read<Uint8List>('sealed')};
+      final stored = <String, Uint8List>{
+        for (final row in rows) row.read<String>('ref'): row.read<Uint8List>('sealed'),
+      };
       final opened = <String, String?>{};
       for (final MapEntry(key: ref, value: bytes) in stored.entries) {
         if (_sealed[ref] == base64.encode(bytes)) continue;

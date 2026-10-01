@@ -28,13 +28,12 @@ enum CloseAction {
 typedef CloseChoice = ({CloseAction action, bool remember});
 
 /// Asks for a [CloseChoice]; null when the dialog was dismissed.
-typedef CloseAsk =
-    Future<CloseChoice?> Function({
-      required bool tray,
-      required int recording,
-      required bool askRemember,
-      required bool remember,
-    });
+typedef CloseAsk = Future<CloseChoice?> Function({
+  required bool tray,
+  required int recording,
+  required bool askRemember,
+  required bool remember,
+});
 
 /// What closing a window does (3.x `Utils.showExitDialog`, `handleWindowClose`
 /// and the tray's exit; docs/ui/compare/U.13 c7–c10):
@@ -170,13 +169,7 @@ Future<CloseChoice?> showCloseWindowDialog(
 /// "最小化" without a tray) and a red "退出应用".
 class CloseWindowDialog extends StatefulWidget {
   /// Creates the dialog.
-  const new({
-    required this.tray,
-    this.recording = 0,
-    this.askRemember = true,
-    this.remember = false,
-    super.key,
-  });
+  const new({required this.tray, this.recording = 0, this.askRemember = true, this.remember = false, super.key});
 
   /// Whether the window hides to a tray icon (else it minimizes to the
   /// taskbar, and the words say so).

@@ -93,10 +93,7 @@ class DesktopTitleBar extends StatelessWidget {
                                     '[${size.width.round()} × ${size.height.round()}]',
                                     key: const ValueKey('title-bar-size'),
                                     maxLines: 1,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: foreground.withValues(alpha: 0.6),
-                                    ).tabular,
+                                    style: TextStyle(fontSize: 12, color: foreground.withValues(alpha: 0.6)).tabular,
                                   ),
                                 ),
                         ),
@@ -235,10 +232,7 @@ class _IconButtonState extends State<_IconButton> {
           width: 24,
           height: 24,
           alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: _hovered ? widget.hover : null,
-            borderRadius: BorderRadius.circular(4),
-          ),
+          decoration: BoxDecoration(color: _hovered ? widget.hover : null, borderRadius: BorderRadius.circular(4)),
           child: Image.asset('assets/icons/icon.png', width: 16, height: 16),
         ),
       ),

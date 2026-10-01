@@ -86,8 +86,7 @@ abstract final class DesktopWindow {
 
   /// Whether "open in a new window" is offered with [settings] (c12: both
   /// entries follow the setting).
-  static bool offersNewWindow(SettingsStore settings) =>
-      canOpenNewWindow && settings.get(Settings.enableNewWindowPlay);
+  static bool offersNewWindow(SettingsStore settings) => canOpenNewWindow && settings.get(Settings.enableNewWindowPlay);
 
   /// Opens a new window that shares this one's data (c14); [room] plays in
   /// it right away. Says "新窗口启动失败，请重试" and returns false when the
@@ -363,7 +362,8 @@ final class DesktopShell with WindowListener {
     try {
       final displays = await screenRetriever.getAllDisplays();
       return titleRowOnScreen(position, size, [
-        for (final display in displays) (display.visiblePosition ?? Offset.zero) & (display.visibleSize ?? display.size),
+        for (final display in displays)
+          (display.visiblePosition ?? Offset.zero) & (display.visibleSize ?? display.size),
       ]);
     } on Object {
       return false;

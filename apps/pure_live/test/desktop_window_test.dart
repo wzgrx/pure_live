@@ -165,7 +165,11 @@ void main() {
       ];
       for (final (key, glyph, left) in buttons) {
         expect(tester.getRect(_key(key)), Rect.fromLTWH(left, 0, 46, 32), reason: key);
-        expect(find.descendant(of: _key(key), matching: find.byIcon(glyph)), findsOneWidget, reason: key);
+        expect(
+          find.descendant(of: _key(key), matching: find.byIcon(glyph)),
+          findsOneWidget,
+          reason: key,
+        );
         expect(tester.getSize(find.descendant(of: _key(key), matching: find.byType(Icon))), const Size(16, 16));
       }
     });
@@ -268,10 +272,7 @@ void main() {
       await _pumpWindow(tester);
       final light = const LiveTheme(primaryColor: _seed).light.colorScheme;
       expect(tester.widget<Material>(_key('title-bar')).color, light.surface);
-      expect(
-        tester.widget<Text>(find.text('纯粹直播')).style!.color,
-        light.onSurface,
-      );
+      expect(tester.widget<Text>(find.text('纯粹直播')).style!.color, light.onSurface);
 
       await _pumpWindow(tester, mode: ThemeMode.dark);
       final dark = const LiveTheme(primaryColor: _seed).dark.colorScheme;
@@ -292,9 +293,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('in a room: "纯粹直播 · 晚风"; the taskbar name "晚风 - 纯粹直播"; menus over it keep it (c11)', (
-      tester,
-    ) async {
+    testWidgets('in a room: "纯粹直播 · 晚风"; the taskbar name "晚风 - 纯粹直播"; menus over it keep it (c11)', (tester) async {
       await _pumpWindow(tester);
       final navigator = tester.state<NavigatorState>(find.byType(Navigator).last)
         ..push(
@@ -314,7 +313,12 @@ void main() {
       expect(roomNameOf(liveRouteObserver.topPage.value), '晚风');
       expect(nativeWindowTitle('纯粹直播', roomNameOf(liveRouteObserver.topPage.value)), '晚风 - 纯粹直播');
 
-      unawaited(showDialog<void>(context: navigator.context, builder: (_) => const AlertDialog(content: Text('m'))));
+      unawaited(
+        showDialog<void>(
+          context: navigator.context,
+          builder: (_) => const AlertDialog(content: Text('m')),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.text(' · 晚风'), findsOneWidget, reason: 'a dialog over the room is not a page');
       navigator.pop();
@@ -325,7 +329,15 @@ void main() {
       expect(_key('title-bar-room'), findsNothing);
       expect(roomNameOf(liveRouteObserver.topPage.value), isNull);
       expect(nativeWindowTitle('纯粹直播', null), '纯粹直播');
-      expect(roomNameOf(RouteSettings(name: RoutePath.kLivePlay, arguments: LiveRoom(platform: 'a', roomId: '2'))), isNull);
+      expect(
+        roomNameOf(
+          RouteSettings(
+            name: RoutePath.kLivePlay,
+            arguments: LiveRoom(platform: 'a', roomId: '2'),
+          ),
+        ),
+        isNull,
+      );
     });
 
     testWidgets('the smallest window 360 × 400 and a 1.5× system font: one line, nothing spills', (tester) async {
@@ -377,8 +389,14 @@ void main() {
       expect(minimize.center.dy, closeTo(exit.center.dy, 1), reason: 'one row');
       expect(minimize.left - dialog.left, lessThan(24), reason: 'at the left end');
       expect(dialog.right - exit.right, 24, reason: 'at the right end');
-      expect(tester.getRect(find.text('不再询问')).top, greaterThan(tester.getRect(find.text('退出应用，还是最小化到托盘继续运行？')).bottom));
-      expect(tester.getRect(find.text('以后可以在“设置 → 通用 → 关闭窗口时”里改')).left, closeTo(tester.getRect(find.text('不再询问')).left, 6));
+      expect(
+        tester.getRect(find.text('不再询问')).top,
+        greaterThan(tester.getRect(find.text('退出应用，还是最小化到托盘继续运行？')).bottom),
+      );
+      expect(
+        tester.getRect(find.text('以后可以在“设置 → 通用 → 关闭窗口时”里改')).left,
+        closeTo(tester.getRect(find.text('不再询问')).left, 6),
+      );
       final scheme = const LiveTheme(primaryColor: _seed).light.colorScheme;
       final exitStyle = tester.widget<FilledButton>(_key('close-exit')).style!;
       expect(exitStyle.backgroundColor!.resolve({}), scheme.error);
@@ -587,7 +605,11 @@ void main() {
     test('a remembered place off every display goes back to the middle (c6)', () {
       const displays = [Rect.fromLTWH(0, 0, 1920, 1040)];
       expect(titleRowOnScreen(const Offset(100, 80), const Size(1280, 720), displays), isTrue);
-      expect(titleRowOnScreen(const Offset(-1000, 80), const Size(1280, 720), displays), isTrue, reason: 'partly on screen');
+      expect(
+        titleRowOnScreen(const Offset(-1000, 80), const Size(1280, 720), displays),
+        isTrue,
+        reason: 'partly on screen',
+      );
       expect(
         titleRowOnScreen(const Offset(2100, 80), const Size(1280, 720), displays),
         isFalse,

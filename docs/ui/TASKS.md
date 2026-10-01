@@ -56,8 +56,8 @@
 | [U.2e](compare/U.2e/README.md) | **弹幕列表和弹幕设置页**：弹幕列表、醒目留言、弹幕设置标签页、屏蔽关键词 | 竖屏、横屏、宽屏 | [5 / 0 / 0 / 9](INVENTORY.md#u2e) | U.2a | 完成（2026-10-01，[记录](records/U.2e.md)） |
 | [U.2f](compare/U.2f/README.md) | **弹窗**：清晰度、线路、录制、弹幕设置、右上角菜单、长按弹幕；切换直播间、定时关闭、房间音量、投屏、获取直链（子对话框下一批） | 竖屏、横屏、宽屏 | [1 / 12 / 0 / 6](INVENTORY.md#u2f) | U.2a | 完成（2026-10-01，[记录](records/U.2f.md)） |
 | [U.2g](compare/U.2g/README.md) | **直播间的状态**：加载、未开播、播放失败和重连、受限、纯音频；网络电视节目单和回看 | 竖屏、横屏、宽屏 | [0 / 1 / 1 / 0](INVENTORY.md#u2g) | U.2a | 完成（2026-10-01，[记录](records/U.2g.md)） |
-| [U.2h](compare/U.2h/README.md) | **飞行弹幕渲染**：渲染选型和优化（计划书第 9.1 节），速度按时间算，代码在 `live_danmaku` | 竖屏、横屏、宽屏 | — | — | 设计已确认，待开发（并入 F.2a） |
-| [U.2i](compare/U.2i/README.md) | **刷新率和帧率匹配**：v3 的三种刷新率模式；播放时匹配视频帧率（计划书第 9.1 节） | Android、电视 | — | — | 设计已确认，待开发（并入 F.2a） |
+| [U.2h](compare/U.2h/README.md) | **飞行弹幕渲染**：渲染选型和优化（计划书第 9.1 节），速度按时间算，代码在 `live_danmaku` | 竖屏、横屏、宽屏 | — | — | 完成（2026-10-02，[记录](records/U.2h.md)） |
+| [U.2i](compare/U.2i/README.md) | **刷新率和帧率匹配**：v3 的三种刷新率模式；播放时匹配视频帧率（计划书第 9.1 节） | Android、电视 | — | — | 完成（2026-10-02，[记录](records/U.2i.md)） |
 | [U.2k](compare/U.2k/README.md) | **本地互动**：v3 的本地互动体验：本地弹幕输入（全屏输入框、竖屏入口）、本地弹幕样式编辑、模拟礼物特效、本地互动面板和设置页；v4 还没有这个功能，设计和实现一起做 | 竖屏、横屏、宽屏 | [0 / 3 / 0 / 1](INVENTORY.md#u2k) | U.2f | 完成（2026-10-01，[记录](records/U.2k.md)） |
 | [U.2j](compare/U.2j/README.md) | **小窗**：应用内悬浮小窗、Android 和 iOS 画中画、Windows 和 Linux 桌面小窗（可置顶）、小窗弹幕 | 竖屏、横屏、宽屏 | [0 / 0 / 1 / 0](INVENTORY.md#u2j) | U.2a | 完成（2026-10-01，[记录](records/U.2j.md)） |
 
@@ -337,3 +337,5 @@ Android TV，遥控器操作，以 pure_live_TV 为基线（不是 v3），1920�
 | U.11a | — | 日志页在 `features/backup/log_page.dart`，路由 `RoutePath.kLogs`；设置总览“数据”组最后一行走路由（U.6e） |
 | U.11a～c | — | 备份数据、恢复预览、备份文件移到 `shared/backup/`（设备同步也用）；扫码页做成共用 `shared/qr_scan.dart`；“WebDav”统一写“WebDAV” |
 | U.11c | 以后（macOS） | v4 还没有 macOS 工程；以后建工程时 `Release.entitlements` 要加 `com.apple.security.network.server` |
+| U.2h | U.8（以后） | 弹幕层新参数（帧率上限、暂停时停住、常亮跟设置）多画面还没接，要的话各加一个参数；同屏最多 48 条 |
+| U.2i | — | 只在 Android 12 起声明视频帧率（Android 11 的接口没有“只在无缝时切换”，可能黑屏），Android 11 只改窗口希望的刷新率 |

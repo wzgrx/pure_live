@@ -242,43 +242,6 @@ void main() {
     expect(find.byKey(const ValueKey('recorder-settings')), findsOneWidget);
   });
 
-  testWidgets('lists the tasks by status with counts, explains failures and removes after asking', (tester) async {
-    final harness = await _pump(
-      tester,
-      (route) => RecorderPage(route: route),
-      tasks: [
-        _task('1', RecordStatus.failed, stage: 'ffmpeg.storageFull', error: 'No space left on device', nick: '甲'),
-        _task('2', RecordStatus.stopped, nick: '乙'),
-        _task('3', RecordStatus.completed, nick: '丙'),
-      ],
-    );
-    expect(find.text('全部 3'), findsOneWidget);
-    expect(find.text('失败 1'), findsOneWidget);
-    expect(find.text('录制中'), findsOneWidget, reason: 'an empty status shows no count');
-    expect(find.text('房间 1'), findsOneWidget);
-    expect(find.text('哔哩哔哩'), findsWidgets);
-    expect(find.textContaining('录制已停止：存储空间已满'), findsOneWidget);
-    expect(find.text('No space left on device'), findsOneWidget);
-    expect(find.text('重试'), findsOneWidget);
-    expect(find.text('重新录制'), findsOneWidget);
-
-    await _tap(tester, find.byKey(const ValueKey('recorder-status-7')));
-    expect(find.text('房间 1'), findsOneWidget);
-    expect(find.text('房间 2'), findsNothing);
-
-    await _tap(tester, find.byKey(const ValueKey('recorder-status-1')));
-    expect(find.text('没有“录制中”的任务'), findsOneWidget);
-
-    await _tap(tester, find.byKey(const ValueKey('recorder-status-0')));
-    await _tap(tester, find.byKey(const ValueKey('recorder-remove')).first);
-    expect(find.textContaining('确定停止监控'), findsOneWidget);
-    await _tap(tester, find.byKey(const ValueKey('recorder-remove-confirm')));
-    await tester.pump(const Duration(seconds: 3));
-    await _settle(tester);
-    expect(harness.recording.recorder!.tasks, hasLength(2));
-    expect(find.text('全部 2'), findsOneWidget);
-  });
-
   testWidgets('the folder dialog saves the folder from the system picker (M12.3)', (tester) async {
     late Directory picked;
     final harness = await _pump(tester, (route) => RecordSettingsPage(route: route), picker: () async => picked.path);

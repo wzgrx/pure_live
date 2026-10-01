@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 
@@ -119,10 +121,15 @@ class SettingsGroup extends StatelessWidget {
     this.title,
     this.note,
     this.footer,
+    this.footerWidget,
     this.first = false,
     this.card = true,
     super.key,
   });
+
+  /// Something under the card other than a line of text (a note with a
+  /// link).
+  final Widget? footerWidget;
 
   /// Whether the children sit on the card; false lays them out as they are
   /// (chips, a preview) under the title.
@@ -195,6 +202,7 @@ class SettingsGroup extends StatelessWidget {
             ),
           ),
         if (footer case final footer?) SettingsNote(footer),
+        ?footerWidget,
       ],
     );
   }
@@ -240,6 +248,7 @@ class SettingsRow extends StatefulWidget {
     this.leading,
     this.subtitle,
     this.subtitleColor,
+    this.titleColor,
     this.trailing,
     this.stackTrailing = true,
     this.below,
@@ -247,6 +256,7 @@ class SettingsRow extends StatefulWidget {
     this.enabled = true,
     this.disabledReason,
     this.busy = false,
+    this.busyColor,
     this.selected = false,
     this.tooltip,
     super.key,
@@ -254,6 +264,9 @@ class SettingsRow extends StatefulWidget {
 
   /// The title.
   final String title;
+
+  /// The spinner's colour while [busy] (error red for clearing).
+  final Color? busyColor;
 
   /// The icon at the start (22 px, primary colour).
   final IconData? icon;
@@ -266,6 +279,10 @@ class SettingsRow extends StatefulWidget {
 
   /// The explanation's colour when it reports a problem (error red).
   final Color? subtitleColor;
+
+  /// The title's colour for a destructive action (error red: "清空本地缓存",
+  /// "恢复默认设置").
+  final Color? titleColor;
 
   /// Shown at the end (value, switch, swatch, counter).
   final Widget? trailing;
@@ -316,7 +333,7 @@ class _SettingsRowState extends State<SettingsRow> {
       fontSize: tv ? 17 : 15,
       fontWeight: FontWeight.w600,
       height: 1.4,
-      color: widget.selected ? colors.onSecondaryContainer : colors.onSurface,
+      color: widget.titleColor ?? (widget.selected ? colors.onSecondaryContainer : colors.onSurface),
     );
     final subtitleStyle = body.copyWith(
       fontSize: tv ? 14 : 12,
@@ -326,13 +343,16 @@ class _SettingsRowState extends State<SettingsRow> {
     );
     final subtitle = !widget.enabled && widget.disabledReason != null ? widget.disabledReason : widget.subtitle;
     final leading =
-        widget.leading ?? (widget.icon == null ? null : Icon(widget.icon, size: tv ? 24 : 22, color: colors.primary));
+        widget.leading ??
+        (widget.icon == null
+            ? null
+            : Icon(widget.icon, size: tv ? 24 : 22, color: widget.titleColor ?? colors.primary));
     final trailing = widget.busy
         ? SizedBox.square(
             dimension: 24,
             child: Padding(
               padding: const EdgeInsets.all(2),
-              child: CircularProgressIndicator(strokeWidth: 2.5, color: colors.primary),
+              child: CircularProgressIndicator(strokeWidth: 2.5, color: widget.busyColor ?? colors.primary),
             ),
           )
         : widget.trailing;
@@ -448,6 +468,7 @@ class SettingsLinkRow extends StatelessWidget {
     this.subtitleColor,
     this.value,
     this.valueWidget,
+    this.valueBelow = false,
     this.chevron = true,
     this.enabled = true,
     this.disabledReason,
@@ -462,6 +483,10 @@ class SettingsLinkRow extends StatelessWidget {
 
   /// The action.
   final VoidCallback? onTap;
+
+  /// Shows [value] under the explanation in the primary colour instead of
+  /// at the end (long values such as "跟随直播源（推荐）", U.6c c6).
+  final bool valueBelow;
 
   /// The icon.
   final IconData? icon;
@@ -504,9 +529,10 @@ class SettingsLinkRow extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final tv = SettingsRowStyle.tvOf(context);
     final value = this.value;
+    final below = valueBelow && value != null && value.isNotEmpty;
     final trailing = <Widget>[
       ?valueWidget,
-      if (value != null && value.isNotEmpty)
+      if (!below && value != null && value.isNotEmpty)
         Flexible(
           child: Text(
             value,
@@ -533,6 +559,19 @@ class SettingsLinkRow extends StatelessWidget {
       selected: selected,
       tooltip: tooltip,
       onTap: onTap,
+      below: below
+          ? Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                value,
+                style: (Theme.of(context).textTheme.bodyMedium ?? const TextStyle()).copyWith(
+                  fontSize: tv ? 16 : 14,
+                  fontWeight: FontWeight.w600,
+                  color: colors.primary,
+                ),
+              ),
+            )
+          : null,
       trailing: trailing.isEmpty
           ? null
           : ConstrainedBox(
@@ -781,9 +820,9 @@ class SettingsSliderRow extends StatelessWidget {
   }
 }
 
-/// A counter row: − and + change the value by one step, the number opens a
-/// field to type it ([onValueTap]).
-class SettingsCounterRow extends StatelessWidget {
+/// A counter row: − and + change the value by one step (held, they repeat),
+/// the number opens a field to type it ([onValueTap]).
+class SettingsCounterRow extends StatefulWidget {
   /// Creates the row.
   const new({
     required this.title,
@@ -850,35 +889,77 @@ class SettingsCounterRow extends StatelessWidget {
   final Key? increaseKey;
 
   @override
+  State<SettingsCounterRow> createState() => _SettingsCounterRowState();
+}
+
+class _SettingsCounterRowState extends State<SettingsCounterRow> {
+  Timer? _repeat;
+
+  @override
+  void dispose() {
+    _repeat?.cancel();
+    super.dispose();
+  }
+
+  /// After half a second held, repeats the − or + of the latest build every
+  /// 100 ms until released (raw pointer events, so the button's own tap and
+  /// tooltip keep working).
+  void _hold({required bool increase}) {
+    _repeat?.cancel();
+    _repeat = Timer(const Duration(milliseconds: 500), () {
+      _repeat = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+        final step = increase ? widget.onIncrease : widget.onDecrease;
+        if (!mounted || step == null) {
+          timer.cancel();
+          return;
+        }
+        step();
+      });
+    });
+  }
+
+  void _release() {
+    _repeat?.cancel();
+    _repeat = null;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final widget = this.widget;
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    Widget button(IconData glyph, String tooltip, VoidCallback? onPressed, Key? key) => IconButton(
-      key: key,
-      tooltip: tooltip,
-      onPressed: onPressed,
-      style: IconButton.styleFrom(
-        fixedSize: const Size.square(40),
-        minimumSize: const Size.square(40),
-        side: BorderSide(color: colors.outlineVariant),
-        foregroundColor: colors.onSurface,
-      ),
-      icon: Icon(glyph, size: 20),
-    );
+    Widget button(IconData glyph, String tooltip, VoidCallback? onPressed, Key? key, {required bool increase}) =>
+        Listener(
+          onPointerDown: onPressed == null ? null : (_) => _hold(increase: increase),
+          onPointerUp: (_) => _release(),
+          onPointerCancel: (_) => _release(),
+          child: IconButton(
+            key: key,
+            tooltip: tooltip,
+            onPressed: onPressed,
+            style: IconButton.styleFrom(
+              fixedSize: const Size.square(40),
+              minimumSize: const Size.square(40),
+              side: BorderSide(color: colors.outlineVariant),
+              foregroundColor: colors.onSurface,
+            ),
+            icon: Icon(glyph, size: 20),
+          ),
+        );
     final number = InkWell(
-      key: valueKey,
-      onTap: onValueTap,
+      key: widget.valueKey,
+      onTap: widget.onValueTap,
       borderRadius: const BorderRadius.all(Radius.circular(8)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 56, minHeight: 40),
         child: Center(
           child: Text(
-            value,
+            widget.value,
             style: (theme.textTheme.bodyMedium ?? const TextStyle()).tabular.copyWith(
               fontSize: SettingsRowStyle.tvOf(context) ? 16 : 14,
               fontWeight: FontWeight.w600,
               color: colors.onSurface,
-              decoration: onValueTap == null ? null : TextDecoration.underline,
+              decoration: widget.onValueTap == null ? null : TextDecoration.underline,
               decorationStyle: TextDecorationStyle.dotted,
               decorationColor: colors.outline,
             ),
@@ -887,18 +968,18 @@ class SettingsCounterRow extends StatelessWidget {
       ),
     );
     return SettingsRow(
-      title: title,
-      icon: icon,
-      leading: leading,
-      subtitle: subtitle,
-      enabled: enabled,
-      disabledReason: disabledReason,
+      title: widget.title,
+      icon: widget.icon,
+      leading: widget.leading,
+      subtitle: widget.subtitle,
+      enabled: widget.enabled,
+      disabledReason: widget.disabledReason,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          button(Icons.remove_rounded, decreaseTooltip, onDecrease, decreaseKey),
+          button(Icons.remove_rounded, widget.decreaseTooltip, widget.onDecrease, widget.decreaseKey, increase: false),
           number,
-          button(Icons.add_rounded, increaseTooltip, onIncrease, increaseKey),
+          button(Icons.add_rounded, widget.increaseTooltip, widget.onIncrease, widget.increaseKey, increase: true),
         ],
       ),
     );

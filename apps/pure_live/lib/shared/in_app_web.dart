@@ -30,18 +30,36 @@ abstract final class InAppWeb {
 /// app schemes, files and JavaScript URLs).
 bool isWebPage(Uri? uri) => uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
 
+/// The User-Agent of a desktop browser (3.x `WebSearchController
+/// .getDynamicUserAgent`): the web search shows the platforms' desktop
+/// sites on phones too, which do not push their apps and whose room links
+/// the app reads (docs/ui/compare/U.5b c8).
+const String desktopUserAgent =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+    'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36';
+
 /// A web page in the app (3.x `WebSearchPage`'s and the web login's view):
 /// only http(s) navigation, untrusted certificates refused, the back key
 /// goes back in the page first, a progress line while loading and the
 /// failure in words.
 class InAppWebPage extends StatefulWidget {
   /// Creates the view of [initial].
-  const new({required this.initial, this.userAgent, this.onPage, this.onCreated, super.key});
+  const new({
+    required this.initial,
+    this.userAgent,
+    this.onPage,
+    this.onCreated,
+    this.desktopSite = false,
+    this.failureBuilder,
+    this.progressHeight = 2,
+    super.key,
+  });
 
   /// The first address.
   final Uri initial;
 
-  /// The User-Agent; null keeps the WebView's own.
+  /// The User-Agent; null keeps the WebView's own ([desktopSite] sets
+  /// [desktopUserAgent]).
   final String? userAgent;
 
   /// Called with every address the page shows (after redirects).
@@ -49,6 +67,17 @@ class InAppWebPage extends StatefulWidget {
 
   /// Gets the controller once the view exists.
   final void Function(InAppWebViewController controller)? onCreated;
+
+  /// Shows the desktop site laid out at its width and zoomable, with every
+  /// navigation checked (3.x's web search settings).
+  final bool desktopSite;
+
+  /// What covers the page when it failed to load; `retry` loads it again.
+  /// Null shows the reason and "retry".
+  final Widget Function(BuildContext context, VoidCallback retry)? failureBuilder;
+
+  /// The height of the progress line.
+  final double progressHeight;
 
   @override
   State<InAppWebPage> createState() => _InAppWebPageState();
@@ -59,27 +88,36 @@ class _InAppWebPageState extends State<InAppWebPage> {
   double _progress = 0;
   bool _failed = false;
 
-  Future<void> _back() async {
+  Future<void> _back(Object? result) async {
     final controller = _controller;
     if (controller != null && await controller.canGoBack()) {
       await controller.goBack();
     } else if (mounted) {
-      await Navigator.of(context).maybePop();
+      // `pop`, not `maybePop`: this page's PopScope refuses `maybePop` and
+      // would call this again without end.
+      Navigator.of(context).pop(result);
     }
   }
+
+  void _retry() => unawaited(_controller?.reload());
+
+  InAppWebViewSettings get _settings => widget.desktopSite
+      // 3.x's wide viewport, overview and zoom are the WebView's defaults.
+      ? InAppWebViewSettings(userAgent: widget.userAgent ?? desktopUserAgent, useShouldOverrideUrlLoading: true)
+      // No pop-up windows, no autoplay (the defaults).
+      : InAppWebViewSettings(userAgent: widget.userAgent ?? '');
 
   @override
   Widget build(BuildContext context) => PopScope(
     canPop: false,
-    onPopInvokedWithResult: (didPop, _) {
-      if (!didPop) unawaited(_back());
+    onPopInvokedWithResult: (didPop, result) {
+      if (!didPop) unawaited(_back(result));
     },
     child: Stack(
       children: [
         InAppWebView(
           initialUrlRequest: URLRequest(url: WebUri.uri(widget.initial)),
-          // No pop-up windows, no autoplay (the defaults).
-          initialSettings: InAppWebViewSettings(userAgent: widget.userAgent ?? ''),
+          initialSettings: _settings,
           onWebViewCreated: (controller) {
             _controller = controller;
             widget.onCreated?.call(controller);
@@ -104,24 +142,31 @@ class _InAppWebPageState extends State<InAppWebPage> {
             if (uri != null) widget.onPage?.call(uri);
           },
         ),
-        if (_progress < 1) LinearProgressIndicator(value: _progress == 0 ? null : _progress, minHeight: 2),
+        if (_progress < 1)
+          LinearProgressIndicator(
+            key: const ValueKey('in-app-web-progress'),
+            value: _progress == 0 ? null : _progress,
+            minHeight: widget.progressHeight,
+          ),
         if (_failed)
           Positioned.fill(
             child: ColoredBox(
               color: Theme.of(context).colorScheme.surface,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(i18n('web_search_load_failed'), textAlign: TextAlign.center),
-                      const SizedBox(height: 12),
-                      FilledButton(onPressed: () => unawaited(_controller?.reload()), child: Text(i18n('retry'))),
-                    ],
+              child:
+                  widget.failureBuilder?.call(context, _retry) ??
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(i18n('web_search_load_failed'), textAlign: TextAlign.center),
+                          const SizedBox(height: 12),
+                          FilledButton(onPressed: _retry, child: Text(i18n('retry'))),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
             ),
           ),
       ],

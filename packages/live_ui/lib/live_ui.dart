@@ -31,6 +31,7 @@ export 'src/widgets/listenable_selector.dart';
 export 'src/widgets/live_room_card.dart';
 export 'src/widgets/loading_styles.dart';
 export 'src/widgets/network_image.dart';
+export 'src/widgets/page_title.dart';
 export 'src/widgets/qr_code_widget.dart';
 export 'src/widgets/record_glyph.dart';
 export 'src/widgets/refresh_rate.dart';

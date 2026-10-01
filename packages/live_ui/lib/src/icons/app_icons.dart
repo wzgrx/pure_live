@@ -907,4 +907,58 @@ abstract final class AppIcons {
 
   /// Close the window (3.x `Icons.close`).
   static const IconData windowClose = Icons.close;
+
+  // ---- search, web search and the watch history (docs/ui/compare/U.5a–U.5c) ----
+
+  /// Search the words in the search field (3.x's field, `Icons.search`).
+  static const IconData submitSearch = Icons.search;
+
+  /// Paste the clipboard into an empty search field.
+  static const IconData paste = Icons.content_paste_rounded;
+
+  /// The "all platforms" chip of the search's platform row.
+  static const IconData allPlatforms = Icons.apps_rounded;
+
+  /// The order of search results (3.x `Icons.sort_rounded`).
+  static const IconData sort = Icons.sort_rounded;
+
+  /// The platform's web search; a page opened in the system browser (3.x
+  /// `Icons.open_in_browser_rounded`).
+  static const IconData webSearch = Icons.open_in_browser_rounded;
+
+  /// A line that opens more about itself (the search's scope line).
+  static const IconData openDetails = Icons.chevron_right_rounded;
+
+  /// The search before the first search (3.x `Icons.travel_explore_rounded`).
+  static const IconData searchStart = Icons.travel_explore_rounded;
+
+  /// Nothing found (3.x `Icons.search_off_rounded`).
+  static const IconData noResults = Icons.search_off_rounded;
+
+  /// Load more results (3.x `Icons.expand_more_rounded`).
+  static const IconData loadMore = Icons.expand_more_rounded;
+
+  /// Recent search words.
+  static const IconData searchHistory = Icons.history_rounded;
+
+  /// Remove every entry of a short list (recent search words).
+  static const IconData clearAll = Icons.delete_sweep_outlined;
+
+  /// A system component is missing (3.x's WebView2 dialog).
+  static const IconData componentMissing = Icons.report_problem_rounded;
+
+  /// Filter a list by words (the watch history).
+  static const IconData filter = Icons.search_rounded;
+
+  /// Close the filter.
+  static const IconData filterOff = Icons.search_off_rounded;
+
+  /// How many history entries are kept (3.x `Icons.settings_rounded`).
+  static const IconData historyLimit = Icons.settings_rounded;
+
+  /// Clear the watch history (3.x `Icons.delete_forever`).
+  static const IconData clearHistory = Icons.delete_forever;
+
+  /// No watch history (3.x `Icons.history_rounded`).
+  static const IconData historyEmpty = Icons.history_rounded;
 }

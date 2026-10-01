@@ -160,11 +160,18 @@ class _HistoryLimitDialogState extends State<HistoryLimitDialog> {
                   errorText: _invalid ? i18n('history_limit_invalid') : null,
                   border: const OutlineInputBorder(),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  suffixIcon: IconButton(
-                    tooltip: i18n('apply'),
-                    icon: const Icon(Icons.check_rounded),
-                    onPressed: _saving ? null : _applyCustom,
-                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // 3.x's whole-width "应用" (U.5c c1); "确认" takes a typed
+              // number too (c6).
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  key: const ValueKey('history-limit-apply'),
+                  onPressed: _saving ? null : _applyCustom,
+                  child: Text(i18n('apply'), style: styles.t13Medium.copyWith(color: theme.colorScheme.primary)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -175,7 +182,7 @@ class _HistoryLimitDialogState extends State<HistoryLimitDialog> {
                   key: const ValueKey('history-limit-warning'),
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.warning_amber_rounded, size: 16, color: theme.colorScheme.error),
+                    Icon(AppIcons.warning, size: 16, color: theme.colorScheme.error),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(

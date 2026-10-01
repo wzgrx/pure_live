@@ -27,11 +27,9 @@
   "raw_styles": {
     "about": 16,
     "backup": 22,
-    "history": 11,
     "live_play": 8,
     "record_settings": 28,
     "remote_receiver": 11,
-    "search": 33,
     "settings": 126,
     "shield": 6,
     "tags": 13,

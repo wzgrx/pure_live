@@ -1092,6 +1092,7 @@
     "live_play_guide_replay_short": "Replay",
     "live_play_guide_replaying": "Replaying",
     "live_play_guide_replaying_at": "Replaying · {when} {time}",
+    "live_play_guide_replaying_now": "Replaying",
     "live_play_guide_title": "Guide",
     "live_play_guide_tomorrow": "Tomorrow",
     "live_play_guide_unfold": "Show the guide",

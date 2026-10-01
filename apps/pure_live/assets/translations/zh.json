@@ -1091,6 +1091,7 @@
     "live_play_guide_replay_short": "回看",
     "live_play_guide_replaying": "回看中",
     "live_play_guide_replaying_at": "正在回看 · {when} {time}",
+    "live_play_guide_replaying_now": "正在回看",
     "live_play_guide_title": "节目单",
     "live_play_guide_tomorrow": "明天",
     "live_play_guide_unfold": "展开节目单",

@@ -413,6 +413,12 @@ void main() {
       expect(_buttons(tester), ['switch-room', 'refresh']);
       expect(find.byKey(const ValueKey('live-play-pause')), findsNothing);
       expect(room.toasts, isEmpty, reason: 'S18: the picture says it, no message');
+      // The info row: "未开播" before the title, no figures or pickers.
+      expect(
+        find.descendant(of: find.byKey(const ValueKey('live-play-offline-tag')), matching: find.text('未开播')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('live-play-audience')), findsNothing);
       expect(find.text('每晚八点开播'), findsWidgets);
       expect(find.text('开播后这里显示弹幕'), findsOneWidget);
       await _close(tester, room);

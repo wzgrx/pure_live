@@ -186,7 +186,8 @@ class PlayerTopBar extends StatelessWidget {
                           ),
                           if (programme.isNotEmpty)
                             Text(
-                              '${i18n(controller.catchup == null ? 'now_playing' : 'playing_catchup')}: $programme',
+                              // U.2g c18: "正在回看: 节目名" while a programme is replayed.
+                              '${i18n(controller.catchup == null ? 'now_playing' : 'live_play_guide_replaying_now')}: $programme',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(

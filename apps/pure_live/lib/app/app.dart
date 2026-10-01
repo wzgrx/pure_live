@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/desktop/desktop_window.dart';
+import 'package:pure_live/app/desktop/title_bar.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -86,6 +88,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
     final strings = await AppStrings.load(language, widget.bundle ?? rootBundle);
     if (!mounted) return;
     setState(() => _strings = currentStrings = strings);
+    DesktopShell.current?.relabel();
   }
 
   @override
@@ -159,7 +162,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
               config: uiConfig,
               child: MediaQuery(
                 data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
-                child: result,
+                child: DesktopFrame(enabled: DesktopShell.current != null, child: result),
               ),
             );
           },

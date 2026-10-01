@@ -37,6 +37,10 @@ abstract final class AppNavigator {
   /// (open_filex on Android, M12.3); replaceable in tests.
   static Future<bool> Function(String path) openFile = (path) => openExternal(Uri.file(path));
 
+  /// The context of the root navigator (dialogs from outside a page, such
+  /// as the window's close question); null before the app is up.
+  static BuildContext? get navigatorContext => _router?.routerDelegate.navigatorKey.currentContext;
+
   /// The router in use.
   static GoRouter get router => _router ?? (throw StateError('No router attached'));
 

@@ -8,6 +8,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -102,6 +103,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   void dispose() {
     unawaited(_autoFullscreen?.cancel());
     if (_fullscreen && _mobile) unawaited(_restoreSystemUi());
+    if (_fullscreen && !_mobile) unawaited(DesktopWindow.setFullScreen(on: false));
     _controller?.dispose();
     final session = _session;
     if (session != null) unawaited(session.dispose());
@@ -111,7 +113,11 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   Future<void> _setFullscreen(bool value) async {
     if (value == _fullscreen) return;
     setState(() => _fullscreen = value);
-    if (!_mobile) return;
+    if (!_mobile) {
+      // The whole window on desktops (3.x `WindowHelper`; window_manager).
+      await DesktopWindow.setFullScreen(on: value);
+      return;
+    }
     if (!value) {
       await _restoreSystemUi();
       return;

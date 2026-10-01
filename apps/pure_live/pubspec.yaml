@@ -59,6 +59,8 @@ dependencies:
   path: ^1.9.1
   # The data folder and 3.x's folders.
   path_provider: ^2.1.6
+  # Whether the remembered window place is still on a display.
+  screen_retriever: ^0.2.2
   # The system share sheet of the room menu.
   share_plus: ^13.3.0
   # Reads 3.x's IPTV database (pure_live_tv.db) for the import (M12.1).

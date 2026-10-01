@@ -4,6 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/desktop/desktop_window.dart';
+import 'package:pure_live/app/desktop/startup_entry.dart';
+import 'package:pure_live/app/desktop/title_bar.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/backup/tv_sync.dart';
@@ -99,7 +102,7 @@ void main() {
   });
 
   testWidgets("the TV dialog reads the TV's QR code when there is a scanner (mobile_scanner)", (tester) async {
-    currentStrings = (await tester.runAsync(loadStrings))!;
+    currentStrings = await tester.runAsync(loadStrings);
     addTearDown(() => QrScan.scan = null);
     String? origin;
     Future<void> pump() async {
@@ -126,6 +129,65 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('backup-tv-scan')));
     await tester.pumpAndSettle();
     expect(origin, contains('192.168.1.5:8080'));
+  });
+
+  test('Windows: the remembered place and the start-up entry', () {
+    expect(parseWindowPosition(formatWindowPosition(const Offset(-1919.6, 40.2))), const Offset(-1920, 40));
+    expect(parseWindowPosition(null), isNull);
+    expect(parseWindowPosition('12'), isNull);
+    expect(parseWindowPosition('a,b'), isNull);
+
+    const exe = r'C:\Apps\PureLive v4\pure_live.exe';
+    expect(startupValueName, isNot('PureLive'), reason: "3.x's entry is never touched");
+    expect(commandTargets(startupCommand(exe), exe), isTrue);
+    expect(
+      commandTargets('"c:/apps/purelive v4/PURE_LIVE.exe" --hidden', exe.replaceAll('PureLive v4', 'purelive v4')),
+      isTrue,
+    );
+    expect(commandTargets(r'"D:\Soft\PureLive\pure_live.exe"', exe), isFalse);
+    expect(commandTargets(null, exe), isFalse);
+  });
+
+  testWidgets('Windows: the title bar sits above the app and hides in full screen', (tester) async {
+    currentStrings = await tester.runAsync(loadStrings);
+    var closes = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => DesktopFrame(enabled: true, child: child!),
+        home: const Scaffold(body: Text('page')),
+      ),
+    );
+    expect(find.byType(DesktopTitleBar), findsOneWidget);
+    expect(find.text('纯粹直播'), findsOneWidget);
+    expect(find.text('page'), findsOneWidget);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => Column(
+          children: [
+            DesktopTitleBar(onClose: () async => closes++),
+            Expanded(child: child!),
+          ],
+        ),
+        home: const Scaffold(body: Text('page')),
+      ),
+    );
+    await tester.tap(find.byKey(const ValueKey('title-bar-close')));
+    await tester.pump();
+    expect(closes, 1, reason: 'close follows the close setting through the shell');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => DesktopFrame(enabled: true, child: child!),
+        home: const Scaffold(body: Text('page')),
+      ),
+    );
+    await DesktopWindow.setFullScreen(on: true);
+    await tester.pump();
+    expect(find.byType(DesktopTitleBar), findsNothing);
+    await DesktopWindow.setFullScreen(on: false);
+    await tester.pump();
+    expect(find.byType(DesktopTitleBar), findsOneWidget);
   });
 }
 

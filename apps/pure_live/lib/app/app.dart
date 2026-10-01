@@ -11,6 +11,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/desktop/title_bar.dart';
+import 'package:pure_live/app/fonts.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -48,6 +49,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   final _refreshRate = AdaptiveRefreshRateController(applyHighRefreshRate);
   late AppStrings _strings = widget.strings;
+  late final FontLibrary _fonts;
 
   @override
   void initState() {
@@ -64,6 +66,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
         );
     };
     imageCacheEpoch.addListener(_imagesCleared);
+    _fonts = ref.read(fontLibraryProvider)..addListener(_imagesCleared);
     // 3.x started the follow check, the login check and the exit timer with
     // its services; here once the first frame is up.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -74,6 +77,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
   @override
   void dispose() {
     imageCacheEpoch.removeListener(_imagesCleared);
+    _fonts.removeListener(_imagesCleared);
     AppNavigator.router = null;
     super.dispose();
   }
@@ -117,8 +121,8 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
     );
     final fontFamily = resolveAppFontFamily(
       selectedName: watchSetting(ref, Settings.fontFamilyName),
-      // Downloaded fonts are registered by the font page (M13).
-      customFonts: const [],
+      // Fonts downloaded on the font page and registered with Flutter.
+      customFonts: _fonts.registered,
       isWindows: Platform.isWindows,
     );
     final textScale = watchSetting(ref, Settings.textScaleFactor);

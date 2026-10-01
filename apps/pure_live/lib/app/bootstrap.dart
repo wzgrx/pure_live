@@ -9,6 +9,7 @@ import 'package:live_media/live_media.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/app_log.dart';
 import 'package:pure_live/app/data_root.dart';
 import 'package:pure_live/app/iptv_legacy.dart';
 import 'package:pure_live/app/iptv_library.dart';
@@ -100,7 +101,10 @@ abstract final class AppBootstrap {
     bool background = true,
   }) {
     final proxy = SettingsProxyPolicy(store.settings);
-    final client = http ?? IoLiveHttp(proxy: proxy);
+    // Failed requests go to the app log as structure-only summaries (no
+    // query strings, cookies or bodies; M12.4).
+    final client =
+        http ?? LoggingHttp(IoLiveHttp(proxy: proxy), onFailure: (summary) => AppLog.instance.warning('http', summary));
     final cookies = StoreCookieVault(store.secrets);
     final settings = store.settings;
     final library = iptvLibrary ?? StoreIptvLibrary(store);

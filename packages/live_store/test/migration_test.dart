@@ -129,6 +129,7 @@ void main() {
         ]),
         'localInteraction.coins': 900,
         'settingsUpgradeSchema': 4,
+        'downloadDirectoryPath': '/storage/emulated/0/Download/PureLive',
       });
     });
 
@@ -170,6 +171,8 @@ void main() {
       expect(s.get(Settings.realOnlinePlatforms), ['douyin', 'picarto', 'twitcasting']);
       expect(s.get(Settings.enableDanmakuTapInteraction), isTrue);
       expect(s.get(Settings.historyLimit), 0);
+      expect(s.get(Settings.downloadDirectoryPath), '/storage/emulated/0/Download/PureLive');
+      expect(await store.meta.legacyKeys(), isNot(contains('downloadDirectoryPath')));
 
       final tasks = jsonDecode((await store.meta.legacyValue('recorder_tasks'))! as String) as List;
       expect(

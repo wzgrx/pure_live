@@ -11,6 +11,7 @@ import 'package:pure_live/pages/backup/backup_page.dart';
 import 'package:pure_live/pages/iptv/iptv_import.dart';
 import 'package:pure_live/pages/record_settings/record_settings_dialogs.dart';
 import 'package:pure_live/pages/settings/data_tools.dart';
+import 'package:pure_live/pages/settings/log_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/in_app_web.dart';
 import 'package:pure_live/shared/qr_scan.dart';
@@ -38,12 +39,24 @@ void installPluginHooks() {
 }
 
 /// The page hooks that are providers (`ProviderScope.overrides` in `main`):
-/// the system pickers of the IPTV import, the backups and the record folder.
+/// the system pickers of the IPTV import, the backups, the record folder and
+/// the download folder; sharing the log file on phones.
 List<Override> pluginOverrides() => [
   iptvFilePickerProvider.overrideWithValue(pickIptvFile),
   backupPickerProvider.overrideWithValue(pickBackupPath),
   recordDirectoryPickerProvider.overrideWithValue(pickRecordDirectory),
+  downloadDirectoryPickerProvider.overrideWithValue(pickDownloadDirectory),
+  if (Platform.isAndroid || Platform.isIOS) logSharerProvider.overrideWithValue(shareFile),
 ];
+
+/// The system share sheet with [file] (share_plus).
+Future<bool> shareFile(File file) async {
+  await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
+  return true;
+}
+
+/// The update download folder (3.x `FileUtils.pickDirectory`).
+Future<String?> pickDownloadDirectory() => FilePicker.getDirectoryPath(dialogTitle: i18n('download_directory'));
 
 /// The system share sheet with [text] (share_plus); true once it was shown.
 Future<bool> shareText(String text) async {

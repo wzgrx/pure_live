@@ -38,6 +38,8 @@ import io.flutter.plugin.common.MethodChannel
  *   an activity);
  * - `pure_live/recorder`: recording's foreground service and storage access
  *   ([RecorderPlugin]);
+ * - `pure_live/system_access`: installing update packages and the
+ *   local-network permission ([SystemAccessPlugin]);
  * - `pure_live/pip`: the live room's picture-in-picture (3.x used the
  *   floating plugin); `changed` reports entering and leaving;
  * - `pure_live/device_controls`: the media volume and the window's
@@ -129,6 +131,10 @@ class MainActivity : AudioServiceActivity() {
         // Recording's foreground service and storage access (M13.15).
         if (!flutterEngine.plugins.has(RecorderPlugin::class.java)) {
             flutterEngine.plugins.add(RecorderPlugin())
+        }
+        // Installing update packages and the local-network permission (M12.4).
+        if (!flutterEngine.plugins.has(SystemAccessPlugin::class.java)) {
+            flutterEngine.plugins.add(SystemAccessPlugin())
         }
         displayModeChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,

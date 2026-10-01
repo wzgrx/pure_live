@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/home/home_menu.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -15,6 +16,7 @@ import 'package:pure_live/pages/settings/settings_catalog.dart';
 import 'package:pure_live/pages/settings/settings_dialogs.dart';
 import 'package:pure_live/pages/settings/settings_model.dart';
 import 'package:pure_live/pages/settings/settings_tiles.dart';
+import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -900,8 +902,8 @@ class HomeMenusPage extends ConsumerWidget {
   }
 }
 
-/// The window size at start (Windows): presets or a checked size (3.x
-/// applied it to the window at once; the desktop shell, M12, reads it).
+/// The window size (Windows): presets or a checked size, applied to the
+/// window at once and used at the next start (3.x).
 class WindowSizeTile extends ConsumerWidget {
   /// Creates the row.
   const new({required this.entry, super.key});
@@ -931,6 +933,12 @@ class WindowSizeTile extends ConsumerWidget {
             Settings.windowWidth: size.width,
             Settings.windowHeight: size.height,
           });
+          // The window takes the size at once (3.x), not only next start.
+          final shell = DesktopShell.current;
+          if (shell != null && !await shell.resize(size)) {
+            AppNavigator.toast(i18n('window_size_apply_failed'));
+            return;
+          }
           AppNavigator.toast(i18n('save_success'));
         },
       ),
@@ -1150,6 +1158,138 @@ class AutoExitTile extends ConsumerWidget {
           onChanged: (on) => writeSetting(ref, Settings.enableAutoShutDownTime, on),
         ),
       ),
+    );
+  }
+}
+
+/// The refresh-rate policy (Android) with the display's current and highest
+/// rate and the rates it offers (3.x showed "· 60 / 120 Hz" after the mode).
+class RefreshRateTile extends StatefulWidget {
+  /// Creates the row with the policy's [options].
+  const new({required this.entry, required this.options, this.hint, super.key});
+
+  /// The entry drawn.
+  final SettingsEntry entry;
+
+  /// The policies.
+  final List<SettingsChoice<String>> Function() options;
+
+  /// A line above the options.
+  final String? hint;
+
+  @override
+  State<RefreshRateTile> createState() => _RefreshRateTileState();
+}
+
+class _RefreshRateTileState extends State<RefreshRateTile> {
+  @override
+  void initState() {
+    super.initState();
+    unawaited(DisplayMode.refresh());
+  }
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<DisplayModeInfo?>(
+    valueListenable: DisplayMode.info,
+    builder: (context, info, _) {
+      final description = widget.entry.descriptionText ?? '';
+      final rates = info == null
+          ? ''
+          : '\n${i18n('settings_display_rates', args: {'current': info.rateLabel, 'supported': info.supportedLabel})}';
+      return SettingChoiceTile<String>(
+        entry: widget.entry,
+        setting: Settings.refreshRateMode,
+        icon: Remix.speed_up_line,
+        options: widget.options,
+        hint: widget.hint,
+        subtitle: '$description$rates',
+      );
+    },
+  );
+}
+
+/// Windows' display (3.x "Windows 动态刷新率"): the monitor the window is on,
+/// its current and highest rate; updates when the window moves to another
+/// monitor or the mode changes; a tap reads it again. Windows picks the
+/// rate itself, the app cannot change it.
+class WindowsDisplayTile extends StatefulWidget {
+  /// Creates the row.
+  const new({required this.entry, super.key});
+
+  /// The entry drawn.
+  final SettingsEntry entry;
+
+  @override
+  State<WindowsDisplayTile> createState() => _WindowsDisplayTileState();
+}
+
+class _WindowsDisplayTileState extends State<WindowsDisplayTile> {
+  @override
+  void initState() {
+    super.initState();
+    unawaited(DisplayMode.refresh());
+  }
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<DisplayModeInfo?>(
+    valueListenable: DisplayMode.info,
+    builder: (context, info, _) {
+      final mode = info == null
+          ? i18n('display_mode_detecting')
+          : '${info.width} × ${info.height} · ${info.currentRefreshRate.round()} Hz '
+                '(${i18n('display_mode_max')} ${info.maxRefreshRate.round()} Hz)';
+      return KeyedSubtree(
+        key: widget.entry.rowKey,
+        child: context.buildTile(
+          icon: Remix.computer_line,
+          title: widget.entry.titleText,
+          subtitle: '${widget.entry.descriptionText ?? ''}\n$mode',
+          isLong: true,
+          trailing: const Icon(Icons.refresh_rounded),
+          onTap: () => unawaited(DisplayMode.refresh()),
+        ),
+      );
+    },
+  );
+}
+
+/// Start with Windows (3.x): the switch, and while the entry is written
+/// "applying", or in red when writing it failed.
+class StartupTile extends ConsumerWidget {
+  /// Creates the row.
+  const new({required this.entry, super.key});
+
+  /// The entry drawn.
+  final SettingsEntry entry;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = watchSetting(ref, Settings.enableStartUp);
+    return ValueListenableBuilder<StartupEntryState>(
+      valueListenable: DesktopShell.startupState,
+      builder: (context, state, _) {
+        final applying = state == StartupEntryState.applying;
+        return KeyedSubtree(
+          key: entry.rowKey,
+          child: context.buildTile(
+            icon: Remix.windows_line,
+            title: entry.titleText,
+            subtitle: switch (state) {
+              StartupEntryState.applying => i18n('startup_applying'),
+              StartupEntryState.failed => i18n('settings_startup_failed'),
+              StartupEntryState.idle => entry.descriptionText,
+            },
+            subtitleColor: state == StartupEntryState.failed ? Theme.of(context).colorScheme.error : null,
+            isLong: true,
+            trailing: Switch(
+              key: const ValueKey('settings-startup-switch'),
+              value: enabled,
+              onChanged: applying ? null : (value) => writeSetting(ref, Settings.enableStartUp, value),
+            ),
+            onTap: applying ? null : () => writeSetting(ref, Settings.enableStartUp, !enabled),
+          ),
+        );
+      },
     );
   }
 }

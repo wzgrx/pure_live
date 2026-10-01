@@ -340,7 +340,15 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
           leading: Icon(device.platform == 'android' ? Icons.phone_android_rounded : Icons.computer_rounded),
           title: Text(device.name, style: context.textStyles.t14SemiBold),
           subtitle: Text(
-            [device.address, if (device.version.isNotEmpty) 'v${device.version}'].join(' · '),
+            [
+              device.address,
+              // 3.x announces a fixed "1.0.0"; say which app it is instead.
+              if (device.viaMdns)
+                i18n('remote_sync_legacy_device')
+              else if (device.version.isNotEmpty)
+                'v${device.version}',
+            ].join(' · '),
+            key: ValueKey('remote-sync-device-detail-${device.id}'),
             style: context.textStyles.t12Muted,
           ),
         ),

@@ -95,3 +95,7 @@ flutter:
     - assets/icons/icon.png
     # Mozilla's CA bundle for FFmpeg's OpenSSL on Android and Linux (3.x).
     - assets/certificates/
+    # The cloud font list of the font manager (3.x).
+    - assets/fonts/fonts-manifest.json
+    # The WebDAV help page's screenshots (3.x).
+    - assets/webdav/

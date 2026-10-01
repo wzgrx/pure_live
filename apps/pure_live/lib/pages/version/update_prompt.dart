@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/version/markdown_text.dart';
+import 'package:pure_live/pages/version/update_download.dart';
 import 'package:pure_live/pages/version/update_feed.dart';
+import 'package:pure_live/pages/version/version_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
 
@@ -29,9 +31,31 @@ Future<void> checkForUpdateOnStartup(
   try {
     final info = await feed.latest();
     if (info == null || !info.isNewer || !context.mounted || !settings.get(Settings.enableAutoCheckUpdate)) return;
+    // This platform's first package (arm64 APK, Windows installer) for the
+    // in-app download; without one "update" opens the version page.
+    ReleaseFile? package;
+    try {
+      final wanted = info.version.replaceFirst(RegExp('^[vV]'), '');
+      final files =
+          (await feed.releases())
+              ?.where((release) => release.version.replaceFirst(RegExp('^[vV]'), '') == wanted)
+              .firstOrNull
+              ?.files ??
+          const <ReleaseFile>[];
+      package = platformPackages(feed.platform, info, files).firstOrNull?.$2;
+    } on Object {
+      package = null;
+    }
+    if (!context.mounted) return;
     await showDialog<void>(
       context: context,
-      builder: (_) => NewVersionDialog(info: info),
+      builder: (_) => NewVersionDialog(
+        info: info,
+        package: package,
+        sources: package == null
+            ? const []
+            : downloadSources(package.url, githubOrigin: settings.get(Settings.useGitHubOriginForUpdates)),
+      ),
     );
   } on Object catch (error, stack) {
     log('Start-up update check skipped', name: 'Update', error: error, stackTrace: stack);
@@ -39,13 +63,20 @@ Future<void> checkForUpdateOnStartup(
 }
 
 /// "A new version is out" (3.x `NewVersionDialog`): the project link, the
-/// update notes, and "update" to the version page.
+/// update notes, "details" to the version page and, when this platform has a
+/// package, "download and install" in the app ([showUpdateDownload]).
 class NewVersionDialog extends StatelessWidget {
-  /// Shows [info].
-  const new({required this.info, super.key});
+  /// Shows [info]; [package] and its [sources] enable the in-app download.
+  const new({required this.info, this.package, this.sources = const [], super.key});
 
   /// The newer version.
   final UpdateInfo info;
+
+  /// This platform's package, or null.
+  final ReleaseFile? package;
+
+  /// Its download mirrors ([downloadSources]).
+  final List<String> sources;
 
   @override
   Widget build(BuildContext context) => AlertDialog(
@@ -79,14 +110,34 @@ class NewVersionDialog extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
         child: Text(i18n('cancel')),
       ),
-      FilledButton(
-        key: const ValueKey('new-version-update'),
-        onPressed: () {
-          Navigator.pop(context);
-          unawaited(AppNavigator.toNamed<void>(RoutePath.kVersionPage));
-        },
-        child: Text(i18n('update')),
-      ),
+      if (package case final file? when sources.isNotEmpty) ...[
+        TextButton(
+          key: const ValueKey('new-version-details'),
+          onPressed: () {
+            Navigator.pop(context);
+            unawaited(AppNavigator.toNamed<void>(RoutePath.kVersionPage));
+          },
+          child: Text(i18n('update_details')),
+        ),
+        FilledButton(
+          key: const ValueKey('new-version-update'),
+          onPressed: () {
+            final navigator = Navigator.of(context);
+            final host = navigator.context;
+            navigator.pop();
+            unawaited(showUpdateDownload(host, file: file, sources: sources));
+          },
+          child: Text(i18n('update_download_install')),
+        ),
+      ] else
+        FilledButton(
+          key: const ValueKey('new-version-update'),
+          onPressed: () {
+            Navigator.pop(context);
+            unawaited(AppNavigator.toNamed<void>(RoutePath.kVersionPage));
+          },
+          child: Text(i18n('update')),
+        ),
     ],
   );
 }

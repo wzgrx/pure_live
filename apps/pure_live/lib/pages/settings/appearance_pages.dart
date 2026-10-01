@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/fonts.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/pages/settings/font_manager_page.dart';
 import 'package:pure_live/pages/settings/loading_style_names.dart';
 import 'package:pure_live/pages/settings/settings_dialogs.dart';
 import 'package:pure_live/pages/settings/settings_model.dart';
@@ -150,10 +152,10 @@ class LanguageTile extends ConsumerWidget {
   }
 }
 
-/// The app or danmaku font. Only the system font can be chosen until the
-/// font downloads come back (3.x's font manager downloaded fonts from a
-/// cloud list; see the module record); a 3.x choice shows as not installed
-/// and can be reset.
+/// The app or danmaku font: the chosen family's name (or the system font)
+/// and a tap opens the font manager ([FontManagerPage]). A choice whose
+/// files are not on this device (3.x's choice on a new install) says so and
+/// the manager offers its download.
 class FontFamilyTile extends ConsumerWidget {
   /// Creates the row for [setting] (`fontFamilyName` or
   /// `danmakuFontFamilyName`).
@@ -167,40 +169,38 @@ class FontFamilyTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final name = watchSetting(ref, setting);
-    final isDefault = name.isEmpty || name == setting.defaultValue;
+    final id = watchSetting(ref, setting);
+    final library = ref.watch(fontLibraryProvider);
+    final isDefault = id.isEmpty || id == setting.defaultValue;
     final systemName = !kIsWeb && Platform.isWindows ? 'Microsoft YaHei' : i18n('font_system_default');
-    final label = isDefault ? systemName : name;
+
     return KeyedSubtree(
       key: entry.rowKey,
-      child: context.buildTile(
-        icon: Remix.font_family,
-        title: entry.titleText,
-        subtitle: isDefault ? entry.descriptionText : i18n('settings_font_not_installed', args: {'name': name}),
-        isLong: true,
-        stackTrailingOnNarrow: true,
-        trailing: SettingValueText(label),
-        onTap: () async {
-          final picked = await showChoiceDialog<String>(
-            context: context,
-            title: entry.titleText,
-            hint: i18n('settings_font_hint'),
-            options: [
-              (value: setting.defaultValue, label: systemName, description: i18n('factory_default_desc')),
-              if (!isDefault)
-                (value: name, label: name, description: i18n('settings_font_not_installed', args: {'name': name})),
-            ],
-            selected: isDefault ? setting.defaultValue : name,
-          );
-          if (picked == setting.defaultValue && !isDefault && context.mounted) {
-            final settings = ref.read(storeProvider).settings;
-            await settings.reset(setting);
-            await settings.reset(
-              setting == Settings.fontFamilyName ? Settings.fontFamilyFileName : Settings.danmakuFontFamilyFileName,
+      child: ListenableBuilder(
+        listenable: library,
+        builder: (context, _) => FutureBuilder<FontFamily?>(
+          future: isDefault ? null : library.family(id),
+          builder: (context, snapshot) {
+            final name = isDefault ? systemName : (snapshot.data?.name ?? id);
+            final missing = !isDefault && !library.isDownloaded(id);
+            return context.buildTile(
+              icon: Remix.font_family,
+              title: entry.titleText,
+              subtitle: missing ? i18n('settings_font_not_installed', args: {'name': name}) : entry.descriptionText,
+              subtitleColor: missing ? Theme.of(context).colorScheme.error : null,
+              isLong: true,
+              stackTrailingOnNarrow: true,
+              trailing: SettingValueText(name),
+              onTap: () => (
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => FontManagerPage(danmaku: setting == Settings.danmakuFontFamilyName),
+                  ),
+                ),
+              ),
             );
-            AppNavigator.toast(i18n('font_reset_default'));
-          }
-        },
+          },
+        ),
       ),
     );
   }

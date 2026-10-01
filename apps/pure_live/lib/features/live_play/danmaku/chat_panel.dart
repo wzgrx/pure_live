@@ -8,6 +8,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -111,7 +112,11 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
           controller: _tabs,
           physics: const PureLiveBoundedScrollPhysics(),
           children: [
-            ChatList(controller: widget.controller, onTouched: _seen),
+            // U.2k-a: the local danmaku composer under the list (while the
+            // local interaction is on).
+            LocalComposerBelow(
+              child: ChatList(controller: widget.controller, onTouched: _seen),
+            ),
             // Rebuilt with the room as before: the remaining times move on
             // with each update (the super chat tab is U.2e's).
             ListenableBuilder(

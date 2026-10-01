@@ -17,6 +17,9 @@ import 'package:pure_live/features/live_play/layout/room_details.dart';
 import 'package:pure_live/features/live_play/layout/room_header.dart';
 import 'package:pure_live/features/live_play/layout/room_info_bar.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_interaction_panel.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
@@ -99,6 +102,9 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   /// together with the details.
   final RoomPanelController _panels = RoomPanelController();
 
+  /// The local interaction in this room (U.2k).
+  LocalRoomSession? _local;
+
   @override
   void initState() {
     super.initState();
@@ -129,6 +135,12 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       network: ref.read(networkProbeProvider),
     );
     _orientation = RoomOrientationChoice(settings: store.settings, room: room);
+    _local = LocalRoomSession(
+      interaction: ref.read(localInteractionProvider),
+      room: controller,
+      overlayShown: () => localOverlayShown(store.settings),
+      toast: (message) => AppNavigator.toast(message),
+    );
     _panels.addListener(_onPanel);
     _reconnect = ReconnectWatch(session.states, now: controller.now);
     _background = RoomBackgroundPolicy(controller: controller, settings: store.settings)..start();
@@ -182,6 +194,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     _panels
       ..removeListener(_onPanel)
       ..dispose();
+    _local?.dispose();
     _controller?.dispose();
     final session = _session;
     if (session != null) unawaited(session.dispose());
@@ -256,7 +269,10 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
         body: AppStatusView(type: AppStatusType.error, title: _problem, subtitle: ''),
       );
     }
-    return RoomPanelScope(notifier: _panels, child: _page(context, controller));
+    return LocalRoomScope(
+      session: _local!,
+      child: RoomPanelScope(notifier: _panels, child: _page(context, controller)),
+    );
   }
 
   Widget _page(BuildContext context, LiveRoomController controller) {
@@ -321,6 +337,19 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       controller: controller,
       onClose: _panels.close,
       dragToClose: portrait,
+    ),
+    // U.2k: the local interaction and its style page; the style by itself
+    // from a composer's star.
+    RoomPanelKind.localInteraction => LocalInteractionPanel(
+      key: const ValueKey('panel-local'),
+      onClose: _panels.close,
+      dragToClose: portrait,
+    ),
+    RoomPanelKind.localStyle => LocalInteractionPanel(
+      key: const ValueKey('panel-local-style'),
+      onClose: _panels.close,
+      dragToClose: portrait,
+      startWithStyle: true,
     ),
     null => const SizedBox.shrink(key: ValueKey('no-panel')),
   };

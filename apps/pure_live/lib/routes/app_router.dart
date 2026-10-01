@@ -13,6 +13,7 @@ import 'package:pure_live/features/home/home_page.dart';
 import 'package:pure_live/features/hot_areas/hot_areas_page.dart';
 import 'package:pure_live/features/iptv/iptv_page.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_interaction_settings_page.dart';
 import 'package:pure_live/features/multiview/multiview_page.dart';
 import 'package:pure_live/features/popular/popular_page.dart';
 import 'package:pure_live/features/record_settings/record_settings_page.dart';
@@ -76,6 +77,7 @@ final Map<String, PageBuilder> pageRoutes = {
   RoutePath.kWebSearch: (route) => SearchPage(route: route),
   RoutePath.kSettingsTags: (route) => TagsPage(route: route),
   RoutePath.kRemoteSync: (route) => RemoteReceiverPage(route: route),
+  RoutePath.kLocalInteraction: (route) => LocalInteractionSettingsPage(route: route),
 };
 
 /// The router of home and [pageRoutes], starting at [initialLocation] (the

@@ -145,6 +145,11 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
 
   void _add(LiveMessage message) {
     if (!mounted || !widget.visible || _size.isEmpty || message.message.trim().isEmpty) return;
+    final local = message.isLocal ? message.style : null;
+    if (local != null) {
+      _addLocal(message, local);
+      return;
+    }
     final look = widget.look;
     final top = look.topMargin.clamp(0, _size.height).toDouble();
     final usable = (_size.height * look.area.clamp(0, 1)).clamp(0, _size.height - top - look.bottomMargin).toDouble();
@@ -154,7 +159,7 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     // The first lane whose last message has fully entered the screen.
     int? lane;
     for (var i = 0; i < lanes; i++) {
-      final last = _items.lastWhereOrNull((item) => item.lane == i);
+      final last = _items.lastWhereOrNull((item) => item.lane == i && item.fixed == null);
       if (last == null || last.right(now, _size.width, look.speed) < _size.width - 16) {
         lane = i;
         break;
@@ -192,11 +197,105 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     if (!_ticker.isActive) _ticker.start();
   }
 
+  /// A danmaku composed on this device (U.2k) flies in its own style (3.x
+  /// `sendDanmaku`): size, weight, font, italic, spacing, opacity, outline
+  /// colour and width, glow; scrolling at its own speed, or held at the top
+  /// or bottom for its time. It always gets a place: it is what the user just
+  /// sent.
+  void _addLocal(LiveMessage message, LiveMessageStyle style) {
+    final color = Color.fromARGB(
+      255,
+      message.color.r,
+      message.color.g,
+      message.color.b,
+    ).withValues(alpha: style.opacity);
+    final base = TextStyle(
+      fontSize: style.fontSize,
+      fontWeight: FontWeight.values[((style.fontWeight ~/ 100) - 1).clamp(0, 8)],
+      fontFamily: style.fontFamily,
+      fontStyle: style.italic ? FontStyle.italic : FontStyle.normal,
+      letterSpacing: style.letterSpacing,
+      height: 1.2,
+    );
+    final fill = TextPainter(
+      text: TextSpan(
+        text: message.message,
+        style: base.copyWith(
+          color: color,
+          shadows: style.showShadow
+              ? [
+                  Shadow(
+                    color: Color(style.shadowColor).withValues(alpha: style.opacity),
+                    blurRadius: style.shadowBlur,
+                    offset: Offset(style.shadowOffset, style.shadowOffset),
+                  ),
+                ]
+              : null,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    final outline = style.showStroke && style.strokeWidth > 0
+        ? (TextPainter(
+            text: TextSpan(
+              text: message.message,
+              style: base.copyWith(
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = style.strokeWidth
+                  ..color = Color(style.strokeColor),
+              ),
+            ),
+            textDirection: TextDirection.ltr,
+            maxLines: 1,
+          )..layout())
+        : null;
+    final height = style.fontSize * 1.4;
+    final look = widget.look;
+    final now = _elapsed;
+    final top = look.topMargin.clamp(0, _size.height).toDouble();
+    final lanes = ((_size.height - top - look.bottomMargin) / height).floor().clamp(1, 1 << 20);
+    final fixed = style.placement == LiveMessagePlacement.scroll ? null : style.placement;
+    // The first free lane from its edge; the first one when all are taken.
+    var lane = 0;
+    for (var i = 0; i < lanes; i++) {
+      final taken = _items.any(
+        (item) =>
+            item.fixed == fixed &&
+            item.lane == i &&
+            item.message.isLocal &&
+            (fixed != null || item.right(now, _size.width, item.speed ?? look.speed) >= _size.width - 16),
+      );
+      if (!taken) {
+        lane = i;
+        break;
+      }
+    }
+    final y = fixed == LiveMessagePlacement.bottom
+        ? _size.height - look.bottomMargin - (lane + 1) * height
+        : top + lane * height;
+    _items.add(
+      _Flying(
+        message,
+        lane,
+        y,
+        now,
+        fill,
+        outline,
+        speed: style.baseSpeed,
+        fixed: fixed,
+        stay: Duration(milliseconds: style.fixedDurationMs),
+      ),
+    );
+    if (!_ticker.isActive) _ticker.start();
+  }
+
   void _tick(Duration elapsed) {
     _elapsed = elapsed;
     final speed = widget.look.speed;
     _items.removeWhere((item) {
-      final gone = item.right(elapsed, _size.width, speed) < 0;
+      final gone = item.gone(elapsed, _size.width, speed);
       if (gone) item.dispose();
       return gone;
     });
@@ -234,7 +333,7 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
 }
 
 final class _Flying {
-  new(this.message, this.lane, this.y, this.start, this.fill, this.outline);
+  new(this.message, this.lane, this.y, this.start, this.fill, this.outline, {this.speed, this.fixed, this.stay});
 
   final LiveMessage message;
   final int lane;
@@ -243,10 +342,24 @@ final class _Flying {
   final TextPainter fill;
   final TextPainter? outline;
 
-  double left(Duration now, double width, double speed) =>
-      width - (now - start).inMicroseconds / Duration.microsecondsPerSecond * speed;
+  /// Its own speed (a local danmaku), else the look's.
+  final double? speed;
+
+  /// Held at the top or bottom (a local danmaku), else scrolling.
+  final LiveMessagePlacement? fixed;
+
+  /// How long a held one stays.
+  final Duration? stay;
+
+  double left(Duration now, double width, double speed) {
+    if (fixed != null) return (width - fill.width) / 2;
+    return width - (now - start).inMicroseconds / Duration.microsecondsPerSecond * (this.speed ?? speed);
+  }
 
   double right(Duration now, double width, double speed) => left(now, width, speed) + fill.width;
+
+  bool gone(Duration now, double width, double speed) =>
+      fixed != null ? now - start > (stay ?? const Duration(seconds: 4)) : right(now, width, speed) < 0;
 
   void dispose() {
     fill.dispose();

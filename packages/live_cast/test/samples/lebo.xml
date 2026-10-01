@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:dlna="urn:schemas-dlna-org:device-1-0" xmlns:pnpx="http://schemas.microsoft.com/windows/pnpx/2005/11" xmlns:df="http://schemas.microsoft.com/windows/2008/09/devicefoundation">
+<specVersion>
+<major>1</major>
+<minor>0</minor>
+</specVersion>
+<URLBase>http://192.168.1.105:49153</URLBase>
+<device>
+<deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+<friendlyName>乐播投屏(卧室)</friendlyName>
+<manufacturer>Lebo</manufacturer>
+<manufacturerURL>http://www.hpplay.com.cn</manufacturerURL>
+<modelDescription>HappyCast Media Renderer</modelDescription>
+<modelName>HappyCast</modelName>
+<modelNumber>3.0</modelNumber>
+<modelURL>http://www.hpplay.com.cn</modelURL>
+<UDN>uuid:2a2c9b1e-0000-1000-8000-0c1d2e3f4a5b</UDN>
+<dlna:X_DLNADOC>DMR-1.50</dlna:X_DLNADOC>
+<pnpx:X_compatibleId>MS_DigitalMediaDeviceClass_DMR_V001</pnpx:X_compatibleId>
+<df:X_deviceCategory>Display.TV.LCD Multimedia.DMR</df:X_deviceCategory>
+<serviceList>
+<service>
+<serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
+<serviceId>urn:upnp-org:serviceId:AVTransport</serviceId>
+<SCPDURL>dlna/Render/AVTransport_scpd.xml</SCPDURL>
+<controlURL>dlna/Render/AVTransport_control</controlURL>
+<eventSubURL>dlna/Render/AVTransport_event</eventSubURL>
+</service>
+<service>
+<serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
+<serviceId>urn:upnp-org:serviceId:ConnectionManager</serviceId>
+<SCPDURL>dlna/Render/ConnectionManager_scpd.xml</SCPDURL>
+<controlURL>dlna/Render/ConnectionManager_control</controlURL>
+<eventSubURL>dlna/Render/ConnectionManager_event</eventSubURL>
+</service>
+<service>
+<serviceType>urn:schemas-upnp-org:service:RenderingControl:1</serviceType>
+<serviceId>urn:upnp-org:serviceId:RenderingControl</serviceId>
+<SCPDURL>dlna/Render/RenderingControl_scpd.xml</SCPDURL>
+<controlURL>dlna/Render/RenderingControl_control</controlURL>
+<eventSubURL>dlna/Render/RenderingControl_event</eventSubURL>
+</service>
+</serviceList>
+</device>
+</root>

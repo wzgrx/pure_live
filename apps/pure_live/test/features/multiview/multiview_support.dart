@@ -1,7 +1,7 @@
 import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
-import 'package:pure_live/features/multiview/multiview_controller.dart';
+import 'package:pure_live/features/multiview/logic/multiview_controller.dart';
 
 import '../../support.dart';
 import '../live_play/live_play_support.dart';

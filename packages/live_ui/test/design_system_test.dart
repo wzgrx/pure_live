@@ -138,6 +138,29 @@ void main() {
       (AppIcons.recordUnavailable, Icons.videocam_off_outlined),
       (AppIcons.enterRoom, Icons.open_in_new_rounded),
       (AppIcons.delete, Remix.delete_bin_line),
+      // U.8: the multi-view keeps 3.x's glyphs of lib/modules/multiview.
+      (AppIcons.immersive, Remix.expand_diagonal_line),
+      (AppIcons.exitImmersive, Remix.collapse_diagonal_line),
+      (AppIcons.gridFullscreen, Remix.fullscreen_line),
+      (AppIcons.gridExitFullscreen, Remix.fullscreen_exit_line),
+      (AppIcons.layoutSingle, Remix.aspect_ratio_line),
+      (AppIcons.layoutDual, Remix.layout_column_line),
+      (AppIcons.layoutQuad, Remix.layout_grid_line),
+      (AppIcons.layoutFocus, Remix.focus_3_line),
+      (AppIcons.muteAll, Remix.volume_up_line),
+      (AppIcons.mutedAll, Remix.volume_mute_line),
+      (AppIcons.smallCellSaver, Remix.speed_mini_line),
+      (AppIcons.cellPlay, Remix.play_line),
+      (AppIcons.cellPause, Remix.pause_line),
+      (AppIcons.cellRefresh, Remix.refresh_line),
+      (AppIcons.changeRoom, Remix.tv_2_line),
+      (AppIcons.closeCell, Remix.close_circle_line),
+      (AppIcons.cellVolume, Remix.volume_down_line),
+      (AppIcons.audioFocus, Remix.volume_up_line),
+      (AppIcons.addCell, Remix.add_circle_line),
+      (AppIcons.roomOffline, Remix.live_line),
+      (AppIcons.cellFailed, Remix.error_warning_line),
+      (AppIcons.restoreLast, Remix.history_line),
     ];
     for (final (actual, glyph) in expected) {
       expect(actual, glyph);
@@ -146,6 +169,15 @@ void main() {
     expect(AppIcons.floatWindow.codePoint, 0xe806);
     expect(AppIcons.floatWindow.fontFamily, 'CustomIcons');
     expect(AppIcons.floatWindow.fontPackage, 'live_ui');
+  });
+
+  test('OnVideoColors.accent is the light tone of the primary colour in both themes (U.8)', () {
+    final light = const LiveTheme().light.colorScheme;
+    final dark = const LiveTheme().dark.colorScheme;
+    expect(OnVideoColors.accent(light), light.inversePrimary);
+    expect(OnVideoColors.accent(dark), dark.primary);
+    expect(OnVideoColors.accent(light).computeLuminance(), greaterThan(0.3));
+    expect(OnVideoColors.accent(dark).computeLuminance(), greaterThan(0.3));
   });
 
   testWidgets('DanmakuIcon draws 3.x on, off and settings pictures in the icon colour', (tester) async {

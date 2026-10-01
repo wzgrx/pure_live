@@ -37,4 +37,5 @@ export 'src/widgets/scrollable_tab_bar.dart';
 export 'src/widgets/scrolling.dart';
 export 'src/widgets/settings_tiles.dart';
 export 'src/widgets/status_view.dart';
+export 'src/widgets/stream_menu_button.dart';
 export 'src/widgets/video_state_view.dart';

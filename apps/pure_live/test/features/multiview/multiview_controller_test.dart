@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
-import 'package:pure_live/features/multiview/multiview_controller.dart';
+import 'package:pure_live/features/multiview/logic/multiview_controller.dart';
 
 import '../../support.dart';
 import '../live_play/live_play_support.dart';
@@ -191,6 +191,38 @@ void main() {
     expect(second.cells[1].room!.roomId, '5');
     expect(second.savedRooms, isEmpty);
     second.dispose();
+    await store.close();
+  });
+  test('a cell out of sight decodes no video until it is back (UI_PLAN §9.3)', () async {
+    final store = await memoryStore();
+    final site = RoomsSite();
+    final engines = <FakeEngine>[];
+    final controller = multiviewController(store, site, engines: engines);
+    await controller.start();
+    await controller.assign(0, pickRoom('1'));
+    final cell = controller.cells[0];
+    controller.setOffscreen({cell.id});
+    await _settle();
+    expect(cell.offscreen, isTrue);
+    expect(cell.session!.state.audioOnly, isTrue);
+    expect(cell.session!.presentationVisible, isFalse);
+
+    // A new stream for a cell out of sight opens without video.
+    await controller.selectQuality(0, 2);
+    expect(engines.single.opens.last.audioOnly, isTrue);
+
+    controller.setOffscreen(const {});
+    await _settle();
+    expect(cell.offscreen, isFalse);
+    expect(cell.session!.state.audioOnly, isFalse);
+    expect(cell.session!.presentationVisible, isTrue);
+
+    // An empty cell is only marked; it opens without video when it plays.
+    final other = controller.cells[1];
+    controller.setOffscreen({other.id});
+    await controller.assign(1, pickRoom('2'));
+    expect(engines.last.opens.single.audioOnly, isTrue);
+    controller.dispose();
     await store.close();
   });
 }

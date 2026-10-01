@@ -423,10 +423,11 @@ class _IptvPageState extends ConsumerState<IptvPage> {
   Future<void> _cardAction(IptvCardAction action, String address, VoidCallback delete) async {
     switch (action) {
       case IptvCardAction.open:
-        final uri = isHttpUrl(address) ? Uri.tryParse(address) : Uri.file(address);
+        final remote = isHttpUrl(address);
+        final uri = remote ? Uri.tryParse(address) : null;
         var opened = false;
         try {
-          opened = uri != null && await AppNavigator.openExternal(uri);
+          opened = remote ? uri != null && await AppNavigator.openExternal(uri) : await AppNavigator.openFile(address);
         } on Object {
           opened = false;
         }

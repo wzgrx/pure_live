@@ -7,6 +7,7 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/account/account_services.dart';
 import 'package:pure_live/pages/favorite/favorite_controller.dart';
+import 'package:pure_live/pages/settings/data_tools.dart';
 import 'package:pure_live/pages/settings/settings_editors.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 
@@ -20,13 +21,15 @@ const Duration bilibiliCheckDelay = Duration(seconds: 1);
 
 /// What the app starts once its first frame is up (3.x started these with
 /// its services, in every window): the first check of every follow, the
-/// exit timer, and one second later the Bilibili login check.
+/// exit timer, the timed cover refresh, and one second later the Bilibili
+/// login check.
 final class AppStartup {
   /// Creates the start-up over [_ref]'s providers.
   new(this._ref);
 
   final Ref _ref;
   Timer? _bilibili;
+  CoverRefreshTimer? _covers;
   bool _started = false;
 
   /// The first check of every follow once started; the splash page waits for
@@ -39,6 +42,7 @@ final class AppStartup {
     _started = true;
     final store = _ref.read(storeProvider);
     AutoExitTimer.instance.attach(store.settings);
+    _covers = CoverRefreshTimer(store.settings)..start();
     followCheck = _ref.read(favoriteControllerProvider).firstCheck;
     _bilibili = Timer(
       bilibiliCheckDelay,
@@ -51,6 +55,7 @@ final class AppStartup {
   /// Stops what is still waiting.
   void dispose() {
     _bilibili?.cancel();
+    unawaited(_covers?.dispose());
     if (_started) {
       AutoExitTimer.instance.detach();
       followCheck = null;

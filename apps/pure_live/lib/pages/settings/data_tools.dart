@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -23,8 +24,7 @@ import 'package:pure_live/shared/images.dart';
 /// The files belong to cached_network_image's cache manager, which keeps
 /// an index next to them; deleting the files alone would leave the index
 /// pointing at nothing, so the disk part is cleared through [clearDisk],
-/// which the app sets to the manager's `emptyCache` (the app does not
-/// depend on flutter_cache_manager yet; see the module record).
+/// which the app sets to the manager's `emptyCache` (M12.3).
 abstract final class ImageCacheTools {
   /// The folder cached_network_image's default manager stores files in.
   static Future<Directory> Function() folder = () async =>
@@ -59,6 +59,62 @@ abstract final class ImageCacheTools {
       ..clearLiveImages();
     await clearDisk?.call();
     imageCacheEpoch.value++;
+  }
+
+  /// The timed cover refresh (3.x `refreshImageCache(refreshVisible: false)`):
+  /// the files on disk and the decoded images that are not on screen go, so
+  /// covers load fresh the next time they are shown; images on screen stay
+  /// (no grid-wide reload).
+  static Future<void> refreshInBackground() async {
+    await clearDisk?.call();
+    PaintingBinding.instance.imageCache.clear();
+  }
+}
+
+/// Refreshes covers every [Settings.thumbnailRefreshInterval] minutes while
+/// [Settings.autoRefreshThumbnails] is on (3.x `CacheController`'s
+/// thumbnail timer), following changes of both.
+final class CoverRefreshTimer {
+  /// Creates the timer over the settings; `refresh` is the work (tests).
+  new(this._settings, {Future<void> Function()? refresh}) : _refresh = refresh ?? ImageCacheTools.refreshInBackground;
+
+  final SettingsStore _settings;
+  final Future<void> Function() _refresh;
+  Timer? _timer;
+  StreamSubscription<Object>? _enabled;
+  StreamSubscription<Object>? _interval;
+
+  /// Starts following the settings.
+  void start() {
+    _enabled ??= _settings.watch(Settings.autoRefreshThumbnails).listen((_) => _schedule());
+    _interval ??= _settings.watch(Settings.thumbnailRefreshInterval).listen((_) => _schedule());
+    _schedule();
+  }
+
+  void _schedule() {
+    _timer?.cancel();
+    _timer = null;
+    if (!_settings.get(Settings.autoRefreshThumbnails)) return;
+    final minutes = _settings.get(Settings.thumbnailRefreshInterval).clamp(5, 360);
+    _timer = Timer.periodic(Duration(minutes: minutes), (_) => unawaited(_run()));
+  }
+
+  Future<void> _run() async {
+    try {
+      await _refresh();
+    } on Object catch (error, stack) {
+      log('Timed cover refresh failed', name: 'ImageCache', error: error, stackTrace: stack);
+    }
+  }
+
+  /// Whether a refresh is scheduled.
+  bool get active => _timer?.isActive ?? false;
+
+  /// Stops the timer.
+  Future<void> dispose() async {
+    _timer?.cancel();
+    await _enabled?.cancel();
+    await _interval?.cancel();
   }
 }
 

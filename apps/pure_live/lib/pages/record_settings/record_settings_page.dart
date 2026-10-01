@@ -143,13 +143,6 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
     setState(() => _choosingDirectory = true);
     try {
       final picker = ref.read(recordDirectoryPickerProvider);
-      if (picker != null) {
-        final picked = (await picker())?.trim() ?? '';
-        if (picked.isEmpty) return;
-        final error = await _saveDirectory(picked);
-        if (error != null) AppNavigator.toast(error);
-        return;
-      }
       final defaultPath = await recording.storage.defaultDirectory();
       if (!mounted) return;
       await showDialog<void>(
@@ -158,6 +151,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
           initialPath: _settings.savePath,
           defaultPath: defaultPath,
           onSubmitted: _saveDirectory,
+          browse: picker,
         ),
       );
     } finally {

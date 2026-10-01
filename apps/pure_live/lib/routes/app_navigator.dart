@@ -33,6 +33,10 @@ abstract final class AppNavigator {
   /// Opens a web address outside the app; replaceable in tests.
   static Future<bool> Function(Uri uri) openExternal = (uri) => launchUrl(uri, mode: LaunchMode.externalApplication);
 
+  /// Opens a local file with the app the system picks; the app sets it
+  /// (open_filex on Android, M12.3); replaceable in tests.
+  static Future<bool> Function(String path) openFile = (path) => openExternal(Uri.file(path));
+
   /// The router in use.
   static GoRouter get router => _router ?? (throw StateError('No router attached'));
 

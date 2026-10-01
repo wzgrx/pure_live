@@ -1124,4 +1124,10 @@ abstract final class AppIcons {
 
   /// Clear the log.
   static const IconData clearLog = Icons.delete_sweep_outlined;
+
+  /// The title of the dialog that adds a WebDAV server.
+  static const IconData webDavAddConfig = Remix.add_box_line;
+
+  /// The title of the dialog that edits a WebDAV server.
+  static const IconData webDavEditConfig = Remix.edit_box_line;
 }

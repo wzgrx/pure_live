@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "platform": "douyu",
+  "case": "S16-broadcast-end",
+  "room": "douyu:12850251",
+  "capturedAt": "2026-10-01T00:26:24.932530Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://danmuproxy.douyu.com:8506",
+      "headers": {}
+    }
+  ],
+  "note": "The rss packet one of 200 live rooms sent when its broadcast ended, in a 6 min anonymous session (2026-10-01, 08:20-08:26 Beijing time); the other packets are left out. betard afterwards: show_status 2, end_time equal to the packet's endtime. No start (ss 1) was seen.",
+  "packets": 1,
+  "raw": {
+    "sha256": "ea667293722ad4ac44aded2dc3d619ab89fb03263636e3662013abc9f019a876",
+    "length": 127
+  },
+  "scrubbed": [],
+  "tool": "M4.D2 probe (dart:io WebSocket, loginreq + joingroup per room)"
+}

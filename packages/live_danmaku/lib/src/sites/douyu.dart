@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/src/binary.dart';
+import 'package:live_danmaku/src/connection.dart';
 import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:meta/meta.dart';
@@ -160,11 +161,20 @@ abstract final class DouyuDanmakuProtocol {
     List<int> frame, {
     required String roomId,
     bool Function()? filterSuspectedAutomated,
+  }) => read(frame, roomId: roomId, filterSuspectedAutomated: filterSuspectedAutomated).messages;
+
+  /// [decode], and whether the frame says room [roomId]'s broadcast ended
+  /// ([endsBroadcast]); the packets after that one are not read.
+  static ({List<LiveMessage> messages, bool ended}) read(
+    List<int> frame, {
+    required String roomId,
+    bool Function()? filterSuspectedAutomated,
   }) {
     final messages = <LiveMessage>[];
     for (final body in bodies(frame)) {
       try {
         final fields = DouyuStt.map(body);
+        if (endsBroadcast(fields, roomId)) return (messages: messages, ended: true);
         final message = switch (fields['type']) {
           'chatmsg' => _chat(fields, roomId, filterSuspectedAutomated),
           'comm_chatmsg' => _superChat(fields),
@@ -178,7 +188,16 @@ abstract final class DouyuDanmakuProtocol {
         // the packets after it in the same frame.
       }
     }
-    return messages;
+    return (messages: messages, ended: false);
+  }
+
+  /// Whether [fields] is room [roomId]'s `rss` packet saying the broadcast
+  /// ended (`ss@=0`). A start (`ss@=1`) gives nothing, nor does another
+  /// room's packet.
+  static bool endsBroadcast(Map<String, String> fields, String roomId) {
+    if (fields['type'] != 'rss' || fields['ss'] != '0') return false;
+    final packetRoomId = fields['rid'] ?? '';
+    return packetRoomId.isEmpty || roomId.isEmpty || packetRoomId == roomId;
   }
 
   /// The colour of `col` (3.x `getColor`); unknown values are white.
@@ -315,7 +334,10 @@ abstract final class DouyuDanmakuProtocol {
 /// Douyu's danmaku connection (3.x `DouyuDanmaku`): one anonymous WebSocket
 /// to [DouyuDanmakuProtocol.endpoint] without extra headers. An open socket
 /// counts as joined; the join packets follow, a `type@=mrkl/` heartbeat goes
-/// out every 45 s, and a socket silent for 135 s is replaced.
+/// out every 45 s, and a socket silent for 135 s is replaced. The room's
+/// broadcast-end packet ([DouyuDanmakuProtocol.endsBroadcast]) ends the run
+/// with [DanmakuCloseReason.connectionFailed] ([broadcastEnded]), as 17LIVE
+/// does (C-6, B-14); a start is not reported.
 ///
 /// The app registers it as `SiteIds.douyu: () => DouyuDanmakuConnection(proxy:
 /// …, filterSuspectedAutomatedMessages: () => …)`, reading 3.x's
@@ -335,6 +357,9 @@ final class DouyuDanmakuConnection extends DanmakuSocketConnection<DouyuDanmakuA
   static const DanmakuSocketPolicy socketPolicy = DanmakuSocketPolicy(
     heartbeatInterval: DouyuDanmakuProtocol.heartbeatInterval,
   );
+
+  /// The detail of the run's end when the broadcast ends.
+  static const String broadcastEnded = 'Broadcast ended';
 
   final bool Function()? _filterSuspectedAutomatedMessages;
   String _roomId = '';
@@ -356,11 +381,13 @@ final class DouyuDanmakuConnection extends DanmakuSocketConnection<DouyuDanmakuA
   void onData(DanmakuSocketSession session, Object? data) {
     // Douyu only sends binary frames.
     if (data is! List<int>) return;
-    DouyuDanmakuProtocol.decode(
+    final (:messages, :ended) = DouyuDanmakuProtocol.read(
       data,
       roomId: _roomId,
       filterSuspectedAutomated: _filterSuspectedAutomatedMessages,
-    ).forEach(session.message);
+    );
+    messages.forEach(session.message);
+    if (ended) session.run.closed(DanmakuCloseReason.connectionFailed, detail: broadcastEnded);
   }
 
   @override

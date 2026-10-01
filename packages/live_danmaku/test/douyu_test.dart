@@ -349,6 +349,46 @@ void main() {
     });
   });
 
+  group('broadcast end (S16-broadcast-end, 2026-10-01, C-6)', () {
+    final sample = _json('S16-broadcast-end/packets.json')! as Map<String, Object?>;
+    final roomId = sample['roomId']! as String;
+    final end = sample['packets']! as List<Object?>;
+    Uint8List server(String body) => DouyuDanmakuProtocol.packet(body, type: DouyuDanmakuProtocol.serverPacketType);
+    String chat(String text) => 'type@=chatmsg/rid@=$roomId/dms@=4/txt@=$text/';
+
+    test("the recorded rss (ss 0) ends this room's broadcast; a start or another room's does not", () {
+      final body = end.single! as String;
+      final read = DouyuDanmakuProtocol.read([
+        ...server(chat('before')),
+        ...server(body),
+        ...server(chat('after')),
+      ], roomId: roomId);
+      expect(read.ended, isTrue);
+      expect(read.messages.map((m) => m.message), ['before']);
+      expect(DouyuDanmakuProtocol.read(server(body), roomId: '1').ended, isFalse);
+      expect(DouyuDanmakuProtocol.read(server(body.replaceFirst('/ss@=0/', '/ss@=1/')), roomId: roomId).ended, isFalse);
+    });
+
+    test('the connection ends the run with connectionFailed (Broadcast ended), without reconnecting', () async {
+      final connector = _Connector();
+      final connection = DouyuDanmakuConnection(connector: connector.call);
+      final events = _record(connection);
+      await connection.connect(DouyuDanmakuArgs(roomId));
+      final channel = connector.channels.single;
+      channel.incoming.add([...server(chat('bye')), ...server(end.single! as String)]);
+      await _until(() => events.whereType<DanmakuClosed>().isNotEmpty);
+      expect(_messages(events).map((m) => m.message), ['bye']);
+      expect(
+        events.last,
+        const DanmakuClosed(DanmakuCloseReason.connectionFailed, detail: DouyuDanmakuConnection.broadcastEnded),
+      );
+      expect(channel.closed, isTrue);
+      await _wait(const Duration(milliseconds: 30));
+      expect(connector.channels, hasLength(1), reason: 'no reconnect');
+      expect(connection.status, DanmakuStatus.closed);
+    });
+  });
+
   group('synthetic frames (S14-synthetic) against 3.x', () {
     final cases = (_json('S14-synthetic/cases.json')! as Map<String, Object?>)['cases']! as List<Object?>;
     final expected = {

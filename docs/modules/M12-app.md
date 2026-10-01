@@ -116,7 +116,7 @@ v3 调用方（`git grep` v3.2.11 的 `lib`）：`AppNavigator` 被 13 个文件
 
 | 编号 | 本块做了什么 |
 |---|---|
-| X-1 恢复 Kick | 部分完成：Android 原生网络层做成通用的 `AndroidNativeHttp`（`LiveHttp`，系统 TLS、走应用代理、白名单主机），Twitch 已作为 GraphQL 备用传输注入。余下：Kick 适配器和弹幕（参考 pure_live_TV e1cca224）、白名单加 Kick 的主机（Kotlin `ALLOWED_HOSTS` 和 Dart `allowedHosts` 两处）、`SiteIds.retired` 去掉 `kick`；Windows 的 WinHTTP 通道 |
+| X-1 恢复 Kick | 完成（M4.34）：Kick 适配器和弹幕在 Android 上走 `AndroidNativeHttp`（Kick 的主机已进白名单）；Twitch 的无界面 WebView 传输作为最后一个 GraphQL 备用传输注入（Android）。余下：Windows 的 WinHTTP 通道（之前 Windows 不登记 Kick，3.x 的 Kick 关注在 Windows 上只显示存下的信息），见 [M4.34](M4.34-kick.md) |
 | B-2 握手不带 `Dart/` 前缀 | 部分完成：留开关和说明。`live_net` 的 `connectIoSocket` 加了可选参数 `plainUserAgent`（只添加，默认关）；应用里的开关是编译参数 `--dart-define=PURE_LIVE_PLAIN_WS_UA=true`，打开后用 dart:io 握手的弹幕平台（YY、FC2 除外）都不带前缀。余下：Android 真机逐平台验证（v3 实测自定义直连客户端可能让握手挂到超时），通过后改成默认开 |
 | 17-1、23-1、抖音 room_id → web_rid | 应用接上 M9 的 `IdentityMigration`：niconico、YouTube 用 `resolveRoomId` 加 `watchUrl`/`roomLink`，抖音用 `getRoomDetailForRefresh`；在启动后台运行，`followsReady` 给关注刷新等待。余下 M13 的页面 |
 | B-13 YouTube“显示全部聊天” | 弹幕登记按连接时的设置 `youtubeShowAllChat` 创建连接 |

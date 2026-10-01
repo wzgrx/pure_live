@@ -122,13 +122,6 @@ final class AccountActions {
     if (site == SiteIds.douyu) await store.settings.set(Settings.douyuCookieSavedAt, 0);
   }
 
-  /// Signs out of every platform (3.x `clearAllCookies`).
-  Future<void> signOutAll() async {
-    await store.secrets.clearCookies();
-    await store.settings.set(Settings.bilibiliUid, 0);
-    await store.settings.set(Settings.douyuCookieSavedAt, 0);
-  }
-
   /// Douyu's renewal key, device id and save time.
   ({String? ltp0, String? did, DateTime? savedAt}) get douyuLogin {
     final seconds = store.settings.get(Settings.douyuCookieSavedAt);

@@ -121,7 +121,8 @@ AccountStatus accountStatus(
   final cookie = stored.cookie;
   if (cookie.isEmpty) {
     if (stored.unreadable) return AccountStatus(i18n('account_status_unreadable'), tone: AccountTone.error);
-    return AccountStatus(i18n(platform.check == AccountCheckKind.online ? 'not_logged_in' : 'account_status_none'));
+    // 3.x: "设置cookie", and "未登录" for Bilibili (docs/ui/compare/U.10a c5).
+    return AccountStatus(i18n('account_status_none'));
   }
   switch (platform.check) {
     case AccountCheckKind.online:
@@ -168,10 +169,22 @@ AccountStatus accountStatus(
           : AccountStatus(i18n('account_status_huya_uid', args: {'uid': '$uid'}), tone: AccountTone.ok, signedIn: true);
     case AccountCheckKind.none:
       return platform.usedByRequests
-          ? AccountStatus(i18n('cookie_saved_local'), tone: AccountTone.ok, signedIn: true)
-          : AccountStatus(i18n('account_status_stored_unused'), tone: AccountTone.ok, signedIn: true);
+          ? AccountStatus(i18n('account_status_saved'), tone: AccountTone.ok, signedIn: true)
+          : AccountStatus(i18n('account_status_stored_unused'), tone: AccountTone.warning, signedIn: true);
   }
 }
+
+/// The status card of a platform's own page: the list's [status], but an
+/// empty one says what to do ("未设置：粘贴登录后的 Cookie", docs/ui/compare/
+/// U.10b c2).
+AccountStatus accountPageStatus(AccountStatus status, AccountSnapshot stored) =>
+    stored.cookie.isEmpty && !stored.unreadable && status.tone == AccountTone.idle
+    ? AccountStatus(i18n('account_status_none_hint'))
+    : status;
+
+/// Whether anything of the login is stored on this device (the list shows
+/// the sign-out button; an unreadable cookie can be removed too).
+bool accountStored(AccountSnapshot stored) => stored.cookie.isNotEmpty || stored.unreadable;
 
 /// The short line of a valid Douyu login: renews itself, or ends then.
 String _douyuValid(AccountSnapshot stored) {
@@ -179,7 +192,7 @@ String _douyuValid(AccountSnapshot stored) {
   if (credentials.ltp0 != null && credentials.did != null) return i18n('account_status_douyu_renews');
   final expiry = DouyuApi.sessionExpiry(stored.cookie, savedAt: stored.douyuSavedAt);
   return expiry == null
-      ? i18n('cookie_saved_local')
+      ? i18n('account_status_saved')
       : i18n('account_status_douyu_until', args: {'time': accountTime(expiry)});
 }
 

@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/route_path.dart';
-import 'package:pure_live/shared/in_app_web.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// How a short message is shown (3.x `ToastUtil.show`); the app sets it to
@@ -133,30 +132,8 @@ abstract final class AppNavigator {
   /// Opens multi-view (3.x `toMultiview`).
   static Future<void> toMultiview() async => unawaited(toNamed<void>(RoutePath.kMultiview));
 
-  /// Opens the Bilibili login (3.x `toBiliBiliLogin`): phones with the
-  /// in-app browser choose between the web page (SMS or password) and the
-  /// QR code; desktops, and phones without it, go to the QR code.
-  static Future<void> toBiliBiliLogin(BuildContext context, {required bool mobile}) async {
-    if (!mobile || !InAppWeb.available) {
-      await toNamed<void>(RoutePath.kBiliBiliQRLogin);
-      return;
-    }
-    final choice = await showDialog<String>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: Text(i18n('select_login_method')),
-        children: [
-          SimpleDialogOption(
-            onPressed: () => Navigator.pop(context, RoutePath.kBiliBiliWebLogin),
-            child: Text(i18n('sms_login')),
-          ),
-          SimpleDialogOption(
-            onPressed: () => Navigator.pop(context, RoutePath.kBiliBiliQRLogin),
-            child: Text(i18n('qrcode_login')),
-          ),
-        ],
-      ),
-    );
-    if (choice != null) await toNamed<void>(choice);
-  }
+  /// Opens the Bilibili login (3.x `toBiliBiliLogin`): the QR code page,
+  /// which offers the web login (phones) and the cookie under the code
+  /// (docs/ui/compare/U.10a K2 A; 3.x first asked "请选择登陆方式").
+  static Future<void> toBiliBiliLogin() => toNamed<void>(RoutePath.kBiliBiliQRLogin);
 }

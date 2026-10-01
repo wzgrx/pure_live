@@ -173,25 +173,7 @@ class _ChatListState extends ConsumerState<ChatList> {
   Future<void> _actions(ChatLine line) async {
     final message = line.message;
     if (message == null) return;
-    await showChatMessageActions(
-      context,
-      message,
-      onBlockUser: (name) async {
-        await widget.controller.blockUser(name);
-        AppNavigator.toast(i18n('live_play_user_blocked', args: {'name': name}));
-      },
-      onBlockKeyword: (text) => unawaited(_blockKeyword(text)),
-    );
-  }
-
-  Future<void> _blockKeyword(String text) async {
-    final keyword = await showDialog<String>(
-      context: context,
-      builder: (_) => _KeywordDialog(initialText: text),
-    );
-    if (keyword == null || keyword.trim().isEmpty) return;
-    await widget.controller.blockKeyword(keyword);
-    AppNavigator.toast(i18n('danmaku_keyword_blocked'));
+    await showRoomMessageActions(context, widget.controller, message);
   }
 
   @override
@@ -511,6 +493,32 @@ class ChatLineView extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The room's actions on [message]: the chat list's long press and a tap or
+/// long press on a flying danmaku (F.2b) open the same sheet. Blocking a
+/// viewer or a keyword goes to [controller]; the keyword box opens over
+/// [context] after the sheet closes.
+Future<void> showRoomMessageActions(BuildContext context, LiveRoomController controller, LiveMessage message) =>
+    showChatMessageActions(
+      context,
+      message,
+      onBlockUser: (name) async {
+        await controller.blockUser(name);
+        AppNavigator.toast(i18n('live_play_user_blocked', args: {'name': name}));
+      },
+      onBlockKeyword: (text) => unawaited(_blockKeyword(context, controller, text)),
+    );
+
+Future<void> _blockKeyword(BuildContext context, LiveRoomController controller, String text) async {
+  if (!context.mounted) return;
+  final keyword = await showDialog<String>(
+    context: context,
+    builder: (_) => _KeywordDialog(initialText: text),
+  );
+  if (keyword == null || keyword.trim().isEmpty) return;
+  await controller.blockKeyword(keyword);
+  AppNavigator.toast(i18n('danmaku_keyword_blocked'));
 }
 
 /// The sheet of a long-pressed message (3.x `DanmakuMessageActions`,

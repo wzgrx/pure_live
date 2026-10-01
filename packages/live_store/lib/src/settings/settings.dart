@@ -42,6 +42,17 @@ abstract final class Settings {
     defaultValue: false,
   );
 
+  /// New (docs/ui/compare/U.3d c4): the version the user asked not to be
+  /// reminded of ("不再提醒这个版本"); the start-up check stays quiet for it
+  /// and speaks again for a newer one. Empty: none. A choice of this device,
+  /// so backups do not carry it.
+  static const skippedUpdateVersion = StringSetting(
+    'skippedUpdateVersion',
+    section: 'app',
+    defaultValue: '',
+    scope: SettingScope.internal,
+  );
+
   /// Enter full screen when a room opens.
   static const enableFullScreenDefault = BoolSetting('enableFullScreenDefault', section: 'app', defaultValue: false);
 
@@ -989,6 +1000,16 @@ abstract final class Settings {
     scope: SettingScope.internal,
   );
 
+  /// Whether the user answered the download folder prompt (3.x
+  /// `CacheController.downloadDirectoryDecisionPrefKey`): with it, an empty
+  /// [downloadDirectoryPath] means the default folder without asking.
+  static const downloadDirectoryDecisionMade = BoolSetting(
+    'downloadDirectoryDecisionMade',
+    section: 'cache',
+    defaultValue: false,
+    scope: SettingScope.internal,
+  );
+
   // ---- log (new; 3.x's switch lasted one session) ----
 
   /// Write the app log to a file.
@@ -1055,6 +1076,7 @@ abstract final class Settings {
     enableScreenKeepOn,
     enableAutoCheckUpdate,
     useGitHubOriginForUpdates,
+    skippedUpdateVersion,
     enableFullScreenDefault,
     showSplashPage,
     refreshRateMode,
@@ -1199,6 +1221,7 @@ abstract final class Settings {
     ...recorder,
     backupDirectory,
     downloadDirectoryPath,
+    downloadDirectoryDecisionMade,
     enableLocalLog,
     logLevel,
     bilibiliUid,

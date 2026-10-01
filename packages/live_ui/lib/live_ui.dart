@@ -16,6 +16,7 @@ export 'src/theme/text_styles.dart';
 export 'src/widgets/app_menu.dart';
 export 'src/widgets/avatar.dart';
 export 'src/widgets/count_button.dart';
+export 'src/widgets/dialog_buttons_theme.dart';
 export 'src/widgets/emote_text.dart';
 export 'src/widgets/listenable_selector.dart';
 export 'src/widgets/loading_styles.dart';

@@ -203,7 +203,7 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
       _restrictions.remove(task.taskId);
     },
     setAuto: (task, {required on}) => setAutoRecord(recording, recorder, on: on, task: task),
-    limit: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kRecordSettings)),
+    limit: () => unawaited(openRecordLimit()),
     folder: (task) => unawaited(openRecordFolder(recording, path: recordTaskFolder(task))),
     reason: (context, task) => unawaited(showRecordFailureReason(context, _failure(task))),
     failed: () => AppNavigator.toast(i18n('live_play_record_failed')),

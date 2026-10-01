@@ -284,7 +284,7 @@ class _RecordPanelBodyState extends ConsumerState<RecordPanelBody> {
               onStart: () => unawaited(_start()),
               onStartTask: () => unawaited(_startTask()),
               onStop: () => unawaited(_stop()),
-              onLimit: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kRecordSettings)),
+              onLimit: () => unawaited(openRecordLimit()),
               // "播放" with the system's player; hidden while there is no file.
               onPlay: switch (view.output) {
                 final path? when File(path).existsSync() => () => unawaited(playRecording(path)),

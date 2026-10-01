@@ -892,4 +892,219 @@ abstract final class AppIcons {
 
   /// The chosen item of a gallery (a loading style).
   static const IconData chosen = Icons.check_circle_rounded;
+
+  // ---- the recording settings (3.x record_settings_page.dart; docs/ui/compare/U.7b) ----
+
+  /// The default recording quality.
+  static const IconData recordQuality = Remix.hd_line;
+
+  /// Pinyin folder names.
+  static const IconData recordPinyin = Remix.translate_2;
+
+  /// Record the danmaku too.
+  static const IconData recordDanmaku = Remix.chat_3_line;
+
+  /// Limit the recordings' total size.
+  static const IconData recordSizeLimit = Remix.exchange_box_line;
+
+  /// The total size cap.
+  static const IconData recordSizeCap = Remix.database_2_line;
+
+  /// The space the recordings take.
+  static const IconData recordUsedSpace = Remix.custom_size;
+
+  /// Empty the recording folder.
+  static const IconData recordClear = Remix.delete_bin_4_line;
+
+  /// Prefer the original track.
+  static const IconData recordBestStream = Remix.video_download_line;
+
+  /// The read and write timeout.
+  static const IconData recordTimeout = Remix.timer_flash_line;
+
+  /// The input queue.
+  static const IconData recordQueue = Remix.speed_mini_line;
+
+  /// The segment length.
+  static const IconData recordSegment = Remix.film_line;
+
+  /// The most recordings at once.
+  static const IconData recordMaxTasks = Remix.task_line;
+
+  /// Reconnect when a recording breaks.
+  static const IconData recordReconnect = Remix.refresh_line;
+
+  /// The most retries.
+  static const IconData recordRetries = Remix.loop_left_line;
+
+  /// An interval (reconnect, live check).
+  static const IconData recordInterval = Remix.time_line;
+
+  /// The live check.
+  static const IconData recordPolling = Remix.radar_line;
+
+  /// The live check's back-off.
+  static const IconData recordBackoff = Remix.line_chart_line;
+
+  /// The longest check interval.
+  static const IconData recordMaxInterval = Remix.hourglass_2_line;
+
+  /// Resume the recordings at start.
+  static const IconData recordResume = Remix.restart_line;
+
+  /// One less (the counter rows).
+  static const IconData decrease = Icons.remove_rounded;
+
+  /// One more (the counter rows).
+  static const IconData increase = Icons.add_rounded;
+
+  // ---- backup and restore (3.x backup_page.dart, scan_page.dart; docs/ui/compare/U.11a) ----
+
+  /// Send the data to the TV.
+  static const IconData syncTv = Remix.qr_code_line;
+
+  /// Create a backup, export the follows.
+  static const IconData backupCreate = Remix.file_download_line;
+
+  /// Restore a backup, import the follows.
+  static const IconData backupRestore = Remix.file_upload_line;
+
+  /// A full backup file.
+  static const IconData backupFile = Remix.file_text_line;
+
+  /// A follows-only backup file; restore only the follows.
+  static const IconData backupFollows = Remix.heart_line;
+
+  /// The backup folder has no backup.
+  static const IconData backupEmpty = Icons.inventory_2_outlined;
+
+  /// The backup folder.
+  static const IconData backupFolder = Remix.folder_open_line;
+
+  /// Open the backup folder in the file manager (computers).
+  static const IconData backupOpenFolder = Remix.external_link_line;
+
+  /// The scanner's torch is off.
+  static const IconData torchOff = Icons.flash_off_rounded;
+
+  /// The scanner's torch is on.
+  static const IconData torchOn = Icons.flash_on_rounded;
+
+  /// The scanner has no torch.
+  static const IconData torchUnavailable = Icons.no_flash_rounded;
+
+  /// The front and back cameras.
+  static const IconData switchCamera = Icons.cameraswitch_rounded;
+
+  /// Type the address instead of scanning.
+  static const IconData typeAddress = Icons.keyboard_rounded;
+
+  /// Scan a QR code.
+  static const IconData scanQr = Icons.qr_code_scanner_rounded;
+
+  /// The camera cannot be used.
+  static const IconData cameraUnavailable = Icons.no_photography_outlined;
+
+  /// Done, sent.
+  static const IconData syncDone = Icons.check_circle_rounded;
+
+  /// A sync failed.
+  static const IconData syncFailed = Icons.error_outline_rounded;
+
+  // ---- WebDAV (3.x web_dav_page.dart, web_dav_help.dart; docs/ui/compare/U.11b) ----
+
+  /// The servers.
+  static const IconData webDavServers = Remix.server_line;
+
+  /// The current server.
+  static const IconData webDavServerCurrent = Icons.cloud_done_rounded;
+
+  /// A server.
+  static const IconData webDavServer = Icons.cloud_outlined;
+
+  /// A folder on the server.
+  static const IconData webDavFolder = Icons.folder_rounded;
+
+  /// An empty folder.
+  static const IconData webDavFolderEmpty = Icons.folder_open_outlined;
+
+  /// A backup file on the server.
+  static const IconData webDavBackupFile = Remix.file_shield_2_line;
+
+  /// Another file on the server.
+  static const IconData webDavOtherFile = Icons.insert_drive_file_rounded;
+
+  /// Upload a backup.
+  static const IconData webDavUpload = Icons.cloud_upload_rounded;
+
+  /// The usage help.
+  static const IconData help = Remix.question_line;
+
+  /// Edit (a server).
+  static const IconData edit = Icons.edit_outlined;
+
+  /// A path separator.
+  static const IconData pathSeparator = Icons.navigate_next_rounded;
+
+  /// A server's name.
+  static const IconData webDavName = Remix.bookmark_line;
+
+  /// A server's address.
+  static const IconData webDavAddress = Remix.global_line;
+
+  /// A user name.
+  static const IconData userName = Remix.user_3_line;
+
+  /// A password.
+  static const IconData password = Remix.lock_password_line;
+
+  /// Show the password.
+  static const IconData showPassword = Icons.visibility_outlined;
+
+  /// Hide the password.
+  static const IconData hidePassword = Icons.visibility_off_outlined;
+
+  /// A check passed.
+  static const IconData checkPassed = Icons.check_circle_outline_rounded;
+
+  /// A link (the help's server address).
+  static const IconData link = Remix.links_line;
+
+  /// Copy (the help's values).
+  static const IconData copyValue = Remix.file_copy_line;
+
+  /// An e-mail address (the help's account).
+  static const IconData mail = Remix.mail_line;
+
+  // ---- device sync (3.x remote_sync_page.dart; docs/ui/compare/U.11c) ----
+
+  /// Start the sync service.
+  static const IconData syncStart = Remix.play_circle_line;
+
+  /// Stop the sync service.
+  static const IconData syncStop = Remix.stop_circle_line;
+
+  /// The sync service runs.
+  static const IconData syncRunning = Icons.check_circle_rounded;
+
+  /// The sync service does not run.
+  static const IconData syncNotRunning = Icons.error_outline_rounded;
+
+  /// A phone.
+  static const IconData devicePhone = Icons.smartphone_rounded;
+
+  /// A computer.
+  static const IconData deviceComputer = Icons.laptop_rounded;
+
+  /// A tablet or another device.
+  static const IconData deviceOther = Icons.devices_rounded;
+
+  /// A network address.
+  static const IconData lanAddress = Icons.lan_outlined;
+
+  /// Receive the settings.
+  static const IconData receive = Icons.download_rounded;
+
+  /// Send the settings.
+  static const IconData send = Icons.upload_rounded;
 }

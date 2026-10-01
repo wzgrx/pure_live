@@ -94,6 +94,50 @@ void main() {
       }
     });
 
+    testWidgets('an explanation may show whole (a folder path, U.7b c3)', (tester) async {
+      await _pump(
+        tester,
+        SettingsGroup(
+          children: [
+            SettingsSwitchRow(
+              title: '同时录制弹幕',
+              subtitle: '在录像旁保存同名 .xml 弹幕文件' * 4,
+              subtitleMaxLines: null,
+              value: false,
+              onChanged: (_) {},
+            ),
+          ],
+        ),
+      );
+      expect(tester.widget<HighlightedText>(find.byType(HighlightedText).last).maxLines, isNull);
+    });
+
+    testWidgets('the frame of settings-like pages: a centred 720 column, a centred title, 48 high when short', (
+      tester,
+    ) async {
+      tester.view
+        ..physicalSize = const Size(852, 393)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: const LiveTheme().light,
+          home: Builder(
+            builder: (context) => Scaffold(
+              appBar: settingsPageAppBar(context, title: '录制设置', subtitle: '我的网盘'),
+              body: const SettingsPageList(children: [SizedBox(key: ValueKey('c'), height: 40)]),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(AppBar)).height, 48);
+      expect(tester.getCenter(find.text('录制设置')).dx, closeTo(426, 1));
+      expect(find.text('我的网盘'), findsOneWidget);
+      final column = tester.getRect(find.byKey(const ValueKey('c')));
+      expect(column.width, 720);
+      expect(column.left, closeTo((852 - 720) / 2, 1));
+    });
+
     testWidgets('a switch row: a tap on the row switches; the thumb stays visible when on', (tester) async {
       var value = false;
       await _pump(

@@ -5,11 +5,21 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/record/record_state.dart';
 
 // What the live room's record panel (U.2f) and the recording centre (U.7a)
 // do the same way: "开播自动录", the live check it needs, "再录一次",
 // "播放" and "查看原因".
+
+/// The argument of `RoutePath.kRecordSettings` that scrolls the page to
+/// "最大同时录制任务数" and highlights it (the "改上限" buttons, U.7b c9).
+const String recordSettingsMaxTasks = 'max-tasks';
+
+/// "改上限" of a queued recording (the room's record panel, the recording
+/// centre): the recording settings at the "最大同时录制任务数" row.
+Future<void> openRecordLimit() =>
+    AppNavigator.toNamed<void>(RoutePath.kRecordSettings, arguments: recordSettingsMaxTasks);
 
 /// Turns the live check on when it is off ("开播自动录" needs it, U.2f F2;
 /// the centre's "打开"), with the toast.

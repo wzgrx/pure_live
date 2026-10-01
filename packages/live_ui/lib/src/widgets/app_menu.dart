@@ -7,7 +7,15 @@ import 'package:live_ui/src/theme/text_styles.dart';
 @immutable
 final class AppMenuEntry<T> {
   /// A row with [label] and an optional [icon] that answers [value].
-  const new({required this.value, required this.label, this.icon, this.key, this.enabled = true});
+  const new({
+    required this.value,
+    required this.label,
+    this.icon,
+    this.key,
+    this.enabled = true,
+    this.danger = false,
+    this.divider = false,
+  });
 
   /// What choosing the row returns.
   final T value;
@@ -23,7 +31,16 @@ final class AppMenuEntry<T> {
 
   /// Whether the row takes taps.
   final bool enabled;
+
+  /// A destructive row (delete): icon and text in the error colour.
+  final bool danger;
+
+  /// A line above the row (sets the destructive row apart).
+  final bool divider;
 }
+
+/// The height of [AppMenuEntry.divider]'s line (Material's menu divider).
+const double appMenuDividerHeight = 16;
 
 /// The smallest width of the small menu (U.2f).
 const double appMenuMinWidth = 128;
@@ -49,12 +66,18 @@ Future<T?> showAppMenu<T>(BuildContext context, {required List<AppMenuEntry<T>> 
   final text = context.textStyles.t14.copyWith(color: scheme.onSurface);
   return showMenu<T>(
     context: context,
-    position: _position(context, entries.length, preferAbove: preferAbove),
+    position: _position(
+      context,
+      entries.length,
+      dividers: entries.where((entry) => entry.divider).length,
+      preferAbove: preferAbove,
+    ),
     color: scheme.surfaceContainerHighest,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     constraints: const BoxConstraints(minWidth: appMenuMinWidth, maxWidth: 280),
     items: [
-      for (final entry in entries)
+      for (final entry in entries) ...[
+        if (entry.divider) const PopupMenuDivider(),
         PopupMenuItem<T>(
           key: entry.key,
           value: entry.value,
@@ -64,27 +87,33 @@ Future<T?> showAppMenu<T>(BuildContext context, {required List<AppMenuEntry<T>> 
             mainAxisSize: MainAxisSize.min,
             children: [
               if (entry.icon case final icon?) ...[
-                Icon(icon, size: 24, color: scheme.onSurfaceVariant),
+                Icon(icon, size: 24, color: entry.danger ? scheme.error : scheme.onSurfaceVariant),
                 const SizedBox(width: 12),
               ],
               Flexible(
-                child: Text(entry.label, style: text, maxLines: 1, overflow: TextOverflow.ellipsis),
+                child: Text(
+                  entry.label,
+                  style: entry.danger ? text.copyWith(color: scheme.error) : text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
         ),
+      ],
     ],
   );
 }
 
 /// Where the menu of [count] rows goes next to the box of [context].
-RelativeRect _position(BuildContext context, int count, {required bool preferAbove}) {
+RelativeRect _position(BuildContext context, int count, {required bool preferAbove, int dividers = 0}) {
   final button = context.findRenderObject()! as RenderBox;
   final overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
   final rect = button.localToGlobal(Offset.zero, ancestor: overlay) & button.size;
   final padding = MediaQuery.paddingOf(context);
   // Rows of 48 and the menu's own 8 above and below (Material's menu).
-  final height = count * kMinInteractiveDimension + 16;
+  final height = count * kMinInteractiveDimension + dividers * appMenuDividerHeight + 16;
   final below = overlay.size.height - padding.bottom - rect.bottom - appMenuGap;
   final above = rect.top - padding.top - appMenuGap;
   final up = preferAbove ? height <= above || above > below : height > below && above > below;

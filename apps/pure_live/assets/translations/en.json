@@ -2423,7 +2423,6 @@
     "settings_loading_restore_message": "The loading animation goes back to the default ring and its colour follows the theme again.",
     "settings_loading_restore_title": "Restore defaults?",
     "settings_loading_style_desc": "The animation shown while loading",
-    "settings_local_interaction_pending": "Local interaction is still being built; its settings will be here.",
     "settings_log_clear": "Clear log",
     "settings_log_clear_confirm": "Clear this session's log and the saved log files?",
     "settings_log_cleared": "Log cleared",

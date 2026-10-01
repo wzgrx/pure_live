@@ -130,14 +130,7 @@ class SettingsSectionPage extends StatelessWidget {
         embedded: embedded,
         leading: onBack == null ? null : BackButton(onPressed: onBack),
       ),
-      body: section == SettingsSection.localInteraction
-          ? AppStatusView(
-              key: const ValueKey('settings-local-interaction-pending'),
-              type: AppStatusType.empty,
-              title: i18n('local_interaction_title'),
-              subtitle: i18n('settings_local_interaction_pending'),
-            )
-          : SettingsSectionView(section: section, highlight: highlight),
+      body: SettingsSectionView(section: section, highlight: highlight),
     );
   }
 }

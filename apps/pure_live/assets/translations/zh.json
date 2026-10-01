@@ -2422,7 +2422,6 @@
     "settings_loading_restore_message": "加载动画换回“默认圆环”，颜色换回跟随主题色。",
     "settings_loading_restore_title": "恢复默认？",
     "settings_loading_style_desc": "加载时显示的动画",
-    "settings_local_interaction_pending": "本地互动体验还在开发，做好后在这里设置。",
     "settings_log_clear": "清除日志",
     "settings_log_clear_confirm": "清除本次运行的日志和保存的日志文件？",
     "settings_log_cleared": "日志已清除",

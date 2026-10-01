@@ -86,6 +86,7 @@ enum SettingsSection {
     'local_interaction_title',
     'local_interaction_settings_desc',
     AppIcons.settingsLocalInteraction,
+    route: RoutePath.kLocalInteraction,
   ),
 
   /// Cache and data (U.6e).

@@ -77,6 +77,9 @@ step() {
     echo "gate: ok   $name"
   else
     echo "gate: FAIL $name" >&2
+    # Test runners print a failure long before the end of a big run; show each
+    # failing test with its message, then the tail.
+    grep -n -A40 ' \[E\]$' "$log" | head -n 200 >&2
     tail -n 60 "$log" >&2
     failures+=("$name")
   fi

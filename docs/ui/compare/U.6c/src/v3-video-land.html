@@ -1,0 +1,120 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="852x393@2"><link rel="stylesheet" href="kit/kit.css"><style>
+@font-face{font-family:'Material Icons Outlined';src:url('.cache/fonts/MaterialIconsOutlined.woff2') format('woff2')}
+.mo{font-family:'Material Icons Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-feature-settings:'liga';white-space:nowrap}
+.ph.long{height:auto;min-height:852px;padding-bottom:24px}
+/* ---------- v3 ---------- */
+.v3bar{height:64px;display:flex;align-items:center;position:relative;background:var(--surface);flex:none}
+.v3bar .bk{width:56px;height:56px;display:grid;place-items:center}.v3bar .bk .mi{font-size:24px}
+.v3bar .t{position:absolute;left:72px;right:72px;text-align:center;font-size:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v3bar .acts{margin-left:auto;display:flex;align-items:center;padding-right:8px;color:var(--onv)}
+.v3body{padding:12px 16px 32px}
+.v3wrap{max-width:960px;margin:0 auto}
+.v3gt{padding:0 0 8px 8px;font-size:12px;font-weight:700;color:rgba(54,97,142,.65);letter-spacing:.5px;line-height:16px}
+.v3card{background:#F5F6FC;border-radius:20px;overflow:hidden;box-shadow:inset 0 0 0 .5px rgba(195,199,207,.25)}
+.v3gap{height:20px}
+.v3t{display:flex;align-items:center;gap:12px;padding:8px 16px;min-height:56px}
+.v3t.two{min-height:72px}.v3t.three{min-height:88px}
+.v3t.swt{padding:2px 8px 2px 16px;gap:16px}
+.v3t .ic{width:22px;flex:none;color:var(--primary);display:grid;place-items:center}
+.v3t .x{flex:1;min-width:0}
+.v3t .a{font-size:15px;font-weight:600;line-height:22px}
+.v3t .b{font-size:12px;line-height:16px;color:rgba(0,0,0,.75);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v3t .b.long{white-space:normal}
+.v3t .b.err{color:var(--error)}
+.v3t .tv{font-size:12px;font-weight:600;color:var(--primary);flex:none;max-width:130px;text-align:right}
+.v3t .chev{font-size:20px;color:rgba(0,0,0,.4)}.v3t .chev24{font-size:24px;color:var(--onv)}
+.v3t.dis .a,.v3t.dis .b{color:rgba(25,28,32,.38)}.v3t.dis .ic{color:rgba(25,28,32,.38)}
+.v3t .sw{margin-left:4px}
+.v3t.dis .sw{opacity:.38}
+.v3hr{height:.5px;margin:0 16px;background:rgba(195,199,207,.25)}
+.v3sl{display:flex;gap:12px;padding:10px 16px}
+.v3sl .ic{width:24px;flex:none;color:var(--primary);padding-top:2px}
+.v3sl .x{flex:1}
+.v3sl .h{display:flex;align-items:flex-start;gap:12px}.v3sl .h .a{flex:1;font-size:15px;font-weight:600;line-height:22px}
+.v3sl .bd{padding:2px 8px;border-radius:6px;background:rgba(54,97,142,.1);font-size:13px;font-weight:700;color:var(--primary);font-feature-settings:'tnum'}
+.v3sl .bd.r20{border-radius:20px;padding:4px 10px;font-size:12px}
+.v3trk{position:relative;height:36px;margin-left:-4px}
+.v3trk .bg{position:absolute;left:0;right:0;top:16px;height:4px;border-radius:2px;background:rgba(54,97,142,.15)}
+.v3trk .fg{position:absolute;left:0;top:15px;height:6px;border-radius:3px;background:var(--primary)}
+.v3trk .th{position:absolute;top:8px;width:20px;height:20px;border-radius:10px;background:var(--primary);margin-left:-10px}
+.v3cnt{display:flex;align-items:center;flex:none}
+.v3cnt i{width:48px;height:48px;background:var(--primary);color:#fff;display:grid;place-items:center;font-style:normal}
+.v3cnt i:first-child{border-radius:12px 0 0 12px}.v3cnt i:last-child{border-radius:0 12px 12px 0}
+.v3cnt b{height:48px;padding:0 8px;display:grid;place-items:center;border-top:2px solid var(--primary);border-bottom:2px solid var(--primary);color:var(--primary);font-size:14px;min-width:30px}
+.v3note{font-size:12px;line-height:16px;color:var(--onv);padding:8px 4px 0}
+/* v3 dialogs */
+.dl3{background:var(--sch);border-radius:24px;padding:24px 0 0;box-shadow:0 6px 20px rgba(0,0,0,.18);position:relative}
+.dl3 .h{padding:0 24px 16px;font-size:20px;font-weight:600;line-height:28px}.dl3 .h.s{font-size:15px;font-weight:700;line-height:22px}
+.dl3 .c{padding:0 24px 0;font-size:13px;line-height:20px;color:var(--onv)}
+.dl3 .opt{display:flex;align-items:center;gap:16px;padding:0 24px;height:48px;font-size:14px}
+.dl3 .rd{width:20px;height:20px;border-radius:10px;border:2px solid var(--onv);display:grid;place-items:center;flex:none}
+.dl3 .rd.on{border-color:var(--primary)}.dl3 .rd.on::after{content:'';width:10px;height:10px;border-radius:5px;background:var(--primary)}
+.dl3 .acts{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px 24px}
+.dl3 .tb{height:40px;padding:0 12px;display:grid;place-items:center;font-size:14px;font-weight:500;color:var(--primary);border-radius:20px}
+.dl3 .tb.mut{color:rgba(0,0,0,.6)}
+.dl3 .fb{height:40px;padding:0 24px;display:grid;place-items:center;font-size:14px;font-weight:500;color:#fff;background:var(--primary);border-radius:20px}
+.dl3 .fb.err{background:var(--error)}
+.fld{position:relative;margin:0 24px 16px;height:56px;border:1px solid var(--outline);border-radius:12px;background:var(--scl);display:flex;align-items:center;gap:12px;padding:0 12px;font-size:15px}
+.fld .lb{position:absolute;left:10px;top:-9px;padding:0 4px;font-size:12px;color:var(--onv);background:linear-gradient(var(--sch) 50%,var(--scl) 50%)}
+.fld.dis{opacity:.45}
+.fld .sx{margin-left:auto;color:var(--onv);font-size:14px}
+.fhelp{margin:-12px 24px 12px;font-size:12px;color:var(--onv)}
+.achip{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--ov);font-size:13px;margin:0 8px 8px 0;background:var(--sch)}
+.achip.on{background:var(--sc);border-color:var(--sc);color:var(--osc);font-weight:600}
+/* ---------- new ---------- */
+.nbody{padding:4px 0 32px}
+.nwrap{max-width:720px;margin:0 auto}
+.grp{overflow:hidden}
+.grp .swr+.swr,.grp .swr+.sl,.grp .sl+.swr,.grp .sl+.sl{box-shadow:inset 0 1px 0 rgba(195,199,207,.45)}
+.swr .val{font-size:14px;color:var(--onv);white-space:nowrap;flex:none;font-feature-settings:'tnum'}
+.swr .chev{font-size:20px;color:var(--onv);margin-left:-8px}
+.swr .a b{font-weight:600}
+.swr .b.err{color:var(--error)}
+.swr.dis .a,.swr.dis .b,.swr.dis .val,.swr.dis .sw,.swr.dis .chev{opacity:.38}
+.swr .why{font-size:12px;color:var(--warn);margin-top:3px}
+.sl.dis .h,.sl.dis .tr{opacity:.38}
+.sl .b{font-size:12px;color:var(--onv);margin-top:2px}
+.sl .why{font-size:12px;color:var(--warn);margin-top:3px}
+.danger .a{color:var(--error)}
+.rad{width:20px;height:20px;border-radius:10px;border:2px solid var(--onv);display:grid;place-items:center;flex:none}
+.rad.on{border-color:var(--primary)}.rad.on::after{content:'';width:10px;height:10px;border-radius:5px;background:var(--primary)}
+.cnt{display:flex;align-items:center;height:40px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--ov);flex:none}
+.cnt span{width:40px;display:grid;place-items:center;color:var(--onv)}.cnt b{min-width:28px;text-align:center;font-size:15px;font-weight:500;font-feature-settings:'tnum'}
+.note{padding:8px 24px 0;font-size:12px;line-height:1.5;color:var(--onv)}
+.note a{color:var(--primary);font-weight:600;text-decoration:none}
+.logo{width:28px;height:28px;border-radius:7px;background:center/cover;flex:none}
+.tagd{font-size:11px;padding:1px 6px;border-radius:6px;background:var(--sc);color:var(--osc);margin-left:6px;font-weight:600;vertical-align:2px}
+/* new dialogs: one component for every choice, one for every confirm */
+.dl4{background:var(--sch);border-radius:24px;padding:24px 0 8px;box-shadow:0 6px 20px rgba(0,0,0,.18);position:relative}
+.dl4 .h{padding:0 24px 8px;font-size:20px;font-weight:600;line-height:28px}
+.dl4 .c{padding:0 24px 8px;font-size:14px;line-height:1.55;color:var(--onv)}
+.dl4 .c ul{margin:6px 0 0 18px}
+.dl4 .opt{display:flex;align-items:center;gap:12px;padding:0 24px;min-height:48px;font-size:15px}
+.dl4 .opt .x{flex:1;padding:8px 0}.dl4 .opt .d{font-size:12px;color:var(--onv);margin-top:2px;line-height:1.45}
+.dl4 .opt.on{color:var(--primary);font-weight:600}.dl4 .opt.on .d{font-weight:400}
+.dl4 .opt .ck{width:20px;font-size:20px;color:var(--primary)}
+.dl4 .acts{display:flex;justify-content:flex-end;gap:8px;padding:8px 16px 8px}
+.dl4 .tb{height:48px;padding:0 16px;display:grid;place-items:center;font-size:15px;font-weight:500;color:var(--primary);border-radius:24px}
+.dl4 .fb{height:40px;margin:4px 0;padding:0 24px;display:grid;place-items:center;font-size:15px;font-weight:600;color:var(--onPrimary);background:var(--primary);border-radius:20px}
+.dl4 .fb.err{background:var(--error);color:#fff}
+.dl4 .fld .lb{background:linear-gradient(var(--sch) 50%,var(--scl) 50%)}
+/* shared */
+.board{display:flex;flex-wrap:wrap;gap:28px;padding:24px;align-items:flex-start;background:#D9DBE2}
+.board .cell{width:393px}
+.board .cap{font-size:13px;color:#43474E;margin:0 0 8px 4px;font-weight:600}
+.board .scr{position:relative;width:393px;background:rgba(0,0,0,.32);border-radius:16px;padding:16px;display:flex;justify-content:center}
+
+.prev{position:relative;border-radius:16px;background:linear-gradient(135deg,#172033,#090B10);overflow:hidden}
+.prev .dmw{position:absolute;white-space:nowrap;font-weight:500;text-shadow:0 0 1px #000,0 0 1px #000,0 0 1.5px #000}
+.prev .off{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.54);color:#fff;border-radius:20px;padding:8px 14px;font-size:14px}
+.prev .lbl{position:absolute;right:8px;bottom:6px;font-size:10px;color:rgba(255,255,255,.55)}
+.swatch{width:22px;height:22px;border-radius:11px;background:#fff;box-shadow:inset 0 0 0 1px var(--ov);flex:none}
+.vs{font-size:14px;color:var(--primary);margin-top:4px;font-weight:500}
+.mini-logos{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.mini-logos i{width:20px;height:20px;border-radius:5px;background:center/cover}
+.cols{flex:1;display:flex;min-height:0}
+.cols .l{flex:none;overflow:hidden;border-right:1px solid var(--ov)}
+.cols .r{flex:1;overflow:hidden}
+.v3cols .l{border-right:1px solid rgba(195,199,207,.6)}
+.toastcell{position:relative;height:120px;width:361px}
+.toastcell .toast{bottom:20px}
+</style></head><body><div class="win" style="--w:852px;--h:393px;display:flex;flex-direction:column"><div class="v3bar"><div class="bk"><span class="mi" style="font-size:24px;">arrow_back</span></div><div class="t">视频设置</div><div class="acts"></div></div><div class="v3body" style="overflow:hidden"><div class="v3gt">音频设置</div><div class="v3card"><div class="v3t swt two "><div class="ic"><span class="rx" style="font-size:22px;">&#xf2a2;</span></div><div class="x"><div class="a">全局静音</div><div class="b ">所有直播间统一静音</div></div><span class="sw"></span></div><div class="v3hr"></div><div class="v3sl" style="padding:10px 16px"><div class="ic"><span class="rx" style="font-size:22px;">&#xefec;</span></div><div class="x"><div class="h"><div class="a">手机端默认音量</div><span class="bd ">50%</span></div><div class="v3trk"><div class="bg"></div><div class="fg" style="width:50%"></div><div class="th" style="left:50%"></div></div></div></div></div><div class="v3gap"></div><div class="v3gt">画质设置</div><div class="v3card"><div class="v3t two "><div class="ic"><span class="rx" style="font-size:22px;">&#xee02;</span></div><div class="x"><div class="a">首选清晰度</div><div class="b ">当进入直播播放页，首选的视频清晰度</div></div><span class="tv" style="font-size:12px;color:var(--primary)">原画</span></div><div class="v3hr"></div><div class="v3t two "><div class="ic"><span class="rx" style="font-size:22px;">&#xf12a;</span></div><div class="x"><div class="a">移动网络清晰度</div><div class="b ">使用流量时的默认画质</div></div><span class="tv" style="font-size:13px;color:var(--primary)">原画</span></div></div><div class="v3gap"></div><div class="v3gt">播放行为设置</div><div class="v3card"><div class="v3t two "><div class="ic"><span class="mr" style="font-size:22px;">stay_current_portrait</span></div><div class="x"><div class="a">竖屏直播适配</div><div class="b ">自动识别直播源方向，并统一普通页、全屏和小窗的显示策略</div></div><span class="mr" style="font-size:24px;color:var(--onv)">chevron_right</span></div><div class="v3hr"></div><div class="v3t two "><div class="ic"><span class="mr" style="font-size:22px;">groups_2</span></div><div class="x"><div class="a">观看数据与排行口径</div><div class="b ">在平台热度和真实在线人数之间切换，并单独管理支持的平台</div></div><span class="mr" style="font-size:24px;color:var(--onv)">chevron_right</span></div><div class="v3hr"></div><div class="v3t swt two "><div class="ic"><span class="rx" style="font-size:22px;">&#xef83;</span></div><div class="x"><div class="a">后台播放</div><div class="b long ">暂时切出 APP 时继续播放；手动纯音频同样遵循此开关，自动助眠会话按计时继续</div></div><span class="sw"></span></div><div class="v3hr"></div><div class="v3t swt two "><div class="ic"><span class="rx" style="font-size:22px;">&#xef6f;</span></div><div class="x"><div class="a">新直播间自动助眠</div><div class="b long ">开启后，进入新的直播间会自动切换为纯音频，并按下方时长停止播放；耳机按钮只切换当前直播间</div></div><span class="sw"></span></div><div class="v3hr"></div><div class="v3t two "><div class="ic"><span class="rx" style="font-size:22px;">&#xf211;</span></div><div class="x"><div class="a">自动助眠播放时长</div><div class="b ">仅用于自动助眠；当前直播间的播放定时器在直播间菜单中单独设置</div></div><span class="tv" style="font-size:12px;color:var(--primary)">1 小时</span></div><div class="v3hr"></div><div class="v3t swt two "><div class="ic"><span class="rx" style="font-size:22px;">&#xeff0;</span></div><div class="x"><div class="a">退出小窗播放</div><div class="b ">返回时是否保留悬浮窗</div></div><span class="sw"></span></div><div class="v3hr"></div><div class="v3t swt two "><div class="ic"><span class="rx" style="font-size:22px;">&#xed9c;</span></div><div class="x"><div class="a">自动全屏</div><div class="b ">当进入直播播放页，自动进入全屏</div></div><span class="sw"></span></div><div class="v3hr"></div><div class="v3t swt two "><div class="ic"><span class="rx" style="font-size:22px;">&#xeea9;</span></div><div class="x"><div class="a">屏幕常亮</div><div class="b ">当处于直播播放页，屏幕保持常亮</div></div><span class="sw on"></span></div></div><div class="v3gap"></div><div class="v3gt">弹幕设置</div><div class="v3card"><div class="v3t swt two "><div class="ic"><span class="rx" style="font-size:22px;">&#xeb6f;</span></div><div class="x"><div class="a">显示弹幕</div><div class="b ">播放直播时默认开启弹幕显示</div></div><span class="sw on"></span></div><div class="v3hr"></div><div class="v3t two "><div class="ic"><span class="rx" style="font-size:22px;">&#xeff0;</span></div><div class="x"><div class="a">小窗弹幕</div><div class="b ">配置 Android 系统画中画、Windows 小窗和应用内悬浮窗的弹幕样式</div></div><span class="mr" style="font-size:24px;color:var(--onv)">chevron_right</span></div><div class="v3hr"></div><div class="v3t two "><div class="ic"><span class="rx" style="font-size:22px;">&#xed8d;</span></div><div class="x"><div class="a">更换弹幕字体</div><div class="b ">当前字体: Default</div></div><span class="mr" style="font-size:20px;color:rgba(0,0,0,.4)">chevron_right</span></div><div class="v3hr"></div><div class="v3t  "><div class="ic"><span class="rx" style="font-size:22px;">&#xed23;</span></div><div class="x"><div class="a">弹幕关键词过滤</div></div><span class="mr" style="font-size:20px;color:rgba(0,0,0,.4)">chevron_right</span></div></div></div></div></body></html>

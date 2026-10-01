@@ -1,0 +1,101 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="852x393@2"><link rel="stylesheet" href="kit/kit.css"><style>
+:root{--hint:rgba(0,0,0,.45);--gt:rgba(54,97,142,.65);--mcbg:#F1F2F8;--gc:#FFDDB8;--ogc:#4A2800;--tag:#E1E2E8}
+[data-theme=dark]{--hint:rgba(255,255,255,.38);--gt:rgba(160,202,253,.65);--mcbg:#1C1F23;--gc:#5C3A12;--ogc:#FFDDB8;--tag:#32353A}
+.pg{width:393px;background:var(--surface)}
+.sbar{height:56px;display:flex;align-items:center;position:relative;background:var(--surface);flex:none}
+.sbar .back{width:56px;height:56px;display:grid;place-items:center;flex:none}
+.sbar .ttl{position:absolute;left:96px;right:96px;text-align:center;font-size:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.sbar .act{margin-left:auto;display:flex;align-items:center;padding-right:4px}
+.bd{padding:12px 16px 28px}
+.col{max-width:720px;margin:0 auto}
+.gt{padding:0 0 8px 8px;font-size:12px;font-weight:700;color:var(--gt);letter-spacing:.5px}
+.gt2{padding:4px 0 8px 4px;font-size:13px;font-weight:600;color:var(--primary);display:flex;align-items:center;gap:6px}
+.gap{height:20px}
+.mc{background:var(--mcbg);border-radius:20px;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.05);overflow:hidden}
+.mc2{background:var(--scl);border-radius:16px;overflow:hidden}
+.tile{display:flex;align-items:center;gap:12px;padding:8px 16px;min-height:72px}
+.tile.one{min-height:56px}
+.tile .ic{color:var(--primary);font-size:22px;flex:none;width:22px;text-align:center}
+.tile .tx{flex:1;min-width:0}
+.tile .t{font-size:15px;font-weight:600;line-height:1.35}
+.tile .s{font-size:12px;color:var(--hint);margin-top:2px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .s.wrap{white-space:normal}
+.tile .s.on{color:var(--primary);font-weight:500}.tile .s.warn{color:#FF9800}.tile .s.err{color:var(--error)}
+.tile .chev{color:rgba(0,0,0,.24);font-size:20px;flex:none}
+[data-theme=dark] .tile .chev{color:rgba(255,255,255,.3)}
+.n .tile .s{color:var(--onv);white-space:normal}.n .tile .chev{color:var(--outline)}
+.dv{height:.5px;margin:0 16px;background:rgba(0,0,0,.08)}
+[data-theme=dark] .dv{background:rgba(255,255,255,.08)}
+.scrimw{position:relative}
+.dlg2{background:var(--sch);border-radius:24px;padding:24px 24px 16px;margin:0 auto;box-shadow:0 8px 28px rgba(0,0,0,.28)}
+.dlg2 .dt{font-size:20px;font-weight:600;line-height:1.3;display:flex;align-items:center;gap:12px}
+.dlg2 .dc{font-size:13px;line-height:1.5;margin-top:14px;color:var(--on)}
+.n .dlg2 .dc{font-size:14px}
+.dlg2 .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;align-items:center}
+.tb{height:40px;padding:0 12px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;color:var(--primary);font-size:13px;font-weight:500;white-space:nowrap}
+.n .tb{font-size:14px}
+.tb.err{color:var(--error)}.tb.dim{opacity:.38}
+.fb{height:40px;padding:0 20px;border-radius:12px;display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:var(--onPrimary);font-size:14px;font-weight:600;white-space:nowrap}
+.fb.err{background:var(--error);color:#fff}.fb.tonal{background:var(--sc);color:var(--osc)}
+.ob{height:40px;padding:0 16px;border-radius:20px;display:inline-flex;align-items:center;gap:6px;box-shadow:inset 0 0 0 1px var(--outline);color:var(--primary);font-size:14px;font-weight:500;white-space:nowrap}
+.inp{border-radius:12px;box-shadow:inset 0 0 0 1px var(--outline);padding:12px;font-size:14px;color:var(--on);background:transparent;line-height:1.4}
+.inp.hint{color:var(--hint)}
+.inp.foc{box-shadow:inset 0 0 0 2px var(--primary)}
+.lab{font-size:12px;color:var(--primary);margin:0 0 -8px 10px;padding:0 4px;background:var(--sch);display:inline-block;position:relative;z-index:1}
+.help{font-size:12px;color:var(--onv);margin:6px 4px 0;line-height:1.45}
+.help.err{color:var(--error)}
+.prog{height:4px;border-radius:2px;background:rgba(54,97,142,.18);position:relative;overflow:hidden}.prog i{position:absolute;left:0;top:0;bottom:0;width:38%;background:var(--primary);border-radius:2px}
+.spin{width:20px;height:20px;border-radius:50%;border:2.5px solid rgba(54,97,142,.2);border-top-color:var(--primary);flex:none;display:inline-block}
+.sheetbg{background:#D5D8DE;padding:20px 16px 8px}
+[data-theme=dark] .sheetbg{background:#050607}
+.cap{font-size:13px;font-weight:600;color:#3B3F46;margin:0 0 10px 4px}
+[data-theme=dark] .cap{color:#C3C7CF}
+.blk{margin-bottom:22px}
+.toast2{background:#2E3135;color:#EFF0F7;font-size:14px;padding:12px 16px;border-radius:8px;box-shadow:0 3px 8px rgba(0,0,0,.25);display:inline-block;max-width:100%;line-height:1.4}
+.pm{background:var(--schh);border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.2);padding:8px 0;width:220px}
+.pm .it{height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;font-size:14px}
+.pm .it .rx,.pm .it .mr{font-size:20px;color:var(--onv)}
+.radio{width:20px;height:20px;border-radius:10px;border:2px solid var(--onv);flex:none;display:grid;place-items:center}
+.radio.on{border-color:var(--primary)}.radio.on::after{content:'';width:10px;height:10px;border-radius:5px;background:var(--primary)}
+
+/* v3 subscription cards (iptv_manage.dart:448-831) */
+.v3stats{border-radius:24px;padding:20px;background:linear-gradient(90deg,rgba(54,97,142,.12),#fff);display:flex;justify-content:space-around}
+.v3stats .it{flex:1;display:flex;flex-direction:column;align-items:center}
+.v3stats .ib2{width:46px;height:46px;border-radius:14px;background:rgba(54,97,142,.1);display:grid;place-items:center;color:var(--primary)}
+.v3stats .v{font-size:12px;font-weight:700;margin-top:10px}.v3stats .l{font-size:12px;color:var(--hint);margin-top:4px}
+.v3sec{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;padding:24px 0 12px}
+.v3sec .rx{color:var(--primary);font-size:18px}
+.v3card{background:#fff;border-radius:22px;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.03);padding:16px;margin-bottom:14px}
+.v3card .idr{display:flex;align-items:flex-start;gap:14px}
+.lead{position:relative;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;flex:none}
+.lead .bdg{position:absolute;right:-4px;bottom:-4px;min-height:18px;padding:1.5px 5px;border-radius:6px;border:2px solid #fff;color:#fff;font:900 11px/14px 'Geist','Noto Sans SC';letter-spacing:.2px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+.v3card .nm{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v3card .url{font-size:14px;color:var(--hint);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v3tag{padding:5px 10px;border-radius:999px;font-size:14px;font-weight:700;flex:none;align-self:center}
+.abtn{min-height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:600;font-size:14px;color:var(--primary);background:rgba(54,97,142,.08);flex:1}
+.abtn.err{color:var(--error);background:rgba(186,26,26,.08)}
+.abtn.dim{opacity:.38}
+.swb{min-height:48px;border-radius:14px;background:rgba(54,97,142,.08);display:flex;align-items:center;gap:6px;padding:4px 12px;color:var(--primary);font-size:12px;font-weight:600}
+.statecard{background:var(--scl);border-radius:16px;padding:20px}
+/* new cards */
+.st{background:var(--scl);border-radius:16px;padding:16px 8px;display:flex}
+.st .it{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.st .v{font:600 20px/1.3 'Geist','Noto Sans SC';font-feature-settings:'tnum'}.st .l{font-size:12px;color:var(--onv)}
+.sc{background:var(--scl);border-radius:16px;padding:14px 4px 12px 16px;margin-bottom:12px}
+.sc.use{box-shadow:inset 0 0 0 1.5px var(--primary)}
+.sc .idr{display:flex;align-items:flex-start;gap:14px}
+.sc .nm{font-size:15px;font-weight:600;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px;font-size:12px;color:var(--onv)}
+.sc .url{font-size:12px;color:var(--onv);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tg{height:22px;padding:0 8px;border-radius:6px;background:var(--tag);color:var(--onv);font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:3px}
+.tg .rx{font-size:13px}.tg.use{background:var(--primary);color:var(--onPrimary)}
+.lead2{position:relative;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--pc);color:var(--opc)}
+.lead2.g{background:var(--gc);color:var(--ogc)}
+.lead2 .bdg{position:absolute;right:-6px;bottom:-6px;padding:1px 5px;border-radius:6px;border:2px solid var(--scl);background:var(--opc);color:var(--pc);font:700 11px/14px 'Geist','Noto Sans SC'}
+.lead2.g .bdg{background:var(--ogc);color:var(--gc)}
+.morebtn{width:44px;height:44px;display:grid;place-items:center;color:var(--onv);flex:none;margin-top:-6px}
+.acts2{display:flex;gap:8px;margin:12px 12px 0 0;align-items:center}
+.swl{display:flex;align-items:center;gap:8px;margin:8px 12px 0 0;padding:4px 4px 4px 12px;min-height:48px;border-radius:12px;background:rgba(54,97,142,.06);font-size:14px;color:var(--on)}
+.swl .x{flex:1}
+.sk{background:var(--sch);border-radius:8px}
+</style></head><body><div class="win" style="--w:852px;--h:393px"><div class="sbar"><div class="back"><span class="mi" style="font-size:24px">arrow_back</span></div><div class="ttl">订阅源管理</div><div class="act"><div class="ib"><span class="rx" style="font-size:24px">&#xf064;</span></div></div></div><div style="padding:12px 16px 40px"><div class="v3stats"><div class="it"><div class="ib2"><span class="rx" style="font-size:24px">&#xf00d;</span></div><div class="v">2</div><div class="l">IPTV</div></div><div class="it"><div class="ib2"><span class="rx" style="font-size:24px">&#xf235;</span></div><div class="v">1</div><div class="l">EPG</div></div><div class="it"><div class="ib2"><span class="rx" style="font-size:24px">&#xedcf;</span></div><div class="v">2</div><div class="l">网络</div></div></div><div class="v3sec"><span class="rx" style="font-size:24px">&#xedcf;</span>网络资源</div><div class="v3card"><div class="idr"><div class="lead" style="background:rgba(54,97,142,.1);color:var(--primary)"><span class="rx" style="font-size:24px">&#xf00d;</span><span class="bdg" style="background:var(--primary)">M3U</span></div><div style="flex:1;min-width:0"><div class="nm">示例频道</div><div class="url">https://example.com/iptv/channels.m3u</div></div><span class="v3tag" style="background:rgba(76,175,80,.12);color:#4CAF50">网络</span></div><div style="display:flex;gap:10px;margin-top:16px"><div class="abtn"><span class="rx" style="font-size:16px">&#xec56;</span>同步</div><div style="flex:1"><div class="swb"><span class="rx" style="font-size:16px">&#xf074;</span><span style="flex:1">自动同步</span><span class="sw on"></span></div></div><div class="abtn err"><span class="rx" style="font-size:16px">&#xec26;</span>删除</div></div></div><div class="v3card"><div class="idr"><div class="lead" style="background:rgba(255,152,0,.12);color:#FF9800"><span class="rx" style="font-size:24px">&#xf235;</span><span class="bdg" style="background:#546E7A">XML.GZ</span></div><div style="flex:1;min-width:0"><div class="nm">hot</div><div class="url">https://epg.zsdc.eu.org/t.xml.gz</div></div><span class="v3tag" style="background:rgba(76,175,80,.12);color:#4CAF50">网络</span></div><div style="display:flex;gap:10px;margin-top:16px"><div class="abtn"><span class="rx" style="font-size:16px">&#xec56;</span>同步</div><div style="flex:1"><div class="swb"><span class="rx" style="font-size:16px">&#xf074;</span><span style="flex:1">自动同步</span><span class="sw on"></span></div></div><div class="abtn err"><span class="rx" style="font-size:16px">&#xec26;</span>删除</div></div></div><div class="v3sec"><span class="rx" style="font-size:24px">&#xed52;</span>本地资源</div><div class="v3card"><div class="idr"><div class="lead" style="background:rgba(54,97,142,.1);color:var(--primary)"><span class="rx" style="font-size:24px">&#xf00d;</span><span class="bdg" style="background:#FF9800">TXT</span></div><div style="flex:1;min-width:0"><div class="nm">本地频道</div><div class="url">/storage/emulated/0/Download/本地频道.txt</div></div><span class="v3tag" style="background:rgba(255,152,0,.12);color:#FF9800">本地</span></div><div style="display:flex;margin-top:16px"><div class="abtn err"><span class="rx" style="font-size:16px">&#xec26;</span>删除</div></div></div></div></div></body></html>

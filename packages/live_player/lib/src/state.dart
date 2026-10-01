@@ -1,0 +1,169 @@
+import 'package:live_core/live_core.dart';
+import 'package:live_media/live_media.dart';
+import 'package:meta/meta.dart';
+
+/// Where the session is (3.x's `PlayerState`, without the adapter-only
+/// steps `initializing`, `initialized`, `ready` and `disposed`).
+enum PlaybackStatus {
+  /// Nothing opened.
+  idle,
+
+  /// Opening a source (resolving the input, loading it into the engine).
+  opening,
+
+  /// Opened and waiting for data, or recovering from a failure.
+  buffering,
+
+  /// Playing.
+  playing,
+
+  /// Paused by the user.
+  paused,
+
+  /// An on-demand source played to its end (not a failure).
+  completed,
+
+  /// Recovery is exhausted or the stream cannot be played; see the error.
+  error,
+
+  /// Stopped by the caller.
+  stopped,
+}
+
+/// One snapshot of the session for the interface.
+@immutable
+final class PlaybackState {
+  /// Creates a snapshot.
+  const new({
+    this.status = PlaybackStatus.idle,
+    this.error,
+    this.failure,
+    this.source,
+    this.line,
+    this.lineIndex = 0,
+    this.lineCount = 0,
+    this.decoder = DecoderMode.hardware,
+    this.audioOnly = false,
+    this.volume = 1,
+    this.videoWidth,
+    this.videoHeight,
+    this.onDemand = false,
+    this.position = Duration.zero,
+    this.duration = Duration.zero,
+    this.appliedQualityData,
+  });
+
+  /// Where the session is.
+  final PlaybackStatus status;
+
+  /// The failure behind [PlaybackStatus.error].
+  final Object? error;
+
+  /// What the failure means ([SourceFailureKind.terminal]: the platform said
+  /// the stream cannot be played now, so retrying is pointless).
+  final SourceFailureKind? failure;
+
+  /// The source the engine plays or opens.
+  final PlaybackSource? source;
+
+  /// The line the engine plays (after renewals, the renewed line).
+  final LivePlayLine? line;
+
+  /// Index of [source] in the plan (3.x's `currentLineIndex`).
+  final int lineIndex;
+
+  /// Number of sources in the plan (3.x's `lineCount`).
+  final int lineCount;
+
+  /// The decoder of the current open.
+  final DecoderMode decoder;
+
+  /// Whether video output is off.
+  final bool audioOnly;
+
+  /// The volume, 0 to 1.
+  final double volume;
+
+  /// Display width of the video, when known.
+  final int? videoWidth;
+
+  /// Display height of the video, when known.
+  final int? videoHeight;
+
+  /// A recording: it seeks and its end is [PlaybackStatus.completed].
+  final bool onDemand;
+
+  /// Position of an on-demand source.
+  final Duration position;
+
+  /// Duration of an on-demand source.
+  final Duration duration;
+
+  /// The quality the platform applied (Picarto 11-1: after a refresh that
+  /// lost the old tier, the interface shows what actually plays).
+  final Object? appliedQualityData;
+
+  /// Whether the session is playing or about to (3.x's `isPlayingNow`
+  /// plus loading).
+  bool get isActive => switch (status) {
+    PlaybackStatus.opening || PlaybackStatus.buffering || PlaybackStatus.playing => true,
+    _ => false,
+  };
+
+  /// Width over height of the video, when known.
+  double? get aspectRatio {
+    final width = videoWidth;
+    final height = videoHeight;
+    if (width == null || height == null || width <= 0 || height <= 0) return null;
+    return width / height;
+  }
+
+  /// Whether the video is taller than wide (3.x's `isVerticalVideo`).
+  bool get isPortrait => (aspectRatio ?? 16 / 9) < 1;
+
+  /// A copy with the given fields replaced; [error] and [failure] are kept
+  /// only while the status stays [PlaybackStatus.error].
+  PlaybackState copyWith({
+    PlaybackStatus? status,
+    Object? error,
+    SourceFailureKind? failure,
+    PlaybackSource? source,
+    LivePlayLine? line,
+    int? lineIndex,
+    int? lineCount,
+    DecoderMode? decoder,
+    bool? audioOnly,
+    double? volume,
+    int? videoWidth,
+    int? videoHeight,
+    bool clearVideoSize = false,
+    bool? onDemand,
+    Duration? position,
+    Duration? duration,
+    Object? appliedQualityData,
+  }) {
+    final next = status ?? this.status;
+    final keepError = next == PlaybackStatus.error;
+    return PlaybackState(
+      status: next,
+      error: keepError ? error ?? this.error : null,
+      failure: keepError ? failure ?? this.failure : null,
+      source: source ?? this.source,
+      line: line ?? this.line,
+      lineIndex: lineIndex ?? this.lineIndex,
+      lineCount: lineCount ?? this.lineCount,
+      decoder: decoder ?? this.decoder,
+      audioOnly: audioOnly ?? this.audioOnly,
+      volume: volume ?? this.volume,
+      videoWidth: clearVideoSize ? null : videoWidth ?? this.videoWidth,
+      videoHeight: clearVideoSize ? null : videoHeight ?? this.videoHeight,
+      onDemand: onDemand ?? this.onDemand,
+      position: position ?? this.position,
+      duration: duration ?? this.duration,
+      appliedQualityData: appliedQualityData ?? this.appliedQualityData,
+    );
+  }
+
+  @override
+  String toString() => 'PlaybackState(${status.name}, line ${lineIndex + 1}/$lineCount, ${decoder.name})';
+}

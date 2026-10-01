@@ -247,7 +247,10 @@ void main() {
   ) async {
     await _pump(tester, inHome: true);
     final title = tester.getCenter(find.text('录制中心'));
-    expect(title.dx, closeTo(393 / 2, 1), reason: '3.x centres the title');
+    // As a phone tab the bar also has search and "more" (U.3a c6): four
+    // buttons on the right leave no room to centre the title on 393, so the
+    // toolbar moves it left of them (centred where it fits, below).
+    expect(find.byType(CommonAppBarActions), findsOneWidget);
     expect(find.byType(MenuButton), findsOneWidget);
     expect(find.byType(BackButton), findsNothing);
     final menu = tester.getCenter(find.byType(MenuButton));
@@ -266,6 +269,8 @@ void main() {
     await _pump(tester);
     expect(find.byType(BackButton), findsOneWidget);
     expect(find.byType(MenuButton), findsNothing);
+    expect(find.byType(CommonAppBarActions), findsNothing);
+    expect(tester.getCenter(find.text('录制中心')).dx, closeTo(393 / 2, 1), reason: '3.x centres the title');
   });
 
   testWidgets('no task at all: how to add one; the five filters count nothing', (tester) async {

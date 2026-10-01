@@ -33,182 +33,95 @@ Future<String> defaultRecordDirectory(Directory dataRoot) async {
   return p.join(dataRoot.path, 'Records');
 }
 
-/// The recording settings (3.x `RecorderConfig` over its Hive keys).
+/// The recording settings: live_store's `Settings.recorder` (3.x's Hive
+/// keys, carried by backups since M8.1) read as live_record's
+/// [RecordSettings].
 ///
-/// live_store's settings registry has no recorder settings (M9 kept 3.x's
-/// values in `legacy_values`), so they live as one JSON object in
-/// `meta[recorder.settings]`, keyed by 3.x's Hive keys. Until the user
-/// changes one, 3.x's imported values are read. Reads are synchronous (the
-/// recorder asks on every decision); writes go to the store in order.
+/// Reads are synchronous (the recorder asks on every decision). [load] moves
+/// the values the app kept before M8.1 into the store once: the user's v4
+/// values from `meta[recorder.settings]` first, then 3.x's values that the
+/// import parked in `legacy_values` (where the store has none yet).
 final class RecordSettingsStore {
-  /// Creates the store over `meta`; [load] reads the saved values.
-  new(this._meta);
+  /// Creates the store over the app's [LiveStore].
+  new(this._store);
 
-  /// The meta key of the saved values.
-  static const storageKey = 'recorder.settings';
+  /// The meta key where M13.15 kept the values (one JSON object, 3.x keys);
+  /// [load] empties it.
+  static const legacyStorageKey = 'recorder.settings';
 
-  /// 3.x's Hive keys (`RecorderKeys`).
-  static const segmentTime = 'segmentTime';
+  final LiveStore _store;
+  Future<void>? _loading;
 
-  /// See [segmentTime].
-  static const maxTaskCount = 'maxTaskCount';
-
-  /// See [segmentTime].
-  static const autoReconnect = 'autoReconnect';
-
-  /// See [segmentTime].
-  static const maxCacheMB = 'maxCacheMB';
-
-  /// See [segmentTime].
-  static const enableCacheLimit = 'enableCacheLimit';
-
-  /// See [segmentTime].
-  static const savePath = 'recordSavePath';
-
-  /// See [segmentTime].
-  static const defaultQuality = 'default_quality';
-
-  /// See [segmentTime].
-  static const maxRetryCount = 'max_retry_count';
-
-  /// See [segmentTime].
-  static const retryDelay = 'retry_delay';
-
-  /// See [segmentTime].
-  static const enablePolling = 'enable_polling';
-
-  /// See [segmentTime].
-  static const liveCheckInterval = 'live_check_interval';
-
-  /// See [segmentTime].
-  static const enableBackoff = 'enable_backoff';
-
-  /// See [segmentTime].
-  static const maxCheckInterval = 'max_check_interval';
-
-  /// See [segmentTime].
-  static const autoStartOnBoot = 'auto_start_on_boot';
-
-  /// See [segmentTime].
-  static const preferBestStream = 'recorder_prefer_best_stream';
-
-  /// See [segmentTime].
-  static const rwTimeout = 'recorder_rw_timeout';
-
-  /// See [segmentTime].
-  static const threadQueueSize = 'recorder_thread_queue_size';
-
-  /// See [segmentTime].
-  static const usePinyinForFolder = 'recorder_folder_naming_strategy';
-
-  /// See [segmentTime].
-  static const recordDanmaku = 'recorder_record_danmaku';
-
-  /// Every key, in 3.x's order.
-  static const List<String> keys = [
-    segmentTime,
-    maxTaskCount,
-    autoReconnect,
-    maxCacheMB,
-    enableCacheLimit,
-    savePath,
-    defaultQuality,
-    maxRetryCount,
-    retryDelay,
-    enablePolling,
-    liveCheckInterval,
-    enableBackoff,
-    maxCheckInterval,
-    autoStartOnBoot,
-    preferBestStream,
-    rwTimeout,
-    threadQueueSize,
-    usePinyinForFolder,
-    recordDanmaku,
-  ];
-
-  final MetaStore _meta;
-  final _changes = StreamController<RecordSettings>.broadcast();
-  var _values = <String, Object?>{};
-  var _current = RecordSettings();
-  var _dirty = false;
-  Future<void>? _writing;
+  SettingsStore get _settings => _store.settings;
 
   /// The settings now.
-  RecordSettings get current => _current;
+  RecordSettings get current => of(_settings);
 
-  /// The settings after every change.
-  Stream<RecordSettings> get changes => _changes.stream;
+  /// The settings after every change of a recorder setting (a restore or a
+  /// reset included).
+  Stream<RecordSettings> get changes => _settings.changes.where(Settings.recorder.contains).map((_) => current);
 
-  /// Reads the saved values, else 3.x's imported ones.
-  Future<void> load() async {
-    Map<String, Object?>? saved;
-    try {
-      final text = await _meta.get(storageKey);
-      final decoded = text == null ? null : jsonDecode(text);
-      if (decoded is Map) saved = Map<String, Object?>.from(decoded);
-    } on FormatException {
-      saved = null;
-    }
-    if (saved == null) {
-      saved = {};
-      for (final key in keys) {
-        final value = await _meta.legacyValue(key);
-        if (value != null) saved[key] = value;
-      }
-    }
-    _values = saved;
-    _current = fromValues(_values);
-    if (!_changes.isClosed) _changes.add(_current);
-  }
+  /// Moves the values kept before M8.1 into the store (once).
+  Future<void> load() => _loading ??= _migrate();
 
-  /// Sets [key] (one of [keys]) to [value]; the stored value is the
-  /// normalized one.
-  Future<void> set(String key, Object value) {
-    _values[key] = value;
-    _current = fromValues(_values);
-    _values = toValues(_current);
-    if (!_changes.isClosed) _changes.add(_current);
-    _dirty = true;
-    return flush();
-  }
-
-  /// Writes pending changes and waits for the write in flight.
-  Future<void> flush() async {
-    while (true) {
-      final inFlight = _writing;
-      if (inFlight != null) {
-        await inFlight;
-        continue;
-      }
-      if (!_dirty) return;
-      _dirty = false;
-      final write = _meta.set(storageKey, jsonEncode(_values));
-      _writing = write;
+  Future<void> _migrate() async {
+    final text = await _store.meta.get(legacyStorageKey);
+    if (text != null) {
+      Object? decoded;
       try {
-        await write;
-      } finally {
-        if (identical(_writing, write)) _writing = null;
+        decoded = jsonDecode(text);
+      } on FormatException {
+        decoded = null;
       }
+      if (decoded is Map) {
+        final values = Map<String, Object?>.from(decoded);
+        final normalized = toValues(fromValues(values));
+        await _settings.setAll({
+          for (final setting in Settings.recorder)
+            if (values.containsKey(setting.key)) setting: normalized[setting.key]!,
+        });
+      }
+      await _store.meta.set(legacyStorageKey, null);
     }
+    await LegacyMigration.adoptLegacyValues(_store);
   }
 
-  /// Writes pending changes and closes [changes].
-  Future<void> close() async {
-    await flush();
-    await _changes.close();
-  }
+  /// Stores [value] for one of `Settings.recorder`.
+  Future<void> set<T extends Object>(Setting<T> setting, T value) => _settings.set(setting, value);
 
-  /// Settings from stored [values] (3.x Hive keys; lenient about types like
-  /// 3.x's `HivePrefUtil`).
+  /// The recorder's settings from [settings].
+  static RecordSettings of(SettingsStore settings) => RecordSettings(
+    segmentTime: settings.get(Settings.recordSegmentTime),
+    maxTaskCount: settings.get(Settings.recordMaxTaskCount),
+    autoReconnect: settings.get(Settings.recordAutoReconnect),
+    maxCacheMB: settings.get(Settings.recordMaxCacheMB),
+    enableCacheLimit: settings.get(Settings.recordEnableCacheLimit),
+    savePath: settings.get(Settings.recordSavePath).trim(),
+    defaultQuality: settings.get(Settings.recordDefaultQuality),
+    maxRetryCount: settings.get(Settings.recordMaxRetryCount),
+    retryDelay: settings.get(Settings.recordRetryDelay),
+    enablePolling: settings.get(Settings.recordEnablePolling),
+    liveCheckInterval: settings.get(Settings.recordLiveCheckInterval),
+    enableBackoff: settings.get(Settings.recordEnableBackoff),
+    maxCheckInterval: settings.get(Settings.recordMaxCheckInterval),
+    autoStartOnBoot: settings.get(Settings.recordAutoStartOnBoot),
+    preferBestStream: settings.get(Settings.recordPreferBestStream),
+    rwTimeout: settings.get(Settings.recordRwTimeout),
+    threadQueueSize: settings.get(Settings.recordThreadQueueSize),
+    usePinyinForFolder: settings.get(Settings.recordPinyinFolders),
+    recordDanmaku: settings.get(Settings.recordDanmaku),
+  );
+
+  /// Settings from values under 3.x's Hive keys (the pre-M8.1 meta object;
+  /// lenient about types like 3.x's `HivePrefUtil`).
   static RecordSettings fromValues(Map<String, Object?> values) {
     final defaults = RecordSettings();
-    int integer(String key, int fallback) => switch (values[key]) {
+    int integer(Setting<Object> setting, int fallback) => switch (values[setting.key]) {
       final num value => value.toInt(),
       final String value => int.tryParse(value.trim()) ?? fallback,
       _ => fallback,
     };
-    bool flag(String key, {required bool fallback}) => switch (values[key]) {
+    bool flag(Setting<Object> setting, {required bool fallback}) => switch (values[setting.key]) {
       final bool value => value,
       final num value => value != 0,
       final String value => switch (value.trim().toLowerCase()) {
@@ -218,54 +131,54 @@ final class RecordSettingsStore {
       },
       _ => fallback,
     };
-    String text(String key, String fallback) => switch (values[key]) {
+    String text(Setting<Object> setting, String fallback) => switch (values[setting.key]) {
       final String value => value,
       _ => fallback,
     };
     return RecordSettings(
-      segmentTime: integer(segmentTime, defaults.segmentTime),
-      maxTaskCount: integer(maxTaskCount, defaults.maxTaskCount),
-      autoReconnect: flag(autoReconnect, fallback: defaults.autoReconnect),
-      maxCacheMB: integer(maxCacheMB, defaults.maxCacheMB),
-      enableCacheLimit: flag(enableCacheLimit, fallback: defaults.enableCacheLimit),
-      savePath: text(savePath, defaults.savePath).trim(),
-      defaultQuality: text(defaultQuality, defaults.defaultQuality),
-      maxRetryCount: integer(maxRetryCount, defaults.maxRetryCount),
-      retryDelay: integer(retryDelay, defaults.retryDelay),
-      enablePolling: flag(enablePolling, fallback: defaults.enablePolling),
-      liveCheckInterval: integer(liveCheckInterval, defaults.liveCheckInterval),
-      enableBackoff: flag(enableBackoff, fallback: defaults.enableBackoff),
-      maxCheckInterval: integer(maxCheckInterval, defaults.maxCheckInterval),
-      autoStartOnBoot: flag(autoStartOnBoot, fallback: defaults.autoStartOnBoot),
-      preferBestStream: flag(preferBestStream, fallback: defaults.preferBestStream),
-      rwTimeout: integer(rwTimeout, defaults.rwTimeout),
-      threadQueueSize: integer(threadQueueSize, defaults.threadQueueSize),
-      usePinyinForFolder: flag(usePinyinForFolder, fallback: defaults.usePinyinForFolder),
-      recordDanmaku: flag(recordDanmaku, fallback: defaults.recordDanmaku),
+      segmentTime: integer(Settings.recordSegmentTime, defaults.segmentTime),
+      maxTaskCount: integer(Settings.recordMaxTaskCount, defaults.maxTaskCount),
+      autoReconnect: flag(Settings.recordAutoReconnect, fallback: defaults.autoReconnect),
+      maxCacheMB: integer(Settings.recordMaxCacheMB, defaults.maxCacheMB),
+      enableCacheLimit: flag(Settings.recordEnableCacheLimit, fallback: defaults.enableCacheLimit),
+      savePath: text(Settings.recordSavePath, defaults.savePath).trim(),
+      defaultQuality: text(Settings.recordDefaultQuality, defaults.defaultQuality),
+      maxRetryCount: integer(Settings.recordMaxRetryCount, defaults.maxRetryCount),
+      retryDelay: integer(Settings.recordRetryDelay, defaults.retryDelay),
+      enablePolling: flag(Settings.recordEnablePolling, fallback: defaults.enablePolling),
+      liveCheckInterval: integer(Settings.recordLiveCheckInterval, defaults.liveCheckInterval),
+      enableBackoff: flag(Settings.recordEnableBackoff, fallback: defaults.enableBackoff),
+      maxCheckInterval: integer(Settings.recordMaxCheckInterval, defaults.maxCheckInterval),
+      autoStartOnBoot: flag(Settings.recordAutoStartOnBoot, fallback: defaults.autoStartOnBoot),
+      preferBestStream: flag(Settings.recordPreferBestStream, fallback: defaults.preferBestStream),
+      rwTimeout: integer(Settings.recordRwTimeout, defaults.rwTimeout),
+      threadQueueSize: integer(Settings.recordThreadQueueSize, defaults.threadQueueSize),
+      usePinyinForFolder: flag(Settings.recordPinyinFolders, fallback: defaults.usePinyinForFolder),
+      recordDanmaku: flag(Settings.recordDanmaku, fallback: defaults.recordDanmaku),
     );
   }
 
-  /// The stored form of [settings].
-  static Map<String, Object?> toValues(RecordSettings settings) => {
-    segmentTime: settings.segmentTime,
-    maxTaskCount: settings.maxTaskCount,
-    autoReconnect: settings.autoReconnect,
-    maxCacheMB: settings.maxCacheMB,
-    enableCacheLimit: settings.enableCacheLimit,
-    savePath: settings.savePath,
-    defaultQuality: settings.defaultQuality,
-    maxRetryCount: settings.maxRetryCount,
-    retryDelay: settings.retryDelay,
-    enablePolling: settings.enablePolling,
-    liveCheckInterval: settings.liveCheckInterval,
-    enableBackoff: settings.enableBackoff,
-    maxCheckInterval: settings.maxCheckInterval,
-    autoStartOnBoot: settings.autoStartOnBoot,
-    preferBestStream: settings.preferBestStream,
-    rwTimeout: settings.rwTimeout,
-    threadQueueSize: settings.threadQueueSize,
-    usePinyinForFolder: settings.usePinyinForFolder,
-    recordDanmaku: settings.recordDanmaku,
+  /// [settings] under 3.x's Hive keys.
+  static Map<String, Object> toValues(RecordSettings settings) => {
+    Settings.recordSegmentTime.key: settings.segmentTime,
+    Settings.recordMaxTaskCount.key: settings.maxTaskCount,
+    Settings.recordAutoReconnect.key: settings.autoReconnect,
+    Settings.recordMaxCacheMB.key: settings.maxCacheMB,
+    Settings.recordEnableCacheLimit.key: settings.enableCacheLimit,
+    Settings.recordSavePath.key: settings.savePath,
+    Settings.recordDefaultQuality.key: settings.defaultQuality,
+    Settings.recordMaxRetryCount.key: settings.maxRetryCount,
+    Settings.recordRetryDelay.key: settings.retryDelay,
+    Settings.recordEnablePolling.key: settings.enablePolling,
+    Settings.recordLiveCheckInterval.key: settings.liveCheckInterval,
+    Settings.recordEnableBackoff.key: settings.enableBackoff,
+    Settings.recordMaxCheckInterval.key: settings.maxCheckInterval,
+    Settings.recordAutoStartOnBoot.key: settings.autoStartOnBoot,
+    Settings.recordPreferBestStream.key: settings.preferBestStream,
+    Settings.recordRwTimeout.key: settings.rwTimeout,
+    Settings.recordThreadQueueSize.key: settings.threadQueueSize,
+    Settings.recordPinyinFolders.key: settings.usePinyinForFolder,
+    Settings.recordDanmaku.key: settings.recordDanmaku,
   };
 }
 
@@ -362,7 +275,6 @@ final class AppRecording {
     } on Object catch (error, stack) {
       log('Recorder shutdown failed', name: 'AppRecording', error: error, stackTrace: stack);
     }
-    await settings.close();
   }
 }
 
@@ -378,7 +290,7 @@ AppRecording buildAppRecording({
   Future<bool> Function(RecordStorage storage, {required bool interactive})? storageAccess,
   String? Function()? caFile,
 }) {
-  final settings = RecordSettingsStore(store.meta);
+  final settings = RecordSettingsStore(store);
   final storage = RecordStorage(
     defaultDirectory: () => defaultRecordDirectory(dataRoot),
     configuredPath: () => settings.current.savePath,

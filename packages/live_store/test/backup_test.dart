@@ -134,6 +134,36 @@ void main() {
     await other.close();
   });
 
+  test('recorder settings: adopted once from parked 3.x values, carried by backups except the folder', () async {
+    await store.meta.keepLegacyValues({
+      'segmentTime': 600,
+      'maxTaskCount': 99,
+      'default_quality': '超清',
+      'recordSavePath': '/old/records',
+      'recorder_tasks': '[]',
+    });
+    await store.settings.set(Settings.recordEnablePolling, true);
+    await store.meta.keepLegacyValues({'enable_polling': false});
+    expect(await LegacyMigration.adoptLegacyValues(store), 4);
+    expect(store.settings.get(Settings.recordSegmentTime), 600);
+    expect(store.settings.get(Settings.recordMaxTaskCount), 10);
+    expect(store.settings.get(Settings.recordDefaultQuality), '超清');
+    expect(store.settings.get(Settings.recordEnablePolling), isTrue, reason: 'a stored value wins');
+    expect(await store.meta.legacyKeys(), ['recorder_tasks'], reason: 'adopted keys leave legacy_values');
+    expect(await LegacyMigration.adoptLegacyValues(store), 0);
+
+    final file = await backup.exportAll();
+    final recorder = file['recorder']! as Map;
+    expect(recorder['segmentTime'], 600);
+    expect(recorder.containsKey('recordSavePath'), isFalse, reason: 'a path of this device (like backupDirectory)');
+    final other = await memoryStore();
+    await BackupService(other).restoreAll(jsonDecode(jsonEncode(file)) as Map<String, Object?>);
+    expect(other.settings.get(Settings.recordSegmentTime), 600);
+    expect(other.settings.get(Settings.recordEnablePolling), isTrue);
+    expect(other.settings.get(Settings.recordSavePath), '');
+    await other.close();
+  });
+
   test('follows-only files (3.x backup_roundtrip_test)', () async {
     await store.follows.add(LiveRoom(platform: 'douyu', roomId: '1'));
     await store.settings.set(Settings.hideDanmaku, true);

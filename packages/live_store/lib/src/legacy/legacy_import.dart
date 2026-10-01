@@ -8,6 +8,8 @@ import 'package:live_store/src/legacy/legacy_rules.dart';
 import 'package:live_store/src/legacy/legacy_snapshot.dart';
 import 'package:live_store/src/live_store.dart';
 import 'package:live_store/src/rooms.dart';
+import 'package:live_store/src/settings/setting.dart';
+import 'package:live_store/src/settings/settings.dart';
 import 'package:live_store/src/webdav.dart';
 import 'package:path/path.dart' as p;
 
@@ -170,6 +172,29 @@ abstract final class LegacyMigration {
     } on FormatException {
       return null;
     }
+  }
+
+  /// Moves the 3.x values kept in `legacy_values` whose key has since become
+  /// a registered setting (the recorder's, M8.1) into the settings: an
+  /// import before the setting existed parked them there, and the source is
+  /// in the ledger, so it is not read again. A value the store already has
+  /// wins (as in [merge]); an unreadable one is dropped. Adopted keys leave
+  /// `legacy_values`, so this runs once per key. Returns how many settings
+  /// were set.
+  static Future<int> adoptLegacyValues(LiveStore store) async {
+    final adopted = <Setting<Object>, Object>{};
+    final done = <String>[];
+    for (final key in await store.meta.legacyKeys()) {
+      final setting = Settings.byKey(key);
+      if (setting == null) continue;
+      done.add(key);
+      if (store.settings.isSet(setting)) continue;
+      final value = setting.decode(await store.meta.legacyValue(key));
+      if (value != null) adopted[setting] = setting.normalize(value);
+    }
+    if (adopted.isNotEmpty) await store.settings.setAll(adopted);
+    if (done.isNotEmpty) await store.meta.forgetLegacyValues(done);
+    return adopted.length;
   }
 
   /// Joins [snapshot] into [store]: settings, cookies and WebDAV servers only

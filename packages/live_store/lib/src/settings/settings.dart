@@ -813,6 +813,152 @@ abstract final class Settings {
   /// Start with Windows (3.x's default is on).
   static const enableStartUp = BoolSetting('enableStartUp', section: 'startup', defaultValue: true);
 
+  // ---- recorder (lib/recorder/consts/recorder_keys.dart, recorder_config.dart) ----
+  //
+  // 3.x kept these in the same Hive box but never put them in backups (M8.1:
+  // v4 backups carry them in a `recorder` section, which 3.x ignores). The
+  // recorder (live_record `RecordSettings`) applies its own finer rules on
+  // top (rw timeout and queue size are choices).
+
+  /// Segment length, seconds.
+  static const recordSegmentTime = IntSetting(
+    'segmentTime',
+    section: 'recorder',
+    defaultValue: 300,
+    min: 60,
+    max: 3600,
+  );
+
+  /// Concurrent recordings.
+  static const recordMaxTaskCount = IntSetting('maxTaskCount', section: 'recorder', defaultValue: 3, min: 1, max: 10);
+
+  /// Retry an interrupted recording.
+  static const recordAutoReconnect = BoolSetting('autoReconnect', section: 'recorder', defaultValue: true);
+
+  /// Size limit of the recording folder, MiB.
+  static const recordMaxCacheMB = IntSetting('maxCacheMB', section: 'recorder', defaultValue: 1024, min: 1);
+
+  /// Delete the oldest recordings above [recordMaxCacheMB].
+  static const recordEnableCacheLimit = BoolSetting('enableCacheLimit', section: 'recorder', defaultValue: false);
+
+  /// Parent folder of the recordings ('' = the app's default). A path of
+  /// this device, so backups do not carry it (like [backupDirectory]).
+  static const recordSavePath = StringSetting(
+    'recordSavePath',
+    section: 'recorder',
+    defaultValue: '',
+    scope: SettingScope.internal,
+  );
+
+  /// The recording quality preference, best first (3.x
+  /// `PlayerConsts.resolutions`; the stored values are 3.x's).
+  static const recordQualityChoices = ['原画', '蓝光8M', '蓝光4M', '超清', '流畅'];
+
+  /// Default recording quality, one of [recordQualityChoices].
+  static const recordDefaultQuality = StringSetting(
+    'default_quality',
+    section: 'recorder',
+    defaultValue: '原画',
+    allowed: {'原画', '蓝光8M', '蓝光4M', '超清', '流畅'},
+  );
+
+  /// Retries before waiting for the room again.
+  static const recordMaxRetryCount = IntSetting(
+    'max_retry_count',
+    section: 'recorder',
+    defaultValue: 5,
+    min: 1,
+    max: 20,
+  );
+
+  /// Retry delay, seconds.
+  static const recordRetryDelay = IntSetting('retry_delay', section: 'recorder', defaultValue: 30, min: 5, max: 120);
+
+  /// Check waiting rooms until they go live.
+  static const recordEnablePolling = BoolSetting('enable_polling', section: 'recorder', defaultValue: false);
+
+  /// Live check interval, seconds.
+  static const recordLiveCheckInterval = IntSetting(
+    'live_check_interval',
+    section: 'recorder',
+    defaultValue: 30,
+    min: 10,
+    max: 300,
+  );
+
+  /// Double the delays after each failure.
+  static const recordEnableBackoff = BoolSetting('enable_backoff', section: 'recorder', defaultValue: false);
+
+  /// Upper bound of backed-off delays, seconds.
+  static const recordMaxCheckInterval = IntSetting(
+    'max_check_interval',
+    section: 'recorder',
+    defaultValue: 300,
+    min: 300,
+    max: 3600,
+  );
+
+  /// Resume waiting and interrupted recordings when the app starts.
+  static const recordAutoStartOnBoot = BoolSetting('auto_start_on_boot', section: 'recorder', defaultValue: false);
+
+  /// Record only the first video and audio stream.
+  static const recordPreferBestStream = BoolSetting(
+    'recorder_prefer_best_stream',
+    section: 'recorder',
+    defaultValue: true,
+  );
+
+  /// FFmpeg read/write timeout, seconds (15, 30 or 60).
+  static const recordRwTimeout = IntSetting(
+    'recorder_rw_timeout',
+    section: 'recorder',
+    defaultValue: 15,
+    min: 15,
+    max: 60,
+  );
+
+  /// FFmpeg input thread queue size (512 to 8192).
+  static const recordThreadQueueSize = IntSetting(
+    'recorder_thread_queue_size',
+    section: 'recorder',
+    defaultValue: 2048,
+    min: 512,
+    max: 8192,
+  );
+
+  /// Name the platform and streamer folders in pinyin.
+  static const recordPinyinFolders = BoolSetting(
+    'recorder_folder_naming_strategy',
+    section: 'recorder',
+    defaultValue: false,
+  );
+
+  /// Save the chat beside each recording.
+  static const recordDanmaku = BoolSetting('recorder_record_danmaku', section: 'recorder', defaultValue: false);
+
+  /// The recorder's settings, in 3.x's key order.
+  static const List<Setting<Object>> recorder = [
+    recordSegmentTime,
+    recordMaxTaskCount,
+    recordAutoReconnect,
+    recordMaxCacheMB,
+    recordEnableCacheLimit,
+    recordSavePath,
+    recordDefaultQuality,
+    recordMaxRetryCount,
+    recordRetryDelay,
+    recordEnablePolling,
+    recordLiveCheckInterval,
+    recordEnableBackoff,
+    recordMaxCheckInterval,
+    recordAutoStartOnBoot,
+    recordPreferBestStream,
+    recordRwTimeout,
+    recordThreadQueueSize,
+    recordPinyinFolders,
+    recordDanmaku,
+  ];
+
   // ---- backup (backup_controller.dart:37) ----
 
   /// Last backup folder (this device).
@@ -1002,6 +1148,7 @@ abstract final class Settings {
     autoShutDownTime,
     enableAutoShutDownTime,
     enableStartUp,
+    ...recorder,
     backupDirectory,
     bilibiliUid,
     douyuCookieSavedAt,

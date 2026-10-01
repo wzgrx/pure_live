@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_record/live_record.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
@@ -127,14 +128,9 @@ Future<void> _tap(WidgetTester tester, Finder finder) async {
   await _settle(tester);
 }
 
-Future<Map<String, Object?>> _saved(WidgetTester tester, AppServices services) async {
-  final text = (await tester.runAsync(() => services.store.meta.get(RecordSettingsStore.storageKey)))!;
-  return Map<String, Object?>.from(jsonDecode(text) as Map);
-}
-
 void main() {
   group('RecordSettingsStore', () {
-    test("reads 3.x's recorder keys until the user changes one, then keeps v4's values", () async {
+    test('moves the values kept before M8.1 into the store once: v4 meta first, then 3.x parked values', () async {
       final services = await testServices();
       addTearDown(services.close);
       await services.store.meta.keepLegacyValues({
@@ -144,31 +140,34 @@ void main() {
         'recorder_rw_timeout': 31,
         'default_quality': '超清',
         'recordSavePath': ' /old/records ',
-        'recorder_folder_naming_strategy': 1,
       });
-      final settings = RecordSettingsStore(services.store.meta);
+      await services.store.meta.set(
+        RecordSettingsStore.legacyStorageKey,
+        jsonEncode({'maxTaskCount': '7', 'recorder_folder_naming_strategy': 1}),
+      );
+      final settings = RecordSettingsStore(services.store);
       await settings.load();
+      expect(settings.current.maxTaskCount, 7, reason: "the user's v4 value wins over 3.x's");
+      expect(settings.current.usePinyinForFolder, isTrue);
       expect(settings.current.segmentTime, 600);
-      expect(settings.current.maxTaskCount, 5);
       expect(settings.current.enablePolling, isTrue);
       expect(settings.current.rwTimeout, 15, reason: '3.x normalized unsupported timeouts to 15 s');
       expect(settings.current.defaultQuality, '超清');
       expect(settings.current.savePath, '/old/records');
-      expect(settings.current.usePinyinForFolder, isTrue);
+      expect(await services.store.meta.get(RecordSettingsStore.legacyStorageKey), isNull);
+      expect(await services.store.meta.legacyValue('segmentTime'), isNull);
+      expect(services.store.settings.get(Settings.recordMaxTaskCount), 7);
 
       final changes = <int>[];
-      settings.changes.listen((value) => changes.add(value.maxTaskCount));
-      await settings.set(RecordSettingsStore.maxTaskCount, 99);
+      final subscription = settings.changes.listen((value) => changes.add(value.maxTaskCount));
+      await settings.set(Settings.recordMaxTaskCount, 99);
       expect(settings.current.maxTaskCount, 10);
       await Future<void>.delayed(Duration.zero);
       expect(changes, [10]);
+      await subscription.cancel();
 
-      final again = RecordSettingsStore(services.store.meta);
-      await again.load();
-      expect(again.current.maxTaskCount, 10);
-      expect(again.current.segmentTime, 600, reason: 'the imported values are kept with the first save');
-      await settings.close();
-      await again.close();
+      final backup = await BackupService(services.store).exportAll();
+      expect((backup['recorder']! as Map)['maxTaskCount'], 10, reason: 'backups carry the recorder settings');
     });
   });
 
@@ -255,7 +254,7 @@ void main() {
     await _tap(tester, find.byKey(const ValueKey('record-max-tasks-quick-4')));
     await _tap(tester, find.byKey(const ValueKey('record-max-tasks-confirm')));
     expect(harness.recording.settings.current.maxTaskCount, 4);
-    expect((await _saved(tester, harness.services))[RecordSettingsStore.maxTaskCount], 4);
+    expect(harness.services.store.settings.get(Settings.recordMaxTaskCount), 4);
 
     await _tap(tester, find.text('录制读写超时'));
     await _tap(tester, find.byKey(const ValueKey('record-option-60')));

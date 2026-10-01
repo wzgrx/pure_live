@@ -44,6 +44,13 @@ final class MetaStore {
     for (final row in await _db.rows('SELECT key FROM legacy_values ORDER BY key')) row.read<String>('key'),
   ];
 
+  /// Drops the kept 3.x values of [keys] (taken over by their owner).
+  Future<void> forgetLegacyValues(Iterable<String> keys) => _db.write({StoreTables.legacyValues}, () async {
+    for (final key in keys) {
+      await _db.run('DELETE FROM legacy_values WHERE key = ?', [key]);
+    }
+  });
+
   /// Keeps [values] where nothing is kept yet under the same key.
   Future<void> keepLegacyValues(Map<String, Object?> values) => _db.write({StoreTables.legacyValues}, () async {
     for (final entry in values.entries) {

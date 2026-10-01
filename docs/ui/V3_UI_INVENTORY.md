@@ -211,3 +211,11 @@ v4 现在（偏差最大）：
 | U.12c 标签管理 | [compare/U.12c](compare/U.12c/README.md) |
 | U.12d 弹幕屏蔽（设置） | [compare/U.12d](compare/U.12d/README.md) |
 | U.15i 电视设置 | [compare/U.15i](compare/U.15i/README.md) |
+| U.13 桌面窗口 | [compare/U.13](compare/U.13/README.md) |
+| U.14 系统界面 | [compare/U.14](compare/U.14/README.md) |
+| U.15d 电视直播间 | [compare/U.15d](compare/U.15d/README.md) |
+| U.15e 电视网络电视和链接放映 | [compare/U.15e](compare/U.15e/README.md) |
+| U.17a iOS 和 iPadOS | [compare/U.17a](compare/U.17a/README.md) |
+| U.17b macOS | [compare/U.17b](compare/U.17b/README.md) |
+| U.1c 通用组件 | [compare/U.1c](compare/U.1c/README.md) |
+| U.1d 弹窗组件 | [compare/U.1d](compare/U.1d/README.md) |

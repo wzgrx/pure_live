@@ -1,6 +1,6 @@
 # U.15e 电视网络电视和链接放映：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：已确认（2026-10-01，用户已同意全部设计：“后续全部通过”；“需要你选的”按建议）。原状态：待确认（第 1 版，2026-10-01）
 - 范围：电视的 IPTV 设置（订阅源、导入、自动同步、请求头、节目单源）、订阅源管理、导入和请求头对话框、删除确认、网络电视直播间的节目单、“链接放映”页（INVENTORY 的 `MoviePlaybackPage`，导航名“链接放映”）。下面的界面清点表是这一批出图的清单
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u15e)、[TASK_FILES.md](../../TASK_FILES.md#u15e)；计划书 [UI_PLAN.md](../../UI_PLAN.md) 第 5.5 节
 - 基线：pure_live_TV（`~/ref/pure_live_TV/lib/modules/live/iptv/`、`modules/live/movie_playback/`）。手机上同样的功能：v3 的 IPTV 设置页和订阅源管理（`modules/iptv/iptv_page.dart`、`iptv_manage.dart`；手机版 [U.9](../U.9/README.md) 未开始）、工具箱的链接解析（`modules/toolbox/toolbox_page.dart`；[U.12a](../U.12a/README.md) 未开始）、节目单（[U.2g](../U.2g/README.md)）。电视直播间的其余部分见 [U.15d](../U.15d/README.md)

@@ -1,6 +1,6 @@
 # U.15h 电视壁纸：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：已确认（2026-10-01，用户已同意全部设计：“后续全部通过”；“需要你选的”按建议）。原状态：待确认（第 1 版，2026-10-01）
 - 范围：电视界面背后的背景（壁纸）：背景设置页、壁纸库 / 随机壁纸 API / 分组 / 分类列表、壁纸网格（含纯色和视频壁纸）、预览、沉浸式、清除背景，以及设好以后在各页面后面的样子；见下面的界面清点表
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u15h)、[TASK_FILES.md](../../TASK_FILES.md#u15h)；依赖 U.15b（外壳）；入口在电视设置（U.15i）；字号、焦点、子页面默认焦点见 [U.15f](../U.15f/README.md)
 - 基线：pure_live_TV（`~/ref/pure_live_TV/lib/features/wallpaper`、`services/background_config`），手机版没有这个功能；v4 电视外壳现在背景是纯色（`tv/tv_theme.dart` 的 `TvBackground`），导航轨里留了一个不显示的“壁纸”占位（`tv/home/tv_home_page.dart`）

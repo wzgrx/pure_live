@@ -225,3 +225,6 @@ v4 现在（偏差最大）：
 | U.3b 宽屏首页 | [compare/U.3b](compare/U.3b/README.md) |
 | U.3c 启动页 | [compare/U.3c](compare/U.3c/README.md) |
 | U.3d 全局弹窗 | [compare/U.3d](compare/U.3d/README.md) |
+| U.15f 电视点播 | [compare/U.15f](compare/U.15f/README.md) |
+| U.15g 电视音乐 | [compare/U.15g](compare/U.15g/README.md) |
+| U.15h 电视壁纸 | [compare/U.15h](compare/U.15h/README.md) |

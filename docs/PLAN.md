@@ -94,7 +94,7 @@ tools/live_cli（平台探针、样本录制）、tools/check_latest、tools/gat
 | M6 | IPTV 内核 | `core/iptv`、`core/site/iptv` | live_iptv | 完成（2026-10-01，[记录](modules/M6-iptv.md)） |
 | M7 | 播放：media_kit 分支和原生包 → 播放核心（拆分 PlayerManager） → Flutter 绑定 | `player/` | live_media、live_player | 进行中：M7.1 播放核心完成（[记录](modules/M7.1-media.md)） |
 | M8 | 录制 | `recorder/` 的内核部分 | live_record | 未开始 |
-| M9 | 存储、设置、备份、3.x 数据迁移 | `plugins/db_service`、`common/services/settings`、`plugins/backup_recovery_service` | live_store | 未开始 |
+| M9 | 存储、设置、备份、3.x 数据迁移 | `plugins/db_service`、`common/services/settings`、`plugins/backup_recovery_service` | live_store | 完成（2026-10-01，[记录](modules/M9-store.md)） |
 | M10 | 投屏 | 直播间的 DLNA 部分 | live_cast | 完成（2026-10-01，[记录](modules/M10-cast.md)） |
 | M11 | 界面基础：主题、通用组件、图标 | `common/style`、`common/styles`、`common/widgets` | live_ui | 完成（2026-10-01，[记录](modules/M11-ui.md)） |
 | M12 | 应用骨架：入口、路由、首页外壳、多语言、Android 和 Windows 原生部分 | `main.dart`、`routes/`、`modules/home`、`assets/translations`、`android/`、`windows/`、`plugins/built_in_kotlin` | apps/pure_live | 未开始 |

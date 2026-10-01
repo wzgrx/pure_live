@@ -17,8 +17,11 @@ Map<String, int> followedTagCounts(Map<String, List<String>> assignments, Iterab
   return counts;
 }
 
-/// One tag in the list: drag handle, name, description and room count,
-/// then pin, edit and delete (3.x tag card).
+/// One tag in the list (docs/ui/compare/U.12c c2–c4): drag handle, name
+/// (15/600), description (12 px, secondary colour) and the followed rooms,
+/// then pin, edit and delete as 48 px buttons with 3.x's icons. The first
+/// tag shows a filled pin that does nothing. A long press anywhere on the
+/// card drags it too (3.x).
 class TagTile extends StatelessWidget {
   /// Creates the row of [tag] at [index].
   const new({
@@ -59,28 +62,25 @@ class TagTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
+    final colors = Theme.of(context).colorScheme;
     final styles = context.textStyles;
     final isTop = index == 0;
     final name = {'name': tag.name};
+    final described = tag.description.isNotEmpty;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 8),
       child: ReorderableDelayedDragStartListener(
         index: index,
         enabled: enabled,
         child: Material(
-          color: colors.secondary.withValues(alpha: 0.08),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: colors.secondary.withValues(alpha: 0.3)),
-          ),
+          color: colors.surfaceContainerLow,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             key: ValueKey('tag-open-${tag.id}'),
             onTap: enabled ? onOpen : null,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 6, 4, 6),
+              padding: const EdgeInsets.fromLTRB(0, 10, 8, 10),
               child: Row(
                 children: [
                   ReorderableDragStartListener(
@@ -91,9 +91,10 @@ class TagTile extends StatelessWidget {
                       child: MouseRegion(
                         cursor: enabled ? SystemMouseCursors.grab : MouseCursor.defer,
                         child: SizedBox(
+                          key: ValueKey('tag-handle-${tag.id}'),
                           width: 44,
                           height: 48,
-                          child: Icon(Icons.drag_indicator_rounded, color: colors.onSurfaceVariant),
+                          child: Icon(AppIcons.dragHandle, size: 20, color: colors.onSurfaceVariant),
                         ),
                       ),
                     ),
@@ -106,18 +107,19 @@ class TagTile extends StatelessWidget {
                         children: [
                           Text(
                             tag.name,
-                            style: styles.t14.copyWith(fontWeight: FontWeight.w600),
+                            key: ValueKey('tag-name-${tag.id}'),
+                            style: styles.t15.copyWith(fontWeight: FontWeight.w600),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            tag.description.isNotEmpty ? tag.description : i18n('no_description_placeholder'),
-                            style: styles.t11.copyWith(
-                              color: tag.description.isNotEmpty
-                                  ? colors.onSurfaceVariant
-                                  : colors.onSurfaceVariant.withValues(alpha: 0.5),
-                              fontStyle: tag.description.isNotEmpty ? FontStyle.normal : FontStyle.italic,
+                            described ? tag.description : i18n('no_description_placeholder'),
+                            key: ValueKey('tag-description-${tag.id}'),
+                            // G1: 3.x drew it 11 px in 38 % black (about 2.6:1).
+                            style: styles.t12.copyWith(
+                              color: colors.onSurfaceVariant,
+                              fontStyle: described ? FontStyle.normal : FontStyle.italic,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -125,13 +127,13 @@ class TagTile extends StatelessWidget {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              Icon(Icons.live_tv_rounded, size: 13, color: colors.primary),
+                              Icon(AppIcons.tagRooms, size: 14, color: colors.primary),
                               const SizedBox(width: 4),
                               Flexible(
                                 child: Text(
                                   i18n('tags_room_count', args: {'count': '$rooms'}),
                                   key: ValueKey('tag-rooms-${tag.id}'),
-                                  style: styles.t11.copyWith(color: colors.primary),
+                                  style: styles.t12.copyWith(color: colors.primary),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -145,20 +147,24 @@ class TagTile extends StatelessWidget {
                   IconButton(
                     key: ValueKey('tag-pin-${tag.id}'),
                     tooltip: i18n(isTop ? 'tag_already_at_top_named' : 'move_tag_to_top_named', args: name),
-                    icon: Icon(isTop ? Icons.push_pin : Icons.push_pin_outlined, size: 20),
+                    icon: Icon(isTop ? AppIcons.pinned : AppIcons.unpinned, size: 22),
                     color: colors.primary,
+                    // The first one keeps its filled pin (3.x), not greyed out.
+                    disabledColor: isTop ? colors.primary : null,
                     onPressed: enabled && !isTop ? onPin : null,
                   ),
                   IconButton(
                     key: ValueKey('tag-edit-${tag.id}'),
                     tooltip: i18n('edit_tag_named', args: name),
-                    icon: Icon(Icons.edit_outlined, size: 20, color: colors.onSurfaceVariant),
+                    icon: const Icon(AppIcons.edit, size: 22),
+                    color: colors.onSurfaceVariant,
                     onPressed: enabled ? onEdit : null,
                   ),
                   IconButton(
                     key: ValueKey('tag-delete-${tag.id}'),
                     tooltip: i18n('delete_tag_named', args: name),
-                    icon: Icon(Icons.delete_outline_rounded, size: 20, color: colors.error.withValues(alpha: 0.8)),
+                    icon: const Icon(AppIcons.delete, size: 22),
+                    color: colors.error,
                     onPressed: enabled ? onDelete : null,
                   ),
                 ],
@@ -177,66 +183,73 @@ enum TagDetailsAction {
   edit,
 }
 
-/// Shows [tag]'s name, description and room count (3.x `_showTagDetails`),
-/// with a button that opens the editor.
+/// Shows [tag]'s name, description and followed rooms (3.x
+/// `_showTagDetails`; c6): "编辑标签" opens the editor, "关闭" closes (3.x
+/// had only "确认").
 Future<TagDetailsAction?> showTagDetails(BuildContext context, {required StoreTag tag, required int rooms}) =>
     showDialog<TagDetailsAction>(
       context: context,
       builder: (dialogContext) {
-        final theme = Theme.of(dialogContext);
-        final colors = theme.colorScheme;
+        final colors = Theme.of(dialogContext).colorScheme;
         final styles = dialogContext.textStyles;
         Widget label(String text) => Padding(
           padding: const EdgeInsets.only(top: 16, bottom: 6),
           child: Text(text, style: styles.t12Bold.copyWith(color: colors.primary)),
         );
-        return AlertDialog(
-          scrollable: true,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          title: Text(i18n('tag_detail'), style: styles.t16Bold),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(i18n('tag_name_label'), style: styles.t12Bold.copyWith(color: colors.primary)),
-                const SizedBox(height: 6),
-                Text(tag.name, style: styles.t16.copyWith(fontWeight: FontWeight.w600)),
-                if (tag.description.isNotEmpty) ...[
-                  label(i18n('tag_desc_label')),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(12),
+        return DialogButtonsTheme(
+          child: AlertDialog(
+            key: const ValueKey('tag-details'),
+            scrollable: true,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            title: Text(i18n('tag_detail'), style: tagDialogTitle(dialogContext)),
+            content: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(i18n('tag_name_label'), style: styles.t12Bold.copyWith(color: colors.primary)),
+                  const SizedBox(height: 6),
+                  Text(tag.name, style: styles.t16.copyWith(fontWeight: FontWeight.w600)),
+                  if (tag.description.isNotEmpty) ...[
+                    label(i18n('tag_desc_label')),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(tag.description, style: styles.t14.copyWith(height: 1.4)),
                     ),
-                    child: Text(tag.description, style: styles.t14.copyWith(height: 1.4)),
-                  ),
+                  ],
+                  label(i18n('tags_rooms_label')),
+                  Text(i18n('tags_room_count', args: {'count': '$rooms'}), style: styles.t14),
                 ],
-                label(i18n('tags_rooms_label')),
-                Text(i18n('tags_room_count', args: {'count': '$rooms'}), style: styles.t14),
-              ],
+              ),
             ),
+            actionsOverflowDirection: VerticalDirection.down,
+            actionsOverflowButtonSpacing: 8,
+            actions: [
+              TextButton(
+                key: const ValueKey('tag-details-edit'),
+                style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                onPressed: () => Navigator.pop(dialogContext, TagDetailsAction.edit),
+                child: Text(i18n('edit_tag')),
+              ),
+              FilledButton(
+                key: const ValueKey('tag-details-close'),
+                style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(i18n('close')),
+              ),
+            ],
           ),
-          actionsOverflowDirection: VerticalDirection.down,
-          actionsOverflowButtonSpacing: 8,
-          actions: [
-            TextButton(
-              key: const ValueKey('tag-details-edit'),
-              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-              onPressed: () => Navigator.pop(dialogContext, TagDetailsAction.edit),
-              child: Text(i18n('edit_tag')),
-            ),
-            FilledButton(
-              key: const ValueKey('tag-details-close'),
-              style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(i18n('confirm')),
-            ),
-          ],
         );
       },
     );
+
+/// The title of the tag dialogs (20 px, semi-bold; the other dialogs of
+/// U.12).
+TextStyle tagDialogTitle(BuildContext context) =>
+    context.textStyles.t18.copyWith(fontSize: 20, fontWeight: FontWeight.w600);

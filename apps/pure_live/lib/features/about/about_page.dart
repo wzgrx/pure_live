@@ -2,18 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:pure_live/features/about/release_history_view.dart';
 import 'package:pure_live/features/version/app_version.dart';
 import 'package:pure_live/features/version/update_feed.dart';
+import 'package:pure_live/features/version/version_page.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 
-/// About and version history (3.x `lib/modules/about`).
+/// About (3.x `lib/modules/about`, docs/ui/compare/U.12b).
 ///
 /// Routes: `RoutePath.kAbout` ([AboutView]) and `RoutePath.kVersionHistory`
-/// ([ReleaseHistoryView]).
+/// (the version feature's [VersionPage], which holds the history next to
+/// the update check it shares the release files and the download with).
 class AboutPage extends StatelessWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -23,13 +24,14 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (route.path) {
-    RoutePath.kVersionHistory => const ReleaseHistoryView(),
+    RoutePath.kVersionHistory => VersionPage(route: route),
     _ => const AboutView(),
   };
 }
 
-/// The app's logo, name and version, the update and history entries, the
-/// licences, the project page and the project statement (3.x `AboutPage`).
+/// The app's logo, name and version, then "关于" (online update, version
+/// history, licences) and "项目" (the project page, the statement), at most
+/// 720 wide (3.x `AboutPage`).
 class AboutView extends StatefulWidget {
   /// Creates the view.
   const new({super.key});
@@ -68,112 +70,158 @@ class _AboutViewState extends State<AboutView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final mobile = MediaQuery.sizeOf(context).shortestSide < 600;
-    final logoSize = mobile ? 80.0 : 96.0;
+    final colors = Theme.of(context).colorScheme;
+    final styles = context.textStyles;
+    final short = MediaQuery.sizeOf(context).height < 480;
     return Scaffold(
-      appBar: AppBar(title: Text(i18n('about'))),
-      body: ListView(
-        physics: const PureLiveScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        children: [
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: settingsContentMaxWidth),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0, end: 1),
-                      duration: const Duration(milliseconds: 1000),
-                      curve: Curves.elasticOut,
-                      builder: (context, value, child) => Transform.scale(scale: value, child: child),
-                      child: Container(
-                        width: logoSize,
-                        height: logoSize,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.08)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.06),
-                              blurRadius: 16,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
+      // 3.x: only "back", no title.
+      appBar: AppBar(toolbarHeight: short ? 48 : null),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final logoSize = constraints.maxWidth < 600 ? 80.0 : 96.0;
+          return ListView(
+            key: const ValueKey('about-scroll'),
+            physics: const PureLiveScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+            children: [
+              for (final child in [
+                // c5: shown at once (3.x bounced it in for a second).
+                Center(
+                  child: Container(
+                    key: const ValueKey('about-logo'),
+                    width: logoSize,
+                    height: logoSize,
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: colors.primary.withValues(alpha: 0.08)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colors.primary.withValues(alpha: 0.06),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
                         ),
-                        padding: const EdgeInsets.all(16),
-                        child: Image.asset('assets/icons/icon.png', fit: BoxFit.contain),
-                      ),
+                      ],
                     ),
+                    padding: const EdgeInsets.all(16),
+                    child: Image.asset('assets/icons/icon.png', fit: BoxFit.contain),
                   ),
-                  const SizedBox(height: 18),
-                  Text(
-                    i18n('app_name'),
-                    textAlign: TextAlign.center,
-                    style: context.textStyles.t18.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5),
-                  ),
-                  const SizedBox(height: 6),
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerLow,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  i18n('app_name'),
+                  textAlign: TextAlign.center,
+                  style: styles.t18.copyWith(fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+                ),
+                const SizedBox(height: 6),
+                Center(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerHigh,
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                       child: Text(
                         'v$appVersion',
                         key: const ValueKey('about-version'),
-                        style: context.textStyles.t11.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: styles.t12.copyWith(color: colors.onSurfaceVariant, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 28),
-                  context.buildGroupTitle(i18n('about')),
-                  const SizedBox(height: 8),
-                  context.buildModernCard([
-                    context.buildTile(
-                      icon: Icons.system_update_alt_rounded,
-                      title: i18n('online_update'),
-                      subtitle: i18n('about_update_subtitle'),
-                      onTap: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kVersionPage)),
+                ),
+                const SizedBox(height: 12),
+                SettingsGroup(
+                  title: i18n('about'),
+                  children: [
+                    ValueListenableBuilder<UpdateInfo?>(
+                      valueListenable: foundUpdate,
+                      builder: (context, update, _) => SettingsLinkRow(
+                        key: const ValueKey('about-online-update'),
+                        icon: AppIcons.onlineUpdate,
+                        title: i18n('online_update'),
+                        subtitle: i18n('about_update_subtitle'),
+                        // c3: the newer version the start-up check found;
+                        // nothing otherwise (the version is shown above).
+                        valueWidget: update == null || !update.isNewer ? null : _NewVersionBadge(update.version),
+                        onTap: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kVersionPage)),
+                      ),
                     ),
-                    context.buildTile(
-                      icon: Icons.history_rounded,
-                      title: i18n('history'),
+                    SettingsLinkRow(
+                      key: const ValueKey('about-version-history'),
+                      icon: AppIcons.versionHistory,
+                      title: i18n('version_history'),
                       subtitle: i18n('history_desc'),
                       onTap: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kVersionHistory)),
                     ),
-                    context.buildTile(icon: Icons.policy_outlined, title: i18n('license'), onTap: _openLicenses),
-                  ]),
-                  const SizedBox(height: 24),
-                  context.buildGroupTitle(i18n('project')),
-                  const SizedBox(height: 8),
-                  context.buildModernCard([
-                    context.buildTile(
-                      icon: Icons.code_rounded,
+                    SettingsLinkRow(
+                      key: const ValueKey('about-licenses'),
+                      icon: AppIcons.licenses,
+                      title: i18n('license'),
+                      onTap: _openLicenses,
+                    ),
+                  ],
+                ),
+                SettingsGroup(
+                  title: i18n('project'),
+                  children: [
+                    SettingsRow(
+                      key: const ValueKey('about-project-page'),
+                      icon: AppIcons.projectPage,
                       title: i18n('project_page'),
                       subtitle: projectUrl.toString(),
-                      isLong: true,
+                      trailing: Icon(AppIcons.openExternal, size: 22, color: colors.onSurfaceVariant),
+                      stackTrailing: false,
                       onTap: () => unawaited(_openProject()),
                     ),
-                    context.buildTile(
-                      icon: Icons.info_outline_rounded,
+                    // c4: v4's statement (no Firebase), an information icon
+                    // and body text (3.x: a red error icon, faint text).
+                    SettingsRow(
+                      key: const ValueKey('about-statement'),
+                      leading: Icon(AppIcons.infoLine, size: 22, color: colors.onSurfaceVariant),
                       title: i18n('project_alert'),
-                      subtitle: i18n('about_legalese'),
-                      isLong: true,
-                      iconColor: theme.colorScheme.error,
+                      below: Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          i18n('about_legalese'),
+                          style: styles.t13.copyWith(color: colors.onSurface, height: 1.5),
+                        ),
+                      ),
                     ),
-                  ]),
-                ],
-              ),
-            ),
-          ),
-        ],
+                  ],
+                ),
+              ])
+                ReadableContent(
+                  child: SizedBox(width: double.infinity, child: child),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// "新版本 v…" at the end of "在线更新".
+class _NewVersionBadge extends StatelessWidget {
+  const new(this.version);
+
+  final String version;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      key: const ValueKey('about-new-version'),
+      decoration: BoxDecoration(color: colors.primary, borderRadius: const BorderRadius.all(Radius.circular(16))),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        child: Text(
+          i18n('about_new_version', args: {'version': version}),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textStyles.t13.copyWith(color: colors.onPrimary, fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }

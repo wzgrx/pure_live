@@ -1,19 +1,24 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
-import 'package:pure_live/features/shield/block_list_tab.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/shared/danmaku/block_manager.dart';
 
-/// Danmaku block lists (3.x `lib/modules/shield`).
+/// Danmaku blocking in the settings (3.x `lib/modules/shield`,
+/// docs/ui/compare/U.12d).
 ///
 /// Routes: `RoutePath.kSettingsDanmuShield`; `BlockKind.user` as the
-/// argument opens the users tab.
+/// argument scrolls to the blocked users.
 ///
-/// Two tabs over `LiveStore.blockLists`: blocked keywords (3.x had only
-/// this list here) and blocked senders (3.x showed them only in the live
-/// room's panel). The live room's filter follows every change.
-class ShieldPage extends ConsumerWidget {
+/// The live room's "屏蔽管理" component ([DanmakuBlockManager], U.2e E4) as
+/// a page of its own: blocked keywords, blocked viewers, the platform's
+/// filter and the similarity filter (3.x had only the keywords here, c2).
+/// One store for both, so a change holds in every room at once. At most
+/// 720 wide (c6).
+class ShieldPage extends StatelessWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
 
@@ -21,33 +26,26 @@ class ShieldPage extends ConsumerWidget {
   final RouteArgs route;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    String count(BlockKind kind) => '${ref.watch(blockListProvider(kind)).value?.length ?? 0}';
-    return DefaultTabController(
-      length: BlockKind.values.length,
-      initialIndex: route.arguments == BlockKind.user ? 1 : 0,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(i18n('shield_title')),
-          bottom: TabBar(
-            tabs: [
-              Tab(
-                key: const ValueKey('shield-tab-keyword'),
-                text: i18n('shield_tab_keywords', args: {'count': count(BlockKind.keyword)}),
-              ),
-              Tab(
-                key: const ValueKey('shield-tab-user'),
-                text: i18n('shield_tab_users', args: {'count': count(BlockKind.user)}),
-              ),
-            ],
-          ),
-        ),
-        body: const TabBarView(
-          children: [
-            BlockListTab(kind: BlockKind.keyword),
-            BlockListTab(kind: BlockKind.user),
-          ],
-        ),
+  Widget build(BuildContext context) {
+    final short = MediaQuery.sizeOf(context).height < 480;
+    return Scaffold(
+      appBar: AppBar(
+        // 3.x's app bars centre the title (common/style/theme.dart:119).
+        centerTitle: true,
+        toolbarHeight: short ? 48 : null,
+        title: Text(i18n('shield_title')),
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // The component's cards keep 12 from its edges: the column is
+          // 720 + 24 wide, centred, and scrolls with the whole window.
+          final side = math.max(0, (constraints.maxWidth - readableContentMaxWidth - 24) / 2).toDouble();
+          return DanmakuBlockManager(
+            key: const ValueKey('shield-block-manager'),
+            showUsers: route.arguments == BlockKind.user,
+            padding: EdgeInsets.fromLTRB(side, 0, side, 32),
+          );
+        },
       ),
     );
   }

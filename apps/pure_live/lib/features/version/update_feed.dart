@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
@@ -12,6 +13,14 @@ const GitHubMirror updateRepository = GitHubMirror(owner: 'wzgrx', repo: 'pure_l
 
 /// The project page (3.x `VersionUtil.projectUrl`).
 final Uri projectUrl = Uri.parse('https://github.com/${updateRepository.owner}/${updateRepository.repo}');
+
+/// The newer version the start-up check or the version page last found;
+/// null when there is none or nothing was checked. The about page shows it
+/// as "新版本 v…" (docs/ui/compare/U.12b c3).
+final ValueNotifier<UpdateInfo?> foundUpdate = ValueNotifier<UpdateInfo?>(null);
+
+/// Keeps [info] in [foundUpdate] when it is newer, clears it otherwise.
+void noteCheckedUpdate(UpdateInfo info) => foundUpdate.value = info.isNewer ? info : null;
 
 /// The Android ABIs 3.x builds (3.x `AppConsts.supportAndroidAbis`).
 const Set<String> supportedAndroidAbis = {'arm64-v8a', 'armeabi-v7a', 'x86_64'};

@@ -25,9 +25,13 @@ final class _Harness {
 }
 
 /// Pumps the page over an in-memory store prepared by [seed].
-Future<_Harness> _pump(WidgetTester tester, {Future<void> Function(LiveStore store)? seed}) async {
+Future<_Harness> _pump(
+  WidgetTester tester, {
+  Future<void> Function(LiveStore store)? seed,
+  Size size = const Size(420, 900),
+}) async {
   tester.view
-    ..physicalSize = const Size(420, 900)
+    ..physicalSize = size
     ..devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final services = (await tester.runAsync(() async {
@@ -83,7 +87,7 @@ void main() {
     expect(find.byKey(const ValueKey('tags-empty')), findsOneWidget);
     expect(find.textContaining('暂无自定义标签'), findsOneWidget);
 
-    await _tap(tester, find.byKey(const ValueKey('tags-empty-add')));
+    await _tap(tester, find.descendant(of: find.byKey(const ValueKey('tags-empty')), matching: find.text('添加标签')));
     expect(find.text('添加标签'), findsWidgets);
     await _tap(tester, find.byKey(const ValueKey('tag-editor-confirm')));
     expect(find.text('标签名称不能为空'), findsOneWidget);
@@ -174,10 +178,7 @@ void main() {
       },
     );
     final a = await _tag(tester, h.tags, 'A');
-    final handle = find.descendant(
-      of: find.byKey(ValueKey('tag-${a.id}')),
-      matching: find.byIcon(Icons.drag_indicator_rounded),
-    );
+    final handle = find.descendant(of: find.byKey(ValueKey('tag-${a.id}')), matching: find.byIcon(AppIcons.dragHandle));
     final gesture = await tester.startGesture(tester.getCenter(handle));
     for (var i = 0; i < 10; i++) {
       await gesture.moveBy(const Offset(0, 25));
@@ -187,6 +188,108 @@ void main() {
     await _settle(tester);
     expect(await _names(tester, h.tags), ['B', 'C', 'A']);
     expect(find.byKey(const ValueKey('tags-busy')), findsNothing);
+  });
+
+  testWidgets('portrait: one line of tip, one tag a row; handle, text, then pin, edit, delete (c2, c3)', (
+    tester,
+  ) async {
+    final h = await _pump(
+      tester,
+      size: const Size(393, 852),
+      seed: (store) async {
+        await store.tags.add('常看', description: '每天都会看的直播间');
+        await store.tags.add('游戏');
+      },
+    );
+    final first = await _tag(tester, h.tags, '常看');
+    final second = await _tag(tester, h.tags, '游戏');
+    // No repeated group title, no tinted box: the tip is a line above.
+    expect(find.text('标签管理'), findsOneWidget);
+    final tip = tester.getRect(find.byKey(const ValueKey('tags-tip')));
+    final card = tester.getRect(find.byKey(ValueKey('tag-${first.id}')));
+    expect(tip.bottom, lessThanOrEqualTo(card.top));
+    expect(card.left, 16);
+    expect(card.width, 393 - 32);
+    // One a row.
+    expect(tester.getRect(find.byKey(ValueKey('tag-${second.id}'))).top, greaterThan(card.bottom - 8));
+    // Handle | name, description, rooms | pin, edit, delete; 48 targets.
+    final handle = tester.getRect(find.byKey(ValueKey('tag-handle-${first.id}')));
+    final name = tester.getRect(find.byKey(ValueKey('tag-name-${first.id}')));
+    final pin = tester.getRect(find.byKey(ValueKey('tag-pin-${first.id}')));
+    final edit = tester.getRect(find.byKey(ValueKey('tag-edit-${first.id}')));
+    final delete = tester.getRect(find.byKey(ValueKey('tag-delete-${first.id}')));
+    expect(
+      [handle.left, name.left, pin.left, edit.left, delete.left],
+      orderedEquals(
+        [
+          ...[handle.left, name.left, pin.left, edit.left, delete.left],
+        ]..sort(),
+      ),
+    );
+    for (final button in [pin, edit, delete]) {
+      expect(button.width, greaterThanOrEqualTo(48));
+      expect(button.height, greaterThanOrEqualTo(48));
+    }
+    expect(tester.widget<Text>(find.byKey(ValueKey('tag-name-${first.id}'))).style!.fontWeight, FontWeight.w600);
+    final description = tester.widget<Text>(find.byKey(ValueKey('tag-description-${second.id}')));
+    expect(description.data, '暂无描述');
+    expect(description.style!.fontSize, greaterThanOrEqualTo(12));
+    // 3.x's icons; the first tag's pin is filled (and does nothing), the
+    // others are outlined.
+    Finder icon(String key, IconData data) =>
+        find.descendant(of: find.byKey(ValueKey(key)), matching: find.byIcon(data));
+    expect(icon('tag-pin-${first.id}', AppIcons.pinned), findsOneWidget);
+    expect(icon('tag-pin-${second.id}', AppIcons.unpinned), findsOneWidget);
+    expect(icon('tag-edit-${first.id}', AppIcons.edit), findsOneWidget);
+    expect(icon('tag-delete-${first.id}', AppIcons.delete), findsOneWidget);
+    expect(icon('tag-handle-${first.id}', AppIcons.dragHandle), findsOneWidget);
+    final pinned = tester.widget<IconButton>(find.byKey(ValueKey('tag-pin-${first.id}')));
+    expect(pinned.onPressed, isNull);
+    expect(pinned.disabledColor, isNotNull);
+  });
+
+  testWidgets('details: rooms, "编辑标签" and "关闭"; editor: labels on the field, counts, errors under it (c6, c7)', (
+    tester,
+  ) async {
+    final h = await _pump(tester, seed: (store) => store.tags.add('音乐', description: '唱歌'));
+    final tag = await _tag(tester, h.tags, '音乐');
+    await _tap(tester, find.byKey(ValueKey('tag-open-${tag.id}')));
+    expect(find.text('关注中带此标签的直播间'), findsOneWidget);
+    final edit = tester.getRect(find.byKey(const ValueKey('tag-details-edit')));
+    final close = tester.getRect(find.byKey(const ValueKey('tag-details-close')));
+    expect(edit.right, lessThan(close.left));
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('tag-details-close')), matching: find.text('关闭')),
+      findsOneWidget,
+    );
+    await _tap(tester, find.byKey(const ValueKey('tag-details-close')));
+    expect(find.byKey(const ValueKey('tag-details')), findsNothing);
+
+    await _tap(tester, find.byKey(const ValueKey('tags-add')));
+    expect(find.text('标签名称'), findsOneWidget);
+    expect(find.text('备注描述'), findsOneWidget);
+    expect(find.text('0/15'), findsOneWidget);
+    expect(find.text('0/40'), findsOneWidget);
+    await tester.enterText(find.byKey(const ValueKey('tag-editor-name')), '音乐');
+    await _tap(tester, find.byKey(const ValueKey('tag-editor-confirm')));
+    final error = tester.getRect(find.text('已存在同名标签'));
+    final field = tester.getRect(find.byKey(const ValueKey('tag-editor-name')));
+    expect(error.top, greaterThan(field.top));
+    expect(error.top, lessThan(tester.getRect(find.byKey(const ValueKey('tag-editor-description'))).top));
+    final cancel = tester.getRect(find.byKey(const ValueKey('tag-editor-cancel')));
+    final confirm = tester.getRect(find.byKey(const ValueKey('tag-editor-confirm')));
+    expect(cancel.right, lessThan(confirm.left));
+  });
+
+  testWidgets('landscape phone and wide window: one column at most 720, centred (J1 A)', (tester) async {
+    for (final size in const [Size(852, 393), Size(1280, 800)]) {
+      final h = await _pump(tester, size: size, seed: (store) => store.tags.add('A'));
+      final tag = await _tag(tester, h.tags, 'A');
+      final card = tester.getRect(find.byKey(ValueKey('tag-${tag.id}')));
+      expect(card.width, 720);
+      expect(card.center.dx, size.width / 2);
+      expect(tester.getSize(find.byType(AppBar)).height, size.height < 480 ? 48 : kToolbarHeight);
+    }
   });
 
   testWidgets('does not overwrite a tag changed elsewhere while editing', (tester) async {

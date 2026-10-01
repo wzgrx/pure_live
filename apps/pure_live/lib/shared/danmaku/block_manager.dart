@@ -22,11 +22,21 @@ const Duration blockUndoDuration = Duration(seconds: 4);
 /// viewers are chips removed only by their ×, each removal undoable for
 /// [blockUndoDuration]; a word already blocked is said under the field,
 /// which keeps it; empty sections say what goes there. The live room's
-/// "屏蔽管理" tab and the settings page's "弹幕关键词屏蔽" (U.12d, E4) use this
+/// "屏蔽管理" tab and the settings page "弹幕屏蔽" (U.12d, E4) use this
 /// same component.
 class DanmakuBlockManager extends ConsumerStatefulWidget {
   /// Creates the block list.
-  const new({this.addKeyword, this.showFilters = true, this.padding = const EdgeInsets.only(bottom: 24), super.key});
+  const new({
+    this.addKeyword,
+    this.showFilters = true,
+    this.padding = const EdgeInsets.only(bottom: 24),
+    this.showUsers = false,
+    super.key,
+  });
+
+  /// Scrolls to "已屏蔽用户" when it opens (the settings page opened for the
+  /// blocked users, U.12d).
+  final bool showUsers;
 
   /// Blocks a word and says whether it was new; the room also takes the
   /// matching messages off its list. Null stores it directly.
@@ -46,6 +56,7 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
   final TextEditingController _input = TextEditingController();
   late final Stream<List<String>> _keywords;
   late final Stream<List<String>> _users;
+  final GlobalKey _usersSection = GlobalKey();
   String? _error;
 
   @override
@@ -54,6 +65,21 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
     final lists = ref.read(storeProvider).blockLists;
     _keywords = lists.watch(BlockKind.keyword);
     _users = lists.watch(BlockKind.user);
+    if (widget.showUsers) unawaited(_revealUsers(lists));
+  }
+
+  /// Brings "已屏蔽用户" into view once the lists have arrived.
+  Future<void> _revealUsers(BlockListStore lists) async {
+    await lists.list(BlockKind.keyword);
+    await lists.list(BlockKind.user);
+    // Two frames: the lists build, then the section has its place.
+    for (var i = 0; i < 2; i++) {
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+    }
+    final section = _usersSection.currentContext;
+    if (section == null || !section.mounted) return;
+    await Scrollable.ensureVisible(section, duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
   }
 
   @override
@@ -80,7 +106,7 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
     setState(() => _error = null);
   }
 
-  Future<void> _remove(BlockKind kind, String value) async {
+  Future<void> _remove(BlockKind kind, String value, int index) async {
     final lists = ref.read(storeProvider).blockLists;
     final messenger = ScaffoldMessenger.maybeOf(context);
     await lists.remove(kind, value);
@@ -99,7 +125,7 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
           action: SnackBarAction(
             key: const ValueKey('block-undo'),
             label: i18n('room_undo'),
-            onPressed: () => unawaited(lists.add(kind, value)),
+            onPressed: () => unawaited(restoreBlockEntry(lists, kind, value, index)),
           ),
         ),
       );
@@ -110,12 +136,12 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
     child: Wrap(
       spacing: 8,
       children: [
-        for (final value in values)
+        for (final (index, value) in values.indexed)
           BlockChip(
             key: ValueKey('block-chip-${kind.name}-$value'),
             label: value,
             icon: kind == BlockKind.user ? AppIcons.blockUser : null,
-            onRemove: () => unawaited(_remove(kind, value)),
+            onRemove: () => unawaited(_remove(kind, value, index)),
           ),
       ],
     ),
@@ -146,165 +172,181 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
     final threshold = watchSetting(ref, Settings.danmakuSimilarityThreshold);
     final cache = watchSetting(ref, Settings.danmakuSimilarityCacheDuration);
     final size = watchSetting(ref, Settings.danmakuSimilarityMaxCacheSize);
-    return ListView(
+    // A short page of four groups, built at once so the users' group can
+    // be scrolled to (showUsers).
+    return SingleChildScrollView(
       key: const ValueKey('live-play-block-list'),
       padding: widget.padding,
-      children: [
-        // c11 (E3): adding a word comes first, its list right under it.
-        PanelGroupTitle(i18n('danmaku_keyword_block')),
-        PanelCard(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      key: const ValueKey('live-play-block-input'),
-                      controller: _input,
-                      maxLength: blockKeywordMaxLength,
-                      textInputAction: TextInputAction.done,
-                      onChanged: (_) {
-                        if (_error != null) setState(() => _error = null);
-                      },
-                      onSubmitted: (_) => unawaited(_add()),
-                      decoration: InputDecoration(
-                        hintText: i18n('please_enter_keyword'),
-                        errorText: _error,
-                        filled: true,
-                        fillColor: scheme.surface,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  SizedBox(
-                    height: 48,
-                    child: FilledButton.icon(
-                      key: const ValueKey('live-play-block-add'),
-                      onPressed: () => unawaited(_add()),
-                      icon: const Icon(AppIcons.add, size: 18),
-                      label: Text(i18n('add')),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            StreamBuilder<List<String>>(
-              stream: _keywords,
-              builder: (context, snapshot) {
-                final values = snapshot.data ?? const <String>[];
-                if (values.isEmpty) {
-                  // c14: 3.x hid the section.
-                  return KeyedSubtree(
-                    key: const ValueKey('block-keywords-empty'),
-                    child: _note(i18n('empty_shield_subtitle'), title: i18n('empty_shield_title')),
-                  );
-                }
-                return Column(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // c11 (E3): adding a word comes first, its list right under it.
+          PanelGroupTitle(i18n('danmaku_keyword_block')),
+          PanelCard(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: Text(
-                        i18n('keyword_added_count', args: {'count': '${values.length}'}),
-                        style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                    Expanded(
+                      child: TextField(
+                        key: const ValueKey('live-play-block-input'),
+                        controller: _input,
+                        maxLength: blockKeywordMaxLength,
+                        textInputAction: TextInputAction.done,
+                        onChanged: (_) {
+                          if (_error != null) setState(() => _error = null);
+                        },
+                        onSubmitted: (_) => unawaited(_add()),
+                        decoration: InputDecoration(
+                          hintText: i18n('please_enter_keyword'),
+                          errorText: _error,
+                          filled: true,
+                          fillColor: scheme.surface,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
                       ),
                     ),
-                    _chips(values, BlockKind.keyword),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
-        StreamBuilder<List<String>>(
-          stream: _users,
-          builder: (context, snapshot) {
-            final values = snapshot.data ?? const <String>[];
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                PanelGroupTitle(i18n('blocked_danmaku_users', args: {'count': '${values.length}'})),
-                PanelCard(
-                  children: [
-                    if (values.isEmpty)
-                      KeyedSubtree(
-                        key: const ValueKey('block-users-empty'),
-                        child: _note(i18n('live_play_no_blocked_users')),
-                      )
-                    else ...[
-                      const SizedBox(height: 8),
-                      _chips(values, BlockKind.user),
-                    ],
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      height: 48,
+                      child: FilledButton.icon(
+                        key: const ValueKey('live-play-block-add'),
+                        onPressed: () => unawaited(_add()),
+                        icon: const Icon(AppIcons.add, size: 18),
+                        label: Text(i18n('add')),
+                      ),
+                    ),
                   ],
                 ),
+              ),
+              StreamBuilder<List<String>>(
+                stream: _keywords,
+                builder: (context, snapshot) {
+                  final values = snapshot.data ?? const <String>[];
+                  if (values.isEmpty) {
+                    // c14: 3.x hid the section.
+                    return KeyedSubtree(
+                      key: const ValueKey('block-keywords-empty'),
+                      child: _note(i18n('empty_shield_subtitle'), title: i18n('empty_shield_title')),
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                        child: Text(
+                          i18n('keyword_added_count', args: {'count': '${values.length}'}),
+                          style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                        ),
+                      ),
+                      _chips(values, BlockKind.keyword),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+          StreamBuilder<List<String>>(
+            stream: _users,
+            builder: (context, snapshot) {
+              final values = snapshot.data ?? const <String>[];
+              return Column(
+                key: _usersSection,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  PanelGroupTitle(i18n('blocked_danmaku_users', args: {'count': '${values.length}'})),
+                  PanelCard(
+                    children: [
+                      if (values.isEmpty)
+                        KeyedSubtree(
+                          key: const ValueKey('block-users-empty'),
+                          child: _note(i18n('live_play_no_blocked_users')),
+                        )
+                      else ...[
+                        const SizedBox(height: 8),
+                        _chips(values, BlockKind.user),
+                      ],
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+          if (widget.showFilters) ...[
+            PanelGroupTitle(i18n('platform_danmaku_filter')),
+            PanelCard(
+              children: [
+                SettingSwitchRow(
+                  settingKey: 'douyuFilter',
+                  title: i18n('douyu_suspected_automated_filter'),
+                  subtitle: i18n('douyu_suspected_automated_filter_desc'),
+                  value: watchSetting(ref, Settings.filterDouyuSuspectedAutomatedMessages),
+                  onChanged: (value) => set(Settings.filterDouyuSuspectedAutomatedMessages, value),
+                ),
               ],
-            );
-          },
-        ),
-        if (widget.showFilters) ...[
-          PanelGroupTitle(i18n('platform_danmaku_filter')),
-          PanelCard(
-            children: [
-              SettingSwitchRow(
-                settingKey: 'douyuFilter',
-                title: i18n('douyu_suspected_automated_filter'),
-                subtitle: i18n('douyu_suspected_automated_filter_desc'),
-                value: watchSetting(ref, Settings.filterDouyuSuspectedAutomatedMessages),
-                onChanged: (value) => set(Settings.filterDouyuSuspectedAutomatedMessages, value),
-              ),
-            ],
-          ),
-          PanelGroupTitle(i18n('danmaku_similarity_filter')),
-          PanelCard(
-            children: [
-              SettingSwitchRow(
-                settingKey: 'similarity',
-                title: i18n('danmaku_similarity_filter_enable'),
-                value: similarity,
-                onChanged: (value) => set(Settings.enableDanmakuSimilarityFilter, value),
-              ),
-              // c16: greyed out while the filter is off (3.x hid them).
-              SettingSliderRow(
-                settingKey: 'similarityThreshold',
-                title: i18n('danmaku_similarity_threshold'),
-                value: threshold.clamp(50, 100).toDouble(),
-                min: 50,
-                max: 100,
-                divisions: 50,
-                display: '$threshold%',
-                onChanged: similarity ? (value) => set(Settings.danmakuSimilarityThreshold, value.round()) : null,
-              ),
-              SettingSliderRow(
-                settingKey: 'similarityCache',
-                title: i18n('danmaku_similarity_cache_duration'),
-                value: cache.clamp(1, 60).toDouble(),
-                min: 1,
-                max: 60,
-                divisions: 59,
-                display: i18n('danmaku_similarity_cache_seconds', args: {'seconds': '$cache'}),
-                onChanged: similarity ? (value) => set(Settings.danmakuSimilarityCacheDuration, value.round()) : null,
-              ),
-              SettingSliderRow(
-                settingKey: 'similaritySize',
-                title: i18n('danmaku_similarity_max_cache_size'),
-                value: size.clamp(20, 1000).toDouble(),
-                min: 20,
-                max: 1000,
-                divisions: 98,
-                display: '$size',
-                onChanged: similarity ? (value) => set(Settings.danmakuSimilarityMaxCacheSize, value.round()) : null,
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
+            ),
+            PanelGroupTitle(i18n('danmaku_similarity_filter')),
+            PanelCard(
+              children: [
+                SettingSwitchRow(
+                  settingKey: 'similarity',
+                  title: i18n('danmaku_similarity_filter_enable'),
+                  value: similarity,
+                  onChanged: (value) => set(Settings.enableDanmakuSimilarityFilter, value),
+                ),
+                // c16: greyed out while the filter is off (3.x hid them).
+                SettingSliderRow(
+                  settingKey: 'similarityThreshold',
+                  title: i18n('danmaku_similarity_threshold'),
+                  value: threshold.clamp(50, 100).toDouble(),
+                  min: 50,
+                  max: 100,
+                  divisions: 50,
+                  display: '$threshold%',
+                  onChanged: similarity ? (value) => set(Settings.danmakuSimilarityThreshold, value.round()) : null,
+                ),
+                SettingSliderRow(
+                  settingKey: 'similarityCache',
+                  title: i18n('danmaku_similarity_cache_duration'),
+                  value: cache.clamp(1, 60).toDouble(),
+                  min: 1,
+                  max: 60,
+                  divisions: 59,
+                  display: i18n('danmaku_similarity_cache_seconds', args: {'seconds': '$cache'}),
+                  onChanged: similarity ? (value) => set(Settings.danmakuSimilarityCacheDuration, value.round()) : null,
+                ),
+                SettingSliderRow(
+                  settingKey: 'similaritySize',
+                  title: i18n('danmaku_similarity_max_cache_size'),
+                  value: size.clamp(20, 1000).toDouble(),
+                  min: 20,
+                  max: 1000,
+                  divisions: 98,
+                  display: '$size',
+                  onChanged: similarity ? (value) => set(Settings.danmakuSimilarityMaxCacheSize, value.round()) : null,
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
+}
+
+/// Undoes the removal of [value] from [kind]'s list: it goes back at
+/// [index] (or the end, when the list got shorter meanwhile); nothing when
+/// it is back already.
+Future<void> restoreBlockEntry(BlockListStore lists, BlockKind kind, String value, int index) async {
+  final current = await lists.list(kind);
+  final folded = value.trim().toLowerCase();
+  if (current.any((entry) => entry.toLowerCase() == folded)) return;
+  await lists.replaceAll(kind, [...current]..insert(index.clamp(0, current.length), value));
 }
 
 /// A blocked word or viewer (U.2e c12): the label, and × to remove it (a

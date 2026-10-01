@@ -28,16 +28,14 @@ final StreamProvider<List<LiveRoom>> tagFollowsProvider = StreamProvider.autoDis
   (ref) => ref.watch(storeProvider).follows.watchAll(),
 );
 
-/// Widest the list grows on a desktop window.
-const double _maxContentWidth = 720;
-
-/// Follow groups (tags) (3.x `lib/modules/tags`).
+/// Follow groups (tags) (3.x `lib/modules/tags`, docs/ui/compare/U.12c).
 ///
 /// Routes: `RoutePath.kSettingsTags`.
 ///
 /// The tags live in `LiveStore.tags`: the page adds, renames, deletes,
 /// reorders and pins them; rooms get their tags from the room card menu
-/// and the follow page filters by them.
+/// and the follow page filters by them. One tag a row at every width, at
+/// most 720 wide (J1 A).
 class TagsPage extends ConsumerStatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -108,6 +106,8 @@ class _TagsPageState extends ConsumerState<TagsPage> {
     if (action == TagDetailsAction.edit && mounted) await _edit(tag);
   }
 
+  /// Asks first, saying how many followed rooms lose the tag (c4; J2 A:
+  /// no undo, "已删除标签“…”" after).
   Future<void> _delete(StoreTag tag) async {
     final rooms = _roomsOf(tag);
     final confirmed = await _dialog(
@@ -116,48 +116,51 @@ class _TagsPageState extends ConsumerState<TagsPage> {
         builder: (dialogContext) {
           final colors = Theme.of(dialogContext).colorScheme;
           final styles = dialogContext.textStyles;
-          return AlertDialog(
-            scrollable: true,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            title: Text(i18n('delete_tag'), style: styles.t16Bold),
-            content: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(i18n('delete_tag_confirm_named', args: {'name': tag.name}), style: styles.t14),
-                  if (rooms > 0) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      i18n('tags_delete_rooms_hint', args: {'count': '$rooms'}),
-                      key: const ValueKey('tag-delete-rooms'),
-                      style: styles.t13Muted,
-                    ),
+          return DialogButtonsTheme(
+            child: AlertDialog(
+              key: const ValueKey('tag-delete-dialog'),
+              scrollable: true,
+              insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              title: Text(i18n('delete_tag'), style: tagDialogTitle(dialogContext)),
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(i18n('delete_tag_confirm_named', args: {'name': tag.name}), style: styles.t14),
+                    if (rooms > 0) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        i18n('tags_delete_rooms_hint', args: {'count': '$rooms'}),
+                        key: const ValueKey('tag-delete-rooms'),
+                        style: styles.t14.copyWith(color: colors.onSurfaceVariant),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-            ),
-            actionsOverflowDirection: VerticalDirection.down,
-            actionsOverflowButtonSpacing: 8,
-            actions: [
-              TextButton(
-                key: const ValueKey('tag-delete-cancel'),
-                style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-                onPressed: () => Navigator.pop(dialogContext, false),
-                child: Text(i18n('cancel'), style: styles.t14Muted),
-              ),
-              FilledButton(
-                key: const ValueKey('tag-delete-confirm'),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(48, 48),
-                  backgroundColor: colors.error,
-                  foregroundColor: colors.onError,
                 ),
-                onPressed: () => Navigator.pop(dialogContext, true),
-                child: Text(i18n('delete')),
               ),
-            ],
+              actionsOverflowDirection: VerticalDirection.down,
+              actionsOverflowButtonSpacing: 8,
+              actions: [
+                TextButton(
+                  key: const ValueKey('tag-delete-cancel'),
+                  style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                  onPressed: () => Navigator.pop(dialogContext, false),
+                  child: Text(i18n('cancel')),
+                ),
+                FilledButton(
+                  key: const ValueKey('tag-delete-confirm'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    backgroundColor: colors.error,
+                    foregroundColor: colors.onError,
+                  ),
+                  onPressed: () => Navigator.pop(dialogContext, true),
+                  child: Text(i18n('delete')),
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -212,14 +215,18 @@ class _TagsPageState extends ConsumerState<TagsPage> {
       ref.watch(tagAssignmentsProvider).value ?? const {},
       ref.watch(tagFollowsProvider).value ?? const [],
     );
+    final short = MediaQuery.sizeOf(context).height < 480;
     return Scaffold(
       appBar: AppBar(
+        // 3.x's app bars centre the title (common/style/theme.dart:119).
+        centerTitle: true,
+        toolbarHeight: short ? 48 : null,
         title: Text(i18n('tag_management')),
         actions: [
           IconButton(
             key: const ValueKey('tags-add'),
             tooltip: i18n('add_tag'),
-            icon: const Icon(Icons.add_rounded),
+            icon: const Icon(AppIcons.add),
             onPressed: _locked ? null : () => unawaited(_edit()),
           ),
           const SizedBox(width: 4),
@@ -229,7 +236,18 @@ class _TagsPageState extends ConsumerState<TagsPage> {
         children: [
           Positioned.fill(
             child: switch (tags) {
-              AsyncValue(value: final list?) when list.isEmpty => _empty(context),
+              // c5: what tags are for and a button that adds one (3.x
+              // showed only a grey line).
+              AsyncValue(value: final list?) when list.isEmpty => AppStatusView(
+                key: const ValueKey('tags-empty'),
+                type: AppStatusType.empty,
+                icon: AppIcons.tag,
+                title: i18n('tags_empty_title'),
+                subtitle: i18n('tags_empty_hint'),
+                buttonText: i18n('add_tag'),
+                buttonIcon: AppIcons.add,
+                onButtonPressed: _locked ? null : () => unawaited(_edit()),
+              ),
               AsyncValue(value: final list?) => _list(context, _pendingOrder ?? list, counts),
               AsyncValue(error: final _?) => AppStatusView(
                 type: AppStatusType.error,
@@ -253,24 +271,36 @@ class _TagsPageState extends ConsumerState<TagsPage> {
 
   Widget _list(BuildContext context, List<StoreTag> tags, Map<String, int> counts) => LayoutBuilder(
     builder: (context, constraints) {
-      final side = math.max(16, (constraints.maxWidth - _maxContentWidth) / 2).toDouble();
+      final side = math.max(16, (constraints.maxWidth - readableContentMaxWidth) / 2).toDouble();
+      final shadow = Theme.of(context).colorScheme.shadow;
       return ReorderableListView.builder(
         key: const ValueKey('tags-list'),
         buildDefaultDragHandles: false,
         physics: const PureLiveScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(side, 12, side, 32),
+        padding: EdgeInsets.fromLTRB(side, 4, side, 32),
         header: _tip(context),
         itemCount: tags.length,
         onReorderItem: (from, to) => _reorder(tags, from, to),
+        // The lifted card: a shadow under it while it moves (a layer of
+        // its own; nothing else repaints).
         proxyDecorator: (child, _, animation) => AnimatedBuilder(
           animation: animation,
-          builder: (context, child) => Material(
-            elevation: 6 * Curves.easeOut.transform(animation.value),
-            color: Colors.transparent,
-            shadowColor: Colors.black26,
-            borderRadius: BorderRadius.circular(16),
-            child: child,
-          ),
+          builder: (context, child) {
+            final lift = Curves.easeOut.transform(animation.value);
+            return DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
+                boxShadow: [
+                  BoxShadow(
+                    color: shadow.withValues(alpha: 0.18 * lift),
+                    blurRadius: 12 * lift,
+                    offset: Offset(0, 4 * lift),
+                  ),
+                ],
+              ),
+              child: child,
+            );
+          },
           child: child,
         ),
         itemBuilder: (context, index) {
@@ -291,67 +321,14 @@ class _TagsPageState extends ConsumerState<TagsPage> {
     },
   );
 
-  /// No tags yet: what they are for and a button that adds one (3.x showed
-  /// only the hint).
-  Widget _empty(BuildContext context) {
-    final theme = Theme.of(context);
-    final styles = context.textStyles;
-    return Center(
-      key: const ValueKey('tags-empty'),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.sell_outlined, size: 48, color: theme.disabledColor.withValues(alpha: 0.4)),
-            const SizedBox(height: 16),
-            Text(
-              i18n('no_tags_tip'),
-              textAlign: TextAlign.center,
-              style: styles.t14.copyWith(color: theme.disabledColor),
-            ),
-            const SizedBox(height: 8),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 360),
-              child: Text(
-                i18n('tags_empty_hint'),
-                textAlign: TextAlign.center,
-                style: styles.t13.copyWith(color: theme.hintColor, height: 1.5),
-              ),
-            ),
-            const SizedBox(height: 20),
-            FilledButton.icon(
-              key: const ValueKey('tags-empty-add'),
-              style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
-              onPressed: _locked ? null : () => unawaited(_edit()),
-              icon: const Icon(Icons.add_rounded),
-              label: Text(i18n('add_tag')),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _tip(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(color: colors.primary.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(16)),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.info_outline_rounded, size: 18, color: colors.primary.withValues(alpha: 0.8)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              i18n('tags_sort_tip'),
-              style: context.textStyles.t13.copyWith(color: colors.onSurfaceVariant, height: 1.4),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  /// c3: how to reorder, one line of small text (3.x: a tinted box with an
+  /// icon over the page, and a group title that repeated the page title).
+  Widget _tip(BuildContext context) => Padding(
+    key: const ValueKey('tags-tip'),
+    padding: const EdgeInsets.fromLTRB(4, 8, 4, 12),
+    child: Text(
+      i18n('tags_sort_tip'),
+      style: context.textStyles.t13.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.4),
+    ),
+  );
 }

@@ -961,4 +961,49 @@ abstract final class AppIcons {
 
   /// No watch history (3.x `Icons.history_rounded`).
   static const IconData historyEmpty = Icons.history_rounded;
+
+  /// Open the room of a pasted link (3.x toolbox "链接跳转").
+  static const IconData linkJump = Remix.play_circle_line;
+
+  /// "在线更新" on the about page (3.x).
+  static const IconData onlineUpdate = Remix.download_cloud_2_line;
+
+  /// "版本历史" on the about page (3.x "历史记录").
+  static const IconData versionHistory = Remix.history_line;
+
+  /// "开源许可证" on the about page (3.x).
+  static const IconData licenses = Remix.shield_user_line;
+
+  /// "项目主页" on the about page (3.x).
+  static const IconData projectPage = Remix.code_s_slash_line;
+
+  /// The update page's status card: a newer version is out.
+  static const IconData updateAvailable = Icons.system_update_rounded;
+
+  /// The update page's status card: this is the newest version.
+  static const IconData upToDate = Icons.verified_rounded;
+
+  /// Download an installation package (3.x version pages).
+  static const IconData downloadPackage = Remix.download_2_line;
+
+  /// One download mirror of a package (3.x "下载源 N").
+  static const IconData downloadSource = Remix.link_m;
+
+  /// Download in the browser.
+  static const IconData openInBrowser = Icons.open_in_browser_rounded;
+
+  /// A file of a release (3.x version history).
+  static const IconData releaseFile = Remix.box_3_line;
+
+  /// A release's publisher without an avatar (3.x version history).
+  static const IconData releaseAuthor = Remix.user_line;
+
+  /// Open a release's page (3.x version history).
+  static const IconData releasePage = Remix.link;
+
+  /// Edit (a tag; 3.x tag management).
+  static const IconData edit = Remix.edit_line;
+
+  /// The followed rooms that carry a tag.
+  static const IconData tagRooms = Icons.live_tv_rounded;
 }

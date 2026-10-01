@@ -1,7 +1,6 @@
 {
   "cross_feature_imports": [
     "about -> version/app_version.dart",
-    "about -> version/markdown_text.dart",
     "about -> version/update_feed.dart",
     "area_rooms -> areas/areas_common.dart",
     "areas -> home/home_menu.dart",
@@ -25,16 +24,11 @@
     "web_dav -> backup/backup_preview_dialog.dart"
   ],
   "raw_styles": {
-    "about": 16,
     "backup": 22,
     "live_play": 8,
     "record_settings": 28,
     "remote_receiver": 11,
     "settings": 126,
-    "shield": 6,
-    "tags": 13,
-    "toolbox": 7,
-    "version": 11,
     "web_dav": 36
   }
 }

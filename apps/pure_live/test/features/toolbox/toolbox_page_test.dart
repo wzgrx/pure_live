@@ -11,6 +11,7 @@ import 'package:pure_live/features/toolbox/toolbox_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/links/supported_platforms.dart';
 
 import '../../support.dart';
 
@@ -56,9 +57,9 @@ final class _Harness {
   final _FakeSite site;
 }
 
-Future<_Harness> _pump(WidgetTester tester, {String? clipboard}) async {
+Future<_Harness> _pump(WidgetTester tester, {String? clipboard, Size size = const Size(420, 900)}) async {
   tester.view
-    ..physicalSize = const Size(420, 900)
+    ..physicalSize = size
     ..devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final services = (await tester.runAsync(testServices))!;
@@ -200,6 +201,110 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('toolbox-platform-bilibili')), findsOneWidget);
     expect(find.byKey(const ValueKey('toolbox-platform-iptv')), findsNothing);
+  });
+
+  testWidgets('portrait: group title outside the card, one box, two buttons side by side, list folded', (tester) async {
+    await _pump(tester);
+    // c3: the group title sits above the card, the explanation inside it.
+    final title = tester.getRect(find.text('平台链接'));
+    final card = tester.getRect(find.byKey(const ValueKey('toolbox-link-card')));
+    final box = tester.getRect(find.byKey(const ValueKey('toolbox-link')));
+    expect(title.bottom, lessThan(box.top));
+    expect(find.text('粘贴直播间链接或分享文字，可以直接打开直播间，也可以获取直播流地址'), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget);
+    // c5: paste while empty.
+    expect(find.byKey(const ValueKey('toolbox-paste')), findsOneWidget);
+    expect(find.byKey(const ValueKey('toolbox-clear')), findsNothing);
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('toolbox-paste')), matching: find.byIcon(AppIcons.pasteText)),
+      findsOneWidget,
+    );
+    // c2: "链接跳转" (filled) left of "获取直链" (tonal), on one row under the box.
+    final jump = tester.getRect(find.byKey(const ValueKey('toolbox-jump')));
+    final link = tester.getRect(find.byKey(const ValueKey('toolbox-direct-link')));
+    expect(jump.top, greaterThan(box.bottom));
+    expect(jump.top, link.top);
+    expect(jump.right, lessThan(link.left));
+    expect(jump.height, greaterThanOrEqualTo(48));
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('toolbox-jump')), matching: find.byIcon(AppIcons.linkJump)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('toolbox-direct-link')),
+        matching: find.byIcon(AppIcons.streamLink),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('链接跳转'), findsOneWidget);
+    expect(find.text('获取直链'), findsOneWidget);
+    // c4: the supported list is its own card under it, folded.
+    final supported = tester.getRect(find.byKey(const ValueKey('toolbox-supported')));
+    expect(supported.top, greaterThan(card.bottom));
+    expect(find.text('支持解析列表'), findsOneWidget);
+    expect(find.textContaining(RegExp(r'^共 \d+ 个平台$')), findsOneWidget);
+    expect(find.byKey(const ValueKey('toolbox-platform-douyu')), findsNothing);
+    // 393 wide: the content fills the width less the gutters.
+    expect(card.left, 16);
+    expect(card.width, 420 - 32);
+
+    // Typing turns "paste" into "clear", which empties the box.
+    await _enter(tester, 'https://www.douyu.com/9999');
+    expect(find.byKey(const ValueKey('toolbox-paste')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('toolbox-clear')));
+    await tester.pump();
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('toolbox-link'))).controller!.text, isEmpty);
+  });
+
+  testWidgets('while busy the buttons are off and a line says what is done, with cancel', (tester) async {
+    final harness = await _pump(tester);
+    await _enter(tester, 'https://www.douyu.com/9999');
+    await tester.tap(find.byKey(const ValueKey('toolbox-direct-link')));
+    await _settle(tester);
+    // The quality dialog is open; behind it the page says what it does.
+    expect(find.text('正在读取直播流地址…'), findsOneWidget);
+    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('toolbox-jump'))).onPressed, isNull);
+    // c8: a 20 px title, options at the start, each at least 56 high.
+    final dialogTitle = tester.widget<Text>(find.text('选择清晰度'));
+    expect(dialogTitle.style!.fontSize, 20);
+    final first = tester.getRect(find.byKey(const ValueKey('toolbox-choice-0')));
+    final dialog = tester.getRect(find.byKey(const ValueKey('toolbox-choice-dialog')));
+    expect(first.height, greaterThanOrEqualTo(56));
+    expect(tester.getTopLeft(find.text('原画')).dx - first.left, 24);
+    expect(tester.getCenter(find.text('原画')).dx, lessThan(dialog.center.dx));
+    expect(find.byIcon(Icons.chevron_right_rounded), findsNothing);
+    await tester.tap(find.text('高清'));
+    await _settle(tester);
+    // The line's address is one line.
+    final address = tester.widget<Text>(find.text('https://line1.example/高清.flv'));
+    expect(address.maxLines, 1);
+    expect(address.overflow, TextOverflow.ellipsis);
+    // Cancelling the choice ends the action and the busy line.
+    await tester.tap(find.byKey(const ValueKey('toolbox-choice-cancel')));
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('toolbox-busy')), findsNothing);
+    expect(harness.copied, isEmpty);
+  });
+
+  testWidgets('landscape phone and wide window: one column at most 720, centred', (tester) async {
+    await _pump(tester, size: const Size(852, 393));
+    var card = tester.getRect(find.byKey(const ValueKey('toolbox-link-card')));
+    expect(card.width, 720);
+    expect(card.center.dx, 426);
+    // A short window gets the compact app bar of the settings pages.
+    expect(tester.getSize(find.byType(AppBar)).height, 48);
+    final jump = tester.getRect(find.byKey(const ValueKey('toolbox-jump')));
+    final link = tester.getRect(find.byKey(const ValueKey('toolbox-direct-link')));
+    expect(jump.top, link.top);
+
+    await _pump(tester, size: const Size(1280, 800));
+    card = tester.getRect(find.byKey(const ValueKey('toolbox-link-card')));
+    expect(card.width, 720);
+    expect(card.center.dx, 640);
+    final supported = tester.getRect(find.byKey(const ValueKey('toolbox-supported')));
+    expect(supported.width, 720);
+    expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
   });
 
   test('the platform list has the platforms with link rules only', () async {

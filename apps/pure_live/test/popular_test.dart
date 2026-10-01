@@ -273,6 +273,50 @@ void main() {
     await tester.runAsync(services.close);
   });
 
+  testWidgets('M13.16: a platform tab tapped where it rests while the room closes switches at once', (tester) async {
+    final bilibili = _FakeSite(SiteIds.bilibili, [
+      [_room('bilibili', 1, heat: 3)],
+    ]);
+    final huya = _FakeSite(SiteIds.huya, [
+      [_room('huya', 2, heat: 3)],
+    ]);
+    final services = await _pump(tester, {SiteIds.bilibili: bilibili, SiteIds.huya: huya}, prefer: SiteIds.huya);
+    // Where the finger goes: the tabs' resting places.
+    final rest = {
+      for (final name in ['哔哩哔哩', '虎牙']) name: tester.getCenter(find.text(name)),
+    };
+    const delays = [
+      Duration.zero,
+      Duration(milliseconds: 60),
+      Duration(milliseconds: 150),
+      Duration(milliseconds: 300),
+    ];
+    final results = <String>[];
+    for (final (index, delay) in delays.indexed) {
+      final target = index.isOdd ? '虎牙' : '哔哩哔哩';
+      final other = target == '虎牙' ? '哔哩哔哩' : '虎牙';
+      // On the other tab, open its room and close it again.
+      await _openTab(tester, other);
+      await tester.tap(find.text(other == '虎牙' ? 'title 2' : 'title 1'));
+      await tester.pumpAndSettle();
+      expect(find.byType(LivePlayPage), findsOneWidget);
+      AppNavigator.back();
+      await tester.pump();
+      await tester.pump(delay);
+      // The page under the closing room stays where it rests (with the
+      // Material transition it slid in from a quarter screen to the left).
+      expect(tester.getCenter(find.text(target)), rest[target]);
+      await tester.tapAt(rest[target]!);
+      await tester.pumpAndSettle();
+      await tester.pump(AppNavigator.openGuard);
+      final tabs = tester.widget<TabBar>(find.byType(TabBar)).controller!;
+      results.add('${delay.inMilliseconds}ms ${tabs.index == (target == '虎牙' ? 1 : 0) ? 'switched' : 'missed'}');
+    }
+    // Before the fix: [0ms missed, 60ms missed, 150ms switched, 300ms switched].
+    expect(results, ['0ms switched', '60ms switched', '150ms switched', '300ms switched']);
+    await tester.runAsync(services.close);
+  });
+
   testWidgets('phone: errors show their state; retry loads; the platform list change keeps the tab', (tester) async {
     final huya = _FakeSite(SiteIds.huya, [
       [_room('huya', 1)],

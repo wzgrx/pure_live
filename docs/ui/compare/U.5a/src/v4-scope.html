@@ -1,0 +1,117 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="393x852@3"><link rel="stylesheet" href="kit/kit.css"><style>
+.ph .status{background:var(--surface)}
+.sb24{height:24px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:600 12px 'Geist','Noto Sans SC';background:var(--surface)}
+.sb24 .mi{font-size:13px}
+/* top bar with the search field */
+.top{height:56px;display:flex;align-items:center;padding:0 16px;background:var(--surface);flex:none;gap:12px}
+.fld{flex:1;min-width:0;height:48px;border:1px solid var(--outline);border-radius:24px;background:var(--scl);display:flex;align-items:center}
+.fld.foc{border:1.5px solid var(--primary);border-radius:12px}
+.fld.v4.foc{border:2px solid var(--primary);border-radius:24px}
+.fld .ic{width:48px;height:48px;display:grid;place-items:center;color:var(--onv);flex:none}
+.fld .ic .mi,.fld .ic .mr{font-size:24px}.fld .ic .rx{font-size:22px}
+.fld .tx{flex:1;min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fld .tx.hint{font-size:13px;color:rgba(67,71,78,.6)}
+.fld .tx.hint4{font-size:14px;color:var(--onv)}
+.caret{display:inline-block;width:2px;height:18px;background:var(--primary);vertical-align:-3px;margin:0 1px}
+/* platform strip */
+.strip{height:56px;display:flex;align-items:center;gap:8px;padding:0 12px;overflow:hidden;background:var(--surface);flex:none;white-space:nowrap}
+.cc{height:32px;border-radius:8px;border:1px solid var(--ov);display:flex;align-items:center;gap:6px;padding:0 12px;font-size:13px;font-weight:500;color:var(--onv);flex:none}
+.cc.on{background:var(--sc);border-color:var(--primary);color:var(--osc)}
+.cc img{width:18px;height:18px;border-radius:4px;margin-left:-4px}.cc .mr{font-size:18px;margin-left:-4px}
+/* options */
+.opts{background:var(--scl);padding:8px 12px 9px;flex:none}
+.crow{display:flex;gap:8px;align-items:center;min-height:48px;white-space:nowrap;overflow:hidden}
+.crow.wrap{flex-wrap:wrap;row-gap:0}
+.fc{height:32px;border-radius:8px;border:1px solid var(--ov);display:flex;align-items:center;gap:8px;padding:0 12px 0 8px;font-size:13px;font-weight:500;color:var(--onv);flex:none;margin:8px 0}
+.fc.on{background:var(--sc);border-color:transparent;color:var(--osc)}
+.fc .mr{font-size:18px}.fc .rx{font-size:18px;margin:0 -4px 0 -4px}
+.seg{height:32px;border-radius:16px;border:1px solid var(--outline);display:flex;overflow:hidden;flex:none;margin:8px 0}
+.seg div{display:flex;align-items:center;padding:0 14px;font-size:13px;font-weight:500;color:var(--on)}
+.seg div+div{border-left:1px solid var(--outline)}.seg .on{background:var(--sc);color:var(--osc)}
+.note{display:flex;gap:6px;align-items:flex-start;font-size:12px;line-height:1.3;color:var(--onv)}
+.note>.mr{color:var(--primary);font-size:16px;flex:none}
+.note .x{flex:1;min-width:0}
+.note .one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbtn{color:var(--primary);font-size:13px;font-weight:500;height:32px;display:flex;align-items:center}
+.note4{display:flex;gap:6px;align-items:center;font-size:12px;line-height:1.3;color:var(--onv);min-height:32px}
+.note4>.mr{color:var(--primary);font-size:16px;flex:none}.note4 .x{flex:1;min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.crow .note4 .x{display:block;white-space:nowrap;text-overflow:ellipsis}
+.note4 .go{flex:none;color:var(--onv);font-size:18px}
+/* results: v3's dense cover card (RoomCard, standard preset) */
+.grid{display:grid;gap:8px;padding:8px}
+.card{background:#fff;border-radius:20px;overflow:hidden;position:relative}
+.cv{position:relative;aspect-ratio:16/9;border-radius:20px;background:#F5F5F5 center/cover}
+.mb{position:absolute;right:8px;bottom:8px;display:flex;align-items:center;gap:4px;padding:3px 6px;border-radius:10px;background:rgba(0,0,0,.48);color:#fff;font:700 11px 'Geist','Noto Sans SC'}
+.mb .mr{font-size:14px}
+.lt{display:flex;align-items:center;gap:8px;padding:8px 10px;min-height:58px}
+.lt .av{width:34px;height:34px;border-radius:17px}
+.lt .tx{flex:1;min-width:0}
+.lt .t{font-size:13px;line-height:18px;font-weight:600;color:rgba(0,0,0,.87);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lt .s{font-size:12px;line-height:17px;font-weight:500;color:#616161;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skel .cv{background:var(--sch)}.skel .av{background:var(--sch)}
+.skel .t{height:12px;width:80%;border-radius:6px;background:var(--sch);margin:3px 0 7px}.skel .s{height:10px;width:50%;border-radius:5px;background:var(--sch)}
+.foot{display:flex;justify-content:center;padding:8px 16px 20px}
+.foot .tb{display:flex;align-items:center;gap:6px;color:var(--primary);font-size:13px;font-weight:500;height:40px;padding:0 12px}
+/* status view (AppStatusView) */
+.sv{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.svc{width:86px;height:86px;border-radius:43px;background:rgba(225,226,232,.15);border:1px solid rgba(54,97,142,.05);display:grid;place-items:center}
+.svc .mr{font-size:42px;color:rgba(54,97,142,.6)}
+.sv h4{margin-top:20px;font-size:15px;font-weight:600}
+.sv p{padding:6px 28px 0;max-width:376px;text-wrap:balance;font-size:13px;line-height:1.5;color:rgba(0,0,0,.6)}
+.sv .tb{margin-top:16px;display:flex;align-items:center;gap:8px;color:var(--primary);font-size:13px;font-weight:500;height:40px;padding:0 12px}
+.sv .tb .mr{font-size:18px}
+.spin{width:40px;height:40px;border-radius:20px;border:4px solid var(--primary);border-right-color:transparent;border-bottom-color:transparent;transform:rotate(30deg)}
+.lin{height:2px;background:rgba(54,97,142,.2);position:relative;overflow:hidden}.lin i{position:absolute;left:18%;width:38%;top:0;bottom:0;background:var(--primary)}
+/* keyboard placeholder */
+.kb{position:absolute;left:0;right:0;bottom:0;height:290px;background:#D3D6DC;z-index:30;padding:10px 4px 28px;display:flex;flex-direction:column;gap:9px}
+.kb .r{display:flex;gap:5px;justify-content:center;flex:1}.kb .r i{flex:1;max-width:34px;border-radius:5px;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.kb .r i.w{max-width:none;flex:5}.kb .r i.d{background:#ADB3BC}
+.kb .lab{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:12px;color:#40454D;background:rgba(255,255,255,.75);padding:3px 8px;border-radius:6px}
+/* banners and notes */
+.mban{background:var(--scl);padding:16px 16px 0;border-bottom:1px solid var(--ov)}
+.mban p{font-size:13px;line-height:1.45}
+.mban .acts{display:flex;justify-content:flex-end;gap:8px;padding:8px 0}
+.mban .acts span{color:var(--primary);font-size:13px;font-weight:500;padding:0 12px;height:40px;display:flex;align-items:center}
+.fnote{margin:8px 12px 0;padding:8px 4px 2px 12px;border-radius:12px;background:var(--sch)}
+.fnote .h{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.45}.fnote .h .mr{font-size:18px;color:var(--onv);flex:none;margin-top:1px}
+.fnote .h .x{width:32px;height:28px;display:grid;place-items:center;color:var(--onv);flex:none;margin-top:-4px}
+.fnote .a{display:flex;flex-wrap:wrap}.fnote .a span{color:var(--primary);font-size:13px;font-weight:500;padding:0 10px;height:36px;display:flex;align-items:center}
+.pend{padding:6px 12px 0}.pend p{font-size:12px;color:var(--onv);margin-top:4px}
+.lbanner{margin:8px 12px 0;border-radius:12px;background:var(--sc);color:var(--osc);display:flex;align-items:center;gap:14px;padding:10px 12px 10px 16px}
+.lbanner .x{flex:1}.lbanner b{display:block;font-size:14px;font-weight:600}.lbanner small{font-size:12px}
+.lbanner .go{height:40px;padding:0 18px;border-radius:20px;background:var(--primary);color:var(--onPrimary);font-size:13px;font-weight:600;display:flex;align-items:center}
+.hist{padding:12px 16px 4px}.hist .hh{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500}
+.hist .hh .mr{font-size:18px;color:var(--onv)}.hist .hh .cl{margin-left:auto;color:var(--primary);font-size:13px;display:flex;align-items:center;gap:4px;height:40px}
+.hist .ws{display:flex;flex-wrap:wrap;gap:8px}
+.ic2{height:32px;border-radius:8px;border:1px solid var(--ov);display:flex;align-items:center;gap:6px;padding:0 6px 0 12px;font-size:13px;font-weight:500;color:var(--onv)}
+.ic2 .mr{font-size:18px}
+/* menus, dialogs, panels */
+.pmenu{position:absolute;z-index:21;background:var(--sc2,#ECEEF4);border-radius:4px;box-shadow:0 3px 10px rgba(0,0,0,.22);padding:8px 0;min-width:112px}
+.pmenu div{height:48px;display:flex;align-items:center;padding:0 12px;font-size:13px;font-weight:500}
+.pmenu div.sel{background:rgba(25,28,32,.08)}
+.dlg2{position:absolute;z-index:21;background:var(--sch);border-radius:24px;padding:24px}
+.dlg2 h3{font-size:20px;font-weight:600;display:flex;gap:8px;align-items:flex-start;line-height:1.3}
+.dlg2 .c{margin-top:16px;font-size:13px;line-height:1.4;white-space:pre-line}
+.dlg2 .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:24px;align-items:center}
+.dlg2 .acts span{height:48px;display:flex;align-items:center;padding:0 12px;font-size:13px;font-weight:500;color:var(--primary)}
+.dlg2 .acts span.fill{background:var(--primary);color:var(--onPrimary);border-radius:12px;padding:0 24px;font-weight:600}
+.shd{position:absolute;left:0;right:0;bottom:0;z-index:21;background:var(--scc);border-radius:24px 24px 0 0;overflow:hidden}
+.shd .hd{width:32px;height:4px;border-radius:2px;background:var(--onv);opacity:.4;margin:22px auto 14px}
+.shd h3{font-size:16px;font-weight:600;padding:0 20px}.shd .d{font-size:12px;color:var(--onv);padding:4px 20px 0;line-height:1.45}
+.shd .qb{display:flex;gap:8px;padding:12px 20px 4px}.shd .qb span{height:32px;border-radius:8px;border:1px solid var(--ov);font-size:13px;font-weight:500;padding:0 12px;display:flex;align-items:center;color:var(--primary)}
+.shd .gh{padding:14px 20px 4px;font-size:13px;font-weight:600;color:var(--primary);display:flex}.shd .gh small{margin-left:auto;color:var(--onv);font-weight:500;font-size:12px}
+.prow{display:flex;align-items:center;gap:12px;padding:6px 20px;min-height:52px}
+.prow .cb{width:18px;height:18px;border-radius:3px;background:var(--primary);display:grid;place-items:center;color:#fff;flex:none}.prow .cb .mr{font-size:16px}
+.prow .cb.off{background:transparent;border:2px solid var(--onv)}
+.prow img{width:24px;height:24px;border-radius:6px;flex:none}
+.prow .x{flex:1;min-width:0}.prow .n{font-size:14px}.prow .s{font-size:12px;color:var(--onv);margin-top:1px}
+.prow .tg{font-size:11px;padding:1px 6px;border-radius:4px;background:var(--sch);color:var(--onv);margin-left:4px}
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:20}
+.tip{z-index:40}
+/* composite pages */
+.multi{display:flex;gap:24px;padding:0;background:#E9EBF0}
+.multi .col{display:flex;flex-direction:column;gap:8px}
+.multi .cap{height:34px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#191C20}
+.multi .ph{box-shadow:0 0 0 1px #C3C7CF}
+.col2{display:flex;flex-direction:column;height:100%}
+</style></head><body><div class="ph" style=""><div class="status"><span>21:36</span><span class="r"><span class="mi">signal_cellular_alt</span><span class="mi">wifi</span><span class="mi">battery_full</span></span></div><div class="top"><div class="fld v4"><span class="ic"><span class="mi">arrow_back</span></span><span class="tx">晚风</span><span class="ic"><span class="mr">close</span></span><span class="ic"><span class="mi">search</span></span></div></div><div class="strip"><div class="cc on"><span class="mr">apps</span>全部</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/bilibili.png">哔哩哔哩</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/douyu.png">斗鱼</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/huya.png">虎牙</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/douyin.png">抖音</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/kuaishou.png">快手</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/cc.png">网易CC</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/twitch.png">Twitch</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/soop.png">Soop</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/yy.png">YY</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/acfun.png">AcFun 直播</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/picarto.png">Picarto</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/twitcasting.png">TwitCasting</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/missevan.png">猫耳 FM</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/inke.png">映客</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/kilakila.png">克拉克拉</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/xiaohongshu.png">小红书</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/niconico.png">niconico</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/weibo.png">微博直播</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/showroom.png">SHOWROOM</div><div class="cc"><img src="../../../packages/live_ui/assets/platforms/chzzk.png">CHZZK</div></div><div style="overflow:hidden;height:704px"><div class="opts" style="padding:2px 12px 6px"><div class="crow wrap"><div class="seg"><div class="on">直播间</div><div class="">主播</div></div><div class="fc on"><span class="mr">check</span>包含未开播</div><div class="fc"><span class="mr">sort</span>综合<span class="rx">&#xea4e;</span></div></div><div class="note4"><span class="mr">info_outline</span><span class="x">同时搜索 34 个平台，各平台能搜到的范围不同，点此查看。</span><span class="mr">chevron_right</span></div></div><div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="card"><div class="cv" style="background-image:url(.cache/img/1.jpg)"><div class="mb"><span class="mr">people_alt</span>1.2万</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/65.jpg)"></span><div class="tx"><div class="t">晚风电台｜深夜点歌</div><div class="s">晚风</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/111.jpg)"><div class="mb"><span class="mr">whatshot</span>8765</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/111.jpg)"></span><div class="tx"><div class="t">晚风吹过的夏天 · 吉他弹唱</div><div class="s">晚风小屋</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/133.jpg)"><div class="mb"><span class="mr">people_alt</span>3.4万</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/133.jpg)"></span><div class="tx"><div class="t">【晚风】原创歌曲首发</div><div class="s">晚风同学</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/169.jpg)"><div class="mb"><span class="mr">whatshot</span>2013</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/169.jpg)"></span><div class="tx"><div class="t">晚风与夜空 户外慢直播</div><div class="s">夜空里的晚风</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/183.jpg)"><div class="mb"><span class="mr">people_alt</span>5.6万</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/183.jpg)"></span><div class="tx"><div class="t">晚风 KTV 等你来点歌</div><div class="s">晚风KTV</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/206.jpg)"><div class="mb"><span class="mr">whatshot</span>980</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/206.jpg)"></span><div class="tx"><div class="t">听晚风讲故事</div><div class="s">讲故事的晚风</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/219.jpg)"><div class="mb"><span class="mr">people_alt</span>1.5万</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/219.jpg)"></span><div class="tx"><div class="t">晚风｜周末合唱</div><div class="s">晚风合唱团</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/225.jpg)"></div><div class="lt"><span class="av" style="background-image:url(.cache/img/225.jpg)"></span><div class="tx"><div class="t">晚风的录播间</div><div class="s">晚风录播</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/237.jpg)"><div class="mb"><span class="mr">people_alt</span>6421</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/237.jpg)"></span><div class="tx"><div class="t">海边的晚风 · 日落直播</div><div class="s">海边晚风</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/250.jpg)"><div class="mb"><span class="mr">whatshot</span>1.1万</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/250.jpg)"></span><div class="tx"><div class="t">晚风读书会</div><div class="s">晚风书房</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/287.jpg)"><div class="mb"><span class="mr">people_alt</span>3355</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/287.jpg)"></span><div class="tx"><div class="t">晚风里的城市骑行</div><div class="s">骑行晚风</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/292.jpg)"><div class="mb"><span class="mr">whatshot</span>2.7万</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/292.jpg)"></span><div class="tx"><div class="t">晚风钢琴｜轻音乐陪伴</div><div class="s">晚风钢琴</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/304.jpg)"><div class="mb"><span class="mr">people_alt</span>742</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/304.jpg)"></span><div class="tx"><div class="t">晚风小厨房</div><div class="s">晚风厨房</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/319.jpg)"><div class="mb"><span class="mr">whatshot</span>9.3万</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/319.jpg)"></span><div class="tx"><div class="t">晚风打游戏</div><div class="s">晚风电竞</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/338.jpg)"></div><div class="lt"><span class="av" style="background-image:url(.cache/img/338.jpg)"></span><div class="tx"><div class="t">晚风画室 · 水彩</div><div class="s">晚风画画</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/342.jpg)"><div class="mb"><span class="mr">people_alt</span>1876</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/342.jpg)"></span><div class="tx"><div class="t">晚风露营夜</div><div class="s">露营的晚风</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/360.jpg)"><div class="mb"><span class="mr">whatshot</span>4410</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/360.jpg)"></span><div class="tx"><div class="t">晚风茶话会</div><div class="s">晚风茶馆</div></div></div></div><div class="card"><div class="cv" style="background-image:url(.cache/img/367.jpg)"><div class="mb"><span class="mr">people_alt</span>5280</div></div><div class="lt"><span class="av" style="background-image:url(.cache/img/367.jpg)"></span><div class="tx"><div class="t">晚风猫咖</div><div class="s">晚风猫咖</div></div></div></div></div></div><div class="dim"></div><div class="shd" style="height:640px"><div class="hd"></div><span style="position:absolute;right:8px;top:36px;width:48px;height:48px;display:grid;place-items:center;color:var(--onv)"><span class="mr">close</span></span><h3>“全部”搜索哪些平台</h3><div class="d">没选中的平台不参加“全部”搜索，单独选它时仍然可以搜。设置会记住。<br>“主播”：能搜主播；“网页”：能打开平台的网页搜索。</div><div class="qb"><span>只搜国内平台</span><span>全选</span></div><div class="gh">国内平台<small>已选 19 / 19</small></div><div class="prow"><span class="cb"><span class="mr">check</span></span><img src="../../../packages/live_ui/assets/platforms/bilibili.png"><div class="x"><div class="n">哔哩哔哩<span class="tg">主播</span><span class="tg">网页</span></div><div class="s">能搜到直播中和部分未开播的房间</div></div></div><div class="prow"><span class="cb"><span class="mr">check</span></span><img src="../../../packages/live_ui/assets/platforms/douyu.png"><div class="x"><div class="n">斗鱼<span class="tg">主播</span><span class="tg">网页</span></div><div class="s">能搜到直播中和部分未开播的房间</div></div></div><div class="prow"><span class="cb"><span class="mr">check</span></span><img src="../../../packages/live_ui/assets/platforms/huya.png"><div class="x"><div class="n">虎牙<span class="tg">主播</span><span class="tg">网页</span></div><div class="s">只能搜到正在直播的房间</div></div></div><div class="prow"><span class="cb"><span class="mr">check</span></span><img src="../../../packages/live_ui/assets/platforms/douyin.png"><div class="x"><div class="n">抖音<span class="tg">网页</span></div><div class="s">只能搜到正在直播的房间</div></div></div><div class="prow"><span class="cb"><span class="mr">check</span></span><img src="../../../packages/live_ui/assets/platforms/xiaohongshu.png"><div class="x"><div class="n">小红书</div><div class="s">只能用房间号或直播链接查找</div></div></div><div class="gh">海外平台<small>已选 15 / 15</small></div><div class="prow"><span class="cb"><span class="mr">check</span></span><img src="../../../packages/live_ui/assets/platforms/twitch.png"><div class="x"><div class="n">Twitch<span class="tg">网页</span></div><div class="s">能搜到直播中和部分未开播的房间</div></div></div><div class="prow"><span class="cb"><span class="mr">check</span></span><img src="../../../packages/live_ui/assets/platforms/youtube.png"><div class="x"><div class="n">YouTube Live</div><div class="s">关键词只能搜到正在直播的频道</div></div></div></div></div></body></html>

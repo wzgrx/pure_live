@@ -1,0 +1,119 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="1280x800@1.5"><link rel="stylesheet" href="kit/kit.css"><style>
+.ph .status{background:var(--surface)}
+.sb24{height:24px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:600 12px 'Geist','Noto Sans SC';background:var(--surface)}
+.sb24 .mi{font-size:13px}
+/* top bar with the search field */
+.top{height:56px;display:flex;align-items:center;padding:0 16px;background:var(--surface);flex:none;gap:12px}
+.fld{flex:1;min-width:0;height:48px;border:1px solid var(--outline);border-radius:24px;background:var(--scl);display:flex;align-items:center}
+.fld.foc{border:1.5px solid var(--primary);border-radius:12px}
+.fld.v4.foc{border:2px solid var(--primary);border-radius:24px}
+.fld .ic{width:48px;height:48px;display:grid;place-items:center;color:var(--onv);flex:none}
+.fld .ic .mi,.fld .ic .mr{font-size:24px}.fld .ic .rx{font-size:22px}
+.fld .tx{flex:1;min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fld .tx.hint{font-size:13px;color:rgba(67,71,78,.6)}
+.fld .tx.hint4{font-size:14px;color:var(--onv)}
+.caret{display:inline-block;width:2px;height:18px;background:var(--primary);vertical-align:-3px;margin:0 1px}
+/* platform strip */
+.strip{height:56px;display:flex;align-items:center;gap:8px;padding:0 12px;overflow:hidden;background:var(--surface);flex:none;white-space:nowrap}
+.cc{height:32px;border-radius:8px;border:1px solid var(--ov);display:flex;align-items:center;gap:6px;padding:0 12px;font-size:13px;font-weight:500;color:var(--onv);flex:none}
+.cc.on{background:var(--sc);border-color:var(--primary);color:var(--osc)}
+.cc img{width:18px;height:18px;border-radius:4px;margin-left:-4px}.cc .mr{font-size:18px;margin-left:-4px}
+/* options */
+.opts{background:var(--scl);padding:8px 12px 9px;flex:none}
+.crow{display:flex;gap:8px;align-items:center;min-height:48px;white-space:nowrap;overflow:hidden}
+.crow.wrap{flex-wrap:wrap;row-gap:0}
+.fc{height:32px;border-radius:8px;border:1px solid var(--ov);display:flex;align-items:center;gap:8px;padding:0 12px 0 8px;font-size:13px;font-weight:500;color:var(--onv);flex:none;margin:8px 0}
+.fc.on{background:var(--sc);border-color:transparent;color:var(--osc)}
+.fc .mr{font-size:18px}.fc .rx{font-size:18px;margin:0 -4px 0 -4px}
+.seg{height:32px;border-radius:16px;border:1px solid var(--outline);display:flex;overflow:hidden;flex:none;margin:8px 0}
+.seg div{display:flex;align-items:center;padding:0 14px;font-size:13px;font-weight:500;color:var(--on)}
+.seg div+div{border-left:1px solid var(--outline)}.seg .on{background:var(--sc);color:var(--osc)}
+.note{display:flex;gap:6px;align-items:flex-start;font-size:12px;line-height:1.3;color:var(--onv)}
+.note>.mr{color:var(--primary);font-size:16px;flex:none}
+.note .x{flex:1;min-width:0}
+.note .one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbtn{color:var(--primary);font-size:13px;font-weight:500;height:32px;display:flex;align-items:center}
+.note4{display:flex;gap:6px;align-items:center;font-size:12px;line-height:1.3;color:var(--onv);min-height:32px}
+.note4>.mr{color:var(--primary);font-size:16px;flex:none}.note4 .x{flex:1;min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.crow .note4 .x{display:block;white-space:nowrap;text-overflow:ellipsis}
+.note4 .go{flex:none;color:var(--onv);font-size:18px}
+/* results: v3's dense cover card (RoomCard, standard preset) */
+.grid{display:grid;gap:8px;padding:8px}
+.card{background:#fff;border-radius:20px;overflow:hidden;position:relative}
+.cv{position:relative;aspect-ratio:16/9;border-radius:20px;background:#F5F5F5 center/cover}
+.mb{position:absolute;right:8px;bottom:8px;display:flex;align-items:center;gap:4px;padding:3px 6px;border-radius:10px;background:rgba(0,0,0,.48);color:#fff;font:700 11px 'Geist','Noto Sans SC'}
+.mb .mr{font-size:14px}
+.lt{display:flex;align-items:center;gap:8px;padding:8px 10px;min-height:58px}
+.lt .av{width:34px;height:34px;border-radius:17px}
+.lt .tx{flex:1;min-width:0}
+.lt .t{font-size:13px;line-height:18px;font-weight:600;color:rgba(0,0,0,.87);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lt .s{font-size:12px;line-height:17px;font-weight:500;color:#616161;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skel .cv{background:var(--sch)}.skel .av{background:var(--sch)}
+.skel .t{height:12px;width:80%;border-radius:6px;background:var(--sch);margin:3px 0 7px}.skel .s{height:10px;width:50%;border-radius:5px;background:var(--sch)}
+.foot{display:flex;justify-content:center;padding:8px 16px 20px}
+.foot .tb{display:flex;align-items:center;gap:6px;color:var(--primary);font-size:13px;font-weight:500;height:40px;padding:0 12px}
+/* status view (AppStatusView) */
+.sv{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.svc{width:86px;height:86px;border-radius:43px;background:rgba(225,226,232,.15);border:1px solid rgba(54,97,142,.05);display:grid;place-items:center}
+.svc .mr{font-size:42px;color:rgba(54,97,142,.6)}
+.sv h4{margin-top:20px;font-size:15px;font-weight:600}
+.sv p{padding:6px 28px 0;max-width:376px;text-wrap:balance;font-size:13px;line-height:1.5;color:rgba(0,0,0,.6)}
+.sv .tb{margin-top:16px;display:flex;align-items:center;gap:8px;color:var(--primary);font-size:13px;font-weight:500;height:40px;padding:0 12px}
+.sv .tb .mr{font-size:18px}
+.spin{width:40px;height:40px;border-radius:20px;border:4px solid var(--primary);border-right-color:transparent;border-bottom-color:transparent;transform:rotate(30deg)}
+.lin{height:2px;background:rgba(54,97,142,.2);position:relative;overflow:hidden}.lin i{position:absolute;left:18%;width:38%;top:0;bottom:0;background:var(--primary)}
+/* keyboard placeholder */
+.kb{position:absolute;left:0;right:0;bottom:0;height:290px;background:#D3D6DC;z-index:30;padding:10px 4px 28px;display:flex;flex-direction:column;gap:9px}
+.kb .r{display:flex;gap:5px;justify-content:center;flex:1}.kb .r i{flex:1;max-width:34px;border-radius:5px;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.kb .r i.w{max-width:none;flex:5}.kb .r i.d{background:#ADB3BC}
+.kb .lab{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:12px;color:#40454D;background:rgba(255,255,255,.75);padding:3px 8px;border-radius:6px}
+/* banners and notes */
+.mban{background:var(--scl);padding:16px 16px 0;border-bottom:1px solid var(--ov)}
+.mban p{font-size:13px;line-height:1.45}
+.mban .acts{display:flex;justify-content:flex-end;gap:8px;padding:8px 0}
+.mban .acts span{color:var(--primary);font-size:13px;font-weight:500;padding:0 12px;height:40px;display:flex;align-items:center}
+.fnote{margin:8px 12px 0;padding:8px 4px 2px 12px;border-radius:12px;background:var(--sch)}
+.fnote .h{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.45}.fnote .h .mr{font-size:18px;color:var(--onv);flex:none;margin-top:1px}
+.fnote .h .x{width:32px;height:28px;display:grid;place-items:center;color:var(--onv);flex:none;margin-top:-4px}
+.fnote .a{display:flex;flex-wrap:wrap}.fnote .a span{color:var(--primary);font-size:13px;font-weight:500;padding:0 10px;height:36px;display:flex;align-items:center}
+.pend{padding:6px 12px 0}.pend p{font-size:12px;color:var(--onv);margin-top:4px}
+.lbanner{margin:8px 12px 0;border-radius:12px;background:var(--sc);color:var(--osc);display:flex;align-items:center;gap:14px;padding:10px 12px 10px 16px}
+.lbanner .x{flex:1}.lbanner b{display:block;font-size:14px;font-weight:600}.lbanner small{font-size:12px}
+.lbanner .go{height:40px;padding:0 18px;border-radius:20px;background:var(--primary);color:var(--onPrimary);font-size:13px;font-weight:600;display:flex;align-items:center}
+.hist{padding:12px 16px 4px}.hist .hh{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500}
+.hist .hh .mr{font-size:18px;color:var(--onv)}.hist .hh .cl{margin-left:auto;color:var(--primary);font-size:13px;display:flex;align-items:center;gap:4px;height:40px}
+.hist .ws{display:flex;flex-wrap:wrap;gap:8px}
+.ic2{height:32px;border-radius:8px;border:1px solid var(--ov);display:flex;align-items:center;gap:6px;padding:0 6px 0 12px;font-size:13px;font-weight:500;color:var(--onv)}
+.ic2 .mr{font-size:18px}
+/* menus, dialogs, panels */
+.pmenu{position:absolute;z-index:21;background:var(--sc2,#ECEEF4);border-radius:4px;box-shadow:0 3px 10px rgba(0,0,0,.22);padding:8px 0;min-width:112px}
+.pmenu div{height:48px;display:flex;align-items:center;padding:0 12px;font-size:13px;font-weight:500}
+.pmenu div.sel{background:rgba(25,28,32,.08)}
+.dlg2{position:absolute;z-index:21;background:var(--sch);border-radius:24px;padding:24px}
+.dlg2 h3{font-size:20px;font-weight:600;display:flex;gap:8px;align-items:flex-start;line-height:1.3}
+.dlg2 .c{margin-top:16px;font-size:13px;line-height:1.4;white-space:pre-line}
+.dlg2 .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:24px;align-items:center}
+.dlg2 .acts span{height:48px;display:flex;align-items:center;padding:0 12px;font-size:13px;font-weight:500;color:var(--primary)}
+.dlg2 .acts span.fill{background:var(--primary);color:var(--onPrimary);border-radius:12px;padding:0 24px;font-weight:600}
+.shd{position:absolute;left:0;right:0;bottom:0;z-index:21;background:var(--scc);border-radius:24px 24px 0 0;overflow:hidden}
+.shd .hd{width:32px;height:4px;border-radius:2px;background:var(--onv);opacity:.4;margin:22px auto 14px}
+.shd h3{font-size:16px;font-weight:600;padding:0 20px}.shd .d{font-size:12px;color:var(--onv);padding:4px 20px 0;line-height:1.45}
+.shd .qb{display:flex;gap:8px;padding:12px 20px 4px}.shd .qb span{height:32px;border-radius:8px;border:1px solid var(--ov);font-size:13px;font-weight:500;padding:0 12px;display:flex;align-items:center;color:var(--primary)}
+.shd .gh{padding:14px 20px 4px;font-size:13px;font-weight:600;color:var(--primary);display:flex}.shd .gh small{margin-left:auto;color:var(--onv);font-weight:500;font-size:12px}
+.prow{display:flex;align-items:center;gap:12px;padding:6px 20px;min-height:52px}
+.prow .cb{width:18px;height:18px;border-radius:3px;background:var(--primary);display:grid;place-items:center;color:#fff;flex:none}.prow .cb .mr{font-size:16px}
+.prow .cb.off{background:transparent;border:2px solid var(--onv)}
+.prow img{width:24px;height:24px;border-radius:6px;flex:none}
+.prow .x{flex:1;min-width:0}.prow .n{font-size:14px}.prow .s{font-size:12px;color:var(--onv);margin-top:1px}
+.prow .tg{font-size:11px;padding:1px 6px;border-radius:4px;background:var(--sch);color:var(--onv);margin-left:4px}
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:20}
+.tip{z-index:40}
+/* composite pages */
+.multi{display:flex;gap:24px;padding:0;background:#E9EBF0}
+.multi .col{display:flex;flex-direction:column;gap:8px}
+.multi .cap{height:34px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#191C20}
+.multi .ph{box-shadow:0 0 0 1px #C3C7CF}
+.col2{display:flex;flex-direction:column;height:100%}
+</style></head><body><div class="win" style="--w:1280px;--h:800px"><div class="top"><div class="fld foc"><span class="ic"><span class="mi">arrow_back</span></span><span class="tx hint"><i class=caret></i>输入直播关键字</span><span class="ic"><span class="mi">search</span></span></div></div><div class="strip"><div class="cc on">全部</div><div class="cc">哔哩哔哩</div><div class="cc">斗鱼</div><div class="cc">虎牙</div><div class="cc">抖音</div><div class="cc">快手</div><div class="cc">网易CC</div><div class="cc">Twitch</div><div class="cc">Soop</div><div class="cc">YY</div><div class="cc">AcFun 直播</div><div class="cc">Picarto</div><div class="cc">TwitCasting</div><div class="cc">猫耳 FM</div><div class="cc">映客</div><div class="cc">克拉克拉</div><div class="cc">小红书</div><div class="cc">niconico</div><div class="cc">微博直播</div><div class="cc">SHOWROOM</div><div class="cc">CHZZK</div></div><div class="col2" style="height:688px"><div class="opts"><div class="crow"><div class="fc on"><span class="mr">check</span>包含未开播</div><div class="fc"><span class="mr">sort</span>综合：直播→观众→粉丝</div></div><div style="height:6px"></div><div class="note"><span class="mr">info_outline</span><div class="x"><div class="one">App 内原生搜索覆盖全部 34 个平台；未开播结果仅在平台接口返回时显示。 TikTok LIVE、YouTube Live 仅支持精确频道号或频道直播链接，可查询未开播频道；暂不支持昵称和关键词搜索。 小红书、百度直播、LOOK 直播 当前仅支持直播房间号或官网直播链接查询……</div><div class="tbtn">展开说明</div></div></div></div><div class="sv" style="flex:1"><div class="svc"><span class="mr">travel_explore</span></div><h4>全平台原生搜索</h4><p>输入关键词后汇总各平台直播间，可筛选未开播结果并切换综合、平台、观众或粉丝排序</p></div></div><div class="dim"></div><div class="dlg2" style="left:430px;top:250px;width:420px"><h3><span class="mr" style="font-size:24px;color:var(--error)">report_problem</span><span>系统组件缺失</span></h3><div class="c">您的 Windows 系统缺少网页核心组件 (WebView2 Runtime)。如果不安装，应用内的网页搜索功能将完全无法使用。
+
+是否立即前往微软官网下载安装？</div><div class="acts"><span>取消</span><span class="fill">打开下载页</span></div></div></div></body></html>

@@ -227,4 +227,84 @@ abstract final class AppIcons {
 
   /// Something will not work as the user expects (a switched-off setting).
   static const IconData warning = Icons.warning_amber_rounded;
+
+  // ---- multi-view (docs/ui/compare/U.8; 3.x lib/modules/multiview) ----
+
+  /// Keep only the cells on screen (沉浸模式).
+  static const IconData immersive = Remix.expand_diagonal_line;
+
+  /// Leave the immersive mode.
+  static const IconData exitImmersive = Remix.collapse_diagonal_line;
+
+  /// The multi-view in fullscreen.
+  static const IconData gridFullscreen = Remix.fullscreen_line;
+
+  /// Leave the multi-view's fullscreen.
+  static const IconData gridExitFullscreen = Remix.fullscreen_exit_line;
+
+  /// One view (1×1).
+  static const IconData layoutSingle = Remix.aspect_ratio_line;
+
+  /// Two views (1×2).
+  static const IconData layoutDual = Remix.layout_column_line;
+
+  /// Four views (2×2).
+  static const IconData layoutQuad = Remix.layout_grid_line;
+
+  /// One large view and small ones (1+3).
+  static const IconData layoutFocus = Remix.focus_3_line;
+
+  /// Silence every view ("全部静音"; the sound plays).
+  static const IconData muteAll = Remix.volume_up_line;
+
+  /// Every view is silent ("恢复声音").
+  static const IconData mutedAll = Remix.volume_mute_line;
+
+  /// Small views play the lowest quality ("小格省流").
+  static const IconData smallCellSaver = Remix.speed_mini_line;
+
+  /// Play one view.
+  static const IconData cellPlay = Remix.play_line;
+
+  /// Pause one view.
+  static const IconData cellPause = Remix.pause_line;
+
+  /// Load one view again.
+  static const IconData cellRefresh = Remix.refresh_line;
+
+  /// Pick another room for a view ("换台").
+  static const IconData changeRoom = Remix.tv_2_line;
+
+  /// Leave for the view's full live room ("进入直播间").
+  static const IconData enterRoom = Remix.external_link_line;
+
+  /// Empty a view ("关闭这一格").
+  static const IconData closeCell = Remix.close_circle_line;
+
+  /// A view's room volume.
+  static const IconData cellVolume = Remix.volume_down_line;
+
+  /// The view whose sound plays ("声音来源").
+  static const IconData audioFocus = Remix.volume_up_line;
+
+  /// An empty view, the "添加画面" slot.
+  static const IconData addCell = Remix.add_circle_line;
+
+  /// A view whose room is not on air.
+  static const IconData roomOffline = Remix.live_line;
+
+  /// A view that failed to play.
+  static const IconData cellFailed = Remix.error_warning_line;
+
+  /// Search the rooms to pick.
+  static const IconData search = Remix.search_line;
+
+  /// Bring back the last visit's rooms.
+  static const IconData restoreLast = Remix.history_line;
+
+  /// Fold the right column away.
+  static const IconData foldRight = Icons.chevron_right_rounded;
+
+  /// Show the right column again.
+  static const IconData unfoldLeft = Icons.chevron_left_rounded;
 }

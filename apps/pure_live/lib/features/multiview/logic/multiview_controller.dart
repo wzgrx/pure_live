@@ -128,6 +128,12 @@ final class MultiviewCell {
 
   /// The session's state, idle when there is none.
   PlaybackState get playback => _session?.state ?? const PlaybackState();
+
+  bool _offscreen = false;
+
+  /// Scrolled out of sight (a small cell of the focus layout): the video is
+  /// not decoded (sound only) until it is on screen again.
+  bool get offscreen => _offscreen;
 }
 
 /// The multi-view logic (3.x `MultiviewController` without GetX): one
@@ -591,15 +597,33 @@ class MultiviewController extends ChangeNotifier {
     final session = cell._session ??= newSession();
     _notify();
     final quality = cell._qualities[playing];
+    session.setPresentationVisible(visible: !cell._offscreen);
     await session.open(
       PlaybackRequest(
         site: site.id,
         plan: _plan(room, resolution),
         refresh: () async => _plan(room, await site.resolvePlayUrlsForRecovery(detail: room, quality: quality)),
+        audioOnly: cell._offscreen,
         volume: _audibleVolume(cell),
       ),
     );
     return _current(cell, epoch);
+  }
+
+  /// The cells whose video is out of sight ([MultiviewCell.offscreen], by
+  /// [MultiviewCell.id]); the others are on screen. A cell out of sight
+  /// stops decoding its video and its stalled-picture watchdog (UI_PLAN
+  /// §9.3, 3.x `focus_rail_visibility.dart`); its sound, if any, goes on.
+  void setOffscreen(Set<int> ids) {
+    for (final cell in _cells) {
+      final offscreen = ids.contains(cell.id);
+      if (offscreen == cell._offscreen) continue;
+      cell._offscreen = offscreen;
+      final session = cell._session;
+      if (session == null) continue;
+      session.setPresentationVisible(visible: !offscreen);
+      if (cell.playing) unawaited(_guard(() => session.setAudioOnly(enabled: offscreen), 'video output'));
+    }
   }
 
   PlaybackPlan _plan(LiveRoom room, LivePlayUrlResolution resolution) =>
@@ -776,14 +800,16 @@ class MultiviewController extends ChangeNotifier {
   }
 
   /// Sets the volume of cell [index]; [save] keeps it for the room (the
-  /// live room opens with it too).
+  /// live room opens with it too). While a slider moves ([save] false) the
+  /// page is not told: the slider shows its own value, so the cells and the
+  /// picker do not rebuild on every step (docs/ui/compare/U.8 性能要点).
   Future<void> setVolume(int index, double volume, {bool save = false}) async {
     if (index < 0 || index >= _cells.length) return;
     final cell = _cells[index].._volume = volume.isFinite ? volume.clamp(0, 1).toDouble() : 1;
     final session = cell._session;
     if (session != null && cell.playing) await session.setVolume(_audibleVolume(cell));
-    _notify();
     if (!save) return;
+    _notify();
     final room = cell.room;
     if (room == null) return;
     await _guard(() async {

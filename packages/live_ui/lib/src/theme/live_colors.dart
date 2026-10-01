@@ -51,6 +51,16 @@ abstract final class OnVideoColors {
   /// audio only and a fixed orientation).
   static const Color active = Color(0xFFFFD166);
 
+  /// Errors on the picture (a failed multi-view cell): the dark theme's
+  /// error tone, readable on black in every theme.
+  static const Color error = Color(0xFFFFB4AB);
+
+  /// The user's colour on the picture (the selected multi-view cell's
+  /// outline, the picked cell's dashed frame): the light tone of the
+  /// primary colour in both themes, since the picture is always black.
+  static Color accent(ColorScheme scheme) =>
+      scheme.brightness == Brightness.light ? scheme.inversePrimary : scheme.primary;
+
   /// The soft shadow under icons and text on the picture.
   static const Color shadow = Color(0x99000000);
 

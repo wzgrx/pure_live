@@ -12,6 +12,31 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
+/// Whether this app may use picture-in-picture (U.2j c9).
+enum PipAvailability {
+  /// It may.
+  allowed,
+
+  /// The device offers it, but the system settings turned it off for this
+  /// app ("无法打开画中画", "去设置").
+  disabled,
+
+  /// The device has none.
+  unsupported,
+}
+
+/// How a request to enter picture-in-picture ended.
+enum PipEntry {
+  /// The window is entering it.
+  entered,
+
+  /// The system settings turned it off for this app.
+  disabled,
+
+  /// The system refused for another reason (3.x's "打开画中画失败，请重试").
+  failed,
+}
+
 /// Android's system picture-in-picture (`pure_live/pip` in `MainActivity`;
 /// 3.x used the floating plugin). [active] follows the activity.
 abstract final class PictureInPicture {
@@ -20,6 +45,12 @@ abstract final class PictureInPicture {
 
   /// Whether the activity is in picture-in-picture now.
   static final ValueNotifier<bool> active = ValueNotifier(false);
+
+  /// Whether to treat this as Android (tests); null asks the platform.
+  @visibleForTesting
+  static bool? debugAndroid;
+
+  static bool get _android => debugAndroid ?? (!kIsWeb && Platform.isAndroid);
 
   static void _listen() {
     if (_listening) return;
@@ -31,7 +62,7 @@ abstract final class PictureInPicture {
 
   /// Whether this device offers picture-in-picture.
   static Future<bool> supported() async {
-    if (kIsWeb || !Platform.isAndroid) return false;
+    if (!_android) return false;
     _listen();
     try {
       return await _channel.invokeMethod<bool>('isSupported') ?? false;
@@ -40,15 +71,59 @@ abstract final class PictureInPicture {
     }
   }
 
-  /// Enters picture-in-picture with the picture's [width]:[height] (the
-  /// system limits the ratio to 2.39:1).
-  static Future<bool> enter({required int width, required int height}) async {
-    if (kIsWeb || !Platform.isAndroid) return false;
+  /// Whether this app may use picture-in-picture now (the system settings
+  /// can turn it off per app).
+  static Future<PipAvailability> availability() async {
+    if (!_android) return PipAvailability.unsupported;
     _listen();
     try {
-      return await _channel.invokeMethod<bool>('enter', {'width': width, 'height': height}) ?? false;
+      return switch (await _channel.invokeMethod<String>('status')) {
+        'allowed' => PipAvailability.allowed,
+        'disabled' => PipAvailability.disabled,
+        _ => PipAvailability.unsupported,
+      };
+    } on Object {
+      return PipAvailability.unsupported;
+    }
+  }
+
+  /// Enters picture-in-picture with the picture's [width]:[height] (the
+  /// system limits the ratio to 2.39:1).
+  static Future<PipEntry> enter({required int width, required int height}) async {
+    if (!_android) return PipEntry.failed;
+    _listen();
+    try {
+      return switch (await _channel.invokeMethod<Object>('enter', {'width': width, 'height': height})) {
+        'entered' || true => PipEntry.entered,
+        'disabled' => PipEntry.disabled,
+        _ => PipEntry.failed,
+      };
+    } on Object {
+      return PipEntry.failed;
+    }
+  }
+
+  /// Opens this app's picture-in-picture page of the system settings (its
+  /// details page where there is none). False when nothing opened.
+  static Future<bool> openSettings() async {
+    if (!_android) return false;
+    try {
+      return await _channel.invokeMethod<bool>('openSettings') ?? false;
     } on Object {
       return false;
+    }
+  }
+
+  /// Lets leaving the app (home, recents) enter picture-in-picture by itself
+  /// with the picture's [width]:[height] (J1: Android 12 and later animate
+  /// it, 8-11 enter when the user leaves); [enabled] false stops that.
+  static Future<void> setAutoEnter({required bool enabled, int width = 16, int height = 9}) async {
+    if (!_android) return;
+    _listen();
+    try {
+      await _channel.invokeMethod<void>('setAutoEnter', {'enabled': enabled, 'width': width, 'height': height});
+    } on Object catch (error) {
+      developer.log('Auto picture-in-picture failed', name: 'LivePlay', error: error);
     }
   }
 }

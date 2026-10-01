@@ -171,8 +171,14 @@ final class FakeEngine implements PlayerEngine {
   @override
   Future<void> setAudioOnly({required bool enabled}) async {}
 
+  /// Whether the session released it.
+  bool disposed = false;
+
   @override
-  Future<void> dispose() => _events.close();
+  Future<void> dispose() {
+    disposed = true;
+    return _events.close();
+  }
 }
 
 /// A session over [engine].

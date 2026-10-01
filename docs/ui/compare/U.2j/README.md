@@ -1,6 +1,6 @@
 # U.2j 小窗：设计（第 1 版）
 
-- 状态：已确认（2026-10-01，用户：“重构评审全部通过，你设计的挺好的，后续全部通过”；“需要你选的”按建议）。原状态：待确认（第 1 版，2026-10-01）
+- 状态：完成（2026-10-01，[记录](../../records/U.2j.md)）；第 1 版用户已确认，J1～J4 按建议 A
 - 范围：应用内悬浮小窗、Android 系统画中画、桌面小窗（Windows；新设计加 Linux、macOS）和置顶、小窗弹幕、iOS 画中画的差异；候选 C-13（离开应用时自动画中画）
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u2j)（U.2j-01 小窗弹幕）、[TASK_FILES.md](../../TASK_FILES.md#u2j)
 - 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)

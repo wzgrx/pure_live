@@ -15,6 +15,7 @@ import 'package:pure_live/app/fonts.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/app/ui_mode.dart';
+import 'package:pure_live/features/live_play/mini/floating_window.dart';
 import 'package:pure_live/features/splash/splash_page.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/platform_services.dart';
@@ -187,7 +188,17 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
           supportedLocales: [for (final value in AppLanguage.values) value.locale],
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           builder: (context, child) {
-            Widget result = MaterialUiThemeBridge(child: child ?? const SizedBox.shrink());
+            // The room's in-app floating window over every page (U.2j); not
+            // on the television, whose room is always full screen.
+            Widget result = MaterialUiThemeBridge(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  child ?? const SizedBox.shrink(),
+                  if (!tv) const Positioned.fill(child: FloatingRoomLayer()),
+                ],
+              ),
+            );
             if (Platform.isAndroid && refreshMode != null) {
               result = AdaptiveRefreshRateScope(controller: _refreshRate, mode: refreshMode, child: result);
             }

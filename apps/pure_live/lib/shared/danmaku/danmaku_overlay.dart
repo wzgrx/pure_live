@@ -18,6 +18,7 @@ final class DanmakuLook {
     this.bottomMargin = 0,
     this.stroke = true,
     this.strokeWidth = 1.5,
+    this.laneHeight,
   });
 
   /// Font size.
@@ -47,6 +48,10 @@ final class DanmakuLook {
   /// Outline width.
   final double strokeWidth;
 
+  /// The height of a lane; null is 1.4 × [fontSize] (the mini windows give
+  /// their own, U.2j).
+  final double? laneHeight;
+
   @override
   bool operator ==(Object other) =>
       other is DanmakuLook &&
@@ -58,11 +63,12 @@ final class DanmakuLook {
       other.topMargin == topMargin &&
       other.bottomMargin == bottomMargin &&
       other.stroke == stroke &&
-      other.strokeWidth == strokeWidth;
+      other.strokeWidth == strokeWidth &&
+      other.laneHeight == laneHeight;
 
   @override
   int get hashCode =>
-      Object.hash(fontSize, fontWeight, speed, opacity, area, topMargin, bottomMargin, stroke, strokeWidth);
+      Object.hash(fontSize, fontWeight, speed, opacity, area, topMargin, bottomMargin, stroke, strokeWidth, laneHeight);
 }
 
 /// Danmaku flying over the video, right to left in lanes (3.x used
@@ -71,7 +77,16 @@ final class DanmakuLook {
 /// overlapping, which keeps busy rooms readable.
 class DanmakuOverlay extends StatefulWidget {
   /// Creates the overlay.
-  const new({required this.messages, required this.retractions, required this.look, this.visible = true, super.key});
+  const new({
+    required this.messages,
+    required this.retractions,
+    required this.look,
+    this.visible = true,
+    this.maxVisible,
+    this.fps,
+    this.color,
+    super.key,
+  });
 
   /// Messages to fly.
   final Stream<LiveMessage> messages;
@@ -84,6 +99,18 @@ class DanmakuOverlay extends StatefulWidget {
 
   /// Hidden messages are not queued.
   final bool visible;
+
+  /// At most this many messages on screen at once; null for no limit (the
+  /// mini windows' "最大同时显示数量", U.2j).
+  final int? maxVisible;
+
+  /// Repaints at most this many times a second; null for every frame (the
+  /// mini windows' frame rate).
+  final int? fps;
+
+  /// One colour for every message instead of the platform's; null keeps
+  /// theirs.
+  final Color? color;
 
   @override
   State<DanmakuOverlay> createState() => DanmakuOverlayState();
@@ -116,7 +143,7 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
       unawaited(_retractions?.cancel());
       _listen();
     }
-    if (oldWidget.look != widget.look) _clear();
+    if (oldWidget.look != widget.look || oldWidget.color != widget.color) _clear();
     if (!widget.visible) _clear();
   }
 
@@ -141,7 +168,10 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     _frame.value++;
   }
 
-  double get _lineHeight => widget.look.fontSize * 1.4;
+  double get _lineHeight => widget.look.laneHeight ?? widget.look.fontSize * 1.4;
+
+  /// When the painting last moved on (the [DanmakuOverlay.fps] cap).
+  Duration _painted = Duration.zero;
 
   void _add(LiveMessage message) {
     if (!mounted || !widget.visible || _size.isEmpty || message.message.trim().isEmpty) return;
@@ -150,6 +180,7 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
       _addLocal(message, local);
       return;
     }
+    if (widget.maxVisible case final limit? when _items.length >= limit) return;
     final look = widget.look;
     final top = look.topMargin.clamp(0, _size.height).toDouble();
     final usable = (_size.height * look.area.clamp(0, 1)).clamp(0, _size.height - top - look.bottomMargin).toDouble();
@@ -166,7 +197,7 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
       }
     }
     if (lane == null) return;
-    final color = Color.fromARGB(255, message.color.r, message.color.g, message.color.b);
+    final color = widget.color ?? Color.fromARGB(255, message.color.r, message.color.g, message.color.b);
     final style = TextStyle(
       fontSize: look.fontSize,
       fontWeight: FontWeight.values[((look.fontWeight ~/ 100) - 1).clamp(0, 8)],
@@ -193,7 +224,18 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
             maxLines: 1,
           )..layout())
         : null;
-    _items.add(_Flying(message, lane, top + lane * _lineHeight, now, fill, outline));
+    // Centred in its lane when the lane is taller than the text.
+    final inset = ((_lineHeight - fill.height) / 2).clamp(0, _lineHeight).toDouble();
+    _items.add(
+      _Flying(
+        message,
+        lane,
+        top + lane * _lineHeight + (widget.look.laneHeight == null ? 0 : inset),
+        now,
+        fill,
+        outline,
+      ),
+    );
     if (!_ticker.isActive) _ticker.start();
   }
 
@@ -299,10 +341,16 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
       if (gone) item.dispose();
       return gone;
     });
-    _frame.value++;
+    final fps = widget.fps;
+    final interval = fps == null || fps <= 0 ? Duration.zero : Duration(microseconds: 1000000 ~/ fps);
+    if (_items.isEmpty || elapsed - _painted >= interval || elapsed < _painted) {
+      _painted = elapsed;
+      _frame.value++;
+    }
     if (_items.isEmpty) {
       _ticker.stop();
       _elapsed = Duration.zero;
+      _painted = Duration.zero;
     }
   }
 

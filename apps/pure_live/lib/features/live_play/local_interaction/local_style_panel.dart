@@ -148,9 +148,8 @@ class LocalDanmakuPreview extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           i18n('local_danmaku_live_preview'),
-                          style: Theme.of(
-                            context,
-                          ).textTheme.labelSmall?.regular.copyWith(fontSize: 11, color: OnVideoColors.secondary),
+                          style: Theme.of(context).textTheme.labelSmall?.regular
+                              .copyWith(fontSize: 11, color: OnVideoColors.secondary),
                         ),
                       ],
                     ),
@@ -660,7 +659,8 @@ class _Palette extends StatelessWidget {
             Semantics(
               button: true,
               selected: value == selected,
-              label: '${i18n('local_danmaku_color')} #${(value & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}',
+              label:
+                  '${i18n('local_danmaku_color')} #${(value & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}',
               child: InkResponse(
                 key: ValueKey('$paletteKey-$value'),
                 radius: 22,
@@ -747,9 +747,7 @@ class _Slider extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(title, style: theme.textTheme.bodyLarge?.regular.copyWith(fontSize: 15)),
-              ),
+              Expanded(child: Text(title, style: theme.textTheme.bodyLarge?.regular.copyWith(fontSize: 15))),
               DecoratedBox(
                 decoration: BoxDecoration(
                   color: scheme.primary.withValues(alpha: 0.1),

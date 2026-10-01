@@ -341,4 +341,23 @@ abstract final class AppIcons {
 
   /// Shadow or glow (3.x `blur_on_rounded`).
   static const IconData localShadow = Icons.blur_on_rounded;
+
+  // ---- the mini windows (U.2j: in-app floating window, picture-in-picture,
+  // desktop mini window; 3.x player_manager.dart) ----
+
+  /// Back to the room from a mini window (new in U.2j).
+  static const IconData backToRoom = Icons.open_in_full_rounded;
+
+  /// Play in a mini window (3.x `Icons.play_circle_filled`).
+  static const IconData miniPlay = Icons.play_circle_filled;
+
+  /// Pause in a mini window (3.x `Icons.pause_circle_filled`).
+  static const IconData miniPause = Icons.pause_circle_filled;
+
+  /// The desktop mini window stays on top (new in U.2j; Remix, as 3.x's
+  /// "pinned" marks).
+  static const IconData pinned = Remix.pushpin_fill;
+
+  /// The desktop mini window does not stay on top.
+  static const IconData unpinned = Remix.pushpin_line;
 }

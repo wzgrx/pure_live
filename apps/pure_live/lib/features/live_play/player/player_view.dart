@@ -7,22 +7,24 @@ import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_gift_effect.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
-import 'package:pure_live/features/live_play/logic/background_playback.dart';
+import 'package:pure_live/features/live_play/logic/mini_window.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/features/live_play/logic/room_status.dart';
+import 'package:pure_live/features/live_play/mini/mini_player.dart';
+import 'package:pure_live/features/live_play/mini/room_mini_window.dart';
 import 'package:pure_live/features/live_play/player/player_controls.dart';
 import 'package:pure_live/features/live_play/player/player_gestures.dart';
 import 'package:pure_live/features/live_play/player/player_status.dart';
 import 'package:pure_live/features/live_play/player/recording_badge.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
 
@@ -53,8 +55,9 @@ class RoomPlayer extends ConsumerStatefulWidget {
   /// Opens or reveals the IPTV guide (the replay mark, U.2g c18).
   final VoidCallback? onOpenGuide;
 
-  /// In Android's picture-in-picture: only the picture (and danmaku when
-  /// `enablePipDanmaku`).
+  /// In a mini window (U.2j): Android's picture-in-picture (only the
+  /// picture, the "小窗弹幕" and the recording mark) or the desktop mini
+  /// window (with its buttons), as the page's `RoomMiniScope` says.
   final bool pip;
 
   /// A phone: the lock and orientation buttons.
@@ -94,7 +97,10 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   /// do not hide by themselves meanwhile (U.2f, 统一规则).
   int _menus = 0;
   RoomPanelController? _panels;
-  late final Future<bool> _pipSupported = widget.android ? PictureInPicture.supported() : Future.value(false);
+
+  /// Whether the picture's mini window button shows (U.2j: Android's
+  /// picture-in-picture or the desktop mini window).
+  late final Future<bool> _pipSupported = RoomMiniScope.maybeOf(context)?.supported() ?? Future.value(false);
 
   /// The picture keeps its element (and its texture) when picture-in-picture
   /// swaps the layout around it (M13.16).
@@ -187,11 +193,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   }
 
   Future<void> _enterPip() async {
-    final state = _room.session.state;
-    final width = state.videoWidth ?? 16;
-    final height = state.videoHeight ?? 9;
-    final entered = await PictureInPicture.enter(width: width > 0 ? width : 16, height: height > 0 ? height : 9);
-    if (!entered) AppNavigator.toast(i18n('pip_enter_failed'));
+    await RoomMiniScope.maybeOf(context)?.enter(context);
   }
 
   Widget _danmaku({required DanmakuLook look, required bool visible}) => RepaintBoundary(
@@ -211,21 +213,21 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       child: LiveVideoView(key: _video, session: _room.session, fit: fit),
     );
     if (pip) {
-      final small = _scaled(
-        look,
-        watchSetting(ref, Settings.pipDanmakuFontSize),
-        watchSetting(ref, Settings.pipDanmakuArea),
-      );
-      return ColoredBox(
-        color: OnVideoColors.ground,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            video,
-            _danmaku(look: small, visible: showDanmaku),
-            Positioned(left: 6, top: 6, child: RoomRecordingBadge(room: _room.room, compact: true)),
-          ],
-        ),
+      // U.2j: the same surface as the in-app floating window; the picture
+      // keeps its element.
+      final mini = RoomMiniScope.maybeOf(context);
+      final desktop = mini?.desktop ?? false;
+      return MiniPlayerSurface(
+        controller: _room,
+        reconnect: widget.reconnect,
+        video: video,
+        kind: desktop ? MiniKind.desktop : MiniKind.systemPip,
+        onBackToRoom: mini == null ? null : () => unawaited(mini.backToRoom()),
+        onClose: mini == null ? null : () => unawaited(mini.close()),
+        pinned: watchSetting(ref, Settings.windowsPipAlwaysOnTop),
+        canPin: mini?.canPin ?? false,
+        onPin: mini == null ? null : () => unawaited(mini.togglePin()),
+        onDragStart: desktop ? (_) => unawaited(DesktopWindow.startDragging()) : null,
       );
     }
     return ColoredBox(

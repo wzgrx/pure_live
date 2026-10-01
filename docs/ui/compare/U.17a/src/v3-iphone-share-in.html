@@ -1,0 +1,88 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="393x852@3"><link rel="stylesheet" href="kit/kit.css"><style>
+html,body{background:#0E1014}
+/* ---------- iPhone ---------- */
+.ph.iph{border-radius:55px;display:flex;flex-direction:column}
+.fs.ifs{border-radius:55px}
+.ipad{border-radius:18px}
+.isl{position:absolute;left:50%;top:11px;width:126px;height:37px;margin-left:-63px;border-radius:19px;background:#000;z-index:70}
+.isl.r{left:auto;right:11px;top:50%;width:37px;height:126px;margin:-63px 0 0}
+.ist{position:absolute;left:0;right:0;top:0;height:54px;z-index:69;display:flex;align-items:center;justify-content:space-between;font:600 16px/1 'Geist','Noto Sans SC';color:var(--on);pointer-events:none}
+.ist .l{width:136px;text-align:center;padding-top:5px;font-feature-settings:'tnum'}
+.ist .r{width:136px;display:flex;align-items:center;justify-content:center;gap:6px;padding-top:5px}
+.ist.w,.ipst.w{color:#fff}
+.sig{display:flex;align-items:flex-end;gap:1.5px;height:11px}.sig i{width:3px;border-radius:1px;background:currentColor}
+.bt{position:relative;width:25px;height:12px;border-radius:4px;border:1px solid currentColor;padding:1.5px;opacity:.95}.bt i{display:block;height:100%;width:72%;border-radius:2px;background:currentColor}
+.bt::after{content:'';position:absolute;right:-4px;top:3px;width:2px;height:4px;border-radius:0 1px 1px 0;background:currentColor;opacity:.5}
+.hind{position:absolute;left:50%;bottom:8px;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:#111;z-index:70}
+.hind.w{background:rgba(255,255,255,.85)}
+.hind.l{width:200px;margin-left:-100px}
+.hind.p{width:320px;margin-left:-160px}
+.top59{height:59px;flex:none}
+.syn{top:auto !important;bottom:18px;left:44px;transform:none}
+.cbtn{width:40px;height:40px;border-radius:20px;background:rgba(0,0,0,.54);border:1px solid rgba(255,255,255,.24);display:grid;place-items:center;color:#fff;flex:none}
+.edge{position:absolute;z-index:8;border-radius:6px}
+.capx{position:absolute;z-index:80;font:500 12px/1.45 'Noto Sans SC';padding:5px 9px;border-radius:7px;background:rgba(25,28,32,.82);color:#fff;max-width:300px}
+/* ---------- safe area diagram ---------- */
+.sa{position:absolute;z-index:66;background:repeating-linear-gradient(45deg,rgba(217,45,32,.30) 0 6px,rgba(217,45,32,.12) 6px 12px)}
+.sal{position:absolute;z-index:75;font:600 12px/1.3 'Noto Sans SC';color:#B42318;background:#fff;padding:3px 7px;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.25);white-space:nowrap}
+/* ---------- system UI (drawn by iOS; shown only to place our parts) ---------- */
+.home-ios{position:absolute;inset:0;background:url(.cache/img/338.jpg) center/cover}
+.home-ios::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.15)}
+.apps{position:absolute;left:28px;right:28px;top:84px;display:grid;grid-template-columns:repeat(4,1fr);gap:28px 0;justify-items:center;z-index:1}
+.apps div,.dock div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.apps i,.dock i{width:62px;height:62px;border-radius:15px;display:block;background:center/cover}
+.dock{position:absolute;left:14px;right:14px;bottom:24px;height:94px;border-radius:32px;background:rgba(255,255,255,.35);display:flex;justify-content:space-around;align-items:center;z-index:1}
+.pipw{position:absolute;z-index:40;border-radius:12px;overflow:hidden;background:#000 url(.cache/img/158.jpg) center 55%/cover;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.pipw .dim{position:absolute;inset:0;background:rgba(0,0,0,.32)}
+.pipw .b{position:absolute;color:#fff;display:grid;place-items:center}
+.alert{position:absolute;z-index:61;left:50%;top:50%;width:270px;transform:translate(-50%,-50%);border-radius:14px;background:#F2F2F7;text-align:center;overflow:hidden;color:#000}
+.alert .h{padding:19px 16px 2px;font-size:16px;font-weight:600;line-height:1.35}.alert .m{padding:0 16px 18px;font-size:13px;line-height:1.4}
+.alert .a{display:flex;border-top:1px solid #C7C7CC}.alert .a span{flex:1;height:44px;display:grid;place-items:center;font-size:16px;color:#0A64D6}
+.alert .a span+span{border-left:1px solid #C7C7CC;font-weight:600}
+.shs{position:absolute;left:0;right:0;bottom:0;z-index:61;background:#F2F2F7;border-radius:28px 28px 0 0;color:#000;padding:18px 16px 40px}
+.shs .hd{display:flex;align-items:center;gap:12px;padding:0 2px 14px;border-bottom:1px solid #D1D1D6}
+.shs .hd i{width:46px;height:46px;border-radius:10px;background:#fff center/80% no-repeat;flex:none;box-shadow:0 0 0 .5px rgba(0,0,0,.12)}
+.shs .hd .x{flex:1;min-width:0}.shs .hd .t{font-size:15px;font-weight:600}.shs .hd .s{font-size:12px;color:#6C6C70;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.shs .hd .c{width:30px;height:30px;border-radius:15px;background:#E3E3E8;display:grid;place-items:center;color:#6C6C70;flex:none}
+.shs .ap{display:flex;justify-content:space-between;padding:16px 4px 14px}
+.shs .ap div{width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:#3C3C43;text-align:center;line-height:1.25}
+.shs .ap i{width:60px;height:60px;border-radius:14px;display:grid;place-items:center;color:#fff;font-style:normal;background:center/80% no-repeat}
+.shs .grp{background:#fff;border-radius:12px;overflow:hidden}
+.shs .grp div{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:15px;border-bottom:1px solid #E5E5EA}
+.shs .grp div:last-child{border:0}.shs .grp .mo,.shs .grp .mr{color:#3C3C43}
+.hl{box-shadow:0 0 0 3px #0A64D6;border-radius:16px}
+.sbar{position:absolute;z-index:62;left:12px;right:12px;display:flex;align-items:center;gap:8px;min-height:48px;padding:6px 6px 6px 16px;border-radius:12px;background:#2E3135;color:#EFF0F7;font-size:14px;box-shadow:0 3px 10px rgba(0,0,0,.25)}
+.sbar .x{flex:1;line-height:1.4}.sbar .go{height:36px;padding:0 12px;border-radius:18px;display:flex;align-items:center;color:#A0CAFD;font-weight:600;flex:none}
+.sbar .cl{width:36px;height:36px;display:grid;place-items:center;color:#C3C7CF;flex:none}
+.cmp{position:absolute;z-index:61;left:20px;right:20px;top:120px;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.25);color:#000}
+.cmp .nb2{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid #D1D1D6;font-size:16px}
+.cmp .nb2 span:first-child,.cmp .nb2 span:last-child{color:#0A64D6}.cmp .nb2 b{font-weight:600}
+.cmp .bd{display:flex;gap:10px;padding:12px 14px;height:150px}.cmp .bd p{flex:1;font-size:15px;line-height:1.4;word-break:break-all}
+.cmp .bd i{width:64px;height:64px;border-radius:6px;background:#E5E5EA;flex:none;display:grid;place-items:center;color:#8E8E93;font-style:normal}
+/* ---------- iPad ---------- */
+.ipst{position:absolute;left:0;right:0;top:0;height:24px;z-index:69;display:flex;align-items:center;justify-content:space-between;padding:0 20px 0 24px;font:600 13px/1 'Geist','Noto Sans SC';color:var(--on);pointer-events:none}
+.ipst .r{display:flex;align-items:center;gap:6px}
+.ptr{position:absolute;z-index:75;width:20px;height:20px;border-radius:10px;background:rgba(60,60,67,.55);box-shadow:0 0 0 1px rgba(255,255,255,.6)}
+.hovc{position:relative}.hovc::after{content:'';position:absolute;inset:0;border-radius:20px;background:rgba(25,28,32,.07);box-shadow:inset 0 0 0 1px rgba(25,28,32,.12)}
+.wctl{position:absolute;z-index:72;display:flex;gap:8px}.wctl i{width:12px;height:12px;border-radius:6px;display:block}
+.wctl .c{background:#FF5F57;box-shadow:inset 0 0 0 .5px #E0443E}.wctl .m{background:#FEBC2E;box-shadow:inset 0 0 0 .5px #DEA123}.wctl .z{background:#28C840;box-shadow:inset 0 0 0 .5px #1AAB29}
+.hud{position:absolute;z-index:65;border-radius:22px;background:#fff;box-shadow:0 18px 50px rgba(0,0,0,.35);color:#000;padding:18px 22px 20px}
+.hud .h{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;padding-bottom:12px;border-bottom:1px solid #E5E5EA}
+.hud .h i{width:28px;height:28px;border-radius:7px;background:center/90% no-repeat;display:block}
+.hud .cols{display:grid;grid-template-columns:repeat(4,1fr);gap:0 26px;padding-top:12px}
+.hud .g{font-size:12px;font-weight:600;color:#6C6C70;margin:8px 0 4px}
+.hud .hk{display:flex;justify-content:space-between;gap:10px;font-size:13px;line-height:25px;white-space:nowrap}.hud .hk b{font-weight:400;color:#6C6C70;font-family:'Geist','Noto Sans SC'}
+.pop{position:absolute;z-index:62;width:360px;border-radius:14px;background:#F2F2F7;box-shadow:0 12px 40px rgba(0,0,0,.28);color:#000;padding:14px 14px 16px}
+.pop::before{content:'';position:absolute;top:-9px;right:var(--ar,24px);width:18px;height:18px;background:#F2F2F7;transform:rotate(45deg);border-radius:3px}
+.gsnack{position:absolute;z-index:62;left:10px;right:10px;border-radius:15px;background:#FFDAD6;color:#410002;padding:14px 18px}
+.gsnack b{display:block;font-size:16px;font-weight:800;margin-bottom:4px}.gsnack span{font-size:14px}
+.split{position:absolute;top:0;bottom:0;width:10px;background:#000;z-index:68;display:grid;place-items:center}.split i{width:4px;height:44px;border-radius:2px;background:#8E8E93;display:block}
+.other{position:absolute;top:0;bottom:0;background:#fff;z-index:2;overflow:hidden}
+.other .ln2{height:12px;border-radius:6px;background:#E5E5EA;margin:16px 28px}
+.stg{position:absolute;inset:0;background:url(.cache/img/287.jpg) center/cover}
+.stg::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.12)}
+.shelf{position:absolute;left:18px;width:120px;border-radius:10px;background:rgba(255,255,255,.55);box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:3}
+.idock{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);height:74px;padding:0 12px;border-radius:26px;background:rgba(255,255,255,.4);display:flex;gap:12px;align-items:center;z-index:4}
+.idock i{width:54px;height:54px;border-radius:13px;display:block;background:center/cover}
+.iwin{position:absolute;z-index:10;border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.35);background:var(--surface)}
+</style></head><body><div class="ph iph"><div class="ist"><span class="l">21:36</span><span class="r"><span class="sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></span><span class="mi" style="font-size:17px">wifi</span><span class="bt"><i></i></span></span></div><div class="top59"></div><div style="position:absolute;left:0;right:0;top:59px;bottom:0;background:#fff"><div style="height:200px;margin:12px 16px;border-radius:12px;background:#000 url(.cache/img/158.jpg) center/cover"></div><div style="height:12px;border-radius:6px;background:#E5E5EA;margin:14px 20px;width:60%"></div><div style="height:12px;border-radius:6px;background:#E5E5EA;margin:14px 20px;width:88%"></div><div style="height:12px;border-radius:6px;background:#E5E5EA;margin:14px 20px;width:92%"></div><div style="height:12px;border-radius:6px;background:#E5E5EA;margin:14px 20px;width:70%"></div><div style="height:12px;border-radius:6px;background:#E5E5EA;margin:14px 20px;width:84%"></div><div style="height:12px;border-radius:6px;background:#E5E5EA;margin:14px 20px;width:66%"></div><div style="height:12px;border-radius:6px;background:#E5E5EA;margin:14px 20px;width:90%"></div><div style="height:12px;border-radius:6px;background:#E5E5EA;margin:14px 20px;width:58%"></div><div class="capx" style="left:16px;top:6px">其他应用（示意）</div></div><div class="scrim" style="z-index:60;background:rgba(0,0,0,.35)"></div><div class="cmp"><div class="nb2"><span>取消</span><b>ShareExtension</b><span>发布</span></div><div class="bd"><p>深夜电台 · 点歌接龙到天亮 https://live.bilibili.com/1234567</p><i><span class="mr" style="font-size:26px">link</span></i></div></div><div class="capx" style="left:16px;top:320px;max-width:361px;z-index:90">v3：选“纯粹直播”后弹出 Xcode 模板的发布框，点“发布”什么也不做（ShareViewController.swift:18-23）；应用本身也只在 Android 接收分享（main.dart:105-106）</div><div class="isl"></div><div class="hind"></div></div></body></html>

@@ -56,8 +56,8 @@
 | [U.2e](compare/U.2e/README.md) | **弹幕列表和弹幕设置页**：弹幕列表、醒目留言、弹幕设置标签页、屏蔽关键词 | 竖屏、横屏、宽屏 | [5 / 0 / 0 / 9](INVENTORY.md#u2e) | U.2a | 完成（2026-10-01，[记录](records/U.2e.md)） |
 | [U.2f](compare/U.2f/README.md) | **弹窗**：清晰度、线路、录制、弹幕设置、右上角菜单、长按弹幕；切换直播间、定时关闭、房间音量、投屏、获取直链（子对话框下一批） | 竖屏、横屏、宽屏 | [1 / 12 / 0 / 6](INVENTORY.md#u2f) | U.2a | 完成（2026-10-01，[记录](records/U.2f.md)） |
 | [U.2g](compare/U.2g/README.md) | **直播间的状态**：加载、未开播、播放失败和重连、受限、纯音频；网络电视节目单和回看 | 竖屏、横屏、宽屏 | [0 / 1 / 1 / 0](INVENTORY.md#u2g) | U.2a | 完成（2026-10-01，[记录](records/U.2g.md)） |
-| [U.2h](compare/U.2h/README.md) | **飞行弹幕渲染**：渲染选型和优化（计划书第 9.1 节），速度按时间算，代码在 `live_danmaku` | 竖屏、横屏、宽屏 | — | — | 未开始 |
-| [U.2i](compare/U.2i/README.md) | **刷新率和帧率匹配**：v3 的三种刷新率模式；播放时匹配视频帧率（计划书第 9.1 节） | Android、电视 | — | — | 未开始 |
+| [U.2h](compare/U.2h/README.md) | **飞行弹幕渲染**：渲染选型和优化（计划书第 9.1 节），速度按时间算，代码在 `live_danmaku` | 竖屏、横屏、宽屏 | — | — | 设计已确认，待开发（并入 F.2a） |
+| [U.2i](compare/U.2i/README.md) | **刷新率和帧率匹配**：v3 的三种刷新率模式；播放时匹配视频帧率（计划书第 9.1 节） | Android、电视 | — | — | 设计已确认，待开发（并入 F.2a） |
 | [U.2k](compare/U.2k/README.md) | **本地互动**：v3 的本地互动体验：本地弹幕输入（全屏输入框、竖屏入口）、本地弹幕样式编辑、模拟礼物特效、本地互动面板和设置页；v4 还没有这个功能，设计和实现一起做 | 竖屏、横屏、宽屏 | [0 / 3 / 0 / 1](INVENTORY.md#u2k) | U.2f | 完成（2026-10-01，[记录](records/U.2k.md)） |
 | [U.2j](compare/U.2j/README.md) | **小窗**：应用内悬浮小窗、Android 和 iOS 画中画、Windows 和 Linux 桌面小窗（可置顶）、小窗弹幕 | 竖屏、横屏、宽屏 | [0 / 0 / 1 / 0](INVENTORY.md#u2j) | U.2a | 完成（2026-10-01，[记录](records/U.2j.md)） |
 
@@ -298,7 +298,7 @@ Android TV，遥控器操作，以 pure_live_TV 为基线（不是 v3），1920�
 | U.2k | U.16（真机） | Windows 上礼物 emoji（COLRv1 子集字体）是否空白，Windows 10 可能不支持；有问题就在 `local_interaction_scope.dart` 的 `_bundledEmoji` 里让 Windows 用系统 emoji |
 | U.2j | U.16（真机） | Windows：无标题栏小窗能否拉边改大小、关闭后最小化到任务栏、置顶切换、记住位置；K90：“去设置”能否直接打开画中画设置页，Android 8～11 离开触发是否误触发自动画中画 |
 | U.2g | U.16（真机） | 播放器不报告第一帧，“正在恢复实时画面”最多显示 3 秒；对照真机看是否合适 |
-| U.3d | M12.5（暂停中） | 剪贴板识别改调 U.3d 的 `showRoomPrompt`（`shared/rooms/room_prompt.dart` 同名，用 U.3d 的）；不加“不再识别”按钮——v3 只有“取消 / 进入直播间”（`common/widgets/share_command_import_dialog.dart:58-66`） |
+| U.3d | F.0a（原 M12.5） | 剪贴板识别改调 U.3d 的 `showRoomPrompt`（`shared/rooms/room_prompt.dart` 同名，用 U.3d 的）；不加“不再识别”按钮——v3 只有“取消 / 进入直播间”（`common/widgets/share_command_import_dialog.dart:58-66`） |
 | U.3a、U.3b | U.4c | 360 宽的手机上关注页带数字的状态标签缩到约 0.8（右上从一个按钮变成两个），要不要调随 U.4c |
 | U.3b | U.2d、U.4、U.6、U.8 等 | 首页分界改成 600（`homeTabletBreakpoint`，原 680）；各页面里还写着 680 的分界随各自任务改到计划书第 5 节的分档 |
 | U.4a | U.5a、U.5b、U.6、U.15 | 搜索、观看记录、设置里的卡片预览、电视还在用旧的 `RoomCard`，各自开发时换成 live_ui 的 `LiveRoomCard`（同一个组件） |

@@ -229,3 +229,5 @@ v4 现在（偏差最大）：
 | U.15g 电视音乐 | [compare/U.15g](compare/U.15g/README.md) |
 | U.15h 电视壁纸 | [compare/U.15h](compare/U.15h/README.md) |
 | U.2f 直播间弹窗 | [compare/U.2f](compare/U.2f/README.md) |
+| U.2h 飞行弹幕渲染 | [compare/U.2h](compare/U.2h/README.md) |
+| U.2i 刷新率和帧率匹配 | [compare/U.2i](compare/U.2i/README.md) |

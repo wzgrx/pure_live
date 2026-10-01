@@ -2759,6 +2759,7 @@
     "tags_deleted": "已删除标签“{name}”",
     "tags_drag_handle": "拖动排序",
     "tags_empty_hint": "标签用来给关注的直播间分组：在直播间卡片的菜单里给直播间加标签，关注页可以按标签筛选。",
+    "tags_empty_title": "暂无自定义标签。",
     "tags_need_follow_tip": "需要先关注",
     "tags_room_count": "{count} 个直播间",
     "tags_rooms_label": "关注中带此标签的直播间",

@@ -136,87 +136,92 @@ class _TagEditorDialogState extends State<TagEditorDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final styles = context.textStyles;
     final message = _staleError ?? _saveError;
     return PopScope<Object?>(
       canPop: !_saving,
-      child: AlertDialog(
-        scrollable: true,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        title: Text(i18n(_isEdit ? 'edit_tag' : 'add_tag'), style: styles.t16Bold),
-        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(i18n('tag_name_label'), style: styles.t12Bold.copyWith(color: theme.colorScheme.primary)),
-              const SizedBox(height: 6),
-              _field(
-                key: const ValueKey('tag-editor-name'),
-                controller: _name,
-                focusNode: _nameFocus,
-                autofocus: !_isEdit,
-                maxLength: tagNameMaxLength,
-                hint: i18n('tag_input_hint'),
-                error: _nameError,
-                clearLabel: i18n('clear_tag_name'),
-                action: TextInputAction.next,
-              ),
-              const SizedBox(height: 8),
-              Text(i18n('tag_desc_label'), style: styles.t12Muted),
-              const SizedBox(height: 6),
-              _field(
-                key: const ValueKey('tag-editor-description'),
-                controller: _description,
-                maxLength: tagDescriptionMaxLength,
-                hint: i18n('tag_desc_hint'),
-                clearLabel: i18n('clear_tag_description'),
-                action: TextInputAction.done,
-                onSubmitted: () => unawaited(_submit()),
-              ),
-              if (message != null) ...[
-                const SizedBox(height: 12),
-                Semantics(
-                  liveRegion: true,
-                  child: Container(
-                    key: const ValueKey('tag-editor-error'),
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.errorContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(message, style: TextStyle(color: theme.colorScheme.onErrorContainer)),
-                  ),
+      child: DialogButtonsTheme(
+        child: AlertDialog(
+          key: const ValueKey('tag-editor'),
+          scrollable: true,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          title: Text(
+            i18n(_isEdit ? 'edit_tag' : 'add_tag'),
+            style: context.textStyles.t18.copyWith(fontSize: 20, fontWeight: FontWeight.w600),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // c7: the label sits on the field's border, the count of
+                // characters and the error under it (3.x: a title above
+                // each field, no count).
+                _field(
+                  key: const ValueKey('tag-editor-name'),
+                  controller: _name,
+                  focusNode: _nameFocus,
+                  autofocus: !_isEdit,
+                  maxLength: tagNameMaxLength,
+                  label: i18n('tag_name_label'),
+                  hint: i18n('tag_input_hint'),
+                  error: _nameError,
+                  clearLabel: i18n('clear_tag_name'),
+                  action: TextInputAction.next,
                 ),
+                const SizedBox(height: 8),
+                _field(
+                  key: const ValueKey('tag-editor-description'),
+                  controller: _description,
+                  maxLength: tagDescriptionMaxLength,
+                  label: i18n('tag_desc_label'),
+                  hint: i18n('tag_desc_hint'),
+                  clearLabel: i18n('clear_tag_description'),
+                  action: TextInputAction.done,
+                  onSubmitted: () => unawaited(_submit()),
+                ),
+                if (message != null) ...[
+                  const SizedBox(height: 12),
+                  Semantics(
+                    liveRegion: true,
+                    child: Container(
+                      key: const ValueKey('tag-editor-error'),
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(message, style: TextStyle(color: theme.colorScheme.onErrorContainer)),
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
+          actionsOverflowDirection: VerticalDirection.down,
+          actionsOverflowButtonSpacing: 8,
+          actions: [
+            TextButton(
+              key: const ValueKey('tag-editor-cancel'),
+              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+              onPressed: _saving ? null : () => Navigator.pop(context),
+              child: Text(i18n('cancel')),
+            ),
+            FilledButton(
+              key: const ValueKey('tag-editor-confirm'),
+              style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
+              onPressed: _staleError == null && !_saving ? () => unawaited(_submit()) : null,
+              child: _saving
+                  ? SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2, semanticsLabel: i18n('refresh_loading')),
+                    )
+                  : Text(i18n('confirm')),
+            ),
+          ],
         ),
-        actionsPadding: const EdgeInsets.fromLTRB(0, 0, 16, 16),
-        actionsOverflowDirection: VerticalDirection.down,
-        actionsOverflowButtonSpacing: 8,
-        actions: [
-          TextButton(
-            key: const ValueKey('tag-editor-cancel'),
-            style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-            onPressed: _saving ? null : () => Navigator.pop(context),
-            child: Text(i18n('cancel'), style: styles.t14Muted),
-          ),
-          FilledButton(
-            key: const ValueKey('tag-editor-confirm'),
-            style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
-            onPressed: _staleError == null && !_saving ? () => unawaited(_submit()) : null,
-            child: _saving
-                ? SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, semanticsLabel: i18n('refresh_loading')),
-                  )
-                : Text(i18n('confirm')),
-          ),
-        ],
       ),
     );
   }
@@ -225,6 +230,7 @@ class _TagEditorDialogState extends State<TagEditorDialog> {
     required Key key,
     required TextEditingController controller,
     required int maxLength,
+    required String label,
     required String hint,
     required String clearLabel,
     required TextInputAction action,
@@ -243,17 +249,19 @@ class _TagEditorDialogState extends State<TagEditorDialog> {
     onChanged: (_) => _clearErrors(),
     onSubmitted: onSubmitted == null ? null : (_) => onSubmitted(),
     decoration: InputDecoration(
+      labelText: label,
       hintText: hint,
       errorText: error,
+      floatingLabelBehavior: FloatingLabelBehavior.always,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
       suffixIcon: ValueListenableBuilder<TextEditingValue>(
         valueListenable: controller,
         builder: (context, value, _) => value.text.isEmpty
             ? const SizedBox.shrink()
             : IconButton(
                 tooltip: clearLabel,
-                icon: const Icon(Icons.clear, size: 18),
+                icon: const Icon(AppIcons.clearField, size: 18),
                 onPressed: () {
                   controller.clear();
                   _clearErrors();

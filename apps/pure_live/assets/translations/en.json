@@ -2760,6 +2760,7 @@
     "tags_deleted": "Tag \"{name}\" deleted",
     "tags_drag_handle": "Drag to reorder",
     "tags_empty_hint": "Tags group your followed rooms: tag a room from its card menu, then filter by tag on the Follows page.",
+    "tags_empty_title": "No custom tags yet.",
     "tags_need_follow_tip": "Must follow first",
     "tags_room_count": "{count} rooms",
     "tags_rooms_label": "Followed rooms with this tag",

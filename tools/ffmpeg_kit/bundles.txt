@@ -1,0 +1,9 @@
+# The recorder's native FFmpeg (ffmpeg_kit_extended_flutter 0.6.2's build
+# hook; 3.x's FFmpeg 9.0.2 build, release native-ffmpeg-9.0.2-b1).
+# fetch.sh / fetch.ps1 keep them in a cache outside the repository and link
+# them into .ffmpeg_kit/, where `ffmpeg_kit_extended_config` in the root
+# pubspec.yaml points. Change a bundle here and in that block together.
+# file	sha256	url
+bundle-base-shared-lgpl-release.aar	c6c9b1ff7be756b0fb587f98e05972ca4dae97e8275c22961b443b4fd5f49bf7	https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-shared-lgpl-release.aar
+bundle-base-linux-x86_64-shared-lgpl.zip	d6003c3feb2bdcdccd0d4ad5e7b76fa8e8951430c6a22c1db7be5e13da19403d	https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-linux-x86_64-shared-lgpl.zip
+bundle-base-windows-x86_64-shared-lgpl.zip	e61684a91f7471ba00f1d5b36a24e93ab602ef72bd57000d94990e7e0c5dfe3a	https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-windows-x86_64-shared-lgpl.zip

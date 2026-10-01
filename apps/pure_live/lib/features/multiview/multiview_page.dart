@@ -90,8 +90,9 @@ bool get _mobile => defaultTargetPlatform == TargetPlatform.android || defaultTa
 /// The right column of wide screens (U.2f's panel width).
 const double _columnWidth = roomSidePanelWidth;
 
-/// The landscape phone's right column is at least this wide.
-const double _minColumnWidth = 240;
+/// The landscape phone's right column is at least this wide: the selected
+/// cell's five 48-point buttons on one row with 8 at each side.
+const double _minColumnWidth = 256;
 
 class _MultiviewPageState extends ConsumerState<MultiviewPage> {
   late final MultiviewController _controller;
@@ -474,7 +475,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
                       child: Row(
                         children: [
                           LayoutSegments(controller: _controller, onChanged: _setLayout),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 8 - toolbarToggleInset),
                           ToolbarToggles(controller: _controller, onDanmakuSettings: _toggleDanmakuSettings),
                         ],
                       ),
@@ -513,21 +514,32 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
   }
 
   /// The layouts and the switches on a row of their own (portrait, wide).
+  /// The switches' 48-point targets fill the row's height and reach into
+  /// the padding beside them: the circles stay where they were.
   Widget _toolbar({required bool icons}) => Padding(
     key: const ValueKey('multiview-toolbar'),
-    padding: EdgeInsets.fromLTRB(icons ? 16 : 12, 6, icons ? 16 : 8, 6),
+    padding: EdgeInsets.fromLTRB(icons ? 16 : 12, 4, (icons ? 16 : 8) - toolbarToggleInset, 4),
     child: Row(
       children: [
         Expanded(
-          child: Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: LayoutSegments(controller: _controller, icons: icons, onChanged: _setLayout),
+          child: LayoutBuilder(
+            builder: (context, box) => Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: LayoutSegments(
+                  controller: _controller,
+                  icons: icons,
+                  // Narrow phones and 1+3's fourth switch: narrower segments
+                  // before smaller words.
+                  dense: !icons && box.maxWidth < LayoutSegments.width,
+                  onChanged: _setLayout,
+                ),
+              ),
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 8 - toolbarToggleInset),
         ToolbarToggles(controller: _controller, onDanmakuSettings: _toggleDanmakuSettings),
       ],
     ),

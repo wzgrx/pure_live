@@ -13,6 +13,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/multiview/multiview_page.dart';
 import 'package:pure_live/features/multiview/widgets/cell_view.dart';
+import 'package:pure_live/features/multiview/widgets/toolbar.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
@@ -287,6 +288,99 @@ void main() {
     await tester.pump();
     expect(find.text('多画面'), findsOneWidget);
 
+    await _close(tester, services);
+  });
+
+  testWidgets('tap targets (UI_PLAN 5.4): 48 around the 40 buttons and the 38 switches in every arrangement', (
+    tester,
+  ) async {
+    const toggles = ['multiview-danmaku', 'multiview-danmaku-settings', 'multiview-mute-all'];
+    const buttons = [
+      'multiview-control-play',
+      'multiview-control-refresh',
+      'multiview-control-change',
+      'multiview-control-room',
+      'multiview-control-close',
+    ];
+    Rect circle(String key) => tester.getRect(find.descendant(of: _key(key), matching: find.byType(Material)).first);
+    // Each 48 square around its circle, side by side without overlapping,
+    // on one row.
+    void expectTargets(List<String> keys, double visible) {
+      for (final (index, key) in keys.indexed) {
+        final target = tester.getRect(_key(key));
+        expect(target.size, const Size.square(48), reason: key);
+        expect(circle(key).size, Size.square(visible), reason: key);
+        expect(circle(key).center, target.center, reason: key);
+        if (index == 0) continue;
+        final previous = tester.getRect(_key(keys[index - 1]));
+        expect(target.left, greaterThanOrEqualTo(previous.right), reason: key);
+        expect(target.center.dy, previous.center.dy, reason: key);
+      }
+    }
+
+    // Narrower segments where the row is short (the words then keep about
+    // their size: each segment 48 instead of 56 with a phone's font).
+    bool dense() => tester.widget<LayoutSegments>(find.byType(LayoutSegments)).dense;
+
+    // Portrait 393: the circles where they were (12 in, 8 from the end, the
+    // toolbar 56 high), the volume after the buttons.
+    var (services, _) = await _pump(tester, const Size(393, 852));
+    await _pick(tester, '1');
+    expectTargets(toggles, 38);
+    expectTargets(buttons, 40);
+    expect(circle(buttons.first).left, 12);
+    expect(circle(toggles.last).right, 393 - 8);
+    expect(tester.getSize(_key('multiview-toolbar')).height, 56);
+    expect(dense(), isFalse);
+    expect(tester.getCenter(_key('multiview-volume-slider')).dy, tester.getCenter(_key(buttons.first)).dy);
+    expect(tester.getRect(_key('multiview-volume-slider')).left - circle(buttons.last).right, greaterThanOrEqualTo(8));
+    // A tap between the circle and the target's edge counts.
+    await tester.tapAt(tester.getRect(_key('multiview-mute-all')).centerLeft + const Offset(2, 0));
+    await _wait(tester);
+    expect(find.descendant(of: _key('multiview-mute-all'), matching: find.byIcon(AppIcons.mutedAll)), findsOneWidget);
+    await tester.tapAt(tester.getRect(_key('multiview-control-play')).topLeft + const Offset(2, 2));
+    await _wait(tester);
+    expect(_inCell(1, _key('multiview-paused')), findsOneWidget);
+
+    // 1+3: the saver's target too, so narrower segments.
+    await tester.tap(_key('multiview-layout-focus'));
+    await _wait(tester);
+    expectTargets([...toggles, 'multiview-saver'], 38);
+    expect(dense(), isTrue);
+    await _close(tester, services);
+
+    // Portrait 360: the volume takes a row of its own rather than a slider
+    // too short to use; narrower segments.
+    (services, _) = await _pump(tester, const Size(360, 780));
+    await _pick(tester, '1');
+    expectTargets(toggles, 38);
+    expectTargets(buttons, 40);
+    expect(dense(), isTrue);
+    expect(
+      tester.getRect(_key('multiview-volume-slider')).top,
+      greaterThan(tester.getRect(_key(buttons.first)).bottom),
+    );
+    await _close(tester, services);
+
+    // A narrow landscape phone: the column fits the five targets on a row.
+    (services, _) = await _pump(tester, const Size(740, 360));
+    await _pick(tester, '1');
+    await tester.tap(_key('multiview-cell-1'));
+    await _wait(tester);
+    final column = tester.getRect(_key('multiview-column'));
+    expect(column.width, 256);
+    expectTargets(toggles, 38);
+    expectTargets(buttons, 40);
+    expect(circle(buttons.first).left, column.left + 12);
+    expect(tester.getRect(_key(buttons.last)).right, lessThanOrEqualTo(column.right));
+    await _close(tester, services);
+
+    // Wide: the same targets; the last circle 16 from the end as before.
+    (services, _) = await _pump(tester, const Size(1280, 800));
+    await _pick(tester, '1');
+    expectTargets(toggles, 38);
+    expectTargets(buttons, 40);
+    expect(circle(toggles.last).right, 1280 - 16);
     await _close(tester, services);
   });
 

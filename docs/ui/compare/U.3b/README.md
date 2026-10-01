@@ -1,6 +1,6 @@
 # U.3b 宽屏首页：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：已确认（2026-10-01，用户：“重构评审全部通过，你设计的挺好的，后续全部通过”；“需要你选的”按建议）。原状态：待确认（第 1 版，2026-10-01）
 - 范围：平板、折叠屏、Windows、Linux、iPad、macOS 的首页外壳：左侧导航栏、上面的菜单和工具按钮、录制中心的打开方式、什么宽度换成这个排法
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u3b)、[V3_UI_INVENTORY.md](../../V3_UI_INVENTORY.md) 第 1 节；手机首页 [U.3a](../U.3a/README.md)
 - 评审页：claude.ai 私有页面，每条改动可以点“满意 / 不满意 / 再想想”；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（卡片、菜单、页面内容从 U.3a 的 `gen.py` 取，两边同一套）

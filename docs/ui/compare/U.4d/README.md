@@ -1,6 +1,6 @@
 # U.4d 分区：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：已确认（2026-10-01，用户：“重构评审全部通过，你设计的挺好的，后续全部通过”；“需要你选的”按建议）。原状态：待确认（第 1 版，2026-10-01）
 - 范围：首页“分区”页（平台标签、分类标签、分区网格、“关注分区”按钮）和分区卡片；分区里的房间在 [U.4e](../U.4e/README.md)，关注分区和平台显示在 [U.4f](../U.4f/README.md)
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u4d)、[TASK_FILES.md](../../TASK_FILES.md#u4d)
 - 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（`python3 docs/ui/compare/U.4d/src/gen.py && python3 tools/ui/mock/render.py docs/ui/compare/U.4d/src/ --annotate`）

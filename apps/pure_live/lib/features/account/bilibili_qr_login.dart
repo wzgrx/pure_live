@@ -318,6 +318,8 @@ class _QrCard extends StatelessWidget {
     final phase = login.phase;
     final url = login.url;
     final ink = context.textStyles.t14.copyWith(color: QrColors.ink);
+    // The veil is always white: the dark theme's light primary would fade on it.
+    final mark = scheme.brightness == Brightness.dark ? QrColors.ink : scheme.primary;
     Widget veil(List<Widget> children, {Key? key}) => Positioned.fill(
       key: key,
       child: ColoredBox(
@@ -344,7 +346,7 @@ class _QrCard extends StatelessWidget {
       ]),
       BilibiliQrPhase.waiting => null,
       BilibiliQrPhase.scanned => veil(key: const ValueKey('qr-scanned'), [
-        Icon(AppIcons.qrScanned, size: 44, color: scheme.primary),
+        Icon(AppIcons.qrScanned, size: 44, color: mark),
         const SizedBox(height: 8),
         Text(i18n('qr_scanned'), style: context.textStyles.t15.emphasis.copyWith(color: QrColors.ink)),
       ]),
@@ -372,7 +374,7 @@ class _QrCard extends StatelessWidget {
         Text(i18n('account_verifying'), style: ink),
       ]),
       BilibiliQrPhase.done => veil(key: const ValueKey('qr-done'), [
-        Icon(AppIcons.qrScanned, size: 44, color: scheme.primary),
+        Icon(AppIcons.qrScanned, size: 44, color: mark),
         const SizedBox(height: 8),
         Text(i18n('bilibili_login_verified'), textAlign: TextAlign.center, style: ink),
       ]),

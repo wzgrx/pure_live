@@ -514,7 +514,11 @@ class _IptvPageState extends ConsumerState<IptvPage> {
                       text: i18n('iptv_initial_load_failed'),
                       actions: [
                         TextButton.icon(
-                          style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 40)),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(48, 40),
+                            alignment: AlignmentDirectional.centerStart,
+                          ),
                           onPressed: () => ref.invalidate(iptvOverviewProvider),
                           icon: const Icon(AppIcons.retry, size: 18),
                           label: Text(i18n('retry')),
@@ -563,7 +567,11 @@ class _IptvPageState extends ConsumerState<IptvPage> {
         actions: [
           TextButton(
             key: const ValueKey('iptv-enable'),
-            style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 40)),
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(48, 40),
+              alignment: AlignmentDirectional.centerStart,
+            ),
             onPressed: () =>
                 unawaited(_set(Settings.hotAreasList, [...platforms, SiteIds.iptv], message: i18n('iptv_enabled'))),
             child: Text(i18n('iptv_enable')),

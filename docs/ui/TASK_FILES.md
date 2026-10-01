@@ -72,8 +72,6 @@
 - `v3:modules/live_play/widgets/danmaku/danmaku_message_actions.dart`
 - `v3:modules/live_play/widgets/resolution_selector/line_selector.dart`
 - `v3:modules/live_play/widgets/resolution_selector/resolution_selector.dart`
-- `v3:modules/live_play/widgets/local_interaction/local_danmaku_style_editor.dart`
-- `v3:modules/live_play/widgets/local_interaction/local_interaction_sheet.dart`
 - `v3:modules/live_play/widgets/button/live_play_menu_button.dart`
 - `v3:modules/live_play/widgets/button/record_action_button.dart`
 - `v3:modules/live_play/widgets/button/record_action_content.dart`
@@ -93,6 +91,11 @@
 
 - `v3:modules/live_play/widgets/danmaku/compact_danmaku_overlay.dart`
 - `v3:player/utils/pip_window_widget.dart`
+
+## U.2k
+
+- `v3:modules/live_play/widgets/local_interaction/local_danmaku_style_editor.dart`
+- `v3:modules/live_play/widgets/local_interaction/local_interaction_sheet.dart`
 
 ## U.3a
 

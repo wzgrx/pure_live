@@ -213,11 +213,24 @@ final class Recorder {
   /// Adds a task for [room] (or returns the existing one) and starts it, or
   /// waits for the room to go live when not [startImmediately]. "Start now"
   /// does not check the card's cached state: the resolver decides.
-  Future<RecordTask?> addTask(LiveRoom room, {bool startImmediately = true}) async {
+  ///
+  /// A new task takes the live room's own choices: [quality] and
+  /// [recordDanmaku] instead of the settings' (`RecordTask.qualityOverride`,
+  /// `recordDanmakuOverride`), and [autoRecord] (`RecordTask.autoRecord`).
+  Future<RecordTask?> addTask(
+    LiveRoom room, {
+    bool startImmediately = true,
+    String? quality,
+    bool? recordDanmaku,
+    bool? autoRecord,
+  }) async {
     if (_closing || !await _access(interactive: true) || _closing) return null;
     final existing = _tasks.where((task) => task.roomId == room.roomId && task.platform == room.platform).firstOrNull;
     if (existing != null) return existing;
-    final task = RecordTask.fromRoom(room, now: clock.now());
+    final task = RecordTask.fromRoom(room, now: clock.now())
+      ..qualityOverride = quality
+      ..recordDanmakuOverride = recordDanmaku
+      ..autoRecord = autoRecord;
     _tasks.add(task);
     _update(task);
     if (startImmediately) {
@@ -228,6 +241,43 @@ final class Recorder {
       _schedulePoll(task);
     }
     return _owns(task) && !_rt(task).removing ? task : null;
+  }
+
+  /// Sets [task]'s own choices (the live room's "这次录制" and "开播自动录"):
+  /// the quality and chat of its next attempts, and whether it waits for the
+  /// room again after a session. A null choice is left as it is; a running
+  /// attempt keeps what it started with.
+  void setTaskOptions(RecordTask task, {String? quality, bool? recordDanmaku, bool? autoRecord}) {
+    if (!_owns(task)) return;
+    if (quality != null) task.qualityOverride = quality;
+    if (recordDanmaku != null) task.recordDanmakuOverride = recordDanmaku;
+    if (autoRecord != null) task.autoRecord = autoRecord;
+    _update(task);
+  }
+
+  /// Waits for [task]'s room to go live again (the live room's "开播自动录"
+  /// turned on for a task that stopped, failed or finished; 3.x's "添加监控"
+  /// for a room that has a task): the live checks resume. A task that is
+  /// queued or recording keeps going and waits afterwards.
+  Future<void> monitorTask(RecordTask task) async {
+    if (!_owns(task) || _rt(task).removing) return;
+    final rt = _rt(task);
+    task.autoRecord = true;
+    if (rt.starting || scheduler.isRunning(task.taskId) || scheduler.isQueued(task.taskId)) {
+      _update(task);
+      return;
+    }
+    await rt.stop;
+    await rt.recovering;
+    await rt.finalizing;
+    if (!_owns(task) || rt.removing || task.status.isActive) return;
+    task
+      ..wasStoppedByUser = false
+      ..autoReconnect = settings().autoReconnect
+      ..retryCount = 0
+      ..status = RecordStatus.waitingLive;
+    _update(task);
+    _schedulePoll(task);
   }
 
   /// Starts a new recording session of [task] (a user action): waits for a
@@ -346,7 +396,7 @@ final class Recorder {
           : await resolver.resolve(
               roomId: task.roomId,
               platform: task.platform,
-              preferredQuality: settings().defaultQuality,
+              preferredQuality: task.preferredQuality(settings().defaultQuality),
               previousQualityId: task.selectedQualityId,
               previousLineIndex: task.selectedLineIndex,
               renewCurrent: rt.rapidRecovery,
@@ -421,7 +471,13 @@ final class Recorder {
     } on RecordStreamException catch (error) {
       if (!token.isCancelled && _owns(task)) {
         task.markFailure(stage: error.stage, error: error.message, now: clock.now());
-        if (error.type == RecordStreamErrorType.notLive) {
+        if (error.type == RecordStreamErrorType.notLive && _endsAfterBroadcast(task)) {
+          // The broadcast ended and the live room's "开播自动录" is off: the
+          // session ends here instead of waiting for the next one.
+          rt.rapidRecovery = false;
+          task.clearFailure();
+          await _endSession(task, failed: false);
+        } else if (error.type == RecordStreamErrorType.notLive) {
           rt.rapidRecovery = false;
           task
             ..clearFailure()
@@ -471,7 +527,7 @@ final class Recorder {
       final renewed = await resolver.resolve(
         roomId: task.roomId,
         platform: task.platform,
-        preferredQuality: settings().defaultQuality,
+        preferredQuality: task.preferredQuality(settings().defaultQuality),
         previousQualityId: task.selectedQualityId,
         previousLineIndex: task.selectedLineIndex,
         renewCurrent: true,
@@ -697,6 +753,44 @@ final class Recorder {
     }
   }
 
+  /// Whether a session that recorded something ends with the broadcast
+  /// instead of waiting for the next one (`RecordTask.autoRecord` off).
+  bool _endsAfterBroadcast(RecordTask task) =>
+      task.autoRecord == false && (task.recordedSeconds > 0 || task.pendingAttempts.isNotEmpty);
+
+  /// Joins the session's attempts and ends it: completed, or failed when
+  /// [failed] or the join failed.
+  Future<void> _endSession(RecordTask task, {required bool failed}) {
+    final rt = _rt(task);
+    return rt.finalizing ??= () async {
+      try {
+        var merged = true;
+        if (task.pendingAttempts.isNotEmpty) {
+          task.status = RecordStatus.processing;
+          _update(task);
+          merged = await _mergePending(task);
+          if (!_owns(task)) return;
+        }
+        if (!merged) {
+          _markMergeFailure(task);
+          task.status = RecordStatus.failed;
+        } else {
+          task
+            ..status = failed ? RecordStatus.failed : RecordStatus.completed
+            ..retryCount = failed ? task.retryCount : 0;
+        }
+        _update(task);
+      } on Object catch (error) {
+        if (_owns(task)) {
+          task
+            ..markFailure(stage: 'merge', error: error, now: clock.now())
+            ..status = RecordStatus.failed;
+          _update(task);
+        }
+      }
+    }().whenComplete(() => rt.finalizing = null);
+  }
+
   void _queueCurrentAttempt(RecordTask task, {bool allowLegacy = false, bool damaged = false}) {
     final directory = task.outputDir?.trim() ?? '';
     if (directory.isEmpty) return;
@@ -723,6 +817,7 @@ final class Recorder {
         );
         if (!_owns(task)) return false;
         if (result.ok) {
+          task.lastOutputPath = result.outputPath;
           final output = File(result.outputPath!);
           final finalized = output.existsSync() ? output.lengthSync() : 0;
           if (sourceBytes > 0 && finalized > 0) {
@@ -763,13 +858,16 @@ final class Recorder {
       maximumRetries: current.maxRetryCount,
       unexpectedEof: fast,
     )) {
+      if (_endsAfterBroadcast(task)) {
+        // Out of retries and not waiting for the room: the session fails.
+        unawaited(_endSession(task, failed: true));
+        return;
+      }
       task.status = RecordStatus.waitingLive;
       _update(task);
       _schedulePoll(task);
       return;
     }
-    task.status = RecordStatus.reconnecting;
-    _update(task);
     rt.retryTimer?.cancel();
     final delay = RecordPolicy.reconnectDelay(
       failureCount: task.retryCount - 1,
@@ -778,8 +876,13 @@ final class Recorder {
       enableBackoff: current.enableBackoff,
       unexpectedEof: fast,
     );
+    task
+      ..status = RecordStatus.reconnecting
+      ..nextRetryAt = clock.now().add(delay);
+    _update(task);
     rt.retryTimer = Timer(delay, () {
       rt.retryTimer = null;
+      task.nextRetryAt = null;
       if (_owns(task) && !task.wasStoppedByUser) unawaited(_start(task));
     });
   }
@@ -805,7 +908,7 @@ final class Recorder {
       final renewed = await resolver.resolve(
         roomId: task.roomId,
         platform: task.platform,
-        preferredQuality: settings().defaultQuality,
+        preferredQuality: task.preferredQuality(settings().defaultQuality),
         previousQualityId: task.selectedQualityId,
         previousLineIndex: task.selectedLineIndex,
         renewCurrent: true,
@@ -835,7 +938,9 @@ final class Recorder {
   Future<void> stopTask(RecordTask task) {
     if (!_owns(task)) return Future.value();
     final rt = _rt(task);
-    task.wasStoppedByUser = true;
+    task
+      ..wasStoppedByUser = true
+      ..nextRetryAt = null;
     _stopPolling(rt);
     rt.retryTimer?.cancel();
     _cancelLease(rt);
@@ -976,7 +1081,9 @@ final class Recorder {
                   : site.getRoomDetail(roomId: task.roomId))
               .timeout(pollTimeout);
       if (!owns()) return;
-      task.updateFromRoom(room);
+      task
+        ..updateFromRoom(room)
+        ..lastLiveCheckAt = clock.now();
       _update(task);
       if (room.isPlayableNow) {
         rt.pollFailures = 0;
@@ -991,7 +1098,9 @@ final class Recorder {
     } on Object catch (error) {
       if (!owns()) return;
       rt.pollFailures++;
-      task.markFailure(stage: 'status', error: error, now: clock.now());
+      task
+        ..lastLiveCheckAt = clock.now()
+        ..markFailure(stage: 'status', error: error, now: clock.now());
       _update(task);
     }
   }

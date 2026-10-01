@@ -251,6 +251,67 @@ void main() {
       expect(File('${directory.path}/$prefix.mp4').existsSync(), isTrue);
     });
 
+    test("the live room's quality is the one resolved, for this task only (U.2f)", () async {
+      site
+        ..qualities = const [
+          LivePlayQuality(quality: '原画', id: 'origin', sort: 2),
+          LivePlayQuality(quality: '超清', id: 'hd', sort: 1),
+        ]
+        ..lines = {
+          'origin': const [LivePlayLine('rtmp://cdn-a.example/live/origin')],
+          'hd': const [LivePlayLine('rtmp://cdn-a.example/live/hd')],
+        };
+      final task = (await recorder.addTask(room(), quality: '超清', recordDanmaku: true, autoRecord: false))!;
+      expect(task.qualityOverride, '超清');
+      expect(task.recordDanmakuOverride, isTrue);
+      expect(task.autoRecord, isFalse);
+      await until(() => task.status == RecordStatus.running);
+      expect(task.selectedQuality, '超清');
+      expect(ffmpeg.runs.single, contains('rtmp://cdn-a.example/live/hd'));
+      await recorder.stopTask(task);
+
+      recorder.setTaskOptions(task, quality: '原画');
+      expect(task.qualityOverride, '原画');
+      await recorder.startTask(task);
+      await until(() => task.status == RecordStatus.running && task.selectedQuality == '原画');
+      expect(ffmpeg.runs.last, contains('rtmp://cdn-a.example/live/origin'));
+      await recorder.stopTask(task);
+      expect(task.lastOutputPath, endsWith('.mp4'));
+      await recorder.flush();
+      expect(persisted.last, contains('"qualityOverride":"原画"'));
+    });
+
+    test('开播自动录: off finishes after the broadcast, on waits again; on for a stopped task resumes', () async {
+      // The broadcast ends: FFmpeg reaches the end, the retry finds the room
+      // offline.
+      ffmpeg
+        ..captureExit = 0
+        ..captureSeconds = const Duration(milliseconds: 50);
+      final once = (await recorder.addTask(room(), autoRecord: false))!;
+      await until(() => once.status == RecordStatus.reconnecting);
+      site.status = LiveStatus.offline;
+      await until(() => once.status == RecordStatus.completed);
+      expect(once.pendingAttempts, isEmpty);
+      expect(once.lastOutputPath, endsWith('.mp4'));
+      await recorder.removeTask(once);
+
+      site.status = LiveStatus.live;
+      final kept = (await recorder.addTask(room(), autoRecord: true))!;
+      await until(() => kept.status == RecordStatus.reconnecting);
+      site.status = LiveStatus.offline;
+      await until(() => kept.status == RecordStatus.waitingLive);
+      await recorder.stopTask(kept);
+      expect(kept.status, RecordStatus.stopped);
+
+      settings = RecordSettings(enablePolling: true, liveCheckInterval: 10);
+      site.status = LiveStatus.offline;
+      await recorder.monitorTask(kept);
+      expect(kept.status, RecordStatus.waitingLive);
+      expect(kept.wasStoppedByUser, isFalse);
+      await recorder.refreshTaskStatus(kept);
+      expect(kept.lastLiveCheckAt, isNotNull);
+    }, timeout: const Timeout(Duration(seconds: 20)));
+
     test('the queue holds tasks above the concurrency limit', () async {
       settings = RecordSettings(maxTaskCount: 1);
       final first = (await recorder.addTask(room()))!;

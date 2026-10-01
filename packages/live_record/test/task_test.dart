@@ -37,6 +37,38 @@ void main() {
     expect(RecordTask.fromJson({'status': 'x'}).status, RecordStatus.stopped);
   });
 
+  test("the live room's own choices are stored only when set; 3.x JSON follows the settings (U.2f)", () {
+    final plain = task().toJson();
+    for (final key in ['qualityOverride', 'recordDanmakuOverride', 'autoRecord', 'lastOutputPath']) {
+      expect(plain.containsKey(key), isFalse, reason: '$key keeps 3.x JSON as it was');
+    }
+    final legacy = RecordTask.fromJson(plain);
+    expect(legacy.qualityOverride, isNull);
+    expect(legacy.recordDanmakuOverride, isNull);
+    expect(legacy.autoRecord, isNull);
+    expect(legacy.preferredQuality('超清'), '超清');
+    expect(legacy.recordsChat(fallback: true), isTrue);
+
+    final chosen = task()
+      ..qualityOverride = '蓝光'
+      ..recordDanmakuOverride = false
+      ..autoRecord = true
+      ..lastOutputPath = '/r/a.mp4'
+      ..lastLiveCheckAt = DateTime(2026, 10, 2)
+      ..nextRetryAt = DateTime(2026, 10, 2);
+    final json = chosen.toJson();
+    expect(json, containsPair('qualityOverride', '蓝光'));
+    expect(json.containsKey('lastLiveCheckAt'), isFalse, reason: 'runtime only');
+    final restored = RecordTask.fromJson(json);
+    expect(restored.qualityOverride, '蓝光');
+    expect(restored.recordDanmakuOverride, isFalse);
+    expect(restored.autoRecord, isTrue);
+    expect(restored.lastOutputPath, '/r/a.mp4');
+    expect(restored.preferredQuality('原画'), '蓝光');
+    expect(restored.recordsChat(fallback: true), isFalse);
+    expect(RecordTask.fromJson({...json, 'autoRecord': 'false'}).autoRecord, isFalse);
+  });
+
   test('signed URLs and credentials are never persisted', () {
     final original = task()
       ..currentUrl = 'https://cdn.example/live.flv?token=secret'

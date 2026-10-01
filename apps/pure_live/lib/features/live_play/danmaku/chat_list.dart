@@ -124,55 +124,14 @@ class _ChatListState extends ConsumerState<ChatList> {
   Future<void> _actions(ChatLine line) async {
     final message = line.message;
     if (message == null) return;
-    final name = message.userName.trim();
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text(name.isEmpty ? i18n('live_play_anonymous') : name),
-                subtitle: Text(message.message, maxLines: 3, overflow: TextOverflow.ellipsis),
-              ),
-              ListTile(
-                key: const ValueKey('live-play-copy-message'),
-                leading: const Icon(AppIcons.copy),
-                title: Text(i18n('live_play_copy_message')),
-                onTap: () async {
-                  Navigator.of(sheetContext).pop();
-                  await Clipboard.setData(ClipboardData(text: message.message));
-                  AppNavigator.toast(i18n('copied_to_clipboard'));
-                },
-              ),
-              if (name.isNotEmpty)
-                ListTile(
-                  key: const ValueKey('live-play-block-user'),
-                  leading: const Icon(AppIcons.blockUser),
-                  title: Text(i18n('live_play_block_user', args: {'name': name})),
-                  onTap: () async {
-                    Navigator.of(sheetContext).pop();
-                    await widget.controller.blockUser(name);
-                    AppNavigator.toast(i18n('live_play_user_blocked', args: {'name': name}));
-                  },
-                ),
-              // 3.x had it; v4 lost it until U.2a.
-              ListTile(
-                key: const ValueKey('live-play-block-keyword'),
-                leading: const Icon(AppIcons.blockKeyword),
-                title: Text(i18n('block_danmaku_keyword')),
-                subtitle: Text(message.message, maxLines: 1, overflow: TextOverflow.ellipsis),
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  unawaited(_blockKeyword(message.message));
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+    await showChatMessageActions(
+      context,
+      message,
+      onBlockUser: (name) async {
+        await widget.controller.blockUser(name);
+        AppNavigator.toast(i18n('live_play_user_blocked', args: {'name': name}));
+      },
+      onBlockKeyword: (text) => unawaited(_blockKeyword(text)),
     );
   }
 
@@ -469,6 +428,122 @@ class ChatLineView extends StatelessWidget {
     );
   }
 }
+
+/// The sheet of a long-pressed message (3.x `DanmakuMessageActions`,
+/// docs/ui/compare/U.2f 长按弹幕): "弹幕" and ✕, the message in a card (the
+/// name in its colour), then copy, block the viewer and block a keyword,
+/// each saying what it does. "屏蔽关键词…" opens the keyword box filled with
+/// the message, to cut down to the word.
+Future<void> showChatMessageActions(
+  BuildContext context,
+  LiveMessage message, {
+  required Future<void> Function(String name) onBlockUser,
+  required void Function(String text) onBlockKeyword,
+}) => showModalBottomSheet<void>(
+  context: context,
+  isScrollControlled: true,
+  // U.2f: "弹幕" and ✕ head the sheet instead of a handle.
+  showDragHandle: false,
+  builder: (sheetContext) {
+    final theme = Theme.of(sheetContext);
+    final scheme = theme.colorScheme;
+    final name = message.userName.trim();
+    final body = theme.textTheme.bodyLarge?.regular;
+    final hint = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
+    void close() => Navigator.of(sheetContext).pop();
+    return SafeArea(
+      child: SingleChildScrollView(
+        key: const ValueKey('live-play-message-sheet'),
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 4, 0),
+              child: Row(
+                children: [
+                  Expanded(child: Text(i18n('danmaku'), style: theme.textTheme.titleMedium?.emphasis)),
+                  IconButton(
+                    key: const ValueKey('live-play-message-close'),
+                    tooltip: i18n('close'),
+                    onPressed: close,
+                    icon: const Icon(AppIcons.close),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: DecoratedBox(
+                key: const ValueKey('live-play-message-card'),
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerLowest,
+                  border: Border.all(color: scheme.outlineVariant),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        if (name.isNotEmpty)
+                          TextSpan(
+                            text: '$name：',
+                            style: body?.copyWith(
+                              color: chatNameColor(message.color, theme.brightness) ?? scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        TextSpan(
+                          text: message.message,
+                          style: body?.copyWith(color: scheme.onSurface),
+                        ),
+                      ],
+                    ),
+                    maxLines: 6,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              key: const ValueKey('live-play-copy-message'),
+              leading: const Icon(AppIcons.copy),
+              title: Text(i18n('copy')),
+              onTap: () async {
+                close();
+                // 3.x copied "用户名: 内容".
+                await Clipboard.setData(ClipboardData(text: chatCopyText(message)));
+                AppNavigator.toast(i18n('copied_to_clipboard'));
+              },
+            ),
+            if (name.isNotEmpty)
+              ListTile(
+                key: const ValueKey('live-play-block-user'),
+                leading: const Icon(AppIcons.blockUser),
+                title: Text(i18n('live_play_block_viewer')),
+                subtitle: Text(i18n('live_play_block_viewer_desc', args: {'name': name}), style: hint),
+                onTap: () {
+                  close();
+                  unawaited(onBlockUser(name));
+                },
+              ),
+            ListTile(
+              key: const ValueKey('live-play-block-keyword'),
+              leading: const Icon(AppIcons.blockKeyword),
+              title: Text(i18n('live_play_block_word')),
+              subtitle: Text(i18n('live_play_block_word_desc'), style: hint),
+              onTap: () {
+                close();
+                onBlockKeyword(message.message);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  },
+);
 
 /// A colour the platform sent as `#RRGGBB` or `AARRGGBB`, or null.
 Color? parsePlatformColor(String text) {

@@ -9,6 +9,7 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/buttons/follow_button.dart';
 import 'package:pure_live/features/live_play/buttons/record_button.dart';
 import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
+import 'package:pure_live/features/live_play/logic/record_state.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
@@ -22,16 +23,13 @@ const double roomHeaderTitleMinWidth = 100;
 /// the menu (docs/ui/compare/U.2a, changes 1, 12, 13 and choice B).
 class RoomHeader extends ConsumerStatefulWidget {
   /// Creates the row.
-  const new({required this.controller, required this.onDetails, this.desktop = false, this.windows = false, super.key});
+  const new({required this.controller, required this.onDetails, this.windows = false, super.key});
 
   /// The room.
   final LiveRoomController controller;
 
   /// Opens or closes the room details.
   final VoidCallback onDetails;
-
-  /// Desktop menu entries.
-  final bool desktop;
 
   /// Windows menu entries.
   final bool windows;
@@ -83,7 +81,7 @@ class _RoomHeaderState extends ConsumerState<RoomHeader> {
         final follow = _pillWidth(context, i18n('followed'));
         final record = !recordable
             ? 0.0
-            : task != null && !task.status.isActive
+            : autoRecordOn(task) && !task!.status.isActive
             ? _pillWidth(context, i18n('live_play_auto_record'))
             : kMinInteractiveDimension;
         final compact = constraints.maxWidth - follow - record - kMinInteractiveDimension - 4 < roomHeaderTitleMinWidth;
@@ -107,12 +105,7 @@ class _RoomHeaderState extends ConsumerState<RoomHeader> {
                 builder: (context, _, _) =>
                     RecordButton(room: controller.room, latest: () => controller.room, compact: compact),
               ),
-            RoomMenuButton(
-              controller: controller,
-              onDetails: widget.onDetails,
-              desktop: widget.desktop,
-              windows: widget.windows,
-            ),
+            RoomMenuButton(controller: controller, windows: widget.windows),
             const SizedBox(width: 4),
           ],
         );

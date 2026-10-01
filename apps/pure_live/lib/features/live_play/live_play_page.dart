@@ -12,14 +12,17 @@ import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_panel.dart';
+import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
 import 'package:pure_live/features/live_play/layout/room_details.dart';
 import 'package:pure_live/features/live_play/layout/room_header.dart';
 import 'package:pure_live/features/live_play/layout/room_info_bar.dart';
+import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/features/live_play/player/player_view.dart';
+import 'package:pure_live/features/live_play/record/record_panel.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
@@ -30,8 +33,11 @@ import 'package:pure_live/routes/route_args.dart';
 ///
 /// Phones (up to 680 wide) stack the video, the room strip and the chat
 /// tabs; wider windows put the chat beside the video (3.x's breakpoint).
-/// The room details open over the chat (never over the picture); Back and
-/// Esc close them first, then leave fullscreen, then the room.
+/// The room details open over the chat (never over the picture). The record
+/// and danmaku settings panels (U.2f) open under the picture in portrait and
+/// on the right otherwise, never over the picture's left half. Back and Esc
+/// close a panel first, then leave fullscreen, then close the details, then
+/// the room.
 class LivePlayPage extends ConsumerStatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -89,6 +95,10 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   bool _details = false;
   String? _problem;
 
+  /// The record or danmaku settings panel (U.2f); one at a time, and not
+  /// together with the details.
+  final RoomPanelController _panels = RoomPanelController();
+
   @override
   void initState() {
     super.initState();
@@ -119,6 +129,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       network: ref.read(networkProbeProvider),
     );
     _orientation = RoomOrientationChoice(settings: store.settings, room: room);
+    _panels.addListener(_onPanel);
     _reconnect = ReconnectWatch(session.states, now: controller.now);
     _background = RoomBackgroundPolicy(controller: controller, settings: store.settings)..start();
     PictureInPicture.active.addListener(_onPip);
@@ -150,6 +161,13 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     if (mounted) setState(() => _pip = PictureInPicture.active.value);
   }
 
+  void _onPanel() {
+    if (!mounted) return;
+    setState(() {
+      if (_panels.value != null) _details = false;
+    });
+  }
+
   @override
   void dispose() {
     unawaited(_autoFullscreen?.cancel());
@@ -161,6 +179,9 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     if (_fullscreen && !_mobile) unawaited(DesktopWindow.setFullScreen(on: false));
     _reconnect?.dispose();
     _orientation?.dispose();
+    _panels
+      ..removeListener(_onPanel)
+      ..dispose();
     _controller?.dispose();
     final session = _session;
     if (session != null) unawaited(session.dispose());
@@ -200,9 +221,13 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
 
   void _toggleFullscreen() => unawaited(_setFullscreen(!_fullscreen));
 
-  void _toggleDetails() => setState(() => _details = !_details);
+  void _toggleDetails() {
+    _panels.close();
+    setState(() => _details = !_details);
+  }
 
   void _openDetails() {
+    _panels.close();
     if (!_details) setState(() => _details = true);
   }
 
@@ -210,9 +235,12 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     if (_details) setState(() => _details = false);
   }
 
-  /// Back and Esc: the fullscreen first, then the details, then the room.
+  /// Back and Esc: a panel first, then the fullscreen, then the details,
+  /// then the room.
   void _back() {
-    if (_fullscreen) {
+    if (_panels.value != null) {
+      _panels.close();
+    } else if (_fullscreen) {
       _toggleFullscreen();
     } else if (_details) {
       _closeDetails();
@@ -228,8 +256,12 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
         body: AppStatusView(type: AppStatusType.error, title: _problem, subtitle: ''),
       );
     }
+    return RoomPanelScope(notifier: _panels, child: _page(context, controller));
+  }
+
+  Widget _page(BuildContext context, LiveRoomController controller) {
     return PopScope(
-      canPop: !_fullscreen && !_details,
+      canPop: !_fullscreen && !_details && _panels.value == null,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _back();
       },
@@ -275,8 +307,80 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     onBack: () => unawaited(_setFullscreen(false)),
   );
 
+  /// The open panel, or nothing.
+  Widget _panelOf(LiveRoomController controller, {required bool portrait}) => switch (_panels.value) {
+    RoomPanelKind.record => RoomRecordPanel(
+      key: const ValueKey('panel-record'),
+      room: () => controller.room,
+      qualities: () => controller.qualities,
+      onClose: _panels.close,
+      dragToClose: portrait,
+    ),
+    RoomPanelKind.danmaku => RoomDanmakuSettingsPanel(
+      key: const ValueKey('panel-danmaku'),
+      controller: controller,
+      onClose: _panels.close,
+      dragToClose: portrait,
+    ),
+    null => const SizedBox.shrink(key: ValueKey('no-panel')),
+  };
+
+  /// The panel sliding in: up from the picture's lower edge in [portrait],
+  /// in from the right otherwise; at once when the system asks for less
+  /// motion.
+  Widget _panelLayer(LiveRoomController controller, {required bool portrait}) {
+    final still = MediaQuery.disableAnimationsOf(context);
+    return AnimatedSwitcher(
+      duration: still ? Duration.zero : const Duration(milliseconds: 220),
+      reverseDuration: still ? Duration.zero : const Duration(milliseconds: 160),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      layoutBuilder: (current, previous) => Stack(fit: StackFit.expand, children: [...previous, ?current]),
+      transitionBuilder: (child, animation) => SlideTransition(
+        position: Tween(begin: portrait ? const Offset(0, 1) : const Offset(1, 0), end: Offset.zero).animate(animation),
+        child: child,
+      ),
+      child: _panelOf(controller, portrait: portrait),
+    );
+  }
+
+  /// [below] with the panel on its right, [roomSidePanelWidth] wide and the
+  /// full height (landscape, fullscreen, wide windows: over the chat
+  /// column, never over the picture's left half).
+  Widget _withSidePanel(LiveRoomController controller, Widget below) => LayoutBuilder(
+    builder: (context, constraints) {
+      final width = constraints.maxWidth / 2 < roomSidePanelWidth ? constraints.maxWidth / 2 : roomSidePanelWidth;
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          below,
+          Positioned(
+            key: const ValueKey('live-play-side-panel'),
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: width,
+            child: _panelLayer(controller, portrait: false),
+          ),
+        ],
+      );
+    },
+  );
+
+  /// [below] (everything under the picture) with the panel over all of it
+  /// (portrait).
+  Widget _withPanelBelow(LiveRoomController controller, Widget below) => ClipRect(
+    child: Stack(
+      fit: StackFit.expand,
+      children: [
+        below,
+        Positioned.fill(key: const ValueKey('live-play-below-panel'), child: _panelLayer(controller, portrait: true)),
+      ],
+    ),
+  );
+
   Widget _buildFullscreen(LiveRoomController controller) =>
-      Scaffold(backgroundColor: OnVideoColors.ground, body: _player(controller));
+      Scaffold(backgroundColor: OnVideoColors.ground, body: _withSidePanel(controller, _player(controller)));
 
   Widget _infoBar(LiveRoomController controller) => RoomInfoBar(
     controller: controller,
@@ -326,13 +430,13 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
           onPressed: () => Navigator.of(context).maybePop(),
           icon: const Icon(AppIcons.back),
         ),
-        title: RoomHeader(controller: controller, onDetails: _openDetails, desktop: !_mobile, windows: _windows),
+        title: RoomHeader(controller: controller, onDetails: _openDetails, windows: _windows),
       ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             if (!showChat) {
-              return Column(
+              final channel = Column(
                 children: [
                   Expanded(child: _player(controller)),
                   _infoBar(controller),
@@ -341,6 +445,22 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
                       height: constraints.maxHeight * 0.45,
                       child: RoomDetailsPanel(controller: controller, onClose: _closeDetails),
                     ),
+                ],
+              );
+              if (constraints.maxWidth > livePlayWideBreakpoint) return _withSidePanel(controller, channel);
+              // A channel on a phone has no chat under the picture: the panel
+              // rises over the lower part instead.
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  channel,
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: constraints.maxHeight * 0.6,
+                    child: ClipRect(child: _panelLayer(controller, portrait: true)),
+                  ),
                 ],
               );
             }
@@ -372,32 +492,45 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
                       ),
                     ),
                   ),
-                  _infoBar(controller),
-                  const Divider(height: 1),
+                  // U.2f: a panel covers everything under the picture.
                   Expanded(
-                    child: _withDetails(controller, ChatPanel(controller: controller, detailsOpen: _details)),
+                    child: _withPanelBelow(
+                      controller,
+                      Column(
+                        children: [
+                          _infoBar(controller),
+                          const Divider(height: 1),
+                          Expanded(
+                            child: _withDetails(controller, ChatPanel(controller: controller, detailsOpen: _details)),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               );
             }
             final panelWidth = (constraints.maxWidth * 0.34).clamp(300.0, 400.0);
-            return Row(
-              key: const ValueKey('live-play-desktop-split'),
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(child: _player(controller)),
-                      _infoBar(controller),
-                    ],
+            return _withSidePanel(
+              controller,
+              Row(
+                key: const ValueKey('live-play-desktop-split'),
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(child: _player(controller)),
+                        _infoBar(controller),
+                      ],
+                    ),
                   ),
-                ),
-                const VerticalDivider(width: 1),
-                SizedBox(
-                  width: panelWidth,
-                  child: _withDetails(controller, ChatPanel(controller: controller, detailsOpen: _details)),
-                ),
-              ],
+                  const VerticalDivider(width: 1),
+                  SizedBox(
+                    width: panelWidth,
+                    child: _withDetails(controller, ChatPanel(controller: controller, detailsOpen: _details)),
+                  ),
+                ],
+              ),
             );
           },
         ),

@@ -1,13 +1,6 @@
-import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
-import 'package:live_ui/live_ui.dart';
-import 'package:pure_live/app/services.dart';
-import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/routes/app_navigator.dart';
 
 /// A danmaku look in one tap (3.x `DanmakuViewingPreset` and
 /// `DanmakuViewingTemplate`): the area, margins, speed, size, weight,
@@ -168,6 +161,33 @@ final class DanmakuTemplate {
     await settings.set(Settings.danmakuAutoFps, autoFps);
   }
 
+  /// Writes a preset into [settings] as 3.x did (`_applyPreset`): the look
+  /// and "frame rate follows the display"; the emote switch and the manual
+  /// frame rate stay as they are.
+  Future<void> applyPreset(SettingsStore settings) async {
+    await settings.set(Settings.danmakuArea, area);
+    await settings.set(Settings.danmakuTopArea, top);
+    await settings.set(Settings.danmakuBottomArea, bottom);
+    await settings.set(Settings.danmakuSpeed, speed);
+    await settings.set(Settings.danmakuFontSize, fontSize);
+    await settings.set(Settings.danmakuFontWeight, fontWeight);
+    await settings.set(Settings.danmakuFontBorder, fontBorder);
+    await settings.set(Settings.danmakuOpacity, opacity);
+    await settings.set(Settings.enableDanmakuStroke, stroke);
+    await settings.set(Settings.danmakuAutoFps, true);
+  }
+
+  /// The preset [current] matches (3.x `_matchingPreset`: the look, with the
+  /// frame rate following the display), as its text key; null for a look
+  /// of the user's own.
+  static String? presetOf(DanmakuTemplate current) {
+    if (!current.autoFps) return null;
+    for (final (key, preset) in presets) {
+      if (preset.sameLook(current)) return key;
+    }
+    return null;
+  }
+
   /// Whether [other] looks the same (3.x `matches`).
   bool sameLook(DanmakuTemplate other) {
     bool close(double a, double b) => (a - b).abs() < 0.001;
@@ -180,94 +200,5 @@ final class DanmakuTemplate {
         close(fontBorder, other.fontBorder) &&
         close(opacity, other.opacity) &&
         stroke == other.stroke;
-  }
-}
-
-/// The templates card above the danmaku settings: the presets, "save the
-/// current look" and "use the saved one".
-class DanmakuTemplatesCard extends ConsumerWidget {
-  /// Creates the card.
-  const new({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.read(storeProvider).settings;
-    // Rebuild when any part of the look changes.
-    for (final setting in const <Setting<Object>>[
-      Settings.danmakuArea,
-      Settings.danmakuTopArea,
-      Settings.danmakuBottomArea,
-      Settings.danmakuSpeed,
-      Settings.danmakuFontSize,
-      Settings.danmakuFontWeight,
-      Settings.danmakuFontBorder,
-      Settings.danmakuOpacity,
-      Settings.enableDanmakuStroke,
-    ]) {
-      watchSetting(ref, setting);
-    }
-    final saved = watchSetting(ref, Settings.savedDanmakuTemplate);
-    final current = DanmakuTemplate.of(settings);
-    Future<void> use(DanmakuTemplate template) async {
-      await template.apply(settings);
-      AppNavigator.toast(i18n('danmaku_template_applied'));
-    }
-
-    return context.buildModernCard([
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-        child: Text(i18n('danmaku_templates'), style: Theme.of(context).textTheme.titleSmall),
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 6,
-          children: [
-            for (final (key, template) in DanmakuTemplate.presets)
-              ChoiceChip(
-                key: ValueKey('danmaku-template-$key'),
-                label: Text(i18n(key)),
-                selected: template.sameLook(current),
-                onSelected: (_) => unawaited(use(template)),
-              ),
-          ],
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-        child: Wrap(
-          spacing: 8,
-          children: [
-            TextButton.icon(
-              key: const ValueKey('danmaku-template-save'),
-              onPressed: () async {
-                await settings.set(Settings.savedDanmakuTemplate, current.encode());
-                AppNavigator.toast(i18n('danmaku_template_saved'));
-              },
-              icon: const Icon(Icons.bookmark_add_outlined, size: 18),
-              label: Text(i18n('live_play_template_save')),
-            ),
-            TextButton.icon(
-              key: const ValueKey('danmaku-template-load'),
-              onPressed: () async {
-                if (saved.trim().isEmpty) {
-                  AppNavigator.toast(i18n('danmaku_template_empty'));
-                  return;
-                }
-                final template = DanmakuTemplate.tryDecode(saved, current);
-                if (template == null) {
-                  AppNavigator.toast(i18n('danmaku_template_invalid'));
-                  return;
-                }
-                await use(template);
-              },
-              icon: const Icon(Icons.bookmark_outline_rounded, size: 18),
-              label: Text(i18n('live_play_template_load')),
-            ),
-          ],
-        ),
-      ),
-    ]);
   }
 }

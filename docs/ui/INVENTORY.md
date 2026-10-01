@@ -10,9 +10,10 @@
 | [U.2b](#u2b) | 0 | 2 | 0 | 0 | 0 | 0 |
 | [U.2c](#u2c) | 0 | 6 | 0 | 0 | 2 | 3 |
 | [U.2e](#u2e) | 5 | 0 | 0 | 0 | 0 | 9 |
-| [U.2f](#u2f) | 1 | 8 | 4 | 3 | 0 | 7 |
+| [U.2f](#u2f) | 1 | 7 | 2 | 3 | 0 | 6 |
 | [U.2g](#u2g) | 0 | 1 | 0 | 0 | 1 | 0 |
 | [U.2j](#u2j) | 0 | 0 | 0 | 0 | 1 | 0 |
+| [U.2k](#u2k) | 0 | 1 | 2 | 0 | 0 | 1 |
 | [U.3a](#u3a) | 2 | 1 | 0 | 2 | 0 | 1 |
 | [U.3b](#u3b) | 1 | 0 | 0 | 0 | 0 | 0 |
 | [U.3c](#u3c) | 1 | 0 | 0 | 0 | 0 | 0 |
@@ -125,13 +126,10 @@
 | U.2f-07 | 对话框 | _DanmakuKeywordDialog（屏蔽弹幕关键词） | `v3:modules/live_play/widgets/danmaku/danmaku_message_actions.dart:82` |
 | U.2f-08 | 菜单 | 选择播放线路/节点 | `v3:modules/live_play/widgets/resolution_selector/line_selector.dart:24` |
 | U.2f-09 | 菜单 | 选择清晰度 | `v3:modules/live_play/widgets/resolution_selector/resolution_selector.dart:24` |
-| U.2f-10 | 对话框 | showLocalDanmakuStyleEditor | `v3:modules/live_play/widgets/local_interaction/local_danmaku_style_editor.dart:12` |
-| U.2f-11 | 底部面板 | 本地弹幕样式 · `showLocalDanmakuStyleEditor` | `v3:modules/live_play/widgets/local_interaction/local_danmaku_style_editor.dart:33` |
-| U.2f-12 | 底部面板 | LocalInteractionSheet（本地互动体验） | `v3:modules/live_play/widgets/local_interaction/local_interaction_sheet.dart:5` |
-| U.2f-13 | 菜单 | 菜单 | `v3:modules/live_play/widgets/button/live_play_menu_button.dart:23` |
-| U.2f-14 | 对话框 | _switchLiveRoom | `v3:modules/live_play/widgets/button/live_play_menu_button.dart:90` |
-| U.2f-15 | 底部面板 | 新窗口启动失败，请重试 · `_showLocalInteraction` | `v3:modules/live_play/widgets/button/live_play_menu_button.dart:152` |
-| U.2f-16 | 对话框 | 录制中 · `_showActionDialog` | `v3:modules/live_play/widgets/button/record_action_button.dart:204` |
+| U.2f-10 | 菜单 | 菜单 | `v3:modules/live_play/widgets/button/live_play_menu_button.dart:23` |
+| U.2f-11 | 对话框 | _switchLiveRoom | `v3:modules/live_play/widgets/button/live_play_menu_button.dart:90` |
+| U.2f-12 | 底部面板 | 新窗口启动失败，请重试 · `_showLocalInteraction` | `v3:modules/live_play/widgets/button/live_play_menu_button.dart:152` |
+| U.2f-13 | 对话框 | 录制中 · `_showActionDialog` | `v3:modules/live_play/widgets/button/record_action_button.dart:204` |
 
 ## U.2g
 
@@ -145,6 +143,14 @@
 | 编号 | 类型 | 名称 | 位置 |
 |---|---|---|---|
 | U.2j-01 | 覆盖层 | CompactDanmakuOverlay | `v3:modules/live_play/widgets/danmaku/compact_danmaku_overlay.dart:6` |
+
+## U.2k
+
+| 编号 | 类型 | 名称 | 位置 |
+|---|---|---|---|
+| U.2k-01 | 对话框 | showLocalDanmakuStyleEditor | `v3:modules/live_play/widgets/local_interaction/local_danmaku_style_editor.dart:12` |
+| U.2k-02 | 底部面板 | 本地弹幕样式 · `showLocalDanmakuStyleEditor` | `v3:modules/live_play/widgets/local_interaction/local_danmaku_style_editor.dart:33` |
+| U.2k-03 | 底部面板 | LocalInteractionSheet（本地互动体验） | `v3:modules/live_play/widgets/local_interaction/local_interaction_sheet.dart:5` |
 
 ## U.3a
 

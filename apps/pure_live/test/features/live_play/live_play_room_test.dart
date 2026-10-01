@@ -459,13 +459,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('live-play-unread-count')), findsNothing);
 
-    // Choice A: 3.x's cards stay as a setting.
+    // Choice A: 3.x's cards stay as a setting (U.2f: last in the settings).
     await tester.tap(find.text('弹幕设置'));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('卡片'),
+      200,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('live-play-danmaku-settings')),
+        matching: find.byType(Scrollable),
+      ),
+    );
     await tester.tap(find.text('卡片'));
     await _settle(tester);
     expect(room.services.store.settings.get(Settings.danmakuListStyle), 'card');
-    await tester.tap(find.text('弹幕列表'));
+    // The settings have a "弹幕列表" group too: the tab is the one in the bar.
+    await tester.tap(_in('live-play-tabs', find.text('弹幕列表')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('live-play-chat-card')), findsWidgets);
     expect(find.byKey(const ValueKey('live-play-chat-line')), findsNothing);

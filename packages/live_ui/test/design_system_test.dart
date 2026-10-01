@@ -41,6 +41,15 @@ void main() {
       (AppIcons.audienceHeat, Icons.whatshot_rounded),
       (AppIcons.audienceTotal, Icons.visibility_rounded),
       (AppIcons.iptvGuide, Icons.assignment_outlined),
+      // U.2f: the room menu and the danmaku templates keep 3.x's glyphs.
+      (AppIcons.switchRoom, Icons.swap_horiz_outlined),
+      (AppIcons.sleepTimer, Remix.time_line),
+      (AppIcons.roomVolume, Remix.volume_up_line),
+      (AppIcons.streamLink, Remix.link_m),
+      (AppIcons.newWindow, Icons.open_in_new_rounded),
+      (AppIcons.localInteraction, Icons.auto_awesome_rounded),
+      (AppIcons.templateSave, Icons.save_outlined),
+      (AppIcons.templateRestore, Icons.restore_rounded),
     ];
     for (final (actual, glyph) in expected) {
       expect(actual, glyph);

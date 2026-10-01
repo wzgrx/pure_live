@@ -157,6 +157,10 @@ final class RecordTask {
     this.lastErrorStage,
     this.inputTailDiscarded = false,
     this.inputCoverageIncomplete = false,
+    this.qualityOverride,
+    this.recordDanmakuOverride,
+    this.autoRecord,
+    this.lastOutputPath,
   }) : pendingAttempts = List.of(pendingAttempts);
 
   /// A task for [room], created at [now].
@@ -234,6 +238,10 @@ final class RecordTask {
       inputTailDiscarded: _bool(json['inputTailDiscarded']),
       inputCoverageIncomplete: _bool(json['inputCoverageIncomplete']),
       wasStoppedByUser: _bool(json['wasStoppedByUser']),
+      qualityOverride: _nullableString(json['qualityOverride']),
+      recordDanmakuOverride: _nullableBool(json['recordDanmakuOverride']),
+      autoRecord: _nullableBool(json['autoRecord']),
+      lastOutputPath: _nullableString(json['lastOutputPath']),
     );
   }
 
@@ -348,6 +356,38 @@ final class RecordTask {
 
   /// The user stopped the task.
   bool wasStoppedByUser;
+
+  /// The quality this task records at instead of the settings' default
+  /// (the live room's "这次录制"; a platform's quality name or one of
+  /// `recordQualityPreferences`). Null follows the settings. v4 only: 3.x
+  /// JSON has no such field.
+  String? qualityOverride;
+
+  /// Whether this task saves the chat, instead of the settings' "record
+  /// danmaku". Null follows the settings. v4 only.
+  bool? recordDanmakuOverride;
+
+  /// Whether the task waits for the room again after a session ends (the
+  /// live room's "开播自动录"). Null keeps 3.x's rule: it waits when
+  /// [autoReconnect] is on. v4 only.
+  bool? autoRecord;
+
+  /// The MP4 the last join wrote (the live room's "播放"). v4 only.
+  String? lastOutputPath;
+
+  /// When the room was last checked for going live. Runtime only.
+  DateTime? lastLiveCheckAt;
+
+  /// When a reconnecting task tries again. Runtime only.
+  DateTime? nextRetryAt;
+
+  /// The quality preference of the next attempt: [qualityOverride], else
+  /// [fallback] (the settings' default).
+  String preferredQuality(String fallback) => qualityOverride ?? fallback;
+
+  /// Whether the chat is saved: [recordDanmakuOverride], else [fallback]
+  /// (the settings' "record danmaku").
+  bool recordsChat({required bool fallback}) => recordDanmakuOverride ?? fallback;
 
   /// When the session started, for display and ordering.
   DateTime get displayStartTime => recordingStartedAt ?? createTime;
@@ -483,6 +523,12 @@ final class RecordTask {
     'inputTailDiscarded': inputTailDiscarded,
     'inputCoverageIncomplete': inputCoverageIncomplete,
     'wasStoppedByUser': wasStoppedByUser,
+    // v4's own choices: written only when set, so a task without them stays
+    // 3.x's JSON and 3.x reads every task (it ignores unknown fields).
+    'qualityOverride': ?qualityOverride,
+    'recordDanmakuOverride': ?recordDanmakuOverride,
+    'autoRecord': ?autoRecord,
+    'lastOutputPath': ?lastOutputPath,
   };
 
   /// Display order of the recording centre (3.x `RecorderTaskOrdering`):
@@ -553,6 +599,8 @@ bool _bool(Object? value, {bool fallback = false}) {
     _ => fallback,
   };
 }
+
+bool? _nullableBool(Object? value) => value == null ? null : _bool(value);
 
 DateTime? _date(Object? value) => DateTime.tryParse(value?.toString() ?? '');
 

@@ -203,7 +203,17 @@ void main() {
 
     await tester.tap(find.text('弹幕设置'));
     await tester.pumpAndSettle();
-    expect(find.text('弹幕观看模板'), findsOneWidget);
+    // U.2f: the tab shows the danmaku settings panel's content, templates
+    // first ("观看模板"), the chat list's own switches last.
+    expect(find.text('观看模板'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('在聊天列表显示礼物'),
+      200,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('live-play-danmaku-settings')),
+        matching: find.byType(Scrollable),
+      ),
+    );
     await tester.tap(find.text('在聊天列表显示礼物'));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
     await tester.pumpAndSettle();

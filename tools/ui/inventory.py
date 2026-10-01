@@ -70,7 +70,7 @@ V3 = [
     ('modules/live_play/widgets/button/live_play_menu_button.dart', 'U.2f'), ('modules/live_play/widgets/button/record_action', 'U.2f'),
     ('modules/live_play/widgets/resolution_selector/line_selector.dart', 'U.2f'),
     ('modules/live_play/widgets/resolution_selector/resolution_selector.dart', 'U.2f'),
-    ('modules/live_play/dialogs/', 'U.2f'), ('modules/live_play/widgets/local_interaction/', 'U.2f'),
+    ('modules/live_play/dialogs/', 'U.2f'), ('modules/live_play/widgets/local_interaction/', 'U.2k'),
     ('modules/live_play/widgets/placeholder/', 'U.2g'), ('modules/live_play/widgets/video_player/playback_failure_overlay.dart', 'U.2g'),
     ('modules/live_play/widgets/video_player/video_loading.dart', 'U.2g'), ('modules/live_play/widgets/video_player/iptv_', 'U.2g'),
     ('player/utils/pip_window_widget.dart', 'U.2j'),

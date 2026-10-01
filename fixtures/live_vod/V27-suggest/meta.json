@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "V27-suggest",
+  "capturedAt": "2026-10-01T05:36:55.995773+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://s.search.bilibili.com/main/suggest?term=%E6%99%B4%E5%A4%A9&main_ver=v1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://search.bilibili.com/",
+      "Cookie": "buvid3=A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D00000infoc;buvid4=F0E1D2C3-B4A5-9687-7869-5A4B3C2D1E0F00000-000000000-AbCdEfGhIjKlMnOpQrStUv==;"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {}
+  },
+  "raw": {
+    "sha256": "4f75341391ffb1499776ab787bfc1ad18366e40d69a993f2996cc6af34d6a983",
+    "length": 1680
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

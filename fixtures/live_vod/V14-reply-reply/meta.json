@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "V14-reply-reply",
+  "capturedAt": "2026-10-01T05:36:53.753215+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/v2/reply/reply?oid=114251901441504&type=1&root=259374509376&pn=1&ps=20",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://www.bilibili.com/video/BV1zKZrYAEi8/",
+      "Cookie": "buvid3=A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D00000infoc;buvid4=F0E1D2C3-B4A5-9687-7869-5A4B3C2D1E0F00000-000000000-AbCdEfGhIjKlMnOpQrStUv==;"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "bili-status-code": "0"
+    }
+  },
+  "raw": {
+    "sha256": "96d4e6ed7fdcc5629a81a6a8ef1528b6b75ebc577c463b3f58519f67e3c70bfa",
+    "length": 29623
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

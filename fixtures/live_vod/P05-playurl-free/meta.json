@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "P05-playurl-free",
+  "capturedAt": "2026-10-01T05:40:51.339977+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/pgc/player/web/playurl?ep_id=826497&cid=1602741036&qn=0&fnval=4048&fnver=0&fourk=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://www.bilibili.com/bangumi/play/ep826497"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "bili-status-code": "0"
+    }
+  },
+  "raw": {
+    "sha256": "3ae80a2c0b4c3fbaab8407b0544c04133879951644d133ccd877dfcfb492f55b",
+    "length": 40970
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "url-signature",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

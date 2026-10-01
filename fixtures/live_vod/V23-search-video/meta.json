@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "V23-search-video",
+  "capturedAt": "2026-10-01T05:36:55.245151+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/web-interface/wbi/search/type?keyword=%E6%99%B4%E5%A4%A9%20%E5%91%A8%E6%9D%B0%E4%BC%A6&order=totalrank&page=1&page_size=20&search_type=video&wts=1790833014&w_rid=e8526e7a1516566802d445a7f7cf55c0",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://search.bilibili.com/",
+      "Cookie": "buvid3=A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D00000infoc;buvid4=F0E1D2C3-B4A5-9687-7869-5A4B3C2D1E0F00000-000000000-AbCdEfGhIjKlMnOpQrStUv==;"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "bili-status-code": "0"
+    }
+  },
+  "raw": {
+    "sha256": "67642c986d3cd9ce58adcac435fefe701e0af5fff9af107d90298f21b87cad92",
+    "length": 30315
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie",
+      "rule": "secret"
+    },
+    {
+      "where": "data.seid",
+      "rule": "secret"
+    },
+    {
+      "where": "trimmed:data.result:20->10",
+      "rule": "trimmed"
+    }
+  ],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

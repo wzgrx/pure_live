@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "V16-space-acc-352",
+  "capturedAt": "2026-10-01T05:36:54.258991+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/space/wbi/acc/info?mid=28454359&wts=1790833014&w_rid=7e11d84988916ca0dc2ec738d765701a",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://space.bilibili.com/28454359/",
+      "Cookie": "buvid3=A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D00000infoc;buvid4=F0E1D2C3-B4A5-9687-7869-5A4B3C2D1E0F00000-000000000-AbCdEfGhIjKlMnOpQrStUv==;"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "bili-status-code": "-352"
+    }
+  },
+  "raw": {
+    "sha256": "6bfe34bcaed67f7d2be6ed054c2cfe2d021c9c74c8003c9933c0ff55ee885e7c",
+    "length": 120
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

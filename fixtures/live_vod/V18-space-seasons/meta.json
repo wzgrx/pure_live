@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "V18-space-seasons",
+  "capturedAt": "2026-10-01T05:36:54.543321+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/polymer/web-space/seasons_series_list?mid=28454359&page_num=1&page_size=10",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://space.bilibili.com/28454359/",
+      "Cookie": "buvid3=A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D00000infoc;buvid4=F0E1D2C3-B4A5-9687-7869-5A4B3C2D1E0F00000-000000000-AbCdEfGhIjKlMnOpQrStUv==;"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "bili-status-code": "0"
+    }
+  },
+  "raw": {
+    "sha256": "6d8628e3a850883364e3cfe669ef7603dd8c63025a2a3b7da8e39e598d39504b",
+    "length": 140
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

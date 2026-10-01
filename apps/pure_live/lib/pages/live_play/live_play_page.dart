@@ -10,9 +10,12 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/pages/live_play/background_playback.dart';
 import 'package:pure_live/pages/live_play/chat_panel.dart';
 import 'package:pure_live/pages/live_play/player_view.dart';
+import 'package:pure_live/pages/live_play/record_button.dart';
 import 'package:pure_live/pages/live_play/room_controller.dart';
+import 'package:pure_live/pages/live_play/room_menu_button.dart';
 import 'package:pure_live/pages/live_play/room_panels.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
@@ -39,11 +42,40 @@ const double livePlayWideBreakpoint = 680;
 
 bool get _mobile => defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS;
 
+bool get _windows => defaultTargetPlatform == TargetPlatform.windows;
+
+/// The height of the picture of a portrait stream on a phone held upright
+/// (3.x `enablePortraitStreamAdaptation`, `portraitAdaptiveHeight`,
+/// `portraitLayoutMode`): `balanced` up to 3:4 or 55 % of the screen,
+/// `immersive` up to 9:16 or 75 %, `compatibility` (or adaptation off) the
+/// usual 16:9.
+double portraitVideoHeight({
+  required double width,
+  required double screenHeight,
+  required bool portraitStream,
+  required bool adaptation,
+  required bool adaptiveHeight,
+  required String mode,
+}) {
+  final standard = width * 9 / 16;
+  if (!portraitStream || !adaptation || !adaptiveHeight) return standard;
+  final (ratio, share) = switch (mode) {
+    'immersive' => (16 / 9, 0.75),
+    'compatibility' => (9 / 16, 1.0),
+    _ => (4 / 3, 0.55),
+  };
+  final height = width * ratio;
+  final limit = screenHeight * share;
+  return height.clamp(standard, limit < standard ? standard : limit);
+}
+
 class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   LiveRoomController? _controller;
   PlaybackSession? _session;
+  RoomBackgroundPolicy? _background;
   StreamSubscription<PlaybackState>? _autoFullscreen;
   bool _fullscreen = false;
+  bool _pip = false;
   String? _problem;
 
   @override
@@ -71,7 +103,12 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       store: store,
       mobile: _mobile,
       toast: (message) => AppNavigator.toast(message),
+      // 3.x's automatic ASMR mode: Android only.
+      sleepSessionOnStart:
+          defaultTargetPlatform == TargetPlatform.android && store.settings.get(Settings.enableAsmrSleepMode),
     );
+    _background = RoomBackgroundPolicy(controller: controller, settings: store.settings)..start();
+    PictureInPicture.active.addListener(_onPip);
     if (store.settings.get(Settings.enableFullScreenDefault)) {
       // 3.x entered fullscreen once the stream played.
       _autoFullscreen = session.states.listen((state) {
@@ -96,10 +133,18 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     rtxVideoSuperResolution: settings.get(Settings.enableRtxVsr),
   );
 
+  void _onPip() {
+    if (mounted) setState(() => _pip = PictureInPicture.active.value);
+  }
+
   @override
   void dispose() {
     unawaited(_autoFullscreen?.cancel());
+    PictureInPicture.active.removeListener(_onPip);
     if (_fullscreen && _mobile) unawaited(_restoreSystemUi());
+    _background?.dispose();
+    // The brightness gesture overrides the window's only inside the room.
+    unawaited(DeviceControls.resetBrightness());
     _controller?.dispose();
     final session = _session;
     if (session != null) unawaited(session.dispose());
@@ -150,10 +195,20 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
           },
           const SingleActivator(LogicalKeyboardKey.keyF): _toggleFullscreen,
           const SingleActivator(LogicalKeyboardKey.space): () => unawaited(controller.session.togglePlayPause()),
+          // 3.x `VideoKeyboard`: arrows change the room's volume, R reloads.
+          const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
+              unawaited(controller.setVolume(controller.volume + 0.05, save: true)),
+          const SingleActivator(LogicalKeyboardKey.arrowDown): () =>
+              unawaited(controller.setVolume(controller.volume - 0.05, save: true)),
+          const SingleActivator(LogicalKeyboardKey.keyR): () => unawaited(controller.load()),
         },
         child: Focus(
           autofocus: true,
-          child: _fullscreen ? _buildFullscreen(controller) : _buildNormal(context, controller),
+          child: _pip
+              ? _player(controller)
+              : _fullscreen
+              ? _buildFullscreen(controller)
+              : _buildNormal(context, controller),
         ),
       ),
     );
@@ -162,6 +217,8 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   Widget _player(LiveRoomController controller) => RoomPlayer(
     controller: controller,
     fullscreen: _fullscreen,
+    pip: _pip,
+    mobile: _mobile,
     onToggleFullscreen: _toggleFullscreen,
     onBack: () => unawaited(_setFullscreen(false)),
   );
@@ -184,20 +241,14 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
             listenable: controller,
             builder: (context, _) => FollowButton(room: controller.room, compact: compact),
           ),
-          PopupMenuButton<String>(
-            key: const ValueKey('live-play-menu'),
-            onSelected: (action) {
-              switch (action) {
-                case 'refresh':
-                  unawaited(controller.load());
-                case 'info':
-                  unawaited(showRoomInfo(context, controller));
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(value: 'refresh', child: Text(i18n('live_play_refresh_room'))),
-              PopupMenuItem(value: 'info', child: Text(i18n('live_play_room_info'))),
-            ],
+          if (controller.site.id != SiteIds.iptv)
+            ListenableBuilder(
+              listenable: controller,
+              builder: (context, _) => RecordButton(room: controller.room, compact: compact),
+            ),
+          ListenableBuilder(
+            listenable: controller,
+            builder: (context, _) => RoomMenuButton(controller: controller, desktop: !_mobile, windows: _windows),
           ),
         ],
       ),
@@ -220,7 +271,23 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
               return Column(
                 key: const ValueKey('live-play-portrait-stack'),
                 children: [
-                  AspectRatio(aspectRatio: 16 / 9, child: _player(controller)),
+                  StreamBuilder<PlaybackState>(
+                    stream: controller.session.states,
+                    initialData: controller.session.state,
+                    builder: (context, snapshot) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOutCubic,
+                      height: portraitVideoHeight(
+                        width: constraints.maxWidth,
+                        screenHeight: constraints.maxHeight,
+                        portraitStream: snapshot.data?.isPortrait ?? false,
+                        adaptation: watchSetting(ref, Settings.enablePortraitStreamAdaptation),
+                        adaptiveHeight: watchSetting(ref, Settings.portraitAdaptiveHeight),
+                        mode: watchSetting(ref, Settings.portraitLayoutMode),
+                      ),
+                      child: _player(controller),
+                    ),
+                  ),
                   infoBar,
                   const Divider(height: 1),
                   Expanded(child: ChatPanel(controller: controller)),

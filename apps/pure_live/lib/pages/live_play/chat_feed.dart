@@ -11,6 +11,9 @@ enum ChatLineKind {
   /// A platform notice (subscriptions, raids, room announcements).
   notice,
 
+  /// A gift a viewer sent (B-21).
+  gift,
+
   /// The app's own status (danmaku connecting, reconnecting).
   system,
 }
@@ -28,6 +31,9 @@ final class ChatLine {
 
   /// A platform notice.
   new notice(LiveMessage this.message) : kind = ChatLineKind.notice, text = message.message, superChat = null;
+
+  /// A gift.
+  new gift(LiveMessage this.message) : kind = ChatLineKind.gift, text = message.message, superChat = null;
 
   /// The app's status text.
   new system(this.text) : kind = ChatLineKind.system, message = null, superChat = null;
@@ -77,7 +83,7 @@ final class ChatFeed {
   }
 
   /// Takes back what [retraction] names: one message by id, a user's
-  /// messages, or all chat (status lines stay).
+  /// messages, or all chat (status lines and gifts stay).
   void retract(LiveRetraction retraction) {
     if (retraction.isAll) {
       _lines.removeWhere((line) => line.kind == ChatLineKind.chat);

@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
+import 'package:live_iptv/live_iptv.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
@@ -50,6 +51,8 @@ class LiveRoomController extends ChangeNotifier {
     required this.store,
     this.mobile = false,
     this.toast,
+    this.sleepSessionOnStart = false,
+    this.minuteLength = const Duration(minutes: 1),
     DateTime Function()? now,
     this.refreshInterval = const Duration(seconds: 60),
     this.danmakuStartTimeout = const Duration(seconds: 30),
@@ -77,6 +80,13 @@ class LiveRoomController extends ChangeNotifier {
 
   /// Shows a short message (the app's SnackBar).
   final void Function(String message)? toast;
+
+  /// Starts as a sleep session: audio only with the sleep timer of
+  /// `asmrSleepMinutes` (3.x's automatic ASMR mode on Android).
+  final bool sleepSessionOnStart;
+
+  /// A minute of the sleep timer (tests shorten it).
+  final Duration minuteLength;
 
   /// How often the room detail is fetched again while the page is open.
   final Duration refreshInterval;
@@ -111,6 +121,16 @@ class LiveRoomController extends ChangeNotifier {
   int _qualityIndex = 0;
   bool _switching = false;
   List<LiveSuperChatMessage> _superChats = const [];
+  bool _showGifts = true;
+  bool _audioOnly = false;
+  Timer? _sleepTimer;
+  DateTime? _sleepDeadline;
+  int _sleepMinutes = 60;
+  bool _sleepSession = false;
+  EpgProgramme? _catchup;
+
+  /// The meta key of the "show gifts" switch (B-21).
+  static const String showGiftsKey = 'live_play.showGifts';
 
   /// The room as known now (the card's data until the detail arrives).
   LiveRoom get room => _room;
@@ -142,6 +162,25 @@ class LiveRoomController extends ChangeNotifier {
   /// What "now" is (tests fix it).
   DateTime now() => _now();
 
+  /// Gifts appear in the chat list (B-21); the switch is kept in `meta`.
+  bool get showGifts => _showGifts;
+
+  /// Video is off: only the sound plays (3.x's headphone button).
+  bool get audioOnly => _audioOnly;
+
+  /// When the sleep timer stops the room, or null when it is off.
+  DateTime? get sleepDeadline => _sleepDeadline;
+
+  /// The sleep timer's last length in minutes (3.x `closeTimes`, 60).
+  int get sleepMinutes => _sleepMinutes;
+
+  /// A sleep session runs: it keeps playing in the background until its
+  /// timer ends (`shouldContinueInBackground`).
+  bool get sleepSessionActive => _sleepSession && _sleepDeadline != null;
+
+  /// The IPTV programme being replayed, or null for the live channel.
+  EpgProgramme? get catchup => _catchup;
+
   void _notify() {
     if (!_disposed) notifyListeners();
   }
@@ -160,6 +199,14 @@ class LiveRoomController extends ChangeNotifier {
       _subscriptions.add(store.settings.watch(setting).skip(1).listen((_) => unawaited(_syncDanmaku())));
     }
     await _reloadFilter();
+    await _guard(() async {
+      _showGifts = await store.meta.get(showGiftsKey) != '0';
+    }, 'gift switch');
+    if (sleepSessionOnStart) {
+      _audioOnly = true;
+      _sleepSession = true;
+      setSleepTimer(enabled: true, minutes: store.settings.get(Settings.asmrSleepMinutes));
+    }
     if (refreshInterval > Duration.zero) {
       _refreshTimer = Timer.periodic(refreshInterval, (_) => unawaited(refreshDetail()));
     }
@@ -200,8 +247,9 @@ class LiveRoomController extends ChangeNotifier {
     final epoch = ++_epoch;
     _stage = RoomStage.loading;
     _failure = null;
+    _catchup = null;
     _notify();
-    final requested = _room;
+    final requested = _room.catchUp.isActive ? _room.withoutCatchUp() : _room;
     final LiveRoom fetched;
     try {
       fetched = await site.getRoomDetail(roomId: requested.roomId);
@@ -317,13 +365,47 @@ class LiveRoomController extends ChangeNotifier {
     _notify();
     final quality = _qualities[playing];
     await session.open(
-      PlaybackRequest(site: site.id, plan: _plan(resolution), refresh: () => _refreshPlan(quality), volume: _volume()),
+      PlaybackRequest(
+        site: site.id,
+        plan: _plan(resolution),
+        refresh: () => _refreshPlan(quality),
+        audioOnly: _audioOnly,
+        volume: _volume(),
+      ),
     );
     return _current(epoch);
   }
 
-  PlaybackPlan _plan(LivePlayUrlResolution resolution) =>
-      PlaybackPlan.of(resolution, preferH264: store.settings.get(Settings.preferH264), onDemand: _room.isRecord);
+  PlaybackPlan _plan(LivePlayUrlResolution resolution) => PlaybackPlan.of(
+    site.id == SiteIds.iptv ? _withIptvHeaders(resolution) : resolution,
+    preferH264: store.settings.get(Settings.preferH264),
+    onDemand: _room.isRecord,
+  );
+
+  /// IPTV lines with the user's agent (`customIptvUserAgent`) under the
+  /// playlist's own headers (3.x `PlaybackHeaderResolver`: the channel's
+  /// `http-user-agent` wins over the setting).
+  LivePlayUrlResolution _withIptvHeaders(LivePlayUrlResolution resolution) {
+    if (resolution.inputRecipe != null) return resolution;
+    return LivePlayUrlResolution.lines(
+      [for (final line in resolution.lines) _iptvLine(line.url, line: line)],
+      appliedQualityData: resolution.appliedQualityData,
+      qualityUnconfirmed: resolution.qualityUnconfirmed,
+    );
+  }
+
+  LivePlayLine _iptvLine(String url, {LivePlayLine? line}) => LivePlayLine(
+    url,
+    headers: iptvPlayHeaders(
+      userAgent: store.settings.get(Settings.customIptvUserAgent),
+      room: _room.httpHeaders,
+      line: line?.headers ?? const {},
+    ),
+    format: line?.format,
+    codec: line?.codec,
+    lineId: line?.lineId,
+    lease: line?.lease,
+  );
 
   Future<PlaybackPlan> _refreshPlan(LivePlayQuality quality) async {
     final resolution = await site.resolvePlayUrlsForRecovery(detail: _room, quality: quality);
@@ -347,6 +429,147 @@ class LiveRoomController extends ChangeNotifier {
       mobile: false,
       defaultDesktop: settings.get(Settings.defaultDesktopVolume),
     );
+  }
+
+  /// The player's volume, 0 to 1.
+  double get volume => session.state.volume;
+
+  /// Sets the player's volume; [save] keeps it as this room's volume (3.x
+  /// `LiveRoomVolumeManager`, the `roomVolumes` setting).
+  Future<void> setVolume(double value, {bool save = false}) async {
+    final volume = value.isFinite ? value.clamp(0.0, 1.0) : 1.0;
+    await session.setVolume(volume);
+    _notify();
+    if (save) await saveVolume();
+  }
+
+  /// Keeps the current volume as this room's.
+  Future<void> saveVolume() => _guard(() async {
+    final settings = store.settings;
+    final saved = Map<String, Object?>.of(settings.get(Settings.roomVolumes));
+    saved[roomVolumeKey(_room.platform, _room.roomId)] = double.parse(volume.toStringAsFixed(2));
+    await settings.set(Settings.roomVolumes, saved);
+  }, 'room volume');
+
+  /// Turns video off or on (3.x's headphone button); the stream stays.
+  Future<void> setAudioOnly({required bool enabled}) async {
+    if (_audioOnly == enabled) return;
+    _audioOnly = enabled;
+    if (!enabled && _sleepSession) {
+      // Back to video ends the automatic sleep session (3.x).
+      _sleepSession = false;
+      setSleepTimer(enabled: false, minutes: _sleepMinutes);
+    }
+    _notify();
+    await session.setAudioOnly(enabled: enabled);
+  }
+
+  /// Shows or hides gifts in the chat list and remembers the choice.
+  Future<void> setShowGifts({required bool show}) async {
+    if (_showGifts == show) return;
+    _showGifts = show;
+    if (!show) chat.removeWhere((line) => line.kind == ChatLineKind.gift);
+    _notify();
+    await _guard(() => store.meta.set(showGiftsKey, show ? '1' : '0'), 'gift switch');
+  }
+
+  /// Starts (or restarts) the sleep timer for [minutes], or stops it (3.x
+  /// `applyRoomPlaybackTimer`): when it ends the room pauses.
+  void setSleepTimer({required bool enabled, required int minutes}) {
+    _sleepMinutes = minutes.clamp(1, 525600);
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+    _sleepDeadline = null;
+    if (enabled && !_disposed) {
+      final length = minuteLength * _sleepMinutes;
+      _sleepDeadline = _now().add(length);
+      _sleepTimer = Timer(length, _sleepEnded);
+    } else {
+      _sleepSession = false;
+    }
+    _notify();
+  }
+
+  void _sleepEnded() {
+    _sleepTimer = null;
+    _sleepDeadline = null;
+    _sleepSession = false;
+    unawaited(session.pause());
+    toast?.call(i18n('room_playback_timer_finished'));
+    _notify();
+  }
+
+  // ---- IPTV catch-up ----
+
+  /// Replays [programme] of this IPTV channel (3.x `playCatchup`); returns
+  /// the text key of the reason when it cannot, null when it plays.
+  Future<String?> playCatchup(EpgProgramme programme) async {
+    if (site.id != SiteIds.iptv || _stage != RoomStage.playing) return 'catchup_unavailable';
+    final now = _now();
+    final phase = classifyIptvProgramme(start: programme.start, stop: programme.stop, now: now);
+    if (phase == IptvProgrammePhase.scheduled) return 'program_scheduled_hint';
+    if (phase == IptvProgrammePhase.live) {
+      await backToLive();
+      return null;
+    }
+    final catchUp = _room.catchUp;
+    final availability = evaluateIptvCatchupAvailability(
+      programmeStop: programme.stop,
+      now: now,
+      mode: catchUp.mode,
+      source: catchUp.source,
+      days: catchUp.days,
+    );
+    if (availability != IptvCatchupAvailability.available) return 'catchup_unavailable';
+    final live = (_room.link ?? _room.data?.toString() ?? '').trim();
+    final String url;
+    try {
+      url = buildIptvCatchupUrl(
+        originalUrl: live,
+        start: programme.start,
+        stop: programme.stop,
+        type: CatchupUrlType.playseek,
+        now: now,
+        mode: catchUp.mode,
+        source: catchUp.source,
+        correctionHours: catchUp.correctionHours,
+      );
+    } on Object {
+      return 'invalid_play_url';
+    }
+    final epoch = _epoch;
+    _catchup = programme;
+    _room = _room.copyWith(
+      catchUp: CatchUp(
+        url: url,
+        active: true,
+        start: programme.start.millisecondsSinceEpoch,
+        end: programme.stop.millisecondsSinceEpoch,
+        mode: catchUp.mode,
+        source: catchUp.source,
+        days: catchUp.days,
+        correctionHours: catchUp.correctionHours,
+      ),
+    );
+    _notify();
+    await session.open(
+      PlaybackRequest(
+        site: site.id,
+        plan: PlaybackPlan.of(LivePlayUrlResolution.lines([_iptvLine(url)]), onDemand: true),
+        audioOnly: _audioOnly,
+        volume: _volume(),
+      ),
+    );
+    return _current(epoch) ? null : 'play_video_failed';
+  }
+
+  /// Leaves the replay for the live channel (3.x `returnToLive`).
+  Future<void> backToLive() async {
+    if (_catchup == null) return;
+    _catchup = null;
+    _room = _room.withoutCatchUp();
+    _notify();
+    await _startStream(_epoch);
   }
 
   /// Plays quality [index] (3.x `setResolution(changeQuality)`); the old
@@ -415,7 +638,7 @@ class LiveRoomController extends ChangeNotifier {
   /// `_updateFavoriteRoomSnapshot`); rooms not followed are untouched.
   Future<void> _saveFollowSnapshot() => _guard(() => store.follows.update([_room]), 'follow snapshot');
 
-  Future<void> _guard(Future<Object?> Function() action, String what) async {
+  Future<void> _guard(Future<void> Function() action, String what) async {
     try {
       await action();
     } on Object catch (error, stackTrace) {
@@ -506,8 +729,10 @@ class LiveRoomController extends ChangeNotifier {
         chat.add(ChatLine.notice(message));
         _notify();
       case LiveMessageType.gift:
-        // Gifts are reported but not shown yet (B-21, decided with the gift UI).
-        return;
+        // B-21: a line in the chat list, not on the video; the switch hides them.
+        if (!_showGifts || message.message.trim().isEmpty) return;
+        chat.add(ChatLine.gift(message));
+        _notify();
     }
   }
 
@@ -597,6 +822,7 @@ class LiveRoomController extends ChangeNotifier {
     _epoch++;
     _refreshTimer?.cancel();
     _superChatTimer?.cancel();
+    _sleepTimer?.cancel();
     for (final subscription in _subscriptions) {
       unawaited(subscription.cancel());
     }
@@ -616,4 +842,23 @@ List<LivePlayQuality> _normalizeQualities(List<LivePlayQuality> qualities) {
     for (final quality in qualities)
       if (quality.quality.trim().isNotEmpty && seen.add('${quality.selectionId}')) quality,
   ];
+}
+
+/// The headers of an IPTV stream: the user's agent ([userAgent], the
+/// `customIptvUserAgent` setting) under the channel's playlist headers
+/// ([room]) and the line's own ([line]); 3.x `PlaybackHeaderResolver`.
+Map<String, String> iptvPlayHeaders({
+  required String userAgent,
+  Map<String, String> room = const {},
+  Map<String, String> line = const {},
+}) {
+  final headers = <String, String>{};
+  final agent = userAgent.trim();
+  if (agent.isNotEmpty) headers['user-agent'] = agent;
+  for (final entry in [...room.entries, ...line.entries]) {
+    headers
+      ..removeWhere((key, _) => key.toLowerCase() == entry.key.toLowerCase())
+      ..[entry.key] = entry.value;
+  }
+  return headers;
 }

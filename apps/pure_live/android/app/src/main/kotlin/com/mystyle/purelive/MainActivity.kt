@@ -1,6 +1,9 @@
 package com.mystyle.purelive
 
+import android.app.PictureInPictureParams
 import android.content.Context
+import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.hardware.display.DisplayManager
 import android.media.AudioManager
 import android.net.wifi.WifiManager
@@ -8,18 +11,23 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
+import android.provider.Settings
+import android.util.Rational
 import android.view.Display
+import android.view.WindowManager
 import android.window.BackEvent
 import android.window.OnBackAnimationCallback
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 /**
- * The app's activity (3.x MainActivity at v3.2.11, without the recorder and
- * audio_service parts, which come back with M7/M8).
+ * The app's activity (3.x MainActivity at v3.2.11). Like 3.x it is
+ * audio_service's [AudioServiceActivity]: the Flutter engine is cached, so
+ * the live room's media notification (M13.14) and recording keep running
+ * when the activity goes away.
  *
  * Channels:
  * - `pure_live/display_mode`: the refresh-rate hint of AdaptiveRefreshRateScope;
@@ -29,14 +37,21 @@ import io.flutter.plugin.common.MethodChannel
  *   (registered by [AppChannelsPlugin], so they also work on an engine without
  *   an activity);
  * - `pure_live/recorder`: recording's foreground service and storage access
- *   ([RecorderPlugin]).
+ *   ([RecorderPlugin]);
+ * - `pure_live/pip`: the live room's picture-in-picture (3.x used the
+ *   floating plugin); `changed` reports entering and leaving;
+ * - `pure_live/device_controls`: the media volume and the window's
+ *   brightness for the live room's gestures (3.x used the volume_controller
+ *   and screen_brightness plugins).
  */
-class MainActivity : FlutterActivity() {
+class MainActivity : AudioServiceActivity() {
     companion object {
         private const val DISPLAY_MODE_CHANNEL = "pure_live/display_mode"
         private const val BACKGROUND_PLAYBACK_CHANNEL = "pure_live/background_playback"
         private const val PREDICTIVE_BACK_CHANNEL = "pure_live/predictive_back"
         private const val APP_CHANNEL = "pure_live/app"
+        private const val PIP_CHANNEL = "pure_live/pip"
+        private const val DEVICE_CONTROLS_CHANNEL = "pure_live/device_controls"
         private var playbackWakeLock: PowerManager.WakeLock? = null
         private var playbackWifiLock: WifiManager.WifiLock? = null
     }
@@ -45,6 +60,7 @@ class MainActivity : FlutterActivity() {
     private var highRefreshRateEnabled = false
     private var displayModeChannel: MethodChannel? = null
     private var predictiveBackChannel: MethodChannel? = null
+    private var pipChannel: MethodChannel? = null
     private var predictiveBackEnabled = false
     private var predictiveBackRegistered = false
     private var displayListenerRegistered = false
@@ -153,6 +169,40 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+        pipChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PIP_CHANNEL).also { channel ->
+            channel.setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "isSupported" -> result.success(pictureInPictureSupported())
+                    "enter" -> result.success(
+                        enterPictureInPicture(call.argument<Int>("width") ?: 16, call.argument<Int>("height") ?: 9),
+                    )
+
+                    else -> result.notImplemented()
+                }
+            }
+        }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, DEVICE_CONTROLS_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "getVolume" -> result.success(mediaVolume())
+                "setVolume" -> {
+                    setMediaVolume(call.argument<Double>("value") ?: 0.0)
+                    result.success(null)
+                }
+
+                "getBrightness" -> result.success(windowBrightness())
+                "setBrightness" -> {
+                    setWindowBrightness((call.argument<Double>("value") ?: 0.5).toFloat())
+                    result.success(null)
+                }
+
+                "resetBrightness" -> {
+                    setWindowBrightness(WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE)
+                    result.success(null)
+                }
+
+                else -> result.notImplemented()
+            }
+        }
         predictiveBackChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             PREDICTIVE_BACK_CHANNEL,
@@ -169,6 +219,63 @@ class MainActivity : FlutterActivity() {
             }
         }
         applyPreferredDisplayMode(highRefreshRateEnabled)
+    }
+
+    private fun pictureInPictureSupported(): Boolean =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+
+    private fun enterPictureInPicture(width: Int, height: Int): Boolean {
+        if (!pictureInPictureSupported()) return false
+        // Android accepts ratios between 1:2.39 and 2.39:1.
+        val ratio = (width.coerceAtLeast(1).toDouble() / height.coerceAtLeast(1)).coerceIn(1 / 2.39, 2.39)
+        val params = PictureInPictureParams.Builder()
+            .setAspectRatio(Rational((ratio * 1000).toInt(), 1000))
+            .build()
+        return try {
+            enterPictureInPictureMode(params)
+        } catch (_: IllegalStateException) {
+            false
+        }
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        pipChannel?.invokeMethod("changed", isInPictureInPictureMode)
+    }
+
+    private fun mediaVolume(): Double {
+        val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val max = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        return if (max <= 0) 0.0 else audio.getStreamVolume(AudioManager.STREAM_MUSIC).toDouble() / max
+    }
+
+    private fun setMediaVolume(value: Double) {
+        val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val max = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        val index = kotlin.math.round(value.coerceIn(0.0, 1.0) * max).toInt()
+        try {
+            audio.setStreamVolume(AudioManager.STREAM_MUSIC, index, 0)
+        } catch (_: SecurityException) {
+            // Do Not Disturb refuses volume changes.
+        }
+    }
+
+    private fun windowBrightness(): Double {
+        val own = window.attributes.screenBrightness
+        if (own >= 0) return own.toDouble()
+        return try {
+            Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS) / 255.0
+        } catch (_: Settings.SettingNotFoundException) {
+            0.5
+        }
+    }
+
+    private fun setWindowBrightness(value: Float) {
+        val attributes = window.attributes
+        attributes.screenBrightness =
+            if (value < 0) WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE else value.coerceIn(0.01f, 1f)
+        window.attributes = attributes
     }
 
     private fun dispatchPresentationBack() {
@@ -275,6 +382,7 @@ class MainActivity : FlutterActivity() {
     override fun onDestroy() {
         mainHandler.removeCallbacks(displayModeRefresh)
         displayModeChannel = null
+        pipChannel = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) unregisterPredictiveBack()
         predictiveBackChannel = null
         super.onDestroy()

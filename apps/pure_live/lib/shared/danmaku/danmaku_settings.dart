@@ -18,6 +18,9 @@ DanmakuLook danmakuLookOf(WidgetRef ref) => DanmakuLook(
   speed: watchSetting(ref, Settings.danmakuSpeed),
   opacity: watchSetting(ref, Settings.danmakuOpacity),
   area: watchSetting(ref, Settings.danmakuArea),
+  // Pixels kept free above and below (3.x `danmakuTopArea`/`BottomArea`).
+  topMargin: watchSetting(ref, Settings.danmakuTopArea),
+  bottomMargin: watchSetting(ref, Settings.danmakuBottomArea),
   stroke: watchSetting(ref, Settings.enableDanmakuStroke),
   strokeWidth: watchSetting(ref, Settings.danmakuFontBorder),
 );
@@ -25,8 +28,12 @@ DanmakuLook danmakuLookOf(WidgetRef ref) => DanmakuLook(
 /// The main danmaku settings (3.x `DanmakuSettingsPage`, first part): they
 /// apply to the video at once.
 class DanmakuSettingsPanel extends ConsumerWidget {
-  /// Creates the panel.
-  const new({super.key});
+  /// Creates the panel; [leading] goes above the settings (the live room's
+  /// viewing templates).
+  const new({this.leading = const [], super.key});
+
+  /// Widgets above the settings.
+  final List<Widget> leading;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,12 +47,15 @@ class DanmakuSettingsPanel extends ConsumerWidget {
     final border = watchSetting(ref, Settings.danmakuFontBorder);
     final repeatWindow = watchSetting(ref, Settings.repeatedDanmakuWindowSeconds);
     final threshold = watchSetting(ref, Settings.danmakuSimilarityThreshold);
+    final top = watchSetting(ref, Settings.danmakuTopArea);
+    final bottom = watchSetting(ref, Settings.danmakuBottomArea);
     return ListView(
       key: const ValueKey('live-play-danmaku-settings'),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       children: [
         Text(i18n('danmaku_realtime_hint'), style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 8),
+        ...leading,
         context.buildModernCard([
           context.buildSwitchTile(
             title: i18n('show_danmaku'),
@@ -75,6 +85,24 @@ class DanmakuSettingsPanel extends ConsumerWidget {
             max: 1,
             displayValue: '${(area * 100).round()}%',
             onChanged: (value) => set(Settings.danmakuArea, (value * 20).round() / 20),
+          ),
+          context.buildSliderTile(
+            icon: Icons.vertical_align_top_rounded,
+            title: i18n('settings_danmaku_top_margin'),
+            value: top.clamp(0, 300).toDouble(),
+            min: 0,
+            max: 300,
+            displayValue: '${top.round()}',
+            onChanged: (value) => set(Settings.danmakuTopArea, (value / 5).round() * 5.0),
+          ),
+          context.buildSliderTile(
+            icon: Icons.vertical_align_bottom_rounded,
+            title: i18n('live_play_danmaku_bottom_margin'),
+            value: bottom.clamp(0, 300).toDouble(),
+            min: 0,
+            max: 300,
+            displayValue: '${bottom.round()}',
+            onChanged: (value) => set(Settings.danmakuBottomArea, (value / 5).round() * 5.0),
           ),
           context.buildSliderTile(
             icon: Icons.opacity_rounded,

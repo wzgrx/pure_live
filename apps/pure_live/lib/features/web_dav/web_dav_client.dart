@@ -3,6 +3,7 @@ import 'dart:io' show HttpDate;
 
 import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/features/web_dav/web_dav_auth.dart';
 
 /// A file or folder on a WebDAV server.
 final class WebDavEntry {
@@ -58,10 +59,20 @@ final class WebDavFailure implements Exception {
   String toString() => 'WebDavFailure($problem, $status, $detail)';
 }
 
+/// How a [WebDavClient] signs its requests.
+enum _Scheme { none, basic, digest }
+
+/// The credentials one request went with.
+typedef _Signed = ({_Scheme scheme, int count, String? authorization});
+
 /// The WebDAV calls the backup page needs (3.x used webdav_client:
 /// `readDir`, `read`, `write`, `remove`), over the app's [LiveHttp] so the
-/// app proxy applies. Basic authentication, as the servers 3.x users have
-/// (Jianguoyun, Nextcloud, Alist) accept.
+/// app proxy applies.
+///
+/// Authentication follows 3.x's webdav_client: the first request goes without
+/// credentials and the server's `401` challenge picks Basic or Digest (Digest
+/// when both are offered); later requests sign with that scheme directly.
+/// Jianguoyun, Nextcloud and Alist ask for Basic.
 final class WebDavClient {
   /// Creates the client for [config].
   new(this._http, this.config) : _base = Uri.parse(config.address.trim());
@@ -83,25 +94,96 @@ final class WebDavClient {
   Uri urlOf(List<String> path, {bool dir = false}) =>
       _base.replace(pathSegments: [..._baseSegments, ...path, if (dir || path.isEmpty) '']);
 
-  Map<String, String> get _auth => {
-    'authorization': 'Basic ${base64.encode(utf8.encode('${config.username}:${config.password}'))}',
-  };
+  _Scheme _scheme = _Scheme.none;
+  DigestChallenge? _digest;
 
-  Future<LiveResponse> _send(String method, Uri url, {Map<String, String> headers = const {}, List<int>? body}) async {
-    final LiveResponse response;
+  /// Requests signed with [_digest]'s nonce so far.
+  int _nonceCount = 0;
+
+  /// The request target Digest signs: what the request line carries.
+  static String _target(Uri url) {
+    final path = url.path.isEmpty ? '/' : url.path;
+    return url.hasQuery ? '$path?${url.query}' : path;
+  }
+
+  /// The credentials for one request under the current scheme.
+  _Signed _sign(String method, Uri url) {
+    switch (_scheme) {
+      case _Scheme.none:
+        return (scheme: _Scheme.none, count: 0, authorization: null);
+      case _Scheme.basic:
+        final token = base64.encode(utf8.encode('${config.username}:${config.password}'));
+        return (scheme: _Scheme.basic, count: 0, authorization: 'Basic $token');
+      case _Scheme.digest:
+        final count = ++_nonceCount;
+        return (
+          scheme: _Scheme.digest,
+          count: count,
+          authorization: digestAuthorization(
+            challenge: _digest!,
+            username: config.username,
+            password: config.password,
+            method: method,
+            uri: _target(url),
+            nc: count,
+            cnonce: randomCnonce(),
+          ),
+        );
+    }
+  }
+
+  /// Takes the scheme a `401` asks for; returns whether to send the request
+  /// again. A request is not repeated with the credentials that just failed:
+  /// Basic again, or Digest with a fresh nonce that is not `stale`. A `401`
+  /// without a challenge gets one try with Basic; a challenge this client
+  /// cannot answer (Bearer, SHA-256 Digest) gets no password.
+  bool _learn(LiveResponse response, _Signed sent) {
+    final challenges = parseAuthChallenges(response.headers['www-authenticate'] ?? const []);
+    final digest = challenges.map(DigestChallenge.from).nonNulls.firstOrNull;
+    if (digest != null) {
+      _scheme = _Scheme.digest;
+      _digest = digest;
+      _nonceCount = 0;
+      return sent.scheme != _Scheme.digest || digest.stale || sent.count > 1;
+    }
+    if (challenges.any((challenge) => challenge.scheme == 'basic') ||
+        (challenges.isEmpty && sent.scheme == _Scheme.none)) {
+      _scheme = _Scheme.basic;
+      return sent.scheme != _Scheme.basic;
+    }
+    return false;
+  }
+
+  Future<LiveResponse> _exchange(
+    String method,
+    Uri url,
+    Map<String, String> headers,
+    List<int>? body,
+    _Signed sent,
+  ) async {
     try {
-      response = await _http.send(
+      return await _http.send(
         LiveRequest(
           site: _site,
           url: url,
           method: method,
-          headers: {..._auth, ...headers},
+          headers: {'authorization': ?sent.authorization, ...headers},
           body: body,
           timeout: const Duration(seconds: 30),
         ),
       );
     } on TransportFailure catch (error) {
       throw WebDavFailure(WebDavProblem.network, detail: '$error');
+    }
+  }
+
+  Future<LiveResponse> _send(String method, Uri url, {Map<String, String> headers = const {}, List<int>? body}) async {
+    var sent = _sign(method, url);
+    var response = await _exchange(method, url, headers, body, sent);
+    if (response.status == 401 && _learn(response, sent)) {
+      sent = _sign(method, url);
+      response = await _exchange(method, url, headers, body, sent);
+      if (response.status == 401) _learn(response, sent);
     }
     if (response.isSuccess) return response;
     throw WebDavFailure(switch (response.status) {

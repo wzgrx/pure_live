@@ -28,6 +28,7 @@ import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_layout.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
+import 'package:pure_live/features/live_play/logic/room_refresh_rate.dart';
 import 'package:pure_live/features/live_play/logic/room_runtime.dart';
 import 'package:pure_live/features/live_play/mini/room_mini_window.dart';
 import 'package:pure_live/features/live_play/player/player_controls.dart';
@@ -131,6 +132,9 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   /// The local interaction in this room (U.2k).
   LocalRoomSession? _local;
 
+  /// The display's refresh rate follows the video's frame rate (U.2i).
+  RoomRefreshRate? _refreshRate;
+
   RoomPlatform get _platform => RoomPlatform.current();
 
   @override
@@ -201,6 +205,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
           )
           ..addListener(_onMini)
           ..startAutoPip();
+    _refreshRate = RoomRefreshRate(session: session, settings: store.settings)..start();
     _detectedPortrait.value = session.state.isPortrait;
     _shape = session.states.listen((state) {
       if (state.isPortrait != _detectedPortrait.value) _detectedPortrait.value = state.isPortrait;
@@ -280,6 +285,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     // The brightness gesture overrides the window's only inside the room.
     unawaited(DeviceControls.resetBrightness());
     if (fullscreen && _platform.desktop) unawaited(DesktopWindow.setFullScreen(on: false));
+    _refreshRate?.dispose();
     _detectedPortrait.dispose();
     _guideReveal.dispose();
     _local?.dispose();

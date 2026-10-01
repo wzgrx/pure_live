@@ -9,6 +9,7 @@ import 'package:pure_live/features/settings/settings_editors.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
 import 'package:pure_live/features/settings/settings_tiles.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/routes/route_path.dart';
 
 /// "30 分钟", "1.5 小时", "2 小时" (3.x's refresh interval labels).
@@ -1285,6 +1286,31 @@ List<SettingsEntry> _build() {
       settings: [Settings.refreshRateMode],
       keywords: ['Hz', '高刷', 'refresh rate'],
       when: _refreshRate,
+    )
+    // U.2i c2, c6: under the refresh rate; greyed out on a display with one rate.
+    ..add(
+      'match_video_frame_rate',
+      'match_video_frame_rate',
+      (context, entry) => ValueListenableBuilder(
+        valueListenable: DisplayMode.info,
+        builder: (context, info, _) => switch (info?.supportedRefreshRates) {
+          [final only] => SettingsSwitchRow(
+            key: entry.rowKey,
+            title: entry.titleText,
+            subtitle: entry.descriptionText,
+            icon: AppIcons.matchFrameRate,
+            value: false,
+            enabled: false,
+            disabledReason: i18n('match_video_frame_rate_single', args: {'rate': '${only.round()}'}),
+            onChanged: null,
+          ),
+          _ => SettingToggleTile(entry: entry, setting: Settings.matchVideoFrameRate, icon: AppIcons.matchFrameRate),
+        },
+      ),
+      desc: 'match_video_frame_rate_desc',
+      settings: [Settings.matchVideoFrameRate],
+      keywords: ['Hz', '帧率', 'frame rate'],
+      when: _android,
     )
     ..add(
       'windows_display',

@@ -24,6 +24,10 @@ import android.text.InputType
 import android.util.Rational
 import android.util.TypedValue
 import android.view.Display
+import android.view.Surface
+import android.view.SurfaceView
+import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -34,6 +38,7 @@ import android.window.OnBackAnimationCallback
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import com.ryanheise.audioservice.AudioServiceActivity
+import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
@@ -44,7 +49,8 @@ import io.flutter.plugin.common.MethodChannel
  * when the activity goes away.
  *
  * Channels:
- * - `pure_live/display_mode`: the refresh-rate hint of AdaptiveRefreshRateScope;
+ * - `pure_live/display_mode`: the refresh-rate hint of AdaptiveRefreshRateScope
+ *   and, while the live room plays, the video's frame rate (U.2i);
  * - `pure_live/background_playback`: wake and Wi-Fi locks while playing in the background;
  * - `pure_live/predictive_back`: the live room's back arbitration;
  * - `pure_live/app`: back to the background, whether this is a television
@@ -81,6 +87,14 @@ class MainActivity : AudioServiceActivity() {
 
     // Android's dynamic policy until Dart asks for the high rate.
     private var highRefreshRateEnabled = false
+
+    // U.2i: while the live room plays, the rate Dart chose as a whole
+    // multiple of the video's frame rate (0 = the system's); null keeps
+    // 3.x's choice (the highest rate or the system's).
+    private var playbackRefreshRate: Float? = null
+
+    // U.2i: the video's frame rate declared on Flutter's surface; 0 = none.
+    private var videoFrameRate = 0f
     private var displayModeChannel: MethodChannel? = null
     private var predictiveBackChannel: MethodChannel? = null
     private var pipChannel: MethodChannel? = null
@@ -94,6 +108,8 @@ class MainActivity : AudioServiceActivity() {
     private var lastPublishedDisplayModeInfo: Map<String, Any>? = null
     private val mainHandler = Handler(Looper.getMainLooper())
     private val displayModeRefresh = Runnable {
+        // A new surface (back from the background) forgets the declaration.
+        applyVideoFrameRate()
         val info = applyPreferredDisplayMode(highRefreshRateEnabled)
         if (info != lastPublishedDisplayModeInfo) {
             lastPublishedDisplayModeInfo = info
@@ -169,9 +185,16 @@ class MainActivity : AudioServiceActivity() {
                 when (call.method) {
                     "setHighRefreshRate" -> {
                         highRefreshRateEnabled = call.argument<Boolean>("enabled") ?: true
+                        playbackRefreshRate = call.argument<Number>("refreshRate")?.toFloat()
                         val info = applyPreferredDisplayMode(highRefreshRateEnabled)
                         lastPublishedDisplayModeInfo = info
                         result.success(info)
+                    }
+
+                    "setVideoFrameRate" -> {
+                        videoFrameRate = (call.argument<Number>("fps")?.toFloat() ?: 0f).coerceAtLeast(0f)
+                        applyVideoFrameRate()
+                        result.success(displayModeInfo())
                     }
 
                     "getDisplayModeInfo" -> result.success(displayModeInfo())
@@ -391,9 +414,9 @@ class MainActivity : AudioServiceActivity() {
             .build()
         return try {
             if (enterPictureInPictureMode(params)) "entered" else "failed"
-        } catch (_: IllegalStateException) {
+        } catch (ignored: IllegalStateException) {
             "failed"
-        } catch (_: IllegalArgumentException) {
+        } catch (ignored: IllegalArgumentException) {
             "failed"
         }
     }
@@ -436,9 +459,9 @@ class MainActivity : AudioServiceActivity() {
                     .setAutoEnterEnabled(autoEnterPip)
                     .build(),
             )
-        } catch (_: IllegalStateException) {
+        } catch (ignored: IllegalStateException) {
             // The activity is going away.
-        } catch (_: IllegalArgumentException) {
+        } catch (ignored: IllegalArgumentException) {
             // A ratio the device refuses.
         }
     }
@@ -449,9 +472,9 @@ class MainActivity : AudioServiceActivity() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || isInPictureInPictureMode || !pictureInPictureAllowed()) return
         try {
             enterPictureInPictureMode(PictureInPictureParams.Builder().setAspectRatio(autoEnterRatio).build())
-        } catch (_: IllegalStateException) {
+        } catch (ignored: IllegalStateException) {
             // Refused; the room pauses as it would without it.
-        } catch (_: IllegalArgumentException) {
+        } catch (ignored: IllegalArgumentException) {
             // Refused.
         }
     }
@@ -639,11 +662,21 @@ class MainActivity : AudioServiceActivity() {
             compareBy<Display.Mode> { it.refreshRate }.thenBy { it.modeId },
         ) ?: currentMode
 
+        // U.2i: the playback's rate, as the nearest mode of this resolution.
+        val playbackMode = playbackRefreshRate?.takeIf { it > 0f }?.let { rate ->
+            compatibleModes.minByOrNull { kotlin.math.abs(it.refreshRate - rate) }
+        }
+
         val attributes = window.attributes
         // Only the rate hint changes; pinning a display mode id can force a
         // heavy vendor mode switch (3.x).
         val targetModeId = 0
-        val targetRefreshRate = if (enabled) preferredMode.refreshRate else 0f
+        val targetRefreshRate = when {
+            playbackMode != null -> playbackMode.refreshRate
+            playbackRefreshRate != null -> 0f
+            enabled -> preferredMode.refreshRate
+            else -> 0f
+        }
         if (
             attributes.preferredDisplayModeId != targetModeId ||
             kotlin.math.abs(attributes.preferredRefreshRate - targetRefreshRate) > 0.01f
@@ -652,7 +685,54 @@ class MainActivity : AudioServiceActivity() {
             attributes.preferredRefreshRate = targetRefreshRate
             window.attributes = attributes
         }
-        return displayModeInfo(if (enabled) preferredMode else currentMode)
+        return displayModeInfo(playbackMode ?: if (enabled) preferredMode else currentMode)
+    }
+
+    /**
+     * U.2i: declares the video's frame rate on Flutter's surface (the video
+     * is a texture inside it, so the system sees no video layer of its own).
+     * Android 12 and later only, where the switch can be limited to seamless
+     * ones; a fixed-source rate lets the system pick a whole multiple.
+     */
+    private fun applyVideoFrameRate() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        val surface = flutterSurfaceView()?.holder?.surface ?: return
+        if (!surface.isValid) return
+        try {
+            if (videoFrameRate > 0f) {
+                surface.setFrameRate(
+                    videoFrameRate,
+                    Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                    Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS,
+                )
+            } else {
+                surface.setFrameRate(
+                    0f,
+                    Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
+                    Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS,
+                )
+            }
+        } catch (ignored: IllegalArgumentException) {
+            // A rate the system does not take: it keeps its own choice.
+        } catch (ignored: IllegalStateException) {
+            // The surface went away meanwhile.
+        }
+    }
+
+    /** Flutter's [SurfaceView] (none with a texture render mode). */
+    private fun flutterSurfaceView(): SurfaceView? {
+        val root: View = findViewById(FlutterActivity.FLUTTER_VIEW_ID) ?: window.decorView
+        return findSurfaceView(root)
+    }
+
+    private fun findSurfaceView(view: View): SurfaceView? {
+        if (view is SurfaceView) return view
+        if (view is ViewGroup) {
+            for (index in 0 until view.childCount) {
+                findSurfaceView(view.getChildAt(index))?.let { return it }
+            }
+        }
+        return null
     }
 
     private fun displayModeInfo(preferredMode: Display.Mode? = null): Map<String, Any> {

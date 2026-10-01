@@ -171,6 +171,19 @@ void main() {
     });
   });
 
+  test("Android folder addresses: shared storage opens in the file manager, the app's own folder does not", () {
+    expect(
+      androidDocumentFolderUri('/storage/emulated/0/Download/PureLiveRecords/').toString(),
+      'content://com.android.externalstorage.documents/document/primary%3ADownload%2FPureLiveRecords',
+    );
+    expect(
+      androidDocumentFolderUri('/storage/emulated/0/Android/data/com.mystyle.purelive.v4dev/files/Records'),
+      isNull,
+    );
+    expect(androidDocumentFolderUri('/data/user/0/com.mystyle.purelive.v4dev/files'), isNull);
+    expect(androidDocumentFolderUri('/storage/emulated/0'), isNull);
+  });
+
   testWidgets('without FFmpeg the centre says recording is unavailable', (tester) async {
     await _pump(tester, (route) => RecorderPage(route: route), withRecorder: false);
     expect(find.text('录制中心'), findsOneWidget);

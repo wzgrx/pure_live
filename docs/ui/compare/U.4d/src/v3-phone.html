@@ -1,0 +1,73 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="393x852@3"><link rel="stylesheet" href="kit/kit.css"><style>
+.col{display:flex;flex-direction:column}
+.fill{flex:1;min-height:0;position:relative;overflow:hidden}
+.row{display:flex;align-items:center}
+.ab{height:56px;flex:none;display:flex;align-items:center;background:var(--surface);position:relative}
+.ab .lead{width:56px;height:56px;display:grid;place-items:center;flex:none}
+.ab .ttl{flex:1;min-width:0;text-align:center;font-size:20px;font-weight:600}
+/* TabBar (v3 theme): 15 px, selected primary semi-bold, others onSurfaceVariant 80 %,
+   indicator 2 px under the label only, no divider */
+.tb{display:flex;height:46px;flex:none;overflow:hidden;white-space:nowrap}
+.tb .t{position:relative;flex:none;height:46px;line-height:46px;padding:0 16px;font-size:15px;color:color-mix(in srgb,var(--onv) 80%,transparent)}
+.tb .t.on{color:var(--primary);font-weight:600}
+.tb .t.on::after{content:'';position:absolute;left:16px;right:16px;bottom:0;height:2px;border-radius:2px 2px 0 0;background:var(--primary)}
+/* new: secondary tabs for the categories (14 px, full-width indicator, divider) */
+.tb2{display:flex;height:46px;flex:none;overflow:hidden;white-space:nowrap;box-shadow:inset 0 -1px 0 var(--ov)}
+.tb2 .t{position:relative;flex:none;height:46px;line-height:46px;padding:0 14px;font-size:14px;color:var(--onv)}
+.tb2 .t.on{color:var(--on);font-weight:600}
+.tb2 .t.on::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--primary)}
+/* grid */
+.grid{position:absolute;left:0;right:0;top:0;padding:6px;display:grid;gap:6px;align-content:start}
+.ac{background:var(--scl);border-radius:15px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.ac .pic{aspect-ratio:1;border-radius:15px;background:#fff center/cover;position:relative}
+.ac .cap{height:72px;padding:0 10px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.ac .cap.one{height:40px}
+.ac .n{font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac .s{font-size:12px;line-height:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac .s2{font-size:12px;line-height:16px;color:var(--onv);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac.hov{background:var(--sch)}
+.ac.press{box-shadow:0 0 0 2px var(--primary)}
+.fav{position:absolute;right:6px;top:6px;width:22px;height:22px;border-radius:11px;background:color-mix(in srgb,var(--surface) 92%,transparent);display:grid;place-items:center;color:var(--primary)}
+.skel{background:var(--scl);border-radius:15px;overflow:hidden}
+.skel .pic{aspect-ratio:1;border-radius:15px;background:var(--sch)}
+.skel .b{height:10px;border-radius:5px;background:var(--sch);margin:15px 10px 0}
+/* "关注分区" floating pill (areas_page.dart:42-82) */
+.fab{position:absolute;right:16px;min-height:48px;padding:0 16px;border-radius:16px;z-index:8;background:color-mix(in srgb,var(--surface) 95%,transparent);
+ border:1px solid color-mix(in srgb,var(--primary) 15%,transparent);box-shadow:0 4px 12px rgba(0,0,0,.06);display:flex;align-items:center;gap:8px;color:var(--primary);font-size:12px;font-weight:700;letter-spacing:.5px}
+/* M3 NavigationBar / NavigationRail (home shell, U.3a / U.3b) */
+.nav{height:80px;flex:none;background:var(--scc);display:flex;position:relative;z-index:9}
+.nav .d{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:4px;font-size:12px;font-weight:500;color:var(--onv)}
+.nav .d .ic{width:64px;height:32px;border-radius:16px;display:grid;place-items:center}
+.nav .d.on{color:var(--on);font-weight:600}.nav .d.on .ic{background:var(--sc);color:var(--osc)}
+.rail{width:80px;flex:none;display:flex;flex-direction:column;align-items:center;padding-top:12px;background:var(--surface);overflow:hidden}
+.rail .ib{margin-bottom:12px}
+.rail .d{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:500;color:var(--onv);margin-bottom:14px}
+.rail .d .ic{width:56px;height:32px;border-radius:16px;display:grid;place-items:center}
+.rail .d.on{color:var(--on);font-weight:600}.rail .d.on .ic{background:var(--sc);color:var(--osc)}
+.vdiv{width:1px;flex:none;background:var(--ov)}
+.sbar{height:24px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:600 12px 'Geist','Noto Sans SC'}
+.sbar .mi{font-size:14px}
+/* desktop pager (desktop_components.dart:94-188) */
+.pager{height:68px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--surface);border-top:1px solid color-mix(in srgb,var(--on) 6%,transparent);font-size:13px;position:relative;z-index:3}
+.pager .ob{height:36px;padding:0 12px;border-radius:6px;border:1px solid var(--outline);color:var(--primary);display:flex;align-items:center;gap:6px;font-weight:500}
+.pager .tbn{height:40px;padding:0 12px;display:flex;align-items:center;gap:6px;color:var(--primary);font-weight:500}
+.pager .tbn.dis{color:color-mix(in srgb,var(--on) 38%,transparent)}
+.pager .pg{min-width:48px;height:48px;margin:0 3px;border-radius:6px;border:1px solid color-mix(in srgb,var(--on) 10%,transparent);display:grid;place-items:center}
+.pager .pg.on{background:var(--primary);border-color:var(--primary);color:var(--onPrimary);font-weight:700}
+.pager .mut{color:color-mix(in srgb,var(--on) 60%,transparent)}
+.pager .sel{height:30px;padding:0 6px 0 10px;border-radius:6px;background:color-mix(in srgb,var(--on) 5%,transparent);display:flex;align-items:center;margin:0 24px 0 6px}
+.pager .inp{width:50px;height:32px;border-radius:6px;border:1px solid var(--outline);margin:0 6px}
+/* AppStatusView (app_status_view.dart:404-470) */
+.sv{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:40px}
+.sv .c{width:86px;height:86px;border-radius:43px;display:grid;place-items:center;background:color-mix(in srgb,var(--schh) 25%,transparent);border:1px solid color-mix(in srgb,var(--primary) 6%,transparent);color:color-mix(in srgb,var(--primary) 60%,transparent)}
+.sv .h{margin-top:20px;font-size:15px;font-weight:600}
+.sv .p{margin-top:6px;max-width:320px;padding:0 28px;text-align:center;font-size:13px;line-height:1.5;color:color-mix(in srgb,var(--on) 60%,transparent)}
+.sv .a{margin-top:16px;height:40px;padding:0 12px;display:flex;align-items:center;gap:8px;color:var(--primary);font-size:14px;font-weight:500}
+.sv .a.fill{background:var(--primary);color:var(--onPrimary);border-radius:20px;padding:0 20px 0 16px}
+.spin{width:24px;height:24px;border-radius:12px;border:3.5px solid var(--primary);border-right-color:color-mix(in srgb,var(--primary) 15%,transparent)}
+/* composite of several phones */
+.multi{display:flex;gap:28px;padding:56px 28px 28px;background:#E9EBF0}
+.multi .cell{position:relative}
+.multi .lab{position:absolute;left:0;right:0;top:-40px;text-align:center;font:600 20px 'Noto Sans SC';color:#191C20}
+.menu .hd{padding:6px 16px 8px;font-size:12px;color:var(--onv)}
+</style></head><body><div class="ph col"><div class="status"><span>21:36</span><span class="r"><span class="mi">signal_cellular_alt</span><span class="mi">wifi</span><span class="mi">battery_full</span></span></div><div class="ab"><div class="lead"><span class="mr" style="font-size:24px">menu</span></div><div style="position:absolute;left:72px;width:253px;top:5px"><div class="tb" style=""><div class="t on">哔哩哔哩</div><div class="t">斗鱼</div><div class="t">虎牙</div><div class="t">抖音</div><div class="t">快手</div><div class="t">网易CC</div><div class="t">Twitch</div><div class="t">Soop</div><div class="t">YY</div><div class="t">AcFun 直播</div><div class="t">Picarto</div><div class="t">TwitCasting</div><div class="t">猫耳 FM</div><div class="t">映客</div><div class="t">克拉克拉</div><div class="t">小红书</div><div class="t">niconico</div><div class="t">微博直播</div><div class="t">SHOWROOM</div><div class="t">CHZZK</div><div class="t">LiveMe</div><div class="t">TikTok LIVE</div></div></div><div style="flex:1"></div><div class="ib"><span class="rx" style="font-size:24px">&#xf3d0;</span></div><div style="width:4px"></div></div><div class="tb" style=""><div class="t on">网游</div><div class="t">手游</div><div class="t">单机游戏</div><div class="t">虚拟主播</div><div class="t">娱乐</div><div class="t">电台</div><div class="t">赛事</div><div class="t">聊天室</div><div class="t">生活</div><div class="t">知识</div><div class="t">帮我玩</div><div class="t">互动玩法</div></div><div class="fill"><div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));"><div class="ac "><div class="pic" style="background-image:url(.cache/img/1.jpg)"></div><div class="cap"><div class="n">英雄联盟</div><div class="s">网游</div></div></div><div class="ac "><div class="pic" style="background-image:url(.cache/img/111.jpg)"></div><div class="cap"><div class="n">无畏契约</div><div class="s">网游</div></div></div><div class="ac "><div class="pic" style="background-image:url(.cache/img/133.jpg)"></div><div class="cap"><div class="n">穿越火线</div><div class="s">网游</div></div></div><div class="ac "><div class="pic" style="background-image:url(.cache/img/158.jpg)"></div><div class="cap"><div class="n">CS2</div><div class="s">网游</div></div></div><div class="ac "><div class="pic" style="background-image:url(.cache/img/169.jpg)"></div><div class="cap"><div class="n">守望先锋</div><div class="s">网游</div></div></div><div class="ac "><div class="pic" style="background-image:url(.cache/img/183.jpg)"></div><div class="cap"><div class="n">魔兽世界</div><div class="s">网游</div></div></div><div class="ac "><div class="pic" style="background-image:url(.cache/img/206.jpg)"></div><div class="cap"><div class="n">永劫无间</div><div class="s">网游</div></div></div><div class="ac "><div class="pic" style="background-image:url(.cache/img/219.jpg)"></div><div class="cap"><div class="n">DOTA2</div><div class="s">网游</div></div></div><div class="ac "><div class="pic" style="background-image:url(.cache/img/225.jpg)"></div><div class="cap"><div class="n">逆水寒</div><div class="s">网游</div></div></div><div class="ac "><div class="pic" style="background-image:url(.cache/img/237.jpg)"></div><div class="cap"><div class="n">剑网3</div><div class="s">网游</div></div></div><div class="ac "><div class="pic" style="background-image:url(.cache/img/250.jpg)"></div><div class="cap"><div class="n">梦幻西游</div><div class="s">网游</div></div></div><div class="ac "><div class="pic" style="background-image:url(.cache/img/274.jpg)"></div><div class="cap"><div class="n">坦克世界</div><div class="s">网游</div></div></div></div><div class="fab" style="bottom:16px"><span class="rx" style="font-size:16px">&#xf4e6;</span>关注分区</div></div><div class="nav"><div class="d"><div class="ic"><span class="rx" style="font-size:24px">&#xee0b;</span></div>关注</div><div class="d"><div class="ic"><span class="rx" style="font-size:24px">&#xed33;</span></div>热门</div><div class="d on"><div class="ic"><span class="rx" style="font-size:24px">&#xea41;</span></div>分区</div><div class="d"><div class="ic"><span class="rx" style="font-size:24px">&#xec54;</span></div>录制中心</div></div><div class="gesture"></div><div class="syn">示意图片</div></div></body></html>

@@ -1,0 +1,48 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="393x852@3"><link rel="stylesheet" href="kit/kit.css"><style>
+.ph{display:flex;flex-direction:column}
+.main{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.appbar{flex:none}
+.lead{width:56px;height:56px;display:grid;place-items:center;flex:none}
+.act{display:flex;align-items:center;flex:none}
+.ttl{flex:1;min-width:0;text-align:center;font-size:20px;font-weight:600}
+/* favourites status tabs in the title (TabBar, fill) */
+.st{flex:1;min-width:0;display:flex;height:46px;margin:0 16px}
+.st div{flex:1;display:flex;align-items:center;justify-content:center;font-size:15px;color:rgba(67,71,78,.8);position:relative;white-space:nowrap}
+.st .on{color:var(--primary);font-weight:600}
+.st .on::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:var(--iw,46px);height:3px;border-radius:3px 3px 0 0;background:var(--primary)}
+/* platform tabs (ScrollableTabBar, scrollable) */
+.pt{height:46px;display:flex;flex:none;overflow:hidden;white-space:nowrap}
+.pt div{padding:0 16px;display:flex;align-items:center;font-size:15px;color:rgba(67,71,78,.8);position:relative;flex:none}
+.pt .on{color:var(--primary);font-weight:600}
+.pt .on::after{content:'';position:absolute;bottom:0;left:16px;right:16px;height:2px;background:var(--primary)}
+/* room grid (RoomGridView dense, RoomCard dense) */
+.grid{display:grid;gap:6px;padding:12px;align-content:start}
+.card{background:#fff;border-radius:20px;overflow:hidden}
+.cov{position:relative;aspect-ratio:16/9;border-radius:20px;background:#eee center/cover}
+.pb{position:absolute;left:8px;top:8px;padding:3px 6px;border-radius:8px;background:rgba(0,0,0,.58);color:#fff;font:700 10px/1.2 'Geist','Noto Sans SC'}
+.aud{position:absolute;right:8px;bottom:8px;display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:10px;background:rgba(0,0,0,.48);color:#fff;font:700 11px/1 'Geist','Noto Sans SC'}
+.aud .mr{font-size:14px}
+.tile{display:flex;align-items:center;gap:8px;padding:6px 10px 8px}
+.tile .a{width:34px;height:34px;border-radius:17px;background:center/cover;flex:none}
+.tile .x{min-width:0;flex:1}
+.tile .t{font-size:13px;font-weight:600;color:rgba(0,0,0,.87);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:18px}
+.tile .n{font-size:12px;font-weight:500;color:#616161;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:17px;margin-top:2px}
+[data-theme=dark] .card{background:#212121}[data-theme=dark] .tile .t{color:#fff}[data-theme=dark] .tile .n{color:#BDBDBD}
+/* bottom NavigationBar (M3 defaults: 80 high, surfaceContainer) */
+.nb{flex:none;height:100px;padding-bottom:20px;background:var(--scc);display:flex;position:relative}
+.nd{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:4px}
+.nd .ind{width:64px;height:32px;border-radius:16px;display:grid;place-items:center;color:var(--onv)}
+.nd .l{font-size:12px;font-weight:500;color:var(--onv);line-height:16px}
+.nd.on .ind{background:var(--sc);color:var(--osc)}.nd.on .l{color:var(--on)}
+/* v3 popup menus (M3 PopupMenu: surfaceContainer, items 48 high, width steps of 56) */
+.pm{position:absolute;z-index:21;background:var(--scc);box-shadow:0 2px 6px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.12);padding:8px 0}
+.pm .it{height:48px;display:flex;align-items:center;gap:12px;white-space:nowrap}
+/* recorder tab body */
+.rs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:9px 13px}
+.rs div{height:48px;border-radius:11px;background:rgba(225,226,232,.46);display:grid;place-items:center;font-size:12px;font-weight:500;color:var(--onv)}
+.rs .on{background:var(--pc);color:var(--opc);font-weight:700}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.empty .c{width:92px;height:92px;border-radius:46px;background:rgba(54,97,142,.08);display:grid;place-items:center;color:var(--primary);margin-bottom:24px}
+.empty .h{font-size:15px;font-weight:700}.empty .s{font-size:13px;color:var(--onv);margin-top:8px}
+.tip{font-family:'Noto Sans SC'}
+</style></head><body><div class="ph"><div class="status"><span>21:36</span><span class="r"><span class="mi" style="font-size:16px">signal_cellular_alt</span><span class="mi" style="font-size:16px">wifi</span><span class="mi" style="font-size:16px">battery_full</span></span></div><div class="appbar"><div class="lead"><span class="mr" style="font-size:24px">menu</span></div><div class="st" style="margin:0 16px"><div class="on">已开播</div><div class="">录播</div><div class="">未开播</div></div><div class="act"><div class="ib"><span class="rx" style="font-size:24px">&#xf3d0;</span></div><div style="width:4px"></div></div></div><div class="main"><div class="pt"><div class="on">全部</div><div class="">哔哩哔哩</div><div class="">斗鱼</div><div class="">虎牙</div><div class="">抖音</div><div class="">快手</div><div class="">网易CC</div></div><div class="grid" style="grid-template-columns:repeat(2,1fr)"><div class="card"><div class="cov" style="background-image:url(.cache/img/1.jpg)"><span class="pb">BILIBILI</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>1.2万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/65.jpg)"></span><div class="x"><div class="t">深夜电台 · 点歌接龙到天亮</div><div class="n">晚风</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/225.jpg)"><span class="pb">HUYA</span><span class="aud"><span class="mr" style="font-size:14px">whatshot</span>86.4万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/111.jpg)"></span><div class="x"><div class="t">王者上分，今晚冲国服</div><div class="n">一只小熊</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/237.jpg)"><span class="pb">DOUYU</span><span class="aud"><span class="mr" style="font-size:14px">whatshot</span>34.1万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/133.jpg)"></span><div class="x"><div class="t">川西自驾第 3 天，雪山日出</div><div class="n">路过的风</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/250.jpg)"><span class="pb">DOUYIN</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>2301</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/169.jpg)"></span><div class="x"><div class="t">手工皮具，慢慢做一只钱包</div><div class="n">清欢</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/287.jpg)"><span class="pb">BILIBILI</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>5620</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/183.jpg)"></span><div class="x"><div class="t">钢琴即兴，弹你点的歌</div><div class="n">月亮邮差</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/292.jpg)"><span class="pb">KUAISHOU</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>1.1万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/206.jpg)"></span><div class="x"><div class="t">深夜食堂，煮一碗面</div><div class="n">橘子汽水</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/304.jpg)"><span class="pb">BILIBILI</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>3488</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/219.jpg)"></span><div class="x"><div class="t">围棋复盘：今天的三局</div><div class="n">不吃香菜</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/319.jpg)"><span class="pb">DOUYU</span><span class="aud"><span class="mr" style="font-size:14px">whatshot</span>12.7万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/274.jpg)"></span><div class="x"><div class="t">城市夜跑 10 公里</div><div class="n">星河长明</div></div></div></div></div><div class="pm" style="left:12px;top:0px;width:168px;border-radius:8px"><div class="it" style="padding:0 12px"><span style="color:var(--onv)"><span class="rx" style="font-size:24px">&#xf0ea;</span></span><span style="font-size:12px;font-weight:500">设置</span></div><div class="it" style="padding:0 12px"><span style="color:var(--onv)"><span class="rx" style="font-size:24px">&#xee59;</span></span><span style="font-size:12px;font-weight:500">关于</span></div><div class="it" style="padding:0 12px"><span style="color:var(--onv)"><span class="rx" style="font-size:24px">&#xee17;</span></span><span style="font-size:12px;font-weight:500">历史记录</span></div><div class="it" style="padding:0 12px"><span style="color:var(--onv)"><span class="rx" style="font-size:24px">&#xeb9d;</span></span><span style="font-size:12px;font-weight:500">备份与恢复</span></div></div></div><div class="nb"><div class="nd on"><div class="ind"><span class="rx" style="font-size:24px">&#xee0a;</span></div><div class="l">关注</div></div><div class="nd"><div class="ind"><span class="rx" style="font-size:24px">&#xed33;</span></div><div class="l">热门</div></div><div class="nd"><div class="ind"><span class="rx" style="font-size:24px">&#xea42;</span></div><div class="l">分区</div></div><div class="nd"><div class="ind"><span class="rx" style="font-size:24px">&#xec54;</span></div><div class="l">录制中心</div></div><div class="gesture"></div></div><div class="syn">示意图片</div></div></body></html>

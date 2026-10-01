@@ -1,0 +1,63 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="1280x800@1.5"><link rel="stylesheet" href="kit/kit.css"><style>
+.ph{display:flex;flex-direction:column}
+.main{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.appbar{flex:none}
+.lead{width:56px;height:56px;display:grid;place-items:center;flex:none}
+.act{display:flex;align-items:center;flex:none}
+.ttl{flex:1;min-width:0;text-align:center;font-size:20px;font-weight:600}
+/* favourites status tabs in the title (TabBar, fill) */
+.st{flex:1;min-width:0;display:flex;height:46px;margin:0 16px}
+.st div{flex:1;display:flex;align-items:center;justify-content:center;font-size:15px;color:rgba(67,71,78,.8);position:relative;white-space:nowrap}
+.st .on{color:var(--primary);font-weight:600}
+.st .on::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:var(--iw,46px);height:3px;border-radius:3px 3px 0 0;background:var(--primary)}
+/* platform tabs (ScrollableTabBar, scrollable) */
+.pt{height:46px;display:flex;flex:none;overflow:hidden;white-space:nowrap}
+.pt div{padding:0 16px;display:flex;align-items:center;font-size:15px;color:rgba(67,71,78,.8);position:relative;flex:none}
+.pt .on{color:var(--primary);font-weight:600}
+.pt .on::after{content:'';position:absolute;bottom:0;left:16px;right:16px;height:2px;background:var(--primary)}
+/* room grid (RoomGridView dense, RoomCard dense) */
+.grid{display:grid;gap:6px;padding:12px;align-content:start}
+.card{background:#fff;border-radius:20px;overflow:hidden}
+.cov{position:relative;aspect-ratio:16/9;border-radius:20px;background:#eee center/cover}
+.pb{position:absolute;left:8px;top:8px;padding:3px 6px;border-radius:8px;background:rgba(0,0,0,.58);color:#fff;font:700 10px/1.2 'Geist','Noto Sans SC'}
+.aud{position:absolute;right:8px;bottom:8px;display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:10px;background:rgba(0,0,0,.48);color:#fff;font:700 11px/1 'Geist','Noto Sans SC'}
+.aud .mr{font-size:14px}
+.tile{display:flex;align-items:center;gap:8px;padding:6px 10px 8px}
+.tile .a{width:34px;height:34px;border-radius:17px;background:center/cover;flex:none}
+.tile .x{min-width:0;flex:1}
+.tile .t{font-size:13px;font-weight:600;color:rgba(0,0,0,.87);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:18px}
+.tile .n{font-size:12px;font-weight:500;color:#616161;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:17px;margin-top:2px}
+[data-theme=dark] .card{background:#212121}[data-theme=dark] .tile .t{color:#fff}[data-theme=dark] .tile .n{color:#BDBDBD}
+/* bottom NavigationBar (M3 defaults: 80 high, surfaceContainer) */
+.nb{flex:none;height:100px;padding-bottom:20px;background:var(--scc);display:flex;position:relative}
+.nd{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:4px}
+.nd .ind{width:64px;height:32px;border-radius:16px;display:grid;place-items:center;color:var(--onv)}
+.nd .l{font-size:12px;font-weight:500;color:var(--onv);line-height:16px}
+.nd.on .ind{background:var(--sc);color:var(--osc)}.nd.on .l{color:var(--on)}
+/* v3 popup menus (M3 PopupMenu: surfaceContainer, items 48 high, width steps of 56) */
+.pm{position:absolute;z-index:21;background:var(--scc);box-shadow:0 2px 6px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.12);padding:8px 0}
+.pm .it{height:48px;display:flex;align-items:center;gap:12px;white-space:nowrap}
+/* recorder tab body */
+.rs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:9px 13px}
+.rs div{height:48px;border-radius:11px;background:rgba(225,226,232,.46);display:grid;place-items:center;font-size:12px;font-weight:500;color:var(--onv)}
+.rs .on{background:var(--pc);color:var(--opc);font-weight:700}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.empty .c{width:92px;height:92px;border-radius:46px;background:rgba(54,97,142,.08);display:grid;place-items:center;color:var(--primary);margin-bottom:24px}
+.empty .h{font-size:15px;font-weight:700}.empty .s{font-size:13px;color:var(--onv);margin-top:8px}
+.tip{font-family:'Noto Sans SC'}
+
+.win{display:flex}
+.rail{width:80px;flex:none;background:var(--surface);display:flex;flex-direction:column;align-items:center;overflow:hidden}
+.vd{width:1px;flex:none;background:var(--ov)}
+.body{flex:1;min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.ra{width:48px;height:48px;display:grid;place-items:center;flex:none;border-radius:24px}
+.rd{width:80px;display:flex;flex-direction:column;align-items:center;padding:4px 0 12px;gap:4px;flex:none}
+.rd .ind{width:56px;height:32px;border-radius:16px;display:grid;place-items:center;color:var(--onv)}
+.rd .l{font-size:12px;font-weight:500;line-height:16px;color:var(--on)}
+.rd.on .ind{background:var(--sc);color:var(--osc)}
+.rt{width:80px;display:flex;flex-direction:column;align-items:center;flex:none;padding-bottom:6px}
+.rt .l{font-size:12px;line-height:16px;color:var(--onv);margin-top:-4px}
+.rsep{width:40px;height:1px;background:var(--ov);margin:6px 0 14px;flex:none}
+.hov{background:rgba(25,28,32,.08)}
+.tipw{position:absolute;z-index:30;background:rgba(25,28,32,.9);color:#fff;font-size:12px;padding:6px 8px;border-radius:4px;white-space:nowrap}
+</style></head><body><div class="win" style="--w:1280px;--h:800px"><div class="rail"><div style="padding:12px"><div class="ra"><span class="mr" style="font-size:24px">menu</span></div></div><div style="padding:0 12px 12px"><div class="ra"><span class="rx" style="font-size:24px">&#xee90;</span></div></div><div style="padding:0 12px 12px"><div class="ra"><span class="rx" style="font-size:24px">&#xeeb2;</span></div></div><div style="padding:0 12px 12px"><div class="ra"><span class="ci" style="font-size:24px">&#xe804;</span></div></div><div style="padding:0 12px 12px"><div class="ra"><span class="rx" style="font-size:24px">&#xec54;</span></div></div><div style="height:8px"></div></div><div class="vd"></div><div class="body"><div class="empty"><div class="c" style="background:rgba(225,226,232,.15);border:1px solid rgba(54,97,142,.05)"><span class="rx" style="font-size:42px">&#xef31;</span></div><div class="h" style="font-size:15px;font-weight:600">尚未选择任何菜单</div><div class="s" style="max-width:320px;text-align:center;line-height:1.5">请点击左上角菜单按钮，添加需要展示的功能菜单</div></div></div><div class="syn" style="left:auto;right:12px;top:auto;bottom:10px;transform:none">示意图片</div></div></body></html>

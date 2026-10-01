@@ -1,0 +1,161 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="393x852@3"><link rel="stylesheet" href="kit/kit.css"><style>
+.ph{display:flex;flex-direction:column}
+.main{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.appbar{flex:none}
+.lead{width:56px;height:56px;display:grid;place-items:center;flex:none}
+.act{display:flex;align-items:center;flex:none}
+.ttl{flex:1;min-width:0;text-align:center;font-size:20px;font-weight:600}
+/* favourites status tabs in the title (TabBar, fill) */
+.st{flex:1;min-width:0;display:flex;height:46px;margin:0 16px}
+.st div{flex:1;display:flex;align-items:center;justify-content:center;font-size:15px;color:rgba(67,71,78,.8);position:relative;white-space:nowrap}
+.st .on{color:var(--primary);font-weight:600}
+.st .on::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:var(--iw,46px);height:3px;border-radius:3px 3px 0 0;background:var(--primary)}
+/* platform tabs (ScrollableTabBar, scrollable) */
+.pt{height:46px;display:flex;flex:none;overflow:hidden;white-space:nowrap}
+.pt div{padding:0 16px;display:flex;align-items:center;font-size:15px;color:rgba(67,71,78,.8);position:relative;flex:none}
+.pt .on{color:var(--primary);font-weight:600}
+.pt .on::after{content:'';position:absolute;bottom:0;left:16px;right:16px;height:2px;background:var(--primary)}
+/* room grid (RoomGridView dense, RoomCard dense) */
+.grid{display:grid;gap:6px;padding:12px;align-content:start}
+.card{background:#fff;border-radius:20px;overflow:hidden}
+.cov{position:relative;aspect-ratio:16/9;border-radius:20px;background:#eee center/cover}
+.pb{position:absolute;left:8px;top:8px;padding:3px 6px;border-radius:8px;background:rgba(0,0,0,.58);color:#fff;font:700 10px/1.2 'Geist','Noto Sans SC'}
+.aud{position:absolute;right:8px;bottom:8px;display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:10px;background:rgba(0,0,0,.48);color:#fff;font:700 11px/1 'Geist','Noto Sans SC'}
+.aud .mr{font-size:14px}
+.tile{display:flex;align-items:center;gap:8px;padding:6px 10px 8px}
+.tile .a{width:34px;height:34px;border-radius:17px;background:center/cover;flex:none}
+.tile .x{min-width:0;flex:1}
+.tile .t{font-size:13px;font-weight:600;color:rgba(0,0,0,.87);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:18px}
+.tile .n{font-size:12px;font-weight:500;color:#616161;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:17px;margin-top:2px}
+[data-theme=dark] .card{background:#212121}[data-theme=dark] .tile .t{color:#fff}[data-theme=dark] .tile .n{color:#BDBDBD}
+/* bottom NavigationBar (M3 defaults: 80 high, surfaceContainer) */
+.nb{flex:none;height:100px;padding-bottom:20px;background:var(--scc);display:flex;position:relative}
+.nd{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:4px}
+.nd .ind{width:64px;height:32px;border-radius:16px;display:grid;place-items:center;color:var(--onv)}
+.nd .l{font-size:12px;font-weight:500;color:var(--onv);line-height:16px}
+.nd.on .ind{background:var(--sc);color:var(--osc)}.nd.on .l{color:var(--on)}
+/* v3 popup menus (M3 PopupMenu: surfaceContainer, items 48 high, width steps of 56) */
+.pm{position:absolute;z-index:21;background:var(--scc);box-shadow:0 2px 6px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.12);padding:8px 0}
+.pm .it{height:48px;display:flex;align-items:center;gap:12px;white-space:nowrap}
+/* recorder tab body */
+.rs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:9px 13px}
+.rs div{height:48px;border-radius:11px;background:rgba(225,226,232,.46);display:grid;place-items:center;font-size:12px;font-weight:500;color:var(--onv)}
+.rs .on{background:var(--pc);color:var(--opc);font-weight:700}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.empty .c{width:92px;height:92px;border-radius:46px;background:rgba(54,97,142,.08);display:grid;place-items:center;color:var(--primary);margin-bottom:24px}
+.empty .h{font-size:15px;font-weight:700}.empty .s{font-size:13px;color:var(--onv);margin-top:8px}
+.tip{font-family:'Noto Sans SC'}
+
+.win{display:flex}
+.rail{width:80px;flex:none;background:var(--surface);display:flex;flex-direction:column;align-items:center;overflow:hidden}
+.vd{width:1px;flex:none;background:var(--ov)}
+.body{flex:1;min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.ra{width:48px;height:48px;display:grid;place-items:center;flex:none;border-radius:24px}
+.rd{width:80px;display:flex;flex-direction:column;align-items:center;padding:4px 0 12px;gap:4px;flex:none}
+.rd .ind{width:56px;height:32px;border-radius:16px;display:grid;place-items:center;color:var(--onv)}
+.rd .l{font-size:12px;font-weight:500;line-height:16px;color:var(--on)}
+.rd.on .ind{background:var(--sc);color:var(--osc)}
+.rt{width:80px;display:flex;flex-direction:column;align-items:center;flex:none;padding-bottom:6px}
+.rt .l{font-size:12px;line-height:16px;color:var(--onv);margin-top:-4px}
+.rsep{width:40px;height:1px;background:var(--ov);margin:6px 0 14px;flex:none}
+.hov{background:rgba(25,28,32,.08)}
+.tipw{position:absolute;z-index:30;background:rgba(25,28,32,.9);color:#fff;font-size:12px;padding:6px 8px;border-radius:4px;white-space:nowrap}
+
+.sp{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sp .logo{width:150px;height:150px;background:url(../../../apps/pure_live/assets/icons/icon.png) center/contain no-repeat}
+.v3sp{background:linear-gradient(135deg,#E0F7FA,#B2EBF2 50%,#80DEEA)}
+[data-theme=dark] .v3sp{background:linear-gradient(135deg,#0D1B2A,#1B263B 50%,#141E27)}
+.v3sp .w{font-size:20px;font-weight:700;color:rgba(0,0,0,.54);line-height:28px}
+[data-theme=dark] .v3sp .w{color:rgba(255,255,255,.7)}
+.v3bar{width:200px;height:4px;background:rgba(255,255,255,.3);position:relative;overflow:hidden}
+.v3bar i{position:absolute;left:30%;width:38%;top:0;bottom:0;background:#fff}
+.v4sp{background:linear-gradient(160deg,var(--surface) 0%,var(--surface) 45%,rgba(209,228,255,.7) 100%)}
+[data-theme=dark] .v4sp{background:linear-gradient(160deg,var(--surface) 0%,var(--surface) 45%,rgba(25,73,117,.45) 100%)}
+.v4sp .w{font-size:20px;font-weight:600;color:var(--on);line-height:28px;margin-top:16px}
+.v4bar{width:200px;height:4px;border-radius:2px;background:rgba(54,97,142,.15);position:relative;overflow:hidden;margin-top:32px}
+[data-theme=dark] .v4bar{background:rgba(160,202,253,.18)}
+.v4bar i{position:absolute;left:30%;width:38%;top:0;bottom:0;border-radius:2px;background:var(--primary)}
+.status.on-sp{position:absolute;left:0;right:0;top:0;z-index:5}
+.cap{position:absolute;left:12px;right:12px;bottom:28px;z-index:6;text-align:center;font-size:12px;color:var(--onv)}
+/* v3 dialogs (AlertDialog: surfaceContainerHigh, radius 24, padding 24) */
+.ov{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.54)}
+.d3{background:var(--sch);border-radius:24px;padding:24px 24px 0;color:var(--on)}
+.d3 .t{font-size:20px;font-weight:600;line-height:28px;margin-bottom:16px}
+.d3 .acts{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:24px 0 24px}
+.tb3{height:40px;padding:0 12px;border-radius:8px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--primary)}
+.fb3{height:40px;padding:0 24px;border-radius:20px;display:flex;align-items:center;font-size:13px;font-weight:500;background:var(--primary);color:var(--onPrimary)}
+.md{font-size:16px;line-height:24px;color:var(--on)}
+.md li{list-style:none;position:relative;padding-left:22px;margin:0 0 6px}
+.md li::before{content:'';position:absolute;left:6px;top:10px;width:5px;height:5px;border-radius:3px;background:var(--on)}
+.lnk3{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px 0 12px;font-size:15px;color:var(--primary)}
+.idb{background:var(--scl);border:1px solid rgba(195,199,207,.35);border-radius:12px;padding:12px;font-size:13px;margin-top:16px}
+.idb .r{display:flex;gap:8px}.idb .r+.r{margin-top:10px}.idb .k{color:var(--onv)}.idb .v{font-weight:600}
+/* start-up order diagram */
+.flow{padding:28px 32px;display:flex;flex-direction:column;gap:18px}
+.flow h3{font-size:17px;font-weight:600}
+.lane{display:flex;align-items:stretch;gap:10px}
+.step{flex:1;border-radius:12px;padding:12px 14px;background:var(--scl);box-shadow:inset 0 0 0 1px var(--ov);font-size:14px;line-height:1.5}
+.step b{display:block;font-size:15px;margin-bottom:2px}.step small{color:var(--onv);font-size:13px}
+.step.bad{box-shadow:inset 0 0 0 2px #D92D20;background:#FCEEEE}
+.arr{display:grid;place-items:center;color:var(--onv);flex:none}
+
+.d4{background:var(--sch);border-radius:24px;padding:24px 24px 0;color:var(--on);display:flex;flex-direction:column;max-height:100%}
+.d4 .t{font-size:20px;font-weight:600;line-height:28px}
+.d4 .sub{font-size:14px;color:var(--onv);margin-top:6px;line-height:20px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.d4 .lk{color:var(--primary);display:inline-flex;align-items:center;gap:2px}
+.d4 .msg{font-size:14px;line-height:1.5;margin-top:16px}
+.d4 .acts{display:flex;align-items:center;gap:8px;padding:20px 0 24px;flex:none}
+.d4 .acts .gap{flex:1}
+.tb4{height:40px;padding:0 12px;border-radius:20px;display:flex;align-items:center;font-size:14px;font-weight:500;color:var(--primary);white-space:nowrap}
+.tb4.gr{color:var(--onv)}
+.fb4{height:40px;padding:0 20px;border-radius:20px;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;background:var(--primary);color:var(--onPrimary);white-space:nowrap}
+.fb4.hv{box-shadow:0 0 0 3px rgba(54,97,142,.25);background:#2E5780}
+.ob4{height:40px;padding:0 16px;border-radius:20px;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--primary);box-shadow:inset 0 0 0 1px var(--outline);white-space:nowrap}
+.lg{font-size:13px;font-weight:600;color:var(--primary);margin:18px 0 6px}
+.log{font-size:14px;line-height:21px;color:var(--on);overflow:hidden;position:relative}
+.log li{list-style:none;position:relative;padding-left:16px;margin:0 0 6px}
+.log li::before{content:'';position:absolute;left:4px;top:8px;width:5px;height:5px;border-radius:3px;background:var(--onv)}
+.log.fade::after{content:'';position:absolute;left:0;right:0;bottom:0;height:36px;background:linear-gradient(transparent,var(--sch))}
+.ck{display:flex;align-items:center;gap:10px;height:48px;font-size:14px;margin-top:8px;white-space:nowrap}
+.ck .bx{width:18px;height:18px;border-radius:2px;box-shadow:inset 0 0 0 2px var(--onv);flex:none}
+.path{font-size:14px;color:var(--onv);margin-top:12px;word-break:break-all;line-height:1.5}
+/* download dialog */
+.dl{background:var(--sch);border-radius:24px;padding:16px;color:var(--on)}
+.dl .hd{display:flex;gap:16px;align-items:flex-start}
+.dl .hd.col{flex-direction:column;gap:12px}
+.ic{width:44px;height:44px;border-radius:22px;background:rgba(54,97,142,.1);display:grid;place-items:center;flex:none;color:var(--primary)}
+.ic.err{color:var(--error);background:rgba(186,26,26,.1)}
+.spin{width:22px;height:22px;border-radius:11px;border:2.5px solid var(--primary);border-right-color:transparent;border-bottom-color:transparent;transform:rotate(30deg)}
+.spin.s18{width:18px;height:18px;border-width:2px}
+.dl .dtt{font-size:15px;font-weight:700;line-height:21px}
+.dl .dst{word-break:break-all;font-size:12px;font-weight:500;color:var(--primary);margin-top:4px;line-height:17px}
+.dl .dst.err{color:var(--error)}
+.dl.v4 .dtt{font-weight:600}.dl.v4 .dst{font-size:14px;line-height:20px;font-weight:400;color:var(--onv)}
+.dl.v4 .dst.err{color:var(--error)}
+.pg{margin-top:20px;padding:14px 16px;border-radius:16px;background:var(--scl);display:flex;align-items:center;gap:16px}
+.pg.col{flex-direction:column;align-items:stretch;gap:8px}
+.pg.col .bar{flex:none}
+.bar{flex:1;height:8px;border-radius:8px;background:var(--schh);position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:var(--primary)}
+.bar.ind i{left:22%;width:36%}
+.bar.err i{background:var(--outline)}
+.pc{width:48px;text-align:right;font-size:14px;font-weight:700;color:var(--primary);font-feature-settings:'tnum'}
+.pg.col .pc{width:auto}
+.dl .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.dl .acts.col{flex-direction:column;align-items:stretch}
+.dl .acts.col>div{justify-content:center}
+.dl .acts .gap{flex:1}
+.fb3i.fb3d,.fb4.fb3d{background:rgba(25,28,32,.12);color:rgba(25,28,32,.38)}
+.ob3{height:40px;padding:0 16px;border-radius:20px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--primary);box-shadow:inset 0 0 0 1px var(--outline)}
+.fb3i{height:40px;padding:0 16px;border-radius:20px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;background:var(--primary);color:var(--onPrimary)}
+.snack{position:absolute;left:0;right:0;bottom:100px;z-index:30;background:#2E3135;color:#EFF0F7;font-size:13px;padding:14px 16px}
+/* state sheet */
+.sheetp{padding:16px 16px 24px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.cap2{font-size:13px;font-weight:600;color:var(--onv);margin-top:10px}
+.cap2 small{font-weight:400;margin-left:6px}
+.room4{display:flex;gap:12px;align-items:flex-start;margin-top:16px}
+.room4 .a{width:48px;height:48px;border-radius:24px;background:url(.cache/img/65.jpg) center/cover;flex:none}
+.room4 .n{font-size:15px;font-weight:600;line-height:21px}
+.room4 .m{font-size:14px;color:var(--onv);margin-top:4px;line-height:20px}
+.kbd{display:inline-block;padding:0 5px;border-radius:4px;box-shadow:inset 0 0 0 1px var(--outline);font-size:12px;line-height:18px;color:var(--onv);margin-left:6px}
+</style></head><body><div class="ph"><div class="status"><span>21:36</span><span class="r"><span class="mi" style="font-size:16px">signal_cellular_alt</span><span class="mi" style="font-size:16px">wifi</span><span class="mi" style="font-size:16px">battery_full</span></span></div><div class="appbar"><div class="lead"><span class="mr" style="font-size:24px">menu</span></div><div class="st" style="margin:0 16px"><div class="on">已开播</div><div class="">录播</div><div class="">未开播</div></div><div class="act"><div class="ib"><span class="rx" style="font-size:24px">&#xf3d0;</span></div><div style="width:4px"></div></div></div><div class="main"><div class="pt"><div class="on">全部</div><div class="">哔哩哔哩</div><div class="">斗鱼</div><div class="">虎牙</div><div class="">抖音</div><div class="">快手</div><div class="">网易CC</div></div><div class="grid" style="grid-template-columns:repeat(2,1fr)"><div class="card"><div class="cov" style="background-image:url(.cache/img/1.jpg)"><span class="pb">BILIBILI</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>1.2万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/65.jpg)"></span><div class="x"><div class="t">深夜电台 · 点歌接龙到天亮</div><div class="n">晚风</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/225.jpg)"><span class="pb">HUYA</span><span class="aud"><span class="mr" style="font-size:14px">whatshot</span>86.4万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/111.jpg)"></span><div class="x"><div class="t">王者上分，今晚冲国服</div><div class="n">一只小熊</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/237.jpg)"><span class="pb">DOUYU</span><span class="aud"><span class="mr" style="font-size:14px">whatshot</span>34.1万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/133.jpg)"></span><div class="x"><div class="t">川西自驾第 3 天，雪山日出</div><div class="n">路过的风</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/250.jpg)"><span class="pb">DOUYIN</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>2301</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/169.jpg)"></span><div class="x"><div class="t">手工皮具，慢慢做一只钱包</div><div class="n">清欢</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/287.jpg)"><span class="pb">BILIBILI</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>5620</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/183.jpg)"></span><div class="x"><div class="t">钢琴即兴，弹你点的歌</div><div class="n">月亮邮差</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/292.jpg)"><span class="pb">KUAISHOU</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>1.1万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/206.jpg)"></span><div class="x"><div class="t">深夜食堂，煮一碗面</div><div class="n">橘子汽水</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/304.jpg)"><span class="pb">BILIBILI</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>3488</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/219.jpg)"></span><div class="x"><div class="t">围棋复盘：今天的三局</div><div class="n">不吃香菜</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/319.jpg)"><span class="pb">DOUYU</span><span class="aud"><span class="mr" style="font-size:14px">whatshot</span>12.7万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/274.jpg)"></span><div class="x"><div class="t">城市夜跑 10 公里</div><div class="n">星河长明</div></div></div></div></div></div><div class="nb"><div class="nd on"><div class="ind"><span class="rx" style="font-size:24px">&#xee0a;</span></div><div class="l">关注</div></div><div class="nd"><div class="ind"><span class="rx" style="font-size:24px">&#xed33;</span></div><div class="l">热门</div></div><div class="nd"><div class="ind"><span class="rx" style="font-size:24px">&#xea42;</span></div><div class="l">分区</div></div><div class="nd"><div class="ind"><span class="rx" style="font-size:24px">&#xec54;</span></div><div class="l">录制中心</div></div><div class="gesture"></div></div><div class="ov" style="padding:0 16px"><div class="d3" style="width:361px"><div class="t">检查更新</div><div class="lnk3"><span class="mr" style="font-size:18px">open_in_new</span>本软件开源免费</div><ul class="md"><li>斗鱼原画不再每 5 分钟断流：到期前在后台换链接并按关键帧无缝接上，没有卡顿。</li><li>Android armv7 与 x86_64 改用自编 FFmpeg 9 播放库。</li><li>下线 Kick（Cloudflare 拦截），现支持 33 个平台 + IPTV。</li></ul><div style="height:10px"></div><div class="acts" style="padding-top:14px"><div class="tb3">取消</div><div class="fb3">更新</div></div></div></div><div class="syn" style="z-index:46">示意图片</div></div></body></html>

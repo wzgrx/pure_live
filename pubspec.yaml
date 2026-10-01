@@ -11,4 +11,5 @@ workspace:
   - packages/live_core
   - packages/live_danmaku
   - packages/live_net
+  - packages/live_store
   - tools/check_latest

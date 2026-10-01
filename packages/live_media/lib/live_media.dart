@@ -15,6 +15,7 @@ export 'src/relay/flv.dart';
 export 'src/relay/flv_splicer.dart';
 export 'src/relay/hls_cookies.dart';
 export 'src/relay/hls_relay.dart';
+export 'src/relay/hls_window.dart';
 export 'src/relay/loopback_relay.dart';
 export 'src/relay/upstream.dart';
 export 'src/source.dart';

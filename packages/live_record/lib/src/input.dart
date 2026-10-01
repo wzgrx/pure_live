@@ -18,11 +18,20 @@ import 'package:live_record/src/resolver.dart';
 /// the recording continues without a new attempt, which 3.x could not do.
 /// Recipes (Bigo, FC2, niconico) open their own grant per attempt. Other
 /// schemes (RTMP, RTSP, files) go to FFmpeg directly.
+///
+/// The relay this opener starts keeps a retained window of every HLS media
+/// playlist and downloads its segments ahead of FFmpeg ([hlsPrefetch], 3.x's
+/// recording prefetch; M8.1), so a slow CDN or a short live window no longer
+/// costs segments.
 final class RecordInputOpener {
   /// Creates an opener. [relay] returns the relay the app shares (or one this
   /// opener starts with [proxy] on first need and stops in [close]).
-  new({this.proxy = const FixedProxyPolicy(), this.recipes = const [], Future<LoopbackRelay> Function()? relay})
-    : _startRelay = relay;
+  new({
+    this.proxy = const FixedProxyPolicy(),
+    this.recipes = const [],
+    this.hlsPrefetch = const HlsPrefetchOptions(),
+    Future<LoopbackRelay> Function()? relay,
+  }) : _startRelay = relay;
 
   /// Proxy routes for direct inputs and a relay this opener starts.
   final ProxyPolicy proxy;
@@ -30,11 +39,15 @@ final class RecordInputOpener {
   /// Openers of input recipes.
   final List<RecipeOpener> recipes;
 
+  /// HLS prefetch of the relay this opener starts; null fetches on demand.
+  final HlsPrefetchOptions? hlsPrefetch;
+
   final Future<LoopbackRelay> Function()? _startRelay;
   Future<LoopbackRelay>? _relay;
   late final MediaOpener _media = MediaOpener(proxy: proxy, recipes: recipes, relay: _relayNow);
 
-  Future<LoopbackRelay> _relayNow() => _relay ??= (_startRelay ?? () => LoopbackRelay.start(proxy: proxy)).call();
+  Future<LoopbackRelay> _relayNow() =>
+      _relay ??= (_startRelay ?? () => LoopbackRelay.start(proxy: proxy, hlsPrefetch: hlsPrefetch)).call();
 
   /// Opens [stream] of platform [site]. [renew] fetches a fresh line for a
   /// lease that cuts the connection.

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:live_core/live_core.dart';
 import 'package:live_media/src/relay/hls_cookies.dart';
+import 'package:live_media/src/relay/hls_window.dart';
 import 'package:live_media/src/relay/upstream.dart';
 import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
@@ -143,6 +144,10 @@ typedef HlsLineRenewer = Future<LivePlayLine> Function(LivePlayLine current);
 /// lease cuts the connection (CHZZK, PandaTV) is renewed at its
 /// `refreshAt`, and the playlists the engine already knows are pointed at
 /// the renewed URLs (children of a master by position).
+///
+/// With [prefetch] (recording, M8.1) every media playlist goes through an
+/// [HlsMediaWindow]: segments stay listed until the engine took them and
+/// are downloaded in parallel ahead of it.
 final class HlsRoute {
   /// Creates the route under [prefix] (`/<secret>/`).
   new({
@@ -156,6 +161,7 @@ final class HlsRoute {
     this.maxEntries = 2048,
     this.maxPlaylistBytes = 4 << 20,
     this.maxRestoredBytes = 64 << 20,
+    this.prefetch,
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now,
        _cookies = HlsSessionCookies(now: now) {
@@ -189,6 +195,10 @@ final class HlsRoute {
   /// Largest segment restored in memory.
   final int maxRestoredBytes;
 
+  /// Prefetch and retained window of media playlists; null serves every
+  /// request on demand.
+  final HlsPrefetchOptions? prefetch;
+
   final DateTime Function() _now;
   final HlsSessionCookies _cookies;
   LivePlayLine _line;
@@ -197,6 +207,7 @@ final class HlsRoute {
   final _media = <String, _Entry>{};
   final _names = <String, String>{};
   List<String> _masterChildren = const [];
+  final _windows = <_Entry, HlsMediaWindow>{};
   var _next = 0;
   var _closed = false;
   var _renewals = 0;
@@ -327,6 +338,23 @@ final class HlsRoute {
     return headers;
   }
 
+  HlsMediaWindow _windowOf(_Entry entry) => _windows.putIfAbsent(
+    entry,
+    () => HlsMediaWindow(
+      options: prefetch!,
+      source: () => identical(entry, _index) ? Uri.parse(_line.url) : entry.url,
+      resolve: _resolve,
+      fetch: (url) async {
+        final answer = await upstream.get(url, _headersFor(url));
+        _cookies.receive(answer.url, answer.setCookies);
+        return (status: answer.status, url: answer.url, body: answer.body);
+      },
+    ),
+  );
+
+  /// The media windows (tests, diagnostics).
+  Iterable<HlsMediaWindow> get windows => _windows.values;
+
   /// Answers [request] for [name]; unknown names get 404.
   Future<void> serve(HttpRequest request, String name) async {
     final response = request.response;
@@ -336,6 +364,7 @@ final class HlsRoute {
       return;
     }
     final url = entry.url;
+    if (entry.kind == _Kind.segment && await _serveHeld(response, entry)) return;
     HlsUpstreamResponse answer;
     try {
       answer = await upstream.get(url, _headersFor(url));
@@ -361,6 +390,7 @@ final class HlsRoute {
           text = recipe.master!(Uri.parse(_line.url), text);
         }
         final restore = text.contains('#EXT-X-STREAM-INF') ? null : recipe.restore?.call(text);
+        if (prefetch != null && !text.contains('#EXT-X-STREAM-INF')) text = _windowOf(entry).serve(text, answer.url);
         final body = utf8.encode(rewrite(text, answer.url, restore: restore, index: isIndex));
         response
           ..statusCode = HttpStatus.ok
@@ -395,6 +425,32 @@ final class HlsRoute {
     } on Object {
       // The player already hung up.
     }
+  }
+
+  /// Answers a segment from its media window when it holds it.
+  Future<bool> _serveHeld(HttpResponse response, _Entry entry) async {
+    final window = _windows.values.where((window) => window.owns(entry.url)).firstOrNull;
+    final held = window == null ? null : await window.take(entry.url);
+    if (held == null || _closed) return false;
+    try {
+      final body = entry.restore?.call(held) ?? held;
+      response
+        ..statusCode = HttpStatus.ok
+        ..contentLength = body.length
+        ..add(body);
+    } on Object {
+      try {
+        response.statusCode = HttpStatus.badGateway;
+      } on Object {
+        // Headers already sent.
+      }
+    }
+    try {
+      await response.close();
+    } on Object {
+      // The player already hung up.
+    }
+    return true;
   }
 
   void _scheduleRenewal() {
@@ -477,6 +533,10 @@ final class HlsRoute {
   void close() {
     _closed = true;
     _renewTimer?.cancel();
+    for (final window in _windows.values) {
+      window.close();
+    }
+    _windows.clear();
     _cookies.clear();
     upstream.close();
   }

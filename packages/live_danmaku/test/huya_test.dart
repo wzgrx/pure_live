@@ -367,6 +367,49 @@ Uint8List _chatWithId(String text, int lMsgId, {int uid = 7, String nick = 'A'})
   lMsgId: lMsgId,
 );
 
+/// The incoming frames of a fixture directory's frames.jsonl.
+List<Uint8List> _fixtureFrames(String name) => [
+  for (final line in File('$_root/$name/frames.jsonl').readAsLinesSync())
+    if (jsonDecode(line) case {'dir': 'in', 'b64': final String b64}) base64Decode(b64),
+];
+
+/// The streamer uid of each S20-end frame, in order.
+final List<int> _s20Uids = [
+  for (final line in File('$_root/S20-end/frames.jsonl').readAsLinesSync())
+    if (jsonDecode(line) case {'conn': final String room})
+      if ((_json('S20-end/meta.json')! as Map<String, Object?>)['rooms'] case final Map<String, Object?> rooms)
+        if (rooms[room] case {'uid': final String uid}) int.parse(uid),
+];
+
+/// A board panel (`GameEventMessageBoardPanel`) with [entries], as a
+/// headline notice carries it: tag 0 a header, tag 1 the entries (0 user: 1
+/// nick, 2 avatar; 1 content; 2 iCost; 4 iTotalSec; 5 iCountDown; 9
+/// lMessageId), tag 2 0.
+Uint8List _panel(List<({int id, String nick, String text, int cost, int total, int countdown})> entries) =>
+    (TarsWriter()
+          ..writeStruct(0, (header) => header.writeInt(2, 0))
+          ..writeList(
+            1,
+            entries,
+            (writer, entry) => writer.writeStruct(
+              0,
+              (fields) => fields
+                ..writeStruct(
+                  0,
+                  (user) => user
+                    ..writeString(1, entry.nick)
+                    ..writeString(2, ''),
+                )
+                ..writeString(1, entry.text)
+                ..writeInt(2, entry.cost)
+                ..writeInt(4, entry.total)
+                ..writeInt(5, entry.countdown)
+                ..writeInt(9, entry.id),
+            ),
+          )
+          ..writeInt(2, 0))
+        .toBytes();
+
 /// [message] without its id: what 3.x reported for a single push.
 LiveMessage _withoutId(LiveMessage message) => LiveMessage(
   type: message.type,
@@ -607,6 +650,104 @@ void main() {
       final gift = HuyaDanmakuProtocol.decode(push(named)).messages.single;
       expect((gift.message, gift.userId, gift.messageId), ('虎粮 ×1', '0', 'huya:7'));
       expect(gift.data, const HuyaGift(id: 0, name: '虎粮', count: 1, combo: 1, payTotal: 0));
+    });
+  });
+
+  group('M4.D2: headline boards (C-9) and the stream end (C-10)', () {
+    final now = DateTime.utc(2026, 10, 1, 0, 20);
+
+    test('C-9: a notice carrying a board gives its entries; an empty board nothing; no panel asks a fetch', () {
+      // S19: the recorded notice, an empty board.
+      final empty = HuyaDanmakuProtocol.decode(_fixtureFrames('S19-headline').single, now: now);
+      expect(empty.messages, isEmpty);
+      expect(empty.superChatNotices, 0, reason: 'the body is the board: nothing to fetch');
+      final board = HuyaDanmakuProtocol.decode(
+        _single(
+          HuyaDanmakuProtocol.superChatUri,
+          _panel([(id: 31, nick: '观众A', text: '加油', cost: 30, total: 60, countdown: 45)]),
+          lMsgId: 9,
+        ),
+        now: now,
+      );
+      expect(board.superChatNotices, 0);
+      final message = board.messages.single;
+      expect((message.type, message.userName), (LiveMessageType.superChat, 'SUPER_CHAT_MESSAGE'));
+      final entry = message.data! as LiveSuperChatMessage;
+      expect((entry.messageId, entry.userName, entry.message, entry.price), ('huya:31', '观众A', '加油', 30));
+      expect(entry.endTime, now.add(const Duration(seconds: 45)));
+      expect(entry.startTime, now.subtract(const Duration(seconds: 15)));
+      // Not a panel: the board is fetched as before.
+      for (final body in [
+        Uint8List(0),
+        Uint8List.fromList([0]),
+        (TarsWriter()..writeInt(0, 1)).toBytes(),
+      ]) {
+        final decoded = HuyaDanmakuProtocol.decode(_single(HuyaDanmakuProtocol.superChatUri, body), now: now);
+        expect((decoded.messages.length, decoded.superChatNotices), (0, 1));
+      }
+    });
+
+    test('C-9: the connection reports a carried entry once and fetches nothing', () async {
+      var fetches = 0;
+      final connector = _Connector();
+      final connection = HuyaDanmakuConnection(connector: connector.call, now: () => now);
+      final events = _record(connection);
+      await connection.connect(
+        _args(
+          superChats: () async {
+            fetches++;
+            return const [];
+          },
+        ),
+      );
+      final notice = _single(
+        HuyaDanmakuProtocol.superChatUri,
+        _panel([(id: 31, nick: '观众A', text: '加油', cost: 30, total: 60, countdown: 45)]),
+      );
+      connector.channels.single.incoming
+        ..add(notice)
+        ..add(notice)
+        ..add(_chat('after'));
+      await _until(() => _messages(events).length == 2);
+      expect(_messages(events).map((message) => message.type), [LiveMessageType.superChat, LiveMessageType.chat]);
+      expect(_superChats(events).single.messageId, 'huya:31');
+      expect(fetches, 0);
+      await connection.close();
+    });
+
+    test('C-10: S20, the recorded stream ends, end the run (Broadcast ended); not for another streamer', () async {
+      final frames = _fixtureFrames('S20-end');
+      expect(_s20Uids, hasLength(3));
+      expect([for (final frame in frames) ...HuyaDanmakuProtocol.decode(frame).ended], _s20Uids);
+      expect(frames.map((frame) => HuyaDanmakuProtocol.decode(frame).messages), everyElement(isEmpty));
+      final frame = frames.first;
+      final uid = _s20Uids.first;
+      // Another streamer's notice changes nothing.
+      final other = _Connector();
+      final kept = HuyaDanmakuConnection(connector: other.call);
+      final keptEvents = _record(kept);
+      await kept.connect(_args());
+      other.channels.single.incoming
+        ..add(frame)
+        ..add(_chat('still here'));
+      await _until(() => _messages(keptEvents).isNotEmpty);
+      expect(keptEvents.whereType<DanmakuClosed>(), isEmpty);
+      await kept.close();
+      // This streamer's: the run ends after the frames before it, without a
+      // reconnect.
+      final connector = _Connector();
+      final connection = HuyaDanmakuConnection(connector: connector.call);
+      final events = _record(connection);
+      await connection.connect(_args(uid: uid));
+      connector.channels.single.incoming
+        ..add(_chat('last'))
+        ..add(frame);
+      await _until(() => events.whereType<DanmakuClosed>().isNotEmpty);
+      expect(events.last, const DanmakuClosed(DanmakuCloseReason.connectionFailed, detail: 'Broadcast ended'));
+      expect(_messages(events).single.message, 'last');
+      await _wait(const Duration(milliseconds: 20));
+      expect(connector.channels, hasLength(1));
+      expect(connector.channels.single.closed, isTrue);
     });
   });
 

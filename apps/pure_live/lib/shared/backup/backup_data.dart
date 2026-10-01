@@ -1,9 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:live_iptv/live_iptv.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/iptv_library.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/multiview/logic/multiview_session.dart';
 import 'package:pure_live/features/search/search_history.dart';
+import 'package:pure_live/shared/backup/backup_iptv.dart';
 
 /// The one backup service of the pages (local files and WebDAV share it, so
 /// its "one restore at a time" lock covers both).
@@ -25,24 +29,60 @@ enum BackupScope {
 /// `BackupService` ignore sections they do not know.
 const String searchSection = 'search';
 
+/// The backup section of the multi-view's last arrangement (new in v4,
+/// F.5a): `{"multiview": {"session": {...}}}`, written when there is one.
+const String multiviewSection = 'multiview';
+
 /// The data of a new backup: [BackupService]'s file (3.x layout, no
-/// accounts, as 3.x) and, for a full backup, the search words.
-Future<Map<String, Object?>> exportBackup(BackupService service, LiveStore store, BackupScope scope) async {
+/// accounts, as 3.x) and, for a full backup, the search words, the IPTV
+/// playlists ([iptvLibrarySection]) and the multi-view's last arrangement.
+/// [iptv] is the IPTV library; null reads the app's tables in [store].
+Future<Map<String, Object?>> exportBackup(
+  BackupService service,
+  LiveStore store,
+  BackupScope scope, {
+  IptvLibrary? iptv,
+}) async {
   if (scope == BackupScope.follows) return await service.exportFollows();
   final data = {...await service.exportAll()};
   data[searchSection] = {'history': await _storedSearchWords(store)};
+  data[iptvLibrarySection] = await exportIptvLibrary(iptv ?? StoreIptvLibrary(store));
+  if (await readMultiviewSession(store.meta) case final session?) data[multiviewSection] = {'session': session};
   return data;
 }
 
 /// Applies [json] for [scope]; a full restore also replaces the search
-/// words when the file has them. Throws [FormatException] for a file that is
-/// not a backup and [StateError] when another restore runs.
-Future<void> restoreBackup(BackupService service, LiveStore store, Map<String, Object?> json, BackupScope scope) async {
+/// words, the IPTV playlists and the multi-view's last arrangement when the
+/// file has them (3.x's files have none: they stay). Throws
+/// [FormatException] for a file that is not a backup and [StateError] when
+/// another restore runs.
+Future<void> restoreBackup(
+  BackupService service,
+  LiveStore store,
+  Map<String, Object?> json,
+  BackupScope scope, {
+  IptvLibrary? iptv,
+}) async {
   if (scope == BackupScope.follows) return await service.restoreFollows(json);
   await service.restoreAll(json);
   final words = searchWordsIn(json);
   if (words != null) await store.meta.set(SearchHistory.key, jsonEncode(words));
+  if (iptvBackupIn(json) case final library?) await restoreIptvLibrary(iptv ?? StoreIptvLibrary(store), library);
+  if (multiviewSessionIn(json) case final session?) await writeMultiviewSession(store.meta, session);
 }
+
+/// The multi-view arrangement of a backup, or null when the file has none.
+Map<String, Object?>? multiviewSessionIn(Map<String, Object?> json) {
+  final section = json[multiviewSection];
+  return section is Map ? multiviewSessionOf(section['session']) : null;
+}
+
+/// The rooms of an arrangement, by identity (empty cells left out).
+List<String> _multiviewRooms(Map<String, Object?>? session) => [
+  for (final room in session?['rooms'] as List? ?? const [])
+    if (room is Map && room['platform'] is String && room['roomId'] is String)
+      '${(room['platform'] as String).trim().toLowerCase()}:${(room['roomId'] as String).trim().toLowerCase()}',
+];
 
 /// The search words of a backup, cleaned like the search page keeps them
 /// (trimmed, cut, case-insensitively unique, at most [SearchHistory.limit]),
@@ -100,7 +140,13 @@ enum RestorePartKind {
   webdav('backup_part_webdav'),
 
   /// Search words.
-  search('backup_part_search');
+  search('backup_part_search'),
+
+  /// IPTV playlists.
+  iptv('backup_part_iptv'),
+
+  /// The rooms of the multi-view's last arrangement.
+  multiview('backup_part_multiview');
 
   new(this.labelKey);
 
@@ -192,13 +238,19 @@ final class RestorePreview {
   bool get changesSomething => settingsChanged > 0 || accounts > 0 || parts.any((part) => !part.unchanged);
 }
 
-/// Works out what restoring [json] for [scope] would change in [store].
+/// Works out what restoring [json] for [scope] would change in [store]
+/// ([iptv] as in [exportBackup]).
 ///
 /// Reads the file the way [BackupService] does ([LegacySnapshot.fromBackup])
 /// and throws the same [FormatException] for a file that is not a backup. A
 /// follows-only file asked to restore everything becomes a follows restore
 /// (3.x refused it with a bare "restore failed").
-Future<RestorePreview> previewRestore(LiveStore store, Map<String, Object?> json, BackupScope scope) async {
+Future<RestorePreview> previewRestore(
+  LiveStore store,
+  Map<String, Object?> json,
+  BackupScope scope, {
+  IptvLibrary? iptv,
+}) async {
   final snapshot = LegacySnapshot.fromBackup(json);
   final version = switch (json['backupVersion']) {
     final num value => value.toInt(),
@@ -265,6 +317,22 @@ Future<RestorePreview> previewRestore(LiveStore store, Map<String, Object?> json
     parts.add(RestorePart.compare(RestorePartKind.search, await _storedSearchWords(store), words, lower));
   } else {
     kept.add(RestorePartKind.search);
+  }
+  if (iptvBackupIn(json) case final library?) {
+    final current = [
+      for (final playlist in await (iptv ?? StoreIptvLibrary(store)).playlists())
+        if (!playlist.isHot) playlist,
+    ];
+    final incoming = [for (final entry in library.playlists) entry.playlist];
+    parts.add(RestorePart.compare(RestorePartKind.iptv, current, incoming, (playlist) => playlist.id));
+  } else {
+    kept.add(RestorePartKind.iptv);
+  }
+  if (multiviewSessionIn(json) case final session?) {
+    final current = _multiviewRooms(await readMultiviewSession(store.meta));
+    parts.add(RestorePart.compare(RestorePartKind.multiview, current, _multiviewRooms(session), (room) => room));
+  } else {
+    kept.add(RestorePartKind.multiview);
   }
 
   var changed = 0;

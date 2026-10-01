@@ -88,7 +88,7 @@ CSS = '''
 .vring{width:22px;height:22px;border-radius:11px;border:2px solid #fff;display:grid;place-items:center}.vring i{width:9px;height:9px;border-radius:5px;background:#FF5449}
 .pbot{position:absolute;left:0;right:0;bottom:0;height:176px;padding:0 8px 8px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;background:linear-gradient(0deg,rgba(0,0,0,.6),rgba(0,0,0,.25) 62%,transparent);z-index:5;color:#fff}
 .comp{flex:1;height:40px;border-radius:20px;background:rgba(0,0,0,.54);border:1px solid rgba(255,255,255,.24);display:flex;align-items:center;color:rgba(255,255,255,.6);font-size:13px;white-space:nowrap;overflow:hidden;min-width:0;margin-right:6px}
-.comp .a{width:40px;display:grid;place-items:center;color:#FFD166;flex:none}.comp .s{margin-left:auto;width:40px;display:grid;place-items:center;color:#fff;flex:none}
+.comp .a{width:40px;display:grid;place-items:center;color:#FFFFFF;flex:none}.comp .s{margin-left:auto;width:40px;display:grid;place-items:center;color:#fff;flex:none}
 .vchip{margin:0 3px}
 .open{background:rgba(255,255,255,.2);border-radius:24px}
 /* pickers */

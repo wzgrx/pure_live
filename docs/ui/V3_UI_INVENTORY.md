@@ -169,3 +169,16 @@ v4 现在（偏差最大）：
 **v3 的问题**：W1 680–839 时画面只剩一小块；W2 顶栏名字和分区同字号；W3 关注和录制按钮随宽度换样子；W4 “默认比例”文字按钮、窗口内全屏图标看不出意思；W5 聊天栏顶上没有标题和信息；W6 窄栏里卡片样式弹幕；W7 没有只收起聊天栏的办法。
 
 **对比和设计**：见 [compare/U.2d](compare/U.2d/README.md)。
+
+## 各任务的 v3 清单
+
+第 7 节以后，每个任务的“v3 的样子、问题、文件对照”写在各自的 README 里：
+
+| 任务 | 位置 |
+|---|---|
+| U.2b 竖屏流和竖屏全屏 | [compare/U.2b](compare/U.2b/README.md) |
+| U.2e 弹幕列表和弹幕设置页 | [compare/U.2e](compare/U.2e/README.md) |
+| U.2j 小窗 | [compare/U.2j](compare/U.2j/README.md) |
+| U.5a 搜索 | [compare/U.5a](compare/U.5a/README.md) |
+| U.5b 网页搜索 | [compare/U.5b](compare/U.5b/README.md) |
+| U.5c 观看历史 | [compare/U.5c](compare/U.5c/README.md) |

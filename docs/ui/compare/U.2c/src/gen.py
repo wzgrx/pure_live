@@ -14,7 +14,7 @@ CSS = '''
 .time{padding:0 4px}.bat{margin:0 8px}
 .lock{position:absolute;right:20px;top:50%;transform:translateY(-50%);width:50px;height:50px;border-radius:25px;background:rgba(0,0,0,.38);display:grid;place-items:center;color:#fff;z-index:6}
 .comp{flex:1;max-width:420px;height:40px;border-radius:20px;background:rgba(0,0,0,.54);border:1px solid rgba(255,255,255,.24);display:flex;align-items:center;color:rgba(255,255,255,.6);font-size:13px;white-space:nowrap;overflow:hidden;min-width:0}
-.comp .a{width:40px;display:grid;place-items:center;color:#FFD166;flex:none}.comp .s{margin-left:auto;width:40px;display:grid;place-items:center;color:#fff;flex:none}
+.comp .a{width:40px;display:grid;place-items:center;color:#FFFFFF;flex:none}.comp .s{margin-left:auto;width:40px;display:grid;place-items:center;color:#fff;flex:none}
 .mid{flex:1;display:flex;justify-content:center;align-items:center;min-width:0;padding:0 8px;height:48px}
 .g{display:flex;align-items:center;height:48px;flex:none}
 /* v3 */
@@ -29,7 +29,7 @@ CSS = '''
 .vfol{height:32px;border-radius:16px;display:flex;align-items:center;gap:3px;padding:0 12px 0 9px;font-size:13px;font-weight:500;background:rgba(255,255,255,.18);color:#fff;margin:0 4px;flex:none}.vfol .rx{font-size:16px}
 .vring{width:22px;height:22px;border-radius:11px;border:2px solid #fff;display:grid;place-items:center}.vring i{width:9px;height:9px;border-radius:5px;background:#FF5449}
 .vbadge{top:60px;left:16px}
-.cbtn{width:40px;height:40px;border-radius:20px;background:rgba(0,0,0,.54);border:1px solid rgba(255,255,255,.24);display:grid;place-items:center;color:#FFD166;flex:none}
+.cbtn{width:40px;height:40px;border-radius:20px;background:rgba(0,0,0,.54);border:1px solid rgba(255,255,255,.24);display:grid;place-items:center;color:#FFFFFF;flex:none}
 .vol{display:flex;align-items:center;gap:6px;flex:none;margin:0 4px;color:#fff}.vol .t{width:90px;height:4px;border-radius:2px;background:rgba(255,255,255,.35);position:relative}.vol .t i{position:absolute;left:0;top:0;bottom:0;width:70%;background:#fff;border-radius:2px}.vol .t u{position:absolute;left:calc(70% - 7px);top:-5px;width:14px;height:14px;border-radius:7px;background:#fff}
 '''
 mr = lambda n, s=24: f'<span class="mr" style="font-size:{s}px">{n}</span>'

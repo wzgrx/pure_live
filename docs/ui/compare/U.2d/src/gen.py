@@ -1,4 +1,6 @@
 """U.2d wide live room mockups: v3 restored and the new design.
+The video is a 16:9 frame (live_play_video.dart LivePlayVideoFrame) centred in
+the video area, and its control bars sit on the frame's edges.
 v3: lib/modules/live_play/widgets/layout/live_play_content.dart:58-110 (split
 above 680: video + chat column 34% clamped 300-400), live_play_header.dart
 (wide header: filled follow button, labelled record button),
@@ -11,7 +13,8 @@ CSS = '''
 .win{display:flex;flex-direction:column}
 .body{flex:1;display:flex;min-height:0}
 .stage{position:relative;flex:1;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.stage .pic{width:100%;aspect-ratio:16/9;background:#000 url(.cache/img/158.jpg) center 55%/cover}
+.frame{position:relative;width:100%;aspect-ratio:16/9;max-height:100%}
+.stage .pic{position:absolute;inset:0;background:#000 url(.cache/img/158.jpg) center 55%/cover}
 .col{flex:none;display:flex;flex-direction:column;background:var(--surface);border-left:1px solid var(--ov);position:relative;overflow:hidden}
 .list{flex:1;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:6px 0 10px}
 /* v3 */
@@ -81,7 +84,7 @@ def v3_stage(windows=True):
     right = (('' if windows else ib(mr('screen_rotation_alt', 21))) + '<div class="fit">默认比例</div>'
              + (ib(mr('volume_up', 22)) + ib(mr('unfold_more', 26)) if windows else '') + ib(mr('fullscreen', 26)))
     bot = f'<div class="v3bot"><div style="display:flex;align-items:center">{left}</div><div style="flex:1"></div><div style="display:flex;align-items:center">{right}</div></div>'
-    return f'<div class="stage"><div class="pic"></div>{top}{bot}</div>'
+    return f'<div class="stage"><div class="frame"><div class="pic"></div>{top}{bot}</div></div>'
 
 
 def v3_chat():
@@ -119,7 +122,7 @@ def v4_stage(windows=True, collapsed=False, recording=False, n=True):
              + (ib(mr('unfold_more', 26), N(15), 'ib vic') if windows else '') + ib(mr('fullscreen', 26), N(16), 'ib vic'))
     bot = f'<div class="vbot"><div style="display:flex;align-items:center">{left}</div><div style="flex:1"></div><div style="display:flex;align-items:center">{right}</div></div>'
     badge = '<div class="vbadge" style="top:60px"><i></i>录制中 12:34</div>' if recording else ''
-    return f'<div class="stage"><div class="pic"></div>{top}{bot}{badge}</div>'
+    return f'<div class="stage"><div class="frame"><div class="pic"></div>{top}{bot}{badge}</div></div>'
 
 
 def v4_info(n=True):

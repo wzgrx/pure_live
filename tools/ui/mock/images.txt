@@ -20,3 +20,5 @@
 342	640	360	cover
 360	640	360	cover
 367	640	360	cover
+1027	720	1280	portrait stream
+1011	720	1280	portrait stream (next room)

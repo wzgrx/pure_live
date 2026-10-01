@@ -484,7 +484,7 @@ def tagrow3(sel=0):
 
 def fav3(focus=None, tags=True, status_focus=None):
     """pure_live_TV favorites pane (favorite_page.dart:264-391)."""
-    cards = ''.join(card3(k, focused=(k == focus)) for k in 'aibcjdke')
+    cards = ''.join(card3(k, focused=(k == focus)) for k in 'aibcjdkemnop')
     return (tabs3(FAV_STATUS3, 0, status_focus) + '<div style="height:6px"></div>' + tabs3(FAV_PLATS3, 0)
             + '<div style="height:6px"></div>' + (tagrow3() if tags else '') + '<div style="height:8px"></div>'
             + f'<div class="grid3">{cards}</div>')
@@ -495,7 +495,7 @@ def tagrow4(sel=0, n=None):
     return f'<div class="tb4" style="height:32px;gap:8px">{out}</div>'
 
 
-def fav4(focus=None, tags=True, n=False, rows='aibcjdke', plat_focus=None):
+def fav4(focus=None, tags=True, n=False, rows='aibcjdkemnop', plat_focus=None):
     """New favorites pane (U.15c): status and platform tabs in one row (U.4c c3), counts (U.4c c4)."""
     N = (lambda k: k) if n else (lambda k: None)
     status = tabs4([('已开播', None, 12), ('录播', None, 1), ('未开播', None, 23)], 0, n=N(11), tag='chg')

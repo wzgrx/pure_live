@@ -100,14 +100,40 @@ void main() {
     expect(categories.map((category) => category.name), expected.map((category) => category['name']));
     for (final (index, category) in categories.indexed) {
       final areas = (expected[index]['children'] as List).cast<Map<String, dynamic>>();
-      expect(category.children, hasLength(areas.length));
-      for (final (position, area) in category.children.indexed) {
+      final twoLevels = category.children.where((area) => area.areaType == category.id).toList();
+      expect(twoLevels, hasLength(areas.length));
+      for (final (position, area) in twoLevels.indexed) {
         _expectParity(area.toJson(), areas[position], reason: 'S01[$index][$position]');
-        expect(area.platform, 'douyin');
       }
+      expect(category.children.every((area) => area.platform == 'douyin'), isTrue);
     }
     expect(DouyinApi.partition('1010032,1'), (partition: '1010032', type: '1'));
     expect(() => DouyinApi.partition('1010032'), throwsA(isA<NotFound>()));
+  });
+
+  test('S01 games (C-12): each 游戏 sub-category is followed by its games, a game listed twice once', () {
+    final fixture = _sample('S01-home');
+    final categories = DouyinApi.categories(fixture.body, status: fixture.status, headers: _headers(fixture));
+    final games = categories.singleWhere((category) => category.name == '游戏').children;
+    expect(games, hasLength(1 + 7 + 138), reason: '141 listed, 3 of them under two sub-categories');
+    expect(games.map((area) => area.areaId).toSet(), hasLength(games.length));
+    final shooting = games.indexWhere((area) => area.areaName == '射击游戏');
+    expect(games[shooting + 1].toJson(), {
+      'platform': 'douyin',
+      'areaType': '1,1',
+      'typeName': '射击游戏',
+      'areaId': '1010032,1',
+      'areaName': '和平精英',
+      'areaPic': '',
+      'shortName': '',
+    });
+    final lol = games.singleWhere((area) => area.areaName == '英雄联盟');
+    expect((lol.areaId, lol.areaType, lol.typeName), ('1010014,1', '2,1', '竞技游戏'));
+    expect(DouyinApi.partition(lol.areaId), (partition: '1010014', type: '1'));
+    expect(games.singleWhere((area) => area.areaName == '星际战甲').typeName, '单机游戏', reason: 'also under 角色扮演');
+    expect(categories.where((category) => category.name != '游戏').map((category) => category.children.length).toSet(), {
+      1,
+    });
   });
 
   group('S02 feed', () {

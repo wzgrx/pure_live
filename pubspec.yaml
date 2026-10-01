@@ -11,5 +11,6 @@ workspace:
   - packages/live_cast
   - packages/live_core
   - packages/live_danmaku
+  - packages/live_iptv
   - packages/live_net
   - tools/check_latest

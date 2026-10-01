@@ -1156,6 +1156,9 @@ abstract final class AppIcons {
   /// The splash animation.
   static const IconData settingsSplash = Remix.rocket_2_line;
 
+  /// Share codes on the clipboard (F.0a).
+  static const IconData settingsClipboardRooms = Remix.clipboard_line;
+
   /// Check for updates.
   static const IconData settingsAutoUpdate = Remix.refresh_line;
 

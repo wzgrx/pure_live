@@ -20,13 +20,19 @@ enum RoomPromptChoice {
 /// prompt) and may open over any page, a full-screen room too.
 ///
 /// The caller opens the room on [RoomPromptChoice.enter] (3.x), right away:
-/// the next prompt looks a frame later, with the room on top.
-Future<RoomPromptChoice> showRoomPrompt(BuildContext context, {required LiveRoom room, AppPrompts? prompts}) async =>
+/// the next prompt looks a frame later, with the room on top. [shared]: the
+/// code came from another app's share (F.0a), not the clipboard.
+Future<RoomPromptChoice> showRoomPrompt(
+  BuildContext context, {
+  required LiveRoom room,
+  AppPrompts? prompts,
+  bool shared = false,
+}) async =>
     await (prompts ?? AppPrompts.instance).show<RoomPromptChoice>(AppPromptKind.share, () async {
       if (!context.mounted) return RoomPromptChoice.dismiss;
       return await showDialog<RoomPromptChoice>(
         context: context,
-        builder: (_) => RoomPromptDialog(room: room),
+        builder: (_) => RoomPromptDialog(room: room, shared: shared),
       );
     }) ??
     RoomPromptChoice.dismiss;
@@ -37,10 +43,13 @@ Future<RoomPromptChoice> showRoomPrompt(BuildContext context, {required LiveRoom
 /// ids in a frame of their own (S1–S3).
 class RoomPromptDialog extends StatelessWidget {
   /// Creates the dialog for [room].
-  const new({required this.room, super.key});
+  const new({required this.room, this.shared = false, super.key});
 
   /// The room found.
   final LiveRoom room;
+
+  /// Whether the code came from a share instead of the clipboard.
+  final bool shared;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +93,10 @@ class RoomPromptDialog extends StatelessWidget {
             children: [
               Text(i18n('room_prompt_title')),
               const SizedBox(height: 6),
-              Text(i18n('room_prompt_from_clipboard'), style: styles.t14.copyWith(color: scheme.onSurfaceVariant)),
+              Text(
+                i18n(shared ? 'room_prompt_from_share' : 'room_prompt_from_clipboard'),
+                style: styles.t14.copyWith(color: scheme.onSurfaceVariant),
+              ),
             ],
           ),
           content: ConstrainedBox(

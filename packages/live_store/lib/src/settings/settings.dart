@@ -104,6 +104,11 @@ abstract final class Settings {
   /// be played; on shows them. Follows and search always show them.
   static const showUnplayableInDiscover = BoolSetting('showUnplayableInDiscover', section: 'app', defaultValue: false);
 
+  /// New (F.0a): on start and one second after the app comes back, a share
+  /// code on the clipboard is offered as "enter the room" (3.x always
+  /// looked and had no switch).
+  static const detectClipboardRooms = BoolSetting('detectClipboardRooms', section: 'app', defaultValue: true);
+
   /// New (UPGRADES 2-1): renew the Douyu cookie every 5 minutes after login.
   static const douyuForceRenew = BoolSetting('douyuForceRenew', section: 'app', defaultValue: false);
 
@@ -1388,6 +1393,7 @@ abstract final class Settings {
     enableMultiView,
     enableNewWindowPlay,
     showUnplayableInDiscover,
+    detectClipboardRooms,
     douyuForceRenew,
     twitchLanguages,
     hotAreasList,

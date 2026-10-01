@@ -253,6 +253,9 @@ Future<bool> shareRoom(LiveRoom room) async {
     AppNavigator.toast(i18n('share_failed'));
     return false;
   }
+  // The clipboard check does not offer the user's own code back (3.x
+  // `ShareCommandHandler._rememberText`).
+  OwnClipboardTexts.remember(code);
   try {
     final sheet = SystemShare.sheet;
     if (sheet != null && (Platform.isAndroid || Platform.isIOS)) return await sheet(code);

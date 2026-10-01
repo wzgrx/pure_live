@@ -23,7 +23,9 @@ import 'package:pure_live/platform/native_http.dart';
 import 'package:pure_live/platform/platform_services.dart';
 import 'package:pure_live/platform/recording_platform.dart';
 import 'package:pure_live/platform/secret_cipher.dart';
+import 'package:pure_live/platform/system_permissions.dart';
 import 'package:pure_live/platform/twitch_webview_http.dart';
+import 'package:pure_live/shared/permission_prompts.dart';
 
 /// Keeps decoded covers and avatars bounded apart from the HTTP cache (3.x
 /// `configureDecodedImageCache`): a 960x540 cover is about 2 MiB decoded.
@@ -148,6 +150,9 @@ abstract final class AppBootstrap {
     // An extra window keeps its own task list beside the main window's in
     // the shared data (both lists are written whole).
     final tasksKey = recorderTasksKeyFor(launch.instanceId);
+    // The notification permission once, all-files access explained first
+    // (docs/ui/compare/U.14 c14).
+    final prompts = RecordingPermissionPrompts(permissions: const SystemPermissions(), meta: store.meta);
     final recording = background
         ? platformAppRecording(
             store: store,
@@ -157,6 +162,8 @@ abstract final class AppBootstrap {
             words: i18n,
             danmaku: danmaku,
             tasksKey: tasksKey,
+            onServiceStart: () => unawaited(prompts.notificationsOnce()),
+            explainStorage: prompts.explainStorage,
           )
         : buildAppRecording(store: store, sites: sites, proxy: proxy, dataRoot: dataRoot, tasksKey: tasksKey);
     if (background) {
@@ -179,7 +186,12 @@ abstract final class AppBootstrap {
       launch: launch,
       dataRoot: dataRoot,
       followsReady: followsReady,
-      mediaOpener: MediaOpener(proxy: proxy, engine: mpvEngineProfile(), recipes: recipeOpeners(sites)),
+      // The live room's streams take the playback proxy (3.x, F.0a).
+      mediaOpener: MediaOpener(
+        proxy: PlaybackProxyPolicy(settings),
+        engine: mpvEngineProfile(),
+        recipes: recipeOpeners(sites),
+      ),
       iptvImporter: importer,
       recording: recording,
     );

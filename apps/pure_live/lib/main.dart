@@ -12,6 +12,7 @@ import 'package:pure_live/app/bootstrap.dart';
 import 'package:pure_live/app/data_root.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/fonts.dart';
+import 'package:pure_live/app/intake/system_intake.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/plugins.dart';
@@ -63,4 +64,6 @@ Future<void> main(List<String> args) async {
       child: PureLiveApp(strings: strings),
     ),
   );
+  // Shares, shortcuts and share codes on the clipboard (F.0a).
+  SystemIntake.start(services);
 }

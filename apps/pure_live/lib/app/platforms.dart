@@ -25,6 +25,28 @@ final class SettingsProxyPolicy implements ProxyPolicy {
   );
 }
 
+/// The playback proxy settings as live_net's [ProxyPolicy] (3.x
+/// `PlaybackProxyPolicy` over `enableProxy`, `proxyHost`, `proxyPort`; F.0a):
+/// the route of the live room's video streams (mpv's `http-proxy`, the
+/// playback relay's upstream requests). Separate from the app proxy
+/// ([SettingsProxyPolicy]) as in 3.x: switched off, streams go direct even
+/// when the app proxy is on. Recording keeps the app proxy (3.x routed its
+/// relays through `enableAppProxy`). Read at every request.
+final class PlaybackProxyPolicy implements ProxyPolicy {
+  /// Creates the policy over [settings].
+  new(this.settings);
+
+  /// The settings.
+  final SettingsStore settings;
+
+  @override
+  ProxyRoute routeFor(String site, Uri url) => proxyRouteFrom(
+    enabled: settings.get(Settings.enableProxy),
+    host: settings.get(Settings.proxyHost),
+    port: settings.get(Settings.proxyPort),
+  );
+}
+
 /// The sealed cookies as live_net's [CookieVault] (M9: `cookieFor` and
 /// `cookieChanges` of the secret store).
 final class StoreCookieVault implements CookieVault {

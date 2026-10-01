@@ -1,0 +1,186 @@
+import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/custom_icons.dart';
+import 'package:remixicon/remixicon.dart';
+
+/// The app's icons by what they are for (docs/ui/UI_PLAN.md §6.4).
+///
+/// Each use maps to the icon 3.x showed in that place (`Remix.*`,
+/// Material's `Icons.*` or 3.x's own `CustomIcons`), so pages name the use,
+/// not the glyph, and a later switch of icon set changes only this file.
+/// Danmaku on, off and settings are pictures, see `DanmakuIcon`; the record
+/// button's ring and dot are drawn by `RecordGlyph`.
+abstract final class AppIcons {
+  // ---- the live room's app bar (3.x live_play_header.dart, widgets/button) ----
+
+  /// Back (3.x fullscreen `BackButton`).
+  static const IconData back = Icons.arrow_back_rounded;
+
+  /// Follow: the "＋ 关注" button.
+  static const IconData follow = Remix.add_line;
+
+  /// Followed: the "✓ 已关注" button.
+  static const IconData followed = Remix.check_line;
+
+  /// Follow as a heart (3.x `FavoriteFloatingButton`, the room details).
+  static const IconData followHeart = Remix.heart_3_line;
+
+  /// Followed as a heart.
+  static const IconData followedHeart = Remix.heart_3_fill;
+
+  /// A room that records by itself when it goes live ("自动录").
+  static const IconData autoRecord = Remix.timer_line;
+
+  /// The room menu (3.x `LivePlayMenuButton`).
+  static const IconData roomMenu = Remix.apps_2_line;
+
+  // ---- the bar at the top of the video (3.x `TopActionBar`) ----
+
+  /// Audio only, off.
+  static const IconData audioOnly = Remix.headphone_line;
+
+  /// Audio only, on.
+  static const IconData audioOnlyActive = Remix.headphone_fill;
+
+  /// Cast to a TV (3.x `CastButton`, the room menu).
+  static const IconData cast = Remix.tv_2_line;
+
+  /// Picture-in-picture (3.x `PIPButton`).
+  static const IconData floatWindow = CustomIcons.float_window;
+
+  /// The IPTV guide.
+  static const IconData iptvGuide = Icons.assignment_outlined;
+
+  /// Another followed or watched room (3.x's fullscreen room history).
+  static const IconData switchRoom = Icons.swap_horiz_outlined;
+
+  // ---- the bar at the bottom of the video (3.x `BottomActionBar`) ----
+
+  /// Play.
+  static const IconData play = Icons.play_arrow_rounded;
+
+  /// Pause.
+  static const IconData pause = Icons.pause_rounded;
+
+  /// Load the room again.
+  static const IconData refresh = Icons.refresh_rounded;
+
+  /// The picture's orientation follows the stream (3.x
+  /// `PortraitOrientationButton`).
+  static const IconData orientationAuto = Icons.screen_rotation_alt_rounded;
+
+  /// The room is forced to portrait.
+  static const IconData orientationPortrait = Icons.stay_current_portrait_rounded;
+
+  /// The room is forced to landscape.
+  static const IconData orientationLandscape = Icons.stay_current_landscape_rounded;
+
+  /// Enter fullscreen.
+  static const IconData fullscreen = Icons.fullscreen_rounded;
+
+  /// Leave fullscreen.
+  static const IconData exitFullscreen = Icons.fullscreen_exit_rounded;
+
+  /// The picture's fit (画面比例).
+  static const IconData aspectRatio = Remix.aspect_ratio_line;
+
+  /// The controls are locked (3.x `LockButton`).
+  static const IconData locked = Icons.lock_rounded;
+
+  /// Lock the controls.
+  static const IconData unlocked = Icons.lock_open_rounded;
+
+  // ---- the room strip and the room details ----
+
+  /// A drop-down button (quality, line).
+  static const IconData dropDown = Remix.arrow_down_s_line;
+
+  /// Fold a section away ("收起").
+  static const IconData foldUp = Remix.arrow_up_s_line;
+
+  /// A link to another page (the room's area).
+  static const IconData forward = Remix.arrow_right_s_line;
+
+  /// The chosen entry of a list of choices.
+  static const IconData selected = Icons.check_rounded;
+
+  /// Copy (3.x's danmaku actions).
+  static const IconData copy = Icons.copy_all_rounded;
+
+  /// Share (3.x's room menu).
+  static const IconData share = Remix.share_forward_line;
+
+  /// Open in the platform's app or site (3.x's "打开直播间").
+  static const IconData openExternal = Icons.open_in_new_rounded;
+
+  /// Viewers now (3.x `AudienceInfo`).
+  static const IconData audienceOnline = Icons.people_alt_rounded;
+
+  /// The platform's heat score.
+  static const IconData audienceHeat = Icons.whatshot_rounded;
+
+  /// Viewers so far.
+  static const IconData audienceTotal = Icons.visibility_rounded;
+
+  /// Followers.
+  static const IconData audienceFollowers = Icons.favorite_rounded;
+
+  /// Time on air.
+  static const IconData liveDuration = Icons.schedule_rounded;
+
+  // ---- the chat list (3.x danmaku_list_view.dart, danmaku_message_actions.dart) ----
+
+  /// Back to the newest messages.
+  static const IconData newMessages = Icons.arrow_downward_rounded;
+
+  /// Block a viewer.
+  static const IconData blockUser = Icons.person_off_rounded;
+
+  /// Block a keyword.
+  static const IconData blockKeyword = Icons.filter_alt_rounded;
+
+  /// A gift line.
+  static const IconData chatGift = Icons.card_giftcard_rounded;
+
+  /// A platform notice line.
+  static const IconData chatNotice = Icons.campaign_outlined;
+
+  /// The chat list's look (compact lines or cards).
+  static const IconData chatListStyle = Icons.view_agenda_outlined;
+
+  // ---- gestures over the video (3.x `BrightnessVolumnDargArea`) ----
+
+  /// Low brightness.
+  static const IconData brightnessLow = Icons.brightness_low;
+
+  /// Medium brightness.
+  static const IconData brightnessMedium = Icons.brightness_medium;
+
+  /// High brightness.
+  static const IconData brightnessHigh = Icons.brightness_high;
+
+  /// No sound.
+  static const IconData volumeMute = Icons.volume_mute;
+
+  /// Low volume.
+  static const IconData volumeDown = Icons.volume_down;
+
+  /// High volume.
+  static const IconData volumeUp = Icons.volume_up;
+
+  // ---- states over the video ----
+
+  /// Playback failed.
+  static const IconData playbackError = Icons.error_outline_rounded;
+
+  /// A restricted room (login, paid, region).
+  static const IconData restricted = Icons.lock_outline_rounded;
+
+  /// No stream to play.
+  static const IconData noStream = Icons.videocam_off_outlined;
+
+  /// Play a finished replay again.
+  static const IconData playAgain = Icons.replay_rounded;
+
+  /// The picture is paused.
+  static const IconData pausedOverlay = Icons.pause_circle_outline_rounded;
+}

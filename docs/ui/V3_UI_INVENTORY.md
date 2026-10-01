@@ -191,3 +191,7 @@ v4 现在（偏差最大）：
 | U.4f 关注的分区、平台显示 | [compare/U.4f](compare/U.4f/README.md)（v3 的 HotAreasPage 实际是“平台显示”页） |
 | U.3a～U.3d 首页外壳、宽屏首页、启动页、全局弹窗 | [compare/U.3a](compare/U.3a/README.md)、[U.3b](compare/U.3b/README.md)、[U.3c](compare/U.3c/README.md)、[U.3d](compare/U.3d/README.md)（第 1 节以这里为准） |
 | U.2k 本地互动 | [compare/U.2k](compare/U.2k/README.md) |
+| U.9 网络电视管理 | [compare/U.9](compare/U.9/README.md) |
+| U.10a 账号总览 | [compare/U.10a](compare/U.10a/README.md) |
+| U.10b 登录和 Cookie | [compare/U.10b](compare/U.10b/README.md) |
+| U.10c 云账号停用说明 | [compare/U.10c](compare/U.10c/README.md) |

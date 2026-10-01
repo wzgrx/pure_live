@@ -1,6 +1,6 @@
 # U.10c 云账号停用说明：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：已确认（2026-10-01，用户已同意全部设计：“后续全部通过”；“需要你选的”按建议）。原状态：待确认（第 1 版，2026-10-01）
 - 范围：v3 的 Firebase 云端账号（登录、注册、找回密码、GitHub 登录，“我的”，管理员的“管理用户”和用户配置中心）已经去掉（M12，用户决定不恢复）；三个旧路由 `kSignIn`、`kMine`、`kUserManage` 落到一个说明页（v4 现在的 `apps/pure_live/lib/features/auth/auth_page.dart`），指向 WebDav、设备同步、备份与恢复
 - 对应：[TASKS.md](../../TASKS.md)（第 6 节“不恢复的界面”）、[INVENTORY.md](../../INVENTORY.md#u10c)（U.10c-01～06）、[TASK_FILES.md](../../TASK_FILES.md#u10c)
 - 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)

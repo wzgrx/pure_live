@@ -1,6 +1,6 @@
 # U.10b 登录和 Cookie：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：已确认（2026-10-01，用户已同意全部设计：“后续全部通过”；“需要你选的”按建议）。原状态：待确认（第 1 版，2026-10-01）
 - 范围：哔哩哔哩扫码登录、网页登录；虎牙、斗鱼、抖音、快手、YY、Twitch、SOOP 的 Cookie 页（共用 `AccountCookieEditorPage`），斗鱼多出的续期输入；改了没保存时的确认
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u10b)（U.10b-01～11）、[TASK_FILES.md](../../TASK_FILES.md#u10b)；入口在 [U.10a](../U.10a/README.md)
 - 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)

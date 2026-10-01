@@ -155,23 +155,54 @@ abstract final class Settings {
 
   // ---- font (font_settings_controller.dart:39-47) ----
 
-  /// Text scale.
-  static const textScaleFactor = DoubleSetting('textScaleFactor', section: 'font', defaultValue: 1);
+  /// Text scale (0.5..2, font_settings_controller.dart:17-18).
+  static const textScaleFactor = DoubleSetting('textScaleFactor', section: 'font', defaultValue: 1, min: 0.5, max: 2);
 
-  /// Font sizes.
-  static const fontSizeBodySmall = DoubleSetting('fontSizeBodySmall', section: 'font', defaultValue: 12);
+  /// Small text size (9..15, font_settings_controller.dart:19-33 gives
+  /// every size's range).
+  static const fontSizeBodySmall = DoubleSetting(
+    'fontSizeBodySmall',
+    section: 'font',
+    defaultValue: 12,
+    min: 9,
+    max: 15,
+  );
 
-  /// Font sizes.
-  static const fontSizeBodyMedium = DoubleSetting('fontSizeBodyMedium', section: 'font', defaultValue: 13);
+  /// Body text size (11..17).
+  static const fontSizeBodyMedium = DoubleSetting(
+    'fontSizeBodyMedium',
+    section: 'font',
+    defaultValue: 13,
+    min: 11,
+    max: 17,
+  );
 
-  /// Font sizes.
-  static const fontSizeBodyLarge = DoubleSetting('fontSizeBodyLarge', section: 'font', defaultValue: 14);
+  /// Large body text size (12..18).
+  static const fontSizeBodyLarge = DoubleSetting(
+    'fontSizeBodyLarge',
+    section: 'font',
+    defaultValue: 14,
+    min: 12,
+    max: 18,
+  );
 
-  /// Font sizes.
-  static const fontSizeTitleMedium = DoubleSetting('fontSizeTitleMedium', section: 'font', defaultValue: 15);
+  /// Heading size (13..20).
+  static const fontSizeTitleMedium = DoubleSetting(
+    'fontSizeTitleMedium',
+    section: 'font',
+    defaultValue: 15,
+    min: 13,
+    max: 20,
+  );
 
-  /// Font sizes.
-  static const fontSizeTitleLarge = DoubleSetting('fontSizeTitleLarge', section: 'font', defaultValue: 20);
+  /// Large heading size (16..26).
+  static const fontSizeTitleLarge = DoubleSetting(
+    'fontSizeTitleLarge',
+    section: 'font',
+    defaultValue: 20,
+    min: 16,
+    max: 26,
+  );
 
   /// App font id.
   static const fontFamilyName = StringSetting('fontFamilyName', section: 'font', defaultValue: 'Default');
@@ -305,19 +336,22 @@ abstract final class Settings {
   /// Hide emoji danmaku.
   static const noEmojiMode = BoolSetting('noEmojiMode', section: 'danmaku', defaultValue: false);
 
-  /// Display area.
-  static const danmakuTopArea = DoubleSetting('danmakuTopArea', section: 'danmaku', defaultValue: 0, min: 0, max: 1);
+  /// Space kept free above the danmaku, in logical pixels (0..300 as 3.x's
+  /// `_boundedDouble`, danmaku_settings_controller.dart:115; it was clamped
+  /// to 0..1 here before, which turned a 3.x value of 40 into 1).
+  static const danmakuTopArea = DoubleSetting('danmakuTopArea', section: 'danmaku', defaultValue: 0, min: 0, max: 300);
 
   /// Display area.
   static const danmakuArea = DoubleSetting('danmakuArea', section: 'danmaku', defaultValue: 1, min: 0, max: 1);
 
-  /// Display area.
+  /// Space kept free below the danmaku, in logical pixels (0..300, see
+  /// [danmakuTopArea]; 3.x's default is 0.5).
   static const danmakuBottomArea = DoubleSetting(
     'danmakuBottomArea',
     section: 'danmaku',
     defaultValue: 0.5,
     min: 0,
-    max: 1,
+    max: 300,
   );
 
   /// Scroll speed.

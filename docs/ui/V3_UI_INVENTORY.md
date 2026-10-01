@@ -219,3 +219,6 @@ v4 现在（偏差最大）：
 | U.17b macOS | [compare/U.17b](compare/U.17b/README.md) |
 | U.1c 通用组件 | [compare/U.1c](compare/U.1c/README.md) |
 | U.1d 弹窗组件 | [compare/U.1d](compare/U.1d/README.md) |
+| U.15a 电视设计系统和通用组件 | [compare/U.15a](compare/U.15a/README.md) |
+| U.15b 电视外壳 | [compare/U.15b](compare/U.15b/README.md) |
+| U.15c 电视直播浏览 | [compare/U.15c](compare/U.15c/README.md) |

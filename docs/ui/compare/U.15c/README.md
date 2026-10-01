@@ -1,6 +1,6 @@
 # U.15c 电视直播浏览：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：已确认（2026-10-01，用户已同意全部设计：“后续全部通过”；“需要你选的”按建议）。原状态：待确认（第 1 版，2026-10-01）
 - 范围：电视首页右边的直播页面：热门、关注、分区（含分区卡片长按）、分区房间、关注分区、观看记录、搜索（含结果）；各页的空状态。卡片、焦点、对话框、加载和出错的样子在 [U.15a](../U.15a/README.md)，导航栏在 [U.15b](../U.15b/README.md)
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u15c)、[TASK_FILES.md](../../TASK_FILES.md#u15c)；手机版：热门 [U.4b](../U.4b/README.md)、关注 [U.4c](../U.4c/README.md)、分区 [U.4d](../U.4d/README.md)、分区房间 [U.4e](../U.4e/README.md)、关注分区 [U.4f](../U.4f/README.md)、搜索 [U.5a](../U.5a/README.md)、观看记录 [U.5c](../U.5c/README.md)
 - 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公共部分 [../U.15a/src/tvkit.py](../U.15a/src/tvkit.py)）

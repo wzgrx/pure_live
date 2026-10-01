@@ -23,6 +23,7 @@ import 'package:pure_live/platform/native_http.dart';
 import 'package:pure_live/platform/platform_services.dart';
 import 'package:pure_live/platform/recording_platform.dart';
 import 'package:pure_live/platform/secret_cipher.dart';
+import 'package:pure_live/platform/twitch_webview_http.dart';
 
 /// Keeps decoded covers and avatars bounded apart from the HTTP cache (3.x
 /// `configureDecodedImageCache`): a 960x540 cover is about 2 MiB decoded.
@@ -111,6 +112,8 @@ abstract final class AppBootstrap {
     final cookies = StoreCookieVault(store.secrets);
     final settings = store.settings;
     final library = iptvLibrary ?? StoreIptvLibrary(store);
+    // Android's system TLS: Twitch's GraphQL fallback, Kick's API.
+    final native = AndroidNativeHttp.isAvailable ? AndroidNativeHttp(proxy: proxy) : null;
     final importer = IptvImporter(
       library: library,
       http: client,
@@ -124,7 +127,12 @@ abstract final class AppBootstrap {
       proxy: proxy,
       cookies: cookies,
       store: store,
-      twitchFallbacks: [if (AndroidNativeHttp.isAvailable) AndroidNativeHttp(proxy: proxy)],
+      // Twitch GraphQL: Android's system TLS, then the headless WebView (3.x).
+      twitchFallbacks: [
+        ?native,
+        if (TwitchWebViewHttp.isAvailable) TwitchWebViewHttp(proxy: proxy),
+      ],
+      kickApi: native,
       iptv: IptvSite(
         library: library,
         importer: importer,

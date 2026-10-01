@@ -286,7 +286,7 @@ void main() {
     });
 
     test('an unknown metric never shows the zero default', () {
-      for (final platform in ['kick', 'chzzk', 'bigo', 'tting']) {
+      for (final platform in ['huajiao', 'chzzk', 'bigo', 'tting']) {
         final room = LiveRoom(platform: platform);
         expect(room.audienceValue(preferRealOnline: false, platformEnabled: false), isEmpty, reason: platform);
         expect(room.audienceType(preferRealOnline: false, platformEnabled: false), AudienceMetricType.unknown);

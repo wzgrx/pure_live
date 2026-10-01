@@ -15,8 +15,32 @@ void main() {
   test('every platform of 3.x and IPTV is registered, adapters are kept', () async {
     final services = await testServices();
     addTearDown(services.close);
-    expect(services.sites.ids, SiteIds.supported);
+    // No Android system TLS here: Kick waits for it (UPGRADES X-1).
+    expect(services.sites.ids, [
+      for (final id in SiteIds.supported)
+        if (id != SiteIds.kick) id,
+    ]);
     expect(identical(services.sites.of('BiliBili '), services.sites.of(SiteIds.bilibili)), isTrue);
+  });
+
+  test('Kick is registered with its API transport, after CHZZK', () async {
+    final services = await testServices();
+    addTearDown(services.close);
+    final api = NoNetworkHttp();
+    final sites = buildSiteRegistry(
+      PlatformDeps(
+        http: services.http,
+        proxy: services.proxy,
+        cookies: services.cookies,
+        store: services.store,
+        kickApi: api,
+      ),
+    );
+    expect(sites.ids, SiteIds.supported.where((id) => id != SiteIds.iptv));
+    final kick = sites.of(SiteIds.kick) as KickSite;
+    expect(identical(kick.apiHttp, api), isTrue);
+    expect(identical(kick.http, services.http), isTrue);
+    expect(services.danmaku.connectionFor(SiteIds.kick), isA<KickDanmakuConnection>());
   });
 
   test('danmaku: every platform with a connection, none for the blocked ones', () async {
@@ -92,8 +116,10 @@ void main() {
       final http = AndroidNativeHttp(proxy: const FixedProxyPolicy(), channel: channel);
       expect(AndroidNativeHttp.allows(Uri.parse('https://gql.twitch.tv/gql')), isTrue);
       expect(AndroidNativeHttp.allows(Uri.parse('http://gql.twitch.tv/gql')), isFalse);
+      expect(AndroidNativeHttp.allows(Uri.parse('https://kick.com/api/v2/channels/xqc')), isTrue);
+      expect(AndroidNativeHttp.allows(Uri.parse('https://web.kick.com/api/v1/livestreams')), isFalse);
       await expectLater(
-        http.send(LiveRequest(site: 'kick', url: Uri.parse('https://kick.com/api'))),
+        http.send(LiveRequest(site: 'kick', url: Uri.parse('https://example.com/api'))),
         throwsA(isA<TransportFailure>()),
       );
     });

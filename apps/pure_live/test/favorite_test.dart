@@ -87,12 +87,12 @@ void main() {
       expect(groupOf(room('bilibili', '5', status: LiveStatus.carousel)), FollowGroup.offline);
       expect(groupOf(room('douyu', '6', status: LiveStatus.unknown)), FollowGroup.offline);
       // A retired platform's stored "live" is stale: it can no longer be checked.
-      expect(groupOf(room('kick', '7', status: LiveStatus.live)), FollowGroup.offline);
+      expect(groupOf(room('huajiao', '7', status: LiveStatus.live)), FollowGroup.offline);
     });
 
     test('platforms: the platform list order, then the others, retired last; only platforms with follows', () {
-      final rooms = [room('kick', 'a'), room('huya', 'b'), room('douyu', 'c'), room('bilibili', 'd')];
-      expect(platformTabs(rooms, ['douyu', 'huya']), ['all', 'douyu', 'huya', 'bilibili', 'kick']);
+      final rooms = [room('huajiao', 'a'), room('huya', 'b'), room('douyu', 'c'), room('bilibili', 'd')];
+      expect(platformTabs(rooms, ['douyu', 'huya']), ['all', 'douyu', 'huya', 'bilibili', 'huajiao']);
     });
 
     test('live follows by audience (tag rank first with a tag), offline in the user order, tag filter', () {
@@ -136,7 +136,7 @@ void main() {
       addTearDown(store.close);
       await store.follows.add(room('douyu', '1', nick: 'Stored', title: 'Old', status: LiveStatus.live));
       await store.follows.add(room('douyu', '2', nick: 'Two', status: LiveStatus.live, popularity: '50'));
-      await store.follows.add(room('kick', '3', nick: 'Retired', status: LiveStatus.live));
+      await store.follows.add(room('huajiao', '3', nick: 'Retired', status: LiveStatus.live));
       final douyu = FakeSite('douyu', {
         // A placeholder-free answer without a name (JD Live, UPGRADES 28-2).
         '1': room('douyu', '1', title: 'New', status: LiveStatus.offline),
@@ -152,7 +152,7 @@ void main() {
       expect((one.nick, one.title, one.effectiveLiveStatus), ('Stored', 'New', LiveStatus.offline));
       final two = (await store.follows.find('douyu', '2'))!;
       expect((two.nick, two.effectiveLiveStatus, two.popularity), ('Two', LiveStatus.unknown, '50'));
-      expect((await store.follows.find('kick', '3'))!.effectiveLiveStatus, LiveStatus.live);
+      expect((await store.follows.find('huajiao', '3'))!.effectiveLiveStatus, LiveStatus.live);
     });
 
     test('at most the concurrency setting at a time; a failed room waits out the cooldown', () async {
@@ -306,7 +306,7 @@ void main() {
           room('douyu', '1', nick: '主播一', status: LiveStatus.offline),
           room('douyu', '2', nick: '主播二', status: LiveStatus.live),
           room('huya', '3', nick: '主播三', status: LiveStatus.offline),
-          room('kick', '4', nick: '旧平台', status: LiveStatus.live),
+          room('huajiao', '4', nick: '旧平台', status: LiveStatus.live),
         ],
         details: {
           '1': room('douyu', '1', status: LiveStatus.live, popularity: '12345', restriction: LiveRestriction.paid),
@@ -320,7 +320,7 @@ void main() {
       expect(find.text('1.2万'), findsOneWidget);
       expect(find.text('主播二'), findsNothing);
       // Platform rail: all, then the platforms with follows, the retired one last.
-      expect(controller.platforms, ['all', 'douyu', 'huya', 'kick']);
+      expect(controller.platforms, ['all', 'douyu', 'huya', 'huajiao']);
 
       await tester.tap(find.textContaining(i18n('offline_room_title')));
       await tester.pumpAndSettle();

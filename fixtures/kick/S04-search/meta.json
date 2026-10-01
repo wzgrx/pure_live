@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "platform": "kick",
+  "sample": "S04-search",
+  "capturedAt": "2026-10-01T05:40:25.924751Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://kick.com/api/search?searched_word=xqc",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Origin": "https://kick.com",
+      "Referer": "https://kick.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 01 Oct 2026 05:40:28 GMT",
+      "content-type": "application/json",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "https://kick.com",
+      "cache-control": "no-cache, private",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.01,\"max_age\":604800}",
+      "vary": "Origin",
+      "cf-cache-status": "DYNAMIC",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=psiuBtQpCwz%2BNsQgy5%2BApsqs5R%2FK6ZZ8%2Byc5TAzVRtdR5AiiFl4pJ1EwU1iV90drrofm8KNwTtQz7Ta3NH7JwwlvrGKLlmRa%2B%2Bzz2BcJ70XkscUp9IOGdkED\"}]}",
+      "content-encoding": "br",
+      "server": "cloudflare",
+      "cf-ray": "a43921fb7d5acefe-SJC",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    }
+  },
+  "raw": {
+    "sha256": "ec2923750882b1d50fd3ce5f6b96df149dd648cff70f5fa05d0cec85c29c7d1b",
+    "length": 17567
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "response.headers.set-cookie",
+      "rule": "removed (Cloudflare cookies)"
+    }
+  ],
+  "tool": "curl 8 (dart:io is refused by Kick's Cloudflare) + scratch scrub.py (schema 1)"
+}

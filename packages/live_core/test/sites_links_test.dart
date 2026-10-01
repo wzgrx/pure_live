@@ -112,21 +112,25 @@ SiteRegistry _registry() =>
 
 void main() {
   group('SiteIds', () {
-    test('34 supported platforms in 3.x order, IPTV last; retired ones are separate', () {
-      expect(SiteIds.supported, hasLength(34));
+    test('35 supported platforms in 3.x order (Kick back after CHZZK), IPTV last; retired ones are separate', () {
+      expect(SiteIds.supported, hasLength(35));
       expect(SiteIds.supported.take(5), ['bilibili', 'douyu', 'huya', 'douyin', 'kuaishou']);
       expect(SiteIds.supported.last, 'iptv');
-      expect(SiteIds.supported.toSet(), hasLength(34));
+      expect(SiteIds.supported.toSet(), hasLength(35));
+      expect(SiteIds.supported.skipWhile((id) => id != 'chzzk').take(2), ['chzzk', 'kick']);
       expect(SiteIds.supported.toSet().intersection(SiteIds.retired), isEmpty);
       expect(SiteIds.isSupported(' Douyu '), isTrue);
-      expect(SiteIds.isSupported('kick'), isFalse);
-      expect(SiteIds.isRetired('KICK'), isTrue);
+      expect(SiteIds.isSupported('kick'), isTrue);
+      expect(SiteIds.isSupported('huajiao'), isFalse);
+      expect(SiteIds.isRetired('HUAJIAO'), isTrue);
+      expect(SiteIds.isRetired('kick'), isFalse);
     });
 
     test('retired links are recognised by host and subdomain', () {
-      expect(SiteIds.isRetiredLink('看这个 https://kick.com/xqc 好看'), isTrue);
+      expect(SiteIds.isRetiredLink('看这个 https://rumble.com/xqc 好看'), isTrue);
+      expect(SiteIds.isRetiredLink('https://kick.com/xqc'), isFalse);
       expect(SiteIds.isRetiredLink('https://www.huajiao.com/l/1'), isTrue);
-      expect(SiteIds.isRetiredLink('https://notkick.com/x'), isFalse);
+      expect(SiteIds.isRetiredLink('https://notrumble.com/x'), isFalse);
       expect(SiteIds.isRetiredLink('https://live.bilibili.com/1'), isFalse);
     });
   });
@@ -151,7 +155,7 @@ void main() {
     });
 
     test('the saved platform list keeps its order without duplicates or unknown ids', () {
-      expect(_registry().availableIds(['huya', ' Bilibili ', 'huya', 'kick', 'douyu', 'cc']), [
+      expect(_registry().availableIds(['huya', ' Bilibili ', 'huya', 'huajiao', 'douyu', 'cc']), [
         'huya',
         'bilibili',
         'cc',

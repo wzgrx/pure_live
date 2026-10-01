@@ -7,11 +7,12 @@ abstract final class PlatformLogos {
   /// The package that holds the images (for [Image.asset]'s `package`).
   static const String package = 'live_ui';
 
-  /// Platforms with a logo of their own: the 33 platforms and IPTV.
+  /// Platforms with a logo of their own: the 33 platforms of 3.x, Kick and
+  /// IPTV.
   static const Set<String> ids = {
     'bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'cc', 'iptv', 'twitch', 'soop', 'yy', 'acfun', //
     'picarto', 'twitcasting', 'missevan', 'inke', 'kilakila', 'xiaohongshu', 'niconico', 'weibo', 'showroom',
-    'chzzk', 'pandalive', 'fc2live', 'steambroadcast', 'jdlive', 'kugoulive', 'baidulive', 'looklive', '17live',
+    'chzzk', 'kick', 'pandalive', 'fc2live', 'steambroadcast', 'jdlive', 'kugoulive', 'baidulive', 'looklive', '17live',
     'sixroom', 'youtube', 'bigo', 'liveme', 'tiktok',
   };
 

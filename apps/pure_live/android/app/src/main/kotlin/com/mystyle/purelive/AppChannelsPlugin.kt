@@ -192,8 +192,8 @@ internal object SecretCipherChannel {
  * reachable, so the channel cannot be used to reach arbitrary addresses.
  */
 internal object NativeHttpChannel {
-    /** Twitch GraphQL (3.x). Kick (UPGRADES X-1) adds its hosts when it returns. */
-    private val ALLOWED_HOSTS = setOf("gql.twitch.tv")
+    /** Twitch GraphQL (3.x) and Kick's API (UPGRADES X-1, M4.34: Cloudflare refuses dart:io's TLS there). */
+    private val ALLOWED_HOSTS = setOf("gql.twitch.tv", "kick.com")
     private const val MAX_RESPONSE_BYTES = 8 * 1024 * 1024
     private val DISALLOWED_HEADERS = setOf(
         "accept-encoding",

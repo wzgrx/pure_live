@@ -106,6 +106,7 @@
     "audience_followers": "粉丝",
     "audience_huya_detail": "当前列表/详情的 totalCount、userCount 与直播间 iAttendeeCount（URI 8006）实测均为热度；公开数据暂未提供独立并发人数",
     "audience_inke_detail": "公开目录与房间详情未提供已验证的观看人数，缺失值保持未知",
+    "audience_kick_detail": "目录、搜索和房间详情的 viewer_count 为当前在线人数；主播关闭人数显示（show_view_count）时不显示",
     "audience_kilakila_detail": "watchNumber 尚无已验证的并发人数含义，不参与真实在线排行",
     "audience_kuaishou_detail": "watchingCount 作为当前观看人数",
     "audience_looklive_detail": "官网推荐的 onlineNumber 按当前观看人数展示，popularity 作为平台热度单独保留；房间详情缺值时保持未知",

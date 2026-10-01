@@ -79,7 +79,7 @@ void main() {
             v3Room('twitch', 'shroud', title: 'later spelling'),
             v3Room('fc2live', '9', nick: 'F', notice: 'FC2 远端聊天尚待接入；媒体控制 WebSocket 由播放或录制独占，并保持到原生输入完整释放。'),
             v3Room('douyu', '0'),
-            v3Room('kick', 'retired-but-kept'),
+            v3Room('huajiao', 'retired-but-kept'),
           ],
         }),
         // 2.0 layout: a list of JSON strings.
@@ -117,7 +117,7 @@ void main() {
         'danmakuSpeed': 150.0,
         'autoRefreshInterval': 9999,
         'enableHighRefreshRate': true,
-        'hotAreasList': ['Bilibili', 'douyu', 'kick', 'douyu'],
+        'hotAreasList': ['Bilibili', 'douyu', 'huajiao', 'douyu'],
         'siteCatalogMigration': 36,
         'preferPlatform': 'HUYA',
         'audienceMetricMigration': 3,
@@ -142,7 +142,7 @@ void main() {
       final follows = await store.follows.all();
       expect(
         [for (final r in follows) r.identityKey],
-        ['bilibili:1', 'twitch:shroud', 'fc2live:9', 'kick:retired-but-kept'],
+        ['bilibili:1', 'twitch:shroud', 'fc2live:9', 'huajiao:retired-but-kept'],
       );
       expect(follows[1].roomId, 'Shroud');
       expect(follows[1].title, 'later spelling');

@@ -252,7 +252,7 @@
 | 33-5 | M4.33 17LIVE | 带冒号的关键词（如 `Re:Zero`）照常搜索；超过 100 字截断后搜索 |  | M4.U | 完成（M4.U） |
 | 33-6 | M4.33 17LIVE | 识别 `www.17.live` 链接 |  | M4.U | 完成（M4.U） |
 | 33-7 | M4.33 17LIVE | 显示开播时间 | 模型部分已完成（M2.1） | M4.U、M2.1 | 平台层完成，余下 M13；直播间完成（M13.3：显示开播时间），余下列表卡片；M13.2 关注卡片显示已播时长，余下其他页面 |
-| X-1 | 跨平台 | 恢复 Kick：等 M12 的原生网络层（Twitch 本来也要）做好后，在 Android 和电视版上恢复；Windows 要再引入 WinHTTP | 先在 Android 和电视版恢复（M12 原生网络层）；Windows 用 WinHTTP 通道随后恢复 | M12 | M12 部分完成：Android 原生网络层 `AndroidNativeHttp`（系统 TLS、应用代理、白名单主机）已做并给 Twitch 用，余下 Kick 适配器和弹幕、白名单加 Kick 主机、`SiteIds.retired` 去掉 kick、Windows WinHTTP（见 M12 记录） |
+| X-1 | 跨平台 | 恢复 Kick：等 M12 的原生网络层（Twitch 本来也要）做好后，在 Android 和电视版上恢复；Windows 要再引入 WinHTTP | 先在 Android 和电视版恢复（M12 原生网络层）；Windows 用 WinHTTP 通道随后恢复 | M12 | Android 完成：原生网络层 `AndroidNativeHttp`（系统 TLS、应用代理、白名单主机，加了 `kick.com`）；Kick 适配器（M4.34：分类、推荐、分区房间、搜索、详情、画质、链接）和聊天（M5.34，Pusher）已恢复，`SiteIds.retired` 去掉 kick，Android 上登记；Twitch 的 GraphQL 备用传输补上无界面 WebView（`TwitchWebViewHttp`，自己缓存完整性令牌，M4.08 文末）。余下：Windows 的 WinHTTP 通道（在那之前 Windows 不登记 Kick：dart:io 被 Cloudflare 拦，实测 403）；电视版随 M14 |
 | X-2 | 跨平台 | 通用规则：平台回答里的占位名字、占位标题（“JD Live”“Steam Broadcast”等）不覆盖关注里存下的值（M9/M13） | 通用规则：占位名字、标题、封面不覆盖关注里存下的值（M2.1 的合并规则）；模型部分已完成（M2.1） | M2.1、M9 | 完成（M2.1 合并规则；M9 的 `FollowStore.update` 用它，占位值不覆盖存下的值） |
 | A-1 | 确认 | 斗鱼分区页修好：平台每页给 120 个房间，界面只显示前 40 个 |  | M13 | 完成（M13.5：分区房间按页显示整页） |
 | A-2 | 确认 | 快手分区页按页加载（v3 只取第 1 页再在本地分页） |  | M13 | 完成（M13.5：分区房间逐页请求，不再只取第 1 页） |

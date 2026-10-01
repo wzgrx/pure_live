@@ -218,11 +218,11 @@ void main() {
       rooms: [
         (_room('1', status: LiveStatus.offline), watched),
         (_room('2', status: LiveStatus.live), watched),
-        (_room('3', platform: 'kick', status: LiveStatus.live), watched),
+        (_room('3', platform: 'huajiao', status: LiveStatus.live), watched),
       ],
       load: (room) async {
         if (room.roomId == '2') throw StateError('network');
-        if (room.platform == 'kick') throw StateError('retired');
+        if (room.platform == 'huajiao') throw StateError('retired');
         return room.copyWith(title: 'Fresh ${room.roomId}', liveStatus: LiveStatus.live, popularity: '25000');
       },
     );

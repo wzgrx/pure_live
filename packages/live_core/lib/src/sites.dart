@@ -62,6 +62,9 @@ abstract final class SiteIds {
   /// CHZZK.
   static const String chzzk = 'chzzk';
 
+  /// Kick (retired in 3.2.11, back in v4: UPGRADES X-1).
+  static const String kick = 'kick';
+
   /// LiveMe.
   static const String liveMe = 'liveme';
 
@@ -129,6 +132,7 @@ abstract final class SiteIds {
     weibo,
     showroom,
     chzzk,
+    kick,
     liveMe,
     tiktok,
     youtube,
@@ -145,10 +149,11 @@ abstract final class SiteIds {
     iptv,
   ];
 
-  /// Platforms retired in 3.2.8 (hard to maintain, niche or unusable) and
-  /// 3.2.11 (Kick: Cloudflare blocks it outside Android and Windows TLS).
+  /// Platforms retired in 3.2.8 (hard to maintain, niche or unusable).
   /// Stored follows, history and links for them stay readable and are shown
-  /// as retired instead of failing as unknown.
+  /// as retired instead of failing as unknown. Kick, retired in 3.2.11
+  /// (Cloudflare refuses dart:io's TLS), is supported again (UPGRADES X-1,
+  /// M4.34): its API goes through Android's system TLS.
   static const Set<String> retired = {
     'huajiao',
     'openrec',
@@ -161,7 +166,6 @@ abstract final class SiteIds {
     'rumble',
     'goodgame',
     'taobaolive',
-    'kick',
   };
 
   /// Web hosts of the retired platforms, so a shared link is answered with
@@ -182,7 +186,6 @@ abstract final class SiteIds {
     'shopee.co.id',
     'taobao.com',
     'm.tb.cn',
-    'kick.com',
   };
 
   /// Platforms whose room id is a user name that the platform itself matches
@@ -210,6 +213,8 @@ abstract final class SiteIds {
   /// - Bigo: the Bigo id. The studio finds a streamer's chosen id in any case
   ///   and answers its own spelling (`chrispcritter78`, `CHRISPCRITTER78` →
   ///   `ChrisPCritter78`, `QASHIA305` → `qashia305`; M4.U.24).
+  /// - Kick: the channel slug. Kick's pages and API find a channel in any
+  ///   case; the adapter requests and answers the lower-case slug (M4.34).
   ///
   /// Not included: numeric ids (case does not apply), YouTube video and
   /// channel ids (case-sensitive), niconico programme ids, CHZZK channel ids
@@ -225,6 +230,7 @@ abstract final class SiteIds {
     douyu,
     kuaishou,
     bigo,
+    kick,
   };
 
   /// Whether rooms of [platform] are identified without regard to the room

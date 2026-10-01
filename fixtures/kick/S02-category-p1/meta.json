@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "platform": "kick",
+  "sample": "S02-category-p1",
+  "capturedAt": "2026-10-01T05:40:11.213872Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://kick.com/stream/livestreams/en?page=1&limit=30&subcategory=just-chatting&sort=desc",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Origin": "https://kick.com",
+      "Referer": "https://kick.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 01 Oct 2026 05:40:13 GMT",
+      "content-type": "application/json",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "https://kick.com",
+      "cache-control": "public, max-age=60",
+      "vary": "Origin",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.01,\"max_age\":604800}",
+      "last-modified": "Thu, 01 Oct 2026 05:40:13 GMT",
+      "expires": "Thu, 01 Oct 2026 05:41:13 GMT",
+      "cf-cache-status": "MISS",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=uvOmlGWoLe%2BbshCzKISJ8V1yDsvMbClabFh1kDhbFOSl%2BFhuy5EPZInqXpBjAFo8iaKHAPf43ALzzJv5spoQANJ7QltCrENnJVZ4VkpkPFySRjuGL8Nj6cJP\"}]}",
+      "content-encoding": "br",
+      "server": "cloudflare",
+      "cf-ray": "a439219a9fd56af7-SJC",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    }
+  },
+  "raw": {
+    "sha256": "08c194debb30c67bacd214e63917f87e13df18f746ec314123224b89ac6021ce",
+    "length": 72795
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "response.headers.set-cookie",
+      "rule": "removed (Cloudflare cookies)"
+    }
+  ],
+  "tool": "curl 8 (dart:io is refused by Kick's Cloudflare) + scratch scrub.py (schema 1)"
+}

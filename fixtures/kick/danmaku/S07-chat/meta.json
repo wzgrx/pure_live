@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "platform": "kick",
+  "case": "S07-chat",
+  "room": "kick:lonche",
+  "danmakuKeys": {
+    "chatroomId": 3852600,
+    "channelId": 3862536,
+    "slug": "lonche"
+  },
+  "capturedAt": "2026-10-01T05:41:58Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false",
+      "headers": {
+        "origin": "https://kick.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "subscribed": [
+    "chatrooms.3852600.v2",
+    "chatrooms.3852600",
+    "channel.3862536"
+  ],
+  "frames": 160,
+  "raw": {
+    "sha256": "9eae8debec17f93a36d6f8fa4f18e3445701b2ae7a79e67b5d39b78b3ad433c9",
+    "length": 1102246,
+    "note": "the recording had 1150 frames; the first 160 kept"
+  },
+  "scrubbed": [
+    {
+      "where": "$.data.metadata.original_sender.{id,username}",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.sender.{id,username,slug}",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.socket_id",
+      "rule": "session"
+    }
+  ],
+  "tool": "scratch pusher_rec.dart (dart:io WebSocket, 75 s) + scrub.py (schema 1)"
+}

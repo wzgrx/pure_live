@@ -12,6 +12,49 @@ import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:live_net/live_net.dart' show brotliDecode;
 import 'package:meta/meta.dart';
 
+/// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from
+/// `SEND_GIFT`, `COMBO_SEND` or `GUARD_BUY` (M4.D2, appendix C-2). Reported,
+/// not shown yet (M5 appendix B-21).
+@immutable
+final class BilibiliGift {
+  /// Creates the gift.
+  const new({required this.id, required this.name, required this.count, this.goldCoins = 0, this.comboId = ''});
+
+  /// `giftId` (`SEND_GIFT`) or `gift_id`; empty when missing or 0.
+  final String id;
+
+  /// `giftName` or `gift_name` (`小心心`, `舰长`).
+  final String name;
+
+  /// How many this message gave, at least 1: `num`, a combo's `total_num`,
+  /// the months of a `GUARD_BUY`.
+  final int count;
+
+  /// What it cost in gold coins (1000 = 1 yuan): `total_coin` of a gold
+  /// `SEND_GIFT`, a combo's `combo_total_coin`, `price × num` of a
+  /// `GUARD_BUY`. 0 for a free (silver) gift or when missing.
+  final int goldCoins;
+
+  /// `batch_combo_id`, shared by every message of one combo; empty when
+  /// missing. The connection reports one message per combo.
+  final String comboId;
+
+  @override
+  bool operator ==(Object other) =>
+      other is BilibiliGift &&
+      other.id == id &&
+      other.name == name &&
+      other.count == count &&
+      other.goldCoins == goldCoins &&
+      other.comboId == comboId;
+
+  @override
+  int get hashCode => Object.hash(id, name, count, goldCoins, comboId);
+
+  @override
+  String toString() => 'BilibiliGift($name ×$count, $goldCoins gold)';
+}
+
 /// Bilibili's danmaku connection (3.x `BiliBiliDanmaku`,
 /// docs/modules/M5.1-bilibili.md) over the shared WebSocket runtime.
 ///
@@ -26,6 +69,8 @@ import 'package:meta/meta.dart';
 ///   [connect]) and reopens with them; when no new credentials come, the
 ///   connection ends with [DanmakuCloseReason.credentialsUnavailable].
 /// - Heartbeats every 30 s; notices that ask for it are acknowledged.
+/// - A combo's gifts are reported once: the first message with its
+///   [BilibiliGift.comboId] in this [connect], later ones are dropped.
 final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDanmakuArgs> {
   /// Creates the connection. [proxy] routes the socket; `connector` replaces
   /// `dart:io`'s handshake. [policy], `credentialRetryDelay` (the step
@@ -53,9 +98,15 @@ final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDa
   /// Credential attempts when a start has no token.
   static const int startCredentialAttempts = 3;
 
+  /// Combo ids remembered per [connect], oldest dropped first.
+  static const int maxRememberedCombos = 512;
+
   final Duration _credentialRetryDelay;
   final Random _random;
   _Credentials? _credentials;
+
+  /// The combos already reported in this run (C-2), in insertion order.
+  final Set<String> _combos = <String>{};
 
   /// Whether Bilibili masked [name] (`**` or `＊＊`, guests see names like
   /// `观***`): the room page tells the user once per session that logging in
@@ -84,6 +135,7 @@ final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDa
       }
     }
     _credentials = _Credentials(run, current);
+    _combos.clear();
     return _target(current);
   }
 
@@ -113,6 +165,7 @@ final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDa
       if (!session.isActive) return;
       switch (item) {
         case BilibiliDanmakuMessage(:final message):
+          if (_isRepeatedCombo(message)) continue;
           session.message(message);
         case BilibiliDanmakuAck(:final packet):
           session.send(packet);
@@ -120,6 +173,16 @@ final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDa
           _authReply(session, code);
       }
     }
+  }
+
+  /// Whether [message] is a gift of a combo already reported; remembers the
+  /// combo otherwise.
+  bool _isRepeatedCombo(LiveMessage message) {
+    final data = message.data;
+    if (data is! BilibiliGift || data.comboId.isEmpty) return false;
+    if (!_combos.add(data.comboId)) return true;
+    if (_combos.length > maxRememberedCombos) _combos.remove(_combos.first);
+    return false;
   }
 
   void _authReply(DanmakuSocketSession session, int code) {
@@ -176,6 +239,7 @@ final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDa
   @protected
   Future<void> stop() async {
     _credentials = null;
+    _combos.clear();
     await super.stop();
   }
 }
@@ -197,8 +261,8 @@ sealed class BilibiliDanmakuItem {
   const new();
 }
 
-/// A message to report: chat, super chat, audience figure, retraction or
-/// notice.
+/// A message to report: chat, super chat, gift, audience figure, retraction
+/// or notice.
 final class BilibiliDanmakuMessage extends BilibiliDanmakuItem {
   /// Creates the item.
   const new(this.message);
@@ -421,6 +485,9 @@ abstract final class BilibiliDanmakuProtocol {
       'RECALL_DANMU_MSG' => [?_recall(notice)],
       _ when cmd.contains('DANMU_MSG') => [?_chat(notice)],
       'WATCHED_CHANGE' => [?_watched(notice)],
+      'ONLINE_RANK_COUNT' => [?_onlineRank(notice)],
+      'SEND_GIFT' || 'COMBO_SEND' => [?_gift(notice, combo: cmd == 'COMBO_SEND')],
+      'GUARD_BUY' => [?_guard(notice)],
       'SUPER_CHAT_MESSAGE' => [?_superChat(notice)],
       'SUPER_CHAT_MESSAGE_DELETE' => _superChatDeleted(notice),
       'WARNING' => [_notify(notice, warningNotice)],
@@ -578,6 +645,95 @@ abstract final class BilibiliDanmakuProtocol {
     if (value == null || value < 0) return null;
     return _audience(LiveAudienceMetricKind.totalViewers, value);
   }
+
+  /// `ONLINE_RANK_COUNT` (about every 3 s): the room's online viewers,
+  /// `data.online_count`, else `data.count` (the web page shows the text of
+  /// one of them on its viewer tab; recorded equal or 1 to 3 apart). M4.D2,
+  /// appendix C-1: the heartbeat reply's popularity is always 1 for guests.
+  static LiveMessage? _onlineRank(Map<String, dynamic> notice) {
+    final data = notice['data'];
+    if (data is! Map) return null;
+    final value = jsonCount(data['online_count']) ?? jsonCount(data['count']);
+    return value == null ? null : _audience(LiveAudienceMetricKind.onlineViewers, value);
+  }
+
+  /// `SEND_GIFT` (`giftName`, `giftId`, `num`, gold `total_coin`) and
+  /// `COMBO_SEND` (a combo's `gift_name`, `gift_id`, `total_num`,
+  /// `combo_total_coin`), both with `uid`, `uname` and `batch_combo_id`: a
+  /// [LiveMessageType.gift] holding a [BilibiliGift], text `<name> ×<count>`.
+  /// Not shown yet (B-21). Without a name, nothing.
+  static LiveMessage? _gift(Map<String, dynamic> notice, {required bool combo}) {
+    final data = notice['data'];
+    if (data is! Map) return null;
+    final name = jsonString(data[combo ? 'gift_name' : 'giftName']) ?? '';
+    if (name.isEmpty) return null;
+    final count = jsonInt(data[combo ? 'total_num' : 'num']) ?? 0;
+    final coins = combo
+        ? jsonInt(data['combo_total_coin'])
+        : (data['coin_type'] == 'gold' ? jsonInt(data['total_coin']) : null);
+    final tid = combo ? '' : jsonString(data['tid']) ?? '';
+    return _giftMessage(
+      data,
+      userName: jsonString(data['uname']) ?? '',
+      messageId: tid.isEmpty ? '' : 'bilibili:gift:$tid',
+      sentAt: combo ? null : jsonInt(data['timestamp']),
+      gift: BilibiliGift(
+        id: _giftId(data[combo ? 'gift_id' : 'giftId']),
+        name: name,
+        count: count > 0 ? count : 1,
+        goldCoins: coins != null && coins > 0 ? coins : 0,
+        comboId: jsonString(data['batch_combo_id']) ?? '',
+      ),
+    );
+  }
+
+  /// `GUARD_BUY`: `username` bought `num` months of `gift_name` (舰长,
+  /// 提督, 总督) at `price` gold coins each. Not shown yet (B-21).
+  static LiveMessage? _guard(Map<String, dynamic> notice) {
+    final data = notice['data'];
+    if (data is! Map) return null;
+    final name = jsonString(data['gift_name']) ?? '';
+    if (name.isEmpty) return null;
+    final count = jsonInt(data['num']) ?? 0;
+    final months = count > 0 ? count : 1;
+    final price = jsonInt(data['price']) ?? 0;
+    return _giftMessage(
+      data,
+      userName: jsonString(data['username']) ?? '',
+      messageId: '',
+      sentAt: jsonInt(data['start_time']),
+      gift: BilibiliGift(
+        id: _giftId(data['gift_id']),
+        name: name,
+        count: months,
+        goldCoins: price > 0 ? price * months : 0,
+      ),
+    );
+  }
+
+  static String _giftId(Object? raw) {
+    final id = jsonString(raw) ?? '';
+    return id == '0' ? '' : id;
+  }
+
+  static LiveMessage _giftMessage(
+    Map<dynamic, dynamic> data, {
+    required String userName,
+    required String messageId,
+    required int? sentAt,
+    required BilibiliGift gift,
+  }) => LiveMessage(
+    type: LiveMessageType.gift,
+    userName: userName,
+    userId: jsonString(data['uid']) ?? '',
+    message: '${gift.name} ×${gift.count}',
+    color: LiveMessageColor.white,
+    messageId: messageId,
+    sentAt: sentAt != null && sentAt > 0 && sentAt < 100000000000
+        ? DateTime.fromMillisecondsSinceEpoch(sentAt * 1000)
+        : null,
+    data: gift,
+  );
 
   /// `SUPER_CHAT_MESSAGE`: `data` read like an item of the snapshot
   /// `BilibiliApi.superChats` (M4.1) reads, so both give the same

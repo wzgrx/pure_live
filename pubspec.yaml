@@ -14,4 +14,11 @@ workspace:
   - packages/live_iptv
   - packages/live_media
   - packages/live_net
+  - packages/live_ui
   - tools/check_latest
+
+# Overrides apply to the whole workspace and may only be declared here.
+dependency_overrides:
+  # Flutter 3.47.5's flutter_test pins test_api 0.7.12, below what test 1.32.0
+  # (the pure Dart members) needs; flutter_test runs on 0.7.14 (live_ui's tests).
+  test_api: 0.7.14

@@ -35,7 +35,7 @@
 |---|---|---|---|---|---|---|---|---|
 | [F.2a](F.2a/README.md) | **弹幕设置生效**：弹幕帧率（跟随或固定）、弹幕字体、纯文字模式 | F-DM-04、F-DM-05、F-DM-06 | `shared/danmaku/danmaku_overlay.dart`、`danmaku_settings.dart` | U.2h（弹幕渲染选型）之后，或并进 U.2h | 必须 | 中 | M13.17 第 3、9 项 | 完成（2026-10-02，[记录](records/F.2a.md)） |
 | [F.2b](F.2b/README.md) | **画面弹幕点按和长按**（复制、屏蔽此用户、屏蔽关键词） | F-DM-13 | `shared/danmaku/danmaku_overlay.dart`、`features/live_play/danmaku/chat_list.dart`（复用 `showChatMessageActions`） | F.2a | 应该 | 中 | M13.14、M13.17 第 3 项 | 完成（2026-10-02，[记录](records/F.2b.md)） |
-| [F.2c](F.2c/README.md) | **飞行弹幕里的表情图片** | F-DM-16 | `shared/danmaku/`（`emotes.dart` 已有表） | U.2h | 可以以后 | 中 | M13.16 | 未开始 |
+| [F.2c](F.2c/README.md) | **飞行弹幕里的表情图片** | F-DM-16 | `shared/danmaku/`（`emotes.dart` 已有表） | U.2h | 可以以后 | 中 | M13.16 | 完成（2026-10-02，随 U.2h 一起做，[记录](records/F.2a.md)；K90 上飞行弹幕里能看到表情图） |
 
 ### F.3 录制
 
@@ -48,7 +48,7 @@
 | 编号 | 名称 | 功能点 | 涉及代码 | 依赖 | 档位 | 规模 | 来源 | 状态 |
 |---|---|---|---|---|---|---|---|---|
 | [F.4a](F.4a/README.md) | **3.x 数据迁移的真机验证**（方式待用户选，见计划第 7 节） | F-APP-01、F-APP-02 | 一般不改代码；发现问题时改 `packages/live_store` 的迁移 | 用户选方式 | 必须 | 中 | M9、M12.1 “没验证” | 未开始 |
-| [F.4b](F.4b/README.md) | **WebDAV Digest 认证** | F-BAK-04 | `features/web_dav/web_dav_client.dart` | U.11b 合并后 | 可以以后 | 小 | M13.10、M13.18 第 4 项 | 未开始 |
+| [F.4b](F.4b/README.md) | **WebDAV Digest 认证** | F-BAK-04 | `features/web_dav/web_dav_client.dart` | U.11b 合并后 | 可以以后 | 小 | M13.10、M13.18 第 4 项 | 完成（2026-10-02，[记录](records/F.4b.md)） |
 
 ### F.5 升级余项
 

@@ -158,6 +158,29 @@ abstract final class LiveSemanticColors {
 
   /// The warning colour for [brightness].
   static Color warning(Brightness brightness) => brightness == Brightness.dark ? warningDark : warningLight;
+
+  /// The soft ground of a "recording" note in light themes (the close
+  /// dialog's "正在录制 2 个直播间", docs/ui/compare/U.13 c9); its text is the
+  /// theme's error colour.
+  static const Color recordingNoteLight = Color(0xFFFCEEEE);
+
+  /// [recordingNoteLight] in dark themes.
+  static const Color recordingNoteDark = Color(0xFF3A1A18);
+
+  /// The recording note's ground for [brightness].
+  static Color recordingNote(Brightness brightness) =>
+      brightness == Brightness.dark ? recordingNoteDark : recordingNoteLight;
+}
+
+/// The desktop title bar's fixed colours (docs/ui/compare/U.13): its close
+/// button turns Windows' red under the pointer in every theme (3.x
+/// `CustomTitleBar`).
+abstract final class WindowButtonColors {
+  /// The close button under the pointer (`#E81123`, as Windows draws it).
+  static const Color closeHover = Color(0xFFE81123);
+
+  /// The close icon on [closeHover].
+  static const Color onCloseHover = Color(0xFFFFFFFF);
 }
 
 /// Text on a colour the platform chose (super chat cards, a viewer's

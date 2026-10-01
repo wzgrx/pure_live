@@ -91,9 +91,45 @@ final class LiveStore {
   /// Opens (or creates) the store in [directory] (`<directory>/pure_live.db`)
   /// with the platform's [cipher]. Settings and secrets are loaded before
   /// this returns, so the UI can read them synchronously.
-  static Future<LiveStore> open(Directory directory, {required SecretCipher cipher}) async {
+  ///
+  /// [shared]: other processes open the same folder (desktop windows,
+  /// docs/ui/compare/U.13 c14); their writes are waited for, and
+  /// [syncExternal] picks them up.
+  static Future<LiveStore> open(Directory directory, {required SecretCipher cipher, bool shared = false}) async {
     await directory.create(recursive: true);
-    return await _load(StoreDatabase.file(File(p.join(directory.path, fileName))), cipher);
+    return await _load(StoreDatabase.file(File(p.join(directory.path, fileName)), shared: shared), cipher);
+  }
+
+  int? _dataVersion;
+  Future<bool>? _syncing;
+  bool _syncAgain = false;
+
+  /// Takes in what another process sharing the database wrote since the last
+  /// call (U.13 c14): settings and secrets are read again and every watcher
+  /// queries again. True when something had changed; calls while one runs
+  /// are folded into one more pass.
+  Future<bool> syncExternal() {
+    final running = _syncing;
+    if (running != null) {
+      _syncAgain = true;
+      return running;
+    }
+    return _syncing = _sync().whenComplete(() => _syncing = null);
+  }
+
+  Future<bool> _sync() async {
+    var changed = false;
+    do {
+      _syncAgain = false;
+      final version = await database.dataVersion();
+      if (_dataVersion == version) continue;
+      _dataVersion = version;
+      changed = true;
+      await settings.reload();
+      await secrets.reload();
+      await database.notifyAllTables();
+    } while (_syncAgain);
+    return changed;
   }
 
   /// A store in memory (tests, previews).
@@ -101,9 +137,12 @@ final class LiveStore {
       _load(StoreDatabase.memory(), cipher, now: now);
 
   static Future<LiveStore> _load(StoreDatabase db, SecretCipher cipher, {DateTime Function()? now}) async {
+    // Counted before reading, so a write of another process meanwhile is
+    // taken in by the first [syncExternal].
+    final version = await db.dataVersion();
     final settings = await SettingsStore.load(db);
     final secrets = await SecretStore.load(db, cipher);
-    return LiveStore._(db, settings, secrets, now: now);
+    return LiveStore._(db, settings, secrets, now: now).._dataVersion = version;
   }
 
   /// The database file name.

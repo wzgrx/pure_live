@@ -1,6 +1,6 @@
 # F.2b 画面弹幕点按和长按
 
-- 状态：开发中（2026-10-02，和 U.2h 的 c9 一起做）
+- 状态：完成（2026-10-02，[记录](../records/F.2b.md)）
 - 档位：应该；规模：中
 - 功能点：F-DM-13（见 [INVENTORY.md](../INVENTORY.md)）
 - 涉及代码：`apps/pure_live/lib/shared/danmaku/danmaku_overlay.dart`；`features/live_play/player/player_view.dart`；面板 `features/live_play/danmaku/chat_list.dart` 的 `showChatMessageActions`
@@ -61,3 +61,4 @@
 |---|---|
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比，和 U.2h 一起开发 |
+| 2026-10-02 | 开发完成（和 U.2h 的 c9 一起），待 K90 验证 |

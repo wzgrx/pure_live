@@ -1,6 +1,6 @@
 # F.2a 弹幕设置生效：帧率、字体、纯文字模式
 
-- 状态：开发中（2026-10-02，和 U.2h、U.2i 合在一起做）
+- 状态：完成（2026-10-02，[记录](../records/F.2a.md)）
 - 档位：必须；规模：中
 - 功能点：F-DM-04、F-DM-05、F-DM-06（见 [INVENTORY.md](../INVENTORY.md)）
 - 涉及代码：`apps/pure_live/lib/shared/danmaku/`（`danmaku_overlay.dart`、`danmaku_settings.dart`）、`features/live_play/player/player_view.dart`
@@ -61,3 +61,4 @@
 |---|---|
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比（v3、v4、根因、改动），和 U.2h、U.2i 一起开发 |
+| 2026-10-02 | 开发完成（和 U.2h 一起），待 K90 验证 |

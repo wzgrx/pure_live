@@ -365,6 +365,20 @@ class _UpdateDownloadDialogState extends ConsumerState<UpdateDownloadDialog> {
 
   void _close() => Navigator.of(context).pop();
 
+  /// Enter: the state's main button (install, reopen, retry); nothing while
+  /// downloading or opening.
+  void _mainAction() {
+    if (_opening) return;
+    switch (_phase) {
+      case UpdateDownloadPhase.done:
+        unawaited(_install());
+      case UpdateDownloadPhase.failed:
+        unawaited(_start());
+      case UpdateDownloadPhase.downloading:
+        break;
+    }
+  }
+
   /// Back and Esc: the dialog's own cancel or close.
   void _onBack() {
     if (_opening) return;
@@ -580,40 +594,45 @@ class _UpdateDownloadDialogState extends ConsumerState<UpdateDownloadDialog> {
           );
 
     return DialogButtonsTheme(
-      child: PopScope<Object?>(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) _onBack();
-        },
-        child: Dialog(
-          key: const ValueKey('update-download-dialog'),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (stacked) ...[
-                    Align(alignment: Alignment.centerLeft, child: icon),
-                    const SizedBox(height: 12),
-                    heading,
-                  ] else
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        icon,
-                        const SizedBox(width: 16),
-                        Expanded(child: heading),
-                      ],
-                    ),
-                  const SizedBox(height: 20),
-                  progressBox,
-                  const SizedBox(height: 8),
-                  actions,
-                ],
+      child: DialogKeys(
+        onEnter: _mainAction,
+        // Not closed by a tap outside, so the route gives it no Esc.
+        onEscape: _onBack,
+        child: PopScope<Object?>(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) _onBack();
+          },
+          child: Dialog(
+            key: const ValueKey('update-download-dialog'),
+            insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (stacked) ...[
+                      Align(alignment: Alignment.centerLeft, child: icon),
+                      const SizedBox(height: 12),
+                      heading,
+                    ] else
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          icon,
+                          const SizedBox(width: 16),
+                          Expanded(child: heading),
+                        ],
+                      ),
+                    const SizedBox(height: 20),
+                    progressBox,
+                    const SizedBox(height: 8),
+                    actions,
+                  ],
+                ),
               ),
             ),
           ),

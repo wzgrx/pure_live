@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/version/app_version.dart';
@@ -148,17 +147,6 @@ class _NewVersionDialogState extends State<NewVersionDialog> {
     unawaited(AppNavigator.toNamed<void>(RoutePath.kVersionPage));
   }
 
-  KeyEventResult _onKey(FocusNode node, KeyEvent event) {
-    // Enter on a focused button presses that button; only the dialog's own
-    // focus takes Enter for the main button.
-    if (!node.hasPrimaryFocus || event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.numpadEnter) {
-      _primary();
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -203,9 +191,8 @@ class _NewVersionDialogState extends State<NewVersionDialog> {
       child: Text(i18n(_inApp ? 'update_download_install' : 'update')),
     );
     return DialogButtonsTheme(
-      child: Focus(
-        autofocus: true,
-        onKeyEvent: _onKey,
+      child: DialogKeys(
+        onEnter: _primary,
         child: Dialog(
           key: const ValueKey('new-version-dialog'),
           insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

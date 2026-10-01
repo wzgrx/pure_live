@@ -130,6 +130,13 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       expect(await dismissed, RoomPromptChoice.dismiss);
+
+      // Enter is "进入房间" on a computer.
+      final entered = showRoomPrompt(context, room: _room(), prompts: prompts);
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(await entered, RoomPromptChoice.enter);
     });
 
     testWidgets('narrow or a large font: the avatar above the names', (tester) async {

@@ -412,6 +412,33 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('update-download-dialog')), findsNothing);
       expect(h.toasts.single, '已取消下载，下次会接着已下载的部分继续');
+
+      // Esc on a computer is the same cancel (a tap outside does nothing).
+      final again = _GatedHttp(size: 3 * 1024 * 1024);
+      final folder2 = _temp();
+      await tester.pumpWidget(const SizedBox.shrink());
+      final h2 = await _pump(
+        tester,
+        width: 1280,
+        height: 800,
+        overrides: [updateDownloadToolsProvider.overrideWithValue(_tools(again, folder2))],
+      );
+      unawaited(
+        showUpdateDownload(
+          tester.element(find.text('home')),
+          file: _apk('9.0.0'),
+          sources: [_apk('9.0.0').url],
+          version: '9.0.0',
+        ),
+      );
+      await _until(tester, () => again.opens > 0);
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('update-download-dialog')), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('update-download-dialog')), findsNothing);
+      expect(h2.toasts.single, '已取消下载，下次会接着已下载的部分继续');
     });
   });
 

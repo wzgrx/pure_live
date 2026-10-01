@@ -7,12 +7,14 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/home/home_menu.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/area_rooms/follow_area_button.dart';
-import 'package:pure_live/pages/area_rooms/room_cards.dart';
-import 'package:pure_live/pages/area_rooms/room_feed.dart';
 import 'package:pure_live/pages/areas/areas_common.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/room_cards.dart';
+import 'package:pure_live/shared/rooms/room_feed.dart';
+import 'package:pure_live/shared/rooms/room_menu.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The rooms of an area (3.x `lib/modules/area_rooms`).
 ///
@@ -59,20 +61,34 @@ class AreaRoomsView extends ConsumerStatefulWidget {
 }
 
 class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
-  late final AreaRoomFeed _feed;
+  late final RoomFeed _feed;
   final ScrollController _scroll = createPureLiveScrollController();
   bool _showTop = false;
+  late bool _showUnplayable;
 
   @override
   void initState() {
     super.initState();
-    _feed = AreaRoomFeed(
-      load: widget.loader ?? areaRoomLoader(widget.site, widget.area),
-      area: widget.area,
-      showUnplayable: ref.read(storeProvider).settings.get(Settings.showUnplayableInDiscover),
+    final services = ref.read(appServicesProvider);
+    _showUnplayable = services.store.settings.get(Settings.showUnplayableInDiscover);
+    _feed = RoomFeed(
+      platform: widget.site.id,
+      source: AreaRoomSource(widget.loader ?? areaRoomLoader(widget.site, widget.area), areaName: widget.area.areaName),
+      // Rooms that cannot play here are hidden unless shown (UPGRADES 统一原则).
+      visible: (room) =>
+          _showUnplayable || !cannotPlayHere(room, signedIn: signedInOn(services.cookies, room.platform)),
+      // 3.x kept up to 20000 rooms of a directory.
+      maxRooms: 5000,
     )..addListener(_changed);
     _scroll.addListener(_scrolled);
-    _feed.refresh().ignore();
+    _refresh().ignore();
+  }
+
+  Future<void> _refresh() => _feed.refresh(count: 1);
+
+  void _showHidden() {
+    setState(() => _showUnplayable = true);
+    _feed.visibilityChanged();
   }
 
   @override
@@ -111,7 +127,7 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
 
   Widget _status() {
     final error = _feed.error;
-    if (!_feed.hasLoaded || (_feed.isRefreshing && error == null)) {
+    if (!_feed.loaded || (_feed.refreshing && error == null)) {
       return AppStatusView(type: AppStatusType.loading, title: i18n('refresh_loading'));
     }
     if (error != null) {
@@ -124,7 +140,7 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
         buttonText: i18n(login ? 'go_to_login' : 'retry'),
         onButtonPressed: login
             ? () => AppNavigator.toNamed<void>(RoutePath.kSettingsAccount).ignore()
-            : () => _feed.refresh().ignore(),
+            : () => _refresh().ignore(),
       );
     }
     return EmptyView(
@@ -134,23 +150,23 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
           ? i18n('area_rooms_hidden_unplayable', args: {'count': '${_feed.hiddenCount}'})
           : i18n('empty_areas_room_subtitle'),
       buttonText: _feed.hiddenCount > 0 ? i18n('area_rooms_show_hidden') : i18n('refresh'),
-      onButtonPressed: _feed.hiddenCount > 0 ? () => _feed.showUnplayable = true : () => _feed.refresh().ignore(),
+      onButtonPressed: _feed.hiddenCount > 0 ? _showHidden : () => _refresh().ignore(),
     );
   }
 
   Widget _footer(BuildContext context) {
     final theme = Theme.of(context);
-    if (_feed.error != null && !_feed.refreshFailed) {
+    if (_feed.error != null && !_feed.errorOnRefresh) {
       return Center(
         child: TextButton.icon(
           key: const ValueKey('area-rooms-retry-more'),
           icon: const Icon(Icons.refresh_rounded),
-          label: Text('${describeLoadError(_feed.error!)} · ${i18n('retry')}'),
-          onPressed: () => _feed.retry().ignore(),
+          label: Text('${describeLoadError(_feed.error)} · ${i18n('retry')}'),
+          onPressed: () => _feed.retry(count: 1).ignore(),
         ),
       );
     }
-    if (_feed.isLoadingMore) {
+    if (_feed.busy && !_feed.refreshing) {
       return const Center(child: SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2)));
     }
     if (_feed.hasMore) {
@@ -173,8 +189,8 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
     final appearance = watchCardAppearance(ref);
     final fontSizes = watchFontSizes(ref);
     final spacing = gridSpacing(ref);
-    final preferReal = watchSetting(ref, Settings.preferRealOnlineCounts);
-    final realPlatforms = watchSetting(ref, Settings.realOnlinePlatforms);
+    final policy = watchAudiencePolicy(ref);
+    final store = ref.read(storeProvider);
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -205,11 +221,11 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
                   final room = rooms[index];
                   return RoomCard(
                     key: ValueKey(room.identityKey),
-                    data: roomCardData(room, preferRealOnline: preferReal, realOnlinePlatforms: realPlatforms),
+                    data: policy.cardOf(room),
                     appearance: appearance,
                     dense: true,
                     onTap: () => AppNavigator.toLiveRoomDetail(liveRoom: room).ignore(),
-                    onLongPress: () => showRoomMenu(context, ref, room).ignore(),
+                    onLongPress: () => showRoomMenu(context, store: store, room: room).ignore(),
                   );
                 },
               ),
@@ -239,7 +255,7 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
             key: const ValueKey('area-rooms-refresh'),
             tooltip: i18n('refresh'),
             icon: const Icon(Icons.refresh_rounded),
-            onPressed: _feed.isRefreshing ? null : () => _feed.refresh().ignore(),
+            onPressed: _feed.refreshing ? null : () => _refresh().ignore(),
           ),
         ],
       ),
@@ -265,17 +281,17 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
                   ),
                   TextButton(
                     key: const ValueKey('area-rooms-show-hidden'),
-                    onPressed: () => _feed.showUnplayable = true,
+                    onPressed: _showHidden,
                     child: Text(i18n('area_rooms_show_hidden')),
                   ),
                 ],
               ),
             ),
-          if (_feed.isRefreshing && rooms.isNotEmpty)
+          if (_feed.refreshing && rooms.isNotEmpty)
             const LinearProgressIndicator(minHeight: 2)
           else
             const SizedBox(height: 2),
-          if (rooms.isNotEmpty && _feed.refreshFailed && _feed.error != null)
+          if (rooms.isNotEmpty && _feed.errorOnRefresh && _feed.error != null)
             Material(
               key: const ValueKey('area-rooms-refresh-error'),
               color: theme.colorScheme.errorContainer,
@@ -283,15 +299,15 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
                 dense: true,
                 leading: Icon(Icons.info_outline_rounded, color: theme.colorScheme.onErrorContainer),
                 title: Text(
-                  describeLoadError(_feed.error!),
+                  describeLoadError(_feed.error),
                   style: TextStyle(color: theme.colorScheme.onErrorContainer),
                 ),
-                trailing: TextButton(onPressed: () => _feed.refresh().ignore(), child: Text(i18n('retry'))),
+                trailing: TextButton(onPressed: () => _refresh().ignore(), child: Text(i18n('retry'))),
               ),
             ),
           Expanded(
             child: RefreshIndicator(
-              onRefresh: _feed.refresh,
+              onRefresh: _refresh,
               child: rooms.isEmpty
                   ? LayoutBuilder(
                       builder: (context, constraints) => SingleChildScrollView(

@@ -9,8 +9,8 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/live_play/room_controller.dart';
-import 'package:pure_live/pages/live_play/room_texts.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The app bar title: avatar, streamer and platform / area (3.x
 /// `LivePlayHeader._buildTitle`).
@@ -337,7 +337,7 @@ class RoomInfoBar extends StatelessWidget {
                   Row(
                     children: [
                       if (room.isRestricted && room.isLiveNow) ...[
-                        _Tag(text: restrictionLabel(room.effectiveRestriction), color: theme.colorScheme.error),
+                        _Tag(text: restrictionLabel(room.effectiveRestriction) ?? '', color: theme.colorScheme.error),
                         const SizedBox(width: 6),
                       ],
                       if (room.isRecord) ...[
@@ -461,7 +461,7 @@ class RoomInfoSheet extends StatelessWidget {
                     : formatStartTime(startedAt),
               ),
             if (room.isRestricted)
-              section(restrictionLabel(room.effectiveRestriction), restrictionReason(room.effectiveRestriction)),
+              section(restrictionLabel(room.effectiveRestriction) ?? '', restrictionReason(room.effectiveRestriction)),
             if (notice.isNotEmpty) section(i18n('live_play_info_notice'), notice),
             if (introduction.isNotEmpty && introduction != notice)
               section(i18n('live_play_info_introduction'), introduction),

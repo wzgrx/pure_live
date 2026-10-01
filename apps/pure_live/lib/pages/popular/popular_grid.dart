@@ -6,17 +6,18 @@ import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
-import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/popular/pagination_bar.dart';
-import 'package:pure_live/pages/popular/popular_feed.dart';
-import 'package:pure_live/pages/popular/popular_rooms.dart';
-import 'package:pure_live/pages/popular/room_menu.dart';
+import 'package:pure_live/pages/popular/popular_catalog.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/room_cards.dart';
+import 'package:pure_live/shared/rooms/room_feed.dart';
+import 'package:pure_live/shared/rooms/room_menu.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Rooms of the first phone load and of each "load more" (3.x's phone
 /// page size).
@@ -28,18 +29,6 @@ bool usesDesktopPages(double width) => width > 680 && !isPhoneDevice;
 
 /// Columns of the room grid (3.x `PopularGridView`).
 int popularColumns(double width) => width > 1280 ? 5 : (width > 960 ? 4 : (width > 640 ? 3 : 2));
-
-/// The words for a failed request: the kind, never the adapter's detail.
-String popularErrorText(Object error) => switch (error) {
-  NeedsLogin() => i18n('login_required_subtitle'),
-  RateLimited() => i18n('popular_error_rate_limited'),
-  RiskControl(cookieSuspect: true) => i18n('popular_error_cookie'),
-  RiskControl() => i18n('popular_error_risk_control'),
-  RegionBlocked() => i18n('popular_error_region'),
-  ApiChanged() => i18n('popular_error_api_changed'),
-  NetworkFailure() || TransportFailure() || HttpStatusFailure() => i18n('network_error_subtitle'),
-  _ => i18n('popular_error_unknown'),
-};
 
 /// The note of a platform whose directory is not the whole site (the
 /// adapter's `LiveDirectoryNotice`), rewritten for the popular page.
@@ -70,7 +59,7 @@ class _PopularPlatformViewState extends ConsumerState<PopularPlatformView> {
   bool _noticeOpen = false;
 
   late final PopularCatalog _catalog = ref.read(popularCatalogProvider);
-  late final PopularFeed _feed = _catalog.feedOf(widget.platform);
+  late final RoomFeed _feed = _catalog.feedOf(widget.platform);
 
   @override
   void initState() {
@@ -324,7 +313,7 @@ class _PopularPlatformViewState extends ConsumerState<PopularPlatformView> {
           backgroundColor: colors.errorContainer,
           leading: Icon(Icons.info_outline_rounded, color: colors.onErrorContainer),
           content: Text(
-            i18n('popular_refresh_failed', args: {'reason': popularErrorText(_feed.error!)}),
+            i18n('popular_refresh_failed', args: {'reason': describeLoadError(_feed.error)}),
             style: TextStyle(color: colors.onErrorContainer),
           ),
           actions: [
@@ -351,7 +340,7 @@ class _PopularPlatformViewState extends ConsumerState<PopularPlatformView> {
       type: AppStatusType.error,
       icon: Icons.wifi_off_rounded,
       title: i18n('network_error_title'),
-      subtitle: popularErrorText(error),
+      subtitle: describeLoadError(error),
       buttonText: i18n('retry'),
       onButtonPressed: () => unawaited(_refresh()),
     );

@@ -15,6 +15,7 @@ import 'package:pure_live/pages/settings/settings_dialogs.dart';
 import 'package:pure_live/pages/settings/settings_model.dart';
 import 'package:pure_live/pages/settings/settings_tiles.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/images.dart';
 
 /// The cover and avatar cache (3.x `CacheController`): its size on disk and
 /// clearing it.
@@ -49,12 +50,15 @@ abstract final class ImageCacheTools {
     return total;
   }
 
-  /// Drops decoded images from memory and, when wired, the files on disk.
+  /// Drops decoded images from memory and, when wired, the files on disk;
+  /// the images on screen load again under a new cache key (3.x bumped
+  /// `imageCacheEpoch` after clearing).
   static Future<void> clear() async {
     PaintingBinding.instance.imageCache
       ..clear()
       ..clearLiveImages();
     await clearDisk?.call();
+    imageCacheEpoch.value++;
   }
 }
 

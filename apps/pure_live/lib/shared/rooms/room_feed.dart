@@ -88,7 +88,7 @@ final class WindowSource implements RoomSource {
 /// which asked each request for only the rooms still missing and so moved
 /// the platform's page boundaries; the size is constant here). The list
 /// ends at an empty page (and at pages that bring nothing new, see
-/// [PopularFeed]).
+/// [RoomFeed]).
 final class PagedSource implements RoomSource {
   /// Creates the source over [site].
   new(this.site, {this.size = 30});
@@ -150,23 +150,126 @@ RoomSource popularSourceFor(LiveSite site) {
   return window == null ? PagedSource(site) : WindowSource(site, window);
 }
 
-/// One platform's recommendations: the rooms fetched so far (without
-/// repeats, each chunk ranked by audience as 3.x did), whether more exist,
-/// and the state of the request in flight.
+/// One page from a platform: its rooms, whether another page exists, and
+/// the server's cursor for it.
+typedef RoomBatch = ({List<LiveRoom> rooms, bool hasMore, String? nextCursor});
+
+/// Loads page [page] (from 1) after [cursor].
+typedef RoomPageLoader = Future<RoomBatch> Function(int page, String? cursor, CancelToken cancel);
+
+/// How many rooms to ask a page-numbered platform for: SOOP and TwitCasting
+/// take 60 (SOOP's maximum; TwitCasting's whole window), the rest the
+/// adapters' default 30 (platforms with a fixed page size ignore it).
+int areaRoomPageSize(String platform) => switch (platform) {
+  SiteIds.soop || SiteIds.twitcasting => 60,
+  _ => 30,
+};
+
+/// How [site] pages the rooms of [area] (3.x `AreaRoomsBinding.createController`,
+/// simplified to one rule per kind of platform):
+/// - platforms with native directory pages (including CC's category pager
+///   and cursor platforms such as AcFun, CHZZK, 17LIVE) page natively and
+///   say whether there is more;
+/// - the others are asked page by page and end at a page with nothing new.
 ///
-/// Pages are slices of the rooms that [visible] keeps, so the phone list
-/// (load more at the end) and the desktop pages show the same catalogue, and
-/// a refresh builds a new catalogue before it replaces the old one (a failed
-/// refresh keeps what is on screen).
-final class PopularFeed extends ChangeNotifier {
-  /// Creates the feed of [platform].
-  new({required this.platform, required this._source, required this.rank, required this.visible});
+/// 3.x cut some platforms' pages into fixed slices, which hid rooms: Douyu
+/// returns 120 a page and 3.x showed 40 (upgrade A-1), SOOP asked 30 a
+/// page but sliced as if 60 (A-4), Kuaishou took page 1 only and paged it
+/// locally (A-2). Every page is now shown whole.
+RoomPageLoader areaRoomLoader(LiveSite site, LiveArea area) {
+  final directory = switch (site) {
+    final LiveSiteDirectoryPager pager => pager,
+    final LiveSiteCategoryDirectoryProvider provider => provider.categoryDirectory,
+    _ => null,
+  };
+  if (directory is LiveSiteCursorDirectoryPager) {
+    return (page, cursor, cancel) async {
+      final answer = await directory.getDirectoryPageAtCursor(
+        page: page,
+        cursor: cursor,
+        category: area,
+        cancel: cancel,
+      );
+      // A cursor that does not move would load the same page forever.
+      final next = answer.nextCursor;
+      final moved = next != null && next.isNotEmpty && next != cursor;
+      return (rooms: answer.rooms, hasMore: answer.hasMore && moved, nextCursor: next);
+    };
+  }
+  if (directory != null) {
+    return (page, cursor, cancel) async {
+      final answer = await directory.getDirectoryPage(page: page, category: area, cancel: cancel);
+      return (rooms: answer.rooms, hasMore: answer.hasMore, nextCursor: answer.nextCursor);
+    };
+  }
+  final pageSize = areaRoomPageSize(site.id);
+  return (page, cursor, cancel) async {
+    final rooms = await site.getCategoryRooms(area, page: page, pageSize: pageSize);
+    return (rooms: rooms, hasMore: rooms.isNotEmpty, nextCursor: null);
+  };
+}
+
+/// An area's rooms as a [RoomSource]: the pages [load] gives, each room
+/// tagged with the area's name ([areaName]; platforms leave it out of
+/// category lists).
+final class AreaRoomSource implements RoomSource {
+  /// Creates the source over [load].
+  new(this.load, {this.areaName = ''});
+
+  /// Loads one page.
+  final RoomPageLoader load;
+
+  /// The area's name given to its rooms; empty keeps theirs.
+  final String areaName;
+
+  var _page = 1;
+  String? _cursor;
+
+  @override
+  Future<RoomChunk> next(CancelToken cancel) async {
+    final batch = await load(_page, _cursor, cancel);
+    _page++;
+    _cursor = batch.nextCursor;
+    final name = areaName.trim();
+    if (name.isEmpty) return RoomChunk(batch.rooms, hasMore: batch.hasMore);
+    return RoomChunk([for (final room in batch.rooms) room.copyWith(area: name)], hasMore: batch.hasMore);
+  }
+
+  @override
+  RoomSource restart() => AreaRoomSource(load, areaName: areaName);
+}
+
+/// A list of rooms fetched chunk after chunk (M12.2: the popular page's
+/// catalogue and an area's rooms share it): the rooms so far without
+/// repeats, each chunk ordered by [rank] (popular: by audience, as 3.x did),
+/// whether more exist, and the state of the request in flight.
+///
+/// The rooms shown are the ones [visible] keeps, so the phone list (load more
+/// at the end) and the desktop pages show the same catalogue, and a refresh
+/// builds a new list before it replaces the old one (a failed refresh keeps
+/// what is on screen).
+final class RoomFeed extends ChangeNotifier {
+  /// Creates the feed of [platform] over [_source]; [rank] orders each chunk
+  /// (unchanged when null), at most [maxRooms] are kept.
+  new({
+    required this.platform,
+    required this._source,
+    required this.visible,
+    List<LiveRoom> Function(String platform, List<LiveRoom> rooms)? rank,
+    this.maxRooms,
+  }) : rank = rank ?? _unranked;
+
+  static List<LiveRoom> _unranked(String platform, List<LiveRoom> rooms) => rooms;
 
   /// The platform id.
   final String platform;
 
-  /// Orders one chunk (3.x `rankPopularRoomsByAudience`).
+  /// Orders one chunk (3.x `rankPopularRoomsByAudience` on the popular page).
   final List<LiveRoom> Function(String platform, List<LiveRoom> rooms) rank;
+
+  /// The most rooms kept (3.x kept up to 20000 of an area's directory); null
+  /// for no limit.
+  final int? maxRooms;
 
   /// Whether a room is shown (the "show rooms that cannot play" setting).
   final bool Function(LiveRoom room) visible;
@@ -255,6 +358,10 @@ final class PopularFeed extends ChangeNotifier {
     });
     return _active = operation;
   }
+
+  /// Loads at least one more shown room unless the list has ended (the end of
+  /// a phone list).
+  Future<void> loadMore() => _loaded ? ensure(rooms.length + 1) : Future.value();
 
   /// Retries what failed: the refresh, or the next rooms.
   Future<void> retry({required int count}) =>
@@ -367,6 +474,7 @@ final class PopularFeed extends ChangeNotifier {
       into.rooms.addAll(rank(platform, fresh));
       unchanged = fresh.isEmpty ? unchanged + 1 : 0;
       hasMore = chunk.hasMore && chunk.rooms.isNotEmpty && unchanged < 2;
+      if (maxRooms case final limit? when into.rooms.length >= limit) hasMore = false;
       onProgress?.call();
     }
     return hasMore;

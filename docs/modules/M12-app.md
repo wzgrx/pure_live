@@ -45,7 +45,7 @@
 | 首页信号 | `HomeSignals.favoritesReselected`（关注页监听后刷新）、`HomeSignals.resumedAfterBackground`（热门、分区监听后刷新） | `favoriteController.tabBottomIndex`、`Get.find<PopularController>()` |
 | 路由事件 | `liveRouteObserver.addListener(...)`、`currentRoute` | `RouteObserverController.to.currentRoute`、`LiveRouteObserver` |
 
-M13 每个页面任务只改 `lib/pages/<页面>/`：保留类名和构造参数 `({required RouteArgs route})`，页面私有的控制器、组件放在同一目录。需要新的共享服务时，在 M13 记录里写明，由合并的人加进 `lib/app/services.dart`。
+M13 每个页面任务只改 `lib/pages/<页面>/`：保留类名和构造参数 `({required RouteArgs route})`，页面私有的控制器、组件放在同一目录。需要新的共享服务时，在 M13 记录里写明，由合并的人加进 `lib/app/services.dart`。几个页面共用的界面代码（房间卡片、卡片菜单、取数、文字、弹幕层）在 `lib/shared/`，见 [M12.2](M12.2-shared.md)。
 
 ## 对照
 
@@ -98,12 +98,9 @@ v3 调用方（`git grep` v3.2.11 的 `lib`）：`AppNavigator` 被 13 个文件
 
 | 差异 | 原因 |
 |---|---|
-| 启动页暂不出现，直接进首页 | 启动页是 M13 最后一页；`showSplashPage` 设置保留，启动页做好后由它决定初始路由 |
 | 首页的 Tab 和路由用同一个页面类 | M13 一个页面只改一个目录 |
 | 打开直播间的防重复只管 0.5 秒 | v3 等 `Get.toNamed` 的结果，它在直播间关闭时才完成，所以直播间开着时别处的“打开房间”全被忽略（直播间里点推荐房间无效）；现在只挡住进场期间的重复点击 |
 | 提示用 SnackBar | v3 的 flutter_smart_dialog 只为了不带 context 弹提示；`AppNavigator.toast` 同样不需要 context |
-| 启动时不检查更新 | 检查更新属于“关于和版本”页（M13），它负责首页启动后 2 秒的检查 |
-| IPTV 库暂时在内存里 | M6 把持久化实现（drift）记在 M9，M9 没有做（它把 IPTV 库记回 M6）；现在网络电视能用，但导入的列表重启后要重新导入。留给网络电视页（M13）前补上 |
 | 不读 SharedPreferences 的 `locale` | 见问题 2；v3 只有用户选语言时才写它，同时也写了 Hive 的 `language`，M9 已导入 |
 
 ## 界面改进
@@ -138,8 +135,6 @@ v3 调用方（`git grep` v3.2.11 的 `lib`）：`AppNavigator` 被 13 个文件
 | Windows 桌面外壳：自绘标题栏、窗口尺寸和位置记忆、托盘、关闭行为、开机自启（v3 `desktop_manager.dart` 848 行、`desktop_tray_service.dart`、`win_auto_start.dart`，用 window_manager、tray_manager） | M12 后续，和 Windows 主机构建一起做 |
 | Twitch 的无界面 WebView 传输和 KPSDK 令牌（M4.08） | M13 账号/网页登录引入 WebView 时 |
 | 分享和深链的接收（v3 `share_handler`、`SharedMediaIntake`）、剪贴板识别 | M13（链接解析、网络电视导入） |
-| 启动后检查更新（首页 2 秒后） | M13 关于和版本 |
-| IPTV 库的持久化 | M13 网络电视页之前（见有意差异） |
 | 下载的字体注册（`resolveAppFontFamily` 的 `customFonts`） | M13 字体设置 |
 | 日志（v3 `core_log`、诊断） | M13 |
 | Windows 构建和实机检查 | 主机上做，本次没做：在 Windows 用 `flutter build windows` 构建，检查单实例、新窗口交接（DPAPI）、3.x 安装目录的导入、GBK 列表 |
@@ -168,4 +163,4 @@ v3 调用方（`git grep` v3.2.11 的 `lib`）：`AppNavigator` 被 13 个文件
 | `platforms_test.dart`（9） | 33 个平台和 IPTV 都登记、适配器复用；弹幕登记的平台（CC、映客、小红书、微博、LiveMe、TikTok、IPTV 不登记）；代理随设置变化；Cookie 来自密钥库并通知变化；斗鱼登录信息；身份迁移不动其他平台；原生 HTTP 的白名单、参数和回答、平台错误转成传输失败（问题 11） |
 | `home_test.dart`（5） | v3 注册的路由全部存在；菜单顺序、未知和重复 id、平板不放录制中心；手机底栏、再点关注发出刷新信号、只剩一个菜单时没有底栏；平板侧栏、录制中心动作、没有菜单的提示；打开直播间带房间参数、已下线平台被拒、返回 |
 
-后续：IPTV 库的持久化和 3.x `pure_live_tv.db` 的导入见 [M12.1 IPTV 列表持久化](M12.1-iptv-store.md)（上面“IPTV 库暂时在内存里”一条已解决）。
+后续：IPTV 库的持久化和 3.x `pure_live_tv.db` 的导入见 [M12.1 IPTV 列表持久化](M12.1-iptv-store.md)；启动页、启动后检查更新、关注核验、哔哩哔哩登录核验、定时关闭和图片请求头的接线，以及各页面共用的房间卡片、卡片菜单、取数和文字见 [M12.2 共用模块和外壳接线](M12.2-shared.md)。

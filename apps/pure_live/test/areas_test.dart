@@ -7,13 +7,14 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/app.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/pages/area_rooms/area_rooms_page.dart';
-import 'package:pure_live/pages/area_rooms/room_feed.dart';
 import 'package:pure_live/pages/areas/area_artwork.dart';
 import 'package:pure_live/pages/areas/area_catalog.dart';
 import 'package:pure_live/pages/areas/favorite_areas_view.dart';
 import 'package:pure_live/pages/hot_areas/hot_areas_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/room_cards.dart';
+import 'package:pure_live/shared/rooms/room_feed.dart';
 
 import 'support.dart';
 
@@ -108,6 +109,7 @@ Future<AppServices> _pumpApp(WidgetTester tester, Map<String, LiveSite> sites, {
     await services.store.settings.set(Settings.preferPlatform, preferred);
     // The test device is English; the texts below are the Chinese ones.
     await services.store.settings.set(Settings.language, '简体中文');
+    await services.store.settings.set(Settings.showSplashPage, false);
     return services;
   }))!;
   final strings = (await tester.runAsync(loadStrings))!;
@@ -248,11 +250,14 @@ void main() {
         3: [_room('douyu', '4')],
       };
       final site = _FakeSite('douyu', '斗鱼', const [], pages: pages);
-      final feed = AreaRoomFeed(
-        load: areaRoomLoader(site, _area('douyu', 'a', '英雄联盟')),
-        area: _area('douyu', 'a', '英雄联盟'),
+      var show = false;
+      final feed = RoomFeed(
+        platform: 'douyu',
+        source: AreaRoomSource(areaRoomLoader(site, _area('douyu', 'a', '英雄联盟')), areaName: '英雄联盟'),
+        // Signed in: the login room plays here, the paid one does not.
+        visible: (room) => show || !cannotPlayHere(room, signedIn: true),
       );
-      await feed.refresh();
+      await feed.refresh(count: 1);
       expect(feed.rooms.map((room) => room.roomId), ['1', '3']);
       expect(feed.hiddenCount, 1);
       expect(feed.rooms.first.area, '英雄联盟');
@@ -261,9 +266,11 @@ void main() {
       expect(feed.hasMore, isTrue);
       await feed.loadMore();
       expect(feed.hasMore, isFalse);
-      feed.showUnplayable = true;
+      show = true;
+      feed.visibilityChanged();
       expect(feed.rooms, hasLength(4));
       expect(site.asked.map((entry) => entry.$2).toSet(), {30});
+      expect(cannotPlayHere(pages[2]![1], signedIn: false), isTrue);
     });
 
     test('SOOP and TwitCasting ask 60 a page; cursor directories stop when the cursor stalls', () async {
@@ -287,21 +294,24 @@ void main() {
 
     test('a failed refresh keeps the rooms; retry refreshes again', () async {
       var fail = false;
-      final feed = AreaRoomFeed(
-        load: (page, cursor, cancel) async => fail
-            ? throw const TransportFailure('douyu', TransportReason.timeout)
-            : (rooms: [_room('douyu', '$page')], hasMore: true, nextCursor: null),
-        area: _area('douyu', 'a', 'a'),
+      final feed = RoomFeed(
+        platform: 'douyu',
+        source: AreaRoomSource(
+          (page, cursor, cancel) async => fail
+              ? throw const TransportFailure('douyu', TransportReason.timeout)
+              : (rooms: [_room('douyu', '$page')], hasMore: true, nextCursor: null),
+        ),
+        visible: (room) => true,
       );
-      await feed.refresh();
+      await feed.refresh(count: 1);
       fail = true;
-      await feed.refresh();
+      await feed.refresh(count: 1);
       expect(feed.rooms, hasLength(1));
-      expect(feed.refreshFailed, isTrue);
+      expect(feed.errorOnRefresh, isTrue);
       expect(feed.error, isA<TransportFailure>());
       fail = false;
-      await feed.retry();
-      expect(feed.refreshFailed, isFalse);
+      await feed.retry(count: 1);
+      expect(feed.errorOnRefresh, isFalse);
       expect(feed.error, isNull);
     });
 

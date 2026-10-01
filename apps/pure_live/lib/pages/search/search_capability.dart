@@ -170,10 +170,6 @@ Uri? webSearchUrl(String platform, String keyword) {
   return url == null || q.isEmpty ? null : Uri.parse(url);
 }
 
-/// The name shown for [platform]: 3.x's translated `site_<id>`, else the
-/// adapter's own name ([fallback]).
-String searchPlatformName(String platform, String fallback) => i18nOr('site_$platform', fallback);
-
 /// The words explaining what [capability] finds on [siteName].
 String searchCoverageText(SearchCapability capability, String siteName) {
   final key =

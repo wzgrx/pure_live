@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:live_core/live_core.dart';
-import 'package:pure_live/pages/live_play/chat_feed.dart';
 
 /// How the flying danmaku look (3.x's danmaku settings).
 @immutable
@@ -281,4 +280,12 @@ extension<T> on List<T> {
     }
     return null;
   }
+}
+
+/// Whether [message] is taken back by [retraction] (the flying layer).
+bool retracts(LiveRetraction retraction, LiveMessage message) {
+  if (retraction.isAll) return true;
+  final messageId = retraction.messageId;
+  if (messageId != null) return message.messageId == messageId;
+  return retraction.userId != null && message.userId == retraction.userId;
 }

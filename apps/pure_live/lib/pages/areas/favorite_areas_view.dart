@@ -8,6 +8,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/areas/area_card.dart';
 import 'package:pure_live/pages/areas/areas_common.dart';
 import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The followed areas (3.x `FavoriteAreasPage`): an "all" tab, then one tab
 /// per platform on the user's list; each tab counts its areas (new). A long
@@ -74,7 +75,7 @@ class _FavoriteAreasViewState extends ConsumerState<FavoriteAreasView> with Tick
     final areas = followed.value ?? const <LiveArea>[];
     int countOf(String id) => id == SiteIds.all ? areas.length : areas.where((area) => area.platform == id).length;
     String label(String id) {
-      final name = id == SiteIds.all ? i18n('site_all') : platformLabel(id, sites.maybeOf(id)?.name);
+      final name = id == SiteIds.all ? i18n('site_all') : platformName(id, fallback: sites.maybeOf(id)?.name);
       final count = countOf(id);
       return count > 0 ? '$name $count' : name;
     }

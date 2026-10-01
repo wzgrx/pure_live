@@ -10,13 +10,14 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/home/home_menu.dart';
 import 'package:pure_live/home/menu_button.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/pages/favorite/favorite_cards.dart';
 import 'package:pure_live/pages/favorite/favorite_controller.dart';
 import 'package:pure_live/pages/favorite/favorite_rules.dart';
-import 'package:pure_live/pages/favorite/room_menu.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/room_cards.dart';
+import 'package:pure_live/shared/rooms/room_menu.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Follows (3.x `lib/modules/favorite`): live, replay and offline tabs in
 /// the app bar, a platform rail with the platforms that have follows, a
@@ -242,7 +243,9 @@ class _PlatformTabsState extends ConsumerState<_PlatformTabs> with SingleTickerP
                 isScrollable: true,
                 tabAlignment: TabAlignment.start,
                 physics: const PureLiveBoundedScrollPhysics(),
-                tabs: [for (final id in widget.platforms) Tab(text: platformName(id, sites))],
+                tabs: [
+                  for (final id in widget.platforms) Tab(text: platformName(id, fallback: sites.maybeOf(id)?.name)),
+                ],
               ),
             ),
             _RefreshButton(controller: controller, onPressed: () => unawaited(_refresh())),
@@ -349,12 +352,10 @@ class _FollowGrid extends ConsumerWidget {
     final dense = watchSetting(ref, Settings.enableDenseFavorites);
     final spacing = watchSetting(ref, Settings.crossAxisSpacing);
     final mainAxisSpacing = watchSetting(ref, Settings.mainAxisSpacing);
-    final preferRealOnline = watchSetting(ref, Settings.preferRealOnlineCounts);
-    final realOnline = watchSetting(ref, Settings.realOnlinePlatforms).toSet();
+    final policy = watchAudiencePolicy(ref);
     final showScrollTop = watchSetting(ref, Settings.pageShowScrollTop);
     final appearance = watchCardAppearance(ref);
     final fontSizes = watchFontSizes(ref);
-    final sites = ref.read(sitesProvider);
     final store = ref.read(storeProvider);
     final rooms = controller.roomsFor(controller.group, platform);
     final now = DateTime.now();
@@ -399,13 +400,7 @@ class _FollowGrid extends ConsumerWidget {
               final retired = SiteIds.isRetired(room.platform);
               return RoomCard(
                 key: ValueKey(room.identityKey),
-                data: cardDataOf(
-                  room,
-                  sites: sites,
-                  preferRealOnline: preferRealOnline,
-                  realOnlinePlatforms: realOnline,
-                  now: now,
-                ),
+                data: policy.cardOf(room, now: now),
                 appearance: appearance,
                 dense: dense,
                 statusPending: !retired && (controller.verifying || room.isLiveStatusPending),
@@ -413,7 +408,7 @@ class _FollowGrid extends ConsumerWidget {
                     ? i18n('favorite_status_verifying')
                     : i18n('favorite_status_unknown'),
                 onTap: () => unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room)),
-                onLongPress: () => unawaited(showFollowMenu(context, store: store, room: room)),
+                onLongPress: () => unawaited(showRoomMenu(context, store: store, room: room)),
               );
             },
           );

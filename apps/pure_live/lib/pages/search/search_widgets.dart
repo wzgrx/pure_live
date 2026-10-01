@@ -5,6 +5,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/search/search_capability.dart';
 import 'package:pure_live/pages/search/search_model.dart';
 import 'package:pure_live/pages/search/search_ranking.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Height of the platform row under the search field.
 const double searchPlatformStripHeight = 56;
@@ -89,7 +90,7 @@ class _SearchPlatformStripState extends State<SearchPlatformStrip> {
                 avatar: site == null
                     ? Icon(Icons.apps_rounded, size: 18, color: selected ? scheme.onSecondaryContainer : null)
                     : PlatformLogo(site.id, size: 18),
-                label: Text(site == null ? i18n('site_all') : searchPlatformName(site.id, site.name)),
+                label: Text(site == null ? i18n('site_all') : platformName(site.id, fallback: site.name)),
                 selected: selected,
                 showCheckmark: false,
                 side: BorderSide(color: selected ? scheme.primary : scheme.outlineVariant),
@@ -213,7 +214,7 @@ class _CoverageLine extends StatelessWidget {
   String get _text {
     final site = model.selectedSite;
     if (site != null) {
-      final name = searchPlatformName(site.id, site.name);
+      final name = platformName(site.id, fallback: site.name);
       if (model.mode == SearchMode.anchors && !SearchCapabilities.of(site.id).anchors) {
         return i18n('search_anchor_unsupported', args: {'site': name});
       }
@@ -222,7 +223,7 @@ class _CoverageLine extends StatelessWidget {
     if (model.mode == SearchMode.anchors) {
       final names = [
         for (final site in model.sites)
-          if (SearchCapabilities.of(site.id).anchors) searchPlatformName(site.id, site.name),
+          if (SearchCapabilities.of(site.id).anchors) platformName(site.id, fallback: site.name),
       ];
       return i18n('search_anchor_platforms', args: {'sites': names.join('、')});
     }
@@ -303,7 +304,7 @@ Future<void> showSearchScopeSheet(BuildContext context, List<LiveSite> sites) {
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   leading: PlatformLogo(site.id, size: 24),
-                  title: Text(searchPlatformName(site.id, site.name)),
+                  title: Text(platformName(site.id, fallback: site.name)),
                   subtitle: Text(_siteDetail(site)),
                 ),
             ],
@@ -317,7 +318,7 @@ Future<void> showSearchScopeSheet(BuildContext context, List<LiveSite> sites) {
 String _siteDetail(LiveSite site) {
   final capability = SearchCapabilities.of(site.id);
   return [
-    searchCoverageText(capability, searchPlatformName(site.id, site.name)),
+    searchCoverageText(capability, platformName(site.id, fallback: site.name)),
     if (capability.anchors) i18n('search_scope_has_anchors'),
     if (capability.webSearch) i18n('search_scope_has_web'),
   ].join(' ');

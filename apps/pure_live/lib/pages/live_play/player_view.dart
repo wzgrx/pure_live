@@ -8,10 +8,11 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/pages/live_play/danmaku_overlay.dart';
 import 'package:pure_live/pages/live_play/room_controller.dart';
 import 'package:pure_live/pages/live_play/room_panels.dart';
-import 'package:pure_live/pages/live_play/room_texts.dart';
+import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
+import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// 3.x's video fit list: the setting `videoFitIndex` is an index into it.
 const List<BoxFit> videoFits = [
@@ -22,17 +23,6 @@ const List<BoxFit> videoFits = [
   BoxFit.fitWidth,
   BoxFit.scaleDown,
 ];
-
-/// The danmaku look from the settings.
-DanmakuLook danmakuLookOf(WidgetRef ref) => DanmakuLook(
-  fontSize: watchSetting(ref, Settings.danmakuFontSize),
-  fontWeight: watchSetting(ref, Settings.danmakuFontWeight),
-  speed: watchSetting(ref, Settings.danmakuSpeed),
-  opacity: watchSetting(ref, Settings.danmakuOpacity),
-  area: watchSetting(ref, Settings.danmakuArea),
-  stroke: watchSetting(ref, Settings.enableDanmakuStroke),
-  strokeWidth: watchSetting(ref, Settings.danmakuFontBorder),
-);
 
 /// The video with its danmaku, status and controls (3.x `VideoPlayer` +
 /// `VideoControllerPanel`, the playback part).

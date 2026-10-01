@@ -316,7 +316,7 @@ void main() {
       expect(douyu.requested, unorderedEquals(['1', '2']));
       // Live: the paid room, marked; its audience shortened as 3.x did.
       expect(find.text('主播一'), findsOneWidget);
-      expect(find.text(i18n('favorite_mark_paid')), findsOneWidget);
+      expect(find.text(i18n('room_mark_paid')), findsOneWidget);
       expect(find.text('1.2万'), findsOneWidget);
       expect(find.text('主播二'), findsNothing);
       // Platform rail: all, then the platforms with follows, the retired one last.
@@ -325,11 +325,11 @@ void main() {
       await tester.tap(find.textContaining(i18n('offline_room_title')));
       await tester.pumpAndSettle();
       expect(find.text('主播二'), findsOneWidget);
-      expect(find.text(i18n('favorite_mark_carousel')), findsOneWidget);
+      expect(find.text(i18n('room_mark_carousel')), findsOneWidget);
       // Huya failed: kept, pending. Kick is retired: marked, not pending.
       expect(find.text('主播三'), findsOneWidget);
       expect(find.text(i18n('favorite_status_unknown')), findsOneWidget);
-      expect(find.text(i18n('favorite_mark_retired')), findsOneWidget);
+      expect(find.text(i18n('room_mark_retired')), findsOneWidget);
 
       // A platform without live follows offers its offline ones.
       await tester.tap(find.textContaining(i18n('online_room_title')));
@@ -361,13 +361,16 @@ void main() {
       // Long press → tags → create "常看" → save.
       await tester.longPress(find.byKey(const ValueKey('douyu:1')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('follow-menu-tags')));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byKey(const ValueKey('tag-new-name')), '常看');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.tap(find.byKey(const ValueKey('room-menu-tags')));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('tag-save')));
+      await tester.tap(find.byKey(const ValueKey('room-tags-new')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const ValueKey('tag-editor-name')), '常看');
+      await tester.tap(find.byKey(const ValueKey('tag-editor-confirm')));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('room-tags-save')));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
       await tester.pumpAndSettle();
 
@@ -383,14 +386,16 @@ void main() {
       // Unfollow 乙 and undo it.
       await tester.longPress(find.byKey(const ValueKey('douyu:2')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('follow-menu-unfollow')));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('room-menu-follow')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('unfollow-confirm')));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('douyu:2')), findsNothing);
       expect(await tester.runAsync(services.store.follows.count), 1);
-      await tester.tap(find.text(i18n('favorite_undo')));
+      await tester.tap(find.text(i18n('room_undo')));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
       await tester.pumpAndSettle();
       final restored = (await tester.runAsync(services.store.follows.all))!;

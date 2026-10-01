@@ -12,6 +12,8 @@ import 'package:pure_live/pages/areas/areas_page.dart';
 import 'package:pure_live/pages/favorite/favorite_page.dart';
 import 'package:pure_live/pages/popular/popular_page.dart';
 import 'package:pure_live/pages/recorder/recorder_page.dart';
+import 'package:pure_live/pages/version/update_feed.dart';
+import 'package:pure_live/pages/version/update_prompt.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
@@ -27,7 +29,8 @@ typedef HomeTabBuilder = Widget Function(BuildContext context, HomeMenu menu);
 /// Kept from 3.x: selecting follows again refreshes them; back sends the app
 /// to the background on Android; after 15 s or more in the background the
 /// visible tab refreshes; a room given on the command line opens once the
-/// page is up.
+/// page is up; the main window checks for an update
+/// [startupUpdateCheckDelay] after its first frame.
 class HomePage extends ConsumerStatefulWidget {
   /// Creates the page.
   const new({this.tabBuilder = buildHomeTab, super.key});
@@ -43,6 +46,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
   HomeMenu? _selected;
   DateTime? _backgroundedAt;
   Timer? _resumeTimer;
+  Timer? _updateTimer;
   final Map<HomeMenu, Widget> _pages = {};
 
   @override
@@ -60,15 +64,28 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
         );
         unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
       }
-      final room = ref.read(appServicesProvider).launch.room;
-      if (room != null) unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room));
+      final launch = ref.read(appServicesProvider).launch;
+      if (launch.room case final room?) unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room));
+      if (launch.isPrimary) _updateTimer = Timer(startupUpdateCheckDelay, _checkForUpdate);
     });
+  }
+
+  void _checkForUpdate() {
+    if (!mounted) return;
+    unawaited(
+      checkForUpdateOnStartup(
+        context,
+        settings: ref.read(appServicesProvider).store.settings,
+        feed: ref.read(updateFeedProvider),
+      ),
+    );
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _resumeTimer?.cancel();
+    _updateTimer?.cancel();
     super.dispose();
   }
 

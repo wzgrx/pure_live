@@ -6,11 +6,11 @@ import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
-import 'package:pure_live/pages/live_play/danmaku_overlay.dart';
 import 'package:pure_live/pages/live_play/live_play_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 
 import 'live_play_support.dart';
 import 'support.dart';

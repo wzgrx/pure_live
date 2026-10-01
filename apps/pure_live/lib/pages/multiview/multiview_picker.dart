@@ -5,7 +5,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/pages/live_play/room_texts.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Where the picker takes rooms from.
 enum PickerSource {

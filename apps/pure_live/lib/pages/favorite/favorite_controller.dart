@@ -128,7 +128,7 @@ final class FavoriteController extends ChangeNotifier {
     HomeSignals.favoritesReselected.addListener(_reselected);
     HomeSignals.resumedAfterBackground.addListener(_resumed);
     _scheduleAutoRefresh();
-    unawaited(_verifyAll());
+    _firstCheck = _verifyAll();
   }
 
   /// The order of live and replay follows, from the settings.
@@ -192,6 +192,11 @@ final class FavoriteController extends ChangeNotifier {
   /// Refreshes every follow.
   Future<void> refreshAll({bool visible = true, bool bypassCooldown = true}) =>
       _enqueue(rooms, full: true, visible: visible, bypassCooldown: bypassCooldown);
+
+  /// The first check of every follow (started by [start]; the splash page
+  /// waits for it a little, 3.x).
+  Future<void> get firstCheck => _firstCheck;
+  Future<void> _firstCheck = Future.value();
 
   Future<void> _verifyAll() async {
     verifying = true;

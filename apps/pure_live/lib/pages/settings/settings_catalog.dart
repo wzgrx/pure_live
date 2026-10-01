@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -1396,6 +1395,3 @@ const List<Setting<Object>> pipDanmakuSettings = [
   Settings.pipDanmakuFps,
   Settings.pipDanmakuAutoFps,
 ];
-
-/// The platform's display name (3.x `site_<id>` words, else the adapter's).
-String platformName(String id, LiveSite? site) => i18nOr('site_$id', site?.name ?? id);

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
@@ -20,7 +21,8 @@ String splashInitialLocation(SettingsStore settings) =>
 ///
 /// The logo fades and grows in over the theme's colours with "welcome" and a
 /// progress bar; home replaces it after [duration] (3.x: one second), or at
-/// once on a tap.
+/// once on a tap, after waiting at most [splashFollowWait] for the first
+/// follow check.
 class SplashPage extends StatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, this.duration = const Duration(seconds: 1), super.key});
@@ -51,7 +53,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _timer = Timer(widget.duration, _leave);
+    _timer = Timer(widget.duration, () => unawaited(_leave()));
   }
 
   @override
@@ -61,11 +63,16 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  void _leave() {
+  Future<void> _leave() async {
     if (_left || !mounted) return;
     _left = true;
     _timer?.cancel();
-    AppNavigator.offAllNamed(RoutePath.kInitial);
+    // A short, bounded wait for the first follow check, so a fast network
+    // opens home with the follows settled (3.x); slow platforms finish later.
+    if (AppStartup.followCheck case final check?) {
+      await Future.any([check, Future<void>.delayed(splashFollowWait)]);
+    }
+    if (mounted) AppNavigator.offAllNamed(RoutePath.kInitial);
   }
 
   @override
@@ -77,7 +84,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
       body: GestureDetector(
         key: const ValueKey('splash'),
         behavior: HitTestBehavior.opaque,
-        onTap: _leave,
+        onTap: () => unawaited(_leave()),
         child: DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(

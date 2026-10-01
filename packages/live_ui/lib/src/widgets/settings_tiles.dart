@@ -5,6 +5,29 @@ import 'package:live_ui/src/theme/text_styles.dart';
 /// stretching each row across the screen; narrower layouts are unaffected.
 const double settingsContentMaxWidth = 960;
 
+/// The widest a reading column gets on large screens (settings-like pages,
+/// details; docs/ui/UI_PLAN.md §5.3): one column, centred.
+const double readableContentMaxWidth = 720;
+
+/// [child] in a centred column at most [readableContentMaxWidth] wide (the
+/// whole width on narrower screens).
+class ReadableContent extends StatelessWidget {
+  /// Wraps [child].
+  const new({required this.child, super.key});
+
+  /// The column.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.topCenter,
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: readableContentMaxWidth),
+      child: child,
+    ),
+  );
+}
+
 /// Centred, but filling that width so a group title lines up with the left
 /// edge of its card.
 Widget _readableWidth(Widget child) => Align(
@@ -138,9 +161,11 @@ extension AppLayoutFactory on BuildContext {
     Color? subtitleColor,
     bool isLong = false,
     bool enabled = true,
+    Key? key,
   }) {
     final theme = Theme.of(this);
     return CardTile(
+      key: key,
       child: SwitchListTile(
         secondary: icon != null ? Icon(icon, color: iconColor ?? theme.colorScheme.primary, size: 22) : null,
         title: Text(title, style: AppTextStyles(theme).t15.copyWith(fontWeight: FontWeight.w600)),
@@ -167,6 +192,7 @@ extension AppLayoutFactory on BuildContext {
     bool isLong = false,
     bool stackTrailingOnNarrow = false,
     bool showNavigationChevronWhenStacked = true,
+    Key? key,
   }) {
     final theme = Theme.of(this);
     final color = iconColor ?? theme.colorScheme.primary;
@@ -203,8 +229,9 @@ extension AppLayoutFactory on BuildContext {
       onTap: onTap,
     );
 
-    if (!stackTrailingOnNarrow || trailing == null) return CardTile(child: standardTile());
+    if (!stackTrailingOnNarrow || trailing == null) return CardTile(key: key, child: standardTile());
     return CardTile(
+      key: key,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final textScale = MediaQuery.textScalerOf(context).scale(1);

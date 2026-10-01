@@ -1,6 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:qr/qr.dart';
 
+/// The colours around a QR code: it is always dark on white, whatever the
+/// theme, so scanners read it; states laid over it use these too.
+abstract final class QrColors {
+  /// The code's paper.
+  static const Color paper = Color(0xFFFFFFFF);
+
+  /// The modules, and text laid over the code.
+  static const Color ink = Color(0xFF191C20);
+
+  /// A veil over the code while it is loading, scanned or expired.
+  static const Color veil = Color(0xE6FFFFFF);
+}
+
 /// A QR code of [data] painted module by module (3.x `QrCodeWidget`, the
 /// Bilibili login code), low error correction.
 class QrCodeWidget extends StatelessWidget {

@@ -227,4 +227,122 @@ abstract final class AppIcons {
 
   /// Something will not work as the user expects (a switched-off setting).
   static const IconData warning = Icons.warning_amber_rounded;
+
+  // ---- IPTV settings (docs/ui/compare/U.9; 3.x iptv_page.dart, iptv_manage.dart) ----
+
+  /// Sync every network playlist and guide (the title bar), and the
+  /// "sync at start" switch.
+  static const IconData syncAll = Remix.refresh_line;
+
+  /// "导入播放列表".
+  static const IconData importPlaylist = Remix.download_2_line;
+
+  /// "导入节目单".
+  static const IconData importGuide = Remix.file_add_line;
+
+  /// A playlist (its card, the import dialog's title, the empty state).
+  static const IconData playlist = Remix.play_list_2_line;
+
+  /// Adding a playlist: the import dialog's title and the empty state.
+  static const IconData playlistAdd = Remix.play_list_add_line;
+
+  /// A programme guide (its card, "当前使用的节目单", the default guide).
+  static const IconData guide = Remix.tv_2_line;
+
+  /// A source read from a network address ("网络", "网络导入").
+  static const IconData networkSource = Remix.global_line;
+
+  /// A source read from a local file ("本地").
+  static const IconData localSource = Remix.folder_2_line;
+
+  /// Import a local playlist file.
+  static const IconData localPlaylistFile = Remix.folder_open_line;
+
+  /// Import a local guide file.
+  static const IconData localGuideFile = Remix.draft_line;
+
+  /// Import a guide from a network address.
+  static const IconData networkGuide = Remix.cloud_windy_line;
+
+  /// Paste text: the playlist import, a cookie.
+  static const IconData pasteText = Remix.clipboard_line;
+
+  /// More actions of a card (⋮).
+  static const IconData more = Icons.more_vert_rounded;
+
+  /// Sync one source.
+  static const IconData syncOne = Remix.download_cloud_2_line;
+
+  /// Delete a source.
+  static const IconData delete = Remix.delete_bin_6_line;
+
+  /// A source's automatic sync.
+  static const IconData autoSync = Remix.repeat_line;
+
+  /// The automatic sync interval.
+  static const IconData syncInterval = Remix.time_line;
+
+  /// The IPTV request header (User-Agent).
+  static const IconData userAgent = Remix.tv_line;
+
+  /// The chosen option of a list of choices.
+  static const IconData choiceOn = Remix.checkbox_circle_fill;
+
+  /// An option of a list of choices that is not chosen.
+  static const IconData choiceOff = Remix.checkbox_blank_circle_line;
+
+  /// Empty a text field.
+  static const IconData clearText = Remix.close_circle_line;
+
+  /// Something failed (a load error, an expired QR code).
+  static const IconData failed = Remix.error_warning_line;
+
+  /// A hint or a notice (ⓘ).
+  static const IconData info = Remix.information_line;
+
+  /// Try again.
+  static const IconData retry = Remix.refresh_line;
+
+  /// A row that opens another page (›).
+  static const IconData navigate = Icons.chevron_right_rounded;
+
+  // ---- platform accounts and cookies (docs/ui/compare/U.10a, U.10b; 3.x modules/account) ----
+
+  /// Sign out of a platform.
+  static const IconData signOut = Remix.logout_box_r_line;
+
+  /// Empty the cookie box.
+  static const IconData eraseText = Remix.eraser_line;
+
+  /// Save (the cookie page).
+  static const IconData save = Icons.save_rounded;
+
+  /// Ask the platform again who a cookie signs in as.
+  static const IconData recheck = Remix.refresh_line;
+
+  /// A QR code to scan.
+  static const IconData qrCode = Remix.qr_code_line;
+
+  /// The QR code was scanned.
+  static const IconData qrScanned = Remix.checkbox_circle_line;
+
+  /// Sign in on a web page.
+  static const IconData webLogin = Remix.global_line;
+
+  // ---- the retired cloud account (docs/ui/compare/U.10c) ----
+
+  /// The cloud account is gone.
+  static const IconData cloudOff = Remix.cloud_off_line;
+
+  /// WebDAV backups (3.x backup page).
+  static const IconData webDav = Remix.cloud_line;
+
+  /// Device sync over the local network (3.x backup page).
+  static const IconData deviceSync = Remix.qr_scan_2_line;
+
+  /// Backup files.
+  static const IconData backupFiles = Remix.save_3_line;
+
+  /// The platform accounts (3.x settings "三方认证").
+  static const IconData platformAccounts = Remix.accessibility_line;
 }

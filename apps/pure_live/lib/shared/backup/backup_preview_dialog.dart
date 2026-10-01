@@ -3,9 +3,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:pure_live/features/backup/backup_data.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/backup/backup_data.dart';
 
 /// Where a backup file comes from, in words.
 String backupSourceText(RestorePreview preview) {
@@ -35,7 +35,7 @@ Future<bool> confirmRestore(BuildContext context, {required String fileName, req
       final styles = dialogContext.textStyles;
       final colors = Theme.of(dialogContext).colorScheme;
       final follows = preview.scope == BackupScope.follows;
-      Widget line(String text, {Color? color, IconData icon = Icons.circle, double iconSize = 6}) => Padding(
+      Widget line(String text, {Color? color, IconData icon = AppIcons.bullet, double iconSize = 6}) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 3),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +95,7 @@ Future<bool> confirmRestore(BuildContext context, {required String fileName, req
                     },
                   ),
                   color: colors.onSurfaceVariant,
-                  icon: Icons.check,
+                  icon: AppIcons.selected,
                   iconSize: 14,
                 ),
               ],
@@ -103,14 +103,14 @@ Future<bool> confirmRestore(BuildContext context, {required String fileName, req
                 line(
                   i18n('webdav_favorites_unchanged_hint'),
                   color: colors.onSurfaceVariant,
-                  icon: Icons.check,
+                  icon: AppIcons.selected,
                   iconSize: 14,
                 ),
               if (preview.skipped > 0)
                 line(
                   i18n('backup_preview_skipped', args: {'count': '${preview.skipped}'}),
                   color: colors.error,
-                  icon: Icons.warning_amber_rounded,
+                  icon: AppIcons.warning,
                   iconSize: 14,
                 ),
               if (!preview.changesSomething)

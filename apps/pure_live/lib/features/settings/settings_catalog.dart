@@ -3,7 +3,6 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/settings/appearance_pages.dart';
 import 'package:pure_live/features/settings/data_tools.dart';
-import 'package:pure_live/features/settings/log_page.dart';
 import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
@@ -1399,7 +1398,7 @@ List<SettingsEntry> _build() {
       'log',
       'log_manage',
       Remix.file_list_3_line,
-      page: (_) => const LogPage(),
+      route: RoutePath.kLogs,
       desc: 'settings_log_desc',
       settings: [Settings.enableLocalLog, Settings.logLevel],
       keywords: ['日志', '错误', 'log', 'debug'],

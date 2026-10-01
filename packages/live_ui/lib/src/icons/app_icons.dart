@@ -1107,4 +1107,21 @@ abstract final class AppIcons {
 
   /// Send the settings.
   static const IconData send = Icons.upload_rounded;
+
+  /// A list item's bullet (the restore preview).
+  static const IconData bullet = Icons.circle;
+
+  // ---- the log page (3.x backup_page.dart's log group; settings → 日志管理) ----
+
+  /// Write the log to a file.
+  static const IconData logFile = Remix.file_text_line;
+
+  /// The lowest level kept.
+  static const IconData logLevel = Remix.filter_3_line;
+
+  /// Export or share the log file.
+  static const IconData exportFile = Icons.ios_share_rounded;
+
+  /// Clear the log.
+  static const IconData clearLog = Icons.delete_sweep_outlined;
 }

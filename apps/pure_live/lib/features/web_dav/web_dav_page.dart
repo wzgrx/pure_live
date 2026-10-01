@@ -8,15 +8,15 @@ import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
-import 'package:pure_live/features/backup/backup_data.dart';
-import 'package:pure_live/features/backup/backup_files.dart';
-import 'package:pure_live/features/backup/backup_preview_dialog.dart';
 import 'package:pure_live/features/web_dav/web_dav_client.dart';
 import 'package:pure_live/features/web_dav/web_dav_config_dialog.dart';
 import 'package:pure_live/features/web_dav/web_dav_help.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/shared/backup/backup_data.dart';
+import 'package:pure_live/shared/backup/backup_files.dart';
+import 'package:pure_live/shared/backup/backup_preview_dialog.dart';
 
 /// The HTTP client of the WebDAV calls (tests replace it).
 final Provider<LiveHttp> webDavHttpProvider = Provider<LiveHttp>((ref) => ref.watch(appServicesProvider).http);

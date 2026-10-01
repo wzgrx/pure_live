@@ -137,71 +137,75 @@ class _LogPageState extends ConsumerState<LogPage> {
     final level = LogLevel.parse(watchSetting(ref, Settings.logLevel));
     final visible = _visible;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(i18n('log_manage')),
+      appBar: settingsPageAppBar(
+        context,
+        title: i18n('log_manage'),
         actions: [
           IconButton(
             key: const ValueKey('log-copy-all'),
             tooltip: i18n('settings_log_copy_all'),
             onPressed: visible.isEmpty ? null : () => unawaited(_copyAll()),
-            icon: const Icon(Icons.copy_all_rounded),
+            icon: const Icon(AppIcons.copy),
           ),
           IconButton(
             key: const ValueKey('log-share'),
             tooltip: i18n('settings_log_share'),
             onPressed: _log.entries.isEmpty ? null : () => unawaited(_share()),
-            icon: const Icon(Icons.ios_share_rounded),
+            icon: const Icon(AppIcons.exportFile),
           ),
           IconButton(
             key: const ValueKey('log-clear'),
             tooltip: i18n('settings_log_clear'),
             onPressed: () => unawaited(_clear()),
-            icon: const Icon(Icons.delete_sweep_outlined),
+            icon: const Icon(AppIcons.clearLog),
           ),
-          const SizedBox(width: 4),
         ],
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: context.buildModernCard([
-              SwitchListTile(
-                key: const ValueKey('log-write-file'),
-                secondary: Icon(Remix.file_text_line, color: theme.colorScheme.primary),
-                title: Text(i18n('enable_local_log')),
-                subtitle: Text(
-                  writing && _log.file != null ? _log.file!.path : i18n('settings_log_file_desc'),
-                  style: context.textStyles.t12.copyWith(color: theme.hintColor),
-                ),
-                value: writing,
-                onChanged: (value) => unawaited(settings.set(Settings.enableLocalLog, value)),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ReadableContent(
+              child: SettingsGroup(
+                first: true,
+                children: [
+                  SettingsSwitchRow(
+                    key: const ValueKey('log-write-file'),
+                    icon: AppIcons.logFile,
+                    title: i18n('enable_local_log'),
+                    subtitle: writing && _log.file != null ? _log.file!.path : i18n('settings_log_file_desc'),
+                    subtitleMaxLines: null,
+                    value: writing,
+                    onChanged: (value) => unawaited(settings.set(Settings.enableLocalLog, value)),
+                  ),
+                  SettingsRow(
+                    icon: AppIcons.logLevel,
+                    title: i18n('settings_log_level'),
+                    subtitle: i18n('settings_log_level_desc'),
+                    stackTrailing: false,
+                    trailing: DropdownButton<LogLevel>(
+                      key: const ValueKey('log-level'),
+                      value: level,
+                      underline: const SizedBox.shrink(),
+                      items: [
+                        for (final value in LogLevel.values)
+                          DropdownMenuItem(value: value, child: Text(_levelLabel(value))),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) unawaited(settings.set(Settings.logLevel, value.name));
+                      },
+                    ),
+                  ),
+                  SettingsLinkRow(
+                    key: const ValueKey('log-open-folder'),
+                    icon: AppIcons.openFolder,
+                    title: i18n('open_log_dir'),
+                    subtitle: i18n('open_log_dir_desc'),
+                    onTap: () => unawaited(_openFolder()),
+                  ),
+                ],
               ),
-              ListTile(
-                leading: Icon(Remix.filter_3_line, color: theme.colorScheme.primary),
-                title: Text(i18n('settings_log_level')),
-                subtitle: Text(i18n('settings_log_level_desc'), style: context.textStyles.t12),
-                trailing: DropdownButton<LogLevel>(
-                  key: const ValueKey('log-level'),
-                  value: level,
-                  underline: const SizedBox.shrink(),
-                  items: [
-                    for (final value in LogLevel.values)
-                      DropdownMenuItem(value: value, child: Text(_levelLabel(value))),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) unawaited(settings.set(Settings.logLevel, value.name));
-                  },
-                ),
-              ),
-              ListTile(
-                key: const ValueKey('log-open-folder'),
-                leading: Icon(Remix.folder_open_line, color: theme.colorScheme.primary),
-                title: Text(i18n('open_log_dir')),
-                subtitle: Text(i18n('open_log_dir_desc'), style: context.textStyles.t12),
-                onTap: () => unawaited(_openFolder()),
-              ),
-            ]),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
@@ -259,7 +263,7 @@ class _EntryRow extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final color = switch (entry.level) {
       LogLevel.error => scheme.error,
-      LogLevel.warning => Colors.orange.shade700,
+      LogLevel.warning => LiveSemanticColors.warning(Theme.of(context).brightness),
       LogLevel.info => scheme.primary,
       LogLevel.debug => scheme.outline,
     };

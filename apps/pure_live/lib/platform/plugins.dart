@@ -8,11 +8,11 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:pure_live/features/backup/backup_page.dart';
+import 'package:pure_live/features/backup/log_page.dart';
 import 'package:pure_live/features/iptv/iptv_import.dart';
 import 'package:pure_live/features/record_settings/record_settings_dialogs.dart';
 import 'package:pure_live/features/recorder/recorder_page.dart';
 import 'package:pure_live/features/settings/data_tools.dart';
-import 'package:pure_live/features/settings/log_page.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/in_app_web.dart';
@@ -30,7 +30,7 @@ import 'package:share_plus/share_plus.dart';
 /// - opening local files ([AppNavigator.openFile], open_filex on Android);
 /// - opening the recording folder in Android's file manager
 ///   ([RecordFolderOpener.android], android_intent_plus);
-/// - the QR scanner of device sync and TV sync on phones ([QrScan.scan],
+/// - the QR scanner of device sync and TV sync on phones ([QrScan.camera],
 ///   mobile_scanner with the bundled ML Kit model, no Play services);
 /// - the in-app browser ([InAppWeb.available], flutter_inappwebview;
 ///   Windows needs the WebView2 runtime).
@@ -39,7 +39,7 @@ void installPluginHooks() {
   ImageCacheTools.clearDisk = () => DefaultCacheManager().emptyCache();
   AppNavigator.openFile = openLocalFile;
   if (Platform.isAndroid) RecordFolderOpener.android = openAndroidFolder;
-  if (Platform.isAndroid || Platform.isIOS) QrScan.scan = scanQrCode;
+  if (Platform.isAndroid || Platform.isIOS) QrScan.camera = MobileQrCamera.new;
   unawaited(InAppWeb.detect().then((value) => InAppWeb.available = value));
 }
 

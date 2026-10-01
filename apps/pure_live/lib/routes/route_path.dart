@@ -135,4 +135,8 @@ abstract final class RoutePath {
 
   /// 设置 → 本地用户与互动 (U.2k; 3.x pushed the page without a route).
   static const kLocalInteraction = '/local_interaction';
+
+  /// 设置 → 日志管理 (3.x's log group of the backup page, U.11a Q1; the page
+  /// lives with the backup feature, the settings row opens it by path).
+  static const kLogs = '/logs';
 }

@@ -3,6 +3,8 @@ import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
+import 'package:pure_live/shared/rooms/room_texts.dart';
+
 /// The recording centre's filters (3.x `RecorderPage.tabs`, same order).
 const List<({String label, RecordStatus? status})> recorderFilters = [
   (label: 'recorder_tab_all', status: null),
@@ -77,12 +79,11 @@ String? recordFailureKindText(FfmpegFailureKind? kind) => switch (kind) {
   FfmpegFailureKind.command || FfmpegFailureKind.native || null => null,
 };
 
-/// The restriction's explanation (the live room's words, upgrade 22-1).
+/// The restriction's explanation (the shared room words, upgrade 22-1).
 String? recordRestrictionText(LiveRestriction? restriction) {
   if (restriction == null || restriction == LiveRestriction.none) return null;
-  final snake = restriction.name.replaceAllMapped(RegExp('[A-Z]'), (match) => '_${match[0]!.toLowerCase()}');
-  final key = 'live_play_restriction_${snake}_hint';
-  return i18nExists(key) ? i18n(key) : null;
+  final reason = restrictionReason(restriction);
+  return reason.isEmpty ? null : reason;
 }
 
 /// The words for a resolution failure.

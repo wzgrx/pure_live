@@ -1,6 +1,6 @@
 # U.2c 横屏全屏：设计（第 2 版）
 
-- 状态：待确认（第 2 版，2026-10-01）
+- 状态：完成（2026-10-01，[记录](../../records/U.2c.md)）
 - 范围：直播间横屏全屏的上栏、下栏、锁定、手势、键盘；四种尺寸
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u2c)、[V3_UI_INVENTORY.md](../../V3_UI_INVENTORY.md) 第 6 节
 - 评审页：claude.ai 私有页面（只有项目所有者能打开），每条改动可以点“满意 / 不满意 / 再想想”；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)

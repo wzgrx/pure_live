@@ -1,6 +1,6 @@
 # U.2d 宽屏直播间：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：完成（2026-10-01，[记录](../../records/U.2d.md)）
 - 范围：平板横屏、折叠屏展开、Windows 和 Linux 窗口、iPad、macOS 上不是全屏时的直播间
 - 对应：[TASKS.md](../../TASKS.md)、[V3_UI_INVENTORY.md](../../V3_UI_INVENTORY.md) 第 7 节
 - 评审页：claude.ai 私有页面，每条改动可以点“满意 / 不满意 / 再想想”；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)

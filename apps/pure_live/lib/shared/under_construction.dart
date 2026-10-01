@@ -60,7 +60,7 @@ class UnderConstruction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final key = routeTitleKeys[route.path];
-    final phoneTab = route.inHome && MediaQuery.sizeOf(context).width <= homeTabletBreakpoint;
+    final phoneTab = showsHomeBarButtons(context, inHome: route.inHome);
     final detail = describe(route.arguments);
     final building = currentStrings?.language == AppLanguage.en ? 'Under construction' : '建设中';
     return Scaffold(

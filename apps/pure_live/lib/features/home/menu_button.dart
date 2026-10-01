@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -10,117 +11,158 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
 
-/// The menu at the top left (3.x `MenuButton`): settings, about, history,
-/// backup, and on Windows a new window.
+/// The entries of the app menu ([MenuButton]) in their order (U.3a c3: the
+/// watch history moved to "more").
+enum AppMenuItem {
+  /// Settings.
+  settings(AppIcons.settings, 'settings_title'),
+
+  /// About.
+  about(AppIcons.about, 'about'),
+
+  /// Backup and restore.
+  backup(AppIcons.backup, 'backup_recover'),
+
+  /// An independent player window (Windows with the setting on).
+  newWindow(AppIcons.newPlayerWindow, 'open_new_window');
+
+  new(this.icon, this.labelKey);
+
+  /// The icon.
+  final IconData icon;
+
+  /// The label's translation key.
+  final String labelKey;
+}
+
+/// The app menu's entries; [newWindow] on Windows with the setting
+/// "新建独立播放窗口" on.
+List<AppMenuItem> appMenuItems({required bool newWindow}) => [
+  AppMenuItem.settings,
+  AppMenuItem.about,
+  AppMenuItem.backup,
+  if (newWindow) AppMenuItem.newWindow,
+];
+
+/// The menu at the top left of the phone tabs and at the top of the rail
+/// (3.x `MenuButton`, its icon kept): settings, about, backup, and on
+/// Windows a new player window; the small menu of U.2f (U.3a c2).
 class MenuButton extends ConsumerWidget {
   /// Creates the button.
   const new({super.key});
 
-  static const List<String> _routes = [RoutePath.kSettings, RoutePath.kAbout, RoutePath.kHistory, RoutePath.kBackup];
-  static const _newWindow = 4;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final newWindow = Platform.isWindows && watchSetting(ref, Settings.enableNewWindowPlay);
-    PopupMenuItem<int> item(int value, IconData icon, String key) => PopupMenuItem(
-      value: value,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: MenuListTile(leading: Icon(icon), text: i18n(key)),
-    );
-    return PopupMenuButton<int>(
+    return AppMenuButton<AppMenuItem>(
+      key: const ValueKey('home-menu'),
       tooltip: i18n('menu'),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      offset: const Offset(12, 0),
-      position: PopupMenuPosition.under,
-      onSelected: (index) async {
-        if (index == _newWindow) {
-          final services = ref.read(appServicesProvider);
-          try {
-            await launchNewWindow(services.store, services.cipher);
-          } on Object {
-            AppNavigator.toast(i18n('open_new_window_failed'));
-          }
-          return;
-        }
-        await AppNavigator.toNamed<void>(_routes[index]);
-      },
-      itemBuilder: (context) => [
-        item(0, Remix.settings_5_line, 'settings_title'),
-        item(1, Remix.information_line, 'about'),
-        item(2, Remix.history_line, 'history'),
-        item(3, Remix.cloud_line, 'backup_recover'),
-        if (newWindow) item(_newWindow, Icons.add_to_photos_outlined, 'open_new_window'),
+      icon: const Icon(AppIcons.appMenu),
+      entries: () => [
+        for (final item in appMenuItems(newWindow: newWindow))
+          AppMenuEntry(
+            key: ValueKey('home-menu-${item.name}'),
+            value: item,
+            icon: item.icon,
+            label: i18n(item.labelKey),
+          ),
       ],
-      child: const SizedBox.square(dimension: kMinInteractiveDimension, child: Icon(Icons.menu_rounded)),
+      onSelected: (item) => unawaited(_run(ref, item)),
     );
+  }
+
+  static Future<void> _run(WidgetRef ref, AppMenuItem item) async {
+    switch (item) {
+      case AppMenuItem.settings:
+        await AppNavigator.toNamed<void>(RoutePath.kSettings);
+      case AppMenuItem.about:
+        await AppNavigator.toNamed<void>(RoutePath.kAbout);
+      case AppMenuItem.backup:
+        await AppNavigator.toNamed<void>(RoutePath.kBackup);
+      case AppMenuItem.newWindow:
+        final services = ref.read(appServicesProvider);
+        try {
+          await launchNewWindow(services.store, services.cipher);
+        } on Object {
+          AppNavigator.toast(i18n('open_new_window_failed'));
+        }
+    }
   }
 }
 
-/// A row of a popup menu (3.x `MenuListTile`).
-class MenuListTile extends StatelessWidget {
-  /// Creates the row.
-  const new({required this.leading, required this.text, this.trailing, super.key});
+/// The ways to find a room that every home layout offers, in their order
+/// (U.3a c4, U.3b c4): search on its own button, the others in "more" on
+/// phones; all four as buttons on the rail.
+enum HomeAction {
+  /// Search rooms.
+  search(AppIcons.search, 'search_live'),
+
+  /// The watch history (U.5c Z1: "观看记录").
+  history(AppIcons.watchHistory, 'watch_history'),
+
+  /// Open a shared link (U.3a c5: "链接解析" everywhere).
+  openLink(AppIcons.openLink, 'toolbox_title'),
+
+  /// Multi-view (when the setting is on).
+  multiview(AppIcons.multiview, 'multiview_title');
+
+  new(this.icon, this.labelKey);
 
   /// The icon.
-  final Widget? leading;
+  final IconData icon;
 
-  /// The label.
-  final String text;
+  /// The label's translation key.
+  final String labelKey;
 
-  /// Trailing widget.
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      if (leading case final leading?) ...[leading, const SizedBox(width: 12)],
-      Text(text, style: Theme.of(context).textTheme.labelMedium),
-      if (trailing case final trailing?) ...[const SizedBox(width: 24), trailing],
-    ],
-  );
+  /// Opens its page.
+  Future<void> run() => switch (this) {
+    HomeAction.search => AppNavigator.toNamed<void>(RoutePath.kSearch),
+    HomeAction.history => AppNavigator.toNamed<void>(RoutePath.kHistory),
+    HomeAction.openLink => AppNavigator.toNamed<void>(RoutePath.kToolbox),
+    HomeAction.multiview => AppNavigator.toMultiview(),
+  };
 }
 
-/// The search menu at the top right of the phone layout (3.x
-/// `CommonAppBarActions`): search, open a link, multi-view.
+/// The home actions shown with [multiView] on or off.
+List<HomeAction> homeActions({required bool multiView}) => [
+  for (final action in HomeAction.values)
+    if (action != HomeAction.multiview || multiView) action,
+];
+
+/// The buttons at the top right of the phone tabs: search in one tap and
+/// "more" with the watch history, the link parser and multi-view (U.3a c4;
+/// 3.x `CommonAppBarActions` had one search menu).
 class CommonAppBarActions extends ConsumerWidget {
-  /// Creates the actions.
+  /// Creates the buttons.
   const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final multiView = watchSetting(ref, Settings.enableMultiView);
-    final primary = Theme.of(context).colorScheme.primary;
-    final style = AppTextStyles.of(context).t14;
-    PopupMenuItem<String> item(String route, IconData icon, String key) => PopupMenuItem(
-      value: route,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: primary),
-          const SizedBox(width: 12),
-          Text(i18n(key), style: style),
-        ],
-      ),
-    );
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        PopupMenuButton<String>(
+        IconButton(
+          key: const ValueKey('home-search'),
+          tooltip: i18n(HomeAction.search.labelKey),
+          onPressed: () => unawaited(HomeAction.search.run()),
+          icon: const Icon(AppIcons.search),
+        ),
+        AppMenuButton<HomeAction>(
+          key: const ValueKey('home-more'),
           tooltip: i18n('more'),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          offset: const Offset(0, 10),
-          position: PopupMenuPosition.under,
-          onSelected: (route) =>
-              route == RoutePath.kMultiview ? AppNavigator.toMultiview() : AppNavigator.toNamed<void>(route),
-          itemBuilder: (context) => [
-            item(RoutePath.kSearch, Remix.search_line, 'search_live'),
-            item(RoutePath.kToolbox, Remix.link, 'open_link'),
-            if (multiView) item(RoutePath.kMultiview, Remix.layout_grid_line, 'multiview_title'),
+          icon: const Icon(AppIcons.more),
+          entries: () => [
+            for (final action in homeActions(multiView: multiView))
+              if (action != HomeAction.search)
+                AppMenuEntry(
+                  key: ValueKey('home-more-${action.name}'),
+                  value: action,
+                  icon: action.icon,
+                  label: i18n(action.labelKey),
+                ),
           ],
-          child: const SizedBox.square(
-            dimension: kMinInteractiveDimension,
-            child: Icon(Remix.menu_search_line, size: 24),
-          ),
+          onSelected: (action) => unawaited(action.run()),
         ),
         const SizedBox(width: 4),
       ],

@@ -145,7 +145,7 @@ class _AreasViewState extends ConsumerState<AreasView> with TickerProviderStateM
   Widget build(BuildContext context) {
     final ids = ref.read(sitesProvider).availableIds(watchSetting(ref, Settings.hotAreasList));
     _sync(ids);
-    final phoneTab = widget.route.inHome && MediaQuery.sizeOf(context).width <= homeTabletBreakpoint;
+    final phoneTab = showsHomeBarButtons(context, inHome: widget.route.inHome);
     final tabs = _tabs;
     return Scaffold(
       appBar: AppBar(

@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="AppName">PureLive</string>
+    <!-- Launcher shortcuts (U.14 c15). -->
+    <string name="shortcut_search">Search</string>
+    <string name="shortcut_recordings">Recordings</string>
 </resources>

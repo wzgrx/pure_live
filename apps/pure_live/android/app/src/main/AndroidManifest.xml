@@ -75,7 +75,9 @@
         <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
-      <!-- Deep links and playlist files (handled by the pages, M13). -->
+      <!-- "Open with": playlists and guides (ShareIntakePlugin, F.0a). 3.x
+           listed only audio/x-mpegurl; the other playlist and guide types
+           are the ones the share filters below take. -->
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
@@ -85,8 +87,16 @@
         <data android:scheme="file" />
         <data android:scheme="content" />
         <data android:mimeType="audio/x-mpegurl" />
+        <data android:mimeType="audio/mpegurl" />
+        <data android:mimeType="application/x-mpegurl" />
+        <data android:mimeType="application/vnd.apple.mpegurl" />
+        <data android:mimeType="application/xml" />
+        <data android:mimeType="text/xml" />
+        <data android:mimeType="application/gzip" />
+        <data android:mimeType="application/x-gzip" />
+        <data android:mimeType="application/json" />
       </intent-filter>
-      <!-- Shared links, playlists and guides (M13 share intake). -->
+      <!-- Shared links, share codes, playlists and guides (ShareIntakePlugin, F.0a). -->
       <intent-filter>
         <action android:name="android.intent.action.SEND" />
         <category android:name="android.intent.category.DEFAULT" />

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resources named only from Dart (audio_service looks the media notification's
+     small icon up by name, U.14 c2): the release build's resource shrinker
+     cannot see that and must keep them. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_playback" />

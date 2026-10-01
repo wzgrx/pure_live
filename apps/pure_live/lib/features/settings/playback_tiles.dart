@@ -18,6 +18,7 @@ import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
 import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
+import 'package:pure_live/shared/permission_prompts.dart';
 
 // The rows of the playback pages that draw more than a plain switch, slider
 // or choice (docs/ui/compare/U.6c): the video page, the player page, the
@@ -54,6 +55,10 @@ enum SwitchGateResult {
 
   /// Something failed.
   failed,
+
+  /// The user cancelled the explanation: the switch stays off, nothing
+  /// turns red (3.x).
+  cancelled,
 }
 
 /// Asks before a switch turns on (a system permission); null lets it turn
@@ -61,9 +66,18 @@ enum SwitchGateResult {
 typedef SwitchGate = Future<SwitchGateResult> Function(BoolSetting setting);
 
 /// The check before background play or the automatic sleep turns on (the
-/// notification permission, U.14); the app provides it where the platform
-/// asks for one.
-final Provider<SwitchGate?> switchGateProvider = Provider((ref) => null);
+/// notification permission and the battery exemption, U.14 c12, c13; F.0a):
+/// the shared [BackgroundPermissions] where the platform asks (Android),
+/// else null.
+final Provider<SwitchGate?> switchGateProvider = Provider((ref) {
+  final permissions = ref.watch(backgroundPermissionsProvider);
+  if (permissions == null) return null;
+  return (setting) async => switch (await permissions.confirm()) {
+    PermissionAnswer.granted => SwitchGateResult.granted,
+    PermissionAnswer.denied => SwitchGateResult.denied,
+    PermissionAnswer.cancelled => SwitchGateResult.cancelled,
+  };
+});
 
 /// A switch that may need a permission before it turns on (3.x background
 /// play and automatic sleep): while asking the switch cannot be used; when
@@ -112,7 +126,7 @@ class _GatedToggleTileState extends ConsumerState<GatedToggleTile> {
     if (!mounted) return;
     setState(() {
       _asking = false;
-      _problem = result == SwitchGateResult.granted ? null : result;
+      _problem = result == SwitchGateResult.granted || result == SwitchGateResult.cancelled ? null : result;
     });
     if (result == SwitchGateResult.granted) writeSetting(ref, widget.setting, true);
   }

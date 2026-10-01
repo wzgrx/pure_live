@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
+import 'package:live_media/live_media.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/platforms.dart';
@@ -76,6 +77,25 @@ void main() {
     expect(services.proxy.routeFor('twitch', url), const DirectRoute(), reason: 'switch still off');
     await settings.set(Settings.enableAppProxy, true);
     expect(services.proxy.routeFor('twitch', url), const HttpProxyRoute('127.0.0.1', 7890));
+  });
+
+  test("the live room's streams take the playback proxy, never the app proxy (3.x, F.0a)", () async {
+    final services = await testServices();
+    addTearDown(services.close);
+    final settings = services.store.settings;
+    final streams = services.mediaOpener.proxy;
+    final url = Uri.parse('https://cdn.example.com/live.flv');
+    expect(streams, isA<PlaybackProxyPolicy>());
+    await settings.setAll({Settings.enableAppProxy: true, Settings.appProxyHost: '127.0.0.1'});
+    expect(streams.routeFor('twitch', url), const DirectRoute(), reason: 'playback proxy off: direct (3.x)');
+    expect(engineProxyUrl(streams, 'twitch', url), '');
+    await settings.setAll({Settings.enableProxy: true, Settings.proxyHost: '10.0.0.2', Settings.proxyPort: 1080});
+    expect(streams.routeFor('twitch', url), const HttpProxyRoute('10.0.0.2', 1080));
+    expect(engineProxyUrl(streams, 'twitch', url), 'http://10.0.0.2:1080');
+    expect(engineProxyUrl(streams, 'twitch', url, private: true), '', reason: 'loopback inputs are never proxied');
+    await settings.set(Settings.enableAppProxy, false);
+    expect(streams.routeFor('douyu', url), const HttpProxyRoute('10.0.0.2', 1080));
+    expect(services.proxy.routeFor('douyu', url), const DirectRoute(), reason: 'the app proxy stays its own');
   });
 
   test('cookies come from the sealed store and report changes', () async {

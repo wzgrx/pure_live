@@ -2,13 +2,18 @@ package com.mystyle.purelive
 
 import android.app.AlertDialog
 import android.app.AppOpsManager
+import android.app.PendingIntent
 import android.app.PictureInPictureParams
+import android.app.RemoteAction
 import android.app.UiModeManager
 import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.drawable.Icon
 import android.hardware.display.DisplayManager
 import android.media.AudioManager
 import android.net.Uri
@@ -67,7 +72,13 @@ import io.flutter.plugin.common.MethodChannel
  *   tells whether the system settings turned it off for the app, `enter`
  *   answers `entered`, `disabled` or `failed`, `openSettings` opens the app's
  *   picture-in-picture page of the system settings, `setAutoEnter` lets
- *   leaving the app (home, recents) enter it by itself;
+ *   leaving the app (home, recents) enter it by itself; U.14 c7:
+ *   `setPlaying {playing, play, pause}` shows the window's pause / play
+ *   action, a tap is sent back as `togglePlay`;
+ * - `pure_live/share_intake` ([ShareIntakePlugin]), `pure_live/permissions`
+ *   ([PermissionsPlugin]): F.0a;
+ * - `pure_live/app` `setSplashTheme {mode}`: Android 13's splash screen in
+ *   the app's own light or dark (U.14 c9);
  * - `pure_live/device_controls`: the media volume and the window's
  *   brightness for the live room's gestures (3.x used the volume_controller
  *   and screen_brightness plugins), and the battery level of the fullscreen
@@ -81,6 +92,7 @@ class MainActivity : AudioServiceActivity() {
         private const val APP_CHANNEL = "pure_live/app"
         private const val PIP_CHANNEL = "pure_live/pip"
         private const val DEVICE_CONTROLS_CHANNEL = "pure_live/device_controls"
+        private const val PIP_TOGGLE = "com.mystyle.purelive.PIP_TOGGLE"
         private var playbackWakeLock: PowerManager.WakeLock? = null
         private var playbackWifiLock: WifiManager.WifiLock? = null
     }
@@ -98,6 +110,17 @@ class MainActivity : AudioServiceActivity() {
     private var displayModeChannel: MethodChannel? = null
     private var predictiveBackChannel: MethodChannel? = null
     private var pipChannel: MethodChannel? = null
+
+    // U.14 c7: the picture-in-picture window's pause / play action.
+    private var pipPlaying: Boolean? = null
+    private var pipPlayLabel = "播放"
+    private var pipPauseLabel = "暂停"
+    private var pipReceiverRegistered = false
+    private val pipReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            pipChannel?.invokeMethod("togglePlay", null)
+        }
+    }
 
     // U.2j J1: leaving the app enters picture-in-picture while the room plays.
     private var autoEnterPip = false
@@ -177,6 +200,14 @@ class MainActivity : AudioServiceActivity() {
         if (!flutterEngine.plugins.has(SystemAccessPlugin::class.java)) {
             flutterEngine.plugins.add(SystemAccessPlugin())
         }
+        // Shares, "open with", shortcuts and the clipboard's change time (F.0a).
+        if (!flutterEngine.plugins.has(ShareIntakePlugin::class.java)) {
+            flutterEngine.plugins.add(ShareIntakePlugin())
+        }
+        // Notifications and battery optimisation (F.0a).
+        if (!flutterEngine.plugins.has(PermissionsPlugin::class.java)) {
+            flutterEngine.plugins.add(PermissionsPlugin())
+        }
         displayModeChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             DISPLAY_MODE_CHANNEL,
@@ -224,6 +255,10 @@ class MainActivity : AudioServiceActivity() {
             when (call.method) {
                 "moveToBack" -> result.success(moveTaskToBack(true))
                 "isTelevision" -> result.success(isTelevision())
+                "setSplashTheme" -> {
+                    setSplashTheme(call.argument<String>("mode"))
+                    result.success(null)
+                }
                 "inputText" -> showTextInput(
                     call.argument<String>("title") ?: "",
                     call.argument<String>("hint") ?: "",
@@ -244,6 +279,14 @@ class MainActivity : AudioServiceActivity() {
                     )
 
                     "openSettings" -> result.success(openPictureInPictureSettings())
+                    "setPlaying" -> {
+                        setPictureInPicturePlaying(
+                            call.argument<Boolean>("playing"),
+                            call.argument<String>("play"),
+                            call.argument<String>("pause"),
+                        )
+                        result.success(null)
+                    }
                     "setAutoEnter" -> {
                         setAutoEnterPictureInPicture(
                             call.argument<Boolean>("enabled") ?: false,
@@ -411,6 +454,7 @@ class MainActivity : AudioServiceActivity() {
         if (!pictureInPictureAllowed()) return "disabled"
         val params = PictureInPictureParams.Builder()
             .setAspectRatio(pictureInPictureRatio(width, height))
+            .setActions(pictureInPictureActions())
             .build()
         return try {
             if (enterPictureInPictureMode(params)) "entered" else "failed"
@@ -457,6 +501,7 @@ class MainActivity : AudioServiceActivity() {
                 PictureInPictureParams.Builder()
                     .setAspectRatio(autoEnterRatio)
                     .setAutoEnterEnabled(autoEnterPip)
+                    .setActions(pictureInPictureActions())
                     .build(),
             )
         } catch (ignored: IllegalStateException) {
@@ -471,11 +516,74 @@ class MainActivity : AudioServiceActivity() {
         if (!autoEnterPip || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) return
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || isInPictureInPictureMode || !pictureInPictureAllowed()) return
         try {
-            enterPictureInPictureMode(PictureInPictureParams.Builder().setAspectRatio(autoEnterRatio).build())
-        } catch (ignored: IllegalStateException) {
+            enterPictureInPictureMode(
+                PictureInPictureParams.Builder()
+                    .setAspectRatio(autoEnterRatio)
+                    .setActions(pictureInPictureActions())
+                    .build(),
+            )
+        } catch (_: IllegalStateException) {
             // Refused; the room pauses as it would without it.
         } catch (ignored: IllegalArgumentException) {
             // Refused.
+        }
+    }
+
+    /**
+     * The pause / play action of the picture-in-picture window (U.14 c7; 3.x
+     * had none): shown while a room is bound ([playing] not null), the
+     * system draws it; a tap reaches Dart as `togglePlay`.
+     */
+    private fun pictureInPictureActions(): List<RemoteAction> {
+        val playing = pipPlaying ?: return emptyList()
+        val label = if (playing) pipPauseLabel else pipPlayLabel
+        val tap = PendingIntent.getBroadcast(
+            this,
+            0,
+            Intent(PIP_TOGGLE).setPackage(packageName),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val icon = Icon.createWithResource(this, if (playing) R.drawable.ic_pip_pause else R.drawable.ic_pip_play)
+        return listOf(RemoteAction(icon, label, label, tap))
+    }
+
+    private fun setPictureInPicturePlaying(playing: Boolean?, play: String?, pause: String?) {
+        pipPlaying = playing
+        if (!play.isNullOrBlank()) pipPlayLabel = play
+        if (!pause.isNullOrBlank()) pipPauseLabel = pause
+        if (playing != null && !pipReceiverRegistered) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(pipReceiver, IntentFilter(PIP_TOGGLE), Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                @Suppress("UnspecifiedRegisterReceiverFlag")
+                registerReceiver(pipReceiver, IntentFilter(PIP_TOGGLE))
+            }
+            pipReceiverRegistered = true
+        }
+        if (!pictureInPictureSupported()) return
+        try {
+            // Merged into the window's current parameters.
+            setPictureInPictureParams(PictureInPictureParams.Builder().setActions(pictureInPictureActions()).build())
+        } catch (_: IllegalStateException) {
+            // The activity is going away.
+        } catch (_: IllegalArgumentException) {
+            // Refused.
+        }
+    }
+
+    /** Android 13+: the next cold start's splash in the app's own light or dark (U.14 c9). */
+    private fun setSplashTheme(mode: String?) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val theme = when (mode) {
+            "Light" -> R.style.SplashTheme_Light
+            "Dark" -> R.style.SplashTheme_Dark
+            // Resources.ID_NULL: back to the manifest theme (the system's light or dark).
+            else -> 0
+        }
+        try {
+            splashScreen.setSplashScreenTheme(theme)
+        } catch (_: RuntimeException) {
+            // A vendor build without it.
         }
     }
 
@@ -623,6 +731,14 @@ class MainActivity : AudioServiceActivity() {
         mainHandler.removeCallbacks(displayModeRefresh)
         displayModeChannel = null
         pipChannel = null
+        if (pipReceiverRegistered) {
+            try {
+                unregisterReceiver(pipReceiver)
+            } catch (_: IllegalArgumentException) {
+                // Not registered.
+            }
+            pipReceiverRegistered = false
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) unregisterPredictiveBack()
         predictiveBackChannel = null
         super.onDestroy()

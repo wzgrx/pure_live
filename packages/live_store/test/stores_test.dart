@@ -146,6 +146,7 @@ void main() {
       expect(store.settings.get(Settings.preferH264), isTrue);
       expect(store.settings.get(Settings.youtubeShowAllChat), isFalse);
       expect(store.settings.get(Settings.showUnplayableInDiscover), isFalse);
+      expect(store.settings.get(Settings.detectClipboardRooms), isTrue);
       expect(store.settings.get(Settings.douyuForceRenew), isFalse);
       await store.settings.set(Settings.autoRefreshInterval, 1);
       await store.settings.set(Settings.themeMode, 'Purple');

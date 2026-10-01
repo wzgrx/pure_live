@@ -11,6 +11,7 @@ import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
 import 'package:path/path.dart' as p;
 import 'package:pure_live/app/recording.dart';
+import 'package:pure_live/app/recording_notice.dart';
 
 /// Whether this build carries the FFmpeg bundle (`ffmpeg_kit_extended_config`
 /// in the workspace pubspec: Android, Windows and Linux, as in 3.x).
@@ -156,11 +157,26 @@ const MethodChannel _recorderChannel = MethodChannel('pure_live/recorder');
 /// (the Android 15 data-sync time limit, or the service dies) the
 /// recorder's tasks stop with the reason, and later starts are refused until
 /// the user starts a task again ([allowUserRetry]).
+///
+/// The notification (docs/ui/compare/U.14 c3–c5): [title] and [text], and
+/// from [extra] the clock's start (`since`), the button words and the
+/// channel names; [refresh] sends changed words while it shows, [alert]
+/// posts a "录制已停止" reminder, and the notification's "停止录制" arrives
+/// at [onStopAll].
 final class AndroidRecordKeepAlive implements RecordingKeepAlive {
   /// Creates the keep-alive; [title] and [text] give the notification's
   /// words, [onInterrupted] receives Android's reason (`timeout`,
-  /// `service_stopped`).
-  new({required this.title, required this.text, required this.onInterrupted, this._channel = _recorderChannel}) {
+  /// `service_stopped`), [onStart] is told when the first holder starts the
+  /// service (F.0a: the notification permission, U.14 c14).
+  new({
+    required this.title,
+    required this.text,
+    required this.onInterrupted,
+    this.extra,
+    this.onStart,
+    this.onStopAll,
+    this._channel = _recorderChannel,
+  }) {
     _channel.setMethodCallHandler(_native);
   }
 
@@ -170,22 +186,66 @@ final class AndroidRecordKeepAlive implements RecordingKeepAlive {
   /// Notification text.
   final String Function() text;
 
+  /// More of the notification: `since` (milliseconds since the epoch), the
+  /// button words and the channel names (U.14 c3–c5).
+  final Map<String, Object?> Function()? extra;
+
   /// Called when Android ended the service.
   final Future<void> Function(String reason) onInterrupted;
+
+  /// Called, without waiting, when the first holder starts the service.
+  final void Function()? onStart;
+
+  /// The notification's "停止录制 / 全部停止".
+  final Future<void> Function()? onStopAll;
 
   final MethodChannel _channel;
   final _owners = <Object>{};
   bool? _applied;
   String? _interruption;
   Future<void>? _applying;
+  Map<String, Object?>? _shown;
 
   @override
   void allowUserRetry() => _interruption = null;
+
+  Map<String, Object?> _words() => {'title': title(), 'text': text(), ...?extra?.call()};
+
+  /// Sends the notification's words again when they changed (the
+  /// recordings changed); nothing while the service is off.
+  Future<void> refresh() async {
+    if (_applied != true || _applying != null) return;
+    final words = _words();
+    if (_same(words, _shown)) return;
+    _shown = words;
+    try {
+      await _channel.invokeMethod<void>('update', words);
+    } on PlatformException catch (error) {
+      log('Recording notification update failed: ${error.message}', name: 'RecordKeepAlive');
+    } on MissingPluginException {
+      // A build without the native side.
+    }
+  }
+
+  /// Posts the "录制已停止" reminder [id] (U.14 c5).
+  Future<void> alert(String id, String title, String text) async {
+    try {
+      await _channel.invokeMethod<void>('alert', {...?extra?.call(), 'id': id, 'title': title, 'text': text});
+    } on PlatformException catch (error) {
+      log('Recording reminder failed: ${error.message}', name: 'RecordKeepAlive');
+    } on MissingPluginException {
+      // A build without the native side.
+    }
+  }
+
+  static bool _same(Map<String, Object?> a, Map<String, Object?>? b) =>
+      b != null && a.length == b.length && a.entries.every((entry) => b[entry.key] == entry.value);
 
   @override
   Future<void> acquire(Object owner) async {
     final interruption = _interruption;
     if (interruption != null) throw RecordKeepAliveException(interruption);
+    if (_owners.isEmpty) onStart?.call();
     _owners.add(owner);
     try {
       await _apply();
@@ -225,11 +285,9 @@ final class AndroidRecordKeepAlive implements RecordingKeepAlive {
 
   Future<void> _set(bool active) async {
     try {
-      await _channel.invokeMethod<void>('setActive', {
-        'active': active,
-        if (active) 'title': title(),
-        if (active) 'text': text(),
-      });
+      final words = active ? _words() : null;
+      await _channel.invokeMethod<void>('setActive', {'active': active, ...?words});
+      _shown = words;
       _applied = active;
     } on PlatformException catch (error) {
       _applied = null;
@@ -240,6 +298,10 @@ final class AndroidRecordKeepAlive implements RecordingKeepAlive {
   }
 
   Future<void> _native(MethodCall call) async {
+    if (call.method == 'stopAll') {
+      await onStopAll?.call();
+      return;
+    }
     if (call.method != 'interrupted') return;
     final arguments = call.arguments;
     final reason = arguments is Map ? '${arguments['reason'] ?? 'service_stopped'}' : 'service_stopped';
@@ -255,11 +317,17 @@ final class AndroidRecordKeepAlive implements RecordingKeepAlive {
 
 /// Storage access for recordings (3.x `requestStoragePermission`): the
 /// managed directory is writable, else Android asks for all-files access
-/// (API 30+) or the storage permission, but only for a user action.
-Future<bool> androidStorageAccess(RecordStorage storage, {required bool interactive}) async {
+/// (API 30+) or the storage permission, but only for a user action, and
+/// after [explain] said why (U.14 c14; false: nothing opens).
+Future<bool> androidStorageAccess(
+  RecordStorage storage, {
+  required bool interactive,
+  Future<bool> Function()? explain,
+}) async {
   if (!Platform.isAndroid) return true;
   if (await storage.canWrite()) return true;
   if (!interactive) return false;
+  if (explain != null && !await explain()) return false;
   try {
     await _recorderChannel.invokeMethod<bool>('requestStorage');
   } on PlatformException catch (error) {
@@ -273,7 +341,10 @@ Future<bool> androidStorageAccess(RecordStorage storage, {required bool interact
 /// Recording with this platform's parts: FFmpegKit where the bundle exists,
 /// Android's foreground service and storage access, the CA bundle on
 /// Android and Linux (written in the background; FFmpeg gets it once
-/// ready). [words] gives the notification's text.
+/// ready). [words] gives the notification's fixed words; its content
+/// follows the recordings ([RecordingNotices], U.14 c3–c5).
+/// [onServiceStart] is told when Android's service starts for the first
+/// recording, [explainStorage] before the all-files page opens (U.14 c14).
 AppRecording platformAppRecording({
   required LiveStore store,
   required SiteRegistry sites,
@@ -282,18 +353,37 @@ AppRecording platformAppRecording({
   required String Function(String key) words,
   DanmakuRegistry? danmaku,
   String tasksKey = recorderTasksKey,
+  void Function()? onServiceStart,
+  Future<bool> Function()? explainStorage,
 }) {
   final caBundle = RecordCaBundle(Directory(p.join(dataRoot.path, 'certificates')));
   unawaited(caBundle.prepare(rootBundle));
   late final AppRecording recording;
+  RecordingNotices? notices;
+  RecordNotificationContent content() => recordNotificationContent(recording.recorder?.tasks ?? const []);
   final keepAlive = Platform.isAndroid
       ? AndroidRecordKeepAlive(
-          title: () => words('recorder_background_notification_title'),
-          text: () => words('recorder_background_notification_text'),
+          title: () => content().title,
+          text: () => content().text,
+          extra: () {
+            final now = content();
+            return {
+              'since': now.since?.millisecondsSinceEpoch,
+              'stop': now.stop,
+              'center': words('record_center'),
+              'open': words('record_notify_open_center'),
+              'channel': words('record_channel_name'),
+              'channelDescription': words('record_channel_desc'),
+              'alertChannel': words('record_alert_channel_name'),
+              'alertChannelDescription': words('record_alert_channel_desc'),
+            };
+          },
           onInterrupted: (reason) async => await recording.recorder?.keepAliveInterrupted(reason),
+          onStart: onServiceStart,
+          onStopAll: () async => await notices?.stopAll(),
         )
       : null;
-  return recording = buildAppRecording(
+  recording = buildAppRecording(
     store: store,
     sites: sites,
     proxy: proxy,
@@ -301,8 +391,14 @@ AppRecording platformAppRecording({
     ffmpeg: platformHasFfmpeg ? FfmpegKitRunner() : null,
     danmaku: danmaku,
     keepAlive: keepAlive,
-    storageAccess: androidStorageAccess,
+    storageAccess: (storage, {required interactive}) =>
+        androidStorageAccess(storage, interactive: interactive, explain: explainStorage),
     caFile: () => caBundle.path,
     tasksKey: tasksKey,
   );
+  final recorder = recording.recorder;
+  if (keepAlive != null && recorder != null) {
+    notices = RecordingNotices.of(recorder, refresh: keepAlive.refresh, alert: keepAlive.alert)..start();
+  }
+  return recording;
 }

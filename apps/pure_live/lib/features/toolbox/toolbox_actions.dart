@@ -8,6 +8,7 @@ import 'package:live_net/live_net.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/rooms/share_code.dart';
 
 /// The two things the toolbox does with a link.
 enum ToolboxAction {
@@ -187,8 +188,16 @@ final class ToolboxController extends ChangeNotifier {
     }
   }
 
-  /// The room [link] points to, or null after telling the user why not.
+  /// The room [link] points to, or null after telling the user why not. A
+  /// share code of 3.x or this app is read offline and keeps its title and
+  /// streamer (F.0a; 3.x took codes only from the clipboard dialog).
   Future<LiveRoom?> _resolve(String link, CancelToken cancel) async {
+    final shared = decodeRoomShareCode(link);
+    if (shared != null) {
+      if (SiteIds.isSupported(shared.platform)) return shared;
+      notify(SiteIds.isRetired(shared.platform) ? 'platform_retired' : 'toolbox_parse_failed');
+      return null;
+    }
     if (SiteIds.isRetiredLink(link)) {
       notify('platform_retired');
       return null;

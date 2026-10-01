@@ -57,7 +57,52 @@ abstract final class PictureInPicture {
     _listening = true;
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'changed') active.value = call.arguments == true;
+      // The pause / play action of the system's picture-in-picture window
+      // (docs/ui/compare/U.14 c7).
+      if (call.method == 'togglePlay') await _toggle?.call();
     });
+  }
+
+  static Object? _owner;
+  static bool? _playing;
+  static Future<void> Function()? _toggle;
+
+  /// Lets the picture-in-picture window of [owner] (the room playing) show
+  /// a pause or play action (U.14 c7); sent to Android only on a change.
+  static void bindPlayback({
+    required Object owner,
+    required bool playing,
+    required Future<void> Function() play,
+    required Future<void> Function() pause,
+  }) {
+    if (!_android) return;
+    _owner = owner;
+    _toggle = () => (_playing ?? false) ? pause() : play();
+    if (_playing == playing) return;
+    _playing = playing;
+    _listen();
+    unawaited(_setPlaying(playing));
+  }
+
+  /// Takes the action away when [owner] leaves.
+  static void unbindPlayback(Object owner) {
+    if (!identical(_owner, owner)) return;
+    _owner = null;
+    _toggle = null;
+    _playing = null;
+    unawaited(_setPlaying(null));
+  }
+
+  static Future<void> _setPlaying(bool? playing) async {
+    try {
+      await _channel.invokeMethod<void>('setPlaying', {
+        'playing': playing,
+        'play': i18n('media_play'),
+        'pause': i18n('media_pause'),
+      });
+    } on Object catch (error) {
+      developer.log('Picture-in-picture action failed', name: 'LivePlay', error: error);
+    }
   }
 
   /// Whether this device offers picture-in-picture.
@@ -221,6 +266,29 @@ class _RoomAudioHandler extends audio.BaseAudioHandler {
   }
 }
 
+/// The media notification's buttons with the app's words, so a screen
+/// reader says "暂停" instead of audio_service's "Pause" (U.14 c6).
+@visibleForTesting
+List<audio.MediaControl> mediaControls({required bool playing}) => [
+  if (playing)
+    audio.MediaControl(
+      androidIcon: audio.MediaControl.pause.androidIcon,
+      label: i18n('media_pause'),
+      action: audio.MediaAction.pause,
+    )
+  else
+    audio.MediaControl(
+      androidIcon: audio.MediaControl.play.androidIcon,
+      label: i18n('media_play'),
+      action: audio.MediaAction.play,
+    ),
+  audio.MediaControl(
+    androidIcon: audio.MediaControl.stop.androidIcon,
+    label: i18n('media_stop'),
+    action: audio.MediaAction.stop,
+  ),
+];
+
 /// The system media notification of the room playing (3.x
 /// `LiveAudioService` + `LiveAudioHandler`, audio_service): title,
 /// streamer, cover, play/pause and stop; on Android only.
@@ -239,6 +307,9 @@ abstract final class RoomMediaNotification {
           androidNotificationChannelId: 'com.mystyle.purelive.audio',
           androidNotificationChannelName: i18n('audio_channel_name'),
           androidNotificationOngoing: true,
+          // The one-colour television of the status bar (U.14 c2; 3.x used
+          // the launcher icon, a white blob there).
+          androidNotificationIcon: 'drawable/ic_stat_playback',
         ),
       );
     } on Object catch (error, stackTrace) {
@@ -284,7 +355,7 @@ abstract final class RoomMediaNotification {
         if (handler == null || !identical(_owner, owner)) return;
         handler.playbackState.add(
           audio.PlaybackState(
-            controls: [if (playing) audio.MediaControl.pause else audio.MediaControl.play, audio.MediaControl.stop],
+            controls: mediaControls(playing: playing),
             androidCompactActionIndices: const [0, 1],
             processingState: audio.AudioProcessingState.ready,
             playing: playing,
@@ -356,6 +427,7 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
   void _syncNotification() {
     final status = _session.state.status;
     final active = status == PlaybackStatus.playing || status == PlaybackStatus.buffering;
+    PictureInPicture.bindPlayback(owner: this, playing: active, play: _session.resume, pause: _session.pause);
     final wanted = (active || status == PlaybackStatus.paused) && _continues;
     if (wanted && !_notified) {
       // Only shown from the foreground or while already shown.
@@ -436,5 +508,6 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
     unawaited(_states?.cancel());
     unawaited(BackgroundKeepAlive.set(enabled: false));
     unawaited(RoomMediaNotification.hide(this));
+    PictureInPicture.unbindPlayback(this);
   }
 }

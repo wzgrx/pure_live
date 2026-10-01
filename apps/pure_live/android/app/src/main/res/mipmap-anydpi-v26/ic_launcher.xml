@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- U.14 c8: the television about six tenths of the visible circle (3.x inset
+     the foreground by 16%, four tenths), and a one-colour layer for themed
+     icons (Android 13+). -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
   <background android:drawable="@color/ic_launcher_background"/>
   <foreground>
       <inset
           android:drawable="@drawable/ic_launcher_foreground"
-          android:inset="16%" />
+          android:inset="2%" />
   </foreground>
+  <monochrome android:drawable="@drawable/ic_launcher_monochrome" />
 </adaptive-icon>

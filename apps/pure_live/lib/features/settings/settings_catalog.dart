@@ -1436,6 +1436,16 @@ List<SettingsEntry> _build() {
       settings: [Settings.autoShutDownTime],
       keywords: ['定时', '关闭', 'timer'],
     )
+    // F.0a: the clipboard's share codes (3.x always looked).
+    ..group = 'settings_group_share'
+    ..toggle(
+      'clipboard_rooms',
+      'settings_clipboard_rooms',
+      Settings.detectClipboardRooms,
+      AppIcons.settingsClipboardRooms,
+      desc: 'settings_clipboard_rooms_desc',
+      keywords: ['剪贴板', '口令', '分享', 'clipboard', 'share'],
+    )
     // ---- network (U.6d d13, d14) ----
     ..section = SettingsSection.network
     ..group = 'app_proxy_group_title'

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher shortcut of a recent room (U.14 c15). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="2.0"
+        android:scaleY="2.0"
+        android:translateX="30"
+        android:translateY="30">
+        <path android:fillColor="@color/shortcut_foreground" android:fillType="evenOdd" android:pathData="M6,7.5h12a3,3 0,0 1,3 3v7a3,3 0,0 1,-3 3H6a3,3 0,0 1,-3 -3v-7a3,3 0,0 1,3 -3ZM10,11v6l5.2,-3Z" />
+        <path android:strokeColor="@color/shortcut_foreground" android:strokeWidth="1.9" android:strokeLineCap="round"
+            android:pathData="M7.6,3.2L10.6,7M16.4,3.2L13.4,7" />
+    </group>
+</vector>

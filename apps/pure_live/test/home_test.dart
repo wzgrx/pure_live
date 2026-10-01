@@ -109,7 +109,7 @@ void main() {
     AppNavigator.toast = toasts.add;
 
     await AppNavigator.toLiveRoomDetail(
-      liveRoom: LiveRoom(platform: 'kick', roomId: 'x'),
+      liveRoom: LiveRoom(platform: 'huajiao', roomId: 'x'),
     );
     await tester.pumpAndSettle();
     expect(toasts.single, contains('下线'));

@@ -78,6 +78,7 @@ final class PlatformDeps {
     required this.cookies,
     required this.store,
     this.twitchFallbacks = const [],
+    this.kickApi,
     this.iptv,
   });
 
@@ -93,15 +94,22 @@ final class PlatformDeps {
   /// Storage (settings read at each request).
   final LiveStore store;
 
-  /// Extra GraphQL transports of Twitch (Android's system TLS).
+  /// Extra GraphQL transports of Twitch (Android's system TLS, then the
+  /// headless WebView).
   final List<LiveHttp> twitchFallbacks;
+
+  /// The transport of Kick's API (Android's system TLS): Cloudflare refuses
+  /// dart:io's TLS on kick.com. Null where there is none (Windows, until a
+  /// WinHTTP channel exists): Kick is then not registered (UPGRADES X-1).
+  final LiveHttp? kickApi;
 
   /// The IPTV platform; null leaves IPTV out.
   final IptvSite? iptv;
 }
 
-/// The 33 platforms and IPTV (3.x `Sites.supportSites`), each built on first
-/// use and then kept (M3 `SiteRegistry`).
+/// The 33 platforms of 3.x, Kick (where [PlatformDeps.kickApi] exists) and
+/// IPTV (3.x `Sites.supportSites`), each built on first use and then kept
+/// (M3 `SiteRegistry`).
 SiteRegistry buildSiteRegistry(PlatformDeps deps) {
   final http = deps.http;
   final cookies = deps.cookies;
@@ -139,6 +147,7 @@ SiteRegistry buildSiteRegistry(PlatformDeps deps) {
     SiteIds.weibo: () => WeiboSite(http),
     SiteIds.showroom: () => ShowroomSite(http),
     SiteIds.chzzk: () => ChzzkSite(http),
+    if (deps.kickApi case final kickApi?) SiteIds.kick: () => KickSite(http, apiHttp: kickApi),
     SiteIds.liveMe: () => LiveMeSite(http),
     SiteIds.tiktok: () => TikTokSite(http, preferH264: preferH264),
     SiteIds.youtube: () => YouTubeSite(http),
@@ -190,6 +199,8 @@ DanmakuRegistry buildDanmakuRegistry(PlatformDeps deps, SiteRegistry sites) {
     SiteIds.niconico: () => NiconicoDanmakuConnection(site: sites.of(SiteIds.niconico) as NiconicoSite),
     SiteIds.showroom: () => ShowroomDanmakuConnection(proxy: proxy, connector: connector),
     SiteIds.chzzk: () => ChzzkDanmakuConnection(http: http, proxy: proxy, connector: connector),
+    // M5.34: Kick's Pusher socket is not behind Kick's Cloudflare; dart:io works.
+    SiteIds.kick: () => KickDanmakuConnection(proxy: proxy, connector: connector),
     // B-13: "显示全部聊天" is read when the room connects.
     SiteIds.youtube: () => YouTubeDanmakuConnection(http: http, allChat: settings.get(Settings.youtubeShowAllChat)),
     SiteIds.bigo: () => BigoDanmakuConnection(http: http, proxy: proxy, connector: connector),

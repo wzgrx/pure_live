@@ -104,6 +104,8 @@ abstract final class AppBootstrap {
     final cookies = StoreCookieVault(store.secrets);
     final settings = store.settings;
     final library = iptvLibrary ?? StoreIptvLibrary(store);
+    // Android's system TLS: Twitch's GraphQL fallback, Kick's API.
+    final native = AndroidNativeHttp.isAvailable ? AndroidNativeHttp(proxy: proxy) : null;
     final importer = IptvImporter(
       library: library,
       http: client,
@@ -117,7 +119,8 @@ abstract final class AppBootstrap {
       proxy: proxy,
       cookies: cookies,
       store: store,
-      twitchFallbacks: [if (AndroidNativeHttp.isAvailable) AndroidNativeHttp(proxy: proxy)],
+      twitchFallbacks: [?native],
+      kickApi: native,
       iptv: IptvSite(
         library: library,
         importer: importer,

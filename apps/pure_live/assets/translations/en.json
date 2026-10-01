@@ -106,6 +106,7 @@
     "audience_followers": "Followers",
     "audience_huya_detail": "Current list/detail totalCount and userCount plus in-room iAttendeeCount (URI 8006) are all heat in live captures; the public feed does not expose a distinct concurrent count",
     "audience_inke_detail": "Public discovery and room details do not expose a verified audience count; missing values stay unknown",
+    "audience_kick_detail": "viewer_count in lists, search and the room detail is the concurrent audience; hidden when the streamer turns the count off (show_view_count)",
     "audience_kilakila_detail": "watchNumber has no verified concurrent-viewer meaning and is not used for real-online ranking",
     "audience_kuaishou_detail": "watchingCount is treated as current viewers",
     "audience_looklive_detail": "Official recommendations expose onlineNumber as current viewers and keep popularity as a separate platform heat value; missing room-detail counts stay unknown",

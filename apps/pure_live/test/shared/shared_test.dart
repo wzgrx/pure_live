@@ -41,7 +41,7 @@ void main() {
 
   group('texts', () {
     test('room marks: retired platform, carousel, ban, then the restriction', () {
-      expect(roomMark(_room(platform: 'kick')), '平台已下线');
+      expect(roomMark(_room(platform: 'huajiao')), '平台已下线');
       expect(roomMark(_room(status: LiveStatus.carousel)), '轮播');
       expect(roomMark(_room(status: LiveStatus.banned)), '已封禁');
       expect(roomMark(_room(restriction: LiveRestriction.subscribersOnly)), '订阅专享');

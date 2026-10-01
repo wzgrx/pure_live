@@ -123,6 +123,8 @@ abstract final class SearchCapabilities {
     SiteIds.weibo: SearchCapability(coverage: SearchCoverage.roomLookup, paged: false, noteKey: 'search_scope_weibo'),
     SiteIds.showroom: SearchCapability(coverage: SearchCoverage.liveOnly, paged: true),
     SiteIds.chzzk: SearchCapability(coverage: SearchCoverage.liveAndOffline, paged: true),
+    // M4.34: one page of channels (live or not), then tagged live broadcasts.
+    SiteIds.kick: SearchCapability(coverage: SearchCoverage.liveAndOffline, paged: false),
     SiteIds.liveMe: SearchCapability(coverage: SearchCoverage.liveAndOffline, paged: true),
     SiteIds.tiktok: SearchCapability(coverage: SearchCoverage.channelLookup, paged: false),
     SiteIds.youtube: SearchCapability(coverage: SearchCoverage.liveOnly, paged: true, noteKey: 'search_scope_youtube'),

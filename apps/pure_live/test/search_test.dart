@@ -88,7 +88,7 @@ void main() {
       expect(SearchCapabilities.of(SiteIds.yy).coverage, SearchCoverage.liveOnly);
       expect(SearchCapabilities.of(SiteIds.twitcasting).coverage, SearchCoverage.liveOnly);
       expect(SearchCapabilities.of(SiteIds.youtube).paged, isTrue);
-      expect(SearchCapabilities.of('kick').native, isFalse);
+      expect(SearchCapabilities.of('huajiao').native, isFalse);
       expect(
         [
           for (final id in SiteIds.supported)

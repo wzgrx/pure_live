@@ -178,7 +178,7 @@ void main() {
     await _settle(tester);
     expect(harness.toasts.last, '无法解析此链接');
 
-    await _enter(tester, 'https://kick.com/someone');
+    await _enter(tester, 'https://rumble.com/someone');
     await tester.tap(find.byKey(const ValueKey('toolbox-jump')));
     await _settle(tester);
     expect(harness.toasts.last, contains('已下线'));
@@ -208,6 +208,6 @@ void main() {
     final ids = [for (final site in linkPlatforms(services.sites)) site.id];
     expect(ids, contains(SiteIds.douyu));
     expect(ids, isNot(contains(SiteIds.iptv)));
-    expect(ids, isNot(contains('kick')));
+    expect(ids, isNot(contains('huajiao')));
   });
 }

@@ -16,9 +16,10 @@ void main() {
       for (final id in PlatformLogos.ids) {
         expect(File(PlatformLogos.assetFor(id)).existsSync(), isTrue, reason: id);
       }
-      expect(PlatformLogos.ids, hasLength(34));
+      expect(PlatformLogos.ids, hasLength(35));
       expect(PlatformLogos.assetFor(' DouYu '), 'assets/platforms/douyu.png');
-      expect(PlatformLogos.assetFor('kick'), PlatformLogos.fallback);
+      expect(PlatformLogos.assetFor('kick'), 'assets/platforms/kick.png');
+      expect(PlatformLogos.assetFor('huajiao'), PlatformLogos.fallback);
       expect(File(PlatformLogos.fallback).existsSync(), isTrue);
     });
 

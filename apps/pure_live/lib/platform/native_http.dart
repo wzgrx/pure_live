@@ -12,14 +12,15 @@ import 'package:live_net/live_net.dart';
 /// dart:io's TLS fingerprint (Kick, UPGRADES X-1). The native side only
 /// reaches [allowedHosts] over https and answers at most 8 MiB, so the
 /// channel cannot be turned into a general request tool. Twitch gets it as a
-/// GraphQL fallback; Kick adds its hosts on both sides when it returns.
+/// GraphQL fallback; Kick sends all its API requests through it (M4.34).
 final class AndroidNativeHttp implements LiveHttp {
   /// Creates the transport; [proxy] routes each request like the dart:io
   /// client does.
   new({required this.proxy, this.channel = const MethodChannel('pure_live/native_http')});
 
-  /// Hosts the native side serves (keep in step with `NativeHttpChannel.ALLOWED_HOSTS`).
-  static const Set<String> allowedHosts = {'gql.twitch.tv'};
+  /// Hosts the native side serves (keep in step with `NativeHttpChannel.ALLOWED_HOSTS`):
+  /// Twitch GraphQL and Kick's API.
+  static const Set<String> allowedHosts = {'gql.twitch.tv', 'kick.com'};
 
   /// Whether this transport exists on the running platform.
   static bool get isAvailable => Platform.isAndroid;

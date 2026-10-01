@@ -1,0 +1,52 @@
+name: pure_live
+description: Pure Live, a third-party live stream aggregator (docs/PLAN.md). The app shell (M12) - entry, routes, home, languages, Android and Windows.
+publish_to: none
+# 3.x's version until the first v4 release (AGENTS.md: changed only when releasing).
+version: 3.2.11+4134
+
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.47.0"
+
+resolution: workspace
+
+dependencies:
+  # Windows DPAPI and the GBK code page (no plugin needed for either).
+  ffi: ^2.2.0
+  flutter:
+    sdk: flutter
+  # Material's own words (dialogs, pickers) in Chinese and English.
+  flutter_localizations:
+    sdk: flutter
+  # State and routes (docs/PLAN.md §4).
+  flutter_riverpod: ^3.4.3
+  go_router: ^18.0.2
+  live_core: any
+  live_danmaku: any
+  live_iptv: any
+  live_media: any
+  live_net: any
+  live_player: any
+  live_record: any
+  live_store: any
+  live_ui: any
+  path: ^1.9.1
+  # The data folder and 3.x's folders.
+  path_provider: ^2.1.6
+  # CC's official entries open in the browser (3.x AppNavigator.toCategoryDetail).
+  url_launcher: ^6.3.2
+  # 3.x's install folders from the uninstall entries (the 3.x data import).
+  win32_registry: ^3.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^11.0.0
+
+flutter:
+  # The shell and live_ui's widgets use Material icons.
+  uses-material-design: true
+  assets:
+    # 3.x's translations (zh, en).
+    - assets/translations/
+    - assets/icons/icon.png

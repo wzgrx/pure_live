@@ -48,19 +48,29 @@ typedef SocketConnector = Future<SocketChannel> Function(
 /// unnecessary: on Android's `dart:io` WebSocket path it could leave the
 /// upgrade pending until the connect timeout on reachable hosts (seen in
 /// 3.x), so direct routes keep the default.
-HttpClient? webSocketClientFor(ProxyRoute route) => switch (route) {
-  DirectRoute() => null,
-  HttpProxyRoute() =>
-    HttpClient()
-      ..idleTimeout = const Duration(seconds: 30)
-      ..findProxy = (_) => route.directive,
-};
+///
+/// With [plainUserAgent] a client is always made and its own User-Agent is
+/// cleared, so a caller's `user-agent` header is sent without dart:io's
+/// `Dart/<version> (dart:io)` prefix (UPGRADES B-2, off by default until
+/// verified on Android, where 3.x saw a custom direct client stall).
+HttpClient? webSocketClientFor(ProxyRoute route, {bool plainUserAgent = false}) {
+  final client = switch (route) {
+    DirectRoute() => plainUserAgent ? HttpClient() : null,
+    HttpProxyRoute() =>
+      HttpClient()
+        ..idleTimeout = const Duration(seconds: 30)
+        ..findProxy = (_) => route.directive,
+  };
+  if (plainUserAgent) client?.userAgent = null;
+  return client;
+}
 
 /// [SocketConnector] on `dart:io`. With [pingInterval] the socket sends a
 /// WebSocket ping at that interval and closes itself when a pong does not
 /// come back before the next one (`WebSocket.pingInterval`), for servers
 /// that keep a session only while its socket is provably alive (FC2's media
-/// control socket, which 3.x pinged every 15 s).
+/// control socket, which 3.x pinged every 15 s). [plainUserAgent]: see
+/// [webSocketClientFor].
 Future<SocketChannel> connectIoSocket(
   Uri endpoint, {
   required Map<String, String> headers,
@@ -68,8 +78,9 @@ Future<SocketChannel> connectIoSocket(
   required ProxyRoute route,
   required Duration connectTimeout,
   Duration? pingInterval,
+  bool plainUserAgent = false,
 }) async {
-  final client = webSocketClientFor(route);
+  final client = webSocketClientFor(route, plainUserAgent: plainUserAgent);
   try {
     final socket = await WebSocket.connect(
       endpoint.toString(),

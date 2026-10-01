@@ -8,6 +8,7 @@ environment:
   sdk: ^3.13.0
 
 workspace:
+  - apps/pure_live
   - packages/live_cast
   - packages/live_core
   - packages/live_danmaku

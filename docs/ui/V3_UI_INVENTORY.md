@@ -200,3 +200,6 @@ v4 现在（偏差最大）：
 | U.6c 播放设置 | [compare/U.6c](compare/U.6c/README.md) |
 | U.6d 通用和网络 | [compare/U.6d](compare/U.6d/README.md) |
 | U.6e 数据 | [compare/U.6e](compare/U.6e/README.md) |
+| U.7a 录制中心 | [compare/U.7a](compare/U.7a/README.md) |
+| U.8 多画面 | [compare/U.8](compare/U.8/README.md) |
+| U.7b 录制设置 | [compare/U.7b](compare/U.7b/README.md) |

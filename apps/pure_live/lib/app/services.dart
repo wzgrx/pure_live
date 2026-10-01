@@ -12,6 +12,7 @@ import 'package:live_player/live_player.dart';
 import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/launch_args.dart';
+import 'package:pure_live/app/recording.dart';
 
 /// Everything the pages use, made once at start (3.x registered these as
 /// GetX services and singletons: `SettingsService.to`, `Sites.of`,
@@ -32,7 +33,7 @@ final class AppServices {
     required this.followsReady,
     required this.mediaOpener,
     this.iptvImporter,
-    this.recorder,
+    this.recording,
   });
 
   /// Storage and settings (3.x `SettingsService.to`).
@@ -82,12 +83,17 @@ final class AppServices {
   /// IPTV imports and syncs; null when IPTV is not set up.
   final IptvImporter? iptvImporter;
 
-  /// The recorder (M8); null until the app has an FFmpeg runner
-  /// (`buildRecorder` in `recording.dart`).
-  final Recorder? recorder;
+  /// Recording (M8 and M13.15): settings, the managed directory and the
+  /// recorder (`buildAppRecording` in `recording.dart`); null in tests that
+  /// do not need it.
+  final AppRecording? recording;
 
-  /// Releases the store and the HTTP client.
+  /// The recorder (M8); null where this build has no FFmpeg.
+  Recorder? get recorder => recording?.recorder;
+
+  /// Releases recording, the store and the HTTP client.
   Future<void> close() async {
+    await recording?.dispose();
     await mediaOpener.close();
     http.close();
     await store.close();
@@ -115,8 +121,13 @@ final Provider<PlaybackSession Function({MpvEngineConfig? config})> playbackSess
   (ref) => ref.watch(appServicesProvider).newPlaybackSession,
 );
 
-/// The recorder; null until it can run (see [AppServices.recorder]).
+/// The recorder; null where this build has no FFmpeg (see
+/// [AppServices.recorder]).
 final Provider<Recorder?> recorderProvider = Provider((ref) => ref.watch(appServicesProvider).recorder);
+
+/// Recording: settings, directory, recorder and the user actions of the
+/// live room's record button (see [AppRecording]).
+final Provider<AppRecording?> recordingProvider = Provider((ref) => ref.watch(appServicesProvider).recording);
 
 /// The value of a setting, updated when it changes (3.x read
 /// `SettingsService.to.<group>.<field>.v` inside `Obx`).

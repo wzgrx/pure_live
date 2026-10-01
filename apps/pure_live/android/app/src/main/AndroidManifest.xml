@@ -114,6 +114,11 @@
       <meta-data android:name="android.app.shortcuts" android:resource="@xml/share_targets" />
     </activity>
     <meta-data android:name="flutterEmbedding" android:value="2" />
+    <!-- Recording's foreground service (3.x RecorderForegroundService; M13.15). -->
+    <service android:name=".RecorderForegroundService"
+      android:exported="false"
+      android:foregroundServiceType="dataSync"
+      android:stopWithTask="false" />
   </application>
   <uses-feature android:name="android.software.leanback" android:required="false" />
   <uses-feature android:name="android.hardware.touchscreen" android:required="false" />

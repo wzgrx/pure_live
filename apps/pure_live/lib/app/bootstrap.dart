@@ -16,8 +16,10 @@ import 'package:pure_live/app/launch_args.dart';
 import 'package:pure_live/app/platforms.dart';
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/native_http.dart';
 import 'package:pure_live/platform/platform_services.dart';
+import 'package:pure_live/platform/recording_platform.dart';
 import 'package:pure_live/platform/secret_cipher.dart';
 
 /// Keeps decoded covers and avatars bounded apart from the HTTP cache (3.x
@@ -125,9 +127,19 @@ abstract final class AppBootstrap {
     final sites = buildSiteRegistry(deps);
     final danmaku = buildDanmakuRegistry(deps, sites);
     final followsReady = background ? _moveFollows(store, sites) : Future<void>.value();
+    // Recording (M13.15): FFmpeg, the foreground service and storage access
+    // only in the running app; tests get the settings and the directory.
+    final recording = background
+        ? platformAppRecording(store: store, sites: sites, proxy: proxy, dataRoot: dataRoot, words: i18n)
+        : buildAppRecording(store: store, sites: sites, proxy: proxy, dataRoot: dataRoot);
     if (background) {
       unawaited(_warmUp(sites));
       unawaited(_iptvAutoSync(store, importer));
+      unawaited(
+        recording.start().catchError((Object error, StackTrace stack) {
+          log('Recording start failed', name: 'AppBootstrap', error: error, stackTrace: stack);
+        }),
+      );
     }
     return AppServices(
       store: store,
@@ -142,6 +154,7 @@ abstract final class AppBootstrap {
       followsReady: followsReady,
       mediaOpener: MediaOpener(proxy: proxy, engine: mpvEngineProfile(), recipes: recipeOpeners(sites)),
       iptvImporter: importer,
+      recording: recording,
     );
   }
 

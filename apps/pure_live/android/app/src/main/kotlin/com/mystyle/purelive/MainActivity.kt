@@ -27,7 +27,9 @@ import io.flutter.plugin.common.MethodChannel
  * - `pure_live/predictive_back`: the live room's back arbitration;
  * - `pure_live/secret_cipher`, `pure_live/native_http`, `pure_live/multicast_lock`
  *   (registered by [AppChannelsPlugin], so they also work on an engine without
- *   an activity).
+ *   an activity);
+ * - `pure_live/recorder`: recording's foreground service and storage access
+ *   ([RecorderPlugin]).
  */
 class MainActivity : FlutterActivity() {
     companion object {
@@ -107,6 +109,10 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         if (!flutterEngine.plugins.has(AppChannelsPlugin::class.java)) {
             flutterEngine.plugins.add(AppChannelsPlugin())
+        }
+        // Recording's foreground service and storage access (M13.15).
+        if (!flutterEngine.plugins.has(RecorderPlugin::class.java)) {
+            flutterEngine.plugins.add(RecorderPlugin())
         }
         displayModeChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,

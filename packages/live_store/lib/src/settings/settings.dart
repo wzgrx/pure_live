@@ -841,6 +841,20 @@ abstract final class Settings {
     scope: SettingScope.internal,
   );
 
+  // ---- interface mode (M14.1) ----
+
+  /// New (M14.1): which interface the app shows — `auto` (the TV interface on
+  /// an Android TV, the phone/desktop one elsewhere), `phone` or `tv`. Kept
+  /// on this device only: a phone's backup must not switch a TV to the phone
+  /// interface, so it is never exported (and a settings reset keeps it).
+  static const uiMode = StringSetting(
+    'uiMode',
+    section: 'app',
+    defaultValue: 'auto',
+    allowed: {'auto', 'phone', 'tv'},
+    scope: SettingScope.internal,
+  );
+
   // ---- internal ----
 
   /// The LAN-sync device id 3.x generated (remote_sync_service.dart:134).
@@ -1006,6 +1020,7 @@ abstract final class Settings {
     bilibiliUid,
     douyuCookieSavedAt,
     remoteSyncDeviceId,
+    uiMode,
   ];
 
   static final Map<String, Setting<Object>> _byKey = {for (final setting in all) setting.key: setting};

@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:path/path.dart' as p;
+import 'package:pure_live/app/data_root.dart';
 import 'package:pure_live/app/launch_args.dart';
+import 'package:pure_live/app/recording.dart';
 
 import 'support.dart';
 
@@ -47,60 +49,20 @@ void main() {
     expect(decoded.isLiveNow, isFalse);
   });
 
-  test('only the hand-over file the launcher wrote is imported', () {
-    final temp = p.join(Directory.systemTemp.path, 'fixture-temp');
-    const id = 'window_42_1790000000';
-    List<String> args(String path, {String instance = id}) => [
-      '${LaunchArgs.instancePrefix}$instance',
-      '${LaunchArgs.configPrefix}$path',
-    ];
-    final handOver = p.join(temp, 'pure_live_instance_ab12', '$id.json');
+  test('extra windows share the data folder; their log and task list are their own (U.13 c14)', () async {
+    final root = Directory(p.join('data', 'UserData'));
+    expect(instanceFolder(root, 'window_1').path, p.join('data', 'UserData', 'instances', 'window_1'));
+    final launch = LaunchArgs.parse(const ['--instance=window_1', '--config-file=C:/Temp/x.json']);
+    expect(launch.isPrimary, isFalse);
+    expect(launch.room, isNull, reason: "3.x's hand-over file is ignored: nothing is copied any more");
+    expect(LaunchArgs.build(instanceId: 'window_2'), ['--instance=window_2']);
 
-    expect(LaunchArgs.configFileFromArgs(args(handOver), tempRoot: temp), p.normalize(p.absolute(handOver)));
-    for (final path in [
-      p.join(Directory.systemTemp.path, 'elsewhere', 'settings.json'),
-      p.join(temp, 'other_ab12', '$id.json'),
-      p.join(temp, 'pure_live_instance_ab12', 'window_other.json'),
-      p.join(temp, 'pure_live_instance_ab12', '..', '..', 'etc', '$id.json'),
-      p.join(temp, '$id.json'),
-      '',
-    ]) {
-      expect(LaunchArgs.configFileFromArgs(args(path), tempRoot: temp), isNull, reason: path);
-    }
-    expect(
-      LaunchArgs.configFileFromArgs(['${LaunchArgs.configPrefix}$handOver'], tempRoot: temp),
-      isNull,
-      reason: 'the main window never imports a hand-over file',
-    );
-  });
-
-  test('a new window gets the data and the cookies, never in plain text (M9 issue 12)', () async {
-    final cipher = FakeCipher();
-    final source = await LiveStore.memory(cipher: cipher);
-    final target = await LiveStore.memory(cipher: cipher);
-    addTearDown(source.close);
-    addTearDown(target.close);
-    await source.follows.add(LiveRoom(platform: 'bilibili', roomId: '1', nick: 'A'));
-    await source.settings.set(Settings.enableAppProxy, true);
-    await source.secrets.setCookie('bilibili', 'SESSDATA=secret-value');
-    final temp = await Directory.systemTemp.createTemp('handoff_test_');
-    addTearDown(() => temp.delete(recursive: true));
-
-    final path = await NewWindowHandoff.write(source, cipher, instanceId: 'window_1', tempRoot: temp);
-    final file = File(path);
-    expect(await file.readAsString(), isNot(contains('secret-value')));
-    expect(
-      LaunchArgs.configFileFromArgs(
-        LaunchArgs.build(instanceId: 'window_1', configFile: path),
-        tempRoot: temp.path,
-      ),
-      path,
-    );
-
-    expect(await NewWindowHandoff.restore(target, cipher, file), isTrue);
-    expect((await target.follows.all()).single.nick, 'A');
-    expect(target.settings.get(Settings.enableAppProxy), isTrue);
-    expect(target.secrets.cookieFor('bilibili'), 'SESSDATA=secret-value');
-    expect(file.parent.existsSync(), isFalse, reason: 'the hand-over file is deleted');
+    expect(recorderTasksKeyFor(''), recorderTasksKey);
+    expect(recorderTasksKeyFor('window_1'), '$recorderTasksKey.window_1');
+    final store = await LiveStore.memory(cipher: FakeCipher());
+    addTearDown(store.close);
+    await store.meta.keepLegacyValues({'recorder_tasks': '[]'});
+    expect(await savedRecorderTasks(store), '[]', reason: "the main window takes 3.x's list");
+    expect(await savedRecorderTasks(store, key: recorderTasksKeyFor('window_1')), isNull);
   });
 }

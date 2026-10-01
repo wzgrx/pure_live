@@ -13,11 +13,24 @@ import 'package:pure_live/routes/route_path.dart';
 final class LiveRouteObserver extends RouteObserver<PageRoute<dynamic>> {
   final ValueNotifier<String> _current = ValueNotifier('');
   final ValueNotifier<int> _popups = ValueNotifier(0);
+  final ValueNotifier<RouteSettings?> _topPage = ValueNotifier(null);
   final Set<Route<dynamic>> _openPopups = {};
   final List<void Function(RouteEvent event)> _listeners = [];
+  Route<dynamic>? _topPageRoute;
 
   /// The name of the page on top ('' before the first page).
   ValueListenable<String> get currentRoute => _current;
+
+  /// The page on top, menus and dialogs over it not counted (its name and
+  /// arguments: the window's title names the room, docs/ui/compare/U.13
+  /// c11); null before the first page.
+  ValueListenable<RouteSettings?> get topPage => _topPage;
+
+  void _setTopPage(Route<dynamic>? route) {
+    if (route is PopupRoute<dynamic>) return;
+    _topPageRoute = route;
+    _topPage.value = route?.settings;
+  }
 
   /// How many menus, dialogs and sheets are open (3.x `PopupRouteTracker`:
   /// the in-app floating window hides meanwhile).
@@ -51,6 +64,7 @@ final class LiveRouteObserver extends RouteObserver<PageRoute<dynamic>> {
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPush(route, previousRoute);
     _track(route, open: true);
+    _setTopPage(route);
     _emit(RouteEventKind.push, route, route);
   }
 
@@ -58,6 +72,7 @@ final class LiveRouteObserver extends RouteObserver<PageRoute<dynamic>> {
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPop(route, previousRoute);
     _track(route, open: false);
+    if (identical(route, _topPageRoute)) _setTopPage(previousRoute);
     _emit(RouteEventKind.pop, route, previousRoute);
   }
 
@@ -65,6 +80,7 @@ final class LiveRouteObserver extends RouteObserver<PageRoute<dynamic>> {
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didRemove(route, previousRoute);
     _track(route, open: false);
+    if (identical(route, _topPageRoute)) _setTopPage(previousRoute);
   }
 
   @override
@@ -73,6 +89,7 @@ final class LiveRouteObserver extends RouteObserver<PageRoute<dynamic>> {
     if (oldRoute != null) _track(oldRoute, open: false);
     if (newRoute != null) {
       _track(newRoute, open: true);
+      if (identical(oldRoute, _topPageRoute) || _topPageRoute == null) _setTopPage(newRoute);
       _emit(RouteEventKind.push, newRoute, newRoute);
     }
   }

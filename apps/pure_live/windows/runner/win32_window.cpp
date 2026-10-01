@@ -185,6 +185,9 @@ Win32Window::MessageHandler(HWND hwnd,
                             LPARAM const lparam) noexcept {
   switch (message) {
     case WM_DESTROY:
+      // The main window's mark for a second launch (main.cpp); a window
+      // removes its properties before it goes.
+      ::RemovePropW(hwnd, L"PureLive.PrimaryWindow");
       window_handle_ = nullptr;
       Destroy();
       if (quit_on_close_) {

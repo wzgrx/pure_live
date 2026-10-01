@@ -16,6 +16,16 @@ import 'package:path_provider/path_provider.dart';
 /// import left 3.x's list in `legacy_values`).
 const String recorderTasksKey = 'recorder.tasks';
 
+/// The task list of window [instanceId]: [recorderTasksKey] for the main
+/// window; an extra desktop window shares the data (docs/ui/compare/U.13
+/// c14) but records on its own, so its list is kept apart (each list is
+/// written whole) and dropped when the window closes.
+String recorderTasksKeyFor(String instanceId) => instanceId.isEmpty ? recorderTasksKey : '$recorderTasksKey.$instanceId';
+
+/// How many of [tasks] hold a recording (preparing, writing, reconnecting
+/// or joining the file).
+int activeRecordings(Iterable<RecordTask> tasks) => tasks.where((task) => task.status.isActive).length;
+
 /// The input openers of the recipe platforms (FC2, Bigo, niconico): without
 /// them those rooms cannot be recorded (M8).
 List<RecipeOpener> recipeOpeners(SiteRegistry sites) => [
@@ -260,7 +270,11 @@ final class AppRecording {
     this.chat,
     this._store,
     this._storageAccess,
+    this.tasksKey = recorderTasksKey,
   });
+
+  /// Where the tasks are kept ([recorderTasksKeyFor]).
+  final String tasksKey;
 
   /// Settings.
   final RecordSettingsStore settings;
@@ -307,7 +321,23 @@ final class AppRecording {
     });
     if (chat != null) _taskChanges = recorder.changes.listen(chat.sync);
     final store = _store;
-    if (store != null) await recorder.restore(await savedRecorderTasks(store));
+    if (store != null) await recorder.restore(await savedRecorderTasks(store, key: tasksKey));
+  }
+
+  /// How many tasks hold a recording now (preparing, writing, reconnecting
+  /// or joining the file): leaving the app stops them, so the close dialog
+  /// and the tray say so (docs/ui/compare/U.13 c9).
+  int get activeCount => activeRecordings(recorder?.tasks ?? const []);
+
+  /// [activeCount] now and after every change of the tasks.
+  Stream<int> get activeCounts {
+    final recorder = this.recorder;
+    if (recorder == null) return Stream.value(0);
+    return Stream<int>.multi((controller) {
+      controller.add(activeCount);
+      final subscription = recorder.changes.map(activeRecordings).listen(controller.add);
+      controller.onCancel = subscription.cancel;
+    }).distinct();
   }
 
   /// The task of [room], if any.
@@ -364,6 +394,7 @@ AppRecording buildAppRecording({
   RecordingKeepAlive? keepAlive,
   Future<bool> Function(RecordStorage storage, {required bool interactive})? storageAccess,
   String? Function()? caFile,
+  String tasksKey = recorderTasksKey,
 }) {
   final settings = RecordSettingsStore(store);
   final storage = RecordStorage(
@@ -381,7 +412,7 @@ AppRecording buildAppRecording({
           storage: storage,
           settings: () => settings.current,
           inputs: RecordInputOpener(proxy: proxy, recipes: recipeOpeners(sites)),
-          persist: (json) => store.meta.set(recorderTasksKey, json),
+          persist: (json) => store.meta.set(tasksKey, json),
           keepAlive: keepAlive,
           storageAccess: access,
           caFile: caFile,
@@ -398,13 +429,15 @@ AppRecording buildAppRecording({
         : RecordChatRecorder(enabled: () => settings.current.recordDanmaku, connect: connect),
     store: store,
     storageAccess: access,
+    tasksKey: tasksKey,
   );
 }
 
-/// The saved task list: v4's, else the one imported from 3.x.
-Future<String?> savedRecorderTasks(LiveStore store) async {
-  final saved = await store.meta.get(recorderTasksKey);
-  if (saved != null) return saved;
+/// The saved task list under [key]: v4's, else (the main window's list)
+/// the one imported from 3.x.
+Future<String?> savedRecorderTasks(LiveStore store, {String key = recorderTasksKey}) async {
+  final saved = await store.meta.get(key);
+  if (saved != null || key != recorderTasksKey) return saved;
   final legacy = await store.meta.legacyValue('recorder_tasks');
   return switch (legacy) {
     null => null,

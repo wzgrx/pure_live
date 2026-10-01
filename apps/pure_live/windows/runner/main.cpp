@@ -15,11 +15,37 @@ constexpr wchar_t kPrimaryInstanceMutex[] =
 
 // Native title shown by the taskbar, Alt+Tab and Task Manager (the Chinese app name);
 // the in-app title bar is drawn by Flutter. Escaped to keep the source ASCII.
+// The app renames the window while a room is open ("<streamer> - 纯粹直播",
+// docs/ui/compare/U.13 c11), so the main window is found by a property
+// instead of its title.
 constexpr wchar_t kWindowTitle[] = L"纯粹直播";
 
+constexpr wchar_t kWindowClass[] = L"FLUTTER_RUNNER_WIN32_WINDOW";
+
+// Set on the main window only; extra windows share the class and title.
+constexpr wchar_t kPrimaryWindowProperty[] = L"PureLive.PrimaryWindow";
+
+BOOL CALLBACK FindPrimaryWindow(HWND window, LPARAM found) {
+  wchar_t class_name[64] = {};
+  if (::GetClassNameW(window, class_name, 64) == 0 ||
+      std::wstring(class_name) != kWindowClass) {
+    return TRUE;
+  }
+  if (::GetPropW(window, kPrimaryWindowProperty) == nullptr) {
+    return TRUE;
+  }
+  *reinterpret_cast<HWND*>(found) = window;
+  return FALSE;
+}
+
 void BringPrimaryWindowToFront() {
-  const HWND window =
-      ::FindWindowW(L"FLUTTER_RUNNER_WIN32_WINDOW", kWindowTitle);
+  HWND window = nullptr;
+  ::EnumWindows(FindPrimaryWindow, reinterpret_cast<LPARAM>(&window));
+  if (window == nullptr) {
+    // A main window of a build before the property: its title is still the
+    // app's name unless a room is open.
+    window = ::FindWindowW(kWindowClass, kWindowTitle);
+  }
   if (window == nullptr) {
     return;
   }
@@ -100,6 +126,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
       return EXIT_FAILURE;
     }
     window.SetQuitOnClose(true);
+    if (instance_id.empty()) {
+      // What a second launch looks for (BringPrimaryWindowToFront).
+      ::SetPropW(window.GetHandle(), kPrimaryWindowProperty,
+                 reinterpret_cast<HANDLE>(static_cast<INT_PTR>(1)));
+    }
 
     ::MSG msg;
     while (::GetMessage(&msg, nullptr, 0, 0)) {

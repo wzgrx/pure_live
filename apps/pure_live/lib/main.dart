@@ -25,7 +25,10 @@ Future<void> main(List<String> args) async {
   final services = await AppBootstrap.start(args);
   installPluginHooks();
   final settings = services.store.settings;
-  await AppLog.instance.attach(settings, directory: Directory(p.join(services.dataRoot.path, 'logs')));
+  // Extra windows share the data folder (U.13 c14) but write their own log.
+  final launch = services.launch;
+  final logRoot = launch.isPrimary ? services.dataRoot : instanceFolder(services.dataRoot, launch.instanceId);
+  await AppLog.instance.attach(settings, directory: Directory(p.join(logRoot.path, 'logs')));
   final language = AppLanguage.resolve(
     stored: settings.isSet(Settings.language) ? settings.get(Settings.language) : null,
     preferred: PlatformDispatcher.instance.locales,
@@ -37,11 +40,18 @@ Future<void> main(List<String> args) async {
   final fonts = FontLibrary(
     root: Directory(p.join(services.dataRoot.path, 'fonts')),
     http: services.http,
-    legacyRoots: services.launch.isPrimary ? legacyFontRoots(await legacyHiveFiles()) : const [],
+    legacyRoots: launch.isPrimary ? legacyFontRoots(await legacyHiveFiles()) : const [],
   );
   await fonts.restore(settings);
-  // The Windows window (title bar, size and place, tray, close, start-up).
-  await DesktopShell.start(services.store, primary: services.launch.isPrimary);
+  // The desktop window (title bar, size and place, tray, close, new windows
+  // over the shared data, start-up).
+  await DesktopShell.start(
+    services.store,
+    primary: launch.isPrimary,
+    recording: services.recording,
+    dataRoot: services.dataRoot,
+    instanceId: launch.instanceId,
+  );
 
   runApp(
     ProviderScope(

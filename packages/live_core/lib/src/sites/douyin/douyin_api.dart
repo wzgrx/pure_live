@@ -606,9 +606,11 @@ abstract final class DouyinApi {
 
   /// The lines of [quality] in `stream_url` issued at [issuedAt]: FLV then
   /// HLS as the platform lists them, each with its format, codec, the media
-  /// headers of [webRid] and [cookie], and its lease. An alias id plays its
-  /// quality; an id `stream_url` does not have plays the URLs in
-  /// [LivePlayQuality.data]. The quality played is the applied one.
+  /// headers of [webRid] and [cookie], its lease and the picture size the
+  /// platform declares for the quality ([pictureSize], F.1b). An alias id
+  /// plays its quality; an id `stream_url` does not have plays the URLs in
+  /// [LivePlayQuality.data] without a size. The quality played is the
+  /// applied one.
   static LivePlayUrlResolution resolution(
     Map<String, dynamic>? streamUrl, {
     required LivePlayQuality quality,
@@ -631,6 +633,8 @@ abstract final class DouyinApi {
           codec: variant?.codec,
           lineId: index == 1 ? line.format.name : '${line.format.name}-$index',
           lease: lease(line.url, issuedAt),
+          width: variant?.size?.width,
+          height: variant?.size?.height,
         ),
       );
     }
@@ -709,6 +713,8 @@ abstract final class DouyinApi {
     final flvMap = _map(streamUrl['flv_pull_url']) ?? const {};
     final hlsMap = _map(streamUrl['hls_pull_url_map']) ?? const {};
     final names = _map(streamUrl['resolution_name']) ?? const {};
+    final defaultQuality = _map(options?['default_quality']);
+    final defaultKey = (_text(defaultQuality?['sdk_key']) ?? _text(streamUrl['default_resolution']))?.toLowerCase();
 
     final descriptors = <String, Map<String, dynamic>>{};
     for (final option in _list(options?['qualities'])) {
@@ -763,6 +769,11 @@ abstract final class DouyinApi {
         ),
         lines: lines,
         codec: _codec(sdk['VCodec']) ?? _codec(descriptor['v_codec']),
+        size: pictureSize(
+          main: main,
+          descriptor: descriptor,
+          defaultQuality: key == defaultKey ? defaultQuality : null,
+        ),
       ));
     }
     ranked.sort((a, b) {
@@ -779,9 +790,15 @@ abstract final class DouyinApi {
       if (survivor != null) {
         final target = kept[survivor];
         aliases['${variant.quality.id}'] = '${target.quality.id}';
-        // Same stream: the survivor takes a codec only the alias reports.
-        if (target.codec == null && variant.codec != null) {
-          kept[survivor] = (quality: target.quality, lines: target.lines, codec: variant.codec);
+        // Same stream: the survivor takes a codec or a size only the alias
+        // reports.
+        if ((target.codec == null && variant.codec != null) || (target.size == null && variant.size != null)) {
+          kept[survivor] = (
+            quality: target.quality,
+            lines: target.lines,
+            codec: target.codec ?? variant.codec,
+            size: target.size ?? variant.size,
+          );
         }
         continue;
       }
@@ -789,6 +806,46 @@ abstract final class DouyinApi {
       kept.add(variant);
     }
     return (list: kept, aliases: aliases);
+  }
+
+  /// The picture size the platform declares for one quality (3.x
+  /// `LiveStreamGeometryHintResolver.resolveDouyin` for the selected URL):
+  /// `main.width`/`height`, then `sdk_params.width`/`height`, then
+  /// `sdk_params.resolution`, then the quality's `options.qualities[]`
+  /// `resolution`, then `default_quality.resolution` when [defaultQuality] is
+  /// given (the quality is the default one). A size outside 120–16384 or a
+  /// ratio outside 0.30–3.50 does not count. `stream_orientation` and the
+  /// top-level `extra.width`/`height` (also on square audio placeholders)
+  /// are never read, as in 3.x.
+  @visibleForTesting
+  static ({int width, int height})? pictureSize({
+    Map<String, dynamic>? main,
+    Map<String, dynamic> descriptor = const {},
+    Map<String, dynamic>? defaultQuality,
+  }) {
+    final sdk = _map(main?['sdk_params']);
+    return _declaredSize(main) ??
+        _declaredSize(sdk) ??
+        _resolutionSize(sdk?['resolution']) ??
+        _resolutionSize(descriptor['resolution']) ??
+        _resolutionSize(defaultQuality?['resolution']);
+  }
+
+  static ({int width, int height})? _declaredSize(Map<String, dynamic>? map) =>
+      map == null ? null : _plausibleSize(jsonInt(_lookup(map, 'width')), jsonInt(_lookup(map, 'height')));
+
+  static ({int width, int height})? _resolutionSize(Object? value) {
+    final match = RegExp(r'(\d{2,5})\s*[xX×*]\s*(\d{2,5})').firstMatch(_text(value) ?? '');
+    if (match == null) return null;
+    return _plausibleSize(int.tryParse(match[1]!), int.tryParse(match[2]!));
+  }
+
+  static ({int width, int height})? _plausibleSize(int? width, int? height) {
+    if (width == null || height == null || width < 120 || height < 120 || width > 16384 || height > 16384) {
+      return null;
+    }
+    final ratio = width / height;
+    return ratio < 0.30 || ratio > 3.50 ? null : (width: width, height: height);
   }
 
   static bool _audioOnly(String key, List<_Line> lines) {
@@ -1145,7 +1202,7 @@ abstract final class DouyinApi {
 
 typedef _Row = ({bool text, String value});
 typedef _Line = ({Uri url, StreamFormat format});
-typedef _Variant = ({LivePlayQuality quality, List<_Line> lines, String? codec});
+typedef _Variant = ({LivePlayQuality quality, List<_Line> lines, String? codec, ({int width, int height})? size});
 typedef _Variants = ({List<_Variant> list, Map<String, String> aliases});
 
 /// An object from a map or a JSON-encoded object string.

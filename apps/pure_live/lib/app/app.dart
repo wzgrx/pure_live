@@ -15,6 +15,8 @@ import 'package:pure_live/app/fonts.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/app/ui_mode.dart';
+import 'package:pure_live/features/favorite/favorite_controller.dart';
+import 'package:pure_live/features/live_play/dialogs/room_switcher.dart';
 import 'package:pure_live/features/live_play/mini/floating_window.dart';
 import 'package:pure_live/features/splash/splash_page.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -27,8 +29,11 @@ import 'package:pure_live/tv/tv_app.dart';
 
 /// The app (3.x `MyApp`): theme, language, text size and the shared
 /// widgets' configuration from the settings, the route table (from the
-/// splash page when it is on), Android's adaptive refresh rate, and the
-/// start-up work after the first frame ([AppStartup]).
+/// splash page when it is on), Android's adaptive refresh rate, the
+/// start-up work after the first frame ([AppStartup]), the links between
+/// features that may not import each other (the room switcher's refresh of
+/// the follows, F.1c) and the images given up when the system runs short of
+/// memory ([releaseImageMemory], F.1d).
 ///
 /// The interface follows `uiMode` (M14.1): on a television (or when chosen)
 /// the TV routes and frame ([buildTvRouter], [TvAppFrame]), else the phone
@@ -51,7 +56,7 @@ class PureLiveApp extends ConsumerStatefulWidget {
   ConsumerState<PureLiveApp> createState() => _PureLiveAppState();
 }
 
-class _PureLiveAppState extends ConsumerState<PureLiveApp> {
+class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingObserver {
   late bool _tv = showsTvInterface(
     ref.read(appServicesProvider).store.settings,
     television: ref.read(televisionDeviceProvider),
@@ -86,6 +91,10 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
     };
     imageCacheEpoch.addListener(_imagesCleared);
     _fonts = ref.read(fontLibraryProvider)..addListener(_imagesCleared);
+    WidgetsBinding.instance.addObserver(this);
+    // F.1c: the room switcher's refresh is the follows' silent full refresh
+    // (3.x `refresh_favorite_rooms`).
+    RoomSwitcher.refreshFollows = () => ref.read(favoriteControllerProvider).refreshAll(visible: false);
     // 3.x started the follow check, the login check and the exit timer with
     // its services; here once the first frame is up.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -95,6 +104,8 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    RoomSwitcher.refreshFollows = null;
     imageCacheEpoch.removeListener(_imagesCleared);
     _fonts.removeListener(_imagesCleared);
     AppNavigator.router = null;
@@ -104,6 +115,9 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
   void _imagesCleared() {
     if (mounted) setState(() {});
   }
+
+  @override
+  void didHaveMemoryPressure() => releaseImageMemory();
 
   GoRouter _buildRouter({required bool tv}) {
     final location = splashInitialLocation(ref.read(appServicesProvider).store.settings);
@@ -242,6 +256,16 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
       },
     );
   }
+}
+
+/// The system runs short of memory (3.x `DesktopManager.didHaveMemoryPressure`,
+/// F.1d): Flutter already empties [cache] (default: the app's); the record of
+/// the images on screen goes too. Pictures on screen stay; they are decoded
+/// again when shown anew.
+void releaseImageMemory([ImageCache? cache]) {
+  (cache ?? PaintingBinding.instance.imageCache)
+    ..clear()
+    ..clearLiveImages();
 }
 
 /// `AARRGGBB` or `#RRGGBB` as stored by the theme settings (3.x `HexColor`);

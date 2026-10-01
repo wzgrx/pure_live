@@ -125,6 +125,27 @@ final class PlaybackState {
   /// Whether the video is taller than wide (3.x's `isVerticalVideo`).
   bool get isPortrait => (aspectRatio ?? 16 / 9) < 1;
 
+  /// Width over height the platform declared for the line being opened or
+  /// played ([LivePlayLine.declaredAspectRatio], 3.x's
+  /// `LiveStreamGeometryHint`); null when it declared none and once the
+  /// session is idle or stopped.
+  double? get declaredAspectRatio {
+    if (status == PlaybackStatus.idle || status == PlaybackStatus.stopped) return null;
+    return switch (source) {
+      LineSource() => line?.declaredAspectRatio,
+      _ => null,
+    };
+  }
+
+  /// Width over height to lay the picture out by: the decoded video's, and
+  /// before the first frame the platform's [declaredAspectRatio] (3.x kept
+  /// the hint provisional until the decoder spoke).
+  double? get expectedAspectRatio => aspectRatio ?? declaredAspectRatio;
+
+  /// [isPortrait] by [expectedAspectRatio]: a portrait stream is laid out
+  /// as portrait before its first frame when the platform said so (F.1b).
+  bool get expectsPortrait => (expectedAspectRatio ?? 16 / 9) < 1;
+
   /// A copy with the given fields replaced; [error] and [failure] are kept
   /// only while the status stays [PlaybackStatus.error]; [clearVideoSize]
   /// also forgets the frame rate.

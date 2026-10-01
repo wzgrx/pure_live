@@ -511,6 +511,100 @@ void main() {
     });
   });
 
+  group('F.1b picture size (3.x LiveStreamGeometryHint)', () {
+    Map<String, (int?, int?)> sizes(String sample, String webRid) {
+      final fixture = _sample(sample);
+      final parsed = DouyinApi.enter(fixture.body, webRid: webRid);
+      return {
+        for (final quality in DouyinApi.qualities(parsed.streamUrl))
+          '${quality.id}': switch (DouyinApi.resolution(
+            parsed.streamUrl,
+            quality: quality,
+            webRid: webRid,
+            issuedAt: fixture.capturedAt,
+          ).lines) {
+            final lines => (lines.first.width, lines.first.height),
+          },
+      };
+    }
+
+    test('every line of a quality carries the size the recorded samples declare', () {
+      expect(sizes('S04-enter-live-portrait', '153806988623'), {
+        'origin': (1088, 1920),
+        'hd': (720, 1270),
+        'sd': (540, 952),
+        'ld': (480, 847),
+        'md': (240, 423),
+      });
+      expect(sizes('S04-enter-live', '547977714661')['origin'], (1920, 1080));
+      // The game room's original quality declares no resolution anywhere:
+      // no size rather than another quality's.
+      final game = sizes('S04-enter-live-game', '1');
+      expect(game['origin'], (null, null));
+      expect(game['full_hd1'], (1440, 1080), reason: 'uhd, its alias, declares it');
+
+      final fixture = _sample('S04-enter-live-portrait');
+      final parsed = DouyinApi.enter(fixture.body, webRid: '153806988623');
+      final origin = DouyinApi.resolution(
+        parsed.streamUrl,
+        quality: DouyinApi.qualities(parsed.streamUrl).first,
+        webRid: '153806988623',
+        issuedAt: fixture.capturedAt,
+      );
+      expect(origin.lines, hasLength(2));
+      for (final line in origin.lines) {
+        expect(line.declaredAspectRatio, closeTo(1088 / 1920, 1e-9));
+      }
+      // An id the description does not have plays its own URLs, unsized.
+      final unknown = DouyinApi.resolution(
+        parsed.streamUrl,
+        quality: const LivePlayQuality(quality: 'x', id: 'gone', data: ['https://a.test/x.flv']),
+        webRid: '1',
+        issuedAt: fixture.capturedAt,
+      );
+      expect(unknown.lines.single.width, isNull);
+      // Normalising keeps the size.
+      final spaced = LivePlayUrlResolution.lines(const [
+        LivePlayLine(' https://a.test/x.flv ', width: 720, height: 1280),
+      ]).normalized();
+      expect((spaced.lines.single.width, spaced.lines.single.height), (720, 1280));
+    });
+
+    test("3.x's order: main, sdk_params width/height, sdk_params resolution, the quality's, the default's", () {
+      ({int width, int height})? size({
+        Map<String, dynamic>? main,
+        Map<String, dynamic> descriptor = const {},
+        Map<String, dynamic>? defaultQuality,
+      }) => DouyinApi.pictureSize(main: main, descriptor: descriptor, defaultQuality: defaultQuality);
+
+      final sdk = jsonEncode({'width': 720, 'height': 1280, 'resolution': '1080x1920'});
+      expect(size(main: {'width': 540, 'height': 960, 'sdk_params': sdk}), (width: 540, height: 960));
+      expect(size(main: {'sdk_params': sdk}), (width: 720, height: 1280));
+      expect(
+        size(
+          main: {
+            'sdk_params': jsonEncode({'resolution': '1080 × 1920'}),
+          },
+        ),
+        (width: 1080, height: 1920),
+      );
+      expect(
+        size(main: const {}, descriptor: {'resolution': '720x1280'}, defaultQuality: {'resolution': '1920x1080'}),
+        (width: 720, height: 1280),
+      );
+      expect(size(main: const {}, defaultQuality: {'resolution': '1920x1080'}), (width: 1920, height: 1080));
+      expect(size(main: const {}), isNull);
+      // Implausible values do not count; the next source is used.
+      expect(size(main: {'width': 0, 'height': 1280}, descriptor: {'resolution': '720x1280'}), (
+        width: 720,
+        height: 1280,
+      ));
+      expect(size(main: {'width': 100, 'height': 1280}), isNull, reason: 'under 120');
+      expect(size(main: {'width': 4000, 'height': 1000}), isNull, reason: 'wider than 3.5');
+      expect(size(main: {'width': 20000, 'height': 10000}), isNull, reason: 'over 16384');
+    });
+  });
+
   group('rules 3.x fixed (test/douyin_*_test.dart)', () {
     Map<String, dynamic> streamUrl({
       List<Map<String, Object?>> options = const [],

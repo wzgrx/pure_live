@@ -24,6 +24,8 @@ import 'package:pure_live/features/live_play/local_interaction/local_interaction
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/mini_window.dart';
+import 'package:pure_live/features/live_play/logic/player_standby.dart';
+import 'package:pure_live/features/live_play/logic/predictive_back.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_layout.dart';
@@ -62,12 +64,15 @@ import 'package:pure_live/routes/route_path.dart';
 /// and danmaku settings panels (U.2f) open under the picture in portrait and
 /// on the right otherwise, never over the picture's left half; at the bottom
 /// in the portrait fullscreen. Back and Esc close a panel first, then leave
-/// fullscreen, then close the details, then the room.
+/// fullscreen, then close the details, then the room. On Android the room
+/// holds the system's back while it is open ([RoomBackChannel], F.1c).
 ///
 /// U.2j: the room's player, danmaku and logic live in a [RoomRuntime]. When
 /// the page closes with "退出小窗播放" on and the room playing, the in-app
 /// floating window takes it over ([FloatingRoom]); opening the same room
-/// again takes it back, so nothing is built twice. The picture's mini window
+/// again takes it back, so nothing is built twice. Closing without the
+/// floating window stops the player and, unless "播放器强制销毁" is on, keeps
+/// it for the next room ([PlayerStandby], F.1d). The picture's mini window
 /// button ([RoomMiniWindow]) enters Android's picture-in-picture or shrinks a
 /// desktop window to the mini window; the page then shows only the picture.
 class LivePlayPage extends ConsumerStatefulWidget {
@@ -95,6 +100,9 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   RoomRuntime? _runtime;
   RoomMiniWindow? _mini;
 
+  /// Where the player waits for the next room (F.1d).
+  PlayerStandby? _standby;
+
   /// The page closes on purpose (the desktop mini window's ✕): no floating
   /// window.
   bool _closingOnPurpose = false;
@@ -115,7 +123,8 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   bool _details = false;
   String? _problem;
 
-  /// What the player found: a portrait picture.
+  /// What the player found, or before the first frame what the platform
+  /// declared: a portrait picture.
   final ValueNotifier<bool> _detectedPortrait = ValueNotifier(false);
 
   /// The record or danmaku settings panel (U.2f); one at a time, and not
@@ -152,6 +161,8 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     }
     final store = ref.read(storeProvider);
     _settings = store.settings;
+    final standby = ref.read(playerStandbyProvider);
+    _standby = standby;
     // The same room still playing in the floating window plays on here; any
     // other floating room stops (3.x `toLiveRoomDetail`).
     final adopted = FloatingRoom.instance.claim(room);
@@ -160,7 +171,10 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       runtime = adopted;
     } else {
       final danmaku = ref.read(danmakuProvider);
-      final session = ref.read(playbackSessionFactoryProvider)(config: _engineConfig(store.settings));
+      final config = _engineConfig(store.settings);
+      final key = engineConfigKey(config);
+      // The player the last room left, when it is configured the same way.
+      final session = standby.take(config: key) ?? ref.read(playbackSessionFactoryProvider)(config: config);
       final controller = LiveRoomController(
         room: room,
         site: site,
@@ -180,6 +194,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
         orientation: RoomOrientationChoice(settings: store.settings, room: room),
         reconnect: ReconnectWatch(session.states, now: controller.now),
         background: RoomBackgroundPolicy(controller: controller, settings: store.settings)..start(),
+        playerConfig: key,
       );
     }
     _runtime = runtime;
@@ -206,9 +221,12 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
           ..addListener(_onMini)
           ..startAutoPip();
     _refreshRate = RoomRefreshRate(session: session, settings: store.settings)..start();
-    _detectedPortrait.value = session.state.isPortrait;
+    // F.1b: before the first frame the size the platform declares for the
+    // line lays the room out (3.x `LiveStreamGeometryHint`); the decoder's
+    // wins once known.
+    _detectedPortrait.value = session.state.expectsPortrait;
     _shape = session.states.listen((state) {
-      if (state.isPortrait != _detectedPortrait.value) _detectedPortrait.value = state.isPortrait;
+      if (state.expectsPortrait != _detectedPortrait.value) _detectedPortrait.value = state.expectsPortrait;
     });
     if (adopted != null &&
         session.state.status == PlaybackStatus.playing &&
@@ -227,6 +245,9 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       });
     }
     if (adopted == null) unawaited(controller.start());
+    // F.1c (3.x `LivePlayBackScope`): Android hands every back to the room
+    // while it is open, before Flutter could pop it.
+    if (_platform.android) unawaited(RoomBackChannel.instance.hold(this, _nativeBack));
   }
 
   /// The player settings (M9) as the engine's configuration.
@@ -239,6 +260,19 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     audioOutputDriver: settings.get(Settings.audioOutputDriver),
     androidCompatibility: settings.get(Settings.playerCompatMode),
     rtxVideoSuperResolution: settings.get(Settings.enableRtxVsr),
+  );
+
+  /// What decides whether a kept player fits ([PlayerStandby]): every field
+  /// of [config] (it has no `==`).
+  static Object engineConfigKey(MpvEngineConfig config) => (
+    config.platform,
+    config.hardwareDecoding,
+    config.customOutput,
+    config.videoOutputDriver,
+    config.hardwareDecoder,
+    config.audioOutputDriver,
+    config.androidCompatibility,
+    config.rtxVideoSuperResolution,
   );
 
   /// Picture-in-picture or the desktop mini window began or ended.
@@ -269,6 +303,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
 
   @override
   void dispose() {
+    unawaited(RoomBackChannel.instance.release(this));
     unawaited(_autoFullscreen?.cancel());
     unawaited(_shape?.cancel());
     _releaseOrientation?.cancel();
@@ -301,10 +336,15 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
         suppressed: _closingOnPurpose,
         topRoute: liveRouteObserver.currentRoute.value,
       );
+      final standby = _standby;
       if (float && floating.canShow) {
         floating.show(runtime);
-      } else {
+      } else if (standby == null || _settings.get(Settings.useHardStopOnExit)) {
         unawaited(runtime.dispose());
+      } else {
+        // "播放器强制销毁" off (3.x default): the stopped player waits for the
+        // next room (F.1d).
+        unawaited(runtime.dispose(keep: (session) => standby.keep(session, config: runtime.playerConfig)));
       }
     }
     super.dispose();
@@ -441,6 +481,28 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     if (_details) setState(() => _details = false);
   }
 
+  /// Whether back closes the room: nothing of the room's own is open.
+  bool get _poppable =>
+      _display == RoomDisplay.inline && !_details && _panels.value == null && !(_mini?.desktop ?? false);
+
+  /// Android's back held by the room (F.1c, 3.x `LivePlayBackScope`): a
+  /// dialog or sheet over the room closes first; then the room's own chain
+  /// ([_back]); else the room closes, or the app goes back to the system
+  /// when the room is the first page.
+  Future<void> _nativeBack() async {
+    if (!mounted) return;
+    final navigator = Navigator.of(context);
+    if (ModalRoute.of(context)?.isCurrent == false) {
+      await navigator.maybePop();
+      return;
+    }
+    if (!_poppable) {
+      _back();
+      return;
+    }
+    if (!await navigator.maybePop()) await SystemNavigator.pop();
+  }
+
   /// Back and Esc: a panel first, then the fullscreen, then the details,
   /// then the room.
   void _back() {
@@ -508,7 +570,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
 
   Widget _page(BuildContext context, LiveRoomController controller, _LayoutSettings settings) {
     return PopScope(
-      canPop: _display == RoomDisplay.inline && !_details && _panels.value == null && !(_mini?.desktop ?? false),
+      canPop: _poppable,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _back();
       },
@@ -525,6 +587,11 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
           const SingleActivator(LogicalKeyboardKey.arrowDown): () =>
               unawaited(controller.setVolume(controller.volume - 0.05, save: true)),
           const SingleActivator(LogicalKeyboardKey.keyR): () => unawaited(controller.load()),
+          // F.1d: a keyboard's media keys (3.x `VideoKeyboard`).
+          const SingleActivator(LogicalKeyboardKey.mediaPlay): () => unawaited(controller.session.resume()),
+          const SingleActivator(LogicalKeyboardKey.mediaPause): () => unawaited(controller.session.pause()),
+          const SingleActivator(LogicalKeyboardKey.mediaPlayPause): () =>
+              unawaited(controller.session.togglePlayPause()),
         },
         child: Focus(
           autofocus: true,

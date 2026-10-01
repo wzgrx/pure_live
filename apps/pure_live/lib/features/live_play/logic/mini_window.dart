@@ -65,11 +65,31 @@ MiniStatus miniStatusOf({required RoomStage stage, required PlaybackStatus playb
   };
 }
 
-/// The picture's width over height, 16:9 when unknown (3.x
-/// `currentVideoRatio`).
-double pictureRatio({int? width, int? height, bool portrait = false}) {
-  if (width != null && height != null && width > 0 && height > 0) return width / height;
-  return portrait ? 9 / 16 : 16 / 9;
+/// The picture's size to lay a window out by: the video's, and before its
+/// first frame the size its line declares (F.1b); unknown otherwise.
+({int? width, int? height}) expectedPictureSize(PlaybackState state) {
+  final width = state.videoWidth;
+  final height = state.videoHeight;
+  if (width != null && height != null && width > 0 && height > 0) return (width: width, height: height);
+  if (state.declaredAspectRatio != null) return (width: state.line?.width, height: state.line?.height);
+  return (width: null, height: null);
+}
+
+/// The picture's width × height for the mini windows (3.x
+/// `resolveCompactWindowAspectRatio`): [width] × [height] when known, else
+/// 9 × 16 for a [portrait] picture and 16 × 9 for the rest. A [portrait]
+/// picture is 9 × 16 whatever its size when the windows do not
+/// [followPortrait] its real ratio (`portraitPipFollowSource`, F.1d).
+(int, int) miniPictureSize({int? width, int? height, bool portrait = false, bool followPortrait = true}) {
+  if (portrait && !followPortrait) return (9, 16);
+  if (width != null && height != null && width > 0 && height > 0) return (width, height);
+  return portrait ? (9, 16) : (16, 9);
+}
+
+/// [miniPictureSize] as width over height (3.x `currentVideoRatio`).
+double pictureRatio({int? width, int? height, bool portrait = false, bool followPortrait = true}) {
+  final (w, h) = miniPictureSize(width: width, height: height, portrait: portrait, followPortrait: followPortrait);
+  return w / h;
 }
 
 /// The in-app floating window's base: the shortest side of the [screen] ×

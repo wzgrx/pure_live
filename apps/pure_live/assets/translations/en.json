@@ -1725,6 +1725,8 @@
     "portrait_danmaku_upper_quarter": "Upper 25%",
     "portrait_detection_group": "Detection and room layout",
     "portrait_diagnostics_group": "Diagnostics and reset",
+    "portrait_evidence_decoder": "Decoded size",
+    "portrait_evidence_platform": "Platform hint",
     "portrait_fullscreen_display_ambient": "Ambient background (recommended)",
     "portrait_fullscreen_display_ambient_desc": "Preserves the full frame and extends a softly blurred cover into the gap",
     "portrait_fullscreen_display_balanced": "Balanced fill",

@@ -99,9 +99,23 @@ class RoomMiniWindow extends ChangeNotifier {
     return false;
   }
 
-  double get _ratio {
+  /// The picture's width × height for the mini windows: the video's (before
+  /// its first frame, its line's), 9 × 16 for a portrait picture when
+  /// "小窗跟随真实画面比例" is off (F.1d).
+  (int, int) get _pictureSize {
     final state = controller.session.state;
-    return pictureRatio(width: state.videoWidth, height: state.videoHeight, portrait: state.isPortrait);
+    final picture = expectedPictureSize(state);
+    return miniPictureSize(
+      width: picture.width,
+      height: picture.height,
+      portrait: state.expectsPortrait,
+      followPortrait: settings.get(Settings.portraitPipFollowSource),
+    );
+  }
+
+  double get _ratio {
+    final (width, height) = _pictureSize;
+    return width / height;
   }
 
   /// The mini window button.
@@ -129,13 +143,8 @@ class RoomMiniWindow extends ChangeNotifier {
     // alone first (3.x `isPipPreparing`).
     preparing.value = true;
     await SchedulerBinding.instance.endOfFrame;
-    final state = controller.session.state;
-    final width = state.videoWidth ?? 0;
-    final height = state.videoHeight ?? 0;
-    final entry = await PictureInPicture.enter(
-      width: width > 0 ? width : (state.isPortrait ? 9 : 16),
-      height: height > 0 ? height : (state.isPortrait ? 16 : 9),
-    );
+    final (width, height) = _pictureSize;
+    final entry = await PictureInPicture.enter(width: width, height: height);
     if (entry == PipEntry.entered && !PictureInPicture.active.value) {
       // Hold the picture-only layout until the activity says it is in.
       final done = Completer<void>();
@@ -257,7 +266,7 @@ final class _AutoPip {
   void start() {
     _states = _room.session.states.listen((_) => _sync());
     _settings = mini.settings.changes.listen((setting) {
-      if (setting.key == Settings.autoPipOnLeave.key) _sync();
+      if (setting.key == Settings.autoPipOnLeave.key || setting.key == Settings.portraitPipFollowSource.key) _sync();
     });
     _room.addListener(_sync);
     liveRouteObserver.currentRoute.addListener(_sync);
@@ -273,8 +282,7 @@ final class _AutoPip {
       status: state.status,
       audioOnly: _room.audioOnly,
     );
-    final width = (state.videoWidth ?? 0) > 0 ? state.videoWidth! : 16;
-    final height = (state.videoHeight ?? 0) > 0 ? state.videoHeight! : 9;
+    final (width, height) = mini._pictureSize;
     if (armed == _armed && (!armed || _size == (width, height))) return;
     _armed = armed;
     _size = (width, height);

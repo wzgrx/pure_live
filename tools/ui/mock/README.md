@@ -50,6 +50,10 @@ bash tools/ui/mock/fetch.sh     # 字体（Material Icons、Geist）和示意图
 - 编号：可点的控件加 `data-n="3"`，可选 `data-tag="chg|add|keep|prob"`（颜色）、`data-at="tc|tl|tr|bl|br|c"`（编号位置）。
 - 深色：渲染时加 `--dark`，用 kit 里的深色角色。
 
+## 类名
+
+页面里自己写的类不要和 kit 的类重名（例如 `.tip`、`.tr`、`.menu`、`.sheet`、`.side`、`.chip`、`.row`、`.sys`、`.info`、`.tabs`、`.btn`、`.sw`），否则 kit 的样式会叠上去；自己的类加前缀，例如 `.x-tip`。
+
 ## 生成
 
 ```bash

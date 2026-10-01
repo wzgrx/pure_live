@@ -185,3 +185,7 @@ v4 现在（偏差最大）：
 | U.4a 房间卡片 | [compare/U.4a](compare/U.4a/README.md)（第 4 节和代码对不上的地方以这里为准：标是“录播”、默认不标平台、卡片默认圆角 20） |
 | U.4b 热门 | [compare/U.4b](compare/U.4b/README.md)（第 2 节的空状态原文是“未发现直播”） |
 | U.4c 关注 | [compare/U.4c](compare/U.4c/README.md) |
+| U.2g 直播间的状态 | [compare/U.2g](compare/U.2g/README.md) |
+| U.4d 分区 | [compare/U.4d](compare/U.4d/README.md) |
+| U.4e 分区房间 | [compare/U.4e](compare/U.4e/README.md) |
+| U.4f 关注的分区、平台显示 | [compare/U.4f](compare/U.4f/README.md)（v3 的 HotAreasPage 实际是“平台显示”页） |

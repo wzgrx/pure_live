@@ -258,6 +258,17 @@ void main() {
   test('texts: time on air, audience numbers', () {
     expect(startedAgo(now.subtract(const Duration(minutes: 80)), now), '已开播 1 小时 20 分');
     expect(startedAgo(now.subtract(const Duration(seconds: 20)), now), '刚刚开播');
+    // One formatter for the room and the cards (M13.16): days past 24 hours.
+    expect(startedAgo(now.subtract(const Duration(hours: 51, minutes: 49)), now), '已开播 2 天 3 小时');
+    expect(elapsedText(const Duration(minutes: 7)), '7 分钟');
+    expect(elapsedText(const Duration(seconds: 10)), '1 分钟');
+    expect(elapsedText(const Duration(hours: 23, minutes: 59)), '23 小时 59 分');
+    expect(elapsedText(const Duration(hours: 24)), '1 天 0 小时');
+    final live = LiveRoom(platform: 'douyu', roomId: '1', liveStatus: LiveStatus.live);
+    expect(
+      liveDuration(live.copyWith(startedAt: now.subtract(const Duration(hours: 51, minutes: 49))), now),
+      '已播 2 天 3 小时',
+    );
     expect(readableAudience('123456'), '12.3万');
     expect(readableAudience('999'), '999');
   });

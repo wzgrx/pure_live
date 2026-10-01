@@ -23,7 +23,7 @@ void main() {
     expect(identical(services.sites.of('BiliBili '), services.sites.of(SiteIds.bilibili)), isTrue);
   });
 
-  test("Kick is registered with its API transport, after CHZZK", () async {
+  test('Kick is registered with its API transport, after CHZZK', () async {
     final services = await testServices();
     addTearDown(services.close);
     final api = NoNetworkHttp();

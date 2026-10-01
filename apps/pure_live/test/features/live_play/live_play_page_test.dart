@@ -72,9 +72,13 @@ void main() {
 
     expect(find.byKey(const ValueKey('live-play-portrait-stack')), findsOneWidget);
     expect(find.text('主播'), findsWidgets);
-    expect(find.text('哔哩哔哩 / 英雄联盟'), findsOneWidget);
-    expect(find.text('今晚开黑'), findsOneWidget);
-    expect(find.textContaining('热度 12.0万'), findsOneWidget);
+    // U.2a change 1: "平台 · 分区" under the name (3.x wrote "平台 / 分区").
+    expect(find.text('哔哩哔哩 · 英雄联盟'), findsOneWidget);
+    expect(find.text('今晚开黑'), findsWidgets);
+    // U.2a change 7: the figure is an icon and the number; its name is the
+    // tooltip (3.x wrote "热度 12.0万").
+    expect(find.text('12.0万'), findsOneWidget);
+    expect(find.byTooltip('热度'), findsOneWidget);
     expect(find.text('原画'), findsOneWidget);
     expect(find.text('线路1'), findsOneWidget);
     expect(find.text('弹幕列表'), findsOneWidget);
@@ -102,7 +106,9 @@ void main() {
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pump();
     expect((await tester.runAsync(services.store.follows.all))!.single.title, '今晚开黑');
-    expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
+    // U.2a change 12: "✓ 已关注" instead of 3.x's filled heart.
+    expect(find.descendant(of: find.byKey(const ValueKey('live-play-follow')), matching: find.text('已关注')), findsOne);
+    expect(find.byIcon(AppIcons.followed), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('live-play-follow')));
     await tester.pumpAndSettle();
@@ -115,22 +121,25 @@ void main() {
     await _close(tester, services);
   });
 
-  testWidgets('room info sheet shows the announcement and the time on air', (tester) async {
+  testWidgets('room details show the announcement and the time on air', (tester) async {
     final started = DateTime.now().subtract(const Duration(minutes: 30));
     final services = await _pump(
       tester,
       site: FakeSite(liveRoom(startedAt: started)),
       danmaku: FakeDanmaku(),
     );
-    expect(find.textContaining('已开播 30 分钟'), findsOneWidget);
+    // U.2a change 7: the time on air is H:MM on the strip (was "已开播 30 分钟").
+    expect(find.text('0:30'), findsOneWidget);
 
+    // U.2a: the details open over the chat instead of the old bottom sheet.
     await tester.tap(find.byKey(const ValueKey('live-play-info')));
     await tester.pumpAndSettle();
     expect(find.text('公告'), findsOneWidget);
     expect(find.text('每晚八点开播'), findsOneWidget);
-    expect(find.text('开播时间'), findsOneWidget);
-    await tester.tapAt(const Offset(10, 10));
+    expect(find.textContaining('已播 30 分钟'), findsOneWidget);
+    await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('live-play-details')), findsNothing);
     await _close(tester, services);
   });
 
@@ -164,9 +173,10 @@ void main() {
   testWidgets('M13.16: back from picture-in-picture the controls hide again and answer; shaded bars', (tester) async {
     final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: FakeDanmaku());
     final player = tester.state(find.byType(RoomPlayer));
-    // The bars sit on a dark shade reaching past them.
-    final shade = tester.widget<Container>(find.byKey(const ValueKey('live-play-bottom-shade')));
-    expect(((shade.decoration! as BoxDecoration).gradient! as LinearGradient).colors.first, const Color(0xB3000000));
+    // The bars sit on a dark shade reaching past them: U.2a change 3 makes
+    // it 60 % black at the edge (M13.16 had 70 %), fading into the picture.
+    final shade = tester.widget<DecoratedBox>(find.byKey(const ValueKey('live-play-bottom-shade')));
+    expect(((shade.decoration as BoxDecoration).gradient! as LinearGradient).colors.first, OnVideoColors.scrim);
 
     PictureInPicture.active.value = true;
     await tester.pump();

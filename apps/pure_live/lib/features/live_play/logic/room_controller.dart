@@ -60,6 +60,7 @@ class LiveRoomController extends ChangeNotifier {
     this.danmakuStartTimeout = const Duration(seconds: 30),
   }) : _now = now ?? DateTime.now {
     _filter = DanmakuMessageFilter(clock: _now);
+    _statusLines = DanmakuNoticeThrottle(clock: _now);
   }
 
   /// The platform.
@@ -105,6 +106,10 @@ class LiveRoomController extends ChangeNotifier {
   final DateTime Function() _now;
   late final DanmakuMessageFilter _filter;
   final DanmakuNoticeThrottle _notices = DanmakuNoticeThrottle();
+
+  /// The app's own status lines: the same line twice within 3 s shows once
+  /// (3.x `_addStatusMessage`).
+  late final DanmakuNoticeThrottle _statusLines;
 
   /// The chat list.
   final ChatFeed chat = ChatFeed();
@@ -753,6 +758,7 @@ class LiveRoomController extends ChangeNotifier {
   }
 
   void _system(String text) {
+    if (!_statusLines.accepts(text)) return;
     chat.add(ChatLine.system(text));
     _notify();
   }
@@ -830,6 +836,19 @@ class LiveRoomController extends ChangeNotifier {
     await store.blockLists.add(BlockKind.user, name);
     chat.removeWhere((line) => line.message?.userName.trim().toLowerCase() == name.toLowerCase());
     _notify();
+  }
+
+  /// Blocks messages containing [keyword] from now on and takes the matching
+  /// ones off the list (3.x `DanmakuMessageActions.showKeywordDialog`).
+  /// Returns whether the word was new.
+  Future<bool> blockKeyword(String keyword) async {
+    final word = keyword.trim();
+    if (word.isEmpty) return false;
+    final added = await store.blockLists.add(BlockKind.keyword, word);
+    final lower = word.toLowerCase();
+    chat.removeWhere((line) => line.kind == ChatLineKind.chat && line.text.toLowerCase().contains(lower));
+    _notify();
+    return added;
   }
 
   @override

@@ -142,6 +142,9 @@ final class FakeEngine implements PlayerEngine {
   @override
   Stream<EngineEvent> get events => _events.stream;
 
+  /// Reports [event] as the engine.
+  void emit(EngineEvent event) => _events.add(event);
+
   @override
   Future<void> open(EngineMedia media) async {
     opens.add(media);
@@ -176,7 +179,13 @@ final class FakeEngine implements PlayerEngine {
 PlaybackSession fakeSession(FakeEngine engine) => PlaybackSession(engine: () async => engine, opener: MediaOpener());
 
 /// A live Bilibili room.
-LiveRoom liveRoom({LiveStatus status = LiveStatus.live, LiveRestriction? restriction, DateTime? startedAt}) => LiveRoom(
+LiveRoom liveRoom({
+  LiveStatus status = LiveStatus.live,
+  LiveRestriction? restriction,
+  DateTime? startedAt,
+  String? link,
+}) => LiveRoom(
+  link: link,
   platform: SiteIds.bilibili,
   roomId: '6',
   nick: '主播',

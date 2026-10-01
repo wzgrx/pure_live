@@ -211,8 +211,10 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('live-play-audio-only')));
     await tester.pump();
-    expect(find.text('纯音频模式'), findsWidgets);
-    expect(find.byIcon(Icons.headphones_rounded), findsWidgets);
+    // U.2a E5: the cover says "纯音频播放中" (was "纯音频模式"), and 3.x's
+    // filled headphone marks the button.
+    expect(find.text('纯音频播放中'), findsOneWidget);
+    expect(find.byIcon(AppIcons.audioOnlyActive), findsWidgets);
     expect(ChatLineKind.values, contains(ChatLineKind.gift));
     await _close(tester, services);
   });

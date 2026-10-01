@@ -381,6 +381,16 @@ abstract final class Settings {
   /// Stroke.
   static const enableDanmakuStroke = BoolSetting('enableDanmakuStroke', section: 'danmaku', defaultValue: true);
 
+  /// The chat list's look in the room (U.2a): `compact` lines ("用户名：" in
+  /// a secondary colour, then the message) or 3.x's `card` per message.
+  /// New in v4; 3.x always drew cards.
+  static const danmakuListStyle = StringSetting(
+    'danmakuListStyle',
+    section: 'danmaku',
+    defaultValue: 'compact',
+    allowed: {'compact', 'card'},
+  );
+
   /// Frame rate.
   static const danmakuFps = IntSetting('danmakuFps', section: 'danmaku', defaultValue: 60, min: 30, max: 240);
 
@@ -1113,6 +1123,7 @@ abstract final class Settings {
     danmakuOpacity,
     enableDanmakuDisplay,
     enableDanmakuStroke,
+    danmakuListStyle,
     danmakuFps,
     danmakuAutoFps,
     enableDanmakuTapInteraction,

@@ -1,379 +1,259 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
-import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
+import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_templates.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
-import 'package:pure_live/shared/danmaku/emotes.dart';
 
-/// The four tabs under the video (3.x `DanmakuTabView`): chat, super chats,
-/// danmaku settings and the block list.
-class ChatPanel extends StatelessWidget {
+export 'package:pure_live/features/live_play/danmaku/chat_list.dart' show superChatPrice;
+
+/// The four tabs under the video (3.x `DanmakuTabView`, four equal widths):
+/// chat, super chats (with their count, U.2a change 9), danmaku settings and
+/// the block list. While the room details cover the tabs, the messages that
+/// arrive are counted on "弹幕列表" until the list is looked at again.
+class ChatPanel extends StatefulWidget {
   /// Creates the panel.
-  const new({required this.controller, super.key});
+  const new({required this.controller, this.detailsOpen = false, super.key});
 
   /// The room.
   final LiveRoomController controller;
 
+  /// Whether the room details cover the panel.
+  final bool detailsOpen;
+
   @override
-  Widget build(BuildContext context) => DefaultTabController(
+  State<ChatPanel> createState() => _ChatPanelState();
+}
+
+class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMixin {
+  late final TabController _tabs = TabController(
     length: 4,
+    vsync: this,
     animationDuration: pureLiveTabTransitionDuration,
-    child: Column(
-      children: [
-        TabBar(
-          key: const ValueKey('live-play-tabs'),
-          labelPadding: const EdgeInsets.symmetric(horizontal: 4),
-          tabs: [
-            Tab(text: i18n('danmaku_list')),
-            ListenableBuilder(
-              listenable: controller,
-              builder: (context, _) => Tab(
-                text: controller.superChats.isEmpty
-                    ? i18n('super_chat')
-                    : '${i18n('super_chat')} ${controller.superChats.length}',
-              ),
-            ),
-            Tab(text: i18n('danmaku_settings')),
-            Tab(text: i18n('block_list')),
-          ],
-        ),
-        Expanded(
-          child: TabBarView(
-            physics: const PureLiveBoundedScrollPhysics(),
-            children: [
-              ChatList(controller: controller),
-              ListenableBuilder(
-                listenable: controller,
-                builder: (context, _) => SuperChatList(messages: controller.superChats, now: controller.now),
-              ),
-              DanmakuSettingsPanel(
-                leading: [
-                  ListenableBuilder(
-                    listenable: controller,
-                    builder: (context, _) => context.buildModernCard([
-                      context.buildSwitchTile(
-                        title: i18n('live_play_show_gifts'),
-                        subtitle: i18n('live_play_show_gifts_desc'),
-                        icon: Icons.card_giftcard_rounded,
-                        value: controller.showGifts,
-                        onChanged: (value) => unawaited(controller.setShowGifts(show: value)),
-                      ),
-                    ]),
-                  ),
-                  const DanmakuTemplatesCard(),
-                ],
-              ),
-              const BlockListPanel(),
-            ],
-          ),
-        ),
-      ],
-    ),
   );
-}
 
-/// The chat list (3.x `DanmakuListView`): follows new lines while at the
-/// bottom; scrolled up, it stays put and offers a "new messages" button.
-class ChatList extends ConsumerStatefulWidget {
-  /// Creates the list.
-  const new({required this.controller, super.key});
-
-  /// The room.
-  final LiveRoomController controller;
-
-  @override
-  ConsumerState<ChatList> createState() => _ChatListState();
-}
-
-class _ChatListState extends ConsumerState<ChatList> {
-  final ScrollController _scroll = ScrollController();
-  bool _following = true;
-  int _seen = 0;
-  EmoteTable _emotes = EmoteTable.empty;
+  /// The chat count when the details opened; null when nothing is pending.
+  int? _unreadFrom;
 
   @override
   void initState() {
     super.initState();
-    _scroll.addListener(_onScroll);
-    widget.controller.addListener(_onChange);
-    _seen = widget.controller.chat.added;
-    // The platform's bundled emoticons (M13.16), read once per platform.
-    final library = ref.read(emoteLibraryProvider);
-    final platform = widget.controller.site.id;
-    _emotes = library.tableOf(platform);
-    if (_emotes.codes.isEmpty) {
-      unawaited(
-        library.load(platform).then((table) {
-          if (mounted && table.codes.isNotEmpty) setState(() => _emotes = table);
-        }),
-      );
-    }
+    if (widget.detailsOpen) _unreadFrom = widget.controller.chat.added;
+  }
+
+  @override
+  void didUpdateWidget(ChatPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.detailsOpen && !oldWidget.detailsOpen) _unreadFrom = widget.controller.chat.added;
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_onChange);
-    _scroll.dispose();
+    _tabs.dispose();
     super.dispose();
   }
 
-  void _onScroll() {
-    if (!_scroll.hasClients) return;
-    final atBottom = _scroll.position.pixels >= _scroll.position.maxScrollExtent - 24;
-    if (atBottom != _following) setState(() => _following = atBottom);
-    if (atBottom) _seen = widget.controller.chat.added;
-  }
-
-  void _onChange() {
-    if (!mounted) return;
-    if (_following) {
-      _seen = widget.controller.chat.added;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scroll.hasClients && _following) _scroll.jumpTo(_scroll.position.maxScrollExtent);
-      });
-    }
-    setState(() {});
-  }
-
-  void _toBottom() {
-    setState(() => _following = true);
-    _seen = widget.controller.chat.added;
-    if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
-  }
-
-  Future<void> _actions(ChatLine line) async {
-    final message = line.message;
-    if (message == null) return;
-    final name = message.userName.trim();
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text(name.isEmpty ? i18n('live_play_anonymous') : name),
-              subtitle: Text(message.message, maxLines: 3, overflow: TextOverflow.ellipsis),
-            ),
-            ListTile(
-              leading: const Icon(Icons.copy_rounded),
-              title: Text(i18n('live_play_copy_message')),
-              onTap: () async {
-                Navigator.of(sheetContext).pop();
-                await Clipboard.setData(ClipboardData(text: message.message));
-                AppNavigator.toast(i18n('copied_to_clipboard'));
-              },
-            ),
-            if (name.isNotEmpty)
-              ListTile(
-                key: const ValueKey('live-play-block-user'),
-                leading: const Icon(Icons.person_off_outlined),
-                title: Text(i18n('live_play_block_user', args: {'name': name})),
-                onTap: () async {
-                  Navigator.of(sheetContext).pop();
-                  await widget.controller.blockUser(name);
-                  AppNavigator.toast(i18n('live_play_user_blocked', args: {'name': name}));
-                },
-              ),
-          ],
-        ),
-      ),
-    );
+  void _seen() {
+    if (_unreadFrom != null && !widget.detailsOpen) setState(() => _unreadFrom = null);
   }
 
   @override
-  Widget build(BuildContext context) {
-    final display = watchSetting(ref, Settings.enableDanmakuDisplay);
-    if (!display) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(i18n('danmaku_display_disabled_hint'), textAlign: TextAlign.center),
-        ),
-      );
-    }
-    final lines = widget.controller.chat.lines;
-    final unseen = widget.controller.chat.added - _seen;
-    return Stack(
-      children: [
-        ListView.builder(
-          key: const ValueKey('live-play-chat'),
-          controller: _scroll,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          itemCount: lines.length,
-          itemBuilder: (context, index) {
-            final line = lines[index];
-            return _ChatLineView(
-              key: ValueKey(line.id),
-              line: line,
-              emotes: _emotes,
-              onLongPress: line.kind == ChatLineKind.chat ? () => unawaited(_actions(line)) : null,
-            );
-          },
-        ),
-        if (!_following && unseen > 0)
-          Positioned(
-            bottom: 8,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: ActionChip(
-                key: const ValueKey('live-play-new-messages'),
-                avatar: const Icon(Icons.arrow_downward_rounded, size: 16),
-                label: Text(i18n('danmaku_new_messages', args: {'count': '$unseen'})),
-                onPressed: _toBottom,
+  Widget build(BuildContext context) => Column(
+    children: [
+      TabBar(
+        key: const ValueKey('live-play-tabs'),
+        controller: _tabs,
+        tabAlignment: TabAlignment.fill,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+        onTap: (index) {
+          if (index == 0) _seen();
+        },
+        tabs: [
+          Tab(
+            child: ListenableSelector<int>(
+              listenable: widget.controller,
+              selector: () {
+                final from = _unreadFrom;
+                return from == null ? 0 : widget.controller.chat.added - from;
+              },
+              builder: (context, count, _) => _TabLabel(
+                text: i18n('danmaku_list'),
+                count: count,
+                countKey: const ValueKey('live-play-unread-count'),
+                semantics: i18n('live_play_unread_count', args: {'count': '$count'}),
               ),
             ),
           ),
+          Tab(
+            child: ListenableSelector<int>(
+              listenable: widget.controller,
+              selector: () => widget.controller.superChats.length,
+              builder: (context, count, _) => _TabLabel(
+                text: i18n('super_chat'),
+                count: count,
+                countKey: const ValueKey('live-play-super-chat-count'),
+              ),
+            ),
+          ),
+          Tab(text: i18n('danmaku_settings')),
+          Tab(text: i18n('block_list')),
+        ],
+      ),
+      Expanded(
+        child: TabBarView(
+          controller: _tabs,
+          physics: const PureLiveBoundedScrollPhysics(),
+          children: [
+            ChatList(controller: widget.controller, onTouched: _seen),
+            // Rebuilt with the room as before: the remaining times move on
+            // with each update (the super chat tab is U.2e's).
+            ListenableBuilder(
+              listenable: widget.controller,
+              builder: (context, _) =>
+                  SuperChatList(messages: widget.controller.superChats, now: widget.controller.now),
+            ),
+            RoomDanmakuSettings(controller: widget.controller),
+            const BlockListPanel(),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+class _TabLabel extends StatelessWidget {
+  const new({required this.text, required this.count, required this.countKey, this.semantics});
+
+  final String text;
+  final int count;
+  final Key countKey;
+  final String? semantics;
+
+  @override
+  Widget build(BuildContext context) {
+    if (count <= 0) return Text(text, maxLines: 1, overflow: TextOverflow.ellipsis);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final number = Semantics(
+      label: semantics,
+      child: Container(
+        key: countKey,
+        constraints: const BoxConstraints(minWidth: 18),
+        height: 18,
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(9)),
+        child: Text(
+          count > 99 ? '99+' : '$count',
+          style: theme.textTheme.labelSmall?.emphasis.tabular.copyWith(color: scheme.onPrimary, height: 1.1),
+        ),
+      ),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final painter = TextPainter(
+          text: TextSpan(text: text, style: DefaultTextStyle.of(context).style),
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+          maxLines: 1,
+        )..layout();
+        final width = painter.width;
+        painter.dispose();
+        if (width + 24 <= constraints.maxWidth) {
+          // Room for the count after the word (U.2a change 9).
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [Text(text, maxLines: 1), const SizedBox(width: 4), number],
+          );
+        }
+        // A narrow column (the wide layout's chat): the count sits on the
+        // word's corner instead of cutting it short.
+        return Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            Text(text, maxLines: 1, overflow: TextOverflow.ellipsis),
+            Positioned(top: -10, right: -18, child: number),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// The room's danmaku settings: the gift switch and the chat list's look,
+/// the viewing templates, then the shared settings (the settings tab, and
+/// the sheet of the video's settings button).
+class RoomDanmakuSettings extends ConsumerWidget {
+  /// Creates the settings.
+  const new({required this.controller, super.key});
+
+  /// The room.
+  final LiveRoomController controller;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final style = ChatListStyle.of(watchSetting(ref, Settings.danmakuListStyle));
+    final settings = ref.read(storeProvider).settings;
+    return DanmakuSettingsPanel(
+      leading: [
+        ListenableSelector<bool>(
+          listenable: controller,
+          selector: () => controller.showGifts,
+          builder: (context, showGifts, _) => context.buildModernCard([
+            context.buildSwitchTile(
+              title: i18n('live_play_show_gifts'),
+              subtitle: i18n('live_play_show_gifts_desc'),
+              icon: AppIcons.chatGift,
+              value: showGifts,
+              onChanged: (value) => unawaited(controller.setShowGifts(show: value)),
+            ),
+            context.buildTile(
+              title: i18n('danmaku_list_style'),
+              subtitle: i18n('danmaku_list_style_desc'),
+              icon: AppIcons.chatListStyle,
+              stackTrailingOnNarrow: true,
+              trailing: SegmentedButton<ChatListStyle>(
+                key: const ValueKey('danmaku-list-style'),
+                showSelectedIcon: false,
+                segments: [
+                  ButtonSegment(value: ChatListStyle.compact, label: Text(i18n('danmaku_list_style_compact'))),
+                  ButtonSegment(value: ChatListStyle.card, label: Text(i18n('danmaku_list_style_card'))),
+                ],
+                selected: {style},
+                onSelectionChanged: (selection) =>
+                    unawaited(settings.set(Settings.danmakuListStyle, selection.first.name)),
+              ),
+            ),
+          ]),
+        ),
+        const DanmakuTemplatesCard(),
       ],
     );
   }
 }
 
-class _ChatLineView extends StatelessWidget {
-  const new({required this.line, this.emotes = EmoteTable.empty, this.onLongPress, super.key});
-
-  final ChatLine line;
-  final EmoteTable emotes;
-  final VoidCallback? onLongPress;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final body = theme.textTheme.bodyMedium;
-    switch (line.kind) {
-      case ChatLineKind.system:
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 3),
-          child: Text(
-            '${i18n('system_message')}：${line.text}',
-            style: body?.copyWith(color: scheme.onSurfaceVariant, fontStyle: FontStyle.italic),
-          ),
-        );
-      case ChatLineKind.notice:
-        return Container(
-          margin: const EdgeInsets.symmetric(vertical: 3),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(color: scheme.secondaryContainer, borderRadius: BorderRadius.circular(6)),
-          child: Row(
-            children: [
-              Icon(Icons.campaign_outlined, size: 16, color: scheme.onSecondaryContainer),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(line.text, style: body?.copyWith(color: scheme.onSecondaryContainer)),
-              ),
-            ],
-          ),
-        );
-      case ChatLineKind.gift:
-        final message = line.message!;
-        final name = message.userName.trim();
-        return Padding(
-          key: const ValueKey('live-play-gift-line'),
-          padding: const EdgeInsets.symmetric(vertical: 3),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 2, right: 6),
-                child: Icon(Icons.card_giftcard_rounded, size: 15, color: scheme.tertiary),
-              ),
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      if (name.isNotEmpty)
-                        TextSpan(
-                          text: '$name ',
-                          style: body?.copyWith(color: scheme.onSurfaceVariant),
-                        ),
-                      TextSpan(
-                        text: line.text,
-                        style: body?.copyWith(color: scheme.tertiary),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      case ChatLineKind.superChat:
-        final superChat = line.superChat!;
-        return Container(
-          margin: const EdgeInsets.symmetric(vertical: 3),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: _parseColor(superChat.backgroundColor, scheme.tertiaryContainer),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            '${superChat.userName} · ${superChatPrice(superChat)}：${superChat.message}',
-            style: body?.copyWith(color: Colors.black87),
-          ),
-        );
-      case ChatLineKind.chat:
-        final message = line.message!;
-        final color = message.color == LiveMessageColor.white
-            ? body?.color
-            : Color.fromARGB(255, message.color.r, message.color.g, message.color.b);
-        return InkWell(
-          onLongPress: onLongPress,
-          onSecondaryTap: onLongPress,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3),
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  if (message.fansName.trim().isNotEmpty)
-                    TextSpan(
-                      text: ' ${message.fansName}${message.fansLevel.isEmpty ? '' : ' ${message.fansLevel}'} ',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: scheme.onPrimary,
-                        backgroundColor: scheme.primary,
-                      ),
-                    ),
-                  if (message.fansName.trim().isNotEmpty) const TextSpan(text: ' '),
-                  TextSpan(
-                    text: message.userName.trim().isEmpty ? '' : '${message.userName}：',
-                    style: body?.copyWith(color: scheme.onSurfaceVariant),
-                  ),
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.baseline,
-                    baseline: TextBaseline.alphabetic,
-                    child: EmoteText(chatSegments(message, emotes), style: body?.copyWith(color: color)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-    }
-  }
-}
-
-Color _parseColor(String text, Color fallback) {
-  final hex = text.trim().replaceFirst('#', '');
-  final value = int.tryParse(hex.length == 6 ? 'FF$hex' : hex, radix: 16);
-  return value == null ? fallback : Color(value);
-}
-
-/// The price as shown: the platform's text, else the number (3.x showed
-/// `￥price`, though only Bilibili and Douyu use yuan).
-String superChatPrice(LiveSuperChatMessage superChat) =>
-    superChat.priceText.trim().isNotEmpty ? superChat.priceText.trim() : '￥${superChat.price}';
+/// The danmaku settings in a sheet (3.x `SettingsButton` opened its
+/// settings panel over the video); the panel looks as in the settings tab.
+Future<void> showRoomDanmakuSettings(BuildContext context, LiveRoomController controller) => showModalBottomSheet<void>(
+  context: context,
+  isScrollControlled: true,
+  showDragHandle: true,
+  builder: (sheetContext) => SizedBox(
+    key: const ValueKey('live-play-danmaku-settings-sheet'),
+    height: MediaQuery.sizeOf(sheetContext).height * 0.6,
+    child: RoomDanmakuSettings(controller: controller),
+  ),
+);
 
 /// Super chats on display with their remaining time (3.x `SuperChatPage`).
 class SuperChatList extends StatelessWidget {
@@ -403,8 +283,8 @@ class SuperChatList extends StatelessWidget {
       itemCount: messages.length,
       itemBuilder: (context, index) {
         final superChat = messages[messages.length - 1 - index];
-        final top = _parseColor(superChat.backgroundColor, theme.colorScheme.tertiaryContainer);
-        final bottom = _parseColor(superChat.backgroundBottomColor, theme.colorScheme.tertiary);
+        final top = parsePlatformColor(superChat.backgroundColor) ?? theme.colorScheme.tertiaryContainer;
+        final bottom = parsePlatformColor(superChat.backgroundBottomColor) ?? theme.colorScheme.tertiary;
         final left = superChat.endTime.difference(current);
         return Card(
           clipBehavior: Clip.antiAlias,
@@ -417,11 +297,11 @@ class SuperChatList extends StatelessWidget {
                 child: ListTile(
                   dense: true,
                   leading: CommonAvatar(avatarUrl: superChat.face, radius: 16, fallbackName: superChat.userName),
-                  title: Text(superChat.userName, style: const TextStyle(color: Colors.black87)),
-                  subtitle: Text(superChatPrice(superChat), style: const TextStyle(color: Colors.black87)),
+                  title: Text(superChat.userName, style: const TextStyle(color: InkOnColor.dark)),
+                  subtitle: Text(superChatPrice(superChat), style: const TextStyle(color: InkOnColor.dark)),
                   trailing: Text(
                     left.isNegative ? '' : '${left.inMinutes}:${(left.inSeconds % 60).toString().padLeft(2, '0')}',
-                    style: const TextStyle(color: Colors.black54),
+                    style: const TextStyle(color: InkOnColor.darkMuted),
                   ),
                 ),
               ),
@@ -429,7 +309,7 @@ class SuperChatList extends StatelessWidget {
                 color: bottom,
                 child: Padding(
                   padding: const EdgeInsets.all(10),
-                  child: Text(superChat.message, style: const TextStyle(color: Colors.white)),
+                  child: Text(superChat.message, style: const TextStyle(color: InkOnColor.light)),
                 ),
               ),
             ],

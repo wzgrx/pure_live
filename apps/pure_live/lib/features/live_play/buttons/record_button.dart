@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/recorder/recorder_texts.dart';
@@ -12,16 +13,22 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
 
 /// The record button of the room bar (3.x `RecordActionButton`): shows the
-/// room's task state; a tap offers record now, wait for live, stop, remove
-/// and the recording centre. Hidden where this build cannot record.
+/// room's task state (not recording, records when live, recording); a tap
+/// offers record now, wait for live, stop, remove and the recording centre
+/// (the sheet is unchanged until the dialogs' design, U.2f). Hidden where
+/// this build cannot record.
 class RecordButton extends ConsumerStatefulWidget {
   /// Creates the button for [room].
-  const new({required this.room, this.compact = false, super.key});
+  const new({required this.room, this.latest, this.compact = false, super.key});
 
   /// The room.
   final LiveRoom room;
 
-  /// An icon without a label (narrow bars).
+  /// The room as known at the tap (a new task takes its newest detail);
+  /// [room] when null.
+  final LiveRoom Function()? latest;
+
+  /// The narrow bar's form: "自动录" as its timer alone.
   final bool compact;
 
   @override
@@ -96,17 +103,18 @@ class _RecordButtonState extends ConsumerState<RecordButton> {
     if (action == null || !mounted) return;
     setState(() => _busy = true);
     try {
-      final current = recording.taskFor(widget.room);
+      final room = widget.latest?.call() ?? widget.room;
+      final current = recording.taskFor(room);
       switch (action) {
         case _RecordAction.start:
           if (!await recording.ensureStorageAccess()) return;
           if (current == null) {
-            await recording.addTask(widget.room);
+            await recording.addTask(room);
           } else if (!current.status.isActive) {
             await recording.startTask(current);
           }
         case _RecordAction.monitor:
-          if (current == null && await recording.addTask(widget.room, startImmediately: false) != null) {
+          if (current == null && await recording.addTask(room, startImmediately: false) != null) {
             AppNavigator.toast(i18n('record_task_added'));
           }
         case _RecordAction.stop:
@@ -128,48 +136,59 @@ class _RecordButtonState extends ConsumerState<RecordButton> {
     final recording = ref.watch(recordingProvider);
     if (recording == null || !recording.available) return const SizedBox.shrink();
     final task = recording.taskFor(widget.room);
-    final status = task?.status;
-    final active = status?.isActive ?? false;
-    final label = i18n(
-      active
-          ? 'recording'
-          : task != null
-          ? 'monitored'
-          : 'record',
-    );
-    final color = active ? Colors.red : null;
-    // M13.16: a hollow circle alone did not read as "record". Idle is the
-    // record glyph (a dot in a ring); a monitored room adds an orange dot;
-    // a recording one is a red dot with "录制中", on narrow bars too.
-    final icon = _busy
-        ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-        : active
-        ? const Icon(Icons.fiber_manual_record_rounded, color: Colors.red, size: 14)
-        : Badge(
-            isLabelVisible: task != null,
-            smallSize: 7,
-            backgroundColor: Colors.orange,
-            child: const Icon(Icons.radio_button_checked_rounded),
-          );
+    final active = task?.status.isActive ?? false;
     final onPressed = _busy ? null : () => unawaited(_pressed());
-    if (widget.compact && !active) {
-      return IconButton(key: const ValueKey('live-play-record'), tooltip: label, onPressed: onPressed, icon: icon);
+    // docs/ui/compare/U.2a, change 13: idle is a grey ring around a red dot;
+    // a room that records by itself when it goes live says "自动录" with a
+    // timer; a recording room is a white dot on red (blinking unless the
+    // system asks for less motion) and the picture's corner shows the time.
+    if (_busy) {
+      return const SizedBox.square(
+        key: ValueKey('live-play-record'),
+        dimension: kMinInteractiveDimension,
+        child: Center(child: SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))),
+      );
     }
-    return TextButton.icon(
+    if (active) {
+      return IconButton(
+        key: const ValueKey('live-play-record'),
+        tooltip: i18n('recording'),
+        onPressed: onPressed,
+        icon: const RecordGlyph(state: RecordGlyphState.recording, size: 26),
+      );
+    }
+    if (task != null) {
+      final label = i18n('live_play_auto_record');
+      if (widget.compact) {
+        return IconButton.filledTonal(
+          key: const ValueKey('live-play-record'),
+          tooltip: label,
+          onPressed: onPressed,
+          icon: const Icon(AppIcons.autoRecord, size: 20),
+        );
+      }
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: FilledButton.tonalIcon(
+          key: const ValueKey('live-play-record'),
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(0, 36),
+            tapTargetSize: MaterialTapTargetSize.padded,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            shape: const StadiumBorder(),
+            textStyle: Theme.of(context).textTheme.labelLarge?.emphasis,
+          ),
+          onPressed: onPressed,
+          icon: const Icon(AppIcons.autoRecord, size: 18),
+          label: Text(label, maxLines: 1),
+        ),
+      );
+    }
+    return IconButton(
       key: const ValueKey('live-play-record'),
-      style: widget.compact
-          ? TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              visualDensity: VisualDensity.compact,
-              backgroundColor: Colors.red.withValues(alpha: 0.1),
-            )
-          : null,
+      tooltip: i18n('record'),
       onPressed: onPressed,
-      icon: icon,
-      label: Text(
-        label,
-        style: TextStyle(color: color, fontSize: widget.compact ? 12 : null),
-      ),
+      icon: const RecordGlyph(state: RecordGlyphState.idle),
     );
   }
 }

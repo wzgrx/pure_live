@@ -1,0 +1,40 @@
+{
+  "id": "F.xx",
+  "short": "功能对比",
+  "title": "F.xx 名称：v3 和 v4 的功能对比",
+  "version": 1,
+  "date": "2026-10-02",
+  "status": "待你确认",
+  "legend": false,
+  "intro": "<p>这个任务管哪些功能点（F-XXX-NN），用户在哪里会用到。左边是 v3.2.11 的行为，右边是 v4 现在的样子和要做的改动。</p>",
+  "notes": [
+    {"kind": "info", "html": "<b>这一版改了什么</b>：……（第 1 版可以不写）"}
+  ],
+  "sections": [
+    {"h": "v3 的行为", "table": {"hdr": ["功能点", "v3 怎么做", "位置"], "rows": [
+      ["F-XXX-NN", "……", "<code>lib/modules/xxx/xxx.dart:120</code>"]
+    ]}},
+    {"h": "v4 现在", "table": {"hdr": ["功能点", "v4 现在", "位置"], "rows": [
+      ["F-XXX-NN", "……", "<code>apps/pure_live/lib/features/xxx/xxx.dart:80</code>"]
+    ]}},
+    {"h": "差别和根因", "problems": [
+      ["P1", "差别是什么、为什么会这样（根因）", "<code>文件:行</code>"]
+    ]},
+    {"h": "要做的改动", "changes": [
+      {"id": "c1", "type": "修复", "text": "……（修 P1）"},
+      {"id": "c2", "type": "补上", "text": "……（v3 有、v4 没有；界面照 docs/ui/compare/U.x 的 cN）"},
+      {"id": "c3", "type": "保留", "text": "……"}
+    ]},
+    {"h": "需要你选的", "choices": [
+      {"id": "X1", "title": "……", "options": ["建议：……（后果）", "另一种：……（后果）"]}
+    ]},
+    {"h": "测试和验证", "list": [
+      "单元测试：……",
+      "K90：TASKS 第 5 节第 x.y 条：步骤……，预期……"
+    ]},
+    {"h": "风险和性能", "list": [
+      "常驻任务、耗电、内存：……",
+      "3.x 数据：……"
+    ]}
+  ]
+}

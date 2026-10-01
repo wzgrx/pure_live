@@ -109,8 +109,14 @@ abstract final class YyApi {
   /// live rooms of 7 areas), so a room entered directly is named without
   /// reading an area page. Left out: `chicken` (和平精英, 天天吃鸡, 综合游戏
   /// and 无畏契约 tell it apart by `subBiz`, which details lack), `other`
-  /// (no area) and the module-less areas (`null`). Names learnt from an
-  /// area page come first.
+  /// (no area). Names learnt from an area page come first.
+  ///
+  /// The module-less areas (`biz` `null` in their page) list their rooms
+  /// in the page, and those rooms' details carry a `biz` of their own
+  /// (M13.16, 2026-10-01: 82 live details from the 11 areas with rooms):
+  /// 综合's rooms say `zonghe` (the area's path, `/others/zonghe`), which no
+  /// other area uses; 手机直播's rooms carry the `biz` of their content area
+  /// (`talk`, `dance`, …). 英雄联盟 had no live room to read.
   static const Map<String, String> bizAreaNames = {
     'sing': '音乐',
     'talk': '脱口秀',
@@ -122,6 +128,7 @@ abstract final class YyApi {
     // The 二次元 page lists the `car` module.
     'car': '二次元',
     'game': '王者荣耀',
+    'zonghe': '综合',
   };
 
   /// The words YY appends to the default title of a room without one

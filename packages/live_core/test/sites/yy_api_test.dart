@@ -218,7 +218,9 @@ void main() {
         'sport': '体育',
         'car': '二次元',
         'game': '王者荣耀',
+        'zonghe': '综合',
       });
+      expect(YyApi.roomList(page('zonghe')).single.area, '综合', reason: 'the rooms of 综合, an area without listing');
       expect(YyApi.roomList(page('dance'), area: '热舞').single.area, '热舞', reason: 'an area listing names its rooms');
     });
 

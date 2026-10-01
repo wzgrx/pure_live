@@ -8,6 +8,8 @@ import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/desktop/desktop_window.dart';
+import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/live_play/background_playback.dart';
@@ -106,6 +108,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       // 3.x's automatic ASMR mode: Android only.
       sleepSessionOnStart:
           defaultTargetPlatform == TargetPlatform.android && store.settings.get(Settings.enableAsmrSleepMode),
+      network: ref.read(networkProbeProvider),
     );
     _background = RoomBackgroundPolicy(controller: controller, settings: store.settings)..start();
     PictureInPicture.active.addListener(_onPip);
@@ -145,6 +148,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     _background?.dispose();
     // The brightness gesture overrides the window's only inside the room.
     unawaited(DeviceControls.resetBrightness());
+    if (_fullscreen && !_mobile) unawaited(DesktopWindow.setFullScreen(on: false));
     _controller?.dispose();
     final session = _session;
     if (session != null) unawaited(session.dispose());
@@ -154,7 +158,11 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   Future<void> _setFullscreen(bool value) async {
     if (value == _fullscreen) return;
     setState(() => _fullscreen = value);
-    if (!_mobile) return;
+    if (!_mobile) {
+      // The whole window on desktops (3.x `WindowHelper`; window_manager).
+      await DesktopWindow.setFullScreen(on: value);
+      return;
+    }
     if (!value) {
       await _restoreSystemUi();
       return;

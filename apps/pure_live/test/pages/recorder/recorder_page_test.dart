@@ -8,6 +8,7 @@ import 'package:live_record/live_record.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/pages/record_settings/record_settings_dialogs.dart';
 import 'package:pure_live/pages/record_settings/record_settings_page.dart';
 import 'package:pure_live/pages/recorder/recorder_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -53,6 +54,7 @@ Future<_Harness> _pump(
   bool withRecorder = true,
   List<RecordTask> tasks = const [],
   Map<String, Object?> legacy = const {},
+  Future<String?> Function()? picker,
 }) async {
   tester.view
     ..physicalSize = const Size(420, 900)
@@ -90,6 +92,7 @@ Future<_Harness> _pump(
         appServicesProvider.overrideWithValue(harness.services),
         recordingProvider.overrideWithValue(harness.recording),
         recorderProvider.overrideWithValue(harness.recording.recorder),
+        if (picker != null) recordDirectoryPickerProvider.overrideWithValue(picker),
       ],
       child: LiveUiScope(
         config: LiveUiConfig(strings: strings.ui),
@@ -211,6 +214,18 @@ void main() {
     await _settle(tester);
     expect(harness.recording.recorder!.tasks, hasLength(2));
     expect(find.text('全部 2'), findsOneWidget);
+  });
+
+  testWidgets('the folder dialog saves the folder from the system picker (M12.3)', (tester) async {
+    late Directory picked;
+    final harness = await _pump(tester, (route) => RecordSettingsPage(route: route), picker: () async => picked.path);
+    picked = harness.folder;
+    await _tap(tester, find.text('Pure Live 录制文件目录'));
+    expect(find.byKey(const ValueKey('record-directory-default')), findsOneWidget, reason: 'the default stays');
+    await _tap(tester, find.byKey(const ValueKey('record-directory-browse')));
+    await _settle(tester);
+    expect(harness.recording.settings.current.savePath, picked.path);
+    expect(find.byKey(const ValueKey('record-directory-input')), findsNothing, reason: 'saved and closed');
   });
 
   testWidgets('the settings page shows imported values and saves changes', (tester) async {

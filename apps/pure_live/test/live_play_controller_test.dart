@@ -3,6 +3,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/network.dart';
 import 'package:pure_live/pages/live_play/chat_feed.dart';
 import 'package:pure_live/pages/live_play/room_controller.dart';
 import 'package:pure_live/shared/rooms/play_quality.dart';
@@ -34,7 +35,12 @@ void main() {
     await store.close();
   });
 
-  LiveRoomController controllerFor(FakeSite site, {LiveRoom? room, bool danmakuSupported = true}) => LiveRoomController(
+  LiveRoomController controllerFor(
+    FakeSite site, {
+    LiveRoom? room,
+    bool danmakuSupported = true,
+    NetworkKind? network,
+  }) => LiveRoomController(
     room: room ?? LiveRoom(platform: SiteIds.bilibili, roomId: '6', nick: '卡片上的名字'),
     site: site,
     session: session,
@@ -42,6 +48,7 @@ void main() {
     danmakuSupported: danmakuSupported,
     store: store,
     toast: toasts.add,
+    network: network == null ? null : () async => network,
     now: () => now,
     refreshInterval: Duration.zero,
   );
@@ -66,6 +73,21 @@ void main() {
     expect(danmaku.connects, ['args-6']);
     expect(controller.chat.lines.map((line) => line.text), contains('弹幕服务器连接正常'));
     controller.dispose();
+  });
+
+  test('on mobile data the first quality follows the mobile-data preference (M12.3)', () async {
+    await store.settings.setAll({Settings.preferResolution: '原画', Settings.preferResolutionCellular: '流畅'});
+    final mobile = controllerFor(FakeSite(liveRoom()), network: NetworkKind.mobile);
+    await mobile.start();
+    await settle();
+    expect(mobile.qualities[mobile.qualityIndex].quality, '流畅');
+    mobile.dispose();
+
+    final wifi = controllerFor(FakeSite(liveRoom()), network: NetworkKind.other);
+    await wifi.start();
+    await settle();
+    expect(wifi.qualities[wifi.qualityIndex].quality, '原画');
+    wifi.dispose();
   });
 
   test('chat passes the block list; audience, super chats, retractions and notices', () async {

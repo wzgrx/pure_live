@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/in_app_web.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// How a short message is shown (3.x `ToastUtil.show`); the app sets it to
@@ -32,6 +33,14 @@ abstract final class AppNavigator {
 
   /// Opens a web address outside the app; replaceable in tests.
   static Future<bool> Function(Uri uri) openExternal = (uri) => launchUrl(uri, mode: LaunchMode.externalApplication);
+
+  /// Opens a local file with the app the system picks; the app sets it
+  /// (open_filex on Android, M12.3); replaceable in tests.
+  static Future<bool> Function(String path) openFile = (path) => openExternal(Uri.file(path));
+
+  /// The context of the root navigator (dialogs from outside a page, such
+  /// as the window's close question); null before the app is up.
+  static BuildContext? get navigatorContext => _router?.routerDelegate.navigatorKey.currentContext;
 
   /// The router in use.
   static GoRouter get router => _router ?? (throw StateError('No router attached'));
@@ -124,10 +133,11 @@ abstract final class AppNavigator {
   /// Opens multi-view (3.x `toMultiview`).
   static Future<void> toMultiview() async => unawaited(toNamed<void>(RoutePath.kMultiview));
 
-  /// Opens the Bilibili login (3.x `toBiliBiliLogin`): phones choose between
-  /// SMS (web) and QR code, desktops go to the QR code.
+  /// Opens the Bilibili login (3.x `toBiliBiliLogin`): phones with the
+  /// in-app browser choose between the web page (SMS or password) and the
+  /// QR code; desktops, and phones without it, go to the QR code.
   static Future<void> toBiliBiliLogin(BuildContext context, {required bool mobile}) async {
-    if (!mobile) {
+    if (!mobile || !InAppWeb.available) {
       await toNamed<void>(RoutePath.kBiliBiliQRLogin);
       return;
     }

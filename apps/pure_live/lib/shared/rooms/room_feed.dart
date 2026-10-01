@@ -257,6 +257,7 @@ final class RoomFeed extends ChangeNotifier {
     required this.visible,
     List<LiveRoom> Function(String platform, List<LiveRoom> rooms)? rank,
     this.maxRooms,
+    this.precheck,
   }) : rank = rank ?? _unranked;
 
   static List<LiveRoom> _unranked(String platform, List<LiveRoom> rooms) => rooms;
@@ -273,6 +274,10 @@ final class RoomFeed extends ChangeNotifier {
 
   /// Whether a room is shown (the "show rooms that cannot play" setting).
   final bool Function(LiveRoom room) visible;
+
+  /// Runs before a refresh asks the platform (3.x `checkNetworkBeforeRequest`:
+  /// the offline check); its error is the refresh's error.
+  final Future<void> Function()? precheck;
 
   /// Requests per load before it gives up (3.x).
   static const int maxRequests = 20;
@@ -419,6 +424,8 @@ final class RoomFeed extends ChangeNotifier {
     final cancel = _cancel = CancelToken();
     final result = _Collected([], {});
     try {
+      await precheck?.call();
+      if (generation != _generation) return;
       final hasMore = await _collect(source, result, count, cancel);
       if (generation != _generation) return;
       _source = source;

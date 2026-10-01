@@ -10,6 +10,7 @@ import 'package:pure_live/pages/remote_receiver/remote_sync_protocol.dart';
 import 'package:pure_live/pages/remote_receiver/remote_sync_service.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/shared/qr_scan.dart';
 
 /// Makes the page's sync service (tests replace it).
 final Provider<RemoteSyncService Function()> remoteSyncServiceProvider = Provider<RemoteSyncService Function()>((ref) {
@@ -365,10 +366,17 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
             key: const ValueKey('remote-sync-target'),
             controller: _address,
             keyboardType: TextInputType.url,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: '192.168.1.100:39888',
-              prefixIcon: Icon(Icons.lan_outlined),
-              border: OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.lan_outlined),
+              border: const OutlineInputBorder(),
+              // The other device's QR code carries its address and pairing
+              // code (3.x scanned it).
+              suffixIcon: qrScanButton(
+                context,
+                key: const ValueKey('remote-sync-scan'),
+                onText: (text) => _address.text = text,
+              ),
             ),
           ),
           const SizedBox(height: 12),

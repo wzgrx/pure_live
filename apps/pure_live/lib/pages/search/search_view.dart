@@ -14,6 +14,8 @@ import 'package:pure_live/pages/search/search_history.dart';
 import 'package:pure_live/pages/search/search_model.dart';
 import 'package:pure_live/pages/search/search_widgets.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/in_app_web.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_menu.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
@@ -232,6 +234,12 @@ class _SearchViewState extends ConsumerState<SearchView> {
     final uri = webSearchUrl(site.id, text);
     if (uri == null) {
       _toast(i18n('search_web_unavailable', args: {'site': name}));
+      return;
+    }
+    if (InAppWeb.available) {
+      // In the app (3.x `WebSearchPage`), which offers to open the rooms it
+      // shows.
+      await AppNavigator.toNamed<void>(RoutePath.kWebSearch, arguments: {'url': uri.toString(), 'platform': site.id});
       return;
     }
     var opened = false;

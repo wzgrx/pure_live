@@ -8,6 +8,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/multiview/multiview_cell_view.dart';
@@ -98,6 +99,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
   void dispose() {
     HardwareKeyboard.instance.removeHandler(_onKey);
     if (_mode == _DisplayMode.fullscreen && _mobile) unawaited(_restoreSystemUi());
+    if (_mode == _DisplayMode.fullscreen && !_mobile) unawaited(DesktopWindow.setFullScreen(on: false));
     _controller
       ..removeListener(_onControllerChanged)
       ..dispose();
@@ -120,7 +122,13 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
       _mode = mode;
       _largeControls = false;
     });
-    if (!_mobile) return;
+    if (!_mobile) {
+      // The whole window on desktops (window_manager).
+      if (mode == _DisplayMode.fullscreen || previous == _DisplayMode.fullscreen) {
+        await DesktopWindow.setFullScreen(on: mode == _DisplayMode.fullscreen);
+      }
+      return;
+    }
     try {
       if (mode == _DisplayMode.fullscreen) {
         await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);

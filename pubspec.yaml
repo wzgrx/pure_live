@@ -42,6 +42,15 @@ dependency_overrides:
   # code_assets ^1.2.1 while the media_kit fork needs ^2.1.0; its build hook
   # only uses APIs unchanged in 2.x (3.x shipped the same override).
   code_assets: 2.1.0
+  # connectivity_plus 7.3.1 (the app's network type, M12.3) declares
+  # nm ^0.5.0, whose dbus ^0.7.0 conflicts with wakelock_plus 1.8.1's
+  # dbus ^0.8.0. nm 0.6.0 is the same NetworkManager client on dbus 0.8 and
+  # is only used on Linux (3.x shipped the same override).
+  nm: 0.6.0
+  # bonsoir 7.1.5's Linux part (device sync's mDNS, M12.3) declares
+  # dbus ^0.7.12; the Avahi calls it makes are unchanged in dbus 0.8.0, which
+  # wakelock_plus 1.8.1 needs (3.x shipped the same override). Linux only.
+  dbus: 0.8.0
 
 # Native FFmpeg of the recorder (apps/pure_live depends on
 # ffmpeg_kit_extended_flutter 0.6.2). The plugin's build hook reads this block

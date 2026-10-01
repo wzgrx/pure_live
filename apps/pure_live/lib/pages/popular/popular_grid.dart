@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/popular/pagination_bar.dart';
@@ -260,6 +261,7 @@ class _PopularPlatformViewState extends ConsumerState<PopularPlatformView> {
             Column(
               children: [
                 if (notice != null) _noticeBar(context, notice),
+                if (hasContent) const MobileDataBanner(),
                 if (_feed.errorOnRefresh && _feed.error != null && hasContent) _refreshErrorBanner(context),
                 Expanded(child: body),
               ],
@@ -594,4 +596,43 @@ class _Skeleton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The mobile-data notice above a list (3.x `_buildCellularBanner`): shown
+/// while the last load ran on mobile data; "never show" hides it for the
+/// session.
+class MobileDataBanner extends StatelessWidget {
+  /// Creates the notice.
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([MobileDataNotice.onMobileData, MobileDataNotice.dismissed]),
+    builder: (context, _) {
+      if (!MobileDataNotice.onMobileData.value || MobileDataNotice.dismissed.value) return const SizedBox.shrink();
+      final colors = Theme.of(context).colorScheme;
+      return Container(
+        key: const ValueKey('mobile-data-notice'),
+        margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+        padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+        decoration: BoxDecoration(
+          color: colors.primaryContainer.withValues(alpha: 0.25),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.15)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.signal_cellular_alt_rounded, color: colors.primary, size: 18),
+            const SizedBox(width: 10),
+            Expanded(child: Text(i18n('cellular_warning_msg'), style: context.textStyles.t13)),
+            TextButton(
+              key: const ValueKey('mobile-data-never'),
+              onPressed: () => MobileDataNotice.dismissed.value = true,
+              child: Text(i18n('never_show')),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }

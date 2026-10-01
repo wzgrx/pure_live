@@ -7,8 +7,8 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
 /// A system folder picker for the recording directory (3.x used
-/// file_picker's `getDirectoryPath`); null until the app adds one (M12.3),
-/// then the page lets the user type the path.
+/// file_picker's `getDirectoryPath`; the app sets it, M12.3); the folder
+/// dialog offers it next to the typed path. Null shows the field only.
 final Provider<Future<String?> Function()?> recordDirectoryPickerProvider = Provider((ref) => null);
 
 /// One choice of a radio dialog.
@@ -242,13 +242,16 @@ class _RecordIntegerDialogState extends State<RecordIntegerDialog> {
   }
 }
 
-/// The recording folder typed by the user (until a system picker exists):
-/// the field shows the current choice; "default" clears it. [onSubmitted]
-/// proves the folder writable and returns an error text, or null when
-/// saved.
+/// The recording folder, typed or picked with the system picker
+/// ([browse]): the field shows the current choice; "default" clears it.
+/// [onSubmitted] proves the folder writable and returns an error text, or
+/// null when saved.
 class RecordDirectoryDialog extends StatefulWidget {
   /// Creates the dialog.
-  const new({required this.initialPath, required this.defaultPath, required this.onSubmitted, super.key});
+  const new({required this.initialPath, required this.defaultPath, required this.onSubmitted, this.browse, super.key});
+
+  /// The system folder picker; null hides the browse button.
+  final Future<String?> Function()? browse;
 
   /// The configured parent ('' for the default).
   final String initialPath;
@@ -272,6 +275,16 @@ class _RecordDirectoryDialogState extends State<RecordDirectoryDialog> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  /// Picks the folder and saves it at once (the picker is the user's
+  /// confirmation); a folder that cannot be used stays in the field with
+  /// the error.
+  Future<void> _browse() async {
+    final picked = (await widget.browse?.call())?.trim() ?? '';
+    if (picked.isEmpty || !mounted) return;
+    _controller.text = picked;
+    await _submit(picked);
   }
 
   Future<void> _submit(String path) async {
@@ -316,6 +329,14 @@ class _RecordDirectoryDialogState extends State<RecordDirectoryDialog> {
               errorText: _error,
               errorMaxLines: 4,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              suffixIcon: widget.browse == null
+                  ? null
+                  : IconButton(
+                      key: const ValueKey('record-directory-browse'),
+                      tooltip: i18n('select_folder'),
+                      icon: const Icon(Icons.folder_open_rounded),
+                      onPressed: _checking ? null : () => unawaited(_browse()),
+                    ),
             ),
             onSubmitted: (text) => unawaited(_submit(text)),
           ),

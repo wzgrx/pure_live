@@ -182,3 +182,6 @@ v4 现在（偏差最大）：
 | U.5a 搜索 | [compare/U.5a](compare/U.5a/README.md) |
 | U.5b 网页搜索 | [compare/U.5b](compare/U.5b/README.md) |
 | U.5c 观看历史 | [compare/U.5c](compare/U.5c/README.md) |
+| U.4a 房间卡片 | [compare/U.4a](compare/U.4a/README.md)（第 4 节和代码对不上的地方以这里为准：标是“录播”、默认不标平台、卡片默认圆角 20） |
+| U.4b 热门 | [compare/U.4b](compare/U.4b/README.md)（第 2 节的空状态原文是“未发现直播”） |
+| U.4c 关注 | [compare/U.4c](compare/U.4c/README.md) |

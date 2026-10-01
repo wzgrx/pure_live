@@ -103,7 +103,9 @@ abstract final class DouyinApi {
   /// The categories of the `live.douyin.com/?from_nav=1` page, whose data is
   /// the page's React Server Component payload (`self.__pace_f.push`).
   /// Ids are `id_str,type`; every category lists itself first as its "all"
-  /// area. Deeper levels (single games) are not areas.
+  /// area. The third level (single games under 游戏's sub-categories, ids
+  /// like `1010014,1`) follows its sub-category and has it as parent; a game
+  /// listed under two sub-categories appears once, under the first.
   static List<LiveCategory> categories(String html, {int status = 200, Map<String, List<String>> headers = const {}}) {
     _checkHttp(html, status, headers, 'home page');
     final raw = _flightObject(_flightRows(html), 'categoryData')?['categoryData'];
@@ -111,16 +113,30 @@ abstract final class DouyinApi {
     return [
       for (final item in raw)
         if (_partition(_map(item)?['partition']) case final top?)
-          LiveCategory(
-            id: top.id,
-            name: top.name,
-            children: [
-              LiveArea(platform: _site, areaId: top.id, areaType: top.id, typeName: top.name, areaName: top.name),
-              for (final sub in _list(_map(item)!['sub_partition']))
-                if (_partition(_map(sub)?['partition']) case final area?)
-                  LiveArea(platform: _site, areaId: area.id, areaType: top.id, typeName: top.name, areaName: area.name),
-            ],
-          ),
+          LiveCategory(id: top.id, name: top.name, children: _areas(top, _list(_map(item)!['sub_partition']))),
+    ];
+  }
+
+  /// [top] itself, then each sub-partition followed by its own (games).
+  static List<LiveArea> _areas(({String id, String name}) top, List<Object?> subs) {
+    final seen = <String>{};
+    LiveArea? area(({String id, String name})? partition, ({String id, String name}) parent) =>
+        partition != null && seen.add(partition.id)
+        ? LiveArea(
+            platform: _site,
+            areaId: partition.id,
+            areaType: parent.id,
+            typeName: parent.name,
+            areaName: partition.name,
+          )
+        : null;
+    return [
+      ?area(top, top),
+      for (final sub in subs)
+        if (_partition(_map(sub)?['partition']) case final partition?) ...[
+          ?area(partition, top),
+          for (final game in _list(_map(sub)!['sub_partition'])) ?area(_partition(_map(game)?['partition']), partition),
+        ],
     ];
   }
 

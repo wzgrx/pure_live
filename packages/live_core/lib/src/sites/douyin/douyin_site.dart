@@ -33,6 +33,13 @@ const _startLookupWait = Duration(seconds: 3);
 /// Broadcasts whose start time is remembered.
 const _startTimesKept = 64;
 
+/// Later recommendation pages draw until they hold this many new rooms
+/// (M4.D2, C-13).
+const _recommendFill = 15;
+
+/// The most draws a later recommendation page makes.
+const _recommendDraws = 3;
+
 final RegExp _controlCharacters = RegExp(r'[\u0000-\u001F\u007F]');
 final RegExp _reflowPath = RegExp(r'(?:^|/)reflow/(\d+)(?:/|$)');
 final Uri _homeUrl = Uri.https(_live, '/', {'from_nav': '1'});
@@ -309,12 +316,35 @@ final class DouyinSite extends LiveSite
   };
 
   /// The feed (unsigned). It takes no page: every request is a new random
-  /// draw, so later pages give only the rooms not delivered since page 1 and
-  /// a draw with nothing new ends the list (pure_live_TV's fix; 3.x appended
-  /// the same rooms again).
+  /// draw, so later pages give only the rooms not delivered since page 1
+  /// (pure_live_TV's fix; 3.x appended the same rooms again). A draw brings
+  /// few new rooms (3 of 20 in M4.D), so a later page draws again, at most
+  /// [_recommendDraws] times, until it holds [_recommendFill] rooms; a draw
+  /// with nothing new stops it, and an empty page ends the list. A later
+  /// draw that fails keeps the rooms already drawn.
   @override
   Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async {
-    if (page <= 1) _recommended.clear();
+    if (page <= 1) {
+      _recommended.clear();
+      return await _draw();
+    }
+    final rooms = <LiveRoom>[];
+    for (var draws = 0; draws < _recommendDraws && rooms.length < _recommendFill; draws++) {
+      final List<LiveRoom> fresh;
+      try {
+        fresh = await _draw();
+      } on SiteError {
+        if (rooms.isEmpty) rethrow;
+        break;
+      }
+      if (fresh.isEmpty) break;
+      rooms.addAll(fresh);
+    }
+    return rooms;
+  }
+
+  /// One feed request's rooms not delivered since page 1.
+  Future<List<LiveRoom>> _draw() async {
     final cookie = await _cookie();
     final response = await _get(
       Uri.https(_live, '/webcast/feed/', {

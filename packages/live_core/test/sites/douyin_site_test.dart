@@ -121,6 +121,37 @@ final class _GatedHttp implements LiveHttp {
   void close() {}
 }
 
+/// Serves the recorded home page and one feed draw per request: a copy of
+/// S02-feed whose first [draws] rooms get new web_rids (null answers 503).
+final class _FeedDraws implements LiveHttp {
+  new(this.draws);
+
+  final List<int?> draws;
+  final ReplayHttp _home = ReplayHttp([ReplaySample.load('$_root/S01-home')]);
+  final String _recorded = Fixture.load('douyin', 'S02-feed').body;
+  int feeds = 0;
+
+  @override
+  Future<LiveResponse> send(LiveRequest request) async {
+    if (request.url.path != '/webcast/feed/') return await _home.send(request);
+    final draw = feeds++;
+    final fresh = draws[draw];
+    if (fresh == null) return LiveResponse(status: 503, bytes: const [], url: request.url);
+    final body = jsonDecode(_recorded) as Map<String, dynamic>;
+    final rooms = (body['data'] as List).cast<Map<String, dynamic>>();
+    for (var index = 0; index < fresh; index++) {
+      rooms[index]['web_rid'] = '9${draw.toString().padLeft(2, '0')}${index.toString().padLeft(2, '0')}';
+    }
+    return LiveResponse(status: 200, bytes: utf8.encode(jsonEncode(body)), url: request.url);
+  }
+
+  @override
+  Future<LiveStreamedResponse> open(LiveRequest request) => _home.open(request);
+
+  @override
+  void close() {}
+}
+
 /// Fails every request at the transport level.
 final class _FailingHttp implements LiveHttp {
   new(this.reason);
@@ -484,7 +515,31 @@ void main() {
       expect(first, hasLength(20));
       expect(http.requests.last.url.queryParameters.containsKey('a_bogus'), isFalse);
       expect(await site.getRecommendRooms(page: 2), isEmpty, reason: 'the same draw: the list ends');
+      expect(_paths(http), [_home, _feed, _feed], reason: 'nothing new: no second draw');
       expect(await site.getRecommendRooms(), hasLength(20), reason: 'a refresh starts over');
+    });
+
+    test('later recommendation pages draw until 15 new rooms, at most 3 times (C-13)', () async {
+      final http = _FeedDraws([0, 5, 12, 3, 3, 3, 0]);
+      final site = DouyinSite(http, now: () => _capturedAt, random: Random(1));
+      expect(await site.getRecommendRooms(), hasLength(20));
+      final second = await site.getRecommendRooms(page: 2);
+      expect((second.length, http.feeds), (17, 3), reason: '5 + 12 new rooms in two draws');
+      expect(second.map((room) => room.roomId).toSet(), hasLength(17));
+      final third = await site.getRecommendRooms(page: 3);
+      expect((third.length, http.feeds), (9, 6), reason: '3 draws at most');
+      expect(third.map((room) => room.roomId).toSet().intersection(second.map((room) => room.roomId).toSet()), isEmpty);
+      expect(await site.getRecommendRooms(page: 4), isEmpty, reason: 'a draw with nothing new ends the list');
+      expect(http.feeds, 7);
+    });
+
+    test('a later draw that fails keeps the rooms already drawn; a first one that fails is reported', () async {
+      final http = _FeedDraws([0, 4, null, null]);
+      final site = DouyinSite(http, now: () => _capturedAt, random: Random(1));
+      await site.getRecommendRooms();
+      expect(await site.getRecommendRooms(page: 2), hasLength(4));
+      await expectLater(site.getRecommendRooms(page: 3), throwsA(isA<NetworkFailure>()));
+      expect(http.feeds, 4);
     });
   });
 

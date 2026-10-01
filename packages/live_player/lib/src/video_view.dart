@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:live_player/src/mpv_engine.dart';
+import 'package:live_player/src/screen_wake.dart';
 import 'package:live_player/src/session.dart';
 import 'package:live_player/src/state.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -13,6 +14,10 @@ import 'package:media_kit_video/media_kit_video.dart';
 ///
 /// [outputSize] (3.x: Windows) makes the native output follow the displayed
 /// size, debounced 180 ms, so a small window does not render 4K frames.
+///
+/// [keepScreenOn] keeps the screen on while the session plays or buffers
+/// (F.1a: media_kit's own keep-on is off; [ScreenWake] counts the views, so
+/// a change of the setting applies at once).
 class LiveVideoView extends StatefulWidget {
   /// Creates the view.
   const new({
@@ -20,6 +25,7 @@ class LiveVideoView extends StatefulWidget {
     this.fit = BoxFit.contain,
     this.outputSize = false,
     this.fill = const Color(0xFF000000),
+    this.keepScreenOn = true,
     super.key,
   });
 
@@ -36,6 +42,9 @@ class LiveVideoView extends StatefulWidget {
   /// backdrop (a portrait stream's ambient background).
   final Color fill;
 
+  /// Keep the screen on while it plays (the live room's "屏幕常亮").
+  final bool keepScreenOn;
+
   @override
   State<LiveVideoView> createState() => _LiveVideoViewState();
 }
@@ -44,11 +53,13 @@ class _LiveVideoViewState extends State<LiveVideoView> {
   StreamSubscription<PlaybackState>? _subscription;
   Timer? _resize;
   Size? _lastSize;
+  bool _awake = false;
 
   @override
   void initState() {
     super.initState();
     _listen();
+    _syncWake();
   }
 
   @override
@@ -58,12 +69,24 @@ class _LiveVideoViewState extends State<LiveVideoView> {
       unawaited(_subscription?.cancel());
       _listen();
     }
+    _syncWake();
+  }
+
+  /// Holds the screen on while [LiveVideoView.keepScreenOn] and the session
+  /// plays or buffers.
+  void _syncWake() {
+    final status = widget.session.state.status;
+    final want = widget.keepScreenOn && (status == PlaybackStatus.playing || status == PlaybackStatus.buffering);
+    if (want == _awake) return;
+    _awake = want;
+    want ? ScreenWake.hold() : ScreenWake.release();
   }
 
   void _listen() {
     // Rebuild only when the engine appears or goes away.
     var engine = widget.session.engine;
     _subscription = widget.session.states.listen((_) {
+      _syncWake();
       final next = widget.session.engine;
       if (!identical(next, engine) && mounted) {
         engine = next;
@@ -77,6 +100,7 @@ class _LiveVideoViewState extends State<LiveVideoView> {
   void dispose() {
     _resize?.cancel();
     unawaited(_subscription?.cancel());
+    if (_awake) ScreenWake.release();
     super.dispose();
   }
 
@@ -102,6 +126,8 @@ class _LiveVideoViewState extends State<LiveVideoView> {
       fit: widget.fit,
       fill: widget.fill,
       pauseUponEnteringBackgroundMode: false,
+      // F.1a: [ScreenWake] keeps the screen on, as the setting says.
+      wakelock: false,
     );
     if (!widget.outputSize) return video;
     final ratio = MediaQuery.devicePixelRatioOf(context);

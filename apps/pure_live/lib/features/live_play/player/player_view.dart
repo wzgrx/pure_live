@@ -9,6 +9,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_gift_effect.dart';
@@ -26,8 +27,11 @@ import 'package:pure_live/features/live_play/player/player_controls.dart';
 import 'package:pure_live/features/live_play/player/player_gestures.dart';
 import 'package:pure_live/features/live_play/player/player_status.dart';
 import 'package:pure_live/features/live_play/player/recording_badge.dart';
+import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
+import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
+import 'package:pure_live/shared/danmaku/emotes.dart';
 
 export 'package:pure_live/features/live_play/dialogs/player_dialogs.dart' show videoFits;
 
@@ -159,6 +163,19 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   /// or a presentation swaps the layout around it (M13.16).
   final GlobalKey _video = GlobalKey(debugLabel: 'room-video');
 
+  /// The flying danmaku, asked what a tap hits (F.2b).
+  final GlobalKey<DanmakuOverlayState> _flying = GlobalKey(debugLabel: 'room-danmaku');
+
+  /// A flying danmaku's actions are open: the danmaku stand (U.2h c9).
+  bool _danmakuHeld = false;
+
+  /// The flying danmaku under the last tap when it went down: the double
+  /// tap holds the tap back, and the danmaku moves on meanwhile.
+  LiveMessage? _tapHit;
+
+  /// The platform's bundled emoticons, flown as pictures (U.2h c1).
+  EmoteTable _emotes = EmoteTable.empty;
+
   LiveRoomController get _room => widget.controller;
 
   /// What the status layer follows: the room's stage and the stream's drops.
@@ -171,6 +188,17 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     super.initState();
     if (widget.entryHint) _hintEpoch++;
     _scheduleHide();
+    // The bundled emoticons, read once per platform (as the chat list).
+    final library = ref.read(emoteLibraryProvider);
+    final platform = _room.site.id;
+    _emotes = library.tableOf(platform);
+    if (_emotes.codes.isEmpty) {
+      unawaited(
+        library.load(platform).then((table) {
+          if (mounted && table.codes.isNotEmpty) setState(() => _emotes = table);
+        }),
+      );
+    }
   }
 
   @override
@@ -238,6 +266,12 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   /// controls while playing and shows them otherwise, resuming a paused
   /// stream; on desktops it only shows them.
   void _onTap() {
+    final hit = _tapHit;
+    _tapHit = null;
+    if (hit != null) {
+      unawaited(_openMessage(hit));
+      return;
+    }
     final playing = _room.session.state.status == PlaybackStatus.playing;
     if (widget.platform.mobile && _controls && (playing || _locked)) {
       setState(() => _controls = false);
@@ -264,11 +298,76 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     await RoomMiniScope.maybeOf(context)?.enter(context);
   }
 
+  /// The flying danmaku a tap or long press at [global] hits (F.2b, 3.x
+  /// `handleDanmakuPointer`): only with the gesture's switch on, not on the
+  /// bars while the controls show, not while locked.
+  LiveMessage? _danmakuAt(Offset global, {required bool longPress}) {
+    if (_locked) return null;
+    final settings = ref.read(storeProvider).settings;
+    if (!settings.get(longPress ? Settings.enableDanmakuLongPressInteraction : Settings.enableDanmakuTapInteraction)) {
+      return null;
+    }
+    final flying = _flying.currentState;
+    final box = flying?.context.findRenderObject();
+    if (flying == null || box is! RenderBox || !box.hasSize) return null;
+    final local = box.globalToLocal(global);
+    final padding = MediaQuery.paddingOf(context);
+    final (top, bottom) = switch (widget.arrangement) {
+      ControlsArrangement.inline => (controlBarHeight, controlBarHeight),
+      ControlsArrangement.landscape => (padding.top + controlBarHeight, padding.bottom + controlBarHeight),
+      ControlsArrangement.portraitFullscreen => (
+        padding.top + 4 + portraitRowHeight * 2,
+        padding.bottom + 8 + portraitRowHeight * 2,
+      ),
+    };
+    if (!danmakuTapAllowed(local: local, size: box.size, controlsVisible: _controls, top: top, bottom: bottom)) {
+      return null;
+    }
+    return flying.messageAt(local);
+  }
+
+  /// The message's actions (U.2f 长按弹幕); the danmaku stand meanwhile
+  /// (3.x paused the barrage until the sheet closed).
+  Future<void> _openMessage(LiveMessage message) async {
+    setState(() => _danmakuHeld = true);
+    try {
+      await showRoomMessageActions(context, _room, message);
+    } finally {
+      if (mounted) setState(() => _danmakuHeld = false);
+    }
+  }
+
   /// The flying danmaku, kept inside the picture: they enter from beyond its
-  /// right edge, which in the wide room is the chat column.
-  Widget _danmaku({required DanmakuLook look, required bool visible}) => ClipRect(
+  /// right edge, which in the wide room is the chat column. They stand while
+  /// the video does not play (U.2h c10) and move at the danmaku frame rate as
+  /// a whole fraction of the display's (c3).
+  Widget _danmaku({required DanmakuLook look, required bool visible, required _FpsSettings fps}) => ClipRect(
     child: RepaintBoundary(
-      child: DanmakuOverlay(messages: _room.flying, retractions: _room.retractions, look: look, visible: visible),
+      child: ValueListenableBuilder<DisplayModeInfo?>(
+        valueListenable: DisplayMode.info,
+        builder: (context, display, _) => StreamBuilder<PlaybackState>(
+          stream: _room.session.states,
+          initialData: _room.session.state,
+          builder: (context, snapshot) => DanmakuOverlay(
+            key: _flying,
+            messages: _room.flying,
+            retractions: _room.retractions,
+            look: look,
+            visible: visible,
+            fps: resolvedDanmakuFps(
+              automatic: fps.automatic,
+              configured: fps.configured,
+              mode: fps.mode,
+              maxRefreshRate: display?.maxRefreshRate,
+              currentRefreshRate: display?.currentRefreshRate,
+            ),
+            refreshRate: (display?.currentRefreshRate ?? 0) > 0 ? display!.currentRefreshRate : null,
+            running: (snapshot.data ?? _room.session.state).status == PlaybackStatus.playing,
+            held: _danmakuHeld,
+            emotes: _emotes,
+          ),
+        ),
+      ),
     ),
   );
 
@@ -281,8 +380,10 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   /// The picture as [PicturePresentation] says.
   Widget _picture(BoxFit fit) {
     final presentation = widget.presentation;
+    // F.1a: the screen stays on while it plays only with "屏幕常亮" on.
+    final keepOn = watchSetting(ref, Settings.enableScreenKeepOn);
     if (presentation == PicturePresentation.plain) {
-      return LiveVideoView(key: _video, session: _room.session, fit: fit);
+      return LiveVideoView(key: _video, session: _room.session, fit: fit, keepScreenOn: keepOn);
     }
     final mode = presentation == PicturePresentation.ambient
         ? PortraitDisplayMode.ambient
@@ -293,6 +394,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       fit: mode == PortraitDisplayMode.cover ? BoxFit.cover : BoxFit.contain,
       // The ambient background shows around the picture.
       fill: OnVideoColors.clear,
+      keepScreenOn: keepOn,
     );
     return Stack(
       key: ValueKey('live-play-picture-${mode.name}'),
@@ -327,6 +429,12 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     final showDanmaku = display && !hidden && (!pip || watchSetting(ref, Settings.enablePipDanmaku));
     final portraitDanmaku = watchSetting(ref, Settings.portraitDanmakuMode);
     final look = danmakuLookOf(ref);
+    final fps = (
+      automatic: watchSetting(ref, Settings.danmakuAutoFps),
+      configured: watchSetting(ref, Settings.danmakuFps),
+      mode: watchSetting(ref, Settings.refreshRateMode),
+    );
+    final longPress = showDanmaku && watchSetting(ref, Settings.enableDanmakuLongPressInteraction);
     final video = RepaintBoundary(child: _picture(fit));
     if (pip) {
       // U.2j: the same surface as the in-app floating window; the picture
@@ -388,7 +496,16 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
           // hold every tap back by the double-tap timeout.
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
+            onTapDown: (details) => _tapHit = _danmakuAt(details.globalPosition, longPress: false),
             onTap: _onTap,
+            // F.2b: only with its switch on, so it never holds a drag back.
+            onLongPressStart: longPress
+                ? (details) {
+                    if (_danmakuAt(details.globalPosition, longPress: true) case final hit?) {
+                      unawaited(_openMessage(hit));
+                    }
+                  }
+                : null,
             onDoubleTap: _locked ? null : widget.onToggleFullscreen,
             child: Stack(
               fit: StackFit.expand,
@@ -402,6 +519,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                 _danmaku(
                   look: widget.portraitStream ? _portraitLook(look, portraitDanmaku) : look,
                   visible: showDanmaku && !(widget.portraitStream && portraitDanmaku == 'hidden'),
+                  fps: fps,
                 ),
               ],
             ),
@@ -531,22 +649,32 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
 /// [look] for a portrait stream (3.x `PortraitDanmakuMode`): the upper
 /// quarter, or a smaller font over half the picture.
 DanmakuLook _portraitLook(DanmakuLook look, String mode) => switch (mode) {
-  'upperQuarter' => _scaled(look, look.fontSize, look.area.clamp(0, 0.25).toDouble()),
-  'reduced' => _scaled(look, (look.fontSize * 0.85).roundToDouble(), look.area.clamp(0, 0.5).toDouble()),
+  'upperQuarter' => look.copyWith(area: look.area.clamp(0, 0.25).toDouble()),
+  'reduced' => look.copyWith(
+    fontSize: (look.fontSize * 0.85).roundToDouble(),
+    area: look.area.clamp(0, 0.5).toDouble(),
+  ),
   _ => look,
 };
 
-DanmakuLook _scaled(DanmakuLook look, double fontSize, double area) => DanmakuLook(
-  fontSize: fontSize,
-  fontWeight: look.fontWeight,
-  speed: look.speed,
-  opacity: look.opacity,
-  area: area,
-  topMargin: look.topMargin,
-  bottomMargin: look.bottomMargin,
-  stroke: look.stroke,
-  strokeWidth: look.strokeWidth,
-);
+/// The danmaku frame-rate settings (F.2a).
+typedef _FpsSettings = ({bool automatic, int configured, String mode});
+
+/// Whether a tap at [local] on the picture may hit a flying danmaku (3.x
+/// `shouldHandleVideoSurfaceTap`): while the controls show, not within
+/// [top] of the top or [bottom] of the bottom, where the bars are.
+@visibleForTesting
+bool danmakuTapAllowed({
+  required Offset local,
+  required Size size,
+  required bool controlsVisible,
+  required double top,
+  required double bottom,
+}) {
+  if (!controlsVisible || size.height <= 0) return true;
+  final half = size.height / 2;
+  return local.dy > top.clamp(0, half) && local.dy < size.height - bottom.clamp(0, half);
+}
 
 /// The portrait fullscreen's bottom bars also take the upward swipe back to
 /// the panel (3.x `PortraitFullscreenRestoreGestureRegion`); their buttons

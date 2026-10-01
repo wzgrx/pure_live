@@ -536,6 +536,8 @@ final class PlaybackSession {
         if (_accepting) _onCompleted(session);
       case EngineVideoSize(:final width, :final height):
         if (_accepting && width > 0 && height > 0) _emit(_state.copyWith(videoWidth: width, videoHeight: height));
+      case EngineFrameRate(:final fps):
+        if (_accepting && fps > 0) _emit(_state.copyWith(frameRate: fps));
       case EnginePosition(:final position):
         if (_accepting && _state.onDemand) _emit(_state.copyWith(position: position));
       case EngineDuration(:final duration):

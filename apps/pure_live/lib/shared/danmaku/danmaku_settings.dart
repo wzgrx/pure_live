@@ -7,15 +7,21 @@ import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 // the settings themselves are in danmaku_settings_content.dart (U.2f, U.8).
 
 /// The danmaku look from the settings.
-DanmakuLook danmakuLookOf(WidgetRef ref) => DanmakuLook(
-  fontSize: watchSetting(ref, Settings.danmakuFontSize),
-  fontWeight: watchSetting(ref, Settings.danmakuFontWeight),
-  speed: watchSetting(ref, Settings.danmakuSpeed),
-  opacity: watchSetting(ref, Settings.danmakuOpacity),
-  area: watchSetting(ref, Settings.danmakuArea),
-  // Pixels kept free above and below (3.x `danmakuTopArea`/`BottomArea`).
-  topMargin: watchSetting(ref, Settings.danmakuTopArea),
-  bottomMargin: watchSetting(ref, Settings.danmakuBottomArea),
-  stroke: watchSetting(ref, Settings.enableDanmakuStroke),
-  strokeWidth: watchSetting(ref, Settings.danmakuFontBorder),
-);
+DanmakuLook danmakuLookOf(WidgetRef ref) {
+  final font = watchSetting(ref, Settings.danmakuFontFamilyName);
+  return DanmakuLook(
+    fontSize: watchSetting(ref, Settings.danmakuFontSize),
+    fontWeight: watchSetting(ref, Settings.danmakuFontWeight),
+    speed: watchSetting(ref, Settings.danmakuSpeed),
+    opacity: watchSetting(ref, Settings.danmakuOpacity),
+    area: watchSetting(ref, Settings.danmakuArea),
+    // Pixels kept free above and below (3.x `danmakuTopArea`/`BottomArea`).
+    topMargin: watchSetting(ref, Settings.danmakuTopArea),
+    bottomMargin: watchSetting(ref, Settings.danmakuBottomArea),
+    stroke: watchSetting(ref, Settings.enableDanmakuStroke),
+    strokeWidth: watchSetting(ref, Settings.danmakuFontBorder),
+    // F.2a: the danmaku font ("Default" is the system's) and text-only mode.
+    fontFamily: font.isEmpty || font == Settings.danmakuFontFamilyName.defaultValue ? null : font,
+    textOnly: watchSetting(ref, Settings.noEmojiMode),
+  );
+}

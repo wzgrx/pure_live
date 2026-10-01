@@ -108,6 +108,19 @@ final class EngineVideoSize extends EngineEvent {
   String toString() => 'EngineVideoSize($width x $height)';
 }
 
+/// The frame rate of the video (mpv's `container-fps`, else a settled
+/// `estimated-vf-fps`; U.2i matches the display's refresh rate to it).
+final class EngineFrameRate extends EngineEvent {
+  /// Creates the event.
+  const new(this.fps);
+
+  /// Frames a second.
+  final double fps;
+
+  @override
+  String toString() => 'EngineFrameRate($fps)';
+}
+
 /// The playback position of an on-demand source.
 final class EnginePosition extends EngineEvent {
   /// Creates the event.

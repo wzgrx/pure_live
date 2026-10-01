@@ -768,6 +768,9 @@ abstract final class AppIcons {
   /// General settings.
   static const IconData settingsGeneral = Remix.settings_4_line;
 
+  /// "播放时匹配视频帧率" (U.2i): the refresh rate follows the video.
+  static const IconData matchFrameRate = Remix.movie_2_line;
+
   /// Network proxies; also the language (both a globe in 3.x).
   static const IconData settingsNetwork = Remix.global_line;
 

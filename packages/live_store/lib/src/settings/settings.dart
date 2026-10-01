@@ -68,6 +68,10 @@ abstract final class Settings {
     allowed: {'powerSaving', 'balanced', 'performance'},
   );
 
+  /// While a stream plays, ask for a display refresh rate that is a whole
+  /// multiple of its frame rate (U.2i; new in v4, so no 3.x key).
+  static const matchVideoFrameRate = BoolSetting('matchVideoFrameRate', section: 'app', defaultValue: true);
+
   /// Prefer real online counts over popularity where a platform has both.
   static const preferRealOnlineCounts = BoolSetting('preferRealOnlineCounts', section: 'app', defaultValue: false);
 
@@ -1382,6 +1386,7 @@ abstract final class Settings {
     enableFullScreenDefault,
     showSplashPage,
     refreshRateMode,
+    matchVideoFrameRate,
     preferRealOnlineCounts,
     realOnlinePlatforms,
     savedMenuIds,

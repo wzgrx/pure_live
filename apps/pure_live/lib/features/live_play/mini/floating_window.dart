@@ -175,7 +175,12 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> {
                           controller: runtime.controller,
                           reconnect: runtime.reconnect,
                           kind: MiniKind.inApp,
-                          video: LiveVideoView(session: runtime.session, fit: fit),
+                          // F.1a: kept on while it plays only with "屏幕常亮" on.
+                          video: LiveVideoView(
+                            session: runtime.session,
+                            fit: fit,
+                            keepScreenOn: watchSetting(ref, Settings.enableScreenKeepOn),
+                          ),
                           onBackToRoom: widget.onBackToRoom,
                           onClose: widget.onClose,
                           onDragStart: (_) => setState(() {

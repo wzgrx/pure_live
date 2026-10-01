@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_player/src/diagnostics.dart';
 import 'package:live_player/src/engine.dart';
+import 'package:live_player/src/frame_rate.dart';
 import 'package:live_player/src/mpv_options.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -88,6 +89,7 @@ final class MpvEngine implements PlayerEngine {
   VoidCallback? _frameListener;
   var _audioOnly = false;
   var _disposed = false;
+  var _opens = 0;
 
   bool get _android => config.platform == MpvPlatform.android;
 
@@ -187,6 +189,24 @@ final class MpvEngine implements PlayerEngine {
     if (size != null) _add(EngineVideoSize(size.width, size.height));
     _add(EngineBuffering(buffering: state.buffering));
     _add(EnginePlaying(playing: state.playing));
+    unawaited(_probeFrameRate(++_opens));
+  }
+
+  /// U.2i: the frame rate of what this open plays, once known.
+  Future<void> _probeFrameRate(int open) async {
+    bool current() => !_disposed && open == _opens;
+    try {
+      final fps = await probeFrameRate(_readProperty, current: current);
+      if (fps != null && current()) _add(EngineFrameRate(fps));
+    } on Object {
+      // No frame rate: the display keeps its own choice.
+    }
+  }
+
+  Future<String> _readProperty(String name) async {
+    final native = player.platform;
+    if (_disposed || native is! NativePlayer) return '';
+    return await native.getProperty(name);
   }
 
   @override
@@ -241,6 +261,7 @@ final class MpvEngine implements PlayerEngine {
   Future<void> dispose() async {
     if (_disposed) return;
     _disposed = true;
+    _opens++;
     _gate.close();
     final listener = _frameListener;
     if (listener != null) controller.frameRevision.removeListener(listener);

@@ -47,6 +47,7 @@ final class PlaybackState {
     this.volume = 1,
     this.videoWidth,
     this.videoHeight,
+    this.frameRate,
     this.onDemand = false,
     this.position = Duration.zero,
     this.duration = Duration.zero,
@@ -90,6 +91,9 @@ final class PlaybackState {
   /// Display height of the video, when known.
   final int? videoHeight;
 
+  /// Frames a second of the video, when known (U.2i).
+  final double? frameRate;
+
   /// A recording: it seeks and its end is [PlaybackStatus.completed].
   final bool onDemand;
 
@@ -122,7 +126,8 @@ final class PlaybackState {
   bool get isPortrait => (aspectRatio ?? 16 / 9) < 1;
 
   /// A copy with the given fields replaced; [error] and [failure] are kept
-  /// only while the status stays [PlaybackStatus.error].
+  /// only while the status stays [PlaybackStatus.error]; [clearVideoSize]
+  /// also forgets the frame rate.
   PlaybackState copyWith({
     PlaybackStatus? status,
     Object? error,
@@ -136,6 +141,7 @@ final class PlaybackState {
     double? volume,
     int? videoWidth,
     int? videoHeight,
+    double? frameRate,
     bool clearVideoSize = false,
     bool? onDemand,
     Duration? position,
@@ -157,6 +163,8 @@ final class PlaybackState {
       volume: volume ?? this.volume,
       videoWidth: clearVideoSize ? null : videoWidth ?? this.videoWidth,
       videoHeight: clearVideoSize ? null : videoHeight ?? this.videoHeight,
+      // The frame rate goes with the size: both belong to the stream.
+      frameRate: clearVideoSize ? null : frameRate ?? this.frameRate,
       onDemand: onDemand ?? this.onDemand,
       position: position ?? this.position,
       duration: duration ?? this.duration,

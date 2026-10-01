@@ -57,6 +57,14 @@ Future<AppServices> _pump(
   return services;
 }
 
+/// Lets a setting reach the widgets.
+Future<void> _settle(WidgetTester tester) async {
+  for (var i = 0; i < 3; i++) {
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester.pump();
+  }
+}
+
 Future<void> _close(WidgetTester tester, AppServices services) async {
   await tester.pumpWidget(const SizedBox.shrink());
   await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
@@ -222,5 +230,158 @@ void main() {
     expect(popped, isTrue);
     expect(find.text('弹幕列表'), findsOneWidget);
     await _close(tester, services);
+  });
+
+  group('F.2b: a tap or long press on a flying danmaku', () {
+    /// Three danmaku in, the third (lane 3, below the top bar) a second in.
+    Future<(DanmakuOverlayState, Offset)> fly(WidgetTester tester, FakeDanmaku danmaku) async {
+      danmaku
+        ..chat('第一条')
+        ..chat('第二条')
+        ..chat('点这一条弹幕', user: '路人');
+      await tester.pump();
+      for (var i = 0; i < 60; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      final overlay = tester.state<DanmakuOverlayState>(find.byType(DanmakuOverlay));
+      final (_, rect) = overlay.debugFlying.firstWhere((item) => item.$1.message == '点这一条弹幕');
+      final box = tester.renderObject<RenderBox>(find.byType(DanmakuOverlay));
+      return (overlay, box.localToGlobal(rect.center));
+    }
+
+    DanmakuOverlay overlay(WidgetTester tester) => tester.widget(find.byType(DanmakuOverlay));
+
+    testWidgets('opens the long-press sheet; the danmaku stand until it closes', (tester) async {
+      final danmaku = FakeDanmaku();
+      final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
+      AppNavigator.toast = (_) {};
+      final (state, at) = await fly(tester, danmaku);
+      await tester.tapAt(at);
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget);
+      expect(find.byKey(const ValueKey('live-play-copy-message')), findsOneWidget);
+      expect(find.byKey(const ValueKey('live-play-block-user')), findsOneWidget);
+      expect(find.byKey(const ValueKey('live-play-block-keyword')), findsOneWidget);
+      expect(overlay(tester).held, isTrue);
+      final rect = state.debugFlying.last.$2;
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(state.debugFlying.last.$2, rect, reason: 'held');
+
+      await tester.tap(find.byKey(const ValueKey('live-play-message-close')));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsNothing);
+      expect(overlay(tester).held, isFalse);
+
+      // The long press opens the same sheet.
+      final (_, again) = await fly(tester, danmaku);
+      await tester.longPressAt(again);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('live-play-message-close')));
+      await tester.pump(const Duration(milliseconds: 400));
+      await _close(tester, services);
+    });
+
+    testWidgets('with the tap switch off, a tap only shows or hides the controls; never on the bars', (tester) async {
+      final danmaku = FakeDanmaku();
+      final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
+      await tester.runAsync(() => services.store.settings.set(Settings.enableDanmakuTapInteraction, false));
+      await _settle(tester);
+      final (_, at) = await fly(tester, danmaku);
+      await tester.tapAt(at);
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsNothing);
+      await _close(tester, services);
+
+      expect(
+        danmakuTapAllowed(
+          local: const Offset(10, 40),
+          size: const Size(400, 225),
+          controlsVisible: true,
+          top: 52,
+          bottom: 52,
+        ),
+        isFalse,
+      );
+      expect(
+        danmakuTapAllowed(
+          local: const Offset(10, 200),
+          size: const Size(400, 225),
+          controlsVisible: true,
+          top: 52,
+          bottom: 52,
+        ),
+        isFalse,
+      );
+      expect(
+        danmakuTapAllowed(
+          local: const Offset(10, 100),
+          size: const Size(400, 225),
+          controlsVisible: true,
+          top: 52,
+          bottom: 52,
+        ),
+        isTrue,
+      );
+      expect(
+        danmakuTapAllowed(
+          local: const Offset(10, 40),
+          size: const Size(400, 225),
+          controlsVisible: false,
+          top: 52,
+          bottom: 52,
+        ),
+        isTrue,
+      );
+    });
+  });
+
+  testWidgets('F.2a, U.2h c10: the room passes the frame rate, the font and text-only; a paused video stops them', (
+    tester,
+  ) async {
+    final danmaku = FakeDanmaku();
+    final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
+    await tester.runAsync(() async {
+      await services.store.settings.set(Settings.danmakuAutoFps, false);
+      await services.store.settings.set(Settings.danmakuFps, 30);
+      await services.store.settings.set(Settings.danmakuFontFamilyName, 'LXGWWenKai');
+      await services.store.settings.set(Settings.noEmojiMode, true);
+    });
+    await _settle(tester);
+    var overlay = tester.widget<DanmakuOverlay>(find.byType(DanmakuOverlay));
+    expect(overlay.fps, 30);
+    expect(overlay.look.fontFamily, 'LXGWWenKai');
+    expect(overlay.look.textOnly, isTrue);
+    expect(overlay.running, isTrue);
+
+    final room = tester.widget<RoomPlayer>(find.byType(RoomPlayer)).controller;
+    await tester.runAsync(room.session.togglePlayPause);
+    await tester.pump();
+    overlay = tester.widget<DanmakuOverlay>(find.byType(DanmakuOverlay));
+    expect(overlay.running, isFalse);
+    danmaku.chat('暂停时不飞');
+    await tester.pump();
+    expect(tester.state<DanmakuOverlayState>(find.byType(DanmakuOverlay)).flyingCount, 0);
+    await _close(tester, services);
+  });
+
+  testWidgets('F.1a: "屏幕常亮" off, the room does not keep the screen on; on again, at once', (tester) async {
+    final applied = <bool>[];
+    ScreenWake.reset();
+    ScreenWake.apply = ({required enabled}) async => applied.add(enabled);
+    addTearDown(ScreenWake.reset);
+    final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: FakeDanmaku());
+    expect(applied, [true], reason: 'on by default (3.x), while it plays');
+    await tester.runAsync(() => services.store.settings.set(Settings.enableScreenKeepOn, false));
+    await _settle(tester);
+    expect(applied, [true, false]);
+    await tester.runAsync(() => services.store.settings.set(Settings.enableScreenKeepOn, true));
+    await _settle(tester);
+    expect(applied, [true, false, true]);
+    await _close(tester, services);
+    expect(applied.last, isFalse, reason: 'released when the room goes');
   });
 }

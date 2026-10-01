@@ -7,8 +7,8 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 
 /// How to set up a WebDAV server, with Jianguoyun as the example (3.x
-/// `WebDavHelpPage`). The steps are 3.x's; its screenshots are not in the
-/// app's assets yet (docs/modules/M13.10-backup.md).
+/// `WebDavHelpPage`): 3.x's steps, each with its screenshot (tap to view it
+/// full screen and zoom).
 class WebDavHelpPage extends StatelessWidget {
   /// Creates the page.
   const new({super.key});
@@ -80,15 +80,28 @@ class WebDavHelpPage extends StatelessWidget {
             ),
           ]),
           section('webdav_help_register_section'),
-          card([body('webdav_help_register_steps'), const SizedBox(height: 8), body('webdav_help_register_form')]),
+          card([
+            body('webdav_help_register_steps'),
+            const WebDavScreenshot(index: 1),
+            const SizedBox(height: 12),
+            body('webdav_help_register_form'),
+            const WebDavScreenshot(index: 2),
+          ]),
           section('webdav_help_login_section'),
-          card([body('webdav_help_login_steps')]),
+          card([body('webdav_help_login_steps'), const WebDavScreenshot(index: 3)]),
           section('webdav_help_password_section'),
           card([
             body('webdav_help_account_steps'),
+            const WebDavScreenshot(index: 4),
+            const SizedBox(height: 12),
             body('webdav_help_security_steps'),
+            const WebDavScreenshot(index: 5),
+            const SizedBox(height: 12),
             body('webdav_help_generate_steps'),
+            const WebDavScreenshot(index: 6),
+            const SizedBox(height: 12),
             body('webdav_help_password_once'),
+            const WebDavScreenshot(index: 7),
           ]),
           section('webdav_help_generic_section'),
           card([body('webdav_help_generic_body')]),
@@ -126,5 +139,94 @@ class WebDavHelpPage extends StatelessWidget {
       opened = false;
     }
     if (!opened) AppNavigator.toast(i18n('external_browser_not_opened'));
+  }
+}
+
+/// One of the help page's screenshots (3.x's seven, in its order): a
+/// preview at most 240 high; a tap opens it full screen, zoomable.
+class WebDavScreenshot extends StatelessWidget {
+  /// Creates screenshot [index] (1..7).
+  const new({required this.index, super.key});
+
+  /// The screenshot's number.
+  final int index;
+
+  /// The assets in the order of the steps (3.x `imgUrls`).
+  static const List<String> assets = [
+    'assets/webdav/00_home.png',
+    'assets/webdav/02_register.png',
+    'assets/webdav/03_login.png',
+    'assets/webdav/01_avatar_menu.png',
+    'assets/webdav/04_security.png',
+    'assets/webdav/05_add_app.png',
+    'assets/webdav/06_get_pwd.png',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final label = i18n('webdav_help_screenshot_label', args: {'number': '$index'});
+    final asset = assets[index - 1];
+    Widget failed(BuildContext context, Object error, StackTrace? stack) => Container(
+      height: 48,
+      alignment: Alignment.center,
+      child: Text(i18n('webdav_help_image_failed'), style: context.textStyles.t11.copyWith(color: theme.hintColor)),
+    );
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Semantics(
+        button: true,
+        label: label,
+        child: InkWell(
+          key: ValueKey('webdav-help-image-$index'),
+          borderRadius: BorderRadius.circular(10),
+          onTap: () => unawaited(
+            showDialog<void>(
+              context: context,
+              builder: (dialogContext) => Dialog.fullscreen(
+                backgroundColor: Colors.black,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: InteractiveViewer(
+                        maxScale: 5,
+                        child: Center(
+                          child: Image.asset(asset, semanticLabel: label, errorBuilder: failed),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: SafeArea(
+                        child: IconButton.filledTonal(
+                          key: const ValueKey('webdav-help-image-close'),
+                          tooltip: i18n('close'),
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 240),
+              child: Image.asset(
+                asset,
+                width: double.infinity,
+                fit: BoxFit.contain,
+                semanticLabel: label,
+                errorBuilder: failed,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -4,8 +4,14 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/pages/remote_receiver/mdns_peers.dart';
 import 'package:pure_live/pages/remote_receiver/remote_sync_protocol.dart';
 import 'package:pure_live/pages/version/app_version.dart';
+
+import 'package:pure_live/platform/platform_services.dart';
+import 'package:pure_live/platform/system_access.dart';
+import 'package:pure_live/routes/app_navigator.dart';
 
 /// Another device on the network, from its announcement.
 @immutable
@@ -19,7 +25,12 @@ final class RemoteSyncDevice {
     required this.port,
     required this.lastSeen,
     this.version = '',
+    this.viaMdns = false,
   });
+
+  /// Found over mDNS only (a 3.x device; v4 devices also answer the UDP
+  /// announcement).
+  final bool viaMdns;
 
   /// Device id.
   final String id;
@@ -60,11 +71,20 @@ typedef RemoteSyncConfirm = Future<bool> Function(String action, String remoteAd
 ///   in 3.x's backup layout ([BackupService]); account cookies only with
 ///   [includeAccounts].
 /// - Announces itself and lists other devices over UDP broadcast (port
-///   39889); 3.x's mDNS discovery is not here yet.
+///   39889, v4 devices) and over mDNS (`_purelive-sync._tcp` with 3.x's TXT
+///   record, so 3.x and v4 devices find each other); Android holds the Wi-Fi
+///   multicast lock meanwhile.
 class RemoteSyncService extends ChangeNotifier {
-  /// Creates the service over [store].
-  new(this.store, {List<String>? Function()? localIps, this.requestTimeout = const Duration(minutes: 2)})
-    : _listIps = localIps;
+  /// Creates the service over [store]; [mdns] replaces bonsoir (tests).
+  new(
+    this.store, {
+    List<String>? Function()? localIps,
+    this.requestTimeout = const Duration(minutes: 2),
+    MdnsPeers? mdns,
+    MulticastLock? multicastLock,
+  }) : _listIps = localIps,
+       _mdns = mdns ?? BonsoirPeers(),
+       _multicast = multicastLock ?? MulticastLock();
 
   /// Settings and backups.
   final LiveStore store;
@@ -73,6 +93,9 @@ class RemoteSyncService extends ChangeNotifier {
   final Duration requestTimeout;
 
   final List<String>? Function()? _listIps;
+  final MdnsPeers _mdns;
+  final MulticastLock _multicast;
+  bool _mdnsRunning = false;
 
   /// Wrong pairing codes before the code changes.
   static const int maxWrongCodes = 10;
@@ -121,13 +144,19 @@ class RemoteSyncService extends ChangeNotifier {
 
   /// This device's sync id (3.x's, kept in the settings).
   String get deviceId {
+    // Kept here too: the new id is saved asynchronously, and a second read
+    // before that lands must not make another one (the UDP and the mDNS
+    // announcements would carry different ids).
+    if (_deviceId case final id?) return id;
     final settings = store.settings;
     final existing = settings.get(Settings.remoteSyncDeviceId);
-    if (existing.isNotEmpty) return existing;
-    final id = '${Platform.operatingSystem}-${DateTime.now().microsecondsSinceEpoch}';
+    if (existing.isNotEmpty) return _deviceId = existing;
+    final id = _deviceId = '${Platform.operatingSystem}-${DateTime.now().microsecondsSinceEpoch}';
     unawaited(settings.set(Settings.remoteSyncDeviceId, id));
     return id;
   }
+
+  String? _deviceId;
 
   /// This device's name for the others (3.x).
   static String get deviceName => switch (Platform.operatingSystem) {
@@ -148,6 +177,11 @@ class RemoteSyncService extends ChangeNotifier {
     if (_disposed || _starting || running) return;
     _starting = true;
     try {
+      // Android 17 blocks local-network sockets without the permission (3.x).
+      if (!await SystemAccess.requestLocalNetwork()) {
+        AppNavigator.toast(i18n('local_network_permission_denied'));
+        return;
+      }
       localIp = await _pickLocalIp();
       HttpServer? server;
       for (
@@ -191,6 +225,11 @@ class RemoteSyncService extends ChangeNotifier {
     _devices.clear();
     _changed();
     await server?.close(force: true);
+    if (_mdnsRunning) {
+      _mdnsRunning = false;
+      await _mdns.stop();
+      await _multicast.release();
+    }
   }
 
   @override
@@ -410,6 +449,57 @@ class RemoteSyncService extends ChangeNotifier {
     } on Object {
       // Discovery is optional: the QR code and the address still work.
     }
+    await _startMdns();
+  }
+
+  /// 3.x's mDNS announce and discovery (its service name `PureLive-<last 6
+  /// of the id>` and TXT record).
+  Future<void> _startMdns() async {
+    if (_disposed || !running || _mdnsRunning) return;
+    _mdnsRunning = true;
+    await _multicast.acquire();
+    final id = deviceId;
+    try {
+      await _mdns.start(
+        name: 'PureLive-${id.length > 6 ? id.substring(id.length - 6) : id}',
+        port: port,
+        attributes: {
+          'id': id,
+          'name': deviceName,
+          'platform': Platform.operatingSystem,
+          'version': appVersion,
+          'ip': localIp,
+        },
+        found: _foundOverMdns,
+        lost: (id) {
+          final device = _devices[id];
+          if (device != null && device.viaMdns) {
+            _devices.remove(id);
+            _changed();
+          }
+        },
+      );
+    } on Object {
+      // mDNS is optional like the broadcast.
+    }
+  }
+
+  void _foundOverMdns(MdnsPeer peer) {
+    if (_disposed || peer.id == deviceId || _ipv4(peer.ip) == null) return;
+    final known = _devices[peer.id];
+    // 3.x answers on its fixed port; a service not resolved yet has port 0.
+    final port = peer.port > 0 && peer.port <= 65535 ? peer.port : RemoteSyncProtocol.defaultHttpPort;
+    _devices[peer.id] = RemoteSyncDevice(
+      id: peer.id,
+      name: peer.name.isEmpty ? 'PureLive' : peer.name,
+      platform: peer.platform,
+      version: peer.version,
+      ip: peer.ip,
+      port: port,
+      lastSeen: DateTime.now(),
+      viaMdns: known == null || known.viaMdns,
+    );
+    _changed();
   }
 
   void _announce() {
@@ -432,10 +522,13 @@ class RemoteSyncService extends ChangeNotifier {
     } on Object {
       // A network without broadcast.
     }
-    // Devices not heard for two minutes are gone (3.x).
+    // Devices not heard for two minutes are gone (3.x); mDNS reports its
+    // devices' departure itself.
     final now = DateTime.now();
     final before = _devices.length;
-    _devices.removeWhere((_, device) => now.difference(device.lastSeen) > const Duration(minutes: 2));
+    _devices.removeWhere(
+      (_, device) => !device.viaMdns && now.difference(device.lastSeen) > const Duration(minutes: 2),
+    );
     if (_devices.length != before) _changed();
   }
 

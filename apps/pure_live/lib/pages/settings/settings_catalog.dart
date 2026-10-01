@@ -4,6 +4,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/settings/appearance_pages.dart';
 import 'package:pure_live/pages/settings/data_tools.dart';
+import 'package:pure_live/pages/settings/log_page.dart';
 import 'package:pure_live/pages/settings/settings_dialogs.dart';
 import 'package:pure_live/pages/settings/settings_editors.dart';
 import 'package:pure_live/pages/settings/settings_model.dart';
@@ -1217,12 +1218,12 @@ List<SettingsEntry> _build() {
       desc: 'use_github_origin_for_updates_desc',
       keywords: ['更新', 'update', 'GitHub'],
     )
-    ..toggle(
+    ..add(
       'startup',
       'startup',
-      Settings.enableStartUp,
-      Remix.windows_line,
+      (context, entry) => StartupTile(entry: entry),
       desc: 'settings_startup_desc',
+      settings: [Settings.enableStartUp],
       keywords: ['开机', 'startup'],
       when: _windows,
     )
@@ -1252,27 +1253,37 @@ List<SettingsEntry> _build() {
       desc: 'open_new_window_subtitle',
       when: _windows,
     )
-    ..choice(
+    ..add(
       'refresh_rate',
       'refresh_rate_mode',
-      Settings.refreshRateMode,
-      Remix.speed_up_line,
-      () => _keyed(
-        {
-          'powerSaving': 'refresh_rate_power_saving',
-          'balanced': 'refresh_rate_balanced',
-          'performance': 'refresh_rate_performance',
-        },
-        {
-          'powerSaving': 'refresh_rate_power_saving_desc',
-          'balanced': 'refresh_rate_balanced_desc',
-          'performance': 'refresh_rate_performance_desc',
-        },
+      (context, entry) => RefreshRateTile(
+        entry: entry,
+        hint: i18n('refresh_rate_mode_hint'),
+        options: () => _keyed(
+          {
+            'powerSaving': 'refresh_rate_power_saving',
+            'balanced': 'refresh_rate_balanced',
+            'performance': 'refresh_rate_performance',
+          },
+          {
+            'powerSaving': 'refresh_rate_power_saving_desc',
+            'balanced': 'refresh_rate_balanced_desc',
+            'performance': 'refresh_rate_performance_desc',
+          },
+        ),
       ),
       desc: 'settings_refresh_rate_desc',
-      hint: 'refresh_rate_mode_hint',
+      settings: [Settings.refreshRateMode],
       keywords: ['Hz', '高刷', 'refresh rate'],
       when: _refreshRate,
+    )
+    ..add(
+      'windows_display',
+      'windows_dynamic_refresh_rate',
+      (context, entry) => WindowsDisplayTile(entry: entry),
+      desc: 'windows_dynamic_refresh_rate_subtitle',
+      keywords: ['Hz', '刷新率', 'refresh rate', '显示器'],
+      when: _windows,
     )
     ..group = 'settings_group_window'
     ..add(
@@ -1356,6 +1367,30 @@ List<SettingsEntry> _build() {
       (context, entry) => ImageCacheTile(entry: entry),
       desc: 'settings_image_cache_desc',
       keywords: ['缓存', 'cache', '清理'],
+    )
+    ..add(
+      'refresh_covers_now',
+      'refresh_thumbnails',
+      (context, entry) => RefreshCoversTile(entry: entry),
+      desc: 'refresh_thumbnails_desc',
+      keywords: ['封面', '缩略图', 'cover', 'thumbnail'],
+    )
+    ..add(
+      'download_directory',
+      'download_directory',
+      (context, entry) => DownloadDirectoryTile(entry: entry),
+      desc: 'download_directory_desc',
+      settings: [Settings.downloadDirectoryPath],
+      keywords: ['下载', '更新', 'download'],
+    )
+    ..link(
+      'log',
+      'log_manage',
+      Remix.file_list_3_line,
+      page: (_) => const LogPage(),
+      desc: 'settings_log_desc',
+      settings: [Settings.enableLocalLog, Settings.logLevel],
+      keywords: ['日志', '错误', 'log', 'debug'],
     )
     ..add(
       'reset_all',

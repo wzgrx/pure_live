@@ -10,6 +10,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:pure_live/app/downloads.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/settings/settings_dialogs.dart';
@@ -58,6 +59,15 @@ abstract final class ImageCacheTools {
       ..clear()
       ..clearLiveImages();
     await clearDisk?.call();
+    imageCacheEpoch.value++;
+  }
+
+  /// "Refresh covers" (3.x `refreshImageCache()`): the files on disk and the
+  /// decoded images go, and the images on screen load again under a new
+  /// cache key ([imageCacheEpoch], read by `app.dart`).
+  static Future<void> refreshCovers() async {
+    await clearDisk?.call();
+    PaintingBinding.instance.imageCache.clear();
     imageCacheEpoch.value++;
   }
 
@@ -334,6 +344,132 @@ class _ConfigPreviewPageState extends ConsumerState<ConfigPreviewPage> {
           },
         );
       },
+    );
+  }
+}
+
+/// Re-downloads the covers and avatars on screen (3.x cache page's
+/// "refresh thumbnails").
+class RefreshCoversTile extends StatefulWidget {
+  /// Creates the row.
+  const new({required this.entry, super.key});
+
+  /// The entry drawn.
+  final SettingsEntry entry;
+
+  @override
+  State<RefreshCoversTile> createState() => _RefreshCoversTileState();
+}
+
+class _RefreshCoversTileState extends State<RefreshCoversTile> {
+  bool _busy = false;
+
+  Future<void> _refresh() async {
+    setState(() => _busy = true);
+    try {
+      await ImageCacheTools.refreshCovers();
+      AppNavigator.toast(i18n('thumbnails_refreshed'));
+    } on Object {
+      AppNavigator.toast(i18n('cache_operation_failed'));
+    }
+    if (mounted) setState(() => _busy = false);
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      SettingActionTile(entry: widget.entry, icon: Remix.refresh_line, busy: _busy, onTap: _busy ? null : _refresh);
+}
+
+/// Picks a folder for the download folder; null when the user cancelled.
+typedef DownloadDirectoryPicker = Future<String?> Function();
+
+/// The system folder picker of the download folder (file_picker in the app).
+final Provider<DownloadDirectoryPicker?> downloadDirectoryPickerProvider = Provider((ref) => null);
+
+/// Where update packages go (3.x cache page's "download folder"): the
+/// folder in use, choose another (checked for writing), back to the default.
+class DownloadDirectoryTile extends ConsumerStatefulWidget {
+  /// Creates the row.
+  const new({required this.entry, super.key});
+
+  /// The entry drawn.
+  final SettingsEntry entry;
+
+  @override
+  ConsumerState<DownloadDirectoryTile> createState() => _DownloadDirectoryTileState();
+}
+
+class _DownloadDirectoryTileState extends ConsumerState<DownloadDirectoryTile> {
+  String? _defaultPath;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadDefault());
+  }
+
+  Future<void> _loadDefault() async {
+    final folder = await defaultDownloadDirectory(dataRoot: ref.read(appServicesProvider).dataRoot);
+    if (mounted) setState(() => _defaultPath = folder.path);
+  }
+
+  Future<void> _choose() async {
+    final pick = ref.read(downloadDirectoryPickerProvider);
+    String? picked;
+    try {
+      picked = pick == null ? null : await pick();
+    } on Object {
+      AppNavigator.toast(i18n('download_directory_pick_failed'));
+      return;
+    }
+    if (picked == null || picked.trim().isEmpty) return;
+    if (!await canWriteDirectory(Directory(picked))) {
+      AppNavigator.toast(i18n('download_directory_permission_hint'));
+      return;
+    }
+    await ref.read(storeProvider).settings.set(Settings.downloadDirectoryPath, picked.trim());
+    AppNavigator.toast(i18n('download_directory_updated'));
+  }
+
+  Future<void> _reset() async {
+    await ref.read(storeProvider).settings.reset(Settings.downloadDirectoryPath);
+    AppNavigator.toast(i18n('download_directory_updated'));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final custom = watchSetting(ref, Settings.downloadDirectoryPath).trim();
+    final canPick = ref.watch(downloadDirectoryPickerProvider) != null;
+    final path = custom.isEmpty
+        ? '${i18n('download_directory_default_label')}${_defaultPath == null ? '' : '\n$_defaultPath'}'
+        : custom;
+    return KeyedSubtree(
+      key: widget.entry.rowKey,
+      child: context.buildTile(
+        icon: Remix.folder_download_line,
+        title: widget.entry.titleText,
+        subtitle: path,
+        isLong: true,
+        stackTrailingOnNarrow: true,
+        trailing: Wrap(
+          spacing: 4,
+          children: [
+            if (custom.isNotEmpty)
+              TextButton(
+                key: const ValueKey('download-directory-reset'),
+                onPressed: () => unawaited(_reset()),
+                child: Text(i18n('download_directory_reset')),
+              ),
+            if (canPick)
+              TextButton(
+                key: const ValueKey('download-directory-choose'),
+                onPressed: () => unawaited(_choose()),
+                child: Text(i18n('download_directory_choose')),
+              ),
+          ],
+        ),
+        onTap: canPick ? () => unawaited(_choose()) : null,
+      ),
     );
   }
 }

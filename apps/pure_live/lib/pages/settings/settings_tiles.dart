@@ -211,11 +211,15 @@ class SettingChoiceTile<T extends Object> extends ConsumerWidget {
     required this.options,
     this.hint,
     this.enabledBy,
+    this.subtitle,
     super.key,
   });
 
   /// The entry drawn.
   final SettingsEntry entry;
+
+  /// The line under the title; the entry's description when null.
+  final String? subtitle;
 
   /// The stored choice.
   final Setting<T> setting;
@@ -245,7 +249,7 @@ class SettingChoiceTile<T extends Object> extends ConsumerWidget {
         child: context.buildTile(
           icon: icon,
           title: entry.titleText,
-          subtitle: entry.descriptionText,
+          subtitle: subtitle ?? entry.descriptionText,
           isLong: true,
           stackTrailingOnNarrow: true,
           trailing: SettingValueText(current?.label ?? '$value'),

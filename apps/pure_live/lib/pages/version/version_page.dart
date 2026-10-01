@@ -10,6 +10,7 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/version/app_version.dart';
 import 'package:pure_live/pages/version/markdown_text.dart';
+import 'package:pure_live/pages/version/update_download.dart';
 import 'package:pure_live/pages/version/update_feed.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
@@ -363,12 +364,25 @@ class _PackageSources extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '$title · ${file.size}',
-          style: context.textStyles.t13.copyWith(
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                '$title · ${file.size}',
+                style: context.textStyles.t13.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            FilledButton.tonalIcon(
+              key: ValueKey('version-download-${file.name}'),
+              onPressed: () => unawaited(showUpdateDownload(context, file: file, sources: sources)),
+              icon: const Icon(Icons.download_rounded, size: 18),
+              label: Text(i18n('update_download_install')),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
         LayoutBuilder(
@@ -441,17 +455,26 @@ class _PackageSources extends StatelessWidget {
                 child: SelectableText(url, style: dialogContext.textStyles.t11),
               ),
               const SizedBox(height: 8),
-              Text(i18n('version_download_in_browser'), style: dialogContext.textStyles.t12),
               const SizedBox(height: 12),
               FilledButton.icon(
                 key: const ValueKey('version-source-download'),
                 onPressed: () {
                   Navigator.of(dialogContext).pop();
+                  unawaited(showUpdateDownload(pageContext, file: file, sources: [url]));
+                },
+                icon: const Icon(Icons.download_rounded, size: 20),
+                label: Text(i18n('update_download_in_app')),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                key: const ValueKey('version-source-browser'),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
                   final uri = updateDownloadUri(url);
                   if (uri != null) unawaited(_openExternal(uri));
                 },
-                icon: const Icon(Icons.download_rounded, size: 20),
-                label: Text(i18n('download')),
+                icon: const Icon(Icons.open_in_browser_rounded, size: 20),
+                label: Text(i18n('update_open_in_browser')),
               ),
               const SizedBox(height: 8),
               OutlinedButton.icon(

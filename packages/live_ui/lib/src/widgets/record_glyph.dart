@@ -16,13 +16,17 @@ enum RecordGlyphState {
 /// every platform.
 class RecordGlyph extends StatefulWidget {
   /// Creates the picture.
-  const new({required this.state, this.size = 24, super.key});
+  const new({required this.state, this.size = 24, this.ringColor, super.key});
 
   /// Which state.
   final RecordGlyphState state;
 
   /// The outer size.
   final double size;
+
+  /// The idle ring's colour: the theme's secondary ink by default, white on
+  /// the picture (the fullscreen bars, U.2c).
+  final Color? ringColor;
 
   @override
   State<RecordGlyph> createState() => _RecordGlyphState();
@@ -76,7 +80,7 @@ class _RecordGlyphState extends State<RecordGlyph> with SingleTickerProviderStat
         child: DecoratedBox(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: scheme.onSurfaceVariant, width: size / 12),
+            border: Border.all(color: widget.ringColor ?? scheme.onSurfaceVariant, width: size / 12),
           ),
           child: Center(
             child: SizedBox.square(

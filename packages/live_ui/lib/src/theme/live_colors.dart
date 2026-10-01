@@ -51,6 +51,29 @@ abstract final class OnVideoColors {
   /// audio only and a fixed orientation).
   static const Color active = Color(0xFFFFD166);
 
+  /// The round backing of the lock button at the side of a fullscreen
+  /// picture (3.x `LockButton`: 38 % black).
+  static const Color lockBacking = Color(0x61000000);
+
+  /// The followed chip on the picture ("✓ 已关注" in fullscreen, U.2c).
+  static const Color followChip = Color(0x2EFFFFFF);
+
+  /// The portrait fullscreen's entry hint (3.x: 66 % black).
+  static const Color hint = Color(0xA8000000);
+
+  /// The hint's outline (16 % white).
+  static const Color hintOutline = Color(0x29FFFFFF);
+
+  /// The veil over the ambient background (3.x: 15 % black).
+  static const Color ambientVeil = Color(0x26000000);
+
+  /// The ambient background before (or without) the cover: 3.x's gradient.
+  static const LinearGradient ambientFallback = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF342B3A), Color(0xFF171B27), Color(0xFF2A202B)],
+  );
+
   /// The outline of a text field on the picture (the fullscreen local
   /// danmaku composer, white 24 %).
   static const Color fieldOutline = Color(0x3DFFFFFF);

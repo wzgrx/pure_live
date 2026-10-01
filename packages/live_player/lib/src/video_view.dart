@@ -15,7 +15,13 @@ import 'package:media_kit_video/media_kit_video.dart';
 /// size, debounced 180 ms, so a small window does not render 4K frames.
 class LiveVideoView extends StatefulWidget {
   /// Creates the view.
-  const new({required this.session, this.fit = BoxFit.contain, this.outputSize = false, super.key});
+  const new({
+    required this.session,
+    this.fit = BoxFit.contain,
+    this.outputSize = false,
+    this.fill = const Color(0xFF000000),
+    super.key,
+  });
 
   /// The session to show.
   final PlaybackSession session;
@@ -25,6 +31,10 @@ class LiveVideoView extends StatefulWidget {
 
   /// Size the native output to the displayed size.
   final bool outputSize;
+
+  /// What fills the box around the video: black, or transparent over a
+  /// backdrop (a portrait stream's ambient background).
+  final Color fill;
 
   @override
   State<LiveVideoView> createState() => _LiveVideoViewState();
@@ -85,11 +95,12 @@ class _LiveVideoViewState extends State<LiveVideoView> {
   @override
   Widget build(BuildContext context) {
     final engine = widget.session.engine;
-    if (engine is! MpvEngine) return const ColoredBox(color: Color(0xFF000000), child: SizedBox.expand());
+    if (engine is! MpvEngine) return ColoredBox(color: widget.fill, child: const SizedBox.expand());
     final video = Video(
       controller: engine.controller,
       controls: null,
       fit: widget.fit,
+      fill: widget.fill,
       pauseUponEnteringBackgroundMode: false,
     );
     if (!widget.outputSize) return video;

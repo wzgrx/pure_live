@@ -15,6 +15,7 @@ export 'src/theme/live_colors.dart';
 export 'src/theme/live_theme.dart';
 export 'src/theme/text_styles.dart';
 export 'src/widgets/adaptive_panel.dart';
+export 'src/widgets/ambient_backdrop.dart';
 export 'src/widgets/app_menu.dart';
 export 'src/widgets/avatar.dart';
 export 'src/widgets/card_dialog.dart';

@@ -122,10 +122,18 @@ enum RoomMenuEntry {
 /// then the local interaction (3.x's last entry, U.2k), only while [local]
 /// (the `localInteraction.enabled` setting) is on; an empty group is left
 /// out.
-List<List<RoomMenuEntry>> roomMenuGroups({required bool iptv, required bool windows, bool local = false}) => [
+///
+/// Cast is left out where there is no DLNA casting ([cast] false: iOS,
+/// docs/ui/compare/U.17a).
+List<List<RoomMenuEntry>> roomMenuGroups({
+  required bool iptv,
+  required bool windows,
+  bool local = false,
+  bool cast = true,
+}) => [
   const [RoomMenuEntry.switchRoom, RoomMenuEntry.timer, RoomMenuEntry.volume, RoomMenuEntry.videoFit],
   [
-    RoomMenuEntry.cast,
+    if (cast) RoomMenuEntry.cast,
     RoomMenuEntry.streamLink,
     // An IPTV channel has no page to share or open (as before).
     if (!iptv) RoomMenuEntry.share,
@@ -140,13 +148,19 @@ List<List<RoomMenuEntry>> roomMenuGroups({required bool iptv, required bool wind
 /// with 3.x's icons.
 class RoomMenuButton extends ConsumerWidget {
   /// Creates the menu.
-  const new({required this.controller, this.windows = false, super.key});
+  const new({required this.controller, this.windows = false, this.onVideo = false, this.onMenu, super.key});
 
   /// The room.
   final LiveRoomController controller;
 
   /// Windows entries (new window).
   final bool windows;
+
+  /// On the picture (the fullscreen bars, U.2c change 2): a white icon.
+  final bool onVideo;
+
+  /// Told when the menu opens (true) and closes: the controls stay up.
+  final ValueChanged<bool>? onMenu;
 
   /// Runs [entry] for [controller].
   static Future<void> run(
@@ -242,7 +256,13 @@ class RoomMenuButton extends ConsumerWidget {
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       icon: const Icon(AppIcons.roomMenu),
-      onSelected: (entry) => unawaited(run(context, ref, controller, entry)),
+      iconColor: onVideo ? OnVideoColors.foreground : null,
+      onOpened: () => onMenu?.call(true),
+      onCanceled: () => onMenu?.call(false),
+      onSelected: (entry) {
+        onMenu?.call(false);
+        unawaited(run(context, ref, controller, entry));
+      },
       // Read when the menu opens: the bar does not rebuild for the room's
       // changes.
       itemBuilder: (context) {
@@ -253,6 +273,7 @@ class RoomMenuButton extends ConsumerWidget {
           iptv: iptv,
           windows: windows,
           local: local,
+          cast: defaultTargetPlatform != TargetPlatform.iOS,
         ).where((group) => group.isNotEmpty).toList();
         return [
           for (final (index, group) in groups.indexed) ...[

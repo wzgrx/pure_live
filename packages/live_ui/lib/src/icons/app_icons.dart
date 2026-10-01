@@ -319,6 +319,33 @@ abstract final class AppIcons {
   /// Something will not work as the user expects (a switched-off setting).
   static const IconData warning = Icons.warning_amber_rounded;
 
+  // ---- portrait streams, fullscreen and the wide room (docs/ui/compare/U.2b-U.2d) ----
+
+  /// The portrait room's handle: swipe down into the portrait fullscreen.
+  static const IconData portraitFullscreenEnter = Icons.keyboard_arrow_down_rounded;
+
+  /// The portrait fullscreen's hint: swipe up back to the panel.
+  static const IconData portraitFullscreenRestore = Icons.keyboard_arrow_up_rounded;
+
+  /// A one-off landscape fullscreen of a portrait room ("横屏全屏").
+  static const IconData landscapeFullscreen = Icons.screen_rotation_rounded;
+
+  /// The picture fills the window, without the app bar and the chat
+  /// (3.x `ExpandWindowButton`, drawn a quarter turn round).
+  static const IconData windowFullscreen = Icons.unfold_more_rounded;
+
+  /// Leave the in-window fullscreen.
+  static const IconData windowFullscreenExit = Icons.unfold_less_rounded;
+
+  /// Fold the wide room's chat column away or bring it back.
+  static const IconData chatColumn = Icons.vertical_split_rounded;
+
+  /// The chat column's edge handle while the column shows (fold it to the right).
+  static const IconData chatColumnFold = Remix.arrow_right_s_line;
+
+  /// The edge handle while the column is folded (bring it back).
+  static const IconData chatColumnUnfold = Remix.arrow_left_s_line;
+
   // ---- the room's states (docs/ui/compare/U.2g) ----
 
   /// Play the next line ("换线路"; U.2g note 6: Material's alt route).

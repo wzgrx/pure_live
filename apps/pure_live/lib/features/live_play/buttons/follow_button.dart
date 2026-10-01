@@ -18,8 +18,8 @@ enum FollowButtonPlace {
   /// The room details: 3.x's heart on a tonal button.
   details,
 
-  /// The fullscreen video bar: white text with a mark (3.x
-  /// `FavoriteButton`).
+  /// The fullscreen bars: the bar's pill on the picture (3.x
+  /// `FavoriteButton`, U.2c change 6).
   video,
 }
 
@@ -191,26 +191,47 @@ class _FollowButtonState extends ConsumerState<FollowButton> {
     );
   }
 
+  /// The fullscreen bars' pill (docs/ui/compare/U.2c change 6, U.2b change
+  /// 6): the bar's look on the picture, "✓ 已关注" on a light chip, "＋ 关注"
+  /// filled with the theme colour; 32 high, 48 to touch.
   Widget _video(BuildContext context, {required bool followed, required VoidCallback? onPressed}) {
-    final style = Theme.of(context).textTheme.bodyMedium
-        ?.copyWith(color: OnVideoColors.foreground, shadows: OnVideoColors.shadows);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final background = followed ? OnVideoColors.followChip : scheme.primary;
+    final foreground = followed ? OnVideoColors.foreground : scheme.onPrimary;
     return Tooltip(
       message: i18n(followed ? 'unfollow' : 'follow'),
       child: InkWell(
         key: const ValueKey('live-play-video-follow'),
-        borderRadius: BorderRadius.circular(8),
+        customBorder: const StadiumBorder(),
         onTap: onPressed,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: kMinInteractiveDimension, minHeight: kMinInteractiveDimension),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _mark(followed ? AppIcons.followed : AppIcons.follow, OnVideoColors.foreground, size: 16),
-                const SizedBox(width: 3),
-                Text(i18n(followed ? 'followed' : 'follow'), style: style),
-              ],
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Center(
+              widthFactor: 1,
+              child: DecoratedBox(
+                decoration: ShapeDecoration(color: background, shape: const StadiumBorder()),
+                child: SizedBox(
+                  height: 32,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 9, right: 12),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _mark(followed ? AppIcons.followed : AppIcons.follow, foreground, size: 16),
+                        const SizedBox(width: 3),
+                        Text(
+                          i18n(followed ? 'followed' : 'follow'),
+                          maxLines: 1,
+                          style: theme.textTheme.labelLarge?.emphasis.copyWith(fontSize: 13, color: foreground),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),

@@ -57,6 +57,11 @@ final class RoomOrientationChoice extends ChangeNotifier {
   /// Whether choices are remembered for the next visit.
   bool get remember => settings.get(Settings.rememberPortraitRoomOverride);
 
+  /// Turns "记住单个直播间方向" on or off at once (U.2b change 10: 3.x kept the
+  /// switch as a draft until an option was tapped): the room's current
+  /// choice moves between this run and the remembered ones.
+  Future<void> setRemember({required bool remember}) => choose(value, remember: remember);
+
   /// Chooses [value]; [remember] keeps it for later visits (and becomes the
   /// default for the next choice, as 3.x's dialog did).
   Future<void> choose(RoomOrientation value, {required bool remember}) async {

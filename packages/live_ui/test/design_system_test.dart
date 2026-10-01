@@ -50,6 +50,17 @@ void main() {
       (AppIcons.localInteraction, Icons.auto_awesome_rounded),
       (AppIcons.templateSave, Icons.save_outlined),
       (AppIcons.templateRestore, Icons.restore_rounded),
+      // U.2b-U.2d: 3.x's glyphs of the portrait room and the window
+      // fullscreen; the chat column's own.
+      (AppIcons.portraitFullscreenEnter, Icons.keyboard_arrow_down_rounded),
+      (AppIcons.portraitFullscreenRestore, Icons.keyboard_arrow_up_rounded),
+      (AppIcons.landscapeFullscreen, Icons.screen_rotation_rounded),
+      (AppIcons.windowFullscreen, Icons.unfold_more_rounded),
+      (AppIcons.windowFullscreenExit, Icons.unfold_less_rounded),
+      (AppIcons.chatColumn, Icons.vertical_split_rounded),
+      (AppIcons.chatColumnFold, Remix.arrow_right_s_line),
+      (AppIcons.chatColumnUnfold, Remix.arrow_left_s_line),
+
       // U.2g and U.2e.
       (AppIcons.switchLine, Icons.alt_route_rounded),
       (AppIcons.banned, Icons.block_rounded),
@@ -247,5 +258,23 @@ void main() {
     expect(InkOnColor.on(const Color(0xFFFFF3C4)), InkOnColor.dark);
     expect(InkOnColor.on(const Color(0xFF1B3A6B)), InkOnColor.light);
     expect(const TextStyle().tabular.fontFeatures, [const FontFeature.tabularFigures()]);
+  });
+
+  testWidgets("AmbientBackdrop: 3.x's gradient under a 15 % veil; a cover decoded tiny over it", (tester) async {
+    await tester.pumpWidget(_app(const SizedBox(width: 200, height: 300, child: AmbientBackdrop(cover: ''))));
+    final boxes = tester.widgetList<DecoratedBox>(find.byType(DecoratedBox)).map((box) => box.decoration).toList();
+    expect(boxes.whereType<BoxDecoration>().map((box) => box.gradient), contains(OnVideoColors.ambientFallback));
+    expect(find.byKey(const ValueKey('ambient-backdrop-cover')), findsNothing);
+    expect(tester.widget<ColoredBox>(find.byType(ColoredBox).last).color, OnVideoColors.ambientVeil);
+    expect(ambientCoverDecodeWidth, lessThanOrEqualTo(32));
+    expect(find.byType(ImageFiltered), findsNothing, reason: 'no blur per frame');
+  });
+
+  testWidgets('RecordGlyph takes a white ring on the picture', (tester) async {
+    await tester.pumpWidget(_app(const RecordGlyph(state: RecordGlyphState.idle, ringColor: OnVideoColors.foreground)));
+    final ring = tester.widget<DecoratedBox>(
+      find.descendant(of: find.byKey(const ValueKey('record-glyph-idle')), matching: find.byType(DecoratedBox)).first,
+    );
+    expect(((ring.decoration as BoxDecoration).border! as Border).top.color, OnVideoColors.foreground);
   });
 }

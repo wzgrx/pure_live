@@ -13,6 +13,7 @@ class LiveNetworkImage extends StatelessWidget {
     required this.error,
     this.memCacheWidth,
     this.fit = BoxFit.cover,
+    this.filterQuality = FilterQuality.low,
     super.key,
   });
 
@@ -31,6 +32,10 @@ class LiveNetworkImage extends StatelessWidget {
   /// How the image fills its box.
   final BoxFit fit;
 
+  /// How the decoded picture is scaled to the box (a tiny decode drawn
+  /// large with [FilterQuality.medium] reads as a soft blur).
+  final FilterQuality filterQuality;
+
   @override
   Widget build(BuildContext context) {
     final config = LiveUiScope.of(context);
@@ -41,6 +46,7 @@ class LiveNetworkImage extends StatelessWidget {
       cacheManager: config.imageCacheManager,
       fit: fit,
       memCacheWidth: memCacheWidth,
+      filterQuality: filterQuality,
       fadeInDuration: Duration.zero,
       fadeOutDuration: Duration.zero,
       useOldImageOnUrlChange: true,

@@ -13,6 +13,7 @@ import android.hardware.display.DisplayManager
 import android.media.AudioManager
 import android.net.Uri
 import android.net.wifi.WifiManager
+import android.os.BatteryManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -63,7 +64,8 @@ import io.flutter.plugin.common.MethodChannel
  *   leaving the app (home, recents) enter it by itself;
  * - `pure_live/device_controls`: the media volume and the window's
  *   brightness for the live room's gestures (3.x used the volume_controller
- *   and screen_brightness plugins).
+ *   and screen_brightness plugins), and the battery level of the fullscreen
+ *   bars (3.x used battery_plus).
  */
 class MainActivity : AudioServiceActivity() {
     companion object {
@@ -251,6 +253,8 @@ class MainActivity : AudioServiceActivity() {
                     result.success(null)
                 }
 
+                "getBattery" -> result.success(batteryLevel())
+
                 else -> result.notImplemented()
             }
         }
@@ -270,6 +274,13 @@ class MainActivity : AudioServiceActivity() {
             }
         }
         applyPreferredDisplayMode(highRefreshRateEnabled)
+    }
+
+    /** The battery charge in percent, or null when the device reports none. */
+    private fun batteryLevel(): Int? {
+        val manager = getSystemService(Context.BATTERY_SERVICE) as? BatteryManager ?: return null
+        val level = manager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+        return if (level in 0..100) level else null
     }
 
     /** A television: the TV UI mode, or a device with the leanback feature (Android TV, Google TV, most boxes). */

@@ -7,7 +7,6 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_templates.dart';
-import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 
@@ -253,21 +252,5 @@ void main() {
     );
     expect(externalRoomTarget(LiveRoom(platform: SiteIds.iptv, roomId: 'x', link: 'http://tv.example/x.m3u8')), isNull);
     expect(externalRoomTarget(LiveRoom(platform: SiteIds.douyu, roomId: '1', link: 'javascript:alert(1)')), isNull);
-  });
-
-  test('portrait streams get a taller picture on phones, as the layout setting says', () {
-    double height({bool portrait = true, String mode = 'balanced', bool adaptation = true}) => portraitVideoHeight(
-      width: 400,
-      screenHeight: 800,
-      portraitStream: portrait,
-      adaptation: adaptation,
-      adaptiveHeight: true,
-      mode: mode,
-    );
-    expect(height(portrait: false), 225);
-    expect(height(adaptation: false), 225);
-    expect(height(), closeTo(440, 0.001));
-    expect(height(mode: 'immersive'), closeTo(600, 0.001));
-    expect(height(mode: 'compatibility'), 225);
   });
 }

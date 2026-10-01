@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:live_core/live_core.dart';
-import 'package:live_player/live_player.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/features/live_play/buttons/stream_menu.dart';
 import 'package:pure_live/features/live_play/layout/room_header.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -27,7 +27,8 @@ IconData audienceIcon(AudienceMetricType type) => switch (type) {
 /// replay or restriction mark, the title and "详情 ⌄" on the first line
 /// (a tap anywhere on it opens or closes the room details); the platform's
 /// audience figures and the time on air on the second, with the quality and
-/// line buttons on its right. Grey placeholders while the room loads (E2).
+/// line buttons on its right ([StreamPickers]). Grey placeholders while the
+/// room loads (E2).
 class RoomInfoBar extends StatelessWidget {
   /// Creates the strip.
   const new({
@@ -288,146 +289,4 @@ class _OnAirClockState extends State<OnAirClock> {
   @override
   Widget build(BuildContext context) =>
       Text(formatOnAir(widget.now().difference(widget.startedAt)), style: widget.style);
-}
-
-/// Quality and line buttons (3.x `ResolutionSelector`, `LineSelector`):
-/// the name with a drop-down mark on an outlined 32-high button with a
-/// 48-high touch area (U.2a change 8); [onVideo] draws them for the
-/// fullscreen bar. The lists they open are unchanged.
-class StreamPickers extends StatelessWidget {
-  /// Creates the pickers.
-  const new({required this.controller, this.onVideo = false, this.onReopen, super.key});
-
-  /// The room.
-  final LiveRoomController controller;
-
-  /// White on the picture.
-  final bool onVideo;
-
-  /// Called before the user asks for another quality or line.
-  final VoidCallback? onReopen;
-
-  @override
-  Widget build(BuildContext context) => ListenableSelector<(RoomStage, int, int, bool, String)>(
-    listenable: controller,
-    selector: () => (
-      controller.stage,
-      controller.qualities.length,
-      controller.qualityIndex,
-      controller.switching,
-      controller.qualities.map((quality) => '${quality.quality}${quality.isPlaybackUnconfirmed ? '?' : ''}').join('|'),
-    ),
-    builder: (context, value, _) {
-      final (stage, count, _, switching, _) = value;
-      if (stage != RoomStage.playing || count == 0) return const SizedBox.shrink();
-      final qualities = controller.qualities;
-      final index = controller.qualityIndex.clamp(0, qualities.length - 1);
-      final current = qualities[index];
-      return StreamBuilder<PlaybackState>(
-        stream: controller.session.states,
-        initialData: controller.session.state,
-        builder: (context, snapshot) {
-          final playback = snapshot.data ?? controller.session.state;
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              PopupMenuButton<int>(
-                key: const ValueKey('live-play-quality'),
-                enabled: !switching && qualities.length > 1,
-                tooltip: i18n('select_quality'),
-                position: PopupMenuPosition.under,
-                onSelected: (selected) {
-                  onReopen?.call();
-                  unawaited(controller.selectQuality(selected));
-                },
-                itemBuilder: (context) => [
-                  for (final (option, quality) in qualities.indexed)
-                    CheckedPopupMenuItem(value: option, checked: option == index, child: Text(quality.quality)),
-                ],
-                child: _DropButton(
-                  text: current.isPlaybackUnconfirmed ? '${current.quality}?' : current.quality,
-                  onVideo: onVideo,
-                  busy: switching,
-                ),
-              ),
-              if (playback.lineCount > 1)
-                PopupMenuButton<int>(
-                  key: const ValueKey('live-play-line'),
-                  tooltip: i18n('select_play_line'),
-                  position: PopupMenuPosition.under,
-                  onSelected: (selected) {
-                    onReopen?.call();
-                    unawaited(controller.selectLine(selected));
-                  },
-                  itemBuilder: (context) => [
-                    for (var line = 0; line < playback.lineCount; line++)
-                      CheckedPopupMenuItem(
-                        value: line,
-                        checked: line == playback.lineIndex,
-                        child: Text(i18n('toolbox_line', args: {'index': '${line + 1}'})),
-                      ),
-                  ],
-                  child: _DropButton(
-                    text: i18n('toolbox_line', args: {'index': '${playback.lineIndex + 1}'}),
-                    onVideo: onVideo,
-                  ),
-                ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
-
-class _DropButton extends StatelessWidget {
-  const new({required this.text, required this.onVideo, this.busy = false});
-
-  final String text;
-  final bool onVideo;
-  final bool busy;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final ink = onVideo ? OnVideoColors.foreground : scheme.onSurface;
-    final style = theme.textTheme.bodyMedium?.regular.copyWith(
-      color: ink,
-      shadows: onVideo ? OnVideoColors.shadows : null,
-    );
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: kMinInteractiveDimension, minWidth: kMinInteractiveDimension),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3),
-        child: Center(
-          child: SizedBox(
-            height: 32,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: onVideo ? OnVideoColors.chip : null,
-                border: Border.all(color: onVideo ? OnVideoColors.chipOutline : scheme.outlineVariant),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 10, right: 6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (busy) ...[
-                      SizedBox.square(dimension: 12, child: CircularProgressIndicator(strokeWidth: 1.8, color: ink)),
-                      const SizedBox(width: 5),
-                    ],
-                    Text(text, style: style, maxLines: 1),
-                    const SizedBox(width: 2),
-                    Icon(AppIcons.dropDown, size: 18, color: ink),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

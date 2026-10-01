@@ -132,6 +132,7 @@ class LiveRoomController extends ChangeNotifier {
   List<LivePlayQuality> _qualities = const [];
   int _qualityIndex = 0;
   bool _switching = false;
+  bool _switchingLine = false;
   List<LiveSuperChatMessage> _superChats = const [];
   bool _showGifts = true;
   bool _audioOnly = false;
@@ -161,6 +162,10 @@ class LiveRoomController extends ChangeNotifier {
 
   /// A quality switch is resolving.
   bool get switching => _switching;
+
+  /// A line switch is opening (3.x's `isStreamSwitching` covered both: the
+  /// quality and line buttons wait while either switches).
+  bool get switchingLine => _switchingLine;
 
   /// Super chats still on display, oldest first.
   List<LiveSuperChatMessage> get superChats => _superChats;
@@ -596,7 +601,7 @@ class LiveRoomController extends ChangeNotifier {
   /// Plays quality [index] (3.x `setResolution(changeQuality)`); the old
   /// stream keeps playing until the new one resolves.
   Future<void> selectQuality(int index) async {
-    if (_switching || index < 0 || index >= _qualities.length || index == _qualityIndex) return;
+    if (_switching || _switchingLine || index < 0 || index >= _qualities.length || index == _qualityIndex) return;
     if (_stage != RoomStage.playing) return;
     _switching = true;
     _notify();
@@ -608,8 +613,19 @@ class LiveRoomController extends ChangeNotifier {
     }
   }
 
-  /// Plays line [index] of the current quality.
-  Future<void> selectLine(int index) => session.selectLine(index);
+  /// Plays line [index] of the current quality; the old line plays until
+  /// the new one opens.
+  Future<void> selectLine(int index) async {
+    if (_switching || _switchingLine) return;
+    _switchingLine = true;
+    _notify();
+    try {
+      await session.selectLine(index);
+    } finally {
+      _switchingLine = false;
+      _notify();
+    }
+  }
 
   /// The retry button: the stream again when only playback failed, else the
   /// whole room.

@@ -173,6 +173,37 @@ void main() {
     expect(controller.state.busy, isFalse);
   });
 
+  test('F.5a: the receiver shows "streamer - title" (the URL without either)', () async {
+    expect(CastMedia.roomTitle(anchor: ' 主播 ', title: '标题 '), '主播 - 标题');
+    expect(CastMedia.roomTitle(anchor: '', title: '标题'), '标题');
+    expect(CastMedia.roomTitle(anchor: '主播', title: ' '), '主播');
+    expect(CastMedia.roomTitle(anchor: '', title: ''), isEmpty);
+    expect(didlLite(const CastMedia(url: _source, title: '主播 - 标题')), contains('<dc:title>主播 - 标题</dc:title>'));
+
+    Future<List<String>> cast(_FixtureDevice device, {String title = ''}) async {
+      final session = _FixtureSession();
+      final controller = DlnaCastController(_source, title: title, startDiscovery: () async => session);
+      addTearDown(controller.close);
+      await controller.startSearch();
+      session.emit([device]);
+      await controller.castToDevice(device.id);
+      return device.events;
+    }
+
+    // A renderer that takes metadata gets the title with the source.
+    expect(await cast(_TitledDevice(), title: '主播 - 标题'), ['media:$_source|主播 - 标题', 'play']);
+    // No title: the source alone, as before.
+    expect(await cast(_TitledDevice()), ['set:$_source', 'play']);
+    // A receiver without metadata support: the source alone.
+    expect(
+      await cast(
+        _FixtureDevice(id: 'plain', name: 'Plain'),
+        title: '主播 - 标题',
+      ),
+      ['set:$_source', 'play'],
+    );
+  });
+
   test('switching receivers waits for the previous pause and tolerates its failure', () async {
     final session = _FixtureSession();
     final first = _FixtureDevice(id: 'first', name: 'First');
@@ -314,4 +345,12 @@ class _FixtureDevice implements DlnaCastDevice {
 
   @override
   Future<TransportInfo> transportInfo() async => const TransportInfo(state: TransportState.playing);
+}
+
+/// A receiver that also takes the metadata (`DlnaRenderer` does).
+class _TitledDevice extends _FixtureDevice implements CastMediaTarget {
+  new() : super(id: 'titled', name: 'Titled');
+
+  @override
+  Future<void> setMedia(CastMedia media) async => events.add('media:${media.url}|${media.title}');
 }

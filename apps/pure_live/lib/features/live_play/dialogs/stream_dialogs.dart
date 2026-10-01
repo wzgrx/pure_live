@@ -36,7 +36,13 @@ Future<void> showStreamPicker(BuildContext context, LiveRoomController controlle
         AppNavigator.toast(i18n('toolbox_copy_failed'));
       }
     case StreamUse.cast:
-      await showCastDialog(context, url);
+      final room = controller.room;
+      // The receiver shows "streamer - title" instead of the address (F.5a).
+      await showCastDialog(
+        context,
+        url,
+        title: CastMedia.roomTitle(anchor: room.nick, title: room.title),
+      );
   }
 }
 
@@ -183,19 +189,23 @@ DlnaDiscoveryStarter castDiscovery = startDlnaDiscovery;
 
 /// The DLNA dialog for [url] (3.x `LiveDlnaPage`): searches for 20 s,
 /// lists the receivers and casts to the one tapped; the logic is
-/// `DlnaCastController` (M10).
-Future<void> showCastDialog(BuildContext context, String url) => showDialog<void>(
+/// `DlnaCastController` (M10). [title] is what the receiver shows; empty
+/// shows the address (3.x).
+Future<void> showCastDialog(BuildContext context, String url, {String title = ''}) => showDialog<void>(
   context: context,
-  builder: (_) => CastDialog(url: url),
+  builder: (_) => CastDialog(url: url, title: title),
 );
 
 /// The DLNA receivers and their state.
 class CastDialog extends StatefulWidget {
   /// Creates the dialog for [url].
-  const new({required this.url, super.key});
+  const new({required this.url, this.title = '', super.key});
 
   /// The stream address.
   final String url;
+
+  /// The title the receiver shows; empty shows [url].
+  final String title;
 
   @override
   State<CastDialog> createState() => _CastDialogState();
@@ -211,6 +221,7 @@ class _CastDialogState extends State<CastDialog> {
     super.initState();
     _cast = DlnaCastController(
       widget.url,
+      title: widget.title,
       startDiscovery: castDiscovery,
       onNotice: (notice) => AppNavigator.toast(switch (notice) {
         DlnaCastNotice.castStarted => i18n('dlna_cast_started'),

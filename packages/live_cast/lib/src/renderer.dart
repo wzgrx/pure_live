@@ -34,6 +34,12 @@ final class CastMedia {
 
   @override
   String toString() => 'CastMedia(${mimeType ?? '*'}, ${title.isEmpty ? url : title})';
+
+  /// The title of a live room on the receiver: `主播 - 标题`, the title alone
+  /// without a streamer, the streamer alone without a title, empty without
+  /// both (the URL then; 3.x always showed the URL).
+  static String roomTitle({required String anchor, required String title}) =>
+      [anchor.trim(), title.trim()].where((part) => part.isNotEmpty).join(' - ');
 }
 
 /// DIDL-Lite metadata for [media]: the item 3.x sent (`dlna_dart` 0.1.1
@@ -155,9 +161,17 @@ abstract interface class DlnaCastDevice {
   Future<TransportInfo> transportInfo();
 }
 
+/// A receiver that takes the metadata with the source: the title to show
+/// and the type ([CastMedia]). `DlnaCastController` uses it when it has a
+/// title; receivers without it get [DlnaCastDevice.setSource].
+abstract interface class CastMediaTarget {
+  /// Loads [media] without starting it (SetAVTransportURI).
+  Future<void> setMedia(CastMedia media);
+}
+
 /// [DlnaCastDevice] over SOAP to the renderer's AVTransport service
 /// (instance 0). Usable after the search that found it has stopped.
-final class DlnaRenderer implements DlnaCastDevice {
+final class DlnaRenderer implements DlnaCastDevice, CastMediaTarget {
   /// Creates a renderer client for [device].
   new(
     this.device, {
@@ -194,6 +208,7 @@ final class DlnaRenderer implements DlnaCastDevice {
   ///
   /// A renderer busy with another stream (701, 705, 715) is stopped and asked
   /// once more; every other failure is thrown as it came.
+  @override
   Future<void> setMedia(CastMedia media) async {
     final arguments = {'InstanceID': '0', 'CurrentURI': media.url, 'CurrentURIMetaData': didlLite(media)};
     try {

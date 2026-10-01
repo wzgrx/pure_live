@@ -130,6 +130,7 @@ final class DlnaCastController {
     this._startDiscovery = startDlnaDiscovery,
     this.searchDuration = const Duration(seconds: 20),
     this._onNotice,
+    this.title = '',
   }) : source = normalizeDlnaSource(datasource) {
     if (source == null) _status = DlnaCastStatus.invalidSource;
     _state = _snapshot();
@@ -137,6 +138,10 @@ final class DlnaCastController {
 
   /// The URL cast, or null when it cannot be.
   final String? source;
+
+  /// The title the receiver shows (`CastMedia.roomTitle`); empty shows the
+  /// URL, as 3.x.
+  final String title;
 
   /// How long one search runs.
   final Duration searchDuration;
@@ -343,7 +348,11 @@ final class DlnaCastController {
       }
       if (!_isCastCurrent(target.id)) return;
 
-      await target.setSource(source);
+      if (target case final CastMediaTarget media when title.trim().isNotEmpty) {
+        await media.setMedia(CastMedia(url: source, title: title.trim()));
+      } else {
+        await target.setSource(source);
+      }
       if (!_isCastCurrent(target.id)) return;
 
       await target.play();

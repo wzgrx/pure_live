@@ -26,11 +26,8 @@
   ],
   "raw_styles": {
     "about": 16,
-    "account": 25,
-    "auth": 5,
     "backup": 22,
     "history": 11,
-    "iptv": 38,
     "live_play": 8,
     "record_settings": 28,
     "remote_receiver": 11,

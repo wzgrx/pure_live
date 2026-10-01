@@ -111,9 +111,8 @@ class _DouyuCookieViewState extends ConsumerState<DouyuCookieView> {
     final effective = keep ? stored : pasted;
     await _actions.saveDouyu(cookie: effective, ltp0: ltp0, did: did);
     _cookie.text = effective;
-    AppNavigator.toast(
-      keep ? i18n('douyu_cookie_credentials_absorbed') : douyuSummary(_actions.snapshot(SiteIds.douyu), now: _now()),
-    );
+    // One message; the session itself is on the status card now (c6).
+    AppNavigator.toast(i18n(keep ? 'douyu_cookie_credentials_absorbed' : 'cookie_saved_local'));
     return true;
   }
 
@@ -176,65 +175,102 @@ class _DouyuCookieViewState extends ConsumerState<DouyuCookieView> {
     final now = ref.watch(accountClockProvider)();
     final status = accountStatus(_platform, stored, now: now);
     final forceRenew = watchSetting(ref, Settings.douyuForceRenew);
+    final scheme = Theme.of(context).colorScheme;
     return CookieEditorScaffold(
-      title: i18n('account_editor_title', args: {'name': _platform.name}),
-      name: _platform.name,
+      platform: _platform,
       tip: const AccountTipBanner(body: _DouyuTip()),
-      status: AccountStatusCard(
-        status: stored.cookie.isEmpty ? status : AccountStatus(douyuSummary(stored, now: now), tone: status.tone),
+      // The session in words stays here (3.x showed it once, after saving).
+      status: stored.cookie.isEmpty
+          ? accountPageStatus(status, stored)
+          : AccountStatus(douyuSummary(stored, now: now), tone: status.tone),
+      cookie: CookieInput(
+        controller: _cookie,
+        fieldKey: const ValueKey('account-cookie-input'),
+        hint: i18n('douyu_cookie_hint'),
+        multiline: true,
       ),
-      inputs: [
-        CookieInput(
-          controller: _cookie,
-          fieldKey: const ValueKey('account-cookie-input'),
-          hint: i18n('douyu_cookie_hint'),
-          multiline: true,
-        ),
-        CookieInput(
-          controller: _ltp0,
-          fieldKey: const ValueKey('douyu-ltp0-input'),
-          label: i18n('douyu_ltp0_label'),
-          hint: i18n('douyu_ltp0_hint'),
-        ),
-        CookieInput(
-          controller: _did,
-          fieldKey: const ValueKey('douyu-did-input'),
-          label: i18n('douyu_did_label'),
-          hint: i18n('douyu_did_hint'),
-        ),
-      ],
-      hasStored: stored.cookie.isNotEmpty || stored.unreadable || stored.douyuLtp0 != null,
+      extraInputs: [_ltp0, _did],
+      hasStored: accountStored(stored) || stored.douyuLtp0 != null,
       onSave: _save,
       onSignOut: _signOut,
       extra: [
-        context.buildGroupTitle(i18n('account_douyu_renewal')),
-        context.buildModernCard([
-          context.buildTile(
-            icon: Remix.refresh_line,
-            title: i18n('douyu_cookie_refresh_now'),
-            subtitle: i18n('account_douyu_renew_now_desc'),
-            isLong: true,
-            trailing: _renewing
-                ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : null,
-            onTap: _renewing ? null : _renewNow,
-          ),
-          context.buildSwitchTile(
-            icon: Remix.timer_flash_line,
-            title: i18n('account_douyu_force_renew'),
-            subtitle: i18n('account_douyu_force_renew_desc'),
-            isLong: true,
-            value: forceRenew,
-            onChanged: (value) => unawaited(ref.read(storeProvider).settings.set(Settings.douyuForceRenew, value)),
-          ),
-        ]),
+        // "续期": the pair and "立即续期" (c9), then the forced renewal (c10).
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            context.buildGroupTitle(i18n('account_douyu_renewal')),
+            context.buildModernCard([
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AccountField(
+                      input: CookieInput(
+                        controller: _ltp0,
+                        fieldKey: const ValueKey('douyu-ltp0-input'),
+                        label: i18n('douyu_ltp0_label'),
+                        hint: i18n('douyu_ltp0_hint'),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    AccountField(
+                      input: CookieInput(
+                        controller: _did,
+                        fieldKey: const ValueKey('douyu-did-input'),
+                        label: i18n('douyu_did_label'),
+                        hint: i18n('douyu_did_hint'),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        OutlinedButton.icon(
+                          key: const ValueKey('douyu-renew-now'),
+                          onPressed: _renewing ? null : _renewNow,
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(0, 40),
+                            shape: const StadiumBorder(),
+                            textStyle: context.textStyles.t14.emphasis,
+                          ),
+                          icon: _renewing
+                              ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(AppIcons.refresh, size: 18),
+                          label: Text(i18n('douyu_cookie_refresh_now')),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            i18n('account_douyu_renew_now_desc'),
+                            style: context.textStyles.t12.copyWith(color: scheme.onSurfaceVariant, height: 1.45),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ]),
+            const SizedBox(height: 12),
+            context.buildModernCard([
+              context.buildSwitchTile(
+                key: const ValueKey('douyu-force-renew'),
+                title: i18n('account_douyu_force_renew'),
+                subtitle: i18n('account_douyu_force_renew_desc'),
+                isLong: true,
+                value: forceRenew,
+                onChanged: (value) => unawaited(ref.read(storeProvider).settings.set(Settings.douyuForceRenew, value)),
+              ),
+            ]),
+          ],
+        ),
       ],
     );
   }
 }
 
-/// How to get the two cookies (3.x `_DouyuCookieTip`): the steps, the
-/// passport link and the lifetime.
+/// How to get the two cookies (3.x `_DouyuCookieTip`): the two steps and
+/// the passport link; the seven-day lifetime is on the status card now.
 class _DouyuTip extends StatelessWidget {
   const new();
 
@@ -245,16 +281,19 @@ class _DouyuTip extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(i18n('douyu_cookie_tip_step1'), style: style),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Text(i18n('douyu_cookie_tip_step2'), style: style),
         TextButton.icon(
           key: const ValueKey('douyu-open-passport'),
-          style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            minimumSize: const Size(0, 36),
+            textStyle: context.textStyles.t13,
+          ),
           onPressed: () => openAccountWebsite(_passport),
-          icon: const Icon(Icons.open_in_new, size: 16),
-          label: const Text('https://passport.douyu.com/'),
+          icon: const Icon(AppIcons.openExternal, size: 16),
+          label: Text(i18n('douyu_open_passport')),
         ),
-        Text(i18n('douyu_cookie_tip_lifetime'), style: style),
       ],
     );
   }

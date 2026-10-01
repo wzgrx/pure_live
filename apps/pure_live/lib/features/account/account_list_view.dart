@@ -13,8 +13,9 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
 
-/// The accounts list (3.x `AccountPage`): every platform's login state,
-/// sign in, open its cookie page, sign out.
+/// "平台账号" (3.x `AccountPage` "三方认证", docs/ui/compare/U.10a): every
+/// platform's login state in two groups; a tap opens the platform's page,
+/// the trailing button signs out after asking.
 ///
 /// Bilibili and Douyin are asked who their cookie signs in as when the page
 /// opens and whenever the cookie changes (3.x checked Bilibili in a global
@@ -91,12 +92,13 @@ class _AccountListViewState extends ConsumerState<AccountListView> {
     if (mounted) setState(() => _checks[site] = result);
   }
 
-  void _open(AccountPlatform platform, AccountStatus status) {
+  /// Opens [platform]'s page (c1; 3.x signed out on a tap of a stored
+  /// login): Bilibili without a login goes straight to the QR code (K2 A).
+  void _open(AccountPlatform platform, bool stored) {
     final String path;
     Object? arguments;
     if (platform.id == SiteIds.bilibili) {
-      // Signed out: the QR code; signed in: the account's cookie page.
-      if (status.signedIn) {
+      if (stored) {
         path = RoutePath.kSettingsAccount;
         arguments = SiteIds.bilibili;
       } else {
@@ -126,26 +128,6 @@ class _AccountListViewState extends ConsumerState<AccountListView> {
     }
   }
 
-  Future<void> _signOutAll() async {
-    final confirmed = await confirmAccountAction(
-      context,
-      title: i18n('account_sign_out_all'),
-      message: i18n('account_sign_out_all_confirm'),
-      action: i18n('account_sign_out_all'),
-    );
-    if (!confirmed || !mounted) return;
-    try {
-      await _actions.signOutAll();
-      _checks.clear();
-      _checkedCookies.clear();
-      if (mounted) setState(() {});
-      AppNavigator.toast(i18n('account_signed_out_all'));
-    } on Object catch (error, stack) {
-      log('Sign out of all failed', name: 'AccountPage', error: error, stackTrace: stack);
-      AppNavigator.toast(i18n('account_save_failed'));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final now = ref.watch(accountClockProvider)();
@@ -153,7 +135,6 @@ class _AccountListViewState extends ConsumerState<AccountListView> {
       for (final platform in accountPlatforms)
         platform.id: accountStatus(platform, _actions.snapshot(platform.id), now: now, check: _checks[platform.id]),
     };
-    final anyStored = statuses.values.any((status) => status.signedIn) || _actions.store.secrets.unreadable.isNotEmpty;
     final unreadable = [
       for (final platform in accountPlatforms)
         if (_actions.unreadable(platform.id)) platform.name,
@@ -168,54 +149,52 @@ class _AccountListViewState extends ConsumerState<AccountListView> {
         ]),
       ],
     );
+    final children = <Widget>[
+      if (unreadable.isNotEmpty) ...[
+        AccountNotice(text: i18n('account_unreadable_notice', args: {'names': unreadable.join('、')})),
+        const SizedBox(height: 16),
+      ] else
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+          child: Text(
+            i18n('account_intro'),
+            key: const ValueKey('account-intro'),
+            style: context.textStyles.t13.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.55),
+          ),
+        ),
+      group(i18n('account_group_domestic'), overseas: false),
+      const SizedBox(height: 20),
+      group(i18n('account_group_overseas'), overseas: true),
+    ];
     return Scaffold(
-      appBar: AppBar(
-        title: Text(i18n('third_party_auth')),
-        actions: [
-          if (anyStored)
-            PopupMenuButton<void>(
-              key: const ValueKey('account-menu'),
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  key: const ValueKey('account-sign-out-all'),
-                  onTap: () => unawaited(_signOutAll()),
-                  child: Text(i18n('account_sign_out_all')),
-                ),
-              ],
-            ),
-        ],
-      ),
+      appBar: AppBar(centerTitle: true, title: Text(i18n('account_title'))),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        key: const ValueKey('account-list'),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
         children: [
-          AccountTipBanner(text: i18n('account_intro')),
-          if (unreadable.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            AccountStatusCard(
-              status: AccountStatus(
-                i18n('account_unreadable_notice', args: {'names': unreadable.join('、')}),
-                tone: AccountTone.error,
-              ),
+          for (final child in children)
+            ReadableContent(
+              child: SizedBox(width: double.infinity, child: child),
             ),
-          ],
-          const SizedBox(height: 20),
-          group(i18n('account_group_domestic'), overseas: false),
-          const SizedBox(height: 20),
-          group(i18n('account_group_overseas'), overseas: true),
-          const SizedBox(height: 32),
         ],
       ),
     );
   }
 
+  /// One platform (3.x `_buildAccountTile`): logo 24, name 15, the status
+  /// (wraps, never cut), the sign-out button when something is stored,
+  /// else the chevron.
   Widget _tile(BuildContext context, AccountPlatform platform, AccountStatus status) {
     final theme = Theme.of(context);
     final color = accountToneColor(theme, status.tone);
     final busy = _signingOut.contains(platform.id);
+    final stored = accountStored(_actions.snapshot(platform.id));
     return ListTile(
       key: ValueKey('account-${platform.id}'),
-      leading: PlatformLogo(platform.id),
-      title: Text(platform.name, style: context.textStyles.t15.copyWith(fontWeight: FontWeight.w600)),
+      minTileHeight: 72,
+      horizontalTitleGap: 16,
+      leading: PlatformLogo(platform.id, size: 24),
+      title: Text(platform.name, style: context.textStyles.t15.emphasis),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 2),
         child: Text(
@@ -223,24 +202,26 @@ class _AccountListViewState extends ConsumerState<AccountListView> {
           key: ValueKey('account-${platform.id}-status'),
           style: context.textStyles.t12.copyWith(
             color: color,
-            fontWeight: status.tone == AccountTone.idle ? FontWeight.normal : FontWeight.w500,
+            fontWeight: status.tone == AccountTone.ok ? FontWeight.w600 : FontWeight.w400,
+            height: 1.4,
           ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
         ),
       ),
       trailing: busy
-          ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
-          : status.signedIn
+          ? const SizedBox.square(
+              dimension: 48,
+              child: Center(child: SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+            )
+          : stored
           ? IconButton(
               key: ValueKey('account-${platform.id}-sign-out'),
               tooltip: i18n('logout'),
               onPressed: () => unawaited(_signOut(platform)),
-              icon: Icon(Remix.logout_box_r_line, color: theme.colorScheme.error.withValues(alpha: 0.8), size: 18),
+              icon: Icon(AppIcons.signOut, color: theme.colorScheme.error.withValues(alpha: 0.8), size: 18),
             )
-          : Icon(Icons.chevron_right_rounded, color: theme.hintColor.withValues(alpha: 0.4), size: 20),
-      onTap: () => _open(platform, status),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          : SizedBox.square(dimension: 48, child: Icon(AppIcons.navigate, color: theme.colorScheme.outline, size: 20)),
+      onTap: () => _open(platform, stored),
+      contentPadding: const EdgeInsets.fromLTRB(16, 6, 4, 6),
     );
   }
 }

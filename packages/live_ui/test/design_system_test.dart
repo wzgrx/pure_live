@@ -161,6 +161,33 @@ void main() {
       (AppIcons.roomOffline, Remix.live_line),
       (AppIcons.cellFailed, Remix.error_warning_line),
       (AppIcons.restoreLast, Remix.history_line),
+      // U.9: 3.x iptv_page.dart and iptv_manage.dart.
+      (AppIcons.syncAll, Remix.refresh_line),
+      (AppIcons.importPlaylist, Remix.download_2_line),
+      (AppIcons.importGuide, Remix.file_add_line),
+      (AppIcons.playlist, Remix.play_list_2_line),
+      (AppIcons.playlistAdd, Remix.play_list_add_line),
+      (AppIcons.guide, Remix.tv_2_line),
+      (AppIcons.networkSource, Remix.global_line),
+      (AppIcons.localSource, Remix.folder_2_line),
+      (AppIcons.localPlaylistFile, Remix.folder_open_line),
+      (AppIcons.localGuideFile, Remix.draft_line),
+      (AppIcons.networkGuide, Remix.cloud_windy_line),
+      (AppIcons.syncOne, Remix.download_cloud_2_line),
+      (AppIcons.autoSync, Remix.repeat_line),
+      (AppIcons.syncInterval, Remix.time_line),
+      (AppIcons.userAgent, Remix.tv_line),
+      (AppIcons.choiceOn, Remix.checkbox_circle_fill),
+      (AppIcons.choiceOff, Remix.checkbox_blank_circle_line),
+      // U.10a-c: 3.x account_page.dart, account_cookie_editor.dart, qr_login_page.dart, the settings entries.
+      (AppIcons.signOut, Remix.logout_box_r_line),
+      (AppIcons.save, Icons.save_rounded),
+      (AppIcons.qrCode, Remix.qr_code_line),
+      (AppIcons.qrScanned, Remix.checkbox_circle_line),
+      (AppIcons.failed, Remix.error_warning_line),
+      (AppIcons.webDav, Remix.cloud_line),
+      (AppIcons.deviceSync, Remix.qr_scan_2_line),
+      (AppIcons.platformAccounts, Remix.accessibility_line),
     ];
     for (final (actual, glyph) in expected) {
       expect(actual, glyph);

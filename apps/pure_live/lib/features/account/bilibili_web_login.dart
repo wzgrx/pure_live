@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/account/account_services.dart';
 import 'package:pure_live/features/account/account_state.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -54,6 +55,9 @@ class _BilibiliWebLoginViewState extends ConsumerState<BilibiliWebLoginView> {
   late final Future<void> _cleared = _clearCookies();
   bool _saving = false;
 
+  /// Why the last sign-in did not finish (the red bar, 3.x).
+  String? _error;
+
   static final List<WebUri> _domains = [
     WebUri('https://www.bilibili.com'),
     WebUri('https://passport.bilibili.com'),
@@ -74,7 +78,10 @@ class _BilibiliWebLoginViewState extends ConsumerState<BilibiliWebLoginView> {
 
   Future<void> _page(Uri uri) async {
     if (_saving || !isBilibiliHome(uri)) return;
-    setState(() => _saving = true);
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
     final found = <({String name, String value})>[];
     for (final url in _domains) {
       try {
@@ -87,8 +94,10 @@ class _BilibiliWebLoginViewState extends ConsumerState<BilibiliWebLoginView> {
     }
     final error = await _complete(cookieHeader(found));
     if (!mounted) return;
-    setState(() => _saving = false);
-    if (error != null) AppNavigator.toast(i18n(error));
+    setState(() {
+      _saving = false;
+      _error = error;
+    });
   }
 
   /// Checks and stores the cookie (the QR login's rules): one the platform
@@ -109,35 +118,112 @@ class _BilibiliWebLoginViewState extends ConsumerState<BilibiliWebLoginView> {
     if (result case AccountVerified(:final uid?)) await actions.rememberBilibiliUid(uid);
     AppNavigator.toast(switch (result) {
       AccountVerified(:final name) => i18n('account_saved_signed_in', args: {'name': name}),
-      _ => i18n('bilibili_user_info_failed'),
+      _ => i18n('account_saved_unverified'),
     });
     if (mounted) Navigator.of(context).maybePop(true);
     return null;
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: Text(i18n('bilibili_login')),
-      actions: [
-        TextButton(
-          onPressed: () => unawaited(AppNavigator.offAndToNamed<void>(RoutePath.kBiliBiliQRLogin)),
-          child: Text(i18n('qr_login')),
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final scheme = Theme.of(context).colorScheme;
+      void toQr() => unawaited(AppNavigator.offAndToNamed<void>(RoutePath.kBiliBiliQRLogin));
+      final error = _error;
+      return Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text(i18n('bilibili_login')),
+          actions: [
+            // 3.x: the words, only the icon when narrow.
+            if (constraints.maxWidth < 520)
+              IconButton(
+                key: const ValueKey('bilibili-web-qr'),
+                tooltip: i18n('qr_login'),
+                onPressed: toQr,
+                icon: const Icon(AppIcons.qrCode),
+              )
+            else
+              TextButton.icon(
+                key: const ValueKey('bilibili-web-qr'),
+                onPressed: toQr,
+                icon: const Icon(AppIcons.qrCode, size: 18),
+                label: Text(i18n('qr_login')),
+              ),
+          ],
         ),
-      ],
-      bottom: _saving
-          ? const PreferredSize(preferredSize: Size.fromHeight(2), child: LinearProgressIndicator(minHeight: 2))
-          : null,
-    ),
-    body: FutureBuilder<void>(
-      future: _cleared,
-      builder: (context, snapshot) => snapshot.connectionState != ConnectionState.done
-          ? const Center(child: CircularProgressIndicator())
-          : InAppWebPage(
-              initial: bilibiliPassportLogin,
-              userAgent: bilibiliLoginUserAgent,
-              onPage: (uri) => unawaited(_page(uri)),
+        body: Stack(
+          children: [
+            FutureBuilder<void>(
+              future: _cleared,
+              builder: (context, snapshot) => snapshot.connectionState != ConnectionState.done
+                  ? const Center(child: CircularProgressIndicator())
+                  : InAppWebPage(
+                      initial: bilibiliPassportLogin,
+                      userAgent: bilibiliLoginUserAgent,
+                      onPage: (uri) => unawaited(_page(uri)),
+                    ),
             ),
-    ),
+            if (_saving)
+              Positioned.fill(
+                child: ColoredBox(
+                  key: const ValueKey('bilibili-web-verifying'),
+                  color: scheme.scrim.withValues(alpha: 0.32),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox.square(dimension: 28, child: CircularProgressIndicator(strokeWidth: 3)),
+                          const SizedBox(height: 12),
+                          Text(i18n('account_verifying'), style: context.textStyles.t14),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            if (error != null)
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 28,
+                child: Material(
+                  key: const ValueKey('bilibili-web-error'),
+                  color: scheme.errorContainer,
+                  elevation: 2,
+                  borderRadius: BorderRadius.circular(16),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
+                    child: Row(
+                      children: [
+                        Icon(AppIcons.failed, size: 20, color: scheme.onErrorContainer),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            i18n(error),
+                            style: context.textStyles.t13.copyWith(color: scheme.onErrorContainer, height: 1.35),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: i18n('close'),
+                          color: scheme.onErrorContainer,
+                          onPressed: () => setState(() => _error = null),
+                          icon: const Icon(AppIcons.close, size: 18),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+    },
   );
 }

@@ -28,8 +28,9 @@ typedef IptvPlaylistInfo = ({IptvPlaylist playlist, int channels});
 /// A saved guide source with its channel count.
 typedef IptvGuideInfo = ({EpgSource source, int channels});
 
-/// What the page shows: the playlists (the built-in hot list last) and the
-/// guide sources, in import order.
+/// What the page shows: the playlists and the guide sources, each network
+/// first and then by name (3.x `iptv_manage.dart:117-124`); the built-in
+/// hot list last.
 @immutable
 final class IptvOverview {
   /// Creates an overview.
@@ -37,14 +38,29 @@ final class IptvOverview {
 
   /// Reads [library].
   static Future<IptvOverview> load(IptvLibrary library) async {
-    final playlists = <IptvPlaylistInfo>[
-      for (final playlist in await library.playlists())
-        (playlist: playlist, channels: (await library.channels(playlist.id)).length),
-    ]..sort((a, b) => (a.playlist.isHot ? 1 : 0).compareTo(b.playlist.isHot ? 1 : 0));
-    final guides = <IptvGuideInfo>[
-      for (final source in await library.guideSources())
-        (source: source, channels: (await library.guideChannels(source.id)).length),
-    ];
+    int order(({bool remote, String name}) a, ({bool remote, String name}) b) =>
+        a.remote != b.remote ? (a.remote ? -1 : 1) : a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    final playlists =
+        <IptvPlaylistInfo>[
+          for (final playlist in await library.playlists())
+            (playlist: playlist, channels: (await library.channels(playlist.id)).length),
+        ]..sort((a, b) {
+          final hot = (a.playlist.isHot ? 1 : 0).compareTo(b.playlist.isHot ? 1 : 0);
+          return hot != 0
+              ? hot
+              : order(
+                  (remote: a.playlist.isRemote, name: a.playlist.name),
+                  (remote: b.playlist.isRemote, name: b.playlist.name),
+                );
+        });
+    final guides =
+        <IptvGuideInfo>[
+          for (final source in await library.guideSources())
+            (source: source, channels: (await library.guideChannels(source.id)).length),
+        ]..sort(
+          (a, b) =>
+              order((remote: a.source.isRemote, name: a.source.name), (remote: b.source.isRemote, name: b.source.name)),
+        );
     return IptvOverview(playlists: playlists, guides: guides);
   }
 
@@ -76,7 +92,7 @@ String playlistBadge(IptvPlaylist playlist) {
 /// `XML`; the importer reads the content, so this is only a hint).
 String guideBadge(EpgSource source) {
   final path = (Uri.tryParse(source.source)?.path ?? source.source).toLowerCase();
-  if (path.endsWith('.gz')) return 'GZ';
+  if (path.endsWith('.gz')) return 'XML.GZ';
   if (path.endsWith('.json')) return 'JSON';
   return 'XML';
 }
@@ -95,8 +111,20 @@ String guideDisplayName(String name, {String? source}) =>
     ? i18n('iptv_default_guide')
     : name;
 
-/// "Updated today 12:05" / "updated 09-30 12:05" / "never updated".
-String updatedText(DateTime? time, DateTime now) {
+/// [value] with thousands separators ("1,024"; the design's counts).
+String groupDigits(int value) {
+  final digits = value.abs().toString();
+  final out = StringBuffer(value < 0 ? '-' : '');
+  for (var i = 0; i < digits.length; i++) {
+    if (i > 0 && (digits.length - i) % 3 == 0) out.write(',');
+    out.write(digits[i]);
+  }
+  return out.toString();
+}
+
+/// When a source last changed: "今天 08:00 更新" / "09-30 12:05 更新" for
+/// network sources, "… 导入" for local files ([imported]), "尚未更新".
+String updatedText(DateTime? time, DateTime now, {bool imported = false}) {
   if (time == null) return i18n('iptv_never_updated');
   String two(int value) => value.toString().padLeft(2, '0');
   final local = time.toLocal();
@@ -108,8 +136,18 @@ String updatedText(DateTime? time, DateTime now) {
       : local.year == now.year
       ? '${two(local.month)}-${two(local.day)} $clock'
       : '${local.year}-${two(local.month)}-${two(local.day)} $clock';
-  return i18n('iptv_updated_at', args: {'time': text});
+  return i18n(imported ? 'iptv_imported_at' : 'iptv_updated_at', args: {'time': text});
 }
+
+/// A card's details: "1,024 个频道 · 今天 08:00 更新".
+String sourceDetails({
+  required int channels,
+  required DateTime? updated,
+  required bool remote,
+  required DateTime now,
+}) =>
+    '${i18n('iptv_channel_count', args: {'count': groupDigits(channels)})} · '
+    '${updatedText(updated, now, imported: !remote)}';
 
 /// The message of a failed import or sync, or null when there is nothing
 /// to say ([IptvImportStatus.imported], [IptvImportStatus.cancelled]).

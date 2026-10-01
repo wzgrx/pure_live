@@ -12,7 +12,6 @@ import 'package:pure_live/features/account/account_widgets.dart';
 import 'package:pure_live/features/account/cookie_editor.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
-import 'package:pure_live/routes/route_path.dart';
 
 /// The cookie page of one platform (3.x `HuyaCookiePage`, `DouyinCookiePage`,
 /// `KuaishouCookiePage`, `TwitchCookiePage`, `YyCookiePage`,
@@ -136,59 +135,33 @@ class _PlatformCookieViewState extends ConsumerState<PlatformCookieView> {
     final platform = widget.platform;
     final stored = _actions.snapshot(_id);
     final status = accountStatus(platform, stored, now: ref.watch(accountClockProvider)(), check: _check);
-    final bilibili = _id == SiteIds.bilibili;
     return CookieEditorScaffold(
-      title: i18n('account_editor_title', args: {'name': platform.name}),
-      name: platform.name,
-      banner: widget.webLoginFallback ? const _WebLoginNotice() : null,
+      platform: platform,
+      banner: widget.webLoginFallback ? AccountNotice(text: i18n('account_bilibili_web_unavailable')) : null,
       tip: AccountTipBanner(
         text: platform.tip,
         website: platform.website,
         websiteLabel: i18n('account_open_website', args: {'name': platform.name}),
       ),
-      status: AccountStatusCard(
-        status: status,
-        action: _online && stored.cookie.isNotEmpty && _check is! AccountChecking
-            ? IconButton(
-                key: const ValueKey('account-recheck'),
-                tooltip: i18n('account_recheck'),
-                onPressed: _verifyStored,
-                icon: const Icon(Remix.refresh_line, size: 18),
-              )
-            : null,
+      status: accountPageStatus(status, stored),
+      statusAction: _online && stored.cookie.isNotEmpty && _check is! AccountChecking
+          ? TextButton.icon(
+              key: const ValueKey('account-recheck'),
+              onPressed: _verifyStored,
+              icon: const Icon(AppIcons.recheck, size: 18),
+              label: Text(i18n('account_recheck')),
+            )
+          : null,
+      cookie: CookieInput(
+        controller: _cookie,
+        fieldKey: const ValueKey('account-cookie-input'),
+        hint: platform.hint,
+        multiline: true,
       ),
-      inputs: [
-        CookieInput(
-          controller: _cookie,
-          fieldKey: const ValueKey('account-cookie-input'),
-          hint: platform.hint,
-          multiline: true,
-        ),
-      ],
-      hasStored: stored.cookie.isNotEmpty || stored.unreadable,
+      verifiesOnSave: _online,
+      hasStored: accountStored(stored),
       onSave: _save,
       onSignOut: _signOut,
-      actions: [
-        if (bilibili)
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: TextButton.icon(
-              key: const ValueKey('account-bilibili-qr'),
-              onPressed: () => unawaited(AppNavigator.offAndToNamed<void>(RoutePath.kBiliBiliQRLogin)),
-              icon: const Icon(Remix.qr_code_line, size: 16),
-              label: Text(i18n('qr_login')),
-            ),
-          ),
-      ],
     );
   }
-}
-
-/// Why `RoutePath.kBiliBiliWebLogin` shows the cookie page.
-class _WebLoginNotice extends StatelessWidget {
-  const new();
-
-  @override
-  Widget build(BuildContext context) =>
-      AccountStatusCard(status: AccountStatus(i18n('account_bilibili_web_unavailable'), tone: AccountTone.warning));
 }

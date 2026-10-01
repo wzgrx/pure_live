@@ -191,6 +191,27 @@ abstract final class LiveSemanticColors {
 
   /// The warning colour for [brightness].
   static Color warning(Brightness brightness) => brightness == Brightness.dark ? warningDark : warningLight;
+
+  /// A warm container next to the theme's primary container (IPTV guides
+  /// beside playlists, docs/ui/compare/U.9), light themes.
+  static const Color warmContainerLight = Color(0xFFFFDDB8);
+
+  /// Text and icons on [warmContainerLight].
+  static const Color onWarmContainerLight = Color(0xFF4A2800);
+
+  /// The warm container in dark themes.
+  static const Color warmContainerDark = Color(0xFF5C3A12);
+
+  /// Text and icons on [warmContainerDark].
+  static const Color onWarmContainerDark = Color(0xFFFFDDB8);
+
+  /// The warm container for [brightness].
+  static Color warmContainer(Brightness brightness) =>
+      brightness == Brightness.dark ? warmContainerDark : warmContainerLight;
+
+  /// Text and icons on [warmContainer] for [brightness].
+  static Color onWarmContainer(Brightness brightness) =>
+      brightness == Brightness.dark ? onWarmContainerDark : onWarmContainerLight;
 }
 
 /// Text on a colour the platform chose (super chat cards, a viewer's

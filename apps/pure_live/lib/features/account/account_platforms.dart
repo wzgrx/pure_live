@@ -31,6 +31,7 @@ final class AccountPlatform {
     this.overseas = false,
     this.hintKey,
     this.tipKey,
+    this.nameKey,
     this.usedByRequests = true,
   });
 
@@ -53,6 +54,10 @@ final class AccountPlatform {
   /// The platform's own instructions; null uses the generic ones.
   final String? tipKey;
 
+  /// The name on the account pages when it differs from the platform list's
+  /// (`site_<id>`): "SOOP", "网易 CC" (docs/ui/compare/U.10a c5).
+  final String? nameKey;
+
   /// Where the user signs in on the web.
   final Uri website;
 
@@ -61,7 +66,7 @@ final class AccountPlatform {
   final bool usedByRequests;
 
   /// The platform's name.
-  String get name => i18n('site_$id');
+  String get name => i18n(nameKey ?? 'site_$id');
 
   /// The input hint.
   String get hint => hintKey == null ? i18n('cookie_hint', args: {'name': name}) : i18n(hintKey!);
@@ -105,7 +110,12 @@ final List<AccountPlatform> accountPlatforms = [
   ),
   AccountPlatform(id: SiteIds.kuaishou, route: RoutePath.kKuaishouCookie, website: Uri.https('live.kuaishou.com', '/')),
   AccountPlatform(id: SiteIds.yy, route: RoutePath.kYyCookie, website: Uri.https('www.yy.com', '/')),
-  AccountPlatform(id: SiteIds.cc, website: Uri.https('cc.163.com', '/'), usedByRequests: false),
+  AccountPlatform(
+    id: SiteIds.cc,
+    nameKey: 'account_site_cc',
+    website: Uri.https('cc.163.com', '/'),
+    usedByRequests: false,
+  ),
   AccountPlatform(
     id: SiteIds.twitch,
     route: RoutePath.kTwitchCookie,
@@ -118,6 +128,7 @@ final List<AccountPlatform> accountPlatforms = [
   AccountPlatform(
     id: SiteIds.soop,
     route: RoutePath.kSoop,
+    nameKey: 'account_site_soop',
     overseas: true,
     hintKey: 'soop_cookie_hint',
     tipKey: 'soop_cookie_tip',

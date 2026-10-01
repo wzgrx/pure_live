@@ -117,7 +117,7 @@ bool get _filterByExtension => !Platform.isAndroid;
 /// the app's cache, so no storage permission is needed.
 Future<File?> pickIptvFile(BuildContext context, IptvImportKind kind) async {
   final file = await FilePicker.pickFile(
-    dialogTitle: i18n(kind == IptvImportKind.playlist ? 'dialog_import_playlist_title' : 'dialog_import_epg_title'),
+    dialogTitle: importPickerTitle(kind),
     type: _filterByExtension ? FileType.custom : FileType.any,
     allowedExtensions: _filterByExtension ? importExtensions(kind) : null,
   );

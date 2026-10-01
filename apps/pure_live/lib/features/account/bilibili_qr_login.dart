@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/account/account_services.dart';
 import 'package:pure_live/features/account/account_state.dart';
-import 'package:pure_live/features/account/account_widgets.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/in_app_web.dart';
 
 /// Where the QR login is.
 enum BilibiliQrPhase {
@@ -176,7 +177,9 @@ final class BilibiliQrLogin extends ChangeNotifier {
   }
 }
 
-/// Bilibili's QR login page (3.x `BiliBiliQRLoginPage`).
+/// Bilibili's QR login page (3.x `BiliBiliQRLoginPage`, docs/ui/compare/
+/// U.10b c11-c13): the code with its state laid over it, the line under it,
+/// and "扫不了？" with the web login (phones) and the cookie.
 class BilibiliQrLoginView extends ConsumerStatefulWidget {
   /// Creates the page.
   const new({super.key});
@@ -223,7 +226,8 @@ class _BilibiliQrLoginViewState extends ConsumerState<BilibiliQrLoginView> {
     if (result case AccountVerified(:final uid?)) await _actions.rememberBilibiliUid(uid);
     AppNavigator.toast(switch (result) {
       AccountVerified(:final name) => i18n('account_saved_signed_in', args: {'name': name}),
-      _ => i18n('bilibili_user_info_failed'),
+      // The passport just issued it: stored, marked unchecked (c13).
+      _ => i18n('account_saved_unverified'),
     });
     if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -233,143 +237,223 @@ class _BilibiliQrLoginViewState extends ConsumerState<BilibiliQrLoginView> {
     return null;
   }
 
+  /// Whether this device offers the web (SMS, password) login: phones with
+  /// the in-app browser (3.x showed it on Android and iOS only).
+  bool get _webLogin =>
+      InAppWeb.available &&
+      (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS);
+
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(i18n('bilibili_login')),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: TextButton.icon(
-              key: const ValueKey('bilibili-qr-paste-cookie'),
-              onPressed: () =>
-                  unawaited(AppNavigator.offAndToNamed<void>(RoutePath.kSettingsAccount, arguments: SiteIds.bilibili)),
-              icon: const Icon(Remix.file_copy_line, size: 16),
-              label: Text(i18n('account_paste_cookie')),
-            ),
-          ),
-        ],
-      ),
+      appBar: AppBar(centerTitle: true, title: Text(i18n('bilibili_login'))),
       body: ListView(
         key: const ValueKey('bilibili-qr-scroll-view'),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
         children: [
-          AccountTipBanner(text: i18n('qr_login_tip')),
-          const SizedBox(height: 28),
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
-              child: ListenableBuilder(listenable: _login, builder: (context, _) => _body(context)),
+          ReadableContent(
+            child: LayoutBuilder(
+              // 200 on phones, 220 on wide screens (c11; 3.x 140-180).
+              builder: (context, constraints) => ListenableBuilder(
+                listenable: _login,
+                builder: (context, _) => _QrCard(login: _login, size: constraints.maxWidth >= 600 ? 220 : 200),
+              ),
             ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: ListenableBuilder(
+              listenable: _login,
+              builder: (context, _) => _QrMessage(login: _login),
+            ),
+          ),
+          const SizedBox(height: 28),
+          // "扫不了？" (c12): the web login on phones, the cookie everywhere.
+          Text(
+            i18n('account_qr_cannot_scan'),
+            textAlign: TextAlign.center,
+            style: context.textStyles.t12.copyWith(color: scheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 4),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              if (_webLogin)
+                TextButton.icon(
+                  key: const ValueKey('bilibili-qr-web-login'),
+                  onPressed: () => unawaited(AppNavigator.offAndToNamed<void>(RoutePath.kBiliBiliWebLogin)),
+                  icon: const Icon(AppIcons.webLogin, size: 18),
+                  label: Text(i18n('account_web_login_option')),
+                ),
+              TextButton.icon(
+                key: const ValueKey('bilibili-qr-paste-cookie'),
+                onPressed: () =>
+                    unawaited(AppNavigator.toNamed<void>(RoutePath.kSettingsAccount, arguments: SiteIds.bilibili)),
+                icon: const Icon(AppIcons.pasteText, size: 18),
+                label: Text(i18n('account_paste_cookie')),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _body(BuildContext context) {
+/// The code in its card; loading, scanned, expired, failed and checking
+/// are laid over it, so it never moves (c11; 3.x swapped it for text).
+class _QrCard extends StatelessWidget {
+  const new({required this.login, required this.size});
+
+  final BilibiliQrLogin login;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      child: switch (_login.phase) {
-        BilibiliQrPhase.loading => _progress(i18n('qr_loading'), key: const ValueKey('qr-loading')),
-        BilibiliQrPhase.verifying => _progress(i18n('account_verifying'), key: const ValueKey('qr-verifying')),
-        BilibiliQrPhase.done => AccountStatusCard(
-          key: const ValueKey('qr-done'),
-          status: AccountStatus(i18n('bilibili_login_verified'), tone: AccountTone.ok),
-        ),
-        BilibiliQrPhase.failed => Column(
-          key: const ValueKey('qr-failed'),
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Remix.error_warning_line, size: 40, color: theme.hintColor.withValues(alpha: 0.4)),
-            const SizedBox(height: 12),
-            Text(i18n(_login.errorKey), textAlign: TextAlign.center, style: context.textStyles.t14Muted),
-            const SizedBox(height: 12),
-            TextButton.icon(
-              key: const ValueKey('bilibili-qr-retry'),
-              onPressed: () => unawaited(_login.load()),
-              icon: const Icon(Remix.refresh_line, size: 18),
-              label: Text(i18n('retry')),
-            ),
-          ],
-        ),
-        BilibiliQrPhase.waiting || BilibiliQrPhase.scanned || BilibiliQrPhase.expired => _code(context),
-      },
+    final scheme = theme.colorScheme;
+    final phase = login.phase;
+    final url = login.url;
+    final ink = context.textStyles.t14.copyWith(color: QrColors.ink);
+    // The veil is always white: the dark theme's light primary would fade on it.
+    final mark = scheme.brightness == Brightness.dark ? QrColors.ink : scheme.primary;
+    Widget veil(List<Widget> children, {Key? key}) => Positioned.fill(
+      key: key,
+      child: ColoredBox(
+        color: QrColors.veil,
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: children),
+      ),
     );
-  }
-
-  Widget _progress(String message, {required Key key}) => Padding(
-    key: key,
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 56),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox.square(dimension: 28, child: CircularProgressIndicator(strokeWidth: 3)),
-        const SizedBox(height: 20),
-        Text(message, textAlign: TextAlign.center, style: context.textStyles.t14),
-      ],
-    ),
-  );
-
-  /// The code, with the scanned and expired states laid over it (3.x
-  /// replaced an expired code by an error text).
-  Widget _code(BuildContext context) {
-    final theme = Theme.of(context);
-    final phase = _login.phase;
-    final scanned = phase == BilibiliQrPhase.scanned;
-    final expired = phase == BilibiliQrPhase.expired;
-    return Column(
-      key: const ValueKey('qr-code'),
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final size = (constraints.maxWidth - 64).clamp(160.0, 220.0);
-            return ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  QrCodeWidget(key: const ValueKey('bilibili-qr-code'), data: '${_login.url}', size: size),
-                  if (scanned || expired)
-                    Positioned.fill(
-                      child: ColoredBox(
-                        color: Colors.white.withValues(alpha: 0.88),
-                        child: Center(
-                          child: expired
-                              ? FilledButton.tonalIcon(
-                                  key: const ValueKey('bilibili-qr-refresh'),
-                                  onPressed: () => unawaited(_login.load()),
-                                  icon: const Icon(Remix.refresh_line, size: 18),
-                                  label: Text(i18n('refresh_qr')),
-                                )
-                              : Icon(Remix.checkbox_circle_fill, size: 48, color: theme.colorScheme.primary),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            );
-          },
+    Widget action(Key key, String label, VoidCallback onPressed) => FilledButton.icon(
+      key: key,
+      onPressed: onPressed,
+      style: FilledButton.styleFrom(
+        minimumSize: const Size(0, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+      ),
+      icon: const Icon(AppIcons.retry, size: 16),
+      label: Text(label),
+    );
+    const spinner = SizedBox.square(dimension: 28, child: CircularProgressIndicator(strokeWidth: 3));
+    final overlay = switch (phase) {
+      BilibiliQrPhase.loading => veil(key: const ValueKey('qr-loading'), [
+        spinner,
+        const SizedBox(height: 12),
+        Text(i18n('qr_loading'), style: ink),
+      ]),
+      BilibiliQrPhase.waiting => null,
+      BilibiliQrPhase.scanned => veil(key: const ValueKey('qr-scanned'), [
+        Icon(AppIcons.qrScanned, size: 44, color: mark),
+        const SizedBox(height: 8),
+        Text(i18n('qr_scanned'), style: context.textStyles.t15.emphasis.copyWith(color: QrColors.ink)),
+      ]),
+      BilibiliQrPhase.expired => veil(key: const ValueKey('qr-expired'), [
+        const Icon(AppIcons.failed, size: 32, color: QrColors.ink),
+        const SizedBox(height: 8),
+        Text(i18n('qr_expired'), style: ink),
+        const SizedBox(height: 8),
+        action(const ValueKey('bilibili-qr-refresh'), i18n('refresh_qr'), () => unawaited(login.load())),
+      ]),
+      BilibiliQrPhase.failed => veil(key: const ValueKey('qr-failed'), [
+        Icon(AppIcons.failed, size: 32, color: scheme.error),
+        const SizedBox(height: 8),
+        Text(
+          i18n(login.errorKey == 'qr_load_failed' ? 'qr_load_failed' : 'account_qr_stopped'),
+          textAlign: TextAlign.center,
+          style: ink,
         ),
-        const SizedBox(height: 20),
-        AccountStatusCard(
-          status: AccountStatus(
-            i18n(switch (phase) {
-              BilibiliQrPhase.scanned => 'qr_scanned_confirm',
-              BilibiliQrPhase.expired => 'qr_expired',
-              _ => 'qr_waiting_scan',
-            }),
-            tone: switch (phase) {
-              BilibiliQrPhase.scanned => AccountTone.ok,
-              BilibiliQrPhase.expired => AccountTone.warning,
-              _ => AccountTone.idle,
-            },
+        const SizedBox(height: 8),
+        action(const ValueKey('bilibili-qr-retry'), i18n('retry'), () => unawaited(login.load())),
+      ]),
+      BilibiliQrPhase.verifying => veil(key: const ValueKey('qr-verifying'), [
+        spinner,
+        const SizedBox(height: 12),
+        Text(i18n('account_verifying'), style: ink),
+      ]),
+      BilibiliQrPhase.done => veil(key: const ValueKey('qr-done'), [
+        Icon(AppIcons.qrScanned, size: 44, color: mark),
+        const SizedBox(height: 8),
+        Text(i18n('bilibili_login_verified'), textAlign: TextAlign.center, style: ink),
+      ]),
+    };
+    return Center(
+      child: Container(
+        key: const ValueKey('bilibili-qr-card'),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.05), width: 0.5),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: SizedBox.square(
+            dimension: size,
+            child: Stack(
+              children: [
+                if (url != null)
+                  QrCodeWidget(key: const ValueKey('bilibili-qr-code'), data: '$url', size: size)
+                else
+                  const Positioned.fill(child: ColoredBox(color: QrColors.paper)),
+                ?overlay,
+              ],
+            ),
           ),
         ),
-      ],
+      ),
+    );
+  }
+}
+
+/// The line under the code (3.x's status row): what to do now; tinted
+/// once the code was scanned.
+class _QrMessage extends StatelessWidget {
+  const new({required this.login});
+
+  final BilibiliQrLogin login;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final phase = login.phase;
+    final scanned = phase == BilibiliQrPhase.scanned;
+    final text = switch (phase) {
+      BilibiliQrPhase.loading => i18n('qr_loading'),
+      BilibiliQrPhase.waiting => i18n('qr_waiting_scan'),
+      BilibiliQrPhase.scanned => i18n('qr_scanned_confirm'),
+      BilibiliQrPhase.expired => i18n('qr_expired_hint'),
+      BilibiliQrPhase.failed => i18n(login.errorKey),
+      BilibiliQrPhase.verifying => i18n('account_verifying'),
+      BilibiliQrPhase.done => i18n('bilibili_login_verified'),
+    };
+    final color = scanned ? scheme.primary : scheme.onSurfaceVariant;
+    return Container(
+      key: const ValueKey('bilibili-qr-message'),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: scanned ? scheme.primary.withValues(alpha: 0.1) : null,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(scanned ? AppIcons.qrScanned : AppIcons.qrCode, size: 18, color: color),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              text,
+              style: context.textStyles.t13.copyWith(
+                color: color,
+                fontWeight: scanned ? FontWeight.w600 : FontWeight.w400,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

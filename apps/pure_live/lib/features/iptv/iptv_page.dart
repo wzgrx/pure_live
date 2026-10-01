@@ -86,47 +86,65 @@ class _IptvPageState extends ConsumerState<IptvPage> {
         Settings.selectedSourceId: source?.id ?? '',
         Settings.selectedSourceName: source?.name ?? '',
       });
-      if (announce && mounted) _toast(i18n('epg_source_switched'));
+      if (announce && mounted && source != null) _toast(i18n('iptv_guide_switched', args: {'name': guideName(source)}));
     } on Object catch (error, stack) {
       log('Selecting the guide failed', name: 'IptvPage', error: error, stackTrace: stack);
       if (announce && mounted) _toast(i18n('iptv_save_failed'));
     }
   }
 
+  /// "选择节目单" (3.x `_showEpgSourceSelector`, docs/ui/compare/U.9 c13):
+  /// a 20 px title, one radio row per guide, the current one in the primary
+  /// colour; a tap switches and closes; only "取消" at the bottom.
   Future<void> _chooseGuide(IptvOverview overview) async {
     final current = _store.settings.get(Settings.selectedSourceId);
     final chosen = await showDialog<EpgSource>(
       context: context,
       builder: (dialogContext) {
-        final colors = Theme.of(dialogContext).colorScheme;
+        final scheme = Theme.of(dialogContext).colorScheme;
+        final styles = dialogContext.textStyles;
         return AlertDialog(
           scrollable: true,
           insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-          title: Text(i18n('select_epg_source'), style: dialogContext.textStyles.t16Bold),
+          title: IptvDialogTitle(i18n('select_epg_source')),
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
             child: overview.guides.isEmpty
                 ? Padding(padding: const EdgeInsets.all(12), child: Text(i18n('no_epg_sources_found')))
-                : Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (final info in overview.guides)
-                        ListTile(
-                          key: ValueKey('iptv-choose-${info.source.id}'),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          selected: info.source.id == current,
-                          selectedTileColor: colors.primary.withValues(alpha: 0.08),
-                          leading: Icon(
-                            info.source.id == current
-                                ? Icons.radio_button_checked_rounded
-                                : Icons.radio_button_off_rounded,
+                : RadioGroup<String>(
+                    groupValue: current,
+                    onChanged: (id) => Navigator.pop(
+                      dialogContext,
+                      overview.guides.map((info) => info.source).firstWhere((source) => source.id == id),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (final info in overview.guides)
+                          RadioListTile<String>(
+                            key: ValueKey('iptv-choose-${info.source.id}'),
+                            value: info.source.id,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            selected: info.source.id == current,
+                            selectedTileColor: scheme.primary.withValues(alpha: 0.08),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                            title: Text(
+                              guideName(info.source),
+                              style: styles.t15.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: info.source.id == current ? scheme.primary : scheme.onSurface,
+                              ),
+                            ),
+                            subtitle: Text(
+                              info.source.source,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: styles.t13.copyWith(color: scheme.onSurfaceVariant),
+                            ),
                           ),
-                          title: Text(guideName(info.source)),
-                          subtitle: Text(info.source.source, maxLines: 1, overflow: TextOverflow.ellipsis),
-                          onTap: () => Navigator.pop(dialogContext, info.source),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
           ),
           actions: [TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(i18n('cancel')))],
@@ -367,25 +385,23 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     final selected = guide && item.id == _store.settings.get(Settings.selectedSourceId);
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (dialogContext) {
         final colors = Theme.of(dialogContext).colorScheme;
         return AlertDialog(
           scrollable: true,
           insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          title: Text(
-            i18n(guide ? 'iptv_delete_guide' : 'iptv_delete_playlist'),
-            style: dialogContext.textStyles.t16Bold,
-          ),
+          title: IptvDialogTitle(i18n(guide ? 'iptv_delete_guide' : 'iptv_delete_playlist')),
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: Text(
               [
                 i18n(
                   guide ? 'iptv_delete_guide_message' : 'iptv_delete_playlist_message',
-                  args: {'name': name, 'count': '$channels'},
+                  args: {'name': name, 'count': groupDigits(channels)},
                 ),
                 if (selected) i18n('iptv_delete_selected_guide'),
-              ].join('\n\n'),
+              ].join('\n'),
               style: dialogContext.textStyles.t14,
             ),
           ),
@@ -395,7 +411,7 @@ class _IptvPageState extends ConsumerState<IptvPage> {
               key: const ValueKey('iptv-delete-confirm'),
               style: FilledButton.styleFrom(backgroundColor: colors.error, foregroundColor: colors.onError),
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(i18n('webdav_delete')),
+              child: Text(i18n('delete')),
             ),
           ],
         );
@@ -420,7 +436,7 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     });
   }
 
-  Future<void> _cardAction(IptvCardAction action, String address, VoidCallback delete) async {
+  Future<void> _cardAction(IptvCardAction action, String address) async {
     switch (action) {
       case IptvCardAction.open:
         final remote = isHttpUrl(address);
@@ -431,12 +447,10 @@ class _IptvPageState extends ConsumerState<IptvPage> {
         } on Object {
           opened = false;
         }
-        if (!opened && mounted) _toast(i18n('manage_page_open_failed'));
+        if (!opened && mounted) _toast(i18n('iptv_open_failed'));
       case IptvCardAction.copy:
         await Clipboard.setData(ClipboardData(text: address));
         if (mounted) _toast(i18n('iptv_address_copied'));
-      case IptvCardAction.delete:
-        delete();
     }
   }
 
@@ -468,7 +482,9 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     final syncAll = _syncAll;
     return Scaffold(
       appBar: AppBar(
-        title: Text(i18n('iptv_title')),
+        // 3.x's app bars centre the title (common/style/theme.dart:119).
+        centerTitle: true,
+        title: Text(i18n('iptv_settings')),
         actions: [
           IconButton(
             key: const ValueKey('iptv-sync-all'),
@@ -476,166 +492,137 @@ class _IptvPageState extends ConsumerState<IptvPage> {
             onPressed: overview == null || syncAll != null ? null : () => unawaited(_syncEverything(overview)),
             icon: syncAll != null
                 ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.sync_rounded),
+                : const Icon(AppIcons.syncAll),
           ),
         ],
       ),
       body: importer == null
           ? AppStatusView(type: AppStatusType.error, title: i18n('iptv_unavailable'))
           : ListView(
+              key: const ValueKey('iptv-scroll'),
               physics: const PureLiveScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
               children: [
-                if (overview == null && state.isLoading) ...[
-                  const LinearProgressIndicator(minHeight: 2),
-                  const SizedBox(height: 12),
-                ],
-                if (syncAll != null) ...[
-                  _readable(_SyncProgress(done: syncAll.done, total: syncAll.total)),
-                  const SizedBox(height: 12),
-                ],
-                if (state.hasError && overview == null)
-                  _readable(
-                    IptvNotice(
-                      icon: Icons.error_outline_rounded,
-                      color: Theme.of(context).colorScheme.error,
-                      title: i18n('iptv_initial_load_failed'),
+                for (final child in [
+                  ..._enableNotice(),
+                  if (overview == null && state.hasError)
+                    IptvStateCard(
+                      key: const ValueKey('iptv-load-failed'),
+                      icon: AppIcons.failed,
+                      iconColor: Theme.of(context).colorScheme.error,
+                      title: i18n('iptv_load_failed_title'),
+                      text: i18n('iptv_initial_load_failed'),
                       actions: [
-                        TextButton(onPressed: () => ref.invalidate(iptvOverviewProvider), child: Text(i18n('retry'))),
+                        TextButton.icon(
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(48, 40),
+                            alignment: AlignmentDirectional.centerStart,
+                          ),
+                          onPressed: () => ref.invalidate(iptvOverviewProvider),
+                          icon: const Icon(AppIcons.retry, size: 18),
+                          label: Text(i18n('retry')),
+                        ),
                       ],
-                    ),
+                    )
+                  else if (overview == null)
+                    const IptvSkeleton(),
+                  if (overview != null) ...[
+                    if (syncAll != null)
+                      IptvSyncProgress(done: syncAll.done, total: syncAll.total)
+                    else
+                      IptvStats(
+                        playlists: groupDigits(overview.playlists.length),
+                        channels: groupDigits(overview.channelCount),
+                        guides: groupDigits(overview.guides.length),
+                      ),
+                    const SizedBox(height: 20),
+                    ..._playlistSection(overview),
+                    const SizedBox(height: 8),
+                    ..._guideSection(overview),
+                    const SizedBox(height: 8),
+                  ] else
+                    const SizedBox(height: 20),
+                  ..._settingsSection(),
+                ])
+                  ReadableContent(
+                    child: SizedBox(width: double.infinity, child: child),
                   ),
-                ..._enableNotice(),
-                if (overview != null) ...[
-                  _readable(_overviewCard(overview)),
-                  const SizedBox(height: 20),
-                  ..._playlistSection(overview),
-                  const SizedBox(height: 8),
-                  ..._guideSection(overview),
-                  const SizedBox(height: 8),
-                ],
-                ..._settingsSection(),
               ],
             ),
     );
   }
 
-  Widget _readable(Widget child) => Align(
-    alignment: Alignment.topCenter,
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: settingsContentMaxWidth),
-      child: SizedBox(width: double.infinity, child: child),
-    ),
-  );
-
+  /// IPTV is not in the platform list (c16): a warning with "启用".
   List<Widget> _enableNotice() {
     final platforms = watchSetting(ref, Settings.hotAreasList);
     if (platforms.contains(SiteIds.iptv)) return const [];
     return [
-      _readable(
-        IptvNotice(
-          key: const ValueKey('iptv-not-enabled'),
-          icon: Icons.info_outline_rounded,
-          title: i18n('iptv_not_enabled'),
-          text: i18n('iptv_not_enabled_desc'),
-          actions: [
-            FilledButton.tonal(
-              key: const ValueKey('iptv-enable'),
-              onPressed: () =>
-                  unawaited(_set(Settings.hotAreasList, [...platforms, SiteIds.iptv], message: i18n('iptv_enabled'))),
-              child: Text(i18n('iptv_enable')),
+      IptvStateCard(
+        key: const ValueKey('iptv-not-enabled'),
+        warning: true,
+        icon: AppIcons.info,
+        title: i18n('iptv_not_enabled'),
+        text: i18n('iptv_not_enabled_desc'),
+        actions: [
+          TextButton(
+            key: const ValueKey('iptv-enable'),
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(48, 40),
+              alignment: AlignmentDirectional.centerStart,
             ),
-          ],
-        ),
-      ),
-    ];
-  }
-
-  Widget _overviewCard(IptvOverview overview) {
-    final colors = Theme.of(context).colorScheme;
-    final importBusy = _importing || _defaultGuideLoading;
-    Widget button(IptvImportKind kind, IconData icon, String label) => FilledButton.tonalIcon(
-      key: ValueKey('iptv-import-${kind.name}'),
-      onPressed: () => unawaited(_import(kind)),
-      icon: importBusy
-          ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
-          : Icon(icon, size: 18),
-      label: Text(label),
-    );
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(colors: [colors.primary.withValues(alpha: 0.12), colors.surfaceContainerLow]),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: IptvStat(
-                  icon: Icons.playlist_play_rounded,
-                  value: '${overview.playlists.length}',
-                  label: i18n('iptv_stat_playlists'),
-                ),
-              ),
-              Expanded(
-                child: IptvStat(
-                  icon: Icons.live_tv_rounded,
-                  value: '${overview.channelCount}',
-                  label: i18n('iptv_stat_channels'),
-                ),
-              ),
-              Expanded(
-                child: IptvStat(
-                  icon: Icons.event_note_rounded,
-                  value: '${overview.guides.length}',
-                  label: i18n('iptv_stat_guides'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 12,
-            runSpacing: 8,
-            children: [
-              button(IptvImportKind.playlist, Icons.playlist_add_rounded, i18n('import_playlist')),
-              button(IptvImportKind.guide, Icons.post_add_rounded, i18n('import_epg_source')),
-            ],
+            onPressed: () =>
+                unawaited(_set(Settings.hotAreasList, [...platforms, SiteIds.iptv], message: i18n('iptv_enabled'))),
+            child: Text(i18n('iptv_enable')),
           ),
         ],
       ),
-    );
+      const SizedBox(height: 4),
+    ];
   }
+
+  /// The trailing spinner of an import row while an import runs (3.x).
+  Widget? get _importSpinner => _importing || _defaultGuideLoading
+      ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
+      : null;
 
   List<Widget> _playlistSection(IptvOverview overview) {
     final now = ref.watch(iptvClockProvider)();
     return [
-      context.buildGroupTitle(i18n('iptv_section_playlists', args: {'count': '${overview.playlists.length}'})),
-      if (overview.playlists.isEmpty)
-        _readable(
-          IptvNotice(
-            icon: Icons.playlist_add_rounded,
-            title: i18n('iptv_no_playlists'),
-            text: i18n('iptv_no_playlists_desc'),
-            actions: [
-              TextButton(
-                onPressed: () => unawaited(_import(IptvImportKind.playlist)),
-                child: Text(i18n('import_playlist')),
-              ),
-            ],
-          ),
+      context.buildGroupTitle(i18n('iptv_group_playlists')),
+      context.buildModernCard([
+        context.buildTile(
+          key: const ValueKey('iptv-import-playlist'),
+          icon: AppIcons.importPlaylist,
+          title: i18n('import_playlist'),
+          subtitle: i18n('iptv_import_playlist_desc'),
+          trailing: _importSpinner,
+          onTap: () => unawaited(_import(IptvImportKind.playlist)),
         ),
-      for (final info in overview.playlists) _readable(_playlistCard(info.playlist, info.channels, now)),
+      ]),
+      const SizedBox(height: 12),
+      if (overview.playlists.isEmpty)
+        IptvStateCard(
+          key: const ValueKey('iptv-no-playlists'),
+          centered: true,
+          icon: AppIcons.playlistAdd,
+          title: i18n('iptv_no_playlists'),
+          text: i18n('iptv_no_playlists_desc'),
+          actions: [
+            FilledButton.tonal(
+              onPressed: () => unawaited(_import(IptvImportKind.playlist)),
+              child: Text(i18n('import_playlist')),
+            ),
+          ],
+        ),
+      for (final info in overview.playlists) _playlistCard(info.playlist, info.channels, now),
     ];
   }
 
   Widget _playlistCard(IptvPlaylist playlist, int channels, DateTime now) {
     final key = 'p:${playlist.id}';
     final name = playlistName(playlist);
-    void delete() => unawaited(_delete(playlist, key, name, channels));
     return IptvSourceCard(
       id: playlist.id,
       isGuide: false,
@@ -643,14 +630,14 @@ class _IptvPageState extends ConsumerState<IptvPage> {
       address: playlist.source,
       badge: playlistBadge(playlist),
       isRemote: playlist.isRemote,
-      details:
-          '${i18n('iptv_channel_count', args: {'count': '$channels'})} · ${updatedText(playlist.lastRefresh, now)}',
+      details: sourceDetails(channels: channels, updated: playlist.lastRefresh, remote: playlist.isRemote, now: now),
       autoUpdate: playlist.autoUpdate,
       busy: _busy.contains(key),
       blocked: _blocked(key),
       onSync: () => unawaited(_sync(playlist, key, name)),
+      onDelete: () => unawaited(_delete(playlist, key, name, channels)),
       onAutoUpdate: (value) => unawaited(_setAutoUpdate(playlist, key, value)),
-      onAction: (action) => unawaited(_cardAction(action, playlist.source, delete)),
+      onAction: (action) => unawaited(_cardAction(action, playlist.source)),
     );
   }
 
@@ -658,66 +645,76 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     final now = ref.watch(iptvClockProvider)();
     final selectedId = watchSetting(ref, Settings.selectedSourceId);
     final selected = overview.guide(selectedId);
+    final scheme = Theme.of(context).colorScheme;
     return [
-      context.buildGroupTitle(i18n('iptv_section_guides', args: {'count': '${overview.guides.length}'})),
+      context.buildGroupTitle(i18n('iptv_group_guides')),
       context.buildModernCard([
         context.buildTile(
-          icon: Icons.tv_rounded,
+          key: const ValueKey('iptv-import-guide'),
+          icon: AppIcons.importGuide,
+          title: i18n('import_epg_source'),
+          subtitle: i18n('iptv_import_guide_desc'),
+          trailing: _importSpinner,
+          onTap: () => unawaited(_import(IptvImportKind.guide)),
+        ),
+        context.buildTile(
+          key: const ValueKey('iptv-active-guide'),
+          icon: AppIcons.guide,
           title: i18n('active_epg_source'),
           subtitle: selected == null ? i18n('please_select_epg_source') : guideName(selected),
-          subtitleColor: selected == null ? Colors.orange : null,
+          subtitleColor: selected == null ? LiveSemanticColors.warning(scheme.brightness) : null,
           onTap: () => unawaited(_chooseGuide(overview)),
         ),
       ]),
       const SizedBox(height: 12),
       if (_defaultGuideLoading)
-        _readable(
-          IptvNotice(
-            key: const ValueKey('iptv-default-guide-loading'),
-            icon: Icons.downloading_rounded,
-            title: i18n('iptv_default_guide_loading'),
-            text: i18n('iptv_default_guide_loading_desc'),
-          ),
+        IptvStateCard(
+          key: const ValueKey('iptv-default-guide-loading'),
+          leading: const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2.5)),
+          title: i18n('iptv_default_guide_loading'),
+          text: i18n('iptv_default_guide_loading_desc'),
         )
       else if (_defaultGuideFailed)
-        _readable(
-          IptvNotice(
-            key: const ValueKey('iptv-default-guide-failed'),
-            icon: Icons.error_outline_rounded,
-            color: Theme.of(context).colorScheme.error,
-            title: i18n('iptv_default_epg_unavailable'),
-            actions: [
-              TextButton(onPressed: () => unawaited(_loadDefaultGuide()), child: Text(i18n('retry'))),
-              TextButton(
-                onPressed: () => unawaited(_import(IptvImportKind.guide)),
-                child: Text(i18n('import_epg_source')),
-              ),
-            ],
-          ),
+        IptvStateCard(
+          key: const ValueKey('iptv-default-guide-failed'),
+          icon: AppIcons.failed,
+          iconColor: scheme.error,
+          title: i18n('iptv_default_guide_failed'),
+          text: i18n('iptv_default_epg_unavailable'),
+          actions: [
+            TextButton(onPressed: () => unawaited(_loadDefaultGuide()), child: Text(i18n('retry'))),
+            TextButton(
+              onPressed: () => unawaited(_import(IptvImportKind.guide)),
+              child: Text(i18n('import_epg_source')),
+            ),
+          ],
         )
       else if (overview.guides.isEmpty)
-        _readable(
-          IptvNotice(
-            icon: Icons.event_note_rounded,
-            title: i18n('iptv_no_guides'),
-            text: i18n('iptv_no_guides_desc'),
-            actions: [
-              TextButton(onPressed: () => unawaited(_loadDefaultGuide()), child: Text(i18n('iptv_default_guide'))),
-              TextButton(
-                onPressed: () => unawaited(_import(IptvImportKind.guide)),
-                child: Text(i18n('import_epg_source')),
-              ),
-            ],
-          ),
+        IptvStateCard(
+          key: const ValueKey('iptv-no-guides'),
+          centered: true,
+          icon: AppIcons.guide,
+          title: i18n('iptv_no_guides'),
+          text: i18n('iptv_no_guides_desc'),
+          actions: [
+            OutlinedButton(
+              key: const ValueKey('iptv-empty-default-guide'),
+              onPressed: () => unawaited(_loadDefaultGuide()),
+              child: Text(i18n('iptv_default_guide')),
+            ),
+            FilledButton.tonal(
+              onPressed: () => unawaited(_import(IptvImportKind.guide)),
+              child: Text(i18n('import_epg_source')),
+            ),
+          ],
         ),
-      for (final info in overview.guides) _readable(_guideCard(info.source, info.channels, now, selectedId)),
+      for (final info in overview.guides) _guideCard(info.source, info.channels, now, selectedId),
     ];
   }
 
   Widget _guideCard(EpgSource source, int channels, DateTime now, String selectedId) {
     final key = 'g:${source.id}';
     final name = guideName(source);
-    void delete() => unawaited(_delete(source, key, name, channels));
     return IptvSourceCard(
       id: source.id,
       isGuide: true,
@@ -725,19 +722,20 @@ class _IptvPageState extends ConsumerState<IptvPage> {
       address: source.source,
       badge: guideBadge(source),
       isRemote: source.isRemote,
-      details:
-          '${i18n('iptv_guide_channel_count', args: {'count': '$channels'})} · ${updatedText(source.lastRefresh, now)}',
+      details: sourceDetails(channels: channels, updated: source.lastRefresh, remote: source.isRemote, now: now),
       autoUpdate: source.autoUpdate,
       busy: _busy.contains(key),
       blocked: _blocked(key),
-      selected: source.id == selectedId,
-      onSelect: () => unawaited(_select(source)),
+      inUse: source.id == selectedId,
       onSync: () => unawaited(_sync(source, key, name)),
+      onDelete: () => unawaited(_delete(source, key, name, channels)),
       onAutoUpdate: (value) => unawaited(_setAutoUpdate(source, key, value)),
-      onAction: (action) => unawaited(_cardAction(action, source.source, delete)),
+      onAction: (action) => unawaited(_cardAction(action, source.source)),
     );
   }
 
+  /// "同步和播放" (3.x "自动化周期同步设置": the switch, the interval while it
+  /// is on, the request header).
   List<Widget> _settingsSection() {
     final autoSync = watchSetting(ref, Settings.isAutoSyncEnabled);
     final hours = IptvImporter.normalizeAutoSyncHours(watchSetting(ref, Settings.autoSyncHoursInterval));
@@ -746,8 +744,8 @@ class _IptvPageState extends ConsumerState<IptvPage> {
       context.buildGroupTitle(i18n('iptv_section_settings')),
       context.buildModernCard([
         context.buildSwitchTile(
-          icon: Icons.autorenew_rounded,
-          title: i18n('iptv_auto_sync_title'),
+          icon: AppIcons.syncAll,
+          title: i18n('auto_sync_title'),
           subtitle: i18n('iptv_auto_sync_desc'),
           isLong: true,
           value: autoSync,
@@ -755,7 +753,7 @@ class _IptvPageState extends ConsumerState<IptvPage> {
         ),
         if (autoSync)
           context.buildTile(
-            icon: Icons.schedule_rounded,
+            icon: AppIcons.syncInterval,
             title: i18n('sync_interval_title'),
             subtitle: i18n('sync_interval_hours', args: {'hour': '$hours'}),
             onTap: () async {
@@ -766,7 +764,7 @@ class _IptvPageState extends ConsumerState<IptvPage> {
             },
           ),
         context.buildTile(
-          icon: Icons.badge_outlined,
+          icon: AppIcons.userAgent,
           title: i18n('custom_ua_title'),
           subtitle: userAgent.isEmpty ? i18n('iptv_ua_default') : userAgent,
           onTap: () async {
@@ -779,24 +777,4 @@ class _IptvPageState extends ConsumerState<IptvPage> {
       ]),
     ];
   }
-}
-
-class _SyncProgress extends StatelessWidget {
-  const new({required this.done, required this.total});
-
-  final int done;
-  final int total;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        i18n('iptv_sync_all_running', args: {'done': '$done', 'total': '$total'}),
-        style: context.textStyles.t13Muted,
-      ),
-      const SizedBox(height: 6),
-      LinearProgressIndicator(value: total == 0 ? null : done / total, minHeight: 4),
-    ],
-  );
 }

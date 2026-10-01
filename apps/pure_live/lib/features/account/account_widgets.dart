@@ -4,28 +4,28 @@ import 'package:pure_live/features/account/account_state.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 
-/// The colour of [tone].
+/// The colour of [tone] (docs/ui/compare/U.10a c2): fine in the primary
+/// colour, a warning in yellow, a failure in red, nothing stored or a check
+/// on its way in the quiet text colour.
 Color accountToneColor(ThemeData theme, AccountTone tone) => switch (tone) {
-  AccountTone.idle => theme.hintColor.withValues(alpha: 0.75),
-  AccountTone.ok || AccountTone.busy => theme.colorScheme.primary,
-  AccountTone.warning => Colors.orange.shade800,
+  AccountTone.idle || AccountTone.busy => theme.colorScheme.onSurfaceVariant,
+  AccountTone.ok => theme.colorScheme.primary,
+  AccountTone.warning => LiveSemanticColors.warning(theme.colorScheme.brightness),
   AccountTone.error => theme.colorScheme.error,
 };
 
-/// The icon of [tone].
-IconData accountToneIcon(AccountTone tone) => switch (tone) {
-  AccountTone.idle => Remix.user_line,
-  AccountTone.ok => Remix.checkbox_circle_line,
-  AccountTone.busy => Remix.loader_4_line,
-  AccountTone.warning => Remix.error_warning_line,
-  AccountTone.error => Remix.close_circle_line,
-};
-
-/// The current state of a login above its editor: icon, sentence, and an
-/// optional action (re-check).
+/// The state of one platform's login at the top of its page (docs/ui/
+/// compare/U.10b c2): the logo, the name and the same sentence as the
+/// accounts list, with an optional action ("重新核验").
 class AccountStatusCard extends StatelessWidget {
   /// Creates the card.
-  const new({required this.status, this.action, super.key});
+  const new({required this.platformId, required this.name, required this.status, this.action, super.key});
+
+  /// The platform (its logo).
+  final String platformId;
+
+  /// The platform's name.
+  final String name;
 
   /// What to say.
   final AccountStatus status;
@@ -36,22 +36,26 @@ class AccountStatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = accountToneColor(theme, status.tone);
     return Container(
       key: const ValueKey('account-status'),
-      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(16)),
+      padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
+      decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerLow, borderRadius: BorderRadius.circular(16)),
       child: Row(
         children: [
-          if (status.tone == AccountTone.busy)
-            SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2, color: color))
-          else
-            Icon(accountToneIcon(status.tone), size: 18, color: color),
-          const SizedBox(width: 12),
+          PlatformLogo(platformId, size: 32),
+          const SizedBox(width: 14),
           Expanded(
-            child: Text(
-              status.text,
-              style: context.textStyles.t13.copyWith(color: color, fontWeight: FontWeight.w600, height: 1.35),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name, style: context.textStyles.t15.emphasis),
+                const SizedBox(height: 2),
+                Text(
+                  status.text,
+                  key: const ValueKey('account-status-text'),
+                  style: context.textStyles.t13.copyWith(color: accountToneColor(theme, status.tone), height: 1.45),
+                ),
+              ],
             ),
           ),
           ?action,
@@ -61,8 +65,37 @@ class AccountStatusCard extends StatelessWidget {
   }
 }
 
-/// The instructions banner (3.x `_buildTipBanner`), with a button that
-/// opens the platform's website.
+/// A warning above the list or a page (the cookies this device cannot
+/// read, the missing in-app browser).
+class AccountNotice extends StatelessWidget {
+  /// Creates the notice.
+  const new({required this.text, super.key});
+
+  /// What to say.
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final warning = LiveSemanticColors.warning(scheme.brightness);
+    return Container(
+      key: const ValueKey('account-notice'),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(color: warning.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(AppIcons.info, size: 20, color: warning),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text, style: context.textStyles.t13.copyWith(height: 1.5))),
+        ],
+      ),
+    );
+  }
+}
+
+/// The instructions banner (3.x `_buildTipBanner`), with a link that opens
+/// the platform's website (docs/ui/compare/U.10b c4).
 class AccountTipBanner extends StatelessWidget {
   /// Creates the banner.
   const new({this.text, this.body, this.website, this.websiteLabel, super.key});
@@ -76,7 +109,7 @@ class AccountTipBanner extends StatelessWidget {
   /// Where the user signs in.
   final Uri? website;
 
-  /// The website button's text.
+  /// The link's text.
   final String? websiteLabel;
 
   @override
@@ -84,7 +117,7 @@ class AccountTipBanner extends StatelessWidget {
     final theme = Theme.of(context);
     final site = website;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       decoration: BoxDecoration(
         color: theme.colorScheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
@@ -93,8 +126,8 @@ class AccountTipBanner extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Icon(Remix.information_line, size: 18, color: theme.colorScheme.primary.withValues(alpha: 0.8)),
+            padding: const EdgeInsets.only(top: 1),
+            child: Icon(AppIcons.info, size: 18, color: theme.colorScheme.primary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -103,16 +136,19 @@ class AccountTipBanner extends StatelessWidget {
               children: [
                 body ?? Text(text ?? '', style: accountTipStyle(context)),
                 if (site != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: TextButton.icon(
-                      key: const ValueKey('account-open-website'),
-                      style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
-                      onPressed: () => openAccountWebsite(site),
-                      icon: const Icon(Icons.open_in_new, size: 16),
-                      label: Text(websiteLabel ?? site.host),
+                  TextButton.icon(
+                    key: const ValueKey('account-open-website'),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 36),
+                      textStyle: context.textStyles.t13,
                     ),
-                  ),
+                    onPressed: () => openAccountWebsite(site),
+                    icon: const Icon(AppIcons.openExternal, size: 16),
+                    label: Text(websiteLabel ?? site.host),
+                  )
+                else
+                  const SizedBox(height: 4),
               ],
             ),
           ),
@@ -123,10 +159,8 @@ class AccountTipBanner extends StatelessWidget {
 }
 
 /// The style of instruction text.
-TextStyle accountTipStyle(BuildContext context) {
-  final theme = Theme.of(context);
-  return context.textStyles.t13.copyWith(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8), height: 1.4);
-}
+TextStyle accountTipStyle(BuildContext context) =>
+    context.textStyles.t13.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.45);
 
 /// Opens [uri] in the browser; says so when no browser opens it.
 Future<void> openAccountWebsite(Uri uri) async {
@@ -144,6 +178,7 @@ Future<bool> confirmAccountAction(
   required String title,
   required String message,
   required String action,
+  String? cancel,
   bool destructive = true,
 }) async {
   final confirmed = await showDialog<bool>(
@@ -153,15 +188,18 @@ Future<bool> confirmAccountAction(
       return AlertDialog(
         scrollable: true,
         insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-        title: Text(title),
-        content: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: Text(message)),
+        title: Text(title, style: dialogContext.textStyles.t20.emphasis),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Text(message, style: dialogContext.textStyles.t14),
+        ),
         actionsOverflowDirection: VerticalDirection.down,
         actionsOverflowButtonSpacing: 8,
         actions: [
           TextButton(
             key: const ValueKey('account-confirm-cancel'),
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(i18n('cancel')),
+            child: Text(cancel ?? i18n('cancel')),
           ),
           FilledButton(
             key: const ValueKey('account-confirm-ok'),
@@ -178,10 +216,20 @@ Future<bool> confirmAccountAction(
   return confirmed ?? false;
 }
 
-/// The sign-out question for [name] (3.x `confirm_logout_named`).
+/// The list's sign-out question for [name] (3.x `account_page.dart:244`,
+/// words unchanged).
 Future<bool> confirmSignOut(BuildContext context, String name) => confirmAccountAction(
   context,
   title: i18n('logout'),
   message: i18n('confirm_logout_named', args: {'name': name}),
+  action: i18n('logout'),
+);
+
+/// The sign-out question on a platform's page, which also says the cookie
+/// is deleted (docs/ui/compare/U.10b c7: "退出虎牙？").
+Future<bool> confirmPageSignOut(BuildContext context, String name) => confirmAccountAction(
+  context,
+  title: i18n('account_sign_out_title', args: {'name': name}),
+  message: i18n('account_sign_out_message', args: {'name': name}),
   action: i18n('logout'),
 );

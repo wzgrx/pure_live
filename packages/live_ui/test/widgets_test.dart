@@ -334,4 +334,47 @@ void main() {
     expect(InkOnColor.contrastOn(const Color(0xFF427D9E)), InkOnColor.light);
     expect(InkOnColor.contrastMutedOn(const Color(0xFF2A60B2)), InkOnColor.lightMuted);
   });
+
+  testWidgets('ReadableContent keeps a reading column at most 720 wide, centred', (tester) async {
+    tester.view
+      ..physicalSize = const Size(1280, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const key = ValueKey('column');
+    await tester.pumpWidget(
+      _app(
+        const ReadableContent(
+          child: SizedBox(key: key, width: double.infinity, height: 10),
+        ),
+      ),
+    );
+    final rect = tester.getRect(find.byKey(key));
+    expect(rect.width, readableContentMaxWidth);
+    expect(rect.center.dx, 640);
+
+    tester.view.physicalSize = const Size(393, 800);
+    await tester.pumpWidget(
+      _app(
+        const ReadableContent(
+          child: SizedBox(key: key, width: double.infinity, height: 10),
+        ),
+      ),
+    );
+    expect(tester.getRect(find.byKey(key)).width, 393);
+  });
+
+  test('the warm container and the QR colours keep their contrast', () {
+    double contrast(Color a, Color b) {
+      final (x, y) = (a.computeLuminance(), b.computeLuminance());
+      return (x > y ? x + 0.05 : y + 0.05) / (x > y ? y + 0.05 : x + 0.05);
+    }
+
+    for (final brightness in Brightness.values) {
+      expect(
+        contrast(LiveSemanticColors.warmContainer(brightness), LiveSemanticColors.onWarmContainer(brightness)),
+        greaterThan(4.5),
+      );
+    }
+    expect(contrast(QrColors.paper, QrColors.ink), greaterThan(15));
+  });
 }

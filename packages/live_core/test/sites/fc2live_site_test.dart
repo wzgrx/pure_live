@@ -730,6 +730,24 @@ void main() {
       expect(channels.map((channel) => channel.sent), everyElement([Fc2LiveControl.hlsRequest]));
     });
 
+    test('F.5a: the probe hands its control over when asked to; any tier can be played from it', () async {
+      final channel = _Channel(_serverFrames('S07-control-hd'));
+      final connector = _Connector([channel]);
+      final taken = <Fc2LiveControl>[];
+      final http = ReplayHttp(_hdAnswers());
+      final site = Fc2LiveSite(http, now: () => _recorded, connector: connector.call, probeControl: taken.add);
+      final room = LiveRoom(platform: 'fc2live', roomId: _hd, liveStatus: LiveStatus.live);
+      final qualities = await site.discoverPlayQualities(detail: room);
+      expect(qualities.first.selectionId, '50');
+      final control = taken.single;
+      expect((control.isClosed, channel.closed), (false, false), reason: 'the taker owns it now');
+      expect((control.channelId, control.requestedQuality), (_hd, 'auto'));
+      expect(Fc2LiveApi.playlistFor(control.playlists, '50')?.url.path, '/a/stream/$_hd/51/playlist');
+      await control.close();
+      expect(channel.closed, isTrue);
+      expect(connector.calls, hasLength(1));
+    });
+
     test('S07: a channel with the tiers 50 and 40 lists them first; each plays its high-latency variant', () async {
       final connector = _Connector([
         _Channel(_serverFrames('S07-control-hd')),

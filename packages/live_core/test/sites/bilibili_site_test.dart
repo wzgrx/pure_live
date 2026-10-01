@@ -375,11 +375,53 @@ void main() {
       final setup = _setup(['S06-replay', 'S07-replay']);
       final room = await setup.site.getRoomDetailForRefresh(roomId: '5440');
       expect(room.effectiveLiveStatus, LiveStatus.carousel);
-      await expectLater(
-        setup.site.getPlayQualities(detail: room),
-        throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('carousel'))),
-      );
+      // F.5a: a guest gets no stream for the carousel (S07-replay), so the
+      // one quality is the carousel's video (M4.01 refused it).
+      expect(await setup.site.getPlayQualities(detail: room), [BilibiliApi.carouselQuality]);
       expect(_count(setup.http, _playInfo), 1, reason: 'the carousel is not refused before asking');
+    });
+
+    test("1-1 (F.5a): a guest plays the carousel's video from where the carousel is", () async {
+      final video = Fixture.load('live_vod', 'V09-playurl-mp4');
+      final round = _synthetic('https://api.live.bilibili.com/live/getRoundPlayVideo?room_id=5440', {
+        'code': 0,
+        'message': '0',
+        'data': {
+          'cid': 29153362694,
+          'play_time': 754,
+          'sequence': 3,
+          'bvid': 'BV1zKZrYAEi8',
+          'title': 'fixture',
+          'play_url': 'https://interface.bilibili.com/v2/playurl?dead',
+        },
+      });
+      final setup = _setup(
+        ['S06-replay', 'S07-replay'],
+        extra: [round, ReplaySample.load('../../fixtures/live_vod/V09-playurl-mp4')],
+      );
+      final room = await setup.site.getRoomDetailForRefresh(roomId: '5440');
+      final qualities = await setup.site.getPlayQualities(detail: room);
+      final resolution = await setup.site.resolvePlayUrls(detail: room, quality: qualities.single);
+      expect(resolution.start, const Duration(seconds: 754), reason: 'play_time');
+      expect(resolution.appliedQualityData, BilibiliApi.carouselQualityId);
+      final line = resolution.lines.single;
+      expect(line.url, startsWith('https://upos-sz-mirrorhwo1.bilivideo.com/upgcxcode/'));
+      expect(line.format, StreamFormat.other, reason: 'one whole MP4');
+      expect(line.headers['referer'], 'https://www.bilibili.com/video/BV1zKZrYAEi8/');
+      expect(line.headers['cookie'], _guestCookie());
+      expect(_paths(setup.http).where((path) => path == '/live/getRoundPlayVideo' || path == '/x/player/playurl'), [
+        '/live/getRoundPlayVideo',
+        '/x/player/playurl',
+      ]);
+      expect(video.url.queryParameters['platform'], 'html5');
+      // A live quality asked of a carousel without a stream (a stored
+      // preference) plays the video too; the room page is asked first.
+      final again = await setup.site.resolvePlayUrls(
+        detail: room,
+        quality: const LivePlayQuality(quality: '自动', id: 0, data: 0),
+      );
+      expect(again.start, const Duration(seconds: 754));
+      expect(_count(setup.http, _playInfo), 2);
     });
 
     test('1-1: signed in, a carousel that comes with a stream plays', () async {

@@ -295,14 +295,21 @@ final class PicartoSite extends LiveSite
   /// The lines of the quality of [data] that is [quality] (by id: the
   /// profile, whatever the edge). A profile the playlist no longer has is
   /// `StreamUnavailable` (3.x's "quality unavailable"), or with [best] the
-  /// playlist's best quality, whose id the resolution reports.
+  /// playlist's best quality, whose id the resolution reports and which it
+  /// names as the quality played instead (11-1,
+  /// [LivePlayUrlResolution.appliedQuality]).
   static LivePlayUrlResolution _resolve(PicartoRoomData data, LivePlayQuality quality, {required bool best}) {
     final wanted = '${quality.selectionId}';
-    final current =
-        data.qualities.where((option) => '${option.selectionId}' == wanted).firstOrNull ??
-        (best ? data.qualities.firstOrNull : null);
+    final same = data.qualities.where((option) => '${option.selectionId}' == wanted).firstOrNull;
+    final current = same ?? (best ? data.qualities.firstOrNull : null);
     if (current == null) throw StreamUnavailable(_site, 'master playlist: no quality $wanted');
-    return PicartoApi.resolution(current, master: data.master);
+    final resolution = PicartoApi.resolution(current, master: data.master);
+    if (same != null) return resolution;
+    return LivePlayUrlResolution.lines(
+      resolution.lines,
+      appliedQualityData: resolution.appliedQualityData,
+      appliedQuality: current,
+    );
   }
 
   // Links ---------------------------------------------------------------------

@@ -366,6 +366,116 @@ abstract final class BilibiliApi {
     return data;
   }
 
+  /// Whether a `getRoomPlayInfo` answer is a carousel (`live_status` 2)
+  /// without a stream for this client (guests): its video is then played
+  /// from `getRoundPlayVideo` (1-1, [roundPlayVideo]). Anything that does
+  /// not read as such an answer is false, and [playData] explains it.
+  static bool carouselWithoutStream(String body, {int status = 200}) {
+    try {
+      final data = _object(_checked(body, status: status, what: 'getRoomPlayInfo')['data']);
+      return data != null && data['playurl_info'] == null && _status(data['live_status']) == LiveStatus.carousel;
+    } on SiteError {
+      return false;
+    }
+  }
+
+  /// The one quality of a carousel played from its video (1-1): the video's
+  /// own tiers are not offered (a guest gets 480P at most).
+  static const LivePlayQuality carouselQuality = LivePlayQuality(
+    quality: '轮播',
+    id: carouselQualityId,
+    data: carouselQualityId,
+  );
+
+  /// The id and data of [carouselQuality].
+  static const String carouselQualityId = 'carousel';
+
+  /// `live/getRoundPlayVideo?room_id=` of the long [roomId]: the video the
+  /// room's carousel is playing (works for guests, M4.01).
+  static Uri roundPlayVideoUrl(String roomId) =>
+      Uri.https('api.live.bilibili.com', '/live/getRoundPlayVideo', {'room_id': roomId});
+
+  static final RegExp _bvid = RegExp(r'^BV[0-9A-Za-z]{10}$');
+
+  /// The video a carousel is playing (`getRoundPlayVideo`'s `data`): its
+  /// `bvid`, part `cid` and `play_time`, the seconds already played, where
+  /// playback starts (M7.1; M4.01 notes). The answer's own `play_url` is
+  /// dead (it redirects to an error page) and is not read. No `bvid` or no
+  /// positive `cid` (nothing in rotation, or the room went live) is
+  /// `StreamUnavailable`; a `play_time` that does not read as seconds
+  /// (negative, not a number) starts at the beginning.
+  static ({String bvid, int cid, Duration start}) roundPlayVideo(String body, {int status = 200}) {
+    final root = _checked(body, status: status, what: 'getRoundPlayVideo');
+    final data = _object(root['data']);
+    if (data == null) throw ApiChanged(_site, 'getRoundPlayVideo: no data (${_snippet(body)})');
+    final bvid = jsonString(data['bvid'])?.trim() ?? '';
+    final cid = jsonInt(data['cid']) ?? 0;
+    if (!_bvid.hasMatch(bvid) || cid <= 0) {
+      throw StreamUnavailable(_site, 'getRoundPlayVideo: no video in rotation (cid ${data['cid']})');
+    }
+    final played = jsonInt(data['play_time']) ?? 0;
+    return (bvid: bvid, cid: cid, start: Duration(seconds: played > 0 ? played : 0));
+  }
+
+  /// `x/player/playurl` of part [cid] of [bvid] as one muxed MP4
+  /// (`platform=html5`, the route of the TV client and `live_vod`): no WBI
+  /// signature, and a guest gets it too.
+  static Uri videoPlayUrl(String bvid, int cid) => Uri.https('api.bilibili.com', '/x/player/playurl', {
+    'bvid': bvid,
+    'cid': '$cid',
+    'qn': '80',
+    'fnval': '0',
+    'fnver': '0',
+    'fourk': '1',
+    'platform': 'html5',
+    'high_quality': '1',
+  });
+
+  /// The media headers of a video [bvid]: UA, the video page as Referer
+  /// (the CDN checks it) and the cookie.
+  static Map<String, String> videoHeaders(String bvid, {String? cookie}) => {
+    'user-agent': userAgent,
+    'referer': 'https://www.bilibili.com/video/$bvid/',
+    if (cookie != null && cookie.trim().isNotEmpty) 'cookie': cookie.trim(),
+  };
+
+  /// The lines of a carousel video's `x/player/playurl` answer: one per
+  /// `durl` part's `url` and `backup_url` (http or https only), whole MP4
+  /// files ([StreamFormat.other]) with [videoHeaders], started at [start]
+  /// and confirmed as [carouselQuality]. No `durl` is `StreamUnavailable`.
+  static LivePlayUrlResolution videoResolution(
+    String body, {
+    required String bvid,
+    required Duration start,
+    int status = 200,
+    String? cookie,
+  }) {
+    final root = _checked(body, status: status, what: 'x/player/playurl');
+    final data = _object(root['data']);
+    if (data == null) throw ApiChanged(_site, 'x/player/playurl: no data (${_snippet(body)})');
+    final headers = videoHeaders(bvid, cookie: cookie);
+    final urls = <String>[];
+    for (final part in _list(data['durl'])) {
+      final map = _object(part);
+      if (map == null) continue;
+      for (final raw in [map['url'], ..._list(map['backup_url'])]) {
+        final url = jsonString(raw)?.trim() ?? '';
+        final uri = Uri.tryParse(url);
+        if (uri == null || (!uri.isScheme('http') && !uri.isScheme('https')) || uri.host.isEmpty) continue;
+        if (!urls.contains(url)) urls.add(url);
+      }
+    }
+    if (urls.isEmpty) throw StreamUnavailable(_site, 'x/player/playurl: no file for $bvid');
+    return LivePlayUrlResolution.lines(
+      [
+        for (final (index, url) in urls.indexed)
+          LivePlayLine(url, headers: headers, format: StreamFormat.other, lineId: '${Uri.parse(url).host}|mp4|$index'),
+      ],
+      appliedQualityData: carouselQualityId,
+      start: start,
+    );
+  }
+
   /// Qualities: the union of every codec's `accept_qn` and `current_qn`,
   /// positive only, best first. Never `g_qn_desc` alone: it lists tiers no
   /// codec serves. Labels come from `g_qn_desc` through [LiveQualityLabel].

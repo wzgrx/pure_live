@@ -195,6 +195,17 @@ void main() {
     expect(danmaku.isConnected, isFalse);
   });
 
+  test('super chats: only Bilibili, Huya and Douyu have them (3.x)', () {
+    expect(_BareSite().hasSuperChats, isFalse);
+    expect(superChatPlatforms, {SiteIds.bilibili, SiteIds.huya, SiteIds.douyu});
+    for (final id in [SiteIds.bilibili, SiteIds.huya, SiteIds.douyu]) {
+      expect(_IdSite(id).hasSuperChats, isTrue, reason: id);
+    }
+    for (final id in [SiteIds.douyin, SiteIds.kuaishou, SiteIds.cc, SiteIds.twitch, SiteIds.iptv]) {
+      expect(_IdSite(id).hasSuperChats, isFalse, reason: id);
+    }
+  });
+
   test('a directory page is unmodifiable', () {
     final page = LiveDirectoryPage(rooms: [_room], page: 1, hasMore: true, nextCursor: 'c2');
     expect(() => page.rooms.add(_room), throwsUnsupportedError);
@@ -207,4 +218,15 @@ final class _BareSite extends LiveSite {
 
   @override
   String get name => 'Bare';
+}
+
+/// A site that is only an id.
+final class _IdSite extends LiveSite {
+  new(this.id);
+
+  @override
+  final String id;
+
+  @override
+  String get name => id;
 }

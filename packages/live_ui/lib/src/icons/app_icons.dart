@@ -227,4 +227,62 @@ abstract final class AppIcons {
 
   /// Something will not work as the user expects (a switched-off setting).
   static const IconData warning = Icons.warning_amber_rounded;
+
+  // ---- the room's states (docs/ui/compare/U.2g) ----
+
+  /// Play the next line ("换线路"; U.2g note 6: Material's alt route).
+  static const IconData switchLine = Icons.alt_route_rounded;
+
+  /// A room the platform banned or closed.
+  static const IconData banned = Icons.block_rounded;
+
+  /// The platform did not say whether the room is on air.
+  static const IconData statusUnknown = Icons.help_outline_rounded;
+
+  /// Sign in to the platform ("去登录").
+  static const IconData login = Icons.login_rounded;
+
+  /// The IPTV programme guide's title (3.x `IptvScheduleDialog`).
+  static const IconData guideTitle = Remix.calendar_todo_line;
+
+  /// An ended programme that can be replayed (3.x `IptvScheduleDialog`).
+  static const IconData catchup = Remix.history_line;
+
+  /// The programme on air, the way back to it (3.x `IptvScheduleDialog`).
+  static const IconData liveNow = Remix.live_line;
+
+  /// A guide with no programmes for the channel (3.x).
+  static const IconData guideEmpty = Remix.inbox_line;
+
+  /// The guide could not be read (3.x).
+  static const IconData guideFailed = Remix.error_warning_line;
+
+  /// Add (a guide, a keyword).
+  static const IconData add = Remix.add_line;
+
+  /// Unfold a column folded to the right (the wide channel's guide).
+  static const IconData unfoldLeft = Remix.arrow_left_s_line;
+
+  // ---- the room's tabs (docs/ui/compare/U.2e) ----
+
+  /// No chat, no super chats yet (3.x `SuperChatPage`'s empty state).
+  static const IconData chatEmpty = Remix.chat_smile_3_line;
+
+  /// The danmaku server did not answer in time.
+  static const IconData danmakuTimeout = Remix.wifi_off_line;
+
+  /// The platform has no danmaku; the list is switched off.
+  static const IconData danmakuUnavailable = Remix.chat_off_line;
+
+  /// A super chat's price (3.x `SuperChatCard`).
+  static const IconData superChatPrice = Remix.money_cny_circle_fill;
+
+  /// The "SC" mark of a super chat (3.x `SuperChatCard`).
+  static const IconData superChatMark = Remix.vip_diamond_fill;
+
+  /// A super chat's remaining time (3.x `SuperChatCard`).
+  static const IconData superChatTime = Remix.time_line;
+
+  /// Remove a blocked word or viewer (×, 3.x `KeywordBlockPage`).
+  static const IconData chipRemove = Remix.close_line;
 }

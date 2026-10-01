@@ -50,6 +50,25 @@ void main() {
       (AppIcons.localInteraction, Icons.auto_awesome_rounded),
       (AppIcons.templateSave, Icons.save_outlined),
       (AppIcons.templateRestore, Icons.restore_rounded),
+      // U.2g and U.2e.
+      (AppIcons.switchLine, Icons.alt_route_rounded),
+      (AppIcons.banned, Icons.block_rounded),
+      (AppIcons.statusUnknown, Icons.help_outline_rounded),
+      (AppIcons.login, Icons.login_rounded),
+      (AppIcons.guideTitle, Remix.calendar_todo_line),
+      (AppIcons.catchup, Remix.history_line),
+      (AppIcons.liveNow, Remix.live_line),
+      (AppIcons.guideEmpty, Remix.inbox_line),
+      (AppIcons.guideFailed, Remix.error_warning_line),
+      (AppIcons.add, Remix.add_line),
+      (AppIcons.unfoldLeft, Remix.arrow_left_s_line),
+      (AppIcons.chatEmpty, Remix.chat_smile_3_line),
+      (AppIcons.danmakuTimeout, Remix.wifi_off_line),
+      (AppIcons.danmakuUnavailable, Remix.chat_off_line),
+      (AppIcons.superChatPrice, Remix.money_cny_circle_fill),
+      (AppIcons.superChatMark, Remix.vip_diamond_fill),
+      (AppIcons.superChatTime, Remix.time_line),
+      (AppIcons.chipRemove, Remix.close_line),
     ];
     for (final (actual, glyph) in expected) {
       expect(actual, glyph);

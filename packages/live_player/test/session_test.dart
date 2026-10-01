@@ -278,4 +278,24 @@ void main() {
       expect(session.state.status, PlaybackStatus.playing);
     });
   });
+
+  test('a picture off screen is not judged stalled; on screen again, the watchdog starts afresh', () {
+    fakeAsync((async) {
+      engine = FakeEngine()..reportsFrames = true;
+      session = PlaybackSession(engine: () async => engine, opener: MediaOpener());
+      unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_a, _b]))));
+      async.flushMicrotasks();
+      session.setPresentationVisible(visible: false);
+      expect(session.presentationVisible, isFalse);
+      async.elapse(const Duration(seconds: 30));
+      expect(engine.opens, hasLength(1));
+      expect(session.state.status, PlaybackStatus.playing);
+      session.setPresentationVisible(visible: true);
+      async.elapse(const Duration(seconds: 9));
+      expect(engine.opens, hasLength(1));
+      async.elapse(const Duration(seconds: 2));
+      // Still no frame ten seconds after it showed again: recovered.
+      expect(engine.opens, hasLength(greaterThan(1)));
+    });
+  });
 }

@@ -9,6 +9,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/live_play/chat_feed.dart';
+import 'package:pure_live/pages/live_play/danmaku_templates.dart';
 import 'package:pure_live/pages/live_play/room_controller.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
@@ -54,7 +55,23 @@ class ChatPanel extends StatelessWidget {
                 listenable: controller,
                 builder: (context, _) => SuperChatList(messages: controller.superChats, now: controller.now),
               ),
-              const DanmakuSettingsPanel(),
+              DanmakuSettingsPanel(
+                leading: [
+                  ListenableBuilder(
+                    listenable: controller,
+                    builder: (context, _) => context.buildModernCard([
+                      context.buildSwitchTile(
+                        title: i18n('live_play_show_gifts'),
+                        subtitle: i18n('live_play_show_gifts_desc'),
+                        icon: Icons.card_giftcard_rounded,
+                        value: controller.showGifts,
+                        onChanged: (value) => unawaited(controller.setShowGifts(show: value)),
+                      ),
+                    ]),
+                  ),
+                  const DanmakuTemplatesCard(),
+                ],
+              ),
               const BlockListPanel(),
             ],
           ),
@@ -245,6 +262,39 @@ class _ChatLineView extends StatelessWidget {
             ],
           ),
         );
+      case ChatLineKind.gift:
+        final message = line.message!;
+        final name = message.userName.trim();
+        return Padding(
+          key: const ValueKey('live-play-gift-line'),
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 2, right: 6),
+                child: Icon(Icons.card_giftcard_rounded, size: 15, color: scheme.tertiary),
+              ),
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      if (name.isNotEmpty)
+                        TextSpan(
+                          text: '$name ',
+                          style: body?.copyWith(color: scheme.onSurfaceVariant),
+                        ),
+                      TextSpan(
+                        text: line.text,
+                        style: body?.copyWith(color: scheme.tertiary),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
       case ChatLineKind.superChat:
         final superChat = line.superChat!;
         return Container(
@@ -285,9 +335,10 @@ class _ChatLineView extends StatelessWidget {
                     text: message.userName.trim().isEmpty ? '' : '${message.userName}：',
                     style: body?.copyWith(color: scheme.onSurfaceVariant),
                   ),
-                  TextSpan(
-                    text: message.message,
-                    style: body?.copyWith(color: color),
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.baseline,
+                    baseline: TextBaseline.alphabetic,
+                    child: EmoteText(chatSegments(message), style: body?.copyWith(color: color)),
                   ),
                 ],
               ),
@@ -297,6 +348,11 @@ class _ChatLineView extends StatelessWidget {
     }
   }
 }
+
+/// The pieces of [message] for `EmoteText`. The danmaku layer reports
+/// emotes as text today (CHZZK `{:name:}`, YouTube shortcuts); pictures come
+/// when the message model carries them (UPGRADES B-12, B-13).
+List<ChatSegment> chatSegments(LiveMessage message) => [ChatTextSegment(message.message)];
 
 Color _parseColor(String text, Color fallback) {
   final hex = text.trim().replaceFirst('#', '');

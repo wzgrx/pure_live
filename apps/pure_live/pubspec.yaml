@@ -11,6 +11,10 @@ environment:
 resolution: workspace
 
 dependencies:
+  # The live room's system media notification and media buttons while it
+  # plays in the background (3.x's engine; the Android activity is its
+  # AudioServiceActivity, which keeps the engine cached).
+  audio_service: ^0.18.19
   # The IPTV tables in live_store's database (M12.1).
   drift: ^2.35.1
   # Windows DPAPI and the GBK code page (no plugin needed for either).
@@ -29,6 +33,8 @@ dependencies:
   # State and routes (docs/PLAN.md §4).
   flutter_riverpod: ^3.4.3
   go_router: ^18.0.2
+  # DLNA casting from the live room (M10).
+  live_cast: any
   live_core: any
   live_danmaku: any
   live_iptv: any

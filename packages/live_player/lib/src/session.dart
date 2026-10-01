@@ -152,6 +152,7 @@ final class PlaybackSession {
   int _refreshAttempts = 0;
   int _retryRounds = 0;
   bool _engineRecreated = false;
+  bool _presentationVisible = true;
 
   Timer? _bufferingTimer;
   Timer? _pauseTimer;
@@ -302,6 +303,21 @@ final class PlaybackSession {
     _emit(_state.copyWith(audioOnly: enabled));
     if (enabled) _cancelFrameWatchdog();
     await _engine?.setAudioOnly(enabled: enabled);
+  }
+
+  /// Whether the picture is on screen (default true). A picture nobody can
+  /// see (a multiview cell scrolled away, a hidden window) presents no
+  /// frames on some platforms, so the stalled-picture watchdog is off until
+  /// it is visible again; then it starts afresh. Playback is not touched.
+  bool get presentationVisible => _presentationVisible;
+
+  /// Tells the session whether its picture is on screen; see
+  /// [presentationVisible].
+  void setPresentationVisible({required bool visible}) {
+    if (_disposed || visible == _presentationVisible) return;
+    _presentationVisible = visible;
+    _cancelFrameWatchdog();
+    if (visible && _playing && !_buffering && _state.status == PlaybackStatus.playing) _armFrameWatchdog(_session);
   }
 
   /// Sets the volume, 0 to 1.
@@ -678,11 +694,18 @@ final class PlaybackSession {
   /// the last frame (3.x allocated nothing per frame either).
   void _armFrameWatchdog(int session) {
     final engine = _engine;
-    if (_frameTimer != null || engine == null || !engine.reportsFrames || _state.audioOnly || !_wantPlaying) return;
+    if (_frameTimer != null ||
+        engine == null ||
+        !engine.reportsFrames ||
+        _state.audioOnly ||
+        !_wantPlaying ||
+        !_presentationVisible) {
+      return;
+    }
     _lastFrame ??= clock.now();
     void check() {
       _frameTimer = null;
-      if (!_current(session) || !_wantPlaying || _state.audioOnly || _buffering) return;
+      if (!_current(session) || !_wantPlaying || _state.audioOnly || _buffering || !_presentationVisible) return;
       final idle = clock.now().difference(_lastFrame ?? clock.now());
       if (idle < timings.frameStall) {
         _frameTimer = Timer(timings.frameStall - idle, check);

@@ -190,3 +190,4 @@ v4 现在（偏差最大）：
 | U.4e 分区房间 | [compare/U.4e](compare/U.4e/README.md) |
 | U.4f 关注的分区、平台显示 | [compare/U.4f](compare/U.4f/README.md)（v3 的 HotAreasPage 实际是“平台显示”页） |
 | U.3a～U.3d 首页外壳、宽屏首页、启动页、全局弹窗 | [compare/U.3a](compare/U.3a/README.md)、[U.3b](compare/U.3b/README.md)、[U.3c](compare/U.3c/README.md)、[U.3d](compare/U.3d/README.md)（第 1 节以这里为准） |
+| U.2k 本地互动 | [compare/U.2k](compare/U.2k/README.md) |

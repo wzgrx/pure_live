@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The Flutter tool talks to the running app over the network
+         (breakpoints, hot reload). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+</manifest>

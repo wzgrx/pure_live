@@ -117,11 +117,11 @@ v3 调用方（`git grep` v3.2.11 `lib`）：`common/global/initial_services.dar
 ## 留给其他模块的部分
 
 - **M12**：`FfmpegRunner` 的实现（FFmpegKit 插件；FFmpeg 9 的 OpenSSL 在 Android/Linux 需要的 CA 包路径给 `Recorder.caFile`）；`RecordKeepAlive`（Android 前台服务，被系统停掉时调 `keepAliveInterrupted`；用户手动开始时允许重试的逻辑 `allowUserRetry`）；存储权限（`storageAccess`）；默认录制目录；`Recorder` 的 provider 和启动时 `restore`。
-- **M9**：录制设置的读写（3.x Hive 键 `segmentTime`、`maxTaskCount`…，见 `recorder_keys.dart`）和 `recorder_tasks`、`record_history` 的迁移；设置变化后调 `settingsChanged()`。
+- **M9**：录制设置的读写（3.x Hive 键 `segmentTime`、`maxTaskCount`…，见 `recorder_keys.dart`）和 `recorder_tasks`、`record_history` 的迁移；设置变化后调 `settingsChanged()`。录制设置已进 live_store 的设置注册表和备份（M8.1）。
 - **M13**：录制中心和设置页；状态、阶段、失败类型、受限类型的文字；合并进度条（v3 `VideoProcessEvent`）。
 - **留给后续（M8 补做）**：
-  - 录制弹幕（v3 `recording_danmaku_service.dart`，按尝试写 B 站 XML）：需要弹幕连接，`live_record` 不能依赖 `live_danmaku`（依赖方向），做法是在本包加一个连接器接口和 XML 写入器，由应用接 `live_danmaku`；
-  - HLS 录制专用预取和保留窗口（有意差异 4）：等实机看漏段情况再定；
+  - ~~录制弹幕（v3 `recording_danmaku_service.dart`，按尝试写 B 站 XML）~~：完成（M8.1，`chat.dart` 的连接器接口和 XML 写入器，应用接 `live_danmaku`，见 `M8.1-record-more.md`）；
+  - ~~HLS 录制专用预取和保留窗口（有意差异 4）~~：完成（M8.1，live_media 的 `HlsMediaWindow`，录制的中继默认打开）；
   - 合并进度事件（`mergeProgress`）。
 
 ## 依赖变化

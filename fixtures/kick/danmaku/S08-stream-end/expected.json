@@ -1,0 +1,175 @@
+{
+ "generator": "fixtures/kick/danmaku/expected.py: an independent reading after pure_live_TV KickDanmaku.parseFrame (e1cca224) plus the v4 level badge and broadcast end",
+ "value": [
+  {
+   "kind": "established"
+  },
+  {
+   "kind": "joined"
+  },
+  {
+   "kind": "chat",
+   "userName": "z15t",
+   "userId": "327400736",
+   "text": "he has one, no?",
+   "messageId": "4a456844-e2ca-4e0f-a5ee-1a724c2abc15",
+   "sentAt": 1790833322000,
+   "color": "#e4d88f",
+   "userLevel": "42"
+  },
+  {
+   "kind": "chat",
+   "userName": "whhpxbmqntp",
+   "userId": "1109744",
+   "text": "aubrey not gonna like that one",
+   "messageId": "ffd7243a-cc55-4c50-895f-d87b079f9f47",
+   "sentAt": 1790833323000,
+   "color": "#93ebe0",
+   "userLevel": "35"
+  },
+  {
+   "kind": "chat",
+   "userName": "UheavsFaRgnkbvs",
+   "userId": "2164419",
+   "text": "GN everyone catKISS",
+   "messageId": "c9754b00-0843-4095-8121-bc120e7e7412",
+   "sentAt": 1790833324000,
+   "color": "#4cff75",
+   "userLevel": "30"
+  },
+  {
+   "kind": "chat",
+   "userName": "lsfzcqsampe",
+   "userId": "735757933",
+   "text": "cicada3001Ncicada3001Ocicada3001Xcicada3001Xcicada3001Xcicada3001Ecicada3001Dcicada3001Wcicada300111",
+   "messageId": "23f04526-c3d2-4f80-89ac-68747a2844a2",
+   "sentAt": 1790833328000,
+   "color": "#bafea3",
+   "userLevel": "54"
+  },
+  {
+   "kind": "chat",
+   "userName": "E0TF_AO_JEKOD",
+   "userId": "8858453",
+   "text": "Pointless no more GAMBA 󠀡",
+   "messageId": "044fde25-12f5-42fc-9c00-cafe30141aac",
+   "sentAt": 1790833330000,
+   "color": "#ff9d00",
+   "userLevel": "17"
+  },
+  {
+   "kind": "chat",
+   "userName": "sfphrkj7",
+   "userId": "759676",
+   "text": "Aware",
+   "messageId": "6a04ed9f-dc3f-4409-9d68-7981663674eb",
+   "sentAt": 1790833330000,
+   "color": "#ffc466",
+   "userLevel": "25"
+  },
+  {
+   "kind": "chat",
+   "userName": "Luucaib",
+   "userId": "9262149",
+   "text": "xQcR is the username",
+   "messageId": "4ba9b119-a76a-415c-a908-4ce6a4c470ad",
+   "sentAt": 1790833331000,
+   "color": "#75fd46",
+   "userLevel": "31"
+  },
+  {
+   "kind": "chat",
+   "userName": "Idonst",
+   "userId": "7759959",
+   "text": "@Playerr is it just xqc?",
+   "messageId": "9a4d1456-cf69-49f7-b5bc-2857a483da70",
+   "sentAt": 1790833333000,
+   "color": "#4cff75",
+   "userLevel": "28"
+  },
+  {
+   "kind": "chat",
+   "userName": "Luucaib",
+   "userId": "9262149",
+   "text": "xQcR",
+   "messageId": "2f14808c-6f2d-4f8d-9482-a2d217d6e1f0",
+   "sentAt": 1790833337000,
+   "color": "#75fd46",
+   "userLevel": "31"
+  },
+  {
+   "kind": "chat",
+   "userName": "Idonst",
+   "userId": "7759959",
+   "text": "ty homke",
+   "messageId": "f03e30e0-d614-40f3-9b1e-1f2cd729c35a",
+   "sentAt": 1790833344000,
+   "color": "#4cff75",
+   "userLevel": "28"
+  },
+  {
+   "kind": "chat",
+   "userName": "Idonst",
+   "userId": "7759959",
+   "text": "homie*",
+   "messageId": "4963016f-a049-4be7-9ed7-3ab181b3bd36",
+   "sentAt": 1790833347000,
+   "color": "#4cff75",
+   "userLevel": "28"
+  },
+  {
+   "kind": "chat",
+   "userName": "jzmoum",
+   "userId": "9093436",
+   "text": "thanks for the gifted sub @Eddie i love these emotes man xqcL ik u will never see this GN",
+   "messageId": "3cfea1e8-0848-4f0a-9e87-5865fc1114ac",
+   "sentAt": 1790833357000,
+   "color": "#31d6c2",
+   "userLevel": "27"
+  },
+  {
+   "kind": "chat",
+   "userName": "z15t",
+   "userId": "327400736",
+   "text": "xqcL",
+   "messageId": "49b6dcf6-df0b-44bd-a742-797e57266636",
+   "sentAt": 1790833359000,
+   "color": "#e4d88f",
+   "userLevel": "42"
+  },
+  {
+   "kind": "chat",
+   "userName": "yrgpgtdiro",
+   "userId": "14813350",
+   "text": "DonoWall",
+   "messageId": "baf1bb79-6367-4592-bf95-d2e8537eabbb",
+   "sentAt": 1790833368000,
+   "color": "#ff55b3",
+   "userLevel": "16"
+  },
+  {
+   "kind": "chat",
+   "userName": "Luucaib",
+   "userId": "9262149",
+   "text": "he dont know you lil bro",
+   "messageId": "e09716fa-fd29-4ab0-8651-07c746f3923f",
+   "sentAt": 1790833379000,
+   "color": "#75fd46",
+   "userLevel": "31"
+  },
+  {
+   "kind": "notice",
+   "text": "直播已结束"
+  },
+  {
+   "kind": "chat",
+   "userName": "Hhknrl_Rbjzxpf",
+   "userId": "649942396",
+   "text": "the coffee fastfood microsoft mind simulation lives",
+   "messageId": "7c805791-673e-4515-a406-45791360cfb0",
+   "sentAt": 1790833392000,
+   "color": "#deb2ff",
+   "userLevel": "30"
+  }
+ ]
+}

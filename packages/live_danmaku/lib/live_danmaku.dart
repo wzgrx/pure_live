@@ -28,6 +28,7 @@ export 'src/sites/douyu.dart';
 export 'src/sites/fc2live.dart';
 export 'src/sites/huya.dart';
 export 'src/sites/jdlive.dart';
+export 'src/sites/kick.dart';
 export 'src/sites/kilakila.dart';
 export 'src/sites/kuaishou.dart';
 export 'src/sites/kugoulive.dart';

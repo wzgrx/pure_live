@@ -11,6 +11,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/buttons/record_button.dart';
+import 'package:pure_live/features/live_play/player/recording_badge.dart';
 import 'package:pure_live/features/record_settings/record_settings_dialogs.dart';
 import 'package:pure_live/features/record_settings/record_settings_page.dart';
 import 'package:pure_live/features/recorder/recorder_page.dart';
@@ -58,6 +59,7 @@ Future<_Harness> _pump(
   List<RecordTask> tasks = const [],
   Map<String, Object?> legacy = const {},
   Future<String?> Function()? picker,
+  void Function(AppRecording recording)? prepare,
 }) async {
   tester.view
     ..physicalSize = const Size(420, 900)
@@ -76,6 +78,7 @@ Future<_Harness> _pump(
     );
     await recording.loadSettings();
     await recording.recorder?.restore(jsonEncode([for (final task in tasks) task.toJson()]));
+    prepare?.call(recording);
     return _Harness(services, recording, folder, []);
   }))!;
   addTearDown(
@@ -186,32 +189,45 @@ void main() {
     expect(androidDocumentFolderUri('/storage/emulated/0'), isNull);
   });
 
-  testWidgets("M13.16: the room bar's record button is a record glyph; a monitored room adds a dot", (tester) async {
+  // U.2a change 13 replaces M13.16's glyph with an orange dot: a grey ring
+  // around a red dot, "⏱ 自动录" for a room that records when it goes live,
+  // a white dot on red while recording, and the "● 录制中 12:34" mark.
+  testWidgets('U.2a: the room bar records as a ring, "自动录" or a red disc; the picture shows the time', (tester) async {
+    final rooms = [
+      for (final id in ['1', '2', '3']) LiveRoom(platform: 'bilibili', roomId: id),
+    ];
     await _pump(
       tester,
-      (_) => Scaffold(
-        appBar: AppBar(
-          actions: [
-            RecordButton(
-              room: LiveRoom(platform: 'bilibili', roomId: '1'),
-              compact: true,
+      (_) => Builder(
+        // The recording dot holds still, so the frames settle.
+        builder: (context) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: true),
+          child: Scaffold(
+            appBar: AppBar(
+              actions: [
+                RecordButton(key: const ValueKey('idle'), room: rooms[0]),
+                RecordButton(key: const ValueKey('monitored'), room: rooms[1]),
+                RecordButton(key: const ValueKey('recording'), room: rooms[2]),
+              ],
             ),
-            RecordButton(
-              key: const ValueKey('monitored'),
-              room: LiveRoom(platform: 'bilibili', roomId: '2'),
-              compact: true,
+            body: Center(
+              child: RoomRecordingBadge(room: rooms[2], now: () => DateTime(2026, 9, 1, 20, 42, 34)),
             ),
-          ],
+          ),
         ),
       ),
-      tasks: [_task('2', RecordStatus.stopped)],
+      tasks: [_task('2', RecordStatus.stopped), _task('3', RecordStatus.stopped)],
+      prepare: (recording) => recording.taskFor(rooms[2])!.status = RecordStatus.running,
     );
-    expect(find.byIcon(Icons.fiber_manual_record_outlined), findsNothing, reason: 'the hollow circle is gone');
-    expect(find.byIcon(Icons.radio_button_checked_rounded), findsNWidgets(2));
-    final badges = tester.widgetList<Badge>(find.byType(Badge)).toList();
-    expect([for (final badge in badges) badge.isLabelVisible], [false, true]);
+    Finder inside(String key, Finder finder) => find.descendant(of: find.byKey(ValueKey(key)), matching: finder);
+    expect(inside('idle', find.byKey(const ValueKey('record-glyph-idle'))), findsOneWidget);
     expect(find.byTooltip('录制'), findsOneWidget);
-    expect(find.byTooltip('已监控'), findsOneWidget);
+    expect(inside('monitored', find.text('自动录')), findsOneWidget);
+    expect(inside('monitored', find.byIcon(AppIcons.autoRecord)), findsOneWidget);
+    expect(inside('recording', find.byKey(const ValueKey('record-glyph-recording'))), findsOneWidget);
+    expect(find.byTooltip('录制中'), findsOneWidget);
+    // Started 20:30 (the task's start), now 20:42:34.
+    expect(find.text('录制中 12:34'), findsOneWidget);
   });
 
   testWidgets('without FFmpeg the centre says recording is unavailable', (tester) async {

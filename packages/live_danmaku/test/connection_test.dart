@@ -69,6 +69,58 @@ void main() {
       ]);
     });
 
+    test('reported texts and names lose invisible placeholders; clean messages pass as they are', () async {
+      final connection = _Fake();
+      final events = _record(connection);
+      await connection.connect('room');
+      final clean = _chat('[笑哭] 好');
+      final start = DateTime.utc(2026, 10);
+      connection.runs.single
+        ..message(clean)
+        ..message(
+          LiveMessage(
+            type: LiveMessageType.chat,
+            userName: '观众\uFFFC',
+            message: '\uFFFC晚上好\u0008',
+            color: const LiveMessageColor(1, 2, 3),
+            userId: '7',
+            fansName: '粉\uFFFC丝',
+            messageId: 'm1',
+            sentAt: start,
+            replayed: true,
+          ),
+        )
+        ..message(
+          LiveMessage(
+            type: LiveMessageType.superChat,
+            userName: 'SUPER_CHAT_MESSAGE',
+            message: 'SUPER_CHAT_MESSAGE',
+            color: LiveMessageColor.white,
+            data: LiveSuperChatMessage(
+              userName: '老板\uFFFC',
+              face: 'f',
+              message: '谢谢\uFFFC',
+              price: 30,
+              startTime: start,
+              endTime: start,
+              backgroundColor: '#fff',
+              backgroundBottomColor: '#000',
+              messageId: 's1',
+            ),
+          ),
+        );
+      final messages = [for (final event in events.cast<DanmakuReceived>()) event.message];
+      expect(messages.first, same(clean));
+      final chat = messages[1];
+      expect((chat.message, chat.userName, chat.fansName), ('晚上好', '观众', '粉丝'));
+      expect(
+        (chat.userId, chat.messageId, chat.sentAt, chat.replayed, chat.color),
+        ('7', 'm1', start, true, const LiveMessageColor(1, 2, 3)),
+      );
+      final paid = messages[2].data! as LiveSuperChatMessage;
+      expect((paid.userName, paid.message, paid.price, paid.messageId), ('老板', '谢谢', 30, 's1'));
+    });
+
     test('events arrive synchronously, while the platform reports them', () async {
       final connection = _Fake();
       final events = _record(connection);

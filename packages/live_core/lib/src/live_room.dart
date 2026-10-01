@@ -1,4 +1,5 @@
 import 'package:live_core/src/audience.dart';
+import 'package:live_core/src/json.dart';
 import 'package:live_core/src/sites.dart';
 import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
@@ -152,14 +153,16 @@ final class CatchUp {
 @immutable
 final class LiveRoom {
   /// Creates a room. [platform] is lower-cased, [roomId] trimmed and
-  /// [startedAt] converted to UTC.
+  /// [startedAt] converted to UTC; [title], [nick], [introduction] and
+  /// [notice] lose invisible placeholder characters
+  /// ([stripInvisiblePlaceholders], such as Kuaishou's U+FFFC).
   new({
     String? roomId,
     String? platform,
     this.userId,
     this.link,
-    this.title = '',
-    this.nick = '',
+    String title = '',
+    String nick = '',
     this.avatar = '',
     this.cover = '',
     this.area,
@@ -172,8 +175,8 @@ final class LiveRoom {
     this.liveStatus,
     DateTime? startedAt,
     this.restriction,
-    this.introduction,
-    this.notice,
+    String? introduction,
+    String? notice,
     this.data,
     this.danmakuData,
     this.epgId,
@@ -185,6 +188,10 @@ final class LiveRoom {
     List<String> tagIds = const [],
   }) : roomId = roomId?.trim() ?? '',
        platform = platform?.trim().toLowerCase() ?? 'unknown',
+       title = stripInvisiblePlaceholders(title),
+       nick = stripInvisiblePlaceholders(nick),
+       introduction = stripInvisiblePlaceholdersOrNull(introduction),
+       notice = stripInvisiblePlaceholdersOrNull(notice),
        startedAt = startedAt?.toUtc(),
        httpHeaders = HttpHeaderPolicy.normalize(httpHeaders),
        tagIds = List.unmodifiable(tagIds);

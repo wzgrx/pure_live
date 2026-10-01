@@ -390,6 +390,32 @@ void main() {
       expect(detail.withAudienceFallbackFrom(LiveRoom(roomId: 'x', platform: 'bilibili')), same(detail));
     });
   });
+
+  group('display text', () {
+    test('placeholders and control characters go; joiners, line breaks and other text stay', () {
+      expect(stripInvisiblePlaceholders('\uFFFC晚上好\uFFFC 一起来'), '晚上好 一起来');
+      expect(stripInvisiblePlaceholders('a\uFFF9b\uFFFBc\u0000d\u007Fe\u0085f\uFFFFg'), 'abcdefg');
+      // Format characters that render invisibly and mean something stay.
+      const kept = '👨\u200D👩\u200D👧 a\tb\nc\r\nd \u200C \uFFFD 敲\u200B黑 (\u2060*\u2060) \uFEFF 中文';
+      expect(stripInvisiblePlaceholders(kept), same(kept));
+      expect(stripInvisiblePlaceholdersOrNull(null), isNull);
+    });
+
+    test("a room's title, name, introduction and notice lose them, from any source", () {
+      final room = LiveRoom(
+        platform: 'kuaishou',
+        roomId: 'x',
+        title: '\uFFFC唱歌\uFFFC',
+        nick: '主播\u0007',
+        introduction: '简介\uFFFC',
+        notice: '\uFFFB公告',
+      );
+      expect((room.title, room.nick, room.introduction, room.notice), ('唱歌', '主播', '简介', '公告'));
+      expect(room.copyWith(title: 'a\uFFFCb').title, 'ab');
+      expect(LiveRoom.fromJson(const {'platform': 'kuaishou', 'roomId': 'x', 'title': '旧\uFFFC'}).title, '旧');
+      expect(LiveRoom(platform: 'x', roomId: '1').introduction, isNull);
+    });
+  });
 }
 
 final class _BareSite extends LiveSite {

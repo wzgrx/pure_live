@@ -83,4 +83,73 @@ void main() {
     expect(find.text('设置'), findsNothing);
     expect(chosen, isEmpty);
   });
+
+  testWidgets('a menu of choices marks the current one: primary, semibold, a tick at the end', (tester) async {
+    int? chosen;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: const LiveTheme().light,
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async => chosen = await showAppMenu<int>(
+                context,
+                selected: 2,
+                entries: const [
+                  AppMenuEntry(key: ValueKey('a'), value: 1, label: '综合'),
+                  AppMenuEntry(key: ValueKey('b'), value: 2, label: '观众优先'),
+                ],
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    final scheme = Theme.of(tester.element(find.byKey(const ValueKey('b')))).colorScheme;
+    final current = tester.widget<Text>(find.text('观众优先'));
+    expect(current.style?.color, scheme.primary);
+    expect(current.style?.fontWeight, FontWeight.w600);
+    expect(tester.widget<Text>(find.text('综合')).style?.color, scheme.onSurface);
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('b')), matching: find.byIcon(AppIcons.selected)),
+      findsOneWidget,
+    );
+    expect(find.byIcon(AppIcons.selected), findsOneWidget);
+    expect(tester.getCenter(find.byIcon(AppIcons.selected)).dx, greaterThan(tester.getTopRight(find.text('观众优先')).dx));
+    await tester.tap(find.text('综合'));
+    await tester.pumpAndSettle();
+    expect(chosen, 1);
+  });
+
+  testWidgets('the page title: a 17-point name over a 12-point line in the variant colour', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: const LiveTheme().light,
+        home: Scaffold(
+          appBar: AppBar(
+            centerTitle: false,
+            title: const PageTitle(title: '观看记录', subtitle: '18 / 50 条'),
+          ),
+        ),
+      ),
+    );
+    final scheme = Theme.of(tester.element(find.byType(PageTitle))).colorScheme;
+    final title = tester.widget<Text>(find.text('观看记录'));
+    final line = tester.widget<Text>(find.text('18 / 50 条'));
+    expect(title.style?.fontSize, 17);
+    expect(title.style?.fontWeight, FontWeight.w600);
+    expect(line.style?.fontSize, 12);
+    expect(line.style?.color, scheme.onSurfaceVariant);
+    expect(tester.getTopLeft(find.text('18 / 50 条')).dx, tester.getTopLeft(find.text('观看记录')).dx);
+    expect(tester.getTopLeft(find.text('18 / 50 条')).dy, greaterThan(tester.getTopLeft(find.text('观看记录')).dy));
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(body: PageTitle(title: '网页搜索')),
+      ),
+    );
+    expect(find.byKey(const ValueKey('page-subtitle')), findsNothing);
+  });
 }

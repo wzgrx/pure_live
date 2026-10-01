@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
+import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
 
 /// One row of the small menu ([showAppMenu], [AppMenuButton]).
@@ -43,10 +45,20 @@ const double appMenuGap = 4;
 /// sits in the right half. A choice closes it and is returned; a tap
 /// outside, Back and Esc close it with null. Arrows and Enter work as in
 /// every Material menu.
-Future<T?> showAppMenu<T>(BuildContext context, {required List<AppMenuEntry<T>> entries, bool preferAbove = false}) {
+///
+/// A menu of choices passes the current one as [selected]: its row is in
+/// the primary colour, semibold, with a tick at the end (docs/ui/UI_PLAN.md
+/// §7: the current entry is always "primary + tick").
+Future<T?> showAppMenu<T>(
+  BuildContext context, {
+  required List<AppMenuEntry<T>> entries,
+  bool preferAbove = false,
+  T? selected,
+}) {
   if (entries.isEmpty) return Future.value();
   final scheme = Theme.of(context).colorScheme;
   final text = context.textStyles.t14.copyWith(color: scheme.onSurface);
+  final current = text.emphasis.copyWith(color: scheme.primary);
   return showMenu<T>(
     context: context,
     position: _position(context, entries.length, preferAbove: preferAbove),
@@ -68,8 +80,17 @@ Future<T?> showAppMenu<T>(BuildContext context, {required List<AppMenuEntry<T>> 
                 const SizedBox(width: 12),
               ],
               Flexible(
-                child: Text(entry.label, style: text, maxLines: 1, overflow: TextOverflow.ellipsis),
+                child: Text(
+                  entry.label,
+                  style: selected != null && entry.value == selected ? current : text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
+              if (selected != null && entry.value == selected) ...[
+                const SizedBox(width: 16),
+                Icon(AppIcons.selected, size: 18, color: scheme.primary),
+              ],
             ],
           ),
         ),

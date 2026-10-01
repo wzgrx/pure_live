@@ -1,6 +1,6 @@
 # U.12a 工具箱（链接解析）：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：已确认（2026-10-01，用户已同意全部设计：“后续全部通过”；“需要你选的”按建议）。原状态：待确认（第 1 版，2026-10-01）
 - 范围：链接解析页（输入、进行中、支持列表）、选择清晰度和选择线路对话框、自动填充提示和结果提示
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u12a)、[TASK_FILES.md](../../TASK_FILES.md#u12a)
 - 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）

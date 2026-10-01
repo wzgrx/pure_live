@@ -1,13 +1,14 @@
 import 'package:flutter/widgets.dart';
-import 'package:pure_live/pages/under_construction.dart';
+import 'package:pure_live/pages/search/search_view.dart';
+import 'package:pure_live/pages/search/web_search_view.dart';
 import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/routes/route_path.dart';
 
 /// Search and web search (3.x `lib/modules/search`).
 ///
-/// Routes: `RoutePath.kSearch`, `RoutePath.kWebSearch`.
-///
-/// A placeholder until M13 rebuilds it: M13 replaces only this folder and
-/// keeps the class name and constructor, so the route table stays as it is.
+/// Routes: `RoutePath.kSearch` ([SearchView]; a `String` argument is
+/// searched at once) and `RoutePath.kWebSearch` ([WebSearchView]; 3.x's
+/// `{'url': …, 'platform': …}` argument).
 class SearchPage extends StatelessWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -16,5 +17,13 @@ class SearchPage extends StatelessWidget {
   final RouteArgs route;
 
   @override
-  Widget build(BuildContext context) => UnderConstruction(route: route);
+  Widget build(BuildContext context) => switch (route.path) {
+    RoutePath.kWebSearch => WebSearchView(arguments: route.arguments),
+    _ => SearchView(
+      initialKeyword: switch (route.arguments) {
+        final String keyword => keyword,
+        _ => null,
+      },
+    ),
+  };
 }

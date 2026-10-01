@@ -98,7 +98,7 @@ tools/live_cli（平台探针、样本录制）、tools/check_latest、tools/gat
 | M10 | 投屏 | 直播间的 DLNA 部分 | live_cast | 完成（2026-10-01，[记录](modules/M10-cast.md)） |
 | M11 | 界面基础：主题、通用组件、图标 | `common/style`、`common/styles`、`common/widgets` | live_ui | 完成（2026-10-01，[记录](modules/M11-ui.md)） |
 | M12 | 应用骨架：入口、路由、首页外壳、多语言、Android 和 Windows 原生部分 | `main.dart`、`routes/`、`modules/home`、`assets/translations`、`android/`、`windows/`、`plugins/built_in_kotlin` | apps/pure_live | 完成（2026-10-01，[记录](modules/M12-app.md)） |
-| M13.x | 各页面，一个页面一次上传 | `modules/*`、`recorder/pages` | apps/pure_live | 未开始 |
+| M13.x | 各页面，一个页面一次上传 | `modules/*`、`recorder/pages` | apps/pure_live | 进行中：M13.4 搜索完成（[记录](modules/M13.4-search.md)） |
 | M14 | 电视端：以 pure_live_TV 的代码为基础并入 | pure_live_TV | apps/pure_live 的电视模式 | 未开始 |
 | M15 | 发布：正式签名、Windows 安装包、覆盖安装 3.x 验证 | — | — | 未开始 |
 

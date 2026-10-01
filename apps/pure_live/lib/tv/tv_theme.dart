@@ -1,109 +1,89 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:live_ui/live_ui.dart';
 
-// The TV look (pure_live_TV b9d2f739 `lib/core/theme/`): a palette derived
-// from one accent, sizes drafted against a 1920x1080 panel, text lifted on
-// small panels, and room grids whose columns follow the text size.
+// The TV look (docs/ui/compare/U.15a): the phone's dark colour roles seeded
+// with the user's theme colour (choice A2), sizes drafted on the 960 x 540
+// canvas of a 1080p television, text one step above the phone (at least 14),
+// and room grids whose columns follow the text size.
 
-/// The colours of the TV interface, derived from the app theme's primary
-/// colour (pure_live_TV `TvThemeData`: deep tinted surfaces on dark, warm
-/// paper tones on light, all in the accent's hue).
+/// The colours of the TV interface: the phone's dark colour roles (U.15a c4,
+/// choice A2), so the TV and the phone are one palette seeded with the
+/// user's theme colour. The TV is dark only (U.6b → U.15i).
 @immutable
 final class TvPalette {
-  /// Creates a palette.
-  const new({
-    required this.background,
-    required this.focus,
-    required this.text,
-    required this.textSecondary,
-    required this.card,
-    required this.focusedCard,
-    required this.isLight,
-  });
+  /// Creates the palette of [scheme] (a dark scheme).
+  const new(this.scheme);
 
-  /// The palette of [scheme]'s brightness and primary colour.
-  factory of(ColorScheme scheme) {
-    final seed = scheme.primary;
-    final light = scheme.brightness == Brightness.light;
-    return light
-        ? TvPalette(
-            background: _tinted(seed, 0.955, 0.30),
-            focus: _vivid(seed),
-            text: _tinted(seed, 0.13, 0.28),
-            textSecondary: _tinted(seed, 0.13, 0.28).withValues(alpha: 0.72),
-            card: _tinted(seed, 0.99, 0.22),
-            focusedCard: _tinted(seed, 0.88, 0.45),
-            isLight: true,
-          )
-        : TvPalette(
-            background: _tinted(seed, 0.055),
-            focus: _vivid(seed),
-            text: _tinted(seed, 0.96, 0.10),
-            textSecondary: _tinted(seed, 0.96, 0.10).withValues(alpha: 0.72),
-            card: _tinted(seed, 0.105),
-            focusedCard: _tinted(seed, 0.20, 0.48),
-            isLight: false,
-          );
-  }
+  /// The palette of [scheme]; a light scheme is replaced by the dark one of
+  /// the same primary colour.
+  factory of(ColorScheme scheme) => TvPalette(
+    scheme.brightness == Brightness.dark
+        ? scheme
+        : ColorScheme.fromSeed(seedColor: scheme.primary, brightness: Brightness.dark),
+  );
 
-  /// The page background.
-  final Color background;
+  /// The colour roles.
+  final ColorScheme scheme;
 
-  /// The focus ring, selected fills and accents.
-  final Color focus;
+  /// The page background (`surface`).
+  Color get background => scheme.surface;
+
+  /// The side menu and settings cards (`surfaceContainerLow`).
+  Color get low => scheme.surfaceContainerLow;
+
+  /// An idle card or tab (`surfaceContainer`).
+  Color get card => scheme.surfaceContainer;
+
+  /// A focused card, a dialog (`surfaceContainerHigh`).
+  Color get raised => scheme.surfaceContainerHigh;
+
+  /// A button, a focused row (`surfaceContainerHighest`).
+  Color get highest => scheme.surfaceContainerHighest;
 
   /// Main text.
-  final Color text;
+  Color get text => scheme.onSurface;
 
-  /// Secondary text.
-  final Color textSecondary;
+  /// Secondary text: names under titles, descriptions, idle icons (P5).
+  Color get textSecondary => scheme.onSurfaceVariant;
 
-  /// An idle card or row.
-  final Color card;
+  /// Accents: the main action's text, a current choice, progress.
+  Color get accent => scheme.primary;
 
-  /// A focused card.
-  final Color focusedCard;
+  /// Text and ticks on [accent].
+  Color get onAccent => scheme.onPrimary;
 
-  /// A light palette (no glow: a halo on white reads as a grey smear).
-  final bool isLight;
+  /// What is selected (the current tab, the destination): a fill (U.15a c3).
+  Color get selected => scheme.primaryContainer;
 
-  /// Text on [focus].
-  Color get onFocus => readableOn(focus);
+  /// Text and icons on [selected].
+  Color get onSelected => scheme.onPrimaryContainer;
 
-  /// Text on [focusedCard].
-  Color get onFocusedCard => readableOn(focusedCard);
+  /// Deleting and unfollowing.
+  Color get danger => scheme.error;
 
-  /// A faint fill for rows that are neither focused nor selected.
-  Color get subtleFill => text.withValues(alpha: 0.06);
+  /// Outlines (an unticked box, a switch that is off).
+  Color get outline => scheme.outline;
 
-  /// Near-black or white, whichever reads better on [background].
-  static Color readableOn(Color background) {
-    const ink = Color(0xFF101014);
-    const paper = Color(0xFFFFFFFF);
-    return _contrast(paper, background) >= _contrast(ink, background) ? paper : ink;
-  }
+  /// Separators.
+  Color get divider => scheme.outlineVariant;
 
-  static double _contrast(Color a, Color b) {
-    final la = a.computeLuminance();
-    final lb = b.computeLuminance();
-    return (math.max(la, lb) + 0.05) / (math.min(la, lb) + 0.05);
-  }
+  /// The focus ring (near white, the same on every theme colour).
+  Color get focusRing => TvColors.focusRing;
 
-  static Color _vivid(Color seed) {
-    final hsl = HSLColor.fromColor(seed);
-    return HSLColor.fromAHSL(1, hsl.hue, hsl.saturation.clamp(0.55, 0.95), 0.52).toColor();
-  }
+  @override
+  bool operator ==(Object other) => other is TvPalette && other.scheme == scheme;
 
-  static Color _tinted(Color seed, double lightness, [double? saturation]) {
-    final hsl = HSLColor.fromColor(seed);
-    final s = (saturation ?? hsl.saturation).clamp(0.22, 0.42);
-    return HSLColor.fromAHSL(1, hsl.hue, s, lightness).toColor();
-  }
+  @override
+  int get hashCode => scheme.hashCode;
 }
 
-/// Sizes of the TV interface: lengths are drafted against a 1920x1080
-/// panel (pure_live_TV `TvTextScale.designSize`) and scaled to the screen.
+/// Sizes of the TV interface, scaled to the screen.
+///
+/// New components draw on the 960 x 540 canvas of a 1080p television ([px]:
+/// the logical pixels of docs/ui/compare/U.15a); the room keeps pure_live_TV's
+/// 1920 x 1080 drafts ([call]) until U.15d redraws it.
 @immutable
 final class TvScale {
   /// Creates the scale: [unit] logical pixels per design pixel and the
@@ -117,10 +97,10 @@ final class TvScale {
     return TvScale(unit: unit > 0 ? unit : 1, textScale: MediaQuery.textScalerOf(context).scale(1));
   }
 
-  /// The panel the sizes are drafted for.
+  /// The panel the 1080p drafts are drawn for.
   static const double designWidth = 1920;
 
-  /// The panel the sizes are drafted for.
+  /// The panel the 1080p drafts are drawn for.
   static const double designHeight = 1080;
 
   /// Logical pixels per design pixel.
@@ -129,16 +109,26 @@ final class TvScale {
   /// The text scale in force (the user's size times the panel lift).
   final double textScale;
 
-  /// [design] pixels as logical pixels.
+  /// [design] pixels (1920 x 1080 drafts) as logical pixels.
   double call(num design) => design * unit;
 
   /// [design] pixels of a box that holds text: grows with the text (3.x's
   /// `.ts(context)`), so labels are never clipped at a large text size.
   double text(num design) => design * unit * textScale;
 
+  /// [canvas] pixels of the 960 x 540 canvas as logical pixels.
+  double px(num canvas) => canvas * unit * 2;
+
+  /// [canvas] pixels of a box that holds text (grows with the text).
+  double pxText(num canvas) => canvas * unit * 2 * textScale;
+
   /// A text style of [size] design pixels.
   TextStyle style(num size, {FontWeight? weight, Color? color, double? height}) =>
       TextStyle(fontSize: size * unit, fontWeight: weight, color: color, height: height);
+
+  /// A text style of [size] canvas pixels (U.15a c5: at least 14).
+  TextStyle font(num size, {FontWeight? weight, Color? color, double? height}) =>
+      TextStyle(fontSize: px(size), fontWeight: weight, color: color, height: height);
 
   /// How much text is lifted on a panel smaller than 1080 lines
   /// (pure_live_TV `legibilityLift`: a 720p box draws at 1080 / 720, at
@@ -151,6 +141,44 @@ final class TvScale {
   }
 }
 
+/// The text sizes of the TV (U.15a c5), in canvas pixels: one step above the
+/// phone, never under 14.
+abstract final class TvTextSize {
+  /// Dialog titles, status titles, page titles.
+  static const double title = 22;
+
+  /// A room card's name (the streamer in the card dialog).
+  static const double heading = 20;
+
+  /// Settings row titles.
+  static const double row = 17;
+
+  /// Body text, buttons, card titles, options.
+  static const double body = 16;
+
+  /// Secondary lines: streamer names, descriptions, chips, counts.
+  static const double small = 14;
+}
+
+/// Corner radii of the TV (U.15a), in canvas pixels.
+abstract final class TvRadius {
+  /// Cards, rows, options, inputs.
+  static const double card = 12;
+
+  /// Settings cards.
+  static const double group = 16;
+
+  /// Dialogs.
+  static const double dialog = 24;
+
+  /// Pills (buttons, tabs) are fully round.
+  static const double pill = 999;
+}
+
+/// How long the focus takes to arrive (U.15a c1); leaving does not animate,
+/// so a held arrow never leaves a trail of half-lit items.
+const Duration tvFocusDuration = Duration(milliseconds: 120);
+
 /// Room grid columns at the user's [textScale] (pure_live_TV
 /// `ThemeSettingsController.cardGridDelegate`: four columns, one fewer up
 /// to 130 %, two fewer above).
@@ -159,33 +187,32 @@ int tvRoomColumns(double textScale, {int base = 4}) {
   return math.max(1, base - fewer);
 }
 
-/// Width over height of a room card at [columns] (pure_live_TV
-/// `roomCardAspectRatio`).
-double tvRoomAspectRatio(int columns) => switch (columns) {
-  5 => 1.25,
-  6 => 1.5,
-  _ => 1.3,
-};
-
-/// The palette and sizes of the TV interface below it.
+/// The palette of the TV interface below it, and whether focused items grow
+/// (the `tvFocusZoom` setting, U.15a c2).
 class TvTheme extends InheritedWidget {
   /// Provides [palette].
-  const new({required this.palette, required super.child, super.key});
+  const new({required this.palette, required super.child, this.zoom = true, super.key});
 
   /// The colours.
   final TvPalette palette;
 
+  /// Focused cards, buttons and tabs grow by 5 % (off on slow boxes).
+  final bool zoom;
+
   /// The palette of [context] (derived from the theme when no [TvTheme] is
-  /// above, so pages also work on their own in tests).
+  /// above, so components also work on their own in tests).
   static TvPalette of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<TvTheme>()?.palette ?? TvPalette.of(Theme.of(context).colorScheme);
 
+  /// Whether focused items grow below [context].
+  static bool zoomOf(BuildContext context) => context.dependOnInheritedWidgetOfExactType<TvTheme>()?.zoom ?? true;
+
   @override
-  bool updateShouldNotify(TvTheme oldWidget) => palette != oldWidget.palette;
+  bool updateShouldNotify(TvTheme oldWidget) => palette != oldWidget.palette || zoom != oldWidget.zoom;
 }
 
-/// The default text and icon colours of the palette (pure_live_TV
-/// `TvPaletteDefaults`), over a filled background.
+/// The default text and icon colours of the palette, over the page
+/// background.
 class TvBackground extends StatelessWidget {
   /// Paints the background under [child].
   const new({required this.child, super.key});
@@ -200,9 +227,9 @@ class TvBackground extends StatelessWidget {
     return ColoredBox(
       color: palette.background,
       child: IconTheme(
-        data: IconThemeData(color: palette.text, size: scale(28)),
+        data: IconThemeData(color: palette.textSecondary, size: scale.px(24)),
         child: DefaultTextStyle(
-          style: scale.style(22, weight: FontWeight.w500, color: palette.text),
+          style: scale.font(TvTextSize.body, color: palette.text),
           child: child,
         ),
       ),

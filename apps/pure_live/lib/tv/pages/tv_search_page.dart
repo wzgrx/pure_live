@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/search/search_history.dart';
 import 'package:pure_live/features/search/search_model.dart';
@@ -12,9 +13,10 @@ import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 import 'package:pure_live/tv/home/tv_home_page.dart';
 import 'package:pure_live/tv/tv_theme.dart';
+import 'package:pure_live/tv/widgets/tv_button.dart';
 import 'package:pure_live/tv/widgets/tv_dialogs.dart';
-import 'package:pure_live/tv/widgets/tv_focusable.dart';
 import 'package:pure_live/tv/widgets/tv_room_grid.dart';
+import 'package:pure_live/tv/widgets/tv_status.dart';
 import 'package:pure_live/tv/widgets/tv_tabs.dart';
 
 /// Search as a page of its own (the phone's `RoutePath.kSearch` on the TV).
@@ -122,6 +124,19 @@ class _TvSearchPaneState extends ConsumerState<TvSearchPane> {
     return true;
   }
 
+  /// Clears the recent words after asking (pure_live_TV asked; the focus
+  /// starts on cancel, U.15a c12).
+  Future<void> _clearRecent(int count) async {
+    final confirmed = await showTvConfirm(
+      context,
+      title: i18n('tv_search_clear_title'),
+      message: i18n('tv_search_clear_message', args: {'count': '$count'}),
+      confirmLabel: i18n('tv_search_clear'),
+      danger: true,
+    );
+    if (confirmed) await _history.clear();
+  }
+
   void _search(String word) {
     final text = word.trim();
     if (text.isEmpty) return;
@@ -143,7 +158,7 @@ class _TvSearchPaneState extends ConsumerState<TvSearchPane> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(scale(24), scale(20), scale(24), scale(4)),
+            padding: EdgeInsets.fromLTRB(scale.px(12), scale.px(16), scale.px(12), scale.px(4)),
             child: TvInputField(
               focusNode: _field,
               autofocus: standalone,
@@ -154,9 +169,9 @@ class _TvSearchPaneState extends ConsumerState<TvSearchPane> {
           ),
           TvTabBar(
             key: _tabs,
-            fontSize: 19,
+            small: true,
             tabs: [
-              TvTab(id: SiteIds.all, label: i18n('tv_all_platforms'), icon: Icons.apps_rounded),
+              TvTab(id: SiteIds.all, label: i18n('tv_all_platforms'), icon: TvIcons.allPlatforms),
               for (final site in _model.sites)
                 TvTab(
                   id: site.id,
@@ -179,21 +194,22 @@ class _TvSearchPaneState extends ConsumerState<TvSearchPane> {
   Widget _results() {
     final rooms = _model.results;
     if (rooms.isEmpty) {
-      if (_model.loading) return TvMessage(busy: true, title: i18n('tv_searching'));
+      if (_model.loading) return const TvSkeletonGrid();
       final unsupported = _model.unsupported;
-      return TvMessage(
-        icon: Icons.search_off_rounded,
+      return TvStatusView(
+        icon: TvIcons.noResults,
         title: unsupported != null
             ? i18n('tv_search_unsupported', args: {'platform': platformName(unsupported.id)})
             : i18n('tv_search_empty'),
         subtitle: _model.failed.isEmpty
-            ? null
+            ? i18n('tv_search_empty_hint')
             : i18n('tv_search_failed', args: {'platforms': _model.failed.map(platformName).join('、')}),
       );
     }
     return TvRoomGrid(
       key: _grid,
       rooms: rooms,
+      showPlatform: _model.selected == 0,
       onLeaveUp: () => _tabs.currentState?.focusSelected(),
       onEndReached: () {
         if (_model.hasMore && !_model.loadingMore && !_model.loading) unawaited(_model.loadMore());
@@ -206,10 +222,10 @@ class _TvSearchPaneState extends ConsumerState<TvSearchPane> {
     final palette = TvTheme.of(context);
     final words = _history.words;
     if (words.isEmpty) {
-      return TvMessage(icon: Icons.manage_search_rounded, title: i18n('tv_search_intro'));
+      return TvStatusView(icon: TvIcons.searchIntro, title: i18n('tv_menu_search'), subtitle: i18n('tv_search_intro'));
     }
     return SingleChildScrollView(
-      padding: EdgeInsets.all(scale(24)),
+      padding: EdgeInsets.all(scale.px(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -217,31 +233,31 @@ class _TvSearchPaneState extends ConsumerState<TvSearchPane> {
             children: [
               Text(
                 i18n('tv_search_recent'),
-                style: scale.style(24, weight: FontWeight.w700, color: palette.text),
+                style: scale.font(TvTextSize.body, weight: FontWeight.w600, color: palette.text),
               ),
-              SizedBox(width: scale(16)),
-              Text(i18n('tv_search_recent_hint'), style: scale.style(17, color: palette.textSecondary)),
+              SizedBox(width: scale.px(12)),
+              Text(i18n('tv_search_recent_hint'), style: scale.font(TvTextSize.small, color: palette.textSecondary)),
               const Spacer(),
               TvButton(
                 key: const ValueKey('tv-search-clear'),
-                icon: Icons.delete_sweep_rounded,
+                icon: TvIcons.clearAll,
                 label: i18n('tv_search_clear'),
-                fontSize: 19,
-                onTap: () => unawaited(_history.clear()),
+                kind: TvButtonKind.danger,
+                onTap: () => unawaited(_clearRecent(words.length)),
               ),
             ],
           ),
-          SizedBox(height: scale(16)),
+          SizedBox(height: scale.px(12)),
           Wrap(
-            spacing: scale(14),
-            runSpacing: scale(14),
+            spacing: scale.px(12),
+            runSpacing: scale.px(12),
             children: [
               for (final word in words)
                 TvButton(
                   key: ValueKey('tv-search-word-$word'),
-                  icon: Icons.history_rounded,
+                  icon: TvIcons.recentWord,
                   label: word,
-                  fontSize: 20,
+                  small: true,
                   onTap: () => _search(word),
                   onLongPress: () => unawaited(_history.remove(word)),
                 ),

@@ -15,8 +15,10 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/tv/home/tv_home_page.dart';
 import 'package:pure_live/tv/room/tv_live_play_page.dart';
 import 'package:pure_live/tv/tv_theme.dart';
+import 'package:pure_live/tv/widgets/tv_button.dart';
 import 'package:pure_live/tv/widgets/tv_dialogs.dart';
 import 'package:pure_live/tv/widgets/tv_focusable.dart';
+import 'package:pure_live/tv/widgets/tv_room_card.dart';
 
 import '../features/live_play/live_play_support.dart';
 import '../support.dart';
@@ -153,7 +155,10 @@ void main() {
     expect(UiMode.tv.showsTv(television: false), isTrue);
     // pure_live_TV: four columns, one fewer up to 130 %, two fewer above.
     expect([1.0, 1.15, 1.3, 1.45, 1.6].map(tvRoomColumns), [4, 3, 3, 2, 2]);
-    expect(tvRoomAspectRatio(5), 1.25);
+    // A card is its 16:9 cover over two lines (U.15a): at 184 wide on a
+    // 1080p television (unit 0.5) the cover is 103.5 high.
+    const scale = TvScale(unit: 0.5, textScale: 1);
+    expect(TvRoomCard.heightFor(184, scale), closeTo(184 * 9 / 16 + 16 + 42 + 1, 0.01));
     // The settings page has the row.
     expect(settingsCatalog.where((entry) => entry.id == 'ui_mode'), hasLength(1));
   });
@@ -286,7 +291,7 @@ void main() {
     await _close(tester, services);
   });
 
-  testWidgets('a held OK opens the card menu instead of the room', (tester) async {
+  testWidgets('a held OK opens the card dialog instead of the room; the menu key too', (tester) async {
     final services = await _pumpApp(tester);
     await _press(tester, LogicalKeyboardKey.arrowDown);
     await _press(tester, LogicalKeyboardKey.select);
@@ -297,14 +302,26 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.sendKeyUpEvent(LogicalKeyboardKey.select);
     await _settle(tester);
-    expect(find.byKey(const ValueKey('room-menu')), findsOneWidget);
+    expect(find.byKey(const ValueKey('tv-room-dialog')), findsOneWidget);
     expect(find.byType(TvLivePlayPage), findsNothing);
-    // The menu took the focus (no arrow needed).
+    // The dialog took the focus (no arrow needed): "设置标签" (U.15a c9).
     expect(FocusManager.instance.primaryFocus?.context?.findAncestorWidgetOfExactType<Dialog>(), isNotNull);
+    expect(
+      FocusManager.instance.primaryFocus?.context?.findAncestorWidgetOfExactType<TvButton>()?.key,
+      const ValueKey('tv-room-dialog-tags'),
+    );
 
     await _press(tester, LogicalKeyboardKey.escape);
     await _settle(tester);
-    expect(find.byKey(const ValueKey('room-menu')), findsNothing);
+    expect(find.byKey(const ValueKey('tv-room-dialog')), findsNothing);
+    expect(_focused, 'cell 0');
+
+    // The remote's menu key is the same as a held OK (U.15a c10).
+    await _press(tester, LogicalKeyboardKey.contextMenu);
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('tv-room-dialog')), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await _settle(tester);
     expect(_focused, 'cell 0');
     await _close(tester, services);
   });
@@ -313,10 +330,11 @@ void main() {
     tester,
   ) async {
     final asked = <String>[];
-    TvTextInput.prompt = (context, {required title, hint = '', text = ''}) async {
-      asked.add(title);
-      return ' 直播 7 ';
-    };
+    TvTextInput.prompt =
+        (context, {required title, hint = '', text = '', subtitle, numeric = false, suffix, maxLength}) async {
+          asked.add(title);
+          return ' 直播 7 ';
+        };
     addTearDown(() => TvTextInput.prompt = TvTextInput.defaultPrompt);
     final services = await _pumpApp(tester);
     for (var i = 0; i < 4; i++) {
@@ -341,7 +359,7 @@ void main() {
     await _close(tester, services);
   });
 
-  testWidgets('TV settings: Right steps the interface mode, which switches to the phone interface', (tester) async {
+  testWidgets('TV settings: OK opens the choices on the current value; picking phone switches', (tester) async {
     final services = await _pumpApp(tester);
     for (var i = 0; i < TvPane.menu.length; i++) {
       await _press(tester, LogicalKeyboardKey.arrowDown);
@@ -349,9 +367,16 @@ void main() {
     expect(_focused, 'tv menu settings');
     await _press(tester, LogicalKeyboardKey.select);
     expect(find.byKey(const ValueKey('tv-setting-ui_mode')), findsOneWidget);
-    // The first row has the focus; Right steps tv → (none after tv), Left
-    // steps back to phone.
-    await _press(tester, LogicalKeyboardKey.arrowLeft);
+    // The first row has the focus; OK opens the choices with the focus on
+    // the current one (tv), Up moves to phone, OK picks it (U.15a row 13).
+    await _press(tester, LogicalKeyboardKey.select);
+    expect(find.byKey(const ValueKey('tv-option-current')), findsOneWidget);
+    expect(
+      FocusManager.instance.primaryFocus?.context?.findAncestorWidgetOfExactType<TvOptionRow>()?.key,
+      const ValueKey('tv-choice-2'),
+    );
+    await _press(tester, LogicalKeyboardKey.arrowUp);
+    await _press(tester, LogicalKeyboardKey.select);
     await _settle(tester);
     expect(services.store.settings.get(Settings.uiMode), 'phone');
     expect(find.byType(HomePage), findsOneWidget);

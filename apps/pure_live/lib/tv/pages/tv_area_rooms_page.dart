@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/areas/areas_common.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -13,14 +14,17 @@ import 'package:pure_live/shared/rooms/room_feed.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 import 'package:pure_live/tv/pages/tv_popular_pane.dart';
 import 'package:pure_live/tv/tv_theme.dart';
-import 'package:pure_live/tv/widgets/tv_dialogs.dart';
-import 'package:pure_live/tv/widgets/tv_focusable.dart';
+import 'package:pure_live/tv/widgets/tv_button.dart';
+import 'package:pure_live/tv/widgets/tv_page_header.dart';
 import 'package:pure_live/tv/widgets/tv_room_grid.dart';
+import 'package:pure_live/tv/widgets/tv_status.dart';
 
 /// An area's rooms on the TV (arguments `[LiveSite, LiveArea]`, the phone's
 /// `RoutePath.kAreaRooms`): the shared area feed (`AreaRoomSource`, M12.2)
-/// in a room grid, with the area's name and a follow button above. The
-/// focus starts on the first room once they arrive.
+/// in a room grid under the sub-page header (docs/ui/compare/U.15a c13: the
+/// area and its platform, the follow button on the right, no "返回"
+/// button). The focus starts on the first room once they arrive; Back
+/// leaves.
 class TvAreaRoomsPage extends ConsumerStatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -87,39 +91,43 @@ class _TvAreaRoomsPageState extends ConsumerState<TvAreaRoomsPage> {
       backgroundColor: palette.background,
       body: TvBackground(
         child: feed == null || area == null
-            ? TvMessage(icon: Icons.error_outline_rounded, title: i18n('get_room_info_failed_retry'), autofocus: true)
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(scale(32), scale(24), scale(32), 0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${platformName(area.platform)} · ${areaDisplayName(area)}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: scale.style(30, weight: FontWeight.w700, color: palette.text),
+            ? TvStatusView(
+                icon: TvIcons.loadFailed,
+                title: i18n('get_room_info_failed_retry'),
+                subtitle: i18n('tv_room_switch_hint'),
+              )
+            : Padding(
+                padding: EdgeInsets.fromLTRB(scale.px(36), scale.px(28), scale.px(36), 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: scale.px(12)),
+                      child: TvPageHeader(
+                        title: areaDisplayName(area),
+                        subtitle: platformName(area.platform),
+                        actions: [
+                          TvButton(
+                            key: const ValueKey('tv-area-follow'),
+                            focusNode: _follow,
+                            icon: followed.contains(area.identityKey) ? TvIcons.followedArea : TvIcons.followArea,
+                            label: i18n(followed.contains(area.identityKey) ? 'tv_area_followed' : 'tv_area_follow'),
+                            selected: followed.contains(area.identityKey),
+                            onTap: () => unawaited(toggleAreaFollow(context, ref, area)),
                           ),
-                        ),
-                        TvButton(
-                          key: const ValueKey('tv-area-follow'),
-                          focusNode: _follow,
-                          icon: followed.contains(area.identityKey)
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          label: i18n(followed.contains(area.identityKey) ? 'tv_area_followed' : 'tv_area_follow'),
-                          selected: followed.contains(area.identityKey),
-                          onTap: () => unawaited(toggleAreaFollow(context, ref, area)),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: TvFeedGrid(feed: feed, gridKey: _grid, onLeaveUp: _follow.requestFocus),
-                  ),
-                ],
+                    Expanded(
+                      child: TvFeedGrid(
+                        feed: feed,
+                        gridKey: _grid,
+                        onLeaveUp: _follow.requestFocus,
+                        emptyHint: 'tv_empty_area',
+                      ),
+                    ),
+                  ],
+                ),
               ),
       ),
     );

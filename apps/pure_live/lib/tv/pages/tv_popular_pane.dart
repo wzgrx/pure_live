@@ -3,26 +3,36 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/home/home_menu.dart';
 import 'package:pure_live/features/popular/popular_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/room_feed.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
-import 'package:pure_live/tv/widgets/tv_dialogs.dart';
 import 'package:pure_live/tv/widgets/tv_room_grid.dart';
+import 'package:pure_live/tv/widgets/tv_status.dart';
 import 'package:pure_live/tv/widgets/tv_tabs.dart';
 
 /// How many rooms a TV page asks for at a time (pure_live_TV pages 12 at a
 /// time; a 1080p grid shows about twelve, so two screens).
 const int tvPageSize = 24;
 
-/// Shows [feed]'s rooms in a [TvRoomGrid], with the loading, failed and
-/// empty states; the grid asks for the next [tvPageSize] rooms near its
-/// end.
+/// Shows [feed]'s rooms in a [TvRoomGrid], with the states of
+/// docs/ui/compare/U.15a c14: a static skeleton on the first load, the
+/// cause of a failure in words (and "前往登录" when the platform wants a
+/// login), an empty list saying what to do with the remote; the grid asks
+/// for the next [tvPageSize] rooms near its end.
 class TvFeedGrid extends StatelessWidget {
   /// Creates the view of [feed].
-  const new({required this.feed, required this.gridKey, this.onLeaveUp, super.key});
+  const new({
+    required this.feed,
+    required this.gridKey,
+    this.onLeaveUp,
+    this.emptyHint = 'tv_empty_platform',
+    this.columns = 4,
+    super.key,
+  });
 
   /// The rooms.
   final RoomFeed feed;
@@ -33,26 +43,33 @@ class TvFeedGrid extends StatelessWidget {
   /// Up on the first row.
   final VoidCallback? onLeaveUp;
 
+  /// The key of what an empty list says to do with the remote.
+  final String emptyHint;
+
+  /// The columns of the first load's skeleton.
+  final int columns;
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: feed,
     builder: (context, _) {
       final rooms = feed.rooms;
       if (rooms.isEmpty) {
-        if (!feed.loaded || feed.busy) return TvMessage(busy: true, title: i18n('tv_loading'));
+        if (!feed.loaded || feed.busy) return TvSkeletonGrid(columns: columns);
         if (feed.error != null) {
-          return TvMessage(
-            icon: Icons.error_outline_rounded,
-            title: describeLoadError(feed.error),
-            action: i18n('retry'),
-            onAction: () => unawaited(feed.retry(count: tvPageSize)),
-          );
+          return TvStatusView.failure(feed.error, onRetry: () => unawaited(feed.retry(count: tvPageSize)));
         }
-        return TvMessage(
-          icon: Icons.live_tv_rounded,
-          title: i18n('tv_no_rooms'),
-          action: i18n('tv_refresh'),
-          onAction: () => unawaited(feed.refresh(count: tvPageSize)),
+        return TvStatusView(
+          icon: TvIcons.noRooms,
+          title: i18n('empty_live_title'),
+          subtitle: i18n(emptyHint),
+          actions: [
+            TvStatusAction(
+              icon: AppIcons.refresh,
+              label: i18n('tv_refresh'),
+              onTap: () => unawaited(feed.refresh(count: tvPageSize)),
+            ),
+          ],
         );
       }
       return TvRoomGrid(
@@ -117,7 +134,7 @@ class _TvPopularPaneState extends ConsumerState<TvPopularPane> {
   Widget build(BuildContext context) {
     final sites = ref.read(sitesProvider);
     final ids = sites.availableIds(watchSetting(ref, Settings.hotAreasList));
-    if (ids.isEmpty) return TvMessage(icon: Icons.apps_rounded, title: i18n('tv_no_platforms'));
+    if (ids.isEmpty) return TvStatusView(icon: TvIcons.noPlatforms, title: i18n('tv_no_platforms'));
     var current = _current;
     if (current == null || !ids.contains(current)) {
       final preferred = _catalog.currentPlatform ?? ref.read(storeProvider).settings.get(Settings.preferPlatform);

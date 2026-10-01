@@ -3,17 +3,18 @@
 library;
 
 export 'package:remixicon/remixicon.dart';
-
 export 'src/icons/app_icons.dart';
 export 'src/icons/custom_icons.dart';
 export 'src/icons/danmaku_icon.dart';
 export 'src/icons/platform_logo.dart';
+export 'src/icons/tv_icons.dart';
 export 'src/scope.dart';
 export 'src/theme/dynamic_color.dart' show LiveDynamicColorBuilder, MaterialUiThemeBridge, toFlutterColorScheme;
 export 'src/theme/grid_columns.dart';
 export 'src/theme/live_colors.dart';
 export 'src/theme/live_theme.dart';
 export 'src/theme/text_styles.dart';
+export 'src/theme/tv_colors.dart';
 export 'src/widgets/adaptive_panel.dart';
 export 'src/widgets/ambient_backdrop.dart';
 export 'src/widgets/app_menu.dart';

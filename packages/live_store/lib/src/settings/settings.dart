@@ -1352,6 +1352,11 @@ abstract final class Settings {
     scope: SettingScope.internal,
   );
 
+  /// New (docs/ui/compare/U.15a c2): the TV interface grows the focused card,
+  /// button or tab by 5 %; a slow box can switch it off and keep only the
+  /// focus ring.
+  static const tvFocusZoom = BoolSetting('tvFocusZoom', section: 'app', defaultValue: true);
+
   // ---- internal ----
 
   /// The LAN-sync device id 3.x generated (remote_sync_service.dart:134).
@@ -1530,6 +1535,7 @@ abstract final class Settings {
     douyuCookieSavedAt,
     remoteSyncDeviceId,
     uiMode,
+    tvFocusZoom,
   ];
 
   static final Map<String, Setting<Object>> _byKey = {for (final setting in all) setting.key: setting};

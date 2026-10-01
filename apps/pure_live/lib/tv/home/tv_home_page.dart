@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/home/home_menu.dart';
 import 'package:pure_live/features/version/update_feed.dart';
@@ -19,41 +20,41 @@ import 'package:pure_live/tv/pages/tv_search_page.dart';
 import 'package:pure_live/tv/pages/tv_settings_pane.dart';
 import 'package:pure_live/tv/tv_navigation.dart';
 import 'package:pure_live/tv/tv_theme.dart';
-import 'package:pure_live/tv/widgets/tv_dialogs.dart';
-import 'package:pure_live/tv/widgets/tv_focusable.dart';
+import 'package:pure_live/tv/widgets/tv_nav_item.dart';
+import 'package:pure_live/tv/widgets/tv_status.dart';
 
 /// The destinations of the TV side menu (pure_live_TV `TvMenuType` and its
 /// mode switch), in order; [settings] sits at the bottom.
 enum TvPane {
   /// Follows (the landing destination, as on pure_live_TV and 3.x).
-  favorites('tv_menu_favorites', Icons.favorite_rounded),
+  favorites('tv_menu_favorites', TvIcons.menuFavorites),
 
   /// Recommended rooms per platform.
-  popular('tv_menu_popular', Icons.local_fire_department_rounded),
+  popular('tv_menu_popular', TvIcons.menuPopular),
 
   /// Areas per platform, followed areas first.
-  areas('tv_menu_areas', Icons.grid_view_rounded),
+  areas('tv_menu_areas', TvIcons.menuAreas),
 
   /// Watch history.
-  history('tv_menu_history', Icons.history_rounded),
+  history('tv_menu_history', TvIcons.menuHistory),
 
   /// Search.
-  search('tv_menu_search', Icons.search_rounded),
+  search('tv_menu_search', TvIcons.menuSearch),
 
   /// IPTV playlists and channels.
-  iptv('tv_menu_iptv', Icons.live_tv_rounded),
+  iptv('tv_menu_iptv', TvIcons.menuIptv),
 
   /// Videos (M14.3); not shown yet.
-  video('tv_menu_video', Icons.movie_rounded, available: false),
+  video('tv_menu_video', TvIcons.menuVideo, available: false),
 
   /// Music (M14.4); not shown yet.
-  music('tv_menu_music', Icons.library_music_rounded, available: false),
+  music('tv_menu_music', TvIcons.menuMusic, available: false),
 
   /// Wallpapers (M14.5); not shown yet.
-  wallpaper('tv_menu_wallpaper', Icons.wallpaper_rounded, available: false),
+  wallpaper('tv_menu_wallpaper', TvIcons.menuWallpaper, available: false),
 
   /// The TV settings.
-  settings('tv_menu_settings', Icons.settings_rounded);
+  settings('tv_menu_settings', TvIcons.menuSettings);
 
   new(this.labelKey, this.icon, {this.available = true});
 
@@ -312,7 +313,7 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
     TvPane.settings => const TvSettingsPane(),
     TvPane.video ||
     TvPane.music ||
-    TvPane.wallpaper => TvMessage(icon: Icons.construction_rounded, title: i18n('tv_under_construction')),
+    TvPane.wallpaper => TvStatusView(icon: TvIcons.underConstruction, title: i18n('tv_under_construction')),
   };
 
   @override
@@ -334,14 +335,17 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
               FocusTraversalGroup(
                 child: Container(
                   key: const ValueKey('tv-home-menu'),
-                  width: scale.text(240),
-                  color: palette.card.withValues(alpha: 0.55),
-                  padding: EdgeInsets.symmetric(vertical: scale(28), horizontal: scale(16)),
+                  width: scale.pxText(200),
+                  decoration: BoxDecoration(
+                    color: palette.low,
+                    border: Border(right: BorderSide(color: palette.divider)),
+                  ),
+                  padding: EdgeInsets.fromLTRB(scale.px(24), scale.px(28), scale.px(16), scale.px(28)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const _Clock(),
-                      SizedBox(height: scale(24)),
+                      SizedBox(height: scale.px(16)),
                       Expanded(
                         child: SingleChildScrollView(
                           clipBehavior: Clip.none,
@@ -388,46 +392,18 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
     );
   }
 
-  Widget _menuItem(TvPane pane) {
-    final palette = TvTheme.of(context);
-    final scale = TvScale.of(context);
-    final selected = pane == _pane;
-    return Padding(
-      padding: EdgeInsets.only(bottom: scale(12)),
-      child: TvFocusable(
-        key: ValueKey('tv-menu-${pane.name}'),
-        focusNode: _menuNode(pane),
-        radius: 40,
-        scale: 1.04,
-        onTap: () => _select(pane),
-        onKey: (node, event) => _menuKey(pane, event),
-        builder: (context, focused) {
-          final foreground = focused ? palette.onFocus : (selected ? palette.focus : palette.text);
-          return Container(
-            padding: EdgeInsets.symmetric(horizontal: scale.text(18), vertical: scale.text(12)),
-            decoration: BoxDecoration(
-              color: focused ? palette.focus : (selected ? palette.focus.withValues(alpha: 0.2) : Colors.transparent),
-              borderRadius: BorderRadius.circular(scale(40)),
-            ),
-            child: Row(
-              children: [
-                Icon(pane.icon, color: foreground, size: scale.text(28)),
-                SizedBox(width: scale(14)),
-                Expanded(
-                  child: Text(
-                    i18n(pane.labelKey),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: scale.style(23, weight: selected ? FontWeight.w700 : FontWeight.w500, color: foreground),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
+  Widget _menuItem(TvPane pane) => Padding(
+    padding: EdgeInsets.only(bottom: TvScale.of(context).px(4)),
+    child: TvNavItem(
+      key: ValueKey('tv-menu-${pane.name}'),
+      focusNode: _menuNode(pane),
+      icon: pane.icon,
+      label: i18n(pane.labelKey),
+      selected: pane == _pane,
+      onTap: () => _select(pane),
+      onKey: (node, event) => _menuKey(pane, event),
+    ),
+  );
 }
 
 /// The wall clock at the top of the menu (pure_live_TV `TvDigitalClock`):
@@ -473,10 +449,13 @@ class _ClockState extends State<_Clock> {
       children: [
         Text(
           '${two(_now.hour)}:${two(_now.minute)}',
-          style: scale.style(40, weight: FontWeight.w700, color: palette.text, height: 1),
+          style: scale.font(TvTextSize.title, weight: FontWeight.w600, color: palette.text, height: 1).tabular,
         ),
-        SizedBox(height: scale(6)),
-        Text('${_now.year}/${two(_now.month)}/${two(_now.day)}', style: scale.style(18, color: palette.textSecondary)),
+        SizedBox(height: scale.px(4)),
+        Text(
+          '${_now.year}/${two(_now.month)}/${two(_now.day)}',
+          style: scale.font(TvTextSize.small, color: palette.textSecondary).tabular,
+        ),
       ],
     );
   }

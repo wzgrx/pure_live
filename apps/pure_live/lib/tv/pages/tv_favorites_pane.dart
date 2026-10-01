@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/favorite/favorite_controller.dart';
 import 'package:pure_live/features/favorite/favorite_rules.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
-import 'package:pure_live/tv/widgets/tv_dialogs.dart';
 import 'package:pure_live/tv/widgets/tv_room_grid.dart';
+import 'package:pure_live/tv/widgets/tv_status.dart';
 import 'package:pure_live/tv/widgets/tv_tabs.dart';
 
 /// Follows (pure_live_TV `FavoritePage` over v4's follows): live, replay and
@@ -64,17 +65,22 @@ class _TvFavoritesPaneState extends ConsumerState<TvFavoritesPane> {
         final gridKey = _grid('${_group.name}/$_platform');
         void refresh() => unawaited(controller.refreshVisible());
         final body = !controller.loaded
-            ? TvMessage(busy: true, title: i18n('tv_loading'))
+            ? const TvSkeletonGrid()
             : rooms.isEmpty
-            ? TvMessage(
-                icon: Icons.favorite_border_rounded,
-                title: i18n(controller.rooms.isEmpty ? 'tv_no_follows' : 'tv_no_rooms'),
-                action: controller.rooms.isEmpty ? null : i18n('tv_refresh'),
-                onAction: controller.rooms.isEmpty ? null : refresh,
+            ? TvStatusView(
+                icon: TvIcons.noFollows,
+                title: i18n(controller.rooms.isEmpty ? 'empty_favorite_title' : 'tv_no_rooms'),
+                subtitle: i18n(controller.rooms.isEmpty ? 'tv_no_follows' : 'tv_empty_follow_group'),
+                actions: [
+                  if (controller.rooms.isNotEmpty)
+                    TvStatusAction(icon: AppIcons.refresh, label: i18n('tv_refresh'), onTap: refresh),
+                ],
               )
             : TvRoomGrid(
                 key: gridKey,
                 rooms: rooms,
+                showPlatform: _platform == allPlatforms,
+                showFollowed: false,
                 onLeaveUp: () {
                   if (_platformTabs.currentState?.focusSelected() ?? false) return;
                   _groupTabs.currentState?.focusSelected();
@@ -97,11 +103,11 @@ class _TvFavoritesPaneState extends ConsumerState<TvFavoritesPane> {
             if (platforms.length > 2)
               TvTabBar(
                 key: _platformTabs,
-                fontSize: 19,
+                small: true,
                 tabs: [
                   for (final id in platforms)
                     if (id == allPlatforms)
-                      TvTab(id: id, label: i18n('tv_all_platforms'), icon: Icons.apps_rounded)
+                      TvTab(id: id, label: i18n('tv_all_platforms'), icon: TvIcons.allPlatforms)
                     else
                       TvTab(id: id, label: platformName(id), logo: id),
                 ],

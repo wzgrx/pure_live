@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
@@ -23,6 +24,8 @@ import 'package:pure_live/tv/tv_navigation.dart';
 import 'package:pure_live/tv/tv_theme.dart';
 import 'package:pure_live/tv/widgets/tv_dialogs.dart';
 import 'package:pure_live/tv/widgets/tv_focusable.dart';
+import 'package:pure_live/tv/widgets/tv_room_dialog.dart';
+import 'package:pure_live/tv/widgets/tv_status.dart';
 
 /// The player settings (M9) as the engine's configuration (the phone room's
 /// rule, M13.3).
@@ -304,8 +307,7 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
       title: i18n('tv_quality'),
       current: controller.qualityIndex,
       options: [
-        for (final (index, quality) in controller.qualities.indexed)
-          (value: index, label: quality.quality, description: null),
+        for (final (index, quality) in controller.qualities.indexed) TvChoice(value: index, label: quality.quality),
       ],
     );
     if (picked != null && picked != controller.qualityIndex) unawaited(controller.selectQuality(picked));
@@ -324,7 +326,10 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
       current: state.lineIndex,
       options: [
         for (var index = 0; index < state.lineCount; index++)
-          (value: index, label: i18n('toolbox_line', args: {'index': '${index + 1}'}), description: null),
+          TvChoice(
+            value: index,
+            label: i18n('toolbox_line', args: {'index': '${index + 1}'}),
+          ),
       ],
     );
     if (picked != null && picked != state.lineIndex) unawaited(controller.selectLine(picked));
@@ -337,7 +342,7 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
     final store = ref.read(storeProvider);
     _hideControls?.cancel();
     if (followed) {
-      await unfollowRoom(context, store: store, room: room);
+      await tvUnfollowRoom(context, store: store, room: room);
     } else {
       await followRoom(store, room);
     }
@@ -355,15 +360,15 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
         if (!didPop) _hide();
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: OnVideoColors.ground,
         body: Focus(
           focusNode: _keys,
           autofocus: true,
           onKeyEvent: _onKey,
           child: controller == null
               ? TvBackground(
-                  child: TvMessage(
-                    icon: Icons.error_outline_rounded,
+                  child: TvStatusView(
+                    icon: AppIcons.playbackError,
                     title: _problem ?? i18n('get_room_info_failed_retry'),
                     subtitle: i18n('tv_room_switch_hint'),
                   ),

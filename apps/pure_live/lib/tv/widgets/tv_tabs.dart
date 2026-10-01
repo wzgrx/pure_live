@@ -26,10 +26,13 @@ final class TvTab {
   final int? badge;
 }
 
-/// A row of tabs for the remote (pure_live_TV `TvTabBar`): walking across
-/// the tabs only moves the highlight, OK switches (so browsing does not load
-/// every platform), OK on the current tab refreshes it, and a thin line
-/// shows while the content loads. Down leaves for the content ([onDown]).
+/// A row of tabs for the remote (pure_live_TV `TvTabBar` in the style of
+/// docs/ui/compare/U.15a): pills 36 high, the current one filled with the
+/// primary container, the focused one ringed and grown; a count after the
+/// label in equal-width figures. Walking across the tabs only moves the
+/// focus, OK switches (so browsing does not load every platform), OK on the
+/// current tab refreshes it, and a thin line shows while the content loads.
+/// Down leaves for the content ([onDown]).
 class TvTabBar extends StatefulWidget {
   /// Creates the bar.
   const new({
@@ -39,7 +42,7 @@ class TvTabBar extends StatefulWidget {
     this.onRefresh,
     this.onDown,
     this.busy = false,
-    this.fontSize = 22,
+    this.small = false,
     super.key,
   });
 
@@ -62,8 +65,8 @@ class TvTabBar extends StatefulWidget {
   /// The content is loading.
   final bool busy;
 
-  /// Text size in design pixels.
-  final double fontSize;
+  /// The smaller row (32 high, 14): a second row under the main tabs.
+  final bool small;
 
   @override
   State<TvTabBar> createState() => TvTabBarState();
@@ -116,54 +119,65 @@ class TvTabBarState extends State<TvTabBar> {
   Widget build(BuildContext context) {
     final palette = TvTheme.of(context);
     final scale = TvScale.of(context);
+    final height = scale.pxText(widget.small ? 32 : 36);
+    final fontSize = widget.small ? TvTextSize.small : TvTextSize.body;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.symmetric(horizontal: scale(16), vertical: scale(10)),
+          padding: EdgeInsets.symmetric(horizontal: scale.px(8), vertical: scale.px(6)),
           clipBehavior: Clip.none,
           child: Row(
             children: [
               for (final (index, tab) in widget.tabs.indexed)
                 Padding(
-                  padding: EdgeInsets.only(right: scale(12)),
+                  padding: EdgeInsets.only(right: scale.px(8)),
                   child: TvFocusable(
                     key: ValueKey('tv-tab-${tab.id}'),
                     focusNode: _node(tab.id),
-                    radius: 40,
+                    radius: TvRadius.pill,
                     onKey: _key,
                     onTap: () => index == widget.selected ? widget.onRefresh?.call() : widget.onSelect(index),
                     builder: (context, focused) {
+                      // Selected is a fill, focus is the ring (U.15a c3): the
+                      // two read apart and can be on the same tab.
                       final selected = index == widget.selected;
-                      final foreground = focused ? palette.onFocus : (selected ? palette.focus : palette.text);
+                      final foreground = selected ? palette.onSelected : palette.textSecondary;
                       return Container(
-                        padding: EdgeInsets.symmetric(horizontal: scale.text(18), vertical: scale.text(8)),
-                        decoration: BoxDecoration(
-                          color: focused
-                              ? palette.focus
-                              : (selected ? palette.focus.withValues(alpha: 0.2) : palette.card.withValues(alpha: 0.6)),
-                          borderRadius: BorderRadius.circular(scale(40)),
+                        height: height,
+                        padding: EdgeInsets.symmetric(horizontal: scale.px(widget.small ? 14 : 16)),
+                        decoration: ShapeDecoration(
+                          color: selected ? palette.selected : palette.card,
+                          shape: const StadiumBorder(),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (tab.logo != null) ...[
-                              PlatformLogo(tab.logo!, size: scale.text(26)),
-                              SizedBox(width: scale(8)),
+                              PlatformLogo(tab.logo!, size: scale.pxText(20)),
+                              SizedBox(width: scale.px(6)),
                             ] else if (tab.icon != null) ...[
-                              Icon(tab.icon, size: scale.text(24), color: foreground),
-                              SizedBox(width: scale(8)),
+                              Icon(tab.icon, size: scale.pxText(20), color: foreground),
+                              SizedBox(width: scale.px(6)),
                             ],
                             Text(
-                              tab.badge == null ? tab.label : '${tab.label} ${tab.badge}',
-                              style: scale.style(
-                                widget.fontSize,
-                                weight: selected ? FontWeight.w700 : FontWeight.w500,
+                              tab.label,
+                              style: scale.font(
+                                fontSize,
+                                weight: selected ? FontWeight.w600 : FontWeight.w400,
                                 color: foreground,
                               ),
                             ),
+                            if (tab.badge case final badge?) ...[
+                              SizedBox(width: scale.px(6)),
+                              Text(
+                                '$badge',
+                                key: ValueKey('tv-tab-${tab.id}-count'),
+                                style: scale.font(TvTextSize.small, weight: FontWeight.w600, color: foreground).tabular,
+                              ),
+                            ],
                           ],
                         ),
                       );
@@ -173,10 +187,16 @@ class TvTabBarState extends State<TvTabBar> {
             ],
           ),
         ),
+        // The refresh line under the tabs (pure_live_TV's, kept by c1).
         SizedBox(
-          height: scale(3),
+          height: scale.px(3),
           child: widget.busy
-              ? LinearProgressIndicator(color: palette.focus, backgroundColor: Colors.transparent)
+              ? LinearProgressIndicator(
+                  key: const ValueKey('tv-tabs-busy'),
+                  color: palette.accent,
+                  backgroundColor: palette.selected,
+                  borderRadius: BorderRadius.circular(scale.px(2)),
+                )
               : const SizedBox.shrink(),
         ),
       ],

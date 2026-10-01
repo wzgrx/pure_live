@@ -3,6 +3,7 @@
 library;
 
 export 'package:remixicon/remixicon.dart';
+
 export 'src/icons/app_icons.dart';
 export 'src/icons/custom_icons.dart';
 export 'src/icons/danmaku_icon.dart';

@@ -2551,6 +2551,7 @@
     "web_search_invalid_address": "The web search address is invalid. Return to search and try again.",
     "web_search_load_failed": "The page did not load. Check the network or proxy, then retry.",
     "web_search_loading": "Loading web search...",
+    "web_search_room_found": "This page is a live room. Open it?",
     "webdav": "WebDav",
     "webdav_add": "Add",
     "webdav_add_new_config": "Add New Config",

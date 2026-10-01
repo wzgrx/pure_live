@@ -2551,6 +2551,7 @@
     "web_search_invalid_address": "网页搜索地址无效，请返回搜索页后重试。",
     "web_search_load_failed": "网页加载失败，请检查网络或代理后重试。",
     "web_search_loading": "正在加载网页搜索...",
+    "web_search_room_found": "这个网页是一个直播间，要进入吗？",
     "webdav": "WebDav",
     "webdav_add": "添加",
     "webdav_add_new_config": "添加新配置",

@@ -1,9 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/in_app_web.dart';
 
 /// A web search to open (3.x `WebSearchLaunchRequest`).
 @immutable
@@ -40,10 +44,11 @@ final class WebSearchRequest {
 }
 
 /// The web search route (`RoutePath.kWebSearch`): the platform's search
-/// page opens in the system browser (3.x did this on Linux; its in-app
-/// WebView needs a WebView plugin the app does not have yet). A room link
+/// page in the app (3.x `WebSearchPage`; [InAppWeb]), which offers to open
+/// a room once the page shows one. Without an in-app WebView (Linux, a
+/// Windows without WebView2) it opens in the system browser, and a room link
 /// copied there and pasted into the search field opens the room.
-class WebSearchView extends StatefulWidget {
+class WebSearchView extends ConsumerStatefulWidget {
   /// Creates the page for the route [arguments].
   const new({required this.arguments, this.openExternal, super.key});
 
@@ -55,12 +60,43 @@ class WebSearchView extends StatefulWidget {
   final Future<bool> Function(Uri uri)? openExternal;
 
   @override
-  State<WebSearchView> createState() => _WebSearchViewState();
+  ConsumerState<WebSearchView> createState() => _WebSearchViewState();
 }
 
-class _WebSearchViewState extends State<WebSearchView> {
+class _WebSearchViewState extends ConsumerState<WebSearchView> {
   late final WebSearchRequest? _request = WebSearchRequest.parse(widget.arguments);
   bool _opening = false;
+  final Set<RoomLink> _offered = {};
+  bool _asking = false;
+
+  /// A page that shows a room: asks once per room whether to open it (3.x).
+  Future<void> _pageShown(Uri uri) async {
+    if (_asking) return;
+    final RoomLink? link;
+    try {
+      link = await LinkParser(ref.read(sitesProvider), ref.read(appServicesProvider).http).parse(uri.toString());
+    } on Object {
+      return;
+    }
+    if (link == null || !_offered.add(link) || !mounted) return;
+    _asking = true;
+    final open = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(i18n('web_search_room_found')),
+        content: Text(uri.toString(), maxLines: 3, overflow: TextOverflow.ellipsis),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: Text(i18n('confirm'))),
+        ],
+      ),
+    );
+    _asking = false;
+    if (open != true || !mounted) return;
+    await AppNavigator.toLiveRoomDetail(
+      liveRoom: LiveRoom(platform: link.platform, roomId: link.roomId),
+    );
+  }
 
   Future<void> _open(Uri uri) async {
     if (_opening) return;
@@ -80,6 +116,21 @@ class _WebSearchViewState extends State<WebSearchView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final request = _request;
+    if (request != null && InAppWeb.available) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(i18n('web_search')),
+          actions: [
+            IconButton(
+              tooltip: i18n('open_in_system_browser'),
+              icon: const Icon(Icons.open_in_new_rounded),
+              onPressed: () => unawaited(_open(request.uri)),
+            ),
+          ],
+        ),
+        body: InAppWebPage(initial: request.uri, onPage: (uri) => unawaited(_pageShown(uri))),
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: Text(i18n('web_search'))),
       body: SingleChildScrollView(

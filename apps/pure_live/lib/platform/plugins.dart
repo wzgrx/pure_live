@@ -12,6 +12,7 @@ import 'package:pure_live/pages/iptv/iptv_import.dart';
 import 'package:pure_live/pages/record_settings/record_settings_dialogs.dart';
 import 'package:pure_live/pages/settings/data_tools.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/in_app_web.dart';
 import 'package:pure_live/shared/qr_scan.dart';
 import 'package:pure_live/shared/rooms/share_code.dart';
 import 'package:share_plus/share_plus.dart';
@@ -25,12 +26,15 @@ import 'package:share_plus/share_plus.dart';
 ///   and live_ui's images use);
 /// - opening local files ([AppNavigator.openFile], open_filex on Android);
 /// - the QR scanner of device sync and TV sync on phones ([QrScan.scan],
-///   mobile_scanner with the bundled ML Kit model, no Play services).
+///   mobile_scanner with the bundled ML Kit model, no Play services);
+/// - the in-app browser ([InAppWeb.available], flutter_inappwebview;
+///   Windows needs the WebView2 runtime).
 void installPluginHooks() {
   SystemShare.sheet = shareText;
   ImageCacheTools.clearDisk = () => DefaultCacheManager().emptyCache();
   AppNavigator.openFile = openLocalFile;
   if (Platform.isAndroid || Platform.isIOS) QrScan.scan = scanQrCode;
+  unawaited(InAppWeb.detect().then((value) => InAppWeb.available = value));
 }
 
 /// The page hooks that are providers (`ProviderScope.overrides` in `main`):

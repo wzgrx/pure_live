@@ -9,9 +9,11 @@ import 'package:pure_live/app/desktop/startup_entry.dart';
 import 'package:pure_live/app/desktop/title_bar.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/pages/account/bilibili_web_login.dart';
 import 'package:pure_live/pages/backup/tv_sync.dart';
 import 'package:pure_live/pages/settings/data_tools.dart';
 import 'package:pure_live/shared/images.dart';
+import 'package:pure_live/shared/in_app_web.dart';
 import 'package:pure_live/shared/qr_scan.dart';
 import 'package:pure_live/shared/rooms/room_feed.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
@@ -188,6 +190,20 @@ void main() {
     await DesktopWindow.setFullScreen(on: false);
     await tester.pump();
     expect(find.byType(DesktopTitleBar), findsOneWidget);
+  });
+
+  test('in-app web: web pages only; the Bilibili login lands on the main site with its cookies', () {
+    expect(InAppWeb.available, isFalse, reason: 'tests and Linux use the system browser');
+    expect(isWebPage(Uri.parse('https://www.huya.com/search?hsk=a')), isTrue);
+    expect(isWebPage(Uri.parse('bilibili://live/1')), isFalse);
+    expect(isWebPage(Uri.parse('javascript:alert(1)')), isFalse);
+    expect(isBilibiliHome(Uri.parse('https://www.bilibili.com/')), isTrue);
+    expect(isBilibiliHome(Uri.parse('https://m.bilibili.com/index.html')), isTrue);
+    expect(isBilibiliHome(bilibiliPassportLogin), isFalse);
+    expect(
+      cookieHeader([(name: 'SESSDATA', value: 'a'), (name: 'bili_jct', value: 'b'), (name: 'SESSDATA', value: 'c')]),
+      'SESSDATA=a; bili_jct=b',
+    );
   });
 }
 

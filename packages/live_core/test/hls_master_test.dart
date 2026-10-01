@@ -129,4 +129,56 @@ void main() {
       expect(() => HlsMasterPlaylist.parse(Uri.parse(bad), _master), throwsFormatException, reason: bad);
     }
   });
+
+  group('HlsStreamInf (the reading YouTube and PandaTV share, F.5a)', () {
+    test('every variant with the URI line that follows; tags between are skipped', () {
+      final entries = HlsStreamInf.read(
+        [
+          '  #EXTM3U  ',
+          '',
+          'orphan.m3u8',
+          '#EXT-X-STREAM-INF:BANDWIDTH=1,RESOLUTION=1x2',
+          '#EXT-X-SOMETHING',
+          '# a comment',
+          'a.m3u8',
+          '#EXT-X-STREAM-INF:BANDWIDTH=2',
+          '#EXT-X-STREAM-INF:BANDWIDTH=3,CODECS="avc1,mp4a"',
+          ' https://x.test/c.m3u8 ',
+          '#EXT-X-STREAM-INF:BANDWIDTH=4',
+        ].join('\r\n'),
+      );
+      expect(
+        [for (final entry in entries) (entry.attributeText, entry.uri)],
+        [
+          ('BANDWIDTH=1,RESOLUTION=1x2', 'a.m3u8'),
+          ('BANDWIDTH=2', null),
+          ('BANDWIDTH=3,CODECS="avc1,mp4a"', 'https://x.test/c.m3u8'),
+          ('BANDWIDTH=4', null),
+        ],
+      );
+      expect(entries[2].attributes(), {'BANDWIDTH': '3', 'CODECS': 'avc1,mp4a'});
+      expect(HlsStreamInf.read('#EXTM3U\n'), isEmpty);
+      for (final bad in ['', '<html>', '#EXTM3Ux\n#EXT-X-STREAM-INF:A=1\na']) {
+        expect(() => HlsStreamInf.read(bad), throwsFormatException, reason: bad);
+      }
+    });
+
+    test('attributes: strict as the RFC (YouTube), lenient keeps what reads (PandaTV)', () {
+      expect(HlsStreamInf.attributesOf('A=1,B="x,y",C=z', strict: true), {'A': '1', 'B': 'x,y', 'C': 'z'});
+      expect(HlsStreamInf.attributesOf('A=1,', strict: true), {'A': '1'}, reason: "YouTube's reading allows it");
+      for (final bad in ['A=1,A=2', 'A=1 B=2', 'a=1', 'A="x', 'A=1,,B=2']) {
+        expect(() => HlsStreamInf.attributesOf(bad, strict: true), throwsFormatException, reason: bad);
+      }
+      expect(HlsStreamInf.attributesOf('A=1,A=2, junk ,B="q"'), {'A': '2', 'B': 'q'});
+      expect(HlsStreamInf.attributesOf('nothing here'), isEmpty);
+      expect(
+        () => HlsMasterPlaylist.parse(
+          Uri.parse('https://media.test/m.m3u8'),
+          '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1,\nv.m3u8',
+        ),
+        throwsFormatException,
+        reason: 'the strict master still refuses a trailing comma',
+      );
+    });
+  });
 }

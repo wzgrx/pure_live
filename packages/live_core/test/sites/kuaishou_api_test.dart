@@ -364,17 +364,20 @@ void main() {
           // page has none for the room (REG-KUAISHOU-016).
           // followers: author.counts.fan, which 3.x never read.
           // link: see area rooms.
+          // title: 3.x wrote the streamer bio; the page has no broadcast
+          // title, so it is empty and the card's stays (A-3).
           // v4 keys (M4.U.5): living with streams is unrestricted; the page
           // has no broadcast start.
           _expectParity(
             room.toJson(),
             expected,
-            changed: {'watching', 'onlineViewers', 'followers', 'link'},
+            changed: {'watching', 'onlineViewers', 'followers', 'link', 'title'},
             added: const {'restriction': 'none'},
             reason: '$name $entry',
           );
           expect(expected['watching'], '1万+');
           expect(_danmaku(room), expected['danmakuData']);
+          expect((room.title, room.introduction), ('', expected['introduction']), reason: 'A-3');
         }
         expect(room.roomId, requested, reason: 'a follow keeps the id it was made with');
         expect(room.audienceValue(preferRealOnline: false, platformEnabled: false), isEmpty);
@@ -433,7 +436,8 @@ void main() {
       expect(room.effectiveLiveStatus, LiveStatus.offline);
       expect(room.roomId, 'tianci666');
       expect(room.nick, author['name']);
-      expect(room.title, (author['description'] as String).replaceAll('\n', ' '));
+      expect(room.title, isEmpty, reason: 'A-3: no broadcast title on the page; 3.x showed the bio');
+      expect(room.introduction, author['description']);
       expect((room.cover, room.area, room.watching), ('', '', ''), reason: 'no audience for an offline room, not 0');
       expect(room.danmakuData, isNull);
       expect((room.data! as KuaishouRoomData).liveStreamId, isNull);
@@ -1010,6 +1014,28 @@ void main() {
       ).appliedQualityData?.toString();
       expect(fallback(130), '蓝光 4M\u000070', reason: 'a saved H.264 preference never lands on H.265');
       expect(fallback(10), '高清\u000030');
+    });
+  });
+
+  group('A-3 detail title (F.5a)', () {
+    test('entering from a card keeps its title; refreshes and follows never put the bio back', () {
+      final fixture = _sample('S09-room-live');
+      final detail = KuaishouApi.roomDetail(fixture.body, requestedId: 'baixi9999999999', issuedAt: fixture.capturedAt);
+      final card = LiveRoom(platform: 'kuaishou', roomId: 'baixi9999999999', title: '今晚冲王者');
+      final entered = detail.fillFromDetail(card);
+      expect(entered.title, '今晚冲王者', reason: "the card's broadcast title, not the bio");
+      expect(entered.introduction, detail.introduction, reason: 'the bio stays in the room information');
+      expect(entered.nick, detail.nick, reason: "the page's name wins over an empty card one");
+      final refreshed = entered.mergeFrom(
+        KuaishouApi.roomDetail(
+          fixture.body,
+          requestedId: 'baixi9999999999',
+          issuedAt: fixture.capturedAt,
+          withStreams: false,
+        ),
+      );
+      expect(refreshed.title, '今晚冲王者', reason: 'the 60 s room refresh and the follow refresh keep it');
+      expect(detail.fillFromDetail(null).title, isEmpty, reason: 'a link without a card has no title');
     });
   });
 }

@@ -80,28 +80,45 @@ const Set<String> superChatPlatforms = {'bilibili', 'huya', 'douyu'};
 final class LivePlayUrlResolution {
   /// Plain URLs (lines without metadata), with [appliedQualityData] when the
   /// platform confirmed a quality.
-  new({required List<String> urls, this.appliedQualityData, this.qualityUnconfirmed = false})
-    : lines = List.unmodifiable([for (final url in urls) LivePlayLine(url)]),
-      sourceQueryPolicies = const {},
-      inputRecipe = null;
+  new({
+    required List<String> urls,
+    this.appliedQualityData,
+    this.qualityUnconfirmed = false,
+    this.appliedQuality,
+    this.start,
+  }) : lines = List.unmodifiable([for (final url in urls) LivePlayLine(url)]),
+       sourceQueryPolicies = const {},
+       inputRecipe = null;
 
   /// Lines that describe themselves (headers, format, lease).
-  new lines(List<LivePlayLine> lines, {this.appliedQualityData, this.qualityUnconfirmed = false})
-    : lines = List.unmodifiable(lines),
-      sourceQueryPolicies = const {},
-      inputRecipe = null;
+  new lines(
+    List<LivePlayLine> lines, {
+    this.appliedQualityData,
+    this.qualityUnconfirmed = false,
+    this.appliedQuality,
+    this.start,
+  }) : lines = List.unmodifiable(lines),
+       sourceQueryPolicies = const {},
+       inputRecipe = null;
 
   /// A source without an exportable URL (see [LiveInputRecipe]).
-  const new owned({required LiveInputRecipe input, this.appliedQualityData, this.qualityUnconfirmed = false})
-    : inputRecipe = input,
-      lines = const [],
-      sourceQueryPolicies = const {};
+  const new owned({
+    required LiveInputRecipe input,
+    this.appliedQualityData,
+    this.qualityUnconfirmed = false,
+    this.appliedQuality,
+    this.start,
+  }) : inputRecipe = input,
+       lines = const [],
+       sourceQueryPolicies = const {};
 
   const new _({
     required this.lines,
     required this.sourceQueryPolicies,
     this.appliedQualityData,
     this.qualityUnconfirmed = false,
+    this.appliedQuality,
+    this.start,
   }) : inputRecipe = null;
 
   /// URLs with HLS query policies, validated together: each key must be one
@@ -111,11 +128,15 @@ final class LivePlayUrlResolution {
     required Map<String, HlsSourceQueryPolicy> sourceQueryPolicies,
     Object? appliedQualityData,
     bool qualityUnconfirmed = false,
+    LivePlayQuality? appliedQuality,
+    Duration? start,
   }) => LivePlayUrlResolution._validated(
     [for (final url in urls) LivePlayLine(url)],
     sourceQueryPolicies,
     appliedQualityData: appliedQualityData,
     qualityUnconfirmed: qualityUnconfirmed,
+    appliedQuality: appliedQuality,
+    start: start,
   );
 
   factory _validated(
@@ -123,6 +144,8 @@ final class LivePlayUrlResolution {
     Map<String, HlsSourceQueryPolicy> sourceQueryPolicies, {
     Object? appliedQualityData,
     bool qualityUnconfirmed = false,
+    LivePlayQuality? appliedQuality,
+    Duration? start,
   }) {
     final normalized = normalizePlayLines(lines);
     final urls = {for (final line in normalized) line.url};
@@ -139,6 +162,8 @@ final class LivePlayUrlResolution {
       sourceQueryPolicies: Map<String, HlsSourceQueryPolicy>.unmodifiable(policies),
       appliedQualityData: appliedQualityData,
       qualityUnconfirmed: qualityUnconfirmed,
+      appliedQuality: appliedQuality,
+      start: start,
     );
   }
 
@@ -157,6 +182,18 @@ final class LivePlayUrlResolution {
   /// The adapter expected a confirmation but the answer had none.
   final bool qualityUnconfirmed;
 
+  /// The quality the platform played instead of the requested one, when it
+  /// switched to one the caller may not know (11-1: Picarto's recovery after
+  /// the streamer changed the profile plays the new best quality): its name
+  /// and [appliedQualityData] id, so the player can show it without asking
+  /// for the qualities again. Null when the requested quality was played.
+  final LivePlayQuality? appliedQuality;
+
+  /// Where to start playing the source, when not at its beginning (1-1:
+  /// Bilibili's carousel video at its `play_time`); null for the start, or
+  /// for a live stream. `PlaybackPlan.of(start:)` takes it.
+  final Duration? start;
+
   /// Stream URLs, one per line.
   List<String> get urls => [for (final line in lines) line.url];
 
@@ -174,12 +211,16 @@ final class LivePlayUrlResolution {
           sourceQueryPolicies,
           appliedQualityData: appliedQualityData,
           qualityUnconfirmed: qualityUnconfirmed,
+          appliedQuality: appliedQuality,
+          start: start,
         );
 }
 
 /// The quality to show for [resolution]: the option whose id the platform
-/// confirmed, else [requested]; marked unconfirmed when the platform did not
-/// confirm it or confirmed an id outside [qualities].
+/// confirmed, else the quality the platform says it switched to
+/// ([LivePlayUrlResolution.appliedQuality], 11-1), else [requested]; marked
+/// unconfirmed when the platform did not confirm it or confirmed an id
+/// outside [qualities] without naming that quality.
 LivePlayQuality resolveAppliedPlayQuality({
   required List<LivePlayQuality> qualities,
   required LivePlayQuality requested,
@@ -188,7 +229,11 @@ LivePlayQuality resolveAppliedPlayQuality({
   final appliedId = resolution.appliedQualityData?.toString();
   final matched = appliedId == null
       ? null
-      : qualities.where((quality) => quality.selectionId.toString() == appliedId).firstOrNull;
+      : qualities.where((quality) => quality.selectionId.toString() == appliedId).firstOrNull ??
+            switch (resolution.appliedQuality) {
+              final switched? when switched.selectionId.toString() == appliedId => switched,
+              _ => null,
+            };
   return (matched ?? requested).withPlaybackUnconfirmed(
     unconfirmed: resolution.qualityUnconfirmed || (appliedId != null && matched == null),
   );
@@ -349,6 +394,18 @@ abstract interface class LiveSiteCursorDirectoryPager implements LiveSiteDirecto
 abstract interface class LiveSiteCategoryDirectoryProvider {
   /// The category pager.
   LiveSiteDirectoryPager get categoryDirectory;
+}
+
+/// A platform that stops sending the user's stored cookie once the platform
+/// refuses it and carries on anonymously (B-7): [cookieRefusals] says so, so
+/// the app can tell the user once that the cookie expired and should be
+/// filled in again.
+abstract interface class LiveSiteCookieRefusals {
+  /// One event each time a stored cookie is refused for the first time (a
+  /// refused cookie is not sent again until it changes, so the same cookie
+  /// is reported once). A broadcast stream that never closes; the cookie is
+  /// not in the event.
+  Stream<void> get cookieRefusals;
 }
 
 /// A lasting explanation of what a platform's directory covers.

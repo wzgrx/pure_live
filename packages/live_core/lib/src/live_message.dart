@@ -249,6 +249,32 @@ final class LiveEmote {
   String toString() => 'LiveEmote($code, $url)';
 }
 
+/// A picture a platform shows next to a sender's name (B-14: 17LIVE's
+/// prefix, role, attendance and level badges): what the chat line draws,
+/// in the platform's order. Level and fan-club text stay in
+/// [LiveMessage.userLevel] and [LiveMessage.fansName].
+@immutable
+final class LiveBadge {
+  /// Creates a badge.
+  const new({required this.url, this.id = ''});
+
+  /// The picture's address (https).
+  final String url;
+
+  /// The platform's id for the badge (17LIVE's `styleID`), empty when it
+  /// has none.
+  final String id;
+
+  @override
+  bool operator ==(Object other) => other is LiveBadge && other.url == url && other.id == id;
+
+  @override
+  int get hashCode => Object.hash(url, id);
+
+  @override
+  String toString() => 'LiveBadge($url${id.isEmpty ? '' : ', $id'})';
+}
+
 /// One danmaku message.
 @immutable
 final class LiveMessage {
@@ -269,6 +295,9 @@ final class LiveMessage {
     this.style,
     this.replayed = false,
     this.emotes = const [],
+    this.sourceRoomId = '',
+    this.nameColor,
+    this.badges = const [],
   });
 
   /// Kind.
@@ -321,6 +350,22 @@ final class LiveMessage {
   /// empty when it names none (the app may still know codes of its own,
   /// such as the bundled emoticon lists).
   final List<LiveEmote> emotes;
+
+  /// The room the message was said in when it is not the room joined, as
+  /// the platform names it (B-16: Kugou's PK partner); empty for this
+  /// room. The chat marks such a line as the other room's.
+  final String sourceRoomId;
+
+  /// The colour the platform gives the sender's name (B-14: 17LIVE's
+  /// `name.textColor`); null for the chat's default.
+  final LiveMessageColor? nameColor;
+
+  /// The badges the platform shows next to the sender's name, in its order
+  /// (B-14); empty when it shows none.
+  final List<LiveBadge> badges;
+
+  /// Whether [sourceRoomId] names another room.
+  bool get isFromOtherRoom => sourceRoomId.isNotEmpty;
 }
 
 /// A super chat (paid message).

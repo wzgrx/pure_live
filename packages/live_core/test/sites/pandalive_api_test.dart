@@ -1384,6 +1384,18 @@ void main() {
       );
     });
 
+    test('a tag between a variant and its URI keeps the variant (the reading shared with YouTube, F.5a)', () {
+      final qualities = _qualities(
+        _masterText([
+          '#EXT-X-STREAM-INF:BANDWIDTH=1000,RESOLUTION=1280x720,FRAME-RATE=30.000',
+          '#EXT-X-PROGRAM-DATE-TIME:2026-10-02T00:00:00Z',
+          'https://fixture.playlist.live-video.net/v1/playlist/720.m3u8',
+        ]),
+      );
+      expect(qualities.map((quality) => quality.id), ['720p']);
+      expect(_line(qualities.single).url, 'https://fixture.playlist.live-video.net/v1/playlist/720.m3u8');
+    });
+
     test('what is not a master is ApiChanged, as 3.x', () {
       expect(() => _qualities('<html>'), throwsA(isA<ApiChanged>()));
       expect(

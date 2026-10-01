@@ -56,12 +56,15 @@ final class Fc2LiveSite extends LiveSite
   /// [Fc2LiveControl.connect]: `dart:io` with 3.x's 15 s ping) through
   /// [proxy]'s route for `fc2live`, the one the app gives [http] too.
   /// [controlStartupTimeout] bounds a control's handshake and HLS answer;
-  /// [now] (the snapshot's age) is injectable for tests.
+  /// [probeControl], when given, takes over the control the quality probe
+  /// opened instead of it being closed ([discoverPlayQualitiesRaw]); [now]
+  /// (the snapshot's age) is injectable for tests.
   new(
     this.http, {
     this.proxy = const FixedProxyPolicy(),
     SocketConnector? connector,
     this.controlStartupTimeout = const Duration(seconds: 20),
+    this.probeControl,
     DateTime Function()? now,
   }) : _connector = connector ?? Fc2LiveControl.connect,
        _now = now ?? DateTime.now;
@@ -77,6 +80,15 @@ final class Fc2LiveSite extends LiveSite
 
   /// Longest wait for a control's HLS answer (3.x: 20 s).
   final Duration controlStartupTimeout;
+
+  /// Who takes over the control a quality probe opened (M7.1 notes "FC2
+  /// control sharing": playback then needs no second grant and socket),
+  /// typically the player's `Fc2RecipeOpener.adopt`. It then owns the
+  /// control and must close it, also when it never plays it. The control
+  /// was opened for `auto`, and its [Fc2LiveControl.playlists] hold every
+  /// tier, so any quality can be played from it
+  /// ([Fc2LiveApi.playlistFor]). Null: the probe closes its control.
+  final void Function(Fc2LiveControl control)? probeControl;
 
   final SocketConnector _connector;
   final DateTime Function() _now;
@@ -423,7 +435,8 @@ final class Fc2LiveSite extends LiveSite
   /// `memberApi.php`, `getControlServer.php` and the socket), its HLS
   /// answer read ([Fc2LiveApi.qualitiesOf]: `50` and `40` only for the
   /// channels that have them, then 3.x's `auto`) and the control closed
-  /// before this returns. Only the control's answer tells which tiers a
+  /// before this returns, or handed to [probeControl] when there is one
+  /// (and the answer listed qualities). Only the control's answer tells which tiers a
   /// channel has, so this costs two requests and a socket (3.x listed
   /// `auto` alone, without a request). [cancel] reaches the requests and
   /// the socket while it opens.
@@ -431,11 +444,20 @@ final class Fc2LiveSite extends LiveSite
   Future<List<LivePlayQuality>> discoverPlayQualitiesRaw({required LiveRoom detail, CancelToken? cancel}) async {
     final channelId = _playable(detail);
     final control = await openControl(channelId, cancel: cancel);
+    final List<LivePlayQuality> qualities;
     try {
-      return Fc2LiveApi.qualitiesOf(control.playlists);
-    } finally {
+      qualities = Fc2LiveApi.qualitiesOf(control.playlists);
+    } on Object {
       await control.close();
+      rethrow;
     }
+    final taker = probeControl;
+    if (taker == null || control.isClosed) {
+      await control.close();
+    } else {
+      taker(control);
+    }
+    return qualities;
   }
 
   @override

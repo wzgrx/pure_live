@@ -604,6 +604,12 @@ void main() {
       final renewed = PicartoApi.qualities(hd, master: _masterUri);
       expect(recovered.appliedQualityData, renewed.first.selectionId, reason: 'the quality played, for M7 to show');
       expect(renewed.first.quality, '1080p 60fps');
+      // F.5a: the quality played is named, so the player shows "1080p 60fps"
+      // instead of the old name marked unconfirmed.
+      expect(recovered.appliedQuality?.quality, '1080p 60fps');
+      expect(recovered.appliedQuality?.selectionId, recovered.appliedQualityData);
+      final shown = resolveAppliedPlayQuality(qualities: [old], requested: old, resolution: recovered);
+      expect((shown.quality, shown.isPlaybackUnconfirmed), ('1080p 60fps', false));
       // With the room's own playlist a quality it lacks is still the caller's
       // mistake (3.x: quality unavailable).
       await expectLater(
@@ -624,6 +630,7 @@ void main() {
       );
       expect(resolution.urls.single, endsWith('/variant.m3u8'));
       expect(resolution.appliedQualityData, PicartoApi.qualities(_masterText, master: _masterUri).single.selectionId);
+      expect(resolution.appliedQuality?.quality, PicartoApi.qualities(_masterText, master: _masterUri).single.quality);
     });
 
     test('a quality the playlist no longer has is StreamUnavailable (3.x: quality unavailable)', () async {

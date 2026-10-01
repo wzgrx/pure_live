@@ -411,9 +411,14 @@ final class BilibiliSite extends LiveSite
 
   // Streams -------------------------------------------------------------------
 
+  /// The room's qualities; a carousel without a stream for this client
+  /// (guests) has the one [BilibiliApi.carouselQuality], played from its
+  /// video (1-1).
   @override
-  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
-      BilibiliApi.qualities((await _play(_longId(detail), 0)).data);
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
+    final data = (await _play(_longId(detail), 0)).data;
+    return data == null ? const [BilibiliApi.carouselQuality] : BilibiliApi.qualities(data);
+  }
 
   @override
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
@@ -421,13 +426,19 @@ final class BilibiliSite extends LiveSite
 
   /// Lines at [quality] with the quality the server applied: guests asking
   /// for 10000 are served 250, and the lines say so. The room's state is not
-  /// checked first: a carousel plays whenever the platform gives it a stream.
+  /// checked first: a carousel plays whenever the platform gives it a stream
+  /// (signed in); without one (guests), and for
+  /// [BilibiliApi.carouselQuality], it plays the video in rotation from
+  /// where the carousel is ([_carousel]).
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
     final longId = _longId(detail);
+    if (quality.data == BilibiliApi.carouselQualityId) return await _carousel(longId);
     final play = await _play(longId, quality.data);
+    final data = play.data;
+    if (data == null) return await _carousel(longId);
     return BilibiliApi.resolution(
-      play.data,
+      data,
       requestedQn: quality.data,
       roomId: longId,
       issuedAt: play.issuedAt,
@@ -435,7 +446,26 @@ final class BilibiliSite extends LiveSite
     );
   }
 
-  Future<({Map<String, dynamic> data, DateTime issuedAt, String cookie})> _play(String longId, Object? qn) async {
+  /// The video [longId]'s carousel is playing (1-1): `getRoundPlayVideo`,
+  /// then its MP4 (`x/player/playurl`), started at `play_time`. Two
+  /// requests; when the video ends, recovery asks again and gets the next.
+  Future<LivePlayUrlResolution> _carousel(String longId) async {
+    final cookie = await _cookie(_current());
+    final round = await _get(BilibiliApi.roundPlayVideoUrl(longId), cookie);
+    final video = BilibiliApi.roundPlayVideo(round.text, status: round.status);
+    final file = await _get(BilibiliApi.videoPlayUrl(video.bvid, video.cid), cookie);
+    return BilibiliApi.videoResolution(
+      file.text,
+      bvid: video.bvid,
+      start: video.start,
+      status: file.status,
+      cookie: cookie,
+    );
+  }
+
+  /// `getRoomPlayInfo` at [qn]; `data` is null for a carousel without a
+  /// stream for this client ([BilibiliApi.carouselWithoutStream]).
+  Future<({Map<String, dynamic>? data, DateTime issuedAt, String cookie})> _play(String longId, Object? qn) async {
     final cookie = await _cookie(_current());
     final response = await _get(
       Uri.https(_liveApi, '/xlive/web-room/v2/index/getRoomPlayInfo', {
@@ -454,6 +484,9 @@ final class BilibiliSite extends LiveSite
       cookie,
     );
     final issuedAt = _now();
+    if (BilibiliApi.carouselWithoutStream(response.text, status: response.status)) {
+      return (data: null, issuedAt: issuedAt, cookie: cookie);
+    }
     return (data: BilibiliApi.playData(response.text, status: response.status), issuedAt: issuedAt, cookie: cookie);
   }
 

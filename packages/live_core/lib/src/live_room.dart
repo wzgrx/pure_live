@@ -646,10 +646,13 @@ final class LiveRoom {
   /// snapshot, so a later guide render never highlights a retired programme.
   LiveRoom withoutCatchUp() => copyWith(catchUp: catchUp.withoutInterval());
 
-  /// Area, name and avatar from [detail] where this room has none.
+  /// Area, name, avatar and title from [detail] where this room has none.
+  /// The title matters for a platform whose room page has no broadcast
+  /// title (Kuaishou, A-3): the card the room was entered from has it.
   LiveRoom fillFromDetail(LiveRoom? detail) {
     if (detail == null) return this;
     return copyWith(
+      title: title.trim().isEmpty && detail.title.trim().isNotEmpty ? detail.title : title,
       area: (area ?? '').isEmpty ? detail.area : area,
       nick: nick.isEmpty ? detail.nick : nick,
       avatar: avatar.isEmpty ? detail.avatar : avatar,

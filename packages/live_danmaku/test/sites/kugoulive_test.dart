@@ -270,6 +270,7 @@ Uint8List _chat({
   List<int>? ext,
   List<int>? sinfo,
   String? msgId,
+  (int, int)? source,
 }) {
   final chat = ProtoWriter()
     ..string(1, text)
@@ -304,6 +305,15 @@ Uint8List _chat({
     ..bytes(14, ext ?? _ext())
     ..bytes(15, sinfo ?? (ProtoWriter()..integer(1, 1)).toBytes())
     ..integer(16, contentCodec);
+  if (source case (final room, final tags)) {
+    message.bytes(
+      18,
+      (ProtoWriter()
+            ..integer(1, room)
+            ..integer(2, tags))
+          .toBytes(),
+    );
+  }
   return _server(command, _envelope(message.toBytes(), codec: 1, msgId: msgId));
 }
 
@@ -703,7 +713,7 @@ void main() {
       expect((other.userId, other.userLevel), ('446974472', '23'));
     });
 
-    test("S08: a refused token (622) after type 4; S09: the PK partner room's chat is not reported", () {
+    test("S08: a refused token (622) after type 4; S09: the PK partner room's chat is marked as theirs (B-16)", () {
       final frames = [
         for (final line in _s08.socket.where((line) => line.incoming))
           KugouLiveDanmakuProtocol.decode(line.bytes, roomId: _s08.room),
@@ -723,8 +733,17 @@ void main() {
       expect(page['otherRoom'], isTrue);
       expect(page['source'], {'roomid': 5138284, 'tags': 3});
       expect(page['roomid'], 1073619);
-      expect(KugouLiveDanmakuProtocol.decode(pk.bytes, roomId: '1073619').messages, isEmpty);
-      expect(KugouLiveDanmakuProtocol.decode(pk.bytes, roomId: '5138284').messages, isEmpty);
+      // B-16 (M5.25 did not report it): chat like the room's own, marked
+      // with the partner room.
+      final partner = KugouLiveDanmakuProtocol.decode(pk.bytes, roomId: '1073619').messages.single;
+      expect(
+        (partner.type, partner.userName, partner.message, partner.userId, partner.userLevel),
+        (LiveMessageType.chat, page['userName'], page['text'], '${page['operationUserId']}', '${page['richLevel']}'),
+      );
+      expect((partner.sourceRoomId, partner.isFromOtherRoom), ('5138284', true));
+      expect(partner.color, KugouLiveDanmakuProtocol.highlightColor, reason: "the page's ${page['contentColor']}");
+      expect(partner.sentAt, DateTime.fromMillisecondsSinceEpoch((page['time']! as int) * 1000));
+      expect(KugouLiveDanmakuProtocol.decode(pk.bytes, roomId: '5138284').messages, isEmpty, reason: 'not this room');
     });
 
     test('status frames: join with or without a session, refusals, other types', () {
@@ -774,7 +793,16 @@ void main() {
       expect(read(_chat(text: '')), isNull);
       expect(read(_chat(text: ' \u2028 ')), isNull);
       expect(read(_chat(contentCodec: 0)), isNull, reason: 'the page cannot read it either');
-      expect(read(_chat(command: 400305)), isNull, reason: 'the PK partner room');
+      // The PK partner room (B-16): only with the partner's room and
+      // `source.tags & 1`, as the page.
+      expect(read(_chat(command: 400305)), isNull, reason: 'no source');
+      expect(read(_chat(command: 400305, source: (5138284, 2))), isNull, reason: 'tags without bit 1');
+      expect(read(_chat(command: 400305, source: (0, 1))), isNull, reason: 'no partner room');
+      expect(read(_chat(command: 400305, source: (51049168, 1))), isNull, reason: 'this room is no partner');
+      final partner = read(_chat(command: 400305, source: (5138284, 1)))!;
+      expect((partner.message, partner.sourceRoomId), ('主播好', '5138284'));
+      expect(plain.sourceRoomId, isEmpty, reason: "the room's own chat");
+      expect(read(_chat(source: (5138284, 1)))!.sourceRoomId, isEmpty, reason: 'a source on 501 is not read');
       expect(read(_chat(), room: '1073619'), isNull);
       expect(read(_chat(room: 0))?.message, '主播好', reason: 'no room: kept');
 
@@ -1110,11 +1138,14 @@ void main() {
         );
       });
 
-      test('what is not a public chat keeps no colour: the PK partner room (400305) is not reported', () {
+      test("the PK partner room's chat (400305) is coloured as the page colours it (B-16)", () {
         final pk = _s09.socket.single;
         final page = _s09.expectedAt(pk.line)['chat']! as Map<String, Object?>;
-        expect(page['contentColor'], '#ff9900', reason: 'the page would colour it (fan club 10)');
-        expect(KugouLiveDanmakuProtocol.decode(pk.bytes, roomId: '1073619').messages, isEmpty);
+        expect(page['contentColor'], '#ff9900', reason: 'the page colours it (fan club 10)');
+        expect(
+          KugouLiveDanmakuProtocol.decode(pk.bytes, roomId: '1073619').messages.single.color,
+          KugouLiveDanmakuProtocol.highlightColor,
+        );
       });
     });
 

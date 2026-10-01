@@ -401,6 +401,78 @@ void main() {
       }
     });
 
+    test('1-1 (F.5a): a carousel without a stream is told apart; its video and file are read', () {
+      expect(BilibiliApi.carouselWithoutStream(_sample('S07-replay').body), isTrue);
+      for (final name in ['S07-offline', 'S07-guest-qn0']) {
+        expect(BilibiliApi.carouselWithoutStream(_sample(name).body), isFalse, reason: name);
+      }
+      expect(BilibiliApi.carouselWithoutStream('<html>'), isFalse);
+      expect(BilibiliApi.carouselWithoutStream('{"code":-352}'), isFalse);
+      expect(
+        BilibiliApi.carouselWithoutStream(_editPlay(_sample('S07-guest-qn0').body, (data) => data['live_status'] = 2)),
+        isFalse,
+        reason: 'signed in, the carousel has a stream',
+      );
+
+      String round(Map<String, Object?> data) => jsonEncode({'code': 0, 'message': '0', 'data': data});
+      final video = BilibiliApi.roundPlayVideo(round({'bvid': 'BV1zKZrYAEi8', 'cid': '29153362694', 'play_time': 61}));
+      expect(video, (bvid: 'BV1zKZrYAEi8', cid: 29153362694, start: const Duration(seconds: 61)));
+      expect(
+        BilibiliApi.roundPlayVideo(round({'bvid': 'BV1zKZrYAEi8', 'cid': 1, 'play_time': -5})).start,
+        Duration.zero,
+      );
+      expect(BilibiliApi.roundPlayVideo(round({'bvid': 'BV1zKZrYAEi8', 'cid': 1})).start, Duration.zero);
+      for (final data in <Map<String, Object?>>[
+        {'bvid': 'BV1zKZrYAEi8', 'cid': -1},
+        {'bvid': '', 'cid': 5},
+        {'bvid': 'av170001', 'cid': 5},
+      ]) {
+        expect(() => BilibiliApi.roundPlayVideo(round(data)), throwsA(isA<StreamUnavailable>()), reason: '$data');
+      }
+      expect(() => BilibiliApi.roundPlayVideo('{"code":0,"data":null}'), throwsA(isA<ApiChanged>()));
+      expect(() => BilibiliApi.roundPlayVideo('{"code":-352,"message":"-352"}'), throwsA(isA<RiskControl>()));
+
+      final file = Fixture.load('live_vod', 'V09-playurl-mp4');
+      expect(
+        BilibiliApi.videoPlayUrl('BV1zKZrYAEi8', 29153362694),
+        file.url,
+        reason: "the recorded request, the TV client's",
+      );
+      final resolution = BilibiliApi.videoResolution(
+        file.body,
+        bvid: 'BV1zKZrYAEi8',
+        start: const Duration(seconds: 61),
+        cookie: 'buvid3=x',
+      );
+      expect(resolution.lines.single.url, contains('29153362694-1-160.mp4'));
+      expect(resolution.lines.single.headers, {
+        'user-agent': BilibiliApi.userAgent,
+        'referer': 'https://www.bilibili.com/video/BV1zKZrYAEi8/',
+        'cookie': 'buvid3=x',
+      });
+      expect((resolution.start, resolution.appliedQualityData), (const Duration(seconds: 61), 'carousel'));
+      expect(
+        () => BilibiliApi.videoResolution('{"code":0,"data":{"durl":[]}}', bvid: 'BV1zKZrYAEi8', start: Duration.zero),
+        throwsA(isA<StreamUnavailable>()),
+      );
+      final backups = BilibiliApi.videoResolution(
+        jsonEncode({
+          'code': 0,
+          'data': {
+            'durl': [
+              {
+                'url': 'https://a.bilivideo.com/1.mp4',
+                'backup_url': ['https://b.bilivideo.com/1.mp4', 'ftp://c/1.mp4', 'https://a.bilivideo.com/1.mp4'],
+              },
+            ],
+          },
+        }),
+        bvid: 'BV1zKZrYAEi8',
+        start: Duration.zero,
+      );
+      expect(backups.urls, ['https://a.bilivideo.com/1.mp4', 'https://b.bilivideo.com/1.mp4']);
+    });
+
     test('1-1: a carousel that comes with a stream (a signed-in user) is played', () {
       final fixture = _sample('S07-guest-qn0');
       final data = BilibiliApi.playData(_editPlay(fixture.body, (data) => data['live_status'] = 2));

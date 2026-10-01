@@ -795,6 +795,38 @@ void main() {
       expect(setup.http.requests.last.url.queryParameters['supported_codecs'], 'h264');
     });
 
+    test('8-8: usher is asked only for the codecs the engine decodes, read each time', () async {
+      Set<String>? decodable = {'avc', 'hevc'};
+      final http = ReplayHttp([_recorded('S06-pat-live'), _usher('zarbex', 'S06-usher-live')], ignoredQuery: _ignored);
+      final site = TwitchSite(
+        http,
+        preferH264: () => false,
+        codecs: () => decodable,
+        random: Random(1),
+        now: () => _now,
+      );
+      final requests = <String>[];
+      for (final engine in <Set<String>?>[
+        {'avc', 'hevc'},
+        {'avc'},
+        null,
+      ]) {
+        decodable = engine;
+        try {
+          await site.getPlayQualities(detail: _live('zarbex'));
+        } on Object {
+          // The replay only answers the H.264 request; the request is what counts.
+        }
+        requests.add(
+          http.requests
+              .lastWhere((request) => request.url.host == 'usher.ttvnw.net')
+              .url
+              .queryParameters['supported_codecs']!,
+        );
+      }
+      expect(requests, ['h265,h264', 'h264', 'av1,h265,h264']);
+    });
+
     test('8-9: a rerun (replay) plays like a live stream', () async {
       final setup = _setup([_recorded('S06-pat-live'), _usher('zarbex', 'S06-usher-live')]);
       final qualities = await setup.site.getPlayQualities(detail: _live('zarbex', status: LiveStatus.replay));
@@ -912,6 +944,43 @@ void main() {
         isTrue,
         reason: 'usher never gets the session',
       );
+    });
+
+    test('B-7: each refused cookie is reported once; an anonymous viewer never', () async {
+      final vault = MemoryCookieVault()..set('twitch', 'auth-token=stale');
+      addTearDown(vault.dispose);
+      final replay = ReplayHttp([
+        _recorded('S06-pat-live'),
+        _usher('zarbex', 'S06-usher-live'),
+      ], ignoredQuery: _ignored);
+      const refused = (401, '{"error":"Unauthorized","status":401}');
+      final script = _Script([refused], replay);
+      final site = TwitchSite(script, cookies: vault, random: Random(1), now: () => _now);
+      expect(site, isA<LiveSiteCookieRefusals>());
+      var refusals = 0;
+      final subscription = site.cookieRefusals.listen((_) => refusals++);
+      addTearDown(subscription.cancel);
+      await site.getPlayQualities(detail: _live('zarbex'));
+      await site.getPlayQualities(detail: _live('zarbex'));
+      await pumpEventQueue();
+      expect(refusals, 1, reason: 'the same cookie is not sent again, so it is reported once');
+      vault.set('twitch', 'auth-token=other');
+      script.steps.add(refused);
+      await site.getPlayQualities(detail: _live('zarbex'));
+      await pumpEventQueue();
+      expect(refusals, 2, reason: 'a new cookie refused is reported again');
+
+      final anonymous = TwitchSite(
+        ReplayHttp([_recorded('S06-pat-live'), _usher('zarbex', 'S06-usher-live')], ignoredQuery: _ignored),
+        random: Random(1),
+        now: () => _now,
+      );
+      var none = 0;
+      final quiet = anonymous.cookieRefusals.listen((_) => none++);
+      addTearDown(quiet.cancel);
+      await anonymous.getPlayQualities(detail: _live('zarbex'));
+      await pumpEventQueue();
+      expect(none, 0);
     });
 
     test("an integrity challenge on the session's token also falls back to anonymous", () async {

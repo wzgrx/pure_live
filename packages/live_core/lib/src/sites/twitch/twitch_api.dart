@@ -115,6 +115,20 @@ abstract final class TwitchApi {
   /// Broadcasting), as the web player asks.
   static const String enhancedCodecs = 'av1,h265,h264';
 
+  /// usher's `supported_codecs` (8-8): [h264Codecs] when [preferH264];
+  /// otherwise the web player's [enhancedCodecs] limited to the video
+  /// codecs the engine decodes, named as lines name them (`av1`, `hevc`;
+  /// [codecs] null when not known: all of them). H.264 is always asked
+  /// for, last, as the web player does.
+  static String supportedCodecs({required bool preferH264, Set<String>? codecs}) {
+    if (preferH264) return h264Codecs;
+    return [
+      if (codecs == null || codecs.contains('av1')) 'av1',
+      if (codecs == null || codecs.contains('hevc')) 'h265',
+      'h264',
+    ].join(',');
+  }
+
   /// The channel login pattern (the lower-cased room id).
   static final RegExp loginPattern = RegExp(r'^[a-z0-9_]{1,25}$');
 
@@ -336,8 +350,15 @@ abstract final class TwitchApi {
 
   /// The usher master playlist of [login] with 3.x's parameters (a random
   /// `p` and one of [playSessionIds]) and the codecs asked for (8-8):
-  /// H.264 only when [preferH264], else HEVC and AV1 as well.
-  static Uri usherUrl(String login, TwitchAccessToken token, Random random, {bool preferH264 = true}) {
+  /// H.264 only when [preferH264], else HEVC and AV1 as well, as far as
+  /// the engine decodes them ([codecs], see [supportedCodecs]).
+  static Uri usherUrl(
+    String login,
+    TwitchAccessToken token,
+    Random random, {
+    bool preferH264 = true,
+    Set<String>? codecs,
+  }) {
     final session = playSessionIds[random.nextInt(playSessionIds.length)];
     return Uri.https('usher.ttvnw.net', '/api/channel/hls/$login.m3u8', {
       'acmb': 'e30=',
@@ -352,7 +373,7 @@ abstract final class TwitchApi {
       'playlist_include_framerate': 'true',
       'reassignments_supported': 'true',
       'sig': token.signature,
-      'supported_codecs': preferH264 ? h264Codecs : enhancedCodecs,
+      'supported_codecs': supportedCodecs(preferH264: preferH264, codecs: codecs),
       'token': token.value,
       'transcode_mode': 'cbr_v1',
     });

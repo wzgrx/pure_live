@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:live_core/src/audience.dart';
+import 'package:live_core/src/hls_master.dart';
 import 'package:live_core/src/json.dart';
 import 'package:live_core/src/live_area.dart';
 import 'package:live_core/src/live_room.dart';
@@ -1009,8 +1010,11 @@ abstract final class PandaLiveApi {
   /// [mediaHeaders], HLS, the codec of `CODECS`, [lineId] and the lease of
   /// [issuedAt] (see [lease]). [qualityIdFromLegacy] maps 3.x's ids.
   ///
-  /// As 3.x, a text that is not a master is `ApiChanged`, and a variant
-  /// without a resolution (audio only) is left out. Unlike 3.x, a variant
+  /// The master is read by the shared [HlsStreamInf.read] with lenient
+  /// attributes (one reading with YouTube's, M7.1 notes); a tag between a
+  /// variant and its URI no longer loses the variant. As 3.x, a text that
+  /// is not a master is `ApiChanged`, and a variant without a resolution
+  /// (audio only) is left out. Unlike 3.x, a variant
   /// without its URI, with a frame rate or bandwidth out of range, or whose
   /// URL is not IVS only loses itself (the unified rule); none left is
   /// `ApiChanged` when some were such, else `StreamUnavailable`.
@@ -1022,28 +1026,25 @@ abstract final class PandaLiveApi {
   }) {
     const what = 'IVS master';
     if (mediaUrl('$master') == null) throw ApiChanged(_site, '$what: $master is not an IVS playlist');
-    if (body.length > manifestLimit || !body.trimLeft().startsWith('#EXTM3U')) {
+    final List<HlsStreamInf> entries;
+    try {
+      if (body.length > manifestLimit) throw const FormatException('over the limit');
+      entries = HlsStreamInf.read(body);
+    } on FormatException {
       throw const ApiChanged(_site, '$what: not a playlist');
     }
-    final lines = const LineSplitter().convert(body);
     final variants =
         <({String id, bool source, int height, double frameRate, int bandwidth, Uri url, String? codec})>[];
     final ids = <String>{};
     var count = 0;
     String? broken;
-    for (var index = 0; index < lines.length; index++) {
-      final line = lines[index].trim();
-      if (!line.startsWith('#EXT-X-STREAM-INF:')) continue;
-      final attributes = _attributes(line.substring('#EXT-X-STREAM-INF:'.length));
-      var next = index + 1;
-      while (next < lines.length && lines[next].trim().isEmpty) {
-        next++;
-      }
-      if (next >= lines.length || lines[next].trim().startsWith('#')) {
+    for (final entry in entries) {
+      final attributes = entry.attributes();
+      final uri = entry.uri;
+      if (uri == null) {
         broken ??= 'a variant without its URI';
         continue;
       }
-      index = next;
       final resolution = attributes['RESOLUTION'];
       final match = resolution == null ? null : RegExp(r'^[1-9][0-9]{1,4}x([1-9][0-9]{1,4})$').firstMatch(resolution);
       if (match == null) continue;
@@ -1056,7 +1057,7 @@ abstract final class PandaLiveApi {
       }
       Uri? url;
       try {
-        url = mediaUrl('${master.resolve(lines[next].trim())}');
+        url = mediaUrl('${master.resolve(uri)}');
       } on FormatException {
         url = null;
       }
@@ -1113,18 +1114,6 @@ abstract final class PandaLiveApi {
   /// known; an expired playlist stops playback, so the renewal cuts over.
   /// (3.x had no lease: it fetched the room again after a failure.)
   static PlayLease lease(DateTime issuedAt) => PlayLease(refreshAt: issuedAt.add(variantRefresh), cutsConnection: true);
-
-  static Map<String, String> _attributes(String raw) {
-    final result = <String, String>{};
-    for (final match in RegExp('([A-Z0-9-]+)=("[^"]*"|[^,]*)').allMatches(raw)) {
-      var value = match.group(2)!;
-      if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) {
-        value = value.substring(1, value.length - 1);
-      }
-      result[match.group(1)!] = value;
-    }
-    return result;
-  }
 
   static String? _codecOf(String? codecs) {
     for (final name in (codecs ?? '').split(',')) {

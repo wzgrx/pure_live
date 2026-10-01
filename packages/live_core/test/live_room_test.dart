@@ -183,6 +183,17 @@ void main() {
       expect(filled.area, 'x');
       expect(card.fillFromDetail(null), same(card));
     });
+
+    test('fillFromDetail takes the card title only when the detail has none (A-3)', () {
+      final card = LiveRoom(platform: 'kuaishou', roomId: '1', title: 'card');
+      expect(LiveRoom(platform: 'kuaishou', roomId: '1').fillFromDetail(card).title, 'card');
+      expect(LiveRoom(platform: 'kuaishou', roomId: '1', title: ' ').fillFromDetail(card).title, 'card');
+      expect(LiveRoom(platform: 'kuaishou', roomId: '1', title: 'detail').fillFromDetail(card).title, 'detail');
+      expect(
+        LiveRoom(platform: 'kuaishou', roomId: '1').fillFromDetail(LiveRoom(platform: 'kuaishou', roomId: '1')).title,
+        '',
+      );
+    });
   });
 
   group('merge', () {

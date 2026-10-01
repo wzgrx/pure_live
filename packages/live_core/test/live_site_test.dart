@@ -117,6 +117,39 @@ void main() {
       expect(_hd.withPlaybackUnconfirmed(unconfirmed: false), same(_hd));
     });
 
+    test('11-1: a quality the platform switched to and named is shown confirmed; normalizing keeps it', () {
+      const switched = LivePlayQuality(quality: '1080p 60fps', id: 'new');
+      final resolution = LivePlayUrlResolution(
+        urls: const ['u', 'u'],
+        appliedQualityData: 'new',
+        appliedQuality: switched,
+        start: const Duration(seconds: 754),
+      );
+      final shown = resolveAppliedPlayQuality(qualities: const [_hd], requested: _hd, resolution: resolution);
+      expect((shown.quality, shown.isPlaybackUnconfirmed), ('1080p 60fps', false));
+      final normalized = resolution.normalized();
+      expect(normalized.urls, ['u']);
+      expect((normalized.appliedQuality, normalized.start), (switched, const Duration(seconds: 754)));
+      // A named quality whose id is not the confirmed one is not trusted.
+      final odd = resolveAppliedPlayQuality(
+        qualities: const [_hd],
+        requested: _hd,
+        resolution: LivePlayUrlResolution(urls: const ['u'], appliedQualityData: 'other', appliedQuality: switched),
+      );
+      expect((odd.quality, odd.isPlaybackUnconfirmed), ('高清', true));
+      // A known id still wins over the named quality.
+      final known = resolveAppliedPlayQuality(
+        qualities: const [_hd],
+        requested: _hd,
+        resolution: LivePlayUrlResolution(
+          urls: const ['u'],
+          appliedQualityData: _hd.selectionId,
+          appliedQuality: switched,
+        ),
+      );
+      expect(known, same(_hd));
+    });
+
     test('source policies must belong to exactly the resolved URLs', () {
       const url = 'https://cdn.test/live/a/master.m3u8?token=t';
       final policy = HlsSourceQueryPolicy.fromSource(Uri.parse(url));

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -114,7 +115,12 @@ final class _Snapshot {
 /// media go through [http] and the player.
 final class TwitchSite extends LiveSite
     with LiveSiteLinks
-    implements LiveSiteRoomRefresher, LiveSiteRecordRoomResolver, LivePlayUrlResolver, LivePlayRecoveryResolver {
+    implements
+        LiveSiteRoomRefresher,
+        LiveSiteRecordRoomResolver,
+        LivePlayUrlResolver,
+        LivePlayRecoveryResolver,
+        LiveSiteCookieRefusals {
   /// Creates the adapter. [_cookies] holds the user's Twitch cookie, if
   /// any; [gqlFallbacks] are the extra GraphQL transports described above.
   /// The settings are read at each request, so a change needs no new
@@ -124,7 +130,11 @@ final class TwitchSite extends LiveSite
   ///   such as `ZH`, `KO`; see [TwitchApi.normalizeLanguages]); none, the
   ///   default, keeps every language;
   /// - [preferH264] reads "优先 H.264" (on by default): on, usher is asked
-  ///   for H.264 only; off, also for HEVC and AV1 (Enhanced Broadcasting).
+  ///   for H.264 only; off, also for HEVC and AV1 (Enhanced Broadcasting),
+  ///   as far as [codecs] says the player decodes them;
+  /// - [codecs] reads the video codecs the player's engine decodes, named
+  ///   as lines name them (`avc`, `hevc`, `av1`); null (the default) is not
+  ///   known, and every codec is asked for (8-8).
   ///
   /// [random] (the `Device-Id`, the usher nonce) and [now] (the covers'
   /// `?&t=`, the snapshots' age) are injectable for tests.
@@ -134,11 +144,13 @@ final class TwitchSite extends LiveSite
     Iterable<LiveHttp> gqlFallbacks = const [],
     List<String> Function()? languages,
     bool Function()? preferH264,
+    Set<String>? Function()? codecs,
     Random? random,
     DateTime Function()? now,
   }) : gqlFallbacks = List.unmodifiable(gqlFallbacks),
        _languages = languages ?? _everyLanguage,
        _preferH264 = preferH264 ?? _on,
+       _codecs = codecs ?? _unknownCodecs,
        _random = random ?? Random.secure(),
        _now = now ?? DateTime.now;
 
@@ -151,12 +163,15 @@ final class TwitchSite extends LiveSite
   final CookieVault? _cookies;
   final List<String> Function() _languages;
   final bool Function() _preferH264;
+  final Set<String>? Function() _codecs;
   final Random _random;
   final DateTime Function() _now;
 
   static List<String> _everyLanguage() => const [];
 
   static bool _on() => true;
+
+  static Set<String>? _unknownCodecs() => null;
 
   /// `Device-Id` of every GraphQL and usher request, one per adapter.
   late final String _deviceId = TwitchApi.deviceId(_random);
@@ -170,6 +185,15 @@ final class TwitchSite extends LiveSite
   /// The stored cookie Twitch refused for the access token; anonymous
   /// tokens are used until the cookie changes.
   String? _rejectedSession;
+
+  final StreamController<void> _refusals = StreamController<void>.broadcast();
+
+  /// An event when Twitch refuses the stored cookie for the access token
+  /// (B-7): playback carries on anonymously and that cookie is not sent
+  /// again until it changes, so each cookie is reported once. The chat
+  /// says the same in its own notice (`TwitchDanmakuProtocol.cookieExpiredNotice`).
+  @override
+  Stream<void> get cookieRefusals => _refusals.stream;
 
   @override
   String get id => _site;
@@ -516,7 +540,7 @@ final class TwitchSite extends LiveSite
   }
 
   /// The access token, then usher's master playlist (asking for the codecs
-  /// the "优先 H.264" setting allows, 8-8), as qualities. When the detail
+  /// the "优先 H.264" setting and the engine allow, 8-8), as qualities. When the detail
   /// marked the stream restricted and Twitch refuses this viewer (a
   /// forbidden token or usher 403 that is not about the region), the
   /// refusal is `StreamUnavailable` naming the restriction.
@@ -525,7 +549,7 @@ final class TwitchSite extends LiveSite
     if (!TwitchApi.loginPattern.hasMatch(login)) throw NotFound(_site, 'not a channel login: ${detail.roomId}');
     try {
       final token = await _accessToken(login);
-      final url = TwitchApi.usherUrl(login, token, _random, preferH264: _preferH264());
+      final url = TwitchApi.usherUrl(login, token, _random, preferH264: _preferH264(), codecs: _codecs());
       final response = await _send(
         LiveRequest(
           site: _site,
@@ -554,13 +578,18 @@ final class TwitchSite extends LiveSite
       try {
         answer = await _gql(operation, what: 'PlaybackAccessToken', session: session);
       } on NeedsLogin {
-        _rejectedSession = session;
+        _refuse(session);
       } on RiskControl {
-        _rejectedSession = session;
+        _refuse(session);
       }
       if (answer != null) return TwitchApi.accessToken(answer, login: login);
     }
     return TwitchApi.accessToken(await _gql(operation, what: 'PlaybackAccessToken'), login: login);
+  }
+
+  void _refuse(String session) {
+    _rejectedSession = session;
+    _refusals.add(null);
   }
 
   // Links ---------------------------------------------------------------------

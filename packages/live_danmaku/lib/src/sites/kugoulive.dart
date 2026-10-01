@@ -173,7 +173,8 @@ abstract final class KugouLiveDanmakuProtocol {
   /// The acknowledgement of a message (`ACKCMD`, `Ack.AckRequest`).
   static const int ackCommand = 211;
 
-  /// Chat of the other room of a PK (`OTHERMESSAGE`), not reported.
+  /// Chat of the other room of a PK (`OTHERMESSAGE`): reported as chat
+  /// marked with that room (B-16, [chat]).
   static const int otherRoomChatCommand = 400305;
 
   /// The audience (`HEAT_NUM`, `actionId` `roomAuNumber`).
@@ -399,7 +400,8 @@ abstract final class KugouLiveDanmakuProtocol {
   /// - Status (901): type 1 with status 1 joins (with its `socsid`); type 1
   ///   with another status is a [KugouLiveDanmakuFrame.refusal]; other types
   ///   (4 comes first) say nothing.
-  /// - Chat (501) as [chat]; the audience (301005) as [audience].
+  /// - Chat (501) and the PK partner room's chat (400305) as [chat]; the
+  ///   audience (301005) as [audience].
   /// - A gift (601) whose envelope asks for it is acknowledged
   ///   ([KugouLiveDanmakuFrame.ack]); gifts are not reported.
   /// - Anything else, text frames, frames that cannot be read (a short
@@ -426,8 +428,8 @@ abstract final class KugouLiveDanmakuProtocol {
         return KugouLiveDanmakuFrame(
           refusal: KugouLiveChatRefusal(jsonInt(packet['errorno']) ?? 0, _text(packet['msg'])),
         );
-      case chatCommand:
-        final message = chat(packet, roomId: roomId);
+      case chatCommand || otherRoomChatCommand:
+        final message = chat(packet, roomId: roomId, otherRoom: command == otherRoomChatCommand);
         return KugouLiveDanmakuFrame(messages: [?message]);
       case audienceCommand:
         return KugouLiveDanmakuFrame(messages: audience(packet, roomId: roomId));
@@ -497,7 +499,8 @@ abstract final class KugouLiveDanmakuProtocol {
   };
 
   /// `Content.ContentMessage{cmd 1, content 2, roomid 3, receiverid 4,
-  /// senderid 6, senderkugouid 7, time 11, ext 14, sinfo 15, codec 16}`; the
+  /// senderid 6, senderkugouid 7, time 11, ext 14, sinfo 15, codec 16,
+  /// source 18 {roomid 1, tags 2}}`; the
   /// `content` of a chat whose `codec` is 1 read as `Chat.ChatResponse`
   /// ([_chatResponse]), its `ext` (`Ext.Extension`) for the fan badge
   /// (`intimacyVo` 39) and the text's colour (`intimacyVo.level`,
@@ -515,13 +518,16 @@ abstract final class KugouLiveDanmakuProtocol {
       'senderkugouid': message.integer(7) ?? 0,
       'time': message.integer(11) ?? 0,
     };
-    if (command != chatCommand || (message.integer(16) ?? 0) != 1) return packet;
+    if ((command != chatCommand && command != otherRoomChatCommand) || (message.integer(16) ?? 0) != 1) {
+      return packet;
+    }
     final chat = ProtoMessage.decode(message.bytes(2) ?? Uint8List(0));
     final ext = ProtoMessage.decode(message.bytes(14) ?? Uint8List(0));
     final intimacy = ext.message(39);
     final userGuard = ext.message(8);
     final littleGuard = ext.message(9);
     final sinfo = message.message(15);
+    final source = message.message(18);
     return {
       ...packet,
       'content': _chatResponse(chat),
@@ -537,6 +543,7 @@ abstract final class KugouLiveDanmakuProtocol {
         if (littleGuard != null) 'littleGuard': {'l': littleGuard.integer(1) ?? 0},
       },
       if (sinfo != null) 'sinfo': {'ck': sinfo.integer(5) ?? 0, 'ckid': sinfo.string(8) ?? ''},
+      if (source != null) 'source': {'roomid': source.integer(1) ?? 0, 'tags': source.integer(2) ?? 0},
     };
   }
 
@@ -555,14 +562,20 @@ abstract final class KugouLiveDanmakuProtocol {
     'senderrichlevelV2': chat.integer(25) ?? 0,
   };
 
-  /// A chat message (`RoomSocket.callback`, case `MESSAGE`) of room
-  /// [roomId] as chat, or null when the page would not show it in the
-  /// public chat:
+  /// A chat message (`RoomSocket.callback`, case `MESSAGE`, or with
+  /// [otherRoom] `OTHERMESSAGE`) of room [roomId] as chat, or null when the
+  /// page would not show it in the public chat:
   ///
   /// - the message goes to someone (`receiverid` of the envelope not 0: a
   ///   private message), comes from a negative sender or is marked
   ///   `privateType` 1;
   /// - it names another room (`roomid` not 0 and not [roomId]);
+  /// - [otherRoom] (the PK partner's chat, B-16) without `source.tags & 1`
+  ///   (the page shows only those) or without the partner's
+  ///   `source.roomid`; such a chat carries that room as
+  ///   [LiveMessage.sourceRoomId], and the page marks it as the other side.
+  ///   Whether the page's PK module also lets it through is not known here
+  ///   (it was shown in the one recording, S09);
   /// - it has no text left.
   ///
   /// The text is `chatmsg` and the name `sendername`, without the
@@ -577,12 +590,20 @@ abstract final class KugouLiveDanmakuProtocol {
   /// `msgId`, else `<sender>:<seq>` (the sender's own counter); the time is
   /// the envelope's `time` (seconds, milliseconds above 10^11). The colour
   /// is the page's for the text ([textColor], M5.F B-15).
-  static LiveMessage? chat(Map<String, Object?> packet, {required String roomId}) {
+  static LiveMessage? chat(Map<String, Object?> packet, {required String roomId, bool otherRoom = false}) {
     if ((jsonInt(packet['receiverid']) ?? 0) != 0 || (jsonInt(packet['senderid']) ?? 0) < 0) return null;
     final content = packet['content'];
     if (content is! Map || jsonInt(content['privateType']) == 1) return null;
     final room = jsonInt(packet['roomid']) ?? 0;
     if (room != 0 && '$room' != roomId) return null;
+    var sourceRoom = '';
+    if (otherRoom) {
+      final source = packet['source'];
+      final partner = source is Map ? jsonInt(source['roomid']) ?? 0 : 0;
+      final tags = source is Map ? jsonInt(source['tags']) ?? 0 : 0;
+      if (tags & 1 == 0 || partner <= 0 || '$partner' == roomId) return null;
+      sourceRoom = '$partner';
+    }
     final text = _clean(content['chatmsg']);
     if (text.isEmpty) return null;
     final sender = _id(packet['senderid']) ?? _id(content['senderid']);
@@ -609,6 +630,7 @@ abstract final class KugouLiveDanmakuProtocol {
           ? '$sender:$seq'
           : '',
       sentAt: _time(packet['time']),
+      sourceRoomId: sourceRoom,
     );
   }
 

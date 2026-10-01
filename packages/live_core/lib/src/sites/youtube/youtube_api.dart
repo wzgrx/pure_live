@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:live_core/src/audience.dart';
+import 'package:live_core/src/hls_master.dart';
 import 'package:live_core/src/json.dart';
 import 'package:live_core/src/live_area.dart';
 import 'package:live_core/src/live_room.dart';
@@ -1183,7 +1184,8 @@ abstract final class YouTubeApi {
   }
 
   /// The variants of the HLS master [text] read from [source] (3.x's
-  /// `_hlsVariants`): one stream per `#EXT-X-STREAM-INF`, labelled by height
+  /// `_hlsVariants`, read by the shared [HlsStreamInf.read] with strict
+  /// attributes): one stream per `#EXT-X-STREAM-INF`, labelled by height
   /// (and frame rate above 30). Throws [FormatException] for anything 3.x
   /// did not accept (then only the master itself is offered): a missing
   /// `#EXTM3U`, more than 64 variants, malformed attributes, two variants of
@@ -1192,22 +1194,14 @@ abstract final class YouTubeApi {
     if (text.length > _maxMaster || utf8.encode(text).length > _maxMaster) {
       throw const FormatException('YouTube HLS master exceeds byte budget');
     }
-    final lines = const LineSplitter().convert(text).map((line) => line.trim()).where((line) => line.isNotEmpty);
-    final iterator = lines.iterator;
-    if (!iterator.moveNext() || iterator.current != '#EXTM3U') {
-      throw const FormatException('Expected YouTube HLS master');
-    }
-    Map<String, String>? pending;
+    final entries = HlsStreamInf.read(text);
+    if (entries.length > 64) throw const FormatException('Invalid YouTube HLS variant count');
     final result = <YouTubeStream>[];
     final seen = <String>{};
-    while (iterator.moveNext()) {
-      final line = iterator.current;
-      if (line.startsWith('#EXT-X-STREAM-INF:')) {
-        if (pending != null || result.length >= 64) throw const FormatException('Invalid YouTube HLS variant count');
-        pending = _attributes(line.substring('#EXT-X-STREAM-INF:'.length));
-        continue;
-      }
-      if (line.startsWith('#') || pending == null) continue;
+    for (final entry in entries) {
+      final line = entry.uri;
+      if (line == null) throw const FormatException('Incomplete YouTube HLS master');
+      final pending = entry.attributes(strict: true);
       final resolution = RegExp(r'^[1-9][0-9]{0,4}x([1-9][0-9]{0,4})$').firstMatch(pending['RESOLUTION'] ?? '');
       final height = int.tryParse(resolution?.group(1) ?? '');
       final frameRate = double.tryParse(pending['FRAME-RATE'] ?? '');
@@ -1233,9 +1227,8 @@ abstract final class YouTubeApi {
           urls: [uri],
         ),
       );
-      pending = null;
     }
-    if (pending != null || result.isEmpty) throw const FormatException('Incomplete YouTube HLS master');
+    if (result.isEmpty) throw const FormatException('Incomplete YouTube HLS master');
     return result;
   }
 
@@ -1393,23 +1386,6 @@ abstract final class YouTubeApi {
 
   static bool _imageHost(String host) =>
       host == 'ytimg.com' || host.endsWith('.ytimg.com') || host == 'ggpht.com' || host.endsWith('.ggpht.com');
-
-  static final RegExp _attribute = RegExp(r'([A-Z0-9-]+)=("[^"\r\n\x00]*"|[^,\s"]+)(?:,|$)');
-
-  static Map<String, String> _attributes(String text) {
-    final values = <String, String>{};
-    var offset = 0;
-    while (offset < text.length) {
-      final match = _attribute.matchAsPrefix(text, offset);
-      if (match == null || values.containsKey(match[1])) {
-        throw const FormatException('Malformed YouTube HLS attributes');
-      }
-      final value = match[2]!;
-      values[match[1]!] = value.startsWith('"') ? value.substring(1, value.length - 1) : value;
-      offset = match.end;
-    }
-    return values;
-  }
 
   /// The first JSON object after [marker] (3.x's `_embeddedObject`): braces
   /// counted outside strings; an object that does not decode is skipped for

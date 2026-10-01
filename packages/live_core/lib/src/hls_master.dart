@@ -264,20 +264,84 @@ Uri _resolve(Uri source, String text) {
   return uri;
 }
 
-final RegExp _attribute = RegExp(r'([A-Z0-9-]+)=("[^"\r\n\x00]*"|[^,\s"]+)(?:,|$)');
-
 /// An attribute list (`KEY=value,KEY="quoted"`); a repeated key, a
 /// malformed pair or a trailing comma throws.
 Map<String, String> _attributes(String text) {
-  final values = <String, String>{};
-  var offset = 0;
-  while (offset < text.length) {
-    final match = _attribute.matchAsPrefix(text, offset);
-    if (match == null || values.containsKey(match[1])) throw const FormatException('Malformed HLS attributes');
-    final value = match[2]!;
-    values[match[1]!] = value.startsWith('"') ? value.substring(1, value.length - 1) : value;
-    offset = match.end;
-  }
+  final values = HlsStreamInf.attributesOf(text, strict: true);
   if (text.endsWith(',')) throw const FormatException('Incomplete HLS attributes');
   return values;
+}
+
+/// One `#EXT-X-STREAM-INF` of a master playlist read leniently: the
+/// reading YouTube and PandaTV share (M7.1 notes; each used to have its
+/// own). Unlike [HlsMasterPlaylist] nothing is validated here: the
+/// platform decides what a missing URI or odd attributes mean (YouTube
+/// refuses the whole master, PandaTV only loses that variant).
+@immutable
+final class HlsStreamInf {
+  const new _(this.attributeText, this.uri);
+
+  /// The tag's attribute list as written (after `#EXT-X-STREAM-INF:`).
+  final String attributeText;
+
+  /// The URI line this variant names, trimmed and not yet resolved: the
+  /// first line after the tag that is not a tag or a comment (other tags in
+  /// between are skipped); null when the next `#EXT-X-STREAM-INF` or the
+  /// end comes first.
+  final String? uri;
+
+  /// [attributeText] read by [attributesOf].
+  Map<String, String> attributes({bool strict = false}) => attributesOf(attributeText, strict: strict);
+
+  /// Every `#EXT-X-STREAM-INF` of the master [text], in order. Lines are
+  /// trimmed and blank ones skipped; the first must be `#EXTM3U`, else
+  /// [FormatException]. A URI line without a tag before it is skipped.
+  static List<HlsStreamInf> read(String text) {
+    final lines = const LineSplitter().convert(text).map((line) => line.trim()).where((line) => line.isNotEmpty);
+    final iterator = lines.iterator;
+    if (!iterator.moveNext() || iterator.current != '#EXTM3U') throw const FormatException('Expected HLS master');
+    final result = <HlsStreamInf>[];
+    String? pending;
+    while (iterator.moveNext()) {
+      final line = iterator.current;
+      if (line.startsWith(_tag)) {
+        if (pending != null) result.add(HlsStreamInf._(pending, null));
+        pending = line.substring(_tag.length);
+      } else if (!line.startsWith('#') && pending != null) {
+        result.add(HlsStreamInf._(pending, line));
+        pending = null;
+      }
+    }
+    if (pending != null) result.add(HlsStreamInf._(pending, null));
+    return result;
+  }
+
+  static const String _tag = '#EXT-X-STREAM-INF:';
+
+  static final RegExp _strictPair = RegExp(r'([A-Z0-9-]+)=("[^"\r\n\x00]*"|[^,\s"]+)(?:,|$)');
+  static final RegExp _lenientPair = RegExp('([A-Z0-9-]+)=("[^"]*"|[^,]*)');
+
+  /// An attribute list as names and values, quotes removed. [strict] (the
+  /// RFC grammar, as YouTube and [HlsMasterPlaylist] read it): one
+  /// comma-separated `NAME=value` after another, each name once, a value
+  /// quoted or a token without spaces; anything else is a
+  /// [FormatException]. Otherwise (PandaTV): every `NAME=value` found, a
+  /// repeated name keeping its last value, the rest ignored.
+  static Map<String, String> attributesOf(String text, {bool strict = false}) {
+    String unquote(String value) => value.length >= 2 && value.startsWith('"') && value.endsWith('"')
+        ? value.substring(1, value.length - 1)
+        : value;
+    if (!strict) {
+      return {for (final match in _lenientPair.allMatches(text)) match[1]!: unquote(match[2]!)};
+    }
+    final values = <String, String>{};
+    var offset = 0;
+    while (offset < text.length) {
+      final match = _strictPair.matchAsPrefix(text, offset);
+      if (match == null || values.containsKey(match[1])) throw const FormatException('Malformed HLS attributes');
+      values[match[1]!] = unquote(match[2]!);
+      offset = match.end;
+    }
+    return values;
+  }
 }

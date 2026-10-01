@@ -13,6 +13,7 @@ export 'src/theme/dynamic_color.dart' show LiveDynamicColorBuilder, MaterialUiTh
 export 'src/theme/live_colors.dart';
 export 'src/theme/live_theme.dart';
 export 'src/theme/text_styles.dart';
+export 'src/widgets/app_menu.dart';
 export 'src/widgets/avatar.dart';
 export 'src/widgets/count_button.dart';
 export 'src/widgets/emote_text.dart';

@@ -50,6 +50,31 @@ void main() {
       (AppIcons.localInteraction, Icons.auto_awesome_rounded),
       (AppIcons.templateSave, Icons.save_outlined),
       (AppIcons.templateRestore, Icons.restore_rounded),
+      // U.3a, U.3b: the home shell keeps 3.x's glyphs, except the areas tab
+      // (three shapes, c7) and "more" (U.3a c4).
+      (AppIcons.homeFavorites, Remix.heart_3_line),
+      (AppIcons.homeFavoritesSelected, Remix.heart_3_fill),
+      (AppIcons.homePopular, Remix.fire_line),
+      (AppIcons.homePopularSelected, Remix.fire_fill),
+      (AppIcons.homeAreas, Remix.shapes_line),
+      (AppIcons.homeAreasSelected, Remix.shapes_fill),
+      (AppIcons.homeRecord, Remix.download_2_line),
+      (AppIcons.homeRecordSelected, Remix.download_2_fill),
+      (AppIcons.appMenu, Icons.menu_rounded),
+      (AppIcons.search, CustomIcons.search),
+      (AppIcons.more, Remix.more_2_fill),
+      (AppIcons.watchHistory, Remix.history_line),
+      (AppIcons.openLink, Remix.link),
+      (AppIcons.multiview, Remix.layout_grid_line),
+      (AppIcons.settings, Remix.settings_5_line),
+      (AppIcons.about, Remix.information_line),
+      (AppIcons.backup, Remix.cloud_line),
+      (AppIcons.newPlayerWindow, Icons.add_to_photos_outlined),
+      // U.3d: the download dialog keeps 3.x's glyphs.
+      (AppIcons.downloadDone, Icons.check_circle_rounded),
+      (AppIcons.downloadFailed, Icons.error_outline_rounded),
+      (AppIcons.install, Icons.install_mobile_rounded),
+      (AppIcons.retry, Icons.refresh_rounded),
     ];
     for (final (actual, glyph) in expected) {
       expect(actual, glyph);

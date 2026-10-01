@@ -24,6 +24,9 @@ import 'package:pure_live/routes/route_path.dart';
 
 import '../../support.dart';
 
+/// The page's and the importer's clock in these tests.
+final DateTime _pageNow = DateTime(2026, 10, 1, 20);
+
 const _playlistUrl = 'https://f/tv.m3u';
 
 const _playlist = '''
@@ -98,6 +101,9 @@ Future<_Harness> _pump(
     final importer = IptvImporter(
       library: StoreIptvLibrary(services.store),
       http: http,
+      // The page's clock: an import stamps "updated" with this time, so the
+      // cards read "今天" whatever day the test runs on.
+      now: () => _pageNow,
       playlistDirectory: directory,
       selectedGuideSourceId: () => settings.get(Settings.selectedSourceId),
       autoSyncEnabled: () => settings.get(Settings.isAutoSyncEnabled),
@@ -117,7 +123,7 @@ Future<_Harness> _pump(
       overrides: [
         appServicesProvider.overrideWithValue(harness.services),
         iptvImporterProvider.overrideWithValue(harness.importer),
-        iptvClockProvider.overrideWithValue(() => DateTime(2026, 10, 1, 20)),
+        iptvClockProvider.overrideWithValue(() => _pageNow),
         ...overrides,
       ],
       child: LiveUiScope(

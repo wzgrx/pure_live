@@ -27,8 +27,12 @@ class PortraitPanelLayout extends StatefulWidget {
     required this.onFullscreen,
     required this.mobile,
     this.onPortraitFullscreen,
+    this.least = portraitPanelLeast,
     super.key,
   });
+
+  /// The lowest stop ([portraitPanelStops]).
+  final double least;
 
   /// The picture, told how much of it the panel covers.
   final Widget Function(double covered) player;
@@ -156,7 +160,7 @@ class _PortraitPanelLayoutState extends State<PortraitPanelLayout> {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      final stops = portraitPanelStops(constraints.maxHeight, widget.mode);
+      final stops = portraitPanelStops(constraints.maxHeight, widget.mode, least: widget.least);
       final current = (_height ?? stops.initial).clamp(stops.minimum, stops.maximum);
       final covered = (_settled ?? stops.initial).clamp(stops.minimum, stops.maximum);
       final still = MediaQuery.disableAnimationsOf(context);

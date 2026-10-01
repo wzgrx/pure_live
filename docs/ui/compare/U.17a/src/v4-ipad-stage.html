@@ -1,0 +1,150 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="1180x820@1.5"><link rel="stylesheet" href="kit/kit.css"><style>
+.ph{display:flex;flex-direction:column}
+.main{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.appbar{flex:none}
+.lead{width:56px;height:56px;display:grid;place-items:center;flex:none}
+.act{display:flex;align-items:center;flex:none}
+.ttl{flex:1;min-width:0;text-align:center;font-size:20px;font-weight:600}
+/* favourites status tabs in the title (TabBar, fill) */
+.st{flex:1;min-width:0;display:flex;height:46px;margin:0 16px}
+.st div{flex:1;display:flex;align-items:center;justify-content:center;font-size:15px;color:rgba(67,71,78,.8);position:relative;white-space:nowrap}
+.st .on{color:var(--primary);font-weight:600}
+.st .on::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:var(--iw,46px);height:3px;border-radius:3px 3px 0 0;background:var(--primary)}
+/* platform tabs (ScrollableTabBar, scrollable) */
+.pt{height:46px;display:flex;flex:none;overflow:hidden;white-space:nowrap}
+.pt div{padding:0 16px;display:flex;align-items:center;font-size:15px;color:rgba(67,71,78,.8);position:relative;flex:none}
+.pt .on{color:var(--primary);font-weight:600}
+.pt .on::after{content:'';position:absolute;bottom:0;left:16px;right:16px;height:2px;background:var(--primary)}
+/* room grid (RoomGridView dense, RoomCard dense) */
+.grid{display:grid;gap:6px;padding:12px;align-content:start}
+.card{background:#fff;border-radius:20px;overflow:hidden}
+.cov{position:relative;aspect-ratio:16/9;border-radius:20px;background:#eee center/cover}
+.pb{position:absolute;left:8px;top:8px;padding:3px 6px;border-radius:8px;background:rgba(0,0,0,.58);color:#fff;font:700 10px/1.2 'Geist','Noto Sans SC'}
+.aud{position:absolute;right:8px;bottom:8px;display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:10px;background:rgba(0,0,0,.48);color:#fff;font:700 11px/1 'Geist','Noto Sans SC'}
+.aud .mr{font-size:14px}
+.tile{display:flex;align-items:center;gap:8px;padding:6px 10px 8px}
+.tile .a{width:34px;height:34px;border-radius:17px;background:center/cover;flex:none}
+.tile .x{min-width:0;flex:1}
+.tile .t{font-size:13px;font-weight:600;color:rgba(0,0,0,.87);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:18px}
+.tile .n{font-size:12px;font-weight:500;color:#616161;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:17px;margin-top:2px}
+[data-theme=dark] .card{background:#212121}[data-theme=dark] .tile .t{color:#fff}[data-theme=dark] .tile .n{color:#BDBDBD}
+/* bottom NavigationBar (M3 defaults: 80 high, surfaceContainer) */
+.nb{flex:none;height:100px;padding-bottom:20px;background:var(--scc);display:flex;position:relative}
+.nd{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:4px}
+.nd .ind{width:64px;height:32px;border-radius:16px;display:grid;place-items:center;color:var(--onv)}
+.nd .l{font-size:12px;font-weight:500;color:var(--onv);line-height:16px}
+.nd.on .ind{background:var(--sc);color:var(--osc)}.nd.on .l{color:var(--on)}
+/* v3 popup menus (M3 PopupMenu: surfaceContainer, items 48 high, width steps of 56) */
+.pm{position:absolute;z-index:21;background:var(--scc);box-shadow:0 2px 6px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.12);padding:8px 0}
+.pm .it{height:48px;display:flex;align-items:center;gap:12px;white-space:nowrap}
+/* recorder tab body */
+.rs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:9px 13px}
+.rs div{height:48px;border-radius:11px;background:rgba(225,226,232,.46);display:grid;place-items:center;font-size:12px;font-weight:500;color:var(--onv)}
+.rs .on{background:var(--pc);color:var(--opc);font-weight:700}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.empty .c{width:92px;height:92px;border-radius:46px;background:rgba(54,97,142,.08);display:grid;place-items:center;color:var(--primary);margin-bottom:24px}
+.empty .h{font-size:15px;font-weight:700}.empty .s{font-size:13px;color:var(--onv);margin-top:8px}
+.tip{font-family:'Noto Sans SC'}
+
+.win{display:flex}
+.rail{width:80px;flex:none;background:var(--surface);display:flex;flex-direction:column;align-items:center;overflow:hidden}
+.vd{width:1px;flex:none;background:var(--ov)}
+.body{flex:1;min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.ra{width:48px;height:48px;display:grid;place-items:center;flex:none;border-radius:24px}
+.rd{width:80px;display:flex;flex-direction:column;align-items:center;padding:4px 0 12px;gap:4px;flex:none}
+.rd .ind{width:56px;height:32px;border-radius:16px;display:grid;place-items:center;color:var(--onv)}
+.rd .l{font-size:12px;font-weight:500;line-height:16px;color:var(--on)}
+.rd.on .ind{background:var(--sc);color:var(--osc)}
+.rt{width:80px;display:flex;flex-direction:column;align-items:center;flex:none;padding-bottom:6px}
+.rt .l{font-size:12px;line-height:16px;color:var(--onv);margin-top:-4px}
+.rsep{width:40px;height:1px;background:var(--ov);margin:6px 0 14px;flex:none}
+.hov{background:rgba(25,28,32,.08)}
+.tipw{position:absolute;z-index:30;background:rgba(25,28,32,.9);color:#fff;font-size:12px;padding:6px 8px;border-radius:4px;white-space:nowrap}
+
+html,body{background:#0E1014}
+/* ---------- iPhone ---------- */
+.ph.iph{border-radius:55px;display:flex;flex-direction:column}
+.fs.ifs{border-radius:55px}
+.ipad{border-radius:18px}
+.isl{position:absolute;left:50%;top:11px;width:126px;height:37px;margin-left:-63px;border-radius:19px;background:#000;z-index:70}
+.isl.r{left:auto;right:11px;top:50%;width:37px;height:126px;margin:-63px 0 0}
+.ist{position:absolute;left:0;right:0;top:0;height:54px;z-index:69;display:flex;align-items:center;justify-content:space-between;font:600 16px/1 'Geist','Noto Sans SC';color:var(--on);pointer-events:none}
+.ist .l{width:136px;text-align:center;padding-top:5px;font-feature-settings:'tnum'}
+.ist .r{width:136px;display:flex;align-items:center;justify-content:center;gap:6px;padding-top:5px}
+.ist.w,.ipst.w{color:#fff}
+.sig{display:flex;align-items:flex-end;gap:1.5px;height:11px}.sig i{width:3px;border-radius:1px;background:currentColor}
+.bt{position:relative;width:25px;height:12px;border-radius:4px;border:1px solid currentColor;padding:1.5px;opacity:.95}.bt i{display:block;height:100%;width:72%;border-radius:2px;background:currentColor}
+.bt::after{content:'';position:absolute;right:-4px;top:3px;width:2px;height:4px;border-radius:0 1px 1px 0;background:currentColor;opacity:.5}
+.hind{position:absolute;left:50%;bottom:8px;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:#111;z-index:70}
+.hind.w{background:rgba(255,255,255,.85)}
+.hind.l{width:200px;margin-left:-100px}
+.hind.p{width:320px;margin-left:-160px}
+.top59{height:59px;flex:none}
+.syn{top:auto !important;bottom:18px;left:44px;transform:none}
+.cbtn{width:40px;height:40px;border-radius:20px;background:rgba(0,0,0,.54);border:1px solid rgba(255,255,255,.24);display:grid;place-items:center;color:#fff;flex:none}
+.edge{position:absolute;z-index:8;border-radius:6px}
+.capx{position:absolute;z-index:80;font:500 12px/1.45 'Noto Sans SC';padding:5px 9px;border-radius:7px;background:rgba(25,28,32,.82);color:#fff;max-width:300px}
+/* ---------- safe area diagram ---------- */
+.sa{position:absolute;z-index:66;background:repeating-linear-gradient(45deg,rgba(217,45,32,.30) 0 6px,rgba(217,45,32,.12) 6px 12px)}
+.sal{position:absolute;z-index:75;font:600 12px/1.3 'Noto Sans SC';color:#B42318;background:#fff;padding:3px 7px;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.25);white-space:nowrap}
+/* ---------- system UI (drawn by iOS; shown only to place our parts) ---------- */
+.home-ios{position:absolute;inset:0;background:url(.cache/img/338.jpg) center/cover}
+.home-ios::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.15)}
+.apps{position:absolute;left:28px;right:28px;top:84px;display:grid;grid-template-columns:repeat(4,1fr);gap:28px 0;justify-items:center;z-index:1}
+.apps div,.dock div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.apps i,.dock i{width:62px;height:62px;border-radius:15px;display:block;background:center/cover}
+.dock{position:absolute;left:14px;right:14px;bottom:24px;height:94px;border-radius:32px;background:rgba(255,255,255,.35);display:flex;justify-content:space-around;align-items:center;z-index:1}
+.pipw{position:absolute;z-index:40;border-radius:12px;overflow:hidden;background:#000 url(.cache/img/158.jpg) center 55%/cover;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.pipw .dim{position:absolute;inset:0;background:rgba(0,0,0,.32)}
+.pipw .b{position:absolute;color:#fff;display:grid;place-items:center}
+.alert{position:absolute;z-index:61;left:50%;top:50%;width:270px;transform:translate(-50%,-50%);border-radius:14px;background:#F2F2F7;text-align:center;overflow:hidden;color:#000}
+.alert .h{padding:19px 16px 2px;font-size:16px;font-weight:600;line-height:1.35}.alert .m{padding:0 16px 18px;font-size:13px;line-height:1.4}
+.alert .a{display:flex;border-top:1px solid #C7C7CC}.alert .a span{flex:1;height:44px;display:grid;place-items:center;font-size:16px;color:#0A64D6}
+.alert .a span+span{border-left:1px solid #C7C7CC;font-weight:600}
+.shs{position:absolute;left:0;right:0;bottom:0;z-index:61;background:#F2F2F7;border-radius:28px 28px 0 0;color:#000;padding:18px 16px 40px}
+.shs .hd{display:flex;align-items:center;gap:12px;padding:0 2px 14px;border-bottom:1px solid #D1D1D6}
+.shs .hd i{width:46px;height:46px;border-radius:10px;background:#fff center/80% no-repeat;flex:none;box-shadow:0 0 0 .5px rgba(0,0,0,.12)}
+.shs .hd .x{flex:1;min-width:0}.shs .hd .t{font-size:15px;font-weight:600}.shs .hd .s{font-size:12px;color:#6C6C70;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.shs .hd .c{width:30px;height:30px;border-radius:15px;background:#E3E3E8;display:grid;place-items:center;color:#6C6C70;flex:none}
+.shs .ap{display:flex;justify-content:space-between;padding:16px 4px 14px}
+.shs .ap div{width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:#3C3C43;text-align:center;line-height:1.25}
+.shs .ap i{width:60px;height:60px;border-radius:14px;display:grid;place-items:center;color:#fff;font-style:normal;background:center/80% no-repeat}
+.shs .grp{background:#fff;border-radius:12px;overflow:hidden}
+.shs .grp div{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:15px;border-bottom:1px solid #E5E5EA}
+.shs .grp div:last-child{border:0}.shs .grp .mo,.shs .grp .mr{color:#3C3C43}
+.hl{box-shadow:0 0 0 3px #0A64D6;border-radius:16px}
+.sbar{position:absolute;z-index:62;left:12px;right:12px;display:flex;align-items:center;gap:8px;min-height:48px;padding:6px 6px 6px 16px;border-radius:12px;background:#2E3135;color:#EFF0F7;font-size:14px;box-shadow:0 3px 10px rgba(0,0,0,.25)}
+.sbar .x{flex:1;line-height:1.4}.sbar .go{height:36px;padding:0 12px;border-radius:18px;display:flex;align-items:center;color:#A0CAFD;font-weight:600;flex:none}
+.sbar .cl{width:36px;height:36px;display:grid;place-items:center;color:#C3C7CF;flex:none}
+.cmp{position:absolute;z-index:61;left:20px;right:20px;top:120px;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.25);color:#000}
+.cmp .nb2{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid #D1D1D6;font-size:16px}
+.cmp .nb2 span:first-child,.cmp .nb2 span:last-child{color:#0A64D6}.cmp .nb2 b{font-weight:600}
+.cmp .bd{display:flex;gap:10px;padding:12px 14px;height:150px}.cmp .bd p{flex:1;font-size:15px;line-height:1.4;word-break:break-all}
+.cmp .bd i{width:64px;height:64px;border-radius:6px;background:#E5E5EA;flex:none;display:grid;place-items:center;color:#8E8E93;font-style:normal}
+/* ---------- iPad ---------- */
+.ipst{position:absolute;left:0;right:0;top:0;height:24px;z-index:69;display:flex;align-items:center;justify-content:space-between;padding:0 20px 0 24px;font:600 13px/1 'Geist','Noto Sans SC';color:var(--on);pointer-events:none}
+.ipst .r{display:flex;align-items:center;gap:6px}
+.ptr{position:absolute;z-index:75;width:20px;height:20px;border-radius:10px;background:rgba(60,60,67,.55);box-shadow:0 0 0 1px rgba(255,255,255,.6)}
+.hovc{position:relative}.hovc::after{content:'';position:absolute;inset:0;border-radius:20px;background:rgba(25,28,32,.07);box-shadow:inset 0 0 0 1px rgba(25,28,32,.12)}
+.wctl{position:absolute;z-index:72;display:flex;gap:8px}.wctl i{width:12px;height:12px;border-radius:6px;display:block}
+.wctl .c{background:#FF5F57;box-shadow:inset 0 0 0 .5px #E0443E}.wctl .m{background:#FEBC2E;box-shadow:inset 0 0 0 .5px #DEA123}.wctl .z{background:#28C840;box-shadow:inset 0 0 0 .5px #1AAB29}
+.hud{position:absolute;z-index:65;border-radius:22px;background:#fff;box-shadow:0 18px 50px rgba(0,0,0,.35);color:#000;padding:18px 22px 20px}
+.hud .h{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;padding-bottom:12px;border-bottom:1px solid #E5E5EA}
+.hud .h i{width:28px;height:28px;border-radius:7px;background:center/90% no-repeat;display:block}
+.hud .cols{display:grid;grid-template-columns:repeat(4,1fr);gap:0 26px;padding-top:12px}
+.hud .g{font-size:12px;font-weight:600;color:#6C6C70;margin:8px 0 4px}
+.hud .hk{display:flex;justify-content:space-between;gap:10px;font-size:13px;line-height:25px;white-space:nowrap}.hud .hk b{font-weight:400;color:#6C6C70;font-family:'Geist','Noto Sans SC'}
+.pop{position:absolute;z-index:62;width:360px;border-radius:14px;background:#F2F2F7;box-shadow:0 12px 40px rgba(0,0,0,.28);color:#000;padding:14px 14px 16px}
+.pop::before{content:'';position:absolute;top:-9px;right:var(--ar,24px);width:18px;height:18px;background:#F2F2F7;transform:rotate(45deg);border-radius:3px}
+.gsnack{position:absolute;z-index:62;left:10px;right:10px;border-radius:15px;background:#FFDAD6;color:#410002;padding:14px 18px}
+.gsnack b{display:block;font-size:16px;font-weight:800;margin-bottom:4px}.gsnack span{font-size:14px}
+.split{position:absolute;top:0;bottom:0;width:10px;background:#000;z-index:68;display:grid;place-items:center}.split i{width:4px;height:44px;border-radius:2px;background:#8E8E93;display:block}
+.other{position:absolute;top:0;bottom:0;background:#fff;z-index:2;overflow:hidden}
+.other .ln2{height:12px;border-radius:6px;background:#E5E5EA;margin:16px 28px}
+.stg{position:absolute;inset:0;background:url(.cache/img/287.jpg) center/cover}
+.stg::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.12)}
+.shelf{position:absolute;left:18px;width:120px;border-radius:10px;background:rgba(255,255,255,.55);box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:3}
+.idock{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);height:74px;padding:0 12px;border-radius:26px;background:rgba(255,255,255,.4);display:flex;gap:12px;align-items:center;z-index:4}
+.idock i{width:54px;height:54px;border-radius:13px;display:block;background:center/cover}
+.iwin{position:absolute;z-index:10;border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.35);background:var(--surface)}
+</style></head><body><div class="win ipad" style="--w:1180px;--h:820px"><div class="stg"></div><div class="shelf" style="top:150px;height:86px;background:rgba(255,255,255,.65) url(.cache/img/304.jpg) center/cover"></div><div class="shelf" style="top:270px;height:86px;background:rgba(255,255,255,.65) url(.cache/img/319.jpg) center/cover"></div><div class="shelf" style="top:390px;height:86px;background:rgba(255,255,255,.65) url(.cache/img/342.jpg) center/cover"></div><div class="iwin" style="left:220px;top:70px;width:760px;height:600px"><div class="win" style="--w:760px;--h:600px"><div class="rail"><div style="height:38px;flex:none"></div><div style="padding:12px 12px 8px"><div class="ra"><span class="mr" style="font-size:24px">menu</span></div></div><div class="rt"><div class="ra"><span class="ci" style="font-size:24px">&#xe804;</span></div><div class="l">搜索直播</div></div><div class="rt"><div class="ra"><span class="rx" style="font-size:24px">&#xee17;</span></div><div class="l">历史记录</div></div><div class="rt"><div class="ra"><span class="rx" style="font-size:24px">&#xeeb2;</span></div><div class="l">链接解析</div></div><div class="rt"><div class="ra"><span class="rx" style="font-size:24px">&#xee90;</span></div><div class="l">多画面</div></div><div class="rsep"></div><div class="rd on"><div class="ind"><span class="rx" style="font-size:24px">&#xee0a;</span></div><div class="l">关注</div></div><div class="rd"><div class="ind"><span class="rx" style="font-size:24px">&#xed33;</span></div><div class="l">热门</div></div><div class="rd"><div class="ind"><span class="rx" style="font-size:24px">&#xf3da;</span></div><div class="l">分区</div></div><div class="rd"><div class="ind"><span class="rx" style="font-size:24px">&#xec54;</span></div><div class="l">录制中心</div></div></div><div class="vd"></div><div class="body"><div class="appbar"><div class="st" style="margin:0 16px"><div class="on">已开播</div><div class="">录播</div><div class="">未开播</div></div></div><div class="pt"><div class="on">全部</div><div class="">哔哩哔哩</div><div class="">斗鱼</div><div class="">虎牙</div><div class="">抖音</div><div class="">快手</div><div class="">网易CC</div></div><div class="grid" style="grid-template-columns:repeat(3,1fr)"><div class="card"><div class="cov" style="background-image:url(.cache/img/1.jpg)"><span class="pb">BILIBILI</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>1.2万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/65.jpg)"></span><div class="x"><div class="t">深夜电台 · 点歌接龙到天亮</div><div class="n">晚风</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/225.jpg)"><span class="pb">HUYA</span><span class="aud"><span class="mr" style="font-size:14px">whatshot</span>86.4万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/111.jpg)"></span><div class="x"><div class="t">王者上分，今晚冲国服</div><div class="n">一只小熊</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/237.jpg)"><span class="pb">DOUYU</span><span class="aud"><span class="mr" style="font-size:14px">whatshot</span>34.1万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/133.jpg)"></span><div class="x"><div class="t">川西自驾第 3 天，雪山日出</div><div class="n">路过的风</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/250.jpg)"><span class="pb">DOUYIN</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>2301</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/169.jpg)"></span><div class="x"><div class="t">手工皮具，慢慢做一只钱包</div><div class="n">清欢</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/287.jpg)"><span class="pb">BILIBILI</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>5620</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/183.jpg)"></span><div class="x"><div class="t">钢琴即兴，弹你点的歌</div><div class="n">月亮邮差</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/292.jpg)"><span class="pb">KUAISHOU</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>1.1万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/206.jpg)"></span><div class="x"><div class="t">深夜食堂，煮一碗面</div><div class="n">橘子汽水</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/304.jpg)"><span class="pb">BILIBILI</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>3488</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/219.jpg)"></span><div class="x"><div class="t">围棋复盘：今天的三局</div><div class="n">不吃香菜</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/319.jpg)"><span class="pb">DOUYU</span><span class="aud"><span class="mr" style="font-size:14px">whatshot</span>12.7万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/274.jpg)"></span><div class="x"><div class="t">城市夜跑 10 公里</div><div class="n">星河长明</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/1.jpg)"><span class="pb">BILIBILI</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>1.2万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/65.jpg)"></span><div class="x"><div class="t">深夜电台 · 点歌接龙到天亮</div><div class="n">晚风</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/225.jpg)"><span class="pb">HUYA</span><span class="aud"><span class="mr" style="font-size:14px">whatshot</span>86.4万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/111.jpg)"></span><div class="x"><div class="t">王者上分，今晚冲国服</div><div class="n">一只小熊</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/237.jpg)"><span class="pb">DOUYU</span><span class="aud"><span class="mr" style="font-size:14px">whatshot</span>34.1万</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/133.jpg)"></span><div class="x"><div class="t">川西自驾第 3 天，雪山日出</div><div class="n">路过的风</div></div></div></div><div class="card"><div class="cov" style="background-image:url(.cache/img/250.jpg)"><span class="pb">DOUYIN</span><span class="aud"><span class="mr" style="font-size:14px">people_alt</span>2301</span></div><div class="tile"><span class="a" style="background-image:url(.cache/img/169.jpg)"></span><div class="x"><div class="t">手工皮具，慢慢做一只钱包</div><div class="n">清欢</div></div></div></div></div></div></div><div class="wctl" style="left:14px;top:14px"><i class="c"></i><i class="m"></i><i class="z"></i></div></div><div class="idock"><i style="background:#7BD389"></i><i style="background:#5AA9F0"></i><i style="background:#fff url(../../../apps/pure_live/assets/icons/icon.png) center/80% no-repeat"></i><i style="background:#F2994A"></i><i style="background:#9EC5F2"></i><i style="background:#F28CA0"></i></div><div class="ipst w"><span>21:36&nbsp;&nbsp;10月1日周三</span><span class="r"><span class="mi" style="font-size:15px">wifi</span><span style="font-weight:500">100%</span><span class="bt"><i style="width:100%"></i></span></span></div><div class="capx" style="left:220px;top:684px;max-width:760px;z-index:80">台前调度的窗口（760×600）：按宽度排（600–839 是侧边导航，U.3b）；窗口左上角是系统的三个窗口按钮（iPadOS 26 起），侧边栏顶部给它们留出位置，和 macOS 同一个做法（U.17b）。</div><div class="hind p w"></div><div class="syn" style="left:auto;right:16px;bottom:96px;transform:none">示意图片</div></div></body></html>

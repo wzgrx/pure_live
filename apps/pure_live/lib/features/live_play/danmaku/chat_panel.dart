@@ -1,18 +1,17 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
-import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
+import 'package:pure_live/features/live_play/danmaku/super_chats.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/danmaku/block_manager.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 export 'package:pure_live/features/live_play/danmaku/chat_list.dart' show superChatPrice;
+export 'package:pure_live/features/live_play/danmaku/super_chats.dart' show SuperChatCard, SuperChatList;
 
 /// The four tabs under the video (3.x `DanmakuTabView`, four equal widths):
 /// chat, super chats (with their count, U.2a change 9), danmaku settings and
@@ -111,16 +110,27 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
           controller: _tabs,
           physics: const PureLiveBoundedScrollPhysics(),
           children: [
-            ChatList(controller: widget.controller, onTouched: _seen),
-            // Rebuilt with the room as before: the remaining times move on
-            // with each update (the super chat tab is U.2e's).
-            ListenableBuilder(
-              listenable: widget.controller,
-              builder: (context, _) =>
-                  SuperChatList(messages: widget.controller.superChats, now: widget.controller.now),
+            // U.2k-a: the local danmaku composer under the list (while the
+            // local interaction is on).
+            LocalComposerBelow(
+              child: ChatList(controller: widget.controller, onTouched: _seen),
             ),
-            RoomDanmakuSettings(controller: widget.controller),
-            const BlockListPanel(),
+            // Rebuilt only when the super chats change; one clock inside
+            // moves the times on (U.2e c6).
+            ListenableSelector<List<LiveSuperChatMessage>>(
+              listenable: widget.controller,
+              selector: () => widget.controller.superChats,
+              builder: (context, messages, _) => SuperChatList(
+                messages: messages,
+                now: widget.controller.now,
+                platformName: platformName(widget.controller.site.id, fallback: widget.controller.site.name),
+                platformHasSuperChats: widget.controller.site.hasSuperChats,
+              ),
+            ),
+            // U.2e c8: the U.2f component, "改动立即生效" by the first title.
+            RoomDanmakuSettings(controller: widget.controller, inTab: true),
+            // U.2e c11-c16; the same component as the settings page's (E4).
+            DanmakuBlockManager(addKeyword: widget.controller.blockKeyword),
           ],
         ),
       ),
@@ -187,186 +197,4 @@ class _TabLabel extends StatelessWidget {
       },
     );
   }
-}
-
-/// Super chats on display with their remaining time (3.x `SuperChatPage`).
-class SuperChatList extends StatelessWidget {
-  /// Creates the list.
-  const new({required this.messages, required this.now, super.key});
-
-  /// Messages, oldest first.
-  final List<LiveSuperChatMessage> messages;
-
-  /// The clock.
-  final DateTime Function() now;
-
-  @override
-  Widget build(BuildContext context) {
-    if (messages.isEmpty) {
-      return AppStatusView(
-        type: AppStatusType.empty,
-        isMini: true,
-        title: i18n('super_chat_empty_title'),
-        subtitle: i18n('super_chat_empty_subtitle'),
-      );
-    }
-    final theme = Theme.of(context);
-    final current = now();
-    return ListView.builder(
-      padding: const EdgeInsets.all(8),
-      itemCount: messages.length,
-      itemBuilder: (context, index) {
-        final superChat = messages[messages.length - 1 - index];
-        final top = parsePlatformColor(superChat.backgroundColor) ?? theme.colorScheme.tertiaryContainer;
-        final bottom = parsePlatformColor(superChat.backgroundBottomColor) ?? theme.colorScheme.tertiary;
-        final left = superChat.endTime.difference(current);
-        return Card(
-          clipBehavior: Clip.antiAlias,
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ColoredBox(
-                color: top,
-                child: ListTile(
-                  dense: true,
-                  leading: CommonAvatar(avatarUrl: superChat.face, radius: 16, fallbackName: superChat.userName),
-                  title: Text(superChat.userName, style: const TextStyle(color: InkOnColor.dark)),
-                  subtitle: Text(superChatPrice(superChat), style: const TextStyle(color: InkOnColor.dark)),
-                  trailing: Text(
-                    left.isNegative ? '' : '${left.inMinutes}:${(left.inSeconds % 60).toString().padLeft(2, '0')}',
-                    style: const TextStyle(color: InkOnColor.darkMuted),
-                  ),
-                ),
-              ),
-              ColoredBox(
-                color: bottom,
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(superChat.message, style: const TextStyle(color: InkOnColor.light)),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// Blocked words and viewers (3.x `KeywordBlockPage`): add a word, tap a
-/// chip to remove it.
-class BlockListPanel extends ConsumerStatefulWidget {
-  /// Creates the panel.
-  const new({super.key});
-
-  @override
-  ConsumerState<BlockListPanel> createState() => _BlockListPanelState();
-}
-
-class _BlockListPanelState extends ConsumerState<BlockListPanel> {
-  final TextEditingController _input = TextEditingController();
-  late final Stream<List<String>> _keywords;
-  late final Stream<List<String>> _users;
-
-  @override
-  void initState() {
-    super.initState();
-    final lists = ref.read(storeProvider).blockLists;
-    _keywords = lists.watch(BlockKind.keyword);
-    _users = lists.watch(BlockKind.user);
-  }
-
-  @override
-  void dispose() {
-    _input.dispose();
-    super.dispose();
-  }
-
-  Future<void> _add() async {
-    final words = _input.text
-        .split(RegExp(r'[\n,，]'))
-        .map((word) => word.trim())
-        .where((word) => word.isNotEmpty)
-        .toList();
-    if (words.isEmpty) {
-      AppNavigator.toast(i18n('please_enter_keyword'));
-      return;
-    }
-    final lists = ref.read(storeProvider).blockLists;
-    var added = 0;
-    for (final word in words) {
-      if (await lists.add(BlockKind.keyword, word)) added++;
-    }
-    _input.clear();
-    AppNavigator.toast(i18n('keyword_added_count', args: {'count': '$added'}));
-  }
-
-  Widget _chips(Stream<List<String>> stream, BlockKind kind, String empty) => StreamBuilder<List<String>>(
-    stream: stream,
-    builder: (context, snapshot) {
-      final values = snapshot.data ?? const <String>[];
-      if (values.isEmpty) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Text(empty, style: Theme.of(context).textTheme.bodySmall),
-        );
-      }
-      return Wrap(
-        spacing: 6,
-        runSpacing: 4,
-        children: [
-          for (final value in values)
-            InputChip(
-              label: Text(value),
-              tooltip: i18n('click_to_remove'),
-              onDeleted: () => unawaited(ref.read(storeProvider).blockLists.remove(kind, value)),
-              onPressed: () => unawaited(ref.read(storeProvider).blockLists.remove(kind, value)),
-            ),
-        ],
-      );
-    },
-  );
-
-  @override
-  Widget build(BuildContext context) => ListView(
-    key: const ValueKey('live-play-block-list'),
-    padding: const EdgeInsets.all(12),
-    children: [
-      Row(
-        children: [
-          Expanded(
-            child: TextField(
-              key: const ValueKey('live-play-block-input'),
-              controller: _input,
-              decoration: InputDecoration(
-                isDense: true,
-                border: const OutlineInputBorder(),
-                hintText: i18n('please_enter_keyword'),
-              ),
-              onSubmitted: (_) => unawaited(_add()),
-            ),
-          ),
-          const SizedBox(width: 8),
-          FilledButton(
-            key: const ValueKey('live-play-block-add'),
-            onPressed: () => unawaited(_add()),
-            child: Text(i18n('add')),
-          ),
-        ],
-      ),
-      const SizedBox(height: 12),
-      Text(i18n('danmaku_keyword_block'), style: Theme.of(context).textTheme.titleSmall),
-      _chips(_keywords, BlockKind.keyword, i18n('live_play_no_blocked_words')),
-      const SizedBox(height: 12),
-      StreamBuilder<List<String>>(
-        stream: _users,
-        builder: (context, snapshot) => Text(
-          i18n('blocked_danmaku_users', args: {'count': '${snapshot.data?.length ?? 0}'}),
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-      ),
-      _chips(_users, BlockKind.user, i18n('live_play_no_blocked_users')),
-    ],
-  );
 }

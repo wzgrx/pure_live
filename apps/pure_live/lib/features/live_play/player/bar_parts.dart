@@ -12,13 +12,11 @@ import 'package:pure_live/features/live_play/logic/device_battery.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_layout.dart';
 import 'package:pure_live/features/live_play/player/player_gestures.dart';
-import 'package:pure_live/features/live_play/player/room_composer.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
 // The smaller pieces of the fullscreen and wide bars (docs/ui/compare/U.2b,
 // U.2c, U.2d): the clock and battery, the desktop volume, the fit and
-// portrait-mode menus, the lock, the composer's place and the portrait
-// fullscreen's entry hint.
+// portrait-mode menus, the lock and the portrait fullscreen's entry hint.
 
 /// The clock of the fullscreen bars (3.x `DatetimeInfo`): `21:36` in equal
 /// digits; redrawn when the minute turns, nothing else.
@@ -337,68 +335,6 @@ class LockButton extends StatelessWidget {
     icon: Icon(locked ? AppIcons.locked : AppIcons.unlocked),
   );
 }
-
-/// Where the local danmaku composer goes in a fullscreen bar (U.2c change 3):
-/// the composer's field, or on a [compact] bar a star in the local danmaku
-/// colour that calls [onOpen]; nothing while local interaction is off.
-class ComposerSlot extends StatelessWidget {
-  /// Creates the slot.
-  const new({required this.compact, required this.onHold, this.onOpen, super.key});
-
-  /// A narrow bar: the star button.
-  final bool compact;
-
-  /// Told when the field gains (true) and loses focus: the controls stay up.
-  final ValueChanged<bool> onHold;
-
-  /// Opens the field above the bar (the star).
-  final VoidCallback? onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final composer = RoomComposerScope.maybeOf(context);
-    if (composer == null) return const SizedBox.shrink();
-    return ValueListenableBuilder<bool>(
-      valueListenable: composer.available,
-      builder: (context, available, _) {
-        if (!available) return const SizedBox.shrink();
-        if (compact) {
-          return ValueListenableBuilder<Color>(
-            valueListenable: composer.color,
-            builder: (context, color, _) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: IconButton(
-                key: const ValueKey('live-play-composer-star'),
-                tooltip: i18n('local_send_message'),
-                onPressed: onOpen,
-                color: color,
-                iconSize: 18,
-                style: IconButton.styleFrom(
-                  backgroundColor: OnVideoColors.composer,
-                  shape: const CircleBorder(side: BorderSide(color: OnVideoColors.composerOutline)),
-                  fixedSize: const Size(40, 40),
-                  minimumSize: const Size(40, 40),
-                  tapTargetSize: MaterialTapTargetSize.padded,
-                ),
-                icon: const Icon(AppIcons.localDanmaku),
-              ),
-            ),
-          );
-        }
-        return Focus(
-          key: const ValueKey('live-play-composer'),
-          canRequestFocus: false,
-          skipTraversal: true,
-          onFocusChange: onHold,
-          child: composer.buildField(context, autofocus: false),
-        );
-      },
-    );
-  }
-}
-
-/// Whether the room has a composer to show now.
-bool composerAvailable(BuildContext context) => RoomComposerScope.maybeOf(context)?.available.value ?? false;
 
 /// The hint after entering the portrait fullscreen (3.x
 /// `PortraitFullscreenEntryHint`): "已进入竖屏全屏 · 上滑恢复弹幕栏" above the

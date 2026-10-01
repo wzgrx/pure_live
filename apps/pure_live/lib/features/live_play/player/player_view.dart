@@ -7,22 +7,25 @@ import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
-import 'package:pure_live/features/live_play/logic/background_playback.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_gift_effect.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
+import 'package:pure_live/features/live_play/logic/mini_window.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_layout.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
+import 'package:pure_live/features/live_play/logic/room_status.dart';
+import 'package:pure_live/features/live_play/mini/mini_player.dart';
+import 'package:pure_live/features/live_play/mini/room_mini_window.dart';
 import 'package:pure_live/features/live_play/player/bar_parts.dart';
 import 'package:pure_live/features/live_play/player/player_controls.dart';
 import 'package:pure_live/features/live_play/player/player_gestures.dart';
 import 'package:pure_live/features/live_play/player/player_status.dart';
 import 'package:pure_live/features/live_play/player/recording_badge.dart';
-import 'package:pure_live/features/live_play/player/room_composer.dart';
-import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
 
@@ -73,8 +76,12 @@ class RoomPlayer extends ConsumerStatefulWidget {
     this.onWindowFullscreen,
     this.onSwipeUp,
     this.entryHint = false,
+    this.onOpenGuide,
     super.key,
   });
+
+  /// Opens or reveals the IPTV guide (the replay mark, U.2g c18).
+  final VoidCallback? onOpenGuide;
 
   /// The room.
   final LiveRoomController controller;
@@ -88,8 +95,9 @@ class RoomPlayer extends ConsumerStatefulWidget {
   /// The platform.
   final RoomPlatform platform;
 
-  /// In Android's picture-in-picture: only the picture (and danmaku when
-  /// `enablePipDanmaku`).
+  /// In a mini window (U.2j): Android's picture-in-picture (only the
+  /// picture, the "小窗弹幕" and the recording mark) or the desktop mini
+  /// window (with its buttons), as the page's `RoomMiniScope` says.
   final bool pip;
 
   /// The stream is laid out as portrait.
@@ -134,7 +142,6 @@ class RoomPlayer extends ConsumerStatefulWidget {
 class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   bool _controls = true;
   bool _locked = false;
-  bool _composerOpen = false;
   int _hintEpoch = 0;
   Timer? _hide;
 
@@ -142,9 +149,11 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   /// panels: the controls do not hide by themselves meanwhile (U.2f,
   /// 统一规则).
   int _menus = 0;
-  bool _composing = false;
   RoomPanelController? _panels;
-  late final Future<bool> _pipSupported = widget.platform.android ? PictureInPicture.supported() : Future.value(false);
+
+  /// Whether the picture's mini window button shows (U.2j: Android's
+  /// picture-in-picture or the desktop mini window).
+  late final Future<bool> _pipSupported = RoomMiniScope.maybeOf(context)?.supported() ?? Future.value(false);
 
   /// The picture keeps its element (and its texture) when picture-in-picture
   /// or a presentation swaps the layout around it (M13.16).
@@ -171,7 +180,6 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     // locked) releases it, or its unlock button stayed on the normal picture
     // with the gestures off (M13.16).
     if (widget.arrangement == ControlsArrangement.inline) _locked = false;
-    if (widget.arrangement != oldWidget.arrangement) _composerOpen = false;
     if (widget.entryHint && !oldWidget.entryHint) _hintEpoch++;
     // Entering or leaving fullscreen shows the controls for a while, as a
     // new player did before the player kept its state.
@@ -211,18 +219,10 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     super.dispose();
   }
 
-  bool get _holding => _menus > 0 || _composing || _composerOpen || _panels?.value != null;
+  bool get _holding => _menus > 0 || _panels?.value != null;
 
   void _onMenu(bool open) {
     _menus = (_menus + (open ? 1 : -1)).clamp(0, 8);
-    _scheduleHide();
-  }
-
-  void _onHold(bool focused) {
-    _composing = focused;
-    if (!focused && _composerOpen) {
-      setState(() => _composerOpen = false);
-    }
     _scheduleHide();
   }
 
@@ -238,11 +238,6 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   /// controls while playing and shows them otherwise, resuming a paused
   /// stream; on desktops it only shows them.
   void _onTap() {
-    if (_composerOpen) {
-      setState(() => _composerOpen = false);
-      _scheduleHide();
-      return;
-    }
     final playing = _room.session.state.status == PlaybackStatus.playing;
     if (widget.platform.mobile && _controls && (playing || _locked)) {
       setState(() => _controls = false);
@@ -265,17 +260,8 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     _scheduleHide();
   }
 
-  void _openComposer() {
-    setState(() => _composerOpen = true);
-    _scheduleHide();
-  }
-
   Future<void> _enterPip() async {
-    final state = _room.session.state;
-    final width = state.videoWidth ?? 16;
-    final height = state.videoHeight ?? 9;
-    final entered = await PictureInPicture.enter(width: width > 0 ? width : 16, height: height > 0 ? height : 9);
-    if (!entered) AppNavigator.toast(i18n('pip_enter_failed'));
+    await RoomMiniScope.maybeOf(context)?.enter(context);
   }
 
   /// The flying danmaku, kept inside the picture: they enter from beyond its
@@ -343,21 +329,21 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     final look = danmakuLookOf(ref);
     final video = RepaintBoundary(child: _picture(fit));
     if (pip) {
-      final small = _scaled(
-        look,
-        watchSetting(ref, Settings.pipDanmakuFontSize),
-        watchSetting(ref, Settings.pipDanmakuArea),
-      );
-      return ColoredBox(
-        color: OnVideoColors.ground,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            video,
-            _danmaku(look: small, visible: showDanmaku),
-            Positioned(left: 6, top: 6, child: RoomRecordingBadge(room: _room.room, compact: true)),
-          ],
-        ),
+      // U.2j: the same surface as the in-app floating window; the picture
+      // keeps its element.
+      final mini = RoomMiniScope.maybeOf(context);
+      final desktop = mini?.desktop ?? false;
+      return MiniPlayerSurface(
+        controller: _room,
+        reconnect: widget.reconnect,
+        video: video,
+        kind: desktop ? MiniKind.desktop : MiniKind.systemPip,
+        onBackToRoom: mini == null ? null : () => unawaited(mini.backToRoom()),
+        onClose: mini == null ? null : () => unawaited(mini.close()),
+        pinned: watchSetting(ref, Settings.windowsPipAlwaysOnTop),
+        canPin: mini?.canPin ?? false,
+        onPin: mini == null ? null : () => unawaited(mini.togglePin()),
+        onDragStart: desktop ? (_) => unawaited(DesktopWindow.startDragging()) : null,
       );
     }
     final arrangement = widget.arrangement;
@@ -377,10 +363,8 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       onPip: () => unawaited(_enterPip()),
       onInteract: _scheduleHide,
       onMenu: _onMenu,
-      onHold: _onHold,
       onReopen: widget.reconnect.expectReopen,
       onWindowFullscreen: widget.onWindowFullscreen,
-      onOpenComposer: _openComposer,
       wide: widget.wide,
     );
     final padding = MediaQuery.paddingOf(context);
@@ -393,7 +377,6 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     if (portraitRows && widget.onSwipeUp != null) {
       bottomBar = _SwipeUpRegion(onSwipeUp: widget.onSwipeUp!, child: bottomBar);
     }
-    final composer = RoomComposerScope.maybeOf(context);
     final overlay = Stack(
       fit: StackFit.expand,
       children: [
@@ -426,7 +409,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
         ),
         // The status of the picture (loading, offline, reconnecting, ...):
         // one layer over the visible part of the picture (U.2g).
-        ListenableSelector<(RoomStage, Object?, LiveStatus, LiveRestriction, String, bool, int)>(
+        ListenableSelector<(RoomStage, Object?, LiveStatus, LiveRestriction, String, bool, int, bool)>(
           listenable: _statusSources,
           selector: () {
             final room = _room.room;
@@ -438,6 +421,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
               room.cover,
               widget.reconnect.reconnecting,
               widget.reconnect.attempts,
+              _room.audioOnly,
             );
           },
           builder: (context, _, _) => StreamBuilder<PlaybackState>(
@@ -449,6 +433,15 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
               reconnect: widget.reconnect,
             ),
           ),
+        ),
+        // U.2k c9: the local gift banner, on its own layer in the middle of
+        // the picture.
+        if (LocalRoomScope.maybeOf(context) case final local?) LocalGiftLayer(session: local, fullscreen: !_inline),
+        // U.2g c18: the replay mark stays whether the controls show or not.
+        Positioned(
+          left: 10 + (_inline ? 0 : padding.left),
+          top: arrangement == ControlsArrangement.inline ? 52 : badgeTop,
+          child: CatchupBadge(controller: _room, onOpenGuide: widget.onOpenGuide),
         ),
         // The recording mark: in the inline title bar while the controls
         // show; under the fullscreen bars (U.2c); dot and time alone in the
@@ -480,51 +473,41 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                 maxScaleFactor: 1.3,
                 child: IconTheme(
                   data: OnVideoColors.icons,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      if (!_locked)
-                        Column(
-                          children: [
-                            PlayerTopBar(actions: actions),
-                            const Spacer(),
-                            bottomBar,
-                          ],
-                        ),
-                      if (lockable)
-                        Positioned(
-                          right: 20 + padding.right,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: LockButton(locked: _locked, onPressed: _toggleLock),
+                  // U.2g c5, c6: no bars while nothing plays (the state's
+                  // buttons are the way on); fullscreen keeps a reduced top
+                  // bar to leave it.
+                  child: ListenableSelector<bool>(
+                    listenable: _room,
+                    selector: () => pictureHasControls(_room.stage),
+                    builder: (context, controls, _) => Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        if (!_locked)
+                          Column(
+                            children: [
+                              if (controls || arrangement != ControlsArrangement.inline)
+                                PlayerTopBar(actions: controls ? actions : actions.reducedCopy()),
+                              const Spacer(),
+                              if (controls) bottomBar,
+                            ],
                           ),
-                        ),
-                    ],
+                        if (lockable && controls)
+                          Positioned(
+                            right: 20 + padding.right,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: LockButton(locked: _locked, onPressed: _toggleLock),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ),
-        if (_composerOpen && composer != null && !_locked)
-          Positioned(
-            key: const ValueKey('live-play-composer-row'),
-            left: 12 + padding.left,
-            right: 12 + padding.right,
-            bottom: padding.bottom + controlBarHeight + 8,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 520),
-                child: Focus(
-                  canRequestFocus: false,
-                  skipTraversal: true,
-                  onFocusChange: _onHold,
-                  child: composer.buildField(context, autofocus: true),
-                ),
-              ),
-            ),
-          ),
         if (portraitRows && widget.entryHint && _hintEpoch > 0)
           PortraitEntryHint(key: ValueKey('hint-$_hintEpoch'), bottom: padding.bottom + 8 + portraitRowHeight * 2 + 16),
       ],

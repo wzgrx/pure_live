@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
+export 'package:pure_live/shared/danmaku/setting_rows.dart' show PanelCard, PanelGroupTitle;
+
 /// The panels the live room opens beside the picture (docs/ui/compare/U.2f,
 /// 统一规则): recording and the danmaku settings. One at a time.
 enum RoomPanelKind {
@@ -10,6 +12,17 @@ enum RoomPanelKind {
 
   /// The danmaku settings (the picture's settings button).
   danmaku,
+
+  /// The IPTV programme guide in landscape fullscreen (docs/ui/compare/U.2g
+  /// c16: under the picture in portrait, in the right column on wide
+  /// windows, here on the right).
+  guide,
+
+  /// The local interaction (the room menu's "本地互动体验", U.2k).
+  localInteraction,
+
+  /// The local danmaku style (a local composer's star, U.2k).
+  localStyle,
 }
 
 /// The panel open in the room, or null.
@@ -57,6 +70,7 @@ class RoomSidePanel extends StatefulWidget {
     required this.child,
     this.actions = const [],
     this.dragToClose = false,
+    this.leading,
     super.key,
   });
 
@@ -74,6 +88,9 @@ class RoomSidePanel extends StatefulWidget {
 
   /// A downward drag on the header closes the panel (portrait).
   final bool dragToClose;
+
+  /// Before the title: the back of a panel's second page (U.2k K3).
+  final Widget? leading;
 
   @override
   State<RoomSidePanel> createState() => _RoomSidePanelState();
@@ -99,11 +116,12 @@ class _RoomSidePanelState extends State<RoomSidePanel> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final header = Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 4, 0),
+      padding: EdgeInsets.fromLTRB(widget.leading == null ? 16 : 4, 4, 4, 0),
       child: SizedBox(
         height: kMinInteractiveDimension + 4,
         child: Row(
           children: [
+            ?widget.leading,
             Expanded(
               child: Text(
                 widget.title,
@@ -185,46 +203,4 @@ class PanelLink extends StatelessWidget {
       ),
     );
   }
-}
-
-/// A group title inside a panel: 13 points in the primary colour (U.2f).
-class PanelGroupTitle extends StatelessWidget {
-  /// Creates the title.
-  const new(this.text, {super.key});
-
-  /// The words.
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
-      child: Text(
-        text,
-        style: theme.textTheme.labelLarge?.emphasis.copyWith(fontSize: 13, color: theme.colorScheme.primary),
-      ),
-    );
-  }
-}
-
-/// A rounded group of rows inside a panel.
-class PanelCard extends StatelessWidget {
-  /// Creates the card.
-  const new({required this.children, super.key});
-
-  /// The rows.
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 12),
-    child: DecoratedBox(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
-    ),
-  );
 }

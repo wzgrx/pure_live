@@ -50,8 +50,8 @@ void main() {
       (AppIcons.localInteraction, Icons.auto_awesome_rounded),
       (AppIcons.templateSave, Icons.save_outlined),
       (AppIcons.templateRestore, Icons.restore_rounded),
-      // U.2b-U.2d: 3.x's glyphs of the portrait room, the window fullscreen
-      // and the composer; the chat column's own.
+      // U.2b-U.2d: 3.x's glyphs of the portrait room and the window
+      // fullscreen; the chat column's own.
       (AppIcons.portraitFullscreenEnter, Icons.keyboard_arrow_down_rounded),
       (AppIcons.portraitFullscreenRestore, Icons.keyboard_arrow_up_rounded),
       (AppIcons.landscapeFullscreen, Icons.screen_rotation_rounded),
@@ -60,7 +60,52 @@ void main() {
       (AppIcons.chatColumn, Icons.vertical_split_rounded),
       (AppIcons.chatColumnFold, Remix.arrow_right_s_line),
       (AppIcons.chatColumnUnfold, Remix.arrow_left_s_line),
-      (AppIcons.localDanmaku, Icons.auto_awesome_rounded),
+
+      // U.2g and U.2e.
+      (AppIcons.switchLine, Icons.alt_route_rounded),
+      (AppIcons.banned, Icons.block_rounded),
+      (AppIcons.statusUnknown, Icons.help_outline_rounded),
+      (AppIcons.login, Icons.login_rounded),
+      (AppIcons.guideTitle, Remix.calendar_todo_line),
+      (AppIcons.catchup, Remix.history_line),
+      (AppIcons.liveNow, Remix.live_line),
+      (AppIcons.guideEmpty, Remix.inbox_line),
+      (AppIcons.guideFailed, Remix.error_warning_line),
+      (AppIcons.add, Remix.add_line),
+      (AppIcons.unfoldLeft, Remix.arrow_left_s_line),
+      (AppIcons.chatEmpty, Remix.chat_smile_3_line),
+      (AppIcons.danmakuTimeout, Remix.wifi_off_line),
+      (AppIcons.danmakuUnavailable, Remix.chat_off_line),
+      (AppIcons.superChatPrice, Remix.money_cny_circle_fill),
+      (AppIcons.superChatMark, Remix.vip_diamond_fill),
+      (AppIcons.superChatTime, Remix.time_line),
+      (AppIcons.chipRemove, Remix.close_line),
+      // U.2k: the local interaction keeps 3.x's glyphs.
+      (AppIcons.localStyle, Icons.auto_awesome_rounded),
+      (AppIcons.localSend, Icons.send_rounded),
+      (AppIcons.localCoins, Icons.toll_rounded),
+      (AppIcons.localOverlay, Icons.subtitles_rounded),
+      (AppIcons.localBadge, Icons.workspace_premium_rounded),
+      (AppIcons.localLevel, Icons.military_tech_rounded),
+      (AppIcons.localGiftEffects, Icons.celebration_rounded),
+      (AppIcons.localClearHistory, Icons.delete_sweep_outlined),
+      (AppIcons.localPreviewStage, Icons.live_tv_rounded),
+      (AppIcons.localPreviewLive, Icons.play_circle_fill_rounded),
+      (AppIcons.localStyleSync, Icons.sync_rounded),
+      (AppIcons.localPlaceScroll, Icons.trending_flat_rounded),
+      (AppIcons.localPlaceTop, Icons.vertical_align_top_rounded),
+      (AppIcons.localPlaceBottom, Icons.vertical_align_bottom_rounded),
+      (AppIcons.localBold, Icons.format_bold_rounded),
+      (AppIcons.localItalic, Icons.format_italic_rounded),
+      (AppIcons.localStroke, Icons.border_color_rounded),
+      (AppIcons.localShadow, Icons.blur_on_rounded),
+      // U.2j: the mini windows' buttons (3.x's play and pause; the new back
+      // and pin).
+      (AppIcons.backToRoom, Icons.open_in_full_rounded),
+      (AppIcons.miniPlay, Icons.play_circle_filled),
+      (AppIcons.miniPause, Icons.pause_circle_filled),
+      (AppIcons.pinned, Remix.pushpin_fill),
+      (AppIcons.unpinned, Remix.pushpin_line),
     ];
     for (final (actual, glyph) in expected) {
       expect(actual, glyph);

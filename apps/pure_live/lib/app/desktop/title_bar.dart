@@ -200,11 +200,12 @@ class DesktopFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!enabled) return child;
-    return ValueListenableBuilder<bool>(
-      valueListenable: DesktopWindow.fullScreen,
-      builder: (context, fullScreen, _) => Column(
+    // No title bar in full screen, nor on the room's mini window (U.2j).
+    return ListenableBuilder(
+      listenable: Listenable.merge([DesktopWindow.fullScreen, DesktopWindow.mini]),
+      builder: (context, _) => Column(
         children: [
-          if (!fullScreen) const DesktopTitleBar(),
+          if (!DesktopWindow.fullScreen.value && !DesktopWindow.mini.value) const DesktopTitleBar(),
           Expanded(child: child),
         ],
       ),

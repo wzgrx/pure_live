@@ -1,0 +1,124 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="1290x2600@1.5 crop"><link rel="stylesheet" href="kit/kit.css"><style>
+@font-face{font-family:'Material Icons Outlined';src:url('.cache/fonts/MaterialIconsOutlined.woff2') format('woff2')}
+.mo{font-family:'Material Icons Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-feature-settings:'liga';white-space:nowrap}
+.ph.long{height:auto;min-height:852px;padding-bottom:24px}
+/* ---------- v3 ---------- */
+.v3bar{height:64px;display:flex;align-items:center;position:relative;background:var(--surface);flex:none}
+.v3bar .bk{width:56px;height:56px;display:grid;place-items:center}.v3bar .bk .mi{font-size:24px}
+.v3bar .t{position:absolute;left:72px;right:72px;text-align:center;font-size:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v3bar .acts{margin-left:auto;display:flex;align-items:center;padding-right:8px;color:var(--onv)}
+.v3body{padding:12px 16px 32px}
+.v3wrap{max-width:960px;margin:0 auto}
+.v3gt{padding:0 0 8px 8px;font-size:12px;font-weight:700;color:rgba(54,97,142,.65);letter-spacing:.5px;line-height:16px}
+.v3card{background:#F5F6FC;border-radius:20px;overflow:hidden;box-shadow:inset 0 0 0 .5px rgba(195,199,207,.25)}
+.v3gap{height:20px}
+.v3t{display:flex;align-items:center;gap:12px;padding:8px 16px;min-height:56px}
+.v3t.two{min-height:72px}.v3t.three{min-height:88px}
+.v3t.swt{padding:2px 8px 2px 16px;gap:16px}
+.v3t .ic{width:22px;flex:none;color:var(--primary);display:grid;place-items:center}
+.v3t .x{flex:1;min-width:0}
+.v3t .a{font-size:15px;font-weight:600;line-height:22px}
+.v3t .b{font-size:12px;line-height:16px;color:rgba(0,0,0,.75);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v3t .b.long{white-space:normal}
+.v3t .b.err{color:var(--error)}
+.v3t .tv{font-size:12px;font-weight:600;color:var(--primary);flex:none;max-width:130px;text-align:right}
+.v3t .chev{font-size:20px;color:rgba(0,0,0,.4)}.v3t .chev24{font-size:24px;color:var(--onv)}
+.v3t.dis .a,.v3t.dis .b{color:rgba(25,28,32,.38)}.v3t.dis .ic{color:rgba(25,28,32,.38)}
+.v3t .sw{margin-left:4px}
+.v3t.dis .sw{opacity:.38}
+.v3hr{height:.5px;margin:0 16px;background:rgba(195,199,207,.25)}
+.v3sl{display:flex;gap:12px;padding:10px 16px}
+.v3sl .ic{width:24px;flex:none;color:var(--primary);padding-top:2px}
+.v3sl .x{flex:1}
+.v3sl .h{display:flex;align-items:flex-start;gap:12px}.v3sl .h .a{flex:1;font-size:15px;font-weight:600;line-height:22px}
+.v3sl .bd{padding:2px 8px;border-radius:6px;background:rgba(54,97,142,.1);font-size:13px;font-weight:700;color:var(--primary);font-feature-settings:'tnum'}
+.v3sl .bd.r20{border-radius:20px;padding:4px 10px;font-size:12px}
+.v3trk{position:relative;height:36px;margin-left:-4px}
+.v3trk .bg{position:absolute;left:0;right:0;top:16px;height:4px;border-radius:2px;background:rgba(54,97,142,.15)}
+.v3trk .fg{position:absolute;left:0;top:15px;height:6px;border-radius:3px;background:var(--primary)}
+.v3trk .th{position:absolute;top:8px;width:20px;height:20px;border-radius:10px;background:var(--primary);margin-left:-10px}
+.v3cnt{display:flex;align-items:center;flex:none}
+.v3cnt i{width:48px;height:48px;background:var(--primary);color:#fff;display:grid;place-items:center;font-style:normal}
+.v3cnt i:first-child{border-radius:12px 0 0 12px}.v3cnt i:last-child{border-radius:0 12px 12px 0}
+.v3cnt b{height:48px;padding:0 8px;display:grid;place-items:center;border-top:2px solid var(--primary);border-bottom:2px solid var(--primary);color:var(--primary);font-size:14px;min-width:30px}
+.v3note{font-size:12px;line-height:16px;color:var(--onv);padding:8px 4px 0}
+/* v3 dialogs */
+.dl3{background:var(--sch);border-radius:24px;padding:24px 0 0;box-shadow:0 6px 20px rgba(0,0,0,.18);position:relative}
+.dl3 .h{padding:0 24px 16px;font-size:20px;font-weight:600;line-height:28px}.dl3 .h.s{font-size:15px;font-weight:700;line-height:22px}
+.dl3 .c{padding:0 24px 0;font-size:13px;line-height:20px;color:var(--onv)}
+.dl3 .opt{display:flex;align-items:center;gap:16px;padding:0 24px;height:48px;font-size:14px}
+.dl3 .rd{width:20px;height:20px;border-radius:10px;border:2px solid var(--onv);display:grid;place-items:center;flex:none}
+.dl3 .rd.on{border-color:var(--primary)}.dl3 .rd.on::after{content:'';width:10px;height:10px;border-radius:5px;background:var(--primary)}
+.dl3 .acts{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px 24px}
+.dl3 .tb{height:40px;padding:0 12px;display:grid;place-items:center;font-size:14px;font-weight:500;color:var(--primary);border-radius:20px}
+.dl3 .tb.mut{color:rgba(0,0,0,.6)}
+.dl3 .fb{height:40px;padding:0 24px;display:grid;place-items:center;font-size:14px;font-weight:500;color:#fff;background:var(--primary);border-radius:20px}
+.dl3 .fb.err{background:var(--error)}
+.fld{position:relative;margin:0 24px 16px;height:56px;border:1px solid var(--outline);border-radius:12px;background:var(--scl);display:flex;align-items:center;gap:12px;padding:0 12px;font-size:15px}
+.fld .lb{position:absolute;left:10px;top:-9px;padding:0 4px;font-size:12px;color:var(--onv);background:linear-gradient(var(--sch) 50%,var(--scl) 50%)}
+.fld.dis{opacity:.45}
+.fld .sx{margin-left:auto;color:var(--onv);font-size:14px}
+.fhelp{margin:-12px 24px 12px;font-size:12px;color:var(--onv)}
+.achip{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--ov);font-size:13px;margin:0 8px 8px 0;background:var(--sch)}
+.achip.on{background:var(--sc);border-color:var(--sc);color:var(--osc);font-weight:600}
+/* ---------- new ---------- */
+.nbody{padding:4px 0 32px}
+.nwrap{max-width:720px;margin:0 auto}
+.grp{overflow:hidden}
+.grp .swr+.swr,.grp .swr+.sl,.grp .sl+.swr,.grp .sl+.sl{box-shadow:inset 0 1px 0 rgba(195,199,207,.45)}
+.swr .val{font-size:14px;color:var(--onv);white-space:nowrap;flex:none;font-feature-settings:'tnum'}
+.swr .chev{font-size:20px;color:var(--onv);margin-left:-8px}
+.swr .a b{font-weight:600}
+.swr .b.err{color:var(--error)}
+.swr.dis .a,.swr.dis .b,.swr.dis .val,.swr.dis .sw,.swr.dis .chev{opacity:.38}
+.swr .why{font-size:12px;color:var(--warn);margin-top:3px}
+.sl.dis .h,.sl.dis .tr{opacity:.38}
+.sl .b{font-size:12px;color:var(--onv);margin-top:2px}
+.sl .why{font-size:12px;color:var(--warn);margin-top:3px}
+.danger .a{color:var(--error)}
+.rad{width:20px;height:20px;border-radius:10px;border:2px solid var(--onv);display:grid;place-items:center;flex:none}
+.rad.on{border-color:var(--primary)}.rad.on::after{content:'';width:10px;height:10px;border-radius:5px;background:var(--primary)}
+.cnt{display:flex;align-items:center;height:40px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--ov);flex:none}
+.cnt span{width:40px;display:grid;place-items:center;color:var(--onv)}.cnt b{min-width:28px;text-align:center;font-size:15px;font-weight:500;font-feature-settings:'tnum'}
+.note{padding:8px 24px 0;font-size:12px;line-height:1.5;color:var(--onv)}
+.note a{color:var(--primary);font-weight:600;text-decoration:none}
+.logo{width:28px;height:28px;border-radius:7px;background:center/cover;flex:none}
+.tagd{font-size:11px;padding:1px 6px;border-radius:6px;background:var(--sc);color:var(--osc);margin-left:6px;font-weight:600;vertical-align:2px}
+/* new dialogs: one component for every choice, one for every confirm */
+.dl4{background:var(--sch);border-radius:24px;padding:24px 0 8px;box-shadow:0 6px 20px rgba(0,0,0,.18);position:relative}
+.dl4 .h{padding:0 24px 8px;font-size:20px;font-weight:600;line-height:28px}
+.dl4 .c{padding:0 24px 8px;font-size:14px;line-height:1.55;color:var(--onv)}
+.dl4 .c ul{margin:6px 0 0 18px}
+.dl4 .opt{display:flex;align-items:center;gap:12px;padding:0 24px;min-height:48px;font-size:15px}
+.dl4 .opt .x{flex:1;padding:8px 0}.dl4 .opt .d{font-size:12px;color:var(--onv);margin-top:2px;line-height:1.45}
+.dl4 .opt.on{color:var(--primary);font-weight:600}.dl4 .opt.on .d{font-weight:400}
+.dl4 .opt .ck{width:20px;font-size:20px;color:var(--primary)}
+.dl4 .acts{display:flex;justify-content:flex-end;gap:8px;padding:8px 16px 8px}
+.dl4 .tb{height:48px;padding:0 16px;display:grid;place-items:center;font-size:15px;font-weight:500;color:var(--primary);border-radius:24px}
+.dl4 .fb{height:40px;margin:4px 0;padding:0 24px;display:grid;place-items:center;font-size:15px;font-weight:600;color:var(--onPrimary);background:var(--primary);border-radius:20px}
+.dl4 .fb.err{background:var(--error);color:#fff}
+.dl4 .fld .lb{background:linear-gradient(var(--sch) 50%,var(--scl) 50%)}
+/* shared */
+.board{display:flex;flex-wrap:wrap;gap:28px;padding:24px;align-items:flex-start;background:#D9DBE2}
+.board .cell{width:393px}
+.board .cap{font-size:13px;color:#43474E;margin:0 0 8px 4px;font-weight:600}
+.board .scr{position:relative;width:393px;background:rgba(0,0,0,.32);border-radius:16px;padding:16px;display:flex;justify-content:center}
+
+.tmr{width:22px;height:22px;position:relative;display:inline-block}
+.tmr::before{content:'';position:absolute;left:1px;top:1px;width:16px;height:16px;border:2px solid var(--primary);border-radius:50%}
+.tmr i{position:absolute;left:10px;top:4px;width:2px;height:7px;background:var(--primary);border-radius:1px}
+.tmr b{position:absolute;left:9px;top:9px;width:4px;height:4px;background:var(--primary);border-radius:2px}
+.ec{display:inline-block;padding:3px 8px;border-radius:12px;background:var(--sc);color:var(--osc);font-size:11px;margin-left:8px;vertical-align:1px}
+.flds{display:flex;gap:12px;padding:8px 20px 14px}.flds .fld{margin:0;flex:1}
+.flds.stack{flex-direction:column}
+.v3flds{display:flex;gap:12px;padding:16px}.v3flds.stack{flex-direction:column}
+.v3flds .fld{margin:0;flex:1;border-radius:4px;background:var(--scl);height:48px}
+.v3flds .fld .lb{background:linear-gradient(#F5F6FC 50%,var(--scl) 50%)}
+.flds .fld .lb{background:linear-gradient(var(--scl) 50%,var(--scl) 50%)}
+.flds.dis{opacity:.38}
+.flds.stack .fld,.v3flds.stack .fld{flex:none}
+.cellbox{height:700px;overflow:hidden;width:361px;display:flex;align-items:flex-start;justify-content:center}
+.src{margin:0 24px 8px;height:48px;border:1px solid var(--outline);border-radius:12px;display:flex;align-items:center;gap:10px;padding:0 12px;color:var(--onv);font-size:14px;background:var(--scl)}
+.dl4 .opt .logo{width:24px;height:24px;border-radius:6px}
+.secd{padding:0 20px 6px;margin-top:-2px;font-size:12px;color:var(--onv)}
+</style></head><body><div class="board" style="width:1290px"><div class="cell"><div class="cap">界面刷新率（同一个选项对话框，加“重新检测”）</div><div class="scr"><div class="dl4" style="width:361px" data-n="1"><div class="h">界面刷新率</div><div class="c">应用会动态检测当前设备与分辨率支持的最高刷新率，切换后立即生效。启用弹幕的“跟随界面策略”时，主画面与小窗弹幕也会按此档位联动。<br>当前 60 Hz，最高 120 Hz。</div><div class="opt on"><div class="x">省电（默认） · 低耗电<div class="d">界面由系统动态调度；主画面弹幕上限 60 FPS，小窗弹幕上限 30 FPS，适合长时间观看。</div></div><span class="ck"><span class="rx" style="font-size:20px;">&#xeb7b;</span></span></div><div class="opt"><div class="x">均衡 · 中等耗电<div class="d">触摸、滑动和转场时使用最高刷新率，操作结束后交还系统；主画面与小窗弹幕上限 60 FPS。</div></div><span class="ck"></span></div><div class="opt"><div class="x">最高（设备上限） · 高耗电<div class="d">前台界面跟随当前设备或显示器上限；自动模式下主画面与小窗弹幕同步使用该上限，耗电和 GPU 占用可能更高。</div></div><span class="ck"></span></div><div class="acts"><div class="tb">重新检测</div><div style="flex:1"></div><div class="tb">取消</div></div></div></div></div><div class="cell"><div class="cap">开机窗口尺寸（Windows）</div><div class="scr"><div class="dl4" style="width:361px" data-n="2" data-tag="chg" data-at="tl"><div class="h">开机窗口尺寸</div><div class="c" style="font-size:13px">快捷预设选择</div><div style="padding:4px 24px 8px"><span class="achip on">1080 × 720 (默认)</span><span class="achip">1280 × 720 (720P)</span><span class="achip">1600 × 900</span><span class="achip">1920 × 1080 (1080P)</span><span class="achip">2560 × 1440 (2K)</span></div><div class="c" style="font-size:13px">自定义输入尺寸</div><div style="display:flex;align-items:center;gap:8px;padding:4px 24px 0"><div class="fld" style="margin:0;flex:1"><span class="lb">宽度</span>1080</div><span style="font-size:20px">×</span><div class="fld" style="margin:0;flex:1"><span class="lb">高度</span>720</div></div><div class="c" style="font-size:12px;padding-top:8px">宽度 400～16384 · 高度 300～16384；点“应用”后窗口立即变成这个大小</div><div class="acts"><div class="tb">取消</div><div class="fb">应用</div></div></div></div></div><div class="cell"><div class="cap">退出前等待时间（输入超出范围时）</div><div class="scr"><div class="dl4" style="width:361px" data-n="3" data-tag="chg" data-at="tl"><div class="h">退出前等待时间</div><div class="c" style="font-size:13px">这是整个应用的退出计时。保存时长或打开开关后重新计时，到时关闭应用。点快捷时长立即生效。</div><div style="padding:4px 24px 8px"><span class="achip">15 分钟</span><span class="achip">30 分钟</span><span class="achip">45 分钟</span><span class="achip">60 分钟</span><span class="achip">90 分钟</span><span class="achip on">120 分钟</span><span class="achip">180 分钟</span></div><div class="fld" style="border-color:var(--error)"><span class="lb" style="color:var(--error)">自定义时长</span>600000<span class="sx">分钟</span></div><div class="fhelp" style="color:var(--error)">输入 1～525600 分钟</div><div class="acts"><div class="tb">取消</div><div class="fb">保存</div></div></div></div></div><div class="cell"><div class="cap">首选直播平台（带图标和搜索）</div><div class="scr"><div class="dl4" style="width:361px" data-n="4" data-tag="chg" data-at="tl"><div class="h">首选直播平台</div><div class="src"><span class="mr" style="font-size:22px;">search</span>搜索已显示的平台</div><div class="opt on"><span class="logo" style="background-image:url(../../../packages/live_ui/assets/platforms/bilibili.png)"></span><div class="x">哔哩哔哩</div><span class="ck"><span class="rx" style="font-size:20px;">&#xeb7b;</span></span></div><div class="opt"><span class="logo" style="background-image:url(../../../packages/live_ui/assets/platforms/douyu.png)"></span><div class="x">斗鱼</div><span class="ck"></span></div><div class="opt"><span class="logo" style="background-image:url(../../../packages/live_ui/assets/platforms/huya.png)"></span><div class="x">虎牙</div><span class="ck"></span></div><div class="opt"><span class="logo" style="background-image:url(../../../packages/live_ui/assets/platforms/douyin.png)"></span><div class="x">抖音</div><span class="ck"></span></div><div class="opt"><span class="logo" style="background-image:url(../../../packages/live_ui/assets/platforms/kuaishou.png)"></span><div class="x">快手</div><span class="ck"></span></div><div class="opt"><span class="logo" style="background-image:url(../../../packages/live_ui/assets/platforms/cc.png)"></span><div class="x">网易CC</div><span class="ck"></span></div><div class="opt"><span class="logo" style="background-image:url(../../../packages/live_ui/assets/platforms/twitch.png)"></span><div class="x">Twitch</div><span class="ck"></span></div><div style="text-align:center;color:var(--onv);font-size:12px;padding:4px 0">……共 34 个，向下滚动</div><div class="acts"><div class="tb">取消</div></div></div></div></div><div class="cell"><div class="cap">刷新间隔时间、缩略图刷新间隔</div><div class="scr"><div class="dl4" style="width:361px"><div class="h">刷新间隔时间</div><div class="opt"><div class="x">5 分钟</div><span class="ck"></span></div><div class="opt"><div class="x">10 分钟</div><span class="ck"></span></div><div class="opt"><div class="x">15 分钟</div><span class="ck"></span></div><div class="opt"><div class="x">20 分钟</div><span class="ck"></span></div><div class="opt on"><div class="x">30 分钟</div><span class="ck"><span class="rx" style="font-size:20px;">&#xeb7b;</span></span></div><div class="opt"><div class="x">45 分钟</div><span class="ck"></span></div><div class="opt"><div class="x">1 小时</div><span class="ck"></span></div><div class="opt"><div class="x">1.5 小时</div><span class="ck"></span></div><div class="opt"><div class="x">2 小时</div><span class="ck"></span></div><div class="opt"><div class="x">3 小时</div><span class="ck"></span></div><div class="opt"><div class="x">4 小时</div><span class="ck"></span></div><div class="opt"><div class="x">6 小时</div><span class="ck"></span></div><div class="acts"><div class="tb">取消</div></div></div></div></div><div class="cell"><div class="cap">关闭窗口时（Windows，新）</div><div class="scr"><div class="dl4" data-n="5" data-tag="add" data-at="tl" style="width:361px"><div class="h">关闭窗口时</div><div class="opt on"><div class="x">每次询问<div class="d">弹出“最小化 / 退出应用”，可以勾选“不再询问”</div></div><span class="ck"><span class="rx" style="font-size:20px;">&#xeb7b;</span></span></div><div class="opt"><div class="x">最小化<div class="d">缩到托盘，直播照常</div></div><span class="ck"></span></div><div class="opt"><div class="x">退出应用</div><span class="ck"></span></div><div class="acts"><div class="tb">取消</div></div></div></div></div></div></body></html>

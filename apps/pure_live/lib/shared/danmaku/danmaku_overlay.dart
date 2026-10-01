@@ -18,6 +18,7 @@ final class DanmakuLook {
     this.bottomMargin = 0,
     this.stroke = true,
     this.strokeWidth = 1.5,
+    this.laneHeight,
   });
 
   /// Font size.
@@ -47,6 +48,10 @@ final class DanmakuLook {
   /// Outline width.
   final double strokeWidth;
 
+  /// The height of a lane; null is 1.4 × [fontSize] (the mini windows give
+  /// their own, U.2j).
+  final double? laneHeight;
+
   @override
   bool operator ==(Object other) =>
       other is DanmakuLook &&
@@ -58,11 +63,12 @@ final class DanmakuLook {
       other.topMargin == topMargin &&
       other.bottomMargin == bottomMargin &&
       other.stroke == stroke &&
-      other.strokeWidth == strokeWidth;
+      other.strokeWidth == strokeWidth &&
+      other.laneHeight == laneHeight;
 
   @override
   int get hashCode =>
-      Object.hash(fontSize, fontWeight, speed, opacity, area, topMargin, bottomMargin, stroke, strokeWidth);
+      Object.hash(fontSize, fontWeight, speed, opacity, area, topMargin, bottomMargin, stroke, strokeWidth, laneHeight);
 }
 
 /// Danmaku flying over the video, right to left in lanes (3.x used
@@ -71,7 +77,16 @@ final class DanmakuLook {
 /// overlapping, which keeps busy rooms readable.
 class DanmakuOverlay extends StatefulWidget {
   /// Creates the overlay.
-  const new({required this.messages, required this.retractions, required this.look, this.visible = true, super.key});
+  const new({
+    required this.messages,
+    required this.retractions,
+    required this.look,
+    this.visible = true,
+    this.maxVisible,
+    this.fps,
+    this.color,
+    super.key,
+  });
 
   /// Messages to fly.
   final Stream<LiveMessage> messages;
@@ -84,6 +99,18 @@ class DanmakuOverlay extends StatefulWidget {
 
   /// Hidden messages are not queued.
   final bool visible;
+
+  /// At most this many messages on screen at once; null for no limit (the
+  /// mini windows' "最大同时显示数量", U.2j).
+  final int? maxVisible;
+
+  /// Repaints at most this many times a second; null for every frame (the
+  /// mini windows' frame rate).
+  final int? fps;
+
+  /// One colour for every message instead of the platform's; null keeps
+  /// theirs.
+  final Color? color;
 
   @override
   State<DanmakuOverlay> createState() => DanmakuOverlayState();
@@ -116,7 +143,7 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
       unawaited(_retractions?.cancel());
       _listen();
     }
-    if (oldWidget.look != widget.look) _clear();
+    if (oldWidget.look != widget.look || oldWidget.color != widget.color) _clear();
     if (!widget.visible) _clear();
   }
 
@@ -141,10 +168,19 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     _frame.value++;
   }
 
-  double get _lineHeight => widget.look.fontSize * 1.4;
+  double get _lineHeight => widget.look.laneHeight ?? widget.look.fontSize * 1.4;
+
+  /// When the painting last moved on (the [DanmakuOverlay.fps] cap).
+  Duration _painted = Duration.zero;
 
   void _add(LiveMessage message) {
     if (!mounted || !widget.visible || _size.isEmpty || message.message.trim().isEmpty) return;
+    final local = message.isLocal ? message.style : null;
+    if (local != null) {
+      _addLocal(message, local);
+      return;
+    }
+    if (widget.maxVisible case final limit? when _items.length >= limit) return;
     final look = widget.look;
     final top = look.topMargin.clamp(0, _size.height).toDouble();
     final usable = (_size.height * look.area.clamp(0, 1)).clamp(0, _size.height - top - look.bottomMargin).toDouble();
@@ -154,14 +190,14 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     // The first lane whose last message has fully entered the screen.
     int? lane;
     for (var i = 0; i < lanes; i++) {
-      final last = _items.lastWhereOrNull((item) => item.lane == i);
+      final last = _items.lastWhereOrNull((item) => item.lane == i && item.fixed == null);
       if (last == null || last.right(now, _size.width, look.speed) < _size.width - 16) {
         lane = i;
         break;
       }
     }
     if (lane == null) return;
-    final color = Color.fromARGB(255, message.color.r, message.color.g, message.color.b);
+    final color = widget.color ?? Color.fromARGB(255, message.color.r, message.color.g, message.color.b);
     final style = TextStyle(
       fontSize: look.fontSize,
       fontWeight: FontWeight.values[((look.fontWeight ~/ 100) - 1).clamp(0, 8)],
@@ -188,7 +224,112 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
             maxLines: 1,
           )..layout())
         : null;
-    _items.add(_Flying(message, lane, top + lane * _lineHeight, now, fill, outline));
+    // Centred in its lane when the lane is taller than the text.
+    final inset = ((_lineHeight - fill.height) / 2).clamp(0, _lineHeight).toDouble();
+    _items.add(
+      _Flying(
+        message,
+        lane,
+        top + lane * _lineHeight + (widget.look.laneHeight == null ? 0 : inset),
+        now,
+        fill,
+        outline,
+      ),
+    );
+    if (!_ticker.isActive) _ticker.start();
+  }
+
+  /// A danmaku composed on this device (U.2k) flies in its own style (3.x
+  /// `sendDanmaku`): size, weight, font, italic, spacing, opacity, outline
+  /// colour and width, glow; scrolling at its own speed, or held at the top
+  /// or bottom for its time. It always gets a place: it is what the user just
+  /// sent.
+  void _addLocal(LiveMessage message, LiveMessageStyle style) {
+    final color = Color.fromARGB(
+      255,
+      message.color.r,
+      message.color.g,
+      message.color.b,
+    ).withValues(alpha: style.opacity);
+    final base = TextStyle(
+      fontSize: style.fontSize,
+      fontWeight: FontWeight.values[((style.fontWeight ~/ 100) - 1).clamp(0, 8)],
+      fontFamily: style.fontFamily,
+      fontStyle: style.italic ? FontStyle.italic : FontStyle.normal,
+      letterSpacing: style.letterSpacing,
+      height: 1.2,
+    );
+    final fill = TextPainter(
+      text: TextSpan(
+        text: message.message,
+        style: base.copyWith(
+          color: color,
+          shadows: style.showShadow
+              ? [
+                  Shadow(
+                    color: Color(style.shadowColor).withValues(alpha: style.opacity),
+                    blurRadius: style.shadowBlur,
+                    offset: Offset(style.shadowOffset, style.shadowOffset),
+                  ),
+                ]
+              : null,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    final outline = style.showStroke && style.strokeWidth > 0
+        ? (TextPainter(
+            text: TextSpan(
+              text: message.message,
+              style: base.copyWith(
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = style.strokeWidth
+                  ..color = Color(style.strokeColor),
+              ),
+            ),
+            textDirection: TextDirection.ltr,
+            maxLines: 1,
+          )..layout())
+        : null;
+    final height = style.fontSize * 1.4;
+    final look = widget.look;
+    final now = _elapsed;
+    final top = look.topMargin.clamp(0, _size.height).toDouble();
+    final lanes = ((_size.height - top - look.bottomMargin) / height).floor().clamp(1, 1 << 20);
+    final fixed = style.placement == LiveMessagePlacement.scroll ? null : style.placement;
+    // The first free lane from its edge; the first one when all are taken.
+    var lane = 0;
+    for (var i = 0; i < lanes; i++) {
+      final taken = _items.any(
+        (item) =>
+            item.fixed == fixed &&
+            item.lane == i &&
+            item.message.isLocal &&
+            (fixed != null || item.right(now, _size.width, item.speed ?? look.speed) >= _size.width - 16),
+      );
+      if (!taken) {
+        lane = i;
+        break;
+      }
+    }
+    final y = fixed == LiveMessagePlacement.bottom
+        ? _size.height - look.bottomMargin - (lane + 1) * height
+        : top + lane * height;
+    _items.add(
+      _Flying(
+        message,
+        lane,
+        y,
+        now,
+        fill,
+        outline,
+        speed: style.baseSpeed,
+        fixed: fixed,
+        stay: Duration(milliseconds: style.fixedDurationMs),
+      ),
+    );
     if (!_ticker.isActive) _ticker.start();
   }
 
@@ -196,14 +337,20 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     _elapsed = elapsed;
     final speed = widget.look.speed;
     _items.removeWhere((item) {
-      final gone = item.right(elapsed, _size.width, speed) < 0;
+      final gone = item.gone(elapsed, _size.width, speed);
       if (gone) item.dispose();
       return gone;
     });
-    _frame.value++;
+    final fps = widget.fps;
+    final interval = fps == null || fps <= 0 ? Duration.zero : Duration(microseconds: 1000000 ~/ fps);
+    if (_items.isEmpty || elapsed - _painted >= interval || elapsed < _painted) {
+      _painted = elapsed;
+      _frame.value++;
+    }
     if (_items.isEmpty) {
       _ticker.stop();
       _elapsed = Duration.zero;
+      _painted = Duration.zero;
     }
   }
 
@@ -234,7 +381,7 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
 }
 
 final class _Flying {
-  new(this.message, this.lane, this.y, this.start, this.fill, this.outline);
+  new(this.message, this.lane, this.y, this.start, this.fill, this.outline, {this.speed, this.fixed, this.stay});
 
   final LiveMessage message;
   final int lane;
@@ -243,10 +390,24 @@ final class _Flying {
   final TextPainter fill;
   final TextPainter? outline;
 
-  double left(Duration now, double width, double speed) =>
-      width - (now - start).inMicroseconds / Duration.microsecondsPerSecond * speed;
+  /// Its own speed (a local danmaku), else the look's.
+  final double? speed;
+
+  /// Held at the top or bottom (a local danmaku), else scrolling.
+  final LiveMessagePlacement? fixed;
+
+  /// How long a held one stays.
+  final Duration? stay;
+
+  double left(Duration now, double width, double speed) {
+    if (fixed != null) return (width - fill.width) / 2;
+    return width - (now - start).inMicroseconds / Duration.microsecondsPerSecond * (this.speed ?? speed);
+  }
 
   double right(Duration now, double width, double speed) => left(now, width, speed) + fill.width;
+
+  bool gone(Duration now, double width, double speed) =>
+      fixed != null ? now - start > (stay ?? const Duration(seconds: 4)) : right(now, width, speed) < 0;
 
   void dispose() {
     fill.dispose();

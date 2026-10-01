@@ -255,6 +255,136 @@ abstract final class AppIcons {
   /// The edge handle while the column is folded (bring it back).
   static const IconData chatColumnUnfold = Remix.arrow_left_s_line;
 
-  /// The local danmaku composer's star (3.x `FullscreenLocalDanmakuComposer`).
-  static const IconData localDanmaku = Icons.auto_awesome_rounded;
+  // ---- the room's states (docs/ui/compare/U.2g) ----
+
+  /// Play the next line ("换线路"; U.2g note 6: Material's alt route).
+  static const IconData switchLine = Icons.alt_route_rounded;
+
+  /// A room the platform banned or closed.
+  static const IconData banned = Icons.block_rounded;
+
+  /// The platform did not say whether the room is on air.
+  static const IconData statusUnknown = Icons.help_outline_rounded;
+
+  /// Sign in to the platform ("去登录").
+  static const IconData login = Icons.login_rounded;
+
+  /// The IPTV programme guide's title (3.x `IptvScheduleDialog`).
+  static const IconData guideTitle = Remix.calendar_todo_line;
+
+  /// An ended programme that can be replayed (3.x `IptvScheduleDialog`).
+  static const IconData catchup = Remix.history_line;
+
+  /// The programme on air, the way back to it (3.x `IptvScheduleDialog`).
+  static const IconData liveNow = Remix.live_line;
+
+  /// A guide with no programmes for the channel (3.x).
+  static const IconData guideEmpty = Remix.inbox_line;
+
+  /// The guide could not be read (3.x).
+  static const IconData guideFailed = Remix.error_warning_line;
+
+  /// Add (a guide, a keyword).
+  static const IconData add = Remix.add_line;
+
+  /// Unfold a column folded to the right (the wide channel's guide).
+  static const IconData unfoldLeft = Remix.arrow_left_s_line;
+
+  // ---- the room's tabs (docs/ui/compare/U.2e) ----
+
+  /// No chat, no super chats yet (3.x `SuperChatPage`'s empty state).
+  static const IconData chatEmpty = Remix.chat_smile_3_line;
+
+  /// The danmaku server did not answer in time.
+  static const IconData danmakuTimeout = Remix.wifi_off_line;
+
+  /// The platform has no danmaku; the list is switched off.
+  static const IconData danmakuUnavailable = Remix.chat_off_line;
+
+  /// A super chat's price (3.x `SuperChatCard`).
+  static const IconData superChatPrice = Remix.money_cny_circle_fill;
+
+  /// The "SC" mark of a super chat (3.x `SuperChatCard`).
+  static const IconData superChatMark = Remix.vip_diamond_fill;
+
+  /// A super chat's remaining time (3.x `SuperChatCard`).
+  static const IconData superChatTime = Remix.time_line;
+
+  /// Remove a blocked word or viewer (×, 3.x `KeywordBlockPage`).
+  static const IconData chipRemove = Remix.close_line;
+
+  // ---- local interaction (3.x widgets/local_interaction, U.2k) ----
+
+  /// The local danmaku style (the composer's star, 3.x `auto_awesome_rounded`).
+  static const IconData localStyle = Icons.auto_awesome_rounded;
+
+  /// Send a local danmaku (3.x `send_rounded`).
+  static const IconData localSend = Icons.send_rounded;
+
+  /// Local coins (3.x `toll_rounded`).
+  static const IconData localCoins = Icons.toll_rounded;
+
+  /// Local danmaku fly over the picture (3.x `subtitles_rounded`).
+  static const IconData localOverlay = Icons.subtitles_rounded;
+
+  /// The platform badge switch (3.x `workspace_premium_rounded`).
+  static const IconData localBadge = Icons.workspace_premium_rounded;
+
+  /// The local level switch (3.x `military_tech_rounded`).
+  static const IconData localLevel = Icons.military_tech_rounded;
+
+  /// The gift effect switch (3.x `celebration_rounded`).
+  static const IconData localGiftEffects = Icons.celebration_rounded;
+
+  /// Clear the local history (3.x `delete_sweep_outlined`).
+  static const IconData localClearHistory = Icons.delete_sweep_outlined;
+
+  /// The style preview's picture (3.x `live_tv_rounded`).
+  static const IconData localPreviewStage = Icons.live_tv_rounded;
+
+  /// The style preview's "实时预览" mark (3.x `play_circle_fill_rounded`).
+  static const IconData localPreviewLive = Icons.play_circle_fill_rounded;
+
+  /// The style's "saved and shared everywhere" line (3.x `sync_rounded`).
+  static const IconData localStyleSync = Icons.sync_rounded;
+
+  /// Scrolling local danmaku (3.x `trending_flat_rounded`).
+  static const IconData localPlaceScroll = Icons.trending_flat_rounded;
+
+  /// Local danmaku fixed at the top (3.x `vertical_align_top_rounded`).
+  static const IconData localPlaceTop = Icons.vertical_align_top_rounded;
+
+  /// Local danmaku fixed at the bottom (3.x `vertical_align_bottom_rounded`).
+  static const IconData localPlaceBottom = Icons.vertical_align_bottom_rounded;
+
+  /// Bold (3.x `format_bold_rounded`).
+  static const IconData localBold = Icons.format_bold_rounded;
+
+  /// Italic (3.x `format_italic_rounded`).
+  static const IconData localItalic = Icons.format_italic_rounded;
+
+  /// Outline (3.x `border_color_rounded`).
+  static const IconData localStroke = Icons.border_color_rounded;
+
+  /// Shadow or glow (3.x `blur_on_rounded`).
+  static const IconData localShadow = Icons.blur_on_rounded;
+
+  // ---- the mini windows (U.2j: in-app floating window, picture-in-picture,
+  // desktop mini window; 3.x player_manager.dart) ----
+
+  /// Back to the room from a mini window (new in U.2j).
+  static const IconData backToRoom = Icons.open_in_full_rounded;
+
+  /// Play in a mini window (3.x `Icons.play_circle_filled`).
+  static const IconData miniPlay = Icons.play_circle_filled;
+
+  /// Pause in a mini window (3.x `Icons.pause_circle_filled`).
+  static const IconData miniPause = Icons.pause_circle_filled;
+
+  /// The desktop mini window stays on top (new in U.2j; Remix, as 3.x's
+  /// "pinned" marks).
+  static const IconData pinned = Remix.pushpin_fill;
+
+  /// The desktop mini window does not stay on top.
+  static const IconData unpinned = Remix.pushpin_line;
 }

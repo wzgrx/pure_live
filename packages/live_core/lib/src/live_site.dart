@@ -57,7 +57,17 @@ abstract class LiveSite {
 
   /// Super chats of [roomId] (platforms that poll them).
   Future<List<LiveSuperChatMessage>> getSuperChatMessage({required String roomId}) async => const [];
+
+  /// Whether the platform has super chats at all ([superChatPlatforms]), so
+  /// an empty list can say the platform has none instead of "they will show
+  /// up here".
+  bool get hasSuperChats => superChatPlatforms.contains(id);
 }
+
+/// The platforms with super chats (3.x: Bilibili and Huya poll them and
+/// send them in the danmaku, Douyu sends them in the danmaku; every other
+/// adapter keeps `getSuperChatMessage`'s empty default).
+const Set<String> superChatPlatforms = {'bilibili', 'huya', 'douyu'};
 
 /// The stream sources for one requested quality, and the quality the
 /// platform actually applied.

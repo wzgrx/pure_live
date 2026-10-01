@@ -18,9 +18,11 @@ import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
 import 'package:pure_live/features/live_play/dialogs/room_switcher.dart';
 import 'package:pure_live/features/live_play/dialogs/stream_dialogs.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_layout.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
+import 'package:pure_live/features/live_play/mini/room_mini_window.dart';
 import 'package:pure_live/features/live_play/player/bar_parts.dart';
 import 'package:pure_live/features/live_play/player/recording_badge.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -36,10 +38,6 @@ const double controlBarHeight = 52;
 
 /// The height of a row of the portrait fullscreen's bars (U.2b).
 const double portraitRowHeight = 48;
-
-/// Below this width a landscape bar folds the composer into its star (3.x
-/// `compact` was under 760; U.2c change 3).
-const double composerFoldWidth = 760;
 
 /// Below this width even the folded landscape bar scrolls sideways.
 const double composerFoldMinWidth = 640;
@@ -74,9 +72,9 @@ final class RoomPlatform {
 }
 
 /// The trailing buttons of the top bar (3.x `resolveTopActionTrailingSlots`):
-/// audio only always, cast on Android, picture-in-picture everywhere 3.x
-/// had it (Android, Windows) and, since U.2j change 5, on Linux, macOS and
-/// iOS too.
+/// audio only always, cast on Android, the mini window everywhere (U.2j
+/// change 5: Linux, macOS and iOS too; it shows where the room's
+/// `RoomMiniScope` says the platform has one, U.17a).
 enum TopBarSlot {
   /// Audio only.
   audioOnly,
@@ -126,11 +124,10 @@ final class PlayerBarActions {
     required this.onPip,
     required this.onInteract,
     required this.onMenu,
-    required this.onHold,
     this.onReopen,
     this.onWindowFullscreen,
-    this.onOpenComposer,
     this.wide,
+    this.reduced = false,
   });
 
   /// The room.
@@ -170,11 +167,9 @@ final class PlayerBarActions {
   /// Keeps the controls up a while longer.
   final VoidCallback onInteract;
 
-  /// Told when a menu opens (true) and closes: the controls stay up.
+  /// Told when a menu opens (true) and closes, or the composer takes the
+  /// focus and lets it go: the controls stay up meanwhile.
   final ValueChanged<bool> onMenu;
-
-  /// Told when the composer's field gains and loses focus.
-  final ValueChanged<bool> onHold;
 
   /// Called before the user asks for another quality or line.
   final VoidCallback? onReopen;
@@ -182,11 +177,34 @@ final class PlayerBarActions {
   /// Desktops: enters or leaves the in-window fullscreen.
   final VoidCallback? onWindowFullscreen;
 
-  /// The narrow bar's composer star.
-  final VoidCallback? onOpenComposer;
-
   /// The wide room's extras.
   final WideBarActions? wide;
+
+  /// Nothing plays (loading, offline, failed, restricted): the top bar keeps
+  /// the way out and the room's buttons, without audio only, cast and the
+  /// mini window that need a picture (docs/ui/compare/U.2g c6).
+  final bool reduced;
+
+  /// These actions for the [reduced] top bar.
+  PlayerBarActions reducedCopy() => PlayerBarActions(
+    controller: controller,
+    arrangement: arrangement,
+    display: display,
+    platform: platform,
+    orientation: orientation,
+    showDanmaku: showDanmaku,
+    portraitStream: portraitStream,
+    pipSupported: pipSupported,
+    onBack: onBack,
+    onToggleFullscreen: onToggleFullscreen,
+    onPip: onPip,
+    onInteract: onInteract,
+    onMenu: onMenu,
+    onReopen: onReopen,
+    onWindowFullscreen: onWindowFullscreen,
+    wide: wide,
+    reduced: true,
+  );
 }
 
 /// A button on the picture: white with a soft shadow (the bar's icon theme),
@@ -367,7 +385,7 @@ class PlayerTopBar extends StatelessWidget {
           onPressed: () => unawaited(showRoomSwitcher(context, controller.room)),
           icon: const Icon(AppIcons.switchRoom),
         ),
-      for (final slot in topBarSlots(platform: actions.platform.platform))
+      for (final slot in actions.reduced ? const <TopBarSlot>[] : topBarSlots(platform: actions.platform.platform))
         switch (slot) {
           TopBarSlot.audioOnly => _AudioOnlyButton(controller: controller, onInteract: actions.onInteract),
           TopBarSlot.cast => ListenableSelector<bool>(
@@ -384,16 +402,25 @@ class PlayerTopBar extends StatelessWidget {
           TopBarSlot.pip => FutureBuilder<bool>(
             future: actions.pipSupported,
             builder: (context, snapshot) {
-              final supported = snapshot.data ?? false;
-              // Android hides it where the system has no picture-in-picture;
-              // elsewhere it waits, grey, for the desktop small window (U.2j).
-              if (actions.platform.android && !supported) return const SizedBox.shrink();
-              return VideoIconButton(
-                key: const ValueKey('live-play-pip'),
-                tooltip: i18n('float_window_play'),
-                iconSize: 22,
-                onPressed: supported ? actions.onPip : null,
-                icon: const Icon(AppIcons.floatWindow),
+              // Only where the platform has a mini window (U.2j); a spinner
+              // while it opens or closes.
+              if (!(snapshot.data ?? false)) return const SizedBox.shrink();
+              final preparing = RoomMiniScope.maybeOf(context)?.preparing ?? ValueNotifier(false);
+              return ValueListenableBuilder<bool>(
+                valueListenable: preparing,
+                builder: (context, busy, _) => VideoIconButton(
+                  key: const ValueKey('live-play-pip'),
+                  tooltip: i18n('float_window_play'),
+                  iconSize: 22,
+                  onPressed: busy ? null : actions.onPip,
+                  icon: busy
+                      ? const SizedBox.square(
+                          key: ValueKey('live-play-pip-busy'),
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: OnVideoColors.foreground),
+                        )
+                      : const Icon(AppIcons.floatWindow),
+                ),
               );
             },
           ),
@@ -455,7 +482,8 @@ class _VideoTitle extends StatelessWidget {
               ),
               if (programme && now.isNotEmpty)
                 Text(
-                  '${i18n(controller.catchup == null ? 'now_playing' : 'playing_catchup')}: $now',
+                  // U.2g c18: "正在回看: 节目名" while a programme is replayed.
+                  '${i18n(controller.catchup == null ? 'now_playing' : 'live_play_guide_replaying_now')}: $now',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -507,8 +535,8 @@ class _AudioOnlyButton extends StatelessWidget {
 ///   volume (desktops), fold the chat (wide), the in-window fullscreen
 ///   (desktops) and the fullscreen on the right;
 /// - landscape (U.2c): play, refresh, follow, the danmaku switch and
-///   settings; the local danmaku composer in the middle (a star on narrow
-///   bars, change 3); quality, line (U.2f), the orientation, the fit (change
+///   settings; the local danmaku composer (U.2k's `LocalDanmakuComposer`) in
+///   the middle, a star where the middle is narrow (change 3); quality, line (U.2f), the orientation, the fit (change
 ///   6), the volume (desktops) and leaving the fullscreen;
 /// - portrait fullscreen (U.2b change 7): the composer, quality and line;
 ///   under them play, refresh, the danmaku switch and settings, then the
@@ -621,7 +649,6 @@ class PlayerBottomBar extends ConsumerWidget {
       ControlsArrangement.landscape => _bar(
         LayoutBuilder(
           builder: (context, constraints) {
-            final fold = constraints.maxWidth < composerFoldWidth;
             final left = [playPause, refresh, follow, ...danmaku];
             final right = [
               streams,
@@ -633,12 +660,19 @@ class PlayerBottomBar extends ConsumerWidget {
               else
                 fullscreen,
             ];
-            final composer = ComposerSlot(compact: fold, onHold: actions.onHold, onOpen: actions.onOpenComposer);
+            final composer = LocalDanmakuComposer.onVideo(onHold: actions.onMenu);
             if (constraints.maxWidth < composerFoldMinWidth) {
-              // Too narrow even for the star: the row scrolls, nothing drops.
+              // Too narrow even for the field: the row scrolls, nothing
+              // drops; the composer is its star.
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: Row(children: [...left, composer, ...right]),
+                child: Row(
+                  children: [
+                    ...left,
+                    SizedBox(width: 48, child: composer),
+                    ...right,
+                  ],
+                ),
               );
             }
             return Row(
@@ -682,7 +716,7 @@ class PlayerBottomBar extends ConsumerWidget {
                             alignment: Alignment.centerLeft,
                             child: Padding(
                               padding: const EdgeInsets.only(right: 6),
-                              child: ComposerSlot(compact: false, onHold: actions.onHold),
+                              child: LocalDanmakuComposer.onVideo(onHold: actions.onMenu),
                             ),
                           ),
                         ),

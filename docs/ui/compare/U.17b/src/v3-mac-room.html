@@ -1,0 +1,82 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="1280x800@1.5"><link rel="stylesheet" href="kit/kit.css"><style>
+.win{display:flex;flex-direction:column}
+.body{flex:1;display:flex;min-height:0}
+.stage{position:relative;flex:1;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.frame{position:relative;width:100%;aspect-ratio:16/9;max-height:100%}
+.stage .pic{position:absolute;inset:0;background:#000 url(.cache/img/158.jpg) center 55%/cover}
+.col{flex:none;display:flex;flex-direction:column;background:var(--surface);border-left:1px solid var(--ov);position:relative;overflow:hidden}
+.list{flex:1;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:6px 0 10px}
+/* v3 */
+.v3h .nick{font-size:11px;line-height:15px}.v3h .area{font-size:11px;line-height:15px}
+.v3fol{height:40px;padding:0 14px;border-radius:6px;background:var(--primary);color:#fff;font-size:12px;display:flex;align-items:center;margin:0 5px 0 2px}
+.v3fol.on{background:rgba(54,97,142,.49)}
+.v3rec{height:48px;padding:0 8px;border-radius:12px;background:var(--schh);color:var(--onv);display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600}
+.v3top{position:absolute;left:0;right:0;top:0;height:56px;display:flex;align-items:center;padding:0 8px;background:linear-gradient(0deg,transparent,rgba(0,0,0,.45));z-index:5;color:#fff}
+.v3top .title{flex:1;padding:0 12px;font:700 16px 'Noto Sans SC';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v3bot{position:absolute;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;padding:0 8px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.45));color:#fff;z-index:5}
+.pill{display:flex;align-items:center;gap:2px;padding:0 6px;height:48px;font-size:14px;flex:none}
+.fit{flex:none;padding:0 6px;font-size:15px;white-space:nowrap}
+.res{height:56px;display:flex;align-items:center;padding:4px}
+.res .aud{flex:3;padding:0 8px;display:flex;align-items:center;gap:4px;font-size:12px}
+.res .sel{flex:2;text-align:right;font-size:11px;color:var(--primary);padding-right:12px}
+.res .line{flex:1;text-align:right;font-size:11px;color:var(--primary);padding-right:12px}
+.it{margin:4px 8px;background:rgba(255,255,255,.72);border:.5px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 12px;display:flex;align-items:flex-start}
+.it i{width:8px;height:8px;border-radius:4px;margin:6px 10px 0 0;flex:none}.it p{font-size:14px;line-height:1.45;font-weight:500}.it b{font-weight:700}
+.tabs.v3t div{font-size:15px}
+/* new */
+.vvol{display:flex;align-items:center;gap:6px;color:#fff;margin:0 4px}.vvol .t{width:80px;height:4px;border-radius:2px;background:rgba(255,255,255,.35);position:relative}.vvol .t i{position:absolute;left:0;top:0;bottom:0;width:70%;background:#fff;border-radius:2px}.vvol .t u{position:absolute;left:calc(70% - 7px);top:-5px;width:14px;height:14px;border-radius:7px;background:#fff}
+.collapse{position:absolute;top:50%;width:22px;height:56px;border-radius:8px 0 0 8px;background:var(--schh);color:var(--onv);display:grid;place-items:center;z-index:8;transform:translateY(-50%)}
+.r-card{margin:0 16px;border-radius:16px;padding:14px 16px 16px;background:var(--recbg);box-shadow:inset 0 0 0 1px #F2C4C0}
+.r-st{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:#B3261E}.r-st small{margin-left:auto;font-size:12px;color:var(--onv);font-weight:500}
+.r-dot{width:10px;height:10px;border-radius:5px;background:var(--rec);box-shadow:0 0 0 4px rgba(217,45,32,.18)}
+.r-time{font:600 34px/1.15 'Geist','Noto Sans SC';font-feature-settings:'tnum';margin:6px 0 2px}
+.r-stats{display:flex;gap:6px;margin:8px 0 14px;flex-wrap:wrap}.r-stats span{height:26px;padding:0 10px;border-radius:13px;background:rgba(255,255,255,.75);font-size:12px;display:flex;align-items:center}
+
+html,body{background:#0E1014}
+.win.mac{border-radius:10px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.tl{position:absolute;z-index:72;display:flex;gap:8px}
+.tl i{width:12px;height:12px;border-radius:6px;display:block}
+.tl .c{background:#FF5F57;box-shadow:inset 0 0 0 .5px #E0443E}.tl .m{background:#FEBC2E;box-shadow:inset 0 0 0 .5px #DEA123}.tl .z{background:#28C840;box-shadow:inset 0 0 0 .5px #1AAB29}
+.drag{position:absolute;z-index:9}
+.capx{position:absolute;z-index:80;font:500 12px/1.45 'Noto Sans SC';padding:5px 9px;border-radius:7px;background:rgba(25,28,32,.82);color:#fff;max-width:420px}
+.mac>.appbar{padding-left:72px}
+/* ---------- screen, menu bar and menus (drawn by macOS; shown to place ours) ---------- */
+.scr{position:relative;width:1280px;overflow:hidden;background:#3B4252 url(.cache/img/287.jpg) center/cover}
+.mb{position:absolute;left:0;right:0;top:0;height:24px;z-index:50;display:flex;align-items:center;gap:2px;padding:0 10px;background:rgba(246,246,248,.96);color:#1D1D1F;font:400 13px/24px 'Noto Sans SC'}
+.mb .sys{width:14px;height:14px;border-radius:4px;background:#1D1D1F;margin:0 12px 0 6px;flex:none}
+.mb span{padding:0 9px;border-radius:5px;white-space:nowrap}
+.mb .app{font-weight:700}.mb .on{background:rgba(0,0,0,.12)}
+.mb .mbr{margin-left:auto;display:flex;align-items:center;gap:12px;padding-right:4px}
+.mb .mbr span{padding:0}
+.mb .bt{position:relative;width:22px;height:11px;border-radius:3px;border:1px solid #1D1D1F;padding:1.5px}.mb .bt i{display:block;height:100%;width:80%;border-radius:1.5px;background:#1D1D1F}
+.ti{width:18px;height:18px;display:block;background:#1D1D1F;-webkit-mask:url(../../../apps/pure_live/assets/icons/icon.png) center/contain no-repeat;mask:url(../../../apps/pure_live/assets/icons/icon.png) center/contain no-repeat;position:relative}
+.tic{width:18px;height:18px;display:block;background:url(../../../apps/pure_live/assets/icons/icon.png) center/contain no-repeat}
+.tdot{position:absolute;right:-3px;bottom:-1px;width:7px;height:7px;border-radius:4px;background:#FF3B30;box-shadow:0 0 0 1.5px rgba(246,246,248,.96)}
+.trayon{border-radius:5px;background:rgba(0,0,0,.12);padding:3px 6px !important}
+.mm{position:absolute;z-index:60;min-width:230px;padding:5px;border-radius:8px;background:rgba(246,246,248,.98);box-shadow:0 0 0 .5px rgba(0,0,0,.25),0 10px 30px rgba(0,0,0,.28);color:#1D1D1F;font:400 13px/22px 'Noto Sans SC'}
+.mm .i{display:flex;align-items:center;height:22px;padding:0 12px 0 20px;border-radius:4px;white-space:nowrap;gap:24px}
+.mm .i span:first-child{flex:1}.mm .i b{font-weight:400;color:#8A8A8E;font-family:'Geist','Noto Sans SC'}
+.mm .i.dis{color:#B0B0B5}.mm .i.hi{background:#0A64D6;color:#fff}.mm .i.hi b{color:rgba(255,255,255,.85)}
+.mm .i{position:relative}.mm .i.ck::before{content:'✓';position:absolute;left:6px;font-size:12px}
+.mm .s{height:1px;background:rgba(0,0,0,.12);margin:5px 10px}
+.mm .i .ar{color:#8A8A8E}
+.ttl{position:absolute;z-index:61;font:600 13px/20px 'Noto Sans SC';color:#1D1D1F;padding:0 9px;border-radius:5px;background:rgba(0,0,0,.12)}
+.board{position:relative;width:1280px;background:#E7E9EC;padding:22px 24px 26px;display:grid;grid-template-columns:repeat(3,1fr);gap:22px 24px;align-items:start}
+.board .col{position:relative}
+.board .mm{position:relative;min-width:0}
+.board h4{font:600 13px/20px 'Noto Sans SC';color:#1D1D1F;margin:0 0 6px 2px}
+.board h4 small{font-weight:400;color:#6C6C70;margin-left:6px}
+/* ---------- dialogs (the app's own dialog component) ---------- */
+.mdlg{position:absolute;z-index:62;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:28px;background:var(--sch);color:var(--on);box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.mdlg .h{padding:24px 24px 0;font-size:22px;line-height:28px}
+.mdlg .b{padding:16px 24px 0;font-size:14px;line-height:1.6;color:var(--onv)}
+.mdlg .q{padding:16px 24px 0;font-size:16px;font-weight:500}
+.mdlg .dv{height:1px;background:var(--ov);margin:12px 24px 0}
+.mdlg .cb{display:flex;align-items:center;justify-content:space-between;margin:0 24px;height:48px;font-size:14px;font-weight:500}
+.mdlg .cb i{width:18px;height:18px;border-radius:2px;border:2px solid var(--onv);display:block}
+.mdlg .a{display:flex;gap:8px;padding:24px 24px 24px}
+.mdlg .a span{height:48px;padding:0 16px;border-radius:24px;display:flex;align-items:center;font-size:14px;font-weight:600;color:var(--primary)}
+.mdlg .a .er{background:var(--error);color:#fff;padding:0 24px}
+.cur{position:absolute;z-index:90;width:18px;height:26px}
+.fsbar{position:absolute;left:0;right:0;top:24px;height:28px;z-index:49;background:rgba(236,236,238,.96);border-bottom:1px solid rgba(0,0,0,.12)}
+</style></head><body><div class="win mac" style="--w:1280px;--h:800px;"><div class="appbar v3h"><div class="back"><span class="mi" style="font-size:24px">arrow_back</span></div><span class="av" style="background-image:url(.cache/img/65.jpg)"></span><div class="tt" style="margin-left:8px"><div class="nick">晚风</div><div class="area">哔哩哔哩 / 唱见电台</div></div><div class="v3fol on">已关注</div><div class="v3rec"><span class="rx" style="font-size:14px">&#xf05a;</span>录制</div><div class="ib"><span class="rx" style="font-size:24px">&#xea42;</span></div><div style="width:4px"></div></div><div class="body"><div class="stage"><div class="frame"><div class="pic"></div><div class="v3top"><div class="title">深夜电台 · 点歌接龙到天亮</div><div class="ib"><span class="rx" style="font-size:21px">&#xee05;</span></div></div><div class="v3bot"><div style="display:flex;align-items:center"><div class="ib"><span class="mr" style="font-size:28px">pause</span></div><div class="ib"><span class="mr" style="font-size:24px">refresh</span></div><div class="pill"><span class="mr" style="font-size:15px">check</span>已关注</div><div class="ib"><span class="dmk open"></span></div><div class="ib"><span class="dmk set"></span></div></div><div style="flex:1"></div><div style="display:flex;align-items:center"><div class="fit">默认比例</div><div class="ib"><span class="mr" style="font-size:26px">fullscreen</span></div></div></div></div></div><div class="col" style="width:400px"><div class="res"><div class="aud"><span class="mr" style="font-size:14px">people_alt</span>在线 1.2万</div><div class="sel">原画</div><div class="line">线路1</div></div><hr><div class="tabs v3t"><div class="on">弹幕列表</div><div>醒目留言</div><div>弹幕设置</div><div>屏蔽管理</div></div><div class="list" style="flex-direction:column-reverse;justify-content:flex-start"><div class="it"><i style="background:#C2410C"></i><p><b>Aki: </b>打卡第 52 天，晚安前来听歌</p></div><div class="it"><i style="background:#000"></i><p><b>路过的风: </b>主播声音太温柔了</p></div><div class="it"><i style="background:#1971C2"></i><p><b>夜猫子: </b>可以点《晴天》吗</p></div><div class="it"><i style="background:#000"></i><p><b>一只小熊: </b>这首歌好好听</p></div><div class="it"><i style="background:#C2255C"></i><p><b>星河长明: </b>前排支持！</p></div><div class="it"><i style="background:#2F9E44"></i><p><b>清欢: </b>下一首想听《晚风》</p></div><div class="it"><i style="background:#000"></i><p><b>风吹麦浪: </b>来了来了</p></div></div></div></div><div class="tl" style="left:8px;top:8px"><i class="c"></i><i class="m"></i><i class="z"></i></div><div class="capx" style="left:96px;top:62px">v3：窗口按钮压在返回键和头像上</div><div class="syn" style="left:auto;right:12px;top:auto;bottom:10px;transform:none">示意图片</div></div></body></html>

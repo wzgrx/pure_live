@@ -272,6 +272,10 @@ abstract final class Settings {
   /// Windows PiP on top.
   static const windowsPipAlwaysOnTop = BoolSetting('windowsPipAlwaysOnTop', section: 'player', defaultValue: false);
 
+  /// Leaving the app from a playing room enters picture-in-picture (U.2j,
+  /// choice J1). New in v4, off by default; 3.x only had the button.
+  static const autoPipOnLeave = BoolSetting('autoPipOnLeave', section: 'player', defaultValue: false);
+
   /// NVIDIA RTX video super resolution.
   static const enableRtxVsr = BoolSetting('enableRtxVsr', section: 'player', defaultValue: false);
 
@@ -973,6 +977,274 @@ abstract final class Settings {
     recordDanmaku,
   ];
 
+  // ---- local interaction (modules/live_play/widgets/local_interaction/
+  // local_interaction_controller.dart:86-114) ----
+  //
+  // 3.x kept these in the same Hive box and never put them in backups; the
+  // 3.x import parks them in `legacy_values` until they are registered here
+  // (U.2k), and v4 backups carry them in a `localInteraction` section, which
+  // 3.x ignores. Ranges are the ones 3.x's style editor and
+  // `buildDanmakuStyle` allowed.
+
+  /// The local interaction (local danmaku, gifts) is on.
+  static const localInteractionEnabled = BoolSetting(
+    'localInteraction.enabled',
+    section: 'localInteraction',
+    defaultValue: true,
+  );
+
+  /// The local nickname (at most 20 characters).
+  static const localInteractionUserName = StringSetting(
+    'localInteraction.userName',
+    section: 'localInteraction',
+    defaultValue: 'Pure Live',
+  );
+
+  /// The local title's id.
+  static const localInteractionTitle = StringSetting(
+    'localInteraction.title',
+    section: 'localInteraction',
+    defaultValue: 'listener',
+    allowed: {'listener', 'night_owl', 'supporter', 'guardian'},
+  );
+
+  /// Local danmaku fly over the picture (they always join the chat list).
+  static const localInteractionShowAsDanmaku = BoolSetting(
+    'localInteraction.showAsDanmaku',
+    section: 'localInteraction',
+    defaultValue: true,
+  );
+
+  /// The platform's badge before the local name.
+  static const localInteractionShowPlatformBadge = BoolSetting(
+    'localInteraction.showPlatformBadge',
+    section: 'localInteraction',
+    defaultValue: true,
+  );
+
+  /// The local level in the badge.
+  static const localInteractionShowLevelBadge = BoolSetting(
+    'localInteraction.showLevelBadge',
+    section: 'localInteraction',
+    defaultValue: true,
+  );
+
+  /// The banner over the picture when a local gift is sent.
+  static const localInteractionEnableGiftEffects = BoolSetting(
+    'localInteraction.enableGiftEffects',
+    section: 'localInteraction',
+    defaultValue: true,
+  );
+
+  /// The platform pack previewed in the settings.
+  static const localInteractionPreviewPlatform = StringSetting(
+    'localInteraction.previewPlatform',
+    section: 'localInteraction',
+    defaultValue: SiteIds.bilibili,
+  );
+
+  /// Local coins.
+  static const localInteractionCoins = IntSetting(
+    'localInteraction.coins',
+    section: 'localInteraction',
+    defaultValue: 1000,
+    min: 0,
+  );
+
+  /// Local experience (a level per 500).
+  static const localInteractionExperience = IntSetting(
+    'localInteraction.experience',
+    section: 'localInteraction',
+    defaultValue: 0,
+    min: 0,
+  );
+
+  /// Gifts and coins added, newest first (at most 30).
+  static const localInteractionHistory = StringListSetting(
+    'localInteraction.history',
+    section: 'localInteraction',
+    defaultValue: [],
+  );
+
+  /// The local danmaku template's id, or `custom`.
+  static const localDanmakuPreset = StringSetting(
+    'localInteraction.danmakuPreset',
+    section: 'localInteraction',
+    defaultValue: 'clean',
+  );
+
+  /// The local danmaku colour, ARGB.
+  static const localDanmakuColor = IntSetting(
+    'localInteraction.danmakuColor',
+    section: 'localInteraction',
+    defaultValue: 0xFFFFFFFF,
+  );
+
+  /// The local danmaku font size.
+  static const localDanmakuFontSize = DoubleSetting(
+    'localInteraction.danmakuFontSize',
+    section: 'localInteraction',
+    defaultValue: 19,
+    min: 14,
+    max: 32,
+  );
+
+  /// The local danmaku speed, pixels per second.
+  static const localDanmakuSpeed = DoubleSetting(
+    'localInteraction.danmakuSpeed',
+    section: 'localInteraction',
+    defaultValue: 130,
+    min: 60,
+    max: 260,
+  );
+
+  /// The local danmaku font weight.
+  static const localDanmakuFontWeight = IntSetting(
+    'localInteraction.danmakuFontWeight',
+    section: 'localInteraction',
+    defaultValue: 600,
+    min: 400,
+    max: 900,
+  );
+
+  /// The local danmaku outline.
+  static const localDanmakuShowStroke = BoolSetting(
+    'localInteraction.danmakuShowStroke',
+    section: 'localInteraction',
+    defaultValue: true,
+  );
+
+  /// The outline width.
+  static const localDanmakuStrokeWidth = DoubleSetting(
+    'localInteraction.danmakuStrokeWidth',
+    section: 'localInteraction',
+    defaultValue: 1.5,
+    min: 0,
+    max: 4,
+  );
+
+  /// Where local danmaku fly: `scroll`, `top` or `bottom`.
+  static const localDanmakuPlacement = StringSetting(
+    'localInteraction.danmakuPlacement',
+    section: 'localInteraction',
+    defaultValue: 'scroll',
+    allowed: {'scroll', 'top', 'bottom'},
+  );
+
+  /// The local danmaku font: `system`, `rounded`, `serif` or `mono`.
+  static const localDanmakuFontFamily = StringSetting(
+    'localInteraction.danmakuFontFamily',
+    section: 'localInteraction',
+    defaultValue: 'system',
+    allowed: {'system', 'rounded', 'serif', 'mono'},
+  );
+
+  /// Italic local danmaku.
+  static const localDanmakuItalic = BoolSetting(
+    'localInteraction.danmakuItalic',
+    section: 'localInteraction',
+    defaultValue: false,
+  );
+
+  /// The local danmaku opacity.
+  static const localDanmakuOpacity = DoubleSetting(
+    'localInteraction.danmakuOpacity',
+    section: 'localInteraction',
+    defaultValue: 1,
+    min: 0.35,
+    max: 1,
+  );
+
+  /// The local danmaku letter spacing.
+  static const localDanmakuLetterSpacing = DoubleSetting(
+    'localInteraction.danmakuLetterSpacing',
+    section: 'localInteraction',
+    defaultValue: 0,
+    min: -0.5,
+    max: 3,
+  );
+
+  /// The outline colour, ARGB.
+  static const localDanmakuStrokeColor = IntSetting(
+    'localInteraction.danmakuStrokeColor',
+    section: 'localInteraction',
+    defaultValue: 0xFF000000,
+  );
+
+  /// The shadow (glow) of local danmaku.
+  static const localDanmakuShowShadow = BoolSetting(
+    'localInteraction.danmakuShowShadow',
+    section: 'localInteraction',
+    defaultValue: false,
+  );
+
+  /// The shadow colour, ARGB.
+  static const localDanmakuShadowColor = IntSetting(
+    'localInteraction.danmakuShadowColor',
+    section: 'localInteraction',
+    defaultValue: 0xFF000000,
+  );
+
+  /// The shadow blur.
+  static const localDanmakuShadowBlur = DoubleSetting(
+    'localInteraction.danmakuShadowBlur',
+    section: 'localInteraction',
+    defaultValue: 2,
+    min: 0,
+    max: 6,
+  );
+
+  /// The shadow offset.
+  static const localDanmakuShadowOffset = DoubleSetting(
+    'localInteraction.danmakuShadowOffset',
+    section: 'localInteraction',
+    defaultValue: 1,
+    min: 0,
+    max: 4,
+  );
+
+  /// How long a fixed (top or bottom) local danmaku stays, milliseconds.
+  static const localDanmakuFixedDurationMs = IntSetting(
+    'localInteraction.danmakuFixedDurationMs',
+    section: 'localInteraction',
+    defaultValue: 4000,
+    min: 2000,
+    max: 10000,
+  );
+
+  /// The local interaction's settings, in 3.x's order.
+  static const List<Setting<Object>> localInteraction = [
+    localInteractionEnabled,
+    localInteractionUserName,
+    localInteractionTitle,
+    localInteractionShowAsDanmaku,
+    localInteractionShowPlatformBadge,
+    localInteractionShowLevelBadge,
+    localInteractionEnableGiftEffects,
+    localInteractionPreviewPlatform,
+    localInteractionCoins,
+    localInteractionExperience,
+    localInteractionHistory,
+    localDanmakuPreset,
+    localDanmakuColor,
+    localDanmakuFontSize,
+    localDanmakuSpeed,
+    localDanmakuFontWeight,
+    localDanmakuShowStroke,
+    localDanmakuStrokeWidth,
+    localDanmakuPlacement,
+    localDanmakuFontFamily,
+    localDanmakuItalic,
+    localDanmakuOpacity,
+    localDanmakuLetterSpacing,
+    localDanmakuStrokeColor,
+    localDanmakuShowShadow,
+    localDanmakuShadowColor,
+    localDanmakuShadowBlur,
+    localDanmakuShadowOffset,
+    localDanmakuFixedDurationMs,
+  ];
+
   // ---- backup (backup_controller.dart:37) ----
 
   /// Last backup folder (this device).
@@ -1103,6 +1375,7 @@ abstract final class Settings {
     videoHardwareDecoder,
     floatPlay,
     windowsPipAlwaysOnTop,
+    autoPipOnLeave,
     enableRtxVsr,
     useHardStopOnExit,
     enablePortraitStreamAdaptation,
@@ -1202,6 +1475,7 @@ abstract final class Settings {
     enableAutoShutDownTime,
     enableStartUp,
     ...recorder,
+    ...localInteraction,
     backupDirectory,
     downloadDirectoryPath,
     enableLocalLog,

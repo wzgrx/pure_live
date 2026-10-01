@@ -191,3 +191,34 @@ v4 现在（偏差最大）：
 | U.4f 关注的分区、平台显示 | [compare/U.4f](compare/U.4f/README.md)（v3 的 HotAreasPage 实际是“平台显示”页） |
 | U.3a～U.3d 首页外壳、宽屏首页、启动页、全局弹窗 | [compare/U.3a](compare/U.3a/README.md)、[U.3b](compare/U.3b/README.md)、[U.3c](compare/U.3c/README.md)、[U.3d](compare/U.3d/README.md)（第 1 节以这里为准） |
 | U.2k 本地互动 | [compare/U.2k](compare/U.2k/README.md) |
+| U.9 网络电视管理 | [compare/U.9](compare/U.9/README.md) |
+| U.10a 账号总览 | [compare/U.10a](compare/U.10a/README.md) |
+| U.10b 登录和 Cookie | [compare/U.10b](compare/U.10b/README.md) |
+| U.10c 云账号停用说明 | [compare/U.10c](compare/U.10c/README.md) |
+| U.6a 设置总览 | [compare/U.6a](compare/U.6a/README.md) |
+| U.6b 外观 | [compare/U.6b](compare/U.6b/README.md) |
+| U.6c 播放设置 | [compare/U.6c](compare/U.6c/README.md) |
+| U.6d 通用和网络 | [compare/U.6d](compare/U.6d/README.md) |
+| U.6e 数据 | [compare/U.6e](compare/U.6e/README.md) |
+| U.7a 录制中心 | [compare/U.7a](compare/U.7a/README.md) |
+| U.8 多画面 | [compare/U.8](compare/U.8/README.md) |
+| U.7b 录制设置 | [compare/U.7b](compare/U.7b/README.md) |
+| U.11a 备份与恢复 | [compare/U.11a](compare/U.11a/README.md) |
+| U.11b WebDAV | [compare/U.11b](compare/U.11b/README.md) |
+| U.11c 设备同步 | [compare/U.11c](compare/U.11c/README.md) |
+| U.12a 工具箱（链接解析） | [compare/U.12a](compare/U.12a/README.md) |
+| U.12b 关于和版本 | [compare/U.12b](compare/U.12b/README.md) |
+| U.12c 标签管理 | [compare/U.12c](compare/U.12c/README.md) |
+| U.12d 弹幕屏蔽（设置） | [compare/U.12d](compare/U.12d/README.md) |
+| U.15i 电视设置 | [compare/U.15i](compare/U.15i/README.md) |
+| U.13 桌面窗口 | [compare/U.13](compare/U.13/README.md) |
+| U.14 系统界面 | [compare/U.14](compare/U.14/README.md) |
+| U.15d 电视直播间 | [compare/U.15d](compare/U.15d/README.md) |
+| U.15e 电视网络电视和链接放映 | [compare/U.15e](compare/U.15e/README.md) |
+| U.17a iOS 和 iPadOS | [compare/U.17a](compare/U.17a/README.md) |
+| U.17b macOS | [compare/U.17b](compare/U.17b/README.md) |
+| U.1c 通用组件 | [compare/U.1c](compare/U.1c/README.md) |
+| U.1d 弹窗组件 | [compare/U.1d](compare/U.1d/README.md) |
+| U.15a 电视设计系统和通用组件 | [compare/U.15a](compare/U.15a/README.md) |
+| U.15b 电视外壳 | [compare/U.15b](compare/U.15b/README.md) |
+| U.15c 电视直播浏览 | [compare/U.15c](compare/U.15c/README.md) |

@@ -109,3 +109,12 @@ flutter:
     - assets/emo/images/douyu/
     - assets/emo/images/huya/
     - assets/emo/images/kuaishou/
+    # The emoji font's licence and origin (U.2k), shown on the licences page.
+    - assets/fonts/emoji/OFL.txt
+  fonts:
+    # The local interaction's gift and badge emoji (U.2k choice K4): a Noto
+    # Color Emoji subset, so they look the same everywhere and never fall to
+    # boxes on systems without a colour emoji font.
+    - family: PureLiveEmoji
+      fonts:
+        - asset: assets/fonts/emoji/NotoColorEmoji-Subset.ttf

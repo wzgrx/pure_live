@@ -1,19 +1,24 @@
 package com.mystyle.purelive
 
 import android.app.AlertDialog
+import android.app.AppOpsManager
 import android.app.PictureInPictureParams
 import android.app.UiModeManager
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.hardware.display.DisplayManager
 import android.media.AudioManager
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
+import android.os.Process
 import android.provider.Settings
 import android.text.InputType
 import android.util.Rational
@@ -52,7 +57,11 @@ import io.flutter.plugin.common.MethodChannel
  * - `pure_live/system_access`: installing update packages and the
  *   local-network permission ([SystemAccessPlugin]);
  * - `pure_live/pip`: the live room's picture-in-picture (3.x used the
- *   floating plugin); `changed` reports entering and leaving;
+ *   floating plugin); `changed` reports entering and leaving. U.2j: `status`
+ *   tells whether the system settings turned it off for the app, `enter`
+ *   answers `entered`, `disabled` or `failed`, `openSettings` opens the app's
+ *   picture-in-picture page of the system settings, `setAutoEnter` lets
+ *   leaving the app (home, recents) enter it by itself;
  * - `pure_live/device_controls`: the media volume and the window's
  *   brightness for the live room's gestures (3.x used the volume_controller
  *   and screen_brightness plugins), and the battery level of the fullscreen
@@ -75,6 +84,10 @@ class MainActivity : AudioServiceActivity() {
     private var displayModeChannel: MethodChannel? = null
     private var predictiveBackChannel: MethodChannel? = null
     private var pipChannel: MethodChannel? = null
+
+    // U.2j J1: leaving the app enters picture-in-picture while the room plays.
+    private var autoEnterPip = false
+    private var autoEnterRatio = Rational(16, 9)
     private var predictiveBackEnabled = false
     private var predictiveBackRegistered = false
     private var displayListenerRegistered = false
@@ -202,9 +215,20 @@ class MainActivity : AudioServiceActivity() {
             channel.setMethodCallHandler { call, result ->
                 when (call.method) {
                     "isSupported" -> result.success(pictureInPictureSupported())
+                    "status" -> result.success(pictureInPictureStatus())
                     "enter" -> result.success(
                         enterPictureInPicture(call.argument<Int>("width") ?: 16, call.argument<Int>("height") ?: 9),
                     )
+
+                    "openSettings" -> result.success(openPictureInPictureSettings())
+                    "setAutoEnter" -> {
+                        setAutoEnterPictureInPicture(
+                            call.argument<Boolean>("enabled") ?: false,
+                            call.argument<Int>("width") ?: 16,
+                            call.argument<Int>("height") ?: 9,
+                        )
+                        result.success(null)
+                    }
 
                     else -> result.notImplemented()
                 }
@@ -327,17 +351,108 @@ class MainActivity : AudioServiceActivity() {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
 
-    private fun enterPictureInPicture(width: Int, height: Int): Boolean {
-        if (!pictureInPictureSupported()) return false
-        // Android accepts ratios between 1:2.39 and 2.39:1.
+    /** Android accepts ratios between 1:2.39 and 2.39:1. */
+    private fun pictureInPictureRatio(width: Int, height: Int): Rational {
         val ratio = (width.coerceAtLeast(1).toDouble() / height.coerceAtLeast(1)).coerceIn(1 / 2.39, 2.39)
+        return Rational((ratio * 1000).toInt(), 1000)
+    }
+
+    /**
+     * Whether the system settings let this app use picture-in-picture
+     * ("Settings > Apps > Picture-in-picture"); 3.x ignored a refusal.
+     */
+    @Suppress("DEPRECATION")
+    private fun pictureInPictureAllowed(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return false
+        val appOps = getSystemService(Context.APP_OPS_SERVICE) as? AppOpsManager ?: return true
+        val mode = try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                appOps.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_PICTURE_IN_PICTURE, Process.myUid(), packageName)
+            } else {
+                appOps.checkOpNoThrow(AppOpsManager.OPSTR_PICTURE_IN_PICTURE, Process.myUid(), packageName)
+            }
+        } catch (_: RuntimeException) {
+            return true
+        }
+        return mode != AppOpsManager.MODE_IGNORED && mode != AppOpsManager.MODE_ERRORED
+    }
+
+    private fun pictureInPictureStatus(): String = when {
+        !pictureInPictureSupported() -> "unsupported"
+        !pictureInPictureAllowed() -> "disabled"
+        else -> "allowed"
+    }
+
+    private fun enterPictureInPicture(width: Int, height: Int): String {
+        if (!pictureInPictureSupported()) return "failed"
+        if (!pictureInPictureAllowed()) return "disabled"
         val params = PictureInPictureParams.Builder()
-            .setAspectRatio(Rational((ratio * 1000).toInt(), 1000))
+            .setAspectRatio(pictureInPictureRatio(width, height))
             .build()
         return try {
-            enterPictureInPictureMode(params)
+            if (enterPictureInPictureMode(params)) "entered" else "failed"
         } catch (_: IllegalStateException) {
-            false
+            "failed"
+        } catch (_: IllegalArgumentException) {
+            "failed"
+        }
+    }
+
+    /**
+     * This app's page of the system's picture-in-picture settings; the app's
+     * details page where a vendor build has none.
+     */
+    private fun openPictureInPictureSettings(): Boolean {
+        val uri = Uri.fromParts("package", packageName, null)
+        val intents = listOf(
+            Intent("android.settings.PICTURE_IN_PICTURE_SETTINGS", uri),
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri),
+        )
+        for (intent in intents) {
+            try {
+                startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                return true
+            } catch (_: ActivityNotFoundException) {
+                // The next one.
+            } catch (_: SecurityException) {
+                // The next one.
+            }
+        }
+        return false
+    }
+
+    /**
+     * Android 12 and later enter picture-in-picture by themselves on the way
+     * home (smoothly); 8-11 enter from [onUserLeaveHint].
+     */
+    private fun setAutoEnterPictureInPicture(enabled: Boolean, width: Int, height: Int) {
+        autoEnterPip = enabled && pictureInPictureSupported()
+        autoEnterRatio = pictureInPictureRatio(width, height)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || !pictureInPictureSupported()) return
+        try {
+            setPictureInPictureParams(
+                PictureInPictureParams.Builder()
+                    .setAspectRatio(autoEnterRatio)
+                    .setAutoEnterEnabled(autoEnterPip)
+                    .build(),
+            )
+        } catch (_: IllegalStateException) {
+            // The activity is going away.
+        } catch (_: IllegalArgumentException) {
+            // A ratio the device refuses.
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (!autoEnterPip || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) return
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || isInPictureInPictureMode || !pictureInPictureAllowed()) return
+        try {
+            enterPictureInPictureMode(PictureInPictureParams.Builder().setAspectRatio(autoEnterRatio).build())
+        } catch (_: IllegalStateException) {
+            // Refused; the room pauses as it would without it.
+        } catch (_: IllegalArgumentException) {
+            // Refused.
         }
     }
 

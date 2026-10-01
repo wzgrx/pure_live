@@ -20,38 +20,12 @@ import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/features/live_play/player/bar_parts.dart';
 import 'package:pure_live/features/live_play/player/player_controls.dart';
 import 'package:pure_live/features/live_play/player/player_view.dart';
-import 'package:pure_live/features/live_play/player/room_composer.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 
 import '../../support.dart';
 import 'live_play_support.dart';
-
-/// Local interaction's composer as the bars see it (U.2k provides the real
-/// one).
-final class _Composer implements RoomComposer {
-  new({bool on = true, Color color = OnVideoColors.foreground})
-    : available = ValueNotifier(on),
-      color = ValueNotifier(color);
-
-  @override
-  final ValueNotifier<bool> available;
-
-  @override
-  final ValueNotifier<Color> color;
-
-  final List<bool> autofocus = [];
-
-  @override
-  Widget buildField(BuildContext context, {required bool autofocus}) {
-    this.autofocus.add(autofocus);
-    return TextField(key: const ValueKey('test-composer-field'), autofocus: autofocus);
-  }
-
-  @override
-  void dispose() {}
-}
 
 final class _Room {
   new(this.services, this.engine, this.orientations);
@@ -69,7 +43,6 @@ Future<_Room> _pump(
   double height = 852,
   TargetPlatform platform = TargetPlatform.android,
   bool portrait = false,
-  RoomComposer? composer,
   Map<Setting<Object>, Object> settings = const {},
 }) async {
   // Reset by [_close]: the test must end with it unset.
@@ -102,7 +75,6 @@ Future<_Room> _pump(
         sitesProvider.overrideWithValue(SiteRegistry({SiteIds.bilibili: () => site})),
         danmakuProvider.overrideWithValue(DanmakuRegistry({SiteIds.bilibili: FakeDanmaku.new})),
         playbackSessionFactoryProvider.overrideWithValue(({config}) => fakeSession(engine)),
-        roomComposerProvider.overrideWithValue(composer == null ? null : (_) => composer),
       ],
       child: MaterialApp(
         theme: const LiveTheme().light,
@@ -183,8 +155,8 @@ const _bottomKeys = [
   'live-play-video-follow',
   'live-play-danmaku-toggle',
   'live-play-danmaku-settings',
-  'live-play-composer',
-  'live-play-composer-star',
+  'local-composer-video',
+  'local-composer-star',
   'live-play-quality',
   'live-play-line',
   'live-play-orientation',
@@ -201,7 +173,7 @@ void main() {
     testWidgets('phone: the bars in order with their icons; the lock at the right; the composer in the middle', (
       tester,
     ) async {
-      final room = await _pump(tester, width: 852, height: 393, composer: _Composer());
+      final room = await _pump(tester, width: 852, height: 393);
       await _tap(tester, 'live-play-fullscreen');
       final top = _key('live-play-top-bar');
       // Change 2 adds record and the menu (no FFmpeg in tests: no record);
@@ -230,7 +202,7 @@ void main() {
         'live-play-video-follow',
         'live-play-danmaku-toggle',
         'live-play-danmaku-settings',
-        'live-play-composer',
+        'local-composer-video',
         'live-play-quality',
         'live-play-line',
         'live-play-orientation',
@@ -242,8 +214,8 @@ void main() {
       // Change 6: follow is the bar's pill.
       expect(_in('live-play-video-follow', find.text('关注')), findsOneWidget);
       expect(tester.getSize(_in('live-play-video-follow', find.byType(DecoratedBox)).first).height, 32);
-      // The composer in the middle, at most 420 wide.
-      expect(tester.getSize(_key('test-composer-field')).width, lessThanOrEqualTo(420));
+      // U.2k's composer in the middle, at most 420 wide.
+      expect(tester.getSize(_key('local-composer-video')).width, lessThanOrEqualTo(420));
       // Change 7: 60 % black at the edges.
       final shade = tester.widget<DecoratedBox>(_key('live-play-bottom-shade'));
       expect(((shade.decoration as BoxDecoration).gradient! as LinearGradient).colors.first, OnVideoColors.scrim);
@@ -255,9 +227,8 @@ void main() {
       await _close(tester, room);
     });
 
-    testWidgets('narrow (740): the composer folds into a star in the local colour; no button drops', (tester) async {
-      final composer = _Composer(color: LiveSemanticColors.live);
-      final room = await _pump(tester, width: 740, height: 360, composer: composer);
+    testWidgets('narrow (740): the composer folds into its star; no button drops', (tester) async {
+      final room = await _pump(tester, width: 740, height: 360);
       await _tap(tester, 'live-play-fullscreen');
       expect(_order(tester, _key('live-play-bottom-bar'), _bottomKeys), [
         'live-play-pause',
@@ -265,40 +236,28 @@ void main() {
         'live-play-video-follow',
         'live-play-danmaku-toggle',
         'live-play-danmaku-settings',
-        'live-play-composer-star',
+        'local-composer-star',
         'live-play-quality',
         'live-play-line',
         'live-play-orientation',
         'live-play-video-fit',
         'live-play-fullscreen',
       ]);
-      final star = tester.widget<IconButton>(_key('live-play-composer-star'));
-      expect(star.color, LiveSemanticColors.live);
-      expect(_in('live-play-composer-star', find.byIcon(AppIcons.localDanmaku)), findsOneWidget);
-      // The star opens the field above the bar, focused.
-      await _tap(tester, 'live-play-composer-star');
-      expect(_key('live-play-composer-row'), findsOneWidget);
-      expect(composer.autofocus.last, isTrue);
-      expect(
-        tester.getRect(_key('live-play-composer-row')).bottom,
-        lessThan(tester.getRect(_key('live-play-pause')).top),
-      );
+      expect(_in('local-composer-star', find.byIcon(AppIcons.localStyle)), findsOneWidget);
+      // The star opens the field above the bar (U.2k c14).
+      await _tap(tester, 'local-composer-star');
+      expect(_key('local-composer-row'), findsOneWidget);
+      expect(tester.getRect(_key('local-composer-row')).bottom, lessThan(tester.getRect(_key('live-play-pause')).top));
       await _close(tester, room);
     });
 
-    testWidgets('local interaction off or missing: no composer, the buttons keep their places', (tester) async {
-      final room = await _pump(tester, width: 852, height: 393, composer: _Composer(on: false));
+    testWidgets('local interaction off: no composer, the buttons keep their places', (tester) async {
+      final room = await _pump(tester, width: 852, height: 393, settings: {Settings.localInteractionEnabled: false});
       await _tap(tester, 'live-play-fullscreen');
-      expect(_key('live-play-composer'), findsNothing);
-      expect(_key('live-play-composer-star'), findsNothing);
+      expect(_key('local-composer-video'), findsNothing);
+      expect(_key('local-composer-star'), findsNothing);
       expect(_order(tester, _key('live-play-bottom-bar'), _bottomKeys), hasLength(10));
       await _close(tester, room);
-
-      final bare = await _pump(tester, width: 740, height: 360);
-      await _tap(tester, 'live-play-fullscreen');
-      expect(_key('live-play-composer-star'), findsNothing);
-      expect(_key('live-play-quality'), findsOneWidget);
-      await _close(tester, bare);
     });
 
     testWidgets('lock: the bars and gestures stop, only the unlock button stays; it brings them back', (tester) async {
@@ -314,9 +273,7 @@ void main() {
       await _close(tester, room);
     });
 
-    testWidgets('Windows: the clock, no orientation; the volume before leaving; picture-in-picture shows', (
-      tester,
-    ) async {
+    testWidgets('Windows: the clock, no orientation; the volume before leaving', (tester) async {
       final room = await _pump(tester, width: 1280, height: 800, platform: TargetPlatform.windows);
       await _tap(tester, 'live-play-fullscreen');
       expect(_order(tester, _key('live-play-top-bar'), _topKeys), [
@@ -325,18 +282,15 @@ void main() {
         'live-play-video-title',
         'live-play-switch-room',
         'live-play-audio-only',
-        'live-play-pip',
         'live-play-menu',
-      ]);
-      // U.2j change 5: shown on every desktop; grey until the desktop small
-      // window exists (U.2j).
-      expect(tester.widget<VideoIconButton>(_key('live-play-pip')).onPressed, isNull);
+      ], reason: 'no desktop mini window in tests (U.2j shows it where there is one)');
       expect(_order(tester, _key('live-play-bottom-bar'), _bottomKeys), [
         'live-play-pause',
         'live-play-refresh',
         'live-play-video-follow',
         'live-play-danmaku-toggle',
         'live-play-danmaku-settings',
+        'local-composer-video',
         'live-play-quality',
         'live-play-line',
         'live-play-video-fit',
@@ -467,12 +421,11 @@ void main() {
       await _close(tester, room);
     });
 
-    testWidgets('under 480 high (a phone held sideways): the landscape bars on the page; back leaves', (tester) async {
-      final room = await _pump(tester, width: 852, height: 393);
-      expect(find.byType(AppBar), findsNothing);
-      expect(_key('live-play-clock'), findsOneWidget);
-      expect(_in('live-play-fullscreen', find.byIcon(AppIcons.fullscreen)), findsOneWidget, reason: 'enters it');
-      expect(tester.widget<VideoIconButton>(_key('live-play-back')).tooltip, 'Back');
+    testWidgets('under 480 high (a phone held sideways): split with the narrow chat column (U.2e c17)', (tester) async {
+      final room = await _pump(tester, width: 740, height: 360);
+      expect(_key('live-play-desktop-split'), findsOneWidget, reason: 'not the phone stack at 740');
+      expect(tester.getSize(_key('live-play-chat-box')).width, 300);
+      expect(find.byType(AppBar), findsOneWidget);
       await _close(tester, room);
     });
   });
@@ -516,7 +469,11 @@ void main() {
       await _close(tester, room);
 
       final immersive = await _pump(tester, portrait: true, settings: {Settings.portraitLayoutMode: 'immersive'});
-      expect(tester.getSize(_key('live-play-portrait-sheet')).height, portraitPanelLeast, reason: '"沉浸": lowest');
+      expect(
+        tester.getSize(_key('live-play-portrait-sheet')).height,
+        portraitPanelLeast + portraitPanelComposer,
+        reason: '"沉浸": the lowest, with the local composer under the chat',
+      );
       await _close(tester, immersive);
     });
 
@@ -551,7 +508,7 @@ void main() {
     testWidgets('portrait fullscreen: two rows each end; the hint for 3 s; an upward swipe and Back restore', (
       tester,
     ) async {
-      final room = await _pump(tester, portrait: true, composer: _Composer());
+      final room = await _pump(tester, portrait: true);
       // Change 5: the fullscreen button of a portrait room (and double tap,
       // appendix A 3) is the portrait fullscreen.
       await _tap(tester, 'live-play-fullscreen');
@@ -574,7 +531,7 @@ void main() {
         'live-play-cast',
       ]);
       final first = _key('live-play-bottom-first-row');
-      expect(_order(tester, first, _bottomKeys), ['live-play-composer', 'live-play-quality', 'live-play-line']);
+      expect(_order(tester, first, _bottomKeys), ['local-composer-video', 'live-play-quality', 'live-play-line']);
       expect(
         _order(
           tester,
@@ -743,6 +700,7 @@ void main() {
       expect(roomPageLayout(width: 393, height: 852, portraitPanel: true), RoomPageLayout.portraitPanel);
       expect(roomPageLayout(width: 852, height: 393, portraitPanel: false), RoomPageLayout.landscape);
       expect(roomPageLayout(width: 360, height: 400, portraitPanel: false), RoomPageLayout.phone);
+      expect(roomPageLayout(width: 560, height: 400, portraitPanel: false), RoomPageLayout.phone);
       expect(
         controlsArrangement(
           display: RoomDisplay.fullscreen,

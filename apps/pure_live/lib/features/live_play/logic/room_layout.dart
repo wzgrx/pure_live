@@ -34,8 +34,9 @@ enum RoomPageLayout {
   /// The picture beside the chat column (U.2d).
   wide,
 
-  /// A short window (a phone held sideways): the picture fills it with the
-  /// landscape bars (UI_PLAN §5.1: a compact height wins).
+  /// A short window, 600 or wider (a phone held sideways, UI_PLAN §5.1: a
+  /// compact height wins over the width): split like [wide], with the
+  /// narrow chat column of U.2e c17, never the phone stack.
   landscape,
 }
 
@@ -45,8 +46,7 @@ enum ControlsArrangement {
   /// The room page: a title bar and one bottom bar.
   inline,
 
-  /// Landscape fullscreen (U.2c), the in-window fullscreen and a short
-  /// window.
+  /// Landscape fullscreen (U.2c) and the in-window fullscreen.
   landscape,
 
   /// Two rows at the top and two at the bottom (U.2b's portrait
@@ -64,7 +64,7 @@ const double roomCompactMaxHeight = 480;
 /// The page layout for an area of [width] × [height]; [portraitPanel] when a
 /// portrait stream gets the three-stop panel ([portraitPanelEligible]).
 RoomPageLayout roomPageLayout({required double width, required double height, required bool portraitPanel}) {
-  if (height < roomCompactMaxHeight && width > height) return RoomPageLayout.landscape;
+  if (height < roomCompactMaxHeight && width > height && width >= 600) return RoomPageLayout.landscape;
   if (width >= roomWideMinWidth) return RoomPageLayout.wide;
   return portraitPanel ? RoomPageLayout.portraitPanel : RoomPageLayout.phone;
 }
@@ -81,7 +81,7 @@ ControlsArrangement controlsArrangement({
 }) {
   final upright = mobile && height > width;
   return switch (display) {
-    RoomDisplay.inline => page == RoomPageLayout.landscape ? ControlsArrangement.landscape : ControlsArrangement.inline,
+    RoomDisplay.inline => ControlsArrangement.inline,
     RoomDisplay.fullscreen ||
     RoomDisplay.portraitFullscreen => upright ? ControlsArrangement.portraitFullscreen : ControlsArrangement.landscape,
     RoomDisplay.windowFullscreen => ControlsArrangement.landscape,
@@ -130,9 +130,17 @@ enum FullscreenOrientation {
 /// view (U.2b change 4: 3.x's 200 left only the tabs once the strip has two
 /// lines; 250 on a 393 × 852 phone). "沉浸" starts at the lowest, the rest in
 /// the middle.
-({double minimum, double middle, double maximum, double initial}) portraitPanelStops(double height, String mode) {
+///
+/// [least] is the lowest stop: [portraitPanelLeast], plus
+/// [portraitPanelComposer] while the local danmaku composer sits under the
+/// chat list (U.2k), so the two chat lines stay in view.
+({double minimum, double middle, double maximum, double initial}) portraitPanelStops(
+  double height,
+  String mode, {
+  double least = portraitPanelLeast,
+}) {
   final area = height.isFinite ? math.max(0, height).toDouble() : 0.0;
-  final minimum = math.min(portraitPanelLeast, area);
+  final minimum = math.min(least, area);
   final ceiling = math.max(minimum, area - 120);
   final maximum = (area * 0.68).clamp(minimum, ceiling);
   final middle = (area * 0.44).clamp(minimum, maximum);
@@ -142,6 +150,10 @@ enum FullscreenOrientation {
 /// The lowest panel: the handle row 48, the two-line strip 92, the tabs 48
 /// and two chat lines 62.
 const double portraitPanelLeast = 250;
+
+/// What the local danmaku composer under the chat list (U.2k) adds to the
+/// lowest panel.
+const double portraitPanelComposer = 72;
 
 /// The stop nearest [height].
 double nearestStop(double height, Iterable<double> stops) =>

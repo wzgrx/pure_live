@@ -1,6 +1,6 @@
 # U.2g 直播间的状态：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：完成（2026-10-01，[记录](../../records/U.2g.md)）
 - 范围：直播间没在正常播放时画面区域和信息行、弹幕区的样子——加载中、未开播（含封禁、轮播、状态未知）、获取失败、播放中断、断流重连、受限、纯音频、回放播完；网络电视的节目单和回看。下面的界面清点表是这一批出图的清单
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u2g)、[TASK_FILES.md](../../TASK_FILES.md#u2g)；依赖 [U.2a](../U.2a/README.md)（E2、E3、E5 已确认，直接沿用），全屏照 [U.2c](../U.2c/README.md)，宽屏照 [U.2d](../U.2d/README.md)，弹法照 [U.2f](../U.2f/README.md)
 - 评审页：`page.json` 生成（`tools/ui/mock/page.py`），待发布；效果图源文件 [src/gen.py](src/gen.py)

@@ -13,23 +13,31 @@ import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_panel.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
+import 'package:pure_live/features/live_play/dialogs/iptv_guide.dart';
 import 'package:pure_live/features/live_play/layout/portrait_panel.dart';
 import 'package:pure_live/features/live_play/layout/room_details.dart';
 import 'package:pure_live/features/live_play/layout/room_header.dart';
 import 'package:pure_live/features/live_play/layout/room_info_bar.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_interaction_panel.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
+import 'package:pure_live/features/live_play/logic/mini_window.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_layout.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
+import 'package:pure_live/features/live_play/logic/room_runtime.dart';
+import 'package:pure_live/features/live_play/mini/room_mini_window.dart';
 import 'package:pure_live/features/live_play/player/player_controls.dart';
 import 'package:pure_live/features/live_play/player/player_view.dart';
-import 'package:pure_live/features/live_play/player/room_composer.dart';
 import 'package:pure_live/features/live_play/record/record_panel.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/routes/route_observer.dart';
+import 'package:pure_live/routes/route_path.dart';
 
 /// The live room (argument: the `LiveRoom`) (3.x `lib/modules/live_play`).
 ///
@@ -54,6 +62,13 @@ import 'package:pure_live/routes/route_args.dart';
 /// on the right otherwise, never over the picture's left half; at the bottom
 /// in the portrait fullscreen. Back and Esc close a panel first, then leave
 /// fullscreen, then close the details, then the room.
+///
+/// U.2j: the room's player, danmaku and logic live in a [RoomRuntime]. When
+/// the page closes with "退出小窗播放" on and the room playing, the in-app
+/// floating window takes it over ([FloatingRoom]); opening the same room
+/// again takes it back, so nothing is built twice. The picture's mini window
+/// button ([RoomMiniWindow]) enters Android's picture-in-picture or shrinks a
+/// desktop window to the mini window; the page then shows only the picture.
 class LivePlayPage extends ConsumerStatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -66,15 +81,26 @@ class LivePlayPage extends ConsumerStatefulWidget {
 }
 
 /// The settings the page's layout follows, read once per build.
-typedef _LayoutSettings = ({bool adaptation, bool adaptiveHeight, String mode, String policy, bool collapsed});
+typedef _LayoutSettings = ({
+  bool adaptation,
+  bool adaptiveHeight,
+  String mode,
+  String policy,
+  bool collapsed,
+  bool composer,
+});
 
 class _LivePlayPageState extends ConsumerState<LivePlayPage> {
+  RoomRuntime? _runtime;
+  RoomMiniWindow? _mini;
+
+  /// The page closes on purpose (the desktop mini window's ✕): no floating
+  /// window.
+  bool _closingOnPurpose = false;
+  late final SettingsStore _settings;
   LiveRoomController? _controller;
-  PlaybackSession? _session;
-  RoomBackgroundPolicy? _background;
   RoomOrientationChoice? _orientation;
-  ReconnectWatch? _reconnect;
-  RoomComposer? _composer;
+  late final ReconnectWatch _reconnect;
   StreamSubscription<PlaybackState>? _autoFullscreen;
   StreamSubscription<PlaybackState>? _shape;
   RoomDisplay _display = RoomDisplay.inline;
@@ -95,6 +121,16 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   /// together with the details.
   final RoomPanelController _panels = RoomPanelController();
 
+  /// Ticks when the IPTV guide should show the programme being watched
+  /// (U.2g c16: the picture's guide button, the replay mark).
+  final ValueNotifier<int> _guideReveal = ValueNotifier(0);
+
+  /// The IPTV guide's column is folded away (wide windows, U.2g c16).
+  bool _guideFolded = false;
+
+  /// The local interaction in this room (U.2k).
+  LocalRoomSession? _local;
+
   RoomPlatform get _platform => RoomPlatform.current();
 
   @override
@@ -111,31 +147,72 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       return;
     }
     final store = ref.read(storeProvider);
-    final danmaku = ref.read(danmakuProvider);
-    final session = _session = ref.read(playbackSessionFactoryProvider)(config: _engineConfig(store.settings));
-    final controller = _controller = LiveRoomController(
-      room: room,
-      site: site,
-      session: session,
-      danmaku: danmaku.connectionFor(site.id),
-      danmakuSupported: danmaku.supports(site.id),
-      store: store,
-      mobile: _platform.mobile,
+    _settings = store.settings;
+    // The same room still playing in the floating window plays on here; any
+    // other floating room stops (3.x `toLiveRoomDetail`).
+    final adopted = FloatingRoom.instance.claim(room);
+    final RoomRuntime runtime;
+    if (adopted != null) {
+      runtime = adopted;
+    } else {
+      final danmaku = ref.read(danmakuProvider);
+      final session = ref.read(playbackSessionFactoryProvider)(config: _engineConfig(store.settings));
+      final controller = LiveRoomController(
+        room: room,
+        site: site,
+        session: session,
+        danmaku: danmaku.connectionFor(site.id),
+        danmakuSupported: danmaku.supports(site.id),
+        store: store,
+        mobile: _platform.mobile,
+        toast: (message) => AppNavigator.toast(message),
+        // 3.x's automatic ASMR mode: Android only.
+        sleepSessionOnStart: _platform.android && store.settings.get(Settings.enableAsmrSleepMode),
+        network: ref.read(networkProbeProvider),
+      );
+      runtime = RoomRuntime(
+        controller: controller,
+        session: session,
+        orientation: RoomOrientationChoice(settings: store.settings, room: room),
+        reconnect: ReconnectWatch(session.states, now: controller.now),
+        background: RoomBackgroundPolicy(controller: controller, settings: store.settings)..start(),
+      );
+    }
+    _runtime = runtime;
+    final session = runtime.session;
+    final controller = _controller = runtime.controller;
+    _orientation = runtime.orientation;
+    _reconnect = runtime.reconnect;
+    // A new local session for each visit; it holds no subscription, so the
+    // room it talks to may be one the floating window hands back (U.2j).
+    _local = LocalRoomSession(
+      interaction: ref.read(localInteractionProvider),
+      room: controller,
+      overlayShown: () => localOverlayShown(store.settings),
       toast: (message) => AppNavigator.toast(message),
-      // 3.x's automatic ASMR mode: Android only.
-      sleepSessionOnStart: _platform.android && store.settings.get(Settings.enableAsmrSleepMode),
-      network: ref.read(networkProbeProvider),
     );
-    _orientation = RoomOrientationChoice(settings: store.settings, room: room);
     _panels.addListener(_onPanel);
-    _reconnect = ReconnectWatch(session.states, now: controller.now);
-    _background = RoomBackgroundPolicy(controller: controller, settings: store.settings)..start();
-    _composer = ref.read(roomComposerProvider)?.call(controller);
-    PictureInPicture.active.addListener(_onPip);
+    _mini =
+        RoomMiniWindow(
+            controller: controller,
+            settings: store.settings,
+            leaveFullscreen: _exitFullscreen,
+            closeRoom: _closeOnPurpose,
+          )
+          ..addListener(_onMini)
+          ..startAutoPip();
+    _detectedPortrait.value = session.state.isPortrait;
     _shape = session.states.listen((state) {
       if (state.isPortrait != _detectedPortrait.value) _detectedPortrait.value = state.isPortrait;
     });
-    if (store.settings.get(Settings.enableFullScreenDefault)) {
+    if (adopted != null &&
+        session.state.status == PlaybackStatus.playing &&
+        store.settings.get(Settings.enableFullScreenDefault)) {
+      // Back from the floating window the stream already plays.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _display == RoomDisplay.inline) unawaited(_enterFullscreen());
+      });
+    } else if (store.settings.get(Settings.enableFullScreenDefault)) {
       // 3.x entered fullscreen once the stream played.
       _autoFullscreen = session.states.listen((state) {
         if (state.status != PlaybackStatus.playing) return;
@@ -144,7 +221,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
         if (mounted && _display == RoomDisplay.inline) unawaited(_enterFullscreen());
       });
     }
-    unawaited(controller.start());
+    if (adopted == null) unawaited(controller.start());
   }
 
   /// The player settings (M9) as the engine's configuration.
@@ -159,8 +236,23 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     rtxVideoSuperResolution: settings.get(Settings.enableRtxVsr),
   );
 
-  void _onPip() {
-    if (mounted) setState(() => _pip = PictureInPicture.active.value);
+  /// Picture-in-picture or the desktop mini window began or ended.
+  void _onMini() {
+    final mini = _mini;
+    if (mounted && mini != null) setState(() => _pip = mini.compact);
+  }
+
+  /// The desktop mini window's ✕ (J3): the room closes without the floating
+  /// window, back to the page before it.
+  void _closeOnPurpose() {
+    if (!mounted) return;
+    _closingOnPurpose = true;
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop();
+    } else {
+      AppNavigator.offAllNamed(RoutePath.kInitial);
+    }
   }
 
   void _onPanel() {
@@ -175,23 +267,40 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     unawaited(_autoFullscreen?.cancel());
     unawaited(_shape?.cancel());
     _releaseOrientation?.cancel();
-    PictureInPicture.active.removeListener(_onPip);
+    final mini = _mini;
+    if (mini != null) {
+      mini.removeListener(_onMini);
+      // A room leaving while the window is its mini window gives the window
+      // back first.
+      if (mini.desktop) unawaited(DesktopWindow.exitMini());
+      mini.dispose();
+    }
     final fullscreen = _display == RoomDisplay.fullscreen || _display == RoomDisplay.portraitFullscreen;
     if (fullscreen && _platform.mobile) unawaited(_restoreSystemUi(upright: _restorePortrait));
-    _background?.dispose();
     // The brightness gesture overrides the window's only inside the room.
     unawaited(DeviceControls.resetBrightness());
     if (fullscreen && _platform.desktop) unawaited(DesktopWindow.setFullScreen(on: false));
-    _composer?.dispose();
-    _reconnect?.dispose();
-    _orientation?.dispose();
     _detectedPortrait.dispose();
+    _guideReveal.dispose();
+    _local?.dispose();
     _panels
       ..removeListener(_onPanel)
       ..dispose();
-    _controller?.dispose();
-    final session = _session;
-    if (session != null) unawaited(session.dispose());
+    final runtime = _runtime;
+    if (runtime != null) {
+      final floating = FloatingRoom.instance;
+      final float = shouldFloatOnLeave(
+        enabled: _settings.get(Settings.floatPlay),
+        stage: runtime.controller.stage,
+        suppressed: _closingOnPurpose,
+        topRoute: liveRouteObserver.currentRoute.value,
+      );
+      if (float && floating.canShow) {
+        floating.show(runtime);
+      } else {
+        unawaited(runtime.dispose());
+      }
+    }
     super.dispose();
   }
 
@@ -201,12 +310,13 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       settings.adaptation &&
       isPortraitLayout(_orientation?.value ?? RoomOrientation.automatic, detected: _detectedPortrait.value);
 
-  _LayoutSettings _settings() => (
+  _LayoutSettings _layoutSettings() => (
     adaptation: ref.read(storeProvider).settings.get(Settings.enablePortraitStreamAdaptation),
     adaptiveHeight: ref.read(storeProvider).settings.get(Settings.portraitAdaptiveHeight),
     mode: ref.read(storeProvider).settings.get(Settings.portraitLayoutMode),
     policy: ref.read(storeProvider).settings.get(Settings.portraitFullscreenPolicy),
     collapsed: ref.read(storeProvider).settings.get(Settings.livePlayChatCollapsed),
+    composer: ref.read(storeProvider).settings.get(Settings.localInteractionEnabled),
   );
 
   /// Enters fullscreen: the portrait fullscreen for a portrait stream on a
@@ -215,7 +325,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   /// turns the phone back upright when it ends.
   Future<void> _enterFullscreen({bool landscape = false}) async {
     if (_display != RoomDisplay.inline && _display != RoomDisplay.windowFullscreen) return;
-    final settings = _settings();
+    final settings = _layoutSettings();
     final orientation = FullscreenOrientation.of(settings.policy);
     final mobile = _platform.mobile;
     final portrait =
@@ -328,13 +438,30 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   /// Back and Esc: a panel first, then the fullscreen, then the details,
   /// then the room.
   void _back() {
-    if (_panels.value != null) {
+    final mini = _mini;
+    if (mini != null && mini.desktop) {
+      unawaited(mini.backToRoom());
+    } else if (_panels.value != null) {
       _panels.close();
     } else if (_display != RoomDisplay.inline) {
       unawaited(_exitFullscreen());
     } else if (_details) {
       _closeDetails();
     }
+  }
+
+  /// The guide button and the replay mark (U.2g 按钮 8, 11): in fullscreen
+  /// the guide opens on the right; on a wide window a folded column
+  /// unfolds; then the guide scrolls to the programme being watched.
+  void _revealGuide() {
+    if (_display != RoomDisplay.inline) {
+      _panels.open(RoomPanelKind.guide);
+    } else if (_guideFolded) {
+      setState(() => _guideFolded = false);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _guideReveal.value++;
+    });
   }
 
   @override
@@ -353,14 +480,21 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       mode: watchSetting(ref, Settings.portraitLayoutMode),
       policy: watchSetting(ref, Settings.portraitFullscreenPolicy),
       collapsed: watchSetting(ref, Settings.livePlayChatCollapsed),
+      composer: watchSetting(ref, Settings.localInteractionEnabled),
     );
-    return RoomPanelScope(
-      notifier: _panels,
-      child: RoomComposerScope(
-        composer: _composer,
-        child: ListenableBuilder(
-          listenable: Listenable.merge([_orientation, _detectedPortrait]),
-          builder: (context, _) => _page(context, controller, settings),
+    return RoomMiniScope(
+      notifier: _mini!,
+      child: LocalRoomScope(
+        session: _local!,
+        child: RoomPanelScope(
+          notifier: _panels,
+          child: IptvGuideScope(
+            reveal: _revealGuide,
+            child: ListenableBuilder(
+              listenable: Listenable.merge([_orientation, _detectedPortrait]),
+              builder: (context, _) => _page(context, controller, settings),
+            ),
+          ),
         ),
       ),
     );
@@ -368,14 +502,16 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
 
   Widget _page(BuildContext context, LiveRoomController controller, _LayoutSettings settings) {
     return PopScope(
-      canPop: _display == RoomDisplay.inline && !_details && _panels.value == null,
+      canPop: _display == RoomDisplay.inline && !_details && _panels.value == null && !(_mini?.desktop ?? false),
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _back();
       },
       child: CallbackShortcuts(
         bindings: {
           const SingleActivator(LogicalKeyboardKey.escape): _back,
-          const SingleActivator(LogicalKeyboardKey.keyF): _toggleFullscreen,
+          const SingleActivator(LogicalKeyboardKey.keyF): () {
+            if (!(_mini?.desktop ?? false)) _toggleFullscreen();
+          },
           const SingleActivator(LogicalKeyboardKey.space): () => unawaited(controller.session.togglePlayPause()),
           // 3.x `VideoKeyboard`: arrows change the room's volume, R reloads.
           const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
@@ -421,12 +557,13 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     overlayBottom: covered,
     wide: wide,
     orientation: _orientation!,
-    reconnect: _reconnect!,
+    reconnect: _reconnect,
     onToggleFullscreen: _toggleFullscreen,
     onWindowFullscreen: _platform.desktop ? _toggleWindowFullscreen : null,
     onBack: onBack ?? () => unawaited(_exitFullscreen()),
     onSwipeUp: _display == RoomDisplay.portraitFullscreen ? () => unawaited(_exitFullscreen()) : null,
     entryHint: _entryHint,
+    onOpenGuide: _revealGuide,
   );
 
   /// The open panel, or nothing.
@@ -443,6 +580,28 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       controller: controller,
       onClose: _panels.close,
       dragToClose: portrait,
+    ),
+    RoomPanelKind.guide => Material(
+      key: const ValueKey('panel-guide'),
+      elevation: 2,
+      child: SafeArea(
+        top: false,
+        left: false,
+        child: IptvGuideView(controller: controller, onClose: _panels.close, reveal: _guideReveal),
+      ),
+    ),
+    // U.2k: the local interaction and its style page; the style by itself
+    // from a composer's star.
+    RoomPanelKind.localInteraction => LocalInteractionPanel(
+      key: const ValueKey('panel-local'),
+      onClose: _panels.close,
+      dragToClose: portrait,
+    ),
+    RoomPanelKind.localStyle => LocalInteractionPanel(
+      key: const ValueKey('panel-local-style'),
+      onClose: _panels.close,
+      dragToClose: portrait,
+      startWithStyle: true,
     ),
     null => const SizedBox.shrink(key: ValueKey('no-panel')),
   };
@@ -555,7 +714,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     controller: controller,
     detailsOpen: _details,
     onToggleDetails: _toggleDetails,
-    onReopen: _reconnect!.expectReopen,
+    onReopen: _reconnect.expectReopen,
   );
 
   /// The details over [below] (the chat), sliding in unless the system asks
@@ -613,23 +772,6 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
           layoutMode: settings.mode,
         ),
       );
-      if (layout == RoomPageLayout.landscape) {
-        // A phone held sideways: the landscape arrangement on the page (its
-        // back leaves the room).
-        return Scaffold(
-          backgroundColor: OnVideoColors.ground,
-          body: _withSidePanel(
-            controller,
-            _player(
-              controller,
-              settings,
-              arrangement: ControlsArrangement.landscape,
-              presentation: portrait ? PicturePresentation.ambient : PicturePresentation.plain,
-              onBack: () => Navigator.of(context).maybePop(),
-            ),
-          ),
-        );
-      }
       return Scaffold(
         appBar: AppBar(
           titleSpacing: 0,
@@ -645,9 +787,12 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
             builder: (context, constraints) {
               if (controller.site.id == SiteIds.iptv) return _channel(controller, settings, layout, constraints);
               return switch (layout) {
-                RoomPageLayout.wide => _wide(controller, settings, constraints, portrait: portrait),
+                // A phone held sideways splits like a wide window, with the
+                // narrow chat column of U.2e c17.
+                RoomPageLayout.wide ||
+                RoomPageLayout.landscape => _wide(controller, settings, constraints, portrait: portrait),
                 RoomPageLayout.portraitPanel => _portraitPanel(controller, settings),
-                RoomPageLayout.phone || RoomPageLayout.landscape => _phone(controller, settings, constraints),
+                RoomPageLayout.phone => _phone(controller, settings, constraints),
               };
             },
           ),
@@ -656,28 +801,82 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     },
   );
 
-  /// A channel (no chat): the picture with the strip under it.
+  /// An IPTV channel (docs/ui/compare/U.2g c16, Z1): the guide where a room
+  /// has its chat. Phone layout: the picture at 16:9 and the guide under it
+  /// (3.x left that space empty); wide: the guide in the right column, which
+  /// the same edge handle as the chat column's folds away (U.2d).
   Widget _channel(
     LiveRoomController controller,
     _LayoutSettings settings,
     RoomPageLayout layout,
     BoxConstraints constraints,
   ) {
+    final guide = IptvGuideView(
+      key: const ValueKey('live-play-guide-view'),
+      controller: controller,
+      reveal: _guideReveal,
+    );
+    if (layout == RoomPageLayout.wide || layout == RoomPageLayout.landscape) {
+      final column = chatColumnWidth(constraints.maxWidth);
+      return _withSidePanel(
+        controller,
+        Row(
+          key: const ValueKey('live-play-channel-split'),
+          children: [
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _player(controller, settings, arrangement: ControlsArrangement.inline),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: _ColumnHandle(
+                        key: const ValueKey('live-play-guide-fold'),
+                        folded: _guideFolded,
+                        tooltip: i18n(_guideFolded ? 'live_play_guide_unfold' : 'live_play_guide_fold'),
+                        onPressed: () => setState(() => _guideFolded = !_guideFolded),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (!_guideFolded) ...[
+              const VerticalDivider(width: 1),
+              SizedBox(width: column, child: _withDetails(controller, guide)),
+            ],
+          ],
+        ),
+      );
+    }
+    final height = (constraints.maxWidth * 9 / 16).clamp(0.0, constraints.maxHeight * 0.6);
     final channel = Column(
+      key: const ValueKey('live-play-channel-stack'),
       children: [
-        Expanded(child: _player(controller, settings, arrangement: ControlsArrangement.inline)),
-        _infoBar(controller),
-        if (_details)
-          SizedBox(
-            height: constraints.maxHeight * 0.45,
-            child: RoomDetailsPanel(controller: controller, onClose: _closeDetails),
-          ),
+        SizedBox(
+          height: height,
+          child: _player(controller, settings, arrangement: ControlsArrangement.inline),
+        ),
+        Expanded(child: _withDetails(controller, guide)),
       ],
     );
-    if (layout == RoomPageLayout.wide) return _withSidePanel(controller, channel);
-    // A channel on a phone has no chat under the picture: the panel rises
-    // over the lower part instead.
-    return _withPanelAtBottom(controller, channel);
+    // The panels rise over everything under the picture (U.2f).
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        channel,
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          top: height,
+          child: ClipRect(child: _panelLayer(controller, portrait: true)),
+        ),
+      ],
+    );
   }
 
   /// A phone, a tablet held upright, a narrow window (U.2d change 2): the
@@ -700,6 +899,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   Widget _portraitPanel(LiveRoomController controller, _LayoutSettings settings) => PortraitPanelLayout(
     key: const ValueKey('live-play-portrait-panel'),
     mode: settings.mode,
+    least: portraitPanelLeast + (settings.composer ? portraitPanelComposer : 0),
     mobile: _platform.mobile,
     onPortraitFullscreen: _platform.mobile ? () => unawaited(_enterPortraitFullscreen()) : null,
     onFullscreen: () => unawaited(_enterFullscreen(landscape: _platform.mobile)),
@@ -740,34 +940,11 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
             ),
     );
     final scheme = Theme.of(context).colorScheme;
-    final handle = Tooltip(
-      message: i18n(collapsed ? 'live_play_show_chat' : 'live_play_hide_chat'),
-      child: InkWell(
-        key: const ValueKey('live-play-chat-handle'),
-        onTap: () => _toggleChat(collapsed),
-        child: SizedBox(
-          width: 40,
-          height: 64,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: SizedBox(
-              width: 22,
-              height: 56,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest,
-                  borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
-                ),
-                child: Icon(
-                  collapsed ? AppIcons.chatColumnUnfold : AppIcons.chatColumnFold,
-                  size: 20,
-                  color: scheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+    final handle = _ColumnHandle(
+      key: const ValueKey('live-play-chat-handle'),
+      folded: collapsed,
+      tooltip: i18n(collapsed ? 'live_play_show_chat' : 'live_play_hide_chat'),
+      onPressed: () => _toggleChat(collapsed),
     );
     final row = Row(
       key: const ValueKey('live-play-desktop-split'),
@@ -824,6 +1001,50 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
               ],
             )
           : row,
+    );
+  }
+}
+
+/// The handle on the edge of a wide room's right column (the chat, U.2d
+/// change 7; an IPTV channel's guide, U.2g 按钮 12): a 22 × 56 tab, 40 × 64
+/// to touch; the chevron points the way the column goes.
+class _ColumnHandle extends StatelessWidget {
+  const new({required this.folded, required this.tooltip, required this.onPressed, super.key});
+
+  final bool folded;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onPressed,
+        child: SizedBox(
+          width: 40,
+          height: 64,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: SizedBox(
+              width: 22,
+              height: 56,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerHighest,
+                  borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
+                ),
+                child: Icon(
+                  folded ? AppIcons.chatColumnUnfold : AppIcons.chatColumnFold,
+                  size: 20,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

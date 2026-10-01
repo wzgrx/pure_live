@@ -134,6 +134,26 @@ void main() {
     await other.close();
   });
 
+  test('local interaction (U.2k): parked 3.x values adopted under their own keys, carried by backups', () async {
+    await store.meta.keepLegacyValues({
+      'localInteraction.coins': 900,
+      'localInteraction.userName': '阿明',
+      'localInteraction.history': ['增加本地体验币 +500'],
+      'localInteraction.danmakuFontSize': 99.0,
+      'localInteraction.danmakuPlacement': 'sideways',
+    });
+    expect(await LegacyMigration.adoptLegacyValues(store), 4, reason: 'an unknown placement is dropped');
+    expect(store.settings.get(Settings.localInteractionCoins), 900);
+    expect(store.settings.get(Settings.localInteractionUserName), '阿明');
+    expect(store.settings.get(Settings.localInteractionHistory), ['增加本地体验币 +500']);
+    expect(store.settings.get(Settings.localDanmakuFontSize), 32, reason: 'clamped to 3.x range');
+    expect(store.settings.get(Settings.localDanmakuPlacement), 'scroll');
+    expect(store.settings.get(Settings.localInteractionEnabled), isTrue, reason: '3.x default');
+    expect(await store.meta.legacyKeys(), isEmpty);
+    final file = await backup.exportAll();
+    expect((file['localInteraction']! as Map)['localInteraction.coins'], 900);
+  });
+
   test('recorder settings: adopted once from parked 3.x values, carried by backups except the folder', () async {
     await store.meta.keepLegacyValues({
       'segmentTime': 600,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/gestures.dart';
@@ -221,5 +222,116 @@ void main() {
     await tester.sendEventToBinding(pointer.scroll(const Offset(0, 120)));
     await tester.pumpAndSettle();
     expect(position.pixels, greaterThan(0));
+  });
+
+  group('VideoStateView (docs/ui/compare/U.2g c2)', () {
+    Widget host(Widget child, {double height = 300}) => MaterialApp(
+      theme: const LiveTheme().light,
+      home: Scaffold(
+        body: Center(
+          child: SizedBox(width: 393, height: height, child: child),
+        ),
+      ),
+    );
+
+    testWidgets('icon, sentence, reason and two buttons, the first filled white', (tester) async {
+      final pressed = <String>[];
+      await tester.pumpWidget(
+        host(
+          VideoStateView(
+            icon: AppIcons.playbackError,
+            title: '播放已中断',
+            reason: '网络连接失败',
+            dim: OnVideoColors.scrim,
+            actions: [
+              VideoStateAction(
+                key: const ValueKey('a'),
+                label: '重试',
+                icon: AppIcons.refresh,
+                onPressed: () => pressed.add('a'),
+              ),
+              VideoStateAction(
+                key: const ValueKey('b'),
+                label: '换线路',
+                icon: AppIcons.switchLine,
+                onPressed: () => pressed.add('b'),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(find.byKey(const ValueKey('video-state-icon')), findsOneWidget);
+      expect(find.text('播放已中断'), findsOneWidget);
+      expect(find.text('网络连接失败'), findsOneWidget);
+      final first = tester.widget<Material>(find.byKey(const ValueKey('a')));
+      final second = tester.widget<Material>(find.byKey(const ValueKey('b')));
+      expect(first.color, OnVideoColors.foreground);
+      expect(second.color, OnVideoColors.buttonFill);
+      expect(tester.getCenter(find.text('重试')).dx, lessThan(tester.getCenter(find.text('换线路')).dx));
+      expect(tester.getTopLeft(find.text('网络连接失败')).dy, greaterThan(tester.getBottomLeft(find.text('播放已中断')).dy - 1));
+      expect(tester.widget<ColoredBox>(find.byKey(const ValueKey('video-state-dim'))).color, OnVideoColors.scrim);
+      await tester.tap(find.text('换线路'));
+      expect(pressed, ['b']);
+    });
+
+    testWidgets('compact leaves out the icon but keeps the streamer; a spinner when busy', (tester) async {
+      await tester.pumpWidget(
+        host(const VideoStateView(icon: AppIcons.playbackError, title: 'x', compact: true), height: 221),
+      );
+      expect(find.byKey(const ValueKey('video-state-icon')), findsNothing);
+      await tester.pumpWidget(
+        host(
+          const VideoStateView(
+            leading: VideoStateAvatar(child: SizedBox()),
+            title: '当前主播未开播或已下播',
+            compact: true,
+          ),
+          height: 221,
+        ),
+      );
+      expect(find.byKey(const ValueKey('video-state-avatar')), findsOneWidget);
+      await tester.pumpWidget(host(const VideoStateView(busy: true, title: '正在进入直播间…')));
+      expect(find.byKey(const ValueKey('video-state-spinner')), findsOneWidget);
+      expect(find.byKey(const ValueKey('video-state-dim')), findsNothing);
+    });
+
+    testWidgets('a button turns while its action runs and takes no second tap', (tester) async {
+      final done = Completer<void>();
+      var taps = 0;
+      await tester.pumpWidget(
+        host(
+          VideoStateView(
+            title: '播放已中断',
+            actions: [
+              VideoStateAction(
+                label: '重试',
+                icon: AppIcons.refresh,
+                onPressed: () {
+                  taps++;
+                  return done.future;
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.tap(find.text('重试'));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('video-state-button-busy')), findsOneWidget);
+      await tester.tap(find.text('重试'), warnIfMissed: false);
+      expect(taps, 1);
+      done.complete();
+      await tester.pump();
+      expect(find.byKey(const ValueKey('video-state-button-busy')), findsNothing);
+    });
+  });
+
+  test('InkOnColor.contrastOn picks the ink with the higher contrast (U.2e S2)', () {
+    // 3.x put white on Bilibili's 100 yuan gold at about 1.9:1.
+    expect(InkOnColor.contrastOn(const Color(0xFFE2B52B)), InkOnColor.ink);
+    expect(InkOnColor.contrastOn(const Color(0xFFFFF1C5)), InkOnColor.ink);
+    expect(InkOnColor.contrastOn(const Color(0xFF2A60B2)), InkOnColor.light);
+    expect(InkOnColor.contrastOn(const Color(0xFF427D9E)), InkOnColor.light);
+    expect(InkOnColor.contrastMutedOn(const Color(0xFF2A60B2)), InkOnColor.lightMuted);
   });
 }

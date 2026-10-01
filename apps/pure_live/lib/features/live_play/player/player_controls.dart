@@ -100,8 +100,14 @@ class PlayerTopBar extends StatelessWidget {
     required this.onBack,
     required this.onPip,
     required this.onInteract,
+    this.reduced = false,
     super.key,
   });
+
+  /// Nothing plays (loading, offline, failed, restricted): only the way out
+  /// and the room's buttons, without audio only, cast and picture-in-picture
+  /// that need a picture (docs/ui/compare/U.2g c6).
+  final bool reduced;
 
   /// The room.
   final LiveRoomController controller;
@@ -180,7 +186,8 @@ class PlayerTopBar extends StatelessWidget {
                           ),
                           if (programme.isNotEmpty)
                             Text(
-                              '${i18n(controller.catchup == null ? 'now_playing' : 'playing_catchup')}: $programme',
+                              // U.2g c18: "正在回看: 节目名" while a programme is replayed.
+                              '${i18n(controller.catchup == null ? 'now_playing' : 'live_play_guide_replaying_now')}: $programme',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(
@@ -207,7 +214,7 @@ class PlayerTopBar extends StatelessWidget {
                     onPressed: () => unawaited(showRoomSwitcher(context, controller.room)),
                     icon: const Icon(AppIcons.switchRoom),
                   ),
-                for (final slot in topBarSlots(android: android))
+                for (final slot in reduced ? const <TopBarSlot>[] : topBarSlots(android: android))
                   switch (slot) {
                     TopBarSlot.audioOnly => _AudioOnlyButton(controller: controller, onInteract: onInteract),
                     TopBarSlot.cast => ListenableSelector<bool>(

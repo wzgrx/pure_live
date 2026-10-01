@@ -60,6 +60,22 @@ abstract final class OnVideoColors {
   /// Icons of the control bars: white, with [shadows].
   static const IconThemeData icons = IconThemeData(color: foreground, size: 24, shadows: shadows);
 
+  /// The lighter dimming of a state over a moving picture (45 %: the
+  /// reconnecting message, docs/ui/compare/U.2g c13).
+  static const Color dimLight = Color(0x73000000);
+
+  /// The text of a state's main button (on a [foreground] fill, U.2g c2).
+  static const Color buttonInk = Color(0xFF191C20);
+
+  /// The fill of a state's second button (outlined with [buttonOutline]).
+  static const Color buttonFill = Color(0x59000000);
+
+  /// The outline of a state's second button.
+  static const Color buttonOutline = Color(0x73FFFFFF);
+
+  /// The ring around a streamer's picture in a state (offline, carousel).
+  static const Color avatarRing = Color(0x47FFFFFF);
+
   /// The shade of a bar along the [edge] of the picture: [scrim] at the edge,
   /// fading out into the picture.
   static LinearGradient shade({required VerticalDirection edge}) => LinearGradient(
@@ -77,6 +93,10 @@ abstract final class LiveSemanticColors {
   /// The "直播" mark: 4.8:1 with white text. Always shown with the word, not
   /// as a dot alone.
   static const Color live = Color(0xFFD92D20);
+
+  /// The gold of a super chat's price and "SC" mark (3.x `SuperChatCard`'s
+  /// amber icons, docs/ui/compare/U.2e).
+  static const Color superChatGold = Color(0xFFFFC107);
 
   /// Text and dots on [live].
   static const Color onLive = Color(0xFFFFFFFF);
@@ -124,6 +144,31 @@ abstract final class InkOnColor {
   /// The ink that reads on [background].
   static Color on(Color background) =>
       ThemeData.estimateBrightnessForColor(background) == Brightness.dark ? light : dark;
+
+  /// Opaque dark ink for [contrastOn].
+  static const Color ink = Color(0xFF18181A);
+
+  /// Secondary dark ink (62 %).
+  static const Color inkMuted = Color(0x9E18181A);
+
+  /// Secondary light ink (80 %).
+  static const Color lightMuted = Color(0xCCFFFFFF);
+
+  /// Whether dark [ink] has the higher contrast on [background] (WCAG
+  /// ratios). 3.x split at a luminance of 0.55, which put white on mid
+  /// golds at 1.9:1 (docs/ui/compare/U.2e S2).
+  static bool darkInkOn(Color background) {
+    final luminance = background.withValues(alpha: 1).computeLuminance();
+    final darkRatio = (luminance + 0.05) / (ink.computeLuminance() + 0.05);
+    final lightRatio = 1.05 / (luminance + 0.05);
+    return darkRatio >= lightRatio;
+  }
+
+  /// [ink] or [light], whichever reads better on [background].
+  static Color contrastOn(Color background) => darkInkOn(background) ? ink : light;
+
+  /// The secondary form of [contrastOn].
+  static Color contrastMutedOn(Color background) => darkInkOn(background) ? inkMuted : lightMuted;
 }
 
 /// Text helpers of the design system.

@@ -59,15 +59,38 @@ class RoomInfoBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _TitleLine(controller: controller, detailsOpen: detailsOpen, onTap: onToggleDetails),
-        Row(
-          children: [
-            Expanded(child: AudienceStrip(controller: controller)),
-            StreamPickers(controller: controller, onReopen: onReopen),
-          ],
+        // U.2g: a room that is not on air (or could not be read) keeps only
+        // its title line; a restricted one keeps its figures, without the
+        // quality and line it cannot play.
+        ListenableSelector<RoomStage>(
+          listenable: controller,
+          selector: () => controller.stage,
+          builder: (context, stage, _) => switch (stage) {
+            RoomStage.offline || RoomStage.failed => const SizedBox.shrink(),
+            RoomStage.unplayable => AudienceStrip(controller: controller),
+            RoomStage.loading || RoomStage.playing => Row(
+              children: [
+                Expanded(child: AudienceStrip(controller: controller)),
+                StreamPickers(controller: controller, onReopen: onReopen),
+              ],
+            ),
+          },
         ),
       ],
     ),
   );
+}
+
+/// The mark before the title of a room that is not on air (U.2g c7, c10):
+/// "未开播", "已封禁", "轮播"; null otherwise.
+String? offlineMark(RoomStage stage, LiveRoom room) {
+  if (stage != RoomStage.offline) return null;
+  return switch (room.effectiveLiveStatus) {
+    LiveStatus.banned => i18n('room_mark_banned'),
+    LiveStatus.carousel => i18n('room_mark_carousel'),
+    LiveStatus.unknown => null,
+    _ => i18n('live_play_tag_offline'),
+  };
 }
 
 class _TitleLine extends StatelessWidget {
@@ -91,7 +114,7 @@ class _TitleLine extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: ListenableSelector<(String, String?, bool, bool)>(
+              child: ListenableSelector<(String, String?, bool, bool, String?)>(
                 listenable: controller,
                 selector: () {
                   final room = controller.room;
@@ -100,10 +123,11 @@ class _TitleLine extends StatelessWidget {
                     room.isRestricted && room.isLiveNow ? restrictionLabel(room.effectiveRestriction) : null,
                     room.isRecord,
                     controller.stage == RoomStage.loading,
+                    offlineMark(controller.stage, room),
                   );
                 },
                 builder: (context, value, _) {
-                  final (title, restriction, replay, loading) = value;
+                  final (title, restriction, replay, loading, offline) = value;
                   if (title.isEmpty && loading) {
                     return const Align(
                       alignment: Alignment.centerLeft,
@@ -113,6 +137,14 @@ class _TitleLine extends StatelessWidget {
                   return Row(
                     children: [
                       if (replay) ...[_Tag(text: i18n('replay'), color: scheme.tertiary), const SizedBox(width: 6)],
+                      if (offline != null) ...[
+                        _Tag(
+                          key: const ValueKey('live-play-offline-tag'),
+                          text: offline,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 6),
+                      ],
                       if (restriction != null) ...[
                         _Tag(text: restriction, color: scheme.error),
                         const SizedBox(width: 6),
@@ -142,7 +174,7 @@ class _TitleLine extends StatelessWidget {
 }
 
 class _Tag extends StatelessWidget {
-  const new({required this.text, required this.color});
+  const new({required this.text, required this.color, super.key});
 
   final String text;
   final Color color;

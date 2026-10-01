@@ -428,16 +428,18 @@ void main() {
     // Change 9: "醒目留言" with its count.
     expect(_in('live-play-super-chat-count', find.text('1')), findsOneWidget);
 
-    // Change 10: the status line is a centred grey label, once in 3 s.
+    // Change 10: the status line is a centred grey label, once in 3 s. U.2e
+    // c2: before the first message the list says so in its middle instead.
     room.danmaku.emit(const DanmakuReady());
     await tester.pump();
-    expect(find.text('弹幕服务器连接正常'), findsOneWidget);
-    expect(_in('live-play-system-line', find.text('弹幕服务器连接正常')), findsOneWidget);
-    expect(find.textContaining('系统消息'), findsNothing);
+    expect(find.byKey(const ValueKey('live-play-chat-quiet')), findsOneWidget);
 
     // Change 11: "用户名：" in the secondary colour, the message in the normal one.
     room.danmaku.chat('前排支持', user: '星河');
     await tester.pump();
+    expect(find.text('弹幕服务器连接正常'), findsOneWidget);
+    expect(_in('live-play-system-line', find.text('弹幕服务器连接正常')), findsOneWidget);
+    expect(find.textContaining('系统消息'), findsNothing);
     final line = tester.widget<Text>(_in('live-play-chat-line', find.byType(Text)).first);
     final spans = (line.textSpan! as TextSpan).children!;
     final name = spans.whereType<TextSpan>().firstWhere((span) => span.text == '星河：');
@@ -470,6 +472,8 @@ void main() {
         matching: find.byType(Scrollable),
       ),
     );
+    await tester.ensureVisible(find.text('卡片'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('卡片'));
     await _settle(tester);
     expect(room.services.store.settings.get(Settings.danmakuListStyle), 'card');

@@ -44,6 +44,15 @@ void main() {
       expect(_inRow('refresh_rate', _text('均衡')), findsOneWidget);
     });
 
+    testWidgets('F.0a: share codes on the clipboard, a switch at the end, on by default', (tester) async {
+      final h = await pumpSettings(tester, height: 2400, arguments: 'general');
+      expectInOrder(tester, [_text('定时退出'), _text('分享与剪贴板'), settingsRow('clipboard_rooms')]);
+      expect(_inRow('clipboard_rooms', _text('识别剪贴板中的分享口令')), findsOneWidget);
+      expect(h.settings.get(Settings.detectClipboardRooms), isTrue);
+      await tapSettings(tester, settingsRow('clipboard_rooms'));
+      expect(h.settings.get(Settings.detectClipboardRooms), isFalse);
+    });
+
     testWidgets('the exit timer: the time left on the length row; a quick pick applies', (tester) async {
       final h = await pumpSettings(tester, arguments: 'general');
       expect(_inRow('auto_exit_minutes', _text('120 分钟')), findsOneWidget);

@@ -190,6 +190,20 @@ void main() {
       expect(h.settings.get(Settings.enableBackgroundPlay), isFalse);
       expect(_inRow('background_play', _text('通知权限已关闭：在系统设置里允许通知后再打开')), findsOneWidget);
     });
+
+    testWidgets('background play: cancelling the explanation keeps it off without red words (3.x, F.0a)', (
+      tester,
+    ) async {
+      final h = await pumpSettings(
+        tester,
+        height: 3200,
+        arguments: 'video',
+        overrides: [switchGateProvider.overrideWithValue((_) async => SwitchGateResult.cancelled)],
+      );
+      await tapSettings(tester, settingsRow('background_play'));
+      expect(h.settings.get(Settings.enableBackgroundPlay), isFalse);
+      expect(_inRow('background_play', _text('通知权限已关闭：在系统设置里允许通知后再打开')), findsNothing);
+    });
   });
 
   group('portrait page', () {

@@ -12,6 +12,7 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/links/supported_platforms.dart';
+import 'package:pure_live/shared/rooms/share_code.dart';
 
 import '../../support.dart';
 
@@ -136,6 +137,15 @@ void main() {
     await _settle(tester);
     expect(find.text('room douyu 9999'), findsOneWidget);
     // The navigator's double-tap guard.
+    await tester.pump(AppNavigator.openGuard);
+  });
+
+  testWidgets('opens the room of a share code offline (F.0a)', (tester) async {
+    await _pump(tester);
+    await _enter(tester, '口令 ${encodeRoomShareCode(LiveRoom(platform: SiteIds.douyu, roomId: '7777', nick: '主播'))}');
+    await tester.tap(find.byKey(const ValueKey('toolbox-jump')));
+    await _settle(tester);
+    expect(find.text('room douyu 7777'), findsOneWidget);
     await tester.pump(AppNavigator.openGuard);
   });
 

@@ -247,6 +247,37 @@ void main() {
     expect(find.byKey(const ValueKey('history-progress')), findsNothing);
   });
 
+  testWidgets('F.5a c3 (1-1): a carousel and a banned room are marked on their history cards', (tester) async {
+    await _pump(
+      tester,
+      rooms: [
+        (_room('1', platform: 'bilibili'), _now),
+        (_room('2'), _now),
+        (_room('3'), _now),
+      ],
+      load: (room) async => room.copyWith(
+        liveStatus: switch (room.roomId) {
+          '1' => LiveStatus.carousel,
+          '2' => LiveStatus.banned,
+          _ => LiveStatus.live,
+        },
+      ),
+    );
+    expect(find.byKey(const ValueKey('room-card-restriction')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('history-refresh')));
+    await tester.pump();
+    await _settle(tester);
+    Finder markOf(String id) => find.descendant(
+      of: find.byKey(ValueKey('history-card-${_room(id, platform: id == '1' ? 'bilibili' : 'douyu').identityKey}')),
+      matching: find.byKey(const ValueKey('room-card-restriction')),
+    );
+    expect(find.descendant(of: markOf('1'), matching: find.text('轮播')), findsOneWidget);
+    expect(find.descendant(of: markOf('2'), matching: find.text('已封禁')), findsOneWidget);
+    expect(markOf('3'), findsNothing);
+    // Both are off air: dimmed and marked like an offline room (U.4a c4).
+    expect(find.byKey(const ValueKey('room-card-offline')), findsNWidgets(2));
+  });
+
   testWidgets('the limit dialog warns about removed entries and trims the history', (tester) async {
     final h = await _pump(
       tester,

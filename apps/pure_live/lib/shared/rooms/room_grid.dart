@@ -80,8 +80,15 @@ final class RoomGridGeometry {
       );
 }
 
+/// The clock of the cards' time on air (UPGRADES "开播时间"; tests replace
+/// it). Read when a card builds: the time follows the page's rebuilds, no
+/// timer of its own.
+final Provider<DateTime Function()> roomClockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
 /// The card of [room] with the page's settings: opens the room on tap and
-/// the card dialog on long press or right click (U.4a).
+/// the card dialog on long press or right click (U.4a). A live room with a
+/// start time says how long it is on air after the streamer, on every page
+/// (follows, popular, area rooms, search; 7-9, 10-3, 25-12, 33-7).
 class RoomGridCard extends ConsumerWidget {
   /// Creates the card.
   const new({
@@ -110,7 +117,7 @@ class RoomGridCard extends ConsumerWidget {
   /// Words of the [statusPending] badge.
   final String? statusPendingLabel;
 
-  /// With a time, a live room's streamer line says how long it is on air.
+  /// "Now" of the time on air; null reads [roomClockProvider].
   final DateTime? now;
 
   /// Opens the room; null opens it as a page.
@@ -121,7 +128,7 @@ class RoomGridCard extends ConsumerWidget {
     final policy = watchAudiencePolicy(ref);
     final appearance = watchCardAppearance(ref);
     return LiveRoomCard(
-      data: policy.cardOf(room, now: now),
+      data: policy.cardOf(room, now: now ?? ref.read(roomClockProvider)()),
       appearance: appearance,
       dense: dense,
       mixedPlatforms: mixedPlatforms,

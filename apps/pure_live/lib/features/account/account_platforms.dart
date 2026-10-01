@@ -1,6 +1,7 @@
 import 'package:live_core/live_core.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// How the page can tell what a stored cookie is worth.
 enum AccountCheckKind {
@@ -67,8 +68,9 @@ final class AccountPlatform {
   /// the signed-in danmaku join is verified, UPGRADES C-22).
   final bool usedByRequests;
 
-  /// The platform's name.
-  String get name => i18n(nameKey ?? 'site_$id');
+  /// The platform's name: the account pages' own, else the app's
+  /// ([platformName]).
+  String get name => nameKey == null ? platformName(id) : i18n(nameKey!);
 
   /// The input hint.
   String get hint => hintKey == null ? i18n('cookie_hint', args: {'name': name}) : i18n(hintKey!);

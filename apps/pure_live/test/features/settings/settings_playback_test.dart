@@ -276,7 +276,8 @@ void main() {
 
       await tapSettings(tester, settingsRow('audience_info'));
       expect(find.byKey(const ValueKey('settings-audience-info')), findsOneWidget);
-      expect(find.textContaining('WATCHED_CHANGE'), findsOneWidget);
+      // Bilibili's note in plain words (F.5a c2; 3.x named the WATCHED_CHANGE field).
+      expect(find.textContaining('本场累计看过的人数'), findsOneWidget);
     });
   });
 

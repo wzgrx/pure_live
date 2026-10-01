@@ -9,6 +9,7 @@ import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/features/multiview/logic/multiview_session.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/play_quality.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
@@ -166,8 +167,8 @@ class MultiviewController extends ChangeNotifier {
   /// Most decoders at once on desktop (3.x); phones stay at four.
   static const int desktopMaxCells = 9;
 
-  /// The meta key of the last arrangement.
-  static const String sessionKey = 'multiview.session';
+  /// The meta key of the last arrangement (also in full backups).
+  static const String sessionKey = multiviewSessionKey;
 
   /// The adapter of a platform; null for a retired one.
   final LiveSite? Function(String platform) siteOf;

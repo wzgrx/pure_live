@@ -83,6 +83,18 @@ void main() {
     final overlay = tester.state<DanmakuOverlayState>(find.byType(DanmakuOverlay));
     expect(overlay.flyingCount, 1);
 
+    // M13.16: the platform's bundled emoticons are pictures in the chat list.
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200)));
+    danmaku.chat('好[dog]');
+    await tester.pump();
+    final pictures = tester.widgetList<Image>(
+      find.descendant(of: find.byKey(const ValueKey('live-play-chat')), matching: find.byType(Image)),
+    );
+    expect(
+      [for (final picture in pictures) ((picture.image as ResizeImage).imageProvider as AssetImage).assetName],
+      ['assets/emo/images/bilibili/dog.png'],
+    );
+
     await tester.tap(find.byKey(const ValueKey('live-play-follow')));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pump();

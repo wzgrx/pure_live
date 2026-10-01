@@ -174,6 +174,25 @@ void main() {
     expect(EmoteText.plainText(segments), 'hi :wave:');
   });
 
+  testWidgets('EmoteText shows a bundled picture first; a missing one falls back to the code', (tester) async {
+    final bundled = ChatEmoteSegment(url: '', alt: '[x]', asset: PlatformLogos.assetFor('douyu'));
+    await tester.pumpWidget(_app(EmoteText([const ChatTextSegment('a'), bundled])));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pump();
+    final image = tester.widget<Image>(find.byType(Image));
+    expect((image.image as ResizeImage).imageProvider, isA<AssetImage>());
+    expect(find.text('[x]'), findsNothing);
+
+    await tester.pumpWidget(
+      _app(const EmoteText([ChatEmoteSegment(url: '', alt: '[y]', asset: 'assets/emo/none.png')])),
+    );
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pump();
+    expect(find.text('[y]'), findsOneWidget);
+    expect(bundled, ChatEmoteSegment(url: '', alt: '[x]', asset: PlatformLogos.assetFor('douyu')));
+    expect(bundled, isNot(const ChatEmoteSegment(url: '', alt: '[x]')));
+  });
+
   testWidgets('QrCodeWidget paints the code at its size', (tester) async {
     await tester.pumpWidget(_app(const Center(child: QrCodeWidget(data: 'https://example.com', size: 120))));
     expect(tester.getSize(find.byType(QrCodeWidget)), const Size(120, 120));

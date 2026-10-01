@@ -95,3 +95,10 @@ flutter:
     - assets/icons/icon.png
     # Mozilla's CA bundle for FFmpeg's OpenSSL on Android and Linux (3.x).
     - assets/certificates/
+    # 3.x's emoticon lists and the pictures they name, for the chat (M13.16).
+    - assets/emo/json/
+    - assets/emo/images/bilibili/
+    - assets/emo/images/douyin/
+    - assets/emo/images/douyu/
+    - assets/emo/images/huya/
+    - assets/emo/images/kuaishou/

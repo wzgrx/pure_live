@@ -94,6 +94,11 @@ String? recordNoticeText(RecordNotice notice) {
   final name = notice.task.nick.trim().isNotEmpty ? notice.task.nick.trim() : notice.task.roomId;
   return switch (notice.kind) {
     RecordNoticeKind.starting => i18n('recorder_task_starting'),
+    // The player's "平台实际返回" (`quality_limited_to`), once per recording.
+    RecordNoticeKind.qualityLimited => switch (notice.quality?.trim()) {
+      final quality? when quality.isNotEmpty => i18n('record_quality_limited_to', args: {'quality': quality}),
+      _ => null,
+    },
     RecordNoticeKind.captureFailed => i18n(
       'recorder_exception',
       args: {

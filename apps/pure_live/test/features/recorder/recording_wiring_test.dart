@@ -42,6 +42,21 @@ void main() {
     expect(failure.detail, 'Connection refused');
   });
 
+  test('a limited quality is said like the player says it', () {
+    final task = RecordTask(
+      taskId: 'bilibili_1',
+      roomId: '1',
+      platform: 'bilibili',
+      title: 't',
+      nick: '主播甲',
+      avatar: '',
+      cover: '',
+      createTime: DateTime(2026),
+    );
+    expect(recordNoticeText(RecordNotice(task, RecordNoticeKind.qualityLimited, quality: '超清')), '平台实际返回 超清，已按真实画质录制');
+    expect(recordNoticeText(RecordNotice(task, RecordNoticeKind.qualityLimited)), isNull);
+  });
+
   test(
     "Android's recording service: one start for many tasks, refused after Android stopped it until a user start",
     () async {

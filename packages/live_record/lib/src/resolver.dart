@@ -111,6 +111,15 @@ final class ResolvedRecordStream {
 
   /// Display label of the line (3.x `线路N`).
   String get lineLabel => '线路${lineIndex + 1}';
+
+  /// The recording's quality as the task shows it: the served [quality],
+  /// with the player's `?` when the platform did not confirm it (3.x
+  /// `playbackLabel`).
+  String get qualityLabel => quality.isPlaybackUnconfirmed ? '${quality.quality}?' : quality.quality;
+
+  /// Whether the platform confirmed another quality than the one asked for
+  /// (a Bilibili guest asking for 原画 is served 超清).
+  bool get qualityLimited => !quality.isPlaybackUnconfirmed && quality.selectionId.toString() != qualityCursorId;
 }
 
 const _recordableSchemes = {'http', 'https', 'rtmp', 'rtmps', 'rtsp', 'rtp', 'udp', 'tcp', 'srt', 'file'};
@@ -315,6 +324,31 @@ final class RecordStreamResolver {
     return _moveToFront(qualities, closest);
   }
 
+  /// The quality the platform served for [requested]: the option of
+  /// [qualities] whose id it confirmed (`resolveAppliedPlayQuality`, as the
+  /// player); a confirmed id outside [qualities] — a room listed as 原画
+  /// only, where a Bilibili guest asking for 10000 is served 250 — named by
+  /// the platform's codes ([LiveQualityLabel]) instead of falling back to
+  /// the request; else [requested], unconfirmed when the platform did not
+  /// say what it was expected to.
+  static LivePlayQuality servedQuality({
+    required String platform,
+    required List<LivePlayQuality> qualities,
+    required LivePlayQuality requested,
+    required LivePlayUrlResolution resolution,
+  }) {
+    final applied = resolveAppliedPlayQuality(qualities: qualities, requested: requested, resolution: resolution);
+    final id = resolution.appliedQualityData;
+    if (!applied.isPlaybackUnconfirmed || resolution.qualityUnconfirmed || id == null || '$id'.trim().isEmpty) {
+      return applied;
+    }
+    return LivePlayQuality(
+      quality: LiveQualityLabel.normalize(platform: platform, rawLabel: '', id: id),
+      data: id,
+      id: id,
+    );
+  }
+
   static List<LivePlayQuality> _moveToFront(List<LivePlayQuality> qualities, int index) =>
       List.unmodifiable([qualities[index], ...qualities.take(index), ...qualities.skip(index + 1)]);
 
@@ -332,7 +366,7 @@ final class RecordStreamResolver {
             lineIndex: lineIndex,
           )).normalized()
         : await site.resolvePlayUrls(detail: detail, quality: requested);
-    final applied = resolveAppliedPlayQuality(qualities: ordered, requested: requested, resolution: resolution);
+    final applied = servedQuality(platform: site.id, qualities: ordered, requested: requested, resolution: resolution);
     final requestedId = requested.selectionId.toString();
     final recipe = resolution.inputRecipe;
     // A cursor adapter has one logical owned line; past line 0 it is used up.

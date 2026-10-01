@@ -8,9 +8,11 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/account/account_page.dart';
+import 'package:pure_live/features/account/account_platforms.dart';
 import 'package:pure_live/features/account/account_services.dart';
 import 'package:pure_live/features/account/account_state.dart';
 import 'package:pure_live/features/auth/auth_page.dart';
+import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
@@ -235,7 +237,7 @@ void main() {
       }
       // Names (c5).
       expect(find.text('SOOP'), findsOneWidget);
-      expect(find.text('网易 CC'), findsOneWidget);
+      expect(find.text('网易CC'), findsOneWidget);
 
       // Statuses (c2).
       expect(_status(tester, SiteIds.bilibili), '已登录：Alice');
@@ -462,7 +464,7 @@ void main() {
     testWidgets('CC opens its cookie page through the accounts route', (tester) async {
       final harness = await _pump(tester);
       await _tap(tester, find.byKey(const ValueKey('account-cc')));
-      expect(find.text('网易 CC账号'), findsOneWidget);
+      expect(find.text('网易CC账号'), findsOneWidget);
       await _enter(tester, 'NTES_SESS=abc');
       await _tap(tester, find.byKey(const ValueKey('account-cookie-save')));
       expect(harness.store.secrets.cookieFor(SiteIds.cc), 'NTES_SESS=abc');
@@ -696,5 +698,19 @@ void main() {
         expect(tester.takeException(), isNull);
       }
     });
+  });
+
+  test('every platform is named on the account pages as in the platform list (SOOP, 网易CC)', () async {
+    // 3.x writes "SOOP" in five strings and the platform does too ("Soop"
+    // only in site_soop); "网易CC" as 3.x's site_cc and the platform.
+    for (final (language, cc) in const [(AppLanguage.zh, '网易CC'), (AppLanguage.en, 'NetEase CC')]) {
+      await loadStrings(language);
+      expect(i18n('site_soop'), 'SOOP', reason: '$language');
+      expect(i18n('site_cc'), cc, reason: '$language');
+      for (final platform in accountPlatforms) {
+        expect(platform.name, i18n('site_${platform.id}'), reason: '$language ${platform.id}');
+      }
+    }
+    await loadStrings();
   });
 }

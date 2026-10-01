@@ -1,7 +1,14 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:live_core/live_core.dart';
+import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/network.dart';
+import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/settings/data_tools.dart';
 import 'package:pure_live/shared/images.dart';
+import 'package:pure_live/shared/rooms/room_feed.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 import 'support.dart';
 
@@ -49,4 +56,58 @@ void main() {
     await tester.pump(const Duration(minutes: 10));
     expect(runs, 2);
   });
+
+  test('the network kind: offline, mobile data only, anything else', () {
+    expect(networkKindOf(const []), NetworkKind.none);
+    expect(networkKindOf(const [ConnectivityResult.none]), NetworkKind.none);
+    expect(networkKindOf(const [ConnectivityResult.mobile]), NetworkKind.mobile);
+    expect(networkKindOf(const [ConnectivityResult.mobile, ConnectivityResult.wifi]), NetworkKind.other);
+    expect(networkKindOf(const [ConnectivityResult.ethernet]), NetworkKind.other);
+    expect(networkKindOf(const [ConnectivityResult.vpn]), NetworkKind.other);
+  });
+
+  test('a list refresh checks the network first: offline asks nothing, mobile data shows the notice', () async {
+    currentStrings = await loadStrings();
+    var asked = 0;
+    var kind = NetworkKind.none;
+    final feed = RoomFeed(
+      platform: 'fake',
+      source: _OnePage(() => asked++),
+      visible: (_) => true,
+      precheck: () => MobileDataNotice.precheck(() async => kind),
+    );
+    addTearDown(feed.dispose);
+    MobileDataNotice.onMobileData.value = false;
+
+    await feed.refresh(count: 1);
+    expect(asked, 0);
+    expect(feed.error, isA<Offline>());
+    expect(describeLoadError(feed.error), '当前无网络连接，请检查网络设置');
+
+    kind = NetworkKind.mobile;
+    await feed.refresh(count: 1);
+    expect(asked, 1);
+    expect(feed.rooms, hasLength(1));
+    expect(MobileDataNotice.onMobileData.value, isTrue);
+
+    kind = NetworkKind.other;
+    await feed.refresh(count: 1);
+    expect(MobileDataNotice.onMobileData.value, isFalse);
+  });
+}
+
+/// One room in one chunk.
+final class _OnePage implements RoomSource {
+  new(this._asked);
+
+  final void Function() _asked;
+
+  @override
+  Future<RoomChunk> next(CancelToken cancel) async {
+    _asked();
+    return RoomChunk([LiveRoom(platform: 'fake', roomId: '1')], hasMore: false);
+  }
+
+  @override
+  RoomSource restart() => this;
 }

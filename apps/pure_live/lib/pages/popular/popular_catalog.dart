@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_feed.dart';
@@ -26,14 +27,16 @@ import 'package:pure_live/shared/rooms/room_feed.dart';
 /// runs (3.x kept a GetX controller per platform), so switching tabs or
 /// home menus does not fetch again.
 final class PopularCatalog {
-  /// Creates the catalogues over [services].
-  new(this.services) {
+  /// Creates the catalogues over [services]; `probe` reads the network
+  /// before each refresh (offline check, mobile-data notice).
+  new(this.services, {this._probe = readNetworkKind}) {
     _settings = services.store.settings.changes.listen(_settingChanged);
   }
 
   /// The services.
   final AppServices services;
 
+  final NetworkProbe _probe;
   final Map<String, RoomFeed> _feeds = {};
   late final StreamSubscription<Setting<Object>> _settings;
   Timer? _rankTimer;
@@ -66,6 +69,7 @@ final class PopularCatalog {
     // IPTV keeps the playlist's order (3.x).
     rank: (id, rooms) => id == SiteIds.iptv ? rooms : policy.rank(rooms),
     visible: visible,
+    precheck: () => MobileDataNotice.precheck(_probe),
   );
 
   void _settingChanged(Setting<Object> setting) {
@@ -100,7 +104,7 @@ final class PopularCatalog {
 
 /// The catalogues (kept for the app's life, like 3.x's controllers).
 final Provider<PopularCatalog> popularCatalogProvider = Provider((ref) {
-  final catalog = PopularCatalog(ref.watch(appServicesProvider));
+  final catalog = PopularCatalog(ref.watch(appServicesProvider), probe: ref.watch(networkProbeProvider));
   ref.onDispose(catalog.dispose);
   return catalog;
 });

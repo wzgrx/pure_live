@@ -2,6 +2,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_net/live_net.dart';
+import 'package:pure_live/app/network.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
 // The words every room page shows the same way: platform names, audience
@@ -124,6 +125,7 @@ String? roomMark(LiveRoom room) {
 /// Words for a failed list request (follows, popular, areas, search): what
 /// went wrong in terms the user can act on, never the adapter's detail.
 String describeLoadError(Object? error) => switch (error) {
+  Offline() => i18n('network_disconnected_msg'),
   NeedsLogin() => i18n('load_error_login'),
   RateLimited() => i18n('load_error_rate_limited'),
   RiskControl(cookieSuspect: true) => i18n('load_error_cookie'),

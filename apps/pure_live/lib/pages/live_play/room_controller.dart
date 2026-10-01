@@ -7,6 +7,7 @@ import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/network.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/live_play/chat_feed.dart';
 import 'package:pure_live/shared/rooms/play_quality.dart';
@@ -50,6 +51,7 @@ class LiveRoomController extends ChangeNotifier {
     required this.store,
     this.mobile = false,
     this.toast,
+    this.network,
     DateTime Function()? now,
     this.refreshInterval = const Duration(seconds: 60),
     this.danmakuStartTimeout = const Duration(seconds: 30),
@@ -77,6 +79,11 @@ class LiveRoomController extends ChangeNotifier {
 
   /// Shows a short message (the app's SnackBar).
   final void Function(String message)? toast;
+
+  /// Reads the network for the first quality: mobile data uses
+  /// [Settings.preferResolutionCellular] (3.x `_setDefaultResolution`);
+  /// null always uses [Settings.preferResolution].
+  final NetworkProbe? network;
 
   /// How often the room detail is fetched again while the page is open.
   final Duration refreshInterval;
@@ -239,6 +246,13 @@ class LiveRoomController extends ChangeNotifier {
     if (session.state.status != PlaybackStatus.idle) await session.stop();
   }
 
+  /// The preferred quality name for the network now.
+  Future<String> _preferredQuality() async {
+    final kind = await network?.call() ?? NetworkKind.other;
+    final setting = kind == NetworkKind.mobile ? Settings.preferResolutionCellular : Settings.preferResolution;
+    return store.settings.get<String>(setting);
+  }
+
   Future<void> _startStream(int epoch) async {
     unawaited(_qualityScope.close());
     final scope = _qualityScope = LiveQualityDiscoveryScope();
@@ -256,9 +270,11 @@ class LiveRoomController extends ChangeNotifier {
       _unplayable(StreamUnavailable(site.id, 'no qualities'));
       return;
     }
-    _qualities = found;
     final kept = previous == null ? -1 : found.indexWhere((q) => q.selectionId == previous.selectionId);
-    _qualityIndex = kept >= 0 ? kept : defaultQualityIndex(found, store.settings.get(Settings.preferResolution));
+    final preferred = kept >= 0 ? null : await _preferredQuality();
+    if (!_current(epoch)) return;
+    _qualities = found;
+    _qualityIndex = kept >= 0 ? kept : defaultQualityIndex(found, preferred!);
     _notify();
     final opened = await _openQuality(_qualityIndex, epoch, userChoice: false);
     if (!opened || !_current(epoch)) return;

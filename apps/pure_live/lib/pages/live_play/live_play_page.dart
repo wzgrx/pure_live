@@ -8,6 +8,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/live_play/chat_panel.dart';
@@ -71,6 +72,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       store: store,
       mobile: _mobile,
       toast: (message) => AppNavigator.toast(message),
+      network: ref.read(networkProbeProvider),
     );
     if (store.settings.get(Settings.enableFullScreenDefault)) {
       // 3.x entered fullscreen once the stream played.

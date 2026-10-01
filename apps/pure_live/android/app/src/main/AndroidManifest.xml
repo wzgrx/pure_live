@@ -140,4 +140,7 @@
        (liuchuancong/pure_live_TV b9d2f739, AGPL-3.0). -->
   <uses-feature android:name="android.software.leanback" android:required="false" />
   <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+  <!-- The Wi-Fi permissions (multicast lock, network state) imply Wi-Fi;
+       wired-only TV boxes have none. -->
+  <uses-feature android:name="android.hardware.wifi" android:required="false" />
 </manifest>

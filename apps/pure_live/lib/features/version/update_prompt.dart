@@ -40,9 +40,13 @@ Future<void> checkForUpdateOnStartup(
   if (!settings.get(Settings.enableAutoCheckUpdate)) return;
   try {
     final info = await feed.latest();
+    // The about page shows "新版本 v…" from this (U.12b c3), also when the
+    // version was skipped.
+    if (info != null) noteCheckedUpdate(info);
     if (info == null || !info.isNewer || !context.mounted || !_wanted(settings, info)) return;
-    // This platform's first package (arm64 APK, Windows installer) for the
-    // in-app download; without one "update" opens the version page.
+    // This device's package (U.12b "本机"; else the platform's first: arm64
+    // APK, Windows installer) for the in-app download; without one "update"
+    // opens the version page.
     ReleaseFile? package;
     try {
       final wanted = info.version.replaceFirst(RegExp('^[vV]'), '');
@@ -52,7 +56,9 @@ Future<void> checkForUpdateOnStartup(
               .firstOrNull
               ?.files ??
           const <ReleaseFile>[];
-      package = platformPackages(feed.platform, info, files).firstOrNull?.$2;
+      final packages = platformPackages(feed.platform, info, files);
+      final native = nativePackageTitle();
+      package = (packages.where((entry) => entry.$1 == native).firstOrNull ?? packages.firstOrNull)?.$2;
     } on Object {
       package = null;
     }

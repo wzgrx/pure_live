@@ -259,6 +259,7 @@ class SettingsRow extends StatefulWidget {
     this.busyColor,
     this.selected = false,
     this.tooltip,
+    this.subtitleMaxLines = 2,
     super.key,
   });
 
@@ -267,6 +268,10 @@ class SettingsRow extends StatefulWidget {
 
   /// The spinner's colour while [busy] (error red for clearing).
   final Color? busyColor;
+
+  /// Lines of the explanation before an ellipsis; null shows it whole (a
+  /// folder path, a long explanation).
+  final int? subtitleMaxLines;
 
   /// The icon at the start (22 px, primary colour).
   final IconData? icon;
@@ -365,7 +370,7 @@ class _SettingsRowState extends State<SettingsRow> {
         if (subtitle != null && subtitle.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 2),
-            child: HighlightedText(subtitle, style: subtitleStyle, maxLines: 2),
+            child: HighlightedText(subtitle, style: subtitleStyle, maxLines: widget.subtitleMaxLines),
           ),
       ],
     );
@@ -475,11 +480,15 @@ class SettingsLinkRow extends StatelessWidget {
     this.busy = false,
     this.selected = false,
     this.tooltip,
+    this.subtitleMaxLines = 2,
     super.key,
   });
 
   /// The title.
   final String title;
+
+  /// See [SettingsRow.subtitleMaxLines].
+  final int? subtitleMaxLines;
 
   /// The action.
   final VoidCallback? onTap;
@@ -558,6 +567,7 @@ class SettingsLinkRow extends StatelessWidget {
       busy: busy,
       selected: selected,
       tooltip: tooltip,
+      subtitleMaxLines: subtitleMaxLines,
       onTap: onTap,
       below: below
           ? Padding(
@@ -596,11 +606,15 @@ class SettingsSwitchRow extends StatelessWidget {
     this.enabled = true,
     this.disabledReason,
     this.busy = false,
+    this.subtitleMaxLines = 2,
     super.key,
   });
 
   /// The title.
   final String title;
+
+  /// See [SettingsRow.subtitleMaxLines].
+  final int? subtitleMaxLines;
 
   /// On or off.
   final bool value;
@@ -641,6 +655,7 @@ class SettingsSwitchRow extends StatelessWidget {
       enabled: enabled && onChanged != null,
       disabledReason: disabledReason,
       busy: busy,
+      subtitleMaxLines: subtitleMaxLines,
       stackTrailing: false,
       onTap: usable ? () => onChanged!(!value) : null,
       // The row takes the taps and the focus; the switch only shows the
@@ -840,11 +855,15 @@ class SettingsCounterRow extends StatefulWidget {
     this.valueKey,
     this.decreaseKey,
     this.increaseKey,
+    this.subtitleMaxLines = 2,
     super.key,
   });
 
   /// The title.
   final String title;
+
+  /// See [SettingsRow.subtitleMaxLines].
+  final int? subtitleMaxLines;
 
   /// The value as shown ("6 px").
   final String value;
@@ -974,6 +993,7 @@ class _SettingsCounterRowState extends State<SettingsCounterRow> {
       subtitle: widget.subtitle,
       enabled: widget.enabled,
       disabledReason: widget.disabledReason,
+      subtitleMaxLines: widget.subtitleMaxLines,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

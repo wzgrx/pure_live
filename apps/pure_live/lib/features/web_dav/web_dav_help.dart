@@ -21,18 +21,25 @@ class WebDavHelpPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // The settings groups' look (U.11b c13): 13 px primary titles, cards
+    // on the low container with 16 px corners.
     Widget section(String key) => Padding(
-      padding: const EdgeInsets.only(left: 4, top: 22, bottom: 10),
-      child: Text(i18n(key), style: context.textStyles.t16SemiBold),
-    );
-    Widget card(List<Widget> children) => Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(20),
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+      child: Text(
+        i18n(key),
+        style: context.textStyles.t13.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
+    );
+    Widget card(List<Widget> children) => Material(
+      color: theme.colorScheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
+        ),
+      ),
     );
     Widget body(String key) => Text(i18n(key), style: context.textStyles.t13.copyWith(height: 1.6));
     const issues = [
@@ -43,90 +50,92 @@ class WebDavHelpPage extends StatelessWidget {
       ('webdav_help_issue_revoke_q', 'webdav_help_issue_revoke_a'),
     ];
     return Scaffold(
-      appBar: AppBar(title: Text(i18n('webdav_help_title'))),
-      body: ListView(
-        physics: const PureLiveScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 40),
-        children: [
-          section('webdav_help_intro_section'),
-          card([body('webdav_help_intro_body')]),
-          section('webdav_help_params_section'),
-          card([
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Remix.links_line, color: theme.colorScheme.primary),
-              title: Text(i18n('webdav_help_server_title')),
-              subtitle: SelectableText(davUrl, style: TextStyle(color: theme.colorScheme.primary)),
-              trailing: IconButton(
-                tooltip: i18n('webdav_help_copy_server'),
-                icon: const Icon(Remix.file_copy_line, size: 18),
-                onPressed: () async {
-                  await Clipboard.setData(const ClipboardData(text: davUrl));
-                  AppNavigator.toast(i18n('copied_to_clipboard'));
-                },
+      appBar: settingsPageAppBar(context, title: i18n('webdav_help_title')),
+      body: ReadableContent(
+        child: ListView(
+          physics: const PureLiveScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 40),
+          children: [
+            section('webdav_help_intro_section'),
+            card([body('webdav_help_intro_body')]),
+            section('webdav_help_params_section'),
+            card([
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(AppIcons.link, color: theme.colorScheme.primary),
+                title: Text(i18n('webdav_help_server_title')),
+                subtitle: SelectableText(davUrl, style: TextStyle(color: theme.colorScheme.primary)),
+                trailing: IconButton(
+                  tooltip: i18n('webdav_help_copy_server'),
+                  icon: const Icon(AppIcons.copyValue, size: 18),
+                  onPressed: () async {
+                    await Clipboard.setData(const ClipboardData(text: davUrl));
+                    AppNavigator.toast(i18n('copied_to_clipboard'));
+                  },
+                ),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(AppIcons.mail, color: theme.colorScheme.primary),
+                title: Text(i18n('webdav_help_username_title')),
+                subtitle: Text(i18n('webdav_help_username_hint')),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(AppIcons.password, color: theme.colorScheme.primary),
+                title: Text(i18n('webdav_help_app_password_title')),
+                subtitle: Text(i18n('webdav_help_app_password_hint')),
+              ),
+            ]),
+            section('webdav_help_register_section'),
+            card([
+              body('webdav_help_register_steps'),
+              const WebDavScreenshot(index: 1),
+              const SizedBox(height: 12),
+              body('webdav_help_register_form'),
+              const WebDavScreenshot(index: 2),
+            ]),
+            section('webdav_help_login_section'),
+            card([body('webdav_help_login_steps'), const WebDavScreenshot(index: 3)]),
+            section('webdav_help_password_section'),
+            card([
+              body('webdav_help_account_steps'),
+              const WebDavScreenshot(index: 4),
+              const SizedBox(height: 12),
+              body('webdav_help_security_steps'),
+              const WebDavScreenshot(index: 5),
+              const SizedBox(height: 12),
+              body('webdav_help_generate_steps'),
+              const WebDavScreenshot(index: 6),
+              const SizedBox(height: 12),
+              body('webdav_help_password_once'),
+              const WebDavScreenshot(index: 7),
+            ]),
+            section('webdav_help_generic_section'),
+            card([body('webdav_help_generic_body')]),
+            section('webdav_help_issues_section'),
+            card([
+              for (final (question, answer) in issues) ...[
+                Text(i18n(question), style: context.textStyles.t13SemiBold.copyWith(color: theme.colorScheme.primary)),
+                const SizedBox(height: 4),
+                Text(i18n(answer), style: context.textStyles.t12Muted.copyWith(height: 1.5)),
+                const SizedBox(height: 10),
+              ],
+            ]),
+            section('webdav_help_limits_section'),
+            card([body('webdav_help_limits_body')]),
+            section('webdav_help_summary_section'),
+            card([body('webdav_help_summary_body')]),
+            const SizedBox(height: 20),
+            OutlinedButton(
+              onPressed: () => unawaited(_openOfficialHelp()),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(i18n('webdav_help_open_official')),
               ),
             ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Remix.mail_line, color: theme.colorScheme.primary),
-              title: Text(i18n('webdav_help_username_title')),
-              subtitle: Text(i18n('webdav_help_username_hint')),
-            ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Remix.lock_password_line, color: theme.colorScheme.primary),
-              title: Text(i18n('webdav_help_app_password_title')),
-              subtitle: Text(i18n('webdav_help_app_password_hint')),
-            ),
-          ]),
-          section('webdav_help_register_section'),
-          card([
-            body('webdav_help_register_steps'),
-            const WebDavScreenshot(index: 1),
-            const SizedBox(height: 12),
-            body('webdav_help_register_form'),
-            const WebDavScreenshot(index: 2),
-          ]),
-          section('webdav_help_login_section'),
-          card([body('webdav_help_login_steps'), const WebDavScreenshot(index: 3)]),
-          section('webdav_help_password_section'),
-          card([
-            body('webdav_help_account_steps'),
-            const WebDavScreenshot(index: 4),
-            const SizedBox(height: 12),
-            body('webdav_help_security_steps'),
-            const WebDavScreenshot(index: 5),
-            const SizedBox(height: 12),
-            body('webdav_help_generate_steps'),
-            const WebDavScreenshot(index: 6),
-            const SizedBox(height: 12),
-            body('webdav_help_password_once'),
-            const WebDavScreenshot(index: 7),
-          ]),
-          section('webdav_help_generic_section'),
-          card([body('webdav_help_generic_body')]),
-          section('webdav_help_issues_section'),
-          card([
-            for (final (question, answer) in issues) ...[
-              Text(i18n(question), style: context.textStyles.t13SemiBold.copyWith(color: theme.colorScheme.primary)),
-              const SizedBox(height: 4),
-              Text(i18n(answer), style: context.textStyles.t12Muted.copyWith(height: 1.5)),
-              const SizedBox(height: 10),
-            ],
-          ]),
-          section('webdav_help_limits_section'),
-          card([body('webdav_help_limits_body')]),
-          section('webdav_help_summary_section'),
-          card([body('webdav_help_summary_body')]),
-          const SizedBox(height: 20),
-          OutlinedButton(
-            onPressed: () => unawaited(_openOfficialHelp()),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(i18n('webdav_help_open_official')),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -184,7 +193,7 @@ class WebDavScreenshot extends StatelessWidget {
             showDialog<void>(
               context: context,
               builder: (dialogContext) => Dialog.fullscreen(
-                backgroundColor: Colors.black,
+                backgroundColor: OnVideoColors.ground,
                 child: Stack(
                   children: [
                     Positioned.fill(
@@ -202,7 +211,7 @@ class WebDavScreenshot extends StatelessWidget {
                         child: IconButton.filledTonal(
                           key: const ValueKey('webdav-help-image-close'),
                           tooltip: i18n('close'),
-                          icon: const Icon(Icons.close_rounded),
+                          icon: const Icon(AppIcons.close),
                           onPressed: () => Navigator.of(dialogContext).pop(),
                         ),
                       ),

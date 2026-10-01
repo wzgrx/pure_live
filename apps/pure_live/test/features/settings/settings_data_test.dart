@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/settings/data_tools.dart';
-import 'package:pure_live/features/settings/log_page.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
 import 'package:pure_live/routes/route_path.dart';
 
@@ -158,7 +157,7 @@ void main() {
       settingsSection(SettingsSection.configPreview),
       settingsSection(SettingsSection.log),
     ]);
-    await tapSettings(tester, settingsSection(SettingsSection.log));
-    expect(find.byType(LogPage), findsOneWidget);
+    // The log page lives with the backup (U.11a) and opens by its route.
+    expect(SettingsSection.log.route, RoutePath.kLogs);
   });
 }

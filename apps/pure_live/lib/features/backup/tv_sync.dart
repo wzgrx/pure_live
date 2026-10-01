@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_ui/live_ui.dart';
@@ -58,12 +60,16 @@ Future<bool> sendToTv(LiveHttp http, String origin, Map<String, Object?> documen
 }
 
 /// Asks for the TV's address (shown on the TV's sync screen); null when
-/// cancelled.
-Future<String?> askTvAddress(BuildContext context) =>
-    showDialog<String>(context: context, builder: (_) => const _TvAddressDialog());
+/// cancelled. [scan] offers the camera inside the field (phones).
+Future<String?> askTvAddress(BuildContext context, {bool scan = true}) => showDialog<String>(
+  context: context,
+  builder: (_) => _TvAddressDialog(scan: scan),
+);
 
 class _TvAddressDialog extends StatefulWidget {
-  const new();
+  const new({required this.scan});
+
+  final bool scan;
 
   @override
   State<_TvAddressDialog> createState() => _TvAddressDialogState();
@@ -91,15 +97,19 @@ class _TvAddressDialogState extends State<_TvAddressDialog> {
   @override
   Widget build(BuildContext context) => AlertDialog(
     scrollable: true,
-    title: Text(i18n('sync_tv_data')),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    title: Text(i18n('sync_tv_data'), style: const TextStyle(fontWeight: FontWeight.w600)),
     content: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 400),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(i18n('backup_tv_hint'), style: context.textStyles.t13Muted),
-          const SizedBox(height: 12),
+          Text(
+            i18n('backup_tv_hint'),
+            style: context.textStyles.t14.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 16),
           TextField(
             key: const ValueKey('backup-tv-address'),
             controller: _address,
@@ -107,19 +117,22 @@ class _TvAddressDialogState extends State<_TvAddressDialog> {
             keyboardType: TextInputType.url,
             autocorrect: false,
             decoration: InputDecoration(
-              border: const OutlineInputBorder(),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               labelText: i18n('remote_sync_address'),
               hintText: i18n('remote_sync_input_address_hint'),
               errorText: _error,
               // The TV shows its address as a QR code (3.x scanned it).
-              suffixIcon: qrScanButton(
-                context,
-                key: const ValueKey('backup-tv-scan'),
-                onText: (text) {
-                  _address.text = text;
-                  _submit();
-                },
-              ),
+              suffixIcon: !widget.scan
+                  ? null
+                  : qrScanButton(
+                      context,
+                      key: const ValueKey('backup-tv-scan'),
+                      hint: i18n('scanner_sync_hint'),
+                      onText: (text) {
+                        _address.text = text;
+                        _submit();
+                      },
+                    ),
             ),
             onSubmitted: (_) => _submit(),
           ),
@@ -131,4 +144,105 @@ class _TvAddressDialogState extends State<_TvAddressDialog> {
       FilledButton(key: const ValueKey('backup-tv-send'), onPressed: _submit, child: Text(i18n('remote_sync_send'))),
     ],
   );
+}
+
+enum _TvStage { scanning, sending, done, failed }
+
+/// "同步TV数据" on phones (3.x `ScanCodePage`, docs/ui/compare/U.11a c8):
+/// scan the TV's code (or type its address), send, then say how it went:
+/// "完成" / "再扫一次" after a success, the reason with "重试" / "输入地址"
+/// after a failure. [send] sends this device's data to a TV origin.
+class TvSyncScanPage extends StatefulWidget {
+  /// Creates the page.
+  const new({required this.send, super.key});
+
+  /// Sends to the TV at an origin; true when the TV took it.
+  final Future<bool> Function(String origin) send;
+
+  @override
+  State<TvSyncScanPage> createState() => _TvSyncScanPageState();
+}
+
+class _TvSyncScanPageState extends State<TvSyncScanPage> {
+  _TvStage _stage = _TvStage.scanning;
+  String? _origin;
+
+  Future<void> _sendTo(String origin) async {
+    setState(() {
+      _origin = origin;
+      _stage = _TvStage.sending;
+    });
+    final sent = await widget.send(origin);
+    if (mounted) setState(() => _stage = sent ? _TvStage.done : _TvStage.failed);
+  }
+
+  void _scanned(String text) {
+    final origin = normalizeTvAddress(text);
+    if (origin == null) {
+      setState(() {
+        _origin = null;
+        _stage = _TvStage.failed;
+      });
+      return;
+    }
+    unawaited(_sendTo(origin));
+  }
+
+  Future<void> _typeAddress() async {
+    final origin = await askTvAddress(context, scan: false);
+    if (origin != null && mounted) await _sendTo(origin);
+  }
+
+  void _scanAgain() => setState(() {
+    _origin = null;
+    _stage = _TvStage.scanning;
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final address = (_origin ?? '').replaceFirst(RegExp('^https?://'), '');
+    final typeAddress = (
+      label: i18n('qr_type_address'),
+      icon: AppIcons.typeAddress as IconData?,
+      onPressed: () => unawaited(_typeAddress()),
+    );
+    return QrScanPage(
+      hint: i18n('scanner_sync_hint'),
+      unavailableHint: i18n('qr_camera_unavailable_tv'),
+      onCode: _scanned,
+      onManual: () => unawaited(_typeAddress()),
+      result: switch (_stage) {
+        _TvStage.scanning => null,
+        _TvStage.sending => QrScanStatus(
+          key: const ValueKey('tv-sync-sending'),
+          busy: true,
+          title: i18n('syncing'),
+          message: i18n('backup_tv_sending', args: {'address': address}),
+        ),
+        _TvStage.done => QrScanStatus(
+          key: const ValueKey('tv-sync-done'),
+          icon: AppIcons.syncDone,
+          iconColor: LiveSemanticColors.success(Theme.of(context).brightness),
+          title: i18n('sync_success'),
+          message: i18n('backup_tv_sent'),
+          primary: (label: i18n('done'), icon: null, onPressed: () => Navigator.of(context).pop()),
+          secondary: (label: i18n('qr_scan_again'), icon: null, onPressed: _scanAgain),
+        ),
+        _TvStage.failed => QrScanStatus(
+          key: const ValueKey('tv-sync-failed'),
+          icon: AppIcons.syncFailed,
+          iconColor: colors.error,
+          title: i18n('sync_failed'),
+          message: i18n(_origin == null ? 'remote_sync_invalid_address' : 'backup_tv_failed'),
+          primary: (
+            label: i18n('retry'),
+            icon: null,
+            onPressed: () => _origin == null ? _scanAgain() : unawaited(_sendTo(_origin!)),
+          ),
+          secondary: typeAddress,
+        ),
+      },
+    );
+  }
 }

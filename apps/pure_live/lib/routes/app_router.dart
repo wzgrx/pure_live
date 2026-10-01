@@ -7,6 +7,7 @@ import 'package:pure_live/features/area_rooms/area_rooms_page.dart';
 import 'package:pure_live/features/areas/areas_page.dart';
 import 'package:pure_live/features/auth/auth_page.dart';
 import 'package:pure_live/features/backup/backup_page.dart';
+import 'package:pure_live/features/backup/log_page.dart';
 import 'package:pure_live/features/favorite/favorite_page.dart';
 import 'package:pure_live/features/history/history_page.dart';
 import 'package:pure_live/features/home/home_page.dart';
@@ -78,6 +79,7 @@ final Map<String, PageBuilder> pageRoutes = {
   RoutePath.kSettingsTags: (route) => TagsPage(route: route),
   RoutePath.kRemoteSync: (route) => RemoteReceiverPage(route: route),
   RoutePath.kLocalInteraction: (route) => LocalInteractionSettingsPage(route: route),
+  RoutePath.kLogs: (route) => const LogPage(),
 };
 
 /// The router of home and [pageRoutes], starting at [initialLocation] (the

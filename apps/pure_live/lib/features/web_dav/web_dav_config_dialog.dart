@@ -96,7 +96,7 @@ class _WebDavConfigDialogState extends State<_WebDavConfigDialog> {
     errorMaxLines: 4,
     prefixIcon: Icon(icon, size: 20),
     suffixIcon: suffix,
-    border: const OutlineInputBorder(),
+    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
   );
 
@@ -107,14 +107,28 @@ class _WebDavConfigDialogState extends State<_WebDavConfigDialog> {
         ? i18n('webdav_edit_config', args: {'name': widget.existing!.name})
         : i18n('webdav_add_new_config');
     final checkColor = switch (_check) {
-      _CheckState.ok => Colors.green,
+      _CheckState.ok => LiveSemanticColors.success(Theme.of(context).brightness),
       _CheckState.failed => colors.error,
       _ => colors.onSurfaceVariant,
     };
     return AlertDialog(
       scrollable: true,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      title: Text(title, style: context.textStyles.t18Bold, maxLines: 3, overflow: TextOverflow.ellipsis),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: Row(
+        children: [
+          Icon(_editing ? AppIcons.webDavEditConfig : AppIcons.webDavAddConfig, size: 24, color: colors.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              title,
+              style: context.textStyles.t18.copyWith(fontWeight: FontWeight.w600),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
         child: Form(
@@ -127,7 +141,7 @@ class _WebDavConfigDialogState extends State<_WebDavConfigDialog> {
                 key: const ValueKey('webdav-name'),
                 controller: _name,
                 enabled: !_editing,
-                decoration: _decoration(i18n('webdav_config_name'), Remix.bookmark_line),
+                decoration: _decoration(i18n('webdav_config_name'), AppIcons.webDavName),
                 validator: (value) {
                   final name = value?.trim() ?? '';
                   if (name.isEmpty) return i18n('webdav_config_name_empty');
@@ -143,7 +157,7 @@ class _WebDavConfigDialogState extends State<_WebDavConfigDialog> {
                 autocorrect: false,
                 decoration: _decoration(
                   i18n('webdav_address'),
-                  Remix.global_line,
+                  AppIcons.webDavAddress,
                 ).copyWith(hintText: 'https://dav.jianguoyun.com/dav/'),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) return i18n('webdav_address_empty');
@@ -155,7 +169,7 @@ class _WebDavConfigDialogState extends State<_WebDavConfigDialog> {
                 key: const ValueKey('webdav-user'),
                 controller: _user,
                 autocorrect: false,
-                decoration: _decoration(i18n('webdav_username'), Remix.user_3_line),
+                decoration: _decoration(i18n('webdav_username'), AppIcons.userName),
                 validator: (value) => value == null || value.trim().isEmpty ? i18n('webdav_username_empty') : null,
               ),
               const SizedBox(height: 16),
@@ -167,10 +181,10 @@ class _WebDavConfigDialogState extends State<_WebDavConfigDialog> {
                 enableSuggestions: false,
                 decoration: _decoration(
                   i18n('webdav_password'),
-                  Remix.lock_password_line,
+                  AppIcons.password,
                   suffix: IconButton(
                     tooltip: i18n(_showPassword ? 'webdav_hide_password' : 'webdav_show_password'),
-                    icon: Icon(_showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                    icon: Icon(_showPassword ? AppIcons.hidePassword : AppIcons.showPassword),
                     onPressed: () => setState(() => _showPassword = !_showPassword),
                   ),
                 ),
@@ -186,7 +200,7 @@ class _WebDavConfigDialogState extends State<_WebDavConfigDialog> {
                         const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
                       else
                         Icon(
-                          _check == _CheckState.ok ? Icons.check_circle_outline : Icons.error_outline,
+                          _check == _CheckState.ok ? AppIcons.checkPassed : AppIcons.syncFailed,
                           size: 18,
                           color: checkColor,
                         ),

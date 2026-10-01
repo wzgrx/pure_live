@@ -152,4 +152,41 @@ void main() {
     );
     expect(find.byKey(const ValueKey('page-subtitle')), findsNothing);
   });
+
+  testWidgets('a destructive row is red and set apart by a line (U.11a, U.11b file menus)', (tester) async {
+    tester.view
+      ..physicalSize = const Size(393, 852)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    int? chosen;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: const LiveTheme().light,
+        home: Scaffold(
+          body: Center(
+            child: AppMenuButton<int>(
+              tooltip: '菜单',
+              icon: const Icon(Icons.more_vert),
+              entries: () => const [
+                AppMenuEntry(value: 1, icon: Icons.restore, label: '恢复全部设置'),
+                AppMenuEntry(value: 2, icon: Icons.delete, label: '删除', danger: true, divider: true),
+              ],
+              onSelected: (value) => chosen = value,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byTooltip('菜单'));
+    await tester.pumpAndSettle();
+    final error = Theme.of(tester.element(find.text('删除'))).colorScheme.error;
+    expect(tester.widget<Text>(find.text('删除')).style?.color, error);
+    expect(tester.widget<Icon>(find.byIcon(Icons.delete)).color, error);
+    expect(find.byType(PopupMenuDivider), findsOneWidget);
+    expect(tester.getTopLeft(find.byType(PopupMenuDivider)).dy, greaterThan(tester.getTopLeft(find.text('恢复全部设置')).dy));
+    expect(tester.getTopLeft(find.byType(PopupMenuDivider)).dy, lessThan(tester.getTopLeft(find.text('删除')).dy));
+    await tester.tap(find.text('删除'));
+    await tester.pumpAndSettle();
+    expect(chosen, 2);
+  });
 }

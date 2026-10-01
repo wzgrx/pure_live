@@ -5,7 +5,6 @@
     "area_rooms -> areas/areas_common.dart",
     "areas -> home/home_menu.dart",
     "areas -> home/menu_button.dart",
-    "backup -> search/search_history.dart",
     "favorite -> home/home_menu.dart",
     "favorite -> home/menu_button.dart",
     "home -> version/update_feed.dart",
@@ -13,22 +12,14 @@
     "live_play -> recorder/recorder_texts.dart",
     "popular -> home/home_menu.dart",
     "popular -> home/menu_button.dart",
-    "record_settings -> recorder/recorder_texts.dart",
     "recorder -> home/home_menu.dart",
     "recorder -> home/menu_button.dart",
     "remote_receiver -> version/app_version.dart",
     "search -> settings/settings_model.dart",
-    "settings -> home/home_menu.dart",
-    "web_dav -> backup/backup_data.dart",
-    "web_dav -> backup/backup_files.dart",
-    "web_dav -> backup/backup_preview_dialog.dart"
+    "settings -> home/home_menu.dart"
   ],
   "raw_styles": {
-    "backup": 22,
     "live_play": 8,
-    "record_settings": 28,
-    "remote_receiver": 11,
-    "settings": 32,
-    "web_dav": 36
+    "settings": 25
   }
 }

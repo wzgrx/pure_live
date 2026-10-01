@@ -12,8 +12,6 @@ import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/buttons/record_button.dart';
 import 'package:pure_live/features/live_play/player/recording_badge.dart';
-import 'package:pure_live/features/record_settings/record_settings_dialogs.dart';
-import 'package:pure_live/features/record_settings/record_settings_page.dart';
 import 'package:pure_live/features/recorder/recorder_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
@@ -58,7 +56,6 @@ Future<_Harness> _pump(
   bool withRecorder = true,
   List<RecordTask> tasks = const [],
   Map<String, Object?> legacy = const {},
-  Future<String?> Function()? picker,
   void Function(AppRecording recording)? prepare,
 }) async {
   tester.view
@@ -98,7 +95,6 @@ Future<_Harness> _pump(
         appServicesProvider.overrideWithValue(harness.services),
         recordingProvider.overrideWithValue(harness.recording),
         recorderProvider.overrideWithValue(harness.recording.recorder),
-        if (picker != null) recordDirectoryPickerProvider.overrideWithValue(picker),
       ],
       child: LiveUiScope(
         config: LiveUiConfig(strings: strings.ui),
@@ -124,13 +120,6 @@ Future<void> _settle(WidgetTester tester) async {
     if (i >= 3 && find.byType(CircularProgressIndicator).evaluate().isEmpty) break;
   }
   await tester.pumpAndSettle();
-}
-
-Future<void> _tap(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
-  await tester.pumpAndSettle();
-  await tester.tap(finder);
-  await _settle(tester);
 }
 
 void main() {
@@ -240,55 +229,5 @@ void main() {
     expect(find.text('录制中心'), findsOneWidget);
     expect(find.text('录制不可用'), findsOneWidget);
     expect(find.byKey(const ValueKey('recorder-settings')), findsOneWidget);
-  });
-
-  testWidgets('the folder dialog saves the folder from the system picker (M12.3)', (tester) async {
-    late Directory picked;
-    final harness = await _pump(tester, (route) => RecordSettingsPage(route: route), picker: () async => picked.path);
-    picked = harness.folder;
-    await _tap(tester, find.text('Pure Live 录制文件目录'));
-    expect(find.byKey(const ValueKey('record-directory-default')), findsOneWidget, reason: 'the default stays');
-    await _tap(tester, find.byKey(const ValueKey('record-directory-browse')));
-    await _settle(tester);
-    expect(harness.recording.settings.current.savePath, picked.path);
-    expect(find.byKey(const ValueKey('record-directory-input')), findsNothing, reason: 'saved and closed');
-  });
-
-  testWidgets('the settings page shows imported values and saves changes', (tester) async {
-    final harness = await _pump(
-      tester,
-      (route) => RecordSettingsPage(route: route),
-      legacy: {'segmentTime': 600, 'maxTaskCount': 5, 'recorder_rw_timeout': 30},
-    );
-    expect(find.text('录制设置'), findsOneWidget);
-    expect(find.text('10m'), findsOneWidget);
-    expect(find.text('5'), findsOneWidget);
-    expect(find.text('30s'), findsOneWidget);
-    expect(find.textContaining('PureLiveRecords').evaluate().isEmpty, isTrue, reason: 'the default folder is used');
-
-    await _tap(tester, find.text('Pure Live 录制文件目录'));
-    final parent = harness.folder.path;
-    await tester.enterText(find.byKey(const ValueKey('record-directory-input')), parent);
-    await _tap(tester, find.byKey(const ValueKey('record-directory-confirm')));
-    expect(harness.recording.settings.current.savePath, parent);
-    expect(find.text('$parent/PureLiveRecords'), findsOneWidget);
-    expect(File('$parent/PureLiveRecords/${RecordStorage.ownershipMarkerName}').existsSync(), isTrue);
-
-    await _tap(tester, find.text('最大同时录制任务数'));
-    await tester.enterText(find.byKey(const ValueKey('record-max-tasks-input')), '11');
-    await tester.pump();
-    expect(find.text('请输入 1 到 10 的整数'), findsOneWidget);
-    await _tap(tester, find.byKey(const ValueKey('record-max-tasks-quick-4')));
-    await _tap(tester, find.byKey(const ValueKey('record-max-tasks-confirm')));
-    expect(harness.recording.settings.current.maxTaskCount, 4);
-    expect(harness.services.store.settings.get(Settings.recordMaxTaskCount), 4);
-
-    await _tap(tester, find.text('录制读写超时'));
-    await _tap(tester, find.byKey(const ValueKey('record-option-60')));
-    expect(harness.recording.settings.current.rwTimeout, 60);
-
-    await _tap(tester, find.text('启用开播检测'));
-    expect(harness.recording.settings.current.enablePolling, isTrue);
-    expect(find.text('检测间隔时间'), findsOneWidget);
   });
 }

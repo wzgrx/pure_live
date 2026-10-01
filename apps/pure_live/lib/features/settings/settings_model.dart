@@ -112,7 +112,7 @@ enum SettingsSection {
 
   /// The log (U.11a Q1: moved to the settings, a row of the data group; its
   /// own page, opened like a route).
-  log(SettingsArea.data, 'log_manage', 'settings_log_desc', AppIcons.settingsLog);
+  log(SettingsArea.data, 'log_manage', 'settings_log_desc', AppIcons.settingsLog, route: RoutePath.kLogs);
 
   new(this.area, this.titleKey, this.descriptionKey, this.icon, {this.route});
 

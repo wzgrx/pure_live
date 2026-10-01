@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
-import 'package:pure_live/features/settings/log_page.dart';
 import 'package:pure_live/features/settings/settings_catalog.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
@@ -46,7 +45,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   final _content = GlobalKey<NavigatorState>();
   late final _contentObserver = _ContentObserver(_contentChanged);
   late SettingsSection? _open = switch (SettingsSection.byName(widget.route.arguments)) {
-    final SettingsSection section when section.route == null && section != SettingsSection.log => section,
+    final SettingsSection section when section.route == null => section,
     _ => null,
   };
   String _query = '';
@@ -95,12 +94,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void _openSection(SettingsSection section) {
     if (section.route case final route?) {
       unawaited(AppNavigator.toNamed<void>(route));
-      return;
-    }
-    if (section == SettingsSection.log) {
-      // The log page has no route yet (U.11a); it opens over the settings
-      // like the pages that have one.
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const LogPage()));
       return;
     }
     FocusScope.of(context).unfocus();

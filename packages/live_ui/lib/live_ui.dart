@@ -41,6 +41,7 @@ export 'src/widgets/room_card.dart';
 export 'src/widgets/room_card_appearance.dart';
 export 'src/widgets/scrollable_tab_bar.dart';
 export 'src/widgets/scrolling.dart';
+export 'src/widgets/settings_page_frame.dart';
 export 'src/widgets/settings_row.dart';
 export 'src/widgets/settings_tiles.dart';
 export 'src/widgets/status_view.dart';

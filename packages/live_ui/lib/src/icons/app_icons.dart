@@ -227,4 +227,170 @@ abstract final class AppIcons {
 
   /// Something will not work as the user expects (a switched-off setting).
   static const IconData warning = Icons.warning_amber_rounded;
+
+  // ---- settings: the overview (3.x settings_page.dart; U.6a) ----
+
+  /// Appearance (3.x "主题定制").
+  static const IconData settingsAppearance = Remix.palette_line;
+
+  /// The bottom navigation bar's pages.
+  static const IconData settingsNavigation = Remix.menu_line;
+
+  /// Platforms shown and their accounts.
+  static const IconData settingsPlatforms = Remix.apps_2_line;
+
+  /// Automatic refresh of follows and covers.
+  static const IconData settingsRefresh = Remix.refresh_line;
+
+  /// IPTV sources.
+  static const IconData settingsIptv = Remix.tv_line;
+
+  /// Video playback.
+  static const IconData settingsVideo = Remix.film_line;
+
+  /// Danmaku in picture-in-picture and floating windows.
+  static const IconData settingsPipDanmaku = Remix.picture_in_picture_2_line;
+
+  /// The player engine and decoding.
+  static const IconData settingsPlayerKernel = Remix.cpu_line;
+
+  /// Recording settings.
+  static const IconData settingsRecording = Remix.record_circle_line;
+
+  /// General settings.
+  static const IconData settingsGeneral = Remix.settings_4_line;
+
+  /// Network proxies; also the language (both a globe in 3.x).
+  static const IconData settingsNetwork = Remix.global_line;
+
+  /// Local interaction.
+  static const IconData settingsLocalInteraction = Icons.auto_awesome_rounded;
+
+  /// Cache and data.
+  static const IconData settingsCache = Remix.database_2_line;
+
+  /// Backup and restore.
+  static const IconData settingsBackup = Remix.cloud_line;
+
+  /// The local configuration preview.
+  static const IconData settingsConfigPreview = Remix.file_text_line;
+
+  // ---- settings: appearance (3.x theme_settings_page.dart; U.6b) ----
+
+  /// Theme mode.
+  static const IconData themeMode = Remix.moon_clear_line;
+
+  /// Pure black background.
+  static const IconData pureBlack = Remix.contrast_2_line;
+
+  /// Theme colour (and the loading colour).
+  static const IconData themeColor = Remix.palette_line;
+
+  /// Dynamic colour.
+  static const IconData dynamicColor = Remix.magic_line;
+
+  /// Room card settings; also the multi-view entry (3.x used one icon).
+  static const IconData roomCardSettings = Remix.layout_grid_line;
+
+  /// Column spacing.
+  static const IconData columnSpacing = Remix.arrow_left_right_line;
+
+  /// Row spacing.
+  static const IconData rowSpacing = Remix.arrow_up_down_line;
+
+  /// The scroll-to-top button.
+  static const IconData scrollToTop = Remix.arrow_up_circle_line;
+
+  /// Paging settings.
+  static const IconData pageSettings = Remix.pages_line;
+
+  /// Interface mode (phone or TV).
+  static const IconData uiMode = Remix.tv_2_line;
+
+  /// The app font.
+  static const IconData appFont = Remix.font_color;
+
+  /// Text size.
+  static const IconData textSize = Remix.text_spacing;
+
+  /// The five text sizes; the small text size.
+  static const IconData fontSizes = Remix.font_size;
+
+  /// Body text size.
+  static const IconData fontBody = Remix.text;
+
+  /// Large body text size.
+  static const IconData fontBodyLarge = Remix.text_wrap;
+
+  /// Card title size.
+  static const IconData fontTitle = Remix.heading;
+
+  /// App bar title size.
+  static const IconData fontTitleLarge = Remix.bold;
+
+  /// Reset the text sizes (3.x).
+  static const IconData resetFontSizes = Remix.rest_time_line;
+
+  /// Restore the loading style (3.x).
+  static const IconData restoreDefault = Remix.arrow_go_back_line;
+
+  /// Reset the room card layout (3.x).
+  static const IconData resetLayout = Remix.restart_line;
+
+  /// Show the anchor's avatar.
+  static const IconData cardAvatar = Remix.user_3_line;
+
+  /// Show the anchor's name.
+  static const IconData cardAnchor = Remix.account_circle_line;
+
+  /// Show the audience.
+  static const IconData cardAudience = Remix.group_line;
+
+  /// Show the replay badge.
+  static const IconData cardReplay = Remix.video_line;
+
+  /// The card layout.
+  static const IconData cardLayout = Icons.view_agenda_outlined;
+
+  /// The corner radius.
+  static const IconData cornerRadius = Remix.rounded_corner;
+
+  /// Drag to reorder.
+  static const IconData dragHandle = Icons.drag_handle_rounded;
+
+  /// The page-size selector of the pager.
+  static const IconData pageSizeSelector = Remix.list_settings_line;
+
+  /// "Go to page" of the pager.
+  static const IconData pageGoto = Remix.skip_forward_mini_line;
+
+  /// The page sizes offered.
+  static const IconData pageSizeOptions = Remix.list_check_2;
+
+  /// The default page size.
+  static const IconData pageDefaultSize = Remix.layout_line;
+
+  /// Back to the recommended page sizes.
+  static const IconData pageSizeRecommended = Icons.restart_alt_rounded;
+
+  /// The system font.
+  static const IconData systemFont = Icons.settings_suggest_outlined;
+
+  /// Open a folder.
+  static const IconData openFolder = Remix.folder_open_line;
+
+  /// Delete.
+  static const IconData delete = Remix.delete_bin_6_line;
+
+  /// Download.
+  static const IconData download = Remix.download_cloud_2_line;
+
+  /// More actions (⋮).
+  static const IconData moreVertical = Icons.more_vert_rounded;
+
+  /// Search.
+  static const IconData search = Remix.search_line;
+
+  /// The chosen item of a gallery (a loading style).
+  static const IconData chosen = Icons.check_circle_rounded;
 }

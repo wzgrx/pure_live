@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/theme/live_colors.dart';
 
 /// The page transitions of 3.x (`appPageTransitionsTheme`).
 ///
@@ -91,8 +92,26 @@ final class LiveFontSizes {
 @immutable
 final class LiveTheme {
   /// Creates the theme.
-  const new({this.primaryColor, this.colorScheme, this.fontSizes = const LiveFontSizes(), this.fontFamily})
-    : assert(colorScheme == null || primaryColor == null, 'give a seed colour or a colour scheme, not both');
+  ///
+  /// [schemeVariant] picks how a seed colour becomes the palette (null keeps
+  /// Material's default, tonal spot; the app passes fidelity so the primary
+  /// stays the chosen colour, U.6b C-3). [pureBlack] darkens the dark
+  /// theme's surfaces to black (U.6b C-4); the light theme ignores it.
+  const new({
+    this.primaryColor,
+    this.colorScheme,
+    this.fontSizes = const LiveFontSizes(),
+    this.fontFamily,
+    this.schemeVariant,
+    this.pureBlack = false,
+  }) : assert(colorScheme == null || primaryColor == null, 'give a seed colour or a colour scheme, not both');
+
+  /// The default theme colour (U.6b C-3): a brand blue that, with
+  /// [DynamicSchemeVariant.fidelity], keeps 4.5:1 for white text.
+  static const Color brandBlue = Color(0xFF2E6FE0);
+
+  /// 3.x's default theme colour (`Colors.blue`), moved to [brandBlue].
+  static const Color legacyBlue = Color(0xFF2196F3);
 
   /// Regular weight.
   static const FontWeight regular = FontWeight.w400;
@@ -120,6 +139,12 @@ final class LiveTheme {
 
   /// The font family, see [resolveAppFontFamily].
   final String? fontFamily;
+
+  /// How [primaryColor] becomes the palette; null is Material's default.
+  final DynamicSchemeVariant? schemeVariant;
+
+  /// Black surfaces in the dark theme ([LivePureBlack]).
+  final bool pureBlack;
 
   /// The light theme.
   ThemeData get light => _build(Brightness.light);
@@ -154,11 +179,20 @@ final class LiveTheme {
     final isDark = brightness == Brightness.dark;
     var scheme = colorScheme;
     if (isDark && scheme != null) scheme = scheme.copyWith(error: darkDynamicError);
+    final seed = primaryColor;
+    if (scheme == null && seed != null && (schemeVariant != null || (isDark && pureBlack))) {
+      scheme = ColorScheme.fromSeed(
+        seedColor: seed,
+        brightness: brightness,
+        dynamicSchemeVariant: schemeVariant ?? DynamicSchemeVariant.tonalSpot,
+      );
+    }
+    if (isDark && pureBlack && scheme != null) scheme = LivePureBlack.apply(scheme);
     final textTheme = _textTheme(isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme);
     final base = ThemeData(
       brightness: brightness,
       fontFamily: fontFamily,
-      colorSchemeSeed: primaryColor,
+      colorSchemeSeed: scheme == null ? primaryColor : null,
       colorScheme: scheme,
       textTheme: textTheme,
       primaryTextTheme: textTheme,
@@ -242,8 +276,10 @@ final class LiveTheme {
       other.primaryColor == primaryColor &&
       other.colorScheme == colorScheme &&
       other.fontSizes == fontSizes &&
-      other.fontFamily == fontFamily;
+      other.fontFamily == fontFamily &&
+      other.schemeVariant == schemeVariant &&
+      other.pureBlack == pureBlack;
 
   @override
-  int get hashCode => Object.hash(primaryColor, colorScheme, fontSizes, fontFamily);
+  int get hashCode => Object.hash(primaryColor, colorScheme, fontSizes, fontFamily, schemeVariant, pureBlack);
 }

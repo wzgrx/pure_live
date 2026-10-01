@@ -1,0 +1,1102 @@
+import 'package:flutter/material.dart';
+import 'package:live_ui/src/theme/live_colors.dart';
+
+// The settings row of every settings page (docs/ui/compare/U.6a, "设置行"):
+// one look for link, switch, choice, slider and counter rows, with pressed,
+// keyboard-focus, hover, disabled and busy states. 3.x had four builders
+// (`buildTile`, `buildSwitchTile`, `buildMenuTile`, `buildSliderTile`) plus
+// pages that drew their own; its explanations showed one line at about
+// 3.4:1. Here the explanation is the theme's `onSurfaceVariant` on
+// `surfaceContainerLow` (above 4.5:1 in every Material scheme) and wraps to
+// two lines.
+
+/// The width under which, or the text scale above which, a row's value
+/// moves under its title (3.x `stackTrailingOnNarrow`).
+const double settingsRowNarrowWidth = 360;
+
+/// Text scale from which a row's value moves under its title.
+const double settingsRowLargeText = 1.5;
+
+/// How settings rows look in a subtree: the phone and desktop style, or the
+/// television style (focus enlarges the row and draws a near-white frame,
+/// text one step larger; UI_PLAN §5.5).
+class SettingsRowStyle extends InheritedWidget {
+  /// Applies [tv] to [child].
+  const new({required this.tv, required super.child, super.key});
+
+  /// The television style.
+  final bool tv;
+
+  /// Whether rows under [context] use the television style.
+  static bool tvOf(BuildContext context) => context.dependOnInheritedWidgetOfExactType<SettingsRowStyle>()?.tv ?? false;
+
+  @override
+  bool updateShouldNotify(SettingsRowStyle oldWidget) => oldWidget.tv != tv;
+}
+
+/// Words searched for: rows under it mark them in their title and
+/// explanation (the settings search).
+class SettingsHighlight extends InheritedWidget {
+  /// Marks [words] (lower case) under [child].
+  const new({required this.words, required super.child, super.key});
+
+  /// The words, lower case, not empty.
+  final List<String> words;
+
+  /// The words in scope, or none.
+  static List<String> of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<SettingsHighlight>()?.words ?? const [];
+
+  @override
+  bool updateShouldNotify(SettingsHighlight oldWidget) => oldWidget.words.join(' ') != words.join(' ');
+}
+
+/// [text] with [words] marked in a soft primary background.
+class HighlightedText extends StatelessWidget {
+  /// Creates the text.
+  const new(this.text, {required this.style, this.maxLines, this.words, super.key});
+
+  /// The text.
+  final String text;
+
+  /// Its style.
+  final TextStyle style;
+
+  /// Lines before an ellipsis.
+  final int? maxLines;
+
+  /// Words to mark; [SettingsHighlight.of] when null.
+  final List<String>? words;
+
+  @override
+  Widget build(BuildContext context) {
+    final marks = words ?? SettingsHighlight.of(context);
+    final overflow = maxLines == null ? null : TextOverflow.ellipsis;
+    if (marks.isEmpty) return Text(text, style: style, maxLines: maxLines, overflow: overflow);
+    final lower = text.toLowerCase();
+    final marked = List<bool>.filled(text.length, false);
+    for (final word in marks) {
+      if (word.isEmpty) continue;
+      var from = 0;
+      while (true) {
+        final at = lower.indexOf(word, from);
+        if (at < 0 || at + word.length > text.length) break;
+        for (var i = at; i < at + word.length; i++) {
+          marked[i] = true;
+        }
+        from = at + word.length;
+      }
+    }
+    final background = Theme.of(context).colorScheme.primary.withValues(alpha: 0.22);
+    final spans = <TextSpan>[];
+    var start = 0;
+    for (var i = 1; i <= text.length; i++) {
+      if (i == text.length || marked[i] != marked[start]) {
+        spans.add(
+          TextSpan(
+            text: text.substring(start, i),
+            style: marked[start] ? TextStyle(backgroundColor: background) : null,
+          ),
+        );
+        start = i;
+      }
+    }
+    return Text.rich(
+      TextSpan(style: style, children: spans),
+      maxLines: maxLines,
+      overflow: overflow,
+    );
+  }
+}
+
+/// A titled group of rows on one rounded card (U.6a: title 13 px semi-bold
+/// in the primary colour, card 16 px corners on `surfaceContainerLow`, a
+/// divider between rows that starts where the text starts).
+class SettingsGroup extends StatelessWidget {
+  /// Creates the group.
+  const new({
+    required this.children,
+    this.title,
+    this.note,
+    this.footer,
+    this.first = false,
+    this.card = true,
+    super.key,
+  });
+
+  /// Whether the children sit on the card; false lays them out as they are
+  /// (chips, a preview) under the title.
+  final bool card;
+
+  /// The group title; none draws only the card.
+  final String? title;
+
+  /// A line between the title and the card (how to use the group).
+  final String? note;
+
+  /// A line under the card.
+  final String? footer;
+
+  /// The first group of a page (less space above the title).
+  final bool first;
+
+  /// The rows.
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final tv = SettingsRowStyle.tvOf(context);
+    final divider = Padding(
+      padding: const EdgeInsetsDirectional.only(start: 56),
+      child: Divider(height: 1, thickness: 1, color: colors.outlineVariant.withValues(alpha: 0.7)),
+    );
+    final rows = <Widget>[];
+    for (final (index, child) in children.indexed) {
+      if (index > 0) rows.add(divider);
+      rows.add(child);
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (title case final title?)
+          Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(16, first ? 8 : 18, 16, 8),
+            child: Semantics(
+              header: true,
+              child: Text(
+                title,
+                style: (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
+                  fontSize: tv ? 15 : 13,
+                  fontWeight: FontWeight.w600,
+                  color: colors.primary,
+                ),
+              ),
+            ),
+          ),
+        if (note case final note?) SettingsNote(note, padding: const EdgeInsets.fromLTRB(8, 0, 8, 12)),
+        if (!card)
+          ...children
+        else
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerLow,
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: rows,
+              ),
+            ),
+          ),
+        if (footer case final footer?) SettingsNote(footer),
+      ],
+    );
+  }
+}
+
+/// A line of explanation under or above a group (12 px, secondary colour).
+class SettingsNote extends StatelessWidget {
+  /// Creates the line.
+  const new(this.text, {this.padding = const EdgeInsets.fromLTRB(8, 12, 8, 0), super.key});
+
+  /// The text.
+  final String text;
+
+  /// Space around it.
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: padding,
+      child: Text(
+        text,
+        style: (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
+          fontSize: SettingsRowStyle.tvOf(context) ? 14 : 12,
+          height: 1.5,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+}
+
+/// The frame every row kind shares: icon, title, explanation, something at
+/// the end and optionally something below; the states.
+class SettingsRow extends StatefulWidget {
+  /// Creates a row; most pages use the named kinds ([SettingsLinkRow],
+  /// [SettingsSwitchRow], [SettingsSliderRow], [SettingsCounterRow],
+  /// [SettingsChipsRow]).
+  const new({
+    required this.title,
+    this.icon,
+    this.leading,
+    this.subtitle,
+    this.subtitleColor,
+    this.trailing,
+    this.stackTrailing = true,
+    this.below,
+    this.onTap,
+    this.enabled = true,
+    this.disabledReason,
+    this.busy = false,
+    this.selected = false,
+    this.tooltip,
+    super.key,
+  });
+
+  /// The title.
+  final String title;
+
+  /// The icon at the start (22 px, primary colour).
+  final IconData? icon;
+
+  /// A widget instead of [icon] (a live preview, a picture).
+  final Widget? leading;
+
+  /// The explanation (at most two lines).
+  final String? subtitle;
+
+  /// The explanation's colour when it reports a problem (error red).
+  final Color? subtitleColor;
+
+  /// Shown at the end (value, switch, swatch, counter).
+  final Widget? trailing;
+
+  /// Whether [trailing] moves under the text on narrow rows or large text
+  /// (values and counters do; a switch stays at the end).
+  final bool stackTrailing;
+
+  /// Shown under the title row, aligned with the text (slider, chips).
+  final Widget? below;
+
+  /// The row's action; null makes the row not tappable.
+  final VoidCallback? onTap;
+
+  /// False greys the row out and ignores taps; [disabledReason] replaces
+  /// the explanation.
+  final bool enabled;
+
+  /// Why the row cannot be used now.
+  final String? disabledReason;
+
+  /// Working: a spinner at the end, taps ignored.
+  final bool busy;
+
+  /// The current item of a list (the left pane of the wide settings).
+  final bool selected;
+
+  /// A hint on hover (desktop).
+  final String? tooltip;
+
+  @override
+  State<SettingsRow> createState() => _SettingsRowState();
+}
+
+class _SettingsRowState extends State<SettingsRow> {
+  bool _focused = false;
+
+  bool get _keyboard => FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final tv = SettingsRowStyle.tvOf(context);
+    final usable = widget.enabled && !widget.busy;
+    final body = theme.textTheme.bodyMedium ?? const TextStyle();
+    final titleStyle = body.copyWith(
+      fontSize: tv ? 17 : 15,
+      fontWeight: FontWeight.w600,
+      height: 1.4,
+      color: widget.selected ? colors.onSecondaryContainer : colors.onSurface,
+    );
+    final subtitleStyle = body.copyWith(
+      fontSize: tv ? 14 : 12,
+      fontWeight: FontWeight.w400,
+      height: 1.45,
+      color: widget.subtitleColor ?? colors.onSurfaceVariant,
+    );
+    final subtitle = !widget.enabled && widget.disabledReason != null ? widget.disabledReason : widget.subtitle;
+    final leading =
+        widget.leading ?? (widget.icon == null ? null : Icon(widget.icon, size: tv ? 24 : 22, color: colors.primary));
+    final trailing = widget.busy
+        ? SizedBox.square(
+            dimension: 24,
+            child: Padding(
+              padding: const EdgeInsets.all(2),
+              child: CircularProgressIndicator(strokeWidth: 2.5, color: colors.primary),
+            ),
+          )
+        : widget.trailing;
+
+    final text = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        HighlightedText(widget.title, style: titleStyle),
+        if (subtitle != null && subtitle.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: HighlightedText(subtitle, style: subtitleStyle, maxLines: 2),
+          ),
+      ],
+    );
+
+    final content = LayoutBuilder(
+      builder: (context, constraints) {
+        final scale = MediaQuery.textScalerOf(context).scale(10) / 10;
+        final stack =
+            widget.stackTrailing &&
+            trailing != null &&
+            (constraints.maxWidth < settingsRowNarrowWidth || scale >= settingsRowLargeText);
+        final start = leading == null
+            ? null
+            : SizedBox(
+                width: tv ? 28 : 24,
+                child: Center(child: leading),
+              );
+        return Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(16, 10, 12, widget.below == null ? 10 : 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(minHeight: subtitle == null || subtitle.isEmpty ? 36 : 44),
+                child: Row(
+                  children: [
+                    if (start != null) ...[start, const SizedBox(width: 16)],
+                    Expanded(
+                      child: stack
+                          ? Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [text, const SizedBox(height: 6), trailing],
+                            )
+                          : text,
+                    ),
+                    if (!stack && trailing != null) ...[const SizedBox(width: 12), trailing],
+                  ],
+                ),
+              ),
+              if (widget.below case final below?)
+                Padding(
+                  padding: EdgeInsetsDirectional.only(start: start == null ? 0 : (tv ? 44 : 40)),
+                  child: below,
+                ),
+            ],
+          ),
+        );
+      },
+    );
+
+    final overlay = colors.onSurface;
+    Widget row = Material(
+      color: widget.selected ? colors.secondaryContainer : Colors.transparent,
+      child: InkWell(
+        onTap: usable ? widget.onTap : null,
+        canRequestFocus: usable && widget.onTap != null,
+        hoverColor: overlay.withValues(alpha: 0.06),
+        highlightColor: overlay.withValues(alpha: 0.10),
+        focusColor: overlay.withValues(alpha: 0.04),
+        splashFactory: NoSplash.splashFactory,
+        onFocusChange: (focused) => setState(() => _focused = focused),
+        child: content,
+      ),
+    );
+
+    final showRing = _focused && (_keyboard || tv);
+    row = DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        border: showRing ? Border.all(color: tv ? LiveTvColors.focusFrame : colors.primary, width: tv ? 3 : 2) : null,
+      ),
+      child: row,
+    );
+    if (tv) row = AnimatedScale(scale: _focused ? 1.05 : 1, duration: const Duration(milliseconds: 150), child: row);
+    if (widget.tooltip case final tooltip?) row = Tooltip(message: tooltip, child: row);
+    if (!widget.enabled) {
+      row = Opacity(
+        opacity: 0.38,
+        child: IgnorePointer(child: ExcludeFocus(child: row)),
+      );
+    }
+    return Semantics(enabled: usable, selected: widget.selected, child: row);
+  }
+}
+
+/// A row that opens something: a page, a dialog of choices, a colour. The
+/// current value (14 px, secondary colour) or [valueWidget] (a swatch) sits
+/// before the chevron.
+class SettingsLinkRow extends StatelessWidget {
+  /// Creates the row.
+  const new({
+    required this.title,
+    required this.onTap,
+    this.icon,
+    this.leading,
+    this.subtitle,
+    this.subtitleColor,
+    this.value,
+    this.valueWidget,
+    this.chevron = true,
+    this.enabled = true,
+    this.disabledReason,
+    this.busy = false,
+    this.selected = false,
+    this.tooltip,
+    super.key,
+  });
+
+  /// The title.
+  final String title;
+
+  /// The action.
+  final VoidCallback? onTap;
+
+  /// The icon.
+  final IconData? icon;
+
+  /// A widget instead of [icon].
+  final Widget? leading;
+
+  /// The explanation.
+  final String? subtitle;
+
+  /// The explanation's colour when it reports a problem.
+  final Color? subtitleColor;
+
+  /// The current value.
+  final String? value;
+
+  /// A widget instead of [value] (a colour swatch).
+  final Widget? valueWidget;
+
+  /// Whether the chevron shows.
+  final bool chevron;
+
+  /// See [SettingsRow.enabled].
+  final bool enabled;
+
+  /// See [SettingsRow.disabledReason].
+  final String? disabledReason;
+
+  /// See [SettingsRow.busy].
+  final bool busy;
+
+  /// See [SettingsRow.selected].
+  final bool selected;
+
+  /// See [SettingsRow.tooltip].
+  final String? tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final tv = SettingsRowStyle.tvOf(context);
+    final value = this.value;
+    final trailing = <Widget>[
+      ?valueWidget,
+      if (value != null && value.isNotEmpty)
+        Flexible(
+          child: Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.end,
+            style: (Theme.of(context).textTheme.bodyMedium ?? const TextStyle()).copyWith(
+              fontSize: tv ? 16 : 14,
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+        ),
+      if (chevron) Icon(Icons.chevron_right_rounded, size: 22, color: colors.onSurfaceVariant),
+    ];
+    return SettingsRow(
+      title: title,
+      icon: icon,
+      leading: leading,
+      subtitle: subtitle,
+      subtitleColor: subtitleColor,
+      enabled: enabled,
+      disabledReason: disabledReason,
+      busy: busy,
+      selected: selected,
+      tooltip: tooltip,
+      onTap: onTap,
+      trailing: trailing.isEmpty
+          ? null
+          : ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 200),
+              child: Row(mainAxisSize: MainAxisSize.min, spacing: 4, children: trailing),
+            ),
+    );
+  }
+}
+
+/// A switch row: a tap anywhere on the row switches it.
+class SettingsSwitchRow extends StatelessWidget {
+  /// Creates the row.
+  const new({
+    required this.title,
+    required this.value,
+    required this.onChanged,
+    this.icon,
+    this.leading,
+    this.subtitle,
+    this.subtitleColor,
+    this.enabled = true,
+    this.disabledReason,
+    this.busy = false,
+    super.key,
+  });
+
+  /// The title.
+  final String title;
+
+  /// On or off.
+  final bool value;
+
+  /// Receives the new value; null disables the row.
+  final ValueChanged<bool>? onChanged;
+
+  /// The icon.
+  final IconData? icon;
+
+  /// A widget instead of [icon].
+  final Widget? leading;
+
+  /// The explanation.
+  final String? subtitle;
+
+  /// The explanation's colour when it reports a problem.
+  final Color? subtitleColor;
+
+  /// See [SettingsRow.enabled].
+  final bool enabled;
+
+  /// See [SettingsRow.disabledReason].
+  final String? disabledReason;
+
+  /// See [SettingsRow.busy].
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context) {
+    final usable = enabled && onChanged != null && !busy;
+    return SettingsRow(
+      title: title,
+      icon: icon,
+      leading: leading,
+      subtitle: subtitle,
+      subtitleColor: subtitleColor,
+      enabled: enabled && onChanged != null,
+      disabledReason: disabledReason,
+      busy: busy,
+      stackTrailing: false,
+      onTap: usable ? () => onChanged!(!value) : null,
+      // The row takes the taps and the focus; the switch only shows the
+      // state (Material 3's default colours: an on switch has a light thumb
+      // on the primary track, so the thumb stays visible, U.4f).
+      trailing: ExcludeFocus(
+        child: IgnorePointer(
+          child: Switch(value: value, onChanged: usable ? (_) {} : null),
+        ),
+      ),
+    );
+  }
+}
+
+/// A slider row: the value in a pill at the end, the slider under the text.
+/// The page stores the value when the drag ends (or a short pause).
+class SettingsSliderRow extends StatelessWidget {
+  /// Creates the row.
+  const new({
+    required this.title,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.label,
+    required this.onChanged,
+    this.onChangeEnd,
+    this.divisions,
+    this.marks = const [],
+    this.icon,
+    this.leading,
+    this.subtitle,
+    this.below,
+    this.enabled = true,
+    this.disabledReason,
+    super.key,
+  });
+
+  /// The title.
+  final String title;
+
+  /// The value shown.
+  final double value;
+
+  /// The range.
+  final double min;
+
+  /// The range.
+  final double max;
+
+  /// The pill's text ("100%", "12px").
+  final String label;
+
+  /// Every move.
+  final ValueChanged<double>? onChanged;
+
+  /// The end of a drag.
+  final ValueChanged<double>? onChangeEnd;
+
+  /// Steps of the slider.
+  final int? divisions;
+
+  /// Values marked on the track (the usual stops).
+  final List<double> marks;
+
+  /// The icon.
+  final IconData? icon;
+
+  /// A widget instead of [icon].
+  final Widget? leading;
+
+  /// The explanation.
+  final String? subtitle;
+
+  /// Shown under the slider (an example text).
+  final Widget? below;
+
+  /// See [SettingsRow.enabled].
+  final bool enabled;
+
+  /// See [SettingsRow.disabledReason].
+  final String? disabledReason;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final pill = DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.primary.withValues(alpha: 0.12),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        child: Text(
+          label,
+          style: (theme.textTheme.bodyMedium ?? const TextStyle()).tabular.copyWith(
+            fontSize: SettingsRowStyle.tvOf(context) ? 15 : 13,
+            fontWeight: FontWeight.w600,
+            color: colors.primary,
+          ),
+        ),
+      ),
+    );
+    final span = max - min;
+    final slider = SliderTheme(
+      data: SliderThemeData(
+        trackHeight: 4,
+        activeTrackColor: colors.primary,
+        inactiveTrackColor: colors.primary.withValues(alpha: 0.18),
+        thumbColor: colors.primary,
+        overlayColor: colors.primary.withValues(alpha: 0.12),
+        thumbShape: const RoundSliderThumbShape(elevation: 0, pressedElevation: 0),
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (marks.isNotEmpty && span > 0)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Padding(
+                  // Material's slider keeps the overlay radius (24) free at
+                  // both ends.
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => Stack(
+                      children: [
+                        for (final mark in marks)
+                          Positioned(
+                            left: constraints.maxWidth * ((mark - min) / span).clamp(0, 1) - 3,
+                            top: constraints.maxHeight / 2 - 3,
+                            child: Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: colors.primary.withValues(alpha: 0.45),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          Slider(
+            value: value.clamp(min, max),
+            min: min,
+            max: max,
+            divisions: divisions,
+            onChanged: enabled ? onChanged : null,
+            onChangeEnd: enabled ? onChangeEnd : null,
+          ),
+        ],
+      ),
+    );
+    return SettingsRow(
+      title: title,
+      icon: icon,
+      leading: leading,
+      subtitle: subtitle,
+      enabled: enabled,
+      disabledReason: disabledReason,
+      stackTrailing: false,
+      trailing: pill,
+      below: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Transform.translate(offset: const Offset(-14, 0), child: slider),
+          ?below,
+        ],
+      ),
+    );
+  }
+}
+
+/// A counter row: − and + change the value by one step, the number opens a
+/// field to type it ([onValueTap]).
+class SettingsCounterRow extends StatelessWidget {
+  /// Creates the row.
+  const new({
+    required this.title,
+    required this.value,
+    required this.onDecrease,
+    required this.onIncrease,
+    required this.decreaseTooltip,
+    required this.increaseTooltip,
+    this.onValueTap,
+    this.icon,
+    this.leading,
+    this.subtitle,
+    this.enabled = true,
+    this.disabledReason,
+    this.valueKey,
+    this.decreaseKey,
+    this.increaseKey,
+    super.key,
+  });
+
+  /// The title.
+  final String title;
+
+  /// The value as shown ("6 px").
+  final String value;
+
+  /// One step down; null at the minimum.
+  final VoidCallback? onDecrease;
+
+  /// One step up; null at the maximum.
+  final VoidCallback? onIncrease;
+
+  /// The − button's name.
+  final String decreaseTooltip;
+
+  /// The + button's name.
+  final String increaseTooltip;
+
+  /// A tap on the number.
+  final VoidCallback? onValueTap;
+
+  /// The icon.
+  final IconData? icon;
+
+  /// A widget instead of [icon].
+  final Widget? leading;
+
+  /// The explanation.
+  final String? subtitle;
+
+  /// See [SettingsRow.enabled].
+  final bool enabled;
+
+  /// See [SettingsRow.disabledReason].
+  final String? disabledReason;
+
+  /// Keys of the number and the buttons (tests).
+  final Key? valueKey;
+
+  /// Key of the − button.
+  final Key? decreaseKey;
+
+  /// Key of the + button.
+  final Key? increaseKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    Widget button(IconData glyph, String tooltip, VoidCallback? onPressed, Key? key) => IconButton(
+      key: key,
+      tooltip: tooltip,
+      onPressed: onPressed,
+      style: IconButton.styleFrom(
+        fixedSize: const Size.square(40),
+        minimumSize: const Size.square(40),
+        side: BorderSide(color: colors.outlineVariant),
+        foregroundColor: colors.onSurface,
+      ),
+      icon: Icon(glyph, size: 20),
+    );
+    final number = InkWell(
+      key: valueKey,
+      onTap: onValueTap,
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 56, minHeight: 40),
+        child: Center(
+          child: Text(
+            value,
+            style: (theme.textTheme.bodyMedium ?? const TextStyle()).tabular.copyWith(
+              fontSize: SettingsRowStyle.tvOf(context) ? 16 : 14,
+              fontWeight: FontWeight.w600,
+              color: colors.onSurface,
+              decoration: onValueTap == null ? null : TextDecoration.underline,
+              decorationStyle: TextDecorationStyle.dotted,
+              decorationColor: colors.outline,
+            ),
+          ),
+        ),
+      ),
+    );
+    return SettingsRow(
+      title: title,
+      icon: icon,
+      leading: leading,
+      subtitle: subtitle,
+      enabled: enabled,
+      disabledReason: disabledReason,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          button(Icons.remove_rounded, decreaseTooltip, onDecrease, decreaseKey),
+          number,
+          button(Icons.add_rounded, increaseTooltip, onIncrease, increaseKey),
+        ],
+      ),
+    );
+  }
+}
+
+/// One short option of a [SettingsChipsRow].
+typedef SettingsChip<T> = ({T value, String label, Key? key});
+
+/// Two or three short options laid out on the row (3.x's room card layout
+/// and platform badge); the chosen one is filled and ticked.
+class SettingsChipsRow<T> extends StatelessWidget {
+  /// Creates the row.
+  const new({
+    required this.title,
+    required this.options,
+    required this.selected,
+    required this.onSelected,
+    this.icon,
+    this.subtitle,
+    this.enabled = true,
+    super.key,
+  });
+
+  /// The title.
+  final String title;
+
+  /// The options.
+  final List<SettingsChip<T>> options;
+
+  /// The current option.
+  final T? selected;
+
+  /// Receives the picked option.
+  final ValueChanged<T>? onSelected;
+
+  /// The icon.
+  final IconData? icon;
+
+  /// The explanation.
+  final String? subtitle;
+
+  /// See [SettingsRow.enabled].
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) => SettingsRow(
+    title: title,
+    icon: icon,
+    subtitle: subtitle,
+    enabled: enabled,
+    below: Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 2),
+      child: SettingsChoiceChips<T>(options: options, selected: selected, onSelected: onSelected),
+    ),
+  );
+}
+
+/// The chips of [SettingsChipsRow], also used alone (presets).
+class SettingsChoiceChips<T> extends StatelessWidget {
+  /// Creates the chips.
+  const new({required this.options, required this.selected, required this.onSelected, super.key});
+
+  /// The options.
+  final List<SettingsChip<T>> options;
+
+  /// The current option.
+  final T? selected;
+
+  /// Receives the picked option.
+  final ValueChanged<T>? onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final option in options)
+          ChoiceChip(
+            key: option.key,
+            label: Text(option.label),
+            selected: option.value == selected,
+            showCheckmark: true,
+            checkmarkColor: colors.onSecondaryContainer,
+            selectedColor: colors.secondaryContainer,
+            labelStyle: TextStyle(
+              fontSize: 14,
+              fontWeight: option.value == selected ? FontWeight.w600 : FontWeight.w400,
+              color: option.value == selected ? colors.onSecondaryContainer : colors.onSurface,
+            ),
+            side: option.value == selected ? BorderSide.none : BorderSide(color: colors.outlineVariant),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+            onSelected: onSelected == null ? null : (_) => onSelected!(option.value),
+          ),
+      ],
+    );
+  }
+}
+
+/// A round colour swatch at the end of a colour row (28 px).
+class SettingsSwatch extends StatelessWidget {
+  /// Creates the swatch.
+  const new(this.color, {this.size = 28, super.key});
+
+  /// The colour.
+  final Color color;
+
+  /// Its diameter.
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      color: color,
+      shape: BoxShape.circle,
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+    ),
+  );
+}
+
+/// The settings search field (48 high, round): search icon, text, clear.
+class SettingsSearchField extends StatelessWidget {
+  /// Creates the field.
+  const new({
+    required this.controller,
+    required this.hint,
+    required this.clearTooltip,
+    this.focusNode,
+    this.fieldKey,
+    this.clearKey,
+    super.key,
+  });
+
+  /// The text.
+  final TextEditingController controller;
+
+  /// The empty field's hint ("搜索设置").
+  final String hint;
+
+  /// The clear button's name.
+  final String clearTooltip;
+
+  /// The focus (Ctrl+F moves it here).
+  final FocusNode? focusNode;
+
+  /// Key of the text field.
+  final Key? fieldKey;
+
+  /// Key of the clear button.
+  final Key? clearKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return ValueListenableBuilder(
+      valueListenable: controller,
+      builder: (context, value, _) => SizedBox(
+        height: 48,
+        child: TextField(
+          key: fieldKey,
+          controller: controller,
+          focusNode: focusNode,
+          textInputAction: TextInputAction.search,
+          style: TextStyle(fontSize: 15, color: colors.onSurface),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(fontSize: 15, color: colors.onSurfaceVariant),
+            filled: true,
+            fillColor: colors.surfaceContainerHigh,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            prefixIcon: Icon(Icons.search_rounded, size: 22, color: colors.onSurfaceVariant),
+            suffixIcon: value.text.isEmpty
+                ? null
+                : IconButton(
+                    key: clearKey,
+                    tooltip: clearTooltip,
+                    icon: Icon(Icons.close_rounded, size: 20, color: colors.onSurfaceVariant),
+                    onPressed: controller.clear,
+                  ),
+            border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(24)),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(24)),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: const BorderRadius.all(Radius.circular(24)),
+              borderSide: BorderSide(color: colors.primary, width: 1.5),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

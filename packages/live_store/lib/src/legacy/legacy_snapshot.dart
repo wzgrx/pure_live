@@ -34,6 +34,7 @@ final class LegacySnapshot {
         strict: false,
       )
       .._readSecrets(raw)
+      .._upgradeThemeColor()
       .._applyHiveCounters(raw)
       .._keepOtherValues(raw);
     return snapshot;
@@ -110,6 +111,9 @@ final class LegacySnapshot {
       if (sections['cookie'] case final cookie?) snapshot._readSecrets(cookie);
       snapshot.favoritesOnly = json['backupScope'] == 'favorites';
     }
+    // 3.x's files (version 3 and older) carry its default blue; v4's own
+    // backups keep whatever the user picked.
+    if (version == null || (version as int) < 4) snapshot._upgradeThemeColor();
     if (!snapshot._recognized) throw const FormatException('No recognized backup settings');
     return snapshot;
   }
@@ -365,6 +369,12 @@ final class LegacySnapshot {
     if (found.isEmpty) return;
     _recognized = true;
     secrets = found;
+  }
+
+  void _upgradeThemeColor() {
+    if (settings[Settings.themeColorSwitch] case final String hex) {
+      settings[Settings.themeColorSwitch] = LegacyRules.themeColor(hex);
+    }
   }
 
   /// The migration counters only the Hive box has: platform list version,

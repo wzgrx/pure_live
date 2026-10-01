@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:live_store/src/block_lists.dart';
 import 'package:live_store/src/database.dart';
+import 'package:live_store/src/legacy/legacy_rules.dart';
 import 'package:live_store/src/rooms.dart';
 import 'package:live_store/src/secrets.dart';
+import 'package:live_store/src/settings/settings.dart';
 import 'package:live_store/src/settings/settings_store.dart';
 import 'package:live_store/src/tags.dart';
 import 'package:live_store/src/webdav.dart';
@@ -103,7 +105,21 @@ final class LiveStore {
   static Future<LiveStore> _load(StoreDatabase db, SecretCipher cipher, {DateTime Function()? now}) async {
     final settings = await SettingsStore.load(db);
     final secrets = await SecretStore.load(db, cipher);
+    await _upgradeThemeColor(settings);
     return LiveStore._(db, settings, secrets, now: now);
+  }
+
+  /// Moves a stored 3.x default blue to the brand blue once (U.6b C-3):
+  /// installs that imported 3.x data before the default changed. 3.x data
+  /// imported later is converted on import (`LegacyRules.themeColor`).
+  static Future<void> _upgradeThemeColor(SettingsStore settings) async {
+    if (settings.get(Settings.themeColorMigration) >= 1) return;
+    final stored = settings.get(Settings.themeColorSwitch);
+    await settings.setAll({
+      if (settings.isSet(Settings.themeColorSwitch) && LegacyRules.themeColor(stored) != stored)
+        Settings.themeColorSwitch: Settings.brandThemeColor,
+      Settings.themeColorMigration: 1,
+    });
   }
 
   /// The database file name.

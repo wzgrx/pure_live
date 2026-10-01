@@ -129,8 +129,29 @@ abstract final class Settings {
   /// Material You colours.
   static const enableDynamicTheme = BoolSetting('enableDynamicTheme', section: 'theme', defaultValue: false);
 
-  /// Seed colour, `AARRGGBB` hex.
-  static const themeColorSwitch = StringSetting('themeColorSwitch', section: 'theme', defaultValue: 'FF2196F3');
+  /// Seed colour, `AARRGGBB` hex. The default is the brand blue (U.6b C-3);
+  /// 3.x's default [legacyThemeColor] is moved to it once
+  /// ([themeColorMigration], `LegacyRules.themeColor`).
+  static const themeColorSwitch = StringSetting('themeColorSwitch', section: 'theme', defaultValue: brandThemeColor);
+
+  /// The brand blue, the default theme colour.
+  static const String brandThemeColor = 'FF2E6FE0';
+
+  /// 3.x's default theme colour (`Colors.blue`); 3.x stored it on its first
+  /// start, so an untouched 3.x install has it.
+  static const String legacyThemeColor = 'FF2196F3';
+
+  /// New (U.6b C-4): black backgrounds in the dark theme.
+  static const pureBlackTheme = BoolSetting('pureBlackTheme', section: 'theme', defaultValue: false);
+
+  /// Bookkeeping: 1 once a stored [legacyThemeColor] was moved to
+  /// [brandThemeColor] (so a later pick of 3.x's blue stays).
+  static const themeColorMigration = IntSetting(
+    'themeColorMigration',
+    section: 'meta',
+    defaultValue: 0,
+    scope: SettingScope.internal,
+  );
 
   /// Language display name (`简体中文`, `English`); 3.x's backups also used
   /// `languageName`.
@@ -1072,6 +1093,8 @@ abstract final class Settings {
     themeMode,
     enableDynamicTheme,
     themeColorSwitch,
+    pureBlackTheme,
+    themeColorMigration,
     language,
     crossAxisSpacing,
     mainAxisSpacing,

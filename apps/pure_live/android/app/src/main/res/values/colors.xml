@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#FFFFFF</color>
+    <!-- The system splash screen (U.14 c9): the surface of the app's default
+         theme (seed 2E6FE0, as the splash page of U.3c); dark in values-night. -->
+    <color name="splash_background">#FAF8FF</color>
+    <color name="splash_light">#FAF8FF</color>
+    <color name="splash_dark">#121318</color>
+    <!-- Launcher shortcut icons (U.14 c15): primary container and its text. -->
+    <color name="shortcut_background">#D9E2FF</color>
+    <color name="shortcut_foreground">#2D4578</color>
 </resources>

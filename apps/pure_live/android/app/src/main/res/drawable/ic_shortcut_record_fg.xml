@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher shortcut "录制中心" (U.14 c15). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="2.0"
+        android:scaleY="2.0"
+        android:translateX="30"
+        android:translateY="30">
+        <path android:fillColor="@color/shortcut_foreground" android:fillType="evenOdd" android:pathData="M12,22C6.477,22 2,17.523 2,12S6.477,2 12,2s10,4.477 10,10 -4.477,10 -10,10zM12,20a8,8 0,1 0,0 -16,8 8,0 0,0 0,16zM12,15a3,3 0,1 1,0 -6,3 3,0 0,1 0,6z" />
+    </group>
+</vector>

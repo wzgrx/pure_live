@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The system splash screen's icon (Android 12+, U.14 c9): the app's logo without the
+     white circle, 150 dp of the 288 dp icon box like the splash page's logo (U.3c). -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/splash_logo"
+    android:inset="24%" />

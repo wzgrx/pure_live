@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="AppName">纯粹直播</string>
+    <!-- Launcher shortcuts (U.14 c15). -->
+    <string name="shortcut_search">搜索直播</string>
+    <string name="shortcut_recordings">录制中心</string>
 </resources>

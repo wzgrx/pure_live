@@ -21,8 +21,11 @@ import io.flutter.plugin.common.PluginRegistry
 /**
  * `pure_live/recorder` (3.x RecorderBackgroundPlugin and permission_handler's
  * storage requests, reduced to what the recorder uses):
- * - `setActive {active, title, text}`: starts [RecorderForegroundService] and
- *   answers once it is in the foreground, or stops it;
+ * - `setActive {active, title, text, …}`: starts [RecorderForegroundService]
+ *   and answers once it is in the foreground, or stops it; `update` sends
+ *   new words, `alert {id, title, text}` posts "录制已停止" ([RecordWords],
+ *   docs/ui/compare/U.14 c3–c5);
+ * - to Dart, `stopAll` when the notification's "停止录制" is pressed;
  * - `requestStorage`: all-files access (API 30+, the system settings page) or
  *   the storage permission (API 26–29); answers whether it is granted;
  * - `storageGranted`: the same without asking;
@@ -76,6 +79,25 @@ internal class RecorderPlugin :
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "setActive" -> setActive(call, result)
+            "update" -> {
+                context?.let { RecorderForegroundService.update(it, RecordWords.from(call.arguments)) }
+                result.success(null)
+            }
+
+            "alert" -> {
+                val context = context
+                if (context != null) {
+                    RecorderForegroundService.alert(
+                        context,
+                        call.argument<String>("id").orEmpty(),
+                        call.argument<String>("title").orEmpty().take(120),
+                        call.argument<String>("text").orEmpty().take(400),
+                        RecordWords.from(call.arguments),
+                    )
+                }
+                result.success(null)
+            }
+
             "storageGranted" -> result.success(storageGranted())
             "requestStorage" -> requestStorage(result)
             else -> result.notImplemented()
@@ -95,13 +117,11 @@ internal class RecorderPlugin :
         }
         if (active && pendingStart == null) return result.success(null)
         if (pendingStart != null) return result.error(ERROR, "The recording service is already starting", null)
-        val title = call.argument<String>("title")?.trim().orEmpty().take(120)
-        val text = call.argument<String>("text")?.trim().orEmpty().take(240)
         pendingStart = result
         active = true
         handler.postDelayed(startTimeout, START_TIMEOUT_MILLIS)
         try {
-            RecorderForegroundService.start(context, title, text)
+            RecorderForegroundService.start(context, RecordWords.from(call.arguments))
         } catch (exception: Exception) {
             failStart(exception.localizedMessage ?: "Foreground service startup failed")
         }
@@ -132,6 +152,12 @@ internal class RecorderPlugin :
         }
         active = false
         channel?.invokeMethod("interrupted", mapOf("reason" to reason))
+    }
+
+    // The notification's "停止录制" (U.14 c4): the recorder stops its tasks
+    // and then releases the service.
+    override fun onStopRequested() {
+        if (active) channel?.invokeMethod("stopAll", null)
     }
 
     private fun storageGranted(): Boolean {

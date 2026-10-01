@@ -1,13 +1,13 @@
 # F.1d 冷门的播放设置
 
-- 状态：开发中
+- 状态：完成（2026-10-02，[记录](../records/F.1d.md)）
 - 档位：可以以后；规模：中
 - 功能点：F-ROOM-21、F-PORT-05、F-PORT-06、F-MINI-04、F-APP-17、F-ROOM-25（见 [INVENTORY.md](../INVENTORY.md)）
 - 涉及代码：`features/live_play/`（`live_play_page.dart`、`logic/room_runtime.dart`、新 `logic/player_standby.dart`、`logic/mini_window.dart`、`mini/`、`player/`）、`app/app.dart`；设置行已在 `features/settings/settings_catalog.dart`（U.6c）
 - 依赖：U.6c（已完成）
 - 来源：M12.4（`useHardStopOnExit`）、M13.7（小窗弹幕预览）、M13.14 第 4 项、M13.17 任务说明第 5、8、9 项
 - 评审页：X1 用户已定 A；其余只把 v3 的行为补回来
-- 记录：[records/F.1d.md](../records/F.1d.md)（开发后）
+- 记录：[records/F.1d.md](../records/F.1d.md)
 
 ## v3 的行为（`~/ref/v3ref/lib`，v3.2.11）
 
@@ -75,3 +75,4 @@
 |---|---|
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比；F-MINI-04 已由 U.6c 做完，清点那一行改成完成 |
+| 2026-10-02 | 开发完成（c1～c6），待 K90 验证 |

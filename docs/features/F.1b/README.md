@@ -1,13 +1,13 @@
 # F.1b 竖屏流的画面比例预判
 
-- 状态：开发中
+- 状态：完成（2026-10-02，[记录](../records/F.1b.md)）
 - 档位：应该；规模：中
 - 功能点：F-ROOM-22（见 [INVENTORY.md](../INVENTORY.md)）
 - 涉及代码：`packages/live_core`（`play_line.dart`、`live_site.dart`、抖音 `douyin_api.dart`，只添加字段）、`packages/live_player`（`state.dart`，只添加）、`features/live_play/`
 - 依赖：—
 - 来源：M7.1、M7.2“放到其他模块的部分”，M13.17 任务说明第 8 项
 - 评审页：只把 v3 的行为补回来，按授权直接开发（X1 按 A）
-- 记录：[records/F.1b.md](../records/F.1b.md)（开发后）
+- 记录：[records/F.1b.md](../records/F.1b.md)
 
 ## v3 的行为（`~/ref/v3ref/lib`，v3.2.11）
 
@@ -62,3 +62,4 @@
 |---|---|
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比；X1 按 A（只有抖音） |
+| 2026-10-02 | 开发完成（c1～c3），待 K90 验证 |

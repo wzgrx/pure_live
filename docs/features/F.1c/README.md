@@ -1,13 +1,13 @@
 # F.1c 直播间小项：快手 App 跳转、切换直播间刷新、预测返回
 
-- 状态：开发中
+- 状态：完成（2026-10-02，[记录](../records/F.1c.md)）
 - 档位：应该；规模：小
 - 功能点：F-RT-05、F-RT-07、F-AND-08（见 [INVENTORY.md](../INVENTORY.md)）
 - 涉及代码：`features/live_play/buttons/room_menu_button.dart`、`dialogs/room_switcher.dart`、`live_play_page.dart`、`logic/`（新 `predictive_back.dart`）；`app/app.dart`（接上关注的刷新）
 - 依赖：—
 - 来源：M13.14“留给后续”第 6、7 项，M13.17 任务说明第 4、6、8 项
 - 评审页：按授权直接开发（只把 v3 的行为补回来，没有要选的）
-- 记录：[records/F.1c.md](../records/F.1c.md)（开发后）
+- 记录：[records/F.1c.md](../records/F.1c.md)
 
 ## v3 的行为（`~/ref/v3ref/lib`，v3.2.11）
 
@@ -60,3 +60,4 @@
 |---|---|
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比；`liveStreamId` 已在 `live_core`，c1 不改平台层 |
+| 2026-10-02 | 开发完成（c1～c3），待 K90 验证 |

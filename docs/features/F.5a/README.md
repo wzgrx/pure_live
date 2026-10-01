@@ -1,13 +1,13 @@
 # F.5a 已批准升级里还没做的（原 M13.18 收尾）
 
-- 状态：未开始
+- 状态：第 2、4 条完成（2026-10-02，[记录](../records/F.5a1.md)；界面部分交回，见记录“交给界面”）
 - 档位：可以以后；规模：大
 - 功能点：不是 v3 功能（[UPGRADES.md](../../UPGRADES.md) 的余项）（见 [INVENTORY.md](../INVENTORY.md)）
 - 涉及代码：多处，见下
 - 依赖：F.0～F.4 的“必须”完成后
 - 来源：scratchpad `rest/m13_18_closing.md`（没开始）、M13.17 任务说明第 7 项
 - 评审页：发评审页（条目多，逐条表态）
-- 记录：[records/F.5a.md](../records/F.5a.md)（开发后）
+- 记录：[records/F.5a.md](../records/F.5a.md)（开发后）；第 2、4 条：[records/F.5a1.md](../records/F.5a1.md)
 
 ## 要做的（逐条核对代码后再定范围）
 
@@ -81,7 +81,7 @@ WebDAV Digest 已拆到 F.4b。
 
 ## 测试和验证（第 2、4 条）
 
-- 单元测试：每条 c 至少一个（`live_core`、`live_danmaku`），用仓库里的样本（快手 S04、酷狗 `S09-pk-chat`、17LIVE `S06-live`、`live_vod/V09-playurl-mp4`、Picarto、YouTube、PandaTV 的样本）和合成回答；`getRoundPlayVideo` 没有录过样本，按 M4.01 记录的字段写合成回答。
+- 单元测试：每条 c 至少一个（`live_core`、`live_danmaku`），用仓库里的样本（快手 S09、酷狗 `S09-pk-chat`、17LIVE `S06-live`、`live_vod/V09-playurl-mp4`、Picarto、YouTube、PandaTV 的样本）和合成回答；`getRoundPlayVideo` 没有录过样本，按 M4.01 记录的字段写合成回答。
 - K90：这些都要界面接上后才看得到（见记录“交给界面”）：快手从推荐卡片进房显示卡片标题；哔哩哔哩找一个轮播房间进房能播放并从中途开始；酷狗 PK 时对方的聊天带“对方”；海外的（Twitch、Picarto、17LIVE）有代理时再看。
 
 ## 风险和性能（第 2、4 条）
@@ -96,3 +96,5 @@ WebDAV Digest 已拆到 F.4b。
 | 日期 | 内容 |
 |---|---|
 | 2026-10-02 | 建立（第 1 版清点） |
+| 2026-10-02 | 第 2、4 条：写功能对比，按授权直接开发（两处选择按 A） |
+| 2026-10-02 | 第 2、4 条平台层、弹幕层完成，界面部分交回；待界面接上后 K90 验证（快手标题下次装机即可看） |

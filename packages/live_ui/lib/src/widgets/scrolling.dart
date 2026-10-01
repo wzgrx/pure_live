@@ -12,6 +12,12 @@ class PureLiveScrollPhysics extends ScrollPhysics {
   /// Creates the physics.
   const new({super.parent});
 
+  /// The platform's physics over [parent].
+  ScrollPhysics get _platform => switch (defaultTargetPlatform) {
+    TargetPlatform.iOS || TargetPlatform.macOS => BouncingScrollPhysics(parent: parent),
+    _ => ClampingScrollPhysics(parent: parent),
+  };
+
   @override
   ScrollPhysics applyTo(ScrollPhysics? ancestor) {
     final parent = buildParent(ancestor);
@@ -20,6 +26,35 @@ class PureLiveScrollPhysics extends ScrollPhysics {
       _ => ClampingScrollPhysics(parent: parent),
     };
   }
+
+  // Used without [applyTo] (as another physics' parent, or the scroll
+  // behaviour's physics) the instance itself must act like the platform's
+  // physics; plain ScrollPhysics has no edges, so lists scrolled past their
+  // content.
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) =>
+      _platform.applyPhysicsToUserOffset(position, offset);
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) =>
+      _platform.applyBoundaryConditions(position, value);
+
+  @override
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) =>
+      _platform.createBallisticSimulation(position, velocity);
+
+  @override
+  double get minFlingVelocity => _platform.minFlingVelocity;
+
+  @override
+  double get maxFlingVelocity => _platform.maxFlingVelocity;
+
+  @override
+  double carriedMomentum(double existingVelocity) => _platform.carriedMomentum(existingVelocity);
+
+  @override
+  double? get dragStartDistanceMotionThreshold => _platform.dragStartDistanceMotionThreshold;
 }
 
 /// Navigation strips, filters and paged views: never an offset before the

@@ -103,6 +103,27 @@ abstract final class YyApi {
   /// The `biz` of the recommendations, and of most live details: no area.
   static const String otherBiz = 'other';
 
+  /// Area names by `biz`, preset from the catalog (C-21): each area page's
+  /// `pageBar` (2026-10-01, all 18 areas of `getCategory`) for the `biz`
+  /// only one area uses. A detail's `biz` is its area's (checked on 298
+  /// live rooms of 7 areas), so a room entered directly is named without
+  /// reading an area page. Left out: `chicken` (和平精英, 天天吃鸡, 综合游戏
+  /// and 无畏契约 tell it apart by `subBiz`, which details lack), `other`
+  /// (no area) and the module-less areas (`null`). Names learnt from an
+  /// area page come first.
+  static const Map<String, String> bizAreaNames = {
+    'sing': '音乐',
+    'talk': '脱口秀',
+    'dance': '舞蹈',
+    'red': '户外',
+    'pretty': '颜值',
+    'mc': '喊麦',
+    'sport': '体育',
+    // The 二次元 page lists the `car` module.
+    'car': '二次元',
+    'game': '王者荣耀',
+  };
+
   /// The words YY appends to the default title of a room without one
   /// (`<nickname> 正在直播`; search's `channelName` and the lists' and
   /// detail's `desc` carry the same value).
@@ -172,6 +193,13 @@ abstract final class YyApi {
         if (_object(raw) case final tab? when jsonString(tab['id']) != null)
           (id: jsonString(tab['id'])!, name: jsonString(tab['title']) ?? ''),
     ];
+  }
+
+  /// Whether an area [page] is a short-video page (`www.yy.com/sv/`, 小视频
+  /// under 其他): no live rooms, so the catalog leaves it out (C-19).
+  static bool isShortVideoPage(Uri? page) {
+    final segments = page?.pathSegments.where((segment) => segment.isNotEmpty);
+    return segments != null && segments.isNotEmpty && segments.first.toLowerCase() == 'sv';
   }
 
   /// `category/getCategory.action?parentId=`: the areas of one category in
@@ -839,13 +867,13 @@ abstract final class YyApi {
     return null;
   }
 
-  /// The area named by [biz], learnt from an area page, else empty: the raw
-  /// key (`dance`) is no name, and `other`, the key of every
-  /// recommendation, is no area.
+  /// The area named by [biz], learnt from an area page, else preset
+  /// ([bizAreaNames]), else empty: the raw key (`chicken`) is no name, and
+  /// `other`, the key of every recommendation, is no area.
   static String _areaOf(Object? biz, Map<String, String> areaNames) {
     final key = jsonString(biz) ?? '';
     if (key == otherBiz) return '';
-    return areaNames[key] ?? '';
+    return areaNames[key] ?? bizAreaNames[key] ?? '';
   }
 
   /// `liveOn` and friends: 1, true or `live` (3.x's `isLiveValue`).

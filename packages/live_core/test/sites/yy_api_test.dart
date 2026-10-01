@@ -102,6 +102,8 @@ void main() {
           _expectParity(entry.area.toJson(), legacy[index], changed: {'areaPic', 'shortName'}, reason: '$name[$index]');
           expect(entry.area.areaPic, _https(legacy[index]['areaPic'] as String));
           expect(entry.page, Uri.parse(_https(raw[index]['url'] as String)), reason: "3.x's normalizeWebUrl");
+          // C-19: only 小视频 is a short-video page.
+          expect(YyApi.isShortVideoPage(entry.page), entry.area.areaName == '小视频', reason: '$name[$index]');
         }
       });
     }
@@ -194,7 +196,7 @@ void main() {
       });
     }
 
-    test('an area page names a biz (6-3); an unknown biz is no name', () {
+    test('an area page names a biz (6-3), else the preset (C-21); an unknown biz is no name', () {
       String page(String biz) => jsonEncode({
         'resultCode': 0,
         'data': {
@@ -203,8 +205,20 @@ void main() {
           ],
         },
       });
-      expect(YyApi.roomList(page('dance'), areaNames: const {'dance': '舞蹈'}).single.area, '舞蹈');
-      expect(YyApi.roomList(page('dance')).single.area, isEmpty, reason: '3.x showed `dance`');
+      expect(YyApi.roomList(page('dance'), areaNames: const {'dance': '热舞'}).single.area, '热舞', reason: 'learnt first');
+      expect(YyApi.roomList(page('dance')).single.area, '舞蹈', reason: 'C-21 preset; 3.x showed `dance`');
+      expect(YyApi.roomList(page('chicken')).single.area, isEmpty, reason: 'four game areas share it');
+      expect(YyApi.bizAreaNames, {
+        'sing': '音乐',
+        'talk': '脱口秀',
+        'dance': '舞蹈',
+        'red': '户外',
+        'pretty': '颜值',
+        'mc': '喊麦',
+        'sport': '体育',
+        'car': '二次元',
+        'game': '王者荣耀',
+      });
       expect(YyApi.roomList(page('dance'), area: '热舞').single.area, '热舞', reason: 'an area listing names its rooms');
     });
 
@@ -382,8 +396,8 @@ void main() {
         reason: '`other` names no area',
       );
       final dance = fixture.body.replaceFirst('"biz": "other"', '"biz": "dance"');
-      expect(YyApi.liveDetail(dance, requestedId: '22490906', areaNames: const {'dance': '舞蹈'})!.area, '舞蹈');
-      expect(YyApi.liveDetail(dance, requestedId: '22490906')!.area, isEmpty, reason: '3.x showed `dance`');
+      expect(YyApi.liveDetail(dance, requestedId: '22490906', areaNames: const {'dance': '热舞'})!.area, '热舞');
+      expect(YyApi.liveDetail(dance, requestedId: '22490906')!.area, '舞蹈', reason: 'C-21 preset; 3.x showed `dance`');
     });
 
     test('offline and unknown channels both answer data: null', () {

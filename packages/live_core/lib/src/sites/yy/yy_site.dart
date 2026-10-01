@@ -102,7 +102,9 @@ final class YySite extends LiveSite
   /// requests. An area's listing module is read from its page when the
   /// area is opened ([_module]), not here (3.x read all 18 area pages to
   /// fill `shortName`); areas come without `shortName`, and followed areas
-  /// that stored one (3.x's) still open without reading their page.
+  /// that stored one (3.x's) still open without reading their page. The
+  /// short-video page (小视频) is no live area and is left out (C-19); a
+  /// stored one still opens, empty.
   @override
   Future<List<LiveCategory>> getCategories(int page, int pageSize) async {
     final response = await _get(Uri.https(_host, '/yyweb/module/data/header'));
@@ -110,7 +112,14 @@ final class YySite extends LiveSite
     final listings = await Future.wait([for (final tab in tabs) _areas(tab.id, tab.name)]);
     return [
       for (final (index, tab) in tabs.indexed)
-        LiveCategory(id: tab.id, name: tab.name, children: [for (final entry in listings[index]) entry.area]),
+        LiveCategory(
+          id: tab.id,
+          name: tab.name,
+          children: [
+            for (final entry in listings[index])
+              if (!YyApi.isShortVideoPage(entry.page)) entry.area,
+          ],
+        ),
     ];
   }
 
@@ -204,8 +213,8 @@ final class YySite extends LiveSite
   }
 
   /// The home listing (`biz=other`); cards name their area by `biz` when an
-  /// area module taught it, else leave it empty (3.x showed the raw `biz`,
-  /// `other` on every card).
+  /// area module taught it or the preset names it ([YyApi.bizAreaNames]),
+  /// else leave it empty (3.x showed the raw `biz`, `other` on every card).
   @override
   Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async {
     final response = await _get(

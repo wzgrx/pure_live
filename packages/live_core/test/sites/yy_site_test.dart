@@ -152,7 +152,13 @@ void main() {
       expect(categories.map((category) => (category.id, category.name)), [('1', '娱乐'), ('2', '游戏'), ('3', '其他')]);
       var stored = 0;
       for (final (index, name) in _categorySamples.indexed) {
-        final legacy = ((Fixture.load('yy', name).legacy as Map)['areas'] as List).cast<Map<String, dynamic>>();
+        final all = ((Fixture.load('yy', name).legacy as Map)['areas'] as List).cast<Map<String, dynamic>>();
+        // C-19: 小视频 (a short-video page, areaId 34) is left out.
+        final legacy = [
+          for (final area in all)
+            if (area['areaName'] != '小视频') area,
+        ];
+        expect(all.length - legacy.length, name == 'S01-category-other' ? 1 : 0, reason: name);
         final areas = categories[index].children;
         expect(areas.map((area) => area.areaId), legacy.map((area) => area['areaId']), reason: name);
         for (final (position, area) in areas.indexed) {
@@ -285,9 +291,9 @@ void main() {
         setup.http.requests.single.url.queryParameters,
         ((Fixture.load('yy', 'S03-recommend-p1').legacy as Map)['query'] as Map).cast<String, String>(),
       );
-      // Cards whose biz is `dance`: no area before the area page was read
-      // (3.x: `dance`), named after.
-      expect((await setup.site.getRecommendRooms(page: 2)).first.area, isEmpty);
+      // Cards whose biz is `dance`: named by the preset before any area page
+      // was read (C-21; 3.x: `dance`, 6-3: empty), and after.
+      expect((await setup.site.getRecommendRooms(page: 2)).first.area, '舞蹈');
       await setup.site.getCategoryRooms(_dance);
       expect((await setup.site.getRecommendRooms(page: 2)).first.area, '舞蹈');
     });
@@ -304,9 +310,9 @@ void main() {
       );
       final shortName = (Fixture.load('yy', 'S02-area-page-dance').legacy as Map)['shortName'] as String;
       await setup.site.getCategoryRooms(
-        LiveArea(platform: 'yy', areaType: '1', areaId: '4', areaName: '舞蹈', shortName: shortName),
+        LiveArea(platform: 'yy', areaType: '1', areaId: '4', areaName: '热舞', shortName: shortName),
       );
-      expect((await setup.site.getRecommendRooms(page: 2)).first.area, '舞蹈');
+      expect((await setup.site.getRecommendRooms(page: 2)).first.area, '热舞', reason: 'learnt before the preset');
       expect(_paths(setup.http), ['/more/page.action', '/more/page.action']);
     });
 

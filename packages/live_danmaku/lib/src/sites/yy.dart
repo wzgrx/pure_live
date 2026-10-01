@@ -227,7 +227,7 @@ final class YyDanmakuSession {
   /// lengths. A trailer shorter than a header, or a length below 10 or past
   /// the end, ends the frame with a warning. A malformed packet is a
   /// failure while joining and a warning afterwards; unknown packets
-  /// (pongs, app 103's gifts and entries) are skipped.
+  /// (pongs, app 103's other counts and mic queue) are skipped.
   YyDanmakuBatch consume(List<int> frame) {
     final bytes = frame is Uint8List ? frame : Uint8List.fromList(frame);
     final batch = YyDanmakuBatch._();
@@ -380,8 +380,10 @@ final class YyDanmakuSession {
 
   void _readService(int appId, Uint8List message, YyDanmakuBatch batch) {
     if (_phase != YyDanmakuPhase.joined || (appId != _chatAppId && appId != _audienceAppId)) return;
-    // App 103 also carries gifts and entries, unread; a body shorter than a
-    // header (S08-live's, emptied when scrubbed) is nothing to read.
+    // App 103 also carries another count (3165186) and the mic queue
+    // (3140610, 3145730), unread; gifts and entries come in app 15012, not
+    // subscribed (M4.D2). A body shorter than a header (S08-live's, emptied
+    // when scrubbed) is nothing to read.
     if (appId == _audienceAppId && message.length < 10) return;
     try {
       final reader = YyPacketReader(message, hasHeader: true);
@@ -399,9 +401,10 @@ final class YyDanmakuSession {
   /// App 103's `3139586`, about twice a second in a busy channel: `u32` the
   /// channel's heat (the `users` of the lists and details, 热度), `u32` 1,
   /// `u32` top channel (another channel's is dropped), `u32` a slightly
-  /// lower figure. Reported as popularity (M4.D). Its companion `3165186`
-  /// carries a far smaller count (2 050 against 1 459 372), likely the
-  /// viewers online; it is not read (a candidate: another number).
+  /// lower figure. Reported as popularity (M4.D); the web room shows this
+  /// figure (`online-num`). Its companion `3165186` carries a far smaller
+  /// count (2 324 against 1 459 645) the web room does not show anywhere,
+  /// so what it counts is unconfirmed and it is not read (M4.D2, C-18).
   LiveMessage? _readPopularity(YyPacketReader reader) {
     final heat = reader.readUint32();
     reader.readUint32();

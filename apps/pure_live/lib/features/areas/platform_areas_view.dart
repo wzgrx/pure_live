@@ -13,17 +13,14 @@ import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/paging.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-/// Whether a platform's areas show as one grid without category tabs, each
-/// card naming its category (3.x `areas_grid_view.dart:13`: Douyin).
-bool flatAreas(String platform) => platform == SiteIds.douyin;
-
 /// Room under the grid for the floating "关注分区" button.
 const double areasButtonClearance = 80;
 
 /// One platform's areas (3.x `AreaGridView`, docs/ui/compare/U.4d): a tab
 /// per category in the secondary style (c2), swiped horizontally; no tabs
-/// when the platform has one category (c4); Douyin in one grid (3.x); the
-/// cards name only the area (c3); skeleton cards while loading (c8); pull
+/// when the platform has one category (c4); Douyin has category tabs too
+/// (3.x put its few areas in one grid; with C-12's ~156 game areas that grid
+/// ran to two or three hundred cards); the cards name only the area (c3); skeleton cards while loading (c8); pull
 /// to refresh on phones and tablets, numbered pages with ← → on desktops
 /// (3.x); a failed refresh keeps the areas and shows the error above them.
 class PlatformAreasView extends ConsumerStatefulWidget {
@@ -43,8 +40,6 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
   List<String> _tabIds = const [];
 
   AreaCatalog get _catalog => widget.catalog;
-
-  bool get _flat => flatAreas(_catalog.site.id);
 
   @override
   bool get wantKeepAlive => true;
@@ -82,7 +77,7 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
   /// Keeps one tab per category; the selection follows the catalogue's (kept
   /// by id across refreshes).
   void _syncTabs() {
-    final ids = _flat ? const <String>[] : [for (final category in _catalog.categories) category.id];
+    final ids = [for (final category in _catalog.categories) category.id];
     final same = ids.length == _tabIds.length && ids.indexed.every((entry) => entry.$2 == _tabIds[entry.$1]);
     if (!same) {
       final old = _tabs;
@@ -170,15 +165,7 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
     final tabs = _tabs;
     final error = _catalog.error;
     final Widget content;
-    if (_flat) {
-      content = _AreaPages(
-        key: const ValueKey('area-page-flat'),
-        areas: _catalog.allAreas,
-        caption: AreaCaption.category,
-        onRefresh: _catalog.refresh,
-        busy: _catalog.isLoading,
-      );
-    } else if (tabs == null) {
+    if (tabs == null) {
       content = _AreaPages(
         key: ValueKey('area-page-${categories.single.id}'),
         areas: categories.single.children,
@@ -224,18 +211,11 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
 /// The areas of one category: the whole grid with pull to refresh, or on
 /// desktops numbered pages (3.x `BasePageView`).
 class _AreaPages extends ConsumerStatefulWidget {
-  const new({
-    required this.areas,
-    required this.onRefresh,
-    required this.busy,
-    this.caption = AreaCaption.nameOnly,
-    super.key,
-  });
+  const new({required this.areas, required this.onRefresh, required this.busy, super.key});
 
   final List<LiveArea> areas;
   final Future<void> Function() onRefresh;
   final bool busy;
-  final AreaCaption caption;
 
   @override
   ConsumerState<_AreaPages> createState() => _AreaPagesState();
@@ -281,7 +261,7 @@ class _AreaPagesState extends ConsumerState<_AreaPages> {
     if (!desktop) {
       return RefreshIndicator(
         onRefresh: widget.onRefresh,
-        child: areas.isEmpty ? _empty() : AreaGrid(areas: areas, caption: widget.caption, controller: _scroll),
+        child: areas.isEmpty ? _empty() : AreaGrid(areas: areas, controller: _scroll),
       );
     }
     final showSizes = watchSetting(ref, Settings.pageShowSizeSelector);
@@ -307,7 +287,7 @@ class _AreaPagesState extends ConsumerState<_AreaPages> {
         child: Column(
           children: [
             Expanded(
-              child: shown.isEmpty ? _empty() : AreaGrid(areas: shown, caption: widget.caption, controller: _scroll),
+              child: shown.isEmpty ? _empty() : AreaGrid(areas: shown, controller: _scroll),
             ),
             PaginationBar(
               page: page,

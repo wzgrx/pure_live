@@ -422,7 +422,7 @@ void main() {
   });
 
   group('U.4d–U.4f layouts', () {
-    testWidgets('Douyin is one grid naming each category; one category shows no category tabs', (tester) async {
+    testWidgets('Douyin has category tabs like the rest; one category shows no category tabs', (tester) async {
       final douyin = _FakeSite('douyin', '抖音', [
         LiveCategory(
           id: 'g',
@@ -462,15 +462,16 @@ void main() {
         await _settle(tester);
         return services;
       })();
-      // Douyin: no category tabs, both areas in one grid with their category (3.x).
-      expect(find.byKey(const ValueKey('area-category-tabs')), findsNothing);
+      // Douyin: a tab per category, not 3.x's single grid (C-12 put ~156
+      // game areas under "游戏"); the cards name only the area (U.4d c3).
+      expect(find.byKey(const ValueKey('area-category-tabs')), findsOneWidget);
       expect(find.text('王者荣耀'), findsOneWidget);
+      expect(find.text('MOBA'), findsNothing);
+      await tester.tap(
+        find.descendant(of: find.byKey(const ValueKey('area-category-tabs')), matching: find.text('娱乐')),
+      );
+      await _settle(tester);
       expect(find.text('颜值'), findsOneWidget);
-      expect(find.text('MOBA'), findsOneWidget);
-      // 393 wide: three columns (U.4d c5).
-      final first = tester.getTopLeft(find.text('王者荣耀'));
-      final second = tester.getTopLeft(find.text('颜值'));
-      expect(first.dy, second.dy);
 
       await tester.tap(find.text('Picarto'));
       await _settle(tester);

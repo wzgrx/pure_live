@@ -222,6 +222,29 @@ abstract final class AppIcons {
   /// A recording failed.
   static const IconData recordFailed = Icons.error_outline_rounded;
 
+  // ---- the recording centre (3.x recorder_page.dart; docs/ui/compare/U.7a) ----
+
+  /// Open the recording folder (3.x's app bar).
+  static const IconData recordFolder = Remix.folder_video_line;
+
+  /// The recording settings (3.x's app bar).
+  static const IconData recordSettings = Remix.settings_5_line;
+
+  /// No record task (3.x's empty centre).
+  static const IconData recordEmpty = Icons.video_collection_outlined;
+
+  /// This build cannot record.
+  static const IconData recordUnavailable = Icons.videocam_off_outlined;
+
+  /// A card's menu (⋮).
+  static const IconData more = Icons.more_vert_rounded;
+
+  /// Enter the live room (a card's menu).
+  static const IconData enterRoom = Icons.open_in_new_rounded;
+
+  /// Delete (a record task).
+  static const IconData delete = Remix.delete_bin_line;
+
   /// Stop a recording (■).
   static const IconData stopRecording = Icons.stop_rounded;
 

@@ -67,12 +67,11 @@ Future<void> playRecording(String path) async {
 }
 
 /// "查看原因": the whole failure, selectable.
-Future<void> showRecordFailureReason(BuildContext context, ({String summary, String? detail}) text) =>
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(i18n('record_panel_reason_title')),
-        content: SelectableText([text.summary, ?text.detail].join('\n\n')),
-        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(i18n('close')))],
-      ),
-    );
+Future<void> showRecordFailureReason(BuildContext context, ({String summary, String? detail}) text) => showDialog<void>(
+  context: context,
+  builder: (dialogContext) => AlertDialog(
+    title: Text(i18n('record_panel_reason_title')),
+    content: SelectableText([text.summary, ?text.detail].join('\n\n')),
+    actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(i18n('close')))],
+  ),
+);

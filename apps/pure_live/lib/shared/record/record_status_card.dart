@@ -294,7 +294,9 @@ class RecordStatusCard extends StatelessWidget {
         const _Spinner(),
         i18n('record_panel_preparing_title'),
         null,
-        <Widget>[Text(i18n('record_panel_preparing_desc', args: {'quality': quality}), style: body)],
+        <Widget>[
+          Text(i18n('record_panel_preparing_desc', args: {'quality': quality}), style: body),
+        ],
         <Widget>[plain('record-panel-cancel', i18n('cancel'), live(onStop))],
       ),
       RecordCardState.queued => (
@@ -594,6 +596,11 @@ const _buttonShape = StadiumBorder();
 /// The compact card's buttons (U.7a c2); the panel's are 48.
 const double _compactButtonHeight = 40;
 
+/// The compact card's padding inside a button: three fit a phone's row.
+const EdgeInsets _compactButtonPadding = EdgeInsets.symmetric(horizontal: 8);
+
+EdgeInsetsGeometry? _paddingFor(double height) => height == _compactButtonHeight ? _compactButtonPadding : null;
+
 /// A red action that starts a recording ("● 开始录制").
 class _RecordButton extends StatelessWidget {
   const new({required this.text, required this.onPressed, required this.height, this.dot = true, super.key});
@@ -609,6 +616,7 @@ class _RecordButton extends StatelessWidget {
       backgroundColor: LiveSemanticColors.recording,
       foregroundColor: LiveSemanticColors.onRecording,
       minimumSize: Size.fromHeight(height),
+      padding: _paddingFor(height),
       shape: _buttonShape,
     ),
     onPressed: onPressed,
@@ -637,6 +645,7 @@ class _StopButton extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.surface,
       side: const BorderSide(color: LiveSemanticColors.recording),
       minimumSize: Size.fromHeight(height),
+      padding: _paddingFor(height),
       shape: _buttonShape,
     ),
     onPressed: onPressed,
@@ -657,6 +666,7 @@ class _PlainButton extends StatelessWidget {
     style: OutlinedButton.styleFrom(
       backgroundColor: Theme.of(context).colorScheme.surface,
       minimumSize: Size.fromHeight(height),
+      padding: _paddingFor(height),
       shape: _buttonShape,
     ),
     onPressed: onPressed,

@@ -50,6 +50,14 @@ void main() {
       (AppIcons.localInteraction, Icons.auto_awesome_rounded),
       (AppIcons.templateSave, Icons.save_outlined),
       (AppIcons.templateRestore, Icons.restore_rounded),
+      // U.7a: the recording centre's bar keeps 3.x's glyphs.
+      (AppIcons.recordFolder, Remix.folder_video_line),
+      (AppIcons.recordSettings, Remix.settings_5_line),
+      (AppIcons.recordEmpty, Icons.video_collection_outlined),
+      (AppIcons.recordUnavailable, Icons.videocam_off_outlined),
+      (AppIcons.more, Icons.more_vert_rounded),
+      (AppIcons.enterRoom, Icons.open_in_new_rounded),
+      (AppIcons.delete, Remix.delete_bin_line),
     ];
     for (final (actual, glyph) in expected) {
       expect(actual, glyph);

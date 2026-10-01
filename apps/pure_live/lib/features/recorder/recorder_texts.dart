@@ -1,51 +1,17 @@
-import 'package:flutter/material.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
+import 'package:pure_live/features/recorder/logic/recorder_view.dart';
 import 'package:pure_live/i18n/i18n.dart';
-
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-/// The recording centre's filters (3.x `RecorderPage.tabs`, same order).
-const List<({String label, RecordStatus? status})> recorderFilters = [
-  (label: 'recorder_tab_all', status: null),
-  (label: 'recorder_tab_recording', status: RecordStatus.running),
-  (label: 'recorder_tab_waiting', status: RecordStatus.waitingLive),
-  (label: 'recorder_tab_queue', status: RecordStatus.queued),
-  (label: 'recorder_tab_reconnecting', status: RecordStatus.reconnecting),
-  (label: 'recorder_tab_processing', status: RecordStatus.processing),
-  (label: 'recorder_tab_completed', status: RecordStatus.completed),
-  (label: 'recorder_tab_failed', status: RecordStatus.failed),
-  (label: 'recorder_tab_stopped', status: RecordStatus.stopped),
-];
-
-/// The status label (3.x `_statusText`).
-String recordStatusText(RecordStatus status) => i18n(switch (status) {
-  RecordStatus.running => 'recorder_status_recording',
-  RecordStatus.preparing => 'recorder_status_preparing',
-  RecordStatus.queued => 'recorder_status_queue',
-  RecordStatus.waitingLive => 'recorder_status_waiting',
-  RecordStatus.reconnecting => 'recorder_status_reconnecting',
-  RecordStatus.processing => 'recorder_status_processing',
-  RecordStatus.completed => 'recorder_status_completed',
-  RecordStatus.failed => 'recorder_status_failed',
-  RecordStatus.stopped => 'recorder_status_stopped',
+/// The label of a recording centre filter (U.7a c6).
+String recorderFilterLabel(RecorderFilter filter) => i18n(switch (filter) {
+  RecorderFilter.all => 'recorder_tab_all',
+  RecorderFilter.active => 'recorder_filter_active',
+  RecorderFilter.waiting => 'recorder_tab_waiting',
+  RecorderFilter.saved => 'recorder_filter_saved',
+  RecorderFilter.failed => 'recorder_tab_failed',
 });
-
-/// The status colour (3.x `_statusColor`).
-Color recordStatusColor(RecordStatus status) => switch (status) {
-  RecordStatus.running => Colors.green,
-  RecordStatus.preparing => Colors.amber,
-  RecordStatus.queued => Colors.deepPurple,
-  RecordStatus.waitingLive => Colors.orangeAccent,
-  RecordStatus.reconnecting => Colors.orange,
-  RecordStatus.processing => Colors.cyan,
-  RecordStatus.completed => Colors.blue,
-  RecordStatus.failed => Colors.red,
-  RecordStatus.stopped => Colors.grey,
-};
-
-/// The platform's name (`site_<id>`), else its id.
-String recordPlatformName(String platform) => i18nOr('site_$platform', platform.toUpperCase());
 
 /// The stage of [stage] (3.x `_failureStageText`).
 String recordStageText(String? stage) {
@@ -148,13 +114,6 @@ String? recordNoticeText(RecordNotice notice) {
   };
 }
 
-/// `hh:mm:ss` (3.x `_formatDuration`).
-String recordDurationText(int seconds) {
-  final duration = Duration(seconds: seconds < 0 ? 0 : seconds);
-  String two(int value) => value.toString().padLeft(2, '0');
-  return '${two(duration.inHours)}:${two(duration.inMinutes.remainder(60))}:${two(duration.inSeconds.remainder(60))}';
-}
-
 /// File size (3.x `_formatFileSize`).
 String recordSizeText(num bytes) {
   const kb = 1024;
@@ -165,21 +124,6 @@ String recordSizeText(num bytes) {
   if (bytes >= mb) return '${(bytes / mb).toStringAsFixed(2)} ${i18n('unit_mb')}';
   if (bytes >= kb) return '${(bytes / kb).toStringAsFixed(1)} ${i18n('unit_kb')}';
   return '${bytes.round()} ${i18n('unit_b')}';
-}
-
-/// Bitrate (3.x `_formatBitrate`).
-String recordBitrateText(double kilobitsPerSecond) {
-  if (!kilobitsPerSecond.isFinite || kilobitsPerSecond <= 0) return '--';
-  if (kilobitsPerSecond >= 1000) return '${(kilobitsPerSecond / 1000).toStringAsFixed(1)} Mbps';
-  return '${kilobitsPerSecond.toStringAsFixed(0)} kbps';
-}
-
-/// `MM-dd HH:mm` of [time] in local time (3.x showed the same part of
-/// `DateTime.toString()`).
-String recordTimeText(DateTime time) {
-  final local = time.toLocal();
-  String two(int value) => value.toString().padLeft(2, '0');
-  return '${two(local.month)}-${two(local.day)} ${two(local.hour)}:${two(local.minute)}';
 }
 
 /// Seconds as `30s`, `5m`, `1.5h` (3.x settings `_formatDuration`).

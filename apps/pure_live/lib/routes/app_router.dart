@@ -78,10 +78,9 @@ final Map<String, PageBuilder> pageRoutes = {
   RoutePath.kRemoteSync: (route) => RemoteReceiverPage(route: route),
 };
 
-/// The router of home and [pageRoutes], starting at [initialLocation].
-///
-/// 3.x opened the splash page first when `showSplashPage` was on; the
-/// splash page is the last page of M13, until then home opens directly.
+/// The router of home and [pageRoutes], starting at [initialLocation] (the
+/// app passes `splashInitialLocation`: the splash page when `showSplashPage`
+/// is on, as 3.x).
 GoRouter buildAppRouter({
   String initialLocation = RoutePath.kInitial,
   List<NavigatorObserver> observers = const [],

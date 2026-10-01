@@ -3,13 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/app.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/home/home_menu.dart';
 import 'package:pure_live/pages/live_play/live_play_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/app_router.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/images.dart';
 
 import 'support.dart';
 
@@ -20,6 +23,7 @@ Future<AppServices> _pump(WidgetTester tester, {required double width, List<Stri
   addTearDown(tester.view.reset);
   final services = (await tester.runAsync(() async {
     final services = await testServices();
+    await services.store.settings.set(Settings.showSplashPage, false);
     if (menus != null) await services.store.settings.set(Settings.savedMenuIds, menus);
     return services;
   }))!;
@@ -126,6 +130,46 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(LivePlayPage), findsNothing);
     await tester.pump(AppNavigator.openGuard);
+    await tester.runAsync(services.close);
+  });
+
+  testWidgets('splash first when it is on, then home; start-up work and image settings are wired', (tester) async {
+    tester.view
+      ..physicalSize = const Size(400, 900)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final services = (await tester.runAsync(testServices))!;
+    final strings = (await tester.runAsync(loadStrings))!;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appServicesProvider.overrideWithValue(services)],
+        child: PureLiveApp(strings: strings, bundle: FileAssetBundle()),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('欢迎使用'), findsOneWidget);
+    // The follow check starts after the first frame; the splash waits for it.
+    expect(AppStartup.followCheck, isNotNull);
+    final config = LiveUiScope.of(tester.element(find.text('欢迎使用')));
+    expect(config.imageHeaders?.call('https://i0.hdslb.com/a.jpg')?['Referer'], 'https://live.bilibili.com/');
+    expect(config.imageHeaders?.call('https://img.example.com/a.jpg')?.containsKey('Referer'), isFalse);
+    final epoch = config.imageCacheEpoch;
+    imageCacheEpoch.value++;
+    await tester.pump();
+    expect(LiveUiScope.of(tester.element(find.text('欢迎使用'))).imageCacheEpoch, epoch + 1);
+
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+    expect(find.text('欢迎使用'), findsNothing);
+    expect(find.widgetWithText(AppBar, '已开播'), findsOneWidget);
+    // The update check after two seconds stays quiet without a network.
+    await tester.pump(const Duration(seconds: 2));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('new-version-dialog')), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
     await tester.runAsync(services.close);
   });
 }

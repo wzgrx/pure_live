@@ -88,6 +88,7 @@ final class _FakeDirectory extends LiveSite implements LiveSiteCursorDirectoryPa
 Future<AppServices> _services(Map<String, LiveSite> sites, {List<String>? platforms, String? prefer}) async {
   final base = await testServices();
   await base.store.settings.set(Settings.savedMenuIds, ['popular']);
+  await base.store.settings.set(Settings.showSplashPage, false);
   await base.store.settings.set(Settings.hotAreasList, platforms ?? sites.keys.toList());
   if (prefer != null) await base.store.settings.set(Settings.preferPlatform, prefer);
   return AppServices(

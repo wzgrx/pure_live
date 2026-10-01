@@ -109,6 +109,7 @@ Future<AppServices> _pumpApp(WidgetTester tester, Map<String, LiveSite> sites, {
     await services.store.settings.set(Settings.preferPlatform, preferred);
     // The test device is English; the texts below are the Chinese ones.
     await services.store.settings.set(Settings.language, '简体中文');
+    await services.store.settings.set(Settings.showSplashPage, false);
     return services;
   }))!;
   final strings = (await tester.runAsync(loadStrings))!;

@@ -10,14 +10,18 @@ import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/pages/splash/splash_page.dart';
 import 'package:pure_live/platform/platform_services.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/app_router.dart';
+import 'package:pure_live/shared/images.dart';
 
 /// The app (3.x `MyApp`): theme, language, text size and the shared
-/// widgets' configuration from the settings, the route table, and Android's
-/// adaptive refresh rate.
+/// widgets' configuration from the settings, the route table (from the
+/// splash page when it is on), Android's adaptive refresh rate, and the
+/// start-up work after the first frame ([AppStartup]).
 class PureLiveApp extends ConsumerStatefulWidget {
   /// Creates the app with the words loaded before the first frame.
   const new({required this.strings, this.router, this.bundle, super.key});
@@ -25,7 +29,7 @@ class PureLiveApp extends ConsumerStatefulWidget {
   /// The words of the starting language.
   final AppStrings strings;
 
-  /// The router; null builds [buildAppRouter].
+  /// The router; null builds [buildAppRouter] from [splashInitialLocation].
   final GoRouter? router;
 
   /// Where translations load from (tests); null is the root bundle.
@@ -36,7 +40,9 @@ class PureLiveApp extends ConsumerStatefulWidget {
 }
 
 class _PureLiveAppState extends ConsumerState<PureLiveApp> {
-  late final GoRouter _router = widget.router ?? buildAppRouter();
+  late final GoRouter _router =
+      widget.router ??
+      buildAppRouter(initialLocation: splashInitialLocation(ref.read(appServicesProvider).store.settings));
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   final _refreshRate = AdaptiveRefreshRateController(applyHighRefreshRate);
   late AppStrings _strings = widget.strings;
@@ -55,12 +61,23 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
           SnackBar(content: Text(message), duration: const Duration(seconds: 3), behavior: SnackBarBehavior.floating),
         );
     };
+    imageCacheEpoch.addListener(_imagesCleared);
+    // 3.x started the follow check, the login check and the exit timer with
+    // its services; here once the first frame is up.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(appStartupProvider).start();
+    });
   }
 
   @override
   void dispose() {
+    imageCacheEpoch.removeListener(_imagesCleared);
     AppNavigator.router = null;
     super.dispose();
+  }
+
+  void _imagesCleared() {
+    if (mounted) setState(() {});
   }
 
   /// Loads the words when the language changes (3.x `context.setLocale`).
@@ -107,6 +124,8 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
       strings: _strings.ui,
       loadingStyle: watchSetting(ref, Settings.loadingStyle),
       loadingColor: parseThemeColorOrNull(watchSetting(ref, Settings.loadingStyleColorSwitch)),
+      imageHeaders: networkImageHeaders,
+      imageCacheEpoch: imageCacheEpoch.value,
     );
 
     return LiveDynamicColorBuilder(

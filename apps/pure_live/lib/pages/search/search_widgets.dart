@@ -108,7 +108,13 @@ class _SearchPlatformStripState extends State<SearchPlatformStrip> {
 /// order, the web search, and what the chosen platforms can find.
 class SearchOptionsBar extends StatelessWidget {
   /// Creates the bar.
-  const new({required this.model, required this.onModeChanged, required this.onOpenWebSearch, super.key});
+  const new({
+    required this.model,
+    required this.onModeChanged,
+    required this.onOpenWebSearch,
+    this.onEditScope,
+    super.key,
+  });
 
   /// The search.
   final SearchModel model;
@@ -118,6 +124,9 @@ class SearchOptionsBar extends StatelessWidget {
 
   /// Opens the chosen platform's web search.
   final VoidCallback onOpenWebSearch;
+
+  /// Chooses the platforms "all" searches (M13.16); shown on "all".
+  final VoidCallback? onEditScope;
 
   /// The words of [mode].
   static String sortLabel(SearchSortMode mode) => switch (mode) {
@@ -183,6 +192,20 @@ class SearchOptionsBar extends StatelessWidget {
                       child: Chip(avatar: const Icon(Icons.sort_rounded, size: 17), label: Text(sortLabel(model.sort))),
                     ),
                   ],
+                  if (model.selected == 0 && onEditScope != null) ...[
+                    const SizedBox(width: 8),
+                    ActionChip(
+                      key: const ValueKey('search-scope'),
+                      avatar: const Icon(Icons.tune_rounded, size: 17),
+                      label: Text(
+                        i18n(
+                          'search_scope_count',
+                          args: {'count': '${model.allScope.length}', 'total': '${model.sites.length}'},
+                        ),
+                      ),
+                      onPressed: onEditScope,
+                    ),
+                  ],
                   if (model.canOpenWebSearch) ...[
                     const SizedBox(width: 8),
                     ActionChip(
@@ -222,12 +245,12 @@ class _CoverageLine extends StatelessWidget {
     }
     if (model.mode == SearchMode.anchors) {
       final names = [
-        for (final site in model.sites)
+        for (final site in model.allScope)
           if (SearchCapabilities.of(site.id).anchors) platformName(site.id, fallback: site.name),
       ];
       return i18n('search_anchor_platforms', args: {'sites': names.join('、')});
     }
-    final count = model.sites.where((site) => SearchCapabilities.of(site.id).native).length;
+    final count = model.allScope.where((site) => SearchCapabilities.of(site.id).native).length;
     return i18n('search_scope_summary', args: {'count': '$count'});
   }
 

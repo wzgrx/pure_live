@@ -60,26 +60,39 @@ String audienceLabel(AudienceMetricType type) => i18n(switch (type) {
   AudienceMetricType.unknown => 'audience_count',
 });
 
-/// How long the broadcast has been on: `已开播 1 小时 20 分`.
+/// A broadcast's length, written the same on cards and in the room: under an
+/// hour `12 分钟` (at least 1), under a day `5 小时 3 分`, then `2 天 3 小时`
+/// (the card said `51 小时 49 分` where the room said `2 天`).
+String elapsedText(Duration elapsed) {
+  final minutes = elapsed.inMinutes < 1 ? 1 : elapsed.inMinutes;
+  if (minutes < 60) return i18n('duration_minutes', args: {'m': '$minutes'});
+  if (minutes < Duration.minutesPerDay) {
+    return i18n('duration_hours', args: {'h': '${minutes ~/ 60}', 'm': '${minutes % 60}'});
+  }
+  return i18n(
+    'duration_days',
+    args: {'d': '${minutes ~/ Duration.minutesPerDay}', 'h': '${minutes % Duration.minutesPerDay ~/ 60}'},
+  );
+}
+
+/// How long the broadcast has been on: `已开播 1 小时 20 分` ([elapsedText]),
+/// `刚刚开播` under a minute.
 String startedAgo(DateTime startedAt, DateTime now) {
   final elapsed = now.difference(startedAt);
   if (elapsed.isNegative || elapsed.inMinutes < 1) return i18n('live_play_started_just_now');
-  final hours = elapsed.inHours;
-  final minutes = elapsed.inMinutes % 60;
-  if (hours == 0) return i18n('live_play_started_minutes', args: {'minutes': '$minutes'});
-  if (hours >= 48) return i18n('live_play_started_days', args: {'days': '${elapsed.inDays}'});
-  return i18n('live_play_started_hours', args: {'hours': '$hours', 'minutes': '$minutes'});
+  return i18n('live_play_started', args: {'duration': elapsedText(elapsed)});
 }
 
-/// How long [room] has been live, short for a card (`已播 12 分钟`), or null
-/// when it is not live or the start is unknown (UPGRADES "开播时间").
+/// How long [room] has been live, short for a card (`已播 12 分钟`,
+/// [elapsedText]; `刚刚开播` under a minute), or null when it is not live or
+/// the start is unknown (UPGRADES "开播时间").
 String? liveDuration(LiveRoom room, DateTime now) {
   final started = room.startedAt;
   if (started == null || !room.isLiveNow) return null;
-  final minutes = now.toUtc().difference(started).inMinutes;
-  if (minutes < 0) return null;
-  if (minutes < 60) return i18n('room_live_minutes', args: {'m': '${minutes < 1 ? 1 : minutes}'});
-  return i18n('room_live_hours', args: {'h': '${minutes ~/ 60}', 'm': '${minutes % 60}'});
+  final elapsed = now.difference(started);
+  if (elapsed.isNegative) return null;
+  if (elapsed.inMinutes < 1) return i18n('live_play_started_just_now');
+  return i18n('room_live', args: {'duration': elapsedText(elapsed)});
 }
 
 /// `2026-10-01 20:05` in local time.

@@ -743,6 +743,28 @@ void main() {
     }
   });
 
+  test("M13.16: a channel's custom emoji names its picture; standard emoji and plain lines have none", () {
+    final lines = [
+      for (final frame in _frames('S07-live-paid'))
+        if (_status(frame) == 200 && !_isNext(frame)) ...YouTubeDanmakuProtocol.chat(_answer(frame)).messages,
+    ];
+    final crying = lines.firstWhere((line) => line.message.contains(':face-purple-crying:'));
+    expect(crying.emotes, [
+      const LiveEmote(
+        code: ':face-purple-crying:',
+        url:
+            'https://yt3.ggpht.com/g6_km98AfdHbN43gvEuNdZ2I07MmzVpArLwEvNBwwPqpZYzszqhRzU_DXALl11TchX5_xFE=w48-h48-c-k-nd',
+      ),
+    ], reason: 'the larger thumbnail, once although the line repeats it');
+    for (final line in lines) {
+      for (final emote in line.emotes) {
+        expect(line.message, contains(emote.code));
+        expect(emote.url, startsWith('https://'));
+      }
+    }
+    expect(lines.where((line) => !line.message.contains(':')).every((line) => line.emotes.isEmpty), isTrue);
+  });
+
   group('synthetic answers (S09-synthetic) against v4', () {
     final answers = _named('answers');
     final v4Answers = _v4Synthetic['answers']! as Map<String, Object?>;

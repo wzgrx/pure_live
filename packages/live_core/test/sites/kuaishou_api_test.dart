@@ -401,6 +401,26 @@ void main() {
       expect(room.startedAt, isNull);
     });
 
+    test("M13.16: the page's emoji table goes to the danmaku, https, codes only", () {
+      final fixture = _sample('S09-room-live');
+      final room = KuaishouApi.roomDetail(fixture.body, requestedId: 'baixi9999999999', issuedAt: fixture.capturedAt);
+      final emotes = (room.danmakuData! as KuaishouDanmakuArgs).emotes;
+      expect(emotes, hasLength(207));
+      expect(emotes['[笑哭]'], startsWith('https://'));
+      expect(emotes['[666]'], 'https://ali2.a.yximgs.com/bs2/emotion/1704763447505third_party_s1296657489.png');
+      final table = KuaishouApi.emojiTable({
+        'pcConfig': {
+          'pcConfig': {
+            'config': {
+              'pcLive.webConfig.emojiPanel': {'[a]': '//x.yximgs.com/a.png', 'b': '//x/b.png', '[c]': '', '[d]': 3},
+            },
+          },
+        },
+      });
+      expect(table, {'[a]': 'https://x.yximgs.com/a.png'});
+      expect(KuaishouApi.emojiTable(const {}), isEmpty);
+    });
+
     test('S11 offline room is offline without cover or danmaku (REG-KUAISHOU-020; 3.x threw TypeError)', () {
       final fixture = _sample('S11-room-offline');
       final legacy = fixture.legacy as Map<String, dynamic>;

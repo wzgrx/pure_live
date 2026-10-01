@@ -173,6 +173,7 @@ class _AreasViewState extends ConsumerState<AreasView> with TickerProviderStateM
               title: i18n('areas_no_platforms'),
               subtitle: i18n('areas_no_platforms_subtitle'),
               buttonText: i18n('platform_display'),
+              buttonIcon: Icons.tune_rounded,
               onButtonPressed: () => AppNavigator.toNamed<void>(RoutePath.kSettingsHotAreas).ignore(),
             )
           : TabBarView(

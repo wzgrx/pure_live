@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
@@ -73,12 +74,45 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   Timer? _hide;
   late final Future<bool> _pipSupported = widget.mobile ? PictureInPicture.supported() : Future.value(false);
 
+  /// The picture keeps its element (and its texture) when picture-in-picture
+  /// swaps the layout around it (M13.16).
+  final GlobalKey _video = GlobalKey(debugLabel: 'room-video');
+
   LiveRoomController get _room => widget.controller;
 
   @override
   void initState() {
     super.initState();
     _scheduleHide();
+  }
+
+  @override
+  void didUpdateWidget(RoomPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The lock is a fullscreen control: leaving fullscreen (Back works while
+    // locked) releases it, or its unlock button stayed on the left of the
+    // normal picture with the gestures off (M13.16).
+    if (oldWidget.fullscreen && !widget.fullscreen) _locked = false;
+    // Entering or leaving fullscreen shows the controls for a while, as a
+    // new player did before the player kept its state.
+    if (oldWidget.fullscreen != widget.fullscreen && !widget.pip) {
+      _controls = true;
+      _scheduleHide();
+    }
+    if (oldWidget.pip == widget.pip) return;
+    if (widget.pip) {
+      // Picture-in-picture has no controls: nothing to hide meanwhile.
+      _hide?.cancel();
+      return;
+    }
+    // Back from picture-in-picture (M13.16: the controls stayed on screen and
+    // ignored taps until the room was left): the controls start afresh, a
+    // lock from before is released, and a frame is drawn at once even if
+    // the window's lifecycle report is still on its way.
+    _controls = true;
+    _locked = false;
+    _scheduleHide();
+    SchedulerBinding.instance.scheduleForcedFrame();
   }
 
   @override
@@ -138,7 +172,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            LiveVideoView(session: _room.session, fit: fit),
+            LiveVideoView(key: _video, session: _room.session, fit: fit),
             DanmakuOverlay(messages: _room.flying, retractions: _room.retractions, look: small, visible: showDanmaku),
           ],
         ),
@@ -163,7 +197,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    LiveVideoView(session: _room.session, fit: fit),
+                    LiveVideoView(key: _video, session: _room.session, fit: fit),
                     ListenableBuilder(
                       listenable: _room,
                       builder: (context, _) =>
@@ -458,6 +492,9 @@ class _Offline extends StatelessWidget {
   }
 }
 
+/// How far the shade under a control bar reaches past the bar.
+const double controlShadeReach = 28;
+
 /// The control bars (3.x `VideoControllerPanel`, main buttons).
 class _Controls extends ConsumerWidget {
   const new({
@@ -482,82 +519,99 @@ class _Controls extends ConsumerWidget {
   final Future<bool> pipSupported;
   final VoidCallback onPip;
 
+  /// The shade under a bar, darkest at the screen's edge, reaching
+  /// [controlShadeReach] past the bar (M13.16: white icons were lost on a
+  /// bright picture under the 54 % black of the bar's own height).
+  static const List<Color> _shade = [Color(0xB3000000), Color(0x66000000), Color(0x00000000)];
+
+  /// Icons read on any picture: white with a soft shadow.
+  static const IconThemeData _icons = IconThemeData(
+    color: Colors.white,
+    shadows: [Shadow(color: Color(0x99000000), blurRadius: 6)],
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const shade = [Colors.black54, Colors.transparent];
     final store = ref.read(storeProvider);
     return Column(
       children: [
         if (fullscreen)
-          DecoratedBox(
+          Container(
+            key: const ValueKey('live-play-top-shade'),
+            padding: const EdgeInsets.only(bottom: controlShadeReach),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: shade),
+              gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: _shade),
             ),
             child: SafeArea(
               bottom: false,
-              child: Row(
-                children: [
-                  IconButton(
-                    tooltip: i18n('exit_fullscreen'),
-                    color: Colors.white,
-                    onPressed: onBack,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  Expanded(
-                    child: ListenableBuilder(
-                      listenable: controller,
-                      builder: (context, _) {
-                        final room = controller.room;
-                        final programme = controller.catchup?.title ?? room.currentProgramme?.trim() ?? '';
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              room.title.trim().isEmpty ? room.displayNick(platformName(room.platform)) : room.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: Colors.white, fontSize: 15),
-                            ),
-                            if (programme.isNotEmpty)
+              child: IconTheme(
+                data: _icons,
+                child: Row(
+                  children: [
+                    IconButton(
+                      tooltip: i18n('exit_fullscreen'),
+                      color: Colors.white,
+                      onPressed: onBack,
+                      icon: const Icon(Icons.arrow_back_rounded),
+                    ),
+                    Expanded(
+                      child: ListenableBuilder(
+                        listenable: controller,
+                        builder: (context, _) {
+                          final room = controller.room;
+                          final programme = controller.catchup?.title ?? room.currentProgramme?.trim() ?? '';
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                               Text(
-                                '${i18n(controller.catchup == null ? 'now_playing' : 'playing_catchup')}: $programme',
+                                room.title.trim().isEmpty ? room.displayNick(platformName(room.platform)) : room.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                style: const TextStyle(color: Colors.white, fontSize: 15),
                               ),
-                          ],
-                        );
-                      },
+                              if (programme.isNotEmpty)
+                                Text(
+                                  '${i18n(controller.catchup == null ? 'now_playing' : 'playing_catchup')}: $programme',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  if (controller.site.id == SiteIds.iptv)
+                    if (controller.site.id == SiteIds.iptv)
+                      IconButton(
+                        key: const ValueKey('live-play-guide'),
+                        tooltip: i18n('view_schedule'),
+                        color: Colors.white,
+                        onPressed: () => unawaited(showIptvGuide(context, controller)),
+                        icon: const Icon(Icons.assignment_outlined),
+                      ),
                     IconButton(
-                      key: const ValueKey('live-play-guide'),
-                      tooltip: i18n('view_schedule'),
+                      tooltip: i18n('switch_live_room'),
                       color: Colors.white,
-                      onPressed: () => unawaited(showIptvGuide(context, controller)),
-                      icon: const Icon(Icons.assignment_outlined),
+                      onPressed: () => unawaited(showRoomSwitcher(context, controller.room)),
+                      icon: const Icon(Icons.swap_horiz_rounded),
                     ),
-                  IconButton(
-                    tooltip: i18n('switch_live_room'),
-                    color: Colors.white,
-                    onPressed: () => unawaited(showRoomSwitcher(context, controller.room)),
-                    icon: const Icon(Icons.swap_horiz_rounded),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         const Spacer(),
-        DecoratedBox(
+        Container(
+          key: const ValueKey('live-play-bottom-shade'),
+          padding: const EdgeInsets.only(top: controlShadeReach),
           decoration: const BoxDecoration(
-            gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: shade),
+            gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: _shade),
           ),
           child: SafeArea(
             top: false,
             child: IconTheme(
-              data: const IconThemeData(color: Colors.white),
+              data: _icons,
               child: Row(
                 children: [
                   StreamBuilder<PlaybackState>(

@@ -13,6 +13,7 @@ import 'package:pure_live/pages/live_play/danmaku_templates.dart';
 import 'package:pure_live/pages/live_play/room_controller.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
+import 'package:pure_live/shared/danmaku/emotes.dart';
 
 /// The four tabs under the video (3.x `DanmakuTabView`): chat, super chats,
 /// danmaku settings and the block list.
@@ -98,6 +99,7 @@ class _ChatListState extends ConsumerState<ChatList> {
   final ScrollController _scroll = ScrollController();
   bool _following = true;
   int _seen = 0;
+  EmoteTable _emotes = EmoteTable.empty;
 
   @override
   void initState() {
@@ -105,6 +107,17 @@ class _ChatListState extends ConsumerState<ChatList> {
     _scroll.addListener(_onScroll);
     widget.controller.addListener(_onChange);
     _seen = widget.controller.chat.added;
+    // The platform's bundled emoticons (M13.16), read once per platform.
+    final library = ref.read(emoteLibraryProvider);
+    final platform = widget.controller.site.id;
+    _emotes = library.tableOf(platform);
+    if (_emotes.codes.isEmpty) {
+      unawaited(
+        library.load(platform).then((table) {
+          if (mounted && table.codes.isNotEmpty) setState(() => _emotes = table);
+        }),
+      );
+    }
   }
 
   @override
@@ -204,6 +217,7 @@ class _ChatListState extends ConsumerState<ChatList> {
             return _ChatLineView(
               key: ValueKey(line.id),
               line: line,
+              emotes: _emotes,
               onLongPress: line.kind == ChatLineKind.chat ? () => unawaited(_actions(line)) : null,
             );
           },
@@ -228,9 +242,10 @@ class _ChatListState extends ConsumerState<ChatList> {
 }
 
 class _ChatLineView extends StatelessWidget {
-  const new({required this.line, this.onLongPress, super.key});
+  const new({required this.line, this.emotes = EmoteTable.empty, this.onLongPress, super.key});
 
   final ChatLine line;
+  final EmoteTable emotes;
   final VoidCallback? onLongPress;
 
   @override
@@ -338,7 +353,7 @@ class _ChatLineView extends StatelessWidget {
                   WidgetSpan(
                     alignment: PlaceholderAlignment.baseline,
                     baseline: TextBaseline.alphabetic,
-                    child: EmoteText(chatSegments(message), style: body?.copyWith(color: color)),
+                    child: EmoteText(chatSegments(message, emotes), style: body?.copyWith(color: color)),
                   ),
                 ],
               ),
@@ -348,11 +363,6 @@ class _ChatLineView extends StatelessWidget {
     }
   }
 }
-
-/// The pieces of [message] for `EmoteText`. The danmaku layer reports
-/// emotes as text today (CHZZK `{:name:}`, YouTube shortcuts); pictures come
-/// when the message model carries them (UPGRADES B-12, B-13).
-List<ChatSegment> chatSegments(LiveMessage message) => [ChatTextSegment(message.message)];
 
 Color _parseColor(String text, Color fallback) {
   final hex = text.trim().replaceFirst('#', '');

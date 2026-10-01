@@ -37,6 +37,15 @@ void main() {
     expect(retries, 1);
   });
 
+  testWidgets('a button that is not a retry shows its own icon', (tester) async {
+    await tester.pumpWidget(
+      _app(EmptyView(buttonText: 'Search', buttonIcon: Icons.search_rounded, onButtonPressed: () {})),
+    );
+    await tester.pumpAndSettle();
+    expect(find.widgetWithIcon(TextButton, Icons.search_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.refresh_rounded), findsNothing);
+  });
+
   testWidgets('the mini form shows only the icon when the texts are empty', (tester) async {
     await tester.pumpWidget(
       _app(AppStatusView(type: AppStatusType.error, title: '', subtitle: '', isMini: true, onButtonPressed: () {})),

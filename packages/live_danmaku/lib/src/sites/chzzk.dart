@@ -354,8 +354,10 @@ abstract final class ChzzkDanmakuProtocol {
   ///   them by user and time, so the message id is `<user>:<time>`
   ///   (`anonymous:<time>` for anonymous donors), and a line without a time
   ///   has none.
-  /// - Emoji stay as `{:name:}` in the text. The name colour (`nicknameColor`
-  ///   is a palette code) is not the text's: white.
+  /// - Emoji stay as `{:name:}` in the text; the ones the line's
+  ///   `extras.emojis` names (`name` → picture) are its
+  ///   [LiveMessage.emotes] ([emojis], M13.16). The name colour
+  ///   (`nicknameColor` is a palette code) is not the text's: white.
   static LiveMessage? line(Map<Object?, Object?> item, {bool recent = false, DateTime? receivedAt}) {
     final type = _int(item[recent ? 'messageTypeCode' : 'msgTypeCode']) ?? textType;
     final status = item[recent ? 'messageStatusType' : 'msgStatusType'];
@@ -380,6 +382,7 @@ abstract final class ChzzkDanmakuProtocol {
           color: LiveMessageColor.white,
           messageId: _id(row.user, row),
           sentAt: row.sentAt,
+          emotes: emojis(row.text, row.extras['emojis']),
         );
       case donationType:
         return _donation(row, receivedAt ?? DateTime.now());
@@ -391,6 +394,22 @@ abstract final class ChzzkDanmakuProtocol {
         return null;
     }
   }
+
+  /// The pictures of the `{:name:}` codes in [text] that [table] (a line's
+  /// `extras.emojis`, `name` → address) names with an http(s) address, each
+  /// once, in the order of the text.
+  static List<LiveEmote> emojis(String text, Object? table) {
+    if (table is! Map || table.isEmpty || !text.contains('{:')) return const [];
+    final seen = <String>{};
+    return [
+      for (final match in _emojiCode.allMatches(text))
+        if (table[match.group(1)] case final String url
+            when (url.startsWith('https://') || url.startsWith('http://')) && seen.add(match.group(0)!))
+          LiveEmote(code: match.group(0)!, url: url),
+    ];
+  }
+
+  static final RegExp _emojiCode = RegExp(r'\{:([^{}:\s]+):\}');
 
   /// The message id of [row] by [user]: `<user>:<time>`, or empty without
   /// a user or a time.

@@ -119,6 +119,7 @@ class _PlatformAreasViewState extends State<PlatformAreasView>
         title: i18n(login ? 'login_required_title' : 'network_error_title'),
         subtitle: describeLoadError(error),
         buttonText: i18n(login ? 'go_to_login' : 'retry'),
+        buttonIcon: login ? Icons.login_rounded : null,
         onButtonPressed: login
             ? () => AppNavigator.toNamed<void>(RoutePath.kSettingsAccount).ignore()
             : () => _catalog.refresh().ignore(),

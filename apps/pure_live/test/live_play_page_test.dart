@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
+import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/pages/live_play/background_playback.dart';
 import 'package:pure_live/pages/live_play/live_play_page.dart';
+import 'package:pure_live/pages/live_play/player_view.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
@@ -83,6 +86,18 @@ void main() {
     final overlay = tester.state<DanmakuOverlayState>(find.byType(DanmakuOverlay));
     expect(overlay.flyingCount, 1);
 
+    // M13.16: the platform's bundled emoticons are pictures in the chat list.
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200)));
+    danmaku.chat('好[dog]');
+    await tester.pump();
+    final pictures = tester.widgetList<Image>(
+      find.descendant(of: find.byKey(const ValueKey('live-play-chat')), matching: find.byType(Image)),
+    );
+    expect(
+      [for (final picture in pictures) ((picture.image as ResizeImage).imageProvider as AssetImage).assetName],
+      ['assets/emo/images/bilibili/dog.png'],
+    );
+
     await tester.tap(find.byKey(const ValueKey('live-play-follow')));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pump();
@@ -143,6 +158,43 @@ void main() {
     services = await _pump(tester, site: failing, danmaku: FakeDanmaku());
     expect(find.text('直播间不存在或已被删除'), findsOneWidget);
     expect(find.text('重试'), findsOneWidget);
+    await _close(tester, services);
+  });
+
+  testWidgets('M13.16: back from picture-in-picture the controls hide again and answer; shaded bars', (tester) async {
+    final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: FakeDanmaku());
+    final player = tester.state(find.byType(RoomPlayer));
+    // The bars sit on a dark shade reaching past them.
+    final shade = tester.widget<Container>(find.byKey(const ValueKey('live-play-bottom-shade')));
+    expect(((shade.decoration! as BoxDecoration).gradient! as LinearGradient).colors.first, const Color(0xB3000000));
+
+    PictureInPicture.active.value = true;
+    await tester.pump();
+    expect(find.byKey(const ValueKey('live-play-fullscreen')), findsNothing, reason: 'only the picture');
+    expect(tester.state(find.byType(RoomPlayer)), same(player), reason: 'one player across the layouts');
+    await tester.pump(const Duration(seconds: 5));
+
+    PictureInPicture.active.value = false;
+    await tester.pump();
+    expect(tester.state(find.byType(RoomPlayer)), same(player));
+    Finder controls() =>
+        find.ancestor(of: find.byKey(const ValueKey('live-play-fullscreen')), matching: find.byType(AnimatedOpacity));
+    expect(tester.widget<AnimatedOpacity>(controls()).opacity, 1);
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    expect(tester.widget<AnimatedOpacity>(controls()).opacity, 0, reason: 'hidden again after 4 s');
+
+    // A tap shows them; the fullscreen button works.
+    await tester.tap(find.byType(LiveVideoView));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.byKey(const ValueKey('live-play-fullscreen')));
+    await tester.pump();
+    expect(find.text('弹幕列表'), findsNothing);
+    expect(find.byKey(const ValueKey('live-play-top-shade')), findsOneWidget);
+    expect(tester.state(find.byType(RoomPlayer)), same(player));
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(find.text('弹幕列表'), findsOneWidget);
     await _close(tester, services);
   });
 

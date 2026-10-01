@@ -81,6 +81,8 @@ class _FavoritePageState extends ConsumerState<FavoritePage> with SingleTickerPr
         automaticallyImplyLeading: !widget.route.inHome,
         leading: phoneTab ? const MenuButton() : null,
         actions: phoneTab ? const [CommonAppBarActions()] : null,
+        // The three tabs need the width more than the gaps around them.
+        titleSpacing: phoneTab ? 4 : null,
         title: ListenableBuilder(
           listenable: _controller,
           builder: (context, _) {
@@ -89,6 +91,7 @@ class _FavoritePageState extends ConsumerState<FavoritePage> with SingleTickerPr
               key: const ValueKey('favorite-status-tabs'),
               controller: _status,
               tabAlignment: TabAlignment.fill,
+              labelPadding: _statusTabPadding,
               dividerHeight: 0,
               physics: const PureLiveBoundedScrollPhysics(),
               tabs: [
@@ -115,6 +118,7 @@ class _FavoritePageState extends ConsumerState<FavoritePage> with SingleTickerPr
         title: i18n('empty_favorite_title'),
         subtitle: i18n('empty_favorite_subtitle'),
         buttonText: i18n('search_live'),
+        buttonIcon: Icons.search_rounded,
         onButtonPressed: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kSearch)),
       );
     } else {
@@ -157,7 +161,14 @@ const Map<FollowGroup, String> _emptyTitleKeys = {
   FollowGroup.offline: 'favorite_empty_offline_title',
 };
 
-/// A status tab with its number of follows.
+/// Horizontal padding of a status tab: the three tabs share the app bar's
+/// title between the menu button and the actions, and the default 16 on
+/// each side left a phone's label too little room (M13.16).
+const EdgeInsets _statusTabPadding = EdgeInsets.symmetric(horizontal: 4);
+
+/// A status tab with its number of follows as a small badge after the
+/// label. The label is never cut: on a very narrow bar the whole tab
+/// shrinks instead (it used to fade out on the right, `已开播 1`).
 class _StatusTab extends StatelessWidget {
   const new({required this.label, required this.count});
 
@@ -165,18 +176,39 @@ class _StatusTab extends StatelessWidget {
   final int count;
 
   @override
-  Widget build(BuildContext context) => Tab(
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.fade, softWrap: false)),
-        if (count > 0) ...[
-          const SizedBox(width: 4),
-          Text('$count', style: context.textStyles.t11.copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
-        ],
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Tab(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label, maxLines: 1, softWrap: false),
+            if (count > 0)
+              Container(
+                key: ValueKey('favorite-status-count-$label'),
+                margin: const EdgeInsetsDirectional.only(start: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                constraints: const BoxConstraints(minWidth: 16),
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$count',
+                  textAlign: TextAlign.center,
+                  style: context.textStyles.t11.copyWith(
+                    height: 1.4,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// The platform rail, the refresh button, the tag strip and one grid per
@@ -431,7 +463,8 @@ class _FollowGrid extends ConsumerWidget {
       subtitle: total == 0
           ? i18n('favorite_empty_platform_subtitle')
           : i18n('favorite_empty_filter_subtitle', args: {'count': '$total'}),
-      buttonText: canShowOffline ? i18n('favorite_show_offline') : i18n('retry'),
+      buttonText: canShowOffline ? i18n('favorite_show_offline') : i18n('refresh'),
+      buttonIcon: canShowOffline ? Icons.visibility_rounded : null,
       onButtonPressed: canShowOffline ? () => controller.showGroup(FollowGroup.offline) : () => unawaited(onRefresh()),
     );
   }

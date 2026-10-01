@@ -449,6 +449,7 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
         title: i18n('webdav_no_config_create_first'),
         subtitle: i18n('webdav_intro'),
         buttonText: i18n('webdav_create_new_config'),
+        buttonIcon: Icons.add_rounded,
         onButtonPressed: () => unawaited(_edit()),
       );
     }
@@ -457,6 +458,7 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
         icon: Icons.cloud_queue,
         title: i18n(_savedInvalid ? 'webdav_saved_address_invalid' : 'webdav_select_config_from_sidebar'),
         buttonText: i18n('webdav_open_config_list'),
+        buttonIcon: Icons.menu_open_rounded,
         onButtonPressed: () => _scaffold.currentState?.openEndDrawer(),
       );
     }

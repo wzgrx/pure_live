@@ -116,8 +116,11 @@ abstract final class KuaishouDanmakuProtocol {
   /// Throws [FormatException] when no object results and
   /// [KuaishouFeedRejected] when `result` is not 1. Only `comment` entries
   /// (any case) with text become messages; an entry that cannot be read (a
-  /// time out of range) is skipped without losing the others.
-  static KuaishouFeedBatch parse(Object? body) {
+  /// time out of range) is skipped without losing the others. A comment's
+  /// codes found in [emotes] (the room page's emoji table, `[笑哭]` → its
+  /// picture) are its [LiveMessage.emotes] (M13.16; the feed itself has no
+  /// pictures).
+  static KuaishouFeedBatch parse(Object? body, {Map<String, String> emotes = const {}}) {
     var payload = body;
     for (var depth = 0; depth < 3 && payload is String; depth++) {
       payload = jsonDecode(payload);
@@ -134,7 +137,7 @@ abstract final class KuaishouDanmakuProtocol {
       pullDelay: Duration(seconds: (_int(payload['pullCycleSeconds']) ?? defaultPullDelay.inSeconds).clamp(1, 10)),
       messages: List.unmodifiable([
         if (feeds is List<Object?>)
-          for (final feed in feeds) ?_comment(feed),
+          for (final feed in feeds) ?_comment(feed, emotes),
       ]),
       onlineViewers: watching.isEmpty ? null : parseAudienceNumber(watching),
     );
@@ -147,7 +150,7 @@ abstract final class KuaishouDanmakuProtocol {
   /// One feed entry as a chat message; null when it is not a comment, has no
   /// text, or has a time no `DateTime` can hold (3.x failed the whole answer
   /// on such an entry, and every retry of it, as the cursor stayed put).
-  static LiveMessage? _comment(Object? feed) {
+  static LiveMessage? _comment(Object? feed, Map<String, String> emotes) {
     if (feed is! Map<Object?, Object?> || feed['type']?.toString().toLowerCase() != 'comment') return null;
     final content = feed['content']?.toString().trim() ?? '';
     if (content.isEmpty) return null;
@@ -170,8 +173,21 @@ abstract final class KuaishouDanmakuProtocol {
       messageId: 'kuaishou:$id',
       sentAt: timestamp == null ? null : DateTime.fromMillisecondsSinceEpoch(timestamp),
       color: LiveMessageColor.white,
+      emotes: emotes.isEmpty ? const [] : codeEmotes(content, emotes),
     );
   }
+
+  /// The `[…]` codes of [text] that [table] has, each once, in order.
+  static List<LiveEmote> codeEmotes(String text, Map<String, String> table) {
+    final seen = <String>{};
+    return [
+      for (final match in _code.allMatches(text))
+        if (table[match.group(0)!] case final url? when seen.add(match.group(0)!))
+          LiveEmote(code: match.group(0)!, url: url),
+    ];
+  }
+
+  static final RegExp _code = RegExp(r'\[[^\[\]\n]{1,16}\]');
 
   /// 3.x `_asInt`: numbers truncated, text parsed, anything else null.
   static int? _int(Object? value) {
@@ -231,6 +247,7 @@ final class KuaishouDanmakuConnection extends DanmakuConnectionBase<KuaishouDanm
 final class _KuaishouFeed {
   new(this._http, KuaishouDanmakuArgs args, this._run)
     : _liveStreamId = args.liveStreamId,
+      _emotes = args.emotes,
       _headers = KuaishouDanmakuProtocol.headers(args.cookie) {
     unawaited(_run.ended.then((_) => _cancel.cancel()));
   }
@@ -238,13 +255,14 @@ final class _KuaishouFeed {
   final LiveHttp _http;
   final DanmakuRun _run;
   final String _liveStreamId;
+  final Map<String, String> _emotes;
   final Map<String, String> _headers;
   final CancelToken _cancel = CancelToken();
   String _cursor = '';
 
   /// Requests and parses the next answer; a new cursor is kept.
   Future<KuaishouFeedBatch> pull() async {
-    final batch = KuaishouDanmakuProtocol.parse(await _fetch());
+    final batch = KuaishouDanmakuProtocol.parse(await _fetch(), emotes: _emotes);
     if (batch.cursor.isNotEmpty) _cursor = batch.cursor;
     return batch;
   }

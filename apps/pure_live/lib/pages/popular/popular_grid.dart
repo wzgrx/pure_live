@@ -335,6 +335,7 @@ class _PopularPlatformViewState extends ConsumerState<PopularPlatformView> {
         title: i18n('login_required_title'),
         subtitle: i18n('login_required_subtitle'),
         buttonText: i18n('go_to_login'),
+        buttonIcon: Icons.login_rounded,
         onButtonPressed: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kSettingsAccount)),
       );
     }
@@ -356,6 +357,7 @@ class _PopularPlatformViewState extends ConsumerState<PopularPlatformView> {
       title: i18n('empty_live_title'),
       subtitle: hidden > 0 ? i18n('popular_hidden_count', args: {'count': '$hidden'}) : i18n('empty_live_subtitle'),
       buttonText: hidden > 0 ? i18n('popular_show_hidden') : i18n('refresh'),
+      buttonIcon: hidden > 0 ? Icons.visibility_rounded : null,
       onButtonPressed: hidden > 0 ? _showHidden : () => unawaited(_refresh()),
     );
   }

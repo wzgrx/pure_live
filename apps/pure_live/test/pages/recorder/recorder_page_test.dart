@@ -4,11 +4,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/pages/live_play/record_button.dart';
 import 'package:pure_live/pages/record_settings/record_settings_dialogs.dart';
 import 'package:pure_live/pages/record_settings/record_settings_page.dart';
 import 'package:pure_live/pages/recorder/recorder_page.dart';
@@ -182,6 +184,34 @@ void main() {
     );
     expect(androidDocumentFolderUri('/data/user/0/com.mystyle.purelive.v4dev/files'), isNull);
     expect(androidDocumentFolderUri('/storage/emulated/0'), isNull);
+  });
+
+  testWidgets("M13.16: the room bar's record button is a record glyph; a monitored room adds a dot", (tester) async {
+    await _pump(
+      tester,
+      (_) => Scaffold(
+        appBar: AppBar(
+          actions: [
+            RecordButton(
+              room: LiveRoom(platform: 'bilibili', roomId: '1'),
+              compact: true,
+            ),
+            RecordButton(
+              key: const ValueKey('monitored'),
+              room: LiveRoom(platform: 'bilibili', roomId: '2'),
+              compact: true,
+            ),
+          ],
+        ),
+      ),
+      tasks: [_task('2', RecordStatus.stopped)],
+    );
+    expect(find.byIcon(Icons.fiber_manual_record_outlined), findsNothing, reason: 'the hollow circle is gone');
+    expect(find.byIcon(Icons.radio_button_checked_rounded), findsNWidgets(2));
+    final badges = tester.widgetList<Badge>(find.byType(Badge)).toList();
+    expect([for (final badge in badges) badge.isLabelVisible], [false, true]);
+    expect(find.byTooltip('录制'), findsOneWidget);
+    expect(find.byTooltip('已监控'), findsOneWidget);
   });
 
   testWidgets('without FFmpeg the centre says recording is unavailable', (tester) async {

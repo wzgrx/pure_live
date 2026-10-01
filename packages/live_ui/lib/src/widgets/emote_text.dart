@@ -23,29 +23,37 @@ final class ChatTextSegment extends ChatSegment {
   int get hashCode => text.hashCode;
 }
 
-/// An emote picture (CHZZK emoticons, YouTube channel emoji), with the text
-/// it stands for, shown while it loads or when it fails.
+/// An emote picture (CHZZK emoticons, YouTube channel emoji, the bundled
+/// lists of the Chinese platforms), with the text it stands for, shown
+/// while it loads or when it fails.
 @immutable
 final class ChatEmoteSegment extends ChatSegment {
   /// Creates the emote.
-  const new({required this.url, this.alt = ''});
+  const new({required this.url, this.alt = '', this.asset = ''});
 
-  /// Picture address.
+  /// Picture address; the fallback of [asset].
   final String url;
 
   /// The text the picture stands for (`:smile:`).
   final String alt;
 
-  @override
-  bool operator ==(Object other) => other is ChatEmoteSegment && other.url == url && other.alt == alt;
+  /// A picture bundled with the app (`assets/emo/images/…`), shown before
+  /// [url]; empty for none.
+  final String asset;
 
   @override
-  int get hashCode => Object.hash(url, alt);
+  bool operator ==(Object other) =>
+      other is ChatEmoteSegment && other.url == url && other.alt == alt && other.asset == asset;
+
+  @override
+  int get hashCode => Object.hash(url, alt, asset);
 }
 
 /// A chat message with emote pictures inline, each as tall as
 /// [emoteScale] × the font size and centred on the line (UPGRADES B-12,
-/// B-13: the picture instead of its code).
+/// B-13: the picture instead of its code). A bundled picture comes first;
+/// when it cannot be loaded the address is used, and the code is shown while
+/// a picture loads or when neither works.
 class EmoteText extends StatelessWidget {
   /// Shows [segments].
   const new(this.segments, {this.style, this.maxLines, this.overflow, this.emoteScale = 1.4, super.key});
@@ -85,20 +93,15 @@ class EmoteText extends StatelessWidget {
           for (final segment in segments)
             switch (segment) {
               ChatTextSegment(:final text) => TextSpan(text: text),
-              ChatEmoteSegment(:final url, :final alt) when url.trim().isEmpty => TextSpan(text: alt),
-              ChatEmoteSegment(:final url, :final alt) => WidgetSpan(
+              ChatEmoteSegment(:final url, :final alt, :final asset) when url.trim().isEmpty && asset.trim().isEmpty =>
+                TextSpan(text: alt),
+              ChatEmoteSegment(:final url, :final alt, :final asset) => WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
                 child: Semantics(
                   label: alt,
                   child: SizedBox(
                     height: height,
-                    child: LiveNetworkImage(
-                      url: url.trim(),
-                      fit: BoxFit.contain,
-                      memCacheWidth: (height * 2 * MediaQuery.devicePixelRatioOf(context)).round(),
-                      placeholder: (_) => Text(alt, style: effective),
-                      error: (_) => Text(alt, style: effective),
-                    ),
+                    child: _picture(context, url.trim(), asset.trim(), alt, height, effective),
                   ),
                 ),
               ),
@@ -108,6 +111,28 @@ class EmoteText extends StatelessWidget {
       style: style,
       maxLines: maxLines,
       overflow: overflow,
+    );
+  }
+
+  Widget _picture(BuildContext context, String url, String asset, String alt, double height, TextStyle style) {
+    final cacheWidth = (height * 2 * MediaQuery.devicePixelRatioOf(context)).round();
+    Widget code() => Text(alt, style: style);
+    Widget network() => url.isEmpty
+        ? code()
+        : LiveNetworkImage(
+            url: url,
+            fit: BoxFit.contain,
+            memCacheWidth: cacheWidth,
+            placeholder: (_) => code(),
+            error: (_) => code(),
+          );
+    if (asset.isEmpty) return network();
+    return Image.asset(
+      asset,
+      fit: BoxFit.contain,
+      cacheWidth: cacheWidth,
+      excludeFromSemantics: true,
+      errorBuilder: (_, _, _) => network(),
     );
   }
 }

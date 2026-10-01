@@ -102,3 +102,10 @@ flutter:
     - assets/fonts/fonts-manifest.json
     # The WebDAV help page's screenshots (3.x).
     - assets/webdav/
+    # 3.x's emoticon lists and the pictures they name, for the chat (M13.16).
+    - assets/emo/json/
+    - assets/emo/images/bilibili/
+    - assets/emo/images/douyin/
+    - assets/emo/images/douyu/
+    - assets/emo/images/huya/
+    - assets/emo/images/kuaishou/

@@ -222,7 +222,13 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     );
   }
 
+  /// One player element for every layout (normal, fullscreen,
+  /// picture-in-picture): its controls' state and the picture survive the
+  /// switches instead of being built anew (M13.16).
+  final GlobalKey _playerKey = GlobalKey(debugLabel: 'room-player');
+
   Widget _player(LiveRoomController controller) => RoomPlayer(
+    key: _playerKey,
     controller: controller,
     fullscreen: _fullscreen,
     pip: _pip,

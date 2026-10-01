@@ -138,6 +138,7 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
         title: i18n(login ? 'login_required_title' : 'network_error_title'),
         subtitle: describeLoadError(error),
         buttonText: i18n(login ? 'go_to_login' : 'retry'),
+        buttonIcon: login ? Icons.login_rounded : null,
         onButtonPressed: login
             ? () => AppNavigator.toNamed<void>(RoutePath.kSettingsAccount).ignore()
             : () => _refresh().ignore(),
@@ -150,6 +151,7 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
           ? i18n('area_rooms_hidden_unplayable', args: {'count': '${_feed.hiddenCount}'})
           : i18n('empty_areas_room_subtitle'),
       buttonText: _feed.hiddenCount > 0 ? i18n('area_rooms_show_hidden') : i18n('refresh'),
+      buttonIcon: _feed.hiddenCount > 0 ? Icons.visibility_rounded : null,
       onButtonPressed: _feed.hiddenCount > 0 ? _showHidden : () => _refresh().ignore(),
     );
   }

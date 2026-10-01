@@ -117,9 +117,10 @@ final class DanmakuRun {
     _owner._events.add(const DanmakuReady());
   }
 
-  /// Reports a message.
+  /// Reports a message, its text and names without invisible placeholder
+  /// characters ([cleanDanmakuText]).
   void message(LiveMessage message) {
-    if (isActive) _owner._events.add(DanmakuReceived(message));
+    if (isActive) _owner._events.add(DanmakuReceived(cleanDanmakuText(message)));
   }
 
   /// Reports a transient interruption ([DanmakuReconnecting]).
@@ -156,4 +157,60 @@ final class DanmakuRun {
     timer.cancel();
     return isActive;
   }
+}
+
+/// [message] with its text, sender name and fan badge name, and those of
+/// its super chat, without invisible placeholder characters (live_core's
+/// [stripInvisiblePlaceholders]: U+FFFC and the like, which fonts draw as a
+/// box); the same message when it has none. Every platform's messages pass
+/// through it in [DanmakuRun.message].
+LiveMessage cleanDanmakuText(LiveMessage message) {
+  final text = stripInvisiblePlaceholders(message.message);
+  final name = stripInvisiblePlaceholders(message.userName);
+  final badge = stripInvisiblePlaceholders(message.fansName);
+  final data = switch (message.data) {
+    final LiveSuperChatMessage chat => _cleanSuperChat(chat),
+    final other => other,
+  };
+  if (identical(text, message.message) &&
+      identical(name, message.userName) &&
+      identical(badge, message.fansName) &&
+      identical(data, message.data)) {
+    return message;
+  }
+  return LiveMessage(
+    type: message.type,
+    userName: name,
+    message: text,
+    color: message.color,
+    userId: message.userId,
+    data: data,
+    userLevel: message.userLevel,
+    fansLevel: message.fansLevel,
+    fansName: badge,
+    isLocal: message.isLocal,
+    messageId: message.messageId,
+    sentAt: message.sentAt,
+    style: message.style,
+    replayed: message.replayed,
+    emotes: message.emotes,
+  );
+}
+
+LiveSuperChatMessage _cleanSuperChat(LiveSuperChatMessage chat) {
+  final text = stripInvisiblePlaceholders(chat.message);
+  final name = stripInvisiblePlaceholders(chat.userName);
+  if (identical(text, chat.message) && identical(name, chat.userName)) return chat;
+  return LiveSuperChatMessage(
+    userName: name,
+    face: chat.face,
+    message: text,
+    price: chat.price,
+    startTime: chat.startTime,
+    endTime: chat.endTime,
+    backgroundColor: chat.backgroundColor,
+    backgroundBottomColor: chat.backgroundBottomColor,
+    messageId: chat.messageId,
+    priceText: chat.priceText,
+  );
 }

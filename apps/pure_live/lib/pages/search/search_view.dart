@@ -12,7 +12,9 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/search/search_capability.dart';
 import 'package:pure_live/pages/search/search_history.dart';
 import 'package:pure_live/pages/search/search_model.dart';
+import 'package:pure_live/pages/search/search_scope.dart';
 import 'package:pure_live/pages/search/search_widgets.dart';
+import 'package:pure_live/pages/settings/settings_model.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/in_app_web.dart';
@@ -48,6 +50,8 @@ class _SearchViewState extends ConsumerState<SearchView> {
   late final LiveStore _store;
   late final SearchModel _model;
   late final SearchHistory _history;
+  late final SearchScopeStore _scope;
+  late final Future<void> _scopeLoaded;
   late final LinkParser _links;
   final TextEditingController _text = TextEditingController();
   final FocusNode _focus = FocusNode();
@@ -59,6 +63,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
   bool _resolvingLink = false;
   CancelToken? _linkCancel;
   List<String>? _dismissedFailures;
+  bool _failureDetails = false;
 
   @override
   void initState() {
@@ -82,6 +87,11 @@ class _SearchViewState extends ConsumerState<SearchView> {
     )..addListener(_changed);
     _history = SearchHistory(_store.meta)..addListener(_changed);
     unawaited(_history.load());
+    // The platforms left out of "all" (M13.16), read before the first search.
+    _scope = SearchScopeStore(_store.meta);
+    _scopeLoaded = _scope.load().then((excluded) {
+      if (mounted) _model.setExcluded(excluded);
+    });
     _links = LinkParser(registry, ref.read(appServicesProvider).http);
     _text.addListener(_textChanged);
     _scroll.addListener(_scrolled);
@@ -179,8 +189,21 @@ class _SearchViewState extends ConsumerState<SearchView> {
     }
     unawaited(_history.add(text));
     _dismissedFailures = null;
+    _failureDetails = false;
     if (_scroll.hasClients) _scroll.jumpTo(0);
+    await _scopeLoaded;
+    if (!mounted) return;
     await _model.search(text);
+  }
+
+  /// Chooses the platforms "all" searches, remembers them and searches again.
+  Future<void> _editScope() async {
+    final excluded = await showSearchScopeDialog(context, _model.sites, _model.excluded);
+    if (excluded == null || !mounted) return;
+    unawaited(_scope.save(excluded));
+    _dismissedFailures = null;
+    _failureDetails = false;
+    _model.setExcluded(excluded, draft: _text.text);
   }
 
   /// Opens the room [text] links to; false when no room was found (the
@@ -298,6 +321,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
                   _model.setMode(mode, draft: _text.text);
                 },
                 onOpenWebSearch: () => unawaited(_openWebSearch()),
+                onEditScope: () => unawaited(_editScope()),
               ),
             ),
             if (_linkDetected) SliverToBoxAdapter(child: _linkBanner(context)),
@@ -496,28 +520,93 @@ class _SearchViewState extends ConsumerState<SearchView> {
     );
   }
 
-  String _failureText() => i18n(
-    'search_partial_failure',
-    args: {
-      'sites': [for (final id in _model.failed) _siteName(id)].join('、'),
-    },
-  );
+  /// Whether an overseas platform is among the failed ones.
+  bool get _overseasFailed => _model.failed.any(overseasPlatforms.contains);
 
-  Widget _failureBanner(BuildContext context) => MaterialBanner(
-    key: const ValueKey('search-failure-banner'),
-    leading: const Icon(Icons.error_outline_rounded),
-    content: Text(_failureText()),
-    forceActionsBelow: true,
-    actions: [
-      TextButton(onPressed: _retry, child: Text(i18n('retry'))),
-      if (_model.canOpenWebSearch)
-        TextButton(onPressed: () => unawaited(_openWebSearch()), child: Text(i18n('continue_web_search'))),
-      TextButton(
-        onPressed: () => setState(() => _dismissedFailures = _model.failed),
-        child: Text(MaterialLocalizations.of(context).closeButtonLabel),
+  /// `有 3 个平台连接失败`, with the proxy hint when an overseas one failed.
+  String _failureText() => [
+    i18n('search_failures_note', args: {'count': '${_model.failed.length}'}),
+    if (_overseasFailed) i18n('search_failures_proxy_hint'),
+  ].join('，');
+
+  String _failedNames() => [for (final id in _model.failed) _siteName(id)].join('、');
+
+  /// A quiet note above the results (M13.16; it was a banner naming every
+  /// failed platform on each search): how many failed, why overseas ones
+  /// may, which ones on request, and what to do about it.
+  Widget _failureBanner(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final small = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
+    final action = TextButton.styleFrom(visualDensity: VisualDensity.compact);
+    return Container(
+      key: const ValueKey('search-failure-banner'),
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      padding: const EdgeInsets.fromLTRB(12, 8, 4, 2),
+      decoration: BoxDecoration(color: scheme.surfaceContainerHigh, borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Icon(Icons.info_outline_rounded, size: 18, color: scheme.onSurfaceVariant),
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: Text(_failureText(), style: theme.textTheme.bodyMedium)),
+              IconButton(
+                key: const ValueKey('search-failure-close'),
+                visualDensity: VisualDensity.compact,
+                tooltip: MaterialLocalizations.of(context).closeButtonLabel,
+                onPressed: () => setState(() => _dismissedFailures = _model.failed),
+                icon: const Icon(Icons.close_rounded, size: 18),
+              ),
+            ],
+          ),
+          if (_failureDetails)
+            Padding(
+              key: const ValueKey('search-failure-names'),
+              padding: const EdgeInsets.fromLTRB(26, 2, 8, 0),
+              child: Text(_failedNames(), style: small),
+            ),
+          Wrap(
+            children: [
+              TextButton(
+                key: const ValueKey('search-failure-details'),
+                style: action,
+                onPressed: () => setState(() => _failureDetails = !_failureDetails),
+                child: Text(i18n(_failureDetails ? 'search_failures_hide' : 'search_failures_details')),
+              ),
+              TextButton(style: action, onPressed: _retry, child: Text(i18n('retry'))),
+              if (_model.selected == 0)
+                TextButton(
+                  key: const ValueKey('search-failure-scope'),
+                  style: action,
+                  onPressed: () => unawaited(_editScope()),
+                  child: Text(i18n('search_scope')),
+                ),
+              if (_overseasFailed)
+                TextButton(
+                  key: const ValueKey('search-failure-proxy'),
+                  style: action,
+                  onPressed: () =>
+                      unawaited(AppNavigator.toNamed<void>(RoutePath.kSettings, arguments: SettingsSection.network)),
+                  child: Text(i18n('search_proxy_settings')),
+                ),
+              if (_model.canOpenWebSearch)
+                TextButton(
+                  style: action,
+                  onPressed: () => unawaited(_openWebSearch()),
+                  child: Text(i18n('continue_web_search')),
+                ),
+            ],
+          ),
+        ],
       ),
-    ],
-  );
+    );
+  }
 
   Widget _emptyStatus() {
     final unsupported = _model.unsupported;
@@ -532,6 +621,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
             ? i18n('search_anchor_unsupported', args: {'site': name})
             : searchCoverageText(SearchCapabilities.of(unsupported.id), name),
         buttonText: _model.canOpenWebSearch ? i18n('continue_web_search') : null,
+        buttonIcon: Icons.open_in_browser_rounded,
         onButtonPressed: _model.canOpenWebSearch ? () => unawaited(_openWebSearch()) : null,
       );
     }
@@ -542,6 +632,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
         title: i18n('search_no_live_results'),
         subtitle: i18n('search_offline_hidden_desc'),
         buttonText: i18n('search_show_offline'),
+        buttonIcon: Icons.visibility_rounded,
         onButtonPressed: () => _model.setIncludeOffline(value: true),
       );
     }
@@ -550,7 +641,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
         key: const ValueKey('search-failed'),
         type: AppStatusType.error,
         title: i18n('search_failed_title'),
-        subtitle: _failureText(),
+        subtitle: '${_failureText()}\n${_failedNames()}',
         buttonText: i18n('retry'),
         onButtonPressed: _retry,
       );
@@ -561,6 +652,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
       title: i18n('search_no_results'),
       subtitle: i18n('search_no_results_desc'),
       buttonText: _model.canOpenWebSearch ? i18n('continue_web_search') : null,
+      buttonIcon: Icons.open_in_browser_rounded,
       onButtonPressed: _model.canOpenWebSearch ? () => unawaited(_openWebSearch()) : null,
     );
   }

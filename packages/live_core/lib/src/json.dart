@@ -45,6 +45,29 @@ String decodeHtmlEntities(String text) {
   });
 }
 
+/// Characters that a platform leaves in display text where it had something
+/// else, and that fonts draw as a box (Kuaishou's titles keep U+FFFC where
+/// the app had a picture, shown as "OBJ"): the object replacement character
+/// U+FFFC, the interlinear annotation marks U+FFF9–U+FFFB, the
+/// noncharacters U+FFFE and U+FFFF, and the C0 and C1 control characters
+/// except tab, line feed and carriage return. Format characters that text
+/// rendering already treats as invisible and that carry meaning stay: the
+/// zero-width space U+200B (a break opportunity), the joiners U+200C,
+/// U+200D and U+2060 (emoji sequences, scripts, kaomoji kept on one line),
+/// U+FEFF; so does the replacement character U+FFFD, a visible sign of
+/// broken text.
+final RegExp _invisiblePlaceholders = RegExp(r'[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F￹-￼￾￿]');
+
+/// [text] without invisible placeholder characters (see above); the same
+/// string when it has none. `LiveRoom` applies it to titles, names,
+/// introductions and notices, the danmaku runtime to chat texts and names,
+/// so no platform has to.
+String stripInvisiblePlaceholders(String text) =>
+    _invisiblePlaceholders.hasMatch(text) ? text.replaceAll(_invisiblePlaceholders, '') : text;
+
+/// [stripInvisiblePlaceholders] of a nullable [text].
+String? stripInvisiblePlaceholdersOrNull(String? text) => text == null ? null : stripInvisiblePlaceholders(text);
+
 /// An integer from a JSON number or integer string; null for anything else
 /// (fractions, negatives are kept as parsed, blank strings are null).
 int? jsonInt(Object? value) {

@@ -119,6 +119,7 @@ final class AppStrings {
     replay: tr('replay'),
     verifying: tr('favorite_status_verifying'),
     delete: tr('delete'),
+    offline: tr('offline_room_title'),
   );
 }
 

@@ -7,22 +7,10 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/areas/area_card.dart';
 import 'package:pure_live/features/areas/areas_common.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
-
-/// The followed areas (3.x `FavoriteAreasPage`): an "all" tab, then one tab
-/// per platform on the user's list; each tab counts its areas (new). A long
-/// press unfollows (new; 3.x only unfollowed from an area's rooms).
-class FavoriteAreasView extends ConsumerStatefulWidget {
-  /// Creates the view.
-  const new({required this.route, super.key});
-
-  /// How the page was opened.
-  final RouteArgs route;
-
-  @override
-  ConsumerState<FavoriteAreasView> createState() => _FavoriteAreasViewState();
-}
 
 /// The tab to show among [siteIds]: [selectedSiteId] when it is still there,
 /// else [fallback] clamped (3.x `resolveFavoriteAreaSiteIndex`).
@@ -34,6 +22,39 @@ int resolveFavoriteAreaSiteIndex({
   if (siteIds.isEmpty) return 0;
   final selected = siteIds.indexOf(selectedSiteId);
   return selected >= 0 ? selected : fallback.clamp(0, siteIds.length - 1);
+}
+
+/// The platform tabs of the followed areas (docs/ui/compare/U.4f c4, choice
+/// Z1): "all", then the platforms that have followed areas, in the order of
+/// "platform display" ([platformOrder]) and the others after them; none
+/// without followed areas.
+List<String> favoriteAreaTabs(Iterable<LiveArea> areas, List<String> platformOrder) {
+  final present = {for (final area in areas) area.platform};
+  if (present.isEmpty) return const [];
+  final ordered = <String>[SiteIds.all];
+  for (final id in [...platformOrder, ...SiteIds.supported, ...(present.toList()..sort())]) {
+    final key = id.trim().toLowerCase();
+    if (present.contains(key) && !ordered.contains(key)) ordered.add(key);
+  }
+  return ordered;
+}
+
+/// The followed areas (3.x `FavoriteAreasPage`, docs/ui/compare/U.4f):
+/// "all" and the platforms that have followed areas, swiped between, the
+/// last one kept while the page lives; the area grid of the areas page with
+/// "platform · category" under each name in "all" and the category in a
+/// platform's tab (c3); a long press or right click opens the area dialog,
+/// whose "取消关注" asks first (c2); with nothing followed it says how to
+/// follow and leads to the areas (c5).
+class FavoriteAreasView extends ConsumerStatefulWidget {
+  /// Creates the view.
+  const new({required this.route, super.key});
+
+  /// How the page was opened.
+  final RouteArgs route;
+
+  @override
+  ConsumerState<FavoriteAreasView> createState() => _FavoriteAreasViewState();
 }
 
 class _FavoriteAreasViewState extends ConsumerState<FavoriteAreasView> with TickerProviderStateMixin {
@@ -48,11 +69,15 @@ class _FavoriteAreasViewState extends ConsumerState<FavoriteAreasView> with Tick
   }
 
   void _sync(List<String> ids) {
-    if (ids.length == _ids.length && ids.indexed.every((entry) => entry.$2 == _ids[entry.$1]) && _tabs != null) return;
+    if (ids.length == _ids.length && ids.indexed.every((entry) => entry.$2 == _ids[entry.$1])) return;
     final index = resolveFavoriteAreaSiteIndex(siteIds: ids, selectedSiteId: _selectedId, fallback: _tabs?.index ?? 0);
     final old = _tabs;
     if (old != null) WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
     _ids = ids;
+    if (ids.isEmpty) {
+      _tabs = null;
+      return;
+    }
     final tabs = TabController(
       length: ids.length,
       initialIndex: index,
@@ -66,71 +91,75 @@ class _FavoriteAreasViewState extends ConsumerState<FavoriteAreasView> with Tick
     _selectedId = ids[index];
   }
 
+  void _toAreas() {
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop();
+    } else {
+      AppNavigator.toNamed<void>(RoutePath.kAreas).ignore();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final sites = ref.read(sitesProvider);
-    final ids = [SiteIds.all, ...sites.availableIds(watchSetting(ref, Settings.hotAreasList))];
-    _sync(ids);
     final followed = ref.watch(followedAreasProvider);
     final areas = followed.value ?? const <LiveArea>[];
-    int countOf(String id) => id == SiteIds.all ? areas.length : areas.where((area) => area.platform == id).length;
-    String label(String id) {
-      final name = id == SiteIds.all ? i18n('site_all') : platformName(id, fallback: sites.maybeOf(id)?.name);
-      final count = countOf(id);
-      return count > 0 ? '$name $count' : name;
-    }
+    _sync(favoriteAreaTabs(areas, watchSetting(ref, Settings.hotAreasList)));
+    final tabs = _tabs;
+    String label(String id) =>
+        id == SiteIds.all ? i18n('site_all') : platformName(id, fallback: sites.maybeOf(id)?.name);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(i18n('favorite_areas'))),
-      body: Column(
+    final Widget body;
+    if (followed.isLoading && !followed.hasValue) {
+      body = const AreaGridSkeleton();
+    } else if (tabs == null) {
+      body = AppStatusView(
+        type: AppStatusType.empty,
+        icon: AppIcons.areas,
+        title: i18n('empty_areas_title'),
+        subtitle: i18n('favorite_areas_empty_hint'),
+        buttonText: i18n('favorite_areas_go_to_areas'),
+        buttonIcon: AppIcons.areas,
+        onButtonPressed: _toAreas,
+      );
+    } else {
+      body = Column(
         children: [
           ScrollableTabBar(
             key: const ValueKey('favorite-areas-platform-tabs'),
-            controller: _tabs,
+            controller: tabs,
             isScrollable: true,
             tabAlignment: TabAlignment.start,
             physics: const PureLiveBoundedScrollPhysics(),
-            tabs: [for (final id in ids) Tab(text: label(id))],
+            tabs: [for (final id in _ids) Tab(text: label(id))],
           ),
           Expanded(
-            child: followed.isLoading && !followed.hasValue
-                ? AppStatusView(type: AppStatusType.loading, title: i18n('refresh_loading'))
-                : TabBarView(
-                    controller: _tabs,
-                    physics: const PureLiveBoundedScrollPhysics(),
-                    children: [
-                      for (final id in ids)
-                        _FollowedAreasTab(
-                          key: PageStorageKey('favorite_areas_$id'),
-                          areas: id == SiteIds.all
-                              ? areas
-                              : [
-                                  for (final area in areas)
-                                    if (area.platform == id) area,
-                                ],
-                          showPlatform: id == SiteIds.all,
-                        ),
-                    ],
+            child: TabBarView(
+              controller: tabs,
+              physics: const PureLiveBoundedScrollPhysics(),
+              children: [
+                for (final id in _ids)
+                  AreaGrid(
+                    key: PageStorageKey('favorite_areas_$id'),
+                    areas: id == SiteIds.all
+                        ? areas
+                        : [
+                            for (final area in areas)
+                              if (area.platform == id) area,
+                          ],
+                    caption: id == SiteIds.all ? AreaCaption.platformAndCategory : AreaCaption.category,
+                    bottomPadding: 16,
                   ),
+              ],
+            ),
           ),
         ],
-      ),
+      );
+    }
+    return Scaffold(
+      appBar: AppBar(centerTitle: true, title: Text(i18n('favorite_areas'))),
+      body: body,
     );
   }
-}
-
-class _FollowedAreasTab extends StatelessWidget {
-  const new({required this.areas, required this.showPlatform, super.key});
-
-  final List<LiveArea> areas;
-  final bool showPlatform;
-
-  @override
-  Widget build(BuildContext context) => areas.isEmpty
-      ? EmptyView(
-          icon: Remix.apps_2_line,
-          title: i18n('empty_areas_title'),
-          subtitle: i18n('areas_followed_empty_subtitle'),
-        )
-      : AreaGrid(areas: areas, showPlatform: showPlatform);
 }

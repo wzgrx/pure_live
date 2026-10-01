@@ -175,16 +175,18 @@ class AreaArtwork extends StatelessWidget {
     if (address.isEmpty) {
       return ColoredBox(
         color: colors.surfaceContainerLow,
-        child: Center(child: Icon(Icons.live_tv_rounded, color: colors.onSurfaceVariant.withValues(alpha: 0.5))),
+        child: Center(child: Icon(AppIcons.coverPlaceholder, color: colors.onSurfaceVariant.withValues(alpha: 0.5))),
       );
     }
     Widget placeholder(BuildContext context) => ColoredBox(
       color: colors.surfaceContainerLow,
-      child: Center(child: Icon(Icons.live_tv_rounded, color: Theme.of(context).disabledColor.withValues(alpha: 0.3))),
+      child: Center(
+        child: Icon(AppIcons.coverPlaceholder, color: Theme.of(context).disabledColor.withValues(alpha: 0.3)),
+      ),
     );
     Widget error(BuildContext context) => ColoredBox(
       color: colors.surfaceContainerLow,
-      child: Center(child: Icon(Icons.broken_image_rounded, color: Theme.of(context).disabledColor)),
+      child: Center(child: Icon(AppIcons.brokenImage, color: Theme.of(context).disabledColor)),
     );
     final alignment = categoryArtworkAlignment(address);
     return LayoutBuilder(

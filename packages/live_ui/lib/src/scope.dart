@@ -23,6 +23,7 @@ final class LiveUiStrings {
     required this.replay,
     required this.verifying,
     required this.delete,
+    this.offline = '未开播',
   });
 
   /// Simplified Chinese (3.x `zh.json`).
@@ -59,6 +60,7 @@ final class LiveUiStrings {
     replay: 'REPLAY',
     verifying: 'Verifying',
     delete: 'Delete',
+    offline: 'Offline',
   );
 
   /// Empty state title (`status_empty_title`).
@@ -102,6 +104,10 @@ final class LiveUiStrings {
 
   /// Delete (`delete`).
   final String delete;
+
+  /// The mark of a room that is not live, on its cover (U.4a c4,
+  /// `offline_room_title`).
+  final String offline;
 }
 
 /// Request headers for an image address (3.x `networkImageHeaders`: some

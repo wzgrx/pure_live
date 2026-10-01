@@ -299,7 +299,10 @@ void main() {
       final (services, _, _) = await pumpPage(tester);
       expect(find.text(i18n('empty_favorite_title')), findsOneWidget);
       expect(find.text(i18n('search_live')), findsOneWidget);
-      expect(find.widgetWithIcon(TextButton, Icons.search_rounded), findsOneWidget);
+      expect(
+        find.descendant(of: find.byKey(const ValueKey('status-button')), matching: find.byIcon(AppIcons.search)),
+        findsOneWidget,
+      );
       expect(find.byIcon(Icons.refresh_rounded), findsNothing);
       await tester.runAsync(services.close);
     });
@@ -402,13 +405,11 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('room-menu-tags')));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('room-tags-new')));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byKey(const ValueKey('tag-editor-name')), '常看');
-      await tester.tap(find.byKey(const ValueKey('tag-editor-confirm')));
+      // No tags yet: the form is open; "确认" makes the typed tag, then saves (U.4a c13).
+      await tester.enterText(find.byKey(const ValueKey('room-tags-name')), '常看');
+      await tester.tap(find.byKey(const ValueKey('room-tags-save')));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('room-tags-save')));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
       await tester.pumpAndSettle();
 
@@ -440,6 +441,87 @@ void main() {
       expect(restored.map((r) => r.roomId), ['1', '2']); // back in its place
       await tester.pump(const Duration(seconds: 5)); // let the snack bar go
       await tester.pumpAndSettle();
+      await tester.runAsync(services.close);
+    });
+    testWidgets('U.4c c3, c4: phones show the platform tabs as a second row; from 840 they join the status tabs', (
+      tester,
+    ) async {
+      final follows = [
+        room('douyu', '1', nick: '甲', status: LiveStatus.live),
+        room('huya', '2', nick: '乙', status: LiveStatus.live),
+        room('huya', '3', nick: '丙', status: LiveStatus.offline),
+      ];
+      final details = {'1': room('douyu', '1', status: LiveStatus.live)};
+      var (services, _, _) = await pumpPage(tester, follows: follows, details: details);
+      final status = find.byKey(const ValueKey('favorite-status-tabs'));
+      final platforms = find.byKey(const ValueKey('favorite-platform-tabs'));
+      expect(tester.getTopLeft(platforms).dy, greaterThan(tester.getBottomLeft(status).dy - 1));
+      // Numbers after the labels: the platform numbers follow the status shown.
+      expect(find.descendant(of: platforms, matching: find.text('全部')), findsOneWidget);
+      expect(tester.widget<TabBar>(status).tabAlignment, TabAlignment.fill);
+      await tester.runAsync(services.close);
+
+      (services, _, _) = await pumpPage(tester, follows: follows, details: details, width: 1000);
+      expect(tester.getCenter(platforms).dy, closeTo(tester.getCenter(status).dy, 1));
+      expect(tester.getTopLeft(platforms).dx, greaterThan(tester.getTopRight(status).dx - 1));
+      expect(tester.widget<TabBar>(status).isScrollable, isTrue);
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets('U.4c c5, c10: "all" cards name their platform; offline follows are rows with the logo', (
+      tester,
+    ) async {
+      final (services, _, _) = await pumpPage(
+        tester,
+        follows: [
+          room('douyu', '1', nick: '甲', status: LiveStatus.live),
+          room('huya', '2', nick: '乙', status: LiveStatus.live),
+          room('douyu', '3', nick: '丙', status: LiveStatus.offline),
+        ],
+        details: {
+          '1': room('douyu', '1', status: LiveStatus.live),
+          '3': room('douyu', '3', status: LiveStatus.offline, title: '上次的标题'),
+        },
+      );
+      // "All" mixes platforms: the badge; the grid has popular's padding (c6).
+      expect(find.byKey(const ValueKey('room-card-platform-badge')), findsWidgets);
+      expect(find.byType(LiveRoomCard), findsWidgets);
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const ValueKey('favorite-platform-tabs')),
+          matching: find.text(i18n('site_douyu')),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('room-card-platform-badge')), findsNothing);
+
+      await tester.tap(find.textContaining(i18n('offline_room_title')));
+      await tester.pumpAndSettle();
+      expect(find.byType(RoomRow), findsOneWidget);
+      expect(find.byType(LiveRoomCard), findsNothing);
+      expect(find.text('丙'), findsWidgets); // the name and the avatar's letter
+      expect(find.text('上次的标题'), findsOneWidget);
+      expect(tester.getSize(find.byType(RoomRow)).height, greaterThanOrEqualTo(RoomRow.height));
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets('U.4c c8: none of the follows is live says so; "view offline" and a text button "refresh"', (
+      tester,
+    ) async {
+      final (services, controller, _) = await pumpPage(
+        tester,
+        follows: [room('douyu', '1', nick: '甲', status: LiveStatus.offline)],
+        details: {'1': room('douyu', '1', status: LiveStatus.offline)},
+      );
+      expect(find.text('关注的 1 个直播间现在都没有开播'), findsOneWidget);
+      expect(find.text(i18n('favorite_show_offline')), findsOneWidget);
+      expect(tester.widget(find.byKey(const ValueKey('status-secondary-button'))), isA<TextButton>());
+      expect(find.text('刷新'), findsOneWidget);
+      // Recording: the hint for phones.
+      await tester.tap(find.textContaining(i18n('recording_room_title')));
+      await tester.pumpAndSettle();
+      expect(find.text('可以左右滑动切换平台，或下拉刷新'), findsOneWidget);
+      expect(controller.group, FollowGroup.replay);
       await tester.runAsync(services.close);
     });
   });

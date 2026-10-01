@@ -1,48 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/areas/area_artwork.dart';
 import 'package:pure_live/features/areas/areas_common.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
-/// An area tile (3.x `AreaCard`): the square picture, the name and the
-/// parent category; CC's official entries say they open in the browser.
-/// Followed areas carry a heart; a long press (or right click) follows or
-/// unfollows (new).
-class AreaCard extends ConsumerWidget {
+/// What an area card says under its name (docs/ui/compare/U.4d c3, U.4f c3).
+enum AreaCaption {
+  /// The name only: the category tab above says the rest.
+  nameOnly,
+
+  /// The category under the name (Douyin's single grid, a single platform of
+  /// the followed areas).
+  category,
+
+  /// "platform · category" (the followed areas' "all").
+  platformAndCategory,
+}
+
+/// An area tile (3.x `AreaCard`): the square picture and the name; the line
+/// under it as [caption] says; CC's official entries say they open in the
+/// browser. A followed area carries a heart on its picture (display only);
+/// a long press or right click opens the area dialog (U.4d c6, X3).
+class AreaCard extends ConsumerStatefulWidget {
   /// Shows [area].
-  const new({required this.area, this.showPlatform = false, super.key});
+  const new({required this.area, this.caption = AreaCaption.nameOnly, super.key});
 
   /// The area.
   final LiveArea area;
 
-  /// Shows the platform's logo in the corner (the "all" tab of followed
-  /// areas mixes platforms).
-  final bool showPlatform;
+  /// The line under the name.
+  final AreaCaption caption;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+  ConsumerState<AreaCard> createState() => _AreaCardState();
+}
+
+class _AreaCardState extends ConsumerState<AreaCard> {
+  void _menu() => showAreaDialog(context, ref, widget.area).ignore();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final area = widget.area;
     final pictures = ref.watch(areaPicturesProvider);
     final followed = ref.watch(followedAreaKeysProvider).value?.contains(area.identityKey) ?? false;
     final official = CcApi.isOfficialEntry(area);
     final typeName = area.typeName.trim();
-    final subtitle = official ? i18n('open_in_system_browser') : (typeName.isEmpty ? i18n('no_data') : typeName);
+    final category = typeName.isEmpty ? i18n('no_data') : typeName;
+    final subtitle = official
+        ? i18n('open_in_system_browser')
+        : switch (widget.caption) {
+            AreaCaption.nameOnly => null,
+            AreaCaption.category => category,
+            AreaCaption.platformAndCategory => '${platformName(area.platform)} · $category',
+          };
     final name = areaDisplayName(area);
+    final styles = context.textStyles;
     return Semantics(
       button: true,
       label: followed ? '$name, ${i18n('followed')}' : name,
       child: Card(
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        clipBehavior: Clip.antiAlias,
         child: InkWell(
+          borderRadius: BorderRadius.circular(15),
           onTap: () => openArea(ref, area),
-          onLongPress: official ? null : () => toggleAreaFollow(context, ref, area).ignore(),
-          onSecondaryTap: official ? null : () => toggleAreaFollow(context, ref, area).ignore(),
+          onLongPress: official ? null : _menu,
+          onSecondaryTap: official ? null : _menu,
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AspectRatio(
                 aspectRatio: 1,
@@ -52,27 +84,26 @@ class AreaCard extends ConsumerWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(15),
                       child: ColoredBox(
-                        color: Colors.white,
+                        color: scheme.surfaceContainerLowest,
                         child: AreaArtwork(url: pictures.pictureFor(area)),
                       ),
                     ),
-                    if (showPlatform) Positioned(left: 6, top: 6, child: PlatformLogo(area.platform, size: 18)),
                     if (followed)
                       Positioned(
                         right: 6,
                         top: 6,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.surface.withValues(alpha: 0.9),
+                            color: scheme.surface.withValues(alpha: 0.9),
                             shape: BoxShape.circle,
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(3),
+                            padding: const EdgeInsets.all(4),
                             child: Icon(
-                              Icons.favorite_rounded,
+                              AppIcons.areaFollowedMark,
                               key: const ValueKey('area-card-followed'),
                               size: 14,
-                              color: theme.colorScheme.primary,
+                              color: scheme.primary,
                             ),
                           ),
                         ),
@@ -80,22 +111,37 @@ class AreaCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              ListTile(
-                dense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                title: Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.t12.copyWith(fontWeight: FontWeight.w600),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: styles.t12.copyWith(fontWeight: FontWeight.w600, height: 1.3),
+                            ),
+                            if (subtitle != null)
+                              Text(
+                                subtitle,
+                                key: const ValueKey('area-card-caption'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: styles.t12.copyWith(fontWeight: FontWeight.w500, height: 1.3),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (official) const Icon(AppIcons.openExternal, size: 16),
+                    ],
+                  ),
                 ),
-                subtitle: Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.t11.copyWith(fontWeight: FontWeight.w500),
-                ),
-                trailing: official ? const Icon(Icons.open_in_new_rounded, size: 16) : null,
               ),
             ],
           ),
@@ -105,11 +151,88 @@ class AreaCard extends ConsumerWidget {
   }
 }
 
-/// A grid of area tiles (3.x `buildFlattenAreasView`), 3 to 9 columns by
-/// width, spacing from the theme settings.
+/// Static placeholder cards of an area grid while it loads (U.4d c8).
+class AreaGridSkeleton extends ConsumerWidget {
+  /// Creates the placeholder.
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = watchSetting(ref, Settings.crossAxisSpacing);
+    final mainSpacing = watchSetting(ref, Settings.mainAxisSpacing);
+    final block = Theme.of(context).colorScheme.surfaceContainerHigh;
+    final card = Theme.of(context).colorScheme.surfaceContainerLow;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = GridColumns.areas(
+          width: constraints.maxWidth,
+          windowWidth: MediaQuery.sizeOf(context).width,
+          spacing: spacing,
+        );
+        final itemWidth = GridColumns.itemWidth(width: constraints.maxWidth, columns: columns, spacing: spacing);
+        final extent = areaCardExtent(context, itemWidth, twoLines: false);
+        final height = constraints.maxHeight.isFinite ? constraints.maxHeight : 800.0;
+        final rows = (height / (extent + mainSpacing)).ceil().clamp(1, 12);
+        return Semantics(
+          key: const ValueKey('area-grid-skeleton'),
+          label: i18n('refresh_loading'),
+          child: GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(6),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              crossAxisSpacing: spacing,
+              mainAxisSpacing: mainSpacing,
+              mainAxisExtent: extent,
+            ),
+            itemCount: rows * columns,
+            itemBuilder: (context, _) => DecoratedBox(
+              decoration: BoxDecoration(color: card, borderRadius: BorderRadius.circular(15)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(color: block, borderRadius: BorderRadius.circular(15)),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Center(
+                        child: FractionallySizedBox(
+                          widthFactor: 0.6,
+                          child: Container(
+                            height: 8,
+                            decoration: BoxDecoration(color: block, borderRadius: BorderRadius.circular(4)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// A grid of area tiles (3.x `buildFlattenAreasView`): the columns of UI_PLAN
+/// §5.3 with the area card's smallest widths (110 / 130 / 150, 3–10
+/// columns, U.4d c5), fixed row heights, spacing from the settings.
 class AreaGrid extends ConsumerWidget {
   /// Shows [areas].
-  const new({required this.areas, this.controller, this.showPlatform = false, super.key});
+  const new({
+    required this.areas,
+    this.controller,
+    this.caption = AreaCaption.nameOnly,
+    this.bottomPadding = 80,
+    super.key,
+  });
 
   /// The areas.
   final List<LiveArea> areas;
@@ -117,27 +240,36 @@ class AreaGrid extends ConsumerWidget {
   /// The scroll position.
   final ScrollController? controller;
 
-  /// Passed to [AreaCard.showPlatform].
-  final bool showPlatform;
+  /// The line under the names.
+  final AreaCaption caption;
+
+  /// Room under the last row (the floating "关注分区" button).
+  final double bottomPadding;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = gridSpacing(ref);
+    final twoLines = caption != AreaCaption.nameOnly || areas.any(CcApi.isOfficialEntry);
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final columns = areaGridColumns(width);
-        final itemWidth = (width - 12 - spacing.cross * (columns - 1)) / columns;
+        final columns = GridColumns.areas(
+          width: width,
+          windowWidth: MediaQuery.sizeOf(context).width,
+          spacing: spacing.cross,
+        );
+        final itemWidth = GridColumns.itemWidth(width: width, columns: columns, spacing: spacing.cross);
         return GridView.builder(
+          key: const ValueKey('area-grid'),
           controller: controller,
           physics: const AlwaysScrollableScrollPhysics(parent: PureLiveScrollPhysics()),
-          padding: const EdgeInsets.fromLTRB(6, 6, 6, 80),
+          padding: EdgeInsets.fromLTRB(6, 6, 6, bottomPadding),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
             crossAxisSpacing: spacing.cross,
             mainAxisSpacing: spacing.main,
-            mainAxisExtent: areaCardExtent(context, itemWidth),
+            mainAxisExtent: areaCardExtent(context, itemWidth, twoLines: twoLines),
           ),
           itemCount: areas.length,
           itemBuilder: (context, index) {
@@ -145,7 +277,7 @@ class AreaGrid extends ConsumerWidget {
             return AreaCard(
               key: ValueKey(area.identityKey ?? '${area.platform}:${area.areaType}:${area.areaId}:$index'),
               area: area,
-              showPlatform: showPlatform,
+              caption: caption,
             );
           },
         );

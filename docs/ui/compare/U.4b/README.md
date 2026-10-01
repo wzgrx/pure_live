@@ -1,6 +1,6 @@
 # U.4b 热门：设计（第 1 版）
 
-- 状态：已确认（2026-10-01，用户：“重构评审全部通过，你设计的挺好的，后续全部通过”；“需要你选的”按建议）。原状态：待确认（第 1 版，2026-10-01）
+- 状态：完成（2026-10-01，[记录](../../records/U.4b.md)）
 - 范围：首页“热门”页：平台标签、房间网格、页面上的提示和各种状态、电脑的翻页栏；新加的“全部平台”面板
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u4b)、[V3_UI_INVENTORY.md](../../V3_UI_INVENTORY.md) 第 2 节；卡片见 [U.4a](../U.4a/README.md)
 - 评审页：claude.ai 私有页面；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（用 [U.4a/src/cards.py](../U.4a/src/cards.py) 的公共部分）

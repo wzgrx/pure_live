@@ -14,6 +14,7 @@ import 'package:pure_live/features/home/home_menu.dart';
 import 'package:pure_live/features/home/home_page.dart';
 import 'package:pure_live/features/home/menu_button.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
+import 'package:pure_live/features/popular/popular_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/app_router.dart';
 import 'package:pure_live/routes/route_observer.dart';
@@ -86,7 +87,8 @@ void main() {
 
     await tester.tap(find.widgetWithText(NavigationDestination, '热门'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(AppBar, '热门'), findsOneWidget);
+    // U.4b: the popular page's title place holds its platform tabs (3.x).
+    expect(find.byType(PopularPage), findsOneWidget);
 
     await tester.tap(find.widgetWithText(NavigationDestination, '关注'));
     await tester.pumpAndSettle();
@@ -99,7 +101,8 @@ void main() {
     await tester.runAsync(() => services.store.settings.set(Settings.savedMenuIds, ['popular']));
     await tester.pumpAndSettle();
     expect(find.byType(NavigationBar), findsNothing);
-    expect(find.widgetWithText(AppBar, '热门'), findsOneWidget);
+    // U.4b: the popular page's title place holds its platform tabs (3.x).
+    expect(find.byType(PopularPage), findsOneWidget);
     await tester.runAsync(services.close);
   });
 

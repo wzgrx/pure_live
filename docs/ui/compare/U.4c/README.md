@@ -1,6 +1,6 @@
 # U.4c 关注：设计（第 1 版）
 
-- 状态：已确认（2026-10-01，用户：“重构评审全部通过，你设计的挺好的，后续全部通过”；“需要你选的”按建议）。原状态：待确认（第 1 版，2026-10-01）
+- 状态：完成（2026-10-01，[记录](../../records/U.4c.md)）
 - 范围：首页“关注”页：状态标签、平台标签、分组标签、房间网格、未开播的样子（候选 C-5）、各种状态
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u4c)、[V3_UI_INVENTORY.md](../../V3_UI_INVENTORY.md) 第 3 节；卡片见 [U.4a](../U.4a/README.md)，翻页栏见 [U.4b](../U.4b/README.md)
 - 评审页：claude.ai 私有页面；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（用 [U.4a/src/cards.py](../U.4a/src/cards.py) 的公共部分）

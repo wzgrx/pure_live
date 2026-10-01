@@ -93,8 +93,24 @@ final class AudiencePolicy {
       isReplay: room.isRecord,
       audience: audienceOf(room),
       restrictionLabel: roomMark(room),
+      platformName: platformName(room.platform),
+      isOffline: room.isExplicitlyOfflineNow,
     );
   }
+}
+
+/// Whether [rooms] come from more than one platform: cards set to show the
+/// platform "automatically" show it then (U.4a c2).
+bool mixesPlatforms(Iterable<LiveRoom> rooms) {
+  String? first;
+  for (final room in rooms) {
+    if (first == null) {
+      first = room.platform;
+    } else if (room.platform != first) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /// The audience policy of the settings, rebuilt when they change.

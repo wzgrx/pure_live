@@ -14,6 +14,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/paging.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Popular rooms (3.x `lib/modules/popular`): one tab per platform of the
@@ -21,12 +22,14 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 ///
 /// Routes: `RoutePath.kPopular`; also the home tab.
 ///
-/// Kept from 3.x: the first tab is the preferred platform, a changed
+/// Kept from 3.x (docs/ui/compare/U.4b c1): the platform tabs sit where the
+/// title would be, the first tab is the preferred platform, a changed
 /// platform list keeps the platform shown, a tab loads once it settles
 /// (80 ms) and the next platform is fetched 700 ms later, a changed
 /// audience setting refreshes the platform shown, and a return after 15 s
-/// in the background refreshes it. See docs/modules/M13.1-popular.md for
-/// what changed.
+/// in the background refreshes it. New: the ⌄ at the end of the tabs opens
+/// "all platforms" (c2), and an empty platform list says where to choose
+/// them (c3). See docs/modules/M13.1-popular.md for earlier changes.
 class PopularPage extends ConsumerStatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -149,11 +152,10 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
   Future<void> _pickPlatform() async {
     final tabs = _tabs;
     if (tabs == null) return;
-    final picked = await showModalBottomSheet<int>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (context) => _PlatformSheet(ids: _ids, current: tabs.index),
+    final picked = await showAdaptivePanel<int>(
+      context,
+      side: MediaQuery.sizeOf(context).width >= 600,
+      builder: (context) => PlatformPicker(ids: _ids, current: tabs.index),
     );
     if (picked != null && mounted && _tabs == tabs) tabs.animateTo(picked);
   }
@@ -167,45 +169,43 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
     final tabs = _tabs;
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         automaticallyImplyLeading: !widget.route.inHome,
         leading: phoneTab ? const MenuButton() : null,
         actions: phoneTab ? const [CommonAppBarActions()] : null,
-        title: Text(i18n('popular_title')),
-        bottom: tabs == null
+        titleSpacing: phoneTab ? 4 : 16,
+        // The platform tabs take the title's place (3.x).
+        title: tabs == null
             ? null
-            : PreferredSize(
-                preferredSize: const Size.fromHeight(kTextTabBarHeight),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ScrollableTabBar(
-                        key: const ValueKey('popular-platform-tabs'),
-                        controller: tabs,
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.start,
-                        physics: const PureLiveBoundedScrollPhysics(),
-                        tabs: [for (final id in ids) Tab(text: platformName(id, fallback: sites.of(id).name))],
-                      ),
+            : Row(
+                children: [
+                  Expanded(
+                    child: ScrollableTabBar(
+                      key: const ValueKey('popular-platform-tabs'),
+                      controller: tabs,
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
+                      dividerHeight: 0,
+                      physics: const PureLiveBoundedScrollPhysics(),
+                      tabs: [for (final id in ids) Tab(text: platformName(id, fallback: sites.of(id).name))],
                     ),
-                    IconButton(
-                      key: const ValueKey('popular-all-platforms'),
-                      tooltip: i18n('popular_all_platforms'),
-                      icon: const Icon(Icons.apps_rounded),
-                      onPressed: _pickPlatform,
-                    ),
-                  ],
-                ),
+                  ),
+                  IconButton(
+                    key: const ValueKey('popular-all-platforms'),
+                    tooltip: i18n('popular_all_platforms'),
+                    icon: const Icon(AppIcons.dropDown, size: 22),
+                    onPressed: _pickPlatform,
+                  ),
+                ],
               ),
       ),
       body: tabs == null
           ? AppStatusView(
               type: AppStatusType.empty,
-              icon: Icons.live_tv_rounded,
+              icon: AppIcons.coverPlaceholder,
               title: i18n('popular_no_platforms'),
               subtitle: i18n('popular_no_platforms_hint'),
               buttonText: i18n('platform_display'),
-              buttonIcon: Icons.tune_rounded,
+              buttonIcon: AppIcons.platformSettings,
               onButtonPressed: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kSettingsHotAreas)),
             )
           : TabBarView(
@@ -217,55 +217,149 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
   }
 }
 
-/// Every platform at a glance, to jump to one of many tabs (new).
-class _PlatformSheet extends StatelessWidget {
-  const new({required this.ids, required this.current});
+/// "All platforms" (U.4b c2): every platform of the tabs with its logo and
+/// name, the current one ticked; a tap switches to it and closes the panel;
+/// "平台显示" opens the settings that hide and order them. The same content
+/// rises from the bottom on phones and sits on the right on wide screens.
+class PlatformPicker extends StatelessWidget {
+  /// Creates the picker of [ids] with [current] selected.
+  const new({required this.ids, required this.current, super.key});
 
+  /// The platforms of the tabs.
   final List<String> ids;
+
+  /// The index of the platform shown.
   final int current;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return SafeArea(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.7),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Expanded(child: Text(i18n('popular_all_platforms'), style: context.textStyles.t16Medium)),
-                  TextButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      unawaited(AppNavigator.toNamed<void>(RoutePath.kSettingsHotAreas));
-                    },
-                    icon: const Icon(Icons.tune_rounded, size: 18),
-                    label: Text(i18n('platform_display')),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Wrap(
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
+      key: const ValueKey('popular-platform-picker'),
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PanelHeader(
+          title: i18n('popular_all_platforms'),
+          closeTooltip: i18n('close'),
+          actions: [
+            TextButton.icon(
+              key: const ValueKey('popular-platform-settings'),
+              onPressed: () {
+                Navigator.pop(context);
+                unawaited(AppNavigator.toNamed<void>(RoutePath.kSettingsHotAreas));
+              },
+              icon: const Icon(AppIcons.platformSettings, size: 18),
+              label: Text(i18n('platform_display')),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+          child: Text(
+            i18n('popular_all_platforms_hint', args: {'count': '${ids.length}'}),
+            style: context.textStyles.t13.copyWith(color: scheme.onSurfaceVariant),
+          ),
+        ),
+        Flexible(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = GridColumns.count(
+                width: constraints.maxWidth,
+                minItemWidth: 84,
                 spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final (index, id) in ids.indexed)
-                    ChoiceChip(
-                      key: ValueKey('popular-platform-$id'),
-                      avatar: PlatformLogo(id, size: 20),
-                      label: Text(platformName(id, fallback: id.toUpperCase())),
-                      selected: index == current,
-                      selectedColor: theme.colorScheme.primaryContainer,
-                      onSelected: (_) => Navigator.pop(context, index),
-                    ),
-                ],
-              ),
-            ],
+                padding: 12,
+                min: 3,
+                max: 6,
+              );
+              return GridView.builder(
+                shrinkWrap: true,
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: columns,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 4,
+                  mainAxisExtent: 76 + MediaQuery.textScalerOf(context).scale(13) * 1.4,
+                ),
+                itemCount: ids.length,
+                itemBuilder: (context, index) => _PlatformTile(
+                  id: ids[index],
+                  selected: index == current,
+                  onTap: () => Navigator.pop(context, index),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PlatformTile extends StatelessWidget {
+  const new({required this.id, required this.selected, required this.onTap});
+
+  final String id;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: selected ? scheme.secondaryContainer : scheme.surface,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        key: ValueKey('popular-platform-$id'),
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Semantics(
+          selected: selected,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox.square(
+                  dimension: 40,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: [
+                      ClipRRect(borderRadius: BorderRadius.circular(9), child: PlatformLogo(id, size: 36)),
+                      if (selected)
+                        Positioned(
+                          right: -6,
+                          top: -6,
+                          child: Container(
+                            key: const ValueKey('popular-platform-selected'),
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: scheme.primary,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: scheme.secondaryContainer, width: 2),
+                            ),
+                            child: Icon(AppIcons.selected, size: 12, color: scheme.onPrimary),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  platformName(id, fallback: id.toUpperCase()),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: context.textStyles.t13.copyWith(
+                    height: 1.4,
+                    color: selected ? scheme.onSecondaryContainer : scheme.onSurface,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

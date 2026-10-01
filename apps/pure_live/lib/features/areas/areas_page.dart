@@ -15,6 +15,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/paging.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Areas and followed areas (3.x `lib/modules/areas`).
@@ -169,11 +170,11 @@ class _AreasViewState extends ConsumerState<AreasView> with TickerProviderStateM
       body: tabs == null
           ? AppStatusView(
               type: AppStatusType.empty,
-              icon: Remix.apps_2_line,
+              icon: AppIcons.areas,
               title: i18n('areas_no_platforms'),
               subtitle: i18n('areas_no_platforms_subtitle'),
               buttonText: i18n('platform_display'),
-              buttonIcon: Icons.tune_rounded,
+              buttonIcon: AppIcons.platformSettings,
               onButtonPressed: () => AppNavigator.toNamed<void>(RoutePath.kSettingsHotAreas).ignore(),
             )
           : TabBarView(
@@ -197,26 +198,33 @@ bool _listEquals(List<String> a, List<String> b) {
   return true;
 }
 
-/// The "followed areas" button (3.x's floating pill), with the number of
-/// followed areas (new).
-class _FollowedAreasButton extends ConsumerWidget {
+/// The "followed areas" button (3.x's floating pill, docs/ui/compare/U.4d
+/// c1); on desktops above the page bar (c7).
+class _FollowedAreasButton extends StatelessWidget {
   const new();
 
+  /// The page bar's height and a gap above it.
+  static const double _abovePager = 76;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final count = ref.watch(followedAreasProvider).value?.length ?? 0;
-    final wide = MediaQuery.sizeOf(context).width > homeTabletBreakpoint;
-    final label = count > 0 ? '${i18n('favorite_areas')} · $count' : i18n('favorite_areas');
+    final width = MediaQuery.sizeOf(context).width;
+    final wide = width > homeTabletBreakpoint;
+    final label = i18n('favorite_areas');
     return Padding(
-      padding: EdgeInsets.only(bottom: wide ? 24 : 0),
+      padding: EdgeInsets.only(bottom: usesDesktopPages(width) ? _abovePager : (wide ? 24 : 0)),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface.withValues(alpha: 0.95),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.15)),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4)),
+            BoxShadow(
+              color: theme.colorScheme.shadow.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Material(
@@ -232,7 +240,7 @@ class _FollowedAreasButton extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Remix.heart_add_2_line, size: 16, color: theme.colorScheme.primary),
+                    Icon(AppIcons.followArea, size: 16, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
                     Text(
                       label,

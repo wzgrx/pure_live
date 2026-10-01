@@ -97,7 +97,15 @@ void main() {
     late List<String> toasts;
     String? copied;
 
-    Future<LiveStore> pumpMenu(WidgetTester tester, {List<RoomMenuAction> actions = const []}) async {
+    Future<LiveStore> pumpMenu(
+      WidgetTester tester, {
+      List<RoomMenuAction> actions = const [],
+      Size size = const Size(393, 852),
+    }) async {
+      tester.view
+        ..physicalSize = size
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       final store = (await tester.runAsync(() => LiveStore.memory(cipher: FakeCipher())))!;
       toasts = [];
       AppNavigator.toast = toasts.add;
@@ -130,14 +138,16 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('details with the introduction; copy link, share code and a page action', (tester) async {
+    testWidgets('U.4a c10, c11: the dialog: streamer, platform and room, the title, share and tags, close and follow', (
+      tester,
+    ) async {
       var removed = 0;
       final store = await pumpMenu(
         tester,
         actions: [
           RoomMenuAction(
             key: const ValueKey('page-action'),
-            icon: Icons.delete_outline,
+            icon: AppIcons.delete,
             label: 'remove',
             onSelected: () => removed++,
           ),
@@ -145,16 +155,29 @@ void main() {
       );
       await tester.tap(find.text('open menu'));
       await settle(tester);
-      expect(find.byKey(const ValueKey('room-menu-intro')), findsOneWidget);
-      expect(find.text('斗鱼'), findsOneWidget);
+      // A dialog in the middle (choice A1), as wide as 3.x's at most.
+      final dialog = find.byKey(const ValueKey('room-menu'));
+      expect(dialog, findsOneWidget);
+      expect(tester.getCenter(dialog).dx, closeTo(393 / 2, 1));
+      expect(find.text('anchor'), findsOneWidget);
+      expect(find.text('斗鱼 · 房间号 1'), findsOneWidget);
+      expect(find.text('title'), findsOneWidget);
+      // Share and tags carry their words, share first; then close and the follow pill.
+      final share = find.byKey(const ValueKey('room-menu-share'));
+      final tags = find.byKey(const ValueKey('room-menu-tags'));
+      expect(find.descendant(of: share, matching: find.text('分享')), findsOneWidget);
+      expect(find.descendant(of: tags, matching: find.text('设置标签')), findsOneWidget);
+      expect(tester.getCenter(share).dx, lessThan(tester.getCenter(tags).dx));
+      final close = find.byKey(const ValueKey('card-dialog-close'));
+      final follow = find.byKey(const ValueKey('room-menu-follow'));
+      expect(tester.getCenter(close).dx, lessThan(tester.getCenter(follow).dx));
+      expect(find.descendant(of: follow, matching: find.text('关注')), findsOneWidget);
+      expect(find.descendant(of: follow, matching: find.byIcon(AppIcons.follow)), findsOneWidget);
+      // 3.x had no "open" or "copy link" here: a tap on the card opens the room.
+      expect(find.byKey(const ValueKey('room-menu-copy')), findsNothing);
+      expect(find.byKey(const ValueKey('room-menu-open')), findsNothing);
 
-      await tester.tap(find.byKey(const ValueKey('room-menu-copy')));
-      await settle(tester);
-      expect(copied, 'https://www.douyu.com/1');
-
-      await tester.tap(find.text('open menu'));
-      await settle(tester);
-      await tester.tap(find.byKey(const ValueKey('room-menu-share')));
+      await tester.tap(share);
       await settle(tester);
       expect(copied, encodeRoomShareCode(_room()));
       expect(toasts.last, '已复制到剪贴板');
@@ -164,45 +187,126 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('page-action')));
       await settle(tester);
       expect(removed, 1);
+
+      // Follow closes the dialog and says so; the pill then reads "✓ 已关注".
+      await tester.tap(find.text('open menu'));
+      await settle(tester);
+      await tester.tap(follow);
+      await settle(tester);
+      expect(find.byKey(const ValueKey('room-menu')), findsNothing);
+      expect(toasts.last, '已关注 anchor');
+      await tester.tap(find.text('open menu'));
+      await settle(tester);
+      expect(find.descendant(of: follow, matching: find.text('已关注')), findsOneWidget);
+      // Esc closes it (as Back does).
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await settle(tester);
+      expect(find.byKey(const ValueKey('room-menu')), findsNothing);
       await tester.runAsync(store.close);
     });
 
-    testWidgets('tags of a room not followed: follow first, then a new tag from the tag editor', (tester) async {
+    testWidgets('U.4a c12, c13: tags of a room not followed: follow first, tags made in place, unfollow undone', (
+      tester,
+    ) async {
       final store = await pumpMenu(tester);
       await tester.tap(find.text('open menu'));
       await settle(tester);
       await tester.tap(find.byKey(const ValueKey('room-menu-tags')));
       await settle(tester);
+      // One dialog that says why, its button says what it does.
+      expect(find.text('先关注再设置标签'), findsOneWidget);
+      expect(find.text('关注并设置标签'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('room-tags-follow')));
       await settle(tester);
       expect(await tester.runAsync(() => store.follows.contains(_room())), isTrue);
       expect(toasts, contains('已关注 anchor'));
 
-      expect(find.text(i18n('room_tags_empty')), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('room-tags-new')));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byKey(const ValueKey('tag-editor-name')), '常看');
-      await tester.tap(find.byKey(const ValueKey('tag-editor-confirm')));
+      // No tags: says which room, the form is open from the start.
+      expect(find.text('anchor · 斗鱼'), findsOneWidget);
+      expect(find.text('还没有标签'), findsOneWidget);
+      expect(find.byKey(const ValueKey('room-tags-form')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('room-tags-add')));
       await settle(tester);
-      await tester.tap(find.byKey(const ValueKey('room-tags-save')));
+      expect(find.text(i18n('tag_name_empty_error')), findsOneWidget);
+      await tester.enterText(find.byKey(const ValueKey('room-tags-name')), '常看');
+      await tester.pump();
+      expect(find.text('2/15'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('room-tags-add')));
       await settle(tester);
+      // Listed and selected; the form is cleared and stays for the next one.
       final tags = (await tester.runAsync(store.tags.all))!;
       expect(tags.map((tag) => tag.name), ['常看']);
-      expect(await tester.runAsync(() => store.tags.tagsOf(_room())), [tags.single.id]);
+      expect(find.byKey(ValueKey('tag-choice-${tags.single.id}')), findsOneWidget);
+      await tester.enterText(find.byKey(const ValueKey('room-tags-name')), '常看');
+      await tester.tap(find.byKey(const ValueKey('room-tags-add')));
+      await settle(tester);
+      expect(find.text(i18n('tag_name_duplicate_error')), findsOneWidget);
+      // "确认" first makes a name still typed into a tag, then saves.
+      await tester.enterText(find.byKey(const ValueKey('room-tags-name')), '睡前听');
+      await tester.tap(find.byKey(const ValueKey('room-tags-save')));
+      await settle(tester);
+      expect(find.byKey(const ValueKey('room-tags')), findsNothing);
+      final saved = (await tester.runAsync(store.tags.all))!;
+      expect(saved.map((tag) => tag.name), ['常看', '睡前听']);
+      expect(await tester.runAsync(() => store.tags.tagsOf(_room())), [for (final tag in saved) tag.id]);
 
-      // Unfollow asks, then can be undone.
+      // With tags: "＋ 新建标签" opens the form in place, the list stays; a tap clears a tag.
+      await tester.tap(find.text('open menu'));
+      await settle(tester);
+      await tester.tap(find.byKey(const ValueKey('room-menu-tags')));
+      await settle(tester);
+      expect(find.byKey(const ValueKey('room-tags-form')), findsNothing);
+      expect(find.byKey(const ValueKey('room-tags-columns-1')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('room-tags-new')));
+      await settle(tester);
+      expect(find.byKey(const ValueKey('room-tags-form')), findsOneWidget);
+      expect(find.byKey(ValueKey('tag-choice-${saved.first.id}')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('room-tags-collapse')));
+      await settle(tester);
+      expect(find.byKey(const ValueKey('room-tags-form')), findsNothing);
+      await tester.tap(find.byKey(ValueKey('tag-choice-${saved.first.id}')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('room-tags-save')));
+      await settle(tester);
+      expect(await tester.runAsync(() => store.tags.tagsOf(_room())), [saved.last.id]);
+
+      // Unfollow asks on top of the dialog (red "取消关注"), then can be undone.
       await tester.tap(find.text('open menu'));
       await settle(tester);
       await tester.tap(find.byKey(const ValueKey('room-menu-follow')));
       await settle(tester);
+      expect(find.byKey(const ValueKey('room-menu')), findsOneWidget);
+      final confirm = tester.widget<FilledButton>(find.byKey(const ValueKey('unfollow-confirm')));
+      expect((confirm.child! as Text).data, '取消关注');
       await tester.tap(find.byKey(const ValueKey('unfollow-confirm')));
       await settle(tester);
+      expect(find.byKey(const ValueKey('room-menu')), findsNothing);
       expect(await tester.runAsync(() => store.follows.contains(_room())), isFalse);
       await tester.tap(find.text('撤销'));
       await settle(tester);
       expect(await tester.runAsync(() => store.follows.contains(_room())), isTrue);
       await tester.pump(const Duration(seconds: 5));
       await tester.pumpAndSettle();
+      await tester.runAsync(store.close);
+    });
+
+    testWidgets('U.4a c14: tags take two columns when the dialog is wide enough, landscape phones too', (tester) async {
+      final store = await pumpMenu(tester, size: const Size(852, 393));
+      await tester.runAsync(() async {
+        await store.follows.add(_room());
+        await store.tags.add('常看');
+        await store.tags.add('唱歌');
+      });
+      await tester.tap(find.text('open menu'));
+      await settle(tester);
+      await tester.tap(find.byKey(const ValueKey('room-menu-tags')));
+      await settle(tester);
+      expect(find.byKey(const ValueKey('room-tags-columns-2')), findsOneWidget);
+      // The dialog fits the short screen and scrolls inside.
+      expect(tester.getSize(find.byKey(const ValueKey('room-tags'))).height, lessThanOrEqualTo(393));
+      await tester.tap(find.byKey(const ValueKey('room-tags-cancel')));
+      await settle(tester);
+      expect(find.byKey(const ValueKey('room-tags')), findsNothing);
       await tester.runAsync(store.close);
     });
   });

@@ -89,7 +89,7 @@ enum TopBarSlot {
 /// The top bar's trailing buttons in 3.x's order on [platform].
 List<TopBarSlot> topBarSlots({required TargetPlatform platform}) => [
   TopBarSlot.audioOnly,
-  if (platform == TargetPlatform.android) TopBarSlot.cast,
+  if (castSupported(platform)) TopBarSlot.cast,
   if (platform != TargetPlatform.fuchsia) TopBarSlot.pip,
 ];
 

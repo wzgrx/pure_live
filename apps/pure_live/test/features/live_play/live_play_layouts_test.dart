@@ -14,6 +14,7 @@ import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/features/live_play/logic/room_layout.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
@@ -690,6 +691,53 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(tester.widget<AnimatedOpacity>(controls()).opacity, 1);
     await _close(tester, desktop);
+  });
+
+  testWidgets('the room menu on each platform: cast only on Android, the new window only on Windows', (tester) async {
+    // docs/ui/compare/U.2c, U.2d: "投屏只有 Android" (the menu as well as the
+    // top bar; U.17a for iOS); U.13: "在新窗口打开" on Windows.
+    const group1 = ['room-menu-switchRoom', 'room-menu-timer', 'room-menu-volume', 'room-menu-videoFit'];
+    const local = ['room-menu-divider-2', 'room-menu-localInteraction'];
+    const passOn = ['room-menu-streamLink', 'room-menu-share', 'room-menu-external'];
+    const cases = <(TargetPlatform, Size, List<String>)>[
+      (
+        TargetPlatform.android,
+        Size(393, 852),
+        [...group1, 'room-menu-divider-1', 'room-menu-cast', ...passOn, ...local],
+      ),
+      (TargetPlatform.iOS, Size(393, 852), [...group1, 'room-menu-divider-1', ...passOn, ...local]),
+      (
+        TargetPlatform.windows,
+        Size(1280, 800),
+        [...group1, 'room-menu-divider-1', ...passOn, 'room-menu-newWindow', ...local],
+      ),
+      (TargetPlatform.linux, Size(1280, 800), [...group1, 'room-menu-divider-1', ...passOn, ...local]),
+      (TargetPlatform.macOS, Size(1280, 800), [...group1, 'room-menu-divider-1', ...passOn, ...local]),
+    ];
+    const all = [...group1, 'room-menu-divider-1', 'room-menu-cast', ...passOn, 'room-menu-newWindow', ...local];
+    List<String> menu() => [
+      for (final key in all)
+        if (_key(key).evaluate().isNotEmpty) key,
+    ]..sort((a, b) => tester.getCenter(_key(a)).dy.compareTo(tester.getCenter(_key(b)).dy));
+
+    for (final (platform, size, expected) in cases) {
+      final room = await _pump(tester, width: size.width, height: size.height, platform: platform);
+      await _tap(tester, 'live-play-menu');
+      expect(menu(), expected, reason: '$platform');
+      if (castSupported(platform)) {
+        expect(_in('room-menu-cast', find.byIcon(AppIcons.cast)), findsOneWidget);
+      }
+      // The fullscreen bars carry the same menu.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump(const Duration(seconds: 1));
+      await _tap(tester, 'live-play-fullscreen');
+      expect(_key('live-play-cast'), castSupported(platform) ? findsOneWidget : findsNothing, reason: '$platform');
+      await tester.tap(find.descendant(of: _key('live-play-top-bar'), matching: _key('live-play-menu')));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(menu(), expected, reason: '$platform fullscreen');
+      await _close(tester, room);
+    }
   });
 
   group('layout logic', () {

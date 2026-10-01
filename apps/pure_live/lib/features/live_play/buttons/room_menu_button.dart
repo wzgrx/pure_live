@@ -118,18 +118,23 @@ enum RoomMenuEntry {
   localInteraction,
 }
 
+/// Whether [platform] offers DLNA casting: Android only, both the top bar's
+/// button and the menu entry (docs/ui/compare/U.2c and U.2d "投屏只有
+/// Android"; U.17a for iOS). 3.x listed it in every platform's menu.
+bool castSupported(TargetPlatform platform) => platform == TargetPlatform.android;
+
 /// The groups of the room menu (U.2f M1): watching, passing the room on,
 /// then the local interaction (3.x's last entry, U.2k), only while [local]
 /// (the `localInteraction.enabled` setting) is on; an empty group is left
 /// out.
 ///
-/// Cast is left out where there is no DLNA casting ([cast] false: iOS,
-/// docs/ui/compare/U.17a).
+/// Cast only where [cast] ([castSupported]); the new window only on
+/// [windows].
 List<List<RoomMenuEntry>> roomMenuGroups({
   required bool iptv,
   required bool windows,
+  required bool cast,
   bool local = false,
-  bool cast = true,
 }) => [
   const [RoomMenuEntry.switchRoom, RoomMenuEntry.timer, RoomMenuEntry.volume, RoomMenuEntry.videoFit],
   [
@@ -273,7 +278,7 @@ class RoomMenuButton extends ConsumerWidget {
           iptv: iptv,
           windows: windows,
           local: local,
-          cast: defaultTargetPlatform != TargetPlatform.iOS,
+          cast: castSupported(defaultTargetPlatform),
         ).where((group) => group.isNotEmpty).toList();
         return [
           for (final (index, group) in groups.indexed) ...[

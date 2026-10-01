@@ -23,7 +23,7 @@ Spec (JSON; strings may contain HTML):
     {"h": "v3 的问题", "problems": [["F1", "问题", "位置"]]},
     {"h": "改了什么", "changes": [{"id": "c1", "type": "保留|修改|增强|去掉", "text": "..."}]},
     {"h": "每个按钮是干什么的、怎么用", "figs": [...], "usage": [["1", "控件", "怎么用"]]},
-    {"h": "需要你选的", "choices": [{"id": "G1", "title": "...", "options": ["建议：...", "另一种：..."]}]},
+    {"h": "需要你选的", "choices": [{"id": "G1", "title": "...", "options": ["A，建议的做法", "B，另一种"]}]},
     {"h": "性能要点", "list": ["..."]},
     {"h": "...", "table": {"hdr": ["..."], "rows": [["..."]]}}
   ]
@@ -92,7 +92,7 @@ def section(sec, base):
         cards = ''
         for ch in sec['choices']:
             opts = ''.join(
-                f'<div class="opt"><span class="tag {"add" if i == 0 else "keep"}">{chr(65 + i)}</span><span>{o}</span></div>'
+                f'<div class="opt"><span class="tag {"add" if i == 0 else "keep"}">{chr(65 + i)}{" · 建议" if i == 0 else ""}</span><span>{o}</span></div>'
                 for i, o in enumerate(ch['options']))
             cards += f'<div class="choice"><h3>{esc(ch["id"])}. {ch["title"]}</h3>{opts}{rv_pick(ch["id"], len(ch["options"]))}</div>'
         out.append(f'<div class="card choices">{cards}</div>')

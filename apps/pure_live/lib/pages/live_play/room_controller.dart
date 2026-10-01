@@ -89,6 +89,7 @@ class LiveRoomController extends ChangeNotifier {
 
   /// A minute of the sleep timer (tests shorten it).
   final Duration minuteLength;
+
   /// Reads the network for the first quality: mobile data uses
   /// [Settings.preferResolutionCellular] (3.x `_setDefaultResolution`);
   /// null always uses [Settings.preferResolution].

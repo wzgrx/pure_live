@@ -26,6 +26,7 @@ import 'package:pure_live/features/live_play/player/bar_parts.dart';
 import 'package:pure_live/features/live_play/player/player_controls.dart';
 import 'package:pure_live/features/live_play/player/player_gestures.dart';
 import 'package:pure_live/features/live_play/player/player_status.dart';
+import 'package:pure_live/features/live_play/player/portrait_diagnostics.dart';
 import 'package:pure_live/features/live_play/player/recording_badge.dart';
 import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
@@ -408,7 +409,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                 scale: balancedScale(
                   width: constraints.maxWidth,
                   height: constraints.maxHeight,
-                  aspectRatio: _room.session.state.aspectRatio ?? 9 / 16,
+                  aspectRatio: _room.session.state.expectedAspectRatio ?? 9 / 16,
                 ),
                 child: video,
               ),
@@ -435,6 +436,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       mode: watchSetting(ref, Settings.refreshRateMode),
     );
     final longPress = showDanmaku && watchSetting(ref, Settings.enableDanmakuLongPressInteraction);
+    final diagnostics = watchSetting(ref, Settings.showPortraitDiagnostics);
     final video = RepaintBoundary(child: _picture(fit));
     if (pip) {
       // U.2j: the same surface as the in-app floating window; the picture
@@ -561,6 +563,13 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
           top: arrangement == ControlsArrangement.inline ? 52 : badgeTop,
           child: CatchupBadge(controller: _room, onOpenGuide: widget.onOpenGuide),
         ),
+        // F.1d: "显示识别状态" (3.x: 12 from the left, 62 from the top).
+        if (diagnostics)
+          Positioned(
+            left: 12 + (_inline ? 0 : padding.left),
+            top: arrangement == ControlsArrangement.inline ? 62 : badgeTop + 30,
+            child: PortraitDiagnosticsBadge(session: _room.session, orientation: widget.orientation),
+          ),
         // The recording mark: in the inline title bar while the controls
         // show; under the fullscreen bars (U.2c); dot and time alone in the
         // corner while they are hidden.

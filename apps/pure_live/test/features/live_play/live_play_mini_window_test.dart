@@ -529,6 +529,10 @@ void main() {
       await _openRoom(tester);
       await _leaveRoom(tester, app);
       expect(_window, findsNothing);
+      // F.1d: with "播放器强制销毁" off (3.x's default) the stopped player
+      // waits 45 s for the next room, then goes.
+      expect(app.engine.disposed, isFalse);
+      await tester.pump(const Duration(seconds: 46));
       expect(app.engine.disposed, isTrue);
       await _close(tester, app);
 
@@ -706,6 +710,9 @@ void main() {
       expect(host.calls.sublist(host.calls.length - 3), ['hide', 'exit', 'minimize']);
       expect(find.text('首页'), findsOneWidget);
       expect(_window, findsNothing);
+      // F.1d: the stopped player waits 45 s for the next room ("播放器强制销毁"
+      // off), then goes.
+      await tester.pump(const Duration(seconds: 46));
       expect(app.engine.disposed, isTrue);
       await _close(tester, app);
     });

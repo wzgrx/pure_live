@@ -24,6 +24,7 @@ final class RoomRuntime {
     required this.reconnect,
     required this.background,
     required this.orientation,
+    this.playerConfig,
   });
 
   /// The room's logic.
@@ -41,6 +42,11 @@ final class RoomRuntime {
   /// The room's orientation choice.
   final RoomOrientationChoice orientation;
 
+  /// How [session]'s player was configured (compared with `==`): a player
+  /// kept for the next room fits only a room configured the same way
+  /// (`PlayerStandby`, F.1d).
+  final Object? playerConfig;
+
   bool _disposed = false;
 
   /// Whether [dispose] ran.
@@ -51,15 +57,24 @@ final class RoomRuntime {
       controller.room.platform.trim().toLowerCase() == room.platform.trim().toLowerCase() &&
       controller.room.roomId == room.roomId;
 
-  /// Stops the room and releases the player.
-  Future<void> dispose() async {
+  /// Stops the room and releases the player; with [keep] the player is only
+  /// stopped and handed to it for the next room (3.x "播放器强制销毁" off,
+  /// F.1d).
+  Future<void> dispose({void Function(PlaybackSession session)? keep}) async {
     if (_disposed) return;
     _disposed = true;
     background.dispose();
     reconnect.dispose();
     orientation.dispose();
     controller.dispose();
-    await session.dispose();
+    if (keep == null) {
+      await session.dispose();
+      return;
+    }
+    // Handed over only once stopped: a stop still running would stop what
+    // the next room opens.
+    await session.stop();
+    keep(session);
   }
 }
 

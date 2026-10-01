@@ -1724,6 +1724,8 @@
     "portrait_danmaku_upper_quarter": "顶部 25%",
     "portrait_detection_group": "识别与普通页布局",
     "portrait_diagnostics_group": "诊断与恢复",
+    "portrait_evidence_decoder": "解码尺寸",
+    "portrait_evidence_platform": "平台预判",
     "portrait_fullscreen_display_ambient": "沉浸背景（推荐）",
     "portrait_fullscreen_display_ambient_desc": "完整保留画面，以封面模糊延展填充空白区域",
     "portrait_fullscreen_display_balanced": "平衡填充",

@@ -11,7 +11,9 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Switches to another room without going back (3.x `PlayOther`): the
 /// followed rooms on air, followed replays and the watch history. The
-/// current room is left out; picking one replaces this page.
+/// current room is left out; picking one replaces this page. The refresh
+/// button beside the title refreshes every follow (F.1c); the lists follow
+/// the store, so they change as the fresh details are written.
 Future<void> showRoomSwitcher(BuildContext context, LiveRoom current) => showModalBottomSheet<void>(
   context: context,
   showDragHandle: true,
@@ -20,17 +22,47 @@ Future<void> showRoomSwitcher(BuildContext context, LiveRoom current) => showMod
 );
 
 /// The three lists of the switcher.
-class RoomSwitcher extends ConsumerWidget {
+class RoomSwitcher extends ConsumerStatefulWidget {
   /// Creates the switcher; [current] is not offered.
   const new({required this.current, super.key});
 
   /// The room playing now.
   final LiveRoom current;
 
+  /// Refreshes every follow without the follows page's progress bar (3.x
+  /// sent `refresh_favorite_rooms`, and the follows page refreshed them all
+  /// silently). Set by the app (`app/app.dart`): a feature does not reach
+  /// into another one. Null: no refresh button.
+  static Future<void> Function()? refreshFollows;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RoomSwitcher> createState() => _RoomSwitcherState();
+}
+
+class _RoomSwitcherState extends ConsumerState<RoomSwitcher> {
+  bool _refreshing = false;
+
+  LiveRoom get current => widget.current;
+
+  /// The refresh button (3.x `room-history-refresh`): greyed while a refresh
+  /// runs; the lists change as the store does.
+  Future<void> _refresh(Future<void> Function() refresh) async {
+    if (_refreshing) return;
+    setState(() => _refreshing = true);
+    try {
+      await refresh();
+    } on Object {
+      // The follows page logs its own failures; the lists keep what they had.
+    } finally {
+      if (mounted) setState(() => _refreshing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final store = ref.read(storeProvider);
     final height = MediaQuery.sizeOf(context).height * 0.7;
+    final refresh = RoomSwitcher.refreshFollows;
     return SafeArea(
       child: SizedBox(
         height: height,
@@ -40,8 +72,25 @@ class RoomSwitcher extends ConsumerWidget {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(i18n('switch_live_room'), style: Theme.of(context).textTheme.titleMedium),
+                padding: EdgeInsets.only(left: 16, right: refresh == null ? 16 : 4),
+                child: Row(
+                  children: [
+                    Expanded(child: Text(i18n('switch_live_room'), style: Theme.of(context).textTheme.titleMedium)),
+                    if (refresh != null)
+                      IconButton(
+                        key: const ValueKey('switch-refresh'),
+                        tooltip: i18n('refresh'),
+                        onPressed: _refreshing ? null : () => unawaited(_refresh(refresh)),
+                        icon: _refreshing
+                            ? const SizedBox.square(
+                                key: ValueKey('switch-refreshing'),
+                                dimension: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(AppIcons.refresh),
+                      ),
+                  ],
+                ),
               ),
               TabBar(
                 tabs: [

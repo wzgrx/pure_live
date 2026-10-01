@@ -123,6 +123,7 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> {
     final runtime = widget.runtime;
     final media = MediaQuery.of(context);
     final fit = videoFits[watchSetting(ref, Settings.videoFitIndex).clamp(0, videoFits.length - 1)];
+    final follow = watchSetting(ref, Settings.portraitPipFollowSource);
     return LayoutBuilder(
       builder: (context, constraints) {
         final area = constraints.biggest;
@@ -133,10 +134,16 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> {
             initialData: runtime.session.state,
             builder: (context, snapshot) {
               final state = snapshot.data ?? runtime.session.state;
-              final portrait = isPortraitLayout(runtime.orientation.value, detected: state.isPortrait);
+              final portrait = isPortraitLayout(runtime.orientation.value, detected: state.expectsPortrait);
+              final picture = expectedPictureSize(state);
               final size = inAppMiniSize(
                 screen: media.size,
-                aspectRatio: pictureRatio(width: state.videoWidth, height: state.videoHeight, portrait: portrait),
+                aspectRatio: pictureRatio(
+                  width: picture.width,
+                  height: picture.height,
+                  portrait: portrait,
+                  followPortrait: follow,
+                ),
               );
               final offset = inAppMiniOffset(
                 area: area,

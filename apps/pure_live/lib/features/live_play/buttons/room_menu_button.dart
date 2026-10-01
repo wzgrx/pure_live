@@ -52,9 +52,33 @@ ExternalRoomTarget? externalRoomTarget(LiveRoom room) {
     },
     SiteIds.cc when (room.userId?.trim() ?? '').isNotEmpty =>
       'cc://join-room/$id/${Uri.encodeComponent(room.userId!.trim())}/',
+    SiteIds.kuaishou => switch (kuaishouStreamId(room)) {
+      final stream? => kuaishouAppLink(stream),
+      _ => null,
+    },
     _ => null,
   };
   return (web: web, native: native == null ? null : Uri.parse(native));
+}
+
+/// The id of [room]'s current Kuaishou broadcast (3.x kept it in `link`),
+/// from the detail or the danmaku arguments; null when off air.
+String? kuaishouStreamId(LiveRoom room) {
+  final id = switch ((room.data, room.danmakuData)) {
+    (final KuaishouRoomData data, _) when (data.liveStreamId?.trim() ?? '').isNotEmpty => data.liveStreamId,
+    (_, final KuaishouDanmakuArgs args) => args.liveStreamId,
+    _ => null,
+  };
+  final trimmed = id?.trim() ?? '';
+  return trimmed.isEmpty ? null : trimmed;
+}
+
+/// The Kuaishou app's room of broadcast [stream] (3.x
+/// `room_external_opener.dart:193-200`, F.1c).
+String kuaishouAppLink(String stream) {
+  final id = Uri.encodeQueryComponent(stream);
+  return 'kwai://liveaggregatesquare?liveStreamId=$id&recoStreamId=$id&recoLiveStreamId=$id&liveSquareSource=28'
+      '&path=/rest/n/live/feed/sharePage/slide/more&mt_product=H5_OUTSIDE_CLIENT_SHARE';
 }
 
 /// Opens [room] in its app or browser (3.x `openNaviteAPP`): on Android

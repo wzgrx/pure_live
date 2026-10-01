@@ -7,11 +7,10 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
-import 'package:pure_live/features/live_play/danmaku/danmaku_templates.dart';
+import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
-import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
 
 export 'package:pure_live/features/live_play/danmaku/chat_list.dart' show superChatPrice;
 
@@ -189,71 +188,6 @@ class _TabLabel extends StatelessWidget {
     );
   }
 }
-
-/// The room's danmaku settings: the gift switch and the chat list's look,
-/// the viewing templates, then the shared settings (the settings tab, and
-/// the sheet of the video's settings button).
-class RoomDanmakuSettings extends ConsumerWidget {
-  /// Creates the settings.
-  const new({required this.controller, super.key});
-
-  /// The room.
-  final LiveRoomController controller;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final style = ChatListStyle.of(watchSetting(ref, Settings.danmakuListStyle));
-    final settings = ref.read(storeProvider).settings;
-    return DanmakuSettingsPanel(
-      leading: [
-        ListenableSelector<bool>(
-          listenable: controller,
-          selector: () => controller.showGifts,
-          builder: (context, showGifts, _) => context.buildModernCard([
-            context.buildSwitchTile(
-              title: i18n('live_play_show_gifts'),
-              subtitle: i18n('live_play_show_gifts_desc'),
-              icon: AppIcons.chatGift,
-              value: showGifts,
-              onChanged: (value) => unawaited(controller.setShowGifts(show: value)),
-            ),
-            context.buildTile(
-              title: i18n('danmaku_list_style'),
-              subtitle: i18n('danmaku_list_style_desc'),
-              icon: AppIcons.chatListStyle,
-              stackTrailingOnNarrow: true,
-              trailing: SegmentedButton<ChatListStyle>(
-                key: const ValueKey('danmaku-list-style'),
-                showSelectedIcon: false,
-                segments: [
-                  ButtonSegment(value: ChatListStyle.compact, label: Text(i18n('danmaku_list_style_compact'))),
-                  ButtonSegment(value: ChatListStyle.card, label: Text(i18n('danmaku_list_style_card'))),
-                ],
-                selected: {style},
-                onSelectionChanged: (selection) =>
-                    unawaited(settings.set(Settings.danmakuListStyle, selection.first.name)),
-              ),
-            ),
-          ]),
-        ),
-        const DanmakuTemplatesCard(),
-      ],
-    );
-  }
-}
-
-/// The danmaku settings in a sheet (3.x `SettingsButton` opened its
-/// settings panel over the video); the panel looks as in the settings tab.
-Future<void> showRoomDanmakuSettings(BuildContext context, LiveRoomController controller) => showModalBottomSheet<void>(
-  context: context,
-  isScrollControlled: true,
-  showDragHandle: true,
-  builder: (sheetContext) => SizedBox(
-    key: const ValueKey('live-play-danmaku-settings-sheet'),
-    height: MediaQuery.sizeOf(sheetContext).height * 0.6,
-    child: RoomDanmakuSettings(controller: controller),
-  ),
-);
 
 /// Super chats on display with their remaining time (3.x `SuperChatPage`).
 class SuperChatList extends StatelessWidget {

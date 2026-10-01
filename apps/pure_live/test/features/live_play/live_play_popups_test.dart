@@ -752,6 +752,8 @@ void main() {
         'room-menu-share',
         'room-menu-external',
         'room-menu-newWindow',
+        'room-menu-divider-2',
+        'room-menu-localInteraction',
       ]),
       [
         'room-menu-switchRoom',
@@ -763,6 +765,9 @@ void main() {
         'room-menu-streamLink',
         'room-menu-share',
         'room-menu-external',
+        // U.2k: the third group, the local interaction (on by default).
+        'room-menu-divider-2',
+        'room-menu-localInteraction',
       ],
     );
     const icons = {
@@ -780,9 +785,11 @@ void main() {
     }
     expect(_in('room-menu-external', find.text('在哔哩哔哩打开')), findsOneWidget);
     expect(find.text('打开直播间'), findsNothing);
-    // Windows adds "在新窗口打开" at the end of the second group; v4 has no
-    // local interaction yet, so there is no third group.
+    // Windows adds "在新窗口打开" at the end of the second group; the local
+    // interaction is the third group only while it is on (U.2k).
     expect(roomMenuGroups(iptv: false, windows: true)[1].last, RoomMenuEntry.newWindow);
+    expect(roomMenuGroups(iptv: false, windows: false)[2], isEmpty);
+    expect(roomMenuGroups(iptv: false, windows: false, local: true)[2], [RoomMenuEntry.localInteraction]);
     expect(roomMenuGroups(iptv: true, windows: false)[1], [RoomMenuEntry.cast, RoomMenuEntry.streamLink]);
     await _close(tester, room);
   });

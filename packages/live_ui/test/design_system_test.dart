@@ -69,6 +69,25 @@ void main() {
       (AppIcons.superChatMark, Remix.vip_diamond_fill),
       (AppIcons.superChatTime, Remix.time_line),
       (AppIcons.chipRemove, Remix.close_line),
+      // U.2k: the local interaction keeps 3.x's glyphs.
+      (AppIcons.localStyle, Icons.auto_awesome_rounded),
+      (AppIcons.localSend, Icons.send_rounded),
+      (AppIcons.localCoins, Icons.toll_rounded),
+      (AppIcons.localOverlay, Icons.subtitles_rounded),
+      (AppIcons.localBadge, Icons.workspace_premium_rounded),
+      (AppIcons.localLevel, Icons.military_tech_rounded),
+      (AppIcons.localGiftEffects, Icons.celebration_rounded),
+      (AppIcons.localClearHistory, Icons.delete_sweep_outlined),
+      (AppIcons.localPreviewStage, Icons.live_tv_rounded),
+      (AppIcons.localPreviewLive, Icons.play_circle_fill_rounded),
+      (AppIcons.localStyleSync, Icons.sync_rounded),
+      (AppIcons.localPlaceScroll, Icons.trending_flat_rounded),
+      (AppIcons.localPlaceTop, Icons.vertical_align_top_rounded),
+      (AppIcons.localPlaceBottom, Icons.vertical_align_bottom_rounded),
+      (AppIcons.localBold, Icons.format_bold_rounded),
+      (AppIcons.localItalic, Icons.format_italic_rounded),
+      (AppIcons.localStroke, Icons.border_color_rounded),
+      (AppIcons.localShadow, Icons.blur_on_rounded),
     ];
     for (final (actual, glyph) in expected) {
       expect(actual, glyph);

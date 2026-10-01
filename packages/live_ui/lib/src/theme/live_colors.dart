@@ -51,6 +51,27 @@ abstract final class OnVideoColors {
   /// audio only and a fixed orientation).
   static const Color active = Color(0xFFFFD166);
 
+  /// The outline of a text field on the picture (the fullscreen local
+  /// danmaku composer, white 24 %).
+  static const Color fieldOutline = Color(0x3DFFFFFF);
+
+  /// A dark stage standing for the picture where there is none: the local
+  /// danmaku style's preview (3.x's gradient, top left to bottom right).
+  static const List<Color> stage = [Color(0xFF27344D), Color(0xFF101623), Color(0xFF06080E)];
+
+  /// The faint television drawn in the middle of [stage] (white 10 %).
+  static const Color stageMark = Color(0x1AFFFFFF);
+
+  /// The "实时预览" mark on [stage] (black 38 %).
+  static const Color stageBadge = Color(0x61000000);
+
+  /// The dark end of a banner over the picture (the local gift effect,
+  /// black 78 %).
+  static const Color bannerEnd = Color(0xC7000000);
+
+  /// The thin outline of a banner over the picture (white 45 %).
+  static const Color bannerOutline = Color(0x73FFFFFF);
+
   /// The soft shadow under icons and text on the picture.
   static const Color shadow = Color(0x99000000);
 

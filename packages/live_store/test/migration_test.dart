@@ -180,7 +180,9 @@ void main() {
         [MissevanApi.qualityIdFromLegacy('flv'), '10000'],
       );
       expect(MissevanApi.qualityIdFromLegacy('flv'), isNot('flv'));
-      expect(await store.meta.legacyValue('localInteraction.coins'), 900);
+      // U.2k registered the local interaction's keys: read like any setting.
+      expect(s.get(Settings.localInteractionCoins), 900);
+      expect(await store.meta.legacyKeys(), isNot(contains('localInteraction.coins')));
       expect(await store.meta.legacyKeys(), isNot(contains('settingsUpgradeSchema')));
 
       expect(File(box).readAsBytesSync(), before, reason: 'the 3.x file is only read');

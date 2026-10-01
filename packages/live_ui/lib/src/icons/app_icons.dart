@@ -285,4 +285,60 @@ abstract final class AppIcons {
 
   /// Remove a blocked word or viewer (×, 3.x `KeywordBlockPage`).
   static const IconData chipRemove = Remix.close_line;
+
+  // ---- local interaction (3.x widgets/local_interaction, U.2k) ----
+
+  /// The local danmaku style (the composer's star, 3.x `auto_awesome_rounded`).
+  static const IconData localStyle = Icons.auto_awesome_rounded;
+
+  /// Send a local danmaku (3.x `send_rounded`).
+  static const IconData localSend = Icons.send_rounded;
+
+  /// Local coins (3.x `toll_rounded`).
+  static const IconData localCoins = Icons.toll_rounded;
+
+  /// Local danmaku fly over the picture (3.x `subtitles_rounded`).
+  static const IconData localOverlay = Icons.subtitles_rounded;
+
+  /// The platform badge switch (3.x `workspace_premium_rounded`).
+  static const IconData localBadge = Icons.workspace_premium_rounded;
+
+  /// The local level switch (3.x `military_tech_rounded`).
+  static const IconData localLevel = Icons.military_tech_rounded;
+
+  /// The gift effect switch (3.x `celebration_rounded`).
+  static const IconData localGiftEffects = Icons.celebration_rounded;
+
+  /// Clear the local history (3.x `delete_sweep_outlined`).
+  static const IconData localClearHistory = Icons.delete_sweep_outlined;
+
+  /// The style preview's picture (3.x `live_tv_rounded`).
+  static const IconData localPreviewStage = Icons.live_tv_rounded;
+
+  /// The style preview's "实时预览" mark (3.x `play_circle_fill_rounded`).
+  static const IconData localPreviewLive = Icons.play_circle_fill_rounded;
+
+  /// The style's "saved and shared everywhere" line (3.x `sync_rounded`).
+  static const IconData localStyleSync = Icons.sync_rounded;
+
+  /// Scrolling local danmaku (3.x `trending_flat_rounded`).
+  static const IconData localPlaceScroll = Icons.trending_flat_rounded;
+
+  /// Local danmaku fixed at the top (3.x `vertical_align_top_rounded`).
+  static const IconData localPlaceTop = Icons.vertical_align_top_rounded;
+
+  /// Local danmaku fixed at the bottom (3.x `vertical_align_bottom_rounded`).
+  static const IconData localPlaceBottom = Icons.vertical_align_bottom_rounded;
+
+  /// Bold (3.x `format_bold_rounded`).
+  static const IconData localBold = Icons.format_bold_rounded;
+
+  /// Italic (3.x `format_italic_rounded`).
+  static const IconData localItalic = Icons.format_italic_rounded;
+
+  /// Outline (3.x `border_color_rounded`).
+  static const IconData localStroke = Icons.border_color_rounded;
+
+  /// Shadow or glow (3.x `blur_on_rounded`).
+  static const IconData localShadow = Icons.blur_on_rounded;
 }

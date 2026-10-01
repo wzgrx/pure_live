@@ -10,6 +10,8 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_gift_effect.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
@@ -299,6 +301,10 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                 ),
               ),
             ),
+            // U.2k c9: the local gift banner, on its own layer in the middle
+            // of the picture.
+            if (LocalRoomScope.maybeOf(context) case final local?)
+              LocalGiftLayer(session: local, fullscreen: widget.fullscreen),
             // The recording mark stays in the corner while the controls are
             // hidden (dot and time only); with them it sits in the top bar.
             if (!_controls || _locked)

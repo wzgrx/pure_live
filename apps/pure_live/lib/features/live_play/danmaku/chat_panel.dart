@@ -4,6 +4,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
 import 'package:pure_live/features/live_play/danmaku/super_chats.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/danmaku/block_manager.dart';
@@ -109,7 +110,11 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
           controller: _tabs,
           physics: const PureLiveBoundedScrollPhysics(),
           children: [
-            ChatList(controller: widget.controller, onTouched: _seen),
+            // U.2k-a: the local danmaku composer under the list (while the
+            // local interaction is on).
+            LocalComposerBelow(
+              child: ChatList(controller: widget.controller, onTouched: _seen),
+            ),
             // Rebuilt only when the super chats change; one clock inside
             // moves the times on (U.2e c6).
             ListenableSelector<List<LiveSuperChatMessage>>(

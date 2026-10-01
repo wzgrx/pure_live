@@ -834,6 +834,16 @@ class LiveRoomController extends ChangeNotifier {
     }
   }
 
+  /// A message composed on this device (the local interaction, U.2k): a line
+  /// in the chat list at once, and over the picture when [fly]. It skips the
+  /// platform filters and the gift switch, as 3.x's local messages did.
+  void addLocal(LiveMessage message, {required bool fly}) {
+    if (_disposed || message.message.trim().isEmpty) return;
+    chat.add(message.type == LiveMessageType.gift ? ChatLine.gift(message) : ChatLine.chat(message));
+    if (fly) _flying.add(message);
+    _notify();
+  }
+
   void _system(String text) {
     if (!_statusLines.accepts(text)) return;
     chat.add(ChatLine.system(text));

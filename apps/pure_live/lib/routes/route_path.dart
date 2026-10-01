@@ -132,4 +132,7 @@ abstract final class RoutePath {
 
   /// Follow groups.
   static const kSettingsTags = '/settingTags';
+
+  /// 设置 → 本地用户与互动 (U.2k; 3.x pushed the page without a route).
+  static const kLocalInteraction = '/local_interaction';
 }

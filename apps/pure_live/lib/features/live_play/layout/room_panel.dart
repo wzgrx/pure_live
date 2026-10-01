@@ -17,6 +17,12 @@ enum RoomPanelKind {
   /// c16: under the picture in portrait, in the right column on wide
   /// windows, here on the right).
   guide,
+
+  /// The local interaction (the room menu's "本地互动体验", U.2k).
+  localInteraction,
+
+  /// The local danmaku style (a local composer's star, U.2k).
+  localStyle,
 }
 
 /// The panel open in the room, or null.
@@ -64,6 +70,7 @@ class RoomSidePanel extends StatefulWidget {
     required this.child,
     this.actions = const [],
     this.dragToClose = false,
+    this.leading,
     super.key,
   });
 
@@ -81,6 +88,9 @@ class RoomSidePanel extends StatefulWidget {
 
   /// A downward drag on the header closes the panel (portrait).
   final bool dragToClose;
+
+  /// Before the title: the back of a panel's second page (U.2k K3).
+  final Widget? leading;
 
   @override
   State<RoomSidePanel> createState() => _RoomSidePanelState();
@@ -106,11 +116,12 @@ class _RoomSidePanelState extends State<RoomSidePanel> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final header = Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 4, 0),
+      padding: EdgeInsets.fromLTRB(widget.leading == null ? 16 : 4, 4, 4, 0),
       child: SizedBox(
         height: kMinInteractiveDimension + 4,
         child: Row(
           children: [
+            ?widget.leading,
             Expanded(
               child: Text(
                 widget.title,

@@ -8,6 +8,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_chat_line.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -300,6 +301,19 @@ class ChatLineView extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final body = theme.textTheme.bodyLarge?.regular;
+    // U.2k c10: a local danmaku or gift has its own line; a local danmaku
+    // keeps the long press, right click and double tap (3.x).
+    if (line.message case final message? when message.isLocal) {
+      final local = LocalChatLine(message: message);
+      if (line.kind != ChatLineKind.chat) return local;
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onLongPress: onActions,
+        onSecondaryTap: onActions,
+        onDoubleTap: onCopy,
+        child: local,
+      );
+    }
     switch (line.kind) {
       case ChatLineKind.system:
         // U.2a change 10: a small grey label in the middle.
@@ -587,7 +601,8 @@ Future<void> showChatMessageActions(
                 AppNavigator.toast(i18n('copied_to_clipboard'));
               },
             ),
-            if (name.isNotEmpty)
+            // 3.x: a local danmaku cannot block its sender.
+            if (name.isNotEmpty && !message.isLocal)
               ListTile(
                 key: const ValueKey('live-play-block-user'),
                 leading: const Icon(AppIcons.blockUser),

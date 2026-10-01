@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/launch_args.dart';
 import 'package:pure_live/app/services.dart';
@@ -13,6 +14,7 @@ import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
 import 'package:pure_live/features/live_play/dialogs/room_dialogs.dart';
 import 'package:pure_live/features/live_play/dialogs/room_switcher.dart';
 import 'package:pure_live/features/live_play/dialogs/stream_dialogs.dart';
+import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -110,12 +112,17 @@ enum RoomMenuEntry {
 
   /// A new window (Windows).
   newWindow,
+
+  /// The local interaction panel (3.x's last entry, U.2k; only while the
+  /// local interaction is on).
+  localInteraction,
 }
 
 /// The groups of the room menu (U.2f M1): watching, passing the room on,
-/// then the local interaction (3.x's last entry; v4 has no local
-/// interaction yet, so that group is empty and left out).
-List<List<RoomMenuEntry>> roomMenuGroups({required bool iptv, required bool windows}) => [
+/// then the local interaction (3.x's last entry, U.2k), only while [local]
+/// (the `localInteraction.enabled` setting) is on; an empty group is left
+/// out.
+List<List<RoomMenuEntry>> roomMenuGroups({required bool iptv, required bool windows, bool local = false}) => [
   const [RoomMenuEntry.switchRoom, RoomMenuEntry.timer, RoomMenuEntry.volume, RoomMenuEntry.videoFit],
   [
     RoomMenuEntry.cast,
@@ -125,6 +132,7 @@ List<List<RoomMenuEntry>> roomMenuGroups({required bool iptv, required bool wind
     if (!iptv) RoomMenuEntry.external,
     if (windows) RoomMenuEntry.newWindow,
   ],
+  [if (local) RoomMenuEntry.localInteraction],
 ];
 
 /// The room menu of the bar (3.x `LivePlayMenuButton`, its four-square
@@ -165,6 +173,8 @@ class RoomMenuButton extends ConsumerWidget {
         await showStreamPicker(context, controller, StreamUse.copy);
       case RoomMenuEntry.share:
         await shareRoom(room);
+      case RoomMenuEntry.localInteraction:
+        RoomPanelScope.maybeOf(context)?.open(RoomPanelKind.localInteraction);
       case RoomMenuEntry.newWindow:
         final services = ref.read(appServicesProvider);
         try {
@@ -207,6 +217,7 @@ class RoomMenuButton extends ConsumerWidget {
           null,
         ),
         RoomMenuEntry.newWindow => (AppIcons.newWindow, i18n('open_room_in_new_window'), null),
+        RoomMenuEntry.localInteraction => (AppIcons.localInteraction, i18n('local_interaction_title'), null),
       };
       // Cast and the stream address need a stream (as before).
       final enabled = playing || (entry != RoomMenuEntry.cast && entry != RoomMenuEntry.streamLink);
@@ -237,7 +248,12 @@ class RoomMenuButton extends ConsumerWidget {
       itemBuilder: (context) {
         final playing = controller.stage == RoomStage.playing;
         final deadline = controller.sleepDeadline;
-        final groups = roomMenuGroups(iptv: iptv, windows: windows).where((group) => group.isNotEmpty).toList();
+        final local = ref.read(storeProvider).settings.get(Settings.localInteractionEnabled);
+        final groups = roomMenuGroups(
+          iptv: iptv,
+          windows: windows,
+          local: local,
+        ).where((group) => group.isNotEmpty).toList();
         return [
           for (final (index, group) in groups.indexed) ...[
             if (index > 0) PopupMenuDivider(key: ValueKey('room-menu-divider-$index')),

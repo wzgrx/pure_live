@@ -66,10 +66,20 @@ void main() {
     now: () => now,
     refreshInterval: Duration.zero,
     sleepSessionOnStart: sleepSession,
-    minuteLength: const Duration(milliseconds: 20),
+    // At least a second (AGENTS.md: timers outlast the steps before them).
+    minuteLength: const Duration(seconds: 1),
   );
 
   Future<void> settle([int ms = 20]) => Future<void>.delayed(Duration(milliseconds: ms));
+
+  /// Polls [done] until it holds, so a slow run under load waits longer
+  /// instead of failing.
+  Future<void> until(bool Function() done, {Duration timeout = const Duration(seconds: 10)}) async {
+    final deadline = DateTime.now().add(timeout);
+    while (!done() && DateTime.now().isBefore(deadline)) {
+      await settle();
+    }
+  }
 
   LiveMessage gift(String user, String text) =>
       LiveMessage(type: LiveMessageType.gift, userName: user, message: text, color: LiveMessageColor.white);
@@ -113,13 +123,13 @@ void main() {
     await settle();
     expect(sleeping.audioOnly, isTrue);
     expect(sleeping.sleepSessionActive, isTrue);
-    expect(sleeping.sleepDeadline, now.add(const Duration(milliseconds: 40)));
+    expect(sleeping.sleepDeadline, now.add(const Duration(seconds: 2)));
     // The background policy keeps a sleep session playing.
     expect(
       shouldContinueInBackground(backgroundPlaybackEnabled: false, sleepSessionActive: sleeping.sleepSessionActive),
       isTrue,
     );
-    await settle(80);
+    await until(() => sleeping.sleepDeadline == null && session.state.status == PlaybackStatus.paused);
     expect(sleeping.sleepDeadline, isNull);
     expect(session.state.status, PlaybackStatus.paused);
     expect(toasts, contains('当前直播间已按定时设置停止播放'));
@@ -194,7 +204,7 @@ void main() {
       hiddenPauseDelay: const Duration(milliseconds: 10),
     )..onHidden();
     expect(session.presentationVisible, isFalse);
-    await settle(40);
+    await until(() => session.state.status == PlaybackStatus.paused);
     expect(session.state.status, PlaybackStatus.paused);
     policy.onResumed();
     await settle();

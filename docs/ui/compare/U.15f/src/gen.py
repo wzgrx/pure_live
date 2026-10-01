@@ -112,11 +112,11 @@ def v3_player_chrome(sel=1):
     top = (f'<div style="position:absolute;top:24px;left:48px;right:48px;display:flex;align-items:center;z-index:5">{mo("movie", 28, "#00A1FF")}'
            f'<span style="flex:1;margin-left:10px;font-size:22px;font-weight:700">天桥与车流</span>'
            '<span style="font-size:18px;font-weight:500;color:rgba(255,255,255,.7);margin-left:12px">P1/3</span>'
-           '<span style="font-size:18px;font-weight:500;color:rgba(255,255,255,.7);margin-left:12px">1080P 高清</span>'
+           '<span style="font-size:18px;font-weight:500;color:rgba(255,255,255,.7);margin-left:12px">1080P</span>'
            f'<span style="margin-left:12px;display:flex;align-items:center;gap:4px;font-size:18px;color:rgba(255,255,255,.7)">{mo("visibility", 20, "rgba(255,255,255,.7)")}1.2万</span>'
            '<span style="font-size:18px;font-weight:500;color:rgba(255,255,255,.7);margin-left:12px">山野影像</span></div>')
     pills = [('skip_previous', '上一集', 'mr'), ('pause', '播放', 'mr'), ('skip_next', '下一集', 'mr'), ('replay_10', '快退10秒', 'mr'),
-             ('forward_10', '快进10秒', 'mr'), ('speed', '1.0x', 'mr'), ('high_quality', '1080P 高清', 'mo'), ('playlist_play', '选集', 'mr'),
+             ('forward_10', '快进10秒', 'mr'), ('speed', '1.0x', 'mr'), ('high_quality', '1080P', 'mo'), ('playlist_play', '选集', 'mr'),
              ('subtitles', '弹幕开', 'mo'), ('comment', '评论', 'mo'), ('tune', '弹幕设置', 'mr'), ('closed_caption', '字幕关', 'mo'), ('aspect_ratio', '适应', 'mr')]
     row = ''.join(f'<span class="pill3{" sel" if i == sel else ""}">{(mr if f == "mr" else mo)(n)}{l}</span>' for i, (n, l, f) in enumerate(pills))
     bar = ('<div style="position:absolute;left:48px;right:48px;bottom:32px;padding:18px 24px;border-radius:24px;background:rgba(0,0,0,.72);border:1px solid rgba(0,161,255,.35);z-index:5">'
@@ -133,7 +133,7 @@ def v3_player(menu=None):
             '<i style="position:absolute;left:0;top:0;bottom:0;width:42%;background:#00A1FF"></i></div>')
     body = f'<div class="pic" style="background-image:url({IMG(274)})"></div>{dm}' + v3_player_chrome(sel=None if menu else 1) + line
     if menu == 'quality':
-        opts = [('1080P 高清', True), ('720P 高清', False), ('480P 清晰', False), ('360P 流畅', False)]
+        opts = [('1080P+', False), ('1080P', True), ('720P', False), ('480P', False), ('360P', False)]
         rows = ''.join(
             f'<div style="height:56px;margin:0 12px 8px;padding:0 14px;border-radius:12px;display:flex;align-items:center;font-size:16px;font-weight:500;'
             f'background:{"rgba(0,161,255,.22)" if c else "rgba(255,255,255,.06)"};color:{"#00A1FF" if c else "#fff"};border:2px solid {"#00A1FF" if c else "transparent"}">'
@@ -338,7 +338,7 @@ def v4_player_chrome(focus='play', n=True, seek=False, open_=None):
     N = (lambda k: k) if n else (lambda k: None)
     F = lambda k: ' f' if focus == k else ''
     top = ('<div class="vtopg"></div><div class="vtitle"><span class="t">天桥与车流</span>'
-           '<span class="m">P1/3 · 1080P 高清 · 1.2万人在看 · 山野影像</span></div>')
+           '<span class="m">P1/3 · 1080P · 1.2万人在看 · 山野影像</span></div>')
     seek_cls = 'vseek f2' if seek else 'vseek'
     sk = (f'<div class="{seek_cls}"{at(N(1), "keep")}><span>01:46</span><div class="bar"><i style="width:42%"></i>' + ('<u style="left:42%"></u>' if seek else '')
           + '</div><span>04:12</span></div>')
@@ -346,7 +346,7 @@ def v4_player_chrome(focus='play', n=True, seek=False, open_=None):
              f'<span class="vp big{F("play")}"{at(N(3), "chg")}>{mr("pause")}</span>'
              f'<span class="vp ic{F("next")}"{at(N(4), "keep")}>{mr("skip_next")}</span><span style="width:10px"></span>'
              f'<span class="vp{F("parts")}"{at(N(5), "keep")}>{mr("playlist_play")}选集 P1/3</span>'
-             f'<span class="vp{F("q")}"{at(N(6), "chg")}' + (' style="background:rgba(255,255,255,.34)"' if open_ == 'q' else '') + f'>{mo("high_quality")}1080P 高清</span>'
+             f'<span class="vp{F("q")}"{at(N(6), "chg")}' + (' style="background:rgba(255,255,255,.34)"' if open_ == 'q' else '') + f'>{mo("high_quality")}1080P</span>'
              f'<span class="vp{F("speed")}"{at(N(7), "keep")}>{mr("speed")}1.0x</span>'
              f'<span class="vp ic on{F("dm")}"{at(N(8), "chg")}><span class="dmk open s"></span></span>'
              f'<span class="vp ic{F("dms")}"{at(N(9), "chg")}><span class="dmk set s"></span></span>'
@@ -364,7 +364,7 @@ def v4_player(menu=None, n=True):
     body = f'<div class="pic" style="background-image:url({IMG(274)})"></div>{dm}' + v4_player_chrome(focus, n and not menu, open_='q' if menu == 'quality' else None)
     if menu == 'quality':
         body += ('<div class="nmenu" style="left:330px;bottom:76px;width:170px">'
-                 + opt4('1080P 高清', cur=True, focus=True) + opt4('720P 高清') + opt4('480P 清晰') + opt4('360P 流畅') + '</div>')
+                 + opt4('1080P+') + opt4('1080P', cur=True, focus=True) + opt4('720P') + opt4('480P') + opt4('360P') + '</div>')
     if menu == 'comments':
         body += comments_panel4()
     return page(body, CSS)

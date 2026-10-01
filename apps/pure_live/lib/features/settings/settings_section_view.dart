@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/settings/data_tools.dart';
+import 'package:pure_live/features/settings/playback_tiles.dart';
 import 'package:pure_live/features/settings/settings_catalog.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
 import 'package:pure_live/features/settings/settings_tiles.dart';
@@ -45,7 +45,7 @@ class _SettingsSectionViewState extends State<SettingsSectionView> {
 
   @override
   Widget build(BuildContext context) {
-    final env = SettingsEnv(platform: defaultTargetPlatform);
+    final env = SettingsEnv.current();
     final groups = groupsOf(settingsCatalog, widget.section, env, subpage: widget.subpage);
     const note = settingsGroupNotes;
     return SettingsPageBody(
@@ -57,7 +57,7 @@ class _SettingsSectionViewState extends State<SettingsSectionView> {
         for (final (index, (group, entries)) in groups.indexed)
           SettingsGroup(
             first: index == 0,
-            title: i18n(group),
+            title: settingsUntitledGroup(group) ? null : i18n(group),
             note: switch (note[group]?.$1) {
               final key? => i18n(key),
               null => null,
@@ -66,6 +66,7 @@ class _SettingsSectionViewState extends State<SettingsSectionView> {
               final key? => i18n(key),
               null => null,
             },
+            footerWidget: settingsGroupFooters[group]?.call(context),
             children: [
               for (final entry in entries)
                 if (entry.id == widget.highlight)
@@ -121,6 +122,7 @@ class SettingsSectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (section == SettingsSection.configPreview) return ConfigPreviewPage(onBack: onBack);
+    if (section == SettingsSection.pipDanmaku) return PipDanmakuPage(highlight: highlight, onBack: onBack);
     final embedded = SettingsPane.of(context);
     return Scaffold(
       key: ValueKey('settings-page-${section.name}'),

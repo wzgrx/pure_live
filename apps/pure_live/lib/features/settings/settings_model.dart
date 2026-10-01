@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
@@ -107,7 +108,11 @@ enum SettingsSection {
     'settings_config_preview',
     'settings_config_preview_local_desc',
     AppIcons.settingsConfigPreview,
-  );
+  ),
+
+  /// The log (U.11a Q1: moved to the settings, a row of the data group; its
+  /// own page, opened like a route).
+  log(SettingsArea.data, 'log_manage', 'settings_log_desc', AppIcons.settingsLog);
 
   new(this.area, this.titleKey, this.descriptionKey, this.icon, {this.route});
 
@@ -139,7 +144,15 @@ enum SettingsSection {
 /// are in the catalogue too, so search finds them.
 enum SettingsSubpage {
   /// The pager of computers (3.x `PageSettingsPage`).
-  paging(SettingsSection.appearance, 'page_settings');
+  paging(SettingsSection.appearance, 'page_settings'),
+
+  /// Portrait streams (3.x `PortraitLiveSettingsPage`, opened from the video
+  /// page; U.6c).
+  portrait(SettingsSection.video, 'portrait_live_settings'),
+
+  /// Audience counts and ranking (3.x `AudienceMetricSettingsPage`, opened
+  /// from the video page; U.6c c15).
+  audience(SettingsSection.video, 'audience_metric_settings');
 
   new(this.section, this.titleKey);
 
@@ -156,10 +169,20 @@ enum SettingsSubpage {
 @immutable
 final class SettingsEnv {
   /// Creates the environment.
-  const new({required this.platform});
+  const new({required this.platform, this.fastDisplay = false});
+
+  /// The environment of this device: [defaultTargetPlatform] and whether a
+  /// display refreshes faster than 60 Hz.
+  factory current() => SettingsEnv(
+    platform: defaultTargetPlatform,
+    fastDisplay: WidgetsBinding.instance.platformDispatcher.displays.any((display) => display.refreshRate > 61),
+  );
 
   /// The operating system.
   final TargetPlatform platform;
+
+  /// A display above 60 Hz (an iPhone or iPad with ProMotion).
+  final bool fastDisplay;
 
   /// Android.
   bool get isAndroid => platform == TargetPlatform.android;
@@ -173,8 +196,12 @@ final class SettingsEnv {
   /// A phone or tablet OS.
   bool get isMobile => platform == TargetPlatform.android || platform == TargetPlatform.iOS;
 
-  /// Android or Windows (the display-mode channel exists there).
-  bool get hasRefreshRate => isAndroid || isWindows;
+  /// Linux or macOS.
+  bool get isOtherDesktop => platform == TargetPlatform.linux || platform == TargetPlatform.macOS;
+
+  /// Android or Windows (the display-mode channel exists there), and iPhones
+  /// and iPads with ProMotion (U.17a).
+  bool get hasRefreshRate => isAndroid || isWindows || (isIOS && fastDisplay);
 }
 
 bool _always(SettingsEnv env) => true;

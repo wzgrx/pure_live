@@ -1,15 +1,18 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/settings/appearance_pages.dart';
+import 'package:pure_live/features/settings/audience_pages.dart';
 import 'package:pure_live/features/settings/data_tools.dart';
-import 'package:pure_live/features/settings/log_page.dart';
+import 'package:pure_live/features/settings/playback_tiles.dart';
 import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
 import 'package:pure_live/features/settings/settings_tiles.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
 
 /// "30 分钟", "1.5 小时", "2 小时" (3.x's refresh interval labels).
 String formatMinutes(int minutes) {
@@ -18,6 +21,10 @@ String formatMinutes(int minutes) {
   if (minutes % 30 == 0) return '${minutes / 60} ${i18n('hour')}';
   return '$minutes ${i18n('minute')}';
 }
+
+/// [formatMinutes] with whole days ("1 天", 3.x's sleep timer).
+String formatDuration(int minutes) =>
+    minutes >= 1440 && minutes % 1440 == 0 ? '${minutes ~/ 1440} ${i18n('day')}' : formatMinutes(minutes);
 
 String _percent(double value) => '${(value * 100).round()}%';
 String _whole(double value) => '${value.round()}';
@@ -43,9 +50,19 @@ const Map<String, String> resolutionKeys = {
   '流畅': 'prefer_resolution_option_smooth',
 };
 
+/// The follow refresh intervals (3.x `refresh_settings.dart`, 12 steps).
+const List<int> followRefreshMinutes = [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 360];
+
+/// The cover refresh intervals (3.x, 8 steps).
+const List<int> coverRefreshMinutes = [5, 10, 15, 30, 60, 120, 240, 360];
+
 List<SettingsChoice<String>> _keyed(Map<String, String> labels, [Map<String, String> descriptions = const {}]) => [
   for (final MapEntry(:key, :value) in labels.entries)
     (value: key, label: i18n(value), description: descriptions[key] == null ? null : i18n(descriptions[key]!)),
+];
+
+List<SettingsChoice<int>> _minutes(List<int> values) => [
+  for (final value in values) (value: value, label: formatMinutes(value), description: null),
 ];
 
 bool _notIos(SettingsEnv env) => !env.isIOS;
@@ -55,7 +72,24 @@ bool _mobile(SettingsEnv env) => env.isMobile;
 bool _desktop(SettingsEnv env) => !env.isMobile;
 bool _refreshRate(SettingsEnv env) => env.hasRefreshRate;
 
+/// Hardware decoding is taken over by the compatibility mode (Android) and
+/// by custom mpv drivers (U.6c c5, P8).
+List<SettingRequirement> _hardwareDecodingFree() => [
+  if (defaultTargetPlatform == TargetPlatform.android)
+    (setting: Settings.playerCompatMode, value: false, reason: i18n('settings_taken_over_by_compat')),
+  (setting: Settings.customPlayerOutput, value: false, reason: i18n('settings_taken_over_by_custom_output')),
+];
+
+/// The custom drivers do nothing in the compatibility mode (Android).
+List<SettingRequirement> _customOutputFree() => [
+  if (defaultTargetPlatform == TargetPlatform.android)
+    (setting: Settings.playerCompatMode, value: false, reason: i18n('settings_taken_over_by_compat')),
+];
+
+List<SettingRequirement> _pipOn() => [needsOn(Settings.enablePipDanmaku, 'pip_danmaku_enable')];
+
 typedef _Build = Widget Function(BuildContext context, SettingsEntry entry);
+typedef _Requires = List<SettingRequirement> Function();
 
 /// A small builder for the catalogue: one section and group at a time.
 final class _Catalog {
@@ -99,17 +133,24 @@ final class _Catalog {
     String id,
     String title,
     BoolSetting setting,
-    IconData icon, {
+    IconData? icon, {
     String? desc,
     bool inverted = false,
     BoolSetting? enabledBy,
+    _Requires? requires,
     List<String> keywords = const [],
     bool Function(SettingsEnv env)? when,
   }) => add(
     id,
     title,
-    (context, entry) =>
-        SettingToggleTile(entry: entry, setting: setting, icon: icon, inverted: inverted, enabledBy: enabledBy),
+    (context, entry) => SettingToggleTile(
+      entry: entry,
+      setting: setting,
+      icon: icon,
+      inverted: inverted,
+      enabledBy: enabledBy,
+      requires: requires?.call() ?? const [],
+    ),
     desc: desc,
     settings: [setting],
     keywords: keywords,
@@ -120,13 +161,14 @@ final class _Catalog {
     String id,
     String title,
     Setting<Object> setting,
-    IconData icon, {
+    IconData? icon, {
     required double min,
     required double max,
     required String Function(double value) format,
     double? step,
     String? desc,
     BoolSetting? enabledBy,
+    _Requires? requires,
     List<String> keywords = const [],
     bool Function(SettingsEnv env)? when,
   }) => add(
@@ -141,6 +183,7 @@ final class _Catalog {
       step: step,
       format: format,
       enabledBy: enabledBy,
+      requires: requires?.call() ?? const [],
     ),
     desc: desc,
     settings: [setting],
@@ -148,27 +191,31 @@ final class _Catalog {
     when: when,
   );
 
-  void choice(
+  void choice<T extends Object>(
     String id,
     String title,
-    StringSetting setting,
-    IconData icon,
-    List<SettingsChoice<String>> Function() options, {
+    Setting<T> setting,
+    IconData? icon,
+    List<SettingsChoice<T>> Function() options, {
     String? desc,
     String? hint,
     BoolSetting? enabledBy,
+    _Requires? requires,
+    bool valueBelow = false,
     List<String> keywords = const [],
     bool Function(SettingsEnv env)? when,
   }) => add(
     id,
     title,
-    (context, entry) => SettingChoiceTile<String>(
+    (context, entry) => SettingChoiceTile<T>(
       entry: entry,
       setting: setting,
       icon: icon,
       options: options,
       hint: hint == null ? null : i18n(hint),
       enabledBy: enabledBy,
+      requires: requires?.call() ?? const [],
+      valueBelow: valueBelow,
     ),
     desc: desc,
     settings: [setting],
@@ -185,7 +232,11 @@ final class _Catalog {
     required String Function(int value) label,
     String? desc,
     String? unit,
+    String? hint,
+    String? inputLabel,
+    String? rangeText,
     BoolSetting? enabledBy,
+    _Requires? requires,
     List<String> keywords = const [],
     bool Function(SettingsEnv env)? when,
   }) => add(
@@ -198,7 +249,11 @@ final class _Catalog {
       presets: presets,
       label: label,
       unit: unit == null ? null : i18n(unit),
+      hint: hint == null ? null : i18n(hint),
+      inputLabel: inputLabel == null ? null : i18n(inputLabel),
+      rangeText: rangeText == null ? null : i18n(rangeText),
       enabledBy: enabledBy,
+      requires: requires?.call() ?? const [],
     ),
     desc: desc,
     settings: [setting],
@@ -209,18 +264,26 @@ final class _Catalog {
   void link(
     String id,
     String title,
-    IconData icon, {
+    IconData? icon, {
     String? route,
     WidgetBuilder? page,
     SettingsSubpage? subpage,
     String? desc,
+    _Requires? requires,
     List<Setting<Object>> settings = const [],
     List<String> keywords = const [],
     bool Function(SettingsEnv env)? when,
   }) => add(
     id,
     title,
-    (context, entry) => SettingLinkTile(entry: entry, icon: icon, route: route, page: page, subpage: subpage),
+    (context, entry) => SettingLinkTile(
+      entry: entry,
+      icon: icon,
+      route: route,
+      page: page,
+      subpage: subpage,
+      requires: requires?.call() ?? const [],
+    ),
     desc: desc,
     settings: settings,
     keywords: keywords,
@@ -233,14 +296,26 @@ final class _Catalog {
 const Map<String, (String?, String?)> settingsGroupNotes = {
   'settings_nav_group_bar': ('settings_nav_hint', 'settings_nav_footer'),
   'settings_group_pager': (null, 'settings_paging_scroll_top_note'),
+  'audience_display_mode': (null, 'audience_ranking_rule_desc'),
+  'settings_group_audience_heat_only': (null, 'audience_metric_fallback_desc'),
+  'settings_group_download': (null, 'settings_download_note'),
 };
+
+/// Something under a group other than a line of text, by group title key
+/// (the MPV warning with its link, U.6c c10).
+final Map<String, WidgetBuilder> settingsGroupFooters = {'mpv_advanced_settings': (context) => const MpvDocsNote()};
+
+/// Group title keys that draw no title (a lone switch at the top of a page,
+/// the "restore defaults" row at its end).
+bool settingsUntitledGroup(String group) => group.startsWith('_');
 
 /// A line at the top of a page, by section or sub-page name.
 const Map<String, String> settingsPageIntros = {};
 
 /// Every settings row, in display order: the pages of the overview (3.x's
 /// settings pages, U.6a) and their rows. Appearance and navigation follow
-/// U.6b; the other pages keep M13.7's rows until U.6c–U.6e rebuild them.
+/// U.6b; playback U.6c; general, platforms, refresh and network U.6d; data
+/// U.6e; danmaku keeps M13.7's rows until U.2e rebuilds it.
 final List<SettingsEntry> settingsCatalog = _build();
 
 List<SettingsEntry> _build() {
@@ -456,15 +531,15 @@ List<SettingsEntry> _build() {
       settings: [Settings.savedMenuIds],
       keywords: ['菜单', '底栏', '导航', 'menu', 'tab', '关注', '热门', '分区', '录制中心'],
     )
-    // ---- platforms (U.6d) ----
+    // ---- platforms (U.6d d8) ----
     ..section = SettingsSection.platforms
-    ..group = 'platform_settings'
+    ..group = 'settings_group_platforms'
     ..link(
       'platform_list',
       'platform_display',
-      Remix.apps_2_line,
+      AppIcons.settingsPlatformList,
       route: RoutePath.kSettingsHotAreas,
-      desc: 'settings_platform_list_desc',
+      desc: 'platform_display_subtitle',
       settings: [Settings.hotAreasList],
       keywords: ['平台', 'platform'],
     )
@@ -472,68 +547,36 @@ List<SettingsEntry> _build() {
       'prefer_platform',
       'prefer_platform',
       (context, entry) => PreferPlatformTile(entry: entry),
-      desc: 'settings_prefer_platform_desc',
+      desc: 'prefer_platform_subtitle',
       settings: [Settings.preferPlatform],
       keywords: ['平台', 'platform'],
     )
+    ..group = 'settings_group_accounts_tags'
     ..link(
       'accounts',
       'settings_accounts',
-      Remix.account_circle_line,
+      AppIcons.platformAccounts,
       route: RoutePath.kSettingsAccount,
       desc: 'settings_accounts_desc',
-      keywords: ['Cookie', '登录', 'login', '账号'],
+      keywords: ['Cookie', '登录', 'login', '账号', '三方认证'],
     )
     ..link(
       'tags',
       'tag_management',
-      Remix.price_tag_3_line,
+      AppIcons.tag,
       route: RoutePath.kSettingsTags,
-      desc: 'settings_tags_desc',
+      desc: 'tag_management_subtitle',
       keywords: ['分组', 'tag'],
     )
-    ..link(
-      'iptv',
-      'iptv_settings',
-      Remix.tv_2_line,
-      route: RoutePath.kIptv,
-      desc: 'settings_iptv_desc',
-      keywords: ['IPTV', 'M3U', '电视'],
-    )
+    // v4's own platform options (UPGRADES 2-1, 8-3, 不可播放).
     ..group = 'settings_group_discover'
     ..toggle(
       'show_unplayable',
       'settings_show_unplayable',
       Settings.showUnplayableInDiscover,
-      Remix.lock_line,
+      AppIcons.settingsUnplayable,
       desc: 'settings_show_unplayable_desc',
       keywords: ['付费', '加锁', '受限'],
-    )
-    ..add(
-      'audience_mode',
-      'audience_display_mode',
-      (context, entry) => SettingChoiceTile<bool>(
-        entry: entry,
-        setting: Settings.preferRealOnlineCounts,
-        icon: Remix.group_line,
-        hint: i18n('audience_ranking_rule_desc'),
-        options: () => [
-          (value: false, label: i18n('audience_mode_heat'), description: i18n('audience_mode_heat_desc')),
-          (value: true, label: i18n('audience_mode_online'), description: i18n('audience_mode_online_desc')),
-        ],
-      ),
-      desc: 'settings_audience_mode_desc',
-      settings: [Settings.preferRealOnlineCounts],
-      keywords: ['人数', '热度', '在线', 'viewers'],
-    )
-    ..link(
-      'audience_platforms',
-      'audience_online_platforms',
-      Remix.list_check_2,
-      page: (_) => const AudiencePlatformsPage(),
-      desc: 'settings_audience_platforms_desc',
-      settings: [Settings.realOnlinePlatforms],
-      keywords: ['人数', '在线', 'viewers'],
     )
     ..add(
       'twitch_languages',
@@ -547,144 +590,102 @@ List<SettingsEntry> _build() {
       'douyu_renew',
       'settings_douyu_renew',
       Settings.douyuForceRenew,
-      Remix.refresh_line,
+      AppIcons.settingsDouyuRenew,
       desc: 'settings_douyu_renew_desc',
       keywords: ['斗鱼', 'douyu', 'Cookie'],
     )
-    // ---- refresh (U.6d) ----
+    // ---- refresh (U.6d d10–d12) ----
     ..section = SettingsSection.refresh
-    ..group = 'auto_refresh_settings'
-    ..toggle(
-      'refresh_on_resume',
-      'refresh_follow_on_resume',
-      Settings.refreshFavoriteOnResume,
-      Remix.restart_line,
-      desc: 'settings_refresh_on_resume_desc',
-      keywords: ['刷新', 'refresh'],
-    )
+    ..group = 'settings_group_follow_list'
     ..toggle(
       'auto_refresh',
       'auto_refresh_follow',
       Settings.autoRefreshFavorite,
-      Remix.refresh_line,
-      desc: 'settings_auto_refresh_desc',
+      AppIcons.settingsAutoRefresh,
+      desc: 'auto_refresh_follow_subtitle',
       keywords: ['刷新', 'refresh'],
     )
-    ..number(
+    ..choice<int>(
       'refresh_interval',
       'auto_refresh_interval',
       Settings.autoRefreshInterval,
-      Remix.timer_line,
-      presets: const [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 360],
-      label: formatMinutes,
-      unit: 'minute',
-      enabledBy: Settings.autoRefreshFavorite,
+      AppIcons.settingsInterval,
+      () => _minutes(followRefreshMinutes),
+      requires: () => [needsOn(Settings.autoRefreshFavorite, 'auto_refresh_follow')],
       keywords: ['刷新', 'refresh'],
     )
-    ..number(
+    ..toggle(
+      'refresh_on_resume',
+      'settings_refresh_on_resume',
+      Settings.refreshFavoriteOnResume,
+      AppIcons.settingsRefreshOnResume,
+      desc: 'settings_refresh_on_resume_desc',
+      keywords: ['刷新', 'refresh', '收藏'],
+    )
+    ..add(
       'refresh_concurrency',
       'max_concurrent_refresh',
-      Settings.maxConcurrentRefresh,
-      Remix.stack_line,
-      presets: const [1, 2, 3, 4, 6, 8, 10, 12, 16, 20],
-      label: (value) => value == 4 ? '$value · ${i18n('recommended')}' : '$value',
+      (context, entry) => SettingCounterTile(
+        entry: entry,
+        setting: Settings.maxConcurrentRefresh,
+        icon: AppIcons.settingsConcurrency,
+        min: 1,
+        max: 20,
+      ),
       desc: 'settings_refresh_concurrency_desc',
-      keywords: ['刷新', 'refresh'],
+      settings: [Settings.maxConcurrentRefresh],
+      keywords: ['刷新', 'refresh', '并发'],
     )
+    ..group = 'settings_group_covers'
     ..toggle(
       'refresh_covers',
       'auto_refresh_thumbnails',
       Settings.autoRefreshThumbnails,
-      Remix.image_line,
+      AppIcons.settingsAutoCovers,
       desc: 'auto_refresh_thumbnails_subtitle',
       keywords: ['封面', 'cover'],
     )
-    ..number(
+    ..choice<int>(
       'cover_interval',
       'thumbnail_refresh_interval',
       Settings.thumbnailRefreshInterval,
-      Remix.timer_2_line,
-      presets: const [5, 10, 15, 30, 60, 120, 240, 360],
-      label: formatMinutes,
-      unit: 'minute',
-      enabledBy: Settings.autoRefreshThumbnails,
+      AppIcons.settingsInterval,
+      () => _minutes(coverRefreshMinutes),
+      requires: () => [needsOn(Settings.autoRefreshThumbnails, 'auto_refresh_thumbnails')],
       keywords: ['封面', 'cover'],
     )
+    // 3.x kept the history size on the history page; v4 put it here.
     ..group = 'history'
     ..number(
       'history_limit',
       'history_limit',
       Settings.historyLimit,
-      Remix.history_line,
+      AppIcons.settingsHistoryLimit,
       presets: const [0, 20, 50, 100, 200, 500],
       label: (value) => value == 0 ? i18n('settings_no_limit') : '$value',
       desc: 'settings_history_limit_desc',
       keywords: ['历史', 'history'],
     )
-    // ---- video (U.6c) ----
+    // ---- video (U.6c c2) ----
     ..section = SettingsSection.video
-    ..group = 'video_quality_settings'
-    ..choice(
-      'prefer_resolution',
-      'prefer_resolution',
-      Settings.preferResolution,
-      Remix.hd_line,
-      () => _keyed(resolutionKeys),
-      desc: 'settings_prefer_resolution_desc',
-      keywords: ['画质', 'quality', 'Wi-Fi'],
-    )
-    ..choice(
-      'prefer_resolution_cellular',
-      'mobile_quality',
-      Settings.preferResolutionCellular,
-      Remix.signal_tower_line,
-      () => _keyed(resolutionKeys),
-      desc: 'settings_prefer_resolution_cellular_desc',
-      keywords: ['画质', 'quality', '流量', '4G', '5G'],
-      when: _mobile,
-    )
-    ..toggle(
-      'prefer_h264',
-      'settings_prefer_h264',
-      Settings.preferH264,
-      Remix.film_line,
-      desc: 'settings_prefer_h264_desc',
-      keywords: ['HEVC', 'H.265', 'H264', '编码'],
-    )
-    ..add(
-      'video_fit',
-      'settings_video_fit',
-      (context, entry) => SettingChoiceTile<int>(
-        entry: entry,
-        setting: Settings.videoFitIndex,
-        icon: Remix.aspect_ratio_line,
-        options: () => [
-          for (var i = 0; i < videoFitKeys.length; i++) (value: i, label: i18n(videoFitKeys[i]), description: null),
-        ],
-      ),
-      desc: 'settings_video_fit_desc',
-      settings: [Settings.videoFitIndex],
-      keywords: ['比例', '裁剪', 'fit', 'crop'],
-    )
     ..group = 'audio_settings'
-    ..toggle(
+    ..add(
       'global_mute',
       'global_mute',
-      Settings.globalVolumeMute,
-      Remix.volume_mute_line,
-      desc: 'settings_global_mute_desc',
+      (context, entry) => GlobalMuteTile(entry: entry),
+      desc: 'global_mute_subtitle',
+      settings: [Settings.globalVolumeMute],
       keywords: ['静音', 'mute'],
     )
     ..slider(
       'mobile_volume',
       'mobile_default_volume',
       Settings.defaultMobileVolume,
-      Remix.smartphone_line,
+      AppIcons.settingsPhoneVolume,
       min: 0,
       max: 1,
       step: 0.01,
       format: _percent,
-      desc: 'settings_default_volume_desc',
       keywords: ['音量', 'volume'],
       when: _mobile,
     )
@@ -692,87 +693,165 @@ List<SettingsEntry> _build() {
       'desktop_volume',
       'desktop_default_volume',
       Settings.defaultDesktopVolume,
-      Remix.computer_line,
+      AppIcons.settingsDesktopVolume,
       min: 0,
       max: 1,
       step: 0.01,
       format: _percent,
-      desc: 'settings_default_volume_desc',
       keywords: ['音量', 'volume'],
       when: _desktop,
+    )
+    ..group = 'video_quality_settings'
+    ..choice<String>(
+      'prefer_resolution',
+      'prefer_resolution',
+      Settings.preferResolution,
+      AppIcons.settingsQuality,
+      () => _keyed(resolutionKeys),
+      desc: 'prefer_resolution_subtitle',
+      keywords: ['画质', 'quality', 'Wi-Fi'],
+    )
+    ..choice<String>(
+      'prefer_resolution_cellular',
+      'mobile_quality',
+      Settings.preferResolutionCellular,
+      AppIcons.settingsCellularQuality,
+      () => _keyed(resolutionKeys),
+      desc: 'mobile_quality_subtitle',
+      keywords: ['画质', 'quality', '流量', '4G', '5G'],
+      when: _mobile,
+    )
+    ..toggle(
+      'prefer_h264',
+      'settings_prefer_h264',
+      Settings.preferH264,
+      AppIcons.settingsH264,
+      desc: 'settings_prefer_h264_desc',
+      keywords: ['HEVC', 'H.265', 'H264', '编码'],
+    )
+    ..choice<int>(
+      'video_fit',
+      'settings_video_fit',
+      Settings.videoFitIndex,
+      AppIcons.settingsVideoFit,
+      () => [for (var i = 0; i < videoFitKeys.length; i++) (value: i, label: i18n(videoFitKeys[i]), description: null)],
+      desc: 'settings_video_fit_desc',
+      keywords: ['比例', '裁剪', 'fit', 'crop'],
     )
     ..group = 'playback_behavior_settings'
     ..toggle(
       'fullscreen_default',
       'enable_fullscreen_default',
       Settings.enableFullScreenDefault,
-      Remix.fullscreen_line,
-      desc: 'settings_fullscreen_default_desc',
+      AppIcons.settingsFullscreenDefault,
+      desc: 'enable_fullscreen_default_subtitle',
+      keywords: ['全屏', 'fullscreen'],
     )
     ..toggle(
       'screen_keep_on',
       'enable_screen_keep_on',
       Settings.enableScreenKeepOn,
-      Remix.lightbulb_line,
-      desc: 'settings_screen_keep_on_desc',
+      AppIcons.settingsScreenKeepOn,
+      desc: 'enable_screen_keep_on_subtitle',
       when: _android,
     )
-    ..toggle(
+    ..link(
+      'portrait',
+      'portrait_live_settings',
+      AppIcons.settingsPortrait,
+      subpage: SettingsSubpage.portrait,
+      desc: 'portrait_live_settings_desc',
+      keywords: ['竖屏', 'portrait'],
+    )
+    ..link(
+      'audience',
+      'audience_metric_settings',
+      AppIcons.settingsAudience,
+      subpage: SettingsSubpage.audience,
+      desc: 'audience_metric_settings_desc',
+      keywords: ['人数', '热度', '在线', 'viewers'],
+    )
+    ..group = 'settings_group_background_sleep'
+    ..add(
       'background_play',
       'enable_background_play',
-      Settings.enableBackgroundPlay,
-      Remix.music_2_line,
-      desc: 'settings_background_play_desc',
+      (context, entry) => GatedToggleTile(
+        entry: entry,
+        setting: Settings.enableBackgroundPlay,
+        icon: AppIcons.settingsBackgroundPlay,
+        failedKey: 'background_play_apply_failed',
+      ),
+      desc: 'enable_background_play_subtitle',
+      settings: [Settings.enableBackgroundPlay],
       keywords: ['后台', 'background'],
-      when: _android,
+      // iOS too (U.17a).
+      when: _mobile,
     )
-    ..toggle(
+    ..add(
       'asmr_sleep',
       'asmr_sleep_mode',
-      Settings.enableAsmrSleepMode,
-      Remix.moon_clear_line,
-      desc: 'settings_asmr_sleep_desc',
-      keywords: ['睡眠', '定时', 'sleep'],
+      (context, entry) => GatedToggleTile(
+        entry: entry,
+        setting: Settings.enableAsmrSleepMode,
+        icon: AppIcons.settingsAutoSleep,
+        failedKey: 'asmr_sleep_mode_apply_failed',
+      ),
+      desc: 'asmr_sleep_mode_desc',
+      settings: [Settings.enableAsmrSleepMode],
+      keywords: ['睡眠', '定时', 'sleep', '助眠'],
       when: _android,
     )
     ..number(
       'asmr_minutes',
       'asmr_sleep_timer',
       Settings.asmrSleepMinutes,
-      Remix.timer_2_line,
+      AppIcons.settingsSleepMinutes,
       presets: const [15, 30, 45, 60, 90, 120, 240, 480, 720, 1440],
-      label: formatMinutes,
+      label: formatDuration,
       unit: 'minute',
-      desc: 'settings_asmr_minutes_desc',
-      enabledBy: Settings.enableAsmrSleepMode,
-      keywords: ['睡眠', '定时', 'sleep'],
+      desc: 'asmr_sleep_timer_desc',
+      hint: 'settings_asmr_timer_hint',
+      inputLabel: 'custom_sleep_minutes',
+      rangeText: 'custom_sleep_minutes_range',
+      requires: () => [needsOn(Settings.enableAsmrSleepMode, 'asmr_sleep_mode')],
+      keywords: ['睡眠', '定时', 'sleep', '助眠'],
       when: _android,
     )
+    ..group = 'settings_group_mini_window'
     ..toggle(
       'float_play',
-      'exit_float_window',
+      'settings_leave_room_mini',
       Settings.floatPlay,
-      Remix.picture_in_picture_2_line,
-      desc: 'settings_float_play_desc',
-      keywords: ['画中画', '小窗', 'PiP'],
+      AppIcons.settingsLeaveRoomMini,
+      desc: 'settings_leave_room_mini_desc',
+      keywords: ['画中画', '小窗', 'PiP', '悬浮窗'],
     )
     ..toggle(
-      'pip_on_top',
-      'windows_pip_always_on_top',
-      Settings.windowsPipAlwaysOnTop,
-      Remix.pushpin_line,
-      desc: 'windows_pip_always_on_top_subtitle',
+      'auto_pip',
+      'auto_pip_on_leave',
+      Settings.autoPipOnLeave,
+      AppIcons.settingsAutoPip,
+      desc: 'auto_pip_on_leave_desc',
       keywords: ['画中画', '小窗', 'PiP'],
-      when: _windows,
+      when: _mobile,
+    )
+    ..add(
+      'pip_on_top',
+      'settings_pip_on_top',
+      (context, entry) => PipOnTopTile(entry: entry),
+      desc: 'windows_pip_always_on_top_subtitle',
+      settings: [Settings.windowsPipAlwaysOnTop],
+      keywords: ['画中画', '小窗', 'PiP', '置顶'],
+      when: _desktop,
     )
     ..toggle(
       'pip_remember_position',
       'windows_pip_remember_position',
       Settings.rememberPipPosition,
-      Remix.drag_move_line,
+      AppIcons.settingsPipRemember,
       desc: 'windows_pip_remember_position_subtitle',
       keywords: ['画中画', '小窗', 'PiP'],
-      when: _windows,
+      when: _desktop,
     )
     ..add(
       'pip_reset_position',
@@ -787,14 +866,49 @@ List<SettingsEntry> _build() {
         Settings.windowsPipY,
       ],
       keywords: ['画中画', '小窗', 'PiP'],
-      when: _windows,
+      when: _desktop,
     )
-    ..group = 'portrait_live_settings'
+    ..group = 'danmaku_settings'
+    ..toggle(
+      'video_danmaku_show',
+      'show_danmaku',
+      Settings.enableDanmakuDisplay,
+      AppIcons.settingsShowDanmaku,
+      desc: 'show_danmaku_subtitle',
+      keywords: ['弹幕', 'danmaku'],
+    )
+    ..link(
+      'danmaku_style',
+      'settings_danmaku_style',
+      AppIcons.settingsDanmakuStyle,
+      page: (_) => const DanmakuStylePage(),
+      desc: 'settings_danmaku_style_desc',
+      keywords: ['弹幕', '字号', '速度', '透明度', 'danmaku'],
+    )
+    ..add(
+      'video_danmaku_font',
+      'change_danmaku_font_family',
+      (context, entry) =>
+          FontFamilyTile(entry: entry, setting: Settings.danmakuFontFamilyName, icon: AppIcons.settingsDanmakuFont),
+      settings: [Settings.danmakuFontFamilyName, Settings.danmakuFontFamilyFileName],
+      keywords: ['字体', 'font', '弹幕'],
+      opens: true,
+    )
+    ..link(
+      'video_block_list',
+      'settings_danmaku_block',
+      AppIcons.settingsDanmakuBlock,
+      route: RoutePath.kSettingsDanmuShield,
+      keywords: ['屏蔽', '关键词', '过滤', 'block'],
+    )
+    // ---- portrait streams (U.6c, a page of the video page) ----
+    ..subpage = SettingsSubpage.portrait
+    ..group = 'portrait_detection_group'
     ..toggle(
       'portrait_detect',
       'portrait_smart_detection',
       Settings.enablePortraitStreamAdaptation,
-      Remix.smartphone_line,
+      AppIcons.portraitDetect,
       desc: 'portrait_smart_detection_desc',
       keywords: ['竖屏', 'portrait'],
     )
@@ -802,44 +916,48 @@ List<SettingsEntry> _build() {
       'portrait_height',
       'portrait_adaptive_height',
       Settings.portraitAdaptiveHeight,
-      Remix.expand_height_line,
+      AppIcons.portraitHeight,
       desc: 'portrait_adaptive_height_desc',
-      enabledBy: Settings.enablePortraitStreamAdaptation,
+      requires: () => [needsOn(Settings.enablePortraitStreamAdaptation, 'portrait_smart_detection')],
       keywords: ['竖屏', 'portrait'],
     )
-    ..choice(
+    ..choice<String>(
       'portrait_layout',
       'portrait_layout_mode',
       Settings.portraitLayoutMode,
-      Remix.layout_line,
+      AppIcons.portraitLayout,
       () => _keyed({
         'balanced': 'portrait_layout_balanced',
         'immersive': 'portrait_layout_immersive',
         'compatibility': 'portrait_layout_compatibility',
       }),
       desc: 'portrait_layout_mode_desc',
-      enabledBy: Settings.enablePortraitStreamAdaptation,
+      hint: 'portrait_layout_mode_desc',
+      valueBelow: true,
+      requires: () => [needsOn(Settings.enablePortraitStreamAdaptation, 'portrait_smart_detection')],
       keywords: ['竖屏', 'portrait'],
     )
-    ..choice(
+    ..group = 'portrait_presentation_group'
+    ..choice<String>(
       'portrait_fullscreen',
       'portrait_fullscreen_policy',
       Settings.portraitFullscreenPolicy,
-      Remix.fullscreen_line,
+      AppIcons.portraitFullscreen,
       () => _keyed({
         'followSource': 'portrait_fullscreen_follow_source',
         'followSystem': 'portrait_fullscreen_follow_system',
         'landscape': 'portrait_fullscreen_landscape',
       }),
       desc: 'portrait_fullscreen_policy_desc',
-      enabledBy: Settings.enablePortraitStreamAdaptation,
-      keywords: ['竖屏', 'portrait'],
+      hint: 'portrait_fullscreen_policy_desc',
+      valueBelow: true,
+      keywords: ['竖屏', 'portrait', '全屏'],
     )
-    ..choice(
+    ..choice<String>(
       'portrait_display',
       'portrait_fullscreen_display_mode',
       Settings.portraitFullscreenDisplayMode,
-      Remix.aspect_ratio_line,
+      AppIcons.portraitDisplay,
       () => _keyed({
         'complete': 'portrait_fullscreen_display_complete',
         'ambient': 'portrait_fullscreen_display_ambient',
@@ -847,23 +965,24 @@ List<SettingsEntry> _build() {
         'cover': 'portrait_fullscreen_display_cover',
       }),
       desc: 'portrait_fullscreen_display_mode_desc',
-      enabledBy: Settings.enablePortraitStreamAdaptation,
-      keywords: ['竖屏', 'portrait'],
+      hint: 'portrait_fullscreen_display_mode_desc',
+      valueBelow: true,
+      keywords: ['竖屏', 'portrait', '全屏'],
     )
     ..toggle(
       'portrait_pip',
       'portrait_pip_follow_source',
       Settings.portraitPipFollowSource,
-      Remix.picture_in_picture_line,
+      AppIcons.portraitPip,
       desc: 'portrait_pip_follow_source_desc',
-      enabledBy: Settings.enablePortraitStreamAdaptation,
-      keywords: ['竖屏', 'portrait'],
+      keywords: ['竖屏', 'portrait', '小窗'],
+      when: _android,
     )
-    ..choice(
+    ..choice<String>(
       'portrait_danmaku',
       'portrait_danmaku_mode',
       Settings.portraitDanmakuMode,
-      Remix.chat_3_line,
+      AppIcons.portraitDanmaku,
       () => _keyed({
         'followGlobal': 'portrait_danmaku_follow_global',
         'upperQuarter': 'portrait_danmaku_upper_quarter',
@@ -871,24 +990,484 @@ List<SettingsEntry> _build() {
         'hidden': 'portrait_danmaku_hidden',
       }),
       desc: 'portrait_danmaku_mode_desc',
-      enabledBy: Settings.enablePortraitStreamAdaptation,
+      hint: 'portrait_danmaku_mode_desc',
+      valueBelow: true,
       keywords: ['竖屏', 'portrait', '弹幕'],
     )
     ..toggle(
       'portrait_remember',
       'portrait_remember_room_override',
       Settings.rememberPortraitRoomOverride,
-      Remix.bookmark_line,
+      AppIcons.portraitRemember,
       desc: 'portrait_remember_room_override_desc',
       keywords: ['竖屏', 'portrait'],
     )
+    ..group = 'portrait_diagnostics_group'
     ..toggle(
       'portrait_diagnostics',
       'portrait_show_diagnostics',
       Settings.showPortraitDiagnostics,
-      Remix.bug_line,
+      AppIcons.portraitDiagnostics,
       desc: 'portrait_show_diagnostics_desc',
       keywords: ['竖屏', 'portrait'],
+    )
+    ..add(
+      'portrait_reset',
+      'portrait_reset_settings',
+      (context, entry) => RestoreDefaultsTile(
+        entry: entry,
+        settings: portraitSettings,
+        confirmTitle: 'portrait_reset_settings',
+        confirmMessage: 'settings_portrait_reset_confirm',
+      ),
+      desc: 'portrait_reset_settings_desc',
+      settings: portraitSettings,
+      keywords: ['竖屏', 'portrait', '默认', 'reset'],
+    )
+    // ---- audience counts (U.6c c15, a page of the video page) ----
+    ..subpage = SettingsSubpage.audience
+    ..group = 'audience_display_mode'
+    ..add(
+      'audience_heat',
+      'audience_mode_heat',
+      (context, entry) => AudienceModeTile(entry: entry, online: false),
+      desc: 'audience_mode_heat_desc',
+      settings: [Settings.preferRealOnlineCounts],
+      keywords: ['人数', '热度', 'viewers'],
+    )
+    ..add(
+      'audience_online',
+      'audience_mode_online',
+      (context, entry) => AudienceModeTile(entry: entry, online: true),
+      desc: 'audience_mode_online_desc',
+      settings: [Settings.preferRealOnlineCounts],
+      keywords: ['人数', '在线', 'viewers'],
+    )
+    ..group = 'audience_online_platforms'
+    ..add(
+      'audience_platforms',
+      'audience_online_platforms',
+      (context, entry) => AudiencePlatformsTile(entry: entry),
+      settings: [Settings.realOnlinePlatforms],
+      keywords: ['人数', '在线', 'viewers', '平台'],
+    )
+    ..group = 'settings_group_audience_heat_only'
+    ..add(
+      'audience_heat_only',
+      'settings_group_audience_heat_only',
+      (context, entry) => AudienceHeatOnlyTile(entry: entry),
+      keywords: ['人数', '热度', '累计'],
+    )
+    ..link(
+      'audience_info',
+      'settings_audience_info',
+      null,
+      page: (_) => const AudienceInfoPage(),
+      desc: 'settings_audience_info_desc',
+      keywords: ['人数', '口径', '来源'],
+    )
+    ..subpage = null
+    // ---- floating-window danmaku (U.6c c14; the page has a preview) ----
+    ..section = SettingsSection.pipDanmaku
+    ..group = '_pip_switch'
+    ..toggle('pip_danmaku', 'pip_danmaku_enable', Settings.enablePipDanmaku, null, keywords: ['画中画', '小窗', 'PiP', '弹幕'])
+    ..group = 'settings_group_style'
+    ..slider(
+      'pip_opacity',
+      'opacity',
+      Settings.pipDanmakuOpacity,
+      null,
+      min: 0.1,
+      max: 1,
+      step: 0.05,
+      format: _percent,
+      requires: _pipOn,
+      keywords: ['小窗', '透明', 'opacity'],
+    )
+    ..slider(
+      'pip_speed',
+      'speed',
+      Settings.pipDanmakuSpeed,
+      null,
+      min: 20,
+      max: 400,
+      step: 1,
+      format: (value) => '${value.round()} px/s',
+      requires: _pipOn,
+      keywords: ['小窗', '速度', 'speed'],
+    )
+    ..slider(
+      'pip_size',
+      'font_size',
+      Settings.pipDanmakuFontSize,
+      null,
+      min: 8,
+      max: 24,
+      step: 0.5,
+      format: (value) => '${value.toStringAsFixed(1)} px',
+      requires: _pipOn,
+      keywords: ['小窗', '字号', 'size'],
+    )
+    ..slider(
+      'pip_weight',
+      'font_weight',
+      Settings.pipDanmakuFontWeight,
+      null,
+      min: 100,
+      max: 900,
+      step: 100,
+      format: (value) => i18n(danmakuFontWeightNames[value.round()] ?? 'font_weight_normal'),
+      requires: _pipOn,
+      keywords: ['小窗', '粗细', 'weight'],
+    )
+    ..toggle(
+      'pip_auto_scale',
+      'pip_danmaku_auto_scale',
+      Settings.pipDanmakuAutoScale,
+      null,
+      desc: 'settings_pip_auto_scale_desc',
+      requires: _pipOn,
+      keywords: ['小窗', '缩放'],
+    )
+    ..toggle(
+      'pip_no_emoji',
+      'danmaku_no_emoji',
+      Settings.pipDanmakuNoEmojiMode,
+      null,
+      requires: _pipOn,
+      keywords: ['小窗', '表情', 'emoji'],
+    )
+    ..toggle(
+      'pip_original_color',
+      'pip_danmaku_original_color',
+      Settings.pipDanmakuUseOriginalColor,
+      null,
+      requires: _pipOn,
+      keywords: ['小窗', '颜色', 'color'],
+    )
+    ..add(
+      'pip_color',
+      'pip_danmaku_color',
+      (context, entry) => PipColorTile(entry: entry),
+      settings: [Settings.pipDanmakuColor],
+      keywords: ['小窗', '颜色', 'color'],
+    )
+    ..group = 'settings_group_display_range'
+    ..slider(
+      'pip_area',
+      'danmaku_area',
+      Settings.pipDanmakuArea,
+      null,
+      min: 0.1,
+      max: 1,
+      step: 0.05,
+      format: _percent,
+      requires: _pipOn,
+      keywords: ['小窗', '区域', 'area'],
+    )
+    ..add(
+      'pip_max_visible',
+      'pip_danmaku_max_visible',
+      (context, entry) => SettingCounterTile(
+        entry: entry,
+        setting: Settings.pipDanmakuMaxVisibleCount,
+        min: 1,
+        max: 20,
+        requires: _pipOn(),
+      ),
+      settings: [Settings.pipDanmakuMaxVisibleCount],
+      keywords: ['小窗', '数量'],
+    )
+    ..slider(
+      'pip_interval',
+      'pip_danmaku_interval',
+      Settings.pipDanmakuEmitInterval,
+      null,
+      min: 0.05,
+      max: 2,
+      step: 0.05,
+      format: (value) => i18n('pip_danmaku_interval_seconds', args: {'seconds': value.toStringAsFixed(2)}),
+      requires: _pipOn,
+      keywords: ['小窗', '间隔'],
+    )
+    ..group = 'settings_group_smoothness'
+    ..toggle(
+      'pip_auto_fps',
+      'settings_pip_fps_follow',
+      Settings.pipDanmakuAutoFps,
+      null,
+      desc: 'pip_danmaku_fps_policy_desc',
+      requires: _pipOn,
+      keywords: ['小窗', '帧率', 'fps'],
+    )
+    ..add(
+      'pip_fps',
+      'danmaku_fps',
+      (context, entry) => PipFpsTile(entry: entry),
+      settings: [Settings.pipDanmakuFps],
+      keywords: ['小窗', '帧率', 'fps'],
+    )
+    ..group = '_pip_reset'
+    ..add(
+      'pip_reset',
+      'pip_danmaku_reset',
+      (context, entry) => RestoreDefaultsTile(
+        entry: entry,
+        settings: pipDanmakuSettings,
+        confirmTitle: 'pip_danmaku_reset',
+        confirmMessage: 'pip_danmaku_reset_confirm',
+      ),
+      settings: pipDanmakuSettings,
+      keywords: ['小窗', '默认', 'reset'],
+    )
+    // ---- player (U.6c c9–c11) ----
+    ..section = SettingsSection.playerKernel
+    ..group = 'settings_group_kernel'
+    ..add(
+      'kernel',
+      'kernel_switch',
+      (context, entry) => KernelTile(entry: entry),
+      desc: 'kernel_switch_subtitle',
+      keywords: ['mpv', '播放器', '内核'],
+    )
+    ..toggle(
+      'hard_stop',
+      'force_destroy_player',
+      Settings.useHardStopOnExit,
+      AppIcons.settingsHardStop,
+      desc: 'force_destroy_player_subtitle',
+    )
+    ..group = 'settings_group_decode'
+    ..toggle(
+      'hardware_decoding',
+      'enable_codec',
+      Settings.enableCodec,
+      AppIcons.settingsHardwareDecoding,
+      desc: 'gpu_decode',
+      requires: _hardwareDecodingFree,
+      keywords: ['硬解', 'decode', 'GPU'],
+    )
+    ..toggle(
+      'compat_mode',
+      'compat_mode',
+      Settings.playerCompatMode,
+      AppIcons.settingsCompatMode,
+      desc: 'settings_compat_mode_takeover',
+      keywords: ['黑屏', 'MediaCodec', '卡顿'],
+      when: _android,
+    )
+    ..toggle(
+      'rtx_vsr',
+      'enable_rtx_vsr',
+      Settings.enableRtxVsr,
+      AppIcons.settingsRtxVsr,
+      desc: 'enable_rtx_vsr_subtitle',
+      keywords: ['NVIDIA', 'RTX', '超分'],
+      when: _windows,
+    )
+    ..group = 'settings_group_network'
+    ..add(
+      'player_proxy_link',
+      'network_proxy',
+      (context, entry) => PlayerProxyLinkTile(entry: entry),
+      desc: 'settings_player_proxy_link_desc',
+      settings: [Settings.enableProxy],
+      keywords: ['代理', 'proxy'],
+      opens: true,
+    )
+    ..group = 'mpv_advanced_settings'
+    ..toggle(
+      'custom_output',
+      'custom_output_hwdec',
+      Settings.customPlayerOutput,
+      AppIcons.settingsCustomOutput,
+      desc: 'settings_custom_output_takeover',
+      requires: _customOutputFree,
+      keywords: ['mpv', 'vo', 'ao', 'hwdec'],
+    )
+    ..add(
+      'video_output',
+      'video_output_driver',
+      (context, entry) => MpvOptionTile(entry: entry, kind: MpvOptionKind.video),
+      settings: [Settings.videoOutputDriver],
+      keywords: ['mpv', 'vo'],
+      opens: true,
+    )
+    ..add(
+      'audio_output',
+      'audio_output_driver',
+      (context, entry) => MpvOptionTile(entry: entry, kind: MpvOptionKind.audio),
+      settings: [Settings.audioOutputDriver],
+      keywords: ['mpv', 'ao'],
+      opens: true,
+    )
+    ..add(
+      'hardware_decoder',
+      'hardware_decoder',
+      (context, entry) => MpvOptionTile(entry: entry, kind: MpvOptionKind.decoder),
+      settings: [Settings.videoHardwareDecoder],
+      keywords: ['mpv', 'hwdec'],
+      opens: true,
+    )
+    ..group = '_kernel_reset'
+    ..add(
+      'kernel_reset',
+      'settings_restore_defaults',
+      (context, entry) => RestoreDefaultsTile(
+        entry: entry,
+        settings: kernelSettings,
+        confirmTitle: 'settings_kernel_reset_title',
+        confirmMessage: 'settings_kernel_reset_confirm',
+      ),
+      desc: 'settings_kernel_reset_desc',
+      settings: kernelSettings,
+      keywords: ['默认', 'reset', 'mpv'],
+    )
+    // ---- general (U.6d d2–d7) ----
+    ..section = SettingsSection.general
+    ..group = 'settings_group_display'
+    ..add(
+      'refresh_rate',
+      'refresh_rate_mode',
+      (context, entry) => RefreshRateTile(entry: entry),
+      settings: [Settings.refreshRateMode],
+      keywords: ['Hz', '高刷', 'refresh rate', '刷新率', '显示器'],
+      when: _refreshRate,
+    )
+    ..group = 'settings_group_launch'
+    ..add(
+      'startup',
+      'startup',
+      (context, entry) => StartupTile(entry: entry),
+      desc: 'settings_startup_desc',
+      settings: [Settings.enableStartUp],
+      keywords: ['开机', 'startup'],
+      when: _windows,
+    )
+    ..add(
+      'window_size',
+      'window_size',
+      (context, entry) => WindowSizeTile(entry: entry),
+      settings: [Settings.windowWidth, Settings.windowHeight],
+      keywords: ['窗口', 'window'],
+      when: _windows,
+    )
+    ..toggle(
+      'splash',
+      'splash_animation',
+      Settings.showSplashPage,
+      AppIcons.settingsSplash,
+      desc: 'splash_animation_subtitle',
+    )
+    ..group = 'settings_group_updates'
+    ..toggle(
+      'auto_update',
+      'enable_auto_check_update',
+      Settings.enableAutoCheckUpdate,
+      AppIcons.settingsAutoUpdate,
+      keywords: ['更新', 'update'],
+    )
+    ..toggle(
+      'github_updates',
+      'use_github_origin_for_updates',
+      Settings.useGitHubOriginForUpdates,
+      AppIcons.settingsGitHub,
+      desc: 'use_github_origin_for_updates_desc',
+      keywords: ['更新', 'update', 'GitHub'],
+    )
+    ..group = 'settings_group_window'
+    ..add(
+      'close_window',
+      'settings_close_window',
+      (context, entry) => CloseWindowTile(entry: entry),
+      desc: 'settings_close_window_desc',
+      settings: [Settings.dontAskExit, Settings.exitChoose],
+      keywords: ['托盘', '关闭', 'close', '退出', '不再询问'],
+      when: _windows,
+    )
+    ..toggle(
+      'new_window',
+      'open_new_window',
+      Settings.enableNewWindowPlay,
+      AppIcons.newPlayerWindow,
+      desc: 'settings_new_window_desc',
+      keywords: ['窗口', 'window'],
+      when: _windows,
+    )
+    ..group = 'settings_group_exit_timer'
+    ..add(
+      'auto_exit',
+      'enable_countdown_close',
+      (context, entry) => AutoExitTile(entry: entry),
+      desc: 'enable_countdown_close_subtitle',
+      settings: [Settings.enableAutoShutDownTime],
+      keywords: ['定时', '关闭', 'timer'],
+    )
+    ..add(
+      'auto_exit_minutes',
+      'countdown_duration',
+      (context, entry) => AutoExitMinutesTile(entry: entry),
+      settings: [Settings.autoShutDownTime],
+      keywords: ['定时', '关闭', 'timer'],
+    )
+    // ---- network (U.6d d13, d14) ----
+    ..section = SettingsSection.network
+    ..group = 'app_proxy_group_title'
+    ..add(
+      'app_proxy',
+      'enable_app_proxy',
+      (context, entry) => ProxyEditorTile(entry: entry, proxy: ProxySettings.app),
+      desc: 'enable_app_proxy_desc',
+      settings: [Settings.enableAppProxy, Settings.appProxyHost, Settings.appProxyPort],
+      keywords: ['代理', 'proxy', 'HTTP'],
+    )
+    ..group = 'player_proxy_group_title'
+    ..add(
+      'player_proxy',
+      'enable_player_proxy',
+      (context, entry) => ProxyEditorTile(entry: entry, proxy: ProxySettings.player),
+      desc: 'enable_player_proxy_desc',
+      settings: [Settings.enableProxy, Settings.proxyHost, Settings.proxyPort],
+      keywords: ['代理', 'proxy', 'HTTP'],
+    )
+    // ---- cache and data (U.6e e2–e7) ----
+    ..section = SettingsSection.cache
+    ..group = 'settings_group_cache'
+    ..add(
+      'cache_size',
+      'current_cache_size',
+      (context, entry) => CacheSizeTile(entry: entry),
+      desc: 'settings_cache_size_desc',
+      keywords: ['缓存', 'cache'],
+    )
+    ..add(
+      'refresh_covers_now',
+      'refresh_thumbnails',
+      (context, entry) => RefreshCoversTile(entry: entry),
+      desc: 'refresh_thumbnails_desc',
+      keywords: ['封面', '缩略图', 'cover', 'thumbnail'],
+    )
+    ..add(
+      'clear_cache',
+      'clear_local_cache',
+      (context, entry) => ClearCacheTile(entry: entry),
+      desc: 'clear_local_cache_desc',
+      keywords: ['缓存', 'cache', '清理', '清除'],
+    )
+    ..group = 'settings_group_download'
+    ..add(
+      'download_directory',
+      'download_directory',
+      (context, entry) => DownloadDirectoryTile(entry: entry),
+      settings: [Settings.downloadDirectoryPath],
+      keywords: ['下载', '更新', 'download', '目录'],
+    )
+    ..add(
+      'download_reset',
+      'settings_download_reset',
+      (context, entry) => DownloadResetTile(entry: entry),
+      settings: [Settings.downloadDirectoryPath],
+      keywords: ['下载', 'download', '默认'],
     )
     // ---- danmaku (U.2e) ----
     ..section = SettingsSection.danmaku
@@ -1140,282 +1719,14 @@ List<SettingsEntry> _build() {
       Settings.enableDanmakuLongPressInteraction,
       Remix.hand,
       desc: 'settings_danmaku_long_press_desc',
-    )
-    // ---- floating-window danmaku (U.6c) ----
-    ..section = SettingsSection.pipDanmaku
-    ..group = 'pip_danmaku'
-    ..toggle(
-      'pip_danmaku',
-      'pip_danmaku_enable',
-      Settings.enablePipDanmaku,
-      Remix.picture_in_picture_2_line,
-      desc: 'settings_pip_danmaku_desc',
-      keywords: ['画中画', '小窗', 'PiP'],
-    )
-    ..link(
-      'pip_danmaku_style',
-      'settings_pip_danmaku_style',
-      Remix.palette_line,
-      page: (_) => const PipDanmakuPage(),
-      desc: 'settings_pip_danmaku_style_desc',
-      settings: pipDanmakuSettings,
-      keywords: ['画中画', '小窗', 'PiP'],
-    )
-    // ---- player (U.6c) ----
-    ..section = SettingsSection.playerKernel
-    ..group = 'settings_group_decoding'
-    ..toggle(
-      'hardware_decoding',
-      'enable_codec',
-      Settings.enableCodec,
-      Remix.cpu_line,
-      desc: 'settings_hardware_decoding_desc',
-      keywords: ['硬解', 'decode', 'GPU'],
-    )
-    ..toggle(
-      'compat_mode',
-      'compat_mode',
-      Settings.playerCompatMode,
-      Remix.shield_check_line,
-      desc: 'settings_compat_mode_desc',
-      keywords: ['黑屏', 'MediaCodec'],
-      when: _android,
-    )
-    ..toggle(
-      'rtx_vsr',
-      'enable_rtx_vsr',
-      Settings.enableRtxVsr,
-      Remix.sparkling_line,
-      desc: 'enable_rtx_vsr_subtitle',
-      keywords: ['NVIDIA', 'RTX', '超分'],
-      when: _windows,
-    )
-    ..toggle(
-      'hard_stop',
-      'force_destroy_player',
-      Settings.useHardStopOnExit,
-      Remix.stop_circle_line,
-      desc: 'settings_hard_stop_desc',
-    )
-    ..toggle(
-      'custom_output',
-      'custom_output_hwdec',
-      Settings.customPlayerOutput,
-      Remix.equalizer_line,
-      desc: 'settings_custom_output_desc',
-      keywords: ['mpv', 'vo', 'ao', 'hwdec'],
-    )
-    ..add(
-      'video_output',
-      'video_output_driver',
-      (context, entry) => MpvOptionTile(entry: entry, kind: MpvOptionKind.video),
-      settings: [Settings.videoOutputDriver],
-      keywords: ['mpv', 'vo'],
-    )
-    ..add(
-      'audio_output',
-      'audio_output_driver',
-      (context, entry) => MpvOptionTile(entry: entry, kind: MpvOptionKind.audio),
-      settings: [Settings.audioOutputDriver],
-      keywords: ['mpv', 'ao'],
-    )
-    ..add(
-      'hardware_decoder',
-      'hardware_decoder',
-      (context, entry) => MpvOptionTile(entry: entry, kind: MpvOptionKind.decoder),
-      settings: [Settings.videoHardwareDecoder],
-      keywords: ['mpv', 'hwdec'],
-    )
-    // ---- general (U.6d) ----
-    ..section = SettingsSection.general
-    ..group = 'settings_group_startup'
-    ..toggle(
-      'splash',
-      'splash_animation',
-      Settings.showSplashPage,
-      Remix.rocket_2_line,
-      desc: 'splash_animation_subtitle',
-    )
-    ..toggle(
-      'auto_update',
-      'enable_auto_check_update',
-      Settings.enableAutoCheckUpdate,
-      Remix.refresh_line,
-      desc: 'settings_auto_update_desc',
-      keywords: ['更新', 'update'],
-    )
-    ..toggle(
-      'github_updates',
-      'use_github_origin_for_updates',
-      Settings.useGitHubOriginForUpdates,
-      Remix.github_line,
-      desc: 'use_github_origin_for_updates_desc',
-      keywords: ['更新', 'update', 'GitHub'],
-    )
-    ..add(
-      'startup',
-      'startup',
-      (context, entry) => StartupTile(entry: entry),
-      desc: 'settings_startup_desc',
-      settings: [Settings.enableStartUp],
-      keywords: ['开机', 'startup'],
-      when: _windows,
-    )
-    ..group = 'settings_group_display'
-    ..add(
-      'refresh_rate',
-      'refresh_rate_mode',
-      (context, entry) => RefreshRateTile(
-        entry: entry,
-        hint: i18n('refresh_rate_mode_hint'),
-        options: () => _keyed(
-          {
-            'powerSaving': 'refresh_rate_power_saving',
-            'balanced': 'refresh_rate_balanced',
-            'performance': 'refresh_rate_performance',
-          },
-          {
-            'powerSaving': 'refresh_rate_power_saving_desc',
-            'balanced': 'refresh_rate_balanced_desc',
-            'performance': 'refresh_rate_performance_desc',
-          },
-        ),
-      ),
-      desc: 'settings_refresh_rate_desc',
-      settings: [Settings.refreshRateMode],
-      keywords: ['Hz', '高刷', 'refresh rate'],
-      when: _refreshRate,
-    )
-    ..add(
-      'windows_display',
-      'windows_dynamic_refresh_rate',
-      (context, entry) => WindowsDisplayTile(entry: entry),
-      desc: 'windows_dynamic_refresh_rate_subtitle',
-      keywords: ['Hz', '刷新率', 'refresh rate', '显示器'],
-      when: _windows,
-    )
-    ..group = 'settings_group_window'
-    ..toggle(
-      'new_window',
-      'open_new_window',
-      Settings.enableNewWindowPlay,
-      Remix.window_line,
-      desc: 'open_new_window_subtitle',
-      when: _windows,
-    )
-    ..add(
-      'window_size',
-      'window_size',
-      (context, entry) => WindowSizeTile(entry: entry),
-      desc: 'settings_window_size_desc',
-      settings: [Settings.windowWidth, Settings.windowHeight],
-      when: _windows,
-    )
-    ..choice(
-      'exit_action',
-      'settings_exit_action',
-      Settings.exitChoose,
-      Remix.logout_box_r_line,
-      () => _keyed({'exit': 'settings_exit_action_exit', 'minimize': 'settings_exit_action_minimize'}),
-      desc: 'settings_exit_action_desc',
-      keywords: ['托盘', '关闭', 'close'],
-      when: _windows,
-    )
-    ..toggle(
-      'dont_ask_exit',
-      'no_exit_confirm',
-      Settings.dontAskExit,
-      Remix.error_warning_line,
-      desc: 'settings_dont_ask_exit_desc',
-      keywords: ['关闭', 'close'],
-      when: _windows,
-    )
-    ..group = 'settings_group_timer'
-    ..add(
-      'auto_exit',
-      'enable_countdown_close',
-      (context, entry) => AutoExitTile(entry: entry),
-      desc: 'enable_countdown_close_subtitle',
-      settings: [Settings.enableAutoShutDownTime],
-      keywords: ['定时', '关闭', 'timer'],
-    )
-    ..number(
-      'auto_exit_minutes',
-      'countdown_duration',
-      Settings.autoShutDownTime,
-      Remix.timer_line,
-      presets: const [15, 30, 45, 60, 90, 120, 180],
-      label: formatMinutes,
-      unit: 'minute',
-      desc: 'app_exit_timer_explain',
-      keywords: ['定时', '关闭', 'timer'],
-    )
-    // ---- network (U.6d) ----
-    ..section = SettingsSection.network
-    ..group = 'settings_group_app_proxy'
-    ..add(
-      'app_proxy',
-      'enable_app_proxy',
-      (context, entry) => ProxyTile(entry: entry, proxy: ProxySettings.app),
-      desc: 'settings_app_proxy_desc',
-      settings: [Settings.enableAppProxy, Settings.appProxyHost, Settings.appProxyPort],
-      keywords: ['代理', 'proxy', 'HTTP'],
-    )
-    ..group = 'settings_group_player_proxy'
-    ..add(
-      'player_proxy',
-      'enable_player_proxy',
-      (context, entry) => ProxyTile(entry: entry, proxy: ProxySettings.player),
-      desc: 'settings_player_proxy_desc',
-      settings: [Settings.enableProxy, Settings.proxyHost, Settings.proxyPort],
-      keywords: ['代理', 'proxy', 'HTTP'],
-    )
-    // ---- cache and data (U.6e) ----
-    ..section = SettingsSection.cache
-    ..group = 'cache_and_data'
-    ..add(
-      'image_cache',
-      'settings_image_cache',
-      (context, entry) => ImageCacheTile(entry: entry),
-      desc: 'settings_image_cache_desc',
-      keywords: ['缓存', 'cache', '清理'],
-    )
-    ..add(
-      'refresh_covers_now',
-      'refresh_thumbnails',
-      (context, entry) => RefreshCoversTile(entry: entry),
-      desc: 'refresh_thumbnails_desc',
-      keywords: ['封面', '缩略图', 'cover', 'thumbnail'],
-    )
-    ..add(
-      'download_directory',
-      'download_directory',
-      (context, entry) => DownloadDirectoryTile(entry: entry),
-      desc: 'download_directory_desc',
-      settings: [Settings.downloadDirectoryPath],
-      keywords: ['下载', '更新', 'download'],
-    )
-    ..link(
-      'log',
-      'log_manage',
-      Remix.file_list_3_line,
-      page: (_) => const LogPage(),
-      desc: 'settings_log_desc',
-      settings: [Settings.enableLocalLog, Settings.logLevel],
-      keywords: ['日志', '错误', 'log', 'debug'],
-    )
-    ..add(
-      'reset_all',
-      'settings_reset_all',
-      (context, entry) => ResetAllTile(entry: entry),
-      desc: 'settings_reset_all_desc',
-      keywords: ['默认', 'reset'],
     );
   return List.unmodifiable(c.entries);
 }
 
-/// Settings of the picture-in-picture danmaku page (its reset).
+/// Settings of the floating-window danmaku page, its switch included (its
+/// restore, 3.x `pip_danmaku_reset_confirm`).
 const List<Setting<Object>> pipDanmakuSettings = [
+  Settings.enablePipDanmaku,
   Settings.pipDanmakuAutoScale,
   Settings.pipDanmakuNoEmojiMode,
   Settings.pipDanmakuUseOriginalColor,
@@ -1429,4 +1740,32 @@ const List<Setting<Object>> pipDanmakuSettings = [
   Settings.pipDanmakuEmitInterval,
   Settings.pipDanmakuFps,
   Settings.pipDanmakuAutoFps,
+];
+
+/// Settings of the portrait page; the restore also forgets the rooms'
+/// remembered orientations (3.x `portrait_reset_settings_desc`).
+const List<Setting<Object>> portraitSettings = [
+  Settings.enablePortraitStreamAdaptation,
+  Settings.portraitAdaptiveHeight,
+  Settings.portraitLayoutMode,
+  Settings.portraitFullscreenPolicy,
+  Settings.portraitFullscreenDisplayMode,
+  Settings.portraitPipFollowSource,
+  Settings.portraitDanmakuMode,
+  Settings.rememberPortraitRoomOverride,
+  Settings.showPortraitDiagnostics,
+  Settings.portraitRoomOverrides,
+];
+
+/// Settings of the player page's restore: only that page (3.x also reset
+/// the preferred qualities, U.6c P9).
+const List<Setting<Object>> kernelSettings = [
+  Settings.enableCodec,
+  Settings.playerCompatMode,
+  Settings.useHardStopOnExit,
+  Settings.customPlayerOutput,
+  Settings.videoOutputDriver,
+  Settings.audioOutputDriver,
+  Settings.videoHardwareDecoder,
+  Settings.enableRtxVsr,
 ];

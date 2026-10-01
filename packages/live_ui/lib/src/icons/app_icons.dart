@@ -1006,4 +1006,249 @@ abstract final class AppIcons {
 
   /// The followed rooms that carry a tag.
   static const IconData tagRooms = Icons.live_tv_rounded;
+
+  // ---- settings: playback (3.x video_settings_page.dart and the pages it
+  // opens, player_kernel_settings_page.dart; U.6c) ----
+
+  /// Global mute while on.
+  static const IconData settingsMuted = Remix.volume_mute_line;
+
+  /// Global mute while off.
+  static const IconData settingsUnmuted = Remix.volume_up_line;
+
+  /// The phones' default volume.
+  static const IconData settingsPhoneVolume = Remix.phone_line;
+
+  /// The computers' default volume.
+  static const IconData settingsDesktopVolume = Remix.computer_line;
+
+  /// The preferred quality.
+  static const IconData settingsQuality = Remix.hd_line;
+
+  /// The quality on mobile data.
+  static const IconData settingsCellularQuality = Remix.signal_tower_line;
+
+  /// Prefer H.264.
+  static const IconData settingsH264 = Remix.film_line;
+
+  /// The picture's fit.
+  static const IconData settingsVideoFit = Remix.aspect_ratio_line;
+
+  /// Full screen on entering a room.
+  static const IconData settingsFullscreenDefault = Remix.fullscreen_line;
+
+  /// Keep the screen on.
+  static const IconData settingsScreenKeepOn = Remix.lightbulb_line;
+
+  /// Portrait streams.
+  static const IconData settingsPortrait = Icons.stay_current_portrait_rounded;
+
+  /// Audience counts and ranking.
+  static const IconData settingsAudience = Icons.groups_2_rounded;
+
+  /// Background play.
+  static const IconData settingsBackgroundPlay = Remix.music_2_line;
+
+  /// Automatic sleep in new rooms.
+  static const IconData settingsAutoSleep = Remix.moon_clear_line;
+
+  /// How long the automatic sleep plays.
+  static const IconData settingsSleepMinutes = Remix.timer_2_line;
+
+  /// The in-app mini window on leaving a room.
+  static const IconData settingsLeaveRoomMini = Remix.picture_in_picture_2_line;
+
+  /// Picture-in-picture on leaving the app.
+  static const IconData settingsAutoPip = Icons.picture_in_picture_alt_rounded;
+
+  /// The desktop mini window stays on top.
+  static const IconData settingsPipOnTop = Remix.pushpin_line;
+
+  /// Remember the desktop mini window's place and size.
+  static const IconData settingsPipRemember = Remix.terminal_window_fill;
+
+  /// Forget the desktop mini window's place and size.
+  static const IconData settingsPipReset = Remix.reserved_line;
+
+  /// Show danmaku.
+  static const IconData settingsShowDanmaku = Remix.chat_smile_2_line;
+
+  /// The danmaku style (the room's danmaku settings).
+  static const IconData settingsDanmakuStyle = Remix.palette_line;
+
+  /// The danmaku font.
+  static const IconData settingsDanmakuFont = Remix.font_size;
+
+  /// The danmaku block list.
+  static const IconData settingsDanmakuBlock = Remix.filter_2_line;
+
+  /// The player engine.
+  static const IconData settingsKernel = Remix.toggle_line;
+
+  /// Close the player for good on leaving.
+  static const IconData settingsHardStop = Remix.shut_down_line;
+
+  /// Hardware decoding.
+  static const IconData settingsHardwareDecoding = Remix.speed_up_line;
+
+  /// The compatibility mode.
+  static const IconData settingsCompatMode = Remix.shield_check_line;
+
+  /// NVIDIA RTX video super resolution.
+  static const IconData settingsRtxVsr = Remix.image_edit_line;
+
+  /// The player's proxy.
+  static const IconData settingsPlayerProxy = Remix.global_line;
+
+  /// Custom mpv drivers.
+  static const IconData settingsCustomOutput = Remix.code_box_line;
+
+  /// mpv's video output.
+  static const IconData settingsVideoOutput = Remix.movie_line;
+
+  /// mpv's audio output.
+  static const IconData settingsAudioOutput = Remix.volume_up_line;
+
+  /// mpv's hardware decoder.
+  static const IconData settingsDecoder = Remix.cpu_line;
+
+  /// Back to the defaults of a page.
+  static const IconData settingsRestoreDefaults = Icons.restart_alt_rounded;
+
+  /// Smart portrait detection.
+  static const IconData portraitDetect = Icons.aspect_ratio_rounded;
+
+  /// Adaptive height of the room page.
+  static const IconData portraitHeight = Icons.view_agenda_outlined;
+
+  /// The room page's layout for portrait streams.
+  static const IconData portraitLayout = Icons.dashboard_customize_outlined;
+
+  /// The full-screen orientation.
+  static const IconData portraitFullscreen = Icons.fullscreen_rounded;
+
+  /// The portrait full-screen picture.
+  static const IconData portraitDisplay = Icons.fit_screen_rounded;
+
+  /// The mini window follows the picture.
+  static const IconData portraitPip = Icons.picture_in_picture_alt_rounded;
+
+  /// Danmaku on portrait streams.
+  static const IconData portraitDanmaku = Icons.subtitles_outlined;
+
+  /// Remember a room's orientation.
+  static const IconData portraitRemember = Icons.bookmark_added_outlined;
+
+  /// Show the detection state.
+  static const IconData portraitDiagnostics = Icons.monitor_heart_outlined;
+
+  // ---- settings: general, platforms, refresh, network (U.6d) ----
+
+  /// The refresh-rate policy.
+  static const IconData settingsRefreshRate = Remix.speed_up_line;
+
+  /// Start with the system.
+  static const IconData settingsStartup = Remix.windows_line;
+
+  /// The window size at start.
+  static const IconData settingsWindowSize = Remix.aspect_ratio_line;
+
+  /// The splash animation.
+  static const IconData settingsSplash = Remix.rocket_2_line;
+
+  /// Check for updates.
+  static const IconData settingsAutoUpdate = Remix.refresh_line;
+
+  /// GitHub as the update source.
+  static const IconData settingsGitHub = Remix.github_line;
+
+  /// What closing the window does.
+  static const IconData settingsCloseWindow = Remix.logout_box_r_line;
+
+  /// The exit timer.
+  static const IconData settingsExitTimer = Remix.timer_line;
+
+  /// How long before the app exits.
+  static const IconData settingsExitMinutes = Remix.timer_flash_line;
+
+  /// The platforms shown.
+  static const IconData settingsPlatformList = Remix.apps_2_line;
+
+  /// The platform opened first.
+  static const IconData settingsPreferPlatform = Remix.heart_3_line;
+
+  /// Show unplayable rooms.
+  static const IconData settingsUnplayable = Remix.lock_line;
+
+  /// Twitch's languages.
+  static const IconData settingsTwitchLanguages = Remix.twitch_line;
+
+  /// Renew Douyu's cookie.
+  static const IconData settingsDouyuRenew = Remix.refresh_line;
+
+  /// Refresh follows automatically.
+  static const IconData settingsAutoRefresh = Remix.refresh_line;
+
+  /// Refresh follows on returning to the app.
+  static const IconData settingsRefreshOnResume = Remix.restart_line;
+
+  /// A refresh interval.
+  static const IconData settingsInterval = Remix.time_line;
+
+  /// Parallel refresh tasks.
+  static const IconData settingsConcurrency = Remix.server_line;
+
+  /// Refresh covers automatically.
+  static const IconData settingsAutoCovers = Remix.image_2_line;
+
+  /// How many rooms the history keeps.
+  static const IconData settingsHistoryLimit = Remix.history_line;
+
+  /// The app's proxy.
+  static const IconData settingsAppProxy = Remix.apps_line;
+
+  /// The player's proxy (on the network page).
+  static const IconData settingsStreamProxy = Remix.video_line;
+
+  // ---- settings: data (3.x cache_data_settings_page.dart,
+  // local_config_preveiw.dart; U.6e) ----
+
+  /// The cache's size.
+  static const IconData settingsCacheSize = Remix.database_2_line;
+
+  /// Measure the cache again.
+  static const IconData settingsRecount = Icons.refresh_rounded;
+
+  /// Refresh the covers now.
+  static const IconData settingsRefreshCovers = Remix.image_2_line;
+
+  /// Clear the cache.
+  static const IconData settingsClearCache = Remix.delete_bin_6_line;
+
+  /// The download folder.
+  static const IconData settingsDownloadFolder = Remix.folder_2_line;
+
+  /// Back to the default download folder.
+  static const IconData settingsDownloadReset = Remix.refresh_line;
+
+  /// The log.
+  static const IconData settingsLog = Remix.file_list_3_line;
+
+  /// Every language (the Twitch filter's preset).
+  static const IconData allLanguages = Icons.public_rounded;
+
+  /// 3.x's choice (the Twitch filter's preset).
+  static const IconData legacyPreset = Icons.history_rounded;
+
+  /// Read again after an error.
+  static const IconData settingsReload = Icons.refresh_rounded;
+
+  /// A branch of the configuration tree, open.
+  static const IconData treeExpanded = Icons.keyboard_arrow_down_rounded;
+
+  /// A branch of the configuration tree, closed.
+  static const IconData treeCollapsed = Icons.keyboard_arrow_right_rounded;
+
+  /// Backup and restore, from the configuration preview.
+  static const IconData settingsToBackup = Icons.settings_backup_restore_rounded;
 }

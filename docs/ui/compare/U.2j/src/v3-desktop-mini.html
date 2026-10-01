@@ -1,0 +1,76 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="1280x800@1.5"><link rel="stylesheet" href="kit/kit.css"><style>
+.bg{position:absolute;inset:0}
+/* ---------- home page behind the in-app window (v3, simplified) ---------- */
+.home{position:absolute;inset:0;background:var(--surface);display:flex;flex-direction:column}
+.hb{height:56px;display:flex;align-items:center;flex:none;color:var(--onv)}
+.htabs{flex:1;min-width:0;display:flex;gap:22px;padding:0 6px;font-size:15px;color:var(--onv);white-space:nowrap;overflow:hidden;align-self:stretch;align-items:stretch}
+.htabs span{position:relative;display:flex;align-items:center}
+.htabs .on{color:var(--primary);font-weight:600}
+.htabs .on::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--primary)}
+.grid{display:grid;gap:10px;padding:6px 10px;align-content:start;grid-auto-rows:max-content;flex:1;min-height:0;overflow:hidden}
+.card{border-radius:16px;background:var(--scl);overflow:hidden}
+.card .img{aspect-ratio:16/9;background:center/cover}
+.card .t{font-size:13px;line-height:18px;padding:6px 10px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .s{font-size:12px;line-height:16px;color:var(--onv);padding:2px 10px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav{height:80px;flex:none;background:var(--scc);display:flex}
+.nav>div,.rail>div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:500;color:var(--onv)}
+.nav i,.rail i{width:64px;height:32px;border-radius:16px;display:grid;place-items:center;font-style:normal}
+.nav .on,.rail .on{color:var(--on)}.nav .on i,.rail .on i{background:var(--sc);color:var(--osc)}
+.inset{height:16px;flex:none;background:var(--scc)}
+.body2{flex:1;display:flex;min-height:0}
+.rail{width:88px;flex:none;display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:6px;border-right:1px solid var(--ov)}
+.rail>div{flex:none;height:64px}
+.rail .lead{color:var(--onv);height:48px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.cap{position:absolute;z-index:44;font:500 11px 'Noto Sans SC';padding:3px 7px;border-radius:5px;background:rgba(0,0,0,.55);color:#fff}
+/* ---------- the mini window ---------- */
+.mw{position:absolute;z-index:30;overflow:hidden;background:#000 url(.cache/img/158.jpg) center 55%/cover}
+.mw.r12{border-radius:12px}
+.mw.sh{box-shadow:0 8px 24px rgba(0,0,0,.38),0 0 0 1px rgba(255,255,255,.10)}
+.mw .d{position:absolute;z-index:2;white-space:nowrap;color:#fff;font-weight:500;line-height:1;text-shadow:0 0 1px #000,0 0 1px #000,0 0 2px #000;opacity:.9}
+.mw .c{position:absolute;display:grid;place-items:center;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;z-index:3}
+.mw .bare{position:absolute;display:grid;place-items:center;color:#fff;z-index:3}
+.mw .c.on{background:var(--primary);color:var(--onPrimary)}
+.mb{position:absolute;left:6px;bottom:6px;z-index:2;height:20px;padding:0 7px 0 6px;border-radius:10px;background:var(--rec);color:#fff;font:600 12px/20px 'Noto Sans SC';font-feature-settings:'tnum';display:flex;align-items:center;gap:4px}
+.mb i{width:6px;height:6px;border-radius:3px;background:#fff}
+.st{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;font-size:12px;background:rgba(0,0,0,.55)}
+.st.solid{background:#000}
+.spin{width:22px;height:22px;border-radius:50%;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff}
+.vp{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:3;height:28px;padding:0 12px 0 8px;border-radius:14px;background:rgba(0,0,0,.6);display:flex;align-items:center;gap:6px;color:#fff}
+.vp .t{width:72px;height:4px;border-radius:2px;background:rgba(255,255,255,.35);position:relative}.vp .t i{position:absolute;left:0;top:0;bottom:0;width:70%;border-radius:2px;background:#fff}
+/* audio only (v3 buildAudioOnlyUI, compact) */
+.au{position:absolute;inset:0;z-index:1;background:linear-gradient(135deg,rgba(18,24,39,.91),rgba(11,14,22,.95),rgba(21,16,32,.94)),url(.cache/img/65.jpg) center/cover;overflow:hidden}
+.au .col{position:absolute;left:0;right:0;top:4px;display:flex;flex-direction:column;align-items:center;padding:0 16px}
+.au .av{border-radius:50%;background:url(.cache/img/65.jpg) center/cover;box-shadow:0 0 0 1.5px rgba(255,255,255,.15)}
+.au .ti{color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.au .ni{color:rgba(255,255,255,.75);font-weight:500;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+.au .bd{display:flex;align-items:center;gap:4px;color:#fff;font-weight:600;border-radius:30px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1)}
+/* ---------- system surroundings ---------- */
+.ln{position:absolute;inset:0;background:url(.cache/img/338.jpg) center/cover}
+.ln::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.18)}
+.ln .status{position:relative;z-index:2;color:#fff}
+.apps{position:absolute;left:30px;right:30px;top:118px;display:grid;grid-template-columns:repeat(4,1fr);gap:34px 0;justify-items:center}
+.apps i,.dock i{width:56px;height:56px;border-radius:18px;display:block}
+.dock{position:absolute;left:30px;right:30px;bottom:44px;display:flex;justify-content:space-between}
+.sbar{position:absolute;left:24px;right:24px;bottom:124px;height:48px;border-radius:24px;background:rgba(255,255,255,.82)}
+.desk{position:absolute;inset:0;background:url(.cache/img/287.jpg) center/cover}
+.app{position:absolute;background:#fff;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.35);overflow:hidden}
+.app .tb{height:32px;background:#EEF0F3;display:flex;align-items:center;justify-content:flex-end;color:#333}
+.app .tb span{width:46px;display:grid;place-items:center}
+.app .ln2{height:10px;border-radius:5px;background:#E4E6EA;margin:14px 28px}
+.task{position:absolute;left:0;right:0;bottom:0;height:48px;background:rgba(28,28,30,.88);display:flex;align-items:center;justify-content:center;gap:10px;z-index:20}
+.task i{width:30px;height:30px;border-radius:6px;background:rgba(255,255,255,.55);display:block}
+.task .clk{position:absolute;right:16px;color:#fff;font:12px/16px 'Geist','Noto Sans SC';text-align:right;font-feature-settings:'tnum'}
+.cur{position:absolute;z-index:50;width:18px;height:26px}
+/* ---------- room behind the PiP dialog (U.2a) ---------- */
+.dlg .h{padding:24px 24px 0;font-size:16px;font-weight:700}
+.dlg .b{padding:12px 24px 0;font-size:14px;line-height:1.6;color:var(--onv)}
+.dlg .a{display:flex;justify-content:flex-end;gap:8px;padding:20px 16px 16px}
+.dlg .a span{height:40px;padding:0 16px;border-radius:20px;display:flex;align-items:center;font-size:14px}
+.dlg .a .ok{background:var(--primary);color:var(--onPrimary);font-weight:600}
+/* ---------- states sheet ---------- */
+.sheetbg{position:absolute;inset:0;background:var(--scc)}
+.cell{position:absolute}
+.cell .lab{position:absolute;left:0;right:0;font-size:13px;line-height:18px;color:var(--on);text-align:left}
+.cell .lab small{display:block;font-size:12px;color:var(--onv)}
+</style></head><body><div class="win" style="--w:1280px;--h:800px"><div class="desk"></div><div class="app" style="left:110px;top:56px;width:860px;height:600px"><div class="tb"><span><span class="mr" style="font-size:16px">remove</span></span><span><span class="mr" style="font-size:16px">crop_square</span></span><span><span class="mr" style="font-size:16px">close</span></span></div><div class="ln2" style="width:40%"></div><div class="ln2" style="width:88%"></div><div class="ln2" style="width:92%"></div><div class="ln2" style="width:70%"></div><div class="ln2" style="width:84%"></div><div class="ln2" style="width:90%"></div><div class="ln2" style="width:60%"></div><div class="ln2" style="width:86%"></div><div class="ln2" style="width:78%"></div><div class="ln2" style="width:91%"></div><div class="ln2" style="width:55%"></div><div class="ln2" style="width:80%"></div><div class="ln2" style="width:88%"></div><div class="ln2" style="width:66%"></div></div><div class="cap" style="left:126px;top:96px;background:rgba(0,0,0,.45)">另一个程序（示意）</div><div class="task"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><div class="clk">21:40<br>2026/10/01</div></div><div class="mw" style="left:900px;top:529px;width:360px;height:203px;box-shadow:0 8px 28px rgba(0,0,0,.45);background-position:center 40%"><div class="d" style="font-size:12.0px;left:151px;top:7px">前排支持！</div><div class="d" style="font-size:12.0px;left:247px;top:7px">这首好好听</div><div class="d" style="font-size:12.0px;left:18px;top:29px">晚风今天状态好好</div><div class="d" style="font-size:12.0px;left:94px;top:51px">来了来了</div><div class="d" style="font-size:12.0px;left:216px;top:73px">晚上好～</div><div class="c" style="left:151px;top:72px;width:58px;height:58px"><span class="mi" style="font-size:42px">pause_circle_filled</span></div><div class="bare" style="left:304px;top:8px;width:48px;height:48px"><span class="mi" style="font-size:24px">close</span></div></div><svg class="cur" style="left:1110px;top:649px" viewBox="0 0 18 26"><path d="M1 1 L1 21 L6 16.5 L9.5 24.5 L12.5 23 L9 15.2 L15.5 15.2 Z" fill="#fff" stroke="#000" stroke-width="1.3" stroke-linejoin="round"/></svg><div class="syn">示意图片</div></div></body></html>

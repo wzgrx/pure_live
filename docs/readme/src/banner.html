@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!-- README 头图。生成：python3 tools/ui/mock/render.py docs/readme/src/banner.html --out /tmp/banner && ffmpeg -i /tmp/banner/banner.jpg -vf scale=1080:-2:flags=lanczos -q:v 3 docs/readme/banner.jpg（先跑一次 tools/ui/mock/fetch.sh 取字体）。三张手机图是 docs/readme/ 里的效果图。 -->
+<meta name="mock-size" content="1200x520@2">
+<style>
+@font-face{font-family:'Geist';src:url(.cache/fonts/Geist.woff2) format('woff2');font-weight:100 900}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1200px;height:520px;overflow:hidden}
+body{font-family:'Geist','Noto Sans CJK SC','Noto Sans SC',sans-serif;color:#fff;
+  background:
+    radial-gradient(600px 420px at 86% 18%, rgba(98,190,255,.38), transparent 70%),
+    radial-gradient(520px 380px at 8% 100%, rgba(46,111,224,.45), transparent 70%),
+    linear-gradient(135deg,#0b1430 0%,#13285c 48%,#1d4fae 100%);
+  position:relative}
+.grid{position:absolute;inset:0;background-image:
+  linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:40px 40px}
+.left{position:absolute;left:68px;top:0;bottom:0;width:520px;display:flex;flex-direction:column;justify-content:center}
+.brand{display:flex;align-items:center;gap:18px}
+.brand img{width:84px;height:84px;filter:drop-shadow(0 8px 18px rgba(0,0,0,.35))}
+.name{font-size:58px;font-weight:700;letter-spacing:2px;line-height:1.1}
+.en{font-size:24px;font-weight:500;letter-spacing:6px;color:rgba(255,255,255,.72);margin-top:4px}
+.tag{margin-top:30px;font-size:24px;font-weight:600;line-height:1.5}
+.sub{margin-top:8px;font-size:17px;line-height:1.6;color:rgba(255,255,255,.72)}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.chips span{font-size:15px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.11);
+  border:1px solid rgba(255,255,255,.18)}
+.chips span.on{background:#fff;color:#13285c;font-weight:700;border-color:#fff}
+.ph{position:absolute;width:214px;height:464px;border-radius:30px;padding:7px;background:#0a0f1e;
+  box-shadow:0 26px 60px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.14) inset}
+.ph img{width:100%;height:100%;border-radius:24px;object-fit:cover;object-position:top;display:block}
+.p1{left:612px;top:70px;transform:rotate(-7deg);opacity:.96}
+.p2{left:786px;top:34px;z-index:3}
+.p3{left:958px;top:70px;transform:rotate(7deg);opacity:.96}
+</style></head><body>
+<div class="grid"></div>
+<div class="left">
+  <div class="brand">
+    <img src="../../../apps/pure_live/assets/icons/icon.png" alt="">
+    <div><div class="name">纯粹直播</div><div class="en">PURE LIVE</div></div>
+  </div>
+  <div class="tag">34 个直播平台加网络电视，一个应用看全</div>
+  <div class="sub">弹幕、录制、多画面、小窗和后台播放。<br>不用注册账号，没有广告，关注和设置都保存在本机。</div>
+  <div class="chips"><span class="on">4.0.0 · Android</span><span>手机</span><span>平板</span><span>开源 AGPL-3.0</span></div>
+</div>
+<div class="ph p1"><img src="../../../docs/readme/home-follow.jpg"></div>
+<div class="ph p2"><img src="../../../docs/readme/room-portrait.jpg"></div>
+<div class="ph p3"><img src="../../../docs/readme/recorder.jpg"></div>
+</body></html>

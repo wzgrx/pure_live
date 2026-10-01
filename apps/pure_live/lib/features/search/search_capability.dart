@@ -187,3 +187,19 @@ String searchCoverageText(SearchCapability capability, String siteName) {
       };
   return i18n(key, args: {'site': siteName});
 }
+
+/// What [capability] finds, without the platform's name: one line of the
+/// scope panel (docs/ui/compare/U.5a c6), such as "只能搜到正在直播的房间".
+String searchCoverageShortText(SearchCapability capability) {
+  final note = capability.noteKey;
+  if (note != null) return i18n('${note}_short');
+  return i18n(switch (capability.coverage) {
+    SearchCoverage.liveOnly => 'search_scope_short_live_only',
+    SearchCoverage.liveAndOffline => 'search_scope_short_live_and_offline',
+    SearchCoverage.channelLookup => 'search_scope_short_channel_lookup',
+    SearchCoverage.roomLookup => 'search_scope_short_room_lookup',
+    SearchCoverage.showcaseSnapshot => 'search_scope_short_showcase',
+    SearchCoverage.localChannels => 'search_scope_short_local',
+    SearchCoverage.webOnly || SearchCoverage.unavailable => 'search_scope_short_unavailable',
+  });
+}

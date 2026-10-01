@@ -10,6 +10,9 @@ __pycache__/
 *.pyc
 *.log
 
+# The recorder's FFmpeg bundles (tools/ffmpeg_kit/fetch.sh links them here)
+/.ffmpeg_kit/
+
 # Dart and Flutter, in every workspace member
 .dart_tool/
 .flutter-plugins

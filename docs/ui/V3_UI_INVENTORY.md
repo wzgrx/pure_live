@@ -46,8 +46,8 @@ v4 现在：结构基本照 v3，但导航图标换成了 Material（`favorite`�
 
 | v3 | v4 |
 |---|---|
-| `lib/modules/home/*` | `apps/pure_live/lib/home/*` |
-| `lib/common/widgets/menu_button.dart`、`common_appbar_actions.dart` | `apps/pure_live/lib/home/`、`lib/shared/` 里的对应部件 |
+| `lib/modules/home/*` | `apps/pure_live/lib/features/home/*` |
+| `lib/common/widgets/menu_button.dart`、`common_appbar_actions.dart` | `apps/pure_live/lib/features/home/`、`lib/shared/` 里的对应部件 |
 
 ## 2. 热门
 
@@ -134,9 +134,9 @@ v4 现在（偏差最大）：
 
 | v3 | v4 |
 |---|---|
-| `pages/live_play_page.dart`、`widgets/layout/*` | `pages/live_play/live_play_page.dart`、`room_panels.dart` |
-| `widgets/video_player/video_controller_panel.dart`、`video_controller.dart` | `pages/live_play/player_view.dart`、`player_gestures.dart` |
-| `widgets/layout/live_play_header.dart`、`widgets/button/*` | `pages/live_play/live_play_page.dart`、`record_button.dart`、`room_menu_button.dart` |
-| `widgets/resolution_selector/*` | `pages/live_play/room_panels.dart`、`stream_dialogs.dart` |
-| `widgets/danmaku/*`、`pages/danmaku_settings_page.dart`、`keyword_block_page.dart`、`super_chat_page.dart` | `pages/live_play/chat_panel.dart`、`chat_feed.dart`、`lib/shared/danmaku/*` |
-| `dialogs/*` | `pages/live_play/room_dialogs.dart`、`room_switcher.dart`、`stream_dialogs.dart` |
+| `pages/live_play_page.dart`、`widgets/layout/*` | `features/live_play/live_play_page.dart`、`room_panels.dart` |
+| `widgets/video_player/video_controller_panel.dart`、`video_controller.dart` | `features/live_play/player/player_view.dart`、`player_gestures.dart` |
+| `widgets/layout/live_play_header.dart`、`widgets/button/*` | `features/live_play/live_play_page.dart`、`record_button.dart`、`room_menu_button.dart` |
+| `widgets/resolution_selector/*` | `features/live_play/layout/room_panels.dart`、`stream_dialogs.dart` |
+| `widgets/danmaku/*`、`pages/danmaku_settings_page.dart`、`keyword_block_page.dart`、`super_chat_page.dart` | `features/live_play/danmaku/chat_panel.dart`、`chat_feed.dart`、`lib/shared/danmaku/*` |
+| `dialogs/*` | `features/live_play/dialogs/room_dialogs.dart`、`room_switcher.dart`、`stream_dialogs.dart` |

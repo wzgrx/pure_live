@@ -240,7 +240,7 @@ def v4_info(heat=True):
     return ('<div class="info"><div class="l1"><span class="t">' + TITLE + '</span><span class="more">详情' + rx('ea4e', 18) + '</span></div>'
             '<div class="l2"><div class="figs"><span class="fg"><span class="mr">people_alt</span><b>1.2万</b></span>' + ('<span class="fg"><span class="mr">whatshot</span><b>84.7万</b></span>' if heat else '') +
             '<span class="fg"><span class="mr">schedule</span><b>2:18</b></span></div>'
-            '<div class="chip">原画' + rx('ea4e', 18) + '</div><div class="chip">线路 1' + rx('ea4e', 18) + '</div></div></div><hr>')
+            '<div class="chip">原画' + rx('ea4e', 18) + '</div><div class="chip">线路1' + rx('ea4e', 18) + '</div></div></div><hr>')
 
 
 def v4_top(on=0, sc=3, n=None):

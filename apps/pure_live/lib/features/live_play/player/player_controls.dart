@@ -100,8 +100,14 @@ class PlayerTopBar extends StatelessWidget {
     required this.onBack,
     required this.onPip,
     required this.onInteract,
+    this.reduced = false,
     super.key,
   });
+
+  /// Nothing plays (loading, offline, failed, restricted): only the way out
+  /// and the room's buttons, without audio only, cast and picture-in-picture
+  /// that need a picture (docs/ui/compare/U.2g c6).
+  final bool reduced;
 
   /// The room.
   final LiveRoomController controller;
@@ -207,7 +213,7 @@ class PlayerTopBar extends StatelessWidget {
                     onPressed: () => unawaited(showRoomSwitcher(context, controller.room)),
                     icon: const Icon(AppIcons.switchRoom),
                   ),
-                for (final slot in topBarSlots(android: android))
+                for (final slot in reduced ? const <TopBarSlot>[] : topBarSlots(android: android))
                   switch (slot) {
                     TopBarSlot.audioOnly => _AudioOnlyButton(controller: controller, onInteract: onInteract),
                     TopBarSlot.cast => ListenableSelector<bool>(

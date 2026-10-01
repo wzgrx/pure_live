@@ -13,6 +13,7 @@ import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_panel.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
+import 'package:pure_live/features/live_play/dialogs/iptv_guide.dart';
 import 'package:pure_live/features/live_play/layout/room_details.dart';
 import 'package:pure_live/features/live_play/layout/room_header.dart';
 import 'package:pure_live/features/live_play/layout/room_info_bar.dart';
@@ -99,6 +100,13 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   /// together with the details.
   final RoomPanelController _panels = RoomPanelController();
 
+  /// Ticks when the IPTV guide should show the programme being watched
+  /// (U.2g c16: the picture's guide button, the replay mark).
+  final ValueNotifier<int> _guideReveal = ValueNotifier(0);
+
+  /// The IPTV guide's column is folded away (wide windows, U.2g c16).
+  bool _guideFolded = false;
+
   @override
   void initState() {
     super.initState();
@@ -182,6 +190,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     _panels
       ..removeListener(_onPanel)
       ..dispose();
+    _guideReveal.dispose();
     _controller?.dispose();
     final session = _session;
     if (session != null) unawaited(session.dispose());
@@ -247,6 +256,20 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     }
   }
 
+  /// The guide button and the replay mark (U.2g 按钮 8, 11): in fullscreen
+  /// the guide opens on the right; on a wide window a folded column
+  /// unfolds; then the guide scrolls to the programme being watched.
+  void _revealGuide() {
+    if (_fullscreen) {
+      _panels.open(RoomPanelKind.guide);
+    } else if (_guideFolded) {
+      setState(() => _guideFolded = false);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _guideReveal.value++;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = _controller;
@@ -256,7 +279,10 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
         body: AppStatusView(type: AppStatusType.error, title: _problem, subtitle: ''),
       );
     }
-    return RoomPanelScope(notifier: _panels, child: _page(context, controller));
+    return RoomPanelScope(
+      notifier: _panels,
+      child: IptvGuideScope(reveal: _revealGuide, child: _page(context, controller)),
+    );
   }
 
   Widget _page(BuildContext context, LiveRoomController controller) {
@@ -305,6 +331,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     reconnect: _reconnect!,
     onToggleFullscreen: _toggleFullscreen,
     onBack: () => unawaited(_setFullscreen(false)),
+    onOpenGuide: _revealGuide,
   );
 
   /// The open panel, or nothing.
@@ -321,6 +348,15 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       controller: controller,
       onClose: _panels.close,
       dragToClose: portrait,
+    ),
+    RoomPanelKind.guide => Material(
+      key: const ValueKey('panel-guide'),
+      elevation: 2,
+      child: SafeArea(
+        top: false,
+        left: false,
+        child: IptvGuideView(controller: controller, onClose: _panels.close, reveal: _guideReveal),
+      ),
     ),
     null => const SizedBox.shrink(key: ValueKey('no-panel')),
   };
@@ -420,6 +456,73 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     );
   }
 
+  /// An IPTV channel (docs/ui/compare/U.2g c16, Z1): the guide where a room
+  /// has its chat. Portrait: the picture at 16:9 and the guide under it (3.x
+  /// left that space empty); wide: the guide in the right column, which a
+  /// handle on its edge folds away.
+  Widget _buildChannel(LiveRoomController controller, BoxConstraints constraints) {
+    final guide = IptvGuideView(
+      key: const ValueKey('live-play-guide-view'),
+      controller: controller,
+      reveal: _guideReveal,
+    );
+    if (constraints.maxWidth > livePlayWideBreakpoint) {
+      final column = (constraints.maxWidth * 0.34).clamp(300.0, 400.0);
+      return _withSidePanel(
+        controller,
+        Row(
+          key: const ValueKey('live-play-channel-split'),
+          children: [
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _player(controller),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: _GuideFoldHandle(
+                        folded: _guideFolded,
+                        onPressed: () => setState(() => _guideFolded = !_guideFolded),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (!_guideFolded) ...[
+              const VerticalDivider(width: 1),
+              SizedBox(width: column, child: _withDetails(controller, guide)),
+            ],
+          ],
+        ),
+      );
+    }
+    final channel = Column(
+      key: const ValueKey('live-play-channel-stack'),
+      children: [
+        SizedBox(height: constraints.maxWidth * 9 / 16, child: _player(controller)),
+        Expanded(child: _withDetails(controller, guide)),
+      ],
+    );
+    // The panels rise over everything under the picture (U.2f).
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        channel,
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          top: constraints.maxWidth * 9 / 16,
+          child: ClipRect(child: _panelLayer(controller, portrait: true)),
+        ),
+      ],
+    );
+  }
+
   Widget _buildNormal(BuildContext context, LiveRoomController controller) {
     final showChat = controller.site.id != SiteIds.iptv;
     return Scaffold(
@@ -435,35 +538,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            if (!showChat) {
-              final channel = Column(
-                children: [
-                  Expanded(child: _player(controller)),
-                  _infoBar(controller),
-                  if (_details)
-                    SizedBox(
-                      height: constraints.maxHeight * 0.45,
-                      child: RoomDetailsPanel(controller: controller, onClose: _closeDetails),
-                    ),
-                ],
-              );
-              if (constraints.maxWidth > livePlayWideBreakpoint) return _withSidePanel(controller, channel);
-              // A channel on a phone has no chat under the picture: the panel
-              // rises over the lower part instead.
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  channel,
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    height: constraints.maxHeight * 0.6,
-                    child: ClipRect(child: _panelLayer(controller, portrait: true)),
-                  ),
-                ],
-              );
-            }
+            if (!showChat) return _buildChannel(controller, constraints);
             if (constraints.maxWidth <= livePlayWideBreakpoint) {
               return Column(
                 key: const ValueKey('live-play-portrait-stack'),
@@ -533,6 +608,37 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+/// The handle on the edge of a wide channel's guide column: folds it away
+/// and back (U.2g 按钮 12; the same handle as the chat column's in U.2d).
+class _GuideFoldHandle extends StatelessWidget {
+  const new({required this.folded, required this.onPressed});
+
+  final bool folded;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: i18n(folded ? 'live_play_guide_unfold' : 'live_play_guide_fold'),
+      child: Material(
+        key: const ValueKey('live-play-guide-fold'),
+        color: scheme.surfaceContainerHighest,
+        borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
+        child: InkWell(
+          borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
+          onTap: onPressed,
+          child: SizedBox(
+            width: 22,
+            height: 56,
+            child: Icon(folded ? AppIcons.unfoldLeft : AppIcons.forward, size: 18, color: scheme.onSurfaceVariant),
+          ),
         ),
       ),
     );

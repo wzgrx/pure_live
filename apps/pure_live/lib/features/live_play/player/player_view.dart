@@ -14,6 +14,7 @@ import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
+import 'package:pure_live/features/live_play/logic/room_status.dart';
 import 'package:pure_live/features/live_play/player/player_controls.dart';
 import 'package:pure_live/features/live_play/player/player_gestures.dart';
 import 'package:pure_live/features/live_play/player/player_status.dart';
@@ -43,8 +44,12 @@ class RoomPlayer extends ConsumerStatefulWidget {
     this.pip = false,
     this.mobile = false,
     this.android = false,
+    this.onOpenGuide,
     super.key,
   });
+
+  /// Opens or reveals the IPTV guide (the replay mark, U.2g c18).
+  final VoidCallback? onOpenGuide;
 
   /// In Android's picture-in-picture: only the picture (and danmaku when
   /// `enablePipDanmaku`).
@@ -268,7 +273,8 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                 ),
               ),
             ),
-            ListenableSelector<(RoomStage, Object?, LiveStatus, LiveRestriction, String, bool, int)>(
+            // U.2g: the picture's state, one component in every layout.
+            ListenableSelector<(RoomStage, Object?, LiveStatus, LiveRestriction, String, bool, int, bool)>(
               listenable: _statusSources,
               selector: () {
                 final room = _room.room;
@@ -280,6 +286,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                   room.cover,
                   widget.reconnect.reconnecting,
                   widget.reconnect.attempts,
+                  _room.audioOnly,
                 );
               },
               builder: (context, _, _) => StreamBuilder<PlaybackState>(
@@ -300,6 +307,12 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                 top: 10 + (widget.fullscreen ? MediaQuery.paddingOf(context).top : 0),
                 child: IgnorePointer(child: RoomRecordingBadge(room: _room.room, compact: true)),
               ),
+            // U.2g c18: the replay mark stays whether the controls show or not.
+            Positioned(
+              left: 10,
+              top: 52 + (widget.fullscreen ? MediaQuery.paddingOf(context).top : 0),
+              child: CatchupBadge(controller: _room, onOpenGuide: widget.onOpenGuide),
+            ),
             RepaintBoundary(
               child: AnimatedOpacity(
                 opacity: _controls ? 1 : 0,
@@ -312,31 +325,41 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                       data: OnVideoColors.icons,
                       child: _locked
                           ? _LockLayer(onUnlock: _toggleLock)
-                          : Column(
-                              children: [
-                                PlayerTopBar(
-                                  controller: _room,
-                                  fullscreen: widget.fullscreen,
-                                  android: widget.android,
-                                  pipSupported: _pipSupported,
-                                  onBack: widget.onBack,
-                                  onPip: () => unawaited(_enterPip()),
-                                  onInteract: _scheduleHide,
-                                ),
-                                const Spacer(),
-                                PlayerBottomBar(
-                                  controller: _room,
-                                  fullscreen: widget.fullscreen,
-                                  mobile: widget.mobile,
-                                  showDanmaku: showDanmaku,
-                                  orientation: widget.orientation,
-                                  onToggleFullscreen: widget.onToggleFullscreen,
-                                  onInteract: _scheduleHide,
-                                  onReopen: widget.reconnect.expectReopen,
-                                  onLock: widget.mobile && widget.fullscreen ? _toggleLock : null,
-                                  onMenu: _onMenu,
-                                ),
-                              ],
+                          // U.2g c5, c6: no bars while nothing plays (the
+                          // state's buttons are the way on); fullscreen
+                          // keeps a reduced top bar to leave it.
+                          : ListenableSelector<bool>(
+                              listenable: _room,
+                              selector: () => pictureHasControls(_room.stage),
+                              builder: (context, controls, _) => Column(
+                                children: [
+                                  if (controls || widget.fullscreen)
+                                    PlayerTopBar(
+                                      controller: _room,
+                                      fullscreen: widget.fullscreen,
+                                      android: widget.android,
+                                      pipSupported: _pipSupported,
+                                      onBack: widget.onBack,
+                                      onPip: () => unawaited(_enterPip()),
+                                      onInteract: _scheduleHide,
+                                      reduced: !controls,
+                                    ),
+                                  const Spacer(),
+                                  if (controls)
+                                    PlayerBottomBar(
+                                      controller: _room,
+                                      fullscreen: widget.fullscreen,
+                                      mobile: widget.mobile,
+                                      showDanmaku: showDanmaku,
+                                      orientation: widget.orientation,
+                                      onToggleFullscreen: widget.onToggleFullscreen,
+                                      onInteract: _scheduleHide,
+                                      onReopen: widget.reconnect.expectReopen,
+                                      onLock: widget.mobile && widget.fullscreen ? _toggleLock : null,
+                                      onMenu: _onMenu,
+                                    ),
+                                ],
+                              ),
                             ),
                     ),
                   ),

@@ -7,6 +7,8 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
+import 'package:pure_live/features/settings/settings_section_view.dart';
+import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 
 /// Stores [value] for [setting] (written in the background; the row
@@ -14,24 +16,30 @@ import 'package:pure_live/routes/app_navigator.dart';
 void writeSetting<T extends Object>(WidgetRef ref, Setting<T> setting, T value) =>
     unawaited(ref.read(storeProvider).settings.set(setting, value));
 
-/// A row that is greyed out and ignores taps while [enabled] is false
-/// (options that only apply when another switch is on).
-class SettingsDependent extends StatelessWidget {
-  /// Wraps [child].
-  const new({required this.enabled, required this.child, super.key});
+/// The search results: a row that opens another page goes to its own page
+/// instead and is highlighted there (U.6a c8).
+class SettingsReveal extends InheritedWidget {
+  /// Provides [reveal] to the rows of [child].
+  const new({required this.reveal, required super.child, super.key});
 
-  /// Whether the row can be used.
-  final bool enabled;
+  /// Shows the page of an entry with the entry highlighted.
+  final void Function(SettingsEntry entry) reveal;
 
-  /// The row.
-  final Widget child;
+  /// The reveal in scope (search results), or null.
+  static SettingsReveal? maybeOf(BuildContext context) => context.dependOnInheritedWidgetOfExactType<SettingsReveal>();
 
   @override
-  Widget build(BuildContext context) => AnimatedOpacity(
-    opacity: enabled ? 1 : 0.45,
-    duration: const Duration(milliseconds: 150),
-    child: IgnorePointer(ignoring: !enabled, child: child),
-  );
+  bool updateShouldNotify(SettingsReveal oldWidget) => oldWidget.reveal != reveal;
+}
+
+/// [open] for a row that opens a page; in search results its page instead.
+void openOrReveal(BuildContext context, SettingsEntry entry, VoidCallback open) {
+  final reveal = SettingsReveal.maybeOf(context);
+  if (reveal != null && entry.opens) {
+    reveal.reveal(entry);
+  } else {
+    open();
+  }
 }
 
 /// A switch bound to [setting]; [inverted] shows the opposite (`hideDanmaku`
@@ -70,20 +78,17 @@ class SettingToggleTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final stored = watchSetting(ref, setting);
     final enabled = enabledBy == null || watchSetting(ref, enabledBy!);
-    return KeyedSubtree(
+    return SettingsSwitchRow(
       key: entry.rowKey,
-      child: context.buildSwitchTile(
-        title: entry.titleText,
-        subtitle: entry.descriptionText,
-        isLong: true,
-        icon: icon,
-        value: inverted ? !stored : stored,
-        enabled: enabled,
-        onChanged: (value) {
-          writeSetting(ref, setting, inverted ? !value : value);
-          onChanged?.call(value);
-        },
-      ),
+      title: entry.titleText,
+      subtitle: entry.descriptionText,
+      icon: icon,
+      value: inverted ? !stored : stored,
+      enabled: enabled,
+      onChanged: (value) {
+        writeSetting(ref, setting, inverted ? !value : value);
+        onChanged?.call(value);
+      },
     );
   }
 }
@@ -102,6 +107,8 @@ class SettingSliderTile extends ConsumerStatefulWidget {
     required this.format,
     this.step,
     this.enabledBy,
+    this.marks = const [],
+    this.below,
     super.key,
   });
 
@@ -124,11 +131,17 @@ class SettingSliderTile extends ConsumerStatefulWidget {
   /// for an [IntSetting]).
   final double? step;
 
-  /// The badge text of a value.
+  /// The pill's text of a value.
   final String Function(double value) format;
 
   /// A switch that must be on for this one to apply.
   final BoolSetting? enabledBy;
+
+  /// Values marked on the track.
+  final List<double> marks;
+
+  /// Shown under the slider for the value shown (an example).
+  final Widget Function(BuildContext context, double value)? below;
 
   @override
   ConsumerState<SettingSliderTile> createState() => _SettingSliderTileState();
@@ -175,28 +188,26 @@ class _SettingSliderTileState extends ConsumerState<SettingSliderTile> {
     };
     final value = _dragging ?? stored;
     final enabled = widget.enabledBy == null || watchSetting(ref, widget.enabledBy!);
-    return KeyedSubtree(
+    return SettingsSliderRow(
       key: widget.entry.rowKey,
-      child: SettingsDependent(
-        enabled: enabled,
-        child: context.buildSliderTile(
-          icon: widget.icon,
-          title: widget.entry.titleText,
-          subtitle: widget.entry.descriptionText,
-          value: value,
-          min: widget.min,
-          max: widget.max,
-          displayValue: widget.format(value),
-          onChanged: (raw) {
-            setState(() => _dragging = _snap(raw));
-            _write?.cancel();
-            _write = Timer(const Duration(milliseconds: 200), () {
-              _flush();
-              if (mounted) setState(() => _dragging = null);
-            });
-          },
-        ),
-      ),
+      icon: widget.icon,
+      title: widget.entry.titleText,
+      subtitle: widget.entry.descriptionText,
+      value: value,
+      min: widget.min,
+      max: widget.max,
+      marks: widget.marks,
+      enabled: enabled,
+      label: widget.format(value),
+      below: widget.below?.call(context, value),
+      onChanged: (raw) {
+        setState(() => _dragging = _snap(raw));
+        _write?.cancel();
+        _write = Timer(const Duration(milliseconds: 200), () {
+          _flush();
+          if (mounted) setState(() => _dragging = null);
+        });
+      },
     );
   }
 }
@@ -242,29 +253,23 @@ class SettingChoiceTile<T extends Object> extends ConsumerWidget {
     final choices = options();
     final current = choices.where((choice) => choice.value == value).firstOrNull;
     final enabled = enabledBy == null || watchSetting(ref, enabledBy!);
-    return KeyedSubtree(
+    return SettingsLinkRow(
       key: entry.rowKey,
-      child: SettingsDependent(
-        enabled: enabled,
-        child: context.buildTile(
-          icon: icon,
+      icon: icon,
+      title: entry.titleText,
+      subtitle: subtitle ?? entry.descriptionText,
+      value: current?.label ?? '$value',
+      enabled: enabled,
+      onTap: () async {
+        final picked = await showChoiceDialog<T>(
+          context: context,
           title: entry.titleText,
-          subtitle: subtitle ?? entry.descriptionText,
-          isLong: true,
-          stackTrailingOnNarrow: true,
-          trailing: SettingValueText(current?.label ?? '$value'),
-          onTap: () async {
-            final picked = await showChoiceDialog<T>(
-              context: context,
-              title: entry.titleText,
-              options: choices,
-              selected: value,
-              hint: hint,
-            );
-            if (picked != null && context.mounted) writeSetting(ref, setting, picked);
-          },
-        ),
-      ),
+          options: choices,
+          selected: value,
+          hint: hint,
+        );
+        if (picked != null && context.mounted) writeSetting(ref, setting, picked);
+      },
     );
   }
 }
@@ -312,38 +317,33 @@ class SettingNumberTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final value = watchSetting(ref, setting);
     final enabled = enabledBy == null || watchSetting(ref, enabledBy!);
-    return KeyedSubtree(
+    return SettingsLinkRow(
       key: entry.rowKey,
-      child: SettingsDependent(
-        enabled: enabled,
-        child: context.buildTile(
-          icon: icon,
+      icon: icon,
+      title: entry.titleText,
+      subtitle: entry.descriptionText,
+      value: label(value),
+      enabled: enabled,
+      onTap: () async {
+        final picked = await showNumberDialog(
+          context: context,
           title: entry.titleText,
-          subtitle: entry.descriptionText,
-          isLong: true,
-          stackTrailingOnNarrow: true,
-          trailing: SettingValueText(label(value)),
-          onTap: () async {
-            final picked = await showNumberDialog(
-              context: context,
-              title: entry.titleText,
-              current: value,
-              presets: presets,
-              min: setting.min ?? 0,
-              max: setting.max ?? 99999,
-              label: label,
-              unit: unit,
-              hint: hint ?? entry.descriptionText,
-            );
-            if (picked != null && context.mounted) writeSetting(ref, setting, picked);
-          },
-        ),
-      ),
+          current: value,
+          presets: presets,
+          min: setting.min ?? 0,
+          max: setting.max ?? 99999,
+          label: label,
+          unit: unit,
+          hint: hint ?? entry.descriptionText,
+        );
+        if (picked != null && context.mounted) writeSetting(ref, setting, picked);
+      },
     );
   }
 }
 
-/// The current value at the end of a row, in the primary colour.
+/// The current value at the end of a row, in the secondary text colour
+/// (rows that draw their own end, such as the proxy and refresh rate).
 class SettingValueText extends StatelessWidget {
   /// Creates the text.
   const new(this.text, {super.key});
@@ -361,18 +361,18 @@ class SettingValueText extends StatelessWidget {
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         textAlign: TextAlign.end,
-        style: context.textStyles.t13.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
+        style: context.textStyles.t14.copyWith(color: theme.colorScheme.onSurfaceVariant),
       ),
     );
   }
 }
 
 /// A row that opens another page: a route of the app (accounts, block list)
-/// or a settings sub-page.
+/// or a settings page.
 class SettingLinkTile extends StatelessWidget {
-  /// Creates the row; give [route] or [page].
-  const new({required this.entry, required this.icon, this.route, this.page, this.trailing, super.key})
-    : assert(route != null || page != null, 'a link needs a target');
+  /// Creates the row; give [route], [page] or [subpage].
+  const new({required this.entry, required this.icon, this.route, this.page, this.subpage, this.value, super.key})
+    : assert(route != null || page != null || subpage != null, 'a link needs a target');
 
   /// The entry drawn.
   final SettingsEntry entry;
@@ -386,36 +386,38 @@ class SettingLinkTile extends StatelessWidget {
   /// The settings sub-page opened.
   final WidgetBuilder? page;
 
-  /// Shown before the chevron (the current value).
-  final Widget? trailing;
+  /// A sub-page of the catalogue opened ([SettingsSubpagePage]).
+  final SettingsSubpage? subpage;
+
+  /// The current value before the chevron.
+  final String? value;
 
   @override
-  Widget build(BuildContext context) => KeyedSubtree(
+  Widget build(BuildContext context) => SettingsLinkRow(
     key: entry.rowKey,
-    child: context.buildTile(
-      icon: icon,
-      title: entry.titleText,
-      subtitle: entry.descriptionText,
-      isLong: true,
-      trailing: trailing == null
-          ? null
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(child: trailing!),
-                Icon(Icons.chevron_right_rounded, color: Theme.of(context).hintColor.withValues(alpha: 0.4), size: 20),
-              ],
-            ),
-      onTap: () {
-        if (page case final page?) {
-          Navigator.of(context).push(MaterialPageRoute<void>(builder: page));
-        } else {
-          unawaited(AppNavigator.toNamed<void>(route!));
-        }
-      },
-    ),
+    icon: icon,
+    title: entry.titleText,
+    subtitle: entry.descriptionText,
+    value: value,
+    onTap: () => openOrReveal(context, entry, () {
+      if (subpage case final subpage?) {
+        unawaited(openSettingsSubpage(context, subpage));
+      } else if (page case final page?) {
+        Navigator.of(context).push(MaterialPageRoute<void>(builder: page));
+      } else {
+        unawaited(AppNavigator.toNamed<void>(route!));
+      }
+    }),
   );
 }
+
+/// Opens [subpage], with the row [highlight] (an entry id) highlighted.
+Future<void> openSettingsSubpage(BuildContext context, SettingsSubpage subpage, {String? highlight}) =>
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SettingsSubpagePage(subpage: subpage, highlight: highlight),
+      ),
+    );
 
 /// A row that runs [onTap] (clear the cache, reset), with a spinner while
 /// [busy].
@@ -444,7 +446,7 @@ class SettingActionTile extends StatelessWidget {
   /// Shows a spinner and ignores taps.
   final bool busy;
 
-  /// The trailing widget when not busy.
+  /// The end of the row when not busy (a button).
   final Widget? trailing;
 
   /// Replaces the entry's explanation (a live status).
@@ -456,19 +458,148 @@ class SettingActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return KeyedSubtree(
+    return SettingsRow(
       key: entry.rowKey,
-      child: context.buildTile(
-        icon: icon,
-        iconColor: destructive ? colors.error : null,
-        title: entry.titleText,
-        subtitle: subtitle ?? entry.descriptionText,
-        isLong: true,
-        trailing: busy
-            ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-            : trailing ?? const SizedBox.shrink(),
-        onTap: busy ? null : onTap,
-      ),
+      leading: destructive ? Icon(icon, size: 22, color: colors.error) : null,
+      icon: icon,
+      title: entry.titleText,
+      subtitle: subtitle ?? entry.descriptionText,
+      trailing: trailing,
+      busy: busy,
+      enabled: onTap != null || busy,
+      onTap: onTap,
     );
   }
 }
+
+/// 3.x's row builders (`buildTile`, `buildSwitchTile`) drawn with the shared
+/// settings row, for the rows that draw their own end (proxy, window size,
+/// refresh rate, folders).
+extension SettingsRowBuilders on BuildContext {
+  /// A row: icon, title, explanation, [trailing] (a chevron when there is
+  /// none and the row opens something).
+  Widget settingsTile({
+    required String title,
+    Key? key,
+    IconData? icon,
+    Widget? iconWidget,
+    String? subtitle,
+    Color? subtitleColor,
+    Widget? trailing,
+    VoidCallback? onTap,
+    bool busy = false,
+    bool enabled = true,
+  }) => SettingsRow(
+    key: key,
+    title: title,
+    icon: icon,
+    leading: iconWidget,
+    subtitle: subtitle,
+    subtitleColor: subtitleColor,
+    busy: busy,
+    enabled: enabled,
+    trailing:
+        trailing ??
+        (onTap == null
+            ? null
+            : Icon(Icons.chevron_right_rounded, size: 22, color: Theme.of(this).colorScheme.onSurfaceVariant)),
+    onTap: onTap,
+  );
+
+  /// A switch row.
+  Widget settingsSwitch({
+    required String title,
+    required bool value,
+    required ValueChanged<bool>? onChanged,
+    Key? key,
+    IconData? icon,
+    String? subtitle,
+    Color? subtitleColor,
+    bool enabled = true,
+    bool busy = false,
+  }) => SettingsSwitchRow(
+    key: key,
+    title: title,
+    value: value,
+    onChanged: onChanged,
+    icon: icon,
+    subtitle: subtitle,
+    subtitleColor: subtitleColor,
+    enabled: enabled,
+    busy: busy,
+  );
+}
+
+/// The app bar of the settings pages: the title centred on phones (3.x
+/// `MyTheme`), at the start in the wide layout's right pane; a compact
+/// height when the window is short (a phone held sideways).
+PreferredSizeWidget settingsAppBar(
+  BuildContext context, {
+  required String title,
+  List<Widget> actions = const [],
+  Widget? leading,
+  bool embedded = false,
+}) {
+  final short = MediaQuery.sizeOf(context).height < 480;
+  return AppBar(
+    title: Text(
+      title,
+      style: context.textStyles.t18.copyWith(fontSize: embedded ? 18 : 20, fontWeight: FontWeight.w600),
+    ),
+    centerTitle: !embedded,
+    leading: leading,
+    automaticallyImplyLeading: leading == null,
+    toolbarHeight: short ? 48 : kToolbarHeight,
+    scrolledUnderElevation: 0,
+    actions: [...actions, if (actions.isNotEmpty) const SizedBox(width: 4)],
+  );
+}
+
+/// The body of a settings page: at most 720 wide, centred (the right pane
+/// keeps it at the start); [children] are groups.
+class SettingsPageBody extends StatelessWidget {
+  /// Creates the body.
+  const new({required this.children, this.controller, this.start = false, super.key});
+
+  /// The groups and notes.
+  final List<Widget> children;
+
+  /// The scroll position.
+  final ScrollController? controller;
+
+  /// Keeps the content at the start (the right pane) instead of centring it.
+  final bool start;
+
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+    controller: controller,
+    physics: const PureLiveScrollPhysics(),
+    padding: EdgeInsets.fromLTRB(start ? 24 : 16, 0, start ? 24 : 16, 32),
+    child: Align(
+      alignment: start ? Alignment.topLeft : Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 720),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
+      ),
+    ),
+  );
+}
+
+/// Shows a page's title as the right pane's heading: the pages read it to
+/// lay out their body at the start (U.6a c9).
+class SettingsPane extends InheritedWidget {
+  /// Marks [child] as inside the right pane.
+  const new({required super.child, super.key});
+
+  /// Whether [context] is inside the wide layout's right pane.
+  static bool of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<SettingsPane>() != null;
+
+  @override
+  bool updateShouldNotify(SettingsPane oldWidget) => false;
+}
+
+/// The words of the counter buttons.
+String get settingsDecrease => i18n('settings_decrease');
+
+/// The words of the counter buttons.
+String get settingsIncrease => i18n('settings_increase');

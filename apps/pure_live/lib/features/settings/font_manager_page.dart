@@ -12,13 +12,16 @@ import 'package:pure_live/app/downloads.dart';
 import 'package:pure_live/app/fonts.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/settings/data_tools.dart';
+import 'package:pure_live/features/settings/settings_dialogs.dart';
+import 'package:pure_live/features/settings/settings_tiles.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 
-/// The font manager (3.x `FontFamilyManagerPage`), one for the app font and
-/// one for the danmaku font: the system font, then the cloud list with
-/// download (progress, cancel), choose (weight for multi-file families),
-/// delete, open the folder, back to the system font.
+/// The font page (3.x `FontFamilyManagerPage`; U.6b c13), one for the app
+/// font and one for the danmaku font: the system font, then the cloud list
+/// with download (progress, cancel), apply (a weight for multi-file
+/// families), change the weight of the font in use, and a "⋮" menu to open
+/// the font's folder or delete it (after a confirmation).
 class FontManagerPage extends ConsumerStatefulWidget {
   /// Creates the page; [danmaku] manages the danmaku font.
   const new({this.danmaku = false, super.key});
@@ -127,22 +130,22 @@ class _FontManagerPageState extends ConsumerState<FontManagerPage> {
   }
 
   Future<void> _delete(FontFamily family) async {
-    final confirmed = await showDialog<bool>(
+    final size = _library.sizeOf(family.id);
+    final confirmed = await showConfirmDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(i18n('delete')),
-        content: Text(i18n('settings_font_delete_confirm', args: {'name': family.name})),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('cancel'))),
-          FilledButton(
-            key: const ValueKey('font-delete-confirm'),
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(i18n('delete')),
-          ),
-        ],
+      title: i18n('settings_font_delete_title'),
+      message: i18n(
+        'settings_font_delete_message',
+        args: {
+          'name': family.name,
+          'count': '${_library.filesOf(family.id).length}',
+          'size': size == null ? '' : formatBytes(size),
+        },
       ),
+      confirmLabel: i18n('delete'),
+      destructive: true,
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     if (!await _library.delete(family.id, _settings)) AppNavigator.toast(i18n('font_delete_failed'));
   }
 
@@ -158,83 +161,88 @@ class _FontManagerPageState extends ConsumerState<FontManagerPage> {
     if (!opened) AppNavigator.toast(i18n('open_font_dir_failed'));
   }
 
-  Future<String?> _pickWeight(FontFamily family, List<File> files) => showDialog<String>(
-    context: context,
-    builder: (dialogContext) => SimpleDialog(
-      title: Text(i18n('font_selector_title', args: {'name': family.name})),
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-          child: Text(i18n('font_selector_subtitle'), style: dialogContext.textStyles.t13),
-        ),
-        SimpleDialogOption(
-          key: const ValueKey('font-weight-auto'),
-          onPressed: () => Navigator.pop(dialogContext, ''),
-          child: ListTile(
-            leading: const Icon(Icons.auto_awesome),
-            title: Text(i18n('font_auto_weight')),
-            subtitle: Text(i18n('font_auto_weight_desc')),
-          ),
-        ),
+  /// The weight dialog (3.x `FontWeightSelectorDialog`): the one in use
+  /// is marked.
+  Future<String?> _pickWeight(FontFamily family, List<File> files) {
+    final active = _settings.get(_name) == family.id;
+    return showChoiceDialog<String>(
+      context: context,
+      title: i18n('font_selector_title', args: {'name': family.name}),
+      hint: i18n('font_selector_subtitle'),
+      selected: active ? _settings.get(_file) : '',
+      options: [
+        (value: '', label: i18n('font_auto_weight'), description: i18n('font_auto_weight_desc')),
         for (final file in files)
-          SimpleDialogOption(
-            key: ValueKey('font-weight-${p.basename(file.path)}'),
-            onPressed: () => Navigator.pop(dialogContext, p.basename(file.path)),
-            child: ListTile(
-              leading: const Icon(Icons.font_download_outlined),
-              title: Text(
-                i18n('font_lock_weight', args: {'label': p.basenameWithoutExtension(file.path).split('-').last}),
-              ),
-              subtitle: Text(i18n('font_lock_weight_desc')),
-            ),
+          (
+            value: p.basename(file.path),
+            label: i18n('font_lock_weight', args: {'label': p.basenameWithoutExtension(file.path).split('-').last}),
+            description: i18n('font_lock_weight_desc'),
           ),
       ],
-    ),
-  );
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final current = watchSetting(ref, _name);
     final isSystem = current.isEmpty || current == _name.defaultValue;
     final families = _families;
     final systemName = !kIsWeb && Platform.isWindows ? 'Microsoft YaHei' : i18n('font_system_default');
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(i18n(widget.danmaku ? 'change_danmaku_font_family' : 'font_family_settings')),
+      appBar: settingsAppBar(
+        context,
+        title: i18n(widget.danmaku ? 'change_danmaku_font_family' : 'settings_font'),
+        embedded: SettingsPane.of(context),
         actions: [
           IconButton(
             key: const ValueKey('font-open-folder-action'),
             tooltip: i18n('recorder_open_folder'),
             onPressed: () => unawaited(_openFolder()),
-            icon: const Icon(Remix.folder_open_line),
+            icon: const Icon(AppIcons.openFolder),
           ),
-          const SizedBox(width: 8),
         ],
       ),
-      body: ListView(
-        physics: const PureLiveScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+      body: SettingsPageBody(
+        start: SettingsPane.of(context),
         children: [
-          context.buildGroupTitle(i18n('factory_default_group')),
-          context.buildModernCard([
-            context.buildTile(
-              icon: Icons.settings_suggest_outlined,
-              title: systemName,
-              subtitle: i18n('factory_default_desc'),
-              trailing: isSystem ? Icon(Icons.check_circle, color: theme.colorScheme.primary) : null,
-              onTap: isSystem || _busy != null ? null : () => unawaited(_useSystem()),
-            ),
-          ]),
-          const SizedBox(height: 20),
-          context.buildGroupTitle(i18n('cloud_font_group')),
-          if (families == null)
-            const Padding(
-              padding: EdgeInsets.all(32),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else
-            for (final family in families) _FontCard(state: this, family: family, active: family.id == current),
+          SettingsGroup(
+            first: true,
+            title: i18n('settings_font_group_system'),
+            children: [
+              SettingsRow(
+                key: const ValueKey('font-system'),
+                icon: AppIcons.systemFont,
+                title: systemName,
+                subtitle: i18n('factory_default_desc'),
+                stackTrailing: false,
+                enabled: _busy == null,
+                trailing: ExcludeFocus(
+                  child: IgnorePointer(
+                    child: RadioGroup<bool>(
+                      groupValue: isSystem,
+                      onChanged: (_) {},
+                      child: const Radio<bool>(key: ValueKey('font-system-radio'), value: true),
+                    ),
+                  ),
+                ),
+                onTap: isSystem ? null : () => unawaited(_useSystem()),
+              ),
+            ],
+          ),
+          SettingsGroup(
+            card: false,
+            title: i18n('settings_font_group_cloud', args: {'count': '${families?.length ?? 0}'}),
+            children: [
+              if (families == null)
+                Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Center(child: CircularProgressIndicator(color: colors.primary)),
+                )
+              else
+                for (final family in families) _FontCard(state: this, family: family, active: family.id == current),
+            ],
+          ),
         ],
       ),
     );
@@ -248,130 +256,171 @@ class _FontCard extends StatelessWidget {
   final FontFamily family;
   final bool active;
 
+  Widget _menu(BuildContext context, {required bool locked}) {
+    final colors = Theme.of(context).colorScheme;
+    return PopupMenuButton<String>(
+      key: ValueKey('font-more-${family.id}'),
+      enabled: !locked,
+      tooltip: i18n('more'),
+      icon: const Icon(AppIcons.moreVertical),
+      onSelected: (action) => unawaited(action == 'delete' ? state._delete(family) : state._openFolder(family.id)),
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          key: ValueKey('font-folder-${family.id}'),
+          value: 'folder',
+          child: Row(
+            children: [
+              const Icon(AppIcons.openFolder, size: 20),
+              const SizedBox(width: 12),
+              Text(i18n('settings_font_open_folder')),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          key: ValueKey('font-delete-${family.id}'),
+          value: 'delete',
+          child: Row(
+            children: [
+              Icon(AppIcons.delete, size: 20, color: colors.error),
+              const SizedBox(width: 12),
+              Text(i18n('delete'), style: TextStyle(color: colors.error)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final size = state._library.sizeOf(family.id);
+    final colors = Theme.of(context).colorScheme;
+    final library = state._library;
+    final size = library.sizeOf(family.id);
+    final downloaded = size != null;
     final busy = state._busy == family.id;
     final locked = state._busy != null;
     final progress = state._progress;
-    return Card(
-      key: ValueKey('font-family-${family.id}'),
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      elevation: 0,
-      color: active
-          ? theme.colorScheme.primaryContainer.withValues(alpha: 0.35)
-          : theme.colorScheme.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: active ? theme.colorScheme.primary : theme.dividerColor.withValues(alpha: 0.08)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 12, 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(family.name, style: context.textStyles.t15.copyWith(fontWeight: FontWeight.w700)),
-                ),
-                if (size != null) _Badge(formatBytes(size), color: theme.colorScheme.primary),
-                if (family.license.isNotEmpty) ...[
-                  const SizedBox(width: 6),
-                  _Badge(family.license, color: theme.colorScheme.onSurfaceVariant),
-                ],
-              ],
+    final weights = downloaded ? library.filesOf(family.id).length : family.files.length;
+    final meta = [
+      i18n('settings_font_weights', args: {'count': '$weights'}),
+      if (family.license.isNotEmpty) family.license,
+      if (size != null) formatBytes(size),
+    ].join('  ·  ');
+    // A font already loaded this session shows its name in itself (loading
+    // a font only for its name would cost memory).
+    final ownFont = library.registered.contains(family.id) ? family.id : null;
+
+    final Widget actions;
+    if (busy && progress != null) {
+      actions = Row(
+        key: ValueKey('font-progress-${family.id}'),
+        children: [
+          Expanded(
+            child: LinearProgressIndicator(
+              value: progress.$2 == 0 ? null : progress.$1 / progress.$2,
+              borderRadius: const BorderRadius.all(Radius.circular(2)),
             ),
-            if (family.description.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text(family.description, style: context.textStyles.t12.copyWith(color: theme.hintColor, height: 1.4)),
-            ],
-            const SizedBox(height: 8),
-            if (busy && progress != null) ...[
-              LinearProgressIndicator(value: progress.$2 == 0 ? null : progress.$1 / progress.$2),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      i18n('settings_font_downloading', args: {'done': '${progress.$1}', 'total': '${progress.$2}'}),
-                      style: context.textStyles.t12,
-                    ),
-                  ),
-                  TextButton(
-                    key: ValueKey('font-cancel-${family.id}'),
-                    onPressed: () => state._cancel?.cancel(),
-                    child: Text(i18n('cancel')),
-                  ),
-                ],
+          ),
+          const SizedBox(width: 12),
+          Text(
+            i18n('settings_font_downloading_short', args: {'done': '${progress.$1}', 'total': '${progress.$2}'}),
+            style: context.textStyles.t12.tabular.copyWith(color: colors.onSurfaceVariant),
+          ),
+          TextButton(
+            key: ValueKey('font-cancel-${family.id}'),
+            onPressed: () => state._cancel?.cancel(),
+            child: Text(i18n('cancel')),
+          ),
+        ],
+      );
+    } else {
+      actions = Row(
+        children: [
+          Expanded(
+            child: Text(meta, style: context.textStyles.t12.copyWith(color: colors.onSurfaceVariant)),
+          ),
+          if (!downloaded)
+            FilledButton.tonalIcon(
+              key: ValueKey('font-download-${family.id}'),
+              onPressed: locked ? null : () => unawaited(state._download(family)),
+              icon: const Icon(AppIcons.download, size: 18),
+              label: Text(i18n(active ? 'settings_font_download_chosen' : 'settings_font_download')),
+            )
+          else ...[
+            if (!active)
+              FilledButton.tonal(
+                key: ValueKey('font-apply-${family.id}'),
+                onPressed: locked ? null : () => unawaited(state._apply(family)),
+                child: Text(i18n('apply')),
+              )
+            else if (weights > 1)
+              TextButton(
+                key: ValueKey('font-weight-${family.id}'),
+                onPressed: locked ? null : () => unawaited(state._apply(family)),
+                child: Text(i18n('settings_font_change_weight')),
               ),
-            ] else
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${family.files.length} ${i18n('font_units_suffix')}',
-                      style: context.textStyles.t12.copyWith(color: theme.hintColor),
-                    ),
-                  ),
-                  if (size != null) ...[
-                    IconButton(
-                      key: ValueKey('font-folder-${family.id}'),
-                      tooltip: i18n('recorder_open_folder'),
-                      onPressed: locked ? null : () => unawaited(state._openFolder(family.id)),
-                      icon: const Icon(Remix.folder_open_line, size: 18),
-                    ),
-                    IconButton(
-                      key: ValueKey('font-delete-${family.id}'),
-                      tooltip: i18n('delete'),
-                      onPressed: locked ? null : () => unawaited(state._delete(family)),
-                      icon: Icon(Remix.delete_bin_6_line, size: 18, color: theme.colorScheme.error),
-                    ),
-                    const SizedBox(width: 4),
-                    if (active)
-                      Chip(
-                        avatar: Icon(Icons.check_circle, size: 16, color: theme.colorScheme.primary),
-                        label: Text(i18n('font_currently_active')),
-                      )
-                    else
-                      FilledButton.tonal(
-                        key: ValueKey('font-apply-${family.id}'),
-                        onPressed: locked ? null : () => unawaited(state._apply(family)),
-                        child: Text(i18n('apply')),
-                      ),
-                  ] else
-                    FilledButton.tonalIcon(
-                      key: ValueKey('font-download-${family.id}'),
-                      onPressed: locked ? null : () => unawaited(state._download(family)),
-                      icon: const Icon(Remix.download_cloud_2_line, size: 16),
-                      label: Text(i18n(active ? 'settings_font_download_chosen' : 'download')),
-                    ),
-                ],
-              ),
+            _menu(context, locked: locked),
           ],
+        ],
+      );
+    }
+
+    return Padding(
+      key: ValueKey('font-family-${family.id}'),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerLow,
+          borderRadius: const BorderRadius.all(Radius.circular(16)),
+          border: active ? Border.all(color: colors.primary, width: 2) : null,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 8, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      family.name,
+                      style: context.textStyles.t16.copyWith(fontWeight: FontWeight.w600, fontFamily: ownFont),
+                    ),
+                  ),
+                  if (active)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Chip(
+                        key: ValueKey('font-active-${family.id}'),
+                        avatar: Icon(AppIcons.selected, size: 16, color: colors.onSecondaryContainer),
+                        label: Text(i18n('settings_font_in_use')),
+                        backgroundColor: colors.secondaryContainer,
+                        side: BorderSide.none,
+                        labelStyle: context.textStyles.t12.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colors.onSecondaryContainer,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                ],
+              ),
+              if (family.description.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Text(
+                    family.description,
+                    style: context.textStyles.t13.copyWith(color: colors.onSurfaceVariant, height: 1.45),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 8),
+              actions,
+            ],
+          ),
         ),
       ),
     );
   }
-}
-
-class _Badge extends StatelessWidget {
-  const new(this.text, {required this.color});
-
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    constraints: const BoxConstraints(maxWidth: 140),
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-    decoration: BoxDecoration(color: color.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(8)),
-    child: Text(
-      text,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: context.textStyles.t11.copyWith(color: color, fontWeight: FontWeight.w700),
-    ),
-  );
 }

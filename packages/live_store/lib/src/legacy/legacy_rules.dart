@@ -1,4 +1,5 @@
 import 'package:live_core/live_core.dart';
+import 'package:live_store/src/settings/settings.dart';
 
 /// Conversions 3.x data needs before v4 uses it (docs/UPGRADES.md, rows
 /// whose module column has M9).
@@ -10,6 +11,17 @@ abstract final class LegacyRules {
   static bool isStaleNotice(String? notice) {
     final text = notice?.trim() ?? '';
     return text.contains('远端聊天尚待接入') || text.contains('遠端聊天尚待接入') || text.contains('remote chat is pending');
+  }
+
+  /// A theme colour from 3.x: its untouched default blue becomes the brand
+  /// blue (U.6b C-3); a colour the user picked stays. Accepts the forms 3.x
+  /// stored (`FF2196F3`, `#2196F3`, `0xff2196f3`).
+  static String themeColor(String hex) {
+    var value = hex.trim().toUpperCase();
+    if (value.startsWith('#')) value = value.substring(1);
+    if (value.startsWith('0X')) value = value.substring(2);
+    if (value.length == 6) value = 'FF$value';
+    return value == Settings.legacyThemeColor ? Settings.brandThemeColor : hex;
   }
 
   /// [room] without a stale notice.

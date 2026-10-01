@@ -168,3 +168,31 @@ extension AppTextStylesContext on BuildContext {
   /// The named text styles of the theme in scope.
   AppTextStyles get textStyles => AppTextStyles.of(this);
 }
+
+/// The system's text size times the app's "文字大小" (U.6b C-5): 3.x
+/// replaced the system size with its own factor, so a larger system font did
+/// nothing inside the app. Keeps the system's (possibly non-linear) curve.
+final class AppTextScaler extends TextScaler {
+  /// [system] scaled by [factor].
+  const new(this.system, this.factor);
+
+  /// The platform's scaler (`MediaQuery.textScalerOf`).
+  final TextScaler system;
+
+  /// The app's factor (`textScaleFactor`, 0.5–2).
+  final double factor;
+
+  @override
+  double scale(double fontSize) => system.scale(fontSize) * factor;
+
+  @override
+  // The interface still requires it; it is the linear equivalent.
+  // ignore: deprecated_member_use
+  double get textScaleFactor => system.textScaleFactor * factor;
+
+  @override
+  bool operator ==(Object other) => other is AppTextScaler && other.system == system && other.factor == factor;
+
+  @override
+  int get hashCode => Object.hash(system, factor);
+}

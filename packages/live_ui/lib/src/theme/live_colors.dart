@@ -268,3 +268,91 @@ extension LiveTextStyleX on TextStyle {
   /// The emphasis weight (600).
   TextStyle get emphasis => copyWith(fontWeight: FontWeight.w600);
 }
+
+/// The surfaces of the "pure black" dark theme (U.6b C-4): black behind the
+/// pages, a few near-black layers for cards and sheets, so OLED screens
+/// stay dark and the layers still read apart.
+abstract final class LivePureBlack {
+  /// Pages (`surface`).
+  static const Color surface = Color(0xFF000000);
+
+  /// Cards and settings groups (`surfaceContainerLow`).
+  static const Color containerLow = Color(0xFF0E0E10);
+
+  /// `surfaceContainer`.
+  static const Color container = Color(0xFF161618);
+
+  /// Dialogs, search fields (`surfaceContainerHigh`).
+  static const Color containerHigh = Color(0xFF1E1E21);
+
+  /// Menus and chips (`surfaceContainerHighest`).
+  static const Color containerHighest = Color(0xFF26262A);
+
+  /// [scheme] (a dark scheme) with the black surfaces.
+  static ColorScheme apply(ColorScheme scheme) => scheme.copyWith(
+    surface: surface,
+    surfaceDim: surface,
+    surfaceBright: containerHighest,
+    surfaceContainerLowest: surface,
+    surfaceContainerLow: containerLow,
+    surfaceContainer: container,
+    surfaceContainerHigh: containerHigh,
+    surfaceContainerHighest: containerHighest,
+  );
+}
+
+/// The colour swatches of the colour picker (3.x `AppConsts.themeColors`
+/// and flex_color_picker's Material lists).
+abstract final class LivePalettes {
+  /// The app's colours, first in the picker (3.x's "自定义" tab, renamed
+  /// "推荐" in U.6b): the brand blue, then 3.x's fourteen in its order.
+  static const List<(String name, Color color)> recommended = [
+    ('Brand', Color(0xFF2E6FE0)),
+    ('Crimson', Color.fromARGB(255, 220, 20, 60)),
+    ('Orange', Color(0xFFFF9800)),
+    ('Chrome', Color.fromARGB(255, 230, 184, 0)),
+    ('Grass', Color(0xFF8BC34A)),
+    ('Teal', Color(0xFF009688)),
+    ('SeaFoam', Color.fromARGB(255, 112, 193, 207)),
+    ('Ice', Color.fromARGB(255, 115, 155, 208)),
+    ('Blue', Color(0xFF2196F3)),
+    ('Indigo', Color(0xFF3F51B5)),
+    ('Violet', Color(0xFF673AB7)),
+    ('Primary', Color(0xFF6200EE)),
+    ('Orchid', Color.fromARGB(255, 218, 112, 214)),
+    ('Variant', Color(0xFF3700B3)),
+    ('Secondary', Color(0xFF03DAC6)),
+  ];
+
+  /// Material's primary colours and grey (the "常用色" tab).
+  static final List<ColorSwatch<int>> primaries = [...Colors.primaries, Colors.grey];
+
+  /// Material's accent colours (the "鲜艳色" tab).
+  static const List<ColorSwatch<int>> accents = Colors.accents;
+
+  /// Ten shades of [color], light to dark, with [color] itself in the
+  /// middle (index 5), for colours that are not a Material swatch.
+  static List<Color> shadesOf(Color color) {
+    const white = Color(0xFFFFFFFF);
+    const black = Color(0xFF000000);
+    return [
+      for (final t in const [0.9, 0.76, 0.6, 0.44, 0.22]) Color.lerp(color, white, t)!,
+      color,
+      for (final t in const [0.12, 0.24, 0.36, 0.5]) Color.lerp(color, black, t)!,
+    ];
+  }
+
+  /// The shades of a Material [swatch], light to dark.
+  static List<Color> swatchShades(ColorSwatch<int> swatch) {
+    final keys = swatch[50] == null
+        ? const [100, 200, 400, 700]
+        : const [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+    return [for (final key in keys) ?swatch[key]];
+  }
+}
+
+/// Colours of the television style (UI_PLAN §5.5).
+abstract final class LiveTvColors {
+  /// The near-white frame of the focused item.
+  static const Color focusFrame = Color(0xFFF2F2F2);
+}

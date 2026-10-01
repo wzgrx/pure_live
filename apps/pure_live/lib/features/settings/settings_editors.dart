@@ -9,7 +9,6 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
-import 'package:pure_live/features/home/home_menu.dart';
 import 'package:pure_live/features/settings/appearance_pages.dart';
 import 'package:pure_live/features/settings/settings_catalog.dart';
 import 'package:pure_live/features/settings/settings_dialogs.dart';
@@ -277,32 +276,30 @@ class PipDanmakuPage extends ConsumerWidget {
               Settings.pipDanmakuUseOriginalColor,
               Remix.palette_line,
             ),
-            SettingsDependent(
+            context.settingsTile(
               enabled: !originalColor,
-              child: context.buildTile(
-                icon: Remix.paint_brush_line,
-                title: i18n('pip_danmaku_color'),
-                subtitle: '#${colorHex(color).substring(2)}',
-                trailing: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-                  ),
+              icon: Remix.paint_brush_line,
+              title: i18n('pip_danmaku_color'),
+              subtitle: '#${colorHex(color).substring(2)}',
+              trailing: Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                 ),
-                onTap: () async {
-                  final picked = await showColorDialog(
-                    context: context,
-                    title: i18n('pip_danmaku_color'),
-                    current: color,
-                  );
-                  if (picked?.color case final chosen? when context.mounted) {
-                    writeSetting(ref, Settings.pipDanmakuColor, chosen.toARGB32());
-                  }
-                },
               ),
+              onTap: () async {
+                final picked = await showColorDialog(
+                  context: context,
+                  title: i18n('pip_danmaku_color'),
+                  current: color,
+                );
+                if (picked != null && context.mounted) {
+                  writeSetting(ref, Settings.pipDanmakuColor, picked.toARGB32());
+                }
+              },
             ),
           ]),
           const SizedBox(height: 16),
@@ -422,12 +419,10 @@ class PreferPlatformTile extends ConsumerWidget {
     final choices = shown.isEmpty ? sites.ids : shown;
     return KeyedSubtree(
       key: entry.rowKey,
-      child: context.buildTile(
+      child: context.settingsTile(
         icon: Remix.star_line,
         title: entry.titleText,
         subtitle: entry.descriptionText,
-        isLong: true,
-        stackTrailingOnNarrow: true,
         trailing: SettingValueText(platformName(current, fallback: sites.maybeOf(current)?.name)),
         onTap: () async {
           final picked = await showDialog<String>(
@@ -585,12 +580,10 @@ class TwitchLanguagesTile extends ConsumerWidget {
     final selected = watchSetting(ref, Settings.twitchLanguages);
     return KeyedSubtree(
       key: entry.rowKey,
-      child: context.buildTile(
+      child: context.settingsTile(
         icon: Remix.twitch_line,
         title: entry.titleText,
         subtitle: entry.descriptionText,
-        isLong: true,
-        stackTrailingOnNarrow: true,
         trailing: SettingValueText(
           selected.isEmpty ? i18n('settings_twitch_languages_all') : selected.map(languageName).join('、'),
         ),
@@ -731,11 +724,10 @@ class ProxyTile extends ConsumerWidget {
     final address = host.trim().isEmpty ? i18n('settings_proxy_not_set') : '$host:$port';
     return KeyedSubtree(
       key: entry.rowKey,
-      child: context.buildTile(
+      child: context.settingsTile(
         icon: Remix.global_line,
         title: entry.titleText,
         subtitle: '${entry.descriptionText}\n${i18n('settings_proxy_address')}: $address',
-        isLong: true,
         trailing: Switch(
           key: ValueKey('settings-proxy-${proxy.name}-switch'),
           value: enabled,
@@ -829,79 +821,6 @@ class _ProxyDialogState extends State<_ProxyDialog> {
   );
 }
 
-/// The home menus: drag to order, switch to show (3.x
-/// `NavigationSettingsPage`).
-class HomeMenusPage extends ConsumerWidget {
-  /// Creates the page.
-  const new({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final shown = HomeMenu.fromIds(watchSetting(ref, Settings.savedMenuIds));
-    final order = [...shown, ...HomeMenu.values.where((menu) => !shown.contains(menu))];
-    void save(List<HomeMenu> menus) => writeSetting(ref, Settings.savedMenuIds, [for (final menu in menus) menu.id]);
-    return Scaffold(
-      appBar: AppBar(title: Text(i18n('settings_home_menus'))),
-      body: ListView(
-        physics: const PureLiveScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
-            child: Text(i18n('drag_menu_to_sort_tip'), style: Theme.of(context).textTheme.bodySmall),
-          ),
-          context.buildModernCard([
-            ReorderableListView(
-              shrinkWrap: true,
-              buildDefaultDragHandles: false,
-              physics: const NeverScrollableScrollPhysics(),
-              onReorderItem: (from, to) {
-                final next = List.of(order);
-                final moved = next.removeAt(from);
-                next.insert(to, moved);
-                save([
-                  for (final menu in next)
-                    if (shown.contains(menu)) menu,
-                ]);
-              },
-              children: [
-                for (final (index, menu) in order.indexed)
-                  ListTile(
-                    key: ValueKey('settings-menu-${menu.id}'),
-                    leading: Icon(menu.icon, color: Theme.of(context).colorScheme.primary),
-                    title: Text(i18n(menu.titleKey)),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: shown.contains(menu),
-                          onChanged: (on) {
-                            if (!on && shown.length == 1) {
-                              AppNavigator.toast(i18n('at_least_one_menu_required'));
-                              return;
-                            }
-                            save([
-                              for (final item in order)
-                                if (item == menu ? on : shown.contains(item)) item,
-                            ]);
-                          },
-                        ),
-                        ReorderableDragStartListener(
-                          index: index,
-                          child: const Padding(padding: EdgeInsets.all(8), child: Icon(Icons.drag_handle_rounded)),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-          ]),
-        ],
-      ),
-    );
-  }
-}
-
 /// The window size (Windows): presets or a checked size, applied to the
 /// window at once and used at the next start (3.x).
 class WindowSizeTile extends ConsumerWidget {
@@ -917,11 +836,10 @@ class WindowSizeTile extends ConsumerWidget {
     final height = watchSetting(ref, Settings.windowHeight).round();
     return KeyedSubtree(
       key: entry.rowKey,
-      child: context.buildTile(
+      child: context.settingsTile(
         icon: Remix.aspect_ratio_line,
         title: entry.titleText,
         subtitle: entry.descriptionText,
-        isLong: true,
         trailing: SettingValueText('$width × $height'),
         onTap: () async {
           final size = await showDialog<Size>(
@@ -1147,12 +1065,11 @@ class AutoExitTile extends ConsumerWidget {
       key: entry.rowKey,
       child: ValueListenableBuilder<Duration?>(
         valueListenable: AutoExitTimer.instance.remaining,
-        builder: (context, left, _) => context.buildSwitchTile(
+        builder: (context, left, _) => context.settingsSwitch(
           title: entry.titleText,
           subtitle: enabled && left != null
               ? '${i18n('remaining_time')}: ${formatCountdown(left)}'
               : entry.descriptionText,
-          isLong: true,
           icon: Remix.timer_flash_line,
           value: enabled,
           onChanged: (on) => writeSetting(ref, Settings.enableAutoShutDownTime, on),
@@ -1240,11 +1157,10 @@ class _WindowsDisplayTileState extends State<WindowsDisplayTile> {
                 '(${i18n('display_mode_max')} ${info.maxRefreshRate.round()} Hz)';
       return KeyedSubtree(
         key: widget.entry.rowKey,
-        child: context.buildTile(
+        child: context.settingsTile(
           icon: Remix.computer_line,
           title: widget.entry.titleText,
           subtitle: '${widget.entry.descriptionText ?? ''}\n$mode',
-          isLong: true,
           trailing: const Icon(Icons.refresh_rounded),
           onTap: () => unawaited(DisplayMode.refresh()),
         ),
@@ -1271,7 +1187,7 @@ class StartupTile extends ConsumerWidget {
         final applying = state == StartupEntryState.applying;
         return KeyedSubtree(
           key: entry.rowKey,
-          child: context.buildTile(
+          child: context.settingsTile(
             icon: Remix.windows_line,
             title: entry.titleText,
             subtitle: switch (state) {
@@ -1280,7 +1196,6 @@ class StartupTile extends ConsumerWidget {
               StartupEntryState.idle => entry.descriptionText,
             },
             subtitleColor: state == StartupEntryState.failed ? Theme.of(context).colorScheme.error : null,
-            isLong: true,
             trailing: Switch(
               key: const ValueKey('settings-startup-switch'),
               value: enabled,

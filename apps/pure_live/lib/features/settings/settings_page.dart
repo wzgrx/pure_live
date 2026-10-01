@@ -2,25 +2,33 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/settings/settings_catalog.dart';
-import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
+import 'package:pure_live/features/settings/settings_section_view.dart';
+import 'package:pure_live/features/settings/settings_tiles.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 
-/// Wider than this shows the sections beside their content.
+/// From this width (of the page, not the screen) the overview and the open
+/// page sit side by side (U.6a c9, c10).
 const double settingsTwoPaneBreakpoint = 840;
 
-/// Settings (3.x `lib/modules/settings`): ten sections with search.
+/// The width of the overview in the two-pane layout.
+const double settingsOverviewWidth = 360;
+
+/// Settings (3.x `lib/modules/settings/settings_page.dart`; U.6a): the
+/// overview of five groups, search, and the pages it opens. Below 840 the
+/// overview is a page of its own and a row opens its page; from 840 the
+/// page opens beside it, and pages it opens stay in that pane.
 ///
-/// Routes: `RoutePath.kSettings`; the arguments may name a section
-/// (`SettingsSection.name`, e.g. `'danmaku'`) to open it directly.
+/// Routes: `RoutePath.kSettings`; the arguments may name a page
+/// (`SettingsSection.name`, e.g. `'network'`) to open it directly.
 class SettingsPage extends ConsumerStatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -34,13 +42,18 @@ class SettingsPage extends ConsumerStatefulWidget {
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   final _search = TextEditingController();
-  late SettingsSection _selected = _initialSection ?? SettingsSection.appearance;
-
-  SettingsSection? get _initialSection => switch (widget.route.arguments) {
-    final String name => SettingsSection.values.asNameMap()[name],
-    final SettingsSection section => section,
+  final _searchFocus = FocusNode();
+  final _content = GlobalKey<NavigatorState>();
+  late final _contentObserver = _ContentObserver(_contentChanged);
+  late SettingsSection? _open = switch (SettingsSection.byName(widget.route.arguments)) {
+    final SettingsSection section when section.route == null => section,
     _ => null,
   };
+  String _query = '';
+  String? _highlight;
+  int _shown = 0;
+  bool _contentCanPop = false;
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -48,349 +61,298 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     // The exit countdown follows the settings (the app attaches it at start
     // too once wired, see AutoExitTimer).
     AutoExitTimer.instance.attach(ref.read(storeProvider).settings);
-    _search.addListener(() => setState(() {}));
+    _search.addListener(_searchChanged);
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _search.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final env = SettingsEnv(platform: defaultTargetPlatform, wide: width > 680);
-    final twoPane = width >= settingsTwoPaneBreakpoint;
-    final query = _search.text.trim();
-    final searchField = _SearchField(controller: _search);
-    final initial = _initialSection;
-
-    if (!twoPane && initial != null && query.isEmpty) {
-      return SettingsSectionPage(section: initial);
-    }
-
-    final Widget body;
-    if (query.isNotEmpty) {
-      body = _SearchResults(query: query, env: env);
-    } else if (twoPane) {
-      body = SettingsSectionView(key: ValueKey(_selected), section: _selected, env: env, showHeader: true);
+  void _searchChanged() {
+    final text = _search.text.trim();
+    if (text == _query) return;
+    _debounce?.cancel();
+    // Filtering waits for a pause in typing (U.6a, performance); clearing
+    // shows the overview at once.
+    if (text.isEmpty) {
+      setState(() => _query = '');
     } else {
-      body = _SectionList(env: env, onOpen: (section) => _open(context, section));
+      _debounce = Timer(const Duration(milliseconds: 150), () {
+        if (mounted) setState(() => _query = _search.text.trim());
+      });
     }
+  }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(i18n('settings_title'))),
-      body: twoPane
-          ? Row(
+  void _contentChanged() {
+    final canPop = _content.currentState?.canPop() ?? false;
+    if (canPop != _contentCanPop && mounted) setState(() => _contentCanPop = canPop);
+  }
+
+  void _openSection(SettingsSection section) {
+    if (section.route case final route?) {
+      unawaited(AppNavigator.toNamed<void>(route));
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _open = section;
+      _highlight = null;
+      _shown++;
+      _contentCanPop = false;
+    });
+  }
+
+  /// A search result that opens a page: its page, the row highlighted.
+  void _reveal(SettingsEntry entry) {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _open = entry.section;
+      _highlight = entry.subpage == null ? entry.id : null;
+      _shown++;
+      _contentCanPop = false;
+    });
+    if (entry.subpage case final subpage?) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final navigator = _content.currentState;
+        if (navigator == null || !navigator.mounted) return;
+        unawaited(openSettingsSubpage(navigator.context, subpage, highlight: entry.id));
+      });
+    }
+  }
+
+  void _closeSection() => setState(() {
+    _open = null;
+    _highlight = null;
+    _contentCanPop = false;
+  });
+
+  Widget _contentNavigator(SettingsSection section, {required bool twoPane}) => HeroControllerScope.none(
+    child: Navigator(
+      key: _content,
+      observers: [_contentObserver],
+      pages: [
+        MaterialPage<void>(
+          key: ValueKey('settings-content-${section.name}-$_shown'),
+          child: SettingsSectionPage(section: section, highlight: _highlight, onBack: twoPane ? null : _closeSection),
+        ),
+      ],
+      onDidRemovePage: (_) {},
+    ),
+  );
+
+  Widget _overviewBody({required bool twoPane, required SettingsSection? selected}) {
+    final env = SettingsEnv(platform: defaultTargetPlatform);
+    return _query.isEmpty
+        ? _Overview(selected: selected, onOpen: _openSection, twoPane: twoPane)
+        : SettingsReveal(
+            reveal: _reveal,
+            child: _SearchResults(query: _query, env: env, twoPane: twoPane),
+          );
+  }
+
+  Widget _searchField() => SettingsSearchField(
+    controller: _search,
+    focusNode: _searchFocus,
+    hint: i18n('settings_search_hint'),
+    clearTooltip: i18n('clear'),
+    fieldKey: const ValueKey('settings-search'),
+    clearKey: const ValueKey('settings-search-clear'),
+  );
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final twoPane = constraints.maxWidth >= settingsTwoPaneBreakpoint;
+      final Widget page;
+      if (twoPane) {
+        final section = _open ?? SettingsSection.appearance;
+        final short = MediaQuery.sizeOf(context).height < 480;
+        page = Scaffold(
+          body: SafeArea(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(
-                  width: 300,
+                  width: settingsOverviewWidth,
                   child: Column(
                     children: [
-                      Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 8), child: searchField),
-                      Expanded(
-                        child: _SectionList(
-                          env: env,
-                          selected: query.isEmpty ? _selected : null,
-                          onOpen: (section) => setState(() {
-                            _selected = section;
-                            _search.clear();
-                          }),
+                      SizedBox(
+                        height: short ? 48 : kToolbarHeight,
+                        child: Row(
+                          children: [
+                            if (Navigator.of(context).canPop()) const BackButton() else const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                i18n('settings_title'),
+                                textAlign: TextAlign.center,
+                                style: context.textStyles.t20.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            const SizedBox(width: 48),
+                          ],
                         ),
                       ),
+                      Padding(padding: const EdgeInsets.fromLTRB(12, 4, 12, 4), child: _searchField()),
+                      Expanded(child: _overviewBody(twoPane: true, selected: section)),
                     ],
                   ),
                 ),
                 const VerticalDivider(width: 1),
-                Expanded(child: body),
-              ],
-            )
-          : Column(
-              children: [
-                Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 4), child: searchField),
-                Expanded(child: body),
+                Expanded(child: SettingsPane(child: _contentNavigator(section, twoPane: true))),
               ],
             ),
-    );
-  }
-
-  void _open(BuildContext context, SettingsSection section) {
-    FocusScope.of(context).unfocus();
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => SettingsSectionPage(section: section)));
-  }
-}
-
-class _SearchField extends StatelessWidget {
-  const new({required this.controller});
-
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) => ConstrainedBox(
-    constraints: const BoxConstraints(maxWidth: settingsContentMaxWidth),
-    child: SearchBar(
-      key: const ValueKey('settings-search'),
-      controller: controller,
-      hintText: i18n('settings_search_hint'),
-      elevation: const WidgetStatePropertyAll(0),
-      constraints: const BoxConstraints(minHeight: 44, maxHeight: 44),
-      leading: const Icon(Icons.search_rounded),
-      trailing: [
-        if (controller.text.isNotEmpty)
-          IconButton(
-            key: const ValueKey('settings-search-clear'),
-            tooltip: i18n('clear'),
-            icon: const Icon(Icons.close_rounded),
-            onPressed: controller.clear,
           ),
-      ],
-    ),
+        );
+      } else if (_open case final section?) {
+        page = _contentNavigator(section, twoPane: false);
+      } else {
+        page = Scaffold(
+          appBar: settingsAppBar(context, title: i18n('settings_title')),
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 720), child: _searchField()),
+              ),
+              Expanded(child: _overviewBody(twoPane: false, selected: null)),
+            ],
+          ),
+        );
+      }
+      return PopScope(
+        canPop: !_contentCanPop && (twoPane || _open == null),
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (_contentCanPop) {
+            _content.currentState?.maybePop();
+          } else if (!twoPane && _open != null) {
+            _closeSection();
+          }
+        },
+        child: Shortcuts(
+          shortcuts: const {
+            SingleActivator(LogicalKeyboardKey.keyF, control: true): _FindIntent(),
+            SingleActivator(LogicalKeyboardKey.keyF, meta: true): _FindIntent(),
+            SingleActivator(LogicalKeyboardKey.escape): _ClearSearchIntent(),
+          },
+          child: Actions(
+            actions: {
+              _FindIntent: CallbackAction<_FindIntent>(
+                onInvoke: (_) {
+                  if (!twoPane && _open != null) _closeSection();
+                  _searchFocus.requestFocus();
+                  return null;
+                },
+              ),
+              _ClearSearchIntent: _ClearSearchAction(_search),
+            },
+            child: page,
+          ),
+        ),
+      );
+    },
   );
 }
 
-/// Rebuilds when any setting changes (section badges, reset actions).
-class _SettingsChanges extends ConsumerStatefulWidget {
-  const new({required this.builder});
-
-  final WidgetBuilder builder;
-
-  @override
-  ConsumerState<_SettingsChanges> createState() => _SettingsChangesState();
+class _FindIntent extends Intent {
+  const new();
 }
 
-class _SettingsChangesState extends ConsumerState<_SettingsChanges> {
-  StreamSubscription<Setting<Object>>? _changes;
-
-  @override
-  void initState() {
-    super.initState();
-    _changes = ref.read(storeProvider).settings.changes.listen((_) {
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    unawaited(_changes?.cancel());
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.builder(context);
+class _ClearSearchIntent extends Intent {
+  const new();
 }
 
-class _SectionList extends ConsumerWidget {
-  const new({required this.env, required this.onOpen, this.selected});
+/// Esc clears the search; with nothing typed it is not handled, so Esc
+/// keeps going back.
+class _ClearSearchAction extends Action<_ClearSearchIntent> {
+  new(this.search);
 
-  final SettingsEnv env;
-  final ValueChanged<SettingsSection> onOpen;
+  final TextEditingController search;
+
+  @override
+  bool isEnabled(_ClearSearchIntent intent) => search.text.isNotEmpty;
+
+  @override
+  Object? invoke(_ClearSearchIntent intent) {
+    search.clear();
+    return null;
+  }
+}
+
+class _ContentObserver extends NavigatorObserver {
+  new(this.changed);
+
+  final VoidCallback changed;
+
+  void _later() => WidgetsBinding.instance.addPostFrameCallback((_) => changed());
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => _later();
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => _later();
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => _later();
+}
+
+/// The overview: five groups of pages (U.6a c2).
+class _Overview extends StatelessWidget {
+  const new({required this.selected, required this.onOpen, required this.twoPane});
+
   final SettingsSection? selected;
+  final ValueChanged<SettingsSection> onOpen;
+  final bool twoPane;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final store = ref.read(storeProvider).settings;
+  Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return _SettingsChanges(
-      builder: (context) => ListView(
-        physics: const PureLiveScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        children: [
-          context.buildModernCard([
-            for (final section in SettingsSection.values)
-              if (groupsOf(settingsCatalog, section, env).isNotEmpty)
-                CardTile(
-                  key: ValueKey('settings-section-${section.name}'),
-                  child: Builder(
-                    builder: (context) {
-                      final changed = changedSettings(
-                        store,
-                        settingsCatalog.where((entry) => entry.section == section && entry.when(env)),
-                      ).length;
-                      final isSelected = section == selected;
-                      return ListTile(
-                        selected: isSelected,
-                        selectedTileColor: colors.primaryContainer.withValues(alpha: 0.5),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                        leading: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: colors.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(section.icon, color: colors.primary, size: 22),
-                        ),
-                        title: Text(
-                          i18n(section.titleKey),
-                          style: context.textStyles.t15.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Text(
-                          i18n(section.descriptionKey),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textStyles.t12.copyWith(color: Theme.of(context).hintColor),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (changed > 0)
-                              Tooltip(
-                                message: i18n('settings_changed_count', args: {'count': '$changed'}),
-                                child: Badge(
-                                  label: Text('$changed'),
-                                  backgroundColor: colors.secondaryContainer,
-                                  textColor: colors.onSecondaryContainer,
-                                ),
-                              ),
-                            Icon(
-                              Icons.chevron_right_rounded,
-                              color: Theme.of(context).hintColor.withValues(alpha: 0.4),
-                            ),
-                          ],
-                        ),
-                        onTap: () => onOpen(section),
-                      );
-                    },
-                  ),
-                ),
-          ]),
-        ],
-      ),
-    );
-  }
-}
-
-/// One section on its own page (phones).
-class SettingsSectionPage extends StatelessWidget {
-  /// Creates the page.
-  const new({required this.section, super.key});
-
-  /// The section shown.
-  final SettingsSection section;
-
-  @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final env = SettingsEnv(platform: defaultTargetPlatform, wide: width > 680);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(i18n(section.titleKey)),
-        actions: [_ResetSectionButton(section: section, env: env)],
-      ),
-      body: SettingsSectionView(section: section, env: env),
-    );
-  }
-}
-
-/// "Restore this section's defaults", shown when something in it changed.
-class _ResetSectionButton extends ConsumerWidget {
-  const new({required this.section, required this.env});
-
-  final SettingsSection section;
-  final SettingsEnv env;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.read(storeProvider).settings;
-    return _SettingsChanges(
-      builder: (context) {
-        final changed = changedSettings(
-          settings,
-          settingsCatalog.where((entry) => entry.section == section && entry.when(env)),
-        );
-        if (changed.isEmpty) return const SizedBox.shrink();
-        return IconButton(
-          key: const ValueKey('settings-section-reset'),
-          tooltip: i18n('settings_reset_section'),
-          icon: const Icon(Icons.restart_alt_rounded),
-          onPressed: () async {
-            final confirmed = await showConfirmDialog(
-              context: context,
-              title: i18n('settings_reset_section'),
-              message: i18n(
-                'settings_reset_section_confirm',
-                args: {'section': i18n(section.titleKey), 'count': '${changed.length}'},
-              ),
-              confirmLabel: i18n('reset'),
-            );
-            if (!confirmed) return;
-            for (final setting in changed) {
-              await settings.reset(setting);
-            }
-            AppNavigator.toast(i18n('settings_reset_done'));
-          },
-        );
-      },
-    );
-  }
-}
-
-/// The groups of a section: a title and a card of rows each.
-class SettingsSectionView extends StatelessWidget {
-  /// Creates the view.
-  const new({required this.section, required this.env, this.showHeader = false, super.key});
-
-  /// The section shown.
-  final SettingsSection section;
-
-  /// Where the page runs.
-  final SettingsEnv env;
-
-  /// Shows the section's title, summary and reset action (two-pane layout,
-  /// which has no section app bar).
-  final bool showHeader;
-
-  @override
-  Widget build(BuildContext context) {
-    final groups = groupsOf(settingsCatalog, section, env);
-    final theme = Theme.of(context);
     return ListView(
-      key: ValueKey('settings-section-view-${section.name}'),
+      key: const ValueKey('settings-overview'),
       physics: const PureLiveScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+      padding: EdgeInsets.fromLTRB(twoPane ? 12 : 16, 0, twoPane ? 12 : 16, 32),
       children: [
-        if (showHeader)
-          Align(
-            alignment: Alignment.topCenter,
+        for (final (index, area) in SettingsArea.values.indexed)
+          Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: settingsContentMaxWidth),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 4, 0, 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(i18n(section.titleKey), style: theme.textTheme.headlineSmall),
-                          const SizedBox(height: 4),
-                          Text(i18n(section.descriptionKey), style: theme.textTheme.bodySmall),
-                        ],
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: SettingsGroup(
+                first: index == 0,
+                title: i18n(area.titleKey),
+                children: [
+                  for (final section in SettingsSection.values)
+                    if (section.area == area)
+                      SettingsLinkRow(
+                        key: ValueKey('settings-section-${section.name}'),
+                        icon: section.icon,
+                        leading: section.icon == null
+                            ? DanmakuIcon(DanmakuIconKind.settings, size: 24, color: colors.primary)
+                            : null,
+                        title: i18n(section.titleKey),
+                        subtitle: i18n(section.descriptionKey),
+                        selected: twoPane && section == selected,
+                        onTap: () => onOpen(section),
                       ),
-                    ),
-                    _ResetSectionButton(section: section, env: env),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
-        for (final (index, (group, entries)) in groups.indexed) ...[
-          if (index > 0) const SizedBox(height: 20),
-          context.buildGroupTitle(i18n(group)),
-          context.buildModernCard([for (final entry in entries) CardTile(child: entry.build(context, entry))]),
-        ],
       ],
     );
   }
 }
 
+/// Search results: the rows themselves, under "页面 › 分组" (U.6a c8).
 class _SearchResults extends StatelessWidget {
-  const new({required this.query, required this.env});
+  const new({required this.query, required this.env, required this.twoPane});
 
   final String query;
   final SettingsEnv env;
+  final bool twoPane;
 
   @override
   Widget build(BuildContext context) {
@@ -399,26 +361,36 @@ class _SearchResults extends StatelessWidget {
       return AppStatusView(
         key: const ValueKey('settings-search-empty'),
         type: AppStatusType.empty,
+        icon: AppIcons.search,
         title: i18n('settings_search_empty'),
         subtitle: i18n('settings_search_empty_hint'),
       );
     }
-    final bySection = <SettingsSection, List<SettingsEntry>>{};
+    final byCrumb = <String, List<SettingsEntry>>{};
     for (final entry in found) {
-      bySection.putIfAbsent(entry.section, () => []).add(entry);
+      byCrumb.putIfAbsent(entry.crumb, () => []).add(entry);
     }
-    return ListView(
-      key: const ValueKey('settings-search-results'),
-      physics: const PureLiveScrollPhysics(),
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-      children: [
-        for (final (index, MapEntry(key: section, value: entries)) in bySection.entries.indexed) ...[
-          if (index > 0) const SizedBox(height: 20),
-          context.buildGroupTitle(i18n(section.titleKey)),
-          context.buildModernCard([for (final entry in entries) CardTile(child: entry.build(context, entry))]),
+    return SettingsHighlight(
+      words: searchWords(query),
+      child: ListView(
+        key: const ValueKey('settings-search-results'),
+        physics: const PureLiveScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: EdgeInsets.fromLTRB(twoPane ? 12 : 16, 0, twoPane ? 12 : 16, 32),
+        children: [
+          for (final (index, MapEntry(key: crumb, value: entries)) in byCrumb.entries.indexed)
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 720),
+                child: SettingsGroup(
+                  first: index == 0,
+                  title: crumb,
+                  children: [for (final entry in entries) entry.build(context, entry)],
+                ),
+              ),
+            ),
         ],
-      ],
+      ),
     );
   }
 }

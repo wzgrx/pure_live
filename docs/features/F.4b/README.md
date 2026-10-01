@@ -1,13 +1,13 @@
 # F.4b WebDAV Digest 认证
 
-- 状态：开发中
+- 状态：完成（2026-10-02，[记录](../records/F.4b.md)）
 - 档位：可以以后；规模：小
 - 功能点：F-BAK-04（见 [INVENTORY.md](../INVENTORY.md)）
 - 涉及代码：`apps/pure_live/lib/features/web_dav/web_dav_client.dart`
 - 依赖：U.11b（WebDAV 界面）合并后
 - 来源：M13.10“留给后续”、M13.18 任务说明第 4 项
 - 评审页：按授权直接开发（把 v3 的认证方式补回来；两处选择按建议 A 做）
-- 记录：[records/F.4b.md](../records/F.4b.md)（开发后）
+- 记录：[records/F.4b.md](../records/F.4b.md)
 
 ## v3 的行为（`~/ref/v3ref`，v3.2.11；认证在依赖包 webdav_client 1.2.2 里）
 
@@ -74,3 +74,4 @@ v3 的 Digest 有几处不合 RFC（v4 不照搬）：`uri` 用的是相对地�
 |---|---|
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比 |
+| 2026-10-02 | 开发完成（先不带账号，按 `WWW-Authenticate` 选 Basic 或 Digest），待 K90 验证 |

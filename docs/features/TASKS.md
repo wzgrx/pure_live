@@ -17,7 +17,7 @@
 
 | 编号 | 名称 | 功能点 | 涉及代码 | 依赖 | 档位 | 规模 | 来源 | 状态 |
 |---|---|---|---|---|---|---|---|---|
-| [F.0a](F.0a/README.md) | **接回 M12.5 半成品**：开后台播放、助眠时申请通知权限和忽略电池优化；接收系统分享和“打开方式”；剪贴板识别分享口令；独立的播放代理 | F-AND-01、F-AND-02、F-AND-03、F-NET-02 | `apps/pure_live/lib/app/`、`platform/`、`shared/rooms/`、`features/settings/`、`features/toolbox/`、`android/`；`packages/live_media`、`live_record`、`live_store`（只添加） | U.14（权限说明、分享接收的界面）合并后 | 必须 | 中 | M12.5 分支 `worktree-agent-a27f9a86b17d9663f`（4 个提交，基于旧目录 `lib/pages/`）；剪贴板提示改用 U.3d 的 `showRoomPrompt`（`docs/ui/TASKS.md` 第 7 节） | 未开始 |
+| [F.0a](F.0a/README.md) | **接回 M12.5 半成品**：开后台播放、助眠时申请通知权限和忽略电池优化；接收系统分享和“打开方式”；剪贴板识别分享口令；独立的播放代理 | F-AND-01、F-AND-02、F-AND-03、F-NET-02 | `apps/pure_live/lib/app/`、`platform/`、`shared/rooms/`、`features/settings/`、`features/toolbox/`、`android/`；`packages/live_media`、`live_record`、`live_store`（只添加） | U.14（权限说明、分享接收的界面）合并后 | 必须 | 中 | M12.5 分支 `worktree-agent-a27f9a86b17d9663f`（4 个提交，基于旧目录 `lib/pages/`）；剪贴板提示改用 U.3d 的 `showRoomPrompt`（`docs/ui/TASKS.md` 第 7 节） | 完成（2026-10-02，[记录](records/F.0a.md)） |
 | [F.0b](F.0b/README.md) | **K90 冒烟**：界面重构后在 K90 上把主流程走一遍，问题按根因分进各任务 | 全部“完成”的主流程 | 不改代码 | Android 界面阶段结束 | 必须 | 小 | 2026-10-01 两轮真机测试之后界面改动很大 | 未开始 |
 
 ### F.1 看直播

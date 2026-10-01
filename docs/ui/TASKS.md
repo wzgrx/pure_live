@@ -159,7 +159,7 @@ Windows、Linux
 
 | 编号 | 内容 | 要出图的形态 | 界面（页面 / 弹窗 / 覆盖层 / 提示条） | 依赖 | 状态 |
 |---|---|---|---|---|---|
-| [U.14](compare/U.14/README.md) | **系统界面**：播放通知（媒体控制）、录制通知、画中画窗口里的控件、启动图标和启动画面、分享接收、桌面快捷方式、权限请求说明 | Android、Windows、Linux（iOS、macOS 的差异在 U.17） | — | — | 设计已确认，开发中（Android 部分，并入 F.0a） |
+| [U.14](compare/U.14/README.md) | **系统界面**：播放通知（媒体控制）、录制通知、画中画窗口里的控件、启动图标和启动画面、分享接收、桌面快捷方式、权限请求说明 | Android、Windows、Linux（iOS、macOS 的差异在 U.17） | — | — | 完成（2026-10-02，Android 部分，[记录](records/U.14.md)） |
 
 ### U.15 电视
 
@@ -339,3 +339,5 @@ Android TV，遥控器操作，以 pure_live_TV 为基线（不是 v3），1920�
 | U.11c | 以后（macOS） | v4 还没有 macOS 工程；以后建工程时 `Release.entitlements` 要加 `com.apple.security.network.server` |
 | U.2h | U.8（以后） | 弹幕层新参数（帧率上限、暂停时停住、常亮跟设置）多画面还没接，要的话各加一个参数；同屏最多 48 条 |
 | U.2i | — | 只在 Android 12 起声明视频帧率（Android 11 的接口没有“只在无缝时切换”，可能黑屏），Android 11 只改窗口希望的刷新率 |
+| F.0a | — | 录制走应用代理、不跟播放代理（照 v3 `initialized.dart:94`）；剪贴板只认分享口令不认平台链接（照 v3）；开关 `detectClipboardRooms` 默认开 |
+| U.14 | U.7a、U.3d | “录制已停止”点开只到录制中心，没定位到任务（录制中心没有定位接口）；“正在打开分享的直播间…”用普通提示条 3 秒消失（提示条接口在 `routes/`） |

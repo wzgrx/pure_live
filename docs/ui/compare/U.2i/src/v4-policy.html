@@ -1,0 +1,127 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="1290x1400@1.5 crop"><link rel="stylesheet" href="kit/kit.css"><style>
+@font-face{font-family:'Material Icons Outlined';src:url('.cache/fonts/MaterialIconsOutlined.woff2') format('woff2')}
+.mo{font-family:'Material Icons Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-feature-settings:'liga';white-space:nowrap}
+.ph.long{height:auto;min-height:852px;padding-bottom:24px}
+/* ---------- v3 ---------- */
+.v3bar{height:64px;display:flex;align-items:center;position:relative;background:var(--surface);flex:none}
+.v3bar .bk{width:56px;height:56px;display:grid;place-items:center}.v3bar .bk .mi{font-size:24px}
+.v3bar .t{position:absolute;left:72px;right:72px;text-align:center;font-size:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v3bar .acts{margin-left:auto;display:flex;align-items:center;padding-right:8px;color:var(--onv)}
+.v3body{padding:12px 16px 32px}
+.v3wrap{max-width:960px;margin:0 auto}
+.v3gt{padding:0 0 8px 8px;font-size:12px;font-weight:700;color:rgba(54,97,142,.65);letter-spacing:.5px;line-height:16px}
+.v3card{background:#F5F6FC;border-radius:20px;overflow:hidden;box-shadow:inset 0 0 0 .5px rgba(195,199,207,.25)}
+.v3gap{height:20px}
+.v3t{display:flex;align-items:center;gap:12px;padding:8px 16px;min-height:56px}
+.v3t.two{min-height:72px}.v3t.three{min-height:88px}
+.v3t.swt{padding:2px 8px 2px 16px;gap:16px}
+.v3t .ic{width:22px;flex:none;color:var(--primary);display:grid;place-items:center}
+.v3t .x{flex:1;min-width:0}
+.v3t .a{font-size:15px;font-weight:600;line-height:22px}
+.v3t .b{font-size:12px;line-height:16px;color:rgba(0,0,0,.75);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v3t .b.long{white-space:normal}
+.v3t .b.err{color:var(--error)}
+.v3t .tv{font-size:12px;font-weight:600;color:var(--primary);flex:none;max-width:130px;text-align:right}
+.v3t .chev{font-size:20px;color:rgba(0,0,0,.4)}.v3t .chev24{font-size:24px;color:var(--onv)}
+.v3t.dis .a,.v3t.dis .b{color:rgba(25,28,32,.38)}.v3t.dis .ic{color:rgba(25,28,32,.38)}
+.v3t .sw{margin-left:4px}
+.v3t.dis .sw{opacity:.38}
+.v3hr{height:.5px;margin:0 16px;background:rgba(195,199,207,.25)}
+.v3sl{display:flex;gap:12px;padding:10px 16px}
+.v3sl .ic{width:24px;flex:none;color:var(--primary);padding-top:2px}
+.v3sl .x{flex:1}
+.v3sl .h{display:flex;align-items:flex-start;gap:12px}.v3sl .h .a{flex:1;font-size:15px;font-weight:600;line-height:22px}
+.v3sl .bd{padding:2px 8px;border-radius:6px;background:rgba(54,97,142,.1);font-size:13px;font-weight:700;color:var(--primary);font-feature-settings:'tnum'}
+.v3sl .bd.r20{border-radius:20px;padding:4px 10px;font-size:12px}
+.v3trk{position:relative;height:36px;margin-left:-4px}
+.v3trk .bg{position:absolute;left:0;right:0;top:16px;height:4px;border-radius:2px;background:rgba(54,97,142,.15)}
+.v3trk .fg{position:absolute;left:0;top:15px;height:6px;border-radius:3px;background:var(--primary)}
+.v3trk .th{position:absolute;top:8px;width:20px;height:20px;border-radius:10px;background:var(--primary);margin-left:-10px}
+.v3cnt{display:flex;align-items:center;flex:none}
+.v3cnt i{width:48px;height:48px;background:var(--primary);color:#fff;display:grid;place-items:center;font-style:normal}
+.v3cnt i:first-child{border-radius:12px 0 0 12px}.v3cnt i:last-child{border-radius:0 12px 12px 0}
+.v3cnt b{height:48px;padding:0 8px;display:grid;place-items:center;border-top:2px solid var(--primary);border-bottom:2px solid var(--primary);color:var(--primary);font-size:14px;min-width:30px}
+.v3note{font-size:12px;line-height:16px;color:var(--onv);padding:8px 4px 0}
+/* v3 dialogs */
+.dl3{background:var(--sch);border-radius:24px;padding:24px 0 0;box-shadow:0 6px 20px rgba(0,0,0,.18);position:relative}
+.dl3 .h{padding:0 24px 16px;font-size:20px;font-weight:600;line-height:28px}.dl3 .h.s{font-size:15px;font-weight:700;line-height:22px}
+.dl3 .c{padding:0 24px 0;font-size:13px;line-height:20px;color:var(--onv)}
+.dl3 .opt{display:flex;align-items:center;gap:16px;padding:0 24px;height:48px;font-size:14px}
+.dl3 .rd{width:20px;height:20px;border-radius:10px;border:2px solid var(--onv);display:grid;place-items:center;flex:none}
+.dl3 .rd.on{border-color:var(--primary)}.dl3 .rd.on::after{content:'';width:10px;height:10px;border-radius:5px;background:var(--primary)}
+.dl3 .acts{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px 24px}
+.dl3 .tb{height:40px;padding:0 12px;display:grid;place-items:center;font-size:14px;font-weight:500;color:var(--primary);border-radius:20px}
+.dl3 .tb.mut{color:rgba(0,0,0,.6)}
+.dl3 .fb{height:40px;padding:0 24px;display:grid;place-items:center;font-size:14px;font-weight:500;color:#fff;background:var(--primary);border-radius:20px}
+.dl3 .fb.err{background:var(--error)}
+.fld{position:relative;margin:0 24px 16px;height:56px;border:1px solid var(--outline);border-radius:12px;background:var(--scl);display:flex;align-items:center;gap:12px;padding:0 12px;font-size:15px}
+.fld .lb{position:absolute;left:10px;top:-9px;padding:0 4px;font-size:12px;color:var(--onv);background:linear-gradient(var(--sch) 50%,var(--scl) 50%)}
+.fld.dis{opacity:.45}
+.fld .sx{margin-left:auto;color:var(--onv);font-size:14px}
+.fhelp{margin:-12px 24px 12px;font-size:12px;color:var(--onv)}
+.achip{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--ov);font-size:13px;margin:0 8px 8px 0;background:var(--sch)}
+.achip.on{background:var(--sc);border-color:var(--sc);color:var(--osc);font-weight:600}
+/* ---------- new ---------- */
+.nbody{padding:4px 0 32px}
+.nwrap{max-width:720px;margin:0 auto}
+.grp{overflow:hidden}
+.grp .swr+.swr,.grp .swr+.sl,.grp .sl+.swr,.grp .sl+.sl{box-shadow:inset 0 1px 0 rgba(195,199,207,.45)}
+.swr .val{font-size:14px;color:var(--onv);white-space:nowrap;flex:none;font-feature-settings:'tnum'}
+.swr .chev{font-size:20px;color:var(--onv);margin-left:-8px}
+.swr .a b{font-weight:600}
+.swr .b.err{color:var(--error)}
+.swr.dis .a,.swr.dis .b,.swr.dis .val,.swr.dis .sw,.swr.dis .chev{opacity:.38}
+.swr .why{font-size:12px;color:var(--warn);margin-top:3px}
+.sl.dis .h,.sl.dis .tr{opacity:.38}
+.sl .b{font-size:12px;color:var(--onv);margin-top:2px}
+.sl .why{font-size:12px;color:var(--warn);margin-top:3px}
+.danger .a{color:var(--error)}
+.rad{width:20px;height:20px;border-radius:10px;border:2px solid var(--onv);display:grid;place-items:center;flex:none}
+.rad.on{border-color:var(--primary)}.rad.on::after{content:'';width:10px;height:10px;border-radius:5px;background:var(--primary)}
+.cnt{display:flex;align-items:center;height:40px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--ov);flex:none}
+.cnt span{width:40px;display:grid;place-items:center;color:var(--onv)}.cnt b{min-width:28px;text-align:center;font-size:15px;font-weight:500;font-feature-settings:'tnum'}
+.note{padding:8px 24px 0;font-size:12px;line-height:1.5;color:var(--onv)}
+.note a{color:var(--primary);font-weight:600;text-decoration:none}
+.logo{width:28px;height:28px;border-radius:7px;background:center/cover;flex:none}
+.tagd{font-size:11px;padding:1px 6px;border-radius:6px;background:var(--sc);color:var(--osc);margin-left:6px;font-weight:600;vertical-align:2px}
+/* new dialogs: one component for every choice, one for every confirm */
+.dl4{background:var(--sch);border-radius:24px;padding:24px 0 8px;box-shadow:0 6px 20px rgba(0,0,0,.18);position:relative}
+.dl4 .h{padding:0 24px 8px;font-size:20px;font-weight:600;line-height:28px}
+.dl4 .c{padding:0 24px 8px;font-size:14px;line-height:1.55;color:var(--onv)}
+.dl4 .c ul{margin:6px 0 0 18px}
+.dl4 .opt{display:flex;align-items:center;gap:12px;padding:0 24px;min-height:48px;font-size:15px}
+.dl4 .opt .x{flex:1;padding:8px 0}.dl4 .opt .d{font-size:12px;color:var(--onv);margin-top:2px;line-height:1.45}
+.dl4 .opt.on{color:var(--primary);font-weight:600}.dl4 .opt.on .d{font-weight:400}
+.dl4 .opt .ck{width:20px;font-size:20px;color:var(--primary)}
+.dl4 .acts{display:flex;justify-content:flex-end;gap:8px;padding:8px 16px 8px}
+.dl4 .tb{height:48px;padding:0 16px;display:grid;place-items:center;font-size:15px;font-weight:500;color:var(--primary);border-radius:24px}
+.dl4 .fb{height:40px;margin:4px 0;padding:0 24px;display:grid;place-items:center;font-size:15px;font-weight:600;color:var(--onPrimary);background:var(--primary);border-radius:20px}
+.dl4 .fb.err{background:var(--error);color:#fff}
+.dl4 .fld .lb{background:linear-gradient(var(--sch) 50%,var(--scl) 50%)}
+/* shared */
+.board{display:flex;flex-wrap:wrap;gap:28px;padding:24px;align-items:flex-start;background:#D9DBE2}
+.board .cell{width:393px}
+.board .cap{font-size:13px;color:#43474E;margin:0 0 8px 4px;font-weight:600}
+.board .scr{position:relative;width:393px;background:rgba(0,0,0,.32);border-radius:16px;padding:16px;display:flex;justify-content:center}
+
+.board .scr.lt{background:var(--surface);padding:8px 0 16px;display:block}
+.pol{padding:28px 32px 32px;background:var(--surface);width:1290px}
+.pol h3{font-size:20px;font-weight:600;margin-bottom:4px}
+.pol .sub{font-size:14px;color:var(--onv);margin-bottom:18px}
+.tl{display:flex;gap:6px;align-items:stretch;margin-bottom:8px}
+.tl .st{flex:1;border-radius:12px;padding:10px 12px;background:var(--scl);box-shadow:inset 0 0 0 1px var(--ov);min-width:0}
+.tl .st .w{font-size:13px;color:var(--onv);line-height:1.45}
+.tl .st .hz{font:600 22px/1.3 'Geist','Noto Sans SC';font-feature-settings:'tnum';margin-top:6px}
+.tl .st .why{font-size:12px;color:var(--onv);line-height:1.45;margin-top:2px}
+.tl .st.x-hi{background:var(--pc);box-shadow:none}.tl .st.x-hi .hz{color:var(--opc)}
+.tl .st.x-sys{background:var(--sch)}
+.tl .ar{display:grid;place-items:center;color:var(--outline);flex:none;width:14px}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;margin-top:22px;font-size:14px}
+.tbl th{text-align:left;font-weight:600;padding:10px 12px;background:var(--sch);border-bottom:1px solid var(--ov)}
+.tbl th:first-child{border-radius:12px 0 0 0}.tbl th:last-child{border-radius:0 12px 0 0}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--ov);vertical-align:top;line-height:1.5;background:var(--scl)}
+.tbl td:first-child{font-weight:600;width:210px}
+.tbl .hz{font:600 15px 'Geist','Noto Sans SC';font-feature-settings:'tnum'}
+.tbl .new{display:inline-block;font-size:11px;font-weight:600;padding:1px 6px;border-radius:6px;background:var(--okbg);color:var(--ok);margin-left:6px;vertical-align:1px}
+.foot{font-size:13px;color:var(--onv);margin-top:14px;line-height:1.6}
+</style></head><body><div class="pol"><h3>什么时候用哪个刷新率（Android，以 60 / 120 Hz 的手机为例）</h3><div class="sub">上面一条是“均衡”档看一次直播的过程；下面是三档在各种情况下的做法。“播放时匹配视频帧率”关掉时，直播间里和列表一样（照 v3）。</div><div class="tl"><div class="st x-sys"><div class="w">首页、列表</div><div class="hz">系统决定</div><div class="why">均衡档：按住、滚动时 120，停 1.5 秒交还系统（照 v3）</div></div><div class="ar"><span class="mr" style="font-size:20px;">chevron_right</span></div><div class="st x-hi"><div class="w">进直播间，开始播放（视频 60 帧）</div><div class="hz">60 Hz</div><div class="why">声明内容帧率 60，系统选 60 或 120</div></div><div class="ar"><span class="mr" style="font-size:20px;">chevron_right</span></div><div class="st x-hi"><div class="w">拖面板、滚弹幕列表</div><div class="hz">120 Hz</div><div class="why">60 的整数倍里最高；停 1.5 秒回 60</div></div><div class="ar"><span class="mr" style="font-size:20px;">chevron_right</span></div><div class="st x-sys"><div class="w">暂停</div><div class="hz">系统决定</div><div class="why">清除声明；继续播放再声明</div></div><div class="ar"><span class="mr" style="font-size:20px;">chevron_right</span></div><div class="st x-hi"><div class="w">画中画</div><div class="hz">60 Hz</div><div class="why">画面还在播，保持声明</div></div><div class="ar"><span class="mr" style="font-size:20px;">chevron_right</span></div><div class="st x-sys"><div class="w">退出直播间、进后台</div><div class="hz">系统决定</div><div class="why">清除声明，释放高刷</div></div></div><table class="tbl"><tr><th>情况</th><th>省电（默认）</th><th>均衡</th><th>最高（设备上限）</th><th>说明</th></tr><tr><td>首页、列表、设置（不在直播间）</td><td>系统决定</td><td>按住、滚动时最高；停 1.5 秒交还系统</td><td>一直最高</td><td>照 v3</td></tr><tr><td>直播间播放中，30 或 60 帧</td><td>声明 60<span class="new">新</span></td><td>60；拖面板、滚列表时 120</td><td>120<span class="new">新</span></td><td>不用 90、144：60 帧在上面停留时间不均</td></tr><tr><td>直播间播放中，25 或 50 帧</td><td>声明 50<span class="new">新</span></td><td>有 50 或 100 Hz 才用，否则同 30/60 帧</td><td>100（没有就用最高）</td><td>只在不闪屏时切换</td></tr><tr><td>直播间播放中，24 帧</td><td>声明 24<span class="new">新</span></td><td>有 48、72 或 120 Hz 才用</td><td>整数倍里最高</td><td>大多是回放、点播</td></tr><tr><td>帧率还没读到（刚开播、音频）</td><td>系统决定</td><td>同列表</td><td>最高</td><td>不声明</td></tr><tr><td>暂停、退出直播间、进后台</td><td>清除声明</td><td>清除声明</td><td>清除声明（回到一直最高）；后台释放</td><td>照 v3：进后台释放</td></tr><tr><td>画中画</td><td>保持声明</td><td>保持</td><td>保持</td><td>照 v3：画中画不释放</td></tr></table><div class="foot">“声明”指告诉系统画面里是固定帧率的视频（Android 11 起），系统在不闪屏的前提下选它的整数倍；Android 6～10 只能改“希望的刷新率”，改成整数倍里最高的那一档。弹幕每个刷新周期都动（U.2h），刷新率变了速度不变。</div></div></body></html>

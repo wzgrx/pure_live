@@ -349,6 +349,18 @@ abstract interface class LiveSiteCategoryDirectoryProvider {
   LiveSiteDirectoryPager get categoryDirectory;
 }
 
+/// A platform that stops sending the user's stored cookie once the platform
+/// refuses it and carries on anonymously (B-7): [cookieRefusals] says so, so
+/// the app can tell the user once that the cookie expired and should be
+/// filled in again.
+abstract interface class LiveSiteCookieRefusals {
+  /// One event each time a stored cookie is refused for the first time (a
+  /// refused cookie is not sent again until it changes, so the same cookie
+  /// is reported once). A broadcast stream that never closes; the cookie is
+  /// not in the event.
+  Stream<void> get cookieRefusals;
+}
+
 /// A lasting explanation of what a platform's directory covers.
 abstract interface class LiveDirectoryNotice {
   /// Text key of the explanation.

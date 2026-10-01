@@ -220,8 +220,12 @@ abstract final class KuaishouApi {
   /// "true") alone decides live or offline; `errorType` 22 is `NotFound`,
   /// any other `errorType` `RiskControl`.
   ///
-  /// The title is the streamer bio with line breaks as spaces (the page has
-  /// no broadcast title). The page has no room audience either:
+  /// The page has no broadcast title, so the title is left empty (A-3: 3.x
+  /// showed the streamer bio there, which then replaced the card's title on
+  /// entry and on every refresh); the bio stays the introduction and the
+  /// notice. Entering from a card keeps the card's title
+  /// ([LiveRoom.fillFromDetail]), and a follow keeps the one it stored
+  /// ([LiveRoom.mergeFrom]). The page has no room audience either:
   /// `gameInfo.watchingCount` counts the whole area, so the audience stays
   /// empty until a card or the danmaku feed brings one. The broadcast's id
   /// and, with [withStreams], its `playUrls` go into [KuaishouRoomData];
@@ -258,7 +262,6 @@ abstract final class KuaishouApi {
     return LiveRoom(
       roomId: id,
       platform: _site,
-      title: description.replaceAll('\n', ' '),
       nick: _text(author['name']),
       avatar: normalizeImageUrl(author['avatar']),
       cover: _cover(stream['poster']),

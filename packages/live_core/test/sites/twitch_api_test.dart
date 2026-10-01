@@ -842,6 +842,26 @@ https://c.test/1.m3u8
       final enhanced = TwitchApi.usherUrl('zarbex', (value: 't', signature: 's'), Random(1), preferH264: false);
       expect(enhanced.queryParameters['supported_codecs'], 'av1,h265,h264');
     });
+
+    test('8-8: with "优先 H.264" off, only the codecs the engine decodes are asked for (H.264 always)', () {
+      String codecs(Set<String>? decodable, {bool preferH264 = false}) =>
+          TwitchApi.supportedCodecs(preferH264: preferH264, codecs: decodable);
+      expect(codecs(null), 'av1,h265,h264', reason: 'not known: as the web player');
+      expect(codecs({'avc', 'hevc', 'av1'}), 'av1,h265,h264');
+      expect(codecs({'avc', 'hevc'}), 'h265,h264');
+      expect(codecs({'avc', 'av1'}), 'av1,h264');
+      expect(codecs({'avc'}), 'h264');
+      expect(codecs(const {}), 'h264');
+      expect(codecs({'hevc', 'av1'}, preferH264: true), 'h264', reason: 'the setting wins');
+      final url = TwitchApi.usherUrl(
+        'zarbex',
+        (value: 't', signature: 's'),
+        Random(1),
+        preferH264: false,
+        codecs: {'hevc'},
+      );
+      expect(url.queryParameters['supported_codecs'], 'h265,h264');
+    });
   });
 
   group('GraphQL', () {

@@ -8,7 +8,7 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_templates.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
-import 'package:pure_live/features/live_play/logic/record_state.dart';
+import 'package:pure_live/features/live_play/logic/danmaku_fps.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/display_mode.dart';

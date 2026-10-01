@@ -1,541 +1,438 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:pure_live/features/recorder/recorder_texts.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/record/record_actions.dart';
+import 'package:pure_live/shared/record/record_state.dart';
+import 'package:pure_live/shared/record/record_status_card.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// What a card's buttons do (the page owns the recorder).
 final class RecorderCardActions {
   /// Creates the actions.
-  const new({required this.open, required this.start, required this.check, required this.stop, required this.remove});
+  const new({
+    required this.open,
+    required this.again,
+    required this.startNow,
+    required this.stop,
+    required this.remove,
+    required this.setAuto,
+    required this.limit,
+    required this.folder,
+    required this.reason,
+    required this.failed,
+  });
 
-  /// Opens the room.
+  /// Opens the room ("进入直播间", a tap on the card).
   final void Function(RecordTask task) open;
 
-  /// Starts a new session (3.x `forceStartTask`).
-  final Future<void> Function(RecordTask task) start;
+  /// "开始录制", "再录一次": a new session (3.x `forceStartTask`).
+  final Future<void> Function(RecordTask task) again;
 
-  /// Checks whether the room is live now (waiting tasks).
-  final Future<void> Function(RecordTask task) check;
+  /// "现在就录", "重试" (3.x's 立即检测 and 重试, also `forceStartTask`).
+  final Future<void> Function(RecordTask task) startNow;
 
-  /// Stops the task.
+  /// "停止录制", "取消".
   final Future<void> Function(RecordTask task) stop;
 
-  /// Stops and removes the task.
+  /// "删除任务": stops (and saves) the task, then removes it.
   final Future<void> Function(RecordTask task) remove;
+
+  /// "开播自动录" on or off.
+  final Future<void> Function(RecordTask task, {required bool on}) setAuto;
+
+  /// "改上限": the recording settings.
+  final VoidCallback limit;
+
+  /// "打开文件夹" of a saved recording.
+  final void Function(RecordTask task) folder;
+
+  /// "查看原因".
+  final void Function(BuildContext context, RecordTask task) reason;
+
+  /// An action threw.
+  final VoidCallback failed;
 }
 
-/// One task of the recording centre (3.x `_TaskCard`): cover with the
-/// status, title, streamer, platform, quality, line and audience; the
-/// recording's figures; warnings and the last failure; the actions.
-class RecorderTaskCard extends StatefulWidget {
-  /// Creates the card of [task].
-  const new({required this.task, required this.actions, this.restriction, super.key});
+/// What the card's layout depends on: the status card's facts and the head.
+typedef _CardView = ({
+  RecordCardFacts facts,
+  String nick,
+  String title,
+  String cover,
+  String platform,
+  String audience,
+  bool auto,
+  String? output,
+});
 
-  /// The task (mutable; the page rebuilds on every change).
-  final RecordTask task;
+/// The entries of a card's menu (U.7a c4).
+enum _CardMenu {
+  /// "进入直播间".
+  open,
+
+  /// "开播自动录" (a switch).
+  auto,
+
+  /// "删除任务".
+  delete,
+}
+
+/// One task of the recording centre (docs/ui/compare/U.7a, c2–c5): the
+/// head (cover, streamer with "自动录", title, platform and audience, "⋮"),
+/// then the live room's status card (U.2f) in its compact size. A tap opens
+/// the room (3.x); a long press, a right click or "⋮" opens the menu:
+/// "进入直播间", "开播自动录", "删除任务".
+class RecorderTaskCard extends StatefulWidget {
+  /// Creates the card of the task [taskId].
+  const new({
+    required this.taskId,
+    required this.task,
+    required this.facts,
+    required this.changes,
+    required this.chatCount,
+    required this.actions,
+    this.wide = false,
+    this.now,
+    super.key,
+  });
+
+  /// The task's id.
+  final String taskId;
+
+  /// The task as it is now (null once removed).
+  final RecordTask? Function() task;
+
+  /// The status card's facts of a task.
+  final RecordCardFacts Function(RecordTask task) facts;
+
+  /// Announces the recorder's and the settings' changes.
+  final Listenable changes;
+
+  /// The chat lines saved for a task.
+  final int Function(RecordTask task) chatCount;
 
   /// The buttons.
   final RecorderCardActions actions;
 
-  /// The room's restriction learnt from this session's notice (22-1).
-  final LiveRestriction? restriction;
+  /// A wide page: the larger cover (160×90 instead of 96×54).
+  final bool wide;
+
+  /// The clock; a fixed one (tests) does not tick.
+  final DateTime Function()? now;
 
   @override
   State<RecorderTaskCard> createState() => _RecorderTaskCardState();
 }
 
 class _RecorderTaskCardState extends State<RecorderTaskCard> {
-  String? _busy;
+  final _menu = GlobalKey<PopupMenuButtonState<_CardMenu>>();
+  bool _acting = false;
 
-  RecordTask get task => widget.task;
+  _CardView? _view() {
+    final task = widget.task();
+    if (task == null) return null;
+    final audience = task.watching.trim();
+    return (
+      facts: widget.facts(task),
+      nick: task.nick.trim().isNotEmpty ? task.nick.trim() : task.roomId,
+      title: task.title.trim().isNotEmpty ? task.title.trim() : task.roomId,
+      cover: normalizeImageUrl(task.cover),
+      platform: task.platform,
+      audience: audience.isEmpty || audience == '0'
+          ? ''
+          : '${audienceLabel(task.audienceMetricType)} ${readableAudience(audience)}',
+      auto: autoRecordOn(task),
+      output: task.lastOutputPath,
+    );
+  }
 
-  Future<void> _run(String action, Future<void> Function(RecordTask task) work) async {
-    if (_busy != null) return;
-    setState(() => _busy = action);
+  Future<void> _run(Future<void> Function(RecordTask task) action) async {
+    final task = widget.task();
+    if (task == null || _acting) return;
+    setState(() => _acting = true);
     try {
-      await work(task);
+      await action(task);
+    } on Object {
+      widget.actions.failed();
     } finally {
-      if (mounted) setState(() => _busy = null);
+      if (mounted) setState(() => _acting = false);
     }
   }
 
-  Future<void> _confirmRemove() async {
-    if (_busy != null) return;
+  void _showMenu() => _menu.currentState?.showButtonMenu();
+
+  void _onMenu(_CardMenu entry) {
+    final task = widget.task();
+    if (task == null) return;
+    switch (entry) {
+      case _CardMenu.open:
+        widget.actions.open(task);
+      case _CardMenu.auto:
+        unawaited(_run((task) => widget.actions.setAuto(task, on: !autoRecordOn(task))));
+      case _CardMenu.delete:
+        unawaited(_confirmDelete(task));
+    }
+  }
+
+  Future<void> _confirmDelete(RecordTask task) async {
     final name = [
-      task.title,
       task.nick,
+      task.title,
       task.roomId,
     ].map((value) => value.trim()).firstWhere((value) => value.isNotEmpty, orElse: () => '--');
     final ok = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        scrollable: true,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-        title: Text(i18n('recorder_cancel_monitor')),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Text(i18n('recorder_cancel_monitor_confirm_named', args: {'name': name})),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(i18n('cancel'))),
-          FilledButton(
-            key: const ValueKey('recorder-remove-confirm'),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(i18n('confirm')),
+      builder: (dialogContext) {
+        final scheme = Theme.of(dialogContext).colorScheme;
+        return AlertDialog(
+          key: const ValueKey('recorder-delete-dialog'),
+          scrollable: true,
+          title: Text(i18n('recorder_delete_title', args: {'name': name})),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Text(i18n('recorder_delete_body')),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(i18n('cancel'))),
+            FilledButton(
+              key: const ValueKey('recorder-delete-confirm'),
+              style: FilledButton.styleFrom(backgroundColor: scheme.error, foregroundColor: scheme.onError),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(i18n('delete')),
+            ),
+          ],
+        );
+      },
     );
-    if (ok ?? false) await _run('remove', widget.actions.remove);
+    if (ok ?? false) await _run(widget.actions.remove);
   }
+
+  List<PopupMenuEntry<_CardMenu>> _menuItems(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final auto = autoRecordOn(widget.task());
+    PopupMenuItem<_CardMenu> item(_CardMenu entry, IconData icon, String text, {Color? color, Widget? trailing}) =>
+        PopupMenuItem(
+          key: ValueKey('recorder-menu-${entry.name}'),
+          value: entry,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            iconColor: color,
+            textColor: color,
+            leading: Icon(icon, size: 20),
+            title: Text(text),
+            trailing: trailing,
+          ),
+        );
+    return [
+      item(_CardMenu.open, AppIcons.enterRoom, i18n('room_open')),
+      item(
+        _CardMenu.auto,
+        AppIcons.autoRecord,
+        i18n('record_panel_auto_switch'),
+        // The row toggles it (the menu closes); the switch only shows it.
+        trailing: IgnorePointer(
+          child: Switch(key: const ValueKey('recorder-menu-auto-switch'), value: auto, onChanged: (_) {}),
+        ),
+      ),
+      const PopupMenuDivider(),
+      item(_CardMenu.delete, AppIcons.delete, i18n('recorder_delete_task'), color: scheme.error),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableSelector<_CardView?>(
+    listenable: widget.changes,
+    selector: _view,
+    builder: (context, view, _) {
+      if (view == null) return const SizedBox.shrink();
+      final scheme = Theme.of(context).colorScheme;
+      final actions = widget.actions;
+      void run(Future<void> Function(RecordTask task) action) => unawaited(_run(action));
+      final output = view.output;
+      return Material(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          key: ValueKey('recorder-card-${widget.taskId}'),
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            if (widget.task() case final task?) actions.open(task);
+          },
+          onLongPress: _showMenu,
+          onSecondaryTap: _showMenu,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _Head(view: view, wide: widget.wide, menu: _menuButton()),
+                const SizedBox(height: 10),
+                RecordStatusCard(
+                  facts: view.facts,
+                  changes: widget.changes,
+                  task: widget.task,
+                  chatCount: widget.chatCount,
+                  acting: _acting,
+                  compact: true,
+                  now: widget.now,
+                  onStart: () => run(actions.again),
+                  onStartTask: () => run(actions.startNow),
+                  onStop: () => run(actions.stop),
+                  onLimit: actions.limit,
+                  // "播放" while the file is there (the panel's rule).
+                  onPlay: output != null && File(output).existsSync() ? () => unawaited(playRecording(output)) : null,
+                  onFolder: () {
+                    if (widget.task() case final task?) actions.folder(task);
+                  },
+                  onReason: () {
+                    if (widget.task() case final task?) actions.reason(context, task);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  Widget _menuButton() => PopupMenuButton<_CardMenu>(
+    key: _menu,
+    tooltip: i18n('more'),
+    icon: const Icon(AppIcons.more, size: 22),
+    padding: EdgeInsets.zero,
+    position: PopupMenuPosition.under,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    onSelected: _onMenu,
+    itemBuilder: _menuItems,
+  );
+}
+
+/// The card's head (U.7a c3): cover, the streamer with "自动录", the title,
+/// the platform and the audience; "⋮" at the top right. No state on the
+/// cover any more (the status card says it, P2).
+class _Head extends StatelessWidget {
+  const new({required this.view, required this.wide, required this.menu});
+
+  final _CardView view;
+  final bool wide;
+  final Widget menu;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final styles = context.textStyles;
-    final color = recordStatusColor(task.status);
-    final showStats =
-        const {
-          RecordStatus.running,
-          RecordStatus.reconnecting,
-          RecordStatus.processing,
-          RecordStatus.preparing,
-        }.contains(task.status) ||
-        task.recordedSeconds > 0 ||
-        task.fileSize > 0;
-    final transitioning = const {
-      RecordStatus.reconnecting,
-      RecordStatus.preparing,
-      RecordStatus.processing,
-    }.contains(task.status);
-    final failure = (task.lastError?.isNotEmpty ?? false) && task.status != RecordStatus.running
-        ? recordFailureText(task, restriction: widget.restriction)
-        : null;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: task.status == RecordStatus.running
-              ? Colors.green.withValues(alpha: 0.35)
-              : theme.colorScheme.outline.withValues(alpha: 0.08),
-        ),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 18, offset: const Offset(0, 6))],
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          key: ValueKey('recorder-card-${task.taskId}'),
-          borderRadius: BorderRadius.circular(18),
-          onTap: () => widget.actions.open(task),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final details = _details(theme, styles);
-                    final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
-                    if (constraints.maxWidth < 480 * textScale) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [_cover(color, styles), const SizedBox(height: 12), details],
-                      );
-                    }
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _cover(color, styles),
-                        const SizedBox(width: 14),
-                        Expanded(child: details),
-                      ],
-                    );
-                  },
-                ),
-                if (showStats) ...[const SizedBox(height: 14), _stats(theme)],
-                if (transitioning) ...[
-                  const SizedBox(height: 12),
-                  _banner(
-                    color: color.withValues(alpha: 0.08),
-                    border: color.withValues(alpha: 0.14),
-                    leading: SizedBox.square(
-                      dimension: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: color),
-                    ),
-                    text: Text(
-                      task.status == RecordStatus.reconnecting && task.retryCount > 0
-                          ? i18n('recorder_retry_count', args: {'count': '${task.retryCount}'})
-                          : recordStatusText(task.status),
-                      style: styles.t12.copyWith(color: color, fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ],
-                if (task.inputTailDiscarded || task.inputCoverageIncomplete) ...[
-                  const SizedBox(height: 12),
-                  _banner(
-                    key: const ValueKey('recorder-input-warning'),
-                    color: theme.colorScheme.tertiaryContainer,
-                    leading: Icon(Icons.warning_amber_rounded, size: 17, color: theme.colorScheme.onTertiaryContainer),
-                    text: Text(
-                      [
-                        if (task.inputCoverageIncomplete) i18n('recorder_input_coverage_incomplete'),
-                        if (task.inputTailDiscarded) i18n('recorder_input_tail_discarded'),
-                      ].join('\n'),
-                      style: styles.t12.copyWith(color: theme.colorScheme.onTertiaryContainer, height: 1.3),
-                    ),
-                  ),
-                ],
-                if (failure != null) ...[
-                  const SizedBox(height: 12),
-                  _banner(
-                    key: const ValueKey('recorder-last-error'),
-                    color: theme.colorScheme.errorContainer.withValues(alpha: 0.52),
-                    leading: Icon(Icons.error_outline_rounded, size: 17, color: theme.colorScheme.error),
-                    text: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          failure.summary,
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
-                          style: styles.t12.copyWith(color: theme.colorScheme.onErrorContainer, height: 1.3),
-                        ),
-                        if (failure.detail case final detail?)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              detail,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: styles.t11.copyWith(
-                                color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.7),
-                                height: 1.3,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  child: Wrap(
-                    alignment: WrapAlignment.spaceBetween,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 12,
-                    runSpacing: 8,
-                    children: [
-                      _miniInfo(theme, styles, Icons.schedule_rounded, recordTimeText(task.displayStartTime)),
-                      _actions(theme, styles),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _cover(Color color, AppTextStyles styles) {
-    final url = normalizeImageUrl(task.cover);
-    Widget blank(BuildContext _) => const ColoredBox(color: Colors.black12);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: SizedBox(
-        width: 150,
-        height: 90,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (url.isEmpty)
-              const ColoredBox(color: Colors.black12)
-            else
-              LiveNetworkImage(url: url, placeholder: blank, error: blank, memCacheWidth: 360),
-            Positioned(
-              left: 8,
-              top: 8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.82),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 0.5),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (task.status == RecordStatus.running) ...[const _Pulse(), const SizedBox(width: 5)],
-                    Text(
-                      recordStatusText(task.status),
-                      style: styles.t12.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _details(ThemeData theme, AppTextStyles styles) {
-    final audienceKey = switch (task.audienceMetricType) {
-      AudienceMetricType.popularity => 'audience_popularity',
-      AudienceMetricType.onlineViewers => 'audience_online',
-      AudienceMetricType.totalViewers => 'audience_total',
-      AudienceMetricType.followers => 'audience_followers',
-      AudienceMetricType.unknown => 'audience_count',
-    };
-    final audienceIcon = switch (task.audienceMetricType) {
-      AudienceMetricType.popularity => Icons.whatshot_rounded,
-      AudienceMetricType.totalViewers => Icons.visibility_rounded,
-      AudienceMetricType.followers => Icons.favorite_rounded,
-      AudienceMetricType.onlineViewers || AudienceMetricType.unknown => Icons.people_alt_rounded,
-    };
-    final title = task.title.trim().isNotEmpty ? task.title : task.roomId;
-    return Column(
+    final scheme = theme.colorScheme;
+    final secondary = scheme.onSurfaceVariant;
+    final (width, height) = wide ? (160.0, 90.0) : (96.0, 54.0);
+    Widget blank(BuildContext _) => ColoredBox(color: scheme.surfaceContainerHighest);
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: styles.t16.copyWith(fontWeight: FontWeight.w700, height: 1.2, letterSpacing: 0.1),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: SizedBox(
+            key: const ValueKey('recorder-card-cover'),
+            width: width,
+            height: height,
+            child: view.cover.isEmpty
+                ? blank(context)
+                : LiveNetworkImage(
+                    url: view.cover,
+                    placeholder: blank,
+                    error: blank,
+                    // Decoded at twice the size shown.
+                    memCacheWidth: (width * 2).round(),
+                  ),
+          ),
         ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            CommonAvatar(avatarUrl: normalizeImageUrl(task.avatar), radius: 12, fallbackName: task.nick),
-            const SizedBox(width: 7),
-            Expanded(
-              child: Text(
-                task.nick,
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      view.nick,
+                      key: const ValueKey('recorder-card-nick'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.emphasis.copyWith(color: scheme.onSurface),
+                    ),
+                  ),
+                  if (view.auto) ...[const SizedBox(width: 6), const _AutoPill()],
+                ],
+              ),
+              const SizedBox(height: 1),
+              Text(
+                view.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: styles.t14.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurfaceVariant),
+                style: theme.textTheme.bodyMedium?.regular.copyWith(color: secondary),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 14,
-          runSpacing: 6,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                PlatformLogo(task.platform, size: 14),
-                const SizedBox(width: 4),
-                Text(recordPlatformName(task.platform), style: styles.t11.copyWith(fontWeight: FontWeight.bold)),
-              ],
-            ),
-            _miniInfo(theme, styles, Icons.high_quality_rounded, task.selectedQuality ?? i18n('recorder_auto')),
-            if (task.selectedLine?.isNotEmpty ?? false)
-              _miniInfo(theme, styles, Icons.alt_route_rounded, task.selectedLine!),
-            _miniInfo(theme, styles, audienceIcon, '${i18n(audienceKey)} ${task.watching}'),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _stats(ThemeData theme) {
-    final running = task.status == RecordStatus.running;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.08)),
-      ),
-      child: Column(
-        children: [
-          Wrap(
-            spacing: 16,
-            runSpacing: 10,
-            children: [
-              _statItem(theme, Icons.timer_outlined, recordDurationText(task.recordedSeconds)),
-              _statItem(theme, Icons.storage_rounded, recordSizeText(task.fileSize)),
-              _statItem(theme, Icons.speed_rounded, '${task.recordSpeed.toStringAsFixed(1)}x'),
-              _statItem(theme, Icons.graphic_eq_rounded, recordBitrateText(task.bitrate)),
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  ClipRRect(borderRadius: BorderRadius.circular(3), child: PlatformLogo(view.platform, size: 13)),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      [platformName(view.platform), if (view.audience.isNotEmpty) view.audience].join(' · '),
+                      key: const ValueKey('recorder-card-meta'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.regular.tabular.copyWith(color: secondary),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: SizedBox(
-              height: 4,
-              child: running || task.status == RecordStatus.processing
-                  ? LinearProgressIndicator(color: theme.colorScheme.primary)
-                  : ColoredBox(color: theme.colorScheme.primary.withValues(alpha: 0.4)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _statItem(ThemeData theme, IconData icon, String label) {
-    final color = theme.colorScheme.onSurfaceVariant;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(10)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 5),
-          Flexible(
-            child: Text(
-              label,
-              style: context.textStyles.t12.copyWith(fontWeight: FontWeight.w600, color: color),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _miniInfo(ThemeData theme, AppTextStyles styles, IconData icon, String label) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(icon, size: 13, color: theme.colorScheme.onSurfaceVariant),
-      const SizedBox(width: 4),
-      Flexible(
-        child: Text(
-          label,
-          style: styles.t11.copyWith(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.w500),
         ),
-      ),
-    ],
-  );
-
-  Widget _banner({required Color color, required Widget leading, required Widget text, Color? border, Key? key}) =>
-      Container(
-        key: key,
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(12),
-          border: border == null ? null : Border.all(color: border),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            leading,
-            const SizedBox(width: 8),
-            Expanded(child: text),
-          ],
-        ),
-      );
-
-  Widget _actions(ThemeData theme, AppTextStyles styles) {
-    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(12));
-    final textStyle = styles.t12.copyWith(fontWeight: FontWeight.w700);
-    const padding = EdgeInsets.symmetric(horizontal: 14);
-    const size = Size(0, kMinInteractiveDimension);
-    Widget label(String action, String text) => _busy == action
-        ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
-        : Text(text);
-    final busy = _busy != null;
-    final remove = TextButton(
-      key: const ValueKey('recorder-remove'),
-      onPressed: busy ? null : _confirmRemove,
-      child: _busy == 'remove'
-          ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
-          : Text(i18n('remove'), style: styles.t15.copyWith(color: busy ? null : Colors.red)),
-    );
-    Widget primary(String action, String text, Future<void> Function(RecordTask task) work) => FilledButton(
-      key: ValueKey('recorder-$action'),
-      style: FilledButton.styleFrom(padding: padding, minimumSize: size, shape: shape, textStyle: textStyle),
-      onPressed: busy ? null : () => unawaited(_run(action, work)),
-      child: label(action, text),
-    );
-    final stop = FilledButton(
-      key: const ValueKey('recorder-stop'),
-      style: FilledButton.styleFrom(
-        backgroundColor: Colors.redAccent,
-        padding: padding,
-        minimumSize: size,
-        shape: shape,
-        textStyle: textStyle,
-      ),
-      onPressed: busy ? null : () => unawaited(_run('stop', widget.actions.stop)),
-      child: label('stop', i18n('recorder_stop')),
-    );
-    final children = switch (task.status) {
-      RecordStatus.running || RecordStatus.reconnecting || RecordStatus.preparing => [remove, stop],
-      RecordStatus.queued => [
-        remove,
-        primary('start', i18n('recorder_start'), widget.actions.start),
-        OutlinedButton(
-          key: const ValueKey('recorder-cancel'),
-          style: OutlinedButton.styleFrom(
-            padding: padding,
-            minimumSize: size,
-            shape: shape,
-            side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
-            textStyle: textStyle,
-          ),
-          onPressed: busy ? null : () => unawaited(_run('cancel', widget.actions.stop)),
-          child: label('cancel', i18n('cancel')),
+        // "⋮" sits in the card's corner (40 × 40, the padding taken back).
+        Transform.translate(
+          offset: const Offset(6, -6),
+          child: SizedBox.square(dimension: 40, child: menu),
         ),
       ],
-      RecordStatus.waitingLive => [
-        remove,
-        primary('check', i18n('recorder_check_now'), widget.actions.check),
-        primary('start', i18n('recorder_start'), widget.actions.start),
-      ],
-      RecordStatus.failed => [remove, primary('start', i18n('retry'), widget.actions.start)],
-      RecordStatus.completed => [remove, primary('start', i18n('recorder_restart_record'), widget.actions.start)],
-      RecordStatus.stopped ||
-      RecordStatus.processing => [remove, primary('start', i18n('recorder_start'), widget.actions.start)],
-    };
-    return Wrap(alignment: WrapAlignment.end, spacing: 6, runSpacing: 4, children: children);
+    );
   }
 }
 
-/// The blinking dot of a running recording.
-class _Pulse extends StatefulWidget {
+/// "⏱ 自动录" (the live room bar's mark, U.2a change 13).
+class _AutoPill extends StatelessWidget {
   const new();
 
   @override
-  State<_Pulse> createState() => _PulseState();
-}
-
-class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 900),
-  )..repeat(reverse: true);
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return DecoratedBox(
+      key: const ValueKey('recorder-card-auto'),
+      decoration: BoxDecoration(color: scheme.primaryContainer, borderRadius: BorderRadius.circular(11)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(6, 2, 8, 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(AppIcons.autoRecord, size: 13, color: scheme.onPrimaryContainer),
+            const SizedBox(width: 3),
+            Text(
+              i18n('live_play_auto_record'),
+              maxLines: 1,
+              style: theme.textTheme.bodySmall?.emphasis.copyWith(color: scheme.onPrimaryContainer),
+            ),
+          ],
+        ),
+      ),
+    );
   }
-
-  @override
-  Widget build(BuildContext context) => FadeTransition(
-    opacity: Tween<double>(begin: 0.35, end: 1).animate(_controller),
-    child: const DecoratedBox(
-      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-      child: SizedBox.square(dimension: 7),
-    ),
-  );
 }

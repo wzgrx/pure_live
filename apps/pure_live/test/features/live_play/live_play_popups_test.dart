@@ -18,13 +18,14 @@ import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
-import 'package:pure_live/features/live_play/logic/record_state.dart';
+import 'package:pure_live/features/live_play/logic/danmaku_fps.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/features/live_play/player/player_view.dart';
 import 'package:pure_live/features/live_play/record/record_panel.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/record/record_state.dart';
 
 import '../../support.dart';
 import 'live_play_support.dart';

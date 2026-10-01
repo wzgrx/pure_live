@@ -43,7 +43,7 @@ abstract final class AppIcons {
   /// Search for rooms (3.x's wide rail, `CustomIcons.search`).
   static const IconData search = CustomIcons.search;
 
-  /// More actions ("更多").
+  /// More actions ("更多"; also a card's ⋮ menu).
   static const IconData more = Remix.more_2_fill;
 
   /// The watch history ("观看记录").
@@ -293,6 +293,26 @@ abstract final class AppIcons {
   /// A recording failed.
   static const IconData recordFailed = Icons.error_outline_rounded;
 
+  // ---- the recording centre (3.x recorder_page.dart; docs/ui/compare/U.7a) ----
+
+  /// Open the recording folder (3.x's app bar).
+  static const IconData recordFolder = Remix.folder_video_line;
+
+  /// The recording settings (3.x's app bar).
+  static const IconData recordSettings = Remix.settings_5_line;
+
+  /// No record task (3.x's empty centre).
+  static const IconData recordEmpty = Icons.video_collection_outlined;
+
+  /// This build cannot record.
+  static const IconData recordUnavailable = Icons.videocam_off_outlined;
+
+  /// Enter the live room (a card's menu).
+  static const IconData enterRoom = Icons.open_in_new_rounded;
+
+  /// Delete (a record task, a history entry).
+  static const IconData delete = Remix.delete_bin_line;
+
   /// Stop a recording (■).
   static const IconData stopRecording = Icons.stop_rounded;
 
@@ -445,9 +465,6 @@ abstract final class AppIcons {
 
   /// A restricted room on a cover (paid, login, region …).
   static const IconData restrictedBadge = Icons.lock_rounded;
-
-  /// Delete one entry (3.x's history card).
-  static const IconData delete = Remix.delete_bin_line;
 
   /// A room's tags (3.x's card dialog).
   static const IconData tag = Remix.price_tag_3_line;

@@ -94,7 +94,7 @@ v3 没有的、不在清点里的：开播提醒（v3 没有通知开播的功�
 | 编号 | 功能 | v3 位置 | Android | v4 现状 | 依据 | 备注 |
 |---|---|---|---|---|---|---|
 | F-NET-01 | 应用代理（平台请求、弹幕、图片、WebDAV） | `common/services/settings/proxy_settings_controller.dart:16`、`common/global/initialized.dart:81` | 是 | 完成 | `app/platforms.dart` 的 `SettingsProxyPolicy`（M1、M12） | |
-| F-NET-02 | 播放代理（独立的一组设置，播放和录制走它；关掉时直连） | `player/core/playback_proxy_policy.dart:6`、`modules/settings/pages/network_proxy_settings_page.dart:16` | 是 | 缺失 | 设置页有入口，但 `proxyPort` 没人读，播放和录制只走应用代理 | 3.x 用户的播放代理现在不生效；半成品：M12.5 分支 `2894bdfe0` |
+| F-NET-02 | 播放代理（独立的一组设置，播放走它，关掉时直连；录制的中继走应用代理，`common/global/initialized.dart:94`） | `player/core/playback_proxy_policy.dart:6`、`modules/settings/pages/network_proxy_settings_page.dart:16` | 是 | 缺失 | 设置页有入口，但 `proxyPort` 没人读，播放和录制只走应用代理 | 3.x 用户的播放代理现在不生效；半成品：M12.5 分支 `2894bdfe0` |
 | F-NET-03 | 断网预检、移动数据提示 | `common/base/base_controller.dart:19` | 是 | 完成 | `app/network.dart`（M12.3） | |
 | F-NET-04 | Twitch 网页完整性令牌（无界面浏览器） | `core/utils/twitch/twitch_web_integrity.dart:9` | 是 | 没验证 | `platform/twitch_webview_http.dart`（UPGRADES X-1） | |
 

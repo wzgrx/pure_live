@@ -16,6 +16,7 @@ import 'package:pure_live/app/launch_args.dart';
 import 'package:pure_live/app/platforms.dart';
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/app/ui_mode.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/native_http.dart';
 import 'package:pure_live/platform/platform_services.dart';
@@ -53,6 +54,8 @@ abstract final class AppBootstrap {
   static Future<AppServices> start(List<String> args) async {
     WidgetsFlutterBinding.ensureInitialized();
     configureDecodedImageCache(desktop: Platform.isWindows);
+    // Which interface `auto` picks (M14.1): asked before the first frame.
+    await TvDevice.detect();
     final launch = LaunchArgs.parse(args);
     final dataRoot = await resolveDataRoot(instanceId: launch.instanceId);
     final cipher = platformSecretCipher();

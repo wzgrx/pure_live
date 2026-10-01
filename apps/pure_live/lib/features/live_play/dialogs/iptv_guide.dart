@@ -78,10 +78,14 @@ Future<void> showIptvGuide(BuildContext context, LiveRoomController controller) 
 /// others say why not. [onClose] adds ✕ (the landscape panel).
 class IptvGuideView extends ConsumerStatefulWidget {
   /// Creates the guide.
-  const new({required this.controller, this.onClose, this.reveal, super.key});
+  const new({required this.controller, this.onClose, this.reveal, this.loader, super.key});
 
   /// The room.
   final LiveRoomController controller;
+
+  /// Reads the programmes from `from` to `to` ([loadChannelGuide] by
+  /// default; tests give their own).
+  final Future<List<EpgProgramme>> Function(DateTime from, DateTime to)? loader;
 
   /// Closes the guide (a panel); null for a guide that stays.
   final VoidCallback? onClose;
@@ -152,12 +156,10 @@ class _IptvGuideViewState extends ConsumerState<IptvGuideView> {
     final back = days != null && days.isFinite && days > 0 ? days.ceil().clamp(1, 7) : 2;
     final midnight = DateTime(now.year, now.month, now.day);
     try {
-      final programmes = await loadChannelGuide(
-        _room,
-        guideSourceId: source,
-        from: midnight.subtract(Duration(days: back)),
-        to: midnight.add(const Duration(days: 2)),
-      );
+      final from = midnight.subtract(Duration(days: back));
+      final to = midnight.add(const Duration(days: 2));
+      final programmes =
+          await (widget.loader?.call(from, to) ?? loadChannelGuide(_room, guideSourceId: source, from: from, to: to));
       if (!mounted || load != _loads) return;
       setState(() {
         _programmes = programmes;

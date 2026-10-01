@@ -1,9 +1,9 @@
 import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
 
-/// What the record panel's status card shows (docs/ui/compare/U.2f,
-/// 录制): one look per state of the room's task, only the actions that
-/// work now.
+/// What the status card of a record task shows (docs/ui/compare/U.2f, 录制;
+/// the same card in the recording centre, U.7a): one look per state of the
+/// task, only the actions that work now.
 enum RecordCardState {
   /// No task, or a task stopped before anything was recorded: "开始录制".
   idle,
@@ -134,21 +134,31 @@ String groupedNumber(int value) {
   return buffer.toString();
 }
 
-/// The danmaku frame rate in use (3.x `resolvedDanmakuFps`): the manual
-/// [configured] rate, or with [automatic] the display's highest rate capped
-/// by the refresh rate [mode] (`powerSaving` 60, `balanced` 60,
-/// `performance` the display's).
-int resolvedDanmakuFps({
-  required bool automatic,
-  required int configured,
-  required String mode,
-  double? maxRefreshRate,
-  double? currentRefreshRate,
-}) {
-  if (!automatic) return configured.clamp(30, 240);
-  final maximum = maxRefreshRate ?? 0;
-  final current = currentRefreshRate ?? 0;
-  final detected = maximum > 0 ? maximum : (current > 0 ? current : 60.0);
-  final device = detected.round().clamp(30, 240);
-  return mode == 'performance' ? device : device.clamp(30, 60);
+/// The order of the recording centre (U.7a c1, 3.x `RecordStatus.order` in
+/// the card's words): recording, reconnecting, joining, preparing, queued,
+/// waiting, failed, saved, not recording.
+const List<RecordCardState> recordCardOrder = [
+  RecordCardState.recording,
+  RecordCardState.reconnecting,
+  RecordCardState.processing,
+  RecordCardState.preparing,
+  RecordCardState.queued,
+  RecordCardState.waiting,
+  RecordCardState.failed,
+  RecordCardState.saved,
+  RecordCardState.idle,
+];
+
+/// Bitrate (3.x `_formatBitrate`): `3.2 Mbps`, `850 kbps`, `--`.
+String recordBitrateText(double kilobitsPerSecond) {
+  if (!kilobitsPerSecond.isFinite || kilobitsPerSecond <= 0) return '--';
+  if (kilobitsPerSecond >= 1000) return '${(kilobitsPerSecond / 1000).toStringAsFixed(1)} Mbps';
+  return '${kilobitsPerSecond.toStringAsFixed(0)} kbps';
+}
+
+/// `21:35` of [time] in local time.
+String recordHourMinute(DateTime time) {
+  final local = time.toLocal();
+  String two(int value) => value.toString().padLeft(2, '0');
+  return '${two(local.hour)}:${two(local.minute)}';
 }

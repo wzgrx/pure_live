@@ -7,11 +7,11 @@ import 'package:live_record/live_record.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
-import 'package:pure_live/features/live_play/logic/record_state.dart';
 import 'package:pure_live/features/live_play/record/record_panel.dart';
 import 'package:pure_live/features/recorder/recorder_texts.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/record/record_state.dart';
 
 /// The record button of the room bar (3.x `RecordActionButton`): shows the
 /// room's task state (not recording, records when live, recording); a tap

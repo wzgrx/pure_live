@@ -9,9 +9,9 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/buttons/follow_button.dart';
 import 'package:pure_live/features/live_play/buttons/record_button.dart';
 import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
-import 'package:pure_live/features/live_play/logic/record_state.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/record/record_state.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The least width kept for the avatar and the names: the buttons turn into

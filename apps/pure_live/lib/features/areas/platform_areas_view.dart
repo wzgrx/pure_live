@@ -1,22 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/areas/area_card.dart';
 import 'package:pure_live/features/areas/area_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/paging.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-/// One platform's areas (3.x `AreaGridView`): a tab per category, swiped
-/// horizontally, each a grid of areas with pull to refresh; a filter that
-/// searches every category of the platform (new); a failed refresh keeps
-/// the areas and shows the error above them (new).
-///
-/// 3.x showed Douyin's categories as one flat grid; since Douyin lists its
-/// games too (156 areas under "games", upgrade C-12) it has tabs like the
-/// other platforms. A platform with one category shows no category tabs.
-class PlatformAreasView extends StatefulWidget {
+/// Whether a platform's areas show as one grid without category tabs, each
+/// card naming its category (3.x `areas_grid_view.dart:13`: Douyin).
+bool flatAreas(String platform) => platform == SiteIds.douyin;
+
+/// Room under the grid for the floating "关注分区" button.
+const double areasButtonClearance = 80;
+
+/// One platform's areas (3.x `AreaGridView`, docs/ui/compare/U.4d): a tab
+/// per category in the secondary style (c2), swiped horizontally; no tabs
+/// when the platform has one category (c4); Douyin in one grid (3.x); the
+/// cards name only the area (c3); skeleton cards while loading (c8); pull
+/// to refresh on phones and tablets, numbered pages with ← → on desktops
+/// (3.x); a failed refresh keeps the areas and shows the error above them.
+class PlatformAreasView extends ConsumerStatefulWidget {
   /// Shows [catalog].
   const new({required this.catalog, super.key});
 
@@ -24,17 +34,17 @@ class PlatformAreasView extends StatefulWidget {
   final AreaCatalog catalog;
 
   @override
-  State<PlatformAreasView> createState() => _PlatformAreasViewState();
+  ConsumerState<PlatformAreasView> createState() => _PlatformAreasViewState();
 }
 
-class _PlatformAreasViewState extends State<PlatformAreasView>
+class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
     with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   TabController? _tabs;
   List<String> _tabIds = const [];
-  final TextEditingController _filter = TextEditingController();
-  bool _filtering = false;
 
   AreaCatalog get _catalog => widget.catalog;
+
+  bool get _flat => flatAreas(_catalog.site.id);
 
   @override
   bool get wantKeepAlive => true;
@@ -61,7 +71,6 @@ class _PlatformAreasViewState extends State<PlatformAreasView>
     _catalog.removeListener(_changed);
     _tabs?.removeListener(_onTab);
     _tabs?.dispose();
-    _filter.dispose();
     super.dispose();
   }
 
@@ -73,7 +82,7 @@ class _PlatformAreasViewState extends State<PlatformAreasView>
   /// Keeps one tab per category; the selection follows the catalogue's (kept
   /// by id across refreshes).
   void _syncTabs() {
-    final ids = [for (final category in _catalog.categories) category.id];
+    final ids = _flat ? const <String>[] : [for (final category in _catalog.categories) category.id];
     final same = ids.length == _tabIds.length && ids.indexed.every((entry) => entry.$2 == _tabIds[entry.$1]);
     if (!same) {
       final old = _tabs;
@@ -101,32 +110,24 @@ class _PlatformAreasViewState extends State<PlatformAreasView>
     _catalog.select(tabs.index);
   }
 
-  void _toggleFilter() => setState(() {
-    _filtering = !_filtering;
-    if (!_filtering) _filter.clear();
-  });
-
   Widget _status(BuildContext context) {
-    if (!_catalog.hasLoaded || _catalog.isLoading) {
-      return AppStatusView(type: AppStatusType.loading, title: i18n('refresh_loading'));
-    }
     final error = _catalog.error;
     if (error != null) {
       final login = isLoginError(error);
       return AppStatusView(
         type: AppStatusType.error,
-        icon: login ? Icons.account_circle_outlined : Icons.wifi_off_rounded,
+        icon: login ? AppIcons.loginRequired : AppIcons.networkError,
         title: i18n(login ? 'login_required_title' : 'network_error_title'),
         subtitle: describeLoadError(error),
         buttonText: i18n(login ? 'go_to_login' : 'retry'),
-        buttonIcon: login ? Icons.login_rounded : null,
+        buttonIcon: login ? AppIcons.login : null,
         onButtonPressed: login
             ? () => AppNavigator.toNamed<void>(RoutePath.kSettingsAccount).ignore()
             : () => _catalog.refresh().ignore(),
       );
     }
     return EmptyView(
-      icon: Remix.apps_2_line,
+      icon: AppIcons.areas,
       title: i18n('empty_areas_title'),
       subtitle: i18n('empty_areas_subtitle'),
       buttonText: i18n('refresh'),
@@ -134,114 +135,235 @@ class _PlatformAreasViewState extends State<PlatformAreasView>
     );
   }
 
-  Widget _grid(List<LiveArea> areas, {required String emptyTitle, String? emptySubtitle}) {
-    final content = areas.isEmpty
-        ? LayoutBuilder(
-            builder: (context, constraints) => SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Center(
-                  child: EmptyView(icon: Remix.apps_2_line, title: emptyTitle, subtitle: emptySubtitle ?? ''),
-                ),
-              ),
-            ),
-          )
-        : AreaGrid(areas: areas);
-    return RefreshIndicator(onRefresh: _catalog.refresh, child: content);
+  /// The secondary tab style of the categories (U.4d c2, choice X1): 14
+  /// points, grey, the selected one dark and semi-bold, the indicator under
+  /// the whole tab, a line under the row; from the left.
+  Widget _categoryTabs(BuildContext context, TabController tabs, List<LiveCategory> categories) {
+    final scheme = Theme.of(context).colorScheme;
+    final styles = context.textStyles;
+    return ScrollableTabBar(
+      key: const ValueKey('area-category-tabs'),
+      controller: tabs,
+      isScrollable: true,
+      tabAlignment: TabAlignment.start,
+      indicatorSize: TabBarIndicatorSize.tab,
+      indicatorColor: scheme.primary,
+      dividerColor: scheme.outlineVariant,
+      dividerHeight: 1,
+      labelColor: scheme.onSurface,
+      unselectedLabelColor: scheme.onSurfaceVariant,
+      labelStyle: styles.t14.copyWith(fontWeight: FontWeight.w600),
+      unselectedLabelStyle: styles.t14.copyWith(fontWeight: FontWeight.w400),
+      labelPadding: const EdgeInsets.symmetric(horizontal: 14),
+      physics: const PureLiveBoundedScrollPhysics(),
+      tabs: [for (final category in categories) Tab(text: category.name)],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
     final categories = _catalog.categories;
+    if (!_catalog.hasLoaded || (_catalog.isLoading && categories.isEmpty)) return const _AreasSkeleton();
     if (categories.isEmpty) return _status(context);
     final theme = Theme.of(context);
-    final keyword = _filter.text.trim();
     final tabs = _tabs;
     final error = _catalog.error;
+    final Widget content;
+    if (_flat) {
+      content = _AreaPages(
+        key: const ValueKey('area-page-flat'),
+        areas: _catalog.allAreas,
+        caption: AreaCaption.category,
+        onRefresh: _catalog.refresh,
+        busy: _catalog.isLoading,
+      );
+    } else if (tabs == null) {
+      content = _AreaPages(
+        key: ValueKey('area-page-${categories.single.id}'),
+        areas: categories.single.children,
+        onRefresh: _catalog.refresh,
+        busy: _catalog.isLoading,
+      );
+    } else {
+      content = TabBarView(
+        controller: tabs,
+        physics: const PureLiveBoundedScrollPhysics(),
+        children: [
+          for (final category in categories)
+            _AreaPages(
+              key: ValueKey('area-page-${category.id}'),
+              areas: category.children,
+              onRefresh: _catalog.refresh,
+              busy: _catalog.isLoading,
+            ),
+        ],
+      );
+    }
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: tabs == null
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(categories.single.name, style: context.textStyles.t14Bold),
-                    )
-                  : ScrollableTabBar(
-                      key: const ValueKey('area-category-tabs'),
-                      controller: tabs,
-                      isScrollable: true,
-                      tabAlignment: TabAlignment.start,
-                      physics: const PureLiveBoundedScrollPhysics(),
-                      tabs: [for (final category in categories) Tab(text: category.name)],
-                    ),
-            ),
-            IconButton(
-              key: const ValueKey('areas-filter-toggle'),
-              tooltip: i18n('areas_filter_hint'),
-              icon: Icon(_filtering ? Icons.close_rounded : Icons.search_rounded),
-              onPressed: _toggleFilter,
-            ),
-            IconButton(
-              key: const ValueKey('areas-refresh'),
-              tooltip: i18n('refresh'),
-              icon: const Icon(Icons.refresh_rounded),
-              onPressed: _catalog.isLoading ? null : () => _catalog.refresh().ignore(),
-            ),
-          ],
-        ),
-        if (_filtering)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
-            child: TextField(
-              key: const ValueKey('areas-filter-field'),
-              controller: _filter,
-              autofocus: true,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                isDense: true,
-                prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                hintText: i18n('areas_filter_hint'),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-          ),
-        if (_catalog.isLoading) const LinearProgressIndicator(minHeight: 2) else const SizedBox(height: 2),
+        if (tabs != null) _categoryTabs(context, tabs, categories),
+        if (_catalog.isLoading) const LinearProgressIndicator(minHeight: 2.5),
         if (error != null)
           Material(
             key: const ValueKey('areas-refresh-error'),
             color: theme.colorScheme.errorContainer,
             child: ListTile(
               dense: true,
-              leading: Icon(Icons.info_outline_rounded, color: theme.colorScheme.onErrorContainer),
+              leading: Icon(AppIcons.info, color: theme.colorScheme.onErrorContainer),
               title: Text(describeLoadError(error), style: TextStyle(color: theme.colorScheme.onErrorContainer)),
               trailing: TextButton(onPressed: () => _catalog.refresh().ignore(), child: Text(i18n('retry'))),
             ),
           ),
-        Expanded(
-          child: keyword.isNotEmpty
-              ? _grid(
-                  filterAreas(_catalog.allAreas, keyword),
-                  emptyTitle: i18n('areas_filter_empty', args: {'keyword': keyword}),
-                )
-              : tabs == null
-              ? _grid(categories.single.children, emptyTitle: i18n('empty_areas_title'))
-              : TabBarView(
-                  controller: tabs,
-                  physics: const PureLiveBoundedScrollPhysics(),
-                  children: [
-                    for (final category in categories)
-                      KeyedSubtree(
-                        key: ValueKey('area-page-${category.id}'),
-                        child: _grid(category.children, emptyTitle: i18n('empty_areas_title')),
-                      ),
-                  ],
-                ),
+        Expanded(child: content),
+      ],
+    );
+  }
+}
+
+/// The areas of one category: the whole grid with pull to refresh, or on
+/// desktops numbered pages (3.x `BasePageView`).
+class _AreaPages extends ConsumerStatefulWidget {
+  const new({
+    required this.areas,
+    required this.onRefresh,
+    required this.busy,
+    this.caption = AreaCaption.nameOnly,
+    super.key,
+  });
+
+  final List<LiveArea> areas;
+  final Future<void> Function() onRefresh;
+  final bool busy;
+  final AreaCaption caption;
+
+  @override
+  ConsumerState<_AreaPages> createState() => _AreaPagesState();
+}
+
+class _AreaPagesState extends ConsumerState<_AreaPages> {
+  final ScrollController _scroll = createPureLiveScrollController();
+  int _page = 1;
+  int? _pageSize;
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _goTo(int page) {
+    if (_scroll.hasClients) _scroll.jumpTo(0);
+    setState(() => _page = page);
+  }
+
+  Widget _empty() => LayoutBuilder(
+    builder: (context, constraints) => SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: constraints.maxHeight),
+        child: Center(
+          child: EmptyView(
+            icon: AppIcons.areas,
+            title: i18n('empty_areas_title'),
+            subtitle: i18n('empty_areas_subtitle'),
+          ),
         ),
+      ),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final windowWidth = MediaQuery.sizeOf(context).width;
+    final desktop = usesDesktopPages(windowWidth);
+    final areas = widget.areas;
+    if (!desktop) {
+      return RefreshIndicator(
+        onRefresh: widget.onRefresh,
+        child: areas.isEmpty ? _empty() : AreaGrid(areas: areas, caption: widget.caption, controller: _scroll),
+      );
+    }
+    final showSizes = watchSetting(ref, Settings.pageShowSizeSelector);
+    final showGoto = watchSetting(ref, Settings.pageShowGotoButton);
+    watchSetting(ref, Settings.pageDefaultSize);
+    watchSetting(ref, Settings.pageSizeOptions);
+    final sizes = pageSizesOf(ref.read(storeProvider).settings, windowWidth);
+    final pageSize = _pageSize ?? sizes.size;
+    final lastPage = areas.isEmpty ? 1 : (areas.length / pageSize).ceil();
+    final page = _page.clamp(1, lastPage);
+    final shown = areas.sublist((page - 1) * pageSize, (page * pageSize).clamp(0, areas.length));
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+          if (page > 1) _goTo(page - 1);
+        },
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () {
+          if (page < lastPage) _goTo(page + 1);
+        },
+      },
+      child: Focus(
+        autofocus: true,
+        child: Column(
+          children: [
+            Expanded(
+              child: shown.isEmpty ? _empty() : AreaGrid(areas: shown, caption: widget.caption, controller: _scroll),
+            ),
+            PaginationBar(
+              page: page,
+              lastPage: lastPage,
+              canNext: page < lastPage,
+              busy: widget.busy,
+              pageSize: pageSize,
+              pageSizes: showSizes ? sizes.options : null,
+              showGoto: showGoto,
+              onPage: _goTo,
+              onPageSize: (size) {
+                final first = (page - 1) * pageSize;
+                setState(() {
+                  _pageSize = size;
+                  _page = first ~/ size + 1;
+                });
+              },
+              onRefresh: () => widget.onRefresh().ignore(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The page while the areas load (U.4d c8): grey pills for the category
+/// row and grey cards, no shimmer.
+class _AreasSkeleton extends StatelessWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
+      key: const ValueKey('areas-skeleton'),
+      children: [
+        Container(
+          height: kTextTabBarHeight,
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: scheme.outlineVariant)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            spacing: 24,
+            children: [
+              for (final width in const [30.0, 30.0, 58.0, 58.0, 30.0])
+                Container(
+                  width: width,
+                  height: 14,
+                  decoration: BoxDecoration(color: scheme.surfaceContainerHigh, borderRadius: BorderRadius.circular(7)),
+                ),
+            ],
+          ),
+        ),
+        const Expanded(child: AreaGridSkeleton()),
       ],
     );
   }

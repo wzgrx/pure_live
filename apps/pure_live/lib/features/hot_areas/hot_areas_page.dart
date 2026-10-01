@@ -35,14 +35,23 @@ List<String> reorderHotAreas(List<String> visible, int oldIndex, int newIndex) {
 String preferredAfter(List<String> visible, String preferred) =>
     visible.isEmpty || visible.contains(preferred) ? preferred : visible.first;
 
-/// Platforms shown on the areas and popular pages, and their order (3.x
-/// `lib/modules/hot_areas`, "platform display").
+/// The widest the page's content gets (docs/ui/compare/U.4f c7).
+const double hotAreasMaxWidth = 720;
+
+/// Platforms shown on the popular, areas, follows and search pages, and
+/// their order (3.x `lib/modules/hot_areas`, "platform display";
+/// docs/ui/compare/U.4f).
 ///
 /// Route: `RoutePath.kSettingsHotAreas`.
 ///
-/// The shown platforms come first and are dragged into order; the hidden
-/// ones are listed below them (new: 3.x mixed both in one list). A count
-/// and "restore default" sit above the list (new).
+/// Kept from 3.x (c1): the explanation bar, a row per platform with its
+/// logo, name and switch, dragging by the handle (only among the shown
+/// platforms), at least one shown, the preferred platform following, the
+/// controls under the name on narrow screens or large text. New: the
+/// content is at most [hotAreasMaxWidth] wide and centred (c7); the
+/// explanation says what the list is for (c8); a six-dot handle, hidden
+/// rows keep its place empty (c9); "显示 (n)" and "隐藏 (n)" groups (c10);
+/// "restore default" beside the shown group (v4).
 class HotAreasPage extends ConsumerWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -86,6 +95,7 @@ class HotAreasPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final sites = ref.read(sitesProvider);
     final visible = sites.availableIds(watchSetting(ref, Settings.hotAreasList));
     final hidden = [
@@ -95,33 +105,36 @@ class HotAreasPage extends ConsumerWidget {
     String name(String id) => platformName(id, fallback: sites.maybeOf(id)?.name);
 
     Widget row(String id, {required bool shown, int? index}) {
+      final draggable = shown && index != null && visible.length > 1;
       final controls = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // The theme's switch, as every settings row (live_ui).
           Switch(
             key: ValueKey('platform-switch-$id'),
             value: shown,
             onChanged: (value) => _toggle(ref, visible, id, value).ignore(),
           ),
-          if (shown && index != null && visible.length > 1) ...[
-            const SizedBox(width: 8),
-            Tooltip(
-              message: i18n('drag_to_sort_tip'),
-              child: ReorderableDragStartListener(
-                key: ValueKey('platform-drag-$id'),
-                index: index,
-                child: const SizedBox.square(
-                  dimension: kMinInteractiveDimension,
-                  child: Center(child: Icon(Icons.drag_handle_rounded, size: 20)),
-                ),
-              ),
-            ),
-          ],
+          const SizedBox(width: 8),
+          // Hidden rows keep the handle's place so the switches line up.
+          SizedBox.square(
+            dimension: kMinInteractiveDimension,
+            child: draggable
+                ? Tooltip(
+                    message: i18n('hot_areas_drag_handle'),
+                    child: ReorderableDragStartListener(
+                      key: ValueKey('platform-drag-$id'),
+                      index: index,
+                      child: const Center(child: Icon(AppIcons.dragHandle, size: 22)),
+                    ),
+                  )
+                : null,
+          ),
         ],
       );
       return Material(
         key: ValueKey(id),
-        color: Colors.transparent,
+        type: MaterialType.transparency,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final title = Text(
@@ -132,7 +145,7 @@ class HotAreasPage extends ConsumerWidget {
             // Narrow screens and large text put the controls under the name (3.x).
             final stack = constraints.maxWidth < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.5;
             return ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              contentPadding: const EdgeInsets.only(left: 16, right: 4, top: 6, bottom: 6),
               leading: PlatformLogo(id, size: 24),
               title: stack
                   ? Column(
@@ -149,7 +162,7 @@ class HotAreasPage extends ConsumerWidget {
     }
 
     BoxDecoration group() => BoxDecoration(
-      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.15),
+      color: scheme.surfaceContainerHighest.withValues(alpha: 0.15),
       borderRadius: BorderRadius.circular(20),
       border: Border.all(color: theme.dividerColor.withValues(alpha: 0.05), width: 0.5),
     );
@@ -158,69 +171,86 @@ class HotAreasPage extends ConsumerWidget {
       appBar: AppBar(title: Text(i18n('platform_display'))),
       body: ListView(
         physics: const PureLiveScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Remix.information_line, size: 18, color: theme.colorScheme.primary.withValues(alpha: 0.8)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    '${i18n('drag_to_sort_tip')}\n${i18n('at_least_one_platform_required')}',
-                    style: context.textStyles.t13.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-                      height: 1.4,
+          Center(
+            child: ConstrainedBox(
+              key: const ValueKey('hot-areas-content'),
+              constraints: const BoxConstraints(maxWidth: hotAreasMaxWidth),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      key: const ValueKey('hot-areas-note'),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: scheme.primary.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(AppIcons.infoLine, size: 18, color: scheme.primary.withValues(alpha: 0.8)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              '${i18n('hot_areas_note')}\n${i18n('at_least_one_platform_required')}',
+                              style: context.textStyles.t13.copyWith(
+                                color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: context.buildGroupTitle(
-                  i18n('hot_areas_visible_count', args: {'count': '${visible.length}', 'total': '${sites.ids.length}'}),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: context.buildGroupTitle(
+                            i18n('hot_areas_shown_title', args: {'count': '${visible.length}'}),
+                          ),
+                        ),
+                        TextButton(
+                          key: const ValueKey('hot-areas-reset'),
+                          onPressed: () => _reset(context, ref).ignore(),
+                          child: Text(i18n('hot_areas_reset')),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      clipBehavior: Clip.antiAlias,
+                      decoration: group(),
+                      child: ReorderableListView.builder(
+                        key: const ValueKey('hot-areas-visible'),
+                        buildDefaultDragHandles: false,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: visible.length,
+                        onReorderItem: (oldIndex, newIndex) =>
+                            _save(ref, reorderHotAreas(visible, oldIndex, newIndex)).ignore(),
+                        itemBuilder: (context, index) => row(visible[index], shown: true, index: index),
+                      ),
+                    ),
+                    if (hidden.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      context.buildGroupTitle(i18n('hot_areas_hidden_group', args: {'count': '${hidden.length}'})),
+                      Container(
+                        key: const ValueKey('hot-areas-hidden'),
+                        clipBehavior: Clip.antiAlias,
+                        decoration: group(),
+                        child: Column(children: [for (final id in hidden) row(id, shown: false)]),
+                      ),
+                    ],
+                    const SizedBox(height: 32),
+                  ],
                 ),
               ),
-              TextButton(
-                key: const ValueKey('hot-areas-reset'),
-                onPressed: () => _reset(context, ref).ignore(),
-                child: Text(i18n('hot_areas_reset')),
-              ),
-            ],
-          ),
-          Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: group(),
-            child: ReorderableListView.builder(
-              key: const ValueKey('hot-areas-visible'),
-              buildDefaultDragHandles: false,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: visible.length,
-              onReorderItem: (oldIndex, newIndex) => _save(ref, reorderHotAreas(visible, oldIndex, newIndex)).ignore(),
-              itemBuilder: (context, index) => row(visible[index], shown: true, index: index),
             ),
           ),
-          if (hidden.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            context.buildGroupTitle(i18n('hot_areas_hidden_title')),
-            Container(
-              clipBehavior: Clip.antiAlias,
-              decoration: group(),
-              child: Column(children: [for (final id in hidden) row(id, shown: false)]),
-            ),
-          ],
-          const SizedBox(height: 32),
         ],
       ),
     );

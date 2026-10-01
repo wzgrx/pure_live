@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/areas/area_artwork.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/rooms/room_menu.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The area pictures learned from every catalogue (one per app run).
 final Provider<AreaPictures> areaPicturesProvider = Provider((ref) {
@@ -23,16 +26,55 @@ String areaDisplayName(LiveArea area) {
   return name.isEmpty ? i18n('unnamed_area') : name;
 }
 
-/// Columns of the area grid at [width] (3.x: 3, 5, 7 or 9).
-int areaGridColumns(double width) => width > 1280 ? 9 : (width > 960 ? 7 : (width > 640 ? 5 : 3));
-
-/// Height of an area card [itemWidth] wide: the square picture and two text
-/// lines that grow with the text scale (3.x `areaCardGridMainAxisExtent`).
-double areaCardExtent(BuildContext context, double itemWidth) {
+/// Height of an area card [itemWidth] wide (docs/ui/compare/U.4d c3): the
+/// square picture and one line (the name, 40 high) or two (name and
+/// category, 72 high, 3.x `areaCardGridMainAxisExtent`), growing with the
+/// text scale.
+double areaCardExtent(BuildContext context, double itemWidth, {required bool twoLines}) {
   final scaler = MediaQuery.textScalerOf(context);
-  final titleHeight = scaler.scale(12) * 1.25;
-  final subtitleHeight = scaler.scale(11) * 1.25;
+  final titleHeight = scaler.scale(12) * 1.3;
+  if (!twoLines) return itemWidth + math.max(40, titleHeight + 22);
+  final subtitleHeight = scaler.scale(12) * 1.3;
   return itemWidth + math.max(72, titleHeight + subtitleHeight + 32);
+}
+
+/// "platform · category" under an area's name (U.4d, U.4f).
+String areaPlatformAndCategory(LiveArea area) =>
+    [platformName(area.platform), if (area.typeName.trim() case final type when type.isNotEmpty) type].join(' · ');
+
+/// The dialog of an area card (long press or right click): the room card's
+/// dialog of U.4a with the area's name, "platform · category" and "关注分区",
+/// or "取消关注" for a followed area, which asks first (U.4d X3 as changed
+/// by the coordinator on 2026-10-01: one component for one action, UI_PLAN
+/// §3 rule 7; it was a small menu in the confirmed design).
+Future<void> showAreaDialog(BuildContext context, WidgetRef ref, LiveArea area) async {
+  final picked = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => Consumer(
+      builder: (context, ref, _) {
+        final followed = ref.watch(followedAreaKeysProvider).value?.contains(area.identityKey) ?? false;
+        return CardDialog(
+          key: const ValueKey('area-menu'),
+          leading: PlatformLogo(area.platform),
+          title: areaDisplayName(area),
+          subtitle: areaPlatformAndCategory(area),
+          closeLabel: i18n('close'),
+          actions: [
+            [
+              CardDialogAction(
+                key: const ValueKey('area-menu-follow'),
+                icon: followed ? AppIcons.unfollowArea : AppIcons.followArea,
+                label: i18n(followed ? 'unfollow' : 'area_follow'),
+                onPressed: () => Navigator.pop(dialogContext, true),
+              ),
+            ],
+          ],
+        );
+      },
+    ),
+  );
+  if (picked != true || !context.mounted) return;
+  await toggleAreaFollow(context, ref, area);
 }
 
 /// Opens [area]: IPTV channels play directly, CC's official entries open in
@@ -83,34 +125,10 @@ Future<bool> toggleAreaFollow(BuildContext context, WidgetRef ref, LiveArea area
   }
 }
 
-/// Asks whether to unfollow [name] (3.x's dialog).
-Future<bool> confirmUnfollow(BuildContext context, String name) async =>
-    await showDialog<bool>(
-      context: context,
-      useRootNavigator: false,
-      builder: (dialogContext) => AlertDialog(
-        scrollable: true,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-        title: Text(i18n('unfollow')),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Text(i18n('unfollow_message', args: {'name': name})),
-        ),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(i18n('cancel')),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(i18n('confirm')),
-          ),
-        ],
-      ),
-    ) ??
-    false;
+/// Asks whether to unfollow [name]: the room's dialog, its button saying
+/// "取消关注" (U.4e as changed by the coordinator on 2026-10-01, U.1d D2;
+/// 3.x's said "确认").
+Future<bool> confirmUnfollow(BuildContext context, String name) => confirmUnfollowRoom(context, name: name);
 
 /// The identities of the followed areas, updated on every change.
 final StreamProvider<Set<String>> followedAreaKeysProvider = StreamProvider((ref) {

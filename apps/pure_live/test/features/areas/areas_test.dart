@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/app.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/area_rooms/area_rooms_page.dart';
@@ -191,7 +192,7 @@ void main() {
       expect(catalog.categories, hasLength(2));
     });
 
-    testWidgets('platform tabs from the list, preferred first; categories, filter, follow, followed areas', (
+    testWidgets('platform tabs from the list, preferred first; category tabs, the area menu, followed areas', (
       tester,
     ) async {
       final huya = _FakeSite('huya', '虎牙直播', [
@@ -209,30 +210,57 @@ void main() {
       expect(find.text('虎牙'), findsOneWidget);
       expect(find.text('英雄联盟'), findsOneWidget);
 
+      // U.4d c2: the categories in the secondary style; c3: the cards name only the area.
+      final categories = tester.widget<ScrollableTabBar>(find.byKey(const ValueKey('area-category-tabs')));
+      expect(categories.indicatorSize, TabBarIndicatorSize.tab);
+      expect(categories.tabAlignment, TabAlignment.start);
+      expect(find.byKey(const ValueKey('area-card-caption')), findsNothing);
+      expect(find.byKey(const ValueKey('areas-filter-toggle')), findsNothing);
+
       await tester.tap(find.text('单机'));
       await _settle(tester);
       expect(find.text('只狼'), findsOneWidget);
-
-      await tester.tap(find.byKey(const ValueKey('areas-filter-toggle')));
+      await tester.tap(find.text('网游'));
       await _settle(tester);
-      await tester.enterText(find.byKey(const ValueKey('areas-filter-field')), '原');
-      await _settle(tester);
-      expect(find.text('原神'), findsOneWidget);
-      expect(find.text('只狼'), findsNothing);
 
-      // A long press follows; the card gets a heart and the button a count.
+      // c6, X3 (as changed on 2026-10-01): a long press opens the room card's dialog: the
+      // area, "platform · category", then "关注分区".
       await tester.longPress(find.text('原神'));
+      await _settle(tester);
+      final dialog = find.byKey(const ValueKey('area-menu'));
+      expect(find.descendant(of: dialog, matching: find.text('原神')), findsOneWidget);
+      expect(find.descendant(of: dialog, matching: find.text('虎牙 · 分类')), findsOneWidget);
+      expect(find.descendant(of: dialog, matching: find.text('关注分区')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('area-menu-follow')));
       await _settle(tester);
       expect(await tester.runAsync(services.store.followAreas.all), hasLength(1));
       expect(find.byKey(const ValueKey('area-card-followed')), findsOneWidget);
-      expect(find.text('关注分区 · 1'), findsOneWidget);
+      expect(find.text('关注分区'), findsOneWidget);
       expect(toasts.single, '已关注分区“原神”');
+
+      // Followed: the menu offers "unfollow", which asks first (3.x's dialog).
+      await tester.longPress(find.text('原神'));
+      await _settle(tester);
+      expect(find.descendant(of: dialog, matching: find.text('取消关注')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('area-menu-follow')));
+      await _settle(tester);
+      expect(find.text('确定要取消关注原神吗？'), findsOneWidget);
+      // The button says what it does (U.1d D2).
+      expect(find.widgetWithText(FilledButton, '取消关注'), findsOneWidget);
+      await tester.tap(find.text('取消'));
+      await _settle(tester);
+      expect(await tester.runAsync(services.store.followAreas.all), hasLength(1));
 
       await tester.tap(find.byKey(const ValueKey('areas-followed-button')));
       await _settle(tester);
       expect(find.byType(FavoriteAreasView), findsOneWidget);
-      expect(find.text('全部 1'), findsOneWidget);
+      // U.4f c4: "all" and the platforms with followed areas only; c3: "platform · category" in "all".
+      final tabs = find.byKey(const ValueKey('favorite-areas-platform-tabs'));
+      expect(find.descendant(of: tabs, matching: find.text('全部')), findsOneWidget);
+      expect(find.descendant(of: tabs, matching: find.text('虎牙')), findsOneWidget);
+      expect(find.descendant(of: tabs, matching: find.text('斗鱼')), findsNothing);
       expect(find.text('原神'), findsOneWidget);
+      expect(find.text('虎牙 · 分类'), findsOneWidget);
       await tester.runAsync(services.close);
     });
 
@@ -336,7 +364,9 @@ void main() {
       expect(find.text('标题11'), findsOneWidget);
       expect(find.text('标题12'), findsNothing);
       expect(find.textContaining('已隐藏 1 个'), findsOneWidget);
-      expect(find.text('已经到底了'), findsOneWidget);
+      expect(find.text('没有更多数据了'), findsOneWidget);
+      // U.4e c2: "platform · category" under the name.
+      expect(find.text('虎牙 · 分类'), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('area-rooms-show-hidden')));
       await _settle(tester);
@@ -361,13 +391,13 @@ void main() {
       AppNavigator.toast = toasts.add;
       AppNavigator.toNamed<void>(RoutePath.kSettingsHotAreas).ignore();
       await _settle(tester);
-      expect(find.text('首页显示的平台（2 / 2）'), findsOneWidget);
+      expect(find.text('显示（2）'), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('platform-switch-douyu')));
       await _settle(tester);
       expect(services.store.settings.get(Settings.hotAreasList), ['huya']);
       expect(services.store.settings.get(Settings.preferPlatform), 'huya');
-      expect(find.text('未显示的平台'), findsOneWidget);
+      expect(find.text('隐藏（1）'), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('platform-switch-huya')));
       await _settle(tester);
@@ -388,6 +418,106 @@ void main() {
       expect(reorderHotAreas(['a', 'b', 'c'], 2, 0), ['c', 'a', 'b']);
       expect(preferredAfter(['b'], 'a'), 'b');
       expect(preferredAfter(['a', 'b'], 'b'), 'b');
+    });
+  });
+
+  group('U.4d–U.4f layouts', () {
+    testWidgets('Douyin is one grid naming each category; one category shows no category tabs', (tester) async {
+      final douyin = _FakeSite('douyin', '抖音', [
+        LiveCategory(
+          id: 'g',
+          name: '游戏',
+          children: [_area('douyin', '1', '王者荣耀', typeName: 'MOBA')],
+        ),
+        LiveCategory(
+          id: 'f',
+          name: '娱乐',
+          children: [_area('douyin', '2', '颜值', typeName: '娱乐')],
+        ),
+      ]);
+      final picarto = _FakeSite('picarto', 'Picarto', [
+        LiveCategory(id: 'all', name: '公开直播', children: [_area('picarto', '3', 'Art')]),
+      ]);
+      final services = await (() async {
+        tester.view
+          ..physicalSize = const Size(393, 852)
+          ..devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        final services = (await tester.runAsync(() async {
+          final services = await _services({'douyin': douyin, 'picarto': picarto});
+          await services.store.settings.set(Settings.savedMenuIds, ['areas']);
+          await services.store.settings.set(Settings.hotAreasList, ['douyin', 'picarto']);
+          await services.store.settings.set(Settings.preferPlatform, 'douyin');
+          await services.store.settings.set(Settings.language, '简体中文');
+          await services.store.settings.set(Settings.showSplashPage, false);
+          return services;
+        }))!;
+        final strings = (await tester.runAsync(loadStrings))!;
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [appServicesProvider.overrideWithValue(services)],
+            child: PureLiveApp(strings: strings, bundle: FileAssetBundle()),
+          ),
+        );
+        await _settle(tester);
+        return services;
+      })();
+      // Douyin: no category tabs, both areas in one grid with their category (3.x).
+      expect(find.byKey(const ValueKey('area-category-tabs')), findsNothing);
+      expect(find.text('王者荣耀'), findsOneWidget);
+      expect(find.text('颜值'), findsOneWidget);
+      expect(find.text('MOBA'), findsOneWidget);
+      // 393 wide: three columns (U.4d c5).
+      final first = tester.getTopLeft(find.text('王者荣耀'));
+      final second = tester.getTopLeft(find.text('颜值'));
+      expect(first.dy, second.dy);
+
+      await tester.tap(find.text('Picarto'));
+      await _settle(tester);
+      expect(find.text('Art'), findsOneWidget);
+      expect(find.byKey(const ValueKey('area-category-tabs')), findsNothing);
+      expect(find.text('公开直播'), findsNothing);
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets('U.4f c5: with nothing followed the page says how and leads to the areas', (tester) async {
+      final services = await _pumpApp(tester, {'huya': _FakeSite('huya', '虎牙直播', const [])});
+      await tester.tap(find.byKey(const ValueKey('areas-followed-button')));
+      await _settle(tester);
+      expect(find.byType(FavoriteAreasView), findsOneWidget);
+      expect(find.byKey(const ValueKey('favorite-areas-platform-tabs')), findsNothing);
+      expect(find.text('未发现分区'), findsOneWidget);
+      expect(find.text('在分区页长按分区卡片，或打开分区后点右上角的“关注”'), findsOneWidget);
+      await tester.tap(find.text('去分区'));
+      await _settle(tester);
+      expect(find.byType(FavoriteAreasView), findsNothing);
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets('U.4f c7, c9, c10: 720 wide at most; a six-dot handle, none on hidden rows; two groups', (
+      tester,
+    ) async {
+      final services = await _pumpApp(tester, {
+        'huya': _FakeSite('huya', '虎牙直播', const []),
+        'douyu': _FakeSite('douyu', '斗鱼直播', const []),
+        'bilibili': _FakeSite('bilibili', '哔哩哔哩', const []),
+      });
+      tester.view.physicalSize = const Size(1280, 800);
+      await tester.runAsync(() => services.store.settings.set(Settings.hotAreasList, ['huya', 'douyu']));
+      AppNavigator.toNamed<void>(RoutePath.kSettingsHotAreas).ignore();
+      await _settle(tester);
+      expect(tester.getSize(find.byKey(const ValueKey('hot-areas-content'))).width, hotAreasMaxWidth);
+      expect(find.text('显示（2）'), findsOneWidget);
+      expect(find.text('隐藏（1）'), findsOneWidget);
+      expect(find.byKey(const ValueKey('platform-drag-huya')), findsOneWidget);
+      expect(find.byKey(const ValueKey('platform-drag-bilibili')), findsNothing);
+      expect(find.byIcon(AppIcons.dragHandle), findsNWidgets(2));
+      // The switches line up: the hidden row keeps the handle's place.
+      final shown = tester.getCenter(find.byKey(const ValueKey('platform-switch-huya'))).dx;
+      final hidden = tester.getCenter(find.byKey(const ValueKey('platform-switch-bilibili'))).dx;
+      expect(hidden, closeTo(shown, 0.5));
+      expect(find.textContaining('这里的顺序和开关用于热门、分区、关注和搜索的平台标签'), findsOneWidget);
+      await tester.runAsync(services.close);
     });
   });
 }

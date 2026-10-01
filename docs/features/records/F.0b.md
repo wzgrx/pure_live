@@ -19,6 +19,8 @@
 
 ## 发现的问题
 1. 录制的清晰度标签写“原画”，实际是 720p：游客时平台只给“超清”，播放会提示真实画质，录制没有，面板、通知和录制中心都写请求的“原画”。要改成记录平台实际返回的清晰度（和播放一样）。归 F.9b 跟进。
+   - 已查过的：标签取 `task.selectedQuality = stream.quality.quality`（`packages/live_record/lib/src/recorder.dart:438`），`stream.quality` 是 `resolveAppliedPlayQuality` 算出的“实际画质”（`resolver.dart:335`）；哔哩哔哩播放和录制都走 `resolvePlayUrlsRaw`，`normalized()` 保留平台确认的 `appliedQualityData`。播放能认出“超清”，录制却落回请求的“原画”，所以差别在录制拿到的清晰度列表（`discoverPlayQualities`）或平台确认的编号和列表对不上（`matched == null` 时退回请求值）。录制面板的清晰度只列出“原画”一个，也指向列表不同。
+   - 下一步：写一个测试，用哔哩哔哩游客返回 `current_qn=250` 的样本走录制解析器，看 `applied` 是什么；再对照 `discoverPlayQualities` 和直播间用的清晰度列表。
 
 ## 没测的（留给 F.9a～F.9c）
 画中画和小窗、投屏、多画面、网络电视、弹幕设置面板、长时间录制的分段合并、划掉应用后继续录、断网重连、搜索、分区、账号登录、剪贴板口令和分享接收。

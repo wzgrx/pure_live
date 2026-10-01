@@ -398,10 +398,21 @@ class RecordStatusCard extends StatelessWidget {
         ],
         <Widget>[stop()],
       ),
+      // F.3a: how far the join is — the percent where the reconnect card
+      // counts its attempts, and a bar under the text (moving until FFmpeg
+      // reports); both redraw on their own, at most once per percent.
       RecordCardState.processing => (
         const _Spinner(),
         i18n('record_panel_processing_title'),
-        null,
+        ListenableSelector<int?>(
+          listenable: changes,
+          selector: () => recordMergePercent(task()?.mergeProgress),
+          builder: (context, percent, _) => Text(
+            percent == null ? '' : '$percent%',
+            key: const ValueKey('record-card-merge-percent'),
+            style: theme.textTheme.bodySmall?.tabular.copyWith(color: scheme.onSurfaceVariant),
+          ),
+        ),
         <Widget>[
           Text(
             i18n(
@@ -411,6 +422,18 @@ class RecordStatusCard extends StatelessWidget {
               args: {'count': '${recordSegmentCount(facts.seconds, facts.segmentTime)}'},
             ),
             style: body,
+          ),
+          ListenableSelector<int?>(
+            listenable: changes,
+            selector: () => recordMergePercent(task()?.mergeProgress),
+            builder: (context, percent, _) => LinearProgressIndicator(
+              key: const ValueKey('record-card-merge-progress'),
+              value: percent == null ? null : percent / 100,
+              minHeight: 4,
+              borderRadius: BorderRadius.circular(2),
+              semanticsLabel: i18n('record_panel_processing_title'),
+              semanticsValue: percent == null ? null : '$percent%',
+            ),
           ),
         ],
         const <Widget>[],

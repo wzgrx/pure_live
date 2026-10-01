@@ -1916,6 +1916,7 @@
     "record_private_path_message": "The recording folder is inside Android private app storage. Choose another recording folder.",
     "record_private_path_title": "Unable to start recording",
     "record_processing": "Processing",
+    "record_quality_limited_to": "The platform returned {quality}; recording at the actual quality",
     "record_queued": "Queued",
     "record_reconnecting": "Reconnecting",
     "record_running": "Recording",

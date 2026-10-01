@@ -72,6 +72,7 @@ void _nineStates(AppRecording recording, String file) {
   task('j')
     ..status = RecordStatus.processing
     ..recordedSeconds = 1200
+    ..mergeProgress = 0.42
     ..autoRecord = false;
   task('p')
     ..status = RecordStatus.preparing
@@ -354,9 +355,11 @@ void main() {
     expect(_inCard('c', find.text('第 2 次，共 5 次')), findsOneWidget);
     expect(_inCard('c', find.text('28 秒后重试。已录的 00:41:08 · 1.1 GB 不会丢。')), findsOneWidget);
     expect(_inCard('c', _key('record-panel-stop')), findsOneWidget);
-    // Joining: no button, nothing to close.
+    // Joining: no button, nothing to close; how far it is (F.3a).
     expect(_inCard('j', find.text('把 4 段合成一个 MP4，完成后就能播放。')), findsOneWidget);
     expect(_inCard('j', find.byType(ButtonStyleButton)), findsNothing);
+    expect(_inCard('j', find.text('42%')), findsOneWidget);
+    expect(tester.widget<LinearProgressIndicator>(_inCard('j', _key('record-card-merge-progress'))).value, 0.42);
     // Preparing: cancel.
     expect(_inCard('p', find.text('正在获取直播流（原画）…')), findsOneWidget);
     expect(_inCard('p', _key('record-panel-cancel')), findsOneWidget);

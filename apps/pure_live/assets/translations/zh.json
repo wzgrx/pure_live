@@ -1915,6 +1915,7 @@
     "record_private_path_message": "当前录制目录位于 Android 应用私有目录，请重新选择录制目录。",
     "record_private_path_title": "无法开始录制",
     "record_processing": "处理中",
+    "record_quality_limited_to": "平台实际返回 {quality}，已按真实画质录制",
     "record_queued": "排队中",
     "record_reconnecting": "重连中",
     "record_running": "录制中",

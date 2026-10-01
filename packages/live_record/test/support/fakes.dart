@@ -67,6 +67,10 @@ final class FakeFfmpeg implements FfmpegRunner {
   int? captureExit;
   Duration captureSeconds = Duration.zero;
 
+  /// Statistics a join reports, one per turn of the event loop, before it
+  /// ends; none: it ends at once.
+  List<FfmpegStatistics> joinStatistics = const [];
+
   @override
   Future<FfmpegExecution> start(List<String> arguments) async {
     runs.add(arguments);
@@ -75,7 +79,21 @@ final class FakeFfmpeg implements FfmpegRunner {
     if (arguments.contains('concat')) {
       final output = arguments.last;
       File(output).writeAsStringSync('mp4');
-      scheduleMicrotask(() => execution.finish(0));
+      final samples = List.of(joinStatistics);
+      void next() {
+        if (samples.isEmpty) {
+          execution.finish(0);
+        } else {
+          execution.stats.add(samples.removeAt(0));
+          Timer.run(next);
+        }
+      }
+
+      if (samples.isEmpty) {
+        scheduleMicrotask(next);
+      } else {
+        Timer.run(next);
+      }
       return execution;
     }
     final pattern = arguments.last;

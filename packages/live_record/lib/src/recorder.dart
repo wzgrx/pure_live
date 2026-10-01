@@ -53,13 +53,17 @@ enum RecordNoticeKind {
 
   /// A start was requested while the task is still starting.
   starting,
+
+  /// The platform served a lower quality than the one asked for (once per
+  /// recording; the player's "平台实际返回").
+  qualityLimited,
 }
 
 /// A message for the user about a task.
 @immutable
 final class RecordNotice {
   /// Creates the notice.
-  const new(this.task, this.kind, {this.failure, this.streamError});
+  const new(this.task, this.kind, {this.failure, this.streamError, this.quality});
 
   /// The task.
   final RecordTask task;
@@ -72,6 +76,9 @@ final class RecordNotice {
 
   /// The resolution failure for [RecordNoticeKind.resolveFailed].
   final RecordStreamException? streamError;
+
+  /// The served quality for [RecordNoticeKind.qualityLimited].
+  final String? quality;
 }
 
 final class _Runtime {
@@ -99,6 +106,9 @@ final class _Runtime {
   bool starting = false;
   bool removing = false;
   Object? keepAliveOwner;
+
+  /// This recording already said its quality was limited.
+  bool qualityNoticed = false;
 }
 
 /// The recording core (the non-page part of 3.x's `RecorderController`):
@@ -307,7 +317,8 @@ final class Recorder {
     rt
       ..base = (bytes: 0, seconds: 0)
       ..rapidRecovery = false
-      ..prefetched = null;
+      ..prefetched = null
+      ..qualityNoticed = false;
     _cancelLease(rt);
     await _start(task);
     return _owns(task) && task.status != RecordStatus.failed;
@@ -435,7 +446,7 @@ final class Recorder {
       }
       task
         ..currentUrl = stream.line?.url
-        ..selectedQuality = stream.quality.quality
+        ..selectedQuality = stream.qualityLabel
         ..selectedQualityId = stream.qualityCursorId
         ..selectedLineIndex = stream.lineIndex
         ..selectedLine = stream.lineLabel
@@ -466,6 +477,10 @@ final class Recorder {
         reservation: reservation,
         onEvent: (event) => unawaited(_onCapture(task, event)),
       );
+      if (stream.qualityLimited && !rt.qualityNoticed) {
+        rt.qualityNoticed = true;
+        _notice(RecordNotice(task, RecordNoticeKind.qualityLimited, quality: stream.qualityLabel));
+      }
       _scheduleLeasePrefetch(task, stream);
       await lifecycle.future;
     } on RecordStreamException catch (error) {
@@ -800,11 +815,40 @@ final class Recorder {
     _update(task);
   }
 
+  /// Joins [task]'s attempts. [RecordTask.mergeProgress] follows the join,
+  /// the attempts weighted by their source bytes; the interface hears of
+  /// the first value and of each whole percent after it, never the store.
   Future<bool> _mergePending(RecordTask task, {bool allowLegacy = false}) async {
+    final attempts = List.of(task.pendingAttempts);
+    final sizes = [for (final attempt in attempts) SegmentMeter.measure(attempt.directoryPath, attempt.filePrefix)];
+    final total = sizes.fold(0, (sum, size) => sum + size);
+    var joined = 0.0;
+    void progress(int index, double value) {
+      final weight = total > 0 ? sizes[index] / total : 1 / attempts.length;
+      if (value >= 1) joined += weight;
+      final before = task.mergeProgress;
+      final now = task.mergeProgress = (value >= 1 ? joined : joined + weight * value).clamp(0.0, 1.0);
+      if (before == null || (now * 100).floor() != (before * 100).floor()) _update(task, persist: false);
+    }
+
+    try {
+      return await _mergeAttempts(task, attempts, sizes, allowLegacy: allowLegacy, onProgress: progress);
+    } finally {
+      task.mergeProgress = null;
+    }
+  }
+
+  Future<bool> _mergeAttempts(
+    RecordTask task,
+    List<PendingRecordingAttempt> attempts,
+    List<int> sizes, {
+    required bool allowLegacy,
+    required void Function(int index, double progress) onProgress,
+  }) async {
     var ok = true;
-    for (final attempt in List.of(task.pendingAttempts)) {
+    for (final (index, attempt) in attempts.indexed) {
       if (!_owns(task)) return false;
-      final sourceBytes = SegmentMeter.measure(attempt.directoryPath, attempt.filePrefix);
+      final sourceBytes = sizes[index];
       storage.protect(attempt.directoryPath);
       try {
         final result = await _merger.merge(
@@ -814,6 +858,7 @@ final class Recorder {
           allowLegacy: allowLegacy,
           damaged: attempt.inputIntegrityError,
           cancelled: () => _closing,
+          onProgress: (progress) => onProgress(index, progress),
         );
         if (!_owns(task)) return false;
         if (result.ok) {
@@ -1086,9 +1131,11 @@ final class Recorder {
         ..lastLiveCheckAt = clock.now();
       _update(task);
       if (room.isPlayableNow) {
-        rt.pollFailures = 0;
+        rt
+          ..pollFailures = 0
+          ..qualityNoticed = false
+          ..poll = null;
         task.retryCount = 0;
-        rt.poll = null;
         await _start(task);
         return;
       }

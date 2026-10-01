@@ -20,7 +20,9 @@ enum AppStatusType {
 ///
 /// The empty and error states show an icon in a circle that pops in, a title,
 /// a text and, with [onButtonPressed], a button (retry unless [buttonText]
-/// and [buttonIcon] say otherwise). Missing texts fall back to the words of
+/// and [buttonIcon] say otherwise) in the tonal filled style, and with
+/// [onSecondaryButtonPressed] a second one as a text button (U.1c C1, the
+/// same on every status page). Missing texts fall back to the words of
 /// [LiveUiScope]. [isMini] is the small form for a card cover: a small icon,
 /// no button, and a title or text only when given non-empty.
 class AppStatusView extends StatelessWidget {
@@ -37,6 +39,8 @@ class AppStatusView extends StatelessWidget {
     this.iconColor,
     this.titleColor,
     this.subtitleColor,
+    this.secondaryButtonText,
+    this.onSecondaryButtonPressed,
     super.key,
   });
 
@@ -74,6 +78,12 @@ class AppStatusView extends StatelessWidget {
 
   /// Text colour.
   final Color? subtitleColor;
+
+  /// The second button's label (a text button after the first).
+  final String? secondaryButtonText;
+
+  /// Shows the second button (not in [isMini]).
+  final VoidCallback? onSecondaryButtonPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -143,12 +153,27 @@ class AppStatusView extends StatelessWidget {
                 ),
               ),
             ),
-          if (!isMini && onButtonPressed != null) ...[
+          if (!isMini && (onButtonPressed != null || onSecondaryButtonPressed != null)) ...[
             const SizedBox(height: 16),
-            TextButton.icon(
-              onPressed: onButtonPressed,
-              icon: Icon(buttonIcon ?? Icons.refresh_rounded, size: 18),
-              label: Text(buttonText ?? words.retry),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (onButtonPressed case final pressed?)
+                  FilledButton.tonalIcon(
+                    key: const ValueKey('status-button'),
+                    onPressed: pressed,
+                    icon: Icon(buttonIcon ?? Icons.refresh_rounded, size: 18),
+                    label: Text(buttonText ?? words.retry),
+                  ),
+                if (onSecondaryButtonPressed case final pressed?)
+                  TextButton(
+                    key: const ValueKey('status-secondary-button'),
+                    onPressed: pressed,
+                    child: Text(secondaryButtonText ?? words.retry),
+                  ),
+              ],
             ),
           ],
         ],
@@ -172,6 +197,8 @@ class EmptyView extends StatelessWidget {
     this.iconColor,
     this.titleColor,
     this.subtitleColor,
+    this.secondaryButtonText,
+    this.onSecondaryButtonPressed,
     super.key,
   });
 
@@ -205,6 +232,12 @@ class EmptyView extends StatelessWidget {
   /// See [AppStatusView.subtitleColor].
   final Color? subtitleColor;
 
+  /// See [AppStatusView.secondaryButtonText].
+  final String? secondaryButtonText;
+
+  /// See [AppStatusView.onSecondaryButtonPressed].
+  final VoidCallback? onSecondaryButtonPressed;
+
   @override
   Widget build(BuildContext context) {
     return AppStatusView(
@@ -219,6 +252,8 @@ class EmptyView extends StatelessWidget {
       iconColor: iconColor,
       titleColor: titleColor,
       subtitleColor: subtitleColor,
+      secondaryButtonText: secondaryButtonText,
+      onSecondaryButtonPressed: onSecondaryButtonPressed,
     );
   }
 }

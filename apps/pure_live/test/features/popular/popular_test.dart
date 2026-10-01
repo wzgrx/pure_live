@@ -248,12 +248,16 @@ void main() {
       ],
     ]);
     final services = await _pump(tester, {SiteIds.bilibili: bilibili, SiteIds.huya: huya}, prefer: SiteIds.huya);
-    expect(find.widgetWithText(AppBar, '热门'), findsOneWidget);
+    // U.4b c1: the platform tabs take the title's place (3.x).
+    expect(
+      find.descendant(of: find.byType(AppBar), matching: find.byKey(const ValueKey('popular-platform-tabs'))),
+      findsOneWidget,
+    );
     expect(find.text('哔哩哔哩'), findsOneWidget);
     expect(find.text('虎牙'), findsOneWidget);
     expect(huya.requested, [1]);
 
-    final cards = tester.widgetList<RoomCard>(find.byType(RoomCard)).map((card) => card.data.title).toList();
+    final cards = tester.widgetList<LiveRoomCard>(find.byType(LiveRoomCard)).map((card) => card.data.title).toList();
     expect(cards, ['title 2', 'title 1']);
     expect(find.text('3.0万'), findsOneWidget);
     expect(find.textContaining('已隐藏 1 个'), findsOneWidget);
@@ -261,7 +265,7 @@ void main() {
     await tester.tap(find.text('显示'));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
     await tester.pumpAndSettle();
-    expect(find.byType(RoomCard), findsNWidgets(3));
+    expect(find.byType(LiveRoomCard), findsNWidgets(3));
     expect(find.text('付费'), findsOneWidget);
 
     await tester.tap(find.text('title 2'));
@@ -377,24 +381,24 @@ void main() {
     ]);
     final services = await _pump(tester, {SiteIds.bilibili: bilibili}, width: 1000, height: 3200);
     // 20 a page above 960 px (3.x).
-    expect(find.byType(RoomCard), findsNWidgets(20));
-    expect(find.byKey(const ValueKey('popular-pagination')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('popular-page-2')));
+    expect(find.byType(LiveRoomCard), findsNWidgets(20));
+    expect(find.byKey(const ValueKey('pager')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pager-page-2')));
     await tester.pumpAndSettle();
-    expect(find.byType(RoomCard), findsNWidgets(10));
+    expect(find.byType(LiveRoomCard), findsNWidgets(10));
     expect(find.text('title 20'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('popular-page-size')));
+    await tester.tap(find.byKey(const ValueKey('pager-size')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('40').last);
     await tester.pumpAndSettle();
-    expect(find.byType(RoomCard), findsNWidgets(30));
+    expect(find.byType(LiveRoomCard), findsNWidgets(30));
 
     bilibili.error = const RateLimited(SiteIds.bilibili);
     await tester.tap(find.widgetWithText(OutlinedButton, '刷新'));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('popular-refresh-error')), findsOneWidget);
-    expect(find.byType(RoomCard), findsNWidgets(30));
+    expect(find.byType(LiveRoomCard), findsNWidgets(30));
     await tester.runAsync(services.close);
   });
 
@@ -412,7 +416,7 @@ void main() {
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('room-menu')), findsOneWidget);
-    expect(find.text('房间号: 7'), findsOneWidget);
+    expect(find.text('虎牙 · 房间号 7'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('room-menu-follow')));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
@@ -426,6 +430,93 @@ void main() {
     await tester.pumpAndSettle();
     expect(copied, encodeRoomShareCode(_room('huya', 7)));
     expect(toasts.last, '已复制到剪贴板');
+    await tester.runAsync(services.close);
+  });
+  testWidgets('U.4b c2: the ⌄ after the tabs opens "all platforms": logos and names, the current one ticked', (
+    tester,
+  ) async {
+    final bilibili = _FakeSite(SiteIds.bilibili, [
+      [_room('bilibili', 1)],
+    ]);
+    final huya = _FakeSite(SiteIds.huya, [
+      [_room('huya', 2)],
+    ]);
+    final services = await _pump(tester, {SiteIds.bilibili: bilibili, SiteIds.huya: huya}, prefer: SiteIds.huya);
+    // The ⌄ sits right of the platform tabs, in the app bar.
+    final picker = find.byKey(const ValueKey('popular-all-platforms'));
+    expect(find.descendant(of: find.byType(AppBar), matching: picker), findsOneWidget);
+    expect(
+      tester.getCenter(picker).dx,
+      greaterThan(tester.getRect(find.byKey(const ValueKey('popular-platform-tabs'))).right - 1),
+    );
+    await tester.tap(picker);
+    await tester.pumpAndSettle();
+    // Phones: from the bottom.
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(find.text('2 个平台，点一个直接切过去；在“平台显示”里可以隐藏和排序'), findsOneWidget);
+    final selected = find.byKey(const ValueKey('popular-platform-selected'));
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('popular-platform-huya')), matching: selected),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('popular-platform-settings')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('popular-platform-bilibili')));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.text('title 1'), findsOneWidget);
+    await tester.runAsync(services.close);
+  });
+
+  testWidgets('U.4b c2: on a wide window "all platforms" is the same panel on the right', (tester) async {
+    final bilibili = _FakeSite(SiteIds.bilibili, [
+      [_room('bilibili', 1)],
+    ]);
+    final services = await _pump(tester, {SiteIds.bilibili: bilibili}, width: 1280, height: 800);
+    await tester.tap(find.byKey(const ValueKey('popular-all-platforms')));
+    await tester.pumpAndSettle();
+    final panel = tester.getRect(find.byKey(const ValueKey('side-panel')));
+    expect(panel.width, sidePanelWidth);
+    expect(panel.right, 1280);
+    expect(find.byKey(const ValueKey('popular-platform-picker')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('panel-close')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('side-panel')), findsNothing);
+    await tester.runAsync(services.close);
+  });
+
+  for (final (size, columns) in [(const Size(393, 852), 2), (const Size(852, 393), 4), (const Size(1280, 800), 5)]) {
+    testWidgets('U.4b c8, U.4a c15: ${size.width.toInt()}×${size.height.toInt()} shows $columns columns', (
+      tester,
+    ) async {
+      final bilibili = _FakeSite(SiteIds.bilibili, [
+        [for (var i = 0; i < 20; i++) _room('bilibili', i, heat: 100 - i)],
+      ]);
+      final services = await _pump(tester, {SiteIds.bilibili: bilibili}, width: size.width, height: size.height);
+      final cards = find.byType(LiveRoomCard);
+      final top = tester.getTopLeft(cards.first).dy;
+      final firstRow = [
+        for (final element in cards.evaluate())
+          if (tester.getTopLeft(find.byWidget(element.widget)).dy == top) element,
+      ];
+      expect(firstRow, hasLength(columns));
+      // The grid's padding is 6 on every side (U.4a c15).
+      final grid = tester.getRect(find.byKey(const ValueKey('popular-grid')));
+      expect(tester.getTopLeft(cards.first).dx - grid.left, 6);
+      await tester.runAsync(services.close);
+    });
+  }
+
+  testWidgets('U.4b c4: an empty platform says what to do; the button refreshes', (tester) async {
+    final bilibili = _FakeSite(SiteIds.bilibili, [const []]);
+    final services = await _pump(tester, {SiteIds.bilibili: bilibili});
+    expect(find.text('未发现直播'), findsOneWidget);
+    expect(find.text('这个平台暂时没有直播。左右滑动或点上方的平台名切换平台，也可以下拉刷新'), findsOneWidget);
+    expect(find.byIcon(AppIcons.emptyPopular), findsOneWidget);
+    await tester.tap(find.text('刷新'));
+    await tester.pumpAndSettle();
+    expect(bilibili.requested.length, greaterThan(1));
     await tester.runAsync(services.close);
   });
 }

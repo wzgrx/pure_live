@@ -227,4 +227,96 @@ abstract final class AppIcons {
 
   /// Something will not work as the user expects (a switched-off setting).
   static const IconData warning = Icons.warning_amber_rounded;
+
+  // ---- room cards, browsing pages and their dialogs (docs/ui/compare/U.4a–U.4f) ----
+
+  /// A cover that is loading or failed to load (3.x's cover placeholder).
+  static const IconData coverPlaceholder = Icons.live_tv_rounded;
+
+  /// The replay badge on a cover (3.x `CountChip`).
+  static const IconData replay = Icons.videocam_rounded;
+
+  /// A live status being checked ("正在核验", "状态待确认").
+  static const IconData statusPending = Icons.sync_rounded;
+
+  /// A restricted room on a cover (paid, login, region …).
+  static const IconData restrictedBadge = Icons.lock_rounded;
+
+  /// Delete one entry (3.x's history card).
+  static const IconData delete = Remix.delete_bin_line;
+
+  /// A room's tags (3.x's card dialog).
+  static const IconData tag = Remix.price_tag_3_line;
+
+  /// Add something (a new tag).
+  static const IconData add = Remix.add_line;
+
+  /// Clear a text field.
+  static const IconData clearField = Icons.cancel_rounded;
+
+  /// The platform display settings (hide and order platforms).
+  static const IconData platformSettings = Icons.tune_rounded;
+
+  /// Drag to reorder (a six-dot handle, U.4f c9).
+  static const IconData dragHandle = Icons.drag_indicator_rounded;
+
+  /// A short explanation in a tinted bar.
+  static const IconData info = Icons.info_outline_rounded;
+
+  /// The 3.x information icon (the platform display explanation).
+  static const IconData infoLine = Remix.information_line;
+
+  /// Mobile data in use (3.x's cellular notice).
+  static const IconData mobileData = Icons.signal_cellular_alt_rounded;
+
+  /// Loading failed for the network (3.x `AppStatusView` error).
+  static const IconData networkError = Icons.wifi_off_rounded;
+
+  /// The platform wants a login.
+  static const IconData loginRequired = Icons.account_circle_outlined;
+
+  /// Go to the login page (U.4e c6).
+  static const IconData login = Icons.login_rounded;
+
+  /// No live rooms on the popular page (3.x `RemixIcons.fire_fill`).
+  static const IconData emptyPopular = Remix.fire_fill;
+
+  /// No follows (3.x `Remix.heart_3_fill`).
+  static const IconData emptyFollows = Remix.heart_3_fill;
+
+  /// Areas (3.x `Remix.apps_2_line`): no areas, "go to areas".
+  static const IconData areas = Remix.apps_2_line;
+
+  /// Follow an area (3.x's "关注分区" button).
+  static const IconData followArea = Remix.heart_add_2_line;
+
+  /// Unfollow an area.
+  static const IconData unfollowArea = Remix.dislike_line;
+
+  /// A followed area, on its picture (U.4d c6).
+  static const IconData areaFollowedMark = Icons.favorite_rounded;
+
+  /// An area's picture is missing or broken (3.x `AreaCard`).
+  static const IconData brokenImage = Icons.broken_image_rounded;
+
+  /// Search.
+  static const IconData search = Icons.search_rounded;
+
+  /// Show what was hidden (rooms that cannot play here).
+  static const IconData showHidden = Icons.visibility_rounded;
+
+  /// Something is hidden.
+  static const IconData hiddenNote = Icons.visibility_off_outlined;
+
+  /// Scroll to the top (3.x's mini button).
+  static const IconData toTop = Icons.arrow_upward_rounded;
+
+  /// Scroll to the end (3.x's mini button).
+  static const IconData toBottom = Icons.arrow_downward_rounded;
+
+  /// The previous page of the desktop pager.
+  static const IconData previousPage = Icons.chevron_left_rounded;
+
+  /// The next page of the desktop pager.
+  static const IconData nextPage = Icons.chevron_right_rounded;
 }

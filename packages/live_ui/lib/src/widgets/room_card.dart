@@ -61,6 +61,8 @@ final class RoomCardData {
     this.isReplay = false,
     this.audience,
     this.restrictionLabel,
+    this.platformName,
+    this.isOffline = false,
   });
 
   /// Platform id; the badge shows it in capitals (3.x).
@@ -92,6 +94,14 @@ final class RoomCardData {
   /// 标出受限类型").
   final String? restrictionLabel;
 
+  /// The platform's name to show beside its logo (`LiveRoomCard`'s platform
+  /// chip, U.4a c2); null shows the id in capitals.
+  final String? platformName;
+
+  /// The platform says the streamer is off (offline, banned, carousel): the
+  /// cover is dimmed and marked (`LiveRoomCard`, U.4a c4).
+  final bool isOffline;
+
   @override
   bool operator ==(Object other) =>
       other is RoomCardData &&
@@ -103,11 +113,24 @@ final class RoomCardData {
       other.isLive == isLive &&
       other.isReplay == isReplay &&
       other.audience == audience &&
-      other.restrictionLabel == restrictionLabel;
+      other.restrictionLabel == restrictionLabel &&
+      other.platformName == platformName &&
+      other.isOffline == isOffline;
 
   @override
-  int get hashCode =>
-      Object.hash(platformId, title, anchorName, avatarUrl, coverUrl, isLive, isReplay, audience, restrictionLabel);
+  int get hashCode => Object.hash(
+    platformId,
+    title,
+    anchorName,
+    avatarUrl,
+    coverUrl,
+    isLive,
+    isReplay,
+    audience,
+    restrictionLabel,
+    platformName,
+    isOffline,
+  );
 }
 
 /// A live room card (3.x `RoomCard`): a 16:9 cover with platform, replay,

@@ -281,7 +281,7 @@ void main() {
     await tester.longPress(find.byType(RoomCard));
     await tester.pumpAndSettle();
     expect(find.text('Streamer'), findsWidgets);
-    expect(find.textContaining('房间号: 7'), findsOneWidget);
+    expect(find.textContaining('房间号 7'), findsOneWidget);
     expect(find.textContaining('今天 19:55'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('room-menu-follow')));
@@ -293,7 +293,7 @@ void main() {
     // Unfollowing asks first.
     await tester.longPress(find.byType(RoomCard));
     await _settle(tester);
-    expect(find.text('取消关注'), findsOneWidget);
+    expect(find.text('已关注'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('room-menu-follow')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('unfollow-confirm')));

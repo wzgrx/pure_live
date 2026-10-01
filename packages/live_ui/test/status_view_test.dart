@@ -42,8 +42,32 @@ void main() {
       _app(EmptyView(buttonText: 'Search', buttonIcon: Icons.search_rounded, onButtonPressed: () {})),
     );
     await tester.pumpAndSettle();
-    expect(find.widgetWithIcon(TextButton, Icons.search_rounded), findsOneWidget);
+    // U.1c C1: the first button is tonal filled.
+    final button = find.byKey(const ValueKey('status-button'));
+    expect(tester.widget(button), isA<FilledButton>());
+    expect(find.descendant(of: button, matching: find.byIcon(Icons.search_rounded)), findsOneWidget);
     expect(find.byIcon(Icons.refresh_rounded), findsNothing);
+  });
+
+  testWidgets('U.1c C1: a second button is a text button after the first', (tester) async {
+    var second = 0;
+    await tester.pumpWidget(
+      _app(
+        EmptyView(
+          buttonText: 'Show',
+          onButtonPressed: () {},
+          secondaryButtonText: 'Refresh',
+          onSecondaryButtonPressed: () => second++,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final first = find.byKey(const ValueKey('status-button'));
+    final next = find.byKey(const ValueKey('status-secondary-button'));
+    expect(tester.widget(next), isA<TextButton>());
+    expect(tester.getCenter(first).dx, lessThan(tester.getCenter(next).dx));
+    await tester.tap(find.text('Refresh'));
+    expect(second, 1);
   });
 
   testWidgets('the mini form shows only the icon when the texts are empty', (tester) async {

@@ -8,21 +8,6 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_feed.dart';
 
-/// Rooms per desktop page and the choices (3.x `PageSettingsController`:
-/// 0 or a missing size means 20 above 960 px, else 12).
-({int size, List<int> options}) pageSizesOf(SettingsStore settings, double width) {
-  final wide = width > 960;
-  final raw = settings.get(Settings.pageSizeOptions);
-  final parsed = {
-    for (final match in RegExp(r'\d+').allMatches(raw))
-      if (int.tryParse(match.group(0)!) case final value? when value >= 1 && value <= 100) value,
-  }.toList()..sort();
-  final options = parsed.isEmpty ? (wide ? const [20, 40, 60, 80] : const [12, 24, 36, 48]) : parsed;
-  final stored = settings.get(Settings.pageDefaultSize);
-  final size = stored > 0 && options.contains(stored) ? stored : (stored > 0 ? options.first : (wide ? 20 : 12));
-  return (size: size, options: options.contains(size) ? options : ([...options, size]..sort()));
-}
-
 /// The popular page's catalogues, one feed per platform, kept while the app
 /// runs (3.x kept a GetX controller per platform), so switching tabs or
 /// home menus does not fetch again.

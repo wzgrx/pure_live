@@ -1,0 +1,403 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/services.dart';
+import 'package:pure_live/home/home_menu.dart';
+import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/pages/favorite/favorite_controller.dart';
+import 'package:pure_live/pages/favorite/favorite_page.dart';
+import 'package:pure_live/pages/favorite/favorite_rules.dart';
+import 'package:pure_live/pages/favorite/follow_refresher.dart';
+import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/routes/route_path.dart';
+
+import 'support.dart';
+
+/// A platform that answers from [details] (a missing room fails) and
+/// counts its requests.
+final class FakeSite extends LiveSite {
+  new(this.id, this.details, {this.delay});
+
+  @override
+  final String id;
+
+  @override
+  String get name => id;
+
+  final Map<String, LiveRoom> details;
+  final Duration? delay;
+  final List<String> requested = [];
+  int _active = 0;
+  int maxActive = 0;
+
+  @override
+  Future<LiveRoom> getRoomDetail({required String roomId}) async {
+    requested.add(roomId);
+    _active++;
+    if (_active > maxActive) maxActive = _active;
+    try {
+      if (delay case final delay?) await Future<void>.delayed(delay);
+      return details[roomId] ?? (throw StateError('no room $roomId'));
+    } finally {
+      _active--;
+    }
+  }
+}
+
+LiveRoom room(
+  String platform,
+  String id, {
+  String nick = '',
+  String title = '',
+  LiveStatus? status,
+  String popularity = '',
+  LiveRestriction? restriction,
+}) => LiveRoom(
+  platform: platform,
+  roomId: id,
+  nick: nick,
+  title: title,
+  liveStatus: status,
+  popularity: popularity,
+  restriction: restriction,
+);
+
+Future<LiveStore> memoryStore() => LiveStore.memory(cipher: FakeCipher());
+
+const _order = FollowOrder(preferRealOnline: false, realOnlinePlatforms: {}, tags: []);
+
+void main() {
+  group('rules', () {
+    test('tabs: live (restricted too), playable replays, everything else offline (UPGRADES 1-1, 3-1)', () {
+      expect(groupOf(room('bilibili', '1', status: LiveStatus.live)), FollowGroup.live);
+      expect(
+        groupOf(room('tiktok', '2', status: LiveStatus.live, restriction: LiveRestriction.paid)),
+        FollowGroup.live,
+      );
+      expect(groupOf(room('weibo', '3', status: LiveStatus.replay)), FollowGroup.replay);
+      expect(
+        groupOf(room('huya', '4', status: LiveStatus.replay, restriction: LiveRestriction.unplayable)),
+        FollowGroup.offline,
+      );
+      expect(groupOf(room('bilibili', '5', status: LiveStatus.carousel)), FollowGroup.offline);
+      expect(groupOf(room('douyu', '6', status: LiveStatus.unknown)), FollowGroup.offline);
+      // A retired platform's stored "live" is stale: it can no longer be checked.
+      expect(groupOf(room('kick', '7', status: LiveStatus.live)), FollowGroup.offline);
+    });
+
+    test('platforms: the platform list order, then the others, retired last; only platforms with follows', () {
+      final rooms = [room('kick', 'a'), room('huya', 'b'), room('douyu', 'c'), room('bilibili', 'd')];
+      expect(platformTabs(rooms, ['douyu', 'huya']), ['all', 'douyu', 'huya', 'bilibili', 'kick']);
+    });
+
+    test('live follows by audience (tag rank first with a tag), offline in the user order, tag filter', () {
+      final rooms = [
+        room('douyu', 'small', status: LiveStatus.live, popularity: '10'),
+        room('douyu', 'off2', status: LiveStatus.offline),
+        room('douyu', 'big', status: LiveStatus.live, popularity: '9000'),
+        room('douyu', 'off1', status: LiveStatus.offline),
+      ];
+      List<String> ids(FollowGroup group, {String tag = allTags, Map<String, List<String>> tags = const {}}) => [
+        for (final r in roomsOf(rooms, group: group, platform: 'all', tagId: tag, assignments: tags, order: _order))
+          r.roomId,
+      ];
+      expect(ids(FollowGroup.live), ['big', 'small']);
+      expect(ids(FollowGroup.offline), ['off2', 'off1']);
+      final assignments = {
+        'douyu:small': ['t1'],
+        'douyu:off1': ['t2'],
+      };
+      expect(ids(FollowGroup.live, tag: 't1', tags: assignments), ['small']);
+      expect(
+        tagsOf(
+          rooms,
+          group: FollowGroup.offline,
+          platform: 'all',
+          tags: const [
+            StoreTag(id: 't1', name: 'A'),
+            StoreTag(id: 't2', name: 'B'),
+          ],
+          assignments: assignments,
+        ).map((tag) => tag.id),
+        ['t2'],
+      );
+      expect(groupCounts(rooms, 'douyu'), {FollowGroup.live: 2, FollowGroup.replay: 0, FollowGroup.offline: 2});
+    });
+  });
+
+  group('refresh', () {
+    test('merges into the stored follow: empty names keep the stored ones, failures become pending', () async {
+      final store = await memoryStore();
+      addTearDown(store.close);
+      await store.follows.add(room('douyu', '1', nick: 'Stored', title: 'Old', status: LiveStatus.live));
+      await store.follows.add(room('douyu', '2', nick: 'Two', status: LiveStatus.live, popularity: '50'));
+      await store.follows.add(room('kick', '3', nick: 'Retired', status: LiveStatus.live));
+      final douyu = FakeSite('douyu', {
+        // A placeholder-free answer without a name (JD Live, UPGRADES 28-2).
+        '1': room('douyu', '1', title: 'New', status: LiveStatus.offline),
+      });
+      final refresher = FollowRefresher(sites: SiteRegistry({'douyu': () => douyu}));
+
+      final result = await refresher.refresh(await store.follows.all(), concurrency: 4);
+      await store.follows.update(result.rooms);
+
+      expect(douyu.requested, ['1', '2']); // one request per room; the retired platform is not asked
+      expect(result.failed, 1);
+      final one = (await store.follows.find('douyu', '1'))!;
+      expect((one.nick, one.title, one.effectiveLiveStatus), ('Stored', 'New', LiveStatus.offline));
+      final two = (await store.follows.find('douyu', '2'))!;
+      expect((two.nick, two.effectiveLiveStatus, two.popularity), ('Two', LiveStatus.unknown, '50'));
+      expect((await store.follows.find('kick', '3'))!.effectiveLiveStatus, LiveStatus.live);
+    });
+
+    test('at most the concurrency setting at a time; a failed room waits out the cooldown', () async {
+      var now = DateTime(2026, 10);
+      final site = FakeSite('huya', {
+        for (var i = 0; i < 6; i++) '$i': room('huya', '$i', status: LiveStatus.live),
+      }, delay: const Duration(milliseconds: 5));
+      final refresher = FollowRefresher(sites: SiteRegistry({'huya': () => site}), now: () => now);
+      final rooms = [for (var i = 0; i < 7; i++) room('huya', '$i')];
+
+      final progress = <int>[];
+      await refresher.refresh(rooms, concurrency: 2, onProgress: (done, _) => progress.add(done));
+      expect(site.maxActive, 2);
+      expect(progress, [1, 2, 3, 4, 5, 6, 7]);
+
+      site.requested.clear();
+      now = now.add(const Duration(minutes: 1));
+      await refresher.refresh(rooms, concurrency: 2);
+      expect(site.requested, isNot(contains('6'))); // failed a minute ago
+      await refresher.refresh(rooms, concurrency: 2, bypassCooldown: true);
+      expect(site.requested.where((id) => id == '6'), hasLength(1));
+    });
+
+    test('an answer under another id is bound to the follow (3.x bindFavoriteRefreshResultToRequest)', () {
+      final bound = bindToFollow(room('douyin', 'webrid'), room('douyin', '7123456789012345678', nick: 'N'));
+      expect((bound.roomId, bound.nick), ('webrid', 'N'));
+    });
+  });
+
+  group('controller', () {
+    test('checks every follow at start after the identity move, marks them verifying meanwhile', () async {
+      final store = await memoryStore();
+      addTearDown(store.close);
+      await store.follows.add(room('douyu', '1', nick: 'A', status: LiveStatus.offline));
+      final ready = Completer<void>();
+      final site = FakeSite('douyu', {'1': room('douyu', '1', status: LiveStatus.live, popularity: '9')});
+      final controller = FavoriteController(
+        store: store,
+        refresher: FollowRefresher(sites: SiteRegistry({'douyu': () => site})),
+        followsReady: ready.future,
+      )..start();
+      addTearDown(controller.dispose);
+
+      await pumpEventQueue();
+      expect(controller.verifying, isTrue);
+      expect(site.requested, isEmpty);
+      ready.complete();
+      await pumpEventQueue();
+      expect(site.requested, ['1']);
+      expect(controller.verifying, isFalse);
+      expect(controller.roomsFor(FollowGroup.live, allPlatforms).single.nick, 'A');
+      expect(controller.lastFullRefreshAt, isNotNull);
+    });
+
+    test('selecting follows again refreshes the shown platform; a resume refreshes all, at most every 15 s', () async {
+      final store = await memoryStore();
+      addTearDown(store.close);
+      await store.follows.add(room('douyu', '1'));
+      await store.follows.add(room('huya', '2'));
+      final douyu = FakeSite('douyu', {'1': room('douyu', '1', status: LiveStatus.live)});
+      final huya = FakeSite('huya', {'2': room('huya', '2', status: LiveStatus.live)});
+      var now = DateTime(2026, 10);
+      final controller = FavoriteController(
+        store: store,
+        refresher: FollowRefresher(sites: SiteRegistry({'douyu': () => douyu, 'huya': () => huya})),
+        now: () => now,
+      )..start();
+      addTearDown(controller.dispose);
+      await pumpEventQueue();
+      expect((douyu.requested.length, huya.requested.length), (1, 1));
+
+      controller.selectPlatform('huya');
+      HomeSignals.favoritesReselected.value++;
+      await pumpEventQueue();
+      expect((douyu.requested.length, huya.requested.length), (1, 2));
+
+      HomeSignals.resumedAfterBackground.value = (HomeMenu.popular, 1);
+      await pumpEventQueue();
+      expect(douyu.requested, hasLength(1)); // the start pass was just now
+      now = now.add(const Duration(seconds: 20));
+      HomeSignals.resumedAfterBackground.value = (HomeMenu.popular, 2);
+      await pumpEventQueue();
+      expect((douyu.requested.length, huya.requested.length), (2, 3));
+
+      await store.settings.set(Settings.refreshFavoriteOnResume, false);
+      now = now.add(const Duration(minutes: 1));
+      HomeSignals.resumedAfterBackground.value = (HomeMenu.popular, 3);
+      await pumpEventQueue();
+      expect(douyu.requested, hasLength(2));
+    });
+  });
+
+  group('page', () {
+    Future<(AppServices, FavoriteController, FakeSite)> pumpPage(
+      WidgetTester tester, {
+      List<LiveRoom> follows = const [],
+      Map<String, LiveRoom> details = const {},
+    }) async {
+      tester.view
+        ..physicalSize = const Size(400, 900)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final douyu = FakeSite('douyu', details);
+      final sites = SiteRegistry({'douyu': () => douyu, 'huya': () => FakeSite('huya', const {})});
+      final services = (await tester.runAsync(() async {
+        final services = await testServices();
+        for (final follow in follows) {
+          await services.store.follows.add(follow);
+        }
+        return services;
+      }))!;
+      final strings = (await tester.runAsync(loadStrings))!;
+      final controller = FavoriteController(
+        store: services.store,
+        refresher: FollowRefresher(sites: sites),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            appServicesProvider.overrideWithValue(services),
+            sitesProvider.overrideWithValue(sites),
+            favoriteControllerProvider.overrideWith((ref) {
+              ref.onDispose(controller.dispose);
+              return controller..start();
+            }),
+          ],
+          child: MaterialApp(
+            theme: const LiveTheme(primaryColor: Colors.blue).light,
+            home: LiveUiScope(
+              config: LiveUiConfig(strings: strings.ui),
+              child: const FavoritePage(route: RouteArgs(RoutePath.kFavorite)),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return (services, controller, douyu);
+    }
+
+    testWidgets('no follows: the empty page leads to search', (tester) async {
+      final (services, _, _) = await pumpPage(tester);
+      expect(find.text(i18n('empty_favorite_title')), findsOneWidget);
+      expect(find.text(i18n('search_live')), findsOneWidget);
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets('tabs, counts, platforms, marks and the offline shortcut', (tester) async {
+      final (services, controller, douyu) = await pumpPage(
+        tester,
+        follows: [
+          room('douyu', '1', nick: '主播一', status: LiveStatus.offline),
+          room('douyu', '2', nick: '主播二', status: LiveStatus.live),
+          room('huya', '3', nick: '主播三', status: LiveStatus.offline),
+          room('kick', '4', nick: '旧平台', status: LiveStatus.live),
+        ],
+        details: {
+          '1': room('douyu', '1', status: LiveStatus.live, popularity: '12345', restriction: LiveRestriction.paid),
+          '2': room('douyu', '2', status: LiveStatus.carousel),
+        },
+      );
+      expect(douyu.requested, unorderedEquals(['1', '2']));
+      // Live: the paid room, marked; its audience shortened as 3.x did.
+      expect(find.text('主播一'), findsOneWidget);
+      expect(find.text(i18n('favorite_mark_paid')), findsOneWidget);
+      expect(find.text('1.2万'), findsOneWidget);
+      expect(find.text('主播二'), findsNothing);
+      // Platform rail: all, then the platforms with follows, the retired one last.
+      expect(controller.platforms, ['all', 'douyu', 'huya', 'kick']);
+
+      await tester.tap(find.textContaining(i18n('offline_room_title')));
+      await tester.pumpAndSettle();
+      expect(find.text('主播二'), findsOneWidget);
+      expect(find.text(i18n('favorite_mark_carousel')), findsOneWidget);
+      // Huya failed: kept, pending. Kick is retired: marked, not pending.
+      expect(find.text('主播三'), findsOneWidget);
+      expect(find.text(i18n('favorite_status_unknown')), findsOneWidget);
+      expect(find.text(i18n('favorite_mark_retired')), findsOneWidget);
+
+      // A platform without live follows offers its offline ones.
+      await tester.tap(find.textContaining(i18n('online_room_title')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(i18n('site_huya')));
+      await tester.pumpAndSettle();
+      expect(find.text(i18n('favorite_show_offline')), findsOneWidget);
+      await tester.tap(find.text(i18n('favorite_show_offline')));
+      await tester.pumpAndSettle();
+      expect(controller.group, FollowGroup.offline);
+      expect(find.text('主播三'), findsOneWidget);
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets('tags filter the grid; the card menu sets tags and unfollows with undo', (tester) async {
+      final (services, controller, _) = await pumpPage(
+        tester,
+        follows: [
+          room('douyu', '1', nick: '甲', status: LiveStatus.live),
+          room('douyu', '2', nick: '乙', status: LiveStatus.live),
+        ],
+        details: {
+          '1': room('douyu', '1', status: LiveStatus.live, popularity: '20'),
+          '2': room('douyu', '2', status: LiveStatus.live, popularity: '10'),
+        },
+      );
+      expect(find.byKey(const ValueKey('favorite-tag-strip')), findsNothing);
+
+      // Long press → tags → create "常看" → save.
+      await tester.longPress(find.byKey(const ValueKey('douyu:1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('follow-menu-tags')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const ValueKey('tag-new-name')), '常看');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('tag-save')));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('favorite-tag-strip')), findsOneWidget);
+      await tester.tap(find.text('常看'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('douyu:1')), findsOneWidget);
+      expect(find.byKey(const ValueKey('douyu:2')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('favorite-tag-all')));
+      await tester.pumpAndSettle();
+      expect(controller.tagId, allTags);
+
+      // Unfollow 乙 and undo it.
+      await tester.longPress(find.byKey(const ValueKey('douyu:2')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('follow-menu-unfollow')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('unfollow-confirm')));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('douyu:2')), findsNothing);
+      expect(await tester.runAsync(services.store.follows.count), 1);
+      await tester.tap(find.text(i18n('favorite_undo')));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pumpAndSettle();
+      final restored = (await tester.runAsync(services.store.follows.all))!;
+      expect(restored.map((r) => r.roomId), ['1', '2']); // back in its place
+      await tester.pump(const Duration(seconds: 5)); // let the snack bar go
+      await tester.pumpAndSettle();
+      await tester.runAsync(services.close);
+    });
+  });
+}

@@ -63,7 +63,7 @@ void main() {
     final services = await _pump(tester, width: 400);
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.byType(NavigationDestination), findsNWidgets(4));
-    expect(find.widgetWithText(AppBar, '关注'), findsOneWidget);
+    expect(find.widgetWithText(AppBar, '已开播'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(NavigationDestination, '热门'));
     await tester.pumpAndSettle();

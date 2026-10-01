@@ -50,6 +50,13 @@ void main() {
       (AppIcons.localInteraction, Icons.auto_awesome_rounded),
       (AppIcons.templateSave, Icons.save_outlined),
       (AppIcons.templateRestore, Icons.restore_rounded),
+      // U.2j: the mini windows' buttons (3.x's play and pause; the new back
+      // and pin).
+      (AppIcons.backToRoom, Icons.open_in_full_rounded),
+      (AppIcons.miniPlay, Icons.play_circle_filled),
+      (AppIcons.miniPause, Icons.pause_circle_filled),
+      (AppIcons.pinned, Remix.pushpin_fill),
+      (AppIcons.unpinned, Remix.pushpin_line),
     ];
     for (final (actual, glyph) in expected) {
       expect(actual, glyph);

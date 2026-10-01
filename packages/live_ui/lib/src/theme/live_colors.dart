@@ -60,6 +60,16 @@ abstract final class OnVideoColors {
   /// Icons of the control bars: white, with [shadows].
   static const IconThemeData icons = IconThemeData(color: foreground, size: 24, shadows: shadows);
 
+  /// The round disc under a mini window's buttons (U.2j: 45 % black, 3.x
+  /// `Colors.black45`), so they read on a bright picture without a blur.
+  static const Color button = Color(0x73000000);
+
+  /// The shadow of the in-app floating window (U.2j c10: square corners and
+  /// a floating shadow instead of clipping the video round).
+  static const List<BoxShadow> floatingShadow = [
+    BoxShadow(color: Color(0x61000000), blurRadius: 24, offset: Offset(0, 8)),
+  ];
+
   /// The shade of a bar along the [edge] of the picture: [scrim] at the edge,
   /// fading out into the picture.
   static LinearGradient shade({required VerticalDirection edge}) => LinearGradient(

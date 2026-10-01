@@ -272,6 +272,10 @@ abstract final class Settings {
   /// Windows PiP on top.
   static const windowsPipAlwaysOnTop = BoolSetting('windowsPipAlwaysOnTop', section: 'player', defaultValue: false);
 
+  /// Leaving the app from a playing room enters picture-in-picture (U.2j,
+  /// choice J1). New in v4, off by default; 3.x only had the button.
+  static const autoPipOnLeave = BoolSetting('autoPipOnLeave', section: 'player', defaultValue: false);
+
   /// NVIDIA RTX video super resolution.
   static const enableRtxVsr = BoolSetting('enableRtxVsr', section: 'player', defaultValue: false);
 
@@ -1099,6 +1103,7 @@ abstract final class Settings {
     videoHardwareDecoder,
     floatPlay,
     windowsPipAlwaysOnTop,
+    autoPipOnLeave,
     enableRtxVsr,
     useHardStopOnExit,
     enablePortraitStreamAdaptation,

@@ -1,6 +1,6 @@
 # U.6e 数据：设计（第 1 版）
 
-- 状态：待确认（第 1 版，2026-10-01）
+- 状态：已确认（2026-10-01，用户已同意全部设计：“后续全部通过”；“需要你选的”按建议）。原状态：待确认（第 1 版，2026-10-01）
 - 范围：缓存与数据管理、本地配置预览两页，以及清空缓存确认、操作结果提示、加载和出错状态
 - 对应：[TASKS.md](../../TASKS.md)、[INVENTORY.md](../../INVENTORY.md#u6e)（U.6e-01～03）、[TASK_FILES.md](../../TASK_FILES.md#u6e)
 - 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（共用部分 [src/smock.py](src/smock.py)，和 U.6c 同一份）

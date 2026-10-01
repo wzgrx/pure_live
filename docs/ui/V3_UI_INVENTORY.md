@@ -197,3 +197,6 @@ v4 现在（偏差最大）：
 | U.10c 云账号停用说明 | [compare/U.10c](compare/U.10c/README.md) |
 | U.6a 设置总览 | [compare/U.6a](compare/U.6a/README.md) |
 | U.6b 外观 | [compare/U.6b](compare/U.6b/README.md) |
+| U.6c 播放设置 | [compare/U.6c](compare/U.6c/README.md) |
+| U.6d 通用和网络 | [compare/U.6d](compare/U.6d/README.md) |
+| U.6e 数据 | [compare/U.6e](compare/U.6e/README.md) |

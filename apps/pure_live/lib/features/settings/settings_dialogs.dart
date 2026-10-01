@@ -8,7 +8,8 @@ typedef SettingsChoice<T> = ({T value, String label, String? description});
 
 /// The dialog frame of the settings: at most 420 wide, scrolls when the
 /// screen is short, tighter margins on narrow or large-text screens (3.x
-/// `ThemeChoiceDialog`).
+/// `ThemeChoiceDialog`); 24 px corners like every other dialog (3.x used 16
+/// here, U.6b Q14).
 class SettingsDialogFrame extends StatelessWidget {
   /// Creates the frame.
   const new({required this.title, required this.child, this.actions = const [], super.key});
@@ -28,7 +29,7 @@ class SettingsDialogFrame extends StatelessWidget {
     final compact = media.size.width < 420 || media.textScaler.scale(13) > 18;
     return Dialog(
       insetPadding: EdgeInsets.symmetric(horizontal: compact ? 12 : 40, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 420, maxHeight: media.size.height - 48),
         child: Column(
@@ -61,18 +62,21 @@ class SettingsDialogFrame extends StatelessWidget {
 }
 
 /// A single-choice list; picking an option closes it with that value (3.x
-/// `ThemeChoiceDialog`, plus a line of explanation per option).
+/// `ThemeChoiceDialog`, plus a line of explanation per option). Without
+/// [showCancel] (theme mode, language: 3.x had no buttons) it closes by a
+/// tap outside, back or Esc.
 Future<T?> showChoiceDialog<T>({
   required BuildContext context,
   required String title,
   required List<SettingsChoice<T>> options,
   required T selected,
   String? hint,
+  bool showCancel = true,
 }) => showDialog<T>(
   context: context,
   builder: (context) => SettingsDialogFrame(
     title: title,
-    actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel')))],
+    actions: [if (showCancel) TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel')))],
     child: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -267,24 +271,6 @@ class _NumberDialogState extends State<_NumberDialog> {
   }
 }
 
-/// 3.x's theme colours (`AppConsts.themeColors`), in its order.
-const List<(String name, Color color)> themePalette = [
-  ('Crimson', Color.fromARGB(255, 220, 20, 60)),
-  ('Orange', Color(0xFFFF9800)),
-  ('Chrome', Color.fromARGB(255, 230, 184, 0)),
-  ('Grass', Color(0xFF8BC34A)),
-  ('Teal', Color(0xFF009688)),
-  ('SeaFoam', Color.fromARGB(255, 112, 193, 207)),
-  ('Ice', Color.fromARGB(255, 115, 155, 208)),
-  ('Blue', Color(0xFF2196F3)),
-  ('Indigo', Color(0xFF3F51B5)),
-  ('Violet', Color(0xFF673AB7)),
-  ('Primary', Color(0xFF6200EE)),
-  ('Orchid', Color.fromARGB(255, 218, 112, 214)),
-  ('Variant', Color(0xFF3700B3)),
-  ('Secondary', Color(0xFF03DAC6)),
-];
-
 /// `AARRGGBB` of [color] (3.x stored colours as this hex).
 String colorHex(Color color) => color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase();
 
@@ -297,141 +283,59 @@ Color? parseColorHex(String text) {
   return value == null ? null : Color(value);
 }
 
-/// The result of [showColorDialog]: a null `color` means "follow the theme".
-typedef ColorChoice = ({Color? color});
-
-/// A colour: 3.x's palette swatches and a hex field (3.x used
-/// flex_color_picker's wheel; the swatches and hex cover what it was used
-/// for). With [allowThemeColor] the first choice follows the theme colour.
-Future<ColorChoice?> showColorDialog({
+/// The colour picker dialog of the theme, loading and floating-window
+/// danmaku colours (3.x `showAppColorPickerDialog`; U.6b c10): tabs
+/// "推荐 / 常用色 / 鲜艳色 / 调色盘", shades, the code, with [opacity] an
+/// alpha slider. [onPreview] gets every change (the page behind follows);
+/// returns the colour on "确定", null when cancelled.
+Future<Color?> showColorDialog({
   required BuildContext context,
   required String title,
-  required Color? current,
-  bool allowThemeColor = false,
-}) => showDialog<ColorChoice>(
-  context: context,
-  builder: (context) => _ColorDialog(title: title, current: current, allowThemeColor: allowThemeColor),
-);
-
-class _ColorDialog extends StatefulWidget {
-  const new({required this.title, required this.current, required this.allowThemeColor});
-
-  final String title;
-  final Color? current;
-  final bool allowThemeColor;
-
-  @override
-  State<_ColorDialog> createState() => _ColorDialogState();
-}
-
-class _ColorDialogState extends State<_ColorDialog> {
-  late final TextEditingController _hex = TextEditingController(
-    text: widget.current == null ? '' : colorHex(widget.current!).substring(2),
-  );
-  String? _error;
-
-  @override
-  void dispose() {
-    _hex.dispose();
-    super.dispose();
-  }
-
-  void _applyHex() {
-    final color = parseColorHex(_hex.text);
-    if (color == null) {
-      setState(() => _error = i18n('settings_color_invalid'));
-      return;
-    }
-    Navigator.of(context).pop((color: color));
-  }
-
-  Widget _swatch(Color color, {required bool selected, required VoidCallback onTap, Key? key, Widget? child}) {
-    final colors = Theme.of(context).colorScheme;
-    return InkWell(
-      key: key,
-      borderRadius: BorderRadius.circular(22),
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(color: selected ? colors.onSurface : colors.outlineVariant, width: selected ? 3 : 1),
-        ),
-        child: child ?? (selected ? const Icon(Icons.check_rounded, color: Colors.white) : null),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final current = widget.current?.toARGB32();
-    final primary = Theme.of(context).colorScheme.primary;
-    return SettingsDialogFrame(
-      title: widget.title,
+  required Color current,
+  bool opacity = false,
+  ValueChanged<Color>? onPreview,
+}) {
+  final picker = GlobalKey<LiveColorPickerState>();
+  return showDialog<Color>(
+    context: context,
+    builder: (context) => SettingsDialogFrame(
+      title: title,
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-        FilledButton(key: const ValueKey('settings-color-apply'), onPressed: _applyHex, child: Text(i18n('confirm'))),
+        TextButton(
+          key: const ValueKey('settings-color-cancel'),
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(i18n('cancel')),
+        ),
+        FilledButton(
+          key: const ValueKey('settings-color-apply'),
+          onPressed: () {
+            final color = picker.currentState?.commit();
+            if (color != null) Navigator.of(context).pop(color);
+          },
+          child: Text(i18n('exit_yes')),
+        ),
       ],
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                if (widget.allowThemeColor)
-                  Tooltip(
-                    message: i18n('settings_color_follow_theme'),
-                    child: _swatch(
-                      primary,
-                      key: const ValueKey('settings-color-theme'),
-                      selected: current == null,
-                      onTap: () => Navigator.of(context).pop((color: null)),
-                      child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
-                    ),
-                  ),
-                for (final (name, color) in themePalette)
-                  Tooltip(
-                    message: name,
-                    child: _swatch(
-                      color,
-                      key: ValueKey('settings-color-$name'),
-                      selected: current == color.toARGB32(),
-                      onTap: () => Navigator.of(context).pop((color: color)),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              key: const ValueKey('settings-color-hex'),
-              controller: _hex,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp('[0-9a-fA-F#]')),
-                LengthLimitingTextInputFormatter(9),
-              ],
-              onSubmitted: (_) => _applyHex(),
-              onChanged: (_) {
-                if (_error != null) setState(() => _error = null);
-              },
-              decoration: InputDecoration(
-                labelText: i18n('settings_color_hex'),
-                prefixText: '#',
-                helperText: 'RRGGBB',
-                errorText: _error,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-          ],
+        child: LiveColorPicker(
+          key: picker,
+          color: current,
+          opacity: opacity,
+          onChanged: (color) => onPreview?.call(color),
+          labels: LiveColorPickerLabels(
+            recommended: i18n('settings_color_recommended'),
+            primary: i18n('settings_color_primary'),
+            accent: i18n('settings_color_accent'),
+            wheel: i18n('settings_color_wheel'),
+            shades: i18n('select_color_shade'),
+            opacity: i18n('select_opacity'),
+            code: i18n(opacity ? 'argb_color_code' : 'rgb_color_code'),
+            invalidCode: i18n('invalid_color_code'),
+          ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
 /// The section of a settings sub-page: a padded, width-limited list.

@@ -233,8 +233,12 @@ class ResetAllTile extends ConsumerWidget {
 /// What is stored, read-only: counts and every section of a backup without
 /// accounts, with copy (3.x `LocalConfigPreviewPage`).
 class ConfigPreviewPage extends ConsumerStatefulWidget {
-  /// Creates the page.
-  const new({super.key});
+  /// Creates the page; [onBack] is the back button when the page is the
+  /// first of its navigator (the settings' one-column layout).
+  const new({this.onBack, super.key});
+
+  /// Back to the settings overview.
+  final VoidCallback? onBack;
 
   @override
   ConsumerState<ConfigPreviewPage> createState() => _ConfigPreviewPageState();
@@ -265,8 +269,11 @@ class _ConfigPreviewPageState extends ConsumerState<ConfigPreviewPage> {
       builder: (context, snapshot) {
         final data = snapshot.data;
         return Scaffold(
-          appBar: AppBar(
-            title: Text(i18n('local_config_preview')),
+          appBar: settingsAppBar(
+            context,
+            title: i18n('local_config_preview'),
+            embedded: SettingsPane.of(context),
+            leading: widget.onBack == null ? null : BackButton(onPressed: widget.onBack),
             actions: [
               if (data != null)
                 IconButton(
@@ -445,12 +452,10 @@ class _DownloadDirectoryTileState extends ConsumerState<DownloadDirectoryTile> {
         : custom;
     return KeyedSubtree(
       key: widget.entry.rowKey,
-      child: context.buildTile(
+      child: context.settingsTile(
         icon: Remix.folder_download_line,
         title: widget.entry.titleText,
         subtitle: path,
-        isLong: true,
-        stackTrailingOnNarrow: true,
         trailing: Wrap(
           spacing: 4,
           children: [

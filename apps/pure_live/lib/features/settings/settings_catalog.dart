@@ -48,7 +48,7 @@ List<SettingsChoice<String>> _keyed(Map<String, String> labels, [Map<String, Str
     (value: key, label: i18n(value), description: descriptions[key] == null ? null : i18n(descriptions[key]!)),
 ];
 
-bool _wide(SettingsEnv env) => env.wide;
+bool _notIos(SettingsEnv env) => !env.isIOS;
 bool _android(SettingsEnv env) => env.isAndroid;
 bool _windows(SettingsEnv env) => env.isWindows;
 bool _mobile(SettingsEnv env) => env.isMobile;
@@ -67,6 +67,9 @@ final class _Catalog {
   /// The group title of the entries added next.
   late String group;
 
+  /// The sub-page of the entries added next.
+  SettingsSubpage? subpage;
+
   void add(
     String id,
     String title,
@@ -75,10 +78,12 @@ final class _Catalog {
     List<Setting<Object>> settings = const [],
     List<String> keywords = const [],
     bool Function(SettingsEnv env)? when,
+    bool opens = false,
   }) => entries.add(
     SettingsEntry(
       id: id,
       section: section,
+      subpage: subpage,
       group: group,
       title: title,
       description: desc,
@@ -86,6 +91,7 @@ final class _Catalog {
       settings: settings,
       keywords: keywords,
       when: when ?? (_) => true,
+      opens: opens,
     ),
   );
 
@@ -206,6 +212,7 @@ final class _Catalog {
     IconData icon, {
     String? route,
     WidgetBuilder? page,
+    SettingsSubpage? subpage,
     String? desc,
     List<Setting<Object>> settings = const [],
     List<String> keywords = const [],
@@ -213,52 +220,130 @@ final class _Catalog {
   }) => add(
     id,
     title,
-    (context, entry) => SettingLinkTile(entry: entry, icon: icon, route: route, page: page),
+    (context, entry) => SettingLinkTile(entry: entry, icon: icon, route: route, page: page, subpage: subpage),
     desc: desc,
     settings: settings,
     keywords: keywords,
     when: when,
+    opens: true,
   );
 }
 
-/// Every settings row, in display order (3.x's 20 settings pages, regrouped
-/// by what a user looks for; see docs/modules/M13.7-settings.md).
+/// Lines above and under a group, by group title key: (above, under).
+const Map<String, (String?, String?)> settingsGroupNotes = {
+  'settings_nav_group_bar': ('settings_nav_hint', 'settings_nav_footer'),
+  'settings_group_pager': (null, 'settings_paging_scroll_top_note'),
+};
+
+/// A line at the top of a page, by section or sub-page name.
+const Map<String, String> settingsPageIntros = {};
+
+/// Every settings row, in display order: the pages of the overview (3.x's
+/// settings pages, U.6a) and their rows. Appearance and navigation follow
+/// U.6b; the other pages keep M13.7's rows until U.6c–U.6e rebuild them.
 final List<SettingsEntry> settingsCatalog = _build();
 
 List<SettingsEntry> _build() {
   final c = _Catalog()
-    // ---- appearance ----
+    // ---- appearance (U.6b) ----
     ..section = SettingsSection.appearance
     ..group = 'settings_group_theme'
     ..add(
       'theme_mode',
       'change_theme_mode',
       (context, entry) => ThemeModeTile(entry: entry),
-      desc: 'settings_theme_mode_desc',
+      desc: 'change_theme_mode_subtitle',
       settings: [Settings.themeMode],
-      keywords: ['dark', 'light', '深色', '浅色', '夜间'],
+      keywords: ['dark', 'light', '深色', '浅色', '夜间', '暗色'],
+    )
+    ..add(
+      'pure_black',
+      'settings_pure_black',
+      (context, entry) => PureBlackTile(entry: entry),
+      desc: 'settings_pure_black_desc',
+      settings: [Settings.pureBlackTheme],
+      keywords: ['black', 'OLED', 'AMOLED', '黑色', '夜间'],
     )
     ..add(
       'theme_color',
       'change_theme_color',
       (context, entry) => ThemeColorTile(entry: entry),
-      desc: 'settings_theme_color_desc',
+      desc: 'change_theme_color_subtitle',
       settings: [Settings.themeColorSwitch],
-      keywords: ['color', '颜色'],
+      keywords: ['color', 'colour', '颜色', '主题色'],
     )
     ..toggle(
       'dynamic_color',
       'enable_dynamic_color',
       Settings.enableDynamicTheme,
-      Remix.magic_line,
-      desc: 'settings_dynamic_color_desc',
-      keywords: ['Material You', 'monet'],
+      AppIcons.dynamicColor,
+      desc: 'enable_dynamic_color_subtitle',
+      keywords: ['Material You', 'monet', '壁纸'],
+      when: _notIos,
     )
+    ..add(
+      'loading_style',
+      'change_loading_style',
+      (context, entry) => LoadingStyleTile(entry: entry),
+      desc: 'change_loading_style_subtitle',
+      settings: [Settings.loadingStyle, Settings.loadingStyleColorSwitch],
+      keywords: ['loading', '加载', '动画'],
+      opens: true,
+    )
+    ..group = 'settings_group_cards_lists'
+    ..link(
+      'room_card',
+      'room_card_settings',
+      AppIcons.roomCardSettings,
+      page: (_) => const RoomCardSettingsPage(),
+      desc: 'room_card_settings_subtitle',
+      settings: [
+        Settings.roomCardMobilePreset,
+        Settings.roomCardDesktopPreset,
+        Settings.roomCardMobileConfig,
+        Settings.roomCardDesktopConfig,
+      ],
+      keywords: ['card', '卡片', '封面', '圆角'],
+    )
+    ..add(
+      'cross_spacing',
+      'cross_axis_spacing',
+      (context, entry) => SpacingTile(entry: entry, setting: Settings.crossAxisSpacing, icon: AppIcons.columnSpacing),
+      desc: 'cross_axis_spacing_subtitle',
+      settings: [Settings.crossAxisSpacing],
+      keywords: ['间距', 'spacing', '网格'],
+    )
+    ..add(
+      'main_spacing',
+      'main_axis_spacing',
+      (context, entry) => SpacingTile(entry: entry, setting: Settings.mainAxisSpacing, icon: AppIcons.rowSpacing),
+      desc: 'main_axis_spacing_subtitle',
+      settings: [Settings.mainAxisSpacing],
+      keywords: ['间距', 'spacing', '网格'],
+    )
+    ..toggle(
+      'page_scroll_top',
+      'show_scroll_to_top',
+      Settings.pageShowScrollTop,
+      AppIcons.scrollToTop,
+      desc: 'show_scroll_to_top_subtitle',
+      keywords: ['置顶', 'top'],
+    )
+    ..link(
+      'page_settings',
+      'page_settings',
+      AppIcons.pageSettings,
+      subpage: SettingsSubpage.paging,
+      desc: 'settings_page_settings_desc',
+      keywords: ['分页', 'page'],
+      when: _desktop,
+    )
+    ..group = 'settings_group_language_ui'
     ..add(
       'language',
       'change_language',
       (context, entry) => LanguageTile(entry: entry),
-      desc: 'settings_language_desc',
+      desc: 'change_language_subtitle',
       settings: [Settings.language],
       keywords: ['language', '语言', 'English', '中文'],
     )
@@ -268,7 +353,7 @@ List<SettingsEntry> _build() {
       'ui_mode',
       'ui_mode',
       Settings.uiMode,
-      Remix.tv_2_line,
+      AppIcons.uiMode,
       () => _keyed(
         const {'auto': 'ui_mode_auto', 'phone': 'ui_mode_phone', 'tv': 'ui_mode_tv'},
         const {'auto': 'ui_mode_auto_desc'},
@@ -276,25 +361,30 @@ List<SettingsEntry> _build() {
       desc: 'ui_mode_desc',
       keywords: ['TV', '电视', '遥控器', 'remote', 'phone', '手机', '界面'],
     )
-    ..group = 'settings_group_text'
-    ..slider(
+    ..group = 'settings_group_fonts'
+    ..add(
+      'app_font',
+      'settings_font',
+      (context, entry) => FontFamilyTile(entry: entry, setting: Settings.fontFamilyName),
+      desc: 'settings_font_desc',
+      settings: [Settings.fontFamilyName, Settings.fontFamilyFileName],
+      keywords: ['font', '字体'],
+      opens: true,
+    )
+    ..add(
       'text_scale',
-      'text_size_title',
-      Settings.textScaleFactor,
-      Remix.text_spacing,
-      min: 0.5,
-      max: 2,
-      step: 0.05,
-      format: (value) => '${value.toStringAsFixed(2)}×',
-      desc: 'settings_text_scale_desc',
-      keywords: ['font', '字号', '缩放'],
+      'settings_text_size',
+      (context, entry) => TextScaleTile(entry: entry),
+      desc: 'settings_text_size_desc',
+      settings: [Settings.textScaleFactor],
+      keywords: ['font', '字号', '缩放', '文字', 'text size'],
     )
     ..link(
       'font_sizes',
       'font_settings_title',
-      Remix.font_size,
+      AppIcons.fontSizes,
       page: (_) => const FontSizesPage(),
-      desc: 'settings_font_sizes_desc',
+      desc: 'settings_font_sizes_row_desc',
       settings: [
         Settings.fontSizeBodySmall,
         Settings.fontSizeBodyMedium,
@@ -304,105 +394,235 @@ List<SettingsEntry> _build() {
       ],
       keywords: ['字号', 'font size'],
     )
-    ..add(
-      'app_font',
-      'change_font_family',
-      (context, entry) => FontFamilyTile(entry: entry, setting: Settings.fontFamilyName),
-      desc: 'settings_app_font_desc',
-      settings: [Settings.fontFamilyName, Settings.fontFamilyFileName],
-      keywords: ['font', '字体'],
-    )
-    ..group = 'settings_group_layout'
-    ..add(
-      'loading_style',
-      'change_loading_style',
-      (context, entry) => LoadingStyleTile(entry: entry),
-      desc: 'settings_loading_style_desc',
-      settings: [Settings.loadingStyle, Settings.loadingStyleColorSwitch],
-      keywords: ['loading', '加载'],
-    )
-    ..link(
-      'room_card',
-      'room_card_settings',
-      Remix.layout_grid_line,
-      page: (_) => const RoomCardSettingsPage(),
-      desc: 'settings_room_card_desc',
-      settings: [
-        Settings.roomCardMobilePreset,
-        Settings.roomCardDesktopPreset,
-        Settings.roomCardMobileConfig,
-        Settings.roomCardDesktopConfig,
-      ],
-      keywords: ['card', '卡片', '封面'],
-    )
-    ..slider(
-      'cross_spacing',
-      'cross_axis_spacing',
-      Settings.crossAxisSpacing,
-      Remix.arrow_left_right_line,
-      min: 0,
-      max: 64,
-      format: _pixels,
-      desc: 'settings_cross_spacing_desc',
-      keywords: ['间距', 'spacing'],
-    )
-    ..slider(
-      'main_spacing',
-      'main_axis_spacing',
-      Settings.mainAxisSpacing,
-      Remix.arrow_up_down_line,
-      min: 0,
-      max: 64,
-      format: _pixels,
-      desc: 'settings_main_spacing_desc',
-      keywords: ['间距', 'spacing'],
-    )
-    ..group = 'page_settings'
+    // The pager of computers (3.x showed it on any screen wider than 680,
+    // where phones have no pager; U.6b c6).
+    ..subpage = SettingsSubpage.paging
+    ..group = 'settings_group_pager'
     ..toggle(
       'page_size_selector',
       'show_page_size_selector',
       Settings.pageShowSizeSelector,
-      Remix.list_settings_line,
-      desc: 'settings_page_size_selector_desc',
-      when: _wide,
+      AppIcons.pageSizeSelector,
+      desc: 'show_page_size_selector_subtitle',
+      keywords: ['分页', 'page'],
+      when: _desktop,
     )
     ..toggle(
       'page_goto',
       'show_goto_button',
       Settings.pageShowGotoButton,
-      Remix.skip_forward_line,
-      desc: 'settings_page_goto_desc',
-      when: _wide,
-    )
-    ..toggle(
-      'page_scroll_top',
-      'show_scroll_to_top',
-      Settings.pageShowScrollTop,
-      Remix.arrow_up_circle_line,
-      desc: 'settings_page_scroll_top_desc',
-      when: _wide,
-    )
-    ..number(
-      'page_default_size',
-      'settings_page_default_size',
-      Settings.pageDefaultSize,
-      Remix.file_list_3_line,
-      presets: const [0, 12, 20, 30, 40, 60],
-      label: (value) => value == 0 ? i18n('settings_page_size_auto') : '$value',
-      desc: 'settings_page_default_size_desc',
-      unit: 'items_per_page',
-      when: _wide,
+      AppIcons.pageGoto,
+      desc: 'show_goto_button_subtitle',
+      keywords: ['分页', '跳转', 'page'],
+      when: _desktop,
     )
     ..add(
       'page_size_options',
       'page_size_options_manage',
       (context, entry) => PageSizeOptionsTile(entry: entry),
-      desc: 'settings_page_size_options_desc',
       settings: [Settings.pageSizeOptions],
-      when: _wide,
+      keywords: ['分页', 'page'],
+      when: _desktop,
     )
-    // ---- playback ----
-    ..section = SettingsSection.playback
+    ..number(
+      'page_default_size',
+      'settings_page_default_size_title',
+      Settings.pageDefaultSize,
+      AppIcons.pageDefaultSize,
+      presets: const [0, 12, 20, 30, 40, 60],
+      label: (value) => value == 0 ? i18n('settings_page_size_auto') : '$value',
+      desc: 'settings_page_default_size_hint',
+      unit: 'items_per_page',
+      keywords: ['分页', 'page'],
+      when: _desktop,
+    )
+    ..subpage = null
+    // ---- navigation (U.6b) ----
+    ..section = SettingsSection.navigation
+    ..group = 'settings_nav_group_home'
+    ..toggle(
+      'multiview',
+      'multiview_title',
+      Settings.enableMultiView,
+      AppIcons.roomCardSettings,
+      desc: 'settings_nav_multiview_desc',
+      keywords: ['多画面', 'multi'],
+    )
+    ..group = 'settings_nav_group_bar'
+    ..add(
+      'home_menus',
+      'settings_home_menus',
+      (context, entry) => HomeMenusList(entry: entry),
+      settings: [Settings.savedMenuIds],
+      keywords: ['菜单', '底栏', '导航', 'menu', 'tab', '关注', '热门', '分区', '录制中心'],
+    )
+    // ---- platforms (U.6d) ----
+    ..section = SettingsSection.platforms
+    ..group = 'platform_settings'
+    ..link(
+      'platform_list',
+      'platform_display',
+      Remix.apps_2_line,
+      route: RoutePath.kSettingsHotAreas,
+      desc: 'settings_platform_list_desc',
+      settings: [Settings.hotAreasList],
+      keywords: ['平台', 'platform'],
+    )
+    ..add(
+      'prefer_platform',
+      'prefer_platform',
+      (context, entry) => PreferPlatformTile(entry: entry),
+      desc: 'settings_prefer_platform_desc',
+      settings: [Settings.preferPlatform],
+      keywords: ['平台', 'platform'],
+    )
+    ..link(
+      'accounts',
+      'settings_accounts',
+      Remix.account_circle_line,
+      route: RoutePath.kSettingsAccount,
+      desc: 'settings_accounts_desc',
+      keywords: ['Cookie', '登录', 'login', '账号'],
+    )
+    ..link(
+      'tags',
+      'tag_management',
+      Remix.price_tag_3_line,
+      route: RoutePath.kSettingsTags,
+      desc: 'settings_tags_desc',
+      keywords: ['分组', 'tag'],
+    )
+    ..link(
+      'iptv',
+      'iptv_settings',
+      Remix.tv_2_line,
+      route: RoutePath.kIptv,
+      desc: 'settings_iptv_desc',
+      keywords: ['IPTV', 'M3U', '电视'],
+    )
+    ..group = 'settings_group_discover'
+    ..toggle(
+      'show_unplayable',
+      'settings_show_unplayable',
+      Settings.showUnplayableInDiscover,
+      Remix.lock_line,
+      desc: 'settings_show_unplayable_desc',
+      keywords: ['付费', '加锁', '受限'],
+    )
+    ..add(
+      'audience_mode',
+      'audience_display_mode',
+      (context, entry) => SettingChoiceTile<bool>(
+        entry: entry,
+        setting: Settings.preferRealOnlineCounts,
+        icon: Remix.group_line,
+        hint: i18n('audience_ranking_rule_desc'),
+        options: () => [
+          (value: false, label: i18n('audience_mode_heat'), description: i18n('audience_mode_heat_desc')),
+          (value: true, label: i18n('audience_mode_online'), description: i18n('audience_mode_online_desc')),
+        ],
+      ),
+      desc: 'settings_audience_mode_desc',
+      settings: [Settings.preferRealOnlineCounts],
+      keywords: ['人数', '热度', '在线', 'viewers'],
+    )
+    ..link(
+      'audience_platforms',
+      'audience_online_platforms',
+      Remix.list_check_2,
+      page: (_) => const AudiencePlatformsPage(),
+      desc: 'settings_audience_platforms_desc',
+      settings: [Settings.realOnlinePlatforms],
+      keywords: ['人数', '在线', 'viewers'],
+    )
+    ..add(
+      'twitch_languages',
+      'settings_twitch_languages',
+      (context, entry) => TwitchLanguagesTile(entry: entry),
+      desc: 'settings_twitch_languages_desc',
+      settings: [Settings.twitchLanguages],
+      keywords: ['Twitch', '语言', 'language'],
+    )
+    ..toggle(
+      'douyu_renew',
+      'settings_douyu_renew',
+      Settings.douyuForceRenew,
+      Remix.refresh_line,
+      desc: 'settings_douyu_renew_desc',
+      keywords: ['斗鱼', 'douyu', 'Cookie'],
+    )
+    // ---- refresh (U.6d) ----
+    ..section = SettingsSection.refresh
+    ..group = 'auto_refresh_settings'
+    ..toggle(
+      'refresh_on_resume',
+      'refresh_follow_on_resume',
+      Settings.refreshFavoriteOnResume,
+      Remix.restart_line,
+      desc: 'settings_refresh_on_resume_desc',
+      keywords: ['刷新', 'refresh'],
+    )
+    ..toggle(
+      'auto_refresh',
+      'auto_refresh_follow',
+      Settings.autoRefreshFavorite,
+      Remix.refresh_line,
+      desc: 'settings_auto_refresh_desc',
+      keywords: ['刷新', 'refresh'],
+    )
+    ..number(
+      'refresh_interval',
+      'auto_refresh_interval',
+      Settings.autoRefreshInterval,
+      Remix.timer_line,
+      presets: const [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 360],
+      label: formatMinutes,
+      unit: 'minute',
+      enabledBy: Settings.autoRefreshFavorite,
+      keywords: ['刷新', 'refresh'],
+    )
+    ..number(
+      'refresh_concurrency',
+      'max_concurrent_refresh',
+      Settings.maxConcurrentRefresh,
+      Remix.stack_line,
+      presets: const [1, 2, 3, 4, 6, 8, 10, 12, 16, 20],
+      label: (value) => value == 4 ? '$value · ${i18n('recommended')}' : '$value',
+      desc: 'settings_refresh_concurrency_desc',
+      keywords: ['刷新', 'refresh'],
+    )
+    ..toggle(
+      'refresh_covers',
+      'auto_refresh_thumbnails',
+      Settings.autoRefreshThumbnails,
+      Remix.image_line,
+      desc: 'auto_refresh_thumbnails_subtitle',
+      keywords: ['封面', 'cover'],
+    )
+    ..number(
+      'cover_interval',
+      'thumbnail_refresh_interval',
+      Settings.thumbnailRefreshInterval,
+      Remix.timer_2_line,
+      presets: const [5, 10, 15, 30, 60, 120, 240, 360],
+      label: formatMinutes,
+      unit: 'minute',
+      enabledBy: Settings.autoRefreshThumbnails,
+      keywords: ['封面', 'cover'],
+    )
+    ..group = 'history'
+    ..number(
+      'history_limit',
+      'history_limit',
+      Settings.historyLimit,
+      Remix.history_line,
+      presets: const [0, 20, 50, 100, 200, 500],
+      label: (value) => value == 0 ? i18n('settings_no_limit') : '$value',
+      desc: 'settings_history_limit_desc',
+      keywords: ['历史', 'history'],
+    )
+    // ---- video (U.6c) ----
+    ..section = SettingsSection.video
     ..group = 'video_quality_settings'
     ..choice(
       'prefer_resolution',
@@ -670,70 +890,7 @@ List<SettingsEntry> _build() {
       desc: 'portrait_show_diagnostics_desc',
       keywords: ['竖屏', 'portrait'],
     )
-    ..group = 'settings_group_decoding'
-    ..toggle(
-      'hardware_decoding',
-      'enable_codec',
-      Settings.enableCodec,
-      Remix.cpu_line,
-      desc: 'settings_hardware_decoding_desc',
-      keywords: ['硬解', 'decode', 'GPU'],
-    )
-    ..toggle(
-      'compat_mode',
-      'compat_mode',
-      Settings.playerCompatMode,
-      Remix.shield_check_line,
-      desc: 'settings_compat_mode_desc',
-      keywords: ['黑屏', 'MediaCodec'],
-      when: _android,
-    )
-    ..toggle(
-      'rtx_vsr',
-      'enable_rtx_vsr',
-      Settings.enableRtxVsr,
-      Remix.sparkling_line,
-      desc: 'enable_rtx_vsr_subtitle',
-      keywords: ['NVIDIA', 'RTX', '超分'],
-      when: _windows,
-    )
-    ..toggle(
-      'hard_stop',
-      'force_destroy_player',
-      Settings.useHardStopOnExit,
-      Remix.stop_circle_line,
-      desc: 'settings_hard_stop_desc',
-    )
-    ..toggle(
-      'custom_output',
-      'custom_output_hwdec',
-      Settings.customPlayerOutput,
-      Remix.equalizer_line,
-      desc: 'settings_custom_output_desc',
-      keywords: ['mpv', 'vo', 'ao', 'hwdec'],
-    )
-    ..add(
-      'video_output',
-      'video_output_driver',
-      (context, entry) => MpvOptionTile(entry: entry, kind: MpvOptionKind.video),
-      settings: [Settings.videoOutputDriver],
-      keywords: ['mpv', 'vo'],
-    )
-    ..add(
-      'audio_output',
-      'audio_output_driver',
-      (context, entry) => MpvOptionTile(entry: entry, kind: MpvOptionKind.audio),
-      settings: [Settings.audioOutputDriver],
-      keywords: ['mpv', 'ao'],
-    )
-    ..add(
-      'hardware_decoder',
-      'hardware_decoder',
-      (context, entry) => MpvOptionTile(entry: entry, kind: MpvOptionKind.decoder),
-      settings: [Settings.videoHardwareDecoder],
-      keywords: ['mpv', 'hwdec'],
-    )
-    // ---- danmaku ----
+    // ---- danmaku (U.2e) ----
     ..section = SettingsSection.danmaku
     ..group = 'settings_group_danmaku_display'
     ..toggle(
@@ -984,6 +1141,8 @@ List<SettingsEntry> _build() {
       Remix.hand,
       desc: 'settings_danmaku_long_press_desc',
     )
+    // ---- floating-window danmaku (U.6c) ----
+    ..section = SettingsSection.pipDanmaku
     ..group = 'pip_danmaku'
     ..toggle(
       'pip_danmaku',
@@ -1002,211 +1161,72 @@ List<SettingsEntry> _build() {
       settings: pipDanmakuSettings,
       keywords: ['画中画', '小窗', 'PiP'],
     )
-    // ---- platforms ----
-    ..section = SettingsSection.platforms
-    ..group = 'platform_settings'
-    ..link(
-      'platform_list',
-      'platform_display',
-      Remix.apps_2_line,
-      route: RoutePath.kSettingsHotAreas,
-      desc: 'settings_platform_list_desc',
-      settings: [Settings.hotAreasList],
-      keywords: ['平台', 'platform'],
-    )
-    ..add(
-      'prefer_platform',
-      'prefer_platform',
-      (context, entry) => PreferPlatformTile(entry: entry),
-      desc: 'settings_prefer_platform_desc',
-      settings: [Settings.preferPlatform],
-      keywords: ['平台', 'platform'],
-    )
-    ..link(
-      'accounts',
-      'settings_accounts',
-      Remix.account_circle_line,
-      route: RoutePath.kSettingsAccount,
-      desc: 'settings_accounts_desc',
-      keywords: ['Cookie', '登录', 'login', '账号'],
-    )
-    ..link(
-      'tags',
-      'tag_management',
-      Remix.price_tag_3_line,
-      route: RoutePath.kSettingsTags,
-      desc: 'settings_tags_desc',
-      keywords: ['分组', 'tag'],
-    )
-    ..link(
-      'iptv',
-      'iptv_settings',
-      Remix.tv_2_line,
-      route: RoutePath.kIptv,
-      desc: 'settings_iptv_desc',
-      keywords: ['IPTV', 'M3U', '电视'],
-    )
-    ..group = 'settings_group_discover'
+    // ---- player (U.6c) ----
+    ..section = SettingsSection.playerKernel
+    ..group = 'settings_group_decoding'
     ..toggle(
-      'show_unplayable',
-      'settings_show_unplayable',
-      Settings.showUnplayableInDiscover,
-      Remix.lock_line,
-      desc: 'settings_show_unplayable_desc',
-      keywords: ['付费', '加锁', '受限'],
-    )
-    ..add(
-      'audience_mode',
-      'audience_display_mode',
-      (context, entry) => SettingChoiceTile<bool>(
-        entry: entry,
-        setting: Settings.preferRealOnlineCounts,
-        icon: Remix.group_line,
-        hint: i18n('audience_ranking_rule_desc'),
-        options: () => [
-          (value: false, label: i18n('audience_mode_heat'), description: i18n('audience_mode_heat_desc')),
-          (value: true, label: i18n('audience_mode_online'), description: i18n('audience_mode_online_desc')),
-        ],
-      ),
-      desc: 'settings_audience_mode_desc',
-      settings: [Settings.preferRealOnlineCounts],
-      keywords: ['人数', '热度', '在线', 'viewers'],
-    )
-    ..link(
-      'audience_platforms',
-      'audience_online_platforms',
-      Remix.list_check_2,
-      page: (_) => const AudiencePlatformsPage(),
-      desc: 'settings_audience_platforms_desc',
-      settings: [Settings.realOnlinePlatforms],
-      keywords: ['人数', '在线', 'viewers'],
-    )
-    ..add(
-      'twitch_languages',
-      'settings_twitch_languages',
-      (context, entry) => TwitchLanguagesTile(entry: entry),
-      desc: 'settings_twitch_languages_desc',
-      settings: [Settings.twitchLanguages],
-      keywords: ['Twitch', '语言', 'language'],
+      'hardware_decoding',
+      'enable_codec',
+      Settings.enableCodec,
+      Remix.cpu_line,
+      desc: 'settings_hardware_decoding_desc',
+      keywords: ['硬解', 'decode', 'GPU'],
     )
     ..toggle(
-      'douyu_renew',
-      'settings_douyu_renew',
-      Settings.douyuForceRenew,
-      Remix.refresh_line,
-      desc: 'settings_douyu_renew_desc',
-      keywords: ['斗鱼', 'douyu', 'Cookie'],
-    )
-    // ---- follows ----
-    ..section = SettingsSection.follows
-    ..group = 'auto_refresh_settings'
-    ..toggle(
-      'refresh_on_resume',
-      'refresh_follow_on_resume',
-      Settings.refreshFavoriteOnResume,
-      Remix.restart_line,
-      desc: 'settings_refresh_on_resume_desc',
-      keywords: ['刷新', 'refresh'],
+      'compat_mode',
+      'compat_mode',
+      Settings.playerCompatMode,
+      Remix.shield_check_line,
+      desc: 'settings_compat_mode_desc',
+      keywords: ['黑屏', 'MediaCodec'],
+      when: _android,
     )
     ..toggle(
-      'auto_refresh',
-      'auto_refresh_follow',
-      Settings.autoRefreshFavorite,
-      Remix.refresh_line,
-      desc: 'settings_auto_refresh_desc',
-      keywords: ['刷新', 'refresh'],
-    )
-    ..number(
-      'refresh_interval',
-      'auto_refresh_interval',
-      Settings.autoRefreshInterval,
-      Remix.timer_line,
-      presets: const [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 360],
-      label: formatMinutes,
-      unit: 'minute',
-      enabledBy: Settings.autoRefreshFavorite,
-      keywords: ['刷新', 'refresh'],
-    )
-    ..number(
-      'refresh_concurrency',
-      'max_concurrent_refresh',
-      Settings.maxConcurrentRefresh,
-      Remix.stack_line,
-      presets: const [1, 2, 3, 4, 6, 8, 10, 12, 16, 20],
-      label: (value) => value == 4 ? '$value · ${i18n('recommended')}' : '$value',
-      desc: 'settings_refresh_concurrency_desc',
-      keywords: ['刷新', 'refresh'],
+      'rtx_vsr',
+      'enable_rtx_vsr',
+      Settings.enableRtxVsr,
+      Remix.sparkling_line,
+      desc: 'enable_rtx_vsr_subtitle',
+      keywords: ['NVIDIA', 'RTX', '超分'],
+      when: _windows,
     )
     ..toggle(
-      'refresh_covers',
-      'auto_refresh_thumbnails',
-      Settings.autoRefreshThumbnails,
-      Remix.image_line,
-      desc: 'auto_refresh_thumbnails_subtitle',
-      keywords: ['封面', 'cover'],
+      'hard_stop',
+      'force_destroy_player',
+      Settings.useHardStopOnExit,
+      Remix.stop_circle_line,
+      desc: 'settings_hard_stop_desc',
     )
-    ..number(
-      'cover_interval',
-      'thumbnail_refresh_interval',
-      Settings.thumbnailRefreshInterval,
-      Remix.timer_2_line,
-      presets: const [5, 10, 15, 30, 60, 120, 240, 360],
-      label: formatMinutes,
-      unit: 'minute',
-      enabledBy: Settings.autoRefreshThumbnails,
-      keywords: ['封面', 'cover'],
+    ..toggle(
+      'custom_output',
+      'custom_output_hwdec',
+      Settings.customPlayerOutput,
+      Remix.equalizer_line,
+      desc: 'settings_custom_output_desc',
+      keywords: ['mpv', 'vo', 'ao', 'hwdec'],
     )
-    ..group = 'history'
-    ..number(
-      'history_limit',
-      'history_limit',
-      Settings.historyLimit,
-      Remix.history_line,
-      presets: const [0, 20, 50, 100, 200, 500],
-      label: (value) => value == 0 ? i18n('settings_no_limit') : '$value',
-      desc: 'settings_history_limit_desc',
-      keywords: ['历史', 'history'],
-    )
-    // ---- network ----
-    ..section = SettingsSection.network
-    ..group = 'settings_group_app_proxy'
     ..add(
-      'app_proxy',
-      'enable_app_proxy',
-      (context, entry) => ProxyTile(entry: entry, proxy: ProxySettings.app),
-      desc: 'settings_app_proxy_desc',
-      settings: [Settings.enableAppProxy, Settings.appProxyHost, Settings.appProxyPort],
-      keywords: ['代理', 'proxy', 'HTTP'],
+      'video_output',
+      'video_output_driver',
+      (context, entry) => MpvOptionTile(entry: entry, kind: MpvOptionKind.video),
+      settings: [Settings.videoOutputDriver],
+      keywords: ['mpv', 'vo'],
     )
-    ..group = 'settings_group_player_proxy'
     ..add(
-      'player_proxy',
-      'enable_player_proxy',
-      (context, entry) => ProxyTile(entry: entry, proxy: ProxySettings.player),
-      desc: 'settings_player_proxy_desc',
-      settings: [Settings.enableProxy, Settings.proxyHost, Settings.proxyPort],
-      keywords: ['代理', 'proxy', 'HTTP'],
+      'audio_output',
+      'audio_output_driver',
+      (context, entry) => MpvOptionTile(entry: entry, kind: MpvOptionKind.audio),
+      settings: [Settings.audioOutputDriver],
+      keywords: ['mpv', 'ao'],
     )
-    // ---- recording ----
-    ..section = SettingsSection.recording
-    ..group = 'settings_section_recording'
-    ..link(
-      'record_settings',
-      'record_settings',
-      Remix.settings_3_line,
-      route: RoutePath.kRecordSettings,
-      desc: 'settings_record_settings_desc',
-      keywords: ['录制', 'record'],
+    ..add(
+      'hardware_decoder',
+      'hardware_decoder',
+      (context, entry) => MpvOptionTile(entry: entry, kind: MpvOptionKind.decoder),
+      settings: [Settings.videoHardwareDecoder],
+      keywords: ['mpv', 'hwdec'],
     )
-    ..link(
-      'record_center',
-      'record_center',
-      Remix.download_2_line,
-      route: RoutePath.kRecordPage,
-      desc: 'settings_record_center_desc',
-      keywords: ['录制', 'record'],
-    )
-    // ---- general ----
+    // ---- general (U.6d) ----
     ..section = SettingsSection.general
     ..group = 'settings_group_startup'
     ..toggle(
@@ -1241,32 +1261,7 @@ List<SettingsEntry> _build() {
       keywords: ['开机', 'startup'],
       when: _windows,
     )
-    ..group = 'navigation_display_settings'
-    ..link(
-      'home_menus',
-      'settings_home_menus',
-      Remix.menu_line,
-      page: (_) => const HomeMenusPage(),
-      desc: 'settings_home_menus_desc',
-      settings: [Settings.savedMenuIds],
-      keywords: ['菜单', '底栏', 'menu', 'tab'],
-    )
-    ..toggle(
-      'multiview',
-      'multiview_title',
-      Settings.enableMultiView,
-      Remix.layout_grid_line,
-      desc: 'settings_multiview_desc',
-      keywords: ['多画面', 'multi'],
-    )
-    ..toggle(
-      'new_window',
-      'open_new_window',
-      Settings.enableNewWindowPlay,
-      Remix.window_line,
-      desc: 'open_new_window_subtitle',
-      when: _windows,
-    )
+    ..group = 'settings_group_display'
     ..add(
       'refresh_rate',
       'refresh_rate_mode',
@@ -1300,6 +1295,14 @@ List<SettingsEntry> _build() {
       when: _windows,
     )
     ..group = 'settings_group_window'
+    ..toggle(
+      'new_window',
+      'open_new_window',
+      Settings.enableNewWindowPlay,
+      Remix.window_line,
+      desc: 'open_new_window_subtitle',
+      when: _windows,
+    )
     ..add(
       'window_size',
       'window_size',
@@ -1347,33 +1350,28 @@ List<SettingsEntry> _build() {
       desc: 'app_exit_timer_explain',
       keywords: ['定时', '关闭', 'timer'],
     )
-    // ---- data ----
-    ..section = SettingsSection.data
-    ..group = 'backup_manage'
-    ..link(
-      'backup',
-      'backup_recover',
-      Remix.save_3_line,
-      route: RoutePath.kBackup,
-      desc: 'settings_backup_desc',
-      keywords: ['备份', '恢复', 'backup'],
+    // ---- network (U.6d) ----
+    ..section = SettingsSection.network
+    ..group = 'settings_group_app_proxy'
+    ..add(
+      'app_proxy',
+      'enable_app_proxy',
+      (context, entry) => ProxyTile(entry: entry, proxy: ProxySettings.app),
+      desc: 'settings_app_proxy_desc',
+      settings: [Settings.enableAppProxy, Settings.appProxyHost, Settings.appProxyPort],
+      keywords: ['代理', 'proxy', 'HTTP'],
     )
-    ..link(
-      'webdav',
-      'webdav',
-      Remix.cloud_line,
-      route: RoutePath.kWebDavPage,
-      desc: 'settings_webdav_desc',
-      keywords: ['云', '同步', 'WebDAV'],
+    ..group = 'settings_group_player_proxy'
+    ..add(
+      'player_proxy',
+      'enable_player_proxy',
+      (context, entry) => ProxyTile(entry: entry, proxy: ProxySettings.player),
+      desc: 'settings_player_proxy_desc',
+      settings: [Settings.enableProxy, Settings.proxyHost, Settings.proxyPort],
+      keywords: ['代理', 'proxy', 'HTTP'],
     )
-    ..link(
-      'config_preview',
-      'config_preview',
-      Remix.file_text_line,
-      page: (_) => const ConfigPreviewPage(),
-      desc: 'settings_config_preview_desc',
-      keywords: ['JSON', '配置'],
-    )
+    // ---- cache and data (U.6e) ----
+    ..section = SettingsSection.cache
     ..group = 'cache_and_data'
     ..add(
       'image_cache',
@@ -1412,18 +1410,6 @@ List<SettingsEntry> _build() {
       (context, entry) => ResetAllTile(entry: entry),
       desc: 'settings_reset_all_desc',
       keywords: ['默认', 'reset'],
-    )
-    // ---- about ----
-    ..section = SettingsSection.about
-    ..group = 'settings_section_about'
-    ..link('about', 'about', Remix.information_line, route: RoutePath.kAbout, desc: 'settings_about_desc')
-    ..link(
-      'check_update',
-      'check_update',
-      Remix.download_cloud_2_line,
-      route: RoutePath.kVersionPage,
-      desc: 'settings_check_update_desc',
-      keywords: ['版本', 'version', '更新'],
     );
   return List.unmodifiable(c.entries);
 }

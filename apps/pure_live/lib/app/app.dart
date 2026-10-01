@@ -138,6 +138,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
     };
     final dynamicTheme = watchSetting(ref, Settings.enableDynamicTheme);
     final seed = parseThemeColor(watchSetting(ref, Settings.themeColorSwitch));
+    final pureBlack = watchSetting(ref, Settings.pureBlackTheme);
     final sizes = LiveFontSizes(
       bodySmall: watchSetting(ref, Settings.fontSizeBodySmall),
       bodyMedium: watchSetting(ref, Settings.fontSizeBodyMedium),
@@ -167,12 +168,25 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
     return LiveDynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
         final useDynamic = dynamicTheme && lightDynamic != null && darkDynamic != null;
+        // The chosen colour stays the primary colour (fidelity, U.6b C-3;
+        // 3.x's tonal spot turned its blue into a grey blue).
         final light = useDynamic
             ? LiveTheme(colorScheme: lightDynamic, fontSizes: sizes, fontFamily: fontFamily)
-            : LiveTheme(primaryColor: seed, fontSizes: sizes, fontFamily: fontFamily);
+            : LiveTheme(
+                primaryColor: seed,
+                schemeVariant: DynamicSchemeVariant.fidelity,
+                fontSizes: sizes,
+                fontFamily: fontFamily,
+              );
         final dark = useDynamic
-            ? LiveTheme(colorScheme: darkDynamic, fontSizes: sizes, fontFamily: fontFamily)
-            : LiveTheme(primaryColor: seed, fontSizes: sizes, fontFamily: fontFamily);
+            ? LiveTheme(colorScheme: darkDynamic, fontSizes: sizes, fontFamily: fontFamily, pureBlack: pureBlack)
+            : LiveTheme(
+                primaryColor: seed,
+                schemeVariant: DynamicSchemeVariant.fidelity,
+                fontSizes: sizes,
+                fontFamily: fontFamily,
+                pureBlack: pureBlack,
+              );
         return MaterialApp.router(
           title: 'PureLive',
           onGenerateTitle: (_) => i18n('app_name'),
@@ -196,7 +210,10 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
             return LiveUiScope(
               config: uiConfig,
               child: MediaQuery(
-                data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
+                // On top of the system's text size (3.x replaced it, U.6b
+                // C-5).
+                data: MediaQuery.of(context)
+                    .copyWith(textScaler: AppTextScaler(MediaQuery.textScalerOf(context), textScale)),
                 child: framed,
               ),
             );
@@ -208,8 +225,8 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> {
 }
 
 /// `AARRGGBB` or `#RRGGBB` as stored by the theme settings (3.x `HexColor`);
-/// 3.x's blue when unreadable.
-Color parseThemeColor(String hex) => parseThemeColorOrNull(hex) ?? const Color(0xFF2196F3);
+/// the brand blue when unreadable.
+Color parseThemeColor(String hex) => parseThemeColorOrNull(hex) ?? LiveTheme.brandBlue;
 
 /// [parseThemeColor], or null for an empty or unreadable value.
 Color? parseThemeColorOrNull(String hex) {

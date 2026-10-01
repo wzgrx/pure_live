@@ -203,9 +203,7 @@ void main() {
     expect(find.byKey(const ValueKey('toolbox-platform-iptv')), findsNothing);
   });
 
-  testWidgets('portrait: group title outside the card, one box, two buttons side by side, list folded', (
-    tester,
-  ) async {
+  testWidgets('portrait: group title outside the card, one box, two buttons side by side, list folded', (tester) async {
     await _pump(tester);
     // c3: the group title sits above the card, the explanation inside it.
     final title = tester.getRect(find.text('平台链接'));
@@ -228,10 +226,15 @@ void main() {
     expect(jump.top, link.top);
     expect(jump.right, lessThan(link.left));
     expect(jump.height, greaterThanOrEqualTo(48));
-    expect(find.descendant(of: find.byKey(const ValueKey('toolbox-jump')), matching: find.byIcon(AppIcons.linkJump)),
-        findsOneWidget);
     expect(
-      find.descendant(of: find.byKey(const ValueKey('toolbox-direct-link')), matching: find.byIcon(AppIcons.streamLink)),
+      find.descendant(of: find.byKey(const ValueKey('toolbox-jump')), matching: find.byIcon(AppIcons.linkJump)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('toolbox-direct-link')),
+        matching: find.byIcon(AppIcons.streamLink),
+      ),
       findsOneWidget,
     );
     expect(find.text('链接跳转'), findsOneWidget);

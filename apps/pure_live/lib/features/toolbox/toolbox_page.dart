@@ -185,7 +185,9 @@ class _ToolboxPageState extends ConsumerState<ToolboxPage> {
             const SizedBox(height: 16),
             const SupportedPlatformsCard(),
           ])
-            ReadableContent(child: SizedBox(width: double.infinity, child: child)),
+            ReadableContent(
+              child: SizedBox(width: double.infinity, child: child),
+            ),
         ],
       ),
     );

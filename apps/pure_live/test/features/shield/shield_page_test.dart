@@ -11,15 +11,18 @@ import 'package:pure_live/routes/route_path.dart';
 
 import '../../support.dart';
 
-/// Pumps the page over an in-memory store holding [keywords] and [users].
-Future<BlockListStore> _pump(
+/// Pumps the page at [size] over an in-memory store holding [keywords] and
+/// [users]; the toasts land in [toasts].
+Future<LiveStore> _pump(
   WidgetTester tester, {
   List<String> keywords = const [],
   List<String> users = const [],
   Object? arguments,
+  Size size = const Size(393, 852),
+  List<String>? toasts,
 }) async {
   tester.view
-    ..physicalSize = const Size(420, 900)
+    ..physicalSize = size
     ..devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final services = (await tester.runAsync(() async {
@@ -31,7 +34,7 @@ Future<BlockListStore> _pump(
   addTearDown(() => tester.runAsync(services.close));
   final strings = (await tester.runAsync(loadStrings))!;
   final previousToast = AppNavigator.toast;
-  AppNavigator.toast = (_) {};
+  AppNavigator.toast = toasts?.add ?? (_) {};
   addTearDown(() => AppNavigator.toast = previousToast);
   await tester.pumpWidget(
     ProviderScope(
@@ -46,7 +49,7 @@ Future<BlockListStore> _pump(
     ),
   );
   await _settle(tester);
-  return services.store.blockLists;
+  return services.store;
 }
 
 /// Lets the store's queries (real async work) finish, then the frames.
@@ -57,66 +60,106 @@ Future<void> _settle(WidgetTester tester) async {
   }
 }
 
-Future<List<String>> _list(WidgetTester tester, BlockListStore lists, BlockKind kind) async =>
-    (await tester.runAsync(() => lists.list(kind)))!;
+Future<List<String>> _list(WidgetTester tester, LiveStore store, BlockKind kind) async =>
+    (await tester.runAsync(() => store.blockLists.list(kind)))!;
 
-Future<void> _tap(WidgetTester tester, Finder finder) async {
-  await tester.tap(finder);
-  await _settle(tester);
-}
+/// The vertical order of [texts] on screen.
+List<String> _topDown(WidgetTester tester, List<String> texts) =>
+    [...texts]..sort((a, b) => tester.getTopLeft(find.text(a)).dy.compareTo(tester.getTopLeft(find.text(b)).dy));
 
 void main() {
-  testWidgets('adds keywords, refusing empty and repeated ones where typed', (tester) async {
-    final lists = await _pump(tester);
+  testWidgets('one page: "弹幕屏蔽", keywords, users, the platform and similarity filters (c2, c5)', (tester) async {
+    await _pump(tester, size: const Size(393, 2000));
     expect(find.text('弹幕屏蔽'), findsOneWidget);
-    expect(find.text('关键词（0）'), findsOneWidget);
+    expect(find.byType(TabBar), findsNothing);
+    final order = ['弹幕关键词屏蔽', '已屏蔽用户（0）', '平台弹幕过滤', '相似弹幕过滤'];
+    expect(_topDown(tester, order), order);
+    // Empty: both lists say what goes there.
     expect(find.text('暂无屏蔽关键词'), findsOneWidget);
+    expect(find.text('添加关键词后，包含该内容的弹幕将被自动过滤'), findsOneWidget);
+    expect(find.text('还没有屏蔽的用户；长按弹幕可屏蔽发送者'), findsOneWidget);
+    expect(find.text('过滤斗鱼疑似自动弹幕'), findsOneWidget);
+    // The similarity sliders are greyed out while the filter is off.
+    expect(tester.widget<Slider>(find.byKey(const ValueKey('danmaku-slider-similarityThreshold'))).onChanged, isNull);
+    // No "clear" (M2 A).
+    expect(find.text('清空'), findsNothing);
+    // The input with "添加" on its right, 40 characters at most.
+    final input = tester.getRect(find.byKey(const ValueKey('live-play-block-input')));
+    final add = tester.getRect(find.byKey(const ValueKey('live-play-block-add')));
+    expect(add.left, greaterThan(input.right));
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('live-play-block-input'))).maxLength, 40);
+  });
 
-    await _tap(tester, find.byKey(const ValueKey('shield-add-keyword')));
-    expect(find.text('请输入关键字'), findsWidgets);
+  testWidgets('adds with Enter; empty and repeated keywords are refused, the repeat kept (c1, c4)', (tester) async {
+    final toasts = <String>[];
+    final store = await _pump(tester, toasts: toasts);
+    await tester.tap(find.byKey(const ValueKey('live-play-block-add')));
+    await _settle(tester);
+    expect(toasts, ['请输入关键词']);
 
-    await tester.enterText(find.byKey(const ValueKey('shield-input-keyword')), ' Spoiler ');
+    await tester.enterText(find.byKey(const ValueKey('live-play-block-input')), ' 剧透 ');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await _settle(tester);
-    expect(await _list(tester, lists, BlockKind.keyword), ['Spoiler']);
-    expect(find.byKey(const ValueKey('shield-chip-keyword-Spoiler')), findsOneWidget);
-    expect(find.text('关键词（1）'), findsOneWidget);
-    expect(find.text('已添加 1 个关键词（点击可移除）'), findsOneWidget);
+    expect(await _list(tester, store, BlockKind.keyword), ['剧透']);
+    expect(find.byKey(const ValueKey('block-chip-keyword-剧透')), findsOneWidget);
+    expect(find.text('已添加1个关键词'), findsOneWidget);
 
     // 3.x dropped a repeated keyword silently and cleared the input.
-    await tester.enterText(find.byKey(const ValueKey('shield-input-keyword')), 'spoiler');
-    await _tap(tester, find.byKey(const ValueKey('shield-add-keyword')));
-    expect(find.text('“spoiler”已在列表中'), findsOneWidget);
-    expect(find.widgetWithText(TextField, 'spoiler'), findsOneWidget);
-    expect(await _list(tester, lists, BlockKind.keyword), ['Spoiler']);
+    await tester.enterText(find.byKey(const ValueKey('live-play-block-input')), '剧透');
+    await tester.tap(find.byKey(const ValueKey('live-play-block-add')));
+    await _settle(tester);
+    expect(find.text('“剧透”已经在屏蔽列表里'), findsOneWidget);
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('live-play-block-input'))).controller!.text, '剧透');
+    expect(await _list(tester, store, BlockKind.keyword), ['剧透']);
   });
 
-  testWidgets('removes a keyword with a tap and puts it back in place on undo', (tester) async {
-    final lists = await _pump(tester, keywords: ['a', 'b', 'c']);
-    await _tap(tester, find.byKey(const ValueKey('shield-chip-keyword-b')));
-    expect(await _list(tester, lists, BlockKind.keyword), ['a', 'c']);
+  testWidgets('only the × removes; undo puts it back where it was (c3)', (tester) async {
+    final store = await _pump(tester, keywords: ['a', 'b', 'c'], users: ['Alice']);
+    // A tap on the word itself does nothing (3.x removed on any tap).
+    await tester.tap(find.text('b'));
+    await _settle(tester);
+    expect(await _list(tester, store, BlockKind.keyword), ['a', 'b', 'c']);
+    expect(tester.getSize(find.byKey(const ValueKey('block-chip-remove-b'))).height, 48);
+
+    await tester.tap(find.byKey(const ValueKey('block-chip-remove-b')));
+    await _settle(tester);
+    expect(await _list(tester, store, BlockKind.keyword), ['a', 'c']);
     expect(find.text('已移除“b”'), findsOneWidget);
-    await _tap(tester, find.text('撤销'));
-    expect(await _list(tester, lists, BlockKind.keyword), ['a', 'b', 'c']);
+    await tester.tap(find.text('撤销'));
+    await _settle(tester);
+    expect(await _list(tester, store, BlockKind.keyword), ['a', 'b', 'c']);
+
+    // Blocked viewers the same way.
+    await tester.tap(find.byKey(const ValueKey('block-chip-remove-Alice')));
+    await _settle(tester);
+    expect(await _list(tester, store, BlockKind.user), isEmpty);
+    await tester.tap(find.text('撤销'));
+    await _settle(tester);
+    expect(await _list(tester, store, BlockKind.user), ['Alice']);
   });
 
-  testWidgets('opens on the users tab, adds a user and clears the list after asking', (tester) async {
-    final lists = await _pump(tester, keywords: ['k'], users: ['Alice', 'Bob'], arguments: BlockKind.user);
-    expect(find.text('用户（2）'), findsOneWidget);
-    expect(find.text('已屏蔽用户（2）'), findsOneWidget);
-    expect(find.byKey(const ValueKey('shield-chip-user-Alice')), findsOneWidget);
+  testWidgets('opened for the blocked users, it scrolls to them', (tester) async {
+    await _pump(
+      tester,
+      keywords: [for (var i = 0; i < 40; i++) '关键词$i'],
+      users: ['Alice', 'Bob'],
+      arguments: BlockKind.user,
+      size: const Size(393, 600),
+    );
+    final title = tester.getTopLeft(find.text('已屏蔽用户（2）'));
+    expect(title.dy, lessThan(600));
+    expect(find.byKey(const ValueKey('block-chip-user-Alice')).hitTestable(), findsOneWidget);
+  });
 
-    await tester.enterText(find.byKey(const ValueKey('shield-input-user')), 'Carol');
-    await _tap(tester, find.byKey(const ValueKey('shield-add-user')));
-    expect(await _list(tester, lists, BlockKind.user), ['Alice', 'Bob', 'Carol']);
-
-    await _tap(tester, find.byKey(const ValueKey('shield-clear-user')));
-    expect(find.text('确定清空全部 3 个屏蔽用户吗？'), findsOneWidget);
-    await _tap(tester, find.byKey(const ValueKey('shield-clear-confirm')));
-    expect(await _list(tester, lists, BlockKind.user), isEmpty);
-    expect(find.text('暂无屏蔽用户'), findsOneWidget);
-    expect(await _list(tester, lists, BlockKind.keyword), ['k']);
-    await _tap(tester, find.text('撤销'));
-    expect(await _list(tester, lists, BlockKind.user), ['Alice', 'Bob', 'Carol']);
+  testWidgets('landscape phone and wide window: at most 720, centred (c6)', (tester) async {
+    for (final size in const [Size(852, 393), Size(1280, 800)]) {
+      await _pump(tester, size: size);
+      final input = tester.getRect(find.byKey(const ValueKey('live-play-block-input')));
+      final add = tester.getRect(find.byKey(const ValueKey('live-play-block-add')));
+      // The card is 720 wide and centred: its contents sit 12 inside it.
+      expect(add.right, closeTo(size.width / 2 + 360 - 12, 0.5));
+      expect(input.left, closeTo(size.width / 2 - 360 + 12, 0.5));
+      expect(tester.getSize(find.byType(AppBar)).height, size.height < 480 ? 48 : kToolbarHeight);
+    }
   });
 }

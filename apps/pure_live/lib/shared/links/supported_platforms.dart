@@ -48,10 +48,7 @@ class SupportedPlatformsCard extends ConsumerWidget {
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            i18n('toolbox_support_hint'),
-            style: context.textStyles.t13.copyWith(color: colors.onSurfaceVariant),
-          ),
+          Text(i18n('toolbox_support_hint'), style: context.textStyles.t13.copyWith(color: colors.onSurfaceVariant)),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,

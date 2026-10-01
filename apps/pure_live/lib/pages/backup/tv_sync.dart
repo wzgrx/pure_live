@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/qr_scan.dart';
 
 /// The origin of a TV's sync server from what the user typed or a QR code
 /// held: `http(s)://host[:port]` with nothing else (3.x
@@ -110,6 +111,15 @@ class _TvAddressDialogState extends State<_TvAddressDialog> {
               labelText: i18n('remote_sync_address'),
               hintText: i18n('remote_sync_input_address_hint'),
               errorText: _error,
+              // The TV shows its address as a QR code (3.x scanned it).
+              suffixIcon: qrScanButton(
+                context,
+                key: const ValueKey('backup-tv-scan'),
+                onText: (text) {
+                  _address.text = text;
+                  _submit();
+                },
+              ),
             ),
             onSubmitted: (_) => _submit(),
           ),

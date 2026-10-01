@@ -1617,6 +1617,8 @@
     "qr_login": "二维码登录",
     "qr_login_tip": "请使用哔哩哔哩手机客户端扫描二维码登录",
     "qr_poll_failed": "二维码状态刷新中断，请检查网络后重试",
+    "qr_scan_hint": "把二维码放进取景框内即可自动识别",
+    "qr_scan_torch": "手电筒",
     "qr_scanned_confirm": "已扫描，请在手机上确认登录",
     "qr_waiting_scan": "请使用 哔哩哔哩 手机客户端扫码登录",
     "qrcode_login": "二维码登陆",

@@ -1,12 +1,15 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/pages/backup/tv_sync.dart';
 import 'package:pure_live/pages/settings/data_tools.dart';
 import 'package:pure_live/shared/images.dart';
+import 'package:pure_live/shared/qr_scan.dart';
 import 'package:pure_live/shared/rooms/room_feed.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -93,6 +96,36 @@ void main() {
     kind = NetworkKind.other;
     await feed.refresh(count: 1);
     expect(MobileDataNotice.onMobileData.value, isFalse);
+  });
+
+  testWidgets("the TV dialog reads the TV's QR code when there is a scanner (mobile_scanner)", (tester) async {
+    currentStrings = (await tester.runAsync(loadStrings))!;
+    addTearDown(() => QrScan.scan = null);
+    String? origin;
+    Future<void> pump() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) =>
+                TextButton(onPressed: () async => origin = await askTvAddress(context), child: const Text('open')),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+    }
+
+    QrScan.scan = null;
+    await pump();
+    expect(find.byKey(const ValueKey('backup-tv-scan')), findsNothing, reason: 'no scanner on desktops');
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+
+    QrScan.scan = (_) async => 'http://192.168.1.5:8080/';
+    await pump();
+    await tester.tap(find.byKey(const ValueKey('backup-tv-scan')));
+    await tester.pumpAndSettle();
+    expect(origin, contains('192.168.1.5:8080'));
   });
 }
 

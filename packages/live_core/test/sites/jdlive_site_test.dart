@@ -292,7 +292,8 @@ void main() {
             : Completer<LiveResponse>().future,
       );
       await expectLater(
-        JdLiveSite(slow, deadline: const Duration(milliseconds: 60)).getRoomDetail(roomId: _live),
+        // A deadline the 20 ms answer always beats, even on a loaded machine.
+        JdLiveSite(slow, deadline: const Duration(seconds: 1)).getRoomDetail(roomId: _live),
         throwsA(isA<NetworkFailure>()),
         reason: 'the playlist counts against the same deadline',
       );

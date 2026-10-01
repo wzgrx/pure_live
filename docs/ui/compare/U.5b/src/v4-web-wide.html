@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="1280x800@1.5"><link rel="stylesheet" href="kit/kit.css"><style>
+.ph .status{background:var(--surface)}
+.sb24{height:24px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:600 12px 'Geist','Noto Sans SC';background:var(--surface)}
+.sb24 .mi{font-size:13px}
+.bar{height:56px;display:flex;align-items:center;background:var(--surface);position:relative;flex:none;z-index:3}
+.bar .b{width:56px;height:56px;display:grid;place-items:center;flex:none}
+.bar .b .mi,.bar .b .mr{font-size:24px}
+.bar .ct{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:20px;font-weight:600;white-space:nowrap}
+.bar .tt{flex:1;min-width:0;padding-left:4px}
+.bar .tt .n{font-size:17px;font-weight:600;line-height:22px}
+.bar .tt .s{font-size:12px;color:var(--onv);line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .ib2{width:48px;height:48px;display:grid;place-items:center;flex:none;color:var(--on)}
+.prog{height:4px;background:rgba(54,97,142,.18);position:relative;z-index:4}.prog i{position:absolute;left:0;top:0;bottom:0;background:var(--primary)}
+.view{position:relative;flex:1;overflow:hidden;background:#fff}
+.col2{display:flex;flex-direction:column;height:100%}
+/* placeholder web page, laid out at desktop width and scaled */
+.wp{position:absolute;left:0;top:0;width:1280px;transform-origin:0 0;background:#fff;color:#222;font-family:'Noto Sans SC'}
+.wp .hd{height:64px;display:flex;align-items:center;gap:24px;padding:0 40px;border-bottom:1px solid #e5e5e5}
+.wp .lg{width:120px;height:32px;border-radius:6px;background:#9AA3AF}
+.wp .sbx{width:520px;height:40px;border:2px solid #9AA3AF;border-radius:8px;display:flex;align-items:center;padding:0 14px;font-size:16px}
+.wp .nav{display:flex;gap:28px;padding:16px 40px;font-size:16px;color:#555;border-bottom:1px solid #eee}.wp .nav b{color:#222}
+.wp .gr{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:20px 40px}
+.wp .it .im{aspect-ratio:16/9;border-radius:8px;background:#ddd center/cover}
+.wp .it .t{font-size:15px;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wp .it .u{font-size:13px;color:#888;margin-top:4px}
+.wp .room{display:flex;gap:16px;padding:20px 40px}.wp .room .v{flex:1;aspect-ratio:16/9;background:#000 url(.cache/img/158.jpg) center/cover;border-radius:6px}
+.wp .room .c{width:300px;border:1px solid #eee;border-radius:6px;padding:12px;font-size:14px;color:#555;line-height:2}
+.wp .rt{padding:20px 40px 0;font-size:22px;font-weight:600}.wp .ru{padding:6px 40px 0;font-size:14px;color:#888}
+.wtag{position:absolute;right:8px;top:8px;z-index:5;font:500 10px 'Noto Sans SC';padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.55);color:#fff}
+/* states */
+.fail{position:absolute;inset:0;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;z-index:6}
+.fail .big{font-size:48px}
+.fail h4{margin-top:20px;font-size:15px;font-weight:600}
+.fail p{margin-top:8px;font-size:13px;line-height:1.4;color:var(--onv);max-width:560px}
+.fbtn{margin-top:20px;height:40px;border-radius:20px;background:var(--primary);color:var(--onPrimary);display:flex;align-items:center;gap:8px;padding:0 24px 0 16px;font-size:13px;font-weight:500}
+.fbtn .mr{font-size:18px}
+.tbtn2{margin-top:8px;height:40px;display:flex;align-items:center;gap:8px;padding:0 12px;color:var(--primary);font-size:13px;font-weight:500}.tbtn2 .mr{font-size:18px}
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:20}
+.dlg2{position:absolute;z-index:21;background:var(--sch);border-radius:24px;padding:24px 24px 16px}
+.dlg2 h3{font-size:20px;font-weight:600;line-height:1.3}
+.dlg2 .c{margin-top:16px;padding:12px 0;font-size:13px;line-height:1.45}
+.dlg2 .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.dlg2 .acts span{height:48px;display:flex;align-items:center;padding:0 12px;font-size:13px;font-weight:500;color:var(--primary)}
+.rbar{position:absolute;left:12px;right:12px;bottom:16px;z-index:8;border-radius:16px;background:var(--sch);box-shadow:0 4px 14px rgba(0,0,0,.22);display:flex;align-items:center;gap:12px;padding:10px 8px 10px 14px}
+.rbar img{width:28px;height:28px;border-radius:7px;flex:none}
+.rbar .x{flex:1;min-width:0}.rbar b{display:block;font-size:14px;font-weight:600}.rbar small{display:block;font-size:12px;color:var(--onv);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rbar .go{height:40px;padding:0 18px;border-radius:20px;background:var(--primary);color:var(--onPrimary);font-size:13px;font-weight:600;display:flex;align-items:center;flex:none}
+.rbar .cl{width:40px;height:40px;display:grid;place-items:center;color:var(--onv);flex:none}
+.toast{bottom:40px}
+</style></head><body><div class="win" style="--w:1280px;--h:800px"><div class="col2" style="height:800px"><div class="bar"><div class="b"><span class="mi">arrow_back</span></div><div class="tt"><div class="n">网页搜索</div><div class="s">哔哩哔哩 · 晚风</div></div><div class="ib2"><span class="mr">open_in_new</span></div><div class="ib2" style="margin-right:4px"><span class="mi">close</span></div></div><div class="view"><div class="wp" style="transform:scale(1)"><div class="hd"><div class="lg"></div><div class="sbx">晚风</div></div><div class="rt">晚风电台｜深夜点歌</div><div class="ru">晚风 · 唱见电台</div><div class="room"><div class="v"></div><div class="c">来了来了<br>主播晚上好<br>这首歌好听<br>前排支持<br>晚风好温柔</div></div></div><span class="wtag">示意网页</span><div class="rbar" style="left:auto;right:24px;bottom:24px;width:440px"><img src="../../../packages/live_ui/assets/platforms/bilibili.png"><div class="x"><b>这是一个直播间</b><small>哔哩哔哩 · 房间号 21452505</small></div><span class="go">进入</span><span class="cl"><span class="mr" style="font-size:20px">close</span></span></div></div></div><div class="tip" style="right:52px;top:52px">使用系统浏览器打开</div></div></body></html>

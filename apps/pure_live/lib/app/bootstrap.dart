@@ -9,8 +9,9 @@ import 'package:live_media/live_media.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
-import 'package:path/path.dart' as p;
 import 'package:pure_live/app/data_root.dart';
+import 'package:pure_live/app/iptv_legacy.dart';
+import 'package:pure_live/app/iptv_library.dart';
 import 'package:pure_live/app/launch_args.dart';
 import 'package:pure_live/app/platforms.dart';
 import 'package:pure_live/app/recording.dart';
@@ -32,7 +33,8 @@ void configureDecodedImageCache({required bool desktop}) {
 ///
 /// 1. the command line (extra Windows windows) and the data folder;
 /// 2. storage with the platform cipher;
-/// 3. the 3.x import (main window only; read-only, recorded in a ledger);
+/// 3. the 3.x import (main window only; read-only, recorded in a ledger):
+///    the settings box (M9), then the IPTV database (M12.1);
 /// 4. a new window's hand-over through `restoreAll`;
 /// 5. the HTTP client, proxy rules, cookies, the platforms, IPTV and the
 ///    danmaku connections;
@@ -53,41 +55,57 @@ abstract final class AppBootstrap {
     final dataRoot = await resolveDataRoot(instanceId: launch.instanceId);
     final cipher = platformSecretCipher();
     final store = await LiveStore.open(dataRoot, cipher: cipher);
+    final iptvLibrary = StoreIptvLibrary(store);
 
     if (launch.isPrimary) {
+      var hiveFiles = const <String>[];
       try {
-        final report = await LegacyMigration.importHiveFiles(store, await legacyHiveFiles());
+        hiveFiles = await legacyHiveFiles();
+        final report = await LegacyMigration.importHiveFiles(store, hiveFiles);
         log('3.x import: $report', name: 'AppBootstrap');
       } on Object catch (error, stack) {
         log('3.x import failed', name: 'AppBootstrap', error: error, stackTrace: stack);
+      }
+      try {
+        final report = await LegacyIptvMigration.importDatabases(
+          store,
+          iptvLibrary,
+          legacyIptvDatabases(hiveFiles),
+          playlistDirectory: iptvPlaylistDirectory(dataRoot),
+        );
+        log('3.x IPTV import: $report', name: 'AppBootstrap');
+      } on Object catch (error, stack) {
+        log('3.x IPTV import failed', name: 'AppBootstrap', error: error, stackTrace: stack);
       }
     }
     if (launch.configFile case final path?) {
       final restored = await NewWindowHandoff.restore(store, cipher, File(path));
       log('New window hand-over ${restored ? 'restored' : 'failed'}', name: 'AppBootstrap');
     }
-    return wire(store: store, cipher: cipher, launch: launch, dataRoot: dataRoot);
+    return wire(store: store, cipher: cipher, launch: launch, dataRoot: dataRoot, iptvLibrary: iptvLibrary);
   }
 
   /// Builds the services over an open [store] and starts the background
-  /// work (tests pass their own [http]).
+  /// work (tests pass their own [http]). IPTV data lives in [store]'s
+  /// database ([StoreIptvLibrary]) unless [iptvLibrary] is given.
   static AppServices wire({
     required LiveStore store,
     required SecretCipher cipher,
     required LaunchArgs launch,
     required Directory dataRoot,
     LiveHttp? http,
+    IptvLibrary? iptvLibrary,
     bool background = true,
   }) {
     final proxy = SettingsProxyPolicy(store.settings);
     final client = http ?? IoLiveHttp(proxy: proxy);
     final cookies = StoreCookieVault(store.secrets);
     final settings = store.settings;
-    final iptvLibrary = MemoryIptvLibrary();
+    final library = iptvLibrary ?? StoreIptvLibrary(store);
     final importer = IptvImporter(
-      library: iptvLibrary,
+      library: library,
       http: client,
-      playlistDirectory: Directory(p.join(dataRoot.path, 'iptv')),
+      playlistDirectory: iptvPlaylistDirectory(dataRoot),
       selectedGuideSourceId: () => settings.get(Settings.selectedSourceId),
       autoSyncEnabled: () => settings.get(Settings.isAutoSyncEnabled),
       legacyDecoder: platformGbkDecoder(),
@@ -99,7 +117,7 @@ abstract final class AppBootstrap {
       store: store,
       twitchFallbacks: [if (AndroidNativeHttp.isAvailable) AndroidNativeHttp(proxy: proxy)],
       iptv: IptvSite(
-        library: iptvLibrary,
+        library: library,
         importer: importer,
         selectedGuideSourceId: () => settings.get(Settings.selectedSourceId),
       ),

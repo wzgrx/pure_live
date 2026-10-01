@@ -129,4 +129,23 @@ void main() {
     );
     expect((cleaned.message, cleaned.emotes), ('[笑哭]', const [emote]));
   });
+
+  test('the runtime keeps the source room, name colour and badges when it cleans a text (B-14, B-16)', () {
+    const badge = LiveBadge(url: 'https://cdn.17app.co/b.png', id: 'vip');
+    final cleaned = cleanDanmakuText(
+      const LiveMessage(
+        type: LiveMessageType.chat,
+        userName: '￼a',
+        message: 'hi',
+        color: LiveMessageColor.white,
+        sourceRoomId: '5138284',
+        nameColor: LiveMessageColor(1, 2, 3),
+        badges: [badge],
+      ),
+    );
+    expect(cleaned.userName, 'a');
+    expect((cleaned.sourceRoomId, cleaned.isFromOtherRoom), ('5138284', true));
+    expect(cleaned.nameColor, const LiveMessageColor(1, 2, 3));
+    expect(cleaned.badges, const [badge]);
+  });
 }

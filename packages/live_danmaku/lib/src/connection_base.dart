@@ -194,6 +194,9 @@ LiveMessage cleanDanmakuText(LiveMessage message) {
     style: message.style,
     replayed: message.replayed,
     emotes: message.emotes,
+    sourceRoomId: message.sourceRoomId,
+    nameColor: message.nameColor,
+    badges: message.badges,
   );
 }
 

@@ -693,6 +693,8 @@ abstract final class SeventeenLiveDanmakuProtocol {
   ///   `displayUser.userID`, the level `displayUser.level` (`commentMsg`'s
   ///   without one), the colour `comment.textColor` ([color]) and the time
   ///   `sendTime` (milliseconds; not above zero or beyond [DateTime]: none).
+  ///   The name's colour is `name.textColor` ([nameColor]) and the badges
+  ///   the website draws by the name are [badges] (B-14).
   ///   A barrage (a comment that also flies over the video on the website)
   ///   is chat as well; a paid one also has a super chat ([superChat]).
   /// - The live figures ([liveType]) carry `liveinfo.liveViewerCount`, the
@@ -724,6 +726,8 @@ abstract final class SeventeenLiveDanmakuProtocol {
           messageId: id,
           sentAt: _millis(comment['sendTime']),
           replayed: replayed,
+          nameColor: nameColor(comment['name']),
+          badges: badges(comment),
         );
       case liveType:
         final info = payload['liveinfo'];
@@ -752,6 +756,55 @@ abstract final class SeventeenLiveDanmakuProtocol {
     if (!_hexColor.hasMatch(hex)) return LiveMessageColor.white;
     return LiveMessageColor.numberToColor(int.parse(hex.substring(hex.length - 6), radix: 16));
   }
+
+  /// The colour of a comment's sender name (B-14): `name.textColor` read
+  /// as [color] reads a text colour; null when the comment has none that
+  /// reads (the website then draws its default).
+  static LiveMessageColor? nameColor(Object? name) {
+    final value = name is Map ? name['textColor'] : null;
+    if (value is! String) return null;
+    var hex = value.trim();
+    if (hex.startsWith('#')) hex = hex.substring(1);
+    return _hexColor.hasMatch(hex) ? color(hex) : null;
+  }
+
+  /// The places of a comment's badges, in the order the comment names them
+  /// around the sender's name (`prefixBadges` holds the prefix badges, and
+  /// the single `prefixBadge` is one of them when set).
+  static const List<String> badgeFields = [
+    'prefixBadge',
+    'middleBadge',
+    'roleBadge',
+    'attendanceBadge',
+    'mLevelBadge',
+    'topRightBadge',
+  ];
+
+  /// The badges of a comment (B-14): `{URL, styleID}` objects, the prefix
+  /// badges (`prefixBadges`, then `prefixBadge`) first and the others in
+  /// [badgeFields] order. A badge without a picture, or with one off the
+  /// platform's hosts, is left out (`SeventeenLiveApi.image`, made https);
+  /// a picture named twice is shown once.
+  static List<LiveBadge> badges(Map<Object?, Object?> comment) {
+    final seen = <String>{};
+    final result = <LiveBadge>[];
+    void add(Object? badge) {
+      if (badge is! Map) return;
+      final url = SeventeenLiveApi.image(badge['URL']);
+      if (url.isEmpty || !seen.add(url)) return;
+      result.add(LiveBadge(url: url, id: _string(badge['styleID']).trim()));
+    }
+
+    final prefixes = comment['prefixBadges'];
+    if (prefixes is List) prefixes.take(badgeLimit).forEach(add);
+    for (final field in badgeFields) {
+      add(comment[field]);
+    }
+    return List.unmodifiable(result);
+  }
+
+  /// The most prefix badges read from one comment.
+  static const int badgeLimit = 16;
 
   /// A comment's `backgroundColor` as `#RRGGBB` (upper case; the alpha of
   /// `#AARRGGBB` dropped, the `#` optional), or empty for anything else.

@@ -1510,6 +1510,81 @@ void main() {
     });
   });
 
+  group('B-14: name colours and badges (F.5a)', () {
+    test("S06-live: every comment carries its name's colour and the badges by the name", () {
+      final comments = [
+        for (final frame in _received('S06-live'))
+          if (jsonDecode(frame.data as String) case {'action': 15, 'messages': final List<Object?> items})
+            for (final item in items.cast<Map<String, Object?>>())
+              if (SeventeenLiveDanmakuProtocol.payload(item['data']) case final payload? when payload['type'] == 3)
+                (payload['commentMsg']! as Map<Object?, Object?>, item['id']),
+      ];
+      expect(comments, hasLength(26));
+      for (final (comment, id) in comments) {
+        final message = SeventeenLiveDanmakuProtocol.message({'type': 3, 'commentMsg': comment}, id: '$id')!;
+        final hex = (comment['name']! as Map<Object?, Object?>)['textColor']! as String;
+        expect(
+          message.nameColor,
+          hex.isEmpty ? isNull : LiveMessageColor.numberToColor(int.parse(hex.substring(3), radix: 16)),
+          reason: hex,
+        );
+        expect(message.badges.every((badge) => badge.url.startsWith('https://')), isTrue);
+      }
+      // The first comment (观众4): a prefix badge, an attendance badge given
+      // over http and a top-right badge; the empty places give nothing.
+      final first = SeventeenLiveDanmakuProtocol.message({'type': 3, 'commentMsg': comments.first.$1})!;
+      expect(first.nameColor, const LiveMessageColor(0x9e, 0x7b, 0xff));
+      expect(first.badges, const [
+        LiveBadge(url: 'https://cdn.17app.co/80fda54d-abdd-4141-bd15-7e3b9e09863b.png', id: '2607-vip-kumamoto_jp'),
+        LiveBadge(url: 'https://cdn.17app.co/ee4041c4-2700-44ea-b931-13255d0f6ff6.png'),
+        LiveBadge(url: 'https://cdn.17app.co/58953f7b-8f7c-4431-a806-c436e13a52ff.png', id: '2602-tw-race-badge'),
+      ]);
+      expect(
+        comments.where(
+          (entry) => SeventeenLiveDanmakuProtocol.message({'type': 3, 'commentMsg': entry.$1})!.badges.isNotEmpty,
+        ),
+        isNotEmpty,
+      );
+    });
+
+    test('S05-live comments have neither; odd names and badges are left out', () {
+      final messages = [
+        for (final frame in _received('S05-live'))
+          ...SeventeenLiveDanmakuProtocol.decode(frame.data, roomId: _archivedRoom).messages,
+      ];
+      expect(messages.every((message) => message.nameColor == null && message.badges.isEmpty), isTrue);
+      expect(
+        SeventeenLiveDanmakuProtocol.nameColor({'textColor': '#FF33CDBB'}),
+        const LiveMessageColor(0x33, 0xcd, 0xbb),
+      );
+      expect(SeventeenLiveDanmakuProtocol.nameColor({'textColor': '9E7BFF'}), const LiveMessageColor(0x9e, 0x7b, 0xff));
+      for (final odd in <Object?>[
+        null,
+        'x',
+        {'textColor': ''},
+        {'textColor': 'blue'},
+        {'textColor': 3},
+      ]) {
+        expect(SeventeenLiveDanmakuProtocol.nameColor(odd), isNull, reason: '$odd');
+      }
+      final badges = SeventeenLiveDanmakuProtocol.badges({
+        'prefixBadges': [
+          {'URL': 'https://cdn.17app.co/a.png', 'styleID': 'a'},
+          {'URL': 'https://evil.example/b.png', 'styleID': 'b'},
+          'not a badge',
+        ],
+        'prefixBadge': {'URL': 'https://cdn.17app.co/a.png', 'styleID': 'a'},
+        'middleBadge': {'URL': '', 'styleID': 'm'},
+        'roleBadge': {'URL': 'https://assets-17app.akamaized.net/r.png', 'styleID': ''},
+        'topRightBadge': {'URL': 7},
+      });
+      expect(badges, const [
+        LiveBadge(url: 'https://cdn.17app.co/a.png', id: 'a'),
+        LiveBadge(url: 'https://assets-17app.akamaized.net/r.png'),
+      ]);
+    });
+  });
+
   group('B-14: paid barrages', () {
     test('S10-events: a paid barrage (barrageStyle, 79 points) is its chat line and a super chat', () {
       final line = _events10().firstWhere((line) => line.room == '26541295');

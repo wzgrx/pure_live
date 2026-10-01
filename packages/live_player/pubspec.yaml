@@ -1,0 +1,33 @@
+name: live_player
+description: Pure Live's player — binds live_media's playback core to mpv through the media_kit fork in third_party, runs the playback session (open, buffer, play, fail over, renew, seek, stop) and draws the video.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.47.0"
+
+resolution: workspace
+
+dependencies:
+  # The session's clock (lease deadlines), replaceable in tests.
+  clock: ^1.1.3
+  flutter:
+    sdk: flutter
+  live_core: any
+  live_media: any
+  live_net: any
+  # Self-maintained fork of Predidit/media-kit (toolchain.env pins the
+  # upstream commit); libmpv comes from its build hook
+  # (third_party/media_kit/hook/native_bundles.json), never from git.
+  media_kit:
+    path: ../../third_party/media_kit
+  media_kit_video:
+    path: ../../third_party/media_kit_video
+  meta: ^1.19.0
+
+dev_dependencies:
+  fake_async: ^1.3.3
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^11.0.0

@@ -14,6 +14,7 @@ workspace:
   - packages/live_iptv
   - packages/live_media
   - packages/live_net
+  - packages/live_player
   - packages/live_record
   - packages/live_store
   - packages/live_ui
@@ -21,6 +22,18 @@ workspace:
 
 # Overrides apply to the whole workspace and may only be declared here.
 dependency_overrides:
+  # Self-maintained fork of Predidit/media-kit (toolchain.env pins the
+  # upstream commit; patches in third_party/media_kit_video/PURELIVE_PATCH.md).
+  media_kit:
+    path: third_party/media_kit
+  media_kit_video:
+    path: third_party/media_kit_video
+  # The fork pins these below their latest stable releases (media_kit: xml
+  # ^6.5.0; media_kit_video: wakelock_plus 1.3.3) but only uses APIs that are
+  # unchanged in the latest ones (XmlDocument in the Apple hook;
+  # WakelockPlus.enable/disable).
+  wakelock_plus: 1.8.1
+  xml: 7.1.0
   # Flutter 3.47.5's flutter_test pins test_api 0.7.12, below what test 1.32.0
   # (the pure Dart members) needs; flutter_test runs on 0.7.14 (live_ui's tests).
   test_api: 0.7.14

@@ -38,3 +38,21 @@ dependency_overrides:
   # Flutter 3.47.5's flutter_test pins test_api 0.7.12, below what test 1.32.0
   # (the pure Dart members) needs; flutter_test runs on 0.7.14 (live_ui's tests).
   test_api: 0.7.14
+  # ffmpeg_kit_extended_flutter 0.6.2 (the recorder's FFmpeg) declares
+  # code_assets ^1.2.1 while the media_kit fork needs ^2.1.0; its build hook
+  # only uses APIs unchanged in 2.x (3.x shipped the same override).
+  code_assets: 2.1.0
+
+# Native FFmpeg of the recorder (apps/pure_live depends on
+# ffmpeg_kit_extended_flutter 0.6.2). The plugin's build hook reads this block
+# from the pubspec next to .dart_tool/package_config.json, which in a pub
+# workspace is this one. The URLs are 3.x's verified FFmpeg 9.0.2 bundles
+# (release native-ffmpeg-9.0.2-b1); they are downloaded at build time and
+# never committed.
+ffmpeg_kit_extended_config:
+  type: base
+  gpl: false
+  small: false
+  android: https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-shared-lgpl-release.aar
+  windows: https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-windows-x86_64-shared-lgpl.zip
+  linux: https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-linux-x86_64-shared-lgpl.zip

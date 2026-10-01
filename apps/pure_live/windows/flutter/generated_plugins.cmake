@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
+  ffmpeg_kit_extended_flutter
   media_kit_video
   url_launcher_windows
 )

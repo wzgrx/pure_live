@@ -15,6 +15,12 @@ dependencies:
   drift: ^2.35.1
   # Windows DPAPI and the GBK code page (no plugin needed for either).
   ffi: ^2.2.0
+  # FFmpeg of the recorder (3.x's engine; M8's FfmpegRunner). Keep this exact:
+  # 0.6.2 passes argv to FFmpeg unchanged. The native bundle (3.x's FFmpeg
+  # 9.0.2 build) is chosen by `ffmpeg_kit_extended_config` in the workspace
+  # pubspec, where the plugin's build hook reads it; it is downloaded at
+  # build time into .dart_tool, never committed.
+  ffmpeg_kit_extended_flutter: 0.6.2
   flutter:
     sdk: flutter
   # Material's own words (dialogs, pickers) in Chinese and English.
@@ -54,3 +60,5 @@ flutter:
     # 3.x's translations (zh, en).
     - assets/translations/
     - assets/icons/icon.png
+    # Mozilla's CA bundle for FFmpeg's OpenSSL on Android and Linux (3.x).
+    - assets/certificates/

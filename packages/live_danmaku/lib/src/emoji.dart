@@ -7,9 +7,11 @@ import 'package:meta/meta.dart';
 /// (3.x `UnifiedEmojiModel`): the text that stands for it in a message and
 /// its image.
 ///
-/// 3.x reads four platforms' lists: Bilibili, Douyin, Douyu and Huya. Other
-/// platforms (Kuaishou and CC have list files too) give emoticons without
-/// keys or files, so none of them is shown.
+/// 3.x reads four platforms' lists: Bilibili, Douyin, Douyu and Huya.
+/// Kuaishou's list (keyed by the code like Bilibili's, with `url` and
+/// `local_file`) is read too since M13.16; 3.x bundled it without reading
+/// it. Other platforms (CC has a list file too, but no chat here) give
+/// emoticons without keys or files, so none of them is shown.
 @immutable
 final class DanmakuEmoji {
   /// Creates an emoticon.
@@ -40,6 +42,13 @@ final class DanmakuEmoji {
           primaryKey: key,
           text: key,
           url: urls.isEmpty ? '' : urls.first.toString(),
+          localFile: text(json['local_file']),
+        );
+      case SiteIds.kuaishou:
+        return DanmakuEmoji(
+          primaryKey: fallbackKey,
+          text: fallbackKey,
+          url: text(json['url']),
           localFile: text(json['local_file']),
         );
       case SiteIds.douyu:

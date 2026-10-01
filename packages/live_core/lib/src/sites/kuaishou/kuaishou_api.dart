@@ -20,13 +20,18 @@ const _origin = 'https://live.kuaishou.com';
 @immutable
 final class KuaishouDanmakuArgs {
   /// Creates the arguments.
-  const new({required this.liveStreamId, this.cookie = ''});
+  const new({required this.liveStreamId, this.cookie = '', this.emotes = const {}});
 
   /// Id of the current broadcast (a new one every broadcast).
   final String liveStreamId;
 
   /// Cookie header for the feed requests; empty for none.
   final String cookie;
+
+  /// The site's emoji table: the code a comment writes (`[笑哭]`) → its
+  /// picture (https), from the room page ([KuaishouApi.emojiTable]); empty
+  /// when the room was not read from its page (a card).
+  final Map<String, String> emotes;
 }
 
 /// The broadcast behind a room card or page, apart from the room's
@@ -241,7 +246,8 @@ abstract final class KuaishouApi {
     int status = 200,
     Uri? url,
   }) {
-    final room = _playItem(body, status: status, userCookie: userCookie, url: url);
+    final state = _pageState(body, status: status, userCookie: userCookie, url: url);
+    final room = _playItem(state, userCookie: userCookie);
     final author = _fields(room['author']);
     final stream = _fields(room['liveStream']);
     final game = _fields(room['gameInfo']);
@@ -270,8 +276,25 @@ abstract final class KuaishouApi {
         playUrls: withStreams ? stream['playUrls'] : null,
         issuedAt: issuedAt,
       ),
-      danmakuData: liveStreamId == null ? null : KuaishouDanmakuArgs(liveStreamId: liveStreamId, cookie: cookie),
+      danmakuData: liveStreamId == null
+          ? null
+          : KuaishouDanmakuArgs(liveStreamId: liveStreamId, cookie: cookie, emotes: emojiTable(state)),
     );
+  }
+
+  /// The emoji table of a room page's [state]
+  /// (`pcConfig.pcConfig.config["pcLive.webConfig.emojiPanel"]`, 207 codes
+  /// on 2026-10-01: `[笑哭]` → `//ali2.a.yximgs.com/bs2/emotion/….png`): what
+  /// the site draws for the codes in comments. Addresses are made https;
+  /// codes that are not `[…]` and entries without an address are skipped.
+  /// Empty when the page has none.
+  static Map<String, String> emojiTable(Map<String, dynamic> state) {
+    final config = _fields(_fields(_fields(state['pcConfig'])['pcConfig'])['config']);
+    return Map.unmodifiable({
+      for (final MapEntry(:key, :value) in _fields(config['pcLive.webConfig.emojiPanel']).entries)
+        if (key.length > 2 && key.startsWith('[') && key.endsWith(']'))
+          if (normalizeImageUrl(value) case final url when url.isNotEmpty) key: url,
+    });
   }
 
   /// The `window.__INITIAL_STATE__` object of a room page, cut by JSON
@@ -561,12 +584,17 @@ abstract final class KuaishouApi {
 
   /// `liveroom.playList[0]` of a room page, with the status and `errorType`
   /// mapping applied.
-  static Map<String, dynamic> _playItem(String body, {required int status, required bool userCookie, Uri? url}) {
+  /// The [initialState] of a room page answered with [status] at [url].
+  static Map<String, dynamic> _pageState(String body, {required int status, required bool userCookie, Uri? url}) {
     _checkStatus(status, 'room page', userCookie: userCookie);
     if (url != null && '${url.host}${url.path}'.toLowerCase().contains('captcha')) {
       throw RiskControl(_site, cookieSuspect: userCookie, detail: 'room page redirected to ${url.host}${url.path}');
     }
-    final list = _object(initialState(body, userCookie: userCookie)['liveroom'])?['playList'];
+    return initialState(body, userCookie: userCookie);
+  }
+
+  static Map<String, dynamic> _playItem(Map<String, dynamic> state, {required bool userCookie}) {
+    final list = _object(state['liveroom'])?['playList'];
     final room = list is List && list.isNotEmpty ? _object(list.first) : null;
     if (room == null) throw const ApiChanged(_site, 'room page: liveroom.playList[0] missing');
     final error = room['errorType'];

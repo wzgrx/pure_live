@@ -567,7 +567,8 @@ abstract final class BilibiliDanmakuProtocol {
   /// `DANMU_MSG`: text `info[1]`, colour `info[0][3]` (0 is white), time
   /// `info[0][4]` (milliseconds above 1e11, else seconds), id
   /// `bilibili:` + `info[0][5]`, user id `info[2][0]`, name from
-  /// [_userName]. A chat without its user list is not shown.
+  /// [_userName], pictures from [emotes]. A chat without its user list is
+  /// not shown.
   static LiveMessage? _chat(Map<String, dynamic> notice) {
     final info = notice['info'];
     if (info is! List || info.length < 3) return null;
@@ -595,7 +596,55 @@ abstract final class BilibiliDanmakuProtocol {
       color: color == 0 ? LiveMessageColor.white : LiveMessageColor.numberToColor(color),
       messageId: nonce.isEmpty ? '' : 'bilibili:$nonce',
       sentAt: sentAt,
+      emotes: emotes('${info[1]}', meta),
     );
+  }
+
+  /// The pictures of a chat with text [text] and `info[0]` [meta] (M13.16):
+  /// a sticker (`info[0][12]` 1, the picture `info[0][13].url`) is its whole
+  /// text; otherwise the inline codes (`[dog]`) of [text] that
+  /// `info[0][15].extra.emots` names (`code` → `{url}`), each once. Image
+  /// addresses on `hdslb.com` are made https.
+  static List<LiveEmote> emotes(String text, List<Object?> meta) {
+    if (text.isEmpty) return const [];
+    final sticker = meta.length > 13 ? meta[13] : null;
+    if (meta.length > 12 && meta[12] == 1 && sticker is Map) {
+      final url = _picture(sticker['url']);
+      return url.isEmpty ? const [] : [LiveEmote(code: text, url: url)];
+    }
+    var rich = meta.length > 15 ? meta[15] : null;
+    if (rich is String) rich = _json(rich);
+    final extra = rich is Map ? _json(rich['extra']) : null;
+    final emots = extra is Map ? extra['emots'] : null;
+    if (emots is! Map || emots.isEmpty) return const [];
+    return [
+      for (final MapEntry(:key, :value) in emots.entries)
+        if (key is String && key.isNotEmpty && text.contains(key) && value is Map)
+          if (_picture(value['url']) case final url when url.isNotEmpty) LiveEmote(code: key, url: url),
+    ];
+  }
+
+  /// [value] decoded when it is JSON text, else [value] itself; null when it
+  /// is text that is not JSON.
+  static Object? _json(Object? value) {
+    if (value is! String) return value;
+    if (!value.trimLeft().startsWith('{')) return null;
+    try {
+      return jsonDecode(value);
+    } on FormatException {
+      return null;
+    }
+  }
+
+  /// An image address: http(s) only, `hdslb.com`'s made https.
+  static String _picture(Object? value) {
+    final url = value is String ? value.trim() : '';
+    final uri = Uri.tryParse(url);
+    if (uri == null || !(uri.scheme == 'http' || uri.scheme == 'https') || uri.host.isEmpty) return '';
+    if (uri.scheme == 'http' && (uri.host == 'hdslb.com' || uri.host.endsWith('.hdslb.com'))) {
+      return uri.replace(scheme: 'https').toString();
+    }
+    return url;
   }
 
   static const int _maxEpochMilliseconds = 8640000000000000;

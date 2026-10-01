@@ -101,6 +101,29 @@ void main() {
     expect(chat(r'$5.00'), chat(r'NT$5'), reason: 'equality is unchanged: sender, text and price');
   });
 
+  test('a message names no pictures unless given; emotes are equal by code and address', () {
+    const plain = LiveMessage(type: LiveMessageType.chat, userName: 'u', message: 'hi', color: LiveMessageColor.white);
+    expect(plain.emotes, isEmpty);
+    const emote = LiveEmote(code: '{:d_47:}', url: 'https://ssl.pstatic.net/static/nng/glive/icon/b_07.gif');
+    const withEmote = LiveMessage(
+      type: LiveMessageType.chat,
+      userName: 'u',
+      message: '{:d_47:}{:d_47:}',
+      color: LiveMessageColor.white,
+      emotes: [emote],
+    );
+    expect(
+      withEmote.emotes.single,
+      const LiveEmote(code: '{:d_47:}', url: 'https://ssl.pstatic.net/static/nng/glive/icon/b_07.gif'),
+    );
+    expect(
+      emote,
+      isNot(const LiveEmote(code: '{:d_48:}', url: 'https://ssl.pstatic.net/static/nng/glive/icon/b_07.gif')),
+    );
+    expect(emote.hashCode, LiveEmote(code: emote.code, url: emote.url).hashCode);
+    expect(emote.toString(), 'LiveEmote({:d_47:}, https://ssl.pstatic.net/static/nng/glive/icon/b_07.gif)');
+  });
+
   group('LiveRetraction', () {
     test('one message, one sender or the whole chat; equal by target', () {
       const one = LiveRetraction.message('m1');

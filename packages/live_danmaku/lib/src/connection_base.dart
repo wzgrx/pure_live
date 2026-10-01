@@ -193,6 +193,7 @@ LiveMessage cleanDanmakuText(LiveMessage message) {
     sentAt: message.sentAt,
     style: message.style,
     replayed: message.replayed,
+    emotes: message.emotes,
   );
 }
 

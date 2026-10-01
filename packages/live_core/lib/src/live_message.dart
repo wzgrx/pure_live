@@ -220,6 +220,35 @@ final class LiveMessageColor {
       '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
 }
 
+/// A picture in a message: [code] is the text that stands for it in
+/// [LiveMessage.message], exactly as written there, and every occurrence of
+/// it is the picture at [url].
+///
+/// Codes by platform: CHZZK `{:d_47:}` (the line's `extras.emojis`),
+/// YouTube a channel emoji's shortcut `:face-purple-crying:`, Bilibili an
+/// inline code `[dog]` (the line's `emots`) or, for a sticker, the whole
+/// text, Kuaishou `[笑哭]` (the room page's emoji table).
+@immutable
+final class LiveEmote {
+  /// Creates an emote.
+  const new({required this.code, required this.url});
+
+  /// The text standing for the picture.
+  final String code;
+
+  /// The picture's address (https or http, as the platform gives it).
+  final String url;
+
+  @override
+  bool operator ==(Object other) => other is LiveEmote && other.code == code && other.url == url;
+
+  @override
+  int get hashCode => Object.hash(code, url);
+
+  @override
+  String toString() => 'LiveEmote($code, $url)';
+}
+
 /// One danmaku message.
 @immutable
 final class LiveMessage {
@@ -239,6 +268,7 @@ final class LiveMessage {
     this.sentAt,
     this.style,
     this.replayed = false,
+    this.emotes = const [],
   });
 
   /// Kind.
@@ -286,6 +316,11 @@ final class LiveMessage {
   /// the chat, or a backlog the platform gives on joining (such as super
   /// chats still on display). The duplicate gate accepts it for longer.
   final bool replayed;
+
+  /// The pictures the platform names for codes in [message], each code once;
+  /// empty when it names none (the app may still know codes of its own,
+  /// such as the bundled emoticon lists).
+  final List<LiveEmote> emotes;
 }
 
 /// A super chat (paid message).

@@ -578,6 +578,7 @@ abstract final class YouTubeDanmakuProtocol {
       messageId: _string(renderer['id']),
       sentAt: _time(renderer['timestampUsec']),
       color: LiveMessageColor.white,
+      emotes: customEmoji(renderer['message']),
     );
   }
 
@@ -614,6 +615,7 @@ abstract final class YouTubeDanmakuProtocol {
       sentAt: time,
       color: LiveMessageColor.white,
       replayed: replayed,
+      emotes: customEmoji(paid['message']),
       data: LiveSuperChatMessage(
         messageId: id,
         userName: name,
@@ -651,7 +653,12 @@ abstract final class YouTubeDanmakuProtocol {
     final header = primary.isEmpty ? subtext : (subtext.isEmpty ? primary : '$primary（$subtext）');
     if (header.isEmpty) return null;
     final text = _runs(member['message']);
-    return _notice(member, _plain(member['authorName']), text.isEmpty ? header : '$header：$text');
+    return _notice(
+      member,
+      _plain(member['authorName']),
+      text.isEmpty ? header : '$header：$text',
+      emotes: customEmoji(member['message']),
+    );
   }
 
   /// A gift (`giftMessageViewModel`, B-23) as the page shows it: the
@@ -690,7 +697,12 @@ abstract final class YouTubeDanmakuProtocol {
 
   /// A notice of kind [LiveNoticeKind.subscription]: [name] and [text] as
   /// one line, the item's id, time and sender. Null without [text].
-  static LiveMessage? _notice(Map<Object?, Object?> renderer, String name, String text) {
+  static LiveMessage? _notice(
+    Map<Object?, Object?> renderer,
+    String name,
+    String text, {
+    List<LiveEmote> emotes = const [],
+  }) {
     if (text.isEmpty) return null;
     return LiveMessage(
       type: LiveMessageType.notice,
@@ -701,6 +713,7 @@ abstract final class YouTubeDanmakuProtocol {
       sentAt: _time(renderer['timestampUsec']),
       color: LiveMessageColor.white,
       data: LiveNoticeKind.subscription,
+      emotes: emotes,
     );
   }
 
@@ -720,6 +733,23 @@ abstract final class YouTubeDanmakuProtocol {
       }
     }
     return out.toString().trim();
+  }
+
+  /// The channel's custom emoji among a message's runs (M13.16, B-13): each
+  /// shortcut ([_runs] writes it into the text) with its largest picture
+  /// (`image.thumbnails`), once per shortcut. Standard emoji are characters
+  /// in the text and need no picture.
+  static List<LiveEmote> customEmoji(Object? message) {
+    final runs = message is Map ? message['runs'] : null;
+    if (runs is! List) return const [];
+    final seen = <String>{};
+    return [
+      for (final run in runs)
+        if (run case {'emoji': final Map<Object?, Object?> emoji} when emoji['isCustomEmoji'] == true)
+          if ((_emoji(emoji), _largest(_map(emoji['image'])['thumbnails'])) case (final code, final url)
+              when code.isNotEmpty && url.isNotEmpty && seen.add(code))
+            LiveEmote(code: code, url: url),
+    ];
   }
 
   static String _emoji(Map<Object?, Object?> emoji) {

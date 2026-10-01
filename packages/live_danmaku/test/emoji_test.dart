@@ -69,11 +69,23 @@ void main() {
     expect(emojis.last.url, 'https://huya/b.png');
   });
 
+  test('Kuaishou: the entry key, its address and file (M13.16; 3.x bundled the list unread)', () {
+    final emojis = DanmakuEmoji.parseList(
+      jsonEncode({
+        '[笑哭]': {'url': 'https://ali2.a.yximgs.com/bs2/emotion/xk.png', 'local_file': '笑哭.png'},
+      }),
+      'kuaishou',
+    );
+    expect(emojis.single.keys, ['[笑哭]']);
+    expect(emojis.single.url, 'https://ali2.a.yximgs.com/bs2/emotion/xk.png');
+    expect(danmakuEmojiAssets('kuaishou', emojis).single.asset, 'assets/emo/images/kuaishou/笑哭.png');
+  });
+
   test('other platforms give empty emoticons, so nothing is registered (3.x)', () {
-    final emojis = DanmakuEmoji.parseList(jsonEncode(_bilibili), 'kuaishou');
+    final emojis = DanmakuEmoji.parseList(jsonEncode(_bilibili), 'cc');
     expect(emojis, hasLength(2));
     expect(emojis.every((emoji) => emoji.keys.isEmpty && emoji.localFile.isEmpty), isTrue);
-    expect(danmakuEmojiAssets('kuaishou', emojis), isEmpty);
+    expect(danmakuEmojiAssets('cc', emojis), isEmpty);
   });
 
   test('entries that are not objects are skipped; other JSON gives nothing', () {

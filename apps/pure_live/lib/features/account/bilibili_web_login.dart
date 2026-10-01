@@ -120,7 +120,9 @@ class _BilibiliWebLoginViewState extends ConsumerState<BilibiliWebLoginView> {
       AccountVerified(:final name) => i18n('account_saved_signed_in', args: {'name': name}),
       _ => i18n('account_saved_unverified'),
     });
-    if (mounted) Navigator.of(context).maybePop(true);
+    // `pop`, not `maybePop`: the in-app web page's PopScope refuses
+    // `maybePop` and turns it into a step back in the page's history.
+    if (mounted) Navigator.of(context).pop(true);
     return null;
   }
 

@@ -11,6 +11,8 @@ environment:
 resolution: workspace
 
 dependencies:
+  # The IPTV tables in live_store's database (M12.1).
+  drift: ^2.35.1
   # Windows DPAPI and the GBK code page (no plugin needed for either).
   ffi: ^2.2.0
   flutter:
@@ -33,6 +35,8 @@ dependencies:
   path: ^1.9.1
   # The data folder and 3.x's folders.
   path_provider: ^2.1.6
+  # Reads 3.x's IPTV database (pure_live_tv.db) for the import (M12.1).
+  sqlite3: ^3.7.0
   # CC's official entries open in the browser (3.x AppNavigator.toCategoryDetail).
   url_launcher: ^6.3.2
   # 3.x's install folders from the uninstall entries (the 3.x data import).

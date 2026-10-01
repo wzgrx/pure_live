@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "V07-playurl-wbi-412",
+  "capturedAt": "2026-10-01T05:40:45.789458+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/player/wbi/playurl?bvid=BV1zKZrYAEi8&cid=29153362694&fnval=4048&fnver=0&fourk=1&gaia_source=pre-load&isGaiaAvoided=true&qn=0&try_look=1&web_location=1315873&wts=1790833245&w_rid=867cc82f50cca9dc9636952a43c4ed16",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://www.bilibili.com/video/BV1zKZrYAEi8/"
+    }
+  },
+  "response": {
+    "status": 412,
+    "headers": {
+      "content-type": "text/html"
+    }
+  },
+  "raw": {
+    "sha256": "e7badcc8c88ee24673ace7d93d15543ef41a0f6db1f93d17a2b1fe8ef6d8ee01",
+    "length": 3400
+  },
+  "body": "body.html",
+  "scrubbed": [],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

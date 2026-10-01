@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "V04-region-retired",
+  "capturedAt": "2026-10-01T05:36:52.190892+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/web-interface/dynamic/region?rid=3&pn=1&ps=20",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://www.bilibili.com/",
+      "Cookie": "buvid3=A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D00000infoc;buvid4=F0E1D2C3-B4A5-9687-7869-5A4B3C2D1E0F00000-000000000-AbCdEfGhIjKlMnOpQrStUv==;"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "bili-status-code": "-404"
+    }
+  },
+  "raw": {
+    "sha256": "1306db584da8f31ace8ce35cafdef4511556ac792f47c7ba4d9880cd41cfd566",
+    "length": 58
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

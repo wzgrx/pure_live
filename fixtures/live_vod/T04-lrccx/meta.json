@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "T04-lrccx",
+  "capturedAt": "2026-10-01T05:37:10.484381+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.lrc.cx/lyrics?title=%E6%99%B4%E5%A4%A9&artist=%E5%91%A8%E6%9D%B0%E4%BC%A6",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://music.163.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/plain; charset=utf-8"
+    }
+  },
+  "raw": {
+    "sha256": "31e59f576b96f0bf4fe60084c3a8626cc58ba6fd22c80ec4ad318da0d985694b",
+    "length": 2095
+  },
+  "body": "body.lrc",
+  "scrubbed": [],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "T03-rangotec",
+  "capturedAt": "2026-10-01T05:37:09.354567+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://tools.rangotec.com/api/anon/lrc?title=%E6%99%B4%E5%A4%A9&artist=%E5%91%A8%E6%9D%B0%E4%BC%A6",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://music.163.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "raw": {
+    "sha256": "65bb04cccd0e6e59b1038e27f0634a26b280b3a89698aec9f6c6e1766c892e4f",
+    "length": 109236
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "trimmed:data:50->3",
+      "rule": "trimmed"
+    }
+  ],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

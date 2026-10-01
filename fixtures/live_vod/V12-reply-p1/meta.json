@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "V12-reply-p1",
+  "capturedAt": "2026-10-01T05:36:53.329883+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/v2/reply/wbi/main?mode=3&oid=114251901441504&pagination_str=%7B%22offset%22%3A%22%22%7D&plat=1&type=1&web_location=1315875&wts=1790833013&w_rid=9b45e527175f687b4a0804a059ca7380",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://www.bilibili.com/video/BV1zKZrYAEi8/",
+      "Cookie": "buvid3=A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D00000infoc;buvid4=F0E1D2C3-B4A5-9687-7869-5A4B3C2D1E0F00000-000000000-AbCdEfGhIjKlMnOpQrStUv==;"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "bili-status-code": "0"
+    }
+  },
+  "raw": {
+    "sha256": "9d457f221939063909dcdce140a4aea82aac6753d7a6c0b4500103007b0b5515",
+    "length": 36511
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "V02-ranking-music",
+  "capturedAt": "2026-10-01T05:36:51.799471+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/web-interface/ranking/v2?rid=3&type=all",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://www.bilibili.com/",
+      "Cookie": "buvid3=A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D00000infoc;buvid4=F0E1D2C3-B4A5-9687-7869-5A4B3C2D1E0F00000-000000000-AbCdEfGhIjKlMnOpQrStUv==;"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "bili-status-code": "0"
+    }
+  },
+  "raw": {
+    "sha256": "4a00c5c639b064aba50007784f2edab622ad43797e460be463a55faf2bb33880",
+    "length": 171439
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie",
+      "rule": "secret"
+    },
+    {
+      "where": "trimmed:data.list:96->10",
+      "rule": "trimmed"
+    }
+  ],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

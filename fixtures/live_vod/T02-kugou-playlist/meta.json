@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "T02-kugou-playlist",
+  "capturedAt": "2026-10-01T05:42:04.150456+00:00",
+  "route": "proxy",
+  "request": {
+    "method": "GET",
+    "url": "https://kg.u2x1.work/playlist/track/all?id=collection_3_2132040296_689_0&pagesize=300",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": ""
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    }
+  },
+  "raw": {
+    "sha256": "47f3ffe9b42670a4e3e2b948d4ecd2c74e72d6b1afdfa35feccdb5cd436fdf64",
+    "length": 119185
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "data.userid",
+      "rule": "secret"
+    },
+    {
+      "where": "trimmed:data.info:54->10",
+      "rule": "trimmed"
+    }
+  ],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

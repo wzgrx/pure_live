@@ -19,6 +19,7 @@ workspace:
   - packages/live_record
   - packages/live_store
   - packages/live_ui
+  - packages/live_vod
   - tools/check_latest
 
 # Overrides apply to the whole workspace and may only be declared here.

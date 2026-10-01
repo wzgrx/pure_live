@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "platform": "live_vod",
+  "sample": "M02-bgm-lyric",
+  "capturedAt": "2026-10-01T05:43:23.953234+00:00",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://i0.hdslb.com/bfs/station_src/music_metadata/2ed6a6e10d73af7e84ede6113b1d5885",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://www.bilibili.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/plain"
+    }
+  },
+  "raw": {
+    "sha256": "24fb101fe53dde2fae68f1ede4fd3ce0cf5e381fe265fc00075101ffb28730aa",
+    "length": 3502
+  },
+  "body": "body.lrc",
+  "scrubbed": [],
+  "tool": "scratchpad probe (python urllib), M14.0"
+}

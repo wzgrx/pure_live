@@ -195,3 +195,5 @@ v4 现在（偏差最大）：
 | U.10a 账号总览 | [compare/U.10a](compare/U.10a/README.md) |
 | U.10b 登录和 Cookie | [compare/U.10b](compare/U.10b/README.md) |
 | U.10c 云账号停用说明 | [compare/U.10c](compare/U.10c/README.md) |
+| U.6a 设置总览 | [compare/U.6a](compare/U.6a/README.md) |
+| U.6b 外观 | [compare/U.6b](compare/U.6b/README.md) |

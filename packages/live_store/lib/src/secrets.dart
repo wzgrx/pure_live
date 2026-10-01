@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:live_store/src/database.dart';
@@ -48,27 +49,85 @@ String normalizeCookie(String value) => value.replaceAll(_controlCharacters, '')
 /// that cannot be opened is treated as signed out and listed in
 /// [unreadable]; its sealed bytes stay until the name is written again.
 final class SecretStore {
-  new _(this._db, this._cipher, this._values, this.unreadable);
+  new _(this._db, this._cipher, this._values, this.unreadable, this._sealed);
 
   /// Opens every stored secret with [cipher].
   static Future<SecretStore> load(StoreDatabase db, SecretCipher cipher) async {
     final values = <String, String>{};
     final unreadable = <String>{};
+    final sealed = <String, String>{};
     for (final row in await db.rows('SELECT ref, sealed FROM secrets')) {
       final ref = row.read<String>('ref');
+      final bytes = row.read<Uint8List>('sealed');
+      sealed[ref] = base64.encode(bytes);
       try {
-        values[ref] = await cipher.open(ref, row.read<Uint8List>('sealed'));
+        values[ref] = await cipher.open(ref, bytes);
       } on Object {
         unreadable.add(ref);
       }
     }
-    return SecretStore._(db, cipher, values, unreadable);
+    return SecretStore._(db, cipher, values, unreadable, sealed);
   }
 
   final StoreDatabase _db;
   final SecretCipher _cipher;
   final Map<String, String> _values;
   final StreamController<String> _changes = StreamController.broadcast();
+
+  // The sealed bytes last seen per name (base64), so [reload] opens only
+  // what another process changed.
+  final Map<String, String> _sealed;
+  int _generation = 0;
+  int _writing = 0;
+  Future<void> _lastWrite = Future.value();
+
+  /// Reads the secrets again (another process sharing the database wrote
+  /// some: a second desktop window, docs/ui/compare/U.13 c14), opens the
+  /// changed ones and reports them through [changes].
+  Future<void> reload() async {
+    for (var attempt = 0; attempt < 5; attempt++) {
+      final generation = _generation;
+      final rows = await _db.rows('SELECT ref, sealed FROM secrets');
+      final stored = <String, Uint8List>{
+        for (final row in rows) row.read<String>('ref'): row.read<Uint8List>('sealed'),
+      };
+      final opened = <String, String?>{};
+      for (final MapEntry(key: ref, value: bytes) in stored.entries) {
+        if (_sealed[ref] == base64.encode(bytes)) continue;
+        try {
+          opened[ref] = await _cipher.open(ref, bytes);
+        } on Object {
+          opened[ref] = null;
+        }
+      }
+      if (_writing > 0 || generation != _generation) {
+        // A write of ours overlapped the read: read again after it.
+        await _lastWrite;
+        continue;
+      }
+      final changed = <String>{};
+      for (final ref in [..._sealed.keys]) {
+        if (stored.containsKey(ref)) continue;
+        _sealed.remove(ref);
+        unreadable.remove(ref);
+        if (_values.remove(ref) != null) changed.add(ref);
+      }
+      for (final MapEntry(key: ref, :value) in opened.entries) {
+        _sealed[ref] = base64.encode(stored[ref]!);
+        final before = _values[ref];
+        if (value == null) {
+          _values.remove(ref);
+          unreadable.add(ref);
+        } else {
+          _values[ref] = value;
+          unreadable.remove(ref);
+        }
+        if (before != _values[ref]) changed.add(ref);
+      }
+      changed.forEach(_changes.add);
+      return;
+    }
+  }
 
   /// Names whose sealed value could not be opened.
   final Set<String> unreadable;
@@ -91,6 +150,18 @@ final class SecretStore {
 
   /// Stores several secrets in one transaction.
   Future<void> writeAll(Map<String, String?> values) async {
+    _generation++;
+    _writing++;
+    final future = _writeAll(values);
+    _lastWrite = future.then((_) {}, onError: (Object _) {});
+    try {
+      await future;
+    } finally {
+      _writing--;
+    }
+  }
+
+  Future<void> _writeAll(Map<String, String?> values) async {
     final sealed = <String, Uint8List?>{
       for (final entry in values.entries)
         entry.key: entry.value == null || entry.value!.isEmpty ? null : await _cipher.seal(entry.key, entry.value!),
@@ -104,6 +175,13 @@ final class SecretStore {
         }
       }
     });
+    for (final entry in sealed.entries) {
+      if (entry.value case final bytes?) {
+        _sealed[entry.key] = base64.encode(bytes);
+      } else {
+        _sealed.remove(entry.key);
+      }
+    }
     for (final entry in values.entries) {
       final value = entry.value;
       final before = _values[entry.key];

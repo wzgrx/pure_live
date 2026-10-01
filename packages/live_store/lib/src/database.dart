@@ -63,10 +63,23 @@ final class StoreDatabase extends GeneratedDatabase {
   new(super.executor);
 
   /// The database file at [file], opened on a background isolate.
-  factory file(File file) => StoreDatabase(NativeDatabase.createInBackground(file));
+  ///
+  /// [shared]: other processes open the same file (another desktop window,
+  /// docs/ui/compare/U.13 c14), so a write waits up to [busyTimeout] for
+  /// theirs instead of failing at once.
+  factory file(File file, {bool shared = false}) => StoreDatabase(
+    NativeDatabase.createInBackground(
+      file,
+      setup: shared ? (db) => db.execute('PRAGMA busy_timeout = ${busyTimeout.inMilliseconds}') : null,
+    ),
+  );
 
   /// A database in memory, for tests and previews.
   factory memory() => StoreDatabase(NativeDatabase.memory());
+
+  /// How long a write to a database opened `shared` waits for another
+  /// process's.
+  static const Duration busyTimeout = Duration(seconds: 5);
 
   @override
   int get schemaVersion => 1;
@@ -97,6 +110,21 @@ final class StoreDatabase extends GeneratedDatabase {
     final result = await transaction(action);
     if (tables.isNotEmpty) notifyUpdates({for (final table in tables) TableUpdate(table)});
     return result;
+  }
+
+  /// SQLite's `data_version`: it changes when another connection (another
+  /// process sharing the file) committed since the last read, never for
+  /// this connection's own writes.
+  Future<int> dataVersion() async => (await rows('PRAGMA data_version')).single.read<int>('data_version');
+
+  /// Tells the watchers of every table that their rows may have changed
+  /// (another process wrote to the file).
+  Future<void> notifyAllTables() async {
+    final names = [
+      for (final row in await rows("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"))
+        row.read<String>('name'),
+    ];
+    if (names.isNotEmpty) notifyUpdates({for (final name in names) TableUpdate(name)});
   }
 
   /// [load] now and again after every write to [tables].

@@ -281,6 +281,7 @@ AppRecording platformAppRecording({
   required Directory dataRoot,
   required String Function(String key) words,
   DanmakuRegistry? danmaku,
+  String tasksKey = recorderTasksKey,
 }) {
   final caBundle = RecordCaBundle(Directory(p.join(dataRoot.path, 'certificates')));
   unawaited(caBundle.prepare(rootBundle));
@@ -302,5 +303,6 @@ AppRecording platformAppRecording({
     keepAlive: keepAlive,
     storageAccess: androidStorageAccess,
     caFile: () => caBundle.path,
+    tasksKey: tasksKey,
   );
 }

@@ -892,4 +892,19 @@ abstract final class AppIcons {
 
   /// The chosen item of a gallery (a loading style).
   static const IconData chosen = Icons.check_circle_rounded;
+
+  // ---- the desktop window's title bar (docs/ui/compare/U.13; 3.x
+  // `CustomTitleBar`, desktop_manager.dart:572-580) ----
+
+  /// Minimize the window (3.x `Icons.remove`).
+  static const IconData windowMinimize = Icons.remove;
+
+  /// Maximize the window (3.x `Icons.crop_square`).
+  static const IconData windowMaximize = Icons.crop_square;
+
+  /// Restore a maximized window: two squares, as Windows draws it (U.13 c3).
+  static const IconData windowRestore = Icons.filter_none;
+
+  /// Close the window (3.x `Icons.close`).
+  static const IconData windowClose = Icons.close;
 }

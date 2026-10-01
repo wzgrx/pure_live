@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -188,6 +189,12 @@ void main() {
       (AppIcons.webDav, Remix.cloud_line),
       (AppIcons.deviceSync, Remix.qr_scan_2_line),
       (AppIcons.platformAccounts, Remix.accessibility_line),
+      // U.13: the title bar keeps 3.x's glyphs; a maximized window shows
+      // "restore".
+      (AppIcons.windowMinimize, Icons.remove),
+      (AppIcons.windowMaximize, Icons.crop_square),
+      (AppIcons.windowRestore, Icons.filter_none),
+      (AppIcons.windowClose, Icons.close),
     ];
     for (final (actual, glyph) in expected) {
       expect(actual, glyph);
@@ -335,5 +342,21 @@ void main() {
       find.descendant(of: find.byKey(const ValueKey('record-glyph-idle')), matching: find.byType(DecoratedBox)).first,
     );
     expect(((ring.decoration as BoxDecoration).border! as Border).top.color, OnVideoColors.foreground);
+  });
+
+  test("U.13: the close button's red and the recording note keep 4.5:1 with their text", () {
+    double contrast(Color a, Color b) {
+      final la = a.computeLuminance();
+      final lb = b.computeLuminance();
+      return (math.max(la, lb) + 0.05) / (math.min(la, lb) + 0.05);
+    }
+
+    expect(WindowButtonColors.closeHover, const Color(0xFFE81123));
+    expect(contrast(WindowButtonColors.closeHover, WindowButtonColors.onCloseHover), greaterThan(4.5));
+    const theme = LiveTheme(primaryColor: Color(0xFF2196F3));
+    final light = theme.light.colorScheme;
+    final dark = theme.dark.colorScheme;
+    expect(contrast(light.error, LiveSemanticColors.recordingNote(Brightness.light)), greaterThan(4.5));
+    expect(contrast(dark.error, LiveSemanticColors.recordingNote(Brightness.dark)), greaterThan(4.5));
   });
 }

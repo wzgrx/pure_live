@@ -13,19 +13,22 @@ import 'package:win32_registry/win32_registry.dart';
 ///   `<exe folder>\AppData`, which is only read by the 3.x import.
 /// - Android: the application support folder (`files`).
 ///
-/// An extra window ([instanceId] not empty) keeps its own folder under
-/// `instances\<id>`, as 3.x did (`AppPathManager.initialize(instanceId:)`).
+/// Every desktop window uses this folder: an extra window shares the main
+/// window's data (docs/ui/compare/U.13 c14; 3.x gave it a copy under
+/// `instances\<id>`, which was lost when it closed). Only its log goes to
+/// [instanceFolder].
 /// Design borrowed from the archived v4 (`apps/pure_live/lib/core/data_root.dart`).
-Future<Directory> resolveDataRoot({String instanceId = '', String? executable}) async {
-  Directory root;
+Future<Directory> resolveDataRoot({String? executable}) async {
   if (Platform.isWindows) {
-    root = Directory(portableDataDir(executable ?? Platform.resolvedExecutable));
-    if (!await isWritableDirectory(root)) root = await getApplicationSupportDirectory();
-  } else {
-    root = await getApplicationSupportDirectory();
+    final root = Directory(portableDataDir(executable ?? Platform.resolvedExecutable));
+    if (await isWritableDirectory(root)) return root;
   }
-  return instanceId.isEmpty ? root : Directory(p.join(root.path, 'instances', instanceId));
+  return await getApplicationSupportDirectory();
 }
+
+/// An extra window's own folder (its log) under [root]: `instances\<id>`,
+/// as 3.x named it.
+Directory instanceFolder(Directory root, String instanceId) => Directory(p.join(root.path, 'instances', instanceId));
 
 /// `UserData` beside [executable].
 String portableDataDir(String executable) => p.join(p.dirname(executable), 'UserData');

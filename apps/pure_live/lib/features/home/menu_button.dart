@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:pure_live/app/launch_args.dart';
+import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -23,7 +22,8 @@ enum AppMenuItem {
   /// Backup and restore.
   backup(AppIcons.backup, 'backup_recover'),
 
-  /// An independent player window (Windows with the setting on).
+  /// An independent player window (a desktop that opens windows, with the
+  /// setting on; U.13 c12).
   newWindow(AppIcons.newPlayerWindow, 'open_new_window');
 
   new(this.icon, this.labelKey);
@@ -35,8 +35,8 @@ enum AppMenuItem {
   final String labelKey;
 }
 
-/// The app menu's entries; [newWindow] on Windows with the setting
-/// "新建独立播放窗口" on.
+/// The app menu's entries; [newWindow] where the desktop opens windows and
+/// the setting "新建独立播放窗口" is on (U.13 c12).
 List<AppMenuItem> appMenuItems({required bool newWindow}) => [
   AppMenuItem.settings,
   AppMenuItem.about,
@@ -46,14 +46,14 @@ List<AppMenuItem> appMenuItems({required bool newWindow}) => [
 
 /// The menu at the top left of the phone tabs and at the top of the rail
 /// (3.x `MenuButton`, its icon kept): settings, about, backup, and on
-/// Windows a new player window; the small menu of U.2f (U.3a c2).
+/// desktops a new player window; the small menu of U.2f (U.3a c2).
 class MenuButton extends ConsumerWidget {
   /// Creates the button.
   const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final newWindow = Platform.isWindows && watchSetting(ref, Settings.enableNewWindowPlay);
+    final newWindow = DesktopWindow.canOpenNewWindow && watchSetting(ref, Settings.enableNewWindowPlay);
     return AppMenuButton<AppMenuItem>(
       key: const ValueKey('home-menu'),
       tooltip: i18n('menu'),
@@ -80,12 +80,8 @@ class MenuButton extends ConsumerWidget {
       case AppMenuItem.backup:
         await AppNavigator.toNamed<void>(RoutePath.kBackup);
       case AppMenuItem.newWindow:
-        final services = ref.read(appServicesProvider);
-        try {
-          await launchNewWindow(services.store, services.cipher);
-        } on Object {
-          AppNavigator.toast(i18n('open_new_window_failed'));
-        }
+        // A new home window over the same data (U.13 c14).
+        await DesktopWindow.openNewWindow();
     }
   }
 }

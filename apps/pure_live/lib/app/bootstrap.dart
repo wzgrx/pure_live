@@ -36,15 +36,17 @@ void configureDecodedImageCache({required bool desktop}) {
 
 /// The start of the app (3.x `AppInitializer.initialize`), in order:
 ///
-/// 1. the command line (extra Windows windows) and the data folder;
-/// 2. storage with the platform cipher;
+/// 1. the command line (extra desktop windows) and the data folder, which
+///    every window shares (docs/ui/compare/U.13 c14);
+/// 2. storage with the platform cipher, opened for sharing with the other
+///    windows' processes;
 /// 3. the 3.x import (main window only; read-only, recorded in a ledger):
 ///    the settings box (M9), then the IPTV database (M12.1);
-/// 4. a new window's hand-over through `restoreAll`;
-/// 5. the HTTP client, proxy rules, cookies, the platforms, IPTV and the
+/// 4. the HTTP client, proxy rules, cookies, the platforms, IPTV and the
 ///    danmaku connections;
-/// 6. in the background: Huya's play User-Agent, the move of per-broadcast
-///    follows ([AppServices.followsReady]) and the IPTV auto-sync 3 s later.
+/// 5. in the background: Huya's play User-Agent, and in the main window the
+///    move of per-broadcast follows ([AppServices.followsReady]) and the
+///    IPTV auto-sync 3 s later.
 ///
 /// Windows single-instance and the main-window mutex live in the runner
 /// (`windows/runner/main.cpp`), before any Flutter engine starts.
@@ -59,9 +61,11 @@ abstract final class AppBootstrap {
     // Which interface `auto` picks (M14.1): asked before the first frame.
     await TvDevice.detect();
     final launch = LaunchArgs.parse(args);
-    final dataRoot = await resolveDataRoot(instanceId: launch.instanceId);
+    final dataRoot = await resolveDataRoot();
     final cipher = platformSecretCipher();
-    final store = await LiveStore.open(dataRoot, cipher: cipher);
+    // Shared: another desktop window's process may write at the same time
+    // (a single process elsewhere, where it changes nothing).
+    final store = await LiveStore.open(dataRoot, cipher: cipher, shared: true);
     final iptvLibrary = StoreIptvLibrary(store);
 
     if (launch.isPrimary) {
@@ -84,10 +88,6 @@ abstract final class AppBootstrap {
       } on Object catch (error, stack) {
         log('3.x IPTV import failed', name: 'AppBootstrap', error: error, stackTrace: stack);
       }
-    }
-    if (launch.configFile case final path?) {
-      final restored = await NewWindowHandoff.restore(store, cipher, File(path));
-      log('New window hand-over ${restored ? 'restored' : 'failed'}', name: 'AppBootstrap');
     }
     return wire(store: store, cipher: cipher, launch: launch, dataRoot: dataRoot, iptvLibrary: iptvLibrary);
   }
@@ -141,9 +141,13 @@ abstract final class AppBootstrap {
     );
     final sites = buildSiteRegistry(deps);
     final danmaku = buildDanmakuRegistry(deps, sites);
-    final followsReady = background ? _moveFollows(store, sites) : Future<void>.value();
+    // The once-only upkeep of the shared data is the main window's (U.13 c14).
+    final followsReady = background && launch.isPrimary ? _moveFollows(store, sites) : Future<void>.value();
     // Recording (M13.15): FFmpeg, the foreground service and storage access
     // only in the running app; tests get the settings and the directory.
+    // An extra window keeps its own task list beside the main window's in
+    // the shared data (both lists are written whole).
+    final tasksKey = recorderTasksKeyFor(launch.instanceId);
     final recording = background
         ? platformAppRecording(
             store: store,
@@ -152,11 +156,12 @@ abstract final class AppBootstrap {
             dataRoot: dataRoot,
             words: i18n,
             danmaku: danmaku,
+            tasksKey: tasksKey,
           )
-        : buildAppRecording(store: store, sites: sites, proxy: proxy, dataRoot: dataRoot);
+        : buildAppRecording(store: store, sites: sites, proxy: proxy, dataRoot: dataRoot, tasksKey: tasksKey);
     if (background) {
       unawaited(_warmUp(sites));
-      unawaited(_iptvAutoSync(store, importer));
+      if (launch.isPrimary) unawaited(_iptvAutoSync(store, importer));
       unawaited(
         recording.start().catchError((Object error, StackTrace stack) {
           log('Recording start failed', name: 'AppBootstrap', error: error, stackTrace: stack);

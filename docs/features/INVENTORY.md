@@ -267,7 +267,7 @@ v3 没有的、不在清点里的：开播提醒（v3 没有通知开播的功�
 | F-REC-10 | 同时录制弹幕（XML） | `recorder/services/recording_danmaku_service.dart:11` | 是 | 没验证 | `packages/live_record` 的 `chat.dart`（M8.1） | |
 | F-REC-11 | HLS 预取和保留窗口（减少漏段） | `recorder/services/hls_relay_prefetch.dart:182` | 是 | 没验证 | `packages/live_media` 的 `HlsMediaWindow`（M8.1） | 效果没在真机量 |
 | F-REC-12 | 打开录制文件夹 | `recorder/pages/recorder/recorder_controller.dart:1599` | 是 | 完成 | M8.1（应用专属目录改为复制路径） | |
-| F-REC-13 | 合并进度 | `recorder/services/video_processor_service.dart:26` | 是 | 缺失 | M8 留给后续 | |
+| F-REC-13 | 合并进度（v3 只发进度事件，界面没接） | `recorder/services/video_processor_service.dart:26` | 是 | 缺失 | M8 留给后续 | |
 
 ## 12 网络电视、账号、备份、工具、标签
 

@@ -228,3 +228,4 @@ v4 现在（偏差最大）：
 | U.15f 电视点播 | [compare/U.15f](compare/U.15f/README.md) |
 | U.15g 电视音乐 | [compare/U.15g](compare/U.15g/README.md) |
 | U.15h 电视壁纸 | [compare/U.15h](compare/U.15h/README.md) |
+| U.2f 直播间弹窗 | [compare/U.2f](compare/U.2f/README.md) |

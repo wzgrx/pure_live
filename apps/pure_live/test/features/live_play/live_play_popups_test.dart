@@ -25,6 +25,7 @@ import 'package:pure_live/features/live_play/record/record_panel.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
 
 import '../../support.dart';
 import 'live_play_support.dart';

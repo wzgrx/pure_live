@@ -6,10 +6,10 @@ import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
-import 'package:pure_live/features/live_play/danmaku/danmaku_templates.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
+import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
 
 import '../../support.dart';
 import 'live_play_support.dart';

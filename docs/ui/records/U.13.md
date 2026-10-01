@@ -5,7 +5,7 @@
 - 范围：自绘标题栏、窗口大小和位置、托盘、关闭时的选择、在新窗口打开（含新窗口和主窗口共用数据）、第二次启动、桌面小窗置顶的入口
 - 改动的目录：`apps/pure_live/lib/app/desktop/`（`desktop_window.dart`、`title_bar.dart`、`tray.dart`，新文件 `close_dialog.dart`、`shared_data.dart`）、`apps/pure_live/lib/app/`（`bootstrap.dart`、`data_root.dart`、`launch_args.dart`、`recording.dart`）、`lib/main.dart`、`lib/platform/recording_platform.dart`（只加一个参数）、`lib/routes/route_observer.dart`（只加“最上面的页面”）、`lib/features/home/menu_button.dart`（首页菜单“新建独立播放窗口”的条件，c12）、`packages/live_ui`（只做添加）、`packages/live_store`（只做添加，见下）、翻译文件、Windows 原生、文档
 - 没有改 `features/settings/`（设置行是 U.6d 的）和 `features/live_play/`（直播间菜单在 U.2b～U.2d 手里，只提供接口，见“给其他任务的接口”）
-- 原生：改了 Windows 运行器（见“Windows 原生改动”），需要在 Windows 上构建；没有改 Android 原生
+- 原生：改了 Windows 运行器（见“Windows 原生改动”），需要在 Windows 上构建；没有改 Android 原生，`flutter build apk --debug` 通过（没有安装）
 
 ## 逐条对照
 

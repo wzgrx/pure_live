@@ -41,13 +41,13 @@
 
 | 编号 | 名称 | 功能点 | 涉及代码 | 依赖 | 档位 | 规模 | 来源 | 状态 |
 |---|---|---|---|---|---|---|---|---|
-| [F.3a](F.3a/README.md) | **合并进度**（录制中心和录制面板显示合成 MP4 的进度） | F-REC-13 | `packages/live_record`（`merge.dart` 加进度事件）、`features/recorder/`、`features/live_play/record/` | U.7b 合并后 | 可以以后 | 小 | M8 | 未开始 |
+| [F.3a](F.3a/README.md) | **合并进度**（录制中心和录制面板显示合成 MP4 的进度） | F-REC-13 | `packages/live_record`（`merge.dart` 加进度事件）、`features/recorder/`、`features/live_play/record/` | U.7b 合并后 | 可以以后 | 小 | M8 | 完成（2026-10-02，含 F.0b 发现的录制清晰度标签，[记录](records/F.3a.md)） |
 
 ### F.4 数据和同步
 
 | 编号 | 名称 | 功能点 | 涉及代码 | 依赖 | 档位 | 规模 | 来源 | 状态 |
 |---|---|---|---|---|---|---|---|---|
-| [F.4a](F.4a/README.md) | **3.x 数据迁移的真机验证**（方式待用户选，见计划第 7 节） | F-APP-01、F-APP-02 | 一般不改代码；发现问题时改 `packages/live_store` 的迁移 | 用户选方式 | 必须 | 中 | M9、M12.1 “没验证” | 未开始 |
+| [F.4a](F.4a/README.md) | **3.x 数据迁移的真机验证**（方式待用户选，见计划第 7 节） | F-APP-01、F-APP-02 | 一般不改代码；发现问题时改 `packages/live_store` 的迁移 | 用户选方式 | 必须 | 中 | M9、M12.1 “没验证” | 移到发布阶段（2026-10-02：读取 3.x 的数据被权限拦下；用真实数据的检查改在覆盖安装 3.x 时做，迁移逻辑有 M9 的单元测试） |
 | [F.4b](F.4b/README.md) | **WebDAV Digest 认证** | F-BAK-04 | `features/web_dav/web_dav_client.dart` | U.11b 合并后 | 可以以后 | 小 | M13.10、M13.18 第 4 项 | 完成（2026-10-02，[记录](records/F.4b.md)） |
 
 ### F.5 升级余项

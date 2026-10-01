@@ -5,6 +5,7 @@
 
 @font-face{font-family:'Material Icons';src:url('../.cache/fonts/MaterialIcons.woff2') format('woff2')}
 @font-face{font-family:'Material Icons Round';src:url('../.cache/fonts/MaterialIconsRound.woff2') format('woff2')}
+@font-face{font-family:'Material Icons Outlined';src:url('../.cache/fonts/MaterialIconsOutlined.woff2') format('woff2')}
 @font-face{font-family:'Geist';font-weight:100 900;src:url('../.cache/fonts/Geist.woff2') format('woff2')}
 @font-face{font-family:'Remix';src:url('../.cache/fonts/remix.ttf') format('truetype')}
 @font-face{font-family:'CustomIcons';src:url('../../../../packages/live_ui/assets/fonts/CustomIcons.ttf') format('truetype')}
@@ -28,8 +29,8 @@ body{background:var(--surface);color:var(--on);font-family:'Noto Sans SC',sans-s
 .tnum{font-feature-settings:'tnum'}
 
 /* ---------- icons ---------- */
-.mi,.mr{font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-feature-settings:'liga';white-space:nowrap}
-.mi{font-family:'Material Icons'}.mr{font-family:'Material Icons Round'}
+.mi,.mr,.mo{font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-feature-settings:'liga';white-space:nowrap}
+.mi{font-family:'Material Icons'}.mr{font-family:'Material Icons Round'}.mo{font-family:'Material Icons Outlined'}
 .rx{font-family:'Remix';font-style:normal;line-height:1;display:inline-block}
 .ci{font-family:'CustomIcons';font-style:normal;line-height:1;display:inline-block}
 .dmk{display:inline-block;width:24px;height:24px;background:currentColor;-webkit-mask:center/contain no-repeat;mask:center/contain no-repeat}

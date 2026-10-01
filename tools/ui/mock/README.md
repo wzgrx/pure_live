@@ -46,7 +46,7 @@ bash tools/ui/mock/fetch.sh     # 字体（Material Icons、Geist）和示意图
 
 - 路径相对 `tools/ui/mock/`（渲染时自动加 `<base href>`）：样式 `kit/kit.css`，示意图片 `.cache/img/<编号>.jpg`。
 - 尺寸：`393x852@3` 手机竖屏，`852x393@2` 横屏，`740x360@2` 窄横屏，`1280x800@1.5` 宽屏，`1920x1080@1` 电脑或电视；长面板写 `393x2400@2 crop`，裁到内容末尾。横屏和窗口用 `.fs` / `.win`，在 style 里设 `--w`、`--h`。
-- 图标：`<span class="mi">名字</span>`（Material）、`<span class="mr">名字</span>`（Material Round）、`<span class="rx">&#xea42;</span>`（Remix，码位查 `remixicon` 包）、`<span class="ci">&#xe806;</span>`（v3 的 CustomIcons）、`<span class="dmk open"></span>`（v3 的弹幕图标：open、close、set）。
+- 图标：`<span class="mi">名字</span>`（Material）、`<span class="mr">名字</span>`（Material Round）、`<span class="mo">名字</span>`（Material Outlined，Flutter 的 `*_outlined`）、`<span class="rx">&#xea42;</span>`（Remix，码位查 `remixicon` 包）、`<span class="ci">&#xe806;</span>`（v3 的 CustomIcons）、`<span class="dmk open"></span>`（v3 的弹幕图标：open、close、set）。
 - 编号：可点的控件加 `data-n="3"`，可选 `data-tag="chg|add|keep|prob"`（颜色）、`data-at="tc|tl|tr|bl|br|c"`（编号位置）。
 - 深色：渲染时加 `--dark`，用 kit 里的深色角色。
 

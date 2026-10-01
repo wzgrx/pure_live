@@ -2,3 +2,4 @@
 MaterialIcons.woff2	8265f64786397d6b832d1ca0aafdf149ad84e72759fffa9f7272e91a0fb015d1	https://fonts.gstatic.com/s/materialicons/v145/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2
 MaterialIconsRound.woff2	c948f1263341699b3c1e9c55d8d0f3e446669d0f2b9d55494c6169222c0243a6	https://fonts.gstatic.com/s/materialiconsround/v109/LDItaoyNOAY6Uewc665JcIzCKsKc_M9flwmP.woff2
 Geist.woff2	19f9c92546aa300c312235e3125af1b81394d8db9a4bc4a425cd5b641d2d54e1	https://fonts.gstatic.com/s/geist/v5/gyByhwUxId8gMEwcGFU.woff2
+MaterialIconsOutlined.woff2	35dca8a7145a17c8d1306f25a3ca091578e15396f0b22d61eb8e73262ac75577	https://fonts.gstatic.com/s/materialiconsoutlined/v110/gok-H7zzDkdnRel8-DQ6KAXJ69wP1tGnf4ZGhUce.woff2

@@ -26,14 +26,14 @@ v4 现在：`packages/live_ui` 的主题基本照 v3（同样的字号和形状�
 - 宽度 ≤680：手机布局，底部 `NavigationBar`，最多四项，顺序和显示由设置“首页菜单”决定（只剩一项时不显示导航栏）：
   - 关注 `Remix.heart_3_line/fill`、热门 `Remix.fire_line/fill`、分区 `Remix.apps_2_line/fill`、录制中心 `Remix.download_2_line/fill`。
   - 关注页已选中时再点一次“关注”= 刷新关注。
-- 宽度 >680：左侧 `NavigationRail`（标签全显示，可滚动），顶部依次是菜单按钮、多画面 `Remix.layout_grid_line`（开了多画面才有）、工具箱 `Remix.link`、搜索 `CustomIcons.search`、录制中心 `Remix.download_2_line`（录制不作为导航项，改为顶部按钮）；中间竖分隔线；右侧是页面。
+- 宽度 >680：左侧 `NavigationRail`（标签全显示，可滚动），顶部依次是菜单按钮、多画面 `Remix.layout_grid_line`（开了多画面才有）、链接解析 `Remix.link`（提示文字是“链接解析”）、搜索 `CustomIcons.search`、录制中心 `Remix.download_2_line`（录制不作为导航项，改为顶部按钮）；中间竖分隔线；右侧是页面。
 - 返回键：不退出，`moveToDesktop` 回到桌面。
 - 回到前台超过 15 秒：刷新当前的热门/分区。
 - 启动 2 秒后检查更新，有新版弹“新版本”对话框。
 
 **各页顶栏的公共部分**
 
-- 左：菜单按钮 `Icons.menu_rounded`（`common/widgets/menu_button.dart`），弹出菜单：设置 `Remix.settings_5_line`、关于 `Remix.information_line`、历史记录 `Remix.history_line`、备份与恢复 `Remix.cloud_line`、新窗口打开（仅 Windows，`Icons.add_to_photos_outlined`）。
+- 左：菜单按钮 `Icons.menu_rounded`（`common/widgets/menu_button.dart`），弹出菜单：设置 `Remix.settings_5_line`、关于 `Remix.information_line`、历史记录 `Remix.history_line`、备份与恢复 `Remix.cloud_line`、“新建独立播放窗口”（仅 Windows，并且要打开对应设置才出现，`Icons.add_to_photos_outlined`）。
 - 右：`CommonAppBarActions`，图标 `Remix.menu_search_line`，弹出菜单：搜索直播 `Remix.search_line`、链接访问 `Remix.link`、多画面 `Remix.layout_grid_line`（开了才有）。
 - 宽屏（>680）时这两个按钮不显示，功能在侧边导航栏里。
 
@@ -42,7 +42,7 @@ v3 的问题：
 2. 手机上“多画面”“链接访问”在右上搜索菜单里，宽屏在侧边栏，两处入口名字和图标不同（`Remix.link` 在宽屏叫工具箱、在手机叫链接访问）。
 3. 分区导航图标 `Remix.apps_2_line` 和直播间右上菜单是同一个图标，含义不同却长得一样。
 
-v4 现在：结构基本照 v3，但导航图标换成了 Material（`favorite`、`local_fire_department`、`grid_view`、`download`）；左上菜单和右上按钮的图标也不同。
+v4 现在（2026-10-01 核对）：导航图标已和 v3 一样；其余差异见 [compare/U.3a](compare/U.3a/README.md)。
 
 | v3 | v4 |
 |---|---|
@@ -189,3 +189,4 @@ v4 现在（偏差最大）：
 | U.4d 分区 | [compare/U.4d](compare/U.4d/README.md) |
 | U.4e 分区房间 | [compare/U.4e](compare/U.4e/README.md) |
 | U.4f 关注的分区、平台显示 | [compare/U.4f](compare/U.4f/README.md)（v3 的 HotAreasPage 实际是“平台显示”页） |
+| U.3a～U.3d 首页外壳、宽屏首页、启动页、全局弹窗 | [compare/U.3a](compare/U.3a/README.md)、[U.3b](compare/U.3b/README.md)、[U.3c](compare/U.3c/README.md)、[U.3d](compare/U.3d/README.md)（第 1 节以这里为准） |

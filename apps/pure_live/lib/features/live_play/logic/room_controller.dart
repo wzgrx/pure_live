@@ -36,6 +36,30 @@ enum RoomStage {
   playing,
 }
 
+/// Where the room's danmaku connection is, for the chat list's empty states
+/// (docs/ui/compare/U.2e c2: 3.x showed the same blank list whether it was
+/// connecting, connected with nobody talking, timed out or not offered).
+enum ChatConnection {
+  /// Not asked for (loading, offline, danmaku switched off, IPTV).
+  idle,
+
+  /// Connecting.
+  connecting,
+
+  /// Connected.
+  connected,
+
+  /// The first attempt did not answer in time; it was released and may be
+  /// tried again.
+  timedOut,
+
+  /// The connection failed or ended for good; it may be tried again.
+  failed,
+
+  /// The platform has no danmaku (3.x `EmptyDanmaku`, NetEase CC).
+  unsupported,
+}
+
 /// The room page's logic (3.x `LivePlayController`, `PlayerController` and
 /// `DanmakuController` without GetX): room detail, qualities and lines,
 /// playback, danmaku, super chats, audience and the periodic refresh.
@@ -141,6 +165,7 @@ class LiveRoomController extends ChangeNotifier {
   int _sleepMinutes = 60;
   bool _sleepSession = false;
   EpgProgramme? _catchup;
+  ChatConnection _chatConnection = ChatConnection.idle;
 
   /// The meta key of the "show gifts" switch (B-21).
   static const String showGiftsKey = 'live_play.showGifts';
@@ -197,6 +222,19 @@ class LiveRoomController extends ChangeNotifier {
 
   /// The IPTV programme being replayed, or null for the live channel.
   EpgProgramme? get catchup => _catchup;
+
+  /// Where the danmaku connection is (the chat list's empty states).
+  ChatConnection get chatConnection => _chatConnection;
+
+  void _setChat(ChatConnection value) {
+    if (_chatConnection == value) return;
+    _chatConnection = value;
+    _notify();
+  }
+
+  /// Connects the danmaku again after a timeout or a failure (the chat
+  /// list's "重新连接", U.2e c2).
+  Future<void> reconnectDanmaku() => _syncDanmaku(force: true);
 
   void _notify() {
     if (!_disposed) notifyListeners();
@@ -299,6 +337,7 @@ class LiveRoomController extends ChangeNotifier {
 
   Future<void> _stopStream() async {
     _qualityScope.cancel();
+    _chatConnection = ChatConnection.idle;
     unawaited(danmaku.close());
     _clearSuperChats();
     if (session.state.status != PlaybackStatus.idle) await session.stop();
@@ -350,6 +389,13 @@ class LiveRoomController extends ChangeNotifier {
     _failure = error;
     unawaited(session.stop());
     _notify();
+    // U.2g c11: the room is on air, so its danmaku and super chats show
+    // while the picture says why it cannot play (3.x connected them too and
+    // hid them).
+    if (_room.isLiveNow) {
+      unawaited(_syncDanmaku(force: true));
+      unawaited(_loadSuperChats(_epoch));
+    }
   }
 
   /// Resolves quality [index] and opens it. Returns whether a stream opened.
@@ -658,7 +704,9 @@ class LiveRoomController extends ChangeNotifier {
     }
     if (!_current(epoch) || fetched.isLiveStatusPending) return;
     final playing = _stage == RoomStage.playing;
-    if (!playing && fetched.isPlayableNow) {
+    // A room that came on air starts playing (U.2g c8). A room on air whose
+    // stream is withheld keeps its danmaku; it is tried again by "重试".
+    if (!playing && _stage != RoomStage.unplayable && fetched.isPlayableNow) {
       await load();
       return;
     }
@@ -688,13 +736,19 @@ class LiveRoomController extends ChangeNotifier {
   bool get _wantsDanmaku =>
       store.settings.get(Settings.enableDanmakuDisplay) || store.settings.get(Settings.enablePipDanmaku);
 
+  /// The room has a stream, or is on air and only its stream is withheld
+  /// (U.2g c11): its danmaku connects.
+  bool get _danmakuStage => _stage == RoomStage.playing || (_stage == RoomStage.unplayable && _room.isLiveNow);
+
   Future<void> _syncDanmaku({bool force = false}) async {
     if (_disposed) return;
-    if (_stage != RoomStage.playing || !_wantsDanmaku || site.id == SiteIds.iptv) {
+    if (!_danmakuStage || !_wantsDanmaku || site.id == SiteIds.iptv) {
+      _setChat(ChatConnection.idle);
       await danmaku.close();
       return;
     }
     if (!danmakuSupported) {
+      _setChat(ChatConnection.unsupported);
       if (!_unsupportedShown) {
         _unsupportedShown = true;
         _system(i18n('live_play_danmaku_unsupported'));
@@ -704,18 +758,22 @@ class LiveRoomController extends ChangeNotifier {
     if (!force && danmaku.status != DanmakuStatus.idle && danmaku.status != DanmakuStatus.closed) return;
     final epoch = ++_danmakuEpoch;
     _maskedNameShown = false;
+    _setChat(ChatConnection.connecting);
     if (_room.isRecord) _system(i18n('recording_mode_notice'));
     _system(i18n('connect_danmaku_server'));
     try {
       await danmaku.connect(_room.danmakuData).timeout(danmakuStartTimeout);
+      if (epoch == _danmakuEpoch && !_disposed && danmaku.isConnected) _setChat(ChatConnection.connected);
     } on TimeoutException {
       if (epoch != _danmakuEpoch || _disposed) return;
       await danmaku.close();
+      _setChat(ChatConnection.timedOut);
       _system(i18n('danmaku_connection_timeout'));
     } on Object catch (error, stackTrace) {
       if (epoch != _danmakuEpoch || _disposed) return;
       developer.log('Danmaku start failed', name: 'LivePlay', error: error, stackTrace: stackTrace);
       await danmaku.close();
+      _setChat(ChatConnection.failed);
       _system(i18n('live_play_danmaku_connect_failed'));
     }
   }
@@ -724,12 +782,15 @@ class LiveRoomController extends ChangeNotifier {
     if (_disposed) return;
     switch (event) {
       case DanmakuReady():
+        _setChat(ChatConnection.connected);
         _system(i18n('danmaku_connected'));
       case DanmakuReceived(:final message):
         _onMessage(message);
       case DanmakuReconnecting(:final reason):
+        _setChat(ChatConnection.connecting);
         _system(interruptionText(reason));
       case DanmakuClosed(:final reason):
+        _setChat(ChatConnection.failed);
         _system(closeText(reason));
     }
   }

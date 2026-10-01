@@ -13,6 +13,8 @@ import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/danmaku/danmaku_color_dialog.dart';
+import 'package:pure_live/shared/danmaku/setting_rows.dart';
 
 /// 3.x's names of the font weights (`AppConsts.fontWeightLabels`).
 const Map<int, String> danmakuFontWeightNames = {
@@ -105,10 +107,14 @@ class RoomDanmakuSettingsPanel extends StatelessWidget {
 /// tab show this same content.
 class RoomDanmakuSettings extends ConsumerWidget {
   /// Creates the settings.
-  const new({required this.controller, super.key});
+  const new({required this.controller, this.inTab = false, super.key});
 
   /// The room.
   final LiveRoomController controller;
+
+  /// In the room's "弹幕设置" tab: no header, so "改动立即生效" sits right of
+  /// the first group's title (U.2e c8).
+  final bool inTab;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -135,12 +141,12 @@ class RoomDanmakuSettings extends ConsumerWidget {
       key: const ValueKey('live-play-danmaku-settings'),
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        PanelGroupTitle(i18n('danmaku_group_templates')),
+        PanelGroupTitle(i18n('danmaku_group_templates'), trailing: inTab ? i18n('danmaku_settings_live_hint') : null),
         _Templates(settings: settings),
         PanelGroupTitle(i18n('danmaku_group_range')),
         PanelCard(
           children: [
-            _SliderRow(
+            SettingSliderRow(
               settingKey: 'area',
               title: i18n('danmaku_area'),
               value: area.clamp(0, 1).toDouble(),
@@ -149,7 +155,7 @@ class RoomDanmakuSettings extends ConsumerWidget {
               display: '${(area * 100).toInt()}%',
               onChanged: (value) => set(Settings.danmakuArea, value),
             ),
-            _CounterRow(
+            SettingCounterRow(
               settingKey: 'top',
               title: i18n('margin_top'),
               value: top.toInt().clamp(0, 300),
@@ -157,7 +163,7 @@ class RoomDanmakuSettings extends ConsumerWidget {
               max: 300,
               onChanged: (value) => set(Settings.danmakuTopArea, value.toDouble()),
             ),
-            _CounterRow(
+            SettingCounterRow(
               settingKey: 'bottom',
               title: i18n('margin_bottom'),
               value: bottom.toInt().clamp(0, 300),
@@ -170,7 +176,7 @@ class RoomDanmakuSettings extends ConsumerWidget {
         PanelGroupTitle(i18n('style')),
         PanelCard(
           children: [
-            _SliderRow(
+            SettingSliderRow(
               settingKey: 'opacity',
               title: i18n('opacity'),
               value: opacity.clamp(0, 1).toDouble(),
@@ -179,7 +185,7 @@ class RoomDanmakuSettings extends ConsumerWidget {
               display: '${(opacity * 100).toInt()}%',
               onChanged: (value) => set(Settings.danmakuOpacity, value),
             ),
-            _SliderRow(
+            SettingSliderRow(
               settingKey: 'speed',
               title: i18n('speed'),
               value: speed.clamp(20, 400).toDouble(),
@@ -188,7 +194,7 @@ class RoomDanmakuSettings extends ConsumerWidget {
               display: '${speed.toInt()} px/s',
               onChanged: (value) => set(Settings.danmakuSpeed, value),
             ),
-            _SliderRow(
+            SettingSliderRow(
               settingKey: 'fontSize',
               title: i18n('font_size'),
               value: fontSize.clamp(10, 30).toDouble(),
@@ -197,7 +203,7 @@ class RoomDanmakuSettings extends ConsumerWidget {
               display: '${fontSize.toStringAsFixed(1)} px',
               onChanged: (value) => set(Settings.danmakuFontSize, value),
             ),
-            _SliderRow(
+            SettingSliderRow(
               settingKey: 'fontWeight',
               title: i18n('font_weight'),
               value: weight.clamp(100, 900).toDouble(),
@@ -207,14 +213,14 @@ class RoomDanmakuSettings extends ConsumerWidget {
               display: i18n(danmakuFontWeightNames[weight] ?? 'font_weight_medium'),
               onChanged: (value) => set(Settings.danmakuFontWeight, (value / 100).round() * 100),
             ),
-            _SwitchRow(
+            SettingSwitchRow(
               settingKey: 'stroke',
               title: i18n('danmaku_stroke'),
               value: stroke,
               onChanged: (value) => set(Settings.enableDanmakuStroke, value),
             ),
             // D4: greyed out while the stroke is off, not hidden.
-            _SliderRow(
+            SettingSliderRow(
               settingKey: 'strokeWidth',
               title: i18n('stroke'),
               value: border.clamp(0, 4).toDouble(),
@@ -223,7 +229,7 @@ class RoomDanmakuSettings extends ConsumerWidget {
               display: '${border.toStringAsFixed(1)} px',
               onChanged: stroke ? (value) => set(Settings.danmakuFontBorder, value) : null,
             ),
-            _SwitchRow(
+            SettingSwitchRow(
               settingKey: 'noEmoji',
               title: i18n('danmaku_no_emoji'),
               value: noEmoji,
@@ -234,14 +240,14 @@ class RoomDanmakuSettings extends ConsumerWidget {
         PanelGroupTitle(i18n('danmaku_group_repeat')),
         PanelCard(
           children: [
-            _SwitchRow(
+            SettingSwitchRow(
               settingKey: 'collapse',
               title: i18n('collapse_repeated_danmaku'),
               subtitle: i18n('collapse_repeated_danmaku_desc'),
               value: collapse,
               onChanged: (value) => set(Settings.collapseRepeatedDanmaku, value),
             ),
-            _CounterRow(
+            SettingCounterRow(
               settingKey: 'repeatWindow',
               title: i18n('repeated_danmaku_window'),
               value: window.clamp(1, 30),
@@ -254,13 +260,13 @@ class RoomDanmakuSettings extends ConsumerWidget {
         PanelGroupTitle(i18n('danmaku_group_interaction')),
         PanelCard(
           children: [
-            _SwitchRow(
+            SettingSwitchRow(
               settingKey: 'tap',
               title: i18n('danmaku_tap_action'),
               value: watchSetting(ref, Settings.enableDanmakuTapInteraction),
               onChanged: (value) => set(Settings.enableDanmakuTapInteraction, value),
             ),
-            _SwitchRow(
+            SettingSwitchRow(
               settingKey: 'longPress',
               title: i18n('danmaku_long_press_action'),
               value: watchSetting(ref, Settings.enableDanmakuLongPressInteraction),
@@ -271,7 +277,7 @@ class RoomDanmakuSettings extends ConsumerWidget {
         PanelGroupTitle(i18n('danmaku_group_smoothness')),
         PanelCard(
           children: [
-            _SwitchRow(
+            SettingSwitchRow(
               settingKey: 'autoFps',
               title: i18n('settings_danmaku_auto_fps'),
               subtitle: i18n('danmaku_auto_fps_desc'),
@@ -289,7 +295,7 @@ class RoomDanmakuSettings extends ConsumerWidget {
                   maxRefreshRate: display?.maxRefreshRate,
                   currentRefreshRate: display?.currentRefreshRate,
                 );
-                return _SliderRow(
+                return SettingSliderRow(
                   settingKey: 'fps',
                   title: i18n('danmaku_fps'),
                   value: (autoFps ? shown : fps).clamp(30, 240).toDouble(),
@@ -303,28 +309,21 @@ class RoomDanmakuSettings extends ConsumerWidget {
             ),
           ],
         ),
-        // v4's switches of the chat list (U.2a), kept with the danmaku.
+        // U.2e c9 (E1): the chat list's look and gifts (U.2a, v4), then 3.x's
+        // picture-in-picture danmaku; in the tab and the panel alike.
         PanelGroupTitle(i18n('danmaku_list')),
         PanelCard(
           children: [
-            ListenableSelector<bool>(
-              listenable: controller,
-              selector: () => controller.showGifts,
-              builder: (context, showGifts, _) => _SwitchRow(
-                settingKey: 'gifts',
-                title: i18n('live_play_show_gifts'),
-                subtitle: i18n('live_play_show_gifts_desc'),
-                value: showGifts,
-                onChanged: (value) => unawaited(controller.setShowGifts(show: value)),
-              ),
-            ),
-            _Row(
+            SettingRow(
               settingKey: 'listStyle',
               title: i18n('danmaku_list_style'),
               subtitle: i18n('danmaku_list_style_desc'),
-              trailing: SegmentedButton<ChatListStyle>(
+              trailing: const SizedBox.shrink(),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: SegmentedButton<ChatListStyle>(
                 key: const ValueKey('danmaku-list-style'),
-                showSelectedIcon: false,
                 segments: [
                   ButtonSegment(value: ChatListStyle.compact, label: Text(i18n('danmaku_list_style_compact'))),
                   ButtonSegment(value: ChatListStyle.card, label: Text(i18n('danmaku_list_style_card'))),
@@ -333,10 +332,195 @@ class RoomDanmakuSettings extends ConsumerWidget {
                 onSelectionChanged: (selection) => set(Settings.danmakuListStyle, selection.first.name),
               ),
             ),
+            ListenableSelector<bool>(
+              listenable: controller,
+              selector: () => controller.showGifts,
+              builder: (context, showGifts, _) => SettingSwitchRow(
+                settingKey: 'gifts',
+                title: i18n('live_play_show_gifts'),
+                subtitle: i18n('live_play_show_gifts_desc'),
+                value: showGifts,
+                onChanged: (value) => unawaited(controller.setShowGifts(show: value)),
+              ),
+            ),
           ],
         ),
+        PanelGroupTitle(i18n('pip_danmaku')),
+        const PipDanmakuSettings(),
       ],
     );
+  }
+}
+
+/// 3.x's picture-in-picture danmaku (`PipDanmakuSettingsSection`, the end of
+/// its danmaku tab), every setting with its range (U.2e c9, c10): the rest
+/// folds away while "小窗显示弹幕" is off (3.x); the values carry their units
+/// like the main danmaku's; "统一弹幕颜色" greys out while the platform's
+/// colours are kept instead of vanishing.
+class PipDanmakuSettings extends ConsumerWidget {
+  /// Creates the group.
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.read(storeProvider).settings;
+    void set<T extends Object>(Setting<T> setting, T value) => unawaited(settings.set(setting, value));
+    final enabled = watchSetting(ref, Settings.enablePipDanmaku);
+    final rows = <Widget>[
+      SettingSwitchRow(
+        settingKey: 'pip',
+        title: i18n('pip_danmaku_enable'),
+        subtitle: i18n('pip_danmaku_desc'),
+        value: enabled,
+        onChanged: (value) => set(Settings.enablePipDanmaku, value),
+      ),
+    ];
+    if (enabled) {
+      final keepColors = watchSetting(ref, Settings.pipDanmakuUseOriginalColor);
+      final color = Color(watchSetting(ref, Settings.pipDanmakuColor));
+      final fontSize = watchSetting(ref, Settings.pipDanmakuFontSize);
+      final weight = watchSetting(ref, Settings.pipDanmakuFontWeight);
+      final speed = watchSetting(ref, Settings.pipDanmakuSpeed);
+      final opacity = watchSetting(ref, Settings.pipDanmakuOpacity);
+      final area = watchSetting(ref, Settings.pipDanmakuArea);
+      final interval = watchSetting(ref, Settings.pipDanmakuEmitInterval);
+      final autoFps = watchSetting(ref, Settings.pipDanmakuAutoFps);
+      final fps = watchSetting(ref, Settings.pipDanmakuFps);
+      final refreshMode = watchSetting(ref, Settings.refreshRateMode);
+      rows.addAll([
+        SettingSwitchRow(
+          settingKey: 'pipNoEmoji',
+          title: i18n('danmaku_no_emoji'),
+          value: watchSetting(ref, Settings.pipDanmakuNoEmojiMode),
+          onChanged: (value) => set(Settings.pipDanmakuNoEmojiMode, value),
+        ),
+        SettingSwitchRow(
+          settingKey: 'pipAutoScale',
+          title: i18n('pip_danmaku_auto_scale'),
+          value: watchSetting(ref, Settings.pipDanmakuAutoScale),
+          onChanged: (value) => set(Settings.pipDanmakuAutoScale, value),
+        ),
+        SettingSwitchRow(
+          settingKey: 'pipOriginalColor',
+          title: i18n('pip_danmaku_original_color'),
+          value: keepColors,
+          onChanged: (value) => set(Settings.pipDanmakuUseOriginalColor, value),
+        ),
+        // c10: greyed out while the platform's colours are kept.
+        InkWell(
+          onTap: keepColors
+              ? null
+              : () async {
+                  final picked = await showDanmakuColorDialog(
+                    context: context,
+                    title: i18n('pip_danmaku_color'),
+                    current: color,
+                  );
+                  if (picked != null) set(Settings.pipDanmakuColor, picked.toARGB32());
+                },
+          child: SettingRow(
+            settingKey: 'pipColor',
+            title: i18n('pip_danmaku_color'),
+            enabled: !keepColors,
+            trailing: DanmakuColorChip(color: color, enabled: !keepColors),
+          ),
+        ),
+        SettingSliderRow(
+          settingKey: 'pipFontSize',
+          title: i18n('font_size'),
+          value: fontSize.clamp(8, 24).toDouble(),
+          min: 8,
+          max: 24,
+          display: '${fontSize.toStringAsFixed(1)} px',
+          onChanged: (value) => set(Settings.pipDanmakuFontSize, value),
+        ),
+        SettingSliderRow(
+          settingKey: 'pipFontWeight',
+          title: i18n('font_weight'),
+          value: weight.clamp(100, 900).toDouble(),
+          min: 100,
+          max: 900,
+          divisions: 8,
+          display: i18n(danmakuFontWeightNames[weight] ?? 'font_weight_normal'),
+          onChanged: (value) => set(Settings.pipDanmakuFontWeight, (value / 100).round() * 100),
+        ),
+        SettingSliderRow(
+          settingKey: 'pipSpeed',
+          title: i18n('speed'),
+          value: speed.clamp(20, 400).toDouble(),
+          min: 20,
+          max: 400,
+          display: '${speed.toStringAsFixed(0)} px/s',
+          onChanged: (value) => set(Settings.pipDanmakuSpeed, value),
+        ),
+        SettingSliderRow(
+          settingKey: 'pipOpacity',
+          title: i18n('opacity'),
+          value: opacity.clamp(0.1, 1).toDouble(),
+          min: 0.1,
+          max: 1,
+          display: '${(opacity * 100).toInt()}%',
+          onChanged: (value) => set(Settings.pipDanmakuOpacity, value),
+        ),
+        SettingSliderRow(
+          settingKey: 'pipArea',
+          title: i18n('danmaku_area'),
+          value: area.clamp(0.1, 1).toDouble(),
+          min: 0.1,
+          max: 1,
+          display: '${(area * 100).toInt()}%',
+          onChanged: (value) => set(Settings.pipDanmakuArea, value),
+        ),
+        SettingCounterRow(
+          settingKey: 'pipMaxVisible',
+          title: i18n('pip_danmaku_max_visible'),
+          value: watchSetting(ref, Settings.pipDanmakuMaxVisibleCount).clamp(1, 20),
+          min: 1,
+          max: 20,
+          onChanged: (value) => set(Settings.pipDanmakuMaxVisibleCount, value),
+        ),
+        SettingSliderRow(
+          settingKey: 'pipInterval',
+          title: i18n('pip_danmaku_interval'),
+          value: interval.clamp(0.05, 2).toDouble(),
+          min: 0.05,
+          max: 2,
+          display: i18n('pip_danmaku_interval_seconds', args: {'seconds': interval.toStringAsFixed(2)}),
+          onChanged: (value) => set(Settings.pipDanmakuEmitInterval, value),
+        ),
+        SettingSwitchRow(
+          settingKey: 'pipAutoFps',
+          title: i18n('settings_danmaku_auto_fps'),
+          subtitle: i18n('pip_danmaku_fps_follow_desc'),
+          value: autoFps,
+          onChanged: (value) => set(Settings.pipDanmakuAutoFps, value),
+        ),
+        ValueListenableBuilder(
+          valueListenable: DisplayMode.info,
+          builder: (context, display, _) {
+            final shown = resolvedDanmakuFps(
+              automatic: autoFps,
+              configured: fps,
+              mode: refreshMode,
+              maxRefreshRate: display?.maxRefreshRate,
+              currentRefreshRate: display?.currentRefreshRate,
+              pip: true,
+            );
+            return SettingSliderRow(
+              settingKey: 'pipFps',
+              title: i18n('danmaku_fps'),
+              value: (autoFps ? shown : fps).clamp(15, 240).toDouble(),
+              min: 15,
+              max: 240,
+              divisions: 225,
+              display: '$shown FPS',
+              onChanged: autoFps ? null : (value) => set(Settings.pipDanmakuFps, value.round()),
+            );
+          },
+        ),
+      ]);
+    }
+    return PanelCard(children: rows);
   }
 }
 
@@ -419,214 +603,6 @@ class _Templates extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-TextStyle? _titleStyle(ThemeData theme, {required bool enabled}) => theme.textTheme.bodyLarge?.regular.copyWith(
-  fontSize: 15,
-  color: enabled ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withValues(alpha: 0.38),
-);
-
-/// A row with a title (and a line under it) and a control on the right.
-class _Row extends StatelessWidget {
-  const new({
-    required this.settingKey,
-    required this.title,
-    required this.trailing,
-    this.subtitle,
-    this.enabled = true,
-  });
-
-  final String settingKey;
-  final String title;
-  final String? subtitle;
-  final Widget trailing;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Padding(
-      key: ValueKey('danmaku-setting-$settingKey'),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: _titleStyle(theme, enabled: enabled)),
-                if (subtitle case final text?)
-                  Text(
-                    text,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: enabled ? scheme.onSurfaceVariant : scheme.onSurface.withValues(alpha: 0.38),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          trailing,
-        ],
-      ),
-    );
-  }
-}
-
-class _SwitchRow extends StatelessWidget {
-  const new({
-    required this.settingKey,
-    required this.title,
-    required this.value,
-    required this.onChanged,
-    this.subtitle,
-  });
-
-  final String settingKey;
-  final String title;
-  final String? subtitle;
-  final bool value;
-  final ValueChanged<bool>? onChanged;
-
-  @override
-  Widget build(BuildContext context) => MergeSemantics(
-    child: InkWell(
-      // The whole row switches, as 3.x's `SwitchListTile`.
-      onTap: onChanged == null ? null : () => onChanged!(!value),
-      child: _Row(
-        settingKey: settingKey,
-        title: title,
-        subtitle: subtitle,
-        enabled: onChanged != null,
-        trailing: Switch(key: ValueKey('danmaku-switch-$settingKey'), value: value, onChanged: onChanged),
-      ),
-    ),
-  );
-}
-
-/// A title with its value on the right and a slider under it (3.x
-/// `_slider`); a null [onChanged] greys it out.
-class _SliderRow extends StatelessWidget {
-  const new({
-    required this.settingKey,
-    required this.title,
-    required this.value,
-    required this.min,
-    required this.max,
-    required this.display,
-    required this.onChanged,
-    this.divisions,
-  });
-
-  final String settingKey;
-  final String title;
-  final double value;
-  final double min;
-  final double max;
-  final int? divisions;
-  final String display;
-  final ValueChanged<double>? onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final enabled = onChanged != null;
-    return Padding(
-      key: ValueKey('danmaku-setting-$settingKey'),
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(title, style: _titleStyle(theme, enabled: enabled)),
-              ),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: scheme.primary.withValues(alpha: enabled ? 0.1 : 0.05),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  child: Text(
-                    display,
-                    key: ValueKey('danmaku-value-$settingKey'),
-                    style: theme.textTheme.labelMedium?.emphasis.tabular.copyWith(
-                      color: enabled ? scheme.primary : scheme.onSurface.withValues(alpha: 0.38),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Slider(
-            key: ValueKey('danmaku-slider-$settingKey'),
-            value: value.clamp(min, max),
-            min: min,
-            max: max,
-            divisions: divisions,
-            semanticFormatterCallback: (_) => '$title, $display',
-            onChanged: onChanged,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A title with a − value + stepper (3.x `_counter`, `CountButton`); a null
-/// [onChanged] greys it out.
-class _CounterRow extends StatelessWidget {
-  const new({
-    required this.settingKey,
-    required this.title,
-    required this.value,
-    required this.min,
-    required this.max,
-    required this.onChanged,
-  });
-
-  final String settingKey;
-  final String title;
-  final int value;
-  final int min;
-  final int max;
-  final ValueChanged<int>? onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final enabled = onChanged != null;
-    final ink = enabled ? scheme.onSurfaceVariant : scheme.onSurface.withValues(alpha: 0.38);
-    return _Row(
-      settingKey: settingKey,
-      title: title,
-      enabled: enabled,
-      trailing: IgnorePointer(
-        ignoring: !enabled,
-        child: CountButton(
-          key: ValueKey('danmaku-counter-$settingKey'),
-          minValue: min,
-          maxValue: max,
-          selectedValue: value,
-          buttonSize: const Size(40, 40),
-          backgroundColor: scheme.surface,
-          foregroundColor: ink,
-          semanticLabel: title,
-          decrementSemanticLabel: i18n('decrease_value', args: {'label': title}),
-          incrementSemanticLabel: i18n('increase_value', args: {'label': title}),
-          textStyle: theme.textTheme.titleSmall?.emphasis.tabular.copyWith(
-            color: enabled ? scheme.primary : scheme.onSurface.withValues(alpha: 0.38),
-          ),
-          onChanged: (next) => onChanged?.call(next),
-        ),
       ),
     );
   }

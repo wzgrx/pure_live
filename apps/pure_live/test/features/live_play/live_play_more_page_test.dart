@@ -214,6 +214,10 @@ void main() {
         matching: find.byType(Scrollable),
       ),
     );
+    // U.2e c9: the list's look comes first in its group now; bring the
+    // switch fully into view.
+    await tester.ensureVisible(find.text('在聊天列表显示礼物'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('在聊天列表显示礼物'));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
     await tester.pumpAndSettle();

@@ -12,6 +12,7 @@ import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The look of the chat list (the `danmakuListStyle` setting, U.2a choice
 /// A): compact lines by default, 3.x's cards on request.
@@ -92,6 +93,53 @@ class _ChatListState extends ConsumerState<ChatList> {
     super.dispose();
   }
 
+  /// What the list says before its first message, or null for the list.
+  Widget? _emptyState(List<ChatLine> lines) {
+    final controller = widget.controller;
+    if (controller.stage == RoomStage.offline) return RoomNoticeState(room: controller.room);
+    final last = lines.isEmpty ? null : lines.last.text;
+    return switch (controller.chatConnection) {
+      ChatConnection.idle => null,
+      ChatConnection.connecting => ChatListState(
+        key: const ValueKey('live-play-chat-connecting'),
+        busy: true,
+        title: last ?? i18n('connect_danmaku_server'),
+      ),
+      ChatConnection.connected => ChatListState(
+        key: const ValueKey('live-play-chat-quiet'),
+        icon: AppIcons.chatEmpty,
+        title: i18n('live_play_chat_empty'),
+        subtitle: i18n('live_play_chat_empty_desc'),
+      ),
+      ChatConnection.timedOut => ChatListState(
+        key: const ValueKey('live-play-chat-timeout'),
+        icon: AppIcons.danmakuTimeout,
+        title: i18n('live_play_chat_timeout'),
+        subtitle: i18n('live_play_chat_timeout_desc'),
+        action: i18n('live_play_chat_reconnect'),
+        actionIcon: AppIcons.refresh,
+        onAction: () => unawaited(controller.reconnectDanmaku()),
+      ),
+      ChatConnection.failed => ChatListState(
+        key: const ValueKey('live-play-chat-failed'),
+        icon: AppIcons.danmakuTimeout,
+        title: last ?? i18n('live_play_danmaku_connect_failed'),
+        action: i18n('live_play_chat_reconnect'),
+        actionIcon: AppIcons.refresh,
+        onAction: () => unawaited(controller.reconnectDanmaku()),
+      ),
+      ChatConnection.unsupported => ChatListState(
+        key: const ValueKey('live-play-chat-unsupported'),
+        icon: AppIcons.danmakuUnavailable,
+        title: i18n(
+          'live_play_chat_unsupported',
+          args: {'platform': platformName(controller.site.id, fallback: controller.site.name)},
+        ),
+        subtitle: i18n('live_play_chat_unsupported_desc'),
+      ),
+    };
+  }
+
   void _onScroll() {
     if (!_scroll.hasClients) return;
     final atBottom = _scroll.position.pixels >= _scroll.position.maxScrollExtent - 24;
@@ -149,15 +197,24 @@ class _ChatListState extends ConsumerState<ChatList> {
   Widget build(BuildContext context) {
     final display = watchSetting(ref, Settings.enableDanmakuDisplay);
     if (!display) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(i18n('danmaku_display_disabled_hint'), textAlign: TextAlign.center),
-        ),
+      // U.2e c3: 3.x only said where else to go; the switch is here now.
+      return ChatListState(
+        key: const ValueKey('live-play-chat-display-off'),
+        icon: AppIcons.danmakuUnavailable,
+        title: i18n('danmaku_display_disabled_title'),
+        subtitle: i18n('danmaku_display_disabled_desc'),
+        action: i18n('danmaku_display_enable'),
+        onAction: () => unawaited(ref.read(storeProvider).settings.set(Settings.enableDanmakuDisplay, true)),
       );
     }
     final style = ChatListStyle.of(watchSetting(ref, Settings.danmakuListStyle));
     final lines = widget.controller.chat.lines;
+    if (!lines.any((line) => line.kind != ChatLineKind.system)) {
+      // U.2e c2, U.2g c7: until the first message the list says where the
+      // danmaku is (3.x: blank, or a few "系统消息" cards).
+      final empty = _emptyState(lines);
+      if (empty != null) return empty;
+    }
     final unseen = widget.controller.chat.added - _seen;
     final scheme = Theme.of(context).colorScheme;
     return Listener(
@@ -216,11 +273,15 @@ class ChatLineView extends StatelessWidget {
     this.emotes = EmoteTable.empty,
     this.onActions,
     this.onCopy,
+    this.tag,
     super.key,
   });
 
   /// The line.
   final ChatLine line;
+
+  /// A mark before the name (the local interaction's "本地", U.2k).
+  final Widget? tag;
 
   /// Compact line or card.
   final ChatListStyle style;
@@ -332,6 +393,13 @@ class ChatLineView extends StatelessWidget {
     }
   }
 
+  List<InlineSpan> _tag() => [
+    if (tag case final mark?) ...[
+      WidgetSpan(alignment: PlaceholderAlignment.middle, child: mark),
+      const TextSpan(text: ' '),
+    ],
+  ];
+
   List<InlineSpan> _fans(ThemeData theme, LiveMessage message) {
     if (message.fansName.trim().isEmpty) return const [];
     final scheme = theme.colorScheme;
@@ -356,6 +424,7 @@ class ChatLineView extends StatelessWidget {
       child: Text.rich(
         TextSpan(
           children: [
+            ..._tag(),
             ..._fans(theme, message),
             if (name.isNotEmpty)
               TextSpan(
@@ -406,6 +475,7 @@ class ChatLineView extends StatelessWidget {
                 child: Text.rich(
                   TextSpan(
                     children: [
+                      ..._tag(),
                       ..._fans(theme, message),
                       if (name.isNotEmpty)
                         TextSpan(
@@ -594,4 +664,162 @@ class _KeywordDialogState extends State<_KeywordDialog> {
       ),
     ],
   );
+}
+
+/// The chat list's state before its first message, and with the danmaku
+/// display off (docs/ui/compare/U.2e c2, c3): an icon or a spinner, a line,
+/// a reason and at most one button.
+class ChatListState extends StatelessWidget {
+  /// Creates the state.
+  const new({
+    required this.title,
+    this.subtitle,
+    this.icon,
+    this.busy = false,
+    this.action,
+    this.actionIcon,
+    this.onAction,
+    super.key,
+  });
+
+  /// The line.
+  final String title;
+
+  /// The reason, or what still works.
+  final String? subtitle;
+
+  /// The icon.
+  final IconData? icon;
+
+  /// A spinner instead of the icon.
+  final bool busy;
+
+  /// The button's words.
+  final String? action;
+
+  /// The button's icon.
+  final IconData? actionIcon;
+
+  /// The button.
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (busy)
+              const SizedBox.square(dimension: 22, child: CircularProgressIndicator(strokeWidth: 3))
+            else if (icon != null)
+              Icon(icon, size: 32, color: scheme.onSurfaceVariant),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              key: const ValueKey('live-play-chat-state-title'),
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleSmall?.emphasis.copyWith(fontSize: 15, color: scheme.onSurface),
+            ),
+            if (subtitle case final text?) ...[
+              const SizedBox(height: 6),
+              Text(
+                text,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant, height: 1.5),
+              ),
+            ],
+            if (action != null && onAction != null) ...[
+              const SizedBox(height: 14),
+              FilledButton.tonalIcon(
+                key: const ValueKey('live-play-chat-state-action'),
+                onPressed: onAction,
+                icon: actionIcon == null ? null : Icon(actionIcon, size: 18),
+                label: Text(action!),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The chat area of a room that is not on air (docs/ui/compare/U.2g c7): the
+/// streamer's announcement when the platform gave one (folded to three
+/// lines, "展开" shows it all), and "开播后这里显示弹幕".
+class RoomNoticeState extends StatefulWidget {
+  /// Creates the area for [room].
+  const new({required this.room, super.key});
+
+  /// The room.
+  final LiveRoom room;
+
+  @override
+  State<RoomNoticeState> createState() => _RoomNoticeStateState();
+}
+
+class _RoomNoticeStateState extends State<RoomNoticeState> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final notice = (widget.room.notice ?? widget.room.introduction ?? '').trim();
+    return ListView(
+      key: const ValueKey('live-play-chat-offline'),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      children: [
+        if (notice.isNotEmpty) ...[
+          DecoratedBox(
+            decoration: BoxDecoration(color: scheme.surfaceContainerLow, borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    i18n('live_play_info_notice'),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    notice,
+                    key: const ValueKey('live-play-offline-notice'),
+                    maxLines: _open ? null : 3,
+                    overflow: _open ? null : TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyLarge?.regular.copyWith(fontSize: 14, height: 1.5),
+                  ),
+                  if (!_open)
+                    TextButton(
+                      key: const ValueKey('live-play-offline-notice-more'),
+                      style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(48, 40)),
+                      onPressed: () => setState(() => _open = true),
+                      child: Text(i18n('live_play_details_expand')),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+        ],
+        Center(
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: scheme.surfaceContainer, borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+              child: Text(
+                i18n('live_play_chat_after_live'),
+                style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

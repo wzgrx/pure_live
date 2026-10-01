@@ -166,7 +166,9 @@ void main() {
     final failing = FakeSite(liveRoom())..detailError = const NotFound(SiteIds.bilibili);
     services = await _pump(tester, site: failing, danmaku: FakeDanmaku());
     expect(find.text('直播间不存在或已被删除'), findsOneWidget);
-    expect(find.text('重试'), findsOneWidget);
+    // U.2g c10: a room that does not exist offers another room, not a retry.
+    expect(find.text('切换直播间'), findsOneWidget);
+    expect(find.text('重试'), findsNothing);
     await _close(tester, services);
   });
 

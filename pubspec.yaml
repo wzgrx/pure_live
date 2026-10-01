@@ -10,5 +10,6 @@ environment:
 workspace:
   - packages/live_core
   - packages/live_danmaku
+  - packages/live_media
   - packages/live_net
   - tools/check_latest

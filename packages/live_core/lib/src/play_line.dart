@@ -40,7 +40,16 @@ final class PlayLease {
 @immutable
 final class LivePlayLine {
   /// Creates a line; header names are lower case.
-  const new(this.url, {this.headers = const {}, this.format, this.codec, this.lineId, this.lease});
+  const new(
+    this.url, {
+    this.headers = const {},
+    this.format,
+    this.codec,
+    this.lineId,
+    this.lease,
+    this.width,
+    this.height,
+  });
 
   /// Media URL.
   final String url;
@@ -59,6 +68,22 @@ final class LivePlayLine {
 
   /// Renewal rule; null when the URL does not expire while playing.
   final PlayLease? lease;
+
+  /// Picture width the platform declares for this line (3.x
+  /// `LiveStreamGeometryHint`), when it does: the player lays the picture
+  /// out by it before the first frame; the decoded size wins once known.
+  final int? width;
+
+  /// Picture height the platform declares for this line; see [width].
+  final int? height;
+
+  /// [width] over [height], when both are declared.
+  double? get declaredAspectRatio {
+    final w = width;
+    final h = height;
+    if (w == null || h == null || w <= 0 || h <= 0) return null;
+    return w / h;
+  }
 
   @override
   String toString() => 'LivePlayLine(${lineId ?? url})';

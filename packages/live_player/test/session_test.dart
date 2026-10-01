@@ -298,4 +298,39 @@ void main() {
       expect(engine.opens, hasLength(greaterThan(1)));
     });
   });
+
+  test("F.1b: the line's declared size lays out the picture until the decoder reports one", () {
+    fakeAsync((async) {
+      const portrait = LivePlayLine('https://a.example/portrait.flv', lineId: 'a', width: 1088, height: 1920);
+      final states = <PlaybackState>[];
+      engine = FakeEngine();
+      session = PlaybackSession(engine: () async => engine, opener: MediaOpener());
+      session.states.listen(states.add);
+      unawaited(session.open(PlaybackRequest(site: 'douyin', plan: _plan([portrait]))));
+      async.flushMicrotasks();
+      final opening = states.firstWhere((state) => state.status == PlaybackStatus.opening && state.line != null);
+      expect(opening.aspectRatio, isNull, reason: 'no frame yet');
+      expect(opening.declaredAspectRatio, closeTo(1088 / 1920, 1e-9));
+      expect(opening.expectsPortrait, isTrue);
+      expect(opening.isPortrait, isFalse, reason: 'isPortrait still only follows the decoder');
+
+      // The decoder wins once it speaks.
+      engine.emit(const EngineVideoSize(1920, 1080));
+      async.flushMicrotasks();
+      expect(session.state.expectedAspectRatio, closeTo(16 / 9, 1e-9));
+      expect(session.state.expectsPortrait, isFalse);
+
+      // A stopped session declares nothing (its next room starts unknown).
+      unawaited(session.stop());
+      async.flushMicrotasks();
+      expect(session.state.declaredAspectRatio, isNull);
+      expect(session.state.expectsPortrait, isFalse);
+
+      // A line without a size declares nothing.
+      unawaited(session.open(PlaybackRequest(site: 'douyin', plan: _plan([_b]))));
+      async.flushMicrotasks();
+      expect(session.state.declaredAspectRatio, isNull);
+      async.elapse(const Duration(seconds: 1));
+    });
+  });
 }

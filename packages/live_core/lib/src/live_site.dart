@@ -211,6 +211,8 @@ List<LivePlayLine> normalizePlayLines(Iterable<LivePlayLine> lines) {
             codec: line.codec,
             lineId: line.lineId,
             lease: line.lease,
+            width: line.width,
+            height: line.height,
           ),
   ]);
 }

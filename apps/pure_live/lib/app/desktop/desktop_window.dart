@@ -22,6 +22,10 @@ abstract final class DesktopWindow {
 
   static Future<void> Function({required bool on})? _setFullScreen;
 
+  /// The window's size while the user drags its edge (the title bar shows
+  /// it, 3.x `WindowSizeController.isTracking`); null otherwise.
+  static final ValueNotifier<Size?> resizing = ValueNotifier(null);
+
   /// Puts the window into ([on]) or out of full screen (3.x `WindowHelper`).
   static Future<void> setFullScreen({required bool on}) async {
     if (fullScreen.value == on) return;
@@ -98,9 +102,9 @@ final class DesktopShell with WindowListener {
       }
       _settings = _prefs.changes.listen((setting) {
         if (setting.key != Settings.enableStartUp.key) return;
-        unawaited(applyStartupEntry(enabled: _prefs.get(Settings.enableStartUp)));
+        unawaited(_applyStartup());
       });
-      if (isReleaseBuild) unawaited(applyStartupEntry(enabled: _prefs.get(Settings.enableStartUp)));
+      if (isReleaseBuild) unawaited(_applyStartup());
     }
   }
 
@@ -116,6 +120,31 @@ final class DesktopShell with WindowListener {
         return area.overlaps(title);
       });
     } on Object {
+      return false;
+    }
+  }
+
+  /// The start-up entry for the settings row (3.x `StartupController`'s
+  /// "applying" and "failed" texts).
+  static final ValueNotifier<StartupEntryState> startupState = ValueNotifier(StartupEntryState.idle);
+
+  Future<void> _applyStartup() async {
+    startupState.value = StartupEntryState.applying;
+    final applied = await applyStartupEntry(enabled: _prefs.get(Settings.enableStartUp));
+    startupState.value = applied ? StartupEntryState.idle : StartupEntryState.failed;
+  }
+
+  /// Gives the window [size] now (3.x applied the window size setting at
+  /// once); a maximized or full-screen window is restored first. False when
+  /// the window manager refused.
+  Future<bool> resize(Size size) async {
+    try {
+      if (await windowManager.isFullScreen()) await windowManager.setFullScreen(false);
+      if (await windowManager.isMaximized()) await windowManager.unmaximize();
+      await windowManager.setSize(size);
+      return true;
+    } on Object catch (error, stack) {
+      log('Window size not applied', name: 'Desktop', error: error, stackTrace: stack);
       return false;
     }
   }
@@ -176,7 +205,15 @@ final class DesktopShell with WindowListener {
   void onWindowClose() => unawaited(requestClose());
 
   @override
-  void onWindowResized() => _scheduleSave();
+  void onWindowResized() {
+    DesktopWindow.resizing.value = null;
+    _scheduleSave();
+  }
+
+  @override
+  void onWindowResize() => unawaited(
+    windowManager.getSize().then((size) => DesktopWindow.resizing.value = size, onError: (Object _) => null),
+  );
 
   @override
   void onWindowMoved() => _scheduleSave();
@@ -299,4 +336,16 @@ class _CloseDialogState extends State<_CloseDialog> {
       ),
     ],
   );
+}
+
+/// The state of the Windows start-up entry.
+enum StartupEntryState {
+  /// Nothing pending; the entry follows the setting.
+  idle,
+
+  /// Being written.
+  applying,
+
+  /// The last write failed.
+  failed,
 }

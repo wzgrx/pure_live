@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
@@ -9,6 +10,8 @@ import 'package:pure_live/pages/account/account_services.dart';
 import 'package:pure_live/pages/favorite/favorite_controller.dart';
 import 'package:pure_live/pages/settings/data_tools.dart';
 import 'package:pure_live/pages/settings/settings_editors.dart';
+import 'package:pure_live/platform/display_mode.dart';
+import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 
 /// How long the splash page waits for the first follow check before home
@@ -21,8 +24,9 @@ const Duration bilibiliCheckDelay = Duration(seconds: 1);
 
 /// What the app starts once its first frame is up (3.x started these with
 /// its services, in every window): the first check of every follow, the
-/// exit timer, the timed cover refresh, and one second later the Bilibili
-/// login check.
+/// exit timer, the timed cover refresh, Android 17's local-network
+/// permission for a LAN proxy, the display mode, and one second later the
+/// Bilibili login check.
 final class AppStartup {
   /// Creates the start-up over [_ref]'s providers.
   new(this._ref);
@@ -30,6 +34,7 @@ final class AppStartup {
   final Ref _ref;
   Timer? _bilibili;
   CoverRefreshTimer? _covers;
+  LocalNetworkGuard? _localNetwork;
   bool _started = false;
 
   /// The first check of every follow once started; the splash page waits for
@@ -43,6 +48,8 @@ final class AppStartup {
     final store = _ref.read(storeProvider);
     AutoExitTimer.instance.attach(store.settings);
     _covers = CoverRefreshTimer(store.settings)..start();
+    if (Platform.isAndroid) _localNetwork = LocalNetworkGuard(store.settings)..start();
+    unawaited(DisplayMode.refresh());
     followCheck = _ref.read(favoriteControllerProvider).firstCheck;
     _bilibili = Timer(
       bilibiliCheckDelay,
@@ -56,6 +63,7 @@ final class AppStartup {
   void dispose() {
     _bilibili?.cancel();
     unawaited(_covers?.dispose());
+    unawaited(_localNetwork?.dispose());
     if (_started) {
       AutoExitTimer.instance.detach();
       followCheck = null;

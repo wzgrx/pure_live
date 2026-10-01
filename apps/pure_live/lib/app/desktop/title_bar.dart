@@ -5,6 +5,8 @@ import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/pages/version/update_feed.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/routes/route_observer.dart';
+import 'package:pure_live/routes/route_path.dart';
 import 'package:window_manager/window_manager.dart';
 
 /// The window's own title bar on Windows (3.x `CustomTitleBar`): the icon and
@@ -26,73 +28,104 @@ class DesktopTitleBar extends StatelessWidget {
     final dark = theme.brightness == Brightness.dark;
     final foreground = dark ? Colors.white.withValues(alpha: 0.75) : Colors.black87;
     final hover = dark ? Colors.white.withValues(alpha: 0.08) : theme.colorScheme.primary.withValues(alpha: 0.08);
-    return Material(
-      color: dark ? Colors.black : theme.scaffoldBackgroundColor,
-      child: SizedBox(
-        height: height,
-        child: Row(
-          children: [
-            Expanded(
-              child: DragToMoveArea(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: InkWell(
-                    key: const ValueKey('title-bar-project'),
-                    onTap: () => unawaited(AppNavigator.openExternal(projectUrl)),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Image.asset('assets/icons/icon.png', width: 16, height: 16),
-                          const SizedBox(width: 6),
-                          Text(
-                            i18n('app_name'),
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: foreground),
-                          ),
-                        ],
+    final colors = theme.colorScheme;
+    return ValueListenableBuilder<String>(
+      valueListenable: liveRouteObserver.currentRoute,
+      builder: (context, route, bar) => DecoratedBox(
+        // On the splash page the bar continues its gradient (3.x).
+        decoration: route == RoutePath.kSplash
+            ? BoxDecoration(
+                gradient: LinearGradient(
+                  colors: dark
+                      ? [colors.surface, colors.surfaceContainer]
+                      : [colors.surface, colors.primaryContainer.withValues(alpha: 0.6)],
+                ),
+              )
+            : BoxDecoration(color: dark ? Colors.black : theme.scaffoldBackgroundColor),
+        child: bar,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: SizedBox(
+          height: height,
+          child: Row(
+            children: [
+              Expanded(
+                child: DragToMoveArea(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: InkWell(
+                      key: const ValueKey('title-bar-project'),
+                      onTap: () => unawaited(AppNavigator.openExternal(projectUrl)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Image.asset('assets/icons/icon.png', width: 16, height: 16),
+                            const SizedBox(width: 6),
+                            Text(
+                              i18n('app_name'),
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: foreground),
+                            ),
+                            // The size while the edge is dragged (3.x).
+                            ValueListenableBuilder<Size?>(
+                              valueListenable: DesktopWindow.resizing,
+                              builder: (context, size, _) => size == null
+                                  ? const SizedBox.shrink()
+                                  : Padding(
+                                      padding: const EdgeInsets.only(left: 6),
+                                      child: Text(
+                                        '[${size.width.round()} × ${size.height.round()}]',
+                                        key: const ValueKey('title-bar-size'),
+                                        style: TextStyle(fontSize: 12, color: foreground.withValues(alpha: 0.6)),
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            _WindowButton(
-              key: const ValueKey('title-bar-minimize'),
-              label: i18n('window_minimize'),
-              icon: Icons.remove,
-              color: foreground,
-              hover: hover,
-              onPressed: windowManager.minimize,
-            ),
-            _WindowButton(
-              key: const ValueKey('title-bar-maximize'),
-              label: i18n('window_maximize_restore'),
-              icon: Icons.crop_square,
-              color: foreground,
-              hover: hover,
-              onPressed: () async {
-                if (await windowManager.isMaximized()) {
-                  await windowManager.unmaximize();
-                } else {
-                  await windowManager.maximize();
-                }
-              },
-            ),
-            _WindowButton(
-              key: const ValueKey('title-bar-close'),
-              label: i18n('window_close'),
-              icon: Icons.close,
-              color: foreground,
-              hover: const Color(0xFFE81123),
-              hoverColor: Colors.white,
-              onPressed:
-                  onClose ??
-                  () async {
-                    await DesktopShell.current?.requestClose();
-                  },
-            ),
-          ],
+              _WindowButton(
+                key: const ValueKey('title-bar-minimize'),
+                label: i18n('window_minimize'),
+                icon: Icons.remove,
+                color: foreground,
+                hover: hover,
+                onPressed: windowManager.minimize,
+              ),
+              _WindowButton(
+                key: const ValueKey('title-bar-maximize'),
+                label: i18n('window_maximize_restore'),
+                icon: Icons.crop_square,
+                color: foreground,
+                hover: hover,
+                onPressed: () async {
+                  if (await windowManager.isMaximized()) {
+                    await windowManager.unmaximize();
+                  } else {
+                    await windowManager.maximize();
+                  }
+                },
+              ),
+              _WindowButton(
+                key: const ValueKey('title-bar-close'),
+                label: i18n('window_close'),
+                icon: Icons.close,
+                color: foreground,
+                hover: const Color(0xFFE81123),
+                hoverColor: Colors.white,
+                onPressed:
+                    onClose ??
+                    () async {
+                      await DesktopShell.current?.requestClose();
+                    },
+              ),
+            ],
+          ),
         ),
       ),
     );

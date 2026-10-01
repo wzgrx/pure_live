@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
 import 'package:live_iptv/live_iptv.dart';
+import 'package:pure_live/platform/display_mode.dart';
 
 /// Strict GBK decoding for IPTV playlists that are not UTF-8 (3.x used the
 /// charset_converter plugin): Android's `Charset`, Windows code page 936.
@@ -106,14 +107,6 @@ final class MulticastLock {
 }
 
 /// The refresh-rate hint of Android (`pure_live/display_mode`), for
-/// live_ui's `AdaptiveRefreshRateController`.
-Future<void> applyHighRefreshRate({required bool high}) async {
-  if (!Platform.isAndroid) return;
-  try {
-    await const MethodChannel('pure_live/display_mode').invokeMethod<Object?>('setHighRefreshRate', {'enabled': high});
-  } on PlatformException {
-    // The system keeps its own choice.
-  } on MissingPluginException {
-    // No activity yet.
-  }
-}
+/// live_ui's `AdaptiveRefreshRateController`; the answer updates
+/// [DisplayMode.info] (the settings page shows the rates).
+Future<void> applyHighRefreshRate({required bool high}) => DisplayMode.applyHighRefreshRate(high: high);

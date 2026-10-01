@@ -4,6 +4,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Platforms whose links are understood (a pasted room link, short link or
 /// app share text), in display order. The toolbox and the TV's link player
@@ -58,7 +59,7 @@ class SupportedPlatformsCard extends ConsumerWidget {
                 Chip(
                   key: ValueKey('toolbox-platform-${site.id}'),
                   avatar: PlatformLogo(site.id, size: 18),
-                  label: Text(i18nOr('site_${site.id}', site.name)),
+                  label: Text(platformName(site.id, fallback: site.name)),
                   visualDensity: VisualDensity.compact,
                 ),
             ],

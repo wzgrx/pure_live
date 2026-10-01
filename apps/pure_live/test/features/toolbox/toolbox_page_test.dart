@@ -211,6 +211,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('toolbox-platform-bilibili')), findsOneWidget);
     expect(find.byKey(const ValueKey('toolbox-platform-iptv')), findsNothing);
+    // The app's platform names (F.5a c3: `platformName`).
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('toolbox-platform-bilibili')), matching: find.text('哔哩哔哩')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('portrait: group title outside the card, one box, two buttons side by side, list folded', (tester) async {

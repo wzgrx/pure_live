@@ -7,15 +7,39 @@ import 'package:pure_live/i18n/i18n.dart';
 
 import 'support.dart';
 
+Map<String, Object?> read(String code) =>
+    jsonDecode(File('assets/translations/$code.json').readAsStringSync()) as Map<String, Object?>;
+
 void main() {
   test("3.x's translation files are kept and differ only by four keys", () {
-    Map<String, Object?> read(String code) =>
-        jsonDecode(File('assets/translations/$code.json').readAsStringSync()) as Map<String, Object?>;
     final zh = read('zh');
     final en = read('en');
     expect(zh.length, greaterThan(2000));
     expect(zh.keys.toSet().difference(en.keys.toSet()), {'count_wan', 'videofit_scaleDown'});
     expect(en.keys.toSet().difference(zh.keys.toSet()), {'count_k', 'double_click_to_exit'});
+  });
+
+  test('F.5a: every key the app asks i18n for is translated (old keys were removed)', () {
+    final zh = read('zh');
+    final en = read('en');
+    final pattern = RegExp(r"\bi18n\(\s*'([A-Za-z0-9_.]+)'");
+    final missing = <String>{
+      for (final file in Directory('lib').listSync(recursive: true).whereType<File>())
+        if (file.path.endsWith('.dart'))
+          for (final match in pattern.allMatches(file.readAsStringSync()))
+            if (!zh.containsKey(match.group(1)) && !en.containsKey(match.group(1))) '${match.group(1)} (${file.path})',
+    };
+    expect(missing, isEmpty);
+  });
+
+  test('F.5a: the directory and audience notes are words for users, not field names', () {
+    final jargon = RegExp(r'\b[a-z]+[A-Z]\w*|\b\w+_\w+');
+    for (final code in ['zh', 'en']) {
+      for (final MapEntry(:key, :value) in read(code).entries) {
+        final note = key.endsWith('_directory_scope') || (key.startsWith('audience_') && key.endsWith('_detail'));
+        if (note) expect(jargon.firstMatch('$value')?.group(0), isNull, reason: '$code $key');
+      }
+    }
   });
 
   test('i18n reads the current language, fills named arguments and falls back', () async {

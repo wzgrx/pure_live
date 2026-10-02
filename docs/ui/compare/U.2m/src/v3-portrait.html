@@ -1,0 +1,92 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="393x852@3"><link rel="stylesheet" href="kit/kit.css"><style>
+.ph{display:flex;flex-direction:column}
+.grow{flex:1;min-height:0}
+/* ---------- v3 room (U.2a's v3 restore) ---------- */
+.v3nick{font-size:12px;line-height:16px}.v3area{font-size:12px;line-height:16px;color:var(--onv)}
+.v3heart{width:40px;height:40px;border-radius:20px;background:var(--pc);display:grid;place-items:center;color:var(--opc);margin-right:6px;flex:none}
+.v3recsq{width:48px;height:48px;border-radius:12px;background:var(--schh);display:grid;place-items:center;color:var(--onv);flex:none}
+.v3top{position:absolute;left:0;right:0;top:0;height:56px;display:flex;align-items:center;padding:0 8px;background:linear-gradient(0deg,transparent,rgba(0,0,0,.45));z-index:5;color:#fff}
+.v3top .title{flex:1;min-width:0;padding:0 12px;font:700 16px 'Noto Sans SC';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
+.v3bot{position:absolute;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;padding:0 8px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.45));color:#fff;z-index:5}
+.pill{display:flex;align-items:center;gap:2px;padding:0 6px;height:48px;font-size:14px;flex:none;color:#fff}
+.res{height:56px;display:flex;align-items:center;padding:0 4px;flex:none}
+.res .aud{flex:3;padding:0 8px;display:flex;align-items:center;gap:4px;font-size:12px}
+.res .q{flex:2;text-align:right;font-size:11px;color:var(--primary);padding-right:12px}
+.res .l{flex:1;text-align:right;font-size:11px;color:var(--primary);padding-right:12px}
+.tabs.v3t div{font-size:15px}
+.list3{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:10px 6px}
+.it3{margin:4px 8px;background:rgba(255,255,255,.72);border:.5px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 12px;display:flex;align-items:flex-start;flex:none}
+.it3 i{width:8px;height:8px;border-radius:4px;margin:6px 10px 0 0;flex:none}.it3 p{font-size:14px;line-height:1.45}.it3 b{font-weight:700}
+/* ---------- v3 PlayOther dialog ---------- */
+.d3{position:absolute;z-index:21;background:var(--sch);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.d3h{height:48px;display:flex;align-items:center;padding:0 2px 0 10px;flex:none}
+.d3h .t{flex:1;font-size:14px;font-weight:600;margin-left:6px}
+.d3h .b{width:48px;height:48px;display:grid;place-items:center;color:var(--onv)}
+.d3t{height:48px;display:flex;flex:none;border-bottom:1px solid var(--ov)}
+.d3t div{flex:1;display:flex;align-items:center;justify-content:center;gap:3px;font-size:12px;color:var(--onv);position:relative}
+.d3t .on{color:var(--primary)}.d3t .on::after{content:'';position:absolute;bottom:0;left:18%;right:18%;height:3px;border-radius:3px 3px 0 0;background:var(--primary)}
+.g3{flex:1;min-height:0;overflow:hidden;padding:6px;display:grid;gap:5px;align-content:start}
+.c3{background:var(--scl);border:1px solid rgba(195,199,207,.55);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.c3 .cv{flex:1;min-height:0;position:relative;background:#333 center/cover}
+.c3 .pf{position:absolute;top:7px;right:7px;padding:3px 7px;border-radius:7px;background:rgba(0,0,0,.58);color:#fff;font-size:11px;font-weight:700;line-height:1}
+.c3 .mt{position:absolute;left:0;right:0;bottom:0;padding:22px 8px 8px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.87));color:#fff;font-size:11px;font-weight:600;line-height:1.1}
+.c3 .ft{height:36px;padding:3px 3px 3px 7px;display:flex;flex-direction:column;flex:none}
+.c3 .ft b{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:16px}
+.c3 .ft span{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--onv);margin-top:auto;line-height:14px}
+/* ---------- v4.0.0 sheet ---------- */
+.bs{position:absolute;left:0;right:0;bottom:0;z-index:21;background:var(--scl);border-radius:28px 28px 0 0;display:flex;flex-direction:column;overflow:hidden}
+.handle{height:48px;display:grid;place-items:center;flex:none}.handle i{width:32px;height:4px;border-radius:2px;background:rgba(67,71,78,.4)}
+.lt{display:flex;align-items:center;gap:16px;padding:8px 24px 8px 16px;min-height:64px}
+.lt .x{flex:1;min-width:0}.lt .a{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lt .b{font-size:12px;color:var(--onv);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lt .av{width:40px;height:40px;border-radius:20px}
+/* ---------- v4 room (U.2a) ---------- */
+.list{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:6px 0 8px}
+.under{position:absolute;left:0;right:0;bottom:0;background:var(--surface);z-index:21;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -2px 8px rgba(0,0,0,.08)}
+/* ---------- new switch panel ---------- */
+.sp{display:flex;flex-direction:column;background:var(--surface);color:var(--on);overflow:hidden}
+.sph{height:56px;display:flex;align-items:center;padding:4px 4px 0 16px;flex:none}
+.sph .t{flex:1;min-width:0;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sph .b{width:48px;height:48px;display:grid;place-items:center;color:var(--onv);flex:none}
+.sph .b.on{color:var(--primary)}
+.rf{height:32px;display:flex;align-items:center;gap:4px;padding:0 8px 0 6px;border-radius:16px;font-size:12px;color:var(--onv);flex:none;white-space:nowrap}
+.rf.err{color:var(--error)}
+.seg{height:40px;display:flex;align-items:center;gap:8px;padding:0 12px;flex:none;overflow:hidden;white-space:nowrap}
+.seg span{height:32px;border-radius:16px;padding:0 12px;display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--onv);box-shadow:inset 0 0 0 1px var(--ov);flex:none}
+.seg span.on{background:var(--sc);color:var(--osc);box-shadow:none;font-weight:600}
+.seg span small{font-size:12px;font-weight:500;opacity:.8}
+.now{height:36px;display:flex;align-items:center;gap:6px;padding:0 12px;background:var(--scl);flex:none;white-space:nowrap;overflow:hidden}
+.now b{font-size:12px;color:var(--primary);font-weight:600;flex:none}
+.now span{font-size:12px;color:var(--onv);overflow:hidden;text-overflow:ellipsis;min-width:0}
+.srch{height:48px;margin:0 12px 6px;border-radius:24px;background:var(--sch);display:flex;align-items:center;gap:8px;padding:0 6px 0 14px;flex:none;font-size:14px}
+.srch .x{margin-left:auto;width:36px;height:36px;display:grid;place-items:center;color:var(--onv)}
+.gr{flex:1;min-height:0;overflow:hidden;padding:6px;display:grid;gap:5px;align-content:start}
+.cd{background:var(--scl);border:1px solid rgba(195,199,207,.55);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.cd .cv{flex:1;min-height:0;position:relative;background:#333 center/cover}
+.cd .tl{position:absolute;left:6px;top:6px;display:flex;gap:4px}
+.cd .tr2{position:absolute;right:6px;top:6px}
+.bdg{height:18px;border-radius:9px;padding:0 6px;display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:700;color:#fff;background:rgba(0,0,0,.54);line-height:1;white-space:nowrap}
+.bdg.live{background:var(--live)}.bdg .mr{font-size:12px}
+.cd .bt{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 5px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.7));color:#fff;font-size:11px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd .ft{height:26px;padding:0 8px;display:flex;align-items:center;flex:none;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden}
+.cd .ft span{overflow:hidden;text-overflow:ellipsis}
+.cd.off .cv::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.54)}
+.cd.off .tl,.cd.off .bt{z-index:2}.cd.off .ft{color:var(--onv)}
+.lr{height:75px;display:flex;align-items:center;gap:12px;padding:6px 12px;flex:none}
+.lr .cv{width:112px;height:63px;border-radius:8px;background:#333 center/cover;position:relative;flex:none;overflow:hidden}
+.lr .cv .tl{position:absolute;left:4px;top:4px;display:flex;gap:3px}
+.lr .x{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.lr .a{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lr .b{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lr .c{font-size:12px;color:var(--onv);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lr.off .cv::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.54)}.lr.off .cv .tl{z-index:2}.lr.off .a,.lr.off .b{color:var(--onv)}
+.ls{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:2px 0}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--onv);font-size:14px;text-align:center;padding:0 24px}
+.empty .mr{font-size:40px;opacity:.6}.empty .ob{margin-top:6px;height:36px;padding:0 16px;border-radius:18px;box-shadow:inset 0 0 0 1px var(--ov);color:var(--primary);font-size:14px;font-weight:600;display:inline-flex;align-items:center}
+.lbl{position:absolute;z-index:50;font:600 13px 'Noto Sans SC';color:#fff;background:#2F5FA8;padding:3px 8px;border-radius:6px}
+.cnt{position:absolute;z-index:50;font:700 13px 'Noto Sans SC';color:#fff;background:#C2410C;padding:2px 8px;border-radius:10px}
+/* menus */
+.menu .it .rx,.menu .it .mr{font-size:20px;color:var(--onv)}
+.menu .it.dup{background:rgba(194,65,12,.12)}
+.menu .it small{display:block;font-size:12px;color:var(--onv)}
+.vtop.fsb{height:84px}
+</style></head><body><div class="ph"><div class="status"><span>21:36</span><span class="r"><span class="mi">signal_cellular_alt</span><span class="mi">wifi</span><span class="mi">battery_full</span></span></div><div class="appbar"><div class="back"><span class="mi" style="font-size:24px;">arrow_back</span></div><span class="av" style="background-image:url(.cache/img/65.jpg)"></span><div class="tt" style="margin-left:8px"><div class="v3nick">晚风</div><div class="v3area">哔哩哔哩 / 唱见电台</div></div><div class="v3heart"><span class="mr" style="font-size:22px;">favorite_border</span></div><div class="v3recsq"><span class="mr" style="font-size:22px;">radio_button_checked</span></div><div class="ib"><span class="rx" style="font-size:24px;">&#xea42;</span></div><div style="width:4px"></div></div><div class="video" style="background-image:url(.cache/img/158.jpg);flex:none"><div class="v3top"><div class="title">深夜电台 · 点歌接龙到天亮</div><div class="ib"><span class="rx" style="font-size:21px;">&#xee05;</span></div><div class="ib"><span class="rx" style="font-size:24px;">&#xf235;</span></div><div class="ib"><span class="ci" style="font-size:24px">&#xe806;</span></div></div><div class="v3bot"><div class="ib"><span class="mr" style="font-size:28px;">pause</span></div><div class="ib"><span class="mr" style="font-size:24px;">refresh</span></div><div class="pill"><span class="mr" style="font-size:15px;">check</span>已关注</div><div class="ib"><span class="dmk open"></span></div><div class="ib"><span class="dmk set"></span></div><div class="ib"><span class="mr" style="font-size:21px;">screen_rotation_alt</span></div><div style="flex:1"></div><div class="ib"><span class="mr" style="font-size:26px;">fullscreen</span></div></div></div><div class="res"><div class="aud"><span class="mr" style="font-size:16px;">people_alt</span>在线 1.2万</div><div class="q">原画</div><div class="l">线路1</div></div><hr><div class="tabs v3t" style="flex:none"><div class="on">弹幕列表</div><div>醒目留言</div><div>弹幕设置</div><div>屏蔽管理</div></div><div class="list3"><div class="it3"><i style="background:#C2255C"></i><p><b>星河长明: </b>前排支持！</p></div><div class="it3"><i style="background:#000"></i><p><b>一只小熊: </b>这首歌好好听</p></div><div class="it3"><i style="background:#1971C2"></i><p><b>夜猫子: </b>可以点《晴天》吗</p></div><div class="it3"><i style="background:#000"></i><p><b>路过的风: </b>主播声音太温柔了</p></div><div class="it3"><i style="background:#C2410C"></i><p><b>Aki: </b>打卡第 52 天，晚安前来听歌</p></div><div class="it3"><i style="background:#000"></i><p><b>橘子汽水: </b>晚风晚上好～</p></div></div><div class="scrim"></div><div class="d3" style="left:105.0px;top:66.0px;width:280.0px;height:720.0px"><div class="d3h"><span class="mr" style="font-size:17px;color:var(--primary)">video_library</span><span class="t">切换直播间</span><span class="b"><span class="mr" style="font-size:18px;">refresh</span></span><span class="b"><span class="mr" style="font-size:18px;">close</span></span></div><div class="d3t"><div class="on"><span class="mr" style="font-size:14px;">sensors</span>已开播</div><div><span class="mr" style="font-size:14px;">fiber_smart_record</span>录播</div><div><span class="mr" style="font-size:14px;">history</span>观看记录</div></div><div class="g3" style="grid-template-columns:repeat(1,1fr);grid-auto-rows:186.8px"><div class="c3"><div class="cv" style="background-image:url(.cache/img/1.jpg)"><span class="pf">哔哩哔哩</span><span class="mt">12.4万</span></div><div class="ft"><b>今晚冲分到王者，水友赛开放</b><span><span class="mr" style="font-size:12px;">person_outline</span><i style="flex:1;font-style:normal;white-space:nowrap;overflow:hidden">星河长明</i><span class="mr" style="font-size:14px;">chevron_right</span></span></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/111.jpg)"><span class="pf">斗鱼</span><span class="mt">8.6万</span></div><div class="ft"><b>周末开黑，来！上分车</b><span><span class="mr" style="font-size:12px;">person_outline</span><i style="flex:1;font-style:normal;white-space:nowrap;overflow:hidden">一只小熊</i><span class="mr" style="font-size:14px;">chevron_right</span></span></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/133.jpg)"><span class="pf">虎牙</span><span class="mt">3.1万</span></div><div class="ft"><b>通宵 · 艾尔登法环 DLC 全收集</b><span><span class="mr" style="font-size:12px;">person_outline</span><i style="flex:1;font-style:normal;white-space:nowrap;overflow:hidden">夜猫子</i><span class="mr" style="font-size:14px;">chevron_right</span></span></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/169.jpg)"><span class="pf">哔哩哔哩</span><span class="mt">2.2万</span></div><div class="ft"><b>深夜点歌，接龙到天亮</b><span><span class="mr" style="font-size:12px;">person_outline</span><i style="flex:1;font-style:normal;white-space:nowrap;overflow:hidden">路过的风</i><span class="mr" style="font-size:14px;">chevron_right</span></span></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/183.jpg)"><span class="pf">抖音</span><span class="mt">1.8万</span></div><div class="ft"><b>城市夜跑 10 公里</b><span><span class="mr" style="font-size:12px;">person_outline</span><i style="flex:1;font-style:normal;white-space:nowrap;overflow:hidden">橘子汽水</i><span class="mr" style="font-size:14px;">chevron_right</span></span></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/206.jpg)"><span class="pf">哔哩哔哩</span><span class="mt">9876</span></div><div class="ft"><b>新衣装首播！</b><span><span class="mr" style="font-size:12px;">person_outline</span><i style="flex:1;font-style:normal;white-space:nowrap;overflow:hidden">Aki</i><span class="mr" style="font-size:14px;">chevron_right</span></span></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/219.jpg)"><span class="pf">斗鱼</span><span class="mt">5432</span></div><div class="ft"><b>做一桌家常菜</b><span><span class="mr" style="font-size:12px;">person_outline</span><i style="flex:1;font-style:normal;white-space:nowrap;overflow:hidden">不吃香菜</i><span class="mr" style="font-size:14px;">chevron_right</span></span></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/225.jpg)"><span class="pf">虎牙</span><span class="mt">3210</span></div><div class="ft"><b>唱歌聊天</b><span><span class="mr" style="font-size:12px;">person_outline</span><i style="flex:1;font-style:normal;white-space:nowrap;overflow:hidden">月亮邮差</i><span class="mr" style="font-size:14px;">chevron_right</span></span></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/237.jpg)"><span class="pf">快手</span><span class="mt">1288</span></div><div class="ft"><b>随便聊聊，今晚早点下</b><span><span class="mr" style="font-size:12px;">person_outline</span><i style="flex:1;font-style:normal;white-space:nowrap;overflow:hidden">北岛</i><span class="mr" style="font-size:14px;">chevron_right</span></span></div></div><div class="c3"><div class="cv" style="background-image:url(.cache/img/250.jpg)"><span class="pf">哔哩哔哩</span><span class="mt">960</span></div><div class="ft"><b>画一张星空</b><span><span class="mr" style="font-size:12px;">person_outline</span><i style="flex:1;font-style:normal;white-space:nowrap;overflow:hidden">阿七</i><span class="mr" style="font-size:14px;">chevron_right</span></span></div></div></div></div><div class="syn">示意图片</div><div class="gesture"></div></div></body></html>

@@ -1,0 +1,92 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="mock-size" content="852x393@2"><link rel="stylesheet" href="kit/kit.css"><style>
+.ph{display:flex;flex-direction:column}
+.grow{flex:1;min-height:0}
+/* ---------- v3 room (U.2a's v3 restore) ---------- */
+.v3nick{font-size:12px;line-height:16px}.v3area{font-size:12px;line-height:16px;color:var(--onv)}
+.v3heart{width:40px;height:40px;border-radius:20px;background:var(--pc);display:grid;place-items:center;color:var(--opc);margin-right:6px;flex:none}
+.v3recsq{width:48px;height:48px;border-radius:12px;background:var(--schh);display:grid;place-items:center;color:var(--onv);flex:none}
+.v3top{position:absolute;left:0;right:0;top:0;height:56px;display:flex;align-items:center;padding:0 8px;background:linear-gradient(0deg,transparent,rgba(0,0,0,.45));z-index:5;color:#fff}
+.v3top .title{flex:1;min-width:0;padding:0 12px;font:700 16px 'Noto Sans SC';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
+.v3bot{position:absolute;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;padding:0 8px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.45));color:#fff;z-index:5}
+.pill{display:flex;align-items:center;gap:2px;padding:0 6px;height:48px;font-size:14px;flex:none;color:#fff}
+.res{height:56px;display:flex;align-items:center;padding:0 4px;flex:none}
+.res .aud{flex:3;padding:0 8px;display:flex;align-items:center;gap:4px;font-size:12px}
+.res .q{flex:2;text-align:right;font-size:11px;color:var(--primary);padding-right:12px}
+.res .l{flex:1;text-align:right;font-size:11px;color:var(--primary);padding-right:12px}
+.tabs.v3t div{font-size:15px}
+.list3{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:10px 6px}
+.it3{margin:4px 8px;background:rgba(255,255,255,.72);border:.5px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 12px;display:flex;align-items:flex-start;flex:none}
+.it3 i{width:8px;height:8px;border-radius:4px;margin:6px 10px 0 0;flex:none}.it3 p{font-size:14px;line-height:1.45}.it3 b{font-weight:700}
+/* ---------- v3 PlayOther dialog ---------- */
+.d3{position:absolute;z-index:21;background:var(--sch);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.d3h{height:48px;display:flex;align-items:center;padding:0 2px 0 10px;flex:none}
+.d3h .t{flex:1;font-size:14px;font-weight:600;margin-left:6px}
+.d3h .b{width:48px;height:48px;display:grid;place-items:center;color:var(--onv)}
+.d3t{height:48px;display:flex;flex:none;border-bottom:1px solid var(--ov)}
+.d3t div{flex:1;display:flex;align-items:center;justify-content:center;gap:3px;font-size:12px;color:var(--onv);position:relative}
+.d3t .on{color:var(--primary)}.d3t .on::after{content:'';position:absolute;bottom:0;left:18%;right:18%;height:3px;border-radius:3px 3px 0 0;background:var(--primary)}
+.g3{flex:1;min-height:0;overflow:hidden;padding:6px;display:grid;gap:5px;align-content:start}
+.c3{background:var(--scl);border:1px solid rgba(195,199,207,.55);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.c3 .cv{flex:1;min-height:0;position:relative;background:#333 center/cover}
+.c3 .pf{position:absolute;top:7px;right:7px;padding:3px 7px;border-radius:7px;background:rgba(0,0,0,.58);color:#fff;font-size:11px;font-weight:700;line-height:1}
+.c3 .mt{position:absolute;left:0;right:0;bottom:0;padding:22px 8px 8px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.87));color:#fff;font-size:11px;font-weight:600;line-height:1.1}
+.c3 .ft{height:36px;padding:3px 3px 3px 7px;display:flex;flex-direction:column;flex:none}
+.c3 .ft b{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:16px}
+.c3 .ft span{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--onv);margin-top:auto;line-height:14px}
+/* ---------- v4.0.0 sheet ---------- */
+.bs{position:absolute;left:0;right:0;bottom:0;z-index:21;background:var(--scl);border-radius:28px 28px 0 0;display:flex;flex-direction:column;overflow:hidden}
+.handle{height:48px;display:grid;place-items:center;flex:none}.handle i{width:32px;height:4px;border-radius:2px;background:rgba(67,71,78,.4)}
+.lt{display:flex;align-items:center;gap:16px;padding:8px 24px 8px 16px;min-height:64px}
+.lt .x{flex:1;min-width:0}.lt .a{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lt .b{font-size:12px;color:var(--onv);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lt .av{width:40px;height:40px;border-radius:20px}
+/* ---------- v4 room (U.2a) ---------- */
+.list{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:6px 0 8px}
+.under{position:absolute;left:0;right:0;bottom:0;background:var(--surface);z-index:21;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -2px 8px rgba(0,0,0,.08)}
+/* ---------- new switch panel ---------- */
+.sp{display:flex;flex-direction:column;background:var(--surface);color:var(--on);overflow:hidden}
+.sph{height:56px;display:flex;align-items:center;padding:4px 4px 0 16px;flex:none}
+.sph .t{flex:1;min-width:0;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sph .b{width:48px;height:48px;display:grid;place-items:center;color:var(--onv);flex:none}
+.sph .b.on{color:var(--primary)}
+.rf{height:32px;display:flex;align-items:center;gap:4px;padding:0 8px 0 6px;border-radius:16px;font-size:12px;color:var(--onv);flex:none;white-space:nowrap}
+.rf.err{color:var(--error)}
+.seg{height:40px;display:flex;align-items:center;gap:8px;padding:0 12px;flex:none;overflow:hidden;white-space:nowrap}
+.seg span{height:32px;border-radius:16px;padding:0 12px;display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--onv);box-shadow:inset 0 0 0 1px var(--ov);flex:none}
+.seg span.on{background:var(--sc);color:var(--osc);box-shadow:none;font-weight:600}
+.seg span small{font-size:12px;font-weight:500;opacity:.8}
+.now{height:36px;display:flex;align-items:center;gap:6px;padding:0 12px;background:var(--scl);flex:none;white-space:nowrap;overflow:hidden}
+.now b{font-size:12px;color:var(--primary);font-weight:600;flex:none}
+.now span{font-size:12px;color:var(--onv);overflow:hidden;text-overflow:ellipsis;min-width:0}
+.srch{height:48px;margin:0 12px 6px;border-radius:24px;background:var(--sch);display:flex;align-items:center;gap:8px;padding:0 6px 0 14px;flex:none;font-size:14px}
+.srch .x{margin-left:auto;width:36px;height:36px;display:grid;place-items:center;color:var(--onv)}
+.gr{flex:1;min-height:0;overflow:hidden;padding:6px;display:grid;gap:5px;align-content:start}
+.cd{background:var(--scl);border:1px solid rgba(195,199,207,.55);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.cd .cv{flex:1;min-height:0;position:relative;background:#333 center/cover}
+.cd .tl{position:absolute;left:6px;top:6px;display:flex;gap:4px}
+.cd .tr2{position:absolute;right:6px;top:6px}
+.bdg{height:18px;border-radius:9px;padding:0 6px;display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:700;color:#fff;background:rgba(0,0,0,.54);line-height:1;white-space:nowrap}
+.bdg.live{background:var(--live)}.bdg .mr{font-size:12px}
+.cd .bt{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 5px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.7));color:#fff;font-size:11px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd .ft{height:26px;padding:0 8px;display:flex;align-items:center;flex:none;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden}
+.cd .ft span{overflow:hidden;text-overflow:ellipsis}
+.cd.off .cv::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.54)}
+.cd.off .tl,.cd.off .bt{z-index:2}.cd.off .ft{color:var(--onv)}
+.lr{height:75px;display:flex;align-items:center;gap:12px;padding:6px 12px;flex:none}
+.lr .cv{width:112px;height:63px;border-radius:8px;background:#333 center/cover;position:relative;flex:none;overflow:hidden}
+.lr .cv .tl{position:absolute;left:4px;top:4px;display:flex;gap:3px}
+.lr .x{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.lr .a{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lr .b{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lr .c{font-size:12px;color:var(--onv);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lr.off .cv::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.54)}.lr.off .cv .tl{z-index:2}.lr.off .a,.lr.off .b{color:var(--onv)}
+.ls{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:2px 0}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--onv);font-size:14px;text-align:center;padding:0 24px}
+.empty .mr{font-size:40px;opacity:.6}.empty .ob{margin-top:6px;height:36px;padding:0 16px;border-radius:18px;box-shadow:inset 0 0 0 1px var(--ov);color:var(--primary);font-size:14px;font-weight:600;display:inline-flex;align-items:center}
+.lbl{position:absolute;z-index:50;font:600 13px 'Noto Sans SC';color:#fff;background:#2F5FA8;padding:3px 8px;border-radius:6px}
+.cnt{position:absolute;z-index:50;font:700 13px 'Noto Sans SC';color:#fff;background:#C2410C;padding:2px 8px;border-radius:10px}
+/* menus */
+.menu .it .rx,.menu .it .mr{font-size:20px;color:var(--onv)}
+.menu .it.dup{background:rgba(194,65,12,.12)}
+.menu .it small{display:block;font-size:12px;color:var(--onv)}
+.vtop.fsb{height:84px}
+.fs{background-image:url(.cache/img/274.jpg);background-position:center 40%}</style></head><body><div class="fs" style="--w:852px;--h:393px"><div class="syn">示意图片</div><div class="vtop"><div class="ib vic"><span class="mi" style="font-size:24px;">arrow_back</span></div><div class="time" style="margin:14px 6px 0 2px">21:36</div><div class="bat" style="margin-top:16px">76</div><div class="title">纽约时代广场，夜游直播</div><div class="ib vic"><span class="mr" style="font-size:24px;">swap_horiz</span></div><div class="ib vic"><span class="rx" style="font-size:21px;">&#xee05;</span></div><div class="ib vic"><span class="rx" style="font-size:24px;">&#xf235;</span></div><div class="ib vic"><span class="ci" style="font-size:24px">&#xe806;</span></div><div class="ib"><span class="ring" style="border-color:#fff"><i></i></span></div><div class="ib vic" style="background:rgba(255,255,255,.18);border-radius:24px"><span class="rx" style="font-size:24px;">&#xea42;</span></div></div><div class="vbot" style="padding:0 12px 4px"><div style="display:flex;align-items:center;height:48px;flex:none"><div class="ib vic"><span class="mr" style="font-size:28px;">pause</span></div><div class="ib vic"><span class="mr" style="font-size:24px;">refresh</span></div><div style="height:32px;border-radius:16px;display:flex;align-items:center;gap:3px;padding:0 12px 0 9px;font-size:13px;font-weight:500;background:rgba(255,255,255,.18);color:#fff;margin:0 4px;flex:none"><span class="rx" style="font-size:16px;">&#xeb7b;</span>已关注</div><div class="ib vic"><span class="dmk open"></span></div><div class="ib vic"><span class="dmk set"></span></div></div><div style="flex:1"></div><div style="display:flex;align-items:center;height:48px;flex:none"><div class="vchip" style="margin:0 3px">原画<span class="rx" style="font-size:18px;">&#xea4e;</span></div><div class="vchip" style="margin:0 3px">线路1<span class="rx" style="font-size:18px;">&#xea4e;</span></div><div class="ib vic"><span class="mr" style="font-size:21px;">screen_rotation_alt</span></div><div class="ib vic"><span class="rx" style="font-size:22px;">&#xea80;</span></div><div class="ib vic"><span class="mr" style="font-size:26px;">fullscreen_exit</span></div></div></div><div class="menu" style="left:624px;top:52px;width:220px"><div class="it"><span class="rx" style="font-size:20px;">&#xf20f;</span><span>定时关闭</span></div><div class="it"><span class="rx" style="font-size:20px;">&#xf2a2;</span><span>房间音量</span></div><div class="sep"></div><div class="it"><span class="rx" style="font-size:20px;">&#xeeaf;</span><span>获取直链</span></div><div class="it"><span class="rx" style="font-size:20px;">&#xf0fd;</span><span>分享</span></div><div class="it"><span class="mr" style="font-size:20px;">open_in_new</span><span>在哔哩哔哩打开</span></div></div></div></body></html>

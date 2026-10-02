@@ -4,7 +4,7 @@
 - 目标包：`packages/live_net`（纯 Dart，没有新依赖）
 - 依据：RFC 7932；参考实现 google/brotli 1.2.0（本机 `libbrotlicommon`、`libbrotlidec` 和 Debian 的 `python3-brotli` 1.2.0），官方测试集取自 google/brotli `d5d3f459`
 - 用途：
-  - 猫耳弹幕的帧是 Brotli（[E02.4](../../../E-直播平台/E02-其他国内平台/E02.4-猫耳FM/record.md) 末尾“升级落地（T02.U）”）；
+  - 猫耳弹幕的帧是 Brotli（[E02.4](../../../E-直播平台/E02-其他国内平台/E02.4-猫耳FM/record.md) 末尾“升级落地（E06 平台层升级）”）；
   - 哔哩哔哩弹幕 protover 3 是 Brotli，[D01.2](../../../D-弹幕/D01-平台弹幕协议/D01.2-哔哩哔哩弹幕/record.md) 因为没有解码器退回了 protover 2（zlib）。
 - 为什么自己写：pub 上的 `brotli` 0.6.0 要求 SDK `<3.0.0`，Dart 3.13 装不上；SDK 和工作区里都没有 Brotli 解码。
 

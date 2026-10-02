@@ -12,7 +12,7 @@
 - 参考：
   - 归档 v4（`archive/v4`，6ba709135）：`packages/live_danmaku/lib/src/sites/fc2live.dart`（`Fc2LiveProtocol`、`Fc2LiveConnector`）和它的运行时 `runtime/socket_connector.dart`；规格 `spec/sites/fc2live.md` 第 6、7 节；
   - 网页客户端：频道页加载的 `https://static-e.live.fc2.com/js/liveView.bundle.js?20260422` 和 `css/pc/livefc2-livePlayer.min.css?20260422`（2026-09-29 下载），见“网页客户端”；
-  - E03.13 和它的“升级落地（T02.U）”一节给 D01 的说明（授权、握手、心跳、历史评论、人数）；
+  - E03.13 和它的“升级落地（E06 平台层升级）”一节给 D01 的说明（授权、握手、心跳、历史评论、人数）；
   - pure_live_TV `e1cca224`：`lib/platforms/fc2live/fc2_site.dart:42` 仍是 `EmptyDanmaku`，没有可参考的实现；
   - 2026-09-29 的只读实测：匿名、直连，不登录、不发言，见“实测”。
 

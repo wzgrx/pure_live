@@ -32,7 +32,7 @@
 | `player/models/player_state.dart` | 14 | 留给 G02.1 | 会话状态 |
 | `player/core/playback_source.dart` | 41 | `source.dart` | `UrlPlaybackSource` → `LineSource`（带请求头、格式、租期），`OwnedPlaybackSource` → `RecipeSource` |
 | `player/core/playback_source_transport.dart` | 303 | `transport.dart`、`input.dart` | 事务规则不变；选路移到 `MediaRoute`，中继移到 `LoopbackRelay` |
-| `player/core/playback_header_resolver.dart` | 211 | 删除 | 请求头已经跟着线路走（E05.1、T02.x），播放器不再按平台写请求头 |
+| `player/core/playback_header_resolver.dart` | 211 | 删除 | 请求头已经跟着线路走（E05.1、E01～E03 各平台），播放器不再按平台写请求头 |
 | `player/core/line_fallback_manager.dart` | 38 | `fallback.dart` `LineFallback` | 修两处问题（见下） |
 | `player/core/engine_fallback_manager.dart` | 73 | `fallback.dart` `DecoderFallback` | 规则不变，对象换成解码方式 |
 | `player/core/player_error_classifier.dart` | 188 | `errors.dart` `NativeDiagnostic` | 不变 |
@@ -56,7 +56,7 @@ v3 调用方（`git grep` v3.2.11 `lib`）：`player_manager.dart`（26 处：�
 | 2 | 签名地址续签后，失败过的线路又被当成没试过 | `line_fallback_manager.dart:23` | 失败按完整 URL 记 | 按 `lineId`（CDN 代号）记，没有才用 URL |
 | 3 | 播放层依赖录制层，HLS 中继和三个配方输入都在 `recorder/services` | `playback_source_transport.dart:5`、`bigo_playback_input.dart:3` 等 | 中继最早为录制写，播放直接借用 | 中继和配方输入放进 `live_media`，录制（H01.1）反过来依赖它 |
 | 4 | 播放核心引 Flutter，不能用 `dart test` 跑、不能给命令行用 | `flv_splice_relay.dart:7`、`live_stream_geometry_hint.dart:3` | 用了 `debugPrint`、`@immutable` | 纯 Dart（`meta`），拼接事件交给调用方记日志 |
-| 5 | 请求头按平台写在播放器里，读全局单例和可变静态量 | `playback_header_resolver.dart:56,75,206` | 线路不带请求头 | live_core 的线路自带请求头（E05.1、T02.x），本模块删掉这层 |
+| 5 | 请求头按平台写在播放器里，读全局单例和可变静态量 | `playback_header_resolver.dart:56,75,206` | 线路不带请求头 | live_core 的线路自带请求头（E05.1、E01～E03 各平台），本模块删掉这层 |
 | 6 | 每个 FLV 中继各开一个本地服务器 | `flv_splice_relay.dart:359`、`flv_legacy_hevc_relay.dart:106` | 中继各自实现 | 一个 `LoopbackRelay` 服务所有输入，每个输入一个随机路径 |
 | 7 | codec 12 HEVC 只认 `.17app.co` 主机，快手、映客的 HEVC FLV 漏掉 | `flv_legacy_hevc_relay.dart:76` | 线路没有编码信息，只能猜主机 | 线路标了 `hevc` 就算，主机表保留作补充；改不改写由引擎能力决定 |
 | 8 | 续签拼接时旧连接常先送出两边共有的关键帧，切换推迟一个 GOP 甚至错过断开点 | `flv_splice_relay.dart` `_handover`（约 200～260 行） | 两条连接都在直播边缘，只等新连接找关键帧 | 用归档 v4 的拼接器：新连接开始找关键帧后，旧流在下一个关键帧前停住等它（最多 10 秒） |

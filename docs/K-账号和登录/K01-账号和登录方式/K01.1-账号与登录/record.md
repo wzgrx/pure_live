@@ -81,7 +81,7 @@ v3 其他打开本页的地方：设置的平台设置页（`platform_settings_p
 | 编号 | 本页 |
 |---|---|
 | 2-1 斗鱼“登录后强制续期” | 完成：斗鱼 Cookie 页的开关，读写设置 `douyuForceRenew`（J02.1，默认关），适配器每次取流时读取（I01.1 已接上），带说明 |
-| C-17 快手：配置 Cookie 后加“直播”搜索 | 入口已有（快手 Cookie 页，存进 `secrets`，`KuaishouSite` 已读取）；余下：有登录 Cookie 后验证快手直播搜索接口，再在平台层加搜索（T02.D2），搜索页的能力表跟着改 |
+| C-17 快手：配置 Cookie 后加“直播”搜索 | 入口已有（快手 Cookie 页，存进 `secrets`，`KuaishouSite` 已读取）；余下：有登录 Cookie 后验证快手直播搜索接口，再在平台层加搜索（国内平台完善第二轮），搜索页的能力表跟着改 |
 | C-22 网易 CC：登录后加入弹幕 | 入口完成：账号列表有 CC（`kSettingsAccount` + `cc`），Cookie 存进 `secrets`，状态写明“暂未用于请求”；余下：`CcSite`/CC 弹幕接上 `CookieVault`，用登录 Cookie 验证“登录后加入”（D01），通过后把平台表里 CC 的 `usedByRequests` 改成 true |
 
 ## 留给后续

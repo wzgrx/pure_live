@@ -14,9 +14,9 @@
 照 E01.1 哔哩哔哩：解析写成纯函数，请求编排单独一层，用样本对照 v3 的输出，差异逐条说明。
 
 - **接口和输出沿用 v3**：`LiveSite`、`LiveRoom` 等模型和 3.x 的 JSON 不变。v3 实现过的可选能力都保留：刷新（`LiveSiteRoomRefresher`）、录制详情（`LiveSiteRecordRoomResolver`）；另加 `LivePlayUrlResolver`（线路带请求头）、`LivePlayRecoveryResolver`（恢复时重新取流）和 `LiveSiteLinks`。
-- **请求照 v3**：同样的持久化查询哈希、变量和请求头（Chrome 137 的 UA、`Client-ID`、每个适配器一个 `Device-Id`、`Accept-Language: en-US`）；分区房间只看中文和韩语直播；推荐是 Just Chatting 分区；usher 用 v3 的全部参数。变化只有两处：详情换成一个原始 `user` 查询（差异 2），分类的各页合并成批量请求（差异 5）。（T02.U 已改：请求中文名、不按语言过滤、推荐改为全站热门、usher 声明编码，见文末“升级落地（T02.U）”。）
-- **解析照 v3 的取值**：图片经 `i2.wp.com`，列表封面带 `?&t=<秒>`，详情封面是头像，画质名称、id、排序和 v3 的 `parseMasterPlaylist` 一致。错误改为类型化，缺字段按空处理。（T02.U 已改：图片直连，直播中详情封面用截图，见文末。）
-- **取流**：先取播放令牌（`PlaybackAccessToken`），再请求 usher 的主播放列表。画质的 `data` 仍是 v3 的变体地址列表；取流时直接把它们变成线路，带上 v3 `PlaybackHeaderResolver` 里 Twitch 的请求头（UA、`Origin`、频道页作 `Referer`、用户 Cookie）。变体地址比 20 分钟的令牌活得长，线路不设租期；恢复时重新取令牌和播放列表。（T02.U 已改：媒体请求不再带用户 Cookie，线路带编码，见文末。）
+- **请求照 v3**：同样的持久化查询哈希、变量和请求头（Chrome 137 的 UA、`Client-ID`、每个适配器一个 `Device-Id`、`Accept-Language: en-US`）；分区房间只看中文和韩语直播；推荐是 Just Chatting 分区；usher 用 v3 的全部参数。变化只有两处：详情换成一个原始 `user` 查询（差异 2），分类的各页合并成批量请求（差异 5）。（E06 平台层升级 已改：请求中文名、不按语言过滤、推荐改为全站热门、usher 声明编码，见文末“升级落地（E06 平台层升级）”。）
+- **解析照 v3 的取值**：图片经 `i2.wp.com`，列表封面带 `?&t=<秒>`，详情封面是头像，画质名称、id、排序和 v3 的 `parseMasterPlaylist` 一致。错误改为类型化，缺字段按空处理。（E06 平台层升级 已改：图片直连，直播中详情封面用截图，见文末。）
+- **取流**：先取播放令牌（`PlaybackAccessToken`），再请求 usher 的主播放列表。画质的 `data` 仍是 v3 的变体地址列表；取流时直接把它们变成线路，带上 v3 `PlaybackHeaderResolver` 里 Twitch 的请求头（UA、`Origin`、频道页作 `Referer`、用户 Cookie）。变体地址比 20 分钟的令牌活得长，线路不设租期；恢复时重新取令牌和播放列表。（E06 平台层升级 已改：媒体请求不再带用户 Cookie，线路带编码，见文末。）
 - **会话**：用户的 Cookie 由构造参数注入的 `CookieVault` 提供，只随播放令牌请求发送（`Cookie` 和 `Authorization: OAuth <auth-token>`）；被拒（401 或完整性质询）就改匿名，并且在 Cookie 换掉之前不再发送。
 - **房间号保持请求时的写法**（大小写不变，关注的身份不变）；请求一律用它的小写形式。Twitch 不需要别的编号，所以没有 `TwitchRoomData`。
 - **弹幕**只输出 `TwitchDanmakuArgs`：频道登录名（小写），和同一份 Cookie 里的聊天登录（`login` 与 `auth-token` 都有时）；这正是 v3 的 `TwitchDanmaku.joinRoom` 自己去设置里读的东西。`toString` 仍是 v3 的 `danmakuData`（频道名），不含令牌。
@@ -88,7 +88,7 @@ TwitchSite(http, cookies: vault, gqlFallbacks: [androidSystemTls, browser]);
 | 5 | 分类合并成批量请求；第一轮失败整体报错 | 问题 12。按样本，v3 在桌面端要 71 次请求（标签 1 次、每个标签第一页 41 次、29 个满页标签的第 2 页各 1 次），现在 4 次；v3 断网时显示空标签，现在报错可重试。每个标签至多翻 50 页，游标重复也停（v3 没有上限） |
 | 6 | 分区房间、推荐的后续页被要求完整性令牌时，列表到此结束 | REG-TWITCH-001。v3 在桌面端报错，在 Android 上走 WebView；注入浏览器传输后这里同样能翻页 |
 | 7 | 推荐和分区的游标分开，游标表有上限 | 问题 9、10 |
-| 8 | 搜索第 2 页起直接为空，不发请求 | v3 的第 2 页重复第 1 页，界面去重后没有新卡片就停了，用户实际只看到第 1 页；现在看到的一样，只是少了两次无用的请求。真正的翻页已实现，开关是 `searchPaging`，默认关（见后续升级候选）。T02.U 起一律翻页，开关去掉了（8-1） |
+| 8 | 搜索第 2 页起直接为空，不发请求 | v3 的第 2 页重复第 1 页，界面去重后没有新卡片就停了，用户实际只看到第 1 页；现在看到的一样，只是少了两次无用的请求。真正的翻页已实现，开关是 `searchPaging`，默认关（见后续升级候选）。E06 平台层升级 起一律翻页，开关去掉了（8-1） |
 | 9 | 弹幕参数是登录名加同一份 Cookie 的聊天登录 | 问题 1、8。内容与 v3 连接时用的一致 |
 | 10 | 线路自带请求头；取流失败按原因报错 | 问题 7、15。v3 对不在播的房间返回空画质，现在是 `StreamUnavailable`（界面显示“暂时无法播放”） |
 | 11 | 恢复时重新取令牌和主播放列表；画质没有地址时也重新取 | 问题 7、16。v3 没有恢复能力，只会重用最初的地址 |
@@ -100,7 +100,7 @@ TwitchSite(http, cookies: vault, gqlFallbacks: [androidSystemTls, browser]);
 
 ## 保持 v3 行为、没有采用归档 v4 或上游做法的地方
 
-（下面的推荐、语言过滤、中文名、图片代理、详情封面和简介、`rerun`、`supported_codecs`、媒体请求头几条已在 T02.U 按用户的决定改掉，见文末“升级落地（T02.U）”；其余照旧。）
+（下面的推荐、语言过滤、中文名、图片代理、详情封面和简介、`rerun`、`supported_codecs`、媒体请求头几条已在 E06 平台层升级 按用户的决定改掉，见文末“升级落地（E06 平台层升级）”；其余照旧。）
 
 - **推荐仍是 Just Chatting 分区**（中文、韩语），不改成全站人数最多的 30 个直播（v4 的原始 `streams` 查询，样本 S03）。
 - **分区房间仍只看中文和韩语直播**。v4 去掉了语言过滤，那会改变列表内容。
@@ -120,7 +120,7 @@ TwitchSite(http, cookies: vault, gqlFallbacks: [androidSystemTls, browser]);
 
 ## 后续升级候选（待用户确认）
 
-（2026-09-28 用户已全部采用，编号 8-1～8-10，落地见文末“升级落地（T02.U）”。）
+（2026-09-28 用户已全部采用，编号 8-1～8-10，落地见文末“升级落地（E06 平台层升级）”。）
 
 - **搜索翻页**：把 `searchPaging` 打开，第 2 页起按频道游标翻（REG-TWITCH-002 的修正，已实现，有样本 S04-search-p2 测试）。搜索结果会变多。
 - **中文分类名**：`Accept-Language` 改为 zh-CN，分类、分区名变成中文（样本就是这样录的）。
@@ -179,7 +179,7 @@ TwitchSite(http, cookies: vault, gqlFallbacks: [androidSystemTls, browser]);
   - 取流：令牌和 usher 的请求、画质、线路、不在播、下播、不存在、恢复、没有地址时重取、会话的 401 和质询回退、媒体 Cookie、传输错误和取消；
   - 链接：移植 v3 的链接用例，pop-out 和嵌入播放器，Twitch 自己的页面，分享文本。
 
-## 升级落地（T02.U）
+## 升级落地（E06 平台层升级）
 
 - 日期：2026-09-29（E03.2）
 - 依据：[升级决定](../../../specs/UPGRADES.md) 的“统一原则”和本平台的 8-1～8-10；模型字段见 [E05.2](../../E05-平台框架和模型/E05.2-模型扩展/record.md)。

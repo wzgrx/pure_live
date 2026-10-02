@@ -33,7 +33,7 @@
 - **加入被拒就换令牌重连**：connect 或 subscribe 的回复带 `error`（令牌无效、过期、没有权限）时重连，下次握手自然取新令牌；连续第 4 次被拒以 `DanmakuClosed(connectionFailed, 'Chat refused: …')` 结束，加入成功一次就重新计数（次数同归档 v4 的 `maxRejections`；v4 从不清零，见差异 2）。收到拒绝也算收到消息，框架的 8 次上限管不到这种循环，所以要自己计数。
 - **不需要保留请求头大小写**：实测不带 `Origin`、UA 也能握手，用默认的 `dart:io` 握手，不用 `connectExactWebSocket`。请求头照归档 v4 和录制带 `Origin: https://www.pandalive.co.kr` 和平台层的 Chrome 140 UA。
 - **只上报聊天**（`bj`、`chatter`、`manager`、`support`）。平台的聊天流里没有醒目留言、付费留言，也没有在线人数；礼物（`SponCoin`、`ItemCoin`）、推荐、点赞收藏、入场、房间状态都不报（和 D01.2～D01.16 的范围一致，见差异 7）。
-- **在线人数的来源不变**：聊天流里没有观看人数（网页另外轮询 `cache-api` 的 `channel_user_count`，归档规格 §7.3），`audience.dart` 里 PandaTV 一项（列表里有在线人数，另有累计观看，T02.U 25-3）不用改。
+- **在线人数的来源不变**：聊天流里没有观看人数（网页另外轮询 `cache-api` 的 `channel_user_count`，归档规格 §7.3），`audience.dart` 里 PandaTV 一项（列表里有在线人数，另有累计观看，E06 平台层升级 25-3）不用改。
 
 ## 协议
 

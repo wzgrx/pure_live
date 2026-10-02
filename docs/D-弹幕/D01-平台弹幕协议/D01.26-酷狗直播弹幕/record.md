@@ -233,7 +233,7 @@ DanmakuRegistry({
 
 ## 平台层的改动
 
-- `kugoulive_api.dart`：新增 `KugouLiveDanmakuArgs(roomId)`；`chatNotice` 去掉“这里暂时看不到酷狗直播间的聊天。”（3.x 原文没有对照测试或迁移要用，不另留 `legacyChatNotice`：对照测试比的是冻结输出里的 3.x 公告，T02.U 已说明 3.x 存下的公告刷新时覆盖、不用迁移）。
+- `kugoulive_api.dart`：新增 `KugouLiveDanmakuArgs(roomId)`；`chatNotice` 去掉“这里暂时看不到酷狗直播间的聊天。”（3.x 原文没有对照测试或迁移要用，不另留 `legacyChatNotice`：对照测试比的是冻结输出里的 3.x 公告，E06 平台层升级 已说明 3.x 存下的公告刷新时覆盖、不用迁移）。
 - `kugoulive_site.dart`：进房和录制详情在直播中时带 `danmakuData: KugouLiveDanmakuArgs(roomId)`，不论取流回答是否能播（要登录、没有流的房间聊天照常）；未开播、没有场次、关注刷新不带。没有多发请求。
 - `audience.dart`：酷狗一项 `hasTotalViewers` 改为 true，注释写明弹幕的 `count`、`visited`（只改这一项）。
 - 对照测试：公告本来就在有意差异里（29-6），注释补上 D01.26；新增一个用例查参数。

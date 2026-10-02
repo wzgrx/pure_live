@@ -77,7 +77,7 @@ WebDAV Digest 已拆到 J04.1。
 | P9 / c9 合并 | YouTube（`youtube_api.dart:1191-1240`）和 PandaTV（`pandalive_api.dart:1017-1105`）各写了一遍 `#EXT-X-STREAM-INF` 的读法，属性解析也是两套 | `hls_master.dart` 加共用的宽松读法 `HlsStreamInf.read` 和 `HlsStreamInf.attributes`（严格、宽松两种），两个平台改用它；各自的规则（YouTube 整体拒绝、PandaTV 只丢坏的那一档）不变。唯一的行为差别：PandaTV 的 `STREAM-INF` 和地址之间夹了别的标签时不再丢掉这一档（同 YouTube） |
 | P10 / c10 补上 | FC2 画质探测开了控制连接，读完就关（`fc2live_site.dart:431-439`），播放再开一条；`live_media` 的 `Fc2RecipeOpener.adopt` 已能接手，平台层没有交出的出口 | `Fc2LiveSite(probeControl:)`：给了就把探测的控制连接交给它（它负责关），没给照旧关掉。控制连接里有全部档位的地址（`Fc2LiveApi.playlistFor`），接手的一方可以播任何一档 |
 | P11 / c11 补上 | `PlaybackPlan.start` 已能从指定位置开始（G01.1），但平台层不给起点 | `LivePlayUrlResolution.start`：c6 的轮播视频从 `play_time` 秒开始；播完按直播流结束处理，恢复时再取当时在轮播的那一个 |
-| P12 / c12 保留 | 租期是否切断连接 | LiveMe 已在 T02.U（21-8）实测：过期不断流，线路不带租期；TikTok 的 `expire` 是签发后约 14 天，只预取、不切断（`tiktok_api.dart:667-675`）。都不改，用已有测试确认 |
+| P12 / c12 保留 | 租期是否切断连接 | LiveMe 已在 E06 平台层升级（21-8）实测：过期不断流，线路不带租期；TikTok 的 `expire` 是签发后约 14 天，只预取、不切断（`tiktok_api.dart:667-675`）。都不改，用已有测试确认 |
 
 ## 测试和验证（第 2、4 条）
 

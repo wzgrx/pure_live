@@ -237,7 +237,7 @@ DanmakuRegistry({
 
 `audience.dart` 里 YouTube 仍是 `roomRealtime`（口径是在线人数，不用累计播放量），能力没有变，只在注释里补上了这个来源：`next` 回答里的 `videoViewCountRenderer` 和观看页、`updated_metadata` 的是同一个渲染器，弹幕连接加入时报一次 `LiveAudienceUpdate(onlineViewers)`。
 
-另外注意到：E03.10（23-2）以后，推荐和搜索的卡片也带着“N watching”在线人数，严格说已经是 `roomList`；那属于平台层，本模块没有改这个值，留给 T02.U 或 M13 核对。
+另外注意到：E03.10（23-2）以后，推荐和搜索的卡片也带着“N watching”在线人数，严格说已经是 `roomList`；那属于平台层，本模块没有改这个值，留给 E06 平台层升级 或 M13 核对。
 
 ## 新增的通用能力、依赖
 

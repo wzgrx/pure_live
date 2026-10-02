@@ -8,7 +8,7 @@
 - 参数：`live_core` 新增的 `JdLiveDanmakuArgs(liveId)`（`packages/live_core/lib/src/sites/jdlive/jdlive_api.dart`，只加）。
   - 进房（`getRoomDetail`）和录制详情里，直播中、不是仅限 App 的场次把它放进 `LiveRoom.danmakuData`（`JdLiveApi.room` 的 `withData`）；不多发请求：聊天只要场次号，进房本来就有。
   - 关注刷新、列表卡片、未开播、已结束、回放、暂停、仅限 App 的都没有参数。仅限 App 的场次能不能连聊天没有样本核实（E02.9 也没见过 `secret` 为 1 的回答），不给。
-  - 同时按协调要求改了房间公告：`JdLiveApi.chatNotice` 去掉“这里暂时看不到京东直播的聊天。”，只留人数说明。合并后协调者又把它改成“列表里的人数是累计观看；直播中连上弹幕后，显示的是正在观看的人数。”，因为弹幕报的是正在观看人数。3.x 原文没有测试或迁移用到（T02.U 改公告时就只在注释里留了原文），所以不加 `legacyChatNotice`。
+  - 同时按协调要求改了房间公告：`JdLiveApi.chatNotice` 去掉“这里暂时看不到京东直播的聊天。”，只留人数说明。合并后协调者又把它改成“列表里的人数是累计观看；直播中连上弹幕后，显示的是正在观看的人数。”，因为弹幕报的是正在观看人数。3.x 原文没有测试或迁移用到（E06 平台层升级 改公告时就只在注释里留了原文），所以不加 `legacyChatNotice`。
   - `audience.dart` 的京东直播一项改为 `roomRealtime`（见“在线人数”）。
 - 升级条目：28-6“聊天（弹幕）”。v3 没有京东直播聊天（`EmptyDanmaku`），这是新增功能，没有 v3 行为可对照。
 - 样本（都是本模块录制，`fixtures/jdlive/danmaku/`）：

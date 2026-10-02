@@ -64,7 +64,7 @@
 |---|---|---|
 | 1 | `api-live/user/room` 查了 80 多个公开账号（`@qvc`、`@hsn`、新闻、体育、购物、电台等） | 都没在播（`status 4` 或账号不存在）。为了测握手，从一个公开的直播存档站找了一个正在播的普通用户的直播间（81 人在线），只把它的直播间号当握手目标，账号和内容都不记录 |
 | 2 | `webcast.us.tiktok.com/webcast/im/fetch/`，网页端的参数，不签名，带或不带页面给的 `ttwid` | HTTP 403，正文为空；响应头里有 `x-ms-token` |
-| 3 | 同上，主机换成 `webcast.tiktok.com` | HTTP 200，`content-type: application/json`，正文为空（和 T02.U 测目录时 `webcast/feed` 空正文的拒绝方式一样） |
+| 3 | 同上，主机换成 `webcast.tiktok.com` | HTTP 200，`content-type: application/json`，正文为空（和 E06 平台层升级 测目录时 `webcast/feed` 空正文的拒绝方式一样） |
 | 4 | 2、3 再加上第 2 步下发的 `msToken`、`ttwid`，以及仓库算出的 `X-Bogus`（`DouyinSigner.xBogus(md5(查询串))`）或 `a_bogus`（`DouyinSigner.aBogus(查询串)`） | 与不签名时相同：美区 403 空正文，另一个主机 200 空正文 |
 | 5 | `webcast.us.tiktok.com/webcast/im/fetch/preview/`，不签名 | HTTP 403，正文为空 |
 | 6 | WebSocket 握手 `wss://webcast-ws.us.tiktok.com/webcast/im/ws_proxy/ws_reuse_supplement/?…`（也试了 `webcast-ws.tiktok.com`），不带 Cookie | 不升级，HTTP 200，`Handshake-Status: 417`，`Handshake-Msg: http: named cookie not present` |
@@ -110,7 +110,7 @@
 
 ## 新增的通用能力、依赖
 
-没有。没有改代码，没有移动 `douyin_sign.dart`（签名对不上，没有可共用的部分），没有新依赖，没有新样本。只改了三个文档：本记录、`docs/specs/UPGRADES.md` 的 22-7 行、`docs/PLAN.md` 第 6 节的 T06a.x 行。
+没有。没有改代码，没有移动 `douyin_sign.dart`（签名对不上，没有可共用的部分），没有新依赖，没有新样本。只改了三个文档：本记录、`docs/specs/UPGRADES.md` 的 22-7 行、`docs/PLAN.md` 第 6 节的 D01 各平台 行。
 
 ## 测试
 

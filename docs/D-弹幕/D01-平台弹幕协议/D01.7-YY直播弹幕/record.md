@@ -5,7 +5,7 @@
   - `packages/live_danmaku/lib/src/sites/yy.dart`：`YyDanmakuProtocol`（地址、请求头、时长、正文规则）、`YyDanmakuSession`（匿名握手和解码，不做 I/O）、`YyDanmakuConnection`（连接）；
   - `packages/live_danmaku/lib/src/sites/yy/packet.dart`：`YyPacketReader`、`YyPacketWriter`（小端包的读写，不导出）；
   - 框架新增 `packages/live_danmaku/lib/src/exact_websocket.dart`：`ExactWebSocket`、`connectExactWebSocket`，**保留请求头大小写的 WebSocket 握手，YY 和 SOOP 共用**（见下面一节）。
-- 参数：`live_core` 的 `YyDanmakuArgs`（E02.1：频道号 `topSid`、子频道号 `subSid`，短号房间已换成规范频道）。T02.U 的 6-7 起，未开播的房间进房时也带这个参数。
+- 参数：`live_core` 的 `YyDanmakuArgs`（E02.1：频道号 `topSid`、子频道号 `subSid`，短号房间已换成规范频道）。E06 平台层升级 的 6-7 起，未开播的房间进房时也带这个参数。
 - 样本：
   - `fixtures/yy/danmaku/S08-live`：真实录制（2026-09-27，频道 54880976，约 120 s，594 帧：31 帧发出、563 帧收到），来自归档。发出的是握手的 6 个包和 25 个 AP ping；收到的是匿名登录、AP 登录、加入频道的回答各 1 个，24 个 pong，536 个用户组消息：534 个是应用 103（礼物、进场之类，归档脱敏时已清空内容），2 个是应用 31 的聊天，正文都是 XML 包着的同一句投票通知。每帧一个包，没有多包帧；
   - `fixtures/yy/danmaku/S09-synthetic`：本模块补的合成帧（`cases.json`，38 组），覆盖录制里没有的：握手各步被拒、加入别的频道、乱序的回答、按 sid 推送和经路由转发的聊天、别的频道和应用、名字（没有、空白、前后空格）、附加项、表情代码、各种 XML 正文、坏包、截断、长度越界、失败之后的状态。编号接在 E02.1 的 S08 之后；
@@ -115,7 +115,7 @@ YY 和 SOOP 的聊天服务器只认浏览器那样写的握手：`dart:io` 把 
 
 ## 升级条目
 
-- **6-7 未开播的房间也给弹幕连接参数**：E02.1 已让进房的未开播房间（含短号）带 `YyDanmakuArgs`。本模块照 v3 的协议连接它们，不看开播状态：测试用样本 S05-page-offline 经 `YyApi.roomPage`、`YyApi.offlineRoom` 得到参数，连接后加入路由请求的是频道 85520900，加入后照常收聊天；实测见上（10 个未开播频道都能进）。一直被拒的频道不再无限重连（问题 2）。`docs/specs/UPGRADES.md` 的状态改为“完成（T02.U、D01.7）”。
+- **6-7 未开播的房间也给弹幕连接参数**：E02.1 已让进房的未开播房间（含短号）带 `YyDanmakuArgs`。本模块照 v3 的协议连接它们，不看开播状态：测试用样本 S05-page-offline 经 `YyApi.roomPage`、`YyApi.offlineRoom` 得到参数，连接后加入路由请求的是频道 85520900，加入后照常收聊天；实测见上（10 个未开播频道都能进）。一直被拒的频道不再无限重连（问题 2）。`docs/specs/UPGRADES.md` 的状态改为“完成（E06 平台层升级、D01.7）”。
 - 表里 YY 的其他条目都不涉及 D01。
 
 ## 登记方式

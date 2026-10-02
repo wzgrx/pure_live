@@ -93,7 +93,7 @@
 ### 在线人数
 
 - 637 的 `watchNumber` 和列表、`getRoomInfo` 里同名的 `watchNumber`（累计收听，REG-KILAKILA-003）不是一回事：它会上下波动，量级也不同，是“现在的收听人数”。
-- 它和主页卡片的 `onlineNumber`（T02.U 15-2 用作在线人数）变化一致，但数值不同，实测见下表；官网直播页开播时用直播信息的 `onlineNumber` 初始化“收听”，之后用 637 的 `watchNumber` 更新，所以直播间里显示的就是它。
+- 它和主页卡片的 `onlineNumber`（E06 平台层升级 15-2 用作在线人数）变化一致，但数值不同，实测见下表；官网直播页开播时用直播信息的 `onlineNumber` 初始化“收听”，之后用 637 的 `watchNumber` 更新，所以直播间里显示的就是它。
 
 | 直播 | 637 的 `watchNumber` | 主页 `onlineNumber` | `getRoomInfo` 的 `watchNumber`（累计） |
 |---|---|---|---|

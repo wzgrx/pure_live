@@ -42,7 +42,7 @@
 
 **游客会话**：`GET https://fm.missevan.com/api/user/info`，回答 `{"code":0,"info":{"user":null,"guest":{"user_id":0,"username":""},"websocket":["wss://im.missevan.com/ws"]}}`，响应头 `Set-Cookie: FM_SESS=<值>; max-age=259200`（另有 `FM_SESS.sig`，不需要）。只取 `Set-Cookie` 开头的 `FM_SESS=`，值只收 RFC 6265 的 cookie-octet（它要放进握手的 `cookie` 头）。
 
-**地址**：`args.url`，也就是详情的 `info.websocket[]`（`wss://im.missevan.com/ws?room_id=<房间号>`，T02.U 已检查过）。连接这边再检查一次，因为会话 Cookie 要发给这个主机：
+**地址**：`args.url`，也就是详情的 `info.websocket[]`（`wss://im.missevan.com/ws?room_id=<房间号>`，E06 平台层升级 已检查过）。连接这边再检查一次，因为会话 Cookie 要发给这个主机：
 
 - 必须是 `wss`、主机是 `missevan.com` 或其子域、没有用户信息，否则换成 `wss://im.missevan.com/ws?room_id=<房间号>`；
 - 没有 `room_id` 的补上：服务端对没有 `room_id` 的握手回 HTTP 400（实测；游客会话回答里列的正是这种地址）；
@@ -174,7 +174,7 @@ DanmakuRegistry({
 | # | 问题 | 位置（归档 v4） | 根因 | 处理 |
 |---|---|---|---|---|
 | 1 | 一帧的帧头写着几百字节，Brotli 流却能解出很大的数据（“解压炸弹”）时，v4 先全部解完再比长度，内存跟着涨 | `MissevanProtocol.text` | `brotli.decode` 没有上限；长度检查在解完之后 | 按帧头的长度设 `maxOutput`，超过就停（差异 6；Q01.2 的接口正为此设计） |
-| 2 | 详情里任何 `wss` 地址都会收到会话 Cookie；没有 `room_id` 的地址握手必然 400 | `MissevanConnector.plan` | 只检查了 scheme | 只认猫耳的主机、补 `room_id`（差异 7；T02.U 的参数已先检查一次） |
+| 2 | 详情里任何 `wss` 地址都会收到会话 Cookie；没有 `room_id` 的地址握手必然 400 | `MissevanConnector.plan` | 只检查了 scheme | 只认猫耳的主机、补 `room_id`（差异 7；E06 平台层升级 的参数已先检查一次） |
 | 3 | 一行的时间超出范围或粉丝牌名不是文字时整行丢失 | `_chat` | 没有逐字段容错 | 差异 4、5 |
 | 4 | 被拒后要等退避并提示“正在重连”，其实马上就能用新会话重开 | `runtime/socket_connector.dart` 的 `rejected` 分支 | 被拒和断线走同一条重连路径 | 差异 13 |
 

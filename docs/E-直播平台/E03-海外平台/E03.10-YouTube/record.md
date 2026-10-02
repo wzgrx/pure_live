@@ -152,7 +152,7 @@
 | 5 | 直播中但不能播放的直播显示为直播中，取流时报 `StreamUnavailable`/`RegionBlocked` | 显示为未开播 | 问题 11 |
 | 6 | 刷新关注不再下载约 1.4 MB 的观看页：只用 `player` 定状态，在线人数另取（如 `next` 回答里的 “N watching”） | 每次刷新 2 个请求、约 1.6 MB | 问题 17；对照笔记 `sub_B.md` 待补清单第 4 条 |
 
-> 2026-09-28 用户答复全部采用，落地见文末“升级落地（T02.U）”（23-1～23-6）。
+> 2026-09-28 用户答复全部采用，落地见文末“升级落地（E06 平台层升级）”（23-1～23-6）。
 
 ## 回归条目的覆盖
 
@@ -194,7 +194,7 @@
   - 目录和推荐不发请求，传输错误和状态码映射；
   - 链接（经 `LinkParser`）：视频链接不发请求，频道链接 1 个请求（v3 的请求头、不跟随跳转），未开播频道没有结果，跳转被重新解析，别的链接不识别；关注合并保留流数据，身份不变。
 
-## 升级落地（T02.U）
+## 升级落地（E06 平台层升级）
 
 - 日期：2026-09-29（E03.10）
 - 依据：[升级决定](../../../specs/UPGRADES.md) 的“统一原则”和本平台的 23-1～23-6（“落地方式”只有 23-5、23-6 写了，其余按上面“后续升级候选”的原文做）；模型字段按 [E05.2](../../E05-平台框架和模型/E05.2-模型扩展/record.md)。23-3（聊天）的连接属于 D01，这里只给出它要的参数。
@@ -208,9 +208,9 @@
 | 23-1 | **房间身份改成频道**：房间号是频道号 `UC…`（`UC` 加 22 位，`YouTubeApi.isChannelId`），`userId` 同样是频道号。`YouTubeApi.video` 给出的房间是视频所属的频道；链接在播时是这一场的观看页，不在播时是 `https://www.youtube.com/channel/<频道号>/live`（`YouTubeApi.roomLink`）。<br>- **进房、录制**：读频道的 `/live` 页。在播时它就是这一场的观看页（S07-channel-live），标题、频道头像、在线人数、开播时间、分区都在上面，再读 `player` 和主列表，共 3 个请求（与 v3 进房相同）；不在播时它是频道页，给出频道名、头像、简介（`YouTubeApi.channel`、`offlineRoom`），1 个请求；只有预告时再读预告的 `player`，2 个。`/live` 页点名的视频如果不属于这个频道，不算它的直播。YouTube 对不存在的频道号回 200 和“This channel does not exist.”（实测），没有频道信息，报 `NotFound`。<br>- **刷新**：见 23-6。<br>- **仍接受 3.x 的 11 位视频号**：进房读它的观看页和 `player`（v3 的请求），在播就返回频道的房间、放这一场；已结束、预告或普通视频时再读频道的 `/live` 页，因为频道可能正在播另一场。刷新读 `player`，在播再读 `updated_metadata`，否则再读 `navigation/resolve_url`。普通视频（不是直播）也换成它的频道（3.x 是 `notLive`）；不存在的视频仍是 `NotFound`。`resolveRoomId` 只换身份：频道号不发请求，视频号 1 个 `player` 请求，给 J02.1 迁移用。<br>- **同一频道同时有几场直播**很常见（S02 第 1 页 20 行里 Lofi Girl 占 8 行）：列表、搜索里一个频道只出一张卡（第一张，站点的顺序），卡片的链接是这一场。适配器记住卡片、精确搜索、进房给某个频道展示的那一场 30 分钟（构造参数 `broadcastLifetime`，0 关闭；最多 256 个频道）：这期间进这个频道的房间直接打开那一场（观看页、`player`、主列表，3 个请求），那一场已结束或不存在时再读频道的 `/live` 页。刷新和开播状态不用它。<br>- **画质数据**：`YouTubeRoomData` 加了 `channelId`，`videoId` 是进房时在播的那一场；线路的 `Referer` 仍是这一场的观看页。恢复只请求这一场的 `player`（和主列表）；这一场结束就报错，播放器重新取详情时跟到频道的下一场。<br>- **链接**：视频链接仍不发请求，得到视频号（进房时换成频道、打开这一场）；`channel/UC…`、`embed/live_stream?channel=UC…` 直接得到频道号，不发请求（v3 读 1.3 MB 的 `/live` 页找当前直播）；`@handle`、`c/<名>`、`user/<名>` 经链接解析的会话 POST 一次 `navigation/resolve_url`（约 1 KB），得到频道号；YouTube 不认识的 handle 回 404，没有结果 | 关注的是频道：频道下次开播还是这一个关注，关注页照常刷新；未开播时关注卡片显示频道名（和上一场的标题）。列表、搜索里一个频道一张卡，点开是卡上那一场。粘贴频道链接、`@handle` 能打开和关注频道。3.x 存下的视频号关注在 J02.1 迁移后换成频道（迁移前刷新不会合并，见“房间身份迁移规则”） | 平台层完成，余下 J02.1/M13 |
 | 23-2 | **推荐和目录**：WEB 客户端 `browse` 的“直播”频道页（`UC4R8DWoMoI7CAwX8_LjQHig`，`YouTubeApi.listing`）。只要在播的行（直播角标、`LIVE` 时长遮罩或“N watching”），已结束、预告的行不要；一个频道一张卡。这一页没有续页：第 1 页 1 个请求，之后的页为空、不发请求。S01：49 行，28 行在播，26 张卡。<br>**搜索**：精确引用（链接、`@handle`、频道号、裸视频号，`YouTubeLink.parseOrReference`）照旧查这一个，只有第 1 页；其余是带“直播”过滤器（`EgJAAQ%3D%3D`）的关键词搜索：第 N 页用第 N−1 页最后一个 `continuationItemRenderer` 的令牌（按关键词记，最多 16 个关键词），第 1 页重新开始，前面几页出过的频道不再出卡（跨页去重）。每页约 20 行，与 `pageSize` 无关；一页没有在播的行就没有下一页。`LiveSearchPaginationPolicy`：精确引用不翻页，关键词翻页。<br>3.x 把 3～30 个字符的裸名字当成 `@handle`（问题 15），现在是关键词（`LofiGirl`、`lofi` 按关键词搜）；11 个小写字母的词（`programming`）也是关键词；其余 11 位的词先当视频号查，查不到（`NotFound`）再按关键词搜。<br>**卡片**：房间号是频道号，标题、主播名、封面（这一场的缩略图）、频道头像（23-4）、在线人数（“N watching”）、直播中、链接是这一场的观看页；会员限定角标标 `subscribersOnly`，其他限制在卡片上看不出（留空）。缺视频号、频道号、标题或名字的在播行只跳过这一行，全部在播行都坏时 `ApiChanged`；`browse` 没有任何视频行时 `ApiChanged` | 推荐页有 YouTube 正在直播的频道；搜索任意关键词能找到直播并能翻页；输入 `@handle`、频道或视频链接仍直接找到那个频道 | 平台层完成，余下 M13 |
 | 23-3 | 平台层：在播的房间（进房、刷新、录制、搜索卡片）带 `danmakuData: YouTubeDanmakuArgs(roomId: 频道号, videoId: 这一场)`，不多发请求。D01 用 `YouTubeApi.webContext`、`apiUrl`、`apiHeaders` 请求 `next` 和 `live_chat/get_live_chat`（归档规格 §7，样本 `danmaku/S06-live`），付费留言按普通聊天行显示。`getDanmaku()` 仍是空的弹幕源 | 看不出变化；聊天在 D01 接入 | 平台层完成，余下 D01 |
-| 23-4 | 头像用频道头像：进房的观看页 `videoOwnerRenderer.thumbnail` 最大的一张（`yt3.ggpht.com`，S07 是 176 px）；未开播的频道页 `channelMetadataRenderer.avatar`（`yt3.googleusercontent.com`，头像允许这个主机，封面不允许）；列表卡片 `channelThumbnailSupportedRenderers`。刷新和只读 `player` 的地方没有频道头像，留空，合并时保留存下的 | 头像是频道头像，不再是视频截图 | 完成（T02.U） |
+| 23-4 | 头像用频道头像：进房的观看页 `videoOwnerRenderer.thumbnail` 最大的一张（`yt3.ggpht.com`，S07 是 176 px）；未开播的频道页 `channelMetadataRenderer.avatar`（`yt3.googleusercontent.com`，头像允许这个主机，封面不允许）；列表卡片 `channelThumbnailSupportedRenderers`。刷新和只读 `player` 的地方没有频道头像，留空，合并时保留存下的 | 头像是频道头像，不再是视频截图 | 完成（E06 平台层升级） |
 | 23-5 | 在播（`isLive` 或 `liveBroadcastDetails.isLiveNow`，且状态不是 `LIVE_STREAM_OFFLINE`）就是直播中，不管本客户端能不能播（3.x：受限的是封禁，不能播的是未开播）。受限类型（`YouTubeApi.restrictionOf`）：`OK` 为 `none`；私密 `private`；会员 `subscribersOnly`；年龄 `adult`；国家、地区 `regionBlocked`；付费、购买 `paid`；其他登录、内容确认 `needsLogin`；其余（`UNPLAYABLE`、`ERROR`）`unplayable`（按 `player` 的状态和原因文字；请求头是 `Accept-Language: en-US`，S10 的原因是英文。认不出的原因按状态码退回 `needsLogin` 或 `unplayable`，仍是直播中、仍报错）。进房时受限的直播不读主列表（2 个请求），`YouTubeRoomData.streamError` 记下原因，取画质时报：`regionBlocked` 为 `RegionBlocked`，`needsLogin`、`adult` 为 `NeedsLogin`，其余 `StreamUnavailable`（写明种类和 YouTube 的原因），都不发请求。不是直播的受限视频仍是封禁（3.x），带受限类型；已结束、预告的受限直播是未开播 | 受限直播显示为直播中，关注分组在直播中，卡片可以标出受限（M13），播放时说明原因 | 平台层完成，余下 M13 |
-| 23-6 | 刷新不读观看页：`navigation/resolve_url`（频道的 `/live` 路径，约 1 KB）找到这一场，`player`（约 165 KB）给状态、标题、封面、受限类型，在播时 `updated_metadata`（3～160 KB，S13 是 Lofi Girl 的 157 KB，大半是周边商品）给在线人数（“1,331 watching now”，`YouTubeApi.viewers`）。在播 3 个请求（v3 2 个：约 1.4 MB 的观看页和 `player`），多的一个就是条目的“在线人数另取”；未开播 1 个，只有预告 2 个。在线人数请求失败时人数留空，不让刷新失败（取消照常抛出）。刷新没有头像、分区、开播时间（只有观看页有），都留空，合并时保留存下的；进房时读完整页面，更新标题和头像（落地方式）。开播状态（`getLiveStatus`）不要人数：1～2 个请求 | 刷新关注快得多、省流量（在播约 0.2～0.3 MB，v3 约 1.6 MB） | 完成（T02.U） |
+| 23-6 | 刷新不读观看页：`navigation/resolve_url`（频道的 `/live` 路径，约 1 KB）找到这一场，`player`（约 165 KB）给状态、标题、封面、受限类型，在播时 `updated_metadata`（3～160 KB，S13 是 Lofi Girl 的 157 KB，大半是周边商品）给在线人数（“1,331 watching now”，`YouTubeApi.viewers`）。在播 3 个请求（v3 2 个：约 1.4 MB 的观看页和 `player`），多的一个就是条目的“在线人数另取”；未开播 1 个，只有预告 2 个。在线人数请求失败时人数留空，不让刷新失败（取消照常抛出）。刷新没有头像、分区、开播时间（只有观看页有），都留空，合并时保留存下的；进房时读完整页面，更新标题和头像（落地方式）。开播状态（`getLiveStatus`）不要人数：1～2 个请求 | 刷新关注快得多、省流量（在播约 0.2～0.3 MB，v3 约 1.6 MB） | 完成（E06 平台层升级） |
 
 ### 按统一原则补的
 

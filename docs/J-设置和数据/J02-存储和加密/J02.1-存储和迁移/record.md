@@ -114,7 +114,7 @@
 | B-13 | 新设置 `youtubeShowAllChat`（默认关） |
 | 6-5 | 关注分区只增删、不被分类页的数据覆盖，3.x 存的 `shortName` 保留 |
 | 9-4、31-4、20-1、33-1 | 分区 id 不变，不需要迁移（核对了各平台记录） |
-| C-17、C-22 | 密钥库按平台存 Cookie（任何平台 id，含 `cc`、`kuaishou`），余下验证和接入在 T02.D2/M5 |
+| C-17、C-22 | 密钥库按平台存 Cookie（任何平台 id，含 `cc`、`kuaishou`），余下验证和接入在 国内平台完善第二轮/M5 |
 | m13_notes：FC2 等“聊天尚待接入”公告 | 导入时清掉（`LegacyRules.isStaleNotice`） |
 
 ## 留给其他模块

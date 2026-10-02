@@ -5,7 +5,7 @@
 - 参数：`live_core` 的 `HuyaDanmakuArgs`（E01.3）：主播 UID、topSid、subSid，另带 `superChats`，由 `HuyaSite` 用自己的 HTTP 客户端读头条留言板（topSid 为 0 时为空）。回放和下播的房间没有弹幕参数，同 v3。
 - 样本：
   - `fixtures/huya/danmaku/S11-live`：真实录制（2026-09-27，房间 998，主播 UID、topSid、subSid 都是 294636272，约 40 s，`frames.jsonl` 共 265 行：2 帧发出、262 帧收到，另 1 行是录制工具请求的头条留言板 HTTP 回答，不是 WebSocket 帧），来自归档。收到的帧里有命令 7（单条推送）的 110 条聊天和 uri 6501、6110、6211 等，命令 22（分组推送）的 2 条热度（8006）和 uri 6111、6892、7708 等，以及注册回应（17）和心跳回应（21）。没有头条通知（2001314），也没有带事件 id 的聊天；
-  - `fixtures/huya/danmaku/S16-synthetic`：本模块补的合成帧（`cases.json`，22 组），覆盖录制里没有的分组推送聊天、各种颜色、热度、头条通知、缺字段、别的分组、未知的 uri 和命令、坏包、截断和非 Tars 数据。编号接在 T02.U 的 S15 之后；
+  - `fixtures/huya/danmaku/S16-synthetic`：本模块补的合成帧（`cases.json`，22 组），覆盖录制里没有的分组推送聊天、各种颜色、热度、头条通知、缺字段、别的分组、未知的 uri 和命令、坏包、截断和非 Tars 数据。编号接在 E06 平台层升级 的 S15 之后；
   - 两个目录的 `expected.json` 都由 `fixtures/huya/danmaku/legacy_expected.dart` 生成：它把 v3 `HuyaDanmaku` 的解码代码（`heartbeatData`、`getJoinData`、`decodeMessage`、`_decodePush` 和六个 `HY*` 结构）和 v3 的 Tars 编解码（`pkg/tars/codec`）原样搬进独立程序，只把日志换成标准错误输出（Tars 读取器的调试日志不输出）、回调换成列表、2001314 触发的留言板补拉换成计数，模型删到只剩字段。合成帧也用 v3 的 `TarsOutputStream` 写出，结果里带上帧的字节。运行：`dart run fixtures/huya/danmaku/legacy_expected.dart`（仓库根目录）。
 - 参考：
   - v3：`legacy/lib/core/danmaku/huya_danmaku.dart`、`pkg/tars/codec/`、`core/common/web_socket_util.dart`、`core/site/huya/huya_site.dart`（`getDanmaku`）、`core/site/huya/huya_utils.dart`（`getHuyaSuperChatMessageList`）、`modules/live_play/controllers/`（醒目留言的去向），测试 `test/huya_danmaku_protocol_test.dart`（8 个用例）；
@@ -133,7 +133,7 @@ pure_live_TV `e1cca224` 的虎牙弹幕与 v3 基本相同：提示文字换成�
 
 ## 升级条目
 
-`docs/specs/UPGRADES.md` 里虎牙只有 3-1（回放），不涉及 D01。T02.U 记录已说明回放房间不给弹幕参数，同 v3。
+`docs/specs/UPGRADES.md` 里虎牙只有 3-1（回放），不涉及 D01。E06 平台层升级 记录已说明回放房间不给弹幕参数，同 v3。
 
 ## 测试
 

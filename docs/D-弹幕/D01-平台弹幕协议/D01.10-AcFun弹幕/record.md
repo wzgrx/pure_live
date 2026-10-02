@@ -6,7 +6,7 @@
   - `AcfunDanmakuProtocol`：分帧、加解密、推送解码；
   - `AcfunDanmakuLink`：一条连接上的序号、会话密钥和要发的帧。
   - 后两者都不做 I/O。
-- 参数：`live_core` 的 `AcfunDanmakuArgs`，E02.3 已给出，T02.U 的 10-4 核对过。
+- 参数：`live_core` 的 `AcfunDanmakuArgs`，E02.3 已给出，E06 平台层升级 的 10-4 核对过。
   - 进房时 `AcfunSite.getRoomDetail` 把它放进 `LiveRoom.danmakuData`；
   - 其中的 `refresh` 是 `AcfunSite.danmakuArgs`：新访客会话加新的 `startPlay`。
   - 本模块没有改 `live_core`。
@@ -118,7 +118,7 @@ DanmakuRegistry({
 - 不需要 HTTP 客户端或 Cookie：`AcfunDanmakuArgs` 自带访客会话，`refresh` 绑定 `AcfunSite` 自己的 HTTP 客户端。AcFun 全程匿名，v3 也没有它的 Cookie 设置。
 - `connector` 可选，默认 `dart:io` 的握手，不需要保留大小写的 `connectExactWebSocket`（实测，见下）。
 - `policy`、`now`（心跳时间戳）、`random`（IV）只给测试用，应用不传。
-- 参数来自 `getRoomDetail`。录制详情（`getRoomDetailForRecording`）和关注刷新不给弹幕参数，与 E02.3 相同。付费直播进房时没有票据，也就没有弹幕参数（T02.U）。
+- 参数来自 `getRoomDetail`。录制详情（`getRoomDetailForRecording`）和关注刷新不给弹幕参数，与 E02.3 相同。付费直播进房时没有票据，也就没有弹幕参数（E06 平台层升级）。
 
 ## 与归档 v4 的对照
 

@@ -11,7 +11,7 @@
 
 ## 做法
 
-> T02.U（2026-09-29）按用户批准的升级改了画质（“原画 + 720p/480p”、平台现在的 CDN 作备用线路、H.265 单列）、已结束房间的回放、付费和封禁的状态、推荐的会话、简介、http 链接、“FLV 原始线路”的 http、公告和昵称兜底，另按统一原则补了开播时间和受限类型，并修好了 v3 打不开的预告房间，见文末“升级落地（T02.U）”（30-1～30-10）。本节以下是 E02.11 时的做法。
+> E06 平台层升级（2026-09-29）按用户批准的升级改了画质（“原画 + 720p/480p”、平台现在的 CDN 作备用线路、H.265 单列）、已结束房间的回放、付费和封禁的状态、推荐的会话、简介、http 链接、“FLV 原始线路”的 http、公告和昵称兜底，另按统一原则补了开播时间和受限类型，并修好了 v3 打不开的预告房间，见文末“升级落地（E06 平台层升级）”（30-1～30-10）。本节以下是 E02.11 时的做法。
 
 - **接口照 v3**：`LiveSite` 和 v3 实现过的全部可选能力——原生目录分页（`LiveSiteDirectoryPager`）、目录说明（`LiveDirectoryNotice`，键 `baidulive_directory_scope`）、可取消的搜索（`LiveCancellableSearch`）、关注刷新（`LiveSiteRoomRefresher`）、录制详情（`LiveSiteRecordRoomResolver`）、带实际画质的取流（`LivePlayUrlResolver`，给出线路）、恢复时重新取流（`LivePlayRecoveryResolver`），另加 `LiveSiteLinks`。3.x 的 JSON 不变。
 - **匿名，照 v3**：所有请求以 `baidulive` 的名义发出（代理路由由应用按平台注入），带 v3 的请求头（桌面 Chrome 140 UA、`Accept: application/json, text/plain, */*`、`Origin`/`Referer` 为 `live.baidu.com`），**不跟随跳转**，不带 Cookie。v3 没有百度的登录和 Cookie 设置，所以不注入 `CookieVault`，也没有账号请求。
@@ -69,8 +69,8 @@
 | 10 | 路径或参数解不开的链接（如 `%FF`）让 `parseRoomId` 抛 `FormatException`，搜索和链接导入直接失败 | L:25、L:29 | `pathSegments`、`queryParameters` 解码失败没有捕获 | 不算链接 |
 | 11 | 平台层调用界面翻译（平台名、两条公告、两种画质名、分区的兜底名） | S:39、S:136-137、S:147、S:269-280 | `i18n` 写在适配器里 | 用 3.x 的中文作默认文字（`BaiduLiveApi.siteName`、`chatNotice`、`restrictedNotice`、`qualityName`、`directoryScope`），界面的翻译在 M13 |
 | 12 | 调用方传错参数（别的平台或类型的分区、不在分类里的频道、不是房间号的房间）报平台错误 | S:70-81、S:210-215、A:243-256 | 本地校验失败用 `identity` | `ArgumentError`，不发请求；不是房间号的房间 `NotFound`，不发请求 |
-| 13 | `flv-live.bdstatic.com` 的 https 证书与主机名不符，“FLV 原始线路”的第二条线路在校验证书时打不开（http 可以） | A:412-424 | 平台给的就是 https；v3 只把 http 升级成 https | 按 v3 保留（第一条线路能播）；播放层是否校验证书见“放到其他模块的部分”（T02.U 30-9 已改用 http） |
-| 14 | 预告房间（新闻频道里 `live_status` 0 的卡片）点进去、按房间号搜索都是加载失败（T02.U 实测时发现，当时没有样本） | A:344-347 | 预告的房间命令是另一种形状：没有 `error_code`（`template` 是 `preview`，字段在顶层），v3 把缺失的 `error_code` 当作未知错误 | T02.U 已改：按预告的形状读，显示为未开播，见文末“升级落地（T02.U）”的“容错” |
+| 13 | `flv-live.bdstatic.com` 的 https 证书与主机名不符，“FLV 原始线路”的第二条线路在校验证书时打不开（http 可以） | A:412-424 | 平台给的就是 https；v3 只把 http 升级成 https | 按 v3 保留（第一条线路能播）；播放层是否校验证书见“放到其他模块的部分”（E06 平台层升级 30-9 已改用 http） |
+| 14 | 预告房间（新闻频道里 `live_status` 0 的卡片）点进去、按房间号搜索都是加载失败（E06 平台层升级 实测时发现，当时没有样本） | A:344-347 | 预告的房间命令是另一种形状：没有 `error_code`（`template` 是 `preview`，字段在顶层），v3 把缺失的 `error_code` 当作未知错误 | E06 平台层升级 已改：按预告的形状读，显示为未开播，见文末“升级落地（E06 平台层升级）”的“容错” |
 
 另外几处按 v3 保留：
 
@@ -148,7 +148,7 @@
 
 ## 后续升级候选（由用户决定）
 
-（2026-09-28 用户已全部采用，编号 30-1～30-10，落地见文末“升级落地（T02.U）”。）
+（2026-09-28 用户已全部采用，编号 30-1～30-10，落地见文末“升级落地（E06 平台层升级）”。）
 
 | # | 内容 | 现状（v3） | 依据 |
 |---|---|---|---|
@@ -206,7 +206,7 @@
   - 错误映射（传输失败、取消、各状态码）；
   - 链接（经 `LinkParser`）：分享文本里的房间页、PC 播放页、分享页，别的页面、主机和 http 不识别，没有短链，不发请求。
 
-## 升级落地（T02.U）
+## 升级落地（E06 平台层升级）
 
 - 日期：2026-09-29（E02.11）
 - 依据：[升级决定](../../../specs/UPGRADES.md) 的“统一原则”和本平台的 30-1～30-10（“落地方式”只有 30-1、30-4、30-9 有内容，其余按上面“后续升级候选”的原文做）；模型字段按 [E05.2](../../E05-平台框架和模型/E05.2-模型扩展/record.md)。30-1 按落地方式采用“原画 + 720p/480p”，平台现在的 CDN 作同档备用线路。30-3（弹幕）属于 D01，本任务不做。
@@ -226,10 +226,10 @@
 | 30-3 | 本任务不做（D01）。平台层没有新增数据，见“留给其他模块” | 无 | 待做（不变） |
 | 30-4 | 已结束（`status` 3、卡片 `live_status` 3）改为回放（v3 显示未开播）。录像取 `replay_list` 里第一个有录像的条目（`BaiduLiveApi.replayVariants`）：`videoInfo.ext.clarityUrl` 每项一档（H.264，名字用平台的 `title`，没有时用 `key`，id `replay:<key>`），没有清晰度时用 `video`（“回放”，id `replay`）；再加 `video_hevc`（JSON 文本，键是清晰度，H.265，名字 `<键> · H.265`，id `replay:<键>:hevc`）。录像地址要是 `*.bdstatic.com` 上、路径在这个房间的流目录（`_<房间号>/`）下的 m3u8（http 改 https，`BaiduLiveApi.replayUrl`）。每档一条 HLS 线路，带媒体请求头，线路编号是主机名，没有租期。<br>有录像：回放、受限类型 `none`，关注分组在回放；拿不到录像：回放 + `unplayable`，分组归入未开播，取流报 `StreamUnavailable`（without a recording）。列表卡片：`play_url` 是合规的录像地址时 `none`，否则 `unplayable`。付费、封禁的回放分别是 `paid`、`unplayable`（30-5）。已结束房间残留的 `url_list` 仍然不播（归档规格 §10）。开播状态查询对回放返回未开播 | 关注和新闻频道里已结束的直播显示为回放，点进去能从头看这一场的录像：“标清”（S02-room-ended 那场实际是 720p 的 H.264 转码）和“720p · H.265”，默认 H.264。拿不到录像的归入未开播并标“不可播放”（M13） | 平台层完成，余下 G/M13 |
 | 30-5 | 付费（`has_pay_service`）、禁止播放（`is_forbidden_url`）、封禁（`ban_status`）不再显示“未知”，按 `status` 显示（`BaiduLiveState.restricted` 去掉）：受限类型付费是 `paid`，禁止播放或封禁是 `unplayable`（两者都有时 `unplayable`），只在直播中和回放时填。取流报 `StreamUnavailable`，说明里写 `(paid)` 或 `(unplayable: forbidden or banned)`（E05.2 的受限类型表；E02.11 付费报 `NeedsLogin`，本平台没有登录）。开播状态查询对受限的直播返回在播（E02.11 报 `NeedsLogin`、`StreamUnavailable`）。卡片只有 `has_pay_service`：付费是 `paid`，是 0 是 `none`，没有这个字段不填 | 付费、封禁的直播从“待定”变成直播中，关注分组在直播中，卡片标“付费”“不可播放”（M13），播放时说明原因。实测 70 张卡片、64 个房间命令都没有付费和封禁，平时看不出变化 | 平台层完成，余下 M13 |
-| 30-6 | 推荐（`getRecommendRooms`、不带分区的 `getDirectoryPage`）用自己的推荐流会话，“推荐”分区（`rec` 频道）用另一个，两者都请求 `tab=rec`；v3 共用一个，一边翻到第 1 页，另一边的会话就重新开始。同一个会话再要一次它最后给出的那一页时，直接重放上次的结果（同一个 `LiveDirectoryPage`），不发请求；v3 回空页，列表就此结束。第 1 页照旧每次开新会话（下拉刷新）；跳页照旧为空 | 推荐页和“推荐”分区来回切换时，已经翻到的位置不再被打断；界面重复加载同一页时不会提前结束 | 完成（T02.U） |
-| 30-7 | 进房、刷新、录制、按房间号搜索的房间带简介：`video.description`（空时不写）；预告房间取它自己的 `description` | 房间页显示直播简介（实测 60 个在播房间 59 个有简介） | 完成（T02.U） |
-| 30-8 | 房间链接也认 http（`BaiduLiveApi.roomIdFromUrl`）：http 用 80 端口、https 用 443 端口（写明默认端口也认），其余规则不变。搜索、进房、链接导入都认 | 粘贴 `http://live.baidu.com/m/room/…` 能找到房间（v3 没有结果） | 完成（T02.U） |
-| 30-9 | `flv-live.bdstatic.com` 的地址改用 http（`BaiduLiveApi.mediaUrl`）：它的 https 证书与主机名不符，http 实测能播。其他 `bdstatic.com` 主机仍把 http 改成 https（v3），`lss-user` 保持平台给的写法 | 原画（v3 的“FLV 原始线路”）的第二条线路能打开了 | 完成（T02.U） |
+| 30-6 | 推荐（`getRecommendRooms`、不带分区的 `getDirectoryPage`）用自己的推荐流会话，“推荐”分区（`rec` 频道）用另一个，两者都请求 `tab=rec`；v3 共用一个，一边翻到第 1 页，另一边的会话就重新开始。同一个会话再要一次它最后给出的那一页时，直接重放上次的结果（同一个 `LiveDirectoryPage`），不发请求；v3 回空页，列表就此结束。第 1 页照旧每次开新会话（下拉刷新）；跳页照旧为空 | 推荐页和“推荐”分区来回切换时，已经翻到的位置不再被打断；界面重复加载同一页时不会提前结束 | 完成（E06 平台层升级） |
+| 30-7 | 进房、刷新、录制、按房间号搜索的房间带简介：`video.description`（空时不写）；预告房间取它自己的 `description` | 房间页显示直播简介（实测 60 个在播房间 59 个有简介） | 完成（E06 平台层升级） |
+| 30-8 | 房间链接也认 http（`BaiduLiveApi.roomIdFromUrl`）：http 用 80 端口、https 用 443 端口（写明默认端口也认），其余规则不变。搜索、进房、链接导入都认 | 粘贴 `http://live.baidu.com/m/room/…` 能找到房间（v3 没有结果） | 完成（E06 平台层升级） |
+| 30-9 | `flv-live.bdstatic.com` 的地址改用 http（`BaiduLiveApi.mediaUrl`）：它的 https 证书与主机名不符，http 实测能播。其他 `bdstatic.com` 主机仍把 http 改成 https（v3），`lss-user` 保持平台给的写法 | 原画（v3 的“FLV 原始线路”）的第二条线路能打开了 | 完成（E06 平台层升级） |
 | 30-10 | 公告改成用户看得懂的话（多语言键不变，M13 按界面语言显示）：`baidulive_chat_notice` 从“百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。”改为“这里暂时看不到百度直播间的聊天。人数是正在观看的人数，主播的粉丝数另外显示。”；`baidulive_restricted_notice` 从“该百度直播受付费或访问范围限制，界面保持未知状态，不将其显示成未开播。”改为“这场直播需要付费观看或受到平台限制，暂时不能在这里播放。”（付费、禁止播放或封禁时加在前面，同 v3）；目录说明 `baidulive_directory_scope` 的中文默认文字（`BaiduLiveApi.directoryScope`）改为“这里是百度直播官网的推荐和各个频道，往下翻会继续加载。搜索只能输入房间号，或粘贴百度直播的直播间、分享链接，还不能按主播名字搜索。”<br>昵称兜底 `Baidu Live` 去掉（`BaiduLiveApi.anonymousName` 删除）：没有名字时 `nick` 为空，标题没有时用昵称、昵称也没有时为空（v3 两处都写 `Baidu Live`）；`enrich` 按“是否为空”补（v3 按“是否等于 `Baidu Live`”）。界面用 `displayNick(本地化的平台名)` 显示（E05.2） | 公告不再是开发说明。没有名字的房间显示界面语言的平台名（M13）；关注刷新不再把存下的主播名、标题换成 `Baidu Live` | 平台层完成，余下 M13 |
 
 ### 按统一原则补的

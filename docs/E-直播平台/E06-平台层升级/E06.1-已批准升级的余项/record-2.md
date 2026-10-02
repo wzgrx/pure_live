@@ -20,7 +20,7 @@
 | c9 | YouTube、PandaTV 主列表读法合并 | 完成 | `hls_master.dart` 加 `HlsStreamInf`：`read`（每个 `#EXT-X-STREAM-INF` 和后面的地址行，中间的别的标签跳过）、`attributesOf(strict:)`（严格：YouTube 和 `HlsMasterPlaylist` 的写法；宽松：PandaTV 的写法）。两个平台和 `HlsMasterPlaylist` 的属性解析都改用它。行为差别只有一处：PandaTV 的变体和地址之间夹了别的标签时不再丢掉这一档 |
 | c10 | FC2 画质探测交出控制连接 | 平台层完成 | `Fc2LiveSite(probeControl:)`：给了就把探测时开的控制连接交给它（它负责关），没给照旧关掉。连接是按 `auto` 开的，`playlists` 里有全部档位，用 `Fc2LiveApi.playlistFor` 可以播任何一档。`live_media` 的接手方式见“交给界面”7 |
 | c11 | 哔哩哔哩轮播从 `play_time` 开始 | 平台层完成 | `LivePlayUrlResolution.start`（c6 的轮播视频为 `play_time` 秒；负数、缺失从头开始）；`normalized()` 保留它和 `appliedQuality` |
-| c12 | LiveMe、TikTok 租期是否断开 | 保留 | LiveMe 在 T02.U（21-8）已实测：过期不断流，线路不带租期；TikTok `expire` 约 14 天，只预取不切断。已有测试：`liveme_api_test.dart` “no lease (21-8)”、`tiktok_api_test.dart` 线路租期 `cutsConnection` 为假 |
+| c12 | LiveMe、TikTok 租期是否断开 | 保留 | LiveMe 在 E06 平台层升级（21-8）已实测：过期不断流，线路不带租期；TikTok `expire` 约 14 天，只预取不切断。已有测试：`liveme_api_test.dart` “no lease (21-8)”、`tiktok_api_test.dart` 线路租期 `cutsConnection` 为假 |
 
 ## 根因
 

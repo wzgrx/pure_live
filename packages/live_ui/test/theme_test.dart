@@ -41,6 +41,7 @@ void main() {
     test("keeps the app bar 3.x showed (main.dart's override) and its page transitions", () {
       final theme = const LiveTheme(primaryColor: Colors.teal).light;
       expect(theme.appBarTheme.surfaceTintColor, Colors.transparent);
+      // The platform's alignment; the pages 3.x centred use centredPageTitle.
       expect(theme.appBarTheme.centerTitle, isNull);
       expect(theme.pageTransitionsTheme, appPageTransitionsTheme);
       expect(theme.splashFactory, NoSplash.splashFactory);

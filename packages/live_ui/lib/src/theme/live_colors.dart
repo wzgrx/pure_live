@@ -197,6 +197,17 @@ abstract final class LiveSemanticColors {
   /// The warning colour for [brightness].
   static Color warning(Brightness brightness) => brightness == Brightness.dark ? warningDark : warningLight;
 
+  /// The ground of a reminder bar (mobile data, docs/ui/compare/U.1c c8),
+  /// light themes; its text is the theme's `onSurface`.
+  static const Color warningContainerLight = Color(0xFFFFF4E5);
+
+  /// [warningContainerLight] in dark themes.
+  static const Color warningContainerDark = Color(0xFF3A2A0E);
+
+  /// The reminder bar's ground for [brightness].
+  static Color warningContainer(Brightness brightness) =>
+      brightness == Brightness.dark ? warningContainerDark : warningContainerLight;
+
   /// A warm container next to the theme's primary container (IPTV guides
   /// beside playlists, docs/ui/compare/U.9), light themes.
   static const Color warmContainerLight = Color(0xFFFFDDB8);

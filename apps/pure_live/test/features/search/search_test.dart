@@ -738,7 +738,17 @@ void main() {
       expect(find.descendant(of: current, matching: find.byIcon(AppIcons.selected)), findsOneWidget);
       final scheme = Theme.of(tester.element(current)).colorScheme;
       expect(tester.widget<Text>(find.text('综合：直播→观众→粉丝')).style?.color, scheme.primary);
-      expect(find.byIcon(AppIcons.selected), findsOneWidget);
+      // One tick in the menu (the chosen platform chip has its own, U.1c c13).
+      for (final mode in SearchSortMode.values) {
+        expect(
+          find.descendant(
+            of: find.byKey(ValueKey('search-sort-${mode.name}')),
+            matching: find.byIcon(AppIcons.selected),
+          ),
+          mode == SearchSortMode.smart ? findsOneWidget : findsNothing,
+          reason: mode.name,
+        );
+      }
       await tester.tap(find.text('观众优先'));
       await tester.pumpAndSettle();
       expect(

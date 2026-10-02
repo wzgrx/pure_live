@@ -6,10 +6,14 @@ import 'package:live_ui/src/theme/text_styles.dart';
 /// (docs/ui/compare/U.5b, U.5c: "网页搜索 / 哔哩哔哩 · 晚风", "观看记录 /
 /// 18 / 50 条"): the name 17 points semibold, the line 12 points in the
 /// variant colour, both on one line each and left-aligned (give the app bar
-/// `centerTitle: false`).
+/// `centerTitle: false`), or both centred with [centred] (the history, whose
+/// title 3.x centred).
 class PageTitle extends StatelessWidget {
   /// Creates the title.
-  const new({required this.title, this.subtitle, super.key});
+  const new({required this.title, this.subtitle, this.centred = false, super.key});
+
+  /// Both lines centred (give the app bar `centerTitle: true`).
+  final bool centred;
 
   /// The page's name.
   final String title;
@@ -23,7 +27,7 @@ class PageTitle extends StatelessWidget {
     final line = subtitle;
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: centred ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         Text(
           title,

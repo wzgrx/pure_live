@@ -136,7 +136,7 @@ class HotAreasPage extends ConsumerWidget {
             final title = Text(
               name(id),
               key: ValueKey('platform-title-$id'),
-              style: context.textStyles.t15.copyWith(fontWeight: FontWeight.w600),
+              style: context.textStyles.t15.copyWith(fontWeight: FontWeight.w400),
             );
             // Narrow screens and large text put the controls under the name (3.x).
             final stack = constraints.maxWidth < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.5;
@@ -157,11 +157,8 @@ class HotAreasPage extends ConsumerWidget {
       );
     }
 
-    BoxDecoration group() => BoxDecoration(
-      color: scheme.surfaceContainerHighest.withValues(alpha: 0.15),
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: theme.dividerColor.withValues(alpha: 0.05), width: 0.5),
-    );
+    // The settings card (U.1c c15).
+    BoxDecoration group() => BoxDecoration(color: scheme.surfaceContainerLow, borderRadius: BorderRadius.circular(16));
 
     return Scaffold(
       appBar: AppBar(title: Text(i18n('platform_display'))),
@@ -206,8 +203,9 @@ class HotAreasPage extends ConsumerWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: context.buildGroupTitle(
+                          child: SettingsGroupTitle(
                             i18n('hot_areas_shown_title', args: {'count': '${visible.length}'}),
+                            padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 0),
                           ),
                         ),
                         TextButton(
@@ -233,7 +231,7 @@ class HotAreasPage extends ConsumerWidget {
                     ),
                     if (hidden.isNotEmpty) ...[
                       const SizedBox(height: 16),
-                      context.buildGroupTitle(i18n('hot_areas_hidden_group', args: {'count': '${hidden.length}'})),
+                      SettingsGroupTitle(i18n('hot_areas_hidden_group', args: {'count': '${hidden.length}'})),
                       Container(
                         key: const ValueKey('hot-areas-hidden'),
                         clipBehavior: Clip.antiAlias,

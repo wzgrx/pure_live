@@ -105,11 +105,12 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
     return allowed ?? false;
   }
 
-  /// The code shown on [peer]; null when cancelled or invalid.
-  Future<String?> _askPairingCode(_Peer peer) async {
+  /// The code shown on [peer] before [action] ("发送", "接收"); null when
+  /// cancelled or invalid.
+  Future<String?> _askPairingCode(_Peer peer, {required String action}) async {
     final code = await showAppDialog<String>(
       context: context,
-      builder: (_) => _PairingCodeDialog(name: peer.name),
+      builder: (_) => _PairingCodeDialog(name: peer.name, action: action),
     );
     if (code == null) return null;
     final normalized = RemoteSyncProtocol.normalizePairingCode(code);
@@ -128,7 +129,7 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
       action: i18n('remote_sync_send_action'),
     );
     if (!confirmed || !mounted) return;
-    final pairing = code ?? await _askPairingCode(peer);
+    final pairing = code ?? await _askPairingCode(peer, action: i18n('remote_sync_send_action'));
     if (pairing == null) return;
     final ok = await _service.send(peer.ip, peer.port, pairing);
     AppNavigator.toast(i18n(ok ? 'remote_sync_send_success' : 'remote_sync_send_failed'));
@@ -137,7 +138,7 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
   /// Receive: the code, then what the other device's settings change, then
   /// apply them (c2, S1).
   Future<void> _receive(_Peer peer, {String? code}) async {
-    final pairing = code ?? await _askPairingCode(peer);
+    final pairing = code ?? await _askPairingCode(peer, action: i18n('remote_sync_receive_action'));
     if (pairing == null || !mounted) return;
     final settings = await _service.fetch(peer.ip, peer.port, pairing);
     if (settings == null) {
@@ -664,9 +665,13 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
 
 /// The pairing code of [name]: six boxes over one field (U.11c c3).
 class _PairingCodeDialog extends StatefulWidget {
-  const new({required this.name});
+  const new({required this.name, required this.action});
 
   final String name;
+
+  /// The main button: what the code is for (U.1d: the button says what
+  /// happens).
+  final String action;
 
   @override
   State<_PairingCodeDialog> createState() => _PairingCodeDialogState();
@@ -758,7 +763,7 @@ class _PairingCodeDialogState extends State<_PairingCodeDialog> {
         const DialogCancelButton(),
         DialogActionButton(
           key: const ValueKey('remote-sync-code-ok'),
-          label: i18n('confirm'),
+          label: widget.action,
           onPressed: () => Navigator.of(context).pop(_code.text),
         ),
       ],

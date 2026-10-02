@@ -383,7 +383,6 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
         context,
         title: i18n('webdav'),
         subtitle: current?.name ?? (_configs == null ? null : i18n('webdav_no_server')),
-        centerTitle: false,
         actions: [
           IconButton(
             key: const ValueKey('webdav-servers'),

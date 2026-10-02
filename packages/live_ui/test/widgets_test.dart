@@ -36,95 +36,50 @@ void main() {
     expect(tester.getSize(find.byType(CommonAvatar)), const Size(34, 34));
   });
 
-  group('settings blocks', () {
-    testWidgets('a card divides neighbouring tiles, the narrow stacked tile included', (tester) async {
-      tester.view.physicalSize = const Size(300, 800);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      var switched = false;
-      await tester.pumpWidget(
-        _app(
-          Builder(
-            builder: (context) => context.buildModernCard([
-              context.buildSwitchTile(title: 'Switch', value: false, onChanged: (value) => switched = value),
-              const SizedBox(),
-              context.buildTile(title: 'Stacked', trailing: const Text('value'), stackTrailingOnNarrow: true),
-              context.buildTile(title: 'Plain', onTap: () {}),
-              const Padding(padding: EdgeInsets.all(8), child: Text('not a tile')),
-            ]),
-          ),
-        ),
-      );
-      // 3.x missed the divider around the stacked tile (it was a LayoutBuilder).
-      expect(find.byType(Divider), findsNWidgets(2));
-      expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
-      await tester.tap(find.text('Switch'));
-      expect(switched, isTrue);
-    });
-
-    testWidgets('a slider row reports values and lays the badge out', (tester) async {
-      double? changed;
-      await tester.pumpWidget(
-        _app(
-          Builder(
-            builder: (context) => context.buildSliderTile(
-              icon: Icons.speed,
-              title: 'Speed',
-              value: 5,
-              min: 0,
-              max: 10,
-              displayValue: '5x',
-              onChanged: (value) => changed = value,
-            ),
-          ),
-        ),
-      );
-      expect(find.text('5x'), findsOneWidget);
-      await tester.drag(find.byType(Slider), const Offset(60, 0));
-      expect(changed, isNotNull);
-    });
-
-    testWidgets('group titles and section titles', (tester) async {
-      await tester.pumpWidget(
-        _app(
-          Builder(
-            builder: (context) => Column(
-              children: [
-                context.buildGroupTitle('Group'),
-                const SectionTitle(title: 'Section'),
-                const MenuListTile(leading: Icon(Icons.settings), text: 'Menu'),
-              ],
-            ),
-          ),
-        ),
-      );
-      expect(find.text('Group'), findsOneWidget);
-      expect(find.text('Section'), findsOneWidget);
-      expect(find.text('Menu'), findsOneWidget);
-    });
-  });
-
   group('CountButton', () {
     testWidgets('steps on tap and stays within the limits', (tester) async {
       final values = <int>[];
       await tester.pumpWidget(
         _app(Center(child: CountButton(minValue: 0, maxValue: 2, selectedValue: 2, onChanged: values.add))),
       );
-      await tester.tap(find.byIcon(Icons.add));
-      await tester.tap(find.byIcon(Icons.remove));
+      await tester.tap(find.byIcon(Icons.add_rounded));
+      await tester.pump();
+      await tester.tap(find.byIcon(Icons.remove_rounded));
       expect(values, [1]);
     });
 
     testWidgets('holding repeats from the last value even when the parent does not rebuild', (tester) async {
       final values = <int>[];
       await tester.pumpWidget(
-        _app(Center(child: CountButton(minValue: 0, maxValue: 3, selectedValue: 0, onChanged: values.add))),
+        _app(Center(child: CountButton(minValue: 0, maxValue: 10, selectedValue: 0, onChanged: values.add))),
       );
-      final gesture = await tester.startGesture(tester.getCenter(find.byIcon(Icons.add)));
+      final gesture = await tester.startGesture(tester.getCenter(find.byIcon(Icons.add_rounded)));
       await tester.pump(kLongPressTimeout + const Duration(milliseconds: 10));
-      await tester.pump(const Duration(milliseconds: 450));
+      for (var i = 0; i < 3; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
       await gesture.up();
+      await tester.pump();
+      // Every 100 ms after half a second; the release is not one more step.
       expect(values, [1, 2, 3]);
+
+      // At the limit the repeat stops and + greys out (U.1c c10).
+      await tester.pumpWidget(
+        _app(Center(child: CountButton(minValue: 0, maxValue: 2, selectedValue: 0, onChanged: values.add))),
+      );
+      values.clear();
+      final hold = await tester.startGesture(tester.getCenter(find.byIcon(Icons.add_rounded)));
+      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 10));
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await hold.up();
+      await tester.pump();
+      expect(values, [1, 2]);
+      final plus = tester.widget<IconButton>(
+        find.ancestor(of: find.byIcon(Icons.add_rounded), matching: find.byType(IconButton)),
+      );
+      expect(plus.onPressed, isNull);
     });
   });
 

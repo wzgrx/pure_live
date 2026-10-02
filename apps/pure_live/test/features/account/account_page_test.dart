@@ -537,11 +537,11 @@ void main() {
       final harness = await _pump(tester, qr: qr);
       await _tap(tester, find.byKey(const ValueKey('account-bilibili')));
       expect(find.text('哔哩哔哩账号登录'), findsOneWidget);
-      expect(find.byKey(const ValueKey('bilibili-qr-code')), findsOneWidget);
+      expect(find.byKey(const ValueKey('qr-code')), findsOneWidget);
       // One sentence, under the code (c11; 3.x said it twice).
       expect(find.text('请使用哔哩哔哩手机客户端扫码登录'), findsOneWidget);
-      expect(tester.getSize(find.byKey(const ValueKey('bilibili-qr-code'))).width, 200);
-      final codeTop = _top(tester, find.byKey(const ValueKey('bilibili-qr-code')));
+      expect(tester.getSize(find.byKey(const ValueKey('qr-code'))).width, 200);
+      final codeTop = _top(tester, find.byKey(const ValueKey('qr-code')));
 
       qr.answers
         ..add((state: BilibiliQrState.scanned, cookie: null))
@@ -556,7 +556,7 @@ void main() {
       expect(find.text('二维码已失效'), findsOneWidget);
       expect(find.text('二维码已失效，刷新后重新扫'), findsOneWidget);
       // The code stays where it was.
-      expect(_top(tester, find.byKey(const ValueKey('bilibili-qr-code'))), codeTop);
+      expect(_top(tester, find.byKey(const ValueKey('qr-code'))), codeTop);
 
       await _tap(tester, find.byKey(const ValueKey('bilibili-qr-refresh')));
       expect(qr.codes, 2);
@@ -612,7 +612,7 @@ void main() {
 
     testWidgets('wide: the QR code is 220; the cookie page one column at most 720', (tester) async {
       await _pump(tester, path: RoutePath.kBiliBiliQRLogin, size: const Size(1280, 800));
-      expect(tester.getSize(find.byKey(const ValueKey('bilibili-qr-code'))).width, 220);
+      expect(tester.getSize(find.byKey(const ValueKey('qr-code'))).width, 220);
 
       await _pump(tester, path: RoutePath.kHuyaCookie, size: const Size(1280, 800));
       final status = tester.getRect(find.byKey(const ValueKey('account-status')));

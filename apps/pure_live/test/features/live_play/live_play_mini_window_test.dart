@@ -618,17 +618,23 @@ void main() {
         expect(rect.right, 852 - 16);
         expect(rect.bottom, 393 - 16, reason: 'no bottom bar beside a side rail');
 
-        // Dragged up and left (80 % while dragged), then the window turns.
+        // Dragged up and left, then the window turns. P05: the video stays
+        // opaque while dragged (3.x showed it at 80 %, an offscreen layer
+        // every frame of the drag).
         final gesture = await tester.startGesture(rect.topLeft + const Offset(60, 100));
         await gesture.moveBy(const Offset(-30, 0));
         await gesture.moveBy(const Offset(-300, -150));
         await tester.pump();
-        expect(
-          tester
-              .widget<AnimatedOpacity>(find.descendant(of: _window, matching: find.byType(AnimatedOpacity)).first)
-              .opacity,
-          0.8,
-        );
+        await tester.pump(const Duration(milliseconds: 200));
+        final video = find.descendant(of: _window, matching: find.byType(LiveVideoView));
+        expect(video, findsOneWidget);
+        for (final see in [Opacity, AnimatedOpacity, FadeTransition]) {
+          expect(
+            find.ancestor(of: video, matching: find.byType(see)),
+            findsNothing,
+            reason: '$see over the video',
+          );
+        }
         await gesture.up();
         await tester.pump(const Duration(milliseconds: 300));
         final moved = tester.getRect(_window);

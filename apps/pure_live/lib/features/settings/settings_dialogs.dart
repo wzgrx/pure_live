@@ -263,14 +263,11 @@ class _NumberDialogState extends State<_NumberDialog> {
                 runSpacing: 8,
                 children: [
                   for (final value in widget.presets)
-                    ChoiceChip(
+                    AppChip(
                       key: ValueKey('settings-number-$value'),
-                      label: Text(widget.label(value)),
+                      label: widget.label(value),
                       selected: value == widget.current,
-                      showCheckmark: false,
-                      selectedColor: colors.primaryContainer,
-                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-                      onSelected: (_) => Navigator.of(context).pop(value),
+                      onSelected: () => Navigator.of(context).pop(value),
                     ),
                 ],
               ),
@@ -333,7 +330,7 @@ Future<Color?> showColorDialog({
         const DialogCancelButton(key: ValueKey('settings-color-cancel')),
         DialogActionButton(
           key: const ValueKey('settings-color-apply'),
-          label: i18n('exit_yes'),
+          label: i18n('save'),
           onPressed: () {
             final color = picker.currentState?.commit();
             if (color != null) Navigator.of(context).pop(color);

@@ -58,50 +58,53 @@ class AuthPage extends StatelessWidget {
           ],
         ),
       ),
-      const SizedBox(height: 20),
-      context.buildGroupTitle(i18n('auth_alternatives')),
-      context.buildModernCard([
-        context.buildTile(
-          key: const ValueKey('auth-webdav'),
-          icon: AppIcons.webDav,
-          title: i18n('webdav'),
-          subtitle: i18n('auth_webdav_desc'),
-          isLong: true,
-          onTap: () => open(RoutePath.kWebDavPage),
-        ),
-        context.buildTile(
-          key: const ValueKey('auth-device-sync'),
-          icon: AppIcons.deviceSync,
-          title: i18n('remote_sync'),
-          subtitle: i18n('remote_sync_subtitle'),
-          isLong: true,
-          onTap: () => open(RoutePath.kRemoteSync),
-        ),
-        context.buildTile(
-          key: const ValueKey('auth-backup'),
-          icon: AppIcons.backupFiles,
-          title: i18n('backup_recover'),
-          subtitle: i18n('auth_backup_desc'),
-          isLong: true,
-          onTap: () => open(RoutePath.kBackup),
-        ),
-      ]),
-      const SizedBox(height: 20),
+      const SizedBox(height: 4),
+      SettingsGroup(
+        title: i18n('auth_alternatives'),
+        children: [
+          SettingsLinkRow(
+            key: const ValueKey('auth-webdav'),
+            icon: AppIcons.webDav,
+            title: i18n('webdav'),
+            subtitle: i18n('auth_webdav_desc'),
+            subtitleMaxLines: null,
+            onTap: () => open(RoutePath.kWebDavPage),
+          ),
+          SettingsLinkRow(
+            key: const ValueKey('auth-device-sync'),
+            icon: AppIcons.deviceSync,
+            title: i18n('remote_sync'),
+            subtitle: i18n('remote_sync_subtitle'),
+            subtitleMaxLines: null,
+            onTap: () => open(RoutePath.kRemoteSync),
+          ),
+          SettingsLinkRow(
+            key: const ValueKey('auth-backup'),
+            icon: AppIcons.backupFiles,
+            title: i18n('backup_recover'),
+            subtitle: i18n('auth_backup_desc'),
+            subtitleMaxLines: null,
+            onTap: () => open(RoutePath.kBackup),
+          ),
+        ],
+      ),
       // X2 A: old users mix up the two kinds of account.
-      context.buildGroupTitle(i18n('auth_platform_accounts')),
-      context.buildModernCard([
-        context.buildTile(
-          key: const ValueKey('auth-platform-accounts'),
-          icon: AppIcons.platformAccounts,
-          title: i18n('account_title'),
-          subtitle: i18n('auth_platform_accounts_desc'),
-          isLong: true,
-          onTap: () => open(RoutePath.kSettingsAccount),
-        ),
-      ]),
+      SettingsGroup(
+        title: i18n('auth_platform_accounts'),
+        children: [
+          SettingsLinkRow(
+            key: const ValueKey('auth-platform-accounts'),
+            icon: AppIcons.platformAccounts,
+            title: i18n('account_title'),
+            subtitle: i18n('auth_platform_accounts_desc'),
+            subtitleMaxLines: null,
+            onTap: () => open(RoutePath.kSettingsAccount),
+          ),
+        ],
+      ),
     ];
     return Scaffold(
-      appBar: AppBar(centerTitle: true, title: Text(i18n('auth_title'))),
+      appBar: AppBar(title: Text(i18n('auth_title'))),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
         children: [

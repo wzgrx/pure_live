@@ -85,7 +85,14 @@ dependencies:
   window_manager: ^0.5.2
 
 dev_dependencies:
+  # The host side of `flutter drive` for the frame benchmarks (P05): it
+  # writes what integration_test/perf_test.dart reports to build/.
+  flutter_driver:
+    sdk: flutter
   flutter_test:
+    sdk: flutter
+  # The frame benchmarks in profile mode on a phone (P05, UI_PLAN §9.4).
+  integration_test:
     sdk: flutter
   very_good_analysis: ^11.0.0
 

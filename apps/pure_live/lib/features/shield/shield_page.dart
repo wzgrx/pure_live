@@ -29,12 +29,7 @@ class ShieldPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final short = MediaQuery.sizeOf(context).height < 480;
     return Scaffold(
-      appBar: AppBar(
-        // 3.x's app bars centre the title (common/style/theme.dart:119).
-        centerTitle: true,
-        toolbarHeight: short ? 48 : null,
-        title: Text(i18n('shield_title')),
-      ),
+      appBar: AppBar(toolbarHeight: short ? 48 : null, title: Text(i18n('shield_title'))),
       body: LayoutBuilder(
         builder: (context, constraints) {
           // The component's cards keep 12 from its edges: the column is

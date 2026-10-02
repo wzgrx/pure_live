@@ -65,7 +65,7 @@ class UnderConstruction extends StatelessWidget {
     final building = currentStrings?.language == AppLanguage.en ? 'Under construction' : '建设中';
     return Scaffold(
       appBar: AppBar(
-        centerTitle: route.inHome,
+        centerTitle: route.inHome && centredPageTitle,
         automaticallyImplyLeading: !route.inHome,
         leading: phoneTab ? const MenuButton() : null,
         actions: phoneTab ? const [CommonAppBarActions()] : null,

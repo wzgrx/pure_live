@@ -157,7 +157,11 @@ class _FavoritePageState extends ConsumerState<FavoritePage> with TickerProvider
       physics: const PureLiveBoundedScrollPhysics(),
       tabs: [
         for (final group in FollowGroup.values)
-          _CountTab(label: i18n(_groupTitleKeys[group]!), count: _controller.loaded ? counts[group]! : null),
+          TabLabel(
+            label: i18n(_groupTitleKeys[group]!),
+            count: _controller.loaded ? counts[group]! : null,
+            countKey: ValueKey('favorite-status-count-${i18n(_groupTitleKeys[group]!)}'),
+          ),
       ],
     );
   }
@@ -179,7 +183,7 @@ class _FavoritePageState extends ConsumerState<FavoritePage> with TickerProvider
       physics: const PureLiveBoundedScrollPhysics(),
       tabs: [
         for (final id in _platforms)
-          _CountTab(
+          TabLabel(
             label: id == allPlatforms ? i18n('site_all') : platformName(id, fallback: sites.maybeOf(id)?.name),
             count: countOf(id),
           ),
@@ -212,7 +216,7 @@ class _FavoritePageState extends ConsumerState<FavoritePage> with TickerProvider
       }
       return Scaffold(
         appBar: AppBar(
-          centerTitle: !oneRow,
+          centerTitle: centredPageTitle && !oneRow,
           automaticallyImplyLeading: !widget.route.inHome,
           leading: phoneTab ? const MenuButton() : null,
           actions: phoneTab ? const [CommonAppBarActions()] : null,
@@ -313,45 +317,6 @@ const Map<FollowGroup, String> _emptyTitleKeys = {
 /// each side left a phone's label too little room (M13.16).
 const EdgeInsets _statusTabPadding = EdgeInsets.symmetric(horizontal: 4);
 
-/// A tab with its number after the label (U.4c c4): 12 points, tabular
-/// figures, in the tab's colour. The label is never cut: on a very narrow
-/// bar the whole tab shrinks instead.
-class _CountTab extends StatelessWidget {
-  const new({required this.label, required this.count});
-
-  final String label;
-  final int? count;
-
-  @override
-  Widget build(BuildContext context) {
-    final count = this.count;
-    return Tab(
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(label, maxLines: 1, softWrap: false),
-            if (count != null) ...[
-              const SizedBox(width: 4),
-              Text(
-                '$count',
-                key: ValueKey('favorite-status-count-$label'),
-                maxLines: 1,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  fontFeatures: [FontFeature.tabularFigures()],
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 /// "All" and the tags the shown follows have (3.x `FavoriteTagStrip`, its
 /// look kept; U.4c c2: the row is 48 high instead of 60); hidden when there
 /// are none.
@@ -364,26 +329,18 @@ class _TagStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final tags = controller.visibleTags;
     if (tags.isEmpty) return const SizedBox.shrink();
-    final scheme = Theme.of(context).colorScheme;
-    Widget chip(String id, String label) {
-      final selected = controller.tagId == id;
-      return Padding(
-        padding: const EdgeInsets.only(right: 6),
-        child: ChoiceChip(
+    // The one chip of the app (U.1c c13).
+    Widget chip(String id, String label) => Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Center(
+        child: AppChip(
           key: ValueKey('favorite-tag-${id.isEmpty ? 'all' : id}'),
-          showCheckmark: false,
-          label: Text(label, maxLines: 1),
-          labelStyle: context.textStyles.t12.copyWith(
-            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-            color: selected ? scheme.onPrimary : scheme.onSurfaceVariant,
-          ),
-          selected: selected,
-          selectedColor: scheme.primary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          onSelected: (_) => controller.selectTag(id),
+          label: label,
+          selected: controller.tagId == id,
+          onSelected: () => controller.selectTag(id),
         ),
-      );
-    }
+      ),
+    );
 
     return SizedBox(
       key: const ValueKey('favorite-tag-strip'),
@@ -391,7 +348,7 @@ class _TagStrip extends StatelessWidget {
       child: ListView(
         scrollDirection: Axis.horizontal,
         physics: const PureLiveBoundedScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         children: [chip(allTags, i18n('recorder_tab_all')), for (final tag in tags) chip(tag.id, tag.name)],
       ),
     );

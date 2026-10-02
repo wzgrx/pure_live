@@ -130,7 +130,7 @@ class RecorderTaskCard extends StatefulWidget {
 }
 
 class _RecorderTaskCardState extends State<RecorderTaskCard> {
-  final _menu = GlobalKey<PopupMenuButtonState<_CardMenu>>();
+  final _menu = GlobalKey<AppMenuButtonState<_CardMenu>>();
   bool _acting = false;
 
   /// Whether the last recording's file is there, asked in the background
@@ -177,7 +177,7 @@ class _RecorderTaskCardState extends State<RecorderTaskCard> {
     }
   }
 
-  void _showMenu() => _menu.currentState?.showButtonMenu();
+  void _showMenu() => unawaited(_menu.currentState?.show());
 
   void _onMenu(_CardMenu entry) {
     final task = widget.task();
@@ -210,39 +210,32 @@ class _RecorderTaskCardState extends State<RecorderTaskCard> {
     if (ok) await _run(widget.actions.remove);
   }
 
-  List<PopupMenuEntry<_CardMenu>> _menuItems(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final auto = autoRecordOn(widget.task());
-    PopupMenuItem<_CardMenu> item(_CardMenu entry, IconData icon, String text, {Color? color, Widget? trailing}) =>
-        PopupMenuItem(
-          key: ValueKey('recorder-menu-${entry.name}'),
-          value: entry,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: ListTile(
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            iconColor: color,
-            textColor: color,
-            leading: Icon(icon, size: 20),
-            title: Text(text),
-            trailing: trailing,
-          ),
-        );
-    return [
-      item(_CardMenu.open, AppIcons.enterRoom, i18n('room_open')),
-      item(
-        _CardMenu.auto,
-        AppIcons.autoRecord,
-        i18n('record_panel_auto_switch'),
-        // The row toggles it (the menu closes); the switch only shows it.
-        trailing: IgnorePointer(
-          child: Switch(key: const ValueKey('recorder-menu-auto-switch'), value: auto, onChanged: (_) {}),
-        ),
-      ),
-      const PopupMenuDivider(),
-      item(_CardMenu.delete, AppIcons.delete, i18n('recorder_delete_task'), color: scheme.error),
-    ];
-  }
+  /// The small menu (U.1d, B03): open, "开播自动录" with its switch (the
+  /// row toggles it and the menu closes), delete.
+  List<AppMenuEntry<_CardMenu>> _menuItems() => [
+    AppMenuEntry(
+      key: const ValueKey('recorder-menu-open'),
+      value: _CardMenu.open,
+      icon: AppIcons.enterRoom,
+      label: i18n('room_open'),
+    ),
+    AppMenuEntry(
+      key: const ValueKey('recorder-menu-auto'),
+      value: _CardMenu.auto,
+      icon: AppIcons.autoRecord,
+      label: i18n('record_panel_auto_switch'),
+      switchValue: autoRecordOn(widget.task()),
+      switchKey: const ValueKey('recorder-menu-auto-switch'),
+    ),
+    AppMenuEntry(
+      key: const ValueKey('recorder-menu-delete'),
+      value: _CardMenu.delete,
+      icon: AppIcons.delete,
+      label: i18n('recorder_delete_task'),
+      danger: true,
+      divider: true,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) => ListenableSelector<_CardView?>(
@@ -301,15 +294,12 @@ class _RecorderTaskCardState extends State<RecorderTaskCard> {
     },
   );
 
-  Widget _menuButton() => PopupMenuButton<_CardMenu>(
+  Widget _menuButton() => AppMenuButton<_CardMenu>(
     key: _menu,
     tooltip: i18n('more'),
     icon: const Icon(AppIcons.more, size: 22),
-    padding: EdgeInsets.zero,
-    position: PopupMenuPosition.under,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    entries: _menuItems,
     onSelected: _onMenu,
-    itemBuilder: _menuItems,
   );
 }
 

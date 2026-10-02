@@ -91,6 +91,13 @@ final class AreaCatalog extends ChangeNotifier {
     }
   }
 
+  /// Hides the failure over the areas still shown (the error bar's ✕).
+  void clearError() {
+    if (_error == null) return;
+    _error = null;
+    _notify();
+  }
+
   void _notify() {
     if (!_disposed) notifyListeners();
   }

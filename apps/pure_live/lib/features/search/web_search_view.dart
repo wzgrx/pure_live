@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
@@ -161,64 +160,60 @@ class _WebSearchViewState extends ConsumerState<WebSearchView> {
   Widget build(BuildContext context) {
     final request = _request;
     final inApp = request != null && _inApp;
-    return CallbackShortcuts(
+    return EscapeBack(
       // Esc is Back: in the page first (c1).
-      bindings: {const SingleActivator(LogicalKeyboardKey.escape): () => Navigator.of(context).maybePop()},
-      child: FocusScope(
-        autofocus: true,
-        child: Scaffold(
-          appBar: AppBar(
-            centerTitle: false,
-            titleSpacing: 4,
-            title: PageTitle(title: i18n('web_search'), subtitle: _subtitle),
-            actions: [
-              if (inApp)
-                IconButton(
-                  key: const ValueKey('web-search-external'),
-                  tooltip: i18n('open_in_system_browser'),
-                  icon: const Icon(AppIcons.openExternal),
-                  onPressed: () => unawaited(_openExternal(_current ?? request.uri)),
-                ),
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: false,
+          titleSpacing: 4,
+          title: PageTitle(title: i18n('web_search'), subtitle: _subtitle),
+          actions: [
+            if (inApp)
               IconButton(
-                key: const ValueKey('web-search-close'),
-                tooltip: i18n('close'),
-                icon: const Icon(AppIcons.close),
-                // `pop`, past the page's own back steps (3.x's ✕).
-                onPressed: () => Navigator.of(context).pop(),
+                key: const ValueKey('web-search-external'),
+                tooltip: i18n('open_in_system_browser'),
+                icon: const Icon(AppIcons.openExternal),
+                onPressed: () => unawaited(_openExternal(_current ?? request.uri)),
               ),
-              const SizedBox(width: 4),
-            ],
-          ),
-          body: request == null
-              ? _invalid(context)
-              : inApp
-              ? LayoutBuilder(
-                  builder: (context, constraints) => Stack(
-                    children: [
-                      Positioned.fill(
-                        child: InAppWebPage(
-                          initial: request.uri,
-                          desktopSite: true,
-                          progressHeight: 4,
-                          onPage: (uri) => unawaited(_pageShown(uri)),
-                          failureBuilder: _failure,
+            IconButton(
+              key: const ValueKey('web-search-close'),
+              tooltip: i18n('close'),
+              icon: const Icon(AppIcons.close),
+              // `pop`, past the page's own back steps (3.x's ✕).
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            const SizedBox(width: 4),
+          ],
+        ),
+        body: request == null
+            ? _invalid(context)
+            : inApp
+            ? LayoutBuilder(
+                builder: (context, constraints) => Stack(
+                  children: [
+                    Positioned.fill(
+                      child: InAppWebPage(
+                        initial: request.uri,
+                        desktopSite: true,
+                        progressHeight: 4,
+                        onPage: (uri) => unawaited(_pageShown(uri)),
+                        failureBuilder: _failure,
+                      ),
+                    ),
+                    if (_found case final link?)
+                      WebSearchRoomBar.place(
+                        width: constraints.maxWidth,
+                        bar: WebSearchRoomBar(
+                          platform: link.platform,
+                          roomId: link.roomId,
+                          onEnter: () => unawaited(_enter(link)),
+                          onDismiss: () => _dismiss(link),
                         ),
                       ),
-                      if (_found case final link?)
-                        WebSearchRoomBar.place(
-                          width: constraints.maxWidth,
-                          bar: WebSearchRoomBar(
-                            platform: link.platform,
-                            roomId: link.roomId,
-                            onEnter: () => unawaited(_enter(link)),
-                            onDismiss: () => _dismiss(link),
-                          ),
-                        ),
-                    ],
-                  ),
-                )
-              : _external(context, request),
-        ),
+                  ],
+                ),
+              )
+            : _external(context, request),
       ),
     );
   }

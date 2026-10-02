@@ -316,7 +316,7 @@ Android TV，遥控器操作，以 pure_live_TV 为基线（不是 v3），1920�
 | U.8 | U.8 收尾 | 竖屏控制区按钮 40、工具条开关 38：点击区域补到 48（计划书第 5.4 节），看起来的大小不变 |
 | U.8 | — | “小格自动降画质”照 v3 的“小格省流”，用户自己打开 |
 | U.7a | — | 等待开播的卡片关掉“开播自动录”会删除任务（同 v3“取消监控”和直播间面板） |
-| U.9、U.10 | U.1c | v3 所有标题栏居中（`common/style/theme.dart:119`），v4 的 `LiveTheme` 没有这一项；在 live_ui 主题里加 `centerTitle`，各页单独设的居中随后去掉 |
+| U.9、U.10 | U.1c | 更正（U01 核实，维护者 2026-10-02 定）：v3 主题里的 `centerTitle: true`（`common/style/theme.dart:119`）不生效——`main.dart:162-169` 用 `AppBarTheme(surfaceTintColor: …)` 整个替换了主题的标题栏样式，所以 3.x 在 Android 上标题靠左，只有录制中心、关注、分区、热门、观看记录、工具箱 6 页自己写了居中。v4 照实际运行的样子：主题不设居中，这几页用 live_ui 的 `centredPageTitle`（U01 已做） |
 | U.10a | U.10 收尾 | 页内退出确认和列表上的退出用同一套 v3 文字（`confirmPageSignOut` 一处，原则 7） |
 | U.10a | U.1b | SOOP、网易 CC 的名字只在账号页改了；平台列表的 `site_soop`“Soop”、`site_cc`“网易CC”统一 |
 | U.10c | U.11a | 备份页“云端账号（已停用）”一行跳 `RoutePath.kMine`（U.10c c4） |

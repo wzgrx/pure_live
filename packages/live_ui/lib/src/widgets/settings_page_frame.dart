@@ -7,8 +7,8 @@ import 'package:live_ui/src/widgets/settings_tiles.dart';
 // (recording settings, backup, WebDAV, device sync; docs/ui/compare/U.7b,
 // U.11a–c): the same app bar and reading column as the settings pages.
 
-/// The app bar of a settings-like page: the title centred (3.x `MyTheme`,
-/// 20 px semi-bold), [subtitle] under it when given (the WebDAV server); a
+/// The app bar of a settings-like page: the title at the platform's place
+/// (3.x: the start on Android; [centerTitle] centres it), 20 px semi-bold, [subtitle] under it when given (the WebDAV server); a
 /// compact height when the window is short (a phone held sideways, U.6a).
 PreferredSizeWidget settingsPageAppBar(
   BuildContext context, {
@@ -16,7 +16,7 @@ PreferredSizeWidget settingsPageAppBar(
   String? subtitle,
   List<Widget> actions = const [],
   PreferredSizeWidget? bottom,
-  bool centerTitle = true,
+  bool centerTitle = false,
 }) {
   final short = MediaQuery.sizeOf(context).height < 480;
   final heading = Text(title, style: context.textStyles.t18.copyWith(fontSize: 20, fontWeight: FontWeight.w600));

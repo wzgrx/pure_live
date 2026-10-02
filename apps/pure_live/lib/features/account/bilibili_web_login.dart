@@ -134,7 +134,6 @@ class _BilibiliWebLoginViewState extends ConsumerState<BilibiliWebLoginView> {
       final error = _error;
       return Scaffold(
         appBar: AppBar(
-          centerTitle: true,
           title: Text(i18n('bilibili_login')),
           actions: [
             // 3.x: the words, only the icon when narrow.

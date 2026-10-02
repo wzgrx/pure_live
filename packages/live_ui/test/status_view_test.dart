@@ -31,8 +31,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Network Request Error'), findsOneWidget);
-    expect(find.byIcon(Icons.wifi_off_rounded), findsOneWidget);
+    // U.1c c4: "加载失败" and the error mark, not "no network" for every failure.
+    expect(find.text('Loading failed'), findsOneWidget);
+    expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
     await tester.tap(find.text('Retry'));
     expect(retries, 1);
   });

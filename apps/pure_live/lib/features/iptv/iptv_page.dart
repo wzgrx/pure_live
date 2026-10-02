@@ -425,8 +425,6 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     final syncAll = _syncAll;
     return Scaffold(
       appBar: AppBar(
-        // 3.x's app bars centre the title (common/style/theme.dart:119).
-        centerTitle: true,
         title: Text(i18n('iptv_settings')),
         actions: [
           IconButton(
@@ -533,17 +531,20 @@ class _IptvPageState extends ConsumerState<IptvPage> {
   List<Widget> _playlistSection(IptvOverview overview) {
     final now = ref.watch(iptvClockProvider)();
     return [
-      context.buildGroupTitle(i18n('iptv_group_playlists')),
-      context.buildModernCard([
-        context.buildTile(
-          key: const ValueKey('iptv-import-playlist'),
-          icon: AppIcons.importPlaylist,
-          title: i18n('import_playlist'),
-          subtitle: i18n('iptv_import_playlist_desc'),
-          trailing: _importSpinner,
-          onTap: () => unawaited(_import(IptvImportKind.playlist)),
-        ),
-      ]),
+      SettingsGroup(
+        title: i18n('iptv_group_playlists'),
+        first: true,
+        children: [
+          SettingsLinkRow(
+            key: const ValueKey('iptv-import-playlist'),
+            icon: AppIcons.importPlaylist,
+            title: i18n('import_playlist'),
+            subtitle: i18n('iptv_import_playlist_desc'),
+            valueWidget: _importSpinner,
+            onTap: () => unawaited(_import(IptvImportKind.playlist)),
+          ),
+        ],
+      ),
       const SizedBox(height: 12),
       if (overview.playlists.isEmpty)
         IptvStateCard(
@@ -590,25 +591,28 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     final selected = overview.guide(selectedId);
     final scheme = Theme.of(context).colorScheme;
     return [
-      context.buildGroupTitle(i18n('iptv_group_guides')),
-      context.buildModernCard([
-        context.buildTile(
-          key: const ValueKey('iptv-import-guide'),
-          icon: AppIcons.importGuide,
-          title: i18n('import_epg_source'),
-          subtitle: i18n('iptv_import_guide_desc'),
-          trailing: _importSpinner,
-          onTap: () => unawaited(_import(IptvImportKind.guide)),
-        ),
-        context.buildTile(
-          key: const ValueKey('iptv-active-guide'),
-          icon: AppIcons.guide,
-          title: i18n('active_epg_source'),
-          subtitle: selected == null ? i18n('please_select_epg_source') : guideName(selected),
-          subtitleColor: selected == null ? LiveSemanticColors.warning(scheme.brightness) : null,
-          onTap: () => unawaited(_chooseGuide(overview)),
-        ),
-      ]),
+      SettingsGroup(
+        title: i18n('iptv_group_guides'),
+        children: [
+          SettingsLinkRow(
+            key: const ValueKey('iptv-import-guide'),
+            icon: AppIcons.importGuide,
+            title: i18n('import_epg_source'),
+            subtitle: i18n('iptv_import_guide_desc'),
+            valueWidget: _importSpinner,
+            onTap: () => unawaited(_import(IptvImportKind.guide)),
+          ),
+          SettingsLinkRow(
+            key: const ValueKey('iptv-active-guide'),
+            icon: AppIcons.guide,
+            title: i18n('active_epg_source'),
+            subtitle: selected == null ? i18n('please_select_epg_source') : guideName(selected),
+            subtitleColor: selected == null ? LiveSemanticColors.warning(scheme.brightness) : null,
+            choice: true,
+            onTap: () => unawaited(_chooseGuide(overview)),
+          ),
+        ],
+      ),
       const SizedBox(height: 12),
       if (_defaultGuideLoading)
         IptvStateCard(
@@ -684,40 +688,43 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     final hours = IptvImporter.normalizeAutoSyncHours(watchSetting(ref, Settings.autoSyncHoursInterval));
     final userAgent = watchSetting(ref, Settings.customIptvUserAgent);
     return [
-      context.buildGroupTitle(i18n('iptv_section_settings')),
-      context.buildModernCard([
-        context.buildSwitchTile(
-          icon: AppIcons.syncAll,
-          title: i18n('auto_sync_title'),
-          subtitle: i18n('iptv_auto_sync_desc'),
-          isLong: true,
-          value: autoSync,
-          onChanged: (value) => unawaited(_set(Settings.isAutoSyncEnabled, value)),
-        ),
-        if (autoSync)
-          context.buildTile(
-            icon: AppIcons.syncInterval,
-            title: i18n('sync_interval_title'),
-            subtitle: i18n('sync_interval_hours', args: {'hour': '$hours'}),
+      SettingsGroup(
+        title: i18n('iptv_section_settings'),
+        children: [
+          SettingsSwitchRow(
+            icon: AppIcons.syncAll,
+            title: i18n('auto_sync_title'),
+            subtitle: i18n('iptv_auto_sync_desc'),
+            subtitleMaxLines: null,
+            value: autoSync,
+            onChanged: (value) => unawaited(_set(Settings.isAutoSyncEnabled, value)),
+          ),
+          if (autoSync)
+            SettingsLinkRow(
+              icon: AppIcons.syncInterval,
+              title: i18n('sync_interval_title'),
+              value: i18n('sync_interval_hours', args: {'hour': '$hours'}),
+              choice: true,
+              onTap: () async {
+                final chosen = await chooseSyncInterval(context, hours);
+                if (chosen != null && chosen != hours) {
+                  await _set(Settings.autoSyncHoursInterval, chosen, message: i18n('settings_saved'));
+                }
+              },
+            ),
+          SettingsLinkRow(
+            icon: AppIcons.userAgent,
+            title: i18n('custom_ua_title'),
+            subtitle: userAgent.isEmpty ? i18n('iptv_ua_default') : userAgent,
             onTap: () async {
-              final chosen = await chooseSyncInterval(context, hours);
-              if (chosen != null && chosen != hours) {
-                await _set(Settings.autoSyncHoursInterval, chosen, message: i18n('settings_saved'));
+              final value = await editUserAgent(context, userAgent);
+              if (value != null && value != userAgent) {
+                await _set(Settings.customIptvUserAgent, value, message: i18n('iptv_ua_saved'));
               }
             },
           ),
-        context.buildTile(
-          icon: AppIcons.userAgent,
-          title: i18n('custom_ua_title'),
-          subtitle: userAgent.isEmpty ? i18n('iptv_ua_default') : userAgent,
-          onTap: () async {
-            final value = await editUserAgent(context, userAgent);
-            if (value != null && value != userAgent) {
-              await _set(Settings.customIptvUserAgent, value, message: i18n('iptv_ua_saved'));
-            }
-          },
-        ),
-      ]),
+        ],
+      ),
     ];
   }
 }

@@ -14,7 +14,10 @@ import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_panel.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
+import 'package:pure_live/features/live_play/danmaku/message_panel.dart';
 import 'package:pure_live/features/live_play/dialogs/iptv_guide.dart';
+import 'package:pure_live/features/live_play/dialogs/room_dialogs.dart';
+import 'package:pure_live/features/live_play/dialogs/stream_dialogs.dart';
 import 'package:pure_live/features/live_play/layout/portrait_panel.dart';
 import 'package:pure_live/features/live_play/layout/room_details.dart';
 import 'package:pure_live/features/live_play/layout/room_header.dart';
@@ -838,6 +841,41 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       onClose: _panels.close,
       dragToClose: portrait,
     ),
+    // U.2n: the room menu's settings and a long-pressed danmaku.
+    RoomPanelKind.sleepTimer => RoomSleepTimerPanel(
+      key: const ValueKey('panel-timer'),
+      controller: controller,
+      onClose: _panels.close,
+      dragToClose: portrait,
+    ),
+    RoomPanelKind.volume => RoomVolumePanel(
+      key: const ValueKey('panel-volume'),
+      controller: controller,
+      onClose: _panels.close,
+      dragToClose: portrait,
+    ),
+    RoomPanelKind.streamLink => RoomStreamPanel(
+      key: const ValueKey('panel-stream-link'),
+      controller: controller,
+      use: StreamUse.copy,
+      onClose: _panels.close,
+      dragToClose: portrait,
+    ),
+    RoomPanelKind.cast => RoomStreamPanel(
+      key: const ValueKey('panel-cast'),
+      controller: controller,
+      use: StreamUse.cast,
+      onClose: _panels.close,
+      dragToClose: portrait,
+    ),
+    RoomPanelKind.message => RoomMessagePanel(
+      // Another message is another panel.
+      key: ValueKey(_panels.message),
+      controller: controller,
+      message: _panels.message!,
+      onClose: _panels.close,
+      dragToClose: portrait,
+    ),
     null => const SizedBox.shrink(key: ValueKey('no-panel')),
   };
 
@@ -914,7 +952,36 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     ),
   );
 
-  Widget _buildFullscreen(LiveRoomController controller, _LayoutSettings settings) => Scaffold(
+  /// The fullscreen's toasts sit above its bottom bar instead of on it
+  /// (docs/ui/compare/U.1d c12, U.2n c10): 16 over the landscape bar, or
+  /// over the portrait fullscreen's two rows.
+  Widget _toastsAboveBars(Widget page) {
+    final size = MediaQuery.sizeOf(context);
+    final upright =
+        controlsArrangement(
+          display: _display,
+          page: RoomPageLayout.landscape,
+          width: size.width,
+          height: size.height,
+          mobile: _platform.mobile,
+        ) ==
+        ControlsArrangement.portraitFullscreen;
+    final theme = Theme.of(context);
+    final inset = theme.snackBarTheme.insetPadding ?? const EdgeInsets.fromLTRB(16, 8, 16, 16);
+    return Theme(
+      data: theme.copyWith(
+        snackBarTheme: theme.snackBarTheme.copyWith(
+          insetPadding: inset.copyWith(bottom: fullscreenBottomBarHeight(portrait: upright) + inset.bottom),
+        ),
+      ),
+      child: page,
+    );
+  }
+
+  Widget _buildFullscreen(LiveRoomController controller, _LayoutSettings settings) =>
+      _toastsAboveBars(_fullscreen(controller, settings));
+
+  Widget _fullscreen(LiveRoomController controller, _LayoutSettings settings) => Scaffold(
     backgroundColor: OnVideoColors.ground,
     body: LayoutBuilder(
       builder: (context, constraints) {

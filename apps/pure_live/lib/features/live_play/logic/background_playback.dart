@@ -181,7 +181,11 @@ abstract final class DeviceControls {
   static const MethodChannel _channel = MethodChannel('pure_live/device_controls');
 
   /// Whether the controls exist on this platform.
-  static bool get available => !kIsWeb && Platform.isAndroid;
+  static bool get available => debugAvailable ?? (!kIsWeb && Platform.isAndroid);
+
+  /// Replaces [available] (tests answer the channel themselves).
+  @visibleForTesting
+  static bool? debugAvailable;
 
   static Future<double?> _get(String method) async {
     if (!available) return null;

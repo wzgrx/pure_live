@@ -39,6 +39,12 @@ const double controlBarHeight = 52;
 /// The height of a row of the portrait fullscreen's bars (U.2b).
 const double portraitRowHeight = 48;
 
+/// How far the fullscreen's bottom bar reaches up from the safe area: the
+/// landscape bar, or the portrait fullscreen's two rows (toasts go above
+/// it, docs/ui/compare/U.2n c10).
+double fullscreenBottomBarHeight({required bool portrait}) =>
+    portrait ? portraitRowHeight * 2 + 4 + 8 : controlBarHeight;
+
 /// Below this width even the folded landscape bar scrolls sideways.
 const double composerFoldMinWidth = 640;
 
@@ -406,7 +412,7 @@ class PlayerTopBar extends StatelessWidget {
               key: const ValueKey('live-play-cast'),
               tooltip: i18n('cast_screen'),
               iconSize: 22,
-              onPressed: playing ? () => unawaited(showStreamPicker(context, controller, StreamUse.cast)) : null,
+              onPressed: playing ? () => showStreamPanel(context, controller, StreamUse.cast) : null,
               icon: const Icon(AppIcons.cast),
             ),
           ),
@@ -633,7 +639,9 @@ class PlayerBottomBar extends ConsumerWidget {
       onReopen: actions.onReopen,
       onMenu: actions.onMenu,
     );
-    final orientation = actions.platform.mobile ? _OrientationButton(choice: actions.orientation) : null;
+    final orientation = actions.platform.mobile
+        ? _OrientationButton(choice: actions.orientation, onMenu: actions.onMenu)
+        : null;
     final volume = actions.platform.desktop
         ? VolumeSlider(controller: controller, onInteract: actions.onInteract)
         : null;
@@ -845,11 +853,15 @@ class _WindowFullscreenButton extends StatelessWidget {
 }
 
 /// The room's orientation (3.x `PortraitOrientationButton`): yellow when it
-/// is not "自动识别"; a long press shows the current choice (E6).
+/// is not "自动识别"; a long press shows the current choice (E6); a tap opens
+/// the orientation menu above it (docs/ui/compare/U.2n c6).
 class _OrientationButton extends StatelessWidget {
-  const new({required this.choice});
+  const new({required this.choice, this.onMenu});
 
   final RoomOrientationChoice choice;
+
+  /// Told when the menu opens and closes.
+  final ValueChanged<bool>? onMenu;
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
@@ -861,7 +873,11 @@ class _OrientationButton extends StatelessWidget {
         tooltip: i18n('live_play_orientation_now', args: {'value': roomOrientationName(value)}),
         iconSize: 22,
         color: value == RoomOrientation.automatic ? null : OnVideoColors.active,
-        onPressed: () => unawaited(showRoomOrientationPicker(context, choice)),
+        onPressed: () async {
+          onMenu?.call(true);
+          await showRoomOrientationMenu(context, choice);
+          onMenu?.call(false);
+        },
         icon: Icon(switch (value) {
           RoomOrientation.automatic => AppIcons.orientationAuto,
           RoomOrientation.portrait => AppIcons.orientationPortrait,

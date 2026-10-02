@@ -214,7 +214,8 @@ class _VolumeSliderState extends State<VolumeSlider> {
 
 /// The fullscreen bar's fit (U.2c change 6, 18): the "画面比例" icon, the same
 /// small menu as the strip's quality, above the button; the room menu's
-/// "画面比例" sets the same setting.
+/// "画面比例" opens the same menu next to its own button
+/// ([showVideoFitMenu], docs/ui/compare/U.2n c5).
 class VideoFitButton extends ConsumerWidget {
   /// Creates the button.
   const new({this.onMenu, super.key});
@@ -233,17 +234,9 @@ class VideoFitButton extends ConsumerWidget {
         constraints: const BoxConstraints(minWidth: kMinInteractiveDimension, minHeight: kMinInteractiveDimension),
         onPressed: () async {
           onMenu?.call(true);
-          final chosen = await showSmallMenu(
-            anchor,
-            entries: [for (var i = 0; i < videoFits.length; i++) videoFitName(i)],
-            current: index,
-            entryKey: 'video-fit',
-            preferAbove: true,
-          );
+          // The room menu's "画面比例" opens the same menu (U.2n c5).
+          await showVideoFitMenu(anchor, ref.read(storeProvider).settings, preferAbove: true);
           onMenu?.call(false);
-          if (chosen != null && chosen != index) {
-            await ref.read(storeProvider).settings.set(Settings.videoFitIndex, chosen);
-          }
         },
         icon: const Icon(AppIcons.aspectRatio, size: 22),
       ),

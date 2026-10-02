@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
@@ -16,6 +17,8 @@ import 'package:pure_live/features/search/search_ranking.dart';
 import 'package:pure_live/features/search/search_scope.dart';
 import 'package:pure_live/features/search/search_view.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_grid.dart';
 
@@ -409,6 +412,63 @@ void main() {
       await tester.pump();
       expect(find.byKey(const ValueKey('search-history')), findsOneWidget);
       expect(find.widgetWithText(InputChip, 'hello'), findsOneWidget);
+    });
+
+    testWidgets('U.2b2 c1: without its own opener a card opens the room with the results in their order', (
+      tester,
+    ) async {
+      tester.view
+        ..physicalSize = const Size(800, 1200)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      services = (await tester.runAsync(testServices))!;
+      final opened = <Object?>[];
+      final router = AppNavigator.router = GoRouter(
+        initialLocation: RoutePath.kInitial,
+        routes: [
+          GoRoute(
+            path: RoutePath.kInitial,
+            builder: (context, state) => const LiveUiScope(config: LiveUiConfig(), child: SearchView()),
+          ),
+          GoRoute(
+            path: RoutePath.kLivePlay,
+            builder: (context, state) {
+              opened.add(state.extra);
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
+      );
+      addTearDown(() => AppNavigator.router = null);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            appServicesProvider.overrideWithValue(services),
+            sitesProvider.overrideWithValue(
+              SiteRegistry({
+                'bilibili': () => FakeSite(
+                  'bilibili',
+                  pages: {
+                    1: [_room('bilibili', '1', title: 'One'), _room('bilibili', '2', title: 'Two')],
+                  },
+                ),
+              }),
+            ),
+          ],
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await tester.pump();
+      await submit(tester, 'x');
+      final shown = tester.widgetList<RoomGridCard>(find.byType(RoomGridCard)).map((card) => card.room.roomId);
+      expect(shown, hasLength(2));
+      await tester.tap(find.text('Two'));
+      await tester.pumpAndSettle();
+      final args = opened.last! as LiveRoomArgs;
+      expect(args.room.roomId, '2');
+      expect(args.playlist.map((room) => room.roomId), shown);
+      await tester.pump(AppNavigator.openGuard);
+      await tester.runAsync(services.close);
     });
 
     testWidgets('M13.16: overseas failures suggest a proxy; the scope panel leaves them out and is remembered', (

@@ -6,6 +6,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_layout.dart';
+import 'package:pure_live/features/live_play/player/room_swipe.dart';
 
 /// The icon of a gesture's [level] (3.x `BrightnessVolumnDargArea`: none,
 /// under half, half and more).
@@ -37,10 +38,19 @@ enum GestureLevel {
 /// drag handling and `volume_control.dart`): on phones a vertical drag on
 /// the right half changes the media volume and on the left half the
 /// brightness; with a mouse the wheel changes the player's volume, kept as
-/// the room's. A level bar shows while it changes.
+/// the room's. A level bar shows while it changes. With a [swipe] (the
+/// portrait fullscreen opened from a list, U.2b2) the picture is in thirds:
+/// brightness on the left, the room on the middle, volume on the right.
 class PlayerGestureLayer extends StatefulWidget {
   /// Wraps [child].
-  const new({required this.controller, required this.child, this.enabled = true, this.onSwipeUp, super.key});
+  const new({
+    required this.controller,
+    required this.child,
+    this.enabled = true,
+    this.onSwipeUp,
+    this.swipe,
+    super.key,
+  });
 
   /// The room.
   final LiveRoomController controller;
@@ -56,6 +66,9 @@ class PlayerGestureLayer extends StatefulWidget {
   /// `BrightnessVolumnDargArea._onVerticalDragStart`).
   final VoidCallback? onSwipeUp;
 
+  /// The swipe between rooms; null without one.
+  final RoomSwipeController? swipe;
+
   @override
   State<PlayerGestureLayer> createState() => PlayerGestureLayerState();
 }
@@ -68,6 +81,9 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
   Timer? _save;
   GestureLevel? _dragging;
   double? _restoring;
+
+  /// A drag in the middle third moves between rooms (U.2b2).
+  bool _switching = false;
 
   bool get _systemVolume => DeviceControls.available;
 
@@ -124,17 +140,30 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
     final size = context.size ?? Size.zero;
     _restoring = null;
     _dragging = null;
+    _switching = false;
     if (widget.onSwipeUp != null && details.localPosition.dy >= size.height - portraitRestoreZone) {
       _restoring = 0;
       return;
     }
+    final swipe = widget.swipe;
+    final drag = pictureDragAt(x: details.localPosition.dx, width: size.width, switchRooms: swipe != null);
+    if (drag == PictureDrag.switchRoom) {
+      _switching = true;
+      swipe?.start();
+      return;
+    }
     if (!DeviceControls.available) return;
-    final kind = details.localPosition.dx < size.width / 2 ? GestureLevel.brightness : GestureLevel.volume;
+    final kind = drag == PictureDrag.brightness ? GestureLevel.brightness : GestureLevel.volume;
     _dragging = kind;
     unawaited(_current(kind).then((value) => _level = value));
   }
 
   void _onDragEnd(DragEndDetails details) {
+    if (_switching) {
+      _switching = false;
+      widget.swipe?.end(details.primaryVelocity ?? 0);
+      return;
+    }
     final restoring = _restoring;
     _restoring = null;
     _dragging = null;
@@ -144,6 +173,10 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
   }
 
   void _onDragUpdate(DragUpdateDetails details) {
+    if (_switching) {
+      widget.swipe?.update(details.delta.dy);
+      return;
+    }
     if (_restoring case final upward?) {
       _restoring = (upward - details.delta.dy).clamp(0.0, double.infinity);
       return;
@@ -160,7 +193,7 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
   Widget build(BuildContext context) {
     final mobile = DeviceControls.available;
     var content = widget.child;
-    if (widget.enabled && (mobile || widget.onSwipeUp != null)) {
+    if (widget.enabled && (mobile || widget.onSwipeUp != null || widget.swipe != null)) {
       content = GestureDetector(
         behavior: HitTestBehavior.translucent,
         onVerticalDragStart: _onDragStart,
@@ -169,6 +202,8 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
         onVerticalDragCancel: () {
           _dragging = null;
           _restoring = null;
+          if (_switching) widget.swipe?.cancel();
+          _switching = false;
         },
         child: content,
       );

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -86,21 +87,41 @@ abstract final class AppNavigator {
     unawaited(toNamed<void>(RoutePath.kAreaRooms, arguments: [site, category]));
   }
 
+  /// Whether [room] has a usable platform and id.
+  static bool _usable(LiveRoom room) {
+    final platform = room.platform.trim().toLowerCase();
+    return platform.isNotEmpty && room.roomId.isNotEmpty && SiteIds.isSupported(platform);
+  }
+
   /// The room with a usable platform and id, or null after telling the user
   /// why not (retired platform, missing id).
   static LiveRoom? _openable(LiveRoom room) {
-    final platform = room.platform.trim().toLowerCase();
-    if (platform.isEmpty || room.roomId.isEmpty || !SiteIds.isSupported(platform)) {
-      toast(i18n(SiteIds.isRetired(platform) ? 'platform_retired' : 'get_room_info_failed_retry'));
+    if (!_usable(room)) {
+      toast(
+        i18n(SiteIds.isRetired(room.platform.trim().toLowerCase()) ? 'platform_retired' : 'get_room_info_failed_retry'),
+      );
       return null;
     }
     return room;
   }
 
+  /// The live room's route arguments: [room] with the usable rooms of
+  /// [playlist] (U.2b2), or [room] alone when that leaves nothing to switch
+  /// to.
+  static Object liveRoomArguments(LiveRoom room, List<LiveRoom> playlist) {
+    final playable = [
+      for (final item in playlist)
+        if (_usable(item)) item,
+    ];
+    final others = playable.where((item) => !item.hasSameIdentity(room));
+    return others.isEmpty ? room : LiveRoomArgs(room: room, playlist: List.unmodifiable(playable));
+  }
+
   /// Opens the live room (3.x `toLiveRoomDetail`); a second call while one
   /// is opening is ignored. The player's floating window hand-off belongs
-  /// to the player (M7.2/M13).
-  static Future<void> toLiveRoomDetail({required LiveRoom liveRoom}) async {
+  /// to the player (M7.2/M13). [playlist] is the list the room was picked
+  /// from, in its order (U.2b2: the portrait fullscreen swipes through it).
+  static Future<void> toLiveRoomDetail({required LiveRoom liveRoom, List<LiveRoom> playlist = const []}) async {
     if (_openingLiveRoom) return;
     final room = _openable(liveRoom);
     if (room == null) return;
@@ -109,7 +130,7 @@ abstract final class AppNavigator {
       // 3.x awaited `Get.toNamed`, which completes when the room closes, so
       // it ignored every other room while one was open. Here a second tap
       // is ignored only while the room's page is coming in.
-      unawaited(toNamed<void>(RoutePath.kLivePlay, arguments: room));
+      unawaited(toNamed<void>(RoutePath.kLivePlay, arguments: liveRoomArguments(room, playlist)));
     } on Object catch (error, stack) {
       log('Open live room failed', name: 'AppNavigator', error: error, stackTrace: stack);
       toast(i18n('get_room_info_failed_retry'));

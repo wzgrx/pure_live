@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -30,11 +31,13 @@ import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_layout.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
+import 'package:pure_live/features/live_play/logic/room_playlist.dart';
 import 'package:pure_live/features/live_play/logic/room_refresh_rate.dart';
 import 'package:pure_live/features/live_play/logic/room_runtime.dart';
 import 'package:pure_live/features/live_play/mini/room_mini_window.dart';
 import 'package:pure_live/features/live_play/player/player_controls.dart';
 import 'package:pure_live/features/live_play/player/player_view.dart';
+import 'package:pure_live/features/live_play/player/room_swipe.dart';
 import 'package:pure_live/features/live_play/record/record_panel.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -42,7 +45,8 @@ import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_observer.dart';
 import 'package:pure_live/routes/route_path.dart';
 
-/// The live room (argument: the `LiveRoom`) (3.x `lib/modules/live_play`).
+/// The live room (argument: the `LiveRoom`, or a `LiveRoomArgs` with the
+/// list it was opened from) (3.x `lib/modules/live_play`).
 ///
 /// Routes: `RoutePath.kLivePlay`.
 ///
@@ -75,6 +79,12 @@ import 'package:pure_live/routes/route_path.dart';
 /// it for the next room ([PlayerStandby], F.1d). The picture's mini window
 /// button ([RoomMiniWindow]) enters Android's picture-in-picture or shrinks a
 /// desktop window to the mini window; the page then shows only the picture.
+///
+/// U.2b2: opened from a list ([LiveRoomArgs.playlist]) and with "竖屏全屏上下滑
+/// 换台" on, the portrait fullscreen's middle third swipes up to the next
+/// room of the list and down to the previous ([RoomSwipeController]). The
+/// page stays and so does the player: the room's [RoomRuntime] is replaced
+/// by one for the new room on the same session.
 class LivePlayPage extends ConsumerStatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});
@@ -94,6 +104,7 @@ typedef _LayoutSettings = ({
   String policy,
   bool collapsed,
   bool composer,
+  bool swipe,
 });
 
 class _LivePlayPageState extends ConsumerState<LivePlayPage> {
@@ -109,7 +120,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   late final SettingsStore _settings;
   LiveRoomController? _controller;
   RoomOrientationChoice? _orientation;
-  late final ReconnectWatch _reconnect;
+  late ReconnectWatch _reconnect;
   StreamSubscription<PlaybackState>? _autoFullscreen;
   StreamSubscription<PlaybackState>? _shape;
   RoomDisplay _display = RoomDisplay.inline;
@@ -144,13 +155,31 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   /// The display's refresh rate follows the video's frame rate (U.2i).
   RoomRefreshRate? _refreshRate;
 
+  /// The list the room was opened from (U.2b2); null for a lone room.
+  RoomPlaylist? _playlist;
+
+  /// The portrait fullscreen's swipe between the rooms of [_playlist].
+  late final RoomSwipeController _swipe = RoomSwipeController(onSwitch: _swipeTo);
+
+  /// A room swiped away still stopping the player, or null: the next room
+  /// starts once it is done, and every stop waits for the one before (the
+  /// session takes one stop at a time).
+  Future<void>? _handover;
+
+  /// Counts the rooms shown: the page's room parts are built afresh for each.
+  int _roomEpoch = 0;
+
   RoomPlatform get _platform => RoomPlatform.current();
 
   @override
   void initState() {
     super.initState();
-    final room = widget.route.arguments;
-    if (room is! LiveRoom) {
+    final (room, playlist) = switch (widget.route.arguments) {
+      LiveRoomArgs(:final room, :final playlist) => (room, playlist),
+      final LiveRoom room => (room, const <LiveRoom>[]),
+      _ => (null, const <LiveRoom>[]),
+    };
+    if (room == null) {
       _problem = i18n('get_room_info_failed_retry');
       return;
     }
@@ -163,6 +192,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     _settings = store.settings;
     final standby = ref.read(playerStandbyProvider);
     _standby = standby;
+    if (playlist.isNotEmpty) _playlist = RoomPlaylist(playlist, current: room);
     // The same room still playing in the floating window plays on here; any
     // other floating room stops (3.x `toLiveRoomDetail`).
     final adopted = FloatingRoom.instance.claim(room);
@@ -170,56 +200,16 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     if (adopted != null) {
       runtime = adopted;
     } else {
-      final danmaku = ref.read(danmakuProvider);
       final config = _engineConfig(store.settings);
       final key = engineConfigKey(config);
       // The player the last room left, when it is configured the same way.
       final session = standby.take(config: key) ?? ref.read(playbackSessionFactoryProvider)(config: config);
-      final controller = LiveRoomController(
-        room: room,
-        site: site,
-        session: session,
-        danmaku: danmaku.connectionFor(site.id),
-        danmakuSupported: danmaku.supports(site.id),
-        store: store,
-        mobile: _platform.mobile,
-        toast: (message) => AppNavigator.toast(message),
-        // 3.x's automatic ASMR mode: Android only.
-        sleepSessionOnStart: _platform.android && store.settings.get(Settings.enableAsmrSleepMode),
-        network: ref.read(networkProbeProvider),
-      );
-      runtime = RoomRuntime(
-        controller: controller,
-        session: session,
-        orientation: RoomOrientationChoice(settings: store.settings, room: room),
-        reconnect: ReconnectWatch(session.states, now: controller.now),
-        background: RoomBackgroundPolicy(controller: controller, settings: store.settings)..start(),
-        playerConfig: key,
-      );
+      runtime = _newRuntime(room, site, session: session, playerConfig: key);
     }
-    _runtime = runtime;
+    _attachRoom(runtime);
     final session = runtime.session;
-    final controller = _controller = runtime.controller;
-    _orientation = runtime.orientation;
-    _reconnect = runtime.reconnect;
-    // A new local session for each visit; it holds no subscription, so the
-    // room it talks to may be one the floating window hands back (U.2j).
-    _local = LocalRoomSession(
-      interaction: ref.read(localInteractionProvider),
-      room: controller,
-      overlayShown: () => localOverlayShown(store.settings),
-      toast: (message) => AppNavigator.toast(message),
-    );
+    final controller = runtime.controller;
     _panels.addListener(_onPanel);
-    _mini =
-        RoomMiniWindow(
-            controller: controller,
-            settings: store.settings,
-            leaveFullscreen: _exitFullscreen,
-            closeRoom: _closeOnPurpose,
-          )
-          ..addListener(_onMini)
-          ..startAutoPip();
     _refreshRate = RoomRefreshRate(session: session, settings: store.settings)..start();
     // F.1b: before the first frame the size the platform declares for the
     // line lays the room out (3.x `LiveStreamGeometryHint`); the decoder's
@@ -248,6 +238,121 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     // F.1c (3.x `LivePlayBackScope`): Android hands every back to the room
     // while it is open, before Flutter could pop it.
     if (_platform.android) unawaited(RoomBackChannel.instance.hold(this, _nativeBack));
+  }
+
+  /// The parts of [room] on [site], playing on [session].
+  RoomRuntime _newRuntime(
+    LiveRoom room,
+    LiveSite site, {
+    required PlaybackSession session,
+    required Object? playerConfig,
+  }) {
+    final store = ref.read(storeProvider);
+    final danmaku = ref.read(danmakuProvider);
+    final controller = LiveRoomController(
+      room: room,
+      site: site,
+      session: session,
+      danmaku: danmaku.connectionFor(site.id),
+      danmakuSupported: danmaku.supports(site.id),
+      store: store,
+      mobile: _platform.mobile,
+      toast: (message) => AppNavigator.toast(message),
+      // 3.x's automatic ASMR mode: Android only.
+      sleepSessionOnStart: _platform.android && store.settings.get(Settings.enableAsmrSleepMode),
+      network: ref.read(networkProbeProvider),
+    );
+    return RoomRuntime(
+      controller: controller,
+      session: session,
+      orientation: RoomOrientationChoice(settings: store.settings, room: room),
+      reconnect: ReconnectWatch(session.states, now: controller.now),
+      background: RoomBackgroundPolicy(controller: controller, settings: store.settings)..start(),
+      playerConfig: playerConfig,
+    );
+  }
+
+  /// Makes [runtime] the page's room, with this visit's local interaction
+  /// (U.2k: it holds no subscription, so the room it talks to may be one the
+  /// floating window hands back, U.2j) and mini window (U.2j).
+  void _attachRoom(RoomRuntime runtime) {
+    _runtime = runtime;
+    final controller = _controller = runtime.controller;
+    _orientation = runtime.orientation;
+    _reconnect = runtime.reconnect;
+    final settings = ref.read(storeProvider).settings;
+    _local = LocalRoomSession(
+      interaction: ref.read(localInteractionProvider),
+      room: controller,
+      overlayShown: () => localOverlayShown(settings),
+      toast: (message) => AppNavigator.toast(message),
+    );
+    _mini =
+        RoomMiniWindow(
+            controller: controller,
+            settings: settings,
+            leaveFullscreen: _exitFullscreen,
+            closeRoom: _closeOnPurpose,
+          )
+          ..addListener(_onMini)
+          ..startAutoPip();
+  }
+
+  /// Lets go of the parts [_attachRoom] made.
+  void _detachRoom() {
+    _local?.dispose();
+    _mini
+      ?..removeListener(_onMini)
+      ..dispose();
+  }
+
+  /// The portrait fullscreen's swipe let go past the switch (U.2b2): the
+  /// room [step] places along the list.
+  void _swipeTo(int step) {
+    final playlist = _playlist;
+    if (!mounted || playlist == null || !playlist.swipeable || _display != RoomDisplay.portraitFullscreen) return;
+    _switchRoom(playlist.move(step));
+  }
+
+  /// Shows [room] in this page on the same player (3.x `switchRoom` kept the
+  /// page too): the room before stops and lets the player go, then [room]
+  /// starts on it. Swipes meanwhile wait their turn, and only the last room
+  /// starts.
+  void _switchRoom(LiveRoom room) {
+    final old = _runtime;
+    final site = ref.read(sitesProvider).maybeOf(room.platform);
+    if (old == null || site == null) return;
+    unawaited(_autoFullscreen?.cancel());
+    _autoFullscreen = null;
+    _panels.close();
+    _detachRoom();
+    final runtime = _newRuntime(room, site, session: old.session, playerConfig: old.playerConfig);
+    setState(() {
+      _attachRoom(runtime);
+      // Everything of the room before is built afresh, the player too.
+      _roomEpoch++;
+      _playerKey = GlobalKey(debugLabel: 'room-player');
+      _details = false;
+      _entryHint = false;
+    });
+    Future<void> release() async {
+      try {
+        // Handed over only once stopped: a stop still running would stop
+        // what the next room opens.
+        await old.dispose(keep: (_) {});
+      } on Object catch (error, stack) {
+        developer.log('Releasing the room before failed', name: 'LivePlay', error: error, stackTrace: stack);
+      }
+    }
+
+    final previous = _handover;
+    final handover = _handover = previous == null ? release() : previous.then((_) => release());
+    unawaited(
+      handover.whenComplete(() {
+        if (identical(_handover, handover)) _handover = null;
+        if (mounted && identical(_runtime, runtime) && !runtime.disposed) unawaited(runtime.controller.start());
+      }),
+    );
   }
 
   /// The player settings (M9) as the engine's configuration.
@@ -321,6 +426,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     unawaited(DeviceControls.resetBrightness());
     if (fullscreen && _platform.desktop) unawaited(DesktopWindow.setFullScreen(on: false));
     _refreshRate?.dispose();
+    _swipe.dispose();
     _detectedPortrait.dispose();
     _guideReveal.dispose();
     _local?.dispose();
@@ -339,12 +445,18 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       final standby = _standby;
       if (float && floating.canShow) {
         floating.show(runtime);
-      } else if (standby == null || _settings.get(Settings.useHardStopOnExit)) {
-        unawaited(runtime.dispose());
       } else {
-        // "播放器强制销毁" off (3.x default): the stopped player waits for the
-        // next room (F.1d).
-        unawaited(runtime.dispose(keep: (session) => standby.keep(session, config: runtime.playerConfig)));
+        final Future<void> Function() release;
+        if (standby == null || _settings.get(Settings.useHardStopOnExit)) {
+          release = runtime.dispose;
+        } else {
+          // "播放器强制销毁" off (3.x default): the stopped player waits for
+          // the next room (F.1d).
+          release = () => runtime.dispose(keep: (session) => standby.keep(session, config: runtime.playerConfig));
+        }
+        // A swipe still stopping the player goes first (U.2b2).
+        final pending = _handover;
+        unawaited(pending == null ? release() : pending.then((_) => release()));
       }
     }
     super.dispose();
@@ -363,6 +475,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     policy: ref.read(storeProvider).settings.get(Settings.portraitFullscreenPolicy),
     collapsed: ref.read(storeProvider).settings.get(Settings.livePlayChatCollapsed),
     composer: ref.read(storeProvider).settings.get(Settings.localInteractionEnabled),
+    swipe: ref.read(storeProvider).settings.get(Settings.portraitFullscreenSwipeSwitch),
   );
 
   /// Enters fullscreen: the portrait fullscreen for a portrait stream on a
@@ -549,6 +662,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       policy: watchSetting(ref, Settings.portraitFullscreenPolicy),
       collapsed: watchSetting(ref, Settings.livePlayChatCollapsed),
       composer: watchSetting(ref, Settings.localInteractionEnabled),
+      swipe: watchSetting(ref, Settings.portraitFullscreenSwipeSwitch),
     );
     return RoomMiniScope(
       notifier: _mini!,
@@ -558,9 +672,13 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
           notifier: _panels,
           child: IptvGuideScope(
             reveal: _revealGuide,
-            child: ListenableBuilder(
-              listenable: Listenable.merge([_orientation, _detectedPortrait]),
-              builder: (context, _) => _page(context, controller, settings),
+            // A room swiped to (U.2b2) builds its parts afresh.
+            child: KeyedSubtree(
+              key: ValueKey(_roomEpoch),
+              child: ListenableBuilder(
+                listenable: Listenable.merge([_orientation, _detectedPortrait]),
+                builder: (context, _) => _page(context, controller, settings),
+              ),
             ),
           ),
         ),
@@ -607,8 +725,9 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
 
   /// One player element for every layout (normal, fullscreen,
   /// picture-in-picture): its controls' state and the picture survive the
-  /// switches instead of being built anew (M13.16).
-  final GlobalKey _playerKey = GlobalKey(debugLabel: 'room-player');
+  /// switches instead of being built anew (M13.16). A new room swiped to
+  /// gets a new one (U.2b2).
+  GlobalKey _playerKey = GlobalKey(debugLabel: 'room-player');
 
   Widget _player(
     LiveRoomController controller,
@@ -618,6 +737,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     double covered = 0,
     WideBarActions? wide,
     VoidCallback? onBack,
+    RoomSwipeController? swipe,
   }) => RoomPlayer(
     key: _playerKey,
     controller: controller,
@@ -637,6 +757,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     onSwipeUp: _display == RoomDisplay.portraitFullscreen ? () => unawaited(_exitFullscreen()) : null,
     entryHint: _entryHint,
     onOpenGuide: _revealGuide,
+    swipe: swipe,
   );
 
   /// The open panel, or nothing.
@@ -764,21 +885,39 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
           mobile: _platform.mobile,
         );
         final portrait = _portraitStream(settings);
+        final upright = arrangement == ControlsArrangement.portraitFullscreen;
+        // U.2b2: the portrait fullscreen swipes through the list the room
+        // came from, with its setting on.
+        final playlist = _playlist;
+        final swipe =
+            upright &&
+                _display == RoomDisplay.portraitFullscreen &&
+                settings.swipe &&
+                _platform.mobile &&
+                playlist != null &&
+                playlist.swipeable
+            ? (_swipe..neighbours(previous: playlist.neighbour(-1), next: playlist.neighbour(1)))
+            : null;
         final player = _player(
           controller,
           settings,
           arrangement: arrangement,
-          presentation: !portrait
-              ? PicturePresentation.plain
-              : arrangement == ControlsArrangement.portraitFullscreen
-              ? PicturePresentation.portraitModes
-              : PicturePresentation.ambient,
+          presentation: portrait
+              ? (upright ? PicturePresentation.portraitModes : PicturePresentation.ambient)
+              // A landscape stream in the portrait fullscreen (swiped to, or
+              // forced landscape) sits in the middle over the ambient
+              // background (U.2b2).
+              : _display == RoomDisplay.portraitFullscreen && upright
+              ? PicturePresentation.ambient
+              : PicturePresentation.plain,
+          swipe: swipe,
         );
+        final picture = swipe == null
+            ? player
+            : RoomSwipeStage(key: const ValueKey('live-play-swipe-stage'), controller: swipe, child: player);
         // Panels in the portrait fullscreen rise from the bottom (U.2b →
         // U.2f), elsewhere they come in from the right.
-        return arrangement == ControlsArrangement.portraitFullscreen
-            ? _withPanelAtBottom(controller, player)
-            : _withSidePanel(controller, player);
+        return upright ? _withPanelAtBottom(controller, picture) : _withSidePanel(controller, picture);
       },
     ),
   );

@@ -494,7 +494,7 @@ class _FollowGridState extends ConsumerState<_FollowGrid> {
                 key: ValueKey(room.identityKey),
                 data: policy.cardOf(room),
                 trailing: note == null ? null : _RowNote(text: note),
-                onTap: () => unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room)),
+                onTap: () => unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room, playlist: all)),
                 onLongPress: () => unawaited(showRoomMenu(context, store: store, room: room)),
               );
             },
@@ -529,6 +529,8 @@ class _FollowGridState extends ConsumerState<_FollowGrid> {
                 statusPending: pending != null,
                 statusPendingLabel: pending,
                 now: now,
+                // The group's rooms go along (U.2b2).
+                onOpen: () => unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room, playlist: all)),
               );
             },
           );

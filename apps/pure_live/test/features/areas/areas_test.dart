@@ -12,7 +12,9 @@ import 'package:pure_live/features/areas/area_artwork.dart';
 import 'package:pure_live/features/areas/area_catalog.dart';
 import 'package:pure_live/features/areas/favorite_areas_view.dart';
 import 'package:pure_live/features/hot_areas/hot_areas_page.dart';
+import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_feed.dart';
@@ -377,6 +379,16 @@ void main() {
       await _settle(tester);
       expect((await tester.runAsync(services.store.followAreas.all))!.single.areaId, '1');
       expect(toasts.last, contains('英雄联盟'));
+
+      // U.2b2 c1: a card opens its room with the area's rooms, in order.
+      await tester.tap(find.text('标题12'));
+      await _settle(tester);
+      final args = tester.widget<LivePlayPage>(find.byType(LivePlayPage)).route.arguments! as LiveRoomArgs;
+      expect(args.room.roomId, '12');
+      expect(args.playlist.map((room) => room.roomId), ['11', '12']);
+      AppNavigator.back();
+      await _settle(tester);
+      await tester.pump(AppNavigator.openGuard);
       await tester.runAsync(services.close);
     });
   });

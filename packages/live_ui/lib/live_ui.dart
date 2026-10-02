@@ -37,6 +37,7 @@ export 'src/widgets/pip_danmaku_preview.dart';
 export 'src/widgets/qr_code_widget.dart';
 export 'src/widgets/record_glyph.dart';
 export 'src/widgets/refresh_rate.dart';
+export 'src/widgets/refresh_view.dart';
 export 'src/widgets/room_card.dart';
 export 'src/widgets/room_card_appearance.dart';
 export 'src/widgets/scrollable_tab_bar.dart';

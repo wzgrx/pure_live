@@ -24,6 +24,12 @@ final class LiveUiStrings {
     required this.verifying,
     required this.delete,
     this.offline = '未开播',
+    this.refreshPull = '下拉刷新',
+    this.refreshRelease = '松开刷新',
+    this.refreshRefreshing = '正在刷新...',
+    this.refreshSucceeded = '刷新成功',
+    this.refreshFailed = '刷新失败',
+    this.refreshLastTime = '上次刷新时间 {time}',
   });
 
   /// Simplified Chinese (3.x `zh.json`).
@@ -61,6 +67,12 @@ final class LiveUiStrings {
     verifying: 'Verifying',
     delete: 'Delete',
     offline: 'Offline',
+    refreshPull: 'Pull to refresh',
+    refreshRelease: 'Release to refresh',
+    refreshRefreshing: 'Refreshing...',
+    refreshSucceeded: 'Refreshed',
+    refreshFailed: 'Refresh failed',
+    refreshLastTime: 'Last refreshed {time}',
   );
 
   /// Empty state title (`status_empty_title`).
@@ -108,6 +120,27 @@ final class LiveUiStrings {
   /// The mark of a room that is not live, on its cover (U.4a c4,
   /// `offline_room_title`).
   final String offline;
+
+  /// The refresh header while pulled (`refresh_pull_to_refresh`; 3.x's
+  /// header said "上拉刷新", U.1c P19).
+  final String refreshPull;
+
+  /// The refresh header once releasing refreshes
+  /// (`refresh_release_to_refresh`).
+  final String refreshRelease;
+
+  /// The refresh header while refreshing (`refresh_refreshing`).
+  final String refreshRefreshing;
+
+  /// The refresh header after a refresh (`refresh_succeeded`).
+  final String refreshSucceeded;
+
+  /// The refresh header after a failed refresh (`refresh_failed`).
+  final String refreshFailed;
+
+  /// The refresh header's second line; `{time}` is the last refresh's
+  /// `H:mm` (`refresh_last_updated_at`).
+  final String refreshLastTime;
 }
 
 /// Request headers for an image address (3.x `networkImageHeaders`: some

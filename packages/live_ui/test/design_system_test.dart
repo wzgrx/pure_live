@@ -229,6 +229,10 @@ void main() {
       (AppIcons.password, Remix.lock_password_line),
       (AppIcons.syncStart, Remix.play_circle_line),
       (AppIcons.syncStop, Remix.stop_circle_line),
+      // The pull-to-refresh header (3.x plugins/global.dart; U.1c c19).
+      (AppIcons.refreshPull, Icons.arrow_downward_rounded),
+      (AppIcons.refreshSucceeded, Icons.done_rounded),
+      (AppIcons.refreshFailed, Icons.error_outline_rounded),
     ];
     for (final (actual, glyph) in expected) {
       expect(actual, glyph);

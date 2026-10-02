@@ -1,6 +1,6 @@
 # U.1c 通用组件（开发记录）
 
-- 日期：2026-10-02（云端任务 U01，本地 worktree；记录见 [docs/cloud/records/U01.md](../../cloud/records/U01.md)）
+- 日期：2026-10-02（云端任务 U01，本地 worktree；记录见 [docs/4.0.x/records/U01.md](../../4.0.x/records/U01.md)）
 - 设计：[docs/ui/compare/U.1c/README.md](../compare/U.1c/README.md)（已确认，C1～C4 按 A）
 - 组件都在 `packages/live_ui`；各页面只替换成统一组件。直播间（`features/live_play/`）按协调人的要求没动。
 

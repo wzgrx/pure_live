@@ -4,7 +4,7 @@
 // each frame takes here (debug mode on the test host: compare runs with
 // each other, not with a phone's profile build).
 //
-// The default run is 3 simulated seconds; the full one (docs/cloud/records/
+// The default run is 3 simulated seconds; the full one (docs/4.0.x/records/
 // B08.md) is
 //   flutter test test/features/live_play/chat_benchmark_test.dart \
 //     --dart-define=CHAT_BENCH_SECONDS=60
@@ -147,7 +147,7 @@ void main() {
     }
     final sorted = [...times]..sort();
     final mean = times.fold<int>(0, (sum, t) => sum + t) / times.length / 1000;
-    // The numbers go to the record (docs/cloud/records/B08.md).
+    // The numbers go to the record (docs/4.0.x/records/B08.md).
     // ignore: avoid_print
     print(
       'B08 chat benchmark: $_seconds s, $sent messages, $frames frames at $_hz Hz\n'

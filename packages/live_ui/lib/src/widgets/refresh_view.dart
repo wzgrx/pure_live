@@ -10,7 +10,7 @@ import 'package:live_ui/src/theme/motion.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
 import 'package:live_ui/src/widgets/status_view.dart';
 
-// Pull to refresh with 3.x's feel (docs/cloud/tasks/P02.md, research
+// Pull to refresh with 3.x's feel (docs/4.0.x/tasks/P02.md, research
 // 2026-10-02 §2.2–2.3 option A): 3.x's lists sat in easy_refresh 3.5.1's
 // `EasyRefresh` with its `ClassicHeader`, so they decelerated and bounced
 // like iOS (`_ERScrollPhysics extends BouncingScrollPhysics`), drew no
@@ -55,7 +55,7 @@ enum AppRefreshMode {
 }
 
 /// A list that refreshes when pulled down, with 3.x's touch feel (U.1c c19,
-/// docs/cloud/tasks/P02.md):
+/// docs/4.0.x/tasks/P02.md):
 ///
 /// * both ends spring back when pulled past them (Bouncing), and a fling
 ///   decelerates like iOS: 3.x's main lists. There is no stretch or glow;

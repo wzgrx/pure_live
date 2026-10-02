@@ -5,7 +5,7 @@
 // raster P90/P99 and janky frames go to the report as JSON, with research
 // §4.1's marks; a run fails only when the app breaks, not on slow frames.
 //
-// On a phone, in profile mode (docs/cloud/records/P05.md):
+// On a phone, in profile mode (docs/4.0.x/records/P05.md):
 //   flutter drive --profile -d <device> \
 //     --driver=integration_test/perf_driver.dart \
 //     --target=integration_test/perf_test.dart

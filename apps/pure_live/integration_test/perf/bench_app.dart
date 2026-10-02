@@ -1,6 +1,6 @@
 // The benchmarks' app (P05, UI_PLAN §9.4): the real PureLiveApp over an
 // in-memory store and fake platform data, so no live platform is contacted
-// (docs/cloud/RULES.md): a hot list of 300 rooms answering like a network,
+// (the tests never reach a live platform): a hot list of 300 rooms answering like a network,
 // covers and avatars from a server on this device, danmaku the benchmark
 // sends, and players that play nothing (the video's own cost is not in these
 // figures).

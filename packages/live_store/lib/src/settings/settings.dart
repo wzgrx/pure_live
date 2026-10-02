@@ -387,7 +387,7 @@ abstract final class Settings {
   /// change 7; new in v4, remembered for the next room).
   static const livePlayChatCollapsed = BoolSetting('livePlayChatCollapsed', section: 'player', defaultValue: false);
 
-  /// New (docs/cloud/tasks/B05.md, docs/ui/compare/U.2m c4; 3.x has no such
+  /// New (docs/4.0.x/tasks/B05.md, docs/ui/compare/U.2m c4; 3.x has no such
   /// setting): how the live room's "切换直播间" panel shows the rooms, kept
   /// from the panel's style button: `grid` (the default, 3.x's small cards,
   /// GitHub issue #37) or `list` (rows with a 16:9 cover).
@@ -461,7 +461,7 @@ abstract final class Settings {
     allowed: {'compact', 'card'},
   );
 
-  /// New (docs/cloud/tasks/B02.md c3; 3.x has no such setting): what the
+  /// New (docs/4.0.x/tasks/B02.md c3; 3.x has no such setting): what the
   /// platform's flying danmaku do while the video is paused ("暂停时的弹幕"):
   /// `pause` stands them with the video (the default, as 3.x's main
   /// picture), `continue` lets them fly on and new ones in. Danmaku composed

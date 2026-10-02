@@ -5,7 +5,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_ui/live_ui.dart';
 
-// docs/cloud/tasks/P03.md: tab pages turn like Android's ViewPager and
+// docs/4.0.x/tasks/P03.md: tab pages turn like Android's ViewPager and
 // settle firmly; a drag let go of carries on at the finger's speed. On the
 // K90's screen (400 × 869 dp at 3×) at 120 Hz.
 

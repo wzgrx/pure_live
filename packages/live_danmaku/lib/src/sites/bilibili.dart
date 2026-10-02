@@ -701,7 +701,7 @@ abstract final class BilibiliDanmakuProtocol {
   /// ([rich], decoded from JSON text), the notice's `uinfo`, `data.uinfo`
   /// and [legacy] (`info[2][1]`); the first rich one when all are masked,
   /// else [legacy]. A guest gets every one of them masked (B06: the server
-  /// masks by connection, see docs/cloud/records/B06.md); a logged-in
+  /// masks by connection, see docs/4.0.x/records/B06.md); a logged-in
   /// connection gets the full name in `user.base.name`.
   static String _userName(Map<String, dynamic> notice, Object? rich, String legacy) {
     final data = notice['data'];

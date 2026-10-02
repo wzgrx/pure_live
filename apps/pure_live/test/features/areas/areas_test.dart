@@ -211,6 +211,12 @@ void main() {
       expect(find.text('斗鱼'), findsOneWidget);
       expect(find.text('虎牙'), findsOneWidget);
       expect(find.text('英雄联盟'), findsOneWidget);
+      // P02: pull to refresh with 3.x's bounce and classic header.
+      expect(find.byType(RefreshIndicator), findsNothing);
+      expect(
+        find.ancestor(of: find.byKey(const ValueKey('area-grid')), matching: find.byType(AppRefreshView)),
+        findsWidgets,
+      );
 
       // U.4d c2: the categories in the secondary style; c3: the cards name only the area.
       final categories = tester.widget<ScrollableTabBar>(find.byKey(const ValueKey('area-category-tabs')));

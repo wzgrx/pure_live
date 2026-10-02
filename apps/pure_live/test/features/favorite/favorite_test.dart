@@ -351,6 +351,10 @@ void main() {
         },
       );
       expect(douyu.requested, unorderedEquals(['1', '2']));
+      // P02: 3.x's bounce and classic header, also here (3.x had the
+      // Material circle on this page).
+      expect(find.byType(RefreshIndicator), findsNothing);
+      expect(find.byType(AppRefreshView), findsWidgets);
       // Live: the paid room, marked; its audience shortened as 3.x did.
       expect(find.text('主播一'), findsOneWidget);
       expect(find.text(i18n('room_mark_paid')), findsOneWidget);

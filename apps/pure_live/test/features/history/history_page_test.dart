@@ -214,6 +214,27 @@ void main() {
     expect(await _ids(tester, h.history), ['2']);
   });
 
+  testWidgets("P02: the refresh button pulls 3.x's classic header down; the pull is the same", (tester) async {
+    final h = await _pump(tester, rooms: [(_room('1', status: LiveStatus.live), _now)]);
+    expect(find.byType(RefreshIndicator), findsNothing);
+    expect(
+      find.ancestor(of: find.byKey(const ValueKey('history-grid')), matching: find.byType(AppRefreshView)),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('history-refresh')));
+    var shown = false;
+    for (var i = 0; i < 60 && h.loaded.isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 8));
+      shown |= find.text('正在刷新...').evaluate().isNotEmpty;
+    }
+    expect(shown, isTrue);
+    await _settle(tester);
+    expect(h.loaded, ['1']);
+    await tester.pump(AppRefreshView.resultDuration);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('refresh-header')), findsNothing);
+  });
+
   testWidgets('refresh updates the rooms, keeps the watch time and marks failures pending', (tester) async {
     final watched = _now.subtract(const Duration(hours: 2));
     final h = await _pump(

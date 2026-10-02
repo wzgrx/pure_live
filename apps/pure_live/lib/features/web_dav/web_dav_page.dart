@@ -102,13 +102,15 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
     if (valid) unawaited(_load());
   }
 
-  Future<void> _load() async {
+  /// Lists the folder; [keepRows] leaves the rows on screen meanwhile (a
+  /// pull, whose header shows the progress).
+  Future<void> _load({bool keepRows = false}) async {
     final client = _client;
     if (client == null) return;
     final epoch = ++_epoch;
     final dir = _dir;
     setState(() {
-      _entries = null;
+      if (!keepRows) _entries = null;
       _error = null;
     });
     try {
@@ -126,6 +128,14 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
       log('Listing the WebDAV folder failed', name: 'WebDav', error: error, stackTrace: stack);
       if (mounted && epoch == _epoch) setState(() => _error = error);
     }
+  }
+
+  /// A pull to refresh (P02): the rows stay under the header while the
+  /// folder loads; a failure still shows the error state.
+  Future<Object?> _pullLoad() async {
+    await _load(keepRows: true);
+    final error = _error;
+    return error == null ? null : AppRefreshFailure(webDavFailureText(error));
   }
 
   void _openDir(List<String> dir) {
@@ -512,11 +522,11 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
     final entries = _entries;
     if (entries == null) return const AppStatusView(type: AppStatusType.loading, title: '', subtitle: '');
     if (entries.isEmpty) {
-      return RefreshIndicator(
-        onRefresh: _load,
-        child: LayoutBuilder(
+      return AppRefreshView(
+        onRefresh: _pullLoad,
+        builder: (context, physics) => LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(parent: PureLiveScrollPhysics()),
+            physics: physics,
             child: SizedBox(
               height: constraints.maxHeight,
               child: AppStatusView(
@@ -532,11 +542,11 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
       );
     }
     final busy = !_idle;
-    return RefreshIndicator(
-      onRefresh: _load,
-      child: ListView.builder(
+    return AppRefreshView(
+      onRefresh: _pullLoad,
+      builder: (context, physics) => ListView.builder(
         key: const ValueKey('webdav-list'),
-        physics: const AlwaysScrollableScrollPhysics(parent: PureLiveScrollPhysics()),
+        physics: physics,
         padding: EdgeInsets.fromLTRB(side, 0, side, 96),
         itemCount: entries.length,
         itemBuilder: (context, index) {

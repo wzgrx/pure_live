@@ -54,7 +54,7 @@ class HistoryPage extends ConsumerStatefulWidget {
 }
 
 class _HistoryPageState extends ConsumerState<HistoryPage> {
-  final _refreshIndicator = GlobalKey<RefreshIndicatorState>();
+  final _refreshView = GlobalKey<AppRefreshViewState>();
   final _query = TextEditingController();
   final _queryFocus = FocusNode();
 
@@ -283,7 +283,9 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                     key: const ValueKey('history-refresh'),
                     tooltip: i18n('history_refresh_status'),
                     icon: const Icon(AppIcons.refresh),
-                    onPressed: shown.isEmpty || progress != null ? null : () => _refreshIndicator.currentState?.show(),
+                    onPressed: shown.isEmpty || progress != null
+                        ? null
+                        : () => unawaited(_refreshView.currentState?.show()),
                   ),
                 ),
                 IconButton(
@@ -412,12 +414,12 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
           appearance: appearance,
           fontSizes: fontSizes,
         );
-        return RefreshIndicator(
-          key: _refreshIndicator,
+        return AppRefreshView(
+          key: _refreshView,
           onRefresh: _refresh,
-          child: CustomScrollView(
+          builder: (context, physics) => CustomScrollView(
             key: const ValueKey('history-grid'),
-            physics: const AlwaysScrollableScrollPhysics(parent: PureLiveScrollPhysics()),
+            physics: physics,
             slivers: [
               for (final (section, sectionRooms) in sections) ...[
                 SliverToBoxAdapter(

@@ -362,6 +362,35 @@ void main() {
       await store.settings.set(Settings.appProxyHost, 'proxy.example.com');
       expect(guard.needed, isFalse);
     });
+
+    test('a LAN stream asks for local-network access first; refused, it says so (release fixes, item 4)', () async {
+      final calls = <String>[];
+      var granted = false;
+      SystemAccess.debugCall = (method) async {
+        calls.add(method);
+        return granted;
+      };
+      addTearDown(() => SystemAccess.debugCall = null);
+      await loadStrings();
+      for (final url in ['http://192.168.1.8:8080/live.m3u8', 'http://10.0.0.2/a.ts', 'http://nas.local/b.m3u8']) {
+        expect(isLocalNetworkUrl(url), isTrue, reason: url);
+      }
+      for (final url in ['https://cdn.example.com/a.flv', 'http://127.0.0.1:8080/relay', 'not a url']) {
+        expect(isLocalNetworkUrl(url), isFalse, reason: url);
+      }
+      final toasts = <String>[];
+      expect(await ensureLocalNetworkFor(['https://cdn.example.com/a.flv'], toast: toasts.add), isTrue);
+      expect(calls, isEmpty, reason: 'nothing local');
+      expect(
+        await ensureLocalNetworkFor(['https://cdn.example.com/a.flv', 'http://192.168.1.8/b.m3u8'], toast: toasts.add),
+        isFalse,
+      );
+      expect(calls, ['requestLocalNetwork']);
+      expect(toasts.single, contains('局域网里的直播源'));
+      granted = true;
+      expect(await ensureLocalNetworkFor(['http://192.168.1.8/b.m3u8'], toast: toasts.add), isTrue);
+      expect(toasts, hasLength(1));
+    });
   });
 
   test('3.x sign-ins this device could not encrypt: "sign in again" once (release fixes, item 2)', () async {

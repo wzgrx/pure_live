@@ -12,6 +12,7 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/dialogs/stream_dialogs.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
+import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
@@ -187,6 +188,43 @@ void main() {
     await tester.tap(find.text('关闭'));
     await tester.pump(const Duration(seconds: 1));
     await _close(tester, services);
+  });
+
+  testWidgets('cast: the search asks for local-network access first; refused, it says so (release fixes, item 4)', (
+    tester,
+  ) async {
+    final asked = <String>[];
+    var granted = false;
+    SystemAccess.debugCall = (method) async {
+      asked.add(method);
+      return granted;
+    };
+    addTearDown(() => SystemAccess.debugCall = null);
+    var searches = 0;
+    castDiscovery = () async {
+      searches++;
+      return _Discovery(_Receiver());
+    };
+    await tester.runAsync(loadStrings);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: const LiveTheme().light,
+        home: const Scaffold(body: CastDialog(url: 'https://a.example/10000.flv')),
+      ),
+    );
+    await _settle(tester);
+    expect(asked, ['requestLocalNetwork']);
+    expect(searches, 0);
+    expect(toasts.single, contains('无法搜索投屏设备'));
+    expect(find.text('DLNA 设备搜索失败，请检查本地网络后重试。'), findsOneWidget);
+
+    granted = true;
+    await tester.tap(find.byKey(const ValueKey('cast-refresh')));
+    await _settle(tester);
+    expect(searches, 1);
+    expect(find.text('客厅电视'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await _settle(tester);
   });
 
   testWidgets('gifts show in the chat and the settings tab hides them; audio only shows the cover', (tester) async {

@@ -7,6 +7,7 @@ import 'package:live_core/live_core.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/platform_services.dart';
+import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 
 /// What the stream picker does with the chosen address.
@@ -222,7 +223,7 @@ class _CastDialogState extends State<CastDialog> {
     _cast = DlnaCastController(
       widget.url,
       title: widget.title,
-      startDiscovery: castDiscovery,
+      startDiscovery: _discover,
       onNotice: (notice) => AppNavigator.toast(switch (notice) {
         DlnaCastNotice.castStarted => i18n('dlna_cast_started'),
         DlnaCastNotice.castFailed => i18n('dlna_cast_failed'),
@@ -234,6 +235,17 @@ class _CastDialogState extends State<CastDialog> {
     // Many phones drop SSDP announcements without the multicast lock.
     unawaited(_lock.acquire());
     unawaited(_cast.startSearch());
+  }
+
+  /// Each search (the first and a refresh) asks for Android 17's
+  /// local-network permission first; refused, the user is told and the
+  /// search fails ("DLNA 设备搜索失败").
+  Future<DlnaDiscoverySession> _discover() async {
+    if (!await SystemAccess.requestLocalNetwork()) {
+      AppNavigator.toast(i18n('local_network_denied_cast'));
+      throw StateError('Local network access refused');
+    }
+    return await castDiscovery();
   }
 
   @override

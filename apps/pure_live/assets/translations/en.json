@@ -976,6 +976,8 @@
     "local_level_soop": "Fan level",
     "local_level_twitch": "Subscription level",
     "local_message_hint": "Send a local danmaku only you can see",
+    "local_network_denied_cast": "Local network access was not granted, so cast receivers cannot be found. Allow it in Settings > Apps > Pure Live > Permissions.",
+    "local_network_denied_stream": "Local network access was not granted, so a stream on your local network (e.g. a home IPTV server) cannot be reached. Allow it in Settings > Apps > Pure Live > Permissions.",
     "local_network_permission_denied": "Local network access was not granted, so a LAN proxy (e.g. Clash on your PC) cannot be reached. Allow it in Settings > Apps > Pure Live > Permissions.",
     "local_overlay_message": "Local danmaku fly over the picture",
     "local_overlay_message_desc": "When off, they only appear in the chat list",

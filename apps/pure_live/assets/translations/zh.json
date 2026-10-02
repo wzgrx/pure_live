@@ -975,6 +975,8 @@
     "local_level_soop": "粉丝等级",
     "local_level_twitch": "订阅等级",
     "local_message_hint": "发送本地弹幕，只有你看得到",
+    "local_network_denied_cast": "未获得「本地网络」权限，无法搜索投屏设备。请在系统设置 → 应用 → 纯粹直播 → 权限中允许。",
+    "local_network_denied_stream": "未获得「本地网络」权限，局域网里的直播源（如家里的 IPTV 服务器）无法连接。请在系统设置 → 应用 → 纯粹直播 → 权限中允许。",
     "local_network_permission_denied": "未获得「本地网络」权限，局域网代理（如电脑上的 Clash）无法连接。请在系统设置 → 应用 → 纯粹直播 → 权限中允许。",
     "local_overlay_message": "本地弹幕在画面上飞过",
     "local_overlay_message_desc": "关闭后只出现在弹幕列表",

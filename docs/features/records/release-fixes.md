@@ -9,6 +9,20 @@
 - **测试**：`test/platform/system_surfaces_test.dart`“every drawable named only from Dart survives the release resource shrinker”：从 `mediaControls` 取出全部图标名，加上通知小图标，逐个检查 `keep.xml` 里有。改之前失败（缺 `audio_service_*`）。
 - **验证**：见文末“release 构建”。
 
+## 4. Android 17 本地网络权限：投屏和局域网直播源没有申请
+
+- **根因**：`AndroidManifest.xml` 声明了 `ACCESS_LOCAL_NETWORK`（targetSdk 37），但只有局域网代理（`LocalNetworkGuard`）和设备同步会申请。投屏对话框（`stream_dialogs.dart` 的 `CastDialog`）打开就搜 SSDP，局域网 IPTV 源（`192.168.x`、`10.x`、`.local` 等）直接交给播放器；Android 17 上没有权限时套接字被拒，用户只看到“搜索失败”或播放失败，不知道原因。
+- **改动**：
+  - `platform/system_access.dart` 加 `isLocalNetworkUrl`（用 live_net 的 `isLocalNetworkProxyHost` 判断地址的主机，回环地址不算）和 `ensureLocalNetworkFor(urls)`：其中有局域网地址才调用 `SystemAccess.requestLocalNetwork()`，被拒时提示“未获得「本地网络」权限，局域网里的直播源（如家里的 IPTV 服务器）无法连接……”。
+  - 投屏：每次搜索（打开时和点刷新）先申请，被拒时提示“未获得「本地网络」权限，无法搜索投屏设备……”，这次搜索按失败处理（显示“DLNA 设备搜索失败”，可以点刷新再申请）。
+  - 播放：直播间 `RoomController` 打开线路前和 IPTV 回看打开前、多画面打开线路前都先 `ensureLocalNetworkFor`；被拒照常打开（会按原来的方式报错），只是多了原因提示。不是局域网地址的不调用原生。
+  - 中英文各加两条提示（`local_network_denied_cast`、`local_network_denied_stream`）。
+- **测试**：
+  - `services_test.dart`：局域网地址判断；公网地址不申请；有局域网地址时申请，被拒提示一次，允许后不再提示。
+  - `live_play_more_test.dart`“IPTV on the local network: local-network access is asked before it opens”：`192.168.1.8` 的频道在第一次打开前就申请，被拒有提示。改之前失败（没有申请）。
+  - `live_play_more_page_test.dart`“cast: the search asks for local-network access first; refused, it says so”：被拒时不搜索、有提示、显示搜索失败；允许后点刷新搜到设备。改之前失败（直接搜索）。
+- **验证**：上述测试和应用全部测试通过。没在真机上试（Android 17 以下 `localNetworkGranted` 直接为 true，不弹窗）。
+
 ## 5. 两个插件用同一个权限请求码
 
 - **根因**：`PermissionsPlugin.kt` 的通知权限和 `SystemAccessPlugin.kt` 的本地网络权限都用 `20261001`。Flutter 把每个权限结果交给所有插件的监听器，两个请求同时在等时，一个插件会拿另一个的结果答复自己的请求（例如通知被拒，本地网络也当成被拒）。

@@ -8,6 +8,7 @@ import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
+import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
 
 import '../../support.dart';
@@ -190,6 +191,28 @@ void main() {
     await settle();
     expect(controller.catchup, isNull);
     expect(engine.opens.last.uri.toString(), 'http://tv.example/cctv1.m3u8');
+    controller.dispose();
+  });
+
+  test('IPTV on the local network: local-network access is asked before it opens (release fixes, item 4)', () async {
+    final asked = <String>[];
+    SystemAccess.debugCall = (method) async {
+      asked.add('$method before ${engine.opens.length} opens');
+      return false;
+    };
+    addTearDown(() => SystemAccess.debugCall = null);
+    final channel = LiveRoom(
+      platform: SiteIds.iptv,
+      roomId: 'home',
+      title: '家里的电视',
+      link: 'http://192.168.1.8:8080/live.m3u8',
+      liveStatus: LiveStatus.live,
+    );
+    final controller = controllerFor(_IptvSite(channel), room: channel);
+    await controller.start();
+    await settle();
+    expect(asked, ['requestLocalNetwork before 0 opens']);
+    expect(toasts.single, contains('局域网里的直播源'));
     controller.dispose();
   });
 

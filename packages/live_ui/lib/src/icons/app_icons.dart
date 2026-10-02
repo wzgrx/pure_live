@@ -252,8 +252,9 @@ abstract final class AppIcons {
   /// Play a finished replay again.
   static const IconData playAgain = Icons.replay_rounded;
 
-  /// The picture is paused.
-  static const IconData pausedOverlay = Icons.pause_circle_outline_rounded;
+  /// The picture is paused: the play mark that resumes it (it shows what a
+  /// tap does, like the play key).
+  static const IconData pausedOverlay = Icons.play_circle_outline_rounded;
 
   // ---- the live room's popups (docs/ui/compare/U.2f) ----
 

@@ -246,8 +246,21 @@ class PictureStateView extends StatelessWidget {
       case PictureStateKind.none || PictureStateKind.audioOnly:
         return const SizedBox.shrink();
       case PictureStateKind.paused:
-        return const IgnorePointer(
-          child: Center(child: Icon(AppIcons.pausedOverlay, size: 56, color: OnVideoColors.secondary)),
+        // The play mark (what a tap does, as on the play key); it resumes.
+        return Center(
+          child: Semantics(
+            button: true,
+            label: i18n('live_play_play'),
+            child: GestureDetector(
+              key: const ValueKey('picture-paused-play'),
+              behavior: HitTestBehavior.opaque,
+              onTap: () => unawaited(controller.session.togglePlayPause()),
+              child: const Padding(
+                padding: EdgeInsets.all(12),
+                child: Icon(AppIcons.pausedOverlay, size: 64, color: OnVideoColors.secondary),
+              ),
+            ),
+          ),
         );
       case PictureStateKind.entering ||
           PictureStateKind.connecting ||

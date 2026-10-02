@@ -270,8 +270,9 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   }
 
   /// A tap on the picture (appendix A 1): on phones it hides visible
-  /// controls while playing and shows them otherwise, resuming a paused
-  /// stream; on desktops it only shows them.
+  /// controls while playing and shows them otherwise; on desktops it only
+  /// shows them. It never resumes a paused stream: the play key and the
+  /// picture's play mark do (a stray tap used to start it again).
   void _onTap() {
     final hit = _tapHit;
     _tapHit = null;
@@ -285,9 +286,6 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       return;
     }
     if (!_controls) setState(() => _controls = true);
-    if (!_locked && _room.session.state.status == PlaybackStatus.paused) {
-      unawaited(_room.session.togglePlayPause());
-    }
     _scheduleHide();
   }
 

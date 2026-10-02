@@ -693,6 +693,30 @@ void main() {
     await _close(tester, desktop);
   });
 
+  testWidgets('paused: a tap on the picture only shows the controls; the play mark resumes', (tester) async {
+    // 2026-10-02 (user): a stray tap no longer starts a paused stream, and the
+    // mark in the middle shows what a tap does (play), not the paused state.
+    final room = await _pump(tester);
+    final session = tester.widget<RoomPlayer>(find.byType(RoomPlayer)).controller.session;
+    await tester.runAsync(session.togglePlayPause);
+    await tester.pump();
+    expect(session.state.status, PlaybackStatus.paused);
+    expect(
+      find.descendant(of: _key('picture-paused-play'), matching: find.byIcon(Icons.play_circle_outline_rounded)),
+      findsOneWidget,
+    );
+
+    await tester.tapAt(tester.getTopLeft(find.byType(LiveVideoView)) + const Offset(40, 40));
+    await tester.pump(const Duration(seconds: 1));
+    expect(session.state.status, PlaybackStatus.paused, reason: 'a tap elsewhere does not resume');
+
+    await tester.tap(_key('picture-paused-play'));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester.pump();
+    expect(session.state.status, isNot(PlaybackStatus.paused));
+    await _close(tester, room);
+  });
+
   testWidgets('the room menu on each platform: cast only on Android, the new window only on Windows', (tester) async {
     // docs/ui/compare/U.2c, U.2d: "投屏只有 Android" (the menu as well as the
     // top bar; U.17a for iOS); U.13: "在新窗口打开" on Windows.

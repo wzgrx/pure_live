@@ -882,10 +882,11 @@ void main() {
 
   testWidgets('B01 c1: a masked name (a Bilibili guest sees 观***) has no "屏蔽此用户"; the keyword stays', (tester) async {
     final room = await _pump(tester);
+    // B08: the list is reversed, so the newest line is the first in the tree.
     for (final masked in ['观***', 'ab＊＊']) {
       room.danmaku.chat('前排', user: masked);
       await tester.pump();
-      await tester.longPress(find.byKey(const ValueKey('live-play-chat-line')).last);
+      await tester.longPress(find.byKey(const ValueKey('live-play-chat-line')).first);
       await tester.pumpAndSettle();
       expect(_in('live-play-message-card', find.textContaining('$masked：前排', findRichText: true)), findsOneWidget);
       expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget);
@@ -899,7 +900,7 @@ void main() {
     // A full name is still blockable.
     room.danmaku.chat('前排', user: '路人');
     await tester.pump();
-    await tester.longPress(find.byKey(const ValueKey('live-play-chat-line')).last);
+    await tester.longPress(find.byKey(const ValueKey('live-play-chat-line')).first);
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('live-play-block-user')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('live-play-block-user')));

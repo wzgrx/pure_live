@@ -151,7 +151,8 @@ class LiveRoomController extends ChangeNotifier {
   /// (3.x `_addStatusMessage`).
   late final DanmakuNoticeThrottle _statusLines;
 
-  /// The chat list.
+  /// The chat list; it tells its own listeners of new lines, at most once a
+  /// frame (B08: the controller no longer notifies for each message).
   final ChatFeed chat = ChatFeed();
   final StreamController<LiveMessage> _flying = StreamController.broadcast(sync: true);
   final StreamController<LiveRetraction> _retractions = StreamController.broadcast(sync: true);
@@ -861,22 +862,32 @@ class LiveRoomController extends ChangeNotifier {
     }
   }
 
+  /// A message from the platform. Chat, notices, gifts and retractions only
+  /// change [chat], which tells the list itself (B08); the room's listeners
+  /// hear of what they show: the super chats and [nameHint].
   void _onMessage(LiveMessage message) {
     switch (message.type) {
       case LiveMessageType.chat:
         // B06: the names tell whether this connection is a guest's
         // ([nameHint]); 3.x added a system line here every connection.
         if (_room.platform == SiteIds.bilibili && message.userName.trim().isNotEmpty) {
-          if (BilibiliDanmakuProtocol.isMaskedName(message.userName)) {
+          final masked = BilibiliDanmakuProtocol.isMaskedName(message.userName);
+          if (masked) {
             _maskedChats++;
           } else {
             _namedChats++;
+          }
+          // The hint turns at the last masked name it waits for, or at the
+          // first full name after them.
+          if (masked
+              ? _maskedChats == maskedChatsForExpiredLogin && _namedChats == 0
+              : _namedChats == 1 && _maskedChats >= maskedChatsForExpiredLogin) {
+            _notify();
           }
         }
         if (!_filter.accepts(message)) return;
         chat.add(ChatLine.chat(message));
         _flying.add(message);
-        _notify();
       case LiveMessageType.online:
         _applyAudience(message.data);
       case LiveMessageType.superChat:
@@ -889,34 +900,31 @@ class LiveRoomController extends ChangeNotifier {
         if (message.data case final LiveRetraction retraction) {
           chat.retract(retraction);
           _retractions.add(retraction);
-          _notify();
         }
       case LiveMessageType.notice:
         if (message.message.trim().isEmpty || !_notices.accepts(message.message)) return;
         chat.add(ChatLine.notice(message));
-        _notify();
       case LiveMessageType.gift:
         // B-21: a line in the chat list, not on the video; the switch hides them.
         if (!_showGifts || message.message.trim().isEmpty) return;
         chat.add(ChatLine.gift(message));
-        _notify();
     }
   }
 
   /// A message composed on this device (the local interaction, U.2k): a line
   /// in the chat list at once, and over the picture when [fly]. It skips the
-  /// platform filters and the gift switch, as 3.x's local messages did.
+  /// platform filters and the gift switch, as 3.x's local messages did; the
+  /// list shows it without waiting for the next frame.
   void addLocal(LiveMessage message, {required bool fly}) {
     if (_disposed || message.message.trim().isEmpty) return;
     chat.add(message.type == LiveMessageType.gift ? ChatLine.gift(message) : ChatLine.chat(message));
     if (fly) _flying.add(message);
-    _notify();
+    chat.flush();
   }
 
   void _system(String text) {
     if (!_statusLines.accepts(text)) return;
     chat.add(ChatLine.system(text));
-    _notify();
   }
 
   /// An audience figure from the danmaku (3.x `updateRuntimeAudience`).
@@ -1021,6 +1029,7 @@ class LiveRoomController extends ChangeNotifier {
     unawaited(danmaku.close());
     unawaited(_flying.close());
     unawaited(_retractions.close());
+    chat.dispose();
     super.dispose();
   }
 }

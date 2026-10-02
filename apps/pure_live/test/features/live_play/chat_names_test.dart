@@ -195,11 +195,14 @@ void main() {
     await tester.pump();
     final cards = find.byKey(const ValueKey('live-play-chat-card'));
     expect(cards, findsNWidgets(2));
-    final avatar = find.descendant(of: cards.first, matching: find.byType(CommonAvatar));
+    // B08: the list is reversed (the newest line first in the tree), so the
+    // cards are found by their text.
+    Finder card(String text) => find.ancestor(of: find.text(text, findRichText: true), matching: cards);
+    final avatar = find.descendant(of: card('有牌子'), matching: find.byType(CommonAvatar));
     expect(tester.widget<CommonAvatar>(avatar).avatarUrl, face);
     expect(tester.getSize(avatar), const Size(24, 24));
     expect(
-      find.descendant(of: cards.last, matching: find.byType(CommonAvatar)),
+      find.descendant(of: card('没头像'), matching: find.byType(CommonAvatar)),
       findsNothing,
       reason: 'the dot',
     );

@@ -24,13 +24,16 @@ if (requireReleaseSigning && !hasReleaseSigning) {
     throw GradleException("Release signing is required but android/key.properties is incomplete.")
 }
 
+// Platform, build-tools and NDK from toolchain.env, as for every plugin (../build.gradle.kts).
+@Suppress("UNCHECKED_CAST")
+val useToolchain = rootProject.extra["useToolchain"] as (com.android.build.api.dsl.CommonExtension) -> Unit
+
 extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
     namespace = "com.mystyle.purelive"
     buildFeatures {
         buildConfig = true
     }
-    compileSdk = 37
-    ndkVersion = flutter.ndkVersion
+    useToolchain(this)
     lint {
         checkReleaseBuilds = true
         abortOnError = true

@@ -13,6 +13,7 @@ import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
+import 'package:pure_live/shared/danmaku/masked_blocks.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The look of the chat list (the `danmakuListStyle` setting, U.2a choice
@@ -525,7 +526,8 @@ Future<void> _blockKeyword(BuildContext context, LiveRoomController controller, 
 /// docs/ui/compare/U.2f 长按弹幕): "弹幕" and ✕, the message in a card (the
 /// name in its colour), then copy, block the viewer and block a keyword,
 /// each saying what it does. "屏蔽关键词…" opens the keyword box filled with
-/// the message, to cut down to the word.
+/// the message, to cut down to the word. A masked name (a Bilibili guest's
+/// `观***`, [isMaskedViewerName]) has no "屏蔽此用户" (B01 c1).
 Future<void> showChatMessageActions(
   BuildContext context,
   LiveMessage message, {
@@ -609,8 +611,9 @@ Future<void> showChatMessageActions(
                 AppNavigator.toast(i18n('copied_to_clipboard'));
               },
             ),
-            // 3.x: a local danmaku cannot block its sender.
-            if (name.isNotEmpty && !message.isLocal)
+            // 3.x: a local danmaku cannot block its sender. B-1: nor can a
+            // masked name, which stands for many viewers.
+            if (name.isNotEmpty && !message.isLocal && !isMaskedViewerName(name))
               ListTile(
                 key: const ValueKey('live-play-block-user'),
                 leading: const Icon(AppIcons.blockUser),

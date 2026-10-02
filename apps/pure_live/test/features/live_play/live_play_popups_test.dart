@@ -850,6 +850,35 @@ void main() {
     await _close(tester, room);
   });
 
+  testWidgets('B01 c1: a masked name (a Bilibili guest sees 观***) has no "屏蔽此用户"; the keyword stays', (tester) async {
+    final room = await _pump(tester);
+    for (final masked in ['观***', 'ab＊＊']) {
+      room.danmaku.chat('前排', user: masked);
+      await tester.pump();
+      await tester.longPress(find.byKey(const ValueKey('live-play-chat-line')).last);
+      await tester.pumpAndSettle();
+      expect(_in('live-play-message-card', find.textContaining('$masked：前排', findRichText: true)), findsOneWidget);
+      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget);
+      expect(find.byKey(const ValueKey('live-play-block-user')), findsNothing);
+      expect(find.text('屏蔽此用户'), findsNothing);
+      expect(find.byKey(const ValueKey('live-play-copy-message')), findsOneWidget);
+      expect(find.byKey(const ValueKey('live-play-block-keyword')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('live-play-message-close')));
+      await tester.pumpAndSettle();
+    }
+    // A full name is still blockable.
+    room.danmaku.chat('前排', user: '路人');
+    await tester.pump();
+    await tester.longPress(find.byKey(const ValueKey('live-play-chat-line')).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('live-play-block-user')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('live-play-block-user')));
+    await tester.pumpAndSettle();
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    expect(await tester.runAsync(() => room.services.store.blockLists.list(BlockKind.user)), ['路人']);
+    await _close(tester, room);
+  });
+
   group('record state', () {
     RecordTask task(RecordStatus status, {bool? autoRecord, int seconds = 0}) => _task(status)
       ..autoRecord = autoRecord

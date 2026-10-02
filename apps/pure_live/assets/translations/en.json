@@ -322,6 +322,7 @@
     "danmaku_list_style_compact": "Compact",
     "danmaku_list_style_desc": "Compact lines with the name in a lighter colour, or 3.x's card per message",
     "danmaku_long_press_action": "Long-press an on-screen danmaku for block actions",
+    "danmaku_masked_blocks_cleaned": "Removed {count} blocked masked names (they also hid other viewers)",
     "danmaku_new_messages": "{count} new messages - tap to resume",
     "danmaku_no_emoji": "Pure text mode (hide emoji)",
     "danmaku_screen_interaction": "On-screen danmaku interaction",

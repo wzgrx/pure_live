@@ -234,11 +234,11 @@ void main() {
 
   group('F.2b: a tap or long press on a flying danmaku', () {
     /// Three danmaku in, the third (lane 3, below the top bar) a second in.
-    Future<(DanmakuOverlayState, Offset)> fly(WidgetTester tester, FakeDanmaku danmaku) async {
+    Future<(DanmakuOverlayState, Offset)> fly(WidgetTester tester, FakeDanmaku danmaku, {String user = '路人'}) async {
       danmaku
         ..chat('第一条')
         ..chat('第二条')
-        ..chat('点这一条弹幕', user: '路人');
+        ..chat('点这一条弹幕', user: user);
       await tester.pump();
       for (var i = 0; i < 60; i++) {
         await tester.pump(const Duration(milliseconds: 16));
@@ -280,6 +280,23 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('live-play-message-close')));
+      await tester.pump(const Duration(milliseconds: 400));
+      await _close(tester, services);
+    });
+
+    testWidgets('B01 c1: a masked sender (观***) has no "屏蔽此用户" in the sheet', (tester) async {
+      final danmaku = FakeDanmaku();
+      final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
+      AppNavigator.toast = (_) {};
+      final (_, at) = await fly(tester, danmaku, user: '观***');
+      await tester.tapAt(at);
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget);
+      expect(find.byKey(const ValueKey('live-play-block-user')), findsNothing);
+      expect(find.byKey(const ValueKey('live-play-block-keyword')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('live-play-message-close')));
+      await tester.pump(const Duration(milliseconds: 400));
       await tester.pump(const Duration(milliseconds: 400));
       await _close(tester, services);
     });

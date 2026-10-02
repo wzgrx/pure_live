@@ -138,6 +138,7 @@ void main() {
       String? Function()? pick,
       Size size = const Size(500, 1400),
       bool opensFolder = false,
+      Future<List<LocalBackupFile>> Function(Directory folder)? list,
     }) async {
       tester.view
         ..physicalSize = size
@@ -162,6 +163,7 @@ void main() {
             backupDefaultFolderProvider.overrideWithValue(() async => made),
             backupPickerProvider.overrideWithValue((_, {required initial, required pickFile}) async => pick?.call()),
             backupOpensFolderProvider.overrideWithValue(opensFolder),
+            if (list != null) backupListerProvider.overrideWithValue(list),
           ],
           child: LiveUiScope(
             config: LiveUiConfig(strings: strings.ui),
@@ -340,13 +342,21 @@ void main() {
     });
 
     testWidgets('a folder that cannot be read says so and retries', (tester) async {
-      await pump(tester);
-      await tester.runAsync(() => Process.run('chmod', ['000', folder.path]));
-      addTearDown(() => tester.runAsync(() => Process.run('chmod', ['755', folder.path])));
+      // The listing fails as a folder without read permission does (chmod 000
+      // would not stop a test run as root).
+      var readable = true;
+      await pump(
+        tester,
+        list: (folder) async {
+          if (!readable) throw FileSystemException('Directory listing failed', folder.path);
+          return await listBackupFiles(folder);
+        },
+      );
+      readable = false;
       await refresh(tester);
       expect(find.byKey(const ValueKey('backup-files-error')), findsOneWidget);
       expect(find.text('无法读取备份目录'), findsOneWidget);
-      await tester.runAsync(() => Process.run('chmod', ['755', folder.path]));
+      readable = true;
       await tester.tap(find.byKey(const ValueKey('backup-files-retry')));
       await _settle(tester);
       expect(find.byKey(const ValueKey('backup-files-empty')), findsOneWidget);

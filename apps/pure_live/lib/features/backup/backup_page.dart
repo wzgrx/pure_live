@@ -26,6 +26,11 @@ final Provider<Future<Directory> Function()> backupDefaultFolderProvider = Provi
   (ref) => defaultBackupFolder,
 );
 
+/// Lists the backups in a folder (tests replace it, e.g. with a folder that
+/// cannot be read).
+final Provider<Future<List<LocalBackupFile>> Function(Directory folder)> backupListerProvider =
+    Provider<Future<List<LocalBackupFile>> Function(Directory folder)>((ref) => listBackupFiles);
+
 /// Picks a folder or a backup file (tests replace it; the app sets the
 /// system pickers, else the in-app browser [showFileBrowser]).
 typedef BackupPicker = Future<String?> Function(
@@ -100,7 +105,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     List<LocalBackupFile> files;
     var failed = false;
     try {
-      files = await listBackupFiles(Directory(folder));
+      files = await ref.read(backupListerProvider)(Directory(folder));
     } on FileSystemException {
       files = const [];
       failed = true;

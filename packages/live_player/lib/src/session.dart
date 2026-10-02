@@ -154,6 +154,11 @@ final class PlaybackSession {
   bool _engineRecreated = false;
   bool _presentationVisible = true;
 
+  /// Recovery attempts in a row ([PlaybackState.recovery]): counted by
+  /// [_recover] and every retry round, reset by the user's reopenings and
+  /// by sustained playback ([_armBudgetReset]).
+  int _recoveries = 0;
+
   Timer? _bufferingTimer;
   Timer? _pauseTimer;
   Timer? _frameTimer;
@@ -198,6 +203,7 @@ final class PlaybackSession {
     _decoder = _decoders.preferred;
     _refreshAttempts = 0;
     _retryRounds = 0;
+    _recoveries = 0;
     _engineRecreated = false;
     _wantPlaying = true;
     _emit(
@@ -232,6 +238,7 @@ final class PlaybackSession {
     final session = _begin();
     _refreshAttempts = 0;
     _retryRounds = 0;
+    _recoveries = 0;
     _wantPlaying = true;
     await _openSource(plan.sources[index], session);
   }
@@ -248,6 +255,7 @@ final class PlaybackSession {
     _decoder = _decoders.preferred;
     _refreshAttempts = 0;
     _retryRounds = 0;
+    _recoveries = 0;
     _engineRecreated = false;
     _wantPlaying = true;
     final source = _source;
@@ -263,7 +271,7 @@ final class PlaybackSession {
     final engine = _engine;
     if (engine != null && _transport.active != null) await engine.pause();
     if (_state.status != PlaybackStatus.error && _state.status != PlaybackStatus.stopped) {
-      _emit(_state.copyWith(status: PlaybackStatus.paused));
+      _emit(_state.copyWith(status: PlaybackStatus.paused, recovery: 0));
     }
   }
 
@@ -340,7 +348,7 @@ final class PlaybackSession {
     final transport = _transport;
     _transport = PlaybackTransport();
     _source = null;
-    _emit(_state.copyWith(status: PlaybackStatus.stopped, clearVideoSize: true));
+    _emit(_state.copyWith(status: PlaybackStatus.stopped, clearVideoSize: true, recovery: 0));
     await transport.close();
     final engine = _engine;
     if (engine != null) {
@@ -431,7 +439,9 @@ final class PlaybackSession {
     await engine?.dispose();
   }
 
-  Future<void> _openSource(PlaybackSource source, int session) async {
+  /// Opens [source]; [recovering] keeps the state's [PlaybackState.recovery]
+  /// (a step of [_recover]), otherwise it is the user's reopening.
+  Future<void> _openSource(PlaybackSource source, int session, {bool recovering = false}) async {
     final request = _request!;
     final plan = _plan!;
     _cancelWatchdogs();
@@ -456,6 +466,7 @@ final class PlaybackSession {
         decoder: _decoder,
         clearVideoSize: true,
         appliedQualityData: plan.appliedQualityData,
+        recovery: recovering ? _recoveries : 0,
       ),
     );
     try {
@@ -581,7 +592,7 @@ final class PlaybackSession {
     if (!_current(session) || !_accepting) return;
     if (!_wantPlaying) {
       if (_state.status != PlaybackStatus.error && _state.status != PlaybackStatus.completed) {
-        _emit(_state.copyWith(status: PlaybackStatus.paused));
+        _emit(_state.copyWith(status: PlaybackStatus.paused, recovery: 0));
       }
       return;
     }
@@ -608,7 +619,9 @@ final class PlaybackSession {
       } else {
         _bufferingTimer?.cancel();
         _bufferingTimer = null;
-        _emit(_state.copyWith(status: PlaybackStatus.playing));
+        // Playing again ends a recovery (its count runs on, see
+        // [_armBudgetReset]).
+        _emit(_state.copyWith(status: PlaybackStatus.playing, recovery: 0));
         _armFrameWatchdog(session);
         _armBudgetReset(session);
       }
@@ -617,7 +630,7 @@ final class PlaybackSession {
     _cancelFrameWatchdog();
     _budgetTimer?.cancel();
     if (!_wantPlaying) {
-      if (_state.status != PlaybackStatus.completed) _emit(_state.copyWith(status: PlaybackStatus.paused));
+      if (_state.status != PlaybackStatus.completed) _emit(_state.copyWith(status: PlaybackStatus.paused, recovery: 0));
     } else if (_buffering) {
       _armBufferingWatchdog(session);
     } else {
@@ -649,7 +662,7 @@ final class PlaybackSession {
     if (_plan?.onDemand ?? false) {
       _wantPlaying = false;
       _cancelWatchdogs();
-      _emit(_state.copyWith(status: PlaybackStatus.completed));
+      _emit(_state.copyWith(status: PlaybackStatus.completed, recovery: 0));
       return;
     }
     if (!_wantPlaying) return;
@@ -759,6 +772,7 @@ final class PlaybackSession {
       if (!_current(session) || !_playing || _buffering) return;
       _refreshAttempts = 0;
       _retryRounds = 0;
+      _recoveries = 0;
       _engineRecreated = false;
     });
   }
@@ -868,7 +882,10 @@ final class PlaybackSession {
     if (!_current(session) || !_wantPlaying) return;
     final plan = _plan!;
     final source = _source;
-    _emit(_state.copyWith(status: PlaybackStatus.buffering));
+    // The stream failed on its own: say so, with the attempt (the "正在重连
+    // （第 N 次）" of the room; a plain buffering is no recovery).
+    _recoveries++;
+    _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries));
     final transport = error.type == PlayerErrorType.network || error.type == PlayerErrorType.source;
 
     if (transport && await _tryRefresh(session)) return;
@@ -878,7 +895,7 @@ final class PlaybackSession {
       _lines.markFailed(source.line);
       final next = _lines.next(plan.lines);
       if (next != null && next.url != source.url) {
-        await _openSource(LineSource(next), session);
+        await _openSource(LineSource(next), session, recovering: true);
         return;
       }
     }
@@ -891,7 +908,7 @@ final class PlaybackSession {
       await transport.close();
       await _releaseEngine();
       if (!_current(session)) return;
-      await _openSource(source, session);
+      await _openSource(source, session, recovering: true);
       return;
     }
 
@@ -903,7 +920,7 @@ final class PlaybackSession {
         final mode = _decoders.fallback(_decoder, error);
         if (mode != _decoder) {
           _decoder = mode;
-          await _openSource(source, session);
+          await _openSource(source, session, recovering: true);
           return;
         }
       } on PlayerException {
@@ -945,7 +962,7 @@ final class PlaybackSession {
       final line = _lines.next(plan.lines);
       next = line != null ? LineSource(line) : plan.sources.first;
     }
-    await _openSource(next, session);
+    await _openSource(next, session, recovering: true);
     return true;
   }
 
@@ -969,10 +986,13 @@ final class PlaybackSession {
 
   Future<void> _retryRound(int session) async {
     _recoveringSession = session;
+    // Each round is another attempt.
+    _recoveries++;
+    _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries));
     try {
       if (await _tryRefresh(session)) return;
       final source = _source;
-      if (source != null && _current(session)) await _openSource(source, session);
+      if (source != null && _current(session)) await _openSource(source, session, recovering: true);
     } finally {
       if (_recoveringSession == session) _recoveringSession = null;
     }
@@ -986,6 +1006,6 @@ final class PlaybackSession {
     _retryTimer?.cancel();
     _prefetchTimer?.cancel();
     _wantPlaying = false;
-    _emit(_state.copyWith(status: PlaybackStatus.error, error: error, failure: kind));
+    _emit(_state.copyWith(status: PlaybackStatus.error, error: error, failure: kind, recovery: 0));
   }
 }

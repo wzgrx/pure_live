@@ -831,6 +831,7 @@
     "live_play_refresh_room": "Refresh room",
     "live_play_replay_again": "Play again",
     "live_play_replay_ended": "The replay has ended",
+    "live_play_room_details": "Room details",
     "live_play_show_chat": "Show the chat",
     "live_play_show_gifts": "Show gifts in the chat",
     "live_play_show_gifts_desc": "Gifts the platform reports appear as chat lines, not on the video",

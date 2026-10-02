@@ -462,15 +462,14 @@ class _ThisRecording extends StatelessWidget {
               spacing: 8,
               runSpacing: 4,
               children: [
+                // B09 c9: the app's one chip (U.1c c13: corners of 8, the
+                // tick of the chosen one, the keyboard frame).
                 for (final quality in choices)
-                  ChoiceChip(
+                  AppChip(
                     key: ValueKey('record-quality-$quality'),
-                    label: Text(quality),
+                    label: quality,
                     selected: quality == chosen,
-                    // Five qualities fit on one line of a phone.
-                    visualDensity: VisualDensity.compact,
-                    labelPadding: const EdgeInsets.symmetric(horizontal: 2),
-                    onSelected: (_) => onQuality(quality),
+                    onSelected: () => onQuality(quality),
                   ),
               ],
             ),

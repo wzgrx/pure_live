@@ -82,36 +82,31 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
         onTap: (index) {
           if (index == 0) _seen();
         },
+        // B09 c9: the app's tab labels (U.1c c12: the badge, the keyboard
+        // frame; a narrow column shrinks the tab instead of cutting it).
         tabs: [
-          Tab(
-            child: ListenableSelector<int>(
-              // The feed tells of new lines at most once a frame (B08).
-              listenable: widget.controller.chat,
-              selector: () {
-                final from = _unreadFrom;
-                return from == null ? 0 : widget.controller.chat.added - from;
-              },
-              builder: (context, count, _) => _TabLabel(
-                text: i18n('danmaku_list'),
-                count: count,
-                countKey: const ValueKey('live-play-unread-count'),
-                semantics: i18n('live_play_unread_count', args: {'count': '$count'}),
-              ),
+          ListenableSelector<int>(
+            // The feed tells of new lines at most once a frame (B08).
+            listenable: widget.controller.chat,
+            selector: () {
+              final from = _unreadFrom;
+              return from == null ? 0 : widget.controller.chat.added - from;
+            },
+            builder: (context, count, _) => _counted(
+              label: i18n('danmaku_list'),
+              count: count,
+              key: const ValueKey('live-play-unread-count'),
+              semantics: i18n('live_play_unread_count', args: {'count': '$count'}),
             ),
           ),
-          Tab(
-            child: ListenableSelector<int>(
-              listenable: widget.controller,
-              selector: () => widget.controller.superChats.length,
-              builder: (context, count, _) => _TabLabel(
-                text: i18n('super_chat'),
-                count: count,
-                countKey: const ValueKey('live-play-super-chat-count'),
-              ),
-            ),
+          ListenableSelector<int>(
+            listenable: widget.controller,
+            selector: () => widget.controller.superChats.length,
+            builder: (context, count, _) =>
+                _counted(label: i18n('super_chat'), count: count, key: const ValueKey('live-play-super-chat-count')),
           ),
-          Tab(text: i18n('danmaku_settings')),
-          Tab(text: i18n('block_list')),
+          TabLabel(label: i18n('danmaku_settings')),
+          TabLabel(label: i18n('block_list')),
         ],
       ),
       Expanded(
@@ -147,63 +142,10 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
   );
 }
 
-class _TabLabel extends StatelessWidget {
-  const new({required this.text, required this.count, required this.countKey, this.semantics});
-
-  final String text;
-  final int count;
-  final Key countKey;
-  final String? semantics;
-
-  @override
-  Widget build(BuildContext context) {
-    if (count <= 0) return Text(text, maxLines: 1, overflow: TextOverflow.ellipsis);
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final number = Semantics(
-      label: semantics,
-      child: Container(
-        key: countKey,
-        constraints: const BoxConstraints(minWidth: 18),
-        height: 18,
-        padding: const EdgeInsets.symmetric(horizontal: 5),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(9)),
-        child: Text(
-          count > 99 ? '99+' : '$count',
-          style: theme.textTheme.labelSmall?.emphasis.tabular.copyWith(color: scheme.onPrimary, height: 1.1),
-        ),
-      ),
-    );
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final painter = TextPainter(
-          text: TextSpan(text: text, style: DefaultTextStyle.of(context).style),
-          textDirection: Directionality.of(context),
-          textScaler: MediaQuery.textScalerOf(context),
-          maxLines: 1,
-        )..layout();
-        final width = painter.width;
-        painter.dispose();
-        if (width + 24 <= constraints.maxWidth) {
-          // Room for the count after the word (U.2a change 9).
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [Text(text, maxLines: 1), const SizedBox(width: 4), number],
-          );
-        }
-        // A narrow column (the wide layout's chat): the count sits on the
-        // word's corner instead of cutting it short.
-        return Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.center,
-          children: [
-            Text(text, maxLines: 1, overflow: TextOverflow.ellipsis),
-            Positioned(top: -10, right: -18, child: number),
-          ],
-        );
-      },
-    );
-  }
+/// A tab with [count] as its badge (U.2a change 9), keyed by [key] while
+/// there is one.
+Widget _counted({required String label, required int count, required Key key, String? semantics}) {
+  if (count <= 0) return TabLabel(label: label);
+  final tab = TabLabel(key: key, label: label, badge: count > 99 ? '99+' : '$count');
+  return semantics == null ? tab : Semantics(label: semantics, child: tab);
 }

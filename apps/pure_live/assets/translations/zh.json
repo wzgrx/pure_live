@@ -830,6 +830,7 @@
     "live_play_refresh_room": "刷新直播间",
     "live_play_replay_again": "从头播放",
     "live_play_replay_ended": "回放已播完",
+    "live_play_room_details": "直播间详情",
     "live_play_show_chat": "展开聊天栏",
     "live_play_show_gifts": "在聊天列表显示礼物",
     "live_play_show_gifts_desc": "平台上报的礼物显示为聊天里的一行，不在画面上飞过",

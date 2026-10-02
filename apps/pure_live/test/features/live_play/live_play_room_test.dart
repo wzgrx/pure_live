@@ -143,6 +143,19 @@ void main() {
     final scheme = Theme.of(tester.element(bar)).colorScheme;
     expect(area.style?.color, scheme.onSurfaceVariant);
     expect(tester.getSize(find.byKey(const ValueKey('live-play-title'))).width, greaterThanOrEqualTo(100));
+    // B09 c9 (U.1c c9): the avatar is the app's tappable avatar (darker
+    // under the pointer and pressed, the keyboard frame) and opens the
+    // details like the names.
+    final avatar = tester.widget<CommonAvatar>(find.byKey(const ValueKey('live-play-avatar')));
+    expect(avatar.onTap, isNotNull);
+    expect(avatar.tooltip, '直播间详情');
+    expect(_in('live-play-avatar', find.byType(FocusRing)), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('live-play-avatar')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('live-play-details')), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('live-play-details')), findsNothing);
 
     // Change 12: "＋ 关注" filled, then "✓ 已关注" grey; unfollowing asks.
     expect(_in('live-play-follow', find.byIcon(AppIcons.follow)), findsOneWidget);
@@ -440,8 +453,13 @@ void main() {
         ),
       ];
     final room = await _pump(tester, site: site);
-    // Change 9: "醒目留言" with its count.
+    // Change 9: "醒目留言" with its count. B09 c9: the app's tab labels.
     expect(_in('live-play-super-chat-count', find.text('1')), findsOneWidget);
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('live-play-tabs')), matching: find.byType(TabLabel)),
+      findsNWidgets(4),
+    );
+    expect(tester.widget<TabLabel>(find.byKey(const ValueKey('live-play-super-chat-count'))).badge, '1');
     // P03: the tabs' pages turn like Android's ViewPager.
     expect(tester.widget<TabBarView>(find.byType(TabBarView)).physics, isA<PureLivePageScrollPhysics>());
 

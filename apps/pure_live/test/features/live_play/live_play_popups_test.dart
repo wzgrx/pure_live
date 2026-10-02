@@ -417,6 +417,13 @@ void main() {
       // The settings' 原画 picks the room's 原画; the chips are the room's.
       expect(tester.widget<ChoiceChip>(find.byKey(const ValueKey('record-quality-原画'))).selected, isTrue);
       expect(find.byKey(const ValueKey('record-quality-蓝光')), findsOneWidget);
+      // B09 c9 (U.1c c13): the app's one chip, corners of 8.
+      expect(tester.widget(find.byKey(const ValueKey('record-quality-原画'))), isA<AppChip>());
+      final chip = tester.element(find.byKey(const ValueKey('record-quality-原画')));
+      expect(
+        (Theme.of(chip).chipTheme.shape! as RoundedRectangleBorder).borderRadius,
+        const BorderRadius.all(Radius.circular(8)),
+      );
       expect(find.text('默认值在录制设置里改'), findsOneWidget);
       expect(tester.widget<Switch>(find.byKey(const ValueKey('record-panel-auto'))).value, isFalse);
       expect(find.byKey(const ValueKey('record-panel-settings')), findsOneWidget);

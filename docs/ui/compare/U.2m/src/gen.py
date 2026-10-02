@@ -89,7 +89,7 @@ CSS = '''
 .bdg.live{background:var(--live)}.bdg .mr{font-size:12px}
 .cd .bt{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 5px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.7));color:#fff;font-size:11px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cd .ft{height:26px;padding:0 8px;display:flex;align-items:center;flex:none;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden}
-.cd .ft span{overflow:hidden;text-overflow:ellipsis}
+.cd .ft span{overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}.cd .ft small{font-size:11px;font-weight:400;color:var(--onv);margin-left:6px;flex:none}
 .cd.off .cv::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.54)}
 .cd.off .tl,.cd.off .bt{z-index:2}.cd.off .ft{color:var(--onv)}
 .lr{height:75px;display:flex;align-items:center;gap:12px;padding:6px 12px;flex:none}
@@ -402,11 +402,6 @@ def v4_fs_bars(n=False, menu_open=False, switch_n=None):
             '<div style="flex:1"></div><div style="display:flex;align-items:center;height:48px;flex:none">' + right + '</div></div>')
 
 
-MENU = [  # (icon html, text, sub, entry)
-    (rx('ea42', 20).replace('ea42', 'ea42'), None, None, None),
-]
-
-
 def menu_html(x, y, onbars=(), mark=False, n=False):
     items = [
         [(mr('swap_horiz', 20), '切换直播间', None, 'switchRoom'), (rx('f20f', 20), '定时关闭', None, 'timer'),
@@ -433,14 +428,13 @@ def menu_html(x, y, onbars=(), mark=False, n=False):
 
 def now_menu_page():
     body = SYN + v4_fs_bars(menu_open=True) + menu_html(852 - 228, 52, mark=True)
-    body += ('<div style="position:absolute;left:503px;top:6px;width:48px;height:48px;border:2px dashed #C2410C;border-radius:24px;z-index:30"></div>'
-             '<div style="position:absolute;left:652px;top:6px;width:48px;height:48px;border:2px dashed #C2410C;border-radius:24px;z-index:30"></div>'
-             '<div style="position:absolute;left:723px;top:337px;width:48px;height:48px;border:2px dashed #C2410C;border-radius:24px;z-index:30"></div>')
+    body += ('<div style="position:absolute;left:556px;top:4px;width:48px;height:48px;border:2px dashed #C2410C;border-radius:24px;z-index:30"></div>'
+             '<div style="position:absolute;left:652px;top:4px;width:48px;height:48px;border:2px dashed #C2410C;border-radius:24px;z-index:30"></div>')
     return page(852, 393, 2, body, frame='fs', extra=FS_EXTRA)
 
 
 def new_menu_page():
-    body = SYN + v4_fs_bars(menu_open=True) + menu_html(852 - 228, 52, onbars=('switchRoom', 'cast', 'videoFit'))
+    body = SYN + v4_fs_bars(n=True, menu_open=True, switch_n=11) + menu_html(852 - 228, 52, onbars=('switchRoom', 'cast', 'videoFit'))
     return page(852, 393, 2, body, frame='fs', extra=FS_EXTRA)
 
 
@@ -460,10 +454,10 @@ def badges(state, aud, small=False, watched=None):
 def card(room, mixed=True, n=None, history=False):
     nick, plat, area, title, aud, img, state, watched = room
     off = state == 'off'
-    tr = f'<span class="tr2"><span class="bdg">{plat}</span></span>' if mixed and not off else ''
+    pf = f'<small>{plat}</small>' if mixed else ''
     return (f'<div class="cd{" off" if off else ""}"{N(n, "c", "add" if n else None)}><div class="cv" style="background-image:url(.cache/img/{img}.jpg)">'
-            f'<span class="tl">{badges(state, aud, watched=watched)}</span>{tr}<span class="bt">{title}</span></div>'
-            f'<div class="ft"><span>{nick}</span></div></div>')
+            f'<span class="tl">{badges(state, aud, watched=watched)}</span><span class="bt">{title}</span></div>'
+            f'<div class="ft"><span>{nick}</span>{pf}</div></div>')
 
 
 def row(room, n=None):
@@ -475,10 +469,10 @@ def row(room, n=None):
             f'<div class="x"><div class="a">{nick}</div><div class="b">{title}</div><div class="c">{line}</div></div></div>')
 
 
-GROUPS = [('source', '来源列表', 6), ('onair', '关注在播', 10), ('history', '观看记录', None), ('replays', '关注回放', 2)]
+GROUPS = [('onair', '关注在播', 10), ('source', '来源列表', 6), ('history', '观看记录', None), ('replays', '关注回放', 2)]
 
 
-def panel(w, h, layout='grid', group='onair', source=True, n=False, refresh='2 分钟前', search=None, rooms=None, state=None, mixed=True, drag=False):
+def panel(w, h, layout='grid', group='onair', source=False, n=False, refresh='2 分钟前', search=None, rooms=None, state=None, mixed=True, drag=False):
     nn = (lambda k: k) if n else (lambda k: None)
     rf_cls = 'rf err' if refresh == '刷新失败' else 'rf'
     rf_icon = mr('error_outline', 18) if refresh == '刷新失败' else ('<span style="width:16px;height:16px;border-radius:8px;border:2px solid var(--primary);border-right-color:transparent;display:inline-block"></span>' if refresh == '正在刷新' else mr('refresh', 18))
@@ -492,7 +486,7 @@ def panel(w, h, layout='grid', group='onair', source=True, n=False, refresh='2 �
         if key == 'source' and not source:
             continue
         on = key == group
-        pills.append(f'<span class="{"on" if on else ""}"{N(nn(6), "tc", "chg") if i == 0 or (not source and key == "onair") else ""}>{label}' + (f'<small>{count}</small>' if count else '') + '</span>')
+        pills.append(f'<span class="{"on" if on else ""}"{N(nn(6), "tc", "chg") if i == 0 else ""}>{label}' + (f'<small>{count}</small>' if count else '') + '</span>')
     seg = '<div class="seg">' + ''.join(pills) + '</div>'
     srch = ''
     if search is not None:
@@ -554,7 +548,7 @@ def v4_portrait_stream_page():
 def v4_landscape_page(layout='grid', n=False, group='onair', **kw):
     inner = panel(360, 393, layout=layout, n=n, group=group, **kw)
     side = f'<div class="side sp" style="border-radius:16px 0 0 16px">{inner}</div>'
-    body = SYN + v4_fs_bars(switch_n=11 if n else None) + side
+    body = SYN + v4_fs_bars() + side
     return page(852, 393, 2, body, frame='fs', extra=FS_EXTRA)
 
 

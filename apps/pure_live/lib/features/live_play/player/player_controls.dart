@@ -15,7 +15,6 @@ import 'package:pure_live/features/live_play/buttons/stream_menu.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
 import 'package:pure_live/features/live_play/dialogs/iptv_guide.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
-import 'package:pure_live/features/live_play/dialogs/room_switcher.dart';
 import 'package:pure_live/features/live_play/dialogs/stream_dialogs.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
@@ -25,6 +24,7 @@ import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/features/live_play/mini/room_mini_window.dart';
 import 'package:pure_live/features/live_play/player/bar_parts.dart';
 import 'package:pure_live/features/live_play/player/recording_badge.dart';
+import 'package:pure_live/features/live_play/switch_room/room_switch_panel.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
@@ -285,7 +285,7 @@ class PlayerTopBar extends StatelessWidget {
             const SizedBox(width: 4),
             Expanded(child: _VideoTitle(controller: actions.controller)),
             ..._trailing(context, switchRoom: true),
-            ..._roomActions(time: true),
+            ..._roomActions(landscape: true, time: true),
             const SizedBox(width: 4),
           ],
         ),
@@ -301,7 +301,7 @@ class PlayerTopBar extends StatelessWidget {
                 _back(context),
                 Expanded(child: _VideoTitle(controller: actions.controller, programme: false)),
                 _follow(),
-                ..._roomActions(),
+                ..._roomActions(landscape: false),
                 const SizedBox(width: 4),
               ],
             ),
@@ -354,10 +354,13 @@ class PlayerTopBar extends StatelessWidget {
   );
 
   /// Record and the room menu, as in the room's app bar (U.2c change 2);
-  /// the landscape bar has room for the recording's [time] (U.2a2 c8).
-  List<Widget> _roomActions({bool time = false}) {
+  /// the landscape bar has room for the recording's [time] (U.2a2 c8). The
+  /// menu leaves out what the [landscape] or portrait fullscreen bars show
+  /// (U.2m c12).
+  List<Widget> _roomActions({required bool landscape, bool time = false}) {
     final controller = actions.controller;
     final iptv = controller.site.id == SiteIds.iptv;
+    final onBars = menuEntriesOnBars(landscape: landscape, cast: castSupported(actions.platform.platform));
     return [
       if (!iptv)
         ListenableSelector<String>(
@@ -366,7 +369,13 @@ class PlayerTopBar extends StatelessWidget {
           builder: (context, _, _) =>
               RecordButton(room: controller.room, latest: () => controller.room, onVideo: true, showTime: time),
         ),
-      RoomMenuButton(controller: controller, windows: actions.platform.windows, onVideo: true, onMenu: actions.onMenu),
+      RoomMenuButton(
+        controller: controller,
+        windows: actions.platform.windows,
+        onVideo: true,
+        onBars: onBars,
+        onMenu: actions.onMenu,
+      ),
     ];
   }
 
@@ -384,7 +393,7 @@ class PlayerTopBar extends StatelessWidget {
         VideoIconButton(
           key: const ValueKey('live-play-switch-room'),
           tooltip: i18n('switch_live_room'),
-          onPressed: () => unawaited(showRoomSwitcher(context, controller.room)),
+          onPressed: () => showRoomSwitchPanel(context, controller),
           icon: const Icon(AppIcons.switchRoom),
         ),
       for (final slot in actions.reduced ? const <TopBarSlot>[] : topBarSlots(platform: actions.platform.platform))

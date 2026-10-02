@@ -77,7 +77,8 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
         tabs: [
           Tab(
             child: ListenableSelector<int>(
-              listenable: widget.controller,
+              // The feed tells of new lines at most once a frame (B08).
+              listenable: widget.controller.chat,
               selector: () {
                 final from = _unreadFrom;
                 return from == null ? 0 : widget.controller.chat.added - from;

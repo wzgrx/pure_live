@@ -128,6 +128,52 @@ void main() {
     expect(danmakuFrameDivisor(refreshRate: 144), 1, reason: 'no cap: every refresh');
   });
 
+  testWidgets("B08 c4 (R5): a frame with the last one's time moves nothing; the next moves one step, not two", (
+    tester,
+  ) async {
+    final layer = _Layer(tester);
+    await layer.pump(refreshRate: 120);
+    final message = _chat('同一时刻');
+    layer.messages.add(message);
+    await tester.pump();
+    const frame = Duration(microseconds: 8333);
+    await layer.run(120, 0.1);
+    var x = layer.rect(message).left;
+    final steps = <double>[];
+    final paints = <int>[];
+    Future<void> next(Duration after) async {
+      final painted = layer.state.paintCount;
+      await tester.pump(after);
+      final now = layer.rect(message).left;
+      steps.add(x - now);
+      paints.add(layer.state.paintCount - painted);
+      x = now;
+    }
+
+    // Variable refresh rate: the engine clamps a time that went back, so a
+    // frame repeats the last time and the next vsync is two periods on
+    // (Flutter #190372).
+    await next(frame);
+    await next(Duration.zero);
+    await next(frame * 2);
+    await next(frame);
+    await next(Duration.zero);
+    await next(frame * 2);
+    await next(frame);
+    const step = 120 * 8333 / Duration.microsecondsPerSecond;
+    expect(steps, [
+      closeTo(step, 0.001),
+      0,
+      closeTo(step, 0.001),
+      closeTo(step, 0.001),
+      0,
+      closeTo(step, 0.001),
+      closeTo(step, 0.001),
+    ]);
+    expect(paints, [1, 0, 1, 1, 0, 1, 1], reason: 'the repeated frame paints nothing');
+    await layer.close();
+  });
+
   testWidgets('c3, F.2a: a manual 30 paints about 30 times a second at 60 Hz; 60 at 120 Hz every other refresh', (
     tester,
   ) async {

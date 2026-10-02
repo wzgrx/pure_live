@@ -107,8 +107,14 @@ Future<_Room> _pump(
   addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(systemAccess, null));
   final toasts = <String>[];
   final previous = AppNavigator.toast;
+  final previousShow = AppNavigator.showToast;
   AppNavigator.toast = toasts.add;
-  addTearDown(() => AppNavigator.toast = previous);
+  AppNavigator.showToast = (toast) =>
+      toasts.add('${toast.message}${toast.actionLabel == null ? '' : ' | ${toast.actionLabel}'}');
+  addTearDown(() {
+    AppNavigator.toast = previous;
+    AppNavigator.showToast = previousShow;
+  });
   final site = _ListSite(
     rooms ??
         {
@@ -230,8 +236,9 @@ void main() {
     });
 
     test('c3: on every layout the grid shows at least as many cards as 3.x (issue #37)', () {
-      // The window, then the new panel's grid (the panel less its 132 of
-      // header, groups and "正在观看").
+      // The window, then the new panel's grid (the panel less 132 of
+      // header, groups and "正在观看", as the design drew it; the shared
+      // header is 4 lower, which only leaves more room).
       const chrome = 132.0;
       final layouts = <(String, Size, Size)>[
         ('phone', const Size(393, 852), const Size(393, 852 - 36 - 56 - 221 - 16)),
@@ -381,6 +388,9 @@ void main() {
     testWidgets('c1, c2: landscape fullscreen: ⇄ opens it on the right; a pick switches in place, still fullscreen', (
       tester,
     ) async {
+      // The longest refresh time: the 360 wide header holds it with every button.
+      final last = DateTime.now().subtract(const Duration(hours: 23));
+      RoomSwitchPanel.follows = FollowsRefresher(refresh: () async => 0, lastRefreshedAt: () => last);
       final room = await _pump(tester, width: 852, height: 393, follows: [_room('5'), _room('7')]);
       await _tap(tester, 'live-play-fullscreen');
       final session = tester.widget<RoomPlayer>(find.byType(RoomPlayer)).controller.session;
@@ -390,6 +400,8 @@ void main() {
       expect(find.descendant(of: _key('live-play-side-panel'), matching: panel), findsOneWidget);
       expect(tester.getRect(panel), const Rect.fromLTWH(852 - 360, 0, 360, 393));
       expect(roomSwitchColumns(360), _v3Columns(360));
+      expect(tester.widget<Text>(_key('switch-refresh-label')).data, '23 小时前');
+      expect(tester.getRect(_key('room-panel-title')).width, greaterThan(60), reason: 'the title still shows');
 
       await tester.tap(_key('switch-room-bilibili-7'));
       await tester.pump();
@@ -578,7 +590,7 @@ void main() {
       expect(_key('switch-refreshing'), findsNothing);
       expect(_key('switch-room-bilibili-5'), findsOneWidget);
       expect(tester.widget<Text>(_key('switch-refresh-label')).data, '刷新失败');
-      expect(room.toasts, ['2 个直播间刷新失败，显示的是上次的状态']);
+      expect(room.toasts, ['2 个直播间刷新失败，显示的是上次的状态 | 重试'], reason: "the app's toast with a retry");
       done = Completer<int>();
       await tester.tap(_key('switch-refresh'));
       await tester.pump();

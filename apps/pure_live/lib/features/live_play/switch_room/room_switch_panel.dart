@@ -34,7 +34,8 @@ final class FollowsRefresher {
 
 /// Opens the "切换直播间" panel of [controller]'s room (docs/ui/compare/U.2m):
 /// the room page's panel, or the same panel in a sheet where there is no
-/// room page around [context] (picking a room then replaces the page).
+/// room page around [context] (the app's adaptive panel, U.1d; picking a
+/// room then replaces the page).
 void showRoomSwitchPanel(BuildContext context, LiveRoomController controller) {
   final panels = RoomPanelScope.maybeOf(context);
   if (panels != null) {
@@ -42,9 +43,9 @@ void showRoomSwitchPanel(BuildContext context, LiveRoomController controller) {
     return;
   }
   unawaited(
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
+    showAdaptivePanel<void>(
+      context,
+      side: false,
       builder: (sheetContext) => SizedBox(
         height: MediaQuery.sizeOf(sheetContext).height * 0.6,
         child: RoomSwitchPanel(
@@ -174,9 +175,11 @@ class _RoomSwitchPanelState extends ConsumerState<RoomSwitchPanel> {
 
   /// The refresh button (3.x `room-history-refresh`): greyed with a spinner
   /// while it runs; the lists follow the store as the fresh details are
-  /// written. Failures turn the button red and say how many rooms failed.
+  /// written. Failures turn the button red and say how many rooms failed,
+  /// in the app's toast with "重试" (U.1d).
   Future<void> _refresh(FollowsRefresher follows) async {
-    if (_refreshing) return;
+    // The toast's "重试" may come after the panel closed.
+    if (_refreshing || !mounted) return;
     setState(() => _refreshing = true);
     var failed = 0;
     var broken = false;
@@ -190,11 +193,17 @@ class _RoomSwitchPanelState extends ConsumerState<RoomSwitchPanel> {
       _refreshing = false;
       _refreshFailed = broken || failed > 0;
     });
-    if (broken) {
-      AppNavigator.toast(i18n('room_switch_refresh_failed'));
-    } else if (failed > 0) {
-      AppNavigator.toast(i18n('room_switch_refresh_failed_count', args: {'count': '$failed'}));
-    }
+    if (!broken && failed == 0) return;
+    AppNavigator.showToast(
+      AppToast(
+        broken
+            ? i18n('room_switch_refresh_failed')
+            : i18n('room_switch_refresh_failed_count', args: {'count': '$failed'}),
+        key: const ValueKey('switch-refresh-failed-toast'),
+        actionLabel: i18n('retry'),
+        onAction: () => unawaited(_refresh(follows)),
+      ),
+    );
   }
 
   void _pickGroup(RoomSwitchGroup group) {

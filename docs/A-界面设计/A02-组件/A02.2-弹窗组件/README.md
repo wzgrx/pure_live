@@ -1,9 +1,11 @@
-# A02.2 弹窗组件：设计（第 1 版）
+# A02.2 弹窗组件：设计（第 1 版，定稿）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（待真机：代码 2026-10-02 合并，K90 还没逐项看，见 [verify.md](verify.md)）
+- 旧编号：U.1d、U02、T01d.1（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：四种弹窗——小菜单、对话框（通用的确认、消息、输入、选项）、面板（画面下方 / 右侧 / 底部同一个组件）、提示条，加按钮名称提示。是一份组件目录：每个组件 v3 和新设计并排，按默认、悬停、键盘焦点、按下、禁用、进行中排，浅色和深色各一张；再放进真实页面（视频设置的三个对话框、首页和全屏的提示条）
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a022)（A02.2-01～06）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a022)；计划书 [specs/UI.md](../../../specs/UI.md) 第 7 节；通用组件在 [A02.1](../A02.1-通用组件/README.md)
-- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（用 [A02.1/src](../A02.1-通用组件/src) 的 `parts.py` 和设置页）
+- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（用 [A02.1/src](../A02.1-通用组件/src) 的 `parts.py` 和设置页）；评审页没有发布，“需要你选的”D1～D4 由维护者按 D-003 选 A（2026-10-02）
+- 任务书：[brief.md](brief.md)；记录：[record.md](record.md)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；封面、画面是示意图片，键盘是示意；“无法打开画中画”的正文、“发现新版本 v3.2.12”是示意
 - 弹法照 v3，不改（计划书第 3 节第 8 条）；小菜单和面板照 [A07.6](../../A07-直播间界面/A07.6-直播间弹窗/README.md) 已确认的样子
 
@@ -25,7 +27,9 @@
 
 退出时的选择（`_ExitDecisionDialog`，`utils.dart:321-393`）在 `utils.dart` 里，但属于 A16.1（桌面窗口），这里只用它的按钮规则。
 
-## v3 的样子（`v3.2.11`，`lib/` 下）
+## 3.x 的样子和问题
+
+### 3.x 的样子（`v3.2.11`，`lib/` 下）
 
 **对话框主题**（`common/style/theme.dart:177-183`）：表面容器高色、无阴影、圆角 24、标题 `titleLarge`（20 号）600、正文 `bodyMedium`（13 号）。按钮：`TextButton` 主题 `labelLarge`（13 号 500）圆角 8（:145-150）；`FilledButton` 默认圆角全圆、高 40；遮罩 54% 黑；点外面关（`barrierDismissible` 默认 true）。
 
@@ -65,7 +69,7 @@
 
 **v4 现在**：直播间的面板（`features/live_play/layout/room_panel.dart` 的 `RoomSidePanel`，A07.6）、清晰度和线路菜单已按 A07.6 做；其余对话框和底部面板各页自己写（`showDialog`、`showModalBottomSheet` 共 51 个文件），提示条是浮起的 `SnackBar`、3 秒（`app/app.dart:70-76`），删除关注房间带“撤销”（`shared/rooms/room_menu.dart:278-283`）。`live_ui` 里还没有公共的对话框、菜单、提示条组件。
 
-## v3 的问题
+### 3.x 的问题
 
 | 编号 | 问题 | 位置 |
 |---|---|---|
@@ -86,11 +90,36 @@
 | Q15 | ToastUtil 不能带操作：删除没有撤销，失败没有重试 | `toast_util.dart:11-33` |
 | Q16 | `showMessageDialog`、`showRightDialog` 没用上；同类对话框 40 个文件各自写 | `utils.dart:137-205` |
 
+### 文件对照
+
+| v3 | v4 现在 |
+|---|---|
+| `plugins/utils.dart`（通用对话框） | 没有公共组件；各页 `showDialog`、`showModalBottomSheet`（共 51 个文件） |
+| `PopupMenuButton` 各处 | A07.6 的清晰度、线路菜单（`features/live_play/`）；其余各页自己写 |
+| `showModalBottomSheet`、直播间右侧面板 | `features/live_play/layout/room_panel.dart`（`RoomSidePanel`，直播间专用） |
+| `common/utils/toast_util.dart`（SmartDialog） | `app/app.dart:70-76`（浮起 `SnackBar`）、`routes/app_navigator.dart` 的 `ToastPresenter` |
+
+开发后（2026-10-03 读代码）：公共组件在 `packages/live_ui/lib/src/widgets/app_dialog.dart`（对话框）、`adaptive_panel.dart`（`PanelHeader`、`PanelFrame`、`showAdaptivePanel`）、`app_toast.dart`（提示条）；直播间的面板 `RoomSidePanel` 在 `apps/pure_live/lib/shared/panels/side_panel.dart`（原来在 `features/live_play/layout/room_panel.dart`）；提示条接在 `apps/pure_live/lib/app/app.dart:70,78-79` 和 `routes/app_navigator.dart:33,38`。
+
 ## 各版的经过
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
 | 第 1 版 | 四张组件对照图（浅色、深色）、视频设置的三个对话框（竖屏、横屏、宽屏）、提示条（竖屏、全屏）、引用 A07.6 / A09.2 的面板位置图、“用在哪”对照、四处选择 | 待评审 |
+| 定稿（2026-10-02） | 没有改图；D1～D4 由维护者按 D-003 选 A，任务书照第 1 版开发；直播间里的弹窗交给 A07.12、A07.13 | 按 A |
+
+### 第 1 版拿不准的地方
+
+1. v3 默认 `PopupMenuButton` 用 `initialValue` 时当前项有没有底色，没在真机上看（同 A09.7 的拿不准）；图里没画底色。
+2. v3 `AlertDialog` 的宽度按 `IntrinsicWidth` 推算（选项 280，确认 300 多），没有截图核对。
+3. v3 Windows 标题栏在对话框遮罩外面（`DesktopManager.buildWithTitleBar` 包在导航器外），图里遮罩盖住了示意标题栏；以 A16.1 为准。
+4. 全屏时 v3 提示条离底 50，按 A07.4 的 v3 下栏（56 高）是紧贴下栏、略压一点；新设计放到下栏上方，差别不大。
+5. 电视上危险确认的默认焦点放“取消”是建议，pure_live_TV 的做法没逐个查。
+
+### 需要改工具的地方
+
+- 同 A02.1：`kit.css` 的 `.toast` 没有深色主题的反色、`.menu` 没有说明行和禁用项、`.dlg` 没有按钮规则；这次写在任务样式里（`src/gen.py` 的 `CSS`），建议收进 kit。
+- `page.py` 引用别的任务的图（`../U.2f/…`）可以用，但导出的章节图里会把那几张图再嵌一次。
 
 ## 对比页（按章节导出）
 
@@ -125,7 +154,9 @@
 | [v3-toast-phone.jpg](v3-toast-phone.jpg)、[v4-toast-phone.jpg](v4-toast-phone.jpg)、[v4-toast-phone-n.jpg](v4-toast-phone-n.jpg) | 首页的提示条 |
 | [v3-toast-fs.jpg](v3-toast-fs.jpg)、[v4-toast-fs.jpg](v4-toast-fs.jpg) | 全屏 852×393 的提示条 |
 
-## 改动（待确认）
+## 确认的改动
+
+第 1 版的 c1～c14 全部确认（维护者按 D-003，D1～D4 选 A）。
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -146,7 +177,7 @@
 
 新加的文字：知道了；屏蔽（作按钮）；退出登录、重置、清除等动作名用 v3 已有的键（`logout`、`reset`、`clear`、`delete`）；撤销（v4 已有 `room_undo`）。
 
-## 用在哪（已出的设计）
+### 用在哪（要同步给其他任务的）
 
 见对比页同名一节。要同步给其他任务的：
 
@@ -158,6 +189,8 @@
 | A06.3 | 对话框宽度（560 / 440 / 400）在这里的规则内；“不再提醒这个版本”的勾选行照这里放 |
 | A09.8 | 认出直播间的提示条是“要用户选的”那种（不自动消失，带“进入”和 ✕） |
 | 计划书第 7 节 | 提示条写的“2 秒后自动消失”和 v3（3 秒）不一致，建议改成 3 秒、带操作 4 秒 |
+
+后来：计划书第 7 节已改成“3 秒，带操作的 4 秒”；A09.4、A09.6 的分区卡片长按按原则 7 改用房间卡片同一个居中对话框（`CardDialog`）。
 
 ## 按钮的作用和用法
 
@@ -185,31 +218,29 @@
 | 电视 | 同一组件的电视样式（A17.1）：焦点放大、字号大一级；对话框默认焦点在主要按钮（危险确认在“取消”）；菜单方向键；面板在右侧 |
 | 苹果平台差异 | 不换系统样式；iPhone 底部面板避开主屏指示条、可下拉关；iPad 键盘和指针同宽屏；macOS 用 Cmd |
 
-## 待选（A 是建议）
+## 待选和决定
 
 - D1 提示条在深色主题：A 跟主题反过来（浅底深字）；B 照 v3 一律深底（v3 深色是灰底）。
 - D2 确认按钮的字：A 写明动作；B 照 v3 一律“确认”。
 - D3 提示条形状：A 圆角 8 的条、左对齐；B 照 v3 居中胶囊。
 - D4 输入对话框的输入框：A 默认单行；B 照 v3 4–5 行大框。
 
-## 拿不准的地方
+定了：D1～D4 都按 A（维护者，D-003，2026-10-02）。
 
-1. v3 默认 `PopupMenuButton` 用 `initialValue` 时当前项有没有底色，没在真机上看（同 A09.7 的拿不准）；图里没画底色。
-2. v3 `AlertDialog` 的宽度按 `IntrinsicWidth` 推算（选项 280，确认 300 多），没有截图核对。
-3. v3 Windows 标题栏在对话框遮罩外面（`DesktopManager.buildWithTitleBar` 包在导航器外），图里遮罩盖住了示意标题栏；以 A16.1 为准。
-4. 全屏时 v3 提示条离底 50，按 A07.4 的 v3 下栏（56 高）是紧贴下栏、略压一点；新设计放到下栏上方，差别不大。
-5. 电视上危险确认的默认焦点放“取消”是建议，pure_live_TV 的做法没逐个查。
+## 实现和验证（开发后补）
 
-## 需要改工具的地方
-
-- 同 A02.1：`kit.css` 的 `.toast` 没有深色主题的反色、`.menu` 没有说明行和禁用项、`.dlg` 没有按钮规则；这次写在任务样式里（`src/gen.py` 的 `CSS`），建议收进 kit。
-- `page.py` 引用别的任务的图（`../U.2f/…`）可以用，但导出的章节图里会把那几张图再嵌一次。
-
-## 文件对照
-
-| v3 | v4 现在 |
-|---|---|
-| `plugins/utils.dart`（通用对话框） | 没有公共组件；各页 `showDialog`、`showModalBottomSheet`（共 51 个文件） |
-| `PopupMenuButton` 各处 | A07.6 的清晰度、线路菜单（`features/live_play/`）；其余各页自己写 |
-| `showModalBottomSheet`、直播间右侧面板 | `features/live_play/layout/room_panel.dart`（`RoomSidePanel`，直播间专用） |
-| `common/utils/toast_util.dart`（SmartDialog） | `app/app.dart:70-76`（浮起 `SnackBar`）、`routes/app_navigator.dart` 的 `ToastPresenter` |
+- 实现：c1～c14 都做了（直播间以外）；逐条见 [record.md](record.md)。
+  - 对话框：`AppDialog`（`packages/live_ui/lib/src/widgets/app_dialog.dart:42`）是唯一的框子：宽 = 屏宽减 32、最宽 400（长内容 560，`:18-24`），高最多屏高减 32；标题 20/600 固定在上、按钮固定在下，只有中间滚动；正文 14 次要色（主题 `dialogTheme.contentTextStyle` 也改成 14，`live_theme.dart:360-367`）；“取消”文字按钮在左（`DialogCancelButton` `:281`），动作实心写明动作（`DialogActionButton` `:214`，`danger` 红、`busy` 转圈）；放不下时竖排、主要按钮在上；回车 = 主要按钮，Esc、返回键、点外面 = 取消，危险确认焦点在“取消”，保存中关不掉。现成调用：`showAppConfirmDialog`（`:466`）、`showAppMessageDialog`（`:508`）、`showAppOptionDialog`（`:585`）、`showAppInputDialog`（`:638`）；选项行 `DialogOptionRow`（`:309`）、输入框 `dialogFieldDecoration`（`:414`）。
+  - 面板：`PanelHeader`（`adaptive_panel.dart:79`，52 高、标题 17/600、✕ 48）、`PanelFrame`（`:155`，滚动后出线）、`showAdaptivePanel`（`:23`，竖屏底部带把手、宽 600 起右侧 360）；底部面板主题改成表面色、顶角 16（`live_theme.dart:352-358`）；直播间 `RoomSidePanel` 用同一个标题栏和滚动线。
+  - 提示条：`AppToast`（`app_toast.dart:23`）、`AppToaster`（`:145`）；主题 `snackBarTheme`（`live_theme.dart:370-378`）：反色底（D1）、圆角 8、14 号、离导航栏 16；最多两行左对齐（D3）；可带一个操作和 ✕；一句 3 秒，带操作 4 秒，`persistent` 不自动消失；宽屏底部居中最宽 560；同一句显示期间不重复，新的替换旧的。
+  - 全应用替换：`features/`（直播间、多画面除外）和 `shared/` 的对话框、底部表单、提示条都换成统一组件（清单见记录“替换了哪些”）；`CardDialog` 宽 428 → 400。
+- 根因（记录里核对的）：3.x 和 4.0 都没有公共的对话框、提示条组件（`showDialog` 在 40 多个文件各写一份）；Flutter 3.47 起带 `action` 的 SnackBar 默认 `persist`，所以“撤销”的提示条一直不消失；面板标题栏 `live_ui` 和直播间各画一份。
+- 偏差：版本历史详情、“发现新版本”、下载进度三个 `Dialog` 保留各自版式（A06.3）；版本历史详情仍是 680 宽；当时部分设置对话框主要按钮仍写“确认”（后来 A02.1 由维护者另定改成“保存”等，现在应用里没有 `i18n('confirm')` 的主要按钮）；选项行说明 14 号（以前设置里是 12）；选项行最少 48 高（工具箱的以前是 56）；全屏时提示条的位置要直播间配合（后来 A07.12 做了：横屏 16 在下栏上方、竖屏全屏在两行之上，`apps/pure_live/test/features/live_play/room_popups_test.dart`）；转屏时已显示的提示条宽度不变；改了 `app/app.dart` 和 `i18n/i18n.dart` 几行（任务单写“其他目录不改”）。
+- 新翻译键：`got_it`（知道了）；没有新设置。
+- 提交：合并提交 `276925183`（2026-10-02，“Merge U02: one dialog, one panel frame, one toast across the app”）；开发提交 `680c2241f`（`live_ui` 组件）、`fc5bcdd46`（应用改用）、`b2b95d024`（测试）；记录 `1c572a5cc`（登记表写的是这个）。
+- 自动测试：新 `packages/live_ui/test/popups_test.dart`（16 个用例声明，其中几条按尺寸或主题循环；记录里写 22 条）；`apps/pure_live` 改了 15 个测试文件的查找和三处随设计变化的断言。合并时 `live_ui` 148 条、`apps/pure_live` 781 条通过。
+- 真机：待真机，步骤在 [verify.md](verify.md)。
+- 留下的问题和去向：
+  - 直播间里的弹窗（记录末尾的表）：A07.12（`c112f5415`，待真机）和 A07.13（待真机）做了——直播间里已经没有 `AlertDialog`、`showModalBottomSheet`；屏蔽关键词改成面板里的输入（`features/live_play/danmaku/message_panel.dart:237`），所以 `showAppMessageDialog`、`showAppInputDialog` 应用里没有调用者。
+  - 本地发送的星标行 `features/live_play/local_interaction/local_composer.dart:344` 仍是 `showGeneralDialog`（透明遮罩，不是对话框）；启动失败页 `app/launch_failure.dart:119` 仍是原生 `SnackBar`。
+  - `kit.css` 的提示条、菜单、对话框样式没收进工具（同 A02.1，建议在 Z 组登记）。

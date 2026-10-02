@@ -1,9 +1,11 @@
-# A02.1 通用组件：设计（第 1 版）
+# A02.1 通用组件：设计（第 1 版，定稿）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（待真机：代码 2026-10-02 合并，K90 还没逐项看，见 [verify.md](verify.md)）
+- 旧编号：U.1c、U01、T01c.1（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：页面共用的小组件：状态页（骨架、加载、空、出错、受限、离线）、头像、计数按钮、二维码、标签栏和标签芯片、列表行、设置行（开关、选择、滑块、计数、跳转）、滚动和列表外壳（刷新、加载更多、回到顶部 / 底部、页顶横幅）。是一份组件目录：每个组件 v3 和新设计并排，按默认、悬停、键盘焦点、按下、禁用、进行中排，浅色和深色各一张
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a021)（A02.1-01～03）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a021)；弹窗在 [A02.2](../A02.2-弹窗组件/README.md)
-- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公共样式和小部件在 [src/parts.py](src/parts.py)，A02.2 也用）
+- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公共样式和小部件在 [src/parts.py](src/parts.py)，A02.2 也用）；评审页没有发布，“需要你选的”C1～C4 由维护者按 D-003 选 A（2026-10-02）
+- 任务书：[brief.md](brief.md)；记录：[record.md](record.md)（组件和设计的对应）、[record-2.md](record-2.md)（逐条对照、测试、真机要看的）
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`，`tools/ui/strings.py`）；头像、封面是示意图片，二维码是示意图案（不是真码），报错原文是按 Dio 常见报错写的示例
 - 新设计不另起炉灶：行、开关、滑块、计数照 [A07.6](../../A07-直播间界面/A07.6-直播间弹窗/README.md)（已确认）；状态照 A08.1、A07.7、A09.2（评审中）
 
@@ -28,7 +30,9 @@
 
 INVENTORY 把 `standardTile`（`widget_extensions.dart:309`）记成对话框，实际 :309 是 `buildMenuTile` 弹出的单选对话框（`_openMenuDialog`），而 `buildMenuTile` 本身代码里没有调用；选项对话框归 A02.2。
 
-## v3 的样子（`v3.2.11`，`lib/` 下）
+## 3.x 的样子和问题
+
+### 3.x 的样子（`v3.2.11`，`lib/` 下）
 
 **状态页**（`common/widgets/app_status_view.dart`）
 - 三种类型 `loading / empty / error`（:10）。加载只画转圈，样子随设置“加载样式”（`_getSpinKit` 等 :43-381，默认是带渐隐的圆环 :497-530），大小 `isMini` 24，否则整屏宽 >680 时 32、否则 24（:387-391）；不显示标题（:407-413）。
@@ -70,7 +74,7 @@ INVENTORY 把 `standardTile`（`widget_extensions.dart:309`）记成对话框，
 
 **v4 现在**（`packages/live_ui/lib/src/widgets/`）：`status_view.dart`、`settings_tiles.dart`、`count_button.dart`、`avatar.dart`、`qr_code_widget.dart`、`scrollable_tab_bar.dart`、`scrolling.dart` 基本是 v3 搬过来的（`AppStatusView` 多了 `buttonIcon`）；A07.6 开发时在直播间面板里做了新的行、开关、计数样子，还没有收进 `live_ui` 的公共组件。
 
-## v3 的问题
+### 3.x 的问题
 
 | 编号 | 问题 | 位置 |
 |---|---|---|
@@ -97,11 +101,42 @@ INVENTORY 把 `standardTile`（`widget_extensions.dart:309`）记成对话框，
 | P21 | 没有键盘焦点框（主题关了水波，焦点只是底色） | `theme.dart:114` |
 | P22 | 转圈大小按整屏宽度选 | `app_status_view.dart:387-391` |
 
+### 文件对照
+
+| v3 | v4 现在 |
+|---|---|
+| `common/widgets/app_status_view.dart`、`empty_view.dart` | `packages/live_ui/lib/src/widgets/status_view.dart`、`loading_styles.dart` |
+| `common/widgets/widget_extensions.dart`、`section_listtile.dart` | `packages/live_ui/lib/src/widgets/settings_tiles.dart` |
+| `common/widgets/count_button.dart` | `packages/live_ui/lib/src/widgets/count_button.dart` |
+| `common/widgets/common_avatar.dart` | `packages/live_ui/lib/src/widgets/avatar.dart` |
+| `common/widgets/qr_code_widget.dart`、`modules/account/bilibili/bilibili_login_qr_code.dart` | `packages/live_ui/lib/src/widgets/qr_code_widget.dart` |
+| `common/widgets/scrollable_tab_bar.dart`、`pure_live_scroll_*.dart`、`keep_alive_wrapper.dart` | `packages/live_ui/lib/src/widgets/scrollable_tab_bar.dart`、`scrolling.dart` |
+| `common/base/base_page_view*.dart`、`desktop_components.dart`、`plugins/global.dart` | 没有公共外壳：各页自己写，下拉刷新用 Material `RefreshIndicator`（`favorite_page.dart:448` 等），翻页栏在 `features/popular/pagination_bar.dart` |
+
+开发后（2026-10-03 读代码）：列表外壳仍在各页，但都用 `live_ui` 的组件拼（`apps/pure_live/lib/shared/rooms/room_grid.dart` 的 `loadErrorStatus` `:290`、`StatusBanner` `:230`、`ScrollJumpButtons` `:197-209`）；下拉刷新已由 A03.1 换成 `AppRefreshView`，应用里没有 `RefreshIndicator`；翻页栏在 `apps/pure_live/lib/shared/rooms/paging.dart`。
+
 ## 各版的经过
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
 | 第 1 版 | 五张组件对照图（浅色、深色）、设置页和横屏状态整屏图、“用在哪”对照、四处选择 | 待评审 |
+| 定稿（2026-10-02） | 没有改图；C1～C4 由维护者按 D-003 选 A，任务书照第 1 版开发；开发中维护者另定两条（设置类对话框写明动作、剩下 3 个原生弹出菜单换成小菜单）和标题对齐（D-011） | 按 A |
+
+### 第 1 版拿不准的地方
+
+1. v3 的“加载样式”默认圆环是 `ShaderMask` 加扫掠渐变，图里用圆锥渐变近似；其余 50 多种加载动画没画。
+2. E04.1 默认 `TextButton`、`ListTile`、`TabBar` 的悬停、焦点、按下叠层透明度按 Flutter 默认（8% / 10% / 10%）画，v3 主题关了水波，按下时只有底色——没有在真机上看。
+3. Windows 标题栏在 v3 是 `DesktopManager.buildWithTitleBar` 自绘的，这里画的是示意（A16.1 定）。
+4. `buildMenuTile` 没有调用处是按 `grep` 得出的（`lib/` 下只有定义）；如果 3.x 里有动态调用，请指出。
+5. 二维码是示意图案（有定位块，但不是真码）；真码的模块数随内容变。
+6. v3 卡片封面加载中的底色：`room_card.dart` 用 `grey.shade100`，图里用 #F5F5F5。
+7. 计数在 A07.6 里画的是 36 高、点击区域没写；这里定为看起来 36、点击区域 48。
+
+### 需要改工具的地方
+
+- `kit/kit.css` 的 `.toast` 只有浅色主题的深底，没有深色主题的反色；这次在任务自己的样式里写了 `--inv` 等变量（`src/parts.py`），建议收进 kit。
+- `kit.css` 的 `Noto Sans SC` 把 500 字重映射到粗体，v3 的 500（按钮、菜单）在图里显得偏粗。
+- `render.py --dark` 只能对整个目录或逐个文件加，这次逐个文件跑了五对组件图。
 
 ## 对比页（按章节导出）
 
@@ -133,7 +168,9 @@ INVENTORY 把 `standardTile`（`widget_extensions.dart:309`）记成对话框，
 | [v3-settings-wide.jpg](v3-settings-wide.jpg)、[v4-settings-wide.jpg](v4-settings-wide.jpg) | 视频设置 1280×800（最宽 960 / 720） |
 | [v3-status-land.jpg](v3-status-land.jpg)、[v4-status-land.jpg](v4-status-land.jpg) | 横屏手机 852×393 的出错状态 |
 
-## 改动（待确认）
+## 确认的改动
+
+第 1 版的 c1～c21 全部确认（维护者按 D-003，C1～C4 选 A）。
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -161,7 +198,9 @@ INVENTORY 把 `standardTile`（`widget_extensions.dart:309`）记成对话框，
 
 新加的文字（开发时加进翻译）：没有网络连接；检查网络后重试；连上网络后会自动刷新；加载失败（v3 有 `refresh_load_failed`）；详情；下拉刷新；松开刷新；上拉加载；刷新失败；加载失败，点这里重试。其余用 v3 已有的键（`refresh_loading`、`login_required_*`、`go_to_login`、`retry`、`refresh`、`refresh_refreshing`、`refresh_no_more_data`、`refresh_release_to_load`、`refresh_last_updated_at`、`qr_*`、`refresh_qr`、`never_show`、`cellular_warning_msg`）。示例里的具体原因句（“平台拒绝了请求（412）…”“这个分区现在没有人在播…”）跟着各页面任务。
 
-## 用在哪（已出的设计）
+### 用在哪（要同步给其他任务的）
+
+下面提到的“TASKS 第 7 节”是整理前的跨任务清单，全文在标签 `docs-archive-2026-10-02` 的 `docs/ui/TASKS.md`。
 
 见对比页同名一节。要同步给其他任务的：
 
@@ -200,37 +239,26 @@ INVENTORY 把 `standardTile`（`widget_extensions.dart:309`）记成对话框，
 | 电视 | 同一组件的电视样式（A17.1）：焦点放大 1.05 倍、近白描边、字号大一级；设置行整行聚焦，开关确认键、计数和滑块左右键；二维码用于手机扫码登录 |
 | 苹果平台差异 | 列表回弹（照 v3）；开关不换 Cupertino（v3 的 `CupertinoSwitchListTile` 没用上）；iPad 指针同宽屏；macOS 用 Cmd |
 
-## 待选（A 是建议）
+## 待选和决定
 
 - C1 状态页的按钮：A 第一个浅色实心、第二个文字按钮；B 照 v3 都是文字按钮（只改图标）。
 - C2 选择行的标记：A 值 + ⌄；B 照 v3 值 + ›。
 - C3 行标题字重：A 400（和 A07.6 一致）；B 照 v3 600。
 - C4 出错的原始报错：A 收进“详情”；B 照 v3 直接显示。
 
-## 拿不准的地方
+定了：C1～C4 都按 A（维护者，D-003，2026-10-02）。C3 曾和 A11.1 的设置行标题 600 冲突，维护者定保持 400（C3 选 A）；标题对齐按 D-011。
 
-1. v3 的“加载样式”默认圆环是 `ShaderMask` 加扫掠渐变，图里用圆锥渐变近似；其余 50 多种加载动画没画。
-2. E04.1 默认 `TextButton`、`ListTile`、`TabBar` 的悬停、焦点、按下叠层透明度按 Flutter 默认（8% / 10% / 10%）画，v3 主题关了水波，按下时只有底色——没有在真机上看。
-3. Windows 标题栏在 v3 是 `DesktopManager.buildWithTitleBar` 自绘的，这里画的是示意（A16.1 定）。
-4. `buildMenuTile` 没有调用处是按 `grep` 得出的（`lib/` 下只有定义）；如果 3.x 里有动态调用，请指出。
-5. 二维码是示意图案（有定位块，但不是真码）；真码的模块数随内容变。
-6. v3 卡片封面加载中的底色：`room_card.dart` 用 `grey.shade100`，图里用 #F5F5F5。
-7. 计数在 A07.6 里画的是 36 高、点击区域没写；这里定为看起来 36、点击区域 48。
+## 实现和验证（开发后补）
 
-## 需要改工具的地方
-
-- `kit/kit.css` 的 `.toast` 只有浅色主题的深底，没有深色主题的反色；这次在任务自己的样式里写了 `--inv` 等变量（`src/parts.py`），建议收进 kit。
-- `kit.css` 的 `Noto Sans SC` 把 500 字重映射到粗体，v3 的 500（按钮、菜单）在图里显得偏粗。
-- `render.py --dark` 只能对整个目录或逐个文件加，这次逐个文件跑了五对组件图。
-
-## 文件对照
-
-| v3 | v4 现在 |
-|---|---|
-| `common/widgets/app_status_view.dart`、`empty_view.dart` | `packages/live_ui/lib/src/widgets/status_view.dart`、`loading_styles.dart` |
-| `common/widgets/widget_extensions.dart`、`section_listtile.dart` | `packages/live_ui/lib/src/widgets/settings_tiles.dart` |
-| `common/widgets/count_button.dart` | `packages/live_ui/lib/src/widgets/count_button.dart` |
-| `common/widgets/common_avatar.dart` | `packages/live_ui/lib/src/widgets/avatar.dart` |
-| `common/widgets/qr_code_widget.dart`、`modules/account/bilibili/bilibili_login_qr_code.dart` | `packages/live_ui/lib/src/widgets/qr_code_widget.dart` |
-| `common/widgets/scrollable_tab_bar.dart`、`pure_live_scroll_*.dart`、`keep_alive_wrapper.dart` | `packages/live_ui/lib/src/widgets/scrollable_tab_bar.dart`、`scrolling.dart` |
-| `common/base/base_page_view*.dart`、`desktop_components.dart`、`plugins/global.dart` | 没有公共外壳：各页自己写，下拉刷新用 Material `RefreshIndicator`（`favorite_page.dart:448` 等），翻页栏在 `features/popular/pagination_bar.dart` |
+- 实现：c1～c21 都做了，c19（下拉刷新的文字）由 A03.1 做、这里只检查（没有 `RefreshIndicator`，能下拉刷新的列表都用 `AppRefreshView`）。组件和设计编号的对应见 [record.md](record.md)，逐条对照见 [record-2.md](record-2.md)。主要的新组件：`StatusBanner`（`packages/live_ui/lib/src/widgets/status_banner.dart:30`）、`StatusSkeleton`（`status_view.dart:463`）、`CounterControl`（`count_button.dart:15`）、`QrCodeCard`（`qr_code_widget.dart:99`）、`TabLabel`/`SecondaryTabBar`（`tab_label.dart:12`、`:79`）、`AppChip`（`app_chip.dart:14`）、`ScrollJumpButtons`（`jump_buttons.dart:13`）、`FocusRing`（`focus_ring.dart:12`）、`EscapeBack`（`escape_back.dart:10`）；主题里的 `FocusFrame`、芯片主题、标签叠层、列表行 15/400（`live_theme.dart:31`、`:277-288`、`:324-337`）。删掉了 3.x 的设置构建函数、960 列宽、旧 `RoomCard`、各页自己画的芯片、二维码卡片、横幅和回到顶部。
+- 和设计不同的地方（详见记录）：转圈大小和横屏左图右文按窗口判断，不按所在区域（`SliverFillRemaining` 里不能用 `LayoutBuilder`）；“离线”的自动刷新只接在热门、分区房间、分区三个列表（`networkChangesProvider`）；账号页说明横幅和搜索的链接横幅保持各自的样子；录制中心的筛选是等宽分段，不是芯片；计数的“点数字输入”保留。
+- 维护者另定并做了的：设置类对话框主要按钮写明动作（主题颜色、弹幕颜色、卡片间距、每页条数、Twitch 语言、录制目录、设置标签 → “保存”；网络电视文件路径 → “导入”；配对码 → “发送”或“接收”）；剩下 3 个原生 `PopupMenuButton`（录制中心任务卡片 ⋮、字体管理 ⋮、翻页栏每页条数）换成小菜单，为此 `AppMenuEntry` 加了 `switchValue`（`app_menu.dart:54`），`AppMenuButton` 加了 `enabled`、`buttonKey` 和 `show()`。
+- 标题对齐：照 3.x 实际运行的样子（D-011）：主题不设居中；录制中心、关注、分区、热门、观看记录、工具箱用 `centredPageTitle`（`live_theme.dart:24`），其余靠左，`settingsPageAppBar` 默认靠左。
+- 新翻译键：`details`、`refresh_load_failed`、`status_offline_title`、`status_offline_subtitle`；没有新设置。
+- 提交：合并提交 `349a4fce5`（2026-10-02，“Merge U01: common components …”）；其中的开发提交有 `9f68079cc`（设置对话框写明动作、去掉最后几个弹出菜单）、`e320e0e72`（标题照 3.x 的位置）；记录 `88ee5de1f`、`097a60963`（登记表写的是 `097a60963`）。
+- 自动测试：新 `packages/live_ui/test/components_test.dart` 26 条（状态页、横幅、头像、计数、二维码、标签、芯片、设置行、开关、列表行、回到顶部、焦点框）；另改了 `status_view_test`、`theme_test`、`widgets_test`、`room_card_test`、`settings_row_test`。合并时 `live_ui` 全部 183 条、`apps/pure_live` 全部 829 条通过；`python3 tools/gate/check_ui_structure.py` 通过。
+- 真机：待真机，步骤在 [verify.md](verify.md)（来自 [record-2.md](record-2.md) 的“要在 K90 上看的地方”）。S02.2、S02.3 的 K90 验证用的 `288fec0ec` 早于本任务的合并，不算。
+- 留下的问题和去向：
+  - 给直播间的四条：`chat_panel.dart` 的标签换 `TabLabel`（已做，`features/live_play/danmaku/chat_panel.dart:108-109,148`）；录制清晰度芯片换 `AppChip`（已做，`record/record_panel.dart:468`）；顶栏可点头像用 `CommonAvatar(onTap:, tooltip:)`（A07.11 已做，`layout/room_header.dart:163-170`）；直播间里的状态用 `AppStatusView`（录制面板用了 `isMini`，`record_panel.dart:314-319`；其余在 A07.7 的 `VideoStateView`）。
+  - `tools/ui/mock/kit/kit.css` 的提示条深色反色、菜单说明行和禁用项、500 字重：没有任务管，建议在 Z 组登记。
+  - 状态页按窗口判断：A04.1 做高度分档时复查。

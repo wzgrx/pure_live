@@ -168,22 +168,42 @@ class _DefaultLoadingIndicatorState extends State<DefaultLoadingIndicator> with 
 
   @override
   Widget build(BuildContext context) {
-    return RotationTransition(
-      turns: _rotation,
-      child: ShaderMask(
-        shaderCallback: (rect) => SweepGradient(
-          colors: [widget.color, widget.color.withValues(alpha: 0.1)],
-          stops: const [0.0, 0.85],
-        ).createShader(rect),
-        child: Container(
-          width: widget.size,
-          height: widget.size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(width: 3.5, color: Colors.white),
-          ),
-        ),
+    // A layer of its own: each turn repaints the ring alone, not the page
+    // around it (P05).
+    return RepaintBoundary(
+      child: RotationTransition(
+        turns: _rotation,
+        child: CustomPaint(size: Size.square(widget.size), painter: _LoadingRing(widget.color)),
       ),
     );
   }
+}
+
+/// The default spinner's ring: 3.5 wide inside its box, its colour fading
+/// from the colour to 10 % along a sweep (3.x). The gradient is the stroke's
+/// shader, one draw; 3.x masked a white ring with a ShaderMask, which draws
+/// it offscreen first on every frame of the turn (P05, research 2026-10-02
+/// §4.2).
+class _LoadingRing extends CustomPainter {
+  const new(this.color);
+
+  final Color color;
+
+  static const double _width = 3.5;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final box = Offset.zero & size;
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _width
+      ..shader = SweepGradient(
+        colors: [color, color.withValues(alpha: 0.1)],
+        stops: const [0.0, 0.85],
+      ).createShader(box);
+    canvas.drawCircle(box.center, (size.shortestSide - _width) / 2, paint);
+  }
+
+  @override
+  bool shouldRepaint(_LoadingRing oldDelegate) => oldDelegate.color != color;
 }

@@ -138,7 +138,7 @@ String? _text(WidgetTester tester, String key) => tester.widget<Text>(_key(key))
 void main() {
   tearDown(() => DeviceControls.debugAvailable = null);
 
-  group('U.2n c1: the room menu\'s settings are room panels', () {
+  group("U.2n c1: the room menu's settings are room panels", () {
     testWidgets('portrait: under the picture, all the height below it', (tester) async {
       final room = await _pump(tester);
       final video = tester.getRect(_key('live-play-video-box'));
@@ -215,7 +215,7 @@ void main() {
       await _close(tester, room);
     });
 
-    testWidgets('a danmaku\'s actions: under the picture in portrait, on the right in fullscreen', (tester) async {
+    testWidgets("a danmaku's actions: under the picture in portrait, on the right in fullscreen", (tester) async {
       final room = await _pump(tester, width: 852, height: 393);
       await tester.tap(_key('live-play-fullscreen'));
       await _settle(tester);
@@ -285,7 +285,7 @@ void main() {
       await gesture.up();
       await _settle(tester);
       expect(system, greaterThan(0.3));
-      expect(system, lessThan(0.6), reason: 'moved from 30 %, not from the player\'s 100 %');
+      expect(system, lessThan(0.6), reason: "moved from 30 %, not from the player's 100 %");
       final afterDrag = system;
 
       // The panel shows what the drag left.
@@ -377,7 +377,7 @@ void main() {
       expect(menu.top, greaterThan(button.bottom));
       expect(menu.top - button.bottom, lessThan(20));
       expect(menu.right, lessThanOrEqualTo(button.right));
-      expect(button.right - menu.right, lessThan(20), reason: 'lined up with the button\'s right edge');
+      expect(button.right - menu.right, lessThan(20), reason: "lined up with the button's right edge");
       await tester.tap(_key('video-fit-2'));
       await _settle(tester);
       expect(room.services.store.settings.get(Settings.videoFitIndex), 2);

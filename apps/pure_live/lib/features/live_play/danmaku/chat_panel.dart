@@ -77,7 +77,8 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
         tabs: [
           Tab(
             child: ListenableSelector<int>(
-              listenable: widget.controller,
+              // The feed tells of new lines at most once a frame (B08).
+              listenable: widget.controller.chat,
               selector: () {
                 final from = _unreadFrom;
                 return from == null ? 0 : widget.controller.chat.added - from;
@@ -108,7 +109,7 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
       Expanded(
         child: TabBarView(
           controller: _tabs,
-          physics: const PureLiveBoundedScrollPhysics(),
+          physics: const PureLivePageScrollPhysics(),
           children: [
             // U.2k-a: the local danmaku composer under the list (while the
             // local interaction is on).

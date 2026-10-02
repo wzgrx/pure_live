@@ -123,7 +123,8 @@ class RoomMessagePanel extends StatelessWidget {
                         TextSpan(
                           text: '$name：',
                           style: body?.copyWith(
-                            color: chatNameColor(message.color, theme.brightness) ?? scheme.onSurfaceVariant,
+                            color:
+                                chatNameColor(message.color, scheme.surfaceContainerLowest) ?? scheme.onSurfaceVariant,
                           ),
                         ),
                       TextSpan(

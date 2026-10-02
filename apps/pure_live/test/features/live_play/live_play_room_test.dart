@@ -442,6 +442,8 @@ void main() {
     final room = await _pump(tester, site: site);
     // Change 9: "醒目留言" with its count.
     expect(_in('live-play-super-chat-count', find.text('1')), findsOneWidget);
+    // P03: the tabs' pages turn like Android's ViewPager.
+    expect(tester.widget<TabBarView>(find.byType(TabBarView)).physics, isA<PureLivePageScrollPhysics>());
 
     // Change 10: the status line is a centred grey label, once in 3 s. U.2e
     // c2: before the first message the list says so in its middle instead.

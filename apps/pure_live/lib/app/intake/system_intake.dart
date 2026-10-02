@@ -13,6 +13,7 @@ import 'package:pure_live/app/intake/share_intake.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/platform/share_channel.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/routes/route_observer.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/room_prompt.dart';
 
@@ -48,7 +49,7 @@ abstract final class SystemIntake {
       importer: services.iptvImporter,
       navigator: appNavigatorReady,
       openRoom: (room) => AppNavigator.toLiveRoomDetail(liveRoom: room),
-      openRoute: (route) => AppNavigator.toNamed<void>(route),
+      openRoute: openOutsidePage,
       notify: (message) => AppNavigator.toast(message),
     );
     unawaited(native.listen((payload) => unawaited(shares.ingest(payload))));
@@ -68,6 +69,14 @@ abstract final class SystemIntake {
     _subscriptions.clear();
   }
 }
+
+/// Opens [route] with [arguments] for a shortcut or a notification: on top,
+/// or in place of the same page when that is on top already (a reminder
+/// tapped while the recording centre shows opens it at its task instead of
+/// stacking a second one, F02 c2).
+Future<void> openOutsidePage(String route, Object? arguments) => liveRouteObserver.topPage.value?.name == route
+    ? AppNavigator.offAndToNamed<void>(route, arguments: arguments)
+    : AppNavigator.toNamed<void>(route, arguments: arguments);
 
 /// The two newest rooms of [history] for the launcher's shortcuts (U.14
 /// c15), sent again only when they change.

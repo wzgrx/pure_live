@@ -123,17 +123,21 @@ class RecorderForegroundService : Service() {
             }
         }
 
-        /** Posts the "录制已停止" reminder [id] (one per task). */
+        /**
+         * Posts the "录制已停止" reminder [id] (one per task, [id] is the task's);
+         * it and its button open the recording centre at that task (F02 c2).
+         */
         internal fun alert(context: Context, id: String, title: String, text: String, words: RecordWords) {
             try {
                 channels(context, words)
+                val open = openRecordings(context, taskRequest(id), id)
                 val notification = Notification.Builder(context, ALERT_CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_stat_record_stopped)
                     .setContentTitle(title)
                     .setContentText(text)
                     .setStyle(Notification.BigTextStyle().bigText(text))
-                    .setContentIntent(openRecordings(context, 1))
-                    .addAction(Notification.Action.Builder(null, words.open, openRecordings(context, 2)).build())
+                    .setContentIntent(open)
+                    .addAction(Notification.Action.Builder(null, words.open, open).build())
                     .setCategory(Notification.CATEGORY_ERROR)
                     .setAutoCancel(true)
                     .build()
@@ -160,13 +164,27 @@ class RecorderForegroundService : Service() {
             )
         }
 
-        /** The recording centre, in the running task or a new activity on the cached engine. */
-        private fun openRecordings(context: Context, request: Int): PendingIntent = PendingIntent.getActivity(
-            context,
-            request,
-            ShareIntakePlugin.openRoute(context, ShareIntakePlugin.ROUTE_RECORDINGS),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
+        /**
+         * The recording centre, in the running task or a new activity on the
+         * cached engine; at [task] (its id) when given.
+         */
+        private fun openRecordings(context: Context, request: Int, task: String? = null): PendingIntent =
+            PendingIntent.getActivity(
+                context,
+                request,
+                ShareIntakePlugin.openRoute(context, ShareIntakePlugin.ROUTE_RECORDINGS).apply {
+                    if (task != null) putExtra(ShareIntakePlugin.EXTRA_TASK, task)
+                },
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+
+        /**
+         * The request code of [task]'s reminder: one per task, since Android
+         * keeps one pending intent per code and the extras do not tell them
+         * apart (with one code, every reminder would open the last task).
+         * Clear of the ongoing notification's codes 0–4.
+         */
+        private fun taskRequest(task: String): Int = 0x1000 + (task.hashCode() and 0x0FFFFFFF)
 
         /** Stops the service on request (not reported as an interruption). */
         internal fun stop(context: Context) {

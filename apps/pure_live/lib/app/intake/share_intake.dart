@@ -36,7 +36,8 @@ enum ShareOutcome {
 ///
 /// 1. a shortcut's or notification's page or room opens; only the pages of
 ///    [openableRoutes] (the launcher's and the recording notification's),
-///    since any app can send the intent;
+///    since any app can send the intent; the "录制已停止" reminder's task
+///    goes to the recording centre as its arguments (F02 c2);
 /// 2. a share code asks "打开分享的直播间" (U.3d's dialog, as 3.x);
 /// 3. playlists (`.m3u`, `.m3u8`, `.txt`) and guides (`.xml`, `.gz`,
 ///    `.json`) are imported into IPTV: shared files, or a shared text that
@@ -86,8 +87,8 @@ final class ShareIntake {
   /// Opens a room.
   final Future<void> Function(LiveRoom room) openRoom;
 
-  /// Opens a page.
-  final Future<void> Function(String route) openRoute;
+  /// Opens a page with its arguments (null for most).
+  final Future<void> Function(String route, Object? arguments) openRoute;
 
   /// Shows a message.
   final void Function(String message) notify;
@@ -119,7 +120,9 @@ final class ShareIntake {
         final context = await navigator();
         if (context == null) return ShareOutcome.notFound;
         if (route != null) {
-          unawaited(openRoute(route).catchError((Object _) {}));
+          // The recording centre takes the task to show (RecorderPage).
+          final arguments = route == RoutePath.kRecordPage ? payload.task : null;
+          unawaited(openRoute(route, arguments).catchError((Object _) {}));
         } else {
           final room = _roomOf(shortcut!);
           if (room == null) return ShareOutcome.unsupported;

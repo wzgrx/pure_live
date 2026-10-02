@@ -630,8 +630,11 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('live-play-fullscreen')));
       await _settle(tester);
-      // The "● 录制中" mark opens the record panel.
-      await tester.tap(find.byKey(const ValueKey('live-play-recording-mark')));
+      // U.2a2 c8: the landscape bar's record button carries the time, so no
+      // "● 录制中" mark repeats it under the bar; the button opens the panel.
+      expect(_in('live-play-record', find.byKey(const ValueKey('live-play-record-time'))), findsOneWidget);
+      expect(find.byKey(const ValueKey('live-play-recording-badge')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('live-play-record')));
       await tester.pumpAndSettle();
       final panel = tester.getRect(find.byKey(const ValueKey('live-play-record-panel')));
       expect(panel.width, 360);

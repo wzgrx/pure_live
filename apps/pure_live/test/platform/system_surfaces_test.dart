@@ -209,6 +209,9 @@ void main() {
     test('one-colour small icons, a larger television with a themed layer', () {
       expect(res('drawable/ic_stat_playback.xml'), contains('#FFFFFFFF'));
       expect(res('drawable/ic_stat_recording.xml'), contains('evenOdd'));
+      // U.2a2 c10: the recording glyph (a disc with its rounded square
+      // knocked out), not the idle ring and dot.
+      expect(res('drawable/ic_stat_recording.xml'), contains('M10.05,8.25h3.9'));
       final icon = res('mipmap-anydpi-v26/ic_launcher.xml');
       expect(icon, contains('android:inset="2%"'));
       expect(icon, contains('<monochrome android:drawable="@drawable/ic_launcher_monochrome" />'));

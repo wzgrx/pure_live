@@ -1338,6 +1338,8 @@
     "record": "录制",
     "record_alert_channel_desc": "录制被系统停掉、失败时提醒",
     "record_alert_channel_name": "录制提醒",
+    "record_badge_processing": "合成中",
+    "record_badge_reconnecting": "重连中",
     "record_cache_limit_invalid": "请输入大于零的整数",
     "record_card_processing_desc": "把 {count} 段合成一个 MP4，完成后就能播放。",
     "record_center": "录制中心",

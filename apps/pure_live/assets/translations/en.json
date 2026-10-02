@@ -1339,6 +1339,8 @@
     "record": "Record",
     "record_alert_channel_desc": "When Android stops a recording or it fails",
     "record_alert_channel_name": "Recording alerts",
+    "record_badge_processing": "Joining",
+    "record_badge_reconnecting": "Reconnecting",
     "record_cache_limit_invalid": "Enter a whole number greater than zero",
     "record_card_processing_desc": "Joining {count} segments into one MP4; it plays once done.",
     "record_center": "Record Center",

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:live_record/live_record.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/record/record_look.dart';
 import 'package:pure_live/shared/record/record_state.dart';
 
 /// What a task's status card shows, apart from the counters that move every
@@ -257,16 +258,21 @@ class RecordStatusCard extends StatelessWidget {
       ],
     );
     final quality = facts.quality;
+    // The head's glyph (docs/ui/compare/U.2a2 c9): the room bar's picture of
+    // the state, in the card's ink (amber when queued or reconnecting); a
+    // join draws its progress.
+    final ink = tone == _Tone.yellow ? accent : scheme.onSurfaceVariant;
+    Widget glyph(RecordCardState state) => RecordGlyph(state: recordGlyphState(state), size: 20, color: ink);
     final (icon, title, meta, texts, buttons) = switch (facts.state) {
       RecordCardState.idle => (
-        const RecordGlyph(state: RecordGlyphState.idle, size: 20),
+        glyph(RecordCardState.idle),
         i18n('record_panel_idle_title'),
         null,
         <Widget>[if (!compact) Text(i18n('record_panel_idle_desc'), style: body)],
         <Widget>[record('record-panel-start', i18n('record_panel_start'), onStart)],
       ),
       RecordCardState.waiting => (
-        Icon(AppIcons.autoRecord, size: 20, color: scheme.primary),
+        glyph(RecordCardState.waiting),
         i18n('record_panel_waiting_title'),
         null,
         <Widget>[
@@ -291,7 +297,7 @@ class RecordStatusCard extends StatelessWidget {
         <Widget>[record('record-panel-start-now', i18n('record_panel_start_now'), onStartTask)],
       ),
       RecordCardState.preparing => (
-        const _Spinner(),
+        glyph(RecordCardState.preparing),
         i18n('record_panel_preparing_title'),
         null,
         <Widget>[
@@ -300,7 +306,7 @@ class RecordStatusCard extends StatelessWidget {
         <Widget>[plain('record-panel-cancel', i18n('cancel'), live(onStop))],
       ),
       RecordCardState.queued => (
-        Icon(AppIcons.recordQueued, size: 20, color: accent),
+        glyph(RecordCardState.queued),
         i18n('record_panel_queued_title'),
         null,
         <Widget>[
@@ -317,7 +323,7 @@ class RecordStatusCard extends StatelessWidget {
         ],
       ),
       RecordCardState.recording => (
-        const _Dot(),
+        glyph(RecordCardState.recording),
         i18n('recording'),
         ListenableSelector<int>(
           listenable: changes,
@@ -371,7 +377,7 @@ class RecordStatusCard extends StatelessWidget {
         <Widget>[stop()],
       ),
       RecordCardState.reconnecting => (
-        Icon(AppIcons.recordReconnecting, size: 20, color: accent),
+        glyph(RecordCardState.reconnecting),
         i18n('record_panel_reconnecting_title'),
         Text(
           i18n('record_panel_reconnect_attempt', args: {'count': '${facts.retry}', 'max': '${facts.maxRetry}'}),
@@ -402,7 +408,17 @@ class RecordStatusCard extends StatelessWidget {
       // counts its attempts, and a bar under the text (moving until FFmpeg
       // reports); both redraw on their own, at most once per percent.
       RecordCardState.processing => (
-        const _Spinner(),
+        // Redrawn once per percent.
+        ListenableSelector<int?>(
+          listenable: changes,
+          selector: () => recordMergePercent(task()?.mergeProgress),
+          builder: (context, percent, _) => RecordGlyph(
+            state: RecordGlyphState.processing,
+            size: 20,
+            color: ink,
+            progress: percent == null ? null : percent / 100,
+          ),
+        ),
         i18n('record_panel_processing_title'),
         ListenableSelector<int?>(
           listenable: changes,
@@ -479,7 +495,7 @@ class RecordStatusCard extends StatelessWidget {
               ],
       ),
       RecordCardState.failed => (
-        Icon(AppIcons.recordFailed, size: 20, color: accent),
+        glyph(RecordCardState.failed),
         i18n('record_panel_failed_title'),
         null,
         <Widget>[
@@ -567,28 +583,15 @@ bool _showsGaps(RecordCardState state) => switch (state) {
   _ => false,
 };
 
-class _Spinner extends StatelessWidget {
+/// The white dot of "● 开始录制".
+class _Dot extends StatelessWidget {
   const new();
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(
-    dimension: 16,
-    child: CircularProgressIndicator(strokeWidth: 2, color: Theme.of(context).colorScheme.primary),
-  );
-}
-
-/// The red dot of a running recording ("● 录制中").
-class _Dot extends StatelessWidget {
-  const new({this.size = 10, this.color = LiveSemanticColors.recording});
-
-  final double size;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => SizedBox.square(
-    dimension: size,
+  Widget build(BuildContext context) => const SizedBox.square(
+    dimension: 8,
     child: DecoratedBox(
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      decoration: BoxDecoration(color: LiveSemanticColors.onRecording, shape: BoxShape.circle),
     ),
   );
 }
@@ -646,7 +649,7 @@ class _RecordButton extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (dot) ...[const _Dot(size: 8, color: LiveSemanticColors.onRecording), const SizedBox(width: 8)],
+        if (dot) ...[const _Dot(), const SizedBox(width: 8)],
         Flexible(child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis)),
       ],
     ),

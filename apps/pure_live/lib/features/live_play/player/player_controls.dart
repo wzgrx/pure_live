@@ -285,7 +285,7 @@ class PlayerTopBar extends StatelessWidget {
             const SizedBox(width: 4),
             Expanded(child: _VideoTitle(controller: actions.controller)),
             ..._trailing(context, switchRoom: true),
-            ..._roomActions(),
+            ..._roomActions(time: true),
             const SizedBox(width: 4),
           ],
         ),
@@ -353,8 +353,9 @@ class PlayerTopBar extends StatelessWidget {
     ),
   );
 
-  /// Record and the room menu, as in the room's app bar (U.2c change 2).
-  List<Widget> _roomActions() {
+  /// Record and the room menu, as in the room's app bar (U.2c change 2);
+  /// the landscape bar has room for the recording's [time] (U.2a2 c8).
+  List<Widget> _roomActions({bool time = false}) {
     final controller = actions.controller;
     final iptv = controller.site.id == SiteIds.iptv;
     return [
@@ -362,7 +363,8 @@ class PlayerTopBar extends StatelessWidget {
         ListenableSelector<String>(
           listenable: controller,
           selector: () => controller.room.identityKey,
-          builder: (context, _, _) => RecordButton(room: controller.room, latest: () => controller.room, onVideo: true),
+          builder: (context, _, _) =>
+              RecordButton(room: controller.room, latest: () => controller.room, onVideo: true, showTime: time),
         ),
       RoomMenuButton(controller: controller, windows: actions.platform.windows, onVideo: true, onMenu: actions.onMenu),
     ];

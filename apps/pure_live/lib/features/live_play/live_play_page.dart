@@ -23,6 +23,7 @@ import 'package:pure_live/features/live_play/layout/room_details.dart';
 import 'package:pure_live/features/live_play/layout/room_header.dart';
 import 'package:pure_live/features/live_play/layout/room_info_bar.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
+import 'package:pure_live/features/live_play/layout/room_view_memory.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
@@ -183,6 +184,11 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
 
   /// Counts the rooms shown: the page's room parts are built afresh for each.
   int _roomEpoch = 0;
+
+  /// The chat's tab and place and the portrait panel's stop while the page
+  /// swaps layouts (B09 c4, audit B-12); a room switched to starts afresh
+  /// but keeps the stop.
+  RoomViewMemory _memory = RoomViewMemory();
 
   RoomPlatform get _platform => RoomPlatform.current();
 
@@ -364,6 +370,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       _attachRoom(runtime);
       // Everything of the room before is built afresh, the player too.
       _roomEpoch++;
+      _memory = RoomViewMemory(panelStop: _memory.panelStop);
       _playerKey = GlobalKey(debugLabel: 'room-player');
       _details = false;
       _entryHint = false;
@@ -772,6 +779,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     WideBarActions? wide,
     VoidCallback? onBack,
     RoomSwipeController? swipe,
+    Widget? edge,
   }) => RoomPlayer(
     key: _playerKey,
     controller: controller,
@@ -792,6 +800,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     entryHint: _entryHint,
     onOpenGuide: _revealGuide,
     swipe: swipe,
+    edge: edge,
   );
 
   /// The open panel, or nothing.
@@ -1070,7 +1079,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       _infoBar(controller),
       const Divider(height: 1),
       Expanded(
-        child: _withDetails(controller, ChatPanel(controller: controller, detailsOpen: _details)),
+        child: _withDetails(controller, ChatPanel(controller: controller, detailsOpen: _details, memory: _memory)),
       ),
     ],
   );
@@ -1140,24 +1149,18 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
           key: const ValueKey('live-play-channel-split'),
           children: [
             Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  _player(controller, settings, arrangement: ControlsArrangement.inline),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: _ColumnHandle(
-                        key: const ValueKey('live-play-guide-fold'),
-                        folded: _guideFolded,
-                        tooltip: i18n(_guideFolded ? 'live_play_guide_unfold' : 'live_play_guide_fold'),
-                        onPressed: () => setState(() => _guideFolded = !_guideFolded),
-                      ),
-                    ),
-                  ),
-                ],
+              child: _player(
+                controller,
+                settings,
+                arrangement: ControlsArrangement.inline,
+                // B09 c5 (audit B-19): with the controls, off the picture's
+                // right edge otherwise.
+                edge: _ColumnHandle(
+                  key: const ValueKey('live-play-guide-fold'),
+                  folded: _guideFolded,
+                  tooltip: i18n(_guideFolded ? 'live_play_guide_unfold' : 'live_play_guide_fold'),
+                  onPressed: () => setState(() => _guideFolded = !_guideFolded),
+                ),
               ),
             ),
             if (!_guideFolded) ...[
@@ -1220,6 +1223,8 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     onPortraitFullscreen: _platform.mobile ? () => unawaited(_enterPortraitFullscreen()) : null,
     onFullscreen: () => unawaited(_enterFullscreen(landscape: _platform.mobile)),
     player: (covered) => _player(controller, settings, arrangement: ControlsArrangement.inline, covered: covered),
+    stop: _memory.panelStop,
+    onStop: (stop) => _memory.panelStop = stop,
     content: _chatColumn(controller),
     panels: _panelLayer(controller, portrait: true),
   );
@@ -1246,6 +1251,15 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       arrangement: ControlsArrangement.inline,
       presentation: portrait ? PicturePresentation.ambient : PicturePresentation.plain,
       wide: WideBarActions(chatCollapsed: collapsed, onToggleChat: () => _toggleChat(collapsed)),
+      // B09 c5 (audit B-19): the handle shows and hides with the controls;
+      // standing on the picture's right edge it took the volume drag and
+      // the taps on the danmaku there.
+      edge: _ColumnHandle(
+        key: const ValueKey('live-play-chat-handle'),
+        folded: collapsed,
+        tooltip: i18n(collapsed ? 'live_play_show_chat' : 'live_play_hide_chat'),
+        onPressed: () => _toggleChat(collapsed),
+      ),
     );
     final picture = ColoredBox(
       color: OnVideoColors.ground,
@@ -1256,24 +1270,10 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
             ),
     );
     final scheme = Theme.of(context).colorScheme;
-    final handle = _ColumnHandle(
-      key: const ValueKey('live-play-chat-handle'),
-      folded: collapsed,
-      tooltip: i18n(collapsed ? 'live_play_show_chat' : 'live_play_hide_chat'),
-      onPressed: () => _toggleChat(collapsed),
-    );
     final row = Row(
       key: const ValueKey('live-play-desktop-split'),
       children: [
-        Expanded(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              picture,
-              Positioned(right: 0, top: 0, bottom: 0, child: Center(child: handle)),
-            ],
-          ),
-        ),
+        Expanded(child: picture),
         AnimatedContainer(
           key: const ValueKey('live-play-chat-box'),
           duration: still ? Duration.zero : const Duration(milliseconds: 200),

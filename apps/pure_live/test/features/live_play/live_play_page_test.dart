@@ -155,8 +155,9 @@ void main() {
       site: FakeSite(liveRoom(startedAt: started)),
       danmaku: FakeDanmaku(),
     );
-    // U.2a change 7: the time on air is H:MM on the strip (was "已开播 30 分钟").
-    expect(find.text('0:30'), findsOneWidget);
+    // U.2a change 7: the time on air on the strip (was "已开播 30 分钟"); B09
+    // c5 (audit B-16): in words, not "0:30".
+    expect(find.text('30 分钟'), findsOneWidget);
 
     // U.2a: the details open over the chat instead of the old bottom sheet.
     await tester.tap(find.byKey(const ValueKey('live-play-info')));
@@ -300,6 +301,26 @@ void main() {
       expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('room-panel-close')));
       await tester.pump(const Duration(milliseconds: 400));
+      await _close(tester, services);
+    });
+
+    testWidgets('B09 c1: a tap opens the actions at once; a double tap takes them back for the fullscreen', (
+      tester,
+    ) async {
+      final danmaku = FakeDanmaku();
+      final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
+      AppNavigator.toast = (_) {};
+      final (_, at) = await fly(tester, danmaku);
+      await tester.tapAt(at);
+      await tester.pump();
+      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget, reason: 'no double tap wait');
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tapAt(at);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsNothing);
+      expect(find.byType(AppBar), findsNothing, reason: 'fullscreen');
+      expect(overlay(tester).held, isFalse);
       await _close(tester, services);
     });
 

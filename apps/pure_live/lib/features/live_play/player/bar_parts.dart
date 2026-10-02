@@ -68,9 +68,13 @@ class _PlayerClockState extends State<PlayerClock> {
   }
 }
 
-/// The battery of the fullscreen bars (3.x `BatteryInfo`): a 35 × 15 outline
-/// with the percentage; nothing on a device without a battery (U.2c change
-/// 4). Read once and then every minute; redrawn only when it changes.
+/// The battery figure's size (B09 c5, audit B-18: at least 11; it was 9).
+const double batteryFontSize = 11;
+
+/// The battery of the fullscreen bars (3.x `BatteryInfo`): a 36 × 17 outline
+/// (3.x 35 × 15, a little more for the larger figure) with the percentage;
+/// nothing on a device without a battery (U.2c change 4). Read once and then
+/// every minute; redrawn only when it changes.
 class PlayerBattery extends StatefulWidget {
   /// Creates the battery.
   const new({this.read = DeviceBattery.level, super.key});
@@ -110,21 +114,27 @@ class _PlayerBatteryState extends State<PlayerBattery> {
     if (level == null) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: SizedBox(
+      // The case grows with larger text instead of cutting the figure.
+      child: ConstrainedBox(
         key: const ValueKey('live-play-battery'),
-        width: 35,
-        height: 15,
+        constraints: const BoxConstraints(minWidth: 36, minHeight: 17),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: OnVideoColors.chipOutline,
             border: Border.all(color: OnVideoColors.foreground),
             borderRadius: BorderRadius.circular(4),
           ),
-          child: Center(
-            child: Text(
-              '$level',
-              style: Theme.of(context).textTheme.labelSmall?.regular.tabular
-                  .copyWith(fontSize: 9, color: OnVideoColors.foreground, height: 1),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+            child: Center(
+              widthFactor: 1,
+              heightFactor: 1,
+              child: Text(
+                '$level',
+                key: const ValueKey('live-play-battery-level'),
+                style: Theme.of(context).textTheme.labelSmall?.regular.tabular
+                    .copyWith(fontSize: batteryFontSize, color: OnVideoColors.foreground, height: 1),
+              ),
             ),
           ),
         ),

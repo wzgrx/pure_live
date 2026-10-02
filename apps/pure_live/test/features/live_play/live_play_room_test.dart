@@ -14,7 +14,6 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/layout/room_details.dart';
-import 'package:pure_live/features/live_play/layout/room_info_bar.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/features/live_play/logic/area_lookup.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
@@ -24,6 +23,7 @@ import 'package:pure_live/features/live_play/player/player_view.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/room_texts.dart';
 
 import '../../support.dart';
 import 'live_play_support.dart';
@@ -318,7 +318,7 @@ void main() {
     expect(heat.style?.fontFeatures, contains(const FontFeature.tabularFigures()));
     expect(_in('live-play-audience', find.byIcon(AppIcons.audienceHeat)), findsOneWidget);
     expect(_in('live-play-audience', find.byIcon(AppIcons.liveDuration)), findsOneWidget);
-    expect(_in('live-play-audience', find.text('0:30')), findsOneWidget);
+    expect(_in('live-play-audience', find.text('30 分钟')), findsOneWidget);
     // Change 8: drop-down buttons, 32 high, 48 to touch.
     expect(_in('live-play-quality', find.text('原画')), findsOneWidget);
     expect(_in('live-play-line', find.text('线路1')), findsOneWidget);
@@ -370,7 +370,7 @@ void main() {
     expect(_in('live-play-details-state', find.text('直播')), findsOneWidget);
     expect(_in('live-play-details-state', find.textContaining('已播 30 分钟')), findsOneWidget);
     expect(_in('live-play-details-figures', find.text('热度')), findsOneWidget);
-    expect(_in('live-play-details-figures', find.text('0:30')), findsOneWidget);
+    expect(_in('live-play-details-figures', find.text('30 分钟')), findsOneWidget);
     expect(find.text('每晚八点开播'), findsOneWidget);
     expect(find.byKey(const ValueKey('live-play-details-copy-room-id')), findsOneWidget);
     final list = find.descendant(
@@ -639,8 +639,10 @@ void main() {
       expect(findAreaByName(categories, ' 英雄联盟 ')?.areaId, '86');
       expect(findAreaByName(categories, 'lol')?.areaId, '86');
       expect(findAreaByName(categories, '王者荣耀'), isNull);
-      expect(formatOnAir(const Duration(hours: 2, minutes: 18)), '2:18');
-      expect(formatOnAir(const Duration(minutes: 5)), '0:05');
+      // B09 c5 (audit B-16): the time on air in words, as on the cards
+      // (`2:18` read like a recording's minutes and seconds).
+      expect(elapsedText(const Duration(hours: 2, minutes: 18)), '2 小时 18 分');
+      expect(elapsedText(const Duration(minutes: 5)), '5 分钟');
       final now = DateTime(2026, 10, 1, 21, 36);
       expect(startedText(DateTime(2026, 10, 1, 19, 18), now), '今天 19:18 开播');
       expect(startedText(DateTime(2026, 9, 30, 23, 5), now), '昨天 23:05 开播');

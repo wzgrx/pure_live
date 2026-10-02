@@ -4,6 +4,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
 import 'package:pure_live/features/live_play/danmaku/super_chats.dart';
+import 'package:pure_live/features/live_play/layout/room_view_memory.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -19,13 +20,17 @@ export 'package:pure_live/features/live_play/danmaku/super_chats.dart' show Supe
 /// arrive are counted on "弹幕列表" until the list is looked at again.
 class ChatPanel extends StatefulWidget {
   /// Creates the panel.
-  const new({required this.controller, this.detailsOpen = false, super.key});
+  const new({required this.controller, this.detailsOpen = false, this.memory, super.key});
 
   /// The room.
   final LiveRoomController controller;
 
   /// Whether the room details cover the panel.
   final bool detailsOpen;
+
+  /// The tab and the chat list's place, kept while the page builds the
+  /// panel anew (leaving the fullscreen, B09 c4).
+  final RoomViewMemory? memory;
 
   @override
   State<ChatPanel> createState() => _ChatPanelState();
@@ -35,8 +40,11 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
   late final TabController _tabs = TabController(
     length: 4,
     vsync: this,
+    initialIndex: (widget.memory?.chatTab ?? 0).clamp(0, 3),
     animationDuration: pureLiveTabTransitionDuration,
-  );
+  )..addListener(_keepTab);
+
+  void _keepTab() => widget.memory?.chatTab = _tabs.index;
 
   /// The chat count when the details opened; null when nothing is pending.
   int? _unreadFrom;
@@ -114,7 +122,7 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
             // U.2k-a: the local danmaku composer under the list (while the
             // local interaction is on).
             LocalComposerBelow(
-              child: ChatList(controller: widget.controller, onTouched: _seen),
+              child: ChatList(controller: widget.controller, onTouched: _seen, memory: widget.memory),
             ),
             // Rebuilt only when the super chats change; one clock inside
             // moves the times on (U.2e c6).

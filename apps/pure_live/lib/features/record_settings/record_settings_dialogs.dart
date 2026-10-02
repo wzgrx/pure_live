@@ -37,7 +37,7 @@ Future<void> showRecordRadioDialog<T>({
   required T selected,
   required List<RecordOption<T>> options,
   required Future<void> Function(T value) onSelected,
-}) => showDialog<void>(
+}) => showAppDialog<void>(
   context: context,
   builder: (dialogContext) {
     var pending = false;
@@ -49,109 +49,30 @@ Future<void> showRecordRadioDialog<T>({
         if (dialogContext.mounted) Navigator.of(dialogContext).pop();
       } on Object {
         pending = false;
-        if (dialogContext.mounted) {
-          ScaffoldMessenger.maybeOf(dialogContext)
-              ?.showSnackBar(SnackBar(content: Text(i18n('record_settings_apply_failed'))));
-        }
+        if (dialogContext.mounted) showAppToast(dialogContext, AppToast(i18n('record_settings_apply_failed')));
       }
     }
 
-    final theme = Theme.of(dialogContext);
-    final colors = theme.colorScheme;
-    return AlertDialog(
-      scrollable: true,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-      contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final option in options)
-              _RecordChoice(
-                key: ValueKey('record-option-${option.value}'),
-                label: option.label,
-                description: option.description,
-                current: option.value == selected,
-                colors: colors,
-                onTap: () => unawaited(choose(option.value)),
-              ),
-          ],
-        ),
+    return AppDialog(
+      title: title,
+      contentPadding: EdgeInsets.zero,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final option in options)
+            DialogOptionRow(
+              key: ValueKey('record-option-${option.value}'),
+              label: option.label,
+              description: option.description,
+              selected: option.value == selected,
+              onTap: () => unawaited(choose(option.value)),
+            ),
+        ],
       ),
     );
   },
 );
-
-class _RecordChoice extends StatelessWidget {
-  const new({
-    required this.label,
-    required this.description,
-    required this.current,
-    required this.colors,
-    required this.onTap,
-    super.key,
-  });
-
-  final String label;
-  final String? description;
-  final bool current;
-  final ColorScheme colors;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final styles = context.textStyles;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Material(
-        color: colors.primary.withValues(alpha: current ? 0.08 : 0),
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 12, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Semantics(
-                      selected: current,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            label,
-                            style: styles.t15.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: current ? colors.primary : colors.onSurface,
-                            ),
-                          ),
-                          if (description case final description?)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Text(description, style: styles.t14.copyWith(color: colors.onSurfaceVariant)),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (current) ...[const SizedBox(width: 12), Icon(AppIcons.selected, size: 22, color: colors.primary)],
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// A whole number typed in a field (3.x `_RecordIntegerDialog`, now only
 /// the size cap: "最大同时录制任务数" moved onto its row, U.7b c9).
@@ -242,54 +163,50 @@ class _RecordIntegerDialogState extends State<RecordIntegerDialog> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return AlertDialog(
-      scrollable: true,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w600)),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              key: ValueKey('${widget.fieldKey}-input'),
-              controller: _controller,
-              enabled: !_submitting,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.done,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: context.textStyles.t18,
-              decoration: InputDecoration(
-                labelText: i18n('manual_input'),
-                hintText: widget.hintText,
-                suffixText: widget.suffix,
-                errorText: _invalid ? widget.errorText : null,
-                errorMaxLines: 3,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              onChanged: (text) {
-                final invalid = _parse(text) == null;
-                if (invalid != _invalid) setState(() => _invalid = invalid);
-              },
-              onSubmitted: (_) => unawaited(_submit()),
+    return AppDialog(
+      title: widget.title,
+      busy: _submitting,
+      autofocus: false,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            key: ValueKey('${widget.fieldKey}-input'),
+            controller: _controller,
+            enabled: !_submitting,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            style: context.textStyles.t18,
+            decoration: dialogFieldDecoration(
+              context,
+              label: i18n('manual_input'),
+              hint: widget.hintText,
+              suffix: widget.suffix,
+              error: _invalid ? widget.errorText : null,
             ),
-            if (widget.note case final note?)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Text(note, style: context.textStyles.t14.copyWith(color: colors.onSurfaceVariant)),
-              ),
-          ],
-        ),
+            onChanged: (text) {
+              final invalid = _parse(text) == null;
+              if (invalid != _invalid) setState(() => _invalid = invalid);
+            },
+            onSubmitted: (_) => unawaited(_submit()),
+          ),
+          if (widget.note case final note?)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(note, style: context.textStyles.t14.copyWith(color: colors.onSurfaceVariant)),
+            ),
+        ],
       ),
       actions: [
-        TextButton(onPressed: _submitting ? null : () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-        FilledButton(
+        DialogCancelButton(enabled: !_submitting),
+        DialogActionButton(
           key: ValueKey('${widget.fieldKey}-confirm'),
-          onPressed: _submitting ? null : () => unawaited(_submit()),
-          child: Text(i18n('confirm')),
+          label: i18n('save'),
+          busy: _submitting,
+          onPressed: () => unawaited(_submit()),
         ),
       ],
     );
@@ -298,36 +215,14 @@ class _RecordIntegerDialogState extends State<RecordIntegerDialog> {
 
 /// Asks before emptying the recording folder: how much goes and that it
 /// cannot come back (U.7b c8); true to empty it.
-Future<bool> confirmRecordClear(BuildContext context, {required String size}) async =>
-    await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        final colors = Theme.of(dialogContext).colorScheme;
-        return AlertDialog(
-          scrollable: true,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text(i18n('record_clear_title'), style: const TextStyle(fontWeight: FontWeight.w600)),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Text(
-              i18n('record_clear_body', args: {'size': size}),
-              style: dialogContext.textStyles.t14.copyWith(color: colors.onSurfaceVariant),
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(i18n('cancel'))),
-            FilledButton(
-              key: const ValueKey('record-clear-confirm'),
-              style: FilledButton.styleFrom(backgroundColor: colors.error, foregroundColor: colors.onError),
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(i18n('record_clear_action')),
-            ),
-          ],
-        );
-      },
-    ) ??
-    false;
+Future<bool> confirmRecordClear(BuildContext context, {required String size}) => showAppConfirmDialog(
+  context: context,
+  title: i18n('record_clear_title'),
+  message: i18n('record_clear_body', args: {'size': size}),
+  confirmLabel: i18n('record_clear_action'),
+  danger: true,
+  confirmKey: const ValueKey('record-clear-confirm'),
+);
 
 /// The recording folder, typed or picked with the system picker
 /// ([browse]): the field shows the current choice; "default" clears it.
@@ -393,64 +288,59 @@ class _RecordDirectoryDialogState extends State<RecordDirectoryDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    scrollable: true,
-    insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-    title: Text(i18n('storage_directory'), style: const TextStyle(fontWeight: FontWeight.w600)),
-    content: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 520),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(i18n('record_settings_directory_help'), style: context.textStyles.t13),
-          const SizedBox(height: 12),
-          TextField(
-            key: const ValueKey('record-directory-input'),
-            controller: _controller,
-            enabled: !_checking,
-            decoration: InputDecoration(
-              labelText: i18n('record_settings_directory_parent'),
-              hintText: widget.defaultPath,
-              errorText: _error,
-              errorMaxLines: 4,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              suffixIcon: widget.browse == null
-                  ? null
-                  : IconButton(
-                      key: const ValueKey('record-directory-browse'),
-                      tooltip: i18n('select_folder'),
-                      icon: const Icon(AppIcons.openFolder),
-                      onPressed: _checking ? null : () => unawaited(_browse()),
-                    ),
-            ),
-            onSubmitted: (text) => unawaited(_submit(text)),
+  Widget build(BuildContext context) => AppDialog(
+    title: i18n('storage_directory'),
+    message: i18n('record_settings_directory_help'),
+    wide: true,
+    busy: _checking,
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 6),
+        TextField(
+          key: const ValueKey('record-directory-input'),
+          controller: _controller,
+          enabled: !_checking,
+          decoration: dialogFieldDecoration(
+            context,
+            label: i18n('record_settings_directory_parent'),
+            hint: widget.defaultPath,
+            error: _error,
+            suffixIcon: widget.browse == null
+                ? null
+                : IconButton(
+                    key: const ValueKey('record-directory-browse'),
+                    tooltip: i18n('select_folder'),
+                    icon: const Icon(AppIcons.openFolder),
+                    onPressed: _checking ? null : () => unawaited(_browse()),
+                  ),
           ),
-          if (_checking) ...[
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-                const SizedBox(width: 8),
-                Expanded(child: Text(i18n('record_storage_checking'), style: context.textStyles.t12)),
-              ],
-            ),
-          ],
+          onSubmitted: (text) => unawaited(_submit(text)),
+        ),
+        if (_checking) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+              const SizedBox(width: 8),
+              Expanded(child: Text(i18n('record_storage_checking'), style: context.textStyles.t12)),
+            ],
+          ),
         ],
-      ),
+      ],
+    ),
+    leading: TextButton(
+      key: const ValueKey('record-directory-default'),
+      onPressed: _checking ? null : () => unawaited(_submit('')),
+      child: Text(i18n('record_settings_directory_default')),
     ),
     actions: [
-      TextButton(
-        key: const ValueKey('record-directory-default'),
-        onPressed: _checking ? null : () => unawaited(_submit('')),
-        child: Text(i18n('record_settings_directory_default')),
-      ),
-      TextButton(onPressed: _checking ? null : () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-      FilledButton(
+      DialogCancelButton(enabled: !_checking),
+      DialogActionButton(
         key: const ValueKey('record-directory-confirm'),
+        label: i18n('confirm'),
         onPressed: _checking ? null : () => unawaited(_submit(_controller.text)),
-        child: Text(i18n('confirm')),
       ),
     ],
   );

@@ -418,7 +418,7 @@ void main() {
     await _settle(tester);
     expect(find.byType(SnackBar), findsOneWidget);
     expect(find.textContaining('文件上传失败'), findsOneWidget);
-    expect(find.widgetWithText(SnackBarAction, '重试'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, '重试'), findsOneWidget);
   });
 
   testWidgets('Back in a folder leaves the page (3.x, R4)', (tester) async {

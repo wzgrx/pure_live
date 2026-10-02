@@ -10,9 +10,11 @@ export 'package:pure_live/shared/danmaku/setting_rows.dart' show PanelCard, Pane
 /// The width of a panel on the right (landscape, tablets, desktops).
 const double roomSidePanelWidth = 360;
 
-/// A panel of the room (U.2f): the same look in every layout, only its place
-/// changes; under the picture in portrait (rising from its lower edge, all
-/// the height below it), on the right in landscape and on wide screens
+/// A panel of the room (U.2f; docs/ui/compare/U.1d c10: the same
+/// [PanelFrame] and [PanelHeader] as the panels of the pages without a
+/// picture): the same look in every layout, only its place changes; under
+/// the picture in portrait (rising from its lower edge, all the height below
+/// it), on the right in landscape and on wide screens
 /// ([roomSidePanelWidth] wide, the full height, over the chat column). The
 /// picture keeps playing and is not dimmed. The header has the [title],
 /// [actions] and ✕; in portrait a downward drag on the header closes it too
@@ -73,34 +75,17 @@ class _RoomSidePanelState extends State<RoomSidePanel> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final header = Padding(
-      padding: EdgeInsets.fromLTRB(widget.leading == null ? 16 : 4, 4, 4, 0),
-      child: SizedBox(
-        height: kMinInteractiveDimension + 4,
-        child: Row(
-          children: [
-            ?widget.leading,
-            Expanded(
-              child: Text(
-                widget.title,
-                key: const ValueKey('room-panel-title'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium?.emphasis.copyWith(color: scheme.onSurface),
-              ),
-            ),
-            ...widget.actions,
-            IconButton(
-              key: const ValueKey('room-panel-close'),
-              tooltip: i18n('close'),
-              onPressed: widget.onClose,
-              icon: const Icon(AppIcons.close),
-            ),
-          ],
-        ),
-      ),
+    final scheme = Theme.of(context).colorScheme;
+    // The header every panel has (live_ui PanelHeader, docs/ui/compare/U.1d:
+    // 52 high, 17/600, ✕ in the variant ink).
+    final header = PanelHeader(
+      title: widget.title,
+      closeTooltip: i18n('close'),
+      leading: widget.leading,
+      actions: widget.actions,
+      onClose: widget.onClose,
+      titleKey: const ValueKey('room-panel-title'),
+      closeKey: const ValueKey('room-panel-close'),
     );
     return Transform.translate(
       offset: Offset(0, _drag),
@@ -112,21 +97,17 @@ class _RoomSidePanelState extends State<RoomSidePanel> {
         child: SafeArea(
           top: false,
           left: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (widget.dragToClose)
-                GestureDetector(
-                  key: const ValueKey('room-panel-drag'),
-                  behavior: HitTestBehavior.opaque,
-                  onVerticalDragUpdate: _dragged,
-                  onVerticalDragEnd: _released,
-                  child: header,
-                )
-              else
-                header,
-              Expanded(child: widget.child),
-            ],
+          child: PanelFrame(
+            header: widget.dragToClose
+                ? GestureDetector(
+                    key: const ValueKey('room-panel-drag'),
+                    behavior: HitTestBehavior.opaque,
+                    onVerticalDragUpdate: _dragged,
+                    onVerticalDragEnd: _released,
+                    child: header,
+                  )
+                : header,
+            child: widget.child,
           ),
         ),
       ),

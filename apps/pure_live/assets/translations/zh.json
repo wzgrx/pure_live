@@ -569,6 +569,7 @@
     "global_mute_subtitle": "所有直播间统一静音",
     "go_to": "跳转至",
     "go_to_login": "前往登录",
+    "got_it": "知道了",
     "gpu_decode": "优先使用 GPU 硬件解码",
     "grant_install_permission": "请授予安装权限后再尝试下载安装",
     "hardware_decoder": "硬件解码器(--hwdec)",

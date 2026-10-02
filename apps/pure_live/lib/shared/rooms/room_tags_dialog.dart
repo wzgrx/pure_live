@@ -165,111 +165,71 @@ class _RoomTagPickerState extends State<RoomTagPicker> {
     final styles = context.textStyles;
     final room = widget.room;
     final name = room.displayNick(platformName(room.platform));
-    return Dialog(
+    // The one dialog (docs/ui/compare/U.1d): the long-content width, the
+    // title and the buttons stay while the tags scroll.
+    return AppDialog(
       key: const ValueKey('room-tags'),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 22, 24, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      title: i18n('set_room_tags'),
+      wide: true,
+      busy: _busy,
+      autofocus: false,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            i18n('room_tags_subtitle', args: {'name': name, 'platform': platformName(room.platform)}),
+            key: const ValueKey('room-tags-subtitle'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: styles.t14.copyWith(color: scheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 12),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth >= roomTagTwoColumnWidth ? 2 : 1;
+              final tileWidth = (constraints.maxWidth - 8 * (columns - 1)) / columns;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    i18n('set_room_tags'),
-                    style: styles.t18.copyWith(fontWeight: FontWeight.w600, color: scheme.onSurface),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    i18n('room_tags_subtitle', args: {'name': name, 'platform': platformName(room.platform)}),
-                    key: const ValueKey('room-tags-subtitle'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: styles.t13.copyWith(color: scheme.onSurfaceVariant),
-                  ),
-                ],
-              ),
-            ),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final columns = constraints.maxWidth >= roomTagTwoColumnWidth ? 2 : 1;
-                    final tileWidth = (constraints.maxWidth - 8 * (columns - 1)) / columns;
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (_tags.isEmpty) _empty(context),
-                        Wrap(
-                          key: ValueKey('room-tags-columns-$columns'),
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            for (final tag in _tags)
-                              SizedBox(
-                                width: tileWidth,
-                                child: _TagTile(
-                                  tag: tag,
-                                  selected: _selected.contains(tag.id),
-                                  onTap: _busy
-                                      ? null
-                                      : () => setState(() {
-                                          if (!_selected.remove(tag.id)) _selected.add(tag.id);
-                                        }),
-                                ),
-                              ),
-                          ],
+                  if (_tags.isEmpty) _empty(context),
+                  Wrap(
+                    key: ValueKey('room-tags-columns-$columns'),
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final tag in _tags)
+                        SizedBox(
+                          width: tileWidth,
+                          child: _TagTile(
+                            tag: tag,
+                            selected: _selected.contains(tag.id),
+                            onTap: _busy
+                                ? null
+                                : () => setState(() {
+                                    if (!_selected.remove(tag.id)) _selected.add(tag.id);
+                                  }),
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        if (_formOpen) _form(context) else _newTagRow(context),
-                      ],
-                    );
-                  },
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
-              child: Row(
-                spacing: 8,
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      key: const ValueKey('room-tags-cancel'),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(0, 48),
-                        shape: const StadiumBorder(),
-                        side: BorderSide(color: scheme.outlineVariant),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(i18n('cancel')),
-                    ),
+                    ],
                   ),
-                  Expanded(
-                    child: FilledButton(
-                      key: const ValueKey('room-tags-save'),
-                      style: FilledButton.styleFrom(minimumSize: const Size(0, 48), shape: const StadiumBorder()),
-                      onPressed: _busy ? null : () => unawaited(_save()),
-                      child: _busy
-                          ? SizedBox.square(
-                              dimension: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: scheme.onSurface),
-                            )
-                          : Text(i18n('confirm')),
-                    ),
-                  ),
+                  const SizedBox(height: 8),
+                  if (_formOpen) _form(context) else _newTagRow(context),
                 ],
-              ),
-            ),
-          ],
-        ),
+              );
+            },
+          ),
+        ],
       ),
+      actions: [
+        DialogCancelButton(key: const ValueKey('room-tags-cancel'), enabled: !_busy),
+        DialogActionButton(
+          key: const ValueKey('room-tags-save'),
+          label: i18n('confirm'),
+          busy: _busy,
+          onPressed: () => unawaited(_save()),
+        ),
+      ],
     );
   }
 

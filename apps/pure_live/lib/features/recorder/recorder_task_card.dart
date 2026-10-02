@@ -185,31 +185,16 @@ class _RecorderTaskCardState extends State<RecorderTaskCard> {
       task.title,
       task.roomId,
     ].map((value) => value.trim()).firstWhere((value) => value.isNotEmpty, orElse: () => '--');
-    final ok = await showDialog<bool>(
+    final ok = await showAppConfirmDialog(
       context: context,
-      builder: (dialogContext) {
-        final scheme = Theme.of(dialogContext).colorScheme;
-        return AlertDialog(
-          key: const ValueKey('recorder-delete-dialog'),
-          scrollable: true,
-          title: Text(i18n('recorder_delete_title', args: {'name': name})),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Text(i18n('recorder_delete_body')),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(i18n('cancel'))),
-            FilledButton(
-              key: const ValueKey('recorder-delete-confirm'),
-              style: FilledButton.styleFrom(backgroundColor: scheme.error, foregroundColor: scheme.onError),
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(i18n('delete')),
-            ),
-          ],
-        );
-      },
+      key: const ValueKey('recorder-delete-dialog'),
+      title: i18n('recorder_delete_title', args: {'name': name}),
+      message: i18n('recorder_delete_body'),
+      confirmLabel: i18n('delete'),
+      danger: true,
+      confirmKey: const ValueKey('recorder-delete-confirm'),
     );
-    if (ok ?? false) await _run(widget.actions.remove);
+    if (ok) await _run(widget.actions.remove);
   }
 
   List<PopupMenuEntry<_CardMenu>> _menuItems(BuildContext context) {

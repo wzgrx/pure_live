@@ -234,64 +234,68 @@ class PlatformPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Column(
+    // The panel's frame (U.1d): a line under the header once scrolled.
+    return PanelFrame(
       key: const ValueKey('popular-platform-picker'),
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        PanelHeader(
-          title: i18n('popular_all_platforms'),
-          closeTooltip: i18n('close'),
-          actions: [
-            TextButton.icon(
-              key: const ValueKey('popular-platform-settings'),
-              onPressed: () {
-                Navigator.pop(context);
-                unawaited(AppNavigator.toNamed<void>(RoutePath.kSettingsHotAreas));
-              },
-              icon: const Icon(AppIcons.platformSettings, size: 18),
-              label: Text(i18n('platform_display')),
-            ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-          child: Text(
-            i18n('popular_all_platforms_hint', args: {'count': '${ids.length}'}),
-            style: context.textStyles.t13.copyWith(color: scheme.onSurfaceVariant),
-          ),
-        ),
-        Flexible(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final columns = GridColumns.count(
-                width: constraints.maxWidth,
-                minItemWidth: 84,
-                spacing: 8,
-                padding: 12,
-                min: 3,
-                max: 6,
-              );
-              return GridView.builder(
-                shrinkWrap: true,
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: columns,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 4,
-                  mainAxisExtent: 76 + MediaQuery.textScalerOf(context).scale(13) * 1.4,
-                ),
-                itemCount: ids.length,
-                itemBuilder: (context, index) => _PlatformTile(
-                  id: ids[index],
-                  selected: index == current,
-                  onTap: () => Navigator.pop(context, index),
-                ),
-              );
+      expand: false,
+      header: PanelHeader(
+        title: i18n('popular_all_platforms'),
+        closeTooltip: i18n('close'),
+        actions: [
+          TextButton.icon(
+            key: const ValueKey('popular-platform-settings'),
+            onPressed: () {
+              Navigator.pop(context);
+              unawaited(AppNavigator.toNamed<void>(RoutePath.kSettingsHotAreas));
             },
+            icon: const Icon(AppIcons.platformSettings, size: 18),
+            label: Text(i18n('platform_display')),
           ),
-        ),
-      ],
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: Text(
+              i18n('popular_all_platforms_hint', args: {'count': '${ids.length}'}),
+              style: context.textStyles.t13.copyWith(color: scheme.onSurfaceVariant),
+            ),
+          ),
+          Flexible(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final columns = GridColumns.count(
+                  width: constraints.maxWidth,
+                  minItemWidth: 84,
+                  spacing: 8,
+                  padding: 12,
+                  min: 3,
+                  max: 6,
+                );
+                return GridView.builder(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 4,
+                    mainAxisExtent: 76 + MediaQuery.textScalerOf(context).scale(13) * 1.4,
+                  ),
+                  itemCount: ids.length,
+                  itemBuilder: (context, index) => _PlatformTile(
+                    id: ids[index],
+                    selected: index == current,
+                    onTap: () => Navigator.pop(context, index),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

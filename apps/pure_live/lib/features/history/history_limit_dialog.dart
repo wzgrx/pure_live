@@ -22,7 +22,7 @@ Future<void> showHistoryLimitDialog(
   required int limit,
   required int count,
   required Future<void> Function(int limit) save,
-}) => showDialog<void>(
+}) => showAppDialog<void>(
   context: context,
   builder: (_) => HistoryLimitDialog(limit: limit, count: count, save: save),
 );
@@ -101,118 +101,99 @@ class _HistoryLimitDialogState extends State<HistoryLimitDialog> {
     final styles = context.textStyles;
     final theme = Theme.of(context);
     final removes = _draft == unlimitedHistoryLimit ? 0 : widget.count - _draft;
-    return AlertDialog(
-      scrollable: true,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      title: Text(i18n('history_limit'), style: styles.t16Bold),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 360),
-        child: SizedBox(
-          width: MediaQuery.sizeOf(context).width,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return AppDialog(
+      title: i18n('history_limit'),
+      busy: _saving,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(i18n('history_limit_presets'), style: styles.t12Muted),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
-              Text(i18n('history_limit_presets'), style: styles.t12Muted),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final value in HistoryLimitDialog.presets)
-                    ChoiceChip(
-                      label: Text('$value', style: styles.t12),
-                      selected: _draft == value,
-                      onSelected: _saving ? null : (_) => _select(value),
-                    ),
-                  ChoiceChip(
-                    label: Text(i18n('history_unlimited'), style: styles.t12),
-                    selected: _draft == unlimitedHistoryLimit,
-                    onSelected: _saving ? null : (_) => _select(unlimitedHistoryLimit),
-                  ),
-                  if (!HistoryLimitDialog.presets.contains(_draft) && _draft != unlimitedHistoryLimit)
-                    ChoiceChip(
-                      label: Text('$_draft', style: styles.t12),
-                      selected: true,
-                      onSelected: _saving ? null : (_) {},
-                    ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Text(i18n('history_limit_custom'), style: styles.t13Medium),
-              const SizedBox(height: 12),
-              TextField(
-                key: const ValueKey('history-limit-custom'),
-                controller: _custom,
-                enabled: !_saving,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9-]'))],
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _applyCustom(),
-                onChanged: (_) {
-                  if (_invalid) setState(() => _invalid = false);
-                },
-                style: styles.t14,
-                decoration: InputDecoration(
-                  hintText: '50',
-                  suffixText: i18n('items'),
-                  suffixStyle: styles.t12Muted,
-                  errorText: _invalid ? i18n('history_limit_invalid') : null,
-                  border: const OutlineInputBorder(),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              for (final value in HistoryLimitDialog.presets)
+                ChoiceChip(
+                  label: Text('$value', style: styles.t12),
+                  selected: _draft == value,
+                  onSelected: _saving ? null : (_) => _select(value),
                 ),
+              ChoiceChip(
+                label: Text(i18n('history_unlimited'), style: styles.t12),
+                selected: _draft == unlimitedHistoryLimit,
+                onSelected: _saving ? null : (_) => _select(unlimitedHistoryLimit),
               ),
-              const SizedBox(height: 8),
-              // 3.x's whole-width "应用" (U.5c c1); "确认" takes a typed
-              // number too (c6).
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  key: const ValueKey('history-limit-apply'),
-                  onPressed: _saving ? null : _applyCustom,
-                  child: Text(i18n('apply'), style: styles.t13Medium.copyWith(color: theme.colorScheme.primary)),
+              if (!HistoryLimitDialog.presets.contains(_draft) && _draft != unlimitedHistoryLimit)
+                ChoiceChip(
+                  label: Text('$_draft', style: styles.t12),
+                  selected: true,
+                  onSelected: _saving ? null : (_) {},
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text('${i18n('current_value')}: ${historyLimitLabel(_draft)}', style: styles.t12Muted),
-              if (removes > 0) ...[
-                const SizedBox(height: 8),
-                Row(
-                  key: const ValueKey('history-limit-warning'),
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(AppIcons.warning, size: 16, color: theme.colorScheme.error),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        i18n('history_limit_trim_warning', args: {'count': '$removes'}),
-                        style: styles.t12Error,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-              const SizedBox(height: 6),
-              Text(i18n('history_limit_desc'), style: styles.t12Muted),
             ],
           ),
-        ),
+          const SizedBox(height: 24),
+          Text(i18n('history_limit_custom'), style: styles.t13Medium),
+          const SizedBox(height: 12),
+          TextField(
+            key: const ValueKey('history-limit-custom'),
+            controller: _custom,
+            enabled: !_saving,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9-]'))],
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _applyCustom(),
+            onChanged: (_) {
+              if (_invalid) setState(() => _invalid = false);
+            },
+            style: styles.t14,
+            decoration: dialogFieldDecoration(
+              context,
+              hint: '50',
+              suffix: i18n('items'),
+              error: _invalid ? i18n('history_limit_invalid') : null,
+            ),
+          ),
+          const SizedBox(height: 8),
+          // 3.x's whole-width "应用" (U.5c c1); "确认" takes a typed
+          // number too (c6).
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              key: const ValueKey('history-limit-apply'),
+              onPressed: _saving ? null : _applyCustom,
+              child: Text(i18n('apply'), style: styles.t13Medium.copyWith(color: theme.colorScheme.primary)),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text('${i18n('current_value')}: ${historyLimitLabel(_draft)}', style: styles.t12Muted),
+          if (removes > 0) ...[
+            const SizedBox(height: 8),
+            Row(
+              key: const ValueKey('history-limit-warning'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(AppIcons.warning, size: 16, color: theme.colorScheme.error),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(i18n('history_limit_trim_warning', args: {'count': '$removes'}), style: styles.t12Error),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 6),
+          Text(i18n('history_limit_desc'), style: styles.t12Muted),
+        ],
       ),
-      actionsOverflowDirection: VerticalDirection.down,
-      actionsOverflowButtonSpacing: 8,
       actions: [
-        TextButton(
-          style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-          onPressed: _saving ? null : () => Navigator.pop(context),
-          child: Text(i18n('cancel'), style: styles.t14Muted),
-        ),
-        TextButton(
-          style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-          onPressed: _saving ? null : () => unawaited(_save()),
-          child: _saving
-              ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-              : Text(i18n('confirm'), style: styles.t14Primary),
+        DialogCancelButton(key: const ValueKey('history-limit-cancel'), enabled: !_saving),
+        DialogActionButton(
+          key: const ValueKey('history-limit-save'),
+          label: i18n('save'),
+          busy: _saving,
+          onPressed: () => unawaited(_save()),
         ),
       ],
     );

@@ -54,8 +54,9 @@ import io.flutter.plugin.common.MethodChannel
  * when the activity goes away.
  *
  * Channels:
- * - `pure_live/display_mode`: the refresh-rate hint of AdaptiveRefreshRateScope
- *   and, while the live room plays, the video's frame rate (U.2i);
+ * - `pure_live/display_mode`: the refresh rate AdaptiveRefreshRateScope asks
+ *   for and, while the live room plays, the rate chosen for the video (U.2i;
+ *   P01: [applyRefreshRate]);
  * - `pure_live/background_playback`: wake and Wi-Fi locks while playing in the background;
  * - `pure_live/predictive_back`: the live room's back arbitration;
  * - `pure_live/app`: back to the background, whether this is a television
@@ -100,13 +101,13 @@ class MainActivity : AudioServiceActivity() {
     // Android's dynamic policy until Dart asks for the high rate.
     private var highRefreshRateEnabled = false
 
-    // U.2i: while the live room plays, the rate Dart chose as a whole
-    // multiple of the video's frame rate (0 = the system's); null keeps
-    // 3.x's choice (the highest rate or the system's).
-    private var playbackRefreshRate: Float? = null
+    // P01: while the live room plays, the rate Dart chose for the video, to
+    // declare on Flutter's surface as a fixed source; 0 = nothing plays.
+    private var playbackFrameRate = 0f
 
-    // U.2i: the video's frame rate declared on Flutter's surface; 0 = none.
-    private var videoFrameRate = 0f
+    // P01: while the live room plays, the window's hint where nothing can be
+    // declared (Android 8-11); 0 = the system's choice.
+    private var playbackWindowRate = 0f
     private var displayModeChannel: MethodChannel? = null
     private var predictiveBackChannel: MethodChannel? = null
     private var pipChannel: MethodChannel? = null
@@ -132,8 +133,7 @@ class MainActivity : AudioServiceActivity() {
     private val mainHandler = Handler(Looper.getMainLooper())
     private val displayModeRefresh = Runnable {
         // A new surface (back from the background) forgets the declaration.
-        applyVideoFrameRate()
-        val info = applyPreferredDisplayMode(highRefreshRateEnabled)
+        val info = applyRefreshRate()
         if (info != lastPublishedDisplayModeInfo) {
             lastPublishedDisplayModeInfo = info
             displayModeChannel?.invokeMethod("displayModeChanged", info)
@@ -216,16 +216,11 @@ class MainActivity : AudioServiceActivity() {
                 when (call.method) {
                     "setHighRefreshRate" -> {
                         highRefreshRateEnabled = call.argument<Boolean>("enabled") ?: true
-                        playbackRefreshRate = call.argument<Number>("refreshRate")?.toFloat()
-                        val info = applyPreferredDisplayMode(highRefreshRateEnabled)
+                        playbackFrameRate = (call.argument<Number>("frameRate")?.toFloat() ?: 0f).coerceAtLeast(0f)
+                        playbackWindowRate = (call.argument<Number>("refreshRate")?.toFloat() ?: 0f).coerceAtLeast(0f)
+                        val info = applyRefreshRate()
                         lastPublishedDisplayModeInfo = info
                         result.success(info)
-                    }
-
-                    "setVideoFrameRate" -> {
-                        videoFrameRate = (call.argument<Number>("fps")?.toFloat() ?: 0f).coerceAtLeast(0f)
-                        applyVideoFrameRate()
-                        result.success(displayModeInfo())
                     }
 
                     "getDisplayModeInfo" -> result.success(displayModeInfo())
@@ -339,7 +334,7 @@ class MainActivity : AudioServiceActivity() {
                 }
             }
         }
-        applyPreferredDisplayMode(highRefreshRateEnabled)
+        applyRefreshRate()
     }
 
     /** The battery charge in percent, or null when the device reports none. */
@@ -768,66 +763,92 @@ class MainActivity : AudioServiceActivity() {
     private fun activeDisplay(): Display? =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) display else windowManager.defaultDisplay
 
-    private fun applyPreferredDisplayMode(enabled: Boolean): Map<String, Any> {
+    /**
+     * Asks the display for a refresh rate (P01, docs/ui/compare/U.2i
+     * "4.0.x 修订"; Dart decides which rate, this decides how):
+     *
+     * - the live room plays: Android 12+ only declares Dart's rate on
+     *   Flutter's surface as a fixed source, switched only when seamless (the
+     *   video is a texture inside that surface; Android ignores the window's
+     *   preferred rate for a surface that declares one, so the hint is
+     *   cleared). Android 8-11 cannot limit the switch to seamless ones and
+     *   keep the window hint (U.2i);
+     * - nothing plays and Dart asks for the high rate: Android 16+ declares
+     *   the highest rate as a minimum (AT_LEAST, meant for interfaces); 8-15
+     *   keep the window hint (3.x);
+     * - otherwise both are cleared: the system's choice.
+     *
+     * Always a number, never a frame-rate category: the K90's HIGH category
+     * is 90 Hz.
+     */
+    private fun applyRefreshRate(): Map<String, Any> {
         val activeDisplay = activeDisplay() ?: return displayModeInfo()
         val currentMode = activeDisplay.mode
         val compatibleModes = activeDisplay.supportedModes.filter {
             it.physicalWidth == currentMode.physicalWidth && it.physicalHeight == currentMode.physicalHeight
         }
-        val preferredMode = compatibleModes.maxWithOrNull(
+        val topMode = compatibleModes.maxWithOrNull(
             compareBy<Display.Mode> { it.refreshRate }.thenBy { it.modeId },
         ) ?: currentMode
-
-        // U.2i: the playback's rate, as the nearest mode of this resolution.
-        val playbackMode = playbackRefreshRate?.takeIf { it > 0f }?.let { rate ->
+        // The playback's rate as the nearest mode of this resolution.
+        val playbackMode = playbackWindowRate.takeIf { it > 0f }?.let { rate ->
             compatibleModes.minByOrNull { kotlin.math.abs(it.refreshRate - rate) }
         }
+        val playing = playbackFrameRate > 0f
+        var surfaceRate = 0f
+        var compatibility = Surface.FRAME_RATE_COMPATIBILITY_DEFAULT
+        var windowRate = 0f
+        when {
+            playing && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                surfaceRate = playbackFrameRate
+                compatibility = Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE
+            }
+
+            playing -> windowRate = playbackMode?.refreshRate ?: 0f
+            highRefreshRateEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA -> {
+                surfaceRate = topMode.refreshRate
+                compatibility = Surface.FRAME_RATE_COMPATIBILITY_AT_LEAST
+            }
+
+            highRefreshRateEnabled -> windowRate = topMode.refreshRate
+        }
+        applySurfaceFrameRate(surfaceRate, compatibility)
 
         val attributes = window.attributes
         // Only the rate hint changes; pinning a display mode id can force a
         // heavy vendor mode switch (3.x).
         val targetModeId = 0
-        val targetRefreshRate = when {
-            playbackMode != null -> playbackMode.refreshRate
-            playbackRefreshRate != null -> 0f
-            enabled -> preferredMode.refreshRate
-            else -> 0f
-        }
         if (
             attributes.preferredDisplayModeId != targetModeId ||
-            kotlin.math.abs(attributes.preferredRefreshRate - targetRefreshRate) > 0.01f
+            kotlin.math.abs(attributes.preferredRefreshRate - windowRate) > 0.01f
         ) {
             attributes.preferredDisplayModeId = targetModeId
-            attributes.preferredRefreshRate = targetRefreshRate
+            attributes.preferredRefreshRate = windowRate
             window.attributes = attributes
         }
-        return displayModeInfo(playbackMode ?: if (enabled) preferredMode else currentMode)
+        val requestedMode = when {
+            playing -> playbackMode ?: currentMode
+            highRefreshRateEnabled -> topMode
+            else -> currentMode
+        }
+        return displayModeInfo(requestedMode)
     }
 
     /**
-     * U.2i: declares the video's frame rate on Flutter's surface (the video
-     * is a texture inside it, so the system sees no video layer of its own).
+     * Declares [rate] on Flutter's surface, or clears the declaration (0).
      * Android 12 and later only, where the switch can be limited to seamless
-     * ones; a fixed-source rate lets the system pick a whole multiple.
+     * ones.
      */
-    private fun applyVideoFrameRate() {
+    private fun applySurfaceFrameRate(rate: Float, compatibility: Int) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
         val surface = flutterSurfaceView()?.holder?.surface ?: return
         if (!surface.isValid) return
         try {
-            if (videoFrameRate > 0f) {
-                surface.setFrameRate(
-                    videoFrameRate,
-                    Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
-                    Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS,
-                )
-            } else {
-                surface.setFrameRate(
-                    0f,
-                    Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
-                    Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS,
-                )
-            }
+            surface.setFrameRate(
+                rate,
+                if (rate > 0f) compatibility else Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
+                Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS,
+            )
         } catch (ignored: IllegalArgumentException) {
             // A rate the system does not take: it keeps its own choice.
         } catch (ignored: IllegalStateException) {

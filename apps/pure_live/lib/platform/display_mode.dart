@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 /// The display the window is on (3.x `DisplayModeInfo`): refresh rates and
@@ -120,42 +123,69 @@ List<double> frameRateMultiples(double fps, List<double> supported) {
   ];
 }
 
-/// The refresh rate the window asks for while [playback] plays (U.2i, see
-/// docs/ui/compare/U.2i/v4-policy.jpg), [high] being what the refresh-rate
-/// mode asks now (touching in balanced, always in performance):
+/// The rate declared on Flutter's surface while [playback] plays (U.2i,
+/// revised in 4.0.x by P01: docs/ui/compare/U.2i/README.md "4.0.x 修订"),
+/// [high] being what the refresh-rate mode asks now (touching in balanced,
+/// always in performance):
 ///
-/// - power saving: 0, the system's choice (the declared frame rate leads it);
-/// - balanced: the highest whole multiple while touching, else the highest
-///   one up to 60 (60 for 30 or 60 frames, 50 for 25 or 50);
-/// - performance: the highest whole multiple (120, not 144, for 60 frames).
+/// - power saving: 0, the video's own frame rate is declared and the system
+///   picks;
+/// - balanced at rest: the highest whole multiple up to 60 (60 for 30 or 60
+///   frames, 50 for 25 where the display has 50 Hz), else the lowest one
+///   (120 for 24 frames at 60/90/120 Hz);
+/// - balanced while touching, performance: the highest whole multiple (120,
+///   not 144, for 60 frames);
+/// - no rate of the display is a whole multiple (25 and 50 frames at
+///   60/90/120 Hz): the highest rate. A frame then stays one period more or
+///   less, and the shortest period judders least (docs/cloud/
+///   research-smoothness-2026-10-02.md 1.4).
 ///
-/// Null keeps 3.x's choice (the highest rate when [high], else the system's):
-/// no rate of the display is a multiple, or a mode that asks for nothing.
-double? playbackRefreshRate({required PlaybackRefresh playback, required bool high, required List<double> supported}) {
+/// 0 too while the display's rates are not known.
+double playbackRefreshRate({required PlaybackRefresh playback, required bool high, required List<double> supported}) {
+  if ((playback.mode != 'balanced' && playback.mode != 'performance') || supported.isEmpty) return 0;
   final multiples = frameRateMultiples(playback.frameRate, supported);
-  if (multiples.isEmpty) return null;
-  return switch (playback.mode) {
-    'performance' => high ? multiples.last : null,
-    'balanced' when high => multiples.last,
-    'balanced' => multiples.where((rate) => rate <= 60.5).lastOrNull,
-    _ => 0,
-  };
+  if (multiples.isEmpty) return supported.reduce(math.max);
+  if (high) return multiples.last;
+  return multiples.where((rate) => rate <= 60.5).lastOrNull ?? multiples.first;
 }
 
-/// The display mode of the window (3.x `DisplayModeService`): applies the
-/// refresh-rate hint (Android) and keeps [info] current from the answers and
-/// the native `displayModeChanged` reports (Android display changes; Windows
+/// The display mode of the window (3.x `DisplayModeService`): asks for a
+/// refresh rate (Android) and keeps [info] current from the answers and the
+/// native `displayModeChanged` reports (Android display changes; Windows
 /// moves to another monitor or a mode switch).
 ///
-/// U.2i: while the live room plays ([setPlayback]) the video's frame rate is
-/// declared to the system (Android 12 and later: only switched when
-/// seamless) and the window's preferred rate becomes a whole multiple of it
-/// ([playbackRefreshRate]).
+/// How the rate is asked for (P01, docs/ui/compare/U.2i "4.0.x 修订"; the
+/// activity's `applyRefreshRate`), always as a number, never a category:
+///
+/// - the live room plays ([setPlayback]): only [playbackRefreshRate] (the
+///   video's own frame rate in power saving) declared on Flutter's surface
+///   as a fixed source, switched only when seamless (Android 12 and later).
+///   Android ignores the window's preferred rate for a surface that declares
+///   one; Android 8–11 keep that window hint;
+/// - nothing plays and the high rate is asked for ([applyHighRefreshRate]):
+///   the highest rate declared as a minimum (Android 16 and later), else the
+///   window hint (3.x);
+/// - otherwise the system's choice.
+///
+/// [limited] tells when the system keeps the display at 60 Hz all the same.
 abstract final class DisplayMode {
   static const MethodChannel _channel = MethodChannel('pure_live/display_mode');
   static bool _listening = false;
   static bool _high = false;
   static PlaybackRefresh? _playback;
+
+  /// How long the display must stay at 60 Hz against a request of 90 or
+  /// more, while the user interacts, before [limited] turns on (P01 c3).
+  static const Duration limitDelay = Duration(seconds: 3);
+
+  // A touch counts as interaction until this long after the last finger
+  // lifts (AdaptiveRefreshRateController.settleDelay).
+  static const Duration _interactionGrace = Duration(milliseconds: 1500);
+  static bool _watchingPointers = false;
+  static int _pointers = 0;
+  static Timer? _graceTimer;
+  static Timer? _limitTimer;
+  static bool _confirming = false;
 
   /// Android in tests.
   @visibleForTesting
@@ -165,6 +195,13 @@ abstract final class DisplayMode {
 
   /// The latest info; null until the first answer or where there is none.
   static final ValueNotifier<DisplayModeInfo?> info = ValueNotifier(null);
+
+  /// Whether the system holds the app at 60 Hz (P01 c3): the app asked for
+  /// 90 Hz or more (balanced while touching, performance) and the display
+  /// stayed at 60 for [limitDelay] while the user interacted (a still
+  /// screen may idle down by design). Off again once the display runs
+  /// faster. The settings' refresh-rate row says where to raise it.
+  static final ValueNotifier<bool> limited = ValueNotifier(false);
 
   /// Whether this platform reports display modes.
   static bool get supported => _android || Platform.isWindows;
@@ -181,7 +218,17 @@ abstract final class DisplayMode {
 
   /// Takes a new [next] (public for the channel handler and tests).
   static void publish(DisplayModeInfo? next) {
-    if (next != null && info.value != next) info.value = next;
+    final previous = info.value;
+    if (next == null || previous == next) return;
+    info.value = next;
+    // Another display or resolution: the room's rate is chosen again.
+    if (_android &&
+        previous != null &&
+        _playback != null &&
+        !listEquals(previous.supportedRefreshRates, next.supportedRefreshRates)) {
+      unawaited(_applyRate());
+    }
+    _checkLimit();
   }
 
   static Future<void> _call(String method, [Object? arguments]) async {
@@ -199,10 +246,11 @@ abstract final class DisplayMode {
 
   /// Asks for the highest rate or the system's choice (live_ui's
   /// `AdaptiveRefreshRateController` calls this on Android); while a video
-  /// plays, a whole multiple of its frame rate instead (U.2i).
+  /// plays, [playbackRefreshRate] instead.
   static Future<void> applyHighRefreshRate({required bool high}) async {
     if (!_android) return;
     _high = high;
+    _watchPointers();
     await _applyRate();
   }
 
@@ -212,20 +260,97 @@ abstract final class DisplayMode {
   static Future<void> setPlayback(PlaybackRefresh? playback) async {
     if (!_android || playback == _playback) return;
     _playback = playback;
-    await _call('setVideoFrameRate', {'fps': playback?.frameRate ?? 0.0});
+    _watchPointers();
     await _applyRate();
+  }
+
+  /// The rate asked for now: the room's while it plays, the display's
+  /// highest while the high rate is asked for, else 0 (the system's).
+  static double get _requested {
+    final rates = info.value?.supportedRefreshRates ?? const <double>[];
+    final playback = _playback;
+    if (playback != null) {
+      final rate = playbackRefreshRate(playback: playback, high: _high, supported: rates);
+      return rate > 0 ? rate : playback.frameRate;
+    }
+    return _high && rates.isNotEmpty ? rates.reduce(math.max) : 0;
   }
 
   static Future<void> _applyRate() {
     final playback = _playback;
-    final rate = playback == null
-        ? null
-        : playbackRefreshRate(
-            playback: playback,
-            high: _high,
-            supported: info.value?.supportedRefreshRates ?? const [],
-          );
-    return _call('setHighRefreshRate', {'enabled': _high, 'refreshRate': ?rate});
+    _checkLimit();
+    if (playback == null) return _call('setHighRefreshRate', {'enabled': _high});
+    final rate = playbackRefreshRate(
+      playback: playback,
+      high: _high,
+      supported: info.value?.supportedRefreshRates ?? const [],
+    );
+    return _call('setHighRefreshRate', {
+      'enabled': _high,
+      // Declared on Flutter's surface: the video's own frame rate in power
+      // saving (the system picks a multiple).
+      'frameRate': rate > 0 ? rate : playback.frameRate,
+      // The window's hint where nothing can be declared (Android 8-11); 0 is
+      // the system's choice.
+      'refreshRate': rate,
+    });
+  }
+
+  // P01 c3: every pointer of the app, to tell interaction from a still
+  // screen.
+  static void _watchPointers() {
+    if (_watchingPointers) return;
+    _watchingPointers = true;
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_onPointer);
+  }
+
+  static void _onPointer(PointerEvent event) {
+    if (event is PointerDownEvent) {
+      _pointers++;
+      _graceTimer?.cancel();
+      _graceTimer = null;
+      _checkLimit();
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+      if (_pointers > 0) _pointers--;
+      if (_pointers == 0) {
+        _graceTimer?.cancel();
+        _graceTimer = Timer(_interactionGrace, () {
+          _graceTimer = null;
+          _checkLimit();
+        });
+      }
+    }
+  }
+
+  static bool get _interacting => _pointers > 0 || _graceTimer != null;
+
+  static void _checkLimit() {
+    final current = info.value?.currentRefreshRate ?? 0;
+    if (current > 60.5) limited.value = false;
+    final suspect = _requested >= 89.5 && _interacting && current > 0 && current <= 60.5;
+    if (!suspect) {
+      _limitTimer?.cancel();
+      _limitTimer = null;
+      return;
+    }
+    _limitTimer ??= Timer(limitDelay, () => unawaited(_confirmLimit()));
+  }
+
+  static Future<void> _confirmLimit() async {
+    if (_confirming) return;
+    _confirming = true;
+    try {
+      // Not every display reports each switch: read the rate again.
+      await refresh();
+    } finally {
+      _confirming = false;
+    }
+    final current = info.value?.currentRefreshRate ?? 0;
+    final still = _limitTimer != null && _requested >= 89.5 && _interacting && current > 0 && current <= 60.5;
+    _limitTimer = null;
+    if (still) limited.value = true;
+    // Still interacting: look again, so a recovery shows up too.
+    _checkLimit();
   }
 
   /// Forgets the requests (tests).
@@ -235,6 +360,15 @@ abstract final class DisplayMode {
     _playback = null;
     debugAndroid = null;
     info.value = null;
+    limited.value = false;
+    _pointers = 0;
+    _graceTimer?.cancel();
+    _graceTimer = null;
+    _limitTimer?.cancel();
+    _limitTimer = null;
+    _confirming = false;
+    if (_watchingPointers) GestureBinding.instance.pointerRouter.removeGlobalRoute(_onPointer);
+    _watchingPointers = false;
   }
 
   /// Reads the info again (the settings page; Windows' "detect" action).

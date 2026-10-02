@@ -450,6 +450,18 @@ abstract final class Settings {
     allowed: {'compact', 'card'},
   );
 
+  /// New (docs/cloud/tasks/B02.md c3; 3.x has no such setting): what the
+  /// platform's flying danmaku do while the video is paused ("暂停时的弹幕"):
+  /// `pause` stands them with the video (the default, as 3.x's main
+  /// picture), `continue` lets them fly on and new ones in. Danmaku composed
+  /// on this device fly on either way.
+  static const danmakuPausedBehavior = StringSetting(
+    'danmakuPausedBehavior',
+    section: 'danmaku',
+    defaultValue: 'pause',
+    allowed: {'pause', 'continue'},
+  );
+
   /// Frame rate.
   static const danmakuFps = IntSetting('danmakuFps', section: 'danmaku', defaultValue: 60, min: 30, max: 240);
 
@@ -1474,6 +1486,7 @@ abstract final class Settings {
     enableDanmakuDisplay,
     enableDanmakuStroke,
     danmakuListStyle,
+    danmakuPausedBehavior,
     danmakuFps,
     danmakuAutoFps,
     enableDanmakuTapInteraction,

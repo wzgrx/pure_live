@@ -285,45 +285,180 @@ void main() {
     }
   });
 
-  testWidgets('RecordGlyph: a grey ring with a red dot, or a blinking white dot on red', (tester) async {
-    await tester.pumpWidget(_app(const RecordGlyph(state: RecordGlyphState.idle)));
-    expect(find.byKey(const ValueKey('record-glyph-idle')), findsOneWidget);
-    expect(
-      find.descendant(of: find.byKey(const ValueKey('record-glyph-idle')), matching: find.byType(FadeTransition)),
-      findsNothing,
-    );
+  RecordGlyphPainter glyphPainter(WidgetTester tester, RecordGlyphState state) =>
+      tester
+              .widget<CustomPaint>(
+                find.descendant(
+                  of: find.byKey(ValueKey('record-glyph-${state.name}')),
+                  matching: find.byType(CustomPaint),
+                ),
+              )
+              .painter!
+          as RecordGlyphPainter;
 
-    await tester.pumpWidget(_app(const RecordGlyph(state: RecordGlyphState.recording)));
-    expect(find.byKey(const ValueKey('record-glyph-recording')), findsOneWidget);
-    expect(
-      find.descendant(of: find.byKey(const ValueKey('record-glyph-recording')), matching: find.byType(FadeTransition)),
-      findsOneWidget,
-      reason: 'the dot blinks',
+  // docs/ui/compare/U.2a2 (problem 02: the idle glyph's red dot looked like
+  // recording).
+  testWidgets('U.2a2: RecordGlyph is red only while recording; the rest take the icon colour', (tester) async {
+    const ink = Color(0xFF43474E);
+    final scheme = const LiveTheme().light.colorScheme;
+    for (final state in RecordGlyphState.values) {
+      await tester.pumpWidget(
+        _app(
+          IconTheme(
+            data: const IconThemeData(color: ink),
+            child: RecordGlyph(state: state),
+          ),
+          reduceMotion: true,
+        ),
+      );
+      final painter = glyphPainter(tester, state);
+      expect(tester.getSize(find.byKey(ValueKey('record-glyph-${state.name}'))), const Size.square(24));
+      final glyph = find.descendant(
+        of: find.byKey(ValueKey('record-glyph-${state.name}')),
+        matching: find.byType(CustomPaint),
+      );
+      switch (state) {
+        case RecordGlyphState.recording:
+          expect(painter.colors, [LiveSemanticColors.recording, LiveSemanticColors.onRecording]);
+          // The halo, the red disc, the white square.
+          expect(
+            glyph,
+            paints
+              ..circle(radius: 11)
+              ..circle(radius: 10, color: LiveSemanticColors.recording)
+              ..rrect(color: LiveSemanticColors.onRecording),
+          );
+        case RecordGlyphState.reconnecting:
+          expect(painter.colors, [LiveSemanticColors.warningLight], reason: 'amber');
+        case RecordGlyphState.failed:
+          expect(painter.colors, [ink, scheme.error, scheme.onError]);
+        case RecordGlyphState.idle ||
+            RecordGlyphState.waiting ||
+            RecordGlyphState.preparing ||
+            RecordGlyphState.processing:
+          expect(painter.colors, [ink], reason: '$state takes the colour of the icons beside it');
+      }
+      if (state != RecordGlyphState.recording) {
+        expect(painter.colors, isNot(contains(LiveSemanticColors.recording)), reason: '$state is not red');
+      }
+    }
+    // The idle glyph: a ring and a dot in the same ink, nothing else.
+    await tester.pumpWidget(
+      _app(
+        const IconTheme(
+          data: IconThemeData(color: ink),
+          child: RecordGlyph(state: RecordGlyphState.idle),
+        ),
+      ),
     );
-    await tester.pump(const Duration(seconds: 1));
-
-    // Less motion: the dot stays lit.
-    await tester.pumpWidget(_app(const RecordGlyph(state: RecordGlyphState.recording), reduceMotion: true));
     expect(
-      find.descendant(of: find.byKey(const ValueKey('record-glyph-recording')), matching: find.byType(FadeTransition)),
-      findsNothing,
+      find.descendant(of: find.byKey(const ValueKey('record-glyph-idle')), matching: find.byType(CustomPaint)),
+      paints
+        ..circle(radius: 9, color: ink, style: PaintingStyle.stroke, strokeWidth: 2)
+        ..circle(radius: 3.5, color: ink, style: PaintingStyle.fill),
     );
   });
 
-  testWidgets('RecordingBadge shows the word and a steady clock; compact keeps the time', (tester) async {
+  testWidgets('U.2a2: on the picture the glyph takes the dark tones; an explicit colour wins', (tester) async {
+    await tester.pumpWidget(
+      _app(const RecordGlyph(state: RecordGlyphState.reconnecting, onVideo: true, color: OnVideoColors.foreground)),
+    );
+    expect(glyphPainter(tester, RecordGlyphState.reconnecting).colors, [LiveSemanticColors.warningDark]);
+    await tester.pumpWidget(
+      _app(const RecordGlyph(state: RecordGlyphState.failed, onVideo: true, color: OnVideoColors.foreground)),
+    );
+    expect(glyphPainter(tester, RecordGlyphState.failed).colors, [
+      OnVideoColors.foreground,
+      OnVideoColors.error,
+      OnVideoColors.onError,
+    ]);
+  });
+
+  testWidgets('U.2a2: the recording halo breathes, preparing spins; less motion holds both still', (tester) async {
+    await tester.pumpWidget(_app(const RecordGlyph(state: RecordGlyphState.recording)));
+    expect(tester.hasRunningAnimations, isTrue, reason: 'the halo breathes');
+    final before = glyphPainter(tester, RecordGlyphState.recording).haloOpacity;
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(glyphPainter(tester, RecordGlyphState.recording).haloOpacity, isNot(before));
+
+    await tester.pumpWidget(_app(const RecordGlyph(state: RecordGlyphState.recording), reduceMotion: true));
+    expect(tester.hasRunningAnimations, isFalse);
+    expect(glyphPainter(tester, RecordGlyphState.recording).haloOpacity, RecordGlyphPainter.haloRest);
+
+    await tester.pumpWidget(_app(const RecordGlyph(state: RecordGlyphState.preparing)));
+    expect(tester.hasRunningAnimations, isTrue, reason: 'the arc turns');
+    await tester.pumpWidget(_app(const RecordGlyph(state: RecordGlyphState.preparing), reduceMotion: true));
+    expect(tester.hasRunningAnimations, isFalse);
+
+    // A join with progress follows it; idle, waiting, reconnecting and failed
+    // never move.
+    for (final state in [
+      RecordGlyphState.idle,
+      RecordGlyphState.waiting,
+      RecordGlyphState.reconnecting,
+      RecordGlyphState.failed,
+    ]) {
+      await tester.pumpWidget(_app(RecordGlyph(state: state)));
+      expect(tester.hasRunningAnimations, isFalse, reason: '$state');
+    }
+    await tester.pumpWidget(_app(const RecordGlyph(state: RecordGlyphState.processing, progress: 0.45)));
+    expect(tester.hasRunningAnimations, isFalse);
+    expect(glyphPainter(tester, RecordGlyphState.processing).progress, 0.45);
+    await tester.pumpWidget(_app(const RecordGlyph(state: RecordGlyphState.processing)));
+    expect(tester.hasRunningAnimations, isTrue, reason: 'no progress yet: it spins');
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('U.2a2: RecordingBadge says recording on red, reconnecting and joining on a dark pill', (tester) async {
     expect(formatRecordingTime(const Duration(minutes: 12, seconds: 34)), '12:34');
     expect(formatRecordingTime(const Duration(hours: 1, minutes: 2, seconds: 3)), '1:02:03');
     expect(formatRecordingTime(const Duration(seconds: -5)), '00:00');
+    Color fill(RecordGlyphState state) =>
+        (tester.widget<DecoratedBox>(find.byKey(ValueKey('recording-badge-${state.name}'))).decoration as BoxDecoration)
+            .color!;
 
     await tester.pumpWidget(_app(const RecordingBadge(elapsed: Duration(minutes: 12, seconds: 34), label: '录制中')));
     final text = tester.widget<Text>(find.text('录制中 12:34'));
     expect(text.style?.fontFeatures, contains(const FontFeature.tabularFigures()));
     expect(text.style?.fontWeight, FontWeight.w600);
-
+    expect(fill(RecordGlyphState.recording), LiveSemanticColors.recording);
+    expect(find.byType(RecordGlyph), findsNothing, reason: 'a white dot on the red pill');
     await tester.pumpWidget(
       _app(const RecordingBadge(elapsed: Duration(minutes: 12, seconds: 34), label: '录制中', compact: true)),
     );
     expect(find.text('12:34'), findsOneWidget);
+
+    await tester.pumpWidget(
+      _app(
+        const RecordingBadge(
+          state: RecordGlyphState.reconnecting,
+          elapsed: Duration(minutes: 12, seconds: 34),
+          label: '重连中',
+        ),
+      ),
+    );
+    expect(find.text('重连中 12:34'), findsOneWidget);
+    expect(fill(RecordGlyphState.reconnecting), OnVideoColors.scrim, reason: 'not red');
+    expect(find.byKey(const ValueKey('record-glyph-reconnecting')), findsOneWidget);
+
+    await tester.pumpWidget(
+      _app(const RecordingBadge(state: RecordGlyphState.processing, progress: 0.456, label: '合成中')),
+    );
+    expect(find.text('合成中 45%'), findsOneWidget);
+    expect(fill(RecordGlyphState.processing), OnVideoColors.scrim);
+    expect(glyphPainter(tester, RecordGlyphState.processing).progress, 0.456);
+    await tester.pumpWidget(
+      _app(const RecordingBadge(state: RecordGlyphState.processing, progress: 0.456, label: '合成中', compact: true)),
+    );
+    expect(find.text('45%'), findsOneWidget);
+    // Before FFmpeg reports: the word alone; compact, the spinning glyph alone.
+    await tester.pumpWidget(_app(const RecordingBadge(state: RecordGlyphState.processing, label: '合成中')));
+    expect(find.text('合成中'), findsOneWidget);
+    await tester.pumpWidget(
+      _app(const RecordingBadge(state: RecordGlyphState.processing, label: '合成中', compact: true)),
+    );
+    expect(find.byType(Text), findsNothing);
+    await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('ListenableSelector rebuilds only when its part changes', (tester) async {
@@ -372,14 +507,6 @@ void main() {
     expect(tester.widget<ColoredBox>(find.byType(ColoredBox).last).color, OnVideoColors.ambientVeil);
     expect(ambientCoverDecodeWidth, lessThanOrEqualTo(32));
     expect(find.byType(ImageFiltered), findsNothing, reason: 'no blur per frame');
-  });
-
-  testWidgets('RecordGlyph takes a white ring on the picture', (tester) async {
-    await tester.pumpWidget(_app(const RecordGlyph(state: RecordGlyphState.idle, ringColor: OnVideoColors.foreground)));
-    final ring = tester.widget<DecoratedBox>(
-      find.descendant(of: find.byKey(const ValueKey('record-glyph-idle')), matching: find.byType(DecoratedBox)).first,
-    );
-    expect(((ring.decoration as BoxDecoration).border! as Border).top.color, OnVideoColors.foreground);
   });
 
   test("U.13: the close button's red and the recording note keep 4.5:1 with their text", () {

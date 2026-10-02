@@ -5,9 +5,11 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/shield/shield_page.dart';
+import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/danmaku/masked_blocks.dart';
 
 import '../../support.dart';
 
@@ -20,6 +22,7 @@ Future<LiveStore> _pump(
   Object? arguments,
   Size size = const Size(393, 852),
   List<String>? toasts,
+  Future<void> Function(LiveStore store)? prepare,
 }) async {
   tester.view
     ..physicalSize = size
@@ -29,6 +32,7 @@ Future<LiveStore> _pump(
     final services = await testServices();
     await services.store.blockLists.replaceAll(BlockKind.keyword, keywords);
     await services.store.blockLists.replaceAll(BlockKind.user, users);
+    await prepare?.call(services.store);
     return services;
   }))!;
   addTearDown(() => tester.runAsync(services.close));
@@ -36,21 +40,21 @@ Future<LiveStore> _pump(
   final previousToast = AppNavigator.toast;
   AppNavigator.toast = toasts?.add ?? (_) {};
   addTearDown(() => AppNavigator.toast = previousToast);
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: [appServicesProvider.overrideWithValue(services)],
-      child: LiveUiScope(
-        config: LiveUiConfig(strings: strings.ui),
-        child: MaterialApp(
-          theme: const LiveTheme(primaryColor: Colors.blue).light,
-          home: ShieldPage(route: RouteArgs(RoutePath.kSettingsDanmuShield, arguments: arguments)),
-        ),
-      ),
-    ),
-  );
+  await tester.pumpWidget(_app(services, strings, arguments));
   await _settle(tester);
   return services.store;
 }
+
+Widget _app(AppServices services, AppStrings strings, [Object? arguments]) => ProviderScope(
+  overrides: [appServicesProvider.overrideWithValue(services)],
+  child: LiveUiScope(
+    config: LiveUiConfig(strings: strings.ui),
+    child: MaterialApp(
+      theme: const LiveTheme(primaryColor: Colors.blue).light,
+      home: ShieldPage(route: RouteArgs(RoutePath.kSettingsDanmuShield, arguments: arguments)),
+    ),
+  ),
+);
 
 /// Lets the store's queries (real async work) finish, then the frames.
 Future<void> _settle(WidgetTester tester) async {
@@ -149,6 +153,37 @@ void main() {
     final title = tester.getTopLeft(find.text('已屏蔽用户（2）'));
     expect(title.dy, lessThan(600));
     expect(find.byKey(const ValueKey('block-chip-user-Alice')).hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('B01 c2: after the one-time cleanup the page says how many masked names went, once', (tester) async {
+    final store = await _pump(
+      tester,
+      users: ['路人', '观***', 'Alice', '离**'],
+      prepare: (store) => MaskedNameBlocks.cleanOnce(store.blockLists, store.meta),
+    );
+    const text = '已清理 2 个打码昵称的屏蔽（它们会误伤其他观众）';
+    expect(find.text(text), findsOneWidget);
+    expect(_topDown(tester, [text, '弹幕关键词屏蔽']), [text, '弹幕关键词屏蔽'], reason: 'at the top');
+    expect(find.text('已屏蔽用户（2）'), findsOneWidget);
+    expect(find.byKey(const ValueKey('block-chip-user-观***')), findsNothing);
+    expect(await _list(tester, store, BlockKind.user), ['路人', 'Alice']);
+    await tester.tap(find.byKey(const ValueKey('block-masked-cleaned-close')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('block-masked-cleaned')), findsNothing);
+
+    // Opened again: said already.
+    final services = ProviderScope.containerOf(tester.element(find.byType(ShieldPage))).read(appServicesProvider);
+    final strings = (await tester.runAsync(loadStrings))!;
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(_app(services, strings));
+    await _settle(tester);
+    expect(find.byType(ShieldPage), findsOneWidget);
+    expect(find.byKey(const ValueKey('block-masked-cleaned')), findsNothing);
+  });
+
+  testWidgets('no masked names: no notice', (tester) async {
+    await _pump(tester, users: ['路人'], prepare: (store) => MaskedNameBlocks.cleanOnce(store.blockLists, store.meta));
+    expect(find.byKey(const ValueKey('block-masked-cleaned')), findsNothing);
   });
 
   testWidgets('landscape phone and wide window: at most 720, centred (c6)', (tester) async {

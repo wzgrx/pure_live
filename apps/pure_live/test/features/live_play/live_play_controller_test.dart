@@ -246,6 +246,74 @@ void main() {
     controller.dispose();
   });
 
+  group("B06: Bilibili's names", () {
+    LiveMessage chat(String user) =>
+        LiveMessage(type: LiveMessageType.chat, userName: user, message: '前排', color: LiveMessageColor.white);
+
+    test('a guest: the hint while the danmaku is on, and no system line for masked names', () async {
+      final controller = controllerFor(FakeSite(liveRoom()));
+      expect(controller.nameHint, ChatNameHint.none, reason: 'not connected yet');
+      await controller.start();
+      await settle();
+      expect(controller.nameHint, ChatNameHint.guest);
+      danmaku.emit(DanmakuReceived(chat('观***')));
+      expect(controller.chat.lines.where((line) => line.kind == ChatLineKind.system).map((line) => line.text), [
+        '开始连接弹幕服务器',
+        '弹幕服务器连接正常',
+      ]);
+      await store.settings.setAll({Settings.enableDanmakuDisplay: false, Settings.enablePipDanmaku: false});
+      await settle();
+      expect(controller.nameHint, ChatNameHint.none, reason: 'danmaku off');
+      controller.dispose();
+    });
+
+    test('signed in: none; three masked names and no full one say the login expired', () async {
+      await store.secrets.setCookie(SiteIds.bilibili, 'SESSDATA=a; DedeUserID=1');
+      final site = FakeSite(liveRoom());
+      final controller = controllerFor(site);
+      await controller.start();
+      await settle();
+      expect(controller.nameHint, ChatNameHint.none);
+      danmaku
+        ..emit(DanmakuReceived(chat('观***')))
+        ..emit(DanmakuReceived(chat('离**')));
+      expect(controller.nameHint, ChatNameHint.none, reason: 'two are not enough');
+      danmaku.emit(DanmakuReceived(chat('V***')));
+      expect(controller.nameHint, ChatNameHint.loginExpired);
+      danmaku.emit(DanmakuReceived(chat('完整的名字')));
+      expect(controller.nameHint, ChatNameHint.none, reason: 'a full name: the login works');
+
+      // Signing out connects again with the guest's credentials.
+      final connects = danmaku.connects.length;
+      site.room = liveRoom().copyWith(danmakuData: 'args-6-guest');
+      await store.secrets.setCookie(SiteIds.bilibili, '');
+      await settle();
+      expect(controller.nameHint, ChatNameHint.guest);
+      expect(danmaku.connects.sublist(connects), ['args-6-guest']);
+      controller.dispose();
+    });
+
+    test('other platforms and other logins: no hint, no reconnect', () async {
+      final room = LiveRoom(
+        platform: SiteIds.douyu,
+        roomId: '6',
+        nick: '主播',
+        liveStatus: LiveStatus.live,
+        danmakuData: 'args-6',
+      );
+      final controller = controllerFor(FakeSite(room), room: room);
+      await controller.start();
+      await settle();
+      danmaku.emit(DanmakuReceived(chat('观***')));
+      expect(controller.nameHint, ChatNameHint.none);
+      await store.secrets.setCookie(SiteIds.douyu, 'acf_uid=1');
+      await store.secrets.setCookie(SiteIds.bilibili, 'SESSDATA=a');
+      await settle();
+      expect(danmaku.connects, ['args-6']);
+      controller.dispose();
+    });
+  });
+
   test("the starting quality follows 3.x's preference rules", () {
     const qualities = [LivePlayQuality(quality: '原画'), LivePlayQuality(quality: '蓝光'), LivePlayQuality(quality: '高清')];
     expect(defaultQualityIndex(qualities, '原画'), 0);

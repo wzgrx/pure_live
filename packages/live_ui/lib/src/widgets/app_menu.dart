@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
+import 'package:live_ui/src/widgets/anchored_menu.dart';
 
 /// One row of the small menu ([showAppMenu], [AppMenuButton]).
 @immutable
@@ -48,7 +49,7 @@ const double appMenuDividerHeight = 16;
 const double appMenuMinWidth = 128;
 
 /// The gap between the button and the menu.
-const double appMenuGap = 4;
+const double appMenuGap = anchoredMenuGap;
 
 /// Opens the small menu (docs/ui/UI_PLAN.md §7, the look U.2f confirmed for
 /// the quality and line menus) next to the widget of [context], usually the
@@ -56,12 +57,14 @@ const double appMenuGap = 4;
 /// colour, 12 apart from 14-point text; `surfaceContainerHighest`, 8-point
 /// corners, at least [appMenuMinWidth] wide and as wide as its text.
 ///
-/// The menu opens [appMenuGap] below the button, or above it when only the
-/// space above takes it ([preferAbove]: above whenever it fits there); it
-/// lines up with the button's left edge, or its right edge when the button
-/// sits in the right half. A choice closes it and is returned; a tap
-/// outside, Back and Esc close it with null. Arrows and Enter work as in
-/// every Material menu.
+/// The menu is placed by its measured height ([showAnchoredMenu]):
+/// [appMenuGap] below the button, or above it when only the space above
+/// takes it ([preferAbove]: above whenever it fits there); a list taller
+/// than the room scrolls. It lines up with the button's left edge, or its
+/// right edge when the button sits in the right half, and unfolds from the
+/// button's side. A choice closes it and is returned; a tap outside, Back
+/// and Esc close it with null. Arrows and Enter work as in every Material
+/// menu.
 ///
 /// A menu of choices passes the current one as [selected]: its row is in
 /// the primary colour, semibold, with a tick at the end (docs/ui/UI_PLAN.md
@@ -76,68 +79,51 @@ Future<T?> showAppMenu<T>(
   final scheme = Theme.of(context).colorScheme;
   final text = context.textStyles.t14.copyWith(color: scheme.onSurface);
   final current = text.emphasis.copyWith(color: scheme.primary);
-  return showMenu<T>(
-    context: context,
-    position: _position(
-      context,
-      entries.length,
-      dividers: entries.where((entry) => entry.divider).length,
-      preferAbove: preferAbove,
-    ),
-    color: scheme.surfaceContainerHighest,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  final currentRow = GlobalKey();
+  final currentIndex = selected == null ? -1 : entries.indexWhere((entry) => entry.value == selected);
+  return showAnchoredMenu<T>(
+    context,
+    preferAbove: preferAbove,
+    current: currentIndex < 0 ? null : currentRow,
     constraints: const BoxConstraints(minWidth: appMenuMinWidth, maxWidth: 280),
-    items: [
-      for (final entry in entries) ...[
+    children: [
+      for (final (index, entry) in entries.indexed) ...[
         if (entry.divider) const PopupMenuDivider(),
-        PopupMenuItem<T>(
-          key: entry.key,
-          value: entry.value,
-          enabled: entry.enabled,
-          padding: const EdgeInsets.only(left: 16, right: 14),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (entry.icon case final icon?) ...[
-                Icon(icon, size: 24, color: entry.danger ? scheme.error : scheme.onSurfaceVariant),
-                const SizedBox(width: 12),
-              ],
-              Flexible(
-                child: Text(
-                  entry.label,
-                  style: entry.danger
-                      ? text.copyWith(color: scheme.error)
-                      : (selected != null && entry.value == selected ? current : text),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+        KeyedSubtree(
+          key: index == currentIndex ? currentRow : null,
+          child: PopupMenuItem<T>(
+            key: entry.key,
+            value: entry.value,
+            enabled: entry.enabled,
+            padding: const EdgeInsets.only(left: 16, right: 14),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (entry.icon case final icon?) ...[
+                  Icon(icon, size: 24, color: entry.danger ? scheme.error : scheme.onSurfaceVariant),
+                  const SizedBox(width: 12),
+                ],
+                Flexible(
+                  child: Text(
+                    entry.label,
+                    style: entry.danger
+                        ? text.copyWith(color: scheme.error)
+                        : (selected != null && entry.value == selected ? current : text),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-              if (selected != null && entry.value == selected) ...[
-                const SizedBox(width: 16),
-                Icon(AppIcons.selected, size: 18, color: scheme.primary),
+                if (selected != null && entry.value == selected) ...[
+                  const SizedBox(width: 16),
+                  Icon(AppIcons.selected, size: 18, color: scheme.primary),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ],
     ],
   );
-}
-
-/// Where the menu of [count] rows goes next to the box of [context].
-RelativeRect _position(BuildContext context, int count, {required bool preferAbove, int dividers = 0}) {
-  final button = context.findRenderObject()! as RenderBox;
-  final overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
-  final rect = button.localToGlobal(Offset.zero, ancestor: overlay) & button.size;
-  final padding = MediaQuery.paddingOf(context);
-  // Rows of 48 and the menu's own 8 above and below (Material's menu).
-  final height = count * kMinInteractiveDimension + dividers * appMenuDividerHeight + 16;
-  final below = overlay.size.height - padding.bottom - rect.bottom - appMenuGap;
-  final above = rect.top - padding.top - appMenuGap;
-  final up = preferAbove ? height <= above || above > below : height > below && above > below;
-  final top = up ? rect.top - appMenuGap - height : rect.bottom + appMenuGap;
-  // Material's menu lines up with the side of the position nearer its edge.
-  return RelativeRect.fromLTRB(rect.left, top, overlay.size.width - rect.right, overlay.size.height - top);
 }
 
 /// An icon button that opens [entries] in the small menu ([showAppMenu]);

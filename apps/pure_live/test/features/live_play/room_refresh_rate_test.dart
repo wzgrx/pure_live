@@ -11,7 +11,8 @@ import 'package:pure_live/platform/display_mode.dart';
 import '../../support.dart';
 import 'live_play_support.dart';
 
-// docs/ui/compare/U.2i: the display's refresh rate follows the video.
+// docs/ui/compare/U.2i: the display's refresh rate follows the video;
+// revised in 4.0.x by P01 (the README's "4.0.x 修订").
 
 const _rates = [60.0, 90.0, 120.0];
 
@@ -30,7 +31,7 @@ void main() {
       expect(frameRateMultiples(25, [50, 60, 100, 120]), [50, 100]);
     });
 
-    double? rate(String mode, {required bool high, double fps = 30, List<double> supported = _rates}) =>
+    double rate(String mode, {required bool high, double fps = 30, List<double> supported = _rates}) =>
         playbackRefreshRate(
           playback: PlaybackRefresh(frameRate: fps, mode: mode),
           high: high,
@@ -39,6 +40,7 @@ void main() {
 
     test('power saving: the system picks (the declared frame rate leads it)', () {
       expect(rate('powerSaving', high: false), 0);
+      expect(rate('powerSaving', high: false, fps: 25), 0);
     });
 
     test('balanced: up to 60 at rest, the highest multiple while touching; 50 for 25 frames', () {
@@ -48,11 +50,53 @@ void main() {
       expect(rate('balanced', high: true, fps: 25, supported: [50, 60, 100, 120]), 100);
     });
 
-    test('performance: 120, not 144, for 60 frames; no multiple keeps 3.x', () {
+    test('performance: 120, not 144, for 60 frames', () {
       expect(rate('performance', high: true, fps: 60, supported: [60, 90, 120, 144]), 120);
-      expect(rate('performance', high: true, fps: 25), isNull);
-      expect(rate('balanced', high: true, fps: 25), isNull);
     });
+
+    test('P01 c2: no whole multiple takes the highest rate; nothing is left to the system', () {
+      expect(rate('performance', high: true, fps: 25), 120);
+      expect(rate('balanced', high: true, fps: 25), 120);
+      expect(rate('balanced', high: false, fps: 25), 120);
+      expect(rate('balanced', high: false, fps: 24), 120, reason: '24 × 5: the only multiple, above 60');
+      expect(rate('balanced', high: false, supported: const []), 0, reason: 'rates not known yet');
+    });
+
+    // P01 acceptance: 24/25/30/50/60 frames × three kinds of display, as
+    // (balanced at rest, balanced while touching and performance).
+    final table = <List<double>, Map<int, (double, double)>>{
+      [60, 90, 120]: {24: (120, 120), 25: (120, 120), 30: (60, 120), 50: (120, 120), 60: (60, 120)},
+      [60, 120, 144]: {24: (120, 144), 25: (144, 144), 30: (60, 120), 50: (144, 144), 60: (60, 120)},
+      [60, 90, 120, 144, 165]: {24: (120, 144), 25: (165, 165), 30: (60, 120), 50: (165, 165), 60: (60, 120)},
+    };
+    for (final MapEntry(key: supported, value: rows) in table.entries) {
+      test('P01: ${supported.map((rate) => rate.round()).join('/')} Hz', () {
+        for (final MapEntry(key: fps, value: (rest, touching)) in rows.entries) {
+          final name = '$fps frames';
+          final frames = fps.toDouble();
+          expect(
+            rate('balanced', high: false, fps: frames, supported: supported),
+            rest,
+            reason: '$name at rest',
+          );
+          expect(
+            rate('balanced', high: true, fps: frames, supported: supported),
+            touching,
+            reason: '$name touching',
+          );
+          expect(
+            rate('performance', high: true, fps: frames, supported: supported),
+            touching,
+            reason: '$name, performance',
+          );
+          expect(
+            rate('powerSaving', high: false, fps: frames, supported: supported),
+            0,
+            reason: '$name, power saving',
+          );
+        }
+      });
+    }
   });
 
   group('the channel', () {
@@ -85,24 +129,61 @@ void main() {
       DisplayMode.debugReset();
     });
 
-    test('c2-c4: playing declares the frame rate and asks for a multiple; stopping clears both', () async {
+    List<String> sent() => [for (final call in calls) '${call.method} ${call.arguments}'];
+
+    test('P01 c1: playing declares one rate on the surface; touching raises it; stopping clears it', () async {
       await DisplayMode.applyHighRefreshRate(high: false);
-      expect(calls.last.arguments, {'enabled': false});
-
       await DisplayMode.setPlayback(const PlaybackRefresh(frameRate: 30, mode: 'balanced'));
-      expect(
-        [for (final call in calls.skip(1)) '${call.method} ${call.arguments}'],
-        ['setVideoFrameRate {fps: 30.0}', 'setHighRefreshRate {enabled: false, refreshRate: 60.0}'],
-      );
-      // c3: touching asks for the highest multiple, not just the highest.
+      // U.2i c3: touching asks for the highest multiple, not just the highest.
       await DisplayMode.applyHighRefreshRate(high: true);
-      expect(calls.last.arguments, {'enabled': true, 'refreshRate': 120.0});
-
+      // Back to the video's rate when the interaction ends.
+      await DisplayMode.applyHighRefreshRate(high: false);
       await DisplayMode.setPlayback(null);
-      expect(
-        [for (final call in calls.skip(4)) '${call.method} ${call.arguments}'],
-        ['setVideoFrameRate {fps: 0.0}', 'setHighRefreshRate {enabled: true}'],
+      expect(sent(), [
+        'setHighRefreshRate {enabled: false}',
+        'setHighRefreshRate {enabled: false, frameRate: 60.0, refreshRate: 60.0}',
+        'setHighRefreshRate {enabled: true, frameRate: 120.0, refreshRate: 120.0}',
+        'setHighRefreshRate {enabled: false, frameRate: 60.0, refreshRate: 60.0}',
+        'setHighRefreshRate {enabled: false}',
+      ]);
+      expect(sent(), everyElement(isNot(contains('setVideoFrameRate'))), reason: 'one call says everything');
+    });
+
+    test('P01: power saving declares the video itself; 25 frames take 120 Hz', () async {
+      await DisplayMode.setPlayback(const PlaybackRefresh(frameRate: 30, mode: 'powerSaving'));
+      await DisplayMode.setPlayback(const PlaybackRefresh(frameRate: 25, mode: 'balanced'));
+      expect(sent(), [
+        'setHighRefreshRate {enabled: false, frameRate: 30.0, refreshRate: 0.0}',
+        'setHighRefreshRate {enabled: false, frameRate: 120.0, refreshRate: 120.0}',
+      ]);
+    });
+
+    test('P01: another display while playing chooses again', () async {
+      await DisplayMode.setPlayback(const PlaybackRefresh(frameRate: 24, mode: 'balanced'));
+      await DisplayMode.applyHighRefreshRate(high: true);
+      DisplayMode.publish(
+        DisplayModeInfo.fromMap(const {
+          'currentRefreshRate': 120.0,
+          'maxRefreshRate': 144.0,
+          'supportedRefreshRates': [60.0, 120.0, 144.0],
+        }),
       );
+      await pumpEventQueue();
+      expect(sent(), [
+        'setHighRefreshRate {enabled: false, frameRate: 120.0, refreshRate: 120.0}',
+        'setHighRefreshRate {enabled: true, frameRate: 120.0, refreshRate: 120.0}',
+        'setHighRefreshRate {enabled: true, frameRate: 144.0, refreshRate: 144.0}',
+      ]);
+      // The same rates again change nothing.
+      DisplayMode.publish(
+        DisplayModeInfo.fromMap(const {
+          'currentRefreshRate': 144.0,
+          'maxRefreshRate': 144.0,
+          'supportedRefreshRates': [60.0, 120.0, 144.0],
+        }),
+      );
+      await pumpEventQueue();
+      expect(calls, hasLength(3));
     });
   });
 

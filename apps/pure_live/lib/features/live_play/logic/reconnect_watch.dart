@@ -3,69 +3,42 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:live_player/live_player.dart';
 
-/// Whether a stream that was playing has dropped and is being brought back,
-/// and how many times in a row (the "正在重连（第 N 次）" message, U.2a E3).
+/// Whether a stream that failed is being brought back, and which attempt
+/// (the "正在重连（第 N 次）" message, U.2a E3).
 ///
-/// The playback session recovers by itself (refreshed address, next line,
-/// bounded retry rounds) but keeps its attempt count private: its state only
-/// says "buffering". So this counts the drops it sees: a playing stream
-/// that turns to buffering or opening without the user having asked for a
-/// new stream ([expectReopen]). The count starts again once the stream has
-/// played for [settle] (the session's own budget reset).
+/// The playback session says so itself ([PlaybackState.recovery]): only its
+/// recovery (a refreshed address, the next line, a new engine, a retry
+/// round) is a reconnection. A stream that buffers without having failed
+/// (a slow start, a short stall, a resume after a pause) and the user's own
+/// reopenings (another quality or line, a refresh) are not; the picture
+/// shows a spinner for those (B02: guessing from "playing, then buffering"
+/// called each of them a drop).
 final class ReconnectWatch extends ChangeNotifier {
   /// Watches [states] (the session's).
-  new(Stream<PlaybackState> states, {DateTime Function()? now, this.settle = const Duration(seconds: 30)})
-    : _now = now ?? DateTime.now {
+  new(Stream<PlaybackState> states) {
     _subscription = states.listen(update);
   }
 
-  /// Sustained playback after which a new drop counts as the first again.
-  final Duration settle;
-
-  final DateTime Function() _now;
   late final StreamSubscription<PlaybackState> _subscription;
-  DateTime? _playingSince;
-  bool _expected = false;
   bool _reconnecting = false;
   int _attempts = 0;
 
-  /// A dropped stream is being brought back.
+  /// A failed stream is being brought back.
   bool get reconnecting => _reconnecting;
 
-  /// Drops in a row, counting the current one.
+  /// The attempt, counting from 1, while [reconnecting]; 0 otherwise.
   int get attempts => _attempts;
-
-  /// The next reopening is the user's doing (another quality or line, a
-  /// refresh), not a drop.
-  void expectReopen() => _expected = true;
 
   /// Takes the session's [state].
   @visibleForTesting
   void update(PlaybackState state) {
-    final wasReconnecting = _reconnecting;
-    switch (state.status) {
-      case PlaybackStatus.playing:
-        final now = _now();
-        if (_reconnecting || _playingSince == null) _playingSince = now;
-        _reconnecting = false;
-        _expected = false;
-      case PlaybackStatus.buffering || PlaybackStatus.opening:
-        final since = _playingSince;
-        if (since != null && !_reconnecting && !_expected) {
-          if (_now().difference(since) >= settle) _attempts = 0;
-          _attempts++;
-          _reconnecting = true;
-        }
-        if (_expected) _playingSince = null;
-      case PlaybackStatus.paused || PlaybackStatus.completed:
-        _reconnecting = false;
-      case PlaybackStatus.idle || PlaybackStatus.stopped || PlaybackStatus.error:
-        _reconnecting = false;
-        _playingSince = null;
-        _expected = false;
-        _attempts = 0;
-    }
-    if (wasReconnecting != _reconnecting) notifyListeners();
+    final reconnecting =
+        state.recovering && (state.status == PlaybackStatus.buffering || state.status == PlaybackStatus.opening);
+    final attempts = reconnecting ? state.recovery : 0;
+    if (reconnecting == _reconnecting && attempts == _attempts) return;
+    _reconnecting = reconnecting;
+    _attempts = attempts;
+    notifyListeners();
   }
 
   @override

@@ -1,9 +1,13 @@
 import 'package:live_core/live_core.dart';
+import 'package:live_danmaku/src/sites/bilibili.dart';
 
 /// The user's blocked viewers and words (3.x `DanmakuController._isBlocked`
 /// with the lists of `_refreshFilters`).
 ///
 /// - Both lists are trimmed and lower-cased once; empty entries are dropped.
+/// - A masked name ([BilibiliDanmakuProtocol.isMaskedName], a guest's view
+///   of a Bilibili viewer such as `观***`) blocks nobody: it stands for
+///   every viewer whose name starts the same way (audit B-1).
 /// - A message is blocked when its trimmed, lower-cased sender name is a
 ///   blocked name, or when its lower-cased text contains a blocked word.
 final class DanmakuBlockList {
@@ -12,7 +16,9 @@ final class DanmakuBlockList {
   new({Iterable<String> users = const [], Iterable<String> keywords = const []})
     : _users = {
         for (final user in users)
-          if (user.trim().toLowerCase() case final name when name.isNotEmpty) name,
+          if (user.trim().toLowerCase() case final name
+              when name.isNotEmpty && !BilibiliDanmakuProtocol.isMaskedName(name))
+            name,
       },
       _keywords = List.unmodifiable([
         for (final keyword in keywords)

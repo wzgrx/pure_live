@@ -13,9 +13,9 @@
 
 | 方面 | 3.x（文件:行） | 现在（文件:行） | 要做到 |
 |---|---|---|---|
-| 握手的 UA | dart:io 默认，带 `Dart/` 前缀：各平台经 `core/common/web_socket_util.dart:39-46` 的 `IOWebSocketChannel.connect`，`:50-60` 的 `_createWebSocketHttpClient` 直连时不建自定义客户端 | 同 3.x：`packages/live_net/lib/src/socket.dart:56-66` 的 `webSocketClientFor`，直连时返回 null（用默认客户端）；`plainUserAgent` 为真时新建 `HttpClient` 并把它的 `userAgent` 清空（`:64`）；`connectIoSocket(plainUserAgent:)`（`:75-90`） | 默认不带前缀 |
+| 握手的 UA | dart:io 默认，带 `Dart/` 前缀：各平台经 `core/common/web_socket_util.dart:33-47` 的 `_connectIoWebSocket`（`:40` 调 `IOWebSocketChannel.connect`），`:49-62` 的 `_createWebSocketHttpClient` 直连时不建自定义客户端 | 同 3.x：`packages/live_net/lib/src/socket.dart:56-66` 的 `webSocketClientFor`，直连时返回 null（用默认客户端）；`plainUserAgent` 为真时新建 `HttpClient` 并把它的 `userAgent` 清空（`:64`）；`connectIoSocket(plainUserAgent:)`（`:74-90`） | 默认不带前缀 |
 | 开关 | 无 | `apps/pure_live/lib/app/platforms.dart:245` 的 `plainDanmakuUserAgent = bool.fromEnvironment('PURE_LIVE_PLAIN_WS_UA')`，`:249-258` 的 `danmakuHandshake()` 只在开时给连接器；`:200` 起的弹幕登记把它传给 21 个平台（哔哩哔哩、斗鱼、虎牙、抖音、Twitch、SOOP、AcFun、Picarto、TwitCasting、猫耳 FM、克拉克拉、SHOWROOM、CHZZK、Kick、BIGO、PandaTV、京东、酷狗、六间房、LOOK、17LIVE），YY、FC2、快手、niconico、YouTube、Steam、百度不走它 | 21 个平台在 K90 上验证通过后默认开 |
-| 风险来源 | v3 曾给直连握手传自定义 `HttpClient`，Android 上握手挂到超时（原因没查明） | `socket.dart:45-50` 的注释写着同一个风险 | 每个平台在 K90 上直连和走代理各连一次 |
+| 风险来源 | v3 曾给直连握手传自定义 `HttpClient`，Android 上握手挂到超时（原因没查明） | `socket.dart:46-55` 的注释写着同一个风险 | 每个平台在 K90 上直连和走代理各连一次 |
 
 ## 方案
 
@@ -37,4 +37,4 @@
 
 ## 留下的问题
 
-- YY、FC2 有自己的握手，不在本任务里（`platforms.dart:250` 的注释）。
+- YY、FC2 有自己的握手，不在本任务里（`platforms.dart:247-248` 的注释）。

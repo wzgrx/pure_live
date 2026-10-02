@@ -19,7 +19,7 @@
 
 - 应用：`apps/pure_live/lib/app/platforms.dart:160`：`SiteIds.yy: () => YySite(http, cookies: cookies),`，没有 `flvFirst`。
 - 平台层：`packages/live_core/lib/src/sites/yy/yy_site.dart:36` 构造参数 `flvFirst`（默认 `false`）；`:47` 字段说明；`:399-407` 取画质时按它排两条路线的先后。
-- 画质 id 换算：`packages/live_core/lib/src/sites/yy/yy_api.dart:748-764` 的 `YyApi.flvQualityId(id, qualities)`：`mobile-hls:4000` → FLV 第一档，`mobile-hls:1200` → 最后一档，其他原样；没有调用方。
+- 画质 id 换算：`packages/live_core/lib/src/sites/yy/yy_api.dart:749-764` 的 `YyApi.flvQualityId(id, qualities)`：`mobile-hls:4000` → FLV 第一档，`mobile-hls:1200` → 最后一档，其他原样；没有调用方。
 - 租期：`yy_api.dart:766-781` 的 `YyApi.lease`（`t` 是签名到期秒数，提前 `leaseLead` 续）；播放会话在 `refreshAt` 预取：`packages/live_player/lib/src/session.dart:28` 附近的说明。
 - 录制按 id 选档：`packages/live_record/lib/src/resolver.dart:234-236`（`previousQualityId` 在 `ordered` 里按 `selectionId` 找，找不到是 -1，退回按 `preferredQuality` 排的顺序）；任务字段 `packages/live_record/lib/src/task.dart:140` 的 `selectedQualityId`。
 - 直播间选默认档按名字：`apps/pure_live/lib/shared/rooms/play_quality.dart:7` 的 `defaultQualityIndex`（名字相同优先，否则按 3.x 五档的相对位置）。

@@ -13,8 +13,8 @@
 
 | 方面 | 3.x（文件:行） | 现在（文件:行） | 要做到 |
 |---|---|---|---|
-| 播放时的画质名 | `common/utils/play_quality_label.dart:6-8`：平台没确认时显示“未确认 · 原画”；`modules/live_play/widgets/video_player/video_controller_panel.dart:1224` | `packages/live_core/lib/src/live_site.dart:218-237` 的 `resolveAppliedPlayQuality`：确认的编号在列表里 → 那一项；是 `appliedQuality` → 它；否则请求的那项并标未确认；直播间 `apps/pure_live/lib/features/live_play/logic/room_controller.dart:491`、多画面 `features/multiview/logic/multiview_controller.dart:592` 调它；菜单在 `buttons/stream_menu.dart:51` 给未确认的加“?” | 确认的编号不在列表里时按平台编号命名（“超清”），算确认 |
-| 录制时的画质名 | `recorder/pages/recorder/recorder_controller.dart:905`：`playbackLabel`（“未确认 · 原画”） | `packages/live_record/lib/src/resolver.dart:325-350` 的 `RecordStreamResolver.servedQuality`：同样的情况用 `LiveQualityLabel.normalize(platform:, id:)` 命名（H01.3） | 直播间和录制用同一个规则 |
+| 播放时的画质名 | `common/utils/play_quality_label.dart:6-8`：平台没确认时显示“未确认 · 原画”；`modules/live_play/widgets/video_player/video_controller_panel.dart:1224` | `packages/live_core/lib/src/live_site.dart:223-239` 的 `resolveAppliedPlayQuality`：确认的编号在列表里 → 那一项；是 `appliedQuality` → 它；否则请求的那项并标未确认；直播间 `apps/pure_live/lib/features/live_play/logic/room_controller.dart:491`、多画面 `features/multiview/logic/multiview_controller.dart:592` 调它；菜单在 `buttons/stream_menu.dart:51` 给未确认的加“?” | 确认的编号不在列表里时按平台编号命名（“超清”），算确认 |
+| 录制时的画质名 | `recorder/pages/recorder/recorder_controller.dart:905`：`playbackLabel`（“未确认 · 原画”） | `packages/live_record/lib/src/resolver.dart:334-350` 的 `RecordStreamResolver.servedQuality`：同样的情况用 `LiveQualityLabel.normalize(platform:, id:)` 命名（H01.3） | 直播间和录制用同一个规则 |
 | 画质受限的提示 | 无 | 直播间只在用户自己点的档和实际不同、且实际档在列表里时提示（`room_controller.dart:492-497`，`quality_limited_to`）；录制提示一次（H01.3 c2） | 直播间进房时实际档和请求不同也提示一次 |
 
 ## 方案

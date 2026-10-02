@@ -32,7 +32,7 @@
 - 返回：`lib/modules/live_play/services/android_predictive_back_service.dart:7`（一组全局回调，旧页面 dispose 会清掉新页面的；v4 谁打开谁关）。
 - 剪贴板：`lib/common/global/platform/desktop_manager.dart:595-651`（启动、回前台 1 秒后读）；同一内容本次运行只问一次。
 - 投屏：`lib/modules/live_play/dialogs/live_dlna_dialog.dart:6`。
-- 多画面：`lib/modules/multiview/multiview_controller.dart:49`（手机最多 4 格）。
+- 多画面：`lib/modules/multiview/multiview_controller.dart:73`（手机 `maxCellCount` 是一大多小的 4 格，桌面最多 9 格）。
 
 ## 先读
 

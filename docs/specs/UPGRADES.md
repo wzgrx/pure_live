@@ -268,7 +268,7 @@ D01 各平台记录的“后续升级候选”，在 222 条之外；2026-09-30 
 | 编号 | 平台 | 改成什么样 | 决定 | 模块 | 状态 |
 |---|---|---|---|---|---|
 | B-1 | 通用 | 弹幕握手被拒（会话失效）时换会话重连（猫耳 FM_SESS 过期） | 采用：框架加握手失败的钩子 | D01.1、D01.13 | 完成（D01.1、D01.13） |
-| B-2 | 通用 | 弹幕握手的 User-Agent 不再带 `Dart/3.13 (dart:io)` 前缀 | 采用，放到 I01.1 在 Android 上验证后再改：去掉前缀要给握手换自定义 `HttpClient`，而 v3 实测 Android 直连时自定义客户端会让握手挂到超时（Q01.1 记录），原因没查明；现在各平台都接受带前缀的写法，收益只是外观 | Q03.1 | 部分完成：开关和说明已留（I01.1；`connectIoSocket(plainUserAgent:)`，`packages/live_net/lib/src/socket.dart:56`；`app/platforms.dart:245` 的编译参数 `PURE_LIVE_PLAIN_WS_UA`，默认关）。余下在 Android 真机上逐平台验证后改为默认开 → Q03.1 |
+| B-2 | 通用 | 弹幕握手的 User-Agent 不再带 `Dart/3.13 (dart:io)` 前缀 | 采用，放到 I01.1 在 Android 上验证后再改：去掉前缀要给握手换自定义 `HttpClient`，而 v3 实测 Android 直连时自定义客户端会让握手挂到超时（Q01.1 记录），原因没查明；现在各平台都接受带前缀的写法，收益只是外观 | Q03.1 | 部分完成：开关和说明已留（I01.1；`packages/live_net/lib/src/socket.dart:74` 的 `connectIoSocket(plainUserAgent:)`、`:56` 的 `webSocketClientFor` 清空 dart:io 的 UA；`app/platforms.dart:245` 的编译参数 `PURE_LIVE_PLAIN_WS_UA`，默认关）。余下在 Android 真机上逐平台验证后改为默认开 → Q03.1 |
 | B-3 | 哔哩哔哩 | 弹幕改回 protover 3（Brotli），和网页一致 | 采用（Q01.2 已有解码器）；先匿名录 protover 3 样本 | D01.2 | 完成（D01.2） |
 | B-4 | 虎牙 | 用平台消息 id 去重，断线重连后不再重复显示 | 采用 | D01.4 | 完成（D01.4） |
 | B-5 | 抖音 | 在线人数优先用精确整数；聊天缺发送时间时用事件时间；连接耗尽后确认本场是否换了（主播重新开播） | 采用 | D01.5 | 完成（D01.5） |

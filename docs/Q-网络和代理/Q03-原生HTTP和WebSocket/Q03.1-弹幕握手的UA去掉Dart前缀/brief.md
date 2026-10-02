@@ -16,16 +16,16 @@
 
 ## 现状（读代码得出，写文件:行）
 
-- `packages/live_net/lib/src/socket.dart:45-55`：说明直连时用默认客户端的原因（v3 在 Android 上自定义直连客户端会挂起）。
+- `packages/live_net/lib/src/socket.dart:46-55`：说明直连时用默认客户端的原因（v3 在 Android 上自定义直连客户端会挂起）。
 - `socket.dart:56-66` 的 `webSocketClientFor(route, plainUserAgent:)`：直连且 `plainUserAgent` 时新建 `HttpClient()`；`:64` 把 `client.userAgent` 设成 null，这样只发调用方给的 `user-agent` 头。
-- `socket.dart:75-90` 的 `connectIoSocket(...)`：`WebSocket.connect(endpoint, headers:, protocols:, customClient: client).timeout(connectTimeout)`，握手完关掉客户端。
+- `socket.dart:74-90` 的 `connectIoSocket(...)`：`WebSocket.connect(endpoint, headers:, protocols:, customClient: client).timeout(connectTimeout)`，握手完关掉客户端。
 - `apps/pure_live/lib/app/platforms.dart:245`：`const bool plainDanmakuUserAgent = bool.fromEnvironment('PURE_LIVE_PLAIN_WS_UA');`
 - `platforms.dart:249-258`：`danmakuHandshake({bool plain = plainDanmakuUserAgent})` 开时返回调用 `connectIoSocket(..., plainUserAgent: true)` 的 `SocketConnector`，否则 null。
 - `platforms.dart:196-238` 的 `buildDanmakuRegistry`：`final connector = danmakuHandshake();`，传给 21 个平台的连接（见 README 的列表）；YY（`YyDanmakuConnection.new`）、FC2、快手、niconico、YouTube、Steam、百度不用它。
 
 ## 3.x 基线
 
-- `git show v3.2.11:lib/core/common/web_socket_util.dart`：`:39-46` 用 `IOWebSocketChannel.connect(…, customClient:)`；`:50-60` 的 `_createWebSocketHttpClient` 只在走代理时建 `HttpClient`，直连时不建（注释写着只回答 DIRECT 的自定义客户端会让握手挂起），所以 UA 带 dart:io 前缀。各平台握手的头（Origin、Referer、Cookie）照旧。
+- `git show v3.2.11:lib/core/common/web_socket_util.dart`：`:33-47` 的 `_connectIoWebSocket` 用 `IOWebSocketChannel.connect(…, customClient:)`；`:49-62` 的 `_createWebSocketHttpClient` 只在走代理时建 `HttpClient`，直连时不建（注释写着只回答 DIRECT 的自定义客户端会让握手挂起），所以 UA 带 dart:io 前缀。各平台握手的头（Origin、Referer、Cookie）照旧。
 - v3 试过给直连握手传自定义客户端，在 Android 上挂到超时（Q01.1 记录写了现象，没查到原因）——这就是本任务要在真机上验证的风险。
 
 ## 先读

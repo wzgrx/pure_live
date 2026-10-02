@@ -17,8 +17,8 @@
 
 ## 现状（读代码得出，写文件:行）
 
-- `packages/live_core/lib/src/live_site.dart:218-237` 的 `resolveAppliedPlayQuality({qualities, requested, resolution})`：`appliedId` 在 `qualities` 里 → 那一项；等于 `resolution.appliedQuality` 的编号 → 它；否则 `requested.withPlaybackUnconfirmed(unconfirmed: resolution.qualityUnconfirmed || (appliedId != null && matched == null))`。
-- `packages/live_record/lib/src/resolver.dart:325-350` 的 `RecordStreamResolver.servedQuality({platform, qualities, requested, resolution})`：先调上面的函数；结果未确认、平台确认了编号且编号不在列表里时，返回 `LivePlayQuality(quality: LiveQualityLabel.normalize(platform: platform, rawLabel: '', id: id), data: id, id: id)`。
+- `packages/live_core/lib/src/live_site.dart:223-239` 的 `resolveAppliedPlayQuality({qualities, requested, resolution})`：`appliedId` 在 `qualities` 里 → 那一项；等于 `resolution.appliedQuality` 的编号 → 它；否则 `requested.withPlaybackUnconfirmed(unconfirmed: resolution.qualityUnconfirmed || (appliedId != null && matched == null))`。
+- `packages/live_record/lib/src/resolver.dart:334-350` 的 `RecordStreamResolver.servedQuality({platform, qualities, requested, resolution})`：先调上面的函数；结果未确认、平台确认了编号且编号不在列表里时，返回 `LivePlayQuality(quality: LiveQualityLabel.normalize(platform: platform, rawLabel: '', id: id), data: id, id: id)`。
 - 直播间：`apps/pure_live/lib/features/live_play/logic/room_controller.dart:462` 的 `_openQuality(index, epoch, {userChoice})`；`:491` 调 `resolveAppliedPlayQuality`；`:492-494` 找实际档在列表里的位置；`:495-497` 只在 `userChoice && playing != index` 时 `toast(i18n('quality_limited_to', …))`，然后 `_qualities[playing] = applied`；`:546` 的 `_refreshPlan`（E06.2 要改的）。
 - 多画面：`apps/pure_live/lib/features/multiview/logic/multiview_controller.dart:592-593`，同样调 `resolveAppliedPlayQuality`。
 - 菜单：`apps/pure_live/lib/features/live_play/buttons/stream_menu.dart:51`：未确认的名字后面加“?”。

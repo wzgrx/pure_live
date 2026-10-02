@@ -153,11 +153,15 @@ void main() {
     expect(_in('live-play-follow', find.text('已关注')), findsOneWidget);
     final followed = tester.widget<FilledButton>(find.byKey(const ValueKey('live-play-follow')));
     expect(followed.style?.backgroundColor?.resolve({}), scheme.surfaceContainerHighest);
+    // U.2n c8: unfollowing asks in a small menu under the button; a tap
+    // outside keeps the follow.
     await tester.tap(find.byKey(const ValueKey('live-play-follow')));
     await tester.pumpAndSettle();
     expect(find.text('取消关注'), findsOneWidget);
-    await tester.tap(find.text('取消'));
+    expect(find.byKey(const ValueKey('app-menu-title')), findsOneWidget);
+    await tester.tapAt(const Offset(4, 400));
     await tester.pumpAndSettle();
+    expect(find.text('取消关注'), findsNothing);
     expect(await tester.runAsync(room.services.store.follows.all), hasLength(1));
     await _close(tester, room);
   });
@@ -234,9 +238,17 @@ void main() {
     expect(room.toasts, hasLength(1));
 
     // E6: a fixed orientation turns the button yellow; the tooltip says it.
+    // U.2n c6: the orientation is a small menu over the button.
     await tester.tap(find.byKey(const ValueKey('live-play-orientation')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('room-orientation-landscape')));
+    expect(find.byType(Dialog), findsNothing);
+    // Too tall for the room above the bar's button: under it, lined up with
+    // its right edge.
+    final button = tester.getRect(find.byKey(const ValueKey('live-play-orientation')));
+    final title = tester.getRect(find.byKey(const ValueKey('small-menu-title')));
+    expect(title.top, greaterThanOrEqualTo(button.bottom));
+    expect(title.top - button.bottom, lessThan(24));
+    await tester.tap(find.byKey(const ValueKey('room-orientation-2')));
     await _settle(tester);
     final orientation = tester.widget<VideoIconButton>(find.byKey(const ValueKey('live-play-orientation')));
     expect(orientation.color, OnVideoColors.active);

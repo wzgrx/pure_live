@@ -28,13 +28,10 @@ void showRecordPanel(BuildContext context, {required LiveRoom Function() room}) 
     return;
   }
   unawaited(
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) => SizedBox(
-        height: MediaQuery.sizeOf(sheetContext).height * 0.75,
-        child: RoomRecordPanel(room: room, onClose: () => Navigator.of(sheetContext).pop()),
-      ),
+    showRoomPanelSheet(
+      context,
+      heightFactor: 0.75,
+      builder: (_, close) => RoomRecordPanel(room: room, onClose: close),
     ),
   );
 }

@@ -67,35 +67,10 @@ class LocalDanmakuStylePanel extends ConsumerWidget {
 }
 
 /// Opens [LocalDanmakuStylePanel] where there is no picture (the settings
-/// page): from the bottom on a phone, on the right on a wide screen
-/// (UI_PLAN §7).
-Future<void> showLocalDanmakuStyleSheet(BuildContext context) {
-  final wide = MediaQuery.sizeOf(context).width >= 600;
-  if (!wide) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (sheetContext) => SizedBox(
-        height: MediaQuery.sizeOf(sheetContext).height * 0.86,
-        child: LocalDanmakuStylePanel(onClose: () => Navigator.of(sheetContext).pop(), dragToClose: true),
-      ),
-    );
-  }
-  return showGeneralDialog<void>(
-    context: context,
-    barrierDismissible: true,
-    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    pageBuilder: (dialogContext, _, _) => Align(
-      alignment: Alignment.centerRight,
-      child: SizedBox(
-        width: roomSidePanelWidth,
-        height: double.infinity,
-        child: LocalDanmakuStylePanel(onClose: () => Navigator.of(dialogContext).pop()),
-      ),
-    ),
-  );
-}
+/// page): the app's panel for such pages (docs/ui/compare/U.1d c10, UI_PLAN
+/// §7), from the bottom on a phone, on the right on a wide screen.
+Future<void> showLocalDanmakuStyleSheet(BuildContext context) =>
+    showRoomPanelSheet(context, heightFactor: 0.86, builder: (_, close) => LocalDanmakuStylePanel(onClose: close));
 
 /// The live preview (3.x `_DanmakuPreview`): a dark stage with
 /// "Pure Live 本地弹幕预览" in the current style, scrolling at the chosen speed

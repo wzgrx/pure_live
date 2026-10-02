@@ -182,7 +182,7 @@ void main() {
       await tester.tap(_key('live-play-menu'));
       await tester.pumpAndSettle();
       expect(_key('room-menu-localInteraction'), findsNothing);
-      expect(_key('room-menu-divider-2'), findsNothing);
+      expect(find.byType(PopupMenuDivider), findsOneWidget, reason: 'two groups, no third');
       await closeLocalRoom(tester, room);
     });
 
@@ -216,7 +216,7 @@ void main() {
       expect(_in('room-menu-localInteraction', find.byIcon(AppIcons.localInteraction)), findsOneWidget);
       expect(
         tester.getTopLeft(_key('room-menu-localInteraction')).dy,
-        greaterThan(tester.getTopLeft(_key('room-menu-divider-2')).dy),
+        greaterThan(tester.getTopLeft(find.byType(PopupMenuDivider).last).dy),
       );
       await tester.tap(_key('room-menu-localInteraction'));
       await tester.pumpAndSettle();

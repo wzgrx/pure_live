@@ -24,13 +24,9 @@ void showRoomDanmakuSettings(BuildContext context, LiveRoomController controller
     return;
   }
   unawaited(
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) => SizedBox(
-        height: MediaQuery.sizeOf(sheetContext).height * 0.6,
-        child: RoomDanmakuSettingsPanel(controller: controller, onClose: () => Navigator.of(sheetContext).pop()),
-      ),
+    showRoomPanelSheet(
+      context,
+      builder: (_, close) => RoomDanmakuSettingsPanel(controller: controller, onClose: close),
     ),
   );
 }

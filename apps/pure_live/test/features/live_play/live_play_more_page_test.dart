@@ -137,13 +137,27 @@ void main() {
     // No FFmpeg in tests: the record button is not offered.
     expect(find.byKey(const ValueKey('live-play-record')), findsNothing);
 
+    // U.2n c1, c11: a room panel; changes apply at once.
     await _menu(tester, 'timer');
-    expect(find.text('当前直播间播放定时器'), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('room-timer-panel')), matching: find.text('定时关闭')), findsOne);
     await tester.tap(find.byKey(const ValueKey('room-timer-enabled')));
     await tester.pump();
+    expect(find.textContaining('60 分钟后暂停'), findsOneWidget, reason: 'the switch starts the last length');
     await tester.tap(find.byKey(const ValueKey('room-timer-preset-30')));
     await tester.pump();
+    expect(find.textContaining('30 分钟后暂停'), findsOneWidget, reason: 'a preset starts at once');
+    await tester.enterText(find.byKey(const ValueKey('room-timer-duration')), '0');
     await tester.tap(find.byKey(const ValueKey('room-timer-confirm')));
+    await tester.pump();
+    expect(
+      tester.widget<TextField>(find.byKey(const ValueKey('room-timer-duration'))).decoration?.errorText,
+      '输入 1 分钟至 365 天之间的分钟数',
+      reason: 'the reason under the field',
+    );
+    await tester.enterText(find.byKey(const ValueKey('room-timer-duration')), '30');
+    await tester.tap(find.byKey(const ValueKey('room-timer-confirm')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('room-panel-close')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('live-play-menu')));
     await tester.pumpAndSettle();
@@ -151,7 +165,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('room-menu-streamLink')));
     await tester.pumpAndSettle();
 
-    expect(find.text('获取直链'), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('stream-panel-copy')), matching: find.text('获取直链')), findsOne);
     await tester.tap(find.byKey(const ValueKey('stream-quality-1')));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
     await tester.pumpAndSettle();
@@ -160,6 +174,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(copied, 'https://b.example/250.flv');
     expect(toasts, contains('已复制直链'));
+    expect(find.byKey(const ValueKey('stream-panel-copy')), findsNothing, reason: 'copying closes the panel');
     await _close(tester, services);
   });
 
@@ -185,7 +200,7 @@ void main() {
     await tester.pump();
     expect(receiver.calls, ['source https://a.example/10000.flv', 'play']);
     expect(toasts, contains('已开始投屏'));
-    await tester.tap(find.text('关闭'));
+    await tester.tap(find.byKey(const ValueKey('room-panel-close')));
     await tester.pump(const Duration(seconds: 1));
     await _close(tester, services);
   });
@@ -209,7 +224,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: const LiveTheme().light,
-        home: const Scaffold(body: CastDialog(url: 'https://a.example/10000.flv')),
+        home: const Scaffold(
+          body: CastDevices(url: 'https://a.example/10000.flv', caption: '原画 · 投屏到'),
+        ),
       ),
     );
     await _settle(tester);

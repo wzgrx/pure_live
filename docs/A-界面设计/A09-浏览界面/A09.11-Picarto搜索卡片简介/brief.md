@@ -18,8 +18,8 @@
 
 - `packages/live_core/lib/src/sites/picarto/picarto_api.dart:295-331` 的 `PicartoApi.searchRooms`：`title: name`、`nick: name`、`introduction: bio.isEmpty ? null : bio`（`:310` 解码 HTML 字符）。
 - `packages/live_core/lib/src/sites/chzzk/chzzk_api.dart:725-730`：CHZZK 频道搜索同样 `nick`、`title` 都是频道名，`introduction` 是频道说明（规则通用时也会受影响，见 README 待选 X1）。
-- `apps/pure_live/lib/shared/rooms/room_cards.dart:82-99` 的 `AudiencePolicy.cardOf`：`title`（空时“未命名”）、`anchorName`（`displayNick`，在播时加“· 已播 N”）。
-- `packages/live_ui/lib/src/widgets/room_card.dart:44-90` 的 `RoomCardData`（`title`、`anchorName` 等，没有简介）；`packages/live_ui/lib/src/widgets/live_room_card.dart:309-330` 的 `title()`、`anchorName()` 两行。
+- `apps/pure_live/lib/shared/rooms/room_cards.dart:82-99` 的 `AudiencePolicy.cardOf`：`title`（空时“未命名直播间”）、`anchorName`（`displayNick`，在播时加“· 已播 N”）。
+- `packages/live_ui/lib/src/widgets/room_card.dart:44-126` 的 `RoomCardData`（`title`、`anchorName` 等，没有简介）；`packages/live_ui/lib/src/widgets/live_room_card.dart:309-330` 的 `title()`、`anchorName()` 两行。
 - 搜索页：`apps/pure_live/lib/features/search/search_view.dart:569` 的 `RoomGridCard` → `apps/pure_live/lib/shared/rooms/room_grid.dart:131` 的 `policy.cardOf(...)`。
 
 ## 3.x 基线

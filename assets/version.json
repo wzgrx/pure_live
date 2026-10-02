@@ -1,10 +1,10 @@
 {
-  "version": "3.2.11",
-  "build_number": 4134,
-  "version_num": 302114134,
-  "version_desc": "- 斗鱼原画不再每 5 分钟断流：到期前在后台换链接并按关键帧无缝接上，没有卡顿。\n- Android armv7 与 x86_64 改用自编 FFmpeg 9 播放库。\n- 下线 Kick（Cloudflare 拦截），现支持 33 个平台 + IPTV。",
+  "version": "4.0.0",
+  "build_number": 5000,
+  "version_num": 400005000,
+  "version_desc": "- 4.0 是全新重写的版本：全新界面，手机、平板一套设计，直播间、弹幕、录制、设置全部重做。\n- 直接覆盖安装 3.x，关注、历史、设置、账号自动导入。\n- 这一版只发布 Android；Windows 等平台以后发布。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v3.2.11",
+  "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.0.0",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "3.2.11",
-      "build_number": 4134,
-      "version_num": 302114134,
-      "version_desc": "- 斗鱼原画不再每 5 分钟断流：到期前在后台换链接并按关键帧无缝接上，没有卡顿。\n- Android armv7 与 x86_64 改用自编 FFmpeg 9 播放库。\n- 下线 Kick（Cloudflare 拦截），现支持 33 个平台 + IPTV。",
+      "version": "4.0.0",
+      "build_number": 5000,
+      "version_num": 400005000,
+      "version_desc": "- 4.0 是全新重写的版本：全新界面，手机、平板一套设计，直播间、弹幕、录制、设置全部重做。\n- 直接覆盖安装 3.x，关注、历史、设置、账号自动导入。\n- 这一版只发布 Android；Windows 等平台以后发布。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v3.2.11",
+      "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.0.0",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",

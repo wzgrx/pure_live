@@ -139,8 +139,8 @@ void main() {
 
   test('reads the repository update files as 3.x does', () {
     final android = UpdateInfo.fromJson(_versionJson(), platform: 'android');
-    expect(android.version, '3.2.11');
-    expect(android.buildNumber, 4134);
+    expect(android.version, '4.0.0');
+    expect(android.buildNumber, 5000);
     expect(android.androidAbis, {'arm64-v8a', 'armeabi-v7a', 'x86_64'});
     expect(android.isNewer, isFalse);
     // A platform block overrides the top level.
@@ -148,17 +148,20 @@ void main() {
     expect(() => UpdateInfo.fromJson({'version': '1.0.0'}, platform: 'android'), throwsFormatException);
 
     final releases = parseReleases(_releasesJson());
-    expect(releases.first.version, '3.2.11');
+    expect(releases.first.version, '4.0.0');
     for (var i = 1; i < releases.length; i++) {
       expect(releases[i - 1].date.compareTo(releases[i].date), greaterThanOrEqualTo(0));
     }
     final packages = platformPackages('android', android, releases.first.files);
     expect([for (final (title, _) in packages) title], ['arch_arm64', 'arch_arm32', 'arch_x86_64']);
     expect(packages.first.$2.name, contains('arm64-v8a'));
+    // 4.0.0 is Android only; Windows stays on 3.2.11 and its packages.
+    final windowsInfo = UpdateInfo.fromJson(_versionJson(), platform: 'windows');
+    expect(windowsInfo.version, '3.2.11');
     final windows = platformPackages(
       'windows',
-      UpdateInfo.fromJson(_versionJson(), platform: 'windows'),
-      releases.first.files,
+      windowsInfo,
+      releases.firstWhere((release) => release.version == windowsInfo.version).files,
     );
     expect([for (final (title, _) in windows) title], containsAll(['exe_installer', 'portable_package']));
 
@@ -536,10 +539,10 @@ void main() {
     final feed = _FakeFeed(history: parseReleases(_releasesJson()));
     await _pump(tester, const AboutPage(route: RouteArgs(RoutePath.kVersionHistory)), feed, width: 1200);
     expect(find.byKey(const ValueKey('release-history-desktop-layout')), findsOneWidget);
-    expect(find.byKey(const ValueKey('release-history-detail-3.2.11')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('release-history-desktop-3.2.10')));
+    expect(find.byKey(const ValueKey('release-history-detail-4.0.0')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('release-history-desktop-3.2.11')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('release-history-detail-3.2.10')), findsOneWidget);
+    expect(find.byKey(const ValueKey('release-history-detail-3.2.11')), findsOneWidget);
   });
 }
 

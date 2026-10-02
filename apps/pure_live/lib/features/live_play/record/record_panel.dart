@@ -153,6 +153,44 @@ class _RecordPanelBodyState extends ConsumerState<RecordPanelBody> {
 
   List<LivePlayQuality> get _roomQualities => widget.qualities?.call() ?? const [];
 
+  /// The last recording's file and whether it was there when last looked
+  /// for (B08, audit B-20: each build asked the disk synchronously on the
+  /// UI thread). A build uses the answer it has and looks again in the
+  /// background; a different answer builds the panel again.
+  String? _outputPath;
+  bool _outputExists = false;
+  bool _lookingForOutput = false;
+
+  /// [path] when the file was there when last looked for, else null.
+  String? _saved(String? path) {
+    if (path != _outputPath) {
+      _outputPath = path;
+      _outputExists = false;
+    }
+    _lookForOutput();
+    return _outputExists ? path : null;
+  }
+
+  void _lookForOutput() {
+    final path = _outputPath;
+    if (path == null || _lookingForOutput) return;
+    _lookingForOutput = true;
+    unawaited(
+      // The asynchronous call on purpose: the UI thread does not wait for
+      // the disk (B-20).
+      // ignore: avoid_slow_async_io
+      File(path).exists().then((exists) => exists, onError: (Object _) => false).then((exists) {
+        _lookingForOutput = false;
+        if (!mounted) return;
+        if (path != _outputPath) {
+          _lookForOutput();
+        } else if (exists != _outputExists) {
+          setState(() => _outputExists = exists);
+        }
+      }),
+    );
+  }
+
   _View _view() {
     final recording = _recording;
     final settings = recording?.settings.current ?? RecordSettings();
@@ -286,8 +324,8 @@ class _RecordPanelBodyState extends ConsumerState<RecordPanelBody> {
               onStop: () => unawaited(_stop()),
               onLimit: () => unawaited(openRecordLimit()),
               // "播放" with the system's player; hidden while there is no file.
-              onPlay: switch (view.output) {
-                final path? when File(path).existsSync() => () => unawaited(playRecording(path)),
+              onPlay: switch (_saved(view.output)) {
+                final path? => () => unawaited(playRecording(path)),
                 _ => null,
               },
               onCentre: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kRecordPage)),

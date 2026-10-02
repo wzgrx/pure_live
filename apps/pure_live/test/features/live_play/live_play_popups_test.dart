@@ -36,6 +36,35 @@ final class _NoFfmpeg implements FfmpegRunner {
   Future<FfmpegExecution> start(List<String> arguments) => throw UnsupportedError('no FFmpeg in tests');
 }
 
+/// A file that says it is there and writes down which of its calls were
+/// used (B08 c3); anything else fails.
+final class _ProbeFile implements File {
+  new(this.path, this.calls);
+
+  @override
+  final String path;
+
+  final List<String> calls;
+
+  @override
+  bool existsSync() {
+    calls.add('existsSync');
+    return true;
+  }
+
+  @override
+  Future<bool> exists() async {
+    calls.add('exists');
+    return true;
+  }
+
+  @override
+  Object? noSuchMethod(Invocation invocation) {
+    calls.add('${invocation.memberName}');
+    return super.noSuchMethod(invocation);
+  }
+}
+
 /// A platform whose second quality resolves only when [gate] opens.
 class _GatedSite extends FakeSite {
   new(super.room);
@@ -511,6 +540,35 @@ void main() {
       expect(find.text('今天 21:30'), findsOneWidget);
       expect(find.text('时长 00:35:12 · 1.2 GB · 原画'), findsOneWidget);
       expect(tester.widget<Switch>(find.byKey(const ValueKey('record-panel-auto'))).value, isFalse);
+    });
+
+    testWidgets('B08 c3: "播放" asks the disk in the background, never synchronously', (tester) async {
+      final recording = await panel(
+        tester,
+        tasks: [
+          _task(RecordStatus.completed)
+            ..recordedSeconds = 2112
+            ..lastUpdate = now
+            ..lastOutputPath = '${Directory.systemTemp.path}/pure_live_b08_not_there.mp4',
+        ],
+      );
+      expectCard('saved', ['record-panel-view'], absent: ['record-panel-play']);
+      // The last real look ends first (real disk work ends only outside the
+      // fake clock).
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+      // The file turns up; the next build asks again, through the overrides.
+      final calls = <String>[];
+      await IOOverrides.runZoned(() async {
+        final task = recording.recorder!.tasks.single..recordedSeconds = 2113;
+        recording.recorder!.setTaskOptions(task);
+        // The change arrives, the panel builds and looks, the answer builds it again.
+        for (var i = 0; i < 3; i++) {
+          await tester.pump();
+        }
+      }, createFile: (path) => _ProbeFile(path, calls));
+      expect(calls, contains('exists'));
+      expect(calls, isNot(contains('existsSync')), reason: 'the UI thread does not wait for the disk (audit B-20)');
+      expectCard('saved', ['record-panel-play', 'record-panel-view']);
     });
 
     testWidgets('failed: where and why; the reason in full and a retry', (tester) async {

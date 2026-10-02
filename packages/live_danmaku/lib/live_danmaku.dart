@@ -18,6 +18,7 @@ export 'src/filters/partial_ratio.dart';
 export 'src/filters/repeated_filter.dart';
 export 'src/filters/similarity_filter.dart';
 export 'src/registry.dart';
+export 'src/sender.dart';
 export 'src/sites/acfun.dart';
 export 'src/sites/baidulive.dart';
 export 'src/sites/bigo.dart';

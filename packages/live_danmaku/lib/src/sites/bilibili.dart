@@ -8,6 +8,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/src/binary.dart';
 import 'package:live_danmaku/src/connection.dart';
 import 'package:live_danmaku/src/connection_base.dart';
+import 'package:live_danmaku/src/sender.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:live_net/live_net.dart' show brotliDecode;
 import 'package:meta/meta.dart';
@@ -567,8 +568,9 @@ abstract final class BilibiliDanmakuProtocol {
   /// `DANMU_MSG`: text `info[1]`, colour `info[0][3]` (0 is white), time
   /// `info[0][4]` (milliseconds above 1e11, else seconds), id
   /// `bilibili:` + `info[0][5]`, user id `info[2][0]`, name from
-  /// [_userName], pictures from [emotes]. A chat without its user list is
-  /// not shown.
+  /// [_userName], pictures from [emotes], fan badge from [_medal] and the
+  /// avatar (a [DanmakuSender] in `data`) from [_avatar] (B06). A chat
+  /// without its user list is not shown.
   static LiveMessage? _chat(Map<String, dynamic> notice) {
     final info = notice['info'];
     if (info is! List || info.length < 3) return null;
@@ -588,16 +590,62 @@ abstract final class BilibiliDanmakuProtocol {
       if (milliseconds.abs() > _maxEpochMilliseconds) return null;
       sentAt = DateTime.fromMillisecondsSinceEpoch(milliseconds);
     }
+    final rich = meta.length > 15 ? _json(meta[15]) : null;
+    final medal = _medal(rich, info.length > 3 ? info[3] : null);
+    final avatar = _avatar(rich);
     return LiveMessage(
       type: LiveMessageType.chat,
-      userName: _userName(notice, meta, user[1]?.toString() ?? ''),
+      userName: _userName(notice, rich, user[1]?.toString() ?? ''),
       userId: user[0]?.toString() ?? '',
       message: '${info[1]}',
       color: color == 0 ? LiveMessageColor.white : LiveMessageColor.numberToColor(color),
+      fansName: medal.name,
+      fansLevel: medal.level,
       messageId: nonce.isEmpty ? '' : 'bilibili:$nonce',
       sentAt: sentAt,
       emotes: emotes('${info[1]}', meta),
+      data: avatar.isEmpty ? null : DanmakuSender(avatar: avatar),
     );
+  }
+
+  /// The fan badge the sender wears: `user.medal{name, level}` of the rich
+  /// user in `info[0][15]` ([rich], decoded), else `info[3]` ([legacy]:
+  /// `[level, name, streamer, room, …]`); empty without a name. Guests see
+  /// it unmasked. The level is empty when it is not a positive number.
+  static ({String name, String level}) _medal(Object? rich, Object? legacy) {
+    String level(Object? value) => switch (jsonInt(value)) {
+      final int number when number > 0 => '$number',
+      _ => '',
+    };
+    String text(Object? value) => value is String ? value.trim() : '';
+    final user = rich is Map ? (rich['user'] is Map ? rich['user'] as Map : rich) : null;
+    if (user?['medal'] case final Map<Object?, Object?> medal when text(medal['name']).isNotEmpty) {
+      return (name: text(medal['name']), level: level(medal['level']));
+    }
+    if (legacy is List && legacy.length > 1 && text(legacy[1]).isNotEmpty) {
+      return (name: text(legacy[1]), level: level(legacy[0]));
+    }
+    return (name: '', level: '');
+  }
+
+  /// The sender's avatar: `user.base.face` of the rich user ([rich],
+  /// decoded), else `base.origin_info.face`; https, and on `hdslb.com` asked
+  /// for at 96 × 96 (the chat draws it at most 32 dp). Guests see it
+  /// unmasked. Empty when there is none.
+  static String _avatar(Object? rich) {
+    if (rich is! Map) return '';
+    final user = rich['user'] is Map ? rich['user'] as Map : rich;
+    final base = user['base'];
+    if (base is! Map) return '';
+    var url = _picture(base['face']);
+    if (url.isEmpty) {
+      final origin = base['origin_info'];
+      if (origin is Map) url = _picture(origin['face']);
+    }
+    if (url.isEmpty) return '';
+    final uri = Uri.parse(url);
+    final small = (uri.host == 'hdslb.com' || uri.host.endsWith('.hdslb.com')) && !uri.path.contains('@');
+    return small ? '$url@96w_96h.jpg' : url;
   }
 
   /// The pictures of a chat with text [text] and `info[0]` [meta] (M13.16):
@@ -650,17 +698,12 @@ abstract final class BilibiliDanmakuProtocol {
   static const int _maxEpochMilliseconds = 8640000000000000;
 
   /// The display name: the first unmasked of the rich user in `info[0][15]`
-  /// (maybe JSON text), the notice's `uinfo`, `data.uinfo` and [legacy]
-  /// (`info[2][1]`); the first rich one when all are masked, else [legacy].
-  static String _userName(Map<String, dynamic> notice, List<Object?> meta, String legacy) {
-    var rich = meta.length > 15 ? meta[15] : null;
-    if (rich is String && rich.trimLeft().startsWith('{')) {
-      try {
-        rich = jsonDecode(rich);
-      } on FormatException {
-        rich = null;
-      }
-    }
+  /// ([rich], decoded from JSON text), the notice's `uinfo`, `data.uinfo`
+  /// and [legacy] (`info[2][1]`); the first rich one when all are masked,
+  /// else [legacy]. A guest gets every one of them masked (B06: the server
+  /// masks by connection, see docs/cloud/records/B06.md); a logged-in
+  /// connection gets the full name in `user.base.name`.
+  static String _userName(Map<String, dynamic> notice, Object? rich, String legacy) {
     final data = notice['data'];
     final candidates = [
       for (final root in [rich, notice['uinfo'], if (data is Map) data['uinfo']])

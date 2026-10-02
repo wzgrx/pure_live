@@ -14,6 +14,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/danmaku/masked_blocks.dart';
 
 /// How long the splash page waits for the first follow check before home
 /// (3.x `app_pages.dart`: a bounded part of the launch transition).
@@ -48,7 +49,8 @@ abstract final class LegacyReloginNotice {
 /// What the app starts once its first frame is up (3.x started these with
 /// its services, in every window): the first check of every follow, the
 /// exit timer, the timed cover refresh, Android 17's local-network
-/// permission for a LAN proxy, the display mode, and one second later the
+/// permission for a LAN proxy, the display mode, the one-time removal of
+/// masked blocked names ([MaskedNameBlocks], B01), and one second later the
 /// Bilibili login check and the 3.x import's [LegacyReloginNotice].
 final class AppStartup {
   /// Creates the start-up over [_ref]'s providers.
@@ -73,6 +75,12 @@ final class AppStartup {
     _covers = CoverRefreshTimer(store.settings)..start();
     if (Platform.isAndroid) _localNetwork = LocalNetworkGuard(store.settings)..start();
     unawaited(DisplayMode.refresh());
+    unawaited(
+      MaskedNameBlocks.cleanOnce(store.blockLists, store.meta).catchError((Object error, StackTrace stack) {
+        log('Masked block cleanup failed', name: 'Startup', error: error, stackTrace: stack);
+        return 0;
+      }),
+    );
     followCheck = _ref.read(favoriteControllerProvider).firstCheck;
     _bilibili = Timer(bilibiliCheckDelay, () {
       unawaited(LegacyReloginNotice.showOnce(store.meta).catchError((Object _) => false));

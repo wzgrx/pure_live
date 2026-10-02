@@ -360,11 +360,22 @@ bool _isOnlineViewers(Map<String, Object?> effect) => switch (effect) {
   _ => false,
 };
 
-/// [effects] as 3.x had them: without the online viewers (C-1).
+/// [effects] as 3.x had them: without the online viewers (C-1), and
+/// without what B06 added to chats ([_withoutB06]).
 List<Map<String, Object?>> _as3x(List<Map<String, Object?>> effects) => [
   for (final effect in effects)
-    if (!_isOnlineViewers(effect)) effect,
+    if (!_isOnlineViewers(effect)) _withoutB06(effect),
 ];
+
+/// [effect] without what task B06 added to a chat, which 3.x did not read:
+/// the fan badge (`fansName`, `fansLevel`) and the avatar (`data`, a
+/// [DanmakuSender]). The B06 tests check them.
+Map<String, Object?> _withoutB06(Map<String, Object?> effect) => switch (effect) {
+  {'message': final Map<String, Object?> message} when message['type'] == 'chat' => {
+    'message': {...message, 'fansName': '', 'fansLevel': '', 'data': null},
+  },
+  _ => effect,
+};
 
 /// The online viewers [effects] report (C-1).
 List<Object?> _onlineViewers(Iterable<Map<String, Object?>> effects) => [
@@ -508,6 +519,176 @@ void main() {
       expect(BilibiliDanmakuConnection.isMaskedName('用＊＊'), isTrue);
       expect(BilibiliDanmakuConnection.isMaskedName('a*b*c'), isFalse);
       expect(BilibiliDanmakuConnection.isMaskedName('观众'), isFalse);
+    });
+
+    group('B06: names, fan badges and avatars', () {
+      List<LiveMessage> chats(Object? notice) => [
+        for (final item in BilibiliDanmakuProtocol.decode(_notice(notice)).items)
+          if (item case BilibiliDanmakuMessage(:final message) when message.type == LiveMessageType.chat) message,
+      ];
+
+      /// Every `DANMU_MSG` of [sample] as the server sent it.
+      List<Map<String, dynamic>> recorded(String sample) => [
+        for (final line in _lines(sample))
+          if (line['dir'] == 'in' && line['b64'] != null)
+            for (final text in _notices(base64.decode(line['b64']! as String)))
+              if (jsonDecode(text) case final Map<String, dynamic> notice when notice['cmd'] == 'DANMU_MSG') notice,
+      ];
+
+      test('a guest (uid 0) gets every name masked, in every field; the fan badge and the avatar are not', () {
+        for (final (sample, count) in [('S13-protover2-paired', 66), ('S13-live', 44)]) {
+          final notices = recorded(sample);
+          expect(notices, hasLength(count), reason: sample);
+          var badges = 0;
+          var avatars = 0;
+          for (final notice in notices) {
+            final info = notice['info'] as List<dynamic>;
+            final user = ((info[0] as List<dynamic>)[15] as Map<String, dynamic>)['user'] as Map<String, dynamic>;
+            final base = user['base'] as Map<String, dynamic>;
+            // Every place a name could come from is masked, and nothing
+            // else names the sender: the server masks by connection.
+            final names = [(info[2] as List<dynamic>)[1], base['name'], (base['origin_info'] as Map)['name']];
+            expect(names.every((name) => BilibiliDanmakuProtocol.isMaskedName('$name')), isTrue, reason: '$names');
+            expect((info[2] as List<dynamic>)[0], 0);
+            expect(user['uid'], 0);
+            expect(notice['dm_v2'], '');
+            expect(notice.keys.toSet(), {'cmd', 'info', 'dm_v2'}, reason: 'no top-level uinfo or data');
+
+            final message = chats(notice).single;
+            expect(BilibiliDanmakuProtocol.isMaskedName(message.userName), isTrue);
+            final medal = user['medal'];
+            if (medal is Map) {
+              badges++;
+              expect((message.fansName, message.fansLevel), (medal['name'], '${medal['level']}'));
+              expect(message.fansName, (info[3] as List<dynamic>)[1], reason: 'info[3] says the same');
+            } else {
+              expect((message.fansName, message.fansLevel), ('', ''));
+              expect(info[3], isEmpty);
+            }
+            // S13-live's recorder scrambled the addresses (not http), so
+            // they give no avatar.
+            final face = '${base['face']}'.replaceFirst('http://', 'https://');
+            expect(message.data, face.startsWith('https://') ? DanmakuSender(avatar: '$face@96w_96h.jpg') : isNull);
+            if (face.startsWith('https://')) avatars++;
+          }
+          expect(badges, count - (sample == 'S13-live' ? 3 : 5), reason: sample);
+          expect(avatars, sample == 'S13-live' ? 0 : count, reason: sample);
+        }
+      });
+
+      test('c3: a logged-in chat (shaped like the recording) gives the full name and the uid', () {
+        final notice = jsonDecode(jsonEncode(recorded('S13-protover2-paired').first)) as Map<String, dynamic>;
+        final info = notice['info'] as List<dynamic>;
+        final user = ((info[0] as List<dynamic>)[15] as Map<String, dynamic>)['user'] as Map<String, dynamic>;
+        final base = user['base'] as Map<String, dynamic>;
+        // What a logged-in connection gets instead of the guest's 观***.
+        info[2] = [12345, '小路的观众'];
+        user['uid'] = 12345;
+        base['name'] = '小路的观众';
+        (base['origin_info'] as Map<String, dynamic>)['name'] = '小路的观众';
+        final message = chats(notice).single;
+        expect((message.userName, message.userId, message.message), ('小路的观众', '12345', '我吗'));
+        expect((message.fansName, message.fansLevel), ('小路泥', '22'));
+
+        // The rich name wins over info[2][1]; a masked one is passed over.
+        base['name'] = '新名字';
+        expect(chats(notice).single.userName, '新名字');
+        base['name'] = '小***';
+        (base['origin_info'] as Map<String, dynamic>)['name'] = '小***';
+        expect(chats(notice).single.userName, '小路的观众', reason: 'info[2][1] unmasked');
+      });
+
+      test('the fan badge: user.medal, else info[3]; no name, no badge; a level of 0 is left out', () {
+        Map<String, Object?> chat({Object? medal, List<Object?> legacy = const [], Object? face}) => {
+          'cmd': 'DANMU_MSG',
+          'info': [
+            [
+              0, 1, 25, 0xFFFFFF, 1790519893202, 1790519804, 0, '8z3o13gj', 0, 0, 0, '', 0, '{}', '{}', //
+              {
+                'user': {
+                  'base': {'name': '观众', 'face': ?face},
+                  'medal': medal,
+                },
+              },
+            ],
+            '你好',
+            [1000, '观众'],
+            legacy,
+          ],
+        };
+        LiveMessage one(Map<String, Object?> notice) => chats(notice).single;
+        expect(one(chat(medal: {'name': ' 小路泥 ', 'level': 22})).fansName, '小路泥');
+        expect(one(chat(medal: {'name': '小路泥', 'level': '7'})).fansLevel, '7');
+        expect(one(chat(medal: {'name': '小路泥', 'level': 0})).fansLevel, '');
+        expect(one(chat(legacy: [21, '大母鹅', '主播', 433351])).fansName, '大母鹅');
+        expect(one(chat(legacy: [21, '大母鹅'])).fansLevel, '21');
+        expect(one(chat(medal: {'name': '', 'level': 3}, legacy: [21, '大母鹅'])).fansName, '大母鹅');
+        expect(one(chat(medal: {'name': 5, 'level': 3})).fansName, '', reason: 'not text');
+        expect((one(chat()).fansName, one(chat()).fansLevel), ('', ''));
+        expect(one(chat(legacy: [0, ''])).fansName, '');
+        // The old shape (rich user as JSON text, no medal) and none at all.
+        expect(one(_danmu('旧')).fansName, '');
+        expect(one(_danmu('旧')).data, isNull);
+      });
+
+      test('the avatar: user.base.face (else origin_info.face), https, 96 × 96 on hdslb.com', () {
+        Map<String, Object?> chat(Object? base) => {
+          'cmd': 'DANMU_MSG',
+          'info': [
+            [0, 1, 25, 0xFFFFFF, 1790519893202, 1790519804, 0, '8z3o13gj', 0, 0, 0, '', 0, '{}', '{}', base],
+            '你好',
+            [1000, '观众'],
+          ],
+        };
+        Object? avatar(Object? rich) => chats(chat(rich)).single.data;
+        expect(
+          avatar({
+            'user': {
+              'base': {'face': 'http://i0.hdslb.com/bfs/face/a.jpg'},
+            },
+          }),
+          const DanmakuSender(avatar: 'https://i0.hdslb.com/bfs/face/a.jpg@96w_96h.jpg'),
+        );
+        expect(
+          avatar({
+            'user': {
+              'base': {
+                'face': '',
+                'origin_info': {'face': 'https://i1.hdslb.com/bfs/face/b.png'},
+              },
+            },
+          }),
+          const DanmakuSender(avatar: 'https://i1.hdslb.com/bfs/face/b.png@96w_96h.jpg'),
+        );
+        expect(
+          avatar(
+            jsonEncode({
+              'user': {
+                'base': {'face': 'https://i0.hdslb.com/bfs/face/c.jpg@40w.jpg'},
+              },
+            }),
+          ),
+          const DanmakuSender(avatar: 'https://i0.hdslb.com/bfs/face/c.jpg@40w.jpg'),
+          reason: 'JSON text; an address already sized is kept',
+        );
+        expect(
+          avatar({
+            'user': {
+              'base': {'face': 'https://cdn.example/d.jpg'},
+            },
+          }),
+          const DanmakuSender(avatar: 'https://cdn.example/d.jpg'),
+        );
+        expect(
+          avatar({
+            'user': {
+              'base': {'face': 'javascript:alert(1)'},
+            },
+          }),
+          isNull,
+        );
+        expect(avatar(null), isNull);
+      });
     });
 
     group('M4.D', () {
@@ -857,6 +1038,7 @@ void main() {
       expect(messages.where((message) => message['type'] == 'chat'), hasLength(66));
       expect(online.where((kind) => kind == 'popularity'), hasLength(4));
       expect(online.where((kind) => kind == 'totalViewers'), hasLength(3));
+      // B06: the fan badge and the avatar, which 3.x did not read.
       expect(messages.firstWhere((message) => message['type'] == 'chat'), {
         'type': 'chat',
         'userName': '观***',
@@ -864,12 +1046,12 @@ void main() {
         'message': '我吗',
         'color': '#ffffff',
         'userLevel': '',
-        'fansLevel': '',
-        'fansName': '',
+        'fansLevel': '22',
+        'fansName': '小路泥',
         'isLocal': false,
         'messageId': 'bilibili:1790780343',
         'sentAt': 1790781387263,
-        'data': null,
+        'data': 'DanmakuSender(https://i0.hdslb.com/bfs/face/cd395d684ff63a33dd0baeb3656423d37cd61533.jpg@96w_96h.jpg)',
       });
       expect(messages.firstWhere((message) => message['type'] == 'superChat'), {
         'type': 'superChat',
@@ -965,7 +1147,7 @@ void main() {
           final line = lines[(frame['line'] as int) - 1];
           expect(line['vector'], name);
           final effects = await replay.receive(base64.decode(line['b64']! as String));
-          expect(effects, _expected(frame), reason: '$name, line ${frame['line']}');
+          expect(effects.map(_withoutB06), _expected(frame), reason: '$name, line ${frame['line']}');
           messages += effects.where((effect) => effect.containsKey('message')).length;
         }
         await replay.connection.close();

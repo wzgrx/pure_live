@@ -329,10 +329,12 @@ final class PlaybackSession {
   }
 
   /// Stops and releases the input but keeps the engine for
-  /// [SessionTimings.idleRelease] (3.x's `close`/`softStop`).
+  /// [SessionTimings.idleRelease] (3.x's `close`/`softStop`). Only the
+  /// latest stop arms that release, and only while nothing was opened since;
+  /// it checks again that the session is still idle when it fires.
   Future<void> stop() async {
     if (_disposed) return;
-    _begin();
+    final session = _begin();
     _wantPlaying = false;
     _fence.clear();
     final transport = _transport;
@@ -347,7 +349,12 @@ final class PlaybackSession {
       } on Object {
         // Already stopped or never opened.
       }
-      _idleTimer = Timer(timings.idleRelease, () => unawaited(_releaseEngine()));
+      // A newer stop arms its own release; a newer open needs the engine.
+      if (!_current(session)) return;
+      _idleTimer?.cancel();
+      _idleTimer = Timer(timings.idleRelease, () {
+        if (_current(session) && _state.status == PlaybackStatus.stopped) unawaited(_releaseEngine());
+      });
     }
   }
 

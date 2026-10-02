@@ -261,6 +261,38 @@ void main() {
     });
   });
 
+  test('overlapping stops, then an open: no idle release of the playing engine', () {
+    // Release fixes, item 9: the first stop's idle timer was overwritten,
+    // never cancelled, and released the engine 45 s into the next playback.
+    fakeAsync((async) {
+      start(PlaybackRequest(site: 'douyu', plan: _plan([_a])), async);
+      unawaited(session.stop());
+      unawaited(session.stop());
+      async.flushMicrotasks();
+      unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_a]))));
+      async
+        ..flushMicrotasks()
+        ..elapse(const Duration(seconds: 46));
+      expect(session.state.status, PlaybackStatus.playing);
+      expect(engine.disposed, isFalse);
+      expect(session.engine, same(engine));
+    });
+  });
+
+  test('a stop still finishing when the next open starts arms no idle release', () {
+    fakeAsync((async) {
+      start(PlaybackRequest(site: 'douyu', plan: _plan([_a])), async);
+      unawaited(session.stop());
+      unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_b]))));
+      async
+        ..flushMicrotasks()
+        ..elapse(const Duration(seconds: 46));
+      expect(session.state.status, PlaybackStatus.playing);
+      expect(engine.opens.last.uri.host, 'b.example');
+      expect(engine.disposed, isFalse);
+    });
+  });
+
   test('disposed while the engine is still being created: dispose waits for it and releases it', () {
     fakeAsync((async) {
       engine = FakeEngine();

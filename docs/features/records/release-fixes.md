@@ -43,6 +43,13 @@
 - **测试**：`packages/live_player/test/session_test.dart`“disposed while the engine is still being created: dispose waits for it and releases it”（假引擎用 `Completer` 延迟创建，期间 `dispose`：`dispose` 要等到创建完成，引擎被释放、没有打开过、`session.engine` 为空；改之前失败，`dispose` 提前结束）；“disposed while the engine creation fails: dispose still completes”。
 - **验证**：live_player 全部测试通过。
 
+## 9. 重叠的 stop 留下空闲释放定时器（追加）
+
+- **根因**：`PlaybackSession.stop()` 在 `await` 输入关闭和 `engine.stop()` 之后直接 `_idleTimer = Timer(45 s, _releaseEngine)`。两次 `stop` 重叠时，第二次把第一次的定时器引用覆盖掉，第一次的定时器再也取消不了；之后 `open` 只取消第二个，45 秒后第一个触发，把正在播放的引擎释放掉。`stop` 还没结束就 `open`（换线、切房间）也一样：`stop` 在 `open` 之后才设定时器。U.2b2 开发时发现，页面那边用“停止排队”绕开了，包本身没修。
+- **改动**（`packages/live_player/lib/src/session.dart`）：`stop` 记下自己的会话代数，`await` 回来后只有它仍是最新的（期间没有新的 `stop`/`open`）才设定时器，设之前先取消已有的；定时器触发时再确认会话代数没变、状态仍是 `stopped` 才释放。
+- **测试**：`session_test.dart`“overlapping stops, then an open: no idle release of the playing engine”（两次重叠 `stop`，再 `open`，过 46 秒引擎没被释放、仍在播放）和“a stop still finishing when the next open starts arms no idle release”。两条改之前都失败（`engine.disposed` 为 true）。原有的“stop 后 45 秒释放引擎”测试照常通过。
+- **验证**：live_player 全部测试通过。
+
 ## release 构建（第 1、5、6 条的原生改动之后）
 
 - 命令：`apps/pure_live` 下 `flutter build apk --release --split-per-abi --target-platform android-arm64`（没有 `key.properties`，用调试密钥签名），提交 `e975d3915` 之上。结果 `✓ Built build/app/outputs/flutter-apk/app-arm64-v8a-release.apk (110.3MB)`。

@@ -256,7 +256,8 @@ void main() {
           onSelected: (value) => picked = value,
         ),
       );
-      final chips = tester.widgetList<ChoiceChip>(find.byType(ChoiceChip)).toList();
+      // The one chip of the app (U.1c c13).
+      final chips = tester.widgetList<AppChip>(find.byType(AppChip)).toList();
       expect(chips.map((chip) => chip.selected), [true, false]);
       await tester.tap(find.text('紧凑信息行'));
       expect(picked, 'compact');

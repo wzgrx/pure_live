@@ -11,7 +11,7 @@
 
 1. `live_ui` 有圆角和动效时长的常量（照 [specs/UI.md](../../../specs/UI.md) 8.3、8.6），从 `live_ui.dart` 导出；`live_ui` 自己的组件改用它们。
 2. 直播间（`features/live_play/`）和电视（`tv/`）以外，页面和 `live_ui` 不再写死字号：每处字号来自主题的五个角色（`textTheme` 或 `context.textStyles`），默认设置下看起来和现在一样（像素级不变），调字号设置时跟着变。
-3. 同样范围内字重只有 400 和 600（`FontWeight.w500`、`w700`、`bold`、`w800` 都改掉）。
+3. 同样范围内字重只有 400 和 600（`FontWeight.w500`、`w700`、`bold`、`w800` 都改掉）。主题那一层（`titleMedium`、`titleSmall`、`labelLarge` 的 500 和 `AppTextStyles` 的 `*Medium`/`*Bold`）改不改由维护者定（见 [README.md](README.md)“待选和决定”）：执行者先列出受影响的页面并截图对比，定了再改；没定之前只改页面里直接写的。
 4. `shared/danmaku/danmaku_color_dialog.dart` 的十个弹幕预设色移进 `live_ui`（例如 `LivePalettes.danmaku`），应用里不再写 `Color(0x…)`。
 5. 有一个测试锁住第 2、3 条（例如扫 `apps/pure_live/lib` 除 `live_play`、`tv` 外的源码，`fontSize: <数字>` 和 `FontWeight.w500/w700/bold` 为 0），或者把检查加进门禁脚本（二选一，记录里写明）。
 6. 门禁通过；`live_ui`、`apps/pure_live` 全部测试通过。
@@ -28,7 +28,9 @@
   - `features/version/release_history_view.dart:336`（17）、`:397`（17）
   - `shared/danmaku/setting_rows.dart:26`（13）、`:39`（13）、`:71`（15）（`danmaku_templates.dart:43-46` 的 `fontSize` 是弹幕模板的数据，不算）
   - `packages/live_ui/lib/src/widgets/`：`adaptive_panel.dart:132`（17，面板标题）、`app_chip.dart:30,49`（14）、`app_dialog.dart:377`（15）、`:390`（14）、`color_picker.dart:335`（14）、`json_tree.dart:151`（14）、`live_room_card.dart:533`（12）、`page_title.dart:38`（17）、`qr_code_widget.dart:137`（14）、`:138`（15）、`settings_page_frame.dart:22`（20，设置类页面标题）、`settings_row.dart:1137,1140`（15）、`stream_menu_button.dart:187`（14）、`:188`（12）、`:255`（13）、`tab_label.dart:43`（13）、`:55`（11）、`:107,108`（14）；画面上的 `video_state_view.dart:117`（15）、`record_glyph.dart:362`（12）、`pip_danmaku_preview.dart:193`（14）
+- 按条件写死的字号（上面的扫描 `fontSize: <数字>` 抓不到）：`packages/live_ui/lib/src/widgets/settings_row.dart:363`（行标题 `tv ? 17 : 15`）、`:369`（说明 `tv ? 14 : 12`）、`:591`、`:622`（值 `tv ? 16 : 14`）；`count_button.dart:144`（`tv ? 16 : 14`）；`apps/pure_live/lib/features/settings/settings_tiles.dart:656`（`embedded ? 18 : 20`）、`settings_editors.dart:1005`（`tv ? 14 : 12`）；直播间的 `local_gift_effect.dart:85`、`:97` 不在范围。也就是说**设置行的标题和说明现在不跟五个字号设置走**，这是第 3b 步最显眼的一处。
 - 字重超出 400 / 600（直播间、电视以外）：`shared/rooms/room_tags_dialog.dart:274`（w500）、`:429`（w500）；`features/multiview/widgets/toolbar.dart:41`（w500）、`cell_controls.dart:218`（w700）、`:443`（w500）、`cell_view.dart:192`（w700）、`:232`（w700）、`:280`（w500）；`features/version/markdown_text.dart:126,241,294`（bold，Markdown 的粗体）、`update_download.dart:481`（w700）；`features/areas/area_card.dart:136`（w500）；`features/backup/log_page.dart:276`（w700）。
+- 主题那一层的字重：`packages/live_ui/lib/src/theme/live_theme.dart:233`（`titleMedium`）、`:234`（`titleSmall`）、`:238`（`labelLarge`）是 w500（`LiveTheme.medium`，`:186`），照 3.x `lib/common/style/theme.dart:76-77`、`:83`；`text_styles.dart:38-163` 的 `t11Medium`……`t32Bold` 是 w500 / w700 / w800，页面用了 11 处（`t12Bold` 3、`t13Medium` 2、`t16Bold`、`t15Medium`、`t14Medium`、`t13Bold`、`t12Medium`、`t11Bold` 各 1）；`live_ui` 组件直接写 w500 的 4 处：`card_dialog.dart:95`、`:149`，`live_room_card.dart:328`，`tab_label.dart:43`。
 - 圆角和时长：`BorderRadius.circular(n)` 178 处，18 种数（12 有 42 处、16 有 32、8 有 21、6 有 17……）；`Duration(milliseconds: …)` 应用 62 处、`live_ui` 19 处（200 有 12 处、150 有 11 处、500 有 7 处，其中有的是计时器不是动画）。没有常量文件；`motion.dart` 只有弹簧和阈值。
 - 应用里的颜色：`apps/pure_live/lib/shared/danmaku/danmaku_color_dialog.dart:8-19`（`danmakuColorSwatches`）；`shared/danmaku/danmaku_overlay.dart:727`（弹幕描边黑，按透明度算，属于弹幕渲染，可以保留并加注释说明）。门禁不扫 `shared/`（`tools/gate/check_ui_structure.py` 的 `scan` 只看 `features/**`、`tv/**`）。
 
@@ -79,6 +81,7 @@
 ## 风险和注意
 
 - 画面上的文字（`video_state_view.dart:117`、`record_glyph.dart:362`、`pip_danmaku_preview.dart:193`）和直播间的 54 处：规范第 8.2 节只说“画面上控制层的文字随系统放大最多 1.3 倍”，没说跟不跟五个字号设置；3.x 的控制层 `lib/modules/live_play/widgets/video_player/video_controller_panel.dart` 写死 6 处、用主题 16 处。这次不动，写进记录交给直播间任务决定。
+- 设置行（`settings_row.dart`）和计数（`count_button.dart`）的电视字号是 `tv ? 大一级 : 手机`：换成角色时电视那一支也要按比例算（规范第 5.5 节“电视字号比手机大一级”），别把电视的字号丢掉；电视界面归 A17，这里只保证数值不变。
 - 按比例换算会出小数字号（17 = 15 × 1.133），默认设置下仍是 17；不要四舍五入到整数，否则默认外观变。
 - `live_theme.dart` 和组件文件是多个任务常改的（A02、A03、A04.1），开工前合并最新 master，按文件分批提交。
 - A04.1（暂停）也会改 `settings_page_frame.dart` 和几个设置页面：同一组同时只开一个开发，A01.2 和 A04.1 不要并行。

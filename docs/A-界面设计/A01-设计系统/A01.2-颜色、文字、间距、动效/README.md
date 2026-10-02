@@ -19,8 +19,8 @@
 | A01.2-03 | 固定语义色 `LiveSemanticColors` | “直播”标、录制、成功、警告、提醒横幅、醒目留言 | 深浅各一套 | 完成（`live_colors.dart:160`） |
 | A01.2-04 | 平台给的颜色上的字 `InkOnColor` | 醒目留言卡、观众的弹幕颜色 | — | 完成（`live_colors.dart:258`，按 WCAG 对比度选） |
 | A01.2-05 | 品牌蓝、纯黑 | 默认主题色、深色的纯黑 | — | 完成（A11.2：`LiveTheme.brandBlue`、`LivePureBlack`） |
-| A01.2-06 | 五个字号角色（12、13、14、15、20） | 全部文字 | 用户可调 | 主题里完成；页面写死字号 94 处、`live_ui` 24 处（第 3 阶段） |
-| A01.2-07 | 字重只用 400 和 600、等宽数字 | 全部文字；人数、码率、时长、时钟 | — | `tabular`/`regular`/`emphasis` 完成；页面里 w500 / w700 / bold 19 处（第 3 阶段） |
+| A01.2-06 | 五个字号角色（12、13、14、15、20） | 全部文字 | 用户可调 | 主题里完成；写死的 `fontSize: <数字>` 应用 94 处（其中直播间 54 处）、`live_ui` 24 处，另有按条件写死的（`tv ? 17 : 15` 这类）9 处，设置行的标题和说明也在其中（第 3 阶段） |
+| A01.2-07 | 字重只用 400 和 600、等宽数字 | 全部文字；人数、码率、时长、时钟 | — | `tabular`/`regular`/`emphasis` 完成；页面里直接写 w500 / w700 / bold 16 处（直播间 2 处、其余 14 处，不含电视）、`live_ui` 组件 4 处；主题本身照 3.x 把 `titleMedium`、`titleSmall`、`labelLarge` 定为 w500（`live_theme.dart:233`、`:234`、`:238`），`AppTextStyles` 的 `*Medium`/`*Bold` 页面用了 11 处（第 3 阶段，主题那一层要维护者定） |
 | A01.2-08 | 间距（4 的倍数）、圆角（卡片 16、按钮 12、列表行 12、输入框 12、对话框 24、小菜单 8、面板顶角 16） | 全部 | — | 主题里的圆角照规范；没有常量，`BorderRadius.circular(n)` 178 处（第 3 阶段） |
 | A01.2-09 | 动效时长（即时反馈 100–150、常规 150–250、页面和面板 250–350 毫秒，退出比进入快） | 全部动画 | 跟随系统“减少动态效果” | 没有常量，`Duration(milliseconds: …)` 应用 62 处、`live_ui` 19 处（第 3 阶段）；弹簧和阈值在 A03.2 的 `AppMotion` |
 
@@ -83,11 +83,12 @@
 - C-3、C-4：按 A（A11.2，D-003）。
 - C-7（五个字号合并成一个“文字大小”）：A11.2 定为“文字大小”为主、五个字号保留在子页。
 - 间距、圆角、时长做成常量的命名和放在哪个文件：没有定，第 3 阶段开工时由执行者提出（建议放 `packages/live_ui/lib/src/theme/`，和 `motion.dart` 并列），写进记录。
+- 主题里的 500 字重：规范第 8.2 节说“字重只用 400 和 600”，但 `LiveTheme._textTheme` 照 3.x（`lib/common/style/theme.dart:76-77`、`:83`）把 `titleMedium`（卡片标题、标签）、`titleSmall`、`labelLarge`（按钮字）定为 500（`packages/live_ui/lib/src/theme/live_theme.dart:233`、`:234`、`:238`），`AppTextStyles` 也保留了 3.x 的 `t13Medium`、`t12Bold` 这类名字（`text_styles.dart:38-163`）。改成 600 或 400 会让全应用的卡片标题和按钮字变样，属于看得见的改动：第 3 阶段执行者先列出受影响的页面和截图，维护者按 D-003 定（建议：主题三个角色改 600，`*Medium` 改指 400、`*Bold` 改指 600，名字保留以免大改）。
 
 ## 实现和验证（开发后补）
 
 - 第 1 阶段“设计”：即规范第 8 节和 A11.2 的选择，没有单独的文件。
 - 第 2 阶段“直播间要用的部分”（2026-10-01，随 A07.1 一起做，[A07.1 记录](../../A07-直播间界面/A07.1-竖屏普通布局/record.md)“A：设计系统里直播间要用的部分”）：`packages/live_ui/lib/src/theme/live_colors.dart` 的 `OnVideoColors`（画面上的前景白、次要白、60% 黑渐变、阴影、黄色“非默认”）、`LiveSemanticColors`（直播红 `#D92D20` 配白字、录制红、成功、警告，取归档 v4 已验算对比度的固定值）、`InkOnColor`（平台给的颜色上用深字还是浅字）、`tabular`/`regular`/`emphasis`（等宽数字、字重只用 400/600）；`ListenableSelector`（人数、时长、标题各自刷新）。测试 `packages/live_ui/test/design_system_test.dart` 的颜色角色一条。之后各任务往这两个类里加了角色（A07.7、A08.1、A10.3、A13.1、A16.1 等，见 `live_colors.dart` 的注释）。
 - 品牌蓝和纯黑（2026-10-01，A11.2）：`LiveTheme.brandBlue`（`live_theme.dart:177`）、`schemeVariant: fidelity`、`LivePureBlack`（`live_colors.dart:314`）；测试 `settings_row_test.dart` 的 theme 组。
-- 第 3 阶段“其余页面”：没做，见 [brief.md](brief.md)。现状数字（2026-10-03 读代码）：写死字号应用 94 处、`live_ui` 24 处；字重 w500/w700/bold 应用 19 处（不含电视）；`BorderRadius.circular(n)` 178 处 18 种数；`Duration(milliseconds: …)` 应用 62 处、`live_ui` 19 处；`shared/danmaku/danmaku_color_dialog.dart:9-18` 十个弹幕预设色写在应用里。
+- 第 3 阶段“其余页面”：没做，见 [brief.md](brief.md)。现状数字（2026-10-03 读代码）：写死字号应用 94 处（直播间 54 处）、`live_ui` 24 处，按条件写死的 9 处；字重 w500/w700/bold 应用 16 处（不含电视；直播间 2 处）、`live_ui` 组件 4 处，主题的三个 w500 角色和 `AppTextStyles` 的 `*Medium`/`*Bold`（页面 11 处）另算；`BorderRadius.circular(n)` 178 处 18 种数；`Duration(milliseconds: …)` 应用 62 处、`live_ui` 19 处；`shared/danmaku/danmaku_color_dialog.dart:9-18` 十个弹幕预设色写在应用里。
 - 验证：自动测试见[子分类页](../README.md)；真机待第 3 阶段完成后照任务书看。

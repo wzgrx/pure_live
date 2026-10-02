@@ -170,7 +170,7 @@
   - `widgets_test.dart`（13）：平台标志齐全、未知 id 回退（P9）；图标字体打包；字母头像；设置卡片分隔线含窄屏堆叠行（P3）和开关回调；滑块行；标题积木；`CountButton` 点按和长按连续（P7）；刷新率均衡模式（P8）和性能模式；`EmoteText`；二维码尺寸；`ScrollableTabBar` 滚轮滚动。
 - 真机：没有单独的 `verify.md`。`live_ui` 的主题、图标、状态页、卡片在 S02.2 的 K90 冒烟（2026-10-02，提交 `288fec0ec` 的 arm64 profile）里随主流程看过：首页关注和热门的卡片、直播间控制层图标、设置总览和视频页都“通过”（[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)）。
 - 后来的变化（以现在的代码为准，接口表是 2026-10-01 的）：
-  - 3.x 的设置构建函数（`buildGroupTitle` 等）、`CardTile`、`settingsSliderTheme`、`SectionTitle`、`MenuListTile`、960 的 `settingsContentMaxWidth` 在 A02.1 被 A11.1 的 `SettingsGroup`/`SettingsRow` 一族和 720 的 `ReadableContent` 取代并删除（`packages/live_ui/lib/src/widgets/settings_tiles.dart:3-5` 的注释）。
+  - 3.x 的设置构建函数（`buildGroupTitle` 等）、`CardTile`、`settingsSliderTheme`、`SectionTitle`、`MenuListTile`、960 的 `settingsContentMaxWidth` 在 A02.1 被 A11.1 的 `SettingsGroup`/`SettingsRow` 一族和 720 的 `ReadableContent` 取代并删除（`packages/live_ui/lib/src/widgets/settings_tiles.dart:3-8` 的注释）。
   - 旧 `RoomCard`、`CoverMetricBadge`、`CountChip` 被 A09.1 的 `LiveRoomCard`（`live_room_card.dart:36`）取代并删除；`room_card.dart` 只剩 `RoomCardData`、`RoomAudience`、`RoomAudienceKind`。
   - `AppStatusView` 的 1 秒弹出动画在 A02.1 c6 去掉；标题对齐在 A02.1 按 D-011 改成 `centredPageTitle`。
   - `live_ui` 现在有 42 个组件文件、18 个测试文件，见[子分类页](../README.md)的代码地图。

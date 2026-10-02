@@ -58,13 +58,14 @@ tools/live_cli（平台探针、样本录制）、tools/check_latest、tools/gat
 
 | 仓库 | 许可证 | 用途 |
 |---|---|---|
+| [liuchuancong/pure_live](https://github.com/liuchuancong/pure_live) | AGPL-3.0 | 3.x 的上游，在 v3.2.11 上接着开发：平台、录制、播放的修复（主仓库的远程 `upstream`，不拉标签） |
 | [liuchuancong/pure_live_TV](https://github.com/liuchuancong/pure_live_TV) | AGPL-3.0 | 电视端的代码基础（T18）；平台层的新修复（T02、T06），例如 Kick |
 | [liuchuancong/flame_barrage](https://github.com/liuchuancong/flame_barrage) | MIT | 弹幕渲染和交互（T06c） |
 | [liuchuancong/media_core](https://github.com/liuchuancong/media_core) | AGPL-3.0 | 播放器会话、恢复、池化、系统媒体控制（T04、T12） |
 | [liuchuancong/flv_lzc](https://github.com/liuchuancong/flv_lzc) | MIT | FLV 和 H.265 的低延迟经验（T04） |
 | 之前从零写的版本（分支 `archive/v4`） | AGPL-3.0 | 已写好并测过的各包实现，按任务借鉴 |
 
-本机副本在 `~/ref/`，对照笔记在 `~/ref/notes/`。AGPL-3.0 的代码借鉴时注明来源仓库和提交；MIT 的保留版权声明。
+本机副本在 `~/ref/`，对照笔记在 `~/ref/notes/`；每次对照的结论写进 [T00 的上游对照](../T00/README.md)（例如 `upstream-2026-10-03.md`）。AGPL-3.0 的代码借鉴时注明来源仓库和提交；MIT 的保留版权声明。
 
 ## 6. 测试包和正式包
 

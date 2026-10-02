@@ -2972,3 +2972,108 @@ type = "发布"
 status = "未开始"
 size = "中"
 tier = 3
+# ---- 2026-10-03 上游对照（docs/T00/upstream-2026-10-03.md）登记的任务
+
+[[task]]
+id = "T00a.3"
+title = "上游跟踪：每周看一次 pure_live、pure_live_TV、media_core、flame_barrage、flv_lzc 的新提交，结论写进 T00 的上游对照"
+type = "工程"
+status = "未开始"
+size = "小"
+tier = 2
+
+[[task]]
+id = "T02g.3"
+title = "房间详情补齐时连封面一起补（fillFromDetail 漏了封面，观看记录等处封面变空）"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+note = "上游 pure_live fa67c637f、pure_live_TV 5bc53016 修了同一个问题"
+
+[[task]]
+id = "T04b.2"
+title = "缓冲状态对账：画面帧在走时补回“播放中”，不再被当成卡住去重连"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+note = "参考 media_core 44710e1、2edc721"
+
+[[task]]
+id = "T05f.4"
+title = "画面上下滑避开系统底部手势区：上滑回桌面时不再误调亮度或音量"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+note = "参考上游 pure_live 1cdcb7b2a；用系统给的手势区高度"
+
+[[task]]
+id = "T05j.3"
+title = "小窗拖角改尺寸、小窗尺寸设置、画中画里的弹幕随窗口缩放"
+type = "界面"
+status = "未开始"
+size = "中"
+tier = 3
+stages = ["方案和对比页", "拖角改尺寸和尺寸设置", "弹幕缩放"]
+done = 0
+note = "参考上游 pure_live f9e03f446、582e355f7、b2cca41c7 和 media_core 的画中画系列"
+
+[[task]]
+id = "T06c.5"
+title = "按住弹幕让它停住，松手继续"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 3
+note = "参考 flame_barrage 3eddae8"
+
+[[task]]
+id = "T06e.5"
+title = "同屏最大弹幕条数可以设置"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 3
+note = "参考 pure_live_TV 9a7bb104"
+
+[[task]]
+id = "T08a.5"
+title = "主播下播后不再无限快速重试；合并时跳过 0 字节分段，有一段有效就能合并"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 1
+stages = ["EOF 重试设上限后转入等开播", "合并跳过空分段"]
+done = 0
+note = "上游 pure_live 2b9ffc7a3 修了同一个问题；现在一个空分段会让整段录像合并失败"
+
+[[task]]
+id = "T09e.2"
+title = "设备同步在发送、接收前先勾选同步哪些内容（保留配对码）"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 3
+note = "参考上游 pure_live 9483ccf03"
+
+[[task]]
+id = "T10a.4"
+title = "哔哩哔哩多账号：账号名册和切换（先出方案）"
+type = "功能"
+status = "未开始"
+size = "中"
+tier = 3
+stages = ["方案和对比页", "开发"]
+done = 0
+note = "参考 pure_live_TV 6ba16c55"
+
+[[task]]
+id = "T13f.1"
+title = "预测返回在 ColorOS 14 上验证全面屏手势返回（上游在 GetX 上遇到卡死）"
+type = "验证"
+status = "未开始"
+size = "小"
+tier = 2
+note = "上游 pure_live a424399e6 关掉了预测返回；4.x 用 go_router，不一定受影响"

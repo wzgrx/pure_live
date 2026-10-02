@@ -1,8 +1,8 @@
 {
   "version": "4.0.0",
-  "build_number": 5000,
-  "version_num": 400005000,
-  "version_desc": "- 4.0 是全新重写的版本：全新界面，手机、平板一套设计，直播间、弹幕、录制、设置全部重做。\n- 直接覆盖安装 3.x，关注、历史、设置、账号自动导入。\n- 这一版只发布 Android；Windows 等平台以后发布。",
+  "build_number": 5001,
+  "version_num": 400005001,
+  "version_desc": "- 4.0 是全新重写的版本：全新界面，手机、平板一套设计，直播间、弹幕、录制、设置全部重做。\n- 直接覆盖安装 3.x，关注、历史、设置、账号自动导入。\n- 这一版只发布 Android；Windows 等平台以后发布。\n- 2026-10-02 更新：修复暂停、录制图标、横屏菜单、哔哩哔哩昵称、暂停时弹幕、切换直播间等问题，详见发布页。",
   "prerelease": false,
   "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.0.0",
   "android_abis": [
@@ -13,9 +13,9 @@
   "platforms": {
     "android": {
       "version": "4.0.0",
-      "build_number": 5000,
-      "version_num": 400005000,
-      "version_desc": "- 4.0 是全新重写的版本：全新界面，手机、平板一套设计，直播间、弹幕、录制、设置全部重做。\n- 直接覆盖安装 3.x，关注、历史、设置、账号自动导入。\n- 这一版只发布 Android；Windows 等平台以后发布。",
+      "build_number": 5001,
+      "version_num": 400005001,
+      "version_desc": "- 4.0 是全新重写的版本：全新界面，手机、平板一套设计，直播间、弹幕、录制、设置全部重做。\n- 直接覆盖安装 3.x，关注、历史、设置、账号自动导入。\n- 这一版只发布 Android；Windows 等平台以后发布。\n- 2026-10-02 更新：修复暂停、录制图标、横屏菜单、哔哩哔哩昵称、暂停时弹幕、切换直播间等问题，详见发布页。",
       "prerelease": false,
       "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.0.0",
       "android_abis": [

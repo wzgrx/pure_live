@@ -140,7 +140,7 @@ void main() {
   test('reads the repository update files as 3.x does', () {
     final android = UpdateInfo.fromJson(_versionJson(), platform: 'android');
     expect(android.version, '4.0.0');
-    expect(android.buildNumber, 5000);
+    expect(android.buildNumber, 5001);
     expect(android.androidAbis, {'arm64-v8a', 'armeabi-v7a', 'x86_64'});
     expect(android.isNewer, isFalse);
     // A platform block overrides the top level.

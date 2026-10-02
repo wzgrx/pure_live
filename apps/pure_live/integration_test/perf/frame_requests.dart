@@ -14,12 +14,14 @@ final class FrameRequests {
   /// frame callbacks keep the zone they had.
   factory install() {
     final requests = FrameRequests._();
-    final scheduler = SchedulerBinding.instance;
+    // A forced frame makes the binding register its frame callbacks (they
+    // hold the warm-up frame's guard, which a deferred first frame uses);
+    // they are then wrapped, not replaced.
+    final scheduler = SchedulerBinding.instance..scheduleForcedFrame();
     final dispatcher = PlatformDispatcher.instance;
-    // The binding's callbacks, or its handlers where it has not registered
-    // them yet (it registers them only where none are set).
     final begin = dispatcher.onBeginFrame ?? scheduler.handleBeginFrame;
     final draw = dispatcher.onDrawFrame ?? scheduler.handleDrawFrame;
+    assert(dispatcher.onBeginFrame != null, 'the binding registers its frame callbacks');
     dispatcher
       ..onBeginFrame = (timeStamp) {
         // Read before the scheduler clears it for this frame.

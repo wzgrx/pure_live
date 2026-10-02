@@ -225,6 +225,7 @@ void main() {
           'portrait_layout',
           'portrait_fullscreen',
           'portrait_display',
+          'portrait_swipe',
           'portrait_pip',
           'portrait_danmaku',
           'portrait_remember',
@@ -240,11 +241,17 @@ void main() {
       expect(_rowWidget(tester, 'portrait_height').enabled, isFalse);
       expect(_rowWidget(tester, 'portrait_layout').enabled, isFalse);
       expect(_rowWidget(tester, 'portrait_fullscreen').enabled, isTrue);
+      // U.2b2 c2: the swipe between rooms, off by default.
+      expect(_text('竖屏全屏上下滑换台'), findsOneWidget);
+      expect(h.settings.get(Settings.portraitFullscreenSwipeSwitch), isFalse);
+      await tapSettings(tester, settingsRow('portrait_swipe'));
+      expect(h.settings.get(Settings.portraitFullscreenSwipeSwitch), isTrue);
 
       await tapSettings(tester, settingsRow('portrait_reset'));
       expect(_text('本页的设置恢复默认，同时清除已记住的直播间方向。'), findsOneWidget);
       await tapSettings(tester, find.byKey(const ValueKey('settings-confirm')));
       expect(h.settings.get(Settings.enablePortraitStreamAdaptation), isTrue);
+      expect(h.settings.get(Settings.portraitFullscreenSwipeSwitch), isFalse);
       expect(h.settings.get(Settings.portraitRoomOverrides), isEmpty);
       expect(h.toasts, ['已恢复默认设置']);
     });

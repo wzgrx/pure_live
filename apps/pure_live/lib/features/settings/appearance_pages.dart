@@ -57,6 +57,7 @@ class ThemeModeTile extends ConsumerWidget {
       key: entry.rowKey,
       icon: AppIcons.themeMode,
       title: entry.titleText,
+      choice: true,
       subtitle: entry.descriptionText,
       value: options.where((option) => option.value == mode).firstOrNull?.label,
       onTap: () async {
@@ -163,6 +164,7 @@ class LanguageTile extends ConsumerWidget {
       key: entry.rowKey,
       icon: AppIcons.settingsNetwork,
       title: entry.titleText,
+      choice: true,
       subtitle: entry.descriptionText,
       value: current.displayName,
       onTap: () async {
@@ -286,7 +288,7 @@ class _SpacingDialogState extends State<_SpacingDialog> {
       title: widget.title,
       actions: [
         const DialogCancelButton(),
-        DialogActionButton(key: const ValueKey('settings-spacing-save'), label: i18n('confirm'), onPressed: _save),
+        DialogActionButton(key: const ValueKey('settings-spacing-save'), label: i18n('save'), onPressed: _save),
       ],
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -869,7 +871,8 @@ class _RoomCardSettingsPageState extends ConsumerState<RoomCardSettingsPage> {
               LayoutBuilder(
                 builder: (context, constraints) {
                   final width = constraints.maxWidth.clamp(0.0, 420.0);
-                  final height = RoomCardLayoutMetrics.gridMainAxisExtent(
+                  // The card the lists show (U.4a's LiveRoomCard, U.1c c3).
+                  final height = LiveRoomCardMetrics.extent(
                     itemWidth: width,
                     appearance: appearance,
                     dense: false,
@@ -880,10 +883,11 @@ class _RoomCardSettingsPageState extends ConsumerState<RoomCardSettingsPage> {
                     child: SizedBox(
                       width: width,
                       height: height,
-                      child: RoomCard(
+                      child: LiveRoomCard(
                         key: const ValueKey('settings-room-card-preview'),
                         data: sample,
                         appearance: appearance,
+                        dense: false,
                       ),
                     ),
                   );
@@ -1093,7 +1097,7 @@ class _PageSizeDialogState extends State<_PageSizeDialog> {
         const DialogCancelButton(),
         DialogActionButton(
           key: const ValueKey('settings-page-sizes-save'),
-          label: i18n('confirm'),
+          label: i18n('save'),
           onPressed: () => Navigator.of(context).pop(_options),
         ),
       ],

@@ -153,8 +153,7 @@ class _ToolboxPageState extends ConsumerState<ToolboxPage> {
     final short = MediaQuery.sizeOf(context).height < 480;
     return Scaffold(
       appBar: AppBar(
-        // 3.x's app bars centre the title (common/style/theme.dart:119).
-        centerTitle: true,
+        centerTitle: centredPageTitle,
         toolbarHeight: short ? 48 : null,
         title: Text(i18n('toolbox_title')),
       ),

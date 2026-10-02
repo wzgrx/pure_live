@@ -335,7 +335,9 @@ void main() {
       [_room('douyu', 1)],
     ])..error = const NetworkFailure(SiteIds.douyu);
     final services = await _pump(tester, {SiteIds.huya: huya, SiteIds.douyu: douyu}, prefer: SiteIds.douyu);
-    expect(find.text('网络请求失败'), findsOneWidget);
+    // U.1c c4: "加载失败" with the reason; the raw error behind "详情".
+    expect(find.text('加载失败'), findsOneWidget);
+    expect(find.byKey(const ValueKey('status-details-button')), findsOneWidget);
     douyu.error = null;
     await tester.tap(find.text('重试'));
     await tester.pumpAndSettle();
@@ -445,6 +447,9 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('pager-size')));
     await tester.pumpAndSettle();
+    // The small menu (U.1d, B03), the current size ticked.
+    expect(find.byType(PopupMenuButton<int>), findsNothing);
+    expect(find.byIcon(AppIcons.selected), findsOneWidget);
     await tester.tap(find.text('40').last);
     await tester.pumpAndSettle();
     expect(find.byType(LiveRoomCard), findsNWidgets(30));

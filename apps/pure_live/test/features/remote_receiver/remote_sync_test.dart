@@ -265,7 +265,8 @@ void _pageTests() {
     // The bar: no scanner here (no camera), start / stop.
     expect(find.byKey(const ValueKey('remote-sync-scan-bar')), findsNothing);
     expect(find.byIcon(AppIcons.syncStop), findsOneWidget);
-    expect(tester.getCenter(find.text('设备同步')).dx, closeTo(393 / 2, 1));
+    // The title at the start, as 3.x showed it on Android.
+    expect(tester.getTopLeft(find.text('设备同步')).dx, lessThan(80));
 
     // Devices: platform icon, name, "address · version" (c7), a line between.
     expect(find.text('192.168.1.101:39888 · v4'), findsOneWidget);
@@ -316,6 +317,11 @@ void _pageTests() {
     expect(find.text('4'), findsOneWidget);
     expect(find.text('9'), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('remote-sync-code-field')), '482916');
+    // The main button says what it does (U.1d; not "确认").
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('remote-sync-code-ok')), matching: find.text('发送')),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const ValueKey('remote-sync-code-ok')));
     await _frames(tester);
     expect(service.sent, [('192.168.1.101', 39888, '482916')]);
@@ -334,6 +340,11 @@ void _pageTests() {
     await _frames(tester);
     expect(find.text('输入“PureLive Windows”上显示的 6 位配对码'), findsOneWidget, reason: 'no question before the code');
     await tester.enterText(find.byKey(const ValueKey('remote-sync-code-field')), '123456');
+    // The main button says what it does (U.1d; not "确认").
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('remote-sync-code-ok')), matching: find.text('接收')),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const ValueKey('remote-sync-code-ok')));
     await _until(tester, () => find.byKey(const ValueKey('remote-sync-preview')).evaluate().isNotEmpty);
     await _frames(tester);

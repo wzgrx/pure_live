@@ -216,7 +216,7 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
     final phoneTab = showsHomeBarButtons(context, inHome: widget.route.inHome);
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
+        centerTitle: centredPageTitle,
         // The home's tab has the menu (3.x); opened from the rail or a room,
         // back. This follows the home's layout, not the screen's width (U.7a
         // P11, U.3a).
@@ -508,46 +508,24 @@ class _TaskGrid extends StatelessWidget {
 }
 
 /// "“开播检测”关着，等待开播的任务到时不会自动开始。" with "打开" (U.7a c8,
-/// the record panel's words and action).
+/// the record panel's words and action): the reminder colour of the
+/// page-top bar (U.1c c8).
 class _PollingOffBanner extends StatelessWidget {
   const new({required this.onEnable});
 
   final VoidCallback onEnable;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final warning = LiveSemanticColors.warning(scheme.brightness);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: DecoratedBox(
-        key: const ValueKey('recorder-polling-off'),
-        decoration: BoxDecoration(
-          color: Color.alphaBlend(warning.withValues(alpha: 0.1), scheme.surface),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
-          child: Row(
-            children: [
-              Icon(AppIcons.warning, size: 18, color: warning),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  i18n('recorder_polling_off'),
-                  style: theme.textTheme.bodyMedium?.copyWith(color: warning, height: 1.45),
-                ),
-              ),
-              TextButton(
-                key: const ValueKey('recorder-polling-on'),
-                onPressed: onEnable,
-                child: Text(i18n('record_panel_polling_enable')),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: StatusBanner(
+      key: const ValueKey('recorder-polling-off'),
+      kind: StatusBannerKind.warning,
+      text: i18n('recorder_polling_off'),
+      margin: EdgeInsets.zero,
+      actions: [
+        (key: const ValueKey('recorder-polling-on'), label: i18n('record_panel_polling_enable'), onPressed: onEnable),
+      ],
+    ),
+  );
 }

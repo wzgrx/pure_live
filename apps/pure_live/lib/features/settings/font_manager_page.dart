@@ -256,40 +256,29 @@ class _FontCard extends StatelessWidget {
   final FontFamily family;
   final bool active;
 
-  Widget _menu(BuildContext context, {required bool locked}) {
-    final colors = Theme.of(context).colorScheme;
-    return PopupMenuButton<String>(
-      key: ValueKey('font-more-${family.id}'),
-      enabled: !locked,
-      tooltip: i18n('more'),
-      icon: const Icon(AppIcons.moreVertical),
-      onSelected: (action) => unawaited(action == 'delete' ? state._delete(family) : state._openFolder(family.id)),
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          key: ValueKey('font-folder-${family.id}'),
-          value: 'folder',
-          child: Row(
-            children: [
-              const Icon(AppIcons.openFolder, size: 20),
-              const SizedBox(width: 12),
-              Text(i18n('settings_font_open_folder')),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          key: ValueKey('font-delete-${family.id}'),
-          value: 'delete',
-          child: Row(
-            children: [
-              Icon(AppIcons.delete, size: 20, color: colors.error),
-              const SizedBox(width: 12),
-              Text(i18n('delete'), style: TextStyle(color: colors.error)),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  /// "⋮": open the folder, delete (the small menu, U.1d / B03).
+  Widget _menu(BuildContext context, {required bool locked}) => AppMenuButton<String>(
+    buttonKey: ValueKey('font-more-${family.id}'),
+    enabled: !locked,
+    tooltip: i18n('more'),
+    icon: const Icon(AppIcons.moreVertical),
+    onSelected: (action) => unawaited(action == 'delete' ? state._delete(family) : state._openFolder(family.id)),
+    entries: () => [
+      AppMenuEntry(
+        key: ValueKey('font-folder-${family.id}'),
+        value: 'folder',
+        icon: AppIcons.openFolder,
+        label: i18n('settings_font_open_folder'),
+      ),
+      AppMenuEntry(
+        key: ValueKey('font-delete-${family.id}'),
+        value: 'delete',
+        icon: AppIcons.delete,
+        label: i18n('delete'),
+        danger: true,
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {

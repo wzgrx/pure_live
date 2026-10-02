@@ -161,7 +161,7 @@ class _ColorDialogState extends State<_ColorDialog> {
       ),
       actions: [
         const DialogCancelButton(),
-        DialogActionButton(key: const ValueKey('danmaku-color-apply'), label: i18n('confirm'), onPressed: _apply),
+        DialogActionButton(key: const ValueKey('danmaku-color-apply'), label: i18n('save'), onPressed: _apply),
       ],
     );
   }

@@ -91,7 +91,6 @@ class _SearchPlatformStripState extends State<SearchPlatformStrip> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: searchPlatformStripHeight,
       child: Listener(
@@ -112,16 +111,14 @@ class _SearchPlatformStripState extends State<SearchPlatformStrip> {
               final site = index == 0 ? null : widget.sites[index - 1];
               return Center(
                 key: _keys[index],
-                child: ChoiceChip(
+                // The one chip of the app (U.1c c13), the platform's logo
+                // before its name.
+                child: AppChip(
                   key: ValueKey('search-platform-$index'),
-                  avatar: site == null
-                      ? Icon(AppIcons.allPlatforms, size: 18, color: selected ? scheme.onSecondaryContainer : null)
-                      : PlatformLogo(site.id, size: 18),
-                  label: Text(site == null ? i18n('site_all') : platformName(site.id, fallback: site.name)),
+                  leading: site == null ? null : PlatformLogo(site.id, size: 18),
+                  label: site == null ? i18n('site_all') : platformName(site.id, fallback: site.name),
                   selected: selected,
-                  showCheckmark: false,
-                  side: BorderSide(color: selected ? scheme.primary : scheme.outlineVariant),
-                  onSelected: (_) => widget.onSelected(index),
+                  onSelected: () => widget.onSelected(index),
                 ),
               );
             },

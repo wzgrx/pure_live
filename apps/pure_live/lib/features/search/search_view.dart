@@ -368,84 +368,80 @@ class _SearchViewState extends ConsumerState<SearchView> {
     final spacing = watchSetting(ref, Settings.crossAxisSpacing);
     final mainSpacing = watchSetting(ref, Settings.mainAxisSpacing);
     final scheme = Theme.of(context).colorScheme;
-    return CallbackShortcuts(
+    return EscapeBack(
       // Esc leaves the page like Back (c1); a Scaffold keeps DismissIntent for drawers.
-      bindings: {const SingleActivator(LogicalKeyboardKey.escape): () => Navigator.of(context).maybePop()},
-      child: FocusScope(
-        autofocus: true,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final oneRow = width >= searchOneRowWidth;
-            final strip = SearchPlatformStrip(
-              sites: _model.sites,
-              selected: _model.selected,
-              onSelected: _selectPlatform,
-            );
-            final options = SearchOptionsBar(
-              model: _model,
-              oneLine: oneRow,
-              onModeChanged: (mode) {
-                _dismissedFailures = null;
-                _model.setMode(mode, draft: _text.text);
-              },
-              onOpenWebSearch: () => unawaited(_openWebSearch()),
-              onOpenScope: () => unawaited(_openScope()),
-            );
-            final geometry = RoomGridGeometry.of(
-              context,
-              width: width,
-              spacing: spacing,
-              appearance: appearance,
-              fontSizes: fontSizes,
-            );
-            return Scaffold(
-              appBar: AppBar(
-                automaticallyImplyLeading: false,
-                titleSpacing: 0,
-                title: oneRow
-                    ? Row(
-                        children: [
-                          const SizedBox(width: 16),
-                          SizedBox(
-                            width: math.min(searchFieldMaxWidth, math.max(280, width * 0.38)),
-                            child: _field(context),
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(child: strip),
-                        ],
-                      )
-                    : Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: _field(context)),
-              ),
-              body: CustomScrollView(
-                key: const ValueKey('search-content'),
-                controller: _scroll,
-                physics: const PureLiveScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                slivers: [
-                  SliverFloatingHeader(
-                    animationStyle: const AnimationStyle(
-                      duration: Duration(milliseconds: 200),
-                      reverseDuration: Duration(milliseconds: 150),
-                    ),
-                    child: oneRow
-                        ? options
-                        : ColoredBox(
-                            color: scheme.surface,
-                            child: Column(mainAxisSize: MainAxisSize.min, children: [strip, options]),
-                          ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final oneRow = width >= searchOneRowWidth;
+          final strip = SearchPlatformStrip(
+            sites: _model.sites,
+            selected: _model.selected,
+            onSelected: _selectPlatform,
+          );
+          final options = SearchOptionsBar(
+            model: _model,
+            oneLine: oneRow,
+            onModeChanged: (mode) {
+              _dismissedFailures = null;
+              _model.setMode(mode, draft: _text.text);
+            },
+            onOpenWebSearch: () => unawaited(_openWebSearch()),
+            onOpenScope: () => unawaited(_openScope()),
+          );
+          final geometry = RoomGridGeometry.of(
+            context,
+            width: width,
+            spacing: spacing,
+            appearance: appearance,
+            fontSizes: fontSizes,
+          );
+          return Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              titleSpacing: 0,
+              title: oneRow
+                  ? Row(
+                      children: [
+                        const SizedBox(width: 16),
+                        SizedBox(
+                          width: math.min(searchFieldMaxWidth, math.max(280, width * 0.38)),
+                          child: _field(context),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(child: strip),
+                      ],
+                    )
+                  : Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: _field(context)),
+            ),
+            body: CustomScrollView(
+              key: const ValueKey('search-content'),
+              controller: _scroll,
+              physics: const PureLiveScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: [
+                SliverFloatingHeader(
+                  animationStyle: const AnimationStyle(
+                    duration: Duration(milliseconds: 200),
+                    reverseDuration: Duration(milliseconds: 150),
                   ),
-                  if (_linkDetected)
-                    SliverToBoxAdapter(
-                      child: SearchLinkBanner(resolving: _resolvingLink, onOpen: () => unawaited(_submit())),
-                    ),
-                  if (_model.pending > 0) SliverToBoxAdapter(child: SearchPendingRow(count: _model.pending)),
-                  ..._content(context, geometry, spacing, mainSpacing),
-                ],
-              ),
-            );
-          },
-        ),
+                  child: oneRow
+                      ? options
+                      : ColoredBox(
+                          color: scheme.surface,
+                          child: Column(mainAxisSize: MainAxisSize.min, children: [strip, options]),
+                        ),
+                ),
+                if (_linkDetected)
+                  SliverToBoxAdapter(
+                    child: SearchLinkBanner(resolving: _resolvingLink, onOpen: () => unawaited(_submit())),
+                  ),
+                if (_model.pending > 0) SliverToBoxAdapter(child: SearchPendingRow(count: _model.pending)),
+                ..._content(context, geometry, spacing, mainSpacing),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

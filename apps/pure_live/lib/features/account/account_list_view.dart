@@ -139,14 +139,12 @@ class _AccountListViewState extends ConsumerState<AccountListView> {
       for (final platform in accountPlatforms)
         if (_actions.unreadable(platform.id)) platform.name,
     ];
-    Widget group(String title, {required bool overseas}) => Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    Widget group(String title, {required bool overseas}) => SettingsGroup(
+      title: title,
+      first: !overseas,
       children: [
-        context.buildGroupTitle(title),
-        context.buildModernCard([
-          for (final platform in accountPlatforms)
-            if (platform.overseas == overseas) _tile(context, platform, statuses[platform.id]!),
-        ]),
+        for (final platform in accountPlatforms)
+          if (platform.overseas == overseas) _tile(context, platform, statuses[platform.id]!),
       ],
     );
     final children = <Widget>[
@@ -163,11 +161,10 @@ class _AccountListViewState extends ConsumerState<AccountListView> {
           ),
         ),
       group(i18n('account_group_domestic'), overseas: false),
-      const SizedBox(height: 20),
       group(i18n('account_group_overseas'), overseas: true),
     ];
     return Scaffold(
-      appBar: AppBar(centerTitle: true, title: Text(i18n('account_title'))),
+      appBar: AppBar(title: Text(i18n('account_title'))),
       body: ListView(
         key: const ValueKey('account-list'),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
@@ -194,7 +191,7 @@ class _AccountListViewState extends ConsumerState<AccountListView> {
       minTileHeight: 72,
       horizontalTitleGap: 16,
       leading: PlatformLogo(platform.id, size: 24),
-      title: Text(platform.name, style: context.textStyles.t15.emphasis),
+      title: Text(platform.name, style: context.textStyles.t15.regular),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 2),
         child: Text(

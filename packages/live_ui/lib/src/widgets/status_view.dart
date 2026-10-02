@@ -1,30 +1,66 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:live_ui/src/scope.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
+import 'package:live_ui/src/widgets/app_dialog.dart';
+import 'package:live_ui/src/widgets/app_toast.dart';
 import 'package:live_ui/src/widgets/loading_styles.dart';
+
+// The one status component (docs/ui/compare/U.1c c2–c7): six states
+// (skeleton, loading, empty, error, restricted, offline) in four places
+// (a page, a block, a card cover, on the video; the video has its own
+// `VideoStateView`), always the same structure: an icon, one sentence, one
+// reason, at most two buttons.
 
 /// What [AppStatusView] shows.
 enum AppStatusType {
-  /// The loading animation the user picked.
+  /// The loading animation the user picked and a line saying what it waits
+  /// for (a list's first load shows a skeleton instead, [StatusSkeleton]).
   loading,
 
   /// Nothing to show.
   empty,
 
-  /// Loading failed.
+  /// Loading failed; the raw error goes into [AppStatusView.details].
   error,
+
+  /// The platform wants a login (3.x "需要登录账号"): a lock, "前往登录".
+  restricted,
+
+  /// No network (3.x showed it as an error): reconnecting reloads.
+  offline,
 }
 
-/// Loading, empty and error states of a page or a tile (3.x
-/// `AppStatusView`).
+/// The window height under which a page's state lies on its side (icon
+/// left, words right; a phone held sideways, whose content is about 300
+/// high, U.1c c7): UI_PLAN §5.1's compact height.
+const double statusSideBySideHeight = 480;
+
+/// Loading, empty, error, restricted and offline states of a page, a block
+/// or a card cover (3.x `AppStatusView`, docs/ui/compare/U.1c).
 ///
-/// The empty and error states show an icon in a circle that pops in, a title,
-/// a text and, with [onButtonPressed], a button (retry unless [buttonText]
-/// and [buttonIcon] say otherwise) in the tonal filled style, and with
-/// [onSecondaryButtonPressed] a second one as a text button (U.1c C1, the
-/// same on every status page). Missing texts fall back to the words of
-/// [LiveUiScope]. [isMini] is the small form for a card cover: a small icon,
-/// no button, and a title or text only when given non-empty.
+/// A page's state: a solid 80 circle (`surfaceContainer`) with a 40 icon in
+/// the primary colour (no pop-in bounce, c6), the title 15/600, the reason
+/// 13 in the variant ink (at most 320 wide), then up to two buttons: the
+/// first tonal filled with an icon that says what it does, the second a text
+/// button (C1). [details] (the raw error) adds "详情" as the second button
+/// when there is none; it opens the whole text, selectable and copyable (C4).
+/// In a window lower than [statusSideBySideHeight] and wider than high the
+/// state lies on its side.
+///
+/// [compact] is the form inside a block (a tab, a panel): a 32 icon in the
+/// variant ink without the circle. [isMini] is the card cover's: a small
+/// icon, no button, a title or text only when given non-empty.
+///
+/// Loading shows the spinner of the user's "加载样式" sized by where it is
+/// (24 in a block or a card, 28 on a page of a compact window, 32 on a page
+/// of a wider one; 3.x chose 24 or 32 by the screen only) and a line under
+/// it ([title], "加载中..." by default).
+///
+/// No `LayoutBuilder`: the view also sits where its height is measured
+/// first (`SliverFillRemaining`), which a `LayoutBuilder` cannot answer.
 class AppStatusView extends StatelessWidget {
   /// Creates the view.
   const new({
@@ -35,7 +71,10 @@ class AppStatusView extends StatelessWidget {
     this.buttonText,
     this.buttonIcon,
     this.onButtonPressed,
+    this.busy = false,
     this.isMini = false,
+    this.compact = false,
+    this.details,
     this.iconColor,
     this.titleColor,
     this.subtitleColor,
@@ -53,22 +92,32 @@ class AppStatusView extends StatelessWidget {
   /// Text under the title; null takes the state's default.
   final String? subtitle;
 
-  /// Icon; null takes the state's default (no network for errors, a TV for
-  /// empty).
+  /// Icon; null takes the state's default (a TV for empty, ⓘ-like error
+  /// mark for errors, a lock when restricted, no Wi-Fi when offline).
   final IconData? icon;
 
-  /// Button label; null takes "retry".
+  /// Button label; null takes "retry" ("前往登录" when restricted).
   final String? buttonText;
 
   /// Button icon, matching what [buttonText] does; null takes the retry
-  /// icon (3.x showed it on every button, also "search" and "log in").
+  /// icon (the login icon when restricted).
   final IconData? buttonIcon;
 
-  /// Shows the button (not in [isMini]).
+  /// Shows the first button (not in [isMini]).
   final VoidCallback? onButtonPressed;
 
-  /// The small form.
+  /// The first button's action runs: a spinner instead of its icon, no taps.
+  final bool busy;
+
+  /// The card cover's form.
   final bool isMini;
+
+  /// The form inside a block (tab, panel).
+  final bool compact;
+
+  /// The raw error behind an error state ("详情", c4); null or empty hides
+  /// it.
+  final String? details;
 
   /// Icon colour, and the loading colour when the user picked none.
   final Color? iconColor;
@@ -85,101 +134,245 @@ class AppStatusView extends StatelessWidget {
   /// Shows the second button (not in [isMini]).
   final VoidCallback? onSecondaryButtonPressed;
 
+  /// The default icon of [type].
+  static IconData defaultIcon(AppStatusType type) => switch (type) {
+    AppStatusType.loading || AppStatusType.empty => Icons.live_tv_rounded,
+    AppStatusType.error => Icons.error_outline_rounded,
+    AppStatusType.restricted => Icons.lock_outline_rounded,
+    AppStatusType.offline => Icons.wifi_off_rounded,
+  };
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => type == AppStatusType.loading ? _loading(context) : _state(context);
+
+  Widget _loading(BuildContext context) {
     final theme = Theme.of(context);
     final config = LiveUiScope.of(context);
-    if (type == AppStatusType.loading) {
-      final size = isMini ? 24.0 : (MediaQuery.sizeOf(context).width > 680 ? 32.0 : 24.0);
+    final small = isMini || compact;
+    final size = small ? 24.0 : (MediaQuery.sizeOf(context).width >= 600 ? 32.0 : 28.0);
+    final spinner = LoadingStyles.build(
+      LoadingStyles.normalize(config.loadingStyle),
+      color: config.loadingColor ?? iconColor ?? theme.colorScheme.primary,
+      size: size,
+      colors: theme.colorScheme,
+    );
+    final line = title ?? config.strings.loading;
+    if (isMini || line.isEmpty) return Center(child: spinner);
+    return Center(
+      child: Semantics(
+        liveRegion: true,
+        label: line,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            spinner,
+            const SizedBox(height: 12),
+            ExcludeSemantics(
+              child: Text(
+                line,
+                textAlign: TextAlign.center,
+                style: context.textStyles.t13.copyWith(color: subtitleColor ?? theme.colorScheme.onSurfaceVariant),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _state(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final words = LiveUiScope.of(context).strings;
+    final styles = context.textStyles;
+    final finalTitle =
+        title ??
+        switch (type) {
+          AppStatusType.empty || AppStatusType.loading => words.emptyTitle,
+          AppStatusType.error => words.loadFailed,
+          AppStatusType.restricted => words.restrictedTitle,
+          AppStatusType.offline => words.offlineTitle,
+        };
+    final finalSubtitle =
+        subtitle ??
+        switch (type) {
+          AppStatusType.empty || AppStatusType.loading => words.emptySubtitle,
+          AppStatusType.error => words.errorSubtitle,
+          AppStatusType.restricted => words.restrictedSubtitle,
+          AppStatusType.offline => words.offlineSubtitle,
+        };
+    final glyph = icon ?? defaultIcon(type);
+
+    if (isMini) {
       return Center(
-        child: LoadingStyles.build(
-          LoadingStyles.normalize(config.loadingStyle),
-          color: config.loadingColor ?? iconColor ?? theme.colorScheme.primary,
-          size: size,
-          colors: theme.colorScheme,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(glyph, size: 16, color: iconColor ?? scheme.onSurfaceVariant.withValues(alpha: 0.6)),
+            if (finalTitle.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                finalTitle,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: styles.t12.copyWith(color: titleColor ?? scheme.onSurfaceVariant),
+              ),
+            ],
+            if (finalSubtitle.isNotEmpty)
+              Text(
+                finalSubtitle,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: styles.t12.copyWith(color: subtitleColor ?? scheme.onSurfaceVariant),
+              ),
+          ],
         ),
       );
     }
 
-    final words = config.strings;
-    final isError = type == AppStatusType.error;
-    final finalTitle = title ?? (isError ? words.errorTitle : words.emptyTitle);
-    final finalSubtitle = subtitle ?? (isError ? words.errorSubtitle : words.emptySubtitle);
-    final styles = AppTextStyles(theme);
-    final effectiveIconColor = iconColor ?? theme.colorScheme.primary;
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 1000),
-            curve: Curves.elasticOut,
-            builder: (context, value, child) => Transform.scale(scale: value, child: child),
-            child: Container(
-              padding: EdgeInsets.all(isMini ? 8 : 22),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-                border: Border.all(color: effectiveIconColor.withValues(alpha: 0.05)),
-              ),
-              child: Icon(
-                icon ?? (isError ? Icons.wifi_off_rounded : Icons.live_tv_rounded),
-                size: isMini ? 16 : 42,
-                color: iconColor ?? theme.colorScheme.primary.withValues(alpha: 0.6),
-              ),
+    final window = MediaQuery.sizeOf(context);
+    final sideways = !compact && window.height < statusSideBySideHeight && window.width > window.height;
+    final mark = compact
+        ? Icon(glyph, size: 32, color: iconColor ?? scheme.onSurfaceVariant)
+        : Container(
+            width: sideways ? 64 : 80,
+            height: sideways ? 64 : 80,
+            decoration: BoxDecoration(color: scheme.surfaceContainer, shape: BoxShape.circle),
+            alignment: Alignment.center,
+            child: Icon(glyph, size: sideways ? 32 : 40, color: iconColor ?? scheme.primary),
+          );
+    final align = sideways ? TextAlign.start : TextAlign.center;
+    final buttons = _buttons(context, words, alignStart: sideways);
+    final texts = <Widget>[
+      Text(
+        finalTitle,
+        textAlign: align,
+        style: styles.t15.copyWith(fontWeight: FontWeight.w600, height: 1.4, color: titleColor ?? scheme.onSurface),
+      ),
+      if (finalSubtitle.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: sideways ? 360 : 320),
+            child: Text(
+              finalSubtitle,
+              textAlign: align,
+              style: styles.t13.copyWith(color: subtitleColor ?? scheme.onSurfaceVariant, height: 1.5),
             ),
           ),
-          if (!isMini || finalTitle.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            Text(
-              finalTitle,
-              style: styles.t15.copyWith(
-                fontWeight: FontWeight.w600,
-                color: titleColor ?? theme.textTheme.titleMedium?.color,
-              ),
-            ),
-          ],
-          if (!isMini || finalSubtitle.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(28, 6, 28, 0),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 320),
-                child: Text(
-                  finalSubtitle,
-                  textAlign: TextAlign.center,
-                  style: styles.t13.copyWith(color: subtitleColor ?? theme.hintColor, height: 1.5),
+        ),
+      if (buttons != null)
+        Padding(
+          padding: EdgeInsets.only(top: sideways ? 12 : 16),
+          child: buttons,
+        ),
+    ];
+
+    if (sideways) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              mark,
+              const SizedBox(width: 20),
+              Flexible(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: texts,
                 ),
               ),
-            ),
-          if (!isMini && (onButtonPressed != null || onSecondaryButtonPressed != null)) ...[
-            const SizedBox(height: 16),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                if (onButtonPressed case final pressed?)
-                  FilledButton.tonalIcon(
-                    key: const ValueKey('status-button'),
-                    onPressed: pressed,
-                    icon: Icon(buttonIcon ?? Icons.refresh_rounded, size: 18),
-                    label: Text(buttonText ?? words.retry),
-                  ),
-                if (onSecondaryButtonPressed case final pressed?)
-                  TextButton(
-                    key: const ValueKey('status-secondary-button'),
-                    onPressed: pressed,
-                    child: Text(secondaryButtonText ?? words.retry),
-                  ),
-              ],
-            ),
+            ],
+          ),
+        ),
+      );
+    }
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24, vertical: compact ? 16 : 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            mark,
+            SizedBox(height: compact ? 10 : 16),
+            ...texts,
           ],
-        ],
+        ),
       ),
     );
   }
+
+  Widget? _buttons(BuildContext context, LiveUiStrings words, {required bool alignStart}) {
+    final details = this.details;
+    final showDetails = onSecondaryButtonPressed == null && details != null && details.trim().isNotEmpty;
+    final restricted = type == AppStatusType.restricted;
+    final children = [
+      if (onButtonPressed case final pressed?)
+        FilledButton.tonalIcon(
+          key: const ValueKey('status-button'),
+          onPressed: busy ? null : pressed,
+          icon: busy
+              ? const SizedBox.square(
+                  key: ValueKey('status-button-busy'),
+                  dimension: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Icon(buttonIcon ?? (restricted ? Icons.login_rounded : Icons.refresh_rounded), size: 18),
+          label: Text(buttonText ?? (restricted ? words.login : words.retry)),
+        ),
+      if (onSecondaryButtonPressed case final pressed?)
+        TextButton(
+          key: const ValueKey('status-secondary-button'),
+          onPressed: pressed,
+          child: Text(secondaryButtonText ?? words.retry),
+        )
+      else if (showDetails)
+        TextButton(
+          key: const ValueKey('status-details-button'),
+          onPressed: () => unawaited(showStatusDetails(context, details)),
+          child: Text(words.details),
+        ),
+    ];
+    if (children.isEmpty) return null;
+    return Wrap(
+      alignment: alignStart ? WrapAlignment.start : WrapAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
+      children: children,
+    );
+  }
+}
+
+/// The raw text behind a failure (U.1c C4): the whole text, selectable,
+/// with "复制" (copies it and says so) and "关闭".
+Future<void> showStatusDetails(BuildContext context, String details) {
+  final words = LiveUiScope.of(context).strings;
+  return showAppDialog<void>(
+    context: context,
+    builder: (dialogContext) => AppDialog(
+      key: const ValueKey('status-details'),
+      title: words.details,
+      message: details,
+      selectable: true,
+      wide: true,
+      actions: [
+        DialogCancelButton(label: words.close),
+        DialogActionButton(
+          key: const ValueKey('status-details-copy'),
+          label: words.copy,
+          onPressed: () {
+            unawaited(Clipboard.setData(ClipboardData(text: details)));
+            Navigator.of(dialogContext).pop();
+            showAppToast(context, AppToast(words.copied));
+          },
+        ),
+      ],
+    ),
+  );
 }
 
 /// The empty state (3.x `EmptyView`): [AppStatusView] with
@@ -194,6 +387,7 @@ class EmptyView extends StatelessWidget {
     this.buttonIcon,
     this.onButtonPressed,
     this.isMini = false,
+    this.compact = false,
     this.iconColor,
     this.titleColor,
     this.subtitleColor,
@@ -223,6 +417,9 @@ class EmptyView extends StatelessWidget {
   /// See [AppStatusView.isMini].
   final bool isMini;
 
+  /// See [AppStatusView.compact].
+  final bool compact;
+
   /// See [AppStatusView.iconColor].
   final Color? iconColor;
 
@@ -249,11 +446,88 @@ class EmptyView extends StatelessWidget {
       buttonIcon: buttonIcon,
       onButtonPressed: onButtonPressed,
       isMini: isMini,
+      compact: compact,
       iconColor: iconColor,
       titleColor: titleColor,
       subtitleColor: subtitleColor,
       secondaryButtonText: secondaryButtonText,
       onSecondaryButtonPressed: onSecondaryButtonPressed,
+    );
+  }
+}
+
+/// The static skeleton of a list of rows while it first loads (U.1c c3;
+/// UI_PLAN §9.3: no shimmer): rows of an icon, two bars and a pill on a
+/// rounded card, as many as fill the space. Room grids use
+/// `RoomCardSkeleton`.
+class StatusSkeleton extends StatelessWidget {
+  /// Creates the skeleton.
+  const new({this.rows, this.trailing = true, this.padding = const EdgeInsets.all(16), super.key});
+
+  /// How many rows; null draws 12, cut where the space ends.
+  final int? rows;
+
+  /// Whether each row has a pill at the end (a switch, a value).
+  final bool trailing;
+
+  /// Space around the card.
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final block = scheme.surfaceContainerHigh;
+    Widget bar(double factor, double height) => FractionallySizedBox(
+      alignment: AlignmentDirectional.centerStart,
+      widthFactor: factor,
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(color: block, borderRadius: BorderRadius.circular(height / 2)),
+      ),
+    );
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(color: block, borderRadius: BorderRadius.circular(6)),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [bar(0.55, 11), const SizedBox(height: 9), bar(0.8, 9)],
+            ),
+          ),
+          if (trailing) ...[
+            const SizedBox(width: 16),
+            Container(
+              width: 44,
+              height: 24,
+              decoration: BoxDecoration(color: block, borderRadius: BorderRadius.circular(12)),
+            ),
+          ],
+        ],
+      ),
+    );
+    return Semantics(
+      key: const ValueKey('status-skeleton'),
+      label: LiveUiScope.of(context).strings.loading,
+      // Cut at the bottom of the space it has (no LayoutBuilder, see
+      // AppStatusView).
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: padding,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLow,
+            borderRadius: const BorderRadius.all(Radius.circular(16)),
+          ),
+          child: Column(children: [for (var i = 0; i < (rows ?? 12); i++) row]),
+        ),
+      ),
     );
   }
 }

@@ -297,10 +297,8 @@ class SettingCounterRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final enabled = onChanged != null;
-    final ink = enabled ? scheme.onSurfaceVariant : scheme.onSurface.withValues(alpha: 0.38);
+    // The outlined counter (U.1c c10): greyed out, not hidden, when off.
     return SettingRow(
       settingKey: settingKey,
       title: title,
@@ -312,15 +310,10 @@ class SettingCounterRow extends StatelessWidget {
           minValue: min,
           maxValue: max,
           selectedValue: value,
-          buttonSize: const Size(40, 40),
-          backgroundColor: scheme.surface,
-          foregroundColor: ink,
+          enabled: enabled,
           semanticLabel: title,
           decrementSemanticLabel: i18n('decrease_value', args: {'label': title}),
           incrementSemanticLabel: i18n('increase_value', args: {'label': title}),
-          textStyle: theme.textTheme.titleSmall?.emphasis.tabular.copyWith(
-            color: enabled ? scheme.primary : scheme.onSurface.withValues(alpha: 0.38),
-          ),
           onChanged: (next) => onChanged?.call(next),
         ),
       ),

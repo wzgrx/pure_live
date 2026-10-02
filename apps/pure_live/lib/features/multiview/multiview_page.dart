@@ -460,7 +460,6 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
     final landscape = _arrangement == _Arrangement.landscape;
     return Scaffold(
       appBar: AppBar(
-        centerTitle: !landscape,
         titleSpacing: landscape ? 0 : null,
         title: landscape
             ? Row(

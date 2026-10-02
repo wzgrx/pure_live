@@ -200,6 +200,7 @@ class PreferPlatformTile extends ConsumerWidget {
       key: entry.rowKey,
       icon: AppIcons.settingsPreferPlatform,
       title: entry.titleText,
+      choice: true,
       subtitle: entry.descriptionText,
       valueWidget: PlatformLogo(current, size: 24),
       value: name(current),
@@ -334,7 +335,7 @@ class _TwitchLanguagesDialogState extends State<_TwitchLanguagesDialog> {
       const DialogCancelButton(),
       DialogActionButton(
         key: const ValueKey('settings-twitch-save'),
-        label: i18n('confirm'),
+        label: i18n('save'),
         onPressed: () => Navigator.of(context).pop(_selected),
       ),
     ],
@@ -665,16 +666,11 @@ class _WindowSizeDialogState extends State<_WindowSizeDialog> {
               runSpacing: 8,
               children: [
                 for (final (width, height, tag) in _presets)
-                  ChoiceChip(
+                  AppChip(
                     key: ValueKey('settings-window-size-$width'),
-                    label: Text(
-                      '$width × $height${_tag(tag, isDefault: width == defaultWidth && height == defaultHeight)}',
-                    ),
+                    label: '$width × $height${_tag(tag, isDefault: width == defaultWidth && height == defaultHeight)}',
                     selected: _width.text == '$width' && _height.text == '$height',
-                    showCheckmark: false,
-                    selectedColor: colors.primaryContainer,
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-                    onSelected: (_) => setState(() {
+                    onSelected: () => setState(() {
                       _width.text = '$width';
                       _height.text = '$height';
                       _error = null;
@@ -741,6 +737,7 @@ class CloseWindowTile extends ConsumerWidget {
       key: entry.rowKey,
       icon: AppIcons.settingsCloseWindow,
       title: entry.titleText,
+      choice: true,
       subtitle: entry.descriptionText,
       value: options.firstWhere((option) => option.value == current, orElse: () => options.first).label,
       onTap: () async {

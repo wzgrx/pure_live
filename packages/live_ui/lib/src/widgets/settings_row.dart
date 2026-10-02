@@ -1,16 +1,17 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/widgets/app_chip.dart';
+import 'package:live_ui/src/widgets/count_button.dart';
 
-// The settings row of every settings page (docs/ui/compare/U.6a, "设置行"):
-// one look for link, switch, choice, slider and counter rows, with pressed,
-// keyboard-focus, hover, disabled and busy states. 3.x had four builders
-// (`buildTile`, `buildSwitchTile`, `buildMenuTile`, `buildSliderTile`) plus
-// pages that drew their own; its explanations showed one line at about
-// 3.4:1. Here the explanation is the theme's `onSurfaceVariant` on
-// `surfaceContainerLow` (above 4.5:1 in every Material scheme) and wraps to
-// two lines.
+// The settings row of every settings page (docs/ui/compare/U.6a, "设置行";
+// U.1c c14–c17): one look for link, switch, choice, slider and counter rows,
+// with pressed, keyboard-focus, hover, disabled and busy states. 3.x had
+// four builders (`buildTile`, `buildSwitchTile`, `buildMenuTile`,
+// `buildSliderTile`) plus pages that drew their own; its explanations showed
+// one line at about 3.4:1. Here the explanation is the theme's
+// `onSurfaceVariant` on `surfaceContainerLow` (above 4.5:1 in every Material
+// scheme) and wraps to two lines; the title is 15 regular (U.1c C3, the
+// weight of U.2f's panel rows).
 
 /// The width under which, or the text scale above which, a row's value
 /// moves under its title (3.x `stackTrailingOnNarrow`).
@@ -154,7 +155,6 @@ class SettingsGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final tv = SettingsRowStyle.tvOf(context);
     final divider = Padding(
       padding: const EdgeInsetsDirectional.only(start: 56),
       child: Divider(height: 1, thickness: 1, color: colors.outlineVariant.withValues(alpha: 0.7)),
@@ -168,42 +168,62 @@ class SettingsGroup extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title case final title?)
-          Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(16, first ? 8 : 18, 16, 8),
-            child: Semantics(
-              header: true,
-              child: Text(
-                title,
-                style: (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
-                  fontSize: tv ? 15 : 13,
-                  fontWeight: FontWeight.w600,
-                  color: colors.primary,
-                ),
-              ),
-            ),
-          ),
+        if (title case final title?) SettingsGroupTitle(title, first: first),
         if (note case final note?) SettingsNote(note, padding: const EdgeInsets.fromLTRB(8, 0, 8, 12)),
         if (!card)
           ...children
         else
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerLow,
-              borderRadius: const BorderRadius.all(Radius.circular(16)),
-            ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(16)),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: rows,
-              ),
+          // A Material, so list tiles on it (the platform accounts) keep
+          // their ink.
+          Material(
+            color: colors.surfaceContainerLow,
+            borderRadius: const BorderRadius.all(Radius.circular(16)),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: rows,
             ),
           ),
         if (footer case final footer?) SettingsNote(footer),
         ?footerWidget,
       ],
+    );
+  }
+}
+
+/// A group's title (U.6a, U.1c c15): 13 points, semi-bold, the primary
+/// colour without transparency (3.x's 65 % was about 2.9:1); for a group
+/// whose card is laid out by the page (a reorderable list).
+class SettingsGroupTitle extends StatelessWidget {
+  /// Creates the title.
+  const new(this.text, {this.first = false, this.padding, super.key});
+
+  /// The words.
+  final String text;
+
+  /// The first group of a page (less space above).
+  final bool first;
+
+  /// Space around the words; null is the group's.
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: padding ?? EdgeInsetsDirectional.fromSTEB(16, first ? 8 : 18, 16, 8),
+      child: Semantics(
+        header: true,
+        child: Text(
+          text,
+          style: (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
+            fontSize: SettingsRowStyle.tvOf(context) ? 15 : 13,
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -260,11 +280,16 @@ class SettingsRow extends StatefulWidget {
     this.selected = false,
     this.tooltip,
     this.subtitleMaxLines = 2,
+    this.keepTrailingWhileBusy = false,
     super.key,
   });
 
   /// The title.
   final String title;
+
+  /// While [busy], shows the spinner before [trailing] (which greys itself
+  /// out) instead of replacing it (a switch that is being changed, U.1c).
+  final bool keepTrailingWhileBusy;
 
   /// The spinner's colour while [busy] (error red for clearing).
   final Color? busyColor;
@@ -336,7 +361,7 @@ class _SettingsRowState extends State<SettingsRow> {
     final body = theme.textTheme.bodyMedium ?? const TextStyle();
     final titleStyle = body.copyWith(
       fontSize: tv ? 17 : 15,
-      fontWeight: FontWeight.w600,
+      fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
       height: 1.4,
       color: widget.titleColor ?? (widget.selected ? colors.onSecondaryContainer : colors.onSurface),
     );
@@ -352,15 +377,24 @@ class _SettingsRowState extends State<SettingsRow> {
         (widget.icon == null
             ? null
             : Icon(widget.icon, size: tv ? 24 : 22, color: widget.titleColor ?? colors.primary));
-    final trailing = widget.busy
-        ? SizedBox.square(
-            dimension: 24,
-            child: Padding(
-              padding: const EdgeInsets.all(2),
-              child: CircularProgressIndicator(strokeWidth: 2.5, color: widget.busyColor ?? colors.primary),
-            ),
+    final spinner = SizedBox.square(
+      key: const ValueKey('settings-row-busy'),
+      dimension: 24,
+      child: Padding(
+        padding: const EdgeInsets.all(2),
+        child: CircularProgressIndicator(strokeWidth: 2.5, color: widget.busyColor ?? colors.primary),
+      ),
+    );
+    final trailing = !widget.busy
+        ? widget.trailing
+        : widget.keepTrailingWhileBusy && widget.trailing != null
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
+            // The trailing control shows itself unusable (a disabled switch).
+            children: [spinner, widget.trailing!],
           )
-        : widget.trailing;
+        : spinner;
 
     final text = Column(
       mainAxisSize: MainAxisSize.min,
@@ -461,7 +495,8 @@ class _SettingsRowState extends State<SettingsRow> {
 
 /// A row that opens something: a page, a dialog of choices, a colour. The
 /// current value (14 px, secondary colour) or [valueWidget] (a swatch) sits
-/// before the chevron.
+/// before the mark at the end: › for a page, ⌄ for a dialog of choices
+/// ([choice], U.1c C2).
 class SettingsLinkRow extends StatelessWidget {
   /// Creates the row.
   const new({
@@ -475,6 +510,7 @@ class SettingsLinkRow extends StatelessWidget {
     this.valueWidget,
     this.valueBelow = false,
     this.chevron = true,
+    this.choice = false,
     this.enabled = true,
     this.disabledReason,
     this.busy = false,
@@ -515,8 +551,11 @@ class SettingsLinkRow extends StatelessWidget {
   /// A widget instead of [value] (a colour swatch).
   final Widget? valueWidget;
 
-  /// Whether the chevron shows.
+  /// Whether the mark at the end (› or ⌄) shows.
   final bool chevron;
+
+  /// The row picks one of a few values in a dialog: ⌄ instead of ›.
+  final bool choice;
 
   /// See [SettingsRow.enabled].
   final bool enabled;
@@ -554,7 +593,12 @@ class SettingsLinkRow extends StatelessWidget {
             ),
           ),
         ),
-      if (chevron) Icon(Icons.chevron_right_rounded, size: 22, color: colors.onSurfaceVariant),
+      if (chevron)
+        Icon(
+          choice ? Icons.expand_more_rounded : Icons.chevron_right_rounded,
+          size: choice ? 20 : 24,
+          color: colors.onSurfaceVariant,
+        ),
     ];
     return SettingsRow(
       title: title,
@@ -655,6 +699,7 @@ class SettingsSwitchRow extends StatelessWidget {
       enabled: enabled && onChanged != null,
       disabledReason: disabledReason,
       busy: busy,
+      keepTrailingWhileBusy: true,
       subtitleMaxLines: subtitleMaxLines,
       stackTrailing: false,
       onTap: usable ? () => onChanged!(!value) : null,
@@ -835,8 +880,9 @@ class SettingsSliderRow extends StatelessWidget {
   }
 }
 
-/// A counter row: − and + change the value by one step (held, they repeat),
-/// the number opens a field to type it ([onValueTap]).
+/// A counter row: the outlined [CounterControl] at the end; − and + change
+/// the value by one step (held, they repeat), the number opens a field to
+/// type it ([onValueTap]).
 class SettingsCounterRow extends StatefulWidget {
   /// Creates the row.
   const new({
@@ -912,80 +958,9 @@ class SettingsCounterRow extends StatefulWidget {
 }
 
 class _SettingsCounterRowState extends State<SettingsCounterRow> {
-  Timer? _repeat;
-
-  @override
-  void dispose() {
-    _repeat?.cancel();
-    super.dispose();
-  }
-
-  /// After half a second held, repeats the − or + of the latest build every
-  /// 100 ms until released (raw pointer events, so the button's own tap and
-  /// tooltip keep working).
-  void _hold({required bool increase}) {
-    _repeat?.cancel();
-    _repeat = Timer(const Duration(milliseconds: 500), () {
-      _repeat = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-        final step = increase ? widget.onIncrease : widget.onDecrease;
-        if (!mounted || step == null) {
-          timer.cancel();
-          return;
-        }
-        step();
-      });
-    });
-  }
-
-  void _release() {
-    _repeat?.cancel();
-    _repeat = null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final widget = this.widget;
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    Widget button(IconData glyph, String tooltip, VoidCallback? onPressed, Key? key, {required bool increase}) =>
-        Listener(
-          onPointerDown: onPressed == null ? null : (_) => _hold(increase: increase),
-          onPointerUp: (_) => _release(),
-          onPointerCancel: (_) => _release(),
-          child: IconButton(
-            key: key,
-            tooltip: tooltip,
-            onPressed: onPressed,
-            style: IconButton.styleFrom(
-              fixedSize: const Size.square(40),
-              minimumSize: const Size.square(40),
-              side: BorderSide(color: colors.outlineVariant),
-              foregroundColor: colors.onSurface,
-            ),
-            icon: Icon(glyph, size: 20),
-          ),
-        );
-    final number = InkWell(
-      key: widget.valueKey,
-      onTap: widget.onValueTap,
-      borderRadius: const BorderRadius.all(Radius.circular(8)),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 56, minHeight: 40),
-        child: Center(
-          child: Text(
-            widget.value,
-            style: (theme.textTheme.bodyMedium ?? const TextStyle()).tabular.copyWith(
-              fontSize: SettingsRowStyle.tvOf(context) ? 16 : 14,
-              fontWeight: FontWeight.w600,
-              color: colors.onSurface,
-              decoration: widget.onValueTap == null ? null : TextDecoration.underline,
-              decorationStyle: TextDecorationStyle.dotted,
-              decorationColor: colors.outline,
-            ),
-          ),
-        ),
-      ),
-    );
     return SettingsRow(
       title: widget.title,
       icon: widget.icon,
@@ -994,13 +969,18 @@ class _SettingsCounterRowState extends State<SettingsCounterRow> {
       enabled: widget.enabled,
       disabledReason: widget.disabledReason,
       subtitleMaxLines: widget.subtitleMaxLines,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          button(Icons.remove_rounded, widget.decreaseTooltip, widget.onDecrease, widget.decreaseKey, increase: false),
-          number,
-          button(Icons.add_rounded, widget.increaseTooltip, widget.onIncrease, widget.increaseKey, increase: true),
-        ],
+      trailing: CounterControl(
+        value: widget.value,
+        semanticLabel: widget.title,
+        decreaseTooltip: widget.decreaseTooltip,
+        increaseTooltip: widget.increaseTooltip,
+        onDecrease: widget.onDecrease,
+        onIncrease: widget.onIncrease,
+        onValueTap: widget.onValueTap,
+        enabled: widget.enabled,
+        valueKey: widget.valueKey,
+        decreaseKey: widget.decreaseKey,
+        increaseKey: widget.increaseKey,
       ),
     );
   }
@@ -1073,32 +1053,19 @@ class SettingsChoiceChips<T> extends StatelessWidget {
   final ValueChanged<T>? onSelected;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final option in options)
-          ChoiceChip(
-            key: option.key,
-            label: Text(option.label),
-            selected: option.value == selected,
-            showCheckmark: true,
-            checkmarkColor: colors.onSecondaryContainer,
-            selectedColor: colors.secondaryContainer,
-            labelStyle: TextStyle(
-              fontSize: 14,
-              fontWeight: option.value == selected ? FontWeight.w600 : FontWeight.w400,
-              color: option.value == selected ? colors.onSecondaryContainer : colors.onSurface,
-            ),
-            side: option.value == selected ? BorderSide.none : BorderSide(color: colors.outlineVariant),
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-            onSelected: onSelected == null ? null : (_) => onSelected!(option.value),
-          ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    children: [
+      for (final option in options)
+        AppChip(
+          key: option.key,
+          label: option.label,
+          selected: option.value == selected,
+          onSelected: onSelected == null ? null : () => onSelected!(option.value),
+        ),
+    ],
+  );
 }
 
 /// A round colour swatch at the end of a colour row (28 px).

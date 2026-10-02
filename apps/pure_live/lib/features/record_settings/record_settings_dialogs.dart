@@ -339,7 +339,7 @@ class _RecordDirectoryDialogState extends State<RecordDirectoryDialog> {
       DialogCancelButton(enabled: !_checking),
       DialogActionButton(
         key: const ValueKey('record-directory-confirm'),
-        label: i18n('confirm'),
+        label: i18n('save'),
         onPressed: _checking ? null : () => unawaited(_submit(_controller.text)),
       ),
     ],

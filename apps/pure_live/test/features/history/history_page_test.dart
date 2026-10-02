@@ -306,7 +306,7 @@ void main() {
     );
     await tester.tap(find.byKey(const ValueKey('history-limit')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ChoiceChip, '20'));
+    await tester.tap(find.widgetWithText(AppChip, '20'));
     await tester.pumpAndSettle();
     expect(find.text('保存后将删除最早的 5 条记录'), findsOneWidget);
 
@@ -325,7 +325,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('history-limit')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ChoiceChip, '不限'));
+    await tester.tap(find.widgetWithText(AppChip, '不限'));
     await tester.tap(find.byKey(const ValueKey('history-limit-save')));
     await _settle(tester);
     expect(find.text('22 条 / 不限'), findsOneWidget);
@@ -378,8 +378,10 @@ void main() {
     final count = tester.getRect(find.byKey(const ValueKey('page-subtitle')));
     expect(find.text('观看记录'), findsOneWidget);
     expect(find.text('2 / 50 条'), findsOneWidget);
-    expect(title.left, lessThan(40), reason: 'left-aligned, not centred like 3.x');
-    expect(count.left, title.left);
+    // Centred like 3.x (the history is one of the six pages 3.x centred).
+    final bar = tester.getRect(find.byType(AppBar));
+    expect(title.center.dx, closeTo(bar.center.dx, 60));
+    expect(count.center.dx, closeTo(title.center.dx, 1));
     expect(count.top, greaterThanOrEqualTo(title.bottom - 1));
 
     const buttons = [
@@ -473,7 +475,7 @@ void main() {
     await tester.tap(apply);
     await tester.pumpAndSettle();
     expect(find.text('当前值: 30'), findsOneWidget);
-    expect(tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '30')).selected, isTrue);
+    expect(tester.widget<AppChip>(find.widgetWithText(AppChip, '30')).selected, isTrue);
   });
 
   test('card data: audience settings, restriction, platform name for a missing streamer', () async {

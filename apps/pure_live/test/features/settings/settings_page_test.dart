@@ -323,6 +323,11 @@ void main() {
       await tapSettings(tester, find.byKey(const ValueKey('color-tab-1')));
       await tapSettings(tester, find.byKey(const ValueKey('color-primary-0')));
       await tester.enterText(find.byKey(const ValueKey('color-code')), '#12');
+      // The main button says what it does (U.1d; not "确认").
+      expect(
+        find.descendant(of: find.byKey(const ValueKey('settings-color-apply')), matching: find.text('保存')),
+        findsOneWidget,
+      );
       await tapSettings(tester, find.byKey(const ValueKey('settings-color-apply')));
       expect(find.text('请输入 6 位 RGB 或 8 位 ARGB 十六进制颜色代码'), findsOneWidget);
       await tester.enterText(find.byKey(const ValueKey('color-code')), '#F44336');
@@ -344,6 +349,11 @@ void main() {
 
       await tapSettings(tester, find.byKey(const ValueKey('settings-spacing-value-crossAxisSpacing')));
       await tester.enterText(find.byKey(const ValueKey('settings-spacing-input')), '99');
+      // The main button says what it does (U.1d; not "确认").
+      expect(
+        find.descendant(of: find.byKey(const ValueKey('settings-spacing-save')), matching: find.text('保存')),
+        findsOneWidget,
+      );
       await tapSettings(tester, find.byKey(const ValueKey('settings-spacing-save')));
       expect(find.text('请输入 0 到 64 之间的间距'), findsOneWidget);
       await tapSettings(tester, find.byKey(const ValueKey('settings-spacing-preset-12')));
@@ -372,6 +382,11 @@ void main() {
         expect(find.text('请输入 1 至 100 的整数'), findsOneWidget);
         await tester.enterText(find.byKey(const ValueKey('settings-page-size-input')), '30');
         await tapSettings(tester, find.byKey(const ValueKey('settings-page-size-add')));
+        // The main button says what it does (U.1d; not "确认").
+        expect(
+          find.descendant(of: find.byKey(const ValueKey('settings-page-sizes-save')), matching: find.text('保存')),
+          findsOneWidget,
+        );
         await tapSettings(tester, find.byKey(const ValueKey('settings-page-sizes-save')));
         expect(h.settings.get(Settings.pageSizeOptions), '12,24,30,36,48');
       });

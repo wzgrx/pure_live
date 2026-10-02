@@ -104,7 +104,6 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
     final platform = platformName(widget.site.id, fallback: widget.site.name);
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         title: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

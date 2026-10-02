@@ -75,8 +75,6 @@ class _ReleaseHistoryViewState extends ConsumerState<ReleaseHistoryView> {
     final short = MediaQuery.sizeOf(context).height < 480;
     return Scaffold(
       appBar: AppBar(
-        // 3.x's app bars centre the title (common/style/theme.dart:119).
-        centerTitle: true,
         toolbarHeight: short ? 48 : null,
         title: Text(i18n('version_history'), maxLines: 2, overflow: TextOverflow.ellipsis),
         actions: [

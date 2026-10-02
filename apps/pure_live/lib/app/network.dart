@@ -49,6 +49,14 @@ Future<NetworkKind> readNetworkKind() async {
 /// How pages read the network (tests replace it).
 final Provider<NetworkProbe> networkProbeProvider = Provider<NetworkProbe>((ref) => readNetworkKind);
 
+/// The network as it changes (connectivity_plus on phones; nothing on
+/// desktops, which never report offline). Offline states reload when a
+/// connection comes back (docs/ui/compare/U.1c "离线"); tests replace it.
+final Provider<Stream<NetworkKind>> networkChangesProvider = Provider<Stream<NetworkKind>>((ref) {
+  if (!Platform.isAndroid && !Platform.isIOS) return const Stream.empty();
+  return Connectivity().onConnectivityChanged.map(networkKindOf).handleError((Object _) {});
+});
+
 /// A request was not sent because the device is offline (3.x
 /// `network_disconnected`).
 final class Offline implements Exception {

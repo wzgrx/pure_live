@@ -152,12 +152,7 @@ class _ToolboxPageState extends ConsumerState<ToolboxPage> {
   Widget build(BuildContext context) {
     final short = MediaQuery.sizeOf(context).height < 480;
     return Scaffold(
-      appBar: AppBar(
-        // 3.x's app bars centre the title (common/style/theme.dart:119).
-        centerTitle: true,
-        toolbarHeight: short ? 48 : null,
-        title: Text(i18n('toolbox_title')),
-      ),
+      appBar: AppBar(toolbarHeight: short ? 48 : null, title: Text(i18n('toolbox_title'))),
       body: ListView(
         key: const ValueKey('toolbox-scroll'),
         physics: const PureLiveScrollPhysics(),

@@ -150,7 +150,6 @@ class _AreasViewState extends ConsumerState<AreasView> with TickerProviderStateM
     final tabs = _tabs;
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         automaticallyImplyLeading: !widget.route.inHome,
         leading: phoneTab ? const MenuButton() : null,
         actions: phoneTab ? const [CommonAppBarActions()] : null,
@@ -163,7 +162,8 @@ class _AreasViewState extends ConsumerState<AreasView> with TickerProviderStateM
                 tabAlignment: TabAlignment.center,
                 physics: const PureLiveBoundedScrollPhysics(),
                 tabs: [
-                  for (final id in ids) Tab(text: platformName(id, fallback: ref.read(sitesProvider).of(id).name)),
+                  for (final id in ids)
+                    TabLabel(label: platformName(id, fallback: ref.read(sitesProvider).of(id).name)),
                 ],
               ),
       ),

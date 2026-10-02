@@ -193,9 +193,9 @@ class RoomGridSkeleton extends ConsumerWidget {
 }
 
 /// "To top" and "to bottom" over a list once it scrolls (3.x
-/// `BasePageView`'s mini buttons): "to top" past 400, "to bottom" while more
-/// than 400 remain; at the bottom right of the list (U.4e c4).
-class JumpButtons extends StatefulWidget {
+/// `BasePageView`'s mini buttons; U.4e c4, U.1c c20): live_ui's
+/// [ScrollJumpButtons] with the app's words.
+class JumpButtons extends StatelessWidget {
   /// Creates the buttons for [controller].
   const new({required this.controller, required this.heroTag, super.key});
 
@@ -206,151 +206,20 @@ class JumpButtons extends StatefulWidget {
   final String heroTag;
 
   @override
-  State<JumpButtons> createState() => _JumpButtonsState();
+  Widget build(BuildContext context) => ScrollJumpButtons(
+    controller: controller,
+    heroTag: heroTag,
+    topTooltip: i18n('popular_to_top'),
+    bottomTooltip: i18n('popular_to_bottom'),
+  );
 }
 
-class _JumpButtonsState extends State<JumpButtons> {
-  bool _top = false;
-  bool _bottom = false;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(_sync);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
-  }
-
-  @override
-  void didUpdateWidget(JumpButtons oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller.removeListener(_sync);
-      widget.controller.addListener(_sync);
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_sync);
-    super.dispose();
-  }
-
-  void _sync() {
-    if (!mounted) return;
-    final controller = widget.controller;
-    if (!controller.hasClients || controller.positions.length != 1) {
-      if (_top || _bottom) setState(() => _top = _bottom = false);
-      return;
-    }
-    final position = controller.position;
-    final top = position.pixels > 400;
-    final bottom = position.maxScrollExtent - position.pixels > 400;
-    if (top != _top || bottom != _bottom) {
-      setState(() {
-        _top = top;
-        _bottom = bottom;
-      });
-    }
-  }
-
-  void _jump({required bool up}) {
-    final controller = widget.controller;
-    if (!controller.hasClients) return;
-    final target = up ? 0.0 : controller.position.maxScrollExtent;
-    final distance = (target - controller.offset).abs();
-    controller.animateTo(
-      target,
-      duration: Duration(milliseconds: (180 + distance / 8).round().clamp(220, 520)),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final background = Theme.of(context).colorScheme.surfaceContainerLow;
-    Widget button({required bool shown, required bool up}) => AnimatedScale(
-      scale: shown ? 1 : 0,
-      duration: const Duration(milliseconds: 200),
-      child: FloatingActionButton.small(
-        key: ValueKey(up ? 'jump-top' : 'jump-bottom'),
-        heroTag: '${widget.heroTag}-${up ? 'top' : 'bottom'}',
-        elevation: 3,
-        backgroundColor: background,
-        tooltip: i18n(up ? 'popular_to_top' : 'popular_to_bottom'),
-        onPressed: shown ? () => _jump(up: up) : null,
-        child: Icon(up ? AppIcons.toTop : AppIcons.toBottom),
-      ),
-    );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      spacing: 8,
-      children: [
-        button(shown: _top, up: true),
-        button(shown: _bottom, up: false),
-      ],
-    );
-  }
-}
-
-/// A short explanation over a list in a tinted bar with ⓘ (U.4b c6): at
-/// most two lines; a tap shows all of it.
-class NoticeBar extends StatefulWidget {
-  /// Creates the bar.
-  const new({required this.text, super.key});
-
-  /// The words.
-  final String text;
-
-  @override
-  State<NoticeBar> createState() => _NoticeBarState();
-}
-
-class _NoticeBarState extends State<NoticeBar> {
-  bool _open = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 6, 12, 2),
-      child: Material(
-        color: scheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () => setState(() => _open = !_open),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 8,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 1),
-                  child: Icon(AppIcons.info, size: 16, color: scheme.primary),
-                ),
-                Expanded(
-                  child: Text(
-                    widget.text,
-                    maxLines: _open ? null : 2,
-                    overflow: _open ? null : TextOverflow.ellipsis,
-                    style: context.textStyles.t12.copyWith(color: scheme.onSurfaceVariant, height: 1.5),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The mobile-data notice above a list (3.x `_buildCellularBanner`): shown
-/// while the last load ran on mobile data; "never show" hides it for the
-/// session.
+/// The mobile-data reminder above a list (3.x `_buildCellularBanner`, U.1c
+/// c8: the reminder colour of the page-top bar): shown while the last load
+/// ran on mobile data; ✕ hides it until the next such load, "不再显示" for
+/// the session (3.x).
 class MobileDataBanner extends StatelessWidget {
-  /// Creates the notice.
+  /// Creates the reminder.
   const new({super.key});
 
   @override
@@ -358,58 +227,121 @@ class MobileDataBanner extends StatelessWidget {
     listenable: Listenable.merge([MobileDataNotice.onMobileData, MobileDataNotice.dismissed]),
     builder: (context, _) {
       if (!MobileDataNotice.onMobileData.value || MobileDataNotice.dismissed.value) return const SizedBox.shrink();
-      final colors = Theme.of(context).colorScheme;
-      return Container(
+      return StatusBanner(
         key: const ValueKey('mobile-data-notice'),
-        margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-        padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
-        decoration: BoxDecoration(
-          color: colors.primaryContainer.withValues(alpha: 0.25),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: colors.primary.withValues(alpha: 0.15)),
-        ),
-        child: Row(
-          children: [
-            Icon(AppIcons.mobileData, color: colors.primary, size: 18),
-            const SizedBox(width: 10),
-            Expanded(child: Text(i18n('cellular_warning_msg'), style: context.textStyles.t13)),
-            TextButton(
-              key: const ValueKey('mobile-data-never'),
-              onPressed: () => MobileDataNotice.dismissed.value = true,
-              child: Text(i18n('never_show')),
-            ),
-          ],
-        ),
+        kind: StatusBannerKind.warning,
+        icon: AppIcons.mobileData,
+        text: i18n('cellular_warning_msg'),
+        actions: [
+          (
+            key: const ValueKey('mobile-data-never'),
+            label: i18n('never_show'),
+            onPressed: () => MobileDataNotice.dismissed.value = true,
+          ),
+        ],
+        onClose: () => MobileDataNotice.onMobileData.value = false,
       );
     },
   );
 }
 
-/// The state of a list that failed to load (3.x `AppStatusView`): a login
-/// for a platform that wants one ("前往登录" with the login icon, U.4e
-/// c6), else "网络请求失败" with the reason in one sentence and "重试"
-/// (U.4b c5).
-Widget loadErrorStatus(Object error, {required VoidCallback onRetry}) {
+/// Reloads [onOnline] when the device gets a connection back (the offline
+/// state says so, U.1c).
+class ReloadWhenOnline extends ConsumerStatefulWidget {
+  /// Watches the network around [child].
+  const new({required this.onOnline, required this.child, super.key});
+
+  /// The reload.
+  final VoidCallback onOnline;
+
+  /// The offline state.
+  final Widget child;
+
+  @override
+  ConsumerState<ReloadWhenOnline> createState() => _ReloadWhenOnlineState();
+}
+
+class _ReloadWhenOnlineState extends ConsumerState<ReloadWhenOnline> {
+  StreamSubscription<NetworkKind>? _changes;
+
+  @override
+  void initState() {
+    super.initState();
+    _changes = ref.read(networkChangesProvider).listen((kind) {
+      if (kind != NetworkKind.none && mounted) widget.onOnline();
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_changes?.cancel());
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// The state of a list that failed to load (3.x `AppStatusView`, U.1c
+/// c2–c5): a login for a platform that wants one (the restricted state,
+/// "前往登录"), no network (the offline state; it reloads once connected),
+/// else "加载失败" with the reason in one sentence, "重试" and the raw error
+/// under "详情" (C4).
+Widget loadErrorStatus(Object error, {required VoidCallback onRetry, bool compact = false}) {
   if (isLoginError(error)) {
     return AppStatusView(
-      type: AppStatusType.error,
-      icon: AppIcons.loginRequired,
+      type: AppStatusType.restricted,
+      compact: compact,
       title: i18n('login_required_title'),
       subtitle: i18n('login_required_subtitle'),
       buttonText: i18n('go_to_login'),
       buttonIcon: AppIcons.login,
       onButtonPressed: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kSettingsAccount)),
+      secondaryButtonText: i18n('retry'),
+      onSecondaryButtonPressed: onRetry,
+    );
+  }
+  if (error is Offline) {
+    return ReloadWhenOnline(
+      onOnline: onRetry,
+      child: AppStatusView(
+        type: AppStatusType.offline,
+        compact: compact,
+        buttonText: i18n('retry'),
+        onButtonPressed: onRetry,
+      ),
     );
   }
   return AppStatusView(
     type: AppStatusType.error,
-    icon: AppIcons.networkError,
-    title: i18n('network_error_title'),
+    compact: compact,
+    title: i18n('refresh_load_failed'),
     subtitle: describeLoadError(error),
+    details: '$error',
     buttonText: i18n('retry'),
     onButtonPressed: onRetry,
   );
 }
+
+/// The bar over a list whose refresh failed while the old rooms stay (U.1c
+/// c8, the error colour of the page-top bar; 3.x `MaterialBanner`): the
+/// reason, "重试", "详情" (the raw error) and ✕.
+Widget refreshErrorBanner(
+  BuildContext context,
+  Object error, {
+  required Key key,
+  required VoidCallback? onRetry,
+  required VoidCallback onClose,
+}) => StatusBanner(
+  key: key,
+  kind: StatusBannerKind.error,
+  text: i18n('popular_refresh_failed', args: {'reason': describeLoadError(error)}),
+  actions: [
+    (key: null, label: i18n('retry'), onPressed: onRetry),
+    (key: null, label: i18n('details'), onPressed: () => unawaited(showStatusDetails(context, '$error'))),
+  ],
+  onClose: onClose,
+);
 
 /// What an empty feed says.
 typedef FeedEmptyWords = ({IconData icon, String title, String Function({required bool desktop}) subtitle});
@@ -700,38 +632,27 @@ class _RoomFeedViewState extends ConsumerState<RoomFeedView> {
         Column(
           children: [
             if (widget.notice case final notice? when notice.isNotEmpty)
-              NoticeBar(key: ValueKey('$prefix-notice'), text: notice),
+              StatusBanner(
+                key: ValueKey('$prefix-notice'),
+                kind: StatusBannerKind.info,
+                text: notice,
+                margin: const EdgeInsets.fromLTRB(12, 6, 12, 2),
+              ),
             if (hasContent) const MobileDataBanner(),
-            if (_feed.errorOnRefresh && _feed.error != null && hasContent) _refreshErrorBanner(context),
+            if (_feed.errorOnRefresh && _feed.error != null && hasContent)
+              refreshErrorBanner(
+                context,
+                _feed.error!,
+                key: ValueKey('${widget.keyPrefix}-refresh-error'),
+                onRetry: _feed.busy ? null : () => unawaited(_refresh()),
+                onClose: _feed.clearError,
+              ),
             Expanded(child: body),
           ],
         ),
         if (hasContent && _feed.busy)
           const Positioned(top: 0, left: 0, right: 0, child: LinearProgressIndicator(minHeight: 2.5)),
       ],
-    );
-  }
-
-  Widget _refreshErrorBanner(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-      child: Semantics(
-        liveRegion: true,
-        child: MaterialBanner(
-          key: ValueKey('${widget.keyPrefix}-refresh-error'),
-          backgroundColor: colors.errorContainer,
-          leading: Icon(AppIcons.info, color: colors.onErrorContainer),
-          content: Text(
-            i18n('popular_refresh_failed', args: {'reason': describeLoadError(_feed.error)}),
-            style: TextStyle(color: colors.onErrorContainer),
-          ),
-          actions: [
-            TextButton(onPressed: _feed.clearError, child: Text(i18n('close'))),
-            TextButton(onPressed: _feed.busy ? null : () => unawaited(_refresh()), child: Text(i18n('retry'))),
-          ],
-        ),
-      ),
     );
   }
 

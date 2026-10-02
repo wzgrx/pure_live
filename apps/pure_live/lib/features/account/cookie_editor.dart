@@ -315,51 +315,54 @@ class _CookieEditorScaffoldState extends State<CookieEditorScaffold> {
       ),
       const SizedBox(height: 12),
       widget.tip,
-      const SizedBox(height: 20),
-      context.buildGroupTitle(i18n('cookie')),
-      context.buildModernCard([
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AccountField(input: widget.cookie, error: _error),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  chip(const ValueKey('account-cookie-paste'), AppIcons.pasteText, i18n('account_paste'), _paste),
-                  chip(
-                    const ValueKey('account-cookie-clear-input'),
-                    AppIcons.eraseText,
-                    i18n('account_clear_input'),
-                    _cookie.clear,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                key: const ValueKey('account-cookie-save'),
-                onPressed: _busy || !_dirty ? null : _save,
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  textStyle: context.textStyles.t14.emphasis,
+      const SizedBox(height: 12),
+      SettingsGroup(
+        title: i18n('cookie'),
+        first: true,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AccountField(input: widget.cookie, error: _error),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    chip(const ValueKey('account-cookie-paste'), AppIcons.pasteText, i18n('account_paste'), _paste),
+                    chip(
+                      const ValueKey('account-cookie-clear-input'),
+                      AppIcons.eraseText,
+                      i18n('account_clear_input'),
+                      _cookie.clear,
+                    ),
+                  ],
                 ),
-                icon: _busy
-                    ? SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: scheme.onSurfaceVariant),
-                      )
-                    : const Icon(AppIcons.save, size: 18),
-                label: Text(_busy ? saving : i18n('save')),
-              ),
-            ],
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  key: const ValueKey('account-cookie-save'),
+                  onPressed: _busy || !_dirty ? null : _save,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    textStyle: context.textStyles.t14.emphasis,
+                  ),
+                  icon: _busy
+                      ? SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: scheme.onSurfaceVariant),
+                        )
+                      : const Icon(AppIcons.save, size: 18),
+                  label: Text(_busy ? saving : i18n('save')),
+                ),
+              ],
+            ),
           ),
-        ),
-      ]),
-      for (final item in widget.extra) ...[const SizedBox(height: 20), item],
+        ],
+      ),
+      for (final item in widget.extra) ...[const SizedBox(height: 8), item],
       if (widget.hasStored) ...[
         const SizedBox(height: 12),
         Center(
@@ -398,7 +401,7 @@ class _CookieEditorScaffoldState extends State<CookieEditorScaffold> {
           const SingleActivator(LogicalKeyboardKey.keyS, meta: true): () => unawaited(_save()),
         },
         child: Scaffold(
-          appBar: AppBar(centerTitle: true, title: Text(i18n('account_editor_title', args: {'name': platform.name}))),
+          appBar: AppBar(title: Text(i18n('account_editor_title', args: {'name': platform.name}))),
           body: SafeArea(
             top: false,
             child: LayoutBuilder(

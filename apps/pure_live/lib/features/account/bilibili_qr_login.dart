@@ -247,7 +247,7 @@ class _BilibiliQrLoginViewState extends ConsumerState<BilibiliQrLoginView> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(centerTitle: true, title: Text(i18n('bilibili_login'))),
+      appBar: AppBar(title: Text(i18n('bilibili_login'))),
       body: ListView(
         key: const ValueKey('bilibili-qr-scroll-view'),
         padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
@@ -303,8 +303,9 @@ class _BilibiliQrLoginViewState extends ConsumerState<BilibiliQrLoginView> {
   }
 }
 
-/// The code in its card; loading, scanned, expired, failed and checking
-/// are laid over it, so it never moves (c11; 3.x swapped it for text).
+/// The code in live_ui's [QrCodeCard] (U.1c c11): loading, scanned,
+/// expired, failed and checking are laid over it, so it never moves (3.x
+/// swapped it for text).
 class _QrCard extends StatelessWidget {
   const new({required this.login, required this.size});
 
@@ -313,97 +314,32 @@ class _QrCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final phase = login.phase;
-    final url = login.url;
-    final ink = context.textStyles.t14.copyWith(color: QrColors.ink);
-    // The veil is always white: the dark theme's light primary would fade on it.
-    final mark = scheme.brightness == Brightness.dark ? QrColors.ink : scheme.primary;
-    Widget veil(List<Widget> children, {Key? key}) => Positioned.fill(
-      key: key,
-      child: ColoredBox(
-        color: QrColors.veil,
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: children),
-      ),
-    );
-    Widget action(Key key, String label, VoidCallback onPressed) => FilledButton.icon(
-      key: key,
-      onPressed: onPressed,
-      style: FilledButton.styleFrom(
-        minimumSize: const Size(0, 36),
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-      ),
-      icon: const Icon(AppIcons.retry, size: 16),
-      label: Text(label),
-    );
-    const spinner = SizedBox.square(dimension: 28, child: CircularProgressIndicator(strokeWidth: 3));
-    final overlay = switch (phase) {
-      BilibiliQrPhase.loading => veil(key: const ValueKey('qr-loading'), [
-        spinner,
-        const SizedBox(height: 12),
-        Text(i18n('qr_loading'), style: ink),
-      ]),
-      BilibiliQrPhase.waiting => null,
-      BilibiliQrPhase.scanned => veil(key: const ValueKey('qr-scanned'), [
-        Icon(AppIcons.qrScanned, size: 44, color: mark),
-        const SizedBox(height: 8),
-        Text(i18n('qr_scanned'), style: context.textStyles.t15.emphasis.copyWith(color: QrColors.ink)),
-      ]),
-      BilibiliQrPhase.expired => veil(key: const ValueKey('qr-expired'), [
-        const Icon(AppIcons.failed, size: 32, color: QrColors.ink),
-        const SizedBox(height: 8),
-        Text(i18n('qr_expired'), style: ink),
-        const SizedBox(height: 8),
-        action(const ValueKey('bilibili-qr-refresh'), i18n('refresh_qr'), () => unawaited(login.load())),
-      ]),
-      BilibiliQrPhase.failed => veil(key: const ValueKey('qr-failed'), [
-        Icon(AppIcons.failed, size: 32, color: scheme.error),
-        const SizedBox(height: 8),
-        Text(
-          i18n(login.errorKey == 'qr_load_failed' ? 'qr_load_failed' : 'account_qr_stopped'),
-          textAlign: TextAlign.center,
-          style: ink,
-        ),
-        const SizedBox(height: 8),
-        action(const ValueKey('bilibili-qr-retry'), i18n('retry'), () => unawaited(login.load())),
-      ]),
-      BilibiliQrPhase.verifying => veil(key: const ValueKey('qr-verifying'), [
-        spinner,
-        const SizedBox(height: 12),
-        Text(i18n('account_verifying'), style: ink),
-      ]),
-      BilibiliQrPhase.done => veil(key: const ValueKey('qr-done'), [
-        Icon(AppIcons.qrScanned, size: 44, color: mark),
-        const SizedBox(height: 8),
-        Text(i18n('bilibili_login_verified'), textAlign: TextAlign.center, style: ink),
-      ]),
-    };
-    return Center(
-      child: Container(
-        key: const ValueKey('bilibili-qr-card'),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.05), width: 0.5),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: SizedBox.square(
-            dimension: size,
-            child: Stack(
-              children: [
-                if (url != null)
-                  QrCodeWidget(key: const ValueKey('bilibili-qr-code'), data: '$url', size: size)
-                else
-                  const Positioned.fill(child: ColoredBox(color: QrColors.paper)),
-                ?overlay,
-              ],
-            ),
-          ),
-        ),
-      ),
+    final retry = login.phase == BilibiliQrPhase.failed;
+    return QrCodeCard(
+      key: const ValueKey('bilibili-qr-card'),
+      data: login.url?.toString(),
+      size: size,
+      status: switch (login.phase) {
+        BilibiliQrPhase.loading => QrCodeStatus.loading,
+        BilibiliQrPhase.waiting => QrCodeStatus.ready,
+        BilibiliQrPhase.scanned => QrCodeStatus.scanned,
+        BilibiliQrPhase.expired => QrCodeStatus.expired,
+        BilibiliQrPhase.failed => QrCodeStatus.failed,
+        BilibiliQrPhase.verifying => QrCodeStatus.working,
+        BilibiliQrPhase.done => QrCodeStatus.done,
+      },
+      message: switch (login.phase) {
+        BilibiliQrPhase.loading => i18n('qr_loading'),
+        BilibiliQrPhase.waiting => null,
+        BilibiliQrPhase.scanned => i18n('qr_scanned'),
+        BilibiliQrPhase.expired => i18n('qr_expired'),
+        BilibiliQrPhase.failed => i18n(login.errorKey == 'qr_load_failed' ? 'qr_load_failed' : 'account_qr_stopped'),
+        BilibiliQrPhase.verifying => i18n('account_verifying'),
+        BilibiliQrPhase.done => i18n('bilibili_login_verified'),
+      },
+      actionLabel: i18n(retry ? 'retry' : 'refresh_qr'),
+      actionKey: ValueKey(retry ? 'bilibili-qr-retry' : 'bilibili-qr-refresh'),
+      onAction: () => unawaited(login.load()),
     );
   }
 }

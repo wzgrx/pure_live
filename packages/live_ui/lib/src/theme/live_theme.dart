@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/widgets/app_chip.dart';
+import 'package:live_ui/src/widgets/focus_ring.dart';
 
 /// The page transitions of 3.x (`appPageTransitionsTheme`).
 ///
@@ -13,6 +15,63 @@ const PageTransitionsTheme appPageTransitionsTheme = PageTransitionsTheme(
     TargetPlatform.windows: FadeForwardsPageTransitionsBuilder(),
   },
 );
+
+/// A button's outline: the keyboard focus frame (2 points in the primary
+/// colour, docs/ui/compare/U.1c c21) while the keyboard focus is on it,
+/// else [outline] ([disabledOutline] when disabled), or none. Equal frames
+/// compare equal, so a rebuilt theme does not animate.
+@immutable
+final class FocusFrame implements WidgetStateProperty<BorderSide?> {
+  /// Creates the frame in [primary].
+  const new(this.primary, {this.outline, this.disabledOutline});
+
+  /// The frame's colour.
+  final Color primary;
+
+  /// The outline when not focused (an outlined button); null: none.
+  final Color? outline;
+
+  /// The outline when disabled.
+  final Color? disabledOutline;
+
+  @override
+  BorderSide? resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.focused) && focusFramesShown) return BorderSide(color: primary, width: 2);
+    if (states.contains(WidgetState.disabled) && disabledOutline != null) return BorderSide(color: disabledOutline!);
+    return outline == null ? null : BorderSide(color: outline!);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is FocusFrame &&
+      other.primary == primary &&
+      other.outline == outline &&
+      other.disabledOutline == disabledOutline;
+
+  @override
+  int get hashCode => Object.hash(primary, outline, disabledOutline);
+}
+
+/// The tint of a tab under the pointer and when pressed (U.1c c12).
+@immutable
+final class _TabOverlay implements WidgetStateProperty<Color?> {
+  const new(this.ink);
+
+  final Color ink;
+
+  @override
+  Color? resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.pressed)) return ink.withValues(alpha: 0.12);
+    if (states.contains(WidgetState.hovered)) return ink.withValues(alpha: 0.08);
+    return Colors.transparent;
+  }
+
+  @override
+  bool operator ==(Object other) => other is _TabOverlay && other.ink == ink;
+
+  @override
+  int get hashCode => ink.hashCode;
+}
 
 /// Resolves the app-wide font without overriding a platform's own default.
 ///
@@ -200,11 +259,15 @@ final class LiveTheme {
     final colors = base.colorScheme;
     return base.copyWith(
       splashFactory: NoSplash.splashFactory,
-      // 3.x's main.dart replaced MyTheme's app bar theme (flat, centred title)
-      // with this one, so app bars keep the platform's title alignment and
-      // Material's defaults; this is what 3.x showed.
-      appBarTheme: const AppBarTheme(surfaceTintColor: Colors.transparent),
+      // Every title centred (3.x `MyTheme`, docs/ui/TASKS.md §7 from U.9 and
+      // U.10, U.1c); 3.x's main.dart dropped it again by replacing the app
+      // bar theme, so only the pages that asked for it were centred. Pages
+      // with a title and a line under it ([PageTitle]) or tabs in the title
+      // turn it off themselves.
+      appBarTheme: const AppBarTheme(surfaceTintColor: Colors.transparent, centerTitle: true),
       pageTransitionsTheme: appPageTransitionsTheme,
+      // U.1c c12, c21: the tab's own 8-point block lights up under the
+      // pointer and when pressed; the keyboard frame comes from `TabLabel`.
       tabBarTheme: TabBarThemeData(
         dividerColor: Colors.transparent,
         indicatorSize: TabBarIndicatorSize.label,
@@ -213,7 +276,21 @@ final class LiveTheme {
         unselectedLabelStyle: textTheme.titleMedium?.copyWith(fontWeight: regular),
         labelColor: colors.primary,
         unselectedLabelColor: colors.onSurfaceVariant.withValues(alpha: 0.8),
+        splashBorderRadius: BorderRadius.circular(8),
+        overlayColor: _TabOverlay(colors.onSurface),
       ),
+      chipTheme: appChipTheme(colors, textTheme),
+      filledButtonTheme: FilledButtonThemeData(style: ButtonStyle(side: FocusFrame(colors.primary))),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: ButtonStyle(
+          side: FocusFrame(
+            colors.primary,
+            outline: colors.outline,
+            disabledOutline: colors.onSurface.withValues(alpha: 0.12),
+          ),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(style: ButtonStyle(side: FocusFrame(colors.primary))),
       cardTheme: CardThemeData(
         elevation: 0,
         margin: EdgeInsets.zero,
@@ -226,21 +303,31 @@ final class LiveTheme {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           textStyle: textTheme.labelLarge?.copyWith(fontWeight: semiBold),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
+        ).copyWith(side: FocusFrame(colors.primary)),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           textStyle: textTheme.labelLarge?.copyWith(fontWeight: medium),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
+        ).copyWith(side: FocusFrame(colors.primary)),
       ),
+      // The list row (U.1c c16): one row for lists, panels and settings;
+      // title 15 regular, explanation 12 in the variant ink, icons in the
+      // variant ink, at least 56 high; the chosen row on the secondary
+      // container.
       listTileTheme: ListTileThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        titleTextStyle: textTheme.bodyLarge?.copyWith(fontWeight: medium),
-        subtitleTextStyle: textTheme.bodyMedium?.copyWith(color: colors.onSurfaceVariant),
+        titleTextStyle: textTheme.bodyLarge?.copyWith(
+          fontSize: fontSizes.titleMedium,
+          fontWeight: regular,
+          color: colors.onSurface,
+        ),
+        subtitleTextStyle: textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant, height: 1.45),
         leadingAndTrailingTextStyle: textTheme.labelMedium,
-        selectedColor: colors.primary,
-        selectedTileColor: colors.primary.withValues(alpha: 0.06),
+        iconColor: colors.onSurfaceVariant,
+        minTileHeight: 56,
+        selectedColor: colors.onSecondaryContainer,
+        selectedTileColor: colors.secondaryContainer,
       ),
       inputDecorationTheme: InputDecorationThemeData(
         filled: true,

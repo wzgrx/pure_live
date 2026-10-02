@@ -8,10 +8,8 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/areas/area_card.dart';
 import 'package:pure_live/features/areas/area_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/routes/app_navigator.dart';
-import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/paging.dart';
-import 'package:pure_live/shared/rooms/room_texts.dart';
+import 'package:pure_live/shared/rooms/room_grid.dart';
 
 /// Room under the grid for the floating "关注分区" button.
 const double areasButtonClearance = 80;
@@ -107,20 +105,8 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
 
   Widget _status(BuildContext context) {
     final error = _catalog.error;
-    if (error != null) {
-      final login = isLoginError(error);
-      return AppStatusView(
-        type: AppStatusType.error,
-        icon: login ? AppIcons.loginRequired : AppIcons.networkError,
-        title: i18n(login ? 'login_required_title' : 'network_error_title'),
-        subtitle: describeLoadError(error),
-        buttonText: i18n(login ? 'go_to_login' : 'retry'),
-        buttonIcon: login ? AppIcons.login : null,
-        onButtonPressed: login
-            ? () => AppNavigator.toNamed<void>(RoutePath.kSettingsAccount).ignore()
-            : () => _catalog.refresh().ignore(),
-      );
-    }
+    // The lists' one failed state (U.1c): restricted, offline or failed.
+    if (error != null) return loadErrorStatus(error, onRetry: () => _catalog.refresh().ignore());
     return EmptyView(
       icon: AppIcons.areas,
       title: i18n('empty_areas_title'),
@@ -130,30 +116,14 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
     );
   }
 
-  /// The secondary tab style of the categories (U.4d c2, choice X1): 14
-  /// points, grey, the selected one dark and semi-bold, the indicator under
-  /// the whole tab, a line under the row; from the left.
-  Widget _categoryTabs(BuildContext context, TabController tabs, List<LiveCategory> categories) {
-    final scheme = Theme.of(context).colorScheme;
-    final styles = context.textStyles;
-    return ScrollableTabBar(
-      key: const ValueKey('area-category-tabs'),
-      controller: tabs,
-      isScrollable: true,
-      tabAlignment: TabAlignment.start,
-      indicatorSize: TabBarIndicatorSize.tab,
-      indicatorColor: scheme.primary,
-      dividerColor: scheme.outlineVariant,
-      dividerHeight: 1,
-      labelColor: scheme.onSurface,
-      unselectedLabelColor: scheme.onSurfaceVariant,
-      labelStyle: styles.t14.copyWith(fontWeight: FontWeight.w600),
-      unselectedLabelStyle: styles.t14.copyWith(fontWeight: FontWeight.w400),
-      labelPadding: const EdgeInsets.symmetric(horizontal: 14),
-      physics: const PureLiveBoundedScrollPhysics(),
-      tabs: [for (final category in categories) Tab(text: category.name)],
-    );
-  }
+  /// The categories in the second row of tabs (U.4d c2, choice X1; the
+  /// shared [SecondaryTabBar], U.1c c12).
+  Widget _categoryTabs(BuildContext context, TabController tabs, List<LiveCategory> categories) => SecondaryTabBar(
+    key: const ValueKey('area-category-tabs'),
+    controller: tabs,
+    physics: const PureLiveBoundedScrollPhysics(),
+    tabs: [for (final category in categories) TabLabel(label: category.name)],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +131,6 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
     final categories = _catalog.categories;
     if (!_catalog.hasLoaded || (_catalog.isLoading && categories.isEmpty)) return const _AreasSkeleton();
     if (categories.isEmpty) return _status(context);
-    final theme = Theme.of(context);
     final tabs = _tabs;
     final error = _catalog.error;
     final Widget content;
@@ -192,15 +161,12 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
         if (tabs != null) _categoryTabs(context, tabs, categories),
         if (_catalog.isLoading) const LinearProgressIndicator(minHeight: 2.5),
         if (error != null)
-          Material(
+          refreshErrorBanner(
+            context,
+            error,
             key: const ValueKey('areas-refresh-error'),
-            color: theme.colorScheme.errorContainer,
-            child: ListTile(
-              dense: true,
-              leading: Icon(AppIcons.info, color: theme.colorScheme.onErrorContainer),
-              title: Text(describeLoadError(error), style: TextStyle(color: theme.colorScheme.onErrorContainer)),
-              trailing: TextButton(onPressed: () => _catalog.refresh().ignore(), child: Text(i18n('retry'))),
-            ),
+            onRetry: _catalog.isLoading ? null : () => _catalog.refresh().ignore(),
+            onClose: _catalog.clearError,
           ),
         Expanded(child: content),
       ],

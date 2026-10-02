@@ -132,7 +132,7 @@ class _FavoriteAreasViewState extends ConsumerState<FavoriteAreasView> with Tick
             isScrollable: true,
             tabAlignment: TabAlignment.start,
             physics: const PureLiveBoundedScrollPhysics(),
-            tabs: [for (final id in _ids) Tab(text: label(id))],
+            tabs: [for (final id in _ids) TabLabel(label: label(id))],
           ),
           Expanded(
             child: TabBarView(
@@ -158,7 +158,7 @@ class _FavoriteAreasViewState extends ConsumerState<FavoriteAreasView> with Tick
       );
     }
     return Scaffold(
-      appBar: AppBar(centerTitle: true, title: Text(i18n('favorite_areas'))),
+      appBar: AppBar(title: Text(i18n('favorite_areas'))),
       body: body,
     );
   }

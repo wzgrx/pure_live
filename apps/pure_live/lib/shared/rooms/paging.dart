@@ -208,37 +208,36 @@ class _PaginationBarState extends State<PaginationBar> {
                 if (sizes != null) ...[
                   const SizedBox(width: 24),
                   Text('${i18n('per_page')}: ', style: styles.t13Muted),
-                  PopupMenuButton<int>(
-                    key: const ValueKey('pager-size'),
-                    initialValue: widget.pageSize,
-                    tooltip: i18n('per_page'),
-                    position: PopupMenuPosition.under,
-                    onSelected: widget.onPageSize,
-                    itemBuilder: (context) => [
-                      for (final size in sizes)
-                        PopupMenuItem(
-                          value: size,
-                          child: Text(
-                            '$size',
-                            style: size == widget.pageSize
-                                ? styles.t13Bold.copyWith(color: theme.colorScheme.primary)
-                                : styles.t13,
+                  // The small menu (U.1d, B03), the current size ticked.
+                  Builder(
+                    builder: (anchor) => Tooltip(
+                      message: i18n('per_page'),
+                      child: InkWell(
+                        key: const ValueKey('pager-size'),
+                        borderRadius: BorderRadius.circular(6),
+                        onTap: () async {
+                          final picked = await showAppMenu<int>(
+                            anchor,
+                            selected: widget.pageSize,
+                            entries: [for (final size in sizes) AppMenuEntry(value: size, label: '$size')],
+                          );
+                          if (picked != null) widget.onPageSize(picked);
+                        },
+                        child: Container(
+                          constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('${widget.pageSize}', style: styles.t13),
+                              Icon(Icons.arrow_drop_down_rounded, size: 18, color: theme.hintColor),
+                            ],
                           ),
                         ),
-                    ],
-                    child: Container(
-                      constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('${widget.pageSize}', style: styles.t13),
-                          Icon(Icons.arrow_drop_down_rounded, size: 18, color: theme.hintColor),
-                        ],
                       ),
                     ),
                   ),

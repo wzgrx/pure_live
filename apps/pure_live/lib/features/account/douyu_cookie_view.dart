@@ -198,70 +198,75 @@ class _DouyuCookieViewState extends ConsumerState<DouyuCookieView> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            context.buildGroupTitle(i18n('account_douyu_renewal')),
-            context.buildModernCard([
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    AccountField(
-                      input: CookieInput(
-                        controller: _ltp0,
-                        fieldKey: const ValueKey('douyu-ltp0-input'),
-                        label: i18n('douyu_ltp0_label'),
-                        hint: i18n('douyu_ltp0_hint'),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    AccountField(
-                      input: CookieInput(
-                        controller: _did,
-                        fieldKey: const ValueKey('douyu-did-input'),
-                        label: i18n('douyu_did_label'),
-                        hint: i18n('douyu_did_hint'),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        OutlinedButton.icon(
-                          key: const ValueKey('douyu-renew-now'),
-                          onPressed: _renewing ? null : _renewNow,
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(0, 40),
-                            shape: const StadiumBorder(),
-                            textStyle: context.textStyles.t14.emphasis,
-                          ),
-                          icon: _renewing
-                              ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                              : const Icon(AppIcons.refresh, size: 18),
-                          label: Text(i18n('douyu_cookie_refresh_now')),
+            SettingsGroup(
+              title: i18n('account_douyu_renewal'),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AccountField(
+                        input: CookieInput(
+                          controller: _ltp0,
+                          fieldKey: const ValueKey('douyu-ltp0-input'),
+                          label: i18n('douyu_ltp0_label'),
+                          hint: i18n('douyu_ltp0_hint'),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            i18n('account_douyu_renew_now_desc'),
-                            style: context.textStyles.t12.copyWith(color: scheme.onSurfaceVariant, height: 1.45),
-                          ),
+                      ),
+                      const SizedBox(height: 12),
+                      AccountField(
+                        input: CookieInput(
+                          controller: _did,
+                          fieldKey: const ValueKey('douyu-did-input'),
+                          label: i18n('douyu_did_label'),
+                          hint: i18n('douyu_did_hint'),
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          OutlinedButton.icon(
+                            key: const ValueKey('douyu-renew-now'),
+                            onPressed: _renewing ? null : _renewNow,
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(0, 40),
+                              shape: const StadiumBorder(),
+                              textStyle: context.textStyles.t14.emphasis,
+                            ),
+                            icon: _renewing
+                                ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                                : const Icon(AppIcons.refresh, size: 18),
+                            label: Text(i18n('douyu_cookie_refresh_now')),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              i18n('account_douyu_renew_now_desc'),
+                              style: context.textStyles.t12.copyWith(color: scheme.onSurfaceVariant, height: 1.45),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ]),
+              ],
+            ),
             const SizedBox(height: 12),
-            context.buildModernCard([
-              context.buildSwitchTile(
-                key: const ValueKey('douyu-force-renew'),
-                title: i18n('account_douyu_force_renew'),
-                subtitle: i18n('account_douyu_force_renew_desc'),
-                isLong: true,
-                value: forceRenew,
-                onChanged: (value) => unawaited(ref.read(storeProvider).settings.set(Settings.douyuForceRenew, value)),
-              ),
-            ]),
+            SettingsGroup(
+              children: [
+                SettingsSwitchRow(
+                  key: const ValueKey('douyu-force-renew'),
+                  title: i18n('account_douyu_force_renew'),
+                  subtitle: i18n('account_douyu_force_renew_desc'),
+                  subtitleMaxLines: null,
+                  value: forceRenew,
+                  onChanged: (value) =>
+                      unawaited(ref.read(storeProvider).settings.set(Settings.douyuForceRenew, value)),
+                ),
+              ],
+            ),
           ],
         ),
       ],

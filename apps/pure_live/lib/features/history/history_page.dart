@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
@@ -227,102 +226,97 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop && _filtering) _toggleFilter();
       },
-      child: CallbackShortcuts(
+      child: EscapeBack(
         // Esc is Back: the filter closes first.
-        bindings: {const SingleActivator(LogicalKeyboardKey.escape): _back},
-        child: FocusScope(
-          autofocus: true,
-          child: Scaffold(
-            appBar: AppBar(
-              centerTitle: false,
-              titleSpacing: 4,
-              // "观看记录" with "18 / 50 条" under it (c2, Z1 A).
-              title: PageTitle(
-                title: i18n('watch_history'),
-                subtitle: limit == unlimitedHistoryLimit
-                    ? i18n('history_count_unlimited', args: {'count': '${all.length}'})
-                    : i18n('history_count_of_limit', args: {'count': '${all.length}', 'limit': '$limit'}),
+        onEscape: _back,
+        child: Scaffold(
+          appBar: AppBar(
+            centerTitle: false,
+            titleSpacing: 4,
+            // "观看记录" with "18 / 50 条" under it (c2, Z1 A).
+            title: PageTitle(
+              title: i18n('watch_history'),
+              subtitle: limit == unlimitedHistoryLimit
+                  ? i18n('history_count_unlimited', args: {'count': '${all.length}'})
+                  : i18n('history_count_of_limit', args: {'count': '${all.length}', 'limit': '$limit'}),
+            ),
+            // Filter and refresh, then 3.x's limit and clear (Z2 A).
+            actions: [
+              IconButton(
+                key: const ValueKey('history-filter'),
+                tooltip: i18n(_filtering ? 'history_filter_close' : 'history_filter'),
+                icon: Icon(_filtering ? AppIcons.filterOff : AppIcons.filter),
+                onPressed: all.isEmpty && !_filtering ? null : _toggleFilter,
               ),
-              // Filter and refresh, then 3.x's limit and clear (Z2 A).
-              actions: [
-                IconButton(
-                  key: const ValueKey('history-filter'),
-                  tooltip: i18n(_filtering ? 'history_filter_close' : 'history_filter'),
-                  icon: Icon(_filtering ? AppIcons.filterOff : AppIcons.filter),
-                  onPressed: all.isEmpty && !_filtering ? null : _toggleFilter,
+              ValueListenableBuilder(
+                valueListenable: _progress,
+                builder: (context, progress, _) => IconButton(
+                  key: const ValueKey('history-refresh'),
+                  tooltip: i18n('history_refresh_status'),
+                  icon: const Icon(AppIcons.refresh),
+                  onPressed: shown.isEmpty || progress != null
+                      ? null
+                      : () => unawaited(_refreshView.currentState?.show()),
                 ),
-                ValueListenableBuilder(
+              ),
+              IconButton(
+                key: const ValueKey('history-limit'),
+                tooltip: i18n('history_limit'),
+                icon: const Icon(AppIcons.historyLimit),
+                onPressed: () => unawaited(_editLimit()),
+              ),
+              if (shown.isNotEmpty)
+                IconButton(
+                  key: const ValueKey('history-clear'),
+                  tooltip: i18n('clear_history'),
+                  icon: const Icon(AppIcons.clearHistory),
+                  onPressed: _mutating ? null : () => unawaited(_clear()),
+                ),
+              const SizedBox(width: 4),
+            ],
+            bottom: _filtering ? _filterBar(context, shown.length) : null,
+          ),
+          body: Stack(
+            children: [
+              Positioned.fill(
+                child: switch (rooms) {
+                  AsyncValue(value: final _?) when all.isEmpty => AppStatusView(
+                    key: const ValueKey('history-empty'),
+                    type: AppStatusType.empty,
+                    icon: AppIcons.historyEmpty,
+                    title: i18n('empty_history'),
+                    subtitle: i18n('history_empty_hint'),
+                  ),
+                  AsyncValue(value: final _?) when shown.isEmpty => AppStatusView(
+                    key: const ValueKey('history-filter-empty'),
+                    type: AppStatusType.empty,
+                    icon: AppIcons.noResults,
+                    title: i18n('history_filter_empty'),
+                    subtitle: '',
+                  ),
+                  AsyncValue(value: final _?) => _grid(context, shown, mixed: mixesPlatforms(all)),
+                  AsyncValue(error: final error?) => AppStatusView(
+                    type: AppStatusType.error,
+                    details: '$error',
+                    buttonText: i18n('status_retry_button'),
+                    onButtonPressed: () => ref.invalidate(historyRoomsProvider),
+                  ),
+                  // A list's first load is a static skeleton (U.1c c3).
+                  _ => const RoomGridSkeleton(key: ValueKey('history-skeleton')),
+                },
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ValueListenableBuilder(
                   valueListenable: _progress,
-                  builder: (context, progress, _) => IconButton(
-                    key: const ValueKey('history-refresh'),
-                    tooltip: i18n('history_refresh_status'),
-                    icon: const Icon(AppIcons.refresh),
-                    onPressed: shown.isEmpty || progress != null
-                        ? null
-                        : () => unawaited(_refreshView.currentState?.show()),
-                  ),
+                  builder: (context, progress, _) => progress == null
+                      ? const SizedBox.shrink()
+                      : LinearProgressIndicator(key: const ValueKey('history-progress'), value: progress, minHeight: 2),
                 ),
-                IconButton(
-                  key: const ValueKey('history-limit'),
-                  tooltip: i18n('history_limit'),
-                  icon: const Icon(AppIcons.historyLimit),
-                  onPressed: () => unawaited(_editLimit()),
-                ),
-                if (shown.isNotEmpty)
-                  IconButton(
-                    key: const ValueKey('history-clear'),
-                    tooltip: i18n('clear_history'),
-                    icon: const Icon(AppIcons.clearHistory),
-                    onPressed: _mutating ? null : () => unawaited(_clear()),
-                  ),
-                const SizedBox(width: 4),
-              ],
-              bottom: _filtering ? _filterBar(context, shown.length) : null,
-            ),
-            body: Stack(
-              children: [
-                Positioned.fill(
-                  child: switch (rooms) {
-                    AsyncValue(value: final _?) when all.isEmpty => AppStatusView(
-                      key: const ValueKey('history-empty'),
-                      type: AppStatusType.empty,
-                      icon: AppIcons.historyEmpty,
-                      title: i18n('empty_history'),
-                      subtitle: i18n('history_empty_hint'),
-                    ),
-                    AsyncValue(value: final _?) when shown.isEmpty => AppStatusView(
-                      key: const ValueKey('history-filter-empty'),
-                      type: AppStatusType.empty,
-                      icon: AppIcons.noResults,
-                      title: i18n('history_filter_empty'),
-                      subtitle: '',
-                    ),
-                    AsyncValue(value: final _?) => _grid(context, shown, mixed: mixesPlatforms(all)),
-                    AsyncValue(error: final _?) => AppStatusView(
-                      type: AppStatusType.error,
-                      buttonText: i18n('status_retry_button'),
-                      onButtonPressed: () => ref.invalidate(historyRoomsProvider),
-                    ),
-                    _ => const AppStatusView(type: AppStatusType.loading),
-                  },
-                ),
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: ValueListenableBuilder(
-                    valueListenable: _progress,
-                    builder: (context, progress, _) => progress == null
-                        ? const SizedBox.shrink()
-                        : LinearProgressIndicator(
-                            key: const ValueKey('history-progress'),
-                            value: progress,
-                            minHeight: 2,
-                          ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

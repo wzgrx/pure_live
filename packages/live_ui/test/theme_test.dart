@@ -38,10 +38,10 @@ void main() {
       expect(theme.textTheme.titleLarge!.fontFamily, 'Microsoft YaHei');
     });
 
-    test("keeps the app bar 3.x showed (main.dart's override) and its page transitions", () {
+    test('centres every title (3.x MyTheme, U.1c), keeps the page transitions', () {
       final theme = const LiveTheme(primaryColor: Colors.teal).light;
       expect(theme.appBarTheme.surfaceTintColor, Colors.transparent);
-      expect(theme.appBarTheme.centerTitle, isNull);
+      expect(theme.appBarTheme.centerTitle, isTrue);
       expect(theme.pageTransitionsTheme, appPageTransitionsTheme);
       expect(theme.splashFactory, NoSplash.splashFactory);
       expect(theme.cardTheme.margin, EdgeInsets.zero);

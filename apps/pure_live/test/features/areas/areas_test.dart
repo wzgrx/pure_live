@@ -219,7 +219,11 @@ void main() {
       );
 
       // U.4d c2: the categories in the secondary style; c3: the cards name only the area.
-      final categories = tester.widget<ScrollableTabBar>(find.byKey(const ValueKey('area-category-tabs')));
+      // The shared second row of tabs (U.1c c12).
+      expect(tester.widget(find.byKey(const ValueKey('area-category-tabs'))), isA<SecondaryTabBar>());
+      final categories = tester.widget<TabBar>(
+        find.descendant(of: find.byKey(const ValueKey('area-category-tabs')), matching: find.byType(TabBar)),
+      );
       expect(categories.indicatorSize, TabBarIndicatorSize.tab);
       expect(categories.tabAlignment, TabAlignment.start);
       expect(find.byKey(const ValueKey('area-card-caption')), findsNothing);

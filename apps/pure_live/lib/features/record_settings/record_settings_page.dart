@@ -278,6 +278,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
               key: const ValueKey('record-quality'),
               icon: AppIcons.recordQuality,
               title: i18n('default_record_quality'),
+              choice: true,
               value: recordQualityLabel(settings.defaultQuality),
               onTap: () => unawaited(
                 showRecordRadioDialog<String>(
@@ -386,6 +387,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
               key: const ValueKey('record-timeout'),
               icon: AppIcons.recordTimeout,
               title: i18n('rw_timeout'),
+              choice: true,
               subtitle: recordTimeoutMeaning(settings.rwTimeout),
               subtitleMaxLines: null,
               value: recordSecondsLabel(settings.rwTimeout),
@@ -410,6 +412,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
               key: const ValueKey('record-queue'),
               icon: AppIcons.recordQueue,
               title: i18n('queue_size'),
+              choice: true,
               subtitle: recordQueueMeaning(settings.threadQueueSize),
               subtitleMaxLines: null,
               value: '${settings.threadQueueSize}',

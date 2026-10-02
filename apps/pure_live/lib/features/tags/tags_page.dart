@@ -182,8 +182,6 @@ class _TagsPageState extends ConsumerState<TagsPage> {
     final short = MediaQuery.sizeOf(context).height < 480;
     return Scaffold(
       appBar: AppBar(
-        // 3.x's app bars centre the title (common/style/theme.dart:119).
-        centerTitle: true,
         toolbarHeight: short ? 48 : null,
         title: Text(i18n('tag_management')),
         actions: [
@@ -213,12 +211,14 @@ class _TagsPageState extends ConsumerState<TagsPage> {
                 onButtonPressed: _locked ? null : () => unawaited(_edit()),
               ),
               AsyncValue(value: final list?) => _list(context, _pendingOrder ?? list, counts),
-              AsyncValue(error: final _?) => AppStatusView(
+              AsyncValue(error: final error?) => AppStatusView(
                 type: AppStatusType.error,
+                details: '$error',
                 buttonText: i18n('status_retry_button'),
                 onButtonPressed: () => ref.invalidate(tagListProvider),
               ),
-              _ => const AppStatusView(type: AppStatusType.loading),
+              // A list's first load is a static skeleton (U.1c c3).
+              _ => const StatusSkeleton(key: ValueKey('tags-skeleton')),
             },
           ),
           if (_busy)

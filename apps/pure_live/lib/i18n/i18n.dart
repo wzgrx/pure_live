@@ -129,6 +129,16 @@ final class AppStrings {
     refreshSucceeded: tr('refresh_succeeded'),
     refreshFailed: tr('refresh_failed'),
     refreshLastTime: tr('refresh_last_updated_at'),
+    loading: tr('refresh_loading'),
+    loadFailed: tr('refresh_load_failed'),
+    offlineTitle: tr('status_offline_title'),
+    offlineSubtitle: tr('status_offline_subtitle'),
+    restrictedTitle: tr('login_required_title'),
+    restrictedSubtitle: tr('login_required_subtitle'),
+    login: tr('go_to_login'),
+    details: tr('details'),
+    copy: tr('copy'),
+    copied: tr('copied_to_clipboard'),
   );
 }
 

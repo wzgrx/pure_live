@@ -186,7 +186,7 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
                       tabAlignment: TabAlignment.start,
                       dividerHeight: 0,
                       physics: const PureLiveBoundedScrollPhysics(),
-                      tabs: [for (final id in ids) Tab(text: platformName(id, fallback: sites.of(id).name))],
+                      tabs: [for (final id in ids) TabLabel(label: platformName(id, fallback: sites.of(id).name))],
                     ),
                   ),
                   IconButton(

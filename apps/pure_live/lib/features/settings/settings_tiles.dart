@@ -325,6 +325,7 @@ class SettingChoiceTile<T extends Object> extends ConsumerWidget {
       key: entry.rowKey,
       icon: icon,
       title: entry.titleText,
+      choice: true,
       subtitle: subtitle ?? entry.descriptionText,
       value: valueText?.call(current, value) ?? current?.label ?? '$value',
       valueWidget: valueWidget?.call(value),

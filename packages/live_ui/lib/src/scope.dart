@@ -33,6 +33,16 @@ final class LiveUiStrings {
     this.refreshSucceeded = '刷新成功',
     this.refreshFailed = '刷新失败',
     this.refreshLastTime = '上次刷新时间 {time}',
+    this.loading = '加载中...',
+    this.loadFailed = '加载失败',
+    this.offlineTitle = '没有网络连接',
+    this.offlineSubtitle = '检查网络后重试；连上网络后会自动刷新',
+    this.restrictedTitle = '需要登录账号',
+    this.restrictedSubtitle = '该平台数据已被风控隐藏，请登录账号后重试',
+    this.login = '前往登录',
+    this.details = '详情',
+    this.copy = '复制',
+    this.copied = '已复制到剪贴板',
   });
 
   /// Simplified Chinese (3.x `zh.json`).
@@ -79,6 +89,16 @@ final class LiveUiStrings {
     refreshSucceeded: 'Refreshed',
     refreshFailed: 'Refresh failed',
     refreshLastTime: 'Last refreshed {time}',
+    loading: 'Loading...',
+    loadFailed: 'Loading failed',
+    offlineTitle: 'No network connection',
+    offlineSubtitle: 'Check the network and retry; it reloads by itself once connected',
+    restrictedTitle: 'Login Required',
+    restrictedSubtitle: 'This platform data is hidden, please log in to your account and try again',
+    login: 'Go to Login',
+    details: 'Details',
+    copy: 'Copy',
+    copied: 'Copied to clipboard',
   );
 
   /// Empty state title (`status_empty_title`).
@@ -156,6 +176,36 @@ final class LiveUiStrings {
   /// The refresh header's second line; `{time}` is the last refresh's
   /// `H:mm` (`refresh_last_updated_at`).
   final String refreshLastTime;
+
+  /// The line under a loading spinner (`refresh_loading`).
+  final String loading;
+
+  /// The title of a failed load (`refresh_load_failed`, U.1c c4).
+  final String loadFailed;
+
+  /// The offline state's title (`status_offline_title`).
+  final String offlineTitle;
+
+  /// The offline state's text (`status_offline_subtitle`).
+  final String offlineSubtitle;
+
+  /// The restricted state's title (`login_required_title`).
+  final String restrictedTitle;
+
+  /// The restricted state's text (`login_required_subtitle`).
+  final String restrictedSubtitle;
+
+  /// The restricted state's button (`go_to_login`).
+  final String login;
+
+  /// The button and the title of a failure's raw text (`details`).
+  final String details;
+
+  /// Copies a text (`copy`).
+  final String copy;
+
+  /// Said after a copy (`copied_to_clipboard`).
+  final String copied;
 }
 
 /// Request headers for an image address (3.x `networkImageHeaders`: some

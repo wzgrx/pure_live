@@ -319,12 +319,13 @@ class _Templates extends StatelessWidget {
             spacing: 8,
             runSpacing: 4,
             children: [
+              // The one chip of the app (U.1c c13; U.2f drew these round).
               for (final (key, template) in DanmakuTemplate.presets)
-                ChoiceChip(
+                AppChip(
                   key: ValueKey('danmaku-template-$key'),
-                  label: Text(i18n(key)),
+                  label: i18n(key),
                   selected: chosen == key,
-                  onSelected: (_) => unawaited(_apply(template, preset: true)),
+                  onSelected: () => unawaited(_apply(template, preset: true)),
                 ),
             ],
           ),

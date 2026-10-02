@@ -114,23 +114,16 @@ class _HistoryLimitDialogState extends State<HistoryLimitDialog> {
             spacing: 8,
             runSpacing: 8,
             children: [
+              // The one chip of the app (U.1c c13).
               for (final value in HistoryLimitDialog.presets)
-                ChoiceChip(
-                  label: Text('$value', style: styles.t12),
-                  selected: _draft == value,
-                  onSelected: _saving ? null : (_) => _select(value),
-                ),
-              ChoiceChip(
-                label: Text(i18n('history_unlimited'), style: styles.t12),
+                AppChip(label: '$value', selected: _draft == value, onSelected: _saving ? null : () => _select(value)),
+              AppChip(
+                label: i18n('history_unlimited'),
                 selected: _draft == unlimitedHistoryLimit,
-                onSelected: _saving ? null : (_) => _select(unlimitedHistoryLimit),
+                onSelected: _saving ? null : () => _select(unlimitedHistoryLimit),
               ),
               if (!HistoryLimitDialog.presets.contains(_draft) && _draft != unlimitedHistoryLimit)
-                ChoiceChip(
-                  label: Text('$_draft', style: styles.t12),
-                  selected: true,
-                  onSelected: _saving ? null : (_) {},
-                ),
+                AppChip(label: '$_draft', selected: true, onSelected: _saving ? null : () {}),
             ],
           ),
           const SizedBox(height: 24),

@@ -18,7 +18,7 @@ import 'package:pure_live/tv/widgets/tv_room_dialog.dart';
 ///   the room, the focus lands on the room shown last (after switching
 ///   channels) or on the card that was opened;
 /// - a held OK or the menu key opens the card dialog ([showTvRoomDialog],
-///   docs/T18/T18a/T18a.2 c9, c10) with [actions];
+///   docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件 c9, c10) with [actions];
 /// - the platform chip shows in lists that mix platforms ([showPlatform]);
 /// - columns follow the text size like pure_live_TV's (four, fewer as the
 ///   text grows), the gaps are the grid-spacing settings.

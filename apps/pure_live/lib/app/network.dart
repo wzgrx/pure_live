@@ -51,7 +51,7 @@ final Provider<NetworkProbe> networkProbeProvider = Provider<NetworkProbe>((ref)
 
 /// The network as it changes (connectivity_plus on phones; nothing on
 /// desktops, which never report offline). Offline states reload when a
-/// connection comes back (docs/T01/T01c/T01c.1 "离线"); tests replace it.
+/// connection comes back (docs/A-界面设计/A02-组件/A02.1-通用组件 "离线"); tests replace it.
 final Provider<Stream<NetworkKind>> networkChangesProvider = Provider<Stream<NetworkKind>>((ref) {
   if (!Platform.isAndroid && !Platform.isIOS) return const Stream.empty();
   return Connectivity().onConnectivityChanged.map(networkKindOf).handleError((Object _) {});

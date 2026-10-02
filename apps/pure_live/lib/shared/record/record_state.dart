@@ -1,7 +1,7 @@
 import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
 
-/// What the status card of a record task shows (docs/T05/T05g/T05g.1, 录制;
+/// What the status card of a record task shows (docs/A-界面设计/A07-直播间界面/A07.6-直播间弹窗, 录制;
 /// the same card in the recording centre, U.7a): one look per state of the
 /// task, only the actions that work now.
 enum RecordCardState {

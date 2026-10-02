@@ -29,7 +29,7 @@ enum _Menu { uploadFollows, help }
 
 enum _FileChoice { restoreAll, restoreFollows, delete }
 
-/// WebDAV (3.x `lib/modules/web_dav`, docs/T09/T09d/T09d.1).
+/// WebDAV (3.x `lib/modules/web_dav`, docs/A-界面设计/A12-账号和数据界面/A12.5-WebDAV).
 ///
 /// Routes: `RoutePath.kWebDavPage`.
 ///

@@ -23,7 +23,7 @@ final class RouteArgs {
   final bool inHome;
 }
 
-/// The live room opened from a list (docs/T05/T05c/T05c.1 U.2b2, the TV's
+/// The live room opened from a list (docs/A-界面设计/A07-直播间界面/A07.2-竖屏流和竖屏全屏 U.2b2, the TV's
 /// `TvRoomArgs.playlist`): the follows, popular, an area's rooms or the
 /// search results hand their rooms over in their order, and the portrait
 /// fullscreen swipes through them. A room opened any other way (a link, the

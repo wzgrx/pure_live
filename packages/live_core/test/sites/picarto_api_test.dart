@@ -1,6 +1,6 @@
 // Picarto parsing against the recorded samples, compared field by field with
 // 3.x's frozen output (expected.json: 3.x's picarto adapter run verbatim over
-// the same samples, docs/T02/T02c/T02c.3/record.md). Every intended difference
+// the same samples, docs/E-直播平台/E03-海外平台/E03.3-Picarto/record.md). Every intended difference
 // is listed with its reason (an upgrade number of docs/specs/UPGRADES.md for the
 // M4.U changes); everything else must match. The synthetic cases are 3.x's
 // own (legacy test/picarto_adapter_test.dart and

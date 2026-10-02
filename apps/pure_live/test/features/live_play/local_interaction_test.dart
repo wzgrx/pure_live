@@ -1,4 +1,4 @@
-// The local interaction (docs/T06/T06f/T06f.1/README.md): the composers, the
+// The local interaction (docs/A-界面设计/A08-弹幕界面/A08.2-本地互动/README.md): the composers, the
 // panel, the gift banner, the style page, the chat lines, the settings page
 // and the logic over 3.x's `localInteraction.*` settings.
 import 'dart:async';

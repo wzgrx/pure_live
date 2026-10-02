@@ -109,7 +109,7 @@ final class KugouLiveChatGrant {
 /// `dispatchSocket.getDispatchSocketAddress`, the socket wrapper `Fx.socket`,
 /// `RoomSocket.login`, the protobuf codec of webpack module 1374 with the
 /// schemas of module 80965; the handling of messages in
-/// `/pub2/room/js/socket_*.js`; docs/T06/T06a/T06a.26/record.md), without
+/// `/pub2/room/js/socket_*.js`; docs/D-弹幕/D01-平台弹幕协议/D01.26-酷狗直播弹幕/record.md), without
 /// I/O.
 ///
 /// - The scheduler (`socket_scheduler/pc/binary/v2/address.jsonp`, signed

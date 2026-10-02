@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// (or a remote), not with touch (UI_PLAN §5.4: "焦点框只在用键盘时显示").
 bool get focusFramesShown => FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
 
-/// The keyboard focus frame (docs/T01/T01c/T01c.1 c21): 2 px in the primary
+/// The keyboard focus frame (docs/A-界面设计/A02-组件/A02.1-通用组件 c21): 2 px in the primary
 /// colour, [gap] outside [child], drawn while [child] or a widget in it has
 /// the focus and the user moves the focus with the keyboard. Material's
 /// buttons, chips and tabs get theirs from the theme; this is for custom

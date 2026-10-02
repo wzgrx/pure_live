@@ -1,4 +1,4 @@
-// The live room's other pop-ups (docs/T05/T05g/T05g.2, task B07): the room
+// The live room's other pop-ups (docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一, task B07): the room
 // menu's sleep timer, room volume, stream address and casting are room
 // panels in every layout; the fit and orientation are small menus next to
 // their buttons; the room volume on a phone is the system's media volume;

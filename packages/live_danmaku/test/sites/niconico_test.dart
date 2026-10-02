@@ -1,4 +1,4 @@
-// niconico comments (docs/T06/T06a/T06a.15/record.md): the comment server
+// niconico comments (docs/D-弹幕/D01-平台弹幕协议/D01.15-niconico弹幕/record.md): the comment server
 // protocol against the archived v4's decoding of the recording
 // (fixtures/niconico/danmaku/S07-live, expected.json written by
 // danmaku/v4_expected.dart), synthetic entries and messages, and the

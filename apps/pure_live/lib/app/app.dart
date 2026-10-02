@@ -65,7 +65,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   final _refreshRate = AdaptiveRefreshRateController(applyHighRefreshRate);
   late AppStrings _strings = widget.strings;
-  // The one toast (docs/T01/T01d/T01d.1 c11–c13): the same words are not
+  // The one toast (docs/A-界面设计/A02-组件/A02.2-弹窗组件 c11–c13): the same words are not
   // repeated while they show (3.x `ToastUtil`; pure_live_TV the same).
   late final AppToaster _toaster = AppToaster(() => _messenger.currentState);
   late final FontLibrary _fonts;
@@ -215,7 +215,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
           scrollBehavior: const AppScrollBehavior(),
           theme: light.light,
           darkTheme: dark.dark,
-          // The TV is dark only (docs/T18/T18a/T18a.2 A2, U.6b → U.15i).
+          // The TV is dark only (docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件 A2, U.6b → U.15i).
           themeMode: tv ? ThemeMode.dark : themeMode,
           locale: language.locale,
           supportedLocales: [for (final value in AppLanguage.values) value.locale],

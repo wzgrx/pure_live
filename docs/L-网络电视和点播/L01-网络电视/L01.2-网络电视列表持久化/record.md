@@ -1,0 +1,69 @@
+# L01.2 IPTV 列表持久化
+
+- 日期：2026-10-01
+- 起因：L01.1 定义了存储接口 `IptvLibrary`，只给了内存版 `MemoryIptvLibrary`，说持久化由 J02.1 用 drift 做；J02.1 又把 IPTV 库记回 L01.1。I01.1 只好先用内存版，导入的列表重启后就没了（I01.1 记录“有意差异”）。本任务补上。
+- 改动：`apps/pure_live/lib/app/iptv_library.dart`（新）、`iptv_legacy.dart`（新）、`bootstrap.dart`；`apps/pure_live/pubspec.yaml` 加直接依赖 `drift`、`sqlite3`（根 `pubspec.lock` 里已有，版本不变）。其他包没有改。
+- v3 来源：`lib/core/iptv/local/tables.dart`、`database.dart`（schema 9）、`common/global/app_path_manager.dart`（`IPTV_CACHE/pure_live_tv/pure_live_tv.db`）。
+
+## 放在哪里
+
+实现放在应用里（`StoreIptvLibrary`），表放在 `live_store` 的数据库 `pure_live.db` 里。
+
+- 依赖方向：`live_store` 只能依赖 `live_core`，拿不到 `IptvPlaylist` 等类型；`live_iptv` 按 L01.1 的分层只管接口、不碰存储。应用是唯一同时依赖两者的成员（`check_deps.py` 不用改）。
+- 同一个文件、同一个连接：`LiveStore.database`（drift，后台 isolate）。两个连接开同一个 SQLite 文件会互相等锁；数据目录、多窗口的 `instances\<id>`、关闭时机也都跟着 `LiveStore` 走，不用另管一个文件。
+- 不改 `live_store`：用它已公开的 `StoreDatabase`（`rows`、`run`、`write`、drift 的 `batch`）。IPTV 表第一次用到时 `CREATE TABLE IF NOT EXISTS` 建好，版本记在 `meta` 的 `iptv.schemaVersion`（现在是 1），以后加列按这个版本升级。表名统一 `iptv_` 前缀，和 `live_store` 的表分开。
+
+## 表
+
+| 表 | 内容 |
+|---|---|
+| `iptv_playlists` | 播放列表；`position` 记导入顺序 |
+| `iptv_channels` | 频道，主键是频道 id（同 3.x）；`position` 记文件顺序（L01.1 问题 12）；请求头存 `HttpHeaderPolicy.encode` 的 JSON |
+| `iptv_epg_mappings` | 频道到节目单频道的映射，主键（列表 id，频道 id），带 `origin`、`locked` |
+| `iptv_epg_sources` | 节目单源 |
+| `iptv_epg_channels` | 节目单频道，按源保存顺序 |
+| `iptv_epg_programmes` | 节目，按 `channel_key`（`epgChannelKey`）和开始时间建索引 |
+
+- 时间存微秒整数，读出是本地时间（3.x 的 drift 列也是读出本地时间）；开关存 0/1。
+- 行为照 `MemoryIptvLibrary`：每次写入一个事务（失败不留半截）；带 `expected` 的写入逐列比对库里的行，不一样就抛 `StaleIptvSnapshot`、什么都不写；删列表连频道和映射一起删，删节目单源连它的频道、节目和指向它的映射一起删。
+- 大批量写（几千个频道、几万条节目）用 drift 的 `batch`，一次发给后台 isolate。
+- 搜索用 `instr(lower(name), lower(?))`：只折叠 ASCII 大小写（同 3.x 的 `LIKE`），但 `%`、`_` 不再当通配符。
+- 写入后发出表变更通知，表名在 `IptvTables`，网络电视页（M13）要随数据刷新时可以 `store.database.watch(IptvTables.all, ...)`。
+
+## 3.x 迁移
+
+`LegacyIptvMigration.importDatabases`，在启动时紧跟 J02.1 的设置导入执行（只在主窗口）。
+
+- 位置：3.x 的数据根目录下 `IPTV_CACHE/pure_live_tv/pure_live_tv.db`，和设置 `HIVE_DB/app_settings.hive` 同一个根。所以直接用 J02.1 找到的设置文件推出来（`legacyIptvDatabases`），Android 和 Windows 的各种旧位置都跟着 J02.1 走。
+- 只读：把 3.x 的库连同可能存在的 `-wal`、`-journal` 复制到临时目录，打开副本读，读完删掉。SQLite 不会在 3.x 的目录里建锁文件、回滚日志或改动原文件（测试里比对了 3.x 目录的全部文件和字节）。读在后台 isolate 里做。
+- 只导一次：和 J02.1 一样按 `路径|大小|修改时间` 记账（`meta` 的 `legacy.iptvImportedSources`），下次启动跳过；读不了的不记，下次重试。
+- 导入什么：
+  - 播放列表（3.x `providers`，按 3.x 的顺序；类型不是 m3u/m3u8/txt 的跳过）、频道（顺序同 3.x 的显示顺序，**id 原样保留**，所以 3.x 房间号、关注、历史继续有效）、映射（含手动和锁定）；
+  - 节目单源、节目单频道，以及还没过期的节目（结束时间不早于两天前，同导入器的保留期），这样升级后不联网也能看到节目单；
+  - 本地导入的列表：3.x 的文件复制一份到应用自己的 `iptv` 目录（命名同导入器 `playlist_<uuid>.<扩展名>`），以后同步读这份，不依赖 3.x 的目录；找不到原文件时保留原路径。
+- 库里已有的优先（同 J02.1）：id 或名字（不分大小写）已存在的列表、节目单源跳过；频道 id 已被占用的频道跳过。都记在报告的 `skipped` 里。
+- 设置（当前节目单源 `selectedSourceId`、自动同步开关和间隔、自定义 UA）由 J02.1 从设置文件导入；节目单源 id 原样保留，所以选中的源和映射对得上。
+- 不导：3.x 的死表（收藏夹、节目提醒、故障转移组、定时录制，L01.1 问题 14）、`providers` 的 `username`/`password`（Xtream，3.x 没有界面）。
+
+## 启动流程
+
+`AppBootstrap.start`：打开 `LiveStore` → 建 `StoreIptvLibrary(store)` →（主窗口）J02.1 设置导入 → IPTV 导入 → `wire(..., iptvLibrary:)`。`wire` 多了可选参数 `iptvLibrary`，不传时用 `StoreIptvLibrary(store)`（测试的 `testServices` 走这条，用内存库）。导入器和 `IptvSite` 共用这一个库；页面可以用 `AppServices.iptvImporter.library`。
+
+## 测试
+
+2 个用例（`apps/pure_live/test/iptv_store_test.dart`，加速流程只测主要路径）：
+
+| 用例 | 内容 |
+|---|---|
+| 写入后重开读回 | 经导入器导入节目单和列表 → 关库重开：列表、频道 id 和顺序、请求头、回看属性、映射、节目单频道、节目查询、搜索都一样；重开后同步（顺序颠倒）id 不变、顺序跟文件；过期快照抛 `StaleIptvSnapshot` 且不写；删节目单源清掉映射、删列表清掉频道；`meta` 里有表版本 |
+| 3.x 样例库导入一次 | 按 3.x schema 9 的表结构造 `pure_live_tv.db`：位置推导；远程、本地、热门三个列表和频道 id、顺序、请求头、`autoUpdate`；锁定的手动映射；本地列表复制到应用目录；过期节目不导；3.x 目录的文件和字节不变、没有多出文件；第二次跳过；库里已有同名列表时跳过它和它的频道 |
+
+应用全部 25 个用例通过；`flutter analyze` 无问题；`check_deps.py` 通过。
+
+## 留给其他模块
+
+| 内容 | 去向 |
+|---|---|
+| 网络电视页、管理页随数据刷新（可用 `IptvTables` 的变更通知） | M13 |
+| 备份里带不带 IPTV 列表（3.x 的备份只带 IPTV 设置、不带列表，现在照旧） | 需要时再问用户 |
+| Android 真机、Windows 主机上用真实的 3.x 数据检查迁移 | 发布前（本次按规则不读真实 3.x 数据） |

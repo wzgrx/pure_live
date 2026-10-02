@@ -15,7 +15,7 @@ enum RoomPromptChoice {
 }
 
 /// Asks whether to open [room], found as a share code on the clipboard (3.x
-/// `ShareCommandImportDialog`, docs/T07/T07a/T07a.6 c11). The dialog waits
+/// `ShareCommandImportDialog`, docs/A-界面设计/A06-首页和全局/A06.3-全局弹窗 c11). The dialog waits
 /// its turn among the app's prompts ([AppPrompts], before the update
 /// prompt) and may open over any page, a full-screen room too.
 ///

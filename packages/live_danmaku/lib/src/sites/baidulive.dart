@@ -74,7 +74,7 @@ final class BaiduLiveSegment {
   final bool ended;
 }
 
-/// Baidu Live's chat (docs/T06/T06a/T06a.27/record.md), without I/O.
+/// Baidu Live's chat (docs/D-弹幕/D01-平台弹幕协议/D01.27-百度直播弹幕/record.md), without I/O.
 ///
 /// The room command 371 names three message lists (`BaiduLiveDanmakuArgs`):
 /// HLS-style playlists on `liveshowstatic.baidu.com` that keep the last few

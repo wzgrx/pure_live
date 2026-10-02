@@ -7,7 +7,7 @@ import 'package:pure_live/features/live_play/logic/room_layout.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-/// The portrait fullscreen's swipe between rooms (docs/T05/T05c/T05c.1
+/// The portrait fullscreen's swipe between rooms (docs/A-界面设计/A07-直播间界面/A07.2-竖屏流和竖屏全屏
 /// c14, U.2b2): the picture's gesture layer feeds the drag in the middle
 /// third ([start], [update], [end]); the [RoomSwipeStage] moves the picture
 /// with it and brings the next (or previous) room's cover and name along.
@@ -218,7 +218,7 @@ class _RoomSwipeStageState extends State<RoomSwipeStage> with SingleTickerProvid
   }
 }
 
-/// The room a swipe brings in (docs/T05/T05c/T05c.1 v4-swipe.jpg): its cover
+/// The room a swipe brings in (docs/A-界面设计/A07-直播间界面/A07.2-竖屏流和竖屏全屏 v4-swipe.jpg): its cover
 /// over the ambient background, and a card with the streamer's avatar and
 /// name, the platform and area, and "松手换到这个直播间" once letting go
 /// switches.

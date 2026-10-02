@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_ui/live_ui.dart';
 
-// docs/T14/T14c/T14c.1/brief.md: the refreshable lists feel like 3.x's
+// docs/A-界面设计/A03-动效和手感/A03.1-主列表手感/brief.md: the refreshable lists feel like 3.x's
 // (easy_refresh 3.5.1's `_ERScrollPhysics` and `ClassicHeader`), on the
 // K90's screen (400 × 869 dp at 3×) at 120 Hz.
 
@@ -90,7 +90,7 @@ void main() {
   // under Flutter's stop speed (20 / dpr = 6.67 dp/s at 3×).
   const table = {500: (250.0, 2.2), 3000: (1498.0, 3.0), 6000: (2996.0, 3.4)};
   // easy_refresh 3.5.1 as 3.x set it up, measured the same way on the same
-  // Flutter (3.47.5): docs/T14/T14c/T14c.1/record.md.
+  // Flutter (3.47.5): docs/A-界面设计/A03-动效和手感/A03.1-主列表手感/record.md.
   const v3 = {500: (246.38, 2.167), 1000: (496.09, 2.517), 3000: (1494.86, 3.067), 6000: (2992.97, 3.408)};
 
   testWidgets('a fling glides like 3.x: 500, 3000 and 6000 dp/s', (tester) async {

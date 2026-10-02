@@ -26,7 +26,7 @@ const double remoteSyncTwoColumns = 840;
 /// Who another device is: its name and the line under it.
 typedef _Peer = ({String name, String ip, int port, String detail});
 
-/// Device sync (3.x `lib/modules/remote_receiver`, docs/T09/T09e/T09e.1).
+/// Device sync (3.x `lib/modules/remote_receiver`, docs/A-界面设计/A12-账号和数据界面/A12.6-设备同步).
 ///
 /// Routes: `RoutePath.kRemoteSync`.
 ///

@@ -119,7 +119,7 @@ final class ShareChannel {
   }
 
   /// Puts [rooms] (newest first, at most two) behind the launcher icon's
-  /// long press (docs/T13/T13a/T13a.1 c15).
+  /// long press (docs/A-界面设计/A14-系统界面/A14.1-系统界面 c15).
   Future<void> setRecentRooms(List<RecentRoomShortcut> rooms) async {
     if (!_android) return;
     try {

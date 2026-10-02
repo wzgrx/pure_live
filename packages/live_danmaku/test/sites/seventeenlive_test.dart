@@ -1,4 +1,4 @@
-// 17LIVE danmaku (docs/T06/T06a/T06a.30/record.md): the protocol and the
+// 17LIVE danmaku (docs/D-弹幕/D01-平台弹幕协议/D01.30-17LIVE弹幕/record.md): the protocol and the
 // connection against the archived v4's output for the recordings (S05-live,
 // S06-live) and the synthetic frames (S07-synthetic), written by
 // fixtures/17live/danmaku/v4_expected.dart; the M5.F follow-ups (B-14: paid
@@ -169,7 +169,7 @@ Map<String, Object?> _line(String id, int n, String text, {Object? sentAt = _t})
 const Map<String, Object?> _nothing = {'joined': false, 'events': <Object?>[]};
 
 /// The differences of the new decoder from v4 in the synthetic cases, beyond
-/// [_shared] (docs/T06/T06a/T06a.30/record.md, "与归档 v4 的差异"): v4's reading →
+/// [_shared] (docs/D-弹幕/D01-平台弹幕协议/D01.30-17LIVE弹幕/record.md, "与归档 v4 的差异"): v4's reading →
 /// the new one, per case. Cases not listed read as v4 read them.
 final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
   // B-14: the paid barrage (barrageStyle, barrage.point 30) is a super chat

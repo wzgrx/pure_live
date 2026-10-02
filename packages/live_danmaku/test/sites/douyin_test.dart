@@ -633,7 +633,7 @@ void main() {
         'EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5'
         'cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw==';
 
-    /// The intentional differences (docs/T06/T06a/T06a.5/record.md), applied to
+    /// The intentional differences (docs/D-弹幕/D01-平台弹幕协议/D01.5-抖音弹幕/record.md), applied to
     /// 3.x's effects of the vector's only frame.
     final differences = <String, List<Map<String, Object?>> Function(List<Map<String, Object?>>)>{
       // 3.x lost the rest of the frame after an unreadable message.
@@ -994,7 +994,7 @@ void main() {
       expect(request.uri.path, DouyinDanmakuProtocol.path);
       expect(request.uri.queryParameters, requested.single.queryParameters);
       // dart:io adds the UA after its own default, as it did under 3.x's
-      // IOWebSocketChannel (docs/T06/T06a/T06a.5/record.md, 框架层的发现).
+      // IOWebSocketChannel (docs/D-弹幕/D01-平台弹幕协议/D01.5-抖音弹幕/record.md, 框架层的发现).
       expect(
         request.headers.value('user-agent'),
         allOf(startsWith('Dart/'), endsWith(' (dart:io), ${DouyinApi.userAgent}')),

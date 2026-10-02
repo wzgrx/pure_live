@@ -24,7 +24,7 @@ import io.flutter.plugin.common.PluginRegistry
  *
  * - `notificationState`: `granted`, `askable` (the system dialog can ask) or
  *   `blocked` (refused for good, switched off in the settings, or Android
- *   12 and older where nothing can be asked; docs/T13/T13a/T13a.1 c13).
+ *   12 and older where nothing can be asked; docs/A-界面设计/A14-系统界面/A14.1-系统界面 c13).
  *   Refused for good is told from the rationale flag after a first request.
  * - `requestNotifications`: the system dialog; whether they are allowed.
  * - `batteryUnrestricted`, `requestBatteryUnrestricted`: the battery

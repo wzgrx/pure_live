@@ -1,6 +1,6 @@
 /// Domain model and platform interfaces of Pure Live: rooms, areas,
 /// qualities, danmaku messages and what a platform adapter offers
-/// (docs/T02/T02g/T02g.1/record.md).
+/// (docs/E-直播平台/E05-平台框架和模型/E05.1-基础模型与接口/record.md).
 library;
 
 export 'src/aes.dart';

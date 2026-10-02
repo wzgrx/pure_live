@@ -1,4 +1,4 @@
-// The room model's upgrade fields (docs/T02/T02g/T02g.2/record.md): start time,
+// The room model's upgrade fields (docs/E-直播平台/E05-平台框架和模型/E05.2-模型扩展/record.md): start time,
 // restriction, carousel, case-insensitive identity and the placeholder rule,
 // and that 3.x's JSON still reads as before.
 import 'dart:convert';

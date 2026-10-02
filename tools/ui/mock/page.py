@@ -9,7 +9,7 @@ database (collection `review`, one document per item id:
 export) the controls stay hidden, so tools/ui/export_compare.py exports the
 same file as clean section pictures.
 
-usage: python3 tools/ui/mock/page.py docs/T05/T05d/T05d.1/page.json [--out FILE]
+usage: python3 tools/ui/mock/page.py docs/A-界面设计/A07-直播间界面/A07.4-横屏全屏/page.json [--out FILE]
   default out: ~/ref/design/compare/<id>.html
 
 Spec (JSON; strings may contain HTML):

@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
 
-// The TV look (docs/T18/T18a/T18a.2): the phone's dark colour roles seeded
+// The TV look (docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件): the phone's dark colour roles seeded
 // with the user's theme colour (choice A2), sizes drafted on the 960 x 540
 // canvas of a 1080p television, text one step above the phone (at least 14),
 // and room grids whose columns follow the text size.
@@ -82,7 +82,7 @@ final class TvPalette {
 /// Sizes of the TV interface, scaled to the screen.
 ///
 /// New components draw on the 960 x 540 canvas of a 1080p television ([px]:
-/// the logical pixels of docs/T18/T18a/T18a.2); the room keeps pure_live_TV's
+/// the logical pixels of docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件); the room keeps pure_live_TV's
 /// 1920 x 1080 drafts ([call]) until U.15d redraws it.
 @immutable
 final class TvScale {

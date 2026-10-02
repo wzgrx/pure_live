@@ -36,7 +36,7 @@ const List<double> tvDanmakuSizes = [14, 16, 18, 20, 24, 28, 32, 36];
 const List<double> tvDanmakuOpacities = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
 
 /// The TV settings (pure_live_TV `TvSettingsPage`, first page) with the
-/// settings rows of docs/T18/T18a/T18a.2: the common ones for the remote —
+/// settings rows of docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件: the common ones for the remote —
 /// interface mode, theme colour, text size, growing the focused item,
 /// default quality, danmaku on/off, size and opacity — then the proxy and
 /// "more settings", which open the full settings page. OK on a value opens

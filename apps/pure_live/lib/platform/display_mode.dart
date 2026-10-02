@@ -124,7 +124,7 @@ List<double> frameRateMultiples(double fps, List<double> supported) {
 }
 
 /// The rate declared on Flutter's surface while [playback] plays (U.2i,
-/// revised in 4.0.x by P01: docs/T14/T14b/T14b.1/README.md "4.0.x 修订"),
+/// revised in 4.0.x by P01: docs/R-性能和流畅度/R02-刷新率/R02.1-刷新率和帧率匹配/README.md "4.0.x 修订"),
 /// [high] being what the refresh-rate mode asks now (touching in balanced,
 /// always in performance):
 ///
@@ -154,7 +154,7 @@ double playbackRefreshRate({required PlaybackRefresh playback, required bool hig
 /// native `displayModeChanged` reports (Android display changes; Windows
 /// moves to another monitor or a mode switch).
 ///
-/// How the rate is asked for (P01, docs/T14/T14b/T14b.1 "4.0.x 修订"; the
+/// How the rate is asked for (P01, docs/R-性能和流畅度/R02-刷新率/R02.1-刷新率和帧率匹配 "4.0.x 修订"; the
 /// activity's `applyRefreshRate`), always as a number, never a category:
 ///
 /// - the live room plays ([setPlayback]): only [playbackRefreshRate] (the

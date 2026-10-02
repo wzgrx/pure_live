@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 /// SHOWROOM's comment broadcast (the archived v4's spec/sites/showroom.md
 /// §7, checked against the recording `fixtures/showroom/danmaku/S06-live`
-/// and the web client; docs/T06/T06a/T06a.16/record.md), without I/O.
+/// and the web client; docs/D-弹幕/D01-平台弹幕协议/D01.16-SHOWROOM弹幕/record.md), without I/O.
 ///
 /// - One WebSocket of text frames on the broadcast server `bcsvr_host`
 ///   (`wss://<host>/`, port 443). The client subscribes to a broadcast with

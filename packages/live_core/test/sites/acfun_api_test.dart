@@ -1,6 +1,6 @@
 // AcFun parsing against the recorded samples, compared field by field with
 // 3.x's frozen output (expected.json: 3.x's acfun_*.dart run over the same
-// samples, docs/T02/T02b/T02b.3/record.md). Every intended difference is listed
+// samples, docs/E-直播平台/E02-其他国内平台/E02.3-AcFun直播/record.md). Every intended difference is listed
 // with its reason; everything else must match.
 import 'dart:convert';
 

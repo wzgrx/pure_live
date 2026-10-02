@@ -11,7 +11,7 @@ import 'package:pure_live/shared/permission_prompts.dart';
 
 import '../support.dart';
 
-// F.0a c4, c6 and docs/T13/T13a/T13a.1 c12–c14: the explanations before
+// F.0a c4, c6 and docs/A-界面设计/A14-系统界面/A14.1-系统界面 c12–c14: the explanations before
 // the system's permission dialogs.
 
 final class _Permissions extends SystemPermissions {

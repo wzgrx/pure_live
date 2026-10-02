@@ -25,7 +25,7 @@ final class VideoStateAction {
   final Key? key;
 }
 
-/// What the picture shows when it is not simply playing (docs/T05/T05i/T05i.1
+/// What the picture shows when it is not simply playing (docs/A-界面设计/A07-直播间界面/A07.7-直播间的状态
 /// c2): one component for every state and every layout. From the top: a
 /// spinner, an icon or a picture ([leading], the streamer); one sentence
 /// ([title]); one reason ([reason]); at most two buttons, the first filled

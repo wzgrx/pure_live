@@ -1,4 +1,4 @@
-// Baidu Live danmaku (docs/T06/T06a/T06a.27/record.md): the message-list
+// Baidu Live danmaku (docs/D-弹幕/D01-平台弹幕协议/D01.27-百度直播弹幕/record.md): the message-list
 // decoder against fixtures/baidulive/danmaku/web_expected.py (a port of the
 // PC room page's reading) for the recorded lists (S03-live-chat,
 // S04-live-online, S05-live-gift, S06-ended) and the synthetic cases

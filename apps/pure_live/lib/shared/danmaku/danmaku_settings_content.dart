@@ -43,7 +43,7 @@ String danmakuTemplateDescription(String? preset) => switch (preset) {
 /// groups of [extra] (the live room's chat list and
 /// picture-in-picture danmaku). Settings that depend on a switch grey out
 /// instead of vanishing (D4, D5). Everything applies at once. The live
-/// room's panel and tab and the multi-view's panel (docs/T12/T12a/T12a.2)
+/// room's panel and tab and the multi-view's panel (docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面)
 /// show this same content.
 class DanmakuSettingsContent extends ConsumerWidget {
   /// Creates the settings.

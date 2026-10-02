@@ -12,7 +12,7 @@ String portraitPanelStopName(int index) => i18n(switch (index) {
   _ => 'portrait_panel_stop_high',
 });
 
-/// The portrait room (3.x `PortraitLiveRoomLayout`, docs/T05/T05c/T05c.1):
+/// The portrait room (3.x `PortraitLiveRoomLayout`, docs/A-界面设计/A07-直播间界面/A07.2-竖屏流和竖屏全屏):
 /// the picture fills the area and a panel with the room strip and the chat
 /// covers its lower part at one of three heights ([portraitPanelStops]).
 ///

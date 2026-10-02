@@ -24,7 +24,7 @@ String? roomNameOf(RouteSettings? page) {
 /// else the app's name (c11).
 String nativeWindowTitle(String app, String? room) => room == null ? app : '$room - $app';
 
-/// The window's own title bar (3.x `CustomTitleBar`; docs/T17/T17a/T17a.1):
+/// The window's own title bar (3.x `CustomTitleBar`; docs/A-界面设计/A16-桌面界面/A16.1-桌面窗口):
 /// the icon (a click opens the system's window menu, c13), the name with
 /// the room's streamer (c11) and the size while the edge is dragged, a drag
 /// area (double click maximizes or restores, a right click opens the window

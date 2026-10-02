@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/widgets/settings_row.dart';
 
-/// The − value + control (docs/T01/T01c/T01c.1 c10, the outlined style U.2f
+/// The − value + control (docs/A-界面设计/A02-组件/A02.1-通用组件 c10, the outlined style U.2f
 /// confirmed): 36 high in a 1-point `outlineVariant` frame with 12-point
 /// corners, each half 48 to tap; − and + in the variant ink, the value in
 /// the primary colour, semi-bold, tabular. The half that cannot step

@@ -5,7 +5,7 @@ import 'package:live_player/live_player.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/routes/route_path.dart';
 
-// The rules of the room's mini windows (docs/T05/T05j/T05j.1): the in-app
+// The rules of the room's mini windows (docs/A-界面设计/A07-直播间界面/A07.8-小窗): the in-app
 // floating window, Android's picture-in-picture and the desktop mini window
 // show the same picture with the same buttons; what they show and where they
 // sit is decided here, without widgets.

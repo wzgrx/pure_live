@@ -1,7 +1,7 @@
 /// Bilibili video on demand and music of Pure Live's TV mode: UGC and PGC
 /// APIs, on-demand danmaku, subtitles, and the music domain (playlist
 /// import, track matching, lyrics, daily picks, the play queue, the audio
-/// cache rules). No UI (docs/T11/T11c/T11c.1/record.md).
+/// cache rules). No UI (docs/L-网络电视和点播/L03-点播和音乐/L03.1-哔哩哔哩点播和音乐核心包/record.md).
 library;
 
 export 'src/client.dart';

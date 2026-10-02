@@ -23,7 +23,7 @@ import 'package:pure_live/tv/widgets/tv_tabs.dart';
 
 import '../support.dart';
 
-// The TV design system and shared components (docs/T18/T18a/T18a.2).
+// The TV design system and shared components (docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件).
 
 /// The dark scheme of the default blue (the TV is dark only, choice A2).
 final ColorScheme _scheme = ColorScheme.fromSeed(seedColor: const Color(0xFF2196F3), brightness: Brightness.dark);

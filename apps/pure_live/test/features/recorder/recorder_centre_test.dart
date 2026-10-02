@@ -1,4 +1,4 @@
-// The recording centre (docs/T08/T08b/T08b.2, confirmed): the bar, the five
+// The recording centre (docs/A-界面设计/A10-录制界面/A10.1-录制中心, confirmed): the bar, the five
 // filters with counts, the cards with the live room's status card in its
 // compact size, the menu, deleting, the live check's warning, the empty
 // states and the columns of each form.
@@ -430,7 +430,7 @@ void main() {
     expect(_inCard('i', _key('record-panel-start')), findsOneWidget);
   });
 
-  // docs/T08/T08b/T08b.3 c9: the card heads draw the room bar's glyph.
+  // docs/A-界面设计/A10-录制界面/A10.3-录制按钮和状态图标 c9: the card heads draw the room bar's glyph.
   testWidgets("U.2a2: each card head draws the room bar's glyph; red only while recording", (tester) async {
     await _pumpNine(tester, size: const Size(393, 6000));
     RecordGlyphPainter painterIn(Finder glyph) =>

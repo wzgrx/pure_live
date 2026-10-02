@@ -35,12 +35,12 @@ List<String> reorderHotAreas(List<String> visible, int oldIndex, int newIndex) {
 String preferredAfter(List<String> visible, String preferred) =>
     visible.isEmpty || visible.contains(preferred) ? preferred : visible.first;
 
-/// The widest the page's content gets (docs/T07/T07c/T07c.4 c7).
+/// The widest the page's content gets (docs/A-界面设计/A09-浏览界面/A09.6-热门分区、关注的分区 c7).
 const double hotAreasMaxWidth = 720;
 
 /// Platforms shown on the popular, areas, follows and search pages, and
 /// their order (3.x `lib/modules/hot_areas`, "platform display";
-/// docs/T07/T07c/T07c.4).
+/// docs/A-界面设计/A09-浏览界面/A09.6-热门分区、关注的分区).
 ///
 /// Route: `RoutePath.kSettingsHotAreas`.
 ///

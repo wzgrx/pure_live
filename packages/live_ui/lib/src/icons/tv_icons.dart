@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:remixicon/remixicon.dart';
 
-/// The icons of the TV interface by what they are for (docs/T18/T18a/T18a.2),
+/// The icons of the TV interface by what they are for (docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件),
 /// in the same spirit as `AppIcons`: TV pages name the use, never the glyph.
 /// Uses the phone has too (refresh, close, lock, the audience kinds) come
 /// from `AppIcons`; these are the TV shell's own and the shared components

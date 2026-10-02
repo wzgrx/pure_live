@@ -95,7 +95,7 @@ final class LiveStore {
   /// this returns, so the UI can read them synchronously.
   ///
   /// [shared]: other processes open the same folder (desktop windows,
-  /// docs/T17/T17a/T17a.1 c14); their writes are waited for, and
+  /// docs/A-界面设计/A16-桌面界面/A16.1-桌面窗口 c14); their writes are waited for, and
   /// [syncExternal] picks them up.
   static Future<LiveStore> open(Directory directory, {required SecretCipher cipher, bool shared = false}) async {
     await directory.create(recursive: true);

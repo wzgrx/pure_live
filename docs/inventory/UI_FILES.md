@@ -2,11 +2,11 @@
 
 由 `tools/ui/inventory.py --files` 生成，不要手改。`v3:` 是 `v3.2.11` 的 `lib/`，`tv:` 是 pure_live_TV 的 `lib/`。
 
-## T01a.2
+## A01.2
 
 - `v3:main.dart`
 
-## T01c.1
+## A02.1
 
 - `v3:common/widgets/app_status_view.dart`
 - `v3:common/widgets/common_avatar.dart`
@@ -19,11 +19,11 @@
 - `v3:common/widgets/section_listtile.dart`
 - `v3:common/widgets/widget_extensions.dart`
 
-## T01d.1
+## A02.2
 
 - `v3:plugins/utils.dart`
 
-## T05b.1
+## A07.1
 
 - `v3:modules/live_play/pages/live_play_page.dart`
 - `v3:modules/live_play/widgets/resolution_selector/audience_info.dart`
@@ -38,22 +38,22 @@
 - `v3:player/utils/popup_route_tracker.dart`
 - `v3:player/widgets/video_output_viewport_sizer.dart`
 
-## T05c.1
+## A07.2
 
 - `v3:modules/live_play/widgets/layout/portrait_fullscreen_interaction.dart`
 - `v3:modules/live_play/widgets/video_player/portrait_playback_picker_dialog.dart`
 
-## T05d.1
+## A07.4
 
 - `v3:modules/live_play/widgets/video_player/video_controller_panel.dart`
 - `v3:modules/live_play/widgets/video_player/volume_control.dart`
 - `v3:modules/live_play/widgets/keyboard/video_keyboard.dart`
 
-## T05e.1
+## A07.5
 
 - `v3:modules/live_play/widgets/layout/control_hover_region.dart`
 
-## T06d.1
+## A08.1
 
 - `v3:modules/live_play/pages/danmaku_settings_page.dart`
 - `v3:modules/live_play/pages/keyword_block_page.dart`
@@ -62,7 +62,7 @@
 - `v3:modules/live_play/widgets/danmaku/danmaku_tab.dart`
 - `v3:modules/live_play/widgets/layout/super_chat_card.dart`
 
-## T05g.1
+## A07.6
 
 - `v3:modules/live_play/dialogs/known_room_link_dialog.dart`
 - `v3:modules/live_play/dialogs/live_dlna_dialog.dart`
@@ -76,28 +76,28 @@
 - `v3:modules/live_play/widgets/button/record_action_button.dart`
 - `v3:modules/live_play/widgets/button/record_action_content.dart`
 
-## T05i.1
+## A07.7
 
 - `v3:modules/live_play/widgets/placeholder/not_living_video_widget.dart`
 - `v3:modules/live_play/widgets/video_player/iptv_schedule_dialog.dart`
 - `v3:modules/live_play/widgets/video_player/playback_failure_overlay.dart`
 - `v3:modules/live_play/widgets/video_player/video_loading.dart`
 
-## T14b.1
+## R02.1
 
 - `v3:common/widgets/adaptive_refresh_rate_scope.dart`
 
-## T05j.1
+## A07.8
 
 - `v3:modules/live_play/widgets/danmaku/compact_danmaku_overlay.dart`
 - `v3:player/utils/pip_window_widget.dart`
 
-## T06f.1
+## A08.2
 
 - `v3:modules/live_play/widgets/local_interaction/local_danmaku_style_editor.dart`
 - `v3:modules/live_play/widgets/local_interaction/local_interaction_sheet.dart`
 
-## T07a.4
+## A06.1
 
 - `v3:common/widgets/common_appbar_actions.dart`
 - `v3:common/widgets/menu_button.dart`
@@ -105,69 +105,69 @@
 - `v3:modules/home/home_page.dart`
 - `v3:modules/home/mobile_view.dart`
 
-## T07a.5
+## A06.2
 
 - `v3:modules/home/tablet_view.dart`
 
-## T07i.2
+## A06.4
 
 - `v3:modules/splash/splash_screen.dart`
 
-## T07a.6
+## A06.3
 
 - `v3:common/widgets/download_apk_dialog.dart`
 - `v3:common/widgets/download_directory_dialog.dart`
 - `v3:common/widgets/share_command_import_dialog.dart`
 - `v3:plugins/update.dart`
 
-## T07d.1
+## A09.1
 
 - `v3:common/widgets/room_card.dart`
 
-## T07b.2
+## A09.2
 
 - `v3:modules/popular/popular_grid_view.dart`
 - `v3:modules/popular/popular_page.dart`
 
-## T07e.2
+## A09.3
 
 - `v3:modules/favorite/favorite_page.dart`
 - `v3:modules/favorite/room_grid_view.dart`
 
-## T07c.2
+## A09.4
 
 - `v3:modules/areas/areas_grid_view.dart`
 - `v3:modules/areas/areas_page.dart`
 - `v3:modules/areas/widgets/area_card.dart`
 
-## T07c.3
+## A09.5
 
 - `v3:modules/area_rooms/area_rooms_page.dart`
 
-## T07c.4
+## A09.6
 
 - `v3:modules/areas/favorite_areas_page.dart`
 - `v3:modules/hot_areas/hot_areas_page.dart`
 
-## T07f.2
+## A09.7
 
 - `v3:modules/search/search_controller.dart`
 - `v3:modules/search/search_page.dart`
 - `v3:modules/search/search_platform_strip.dart`
 
-## T07f.3
+## A09.8
 
 - `v3:modules/search/web_search_page.dart`
 
-## T07g.2
+## A09.9
 
 - `v3:modules/history/history_page.dart`
 
-## T09a.2
+## A11.1
 
 - `v3:modules/settings/settings_page.dart`
 
-## T09a.3
+## A11.2
 
 - `v3:modules/settings/pages/font_family_manager_page.dart`
 - `v3:modules/settings/pages/font_settings_page.dart`
@@ -178,7 +178,7 @@
 - `v3:modules/settings/pages/theme_settings_page.dart`
 - `v3:modules/settings/widgets/app_color_picker_dialog.dart`
 
-## T09a.4
+## A11.3
 
 - `v3:modules/settings/pages/audience_metric_settings_page.dart`
 - `v3:modules/settings/pages/mpv_option_page.dart`
@@ -187,7 +187,7 @@
 - `v3:modules/settings/pages/portrait_live_settings_page.dart`
 - `v3:modules/settings/pages/video_settings_page.dart`
 
-## T09a.5
+## A11.4
 
 - `v3:modules/settings/pages/general_settings_page.dart`
 - `v3:modules/settings/pages/local_interaction_settings_page.dart`
@@ -195,38 +195,38 @@
 - `v3:modules/settings/pages/platform_settings_page.dart`
 - `v3:modules/settings/pages/refresh_settings.dart`
 
-## T09a.6
+## A11.5
 
 - `v3:modules/settings/pages/cache_data_settings_page.dart`
 - `v3:modules/settings/pages/local_config_preveiw.dart`
 
-## T08b.2
+## A10.1
 
 - `v3:recorder/pages/recorder/recorder_page.dart`
 - `v3:recorder/widgets/recorder_bounded_scroll.dart`
 
-## T08c.1
+## A10.2
 
 - `v3:recorder/pages/record_settings/record_settings_page.dart`
 
-## T12a.2
+## A13.2
 
 - `v3:modules/multiview/multiview_page.dart`
 - `v3:modules/multiview/widgets/multiview_fullscreen_surface.dart`
 - `v3:modules/multiview/widgets/multiview_room_picker.dart`
 
-## T11a.4
+## A13.1
 
 - `v3:modules/iptv/iptv_manage.dart`
 - `v3:modules/iptv/iptv_page.dart`
 - `v3:core/iptv/services/epg_import_manager.dart`
 - `v3:core/iptv/services/iptv_import_manager.dart`
 
-## T10a.2
+## A12.1
 
 - `v3:modules/account/account_page.dart`
 
-## T10a.3
+## A12.2
 
 - `v3:modules/account/douyu/douyu_cookie_page.dart`
 - `v3:modules/account/kuaishou/kuaishou_cookie_page.dart`
@@ -240,7 +240,7 @@
 - `v3:modules/account/douyin/douyin_cookie_page.dart`
 - `v3:modules/account/widgets/account_cookie_editor.dart`
 
-## T10c.1
+## A12.3
 
 - `v3:modules/auth/mine_page.dart`
 - `v3:modules/auth/sign_in_page.dart`
@@ -248,45 +248,45 @@
 - `v3:modules/auth/components/firebase_email_auth.dart`
 - `v3:modules/auth/components/user_detail_main_page.dart`
 
-## T09c.2
+## A12.4
 
 - `v3:modules/backup/backup_page.dart`
 - `v3:modules/backup/scan_page.dart`
 
-## T09d.1
+## A12.5
 
 - `v3:modules/web_dav/web_dav_help.dart`
 - `v3:modules/web_dav/web_dav_page.dart`
 
-## T09e.1
+## A12.6
 
 - `v3:modules/remote_receiver/remote_sync_page.dart`
 
-## T07i.3
+## A15.1
 
 - `v3:modules/toolbox/toolbox_page.dart`
 
-## T07i.4
+## A15.2
 
 - `v3:modules/about/about_page.dart`
 - `v3:modules/about/version_history.dart`
 - `v3:modules/about/widgets/version_dialog.dart`
 - `v3:modules/version/version_page.dart`
 
-## T07h.2
+## A09.10
 
 - `v3:modules/tags/tag_management_page.dart`
 
-## T06b.1
+## A08.3
 
 - `v3:modules/shield/danmu_shield_page.dart`
 
-## T17a.1
+## A16.1
 
 - `v3:common/base/desktop_components.dart`
 - `v3:common/global/platform/desktop_manager.dart`
 
-## T18a.2
+## A17.1
 
 - `tv:domains/device/global_room_push.dart`
 - `tv:app/app.dart`
@@ -332,14 +332,14 @@
 - `tv:core/widgets/tv_tab_bar.dart`
 - `tv:core/widgets/tv_tab_view.dart`
 
-## T18a.3
+## A17.2
 
 - `tv:features/home/exit_confirm_dialog.dart`
 - `tv:features/home/home_page.dart`
 - `tv:features/home/home_update_dialog.dart`
 - `tv:features/agreement/agreement_page.dart`
 
-## T18b.1
+## A17.3
 
 - `tv:modules/live/areas/area_grid_view.dart`
 - `tv:modules/live/areas/area_rooms_page.dart`
@@ -351,7 +351,7 @@
 - `tv:modules/live/search/tv_search_page.dart`
 - `tv:modules/live/search/tv_search_result_page.dart`
 
-## T18c.1
+## A17.4
 
 - `tv:modules/live/playback/pages/live_play_page.dart`
 - `tv:modules/live/playback/dialogs/room_switch_dialog_parts.dart`
@@ -369,7 +369,7 @@
 - `tv:modules/live/playback/widgets/video_player/tv_video_surface.dart`
 - `tv:modules/live/playback/widgets/video_player/video_controller_panel_parts.dart`
 
-## T18d.1
+## A17.5
 
 - `tv:modules/live/iptv/pages/iptv_headers_section.dart`
 - `tv:modules/live/iptv/pages/iptv_import_section.dart`
@@ -379,7 +379,7 @@
 - `tv:modules/live/iptv/services/iptv_confirm_dialog.dart`
 - `tv:modules/live/movie_playback/movie_playback_page.dart`
 
-## T18d.2
+## A17.6
 
 - `tv:modules/video/video_section_view.dart`
 - `tv:modules/video/pages/personal/video_bangumi_pane.dart`
@@ -416,7 +416,7 @@
 - `tv:modules/vod/widgets/bilibili_login_gate.dart`
 - `tv:modules/vod/widgets/handle_video_surface.dart`
 
-## T18d.3
+## A17.7
 
 - `tv:modules/music/music_section_view.dart`
 - `tv:modules/music/pages/music_follow_pane.dart`
@@ -448,7 +448,7 @@
 - `tv:modules/music/widgets/music_song_row.dart`
 - `tv:modules/music/widgets/music_video_card.dart`
 
-## T18e.1
+## A17.8
 
 - `tv:features/wallpaper/wallpaper_api_group_page.dart`
 - `tv:features/wallpaper/wallpaper_api_page.dart`
@@ -461,7 +461,7 @@
 - `tv:features/wallpaper/wallpaper_preview_page_parts.dart`
 - `tv:features/wallpaper/wallpaper_tile.dart`
 
-## T18e.2
+## A17.9
 
 - `tv:features/settings/tv_settings_page.dart`
 - `tv:features/settings/pages/about_settings_section.dart`

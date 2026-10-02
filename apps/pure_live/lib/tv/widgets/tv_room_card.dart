@@ -6,8 +6,8 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 import 'package:pure_live/tv/tv_theme.dart';
 import 'package:pure_live/tv/widgets/tv_focusable.dart';
 
-/// A room on the TV: the phone's card (docs/T07/T07d/T07d.1) in the TV style
-/// of docs/T18/T18a/T18a.2 (c5, c7, c8):
+/// A room on the TV: the phone's card (docs/A-界面设计/A09-浏览界面/A09.1-房间卡片) in the TV style
+/// of docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件 (c5, c7, c8):
 ///
 /// - the cover takes what the info row leaves; on it the platform ("logo +
 ///   Chinese name", only in lists that mix platforms, [showPlatform]), the

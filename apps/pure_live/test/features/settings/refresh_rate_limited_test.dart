@@ -9,7 +9,7 @@ import 'package:pure_live/platform/display_mode.dart';
 
 import '../../support.dart';
 
-// docs/T14/T14b/T14b.2/brief.md c3: a line under "界面刷新率" while the system
+// docs/R-性能和流畅度/R02-刷新率/R02.2-刷新率策略修正/brief.md c3: a line under "界面刷新率" while the system
 // holds the app at 60 Hz.
 
 const _limited = '系统把本应用限制在 60 Hz，可以在系统设置 → 显示 → 屏幕刷新率里调高';

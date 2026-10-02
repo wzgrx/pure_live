@@ -2,7 +2,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_iptv/live_iptv.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
-/// What a programme of the guide is now (docs/T05/T05i/T05i.1 c17, c18).
+/// What a programme of the guide is now (docs/A-界面设计/A07-直播间界面/A07.7-直播间的状态 c17, c18).
 enum GuideProgrammeKind {
   /// Ended and still kept: "回看".
   replayable,

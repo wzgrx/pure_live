@@ -1,4 +1,4 @@
-// The room's three arrangements of one control layer (docs/T05/T05c/T05c.1,
+// The room's three arrangements of one control layer (docs/A-界面设计/A07-直播间界面/A07.2-竖屏流和竖屏全屏,
 // U.2c, U.2d): landscape fullscreen, the wide room and portrait streams; the
 // order, icons, places and states the confirmed designs fix.
 
@@ -974,7 +974,7 @@ void main() {
   });
 
   testWidgets('the room menu on each platform: cast only on Android, the new window only on Windows', (tester) async {
-    // docs/T05/T05d/T05d.1, U.2d: "投屏只有 Android" (the menu as well as the
+    // docs/A-界面设计/A07-直播间界面/A07.4-横屏全屏, U.2d: "投屏只有 Android" (the menu as well as the
     // top bar; U.17a for iOS); U.13: "在新窗口打开" on Windows.
     const group1 = ['room-menu-switchRoom', 'room-menu-timer', 'room-menu-volume', 'room-menu-videoFit'];
     const local = ['room-menu-localInteraction'];
@@ -1000,7 +1000,7 @@ void main() {
         expect(_in('room-menu-cast', find.byIcon(AppIcons.cast)), findsOneWidget);
       }
       // The fullscreen bars carry the same menu, less what the bars show
-      // (B05, docs/T05/T05h/T05h.2 c12: ⇄ and cast on the top bar; the fit on
+      // (B05, docs/A-界面设计/A07-直播间界面/A07.13-切换直播间面板 c12: ⇄ and cast on the top bar; the fit on
       // the landscape bottom bar, not on the upright fullscreen's).
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump(const Duration(seconds: 1));

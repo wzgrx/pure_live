@@ -31,7 +31,7 @@ import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
 import 'package:pure_live/shared/panels/side_panel.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-/// Multi-view (3.x `lib/modules/multiview`, docs/T12/T12a/T12a.2): several
+/// Multi-view (3.x `lib/modules/multiview`, docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面): several
 /// rooms at once, one of them audible, in a 1×1, 1×2, 2×2 or 1+3 wall of
 /// 16:9 cells. Laid out as the live room: the picture area above (portrait)
 /// or on the left (landscape, wide), the selected cell's controls and the

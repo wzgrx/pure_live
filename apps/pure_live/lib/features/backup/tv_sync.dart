@@ -144,7 +144,7 @@ class _TvAddressDialogState extends State<_TvAddressDialog> {
 
 enum _TvStage { scanning, sending, done, failed }
 
-/// "同步TV数据" on phones (3.x `ScanCodePage`, docs/T09/T09c/T09c.2 c8):
+/// "同步TV数据" on phones (3.x `ScanCodePage`, docs/A-界面设计/A12-账号和数据界面/A12.4-备份与恢复 c8):
 /// scan the TV's code (or type its address), send, then say how it went:
 /// "完成" / "再扫一次" after a success, the reason with "重试" / "输入地址"
 /// after a failure. [send] sends this device's data to a TV origin.

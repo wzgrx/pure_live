@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 // `buildModernCard`, `buildSwitchTile`, `buildTile`, `buildSliderTile`,
 // `SectionTitle`, `MenuListTile`) are gone: every page uses the one settings
 // row ([SettingsGroup], [SettingsLinkRow], [SettingsSwitchRow] …,
-// docs/T01/T01c/T01c.1 c16), and reading columns are at most 720 wide
+// docs/A-界面设计/A02-组件/A02.1-通用组件 c16), and reading columns are at most 720 wide
 // instead of 3.x's 960 (U.1c c18).
 
 /// The widest a reading column gets on large screens (settings-like pages,

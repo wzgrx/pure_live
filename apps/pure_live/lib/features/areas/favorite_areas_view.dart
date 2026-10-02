@@ -24,7 +24,7 @@ int resolveFavoriteAreaSiteIndex({
   return selected >= 0 ? selected : fallback.clamp(0, siteIds.length - 1);
 }
 
-/// The platform tabs of the followed areas (docs/T07/T07c/T07c.4 c4, choice
+/// The platform tabs of the followed areas (docs/A-界面设计/A09-浏览界面/A09.6-热门分区、关注的分区 c4, choice
 /// Z1): "all", then the platforms that have followed areas, in the order of
 /// "platform display" ([platformOrder]) and the others after them; none
 /// without followed areas.
@@ -39,7 +39,7 @@ List<String> favoriteAreaTabs(Iterable<LiveArea> areas, List<String> platformOrd
   return ordered;
 }
 
-/// The followed areas (3.x `FavoriteAreasPage`, docs/T07/T07c/T07c.4):
+/// The followed areas (3.x `FavoriteAreasPage`, docs/A-界面设计/A09-浏览界面/A09.6-热门分区、关注的分区):
 /// "all" and the platforms that have followed areas, swiped between, the
 /// last one kept while the page lives; the area grid of the areas page with
 /// "platform · category" under each name in "all" and the category in a

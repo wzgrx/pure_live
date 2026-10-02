@@ -24,7 +24,7 @@ import io.flutter.plugin.common.PluginRegistry
  * - `setActive {active, title, text, …}`: starts [RecorderForegroundService]
  *   and answers once it is in the foreground, or stops it; `update` sends
  *   new words, `alert {id, title, text}` posts "录制已停止" ([RecordWords],
- *   docs/T13/T13a/T13a.1 c3–c5);
+ *   docs/A-界面设计/A14-系统界面/A14.1-系统界面 c3–c5);
  * - to Dart, `stopAll` when the notification's "停止录制" is pressed;
  * - `requestStorage`: all-files access (API 30+, the system settings page) or
  *   the storage permission (API 26–29); answers whether it is granted;

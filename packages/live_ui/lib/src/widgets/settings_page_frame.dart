@@ -4,7 +4,7 @@ import 'package:live_ui/src/widgets/scrolling.dart';
 import 'package:live_ui/src/widgets/settings_tiles.dart';
 
 // The frame of the settings-like pages outside the settings feature
-// (recording settings, backup, WebDAV, device sync; docs/T08/T08c/T08c.1,
+// (recording settings, backup, WebDAV, device sync; docs/A-界面设计/A10-录制界面/A10.2-录制设置,
 // U.11a–c): the same app bar and reading column as the settings pages.
 
 /// The app bar of a settings-like page: the title at the platform's place

@@ -1,4 +1,4 @@
-// docs/T12/T12a/T12a.2: the multi-view page in portrait, landscape and wide
+// docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面: the multi-view page in portrait, landscape and wide
 // windows; the order, icons and places of its controls; the cells' states;
 // UI_PLAN appendix A 7 (Back and Esc) and 13 (tap, 1+3, long press, empty
 // cells).

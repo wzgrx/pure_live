@@ -26,7 +26,7 @@ String areaDisplayName(LiveArea area) {
   return name.isEmpty ? i18n('unnamed_area') : name;
 }
 
-/// Height of an area card [itemWidth] wide (docs/T07/T07c/T07c.2 c3): the
+/// Height of an area card [itemWidth] wide (docs/A-界面设计/A09-浏览界面/A09.4-分区 c3): the
 /// square picture and one line (the name, 40 high) or two (name and
 /// category, 72 high, 3.x `areaCardGridMainAxisExtent`), growing with the
 /// text scale.

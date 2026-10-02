@@ -1,4 +1,4 @@
-// The live room's popups of U.2f (docs/T05/T05g/T05g.1/README.md): the
+// The live room's popups of U.2f (docs/A-界面设计/A07-直播间界面/A07.6-直播间弹窗/README.md): the
 // quality and line menus, the record panel, the danmaku settings panel, the
 // room menu and the long press on a message.
 import 'dart:async';

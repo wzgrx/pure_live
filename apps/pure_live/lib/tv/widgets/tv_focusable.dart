@@ -14,7 +14,7 @@ bool isTvConfirmKey(LogicalKeyboardKey key) =>
     key == LogicalKeyboardKey.space;
 
 /// The remote's menu key (Android `KEYCODE_MENU`): the same as a held OK
-/// (UI_PLAN §5.4, docs/T18/T18a/T18a.2 c10).
+/// (UI_PLAN §5.4, docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件 c10).
 bool isTvMenuKey(LogicalKeyboardKey key) => key == LogicalKeyboardKey.contextMenu;
 
 /// How long OK must be held to count as a long press.
@@ -41,7 +41,7 @@ typedef TvKeyHandler = KeyEventResult Function(FocusNode node, KeyEvent event);
 typedef TvFocusBuilder = Widget Function(BuildContext context, bool focused);
 
 /// One remote-control target with the TV's single focus look
-/// (docs/T18/T18a/T18a.2 c2): a near-white 3 px ring outside the target and,
+/// (docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件 c2): a near-white 3 px ring outside the target and,
 /// for cards, buttons, tabs and menu items ([zoom]), 5 % growth; no glow.
 /// Whole rows (settings rows, dialog options, input fields) pass
 /// `zoom: false`: growing a full-width row would push it off the screen.

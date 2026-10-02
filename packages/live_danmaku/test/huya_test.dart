@@ -543,7 +543,7 @@ void main() {
       'data': null,
     };
 
-    /// The intentional differences (docs/T06/T06a/T06a.4/record.md), applied to
+    /// The intentional differences (docs/D-弹幕/D01-平台弹幕协议/D01.4-虎牙弹幕/record.md), applied to
     /// 3.x's output of the case they concern.
     final differences = <String, List<Map<String, Object?>> Function(List<Map<String, Object?>>)>{
       // M2: 3.x parsed the colour's hexadecimal text and understood only 4,

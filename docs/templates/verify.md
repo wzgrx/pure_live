@@ -1,4 +1,4 @@
-# Txxy.n 名称：真机验证
+# A07.n 名称：真机验证
 
 - 设备：Redmi K90 Pro Max（Android 17，120 Hz）
 - 构建：`com.mystyle.purelive.v4dev`，提交 ……（profile / debug）

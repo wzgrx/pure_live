@@ -11,7 +11,7 @@ typedef SettingsChoice<T> = ({T value, String label, String? description});
 typedef SettingsDialogAction = ({String label, VoidCallback onPressed, Key? key});
 
 /// The dialog frame of the settings: the one dialog of the app (live_ui
-/// [AppDialog], docs/T01/T01d/T01d.1: the screen less 32 and at most 400
+/// [AppDialog], docs/A-界面设计/A02-组件/A02.2-弹窗组件: the screen less 32 and at most 400
 /// wide, the title and buttons fixed while the middle scrolls); the content
 /// sits 12 in from the dialog's sides and adds its own 12 (3.x
 /// `ThemeChoiceDialog`).

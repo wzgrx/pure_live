@@ -17,7 +17,7 @@ import 'package:path_provider/path_provider.dart';
 const String recorderTasksKey = 'recorder.tasks';
 
 /// The task list of window [instanceId]: [recorderTasksKey] for the main
-/// window; an extra desktop window shares the data (docs/T17/T17a/T17a.1
+/// window; an extra desktop window shares the data (docs/A-界面设计/A16-桌面界面/A16.1-桌面窗口
 /// c14) but records on its own, so its list is kept apart (each list is
 /// written whole) and dropped when the window closes.
 String recorderTasksKeyFor(String instanceId) =>
@@ -452,7 +452,7 @@ final class AppRecording {
 
   /// How many tasks hold a recording now (preparing, writing, reconnecting
   /// or joining the file): leaving the app stops them, so the close dialog
-  /// and the tray say so (docs/T17/T17a/T17a.1 c9).
+  /// and the tray say so (docs/A-界面设计/A16-桌面界面/A16.1-桌面窗口 c9).
   int get activeCount => activeRecordings(recorder?.tasks ?? const []);
 
   /// [activeCount] now and after every change of the tasks.

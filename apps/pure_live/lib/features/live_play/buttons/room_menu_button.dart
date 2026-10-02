@@ -106,7 +106,7 @@ Future<void> openRoomExternally(LiveRoom room, {bool? android}) async {
   if (!await attempt(target.web)) AppNavigator.toast(i18n('open_room_external_failed'));
 }
 
-/// The entries of the room menu, in its order (docs/T05/T05g/T05g.1, 右上角
+/// The entries of the room menu, in its order (docs/A-界面设计/A07-直播间界面/A07.6-直播间弹窗, 右上角
 /// 菜单): three groups split by lines.
 enum RoomMenuEntry {
   /// Another followed or watched room.
@@ -143,7 +143,7 @@ enum RoomMenuEntry {
 }
 
 /// Whether [platform] offers DLNA casting: Android only, both the top bar's
-/// button and the menu entry (docs/T05/T05d/T05d.1 and U.2d "投屏只有
+/// button and the menu entry (docs/A-界面设计/A07-直播间界面/A07.4-横屏全屏 and U.2d "投屏只有
 /// Android"; U.17a for iOS). 3.x listed it in every platform's menu.
 bool castSupported(TargetPlatform platform) => platform == TargetPlatform.android;
 
@@ -154,7 +154,7 @@ bool castSupported(TargetPlatform platform) => platform == TargetPlatform.androi
 ///
 /// Cast only where [cast] ([castSupported]); the new window only on
 /// [windows]. The menu on the picture leaves out what its bars already show
-/// ([onBars], docs/T05/T05h/T05h.2 c12).
+/// ([onBars], docs/A-界面设计/A07-直播间界面/A07.13-切换直播间面板 c12).
 List<List<RoomMenuEntry>> roomMenuGroups({
   required bool iptv,
   required bool windows,
@@ -193,7 +193,7 @@ Set<RoomMenuEntry> menuEntriesOnBars({required bool landscape, required bool cas
 
 /// The room menu of the bar (3.x `LivePlayMenuButton`, its four-square
 /// icon kept, U.2a choice B): the app's small menu next to the button
-/// ([AppMenuButton], docs/T05/T05g/T05g.2 c7, B-7), grouped (U.2f), with
+/// ([AppMenuButton], docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一 c7, B-7), grouped (U.2f), with
 /// 3.x's icons; the sleep timer's time left and the picture's fit on a
 /// second line.
 class RoomMenuButton extends ConsumerWidget {

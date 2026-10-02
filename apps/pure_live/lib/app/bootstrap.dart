@@ -77,7 +77,7 @@ int? readTotalMemoryBytes({String path = '/proc/meminfo'}) {
 /// The start of the app (3.x `AppInitializer.initialize`), in order:
 ///
 /// 1. the command line (extra desktop windows) and the data folder, which
-///    every window shares (docs/T17/T17a/T17a.1 c14);
+///    every window shares (docs/A-界面设计/A16-桌面界面/A16.1-桌面窗口 c14);
 /// 2. storage with the platform cipher, opened for sharing with the other
 ///    windows' processes;
 /// 3. the 3.x import (main window only; read-only, recorded in a ledger):
@@ -193,7 +193,7 @@ abstract final class AppBootstrap {
     // the shared data (both lists are written whole).
     final tasksKey = recorderTasksKeyFor(launch.instanceId);
     // The notification permission once, all-files access explained first
-    // (docs/T13/T13a/T13a.1 c14).
+    // (docs/A-界面设计/A14-系统界面/A14.1-系统界面 c14).
     final prompts = RecordingPermissionPrompts(permissions: const SystemPermissions(), meta: store.meta);
     final recording = background
         ? platformAppRecording(

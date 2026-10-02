@@ -16,7 +16,7 @@ Widget _app(Widget child, {bool reduceMotion = false}) => MaterialApp(
 
 void main() {
   test("AppIcons name each use and keep the icon 3.x's places showed", () {
-    // docs/T05/T05b/T05b.1/README.md and 3.x's live_play widgets.
+    // docs/A-界面设计/A07-直播间界面/A07.1-竖屏普通布局/README.md and 3.x's live_play widgets.
     final expected = <(IconData, IconData)>[
       (AppIcons.follow, Remix.add_line),
       (AppIcons.followed, Remix.check_line),
@@ -296,7 +296,7 @@ void main() {
               .painter!
           as RecordGlyphPainter;
 
-  // docs/T08/T08b/T08b.3 (problem 02: the idle glyph's red dot looked like
+  // docs/A-界面设计/A10-录制界面/A10.3-录制按钮和状态图标 (problem 02: the idle glyph's red dot looked like
   // recording).
   testWidgets('U.2a2: RecordGlyph is red only while recording; the rest take the icon colour', (tester) async {
     const ink = Color(0xFF43474E);

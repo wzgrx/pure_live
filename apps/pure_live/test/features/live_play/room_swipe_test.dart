@@ -1,4 +1,4 @@
-// U.2b2 (docs/T05/T05c/T05c.1 c14, X1 A): the list a room was opened from
+// U.2b2 (docs/A-界面设计/A07-直播间界面/A07.2-竖屏流和竖屏全屏 c14, X1 A): the list a room was opened from
 // goes along, and the portrait fullscreen swipes through it on the same
 // player.
 

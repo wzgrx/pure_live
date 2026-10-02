@@ -43,7 +43,7 @@ List<(String, ReleaseFile)> platformPackages(String platform, UpdateInfo info, L
 }
 
 /// The title of this device's package among [platformPackages] (the "本机"
-/// mark, docs/T07/T07i/T07i.4 c7): the running app's architecture on
+/// mark, docs/A-界面设计/A15-小页面/A15.2-关于和版本 c7): the running app's architecture on
 /// Android, the EXE installer on Windows, the universal package on macOS;
 /// null elsewhere.
 String? nativePackageTitle([Abi? abi]) => switch (abi ?? Abi.current()) {
@@ -69,7 +69,7 @@ String _platformName(String platform) => switch (platform) {
 };
 
 /// Update check and version history (3.x `lib/modules/version` and
-/// `modules/about/version_history.dart`, docs/T07/T07i/T07i.4).
+/// `modules/about/version_history.dart`, docs/A-界面设计/A15-小页面/A15.2-关于和版本).
 ///
 /// Routes: `RoutePath.kVersionPage` ([UpdateView]) and
 /// `RoutePath.kVersionHistory` ([ReleaseHistoryView]; the about page hands

@@ -19,7 +19,7 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 /// out its icon but keeps the streamer and the lock (U.2g note 10).
 const double compactPictureHeight = 260;
 
-/// The picture's state over the video (docs/T05/T05i/T05i.1): one
+/// The picture's state over the video (docs/A-界面设计/A07-直播间界面/A07.7-直播间的状态): one
 /// [VideoStateView] for loading, offline, failures, restrictions,
 /// reconnecting, restoring and ended replays, in every layout. Words and
 /// dimming let taps through to the picture; only the buttons take them. It

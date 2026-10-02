@@ -42,7 +42,7 @@ v3 的问题：
 2. 手机上“多画面”“链接访问”在右上搜索菜单里，宽屏在侧边栏，两处入口名字和图标不同（`Remix.link` 在宽屏叫工具箱、在手机叫链接访问）。
 3. 分区导航图标 `Remix.apps_2_line` 和直播间右上菜单是同一个图标，含义不同却长得一样。
 
-v4 现在（2026-10-01 核对）：导航图标已和 v3 一样；其余差异见 [compare/U.3a](../T07/T07a/T07a.4/README.md)。
+v4 现在（2026-10-01 核对）：导航图标已和 v3 一样；其余差异见 [compare/U.3a](../A-界面设计/A06-首页和全局/A06.1-手机首页/README.md)。
 
 | v3 | v4 |
 |---|---|
@@ -78,7 +78,7 @@ v3 的问题：
 2. 标签上不显示数量，看不出各状态、各平台有几个房间。
 3. 没有可见的刷新按钮（只能下拉或再点导航），桌面上不直观。
 
-v4 现在：结构照 v3，另加了数量徽标和平台行右端的刷新按钮；真机上“已开播 1”的文字被截断（T15b.1 已修）。
+v4 现在：结构照 v3，另加了数量徽标和平台行右端的刷新按钮；真机上“已开播 1”的文字被截断（S02.1 已修）。
 
 ## 4. 房间卡片（通用）
 
@@ -129,7 +129,7 @@ v4 现在（偏差最大）：
 - 竖屏时画面**上栏不显示**（只在全屏时出现），纯音频、投屏、小窗被挪到了下栏。
 - 下栏变成：播放/暂停、刷新、弹幕开关（换成字幕图标 `Icons.subtitles`）、纯音频、锁定 …… 投屏、小窗、全屏；**没有关注胶囊、弹幕设置、方向、画面比例**。
 - 信息行变成两行：标题 + 在线/热度/累计三个数 + 开播时长 + 画质线路，比 v3 挤。
-- 顶栏右侧只有心形和 `⋮`，**没有录制按钮**（T15b.1 后改到别处），菜单图标也不是 v3 的。
+- 顶栏右侧只有心形和 `⋮`，**没有录制按钮**（S02.1 后改到别处），菜单图标也不是 v3 的。
 - 弹幕列表去掉了卡片和圆点，系统消息用斜体。
 
 | v3 | v4 |
@@ -141,7 +141,7 @@ v4 现在（偏差最大）：
 | `widgets/danmaku/*`、`pages/danmaku_settings_page.dart`、`keyword_block_page.dart`、`super_chat_page.dart` | `features/live_play/danmaku/chat_panel.dart`、`chat_feed.dart`、`lib/shared/danmaku/*` |
 | `dialogs/*` | `features/live_play/dialogs/room_dialogs.dart`、`room_switcher.dart`、`stream_dialogs.dart` |
 
-## 6. 直播间（横屏全屏，T05d.1）
+## 6. 直播间（横屏全屏，A07.4）
 
 **v3 的样子**（`lib/modules/live_play/widgets/video_player/video_controller_panel.dart`）
 
@@ -152,11 +152,11 @@ v4 现在（偏差最大）：
 - 手势：左半边上下滑调亮度、右半边调音量（中间显示黑色进度卡片），单击显示或隐藏控制栏（触屏播放中第二次点击隐藏），双击退出全屏，长按画面上的弹幕打开屏蔽操作；控制栏范围内的点击不当作点弹幕（`shouldHandleVideoSurfaceTap`）。
 - 键盘（`widgets/keyboard/video_keyboard.dart`）：Esc 退出全屏、空格暂停或继续、R 刷新、上下键音量、媒体键。
 
-**v3 的问题**：F1 全屏时没有录制入口、打不开右上角菜单；F2 宽度不到 760 时三个按钮消失；F3 时间电量位置随平台变；F4 切换直播间带深色圆底，样式不统一；F5 画面比例和已关注是文字，和图标混排；F6 渐变 45% 黑偏淡；F7 清晰度线路合并按钮和半屏对话框（T05g.1 已改）。
+**v3 的问题**：F1 全屏时没有录制入口、打不开右上角菜单；F2 宽度不到 760 时三个按钮消失；F3 时间电量位置随平台变；F4 切换直播间带深色圆底，样式不统一；F5 画面比例和已关注是文字，和图标混排；F6 渐变 45% 黑偏淡；F7 清晰度线路合并按钮和半屏对话框（A07.6 已改）。
 
-**对比和设计**：见 [compare/U.2c](../T05/T05d/T05d.1/README.md)。
+**对比和设计**：见 [compare/U.2c](../A-界面设计/A07-直播间界面/A07.4-横屏全屏/README.md)。
 
-## 7. 直播间（宽屏左右分栏，T05e.1）
+## 7. 直播间（宽屏左右分栏，A07.5）
 
 **v3 的样子**（`lib/modules/live_play/widgets/layout/live_play_content.dart`、`live_play_header.dart`、`video_controller_panel.dart`）
 
@@ -168,7 +168,7 @@ v4 现在（偏差最大）：
 
 **v3 的问题**：W1 680–839 时画面只剩一小块；W2 顶栏名字和分区同字号；W3 关注和录制按钮随宽度换样子；W4 “默认比例”文字按钮、窗口内全屏图标看不出意思；W5 聊天栏顶上没有标题和信息；W6 窄栏里卡片样式弹幕；W7 没有只收起聊天栏的办法。
 
-**对比和设计**：见 [compare/U.2d](../T05/T05e/T05e.1/README.md)。
+**对比和设计**：见 [compare/U.2d](../A-界面设计/A07-直播间界面/A07.5-宽屏左右分栏/README.md)。
 
 ## 各任务的 v3 清单
 
@@ -176,58 +176,58 @@ v4 现在（偏差最大）：
 
 | 任务 | 位置 |
 |---|---|
-| T05c.1 竖屏流和竖屏全屏 | [compare/U.2b](../T05/T05c/T05c.1/README.md) |
-| T06d.1 弹幕列表和弹幕设置页 | [compare/U.2e](../T06/T06d/T06d.1/README.md) |
-| T05j.1 小窗 | [compare/U.2j](../T05/T05j/T05j.1/README.md) |
-| T07f.2 搜索 | [compare/U.5a](../T07/T07f/T07f.2/README.md) |
-| T07f.3 网页搜索 | [compare/U.5b](../T07/T07f/T07f.3/README.md) |
-| T07g.2 观看历史 | [compare/U.5c](../T07/T07g/T07g.2/README.md) |
-| T07d.1 房间卡片 | [compare/U.4a](../T07/T07d/T07d.1/README.md)（第 4 节和代码对不上的地方以这里为准：标是“录播”、默认不标平台、卡片默认圆角 20） |
-| T07b.2 热门 | [compare/U.4b](../T07/T07b/T07b.2/README.md)（第 2 节的空状态原文是“未发现直播”） |
-| T07e.2 关注 | [compare/U.4c](../T07/T07e/T07e.2/README.md) |
-| T05i.1 直播间的状态 | [compare/U.2g](../T05/T05i/T05i.1/README.md) |
-| T07c.2 分区 | [compare/U.4d](../T07/T07c/T07c.2/README.md) |
-| T07c.3 分区房间 | [compare/U.4e](../T07/T07c/T07c.3/README.md) |
-| T07c.4 关注的分区、平台显示 | [compare/U.4f](../T07/T07c/T07c.4/README.md)（v3 的 HotAreasPage 实际是“平台显示”页） |
-| T07a.4～T07a.6 首页外壳、宽屏首页、启动页、全局弹窗 | [compare/U.3a](../T07/T07a/T07a.4/README.md)、[T07a.5](../T07/T07a/T07a.5/README.md)、[T07i.2](../T07/T07i/T07i.2/README.md)、[T07a.6](../T07/T07a/T07a.6/README.md)（第 1 节以这里为准） |
-| T06f.1 本地互动 | [compare/U.2k](../T06/T06f/T06f.1/README.md) |
-| T11a.4 网络电视管理 | [compare/U.9](../T11/T11a/T11a.4/README.md) |
-| T10a.2 账号总览 | [compare/U.10a](../T10/T10a/T10a.2/README.md) |
-| T10a.3 登录和 Cookie | [compare/U.10b](../T10/T10a/T10a.3/README.md) |
-| T10c.1 云账号停用说明 | [compare/U.10c](../T10/T10c/T10c.1/README.md) |
-| T09a.2 设置总览 | [compare/U.6a](../T09/T09a/T09a.2/README.md) |
-| T09a.3 外观 | [compare/U.6b](../T09/T09a/T09a.3/README.md) |
-| T09a.4 播放设置 | [compare/U.6c](../T09/T09a/T09a.4/README.md) |
-| T09a.5 通用和网络 | [compare/U.6d](../T09/T09a/T09a.5/README.md) |
-| T09a.6 数据 | [compare/U.6e](../T09/T09a/T09a.6/README.md) |
-| T08b.2 录制中心 | [compare/U.7a](../T08/T08b/T08b.2/README.md) |
-| T12a.2 多画面 | [compare/U.8](../T12/T12a/T12a.2/README.md) |
-| T08c.1 录制设置 | [compare/U.7b](../T08/T08c/T08c.1/README.md) |
-| T09c.2 备份与恢复 | [compare/U.11a](../T09/T09c/T09c.2/README.md) |
-| T09d.1 WebDAV | [compare/U.11b](../T09/T09d/T09d.1/README.md) |
-| T09e.1 设备同步 | [compare/U.11c](../T09/T09e/T09e.1/README.md) |
-| T07i.3 工具箱（链接解析） | [compare/U.12a](../T07/T07i/T07i.3/README.md) |
-| T07i.4 关于和版本 | [compare/U.12b](../T07/T07i/T07i.4/README.md) |
-| T07h.2 标签管理 | [compare/U.12c](../T07/T07h/T07h.2/README.md) |
-| T06b.1 弹幕屏蔽（设置） | [compare/U.12d](../T06/T06b/T06b.1/README.md) |
-| T18e.2 电视设置 | [compare/U.15i](../T18/T18e/T18e.2/README.md) |
-| T17a.1 桌面窗口 | [compare/U.13](../T17/T17a/T17a.1/README.md) |
-| T13a.1 系统界面 | [compare/U.14](../T13/T13a/T13a.1/README.md) |
-| T18c.1 电视直播间 | [compare/U.15d](../T18/T18c/T18c.1/README.md) |
-| T18d.1 电视网络电视和链接放映 | [compare/U.15e](../T18/T18d/T18d.1/README.md) |
-| T19a.1 iOS 和 iPadOS | [compare/U.17a](../T19/T19a/T19a.1/README.md) |
-| T19b.1 macOS | [compare/U.17b](../T19/T19b/T19b.1/README.md) |
-| T01c.1 通用组件 | [compare/U.1c](../T01/T01c/T01c.1/README.md) |
-| T01d.1 弹窗组件 | [compare/U.1d](../T01/T01d/T01d.1/README.md) |
-| T18a.2 电视设计系统和通用组件 | [compare/U.15a](../T18/T18a/T18a.2/README.md) |
-| T18a.3 电视外壳 | [compare/U.15b](../T18/T18a/T18a.3/README.md) |
-| T18b.1 电视直播浏览 | [compare/U.15c](../T18/T18b/T18b.1/README.md) |
-| T07a.5 宽屏首页 | [compare/U.3b](../T07/T07a/T07a.5/README.md) |
-| T07i.2 启动页 | [compare/U.3c](../T07/T07i/T07i.2/README.md) |
-| T07a.6 全局弹窗 | [compare/U.3d](../T07/T07a/T07a.6/README.md) |
-| T18d.2 电视点播 | [compare/U.15f](../T18/T18d/T18d.2/README.md) |
-| T18d.3 电视音乐 | [compare/U.15g](../T18/T18d/T18d.3/README.md) |
-| T18e.1 电视壁纸 | [compare/U.15h](../T18/T18e/T18e.1/README.md) |
-| T05g.1 直播间弹窗 | [compare/U.2f](../T05/T05g/T05g.1/README.md) |
-| T06c.1 飞行弹幕渲染 | [compare/U.2h](../T06/T06c/T06c.1/README.md) |
-| T14b.1 刷新率和帧率匹配 | [compare/U.2i](../T14/T14b/T14b.1/README.md) |
+| A07.2 竖屏流和竖屏全屏 | [compare/U.2b](../A-界面设计/A07-直播间界面/A07.2-竖屏流和竖屏全屏/README.md) |
+| A08.1 弹幕列表和弹幕设置页 | [compare/U.2e](../A-界面设计/A08-弹幕界面/A08.1-弹幕列表和弹幕设置页/README.md) |
+| A07.8 小窗 | [compare/U.2j](../A-界面设计/A07-直播间界面/A07.8-小窗/README.md) |
+| A09.7 搜索 | [compare/U.5a](../A-界面设计/A09-浏览界面/A09.7-搜索/README.md) |
+| A09.8 网页搜索 | [compare/U.5b](../A-界面设计/A09-浏览界面/A09.8-网页搜索/README.md) |
+| A09.9 观看历史 | [compare/U.5c](../A-界面设计/A09-浏览界面/A09.9-观看历史/README.md) |
+| A09.1 房间卡片 | [compare/U.4a](../A-界面设计/A09-浏览界面/A09.1-房间卡片/README.md)（第 4 节和代码对不上的地方以这里为准：标是“录播”、默认不标平台、卡片默认圆角 20） |
+| A09.2 热门 | [compare/U.4b](../A-界面设计/A09-浏览界面/A09.2-热门/README.md)（第 2 节的空状态原文是“未发现直播”） |
+| A09.3 关注 | [compare/U.4c](../A-界面设计/A09-浏览界面/A09.3-关注/README.md) |
+| A07.7 直播间的状态 | [compare/U.2g](../A-界面设计/A07-直播间界面/A07.7-直播间的状态/README.md) |
+| A09.4 分区 | [compare/U.4d](../A-界面设计/A09-浏览界面/A09.4-分区/README.md) |
+| A09.5 分区房间 | [compare/U.4e](../A-界面设计/A09-浏览界面/A09.5-分区房间/README.md) |
+| A09.6 关注的分区、平台显示 | [compare/U.4f](../A-界面设计/A09-浏览界面/A09.6-热门分区、关注的分区/README.md)（v3 的 HotAreasPage 实际是“平台显示”页） |
+| A06.1～A06.3 首页外壳、宽屏首页、启动页、全局弹窗 | [compare/U.3a](../A-界面设计/A06-首页和全局/A06.1-手机首页/README.md)、[A06.2](../A-界面设计/A06-首页和全局/A06.2-宽屏首页/README.md)、[A06.4](../A-界面设计/A06-首页和全局/A06.4-启动页/README.md)、[A06.3](../A-界面设计/A06-首页和全局/A06.3-全局弹窗/README.md)（第 1 节以这里为准） |
+| A08.2 本地互动 | [compare/U.2k](../A-界面设计/A08-弹幕界面/A08.2-本地互动/README.md) |
+| A13.1 网络电视管理 | [compare/U.9](../A-界面设计/A13-网络电视和多画面界面/A13.1-网络电视管理/README.md) |
+| A12.1 账号总览 | [compare/U.10a](../A-界面设计/A12-账号和数据界面/A12.1-账号总览/README.md) |
+| A12.2 登录和 Cookie | [compare/U.10b](../A-界面设计/A12-账号和数据界面/A12.2-登录和Cookie/README.md) |
+| A12.3 云账号停用说明 | [compare/U.10c](../A-界面设计/A12-账号和数据界面/A12.3-云账号停用说明/README.md) |
+| A11.1 设置总览 | [compare/U.6a](../A-界面设计/A11-设置界面/A11.1-设置总览/README.md) |
+| A11.2 外观 | [compare/U.6b](../A-界面设计/A11-设置界面/A11.2-外观/README.md) |
+| A11.3 播放设置 | [compare/U.6c](../A-界面设计/A11-设置界面/A11.3-播放/README.md) |
+| A11.4 通用和网络 | [compare/U.6d](../A-界面设计/A11-设置界面/A11.4-通用和网络/README.md) |
+| A11.5 数据 | [compare/U.6e](../A-界面设计/A11-设置界面/A11.5-数据/README.md) |
+| A10.1 录制中心 | [compare/U.7a](../A-界面设计/A10-录制界面/A10.1-录制中心/README.md) |
+| A13.2 多画面 | [compare/U.8](../A-界面设计/A13-网络电视和多画面界面/A13.2-多画面/README.md) |
+| A10.2 录制设置 | [compare/U.7b](../A-界面设计/A10-录制界面/A10.2-录制设置/README.md) |
+| A12.4 备份与恢复 | [compare/U.11a](../A-界面设计/A12-账号和数据界面/A12.4-备份与恢复/README.md) |
+| A12.5 WebDAV | [compare/U.11b](../A-界面设计/A12-账号和数据界面/A12.5-WebDAV/README.md) |
+| A12.6 设备同步 | [compare/U.11c](../A-界面设计/A12-账号和数据界面/A12.6-设备同步/README.md) |
+| A15.1 工具箱（链接解析） | [compare/U.12a](../A-界面设计/A15-小页面/A15.1-工具箱/README.md) |
+| A15.2 关于和版本 | [compare/U.12b](../A-界面设计/A15-小页面/A15.2-关于和版本/README.md) |
+| A09.10 标签管理 | [compare/U.12c](../A-界面设计/A09-浏览界面/A09.10-标签管理/README.md) |
+| A08.3 弹幕屏蔽（设置） | [compare/U.12d](../A-界面设计/A08-弹幕界面/A08.3-弹幕屏蔽页/README.md) |
+| A17.9 电视设置 | [compare/U.15i](../A-界面设计/A17-电视界面/A17.9-电视设置/README.md) |
+| A16.1 桌面窗口 | [compare/U.13](../A-界面设计/A16-桌面界面/A16.1-桌面窗口/README.md) |
+| A14.1 系统界面 | [compare/U.14](../A-界面设计/A14-系统界面/A14.1-系统界面/README.md) |
+| A17.4 电视直播间 | [compare/U.15d](../A-界面设计/A17-电视界面/A17.4-电视直播间/README.md) |
+| A17.5 电视网络电视和链接放映 | [compare/U.15e](../A-界面设计/A17-电视界面/A17.5-电视网络电视和影片/README.md) |
+| A18.1 iOS 和 iPadOS | [compare/U.17a](../A-界面设计/A18-苹果平台界面/A18.1-iOS和iPadOS差异设计/README.md) |
+| A18.2 macOS | [compare/U.17b](../A-界面设计/A18-苹果平台界面/A18.2-macOS差异设计/README.md) |
+| A02.1 通用组件 | [compare/U.1c](../A-界面设计/A02-组件/A02.1-通用组件/README.md) |
+| A02.2 弹窗组件 | [compare/U.1d](../A-界面设计/A02-组件/A02.2-弹窗组件/README.md) |
+| A17.1 电视设计系统和通用组件 | [compare/U.15a](../A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件/README.md) |
+| A17.2 电视外壳 | [compare/U.15b](../A-界面设计/A17-电视界面/A17.2-电视外壳/README.md) |
+| A17.3 电视直播浏览 | [compare/U.15c](../A-界面设计/A17-电视界面/A17.3-电视直播浏览/README.md) |
+| A06.2 宽屏首页 | [compare/U.3b](../A-界面设计/A06-首页和全局/A06.2-宽屏首页/README.md) |
+| A06.4 启动页 | [compare/U.3c](../A-界面设计/A06-首页和全局/A06.4-启动页/README.md) |
+| A06.3 全局弹窗 | [compare/U.3d](../A-界面设计/A06-首页和全局/A06.3-全局弹窗/README.md) |
+| A17.6 电视点播 | [compare/U.15f](../A-界面设计/A17-电视界面/A17.6-电视点播/README.md) |
+| A17.7 电视音乐 | [compare/U.15g](../A-界面设计/A17-电视界面/A17.7-电视音乐/README.md) |
+| A17.8 电视壁纸 | [compare/U.15h](../A-界面设计/A17-电视界面/A17.8-电视壁纸/README.md) |
+| A07.6 直播间弹窗 | [compare/U.2f](../A-界面设计/A07-直播间界面/A07.6-直播间弹窗/README.md) |
+| D03.1 飞行弹幕渲染 | [compare/U.2h](../D-弹幕/D03-飞行弹幕引擎/D03.1-飞行弹幕渲染/README.md) |
+| R02.1 刷新率和帧率匹配 | [compare/U.2i](../R-性能和流畅度/R02-刷新率/R02.1-刷新率和帧率匹配/README.md) |

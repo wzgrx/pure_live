@@ -808,7 +808,7 @@ class MultiviewController extends ChangeNotifier {
   /// Sets the volume of cell [index]; [save] keeps it for the room (the
   /// live room opens with it too). While a slider moves ([save] false) the
   /// page is not told: the slider shows its own value, so the cells and the
-  /// picker do not rebuild on every step (docs/T12/T12a/T12a.2 性能要点).
+  /// picker do not rebuild on every step (docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面 性能要点).
   Future<void> setVolume(int index, double volume, {bool save = false}) async {
     if (index < 0 || index >= _cells.length) return;
     final cell = _cells[index].._volume = volume.isFinite ? volume.clamp(0, 1).toDouble() : 1;

@@ -36,7 +36,7 @@ class AreaRoomsPage extends StatelessWidget {
   }
 }
 
-/// The rooms of [area] on [site] (docs/T07/T07c/T07c.3): the area's name
+/// The rooms of [area] on [site] (docs/A-界面设计/A09-浏览界面/A09.5-分区房间): the area's name
 /// with "platform · category" under it (c2) and the follow pill (c3) in the
 /// app bar; the room cards of U.4a in the columns of UI_PLAN §5.3 (c7);
 /// skeleton cards while loading (c8); on phones pull to refresh and more

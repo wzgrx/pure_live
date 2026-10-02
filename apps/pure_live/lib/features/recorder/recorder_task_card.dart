@@ -82,7 +82,7 @@ enum _CardMenu {
   delete,
 }
 
-/// One task of the recording centre (docs/T08/T08b/T08b.2, c2–c5): the
+/// One task of the recording centre (docs/A-界面设计/A10-录制界面/A10.1-录制中心, c2–c5): the
 /// head (cover, streamer with "自动录", title, platform and audience, "⋮"),
 /// then the live room's status card (U.2f) in its compact size. A tap opens
 /// the room (3.x); a long press, a right click or "⋮" opens the menu:

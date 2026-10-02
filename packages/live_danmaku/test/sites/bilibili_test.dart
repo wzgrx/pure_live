@@ -928,7 +928,7 @@ void main() {
     test('S13-vectors: every vector as 3.x handled it, except the intentional differences', () async {
       final lines = _lines('S13-vectors');
       final vectors = (_expectedValue('S13-vectors')['vectors'] as List<dynamic>).cast<Map<String, dynamic>>();
-      // Intentional differences (docs/T06/T06a/T06a.2/record.md): M2's colour
+      // Intentional differences (docs/D-弹幕/D01-平台弹幕协议/D01.2-哔哩哔哩弹幕/record.md): M2's colour
       // fix, and super chats read like M4.1's snapshot.
       final differences = <String, Map<String, Object?> Function(Map<String, Object?> message)>{
         'chat-colors/blue': (message) => {...message, 'color': '#0000ff'},

@@ -1,0 +1,102 @@
+# A10.3 录制按钮和录制状态的图标重新设计
+
+- 日期：2026-10-02（本地 worktree 任务，只提交到 worktree 分支，没有推送、没有开 PR）
+- 用户原话（问题 02）：“录制的按钮图标需要重新优化设计一下，现在这个看起来像在录制，需要重新设计一下，未录制和没有录制，让人从图标就可以明显看出来”
+- 设计：[docs/A-界面设计/A10-录制界面/A10.3-录制按钮和状态图标/README.md](README.md)（第 1 版；用户已授权“所有决定你选择”，待选 X1～X3 按建议 A 做，X4 超出范围交维护者）
+- 审查报告：A-02（[audit-2026-10-02.md](../../../V-需求和反馈/V03-审查和调研/V03.1-全面审查/README.md)）
+
+## 根因
+
+1. **图形**：`packages/live_ui/lib/src/widgets/record_glyph.dart` 的“未录”是灰圈里一个**红色实心点**（A07.1 改动 13 加的），红点本身就是“正在录”的信号。v3 的未录是中性色空心圈（`Remix.record_circle_line`），录制中才变红。
+2. **状态**：顶栏按钮 `LP/buttons/record_button.dart:75` 和画面角标 `LP/player/recording_badge.dart:59` 用 `RecordStatus.isActive` 二分；`isActive` 把 running、reconnecting、processing、preparing 都算进去，所以准备中、重连中、合成 MP4 时也是红底闪烁和“● 录制中”。失败落到“未录”分支，看不出来。
+3. 状态卡的图标（计时器、沙漏、循环箭头、转圈、红点）和顶栏不是一套；通知小图标是圆环圆点，和“未录”同形。
+
+## 逐条对照
+
+| 编号 | 要求 | 做到 | 说明 |
+|---|---|---|---|
+| c1 | 先出设计：七种状态在顶栏（亮）、画面上（暗）、全屏顶栏、录制中心、状态卡、通知各是什么样；README、`src/gen.py`、效果图、编号图、`page.json`、导出章节图 | ✅ | `docs/A-界面设计/A10-录制界面/A10.3-录制按钮和状态图标`：14 张效果图（含 v3 还原、4.0.0 现状、图形规格、七状态×六处总表、竖屏、横屏、状态卡、录制中心、通知）、3 张编号图、4 张深色图、15 张导出章节图；效果图都用 Read 看过。评审页在本机 `~/ref/design/compare/U.2a2.html`，没有发布成 claude.ai 页面（全部按建议定稿，无需评审） |
+| c1 | 方向：未录单色无红（2dp 圆环 + 中心小实心圆，和其他图标同色） | ✅ | 半径 9、线宽 2 的环（外径 20，和 Material 图标的有效区一样大）+ 半径 3.5 的圆点；颜色默认取 `IconTheme`（顶栏 IconButton 的 onSurfaceVariant，画面上白色），和旁边的菜单按钮同色 |
+| c1 | 录制中红色实心圆底 + 白色圆角方块，外圈慢慢呼吸（减少动态效果时常亮）；全屏顶栏有空间时右边加 mm:ss | ✅ | 半径 10 的红圆 + 7.5 的白色圆角方块（圆角 1.8），外圈半径 10～12 的光晕透明度 15%↔45%、2.4 秒一呼一吸；减少动态效果时不启动动画控制器，常亮 30%。横屏全屏顶栏的录制按钮在录制中时右边加 `12:34`（X1 A：这时控制栏下面不再重复“录制中 12:34”角标）；竖屏全屏第一行放不下，时间留在角标里 |
+| c1 | 红色只给真正在写文件的 running | ✅ | 只有 `RecordStatus.running` 映射到红色图形和红色角标；测试固定其余每种状态不含红色 |
+| c1 | 等待开播：圆环右下角小钟；准备中、合成中：中性色环形进度；重连中：琥珀色虚线圆环 | ✅ | 小钟在右下角挖空（`saveLayer` + `BlendMode.clear`，只在状态变化时画）；准备中 1/4 段弧转圈（1.2 秒一圈，减少动态效果时停住）；合成中按合成进度画弧（FFmpeg 报进度前同准备中）；重连中 8 段虚线 + 圆点，`LiveSemanticColors.warning`（画面上用深色主题的琥珀色） |
+| c1 | 失败（任务单列的第七种） | ✅ | 设计里没给方向，按建议 A（X3）：圆环右下角挖空放错误色“!”徽标 |
+| c2 | `packages/live_ui` 的 `RecordGlyph`、`RecordingBadge` 扩成这些状态 | ✅ | `RecordGlyphState` 七个值：idle、waiting、preparing、recording、reconnecting、processing、failed；`RecordGlyph` 改为 `CustomPainter` 画（`RecordGlyphPainter`，测试读它的颜色和进度），参数 `color`（原 `ringColor`）、`progress`、`onVideo`。`RecordingBadge` 加 `state`、`progress`：录制中红底白点“录制中 12:34”，重连中、合成中黑 60% 底加 14 的小图形“重连中 12:34”“合成中 45%”；紧凑形只剩图形和数字 |
+| c2 | 顶栏按钮、角标、状态卡、录制中心按 `task.status` 映射，不再用 `isActive` 二分 | ✅ | 新文件 `shared/record/record_look.dart`：`recordGlyphState(RecordCardState)`（和状态卡同一个映射，见下表）、`recordButtonLabel`、`recordBadgeState(task)`（只认 running / reconnecting / processing）、`recordBadgeLabel`、`recordJoinProgress`。`record_button.dart` 按卡片状态画（排队中才去算名额，和状态卡一样区分“排队中”和“准备中”）；`recording_badge.dart` 按任务状态；`record_status_card.dart` 卡片头换成同一组图形（录制中心用的是同一张卡，自动跟着变） |
+| c2 | 角标文字按状态写“录制中 / 重连中 / 合成中” | ✅ | 新翻译键 `record_badge_reconnecting`（重连中 / Reconnecting）、`record_badge_processing`（合成中 / Joining）；“录制中”用原有的 `recording` |
+| c3 | Android 通知小图标（录制）跟着新图形（单色） | ✅ | `res/drawable/ic_stat_recording.xml`：实心圆挖出圆角方块（evenOdd，白色）。见“偏差 2” |
+| 验收 | 只看图标就能分出“没在录”和“在录”；合成、准备时不再显示红色“录制中” | ✅ | 没在录的几种都是单色圆环为底（只在环上或角上加记号），录制中是红色实心圆；准备中、合成中没有红色、没有“录制中”字样 |
+| 验收 | 测试：每种状态的图标、颜色和文字；减少动态效果时不呼吸 | ✅ | 见“测试” |
+
+### 七种状态从哪里来（`recordGlyphState`）
+
+| 卡片状态 | 任务状态 | 图形 | 顶栏提示 | 画面角标 |
+|---|---|---|---|---|
+| idle、saved | 没有任务、stopped、completed | 未录 | 录制 | 无 |
+| waiting | waitingLive | 等待开播（顶栏仍是“自动录”胶囊，图标换成新图形） | 自动录 | 无 |
+| queued | queued 且名额已满 | 等待开播（X2 A） | 排队中（开着开播自动录时是“自动录”胶囊，同 4.0.0） | 无 |
+| preparing | preparing；queued 且有空位 | 准备中 | 准备中 | 无 |
+| recording | running | 录制中 | 录制中 | 红底“录制中 12:34” |
+| reconnecting | reconnecting | 重连中 | 重连中 | 深色底“重连中 12:34” |
+| processing | processing | 合成中 | 合成中 | 深色底“合成中 45%” |
+| failed | failed | 失败 | 录制失败 | 无 |
+
+## 偏差和原因
+
+1. **状态卡的“等待开播”“准备中”“合成中”图标从主色改成中性色**：设计要求“中性色”，原来转圈和计时器是主色。已保存的绿色勾不变（不在七种状态里，卡片的绿色已经说明）。
+2. **通知只有一个小图标**：前台录制通知在准备中、重连中、合成中也显示（`app/recording_notice.dart` 用 `isActive` 决定有没有通知，文字是“正在录制 · 晚风”），“录制已停止”提醒（`RecorderForegroundService.kt` 的 `alert`）也用同一个 `ic_stat_recording`。按状态换图标或文字要改 `app/` 和 Kotlin，超出 A10.3 可改范围，没有做；设计里画了建议的“录制已停止”图形（圆环加“!”），见 A10.3 的 X4。
+3. **画面角标在准备中不显示**：任务单只列了“录制中 / 重连中 / 合成中”三种文字，准备中通常几秒，顶栏的转圈已经说明。
+4. **横屏全屏控制栏下面的角标**：录制中时不再显示（按钮带时间，X1 A）；重连中、合成中照旧显示。控制栏隐藏和锁定时左上角的紧凑角标照旧。
+
+## 改了哪些文件
+
+- 设计：`docs/A-界面设计/A10-录制界面/A10.3-录制按钮和状态图标`（README、`src/gen.py` 和生成的 `src/*.html`、效果图、`page.json`、`page/` 章节图）
+- `packages/live_ui/lib/src/widgets/record_glyph.dart`（`RecordGlyphState` 七态、`RecordGlyph`、`RecordGlyphPainter`、`RecordingBadge`）
+- `packages/live_ui/lib/src/theme/live_colors.dart`（新角色 `OnVideoColors.onError`；`recordingHalo` 改成光晕静止时的 30%）
+- `apps/pure_live/lib/shared/record/record_look.dart`（新）、`record_status_card.dart`
+- `apps/pure_live/lib/features/live_play/buttons/record_button.dart`（按状态画；新参数 `showTime`、`now`）
+- `apps/pure_live/lib/features/live_play/player/recording_badge.dart`（按状态；新参数 `showsRecording`）、`player_controls.dart`（横屏顶栏传 `showTime`）、`player_view.dart`（横屏控制栏下面录制中不重复角标）
+- `apps/pure_live/android/app/src/main/res/drawable/ic_stat_recording.xml`
+- `apps/pure_live/assets/translations/zh.json`、`en.json`（两个键）
+- 测试：`packages/live_ui/test/design_system_test.dart`、`apps/pure_live/test/features/recorder/recorder_page_test.dart`、`recorder_centre_test.dart`、`test/features/live_play/live_play_popups_test.dart`、`test/platform/system_surfaces_test.dart`
+
+## 新设置和翻译键
+
+- 没有新设置。
+- 新翻译键：`record_badge_processing`（合成中 / Joining）、`record_badge_reconnecting`（重连中 / Reconnecting）。
+
+## 测试
+
+- 新写 7 个：`live_ui` 4 个（七种状态的颜色、只有录制中有红色、未录只画同色的环和点；画面上的深色色调；呼吸和转圈、减少动态效果时都不动、合成按进度不转；角标三种状态的底色、文字和紧凑形）；`pure_live` 3 个（顶栏八个房间七种状态的图形、红色、提示文字、合成进度、横屏带时间的按钮、角标三种文字和不显示的情况、`showsRecording`；九种卡片状态到图形的映射和角标映射；录制中心九张卡片头的图形、琥珀色、合成进度、已保存仍是绿勾）。
+- 改了 2 个：横屏全屏面板测试改为点顶栏录制按钮（录制中时控制栏下面不再有角标，并断言按钮带时间）；通知资源测试加一条新图形的路径。
+- 删掉 `live_ui` 原来的 3 个（闪烁白点、旧角标、白色圆环），由上面的新测试代替。
+- 跑过：`packages/live_ui` 和 `apps/pure_live` 的 `dart format --set-exit-if-changed`、`flutter analyze`（都无问题）；`packages/live_ui` 全部测试 100 个通过；`apps/pure_live` 全部测试 743 个通过；`python3 tools/gate/check_ui_structure.py` 通过（功能目录没有新增直接写的颜色和图标）。
+- APK：`flutter build apk --debug --target-platform android-arm64` 构建成功（新的通知图标资源能编译），之后 `./gradlew --stop`。没有往手机安装。
+
+## 要在 K90 上看的地方
+
+1. 进一个没录过的直播间：顶栏关注右边的录制按钮是**单色圆环加圆点**，和右边四宫格菜单同色，没有一点红色；深色主题下也是浅灰。
+2. 点录制按钮 →“开始录制”：先是灰色转圈的环（准备中，几秒），开始写文件后变成**红色实心圆 + 白色圆角方块**，外圈淡红光晕慢慢一明一暗（约 2.4 秒一次）；画面左上角“● 录制中 00:05”红色角标。系统设置 → 无障碍 → 移除动画（或“减少动画”）打开后，光晕不再变化。
+3. 横过手机进全屏：顶栏录制按钮右边有 `mm:ss` 在走；控制栏下面不再有第二个“录制中”角标；点画面隐藏控制栏后左上角只剩红色“● mm:ss”。竖屏全屏：顶栏第一行只有图标，时间在控制栏下面的角标里。
+4. 停止录制：顶栏变成**灰色进度环**（合成进度），角标变成深色底“合成中 xx%”，没有红色；合成完变回单色圆环。
+5. 断网或切到飞行模式几秒让录制重连：顶栏是**琥珀色虚线圆环**，角标深色底“重连中 mm:ss”。
+6. 在“开播自动录”打开、主播未开播的房间：顶栏“自动录”胶囊里的图标是圆环右下角带小钟。
+7. 录制中心：每张卡片的状态头用同一组图形（录制中红、重连中琥珀虚线、整理文件灰色进度、等待开播带小钟、失败带红色“!”）。
+8. 下拉通知栏：录制通知的小图标是**实心圆里挖出一个方块**（以前是圆环圆点）。
+
+## 需要维护者决定的
+
+- X4：“录制已停止”提醒和前台通知共用 `ic_stat_recording`，现在提醒也显示“录制中”的形状；准备中、合成中的前台通知文字仍写“正在录制”。建议另做一个“!”小图标（设计 `v4-notify.jpg` 右下）并让通知按状态写字，要改 `RecorderForegroundService.kt`（一行 `setSmallIcon`）和 `app/recording_notice.dart`，不在 A10.3 的可改目录里。
+- 电视版 `lib/tv/widgets/tv_room_card.dart` 也用 `isActive` 判断“录制中”，这一轮不做电视，没改。
+
+## 可能和别的任务冲突的文件
+
+- `features/live_play/buttons/record_button.dart`、`player/player_controls.dart`、`player/player_view.dart`：A07.13（也改顶栏按钮）会碰到同样的文件；`player_controls.dart` 的 `_roomActions` 加了参数。
+- `shared/record/record_status_card.dart`：录制面板、录制中心相关任务（D02.1～A02.3、D01.32 如涉及录制状态卡）。
+- `packages/live_ui/lib/src/theme/live_colors.dart`：只加了一个角色、改了一个透明度。
+- 翻译文件 `zh.json`、`en.json`：只在 `record_alert_channel_name` 后面加了两行。
+
+## 维护者补做（X4，建议 A）
+
+- 单个直播间的前台通知按状态写标题：准备录制 / 正在录制 / 正在重连 / 正在整理录像（`app/recording_notice.dart`），测试在 `test/platform/system_surfaces_test.dart`。
+- “录制已停止”提醒换成新的小图标 `ic_stat_record_stopped`（未录的圆环开口加“!”），不再用录制中的形状。

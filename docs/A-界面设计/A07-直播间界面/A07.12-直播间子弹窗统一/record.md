@@ -1,0 +1,102 @@
+# A07.12 记录：直播间子弹窗统一（定时关闭、房间音量、投屏、获取直链、画面比例和方向，以及 A02.2 留下的直播间弹窗）
+
+- 日期：2026-10-02
+- 任务单：[tasks/B07.md](brief.md)（含“A02.2 之后补充”一节）；审查报告 B-3、B-7、B-13、B-14、B-15；设计 [docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一/README.md](README.md)（本任务新出，按建议 A 定稿）、A02.2、A07.6。
+- 本地 worktree 任务：开工前合并了本地 master（A07.10～A07.13、A02.2、R02.2、A03.1），提交前又合并了一次（D04.1、A03.2；`chat_list.dart` 有冲突，见“合并”）。没有改 Android 原生代码，没有构建 APK。
+
+## 逐条对照
+
+| 编号 | 条目 | 做了没有 | 内容和偏差 |
+|---|---|---|---|
+| c1 | 先出设计（A07.12） | 完成 | `docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一`：18 张效果图（4.0.0 现在 4 张、新设计 14 张，含 `-n` 编号图）、评审页 `page.json`（本机 `~/ref/design/compare/U.2n.html`）和按章节导出的 14 张图、README（清点表、v3 和 4.0.0 的样子、新设计、改动 c1～c12、待选 N1～N5）。规则：**设置类**（定时关闭、房间音量、获取直链、投屏、长按弹幕）用直播间面板 `RoomSidePanel`，竖屏画面下方、竖屏全屏底部 60%、横屏全屏和平板右侧 360；**选一项**（画面比例、画面方向、取消关注）用贴着按钮的小菜单；横屏全屏不再有压在画面中间的居中对话框。N1～N5 按 A 做（见下） |
+| c2 | B-3 手机上房间音量直接调系统音量 | 完成 | `RoomVolumePanel`：`DeviceControls.available`（Android 手机、平板；和画面上下滑手势用同一个判断）时读写系统媒体音量（`pure_live/device_controls` 的 `getVolume`/`setVolume`，手势也走它），不再改 mpv 音量、不写 `roomVolumes`；面板开着时每秒读一次系统音量（音量键、手势改了也跟着变，拖动中不读）。其他平台照旧是这个直播间的播放器音量，松手时存进 `roomVolumes`。说明行写清是哪种音量 |
+| c3 | B-13 线路页能回清晰度页、标当前、`AppIcons.selected`；B-14 取消静音回到静音前 | 完成 | `RoomStreamPanel`（获取直链 / 投屏同一个）：清晰度 → 线路 →（投屏）设备三页，标题栏左边 ← 回上一页；正在播的清晰度和线路用 `DialogOptionRow`（主色、600、`AppIcons.selected`），说明行写“正在播放”；只有一档清晰度直接读线路，只有一条线路直接复制（投屏直接到设备页），回放节目直接用回放地址（同以前）。投屏设备行用 `DialogOptionRow`（新加的 `trailing`：投的时候转圈，投上后主色加勾）。B-14：静音前的音量记住（系统音量一份，每个直播间的播放器音量各一份），再点回到它；不知道时回到 50%（N5） |
+| c4 | 画面比例：菜单和横屏底栏同一个组件，当前项主色加勾 | 完成 | `showVideoFitMenu(anchor, settings)`：两处都调它（`showSmallMenu`，当前项主色加勾）；从右上角菜单进时贴着四宫格按钮弹，横屏下栏贴着画面比例按钮向上弹。居中的 `_ChoiceDialog` 删掉 |
+| 补充 1 | `follow_button.dart` 取消关注（按钮写“取消关注”，确认后带“撤销”的提示条，B-15） | 完成，形态有偏差 | 贴着“已关注”的小菜单（`showAppMenu`：标题行“主播 · 平台”、红色“取消关注”），全屏也不压画面中间（N3 选 A）；选了以后调 `shared/rooms/room_menu.dart` 的 `unfollowRoom(confirmed: true)`：提示条“已取消关注 X · 撤销”（4 秒），撤销放回原位置。A02.2 表里建议的是居中危险确认 `confirmUnfollowRoom`（首页卡片长按用的那个），这里没用，原因是横屏全屏不能有居中对话框，见“需要维护者决定的” |
+| 补充 2 | `room_dialogs.dart` 定时关闭、房间音量 | 完成 | `RoomSleepTimerPanel`、`RoomVolumePanel`（`RoomPanelKind.sleepTimer`、`volume`）。定时关闭改动立即生效（N2）：开关开 = 按上次的时长开始，点预设直接开始，自定义分钟点“开始”，超出 1～525600 在框下写原因；开着时第二行主色写“X 分钟后暂停（HH:mm）”，每 30 秒更新；面板留着。标题用菜单项的名字“定时关闭”（以前对话框标题是“当前直播间播放定时器”） |
+| 补充 3 | `stream_dialogs.dart` 获取直链、投屏 | 完成 | 见 c3；`RoomPanelKind.streamLink`、`cast`；全屏顶栏的投屏按钮也打开这个面板。`CastDialog` 改成面板里的 `CastDevices`（列表上方那一行右边是刷新，内容和文案照旧） |
+| 补充 4 | `player_dialogs.dart` 画面比例、画面方向 | 完成 | 比例见 c4。方向 `showRoomOrientationMenu`：贴着方向按钮的小菜单（下栏上的按钮放得下就向上），标题行“本直播间画面方向”、三项各带说明、当前项主色加勾，分隔线下面是“记住单个直播间方向”开关（`showSmallMenu` 新加的 `footer`，切换立即生效、不关菜单），和竖屏全屏的“画面模式”菜单同一种样子（N4 选 A） |
+| 补充 5 | `chat_list.dart` 屏蔽关键词输入、长按弹幕的底部表单 | 完成 | 长按弹幕（和点画面弹幕）改成面板 `RoomPanelKind.message`（`RoomPanelController.openMessage`），内容照 A07.6；屏蔽关键词用 `showAppInputDialog`（单行、预填弹幕、字数 40、说明“输入一个词，含这个词的弹幕都不再显示”、主要按钮“屏蔽”）。为了少碰 D04.1 改的列表，这两处整体移到新文件 `danmaku/message_panel.dart`，`chat_list.dart` 只删掉了旧代码、加了一行 import。面板关上前画面弹幕保持停住（3.x，A08.4 原有行为） |
+| 补充 6 | `room_mini_window.dart` 无法打开画中画 | 完成 | `showAppMessageDialog`（“知道了”和“去设置”） |
+| 补充 7 | `iptv_guide.dart`、`record_panel.dart`、`danmaku_settings_panel.dart` 没有直播间页面时的底部表单 | 完成 | 都改用新 `showRoomPanelSheet`（`layout/room_panel.dart`，包了 `showAdaptivePanel`：窄屏底部带把手、宽 600 起右侧） |
+| 补充 8 | `local_style_panel.dart` 本地弹幕样式 | 完成 | 直播间里本来就是 `RoomPanelKind.localStyle`；设置页打开的 `showLocalDanmakuStyleSheet` 改用 `showRoomPanelSheet` |
+| 补充 9 | `room_menu_button.dart` 右上角菜单换成 `AppMenuButton`（B-7） | 完成 | 图标 24、字 14、分组线；定时关闭开着时第二行写“X 分钟后暂停”，画面比例写当前比例（`AppMenuEntry` 新加的 `description`，A02.2 c4 的说明行）；没在播放时投屏、获取直链不可点（同以前）。`AppMenuButton` 新加 `onMenu`，菜单开着时控制层不隐藏（同以前） |
+| 补充 10 | 全屏时提示条压在下栏上 | 完成 | 全屏布局外包一层 `Theme`，把提示条主题的下边距调到下栏以上：横屏下栏 52 + 16，竖屏全屏两行（108）+ 16；直播间普通页面不变（离底 16） |
+| 补充 11 | （维护者已定）设置类对话框主要按钮写明动作；3 个原生 `PopupMenuButton` 换 `showAppMenu` | 没做 | 都不在直播间；协调人说明 A02.1 同时在做直播间以外的部分，留给 A02.1，避免两边改同一批文件。直播间里新出的按钮都写明动作（“开始”“屏蔽”“去设置”“取消关注”） |
+| — | `local_composer.dart` 本地发送的星标行（`showGeneralDialog`，透明遮罩） | 保持 | A02.2 表里写“贴着按钮的小菜单或保持（不是对话框）”；它不是对话框，也不压暗画面，没动 |
+
+验收：
+
+- 三种布局里这些弹窗的样子和操作一致：同一个面板组件，只换位置；横屏全屏没有居中对话框（定时关闭、房间音量、获取直链、投屏、长按弹幕在右侧；画面比例、方向贴着按钮）。`features/live_play/` 和 `features/multiview/` 里已经没有 `showDialog`、`showModalBottomSheet`、`AlertDialog`、`PopupMenuButton`（只剩上面说的星标行）。
+- 房间音量和手势音量是同一个音量（Android 上都是系统媒体音量），有测试。
+
+## 根因（核对过）
+
+- **B-3**：`room_controller.dart` 的 `_volume()` 在手机上一律返回 1（3.x 适配器的做法，系统音量为准），而“房间音量”对话框改的是 mpv 音量并存进 `roomVolumes`，下次进房不恢复；画面上下滑（`player_gestures.dart`）改的是系统音量。两层互不知道，所以“房间音量 30%”和手势显示的不是一个数。3.2.11 手机上 `trySetVolume` 走的是系统音量（`video_controller.dart:823`，`_usesSystemVolume`）。
+- **B-14**：对话框静音按钮 `_value <= 0 ? 1 : 0`，取消静音写死 100%。
+- **B-13**：`_StreamPickerDialog` 点了清晰度后用线路列表**替换**清晰度列表（同一个 `build` 分支），没有返回的状态；线路行是 `ListTile`，没有和 `session.state.lineIndex` 比较；对勾写的是 `Icons.check_rounded`。
+- **B-7**：这些弹窗各自 `showDialog`/`showModalBottomSheet`，用的是根导航器上的居中对话框，横屏全屏时自然落在画面正中并压暗；画面比例两处入口是两段代码。
+- **全屏提示条**：`AppToast` 的下边距取主题 `snackBarTheme.insetPadding`（16），全屏页面的 Scaffold 没有底部导航，所以离底 16，正好压在 52 高的下栏上。
+- 顺手修的：画面上下滑开始时异步读系统音量，读到之前的第一次移动会从 `_level` 的旧值（初始 0）算起，可能一下把音量调到接近 0；加了 `_reading`，读到之前不动（`player_gestures.dart`）。
+
+## 合并
+
+- D04.1 改了 `chat_list.dart`（列表、`chatNameColor` 改成按底色算）。冲突在旧的 `showChatMessageActions`/`_KeywordDialog` 一段：保留 A07.12 的删除（代码已搬到 `message_panel.dart`），名字颜色那一行用 D04.1 的新签名 `chatNameColor(message.color, scheme.surfaceContainerLowest)`。A03.2 改的 `side_panel.dart` 没冲突。
+
+## 测试
+
+- 新 `apps/pure_live/test/features/live_play/room_popups_test.dart` 12 条：定时关闭、房间音量、获取直链在竖屏（画面下方、到底）、横屏全屏（右侧 360 全高，顶栏投屏也是；返回键先关面板、还在全屏）、竖屏全屏（底部 60%）、平板（右侧盖在聊天栏上）的位置，且没有对话框、底部表单，画面不压暗；长按弹幕的面板在横屏全屏右侧；Android 房间音量 = 系统音量（读到 80%，拖到 30% 写进系统、不写 `roomVolumes`，静音再取消回到 30%，画面右侧上滑从 30% 起算，再开面板显示手势后的值，音量键改了一秒内跟上）；电脑上是播放器音量并存进 `roomVolumes`、静音再取消回到原值；获取直链：当前清晰度主色加勾写“正在播放”，← 回清晰度页，当前线路加勾；画面比例从菜单进贴着四宫格按钮下方、右边对齐，从横屏下栏进在按钮上方，同样 6 行、当前项主色加勾；全屏提示条：横屏在下栏上方 16（宽 560），竖屏全屏在两行上方 16，普通页面离底 16。
+- 改了 7 个已有测试文件里随设计变化的断言：右上角菜单不再有分隔线的键（改查 `PopupMenuDivider`）；长按弹幕的 ✕ 换成面板的 `room-panel-close`；屏蔽关键词断言单行、字数 40、按钮“屏蔽”；定时关闭改成立即生效的流程（含输错时框下写原因）；获取直链复制后面板关上；投屏关闭用面板的 ✕，`CastDialog` 测试改测 `CastDevices`；画面方向键名 `room-orientation-<序号>`（小菜单的键），“关闭”按钮没有了（返回键关）；取消关注：小菜单在按钮下方、红色、确认后提示条带“撤销”并能放回；画中画：消息对话框“知道了”“去设置”。
+- `packages/live_ui`：新 `test/menu_additions_test.dart` 4 条（说明行 12 号次要色、`onMenu` 开关顺序；标题行不能点、危险项红色；`footer` 切换不关菜单；`DialogOptionRow.trailing` 代替对勾）。live_ui 全部 165 条通过；`dart format`、`flutter analyze` 无问题。
+- `apps/pure_live`：合并 master 之后 `flutter analyze` 无问题；全部 `flutter test` 829 条通过。根目录 `python3 tools/gate/check_ui_structure.py` 通过（`live_play` 的原始颜色和图标从 7 降到 0，`ui_baseline.json` 去掉这一项）。
+
+## 自己看的结果（渲染图）
+
+用临时 widget 测试（载入文泉驿正黑、Material Icons、Remix）把定时关闭（竖屏）、房间音量（横屏深色）、右上角菜单（带说明行）、获取直链线路页（竖屏全屏底部）、投屏（平板右侧）、画面比例（贴着四宫格）、方向（横屏下栏上方）、取消关注小菜单、长按弹幕（横屏右侧）、全屏提示条渲染成 PNG（本地 scratchpad `.../scratchpad/B07/shots/`，脚本已删，不进仓库），和 A07.12 效果图一致。两处和效果图不同，已改效果图：投屏的刷新放在设备列表上方那一行右边（不在标题栏，标题栏里只有 ← 和 ✕）；定时关闭关着时预设时长不变灰（点一个直接开始）。
+
+## 改了哪些文件
+
+- 设计：`docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一`（README、page.json、`src/gen.py` 和 HTML、效果图、`page/`）。
+- `apps/pure_live/lib/features/live_play/`：
+  - `dialogs/room_dialogs.dart`（定时关闭、房间音量面板）、`dialogs/stream_dialogs.dart`（获取直链 / 投屏面板、`CastDevices`）、`dialogs/player_dialogs.dart`（比例、方向小菜单）、`dialogs/iptv_guide.dart`；
+  - `buttons/room_menu_button.dart`、`buttons/follow_button.dart`；
+  - `danmaku/message_panel.dart`（新）、`danmaku/chat_list.dart`（删掉旧表单和对话框）、`danmaku/danmaku_settings_panel.dart`；
+  - `player/bar_parts.dart`、`player/player_controls.dart`（方向按钮、顶栏投屏、`fullscreenBottomBarHeight`）、`player/player_gestures.dart`（`_reading`）、`player/player_view.dart`（import）；
+  - `layout/room_panel.dart`（新面板种类、`openMessage`、`showRoomPanelSheet`）、`live_play_page.dart`（新面板、全屏提示条位置）；
+  - `logic/background_playback.dart`（`DeviceControls.debugAvailable`，测试用）、`mini/room_mini_window.dart`、`record/record_panel.dart`、`local_interaction/local_style_panel.dart`。
+- `packages/live_ui`（只加不改）：`AppMenuEntry.description`、`showAppMenu(title:)`、`AppMenuButton.onMenu`、`showSmallMenu(footer:)`、`DialogOptionRow.trailing`；`AppIcons.volumeMuted`、`volumeLow`、`volumeHigh`、`castDevice`、`unfollow`。
+- `apps/pure_live/assets/translations/zh.json`、`en.json`；`tools/gate/ui_baseline.json`。
+- 测试见上。
+- 任务单写的“可以改”不含 `layout/`、`live_play_page.dart`、`logic/`：新面板要在页面上挂（照 A07.13 的 `switchRoom` 做法），系统音量要给测试一个开关，这三处是必须的，改动都很小。
+
+## 新设置和翻译键
+
+- 没有新设置。
+- 新翻译键（zh / en）：`live_play_block_action`（屏蔽）、`live_play_cast_to`（{source} · 投屏到）、`live_play_stream_lines`（{quality} · 选择线路）、`live_play_timer_left_until`（{minutes} 分钟后暂停（{time}））、`live_play_volume_room_hint`（只对这个直播间生效，下次进来还是这个音量）、`live_play_volume_system_hint`（调的是手机的媒体音量：和画面右侧上下滑、音量键是同一个音量）。
+
+## 要在 K90 上看的地方（Redmi K90 Pro Max，Android 17，120Hz）
+
+1. 进一个直播间，横屏全屏，点右上四宫格 → “定时关闭”：右侧 360 宽的面板，画面照常播、不变暗；点“30 分钟”，开关自动打开，第二行变成“30 分钟后暂停（HH:mm）”；✕ 或返回键关面板，仍在全屏。
+2. 同一处 → “房间音量”：右侧面板，百分比和当前系统媒体音量一致；拖到 30%，关面板，在画面右侧上下滑：手势条从 30% 起算，两边数值一致；再开面板，显示手势调后的值；按手机音量键，面板里一秒内跟着变。点喇叭静音，再点回到静音前的值（不是 100%）。
+3. 横屏顶栏投屏按钮（或菜单“获取直链”）：右侧面板；当前清晰度蓝色带勾、写“正在播放”；点另一档进线路页，左上 ← 能回来；当前清晰度的线路页里正在播的线路带勾。获取直链点一条：提示“已复制直链”、面板关上。
+4. 横屏下栏方向按钮：小菜单在按钮上方，标题“本直播间画面方向”，每项带说明；拨“记住单个直播间方向”菜单不关；点一项立即生效。横屏下栏画面比例按钮：小菜单在按钮上方。
+5. 竖屏：右上四宫格菜单是新样子（图标 24、分组线），定时开着时“定时关闭”下面一行写还剩多久，“画面比例”下面写当前比例；点“画面比例”：小菜单贴着四宫格按钮下方，不是居中对话框。
+6. 已关注时点“已关注”（竖屏顶栏、横屏下栏都试）：贴着按钮的小菜单，红色“取消关注”；点了以后提示条“已取消关注 X · 撤销”，4 秒内点“撤销”恢复。
+7. 长按弹幕列表一条：面板从画面下沿升起盖住聊天区；“屏蔽关键词…”弹出输入框（单行、预填弹幕、字数 x/40、按钮“屏蔽”）。横屏全屏点画面上的弹幕：面板在右侧。
+8. 横屏全屏里复制直链或取消关注：提示条在下栏上方，不压住下栏按钮；竖屏全屏同样在下面两行按钮上方。
+9. 竖屏全屏（竖屏直播）打开定时关闭 / 获取直链：从底部升起，占下面 60%。
+
+## 需要维护者决定的
+
+- **取消关注的确认（N3）**：直播间里用贴着按钮的小菜单（全屏不压画面中间），首页 / 关注页卡片长按里仍是居中危险确认对话框（A02.2 的 `confirmUnfollowRoom`）。同一个动作两种确认，要不要统一（都用小菜单，或直播间也用对话框而接受全屏时居中）。
+- **还留在全屏中间的两个对话框**：“无法打开画中画”（A02.2 的消息对话框，只在系统关了画中画时出现）和屏蔽关键词的输入对话框（有键盘时在键盘上方）。按任务单补充用了 `showAppMessageDialog`、`showAppInputDialog`；如果要求全屏一律不出现居中对话框，前者可以改成“要用户选的”提示条（带“去设置”和 ✕），后者可以做成长按弹幕面板的第二页。
+- 定时关闭面板标题用了菜单项名“定时关闭”，没有用以前对话框的“当前直播间播放定时器”。
+- 维护者补充的两条（设置类对话框按钮写明动作、3 个原生 `PopupMenuButton`）没做，留给 A02.1。
+
+## 可能和别的任务冲突的文件
+
+- `apps/pure_live/lib/features/live_play/danmaku/chat_list.dart`（D04.1 已合并过一次；以后改列表的任务注意旧表单已搬走）。
+- `apps/pure_live/lib/features/live_play/live_play_page.dart`、`layout/room_panel.dart`、`player/player_controls.dart`、`player/player_gestures.dart`：直播间组后续任务（A07.11 等）。
+- `packages/live_ui/lib/src/widgets/app_menu.dart`、`stream_menu_button.dart`、`app_dialog.dart`、`icons/app_icons.dart`：A02.1 如果也换 `PopupMenuButton`、改对话框按钮，会碰同一批文件（都是只加的改动，合并时两边保留）。
+- `apps/pure_live/assets/translations/zh.json`、`en.json`（按键名排序插入）；`tools/gate/ui_baseline.json`（`raw_styles` 去掉了 `live_play`，A02.1 降 `settings` 时在同一块）。
+- 测试：`live_play_popups_test.dart`、`live_play_page_test.dart`、`live_play_room_test.dart`、`live_play_layouts_test.dart`、`live_play_more_page_test.dart`。

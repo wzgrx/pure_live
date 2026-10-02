@@ -26,7 +26,7 @@ enum TvRoomPushChoice {
 ///
 /// The TV has no receiver for phone pushes yet (pure_live_TV
 /// `GlobalRoomPushOverlay`); this is the dialog it will show, the parsing is
-/// U.3d's share-code import (docs/T18/T18a/T18a.2/record.md).
+/// U.3d's share-code import (docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件/record.md).
 Future<TvRoomPushChoice?> showTvRoomPush(BuildContext context, {required String text, LiveRoom? room}) =>
     showTvDialog<TvRoomPushChoice>(
       context,

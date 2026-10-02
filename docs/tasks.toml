@@ -1,3079 +1,3234 @@
-# 项目任务登记表：docs 里所有编号、状态和进度的唯一来源。
+# 项目任务登记表（docs v1）：docs 里所有编号、状态和进度的唯一来源。
 # 加任务、改状态、记阶段都只改这里，然后运行 python3 tools/docs/docs.py 重新生成索引和进度；
 # 门禁会检查生成的文件是不是最新。字段的含义见 docs/PROCESS.md 第 3 节。
 
 [[group]]
-id = "T00"
-title = "工程底座"
-scope = "支撑全项目的工程设施：工具链和依赖、门禁、清点和归属、构建和装机、多语言、文档。"
-
-[[sub]]
-id = "T00a"
-title = "工具链和依赖"
-scope = "Flutter、Dart、Gradle、JDK、NDK、mpv 分支、FFmpeg 包和 pub 依赖的版本和升级检查。"
-code = "`toolchain.env`、根目录 `pubspec.yaml`、`tools/check_latest/`、`third_party/`"
-
-[[sub]]
-id = "T00b"
-title = "门禁"
-scope = "每次推送前必须通过的检查：格式、依赖方向、分析、测试、界面结构、样本隐私、文档。"
-code = "`tools/gate/`"
-
-[[sub]]
-id = "T00c"
-title = "清点和归属"
-scope = "保证不漏：代码文件、功能点、设置项、平台、原生插件、界面都归到某个子分类，没归的报错。"
-code = "`tools/ui/inventory.py`、`tools/docs/`、`docs/inventory/`"
-
-[[sub]]
-id = "T00d"
-title = "构建和装机"
-scope = "测试包和正式包的构建，K90 装机、截图、前台检查等助手。"
-code = "`apps/pure_live/android/` 的构建配置、`tools/ffmpeg_kit/`"
-
-[[sub]]
-id = "T00e"
-title = "多语言"
-scope = "中文和英文翻译、键名排序和检查、运行时拼出来的键。"
-code = "`apps/pure_live/assets/translations/`、`apps/pure_live/lib/i18n/`"
-
-[[sub]]
-id = "T00f"
-title = "文档"
-scope = "docs 的结构、登记表、生成脚本、模板、链接检查。"
-code = "`docs/`、`tools/docs/`"
+id = "A"
+title = "界面设计"
+scope = "所有看得见的：设计系统、组件、动效和手感、尺寸适配、无障碍，以及每个区域、每个客户端的界面设计和它的实现。界面优先，排第一。"
 
 [[group]]
-id = "T01"
-title = "设计系统和通用组件"
-scope = "所有界面共用的设计系统：主题、图标、通用组件、弹窗组件、动效、无障碍。"
+id = "C"
+title = "直播间"
+scope = "直播间的功能和逻辑：进房、房间控制器、播放接入、小窗和后台播放、菜单里的工具。界面在 A07。"
+
+[[group]]
+id = "D"
+title = "弹幕"
+scope = "各平台的弹幕协议、过滤和屏蔽、飞行弹幕引擎、数据流和性能、弹幕设置。界面在 A08。"
+
+[[group]]
+id = "E"
+title = "直播平台"
+scope = "35 个来源（33 个 v3 平台、Kick、网络电视）的播放地址、搜索、分区、关注刷新、链接解析和平台框架。"
+
+[[group]]
+id = "G"
+title = "播放"
+scope = "mpv 播放引擎、播放会话和恢复、起播速度和弱网、画面、声音和媒体控制。"
+
+[[group]]
+id = "H"
+title = "录制"
+scope = "录制核心、录制中心、录制设置和存储、自动录制、录制通知。界面在 A10。"
+
+[[group]]
+id = "I"
+title = "浏览和发现"
+scope = "首页外壳和全局、热门、分区、关注、搜索、观看历史、标签和分组、小页面的功能和逻辑。界面在 A06、A09、A15。"
+
+[[group]]
+id = "J"
+title = "设置和数据"
+scope = "设置、存储和加密、备份恢复、WebDAV、设备同步、3.x 数据迁移。界面在 A11、A12。"
+
+[[group]]
+id = "K"
+title = "账号和登录"
+scope = "各平台账号和登录方式、登录状态、第三方认证。界面在 A12。"
+
+[[group]]
+id = "L"
+title = "网络电视和点播"
+scope = "网络电视（订阅源、导入、管理）、节目单和回看、点播和音乐。界面在 A13、A17。"
+
+[[group]]
+id = "N"
+title = "多画面和投屏"
+scope = "多画面和投屏的功能。界面在 A13。"
+
+[[group]]
+id = "O"
+title = "Android系统集成"
+scope = "Android 原生部分：通知和前台服务、画中画、分享接收、权限、方向和刷新率、返回手势。"
+
+[[group]]
+id = "Q"
+title = "网络和代理"
+scope = "HTTP 和 WebSocket、请求头、压缩、代理和镜像、原生 HTTP 通道、网络状态。"
+
+[[group]]
+id = "R"
+title = "性能和流畅度"
+scope = "基准和测量、刷新率、内存、启动速度、耗电。手感在 A03，尺寸适配在 A04。"
+
+[[group]]
+id = "S"
+title = "质量和验证"
+scope = "自动测试、真机验证、统一验证、覆盖安装 3.x 验证。"
+
+[[group]]
+id = "V"
+title = "需求和反馈"
+scope = "新功能从这里提出和评估，用户反馈和 issue、审查和调研的发现也从这里进来；采纳后在目标组开任务，不做的写明原因。"
+
+[[group]]
+id = "W"
+title = "上游借鉴"
+scope = "跟踪上游项目的更新，找出可以借鉴的修复和功能，对照 4.x 是否有同样的问题。"
+
+[[group]]
+id = "X"
+title = "多端客户端"
+scope = "Windows、Linux、电视、苹果平台的客户端专属工作（打包、原生、平台差异）；各端的界面在 A16～A18。"
+
+[[group]]
+id = "Y"
+title = "发布和运营"
+scope = "版本、签名和发布、更新通道、发布说明和 README、隐私和合规。"
+
+[[group]]
+id = "Z"
+title = "工程文档和维护"
+scope = "工具链和依赖、门禁、清点和归属、构建和装机、多语言、文档和登记表、定期维护。"
 
 [[sub]]
-id = "T01a"
-title = "主题"
-scope = "颜色角色（深浅两套、语义色、画面上的颜色）、文字、间距、圆角、阴影。"
-code = "`packages/live_ui/lib/src/theme/`"
+id = "A01"
+title = "设计系统"
+scope = "主题（颜色、文字、间距、圆角）和图标。"
+code = "`packages/live_ui/lib/src/theme/`、`icons/`"
 
 [[sub]]
-id = "T01b"
-title = "图标"
-scope = "`AppIcons`：每个位置用的图标按用途命名。"
-code = "`packages/live_ui/lib/src/icons/`"
-
-[[sub]]
-id = "T01c"
-title = "通用组件"
-scope = "状态页、头像、计数、二维码、标签、芯片、列表行、设置行、滚动外壳、焦点框。"
+id = "A02"
+title = "组件"
+scope = "通用组件、弹窗组件、贴着按钮的小菜单、提示条。"
 code = "`packages/live_ui/lib/src/widgets/`"
 
 [[sub]]
-id = "T01d"
-title = "弹窗组件"
-scope = "对话框、面板、贴着按钮的小菜单、提示条。"
-code = "`packages/live_ui/lib/src/widgets/`（`app_dialog`、`anchored_menu`、`app_menu`、`app_toast`、`adaptive_panel`）"
+id = "A03"
+title = "动效和手感"
+scope = "列表滑动、下拉刷新、翻页、面板、直播间拖动的跟手、回弹和阻尼。"
+code = "`packages/live_ui`（motion、scrolling、refresh_view）、`features/live_play/`"
 
 [[sub]]
-id = "T01e"
-title = "动效和滑动手感"
-scope = "动效时长、弹簧和快滑阈值（`AppMotion`）、滚动物理、下拉刷新。"
-code = "`packages/live_ui/lib/src/theme/motion.dart`、`widgets/scrolling.dart`、`widgets/refresh_view.dart`"
+id = "A04"
+title = "尺寸和适配"
+scope = "分辨率、高度分档、分屏、折叠屏、字号上限、触控区域。"
+code = "`packages/live_ui/lib/src/theme/grid_columns.dart`、各页面"
 
 [[sub]]
-id = "T01f"
+id = "A05"
 title = "无障碍"
-scope = "读屏文字、键盘焦点、对比度、触控区域。"
+scope = "读屏文字、键盘焦点、对比度。"
 code = "全部界面代码"
 
-[[group]]
-id = "T02"
-title = "直播平台适配"
-scope = "35 个来源（33 个 v3 平台、Kick、网络电视）的播放地址、搜索、分区、关注刷新、链接解析，以及平台框架。"
+[[sub]]
+id = "A06"
+title = "首页和全局"
+scope = "手机首页、宽屏首页、启动页、全局弹窗。"
+code = "`features/home/`、`features/splash/`、`app/`"
 
 [[sub]]
-id = "T02a"
-title = "国内五大平台"
-scope = "哔哩哔哩、斗鱼、虎牙、抖音、快手。"
-code = "`packages/live_core/lib/src/sites/`（bilibili、douyu、huya、douyin、kuaishou）"
+id = "A07"
+title = "直播间界面"
+scope = "竖屏、竖屏流和竖屏全屏、横屏全屏、平板分栏、控制层和手势、面板和小菜单、切换直播间、直播间状态、小窗。"
+code = "`features/live_play/`"
 
 [[sub]]
-id = "T02b"
-title = "其他国内平台"
-scope = "YY、网易 CC、AcFun、猫耳 FM、映客、克拉克拉、小红书、微博、京东、酷狗、百度、六间房、LOOK，共 13 个。"
-code = "`packages/live_core/lib/src/sites/`"
+id = "A08"
+title = "弹幕界面"
+scope = "弹幕列表、醒目留言、弹幕设置页、屏蔽页、画面弹幕的点按和长按、本地互动。"
+code = "`features/live_play/danmaku/`、`shared/danmaku/`、`local_interaction/`"
 
 [[sub]]
-id = "T02c"
-title = "海外平台"
-scope = "SOOP、Twitch、Picarto、TwitCasting、niconico、SHOWROOM、CHZZK、LiveMe、TikTok、YouTube、BIGO、PandaTV、FC2、Steam、17LIVE、Kick，共 16 个。"
-code = "`packages/live_core/lib/src/sites/`"
+id = "A09"
+title = "浏览界面"
+scope = "房间卡片、热门、关注、分区、分区房间、搜索、网页搜索、观看历史、标签管理。"
+code = "`shared/rooms/`、`features/popular/`、`favorite/`、`areas/`、`search/`、`history/`、`tags/`"
 
 [[sub]]
-id = "T02d"
-title = "链接解析和分享口令"
-scope = "直播间链接、短链、分享口令识别。"
-code = "`packages/live_core/lib/src/links/`"
+id = "A10"
+title = "录制界面"
+scope = "录制中心、录制设置、录制按钮和各处的录制状态图形。"
+code = "`features/recorder/`、`record_settings/`、`shared/record/`"
 
 [[sub]]
-id = "T02e"
-title = "平台巡检"
-scope = "定期用真实接口检查各平台的播放、搜索、分区，失效时报出来。"
-code = "`tools/live_cli/`（计划）"
+id = "A11"
+title = "设置界面"
+scope = "设置总览和外观、播放、通用和网络、数据各分页。"
+code = "`features/settings/`"
 
 [[sub]]
-id = "T02f"
-title = "平台层升级"
-scope = "已批准的升级（`docs/specs/UPGRADES.md`）和平台新数据接到界面。"
-code = "`packages/live_core`、`apps/pure_live/lib/app/platforms.dart`"
+id = "A12"
+title = "账号和数据界面"
+scope = "账号、登录和 Cookie、云账号说明、备份、WebDAV、设备同步。"
+code = "`features/account/`、`auth/`、`backup/`、`web_dav/`、`remote_receiver/`"
 
 [[sub]]
-id = "T02g"
-title = "平台框架"
-scope = "模型、平台接口、注册表、错误类型。"
-code = "`packages/live_core/lib/src/`（models、interfaces、registry）"
-
-[[group]]
-id = "T03"
-title = "网络和代理"
-scope = "HTTP 和 WebSocket、请求头策略、代理和镜像、原生 HTTP 通道、网络状态和权限。"
+id = "A13"
+title = "网络电视和多画面界面"
+scope = "网络电视管理、多画面。"
+code = "`features/iptv/`、`multiview/`"
 
 [[sub]]
-id = "T03a"
-title = "请求和编码"
-scope = "HTTP 客户端、拦截器、请求头策略、请求作用域、压缩（含 Brotli）。"
-code = "`packages/live_net`"
+id = "A14"
+title = "系统界面"
+scope = "通知、画中画窗口、启动画面、分享接收的外观。"
+code = "`apps/pure_live/android/` 的资源、`features/live_play/mini/`"
 
 [[sub]]
-id = "T03b"
-title = "代理和镜像"
-scope = "系统代理、自定义代理、局域网代理、GitHub 镜像。"
-code = "`packages/live_net`、`apps/pure_live/lib/app/network.dart`"
+id = "A15"
+title = "小页面"
+scope = "工具箱、关于和版本。"
+code = "`features/toolbox/`、`about/`、`version/`"
 
 [[sub]]
-id = "T03c"
-title = "原生 HTTP 通道和 WebSocket"
-scope = "系统 TLS 的原生 HTTP（Twitch、Kick）、WebSocket。"
-code = "`apps/pure_live/lib/platform/native_http.dart`、`packages/live_net`"
+id = "A16"
+title = "桌面界面"
+scope = "桌面窗口、标题栏、托盘、窗口内全屏。"
+code = "`app/desktop/`"
 
 [[sub]]
-id = "T03d"
-title = "网络状态和权限"
-scope = "离线检测、Android 17 本地网络权限。"
-code = "`apps/pure_live/lib/app/network.dart`、`platform/system_access.dart`"
-
-[[group]]
-id = "T04"
-title = "播放内核"
-scope = "mpv 播放引擎、播放会话、恢复和换线、起播速度、画面、声音和系统媒体控制。"
+id = "A17"
+title = "电视界面"
+scope = "电视设计系统和通用组件、外壳、直播浏览、直播间、网络电视和影片、点播、音乐、壁纸、设置。"
+code = "电视模式代码"
 
 [[sub]]
-id = "T04a"
-title = "引擎"
-scope = "media_kit 分支、libmpv 和 FFmpeg 原生包、软硬解、编码兼容、取流管线。"
-code = "`packages/live_media`、`third_party/media_kit`"
+id = "A18"
+title = "苹果平台界面"
+scope = "iOS、iPadOS、macOS 的差异设计。"
+code = "—"
 
 [[sub]]
-id = "T04b"
-title = "播放会话"
-scope = "打开、恢复重连、换线、卡住检测、状态（含“正在重连”的恢复标记）。"
-code = "`packages/live_player`"
-
-[[sub]]
-id = "T04c"
-title = "起播速度和弱网"
-scope = "首帧时间、缓冲策略、弱网下的体验。"
-code = "`packages/live_player`、`packages/live_media`"
-
-[[sub]]
-id = "T04d"
-title = "画面"
-scope = "画面比例、方向、竖屏预判。"
-code = "`packages/live_player`、`apps/pure_live/lib/features/live_play/logic/`"
-
-[[sub]]
-id = "T04e"
-title = "声音和媒体控制"
-scope = "纯音频、音量、系统媒体会话。"
-code = "`packages/live_player`、`features/live_play/logic/background_playback.dart`"
-
-[[group]]
-id = "T05"
-title = "直播间"
-scope = "直播间的全部界面和逻辑：各种布局、控制层、面板、切换直播间、状态、小窗和画中画、拖动手感。"
-
-[[sub]]
-id = "T05a"
-title = "页面和逻辑"
+id = "C01"
+title = "进房和房间逻辑"
 scope = "进房、房间控制器、播放接入、刷新、播放列表。"
-code = "`apps/pure_live/lib/features/live_play/live_play_page.dart`、`logic/`"
+code = "`features/live_play/live_play_page.dart`、`logic/`"
 
 [[sub]]
-id = "T05b"
-title = "竖屏普通布局"
-scope = "顶栏、画面上下栏、信息行、详情、聊天区标签。"
-code = "`features/live_play/layout/`、`player/`"
-
-[[sub]]
-id = "T05c"
-title = "竖屏流和竖屏全屏"
-scope = "竖屏直播的三档面板、竖屏全屏、画面模式。"
-code = "`features/live_play/layout/portrait_panel.dart`、`player/`"
-
-[[sub]]
-id = "T05d"
-title = "横屏全屏"
-scope = "全屏上下栏、时间电量、锁定、本地弹幕输入、手势、快捷键。"
-code = "`features/live_play/player/`"
-
-[[sub]]
-id = "T05e"
-title = "平板分栏"
-scope = "平板和宽屏的画面加聊天栏、悬停显示控制层、窗口内全屏。"
-code = "`features/live_play/layout/`"
-
-[[sub]]
-id = "T05f"
-title = "控制层和手势"
-scope = "单击、双击、暂停状态、亮度音量手势、锁定。"
-code = "`features/live_play/player/player_view.dart`、`player_gestures.dart`"
-
-[[sub]]
-id = "T05g"
-title = "面板和小菜单"
-scope = "清晰度、线路、录制、弹幕设置、右上角菜单、定时、音量、投屏、直链、画面比例。"
-code = "`features/live_play/dialogs/`、`buttons/`、`layout/room_panel.dart`"
-
-[[sub]]
-id = "T05h"
-title = "切换直播间和换台"
-scope = "切换直播间面板、竖屏全屏上下滑换台。"
-code = "`features/live_play/switch_room/`、`player/room_swipe.dart`"
-
-[[sub]]
-id = "T05i"
-title = "直播间状态"
-scope = "加载、未开播、失败和重连、受限、纯音频。"
-code = "`features/live_play/player/player_status.dart`、`logic/room_status.dart`"
-
-[[sub]]
-id = "T05j"
+id = "C02"
 title = "小窗、画中画、后台播放"
-scope = "应用内小窗、系统画中画、后台播放。"
+scope = "应用内小窗、系统画中画、后台播放的逻辑。"
 code = "`features/live_play/mini/`、`logic/background_playback.dart`"
 
 [[sub]]
-id = "T05k"
-title = "拖动手感"
-scope = "上下滑换台、三档面板、详情面板的跟手、回弹和阻尼。"
-code = "`features/live_play/player/room_swipe.dart`、`layout/`"
-
-[[group]]
-id = "T06"
-title = "弹幕"
-scope = "各平台的弹幕协议、过滤和屏蔽、飞行弹幕、聊天列表、弹幕设置、本地互动。"
+id = "C03"
+title = "直播间工具"
+scope = "右上角菜单里的功能：定时关闭、投屏入口、获取直链、App 跳转、返回手势。"
+code = "`features/live_play/buttons/`、`dialogs/`"
 
 [[sub]]
-id = "T06a"
+id = "D01"
 title = "平台弹幕协议"
-scope = "30 个平台的弹幕连接和解析（LiveMe、TikTok 受阻）。"
+scope = "30 个平台的弹幕连接和解析，昵称、粉丝牌、头像等数据。"
 code = "`packages/live_danmaku/lib/src/sites/`"
 
 [[sub]]
-id = "T06b"
+id = "D02"
 title = "过滤和屏蔽"
 scope = "关键词、用户、相似、打码昵称。"
-code = "`packages/live_danmaku/lib/src/filters/`、`apps/pure_live/lib/shared/danmaku/`"
+code = "`packages/live_danmaku/lib/src/filters/`、`shared/danmaku/`"
 
 [[sub]]
-id = "T06c"
-title = "飞行弹幕"
-scope = "画面上的弹幕渲染、速度、帧率、表情图、点按和长按。"
-code = "`apps/pure_live/lib/shared/danmaku/danmaku_overlay.dart`"
+id = "D03"
+title = "飞行弹幕引擎"
+scope = "画面弹幕的渲染、速度、帧率、表情图。"
+code = "`shared/danmaku/danmaku_overlay.dart`"
 
 [[sub]]
-id = "T06d"
-title = "聊天列表和醒目留言"
-scope = "聊天列表、醒目留言、昵称颜色、粉丝牌、头像、性能。"
-code = "`features/live_play/danmaku/`"
+id = "D04"
+title = "数据流和性能"
+scope = "弹幕进来到显示的数据流、批量刷新、表情解析。"
+code = "`features/live_play/danmaku/`、`logic/room_controller.dart`"
 
 [[sub]]
-id = "T06e"
-title = "弹幕设置"
-scope = "直播间和设置页共用的弹幕设置。"
-code = "`apps/pure_live/lib/shared/danmaku/danmaku_settings_content.dart`、`features/settings/danmaku_page.dart`"
+id = "D05"
+title = "弹幕设置生效"
+scope = "弹幕帧率、字体、纯文字等设置真正生效。"
+code = "`shared/danmaku/`"
 
 [[sub]]
-id = "T06f"
-title = "本地互动"
-scope = "本地发送、样式、礼物效果。"
-code = "`features/live_play/local_interaction/`"
-
-[[group]]
-id = "T07"
-title = "浏览和发现"
-scope = "首页外壳和全局、热门、分区、房间卡片、关注、搜索、观看历史、标签、小页面。"
+id = "D06"
+title = "弹幕功能余项"
+scope = "功能清点里弹幕部分没做完的。"
+code = "—"
 
 [[sub]]
-id = "T07a"
+id = "E01"
+title = "国内五大平台"
+scope = "哔哩哔哩、斗鱼、虎牙、抖音、快手。"
+code = "`packages/live_core/lib/src/sites/`"
+
+[[sub]]
+id = "E02"
+title = "其他国内平台"
+scope = "YY、网易 CC、AcFun、猫耳 FM、映客、克拉克拉、小红书、微博、京东、酷狗、百度、六间房、LOOK。"
+code = "`packages/live_core/lib/src/sites/`"
+
+[[sub]]
+id = "E03"
+title = "海外平台"
+scope = "SOOP、Twitch、Picarto、TwitCasting、niconico、SHOWROOM、CHZZK、LiveMe、TikTok、YouTube、BIGO、PandaTV、FC2、Steam、17LIVE、Kick。"
+code = "`packages/live_core/lib/src/sites/`"
+
+[[sub]]
+id = "E04"
+title = "链接解析和分享口令"
+scope = "直播间链接、短链、分享口令。"
+code = "`packages/live_core/lib/src/links.dart`"
+
+[[sub]]
+id = "E05"
+title = "平台框架和模型"
+scope = "模型、平台接口、注册表、错误类型、房间资料的合并和补齐。"
+code = "`packages/live_core/lib/src/`"
+
+[[sub]]
+id = "E06"
+title = "平台层升级"
+scope = "已批准的升级和平台新数据接到界面。"
+code = "`packages/live_core`、`app/platforms.dart`"
+
+[[sub]]
+id = "E07"
+title = "平台巡检"
+scope = "定期用真实接口检查各平台还能不能用。"
+code = "`tools/live_cli/`（计划）"
+
+[[sub]]
+id = "G01"
+title = "引擎"
+scope = "media_kit 分支、libmpv 和 FFmpeg 原生包、软硬解、取流管线。"
+code = "`packages/live_media`、`third_party/media_kit`"
+
+[[sub]]
+id = "G02"
+title = "会话和恢复"
+scope = "打开、恢复重连、换线、卡住检测、状态对账。"
+code = "`packages/live_player`"
+
+[[sub]]
+id = "G03"
+title = "起播速度和弱网"
+scope = "首帧时间、缓冲策略、弱网体验。"
+code = "`packages/live_player`、`packages/live_media`"
+
+[[sub]]
+id = "G04"
+title = "画面"
+scope = "画面比例、方向、竖屏预判。"
+code = "`packages/live_player`"
+
+[[sub]]
+id = "G05"
+title = "声音和媒体控制"
+scope = "纯音频、音量、系统媒体会话。"
+code = "`packages/live_player`、`logic/background_playback.dart`"
+
+[[sub]]
+id = "H01"
+title = "录制核心"
+scope = "FFmpeg 录制、分段、合并、弹幕文件、重试。"
+code = "`packages/live_record`"
+
+[[sub]]
+id = "H02"
+title = "录制中心"
+scope = "录制任务的管理和接入。"
+code = "`features/recorder/`、`app/recording.dart`"
+
+[[sub]]
+id = "H03"
+title = "录制设置和存储"
+scope = "录制设置、存储目录、权限。"
+code = "`features/record_settings/`、`app/recording.dart`"
+
+[[sub]]
+id = "H04"
+title = "自动录制和排队"
+scope = "开播自动录、名额和排队。"
+code = "`packages/live_record`"
+
+[[sub]]
+id = "H05"
+title = "录制通知"
+scope = "前台录制通知、“录制已停止”提醒。"
+code = "`app/recording_notice.dart`、`RecorderForegroundService.kt`"
+
+[[sub]]
+id = "I01"
 title = "首页外壳和全局"
-scope = "应用入口、路由、首页外壳和导航、全局弹窗、应用服务。"
-code = "`apps/pure_live/lib/app/`、`routes/`、`features/home/`"
+scope = "应用入口、路由、首页外壳、应用服务。"
+code = "`app/`、`routes/`、`features/home/`"
 
 [[sub]]
-id = "T07b"
+id = "I02"
 title = "热门"
 scope = "热门和推荐列表。"
 code = "`features/popular/`"
 
 [[sub]]
-id = "T07c"
+id = "I03"
 title = "分区"
-scope = "分区列表、分区房间、热门分区、关注的分区。"
+scope = "分区列表、分区房间、热门分区。"
 code = "`features/areas/`、`area_rooms/`、`hot_areas/`"
 
 [[sub]]
-id = "T07d"
-title = "房间卡片"
-scope = "房间卡片和长按菜单。"
-code = "`apps/pure_live/lib/shared/rooms/`"
-
-[[sub]]
-id = "T07e"
+id = "I04"
 title = "关注"
 scope = "关注列表、分组、开播检查和刷新。"
 code = "`features/favorite/`"
 
 [[sub]]
-id = "T07f"
+id = "I05"
 title = "搜索"
 scope = "搜索、网页搜索。"
 code = "`features/search/`"
 
 [[sub]]
-id = "T07g"
+id = "I06"
 title = "观看历史"
 scope = "观看历史。"
 code = "`features/history/`"
 
 [[sub]]
-id = "T07h"
+id = "I07"
 title = "标签和分组"
-scope = "标签管理、分组。"
-code = "`features/tags/`"
+scope = "标签、分组、屏蔽。"
+code = "`features/tags/`、`shield/`"
 
 [[sub]]
-id = "T07i"
+id = "I08"
 title = "小页面"
-scope = "启动页、工具箱、关于和版本。"
-code = "`features/splash/`、`toolbox/`、`about/`、`version/`"
-
-[[group]]
-id = "T08"
-title = "录制"
-scope = "录制核心、录制中心和录制状态、录制设置、自动录制、录制通知。"
+scope = "工具箱、远程接收、关于、版本、启动页的逻辑。"
+code = "`features/toolbox/`、`about/`、`version/`、`splash/`"
 
 [[sub]]
-id = "T08a"
-title = "录制核心"
-scope = "FFmpeg 录制、分段、合并、弹幕文件。"
-code = "`packages/live_record`"
+id = "J01"
+title = "设置"
+scope = "设置项、设置搜索、设置项核对。"
+code = "`features/settings/`、`packages/live_store/lib/src/settings/`"
 
 [[sub]]
-id = "T08b"
-title = "录制中心和录制状态"
-scope = "录制中心、录制按钮和各处的录制状态图形。"
-code = "`features/recorder/`、`shared/record/`、`features/live_play/buttons/record_button.dart`"
-
-[[sub]]
-id = "T08c"
-title = "录制设置"
-scope = "录制设置和存储目录。"
-code = "`features/record_settings/`、`app/recording.dart`"
-
-[[sub]]
-id = "T08d"
-title = "自动录制和排队"
-scope = "开播自动录、名额和排队。"
-code = "`packages/live_record`、`app/recording.dart`"
-
-[[sub]]
-id = "T08e"
-title = "录制通知"
-scope = "前台录制通知、“录制已停止”提醒。"
-code = "`app/recording_notice.dart`、`android/.../RecorderForegroundService.kt`"
-
-[[group]]
-id = "T09"
-title = "设置和数据"
-scope = "设置页、存储和加密、备份恢复、WebDAV、设备同步、3.x 数据迁移。"
-
-[[sub]]
-id = "T09a"
-title = "设置页"
-scope = "设置总览、搜索、各分页、设置项核对。"
-code = "`features/settings/`"
-
-[[sub]]
-id = "T09b"
+id = "J02"
 title = "存储和加密"
 scope = "数据库、设置存储、Cookie 和密码加密。"
 code = "`packages/live_store`"
 
 [[sub]]
-id = "T09c"
+id = "J03"
 title = "备份恢复"
 scope = "备份和恢复。"
 code = "`features/backup/`"
 
 [[sub]]
-id = "T09d"
+id = "J04"
 title = "WebDAV"
 scope = "WebDAV 备份。"
 code = "`features/web_dav/`"
 
 [[sub]]
-id = "T09e"
+id = "J05"
 title = "设备同步"
-scope = "局域网设备同步（远程接收）。"
+scope = "局域网设备同步。"
 code = "`features/remote_receiver/`"
 
 [[sub]]
-id = "T09f"
+id = "J06"
 title = "3.x 数据迁移"
 scope = "覆盖安装 3.x 后自动导入关注、历史、设置、账号。"
 code = "`packages/live_store/lib/src/legacy/`"
 
-[[group]]
-id = "T10"
-title = "账号和登录"
-scope = "各平台账号和登录方式、登录状态、第三方认证。"
-
 [[sub]]
-id = "T10a"
+id = "K01"
 title = "账号和登录方式"
-scope = "账号总览、网页登录、扫码、Cookie。"
+scope = "账号、网页登录、扫码、Cookie。"
 code = "`features/account/`"
 
 [[sub]]
-id = "T10b"
+id = "K02"
 title = "登录状态"
-scope = "失效检测、重新登录、弹幕用的登录凭据。"
+scope = "失效检测、重新登录、弹幕用的登录凭据、加密存储。"
 code = "`features/account/`、`packages/live_danmaku`"
 
 [[sub]]
-id = "T10c"
-title = "第三方认证和云账号"
-scope = "第三方认证、云账号停用说明。"
+id = "K03"
+title = "第三方认证"
+scope = "第三方认证和云账号。"
 code = "`features/auth/`"
 
-[[group]]
-id = "T11"
-title = "网络电视和点播"
-scope = "网络电视（订阅源、导入、管理）、节目单和回看、点播和音乐。"
-
 [[sub]]
-id = "T11a"
+id = "L01"
 title = "网络电视"
 scope = "订阅源管理、导入、播放。"
 code = "`packages/live_iptv`、`features/iptv/`"
 
 [[sub]]
-id = "T11b"
+id = "L02"
 title = "节目单和回看"
 scope = "节目单、回看。"
-code = "`packages/live_iptv`、`features/live_play/dialogs/iptv_guide.dart`"
+code = "`packages/live_iptv`"
 
 [[sub]]
-id = "T11c"
+id = "L03"
 title = "点播和音乐"
 scope = "哔哩哔哩点播和音乐（电视端主要使用）。"
 code = "`packages/live_vod`"
 
-[[group]]
-id = "T12"
-title = "多画面和投屏"
-scope = "多画面、多画面会话、投屏。"
-
 [[sub]]
-id = "T12a"
+id = "N01"
 title = "多画面"
-scope = "多画面布局和格子控制。"
+scope = "多画面布局、格子控制、会话。"
 code = "`features/multiview/`"
 
 [[sub]]
-id = "T12b"
-title = "多画面会话"
-scope = "多画面会话的保存和恢复。"
-code = "`features/multiview/`"
-
-[[sub]]
-id = "T12c"
+id = "N02"
 title = "投屏"
 scope = "DLNA 设备搜索和投屏控制。"
 code = "`packages/live_cast`"
 
-[[group]]
-id = "T13"
-title = "Android 系统集成"
-scope = "Android 原生部分：通知和系统界面、画中画、分享接收、权限、方向和刷新率、返回手势。"
-
 [[sub]]
-id = "T13a"
-title = "通知和系统界面"
-scope = "媒体通知、启动画面、系统界面。"
+id = "O01"
+title = "通知和前台服务"
+scope = "媒体通知、前台服务。"
 code = "`apps/pure_live/android/`"
 
 [[sub]]
-id = "T13b"
+id = "O02"
 title = "画中画"
 scope = "系统画中画。"
 code = "`android/.../MainActivity.kt`、`features/live_play/mini/`"
 
 [[sub]]
-id = "T13c"
+id = "O03"
 title = "分享接收和快捷方式"
 scope = "系统分享、打开方式、剪贴板口令、桌面快捷方式、插件接入。"
-code = "`android/.../ShareIntakePlugin.kt`、`apps/pure_live/lib/app/intake/`"
+code = "`ShareIntakePlugin.kt`、`app/intake/`"
 
 [[sub]]
-id = "T13d"
+id = "O04"
 title = "权限"
 scope = "通知、电池优化、存储、本地网络。"
-code = "`android/.../PermissionsPlugin.kt`、`SystemAccessPlugin.kt`、`platform/`"
+code = "`PermissionsPlugin.kt`、`SystemAccessPlugin.kt`、`platform/`"
 
 [[sub]]
-id = "T13e"
+id = "O05"
 title = "方向、刷新率、常亮"
 scope = "屏幕方向、刷新率声明、屏幕常亮的原生部分。"
-code = "`android/.../MainActivity.kt`、`platform/display_mode.dart`、`platform/screen_orientation.dart`"
+code = "`MainActivity.kt`、`platform/display_mode.dart`、`platform/screen_orientation.dart`"
 
 [[sub]]
-id = "T13f"
+id = "O06"
 title = "返回手势、平板和折叠屏"
 scope = "预测返回、平板和折叠屏的系统特性。"
 code = "`android/`、`features/live_play/logic/predictive_back.dart`"
 
-[[group]]
-id = "T14"
-title = "性能和流畅度"
-scope = "基准和测量、刷新率、滑动和动画手感、内存、启动速度、耗电、尺寸和字号适配。"
+[[sub]]
+id = "Q01"
+title = "请求和编码"
+scope = "HTTP 客户端、拦截器、请求头策略、压缩（含 Brotli）。"
+code = "`packages/live_net`"
 
 [[sub]]
-id = "T14a"
+id = "Q02"
+title = "代理和镜像"
+scope = "系统代理、自定义代理、局域网代理、GitHub 镜像。"
+code = "`packages/live_net`、`app/network.dart`"
+
+[[sub]]
+id = "Q03"
+title = "原生HTTP和WebSocket"
+scope = "系统 TLS 的原生 HTTP（Twitch、Kick）、WebSocket。"
+code = "`platform/native_http.dart`、`packages/live_net`"
+
+[[sub]]
+id = "Q04"
+title = "网络状态和权限"
+scope = "离线检测、本地网络权限。"
+code = "`app/network.dart`、`platform/system_access.dart`"
+
+[[sub]]
+id = "R01"
 title = "基准和测量"
-scope = "profile 基准测试、K90 实测、帧时间统计。"
+scope = "profile 基准、K90 实测、帧时间统计、渲染开销。"
 code = "`apps/pure_live/integration_test/`"
 
 [[sub]]
-id = "T14b"
+id = "R02"
 title = "刷新率"
 scope = "30～240 Hz 屏幕的刷新率策略和帧率匹配。"
-code = "`platform/display_mode.dart`、`features/live_play/logic/room_refresh_rate.dart`"
+code = "`platform/display_mode.dart`、`logic/room_refresh_rate.dart`"
 
 [[sub]]
-id = "T14c"
-title = "滑动和动画手感"
-scope = "列表、翻页、面板的滑动物理和弹簧。"
-code = "`packages/live_ui`（scrolling、motion、refresh_view）"
-
-[[sub]]
-id = "T14d"
+id = "R03"
 title = "内存和图片"
 scope = "图片解码和缓存、长时间播放的内存。"
-code = "`apps/pure_live/lib/app/bootstrap.dart`、图片组件"
+code = "`app/bootstrap.dart`、图片组件"
 
 [[sub]]
-id = "T14e"
+id = "R04"
 title = "启动速度"
 scope = "冷启动到首页可用的时间。"
 code = "`apps/pure_live/lib/app/`"
 
 [[sub]]
-id = "T14f"
+id = "R05"
 title = "耗电"
 scope = "播放、后台、高刷新率下的耗电。"
 code = "横跨"
 
 [[sub]]
-id = "T14g"
-title = "尺寸、分辨率、字号"
-scope = "高度分档、分屏、折叠屏、字号叠加、触控区域。"
-code = "`packages/live_ui/lib/src/theme/grid_columns.dart`、各页面"
-
-[[group]]
-id = "T15"
-title = "质量和验证"
-scope = "自动测试、真机验证、统一验证、覆盖安装 3.x 验证。"
-
-[[sub]]
-id = "T15a"
+id = "S01"
 title = "自动测试"
 scope = "单元、组件、集成测试和测试的稳定性。"
 code = "各包的 `test/`"
 
 [[sub]]
-id = "T15b"
+id = "S02"
 title = "真机验证"
-scope = "K90 上的真机验证、冒烟、问题回收。"
-code = "—（真机清单是本子分类的 `CHECKLIST.md`）"
+scope = "K90 上的冒烟、逐项验证、问题回收；清单是本子分类的 `CHECKLIST.md`。"
+code = "—"
 
 [[sub]]
-id = "T15c"
+id = "S03"
 title = "统一验证"
 scope = "所有界面和流程走一遍的统一验收。"
 code = "—"
 
 [[sub]]
-id = "T15d"
-title = "覆盖安装 3.x 验证"
+id = "S04"
+title = "覆盖安装验证"
 scope = "用真实的 3.x 数据覆盖安装 4.x，核对迁移结果。"
 code = "—"
 
-[[group]]
-id = "T16"
-title = "发布和运营"
-scope = "版本、签名和发布、更新通道、发布说明和 README、用户反馈、隐私和合规。"
+[[sub]]
+id = "V01"
+title = "新功能提议"
+scope = "3.x 没有的新功能：先提议、出方案、确认，采纳后在目标组开任务。"
+code = "—"
 
 [[sub]]
-id = "T16a"
-title = "版本、签名和发布"
+id = "V02"
+title = "用户反馈和issue"
+scope = "用户提的问题、GitHub issue：复现、归类、去向、回复。"
+code = "—"
+
+[[sub]]
+id = "V03"
+title = "审查和调研"
+scope = "全面审查、调研报告：发现的问题和建议。"
+code = "—"
+
+[[sub]]
+id = "V04"
+title = "不做的"
+scope = "决定不做的事和原因。"
+code = "—"
+
+[[sub]]
+id = "W01"
+title = "定期对照"
+scope = "每周看一次上游的新提交，逐条对照 4.x，结论和登记的任务写进对照记录。"
+code = "—"
+
+[[sub]]
+id = "W02"
+title = "参考仓库"
+scope = "上游和参考仓库的清单、本机副本、许可证和借鉴规则。"
+code = "`~/ref/`、主仓库的远程 `upstream`"
+
+[[sub]]
+id = "X01"
+title = "Windows"
+scope = "Windows 专属功能、键鼠、安装包和更新。"
+code = "`apps/pure_live/windows/`"
+
+[[sub]]
+id = "X02"
+title = "Linux"
+scope = "Linux 构建和打包。"
+code = "—"
+
+[[sub]]
+id = "X03"
+title = "电视"
+scope = "电视外壳、焦点导航、以 pure_live_TV 为基线的并入。"
+code = "电视模式代码"
+
+[[sub]]
+id = "X04"
+title = "iOS和iPadOS"
+scope = "构建、签名、平台差异。"
+code = "—"
+
+[[sub]]
+id = "X05"
+title = "macOS"
+scope = "构建、签名、平台差异。"
+code = "—"
+
+[[sub]]
+id = "Y01"
+title = "版本签名和发布"
 scope = "版本号、构建号、签名、发布页、安装包检查。"
 code = "`apps/pure_live/pubspec.yaml`、`features/version/app_version.dart`"
 
 [[sub]]
-id = "T16b"
+id = "Y02"
 title = "更新通道"
 scope = "`assets/version.json`、`assets/releases.json`、应用内更新。"
 code = "`assets/`、`features/version/`"
 
 [[sub]]
-id = "T16c"
-title = "发布说明和 README"
-scope = "发布说明、项目 README 和配图。"
-code = "根目录 `README.md`、本子分类的 `releases/`、`readme/`"
+id = "Y03"
+title = "发布说明和README"
+scope = "发布说明、项目 README 和配图（本子分类的 `releases/`、`readme/`）。"
+code = "根目录 `README.md`"
 
 [[sub]]
-id = "T16d"
-title = "用户反馈"
-scope = "GitHub issue 的回复、复现、归类。"
-code = "—"
-
-[[sub]]
-id = "T16e"
+id = "Y04"
 title = "隐私和合规"
 scope = "不收集数据、样本脱敏、许可证、免责声明。"
 code = "`tools/gate/check_fixtures.py`、`LICENSE`"
 
-[[group]]
-id = "T17"
-title = "桌面客户端"
-scope = "Windows 和 Linux：窗口、标题栏和托盘、键盘鼠标、Windows 专属功能、安装包、Linux 打包。"
+[[sub]]
+id = "Z01"
+title = "工具链和依赖"
+scope = "Flutter、Dart、Gradle、JDK、mpv、FFmpeg、pub 依赖的版本和升级。"
+code = "`toolchain.env`、`tools/check_latest/`"
 
 [[sub]]
-id = "T17a"
-title = "窗口、标题栏、托盘"
-scope = "桌面窗口、标题栏、托盘。"
-code = "`apps/pure_live/lib/app/desktop/`、`apps/pure_live/windows/`"
+id = "Z02"
+title = "门禁"
+scope = "格式、依赖方向、分析、测试、界面结构、样本隐私、文档。"
+code = "`tools/gate/`"
 
 [[sub]]
-id = "T17b"
-title = "键盘鼠标"
-scope = "快捷键、滚轮、悬停。"
-code = "各页面"
+id = "Z03"
+title = "清点和归属"
+scope = "代码文件、功能点、设置项、平台、原生插件、界面都归到子分类。"
+code = "`tools/ui/inventory.py`、`docs/inventory/`"
 
 [[sub]]
-id = "T17c"
-title = "Windows 专属功能"
-scope = "功能清点第 13 节的 14 项。"
-code = "`apps/pure_live/windows/`"
+id = "Z04"
+title = "构建和装机"
+scope = "测试包和正式包的构建，K90 装机和截图助手。"
+code = "`apps/pure_live/android/`、`tools/ffmpeg_kit/`"
 
 [[sub]]
-id = "T17d"
-title = "安装包和更新"
-scope = "Windows 安装包、自动更新。"
-code = "—"
+id = "Z05"
+title = "多语言"
+scope = "中文和英文翻译、键名检查、运行时拼出来的键。"
+code = "`apps/pure_live/assets/translations/`"
 
 [[sub]]
-id = "T17e"
-title = "Linux"
-scope = "Linux 构建和打包。"
-code = "—"
-
-[[group]]
-id = "T18"
-title = "电视客户端"
-scope = "以 pure_live_TV 为基线的电视端：外壳和设计系统、直播浏览、直播间、网络电视点播音乐、设置。"
+id = "Z06"
+title = "文档和登记表"
+scope = "docs 的结构、登记表、生成脚本、模板、文档版本。"
+code = "`docs/`、`tools/docs/`"
 
 [[sub]]
-id = "T18a"
-title = "外壳和设计系统"
-scope = "电视外壳、焦点导航、电视设计系统和通用组件。"
-code = "电视模式代码"
-
-[[sub]]
-id = "T18b"
-title = "直播浏览"
-scope = "电视上的直播浏览。"
-code = "电视模式代码"
-
-[[sub]]
-id = "T18c"
-title = "直播间"
-scope = "电视上的直播间。"
-code = "电视模式代码"
-
-[[sub]]
-id = "T18d"
-title = "网络电视、点播和音乐"
-scope = "电视上的网络电视、影片、点播和音乐。"
-code = "电视模式代码、`packages/live_vod`"
-
-[[sub]]
-id = "T18e"
-title = "设置、账号、壁纸"
-scope = "电视上的设置、账号、壁纸。"
-code = "电视模式代码"
-
-[[group]]
-id = "T19"
-title = "苹果平台"
-scope = "iOS、iPadOS、macOS：先只做设计，以后构建。"
-
-[[sub]]
-id = "T19a"
-title = "iPhone 和 iPad"
-scope = "iOS 和 iPadOS 的差异设计。"
-code = "—"
-
-[[sub]]
-id = "T19b"
-title = "macOS"
-scope = "macOS 的差异设计。"
-code = "—"
-
-[[sub]]
-id = "T19c"
-title = "构建和签名"
-scope = "苹果平台的构建和签名（以后）。"
+id = "Z07"
+title = "定期维护"
+scope = "定期要做的事：清理分支和工作区、发布后更新文档、文档和决定复查。"
 code = "—"
 
 [[task]]
-id = "T00a.1"
-title = "工程底座：工具链、门禁、代码规范"
-type = "工程"
-status = "完成"
-date = "2026-09-28"
-commit = "4aaeb0fda"
-old = ["M0"]
-
-[[task]]
-id = "T00a.2"
-title = "例行依赖升级检查（每月用 check_latest 查一次，升级后跑门禁）"
-type = "工程"
-status = "未开始"
-size = "小"
-tier = 3
-
-[[task]]
-id = "T00b.1"
-title = "搬目录：界面代码按 v3 模块分目录，门禁加“界面结构”检查"
-type = "工程"
-status = "完成"
-date = "2026-10-01"
-old = ["U.0"]
-
-[[task]]
-id = "T00b.2"
-title = "门禁加“文档”检查：生成文件是否最新、链接和代码里的文档路径是否有效"
-type = "工程"
-status = "完成"
-date = "2026-10-02"
-
-[[task]]
-id = "T00c.1"
-title = "界面清点脚本：v3 和电视的每个界面文件都分到一个任务"
-type = "工程"
-status = "完成"
-date = "2026-10-01"
-
-[[task]]
-id = "T00c.2"
-title = "项目清点脚本：代码文件、功能点、设置项、平台、原生插件都归到子分类，没归的报错"
-type = "工程"
-status = "未开始"
-size = "中"
-tier = 2
-stages = ["定规则和路径表", "写脚本", "接进门禁"]
-done = 0
-
-[[task]]
-id = "T00c.3"
-title = "界面清点脚本改用新编号（现在输出 U 开头的旧编号）"
-type = "工程"
-status = "未开始"
-size = "小"
-tier = 2
-
-[[task]]
-id = "T00d.1"
-title = "装机和截图助手进仓库：K90 截图、带前台检查的点按"
-type = "工程"
-status = "未开始"
-size = "小"
-tier = 3
-
-[[task]]
-id = "T00e.1"
-title = "翻译键：列出运行时拼出来的键，再清理不用的键（18 个）"
-type = "工程"
-status = "未开始"
-size = "小"
-tier = 3
-stages = ["列出拼接键", "核对 18 个键", "删除并跑全部测试"]
-done = 0
-
-[[task]]
-id = "T00f.1"
-title = "docs 重写为 20 组：登记表、总进度、生成脚本、模板"
-type = "文档"
-status = "完成"
-date = "2026-10-02"
-
-[[task]]
-id = "T01a.1"
+id = "A01.1"
 title = "界面基础：主题、通用组件、图标（模块重构）"
 type = "界面"
 status = "完成"
 date = "2026-10-01"
 commit = "c8f1ca08d"
-old = ["M11"]
+old = ["M11", "T01a.1"]
 
 [[task]]
-id = "T01a.2"
+id = "A01.2"
 title = "颜色、文字、间距、动效"
 type = "界面"
 status = "开发中"
 size = "小"
 tier = 2
-old = ["U.1a"]
+old = ["U.1a", "T01a.2"]
 stages = ["设计", "直播间要用的部分", "其余页面"]
 done = 2
 next = "直播间以外页面的颜色和文字角色收尾"
 
 [[task]]
-id = "T01b.1"
+id = "A01.3"
 title = "图标"
 type = "界面"
 status = "开发中"
 size = "小"
 tier = 2
-old = ["U.1b"]
+old = ["U.1b", "T01b.1"]
 stages = ["设计", "直播间要用的部分", "其余页面"]
 done = 2
 next = "直播间以外页面的图标收尾"
 
 [[task]]
-id = "T01c.1"
+id = "A02.1"
 title = "通用组件：状态页、头像、计数、二维码、标签、芯片、设置行"
 type = "界面"
 status = "待真机"
 date = "2026-10-02"
 commit = "097a60963"
-old = ["U.1c", "U01"]
+old = ["U.1c", "U01", "T01c.1"]
 
 [[task]]
-id = "T01d.1"
+id = "A02.2"
 title = "弹窗组件：对话框、面板、提示条"
 type = "界面"
 status = "待真机"
 date = "2026-10-02"
 commit = "1c572a5cc"
-old = ["U.1d", "U02"]
+old = ["U.1d", "U02", "T01d.1"]
 
 [[task]]
-id = "T01d.2"
+id = "A02.3"
 title = "贴着按钮的小菜单：按实测高度定位、从按钮方向展开"
 type = "界面"
 status = "待真机"
 date = "2026-10-02"
 commit = "39b570ee6"
-old = ["B03"]
+old = ["B03", "T01d.2"]
 
 [[task]]
-id = "T01f.1"
-title = "无障碍检查：读屏文字、键盘焦点、对比度、48dp 触控区域全应用过一遍"
-type = "界面"
-status = "未开始"
-size = "中"
-tier = 3
-
-[[task]]
-id = "T02a.1"
-title = "哔哩哔哩"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "d5ed42a5d"
-old = ["M4.01", "M4.U.1"]
-
-[[task]]
-id = "T02a.2"
-title = "斗鱼"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "dc09e6d8e"
-old = ["M4.02", "M4.U.2"]
-
-[[task]]
-id = "T02a.3"
-title = "虎牙"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "c1a82891f"
-old = ["M4.03", "M4.U.3"]
-
-[[task]]
-id = "T02a.4"
-title = "抖音"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "6b4a3d35b"
-old = ["M4.04", "M4.U.4"]
-
-[[task]]
-id = "T02a.5"
-title = "快手"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "944c67f40"
-old = ["M4.05", "M4.U.5"]
-
-[[task]]
-id = "T02a.6"
-title = "国内五大平台巡检和修复（持续）"
-type = "平台"
-status = "未开始"
-size = "中"
-tier = 1
-stages = ["写巡检清单", "逐个平台跑一遍", "修复失效的"]
-done = 0
-
-[[task]]
-id = "T02b.1"
-title = "YY 直播"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "df90a0156"
-old = ["M4.06", "M4.U.6"]
-
-[[task]]
-id = "T02b.2"
-title = "网易 CC"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "480454577"
-old = ["M4.09", "M4.U.9"]
-
-[[task]]
-id = "T02b.3"
-title = "AcFun 直播"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "fc70af736"
-old = ["M4.10", "M4.U.10"]
-
-[[task]]
-id = "T02b.4"
-title = "猫耳 FM"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "8674cb62f"
-old = ["M4.13", "M4.U.13"]
-
-[[task]]
-id = "T02b.5"
-title = "映客"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "656194b3f"
-old = ["M4.14", "M4.U.14"]
-
-[[task]]
-id = "T02b.6"
-title = "克拉克拉"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "c50732382"
-old = ["M4.15", "M4.U.15"]
-
-[[task]]
-id = "T02b.7"
-title = "小红书"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "3982eaa0e"
-old = ["M4.16", "M4.U.16"]
-
-[[task]]
-id = "T02b.8"
-title = "微博直播"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "d104f69e9"
-old = ["M4.18", "M4.U.18"]
-
-[[task]]
-id = "T02b.9"
-title = "京东直播"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "9d36d0852"
-old = ["M4.28", "M4.U.28"]
-
-[[task]]
-id = "T02b.10"
-title = "酷狗直播"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "f80083fe2"
-old = ["M4.29", "M4.U.29"]
-
-[[task]]
-id = "T02b.11"
-title = "百度直播"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "4971f23cc"
-old = ["M4.30", "M4.U.30"]
-
-[[task]]
-id = "T02b.12"
-title = "六间房"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "98c644829"
-old = ["M4.31", "M4.U.31"]
-
-[[task]]
-id = "T02b.13"
-title = "LOOK 直播"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "7761b780a"
-old = ["M4.32", "M4.U.32"]
-
-[[task]]
-id = "T02c.1"
-title = "SOOP"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "71fbb1982"
-old = ["M4.07", "M4.U.7"]
-
-[[task]]
-id = "T02c.2"
-title = "Twitch"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "a312c7267"
-old = ["M4.08", "M4.U.8"]
-
-[[task]]
-id = "T02c.3"
-title = "Picarto"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "b8bcd1eb3"
-old = ["M4.11", "M4.U.11"]
-
-[[task]]
-id = "T02c.4"
-title = "TwitCasting"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "2badf4756"
-old = ["M4.12", "M4.U.12"]
-
-[[task]]
-id = "T02c.5"
-title = "niconico"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "5442c7303"
-old = ["M4.17", "M4.U.17"]
-
-[[task]]
-id = "T02c.6"
-title = "SHOWROOM"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "eaca04cc0"
-old = ["M4.19", "M4.U.19"]
-
-[[task]]
-id = "T02c.7"
-title = "CHZZK"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "be431b915"
-old = ["M4.20", "M4.U.20"]
-
-[[task]]
-id = "T02c.8"
-title = "LiveMe"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "6fe261aa8"
-old = ["M4.21", "M4.U.21"]
-
-[[task]]
-id = "T02c.9"
-title = "TikTok"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "1ea332247"
-old = ["M4.22", "M4.U.22"]
-
-[[task]]
-id = "T02c.10"
-title = "YouTube"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "af6e14961"
-old = ["M4.23", "M4.U.23"]
-
-[[task]]
-id = "T02c.11"
-title = "BIGO LIVE"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "b336f2d27"
-old = ["M4.24", "M4.U.24"]
-
-[[task]]
-id = "T02c.12"
-title = "PandaTV"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "c33ee7611"
-old = ["M4.25", "M4.U.25"]
-
-[[task]]
-id = "T02c.13"
-title = "FC2 LIVE"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "eb7cd2497"
-old = ["M4.26", "M4.U.26"]
-
-[[task]]
-id = "T02c.14"
-title = "Steam 直播"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "9965e3c7f"
-old = ["M4.27", "M4.U.27"]
-
-[[task]]
-id = "T02c.15"
-title = "17LIVE"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "0141660c6"
-old = ["M4.33", "M4.U.33"]
-
-[[task]]
-id = "T02c.16"
-title = "Kick（恢复，仅 Android）"
-type = "平台"
-status = "完成"
-date = "2026-10-01"
-commit = "6c68f0010"
-old = ["M4.34"]
-
-[[task]]
-id = "T02d.1"
-title = "平台框架与链接解析：站点注册、链接工具和短链"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "e49c4bdd3"
-old = ["M3"]
-
-[[task]]
-id = "T02e.1"
-title = "平台巡检工具：定期用真实接口跑播放地址、搜索、分区，失效报出来"
-type = "平台"
-status = "未开始"
-size = "中"
-tier = 1
-stages = ["定检查项", "写工具", "跑一遍并记录"]
-done = 0
-
-[[task]]
-id = "T02f.1"
-title = "已批准升级的余项（UPGRADES 回填、平台层和弹幕层、列表、数据、文字）"
-type = "平台"
-status = "完成"
-date = "2026-10-02"
-commit = "069be46e4"
-old = ["F.5a", "F.5a1"]
-
-[[task]]
-id = "T02f.2"
-title = "平台层新数据接到界面：哔哩哔哩轮播、17LIVE 名字颜色和徽章、酷狗 PK 标签、Twitch Cookie 提示和编码、恢复后的实际清晰度、FC2 接手"
-type = "功能"
-status = "暂停"
-size = "中"
-tier = 2
-old = ["F01"]
-stages = ["哔哩哔哩轮播", "名字颜色和徽章", "酷狗 PK", "Twitch", "实际清晰度", "FC2"]
-done = 0
-next = "按任务书从头做；旧工作区里的半成品可参考"
-branch = "worktree-agent-af6f5e80c4e19804f（半成品，未提交）"
-
-[[task]]
-id = "T02g.1"
-title = "基础模型与接口"
-type = "平台"
-status = "完成"
-date = "2026-09-28"
-commit = "50d4f9bdb"
-old = ["M2"]
-
-[[task]]
-id = "T02g.2"
-title = "模型扩展：开播时间、受限类型、轮播和不可播放状态、房间身份"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "87bc61dfc"
-old = ["M2.1"]
-
-[[task]]
-id = "T03a.1"
-title = "网络：HTTP 客户端、拦截器、请求头策略、代理路由、WebSocket"
-type = "功能"
-status = "完成"
-date = "2026-09-28"
-commit = "9b70c640d"
-old = ["M1"]
-
-[[task]]
-id = "T03a.2"
-title = "Brotli 解码（猫耳弹幕、哔哩哔哩 protover 3）"
-type = "功能"
-status = "完成"
-date = "2026-09-29"
-commit = "a2b5c0610"
-old = ["M1.1"]
-
-[[task]]
-id = "T03d.1"
-title = "网络余项：功能清点里网络部分的 1 项缺失、1 项没验证"
-type = "功能"
-status = "未开始"
-size = "小"
-tier = 2
-
-[[task]]
-id = "T04a.1"
-title = "播放核心：media_kit 分支和取流管线"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "b4fb966e8"
-old = ["M7.1"]
-
-[[task]]
-id = "T04b.1"
-title = "播放器：会话、恢复、Flutter 绑定"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "4e8cd6c67"
-old = ["M7.2"]
-
-[[task]]
-id = "T04c.1"
-title = "起播速度和弱网：测首帧时间，找出慢的环节，改进后真机对比"
+id = "A03.1"
+title = "主列表手感：照 3.x 两端回弹，经典下拉刷新头"
 type = "性能"
-status = "未开始"
-size = "中"
-tier = 1
-stages = ["测量现状", "找出慢的环节", "改进", "真机对比"]
-done = 0
-
-[[task]]
-id = "T04d.1"
-title = "竖屏流的画面比例预判（抖音竖屏起播不跳）"
-type = "功能"
-status = "完成"
-date = "2026-10-02"
-commit = "7b37e6f5f"
-old = ["F.1b"]
-
-[[task]]
-id = "T05a.1"
-title = "直播间（主要流程）"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "0249e830e"
-old = ["M13.3"]
-
-[[task]]
-id = "T05a.2"
-title = "直播间（第二部分）"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "13bc7fac1"
-old = ["M13.14"]
-
-[[task]]
-id = "T05a.3"
-title = "已合并界面任务的收尾（横屏、宽屏、多画面、账号、平台名）"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "085fb71a3"
-old = ["U.2-followups"]
-
-[[task]]
-id = "T05a.4"
-title = "直播间功能余项：功能清点里直播间部分的 6 项缺失、1 项有问题"
-type = "功能"
-status = "未开始"
-size = "中"
-tier = 2
-
-[[task]]
-id = "T05b.1"
-title = "竖屏普通布局"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "a7d0e8d2a"
-old = ["U.2a"]
-
-[[task]]
-id = "T05c.1"
-title = "竖屏流和竖屏全屏"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "121280824"
-old = ["U.2b"]
-
-[[task]]
-id = "T05d.1"
-title = "横屏全屏"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "121280824"
-old = ["U.2c"]
-
-[[task]]
-id = "T05e.1"
-title = "宽屏左右分栏"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "121280824"
-old = ["U.2d"]
-
-[[task]]
-id = "T05f.1"
-title = "暂停状态：中间 ▶、控制层常显、“暂停时的弹幕”设置、重连误报、锁定后能解锁"
-type = "功能"
 status = "待真机"
 date = "2026-10-02"
-commit = "7cd3a0463"
-old = ["B02"]
+commit = "6e9e0da7e"
+old = ["P02", "T14c.1"]
 
 [[task]]
-id = "T05f.2"
-title = "直播间小问题合集：单击立即响应、全屏状态保持、全屏不再有居中对话框等"
-type = "功能"
+id = "A03.2"
+title = "翻页和面板：弹簧带上松手速度，翻页阈值照 ViewPager"
+type = "性能"
 status = "待真机"
 date = "2026-10-02"
-commit = "d3272b9b1"
-old = ["B09"]
+commit = "7e1124e01"
+old = ["P03", "T14c.2"]
 
 [[task]]
-id = "T05f.3"
-title = "双击飞行弹幕时弹幕面板会一闪再关上"
-type = "界面"
-status = "未开始"
-size = "小"
-tier = 2
-
-[[task]]
-id = "T05g.1"
-title = "直播间弹窗：清晰度、线路、录制、弹幕设置、右上角菜单、长按弹幕"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "a6609f0c3"
-old = ["U.2f"]
-
-[[task]]
-id = "T05g.2"
-title = "直播间子弹窗统一：定时关闭、房间音量、投屏、获取直链、画面比例"
-type = "界面"
-status = "待真机"
-date = "2026-10-02"
-commit = "c112f5415"
-old = ["U.2n", "B07"]
-
-[[task]]
-id = "T05g.3"
-title = "直播间小项：快手 App 跳转、切换直播间的刷新按钮、预测返回手势"
-type = "功能"
-status = "完成"
-date = "2026-10-02"
-commit = "7b37e6f5f"
-old = ["F.1c"]
-
-[[task]]
-id = "T05h.1"
-title = "竖屏全屏上下滑换台"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "cf01bf011"
-old = ["U.2b2"]
-
-[[task]]
-id = "T05h.2"
-title = "切换直播间面板：各布局同一个面板、3.x 小卡片网格、原地换台、去掉重复入口（issue #37）"
-type = "界面"
-status = "待真机"
-date = "2026-10-02"
-commit = "4a09a48bc"
-old = ["U.2m", "B05"]
-
-[[task]]
-id = "T05i.1"
-title = "直播间的状态：加载、未开播、失败和重连、受限、纯音频；节目单和回看"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "05793a4c8"
-old = ["U.2g"]
-
-[[task]]
-id = "T05j.1"
-title = "小窗：应用内小窗和系统画中画"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "62e8b34dd"
-old = ["U.2j"]
-
-[[task]]
-id = "T05j.2"
-title = "冷门的播放设置：退出时销毁播放器、小窗跟随竖屏源、竖屏诊断、小窗弹幕预览、内存紧张清缓存、键盘媒体键"
-type = "功能"
-status = "完成"
-date = "2026-10-02"
-commit = "7b37e6f5f"
-old = ["F.1d"]
-
-[[task]]
-id = "T05k.1"
+id = "A03.3"
 title = "直播间拖动手感：换台、三档面板、详情面板带松手速度的弹簧和橡皮筋"
 type = "性能"
 status = "暂停"
 size = "中"
 tier = 2
-old = ["P04"]
+old = ["P04", "T05k.1"]
 stages = ["换台和面板的弹簧", "到头的橡皮筋", "拖面板不重建播放器", "把手和手势细节"]
 done = 0
 next = "按任务书从头做"
 branch = "worktree-agent-a770fdd52c3109749（刚开始，未提交）"
 
 [[task]]
-id = "T06a.1"
-title = "弹幕框架和过滤"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "1251ad846"
-old = ["M5.0"]
-
-[[task]]
-id = "T06a.2"
-title = "哔哩哔哩 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "95adcea10"
-old = ["M5.1"]
-
-[[task]]
-id = "T06a.3"
-title = "斗鱼 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "04717fcf9"
-old = ["M5.2"]
-
-[[task]]
-id = "T06a.4"
-title = "虎牙 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "5051893e3"
-old = ["M5.3"]
-
-[[task]]
-id = "T06a.5"
-title = "抖音 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "a4959ea90"
-old = ["M5.4"]
-
-[[task]]
-id = "T06a.6"
-title = "快手 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "60e8e0278"
-old = ["M5.5"]
-
-[[task]]
-id = "T06a.7"
-title = "YY 直播 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "8122b9713"
-old = ["M5.6"]
-
-[[task]]
-id = "T06a.8"
-title = "SOOP 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "e97d20574"
-old = ["M5.7"]
-
-[[task]]
-id = "T06a.9"
-title = "Twitch 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "9f1f3de1f"
-old = ["M5.8"]
-
-[[task]]
-id = "T06a.10"
-title = "AcFun 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "36285b104"
-old = ["M5.9"]
-
-[[task]]
-id = "T06a.11"
-title = "Picarto 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "863bbf99c"
-old = ["M5.10"]
-
-[[task]]
-id = "T06a.12"
-title = "TwitCasting 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "a4cb9a72e"
-old = ["M5.11"]
-
-[[task]]
-id = "T06a.13"
-title = "猫耳 FM 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "700066213"
-old = ["M5.12"]
-
-[[task]]
-id = "T06a.14"
-title = "克拉克拉 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "644d18e6b"
-old = ["M5.13"]
-
-[[task]]
-id = "T06a.15"
-title = "niconico 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "67dba6d24"
-old = ["M5.14"]
-
-[[task]]
-id = "T06a.16"
-title = "SHOWROOM 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "a30d7aedd"
-old = ["M5.15"]
-
-[[task]]
-id = "T06a.17"
-title = "CHZZK 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "00da1b768"
-old = ["M5.16"]
-
-[[task]]
-id = "T06a.18"
-title = "LiveMe 弹幕"
-type = "平台"
-status = "受阻"
-date = "2026-09-29"
-commit = "2d1994160"
-old = ["M5.17"]
-note = "要登录才能连弹幕，调查完成"
-
-[[task]]
-id = "T06a.19"
-title = "TikTok 弹幕"
-type = "平台"
-status = "受阻"
-date = "2026-09-29"
-commit = "d1db5734e"
-old = ["M5.18"]
-note = "要签名才能连弹幕，调查完成"
-
-[[task]]
-id = "T06a.20"
-title = "YouTube 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "da62d0146"
-old = ["M5.19"]
-
-[[task]]
-id = "T06a.21"
-title = "BIGO LIVE 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-30"
-commit = "51ca7deda"
-old = ["M5.20"]
-
-[[task]]
-id = "T06a.22"
-title = "PandaTV 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-29"
-commit = "2a6b552b2"
-old = ["M5.21"]
-
-[[task]]
-id = "T06a.23"
-title = "FC2 LIVE 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-30"
-commit = "ecfea58fb"
-old = ["M5.22"]
-
-[[task]]
-id = "T06a.24"
-title = "Steam 直播 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-30"
-commit = "3a9914ad8"
-old = ["M5.23"]
-
-[[task]]
-id = "T06a.25"
-title = "京东直播 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-30"
-commit = "20deb4695"
-old = ["M5.24"]
-
-[[task]]
-id = "T06a.26"
-title = "酷狗直播 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-30"
-commit = "8fe5c32bb"
-old = ["M5.25"]
-
-[[task]]
-id = "T06a.27"
-title = "百度直播 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-30"
-commit = "cdb9504e3"
-old = ["M5.26"]
-
-[[task]]
-id = "T06a.28"
-title = "六间房 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-30"
-commit = "3a6825c91"
-old = ["M5.27"]
-
-[[task]]
-id = "T06a.29"
-title = "LOOK 直播 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-30"
-commit = "3da78f071"
-old = ["M5.28"]
-
-[[task]]
-id = "T06a.30"
-title = "17LIVE 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-09-30"
-commit = "447e34074"
-old = ["M5.29"]
-
-[[task]]
-id = "T06a.31"
-title = "Kick 弹幕"
-type = "平台"
-status = "完成"
-date = "2026-10-01"
-commit = "6c68f0010"
-old = ["M5.34"]
-
-[[task]]
-id = "T06b.1"
-title = "弹幕屏蔽页"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "5ba728803"
-old = ["U.12d"]
-
-[[task]]
-id = "T06b.2"
-title = "哔哩哔哩打码昵称不能“屏蔽此用户”，清理已存的打码屏蔽"
-type = "功能"
-status = "待真机"
-date = "2026-10-02"
-commit = "40dc22279"
-old = ["B01"]
-
-[[task]]
-id = "T06c.1"
-title = "飞行弹幕渲染：选型和优化，速度按时间算"
-type = "性能"
-status = "完成"
-date = "2026-10-02"
-commit = "b8462638a"
-old = ["U.2h"]
-
-[[task]]
-id = "T06c.2"
-title = "飞行弹幕里的表情图片"
-type = "功能"
-status = "完成"
-date = "2026-10-02"
-commit = "cd42f89b1"
-old = ["F.2c"]
-
-[[task]]
-id = "T06c.3"
-title = "画面弹幕点按和长按：复制、屏蔽此用户、屏蔽关键词"
-type = "功能"
-status = "完成"
-date = "2026-10-02"
-commit = "b8462638a"
-old = ["F.2b"]
-
-[[task]]
-id = "T06c.4"
-title = "弹幕功能余项：功能清点里弹幕部分的 3 项缺失、2 项有问题"
-type = "功能"
-status = "未开始"
-size = "中"
-tier = 2
-
-[[task]]
-id = "T06d.1"
-title = "弹幕列表和弹幕设置页"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "05793a4c8"
-old = ["U.2e"]
-
-[[task]]
-id = "T06d.2"
-title = "哔哩哔哩访客昵称提示和登录引导、粉丝牌和头像"
-type = "功能"
-status = "待真机"
-date = "2026-10-02"
-commit = "2eea8022a"
-old = ["B06"]
-
-[[task]]
-id = "T06d.3"
-title = "弹幕性能和可读性：每帧最多刷新一次、聊天列表反转、昵称对比度"
-type = "性能"
-status = "待真机"
-date = "2026-10-02"
-commit = "463115797"
-old = ["B08"]
-
-[[task]]
-id = "T06e.1"
-title = "弹幕设置生效：弹幕帧率、字体、纯文字模式"
-type = "功能"
-status = "完成"
-date = "2026-10-02"
-commit = "b8462638a"
-old = ["F.2a"]
-
-[[task]]
-id = "T06e.2"
-title = "设置里的弹幕页和直播间同一个组件；“录制已停止”通知定位到任务"
-type = "功能"
-status = "待真机"
-date = "2026-10-02"
-commit = "ec7a27261"
-old = ["F02"]
-
-[[task]]
-id = "T06e.3"
-title = "设置的弹幕页补上“弹幕列表”“小窗弹幕”两组"
-type = "界面"
-status = "未开始"
-size = "小"
-tier = 2
-
-[[task]]
-id = "T06e.4"
-title = "小窗弹幕的颜色选择改成面板（全屏里最后一个居中对话框）"
-type = "界面"
-status = "未开始"
-size = "小"
-tier = 2
-
-[[task]]
-id = "T06f.1"
-title = "本地互动"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "e704b933a"
-old = ["U.2k"]
-
-[[task]]
-id = "T07a.1"
-title = "应用骨架：入口、路由、首页外壳、多语言、Android 和 Windows 原生部分"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "6e2376d6e"
-old = ["M12"]
-
-[[task]]
-id = "T07a.2"
-title = "共用模块和应用外壳接线"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "cc48756fb"
-old = ["M12.2"]
-
-[[task]]
-id = "T07a.3"
-title = "应用服务补全"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "0e4ecb34e"
-old = ["M12.4"]
-
-[[task]]
-id = "T07a.4"
-title = "手机首页"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "6e00ef1dc"
-old = ["U.3a"]
-
-[[task]]
-id = "T07a.5"
-title = "宽屏首页"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "6e00ef1dc"
-old = ["U.3b"]
-
-[[task]]
-id = "T07a.6"
-title = "全局弹窗"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "6e00ef1dc"
-old = ["U.3d"]
-
-[[task]]
-id = "T07b.1"
-title = "推荐首页"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "414996596"
-old = ["M13.1"]
-
-[[task]]
-id = "T07b.2"
-title = "热门"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "7daeb3805"
-old = ["U.4b"]
-
-[[task]]
-id = "T07c.1"
-title = "分区：分区列表、分区房间、热门分区"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "023936ebe"
-old = ["M13.5"]
-
-[[task]]
-id = "T07c.2"
-title = "分区"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "7daeb3805"
-old = ["U.4d"]
-
-[[task]]
-id = "T07c.3"
-title = "分区房间"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "7daeb3805"
-old = ["U.4e"]
-
-[[task]]
-id = "T07c.4"
-title = "热门分区、关注的分区"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "7daeb3805"
-old = ["U.4f"]
-
-[[task]]
-id = "T07d.1"
-title = "房间卡片"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "7daeb3805"
-old = ["U.4a"]
-
-[[task]]
-id = "T07e.1"
-title = "关注"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "dc167d266"
-old = ["M13.2"]
-
-[[task]]
-id = "T07e.2"
-title = "关注"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "7daeb3805"
-old = ["U.4c"]
-
-[[task]]
-id = "T07e.3"
-title = "开播提醒（v3 没有的新功能，先出方案再定做不做）"
-type = "功能"
-status = "未开始"
-size = "中"
-tier = 3
-stages = ["方案和对比页", "用户确认", "开发"]
-done = 0
-
-[[task]]
-id = "T07f.1"
-title = "搜索"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "b8b1ec18f"
-old = ["M13.4"]
-
-[[task]]
-id = "T07f.2"
-title = "搜索"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "480a8d8ac"
-old = ["U.5a"]
-
-[[task]]
-id = "T07f.3"
-title = "网页搜索"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "773f31fa5"
-old = ["U.5b"]
-
-[[task]]
-id = "T07g.1"
-title = "观看历史"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "070024e43"
-old = ["M13.6"]
-
-[[task]]
-id = "T07g.2"
-title = "观看历史"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "cbd96fcc6"
-old = ["U.5c"]
-
-[[task]]
-id = "T07h.1"
-title = "分组与屏蔽"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "caebee14d"
-old = ["M13.9"]
-
-[[task]]
-id = "T07h.2"
-title = "标签管理"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "3b00b519f"
-old = ["U.12c"]
-
-[[task]]
-id = "T07i.1"
-title = "小页面：工具箱、远程接收、关于、版本、启动页"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "d5a0a060a"
-old = ["M13.13"]
-
-[[task]]
-id = "T07i.2"
-title = "启动页"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "6e00ef1dc"
-old = ["U.3c"]
-
-[[task]]
-id = "T07i.3"
-title = "工具箱"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "b164796dc"
-old = ["U.12a"]
-
-[[task]]
-id = "T07i.4"
-title = "关于和版本"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "dd2e8cbfb"
-old = ["U.12b"]
-
-[[task]]
-id = "T08a.1"
-title = "录制内核"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "833e570ce"
-old = ["M8"]
-
-[[task]]
-id = "T08a.2"
-title = "录制补全"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "8c043873d"
-old = ["M8.1"]
-
-[[task]]
-id = "T08a.3"
-title = "合并进度：录制中心和录制面板显示合成 MP4 的进度"
-type = "功能"
-status = "完成"
-date = "2026-10-02"
-commit = "d145aa930"
-old = ["F.3a"]
-
-[[task]]
-id = "T08a.4"
-title = "录制余项：功能清点里录制部分的 1 项缺失、5 项没验证"
-type = "功能"
-status = "未开始"
-size = "中"
-tier = 2
-
-[[task]]
-id = "T08b.1"
-title = "录制中心与录制设置（含录制接入）"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "de14b3c8e"
-old = ["M13.15"]
-
-[[task]]
-id = "T08b.2"
-title = "录制中心"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "83b1de999"
-old = ["U.7a"]
-
-[[task]]
-id = "T08b.3"
-title = "录制按钮和录制状态图标重新设计：没在录单色圆环、在录红底白方块"
-type = "界面"
-status = "待真机"
-date = "2026-10-02"
-commit = "2e6c6f5ab"
-old = ["U.2a2", "B04"]
-
-[[task]]
-id = "T08c.1"
-title = "录制设置"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "965d41956"
-old = ["U.7b"]
-
-[[task]]
-id = "T08e.1"
-title = "录制通知按状态写标题，“录制已停止”提醒换新图标"
-type = "功能"
-status = "待真机"
-date = "2026-10-02"
-commit = "79ecb5d2b"
-
-[[task]]
-id = "T08e.2"
-title = "只录一个直播间时，点前台录制通知也定位到那条任务"
-type = "功能"
-status = "未开始"
-size = "小"
-tier = 3
-
-[[task]]
-id = "T09a.1"
-title = "设置"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "9a90cbf6c"
-old = ["M13.7"]
-
-[[task]]
-id = "T09a.2"
-title = "设置：设置总览"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "3f53f8123"
-old = ["U.6a"]
-
-[[task]]
-id = "T09a.3"
-title = "设置：外观"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "3f53f8123"
-old = ["U.6b"]
-
-[[task]]
-id = "T09a.4"
-title = "设置：播放"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "e9e41d557"
-old = ["U.6c"]
-
-[[task]]
-id = "T09a.5"
-title = "设置：通用和网络"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "e9e41d557"
-old = ["U.6d"]
-
-[[task]]
-id = "T09a.6"
-title = "设置：数据"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "e9e41d557"
-old = ["U.6e"]
-
-[[task]]
-id = "T09a.7"
-title = "设置项逐条核对（功能清点第 15 节）"
-type = "功能"
-status = "未开始"
-size = "中"
-tier = 2
-
-[[task]]
-id = "T09b.1"
-title = "存储、设置、备份、3.x 数据迁移（模块重构）"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "d2fbe3072"
-old = ["M9"]
-
-[[task]]
-id = "T09c.1"
-title = "备份与 WebDAV"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "1b730f77e"
-old = ["M13.10"]
-
-[[task]]
-id = "T09c.2"
-title = "备份与恢复"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "965d41956"
-old = ["U.11a"]
-
-[[task]]
-id = "T09d.1"
-title = "WebDAV"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "965d41956"
-old = ["U.11b"]
-
-[[task]]
-id = "T09d.2"
-title = "WebDAV Digest 认证"
-type = "功能"
-status = "完成"
-date = "2026-10-02"
-commit = "c168fdb99"
-old = ["F.4b"]
-
-[[task]]
-id = "T09e.1"
-title = "设备同步"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "965d41956"
-old = ["U.11c"]
-
-[[task]]
-id = "T09f.1"
-title = "3.x 数据迁移的真机验证（覆盖安装时用真实数据核对）"
-type = "验证"
-status = "未开始"
-size = "中"
-tier = 1
-old = ["F.4a"]
-stages = ["准备装着 3.x 和真实数据的手机", "覆盖安装 4.x", "逐项核对关注、历史、设置、账号"]
-done = 0
-
-[[task]]
-id = "T10a.1"
-title = "账号与登录"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "e5ae55fbf"
-old = ["M13.8"]
-
-[[task]]
-id = "T10a.2"
-title = "账号总览"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "587ccc3c7"
-old = ["U.10a"]
-
-[[task]]
-id = "T10a.3"
-title = "登录和 Cookie"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "587ccc3c7"
-old = ["U.10b"]
-
-[[task]]
-id = "T10b.1"
-title = "Cookie 和密码加密存储在真机上验证"
-type = "验证"
-status = "未开始"
-size = "小"
-tier = 2
-
-[[task]]
-id = "T10c.1"
-title = "云账号停用说明"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "a90c0502e"
-old = ["U.10c"]
-
-[[task]]
-id = "T11a.1"
-title = "网络电视内核"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "414fe49a6"
-old = ["M6"]
-
-[[task]]
-id = "T11a.2"
-title = "网络电视列表持久化"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "27385a999"
-old = ["M12.1"]
-
-[[task]]
-id = "T11a.3"
-title = "网络电视页面"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "abf627e86"
-old = ["M13.11"]
-
-[[task]]
-id = "T11a.4"
-title = "网络电视管理"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "7c6d685cb"
-old = ["U.9"]
-
-[[task]]
-id = "T11c.1"
-title = "哔哩哔哩点播和音乐核心包"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "11d579e05"
-old = ["M14.0"]
-
-[[task]]
-id = "T12a.1"
-title = "多画面"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "6ac31a036"
-old = ["M13.12"]
-
-[[task]]
-id = "T12a.2"
-title = "多画面"
-type = "界面"
-status = "完成"
-date = "2026-10-01"
-commit = "b601b444e"
-old = ["U.8"]
-
-[[task]]
-id = "T12c.1"
-title = "投屏"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "a070b0ed4"
-old = ["M10"]
-
-[[task]]
-id = "T13a.1"
-title = "系统界面：通知、画中画窗口、启动画面、分享接收"
-type = "界面"
-status = "完成"
-date = "2026-10-02"
-commit = "8cf3c21b7"
-old = ["U.14"]
-
-[[task]]
-id = "T13b.1"
-title = "画中画复验：从画中画回来后控制条卡住的问题"
-type = "验证"
-status = "未开始"
-size = "小"
-tier = 2
-
-[[task]]
-id = "T13c.1"
-title = "插件接入和 Windows 桌面外壳"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "9ded26f50"
-old = ["M12.3"]
-
-[[task]]
-id = "T13c.2"
-title = "接回半成品：后台播放和助眠的权限、系统分享和打开方式、剪贴板口令、播放代理"
-type = "功能"
-status = "完成"
-date = "2026-10-02"
-commit = "8cf3c21b7"
-old = ["F.0a"]
-
-[[task]]
-id = "T13d.1"
-title = "Android 17 本地网络权限验证（要另找 Android 17 设备）"
-type = "验证"
-status = "未开始"
-size = "小"
-tier = 3
-
-[[task]]
-id = "T13e.1"
-title = "屏幕常亮跟随设置"
-type = "功能"
-status = "完成"
-date = "2026-10-02"
-commit = "b8462638a"
-old = ["F.1a"]
-
-[[task]]
-id = "T13e.2"
-title = "横屏全屏随手机方向翻转，开着旋转锁也翻（issue #36）"
-type = "功能"
-status = "待真机"
-date = "2026-10-02"
-commit = "3c1aa45ee"
-
-[[task]]
-id = "T14a.1"
-title = "基准测试和渲染开销：profile 基准、浮窗和转圈不再离屏绘制、图片缓存上限"
-type = "性能"
-status = "待真机"
-date = "2026-10-02"
-commit = "2ec6f598e"
-old = ["P05"]
-
-[[task]]
-id = "T14a.2"
-title = "在 K90 上跑基准，按数字决定封面圆角画法"
-type = "性能"
-status = "未开始"
-size = "小"
-tier = 2
-stages = ["跑基准", "判定并记录"]
-done = 0
-
-[[task]]
-id = "T14b.1"
-title = "刷新率和帧率匹配"
-type = "性能"
-status = "完成"
-date = "2026-10-02"
-commit = "b8462638a"
-old = ["U.2i"]
-
-[[task]]
-id = "T14b.2"
-title = "刷新率策略修正：播放中只用帧率声明、没有整数倍取最高、系统限速提示"
-type = "性能"
-status = "待真机"
-date = "2026-10-02"
-commit = "584da6662"
-old = ["P01"]
-
-[[task]]
-id = "T14c.1"
-title = "主列表手感：照 3.x 两端回弹，经典下拉刷新头"
-type = "性能"
-status = "待真机"
-date = "2026-10-02"
-commit = "6e9e0da7e"
-old = ["P02"]
-
-[[task]]
-id = "T14c.2"
-title = "翻页和面板：弹簧带上松手速度，翻页阈值照 ViewPager"
-type = "性能"
-status = "待真机"
-date = "2026-10-02"
-commit = "7e1124e01"
-old = ["P03"]
-
-[[task]]
-id = "T14d.1"
-title = "内存：长时间播放和快速滚动后内存稳定"
-type = "性能"
-status = "未开始"
-size = "中"
-tier = 3
-
-[[task]]
-id = "T14e.1"
-title = "启动速度：冷启动到首页可用的时间测量和优化"
-type = "性能"
-status = "未开始"
-size = "中"
-tier = 2
-stages = ["测量", "改进", "真机对比"]
-done = 0
-
-[[task]]
-id = "T14f.1"
-title = "耗电：播放 30 分钟耗电对比（省电档不高于 3.x）"
-type = "性能"
-status = "未开始"
-size = "中"
-tier = 3
-
-[[task]]
-id = "T14g.1"
+id = "A04.1"
 title = "尺寸和字号适配：高度分档、分屏、折叠屏、字号上限、触控区域"
 type = "性能"
 status = "暂停"
 size = "中"
 tier = 2
-old = ["P06"]
+old = ["P06", "T14g.1"]
 stages = ["高度分档", "字号上限", "触控区域"]
 done = 0
 next = "先看旧工作区里的改动能否直接用，再补测试"
 branch = "worktree-agent-a39fe9339ffb138a9（做了大半，未提交）"
 
 [[task]]
-id = "T15a.1"
-title = "远程同步测试改成等真实服务启动（负载高时随机失败）"
-type = "验证"
-status = "完成"
-date = "2026-10-02"
-commit = "661fa07ad"
-
-[[task]]
-id = "T15a.2"
-title = "测试覆盖清单：各包测试数和缺口"
-type = "验证"
+id = "A05.1"
+title = "无障碍检查：读屏文字、键盘焦点、对比度、48dp 触控区域全应用过一遍"
+type = "界面"
 status = "未开始"
-size = "小"
+size = "中"
 tier = 3
+old = ["T01f.1"]
 
 [[task]]
-id = "T15b.1"
-title = "真机问题修复"
-type = "验证"
+id = "A06.1"
+title = "手机首页"
+type = "界面"
 status = "完成"
 date = "2026-10-01"
-commit = "f4cb41c68"
-old = ["M13.16"]
+commit = "6e00ef1dc"
+old = ["U.3a", "T07a.4"]
 
 [[task]]
-id = "T15b.2"
-title = "K90 冒烟：界面重构后把主流程走一遍"
-type = "验证"
+id = "A06.2"
+title = "宽屏首页"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "6e00ef1dc"
+old = ["U.3b", "T07a.5"]
+
+[[task]]
+id = "A06.3"
+title = "全局弹窗"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "6e00ef1dc"
+old = ["U.3d", "T07a.6"]
+
+[[task]]
+id = "A06.4"
+title = "启动页"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "6e00ef1dc"
+old = ["U.3c", "T07i.2"]
+
+[[task]]
+id = "A07.1"
+title = "竖屏普通布局"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "a7d0e8d2a"
+old = ["U.2a", "T05b.1"]
+
+[[task]]
+id = "A07.2"
+title = "竖屏流和竖屏全屏"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "121280824"
+old = ["U.2b", "T05c.1"]
+
+[[task]]
+id = "A07.3"
+title = "竖屏全屏上下滑换台"
+type = "界面"
 status = "完成"
 date = "2026-10-02"
-commit = "c8e72f34d"
-old = ["F.0b"]
+commit = "cf01bf011"
+old = ["U.2b2", "T05h.1"]
 
 [[task]]
-id = "T15b.3"
-title = "K90 验证：看直播、录制、关注搜索分区历史账号"
-type = "验证"
+id = "A07.4"
+title = "横屏全屏"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "121280824"
+old = ["U.2c", "T05d.1"]
+
+[[task]]
+id = "A07.5"
+title = "宽屏左右分栏"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "121280824"
+old = ["U.2d", "T05e.1"]
+
+[[task]]
+id = "A07.6"
+title = "直播间弹窗：清晰度、线路、录制、弹幕设置、右上角菜单、长按弹幕"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "a6609f0c3"
+old = ["U.2f", "T05g.1"]
+
+[[task]]
+id = "A07.7"
+title = "直播间的状态：加载、未开播、失败和重连、受限、纯音频；节目单和回看"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "05793a4c8"
+old = ["U.2g", "T05i.1"]
+
+[[task]]
+id = "A07.8"
+title = "小窗：应用内小窗和系统画中画"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "62e8b34dd"
+old = ["U.2j", "T05j.1"]
+
+[[task]]
+id = "A07.9"
+title = "已合并界面任务的收尾（横屏、宽屏、多画面、账号、平台名）"
+type = "界面"
 status = "完成"
 date = "2026-10-02"
-commit = "1f6270984"
-old = ["F.9", "F.9a", "F.9b", "F.9c"]
+commit = "085fb71a3"
+old = ["U.2-followups", "T05a.3"]
 
 [[task]]
-id = "T15b.4"
-title = "K90 验证：备份恢复、WebDAV、设备同步、扫码、应用内更新、字体、Twitch 和 Kick"
-type = "验证"
+id = "A07.10"
+title = "暂停状态：中间 ▶、控制层常显、“暂停时的弹幕”设置、重连误报、锁定后能解锁"
+type = "功能"
+status = "待真机"
+date = "2026-10-02"
+commit = "7cd3a0463"
+old = ["B02", "T05f.1"]
+
+[[task]]
+id = "A07.11"
+title = "直播间小问题合集：单击立即响应、全屏状态保持、全屏不再有居中对话框等"
+type = "功能"
+status = "待真机"
+date = "2026-10-02"
+commit = "d3272b9b1"
+old = ["B09", "T05f.2"]
+
+[[task]]
+id = "A07.12"
+title = "直播间子弹窗统一：定时关闭、房间音量、投屏、获取直链、画面比例"
+type = "界面"
+status = "待真机"
+date = "2026-10-02"
+commit = "c112f5415"
+old = ["U.2n", "B07", "T05g.2"]
+
+[[task]]
+id = "A07.13"
+title = "切换直播间面板：各布局同一个面板、3.x 小卡片网格、原地换台、去掉重复入口（issue #37）"
+type = "界面"
+status = "待真机"
+date = "2026-10-02"
+commit = "4a09a48bc"
+old = ["U.2m", "B05", "T05h.2"]
+
+[[task]]
+id = "A07.14"
+title = "双击飞行弹幕时弹幕面板会一闪再关上"
+type = "界面"
 status = "未开始"
-size = "中"
+size = "小"
 tier = 2
-old = ["F.9d"]
+old = ["T05f.3"]
 
 [[task]]
-id = "T15b.5"
-title = "4.0.0（构建号 5001）这一批改动的真机验证"
-type = "验证"
-status = "未开始"
-size = "中"
-tier = 1
-stages = ["直播间（暂停、菜单、切换直播间、弹窗）", "弹幕和录制", "列表手感和刷新率", "设置和通知"]
-done = 0
-
-[[task]]
-id = "T15c.1"
-title = "统一验证：所有界面和流程走一遍"
-type = "验证"
-status = "未开始"
-size = "大"
-tier = 2
-old = ["U.16"]
-
-[[task]]
-id = "T15d.1"
-title = "覆盖安装 3.x 验证（和 T09f.1 一起做）"
-type = "验证"
-status = "未开始"
-size = "小"
-tier = 1
-
-[[task]]
-id = "T16a.1"
-title = "4.0.0 发布前修复"
-type = "发布"
-status = "完成"
-date = "2026-10-02"
-commit = "c5bc87666"
-
-[[task]]
-id = "T16a.2"
-title = "4.0.0 发布（Android）"
-type = "发布"
-status = "完成"
-date = "2026-10-02"
-
-[[task]]
-id = "T16a.3"
-title = "4.0.0 覆盖发布为构建号 5001"
-type = "发布"
-status = "完成"
-date = "2026-10-02"
-commit = "e3f644d67"
-
-[[task]]
-id = "T16a.4"
-title = "正式签名方案（现在用维护者调试密钥，和 3.x 同一证书）"
-type = "发布"
-status = "未开始"
-size = "小"
-tier = 3
-
-[[task]]
-id = "T16b.1"
-title = "同版本换包时应用内收不到更新提示：以后发布一律改版本号，或让比较带上构建号"
-type = "发布"
+id = "A07.15"
+title = "画面上下滑避开系统底部手势区：上滑回桌面时不再误调亮度或音量"
+type = "功能"
 status = "未开始"
 size = "小"
 tier = 2
+old = ["T05f.4"]
+note = "参考上游 pure_live 1cdcb7b2a；用系统给的手势区高度"
 
 [[task]]
-id = "T16c.1"
-title = "README 和 4.0.0 发布说明"
-type = "发布"
+id = "A08.1"
+title = "弹幕列表和弹幕设置页"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "05793a4c8"
+old = ["U.2e", "T06d.1"]
+
+[[task]]
+id = "A08.2"
+title = "本地互动"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "e704b933a"
+old = ["U.2k", "T06f.1"]
+
+[[task]]
+id = "A08.3"
+title = "弹幕屏蔽页"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "5ba728803"
+old = ["U.12d", "T06b.1"]
+
+[[task]]
+id = "A08.4"
+title = "画面弹幕点按和长按：复制、屏蔽此用户、屏蔽关键词"
+type = "功能"
 status = "完成"
 date = "2026-10-02"
+commit = "b8462638a"
+old = ["F.2b", "T06c.3"]
 
 [[task]]
-id = "T16d.1"
-title = "回复并关闭 issue #36、#37"
-type = "发布"
+id = "A08.5"
+title = "设置里的弹幕页和直播间同一个组件；“录制已停止”通知定位到任务"
+type = "功能"
+status = "待真机"
+date = "2026-10-02"
+commit = "ec7a27261"
+old = ["F02", "T06e.2"]
+
+[[task]]
+id = "A08.6"
+title = "设置的弹幕页补上“弹幕列表”“小窗弹幕”两组"
+type = "界面"
 status = "未开始"
 size = "小"
-tier = 1
+tier = 2
+old = ["T06e.3"]
 
 [[task]]
-id = "T16e.1"
-title = "隐私说明写进 README：不收集数据、样本脱敏规则"
-type = "发布"
+id = "A08.7"
+title = "小窗弹幕的颜色选择改成面板（全屏里最后一个居中对话框）"
+type = "界面"
 status = "未开始"
 size = "小"
-tier = 3
+tier = 2
+old = ["T06e.4"]
 
 [[task]]
-id = "T17a.1"
+id = "A09.1"
+title = "房间卡片"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "7daeb3805"
+old = ["U.4a", "T07d.1"]
+
+[[task]]
+id = "A09.2"
+title = "热门"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "7daeb3805"
+old = ["U.4b", "T07b.2"]
+
+[[task]]
+id = "A09.3"
+title = "关注"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "7daeb3805"
+old = ["U.4c", "T07e.2"]
+
+[[task]]
+id = "A09.4"
+title = "分区"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "7daeb3805"
+old = ["U.4d", "T07c.2"]
+
+[[task]]
+id = "A09.5"
+title = "分区房间"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "7daeb3805"
+old = ["U.4e", "T07c.3"]
+
+[[task]]
+id = "A09.6"
+title = "热门分区、关注的分区"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "7daeb3805"
+old = ["U.4f", "T07c.4"]
+
+[[task]]
+id = "A09.7"
+title = "搜索"
+type = "界面"
+status = "完成"
+date = "2026-10-02"
+commit = "480a8d8ac"
+old = ["U.5a", "T07f.2"]
+
+[[task]]
+id = "A09.8"
+title = "网页搜索"
+type = "界面"
+status = "完成"
+date = "2026-10-02"
+commit = "773f31fa5"
+old = ["U.5b", "T07f.3"]
+
+[[task]]
+id = "A09.9"
+title = "观看历史"
+type = "界面"
+status = "完成"
+date = "2026-10-02"
+commit = "cbd96fcc6"
+old = ["U.5c", "T07g.2"]
+
+[[task]]
+id = "A09.10"
+title = "标签管理"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "3b00b519f"
+old = ["U.12c", "T07h.2"]
+
+[[task]]
+id = "A10.1"
+title = "录制中心"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "83b1de999"
+old = ["U.7a", "T08b.2"]
+
+[[task]]
+id = "A10.2"
+title = "录制设置"
+type = "界面"
+status = "完成"
+date = "2026-10-02"
+commit = "965d41956"
+old = ["U.7b", "T08c.1"]
+
+[[task]]
+id = "A10.3"
+title = "录制按钮和录制状态图标重新设计：没在录单色圆环、在录红底白方块"
+type = "界面"
+status = "待真机"
+date = "2026-10-02"
+commit = "2e6c6f5ab"
+old = ["U.2a2", "B04", "T08b.3"]
+
+[[task]]
+id = "A11.1"
+title = "设置：设置总览"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "3f53f8123"
+old = ["U.6a", "T09a.2"]
+
+[[task]]
+id = "A11.2"
+title = "设置：外观"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "3f53f8123"
+old = ["U.6b", "T09a.3"]
+
+[[task]]
+id = "A11.3"
+title = "设置：播放"
+type = "界面"
+status = "完成"
+date = "2026-10-02"
+commit = "e9e41d557"
+old = ["U.6c", "T09a.4"]
+
+[[task]]
+id = "A11.4"
+title = "设置：通用和网络"
+type = "界面"
+status = "完成"
+date = "2026-10-02"
+commit = "e9e41d557"
+old = ["U.6d", "T09a.5"]
+
+[[task]]
+id = "A11.5"
+title = "设置：数据"
+type = "界面"
+status = "完成"
+date = "2026-10-02"
+commit = "e9e41d557"
+old = ["U.6e", "T09a.6"]
+
+[[task]]
+id = "A12.1"
+title = "账号总览"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "587ccc3c7"
+old = ["U.10a", "T10a.2"]
+
+[[task]]
+id = "A12.2"
+title = "登录和 Cookie"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "587ccc3c7"
+old = ["U.10b", "T10a.3"]
+
+[[task]]
+id = "A12.3"
+title = "云账号停用说明"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "a90c0502e"
+old = ["U.10c", "T10c.1"]
+
+[[task]]
+id = "A12.4"
+title = "备份与恢复"
+type = "界面"
+status = "完成"
+date = "2026-10-02"
+commit = "965d41956"
+old = ["U.11a", "T09c.2"]
+
+[[task]]
+id = "A12.5"
+title = "WebDAV"
+type = "界面"
+status = "完成"
+date = "2026-10-02"
+commit = "965d41956"
+old = ["U.11b", "T09d.1"]
+
+[[task]]
+id = "A12.6"
+title = "设备同步"
+type = "界面"
+status = "完成"
+date = "2026-10-02"
+commit = "965d41956"
+old = ["U.11c", "T09e.1"]
+
+[[task]]
+id = "A13.1"
+title = "网络电视管理"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "7c6d685cb"
+old = ["U.9", "T11a.4"]
+
+[[task]]
+id = "A13.2"
+title = "多画面"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "b601b444e"
+old = ["U.8", "T12a.2"]
+
+[[task]]
+id = "A14.1"
+title = "系统界面：通知、画中画窗口、启动画面、分享接收"
+type = "界面"
+status = "完成"
+date = "2026-10-02"
+commit = "8cf3c21b7"
+old = ["U.14", "T13a.1"]
+
+[[task]]
+id = "A15.1"
+title = "工具箱"
+type = "界面"
+status = "完成"
+date = "2026-10-01"
+commit = "b164796dc"
+old = ["U.12a", "T07i.3"]
+
+[[task]]
+id = "A15.2"
+title = "关于和版本"
+type = "界面"
+status = "完成"
+date = "2026-10-02"
+commit = "dd2e8cbfb"
+old = ["U.12b", "T07i.4"]
+
+[[task]]
+id = "A16.1"
 title = "桌面窗口：标题栏、托盘、窗口内全屏"
 type = "界面"
 status = "完成"
 date = "2026-10-01"
 commit = "99a8f8f53"
-old = ["U.13"]
+old = ["U.13", "T17a.1"]
 
 [[task]]
-id = "T17b.1"
-title = "键盘鼠标操作核对"
-type = "功能"
-status = "未开始"
-size = "小"
-tier = 3
-
-[[task]]
-id = "T17c.1"
-title = "Windows 专属功能（功能清点第 13 节的 14 项）"
-type = "功能"
-status = "未开始"
-size = "大"
-tier = 3
-
-[[task]]
-id = "T17d.1"
-title = "Windows 安装包和自动更新"
-type = "发布"
-status = "未开始"
-size = "中"
-tier = 3
-
-[[task]]
-id = "T17e.1"
-title = "Linux 构建和打包"
-type = "发布"
-status = "未开始"
-size = "中"
-tier = 3
-
-[[task]]
-id = "T18a.1"
-title = "电视外壳、焦点导航、直播浏览、基本直播间"
-type = "功能"
-status = "完成"
-date = "2026-10-01"
-commit = "781586ff7"
-old = ["M14.1"]
-
-[[task]]
-id = "T18a.2"
+id = "A17.1"
 title = "电视设计系统和通用组件"
 type = "界面"
 status = "完成"
 date = "2026-10-01"
 commit = "537428abf"
-old = ["U.15a"]
+old = ["U.15a", "T18a.2"]
 
 [[task]]
-id = "T18a.3"
+id = "A17.2"
 title = "电视外壳"
-note = "旧分支 M14.2～M14.5（工作区 agent-af79805552a6c7d0e 等，2026-10-01 停在界面重做前）有电视各界面的半成品，逻辑部分可以参考"
 type = "界面"
 status = "已确认"
 size = "中"
 tier = 3
-old = ["U.15b"]
+old = ["U.15b", "T18a.3"]
 stages = ["设计", "开发", "真机"]
 done = 1
+note = "旧分支 M14.2～M14.5（工作区 agent-af79805552a6c7d0e 等，2026-10-01 停在界面重做前）有电视各界面的半成品，逻辑部分可以参考"
 
 [[task]]
-id = "T18b.1"
+id = "A17.3"
 title = "电视直播浏览"
 type = "界面"
 status = "已确认"
 size = "中"
 tier = 3
-old = ["U.15c"]
+old = ["U.15c", "T18b.1"]
 stages = ["设计", "开发", "真机"]
 done = 1
 
 [[task]]
-id = "T18c.1"
+id = "A17.4"
 title = "电视直播间"
 type = "界面"
 status = "已确认"
 size = "中"
 tier = 3
-old = ["U.15d"]
+old = ["U.15d", "T18c.1"]
 stages = ["设计", "开发", "真机"]
 done = 1
 
 [[task]]
-id = "T18d.1"
+id = "A17.5"
 title = "电视网络电视和影片"
 type = "界面"
 status = "已确认"
 size = "中"
 tier = 3
-old = ["U.15e"]
+old = ["U.15e", "T18d.1"]
 stages = ["设计", "开发", "真机"]
 done = 1
 
 [[task]]
-id = "T18d.2"
+id = "A17.6"
 title = "电视点播"
 type = "界面"
 status = "已确认"
 size = "中"
 tier = 3
-old = ["U.15f"]
+old = ["U.15f", "T18d.2"]
 stages = ["设计", "开发", "真机"]
 done = 1
 
 [[task]]
-id = "T18d.3"
+id = "A17.7"
 title = "电视音乐"
 type = "界面"
 status = "已确认"
 size = "中"
 tier = 3
-old = ["U.15g"]
+old = ["U.15g", "T18d.3"]
 stages = ["设计", "开发", "真机"]
 done = 1
 
 [[task]]
-id = "T18e.1"
+id = "A17.8"
 title = "电视壁纸"
 type = "界面"
 status = "已确认"
 size = "小"
 tier = 3
-old = ["U.15h"]
+old = ["U.15h", "T18e.1"]
 stages = ["设计", "开发", "真机"]
 done = 1
 
 [[task]]
-id = "T18e.2"
+id = "A17.9"
 title = "电视设置"
 type = "界面"
 status = "已确认"
 size = "中"
 tier = 3
-old = ["U.15i"]
+old = ["U.15i", "T18e.2"]
 stages = ["设计", "开发", "真机"]
 done = 1
 
 [[task]]
-id = "T19a.1"
+id = "A18.1"
 title = "iOS 和 iPadOS 差异设计"
 type = "界面"
 status = "已确认"
 size = "中"
 tier = 3
-old = ["U.17a"]
+old = ["U.17a", "T19a.1"]
 
 [[task]]
-id = "T19b.1"
+id = "A18.2"
 title = "macOS 差异设计"
 type = "界面"
 status = "已确认"
 size = "中"
 tier = 3
-old = ["U.17b"]
+old = ["U.17b", "T19b.1"]
 
 [[task]]
-id = "T19c.1"
+id = "C01.1"
+title = "直播间（主要流程）"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "0249e830e"
+old = ["M13.3", "T05a.1"]
+
+[[task]]
+id = "C01.2"
+title = "直播间（第二部分）"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "13bc7fac1"
+old = ["M13.14", "T05a.2"]
+
+[[task]]
+id = "C01.3"
+title = "直播间功能余项：功能清点里直播间部分的 6 项缺失、1 项有问题"
+type = "功能"
+status = "未开始"
+size = "中"
+tier = 2
+old = ["T05a.4"]
+
+[[task]]
+id = "C02.1"
+title = "冷门的播放设置：退出时销毁播放器、小窗跟随竖屏源、竖屏诊断、小窗弹幕预览、内存紧张清缓存、键盘媒体键"
+type = "功能"
+status = "完成"
+date = "2026-10-02"
+commit = "7b37e6f5f"
+old = ["F.1d", "T05j.2"]
+
+[[task]]
+id = "C03.1"
+title = "直播间小项：快手 App 跳转、切换直播间的刷新按钮、预测返回手势"
+type = "功能"
+status = "完成"
+date = "2026-10-02"
+commit = "7b37e6f5f"
+old = ["F.1c", "T05g.3"]
+
+[[task]]
+id = "D01.1"
+title = "弹幕框架和过滤"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "1251ad846"
+old = ["M5.0", "T06a.1"]
+
+[[task]]
+id = "D01.2"
+title = "哔哩哔哩 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "95adcea10"
+old = ["M5.1", "T06a.2"]
+
+[[task]]
+id = "D01.3"
+title = "斗鱼 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "04717fcf9"
+old = ["M5.2", "T06a.3"]
+
+[[task]]
+id = "D01.4"
+title = "虎牙 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "5051893e3"
+old = ["M5.3", "T06a.4"]
+
+[[task]]
+id = "D01.5"
+title = "抖音 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "a4959ea90"
+old = ["M5.4", "T06a.5"]
+
+[[task]]
+id = "D01.6"
+title = "快手 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "60e8e0278"
+old = ["M5.5", "T06a.6"]
+
+[[task]]
+id = "D01.7"
+title = "YY 直播 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "8122b9713"
+old = ["M5.6", "T06a.7"]
+
+[[task]]
+id = "D01.8"
+title = "SOOP 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "e97d20574"
+old = ["M5.7", "T06a.8"]
+
+[[task]]
+id = "D01.9"
+title = "Twitch 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "9f1f3de1f"
+old = ["M5.8", "T06a.9"]
+
+[[task]]
+id = "D01.10"
+title = "AcFun 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "36285b104"
+old = ["M5.9", "T06a.10"]
+
+[[task]]
+id = "D01.11"
+title = "Picarto 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "863bbf99c"
+old = ["M5.10", "T06a.11"]
+
+[[task]]
+id = "D01.12"
+title = "TwitCasting 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "a4cb9a72e"
+old = ["M5.11", "T06a.12"]
+
+[[task]]
+id = "D01.13"
+title = "猫耳 FM 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "700066213"
+old = ["M5.12", "T06a.13"]
+
+[[task]]
+id = "D01.14"
+title = "克拉克拉 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "644d18e6b"
+old = ["M5.13", "T06a.14"]
+
+[[task]]
+id = "D01.15"
+title = "niconico 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "67dba6d24"
+old = ["M5.14", "T06a.15"]
+
+[[task]]
+id = "D01.16"
+title = "SHOWROOM 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "a30d7aedd"
+old = ["M5.15", "T06a.16"]
+
+[[task]]
+id = "D01.17"
+title = "CHZZK 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "00da1b768"
+old = ["M5.16", "T06a.17"]
+
+[[task]]
+id = "D01.18"
+title = "LiveMe 弹幕"
+type = "平台"
+status = "受阻"
+date = "2026-09-29"
+commit = "2d1994160"
+old = ["M5.17", "T06a.18"]
+note = "要登录才能连弹幕，调查完成"
+
+[[task]]
+id = "D01.19"
+title = "TikTok 弹幕"
+type = "平台"
+status = "受阻"
+date = "2026-09-29"
+commit = "d1db5734e"
+old = ["M5.18", "T06a.19"]
+note = "要签名才能连弹幕，调查完成"
+
+[[task]]
+id = "D01.20"
+title = "YouTube 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "da62d0146"
+old = ["M5.19", "T06a.20"]
+
+[[task]]
+id = "D01.21"
+title = "BIGO LIVE 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-30"
+commit = "51ca7deda"
+old = ["M5.20", "T06a.21"]
+
+[[task]]
+id = "D01.22"
+title = "PandaTV 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "2a6b552b2"
+old = ["M5.21", "T06a.22"]
+
+[[task]]
+id = "D01.23"
+title = "FC2 LIVE 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-30"
+commit = "ecfea58fb"
+old = ["M5.22", "T06a.23"]
+
+[[task]]
+id = "D01.24"
+title = "Steam 直播 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-30"
+commit = "3a9914ad8"
+old = ["M5.23", "T06a.24"]
+
+[[task]]
+id = "D01.25"
+title = "京东直播 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-30"
+commit = "20deb4695"
+old = ["M5.24", "T06a.25"]
+
+[[task]]
+id = "D01.26"
+title = "酷狗直播 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-30"
+commit = "8fe5c32bb"
+old = ["M5.25", "T06a.26"]
+
+[[task]]
+id = "D01.27"
+title = "百度直播 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-30"
+commit = "cdb9504e3"
+old = ["M5.26", "T06a.27"]
+
+[[task]]
+id = "D01.28"
+title = "六间房 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-30"
+commit = "3a6825c91"
+old = ["M5.27", "T06a.28"]
+
+[[task]]
+id = "D01.29"
+title = "LOOK 直播 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-30"
+commit = "3da78f071"
+old = ["M5.28", "T06a.29"]
+
+[[task]]
+id = "D01.30"
+title = "17LIVE 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-09-30"
+commit = "447e34074"
+old = ["M5.29", "T06a.30"]
+
+[[task]]
+id = "D01.31"
+title = "Kick 弹幕"
+type = "平台"
+status = "完成"
+date = "2026-10-01"
+commit = "6c68f0010"
+old = ["M5.34", "T06a.31"]
+
+[[task]]
+id = "D01.32"
+title = "哔哩哔哩访客昵称提示和登录引导、粉丝牌和头像"
+type = "功能"
+status = "待真机"
+date = "2026-10-02"
+commit = "2eea8022a"
+old = ["B06", "T06d.2"]
+
+[[task]]
+id = "D02.1"
+title = "哔哩哔哩打码昵称不能“屏蔽此用户”，清理已存的打码屏蔽"
+type = "功能"
+status = "待真机"
+date = "2026-10-02"
+commit = "40dc22279"
+old = ["B01", "T06b.2"]
+
+[[task]]
+id = "D03.1"
+title = "飞行弹幕渲染：选型和优化，速度按时间算"
+type = "性能"
+status = "完成"
+date = "2026-10-02"
+commit = "b8462638a"
+old = ["U.2h", "T06c.1"]
+
+[[task]]
+id = "D03.2"
+title = "飞行弹幕里的表情图片"
+type = "功能"
+status = "完成"
+date = "2026-10-02"
+commit = "cd42f89b1"
+old = ["F.2c", "T06c.2"]
+
+[[task]]
+id = "D04.1"
+title = "弹幕性能和可读性：每帧最多刷新一次、聊天列表反转、昵称对比度"
+type = "性能"
+status = "待真机"
+date = "2026-10-02"
+commit = "463115797"
+old = ["B08", "T06d.3"]
+
+[[task]]
+id = "D05.1"
+title = "弹幕设置生效：弹幕帧率、字体、纯文字模式"
+type = "功能"
+status = "完成"
+date = "2026-10-02"
+commit = "b8462638a"
+old = ["F.2a", "T06e.1"]
+
+[[task]]
+id = "D06.1"
+title = "弹幕功能余项：功能清点里弹幕部分的 3 项缺失、2 项有问题"
+type = "功能"
+status = "未开始"
+size = "中"
+tier = 2
+old = ["T06c.4"]
+
+[[task]]
+id = "E01.1"
+title = "哔哩哔哩"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "d5ed42a5d"
+old = ["M4.01", "M4.U.1", "T02a.1"]
+
+[[task]]
+id = "E01.2"
+title = "斗鱼"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "dc09e6d8e"
+old = ["M4.02", "M4.U.2", "T02a.2"]
+
+[[task]]
+id = "E01.3"
+title = "虎牙"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "c1a82891f"
+old = ["M4.03", "M4.U.3", "T02a.3"]
+
+[[task]]
+id = "E01.4"
+title = "抖音"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "6b4a3d35b"
+old = ["M4.04", "M4.U.4", "T02a.4"]
+
+[[task]]
+id = "E01.5"
+title = "快手"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "944c67f40"
+old = ["M4.05", "M4.U.5", "T02a.5"]
+
+[[task]]
+id = "E01.6"
+title = "国内五大平台巡检和修复（持续）"
+type = "平台"
+status = "未开始"
+size = "中"
+tier = 1
+old = ["T02a.6"]
+stages = ["写巡检清单", "逐个平台跑一遍", "修复失效的"]
+done = 0
+
+[[task]]
+id = "E02.1"
+title = "YY 直播"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "df90a0156"
+old = ["M4.06", "M4.U.6", "T02b.1"]
+
+[[task]]
+id = "E02.2"
+title = "网易 CC"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "480454577"
+old = ["M4.09", "M4.U.9", "T02b.2"]
+
+[[task]]
+id = "E02.3"
+title = "AcFun 直播"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "fc70af736"
+old = ["M4.10", "M4.U.10", "T02b.3"]
+
+[[task]]
+id = "E02.4"
+title = "猫耳 FM"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "8674cb62f"
+old = ["M4.13", "M4.U.13", "T02b.4"]
+
+[[task]]
+id = "E02.5"
+title = "映客"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "656194b3f"
+old = ["M4.14", "M4.U.14", "T02b.5"]
+
+[[task]]
+id = "E02.6"
+title = "克拉克拉"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "c50732382"
+old = ["M4.15", "M4.U.15", "T02b.6"]
+
+[[task]]
+id = "E02.7"
+title = "小红书"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "3982eaa0e"
+old = ["M4.16", "M4.U.16", "T02b.7"]
+
+[[task]]
+id = "E02.8"
+title = "微博直播"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "d104f69e9"
+old = ["M4.18", "M4.U.18", "T02b.8"]
+
+[[task]]
+id = "E02.9"
+title = "京东直播"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "9d36d0852"
+old = ["M4.28", "M4.U.28", "T02b.9"]
+
+[[task]]
+id = "E02.10"
+title = "酷狗直播"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "f80083fe2"
+old = ["M4.29", "M4.U.29", "T02b.10"]
+
+[[task]]
+id = "E02.11"
+title = "百度直播"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "4971f23cc"
+old = ["M4.30", "M4.U.30", "T02b.11"]
+
+[[task]]
+id = "E02.12"
+title = "六间房"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "98c644829"
+old = ["M4.31", "M4.U.31", "T02b.12"]
+
+[[task]]
+id = "E02.13"
+title = "LOOK 直播"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "7761b780a"
+old = ["M4.32", "M4.U.32", "T02b.13"]
+
+[[task]]
+id = "E03.1"
+title = "SOOP"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "71fbb1982"
+old = ["M4.07", "M4.U.7", "T02c.1"]
+
+[[task]]
+id = "E03.2"
+title = "Twitch"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "a312c7267"
+old = ["M4.08", "M4.U.8", "T02c.2"]
+
+[[task]]
+id = "E03.3"
+title = "Picarto"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "b8bcd1eb3"
+old = ["M4.11", "M4.U.11", "T02c.3"]
+
+[[task]]
+id = "E03.4"
+title = "TwitCasting"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "2badf4756"
+old = ["M4.12", "M4.U.12", "T02c.4"]
+
+[[task]]
+id = "E03.5"
+title = "niconico"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "5442c7303"
+old = ["M4.17", "M4.U.17", "T02c.5"]
+
+[[task]]
+id = "E03.6"
+title = "SHOWROOM"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "eaca04cc0"
+old = ["M4.19", "M4.U.19", "T02c.6"]
+
+[[task]]
+id = "E03.7"
+title = "CHZZK"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "be431b915"
+old = ["M4.20", "M4.U.20", "T02c.7"]
+
+[[task]]
+id = "E03.8"
+title = "LiveMe"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "6fe261aa8"
+old = ["M4.21", "M4.U.21", "T02c.8"]
+
+[[task]]
+id = "E03.9"
+title = "TikTok"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "1ea332247"
+old = ["M4.22", "M4.U.22", "T02c.9"]
+
+[[task]]
+id = "E03.10"
+title = "YouTube"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "af6e14961"
+old = ["M4.23", "M4.U.23", "T02c.10"]
+
+[[task]]
+id = "E03.11"
+title = "BIGO LIVE"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "b336f2d27"
+old = ["M4.24", "M4.U.24", "T02c.11"]
+
+[[task]]
+id = "E03.12"
+title = "PandaTV"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "c33ee7611"
+old = ["M4.25", "M4.U.25", "T02c.12"]
+
+[[task]]
+id = "E03.13"
+title = "FC2 LIVE"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "eb7cd2497"
+old = ["M4.26", "M4.U.26", "T02c.13"]
+
+[[task]]
+id = "E03.14"
+title = "Steam 直播"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "9965e3c7f"
+old = ["M4.27", "M4.U.27", "T02c.14"]
+
+[[task]]
+id = "E03.15"
+title = "17LIVE"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "0141660c6"
+old = ["M4.33", "M4.U.33", "T02c.15"]
+
+[[task]]
+id = "E03.16"
+title = "Kick（恢复，仅 Android）"
+type = "平台"
+status = "完成"
+date = "2026-10-01"
+commit = "6c68f0010"
+old = ["M4.34", "T02c.16"]
+
+[[task]]
+id = "E04.1"
+title = "平台框架与链接解析：站点注册、链接工具和短链"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "e49c4bdd3"
+old = ["M3", "T02d.1"]
+
+[[task]]
+id = "E05.1"
+title = "基础模型与接口"
+type = "平台"
+status = "完成"
+date = "2026-09-28"
+commit = "50d4f9bdb"
+old = ["M2", "T02g.1"]
+
+[[task]]
+id = "E05.2"
+title = "模型扩展：开播时间、受限类型、轮播和不可播放状态、房间身份"
+type = "平台"
+status = "完成"
+date = "2026-09-29"
+commit = "87bc61dfc"
+old = ["M2.1", "T02g.2"]
+
+[[task]]
+id = "E05.3"
+title = "房间详情补齐时连封面一起补（fillFromDetail 漏了封面，观看记录等处封面变空）"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+old = ["T02g.3"]
+note = "上游 pure_live fa67c637f、pure_live_TV 5bc53016 修了同一个问题"
+
+[[task]]
+id = "E06.1"
+title = "已批准升级的余项（UPGRADES 回填、平台层和弹幕层、列表、数据、文字）"
+type = "平台"
+status = "完成"
+date = "2026-10-02"
+commit = "069be46e4"
+old = ["F.5a", "F.5a1", "T02f.1"]
+
+[[task]]
+id = "E06.2"
+title = "平台层新数据接到界面：哔哩哔哩轮播、17LIVE 名字颜色和徽章、酷狗 PK 标签、Twitch Cookie 提示和编码、恢复后的实际清晰度、FC2 接手"
+type = "功能"
+status = "暂停"
+size = "中"
+tier = 2
+old = ["F01", "T02f.2"]
+stages = ["哔哩哔哩轮播", "名字颜色和徽章", "酷狗 PK", "Twitch", "实际清晰度", "FC2"]
+done = 0
+next = "按任务书从头做；旧工作区里的半成品可参考"
+branch = "worktree-agent-af6f5e80c4e19804f（半成品，未提交）"
+
+[[task]]
+id = "E07.1"
+title = "平台巡检工具：定期用真实接口跑播放地址、搜索、分区，失效报出来"
+type = "平台"
+status = "未开始"
+size = "中"
+tier = 1
+old = ["T02e.1"]
+stages = ["定检查项", "写工具", "跑一遍并记录"]
+done = 0
+
+[[task]]
+id = "G01.1"
+title = "播放核心：media_kit 分支和取流管线"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "b4fb966e8"
+old = ["M7.1", "T04a.1"]
+
+[[task]]
+id = "G02.1"
+title = "播放器：会话、恢复、Flutter 绑定"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "4e8cd6c67"
+old = ["M7.2", "T04b.1"]
+
+[[task]]
+id = "G02.2"
+title = "缓冲状态对账：画面帧在走时补回“播放中”，不再被当成卡住去重连"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+old = ["T04b.2"]
+note = "参考 media_core 44710e1、2edc721"
+
+[[task]]
+id = "G03.1"
+title = "起播速度和弱网：测首帧时间，找出慢的环节，改进后真机对比"
+type = "性能"
+status = "未开始"
+size = "中"
+tier = 1
+old = ["T04c.1"]
+stages = ["测量现状", "找出慢的环节", "改进", "真机对比"]
+done = 0
+
+[[task]]
+id = "G04.1"
+title = "竖屏流的画面比例预判（抖音竖屏起播不跳）"
+type = "功能"
+status = "完成"
+date = "2026-10-02"
+commit = "7b37e6f5f"
+old = ["F.1b", "T04d.1"]
+
+[[task]]
+id = "H01.1"
+title = "录制内核"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "833e570ce"
+old = ["M8", "T08a.1"]
+
+[[task]]
+id = "H01.2"
+title = "录制补全"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "8c043873d"
+old = ["M8.1", "T08a.2"]
+
+[[task]]
+id = "H01.3"
+title = "合并进度：录制中心和录制面板显示合成 MP4 的进度"
+type = "功能"
+status = "完成"
+date = "2026-10-02"
+commit = "d145aa930"
+old = ["F.3a", "T08a.3"]
+
+[[task]]
+id = "H01.4"
+title = "录制余项：功能清点里录制部分的 1 项缺失、5 项没验证"
+type = "功能"
+status = "未开始"
+size = "中"
+tier = 2
+old = ["T08a.4"]
+
+[[task]]
+id = "H01.5"
+title = "主播下播后不再无限快速重试；合并时跳过 0 字节分段，有一段有效就能合并"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 1
+old = ["T08a.5"]
+stages = ["EOF 重试设上限后转入等开播", "合并跳过空分段"]
+done = 0
+note = "上游 pure_live 2b9ffc7a3 修了同一个问题；现在一个空分段会让整段录像合并失败"
+
+[[task]]
+id = "H02.1"
+title = "录制中心与录制设置（含录制接入）"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "de14b3c8e"
+old = ["M13.15", "T08b.1"]
+
+[[task]]
+id = "H05.1"
+title = "录制通知按状态写标题，“录制已停止”提醒换新图标"
+type = "功能"
+status = "待真机"
+date = "2026-10-02"
+commit = "79ecb5d2b"
+old = ["T08e.1"]
+
+[[task]]
+id = "H05.2"
+title = "只录一个直播间时，点前台录制通知也定位到那条任务"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 3
+old = ["T08e.2"]
+
+[[task]]
+id = "I01.1"
+title = "应用骨架：入口、路由、首页外壳、多语言、Android 和 Windows 原生部分"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "6e2376d6e"
+old = ["M12", "T07a.1"]
+
+[[task]]
+id = "I01.2"
+title = "共用模块和应用外壳接线"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "cc48756fb"
+old = ["M12.2", "T07a.2"]
+
+[[task]]
+id = "I01.3"
+title = "应用服务补全"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "0e4ecb34e"
+old = ["M12.4", "T07a.3"]
+
+[[task]]
+id = "I02.1"
+title = "推荐首页"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "414996596"
+old = ["M13.1", "T07b.1"]
+
+[[task]]
+id = "I03.1"
+title = "分区：分区列表、分区房间、热门分区"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "023936ebe"
+old = ["M13.5", "T07c.1"]
+
+[[task]]
+id = "I04.1"
+title = "关注"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "dc167d266"
+old = ["M13.2", "T07e.1"]
+
+[[task]]
+id = "I05.1"
+title = "搜索"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "b8b1ec18f"
+old = ["M13.4", "T07f.1"]
+
+[[task]]
+id = "I06.1"
+title = "观看历史"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "070024e43"
+old = ["M13.6", "T07g.1"]
+
+[[task]]
+id = "I07.1"
+title = "分组与屏蔽"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "caebee14d"
+old = ["M13.9", "T07h.1"]
+
+[[task]]
+id = "I08.1"
+title = "小页面：工具箱、远程接收、关于、版本、启动页"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "d5a0a060a"
+old = ["M13.13", "T07i.1"]
+
+[[task]]
+id = "J01.1"
+title = "设置"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "9a90cbf6c"
+old = ["M13.7", "T09a.1"]
+
+[[task]]
+id = "J01.2"
+title = "设置项逐条核对（功能清点第 15 节）"
+type = "功能"
+status = "未开始"
+size = "中"
+tier = 2
+old = ["T09a.7"]
+
+[[task]]
+id = "J02.1"
+title = "存储、设置、备份、3.x 数据迁移（模块重构）"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "d2fbe3072"
+old = ["M9", "T09b.1"]
+
+[[task]]
+id = "J03.1"
+title = "备份与 WebDAV"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "1b730f77e"
+old = ["M13.10", "T09c.1"]
+
+[[task]]
+id = "J04.1"
+title = "WebDAV Digest 认证"
+type = "功能"
+status = "完成"
+date = "2026-10-02"
+commit = "c168fdb99"
+old = ["F.4b", "T09d.2"]
+
+[[task]]
+id = "J06.1"
+title = "3.x 数据迁移的真机验证（覆盖安装时用真实数据核对）"
+type = "验证"
+status = "未开始"
+size = "中"
+tier = 1
+old = ["F.4a", "T09f.1"]
+stages = ["准备装着 3.x 和真实数据的手机", "覆盖安装 4.x", "逐项核对关注、历史、设置、账号"]
+done = 0
+
+[[task]]
+id = "K01.1"
+title = "账号与登录"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "e5ae55fbf"
+old = ["M13.8", "T10a.1"]
+
+[[task]]
+id = "K02.1"
+title = "Cookie 和密码加密存储在真机上验证"
+type = "验证"
+status = "未开始"
+size = "小"
+tier = 2
+old = ["T10b.1"]
+
+[[task]]
+id = "L01.1"
+title = "网络电视内核"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "414fe49a6"
+old = ["M6", "T11a.1"]
+
+[[task]]
+id = "L01.2"
+title = "网络电视列表持久化"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "27385a999"
+old = ["M12.1", "T11a.2"]
+
+[[task]]
+id = "L01.3"
+title = "网络电视页面"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "abf627e86"
+old = ["M13.11", "T11a.3"]
+
+[[task]]
+id = "L03.1"
+title = "哔哩哔哩点播和音乐核心包"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "11d579e05"
+old = ["M14.0", "T11c.1"]
+
+[[task]]
+id = "N01.1"
+title = "多画面"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "6ac31a036"
+old = ["M13.12", "T12a.1"]
+
+[[task]]
+id = "N02.1"
+title = "投屏"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "a070b0ed4"
+old = ["M10", "T12c.1"]
+
+[[task]]
+id = "O02.1"
+title = "画中画复验：从画中画回来后控制条卡住的问题"
+type = "验证"
+status = "未开始"
+size = "小"
+tier = 2
+old = ["T13b.1"]
+
+[[task]]
+id = "O03.1"
+title = "插件接入和 Windows 桌面外壳"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "9ded26f50"
+old = ["M12.3", "T13c.1"]
+
+[[task]]
+id = "O03.2"
+title = "接回半成品：后台播放和助眠的权限、系统分享和打开方式、剪贴板口令、播放代理"
+type = "功能"
+status = "完成"
+date = "2026-10-02"
+commit = "8cf3c21b7"
+old = ["F.0a", "T13c.2"]
+
+[[task]]
+id = "O04.1"
+title = "Android 17 本地网络权限验证（要另找 Android 17 设备）"
+type = "验证"
+status = "未开始"
+size = "小"
+tier = 3
+old = ["T13d.1"]
+
+[[task]]
+id = "O05.1"
+title = "屏幕常亮跟随设置"
+type = "功能"
+status = "完成"
+date = "2026-10-02"
+commit = "b8462638a"
+old = ["F.1a", "T13e.1"]
+
+[[task]]
+id = "O05.2"
+title = "横屏全屏随手机方向翻转，开着旋转锁也翻（issue #36）"
+type = "功能"
+status = "待真机"
+date = "2026-10-02"
+commit = "3c1aa45ee"
+old = ["T13e.2"]
+
+[[task]]
+id = "O06.1"
+title = "预测返回在 ColorOS 14 上验证全面屏手势返回（上游在 GetX 上遇到卡死）"
+type = "验证"
+status = "未开始"
+size = "小"
+tier = 2
+old = ["T13f.1"]
+note = "上游 pure_live a424399e6 关掉了预测返回；4.x 用 go_router，不一定受影响"
+
+[[task]]
+id = "Q01.1"
+title = "网络：HTTP 客户端、拦截器、请求头策略、代理路由、WebSocket"
+type = "功能"
+status = "完成"
+date = "2026-09-28"
+commit = "9b70c640d"
+old = ["M1", "T03a.1"]
+
+[[task]]
+id = "Q01.2"
+title = "Brotli 解码（猫耳弹幕、哔哩哔哩 protover 3）"
+type = "功能"
+status = "完成"
+date = "2026-09-29"
+commit = "a2b5c0610"
+old = ["M1.1", "T03a.2"]
+
+[[task]]
+id = "Q04.1"
+title = "网络余项：功能清点里网络部分的 1 项缺失、1 项没验证"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+old = ["T03d.1"]
+
+[[task]]
+id = "R01.1"
+title = "基准测试和渲染开销：profile 基准、浮窗和转圈不再离屏绘制、图片缓存上限"
+type = "性能"
+status = "待真机"
+date = "2026-10-02"
+commit = "2ec6f598e"
+old = ["P05", "T14a.1"]
+
+[[task]]
+id = "R01.2"
+title = "在 K90 上跑基准，按数字决定封面圆角画法"
+type = "性能"
+status = "未开始"
+size = "小"
+tier = 2
+old = ["T14a.2"]
+stages = ["跑基准", "判定并记录"]
+done = 0
+
+[[task]]
+id = "R02.1"
+title = "刷新率和帧率匹配"
+type = "性能"
+status = "完成"
+date = "2026-10-02"
+commit = "b8462638a"
+old = ["U.2i", "T14b.1"]
+
+[[task]]
+id = "R02.2"
+title = "刷新率策略修正：播放中只用帧率声明、没有整数倍取最高、系统限速提示"
+type = "性能"
+status = "待真机"
+date = "2026-10-02"
+commit = "584da6662"
+old = ["P01", "T14b.2"]
+
+[[task]]
+id = "R03.1"
+title = "内存：长时间播放和快速滚动后内存稳定"
+type = "性能"
+status = "未开始"
+size = "中"
+tier = 3
+old = ["T14d.1"]
+
+[[task]]
+id = "R04.1"
+title = "启动速度：冷启动到首页可用的时间测量和优化"
+type = "性能"
+status = "未开始"
+size = "中"
+tier = 2
+old = ["T14e.1"]
+stages = ["测量", "改进", "真机对比"]
+done = 0
+
+[[task]]
+id = "R05.1"
+title = "耗电：播放 30 分钟耗电对比（省电档不高于 3.x）"
+type = "性能"
+status = "未开始"
+size = "中"
+tier = 3
+old = ["T14f.1"]
+
+[[task]]
+id = "S01.1"
+title = "远程同步测试改成等真实服务启动（负载高时随机失败）"
+type = "验证"
+status = "完成"
+date = "2026-10-02"
+commit = "661fa07ad"
+old = ["T15a.1"]
+
+[[task]]
+id = "S01.2"
+title = "测试覆盖清单：各包测试数和缺口"
+type = "验证"
+status = "未开始"
+size = "小"
+tier = 3
+old = ["T15a.2"]
+
+[[task]]
+id = "S02.1"
+title = "真机问题修复"
+type = "验证"
+status = "完成"
+date = "2026-10-01"
+commit = "f4cb41c68"
+old = ["M13.16", "T15b.1"]
+
+[[task]]
+id = "S02.2"
+title = "K90 冒烟：界面重构后把主流程走一遍"
+type = "验证"
+status = "完成"
+date = "2026-10-02"
+commit = "c8e72f34d"
+old = ["F.0b", "T15b.2"]
+
+[[task]]
+id = "S02.3"
+title = "K90 验证：看直播、录制、关注搜索分区历史账号"
+type = "验证"
+status = "完成"
+date = "2026-10-02"
+commit = "1f6270984"
+old = ["F.9", "F.9a", "F.9b", "F.9c", "T15b.3"]
+
+[[task]]
+id = "S02.4"
+title = "K90 验证：备份恢复、WebDAV、设备同步、扫码、应用内更新、字体、Twitch 和 Kick"
+type = "验证"
+status = "未开始"
+size = "中"
+tier = 2
+old = ["F.9d", "T15b.4"]
+
+[[task]]
+id = "S02.5"
+title = "4.0.0（构建号 5001）这一批改动的真机验证"
+type = "验证"
+status = "未开始"
+size = "中"
+tier = 1
+old = ["T15b.5"]
+stages = ["直播间（暂停、菜单、切换直播间、弹窗）", "弹幕和录制", "列表手感和刷新率", "设置和通知"]
+done = 0
+
+[[task]]
+id = "S03.1"
+title = "统一验证：所有界面和流程走一遍"
+type = "验证"
+status = "未开始"
+size = "大"
+tier = 2
+old = ["U.16", "T15c.1"]
+
+[[task]]
+id = "S04.1"
+title = "覆盖安装 3.x 验证（和 J06.1 一起做）"
+type = "验证"
+status = "未开始"
+size = "小"
+tier = 1
+old = ["T15d.1"]
+
+[[task]]
+id = "V01.1"
+title = "开播提醒（v3 没有的新功能，先出方案再定做不做）"
+type = "功能"
+status = "未开始"
+size = "中"
+tier = 3
+old = ["T07e.3"]
+stages = ["方案和对比页", "用户确认", "开发"]
+done = 0
+
+[[task]]
+id = "V01.2"
+title = "哔哩哔哩多账号：账号名册和切换（先出方案）"
+type = "功能"
+status = "未开始"
+size = "中"
+tier = 3
+old = ["T10a.4"]
+stages = ["方案和对比页", "开发"]
+done = 0
+note = "参考 pure_live_TV 6ba16c55"
+
+[[task]]
+id = "V01.3"
+title = "按住弹幕让它停住，松手继续"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 3
+old = ["T06c.5"]
+note = "参考 flame_barrage 3eddae8"
+
+[[task]]
+id = "V01.4"
+title = "同屏最大弹幕条数可以设置"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 3
+old = ["T06e.5"]
+note = "参考 pure_live_TV 9a7bb104"
+
+[[task]]
+id = "V01.5"
+title = "小窗拖角改尺寸、小窗尺寸设置、画中画里的弹幕随窗口缩放"
+type = "界面"
+status = "未开始"
+size = "中"
+tier = 3
+old = ["T05j.3"]
+stages = ["方案和对比页", "拖角改尺寸和尺寸设置", "弹幕缩放"]
+done = 0
+note = "参考上游 pure_live f9e03f446、582e355f7、b2cca41c7 和 media_core 的画中画系列"
+
+[[task]]
+id = "V01.6"
+title = "设备同步在发送、接收前先勾选同步哪些内容（保留配对码）"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 3
+old = ["T09e.2"]
+note = "参考上游 pure_live 9483ccf03"
+
+[[task]]
+id = "V02.1"
+title = "回复并关闭 issue #36、#37"
+type = "发布"
+status = "未开始"
+size = "小"
+tier = 1
+old = ["T16d.1"]
+
+[[task]]
+id = "V02.2"
+title = "用户 2026-10-02 提的问题 01～09（暂停图标、录制图标、横屏菜单、哔哩哔哩昵称、暂停时弹幕、切换直播间、点画面恢复播放、重复入口、全面分析）"
+type = "验证"
+status = "完成"
+date = "2026-10-02"
+from = "用户"
+to = ["A07.10", "A10.3", "A02.3", "D02.1", "D01.32", "A07.13", "A07.12", "A07.11"]
+
+[[task]]
+id = "V02.3"
+title = "issue #36：横屏全屏不随手机方向翻转"
+type = "验证"
+status = "完成"
+date = "2026-10-02"
+from = "GitHub issue #36"
+to = ["O05.2"]
+
+[[task]]
+id = "V02.4"
+title = "issue #37：切换直播间想要旧版小卡片，加新旧切换"
+type = "验证"
+status = "完成"
+date = "2026-10-02"
+from = "GitHub issue #37"
+to = ["A07.13"]
+
+[[task]]
+id = "V03.1"
+title = "全面审查（2026-10-02）：直播间、弹幕、录制等界面和功能问题"
+type = "验证"
+status = "完成"
+date = "2026-10-02"
+
+[[task]]
+id = "V03.2"
+title = "流畅度、刷新率、分辨率调研（2026-10-02）"
+type = "性能"
+status = "完成"
+date = "2026-10-02"
+
+[[task]]
+id = "V04.1"
+title = "还原哔哩哔哩访客看到的打码昵称（平台为隐私打码，见 D-013）"
+type = "功能"
+status = "不做"
+date = "2026-10-02"
+
+[[task]]
+id = "V04.2"
+title = "Anime4K 超分辨率（耗电和发热大）"
+type = "性能"
+status = "不做"
+date = "2026-10-03"
+from = "上游 pure_live d90f85468"
+
+[[task]]
+id = "V04.3"
+title = "云端会话做任务（见 D-014）"
+type = "工程"
+status = "不做"
+date = "2026-10-02"
+
+[[task]]
+id = "W01.1"
+title = "2026-10-03 上游对照：pure_live 271 个、pure_live_TV 167 个、media_core 66 个提交"
+type = "工程"
+status = "完成"
+date = "2026-10-03"
+commit = "d54772d54"
+
+[[task]]
+id = "W01.2"
+title = "上游跟踪：每周看一次 pure_live、pure_live_TV、media_core、flame_barrage、flv_lzc 的新提交，结论写进 W01 的对照记录"
+type = "工程"
+status = "未开始"
+size = "小"
+tier = 2
+old = ["T00a.3"]
+
+[[task]]
+id = "W02.1"
+title = "把手机版 pure_live 加进参考仓库：主仓库远程 upstream（不拉标签）"
+type = "工程"
+status = "完成"
+date = "2026-10-03"
+
+[[task]]
+id = "X01.1"
+title = "键盘鼠标操作核对"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 3
+old = ["T17b.1"]
+
+[[task]]
+id = "X01.2"
+title = "Windows 专属功能（功能清点第 13 节的 14 项）"
+type = "功能"
+status = "未开始"
+size = "大"
+tier = 3
+old = ["T17c.1"]
+
+[[task]]
+id = "X01.3"
+title = "Windows 安装包和自动更新"
+type = "发布"
+status = "未开始"
+size = "中"
+tier = 3
+old = ["T17d.1"]
+
+[[task]]
+id = "X02.1"
+title = "Linux 构建和打包"
+type = "发布"
+status = "未开始"
+size = "中"
+tier = 3
+old = ["T17e.1"]
+
+[[task]]
+id = "X03.1"
+title = "电视外壳、焦点导航、直播浏览、基本直播间"
+type = "功能"
+status = "完成"
+date = "2026-10-01"
+commit = "781586ff7"
+old = ["M14.1", "T18a.1"]
+
+[[task]]
+id = "X04.1"
 title = "苹果平台的构建和签名"
 type = "发布"
 status = "未开始"
 size = "中"
 tier = 3
-# ---- 2026-10-03 上游对照（docs/T00/upstream-2026-10-03.md）登记的任务
+old = ["T19c.1"]
 
 [[task]]
-id = "T00a.3"
-title = "上游跟踪：每周看一次 pure_live、pure_live_TV、media_core、flame_barrage、flv_lzc 的新提交，结论写进 T00 的上游对照"
+id = "Y01.1"
+title = "4.0.0 发布前修复"
+type = "发布"
+status = "完成"
+date = "2026-10-02"
+commit = "c5bc87666"
+old = ["T16a.1"]
+
+[[task]]
+id = "Y01.2"
+title = "4.0.0 发布（Android）"
+type = "发布"
+status = "完成"
+date = "2026-10-02"
+old = ["T16a.2"]
+
+[[task]]
+id = "Y01.3"
+title = "4.0.0 覆盖发布为构建号 5001"
+type = "发布"
+status = "完成"
+date = "2026-10-02"
+commit = "e3f644d67"
+old = ["T16a.3"]
+
+[[task]]
+id = "Y01.4"
+title = "正式签名方案（现在用维护者调试密钥，和 3.x 同一证书）"
+type = "发布"
+status = "未开始"
+size = "小"
+tier = 3
+old = ["T16a.4"]
+
+[[task]]
+id = "Y02.1"
+title = "同版本换包时应用内收不到更新提示：以后发布一律改版本号，或让比较带上构建号"
+type = "发布"
+status = "未开始"
+size = "小"
+tier = 2
+old = ["T16b.1"]
+
+[[task]]
+id = "Y03.1"
+title = "README 和 4.0.0 发布说明"
+type = "发布"
+status = "完成"
+date = "2026-10-02"
+old = ["T16c.1"]
+
+[[task]]
+id = "Y04.1"
+title = "隐私说明写进 README：不收集数据、样本脱敏规则"
+type = "发布"
+status = "未开始"
+size = "小"
+tier = 3
+old = ["T16e.1"]
+
+[[task]]
+id = "Z01.1"
+title = "工程底座：工具链、门禁、代码规范"
+type = "工程"
+status = "完成"
+date = "2026-09-28"
+commit = "4aaeb0fda"
+old = ["M0", "T00a.1"]
+
+[[task]]
+id = "Z01.2"
+title = "例行依赖升级检查（每月用 check_latest 查一次，升级后跑门禁）"
+type = "工程"
+status = "未开始"
+size = "小"
+tier = 3
+old = ["T00a.2"]
+
+[[task]]
+id = "Z02.1"
+title = "搬目录：界面代码按 v3 模块分目录，门禁加“界面结构”检查"
+type = "工程"
+status = "完成"
+date = "2026-10-01"
+old = ["U.0", "T00b.1"]
+
+[[task]]
+id = "Z02.2"
+title = "门禁加“文档”检查：生成文件是否最新、链接和代码里的文档路径是否有效"
+type = "工程"
+status = "完成"
+date = "2026-10-02"
+old = ["T00b.2"]
+
+[[task]]
+id = "Z03.1"
+title = "界面清点脚本：v3 和电视的每个界面文件都分到一个任务"
+type = "工程"
+status = "完成"
+date = "2026-10-01"
+old = ["T00c.1"]
+
+[[task]]
+id = "Z03.2"
+title = "项目清点脚本：代码文件、功能点、设置项、平台、原生插件都归到子分类，没归的报错"
+type = "工程"
+status = "未开始"
+size = "中"
+tier = 2
+old = ["T00c.2"]
+stages = ["定规则和路径表", "写脚本", "接进门禁"]
+done = 0
+
+[[task]]
+id = "Z03.3"
+title = "界面清点脚本改用新编号（现在输出 U 开头的旧编号）"
+type = "工程"
+status = "未开始"
+size = "小"
+tier = 2
+old = ["T00c.3"]
+
+[[task]]
+id = "Z04.1"
+title = "装机和截图助手进仓库：K90 截图、带前台检查的点按"
+type = "工程"
+status = "未开始"
+size = "小"
+tier = 3
+old = ["T00d.1"]
+
+[[task]]
+id = "Z05.1"
+title = "翻译键：列出运行时拼出来的键，再清理不用的键（18 个）"
+type = "工程"
+status = "未开始"
+size = "小"
+tier = 3
+old = ["T00e.1"]
+stages = ["列出拼接键", "核对 18 个键", "删除并跑全部测试"]
+done = 0
+
+[[task]]
+id = "Z06.1"
+title = "docs 重写为 20 组：登记表、总进度、生成脚本、模板"
+type = "文档"
+status = "完成"
+date = "2026-10-02"
+old = ["T00f.1"]
+
+[[task]]
+id = "Z06.2"
+title = "docs v1：20 组按优先级重排（界面设计第一），字母加中文文件夹，新增需求和反馈、上游借鉴、定期维护"
+type = "文档"
+status = "完成"
+date = "2026-10-03"
+
+[[task]]
+id = "Z07.1"
+title = "每月：清理已合并的分支和工作区（含暂停任务确认后的旧工作区）、本机中间文件"
 type = "工程"
 status = "未开始"
 size = "小"
 tier = 2
 
 [[task]]
-id = "T02g.3"
-title = "房间详情补齐时连封面一起补（fillFromDetail 漏了封面，观看记录等处封面变空）"
-type = "功能"
+id = "Z07.2"
+title = "每次发布后：更新 STATUS 的待真机、版本路线、发布说明和 README"
+type = "文档"
 status = "未开始"
 size = "小"
 tier = 2
-note = "上游 pure_live fa67c637f、pure_live_TV 5bc53016 修了同一个问题"
 
 [[task]]
-id = "T04b.2"
-title = "缓冲状态对账：画面帧在走时补回“播放中”，不再被当成卡住去重连"
-type = "功能"
-status = "未开始"
-size = "小"
-tier = 2
-note = "参考 media_core 44710e1、2edc721"
-
-[[task]]
-id = "T05f.4"
-title = "画面上下滑避开系统底部手势区：上滑回桌面时不再误调亮度或音量"
-type = "功能"
-status = "未开始"
-size = "小"
-tier = 2
-note = "参考上游 pure_live 1cdcb7b2a；用系统给的手势区高度"
-
-[[task]]
-id = "T05j.3"
-title = "小窗拖角改尺寸、小窗尺寸设置、画中画里的弹幕随窗口缩放"
-type = "界面"
-status = "未开始"
-size = "中"
-tier = 3
-stages = ["方案和对比页", "拖角改尺寸和尺寸设置", "弹幕缩放"]
-done = 0
-note = "参考上游 pure_live f9e03f446、582e355f7、b2cca41c7 和 media_core 的画中画系列"
-
-[[task]]
-id = "T06c.5"
-title = "按住弹幕让它停住，松手继续"
-type = "功能"
+id = "Z07.3"
+title = "每季度：复查文档和决定（过时的规则、被取代的决定、没人管的子分类）"
+type = "文档"
 status = "未开始"
 size = "小"
 tier = 3
-note = "参考 flame_barrage 3eddae8"
-
-[[task]]
-id = "T06e.5"
-title = "同屏最大弹幕条数可以设置"
-type = "功能"
-status = "未开始"
-size = "小"
-tier = 3
-note = "参考 pure_live_TV 9a7bb104"
-
-[[task]]
-id = "T08a.5"
-title = "主播下播后不再无限快速重试；合并时跳过 0 字节分段，有一段有效就能合并"
-type = "功能"
-status = "未开始"
-size = "小"
-tier = 1
-stages = ["EOF 重试设上限后转入等开播", "合并跳过空分段"]
-done = 0
-note = "上游 pure_live 2b9ffc7a3 修了同一个问题；现在一个空分段会让整段录像合并失败"
-
-[[task]]
-id = "T09e.2"
-title = "设备同步在发送、接收前先勾选同步哪些内容（保留配对码）"
-type = "功能"
-status = "未开始"
-size = "小"
-tier = 3
-note = "参考上游 pure_live 9483ccf03"
-
-[[task]]
-id = "T10a.4"
-title = "哔哩哔哩多账号：账号名册和切换（先出方案）"
-type = "功能"
-status = "未开始"
-size = "中"
-tier = 3
-stages = ["方案和对比页", "开发"]
-done = 0
-note = "参考 pure_live_TV 6ba16c55"
-
-[[task]]
-id = "T13f.1"
-title = "预测返回在 ColorOS 14 上验证全面屏手势返回（上游在 GetX 上遇到卡死）"
-type = "验证"
-status = "未开始"
-size = "小"
-tier = 2
-note = "上游 pure_live a424399e6 关掉了预测返回；4.x 用 go_router，不一定受影响"

@@ -36,7 +36,7 @@ void showRecordPanel(BuildContext context, {required LiveRoom Function() room}) 
   );
 }
 
-/// The record panel (docs/T05/T05g/T05g.1, 录制, confirmed): "录制" with
+/// The record panel (docs/A-界面设计/A07-直播间界面/A07.6-直播间弹窗, 录制, confirmed): "录制" with
 /// "录制中心 ›" and ✕; the status card, "这次录制", "自动录", then
 /// "录制设置 ›" and where files go. Under the picture in portrait, on the
 /// right otherwise; the picture keeps playing. It replaces 3.x's dialog of

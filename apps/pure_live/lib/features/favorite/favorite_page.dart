@@ -23,7 +23,7 @@ import 'package:pure_live/shared/rooms/room_menu.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The page width from which the platform tabs join the status tabs in the
-/// app bar (docs/T07/T07e/T07e.2 c3, choice C3).
+/// app bar (docs/A-界面设计/A09-浏览界面/A09.3-关注 c3, choice C3).
 const double favoriteOneRowWidth = 840;
 
 /// The smallest large card when "compact mode" is off (U.4c c6: one column
@@ -33,7 +33,7 @@ const double favoriteLargeCardMinWidth = 300;
 /// The smallest row of the offline tab on wide screens (U.4c c5).
 const double favoriteRowMinWidth = 320;
 
-/// Follows (3.x `lib/modules/favorite`, docs/T07/T07e/T07e.2): the live,
+/// Follows (3.x `lib/modules/favorite`, docs/A-界面设计/A09-浏览界面/A09.3-关注): the live,
 /// replay and offline tabs where the title would be, the platform tabs
 /// ("all" and every platform with follows) and the tag strip, and one grid
 /// per platform (swipe between them).

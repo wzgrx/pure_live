@@ -12,7 +12,7 @@
 1. **行为不变**：重构前后对照 3.x 的行为，依据是 3.x 原有的测试、平台接口样本和真机。
 2. **先找根因**：每个问题写清根因（文件:行）再动手。
 3. **不照搬**：3.x 的代码是起点，GetX、全局单例、界面线程上的重活等结构问题在各自的任务里一并改掉。
-4. **最新稳定版**：工具链和依赖用最新稳定版，升级时连同本机环境一起验证（[T00a](../T00/T00a/README.md)）。
+4. **最新稳定版**：工具链和依赖用最新稳定版，升级时连同本机环境一起验证（[W01](../W-上游借鉴/W01-定期对照/README.md)）。
 5. **参考上游**：做相关任务前先更新并阅读第 5 节的参考仓库，借鉴代码时注明来源。
 
 ## 3. 工程底座
@@ -52,25 +52,25 @@ apps/pure_live
 tools/live_cli（平台探针、样本录制）、tools/check_latest、tools/gate、tools/docs
 ```
 
-每个包归哪个组见 [README.md](../README.md#20-组)。
+每个包归哪个组见 [README.md](../README.md#20-组按优先级)。
 
 ## 5. 参考仓库
 
 | 仓库 | 许可证 | 用途 |
 |---|---|---|
 | [liuchuancong/pure_live](https://github.com/liuchuancong/pure_live) | AGPL-3.0 | 3.x 的上游，在 v3.2.11 上接着开发：平台、录制、播放的修复（主仓库的远程 `upstream`，不拉标签） |
-| [liuchuancong/pure_live_TV](https://github.com/liuchuancong/pure_live_TV) | AGPL-3.0 | 电视端的代码基础（T18）；平台层的新修复（T02、T06），例如 Kick |
-| [liuchuancong/flame_barrage](https://github.com/liuchuancong/flame_barrage) | MIT | 弹幕渲染和交互（T06c） |
-| [liuchuancong/media_core](https://github.com/liuchuancong/media_core) | AGPL-3.0 | 播放器会话、恢复、池化、系统媒体控制（T04、T12） |
-| [liuchuancong/flv_lzc](https://github.com/liuchuancong/flv_lzc) | MIT | FLV 和 H.265 的低延迟经验（T04） |
+| [liuchuancong/pure_live_TV](https://github.com/liuchuancong/pure_live_TV) | AGPL-3.0 | 电视端的代码基础（X）；平台层的新修复（E、D），例如 Kick |
+| [liuchuancong/flame_barrage](https://github.com/liuchuancong/flame_barrage) | MIT | 弹幕渲染和交互（A08） |
+| [liuchuancong/media_core](https://github.com/liuchuancong/media_core) | AGPL-3.0 | 播放器会话、恢复、池化、系统媒体控制（G、N） |
+| [liuchuancong/flv_lzc](https://github.com/liuchuancong/flv_lzc) | MIT | FLV 和 H.265 的低延迟经验（G） |
 | 之前从零写的版本（分支 `archive/v4`） | AGPL-3.0 | 已写好并测过的各包实现，按任务借鉴 |
 
-本机副本在 `~/ref/`，对照笔记在 `~/ref/notes/`；每次对照的结论写进 [T00 的上游对照](../T00/README.md)（例如 `upstream-2026-10-03.md`）。AGPL-3.0 的代码借鉴时注明来源仓库和提交；MIT 的保留版权声明。
+本机副本在 `~/ref/`，对照笔记在 `~/ref/notes/`；每次对照的结论写进 [Z 的上游对照](../Z-工程文档和维护/README.md)（例如 `upstream-2026-10-03.md`）。AGPL-3.0 的代码借鉴时注明来源仓库和提交；MIT 的保留版权声明。
 
 ## 6. 测试包和正式包
 
 - **测试包**：Android 包名加 `.v4dev`（`com.mystyle.purelive.v4dev`，debug 和 profile 构建），和用户手机上的正式包并存，不碰正式包和它的数据。Windows 测试版放在工作目录，不碰 `D:\Soft` 下的安装。
-- **正式包**：包名 `com.mystyle.purelive`，覆盖安装 3.x，数据由迁移保留（[T09f](../T09/T09f/README.md)）；发布步骤见 [PROCESS.md](../PROCESS.md) 第 9 节。
+- **正式包**：包名 `com.mystyle.purelive`，覆盖安装 3.x，数据由迁移保留（[J06](../J-设置和数据/J06-3.x数据迁移/README.md)）；发布步骤见 [PROCESS.md](../PROCESS.md) 第 11 节。
 
 ## 7. 代码规则
 

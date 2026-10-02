@@ -18,7 +18,7 @@ import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/room_prompt.dart';
 
 /// What comes into the app from the system, in the main window (M12.5 →
-/// F.0a, docs/T13/T13a/T13a.1): shares, "open with", launcher shortcuts and
+/// F.0a, docs/A-界面设计/A14-系统界面/A14.1-系统界面): shares, "open with", launcher shortcuts and
 /// notification taps (Android, [ShareIntake]); share codes on the
 /// clipboard (every platform as 3.x, [ClipboardRoomWatcher]); the recent
 /// rooms behind the launcher icon (U.14 c15) and the system splash

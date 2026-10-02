@@ -17,7 +17,7 @@ abstract final class QrColors {
 /// A QR code of [data] painted module by module (3.x `QrCodeWidget`, the
 /// Bilibili login code), low error correction: black on white in every
 /// theme (scanners read it), a 12-point quiet zone, 12-point corners
-/// (docs/T01/T01c/T01c.1 c11; 3.x had square and round codes).
+/// (docs/A-界面设计/A02-组件/A02.1-通用组件 c11; 3.x had square and round codes).
 class QrCodeWidget extends StatelessWidget {
   /// Creates the code.
   const new({
@@ -91,7 +91,7 @@ enum QrCodeStatus {
   done,
 }
 
-/// The QR code in its card (docs/T01/T01c/T01c.1 c11): the code on the
+/// The QR code in its card (docs/A-界面设计/A02-组件/A02.1-通用组件 c11): the code on the
 /// `surfaceContainerLow` card (16-point corners); every state is laid over
 /// the code in its place, so nothing below it moves (3.x swapped the code
 /// for text). The veil is always white like the code; [message] says what

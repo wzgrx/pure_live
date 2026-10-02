@@ -236,7 +236,7 @@ class _FilePathDialogState extends State<_FilePathDialog> {
 }
 
 /// Asks whether to replace the saved playlist or guide [name] (3.x
-/// "该订阅名称已存在"; docs/T11/T11a/T11a.4 "已有同名播放列表").
+/// "该订阅名称已存在"; docs/A-界面设计/A13-网络电视和多画面界面/A13.1-网络电视管理 "已有同名播放列表").
 Future<bool> confirmReplace(BuildContext context, String name, IptvImportKind kind) => showAppConfirmDialog(
   context: context,
   title: i18n(kind == IptvImportKind.playlist ? 'iptv_replace_playlist_title' : 'iptv_replace_guide_title'),
@@ -425,7 +425,7 @@ class _NetworkImportDialogState extends State<IptvNetworkImportDialog> {
 }
 
 /// Imports pasted playlist text (3.x `importFromWebString`, used by shared
-/// text; here also by hand, docs/T11/T11a/T11a.4 c9). The name is required:
+/// text; here also by hand, docs/A-界面设计/A13-网络电视和多画面界面/A13.1-网络电视管理 c9). The name is required:
 /// the text has no file name.
 class IptvTextImportDialog extends StatefulWidget {
   /// Creates the dialog.

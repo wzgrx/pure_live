@@ -3,7 +3,7 @@ import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/widgets/focus_ring.dart';
 import 'package:live_ui/src/widgets/scrollable_tab_bar.dart';
 
-/// A tab's content (docs/T01/T01c/T01c.1 c12): the label, optionally a
+/// A tab's content (docs/A-界面设计/A02-组件/A02.1-通用组件 c12): the label, optionally a
 /// number after it (tabular, in the tab's colour; the follows' states and
 /// platforms, U.4c c4) or a badge (a count on the primary colour, U.2e's
 /// super chats); the label is never cut: on a very narrow bar the whole tab
@@ -71,7 +71,7 @@ class TabLabel extends StatelessWidget {
   }
 }
 
-/// The second row of tabs under the first (docs/T01/T01c/T01c.1 c12, U.4d
+/// The second row of tabs under the first (docs/A-界面设计/A02-组件/A02.1-通用组件 c12, U.4d
 /// c2): 14 points, the selected one dark and semi-bold, the others in the
 /// variant ink; the indicator under the whole tab; a line under the row;
 /// from the left; scrolls with the wheel and the mouse like

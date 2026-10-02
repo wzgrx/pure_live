@@ -1,4 +1,4 @@
-/// Recording core of Pure Live (docs/T08/T08a/T08a.1/record.md): record tasks
+/// Recording core of Pure Live (docs/H-录制/H01-录制核心/H01.1-录制内核/record.md): record tasks
 /// and their queue, stream selection, inputs through live_media's loopback
 /// relay, FFmpeg capture into clock-v1 segments and their MP4 join behind
 /// an injected [FfmpegRunner], retries, lease renewal, live checks,

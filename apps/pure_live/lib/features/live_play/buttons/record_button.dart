@@ -15,10 +15,10 @@ import 'package:pure_live/shared/record/record_look.dart';
 import 'package:pure_live/shared/record/record_state.dart';
 
 /// The record button of the room bar (3.x `RecordActionButton`): its glyph
-/// is the room's recording state (docs/T08/T08b/T08b.3: not recording,
+/// is the room's recording state (docs/A-界面设计/A10-录制界面/A10.3-录制按钮和状态图标: not recording,
 /// waiting, preparing, recording, reconnecting, joining, failed; red only
 /// while a file is written); a tap opens the record panel
-/// (docs/T05/T05g/T05g.1), which replaced 3.x's dialog of five actions.
+/// (docs/A-界面设计/A07-直播间界面/A07.6-直播间弹窗), which replaced 3.x's dialog of five actions.
 /// Hidden where this build cannot record.
 class RecordButton extends ConsumerStatefulWidget {
   /// Creates the button for [room].

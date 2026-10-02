@@ -14,7 +14,7 @@ enum TvButtonKind {
   danger,
 }
 
-/// A pill button of the TV interface (docs/T18/T18a/T18a.2, parts 1): the
+/// A pill button of the TV interface (docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件, parts 1): the
 /// highest surface container, the words in the colour of their [kind];
 /// [selected] fills it with the primary container. Focus is the shared ring
 /// and 5 % growth; a button without [onTap] is drawn at 38 % and the focus

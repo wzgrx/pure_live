@@ -18,7 +18,7 @@ import 'package:pure_live/shared/record/record_actions.dart';
 
 import '../../support.dart';
 
-// U.7b (docs/T08/T08c/T08c.1): the recording settings page, its dialogs and
+// U.7b (docs/A-界面设计/A10-录制界面/A10.2-录制设置): the recording settings page, its dialogs and
 // the "改上限" entry.
 
 /// FFmpeg is never started by these tests.

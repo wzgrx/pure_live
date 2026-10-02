@@ -1,4 +1,4 @@
-// The room's four tabs of U.2e (docs/T06/T06d/T06d.1/README.md): the chat
+// The room's four tabs of U.2e (docs/A-界面设计/A08-弹幕界面/A08.1-弹幕列表和弹幕设置页/README.md): the chat
 // list's states, super chats, the settings tab and the block list.
 import 'dart:async';
 

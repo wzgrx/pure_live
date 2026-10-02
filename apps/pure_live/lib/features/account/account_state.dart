@@ -121,7 +121,7 @@ AccountStatus accountStatus(
   final cookie = stored.cookie;
   if (cookie.isEmpty) {
     if (stored.unreadable) return AccountStatus(i18n('account_status_unreadable'), tone: AccountTone.error);
-    // 3.x: "设置cookie", and "未登录" for Bilibili (docs/T10/T10a/T10a.2 c5).
+    // 3.x: "设置cookie", and "未登录" for Bilibili (docs/A-界面设计/A12-账号和数据界面/A12.1-账号总览 c5).
     return AccountStatus(i18n('account_status_none'));
   }
   switch (platform.check) {

@@ -1,0 +1,85 @@
+# I01.3 应用服务补全
+
+- 日期：2026-10-01
+- 范围：`apps/pure_live`（`lib/app/`、`lib/platform/`、`lib/pages/settings/`、`pages/version/`、`pages/remote_receiver/`、`pages/web_dav/`、`android/`、`assets/`）；`packages/live_store` 只加设置项
+- 来源：O03.1 记录“没做，留给 Y01”的应用内更新和 bonsoir 做法，J01.1 记录“留给后续”和“只存设置”，I08.1 版本页、设备同步的“留给后续”
+- v3 对照：`lib/plugins/font_download_manager.dart`、`common/services/settings/font_settings_controller.dart`、`modules/settings/pages/font_family_manager_page.dart`、`common/widgets/download_apk_dialog.dart`、`plugins/update.dart`、`common/services/settings/cache_controller.dart`、`modules/remote_receiver/remote_sync_service.dart`（bonsoir 部分）、`common/services/display_mode_service.dart`、`modules/settings/pages/general_settings_page.dart`、`common/services/settings/log_controller.dart`、`core/common/log.dart`、`modules/backup/backup_page.dart`（日志部分）、`common/services/local_network_access.dart`、`common/global/platform/desktop_manager.dart`（标题栏）、`modules/web_dav/web_dav_help.dart`（截图）
+
+## 每项的做法
+
+| # | 项 | 做法 | 文件 |
+|---|---|---|---|
+| 1 | 字体下载 | `FontLibrary`：云端字体列表是 3.x 的 `assets/fonts/fonts-manifest.json`（搬进应用资源，57 个字体，读时检查 id 和文件路径）；下载走应用的 HTTP 客户端（代理、日志），先用 `fastestUrl` 在 `liuchuancong/fonts` 的镜像里挑最快的，再按顺序试；文件先放 `.<id>.pending`，全部到齐且文件头像字体才替换 `<数据目录>/fonts/<id>`（中断时 `.previous` 回滚，同 3.x）；`FontLoader` 以 id 注册；选字重（多文件字体）只注册那一个文件；删除时用到它的设置改回系统字体。启动时（首帧前，`main`）`restore` 注册已选的应用字体和弹幕字体；**3.x 选过的字体**：本机没有就到 3.x 的字体目录（`<3.x 数据>/DOWNLOADS/fonts/<id>`，按 3.x 设置文件位置推出）复制过来直接用（只读 3.x 的文件）；都没有时设置行用红字提示“还没有下载……点此下载”，字体页里该字体的按钮是“下载已选字体”。`app.dart` 的 `resolveAppFontFamily(customFonts:)` 用 `FontLibrary.registered`，注册后整个应用重建 | `lib/app/fonts.dart`、`pages/settings/font_manager_page.dart`、`appearance_pages.dart` 的 `FontFamilyTile` |
+| 2 | 应用内下载和安装更新 | `FileDownloader`：走应用 HTTP 客户端，写 `<文件>.part`，下次用 `Range` 接着下（3.x 每次从头）；一个源断了换下一个源时也接着下；完成后才改名。版本页每个安装包加“下载并安装”（全部镜像，先竞速挑最快），点开某个源的对话框里有“在应用内下载”“在浏览器中下载”“复制链接”；启动后的新版本对话框有本平台安装包时给“下载并安装”和“查看详情”，没有时仍是“更新”进版本页。下载框：进度（MB/MB）、取消（保留已下载部分并提示下次接着下）、失败后“重试”“在浏览器中下载”；完成后 Android 先查“安装未知应用”权限，没有就提示并打开系统设置页，有则 `open_filex` 交给系统安装器；Windows 安装包直接运行，ZIP 打开所在文件夹（`explorer /select`），桌面有“打开文件夹” | `lib/app/downloads.dart`、`pages/version/update_download.dart`、`version_page.dart`、`update_prompt.dart` |
+| 3 | bonsoir | 设备同步开始时同时 `BonsoirBroadcast`（名字 `PureLive-<id 后 6 位>`，TXT 同 3.x：id、name、platform、version、ip）和 `BonsoirDiscovery`（`_purelive-sync._tcp`），发现的设备并进设备列表（未解析时端口 0 用 39888，同 3.x）；只经 mDNS 发现的设备标“3.x 版本的设备”（3.x 广播的版本固定是 1.0.0），mDNS 报离开时移除；v4 之间的 UDP 广播保留，两边都听到时按 UDP 处理。Android 期间持有组播锁。顺带修了设备 id：第一次生成后异步保存，保存前再读会生成另一个（UDP 和 mDNS 会带不同 id），现在缓存在服务里 | `pages/remote_receiver/mdns_peers.dart`、`remote_sync_service.dart`、`remote_receiver_page.dart` |
+| 4 | 显示模式 | `DisplayMode`：Android 和 Windows 原生的 `pure_live/display_mode` 早已有 `getDisplayModeInfo` 和 `displayModeChanged`（I01.1、O03.1 照 v3 搬了），本次接 Dart：刷新率提示的应答、原生推送都更新 `DisplayMode.info`。设置“界面刷新率”一行显示“当前 / 最高：60 / 120 Hz；可用：60, 90, 120 Hz”；Windows 新增一行“Windows 动态刷新率”：显示器分辨率、当前和最高 Hz，点一下重读，窗口移到别的显示器或系统切换模式时自动更新（同 3.x）。Windows 的刷新率由系统决定，应用改不了（3.x 同样只显示） | `lib/platform/display_mode.dart`、`settings_editors.dart` 的 `RefreshRateTile`、`WindowsDisplayTile` |
+| 5 | 日志 | `AppLog`：内存里最近 2000 条（同 3.x）；“写入文件”开时每次运行一个文件（`<数据目录>/logs/<时间>.log`，开启时把内存里已有的也写进去）；记录等级（调试/信息/警告/错误）。接入：`FlutterError.onError`（保留原来的控制台输出）、`PlatformDispatcher.onError`（未捕获异常）、`debugPrint`（调试级）、平台请求失败摘要（`live_net` 的 `LoggingHttp`，只有方法、主机、路径、状态和耗时，不带查询串和正文）。**脱敏** `redactSecrets`：`Cookie:`/`Authorization:` 等请求头行、JSON 的 `"token": "..."`、`name=value`（Cookie 和查询串里的 SESSDATA、bili_jct、acf_auth、dy_auth、LTP0、udb_biztoken、sessionid、token、sign、w_rid、wts、password 等）、Bearer 令牌、URL 里的用户名密码，都变成 `***`，名字保留；每条日志写入前都过一遍。页面（设置 → 数据与备份 → 日志管理）：写入文件开关（显示文件路径）、等级、打开日志目录、按等级筛选、长按复制一条、复制全部、导出/分享（手机用系统分享面板，桌面复制到剪贴板）、清除（内存和旧文件） | `lib/app/app_log.dart`、`pages/settings/log_page.dart`、`main.dart`、`bootstrap.dart` |
+| 6 | Android 17 本地网络权限 | 清单里早有 `ACCESS_LOCAL_NETWORK`（I01.1）。新原生通道 `pure_live/system_access` 的 `localNetworkGranted`/`requestLocalNetwork`（API 37 以下视为已允许）。`LocalNetworkGuard`：启动时和代理设置（应用代理、播放代理的开关和地址）停止改动 1 秒后，有代理指向局域网（`isLocalNetworkProxyHost`）且没授权就申请一次，拒绝时提示去系统设置允许（3.x 文字），本次运行不再问。设备同步开始前也申请（同 3.x） | `SystemAccessPlugin.kt`、`lib/platform/system_access.dart`、`startup.dart`、`remote_sync_service.dart` |
+| 7 | 缓存页 | “刷新直播缩略图”：清磁盘缓存和解码缓存，`imageCacheEpoch` 加一，屏幕上的封面换新缓存键重新下载（3.x `refreshImageCache()`；I01.2 只在“清除图片缓存”里加一）。“下载目录”：显示当前目录（默认时显示“当前使用默认目录”和路径），“选择目录”用系统选择器并检查能否写入，“恢复默认”；更新包下载到这里 | `data_tools.dart` 的 `RefreshCoversTile`、`DownloadDirectoryTile` |
+| 8 | 其余只存未生效的设置 | 见下表 | |
+
+协调者追加的几项：
+
+- **字体清单、WebDAV 截图**：`assets/fonts/fonts-manifest.json`、`assets/webdav/*.png`（7 张）搬进 `apps/pure_live/assets/` 并登记；WebDAV 帮助页每一步下面放对应截图（最高 240，点开全屏、可缩放）。
+- **备份页的“所有文件访问”**：核对后 v4 的备份页没有申请（`pages/backup/` 里没有任何存储权限调用；默认目录不需要权限，选目录和文件用 O03.1 接的系统选择器）。清单里的 `MANAGE_EXTERNAL_STORAGE` 只给录制写公共目录用（H02.1 的 `RecorderPlugin.requestStorage`），本次没动。
+- **Windows 标题栏**：拖动窗口边缘时应用名后显示 `[宽 × 高]`（`DesktopWindow.resizing`，`onWindowResize` 读尺寸、`onWindowResized` 清掉）；启动页时标题栏用和启动页一致的渐变（启动页在 I08.1 改成了主题色渐变，标题栏跟随它，不用 3.x 写死的青色）。
+- **M12.5 的范围**（播放代理、分享接收、分享口令导入、通知和电池优化权限）：没有动。`lib/app/` 里与之相邻的改动只有 `bootstrap.dart` 给 HTTP 客户端套了 `LoggingHttp`（应用代理不变）、`startup.dart` 加了本地网络权限守卫（读播放代理的开关和地址，只读不写）。
+
+## 其余“只存设置”的核对（J01.1 问题表和“留给后续”）
+
+| 设置 | 结果 | 说明 |
+|---|---|---|
+| 定时刷新关注（`autoRefreshFavorite`、`autoRefreshInterval`） | 已生效（I04.1） | `favorite_controller.dart` 按开关和间隔定时静默刷新，跟随改动 |
+| 定时刷新封面（`autoRefreshThumbnails`、间隔） | 已生效（O03.1） | `CoverRefreshTimer`，本次核对 |
+| 分页控件（推荐/分区每页数量、跳页、回到顶部） | 已生效（I02.1、I03.1） | 推荐页 `popular_grid.dart` 读三个开关和每页数量；分区房间页读“回到顶部”。分区房间页没有分页栏（v3 也只有推荐页有），不需要 |
+| 退出时销毁播放器（`useHardStopOnExit`） | 留给直播间任务 | v4 的直播间离开时总是释放自己的播放会话，相当于“开”；“关”在 3.x 是保留播放器给下一个房间复用，属于直播间/播放会话的设计，本任务不改 `pages/live_play/` |
+| Windows 窗口大小立即应用 | 本次完成 | 保存后 `DesktopShell.resize`（最大化/全屏时先还原），失败提示 `window_size_apply_failed` |
+| 开机启动“应用中/失败”提示 | 本次完成 | `DesktopShell.startupState`：写注册表时显示“正在更新 Windows 启动项…”、开关不可点；失败红字提示 |
+| 关闭窗口时、退出不再询问 | 已生效（O03.1） | |
+| 后台播放、睡眠定时、画中画、小窗弹幕、竖屏、弹幕留白/帧率/字体/点按长按、本地互动 | 不做 | 直播间任务 |
+| 录制相关 | 不做 | 录制任务 |
+| 弹幕字体 | 部分 | 本次能下载、选择并在启动时注册（注册名就是设置里存的 id）；弹幕层用 `danmakuFontFamilyName` 作字体是直播间任务（`shared/danmaku` 现在没读它） |
+
+## 原生改动
+
+- Android：新文件 `SystemAccessPlugin.kt`（`pure_live/system_access`：`canInstallPackages`、`openInstallSettings`、`localNetworkGranted`、`requestLocalNetwork`），`MainActivity.configureFlutterEngine` 加 3 行注册（和 `RecorderPlugin` 同样的写法）和注释一行。清单没改（`REQUEST_INSTALL_PACKAGES`、`ACCESS_LOCAL_NETWORK` 早已在）。`flutter build apk --debug` 成功。
+- Windows：没有改 C++（显示模式通道 v4 早已照 v3 搬了）；`lib/app/desktop/` 的 Dart 改动见上。
+
+## 新设置项（`live_store`）
+
+| 键 | 说明 | 3.x 迁移 |
+|---|---|---|
+| `downloadDirectoryPath`（`cache`，internal，默认空 = 默认目录） | 更新包下载目录 | 3.x 同名 Hive 键直接导入（迁移测试已加）；是本机路径，不进备份。3.x 的 `downloadDirectoryDecisionMade` 不再需要（v4 不弹“选择下载目录”框，直接用默认目录，可在缓存页改） |
+| `enableLocalLog`（`log`，默认关） | 日志写入文件 | 3.x 的开关不保存（每次运行都是关），没有可迁移的 |
+| `logLevel`（`log`，默认 `info`） | 记录等级 | 新增 |
+
+## 有意差异
+
+| 差异 | 原因 |
+|---|---|
+| 日志在应用内查看，不再开本机 HTTP 服务在浏览器里看 | 手机上开浏览器看本机端口不方便；应用内页面有同样的筛选、复制、清除，另加导出/分享 |
+| 下载前不再弹“选择下载目录”框 | 默认目录不需要权限，总能用；要换目录在缓存页改 |
+| 字体文件放在 `<数据目录>/fonts` | 3.x 在 `<数据目录>/DOWNLOADS/fonts`；3.x 的文件按需复制过来 |
+| 刷新率一行多显示“可用”的刷新率 | 任务要求，便于判断“性能”档能到多少 |
+
+## 没验证的部分
+
+- **Android 真机**（本次不往手机装）：安装未知应用权限页的跳转和返回后再点“立即安装”、open_filex 安装 APK、默认下载目录 `Android/data/<包名>/files/Download/pure_live`、Android 17 本地网络权限弹框（需要 API 37 的系统）、bonsoir 在 Android 上的广播和发现（组播锁）、刷新率信息、字体下载和 `FontLoader` 注册后的界面、日志分享。
+- **Windows**：全部没构建、没运行：安装包运行、`explorer /select`、窗口大小立即应用、启动项状态、标题栏尺寸小字和启动页渐变、显示器信息、bonsoir 的 Windows 部分（`bonsoir_windows`）、字体目录打开。
+- **和 3.x 设备互相发现**：只在 WSL 用假 mDNS 测了 TXT 和设备合并；真机上 3.x ↔ v4 互相看到、配对同步没测。
+- 下载镜像的真实可用性、断点续传对各镜像的 `Range` 支持没联网测（测试用本地假服务器）。
+
+## 测试
+
+- 新增 `test/services_test.dart`（11 个）：脱敏（Cookie 头、查询串签名、JSON 令牌和密码、Bearer、URL 密码；普通文字不变）；日志等级、容量、写文件、导出、清除；下载断线后换源接着下、取消保留已下部分后续传、全部失败和目录/文件名；字体清单 57 个且坏条目被丢弃；字体下载、锁定字重、启动注册、从 3.x 目录复制、缺字重回退、删除后设置复原；显示模式信息；局域网代理只申请一次本地网络权限；设备同步经 mDNS 发现 3.x 设备并在离开时移除；资源登记。
+- `version_page_test.dart` 加 1 个：应用内下载安装包并打开安装器。
+- `live_store` 的迁移测试加 3.x 下载目录键的导入。
+- 应用 `flutter test` 全量 217 个：216 个通过，1 个（设置目录新加的行 id 和“定时刷新封面”重复）改名后重跑设置、版本、服务三组测试通过；`flutter analyze` 无问题；`live_store` `dart analyze`、`dart test`（30 个）通过。
+
+## 合并时注意（冲突点）
+
+- 翻译文件：中英文各加 30 个键（`remote_sync_legacy_device`、`settings_display_rates`、`settings_font_*` 3 个、`settings_log_*` 18 个、`settings_startup_failed`、`update_*` 6 个），改了 `settings_font_not_installed` 的文字；按键名排序合并。
+- `lib/app/`：`app.dart`（字体监听）、`bootstrap.dart`（`LoggingHttp`）、`startup.dart`（本地网络守卫、显示模式）、`desktop/desktop_window.dart`、`desktop/title_bar.dart`；`lib/main.dart`（日志、字体）；`lib/platform/plugins.dart`（两个新的选择器/分享覆盖）、`platform_services.dart`。
+- `MainActivity.kt`：只加了注册 `SystemAccessPlugin` 的 3 行和注释一行；清单没改。
+- 设置：`settings_catalog.dart`（开机启动、刷新率改成自定义行，新增 Windows 显示器、刷新缩略图、下载目录、日志 4 行）、`settings_tiles.dart`（`SettingChoiceTile` 加可选 `subtitle`）、`settings_editors.dart`、`data_tools.dart`、`appearance_pages.dart`。
+- `apps/pure_live/pubspec.yaml`：资源加 `assets/fonts/fonts-manifest.json`、`assets/webdav/`（依赖没变，`pubspec.lock` 不变）。

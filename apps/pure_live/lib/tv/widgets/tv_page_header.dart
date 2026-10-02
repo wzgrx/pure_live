@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pure_live/tv/tv_theme.dart';
 
-/// The top of a TV sub-page (docs/T18/T18a/T18a.2 c13, choice A3): the
+/// The top of a TV sub-page (docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件 c13, choice A3): the
 /// title (22, 600), a line under it (14, secondary) and the page's own
 /// actions on the right. No "返回" button: the remote's Back goes back, and
 /// the page puts its first focus on the content (pure_live_TV focused the

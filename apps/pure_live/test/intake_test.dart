@@ -23,7 +23,7 @@ import 'package:pure_live/shared/rooms/share_code.dart';
 import 'support.dart';
 
 // F.0a: share codes, the clipboard check, shares and shortcuts
-// (docs/T13/T13c/T13c.2, docs/T13/T13a/T13a.1 c10, c11, c15).
+// (docs/O-Android系统集成/O03-分享接收和快捷方式/O03.2-接回半成品, docs/A-界面设计/A14-系统界面/A14.1-系统界面 c10, c11, c15).
 
 /// A navigator context for code that only checks it is there.
 final class _Context extends Fake implements BuildContext {

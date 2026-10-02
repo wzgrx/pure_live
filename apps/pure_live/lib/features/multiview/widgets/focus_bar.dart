@@ -8,7 +8,7 @@ import 'package:pure_live/features/multiview/widgets/cell_controls.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
 /// The large cell's controls in the immersive and fullscreen modes (3.x
-/// `_buildLargeControlBar`, docs/T12/T12a/T12a.2 c14): pause, refresh, the
+/// `_buildLargeControlBar`, docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面 c14): pause, refresh, the
 /// danmaku and its settings, the quality and line buttons with their small
 /// menus (U.2f), the volume (the cell's panel) and fullscreen. Scrolls
 /// sideways when the cell is narrower than the bar.

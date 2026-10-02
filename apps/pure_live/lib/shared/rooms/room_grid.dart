@@ -17,7 +17,7 @@ import 'package:pure_live/shared/rooms/room_feed.dart';
 import 'package:pure_live/shared/rooms/room_menu.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-// The room grids of the browsing pages (docs/T07/T07d/T07d.1–U.4e): the
+// The room grids of the browsing pages (docs/A-界面设计/A09-浏览界面/A09.1-房间卡片–U.4e): the
 // card, the columns, the skeleton, the jump buttons and a whole feed page
 // (popular, area rooms) with its states, phone paging and desktop pages.
 

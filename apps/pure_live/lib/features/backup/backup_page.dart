@@ -44,7 +44,7 @@ final Provider<bool> backupOpensFolderProvider = Provider<bool>(
 
 enum _Action { create, createFollows, restore, restoreFollows, folder, tv, file }
 
-/// Backup and restore (3.x `lib/modules/backup`, docs/T09/T09c/T09c.2).
+/// Backup and restore (3.x `lib/modules/backup`, docs/A-界面设计/A12-账号和数据界面/A12.4-备份与恢复).
 ///
 /// Routes: `RoutePath.kBackup`.
 ///

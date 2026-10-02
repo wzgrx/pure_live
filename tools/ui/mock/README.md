@@ -57,10 +57,10 @@ bash tools/ui/mock/fetch.sh     # 字体（Material Icons、Geist）和示意图
 ## 生成
 
 ```bash
-python3 tools/ui/mock/render.py docs/T05/T05d/T05d.1/src/                 # 整个目录
-python3 tools/ui/mock/render.py docs/T05/T05d/T05d.1/src/v4-phone.html --annotate --dark
-python3 tools/ui/mock/page.py docs/T05/T05d/T05d.1/page.json              # → ~/ref/design/compare/U.2c.html
-python3 tools/ui/export_compare.py ~/ref/design/compare/U.2c.html docs/T05/T05d/T05d.1/page
+python3 tools/ui/mock/render.py docs/A-界面设计/A07-直播间界面/A07.4-横屏全屏/src                 # 整个目录
+python3 tools/ui/mock/render.py docs/A-界面设计/A07-直播间界面/A07.4-横屏全屏/src/v4-phone.html --annotate --dark
+python3 tools/ui/mock/page.py docs/A-界面设计/A07-直播间界面/A07.4-横屏全屏/page.json              # → ~/ref/design/compare/U.2c.html
+python3 tools/ui/export_compare.py ~/ref/design/compare/U.2c.html docs/A-界面设计/A07-直播间界面/A07.4-横屏全屏/page
 ```
 
 `render.py` 把图写到 `src/` 的上一级（任务文件夹）：`v4-phone.jpg`，加 `--annotate` 多一张 `v4-phone-n.jpg`，加 `--dark` 多一张 `v4-phone-dark.jpg`。

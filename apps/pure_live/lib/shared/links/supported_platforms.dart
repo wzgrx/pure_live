@@ -14,7 +14,7 @@ List<LiveSite> linkPlatforms(SiteRegistry registry) => [
     if (site is LiveSiteLinks && site.id != SiteIds.iptv) site,
 ];
 
-/// "支持解析列表 · 共 N 个平台" (docs/T07/T07i/T07i.3 c4): a card of its
+/// "支持解析列表 · 共 N 个平台" (docs/A-界面设计/A15-小页面/A15.1-工具箱 c4): a card of its
 /// own, folded by default; unfolded, a line on what can be pasted and a
 /// labelled logo for each platform of [linkPlatforms] (3.x showed a fixed
 /// text of seventy lines that no longer matched the platforms).

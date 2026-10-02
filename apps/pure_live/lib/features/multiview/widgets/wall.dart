@@ -8,7 +8,7 @@ import 'package:pure_live/features/multiview/widgets/cell_view.dart';
 typedef CellBuilder = Widget Function(int index, {required bool large, required double nameInset});
 
 /// The black picture area with the cells at [WallGeometry]'s places
-/// (docs/T12/T12a/T12a.2 c2, c3, c12): 16:9 cells, centred. In the 1+3 layout
+/// (docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面 c2, c3, c12): 16:9 cells, centred. In the 1+3 layout
 /// the small cells sit in a rail that scrolls past three; the cells
 /// scrolled out of sight are reported ([onOffscreen]) so they stop decoding
 /// (UI_PLAN §9.3). Cells keep their [GlobalKey]s from [cellBuilder], so a

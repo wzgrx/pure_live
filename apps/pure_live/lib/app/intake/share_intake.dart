@@ -31,7 +31,7 @@ enum ShareOutcome {
 
 /// What other apps share with Pure Live and what the launcher shortcuts and
 /// notifications open (3.x `SharedMediaIntake` with `SharedLiveLinkOpener`;
-/// M12.5 → F.0a, docs/T13/T13a/T13a.1), one payload at a time, in 3.x's
+/// M12.5 → F.0a, docs/A-界面设计/A14-系统界面/A14.1-系统界面), one payload at a time, in 3.x's
 /// order:
 ///
 /// 1. a shortcut's or notification's page or room opens; only the pages of

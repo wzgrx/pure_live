@@ -12,7 +12,7 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 /// live room).
 String qualityLabel(LivePlayQuality quality) => quality.isPlaybackUnconfirmed ? '${quality.quality}?' : quality.quality;
 
-/// The visible size of a control button (docs/T12/T12a/T12a.2, `.sr2 .ib`).
+/// The visible size of a control button (docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面, `.sr2 .ib`).
 const double _buttonSize = 40;
 
 /// How far a button's 48-point tap target reaches past its circle on each
@@ -33,7 +33,7 @@ const double _start = 12 - _buttonInset;
 const double _minInlineSlider = 64;
 
 /// The selected cell's controls, all in one place and the same in every
-/// layout (docs/T12/T12a/T12a.2 c4): the room with the cell's number; the
+/// layout (docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面 c4): the room with the cell's number; the
 /// quality and line buttons with their small menus (U.2f); pause, refresh,
 /// change room, open the live room, close the cell; the room volume.
 ///

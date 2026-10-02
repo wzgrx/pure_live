@@ -1,4 +1,4 @@
-# Txxy.n 名称：任务书
+# A07.n 名称：任务书
 
 > 交给执行者（维护者、Claude 或其他 AI）的全部要求。不依赖聊天记录；读完这一页和下面列的文件就能开工。
 
@@ -9,7 +9,7 @@
 
 ## 先读
 
-1. `AGENTS.md`、`docs/PROCESS.md`（尤其第 5 节分阶段、第 7 节合并审查）。
+1. `AGENTS.md`、`docs/PROCESS.md`（尤其第 5 节分阶段、第 8 节合并审查）。
 2. 规范：`docs/specs/ENGINEERING.md`、`docs/specs/UI.md`（界面任务）。
 3. 设计或说明：本文件夹的 `README.md`（已确认的逐条照做）。
 4. 3.x 代码（标签 `v3.2.11`：`git show v3.2.11:lib/...`）：列文件。

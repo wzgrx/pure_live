@@ -55,7 +55,7 @@ final class AccountPlatform {
   /// The platform's own instructions; null uses the generic ones.
   final String? tipKey;
 
-  /// The account pages' own name key (docs/T10/T10a/T10a.2 c5: "SOOP",
+  /// The account pages' own name key (docs/A-界面设计/A12-账号和数据界面/A12.1-账号总览 c5: "SOOP",
   /// "网易CC"); null uses the platform list's `site_<id>`. The words are the
   /// same as the list's since both were unified on 3.x's and the platforms'
   /// own spelling.

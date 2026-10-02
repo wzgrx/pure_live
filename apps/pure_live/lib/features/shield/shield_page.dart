@@ -8,7 +8,7 @@ import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/shared/danmaku/block_manager.dart';
 
 /// Danmaku blocking in the settings (3.x `lib/modules/shield`,
-/// docs/T06/T06b/T06b.1).
+/// docs/A-界面设计/A08-弹幕界面/A08.3-弹幕屏蔽页).
 ///
 /// Routes: `RoutePath.kSettingsDanmuShield`; `BlockKind.user` as the
 /// argument scrolls to the blocked users.

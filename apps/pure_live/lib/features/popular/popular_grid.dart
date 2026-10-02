@@ -18,7 +18,7 @@ String? popularNoticeOf(LiveSite site) {
 }
 
 /// One platform's recommendations (3.x `PopularGridView` over
-/// `BasePageView`, docs/T07/T07b/T07b.2): the shared [RoomFeedView] over the
+/// `BasePageView`, docs/A-界面设计/A09-浏览界面/A09.2-热门): the shared [RoomFeedView] over the
 /// platform's feed, with the popular page's empty state (c4) and its notes.
 class PopularPlatformView extends ConsumerWidget {
   /// Creates the view of [platform].

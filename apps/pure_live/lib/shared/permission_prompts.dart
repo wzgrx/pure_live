@@ -9,7 +9,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/system_permissions.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 
-// The explanations before a system permission (docs/T13/T13a/T13a.1 c12–c14;
+// The explanations before a system permission (docs/A-界面设计/A14-系统界面/A14.1-系统界面 c12–c14;
 // 3.x `LiveAudioService._showExplainDialog`, M12.5 → F.0a).
 
 /// What asking for a permission came to.

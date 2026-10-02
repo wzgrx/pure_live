@@ -31,7 +31,7 @@ void showRoomDanmakuSettings(BuildContext context, LiveRoomController controller
   );
 }
 
-/// The danmaku settings panel (docs/T05/T05g/T05g.1, 弹幕设置): under the
+/// The danmaku settings panel (docs/A-界面设计/A07-直播间界面/A07.6-直播间弹窗, 弹幕设置): under the
 /// picture in portrait, on the right otherwise; "改动立即生效" and ✕ in the
 /// header.
 class RoomDanmakuSettingsPanel extends StatelessWidget {

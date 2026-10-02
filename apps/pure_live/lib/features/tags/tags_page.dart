@@ -28,7 +28,7 @@ final StreamProvider<List<LiveRoom>> tagFollowsProvider = StreamProvider.autoDis
   (ref) => ref.watch(storeProvider).follows.watchAll(),
 );
 
-/// Follow groups (tags) (3.x `lib/modules/tags`, docs/T07/T07h/T07h.2).
+/// Follow groups (tags) (3.x `lib/modules/tags`, docs/A-界面设计/A09-浏览界面/A09.10-标签管理).
 ///
 /// Routes: `RoutePath.kSettingsTags`.
 ///

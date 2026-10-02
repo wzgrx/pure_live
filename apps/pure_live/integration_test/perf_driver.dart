@@ -1,7 +1,7 @@
 // The host side of the frame benchmarks (P05): `flutter drive --profile`
 // runs integration_test/perf_test.dart on the phone and hands what it
 // reported to this, which writes it to build/perf/perf-<time>.json and prints
-// one line per scenario. See docs/T14/T14a/T14a.1/record.md for the command.
+// one line per scenario. See docs/R-性能和流畅度/R01-基准和测量/R01.1-基准测试和渲染开销/record.md for the command.
 import 'dart:convert';
 import 'dart:io';
 

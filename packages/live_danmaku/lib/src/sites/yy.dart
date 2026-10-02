@@ -11,7 +11,7 @@ import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
 
 /// YY's danmaku endpoint, timing and text rules (3.x `YyDanmaku` and
-/// `yy_protocol.dart`, docs/T06/T06a/T06a.7/record.md). The binary protocol is
+/// `yy_protocol.dart`, docs/D-弹幕/D01-平台弹幕协议/D01.7-YY直播弹幕/record.md). The binary protocol is
 /// [YyDanmakuSession].
 abstract final class YyDanmakuProtocol {
   /// Version of the web client's H5 service protocol (3.x

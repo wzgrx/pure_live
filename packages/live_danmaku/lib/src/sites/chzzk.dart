@@ -56,7 +56,7 @@ final class ChzzkDanmakuFrame {
   final bool closed;
 }
 
-/// CHZZK's chat (docs/T06/T06a/T06a.17/record.md), without I/O.
+/// CHZZK's chat (docs/D-弹幕/D01-平台弹幕协议/D01.17-CHZZK弹幕/record.md), without I/O.
 ///
 /// 3.x had no CHZZK danmaku; this follows the archived v4 connector, the
 /// recordings and the site's own chat client (NAVER's chat SDK 4.11.0 in

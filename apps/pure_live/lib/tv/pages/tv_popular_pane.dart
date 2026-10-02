@@ -19,7 +19,7 @@ import 'package:pure_live/tv/widgets/tv_tabs.dart';
 const int tvPageSize = 24;
 
 /// Shows [feed]'s rooms in a [TvRoomGrid], with the states of
-/// docs/T18/T18a/T18a.2 c14: a static skeleton on the first load, the
+/// docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件 c14: a static skeleton on the first load, the
 /// cause of a failure in words (and "前往登录" when the platform wants a
 /// login), an empty list saying what to do with the remote; the grid asks
 /// for the next [tvPageSize] rooms near its end.

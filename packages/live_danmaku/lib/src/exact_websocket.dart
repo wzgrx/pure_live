@@ -8,7 +8,7 @@ import 'package:live_net/live_net.dart';
 
 /// [SocketConnector] for chat edges that only answer an opening handshake
 /// spelled the way browsers spell it (3.x `connectCaseSensitiveWebSocket`,
-/// shared by YY and SOOP; docs/T06/T06a/T06a.7/record.md).
+/// shared by YY and SOOP; docs/D-弹幕/D01-平台弹幕协议/D01.7-YY直播弹幕/record.md).
 ///
 /// `dart:io` lower-cases `Connection`, `Upgrade` and the `Sec-WebSocket-*`
 /// fields of its handshake; YY's and SOOP's edges then leave the upgrade
@@ -29,7 +29,7 @@ Future<SocketChannel> connectExactWebSocket(
 /// [connectExactWebSocket] through the platform's proxy [route]: an
 /// [HttpProxyRoute] is asked for a `CONNECT` tunnel to the edge, and TLS
 /// (for `wss`) runs inside it, as `HttpClient` does; a [DirectRoute] dials
-/// the edge (SOOP since M5.F B-6, docs/T06/T06a/T06a.8/record.md).
+/// the edge (SOOP since M5.F B-6, docs/D-弹幕/D01-平台弹幕协议/D01.8-SOOP弹幕/record.md).
 Future<SocketChannel> connectExactWebSocketViaRoute(
   Uri endpoint, {
   required Map<String, String> headers,

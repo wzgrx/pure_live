@@ -6,7 +6,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-// The rooms of the "切换直播间" panel (docs/T05/T05h/T05h.2): 3.x's small
+// The rooms of the "切换直播间" panel (docs/A-界面设计/A07-直播间界面/A07.13-切换直播间面板): 3.x's small
 // card (`play_other.dart` `_RoomSwitchCard`) and the list style's row.
 
 /// "刚刚", "5 分钟前", "2 小时前", "3 天前".

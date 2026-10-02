@@ -21,7 +21,7 @@ import 'package:window_manager/window_manager.dart';
 
 export 'package:pure_live/app/desktop/mini_window.dart' show MiniWindowHost;
 
-/// What the title bar asks of the window (docs/T17/T17a/T17a.1): the
+/// What the title bar asks of the window (docs/A-界面设计/A16-桌面界面/A16.1-桌面窗口): the
 /// shell's window_manager; tests set their own.
 abstract interface class WindowControls {
   /// Minimizes the window to the taskbar.
@@ -218,7 +218,7 @@ final class _WindowManagerControls implements WindowControls {
 }
 
 /// The desktop window (3.x `DesktopManager`, `DesktopWindowMixin`,
-/// `WindowSizeController`; docs/T17/T17a/T17a.1): no system title bar (the
+/// `WindowSizeController`; docs/A-界面设计/A16-桌面界面/A16.1-桌面窗口): no system title bar (the
 /// app draws [DesktopTitleBar]), the size, place and maximized state of
 /// last time (c6), the tray (main window only, c10), what the close button
 /// does ([WindowCloser]), the window's name with the room (c11), new

@@ -98,7 +98,7 @@ class AccountField extends StatelessWidget {
   }
 }
 
-/// A cookie page (3.x `AccountCookieEditorPage`, docs/T10/T10a/T10a.3):
+/// A cookie page (3.x `AccountCookieEditorPage`, docs/A-界面设计/A12-账号和数据界面/A12.2-登录和Cookie):
 /// the platform's status card, the instructions with a link to its
 /// website, the "Cookie" group (the box, "粘贴", "清空", "保存"), any
 /// [extra] groups (Douyu's renewal), "退出登录" and the privacy note.

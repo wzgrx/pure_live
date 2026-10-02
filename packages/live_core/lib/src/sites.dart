@@ -190,7 +190,7 @@ abstract final class SiteIds {
 
   /// Platforms whose room id is a user name that the platform itself matches
   /// without regard to case, so room identity ignores case there
-  /// (`LiveRoom.identityKeyFor`; docs/T02/T02g/T02g.2/record.md). The room id
+  /// (`LiveRoom.identityKeyFor`; docs/E-直播平台/E05-平台框架和模型/E05.2-模型扩展/record.md). The room id
   /// keeps the spelling it was stored with; only comparisons fold it.
   ///
   /// - Twitch: the login name. Logins are lower case; the adapter requests

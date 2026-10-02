@@ -11,7 +11,7 @@ import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:meta/meta.dart';
 
-/// AcFun's danmaku connection (docs/T06/T06a/T06a.10/record.md): the web live
+/// AcFun's danmaku connection (docs/D-弹幕/D01-平台弹幕协议/D01.10-AcFun弹幕/record.md): the web live
 /// page's link (Kuaishou's live middle platform, `wss://link.xiatou.com/`)
 /// over the shared WebSocket runtime. 3.x had no AcFun danmaku.
 ///

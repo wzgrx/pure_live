@@ -20,7 +20,7 @@ const double roomHeaderTitleMinWidth = 100;
 
 /// The live room's app bar row (3.x `LivePlayHeader`): avatar, streamer and
 /// "平台 · 分区" (a tap opens the room details, E1), then follow, record and
-/// the menu (docs/T05/T05b/T05b.1, changes 1, 12, 13 and choice B).
+/// the menu (docs/A-界面设计/A07-直播间界面/A07.1-竖屏普通布局, changes 1, 12, 13 and choice B).
 class RoomHeader extends ConsumerStatefulWidget {
   /// Creates the row.
   const new({required this.controller, required this.onDetails, this.windows = false, super.key});

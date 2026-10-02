@@ -47,27 +47,38 @@ BAR = 20
 
 # Old documents and where their content went (MAPPING.md, last section).
 OLD_DOCS = [
-    ('docs/PLAN.md（模块重构计划）', '[PLAN.md](PLAN.md)；还有效的工程规则在 [specs/ENGINEERING.md](specs/ENGINEERING.md)'),
+    ('docs/PLAN.md（模块重构计划，到 2026-10-02）', '[PLAN.md](PLAN.md)；还有效的工程规则在 [specs/ENGINEERING.md](specs/ENGINEERING.md)'),
     ('docs/UPGRADES.md', '[specs/UPGRADES.md](specs/UPGRADES.md)'),
     ('docs/ui/UI_PLAN.md', '[specs/UI.md](specs/UI.md)'),
     ('docs/ui/TASKS.md、docs/features/TASKS.md、docs/4.0.x/TASKS.md', '[TASKS.md](TASKS.md)、[STATUS.md](STATUS.md)（由 tasks.toml 生成）'),
     ('docs/ui/PROCESS.md、docs/features/PROCESS.md、docs/features/FEATURE_PLAN.md', '[PROCESS.md](PROCESS.md)、[PLAN.md](PLAN.md)'),
     ('docs/ui/INVENTORY.md、TASK_FILES.md、V3_UI_INVENTORY.md', '[inventory/](inventory/README.md) 的 UI.md、UI_FILES.md、V3_UI.md'),
     ('docs/features/INVENTORY.md', '[inventory/FEATURES.md](inventory/FEATURES.md)'),
-    ('docs/features/TASKS.md 第 5 节（K90 真机清单）', '[T15/T15b/CHECKLIST.md](T15/T15b/CHECKLIST.md)'),
-    ('docs/ui/compare/<编号>/、docs/ui/records/<编号>.md', '对应任务的文件夹（`README.md` 设计、`record.md` 记录）'),
-    ('docs/features/<编号>/、docs/features/records/', '对应任务的文件夹（`README.md` 说明、`record.md` 记录）'),
-    ('docs/modules/<编号>.md', '对应任务的文件夹（`record.md`）'),
-    ('docs/4.0.x/tasks/、records/', '对应任务的文件夹（`brief.md` 任务书、`record.md` 记录）'),
-    ('docs/4.0.x/audit-2026-10-02.md', '[T15/T15b/audit-2026-10-02.md](T15/T15b/audit-2026-10-02.md)'),
-    ('docs/4.0.x/research-smoothness-2026-10-02.md', '[T14/research-2026-10-02.md](T14/research-2026-10-02.md)'),
-    ('docs/readme/、docs/releases/', '[T16/T16c/](T16/T16c/README.md) 的 readme/、releases/'),
-    ('docs/ui/templates/、docs/features/templates/', '[templates/](templates/README.md)'),
+    ('docs/ui/compare/<编号>/（界面设计）、docs/ui/records/', '界面设计组 [A-界面设计](A-界面设计/README.md) 里对应任务的文件夹（`README.md` 设计、`record.md` 记录）'),
+    ('docs/features/<编号>/、docs/modules/<编号>.md、docs/4.0.x/tasks/、records/', '对应任务的文件夹（`README.md`、`brief.md`、`record.md`）'),
+    ('docs v0 的 docs/T00～T19/（2026-10-02 一天）', '本页上面的对照：组、子分类、任务都换成了字母编号'),
 ]
 
-GROUP_RX = re.compile(r'T\d\d')
-SUB_RX = re.compile(r'T\d\d[a-z]')
-TASK_RX = re.compile(r'T\d\d[a-z]\.\d+')
+GROUP_RX = re.compile(r'[A-Z]')
+SUB_RX = re.compile(r'[A-Z]\d\d')
+TASK_RX = re.compile(r'[A-Z]\d\d\.\d+')
+# Letters the old numbers used (B01, F01, M4.01, P01, U.2a, T05h.2): never group letters.
+RESERVED = set('BFMPTU')
+
+
+def safe(text: str) -> str:
+    """A folder name part: no spaces, brackets or path characters."""
+    return re.sub(r'[\s()（）/\\:*?"<>|“”‘’,，;；]', '', text)
+
+
+def find_dir(parent: Path, prefix: str) -> Path | None:
+    """The folder under [parent] whose name is [prefix] or starts with `prefix-`."""
+    if not parent.is_dir():
+        return None
+    for path in sorted(parent.iterdir()):
+        if path.is_dir() and (path.name == prefix or path.name.startswith(prefix + '-')):
+            return path
+    return None
 
 
 def load() -> dict:
@@ -130,20 +141,20 @@ class Project:
     def validate(self) -> None:
         seen: set[str] = set()
         for g in self.groups:
-            if not GROUP_RX.fullmatch(g['id']):
-                self.problems.append(f'组编号不对：{g["id"]}')
+            if not GROUP_RX.fullmatch(g['id']) or g['id'] in RESERVED:
+                self.problems.append(f'组编号不对（一个大写字母，不用 {"、".join(sorted(RESERVED))}）：{g["id"]}')
         for s in self.subs:
-            if not SUB_RX.fullmatch(s['id']) or s['id'][:3] not in self.group_by:
+            if not SUB_RX.fullmatch(s['id']) or s['id'][:1] not in self.group_by:
                 self.problems.append(f'子分类编号不对或组不存在：{s["id"]}')
         for t in self.tasks:
             tid = t.get('id', '?')
             if tid in seen:
                 self.problems.append(f'任务编号重复：{tid}')
             seen.add(tid)
-            if not TASK_RX.fullmatch(tid) or tid[:4] not in self.sub_by:
+            if not TASK_RX.fullmatch(tid) or tid[:3] not in self.sub_by:
                 self.problems.append(f'任务编号不对或子分类不存在：{tid}')
                 continue
-            self.tasks_of_sub[tid[:4]].append(t)
+            self.tasks_of_sub[tid[:3]].append(t)
             if t.get('status') not in STATUSES:
                 self.problems.append(f'{tid} 的状态不在 {"、".join(STATUSES)} 里：{t.get("status")}')
             if t.get('type') not in TYPES:
@@ -161,20 +172,43 @@ class Project:
             stages = t.get('stages')
             if stages is not None and not 0 <= t.get('done', 0) <= len(stages):
                 self.problems.append(f'{tid} 的 done 超出了阶段数')
+        for t in self.tasks:
+            for target in t.get('to', []):
+                if target not in seen:
+                    self.problems.append(f'{t["id"]} 的去向 {target} 不存在')
         for tasks in self.tasks_of_sub.values():
             tasks.sort(key=lambda t: int(t['id'].split('.')[1]))
-        # Task folders on disk must be registered.
-        for path in DOCS.glob('T??/T???/*'):
-            if path.is_dir() and TASK_RX.fullmatch(path.name) and path.name not in seen:
-                self.problems.append(f'没登记的任务文件夹：{path.relative_to(ROOT)}')
+        # Folders on disk: named after the registry and all registered.
+        for g in self.groups:
+            want = f'{g["id"]}-{safe(g["title"])}'
+            found = find_dir(DOCS, g['id'])
+            if found and found.name != want:
+                self.problems.append(f'组文件夹名应为 {want}：{found.relative_to(ROOT)}')
+        for s in self.subs:
+            want = f'{s["id"]}-{safe(s["title"])}'
+            found = find_dir(self.group_dir(s['id'][:1]), s['id'])
+            if found and found.name != want:
+                self.problems.append(f'子分类文件夹名应为 {want}：{found.relative_to(ROOT)}')
+        for path in DOCS.glob('?-*/???-*/*'):
+            if path.is_dir():
+                tid = path.name.split('-', 1)[0]
+                if TASK_RX.fullmatch(tid) and tid not in seen:
+                    self.problems.append(f'没登记的任务文件夹：{path.relative_to(ROOT)}')
 
     def group_tasks(self, gid: str) -> list[dict]:
-        return [t for s in self.subs if s['id'][:3] == gid for t in self.tasks_of_sub[s['id']]]
+        return [t for s in self.subs if s['id'][:1] == gid for t in self.tasks_of_sub[s['id']]]
 
     # ---- paths and links
-    @staticmethod
-    def task_dir(tid: str) -> Path:
-        return DOCS / tid[:3] / tid[:4] / tid
+    def group_dir(self, gid: str) -> Path:
+        return find_dir(DOCS, gid) or DOCS / f'{gid}-{safe(self.group_by[gid]["title"])}'
+
+    def sub_dir(self, sid: str) -> Path:
+        parent = self.group_dir(sid[:1])
+        return find_dir(parent, sid) or parent / f'{sid}-{safe(self.sub_by[sid]["title"])}'
+
+    def task_dir(self, tid: str) -> Path:
+        parent = self.sub_dir(tid[:3])
+        return find_dir(parent, tid) or parent / tid
 
     def materials(self, tid: str, base: Path) -> str:
         folder = self.task_dir(tid)
@@ -197,9 +231,15 @@ class Project:
                 links.append(f'[评审页]({os.path.relpath(first[0], base)})')
         return '、'.join(links) or '—'
 
+    def to_text(self, task: dict, base: Path) -> str:
+        targets = task.get('to', [])
+        if not targets:
+            return ''
+        return '（去向：' + '、'.join(self.task_link(t, base) for t in targets) + '）'
+
     def task_link(self, tid: str, base: Path) -> str:
         folder = self.task_dir(tid)
-        target = folder / 'README.md' if (folder / 'README.md').exists() else DOCS / tid[:3] / tid[:4] / 'README.md'
+        target = folder / 'README.md' if (folder / 'README.md').exists() else self.sub_dir(tid[:3]) / 'README.md'
         return f'[{tid}]({os.path.relpath(target, base)})'
 
     # ---- generated files
@@ -233,7 +273,7 @@ class Project:
                 (t for t in gt if t['status'] in ('未开始', '已确认')),
                 key=lambda t: (t.get('tier', 9), t['id']),
             )
-            link = f'[{g["id"]} {g["title"]}]({g["id"]}/README.md)'
+            link = f'[{g["id"]} {g["title"]}]({os.path.relpath(self.group_dir(g["id"]) / "README.md", base)})'
             out.append(
                 f'| {link} | {bar(ratio(gt))} | {done} / {len(gt)} | {"、".join(doing) or "—"} | '
                 f'{nxt[0]["id"] + " " + nxt[0]["title"] if nxt else "—"} |'
@@ -269,6 +309,13 @@ class Project:
                 f'{"、".join(t.get("stages", [])) or "—"} |'
             )
         out.append('')
+        rows = [t for t in self.tasks if t['id'].startswith('V01.') and t['status'] in OPEN]
+        out.append(f'## 新功能提议（{len(rows)}）\n\n还没决定做不做的新功能；做法见 [PROCESS.md](PROCESS.md) 第 6 节。\n')
+        if rows:
+            out.append('| 提议 | 状态 | 来源 |\n|---|---|---|')
+            for t in rows:
+                out.append(f'| {self.task_link(t["id"], base)} {t["title"]} | {t["status"]} | {t.get("from", t.get("note", "—"))} |')
+        out.append('')
         rows = [t for t in self.tasks if t['status'] == '受阻']
         out.append(f'## 受阻（{len(rows)}）\n')
         for t in rows:
@@ -290,16 +337,16 @@ class Project:
         )
         for g in self.groups:
             out.append(f'## {g["id"]} {g["title"]}\n\n{g["scope"]}\n\n{bar(ratio(self.group_tasks(g["id"])))}\n')
-            for s in (s for s in self.subs if s['id'][:3] == g['id']):
+            for s in (s for s in self.subs if s['id'][:1] == g['id']):
                 tasks = self.tasks_of_sub[s['id']]
-                out.append(f'### [{s["id"]} {s["title"]}]({s["id"][:3]}/{s["id"]}/README.md)\n')
+                out.append(f'### [{s["id"]} {s["title"]}]({os.path.relpath(self.sub_dir(s["id"]) / "README.md", base)})\n')
                 if not tasks:
                     out.append('还没有任务。\n')
                     continue
                 out.append('| 编号 | 任务 | 类型 | 档位 | 状态 | 阶段 | 资料 |\n|---|---|---|---|---|---|---|')
                 for t in tasks:
                     out.append(
-                        f'| {t["id"]} | {t["title"]} | {t["type"]} | {TIERS.get(t.get("tier"), "—")} | {t["status"]} | '
+                        f'| {t["id"]} | {t["title"]}{self.to_text(t, base)} | {t["type"]} | {TIERS.get(t.get("tier"), "—")} | {t["status"]} | '
                         f'{stage_text(t)} | {self.materials(t["id"], base)} |'
                     )
                 out.append('')
@@ -308,8 +355,9 @@ class Project:
     def mapping_md(self) -> str:
         out = [HEADER, '# 旧编号对照\n']
         out.append(
-            '2026-10-02 之前用过五套编号：模块 M、界面 U、功能 F，以及 4.0.0 更新时的 B、P、U01、U02、F01、F02。'
-            '提交信息和代码注释里还会看到它们，按下表找到新任务。旧文档的全文在 git 标签 `docs-archive-2026-10-02`。\n'
+            '以前用过六套编号：模块 M、界面 U、功能 F、4.0.0 更新时的 B、P、U01、U02、F01、F02，'
+            '以及 docs v0（2026-10-02，一天）的 T00～T19。提交信息和代码注释里还会看到它们，按下表找到新任务。'
+            '这几个字母（B、F、M、P、T、U）因此不再用作组的字母。旧文档的全文在 git 标签 `docs-archive-2026-10-02`。\n'
         )
         rows = []
         for t in self.tasks:
@@ -318,7 +366,7 @@ class Project:
 
         def key(row: tuple[str, str, str]) -> tuple:
             old = row[0]
-            kind = {'M': 0, 'U': 1, 'F': 2, 'B': 3, 'P': 4}.get(old[0], 5)
+            kind = {'M': 0, 'U': 1, 'F': 2, 'B': 3, 'P': 4, 'T': 6}.get(old[0], 5)
             if re.fullmatch(r'(U0|F0)\d', old):
                 kind = 3
             nums = [int(n) for n in re.findall(r'\d+', old)]
@@ -330,10 +378,16 @@ class Project:
         out.append('\n## 旧的组编号\n')
         out.append('| 旧 | 新 |\n|---|---|')
         for old, new in [
-            ('U.1 设计系统', 'T01'), ('U.2 直播间', 'T05（飞行弹幕、弹幕列表、本地互动在 T06）'), ('U.3、U.4、U.5 首页、浏览、搜索和历史', 'T07'),
-            ('U.6 设置', 'T09a'), ('U.7 录制', 'T08'), ('U.10 账号', 'T10'), ('U.11 备份和同步', 'T09'), ('U.12 其他页面', 'T07（弹幕屏蔽在 T06b）'),
-            ('U.15 电视', 'T18'), ('U.17 苹果平台', 'T19'), ('M4 各直播平台', 'T02'), ('M5 弹幕', 'T06a'), ('M7 播放', 'T04'), ('M13 各页面', '各页面所在的组'),
-            ('M14 电视', 'T18'), ('M15 发布', 'T16a'), ('F.9 K90 验证', 'T15b'),
+            ('U.1 设计系统', 'A01、A02'), ('U.2 直播间', 'A07（飞行弹幕在 D03，弹幕列表在 A08）'), ('U.3～U.5 首页、浏览、搜索和历史', 'A06、A09'),
+            ('U.6 设置', 'A11'), ('U.7 录制', 'A10'), ('U.10 账号、U.11 备份和同步', 'A12'), ('U.12 其他页面', 'A15、A09、A08'),
+            ('U.13 桌面窗口', 'A16'), ('U.14 系统界面', 'A14'), ('U.15 电视', 'A17'), ('U.16 统一验证', 'S03'), ('U.17 苹果平台', 'A18'),
+            ('M4 各直播平台', 'E01～E03'), ('M5 弹幕', 'D01'), ('M7 播放', 'G'), ('M13 各页面', '各页面所在的组（功能在 C、I、J、K、L、N，界面在 A）'),
+            ('M14 电视', 'X03、A17'), ('M15 发布', 'Y01'), ('F.9 K90 验证', 'S02'),
+            ('T00 工程底座', 'Z'), ('T01 设计系统', 'A01～A05'), ('T02 直播平台', 'E'), ('T03 网络', 'Q'), ('T04 播放', 'G'),
+            ('T05 直播间', '界面 A07，功能 C'), ('T06 弹幕', '界面 A08，功能 D'), ('T07 浏览', '界面 A06、A09、A15，功能 I'),
+            ('T08 录制', '界面 A10，功能 H'), ('T09 设置和数据', '界面 A11、A12，功能 J'), ('T10 账号', '界面 A12，功能 K'),
+            ('T11 网络电视和点播', 'L'), ('T12 多画面和投屏', 'N'), ('T13 Android 系统集成', 'O'), ('T14 性能', 'R（手感 A03、尺寸 A04）'),
+            ('T15 质量和验证', 'S'), ('T16 发布和运营', 'Y（issue 在 V02）'), ('T17 桌面、T18 电视、T19 苹果', 'X（界面在 A16～A18）'),
         ]:
             out.append(f'| {old} | {new} |')
         out.append('\n## 旧文档去了哪里\n')
@@ -343,14 +397,14 @@ class Project:
         return '\n'.join(out) + '\n'
 
     def group_md(self, g: dict) -> str:
-        base = DOCS / g['id']
+        base = self.group_dir(g['id'])
         tasks = self.group_tasks(g['id'])
         out = [HEADER, f'# {g["id"]} {g["title"]}\n', f'{g["scope"]}\n', f'{bar(ratio(tasks))}\n']
         out.append('| 子分类 | 范围 | 进度 | 完成 / 全部 |\n|---|---|---|---:|')
-        for s in (s for s in self.subs if s['id'][:3] == g['id']):
+        for s in (s for s in self.subs if s['id'][:1] == g['id']):
             st = counted(self.tasks_of_sub[s['id']])
             done = sum(1 for t in st if t['status'] == '完成')
-            out.append(f'| [{s["id"]} {s["title"]}]({s["id"]}/README.md) | {s["scope"]} | {bar(ratio(st)) if st else "—"} | {done} / {len(st)} |')
+            out.append(f'| [{s["id"]} {s["title"]}]({os.path.relpath(self.sub_dir(s["id"]) / "README.md", base)}) | {s["scope"]} | {bar(ratio(st)) if st else "—"} | {done} / {len(st)} |')
         out.append('')
         left = [t for t in tasks if t['status'] in OPEN or t['status'] == '待真机']
         out.append(f'## 还没完成的（{len(left)}）\n')
@@ -368,8 +422,8 @@ class Project:
         return '\n'.join(out) + '\n'
 
     def sub_md(self, s: dict) -> str:
-        g = self.group_by[s['id'][:3]]
-        base = DOCS / g['id'] / s['id']
+        g = self.group_by[s['id'][:1]]
+        base = self.sub_dir(s['id'])
         tasks = self.tasks_of_sub[s['id']]
         out = [HEADER, f'# {s["id"]} {s["title"]}\n', f'属于 [{g["id"]} {g["title"]}](../README.md)。{s["scope"]}\n']
         out.append(f'- 代码：{s["code"]}')
@@ -379,7 +433,7 @@ class Project:
             out.append('| 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |\n|---|---|---|---|---|---|---|')
             for t in tasks:
                 out.append(
-                    f'| {t["id"]} | {t["title"]} | {t["type"]} | {t["status"]} | {t.get("date", "—")} | '
+                    f'| {t["id"]} | {t["title"]}{self.to_text(t, base)} | {t["type"]} | {t["status"]} | {t.get("date", "—")} | '
                     f'{t.get("commit", "—")} | {self.materials(t["id"], base)} |'
                 )
         else:
@@ -398,6 +452,8 @@ class Project:
                     lines.append(f'  - 分支：{t["branch"]}')
                 if t.get('note'):
                     lines.append(f'  - 说明：{t["note"]}')
+                if t.get('from'):
+                    lines.append(f'  - 来源：{t["from"]}')
                 out += lines
         extra = sorted(p for p in base.iterdir() if p.name != 'README.md' and not TASK_RX.fullmatch(p.name)) if base.is_dir() else []
         if extra:
@@ -414,14 +470,14 @@ class Project:
             DOCS / 'MAPPING.md': self.mapping_md(),
         }
         for g in self.groups:
-            files[DOCS / g['id'] / 'README.md'] = self.group_md(g)
+            files[self.group_dir(g['id']) / 'README.md'] = self.group_md(g)
         for s in self.subs:
-            files[DOCS / s['id'][:3] / s['id'] / 'README.md'] = self.sub_md(s)
+            files[self.sub_dir(s['id']) / 'README.md'] = self.sub_md(s)
         return files
 
 
 LINK_RX = re.compile(r'\]\(([^)\s]+)\)')
-PATH_RX = re.compile(r'(?<![\w/.\-])docs/[A-Za-z0-9_.\-/]*[A-Za-z0-9_\-]')
+PATH_RX = re.compile(r'(?<![\w/.\-])docs/[\w.\-/、]*[\w\-]')
 CODE_DIRS = ['apps', 'packages', 'tools']
 CODE_FILES = ['README.md', 'AGENTS.md', 'CLAUDE.md', 'toolchain.env', 'pubspec.yaml']
 CODE_EXT = {'.dart', '.py', '.sh', '.kt', '.md', '.yaml', '.json', '.kts', '.xml'}

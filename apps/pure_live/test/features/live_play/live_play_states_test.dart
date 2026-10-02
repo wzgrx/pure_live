@@ -1,4 +1,4 @@
-// The live room's states of U.2g (docs/T05/T05i/T05i.1/README.md): one
+// The live room's states of U.2g (docs/A-界面设计/A07-直播间界面/A07.7-直播间的状态/README.md): one
 // picture state for every case, its words and buttons in order, no bars
 // while nothing plays, and the IPTV guide in place of the chat.
 import 'dart:async';

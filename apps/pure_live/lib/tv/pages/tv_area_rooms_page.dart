@@ -21,7 +21,7 @@ import 'package:pure_live/tv/widgets/tv_status.dart';
 
 /// An area's rooms on the TV (arguments `[LiveSite, LiveArea]`, the phone's
 /// `RoutePath.kAreaRooms`): the shared area feed (`AreaRoomSource`, M12.2)
-/// in a room grid under the sub-page header (docs/T18/T18a/T18a.2 c13: the
+/// in a room grid under the sub-page header (docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件 c13: the
 /// area and its platform, the follow button on the right, no "返回"
 /// button). The focus starts on the first room once they arrive; Back
 /// leaves.

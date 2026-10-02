@@ -45,7 +45,7 @@ final class PandaLiveChatRefusal implements Exception {
 
 /// PandaTV's chat (the archived v4's spec/sites/pandalive.md §7, checked
 /// against the recording `fixtures/pandalive/danmaku/S07-live` and a
-/// read-only session of 2026-09-29; docs/T06/T06a/T06a.22/record.md),
+/// read-only session of 2026-09-29; docs/D-弹幕/D01-平台弹幕协议/D01.22-PandaTV弹幕/record.md),
 /// without I/O.
 ///
 /// - A Centrifugo 3 server ([endpoint]) speaking its JSON protocol: every

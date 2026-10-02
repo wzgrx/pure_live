@@ -38,7 +38,7 @@ enum RoomStage {
 }
 
 /// Where the room's danmaku connection is, for the chat list's empty states
-/// (docs/T06/T06d/T06d.1 c2: 3.x showed the same blank list whether it was
+/// (docs/A-界面设计/A08-弹幕界面/A08.1-弹幕列表和弹幕设置页 c2: 3.x showed the same blank list whether it was
 /// connecting, connected with nobody talking, timed out or not offered).
 enum ChatConnection {
   /// Not asked for (loading, offline, danmaku switched off, IPTV).

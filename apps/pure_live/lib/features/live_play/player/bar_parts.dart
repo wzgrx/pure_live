@@ -13,7 +13,7 @@ import 'package:pure_live/features/live_play/logic/room_layout.dart';
 import 'package:pure_live/features/live_play/player/player_gestures.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
-// The smaller pieces of the fullscreen and wide bars (docs/T05/T05c/T05c.1,
+// The smaller pieces of the fullscreen and wide bars (docs/A-界面设计/A07-直播间界面/A07.2-竖屏流和竖屏全屏,
 // U.2c, U.2d): the clock and battery, the desktop volume, the fit and
 // portrait-mode menus, the lock and the portrait fullscreen's entry hint.
 
@@ -225,7 +225,7 @@ class _VolumeSliderState extends State<VolumeSlider> {
 /// The fullscreen bar's fit (U.2c change 6, 18): the "画面比例" icon, the same
 /// small menu as the strip's quality, above the button; the room menu's
 /// "画面比例" opens the same menu next to its own button
-/// ([showVideoFitMenu], docs/T05/T05g/T05g.2 c5).
+/// ([showVideoFitMenu], docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一 c5).
 class VideoFitButton extends ConsumerWidget {
   /// Creates the button.
   const new({this.onMenu, super.key});

@@ -10,7 +10,7 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 
-/// About (3.x `lib/modules/about`, docs/T07/T07i/T07i.4).
+/// About (3.x `lib/modules/about`, docs/A-界面设计/A15-小页面/A15.2-关于和版本).
 ///
 /// Routes: `RoutePath.kAbout` ([AboutView]) and `RoutePath.kVersionHistory`
 /// (the version feature's [VersionPage], which holds the history next to

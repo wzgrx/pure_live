@@ -5,7 +5,7 @@ import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-/// What the picture shows when it is not simply playing (docs/T05/T05i/T05i.1:
+/// What the picture shows when it is not simply playing (docs/A-界面设计/A07-直播间界面/A07.7-直播间的状态:
 /// eighteen states, one component).
 enum PictureStateKind {
   /// Playing: nothing over the picture.
@@ -68,7 +68,7 @@ enum PictureStateKind {
   replayEnded,
 }
 
-/// A button of a picture state (docs/T05/T05i/T05i.1 按钮 1–7).
+/// A button of a picture state (docs/A-界面设计/A07-直播间界面/A07.7-直播间的状态 按钮 1–7).
 enum PictureAction {
   /// Opens the room switcher (1).
   switchRoom,
@@ -184,7 +184,7 @@ bool pictureBuffering(PlaybackState playback) =>
 /// fullscreen keeps a reduced top bar, c6).
 bool pictureHasControls(RoomStage stage) => stage == RoomStage.playing;
 
-/// The picture state of a room (docs/T05/T05i/T05i.1): [stage] and [failure]
+/// The picture state of a room (docs/A-界面设计/A07-直播间界面/A07.7-直播间的状态): [stage] and [failure]
 /// of the room, [room] as known, the session's [playback], the stream's
 /// recovery ([reconnecting], [attempts]: the session's own, B02 c4),
 /// [audioOnly], [restoring] (back from audio only, no picture yet) and

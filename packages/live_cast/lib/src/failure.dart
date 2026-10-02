@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-/// Every failure the cast package reports (docs/T12/T12c/T12c.1/record.md).
+/// Every failure the cast package reports (docs/N-多画面和投屏/N02-投屏/N02.1-投屏/record.md).
 ///
 /// Sealed so the app words each kind by type, never by message text.
 @immutable

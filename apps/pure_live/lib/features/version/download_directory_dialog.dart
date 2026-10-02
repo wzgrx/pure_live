@@ -13,7 +13,7 @@ enum DownloadDirectoryChoice {
 
 /// Asks where updates, downloads and fonts go when there is no usable
 /// download folder yet (3.x `showDownloadDirectoryChoiceDialog`,
-/// docs/T07/T07a/T07a.6): the message, the default folder, and "取消",
+/// docs/A-界面设计/A06-首页和全局/A06.3-全局弹窗): the message, the default folder, and "取消",
 /// "使用默认目录", "选择目录". Null is cancel, also from a tap outside, Back and
 /// Esc (U.3d c6; 3.x had no way out but the two choices). Without a picker
 /// ([canPick] false) "选择目录" is not offered.

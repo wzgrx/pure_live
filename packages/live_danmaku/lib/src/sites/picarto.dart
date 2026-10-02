@@ -22,7 +22,7 @@ final class PicartoDanmakuFrame {
   final bool tokenRefused;
 }
 
-/// Picarto's chat (docs/T06/T06a/T06a.11/record.md), without I/O: an
+/// Picarto's chat (docs/D-弹幕/D01-平台弹幕协议/D01.11-Picarto弹幕/record.md), without I/O: an
 /// anonymous JWT from the site's GraphQL API names the channel, and a
 /// WebSocket of JSON text frames carries the chat.
 ///

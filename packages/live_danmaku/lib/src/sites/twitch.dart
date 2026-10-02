@@ -118,7 +118,7 @@ final class TwitchIrcLine {
 }
 
 /// Twitch chat, IRC over a WebSocket of text frames (the codec of 3.x
-/// `TwitchDanmaku`, docs/T06/T06a/T06a.9/record.md), without I/O.
+/// `TwitchDanmaku`, docs/D-弹幕/D01-平台弹幕协议/D01.9-Twitch弹幕/record.md), without I/O.
 ///
 /// A frame holds one or more lines separated by `\r\n`. The client joins with
 /// `PASS`, `NICK`, `CAP REQ` and `JOIN`; chat is `PRIVMSG` with IRCv3 tags.
@@ -394,7 +394,7 @@ abstract final class TwitchDanmakuProtocol {
 ///   max(3 × 40 s, 90 s) = 120 s is replaced; server `PING`s are answered.
 /// - A refused login (the token expired) reopens the socket at once as an
 ///   anonymous nick for the rest of this [connect]; 3.x kept retrying the
-///   refused token (docs/T06/T06a/T06a.9/record.md, issue 1). The user is told
+///   refused token (docs/D-弹幕/D01-平台弹幕协议/D01.9-Twitch弹幕/record.md, issue 1). The user is told
 ///   once, with [TwitchDanmakuProtocol.cookieExpiredNotice] (B-7).
 /// - A `RECONNECT` (the server is going down for maintenance) replaces the
 ///   socket at once, without a notice and without a second `DanmakuReady`

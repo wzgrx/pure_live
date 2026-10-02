@@ -57,7 +57,7 @@ final class BilibiliGift {
 }
 
 /// Bilibili's danmaku connection (3.x `BiliBiliDanmaku`,
-/// docs/T06/T06a/T06a.2/record.md) over the shared WebSocket runtime.
+/// docs/D-弹幕/D01-平台弹幕协议/D01.2-哔哩哔哩弹幕/record.md) over the shared WebSocket runtime.
 ///
 /// - Connects to the credentials' endpoints (the general gateway first) with
 ///   their headers; a start without a token first refreshes the credentials
@@ -701,7 +701,7 @@ abstract final class BilibiliDanmakuProtocol {
   /// ([rich], decoded from JSON text), the notice's `uinfo`, `data.uinfo`
   /// and [legacy] (`info[2][1]`); the first rich one when all are masked,
   /// else [legacy]. A guest gets every one of them masked (B06: the server
-  /// masks by connection, see docs/T06/T06d/T06d.2/record.md); a logged-in
+  /// masks by connection, see docs/D-弹幕/D01-平台弹幕协议/D01.32-哔哩哔哩访客昵称和粉丝牌/record.md); a logged-in
   /// connection gets the full name in `user.base.name`.
   static String _userName(Map<String, dynamic> notice, Object? rich, String legacy) {
     final data = notice['data'];

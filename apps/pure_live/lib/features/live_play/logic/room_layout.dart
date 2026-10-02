@@ -14,7 +14,7 @@ enum RoomDisplay {
   fullscreen,
 
   /// A portrait stream filling an upright phone (3.x
-  /// `VideoMode.portraitFullscreen`, docs/T05/T05c/T05c.1).
+  /// `VideoMode.portraitFullscreen`, docs/A-界面设计/A07-直播间界面/A07.2-竖屏流和竖屏全屏).
   portraitFullscreen,
 
   /// Desktops: the picture fills the window, the header and the chat hidden

@@ -87,7 +87,7 @@ final class KilakilaDanmakuFrame {
   final bool dropped;
 }
 
-/// KilaKila's guest chat room (docs/T06/T06a/T06a.14/record.md), without I/O:
+/// KilaKila's guest chat room (docs/D-弹幕/D01-平台弹幕协议/D01.14-克拉克拉弹幕/record.md), without I/O:
 /// Socket.IO 2 over Engine.IO 3 on a WebSocket, the namespace
 /// `/live_chat_room_guest` (the archived v4's spec/sites/kilakila.md §7 and
 /// the live page's own client, `/static/pclive/js/chunk-82396490.*.js`).

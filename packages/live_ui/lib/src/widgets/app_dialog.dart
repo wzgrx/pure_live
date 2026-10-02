@@ -9,7 +9,7 @@ import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/widgets/dialog_buttons_theme.dart';
 import 'package:live_ui/src/widgets/dialog_keys.dart';
 
-// The one dialog of the app (docs/T01/T01d/T01d.1 c5–c9, c14; UI_PLAN §7):
+// The one dialog of the app (docs/A-界面设计/A02-组件/A02.2-弹窗组件 c5–c9, c14; UI_PLAN §7):
 // confirm, message, input and options are the same frame with different
 // content.
 

@@ -9,12 +9,12 @@ import 'package:live_ui/src/theme/live_colors.dart';
 const double sidePanelWidth = 360;
 
 /// The width from which a page without a picture opens its panels on the
-/// right (docs/T01/T01d/T01d.1 c10: the bottom on phones, the right on wide
+/// right (docs/A-界面设计/A02-组件/A02.2-弹窗组件 c10: the bottom on phones, the right on wide
 /// screens).
 const double sidePanelBreakpoint = 600;
 
 /// Opens a panel of a page without a picture (docs/specs/UI.md §7,
-/// docs/T01/T01d/T01d.1 c10): the same content rises from the bottom with
+/// docs/A-界面设计/A02-组件/A02.2-弹窗组件 c10): the same content rises from the bottom with
 /// a handle on narrow screens, or slides in on the right ([sidePanelWidth]
 /// wide, the full height) when [side] (by default from
 /// [sidePanelBreakpoint]); the page behind is dimmed. ✕ in the content's
@@ -72,7 +72,7 @@ Future<T?> showAdaptivePanel<T>(
   );
 }
 
-/// The top of a panel (docs/T01/T01d/T01d.1, U.2f): 52 high, the title
+/// The top of a panel (docs/A-界面设计/A02-组件/A02.2-弹窗组件, U.2f): 52 high, the title
 /// (17, semi-bold), [actions] (a text link such as "录制中心 ›") and ✕ (48,
 /// the variant ink); [leading] before the title (the back of a second
 /// page).

@@ -1,6 +1,6 @@
 import 'package:pure_live/i18n/i18n.dart';
 
-// The words of the recording settings (docs/T08/T08c/T08c.1 c5, c6): units
+// The words of the recording settings (docs/A-界面设计/A10-录制界面/A10.2-录制设置 c5, c6): units
 // in words ("15 秒", "5 分钟", "3.5 GB") where 3.x wrote "15s", "5m",
 // "3584.25 MB", and what a value means next to it.
 

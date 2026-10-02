@@ -15,12 +15,12 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 
 /// From this width of the page the history shows the list and the details
-/// side by side (docs/T07/T07i/T07i.4 c10, N3 A: the plan's "expanded"
+/// side by side (docs/A-界面设计/A15-小页面/A15.2-关于和版本 c10, N3 A: the plan's "expanded"
 /// width of the parent; 3.x used the whole screen's 760).
 const double releaseHistorySplitWidth = 840;
 
 /// Every release with its notes and files (3.x `VersionHistoryPage`,
-/// docs/T07/T07i/T07i.4 "版本历史"): a list (a release opens in a dialog
+/// docs/A-界面设计/A15-小页面/A15.2-关于和版本 "版本历史"): a list (a release opens in a dialog
 /// whose close button is at the top right), or the list and the details
 /// side by side from [releaseHistorySplitWidth]. The newest release is
 /// marked "最新", the installed one "当前" (c11).

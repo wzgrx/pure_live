@@ -119,7 +119,7 @@ abstract final class OnVideoColors {
   static const IconThemeData icons = IconThemeData(color: foreground, size: 24, shadows: shadows);
 
   /// The lighter dimming of a state over a moving picture (45 %: the
-  /// reconnecting message, docs/T05/T05i/T05i.1 c13).
+  /// reconnecting message, docs/A-界面设计/A07-直播间界面/A07.7-直播间的状态 c13).
   static const Color dimLight = Color(0x73000000);
 
   /// The text of a state's main button (on a [foreground] fill, U.2g c2).
@@ -163,7 +163,7 @@ abstract final class LiveSemanticColors {
   static const Color live = Color(0xFFD92D20);
 
   /// The gold of a super chat's price and "SC" mark (3.x `SuperChatCard`'s
-  /// amber icons, docs/T06/T06d/T06d.1).
+  /// amber icons, docs/A-界面设计/A08-弹幕界面/A08.1-弹幕列表和弹幕设置页).
   static const Color superChatGold = Color(0xFFFFC107);
 
   /// Text and dots on [live].
@@ -176,7 +176,7 @@ abstract final class LiveSemanticColors {
   static const Color onRecording = Color(0xFFFFFFFF);
 
   /// The soft ring around a recording button (its resting tone: the halo
-  /// breathes between 15 % and 45 % of [recording], docs/T08/T08b/T08b.3).
+  /// breathes between 15 % and 45 % of [recording], docs/A-界面设计/A10-录制界面/A10.3-录制按钮和状态图标).
   static const Color recordingHalo = Color(0x4DD92D20);
 
   /// Success text and icons in light themes (4.6:1 on every surface).
@@ -197,7 +197,7 @@ abstract final class LiveSemanticColors {
   /// The warning colour for [brightness].
   static Color warning(Brightness brightness) => brightness == Brightness.dark ? warningDark : warningLight;
 
-  /// The ground of a reminder bar (mobile data, docs/T01/T01c/T01c.1 c8),
+  /// The ground of a reminder bar (mobile data, docs/A-界面设计/A02-组件/A02.1-通用组件 c8),
   /// light themes; its text is the theme's `onSurface`.
   static const Color warningContainerLight = Color(0xFFFFF4E5);
 
@@ -209,7 +209,7 @@ abstract final class LiveSemanticColors {
       brightness == Brightness.dark ? warningContainerDark : warningContainerLight;
 
   /// A warm container next to the theme's primary container (IPTV guides
-  /// beside playlists, docs/T11/T11a/T11a.4), light themes.
+  /// beside playlists, docs/A-界面设计/A13-网络电视和多画面界面/A13.1-网络电视管理), light themes.
   static const Color warmContainerLight = Color(0xFFFFDDB8);
 
   /// Text and icons on [warmContainerLight].
@@ -230,7 +230,7 @@ abstract final class LiveSemanticColors {
       brightness == Brightness.dark ? onWarmContainerDark : onWarmContainerLight;
 
   /// The soft ground of a "recording" note in light themes (the close
-  /// dialog's "正在录制 2 个直播间", docs/T17/T17a/T17a.1 c9); its text is the
+  /// dialog's "正在录制 2 个直播间", docs/A-界面设计/A16-桌面界面/A16.1-桌面窗口 c9); its text is the
   /// theme's error colour.
   static const Color recordingNoteLight = Color(0xFFFCEEEE);
 
@@ -242,7 +242,7 @@ abstract final class LiveSemanticColors {
       brightness == Brightness.dark ? recordingNoteDark : recordingNoteLight;
 }
 
-/// The desktop title bar's fixed colours (docs/T17/T17a/T17a.1): its close
+/// The desktop title bar's fixed colours (docs/A-界面设计/A16-桌面界面/A16.1-桌面窗口): its close
 /// button turns Windows' red under the pointer in every theme (3.x
 /// `CustomTitleBar`).
 abstract final class WindowButtonColors {
@@ -280,7 +280,7 @@ abstract final class InkOnColor {
 
   /// Whether dark [ink] has the higher contrast on [background] (WCAG
   /// ratios). 3.x split at a luminance of 0.55, which put white on mid
-  /// golds at 1.9:1 (docs/T06/T06d/T06d.1 S2).
+  /// golds at 1.9:1 (docs/A-界面设计/A08-弹幕界面/A08.1-弹幕列表和弹幕设置页 S2).
   static bool darkInkOn(Color background) {
     final luminance = background.withValues(alpha: 1).computeLuminance();
     final darkRatio = (luminance + 0.05) / (ink.computeLuminance() + 0.05);

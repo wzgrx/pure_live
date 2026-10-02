@@ -7,7 +7,7 @@ import 'package:live_ui/src/widgets/loading_styles.dart';
 /// The diameter of the [VideoCentreButton] on a room's picture (64).
 const double videoCentreButtonSize = 64;
 
-/// The round button in the middle of a picture (docs/T05/T05f/T05f.1/brief.md c2,
+/// The round button in the middle of a picture (docs/A-界面设计/A07-直播间界面/A07.10-暂停状态/brief.md c2,
 /// audit A-01): a white glyph on a 45 % black disc ([OnVideoColors.button],
 /// as the mini windows' buttons), so it reads on a bright picture. Paused it
 /// is the play mark ([AppIcons.play], what a tap does) and stays on; while

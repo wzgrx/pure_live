@@ -44,7 +44,7 @@ final class RoomMenuAction {
 enum _Choice { follow, unfollow, tags, share }
 
 /// The dialog of a room card, the same on every card page and client
-/// (3.x `RoomCard.onLongPress`, also on right click; docs/T07/T07d/T07d.1,
+/// (3.x `RoomCard.onLongPress`, also on right click; docs/A-界面设计/A09-浏览界面/A09.1-房间卡片,
 /// choice A1: a dialog in the middle of the screen, like 3.x).
 ///
 /// The platform's logo, the streamer and "platform · room id" ([detail]

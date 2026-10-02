@@ -1,4 +1,4 @@
-// The room's mini windows of U.2j (docs/T05/T05j/T05j.1/README.md): the
+// The room's mini windows of U.2j (docs/A-界面设计/A07-直播间界面/A07.8-小窗/README.md): the
 // in-app floating window, Android's picture-in-picture and the desktop mini
 // window share one player and one set of buttons.
 import 'dart:async';

@@ -7,7 +7,7 @@ import 'package:pure_live/features/multiview/logic/multiview_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-/// One cell on screen (3.x `_MultiviewCellView`, docs/T12/T12a/T12a.2 c6–c8):
+/// One cell on screen (3.x `_MultiviewCellView`, docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面 c6–c8):
 /// black in every theme with white words; its number, platform and name in
 /// the top-left corner; the audible cell outlined with a "声音来源" mark; the
 /// cell the picker fills framed with a dashed line; and the empty, opening,

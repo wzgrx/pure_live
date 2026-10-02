@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/platform/display_mode.dart';
 
-// docs/T14/T14b/T14b.2/brief.md: c3 (the system holds the app at 60 Hz) and c4
+// docs/R-性能和流畅度/R02-刷新率/R02.2-刷新率策略修正/brief.md: c3 (the system holds the app at 60 Hz) and c4
 // (numbers, never a category; not a game).
 
 const _channel = MethodChannel('pure_live/display_mode');

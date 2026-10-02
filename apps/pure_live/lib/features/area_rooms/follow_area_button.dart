@@ -6,7 +6,7 @@ import 'package:pure_live/features/areas/areas_common.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
 /// Follows or unfollows the area from the app bar (3.x
-/// `FavoriteAreaFloatingButton`; docs/T07/T07c/T07c.3 c3, choice Y1): the
+/// `FavoriteAreaFloatingButton`; docs/A-界面设计/A09-浏览界面/A09.5-分区房间 c3, choice Y1): the
 /// live room's pill, "＋ 关注" filled while not followed, "✓ 已关注" grey
 /// once followed (3.x shrank to the area's picture). Unfollowing asks first
 /// (3.x's dialog); while saving the pill is grey and cannot be pressed; a

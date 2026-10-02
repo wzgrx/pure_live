@@ -147,7 +147,7 @@ void main() {
     }
     final sorted = [...times]..sort();
     final mean = times.fold<int>(0, (sum, t) => sum + t) / times.length / 1000;
-    // The numbers go to the record (docs/T06/T06d/T06d.3/record.md).
+    // The numbers go to the record (docs/D-弹幕/D04-数据流和性能/D04.1-弹幕性能和可读性/record.md).
     // ignore: avoid_print
     print(
       'B08 chat benchmark: $_seconds s, $sent messages, $frames frames at $_hz Hz\n'

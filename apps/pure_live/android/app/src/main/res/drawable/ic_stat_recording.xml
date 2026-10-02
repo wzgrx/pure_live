@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Recording notification small icon (docs/T08/T08b/T08b.3 c10): the
+<!-- Recording notification small icon (docs/A-界面设计/A10-录制界面/A10.3-录制按钮和状态图标 c10): the
      recording glyph in one colour, a disc with its rounded square knocked
      out (the ring and dot is "not recording"). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"

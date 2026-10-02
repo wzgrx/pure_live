@@ -81,7 +81,7 @@ String? recordTaskFolder(RecordTask task) {
   return attempt.isEmpty ? null : attempt;
 }
 
-/// Recording centre (3.x `lib/recorder/pages/recorder`; docs/T08/T08b/T08b.2,
+/// Recording centre (3.x `lib/recorder/pages/recorder`; docs/A-界面设计/A10-录制界面/A10.1-录制中心,
 /// confirmed): five filters with counts, then each task's card, whose
 /// status block is the live room's record panel status card (U.2f) in its
 /// compact size. One column on a phone in portrait; as many columns of at

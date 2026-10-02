@@ -1,5 +1,5 @@
 /// Network layer of Pure Live: HTTP and WebSocket transport for platform
-/// adapters and the app (docs/T03/T03a/T03a.1/record.md).
+/// adapters and the app (docs/Q-网络和代理/Q01-请求和编码/Q01.1-网络/record.md).
 library;
 
 export 'src/calls.dart';

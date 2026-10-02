@@ -8,7 +8,7 @@ import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
-// The room menu's "定时关闭" and "房间音量" (docs/T05/T05g/T05g.2 c1): room
+// The room menu's "定时关闭" and "房间音量" (docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一 c1): room
 // panels like the record and danmaku settings ones, under the picture in
 // portrait, on the right in landscape and on tablets; 3.x and 4.0.0 showed
 // centred dialogs over the picture.
@@ -35,7 +35,7 @@ const List<int> sleepTimerPresets = [15, 30, 45, 60, 90, 120, 240, 480];
 /// The longest sleep timer in minutes (365 days, 3.x).
 const int sleepTimerMaxMinutes = 525600;
 
-/// "定时关闭" (docs/T05/T05g/T05g.2 c1, c11): the switch, the preset lengths
+/// "定时关闭" (docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一 c1, c11): the switch, the preset lengths
 /// and a length of one's own. Changes apply at once (N2): the switch starts
 /// or stops the timer, a preset starts it, "开始" starts the typed length;
 /// the panel stays and says when the room pauses. When the timer ends the
@@ -264,7 +264,7 @@ final Expando<double> _roomBeforeMute = Expando('room volume before mute');
 /// The volume "取消静音" goes to when nothing was heard before (N5).
 const double unmuteFallbackVolume = 0.5;
 
-/// "房间音量" (docs/T05/T05g/T05g.2 c1–c3): the mute button, the slider and
+/// "房间音量" (docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一 c1–c3): the mute button, the slider and
 /// the level. Where the picture's drags change the phone's media volume
 /// ([DeviceControls], Android phones and tablets; B-3, 3.x's
 /// `_usesSystemVolume`), this is that same volume: nothing of its own is

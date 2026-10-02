@@ -37,7 +37,7 @@ final class SixRoomDanmakuFrame {
 }
 
 /// Six Rooms' room chat, as the public room page (`v.6.cn/<room>`) runs it
-/// anonymously (docs/T06/T06a/T06a.28/record.md), without I/O. The page's
+/// anonymously (docs/D-弹幕/D01-平台弹幕协议/D01.28-六间房弹幕/record.md), without I/O. The page's
 /// scripts: `chunkimport-pcwebsocket_*.js` (the socket client), `chunk8104_*`
 /// (`Room.Socket`, `Room.Msg`, the error flags), `chunk6236_*` (the codec),
 /// `chunkimport-room_2016_*` (the chat list).

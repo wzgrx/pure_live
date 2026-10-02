@@ -18,7 +18,7 @@ String superChatRemaining(LiveSuperChatMessage superChat, DateTime now) {
   return '${two(seconds ~/ 60)}:${two(seconds % 60)}';
 }
 
-/// The super chats on display (3.x `SuperChatPage`, docs/T06/T06d/T06d.1
+/// The super chats on display (3.x `SuperChatPage`, docs/A-界面设计/A08-弹幕界面/A08.1-弹幕列表和弹幕设置页
 /// c5–c7): newest first; one clock for the whole list redraws only the
 /// times (3.x ran a timer per card); a platform without super chats says so
 /// instead of "会显示在这里".

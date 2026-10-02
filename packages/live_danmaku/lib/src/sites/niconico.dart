@@ -315,7 +315,7 @@ final class NiconicoDelimitedReader {
 /// (`NiconicoSeat.messageServer`) names its `view` address; everything
 /// after is HTTP, every answer a varint-length-delimited protobuf stream
 /// (`dwango.nicolive.chat`, the definitions n-air-app publishes as
-/// nicolive-comment-protobuf; docs/T06/T06a/T06a.15/record.md):
+/// nicolive-comment-protobuf; docs/D-弹幕/D01-平台弹幕协议/D01.15-niconico弹幕/record.md):
 ///
 /// - `view?at=now` answers at once with `next`;
 /// - `view?at=<next>` streams the history pointers (`backward`), the

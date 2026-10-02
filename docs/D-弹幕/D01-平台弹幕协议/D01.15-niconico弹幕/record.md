@@ -1,0 +1,370 @@
+# D01.15 弹幕（新增）：niconico
+
+- 日期：2026-09-29
+- 目标：`packages/live_danmaku/lib/src/sites/niconico.dart`
+  - `NiconicoDanmakuConnection`：连接（像快手一样直接继承 `DanmakuConnectionBase`）；
+  - `NiconicoDanmakuProtocol`：评论服务器的地址检查、请求、`view` 条目和窗口消息的解码、颜色表、退避，不做 I/O；
+  - `NiconicoDelimitedReader`：边收边切长度前缀（varint）的 protobuf 流；
+  - `NiconicoCommentWindow`、`NiconicoViewEntry`、`NiconicoViewEntryKind`：`view` 回答的条目。
+- 参数：`live_core` 的 `NiconicoDanmakuArgs(roomId, programId)`（E03.5 已给出）：在播且匿名可看的详情才有（进房、关注刷新、录制详情读的是同一个观看页，都有），不多发请求。本模块没有改参数类。
+- 升级条目：17-3“评论（弹幕）”。v3 没有 niconico 评论（`EmptyDanmaku`），这是新增功能，没有 v3 行为可对照。
+- 样本（都在 `fixtures/niconico/`）：
+  - `danmaku/S07-live`：归档 v4 的真实录制（2026-09-27，节目 lv351482215，75 s：3 次 `view`、4 个窗口、15 条评论）。帧没有改，本模块加上 v4 解码的冻结输出 `expected.json`，生成脚本 `danmaku/v4_expected.dart`；
+  - `seat/S04-seat`（E03.5）：座位对话，连接测试用它回放座位；`S03-watch-*`（E03.5）：观看页。
+  - 没有新录样本，见“样本”。
+- 参考：
+  - 归档 v4（`archive/v4`，6ba709135）：`packages/live_danmaku/lib/src/sites/niconico.dart`（`NiconicoChatProtocol`、`NiconicoChatConnector`）、`test/niconico_test.dart`；规格 `spec/sites/niconico.md` 第 7 节；
+  - 评论服务器的 protobuf 定义：n-air-app（niconico 的官方直播工具）公开的 `nicolive-comment-protobuf`（2026-09-29 读取，版本 2026.629.180145）：`service/edge/payload.proto`（`ChunkedEntry`、`MessageSegment`、`ChunkedMessage`）、`data/message.proto`（`NicoliveMessage`）、`data/atoms.proto`（`Chat`、`Chat.Modifier`、`Statistics`）、`data/state.proto`（`NicoliveState`）、`data/origin.proto`、`data/atoms/notifications.proto`、`data/atoms/forwarded.proto`；
+  - 颜色值：niconico 评论命令的颜色表。二十个名字的顺序来自上面的 `ColorName`，数值取 ZenzaWatch 的 `NicoChat.COLORS`，SRNicoNico、Hohoema 等客户端相同；Saccubus 的基本色相同、`marineblue` 是旧值 `#33FFFC`，没有采用；
+  - pure_live_TV `e1cca224`：`lib/platforms/niconico/niconico_site.dart:36` 仍是 `EmptyDanmaku`，没有可参考的实现；
+  - 2026-09-28 21:19～21:35 UTC 的只读实测（匿名、经本机代理、不登录、不发言），见“实测”。
+
+## 做法
+
+- **直接继承 `DanmakuConnectionBase`**，不用 D01.1 的 WebSocket 运行时：评论服务器是 HTTP；座位的 WebSocket 只收文本帧，由 `live_core` 的 `NiconicoSeat`（E03.5）负责，框架的 `LiveSocket` 用不上。取消、停止后没有事件、换房间先停旧的，照样由基类保证。
+- **自己开座位**：`NiconicoSite.openSeat(roomId)` 读观看页、按平台的代理路由开座位、等到 `seat` 和 `stream`；座位随后给出 `messageServer.viewUri`（S04 里与 `stream` 同一毫秒到），每 100 ms 看一次，最多等 10 s（v4 的值）。座位在读评论期间一直开着，它自己按 `keepIntervalSec` 保活、应答 `ping`。
+- **流式读取评论服务器**（`LiveHttp.open`），不像 v4 那样等整个回答读完：
+  - `view?at=now` 立刻回答一个 `next`；
+  - `view?at=<next>` 先给出历史指针（`backward`）、已结束的窗口（`previous`）和进行中的窗口（`segment`），之后每个新窗口在开始前约 6 s 给出，最后给出 `next`，整个回答约 30 s；
+  - 每读到一个 `segment` 就开这个窗口（同一个座位里按地址只开一次）；`previous` 和 `backward` 不读；回答结束时用它的 `next` 再问；
+  - 窗口的回答先给出这个窗口已有的消息、一个 `Flushed` 信号，然后每条消息一发出就到，窗口结束（`until`）后约 1 s 结束。收到一条报一条。
+  - 所以评论是实时的（实测延迟不到 1 s）；连上时当前窗口已有的评论（最多 16 s）先一起到。v4 读完整个 `view` 回答才知道窗口，再读完整个窗口、按原节奏放出，评论晚 16～40 s（差异 3）。
+- **就绪**：一个 `view` 回答的第一个条目（通常是 `at=now` 的 `next`，座位打开后约 1 s；实测从进房的详情到就绪 3.6～3.8 s）。每次恢复后再报一次。
+- **失败**（详见“连接和时序”）：
+  - 窗口失败只丢这个窗口的评论，不算连接失败；
+  - `view` 失败：服务端拒绝（4xx）说明地址失效，换一个座位（重读观看页）；其他失败（传输、5xx、回答里没有 `next`）在同一个座位上重问同一个 `at`；
+  - 座位结束（节目结束 `END_PROGRAM`、服务端断开、90 s 无消息、`error`）：换一个座位。新座位重读观看页，所以主播开了下一场就跟过去；房间已经不在播、受限、不存在时以 `connectionFailed` 结束；
+  - 连续失败按 1、2、4、8、8… s 退避（快手 D01.6 的做法），第一次报 `DanmakuReconnecting`，第 9 次以 `reconnectsExhausted` 结束；任何一个 `view` 条目都结束这一轮。
+- **上报**：
+  - 聊天：`chat`，以及 `overflowed_chat`（服务端标为“溢出”的评论，也是观众发的聊天）；
+  - 观众数：`state.statistics.viewers` 是**累计来场数**，和观看页的 `watchCount`、座位的 `statistics.viewers` 是同一个数（见差异 2），报 `LiveAudienceMetricKind.totalViewers`，只在数值变化时报（S07 的 30 条里 17 次变化）；
+  - 平台没有醒目留言。礼物（`gift`）、ニコニ広告（`nicoad`）、来场和排名等通知（`simple_notification`、`simple_notification_v2`）、合作直播转发的评论（`forwarded_chat`）、运营评论和其他状态、信号都不报（和 D01.2～D01.13 的范围一致，见候选）。
+- **`audience.dart` 不改**：本平台的真实在线人数哪里都没有（列表、观看页、座位、评论服务器给的都是累计来场数），在线人数的来源没有变。niconico 从 E 起就不在这张表里，这次也不加。
+- **公告**：去掉“；弹幕暂未接入”，见“公告”。
+
+## 协议
+
+`view` 的回答（`ChunkedEntry`，一个 oneof，最后一个字段为准）：
+
+| 字段 | 名字 | 内容 | 本实现 |
+|---|---|---|---|
+| 1 | `segment` | 进行中或即将开始的窗口：`MessageSegment{1 from, 2 until, 3 uri}`，时间是 `Timestamp{1 秒, 2 纳秒}`，窗口 16 s | 读（按地址去重） |
+| 3 | `previous` | 已结束的窗口，同样的结构 | 不读 |
+| 2 | `backward` | 更早的历史和状态快照的地址 | 不读 |
+| 4 | `next` | `{1 at}`：下一次 `view` 的 `at`（秒） | 下一次请求 |
+
+窗口的消息（`ChunkedMessage`）：`1 meta{1 id, 2 at, 3 origin}`，之后是 oneof：`2 message`（`NicoliveMessage`）、`4 state`（`NicoliveState`）、`5 signal`（`Flushed`，没有 `meta`）。
+
+| 内容 | 字段 | 本实现 | 归档 v4 |
+|---|---|---|---|
+| 聊天 | `message.1 chat` | 聊天 | 聊天 |
+| 溢出的聊天 | `message.20 overflowed_chat` | 聊天 | 不报（差异 5） |
+| 观众数 | `state.1 statistics.1 viewers` | 累计（`totalViewers`），变化时报 | 在线（`online`），每条都报（差异 2、4） |
+| 通知 | `message.7`、`message.23`（S07 有来场通知） | 不报 | 不报 |
+| 礼物、ニコニ広告 | `message.8`、`message.9`（S07 有一条广告） | 不报 | 不报 |
+| 转发的聊天、标签、主持人、NG 设置、游戏、Akashic 等 | `message.22`、`17`、`18`、`19`、`13`、`24`～`26` | 不报 | 不报 |
+| 其他状态（问卷、跑马灯、评论锁、节目结束等） | `state` 的其他字段 | 不报 | 不报 |
+| 信号 | `5` | 不报 | 不报 |
+
+聊天的字段（`Chat`）：
+
+| `LiveMessage` | 取值 | 与归档 v4 |
+|---|---|---|
+| 文本 | `1 content` 去首尾空白，空的不报 | 同 |
+| 用户名 | `2 name` 去首尾空白；匿名（184）评论没有，为空。实测 112 条里 8 条有名字 | 同 |
+| 用户 id | `6 hashed_user_id`（匿名评论的 `a:…` 形式），为空时用 `5 raw_user_id` | v4 在 `hashed_user_id` 是空串时就用空串（差异 9） |
+| 消息 id | `meta.1 id`，不加前缀 | v4 加 `niconico:`（差异 1） |
+| 时间 | `meta.2 at`（秒 + 纳秒，本地时区）；没有或超出 `DateTime` 范围时为空，消息照报 | v4 丢掉没有时间的消息，超出范围时抛错、整个窗口丢失（差异 7、8） |
+| 颜色 | `7 modifier` 的 `3 named_color`（下表）或 `4 full_color{r, g, b}`（限制在 0–255），oneof 以最后一个为准；没有时白色 | v4 不读（差异 6） |
+
+`vpos`（3）、`account_status`（4，高级会员）、`no`（8）、`modifier` 的位置、大小、字体、透明度不用（`LiveMessage` 没有这些字段，见候选）。
+
+`ColorName` 的颜色：
+
+| 值 | 名字 | 颜色 | 值 | 名字 | 颜色 |
+|---|---|---|---|---|---|
+| 0 | white | `#FFFFFF` | 10 | white2（niconicowhite） | `#CCCC99` |
+| 1 | red | `#FF0000` | 11 | red2（truered） | `#CC0033` |
+| 2 | pink | `#FF8080` | 12 | pink2 | `#FF33CC` |
+| 3 | orange | `#FFC000` | 13 | orange2（passionorange） | `#FF6600` |
+| 4 | yellow | `#FFFF00` | 14 | yellow2（madyellow） | `#999900` |
+| 5 | green | `#00FF00` | 15 | green2（elementalgreen） | `#00CC66` |
+| 6 | cyan | `#00FFFF` | 16 | cyan2 | `#00CCCC` |
+| 7 | blue | `#0000FF` | 17 | blue2（marineblue） | `#3399FF` |
+| 8 | purple | `#C000FF` | 18 | purple2（nobleviolet） | `#6633CC` |
+| 9 | black | `#000000` | 19 | black2 | `#666666` |
+
+表外的值当白色。录制和实测里的评论都没有 `modifier` 内容（空消息），颜色只由合成用例覆盖。
+
+**长度前缀**：每个回答都是“varint 长度 + 消息”的序列。长度前缀最多 10 字节，单条消息最多 1 MiB，超过就放弃这个回答；回答在一条消息中间结束也算失败（已经报的消息不收回）。单条消息解不开时只跳过这一条。
+
+**地址**：`view` 地址和窗口地址都只认 https 的 `nicovideo.jp` 及其子域（没有凭据、端口、片段）。座位给的 `view` 地址不合格时换座位；窗口地址不合格的条目跳过。请求以 `niconico` 的名义发出（平台的代理路由），带适配器的请求头（`referer`、`user-agent: Mozilla/5.0`）和 `origin: https://live.nicovideo.jp`，不跟随跳转。地址路径里带令牌，诊断文字里不写地址。
+
+## 连接和时序
+
+| 项目 | 本实现 | 归档 v4 | 依据 |
+|---|---|---|---|
+| 开始前的请求 | 观看页 1 个（`openSeat`） | 同（`seatSocket`） | E03.5 |
+| 座位 | `NiconicoSeat`（E03.5，v3 的协议：`startWatching`、`getAkashic`、`ping` 后补 `keepSeat`、90 s 静默看门狗）；启动最多 20 s（`NiconicoSite.seatStartupTimeout`） | 自己的座位（不发 `getAkashic`），没有静默看门狗 | E03.5 |
+| 等评论服务器地址 | 每 100 ms 查一次，最多 10 s | 同 | v4；S04 里与 `stream` 同时到 |
+| 就绪 | 第一个 `view` 条目 | 第一个 `view` 回答读完 | 差异 3 |
+| `view` 的超时 | `at=now` 20 s；之后 60 s，按响应头和条目之间的间隔计 | 整个回答 60 s | 实测：回答约 30 s，条目间隔约 16 s |
+| 窗口的超时 | 剩余时间（0～60 s）+ 20 s，按间隔计 | 剩余时间 + 20 s，按整个回答计 | 实测：窗口最长约 22 s（提前 6 s 给出） |
+| 同时读的窗口 | 最多 8 个（通常 2～3 个），每个座位记住最近 64 个已读地址 | 不限；记住 64 个 | — |
+| 窗口失败 | 只丢这个窗口 | 同 | — |
+| `view` 失败 | 4xx：换座位；其他：同一座位重问同一个 `at` | 同一座位连续 6 次后换座位 | 差异 13 |
+| 座位结束 | 换座位（重读观看页）；房间不在播、受限、不存在：`connectionFailed` | `END_PROGRAM` 以 `offline` 结束；其他换座位 | 差异 14；T02.U“留给其他模块”的约定 |
+| 连续失败 | 1、2、4、8、8… s 后重试，第一次报 `DanmakuReconnecting`，第 9 次 `reconnectsExhausted`；任何 `view` 条目清零 | 固定 3 s，6 次后 `maxRetries`；第一次开座位就失败直接结束 | 差异 12；D01.6 |
+| 心跳 | 没有（`heartbeatInterval` 为 0，`heartbeat()` 不做事）；座位自己保活 | 同 | — |
+| 结束原因 | 不能看（不在播、登录、地区、不存在）：`connectionFailed`；失败用尽：`reconnectsExhausted` | `offline`、`credentials`、`failed`、`maxRetries` | 差异 15 |
+| 代理 | 座位走 `NiconicoSite` 的代理路由；评论服务器的请求以 `niconico` 的名义经 `LiveHttp` | 同 | — |
+| 诊断文字 | 错误的类型和原因（`SiteError`、`TransportFailure`、`the comment server answered HTTP 403` 等），没有地址和令牌 | 错误原文 | — |
+
+## 登记方式
+
+应用（I01.1）建平台表时：
+
+```dart
+DanmakuRegistry({
+  SiteIds.niconico: () => NiconicoDanmakuConnection(site: niconicoSite),
+  // …
+});
+```
+
+| 参数 | 必需 | 说明 |
+|---|---|---|
+| `site` | 是 | 应用的 `NiconicoSite`：开座位（它的 `SocketConnector` 和代理策略），它的 `http` 也用来读评论服务器 |
+| `http` | 否 | 读评论服务器的 `LiveHttp`，默认 `site.http` |
+| `now` | 否 | 只给测试固定“现在”（窗口的超时由它算） |
+| `retryDelay` | 否 | 退避的第一步（1 s），只给测试缩短 |
+| `messageServerTimeout` | 否 | 等评论服务器地址的上限（10 s），只给测试缩短 |
+
+不需要 Cookie 或设置：v3 的 niconico 全程匿名（E03.5 没有账号）。
+
+## 与归档 v4 的对照
+
+- `fixtures/niconico/danmaku/v4_expected.dart` 把归档 v4 的 `NiconicoSegment`、`NiconicoView`、`NiconicoTimedEvent`、`NiconicoChatProtocol` 和它用的 `ProtoField`、`ProtoMessage`（`codec/protobuf.dart` 的读取部分）原样搬进一个独立程序，只替换事件类型（`DanmakuChat`、`DanmakuOnline`、`AudienceKind`）和 `DecodeContext`。它对 S07 的每个回答写下：`view` 的窗口（开始、结束、地址）、已结束的窗口和 `next`；窗口的每个事件（时间、类型、id、用户、文本或观众数）。运行：在仓库根目录 `dart run fixtures/niconico/danmaku/v4_expected.dart`，`generator` 字段写明来源。
+- 测试把新代码的 `LiveMessage` 投影成 v4 的形状（id 补回 `niconico:`，观众数写回 v4 的 `online`），逐帧比较；再单独断言新代码的 id 没有前缀、观众数是 `totalViewers`。
+
+| 对照 | 结果 |
+|---|---|
+| 3 个 `view` 回答 | 一致：`at=now` 只有 `next` 1790541775；之后两次各有 2 个进行中的窗口、2 个已结束的窗口和 `next`（1790541805、1790541837）；新代码另外认出每次 1 个 `backward` |
+| 4 个窗口 | 一致：15 条聊天（文本、时间、用户 id；名字都为空，是匿名评论）和 30 个观众数（9988→10005，只增不减）；广告、来场通知、4 个 `Flushed` 信号两边都不报 |
+| 请求地址 | 新代码的 `view` 请求与录下的 3 个地址逐字相同；读的窗口正是录下的 4 个，已结束的窗口没有请求 |
+| 通过连接回放 | 用 S04 的座位（把它的评论服务器换成 S07 的地址）、合成的观看页（S03 的页面改成 S07 的主播和节目）回放：15 条聊天按录制顺序、17 个观众数（去掉重复），一次就绪 |
+
+## 与归档 v4 的差异
+
+| # | 差异 | 原因 |
+|---|---|---|
+| 1 | 消息 id 不加 `niconico:` 前缀 | 与 D01.2～D01.13 一致：去重闸门按房间内的 id 比较 |
+| 2 | 观众数报累计（`totalViewers`），不是在线 | 这个数与观看页的 `watchCount`、座位的 `statistics.viewers` 是同一个累计数：S03 的观看页 2292，一两分钟后同一节目的座位 2308、2322；实测观看页 7951、座位 7952、评论服务器从 7952 起，S07 9988→10005，都只增不减。v3 的说明 `audience_niconico_detail` 和 E03.5 的口径都是累计。v4 规格第 2.2 节自己也写了累计，第 7.3 节却标成在线（问题 1） |
+| 3 | 流式读取，评论到了就报 | v4 用 `send` 读完整个回答（问题 2）。实测新代码的延迟不到 1 s |
+| 4 | 观众数只在变化时报 | 服务端每有一条评论或来场就发一次统计，S07 的 30 条里 13 条和上一条相同；报重复的数只让界面多刷新 |
+| 5 | `overflowed_chat` 也当聊天 | 定义里它和 `chat` 是同一个 `Chat` 类型，是观众发的评论。录制和实测里没有出现 |
+| 6 | 评论带颜色 | 平台数据有（`modifier`），v4 规格把颜色表列为待确认；现在按定义的 `ColorName` 和评论命令的颜色表填 |
+| 7 | 没有时间的消息照报（时间为空） | 统一原则“一行坏数据只跳过这一行”；没有时间不是坏数据。录制里只有信号没有 `meta` |
+| 8 | 时间超出范围只让这一条没有时间 | v4 抛 `RangeError`，这个窗口的评论全部丢失（问题 3） |
+| 9 | `hashed_user_id` 是空串时用 `raw_user_id` | v4 用 `string(6) ?? raw`，空串也算有 |
+| 10 | 评论服务器的地址只认 https 的 `nicovideo.jp` | v4 任何带 scheme 的地址都带着平台的请求头去请求（问题 4） |
+| 11 | 长度前缀最多 10 字节、单条最多 1 MiB | 流式读取要限制缓冲；v4 把整个回答读进内存，不设上限 |
+| 12 | 连续失败按 1、2、4、8… s 退避，第 9 次结束；第一次开座位失败也重试 | 和快手（D01.6，同样是 HTTP）一致。v4 固定 3 s、6 次，第一次开座位失败（例如一次网络抖动）就结束（问题 5） |
+| 13 | `view` 被拒（4xx）立刻换座位，其他失败在同一座位重试 | 4xx 说明地址失效，重试没有用；v4 在同一座位连续失败 6 次才换 |
+| 14 | 节目结束后重读观看页，主播开了下一场就跟过去；房间不在播才结束 | 房间是主播（17-1），T02.U 约定“主播换了一场要重新开座位”。v4 见到 `END_PROGRAM` 就以 `offline` 结束 |
+| 15 | 结束原因用 D01.1 的类型 | v4 的 `offline`、`credentials`、`failed`、`maxRetries`；界面文字由 M13 给出 |
+| 16 | 窗口的超时按间隔计，剩余时间最多算 60 s | 流式读取下整个回答的时长没有意义；设备时钟偏差很大时不让一个卡住的窗口占着很久 |
+| 17 | 同时最多读 8 个窗口 | 防御：正常 2～3 个 |
+| 18 | 座位用 E03.5 的 `NiconicoSeat` | 平台层已有、与播放和录制相同的座位协议（v3）；v4 自己实现，不发 `getAkashic`、没有静默看门狗 |
+
+没有改的地方：`view` 从 `at=now` 开始、按 `next` 接着问；只读 `segment`、不读 `previous` 和 `backward`；按地址去重；窗口超时的 20 s 余量；等评论服务器地址 10 s；请求头（`origin`、`referer`）；聊天的文本、名字、时间、id 的读法；不报通知、礼物、广告和信号。
+
+## 审查发现的归档 v4 问题
+
+| # | 问题 | 位置（归档 v4） | 根因 | 处理 |
+|---|---|---|---|---|
+| 1 | 累计来场数被当成在线人数上报 | `NiconicoChatProtocol.messages` | 按字段名 `viewers` 理解 | 差异 2 |
+| 2 | 评论晚 16～40 s 才出现：`view` 要读完（约 25 s）才知道窗口，窗口也要读完（到窗口结束）才解码，再按原节奏放出 | `_follow`、`_window`、`_get` | `LiveHttp.send` 读完整个回答；v4 规格 7.4 写明“晚一个窗口” | 用 `LiveHttp.open` 流式读取（差异 3） |
+| 3 | 一条消息的时间超出 `DateTime` 范围时抛 `RangeError`，这个窗口的评论全部丢失 | `_time`（`messages` 一次解整个窗口） | 没有范围检查 | 差异 8 |
+| 4 | 任何带 scheme 的窗口地址都会被请求（http、别的主机），带着平台的请求头 | `_segment`（`uri.hasScheme`） | 只检查了 scheme 存在 | 差异 10 |
+| 5 | 第一次开座位失败就结束连接，网络抖动一次这个房间就没有评论，直到重新进房 | `run`（`!joinedOnce` 分支） | 没加入过就不重试 | 差异 12 |
+
+## 实测
+
+2026-09-28 21:19～21:35 UTC，只读、匿名、经本机代理（直连 `live.nicovideo.jp` 的 TLS 握手在本机失败），没有登录，没有发言。只记时序和消息类型，不存评论内容。
+
+- 探测程序（自写的 `dart:io` 小程序：读观看页、开座位、流式读 `view` 和窗口，记录每个条目到达的时刻）连了综合分区评论最多的节目两次，各约 80 s：
+  - 座位打开后约 0.4 s 给出 `messageServer`（与 `stream`、`schedule`、`statistics` 同一批）；
+  - `view?at=now` 约 1 s 回答，只有 `next`（比当时晚 1～2 s）；
+  - `view?at=<next>` 的前几个条目立刻到：`backward`、两个 `previous`、进行中的 `segment`（有时连下一个也在）；之后每个新窗口在开始前约 6 s 到，`next` 在它指的时刻之前约 6 s 到，回答随之结束，一个回答约 30 s；
+  - 窗口的回答：进行中的窗口先给出已有的消息（最早的晚 13 s），然后是 `Flushed`，之后每条消息在它的时间后不到 1 s 到达（本机时钟比服务端慢约 0.8 s，所以算出来是 −0.8 s）；未开始的窗口立刻回答，先是 `Flushed`；回答在窗口结束后约 1 s 结束；一个窗口的回答里两段数据之间最长隔了约 9 s（未开始的窗口从 `Flushed` 到第一条消息）；
+  - 80 s 里 24 条聊天、46 个统计、3 条来场通知（`simple_notification_v2`）、6 个 `Flushed`；聊天都有 `name`（多数为空）和 `hashed_user_id`，没有 `raw_user_id`，`modifier` 都是空的；
+  - 观看页 `watchCount` 7951（7999），座位 `statistics.viewers` 7952（8000），评论服务器 7952 起逐渐增加：同一个累计数。
+- 用本实现（`IoLiveHttp` + `NiconicoSite` + `NiconicoDanmakuConnection`，从目录第 1 页取来场最多的房间、进房拿参数）：
+  - user/52553742（lv351489826），90 s：详情后 3.8 s 就绪，没有重连；当前窗口已有的评论先到（晚 10～13 s），之后每条的延迟都不到 1 s；112 条聊天（8 条有名字，都没有颜色）、38 个观众数；关闭后状态为 `idle`；
+  - 同一房间 180 s：详情后 3.6 s 就绪，没有重连，193 条聊天（10 条有名字）、63 个观众数，第 20 条以后每条的延迟都不到 1 s；关闭后状态为 `idle`。
+
+## 样本
+
+- **没有新录**。S07 已覆盖 `view` 的三种回答、窗口里的聊天、统计、广告、通知和信号；流式到达的时序只影响读取方式，测试用把录下的回答切成 7 字节一片的假服务器和一个本地 HTTP 服务器（真实的 `IoLiveHttp`）覆盖。实测里见到而 S07 没有的（有名字的评论、`account_status`）由合成用例覆盖。
+- **S07 的脱敏**（归档时做的，本模块逐字段复查）：评论服务器的路径令牌（`/api/view/v4/…`、`/data/segment/v4/…`，在 URL 和 `view` 回答里）已换成合成值；`hashed_user_id` 已换；名字全为空，没有 `raw_user_id`。本模块解开 7 个回答的每个字段检查：`meta.id` 是服务端的消息编号（base64 的 protobuf：两个 64 位数和一个整数），`meta.origin` 是节目号 351482215，没有 IP、Cookie、用户编号或头像。`expected.json` 里只有这些已脱敏的值和公开的评论文字（和其他平台的口径相同）。门禁的 `fixture privacy` 通过。
+- **S04-seat**：连接测试把它的 `messageServer.viewUri` 换成 S07 的地址（它录的是另一场节目），其余帧原样回放。
+
+## 公告
+
+- `NiconicoApi.noticeText['niconico_program_scope']` 从“收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。”改为“收藏对应本次节目，主播的新节目需重新添加。”。这一句只出现在官方节目（房间号 `lv…`）的公告里，主播房间在 T02.U 已经没有。3.x 存下的官方节目关注，下次刷新时公告被新详情覆盖（`preferNullable`）。
+- `live_core` 的测试：`niconico_api_test.dart` 里两处用到这句的地方，与 v3 冻结输出比较的改用常量 `_v3ProgramScope`（v3 的原文，冻结输出不变），公告文字的用例改成新文字并断言公告里不再有“弹幕”。`niconico_site_test.dart` 用的是常量本身，不用改。
+
+## 回归条目的覆盖
+
+归档规格第 10 节与评论有关的只有“座位立刻被关（发了二进制帧）”：座位用 `NiconicoSeat`，只发文本帧，E03.5 的测试覆盖。没有弹幕的 REG 条目。
+
+## 受阻和限制
+
+没有受阻的部分。
+
+限制：
+
+1. 每个直播间多占一个座位：播放（G）一个、评论一个（E03.5 的“每个使用者自己开座位”，v4 同样）。匿名座位的连接数上限没有测到；座位报 `TOO_MANY_CONNECTIONS`（`RateLimited`）时按普通失败退避重试。
+2. `NiconicoDanmakuArgs.programId` 没有用到：连接只按房间号开座位，主播换场由座位的结束和重读观看页处理。
+3. 刚连上时当前窗口已有的评论（最多 16 s）一起到达；之后是实时的。
+4. 付费频道节目试看结束时座位发什么没有观察到（v4 规格待确认 4）：座位结束后重开，观看页不再允许匿名观看时以 `connectionFailed` 结束。
+
+## 后续升级候选（由用户决定）
+
+| # | 内容 | 现状 | 依据 |
+|---|---|---|---|
+| 1 | 评论的位置（`ue` 顶部、`shita` 底部）、大小、字体、半透明 | 都按普通滚动评论显示 | `Chat.Modifier`；`LiveMessage` 没有这些字段（E05.1、A01.1、M13） |
+| 2 | 运营评论（`state.marquee` 的 `operator_comment`，官方播放器置顶显示）作为提示 | 已做（D01 后续升级（原 M5.F））：系统通知，见文末 | `NicoliveState.marquee` |
+| 3 | 显示礼物、ニコニ広告、来场和排名通知 | 已做（D01 后续升级（原 M5.F））：礼物上报（界面暂不显示）；广告、来场、排名按决定不显示，见文末 | 与其他平台一起由 M13 决定 |
+| 4 | 合作直播转发的评论（`forwarded_chat`，带来源节目） | 不显示 | `atoms/forwarded.proto` |
+| 5 | 播放和评论共用一个座位 | 各开一个 | 限制 1；G |
+| 6 | 评论锁定、仅关注者可评论、节目结束等状态提示 | 已做（D01 后续升级（原 M5.F））：系统通知，节目结束后的连接见文末 | `NicoliveState` 的 `comment_lock`、`program_status` |
+
+## 放到其他模块的部分
+
+| 内容 | 去向 |
+|---|---|
+| 登记到 `DanmakuRegistry` | I01.1（见“登记方式”） |
+| 关闭、重连原因的界面文字 | M13（D01.1 的原因表） |
+| 用 `totalViewers` 更新房间的来场数（房间的口径本来就是 `totalViewers`） | M13 |
+| 公告的多语言文字：`niconico_program_scope` 同样去掉后半句 | M13 |
+| 多画面弹幕（v3 不支持 niconico）是否接入 | 已完成（N01.1：多画面按弹幕登记接入所有有弹幕的平台，[记录](../../../N-多画面和投屏/N01-多画面/N01.1-多画面/record.md)） |
+| 上面的候选 | E05.1、G、A01.1、M13 |
+| `live_core` 的 `LiveDanmaku`、`LiveSite.getDanmaku()`（niconico 仍是默认的 `EmptyDanmaku`） | D01 各平台完成后删除 |
+
+## 新增的通用能力、依赖
+
+没有。框架文件没有改；`live_danmaku.dart` 按字母顺序加了一行导出；没有新依赖（protobuf 用 D01.5 的 `codec/protobuf.dart`，流式读取用 `live_net` 已有的 `LiveHttp.open`）。
+
+`live_core` 只改了 `niconico_api.dart` 的一句公告和 `niconico_api_test.dart` 的两处断言（见“公告”）。
+
+## 测试
+
+`test/sites/niconico_test.dart` 34 个用例，`live_danmaku` 共 724 个，连续跑 3 次全部通过；`live_core` 的 niconico 用例 307 个全部通过。另做了变异检查，下面每一种改动都会让对应的用例失败：观众数不去重、观众数报在线、读已结束的窗口、4xx 在同一座位重试、跟随跳转、加入后不清零失败次数、`at=now` 等 60 s、丢掉溢出的聊天、不退回 `raw_user_id`、不等评论服务器地址、窗口超时用真实时钟、不在播的房间也重试、退避不加倍、6 次就放弃（v4）、不检查主机、座位结束后还报旧窗口的评论。
+
+| 分组 | 用例 | 内容 |
+|---|---|---|
+| 协议 | 6 | 请求头、各项时限、窗口超时的上下限、退避 1、2、4、8、8…；评论服务器地址的检查（7 种不合格）；`view` 请求与录下的地址逐字相同、请求的平台和不跟随跳转；录下的 7 个回答按 1、2、3、5、7、64、1000 字节切开都得到同样的消息；空消息、跨片的前缀、10 字节前缀、负长度、超长、截断；流式读取边到边给出、在消息中间结束时报错 |
+| 录制对照 v4 | 4 | 3 个 `view` 回答的窗口、已结束的窗口、`next`、`backward`；4 个窗口的 15 条聊天和 30 个观众数与 v4 一致（id 没有前缀、累计口径、白色、本地时间、hashed id 的形式）；不报的广告、来场通知、信号；座位、观看页、评论服务器的观众数是同一个只增不减的累计数 |
+| 合成条目和消息 | 6 | `view` 条目的四种和未知、oneof 以最后一个为准、不合格的窗口（http、别的主机、坏地址、缺 `until`）、`next` 为 0 或负、不是 protobuf；聊天的文本、名字、id、时间（纳秒）、用户 id 的退回、空文本；溢出的聊天、13 种不报的消息、oneof；观众数的 0、2^40、负数、缺失、别的状态、oneof；信号、没有内容或 `meta`、时间的 6 种越界和最大值；20 种颜色、表外的值、位置和大小不影响颜色、完整颜色的限制和空值、oneof |
+| 连接 | 18 | 平台表登记、参数类型、没有心跳、默认参数；用 S04 座位和 S07 回答回放（观看页和请求头、座位地址和代理路由、`startWatching`、`view` 的 `at` 序列、4 个窗口各读一次、各请求的平台、请求头、超时，15 条聊天和 17 个观众数与 v4 一致，关闭后取消、座位关闭、没有事件）；评论服务器回答前不就绪；窗口 404、中途截断、传输失败只丢这个窗口；`view` 503 和超时在同一座位重试；两轮失败各报一次、不累计；`view` 403 换座位；座位 `END_PROGRAM` 后跟到下一场；房间已下播时 `connectionFailed`；五种不能看的房间开始即结束（不在播、要登录、地区限制、404、不是房间号）且不开座位；失败 9 次以 `reconnectsExhausted` 结束、退避序列、详情；评论服务器的失败同样计数、详情没有令牌；座位不给评论服务器、给 http 或别的主机时换座位、不请求它；座位结束后旧窗口晚到的评论不报；读观看页时关闭会取消、没有事件；读窗口时关闭会取消所有请求、关闭座位；换房间关掉旧座位、旧座位的结束不影响新房间；经 `IoLiveHttp` 从本地服务器流式读取一个窗口，前两条在回答结束前就到 |
+
+用到样本时间的只有窗口的超时，测试把“现在”固定成 S07 的录制时间（`now:`）；座位授权里 Cookie 的过期时间在连接里不用。`tools/timeshift/run.sh 30 1825`：`live_net`、`live_core` 全部 ok，`live_danmaku` 除 `test/sites/twitcasting_test.dart` 外全部 ok（包括本模块的 `niconico_test.dart`）。`twitcasting_test.dart` 的报错与时间无关：它作为普通程序运行（timeshift 的跑法）时，24 个用例都通过但进程不退出，不移时间也一样，是 D01.12 留下的，没有在本模块改。
+
+## 后续升级（D01 后续升级（原 M5.F），附录 B-11）
+
+- 日期：2026-09-30
+- 条目：B-11（候选 2、3、6）：运营评论、评论限制、节目结束显示为系统通知；礼物上报。候选 1（评论的位置、字体）放 A01.1，候选 4（合作直播转发的评论）放 M13，这次不做；广告、排名（以及来场通知）按决定不显示。
+- 本节取代前文“做法”“协议”里礼物、运营评论、评论锁、节目结束“不报”的说法；聊天、观众数的读法不变。
+
+### 做法
+
+| 内容 | 字段 | 上报 | 依据（网页脚本，2026-09-30 取自 `nicolive.cdn.nimg.jp/relive/program-watch/scripts/`） |
+|---|---|---|---|
+| 运营评论 | `state.4 marquee` → `1 display` → `1 operator_comment`（`1 content`、`2 name`、`3 modifier`、`4 link`） | `notice`、`LiveNoticeKind.system`：文字是 `content`（去首尾空白），用户名是 `name`，颜色按 `modifier`（与聊天同一张颜色表，没有时白色），id 和时间取 `meta`。没有 `display`（撤下）、没有评论、文字为空的不报；`link` 不带 | `resolveOperatorCommentEvent`、`updateOperatorComment`（usecase.cb7efc6a32.js）：实时收到的运营评论置顶并加进评论列表 |
+| 评论限制 | `state.5 comment_lock`（`1 status`：0 不限、1 锁定、2 限制；`2 follow_restriction` → `1 minimum_follow_duration` → `1 秒`） | 只在变化时报 `notice`（`system`），见下表；状态按连接记住，初始为“不限”（网页的默认值）。`Restricted` 没有关注限制时当作不限（网页同样）；不认识的 `status` 不改变状态、不报；关注时长小于 0 当 0，最多读 2^32 秒 | `resolveCommentLockEvent`、`updateCommentLock`、`updateCommentFollowerOnlyMode`；关注限制的一行由 `FollowerOnlyMode.generateSystemMessage` 写进评论列表（只在所需时长变化时）；锁定时评论框写“現在コメントできません”（vc.c3c6c95a6a.js） |
+| 节目结束 | `state.9 program_status`（`1 state`：0 Unknown、1 Ended） | `Ended` 报 `notice`（`system`）“この番組は終了しました”，id 和时间取 `meta`；`Unknown` 和别的值不报。随后结束这个座位，见“节目结束后的连接” | `resolveProgramStatusEvent`、`updateProgramStatus`（结束播放、断开座位），结束后的公告文字“この番組は終了しました”（nicolib.37f1064f38.js） |
+| 礼物 | `message.8 gift`（`1 item_id`、`2 advertiser_user_id`、`3 advertiser_name`、`4 point`、`5 message`、`6 item_name`、`7 contribution_rank`） | `gift`，`data` 是 `NiconicoGift`（`itemId`、`name`、`point`、`message`、`contributionRank`），用户名、用户 id 是赠送者（id 不是正数时为空），文字是网页那一行：`【ギフト貢献N位】` + `<赠送者>さんがギフト「<礼物>（<点数>pt）」を贈りました`（没有名次时没有前缀）。点数为负的丢掉（网页同样）；`item_id`、`item_name` 都空的不当作礼物 | `resolveGiftEvent`、`updateGift`（usecase）、`eF`（domain.ce2c3387de.js） |
+| 广告、来场、排名等通知 | `message.9`、`message.7`、`message.23` | 不报（决定） | — |
+
+评论限制的通知（前一个状态 → 新状态）：
+
+| 变化 | 文字 | 来源 |
+|---|---|---|
+| → 仅关注者（0 秒） | `【コメント制限】フォロワーに限定されます` | 网页原文 |
+| → 仅关注者（N） | `【コメント制限】<N>フォローを継続したユーザーに限定されます`；N 照网页写：1 天起 `2日`、`1日と3時間`，1 小时起 `1時間`、`1時間30分`，其余 `10分`（不足 1 分为 `0分`） | 网页原文 |
+| 仅关注者 → 不限 | `フォロワー限定コメントが解除されました` | 网页原文 |
+| → 锁定 | `現在コメントできません` | 网页锁定时评论框的文字（网页不往列表加行） |
+| 锁定 → 不限 | `评论锁定已解除` | 网页只是重新启用评论框，没有文字，这句是拼的 |
+| 没有变化 | 不报 | 网页的状态没变不出行 |
+
+- **一个状态消息多个字段**：`NicoliveState` 的字段不是 oneof，但录到的每个状态消息（包括快照）都只有一个字段。有多个时照网页 `subscribeUpdate` 的顺序取第一个能报的：评论限制、运营评论、节目结束、观众数。某个字段不是 protobuf 时当作没有，不影响其他字段（例如观众数照报）。
+- **读法**：`NiconicoMessageReader` 按顺序读一个连接的窗口消息，记住评论限制；`NiconicoDanmakuProtocol.message` 单独读一条（评论限制当作从“不限”变来）。
+- **换座位后**：新座位会重读当前窗口已有的消息（D01.15 的做法），其中的运营评论、评论限制、礼物再报一次，id 与第一次相同，和聊天一样由去重闸门挡掉（测试里用 `DanmakuMessageGate` 核对）。
+
+### 节目结束后的连接
+
+实测（S09-ended）：座位的 `disconnect`（`END_PROGRAM`）先到，25 ms 后窗口里的 `program_status` 到；之后评论服务器照常回答 `view`，新窗口里只有 `Flushed`。
+
+- 两者谁先到都算节目结束，通知只报一次：窗口先到时报带 id 的通知并结束这个座位；座位先到时由连接补报一条（没有 id 和时间），之后窗口里晚到的结束消息随座位作废。
+- 结束后立即重读观看页开新座位，不报重连、不计失败：房间已不在播（或受限、不存在）时以 `connectionFailed` 结束，和其他平台下播时结束连接一致（百度 D01.27、京东 D01.25 以 `connectionFailed` 结束；17LIVE 的 B-14 同样是下播结束）；主播已经开了下一场就跟过去（D01.15 差异 14 保留），连接状态不变，不再报就绪。
+- 结束后还没有任何 `view` 回答之前又遇到一次结束（观看页还显示刚结束的那场，新座位马上被断开），按普通失败处理：报重连、按 1、2、4… s 退避、计入 8 次上限，通知不重复，避免空转。
+- 与 D01.15 原来的差别：原来 `END_PROGRAM` 走失败路径，先报一次 `DanmakuReconnecting` 再结束或跟到下一场（跟过去时再报一次就绪）。其他原因的座位结束（`TAKEOVER` 等）不变。
+- `live_core` 在本平台目录下加了 `NiconicoApi.isProgramEnd`（座位结束的原因是不是 `END_PROGRAM` 的 `disconnect`），测试 1 个。
+
+### 样本
+
+新录 3 个（`fixtures/niconico/danmaku/`），2026-09-30 15:22～15:56 UTC，匿名、只读（不登录、不发言），经本机代理；录制程序照 D01.15 的探测程序写（一个座位，流式读 `view` 和窗口，第一次的状态快照也读了），格式同 S07（一行一个 HTTP 回答）：
+
+| 样本 | 内容 | 用途 |
+|---|---|---|
+| `S08-marquee` | 节目 lv351501141，约 285 s：10 个 `view` 回答、18 个窗口；4 条运营评论（都没有名字、颜色，`duration` 15 s）、4 条匿名聊天、观众数 | 运营评论的录制对照和连接回放 |
+| `S09-ended` | 节目 lv351501491 结束前后约 127 s：5 个 `view` 回答、7 个窗口、座位的 `disconnect` 帧；结束前 3 条有名字的聊天（`raw_user_id`，没有 hashed id）和 3 条表情通知，结束的 `program_status`，之后的窗口只有 `Flushed` | 节目结束的录制对照、连接回放和两个信号的先后 |
+| `S10-gift` | 节目 lv351499074（评论最多、累计礼物点数 31375）连录约 16 分钟才出现一条礼物；只留这个窗口和给出它的 `view` 回答：1 条礼物（`item_id`、赠送者 id 和名字、100 点、礼物名、`gift_bar_update`，没有 `message` 和名次）、9 条匿名聊天、观众数 | 礼物的录制对照 |
+
+脱敏（`meta.json` 的 `scrubbed` 有记录，写入前检查输出里找不到任何原值）：评论服务器路径里的令牌（`view`、`segment`、`snapshot`、`backward`，URL 和回答里）换成同长度的合成值；`hashed_user_id` 换成同形合成值；聊天的名字和礼物赠送者的名字换成同字节数的 ASCII；`raw_user_id` 和赠送者 id 换成同样变长整数长度的合成数；礼物的 `item_id`（`user15119555_26`，含的是主播即 S07 那个房间的编号，公开）保留；状态快照的回答不收（连接不读它，其中的市场商品可能带添加者编号）；座位只留 `disconnect` 帧。运营评论文字、聊天文字是公开内容，照其他样本的口径保留。门禁的 `fixture privacy` 通过。
+
+没能实测的部分（用合成帧，**未实测**）：
+
+- **礼物的 `message` 和名次**：录到的礼物没有这两个字段（6 个节目约 70 分钟里只出现这一条礼物），由合成用例覆盖。
+- **评论限制**：评论最多的 120 个在播节目里没有开“仅关注者评论”的（观看页 `commentFollowerOnlyMode`），也没遇到锁定；字段按定义和网页脚本写。
+- 运营评论的名字、颜色、链接：录到的都没有，由合成用例覆盖。
+
+### 与决定的差异
+
+- 没有新设置（条目不要求）。
+- 锁定和解除的文字：网页没有列表行，锁定用评论框的原文，解除是拼的中文（见上表）。
+- 不读状态快照：网页进房时从快照知道当前的限制（此时如有关注限制会出一行）和置顶的运营评论（只置顶，不进列表）。这里进房前已有的限制不提示，只报之后的变化；多一个请求换这一行，不划算。
+
+### 放到其他模块的部分
+
+| 内容 | 去向 |
+|---|---|
+| 通知的显示（聊天列表单独一行）、礼物的界面（B-21） | M13 |
+| 运营评论的置顶、显示时长（`duration`）、链接 | M13（`LiveMessage` 没有这些字段；要用时在协议层加） |
+| 网页锁定期间不显示聊天（列表不收、画面弹幕隐藏）：本实现照报聊天，是否照做由 M13 决定 | M13 |
+| 评论的位置、大小、字体（候选 1） | A01.1 |
+| 合作直播转发的评论（候选 4，要来源标记） | M13 |
+
+### 测试
+
+`test/sites/niconico_test.dart` 49 个（原 34 个，加 15 个），连续跑 3 次全部通过；`live_core` 的 `niconico_api_test.dart` 加 1 个（`isProgramEnd`）。原有用例改了 4 处，都在测试里注明 B-11：礼物不再列在“不报”里、oneof 最后是礼物时报礼物；座位 `END_PROGRAM` 后跟到下一场、房间已下播时结束，这两个不再有重连；“座位结束后旧窗口晚到的评论不报”改用 `TAKEOVER` 结束座位（`END_PROGRAM` 不再报重连）。另加“其他原因的座位结束仍是重连”。
+
+| 新用例 | 内容 |
+|---|---|
+| S08 录制 | 4 条运营评论是系统通知，文字与录制一致、顺序、id 各不相同、时间递增、没有名字和颜色；聊天 4 条、观众数 7 个，没有别的类型 |
+| S09 录制 | 结束只有一条通知（id、时间在录制开始后 20～30 s）；录制里的 `disconnect` 帧；结束之后的窗口什么都不报；有名字的聊天用 `raw_user_id` |
+| S10 录制 | 一条礼物：`NiconicoGift` 各字段、赠送者（合成的名字和 id）、网页那一行；`gift_bar_update` 不读；窗口里其余是聊天和观众数 |
+| 运营评论（合成） | 名字、颜色（命名色、完整颜色）、去空白、不带链接、时间；撤下、没有评论、空和空白文字、不是 protobuf 的两层都不报 |
+| 评论限制（合成） | 15 步状态序列（每一步的文字、id、时间、之后的状态，重复不报、不认识的 `status`、空的关注限制、负数时长）；单独读时的口径；超大时长的上限；不是 protobuf 的限制不改变状态；值类型的相等和文字 |
+| 关注时长的写法 | 15 个边界（0 分、分、时、时分、日、日と時間、上限） |
+| 节目结束和字段顺序 | `Ended` 的通知（纳秒时间）、`endedProgram` 只标那一条、0、2、−1 不报；多个字段时的顺序；限制没变时让给运营评论；不能读的运营评论不挡观众数 |
+| 礼物（合成） | 各字段、网页那一行（有无名次、名次 0、0 点、没有点数、没有礼物名）、赠送者 id 缺失、0、负数；负点数和没有礼物不报；不是 protobuf 抛 `FormatException`；`NiconicoGift` 的相等和文字 |
+| S08 连接回放 | 运营评论按录制顺序夹在聊天里、只就绪一次、从不请求状态快照 |
+| S09 连接回放 | 结束通知一条且在最后，不报重连，重读观看页后 `connectionFailed`；座位关闭、所有请求取消；座位随后的 `END_PROGRAM` 不再加通知 |
+| 座位先到 | `END_PROGRAM` 先到：一条没有 id 的通知，窗口晚到的结束消息丢掉，跟到下一场，不报重连 |
+| 连续两次结束 | 第二次（新座位马上被断开）按失败处理：报重连、之后 `connectionFailed`，通知只有一条 |
+| 连接里的评论限制 | 两个窗口的 6 条限制消息只报 3 次变化；换座位后重读的 3 条 id 相同，经去重闸门后只剩 3 条 |
+| 连接里的礼物 | 以 `gift` 上报，后面的聊天照常 |
+
+时间：用到样本时间的是窗口的超时，新用例把“现在”固定成各样本的录制时间（`now:`）；消息时间只做比较，不与真实时钟比。`niconico_test.dart` 以普通程序在 `SHIFT_SECONDS` +30 天、+5 年下运行都通过，`niconico_api_test.dart` +30 天通过。

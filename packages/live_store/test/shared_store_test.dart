@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 import 'support.dart';
 
-/// Two desktop windows on one data folder (docs/T17/T17a/T17a.1 c14): each
+/// Two desktop windows on one data folder (docs/A-界面设计/A16-桌面界面/A16.1-桌面窗口 c14): each
 /// process opens the same database file; what one writes the other takes in
 /// with `syncExternal`.
 void main() {

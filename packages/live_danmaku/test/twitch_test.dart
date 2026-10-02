@@ -314,7 +314,7 @@ void main() {
       final cookies = (_recorded['cookies']! as Map<String, Object?>).cast<String, String>();
       // M4.8's TwitchApi.cookieValue takes the first of repeated names and
       // compares names without case; 3.x's _parseCookie kept the last one and
-      // matched names exactly (docs/T06/T06a/T06a.9/record.md, "与 v3 的对照").
+      // matched names exactly (docs/D-弹幕/D01-平台弹幕协议/D01.9-Twitch弹幕/record.md, "与 v3 的对照").
       final differences = <String, List<String> Function(List<String>)>{
         'a repeated name (3.x: the last one)': (legacy) {
           expect(legacy.first, 'PASS oauth:second');
@@ -415,7 +415,7 @@ void main() {
           ),
     };
 
-    /// The intentional differences (docs/T06/T06a/T06a.9/record.md), applied to
+    /// The intentional differences (docs/D-弹幕/D01-平台弹幕协议/D01.9-Twitch弹幕/record.md), applied to
     /// 3.x's output of the case they concern.
     final differences =
         <

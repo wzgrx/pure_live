@@ -1,4 +1,4 @@
-// The portrait live room of U.2a (docs/T05/T05b/T05b.1/README.md): the
+// The portrait live room of U.2a (docs/A-界面设计/A07-直播间界面/A07.1-竖屏普通布局/README.md): the
 // order, icons and states the confirmed design fixes.
 import 'dart:async';
 

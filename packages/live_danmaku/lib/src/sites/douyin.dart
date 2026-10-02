@@ -24,7 +24,7 @@ typedef DouyinDanmakuFrame = ({
 });
 
 /// Douyin's danmaku protocol (the codec of 3.x `DouyinDanmaku`,
-/// docs/T06/T06a/T06a.5/record.md), without I/O.
+/// docs/D-弹幕/D01-平台弹幕协议/D01.5-抖音弹幕/record.md), without I/O.
 ///
 /// Both directions are protobuf `PushFrame`s (`seqId 1, logId 2, service 3,
 /// method 4, headersList 5, payloadEncoding 6, payloadType 7, payload 8`). A

@@ -1,0 +1,102 @@
+# N01.1 页面：多画面
+
+- 日期：2026-10-01
+- 目录：`apps/pure_live/lib/features/multiview/`（4 个文件，约 2500 行）
+- v3 来源：标签 `v3.2.11` 的 `lib/modules/multiview/`（11 个文件，4321 行）
+- 用到的包：`live_player`（每格一个 `PlaybackSession`、`LiveVideoView`、`roomVolume`）、`live_media`（`PlaybackPlan`）、`live_core`（房间、画质、`LiveQualityDiscoveryScope`）、`live_danmaku`（连接、`DanmakuMessageFilter`）、`live_store`（关注、历史、设置、屏蔽表、`meta`）、`live_ui`（主题、状态页、头像、平台图标）。直播间（C01.1）的飞行弹幕层、弹幕设置面板和错误文字直接复用（见“缺的共享服务或接口”）。
+
+## 做法
+
+- **页面怎么取服务**（I01.1 的约定）：`sitesProvider.maybeOf` 取平台，`playbackSessionFactoryProvider(config:)` 每格建一个会话（所有会话共用应用的 `MediaOpener`，即一个中继），`danmakuProvider.connectionFor/supports` 取弹幕，`storeProvider` 取设置和数据。播放设置（硬解、输出、兼容模式、RTX 超分）组成 `MpvEngineConfig`，和直播间一样。
+- **逻辑和界面分开**：`multiview_controller.dart` 的 `MultiviewController`（`ChangeNotifier`）对应 v3 的 `MultiviewController` + `MultiviewDanmakuSession`，依赖全部从构造参数传入，测试用假平台、假引擎、假弹幕驱动。格子 `MultiviewCell` 只有五个阶段（空、解析中、播放中、未开播、失败）；播放中的细分（打开、缓冲、暂停、出错）直接看该格会话的 `PlaybackState`，格子视图用 `StreamBuilder` 跟随，不让整页重建。
+- **每格一个会话**：v3 每格自建 media_kit 播放器、自建帧看门狗和“源结束重载”。v4 每格是一个 `PlaybackSession`（G02.1），恢复规则（刷新、换线、软解、画面停住重建、延迟重试轮次、租期续签）和直播间完全一样；换台时同一会话重开（旧输入在新输入被接受后才释放），关格或缩小布局时 `dispose`。
+- **选台**：总是先取一次详情（`LiveSiteRecordRoomResolver` 有严格接口就用它，同 v3），详情合并卡片信息后存进格子（弹幕参数用新的），关注里有这个房间就更新快照；能播就发现画质（离开或换台时取消）→ 选默认画质 → `resolvePlayUrls` → `PlaybackPlan.of(preferH264:, onDemand: 回放)` → `session.open`（刷新回调 `resolvePlayUrlsForRecovery`）。每次分配有序号，晚到的结果丢弃（v3 的格子纪元）。
+- **声音**：只有一格出声（v3 的音频焦点）。会话没有单独的静音，静音的格子音量设为 0，出声的格子用房间音量（`roomVolume`，和直播间同一个存储 `roomVolumes`，3.x 的值直接可用）；“全部静音”时所有格为 0。v3 的规则照旧：新起播的格成为声音来源，但一大多小布局里向小格选台不抢声音；进入一大多小时大画面跟随当前声音；关掉出声的格，声音转到第一个在播的格。
+- **画质和线路**：每格可选画质（旧流在新流解析好之前继续播，失败只提示）、线路（由会话管理，`selectLine`）；平台实际给的画质和请求的不同时按实际显示并提示。“小格省流”（仅一大多小）照 v3：小格取最低档，晋升为大画面的格换回正常档，被换下来的大画面换最低档，开关切换后在播的小格立即调整。
+- **弹幕**：页级开关，默认关（v3）。只连一个房间：一大多小布局是大画面，其他布局是出声的格（v3 规则）。连接事件经 `DanmakuMessageFilter`（屏蔽词和用户、去重、合并重复、相似过滤，设置和屏蔽表改了立即生效），聊天进飞行层，撤回同时从画面撤下。飞行层用直播间的 `DanmakuOverlay`，样式读弹幕设置；弹幕设置按钮打开直播间的 `DanmakuSettingsPanel`（同 v3 复用直播间面板，改的是全局设置）。
+- **布局**：1×1、1×2、2×2、一大多小（1+3），切换时前几格继续播，多出的格释放。一大多小在桌面可加到 9 格（手机 4 格，v3 的解码上限），小格三格铺满，更多滚动；格子用 `GlobalKey`，晋升时视频整体搬移，不重建、不闪黑。
+- **显示模式**：正常、沉浸（只留网格和右下角恢复钮）、全屏（手机隐藏系统栏并转横屏；桌面同沉浸，只是退出钮在左上角）；返回键和 Esc 先回到正常，正常时返回先把视频撤下、等两帧再关页面（v3 规避纹理注销和合成器竞态的做法）。
+- **上次的画面**：布局、省流、弹幕开关和各格房间（只存身份和卡片字段）写在 `LiveStore.meta` 的 `multiview.session`；再次打开时恢复布局，并提示“上次看了 N 个直播间，要恢复吗？”，点恢复逐格重新选台。
+
+## 与 v3 的功能对照
+
+| v3 功能（文件） | v4 | 说明 |
+|---|---|---|
+| 四种布局、缩容释放、扩容补空格（`multiview_controller.dart` `setLayout`） | 有 | 同 v3 |
+| 一大多小加格到上限（桌面 9、手机 4），列尾“添加画面”（`addCell`、`_AddCellSlot`） | 有 | 同 v3 |
+| 点小格晋升为大画面、点大画面呼出控制条（`promoteCell`、`_buildLargeControlBar`） | 有 | 控制条按钮同 v3：暂停、刷新、弹幕、弹幕设置、画质、线路、音量、全屏 |
+| 大画面左下角画质入口（`_buildQualityEntry`） | 有 | 点开画质列表；未确认的画质带“?” |
+| 音频焦点、声音来源角标、全部静音（`setAudioFocus`、`toggleMuteAll`、`_AudioFocusBadge`） | 有 | 窄格只显示图标 |
+| 每格音量、写入房间音量（`setCellVolume`、`_showVolumeSheet`） | 有 | 拖动即时生效，松手时保存 |
+| 每格画质、线路（`setCellQuality`、`setCellLine`） | 有，改进 | 换画质失败不再让整格出错（问题 5） |
+| 小格省流（`smallCellsLowQuality`、`_reconcileSmallCellQualities`） | 有 | 同 v3 |
+| 暂停/继续（`toggleCellPlayPause`） | 有 | 控制条和格子菜单 |
+| 长按/右键格子菜单：换台、画质、关闭（`_showCellActions`） | 有，改进 | 加了“更多”按钮和更多项（见界面改进） |
+| 解析中、未开播、失败占位和重试（`_buildResolvingContent` 等） | 有，改进 | 失败按类型说明（问题 3）；未开播可重新检查（问题 1） |
+| 选台：关注/历史、搜索、排序（开播优先、按人数）、空状态（`multiview_room_picker.dart`） | 有 | 排序规则同 v3（`compareAudienceRanking`、真实在线设置） |
+| 桌面宽屏常驻选台侧板、选完自动跳到下一个空格（`_buildSidePanel`、`_advanceTarget`） | 有 | 目标格加主色边框 |
+| 页级弹幕：只连大画面/出声格，过滤同直播间（`multiview_danmaku_session.dart`） | 有，改进 | 支持所有有弹幕的平台（问题 4） |
+| 弹幕设置面板（`multiview_danmaku_settings_binding.dart` + 直播间面板） | 有 | 复用直播间的 `DanmakuSettingsPanel` |
+| 沉浸、全屏、Esc、返回键回退（`_DisplayMode`、`multiview_fullscreen_surface.dart`） | 有 | Windows 真正的窗口全屏留给后续（同直播间） |
+| 安全退出：先撤视频、等两帧再出栈（`_exitSafely`） | 有 | 同 v3 |
+| 每格播放器、租期续签、帧看门狗、源结束重载（`cells/*`、`_recoverPresentedFrameStall`） | 有，换实现 | 由 `PlaybackSession` 统一负责（问题 7） |
+| 进入时暂停全局播放器（`_defaultPauseGlobalPlayback`） | 不需要 | v4 没有全局播放器，直播间离开时释放自己的会话 |
+| Windows 按格子实际尺寸设输出（`VideoOutputViewportSizer`） | 有 | `LiveVideoView(outputSize:)` 在 Windows 打开 |
+| 焦点小列只监控可见格的画面停住（`focus_rail_visibility.dart`） | 无 | 会话没有“是否在显示”的开关，见留给后续 |
+
+## 审查发现的 v3 问题
+
+| # | 问题 | 位置 | 处理 |
+|---|---|---|---|
+| 1 | 选台时相信关注/历史里存的“未开播”，不取详情，直接显示未开播；之后开播了也只能换台，没有重新检查 | `multiview_controller.dart:712-715`、`multiview_page.dart:921`（未开播格点击 = 选台） | 总是取一次详情；未开播格有“重新检查”按钮 |
+| 2 | 弹幕用的是卡片里存的 `danmakuData`：解析时取到的详情没有写回格子，抖音等按场次的参数会过期 | `multiview_controller.dart:676,696-707`（格子房间是选台的卡片）、`_syncDanmakuSession` | 详情合并卡片后存进格子，弹幕用新的参数 |
+| 3 | 失败直接显示异常原文（`StateError: multiview: room status is ...`、平台内部文字） | `multiview_controller.dart:739,766`（`error.toString()`）、`multiview_page.dart:1183-1191` | 按错误类型说明（与直播间同一套文字），原文只进日志 |
+| 4 | 弹幕平台写死 8 个，其余平台（v4 已有弹幕的 20 多个）在多画面里没有弹幕 | `multiview_danmaku_session.dart:54-67` | 按弹幕登记判断（`danmaku.supports`） |
+| 5 | 换画质时取地址失败，整格变成“播放失败”，而旧流本来还能播 | `multiview_controller.dart:856-864` | 旧流继续播，只提示原因 |
+| 6 | 同一个直播间可以选进多个格子（多一路解码，声音、弹幕重复） | `multiview_page.dart:242-247` | 已在别的格子时提示“已在第 N 格播放”并切到那一格；选台列表标出所在格 |
+| 7 | 多画面和直播间各有一套恢复规则（PLAN 第 4 节列出的问题），多画面的恢复只有“3 分钟内最多重载 2 次” | `multiview_controller.dart:337-366,1227-1284`、`cells/` | 每格用 `PlaybackSession`，恢复与直播间一致 |
+| 8 | 未开播或失败的格子没有菜单，关不掉，只能换台或切布局 | `multiview_page.dart:927`（只有播放中的格有长按） | 所有非空格都有菜单（含“关闭该格”） |
+
+## 界面改进
+
+- **格子菜单好找**：播放中的格子右上角有“更多”按钮（v3 只能长按或右键）；菜单加了暂停/继续、“播放这一格的声音”（非一大多小布局）、线路、音量、刷新、“进入直播间”（打开前暂停所有格，回来后继续）。
+- **播放状态显示在格子里**：加载和缓冲时转圈，暂停时显示暂停图标，播放出错时显示原因和重试（v3 起播后只有黑屏）。
+- **失败和未开播说明原因**：失败按类型（网络、要登录、地区、接口变化……），未开播区分下播、封禁、轮播，并可“重新检查”。
+- **不重复选台**：已在格子里的直播间，选台列表标“第 N 格”，再选会切过去而不是再开一路。
+- **记住上次**：布局、省流、弹幕开关下次打开时保留；可一键恢复上次的直播间（v3 控制器注释里的“optional session persistence”）。
+- **默认画质跟随设置**：用“首选清晰度”（和直播间相同的规则），v3 多画面固定取最高档；省流时小格仍是最低档。
+- **手机竖屏的一大多小**：大画面在上、小格在下横向排列（v3 小列在右侧，竖屏时只有屏幕宽度的四分之一）。
+- **桌面选台目标**：侧板正在为哪一格选台，那一格有主色边框。
+- **弹幕平台**：所有有弹幕连接的平台都能在多画面里显示弹幕。
+- **窄格**：声音来源角标在窄格里只显示图标，不挤掉主播名。
+
+## 已批准的升级（docs/specs/UPGRADES.md）
+
+UPGRADES 里没有模块列只属于多画面的条目。“统一原则 · 弹幕”（各平台接入弹幕）在多画面完成：弹幕按登记的平台连接；D01.13 猫耳、D01.15 niconico、D01.17 CHZZK、D01.30 17LIVE 等记录里“多画面弹幕（v3 不支持）是否接入 → M13”一项随之完成。
+
+## 留给后续
+
+- **Windows 焦点小列的可见性**：v3 只对看得见的小格做“画面停住”检测（滚出视口的格子在 Windows 上不出新帧）。现在会话的帧看门狗不知道格子是否在显示，一大多小加到 5 格以上并滚动时，看不见的格可能被当成停住而重建或报错。需要 `PlaybackSession` 加一个“画面是否在显示”的开关（见下表）。
+- **Windows 真正的窗口全屏**（要 `window_manager`，I01.1 桌面外壳）；现在桌面的“全屏”和沉浸一样在窗口内。
+- 前后台生命周期（v3 多画面也没有处理）、后台播放和系统媒体通知（I01.1 后续）。
+- 弹幕次要设置（帧率、字体、表情图片）同直播间的留给后续。
+- 真机检查：Android 四路解码、全屏转向；Windows 九路、按格子尺寸设输出、退出时的纹理释放。
+
+## 缺的共享服务或接口
+
+| 内容 | 建议 |
+|---|---|
+| `PlaybackSession` 没有“画面是否在显示”的开关，滚出视口的格子会触发帧看门狗 | `live_player` 加 `setPresentationVisible(bool)`（不可见时暂停帧看门狗，重新可见时给一段宽限），多画面的焦点小列按可见区域调用 |
+| 飞行弹幕层 `DanmakuOverlay`、`danmakuLookOf`、`DanmakuSettingsPanel`、文字函数 `platformName`/`failureText`/`offlineText` 在 `pages/live_play/` 里，本页直接 import（第一个跨页面目录的引用） | 移到共享位置（如 `lib/pages/shared/` 或 `lib/widgets/`），直播间和多画面一起改 import |
+| 直播间的 `defaultQualityIndex` 标了 `@visibleForTesting`，不能跨库用 | 本页复制为 `defaultMultiviewQuality`；共享模块建好后合并 |
+| `meta` 的 `multiview.session` 不在备份里（同搜索历史） | 和搜索历史一起决定是否进备份 |
+| 旧键 `multiview_error_resolve`、`multiview_error_start` 不再使用（失败改按类型说明） | 留着不删（翻译文件保持 3.x 的键），以后统一清理 |
+
+## 测试
+
+`flutter test`（加速流程，只覆盖主要路径）：7 个用例。
+
+| 文件 | 用例 |
+|---|---|
+| `test/pages/multiview/multiview_controller_test.dart`（5） | 选台后播放、按首选清晰度、成为声音来源、其他格静音、房间音量读写、全部静音；未开播（不建播放器）、重新检查后开播、详情失败保留卡片并重试、关格后声音转移；布局缩小释放会话、一大多小小格不抢声音、省流和晋升换档、桌面加到 9 格、手机不能加格；弹幕默认关、跟随出声格切换、屏蔽词过滤、关闭；保存上次的布局和房间并恢复 |
+| `test/pages/multiview/multiview_page_test.dart`（2） | 手机：点空格弹出选台、选关注里的房间后播放并显示声音来源、“更多”菜单关闭该格、沉浸模式下返回先回到正常；桌面：侧板选台依次填格、重复选台的提示、切到一大多小显示添加画面和画质入口、点大画面呼出控制条 |

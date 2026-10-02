@@ -74,7 +74,7 @@ final class BigoDanmakuFrame {
 }
 
 /// Bigo Live's web chat, as the website's scripts of 2026-09-30 speak it
-/// (docs/T06/T06a/T06a.21/record.md; samples `fixtures/bigo/danmaku/S05-live`,
+/// (docs/D-弹幕/D01-平台弹幕协议/D01.21-BIGOLIVE弹幕/record.md; samples `fixtures/bigo/danmaku/S05-live`,
 /// `S06-idle`, `S07-unsigned`), without I/O.
 ///
 /// - Every frame is text: a decimal uri, then a JSON object. The client

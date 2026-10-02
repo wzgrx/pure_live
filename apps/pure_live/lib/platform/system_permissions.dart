@@ -14,7 +14,7 @@ enum NotificationPermission {
 
   /// Off for good: refused twice, or switched off in the system settings
   /// (below Android 13 there is nothing to ask); only the settings page
-  /// helps (docs/T13/T13a/T13a.1 c13).
+  /// helps (docs/A-界面设计/A14-系统界面/A14.1-系统界面 c13).
   blocked,
 }
 

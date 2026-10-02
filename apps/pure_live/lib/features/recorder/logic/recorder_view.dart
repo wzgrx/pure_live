@@ -1,7 +1,7 @@
 import 'package:live_record/live_record.dart';
 import 'package:pure_live/shared/record/record_state.dart';
 
-/// The recording centre's filters (docs/T08/T08b/T08b.2, c6, choice U1 A):
+/// The recording centre's filters (docs/A-界面设计/A10-录制界面/A10.1-录制中心, c6, choice U1 A):
 /// one row of five with counts instead of 3.x's nine. "没在录制" shows only
 /// under [all]; the card itself names every state.
 enum RecorderFilter {

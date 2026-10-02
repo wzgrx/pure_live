@@ -33,10 +33,10 @@ int multiviewMaxCells({required bool mobile, required int processors}) {
   return (first, end);
 }
 
-/// Cells are 16:9 (docs/T12/T12a/T12a.2 c2).
+/// Cells are 16:9 (docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面 c2).
 const double cellAspect = 16 / 9;
 
-/// Where the cells of a layout go (docs/T12/T12a/T12a.2): 16:9 cells as large
+/// Where the cells of a layout go (docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面): 16:9 cells as large
 /// as the area lets them be, centred; 1×2 one above the other or side by
 /// side, and 1+3 with its small cells below or beside the large one,
 /// whichever shows larger pictures.

@@ -20,7 +20,7 @@ const int roomTagNoteMaxLength = 40;
 const double roomTagTwoColumnWidth = 400;
 
 /// "设置房间标签 / 分类" of a followed room (3.x
-/// `_showTagSelectionGridModal`, docs/T07/T07d/T07d.1 c13, c14).
+/// `_showTagSelectionGridModal`, docs/A-界面设计/A09-浏览界面/A09.1-房间卡片 c13, c14).
 ///
 /// Says which room under the title; every tag as a tile (tap to select or
 /// clear, several at once); "＋ 新建标签" opens the form in place (name up
@@ -165,7 +165,7 @@ class _RoomTagPickerState extends State<RoomTagPicker> {
     final styles = context.textStyles;
     final room = widget.room;
     final name = room.displayNick(platformName(room.platform));
-    // The one dialog (docs/T01/T01d/T01d.1): the long-content width, the
+    // The one dialog (docs/A-界面设计/A02-组件/A02.2-弹窗组件): the long-content width, the
     // title and the buttons stay while the tags scroll.
     return AppDialog(
       key: const ValueKey('room-tags'),

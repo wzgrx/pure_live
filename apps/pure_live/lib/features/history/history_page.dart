@@ -31,7 +31,7 @@ final Provider<HistoryRoomLoader> historyLoaderProvider = Provider<HistoryRoomLo
 /// The page's clock, for the day sections (tests replace it).
 final Provider<DateTime Function()> historyClockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
-/// Watch history (3.x `lib/modules/history`, docs/T07/T07g/T07g.2).
+/// Watch history (3.x `lib/modules/history`, docs/A-界面设计/A09-浏览界面/A09.9-观看历史).
 ///
 /// Routes: `RoutePath.kHistory`.
 ///

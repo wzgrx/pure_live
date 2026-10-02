@@ -82,7 +82,7 @@ final class SecretStore {
   Future<void> _lastWrite = Future.value();
 
   /// Reads the secrets again (another process sharing the database wrote
-  /// some: a second desktop window, docs/T17/T17a/T17a.1 c14), opens the
+  /// some: a second desktop window, docs/A-界面设计/A16-桌面界面/A16.1-桌面窗口 c14), opens the
   /// changed ones and reports them through [changes].
   Future<void> reload() async {
     for (var attempt = 0; attempt < 5; attempt++) {

@@ -16,7 +16,7 @@ final Uri projectUrl = Uri.parse('https://github.com/${updateRepository.owner}/$
 
 /// The newer version the start-up check or the version page last found;
 /// null when there is none or nothing was checked. The about page shows it
-/// as "新版本 v…" (docs/T07/T07i/T07i.4 c3).
+/// as "新版本 v…" (docs/A-界面设计/A15-小页面/A15.2-关于和版本 c3).
 final ValueNotifier<UpdateInfo?> foundUpdate = ValueNotifier<UpdateInfo?>(null);
 
 /// Keeps [info] in [foundUpdate] when it is newer, clears it otherwise.

@@ -106,7 +106,7 @@ final class _Snapshot {
 /// answer that is neither is used. 3.x did this on Android (the system TLS
 /// stack, then a headless WebView), because some proxies reset `dart:io`'s
 /// TLS connection after CONNECT; the app injects those transports (M12),
-/// see docs/T02/T02c/T02c.2/record.md. A fallback gets exactly the
+/// see docs/E-直播平台/E03-海外平台/E03.2-Twitch/record.md. A fallback gets exactly the
 /// [LiveRequest] [http] got: `site` `twitch` (so the app's proxy route
 /// applies), `POST https://gql.twitch.tv/gql`, lower-case headers, a JSON
 /// body, the request's timeout and cancellation. It returns the real status

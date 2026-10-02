@@ -962,7 +962,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   );
 
   /// The fullscreen's toasts sit above its bottom bar instead of on it
-  /// (docs/T01/T01d/T01d.1 c12, U.2n c10): 16 over the landscape bar, or
+  /// (docs/A-界面设计/A02-组件/A02.2-弹窗组件 c12, U.2n c10): 16 over the landscape bar, or
   /// over the portrait fullscreen's two rows.
   Widget _toastsAboveBars(Widget page) {
     final size = MediaQuery.sizeOf(context);
@@ -1126,7 +1126,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     },
   );
 
-  /// An IPTV channel (docs/T05/T05i/T05i.1 c16, Z1): the guide where a room
+  /// An IPTV channel (docs/A-界面设计/A07-直播间界面/A07.7-直播间的状态 c16, Z1): the guide where a room
   /// has its chat. Phone layout: the picture at 16:9 and the guide under it
   /// (3.x left that space empty); wide: the guide in the right column, which
   /// the same edge handle as the chat column's folds away (U.2d).

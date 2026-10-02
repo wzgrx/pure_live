@@ -1,4 +1,4 @@
-// YouTube danmaku (docs/T06/T06a/T06a.20/record.md): the chat parser and the
+// YouTube danmaku (docs/D-弹幕/D01-平台弹幕协议/D01.20-YouTube弹幕/record.md): the chat parser and the
 // polling connection against the archived v4's output for the recorded
 // answers and sessions (S06-live, S07-live-paid, S08-ended) and the synthetic
 // answers and sessions (S09-synthetic), written by

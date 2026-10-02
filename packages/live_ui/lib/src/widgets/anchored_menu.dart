@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 // The route behind the small menu ([showSmallMenu], [showAppMenu];
-// docs/T01/T01d/T01d.2/brief.md). Flutter's `showMenu` only takes the menu's top
+// docs/A-界面设计/A02-组件/A02.3-贴着按钮的小菜单/brief.md). Flutter's `showMenu` only takes the menu's top
 // edge and always grows downwards from it, so a menu meant to sit above its
 // button first showed as a line far above it and then dropped onto it; and
 // the side was chosen from a guessed height. Here the menu is laid out first

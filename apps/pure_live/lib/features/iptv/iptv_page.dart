@@ -93,7 +93,7 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     }
   }
 
-  /// "选择节目单" (3.x `_showEpgSourceSelector`, docs/T11/T11a/T11a.4 c13):
+  /// "选择节目单" (3.x `_showEpgSourceSelector`, docs/A-界面设计/A13-网络电视和多画面界面/A13.1-网络电视管理 c13):
   /// a 20 px title, one radio row per guide, the current one in the primary
   /// colour; a tap switches and closes; only "取消" at the bottom.
   Future<void> _chooseGuide(IptvOverview overview) async {

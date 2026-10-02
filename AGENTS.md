@@ -2,12 +2,12 @@
 
 纯粹直播（Pure Live）4.x：在 3.x（`v3.2.11`）的代码上重构的第三方直播聚合应用。4.0.0（Android）已发布。
 
-**文档入口：[docs/README.md](docs/README.md)。** 进度看 [docs/STATUS.md](docs/STATUS.md)，做法看 [docs/PROCESS.md](docs/PROCESS.md)，决定看 [docs/DECISIONS.md](docs/DECISIONS.md)。全部任务登记在 [docs/tasks.toml](docs/tasks.toml)，分成 20 组（T00～T19）。
+**文档入口：[docs/README.md](docs/README.md)。** 进度看 [docs/STATUS.md](docs/STATUS.md)，做法看 [docs/PROCESS.md](docs/PROCESS.md)，决定看 [docs/DECISIONS.md](docs/DECISIONS.md)。全部任务登记在 [docs/tasks.toml](docs/tasks.toml)，分成 20 组（字母 A～Z，界面设计 A 排第一）。
 
 ## 接到一个任务时
 
-1. 在 [docs/STATUS.md](docs/STATUS.md) 或 [docs/TASKS.md](docs/TASKS.md) 找到任务编号（例如 `T05h.2`），读它文件夹里的 `brief.md`（任务书）、`README.md`（设计或说明）、`record.md`（记录）。
-2. 读 [docs/PROCESS.md](docs/PROCESS.md)：分阶段做（第 5 节）、合并审查（第 7 节）、规则汇总（第 11 节）。
+1. 在 [docs/STATUS.md](docs/STATUS.md) 或 [docs/TASKS.md](docs/TASKS.md) 找到任务编号（例如 `A07.13`），读它文件夹里的 `brief.md`（任务书）、`README.md`（设计或说明）、`record.md`（记录）。
+2. 读 [docs/PROCESS.md](docs/PROCESS.md)：分阶段做（第 5 节）、新功能（第 6 节）、合并审查（第 8 节）、规则汇总（第 14 节）。
 3. 读规范：[docs/specs/ENGINEERING.md](docs/specs/ENGINEERING.md)，界面任务再读 [docs/specs/UI.md](docs/specs/UI.md)。
 4. 在自己的分支上做（`ai/<任务编号>` 或本机工作区），提交信息以 `[<任务编号>]` 开头；不推 master。
 5. 做不完时按 PROCESS 第 5.2 节停下：提交、在 `record.md` 写“停在哪”、更新登记表。

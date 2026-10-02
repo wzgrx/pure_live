@@ -12,10 +12,10 @@ import 'package:pure_live/app/launch_args.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
 import 'package:pure_live/features/live_play/dialogs/room_dialogs.dart';
-import 'package:pure_live/features/live_play/dialogs/room_switcher.dart';
 import 'package:pure_live/features/live_play/dialogs/stream_dialogs.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
+import 'package:pure_live/features/live_play/switch_room/room_switch_panel.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/rooms/room_menu.dart';
@@ -153,31 +153,57 @@ bool castSupported(TargetPlatform platform) => platform == TargetPlatform.androi
 /// out.
 ///
 /// Cast only where [cast] ([castSupported]); the new window only on
-/// [windows].
+/// [windows]. The menu on the picture leaves out what its bars already show
+/// ([onBars], docs/ui/compare/U.2m c12).
 List<List<RoomMenuEntry>> roomMenuGroups({
   required bool iptv,
   required bool windows,
   required bool cast,
   bool local = false,
+  Set<RoomMenuEntry> onBars = const {},
 }) => [
-  const [RoomMenuEntry.switchRoom, RoomMenuEntry.timer, RoomMenuEntry.volume, RoomMenuEntry.videoFit],
-  [
-    if (cast) RoomMenuEntry.cast,
-    RoomMenuEntry.streamLink,
-    // An IPTV channel has no page to share or open (as before).
-    if (!iptv) RoomMenuEntry.share,
-    if (!iptv) RoomMenuEntry.external,
-    if (windows) RoomMenuEntry.newWindow,
-  ],
-  [if (local) RoomMenuEntry.localInteraction],
+  for (final group in [
+    const [RoomMenuEntry.switchRoom, RoomMenuEntry.timer, RoomMenuEntry.volume, RoomMenuEntry.videoFit],
+    [
+      if (cast) RoomMenuEntry.cast,
+      RoomMenuEntry.streamLink,
+      // An IPTV channel has no page to share or open (as before).
+      if (!iptv) RoomMenuEntry.share,
+      if (!iptv) RoomMenuEntry.external,
+      if (windows) RoomMenuEntry.newWindow,
+    ],
+    [if (local) RoomMenuEntry.localInteraction],
+  ])
+    [
+      for (final entry in group)
+        if (!onBars.contains(entry)) entry,
+    ],
 ];
+
+/// The room menu's entries the fullscreen bars already show (U.2m c12,
+/// audit A-08): the landscape top bar's ⇄ and cast and its bottom bar's
+/// fit; the portrait fullscreen's ⇄ and cast (its bottom bar has the
+/// portrait picture mode, not the fit). Cast only where [cast]. None for
+/// the bars of the room page (the menu in the app bar keeps every entry).
+Set<RoomMenuEntry> menuEntriesOnBars({required bool landscape, required bool cast}) => {
+  RoomMenuEntry.switchRoom,
+  if (cast) RoomMenuEntry.cast,
+  if (landscape) RoomMenuEntry.videoFit,
+};
 
 /// The room menu of the bar (3.x `LivePlayMenuButton`, its four-square
 /// icon kept, U.2a choice B): a menu next to the button, grouped (U.2f),
 /// with 3.x's icons.
 class RoomMenuButton extends ConsumerWidget {
   /// Creates the menu.
-  const new({required this.controller, this.windows = false, this.onVideo = false, this.onMenu, super.key});
+  const new({
+    required this.controller,
+    this.windows = false,
+    this.onVideo = false,
+    this.onBars = const {},
+    this.onMenu,
+    super.key,
+  });
 
   /// The room.
   final LiveRoomController controller;
@@ -187,6 +213,10 @@ class RoomMenuButton extends ConsumerWidget {
 
   /// On the picture (the fullscreen bars, U.2c change 2): a white icon.
   final bool onVideo;
+
+  /// What the bars around the button already show, left out of the menu
+  /// ([menuEntriesOnBars], U.2m c12).
+  final Set<RoomMenuEntry> onBars;
 
   /// Told when the menu opens (true) and closes: the controls stay up.
   final ValueChanged<bool>? onMenu;
@@ -205,7 +235,7 @@ class RoomMenuButton extends ConsumerWidget {
       case RoomMenuEntry.external:
         await openRoomExternally(room);
       case RoomMenuEntry.switchRoom:
-        await showRoomSwitcher(context, room);
+        showRoomSwitchPanel(context, controller);
       case RoomMenuEntry.cast:
         await showStreamPicker(context, controller, StreamUse.cast);
       case RoomMenuEntry.timer:
@@ -303,6 +333,7 @@ class RoomMenuButton extends ConsumerWidget {
           windows: windows,
           local: local,
           cast: castSupported(defaultTargetPlatform),
+          onBars: onBars,
         ).where((group) => group.isNotEmpty).toList();
         return [
           for (final (index, group) in groups.indexed) ...[

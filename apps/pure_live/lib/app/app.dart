@@ -16,8 +16,8 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/app/ui_mode.dart';
 import 'package:pure_live/features/favorite/favorite_controller.dart';
-import 'package:pure_live/features/live_play/dialogs/room_switcher.dart';
 import 'package:pure_live/features/live_play/mini/floating_window.dart';
+import 'package:pure_live/features/live_play/switch_room/room_switch_panel.dart';
 import 'package:pure_live/features/splash/splash_page.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/platform_services.dart';
@@ -82,7 +82,15 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
     WidgetsBinding.instance.addObserver(this);
     // F.1c: the room switcher's refresh is the follows' silent full refresh
     // (3.x `refresh_favorite_rooms`).
-    RoomSwitcher.refreshFollows = () => ref.read(favoriteControllerProvider).refreshAll(visible: false);
+    // B05: its last refresh time and failures show on the button.
+    RoomSwitchPanel.follows = FollowsRefresher(
+      refresh: () async {
+        final follows = ref.read(favoriteControllerProvider);
+        await follows.refreshAll(visible: false);
+        return follows.lastFailed;
+      },
+      lastRefreshedAt: () => ref.read(favoriteControllerProvider).lastFullRefreshAt,
+    );
     // 3.x started the follow check, the login check and the exit timer with
     // its services; here once the first frame is up.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -93,7 +101,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    RoomSwitcher.refreshFollows = null;
+    RoomSwitchPanel.follows = null;
     imageCacheEpoch.removeListener(_imagesCleared);
     _fonts.removeListener(_imagesCleared);
     AppNavigator.router = null;

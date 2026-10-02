@@ -1504,4 +1504,25 @@ abstract final class AppIcons {
 
   /// The title of the dialog that edits a WebDAV server.
   static const IconData webDavEditConfig = Remix.edit_box_line;
+
+  // ---- the live room's switch-room panel (docs/ui/compare/U.2m) ----
+
+  /// Show the rooms as v3's small cards (the panel's style button while it
+  /// shows the list).
+  static const IconData switchRoomGrid = Icons.grid_view_rounded;
+
+  /// Show the rooms as rows (the style button while it shows the grid).
+  static const IconData switchRoomList = Icons.view_list_rounded;
+
+  /// The "正在观看" line: the room playing now.
+  static const IconData switchRoomWatching = Icons.graphic_eq_rounded;
+
+  /// The refresh failed (the refresh button turns red).
+  static const IconData switchRoomRefreshFailed = Icons.error_outline_rounded;
+
+  /// No streamer's name matches the filter.
+  static const IconData switchRoomNoMatch = Icons.search_off_rounded;
+
+  /// A group with no rooms.
+  static const IconData switchRoomEmpty = Icons.live_tv_rounded;
 }

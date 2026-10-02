@@ -29,3 +29,13 @@
 - **改动**（`packages/live_player/lib/src/session.dart`）：`_engineNow()` 等到引擎后先检查会话还在，已释放就不接上（抛出，`open` 那边会话已过期，直接忽略）；`dispose()` 若有正在创建的引擎，等它完成，没被接上就释放它，创建失败则忽略，然后照常释放。
 - **测试**：`packages/live_player/test/session_test.dart`“disposed while the engine is still being created: dispose waits for it and releases it”（假引擎用 `Completer` 延迟创建，期间 `dispose`：`dispose` 要等到创建完成，引擎被释放、没有打开过、`session.engine` 为空；改之前失败，`dispose` 提前结束）；“disposed while the engine creation fails: dispose still completes”。
 - **验证**：live_player 全部测试通过。
+
+## release 构建（第 1、5、6 条的原生改动之后）
+
+- 命令：`apps/pure_live` 下 `flutter build apk --release --split-per-abi --target-platform android-arm64`（没有 `key.properties`，用调试密钥签名），提交 `e975d3915` 之上。结果 `✓ Built build/app/outputs/flutter-apk/app-arm64-v8a-release.apk (110.3MB)`。
+- lint：`checkReleaseBuilds = true`、`abortOnError = true`，构建里跑了 `lintVitalAnalyzeRelease` / `lintVitalReportRelease`，报告 `No issues found.`、返回值 0，没有让构建失败。
+- `aapt2 dump resources`（build-tools 37.0.0）：
+  - `drawable/audio_service_pause`（0x7f070073）、`drawable/audio_service_play_arrow`（0x7f070074）、`drawable/audio_service_stop`（0x7f070077）都在，各有 mdpi～xxxhdpi 五个 PNG，mdpi 文件大小和 audio_service 原图一致（168/285/114 字节，不是压缩器的占位图）；
+  - `drawable/ic_stat_playback`（0x7f0700b7）在；
+  - 没保留的 `audio_service_skip_next`、`audio_service_fast_forward` 等不在资源表里，说明压缩器确实会删掉没保留的 audio_service 图标（改之前这三个也是这样被删的）。
+- 构建后 `gradlew --stop` 停了 Gradle 守护进程，Kotlin 编译守护进程也已退出。

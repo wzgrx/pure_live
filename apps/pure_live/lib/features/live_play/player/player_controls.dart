@@ -314,16 +314,12 @@ class PlayerTopBar extends StatelessWidget {
           ),
           SizedBox(
             height: portraitRowHeight,
-            child: Row(
+            // B09 c3 (audit B-11): scrolls sideways where a split screen or
+            // a larger display size leaves too little room.
+            child: _InlineRow(
               key: const ValueKey('live-play-top-second-row'),
-              children: [
-                const SizedBox(width: 14),
-                const PlayerClock(),
-                const PlayerBattery(),
-                const Spacer(),
-                ..._trailing(context, switchRoom: true),
-                const SizedBox(width: 4),
-              ],
+              left: const [SizedBox(width: 14), PlayerClock(), PlayerBattery()],
+              right: [..._trailing(context, switchRoom: true), const SizedBox(width: 4)],
             ),
           ),
         ],
@@ -746,16 +742,17 @@ class PlayerBottomBar extends ConsumerWidget {
                   const SizedBox(height: 4),
                   SizedBox(
                     height: portraitRowHeight,
-                    child: Row(
-                      children: [
-                        playPause,
-                        refresh,
-                        ...danmaku,
-                        const Spacer(),
+                    // B09 c3 (audit B-11): seven buttons are 336 wide; the
+                    // row scrolls sideways where that does not fit, leaving
+                    // the fullscreen in its place.
+                    child: _InlineRow(
+                      key: const ValueKey('live-play-bottom-second-row'),
+                      left: [playPause, refresh, ...danmaku],
+                      right: [
                         if (actions.portraitStream) PortraitModeButton(onMenu: actions.onMenu),
                         ?orientation,
-                        fullscreen,
                       ],
+                      pinned: fullscreen,
                     ),
                   ),
                 ],
@@ -799,15 +796,16 @@ class PlayerBottomBar extends ConsumerWidget {
   );
 }
 
-/// The inline bottom row: [left] and [right] apart, scrolling sideways when
-/// a narrow window cannot hold them, with [pinned] (the fullscreen) always
-/// at the end (3.x: the last button used to scroll out of sight).
+/// A row of the bars: [left] and [right] apart, scrolling sideways when a
+/// narrow window cannot hold them, with [pinned] (the fullscreen) always at
+/// the end (3.x: the last button used to scroll out of sight). The inline
+/// bottom bar and the portrait fullscreen's second rows (B09 c3).
 class _InlineRow extends StatelessWidget {
-  const new({required this.left, required this.right, required this.pinned});
+  const new({required this.left, required this.right, this.pinned, super.key});
 
   final List<Widget> left;
   final List<Widget> right;
-  final Widget pinned;
+  final Widget? pinned;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -829,7 +827,7 @@ class _InlineRow extends StatelessWidget {
           ),
         ),
       ),
-      pinned,
+      ?pinned,
     ],
   );
 }

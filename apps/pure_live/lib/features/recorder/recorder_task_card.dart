@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:live_core/live_core.dart';
@@ -9,6 +8,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/record/record_actions.dart';
 import 'package:pure_live/shared/record/record_state.dart';
 import 'package:pure_live/shared/record/record_status_card.dart';
+import 'package:pure_live/shared/record/saved_file.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// What a card's buttons do (the page owns the recorder).
@@ -133,6 +133,19 @@ class _RecorderTaskCardState extends State<RecorderTaskCard> {
   final _menu = GlobalKey<AppMenuButtonState<_CardMenu>>();
   bool _acting = false;
 
+  /// Whether the last recording's file is there, asked in the background
+  /// (B09 c6: each build asked the disk synchronously, as the room's record
+  /// panel did before B08).
+  late final SavedFileCheck _output = SavedFileCheck(() {
+    if (mounted) setState(() {});
+  });
+
+  @override
+  void dispose() {
+    _output.dispose();
+    super.dispose();
+  }
+
   _CardView? _view() {
     final task = widget.task();
     if (task == null) return null;
@@ -233,7 +246,7 @@ class _RecorderTaskCardState extends State<RecorderTaskCard> {
       final scheme = Theme.of(context).colorScheme;
       final actions = widget.actions;
       void run(Future<void> Function(RecordTask task) action) => unawaited(_run(action));
-      final output = view.output;
+      final output = _output.saved(view.output);
       return Material(
         color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
@@ -265,7 +278,7 @@ class _RecorderTaskCardState extends State<RecorderTaskCard> {
                   onStop: () => run(actions.stop),
                   onLimit: actions.limit,
                   // "播放" while the file is there (the panel's rule).
-                  onPlay: output != null && File(output).existsSync() ? () => unawaited(playRecording(output)) : null,
+                  onPlay: output != null ? () => unawaited(playRecording(output)) : null,
                   onFolder: () {
                     if (widget.task() case final task?) actions.folder(task);
                   },

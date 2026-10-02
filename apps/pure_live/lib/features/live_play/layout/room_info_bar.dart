@@ -9,12 +9,6 @@ import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-/// `2:18` (hours and minutes) for a broadcast's time on air.
-String formatOnAir(Duration elapsed) {
-  final minutes = elapsed.isNegative ? 0 : elapsed.inMinutes;
-  return '${minutes ~/ 60}:${(minutes % 60).toString().padLeft(2, '0')}';
-}
-
 /// The icon of an audience figure (3.x `AudienceInfo`).
 IconData audienceIcon(AudienceMetricType type) => switch (type) {
   AudienceMetricType.onlineViewers => AppIcons.audienceOnline,
@@ -277,13 +271,19 @@ class _Figure extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: color),
         const SizedBox(width: 4),
-        child ?? Text(text ?? '', style: style),
+        // A narrow strip with large text cuts the figure short instead of
+        // overflowing (B09 c3).
+        Flexible(
+          child: child ?? Text(text ?? '', style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
       ],
     ),
   );
 }
 
-/// The time on air as `H:MM`, redrawn by itself each minute.
+/// The time on air as `2 小时 18 分` ([elapsedText], the cards' words; B09
+/// c5, audit B-16: `2:18` read like a recording's minutes and seconds),
+/// redrawn by itself each minute.
 class OnAirClock extends StatefulWidget {
   /// Creates the clock.
   const new({required this.startedAt, required this.now, this.style, super.key});
@@ -319,6 +319,10 @@ class _OnAirClockState extends State<OnAirClock> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Text(formatOnAir(widget.now().difference(widget.startedAt)), style: widget.style);
+  Widget build(BuildContext context) => Text(
+    elapsedText(widget.now().difference(widget.startedAt)),
+    style: widget.style,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+  );
 }

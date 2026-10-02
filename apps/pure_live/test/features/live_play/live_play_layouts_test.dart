@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -326,6 +327,8 @@ void main() {
       await tester.pump();
       expect(find.text('76'), findsOneWidget);
       expect(_key('live-play-battery'), findsOneWidget);
+      // B09 c5 (audit B-18): at least 11 (it was 9).
+      expect(tester.widget<Text>(find.text('76')).style!.fontSize, greaterThanOrEqualTo(11));
       await tester.pumpWidget(const SizedBox.shrink());
     });
   });
@@ -410,6 +413,35 @@ void main() {
       );
       expect(tester.getSize(_key('live-play-chat-box')).width, 0, reason: 'remembered');
       await _close(tester, next);
+    });
+
+    testWidgets('B09 c5: the edge handle shows and hides with the controls, at the picture edge', (tester) async {
+      // Audit B-19: always on the picture's right edge, it took the volume
+      // drag and the taps on the danmaku there.
+      final room = await _pump(tester, width: 1280, height: 800);
+      Finder layer() => find.ancestor(of: _key('live-play-chat-handle'), matching: find.byType(AnimatedOpacity));
+      expect(find.descendant(of: find.byType(RoomPlayer), matching: _key('live-play-chat-handle')), findsOneWidget);
+      expect(tester.widget<AnimatedOpacity>(layer()).opacity, 1);
+      final handle = tester.getRect(_key('live-play-chat-handle'));
+      expect(handle.right, closeTo(tester.getRect(find.byType(RoomPlayer)).right, 0.5));
+      expect(handle.center.dy, closeTo(tester.getRect(find.byType(RoomPlayer)).center.dy, 0.5));
+      await tester.pump(const Duration(seconds: 5));
+      expect(tester.widget<AnimatedOpacity>(layer()).opacity, 0);
+      expect(
+        find.ancestor(
+          of: _key('live-play-chat-handle'),
+          matching: find.byWidgetPredicate((w) => w is IgnorePointer && w.ignoring),
+        ),
+        findsOneWidget,
+        reason: 'hidden, it takes nothing',
+      );
+      // A tap brings it with the controls; it folds the chat.
+      await tester.tapAt(tester.getRect(find.byType(RoomPlayer)).center);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await _tap(tester, 'live-play-chat-handle');
+      expect(room.services.store.settings.get(Settings.livePlayChatCollapsed), isTrue);
+      await _close(tester, room);
     });
 
     testWidgets('in-window fullscreen (desktops): no app bar or chat, the landscape bars; Esc leaves it', (
@@ -512,6 +544,34 @@ void main() {
       await _close(tester, room);
     });
 
+    testWidgets('B09 c4, c5: the stop is kept through the fullscreen; the handle reads 最低, 中间, 最高', (tester) async {
+      final semantics = tester.ensureSemantics();
+      final room = await _pump(tester, portrait: true);
+      final stops = portraitPanelStops(796, 'balanced');
+      SemanticsNode handle() => tester.getSemantics(find.bySemanticsLabel('弹幕面板高度'));
+      // Audit B-17: the stop's name, not "350 px".
+      expect(handle().value, '中间');
+      expect(handle().increasedValue, '最高');
+      expect(handle().decreasedValue, '最低');
+      await tester.drag(_key('live-play-portrait-handle'), const Offset(0, -300));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(tester.getSize(_key('live-play-portrait-sheet')).height, closeTo(stops.maximum, 0.5));
+      expect(handle().value, '最高');
+      expect(handle().decreasedValue, '中间');
+
+      // Audit B-12: into the portrait fullscreen and back, at the same stop.
+      await _tap(tester, 'live-play-fullscreen');
+      expect(_key('live-play-portrait-panel'), findsNothing);
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(tester.getSize(_key('live-play-portrait-sheet')).height, closeTo(stops.maximum, 0.5));
+      expect(tester.getRect(_key('live-play-bottom-bar')).bottom, closeTo(852 - stops.maximum, 1));
+      semantics.dispose();
+      await _close(tester, room);
+    });
+
     testWidgets('portrait fullscreen: two rows each end; the hint for 3 s; an upward swipe and Back restore', (
       tester,
     ) async {
@@ -575,6 +635,43 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(_key('live-play-portrait-panel'), findsOneWidget, reason: 'Back leaves the fullscreen first');
       await _close(tester, room);
+    });
+
+    testWidgets('B09 c3: 360 wide, a split screen, the largest display size: no overflow; the rows scroll', (
+      tester,
+    ) async {
+      // Audit B-11: the second rows were plain rows; seven 48 buttons need
+      // 352 with the margins. The largest display size leaves about 300
+      // (and the bars' text grows up to 1.3 times).
+      tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      for (final width in [360.0, 300.0, 280.0]) {
+        final room = await _pump(tester, width: width, height: 640, portrait: true);
+        await _tap(tester, 'live-play-fullscreen');
+        expect(tester.takeException(), isNull, reason: '$width');
+        expect(_key('live-play-bottom-first-row'), findsOneWidget);
+        // The fullscreen stays at the end of its row, on screen.
+        final exit = tester.getRect(_key('live-play-fullscreen'));
+        expect(exit.right, lessThanOrEqualTo(width), reason: '$width');
+        final rows = [_key('live-play-top-second-row'), _key('live-play-bottom-second-row')];
+        for (final row in rows) {
+          expect(tester.getRect(row).right, lessThanOrEqualTo(width), reason: '$width');
+          final scroll = find.descendant(of: row, matching: find.byType(Scrollable));
+          expect(scroll, findsOneWidget, reason: '$width');
+        }
+        if (width < 340) {
+          // What does not fit is a sideways drag away: the orientation.
+          final bottom = tester.state<ScrollableState>(
+            find.descendant(of: rows.last, matching: find.byType(Scrollable)),
+          );
+          expect(bottom.position.maxScrollExtent, greaterThan(0), reason: '$width');
+          await tester.drag(rows.last, const Offset(-200, 0));
+          await tester.pump();
+          await tester.pump(const Duration(seconds: 1));
+          expect(tester.getRect(_key('live-play-orientation')).right, lessThanOrEqualTo(exit.left + 1));
+        }
+        await _close(tester, room);
+      }
     });
 
     testWidgets('picture mode: the 画面比例 icon, yellow off the default; a titled menu with lines; applies', (
@@ -705,6 +802,102 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(tester.widget<AnimatedOpacity>(controls()).opacity, 1);
     await _close(tester, desktop);
+  });
+
+  testWidgets('B09 c1: a tap acts at once; a second one takes it back and toggles the fullscreen', (tester) async {
+    // Audit B-8: the picture's double tap held every tap back by its
+    // timeout (about 300 ms) before the controls showed.
+    final room = await _pump(tester);
+    Finder controls() => find.ancestor(of: _key('live-play-fullscreen'), matching: find.byType(AnimatedOpacity));
+    double shown() => tester.widget<AnimatedOpacity>(controls()).opacity;
+    await tester.pump(const Duration(seconds: 5));
+    expect(shown(), 0);
+    final picture = tester.getRect(find.byType(LiveVideoView));
+    final at = Offset(picture.left + 60, picture.center.dy);
+    await tester.tapAt(at);
+    await tester.pump();
+    expect(shown(), 1, reason: 'at once, not after the double tap timeout');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tapAt(at);
+    await tester.pump();
+    expect(shown(), 0, reason: 'a later tap is a tap of its own');
+    expect(find.byType(AppBar), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+
+    // A double tap: the first tap shows the controls at once, the second
+    // takes that back and enters the fullscreen (appendix A 3).
+    await tester.tapAt(at);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(shown(), 1);
+    await tester.tapAt(at + const Offset(8, 4));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(AppBar), findsNothing, reason: 'fullscreen');
+    // And out again the same way.
+    tester.view.physicalSize = const Size(852, 393);
+    await tester.pump(const Duration(seconds: 1));
+    final full = tester.getRect(find.byType(LiveVideoView));
+    final there = Offset(full.left + 120, full.center.dy);
+    await tester.tapAt(there);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tapAt(there);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(AppBar), findsOneWidget, reason: 'back from the fullscreen');
+    await _close(tester, room);
+  });
+
+  testWidgets('B09 c1: a double tap where a button appears does not press it', (tester) async {
+    // The first tap shows the bars at once; the second must still be the
+    // double tap, not a tap on the pause button that just appeared there.
+    final room = await _pump(tester);
+    final session = tester.widget<RoomPlayer>(find.byType(RoomPlayer)).controller.session;
+    room.engine.emit(const EngineVideoSize(1920, 1080));
+    await tester.pump(const Duration(seconds: 5));
+    final status = session.state.status;
+    final at = tester.getCenter(_key('live-play-pause'));
+    await tester.tapAt(at);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tapAt(at);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(session.state.status, status, reason: 'not paused');
+    expect(find.byType(AppBar), findsNothing, reason: 'the double tap entered the fullscreen');
+    // A moment later the bars take taps again.
+    await tester.binding.handlePopRoute();
+    await tester.pump(const Duration(seconds: 1));
+    final pause = tester.getCenter(_key('live-play-pause'));
+    await tester.tapAt(pause);
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester.pump();
+    expect(session.state.status, PlaybackStatus.paused);
+    await _close(tester, room);
+  });
+
+  testWidgets('B09 c1: locked, taps only show or hide the unlock button; no double tap', (tester) async {
+    final room = await _pump(tester, width: 852, height: 393);
+    await _tap(tester, 'live-play-fullscreen');
+    await _tap(tester, 'live-play-lock');
+    final picture = tester.getRect(find.byType(LiveVideoView));
+    final at = Offset(picture.left + 120, picture.center.dy);
+    await tester.tapAt(at);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tapAt(at);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(AppBar), findsNothing, reason: 'still in the fullscreen');
+    expect(_key('live-play-unlock'), findsOneWidget);
+    await _close(tester, room);
+  });
+
+  testWidgets('B09 c2: the recording corner clears a cut-out on the left in landscape', (tester) async {
+    final room = await _pump(tester, width: 852, height: 393);
+    tester.view.padding = const FakeViewPadding(left: 40);
+    await _tap(tester, 'live-play-fullscreen');
+    await tester.pump(const Duration(seconds: 5));
+    final corner = tester.widget<Positioned>(_key('live-play-recording-corner'));
+    expect(corner.left, 12 + 40);
+    await _close(tester, room);
   });
 
   testWidgets('paused: a tap on the picture only shows the controls; the play mark resumes', (tester) async {

@@ -130,6 +130,9 @@ void main() {
         ChatEmoteSegment(url: '', alt: '[笑哭]', asset: 'assets/emo/images/bilibili/xk.png'),
       ]);
       expect(line.segments(table), same(first), reason: 'cached on the line');
+      // B09 c7: the flying layer asks for the same message and gets the
+      // same parse.
+      expect(chatSegments(line.message!, table), same(first));
       final plain = line.segments(EmoteTable.empty);
       expect(plain, const [ChatTextSegment('哈[笑哭]')], reason: 'another table parses again');
       expect(line.segments(EmoteTable.empty), same(plain));

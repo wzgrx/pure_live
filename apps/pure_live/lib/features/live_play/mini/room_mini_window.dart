@@ -126,14 +126,14 @@ class RoomMiniWindow extends ChangeNotifier {
       await _enterDesktop();
       return;
     }
-    if (android) await _enterPip(context);
+    if (android) await _enterPip();
   }
 
-  Future<void> _enterPip(BuildContext context) async {
+  Future<void> _enterPip() async {
     final availability = await PictureInPicture.availability();
     if (_disposed) return;
     if (availability == PipAvailability.disabled) {
-      if (context.mounted) await showPipDisabledDialog(context);
+      showPipDisabledToast();
       return;
     }
     if (availability == PipAvailability.unsupported) {
@@ -162,7 +162,7 @@ class RoomMiniWindow extends ChangeNotifier {
       case PipEntry.entered:
         break;
       case PipEntry.disabled:
-        if (context.mounted) await showPipDisabledDialog(context);
+        showPipDisabledToast();
       case PipEntry.failed:
         AppNavigator.toast(i18n('pip_enter_failed'));
     }
@@ -310,18 +310,19 @@ class RoomMiniScope extends InheritedNotifier<RoomMiniWindow> {
 }
 
 /// c9: the system settings turned picture-in-picture off for this app; "去设置"
-/// opens this app's page there (3.x ignored the refusal). The app's message
-/// dialog (docs/ui/compare/U.1d: "知道了" and "去设置").
-Future<void> showPipDisabledDialog(BuildContext context) async {
-  final open = await showAppMessageDialog(
-    context: context,
-    key: const ValueKey('pip-disabled-dialog'),
-    title: i18n('pip_disabled_title'),
-    message: i18n('pip_disabled_body', args: {'app': i18n('app_name')}),
+/// opens this app's page there (3.x ignored the refusal). B09 c8: a toast
+/// that waits for "去设置" or ✕ (U.1d c13, one the user has to answer), not
+/// a centred dialog over the picture, which is often in fullscreen.
+void showPipDisabledToast() => AppNavigator.showToast(
+  AppToast(
+    i18n('pip_disabled_toast', args: {'app': i18n('app_name')}),
+    key: const ValueKey('pip-disabled-toast'),
     actionLabel: i18n('pip_open_settings'),
-    actionKey: const ValueKey('pip-open-settings'),
-  );
-  if (open) {
-    if (!await PictureInPicture.openSettings()) AppNavigator.toast(i18n('pip_enter_failed'));
-  }
+    onAction: () => unawaited(_openPipSettings()),
+    persistent: true,
+  ),
+);
+
+Future<void> _openPipSettings() async {
+  if (!await PictureInPicture.openSettings()) AppNavigator.toast(i18n('pip_enter_failed'));
 }

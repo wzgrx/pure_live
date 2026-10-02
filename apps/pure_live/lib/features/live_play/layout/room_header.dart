@@ -150,12 +150,24 @@ class RoomTitle extends StatelessWidget {
       return InkWell(
         key: const ValueKey('live-play-title'),
         onTap: onTap,
+        // The avatar is the keyboard's stop for the details (B09 c9); the
+        // names around it are more room for a finger.
+        canRequestFocus: false,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
             children: [
-              CommonAvatar(avatarUrl: avatar, radius: 16, fallbackName: nick.isEmpty ? platformLabel : nick),
+              // B09 c9 (U.1c c9): the tappable avatar darkens under the
+              // pointer and when pressed, and draws the keyboard frame.
+              CommonAvatar(
+                key: const ValueKey('live-play-avatar'),
+                avatarUrl: avatar,
+                radius: 16,
+                fallbackName: nick.isEmpty ? platformLabel : nick,
+                onTap: onTap,
+                tooltip: onTap == null ? null : i18n('live_play_room_details'),
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: placeholder

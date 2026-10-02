@@ -16,7 +16,7 @@ typedef BundledEmote = ({String asset, String url});
 /// code a message writes (`[笑哭]`, Huya's `/{dx` too) → its picture.
 @immutable
 final class EmoteTable {
-  const new _(this.codes, this._others);
+  const new _(this.codes, this._others, this._pattern);
 
   /// A table of [codes].
   factory of(Map<String, BundledEmote> codes) {
@@ -24,17 +24,26 @@ final class EmoteTable {
       for (final code in codes.keys)
         if (!_bracket.hasMatch(code) || _bracket.firstMatch(code)!.group(0) != code) code,
     ]..sort((a, b) => b.length.compareTo(a.length));
-    return EmoteTable._(Map.unmodifiable(codes), others.isEmpty ? null : others.map(RegExp.escape).join('|'));
+    final pattern = others.isEmpty ? null : others.map(RegExp.escape).join('|');
+    return EmoteTable._(
+      Map.unmodifiable(codes),
+      pattern,
+      codes.isEmpty ? null : RegExp([_bracket.pattern, ?pattern].join('|')),
+    );
   }
 
   /// No codes.
-  static const EmoteTable empty = EmoteTable._({}, null);
+  static const EmoteTable empty = EmoteTable._({}, null, null);
 
   /// The codes and their pictures.
   final Map<String, BundledEmote> codes;
 
   /// The codes that are not `[…]`, longest first, as a pattern.
   final String? _others;
+
+  /// The table's codes compiled once (B09 c7: every message compiled them
+  /// again); null without codes.
+  final RegExp? _pattern;
 
   /// A code in brackets (`[笑哭]`, `[dog]`).
   static final RegExp _bracket = RegExp(r'\[[^\[\]\n]{1,16}\]');
@@ -98,26 +107,43 @@ final class EmoteLibrary {
 /// The app's [EmoteLibrary].
 final Provider<EmoteLibrary> emoteLibraryProvider = Provider((ref) => EmoteLibrary());
 
+/// Each message's pieces with the table they were made with: the chat list
+/// and the flying layer get the same message and share one parse (B09 c7).
+final Expando<(EmoteTable, List<ChatSegment>)> _parsed = Expando('chat segments');
+
 /// The pieces of [message] for `EmoteText` (M13.16, UPGRADES B-12, B-13):
 /// the codes the message names ([LiveMessage.emotes]: CHZZK, YouTube,
 /// Bilibili, Kuaishou) and the codes of the platform's bundled list [table]
 /// become pictures, the bundled picture first and the address as its
 /// fallback; anything else stays text.
+///
+/// Parsed once per message and table (B09 c7: the chat list and the flying
+/// danmaku each parsed it); the list is shared and cannot be changed.
 List<ChatSegment> chatSegments(LiveMessage message, [EmoteTable table = EmoteTable.empty]) {
+  if (_parsed[message] case (final of, final segments) when identical(of, table)) return segments;
+  final segments = List<ChatSegment>.unmodifiable(_parse(message, table));
+  _parsed[message] = (table, segments);
+  return segments;
+}
+
+List<ChatSegment> _parse(LiveMessage message, EmoteTable table) {
   final text = message.message;
   final named = {
     for (final emote in message.emotes)
       if (emote.code.isNotEmpty) emote.code: emote.url,
   };
   if (named.isEmpty && table.codes.isEmpty) return [ChatTextSegment(text)];
-  final pattern = RegExp(
-    [
-      if (named.isNotEmpty)
-        ([...named.keys]..sort((a, b) => b.length.compareTo(a.length))).map(RegExp.escape).join('|'),
-      if (table.codes.isNotEmpty) EmoteTable._bracket.pattern,
-      ?table._others,
-    ].join('|'),
-  );
+  // The table's own pattern, compiled once; a message naming its own codes
+  // puts them first.
+  final pattern = named.isEmpty
+      ? table._pattern!
+      : RegExp(
+          [
+            ([...named.keys]..sort((a, b) => b.length.compareTo(a.length))).map(RegExp.escape).join('|'),
+            if (table.codes.isNotEmpty) EmoteTable._bracket.pattern,
+            ?table._others,
+          ].join('|'),
+        );
   final segments = <ChatSegment>[];
   var start = 0;
   for (final match in pattern.allMatches(text)) {

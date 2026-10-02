@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +16,7 @@ import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/record/record_actions.dart';
 import 'package:pure_live/shared/record/record_state.dart';
 import 'package:pure_live/shared/record/record_status_card.dart';
+import 'package:pure_live/shared/record/saved_file.dart';
 
 /// Opens the record panel of [room]: the room's panel (U.2f), or the same
 /// panel in a sheet where there is no room page around [context] (a lone
@@ -78,6 +78,49 @@ class RoomRecordPanel extends StatelessWidget {
     ],
     child: RecordPanelBody(room: room, qualities: qualities, now: now),
   );
+}
+
+/// The whole failure of the last recording, in the panel (B09 c8).
+class _FailureReason extends StatelessWidget {
+  const new({required this.text, required this.onClose});
+
+  final ({String summary, String? detail}) text;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return DecoratedBox(
+      key: const ValueKey('record-panel-reason-text'),
+      decoration: BoxDecoration(color: scheme.surfaceContainerHigh, borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 4, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(child: Text(i18n('record_panel_reason_title'), style: theme.textTheme.titleSmall?.emphasis)),
+                TextButton(
+                  key: const ValueKey('record-panel-reason-close'),
+                  onPressed: onClose,
+                  child: Text(i18n('live_play_details_fold')),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: SelectableText(
+                [text.summary, ?text.detail].join('\n\n'),
+                style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Announces the recorder's and the settings' changes to the panel's parts.
@@ -145,48 +188,22 @@ class _RecordPanelBodyState extends ConsumerState<RecordPanelBody> {
     unawaited(_tasks?.cancel());
     unawaited(_settings?.cancel());
     _changes.dispose();
+    _output.dispose();
     super.dispose();
   }
 
   List<LivePlayQuality> get _roomQualities => widget.qualities?.call() ?? const [];
 
-  /// The last recording's file and whether it was there when last looked
-  /// for (B08, audit B-20: each build asked the disk synchronously on the
-  /// UI thread). A build uses the answer it has and looks again in the
-  /// background; a different answer builds the panel again.
-  String? _outputPath;
-  bool _outputExists = false;
-  bool _lookingForOutput = false;
+  /// Whether the last recording's file is there (B08, audit B-20: each
+  /// build asked the disk synchronously on the UI thread). A build uses the
+  /// answer it has and looks again in the background; a different answer
+  /// builds the panel again.
+  late final SavedFileCheck _output = SavedFileCheck(() {
+    if (mounted) setState(() {});
+  });
 
   /// [path] when the file was there when last looked for, else null.
-  String? _saved(String? path) {
-    if (path != _outputPath) {
-      _outputPath = path;
-      _outputExists = false;
-    }
-    _lookForOutput();
-    return _outputExists ? path : null;
-  }
-
-  void _lookForOutput() {
-    final path = _outputPath;
-    if (path == null || _lookingForOutput) return;
-    _lookingForOutput = true;
-    unawaited(
-      // The asynchronous call on purpose: the UI thread does not wait for
-      // the disk (B-20).
-      // ignore: avoid_slow_async_io
-      File(path).exists().then((exists) => exists, onError: (Object _) => false).then((exists) {
-        _lookingForOutput = false;
-        if (!mounted) return;
-        if (path != _outputPath) {
-          _lookForOutput();
-        } else if (exists != _outputExists) {
-          setState(() => _outputExists = exists);
-        }
-      }),
-    );
-  }
+  String? _saved(String? path) => _output.saved(path);
 
   _View _view() {
     final recording = _recording;
@@ -283,11 +300,12 @@ class _RecordPanelBodyState extends ConsumerState<RecordPanelBody> {
     }
   }
 
-  Future<void> _showReason() async {
-    final task = _task;
-    if (task == null) return;
-    await showRecordFailureReason(context, recordFailureText(task));
-  }
+  /// "查看原因" opens the whole failure under the card, selectable (B09 c8:
+  /// the centred dialog lay over the picture, which is often in
+  /// fullscreen); "收起" or the button again closes it.
+  bool _reasonOpen = false;
+
+  void _toggleReason() => setState(() => _reasonOpen = !_reasonOpen);
 
   @override
   Widget build(BuildContext context) {
@@ -326,9 +344,14 @@ class _RecordPanelBodyState extends ConsumerState<RecordPanelBody> {
                 _ => null,
               },
               onCentre: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kRecordPage)),
-              onReason: () => unawaited(_showReason()),
+              onReason: _toggleReason,
             ),
           ),
+          if (_task case final task? when _reasonOpen && task.status == RecordStatus.failed)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: _FailureReason(text: recordFailureText(task), onClose: _toggleReason),
+            ),
           PanelGroupTitle(i18n('record_panel_this_time')),
           _ThisRecording(
             view: view,
@@ -439,15 +462,14 @@ class _ThisRecording extends StatelessWidget {
               spacing: 8,
               runSpacing: 4,
               children: [
+                // B09 c9: the app's one chip (U.1c c13: corners of 8, the
+                // tick of the chosen one, the keyboard frame).
                 for (final quality in choices)
-                  ChoiceChip(
+                  AppChip(
                     key: ValueKey('record-quality-$quality'),
-                    label: Text(quality),
+                    label: quality,
                     selected: quality == chosen,
-                    // Five qualities fit on one line of a phone.
-                    visualDensity: VisualDensity.compact,
-                    labelPadding: const EdgeInsets.symmetric(horizontal: 2),
-                    onSelected: (_) => onQuality(quality),
+                    onSelected: () => onQuality(quality),
                   ),
               ],
             ),

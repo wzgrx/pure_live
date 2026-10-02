@@ -242,6 +242,60 @@ void main() {
     await _close(tester, room);
   });
 
+  testWidgets('B09 c4: back from the fullscreen, the tab, the held lines and their place are kept', (tester) async {
+    // Audit B-12: the normal layout and the fullscreen are two trees; the
+    // chat came back on its first tab, at the newest line.
+    final room = await _pump(tester);
+    _chats(room, 0, 60);
+    await tester.pump();
+    await tester.drag(_list, const Offset(0, 300));
+    await _frames(tester, 3);
+    final offset = _position(tester).pixels;
+    expect(offset, greaterThan(24));
+    final listRect = tester.getRect(_list);
+    final watched = [
+      for (var i = 59; i >= 0; i--)
+        if (_line(i).evaluate().isNotEmpty && listRect.contains(tester.getCenter(_line(i)))) i,
+    ].first;
+    final rect = tester.getRect(_line(watched));
+
+    Future<void> throughFullscreen(void Function() meanwhile) async {
+      await tester.tap(find.byKey(const ValueKey('live-play-fullscreen')));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(ChatList), findsNothing, reason: 'fullscreen');
+      meanwhile();
+      await _frames(tester, 2);
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+    }
+
+    await throughFullscreen(() => _chats(room, 60, 80));
+    expect(_position(tester).pixels, offset);
+    expect(tester.getRect(_line(watched)), rect, reason: 'the same lines in the same place');
+    expect(find.text('20 条新弹幕，点击回到底部'), findsOneWidget);
+    expect(_line(79), findsNothing);
+
+    // Following, it follows again; the tab it was left on comes back.
+    await tester.tap(find.byKey(const ValueKey('live-play-new-messages')));
+    await _frames(tester, 2);
+    await tester.tap(find.text('醒目留言'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    TabController tabs() => tester.widget<TabBar>(find.byKey(const ValueKey('live-play-tabs'))).controller!;
+    expect(tabs().index, 1);
+    await throughFullscreen(() => _chats(room, 80, 85));
+    expect(tabs().index, 1);
+    await tester.tap(find.text('弹幕列表'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(_position(tester).pixels, 0);
+    expect(_line(84), findsOneWidget);
+    expect(find.byKey(const ValueKey('live-play-new-messages')), findsNothing);
+    await _close(tester, room);
+  });
+
   testWidgets('a drag that ends back at the bottom follows again', (tester) async {
     final room = await _pump(tester);
     _chats(room, 0, 60);

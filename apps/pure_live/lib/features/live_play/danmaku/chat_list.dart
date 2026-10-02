@@ -11,6 +11,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/danmaku/message_panel.dart';
+import 'package:pure_live/features/live_play/layout/room_view_memory.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_chat_line.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -95,13 +96,18 @@ String chatCopyText(LiveMessage message) {
 /// when a scroll ends at the bottom or "N 条新弹幕" is pressed.
 class ChatList extends ConsumerStatefulWidget {
   /// Creates the list.
-  const new({required this.controller, this.onTouched, super.key});
+  const new({required this.controller, this.onTouched, this.memory, super.key});
 
   /// The room.
   final LiveRoomController controller;
 
   /// Called when the user touches the list (clears the tab's count).
   final VoidCallback? onTouched;
+
+  /// Where the list keeps the lines it held and its place when the page
+  /// builds it anew (leaving the fullscreen, B09 c4); null: it starts at
+  /// the newest line.
+  final RoomViewMemory? memory;
 
   @override
   ConsumerState<ChatList> createState() => _ChatListState();
@@ -111,7 +117,7 @@ class _ChatListState extends ConsumerState<ChatList> {
   /// This close to the newest line the list is at the bottom.
   static const double _bottomSlack = 24;
 
-  final ScrollController _scroll = ScrollController();
+  late final ScrollController _scroll;
 
   /// Lines added since the list last showed the newest one.
   final ValueNotifier<int> _unseen = ValueNotifier(0);
@@ -137,8 +143,26 @@ class _ChatListState extends ConsumerState<ChatList> {
   @override
   void initState() {
     super.initState();
-    _scroll.addListener(_onScroll);
-    _attach(widget.controller);
+    // B09 c4: back where it was left (the memory is the page's; the offset
+    // is not left to the page storage, which keys by place in the tree).
+    final held = widget.memory?.chatList;
+    final restore = held != null && identical(held.feed, widget.controller.chat);
+    _scroll = ScrollController(initialScrollOffset: restore ? held.offset : 0, keepScrollOffset: false)
+      ..addListener(_onScroll);
+    _attach(widget.controller, held: restore ? held : null);
+  }
+
+  @override
+  void deactivate() {
+    // Leaving the tree (the fullscreen, another layout, another tab): what
+    // it held, for the list built in its place.
+    final memory = widget.memory;
+    if (memory != null) {
+      memory.chatList = _following || !_scroll.hasClients
+          ? null
+          : ChatListMemory(feed: _feed, shown: _shown.value, seen: _seen, removals: _removals, offset: _scroll.offset);
+    }
+    super.deactivate();
   }
 
   @override
@@ -159,13 +183,22 @@ class _ChatListState extends ConsumerState<ChatList> {
     super.dispose();
   }
 
-  void _attach(LiveRoomController controller) {
+  void _attach(LiveRoomController controller, {ChatListMemory? held}) {
     controller.addListener(_onRoom);
     controller.chat.addListener(_onLines);
-    _shown.value = controller.chat.lines;
-    _seen = controller.chat.added;
-    _removals = controller.chat.removals;
-    _unseen.value = 0;
+    if (held != null) {
+      // Holding the lines it showed: removals since apply, new lines count.
+      _following = false;
+      _shown.value = held.shown;
+      _seen = held.seen;
+      _removals = held.removals;
+      _onLines();
+    } else {
+      _shown.value = controller.chat.lines;
+      _seen = controller.chat.added;
+      _removals = controller.chat.removals;
+      _unseen.value = 0;
+    }
     _facts = _RoomFacts.of(controller);
     // The platform's bundled emoticons (M13.16), read once per platform.
     final library = ref.read(emoteLibraryProvider);

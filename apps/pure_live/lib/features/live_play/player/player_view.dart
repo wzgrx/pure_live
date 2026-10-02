@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,8 +85,15 @@ class RoomPlayer extends ConsumerStatefulWidget {
     this.entryHint = false,
     this.onOpenGuide,
     this.swipe,
+    this.edge,
     super.key,
   });
+
+  /// On the middle of the right edge, shown and hidden with the controls:
+  /// the wide room's handle that folds the chat or guide column (B09 c5,
+  /// audit B-19: always there, it took the volume drag and the danmaku
+  /// taps on that edge).
+  final Widget? edge;
 
   /// The portrait fullscreen's swipe between rooms (U.2b2): the middle third
   /// of the picture drags it; null without one.
@@ -180,9 +188,25 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   /// A flying danmaku's actions are open: the danmaku stand (U.2h c9).
   bool _danmakuHeld = false;
 
-  /// The flying danmaku under the last tap when it went down: the double
-  /// tap holds the tap back, and the danmaku moves on meanwhile.
+  /// The flying danmaku under the last tap when it went down (the danmaku
+  /// moves on before the tap ends).
   LiveMessage? _tapHit;
+
+  /// Where the last tap went down.
+  Offset? _tapAt;
+
+  /// B09 c1 (audit B-8): a tap acts at once instead of waiting out the
+  /// double tap's timeout; a second tap within [kDoubleTapTimeout] and
+  /// [kDoubleTapSlop] of it takes the first one back ([_undoTap]) and
+  /// toggles the fullscreen. Open while this runs.
+  Timer? _doubleTapWindow;
+  Offset? _firstTapAt;
+  VoidCallback? _undoTap;
+
+  /// The controls a tap just showed take no taps while a second one may
+  /// come: a double tap near the bars would press the button that appeared
+  /// under it (they used to show only after the timeout).
+  bool _controlsSettling = false;
 
   /// The platform's bundled emoticons, flown as pictures (U.2h c1).
   EmoteTable _emotes = EmoteTable.empty;
@@ -256,6 +280,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   @override
   void dispose() {
     _hide?.cancel();
+    _doubleTapWindow?.cancel();
     unawaited(_playback?.cancel());
     _panels?.removeListener(_scheduleHide);
     super.dispose();
@@ -299,21 +324,76 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   /// the picture's play mark do (a stray tap used to start it again).
   /// Paused, the controls stay until a tap hides them (B02 c1), so the
   /// still picture can be seen without them.
+  ///
+  /// B09 c1 (audit B-8): the tap acts at once (3.x, and 4.0.0, held every
+  /// tap back by the double tap's timeout, about 300 ms). A second tap
+  /// within that time and near the first is the double tap (appendix A 3,
+  /// not while locked): it takes the first tap back and toggles the
+  /// fullscreen.
   void _onTap() {
     final hit = _tapHit;
+    final at = _tapAt;
     _tapHit = null;
-    if (hit != null) {
-      unawaited(_openMessage(hit));
+    _tapAt = null;
+    final first = _firstTapAt;
+    if ((_doubleTapWindow?.isActive ?? false) &&
+        !_locked &&
+        at != null &&
+        first != null &&
+        (at - first).distance <= kDoubleTapSlop) {
+      final undo = _undoTap;
+      _closeDoubleTap();
+      undo?.call();
+      widget.onToggleFullscreen();
       return;
     }
+    _closeDoubleTap();
+    final shownBefore = _controls;
+    final undo = hit != null ? _tapMessage(hit) : _tapControls();
+    if (_locked || at == null) return;
+    _firstTapAt = at;
+    _undoTap = undo;
+    if (!shownBefore && _controls) setState(() => _controlsSettling = true);
+    _doubleTapWindow = Timer(kDoubleTapTimeout, _closeDoubleTap);
+  }
+
+  void _closeDoubleTap() {
+    _doubleTapWindow?.cancel();
+    _doubleTapWindow = null;
+    _firstTapAt = null;
+    _undoTap = null;
+    if (_controlsSettling && mounted) setState(() => _controlsSettling = false);
+  }
+
+  /// A tap's effect on the controls (see [_onTap]); returns what puts them
+  /// back as they were.
+  VoidCallback _tapControls() {
+    final before = _controls;
     final status = _room.session.state.status;
     final shown = status == PlaybackStatus.playing || status == PlaybackStatus.paused;
     if (widget.platform.mobile && _controls && (shown || _locked)) {
       setState(() => _controls = false);
-      return;
+    } else {
+      if (!_controls) setState(() => _controls = true);
+      _scheduleHide();
     }
-    if (!_controls) setState(() => _controls = true);
-    _scheduleHide();
+    return () {
+      if (!mounted || _controls == before) return;
+      setState(() => _controls = before);
+      if (before) _scheduleHide();
+    };
+  }
+
+  /// A tap on a flying danmaku opens its actions at once; returns what
+  /// closes them again.
+  VoidCallback _tapMessage(LiveMessage message) {
+    unawaited(_openMessage(message));
+    return () {
+      final panels = mounted ? RoomPanelScope.maybeOf(context) : null;
+      if (panels != null && panels.value == RoomPanelKind.message && identical(panels.message, message)) {
+        panels.close();
+      }
+    };
   }
 
   void _touch() {
@@ -566,11 +646,14 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Only the picture takes the double tap: on the buttons it
-              // would hold every tap back by the double-tap timeout.
+              // Only the picture takes the double tap; a tap acts at once
+              // and a second one takes it back (B09 c1, [_onTap]).
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTapDown: (details) => _tapHit = _danmakuAt(details.globalPosition, longPress: false),
+                onTapDown: (details) {
+                  _tapAt = details.globalPosition;
+                  _tapHit = _danmakuAt(details.globalPosition, longPress: false);
+                },
                 onTap: _onTap,
                 // F.2b: only with its switch on, so it never holds a drag back.
                 onLongPressStart: longPress
@@ -580,7 +663,6 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                         }
                       }
                     : null,
-                onDoubleTap: _locked ? null : widget.onToggleFullscreen,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -634,7 +716,10 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
         // and figure alone in the corner while they are hidden.
         if (!_controls || _locked)
           Positioned(
-            left: 12,
+            key: const ValueKey('live-play-recording-corner'),
+            // B09 c2 (audit B-10): clear of a cut-out on the left in
+            // landscape, like the marks under the bars.
+            left: 12 + (_inline ? 0 : padding.left),
             top: 10 + (_inline ? 0 : padding.top),
             child: IgnorePointer(child: RoomRecordingBadge(room: _room.room, compact: true)),
           )
@@ -657,7 +742,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
             opacity: _controls ? 1 : 0,
             duration: const Duration(milliseconds: 200),
             child: IgnorePointer(
-              ignoring: !_controls,
+              ignoring: !_controls || _controlsSettling,
               child: MediaQuery.withClampedTextScaling(
                 maxScaleFactor: 1.3,
                 child: IconTheme(
@@ -671,15 +756,19 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                     builder: (context, controls, _) => Stack(
                       fit: StackFit.expand,
                       children: [
-                        if (!_locked)
-                          Column(
-                            children: [
-                              if (controls || arrangement != ControlsArrangement.inline)
-                                PlayerTopBar(actions: controls ? actions : actions.reducedCopy()),
-                              const Spacer(),
-                              if (controls) bottomBar,
-                            ],
+                        // The bars on the edges: on a picture lower than the
+                        // two (a 16:9 picture under 285 wide) their shades
+                        // overlap instead of overflowing (B09 c3).
+                        if (!_locked && (controls || arrangement != ControlsArrangement.inline))
+                          Positioned(
+                            left: 0,
+                            top: 0,
+                            right: 0,
+                            child: PlayerTopBar(actions: controls ? actions : actions.reducedCopy()),
                           ),
+                        if (!_locked && controls) Positioned(left: 0, right: 0, bottom: 0, child: bottomBar),
+                        if (!_locked && widget.edge != null)
+                          Positioned(right: 0, top: 0, bottom: 0, child: Center(child: widget.edge)),
                         // B-4: while locked the unlock button stays whatever
                         // the room does (off the air, failed), or nothing
                         // on screen could unlock it.

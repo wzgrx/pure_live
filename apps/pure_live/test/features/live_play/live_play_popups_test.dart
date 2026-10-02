@@ -417,6 +417,13 @@ void main() {
       // The settings' 原画 picks the room's 原画; the chips are the room's.
       expect(tester.widget<ChoiceChip>(find.byKey(const ValueKey('record-quality-原画'))).selected, isTrue);
       expect(find.byKey(const ValueKey('record-quality-蓝光')), findsOneWidget);
+      // B09 c9 (U.1c c13): the app's one chip, corners of 8.
+      expect(tester.widget(find.byKey(const ValueKey('record-quality-原画'))), isA<AppChip>());
+      final chip = tester.element(find.byKey(const ValueKey('record-quality-原画')));
+      expect(
+        (Theme.of(chip).chipTheme.shape! as RoundedRectangleBorder).borderRadius,
+        const BorderRadius.all(Radius.circular(8)),
+      );
       expect(find.text('默认值在录制设置里改'), findsOneWidget);
       expect(tester.widget<Switch>(find.byKey(const ValueKey('record-panel-auto'))).value, isFalse);
       expect(find.byKey(const ValueKey('record-panel-settings')), findsOneWidget);
@@ -586,6 +593,20 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('record-panel-reason')));
       await tester.pumpAndSettle();
       expect(find.text('失败原因'), findsOneWidget);
+      // B09 c8: in the panel under the card, selectable; no centred dialog
+      // over the picture (often in fullscreen).
+      expect(find.byType(Dialog), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('record-panel-reason-text')),
+          matching: find.byType(SelectableText),
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('timeout', findRichText: true), findsWidgets);
+      await tester.tap(find.byKey(const ValueKey('record-panel-reason-close')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('record-panel-reason-text')), findsNothing);
     });
 
     testWidgets('开播自动录 turns the live check on with it, or offers to (F2, R4)', (tester) async {
@@ -937,13 +958,22 @@ void main() {
     await tester.pumpAndSettle();
     final input = tester.widget<TextField>(find.byKey(const ValueKey('live-play-keyword-input')));
     expect(input.controller?.text, '剧透警告', reason: 'filled with the message, to cut down to the word');
-    // U.2n c9: the app's input dialog: one line, at most 40, "屏蔽".
+    // U.2n c9: one line, at most 40, "屏蔽". B09 c8: the panel's second
+    // page, no centred dialog (the picture is often in fullscreen).
     expect(input.maxLines, 1);
     expect(input.maxLength, 40);
     expect(_in('live-play-keyword-confirm', find.text('屏蔽')), findsOneWidget);
-    expect(find.byKey(const ValueKey('live-play-message-panel')), findsNothing);
-    await tester.tap(find.text('取消'));
+    expect(find.byType(Dialog), findsNothing);
+    expect(_in('live-play-message-panel', find.byKey(const ValueKey('live-play-keyword-input'))), findsOneWidget);
+    expect(_in('live-play-message-panel', find.text('屏蔽弹幕关键词')), findsOneWidget);
+    // ← back to the actions; ✕ closes the panel.
+    await tester.tap(find.byKey(const ValueKey('message-panel-back')));
     await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('live-play-keyword-input')), findsNothing);
+    expect(find.byKey(const ValueKey('live-play-block-keyword')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('room-panel-close')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('live-play-message-panel')), findsNothing);
     await _close(tester, room);
   });
 

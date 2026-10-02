@@ -457,87 +457,90 @@ class _FollowGridState extends ConsumerState<_FollowGrid> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const physics = PureLiveScrollPhysics(parent: AlwaysScrollableScrollPhysics());
-        final Widget scrollable;
-        if (rooms.isEmpty) {
-          scrollable = CustomScrollView(
-            key: PageStorageKey('favorite-empty-${widget.platform}'),
-            physics: physics,
-            slivers: [SliverFillRemaining(hasScrollBody: false, child: _emptyState(desktop: desktop))],
-          );
-        } else if (group == FollowGroup.offline) {
-          final columns = GridColumns.count(
-            width: constraints.maxWidth,
-            minItemWidth: favoriteRowMinWidth,
-            spacing: spacing,
-            min: 1,
-          );
-          final rowHeight = RoomRow.height - 16 + MediaQuery.textScalerOf(context).scale(15 + 13) * 1.4;
-          scrollable = GridView.builder(
-            key: PageStorageKey('favorite-rows-${widget.platform}'),
-            controller: _scroll,
-            padding: const EdgeInsets.all(roomGridPadding),
-            physics: physics,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columns,
-              crossAxisSpacing: spacing,
-              mainAxisSpacing: mainSpacing,
-              mainAxisExtent: rowHeight < RoomRow.height ? RoomRow.height : rowHeight,
-            ),
-            itemCount: rooms.length,
-            itemBuilder: (context, index) {
-              final room = rooms[index];
-              final pending = _pendingLabel(room);
-              final mark = roomMark(room);
-              final note = pending ?? mark;
-              return RoomRow(
-                key: ValueKey(room.identityKey),
-                data: policy.cardOf(room),
-                trailing: note == null ? null : _RowNote(text: note),
-                onTap: () => unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room, playlist: all)),
-                onLongPress: () => unawaited(showRoomMenu(context, store: store, room: room)),
-              );
-            },
-          );
-        } else {
-          final geometry = RoomGridGeometry.of(
-            context,
-            width: constraints.maxWidth,
-            spacing: spacing,
-            appearance: appearance,
-            fontSizes: fontSizes,
-            dense: dense,
-            minItemWidth: dense ? null : favoriteLargeCardMinWidth,
-            minColumns: dense ? 2 : 1,
-          );
-          scrollable = GridView.builder(
-            key: PageStorageKey('favorite-grid-${widget.platform}-${group.name}'),
-            controller: _scroll,
-            padding: const EdgeInsets.all(roomGridPadding),
-            physics: physics,
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            gridDelegate: geometry.delegate(spacing: spacing, mainSpacing: mainSpacing),
-            itemCount: rooms.length,
-            itemBuilder: (context, index) {
-              final room = rooms[index];
-              final pending = _pendingLabel(room);
-              return RoomGridCard(
-                key: ValueKey(room.identityKey),
-                room: room,
-                dense: dense,
-                mixedPlatforms: mixed,
-                statusPending: pending != null,
-                statusPendingLabel: pending,
-                now: now,
-                // The group's rooms go along (U.2b2).
-                onOpen: () => unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room, playlist: all)),
-              );
-            },
-          );
+        // The physics come from the pull-to-refresh view on phones (3.x's
+        // bounce, P02), else the app's own.
+        Widget scrollable(ScrollPhysics physics) {
+          if (rooms.isEmpty) {
+            return CustomScrollView(
+              key: PageStorageKey('favorite-empty-${widget.platform}'),
+              physics: physics,
+              slivers: [SliverFillRemaining(hasScrollBody: false, child: _emptyState(desktop: desktop))],
+            );
+          } else if (group == FollowGroup.offline) {
+            final columns = GridColumns.count(
+              width: constraints.maxWidth,
+              minItemWidth: favoriteRowMinWidth,
+              spacing: spacing,
+              min: 1,
+            );
+            final rowHeight = RoomRow.height - 16 + MediaQuery.textScalerOf(context).scale(15 + 13) * 1.4;
+            return GridView.builder(
+              key: PageStorageKey('favorite-rows-${widget.platform}'),
+              controller: _scroll,
+              padding: const EdgeInsets.all(roomGridPadding),
+              physics: physics,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                crossAxisSpacing: spacing,
+                mainAxisSpacing: mainSpacing,
+                mainAxisExtent: rowHeight < RoomRow.height ? RoomRow.height : rowHeight,
+              ),
+              itemCount: rooms.length,
+              itemBuilder: (context, index) {
+                final room = rooms[index];
+                final pending = _pendingLabel(room);
+                final mark = roomMark(room);
+                final note = pending ?? mark;
+                return RoomRow(
+                  key: ValueKey(room.identityKey),
+                  data: policy.cardOf(room),
+                  trailing: note == null ? null : _RowNote(text: note),
+                  onTap: () => unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room, playlist: all)),
+                  onLongPress: () => unawaited(showRoomMenu(context, store: store, room: room)),
+                );
+              },
+            );
+          } else {
+            final geometry = RoomGridGeometry.of(
+              context,
+              width: constraints.maxWidth,
+              spacing: spacing,
+              appearance: appearance,
+              fontSizes: fontSizes,
+              dense: dense,
+              minItemWidth: dense ? null : favoriteLargeCardMinWidth,
+              minColumns: dense ? 2 : 1,
+            );
+            return GridView.builder(
+              key: PageStorageKey('favorite-grid-${widget.platform}-${group.name}'),
+              controller: _scroll,
+              padding: const EdgeInsets.all(roomGridPadding),
+              physics: physics,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              gridDelegate: geometry.delegate(spacing: spacing, mainSpacing: mainSpacing),
+              itemCount: rooms.length,
+              itemBuilder: (context, index) {
+                final room = rooms[index];
+                final pending = _pendingLabel(room);
+                return RoomGridCard(
+                  key: ValueKey(room.identityKey),
+                  room: room,
+                  dense: dense,
+                  mixedPlatforms: mixed,
+                  statusPending: pending != null,
+                  statusPendingLabel: pending,
+                  now: now,
+                  // The group's rooms go along (U.2b2).
+                  onOpen: () => unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room, playlist: all)),
+                );
+              },
+            );
+          }
         }
-        final list = Stack(
+
+        Widget list(ScrollPhysics physics) => Stack(
           children: [
-            Positioned.fill(child: scrollable),
+            Positioned.fill(child: scrollable(physics)),
             if (showJumps && rooms.isNotEmpty)
               Positioned(
                 right: 16,
@@ -546,7 +549,7 @@ class _FollowGridState extends ConsumerState<_FollowGrid> {
               ),
           ],
         );
-        if (!desktop) return RefreshIndicator(onRefresh: widget.onRefresh, child: list);
+        if (!desktop) return AppRefreshView(onRefresh: widget.onRefresh, builder: (context, physics) => list(physics));
         return CallbackShortcuts(
           bindings: {
             const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
@@ -560,7 +563,7 @@ class _FollowGridState extends ConsumerState<_FollowGrid> {
             autofocus: true,
             child: Column(
               children: [
-                Expanded(child: list),
+                Expanded(child: list(const PureLiveScrollPhysics(parent: AlwaysScrollableScrollPhysics()))),
                 ValueListenableBuilder<double?>(
                   valueListenable: _controller.progress,
                   builder: (context, progress, _) => PaginationBar(

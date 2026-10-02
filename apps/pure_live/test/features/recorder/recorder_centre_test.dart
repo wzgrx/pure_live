@@ -401,6 +401,40 @@ void main() {
     expect(_inCard('i', _key('record-panel-start')), findsOneWidget);
   });
 
+  // docs/ui/compare/U.2a2 c9: the card heads draw the room bar's glyph.
+  testWidgets("U.2a2: each card head draws the room bar's glyph; red only while recording", (tester) async {
+    await _pumpNine(tester, size: const Size(393, 6000));
+    RecordGlyphPainter painterIn(Finder glyph) =>
+        tester.widget<CustomPaint>(find.descendant(of: glyph, matching: find.byType(CustomPaint))).painter!
+            as RecordGlyphPainter;
+    const glyphs = {
+      'r': 'recording',
+      'c': 'reconnecting',
+      'j': 'processing',
+      'p': 'preparing',
+      'q': 'waiting',
+      'w': 'waiting',
+      'f': 'failed',
+      'i': 'idle',
+    };
+    for (final MapEntry(key: id, value: state) in glyphs.entries) {
+      final glyph = _inCard(id, _key('record-glyph-$state'));
+      expect(glyph, findsOneWidget, reason: id);
+      expect(painterIn(glyph).colors.contains(LiveSemanticColors.recording), state == 'recording', reason: id);
+    }
+    // Queued and reconnecting take the card's amber; the others its grey.
+    expect(painterIn(_inCard('q', _key('record-glyph-waiting'))).ink, LiveSemanticColors.warningLight);
+    expect(painterIn(_inCard('c', _key('record-glyph-reconnecting'))).warning, LiveSemanticColors.warningLight);
+    final grey = painterIn(_inCard('w', _key('record-glyph-waiting'))).ink;
+    expect(grey, isNot(LiveSemanticColors.warningLight));
+    expect(painterIn(_inCard('i', _key('record-glyph-idle'))).ink, grey);
+    // The join draws how far it is (42 %, as the bar under it).
+    expect(painterIn(_inCard('j', _key('record-glyph-processing'))).progress, 0.42);
+    // Saved keeps its green tick.
+    expect(_inCard('s', find.byIcon(AppIcons.recordSaved)), findsOneWidget);
+    expect(_inCard('s', find.byType(RecordGlyph)), findsNothing);
+  });
+
   testWidgets('saved: play opens the file, the folder its own folder; the reason in full', (tester) async {
     final (_, outside, file) = await _pumpNine(tester, size: const Size(393, 6000));
     await tester.tap(_inCard('s', _key('record-panel-play')));

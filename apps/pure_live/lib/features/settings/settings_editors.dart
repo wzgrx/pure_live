@@ -899,35 +899,30 @@ class AutoExitMinutesTile extends ConsumerWidget {
 /// the right, the display's rates as the explanation (on Windows the
 /// monitor's mode, updated when the window moves to another monitor; 3.x's
 /// "Windows 动态刷新率" row); the dialog explains each policy and can read
-/// the display again.
-class RefreshRateTile extends StatefulWidget {
+/// the display again. P01 c3: a line under the row while the system holds
+/// the app at 60 Hz against the policy ([DisplayMode.limited]).
+class RefreshRateTile extends ConsumerStatefulWidget {
   /// Creates the row.
   const new({required this.entry, super.key});
 
   /// The entry drawn.
   final SettingsEntry entry;
 
-  /// The policies, with their energy use (3.x).
+  /// The policies, with their energy use and explanation (3.x).
   static List<SettingsChoice<String>> options() => [
-    for (final (mode, energy) in const [
-      ('powerSaving', 'refresh_rate_energy_low'),
-      ('balanced', 'refresh_rate_energy_medium'),
-      ('performance', 'refresh_rate_energy_high'),
+    for (final (mode, label, energy, description) in const [
+      ('powerSaving', 'refresh_rate_power_saving', 'refresh_rate_energy_low', 'refresh_rate_power_saving_desc'),
+      ('balanced', 'refresh_rate_balanced', 'refresh_rate_energy_medium', 'refresh_rate_balanced_desc'),
+      ('performance', 'refresh_rate_performance', 'refresh_rate_energy_high', 'refresh_rate_performance_desc'),
     ])
-      (value: mode, label: '${i18n(_labels[mode]!)} · ${i18n(energy)}', description: i18n('${_labels[mode]!}_desc')),
+      (value: mode, label: '${i18n(label)} · ${i18n(energy)}', description: i18n(description)),
   ];
 
-  static const Map<String, String> _labels = {
-    'powerSaving': 'refresh_rate_power_saving',
-    'balanced': 'refresh_rate_balanced',
-    'performance': 'refresh_rate_performance',
-  };
-
   @override
-  State<RefreshRateTile> createState() => _RefreshRateTileState();
+  ConsumerState<RefreshRateTile> createState() => _RefreshRateTileState();
 }
 
-class _RefreshRateTileState extends State<RefreshRateTile> {
+class _RefreshRateTileState extends ConsumerState<RefreshRateTile> {
   @override
   void initState() {
     super.initState();
@@ -954,27 +949,67 @@ class _RefreshRateTileState extends State<RefreshRateTile> {
   @override
   Widget build(BuildContext context) {
     final fallback = View.maybeOf(context)?.display.refreshRate ?? 60;
+    final asksHigh = watchSetting(ref, Settings.refreshRateMode) != 'powerSaving';
     return ValueListenableBuilder<DisplayModeInfo?>(
       valueListenable: DisplayMode.info,
       builder: (context, info, _) {
         final rates = _rates(info, fallback);
-        return SettingChoiceTile<String>(
-          entry: widget.entry,
-          setting: Settings.refreshRateMode,
-          icon: AppIcons.settingsRefreshRate,
-          options: RefreshRateTile.options,
-          subtitle: rates,
-          hint: '${i18n('refresh_rate_mode_hint')}\n$rates',
-          valueText: (current, value) => i18n('settings_refresh_rate_short_$value'),
-          action: DisplayMode.supported
-              ? (
-                  label: i18n('settings_display_recheck'),
-                  key: const ValueKey('settings-display-recheck'),
-                  onPressed: () => unawaited(DisplayMode.refresh()),
-                )
-              : null,
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SettingChoiceTile<String>(
+              entry: widget.entry,
+              setting: Settings.refreshRateMode,
+              icon: AppIcons.settingsRefreshRate,
+              options: RefreshRateTile.options,
+              subtitle: rates,
+              hint: '${i18n('refresh_rate_mode_hint')}\n$rates',
+              valueText: (current, value) => i18n('settings_refresh_rate_short_$value'),
+              action: DisplayMode.supported
+                  ? (
+                      label: i18n('settings_display_recheck'),
+                      key: const ValueKey('settings-display-recheck'),
+                      onPressed: () => unawaited(DisplayMode.refresh()),
+                    )
+                  : null,
+            ),
+            ValueListenableBuilder<bool>(
+              valueListenable: DisplayMode.limited,
+              builder: (context, limited, _) => limited && asksHigh
+                  ? _RefreshRateLimitedNote(rate: info?.currentRefreshRate ?? 60)
+                  : const SizedBox.shrink(),
+            ),
+          ],
         );
       },
+    );
+  }
+}
+
+/// P01 c3: the system holds the app at [rate] (60 Hz) although the policy
+/// asks for more; under the refresh-rate row, where the row's text starts,
+/// in the warning colour.
+class _RefreshRateLimitedNote extends StatelessWidget {
+  const new({required this.rate});
+
+  final double rate;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tv = SettingsRowStyle.tvOf(context);
+    return Padding(
+      key: const ValueKey('settings-refresh-rate-limited'),
+      padding: EdgeInsetsDirectional.fromSTEB(tv ? 60 : 56, 0, 16, 12),
+      child: Text(
+        i18n('settings_refresh_rate_limited', args: {'rate': '${rate.round()}'}),
+        style: (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
+          fontSize: tv ? 14 : 12,
+          height: 1.45,
+          color: LiveSemanticColors.warning(theme.brightness),
+        ),
+      ),
     );
   }
 }

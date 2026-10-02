@@ -554,6 +554,17 @@ abstract final class AppIcons {
   /// Scroll to the end (3.x's mini button).
   static const IconData toBottom = Icons.arrow_downward_rounded;
 
+  /// The pull-to-refresh header while pulled; turns over once releasing
+  /// refreshes (3.x `plugins/global.dart` pull icon; U.1c c19).
+  static const IconData refreshPull = Icons.arrow_downward_rounded;
+
+  /// The pull-to-refresh header after a refresh (easy_refresh's
+  /// `ClassicHeader` default).
+  static const IconData refreshSucceeded = Icons.done_rounded;
+
+  /// The pull-to-refresh header after a failed refresh (U.1c c19).
+  static const IconData refreshFailed = Icons.error_outline_rounded;
+
   /// The previous page of the desktop pager.
   static const IconData previousPage = Icons.chevron_left_rounded;
 

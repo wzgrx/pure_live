@@ -128,7 +128,7 @@ class RecorderForegroundService : Service() {
             try {
                 channels(context, words)
                 val notification = Notification.Builder(context, ALERT_CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_stat_recording)
+                    .setSmallIcon(R.drawable.ic_stat_record_stopped)
                     .setContentTitle(title)
                     .setContentText(text)
                     .setStyle(Notification.BigTextStyle().bigText(text))

@@ -110,20 +110,14 @@ void main() {
         ),
       ),
     );
-    for (var i = 0; i < 5; i++) {
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
-      await tester.pump();
-    }
+    await _until(tester, () => find.byKey(const ValueKey('remote-sync-code')).evaluate().isNotEmpty);
     expect(find.textContaining('192.168.7.8:'), findsOneWidget);
     expect(find.byKey(const ValueKey('remote-sync-qr')), findsOneWidget);
     expect(find.byKey(const ValueKey('remote-sync-code')), findsOneWidget);
     expect(find.text('同步服务运行中'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('remote-sync-toggle')));
-    for (var i = 0; i < 3; i++) {
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
-      await tester.pump();
-    }
+    await _until(tester, () => find.text('同步服务未运行').evaluate().isNotEmpty);
     expect(find.text('同步服务未运行'), findsOneWidget);
     expect(find.byKey(const ValueKey('remote-sync-code')), findsNothing);
     await tester.pumpWidget(const SizedBox());
@@ -205,7 +199,7 @@ Future<_FakeSync> _pumpPage(
   AppNavigator.toast = toasts.add;
   addTearDown(() => AppNavigator.toast = previous);
   _toasts = toasts;
-  late _FakeSync service;
+  _FakeSync? service;
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -221,17 +215,31 @@ Future<_FakeSync> _pumpPage(
       ),
     ),
   );
-  for (var i = 0; i < 5; i++) {
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
-    await tester.pump();
-  }
-  devices.forEach(service.heard);
+  // The service opens real sockets: wait until it serves, however busy the
+  // machine is (a fixed 250 ms lost the heard devices under load), then
+  // let its discovery start.
+  await _until(tester, () => service?.running ?? false);
+  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+  await tester.pump();
+  final started = service!;
+  devices.forEach(started.heard);
   await tester.pump();
   addTearDown(() async {
     await tester.pumpWidget(const SizedBox());
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
   });
-  return service;
+  return started;
+}
+
+/// Lets the real work behind the page (its sockets, the store) finish,
+/// pumping between short real waits, for up to 10 s; fixed budgets were
+/// lost when the machine was busy.
+Future<void> _until(WidgetTester tester, bool Function() done) async {
+  for (var i = 0; i < 500 && !done(); i++) {
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester.pump();
+  }
+  expect(done(), isTrue, reason: 'still waiting after 10 s');
 }
 
 double _y(WidgetTester tester, Finder finder) => tester.getTopLeft(finder).dy;
@@ -287,10 +295,7 @@ void _pageTests() {
     expect(find.text('使用另一台设备扫描此二维码'), findsNothing, reason: 'nothing to scan (L4)');
 
     await tester.tap(find.byKey(const ValueKey('remote-sync-toggle')));
-    for (var i = 0; i < 3; i++) {
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
-      await tester.pump();
-    }
+    await _until(tester, () => find.text('同步服务未运行').evaluate().isNotEmpty);
     expect(find.text('同步服务未运行'), findsOneWidget);
     final error = Theme.of(tester.element(find.text('同步服务未运行'))).colorScheme.error;
     expect(tester.widget<Text>(find.text('同步服务未运行')).style?.color, error);
@@ -330,10 +335,7 @@ void _pageTests() {
     expect(find.text('输入“PureLive Windows”上显示的 6 位配对码'), findsOneWidget, reason: 'no question before the code');
     await tester.enterText(find.byKey(const ValueKey('remote-sync-code-field')), '123456');
     await tester.tap(find.byKey(const ValueKey('remote-sync-code-ok')));
-    for (var i = 0; i < 5; i++) {
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
-      await tester.pump();
-    }
+    await _until(tester, () => find.byKey(const ValueKey('remote-sync-preview')).evaluate().isNotEmpty);
     await _frames(tester);
     expect(service.fetched, [('192.168.1.101', 39888, '123456')]);
     expect(service.applied, isNull, reason: 'nothing changes before the preview is accepted');

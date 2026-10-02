@@ -7,6 +7,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/danmaku/masked_blocks.dart';
 import 'package:pure_live/shared/danmaku/setting_rows.dart';
 
 /// The longest keyword (3.x `KeywordBlockPage`'s field).
@@ -23,7 +24,8 @@ const Duration blockUndoDuration = Duration(seconds: 4);
 /// [blockUndoDuration]; a word already blocked is said under the field,
 /// which keeps it; empty sections say what goes there. The live room's
 /// "屏蔽管理" tab and the settings page "弹幕屏蔽" (U.12d, E4) use this
-/// same component.
+/// same component. The first one opened after [MaskedNameBlocks.cleanOnce]
+/// removed masked names says so at the top, once (B01 c2).
 class DanmakuBlockManager extends ConsumerStatefulWidget {
   /// Creates the block list.
   const new({
@@ -59,13 +61,62 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
   final GlobalKey _usersSection = GlobalKey();
   String? _error;
 
+  /// How many masked names the one-time cleanup removed, while its notice
+  /// shows.
+  int? _maskedCleaned;
+
   @override
   void initState() {
     super.initState();
-    final lists = ref.read(storeProvider).blockLists;
+    final store = ref.read(storeProvider);
+    final lists = store.blockLists;
     _keywords = lists.watch(BlockKind.keyword);
     _users = lists.watch(BlockKind.user);
     if (widget.showUsers) unawaited(_revealUsers(lists));
+    unawaited(_takeMaskedNotice(store.meta));
+  }
+
+  Future<void> _takeMaskedNotice(MetaStore meta) async {
+    final int? count;
+    try {
+      count = await MaskedNameBlocks.takeNotice(meta);
+    } on Object {
+      return;
+    }
+    if (count != null && mounted) setState(() => _maskedCleaned = count);
+  }
+
+  /// B01 c2: "已清理 N 个打码昵称的屏蔽", with × to put it away.
+  Widget _maskedNotice(BuildContext context, int count) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+      child: DecoratedBox(
+        key: const ValueKey('block-masked-cleaned'),
+        decoration: BoxDecoration(color: scheme.secondaryContainer, borderRadius: BorderRadius.circular(12)),
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+              child: Icon(AppIcons.info, size: 20, color: scheme.onSecondaryContainer),
+            ),
+            Expanded(
+              child: Text(
+                i18n('danmaku_masked_blocks_cleaned', args: {'count': '$count'}),
+                style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSecondaryContainer, height: 1.4),
+              ),
+            ),
+            IconButton(
+              key: const ValueKey('block-masked-cleaned-close'),
+              tooltip: i18n('close'),
+              onPressed: () => setState(() => _maskedCleaned = null),
+              icon: Icon(AppIcons.close, size: 18, color: scheme.onSecondaryContainer),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// Brings "已屏蔽用户" into view once the lists have arrived.
@@ -175,6 +226,7 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_maskedCleaned case final count?) _maskedNotice(context, count),
           // c11 (E3): adding a word comes first, its list right under it.
           PanelGroupTitle(i18n('danmaku_keyword_block')),
           PanelCard(

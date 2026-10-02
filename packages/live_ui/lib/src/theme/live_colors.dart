@@ -99,6 +99,10 @@ abstract final class OnVideoColors {
   /// error tone, readable on black in every theme.
   static const Color error = Color(0xFFFFB4AB);
 
+  /// Marks on [error] (the "!" of a failed recording's glyph, U.2a2): the
+  /// dark theme's on-error tone.
+  static const Color onError = Color(0xFF690005);
+
   /// The user's colour on the picture (the selected multi-view cell's
   /// outline, the picked cell's dashed frame): the light tone of the
   /// primary colour in both themes, since the picture is always black.
@@ -171,8 +175,9 @@ abstract final class LiveSemanticColors {
   /// Text and dots on [recording].
   static const Color onRecording = Color(0xFFFFFFFF);
 
-  /// The soft ring around a recording button.
-  static const Color recordingHalo = Color(0x40D92D20);
+  /// The soft ring around a recording button (its resting tone: the halo
+  /// breathes between 15 % and 45 % of [recording], docs/ui/compare/U.2a2).
+  static const Color recordingHalo = Color(0x4DD92D20);
 
   /// Success text and icons in light themes (4.6:1 on every surface).
   static const Color successLight = Color(0xFF1B7236);

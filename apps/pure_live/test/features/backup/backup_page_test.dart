@@ -253,7 +253,10 @@ void main() {
         await File(p(folder, 'purelive_2026-09-01T10_00_00.txt'))
             .writeAsString(jsonEncode(_legacyBackup([_room('2'), _room('3')])));
       });
-      // The list picks the new file up on refresh.
+      // The list picks the new file up on refresh: a pull with 3.x's
+      // bounce and classic header (P02).
+      expect(find.byType(RefreshIndicator), findsNothing);
+      expect(find.byType(AppRefreshView), findsOneWidget);
       await refresh(tester);
       await tester.tap(find.text('purelive_2026-09-01T10_00_00.txt'));
       await _settle(tester);

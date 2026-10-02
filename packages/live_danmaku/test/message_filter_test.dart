@@ -28,6 +28,14 @@ void main() {
       expect(list.blocks(_message('hi', user: '')), isFalse, reason: 'empty entries are dropped');
     });
 
+    test('B-1: a masked name blocks nobody, not even the same masked name', () {
+      final list = DanmakuBlockList(users: ['观***', 'ab＊＊', '路人']);
+      expect(list.blocks(_message('hi', user: '观***')), isFalse);
+      expect(list.blocks(_message('hi', user: 'ab＊＊')), isFalse);
+      expect(list.blocks(_message('hi', user: '路人')), isTrue, reason: 'a full name still blocks');
+      expect(DanmakuBlockList(users: ['观***']).isEmpty, isTrue);
+    });
+
     test('words match inside the text in any case', () {
       final list = DanmakuBlockList(keywords: [' 广告 ', 'SPAM', '']);
       expect(list.blocks(_message('这是广告位')), isTrue);

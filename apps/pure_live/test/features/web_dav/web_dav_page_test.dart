@@ -252,6 +252,31 @@ void main() {
     expect(_toasts.last, '恢复备份成功');
   });
 
+  testWidgets('P02: a pull lists the folder again under the classic header, the rows staying', (tester) async {
+    final dav = FakeDav()..files['purelive_2026-09-01T10_00_00.txt'] = utf8.encode('{}');
+    await _pump(tester, dav, server: _server);
+    expect(find.byType(RefreshIndicator), findsNothing);
+    final list = find.byKey(const ValueKey('webdav-list'));
+    expect(find.ancestor(of: list, matching: find.byType(AppRefreshView)), findsOneWidget);
+    dav.files['purelive_2026-09-02T10_00_00.txt'] = utf8.encode('{}');
+    final gesture = await tester.startGesture(tester.getCenter(list));
+    for (var i = 0; i < 40; i++) {
+      await gesture.moveBy(const Offset(0, 5));
+      await tester.pump(const Duration(milliseconds: 8));
+    }
+    expect(find.text('松开刷新'), findsOneWidget);
+    await gesture.up();
+    for (var i = 0; i < 50; i++) {
+      await tester.pump(const Duration(milliseconds: 8));
+      // No full-page spinner: the rows stay while the folder loads.
+      expect(list, findsOneWidget);
+    }
+    await _settle(tester);
+    expect(find.text('purelive_2026-09-02T10_00_00.txt'), findsOneWidget);
+    await tester.pump(AppRefreshView.resultDuration);
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('the bar: server, refresh, ⋮ (follows upload, help); rows: icon, time · size, ⋮', (tester) async {
     final dav = FakeDav()
       ..dirs.add('old')

@@ -123,6 +123,12 @@ final class AppStrings {
     cancel: tr('cancel'),
     close: tr('close'),
     gotIt: tr('got_it'),
+    refreshPull: tr('refresh_pull_to_refresh'),
+    refreshRelease: tr('refresh_release_to_refresh'),
+    refreshRefreshing: tr('refresh_refreshing'),
+    refreshSucceeded: tr('refresh_succeeded'),
+    refreshFailed: tr('refresh_failed'),
+    refreshLastTime: tr('refresh_last_updated_at'),
   );
 }
 

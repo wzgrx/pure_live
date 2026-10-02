@@ -16,6 +16,8 @@ import 'package:pure_live/features/recorder/recorder_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/record/record_look.dart';
+import 'package:pure_live/shared/record/record_state.dart';
 
 import '../../support.dart';
 
@@ -178,50 +180,134 @@ void main() {
     expect(androidDocumentFolderUri('/storage/emulated/0'), isNull);
   });
 
-  // U.2a change 13 replaces M13.16's glyph with an orange dot: a grey ring
-  // around a red dot, "⏱ 自动录" for a room that records when it goes live,
-  // a white dot on red while recording, and the "● 录制中 12:34" mark.
-  testWidgets('U.2a: the room bar records as a ring, "自动录" or a red disc; the picture shows the time', (tester) async {
-    final rooms = [
-      for (final id in ['1', '2', '3']) LiveRoom(platform: 'bilibili', roomId: id),
-    ];
+  // U.2a2 (problem 02: "现在这个看起来像在录制"): one glyph per state of the
+  // task, red only while a file is written; the mark on the picture names
+  // recording, reconnecting and joining, and nothing else.
+  testWidgets('U.2a2: the room bar shows each recording state; only running is red; the marks name the state', (
+    tester,
+  ) async {
+    const ids = ['1', '2', '3', '4', '5', '6', '7', '8'];
+    final rooms = {for (final id in ids) id: LiveRoom(platform: 'bilibili', roomId: id)};
+    DateTime now() => DateTime(2026, 9, 1, 20, 42, 34);
     await _pump(
       tester,
       (_) => Builder(
-        // The recording dot holds still, so the frames settle.
+        // The glyphs hold still, so the frames settle.
         builder: (context) => MediaQuery(
           data: MediaQuery.of(context).copyWith(disableAnimations: true),
           child: Scaffold(
-            appBar: AppBar(
-              actions: [
-                RecordButton(key: const ValueKey('idle'), room: rooms[0]),
-                RecordButton(key: const ValueKey('monitored'), room: rooms[1]),
-                RecordButton(key: const ValueKey('recording'), room: rooms[2]),
+            body: ListView(
+              children: [
+                Wrap(
+                  children: [
+                    for (final id in ids) RecordButton(key: ValueKey('b$id'), room: rooms[id]!),
+                    RecordButton(key: const ValueKey('timed'), room: rooms['4']!, showTime: true, now: now),
+                  ],
+                ),
+                for (final id in ids) RoomRecordingBadge(key: ValueKey('m$id'), room: rooms[id]!, now: now),
+                RoomRecordingBadge(key: const ValueKey('hidden'), room: rooms['4']!, showsRecording: false, now: now),
               ],
-            ),
-            body: Center(
-              child: RoomRecordingBadge(room: rooms[2], now: () => DateTime(2026, 9, 1, 20, 42, 34)),
             ),
           ),
         ),
       ),
-      tasks: [_task('2', RecordStatus.stopped), _task('3', RecordStatus.stopped)],
-      // U.2f: "自动录" means the task waits for the room ("开播自动录"); a
-      // stopped one is a plain ring now.
+      tasks: [for (final id in ids.skip(1)) _task(id, RecordStatus.stopped)],
       prepare: (recording) {
-        recording.taskFor(rooms[1])!.status = RecordStatus.waitingLive;
-        recording.taskFor(rooms[2])!.status = RecordStatus.running;
+        RecordTask task(String id) => recording.taskFor(rooms[id]!)!;
+        task('2').status = RecordStatus.waitingLive;
+        task('3').status = RecordStatus.preparing;
+        task('4').status = RecordStatus.running;
+        task('5').status = RecordStatus.reconnecting;
+        task('6')
+          ..status = RecordStatus.processing
+          ..mergeProgress = 0.45;
+        task('7').status = RecordStatus.failed;
+        task('8').status = RecordStatus.completed;
       },
     );
     Finder inside(String key, Finder finder) => find.descendant(of: find.byKey(ValueKey(key)), matching: finder);
-    expect(inside('idle', find.byKey(const ValueKey('record-glyph-idle'))), findsOneWidget);
-    expect(find.byTooltip('录制'), findsOneWidget);
-    expect(inside('monitored', find.text('自动录')), findsOneWidget);
-    expect(inside('monitored', find.byIcon(AppIcons.autoRecord)), findsOneWidget);
-    expect(inside('recording', find.byKey(const ValueKey('record-glyph-recording'))), findsOneWidget);
-    expect(find.byTooltip('录制中'), findsOneWidget);
-    // Started 20:30 (the task's start), now 20:42:34.
-    expect(find.text('录制中 12:34'), findsOneWidget);
+    const glyphs = {
+      '1': 'idle',
+      '2': 'waiting',
+      '3': 'preparing',
+      '4': 'recording',
+      '5': 'reconnecting',
+      '6': 'processing',
+      '7': 'failed',
+      '8': 'idle',
+    };
+    for (final MapEntry(key: id, value: state) in glyphs.entries) {
+      final glyph = inside('b$id', find.byKey(ValueKey('record-glyph-$state')));
+      expect(glyph, findsOneWidget, reason: 'room $id is $state');
+      final painter =
+          tester.widget<CustomPaint>(find.descendant(of: glyph, matching: find.byType(CustomPaint))).painter!
+              as RecordGlyphPainter;
+      expect(
+        painter.colors.contains(LiveSemanticColors.recording),
+        state == 'recording',
+        reason: 'red only while recording ($id)',
+      );
+    }
+    // The words of each state (tooltips; "自动录" is the pill's own text).
+    expect(find.byTooltip('录制'), findsNWidgets(2));
+    expect(inside('b2', find.text('自动录')), findsOneWidget);
+    expect(find.byTooltip('准备中'), findsOneWidget);
+    expect(find.byTooltip('录制中'), findsNWidgets(2));
+    expect(find.byTooltip('重连中'), findsOneWidget);
+    expect(find.byTooltip('合成中'), findsOneWidget);
+    expect(find.byTooltip('录制失败'), findsOneWidget);
+    // The join draws its progress.
+    final join =
+        tester
+                .widget<CustomPaint>(
+                  find.descendant(
+                    of: inside('b6', find.byKey(const ValueKey('record-glyph-processing'))),
+                    matching: find.byType(CustomPaint),
+                  ),
+                )
+                .painter!
+            as RecordGlyphPainter;
+    expect(join.progress, 0.45);
+    // c8: the landscape bar's form carries the time (started 20:30, now 20:42:34).
+    expect(inside('timed', find.text('12:34')), findsOneWidget);
+
+    // c7: the marks — recording on red, reconnecting and joining on a dark
+    // pill; nothing while not recording, preparing or failed.
+    expect(inside('m4', find.text('录制中 12:34')), findsOneWidget);
+    expect(inside('m5', find.text('重连中 12:34')), findsOneWidget);
+    expect(inside('m6', find.text('合成中 45%')), findsOneWidget);
+    for (final id in ['1', '2', '3', '7', '8']) {
+      expect(inside('m$id', find.byType(RecordingBadge)), findsNothing, reason: 'room $id');
+    }
+    expect(inside('m4', find.byKey(const ValueKey('recording-badge-recording'))), findsOneWidget);
+    expect(inside('m5', find.byKey(const ValueKey('recording-badge-reconnecting'))), findsOneWidget);
+    expect(inside('m6', find.byKey(const ValueKey('recording-badge-processing'))), findsOneWidget);
+    expect(inside('hidden', find.byType(RecordingBadge)), findsNothing, reason: 'the landscape bar shows it');
+  });
+
+  test('U.2a2: every card state has its glyph and words; queued waits like waiting, saved is idle', () {
+    expect(
+      {for (final state in RecordCardState.values) state: recordGlyphState(state)},
+      {
+        RecordCardState.idle: RecordGlyphState.idle,
+        RecordCardState.waiting: RecordGlyphState.waiting,
+        RecordCardState.preparing: RecordGlyphState.preparing,
+        RecordCardState.queued: RecordGlyphState.waiting,
+        RecordCardState.recording: RecordGlyphState.recording,
+        RecordCardState.reconnecting: RecordGlyphState.reconnecting,
+        RecordCardState.processing: RecordGlyphState.processing,
+        RecordCardState.saved: RecordGlyphState.idle,
+        RecordCardState.failed: RecordGlyphState.failed,
+      },
+    );
+    expect(recordBadgeState(null), isNull);
+    expect([for (final status in RecordStatus.values) recordBadgeState(_task('1', status))].nonNulls.toList(), [
+      RecordGlyphState.recording,
+      RecordGlyphState.reconnecting,
+      RecordGlyphState.processing,
+    ], reason: 'preparing is not "录制中" any more');
+    expect(recordJoinProgress(_task('1', RecordStatus.processing)..mergeProgress = double.nan), isNull);
+    expect(recordJoinProgress(_task('1', RecordStatus.processing)..mergeProgress = 1.2), 1);
   });
 
   testWidgets('without FFmpeg the centre says recording is unavailable', (tester) async {

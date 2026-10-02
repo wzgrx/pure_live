@@ -468,6 +468,9 @@ class RoomFeedView extends ConsumerStatefulWidget {
   ConsumerState<RoomFeedView> createState() => _RoomFeedViewState();
 }
 
+/// The lists' physics where there is no pull to refresh (desktop pages).
+const ScrollPhysics _listPhysics = PureLiveScrollPhysics(parent: AlwaysScrollableScrollPhysics());
+
 class _RoomFeedViewState extends ConsumerState<RoomFeedView> {
   final ScrollController _scroll = createPureLiveScrollController();
   int? _pageSize;
@@ -528,6 +531,14 @@ class _RoomFeedViewState extends ConsumerState<RoomFeedView> {
 
   Future<void> _refresh() => _feed.refresh(count: _firstCount);
 
+  /// A pull's refresh: "刷新失败" with the reason in the header when it
+  /// failed (the banner above the cards says so too).
+  Future<Object?> _pullRefresh() async {
+    await _refresh();
+    final error = _feed.error;
+    return error == null ? null : AppRefreshFailure(describeLoadError(error));
+  }
+
   void _loadMore() {
     if (_desktop || !_feed.hasMore || _feed.busy || _feed.error != null) return;
     unawaited(_feed.ensure(_feed.rooms.length + phonePageSize));
@@ -584,53 +595,58 @@ class _RoomFeedViewState extends ConsumerState<RoomFeedView> {
       body = _status(desktop, _emptyStatus(desktop));
     } else {
       final rooms = desktop ? _feed.pageRooms(_feed.page, pageSize) : _feed.rooms;
-      final grid = LayoutBuilder(
-        builder: (context, constraints) {
-          final geometry = RoomGridGeometry.of(
-            context,
-            width: constraints.maxWidth,
-            spacing: spacing,
-            appearance: appearance,
-            fontSizes: fontSizes,
-          );
-          return CustomScrollView(
-            key: ValueKey('$prefix-grid'),
-            controller: _scroll,
-            physics: const PureLiveScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-            semanticChildCount: rooms.length,
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.all(roomGridPadding),
-                sliver: SliverGrid.builder(
-                  gridDelegate: geometry.delegate(spacing: spacing, mainSpacing: mainSpacing),
-                  itemCount: rooms.length,
-                  itemBuilder: (context, index) => RoomGridCard(
-                    key: ValueKey(rooms[index].identityKey),
-                    room: rooms[index],
-                    // The feed's rooms go along: the portrait fullscreen
-                    // swipes through them (U.2b2).
-                    onOpen: () =>
-                        unawaited(AppNavigator.toLiveRoomDetail(liveRoom: rooms[index], playlist: _feed.rooms)),
+      // The physics come from the pull-to-refresh view on phones (3.x's
+      // bounce, P02), else the app's own.
+      Widget list(ScrollPhysics physics) {
+        final grid = LayoutBuilder(
+          builder: (context, constraints) {
+            final geometry = RoomGridGeometry.of(
+              context,
+              width: constraints.maxWidth,
+              spacing: spacing,
+              appearance: appearance,
+              fontSizes: fontSizes,
+            );
+            return CustomScrollView(
+              key: ValueKey('$prefix-grid'),
+              controller: _scroll,
+              physics: physics,
+              semanticChildCount: rooms.length,
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.all(roomGridPadding),
+                  sliver: SliverGrid.builder(
+                    gridDelegate: geometry.delegate(spacing: spacing, mainSpacing: mainSpacing),
+                    itemCount: rooms.length,
+                    itemBuilder: (context, index) => RoomGridCard(
+                      key: ValueKey(rooms[index].identityKey),
+                      room: rooms[index],
+                      // The feed's rooms go along: the portrait fullscreen
+                      // swipes through them (U.2b2).
+                      onOpen: () =>
+                          unawaited(AppNavigator.toLiveRoomDetail(liveRoom: rooms[index], playlist: _feed.rooms)),
+                    ),
                   ),
                 ),
+                if (desktop ? _hiddenNote(context) : _phoneFooter(context) case final footer?)
+                  SliverToBoxAdapter(child: footer),
+              ],
+            );
+          },
+        );
+        return Stack(
+          children: [
+            Positioned.fill(child: grid),
+            if (showJumps)
+              Positioned(
+                right: 16,
+                bottom: 16,
+                child: JumpButtons(controller: _scroll, heroTag: '$prefix-${_feed.platform}'),
               ),
-              if (desktop ? _hiddenNote(context) : _phoneFooter(context) case final footer?)
-                SliverToBoxAdapter(child: footer),
-            ],
-          );
-        },
-      );
-      final list = Stack(
-        children: [
-          Positioned.fill(child: grid),
-          if (showJumps)
-            Positioned(
-              right: 16,
-              bottom: 16,
-              child: JumpButtons(controller: _scroll, heroTag: '$prefix-${_feed.platform}'),
-            ),
-        ],
-      );
+          ],
+        );
+      }
+
       if (desktop) {
         body = CallbackShortcuts(
           bindings: {
@@ -645,7 +661,7 @@ class _RoomFeedViewState extends ConsumerState<RoomFeedView> {
             autofocus: true,
             child: Column(
               children: [
-                Expanded(child: list),
+                Expanded(child: list(_listPhysics)),
                 PaginationBar(
                   page: _feed.page,
                   lastPage: _feed.hasMore ? null : _feed.lastPage(pageSize),
@@ -663,14 +679,17 @@ class _RoomFeedViewState extends ConsumerState<RoomFeedView> {
           ),
         );
       } else {
-        body = RefreshIndicator(
-          onRefresh: _refresh,
-          child: NotificationListener<ScrollNotification>(
+        // 3.x's loading footer: while more rooms may come, a fling stops at
+        // the end above it instead of bouncing.
+        body = AppRefreshView(
+          onRefresh: _pullRefresh,
+          stopAtEnd: _feed.hasMore,
+          builder: (context, physics) => NotificationListener<ScrollNotification>(
             onNotification: (notification) {
               if (notification.metrics.axis == Axis.vertical && notification.metrics.extentAfter < 600) _loadMore();
               return false;
             },
-            child: list,
+            child: list(physics),
           ),
         );
       }
@@ -735,15 +754,16 @@ class _RoomFeedViewState extends ConsumerState<RoomFeedView> {
 
   Widget _status(bool desktop, Widget status) => LayoutBuilder(
     builder: (context, constraints) {
-      final view = SingleChildScrollView(
+      Widget view(ScrollPhysics physics) => SingleChildScrollView(
         key: ValueKey('${widget.keyPrefix}-status'),
-        physics: const PureLiveScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        physics: physics,
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: constraints.maxHeight * (desktop ? 1 : 0.8)),
           child: Center(child: status),
         ),
       );
-      return desktop ? view : RefreshIndicator(onRefresh: _refresh, child: view);
+      if (desktop) return view(_listPhysics);
+      return AppRefreshView(onRefresh: _pullRefresh, builder: (context, physics) => view(physics));
     },
   );
 

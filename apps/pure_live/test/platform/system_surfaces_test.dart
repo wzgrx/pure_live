@@ -49,6 +49,14 @@ void main() {
       expect((two.title, two.text, two.stop, two.since), ('正在录制 2 个直播间', '晚风、星河长明', '全部停止', first));
     });
 
+    test('one room says what it does: only writing is "正在录制" (U.2a2 X4)', () {
+      String title(RecordStatus status) => recordNotificationContent([_task('a', '晚风', status: status)]).title;
+      expect(title(RecordStatus.running), '正在录制 · 晚风');
+      expect(title(RecordStatus.preparing), '准备录制 · 晚风');
+      expect(title(RecordStatus.reconnecting), '正在重连 · 晚风');
+      expect(title(RecordStatus.processing), '正在整理录像 · 晚风');
+    });
+
     test('the keep-alive sends the words, again only when they change, and "停止录制" stops all', () async {
       const channel = MethodChannel('pure_live/recorder');
       final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
@@ -209,6 +217,9 @@ void main() {
     test('one-colour small icons, a larger television with a themed layer', () {
       expect(res('drawable/ic_stat_playback.xml'), contains('#FFFFFFFF'));
       expect(res('drawable/ic_stat_recording.xml'), contains('evenOdd'));
+      // U.2a2 c10: the recording glyph (a disc with its rounded square
+      // knocked out), not the idle ring and dot.
+      expect(res('drawable/ic_stat_recording.xml'), contains('M10.05,8.25h3.9'));
       final icon = res('mipmap-anydpi-v26/ic_launcher.xml');
       expect(icon, contains('android:inset="2%"'));
       expect(icon, contains('<monochrome android:drawable="@drawable/ic_launcher_monochrome" />'));

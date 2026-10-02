@@ -621,6 +621,15 @@ void main() {
       expect(strip.top, greaterThanOrEqualTo(field.bottom));
       expect(options.top, greaterThanOrEqualTo(strip.bottom - 1));
       expect(field.width, greaterThan(393 - 40));
+      // P02 (research S10): the platform strip stretches at its ends like
+      // the other strips.
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('search-platform-strip')),
+          matching: find.byType(StretchingOverscrollIndicator),
+        ),
+        findsOneWidget,
+      );
 
       // Rooms / streamers, offline, order — in 3.x's order, nothing off the edge.
       final mode = tester.getRect(find.byKey(const ValueKey('search-mode')));

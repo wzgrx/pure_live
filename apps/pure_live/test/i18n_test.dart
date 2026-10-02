@@ -71,7 +71,14 @@ void main() {
     final zh = await loadStrings();
     expect(zh.ui.retry, '重新加载');
     expect(zh.ui.emptyTitle, '暂无数据');
+    // P02: the refresh header's words, set right (U.1c c19: 3.x said "上拉刷新").
+    expect(
+      [zh.ui.refreshPull, zh.ui.refreshRelease, zh.ui.refreshRefreshing, zh.ui.refreshSucceeded, zh.ui.refreshFailed],
+      ['下拉刷新', '松开刷新', '正在刷新...', '刷新成功', '刷新失败'],
+    );
+    expect(zh.ui.refreshLastTime, '上次刷新时间 {time}');
     final en = await loadStrings(AppLanguage.en);
     expect(en.ui.retry, 'Retry');
+    expect(en.ui.refreshPull, 'Pull to refresh');
   });
 }

@@ -276,8 +276,12 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('room-menu-follow')));
       await settle(tester);
       expect(find.byKey(const ValueKey('room-menu')), findsOneWidget);
-      final confirm = tester.widget<FilledButton>(find.byKey(const ValueKey('unfollow-confirm')));
-      expect((confirm.child! as Text).data, '取消关注');
+      final confirm = tester.widget<DialogActionButton>(find.byKey(const ValueKey('unfollow-confirm')));
+      expect(confirm.danger, isTrue);
+      expect(
+        find.descendant(of: find.byKey(const ValueKey('unfollow-confirm')), matching: find.text('取消关注')),
+        findsOneWidget,
+      );
       await tester.tap(find.byKey(const ValueKey('unfollow-confirm')));
       await settle(tester);
       expect(find.byKey(const ValueKey('room-menu')), findsNothing);

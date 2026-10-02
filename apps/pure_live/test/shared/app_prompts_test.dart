@@ -119,8 +119,10 @@ void main() {
       for (final label in ['取消', '进入房间', '从剪贴板识别到分享口令']) {
         expect(tester.renderObject<RenderParagraph>(find.text(label)).text.style?.fontSize, 14, reason: label);
       }
-      final dialog = tester.widget<AlertDialog>(find.byType(AlertDialog));
-      expect(dialog.shape, isNull, reason: 'the theme radius 24 (3.x: 16)');
+      // The one dialog (U.1d): the theme's 24-point corners (3.x: 16).
+      final dialog = tester.widget<Dialog>(find.byType(Dialog));
+      expect(dialog.shape, isNull);
+      expect(find.byKey(const ValueKey('room-prompt')), findsOneWidget);
       await tester.tap(find.text('进入房间'));
       await tester.pumpAndSettle();
       expect(await answer, RoomPromptChoice.enter);
@@ -167,7 +169,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final material = find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)).first;
+      final material = find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first;
       expect(tester.getSize(material).width, lessThanOrEqualTo(400.5));
       expect(tester.takeException(), isNull);
     });

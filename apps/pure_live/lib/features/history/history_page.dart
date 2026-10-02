@@ -54,7 +54,7 @@ class HistoryPage extends ConsumerStatefulWidget {
 }
 
 class _HistoryPageState extends ConsumerState<HistoryPage> {
-  final _refreshIndicator = GlobalKey<RefreshIndicatorState>();
+  final _refreshView = GlobalKey<AppRefreshViewState>();
   final _query = TextEditingController();
   final _queryFocus = FocusNode();
 
@@ -114,41 +114,15 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
   }
 
   Future<bool> _confirm({required String title, required String message, required String action}) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppConfirmDialog(
       context: context,
-      builder: (dialogContext) {
-        final colors = Theme.of(dialogContext).colorScheme;
-        return AlertDialog(
-          scrollable: true,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          title: Text(title, style: dialogContext.textStyles.t16Bold),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Text(message, style: dialogContext.textStyles.t14),
-          ),
-          actionsOverflowDirection: VerticalDirection.down,
-          actionsOverflowButtonSpacing: 8,
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(i18n('cancel'), style: dialogContext.textStyles.t14Muted),
-            ),
-            FilledButton(
-              key: const ValueKey('history-confirm'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(48, 48),
-                backgroundColor: colors.error,
-                foregroundColor: colors.onError,
-              ),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(action),
-            ),
-          ],
-        );
-      },
+      title: title,
+      message: message,
+      confirmLabel: action,
+      danger: true,
+      confirmKey: const ValueKey('history-confirm'),
     );
-    return confirmed ?? false;
+    return confirmed;
   }
 
   /// Runs [change] unless another change is running, telling the user when
@@ -283,7 +257,9 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                     key: const ValueKey('history-refresh'),
                     tooltip: i18n('history_refresh_status'),
                     icon: const Icon(AppIcons.refresh),
-                    onPressed: shown.isEmpty || progress != null ? null : () => _refreshIndicator.currentState?.show(),
+                    onPressed: shown.isEmpty || progress != null
+                        ? null
+                        : () => unawaited(_refreshView.currentState?.show()),
                   ),
                 ),
                 IconButton(
@@ -412,12 +388,12 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
           appearance: appearance,
           fontSizes: fontSizes,
         );
-        return RefreshIndicator(
-          key: _refreshIndicator,
+        return AppRefreshView(
+          key: _refreshView,
           onRefresh: _refresh,
-          child: CustomScrollView(
+          builder: (context, physics) => CustomScrollView(
             key: const ValueKey('history-grid'),
-            physics: const AlwaysScrollableScrollPhysics(parent: PureLiveScrollPhysics()),
+            physics: physics,
             slivers: [
               for (final (section, sectionRooms) in sections) ...[
                 SliverToBoxAdapter(

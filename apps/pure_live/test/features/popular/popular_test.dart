@@ -381,6 +381,53 @@ void main() {
     await tester.runAsync(services.close);
   });
 
+  testWidgets('P02: the phone grid bounces like 3.x with the classic header, no stretch', (tester) async {
+    final bilibili = _FakeSite(SiteIds.bilibili, [
+      [for (var i = 0; i < 30; i++) _room('bilibili', i, heat: 100 - i)],
+    ]);
+    final services = await _pump(tester, {SiteIds.bilibili: bilibili});
+    final grid = find.byKey(const ValueKey('popular-grid'));
+    expect(find.byType(RefreshIndicator), findsNothing);
+    expect(find.ancestor(of: grid, matching: find.byType(AppRefreshView)), findsOneWidget);
+    expect(find.descendant(of: grid, matching: find.byType(StretchingOverscrollIndicator)), findsNothing);
+
+    final gesture = await tester.startGesture(tester.getCenter(grid));
+    for (var i = 0; i < 40; i++) {
+      await gesture.moveBy(const Offset(0, 5));
+      await tester.pump(const Duration(milliseconds: 8));
+      if (i == 4) expect(find.text('下拉刷新'), findsOneWidget);
+    }
+    expect(find.text('松开刷新'), findsOneWidget);
+    await gesture.up();
+    for (var i = 0; i < 60; i++) {
+      await tester.pump(const Duration(milliseconds: 8));
+    }
+    expect(bilibili.requested, [1, 1]);
+    expect(find.text('刷新成功'), findsOneWidget);
+    // The result shows for a second, then the header springs back.
+    await tester.pump(AppRefreshView.resultDuration);
+    await tester.pumpAndSettle();
+    expect(find.text('刷新成功'), findsNothing);
+
+    // A failure says so in the header too.
+    bilibili.error = Exception('down');
+    final again = await tester.startGesture(tester.getCenter(grid));
+    for (var i = 0; i < 40; i++) {
+      await again.moveBy(const Offset(0, 5));
+      await tester.pump(const Duration(milliseconds: 8));
+    }
+    await again.up();
+    for (var i = 0; i < 60; i++) {
+      await tester.pump(const Duration(milliseconds: 8));
+    }
+    expect(find.text('刷新失败'), findsOneWidget);
+    await tester.pump(AppRefreshView.resultDuration);
+    await tester.pumpAndSettle();
+    // The cards stay.
+    expect(find.text('title 1'), findsOneWidget);
+    await tester.runAsync(services.close);
+  });
+
   testWidgets('desktop: numbered pages, page size, refresh failure keeps the cards', (tester) async {
     final bilibili = _FakeSite(SiteIds.bilibili, [
       [for (var i = 0; i < 30; i++) _room('bilibili', i, heat: 100 - i)],

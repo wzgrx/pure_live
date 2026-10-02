@@ -214,6 +214,27 @@ void main() {
     expect(await _ids(tester, h.history), ['2']);
   });
 
+  testWidgets("P02: the refresh button pulls 3.x's classic header down; the pull is the same", (tester) async {
+    final h = await _pump(tester, rooms: [(_room('1', status: LiveStatus.live), _now)]);
+    expect(find.byType(RefreshIndicator), findsNothing);
+    expect(
+      find.ancestor(of: find.byKey(const ValueKey('history-grid')), matching: find.byType(AppRefreshView)),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('history-refresh')));
+    var shown = false;
+    for (var i = 0; i < 60 && h.loaded.isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 8));
+      shown |= find.text('正在刷新...').evaluate().isNotEmpty;
+    }
+    expect(shown, isTrue);
+    await _settle(tester);
+    expect(h.loaded, ['1']);
+    await tester.pump(AppRefreshView.resultDuration);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('refresh-header')), findsNothing);
+  });
+
   testWidgets('refresh updates the rooms, keeps the watch time and marks failures pending', (tester) async {
     final watched = _now.subtract(const Duration(hours: 2));
     final h = await _pump(
@@ -291,13 +312,13 @@ void main() {
 
     // A typed number is used even without pressing "apply" (3.x dropped it).
     await tester.enterText(find.byKey(const ValueKey('history-limit-custom')), '-3');
-    await tester.tap(find.text('确认'));
+    await tester.tap(find.byKey(const ValueKey('history-limit-save')));
     await tester.pumpAndSettle();
     expect(find.text('请输入大于或等于 0 的整数。'), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('history-limit-custom')), '22');
-    await tester.tap(find.text('确认'));
+    await tester.tap(find.byKey(const ValueKey('history-limit-save')));
     await _settle(tester);
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(Dialog), findsNothing);
     expect(h.services.store.settings.get(Settings.historyLimit), 22);
     expect(await _ids(tester, h.history), [for (var i = 1; i <= 22; i++) '$i']);
     expect(find.text('22 / 22 条'), findsOneWidget);
@@ -305,7 +326,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('history-limit')));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ChoiceChip, '不限'));
-    await tester.tap(find.text('确认'));
+    await tester.tap(find.byKey(const ValueKey('history-limit-save')));
     await _settle(tester);
     expect(find.text('22 条 / 不限'), findsOneWidget);
   });
@@ -322,7 +343,7 @@ void main() {
     await _settle(tester);
     expect(await tester.runAsync(() => h.services.store.follows.contains(_room('7'))), isTrue);
     expect(h.toasts, ['已关注 Streamer']);
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(Dialog), findsNothing);
 
     // Unfollowing asks first.
     await tester.longPress(find.byType(LiveRoomCard));

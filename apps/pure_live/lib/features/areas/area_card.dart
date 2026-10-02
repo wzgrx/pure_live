@@ -231,6 +231,7 @@ class AreaGrid extends ConsumerWidget {
     this.controller,
     this.caption = AreaCaption.nameOnly,
     this.bottomPadding = 80,
+    this.physics = const AlwaysScrollableScrollPhysics(parent: PureLiveScrollPhysics()),
     super.key,
   });
 
@@ -245,6 +246,9 @@ class AreaGrid extends ConsumerWidget {
 
   /// Room under the last row (the floating "关注分区" button).
   final double bottomPadding;
+
+  /// The grid's physics (the pull-to-refresh view's on phones).
+  final ScrollPhysics physics;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -262,7 +266,7 @@ class AreaGrid extends ConsumerWidget {
         return GridView.builder(
           key: const ValueKey('area-grid'),
           controller: controller,
-          physics: const AlwaysScrollableScrollPhysics(parent: PureLiveScrollPhysics()),
+          physics: physics,
           padding: EdgeInsets.fromLTRB(6, 6, 6, bottomPadding),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

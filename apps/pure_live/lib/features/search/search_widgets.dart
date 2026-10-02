@@ -96,8 +96,9 @@ class _SearchPlatformStripState extends State<SearchPlatformStrip> {
       height: searchPlatformStripHeight,
       child: Listener(
         onPointerSignal: _wheel,
+        // Stretches at its ends like the other strips (P02, research S10).
         child: ScrollConfiguration(
-          behavior: ScrollConfiguration.of(context).copyWith(overscroll: false, scrollbars: false),
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
           child: ListView.separated(
             key: const ValueKey('search-platform-strip'),
             controller: _scroll,

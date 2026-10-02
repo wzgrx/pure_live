@@ -366,9 +366,15 @@ void main() {
     await _tap(tester, find.text('清空录制文件目录'));
     expect(find.text('清空录制文件目录？'), findsOneWidget);
     expect(find.textContaining('将删除 0 B 录像，不能恢复'), findsOneWidget);
-    final button = tester.widget<FilledButton>(find.byKey(const ValueKey('record-clear-confirm')));
+    // The destructive button of the one dialog (U.1d c6): red.
+    final button = tester.widget<DialogActionButton>(find.byKey(const ValueKey('record-clear-confirm')));
+    expect(button.danger, isTrue);
+    final surface = find.descendant(
+      of: find.byKey(const ValueKey('record-clear-confirm')),
+      matching: find.byType(Material),
+    );
     final colors = Theme.of(tester.element(find.text('清空录制文件目录？'))).colorScheme;
-    expect(button.style?.backgroundColor?.resolve({}), colors.error);
+    expect(tester.widget<Material>(surface.first).color, colors.error);
     expect(find.text('清空'), findsOneWidget);
     await _tap(tester, find.text('取消'));
     expect(harness.toasts, isEmpty);

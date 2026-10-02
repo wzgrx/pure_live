@@ -211,6 +211,12 @@ void main() {
       expect(find.text('斗鱼'), findsOneWidget);
       expect(find.text('虎牙'), findsOneWidget);
       expect(find.text('英雄联盟'), findsOneWidget);
+      // P02: pull to refresh with 3.x's bounce and classic header.
+      expect(find.byType(RefreshIndicator), findsNothing);
+      expect(
+        find.ancestor(of: find.byKey(const ValueKey('area-grid')), matching: find.byType(AppRefreshView)),
+        findsWidgets,
+      );
 
       // U.4d c2: the categories in the secondary style; c3: the cards name only the area.
       final categories = tester.widget<ScrollableTabBar>(find.byKey(const ValueKey('area-category-tabs')));
@@ -248,7 +254,7 @@ void main() {
       await _settle(tester);
       expect(find.text('确定要取消关注原神吗？'), findsOneWidget);
       // The button says what it does (U.1d D2).
-      expect(find.widgetWithText(FilledButton, '取消关注'), findsOneWidget);
+      expect(find.widgetWithText(DialogActionButton, '取消关注'), findsOneWidget);
       await tester.tap(find.text('取消'));
       await _settle(tester);
       expect(await tester.runAsync(services.store.followAreas.all), hasLength(1));

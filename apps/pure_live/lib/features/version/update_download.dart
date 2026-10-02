@@ -110,9 +110,9 @@ Future<void> _download(
     }
   }
   if (!context.mounted || !await ensureDownloadDirectory(context, tools) || !context.mounted) return;
-  await showDialog<void>(
+  await showAppDialog<void>(
     context: context,
-    barrierDismissible: false,
+    dismissible: false,
     builder: (_) => UpdateDownloadDialog(file: file, sources: sources, version: version),
   );
 }
@@ -605,7 +605,7 @@ class _UpdateDownloadDialogState extends ConsumerState<UpdateDownloadDialog> {
           },
           child: Dialog(
             key: const ValueKey('update-download-dialog'),
-            insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            insetPadding: const EdgeInsets.all(appDialogMargin),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440),
               child: SingleChildScrollView(

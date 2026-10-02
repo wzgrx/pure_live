@@ -102,13 +102,15 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
     if (valid) unawaited(_load());
   }
 
-  Future<void> _load() async {
+  /// Lists the folder; [keepRows] leaves the rows on screen meanwhile (a
+  /// pull, whose header shows the progress).
+  Future<void> _load({bool keepRows = false}) async {
     final client = _client;
     if (client == null) return;
     final epoch = ++_epoch;
     final dir = _dir;
     setState(() {
-      _entries = null;
+      if (!keepRows) _entries = null;
       _error = null;
     });
     try {
@@ -128,6 +130,14 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
     }
   }
 
+  /// A pull to refresh (P02): the rows stay under the header while the
+  /// folder loads; a failure still shows the error state.
+  Future<Object?> _pullLoad() async {
+    await _load(keepRows: true);
+    final error = _error;
+    return error == null ? null : AppRefreshFailure(webDavFailureText(error));
+  }
+
   void _openDir(List<String> dir) {
     if (_busy != null) return;
     setState(() => _dir = dir);
@@ -138,16 +148,10 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
 
   /// A failure with a way to try again (U.11b c12): 4 s, "重试".
   void _failed(String message, VoidCallback retry) {
+    final toast = AppToast(message, actionLabel: i18n('retry'), onAction: retry);
     final messenger = ScaffoldMessenger.maybeOf(context);
-    if (messenger == null) return AppNavigator.toast(message);
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          action: SnackBarAction(label: i18n('retry'), onPressed: retry),
-        ),
-      );
+    if (messenger == null) return AppNavigator.showToast(toast);
+    showAppToastOn(messenger, toast);
   }
 
   Future<void> _mutateConfigs(Future<void> Function() change) async {
@@ -224,28 +228,16 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
 
   /// 3.x's delete question with a red "删除".
   Future<bool> _confirmDelete(String message) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppConfirmDialog(
       context: context,
-      builder: (dialogContext) {
-        final colors = Theme.of(dialogContext).colorScheme;
-        return AlertDialog(
-          scrollable: true,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text(i18n('webdav_confirm_delete'), style: const TextStyle(fontWeight: FontWeight.w600)),
-          content: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: Text(message)),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('webdav_cancel'))),
-            FilledButton(
-              key: const ValueKey('webdav-confirm'),
-              style: FilledButton.styleFrom(backgroundColor: colors.error, foregroundColor: colors.onError),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(i18n('webdav_delete')),
-            ),
-          ],
-        );
-      },
+      title: i18n('webdav_confirm_delete'),
+      message: message,
+      confirmLabel: i18n('webdav_delete'),
+      cancelLabel: i18n('webdav_cancel'),
+      danger: true,
+      confirmKey: const ValueKey('webdav-confirm'),
     );
-    return confirmed ?? false;
+    return confirmed;
   }
 
   Future<void> _fileAction(String label, Future<void> Function(WebDavClient client) action) async {
@@ -512,11 +504,11 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
     final entries = _entries;
     if (entries == null) return const AppStatusView(type: AppStatusType.loading, title: '', subtitle: '');
     if (entries.isEmpty) {
-      return RefreshIndicator(
-        onRefresh: _load,
-        child: LayoutBuilder(
+      return AppRefreshView(
+        onRefresh: _pullLoad,
+        builder: (context, physics) => LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(parent: PureLiveScrollPhysics()),
+            physics: physics,
             child: SizedBox(
               height: constraints.maxHeight,
               child: AppStatusView(
@@ -532,11 +524,11 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
       );
     }
     final busy = !_idle;
-    return RefreshIndicator(
-      onRefresh: _load,
-      child: ListView.builder(
+    return AppRefreshView(
+      onRefresh: _pullLoad,
+      builder: (context, physics) => ListView.builder(
         key: const ValueKey('webdav-list'),
-        physics: const AlwaysScrollableScrollPhysics(parent: PureLiveScrollPhysics()),
+        physics: physics,
         padding: EdgeInsets.fromLTRB(side, 0, side, 96),
         itemCount: entries.length,
         itemBuilder: (context, index) {

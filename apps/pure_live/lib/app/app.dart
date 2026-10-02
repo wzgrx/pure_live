@@ -65,8 +65,9 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   final _refreshRate = AdaptiveRefreshRateController(applyHighRefreshRate);
   late AppStrings _strings = widget.strings;
-  String? _lastToast;
-  DateTime _lastToastAt = DateTime.fromMillisecondsSinceEpoch(0);
+  // The one toast (docs/ui/compare/U.1d c11–c13): the same words are not
+  // repeated while they show (3.x `ToastUtil`; pure_live_TV the same).
+  late final AppToaster _toaster = AppToaster(() => _messenger.currentState);
   late final FontLibrary _fonts;
 
   @override
@@ -74,21 +75,8 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
     super.initState();
     currentStrings = _strings;
     AppNavigator.router = _router;
-    AppNavigator.toast = (message) {
-      final messenger = _messenger.currentState;
-      if (messenger == null) return;
-      // The TV does not repeat the same words within the 3 s a toast shows
-      // (pure_live_TV `ToastUtil`, docs/ui/compare/U.15a).
-      final now = DateTime.now();
-      if (_tv && message == _lastToast && now.difference(_lastToastAt) < const Duration(seconds: 3)) return;
-      _lastToast = message;
-      _lastToastAt = now;
-      messenger
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(content: Text(message), duration: const Duration(seconds: 3), behavior: SnackBarBehavior.floating),
-        );
-    };
+    AppNavigator.toast = (message) => _toaster.show(AppToast(message));
+    AppNavigator.showToast = _toaster.show;
     imageCacheEpoch.addListener(_imagesCleared);
     _fonts = ref.read(fontLibraryProvider)..addListener(_imagesCleared);
     WidgetsBinding.instance.addObserver(this);

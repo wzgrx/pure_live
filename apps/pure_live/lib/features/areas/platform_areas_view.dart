@@ -237,9 +237,9 @@ class _AreaPagesState extends ConsumerState<_AreaPages> {
     setState(() => _page = page);
   }
 
-  Widget _empty() => LayoutBuilder(
+  Widget _empty({ScrollPhysics physics = const AlwaysScrollableScrollPhysics()}) => LayoutBuilder(
     builder: (context, constraints) => SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
+      physics: physics,
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: constraints.maxHeight),
         child: Center(
@@ -259,9 +259,11 @@ class _AreaPagesState extends ConsumerState<_AreaPages> {
     final desktop = usesDesktopPages(windowWidth);
     final areas = widget.areas;
     if (!desktop) {
-      return RefreshIndicator(
+      // 3.x's bounce and classic header (P02).
+      return AppRefreshView(
         onRefresh: widget.onRefresh,
-        child: areas.isEmpty ? _empty() : AreaGrid(areas: areas, controller: _scroll),
+        builder: (context, physics) =>
+            areas.isEmpty ? _empty(physics: physics) : AreaGrid(areas: areas, controller: _scroll, physics: physics),
       );
     }
     final showSizes = watchSetting(ref, Settings.pageShowSizeSelector);

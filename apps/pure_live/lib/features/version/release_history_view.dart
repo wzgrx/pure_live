@@ -251,7 +251,7 @@ class _ReleaseHistoryViewState extends ConsumerState<ReleaseHistoryView> {
   /// One release on a phone (c12): the close button at the top right next
   /// to the release page, the rest scrolls on its own; Back, Esc and a tap
   /// outside close it too (3.x put "关闭" after everything).
-  Future<void> _showDetails(ReleaseInfo release) => showDialog<void>(
+  Future<void> _showDetails(ReleaseInfo release) => showAppDialog<void>(
     context: context,
     builder: (dialogContext) {
       final media = MediaQuery.of(dialogContext);
@@ -458,44 +458,16 @@ class _FileCard extends ConsumerWidget {
   /// "点击下载" twice), then downloads in the app like 3.x
   /// (`downloadAndInstallApk`, U.3d's dialog).
   Future<void> _download(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppConfirmDialog(
       context: context,
-      builder: (dialogContext) => DialogButtonsTheme(
-        child: AlertDialog(
-          key: const ValueKey('release-download-confirm'),
-          scrollable: true,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          title: Text(
-            i18n('update_download_package_title'),
-            style: dialogContext.textStyles.t18.copyWith(fontSize: 20, fontWeight: FontWeight.w600),
-          ),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Text(
-              i18n('update_download_confirm_named', args: {'name': _name, 'size': file.size}),
-              style: dialogContext.textStyles.t14,
-            ),
-          ),
-          actionsOverflowDirection: VerticalDirection.down,
-          actionsOverflowButtonSpacing: 8,
-          actions: [
-            TextButton(
-              key: const ValueKey('release-download-cancel'),
-              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(i18n('cancel')),
-            ),
-            FilledButton(
-              key: const ValueKey('release-download-start'),
-              style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(i18n('update_download_action')),
-            ),
-          ],
-        ),
-      ),
+      key: const ValueKey('release-download-confirm'),
+      title: i18n('update_download_package_title'),
+      message: i18n('update_download_confirm_named', args: {'name': _name, 'size': file.size}),
+      confirmLabel: i18n('update_download_action'),
+      cancelKey: const ValueKey('release-download-cancel'),
+      confirmKey: const ValueKey('release-download-start'),
     );
-    if (confirmed != true || !context.mounted) return;
+    if (!confirmed || !context.mounted) return;
     final githubOrigin = ref.read(appServicesProvider).store.settings.get(Settings.useGitHubOriginForUpdates);
     await showUpdateDownload(
       context,

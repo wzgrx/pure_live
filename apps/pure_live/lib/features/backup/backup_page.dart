@@ -179,30 +179,15 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   }
 
   Future<void> _delete(LocalBackupFile entry) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppConfirmDialog(
       context: context,
-      builder: (dialogContext) {
-        final colors = Theme.of(dialogContext).colorScheme;
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text(i18n('webdav_confirm_delete'), style: const TextStyle(fontWeight: FontWeight.w600)),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Text(i18n('backup_delete_confirm', args: {'name': entry.name})),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('cancel'))),
-            FilledButton(
-              key: const ValueKey('backup-delete-confirm'),
-              style: FilledButton.styleFrom(backgroundColor: colors.error, foregroundColor: colors.onError),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(i18n('webdav_delete')),
-            ),
-          ],
-        );
-      },
+      title: i18n('webdav_confirm_delete'),
+      message: i18n('backup_delete_confirm', args: {'name': entry.name}),
+      confirmLabel: i18n('webdav_delete'),
+      danger: true,
+      confirmKey: const ValueKey('backup-delete-confirm'),
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     await _run(_Action.file, () async {
       try {
         await entry.file.delete();
@@ -291,11 +276,15 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     final opensFolder = ref.watch(backupOpensFolderProvider);
     return Scaffold(
       appBar: settingsPageAppBar(context, title: i18n('backup_recover')),
-      body: RefreshIndicator(
-        onRefresh: _loadFiles,
-        child: SettingsPageList(
+      // 3.x's bounce and classic header (P02).
+      body: AppRefreshView(
+        onRefresh: () async {
+          await _loadFiles();
+          return _filesFailed ? const AppRefreshFailure() : null;
+        },
+        builder: (context, physics) => SettingsPageList(
           key: const ValueKey('backup-list'),
-          physics: const AlwaysScrollableScrollPhysics(parent: PureLiveScrollPhysics()),
+          physics: physics,
           children: [
             SettingsGroup(
               first: true,

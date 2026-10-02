@@ -41,6 +41,25 @@ abstract final class SystemAccess {
   static Future<bool> requestLocalNetwork() => _ask('requestLocalNetwork', fallback: true);
 }
 
+/// Whether [url]'s host is on the local network (a home IPTV server, a
+/// receiver), which Android 17 gates like a LAN proxy
+/// ([isLocalNetworkProxyHost]; loopback is not gated).
+bool isLocalNetworkUrl(String url) {
+  final host = Uri.tryParse(url.trim())?.host ?? '';
+  return host.isNotEmpty && isLocalNetworkProxyHost(host);
+}
+
+/// Asks for Android 17's local-network permission before [urls] are opened
+/// when one of them is on the local network ([isLocalNetworkUrl]), and says
+/// so ([toast], by default the app's) when it is refused. Whether they can
+/// be reached; true at once when none is local.
+Future<bool> ensureLocalNetworkFor(Iterable<String> urls, {void Function(String message)? toast}) async {
+  if (!urls.any(isLocalNetworkUrl)) return true;
+  if (await SystemAccess.requestLocalNetwork()) return true;
+  (toast ?? AppNavigator.toast)(i18n('local_network_denied_stream'));
+  return false;
+}
+
 /// Asks for Android 17's local-network permission when a proxy points at the
 /// local network (3.x `LocalNetworkAccess.ensureForProxies`): at start and
 /// when the proxy settings settle after a change. A refusal is asked again

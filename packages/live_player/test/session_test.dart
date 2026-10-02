@@ -261,6 +261,73 @@ void main() {
     });
   });
 
+  test('overlapping stops, then an open: no idle release of the playing engine', () {
+    // Release fixes, item 9: the first stop's idle timer was overwritten,
+    // never cancelled, and released the engine 45 s into the next playback.
+    fakeAsync((async) {
+      start(PlaybackRequest(site: 'douyu', plan: _plan([_a])), async);
+      unawaited(session.stop());
+      unawaited(session.stop());
+      async.flushMicrotasks();
+      unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_a]))));
+      async
+        ..flushMicrotasks()
+        ..elapse(const Duration(seconds: 46));
+      expect(session.state.status, PlaybackStatus.playing);
+      expect(engine.disposed, isFalse);
+      expect(session.engine, same(engine));
+    });
+  });
+
+  test('a stop still finishing when the next open starts arms no idle release', () {
+    fakeAsync((async) {
+      start(PlaybackRequest(site: 'douyu', plan: _plan([_a])), async);
+      unawaited(session.stop());
+      unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_b]))));
+      async
+        ..flushMicrotasks()
+        ..elapse(const Duration(seconds: 46));
+      expect(session.state.status, PlaybackStatus.playing);
+      expect(engine.opens.last.uri.host, 'b.example');
+      expect(engine.disposed, isFalse);
+    });
+  });
+
+  test('disposed while the engine is still being created: dispose waits for it and releases it', () {
+    fakeAsync((async) {
+      engine = FakeEngine();
+      final creating = Completer<PlayerEngine>();
+      session = PlaybackSession(engine: () => creating.future, opener: MediaOpener());
+      unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_a]))));
+      async.flushMicrotasks();
+      var done = false;
+      unawaited(session.dispose().then((_) => done = true));
+      async.flushMicrotasks();
+      expect(done, isFalse, reason: 'the engine is still being created');
+      creating.complete(engine);
+      async.flushMicrotasks();
+      expect(engine.disposed, isTrue);
+      expect(engine.opens, isEmpty);
+      expect(session.engine, isNull);
+      expect(done, isTrue);
+    });
+  });
+
+  test('disposed while the engine creation fails: dispose still completes', () {
+    fakeAsync((async) {
+      final creating = Completer<PlayerEngine>();
+      session = PlaybackSession(engine: () => creating.future, opener: MediaOpener());
+      unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_a]))));
+      async.flushMicrotasks();
+      var done = false;
+      unawaited(session.dispose().then((_) => done = true));
+      creating.completeError(StateError('no decoder'));
+      async.flushMicrotasks();
+      expect(done, isTrue);
+      expect(session.engine, isNull);
+    });
+  });
+
   test('a stalled open is bounded and the next line is tried', () {
     fakeAsync((async) {
       engine = FakeEngine();

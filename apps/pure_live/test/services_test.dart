@@ -9,6 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:pure_live/app/app_log.dart';
 import 'package:pure_live/app/downloads.dart';
 import 'package:pure_live/app/fonts.dart';
+import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/features/remote_receiver/mdns_peers.dart';
 import 'package:pure_live/features/remote_receiver/remote_sync_service.dart';
 import 'package:pure_live/platform/display_mode.dart';
@@ -361,6 +362,48 @@ void main() {
       await store.settings.set(Settings.appProxyHost, 'proxy.example.com');
       expect(guard.needed, isFalse);
     });
+
+    test('a LAN stream asks for local-network access first; refused, it says so (release fixes, item 4)', () async {
+      final calls = <String>[];
+      var granted = false;
+      SystemAccess.debugCall = (method) async {
+        calls.add(method);
+        return granted;
+      };
+      addTearDown(() => SystemAccess.debugCall = null);
+      await loadStrings();
+      for (final url in ['http://192.168.1.8:8080/live.m3u8', 'http://10.0.0.2/a.ts', 'http://nas.local/b.m3u8']) {
+        expect(isLocalNetworkUrl(url), isTrue, reason: url);
+      }
+      for (final url in ['https://cdn.example.com/a.flv', 'http://127.0.0.1:8080/relay', 'not a url']) {
+        expect(isLocalNetworkUrl(url), isFalse, reason: url);
+      }
+      final toasts = <String>[];
+      expect(await ensureLocalNetworkFor(['https://cdn.example.com/a.flv'], toast: toasts.add), isTrue);
+      expect(calls, isEmpty, reason: 'nothing local');
+      expect(
+        await ensureLocalNetworkFor(['https://cdn.example.com/a.flv', 'http://192.168.1.8/b.m3u8'], toast: toasts.add),
+        isFalse,
+      );
+      expect(calls, ['requestLocalNetwork']);
+      expect(toasts.single, contains('局域网里的直播源'));
+      granted = true;
+      expect(await ensureLocalNetworkFor(['http://192.168.1.8/b.m3u8'], toast: toasts.add), isTrue);
+      expect(toasts, hasLength(1));
+    });
+  });
+
+  test('3.x sign-ins this device could not encrypt: "sign in again" once (release fixes, item 2)', () async {
+    await loadStrings();
+    final store = await LiveStore.memory(cipher: FakeCipher());
+    addTearDown(store.close);
+    final toasts = <String>[];
+    await LegacyReloginNotice.record(store.meta, LegacyImportReport());
+    expect(await LegacyReloginNotice.showOnce(store.meta, toast: toasts.add), isFalse, reason: 'all were kept');
+    await LegacyReloginNotice.record(store.meta, LegacyImportReport()..skippedSecrets.add('cookie/bilibili'));
+    expect(await LegacyReloginNotice.showOnce(store.meta, toast: toasts.add), isTrue);
+    expect(await LegacyReloginNotice.showOnce(store.meta, toast: toasts.add), isFalse);
+    expect(toasts.single, startsWith('部分平台需要重新登录'));
   });
 
   test('device sync finds 3.x devices over mDNS with their TXT record', () async {

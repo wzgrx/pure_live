@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Resources named only from Dart (audio_service looks the media notification's
-     small icon up by name, U.14 c2): the release build's resource shrinker
-     cannot see that and must keep them. -->
+<!-- Resources named only from Dart: the release build's resource shrinker
+     cannot see those references and must keep them.
+     - ic_stat_playback: the media notification's small icon (U.14 c2).
+     - audio_service_*: the media buttons' icons (MediaControl.androidIcon).
+       audio_service resolves them with getIdentifier; once shrunk the id is 0
+       and, from Android 13, PlaybackStateCompat.CustomAction.Builder throws,
+       so neither the notification nor the foreground service starts (3.x
+       kept the same three). -->
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@drawable/ic_stat_playback" />
+    tools:keep="@drawable/ic_stat_playback,@drawable/audio_service_pause,@drawable/audio_service_play_arrow,@drawable/audio_service_stop" />

@@ -11,6 +11,7 @@ import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/multiview/logic/multiview_session.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/shared/rooms/play_quality.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -584,6 +585,10 @@ class MultiviewController extends ChangeNotifier {
       _fail(cell, StreamUnavailable(site.id, 'no urls'));
       return false;
     }
+    // A LAN source (a home IPTV server) needs Android 17's local-network
+    // permission first; refused, the user is told and the open fails as usual.
+    await ensureLocalNetworkFor(resolution.lines.map((line) => line.url), toast: toast);
+    if (!_current(cell, epoch)) return false;
     final applied = resolveAppliedPlayQuality(qualities: cell._qualities, requested: requested, resolution: resolution);
     final appliedIndex = cell._qualities.indexWhere((q) => q.selectionId == applied.selectionId);
     final playing = appliedIndex >= 0 ? appliedIndex : index;

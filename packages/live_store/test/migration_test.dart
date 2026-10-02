@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:live_core/live_core.dart';
@@ -23,6 +24,18 @@ Future<String> writeV3Box(Directory dir, Map<String, Object?> values, {List<Stri
   await box.close();
   await Hive.close();
   return p.join(dir.path, 'app_settings.hive');
+}
+
+/// A platform cipher that opens nothing and cannot seal (an AndroidKeyStore
+/// that fails on this device).
+final class _BrokenSealCipher implements SecretCipher {
+  const new();
+
+  @override
+  Future<Uint8List> seal(String ref, String plain) async => throw StateError('KeyStore unavailable');
+
+  @override
+  Future<String> open(String ref, Uint8List sealed) async => throw StateError('KeyStore unavailable');
 }
 
 void main() {
@@ -187,6 +200,28 @@ void main() {
 
       expect(File(box).readAsBytesSync(), before, reason: 'the 3.x file is only read');
       expect(File('${p.withoutExtension(box)}.lock').existsSync(), isFalse);
+      await store.close();
+    });
+
+    test('a keystore that cannot encrypt: everything else is imported, the sign-ins are skipped once', () async {
+      // Some Android devices' AndroidKeyStore fails (release fixes, item 2).
+      final store = await LiveStore.memory(cipher: const _BrokenSealCipher());
+      final report = await LegacyMigration.importHiveFiles(store, [box]);
+      expect(report.importedSources, 1);
+      expect(report.skippedSecrets, ['cookie/bilibili', 'cookie/douyu.ltp0', 'webdav/nas']);
+      expect(await store.follows.count(), 4);
+      expect([for (final r in await store.history.all()) r.roomId], ['7', '8']);
+      expect((await store.followAreas.all()).single.areaId, '1001');
+      expect([for (final t in await store.tags.all()) t.name], ['Top', 'Games']);
+      expect(await store.blockLists.list(BlockKind.user), ['bot']);
+      expect(store.settings.get(Settings.danmakuSpeed), 150);
+      final nas = await store.webdav.current();
+      expect((nas?.address, nas?.username, nas?.password), ('https://nas/dav', 'u', ''));
+      expect(store.secrets.cookieFor('bilibili'), isNull);
+      expect(await store.meta.legacyValue('recorder_tasks'), isNotNull);
+      final again = await LegacyMigration.importHiveFiles(store, [box]);
+      expect((again.importedSources, again.alreadyImported), (0, 1), reason: 'recorded in the ledger');
+      expect(again.skippedSecrets, isEmpty);
       await store.close();
     });
 

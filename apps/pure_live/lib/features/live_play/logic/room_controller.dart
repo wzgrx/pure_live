@@ -11,6 +11,7 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/shared/rooms/play_quality.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -424,6 +425,10 @@ class LiveRoomController extends ChangeNotifier {
       _unplayable(StreamUnavailable(site.id, 'no urls'));
       return false;
     }
+    // A LAN source (a home IPTV server) needs Android 17's local-network
+    // permission first; refused, the user is told and the open fails as usual.
+    await ensureLocalNetworkFor(resolution.lines.map((line) => line.url), toast: toast);
+    if (!_current(epoch)) return false;
     final applied = resolveAppliedPlayQuality(qualities: _qualities, requested: requested, resolution: resolution);
     final appliedIndex = _qualities.indexWhere((q) => q.selectionId == applied.selectionId);
     final playing = appliedIndex >= 0 ? appliedIndex : index;
@@ -624,6 +629,8 @@ class LiveRoomController extends ChangeNotifier {
       ),
     );
     _notify();
+    await ensureLocalNetworkFor([url], toast: toast);
+    if (!_current(epoch)) return 'play_video_failed';
     await session.open(
       PlaybackRequest(
         site: site.id,

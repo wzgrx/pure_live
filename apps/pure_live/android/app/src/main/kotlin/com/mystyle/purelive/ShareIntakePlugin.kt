@@ -30,7 +30,8 @@ import java.util.concurrent.Executors
  * launcher shortcuts and the recording notifications open.
  *
  * - [ACTION_OPEN] (shortcuts, notifications; docs/ui/compare/U.14 c3, c5,
- *   c15): `route` opens a page, `platform` + `roomId` a room; delivered as
+ *   c15): `route` opens a page (only [OPENABLE_ROUTES]), `platform` +
+ *   `roomId` a room; delivered as
  *   `shared {route}` or `shared {room: {platform, roomId, title, nick}}`.
  * - `setRecentRooms [{platform, roomId, title, nick}]`: the launcher icon's
  *   long press shows "搜索直播", "录制中心" and these rooms (dynamic
@@ -60,6 +61,13 @@ internal class ShareIntakePlugin :
         internal const val EXTRA_ROUTE = "route"
         internal const val ROUTE_SEARCH = "/search"
         internal const val ROUTE_RECORDINGS = "/record_mannager"
+
+        /**
+         * The pages [ACTION_OPEN] may open. The activity is exported (it is
+         * the launcher's), so any app can send the action; other routes are
+         * dropped here and again in Dart (`ShareIntake.openableRoutes`).
+         */
+        private val OPENABLE_ROUTES = setOf(ROUTE_SEARCH, ROUTE_RECORDINGS)
 
         /** The intent that opens [route] in the app. */
         internal fun openRoute(context: Context, route: String): Intent =
@@ -220,7 +228,7 @@ internal class ShareIntakePlugin :
             val platform = intent.getStringExtra("platform")
             val roomId = intent.getStringExtra("roomId")
             when {
-                route != null -> deliver(mapOf("route" to route))
+                route != null -> if (route in OPENABLE_ROUTES) deliver(mapOf("route" to route))
                 platform != null && roomId != null -> deliver(
                     mapOf(
                         "room" to mapOf(

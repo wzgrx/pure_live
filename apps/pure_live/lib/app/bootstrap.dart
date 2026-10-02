@@ -17,6 +17,7 @@ import 'package:pure_live/app/launch_args.dart';
 import 'package:pure_live/app/platforms.dart';
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/app/ui_mode.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/native_http.dart';
@@ -76,6 +77,7 @@ abstract final class AppBootstrap {
         hiveFiles = await legacyHiveFiles();
         final report = await LegacyMigration.importHiveFiles(store, hiveFiles);
         log('3.x import: $report', name: 'AppBootstrap');
+        await LegacyReloginNotice.record(store.meta, report);
       } on Object catch (error, stack) {
         log('3.x import failed', name: 'AppBootstrap', error: error, stackTrace: stack);
       }

@@ -220,6 +220,18 @@ void main() {
       expect((opened.single.platform, opened.single.roomId, opened.single.nick), ('douyu', '8888', '主播'));
     });
 
+    test('an outside intent opens only the shortcut pages, anything else is ignored quietly', () async {
+      // Any app can send the open intent (release fixes, item 6).
+      for (final route in ['/settings', '/backup', '/web_dav', '/live_play', '/search/../settings']) {
+        expect(await intake.ingest(SharedPayload(route: route)), ShareOutcome.unsupported, reason: route);
+      }
+      expect(await intake.ingest(const SharedPayload(route: '/search')), ShareOutcome.opened);
+      await pumpEventQueue();
+      expect(routes, ['/search']);
+      expect(notes, isEmpty);
+      expect(ShareIntake.openableRoutes, {'/search', '/record_mannager'});
+    });
+
     test('a shared code asks first (U.3d dialog, as 3.x)', () async {
       expect(await intake.ingest(SharedPayload(text: '口令 ${encodeRoomShareCode(_douyu)}')), ShareOutcome.opened);
       await pumpEventQueue();

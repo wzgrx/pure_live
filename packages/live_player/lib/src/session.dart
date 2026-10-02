@@ -329,10 +329,12 @@ final class PlaybackSession {
   }
 
   /// Stops and releases the input but keeps the engine for
-  /// [SessionTimings.idleRelease] (3.x's `close`/`softStop`).
+  /// [SessionTimings.idleRelease] (3.x's `close`/`softStop`). Only the
+  /// latest stop arms that release, and only while nothing was opened since;
+  /// it checks again that the session is still idle when it fires.
   Future<void> stop() async {
     if (_disposed) return;
-    _begin();
+    final session = _begin();
     _wantPlaying = false;
     _fence.clear();
     final transport = _transport;
@@ -347,16 +349,32 @@ final class PlaybackSession {
       } on Object {
         // Already stopped or never opened.
       }
-      _idleTimer = Timer(timings.idleRelease, () => unawaited(_releaseEngine()));
+      // A newer stop arms its own release; a newer open needs the engine.
+      if (!_current(session)) return;
+      _idleTimer?.cancel();
+      _idleTimer = Timer(timings.idleRelease, () {
+        if (_current(session) && _state.status == PlaybackStatus.stopped) unawaited(_releaseEngine());
+      });
     }
   }
 
-  /// Releases everything; the session cannot be used afterwards.
+  /// Releases everything; the session cannot be used afterwards. An engine
+  /// still being created is waited for and released too.
   Future<void> dispose() async {
     if (_disposed) return;
     await stop();
     _idleTimer?.cancel();
     _disposed = true;
+    final creating = _engineCreating;
+    if (creating != null) {
+      try {
+        // [_engineNow] no longer adopts it once disposed.
+        final created = await creating;
+        if (!identical(created, _engine)) await created.dispose();
+      } on Object {
+        // The creation failed: nothing to release.
+      }
+    }
     await _releaseEngine();
     await _states.close();
   }
@@ -384,6 +402,8 @@ final class PlaybackSession {
     final creating = _engineCreating ??= _createEngine();
     try {
       final created = await creating;
+      // Disposed meanwhile: not adopted, dispose() releases it.
+      _checkAlive();
       if (_engine == null) {
         _engine = created;
         _events = created.events.listen(_onEvent);

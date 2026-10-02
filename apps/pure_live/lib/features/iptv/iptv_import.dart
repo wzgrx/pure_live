@@ -81,81 +81,82 @@ class IptvDialogTitle extends StatelessWidget {
 /// Asks where an import of [kind] reads from (3.x's "本地导入 / 网络导入"
 /// dialog without buttons, plus pasted text for playlists and the default
 /// guide for guides; each option says what it takes).
-Future<IptvImportOrigin?> chooseImportOrigin(BuildContext context, IptvImportKind kind) => showDialog<IptvImportOrigin>(
-  context: context,
-  builder: (dialogContext) {
-    final scheme = Theme.of(dialogContext).colorScheme;
-    final playlist = kind == IptvImportKind.playlist;
-    Widget option(IptvImportOrigin origin, IconData icon, String title, String subtitle) => InkWell(
-      key: ValueKey('iptv-origin-${origin.name}'),
-      onTap: () => Navigator.pop(dialogContext, origin),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 64),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-          child: Row(
-            children: [
-              Icon(icon, size: 24, color: scheme.primary),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(title, style: dialogContext.textStyles.t15.emphasis),
-                    const SizedBox(height: 2),
-                    Text(subtitle, style: dialogContext.textStyles.t13.copyWith(color: scheme.onSurfaceVariant)),
-                  ],
-                ),
+Future<IptvImportOrigin?> chooseImportOrigin(BuildContext context, IptvImportKind kind) =>
+    showAppDialog<IptvImportOrigin>(
+      context: context,
+      builder: (dialogContext) {
+        final scheme = Theme.of(dialogContext).colorScheme;
+        final playlist = kind == IptvImportKind.playlist;
+        Widget option(IptvImportOrigin origin, IconData icon, String title, String subtitle) => InkWell(
+          key: ValueKey('iptv-origin-${origin.name}'),
+          onTap: () => Navigator.pop(dialogContext, origin),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 64),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: Row(
+                children: [
+                  Icon(icon, size: 24, color: scheme.primary),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(title, style: dialogContext.textStyles.t15.emphasis),
+                        const SizedBox(height: 2),
+                        Text(subtitle, style: dialogContext.textStyles.t13.copyWith(color: scheme.onSurfaceVariant)),
+                      ],
+                    ),
+                  ),
+                ],
               ),
+            ),
+          ),
+        );
+        // The one dialog (U.1d): options with what each takes; a tap picks one
+        // (3.x had no buttons).
+        return AppDialog(
+          title: i18n(playlist ? 'dialog_import_playlist_title' : 'dialog_import_epg_title'),
+          icon: playlist ? AppIcons.playlistAdd : AppIcons.importGuide,
+          contentPadding: EdgeInsets.zero,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              option(
+                IptvImportOrigin.file,
+                playlist ? AppIcons.localPlaylistFile : AppIcons.localGuideFile,
+                i18n('local_import'),
+                i18n(playlist ? 'iptv_origin_file_playlist' : 'iptv_origin_file_guide'),
+              ),
+              option(
+                IptvImportOrigin.network,
+                playlist ? AppIcons.networkSource : AppIcons.networkGuide,
+                i18n('network_import'),
+                i18n(playlist ? 'iptv_origin_network_playlist' : 'iptv_origin_network_guide'),
+              ),
+              if (playlist)
+                option(
+                  IptvImportOrigin.text,
+                  AppIcons.pasteText,
+                  i18n('iptv_origin_text'),
+                  i18n('iptv_origin_text_desc'),
+                )
+              else
+                option(
+                  IptvImportOrigin.defaultGuide,
+                  AppIcons.guide,
+                  i18n('iptv_default_guide'),
+                  i18n('iptv_default_guide_desc'),
+                ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
-    return AlertDialog(
-      scrollable: true,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      contentPadding: const EdgeInsets.fromLTRB(0, 12, 0, 16),
-      title: IptvDialogTitle(
-        i18n(playlist ? 'dialog_import_playlist_title' : 'dialog_import_epg_title'),
-        icon: playlist ? AppIcons.playlistAdd : AppIcons.importGuide,
-      ),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 440),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            option(
-              IptvImportOrigin.file,
-              playlist ? AppIcons.localPlaylistFile : AppIcons.localGuideFile,
-              i18n('local_import'),
-              i18n(playlist ? 'iptv_origin_file_playlist' : 'iptv_origin_file_guide'),
-            ),
-            option(
-              IptvImportOrigin.network,
-              playlist ? AppIcons.networkSource : AppIcons.networkGuide,
-              i18n('network_import'),
-              i18n(playlist ? 'iptv_origin_network_playlist' : 'iptv_origin_network_guide'),
-            ),
-            if (playlist)
-              option(IptvImportOrigin.text, AppIcons.pasteText, i18n('iptv_origin_text'), i18n('iptv_origin_text_desc'))
-            else
-              option(
-                IptvImportOrigin.defaultGuide,
-                AppIcons.guide,
-                i18n('iptv_default_guide'),
-                i18n('iptv_default_guide_desc'),
-              ),
-          ],
-        ),
-      ),
-    );
-  },
-);
 
 /// The default [IptvFilePicker]: the path of the file, checked to exist.
-Future<File?> askForFilePath(BuildContext context, IptvImportKind kind) => showDialog<File>(
+Future<File?> askForFilePath(BuildContext context, IptvImportKind kind) => showAppDialog<File>(
   context: context,
   builder: (_) => _FilePathDialog(kind: kind),
 );
@@ -202,75 +203,48 @@ class _FilePathDialogState extends State<_FilePathDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    scrollable: true,
-    insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-    title: IptvDialogTitle(importPickerTitle(widget.kind)),
-    content: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 480),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            i18n('iptv_file_path_desc'),
-            style: context.textStyles.t13.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+  Widget build(BuildContext context) => AppDialog(
+    title: importPickerTitle(widget.kind),
+    message: i18n('iptv_file_path_desc'),
+    wide: true,
+    autofocus: false,
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 6),
+        TextField(
+          key: const ValueKey('iptv-file-path'),
+          controller: _path,
+          autofocus: true,
+          style: context.textStyles.t14,
+          decoration: iptvFieldDecoration(
+            context,
+            label: i18n('iptv_file_path'),
+            hint: Platform.isWindows ? r'D:\TV\list.m3u' : '/storage/emulated/0/Download/list.m3u',
+            error: _error,
           ),
-          const SizedBox(height: 16),
-          TextField(
-            key: const ValueKey('iptv-file-path'),
-            controller: _path,
-            autofocus: true,
-            style: context.textStyles.t14,
-            decoration: iptvFieldDecoration(
-              context,
-              label: i18n('iptv_file_path'),
-              hint: Platform.isWindows ? r'D:\TV\list.m3u' : '/storage/emulated/0/Download/list.m3u',
-              error: _error,
-            ),
-            onSubmitted: (_) => _submit(),
-          ),
-        ],
-      ),
+          onSubmitted: (_) => _submit(),
+        ),
+      ],
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: Text(i18n('cancel'))),
-      FilledButton(onPressed: _submit, child: Text(i18n('confirm'))),
+      const DialogCancelButton(),
+      DialogActionButton(key: const ValueKey('iptv-file-path-confirm'), label: i18n('confirm'), onPressed: _submit),
     ],
   );
 }
 
 /// Asks whether to replace the saved playlist or guide [name] (3.x
 /// "该订阅名称已存在"; docs/ui/compare/U.9 "已有同名播放列表").
-Future<bool> confirmReplace(BuildContext context, String name, IptvImportKind kind) async =>
-    await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        final playlist = kind == IptvImportKind.playlist;
-        return AlertDialog(
-          scrollable: true,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          title: IptvDialogTitle(i18n(playlist ? 'iptv_replace_playlist_title' : 'iptv_replace_guide_title')),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Text(
-              i18n(playlist ? 'iptv_replace_playlist' : 'iptv_replace_guide', args: {'name': name}),
-              style: dialogContext.textStyles.t14,
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('cancel'))),
-            FilledButton(
-              key: const ValueKey('iptv-replace-confirm'),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(i18n('iptv_replace')),
-            ),
-          ],
-        );
-      },
-    ) ??
-    false;
+Future<bool> confirmReplace(BuildContext context, String name, IptvImportKind kind) => showAppConfirmDialog(
+  context: context,
+  title: i18n(kind == IptvImportKind.playlist ? 'iptv_replace_playlist_title' : 'iptv_replace_guide_title'),
+  message: i18n(kind == IptvImportKind.playlist ? 'iptv_replace_playlist' : 'iptv_replace_guide', args: {'name': name}),
+  confirmLabel: i18n('iptv_replace'),
+  danger: true,
+  confirmKey: const ValueKey('iptv-replace-confirm'),
+);
 
 /// Runs an import from the dialogs below; the dialog closes on success.
 typedef IptvImportRun = Future<IptvImportResult> Function(String address, String name);
@@ -283,29 +257,13 @@ InputDecoration iptvFieldDecoration(
   String? hint,
   String? error,
   String? helper,
-}) {
-  final scheme = Theme.of(context).colorScheme;
-  OutlineInputBorder border(Color color, [double width = 1]) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
-    borderSide: BorderSide(color: color, width: width),
-  );
-  return InputDecoration(
-    labelText: label,
-    floatingLabelBehavior: FloatingLabelBehavior.always,
-    hintText: hint,
-    hintStyle: TextStyle(color: scheme.onSurfaceVariant.withValues(alpha: 0.6)),
-    errorText: error,
-    errorMaxLines: 3,
-    helperText: helper,
-    helperMaxLines: 3,
-    contentPadding: const EdgeInsets.all(12),
-    border: border(scheme.outline),
-    enabledBorder: border(scheme.outline),
-    focusedBorder: border(scheme.primary, 2),
-    errorBorder: border(scheme.error, 2),
-    focusedErrorBorder: border(scheme.error, 2),
-  );
-}
+}) => dialogFieldDecoration(
+  context,
+  label: label,
+  hint: hint,
+  error: error,
+  helper: helper,
+).copyWith(floatingLabelBehavior: FloatingLabelBehavior.always);
 
 /// The network import dialog (3.x `_NetworkImportDialog`, docs/ui/compare/
 /// U.9 c10): "订阅地址" and "名称（可选）" (the file name of the address when
@@ -398,72 +356,68 @@ class _NetworkImportDialogState extends State<IptvNetworkImportDialog> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final defaultName = _defaultName;
-    return AlertDialog(
-      scrollable: true,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      title: IptvDialogTitle(
-        i18n(widget.kind == IptvImportKind.playlist ? 'iptv_network_playlist_title' : 'iptv_network_guide_title'),
-      ),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 6),
+    return AppDialog(
+      title: i18n(widget.kind == IptvImportKind.playlist ? 'iptv_network_playlist_title' : 'iptv_network_guide_title'),
+      wide: true,
+      autofocus: false,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 6),
+          TextField(
+            key: const ValueKey('iptv-import-url'),
+            controller: _url,
+            readOnly: _running,
+            autofocus: true,
+            keyboardType: TextInputType.url,
+            style: context.textStyles.t14,
+            decoration: iptvFieldDecoration(
+              context,
+              label: i18n('iptv_import_url'),
+              hint: 'https://',
+              error: _urlError,
+            ),
+            onSubmitted: (_) => unawaited(_submit()),
+          ),
+          if (!_running) ...[
+            const SizedBox(height: 16),
             TextField(
-              key: const ValueKey('iptv-import-url'),
-              controller: _url,
-              readOnly: _running,
-              autofocus: true,
-              keyboardType: TextInputType.url,
+              key: const ValueKey('iptv-import-name'),
+              controller: _name,
               style: context.textStyles.t14,
               decoration: iptvFieldDecoration(
                 context,
-                label: i18n('iptv_import_url'),
-                hint: 'https://',
-                error: _urlError,
+                label: i18n('iptv_import_name'),
+                hint: defaultName.isEmpty ? i18n('iptv_import_name_hint') : defaultName,
+                helper: i18n('iptv_import_name_helper'),
               ),
               onSubmitted: (_) => unawaited(_submit()),
             ),
-            if (!_running) ...[
-              const SizedBox(height: 16),
-              TextField(
-                key: const ValueKey('iptv-import-name'),
-                controller: _name,
-                style: context.textStyles.t14,
-                decoration: iptvFieldDecoration(
-                  context,
-                  label: i18n('iptv_import_name'),
-                  hint: defaultName.isEmpty ? i18n('iptv_import_name_hint') : defaultName,
-                  helper: i18n('iptv_import_name_helper'),
-                ),
-                onSubmitted: (_) => unawaited(_submit()),
-              ),
-            ],
-            if (_message != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                _message!,
-                key: const ValueKey('iptv-import-message'),
-                style: context.textStyles.t13.copyWith(color: scheme.onSurfaceVariant),
-              ),
-            ],
-            if (_running) ...[
-              const SizedBox(height: 16),
-              ClipRRect(borderRadius: BorderRadius.circular(2), child: const LinearProgressIndicator(minHeight: 4)),
-              const SizedBox(height: 8),
-              Text(i18n('iptv_import_running'), style: context.textStyles.t13),
-            ],
           ],
-        ),
+          if (_message != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              _message!,
+              key: const ValueKey('iptv-import-message'),
+              style: context.textStyles.t13.copyWith(color: scheme.onSurfaceVariant),
+            ),
+          ],
+          if (_running) ...[
+            const SizedBox(height: 16),
+            ClipRRect(borderRadius: BorderRadius.circular(2), child: const LinearProgressIndicator(minHeight: 4)),
+            const SizedBox(height: 8),
+            Text(i18n('iptv_import_running'), style: context.textStyles.t13),
+          ],
+        ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: Text(i18n(_running ? 'close' : 'cancel'))),
-        FilledButton(
+        DialogCancelButton(label: i18n(_running ? 'close' : 'cancel')),
+        DialogActionButton(
           key: const ValueKey('iptv-import-submit'),
-          onPressed: _running ? null : () => unawaited(_submit()),
-          child: Text(i18n(_failed ? 'retry' : 'iptv_import')),
+          label: i18n(_failed ? 'retry' : 'iptv_import'),
+          busy: _running,
+          onPressed: () => unawaited(_submit()),
         ),
       ],
     );
@@ -532,56 +486,53 @@ class _TextImportDialogState extends State<IptvTextImportDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    scrollable: true,
-    insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-    title: IptvDialogTitle(i18n('iptv_origin_text')),
-    content: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 560),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 6),
-          TextField(
-            key: const ValueKey('iptv-import-text'),
-            controller: _text,
-            readOnly: _running,
-            minLines: 5,
-            maxLines: 10,
-            style: context.textStyles.t13.copyWith(fontFamily: 'monospace'),
-            decoration: iptvFieldDecoration(
-              context,
-              label: i18n('iptv_import_text'),
-              hint: '#EXTM3U\n#EXTINF:-1 group-title="…",CCTV-1\nhttps://…',
-              error: _textError,
-            ),
+  Widget build(BuildContext context) => AppDialog(
+    title: i18n('iptv_origin_text'),
+    wide: true,
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 6),
+        TextField(
+          key: const ValueKey('iptv-import-text'),
+          controller: _text,
+          readOnly: _running,
+          minLines: 5,
+          maxLines: 10,
+          style: context.textStyles.t13.copyWith(fontFamily: 'monospace'),
+          decoration: iptvFieldDecoration(
+            context,
+            label: i18n('iptv_import_text'),
+            hint: '#EXTM3U\n#EXTINF:-1 group-title="…",CCTV-1\nhttps://…',
+            error: _textError,
           ),
-          const SizedBox(height: 16),
-          TextField(
-            key: const ValueKey('iptv-import-text-name'),
-            controller: _name,
-            readOnly: _running,
-            style: context.textStyles.t14,
-            decoration: iptvFieldDecoration(context, label: i18n('iptv_import_text_name'), error: _nameError),
-          ),
-          if (_message != null) ...[
-            const SizedBox(height: 12),
-            Text(_message!, style: context.textStyles.t13.copyWith(color: Theme.of(context).colorScheme.error)),
-          ],
-          if (_running) ...[
-            const SizedBox(height: 16),
-            ClipRRect(borderRadius: BorderRadius.circular(2), child: const LinearProgressIndicator(minHeight: 4)),
-          ],
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          key: const ValueKey('iptv-import-text-name'),
+          controller: _name,
+          readOnly: _running,
+          style: context.textStyles.t14,
+          decoration: iptvFieldDecoration(context, label: i18n('iptv_import_text_name'), error: _nameError),
+        ),
+        if (_message != null) ...[
+          const SizedBox(height: 12),
+          Text(_message!, style: context.textStyles.t13.copyWith(color: Theme.of(context).colorScheme.error)),
         ],
-      ),
+        if (_running) ...[
+          const SizedBox(height: 16),
+          ClipRRect(borderRadius: BorderRadius.circular(2), child: const LinearProgressIndicator(minHeight: 4)),
+        ],
+      ],
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: Text(i18n(_running ? 'close' : 'cancel'))),
-      FilledButton(
+      DialogCancelButton(label: i18n(_running ? 'close' : 'cancel')),
+      DialogActionButton(
         key: const ValueKey('iptv-import-text-submit'),
-        onPressed: _running ? null : () => unawaited(_submit()),
-        child: Text(i18n('iptv_import')),
+        label: i18n('iptv_import'),
+        busy: _running,
+        onPressed: () => unawaited(_submit()),
       ),
     ],
   );

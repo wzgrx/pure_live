@@ -437,13 +437,13 @@ void main() {
     expect(find.text('已有名为“tv”的播放列表。替换后会用新内容更新它的频道，已关注的频道尽量保留。'), findsOneWidget);
     await _tap(tester, find.widgetWithText(TextButton, '取消').last);
     expect(find.text('已保留同名的原有数据。可以换一个名称再导入。'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, '导入'), findsOneWidget);
+    expect(find.widgetWithText(DialogActionButton, '导入'), findsOneWidget);
 
     // A failed download says why under the address and offers a retry.
     await tester.enterText(find.byKey(const ValueKey('iptv-import-url')), 'https://f/missing.m3u');
     await _tap(tester, find.byKey(const ValueKey('iptv-import-submit')));
     expect(find.text('下载失败，请检查地址和网络后重试'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, '重试'), findsOneWidget);
+    expect(find.widgetWithText(DialogActionButton, '重试'), findsOneWidget);
     // An address that is not http(s) is rejected before any request.
     await tester.enterText(find.byKey(const ValueKey('iptv-import-url')), 'ftp://f/tv.m3u');
     await _tap(tester, find.byKey(const ValueKey('iptv-import-submit')));
@@ -488,7 +488,7 @@ void main() {
     await _tap(tester, find.byKey(const ValueKey('iptv-origin-file')));
     expect(find.text('选择播放列表文件'), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('iptv-file-path')), '"${file.path}"');
-    await _tap(tester, find.widgetWithText(FilledButton, '确认'));
+    await _tap(tester, find.byKey(const ValueKey('iptv-file-path-confirm')));
     expect(h.toasts.last, '已导入播放列表“local”');
 
     final playlists = await _run(tester, h.library.playlists);
@@ -610,8 +610,9 @@ void main() {
     for (final hours in [2, 6, 12, 24, 48, 72]) {
       expect(find.text('$hours 小时'), findsOneWidget);
     }
+    // The current one: the primary colour and a tick (U.1d c3).
     expect(
-      find.descendant(of: find.byKey(const ValueKey('iptv-interval-24')), matching: find.byIcon(AppIcons.choiceOn)),
+      find.descendant(of: find.byKey(const ValueKey('iptv-interval-24')), matching: find.byIcon(AppIcons.selected)),
       findsOneWidget,
     );
     await _tap(tester, find.byKey(const ValueKey('iptv-interval-6')));

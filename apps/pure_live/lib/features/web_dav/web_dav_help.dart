@@ -190,7 +190,7 @@ class WebDavScreenshot extends StatelessWidget {
           key: ValueKey('webdav-help-image-$index'),
           borderRadius: BorderRadius.circular(10),
           onTap: () => unawaited(
-            showDialog<void>(
+            showAppDialog<void>(
               context: context,
               builder: (dialogContext) => Dialog.fullscreen(
                 backgroundColor: OnVideoColors.ground,

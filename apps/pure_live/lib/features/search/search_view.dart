@@ -314,42 +314,27 @@ class _SearchViewState extends ConsumerState<SearchView> {
     _webView2Asking = true;
     final String? choice;
     try {
-      choice = await showDialog<String>(
+      choice = await showAppDialog<String>(
         context: context,
-        builder: (dialogContext) {
-          final scheme = Theme.of(dialogContext).colorScheme;
-          return AlertDialog(
-            key: const ValueKey('webview2-dialog'),
-            scrollable: true,
-            title: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(AppIcons.componentMissing, color: scheme.error),
-                const SizedBox(width: 8),
-                Flexible(child: Text(i18n('webview2_missing_title'))),
-              ],
+        builder: (dialogContext) => AppDialog(
+          key: const ValueKey('webview2-dialog'),
+          title: i18n('webview2_missing_title'),
+          icon: AppIcons.componentMissing,
+          message: i18n('webview2_missing_web_search'),
+          actions: [
+            const DialogCancelButton(),
+            TextButton(
+              key: const ValueKey('webview2-download'),
+              onPressed: () => Navigator.pop(dialogContext, 'download'),
+              child: Text(i18n('webview2_open_download')),
             ),
-            content: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Text(i18n('webview2_missing_web_search'), style: const TextStyle(height: 1.4)),
+            DialogActionButton(
+              key: const ValueKey('webview2-browser'),
+              label: i18n('webview2_use_system_browser'),
+              onPressed: () => Navigator.pop(dialogContext, 'browser'),
             ),
-            actionsOverflowDirection: VerticalDirection.down,
-            actionsOverflowButtonSpacing: 8,
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(i18n('cancel'))),
-              TextButton(
-                key: const ValueKey('webview2-download'),
-                onPressed: () => Navigator.pop(dialogContext, 'download'),
-                child: Text(i18n('webview2_open_download')),
-              ),
-              FilledButton(
-                key: const ValueKey('webview2-browser'),
-                onPressed: () => Navigator.pop(dialogContext, 'browser'),
-                child: Text(i18n('webview2_use_system_browser')),
-              ),
-            ],
-          );
-        },
+          ],
+        ),
       );
     } finally {
       _webView2Asking = false;

@@ -137,7 +137,7 @@ class _FavoriteAreasViewState extends ConsumerState<FavoriteAreasView> with Tick
           Expanded(
             child: TabBarView(
               controller: tabs,
-              physics: const PureLiveBoundedScrollPhysics(),
+              physics: const PureLivePageScrollPhysics(),
               children: [
                 for (final id in _ids)
                   AreaGrid(

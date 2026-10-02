@@ -222,7 +222,7 @@ class SpacingTile extends ConsumerWidget {
           ? null
           : () => writeSetting(ref, setting, (value.floor() + 1).clamp(min, max).toDouble()),
       onValueTap: () async {
-        final picked = await showDialog<double>(
+        final picked = await showAppDialog<double>(
           context: context,
           builder: (_) => _SpacingDialog(
             title: entry.titleText,
@@ -285,8 +285,8 @@ class _SpacingDialogState extends State<_SpacingDialog> {
     return SettingsDialogFrame(
       title: widget.title,
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-        FilledButton(key: const ValueKey('settings-spacing-save'), onPressed: _save, child: Text(i18n('confirm'))),
+        const DialogCancelButton(),
+        DialogActionButton(key: const ValueKey('settings-spacing-save'), label: i18n('confirm'), onPressed: _save),
       ],
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -321,10 +321,11 @@ class _SpacingDialogState extends State<_SpacingDialog> {
               inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))],
               onChanged: (_) => setState(() => _error = null),
               onSubmitted: (_) => _save(),
-              decoration: InputDecoration(
-                suffixText: 'px',
-                helperText: i18n('settings_spacing_range'),
-                errorText: _error,
+              decoration: dialogFieldDecoration(
+                context,
+                suffix: 'px',
+                helper: i18n('settings_spacing_range'),
+                error: _error,
               ),
             ),
           ],
@@ -1030,7 +1031,7 @@ class PageSizeOptionsTile extends ConsumerWidget {
       title: entry.titleText,
       subtitle: (options.isEmpty ? recommended : options).join(', '),
       onTap: () async {
-        final result = await showDialog<List<int>>(
+        final result = await showAppDialog<List<int>>(
           context: context,
           builder: (context) => _PageSizeDialog(initial: options, recommended: recommended),
         );
@@ -1089,11 +1090,11 @@ class _PageSizeDialogState extends State<_PageSizeDialog> {
     return SettingsDialogFrame(
       title: i18n('page_size_options_manage'),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-        FilledButton(
+        const DialogCancelButton(),
+        DialogActionButton(
           key: const ValueKey('settings-page-sizes-save'),
+          label: i18n('confirm'),
           onPressed: () => Navigator.of(context).pop(_options),
-          child: Text(i18n('confirm')),
         ),
       ],
       child: Padding(
@@ -1142,10 +1143,11 @@ class _PageSizeDialogState extends State<_PageSizeDialog> {
                     onChanged: (_) {
                       if (_error != null) setState(() => _error = null);
                     },
-                    decoration: InputDecoration(
-                      hintText: i18n('settings_page_size_input'),
-                      suffixText: i18n('items_per_page'),
-                      errorText: _error,
+                    decoration: dialogFieldDecoration(
+                      context,
+                      hint: i18n('settings_page_size_input'),
+                      suffix: i18n('items_per_page'),
+                      error: _error,
                     ),
                   ),
                 ),

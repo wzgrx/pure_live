@@ -280,12 +280,13 @@ void main() {
     // The quality dialog is open; behind it the page says what it does.
     expect(find.text('正在读取直播流地址…'), findsOneWidget);
     expect(tester.widget<FilledButton>(find.byKey(const ValueKey('toolbox-jump'))).onPressed, isNull);
-    // c8: a 20 px title, options at the start, each at least 56 high.
+    // c8: a 20 px title, options at the start, each at least 48 high (the
+    // option row of the one dialog, U.1d).
     final dialogTitle = tester.widget<Text>(find.text('选择清晰度'));
     expect(dialogTitle.style!.fontSize, 20);
     final first = tester.getRect(find.byKey(const ValueKey('toolbox-choice-0')));
     final dialog = tester.getRect(find.byKey(const ValueKey('toolbox-choice-dialog')));
-    expect(first.height, greaterThanOrEqualTo(56));
+    expect(first.height, greaterThanOrEqualTo(48));
     expect(tester.getTopLeft(find.text('原画')).dx - first.left, 24);
     expect(tester.getCenter(find.text('原画')).dx, lessThan(dialog.center.dx));
     expect(find.byIcon(Icons.chevron_right_rounded), findsNothing);

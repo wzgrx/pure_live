@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/settings/playback_tiles.dart';
-import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
 
@@ -163,7 +162,7 @@ void main() {
       expect(_text('取消'), findsOneWidget);
       await tapSettings(tester, find.byKey(const ValueKey('settings-choice-超清')));
       expect(h.settings.get(Settings.preferResolution), '超清');
-      expect(find.byType(SettingsChoiceRow), findsNothing);
+      expect(find.byType(DialogOptionRow), findsNothing);
     });
 
     testWidgets('"弹幕样式" opens the room\'s danmaku settings (c12)', (tester) async {

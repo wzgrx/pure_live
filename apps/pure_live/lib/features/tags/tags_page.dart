@@ -111,58 +111,22 @@ class _TagsPageState extends ConsumerState<TagsPage> {
   Future<void> _delete(StoreTag tag) async {
     final rooms = _roomsOf(tag);
     final confirmed = await _dialog(
-      () => showDialog<bool>(
+      () => showAppConfirmDialog(
         context: context,
-        builder: (dialogContext) {
-          final colors = Theme.of(dialogContext).colorScheme;
-          final styles = dialogContext.textStyles;
-          return DialogButtonsTheme(
-            child: AlertDialog(
-              key: const ValueKey('tag-delete-dialog'),
-              scrollable: true,
-              insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              title: Text(i18n('delete_tag'), style: tagDialogTitle(dialogContext)),
-              content: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(i18n('delete_tag_confirm_named', args: {'name': tag.name}), style: styles.t14),
-                    if (rooms > 0) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        i18n('tags_delete_rooms_hint', args: {'count': '$rooms'}),
-                        key: const ValueKey('tag-delete-rooms'),
-                        style: styles.t14.copyWith(color: colors.onSurfaceVariant),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              actionsOverflowDirection: VerticalDirection.down,
-              actionsOverflowButtonSpacing: 8,
-              actions: [
-                TextButton(
-                  key: const ValueKey('tag-delete-cancel'),
-                  style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-                  onPressed: () => Navigator.pop(dialogContext, false),
-                  child: Text(i18n('cancel')),
-                ),
-                FilledButton(
-                  key: const ValueKey('tag-delete-confirm'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(48, 48),
-                    backgroundColor: colors.error,
-                    foregroundColor: colors.onError,
-                  ),
-                  onPressed: () => Navigator.pop(dialogContext, true),
-                  child: Text(i18n('delete')),
-                ),
-              ],
-            ),
-          );
-        },
+        key: const ValueKey('tag-delete-dialog'),
+        title: i18n('delete_tag'),
+        message: i18n('delete_tag_confirm_named', args: {'name': tag.name}),
+        content: rooms > 0
+            ? Text(
+                i18n('tags_delete_rooms_hint', args: {'count': '$rooms'}),
+                key: const ValueKey('tag-delete-rooms'),
+                style: context.textStyles.t14.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              )
+            : null,
+        confirmLabel: i18n('delete'),
+        danger: true,
+        cancelKey: const ValueKey('tag-delete-cancel'),
+        confirmKey: const ValueKey('tag-delete-confirm'),
       ),
     );
     if (confirmed != true) return;

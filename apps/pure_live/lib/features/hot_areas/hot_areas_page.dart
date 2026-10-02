@@ -77,18 +77,14 @@ class HotAreasPage extends ConsumerWidget {
   }
 
   Future<void> _reset(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppConfirmDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(i18n('hot_areas_reset')),
-        content: Text(i18n('hot_areas_reset_confirm')),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(i18n('cancel'))),
-          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(i18n('confirm'))),
-        ],
-      ),
+      title: i18n('hot_areas_reset'),
+      message: i18n('hot_areas_reset_confirm'),
+      confirmLabel: i18n('reset'),
+      confirmKey: const ValueKey('hot-areas-reset-confirm'),
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     await _save(ref, ref.read(sitesProvider).availableIds(Settings.hotAreasList.defaultValue));
   }
 

@@ -52,7 +52,7 @@ enum _Choice { follow, unfollow, tags, share }
 /// "设置标签" with their words (c10), the page's own [actions], then "关闭"
 /// and the follow pill of the live room's app bar (c11): following closes
 /// the dialog and says so; unfollowing asks first (on top of the dialog)
-/// and can be undone from the snack bar. Setting the tags of a room not
+/// and can be undone from the toast. Setting the tags of a room not
 /// followed offers to follow it first (tags belong to follows).
 ///
 /// [onOpen] is kept for callers that open rooms their own way; the dialog
@@ -65,7 +65,7 @@ Future<void> showRoomMenu(
   String? detail,
   List<RoomMenuAction> actions = const [],
 }) async {
-  final picked = await showDialog<Object>(
+  final picked = await showAppDialog<Object>(
     context: context,
     builder: (dialogContext) => _RoomMenu(follows: store.follows, room: room, detail: detail, actions: actions),
   );
@@ -155,29 +155,15 @@ class _RoomMenu extends StatelessWidget {
 
 /// Asks whether to unfollow [name] (U.4a c12: one kind of confirmation for
 /// follow and unfollow, the main button saying what it does, in red).
-Future<bool> confirmUnfollowRoom(BuildContext context, {required String name}) async =>
-    await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        final scheme = Theme.of(dialogContext).colorScheme;
-        return AlertDialog(
-          key: const ValueKey('unfollow-dialog'),
-          scrollable: true,
-          title: Text(i18n('unfollow')),
-          content: Text(i18n('unfollow_message', args: {'name': name})),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('cancel'))),
-            FilledButton(
-              key: const ValueKey('unfollow-confirm'),
-              style: FilledButton.styleFrom(backgroundColor: scheme.error, foregroundColor: scheme.onError),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(i18n('unfollow')),
-            ),
-          ],
-        );
-      },
-    ) ??
-    false;
+Future<bool> confirmUnfollowRoom(BuildContext context, {required String name}) => showAppConfirmDialog(
+  context: context,
+  key: const ValueKey('unfollow-dialog'),
+  title: i18n('unfollow'),
+  message: i18n('unfollow_message', args: {'name': name}),
+  confirmLabel: i18n('unfollow'),
+  danger: true,
+  confirmKey: const ValueKey('unfollow-confirm'),
+);
 
 /// Follows [room] and says so; false when it could not be stored.
 Future<bool> followRoom(LiveStore store, LiveRoom room) async {
@@ -197,7 +183,7 @@ Future<bool> followRoom(LiveStore store, LiveRoom room) async {
 }
 
 /// Unfollows [room] after asking (3.x `FollowButton`; [confirmed] when the
-/// caller asked already); the snack bar can put it back in its place.
+/// caller asked already); the toast's "撤销" can put it back in its place.
 /// Completes with whether it was unfollowed.
 Future<bool> unfollowRoom(
   BuildContext context, {
@@ -214,16 +200,16 @@ Future<bool> unfollowRoom(
     final index = before.indexWhere(room.hasSameIdentity);
     final stored = index < 0 ? room : before[index];
     if (!await store.follows.remove(room)) return false;
-    messenger
-      ?..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text(i18n('room_unfollowed', args: {'name': name})),
-          action: SnackBarAction(label: i18n('room_undo'), onPressed: () => unawaited(_restore(store, stored, index))),
-        ),
-      );
-    if (messenger == null) AppNavigator.toast(i18n('room_unfollowed', args: {'name': name}));
+    final toast = AppToast(
+      i18n('room_unfollowed', args: {'name': name}),
+      actionLabel: i18n('room_undo'),
+      onAction: () => unawaited(_restore(store, stored, index)),
+    );
+    if (messenger != null) {
+      showAppToastOn(messenger, toast);
+    } else {
+      AppNavigator.showToast(toast);
+    }
     return true;
   } on Object catch (error, stack) {
     log('Unfollow failed', name: 'RoomMenu', error: error, stackTrace: stack);
@@ -276,24 +262,15 @@ Future<void> editRoomTags(BuildContext context, {required LiveStore store, requi
   if (!await store.follows.contains(room)) {
     if (!context.mounted) return;
     final name = room.displayNick(platformName(room.platform));
-    final follow = await showDialog<bool>(
+    final follow = await showAppConfirmDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        key: const ValueKey('room-tags-ask'),
-        scrollable: true,
-        title: Text(i18n('room_tags_follow_title')),
-        content: Text(i18n('room_tags_follow_message', args: {'name': name})),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('cancel'))),
-          FilledButton(
-            key: const ValueKey('room-tags-follow'),
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(i18n('room_tags_follow_confirm')),
-          ),
-        ],
-      ),
+      key: const ValueKey('room-tags-ask'),
+      title: i18n('room_tags_follow_title'),
+      message: i18n('room_tags_follow_message', args: {'name': name}),
+      confirmLabel: i18n('room_tags_follow_confirm'),
+      confirmKey: const ValueKey('room-tags-follow'),
     );
-    if (follow != true || !await followRoom(store, room)) return;
+    if (!follow || !await followRoom(store, room)) return;
   }
   final List<StoreTag> tags;
   final Set<String> selected;
@@ -306,7 +283,7 @@ Future<void> editRoomTags(BuildContext context, {required LiveStore store, requi
     return;
   }
   if (!context.mounted) return;
-  await showDialog<void>(
+  await showAppDialog<void>(
     context: context,
     builder: (_) => RoomTagPicker(store: store, room: room, tags: tags, selected: selected),
   );

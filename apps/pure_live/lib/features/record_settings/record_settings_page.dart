@@ -183,7 +183,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
       }
       final defaultPath = await recording.storage.defaultDirectory();
       if (!mounted) return;
-      await showDialog<void>(
+      await showAppDialog<void>(
         context: context,
         builder: (_) => RecordDirectoryDialog(
           initialPath: _settings.savePath,
@@ -215,7 +215,7 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
   }
 
   void _editCacheLimit() => unawaited(
-    showDialog<void>(
+    showAppDialog<void>(
       context: context,
       builder: (_) => RecordIntegerDialog(
         title: i18n('record_size_cap_dialog'),

@@ -34,11 +34,13 @@ import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/features/live_play/logic/room_playlist.dart';
 import 'package:pure_live/features/live_play/logic/room_refresh_rate.dart';
 import 'package:pure_live/features/live_play/logic/room_runtime.dart';
+import 'package:pure_live/features/live_play/logic/room_switch.dart';
 import 'package:pure_live/features/live_play/mini/room_mini_window.dart';
 import 'package:pure_live/features/live_play/player/player_controls.dart';
 import 'package:pure_live/features/live_play/player/player_view.dart';
 import 'package:pure_live/features/live_play/player/room_swipe.dart';
 import 'package:pure_live/features/live_play/record/record_panel.dart';
+import 'package:pure_live/features/live_play/switch_room/room_switch_panel.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/screen_orientation.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -156,8 +158,17 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   /// The display's refresh rate follows the video's frame rate (U.2i).
   RoomRefreshRate? _refreshRate;
 
-  /// The list the room was opened from (U.2b2); null for a lone room.
+  /// The list the portrait fullscreen swipes through (U.2b2): the one the
+  /// room was opened from, or the group of the switch panel a room was
+  /// picked from (U.2m c2); null for a lone room.
   RoomPlaylist? _playlist;
+
+  /// The list the room was opened from, as it came (the switch panel's
+  /// "来源列表", U.2m c5).
+  List<LiveRoom> _source = const [];
+
+  /// The switch panel's group, kept while the page stays (U.2m X1).
+  final ValueNotifier<RoomSwitchGroup?> _switchGroup = ValueNotifier(null);
 
   /// The portrait fullscreen's swipe between the rooms of [_playlist].
   late final RoomSwipeController _swipe = RoomSwipeController(onSwitch: _swipeTo);
@@ -194,6 +205,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     final standby = ref.read(playerStandbyProvider);
     _standby = standby;
     if (playlist.isNotEmpty) _playlist = RoomPlaylist(playlist, current: room);
+    _source = playlist;
     // The same room still playing in the floating window plays on here; any
     // other floating room stops (3.x `toLiveRoomDetail`).
     final adopted = FloatingRoom.instance.claim(room);
@@ -315,6 +327,23 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     _switchRoom(playlist.move(step));
   }
 
+  /// A room picked in the switch panel (U.2m c2): shown in this page on the
+  /// same player, staying in fullscreen, like a swipe; the portrait
+  /// fullscreen then swipes through [group], the list it was picked from.
+  void _pickRoom(LiveRoom room, List<LiveRoom> group) {
+    final sites = ref.read(sitesProvider);
+    if (sites.maybeOf(room.platform) == null) {
+      AppNavigator.toast(i18n('platform_retired'));
+      return;
+    }
+    final usable = [
+      for (final item in group)
+        if (sites.maybeOf(item.platform) != null) item,
+    ];
+    _playlist = usable.isEmpty ? null : RoomPlaylist(usable, current: room);
+    _switchRoom(room);
+  }
+
   /// Shows [room] in this page on the same player (3.x `switchRoom` kept the
   /// page too): the room before stops and lets the player go, then [room]
   /// starts on it. Swipes meanwhile wait their turn, and only the last room
@@ -428,6 +457,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     if (fullscreen && _platform.desktop) unawaited(DesktopWindow.setFullScreen(on: false));
     _refreshRate?.dispose();
     _swipe.dispose();
+    _switchGroup.dispose();
     _detectedPortrait.dispose();
     _guideReveal.dispose();
     _local?.dispose();
@@ -797,6 +827,16 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       onClose: _panels.close,
       dragToClose: portrait,
       startWithStyle: true,
+    ),
+    // U.2m: switch rooms in place.
+    RoomPanelKind.switchRoom => RoomSwitchPanel(
+      key: const ValueKey('panel-switch'),
+      controller: controller,
+      source: _source,
+      group: _switchGroup,
+      onPick: _pickRoom,
+      onClose: _panels.close,
+      dragToClose: portrait,
     ),
     null => const SizedBox.shrink(key: ValueKey('no-panel')),
   };

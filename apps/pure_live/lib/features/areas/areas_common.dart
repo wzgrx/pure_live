@@ -48,7 +48,7 @@ String areaPlatformAndCategory(LiveArea area) =>
 /// by the coordinator on 2026-10-01: one component for one action, UI_PLAN
 /// §3 rule 7; it was a small menu in the confirmed design).
 Future<void> showAreaDialog(BuildContext context, WidgetRef ref, LiveArea area) async {
-  final picked = await showDialog<bool>(
+  final picked = await showAppDialog<bool>(
     context: context,
     builder: (dialogContext) => Consumer(
       builder: (context, ref, _) {

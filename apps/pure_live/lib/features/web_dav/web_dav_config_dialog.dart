@@ -24,7 +24,7 @@ Future<WebDavConfig?> showWebDavConfigDialog(
   required Set<String> taken,
   required WebDavCheck check,
   WebDavConfig? existing,
-}) => showDialog<WebDavConfig>(
+}) => showAppDialog<WebDavConfig>(
   context: context,
   builder: (_) => _WebDavConfigDialog(existing: existing, taken: taken, check: check),
 );
@@ -91,14 +91,8 @@ class _WebDavConfigDialogState extends State<_WebDavConfigDialog> {
     Navigator.pop(context, _entered);
   }
 
-  InputDecoration _decoration(String label, IconData icon, {Widget? suffix}) => InputDecoration(
-    labelText: label,
-    errorMaxLines: 4,
-    prefixIcon: Icon(icon, size: 20),
-    suffixIcon: suffix,
-    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-  );
+  InputDecoration _decoration(String label, IconData icon, {Widget? suffix}) =>
+      dialogFieldDecoration(context, label: label, suffixIcon: suffix).copyWith(prefixIcon: Icon(icon, size: 20));
 
   @override
   Widget build(BuildContext context) {
@@ -111,123 +105,103 @@ class _WebDavConfigDialogState extends State<_WebDavConfigDialog> {
       _CheckState.failed => colors.error,
       _ => colors.onSurfaceVariant,
     };
-    return AlertDialog(
-      scrollable: true,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Row(
-        children: [
-          Icon(_editing ? AppIcons.webDavEditConfig : AppIcons.webDavAddConfig, size: 24, color: colors.primary),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              title,
-              style: context.textStyles.t18.copyWith(fontWeight: FontWeight.w600),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+    return AppDialog(
+      title: title,
+      icon: _editing ? AppIcons.webDavEditConfig : AppIcons.webDavAddConfig,
+      content: Form(
+        key: _form,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            TextFormField(
+              key: const ValueKey('webdav-name'),
+              controller: _name,
+              enabled: !_editing,
+              decoration: _decoration(i18n('webdav_config_name'), AppIcons.webDavName),
+              validator: (value) {
+                final name = value?.trim() ?? '';
+                if (name.isEmpty) return i18n('webdav_config_name_empty');
+                if (!_editing && widget.taken.contains(name)) return i18n('webdav_config_name_exists');
+                return null;
+              },
             ),
-          ),
-        ],
-      ),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400),
-        child: Form(
-          key: _form,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              TextFormField(
-                key: const ValueKey('webdav-name'),
-                controller: _name,
-                enabled: !_editing,
-                decoration: _decoration(i18n('webdav_config_name'), AppIcons.webDavName),
-                validator: (value) {
-                  final name = value?.trim() ?? '';
-                  if (name.isEmpty) return i18n('webdav_config_name_empty');
-                  if (!_editing && widget.taken.contains(name)) return i18n('webdav_config_name_exists');
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                key: const ValueKey('webdav-address'),
-                controller: _address,
-                keyboardType: TextInputType.url,
-                autocorrect: false,
-                decoration: _decoration(
-                  i18n('webdav_address'),
-                  AppIcons.webDavAddress,
-                ).copyWith(hintText: 'https://dav.jianguoyun.com/dav/'),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) return i18n('webdav_address_empty');
-                  return WebDavConfig.isValidAddress(value) ? null : i18n('webdav_address_invalid');
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                key: const ValueKey('webdav-user'),
-                controller: _user,
-                autocorrect: false,
-                decoration: _decoration(i18n('webdav_username'), AppIcons.userName),
-                validator: (value) => value == null || value.trim().isEmpty ? i18n('webdav_username_empty') : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                key: const ValueKey('webdav-password'),
-                controller: _password,
-                obscureText: !_showPassword,
-                autocorrect: false,
-                enableSuggestions: false,
-                decoration: _decoration(
-                  i18n('webdav_password'),
-                  AppIcons.password,
-                  suffix: IconButton(
-                    tooltip: i18n(_showPassword ? 'webdav_hide_password' : 'webdav_show_password'),
-                    icon: Icon(_showPassword ? AppIcons.hidePassword : AppIcons.showPassword),
-                    onPressed: () => setState(() => _showPassword = !_showPassword),
-                  ),
+            const SizedBox(height: 16),
+            TextFormField(
+              key: const ValueKey('webdav-address'),
+              controller: _address,
+              keyboardType: TextInputType.url,
+              autocorrect: false,
+              decoration: _decoration(
+                i18n('webdav_address'),
+                AppIcons.webDavAddress,
+              ).copyWith(hintText: 'https://dav.jianguoyun.com/dav/'),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) return i18n('webdav_address_empty');
+                return WebDavConfig.isValidAddress(value) ? null : i18n('webdav_address_invalid');
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              key: const ValueKey('webdav-user'),
+              controller: _user,
+              autocorrect: false,
+              decoration: _decoration(i18n('webdav_username'), AppIcons.userName),
+              validator: (value) => value == null || value.trim().isEmpty ? i18n('webdav_username_empty') : null,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              key: const ValueKey('webdav-password'),
+              controller: _password,
+              obscureText: !_showPassword,
+              autocorrect: false,
+              enableSuggestions: false,
+              decoration: _decoration(
+                i18n('webdav_password'),
+                AppIcons.password,
+                suffix: IconButton(
+                  tooltip: i18n(_showPassword ? 'webdav_hide_password' : 'webdav_show_password'),
+                  icon: Icon(_showPassword ? AppIcons.hidePassword : AppIcons.showPassword),
+                  onPressed: () => setState(() => _showPassword = !_showPassword),
                 ),
-                validator: (value) => value == null || value.isEmpty ? i18n('webdav_password_empty') : null,
               ),
-              if (_check != _CheckState.idle)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Row(
-                    key: const ValueKey('webdav-check-result'),
-                    children: [
-                      if (_check == _CheckState.running)
-                        const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                      else
-                        Icon(
-                          _check == _CheckState.ok ? AppIcons.checkPassed : AppIcons.syncFailed,
-                          size: 18,
-                          color: checkColor,
-                        ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(_checkText, style: context.textStyles.t13.copyWith(color: checkColor)),
+              validator: (value) => value == null || value.isEmpty ? i18n('webdav_password_empty') : null,
+            ),
+            if (_check != _CheckState.idle)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Row(
+                  key: const ValueKey('webdav-check-result'),
+                  children: [
+                    if (_check == _CheckState.running)
+                      const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                    else
+                      Icon(
+                        _check == _CheckState.ok ? AppIcons.checkPassed : AppIcons.syncFailed,
+                        size: 18,
+                        color: checkColor,
                       ),
-                    ],
-                  ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(_checkText, style: context.textStyles.t13.copyWith(color: checkColor)),
+                    ),
+                  ],
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
-      actionsOverflowDirection: VerticalDirection.down,
-      actionsOverflowButtonSpacing: 8,
+      leading: TextButton(
+        key: const ValueKey('webdav-test'),
+        onPressed: _check == _CheckState.running ? null : _test,
+        child: Text(i18n('webdav_check')),
+      ),
       actions: [
-        TextButton(
-          key: const ValueKey('webdav-test'),
-          onPressed: _check == _CheckState.running ? null : _test,
-          child: Text(i18n('webdav_check')),
-        ),
-        TextButton(onPressed: () => Navigator.pop(context), child: Text(i18n('webdav_cancel'))),
-        FilledButton(
+        DialogCancelButton(label: i18n('webdav_cancel')),
+        DialogActionButton(
           key: const ValueKey('webdav-save'),
+          label: i18n(_editing ? 'webdav_update' : 'webdav_add'),
           onPressed: _save,
-          child: Text(i18n(_editing ? 'webdav_update' : 'webdav_add')),
         ),
       ],
     );

@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/settings/settings_catalog.dart';
-import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
 import 'package:pure_live/features/settings/settings_page.dart';
@@ -275,10 +274,10 @@ void main() {
       await tapSettings(tester, settingsRow('theme_mode'));
       // One choice dialog everywhere: the current option in the primary
       // colour with a tick, no radio buttons (UI_PLAN §7, U.6c c7).
-      expect(find.byType(SettingsChoiceRow), findsNWidgets(3));
+      expect(find.byType(DialogOptionRow), findsNWidgets(3));
       expect(find.byType(RadioListTile<String>), findsNothing);
       expect(
-        find.descendant(of: find.byType(SettingsChoiceRow).first, matching: find.byIcon(AppIcons.selected)),
+        find.descendant(of: find.byType(DialogOptionRow).first, matching: find.byIcon(AppIcons.selected)),
         findsOneWidget,
       );
       expectInOrder(tester, [find.text('跟随系统').last, find.text('深色模式'), find.text('浅色模式')]);

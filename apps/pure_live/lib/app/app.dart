@@ -16,8 +16,8 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/app/ui_mode.dart';
 import 'package:pure_live/features/favorite/favorite_controller.dart';
-import 'package:pure_live/features/live_play/dialogs/room_switcher.dart';
 import 'package:pure_live/features/live_play/mini/floating_window.dart';
+import 'package:pure_live/features/live_play/switch_room/room_switch_panel.dart';
 import 'package:pure_live/features/splash/splash_page.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/platform_services.dart';
@@ -65,8 +65,9 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   final _refreshRate = AdaptiveRefreshRateController(applyHighRefreshRate);
   late AppStrings _strings = widget.strings;
-  String? _lastToast;
-  DateTime _lastToastAt = DateTime.fromMillisecondsSinceEpoch(0);
+  // The one toast (docs/ui/compare/U.1d c11–c13): the same words are not
+  // repeated while they show (3.x `ToastUtil`; pure_live_TV the same).
+  late final AppToaster _toaster = AppToaster(() => _messenger.currentState);
   late final FontLibrary _fonts;
 
   @override
@@ -74,27 +75,22 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
     super.initState();
     currentStrings = _strings;
     AppNavigator.router = _router;
-    AppNavigator.toast = (message) {
-      final messenger = _messenger.currentState;
-      if (messenger == null) return;
-      // The TV does not repeat the same words within the 3 s a toast shows
-      // (pure_live_TV `ToastUtil`, docs/ui/compare/U.15a).
-      final now = DateTime.now();
-      if (_tv && message == _lastToast && now.difference(_lastToastAt) < const Duration(seconds: 3)) return;
-      _lastToast = message;
-      _lastToastAt = now;
-      messenger
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(content: Text(message), duration: const Duration(seconds: 3), behavior: SnackBarBehavior.floating),
-        );
-    };
+    AppNavigator.toast = (message) => _toaster.show(AppToast(message));
+    AppNavigator.showToast = _toaster.show;
     imageCacheEpoch.addListener(_imagesCleared);
     _fonts = ref.read(fontLibraryProvider)..addListener(_imagesCleared);
     WidgetsBinding.instance.addObserver(this);
     // F.1c: the room switcher's refresh is the follows' silent full refresh
     // (3.x `refresh_favorite_rooms`).
-    RoomSwitcher.refreshFollows = () => ref.read(favoriteControllerProvider).refreshAll(visible: false);
+    // B05: its last refresh time and failures show on the button.
+    RoomSwitchPanel.follows = FollowsRefresher(
+      refresh: () async {
+        final follows = ref.read(favoriteControllerProvider);
+        await follows.refreshAll(visible: false);
+        return follows.lastFailed;
+      },
+      lastRefreshedAt: () => ref.read(favoriteControllerProvider).lastFullRefreshAt,
+    );
     // 3.x started the follow check, the login check and the exit timer with
     // its services; here once the first frame is up.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -105,7 +101,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    RoomSwitcher.refreshFollows = null;
+    RoomSwitchPanel.follows = null;
     imageCacheEpoch.removeListener(_imagesCleared);
     _fonts.removeListener(_imagesCleared);
     AppNavigator.router = null;

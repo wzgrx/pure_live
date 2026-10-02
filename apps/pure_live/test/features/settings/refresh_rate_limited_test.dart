@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/settings/settings_catalog.dart';
-import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/platform/display_mode.dart';
 
 import '../../support.dart';
@@ -85,7 +85,7 @@ void main() {
     );
     await tester.tap(find.text('界面刷新率'));
     await tester.pumpAndSettle();
-    expect(find.byType(SettingsChoiceRow), findsNWidgets(3));
+    expect(find.byType(DialogOptionRow), findsNWidgets(3));
     expect(find.textContaining('_desc'), findsNothing);
     expect(find.textContaining('界面由系统动态调度'), findsOneWidget);
     expect(find.textContaining('操作结束后交还系统'), findsOneWidget);

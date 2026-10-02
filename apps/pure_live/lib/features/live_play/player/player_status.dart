@@ -6,10 +6,10 @@ import 'package:live_iptv/live_iptv.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
-import 'package:pure_live/features/live_play/dialogs/room_switcher.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_status.dart';
+import 'package:pure_live/features/live_play/switch_room/room_switch_panel.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
@@ -195,7 +195,7 @@ class PictureStateView extends StatelessWidget {
         key: const ValueKey('live-play-state-switch-room'),
         label: i18n('switch_live_room'),
         icon: AppIcons.switchRoom,
-        onPressed: () => unawaited(showRoomSwitcher(context, room)),
+        onPressed: () => showRoomSwitchPanel(context, controller),
       ),
       PictureAction.refresh => VideoStateAction(
         key: const ValueKey('live-play-state-refresh'),

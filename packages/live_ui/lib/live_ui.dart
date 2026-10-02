@@ -14,11 +14,14 @@ export 'src/theme/dynamic_color.dart' show LiveDynamicColorBuilder, MaterialUiTh
 export 'src/theme/grid_columns.dart';
 export 'src/theme/live_colors.dart';
 export 'src/theme/live_theme.dart';
+export 'src/theme/motion.dart';
 export 'src/theme/text_styles.dart';
 export 'src/theme/tv_colors.dart';
 export 'src/widgets/adaptive_panel.dart';
 export 'src/widgets/ambient_backdrop.dart';
+export 'src/widgets/app_dialog.dart';
 export 'src/widgets/app_menu.dart';
+export 'src/widgets/app_toast.dart';
 export 'src/widgets/avatar.dart';
 export 'src/widgets/card_dialog.dart';
 export 'src/widgets/color_picker.dart';

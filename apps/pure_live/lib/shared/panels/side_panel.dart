@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -10,9 +12,11 @@ export 'package:pure_live/shared/danmaku/setting_rows.dart' show PanelCard, Pane
 /// The width of a panel on the right (landscape, tablets, desktops).
 const double roomSidePanelWidth = 360;
 
-/// A panel of the room (U.2f): the same look in every layout, only its place
-/// changes; under the picture in portrait (rising from its lower edge, all
-/// the height below it), on the right in landscape and on wide screens
+/// A panel of the room (U.2f; docs/ui/compare/U.1d c10: the same
+/// [PanelFrame] and [PanelHeader] as the panels of the pages without a
+/// picture): the same look in every layout, only its place changes; under
+/// the picture in portrait (rising from its lower edge, all the height below
+/// it), on the right in landscape and on wide screens
 /// ([roomSidePanelWidth] wide, the full height, over the chat column). The
 /// picture keeps playing and is not dimmed. The header has the [title],
 /// [actions] and ✕; in portrait a downward drag on the header closes it too
@@ -56,54 +60,95 @@ class RoomSidePanel extends StatefulWidget {
   State<RoomSidePanel> createState() => _RoomSidePanelState();
 }
 
-class _RoomSidePanelState extends State<RoomSidePanel> {
-  double _drag = 0;
+class _RoomSidePanelState extends State<RoomSidePanel> with SingleTickerProviderStateMixin {
+  /// Pulled further than this, letting go closes the panel.
+  static const double _closeDistance = 72;
 
-  void _dragged(DragUpdateDetails details) {
-    setState(() => _drag = (_drag + details.delta.dy).clamp(0, 400));
+  /// How far the header has pulled the panel down from its place.
+  late final AnimationController _pull = AnimationController.unbounded(vsync: this);
+  bool _closing = false;
+
+  @override
+  void didUpdateWidget(RoomSidePanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.dragToClose && !_closing && _pull.value != 0) _pull.value = 0;
   }
 
+  @override
+  void dispose() {
+    _pull.dispose();
+    super.dispose();
+  }
+
+  /// How far down the panel is out of sight.
+  double get _height => math.max(0, context.size?.height ?? 0);
+
+  void _started(DragStartDetails details) {
+    // Catches a panel springing back.
+    if (!_closing) _pull.stop();
+  }
+
+  void _dragged(DragUpdateDetails details) {
+    if (_closing) return;
+    // With the finger, down to out of sight; never above its place.
+    _pull.value = (_pull.value + details.delta.dy).clamp(0, _height);
+  }
+
+  /// A spring takes the panel on from the finger at its speed (research
+  /// 2026-10-02 S2): out of sight and closed, or back to its place. A fling
+  /// decides which (down closes, up keeps it), otherwise how far it was
+  /// pulled, as Android's and Flutter's bottom sheets do.
   void _released(DragEndDetails details) {
-    if (_drag > 72 || (details.primaryVelocity ?? 0) > 600) {
-      widget.onClose();
-    } else {
-      setState(() => _drag = 0);
+    if (_closing) return;
+    final velocity = details.primaryVelocity ?? 0;
+    final close = velocity.abs() >= AppMotion.panelFlingVelocity ? velocity > 0 : _pull.value > _closeDistance;
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _pull.value = 0;
+      if (close) _close();
+      return;
     }
+    final height = _height;
+    final run = _pull.animateRelease(
+      ReleaseSpringSimulation(
+        spring: AppMotion.panelSpring,
+        start: _pull.value,
+        end: close ? height : 0,
+        velocity: velocity,
+        // Out of sight is the end: no slow tail at the edge.
+        beyond: close ? height * 0.01 : 0,
+        tolerance: AppMotion.tolerance(MediaQuery.devicePixelRatioOf(context)),
+      ),
+      refreshRate: View.of(context).display.refreshRate,
+    );
+    if (!close) return;
+    _closing = true;
+    run.whenCompleteOrCancel(() {
+      if (mounted) _close();
+    });
+  }
+
+  void _close() {
+    _closing = true;
+    widget.onClose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final header = Padding(
-      padding: EdgeInsets.fromLTRB(widget.leading == null ? 16 : 4, 4, 4, 0),
-      child: SizedBox(
-        height: kMinInteractiveDimension + 4,
-        child: Row(
-          children: [
-            ?widget.leading,
-            Expanded(
-              child: Text(
-                widget.title,
-                key: const ValueKey('room-panel-title'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium?.emphasis.copyWith(color: scheme.onSurface),
-              ),
-            ),
-            ...widget.actions,
-            IconButton(
-              key: const ValueKey('room-panel-close'),
-              tooltip: i18n('close'),
-              onPressed: widget.onClose,
-              icon: const Icon(AppIcons.close),
-            ),
-          ],
-        ),
-      ),
+    final scheme = Theme.of(context).colorScheme;
+    // The header every panel has (live_ui PanelHeader, docs/ui/compare/U.1d:
+    // 52 high, 17/600, ✕ in the variant ink).
+    final header = PanelHeader(
+      title: widget.title,
+      closeTooltip: i18n('close'),
+      leading: widget.leading,
+      actions: widget.actions,
+      onClose: widget.onClose,
+      titleKey: const ValueKey('room-panel-title'),
+      closeKey: const ValueKey('room-panel-close'),
     );
-    return Transform.translate(
-      offset: Offset(0, _drag),
+    return AnimatedBuilder(
+      animation: _pull,
+      builder: (context, panel) => Transform.translate(offset: Offset(0, math.max(0, _pull.value)), child: panel),
       child: Material(
         key: const ValueKey('room-panel'),
         color: scheme.surface,
@@ -112,21 +157,18 @@ class _RoomSidePanelState extends State<RoomSidePanel> {
         child: SafeArea(
           top: false,
           left: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (widget.dragToClose)
-                GestureDetector(
-                  key: const ValueKey('room-panel-drag'),
-                  behavior: HitTestBehavior.opaque,
-                  onVerticalDragUpdate: _dragged,
-                  onVerticalDragEnd: _released,
-                  child: header,
-                )
-              else
-                header,
-              Expanded(child: widget.child),
-            ],
+          child: PanelFrame(
+            header: widget.dragToClose
+                ? GestureDetector(
+                    key: const ValueKey('room-panel-drag'),
+                    behavior: HitTestBehavior.opaque,
+                    onVerticalDragStart: _started,
+                    onVerticalDragUpdate: _dragged,
+                    onVerticalDragEnd: _released,
+                    child: header,
+                  )
+                : header,
+            child: widget.child,
           ),
         ),
       ),

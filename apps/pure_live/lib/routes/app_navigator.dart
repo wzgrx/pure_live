@@ -4,13 +4,14 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_ui/live_ui.dart' show AppToast;
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// How a short message is shown (3.x `ToastUtil.show`); the app sets it to
-/// a snack bar on the root messenger.
+/// the one toast ([AppToast], docs/ui/compare/U.1d) on the root messenger.
 typedef ToastPresenter = void Function(String message);
 
 /// Navigation without a [BuildContext] (3.x `AppNavigator` plus the
@@ -30,6 +31,11 @@ abstract final class AppNavigator {
 
   /// Shows a short message; set by the app.
   static ToastPresenter toast = (message) => log(message, name: 'Toast');
+
+  /// Shows a toast with an action ("撤销", "重试") or ✕ (U.1d c13); set by
+  /// the app. Until then (and in tests that replace only [toast]) the words
+  /// go to [toast].
+  static void Function(AppToast toast) showToast = (toast) => AppNavigator.toast(toast.message);
 
   /// Opens a web address outside the app; replaceable in tests.
   static Future<bool> Function(Uri uri) openExternal = (uri) => launchUrl(uri, mode: LaunchMode.externalApplication);

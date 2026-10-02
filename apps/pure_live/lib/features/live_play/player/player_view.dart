@@ -203,6 +203,11 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   Offset? _firstTapAt;
   VoidCallback? _undoTap;
 
+  /// The controls a tap just showed take no taps while a second one may
+  /// come: a double tap near the bars would press the button that appeared
+  /// under it (they used to show only after the timeout).
+  bool _controlsSettling = false;
+
   /// The platform's bundled emoticons, flown as pictures (U.2h c1).
   EmoteTable _emotes = EmoteTable.empty;
 
@@ -343,10 +348,12 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       return;
     }
     _closeDoubleTap();
+    final shownBefore = _controls;
     final undo = hit != null ? _tapMessage(hit) : _tapControls();
     if (_locked || at == null) return;
     _firstTapAt = at;
     _undoTap = undo;
+    if (!shownBefore && _controls) setState(() => _controlsSettling = true);
     _doubleTapWindow = Timer(kDoubleTapTimeout, _closeDoubleTap);
   }
 
@@ -355,6 +362,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     _doubleTapWindow = null;
     _firstTapAt = null;
     _undoTap = null;
+    if (_controlsSettling && mounted) setState(() => _controlsSettling = false);
   }
 
   /// A tap's effect on the controls (see [_onTap]); returns what puts them
@@ -734,7 +742,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
             opacity: _controls ? 1 : 0,
             duration: const Duration(milliseconds: 200),
             child: IgnorePointer(
-              ignoring: !_controls,
+              ignoring: !_controls || _controlsSettling,
               child: MediaQuery.withClampedTextScaling(
                 maxScaleFactor: 1.3,
                 child: IconTheme(

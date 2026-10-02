@@ -847,6 +847,33 @@ void main() {
     await _close(tester, room);
   });
 
+  testWidgets('B09 c1: a double tap where a button appears does not press it', (tester) async {
+    // The first tap shows the bars at once; the second must still be the
+    // double tap, not a tap on the pause button that just appeared there.
+    final room = await _pump(tester);
+    final session = tester.widget<RoomPlayer>(find.byType(RoomPlayer)).controller.session;
+    room.engine.emit(const EngineVideoSize(1920, 1080));
+    await tester.pump(const Duration(seconds: 5));
+    final status = session.state.status;
+    final at = tester.getCenter(_key('live-play-pause'));
+    await tester.tapAt(at);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tapAt(at);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(session.state.status, status, reason: 'not paused');
+    expect(find.byType(AppBar), findsNothing, reason: 'the double tap entered the fullscreen');
+    // A moment later the bars take taps again.
+    await tester.binding.handlePopRoute();
+    await tester.pump(const Duration(seconds: 1));
+    final pause = tester.getCenter(_key('live-play-pause'));
+    await tester.tapAt(pause);
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester.pump();
+    expect(session.state.status, PlaybackStatus.paused);
+    await _close(tester, room);
+  });
+
   testWidgets('B09 c1: locked, taps only show or hide the unlock button; no double tap', (tester) async {
     final room = await _pump(tester, width: 852, height: 393);
     await _tap(tester, 'live-play-fullscreen');

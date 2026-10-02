@@ -116,7 +116,6 @@ class _FloatingWindow extends ConsumerStatefulWidget {
 class _FloatingWindowState extends ConsumerState<_FloatingWindow> {
   /// Where the user dragged it (top-left), or null for the corner.
   Offset? _dragged;
-  bool _dragging = false;
 
   @override
   Widget build(BuildContext context) {
@@ -167,40 +166,32 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> {
                     top: offset.dy,
                     width: size.width,
                     height: size.height,
-                    child: AnimatedOpacity(
-                      // 3.x: 80 % while it is dragged.
-                      opacity: _dragging ? 0.8 : 1,
-                      duration: const Duration(milliseconds: 120),
-                      child: DecoratedBox(
-                        // c10: square corners and a floating shadow; the
-                        // video is not clipped.
-                        decoration: const BoxDecoration(
-                          color: OnVideoColors.ground,
-                          boxShadow: OnVideoColors.floatingShadow,
+                    // 3.x showed it at 80 % while dragged; the video stays
+                    // opaque now (P05): a see-through video is drawn
+                    // offscreen (saveLayer) every frame of the drag.
+                    child: DecoratedBox(
+                      // c10: square corners and a floating shadow; the
+                      // video is not clipped.
+                      decoration: const BoxDecoration(
+                        color: OnVideoColors.ground,
+                        boxShadow: OnVideoColors.floatingShadow,
+                      ),
+                      child: MiniPlayerSurface(
+                        controller: runtime.controller,
+                        reconnect: runtime.reconnect,
+                        kind: MiniKind.inApp,
+                        // F.1a: kept on while it plays only with "屏幕常亮" on.
+                        video: LiveVideoView(
+                          session: runtime.session,
+                          fit: fit,
+                          keepScreenOn: watchSetting(ref, Settings.enableScreenKeepOn),
                         ),
-                        child: MiniPlayerSurface(
-                          controller: runtime.controller,
-                          reconnect: runtime.reconnect,
-                          kind: MiniKind.inApp,
-                          // F.1a: kept on while it plays only with "屏幕常亮" on.
-                          video: LiveVideoView(
-                            session: runtime.session,
-                            fit: fit,
-                            keepScreenOn: watchSetting(ref, Settings.enableScreenKeepOn),
-                          ),
-                          onBackToRoom: widget.onBackToRoom,
-                          onClose: widget.onClose,
-                          onDragStart: (_) => setState(() {
-                            _dragging = true;
-                            _dragged = offset;
-                          }),
-                          onDragUpdate: (details) => setState(() => _dragged = (_dragged ?? offset) + details.delta),
-                          onDragEnd: (_) => setState(() {
-                            _dragging = false;
-                            // Kept where it is, within the screen.
-                            _dragged = offset;
-                          }),
-                        ),
+                        onBackToRoom: widget.onBackToRoom,
+                        onClose: widget.onClose,
+                        onDragStart: (_) => setState(() => _dragged = offset),
+                        onDragUpdate: (details) => setState(() => _dragged = (_dragged ?? offset) + details.delta),
+                        // Kept where it is, within the screen.
+                        onDragEnd: (_) => setState(() => _dragged = offset),
                       ),
                     ),
                   ),

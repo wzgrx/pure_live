@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -44,9 +45,13 @@ final class _FakeSite extends LiveSite {
   final List<int> requested = [];
   Exception? error;
 
+  /// Holds the next answers until it completes.
+  Completer<void>? gate;
+
   @override
   Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async {
     requested.add(page);
+    if (gate case final gate?) await gate.future;
     if (error case final error?) throw error;
     return page <= pages.length ? pages[page - 1] : const [];
   }
@@ -426,6 +431,79 @@ void main() {
     // The cards stay.
     expect(find.text('title 1'), findsOneWidget);
     await tester.runAsync(services.close);
+  });
+
+  group('P05: loading indicators only while their load runs, each in its own layer', () {
+    final line = find.byKey(const ValueKey('popular-progress'));
+    final footerSpinner = find.byKey(const ValueKey('popular-load-more-busy'));
+    final grid = find.byKey(const ValueKey('popular-grid'));
+    Future<void> frames(WidgetTester tester, [int count = 20]) async {
+      for (var i = 0; i < count; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+    }
+
+    testWidgets('at rest nothing moves; a pull refresh runs the line, the footer does not spin', (tester) async {
+      // A short list: the footer is on screen and says the list ended.
+      final short = _FakeSite(SiteIds.bilibili, [
+        [for (var i = 0; i < 4; i++) _room('bilibili', i)],
+      ]);
+      final services = await _pump(tester, {SiteIds.bilibili: short});
+      // At rest nothing moves: the app settled (no frame asked for).
+      expect(line, findsNothing);
+      expect(footerSpinner, findsNothing);
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(tester.binding.hasScheduledFrame, isFalse);
+      expect(find.text('没有更多数据了'), findsOneWidget);
+
+      // A pull's refresh: the header turns and the line runs; the footer does
+      // not spin, as no more rooms are loading (it did before).
+      short.gate = Completer();
+      final pull = await tester.startGesture(tester.getCenter(grid));
+      for (var i = 0; i < 40; i++) {
+        await pull.moveBy(const Offset(0, 5));
+        await tester.pump(const Duration(milliseconds: 8));
+      }
+      await pull.up();
+      await frames(tester, 60);
+      expect(find.text('正在刷新...'), findsOneWidget);
+      expect(find.descendant(of: line, matching: find.byType(LinearProgressIndicator)), findsOneWidget);
+      expect(tester.renderObject(line).isRepaintBoundary, isTrue);
+      expect(footerSpinner, findsNothing);
+      expect(find.text('没有更多数据了'), findsOneWidget);
+      short.gate!.complete();
+      await frames(tester);
+      await tester.pump(AppRefreshView.resultDuration);
+      await tester.pumpAndSettle();
+      expect(line, findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets('more rooms at the end: the footer spinner and the line while the page loads, then neither', (
+      tester,
+    ) async {
+      final long = _FakeSite(SiteIds.bilibili, [
+        [for (var i = 0; i < 30; i++) _room('bilibili', i, heat: 100 - i)],
+        [for (var i = 30; i < 40; i++) _room('bilibili', i, heat: 100 - i)],
+      ]);
+      final services = await _pump(tester, {SiteIds.bilibili: long});
+      expect(line, findsNothing);
+      long.gate = Completer();
+      await tester.drag(grid, const Offset(0, -20000));
+      await frames(tester);
+      expect(long.requested, [1, 2]);
+      expect(find.descendant(of: footerSpinner, matching: find.byType(CircularProgressIndicator)), findsOneWidget);
+      expect(tester.renderObject(footerSpinner).isRepaintBoundary, isTrue);
+      expect(line, findsOneWidget);
+      long.gate!.complete();
+      await tester.pumpAndSettle();
+      expect(line, findsNothing);
+      expect(footerSpinner, findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      await tester.runAsync(services.close);
+    });
   });
 
   testWidgets('desktop: numbered pages, page size, refresh failure keeps the cards', (tester) async {

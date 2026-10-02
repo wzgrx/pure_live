@@ -706,8 +706,20 @@ class _RoomFeedViewState extends ConsumerState<RoomFeedView> {
             Expanded(child: body),
           ],
         ),
+        // 3.x's line over the cards while a request runs. Moving indicators
+        // ask for a frame each refresh (P05): they are built only while
+        // their load runs, in a layer of their own so a frame repaints the
+        // line, not the page.
         if (hasContent && _feed.busy)
-          const Positioned(top: 0, left: 0, right: 0, child: LinearProgressIndicator(minHeight: 2.5)),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: RepaintBoundary(
+              key: ValueKey('$prefix-progress'),
+              child: const LinearProgressIndicator(minHeight: 2.5),
+            ),
+          ),
       ],
     );
   }
@@ -797,8 +809,13 @@ class _RoomFeedViewState extends ConsumerState<RoomFeedView> {
         icon: const Icon(AppIcons.refresh, size: 18),
         label: Text(i18n('popular_load_more_failed')),
       );
-    } else if (_feed.busy) {
-      state = const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2));
+    } else if (_feed.busy && !_feed.refreshing) {
+      // Only while more rooms load: a refresh shows in the header and the
+      // line (P05).
+      state = RepaintBoundary(
+        key: ValueKey('${widget.keyPrefix}-load-more-busy'),
+        child: const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+      );
     } else if (_feed.hasMore) {
       state = TextButton(onPressed: _loadMore, child: Text(i18n('popular_load_more')));
     } else {

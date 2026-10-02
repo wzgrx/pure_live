@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # W 上游借鉴
 
 跟踪上游项目的更新，找出可以借鉴的修复和功能，对照 4.x 是否有同样的问题。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `████████████████░░░░` 80%
 
@@ -18,3 +22,5 @@
 | [W01.2](W01-定期对照/README.md) 上游跟踪：每周看一次 pure_live、pure_live_TV、media_core、flame_barrage、flv_lzc 的新提交，结论写进 W01 的对照记录 | 未开始 | 第二档 | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

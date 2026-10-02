@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # O Android系统集成
 
 Android 原生部分：通知和前台服务、画中画、分享接收、权限、方向和刷新率、返回手势。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `██████████████░░░░░░` 71%
 
@@ -25,3 +29,5 @@ Android 原生部分：通知和前台服务、画中画、分享接收、权限
 | [O05.2](O05-方向、刷新率、常亮/README.md) 横屏全屏随手机方向翻转，开着旋转锁也翻（issue #36） | 待真机 | — | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

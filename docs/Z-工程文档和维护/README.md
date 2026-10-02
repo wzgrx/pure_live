@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # Z 工程文档和维护
 
 工具链和依赖、门禁、清点和归属、构建和装机、多语言、文档和登记表、定期维护。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `███████████░░░░░░░░░` 57%
 
@@ -30,3 +34,5 @@
 | [Z07.3](Z07-定期维护/README.md) 每季度：复查文档和决定（过时的规则、被取代的决定、没人管的子分类） | 未开始 | 第三档 | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # E 直播平台
 
 35 个来源（33 个 v3 平台、Kick、网络电视）的播放地址、搜索、分区、关注刷新、链接解析和平台框架。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `██████████████████░░` 92%
 
@@ -26,3 +30,5 @@
 | [E06.2](E06-平台层升级/README.md) 平台层新数据接到界面：哔哩哔哩轮播、17LIVE 名字颜色和徽章、酷狗 PK 标签、Twitch Cookie 提示和编码、恢复后的实际清晰度、FC2 接手 | 暂停 | 第二档 | 0/6：下一阶段“哔哩哔哩轮播” |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

@@ -25,6 +25,20 @@ ROOT = Path(__file__).resolve().parents[2]
 DOCS = ROOT / 'docs'
 REGISTRY = DOCS / 'tasks.toml'
 HEADER = '<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->\n'
+# Group and sub-category READMEs: a hand-written part, then this generated block.
+START = '<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->'
+END = '<!-- docs:生成结束 -->'
+
+
+def compose(path: Path, block: str, default_hand: str) -> str:
+    """[path]'s hand-written part (or [default_hand]) around the generated [block]."""
+    text = path.read_text(encoding='utf-8') if path.exists() else ''
+    if START in text and END in text:
+        hand = text[: text.index(START)]
+        tail = text[text.index(END) + len(END) :]
+    else:
+        hand, tail = default_hand, '\n'
+    return f'{hand.rstrip()}\n\n{START}\n\n{block.strip()}\n\n{END}{tail}'
 
 STATUSES = ['未开始', '设计中', '待确认', '已确认', '开发中', '暂停', '受阻', '待真机', '完成', '不做']
 TYPES = ['界面', '功能', '平台', '性能', '原生', '验证', '发布', '工程', '文档']
@@ -399,7 +413,7 @@ class Project:
     def group_md(self, g: dict) -> str:
         base = self.group_dir(g['id'])
         tasks = self.group_tasks(g['id'])
-        out = [HEADER, f'# {g["id"]} {g["title"]}\n', f'{g["scope"]}\n', f'{bar(ratio(tasks))}\n']
+        out = [f'## 进度和子分类\n', f'{bar(ratio(tasks))}\n']
         out.append('| 子分类 | 范围 | 进度 | 完成 / 全部 |\n|---|---|---|---:|')
         for s in (s for s in self.subs if s['id'][:1] == g['id']):
             st = counted(self.tasks_of_sub[s['id']])
@@ -425,10 +439,10 @@ class Project:
         g = self.group_by[s['id'][:1]]
         base = self.sub_dir(s['id'])
         tasks = self.tasks_of_sub[s['id']]
-        out = [HEADER, f'# {s["id"]} {s["title"]}\n', f'属于 [{g["id"]} {g["title"]}](../README.md)。{s["scope"]}\n']
+        out = ['## 登记的任务和进度\n', f'属于 [{g["id"]} {g["title"]}](../README.md)。\n']
         out.append(f'- 代码：{s["code"]}')
         out.append(f'- 进度：{bar(ratio(tasks)) if counted(tasks) else "还没有任务"}\n')
-        out.append('## 任务\n')
+        out.append('')
         if tasks:
             out.append('| 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |\n|---|---|---|---|---|---|---|')
             for t in tasks:
@@ -455,7 +469,11 @@ class Project:
                 if t.get('from'):
                     lines.append(f'  - 来源：{t["from"]}')
                 out += lines
-        extra = sorted(p for p in base.iterdir() if p.name != 'README.md' and not TASK_RX.fullmatch(p.name)) if base.is_dir() else []
+        extra = (
+            sorted(p for p in base.iterdir() if p.name != 'README.md' and not TASK_RX.fullmatch(p.name.split('-', 1)[0]))
+            if base.is_dir()
+            else []
+        )
         if extra:
             out.append('\n## 资料\n')
             for p in extra:
@@ -470,9 +488,13 @@ class Project:
             DOCS / 'MAPPING.md': self.mapping_md(),
         }
         for g in self.groups:
-            files[self.group_dir(g['id']) / 'README.md'] = self.group_md(g)
+            path = self.group_dir(g['id']) / 'README.md'
+            hand = f'# {g["id"]} {g["title"]}\n\n{g["scope"]}\n\n> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。\n'
+            files[path] = compose(path, self.group_md(g), hand)
         for s in self.subs:
-            files[self.sub_dir(s['id']) / 'README.md'] = self.sub_md(s)
+            path = self.sub_dir(s['id']) / 'README.md'
+            hand = f'# {s["id"]} {s["title"]}\n\n{s["scope"]}\n\n> 子分类说明还没写：照 [templates/sub.md](../../templates/sub.md) 写。\n'
+            files[path] = compose(path, self.sub_md(s), hand)
         return files
 
 

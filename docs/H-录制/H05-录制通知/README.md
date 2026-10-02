@@ -1,13 +1,18 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # H05 录制通知
 
-属于 [H 录制](../README.md)。前台录制通知、“录制已停止”提醒。
+前台录制通知、“录制已停止”提醒。
+
+> 子分类说明还没写：照 [templates/sub.md](../../templates/sub.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 登记的任务和进度
+
+属于 [H 录制](../README.md)。
 
 - 代码：`app/recording_notice.dart`、`RecorderForegroundService.kt`
 - 进度：`████████████░░░░░░░░` 60%
 
-## 任务
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
@@ -17,3 +22,5 @@
 ## 还没完成的
 
 - **H05.2 只录一个直播间时，点前台录制通知也定位到那条任务**（未开始，第三档，规模 小）
+
+<!-- docs:生成结束 -->

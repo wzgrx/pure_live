@@ -38,6 +38,8 @@
 | `page.json`、`src/`、`*.jpg`、`page/` | 界面任务的评审页源、效果图源文件、效果图、评审页导出 | [templates/page.json](templates/page.json) |
 
 - 子分类文件夹里可以放这个子分类共用的资料（例如 S02 的真机清单 `CHECKLIST.md`、Y03 的 `releases/` 和 `readme/`）；生成的 README 会自动列出它们。
+- **组和子分类的 README 分两部分**：上面是手写的说明（组用 [templates/group.md](templates/group.md)，子分类用 [templates/sub.md](templates/sub.md)：范围、现状、代码地图、3.x 基线、已知问题、路线），下面 `docs:生成开始` 到 `docs:生成结束` 之间是脚本生成的进度和任务表。只改上面，生成区由 docs.py 维护。
+- **每个任务都有 `README.md`**（任务说明）：界面任务用 design.md，其他用 feature.md；**每个没完成的任务都有 `brief.md`**（任务书，模板 v2）；**待真机的任务都有 `verify.md`**（真机步骤）。
 
 ## 2. 任务类型和证据
 

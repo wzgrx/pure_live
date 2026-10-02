@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # C 直播间
 
 直播间的功能和逻辑：进房、房间控制器、播放接入、小窗和后台播放、菜单里的工具。界面在 A07。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `████████████████░░░░` 80%
 
@@ -19,3 +23,5 @@
 | [C01.3](C01-进房和房间逻辑/README.md) 直播间功能余项：功能清点里直播间部分的 6 项缺失、1 项有问题 | 未开始 | 第二档 | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

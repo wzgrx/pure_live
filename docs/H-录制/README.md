@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # H 录制
 
 录制核心、录制中心、录制设置和存储、自动录制、录制通知。界面在 A10。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `██████████████░░░░░░` 70%
 
@@ -24,3 +28,5 @@
 | [H05.1](H05-录制通知/README.md) 录制通知按状态写标题，“录制已停止”提醒换新图标 | 待真机 | — | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

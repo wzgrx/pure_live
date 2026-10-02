@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # R 性能和流畅度
 
 基准和测量、刷新率、内存、启动速度、耗电。手感在 A03，尺寸适配在 A04。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `█████████░░░░░░░░░░░` 43%
 
@@ -26,3 +30,5 @@
 | [R02.2](R02-刷新率/README.md) 刷新率策略修正：播放中只用帧率声明、没有整数倍取最高、系统限速提示 | 待真机 | — | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

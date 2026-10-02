@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # Y 发布和运营
 
 版本、签名和发布、更新通道、发布说明和 README、隐私和合规。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `███████████████░░░░░` 73%
 
@@ -22,3 +26,5 @@
 | [Y04.1](Y04-隐私和合规/README.md) 隐私说明写进 README：不收集数据、样本脱敏规则 | 未开始 | 第三档 | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

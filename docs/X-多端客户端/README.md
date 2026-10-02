@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # X 多端客户端
 
 Windows、Linux、电视、苹果平台的客户端专属工作（打包、原生、平台差异）；各端的界面在 A16～A18。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `███░░░░░░░░░░░░░░░░░` 15%
 
@@ -25,3 +29,5 @@ Windows、Linux、电视、苹果平台的客户端专属工作（打包、原�
 | [X04.1](X04-iOS和iPadOS/README.md) 苹果平台的构建和签名 | 未开始 | 第三档 | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

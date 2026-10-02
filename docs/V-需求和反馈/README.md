@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # V 需求和反馈
 
 新功能从这里提出和评估，用户反馈和 issue、审查和调研的发现也从这里进来；采纳后在目标组开任务，不做的写明原因。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `██████████░░░░░░░░░░` 50%
 
@@ -26,3 +30,5 @@
 | [V01.6](V01-新功能提议/README.md) 设备同步在发送、接收前先勾选同步哪些内容（保留配对码） | 未开始 | 第三档 | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

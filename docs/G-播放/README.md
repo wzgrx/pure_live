@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # G 播放
 
 mpv 播放引擎、播放会话和恢复、起播速度和弱网、画面、声音和媒体控制。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `█████████████░░░░░░░` 67%
 
@@ -22,3 +26,5 @@ mpv 播放引擎、播放会话和恢复、起播速度和弱网、画面、声�
 | [G02.2](G02-会话和恢复/README.md) 缓冲状态对账：画面帧在走时补回“播放中”，不再被当成卡住去重连 | 未开始 | 第二档 | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

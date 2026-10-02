@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # D 弹幕
 
 各平台的弹幕协议、过滤和屏蔽、飞行弹幕引擎、数据流和性能、弹幕设置。界面在 A08。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `███████████████████░` 94%
 
@@ -27,3 +31,5 @@
 | [D04.1](D04-数据流和性能/README.md) 弹幕性能和可读性：每帧最多刷新一次、聊天列表反转、昵称对比度 | 待真机 | — | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

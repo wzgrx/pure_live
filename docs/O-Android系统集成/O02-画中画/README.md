@@ -1,13 +1,18 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # O02 画中画
 
-属于 [O Android系统集成](../README.md)。系统画中画。
+系统画中画。
+
+> 子分类说明还没写：照 [templates/sub.md](../../templates/sub.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 登记的任务和进度
+
+属于 [O Android系统集成](../README.md)。
 
 - 代码：`android/.../MainActivity.kt`、`features/live_play/mini/`
 - 进度：`░░░░░░░░░░░░░░░░░░░░` 0%
 
-## 任务
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
@@ -16,3 +21,5 @@
 ## 还没完成的
 
 - **O02.1 画中画复验：从画中画回来后控制条卡住的问题**（未开始，第二档，规模 小）
+
+<!-- docs:生成结束 -->

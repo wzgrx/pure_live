@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # Q 网络和代理
 
 HTTP 和 WebSocket、请求头、压缩、代理和镜像、原生 HTTP 通道、网络状态。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `████████████████░░░░` 80%
 
@@ -20,3 +24,5 @@ HTTP 和 WebSocket、请求头、压缩、代理和镜像、原生 HTTP 通道�
 | [Q04.1](Q04-网络状态和权限/README.md) 网络余项：功能清点里网络部分的 1 项缺失、1 项没验证 | 未开始 | 第二档 | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

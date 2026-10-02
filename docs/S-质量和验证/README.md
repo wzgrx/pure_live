@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # S 质量和验证
 
 自动测试、真机验证、统一验证、覆盖安装 3.x 验证。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `█████████░░░░░░░░░░░` 44%
 
@@ -24,3 +28,5 @@
 | [S01.2](S01-自动测试/README.md) 测试覆盖清单：各包测试数和缺口 | 未开始 | 第三档 | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

@@ -1,8 +1,12 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # A 界面设计
 
 所有看得见的：设计系统、组件、动效和手感、尺寸适配、无障碍，以及每个区域、每个客户端的界面设计和它的实现。界面优先，排第一。
+
+> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 进度和子分类
 
 `████████████████░░░░` 82%
 
@@ -63,3 +67,5 @@
 | [A10.3](A10-录制界面/A10.3-录制按钮和状态图标/README.md) 录制按钮和录制状态图标重新设计：没在录单色圆环、在录红底白方块 | 待真机 | — | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
+
+<!-- docs:生成结束 -->

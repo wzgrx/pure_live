@@ -1,13 +1,18 @@
-<!-- 由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改 -->
-
 # Y02 更新通道
 
-属于 [Y 发布和运营](../README.md)。`assets/version.json`、`assets/releases.json`、应用内更新。
+`assets/version.json`、`assets/releases.json`、应用内更新。
+
+> 子分类说明还没写：照 [templates/sub.md](../../templates/sub.md) 写。
+
+<!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
+
+## 登记的任务和进度
+
+属于 [Y 发布和运营](../README.md)。
 
 - 代码：`assets/`、`features/version/`
 - 进度：`░░░░░░░░░░░░░░░░░░░░` 0%
 
-## 任务
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
@@ -16,3 +21,5 @@
 ## 还没完成的
 
 - **Y02.1 同版本换包时应用内收不到更新提示：以后发布一律改版本号，或让比较带上构建号**（未开始，第二档，规模 小）
+
+<!-- docs:生成结束 -->

@@ -254,7 +254,7 @@ void main() {
       await _settle(tester);
       expect(find.text('确定要取消关注原神吗？'), findsOneWidget);
       // The button says what it does (U.1d D2).
-      expect(find.widgetWithText(FilledButton, '取消关注'), findsOneWidget);
+      expect(find.widgetWithText(DialogActionButton, '取消关注'), findsOneWidget);
       await tester.tap(find.text('取消'));
       await _settle(tester);
       expect(await tester.runAsync(services.store.followAreas.all), hasLength(1));

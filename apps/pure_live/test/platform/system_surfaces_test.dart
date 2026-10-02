@@ -218,6 +218,20 @@ void main() {
       );
     });
 
+    test('every drawable named only from Dart survives the release resource shrinker', () {
+      // audio_service looks these up by name; a shrunk one resolves to 0 and,
+      // from Android 13, its CustomAction.Builder throws (release fixes, item 1).
+      final named = {
+        'drawable/ic_stat_playback',
+        for (final playing in [true, false]) ...mediaControls(playing: playing).map((control) => control.androidIcon),
+      };
+      expect(named, containsAll(['drawable/audio_service_pause', 'drawable/audio_service_stop']));
+      final keep = res('raw/keep.xml');
+      for (final name in named) {
+        expect(keep, contains('@$name'), reason: name);
+      }
+    });
+
     test("the system splash screen in the splash page's colours, no white circle", () {
       expect(res('values/colors.xml'), contains('<color name="splash_background">#FAF8FF</color>'));
       expect(res('values-night/colors.xml'), contains('<color name="splash_background">#121318</color>'));

@@ -138,16 +138,10 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
 
   /// A failure with a way to try again (U.11b c12): 4 s, "重试".
   void _failed(String message, VoidCallback retry) {
+    final toast = AppToast(message, actionLabel: i18n('retry'), onAction: retry);
     final messenger = ScaffoldMessenger.maybeOf(context);
-    if (messenger == null) return AppNavigator.toast(message);
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          action: SnackBarAction(label: i18n('retry'), onPressed: retry),
-        ),
-      );
+    if (messenger == null) return AppNavigator.showToast(toast);
+    showAppToastOn(messenger, toast);
   }
 
   Future<void> _mutateConfigs(Future<void> Function() change) async {
@@ -224,28 +218,16 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
 
   /// 3.x's delete question with a red "删除".
   Future<bool> _confirmDelete(String message) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppConfirmDialog(
       context: context,
-      builder: (dialogContext) {
-        final colors = Theme.of(dialogContext).colorScheme;
-        return AlertDialog(
-          scrollable: true,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text(i18n('webdav_confirm_delete'), style: const TextStyle(fontWeight: FontWeight.w600)),
-          content: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: Text(message)),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('webdav_cancel'))),
-            FilledButton(
-              key: const ValueKey('webdav-confirm'),
-              style: FilledButton.styleFrom(backgroundColor: colors.error, foregroundColor: colors.onError),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(i18n('webdav_delete')),
-            ),
-          ],
-        );
-      },
+      title: i18n('webdav_confirm_delete'),
+      message: message,
+      confirmLabel: i18n('webdav_delete'),
+      cancelLabel: i18n('webdav_cancel'),
+      danger: true,
+      confirmKey: const ValueKey('webdav-confirm'),
     );
-    return confirmed ?? false;
+    return confirmed;
   }
 
   Future<void> _fileAction(String label, Future<void> Function(WebDavClient client) action) async {

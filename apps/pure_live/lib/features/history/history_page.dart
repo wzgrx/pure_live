@@ -114,41 +114,15 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
   }
 
   Future<bool> _confirm({required String title, required String message, required String action}) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppConfirmDialog(
       context: context,
-      builder: (dialogContext) {
-        final colors = Theme.of(dialogContext).colorScheme;
-        return AlertDialog(
-          scrollable: true,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          title: Text(title, style: dialogContext.textStyles.t16Bold),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Text(message, style: dialogContext.textStyles.t14),
-          ),
-          actionsOverflowDirection: VerticalDirection.down,
-          actionsOverflowButtonSpacing: 8,
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(i18n('cancel'), style: dialogContext.textStyles.t14Muted),
-            ),
-            FilledButton(
-              key: const ValueKey('history-confirm'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(48, 48),
-                backgroundColor: colors.error,
-                foregroundColor: colors.onError,
-              ),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(action),
-            ),
-          ],
-        );
-      },
+      title: title,
+      message: message,
+      confirmLabel: action,
+      danger: true,
+      confirmKey: const ValueKey('history-confirm'),
     );
-    return confirmed ?? false;
+    return confirmed;
   }
 
   /// Runs [change] unless another change is running, telling the user when

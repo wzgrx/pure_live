@@ -163,7 +163,7 @@ void main() {
       expect(_text('取消'), findsOneWidget);
       await tapSettings(tester, find.byKey(const ValueKey('settings-choice-超清')));
       expect(h.settings.get(Settings.preferResolution), '超清');
-      expect(find.byType(SettingsChoiceRow), findsNothing);
+      expect(find.byType(DialogOptionRow), findsNothing);
     });
 
     testWidgets('"弹幕样式" opens the room\'s danmaku settings (c12)', (tester) async {

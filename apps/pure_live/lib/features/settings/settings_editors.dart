@@ -204,7 +204,7 @@ class PreferPlatformTile extends ConsumerWidget {
       valueWidget: PlatformLogo(current, size: 24),
       value: name(current),
       onTap: () async {
-        final picked = await showDialog<String>(
+        final picked = await showAppDialog<String>(
           context: context,
           builder: (context) => _PlatformPicker(
             title: entry.titleText,
@@ -243,7 +243,7 @@ class _PlatformPickerState extends State<_PlatformPicker> {
     ];
     return SettingsDialogFrame(
       title: widget.title,
-      actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel')))],
+      actions: const [DialogCancelButton()],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -253,12 +253,10 @@ class _PlatformPickerState extends State<_PlatformPicker> {
             child: TextField(
               key: const ValueKey('settings-platform-filter'),
               onChanged: (value) => setState(() => _filter = value),
-              decoration: InputDecoration(
-                prefixIcon: const Icon(AppIcons.search),
-                hintText: i18n('prefer_platform_filter_hint'),
-                isDense: true,
-                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-              ),
+              decoration: dialogFieldDecoration(
+                context,
+                hint: i18n('prefer_platform_filter_hint'),
+              ).copyWith(prefixIcon: const Icon(AppIcons.search), isDense: true),
             ),
           ),
           const SizedBox(height: 8),
@@ -307,7 +305,7 @@ class TwitchLanguagesTile extends ConsumerWidget {
       subtitle: entry.descriptionText,
       value: selected.isEmpty ? i18n('settings_twitch_languages_all') : selected.map(languageName).join('、'),
       onTap: () async {
-        final result = await showDialog<List<String>>(
+        final result = await showAppDialog<List<String>>(
           context: context,
           builder: (context) => _TwitchLanguagesDialog(initial: selected),
         );
@@ -333,11 +331,11 @@ class _TwitchLanguagesDialogState extends State<_TwitchLanguagesDialog> {
   Widget build(BuildContext context) => SettingsDialogFrame(
     title: i18n('settings_twitch_languages'),
     actions: [
-      TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-      FilledButton(
+      const DialogCancelButton(),
+      DialogActionButton(
         key: const ValueKey('settings-twitch-save'),
+        label: i18n('confirm'),
         onPressed: () => Navigator.of(context).pop(_selected),
-        child: Text(i18n('confirm')),
       ),
     ],
     child: Padding(
@@ -551,7 +549,7 @@ class WindowSizeTile extends ConsumerWidget {
       subtitle: entry.descriptionText,
       value: '$width × $height',
       onTap: () async {
-        final size = await showDialog<Size>(
+        final size = await showAppDialog<Size>(
           context: context,
           builder: (context) => _WindowSizeDialog(width: width, height: height),
         );
@@ -634,11 +632,7 @@ class _WindowSizeDialogState extends State<_WindowSizeDialog> {
     inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(5)],
     onChanged: (_) => setState(() => _error = null),
     onSubmitted: (_) => _apply(),
-    decoration: InputDecoration(
-      labelText: label,
-      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-      isDense: true,
-    ),
+    decoration: dialogFieldDecoration(context, label: label).copyWith(isDense: true),
   );
 
   @override
@@ -655,8 +649,8 @@ class _WindowSizeDialogState extends State<_WindowSizeDialog> {
     return SettingsDialogFrame(
       title: i18n('window_size'),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-        FilledButton(key: const ValueKey('settings-window-size-apply'), onPressed: _apply, child: Text(i18n('apply'))),
+        const DialogCancelButton(),
+        DialogActionButton(key: const ValueKey('settings-window-size-apply'), label: i18n('apply'), onPressed: _apply),
       ],
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),

@@ -10,13 +10,22 @@ typedef SettingsChoice<T> = ({T value, String label, String? description});
 /// closing it ("重新检测").
 typedef SettingsDialogAction = ({String label, VoidCallback onPressed, Key? key});
 
-/// The dialog frame of the settings: at most 420 wide, scrolls when the
-/// screen is short, tighter margins on narrow or large-text screens (3.x
-/// `ThemeChoiceDialog`); 24 px corners like every other dialog (3.x used 16
-/// here, U.6b Q14).
+/// The dialog frame of the settings: the one dialog of the app (live_ui
+/// [AppDialog], docs/ui/compare/U.1d: the screen less 32 and at most 400
+/// wide, the title and buttons fixed while the middle scrolls); the content
+/// sits 12 in from the dialog's sides and adds its own 12 (3.x
+/// `ThemeChoiceDialog`).
 class SettingsDialogFrame extends StatelessWidget {
   /// Creates the frame.
-  const new({required this.title, required this.child, this.actions = const [], this.leadingAction, super.key});
+  const new({
+    required this.title,
+    required this.child,
+    this.actions = const [],
+    this.leadingAction,
+    this.onEnter,
+    this.autofocus = true,
+    super.key,
+  });
 
   /// The title.
   final String title;
@@ -30,54 +39,28 @@ class SettingsDialogFrame extends StatelessWidget {
   /// A button at the bottom start ("重新检测").
   final Widget? leadingAction;
 
+  /// The main button's action for Enter.
+  final VoidCallback? onEnter;
+
+  /// Whether the dialog takes the focus (off when a field inside does).
+  final bool autofocus;
+
   @override
-  Widget build(BuildContext context) {
-    final media = MediaQuery.of(context);
-    final compact = media.size.width < 420 || media.textScaler.scale(13) > 18;
-    return Dialog(
-      insetPadding: EdgeInsets.symmetric(horizontal: compact ? 12 : 40, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 420, maxHeight: media.size.height - 48),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(compact ? 20 : 24, 20, compact ? 20 : 24, 8),
-              child: Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-            ),
-            Flexible(
-              child: SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 12),
-                child: child,
-              ),
-            ),
-            if (actions.isNotEmpty || leadingAction != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                child: Row(
-                  children: [
-                    ?leadingAction,
-                    Expanded(
-                      child: OverflowBar(alignment: MainAxisAlignment.end, spacing: 8, children: actions),
-                    ),
-                  ],
-                ),
-              )
-            else
-              const SizedBox(height: 12),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => AppDialog(
+    title: title,
+    content: child,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+    leading: leadingAction,
+    actions: actions,
+    onEnter: onEnter,
+    autofocus: autofocus,
+  );
 }
 
 /// One option of a choice dialog: an optional picture, the label, a line of
 /// explanation; the current one in the primary colour with a tick (UI_PLAN
-/// §7, U.6c c7). A tap picks it.
+/// §7, U.6c c7). A tap picks it. The shared [DialogOptionRow] inside the
+/// 12 of [SettingsDialogFrame].
 class SettingsChoiceRow extends StatelessWidget {
   /// Creates the row.
   const new({
@@ -105,56 +88,14 @@ class SettingsChoiceRow extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final base = theme.textTheme.bodyMedium ?? const TextStyle();
-    return Semantics(
-      selected: selected,
-      button: true,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 48),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Row(
-              children: [
-                if (leading case final leading?) ...[leading, const SizedBox(width: 12)],
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        label,
-                        style: base.copyWith(
-                          fontSize: 15,
-                          fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                          color: selected ? colors.primary : colors.onSurface,
-                        ),
-                      ),
-                      if (description case final description?)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Text(
-                            description,
-                            style: base.copyWith(fontSize: 12, height: 1.45, color: colors.onSurfaceVariant),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                SizedBox(width: 24, child: selected ? Icon(AppIcons.selected, size: 22, color: colors.primary) : null),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => DialogOptionRow(
+    label: label,
+    description: description,
+    leading: leading,
+    selected: selected,
+    onTap: onTap,
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  );
 }
 
 /// A single-choice list; picking an option closes it with that value (3.x
@@ -172,70 +113,41 @@ Future<T?> showChoiceDialog<T>({
   bool showCancel = true,
   Widget? Function(T value)? leadingOf,
   SettingsDialogAction? action,
-}) => showDialog<T>(
+}) => showAppOptionDialog<T>(
   context: context,
-  builder: (context) => SettingsDialogFrame(
-    title: title,
-    leadingAction: action == null
-        ? null
-        : TextButton(key: action.key, onPressed: action.onPressed, child: Text(action.label)),
-    actions: [if (showCancel) TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel')))],
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (hint != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-            child: Text(
-              hint,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
-            ),
-          ),
-        for (final option in options)
-          SettingsChoiceRow(
-            key: ValueKey('settings-choice-${option.value}'),
-            label: option.label,
-            description: option.description,
-            leading: leadingOf?.call(option.value),
-            selected: option.value == selected,
-            onTap: () => Navigator.of(context).pop(option.value),
-          ),
-      ],
-    ),
-  ),
+  title: title,
+  message: hint,
+  selected: selected,
+  showCancel: showCancel,
+  leading: action == null ? null : TextButton(key: action.key, onPressed: action.onPressed, child: Text(action.label)),
+  options: [
+    for (final option in options)
+      AppDialogOption(
+        key: ValueKey('settings-choice-${option.value}'),
+        value: option.value,
+        label: option.label,
+        description: option.description,
+        leading: leadingOf?.call(option.value),
+      ),
+  ],
 );
 
-/// A yes/no question; true when confirmed.
+/// A yes/no question; true when confirmed. The button says what it does
+/// ([confirmLabel]), red when [destructive] (U.1d c6).
 Future<bool> showConfirmDialog({
   required BuildContext context,
   required String title,
   required String message,
   required String confirmLabel,
   bool destructive = false,
-}) async {
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (context) {
-      final colors = Theme.of(context).colorScheme;
-      return AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(i18n('cancel'))),
-          FilledButton(
-            key: const ValueKey('settings-confirm'),
-            style: destructive ? FilledButton.styleFrom(backgroundColor: colors.error) : null,
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(confirmLabel),
-          ),
-        ],
-      );
-    },
-  );
-  return confirmed ?? false;
-}
+}) => showAppConfirmDialog(
+  context: context,
+  title: title,
+  message: message,
+  confirmLabel: confirmLabel,
+  danger: destructive,
+  confirmKey: const ValueKey('settings-confirm'),
+);
 
 /// A whole number: quick picks plus a checked custom value (3.x's refresh
 /// interval, countdown and sleep timer dialogs, which each had their own
@@ -252,7 +164,7 @@ Future<int?> showNumberDialog({
   String? unit,
   String? inputLabel,
   String? rangeText,
-}) => showDialog<int>(
+}) => showAppDialog<int>(
   context: context,
   builder: (context) => _NumberDialog(
     title: title,
@@ -326,9 +238,10 @@ class _NumberDialogState extends State<_NumberDialog> {
     final colors = Theme.of(context).colorScheme;
     return SettingsDialogFrame(
       title: widget.title,
+      autofocus: false,
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-        FilledButton(key: const ValueKey('settings-number-save'), onPressed: _save, child: Text(i18n('save'))),
+        const DialogCancelButton(),
+        DialogActionButton(key: const ValueKey('settings-number-save'), label: i18n('save'), onPressed: _save),
       ],
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -372,12 +285,12 @@ class _NumberDialogState extends State<_NumberDialog> {
                 if (_error != null) setState(() => _error = null);
               },
               onSubmitted: (_) => _save(),
-              decoration: InputDecoration(
-                labelText: widget.inputLabel ?? i18n('settings_custom_value'),
-                suffixText: widget.unit,
-                helperText: _range,
-                errorText: _error,
-                border: const OutlineInputBorder(),
+              decoration: dialogFieldDecoration(
+                context,
+                label: widget.inputLabel ?? i18n('settings_custom_value'),
+                suffix: widget.unit,
+                helper: _range,
+                error: _error,
               ),
             ),
           ],
@@ -412,23 +325,19 @@ Future<Color?> showColorDialog({
   ValueChanged<Color>? onPreview,
 }) {
   final picker = GlobalKey<LiveColorPickerState>();
-  return showDialog<Color>(
+  return showAppDialog<Color>(
     context: context,
     builder: (context) => SettingsDialogFrame(
       title: title,
       actions: [
-        TextButton(
-          key: const ValueKey('settings-color-cancel'),
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(i18n('cancel')),
-        ),
-        FilledButton(
+        const DialogCancelButton(key: ValueKey('settings-color-cancel')),
+        DialogActionButton(
           key: const ValueKey('settings-color-apply'),
+          label: i18n('exit_yes'),
           onPressed: () {
             final color = picker.currentState?.commit();
             if (color != null) Navigator.of(context).pop(color);
           },
-          child: Text(i18n('exit_yes')),
         ),
       ],
       child: Padding(

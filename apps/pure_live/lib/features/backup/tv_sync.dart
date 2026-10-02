@@ -61,7 +61,7 @@ Future<bool> sendToTv(LiveHttp http, String origin, Map<String, Object?> documen
 
 /// Asks for the TV's address (shown on the TV's sync screen); null when
 /// cancelled. [scan] offers the camera inside the field (phones).
-Future<String?> askTvAddress(BuildContext context, {bool scan = true}) => showDialog<String>(
+Future<String?> askTvAddress(BuildContext context, {bool scan = true}) => showAppDialog<String>(
   context: context,
   builder: (_) => _TvAddressDialog(scan: scan),
 );
@@ -95,53 +95,49 @@ class _TvAddressDialogState extends State<_TvAddressDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    scrollable: true,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-    title: Text(i18n('sync_tv_data'), style: const TextStyle(fontWeight: FontWeight.w600)),
-    content: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 400),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            i18n('backup_tv_hint'),
-            style: context.textStyles.t14.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+  Widget build(BuildContext context) => AppDialog(
+    title: i18n('sync_tv_data'),
+    message: i18n('backup_tv_hint'),
+    autofocus: false,
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 6),
+        TextField(
+          key: const ValueKey('backup-tv-address'),
+          controller: _address,
+          autofocus: true,
+          keyboardType: TextInputType.url,
+          autocorrect: false,
+          onChanged: (_) {
+            if (_error != null) setState(() => _error = null);
+          },
+          decoration: dialogFieldDecoration(
+            context,
+            label: i18n('remote_sync_address'),
+            hint: i18n('remote_sync_input_address_hint'),
+            error: _error,
+            // The TV shows its address as a QR code (3.x scanned it).
+            suffixIcon: !widget.scan
+                ? null
+                : qrScanButton(
+                    context,
+                    key: const ValueKey('backup-tv-scan'),
+                    hint: i18n('scanner_sync_hint'),
+                    onText: (text) {
+                      _address.text = text;
+                      _submit();
+                    },
+                  ),
           ),
-          const SizedBox(height: 16),
-          TextField(
-            key: const ValueKey('backup-tv-address'),
-            controller: _address,
-            autofocus: true,
-            keyboardType: TextInputType.url,
-            autocorrect: false,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              labelText: i18n('remote_sync_address'),
-              hintText: i18n('remote_sync_input_address_hint'),
-              errorText: _error,
-              // The TV shows its address as a QR code (3.x scanned it).
-              suffixIcon: !widget.scan
-                  ? null
-                  : qrScanButton(
-                      context,
-                      key: const ValueKey('backup-tv-scan'),
-                      hint: i18n('scanner_sync_hint'),
-                      onText: (text) {
-                        _address.text = text;
-                        _submit();
-                      },
-                    ),
-            ),
-            onSubmitted: (_) => _submit(),
-          ),
-        ],
-      ),
+          onSubmitted: (_) => _submit(),
+        ),
+      ],
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: Text(i18n('cancel'))),
-      FilledButton(key: const ValueKey('backup-tv-send'), onPressed: _submit, child: Text(i18n('remote_sync_send'))),
+      const DialogCancelButton(),
+      DialogActionButton(key: const ValueKey('backup-tv-send'), label: i18n('remote_sync_send'), onPressed: _submit),
     ],
   );
 }

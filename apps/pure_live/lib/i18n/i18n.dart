@@ -120,6 +120,9 @@ final class AppStrings {
     verifying: tr('favorite_status_verifying'),
     delete: tr('delete'),
     offline: tr('offline_room_title'),
+    cancel: tr('cancel'),
+    close: tr('close'),
+    gotIt: tr('got_it'),
   );
 }
 

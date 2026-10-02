@@ -107,22 +107,15 @@ class _LogPageState extends ConsumerState<LogPage> {
   }
 
   Future<void> _clear() async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppConfirmDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(i18n('settings_log_clear')),
-        content: Text(i18n('settings_log_clear_confirm')),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('cancel'))),
-          FilledButton(
-            key: const ValueKey('log-clear-confirm'),
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(i18n('clear')),
-          ),
-        ],
-      ),
+      title: i18n('settings_log_clear'),
+      message: i18n('settings_log_clear_confirm'),
+      confirmLabel: i18n('clear'),
+      danger: true,
+      confirmKey: const ValueKey('log-clear-confirm'),
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     await _log.clear();
     AppNavigator.toast(i18n('settings_log_cleared'));
   }

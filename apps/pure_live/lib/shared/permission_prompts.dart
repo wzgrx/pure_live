@@ -33,34 +33,16 @@ Future<bool> showPermissionDialog(
   required String message,
   required String confirm,
   String? cancel,
-}) async =>
-    await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => DialogButtonsTheme(
-        child: DialogKeys(
-          onEnter: () => Navigator.of(dialogContext).pop(true),
-          child: AlertDialog(
-            key: const ValueKey('permission-dialog'),
-            scrollable: true,
-            title: Text(title),
-            content: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 400), child: Text(message)),
-            actions: [
-              TextButton(
-                key: const ValueKey('permission-cancel'),
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: Text(cancel ?? i18n('permission_cancel')),
-              ),
-              FilledButton(
-                key: const ValueKey('permission-confirm'),
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: Text(confirm),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ) ??
-    false;
+}) => showAppConfirmDialog(
+  context: context,
+  key: const ValueKey('permission-dialog'),
+  title: title,
+  message: message,
+  confirmLabel: confirm,
+  cancelLabel: cancel ?? i18n('permission_cancel'),
+  cancelKey: const ValueKey('permission-cancel'),
+  confirmKey: const ValueKey('permission-confirm'),
+);
 
 /// Completes the next time the app comes back to the front (after the
 /// system settings page).

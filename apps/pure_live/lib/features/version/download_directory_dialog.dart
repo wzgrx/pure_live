@@ -21,7 +21,7 @@ Future<DownloadDirectoryChoice?> showDownloadDirectoryDialog(
   BuildContext context, {
   required String defaultPath,
   bool canPick = true,
-}) => showDialog<DownloadDirectoryChoice>(
+}) => showAppDialog<DownloadDirectoryChoice>(
   context: context,
   builder: (_) => DownloadDirectoryDialog(defaultPath: defaultPath, canPick: canPick),
 );
@@ -41,71 +41,43 @@ class DownloadDirectoryDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final styles = context.textStyles;
-    return DialogButtonsTheme(
-      child: DialogKeys(
-        onEnter: () =>
-            Navigator.of(context).pop(canPick ? DownloadDirectoryChoice.pick : DownloadDirectoryChoice.useDefault),
-        child: AlertDialog(
-          key: const ValueKey('download-directory-dialog'),
-          scrollable: true,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          title: Text(i18n('download_directory_prompt_title')),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  i18n('download_directory_prompt_message'),
-                  style: styles.t14.copyWith(color: scheme.onSurface, height: 1.5),
-                ),
-                if (defaultPath.trim().isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  SelectableText(
-                    i18n('download_directory_default_path', args: {'path': defaultPath.trim()}),
-                    key: const ValueKey('download-directory-default-path'),
-                    style: styles.t14.copyWith(color: scheme.onSurfaceVariant, height: 1.5),
-                  ),
-                ],
-              ],
+    return AppDialog(
+      key: const ValueKey('download-directory-dialog'),
+      title: i18n('download_directory_prompt_title'),
+      message: i18n('download_directory_prompt_message'),
+      onEnter: () =>
+          Navigator.of(context).pop(canPick ? DownloadDirectoryChoice.pick : DownloadDirectoryChoice.useDefault),
+      content: defaultPath.trim().isEmpty
+          ? null
+          : SelectableText(
+              i18n('download_directory_default_path', args: {'path': defaultPath.trim()}),
+              key: const ValueKey('download-directory-default-path'),
+              style: styles.t14.copyWith(color: scheme.onSurfaceVariant, height: 1.5),
             ),
-          ),
-          actions: [
-            Row(
-              children: [
-                TextButton(
-                  key: const ValueKey('download-directory-cancel'),
-                  style: TextButton.styleFrom(foregroundColor: scheme.onSurfaceVariant),
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(i18n('cancel')),
-                ),
-                // The two choices at the right, wrapping with a large font.
-                Expanded(
-                  child: Wrap(
-                    alignment: WrapAlignment.end,
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      TextButton(
-                        key: const ValueKey('download-directory-use-default'),
-                        onPressed: () => Navigator.of(context).pop(DownloadDirectoryChoice.useDefault),
-                        child: Text(i18n('download_directory_use_default')),
-                      ),
-                      if (canPick)
-                        FilledButton(
-                          key: const ValueKey('download-directory-pick'),
-                          onPressed: () => Navigator.of(context).pop(DownloadDirectoryChoice.pick),
-                          child: Text(i18n('download_directory_choose')),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
+      actions: [
+        DialogCancelButton(
+          key: const ValueKey('download-directory-cancel'),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-      ),
+        if (canPick)
+          TextButton(
+            key: const ValueKey('download-directory-use-default'),
+            onPressed: () => Navigator.of(context).pop(DownloadDirectoryChoice.useDefault),
+            child: Text(i18n('download_directory_use_default')),
+          )
+        else
+          DialogActionButton(
+            key: const ValueKey('download-directory-use-default'),
+            label: i18n('download_directory_use_default'),
+            onPressed: () => Navigator.of(context).pop(DownloadDirectoryChoice.useDefault),
+          ),
+        if (canPick)
+          DialogActionButton(
+            key: const ValueKey('download-directory-pick'),
+            label: i18n('download_directory_choose'),
+            onPressed: () => Navigator.of(context).pop(DownloadDirectoryChoice.pick),
+          ),
+      ],
     );
   }
 }

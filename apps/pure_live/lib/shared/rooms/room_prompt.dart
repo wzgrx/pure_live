@@ -30,7 +30,7 @@ Future<RoomPromptChoice> showRoomPrompt(
 }) async =>
     await (prompts ?? AppPrompts.instance).show<RoomPromptChoice>(AppPromptKind.share, () async {
       if (!context.mounted) return RoomPromptChoice.dismiss;
-      return await showDialog<RoomPromptChoice>(
+      return await showAppDialog<RoomPromptChoice>(
         context: context,
         builder: (_) => RoomPromptDialog(room: room, shared: shared),
       );
@@ -81,55 +81,36 @@ class RoomPromptDialog extends StatelessWidget {
         ),
       ],
     );
-    return DialogButtonsTheme(
-      child: DialogKeys(
-        onEnter: () => Navigator.of(context).pop(RoomPromptChoice.enter),
-        child: AlertDialog(
-          key: const ValueKey('room-prompt'),
-          scrollable: true,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(i18n('room_prompt_title')),
-              const SizedBox(height: 6),
-              Text(
-                i18n(shared ? 'room_prompt_from_share' : 'room_prompt_from_clipboard'),
-                style: styles.t14.copyWith(color: scheme.onSurfaceVariant),
-              ),
-            ],
-          ),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 352),
-            child: stacked
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [avatar, const SizedBox(height: 12), names],
-                  )
-                : Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      avatar,
-                      const SizedBox(width: 12),
-                      Expanded(child: names),
-                    ],
-                  ),
-          ),
-          actions: [
-            TextButton(
-              key: const ValueKey('room-prompt-cancel'),
-              onPressed: () => Navigator.of(context).pop(RoomPromptChoice.dismiss),
-              child: Text(i18n('cancel')),
+    return AppDialog(
+      key: const ValueKey('room-prompt'),
+      title: i18n('room_prompt_title'),
+      message: i18n(shared ? 'room_prompt_from_share' : 'room_prompt_from_clipboard'),
+      onEnter: () => Navigator.of(context).pop(RoomPromptChoice.enter),
+      content: stacked
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [avatar, const SizedBox(height: 12), names],
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                avatar,
+                const SizedBox(width: 12),
+                Expanded(child: names),
+              ],
             ),
-            FilledButton(
-              key: const ValueKey('room-prompt-enter'),
-              onPressed: () => Navigator.of(context).pop(RoomPromptChoice.enter),
-              child: Text(i18n('enter_room')),
-            ),
-          ],
+      actions: [
+        DialogCancelButton(
+          key: const ValueKey('room-prompt-cancel'),
+          onPressed: () => Navigator.of(context).pop(RoomPromptChoice.dismiss),
         ),
-      ),
+        DialogActionButton(
+          key: const ValueKey('room-prompt-enter'),
+          label: i18n('enter_room'),
+          onPressed: () => Navigator.of(context).pop(RoomPromptChoice.enter),
+        ),
+      ],
     );
   }
 }

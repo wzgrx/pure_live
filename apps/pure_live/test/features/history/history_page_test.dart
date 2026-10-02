@@ -291,13 +291,13 @@ void main() {
 
     // A typed number is used even without pressing "apply" (3.x dropped it).
     await tester.enterText(find.byKey(const ValueKey('history-limit-custom')), '-3');
-    await tester.tap(find.text('确认'));
+    await tester.tap(find.byKey(const ValueKey('history-limit-save')));
     await tester.pumpAndSettle();
     expect(find.text('请输入大于或等于 0 的整数。'), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('history-limit-custom')), '22');
-    await tester.tap(find.text('确认'));
+    await tester.tap(find.byKey(const ValueKey('history-limit-save')));
     await _settle(tester);
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(Dialog), findsNothing);
     expect(h.services.store.settings.get(Settings.historyLimit), 22);
     expect(await _ids(tester, h.history), [for (var i = 1; i <= 22; i++) '$i']);
     expect(find.text('22 / 22 条'), findsOneWidget);
@@ -305,7 +305,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('history-limit')));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ChoiceChip, '不限'));
-    await tester.tap(find.text('确认'));
+    await tester.tap(find.byKey(const ValueKey('history-limit-save')));
     await _settle(tester);
     expect(find.text('22 条 / 不限'), findsOneWidget);
   });
@@ -322,7 +322,7 @@ void main() {
     await _settle(tester);
     expect(await tester.runAsync(() => h.services.store.follows.contains(_room('7'))), isTrue);
     expect(h.toasts, ['已关注 Streamer']);
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(Dialog), findsNothing);
 
     // Unfollowing asks first.
     await tester.longPress(find.byType(LiveRoomCard));

@@ -64,7 +64,7 @@ class DanmakuColorChip extends StatelessWidget {
 /// Picks a danmaku colour: [danmakuColorSwatches] or a hex value. Null when
 /// cancelled.
 Future<Color?> showDanmakuColorDialog({required BuildContext context, required String title, required Color current}) =>
-    showDialog<Color>(
+    showAppDialog<Color>(
       context: context,
       builder: (context) => _ColorDialog(title: title, current: current),
     );
@@ -106,9 +106,10 @@ class _ColorDialogState extends State<_ColorDialog> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final current = widget.current.toARGB32();
-    return AlertDialog(
-      scrollable: true,
-      title: Text(widget.title),
+    return AppDialog(
+      title: widget.title,
+      autofocus: false,
+      onEnter: _apply,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,19 +147,21 @@ class _ColorDialogState extends State<_ColorDialog> {
               LengthLimitingTextInputFormatter(9),
             ],
             onSubmitted: (_) => _apply(),
-            decoration: InputDecoration(
-              labelText: i18n('settings_color_hex'),
-              prefixText: '#',
-              helperText: 'RRGGBB',
-              errorText: _error,
-              border: const OutlineInputBorder(),
-            ),
+            onChanged: (_) {
+              if (_error != null) setState(() => _error = null);
+            },
+            decoration: dialogFieldDecoration(
+              context,
+              label: i18n('settings_color_hex'),
+              helper: 'RRGGBB',
+              error: _error,
+            ).copyWith(prefixText: '#'),
           ),
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-        FilledButton(onPressed: _apply, child: Text(i18n('confirm'))),
+        const DialogCancelButton(),
+        DialogActionButton(key: const ValueKey('danmaku-color-apply'), label: i18n('confirm'), onPressed: _apply),
       ],
     );
   }

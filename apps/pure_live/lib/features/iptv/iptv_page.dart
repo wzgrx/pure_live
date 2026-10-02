@@ -98,58 +98,21 @@ class _IptvPageState extends ConsumerState<IptvPage> {
   /// colour; a tap switches and closes; only "取消" at the bottom.
   Future<void> _chooseGuide(IptvOverview overview) async {
     final current = _store.settings.get(Settings.selectedSourceId);
-    final chosen = await showDialog<EpgSource>(
+    final chosen = await showAppOptionDialog<EpgSource>(
       context: context,
-      builder: (dialogContext) {
-        final scheme = Theme.of(dialogContext).colorScheme;
-        final styles = dialogContext.textStyles;
-        return AlertDialog(
-          scrollable: true,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-          title: IptvDialogTitle(i18n('select_epg_source')),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: overview.guides.isEmpty
-                ? Padding(padding: const EdgeInsets.all(12), child: Text(i18n('no_epg_sources_found')))
-                : RadioGroup<String>(
-                    groupValue: current,
-                    onChanged: (id) => Navigator.pop(
-                      dialogContext,
-                      overview.guides.map((info) => info.source).firstWhere((source) => source.id == id),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        for (final info in overview.guides)
-                          RadioListTile<String>(
-                            key: ValueKey('iptv-choose-${info.source.id}'),
-                            value: info.source.id,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            selected: info.source.id == current,
-                            selectedTileColor: scheme.primary.withValues(alpha: 0.08),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                            title: Text(
-                              guideName(info.source),
-                              style: styles.t15.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: info.source.id == current ? scheme.primary : scheme.onSurface,
-                              ),
-                            ),
-                            subtitle: Text(
-                              info.source.source,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: styles.t13.copyWith(color: scheme.onSurfaceVariant),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+      title: i18n('select_epg_source'),
+      message: overview.guides.isEmpty ? i18n('no_epg_sources_found') : null,
+      selected: overview.guides.map((info) => info.source).where((source) => source.id == current).firstOrNull,
+      options: [
+        for (final info in overview.guides)
+          AppDialogOption(
+            key: ValueKey('iptv-choose-${info.source.id}'),
+            value: info.source,
+            label: guideName(info.source),
+            description: info.source.source,
+            descriptionMaxLines: 1,
           ),
-          actions: [TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(i18n('cancel')))],
-        );
-      },
+      ],
     );
     if (chosen != null && mounted && chosen.id != current) await _select(chosen);
   }
@@ -255,9 +218,9 @@ class _IptvPageState extends ConsumerState<IptvPage> {
           return result;
         }
 
-        final result = await showDialog<IptvImportResult>(
+        final result = await showAppDialog<IptvImportResult>(
           context: context,
-          barrierDismissible: false,
+          dismissible: false,
           builder: (_) => origin == IptvImportOrigin.text
               ? IptvTextImportDialog(run: run)
               : IptvNetworkImportDialog(kind: kind, run: run),
@@ -383,41 +346,21 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     }
     final guide = item is EpgSource;
     final selected = guide && item.id == _store.settings.get(Settings.selectedSourceId);
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppConfirmDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        final colors = Theme.of(dialogContext).colorScheme;
-        return AlertDialog(
-          scrollable: true,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          title: IptvDialogTitle(i18n(guide ? 'iptv_delete_guide' : 'iptv_delete_playlist')),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Text(
-              [
-                i18n(
-                  guide ? 'iptv_delete_guide_message' : 'iptv_delete_playlist_message',
-                  args: {'name': name, 'count': groupDigits(channels)},
-                ),
-                if (selected) i18n('iptv_delete_selected_guide'),
-              ].join('\n'),
-              style: dialogContext.textStyles.t14,
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('cancel'))),
-            FilledButton(
-              key: const ValueKey('iptv-delete-confirm'),
-              style: FilledButton.styleFrom(backgroundColor: colors.error, foregroundColor: colors.onError),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(i18n('delete')),
-            ),
-          ],
-        );
-      },
+      title: i18n(guide ? 'iptv_delete_guide' : 'iptv_delete_playlist'),
+      message: [
+        i18n(
+          guide ? 'iptv_delete_guide_message' : 'iptv_delete_playlist_message',
+          args: {'name': name, 'count': groupDigits(channels)},
+        ),
+        if (selected) i18n('iptv_delete_selected_guide'),
+      ].join('\n'),
+      confirmLabel: i18n('delete'),
+      danger: true,
+      confirmKey: const ValueKey('iptv-delete-confirm'),
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
     await _runItem(key, () async {
       final importer = _importer!;
       final deleted = item is IptvPlaylist

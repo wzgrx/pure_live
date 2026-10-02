@@ -70,7 +70,7 @@ Future<void> checkForUpdateOnStartup(
       () async {
         // The setting or the skip may have changed while it waited.
         if (!context.mounted || !_wanted(settings, info)) return;
-        await showDialog<void>(
+        await showAppDialog<void>(
           context: context,
           builder: (_) => NewVersionDialog(
             info: info,
@@ -201,9 +201,9 @@ class _NewVersionDialogState extends State<NewVersionDialog> {
         onEnter: _primary,
         child: Dialog(
           key: const ValueKey('new-version-dialog'),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          insetPadding: const EdgeInsets.all(appDialogMargin),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
+            constraints: const BoxConstraints(maxWidth: appDialogWideMaxWidth),
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final wide = constraints.maxWidth >= newVersionWideFrom;

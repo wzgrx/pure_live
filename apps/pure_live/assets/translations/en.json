@@ -562,6 +562,7 @@
     "global_mute_subtitle": "Mute all live rooms",
     "go_to": "Go to",
     "go_to_login": "Go to Login",
+    "got_it": "Got it",
     "gpu_decode": "Prefer GPU Decoding",
     "grant_install_permission": "Please grant install permission before downloading",
     "hardware_decoder": "Hardware Decoder (--hwdec)",

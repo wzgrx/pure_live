@@ -13,7 +13,7 @@ import 'package:pure_live/i18n/i18n.dart';
 /// app does not have yet): it browses with `dart:io`, so on Android it sees
 /// only the folders the app may read.
 Future<String?> showFileBrowser(BuildContext context, {required String initial, required bool pickFile}) =>
-    showDialog<String>(
+    showAppDialog<String>(
       context: context,
       builder: (_) => _FileBrowserDialog(initial: initial, pickFile: pickFile),
     );
@@ -89,11 +89,14 @@ class _FileBrowserDialogState extends State<_FileBrowserDialog> {
     final colors = Theme.of(context).colorScheme;
     final entries = _entries;
     final parent = p.dirname(_current);
-    return AlertDialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      title: Text(i18n(widget.pickFile ? 'select_recover_file' : 'backup_pick_folder')),
+    // The one dialog (U.1d), the long-content width; the list scrolls by
+    // itself in a fixed height.
+    return AppDialog(
+      title: i18n(widget.pickFile ? 'select_recover_file' : 'backup_pick_folder'),
+      wide: true,
+      scrollable: false,
+      autofocus: false,
       content: SizedBox(
-        width: 480,
         height: 420,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,10 +104,9 @@ class _FileBrowserDialogState extends State<_FileBrowserDialog> {
             TextField(
               key: const ValueKey('backup-browser-path'),
               controller: _path,
-              decoration: InputDecoration(
-                isDense: true,
-                border: const OutlineInputBorder(),
-                labelText: i18n('backup_browser_path'),
+              decoration: dialogFieldDecoration(
+                context,
+                label: i18n('backup_browser_path'),
                 suffixIcon: IconButton(
                   tooltip: i18n('backup_browser_open'),
                   icon: const Icon(AppIcons.forward),
@@ -160,12 +162,12 @@ class _FileBrowserDialogState extends State<_FileBrowserDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: Text(i18n('cancel'))),
+        const DialogCancelButton(),
         if (!widget.pickFile)
-          FilledButton(
+          DialogActionButton(
             key: const ValueKey('backup-browser-choose'),
+            label: i18n('backup_browser_choose'),
             onPressed: _failed ? null : () => Navigator.pop(context, _current),
-            child: Text(i18n('backup_browser_choose')),
           ),
       ],
     );

@@ -115,20 +115,15 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
       AppNavigator.toast(message);
       return;
     }
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          key: const ValueKey('block-undo-snack'),
-          behavior: SnackBarBehavior.floating,
-          content: Text(message),
-          action: SnackBarAction(
-            key: const ValueKey('block-undo'),
-            label: i18n('room_undo'),
-            onPressed: () => unawaited(restoreBlockEntry(lists, kind, value, index)),
-          ),
-        ),
-      );
+    showAppToastOn(
+      messenger,
+      AppToast(
+        message,
+        key: const ValueKey('block-undo-snack'),
+        actionLabel: i18n('room_undo'),
+        onAction: () => unawaited(restoreBlockEntry(lists, kind, value, index)),
+      ),
+    );
   }
 
   Widget _chips(List<String> values, BlockKind kind) => Padding(

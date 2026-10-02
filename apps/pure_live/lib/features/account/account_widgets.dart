@@ -181,39 +181,17 @@ Future<bool> confirmAccountAction(
   String? cancel,
   bool destructive = true,
 }) async {
-  final confirmed = await showDialog<bool>(
+  final confirmed = await showAppConfirmDialog(
     context: context,
-    builder: (dialogContext) {
-      final colors = Theme.of(dialogContext).colorScheme;
-      return AlertDialog(
-        scrollable: true,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-        title: Text(title, style: dialogContext.textStyles.t20.emphasis),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Text(message, style: dialogContext.textStyles.t14),
-        ),
-        actionsOverflowDirection: VerticalDirection.down,
-        actionsOverflowButtonSpacing: 8,
-        actions: [
-          TextButton(
-            key: const ValueKey('account-confirm-cancel'),
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(cancel ?? i18n('cancel')),
-          ),
-          FilledButton(
-            key: const ValueKey('account-confirm-ok'),
-            style: destructive
-                ? FilledButton.styleFrom(backgroundColor: colors.error, foregroundColor: colors.onError)
-                : null,
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(action),
-          ),
-        ],
-      );
-    },
+    title: title,
+    message: message,
+    confirmLabel: action,
+    cancelLabel: cancel,
+    danger: destructive,
+    cancelKey: const ValueKey('account-confirm-cancel'),
+    confirmKey: const ValueKey('account-confirm-ok'),
   );
-  return confirmed ?? false;
+  return confirmed;
 }
 
 /// The sign-out question for [name], the list's and a platform page's alike

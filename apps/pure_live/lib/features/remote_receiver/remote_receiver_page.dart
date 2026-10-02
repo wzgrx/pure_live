@@ -72,37 +72,32 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
   Future<bool> _confirmIncoming(String action, String remoteAddress) async {
     if (!mounted) return false;
     final name = _service.nameOf(remoteAddress);
-    final allowed = await showDialog<bool>(
+    final allowed = await showAppDialog<bool>(
       context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
+      dismissible: false,
+      builder: (dialogContext) => AppDialog(
         key: const ValueKey('remote-sync-incoming'),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(i18n('remote_sync'), style: const TextStyle(fontWeight: FontWeight.w600)),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: Text(
-            i18n(
-              switch ((action == 'import', name == null)) {
-                (true, true) => 'remote_sync_incoming_import',
-                (true, false) => 'remote_sync_incoming_import_named',
-                (false, true) => 'remote_sync_incoming_export',
-                (false, false) => 'remote_sync_incoming_export_named',
-              },
-              args: {'address': remoteAddress, 'name': name ?? ''},
-            ),
-          ),
+        title: i18n('remote_sync'),
+        message: i18n(
+          switch ((action == 'import', name == null)) {
+            (true, true) => 'remote_sync_incoming_import',
+            (true, false) => 'remote_sync_incoming_import_named',
+            (false, true) => 'remote_sync_incoming_export',
+            (false, false) => 'remote_sync_incoming_export_named',
+          },
+          args: {'address': remoteAddress, 'name': name ?? ''},
         ),
+        onEnter: () => Navigator.of(dialogContext).pop(true),
         actions: [
-          TextButton(
+          DialogCancelButton(
             key: const ValueKey('remote-sync-reject'),
+            label: i18n('remote_sync_reject'),
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(i18n('remote_sync_reject')),
           ),
-          FilledButton(
+          DialogActionButton(
             key: const ValueKey('remote-sync-allow'),
+            label: i18n('remote_sync_allow'),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(i18n('remote_sync_allow')),
           ),
         ],
       ),
@@ -112,7 +107,7 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
 
   /// The code shown on [peer]; null when cancelled or invalid.
   Future<String?> _askPairingCode(_Peer peer) async {
-    final code = await showDialog<String>(
+    final code = await showAppDialog<String>(
       context: context,
       builder: (_) => _PairingCodeDialog(name: peer.name),
     );
@@ -162,7 +157,7 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
   }
 
   Future<bool> _confirmReceive(_Peer peer, RestorePreview preview) async =>
-      await showDialog<bool>(
+      await showAppDialog<bool>(
         context: context,
         builder: (dialogContext) {
           final styles = dialogContext.textStyles;
@@ -182,47 +177,43 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
               ],
             ),
           );
-          return AlertDialog(
-            scrollable: true,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            title: Text(i18n('remote_sync_receive'), style: const TextStyle(fontWeight: FontWeight.w600)),
-            content: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
-              child: Column(
-                key: const ValueKey('remote-sync-preview'),
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(i18n('remote_sync_from', args: {'name': peer.name}), style: styles.t14SemiBold),
-                  const SizedBox(height: 2),
-                  Text(peer.detail, style: styles.t12.copyWith(color: colors.onSurfaceVariant)),
-                  const SizedBox(height: 12),
-                  Text(i18n('remote_sync_preview_title'), style: styles.t13SemiBold),
-                  const SizedBox(height: 4),
-                  if (preview.settingsInFile > 0)
-                    line(
-                      i18n(
-                        'remote_sync_preview_settings',
-                        args: {'count': '${preview.settingsInFile}', 'changed': '${preview.settingsChanged}'},
-                      ),
-                    ),
-                  for (final part in preview.parts) line(restorePartText(part)),
+          return AppDialog(
+            title: i18n('remote_sync_receive'),
+            onEnter: () => Navigator.pop(dialogContext, true),
+            content: Column(
+              key: const ValueKey('remote-sync-preview'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(i18n('remote_sync_from', args: {'name': peer.name}), style: styles.t14SemiBold),
+                const SizedBox(height: 2),
+                Text(peer.detail, style: styles.t12.copyWith(color: colors.onSurfaceVariant)),
+                const SizedBox(height: 12),
+                Text(i18n('remote_sync_preview_title'), style: styles.t13SemiBold),
+                const SizedBox(height: 4),
+                if (preview.settingsInFile > 0)
                   line(
-                    preview.accounts > 0
-                        ? i18n('backup_preview_accounts', args: {'count': '${preview.accounts}'})
-                        : i18n('remote_sync_preview_no_accounts'),
+                    i18n(
+                      'remote_sync_preview_settings',
+                      args: {'count': '${preview.settingsInFile}', 'changed': '${preview.settingsChanged}'},
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(i18n('remote_sync_preview_warning'), style: styles.t12.copyWith(color: colors.onSurfaceVariant)),
-                ],
-              ),
+                for (final part in preview.parts) line(restorePartText(part)),
+                line(
+                  preview.accounts > 0
+                      ? i18n('backup_preview_accounts', args: {'count': '${preview.accounts}'})
+                      : i18n('remote_sync_preview_no_accounts'),
+                ),
+                const SizedBox(height: 8),
+                Text(i18n('remote_sync_preview_warning'), style: styles.t12.copyWith(color: colors.onSurfaceVariant)),
+              ],
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('cancel'))),
-              FilledButton(
+              DialogCancelButton(onPressed: () => Navigator.pop(dialogContext, false)),
+              DialogActionButton(
                 key: const ValueKey('remote-sync-receive-confirm'),
+                label: i18n('remote_sync_receive_action'),
                 onPressed: () => Navigator.pop(dialogContext, true),
-                child: Text(i18n('remote_sync_receive_action')),
               ),
             ],
           );
@@ -230,24 +221,14 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
       ) ??
       false;
 
-  Future<bool> _confirm({required String title, required String message, required String action}) async =>
-      await showDialog<bool>(
+  Future<bool> _confirm({required String title, required String message, required String action}) =>
+      showAppConfirmDialog(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-          content: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 400), child: Text(message)),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(i18n('cancel'))),
-            FilledButton(
-              key: const ValueKey('remote-sync-confirm'),
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(action),
-            ),
-          ],
-        ),
-      ) ??
-      false;
+        title: title,
+        message: message,
+        confirmLabel: action,
+        confirmKey: const ValueKey('remote-sync-confirm'),
+      );
 
   _Peer _peerOf(RemoteSyncDevice device) => (
     name: device.name,
@@ -296,23 +277,22 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
       return;
     }
     final peer = _peerAt(target.ip, target.port);
-    final send = await showDialog<bool>(
+    final send = await showAppDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => AppDialog(
         key: const ValueKey('remote-sync-direction'),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(i18n('remote_sync_select_action'), style: const TextStyle(fontWeight: FontWeight.w600)),
-        content: Text(peer.name == peer.detail ? peer.detail : '${peer.name} · ${target.ip}:${target.port}'),
+        title: i18n('remote_sync_select_action'),
+        message: peer.name == peer.detail ? peer.detail : '${peer.name} · ${target.ip}:${target.port}',
         actions: [
           TextButton(
             key: const ValueKey('remote-sync-direction-receive'),
             onPressed: () => Navigator.pop(dialogContext, false),
             child: Text(i18n('remote_sync_receive')),
           ),
-          FilledButton(
+          DialogActionButton(
             key: const ValueKey('remote-sync-direction-send'),
+            label: i18n('remote_sync_send'),
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(i18n('remote_sync_send')),
           ),
         ],
       ),
@@ -707,85 +687,79 @@ class _PairingCodeDialogState extends State<_PairingCodeDialog> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     const length = RemoteSyncProtocol.pairingCodeLength;
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Text(i18n('remote_sync_pairing_code'), style: const TextStyle(fontWeight: FontWeight.w600)),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              i18n('remote_sync_pairing_code_for', args: {'name': widget.name}),
-              style: context.textStyles.t14.copyWith(color: colors.onSurfaceVariant),
-            ),
-            const SizedBox(height: 16),
-            Stack(
-              children: [
-                // Six boxes up to 44 wide, narrower on a narrow dialog.
-                ValueListenableBuilder(
-                  valueListenable: _code,
-                  builder: (context, value, _) => Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (var i = 0; i < length; i++)
-                        Flexible(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 44),
-                              child: Container(
-                                height: 52,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: i == value.text.length ? colors.primary : colors.outline,
-                                    width: i == value.text.length ? 2 : 1,
-                                  ),
+    return AppDialog(
+      title: i18n('remote_sync_pairing_code'),
+      message: i18n('remote_sync_pairing_code_for', args: {'name': widget.name}),
+      autofocus: false,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 4),
+          Stack(
+            children: [
+              // Six boxes up to 44 wide, narrower on a narrow dialog.
+              ValueListenableBuilder(
+                valueListenable: _code,
+                builder: (context, value, _) => Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (var i = 0; i < length; i++)
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 44),
+                            child: Container(
+                              height: 52,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: i == value.text.length ? colors.primary : colors.outline,
+                                  width: i == value.text.length ? 2 : 1,
                                 ),
-                                child: Text(
-                                  i < value.text.length ? value.text[i] : '',
-                                  style: context.textStyles.t20.copyWith(fontWeight: FontWeight.w600).tabular,
-                                ),
+                              ),
+                              child: Text(
+                                i < value.text.length ? value.text[i] : '',
+                                style: context.textStyles.t20.copyWith(fontWeight: FontWeight.w600).tabular,
                               ),
                             ),
                           ),
                         ),
-                    ],
+                      ),
+                  ],
+                ),
+              ),
+              // The field takes the typing, the paste and the taps; the
+              // boxes show it.
+              Positioned.fill(
+                child: Opacity(
+                  opacity: 0,
+                  child: TextField(
+                    key: const ValueKey('remote-sync-code-field'),
+                    controller: _code,
+                    focusNode: _focus,
+                    autofocus: true,
+                    showCursor: false,
+                    keyboardType: TextInputType.number,
+                    maxLength: length,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: const InputDecoration(counterText: '', border: InputBorder.none),
+                    onSubmitted: (value) => Navigator.of(context).pop(value),
                   ),
                 ),
-                // The field takes the typing, the paste and the taps; the
-                // boxes show it.
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0,
-                    child: TextField(
-                      key: const ValueKey('remote-sync-code-field'),
-                      controller: _code,
-                      focusNode: _focus,
-                      autofocus: true,
-                      showCursor: false,
-                      keyboardType: TextInputType.number,
-                      maxLength: length,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: const InputDecoration(counterText: '', border: InputBorder.none),
-                      onSubmitted: (value) => Navigator.of(context).pop(value),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-        FilledButton(
+        const DialogCancelButton(),
+        DialogActionButton(
           key: const ValueKey('remote-sync-code-ok'),
+          label: i18n('confirm'),
           onPressed: () => Navigator.of(context).pop(_code.text),
-          child: Text(i18n('confirm')),
         ),
       ],
     );

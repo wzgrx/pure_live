@@ -21,6 +21,7 @@ import 'package:pure_live/features/record_settings/record_settings_page.dart';
 import 'package:pure_live/features/recorder/recorder_page.dart';
 import 'package:pure_live/features/remote_receiver/remote_receiver_page.dart';
 import 'package:pure_live/features/search/search_page.dart';
+import 'package:pure_live/features/settings/danmaku_page.dart';
 import 'package:pure_live/features/settings/settings_page.dart';
 import 'package:pure_live/features/shield/shield_page.dart';
 import 'package:pure_live/features/splash/splash_page.dart';
@@ -58,6 +59,7 @@ final Map<String, PageBuilder> pageRoutes = {
   RoutePath.kBiliBiliWebLogin: (route) => AccountPage(route: route),
   RoutePath.kBiliBiliQRLogin: (route) => AccountPage(route: route),
   RoutePath.kSettingsDanmuShield: (route) => ShieldPage(route: route),
+  RoutePath.kDanmakuSettings: (route) => DanmakuSettingsPage(route: route),
   RoutePath.kSettingsHotAreas: (route) => HotAreasPage(route: route),
   RoutePath.kVersionHistory: (route) => AboutPage(route: route),
   RoutePath.kToolbox: (route) => ToolboxPage(route: route),

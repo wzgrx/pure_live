@@ -174,7 +174,9 @@ void main() {
       expect(find.text('外观 › 字体和字号'), findsOneWidget);
       expect(settingsRow('app_font'), findsOneWidget);
       expect(settingsRow('text_scale'), findsOneWidget);
-      expect(settingsRow('danmaku_font'), findsOneWidget);
+      // The danmaku font is found on the video page (the danmaku page links
+      // to the same font page, F02 c1).
+      expect(settingsRow('video_danmaku_font'), findsOneWidget);
       expect(tester.widget<SettingsHighlight>(find.byType(SettingsHighlight)).words, ['字体']);
 
       // A switch works in place.

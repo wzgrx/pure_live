@@ -96,6 +96,111 @@ Future<String> defaultRecordDirectory(Directory dataRoot) async {
   return p.join(dataRoot.path, 'Records');
 }
 
+/// 3.x's default recording folder on Android, `<documents>/PURE_LIVE/RECORDS`
+/// (`AppPathManager.dirRecords` under `app_flutter`: the app's private
+/// storage, out of the user's reach); null elsewhere.
+Future<String?> legacyRecordDirectory() async {
+  if (!Platform.isAndroid) return null;
+  final documents = await getApplicationDocumentsDirectory();
+  return p.join(documents.path, 'PURE_LIVE', 'RECORDS');
+}
+
+/// The meta record that [moveLegacyRecordings] ran (how many files moved).
+const String legacyRecordingsMovedKey = 'recorder.legacyRecordingsMoved';
+
+/// Moves the finished recordings in 3.x's default folder [from] to [to],
+/// keeping the sub-folders, once ([meta] records it): v4 records into the
+/// app's external folder, and the import drops 3.x's private path, so they
+/// would be lost otherwise (3.x `cache_service.dart`).
+///
+/// What an unfinished attempt needs stays where the imported tasks expect
+/// it: segments (`.ts`), clock journals (`.clock-v1.csv`), `.partial`
+/// outputs, hidden files (merge lists, the ownership marker) and the other
+/// files of an attempt whose segments or journal are still there. A file
+/// that cannot be moved stays and is logged; a name taken in [to] gets
+/// `-1`, `-2`… Returns how many files moved and how many could not, or null
+/// when it ran before.
+Future<({int moved, int failed})?> moveLegacyRecordings({
+  required MetaStore meta,
+  required String from,
+  required String to,
+}) async {
+  if (await meta.get(legacyRecordingsMovedKey) != null) return null;
+  var moved = 0;
+  var failed = 0;
+  final source = Directory(from);
+  if (source.existsSync()) {
+    final files = [
+      await for (final entity in source.list(recursive: true, followLinks: false))
+        if (entity is File) entity,
+    ];
+    final unfinished = {
+      for (final file in files)
+        if (_attemptPrefix(p.basename(file.path)) case final prefix?) p.join(p.dirname(file.path), prefix),
+    };
+    for (final file in files) {
+      final name = p.basename(file.path);
+      if (_attemptPrefix(name) != null || name.startsWith('.') || name.toLowerCase().endsWith('.partial')) continue;
+      final stem = p.basenameWithoutExtension(name).replaceFirst(RegExp(r'-\d+$'), '');
+      if (unfinished.contains(p.join(p.dirname(file.path), stem))) continue;
+      final relative = p.relative(file.path, from: from);
+      try {
+        await _moveFile(file, _freePath(p.join(to, relative)));
+        moved++;
+      } on FileSystemException catch (error) {
+        failed++;
+        log('3.x recording left in place: $relative ($error)', name: 'AppRecording');
+      }
+    }
+  }
+  await meta.set(legacyRecordingsMovedKey, '$moved');
+  return (moved: moved, failed: failed);
+}
+
+/// The attempt prefix of a recording's segment (`<prefix>_000001.ts`,
+/// `<prefix>_000001.clock-v1.ts`) or clock journal; a 3.x strftime segment
+/// (no prefix) is ''; null for other files.
+String? _attemptPrefix(String name) {
+  final lower = name.toLowerCase();
+  if (lower.endsWith('.clock-v1.csv')) return name.substring(0, name.length - '.clock-v1.csv'.length);
+  if (!lower.endsWith('.ts')) return null;
+  return RegExp(r'^(.+)_\d{6,}(?:\.clock-v1)?\.ts$', caseSensitive: false).firstMatch(name)?.group(1) ?? '';
+}
+
+/// [path], or with `-1`, `-2`… before the extension while that is taken.
+String _freePath(String path) {
+  var candidate = path;
+  for (var suffix = 1; File(candidate).existsSync() || Directory(candidate).existsSync(); suffix++) {
+    candidate = p.join(p.dirname(path), '${p.basenameWithoutExtension(path)}-$suffix${p.extension(path)}');
+  }
+  return candidate;
+}
+
+/// Renames [file] to [target], or copies it there (another file system:
+/// the private and the external storage) and deletes it.
+Future<void> _moveFile(File file, String target) async {
+  await Directory(p.dirname(target)).create(recursive: true);
+  try {
+    await file.rename(target);
+    return;
+  } on FileSystemException {
+    // Another file system: copy below.
+  }
+  final partial = File('$target.partial');
+  try {
+    await file.copy(partial.path);
+    await partial.rename(target);
+  } on FileSystemException {
+    if (partial.existsSync()) await partial.delete();
+    rethrow;
+  }
+  try {
+    await file.delete();
+  } on FileSystemException catch (error) {
+    log('3.x recording copied but not deleted: ${file.path} ($error)', name: 'AppRecording');
+  }
+}
+
 /// The recording settings: live_store's `Settings.recorder` (3.x's Hive
 /// keys, carried by backups since M8.1) read as live_record's
 /// [RecordSettings].
@@ -272,7 +377,12 @@ final class AppRecording {
     this._store,
     this._storageAccess,
     this.tasksKey = recorderTasksKey,
+    this.legacyDirectory,
   });
+
+  /// 3.x's default recording folder ([legacyRecordDirectory]); its finished
+  /// recordings move to the default folder once at [start].
+  final Future<String?> Function()? legacyDirectory;
 
   /// Where the tasks are kept ([recorderTasksKeyFor]).
   final String tasksKey;
@@ -313,6 +423,7 @@ final class AppRecording {
 
   Future<void> _start() async {
     await loadSettings();
+    unawaited(_moveLegacyRecordings());
     final recorder = this.recorder;
     if (recorder == null) return;
     final chat = this.chat;
@@ -323,6 +434,20 @@ final class AppRecording {
     if (chat != null) _taskChanges = recorder.changes.listen(chat.sync);
     final store = _store;
     if (store != null) await recorder.restore(await savedRecorderTasks(store, key: tasksKey));
+  }
+
+  Future<void> _moveLegacyRecordings() async {
+    final store = _store;
+    final legacy = legacyDirectory;
+    if (store == null || legacy == null) return;
+    try {
+      final from = await legacy();
+      if (from == null) return;
+      final result = await moveLegacyRecordings(meta: store.meta, from: from, to: await storage.defaultDirectory());
+      if (result != null) log('3.x recordings: ${result.moved} moved, ${result.failed} left', name: 'AppRecording');
+    } on Object catch (error, stack) {
+      log('Moving the 3.x recordings failed', name: 'AppRecording', error: error, stackTrace: stack);
+    }
   }
 
   /// How many tasks hold a recording now (preparing, writing, reconnecting
@@ -431,6 +556,7 @@ AppRecording buildAppRecording({
     store: store,
     storageAccess: access,
     tasksKey: tasksKey,
+    legacyDirectory: legacyRecordDirectory,
   );
 }
 

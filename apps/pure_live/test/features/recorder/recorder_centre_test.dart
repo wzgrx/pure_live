@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:path/path.dart' as p;
 import 'package:pure_live/app/recording.dart';
@@ -599,5 +600,58 @@ void main() {
     expect(recorderColumns(1280 - 48), 3);
     expect(recorderColumns(1920 - 48), 4);
     expect(recorderColumns(3840 - 48), 4);
+  });
+
+  test("3.x's default folder: the finished recordings move once, sub-folders kept (release fixes, item 8)", () async {
+    final temp = Directory.systemTemp.createTempSync('legacy_records_');
+    addTearDown(() => temp.deleteSync(recursive: true));
+    final from = p.join(temp.path, 'app_flutter', 'PURE_LIVE', 'RECORDS');
+    final to = p.join(temp.path, 'external', 'Records');
+    void write(String root, String path, [String text = 'x']) =>
+        (File(p.join(root, path))..createSync(recursive: true)).writeAsStringSync(text);
+    write(from, 'douyu/晚风/20260901_210000.mp4', 'video');
+    write(from, 'douyu/晚风/20260901_210000.xml', 'chat');
+    // An attempt the import's task may still finish: its parts stay.
+    write(from, 'huya/星河/20260902_010000_000001.clock-v1.ts');
+    write(from, 'huya/星河/20260902_010000.clock-v1.csv');
+    write(from, 'huya/星河/20260902_010000.xml');
+    write(from, 'huya/星河/.20260902_010000.ffconcat');
+    write(from, 'huya/星河/20260902_000000.mp4.partial');
+    write(from, '.pure_live_recording_root');
+    write(from, 'old.mp4', 'from 3.x');
+    write(to, 'old.mp4', 'already here');
+    // A file that cannot go: its folder's name is taken by a file.
+    write(from, 'blocked/a.mp4');
+    write(to, 'blocked');
+    final store = await LiveStore.memory(cipher: FakeCipher());
+    addTearDown(store.close);
+
+    final result = await moveLegacyRecordings(meta: store.meta, from: from, to: to);
+    expect(result, (moved: 3, failed: 1));
+    expect(File(p.join(to, 'douyu/晚风/20260901_210000.mp4')).readAsStringSync(), 'video');
+    expect(File(p.join(to, 'douyu/晚风/20260901_210000.xml')).existsSync(), isTrue);
+    expect(File(p.join(to, 'old.mp4')).readAsStringSync(), 'already here');
+    expect(File(p.join(to, 'old-1.mp4')).readAsStringSync(), 'from 3.x');
+    expect(File(p.join(from, 'douyu/晚风/20260901_210000.mp4')).existsSync(), isFalse);
+    expect(File(p.join(from, 'blocked/a.mp4')).existsSync(), isTrue, reason: 'left in place');
+    for (final kept in [
+      'huya/星河/20260902_010000_000001.clock-v1.ts',
+      'huya/星河/20260902_010000.clock-v1.csv',
+      'huya/星河/20260902_010000.xml',
+      'huya/星河/.20260902_010000.ffconcat',
+      'huya/星河/20260902_000000.mp4.partial',
+      '.pure_live_recording_root',
+    ]) {
+      expect(File(p.join(from, kept)).existsSync(), isTrue, reason: kept);
+    }
+    expect(Directory(p.join(to, 'huya')).existsSync(), isFalse);
+
+    write(from, 'later.mp4');
+    expect(
+      await moveLegacyRecordings(meta: store.meta, from: from, to: to),
+      isNull,
+      reason: 'once',
+    );
+    expect(File(p.join(from, 'later.mp4')).existsSync(), isTrue);
   });
 }

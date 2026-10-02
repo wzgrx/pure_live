@@ -57,6 +57,17 @@
 - **测试**：`packages/live_player/test/session_test.dart`“disposed while the engine is still being created: dispose waits for it and releases it”（假引擎用 `Completer` 延迟创建，期间 `dispose`：`dispose` 要等到创建完成，引擎被释放、没有打开过、`session.engine` 为空；改之前失败，`dispose` 提前结束）；“disposed while the engine creation fails: dispose still completes”。
 - **验证**：live_player 全部测试通过。
 
+## 8. 3.x 默认目录里的录像
+
+- **根因**：3.x 默认录到 `<app_flutter>/PURE_LIVE/RECORDS`（`AppPathManager.dirRecords`，应用私有存储）；v4 默认录到外部私有目录 `Android/data/<包名>/files/Records`（`app/recording.dart` 的 `defaultRecordDirectory`），导入的 3.x 私有路径又被 `RecordStorage` 当作无效选择丢掉（`_isAndroidPrivate`）。升级后旧录像留在用户进不去的私有目录里，录制中心也看不到。
+- **改动**（`app/recording.dart`）：
+  - `legacyRecordDirectory()`：Android 上 3.x 的默认目录（`getApplicationDocumentsDirectory()/PURE_LIVE/RECORDS`），其他平台为 null。
+  - `moveLegacyRecordings(meta, from, to)`：只做一次（meta `recorder.legacyRecordingsMoved`）。把成品文件按原来的相对路径移到 v4 的默认目录；不移的有：分段（`.ts`）、时钟日志（`.clock-v1.csv`）、`.partial`、隐藏文件（合并清单、目录标记），以及同目录里还有分段或日志的那次录制的其他文件（导入的任务可能还要在原处合并它们）。同名的加 `-1`、`-2`。先 `rename`，跨文件系统（私有存储 → 外部存储）时复制到 `.partial` 再改名、删原文件。移不动的留在原处，记日志。
+  - `AppRecording.start()` 加载设置后在后台调用它（不耽误恢复任务），目标是默认目录（不需要权限；用户另选了目录时也移到默认目录）。
+- **测试**：`test/features/recorder/recorder_centre_test.dart`“3.x's default folder: the finished recordings move once, sub-folders kept”：临时目录模拟两边，成品 MP4 和弹幕 XML 带子目录移过去；未完成那次录制的分段、日志、XML、清单、`.partial` 和目录标记留下；同名改成 `old-1.mp4`；目标路径被文件占住的那个留在原处、计为失败；第二次不再移动。（这是新加的函数，改之前测试编译不过，没法先跑出“失败”。）跨文件系统的复制分支没有单独测（同一文件系统上 `rename` 就成功了）。
+- **验证**：上述测试和应用全部测试通过。没在真机上试。
+- **已知不足**：导入的 3.x 任务里的“上次文件”路径（`lastOutputPath`）没改，录制中心点这个任务的“打开文件夹”仍指向旧的私有目录。
+
 ## 9. 重叠的 stop 留下空闲释放定时器（追加）
 
 - **根因**：`PlaybackSession.stop()` 在 `await` 输入关闭和 `engine.stop()` 之后直接 `_idleTimer = Timer(45 s, _releaseEngine)`。两次 `stop` 重叠时，第二次把第一次的定时器引用覆盖掉，第一次的定时器再也取消不了；之后 `open` 只取消第二个，45 秒后第一个触发，把正在播放的引擎释放掉。`stop` 还没结束就 `open`（换线、切房间）也一样：`stop` 在 `open` 之后才设定时器。U.2b2 开发时发现，页面那边用“停止排队”绕开了，包本身没修。

@@ -24,6 +24,9 @@ final class LiveUiStrings {
     required this.verifying,
     required this.delete,
     this.offline = '未开播',
+    this.cancel = '取消',
+    this.close = '关闭',
+    this.gotIt = '知道了',
   });
 
   /// Simplified Chinese (3.x `zh.json`).
@@ -61,6 +64,9 @@ final class LiveUiStrings {
     verifying: 'Verifying',
     delete: 'Delete',
     offline: 'Offline',
+    cancel: 'Cancel',
+    close: 'Close',
+    gotIt: 'Got it',
   );
 
   /// Empty state title (`status_empty_title`).
@@ -108,6 +114,15 @@ final class LiveUiStrings {
   /// The mark of a room that is not live, on its cover (U.4a c4,
   /// `offline_room_title`).
   final String offline;
+
+  /// The dialogs' "取消" (`cancel`).
+  final String cancel;
+
+  /// "关闭": a panel's ✕, a toast's ✕ (`close`).
+  final String close;
+
+  /// The one button of a message dialog, "知道了" (`got_it`, U.1d c14).
+  final String gotIt;
 }
 
 /// Request headers for an image address (3.x `networkImageHeaders`: some

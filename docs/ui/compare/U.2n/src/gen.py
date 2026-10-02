@@ -130,7 +130,7 @@ def timer_body(n=False, on=True, chosen=30, left='28 分钟后暂停（22:04）'
     return (f'<div class="swr2"{N(nn(1), "tr", "chg")}><div class="x"><div class="a">启用当前直播间定时停止</div>'
             f'<div class="b{" on" if on else ""}">{sub}</div></div><span class="swm{"" if on else " off"}"></span></div>'
             '<div class="cap">停止前播放时长</div>'
-            f'<div class="chips{"" if on else " dis"}">{chips}</div>'
+            f'<div class="chips">{chips}</div>'
             f'<div class="fdr"><div class="fd2"{N(nn(3), "tl", "keep")}><span class="lbl">自定义</span><span>{chosen}</span><span class="sfx">分钟</span></div>'
             f'<span class="fbtn"{N(nn(4), "tc", "chg")}>开始</span></div>'
             '<div class="fh2">输入 1 分钟至 365 天之间的分钟数</div>')
@@ -178,16 +178,19 @@ DEVICES = [('客厅电视', '192.168.1.23'), ('小米盒子 4S', '192.168.1.41')
 
 def cast_body(state='ready', n=False):
     nn = (lambda k: k) if n else (lambda k: None)
-    prog = '<div class="prog"><i></i></div>' if state == 'searching' else ''
+    prog = '<div class="prog"><i></i></div>' if state == 'searching' else '<div style="height:4px"></div>'
+    refresh = (f'<span class="b" style="width:48px;height:40px;display:grid;place-items:center;color:var(--onv);{"opacity:.38;" if state == "searching" else ""}"'
+               f'{N(nn(7), "tc", "keep")}>' + mr('refresh') + '</span>')
+    caption = f'<div style="display:flex;align-items:center;padding-right:4px"><div class="cap" style="flex:1">原画 · 线路1 · 投屏到</div>{refresh}</div>'
     if state == 'empty':
-        return ('<div style="padding:40px 24px;text-align:center;color:var(--onv);font-size:14px;line-height:1.6">' + mr('tv_off', 40, 'opacity:.6') +
+        return (prog + caption + '<div style="padding:24px 24px;text-align:center;color:var(--onv);font-size:14px;line-height:1.6">' + mr('tv_off', 40, 'opacity:.6') +
                 '<div style="margin-top:8px;color:var(--on)">未发现DLNA设备</div><div style="font-size:13px">请让本设备与接收器保持在同一局域网。</div></div>')
     rows = []
     for i, (name, ip) in enumerate(DEVICES if state != 'searching' else DEVICES[:1]):
         cur = state == 'cast' and i == 0
         trail = ('<span class="spin"></span>' if state == 'casting' and i == 0 else (mr('check', 22, 'color:var(--primary)') if cur else ''))
         rows.append(f'<div class="opr{" on" if cur else ""}"{N(nn(8), "tr", "chg") if i == 0 else ""}><span class="lead">' + mr('tv', 22) + f'</span><div class="x"><div class="a">{name}</div><div class="b">{ip}</div></div>{trail}</div>')
-    return prog + '<div class="cap">原画 · 线路1 · 投屏到</div>' + ''.join(rows) + ('<div class="hint">正在搜索 DLNA 设备……</div>' if state == 'searching' else '')
+    return prog + caption + ''.join(rows) + ('<div class="hint">正在搜索 DLNA 设备……</div>' if state == 'searching' else '')
 
 
 def message_body(n=False):
@@ -288,7 +291,7 @@ def v4_link_portrait_fullscreen():
 
 
 def v4_cast_tablet():
-    return tablet(pnl('投屏', cast_body('cast'), back=True, actions='<span class="b">' + mr('refresh') + '</span>'))
+    return tablet(pnl('投屏', cast_body('cast'), back=True))
 
 
 def v4_message_landscape():
@@ -303,12 +306,12 @@ def v4_panels(n=True):
     cells = [
         ('获取直链 · 清晰度', '当前清晰度主色加勾，写“正在播放”', pnl('获取直链', quality_body(n=n), n=False)),
         ('获取直链 · 线路', '左上 ← 回到清晰度；当前线路主色加勾；点一条复制并关闭', pnl('获取直链', line_body(n=n), back=True, n_back=nn(5))),
-        ('投屏 · 设备', '← 回到线路；正在投的设备主色加勾；右上刷新', pnl('投屏', cast_body('cast', n=n), back=True, actions=f'<span class="b"{N(nn(7), "tc", "keep")}>' + mr('refresh') + '</span>')),
-        ('投屏 · 搜索中', '顶上一条进度；搜到一个列一个', pnl('投屏', cast_body('searching'), back=True, actions='<span class="b" style="opacity:.38">' + mr('refresh') + '</span>')),
-        ('投屏 · 正在投', '点了的设备转圈，投上后加勾', pnl('投屏', cast_body('casting'), back=True, actions='<span class="b">' + mr('refresh') + '</span>')),
-        ('投屏 · 没找到', '原文案；右上刷新再找一次', pnl('投屏', cast_body('empty'), back=True, actions='<span class="b">' + mr('refresh') + '</span>')),
+        ('投屏 · 设备', '← 回到线路；正在投的设备主色加勾；列表上方那行右边是刷新', pnl('投屏', cast_body('cast', n=n), back=True)),
+        ('投屏 · 搜索中', '顶上一条进度；搜到一个列一个', pnl('投屏', cast_body('searching'), back=True)),
+        ('投屏 · 正在投', '点了的设备转圈，投上后加勾', pnl('投屏', cast_body('casting'), back=True)),
+        ('投屏 · 没找到', '原文案；点刷新再找一次', pnl('投屏', cast_body('empty'), back=True)),
         ('房间音量 · 静音后', '图标变成静音；再点回到静音前的音量（B-14）', pnl('房间音量', volume_body(muted=True))),
-        ('定时关闭 · 关着', '时长灰着，点一个时长直接开', pnl('定时关闭', timer_body(on=False))),
+        ('定时关闭 · 关着', '点一个时长直接开始', pnl('定时关闭', timer_body(on=False))),
     ]
     o = ['<div style="display:flex;flex-wrap:wrap;gap:24px;padding:24px;background:var(--sch)">']
     for cap, sub, inner in cells:

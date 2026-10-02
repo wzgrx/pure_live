@@ -18,6 +18,12 @@ import 'settings_harness.dart';
 void main() {
   setUpAll(loadStrings);
 
+  testWidgets("P02: settings keep Android's stretch at their ends; only refreshable lists bounce", (tester) async {
+    await pumpSettings(tester);
+    expect(find.byType(AppRefreshView), findsNothing);
+    expect(find.byType(StretchingOverscrollIndicator), findsWidgets);
+  });
+
   group('overview (U.6a)', () {
     testWidgets('five groups and the 3.x rows in their new order, with their icons', (tester) async {
       await pumpSettings(tester, height: 2600);

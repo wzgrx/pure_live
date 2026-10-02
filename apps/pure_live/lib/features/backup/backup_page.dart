@@ -291,11 +291,15 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     final opensFolder = ref.watch(backupOpensFolderProvider);
     return Scaffold(
       appBar: settingsPageAppBar(context, title: i18n('backup_recover')),
-      body: RefreshIndicator(
-        onRefresh: _loadFiles,
-        child: SettingsPageList(
+      // 3.x's bounce and classic header (P02).
+      body: AppRefreshView(
+        onRefresh: () async {
+          await _loadFiles();
+          return _filesFailed ? const AppRefreshFailure() : null;
+        },
+        builder: (context, physics) => SettingsPageList(
           key: const ValueKey('backup-list'),
-          physics: const AlwaysScrollableScrollPhysics(parent: PureLiveScrollPhysics()),
+          physics: physics,
           children: [
             SettingsGroup(
               first: true,

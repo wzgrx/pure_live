@@ -382,6 +382,17 @@ void main() {
     danmaku.chat('暂停时不飞');
     await tester.pump();
     expect(tester.state<DanmakuOverlayState>(find.byType(DanmakuOverlay)).flyingCount, 0);
+
+    // B02 c3: "暂停时的弹幕 · 继续飘过" lets them fly on while paused.
+    await tester.runAsync(() => services.store.settings.set(Settings.danmakuPausedBehavior, 'continue'));
+    await tester.pump();
+    expect(tester.widget<DanmakuOverlay>(find.byType(DanmakuOverlay)).running, isTrue);
+    danmaku.chat('暂停时照飞');
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.state<DanmakuOverlayState>(find.byType(DanmakuOverlay)).flyingCount, 1);
+    await tester.runAsync(() => services.store.settings.set(Settings.danmakuPausedBehavior, 'pause'));
+    await tester.pump();
+    expect(tester.widget<DanmakuOverlay>(find.byType(DanmakuOverlay)).running, isFalse);
     await _close(tester, services);
   });
 

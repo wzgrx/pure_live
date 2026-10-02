@@ -868,11 +868,22 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
       onRetry: () => unawaited(_controller.retry(index)),
       danmaku: showDanmaku
           ? Consumer(
-              builder: (context, ref, _) => DanmakuOverlay(
-                messages: _controller.flying,
-                retractions: _controller.retractions,
-                look: danmakuLookOf(ref),
-              ),
+              // B02 c3: they stand while the cell's video is paused, as
+              // "暂停时的弹幕" says (as on the room's picture).
+              builder: (context, ref, _) {
+                final look = danmakuLookOf(ref);
+                final pausedBehavior = watchSetting(ref, Settings.danmakuPausedBehavior);
+                return StreamBuilder<PlaybackState>(
+                  stream: cell.session?.states,
+                  initialData: cell.playback,
+                  builder: (context, snapshot) => DanmakuOverlay(
+                    messages: _controller.flying,
+                    retractions: _controller.retractions,
+                    look: look,
+                    running: danmakuRunning((snapshot.data ?? cell.playback).status, pausedBehavior),
+                  ),
+                );
+              },
             )
           : null,
       footer: bar

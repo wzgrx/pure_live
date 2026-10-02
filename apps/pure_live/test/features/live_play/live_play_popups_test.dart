@@ -630,8 +630,11 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('live-play-fullscreen')));
       await _settle(tester);
-      // The "● 录制中" mark opens the record panel.
-      await tester.tap(find.byKey(const ValueKey('live-play-recording-mark')));
+      // U.2a2 c8: the landscape bar's record button carries the time, so no
+      // "● 录制中" mark repeats it under the bar; the button opens the panel.
+      expect(_in('live-play-record', find.byKey(const ValueKey('live-play-record-time'))), findsOneWidget);
+      expect(find.byKey(const ValueKey('live-play-recording-badge')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('live-play-record')));
       await tester.pumpAndSettle();
       final panel = tester.getRect(find.byKey(const ValueKey('live-play-record-panel')));
       expect(panel.width, 360);
@@ -711,6 +714,24 @@ void main() {
     for (final MapEntry(:key, :value) in items.entries) {
       expect(_in('danmaku-setting-$key', find.text(value)), findsOneWidget, reason: key);
     }
+    // B02 c3: "暂停时的弹幕" in 显示范围 (after its last row), with the video by
+    // default; the choice applies at once.
+    expect(_in('danmaku-setting-pausedBehavior', find.text('暂停时的弹幕')), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byKey(const ValueKey('danmaku-setting-pausedBehavior'))).dy,
+      allOf(
+        greaterThan(tester.getTopLeft(find.byKey(const ValueKey('danmaku-setting-bottom'))).dy),
+        lessThan(tester.getTopLeft(find.descendant(of: panel, matching: find.text('样式'))).dy),
+      ),
+    );
+    final paused = tester.widget<SegmentedButton<String>>(find.byKey(const ValueKey('danmaku-paused-behavior')));
+    expect(paused.selected, {'pause'});
+    await tester.tap(_in('danmaku-paused-behavior', find.text('继续飘过')));
+    await _settle(tester);
+    expect(room.services.store.settings.get(Settings.danmakuPausedBehavior), 'continue');
+    expect(tester.widget<SegmentedButton<String>>(find.byKey(const ValueKey('danmaku-paused-behavior'))).selected, {
+      'continue',
+    });
     // 3.x's ranges.
     final speed = tester.widget<Slider>(find.byKey(const ValueKey('danmaku-slider-speed')));
     expect((speed.min, speed.max), (20, 400));

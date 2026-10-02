@@ -32,12 +32,12 @@ const double miniCentreSize = 58;
 /// window, Android's picture-in-picture and the desktop mini window.
 ///
 /// - Top left: back to the room (new); top right: close (always stops, c2);
-///   the centre: play or pause, refresh when playback failed; the desktop
-///   adds the pin at the bottom right and the volume (wheel, bar at the
-///   bottom).
+///   the centre: play or pause, refresh when playback failed, the room's
+///   own [VideoCentreButton] (B02 c2); the desktop adds the pin at the
+///   bottom right and the volume (wheel, bar at the bottom).
 /// - A touch shows the buttons for 3 s, a touch while they show goes back
 ///   to the room; a mouse shows them while it hovers and a double click goes
-///   back (3.x). Paused, the play button stays.
+///   back (3.x). Paused, the play button stays; buffering, it turns.
 /// - Bottom left: the recording mark; over the picture the "小窗弹幕".
 /// - Android's picture-in-picture has none of the buttons (the system draws
 ///   its own).
@@ -222,7 +222,7 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
           builder: (context, audioOnly, _) => audioOnly ? _MiniAudioCover(room: room.room) : const SizedBox.shrink(),
         ),
         IgnorePointer(child: CompactDanmakuLayer(controller: room)),
-        _MiniStatusLayer(controller: room, reconnect: widget.reconnect),
+        _MiniStatusLayer(controller: room, reconnect: widget.reconnect, centre: _buttons),
         Positioned(
           left: 6,
           bottom: 6,
@@ -268,8 +268,11 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
         builder: (context, status, _) {
           final shown = _shown;
           final failed = status == MiniStatus.failed;
-          // Paused, the play button stays (c8); failed, refresh stays.
-          final centreShown = shown || status == MiniStatus.paused || failed;
+          final paused = status == MiniStatus.paused;
+          final buffering = status == MiniStatus.buffering;
+          // Paused, the play button stays (c8); buffering, it turns (B02
+          // c2, as in the room); failed, refresh stays.
+          final centreShown = shown || paused || buffering || failed;
           final centreBusy = status == MiniStatus.loading || status == MiniStatus.reconnecting;
           return Stack(
             fit: StackFit.expand,
@@ -311,20 +314,25 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
                     child: Padding(
                       padding: EdgeInsets.only(top: failed ? 16 : 0),
                       child: failed
-                          ? _MiniButton(
+                          ? VideoCentreButton(
                               key: const ValueKey('mini-retry'),
                               tooltip: i18n('retry'),
                               icon: AppIcons.refresh,
                               size: miniCentreSize,
-                              iconSize: 34,
                               onPressed: _room.retry,
                             )
-                          : _MiniButton(
+                          : VideoCentreButton(
                               key: const ValueKey('mini-play-pause'),
-                              tooltip: i18n(status == MiniStatus.paused ? 'multiview_play' : 'multiview_pause'),
-                              icon: status == MiniStatus.paused ? AppIcons.miniPlay : AppIcons.miniPause,
+                              tooltip: i18n(
+                                buffering
+                                    ? 'live_play_buffering'
+                                    : paused
+                                    ? 'multiview_play'
+                                    : 'multiview_pause',
+                              ),
+                              icon: paused ? AppIcons.play : AppIcons.pause,
+                              busy: buffering,
                               size: miniCentreSize,
-                              iconSize: 42,
                               onPressed: _togglePlay,
                             ),
                     ),
@@ -405,38 +413,30 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
   );
 }
 
-/// A round button on the picture: white on a 45 % black disc (U.2j c2).
+/// A corner button on the picture: white on a 45 % black disc (U.2j c2;
+/// the centre one is the room's [VideoCentreButton]).
 class _MiniButton extends StatelessWidget {
-  const new({
-    required this.tooltip,
-    required this.icon,
-    required this.onPressed,
-    this.size = miniButtonSize,
-    this.iconSize = 20,
-    super.key,
-  });
+  const new({required this.tooltip, required this.icon, required this.onPressed, super.key});
 
   final String tooltip;
   final IconData icon;
   final VoidCallback? onPressed;
-  final double size;
-  final double iconSize;
 
   @override
   Widget build(BuildContext context) => SizedBox.square(
-    dimension: size,
+    dimension: miniButtonSize,
     child: IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
-      iconSize: iconSize,
+      iconSize: 20,
       padding: EdgeInsets.zero,
       style: IconButton.styleFrom(
         backgroundColor: OnVideoColors.button,
         foregroundColor: OnVideoColors.foreground,
         disabledBackgroundColor: OnVideoColors.button,
         disabledForegroundColor: OnVideoColors.disabled,
-        fixedSize: Size.square(size),
-        minimumSize: Size.square(size),
+        fixedSize: const Size.square(miniButtonSize),
+        minimumSize: const Size.square(miniButtonSize),
       ),
       icon: Icon(icon),
     ),
@@ -538,12 +538,15 @@ class _MiniAudioCover extends StatelessWidget {
 
 /// Loading, buffering, reconnecting and failure over a mini window's picture
 /// (c8): small, no buttons of their own (the surface's centre button
-/// retries).
+/// retries). Where the surface has its centre button ([centre]), that
+/// button turns while buffering instead (B02 c2); picture-in-picture keeps
+/// the plain spinner.
 class _MiniStatusLayer extends StatelessWidget {
-  const new({required this.controller, required this.reconnect});
+  const new({required this.controller, required this.reconnect, required this.centre});
 
   final LiveRoomController controller;
   final ReconnectWatch reconnect;
+  final bool centre;
 
   @override
   Widget build(BuildContext context) => StreamBuilder<PlaybackState>(
@@ -578,7 +581,8 @@ class _MiniStatusLayer extends StatelessWidget {
               color: OnVideoColors.ground,
               child: Center(child: spinner),
             ),
-            MiniStatus.buffering => const Center(key: ValueKey('mini-buffering'), child: spinner),
+            MiniStatus.buffering =>
+              centre ? const SizedBox.shrink() : const Center(key: ValueKey('mini-buffering'), child: spinner),
             MiniStatus.reconnecting => ColoredBox(
               key: const ValueKey('mini-reconnecting'),
               color: OnVideoColors.dim,

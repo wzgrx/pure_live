@@ -52,6 +52,7 @@ final class PlaybackState {
     this.position = Duration.zero,
     this.duration = Duration.zero,
     this.appliedQualityData,
+    this.recovery = 0,
   });
 
   /// Where the session is.
@@ -106,6 +107,19 @@ final class PlaybackState {
   /// The quality the platform applied (Picarto 11-1: after a refresh that
   /// lost the old tier, the interface shows what actually plays).
   final Object? appliedQualityData;
+
+  /// The session's attempt, counting from 1, at bringing back a stream that
+  /// failed on its own (a refreshed address, the next line, a new engine,
+  /// software decoding, a retry round); 0 while nothing is being recovered.
+  /// The count runs on over drops in a row and starts again once the
+  /// stream has played long enough to restore the session's recovery
+  /// budgets (30 s by default). Buffering of a stream that has not failed,
+  /// a resume and the user's own reopenings (a new open, another line,
+  /// retry) are no recovery.
+  final int recovery;
+
+  /// Whether the session is bringing a failed stream back ([recovery]).
+  bool get recovering => recovery > 0;
 
   /// Whether the session is playing or about to (3.x's `isPlayingNow`
   /// plus loading).
@@ -168,6 +182,7 @@ final class PlaybackState {
     Duration? position,
     Duration? duration,
     Object? appliedQualityData,
+    int? recovery,
   }) {
     final next = status ?? this.status;
     final keepError = next == PlaybackStatus.error;
@@ -190,6 +205,7 @@ final class PlaybackState {
       position: position ?? this.position,
       duration: duration ?? this.duration,
       appliedQualityData: appliedQualityData ?? this.appliedQualityData,
+      recovery: recovery ?? this.recovery,
     );
   }
 

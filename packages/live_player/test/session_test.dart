@@ -190,6 +190,83 @@ void main() {
     });
   });
 
+  test('B02: the state says when the session recovers and which attempt; buffering, a resume and the user do not', () {
+    fakeAsync((async) {
+      start(PlaybackRequest(site: 'yy', plan: _plan([_a, _b])), async);
+      final seen = <(PlaybackStatus, int)>[];
+      final subscription = session.states.listen((state) => seen.add((state.status, state.recovery)));
+      addTearDown(subscription.cancel);
+
+      // A stream that waits for data (a YY room right after it starts) has
+      // not failed: buffering, no recovery.
+      engine.emit(const EngineBuffering(buffering: true));
+      expect((session.state.status, session.state.recovering), (PlaybackStatus.buffering, false));
+      engine.playing();
+      expect(session.state.status, PlaybackStatus.playing);
+
+      // A drop: every step of the recovery carries the attempt; playing
+      // again ends it.
+      seen.clear();
+      engine.emit(const EngineError(_network));
+      async.flushMicrotasks();
+      expect(seen.where((state) => state.$1 != PlaybackStatus.playing), everyElement((PlaybackStatus.buffering, 1)));
+      expect(seen.last, (PlaybackStatus.playing, 0));
+      expect(session.state.lineIndex, 1);
+
+      // Another drop soon after is the second attempt; after sustained
+      // playback the count starts again.
+      seen.clear();
+      engine.emit(const EngineError(PlayerException(message: 'reset', type: PlayerErrorType.network, code: 'b')));
+      async.flushMicrotasks();
+      expect(seen.first, (PlaybackStatus.buffering, 2));
+      // Both lines failed: a retry round, the third attempt, brings it back.
+      async.elapse(const Duration(seconds: 1));
+      expect(seen.map((state) => state.$2), contains(3));
+      expect((session.state.status, session.state.recovery), (PlaybackStatus.playing, 0));
+      async.elapse(const Duration(seconds: 31));
+      seen.clear();
+      engine.emit(const EngineError(PlayerException(message: 'reset', type: PlayerErrorType.network, code: 'c')));
+      async.flushMicrotasks();
+      expect(seen.first, (PlaybackStatus.buffering, 1));
+
+      // A pause and its resume: buffering again, no recovery.
+      unawaited(session.pause());
+      async.flushMicrotasks();
+      seen.clear();
+      unawaited(session.resume());
+      async.flushMicrotasks();
+      expect(seen.first, (PlaybackStatus.buffering, 0));
+      expect(seen.map((state) => state.$2), everyElement(0));
+
+      // The user's own line switch is no recovery either.
+      seen.clear();
+      unawaited(session.selectLine(0));
+      async.flushMicrotasks();
+      expect(seen.map((state) => state.$2), everyElement(0));
+    });
+  });
+
+  test('B02: retry rounds count as attempts; the published error ends the recovery', () {
+    fakeAsync((async) {
+      Future<void> notFound(EngineMedia _) async => throw const PlayerException(
+        message: 'server returned 404',
+        type: PlayerErrorType.source,
+        code: 'source_open',
+      );
+      start(PlaybackRequest(site: 'douyu', plan: _plan([_a])), async);
+      engine
+        ..onOpen = notFound
+        ..emit(const EngineError(_network));
+      async.flushMicrotasks();
+      final first = session.state.recovery;
+      expect(first, greaterThan(0));
+      async.elapse(const Duration(seconds: 1));
+      expect(session.state.recovery, greaterThan(first), reason: 'the first round');
+      async.elapse(const Duration(seconds: 10));
+      expect((session.state.status, session.state.recovering), (PlaybackStatus.error, false));
+    });
+  });
+
   test('a user pause is kept; an unexpected live pause asks the engine to play', () {
     fakeAsync((async) {
       start(PlaybackRequest(site: 'douyu', plan: _plan([_a])), async);

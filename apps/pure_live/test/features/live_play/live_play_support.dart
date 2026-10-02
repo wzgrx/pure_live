@@ -145,9 +145,17 @@ final class FakeEngine implements PlayerEngine {
   /// Reports [event] as the engine.
   void emit(EngineEvent event) => _events.add(event);
 
+  /// What the next opens do instead of playing (B02: an open that hangs
+  /// keeps a recovery on screen); null plays.
+  Future<void> Function(EngineMedia media)? onOpen;
+
   @override
   Future<void> open(EngineMedia media) async {
     opens.add(media);
+    if (onOpen case final script?) {
+      await script(media);
+      return;
+    }
     _events
       ..add(const EngineBuffering(buffering: false))
       ..add(const EnginePlaying(playing: true));

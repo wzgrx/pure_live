@@ -585,8 +585,9 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
             child: PortraitDiagnosticsBadge(session: _room.session, orientation: widget.orientation),
           ),
         // The recording mark: in the inline title bar while the controls
-        // show; under the fullscreen bars (U.2c); dot and time alone in the
-        // corner while they are hidden.
+        // show; under the fullscreen bars (U.2c), where the landscape bar's
+        // record button carries a recording's time itself (U.2a2 c8); mark
+        // and figure alone in the corner while they are hidden.
         if (!_controls || _locked)
           Positioned(
             left: 12,
@@ -601,7 +602,10 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
               key: const ValueKey('live-play-recording-mark'),
               behavior: HitTestBehavior.opaque,
               onTap: () => RoomPanelScope.maybeOf(context)?.open(RoomPanelKind.record),
-              child: RoomRecordingBadge(room: _room.room),
+              child: RoomRecordingBadge(
+                room: _room.room,
+                showsRecording: arrangement != ControlsArrangement.landscape || _room.site.id == SiteIds.iptv,
+              ),
             ),
           ),
         RepaintBoundary(

@@ -166,6 +166,16 @@ void main() {
       expect(Settings.byKey('uiMode'), Settings.uiMode);
     });
 
+    test('B02: "暂停时的弹幕" stands with the video by default; two choices, backed up', () async {
+      expect(store.settings.get(Settings.danmakuPausedBehavior), 'pause');
+      await store.settings.set(Settings.danmakuPausedBehavior, 'continue');
+      expect(store.settings.get(Settings.danmakuPausedBehavior), 'continue');
+      await store.settings.set(Settings.danmakuPausedBehavior, 'stop');
+      expect(store.settings.get(Settings.danmakuPausedBehavior), 'pause');
+      expect(Settings.byKey('danmakuPausedBehavior'), Settings.danmakuPausedBehavior);
+      expect(Settings.danmakuPausedBehavior.scope, isNot(SettingScope.internal));
+    });
+
     test('watch emits the current value and changes', () async {
       final values = <bool>[];
       final sub = store.settings.watch(Settings.hideDanmaku).listen(values.add);

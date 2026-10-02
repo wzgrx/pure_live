@@ -8,6 +8,7 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
 import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
 import 'package:pure_live/shared/danmaku/setting_rows.dart';
 
@@ -38,7 +39,8 @@ String danmakuTemplateDescription(String? preset) => switch (preset) {
 /// Every danmaku setting of 3.x's `DanmakuSettingsContent`
 /// (`pages/danmaku_settings_page.dart:195-420`), with its ranges and keys,
 /// grouped as U.2f confirmed: 观看模板, 显示范围, 样式, 重复弹幕, 画面弹幕交互,
-/// 流畅度; then the groups of [extra] (the live room's chat list and
+/// 流畅度 (显示范围 also holds "暂停时的弹幕", B02 c3, new in v4); then the
+/// groups of [extra] (the live room's chat list and
 /// picture-in-picture danmaku). Settings that depend on a switch grey out
 /// instead of vanishing (D4, D5). Everything applies at once. The live
 /// room's panel and tab and the multi-view's panel (docs/ui/compare/U.8)
@@ -73,6 +75,7 @@ class DanmakuSettingsContent extends ConsumerWidget {
     final autoFps = watchSetting(ref, Settings.danmakuAutoFps);
     final fps = watchSetting(ref, Settings.danmakuFps);
     final refreshMode = watchSetting(ref, Settings.refreshRateMode);
+    final paused = watchSetting(ref, Settings.danmakuPausedBehavior);
     watchSetting(ref, Settings.savedDanmakuTemplate);
     return ListView(
       key: const ValueKey('live-play-danmaku-settings'),
@@ -107,6 +110,25 @@ class DanmakuSettingsContent extends ConsumerWidget {
               min: 0,
               max: 300,
               onChanged: (value) => set(Settings.danmakuBottomArea, value.toDouble()),
+            ),
+            // B02 c3: what the flying danmaku do while the video is paused.
+            SettingRow(
+              settingKey: 'pausedBehavior',
+              title: i18n('danmaku_paused_behavior'),
+              subtitle: i18n('danmaku_paused_behavior_desc'),
+              trailing: const SizedBox.shrink(),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: SegmentedButton<String>(
+                key: const ValueKey('danmaku-paused-behavior'),
+                segments: [
+                  ButtonSegment(value: DanmakuPausedBehavior.pause, label: Text(i18n('danmaku_paused_pause'))),
+                  ButtonSegment(value: DanmakuPausedBehavior.fly, label: Text(i18n('danmaku_paused_fly'))),
+                ],
+                selected: {paused},
+                onSelectionChanged: (selection) => set(Settings.danmakuPausedBehavior, selection.first),
+              ),
             ),
           ],
         ),

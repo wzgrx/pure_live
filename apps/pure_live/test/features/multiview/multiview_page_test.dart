@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/multiview/multiview_page.dart';
@@ -17,6 +18,7 @@ import 'package:pure_live/features/multiview/widgets/toolbar.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 
 import '../../support.dart';
 import '../live_play/live_play_support.dart';
@@ -288,6 +290,26 @@ void main() {
     await tester.pump();
     expect(find.text('多画面'), findsOneWidget);
 
+    await _close(tester, services);
+  });
+
+  testWidgets('B02 c3: the danmaku stand while their cell is paused, or fly on as "暂停时的弹幕" says', (tester) async {
+    final (services, _) = await _pump(tester, const Size(393, 852));
+    await _pick(tester, '1');
+    await tester.tap(_key('multiview-danmaku'));
+    await _wait(tester);
+    DanmakuOverlay overlay() => tester.widget<DanmakuOverlay>(_inCell(1, find.byType(DanmakuOverlay)));
+    expect(overlay().running, isTrue);
+    await tester.tap(_key('multiview-control-play'));
+    await _wait(tester);
+    expect(_inCell(1, _key('multiview-paused')), findsOneWidget);
+    expect(overlay().running, isFalse, reason: 'with the video, the default');
+    await tester.runAsync(() => services.store.settings.set(Settings.danmakuPausedBehavior, 'continue'));
+    await _wait(tester);
+    expect(overlay().running, isTrue);
+    await tester.tap(_key('multiview-control-play'));
+    await _wait(tester);
+    expect(overlay().running, isTrue);
     await _close(tester, services);
   });
 

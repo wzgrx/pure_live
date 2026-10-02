@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +16,7 @@ import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/record/record_actions.dart';
 import 'package:pure_live/shared/record/record_state.dart';
 import 'package:pure_live/shared/record/record_status_card.dart';
+import 'package:pure_live/shared/record/saved_file.dart';
 
 /// Opens the record panel of [room]: the room's panel (U.2f), or the same
 /// panel in a sheet where there is no room page around [context] (a lone
@@ -145,48 +145,22 @@ class _RecordPanelBodyState extends ConsumerState<RecordPanelBody> {
     unawaited(_tasks?.cancel());
     unawaited(_settings?.cancel());
     _changes.dispose();
+    _output.dispose();
     super.dispose();
   }
 
   List<LivePlayQuality> get _roomQualities => widget.qualities?.call() ?? const [];
 
-  /// The last recording's file and whether it was there when last looked
-  /// for (B08, audit B-20: each build asked the disk synchronously on the
-  /// UI thread). A build uses the answer it has and looks again in the
-  /// background; a different answer builds the panel again.
-  String? _outputPath;
-  bool _outputExists = false;
-  bool _lookingForOutput = false;
+  /// Whether the last recording's file is there (B08, audit B-20: each
+  /// build asked the disk synchronously on the UI thread). A build uses the
+  /// answer it has and looks again in the background; a different answer
+  /// builds the panel again.
+  late final SavedFileCheck _output = SavedFileCheck(() {
+    if (mounted) setState(() {});
+  });
 
   /// [path] when the file was there when last looked for, else null.
-  String? _saved(String? path) {
-    if (path != _outputPath) {
-      _outputPath = path;
-      _outputExists = false;
-    }
-    _lookForOutput();
-    return _outputExists ? path : null;
-  }
-
-  void _lookForOutput() {
-    final path = _outputPath;
-    if (path == null || _lookingForOutput) return;
-    _lookingForOutput = true;
-    unawaited(
-      // The asynchronous call on purpose: the UI thread does not wait for
-      // the disk (B-20).
-      // ignore: avoid_slow_async_io
-      File(path).exists().then((exists) => exists, onError: (Object _) => false).then((exists) {
-        _lookingForOutput = false;
-        if (!mounted) return;
-        if (path != _outputPath) {
-          _lookForOutput();
-        } else if (exists != _outputExists) {
-          setState(() => _outputExists = exists);
-        }
-      }),
-    );
-  }
+  String? _saved(String? path) => _output.saved(path);
 
   _View _view() {
     final recording = _recording;

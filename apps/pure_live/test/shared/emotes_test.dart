@@ -66,6 +66,21 @@ void main() {
       expect(chatSegments(_chat('[笑哭]')), const [ChatTextSegment('[笑哭]')], reason: 'no table, nothing named');
     });
 
+    test('B09 c7: one parse per message and table, shared by the chat list and the flying layer', () {
+      final message = _chat('哈[笑哭]');
+      final first = chatSegments(message, table);
+      expect(identical(chatSegments(message, table), first), isTrue, reason: 'the flying layer gets the same list');
+      expect(() => first.add(const ChatTextSegment('x')), throwsUnsupportedError, reason: 'shared, so fixed');
+      // Another table (the list loaded later) parses again.
+      final other = EmoteTable.of(const {'[笑哭]': (asset: '', url: 'https://other/xk.png')});
+      final again = chatSegments(message, other);
+      expect(identical(again, first), isFalse);
+      expect(again.last, const ChatEmoteSegment(url: 'https://other/xk.png', alt: '[笑哭]'));
+      // A message of the same words is a message of its own.
+      expect(identical(chatSegments(_chat('哈[笑哭]'), table), first), isFalse);
+      expect(chatSegments(_chat('哈[笑哭]'), table), first);
+    });
+
     test("the message's own pictures (CHZZK, YouTube, a Bilibili sticker); a bundled picture still comes first", () {
       expect(
         chatSegments(

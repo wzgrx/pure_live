@@ -101,6 +101,34 @@ void _nineStates(AppRecording recording, String file) {
 
 const _ids = ['r', 'c', 'j', 'p', 'q', 'w', 'f', 's', 'i'];
 
+/// A file that is always there and notes how it was asked.
+final class _ProbeFile implements File {
+  new(this.path, this.calls);
+
+  @override
+  final String path;
+
+  final List<String> calls;
+
+  @override
+  bool existsSync() {
+    calls.add('existsSync');
+    return true;
+  }
+
+  @override
+  Future<bool> exists() async {
+    calls.add('exists');
+    return true;
+  }
+
+  @override
+  Object? noSuchMethod(Invocation invocation) {
+    calls.add('${invocation.memberName}');
+    return super.noSuchMethod(invocation);
+  }
+}
+
 /// What the page did outside the app.
 final class _Outside {
   final toasts = <String>[];
@@ -447,6 +475,38 @@ void main() {
     await _frames(tester);
     expect(find.text('失败原因'), findsOneWidget);
     expect(find.byType(SelectableText), findsOneWidget);
+  });
+
+  testWidgets('B09 c6: "播放" asks the disk in the background, never synchronously', (tester) async {
+    // B08 c3's rule for the room's record panel, for the centre's cards
+    // (each build called File.existsSync on the UI thread).
+    final missing = p.join(Directory.systemTemp.path, 'pure_live_b09_not_there.mp4');
+    final (recording, _) = await _pump(
+      tester,
+      size: const Size(393, 2000),
+      tasks: [_task('s', status: RecordStatus.completed)],
+      prepare: (recording) => recording.recorder!.tasks.single
+        ..recordedSeconds = 2112
+        ..lastUpdate = _now
+        ..lastOutputPath = missing,
+    );
+    expect(_inCard('s', _key('record-panel-play')), findsNothing);
+    // The last real look ends first (real disk work ends only outside the
+    // fake clock).
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    final calls = <String>[];
+    await IOOverrides.runZoned(() async {
+      final task = recording.recorder!.tasks.single..recordedSeconds = 2113;
+      recording.recorder!.setTaskOptions(task);
+      // The change arrives, the card builds and looks, the answer builds it again.
+      for (var i = 0; i < 3; i++) {
+        await tester.pump();
+      }
+    }, createFile: (path) => _ProbeFile(path, calls));
+    expect(calls, contains('exists'));
+    expect(calls, isNot(contains('existsSync')), reason: 'the UI thread does not wait for the disk');
+    expect(_inCard('s', _key('record-panel-play')), findsOneWidget);
+    await _drain(tester);
   });
 
   testWidgets('filters show their tasks only; an empty one names itself', (tester) async {

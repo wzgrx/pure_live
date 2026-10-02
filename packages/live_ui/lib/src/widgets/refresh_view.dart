@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/scope.dart';
+import 'package:live_ui/src/theme/motion.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
 import 'package:live_ui/src/widgets/status_view.dart';
 
@@ -15,14 +16,6 @@ import 'package:live_ui/src/widgets/status_view.dart';
 // like iOS (`_ERScrollPhysics extends BouncingScrollPhysics`), drew no
 // stretch, and showed the classic header. This is that behaviour, ported
 // for the one header the app uses; easy_refresh is not a dependency.
-
-/// The spring that settles the refresh header at its height, closes it
-/// after a refresh and returns a list pulled past either end: mass 1,
-/// stiffness 500, damping ratio 1, the spring of Flutter's bottom sheet fling
-/// (research 2026-10-02 §2.3). It comes to rest in about 0.35 s; 3.x used
-/// Flutter's default scroll spring (mass 0.5, stiffness 100, ratio 1.1),
-/// which takes about 0.65 s.
-final SpringDescription appRefreshSpring = SpringDescription.withDampingRatio(mass: 1, stiffness: 500);
 
 /// A refresh that failed: [AppRefreshView.onRefresh] completes with one to
 /// show "刷新失败", with [reason] under it (U.1c c19).
@@ -448,8 +441,10 @@ class _RefreshTracker extends ChangeNotifier {
   }
 }
 
-/// [BouncingScrollPhysics] with the refresh header's edges and the shared
-/// spring (easy_refresh's `_ERScrollPhysics`).
+/// [BouncingScrollPhysics] with the refresh header's edges and
+/// [AppMotion.refreshSpring] (easy_refresh's `_ERScrollPhysics`): it settles
+/// the header at its height, closes it after a refresh and returns a list
+/// pulled past either end in about 0.35 s.
 class _RefreshScrollPhysics extends BouncingScrollPhysics {
   const new({required this.tracker, super.parent = const AlwaysScrollableScrollPhysics()});
 
@@ -460,7 +455,7 @@ class _RefreshScrollPhysics extends BouncingScrollPhysics {
       _RefreshScrollPhysics(tracker: tracker, parent: buildParent(ancestor));
 
   @override
-  SpringDescription get spring => appRefreshSpring;
+  SpringDescription get spring => AppMotion.refreshSpring;
 
   @override
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {

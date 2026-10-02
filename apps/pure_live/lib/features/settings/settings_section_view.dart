@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/features/settings/danmaku_page.dart';
 import 'package:pure_live/features/settings/data_tools.dart';
 import 'package:pure_live/features/settings/playback_tiles.dart';
 import 'package:pure_live/features/settings/settings_catalog.dart';
@@ -123,6 +124,9 @@ class SettingsSectionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     if (section == SettingsSection.configPreview) return ConfigPreviewPage(onBack: onBack);
     if (section == SettingsSection.pipDanmaku) return PipDanmakuPage(highlight: highlight, onBack: onBack);
+    // The live room's danmaku settings (F02 c1); the catalogue's danmaku
+    // rows are only for search.
+    if (section == SettingsSection.danmaku) return DanmakuSettingsPage(onBack: onBack);
     final embedded = SettingsPane.of(context);
     return Scaffold(
       key: ValueKey('settings-page-${section.name}'),

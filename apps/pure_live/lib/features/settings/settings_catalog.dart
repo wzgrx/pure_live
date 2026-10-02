@@ -13,6 +13,7 @@ import 'package:pure_live/features/settings/settings_tiles.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
 
 /// "30 分钟", "1.5 小时", "2 小时" (3.x's refresh interval labels).
@@ -29,7 +30,6 @@ String formatDuration(int minutes) =>
 
 String _percent(double value) => '${(value * 100).round()}%';
 String _whole(double value) => '${value.round()}';
-String _pixels(double value) => '${value.round()} px';
 
 /// Video fit names, by the index `videoFitIndex` stores (3.x
 /// `AppConsts.videoFitType`).
@@ -316,7 +316,8 @@ const Map<String, String> settingsPageIntros = {};
 /// Every settings row, in display order: the pages of the overview (3.x's
 /// settings pages, U.6a) and their rows. Appearance and navigation follow
 /// U.6b; playback U.6c; general, platforms, refresh and network U.6d; data
-/// U.6e; danmaku keeps M13.7's rows until U.2e rebuilds it.
+/// U.6e. The danmaku page is the live room's component (F02 c1); its rows
+/// here are for search.
 final List<SettingsEntry> settingsCatalog = _build();
 
 List<SettingsEntry> _build() {
@@ -900,7 +901,9 @@ List<SettingsEntry> _build() {
       'settings_danmaku_block',
       AppIcons.settingsDanmakuBlock,
       route: RoutePath.kSettingsDanmuShield,
-      keywords: ['屏蔽', '关键词', '过滤', 'block'],
+      // The block page also holds the platform's and the similarity filter
+      // (the danmaku page's rows until F02).
+      keywords: ['屏蔽', '关键词', '过滤', 'block', '相似', '刷屏', '斗鱼', '机器人'],
     )
     // ---- portrait streams (U.6c, a page of the video page) ----
     ..subpage = SettingsSubpage.portrait
@@ -1515,73 +1518,70 @@ List<SettingsEntry> _build() {
       settings: [Settings.downloadDirectoryPath],
       keywords: ['下载', 'download', '默认'],
     )
-    // ---- danmaku (U.2e) ----
+    // ---- danmaku (F02 c1) ----
+    // The page is the live room's danmaku settings (DanmakuSettingsPage);
+    // these rows only let search find its settings, in its groups and with
+    // its ranges. Its templates are not settings of their own; the font and
+    // the block list are found on the video page.
     ..section = SettingsSection.danmaku
-    ..group = 'settings_group_danmaku_display'
-    ..toggle(
-      'danmaku_show',
-      'show_danmaku',
-      Settings.enableDanmakuDisplay,
-      Remix.chat_smile_2_line,
-      desc: 'settings_danmaku_show_desc',
-    )
-    ..toggle(
-      'danmaku_on_video',
-      'live_play_danmaku_on_video',
-      Settings.hideDanmaku,
-      Remix.stack_line,
-      inverted: true,
-      desc: 'settings_danmaku_on_video_desc',
-    )
-    ..toggle(
-      'danmaku_no_emoji',
-      'danmaku_no_emoji',
-      Settings.noEmojiMode,
-      Remix.emotion_unhappy_line,
-      desc: 'settings_danmaku_no_emoji_desc',
-      keywords: ['表情', 'emoji'],
-    )
+    ..group = 'danmaku_group_range'
     ..slider(
       'danmaku_area',
-      'live_play_danmaku_area',
+      'danmaku_area',
       Settings.danmakuArea,
-      Remix.layout_top_line,
-      min: 0.1,
+      null,
+      min: 0,
       max: 1,
-      step: 0.05,
+      step: 0.01,
       format: _percent,
       desc: 'settings_danmaku_area_desc',
+      keywords: ['范围', '弹幕'],
     )
     ..slider(
       'danmaku_top',
-      'settings_danmaku_top_margin',
+      'margin_top',
       Settings.danmakuTopArea,
-      Remix.align_top,
+      null,
       min: 0,
       max: 300,
       step: 1,
-      format: _pixels,
+      format: _whole,
       desc: 'settings_danmaku_top_margin_desc',
+      keywords: ['边距', '弹幕'],
     )
     ..slider(
       'danmaku_bottom',
-      'settings_danmaku_bottom_margin',
+      'margin_bottom',
       Settings.danmakuBottomArea,
-      Remix.align_bottom,
+      null,
       min: 0,
       max: 300,
       step: 1,
-      format: _pixels,
+      format: _whole,
       desc: 'settings_danmaku_bottom_margin_desc',
+      keywords: ['边距', '弹幕'],
     )
+    ..choice(
+      'danmaku_paused',
+      'danmaku_paused_behavior',
+      Settings.danmakuPausedBehavior,
+      null,
+      () => _keyed({
+        DanmakuPausedBehavior.pause: 'danmaku_paused_pause',
+        DanmakuPausedBehavior.fly: 'danmaku_paused_fly',
+      }),
+      desc: 'danmaku_paused_behavior_desc',
+      keywords: ['暂停', '弹幕'],
+    )
+    ..group = 'style'
     ..slider(
       'danmaku_opacity',
       'opacity',
       Settings.danmakuOpacity,
-      Remix.contrast_drop_line,
-      min: 0.1,
+      null,
+      min: 0,
       max: 1,
-      step: 0.05,
+      step: 0.01,
       format: _percent,
       keywords: ['透明', 'opacity', '弹幕'],
     )
@@ -1589,11 +1589,11 @@ List<SettingsEntry> _build() {
       'danmaku_speed',
       'speed',
       Settings.danmakuSpeed,
-      Remix.speed_line,
-      min: 30,
+      null,
+      min: 20,
       max: 400,
       step: 1,
-      format: _whole,
+      format: (value) => '${value.round()} px/s',
       desc: 'settings_danmaku_speed_desc',
       keywords: ['速度', 'speed', '弹幕'],
     )
@@ -1601,170 +1601,137 @@ List<SettingsEntry> _build() {
       'danmaku_font_size',
       'font_size',
       Settings.danmakuFontSize,
-      Remix.font_size_2,
+      null,
       min: 10,
-      max: 40,
-      step: 1,
-      format: _whole,
+      max: 30,
+      step: 0.5,
+      format: (value) => '${value.toStringAsFixed(1)} px',
       keywords: ['字号', 'size', '弹幕'],
     )
     ..slider(
       'danmaku_font_weight',
       'font_weight',
       Settings.danmakuFontWeight,
-      Remix.bold,
+      null,
       min: 100,
       max: 900,
       step: 100,
-      format: _whole,
+      format: (value) => i18n(danmakuFontWeightNames[value.round()] ?? 'font_weight_medium'),
       keywords: ['粗细', 'weight', '弹幕'],
     )
     ..toggle(
       'danmaku_stroke',
       'danmaku_stroke',
       Settings.enableDanmakuStroke,
-      Remix.font_color,
+      null,
       desc: 'settings_danmaku_stroke_desc',
+      keywords: ['描边', '弹幕'],
     )
     ..slider(
       'danmaku_stroke_width',
       'stroke',
       Settings.danmakuFontBorder,
-      Remix.pen_nib_line,
+      null,
       min: 0,
       max: 4,
-      step: 0.5,
-      format: (value) => value.toStringAsFixed(1),
-      enabledBy: Settings.enableDanmakuStroke,
+      step: 0.1,
+      format: (value) => '${value.toStringAsFixed(1)} px',
+      requires: () => [needsOn(Settings.enableDanmakuStroke, 'danmaku_stroke')],
       keywords: ['描边', 'stroke', '弹幕'],
     )
     ..toggle(
-      'danmaku_auto_fps',
-      'settings_danmaku_auto_fps',
-      Settings.danmakuAutoFps,
-      Remix.speed_up_line,
-      desc: 'settings_danmaku_auto_fps_desc',
-      keywords: ['帧率', 'fps'],
+      'danmaku_no_emoji',
+      'danmaku_no_emoji',
+      Settings.noEmojiMode,
+      null,
+      desc: 'settings_danmaku_no_emoji_desc',
+      keywords: ['表情', 'emoji', '弹幕'],
     )
-    ..slider(
-      'danmaku_fps',
-      'danmaku_fps',
-      Settings.danmakuFps,
-      Remix.dashboard_3_line,
-      min: 30,
-      max: 240,
-      step: 1,
-      format: (value) => '${value.round()} FPS',
-      keywords: ['帧率', 'fps'],
-    )
-    ..add(
-      'danmaku_font',
-      'change_danmaku_font_family',
-      (context, entry) => FontFamilyTile(entry: entry, setting: Settings.danmakuFontFamilyName),
-      desc: 'settings_app_font_desc',
-      settings: [Settings.danmakuFontFamilyName, Settings.danmakuFontFamilyFileName],
-      keywords: ['字体', 'font'],
-    )
-    ..group = 'danmaku_filter'
-    ..link(
-      'block_list',
-      'settings_block_list',
-      Remix.forbid_line,
-      route: RoutePath.kSettingsDanmuShield,
-      desc: 'settings_block_list_desc',
-      keywords: ['屏蔽', '关键词', 'block'],
-    )
+    ..group = 'danmaku_group_repeat'
     ..toggle(
       'collapse_repeated',
       'collapse_repeated_danmaku',
       Settings.collapseRepeatedDanmaku,
-      Remix.filter_2_line,
+      null,
       desc: 'collapse_repeated_danmaku_desc',
       keywords: ['重复', '刷屏'],
     )
     ..slider(
       'repeat_window',
-      'settings_repeat_window',
+      'repeated_danmaku_window',
       Settings.repeatedDanmakuWindowSeconds,
-      Remix.timer_line,
+      null,
       min: 1,
       max: 30,
-      format: (value) => '${value.round()} s',
-      enabledBy: Settings.collapseRepeatedDanmaku,
-      desc: 'settings_repeat_window_desc',
-    )
-    ..toggle(
-      'similarity_filter',
-      'danmaku_similarity_filter_enable',
-      Settings.enableDanmakuSimilarityFilter,
-      Remix.git_merge_line,
-      desc: 'danmaku_similarity_filter_desc',
-      keywords: ['相似', '刷屏'],
-    )
-    ..slider(
-      'similarity_threshold',
-      'danmaku_similarity_threshold',
-      Settings.danmakuSimilarityThreshold,
-      Remix.equalizer_line,
-      min: 50,
-      max: 100,
-      format: (value) => '${value.round()}%',
-      desc: 'danmaku_similarity_threshold_desc',
-      enabledBy: Settings.enableDanmakuSimilarityFilter,
-    )
-    ..slider(
-      'similarity_duration',
-      'danmaku_similarity_cache_duration',
-      Settings.danmakuSimilarityCacheDuration,
-      Remix.time_line,
-      min: 1,
-      max: 60,
-      format: (value) => '${value.round()} s',
-      desc: 'danmaku_similarity_cache_duration_desc',
-      enabledBy: Settings.enableDanmakuSimilarityFilter,
-    )
-    ..slider(
-      'similarity_size',
-      'danmaku_similarity_max_cache_size',
-      Settings.danmakuSimilarityMaxCacheSize,
-      Remix.stack_line,
-      min: 20,
-      max: 1000,
-      step: 10,
+      step: 1,
       format: _whole,
-      desc: 'danmaku_similarity_max_cache_size_desc',
-      enabledBy: Settings.enableDanmakuSimilarityFilter,
+      requires: () => [needsOn(Settings.collapseRepeatedDanmaku, 'collapse_repeated_danmaku')],
+      desc: 'settings_repeat_window_desc',
+      keywords: ['重复', '刷屏'],
+    )
+    ..group = 'danmaku_group_interaction'
+    ..toggle(
+      'danmaku_tap',
+      'danmaku_tap_action',
+      Settings.enableDanmakuTapInteraction,
+      null,
+      desc: 'settings_danmaku_tap_desc',
+      keywords: ['点击', '弹幕'],
     )
     ..toggle(
-      'douyu_bots',
-      'settings_douyu_bots',
-      Settings.filterDouyuSuspectedAutomatedMessages,
-      Remix.robot_2_line,
-      desc: 'settings_douyu_bots_desc',
-      keywords: ['斗鱼', 'douyu', '机器人'],
+      'danmaku_long_press',
+      'danmaku_long_press_action',
+      Settings.enableDanmakuLongPressInteraction,
+      null,
+      desc: 'settings_danmaku_long_press_desc',
+      keywords: ['长按', '弹幕'],
+    )
+    ..group = 'danmaku_group_smoothness'
+    ..toggle(
+      'danmaku_auto_fps',
+      'settings_danmaku_auto_fps',
+      Settings.danmakuAutoFps,
+      null,
+      desc: 'danmaku_auto_fps_desc',
+      keywords: ['帧率', 'fps', '弹幕'],
+    )
+    ..slider(
+      'danmaku_fps',
+      'danmaku_fps',
+      Settings.danmakuFps,
+      null,
+      min: 30,
+      max: 240,
+      step: 1,
+      format: (value) => '${value.round()} FPS',
+      requires: () => [needsOff(Settings.danmakuAutoFps, 'settings_danmaku_auto_fps')],
+      keywords: ['帧率', 'fps', '弹幕'],
+    )
+    ..group = 'more'
+    ..toggle(
+      'danmaku_show',
+      'show_danmaku',
+      Settings.enableDanmakuDisplay,
+      null,
+      desc: 'settings_danmaku_show_desc',
+      keywords: ['弹幕'],
+    )
+    ..toggle(
+      'danmaku_on_video',
+      'live_play_danmaku_on_video',
+      Settings.hideDanmaku,
+      null,
+      inverted: true,
+      desc: 'settings_danmaku_on_video_desc',
+      keywords: ['弹幕'],
     )
     ..toggle(
       'youtube_all_chat',
       'settings_youtube_all_chat',
       Settings.youtubeShowAllChat,
-      Remix.youtube_line,
+      null,
       desc: 'settings_youtube_all_chat_desc',
-      keywords: ['YouTube', '聊天'],
-    )
-    ..group = 'danmaku_screen_interaction'
-    ..toggle(
-      'danmaku_tap',
-      'settings_danmaku_tap',
-      Settings.enableDanmakuTapInteraction,
-      Remix.cursor_line,
-      desc: 'settings_danmaku_tap_desc',
-    )
-    ..toggle(
-      'danmaku_long_press',
-      'settings_danmaku_long_press',
-      Settings.enableDanmakuLongPressInteraction,
-      Remix.hand,
-      desc: 'settings_danmaku_long_press_desc',
+      keywords: ['YouTube', '聊天', '弹幕'],
     );
   return List.unmodifiable(c.entries);
 }

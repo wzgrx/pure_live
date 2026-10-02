@@ -351,12 +351,23 @@ final class PlaybackSession {
     }
   }
 
-  /// Releases everything; the session cannot be used afterwards.
+  /// Releases everything; the session cannot be used afterwards. An engine
+  /// still being created is waited for and released too.
   Future<void> dispose() async {
     if (_disposed) return;
     await stop();
     _idleTimer?.cancel();
     _disposed = true;
+    final creating = _engineCreating;
+    if (creating != null) {
+      try {
+        // [_engineNow] no longer adopts it once disposed.
+        final created = await creating;
+        if (!identical(created, _engine)) await created.dispose();
+      } on Object {
+        // The creation failed: nothing to release.
+      }
+    }
     await _releaseEngine();
     await _states.close();
   }
@@ -384,6 +395,8 @@ final class PlaybackSession {
     final creating = _engineCreating ??= _createEngine();
     try {
       final created = await creating;
+      // Disposed meanwhile: not adopted, dispose() releases it.
+      _checkAlive();
       if (_engine == null) {
         _engine = created;
         _events = created.events.listen(_onEvent);

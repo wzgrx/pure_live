@@ -261,6 +261,41 @@ void main() {
     });
   });
 
+  test('disposed while the engine is still being created: dispose waits for it and releases it', () {
+    fakeAsync((async) {
+      engine = FakeEngine();
+      final creating = Completer<PlayerEngine>();
+      session = PlaybackSession(engine: () => creating.future, opener: MediaOpener());
+      unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_a]))));
+      async.flushMicrotasks();
+      var done = false;
+      unawaited(session.dispose().then((_) => done = true));
+      async.flushMicrotasks();
+      expect(done, isFalse, reason: 'the engine is still being created');
+      creating.complete(engine);
+      async.flushMicrotasks();
+      expect(engine.disposed, isTrue);
+      expect(engine.opens, isEmpty);
+      expect(session.engine, isNull);
+      expect(done, isTrue);
+    });
+  });
+
+  test('disposed while the engine creation fails: dispose still completes', () {
+    fakeAsync((async) {
+      final creating = Completer<PlayerEngine>();
+      session = PlaybackSession(engine: () => creating.future, opener: MediaOpener());
+      unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_a]))));
+      async.flushMicrotasks();
+      var done = false;
+      unawaited(session.dispose().then((_) => done = true));
+      creating.completeError(StateError('no decoder'));
+      async.flushMicrotasks();
+      expect(done, isTrue);
+      expect(session.engine, isNull);
+    });
+  });
+
   test('a stalled open is bounded and the next line is tried', () {
     fakeAsync((async) {
       engine = FakeEngine();

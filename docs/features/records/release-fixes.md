@@ -22,3 +22,10 @@
 - **改动**：只允许启动图标快捷方式（U.14 c15）和录制通知用到的两个页面：`/search`（搜索直播）、`/record_mannager`（录制中心）。Dart 侧 `ShareIntake.openableRoutes`，其他路由记日志后忽略（不提示）；Kotlin 侧 `OPENABLE_ROUTES` 在入口先丢掉，两边都挡。打开直播间的快捷方式（`platform` + `roomId`）不变，和分享链接一样。
 - **测试**：`test/intake_test.dart`“an outside intent opens only the shortcut pages, anything else is ignored quietly”：`/settings`、`/backup`、`/web_dav`、`/live_play`、`/search/../settings` 都返回 `unsupported`、不导航、不提示；`/search` 照常打开。改之前失败（`/settings` 返回 `opened`）。
 - **验证**：release 构建编译通过（见文末）。没有在手机上用 `am start` 试。
+
+## 3. 播放会话释放时引擎还在创建
+
+- **根因**：`PlaybackSession.dispose()` 只释放已经有的 `_engine`；`_engineNow()` 在 `await` 引擎创建之后不看 `_disposed`。打开直播间后很快离开（引擎还在创建）时，`dispose()` 先结束，随后创建好的引擎被接上并订阅事件，再也没人释放（原生播放器和纹理泄漏）。
+- **改动**（`packages/live_player/lib/src/session.dart`）：`_engineNow()` 等到引擎后先检查会话还在，已释放就不接上（抛出，`open` 那边会话已过期，直接忽略）；`dispose()` 若有正在创建的引擎，等它完成，没被接上就释放它，创建失败则忽略，然后照常释放。
+- **测试**：`packages/live_player/test/session_test.dart`“disposed while the engine is still being created: dispose waits for it and releases it”（假引擎用 `Completer` 延迟创建，期间 `dispose`：`dispose` 要等到创建完成，引擎被释放、没有打开过、`session.engine` 为空；改之前失败，`dispose` 提前结束）；“disposed while the engine creation fails: dispose still completes”。
+- **验证**：live_player 全部测试通过。

@@ -143,8 +143,10 @@ final class WebDavStore {
 
   /// Replaces every server and the current one, in one transaction (3.x
   /// `replaceStateDurably`). Duplicate names keep the first; the current
-  /// one is matched by name.
-  Future<void> replaceAll(Iterable<WebDavConfig> configs, {WebDavConfig? current}) async {
+  /// one is matched by name. [withPasswords] false leaves the stored
+  /// passwords as they are (nothing is encrypted; a removed server's
+  /// password still goes).
+  Future<void> replaceAll(Iterable<WebDavConfig> configs, {WebDavConfig? current, bool withPasswords = true}) async {
     final unique = <String, WebDavConfig>{};
     for (final config in configs) {
       if (config.name.isNotEmpty) unique.putIfAbsent(config.name, () => config);
@@ -153,7 +155,8 @@ final class WebDavStore {
     await _secrets.writeAll({
       for (final name in previous)
         if (!unique.containsKey(name)) SecretRefs.webdav(name): null,
-      for (final config in unique.values) SecretRefs.webdav(config.name): config.password,
+      if (withPasswords)
+        for (final config in unique.values) SecretRefs.webdav(config.name): config.password,
     });
     await _db.write(_tables, () async {
       await _db.run('DELETE FROM webdav_profiles');

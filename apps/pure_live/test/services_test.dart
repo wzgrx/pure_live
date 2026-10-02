@@ -9,6 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:pure_live/app/app_log.dart';
 import 'package:pure_live/app/downloads.dart';
 import 'package:pure_live/app/fonts.dart';
+import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/features/remote_receiver/mdns_peers.dart';
 import 'package:pure_live/features/remote_receiver/remote_sync_service.dart';
 import 'package:pure_live/platform/display_mode.dart';
@@ -361,6 +362,19 @@ void main() {
       await store.settings.set(Settings.appProxyHost, 'proxy.example.com');
       expect(guard.needed, isFalse);
     });
+  });
+
+  test('3.x sign-ins this device could not encrypt: "sign in again" once (release fixes, item 2)', () async {
+    await loadStrings();
+    final store = await LiveStore.memory(cipher: FakeCipher());
+    addTearDown(store.close);
+    final toasts = <String>[];
+    await LegacyReloginNotice.record(store.meta, LegacyImportReport());
+    expect(await LegacyReloginNotice.showOnce(store.meta, toast: toasts.add), isFalse, reason: 'all were kept');
+    await LegacyReloginNotice.record(store.meta, LegacyImportReport()..skippedSecrets.add('cookie/bilibili'));
+    expect(await LegacyReloginNotice.showOnce(store.meta, toast: toasts.add), isTrue);
+    expect(await LegacyReloginNotice.showOnce(store.meta, toast: toasts.add), isFalse);
+    expect(toasts.single, startsWith('部分平台需要重新登录'));
   });
 
   test('device sync finds 3.x devices over mDNS with their TXT record', () async {

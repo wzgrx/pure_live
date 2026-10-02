@@ -8,6 +8,7 @@ import 'package:live_store/src/legacy/legacy_rules.dart';
 import 'package:live_store/src/legacy/legacy_snapshot.dart';
 import 'package:live_store/src/live_store.dart';
 import 'package:live_store/src/rooms.dart';
+import 'package:live_store/src/secrets.dart';
 import 'package:live_store/src/settings/setting.dart';
 import 'package:live_store/src/settings/settings.dart';
 import 'package:live_store/src/webdav.dart';
@@ -107,10 +108,16 @@ final class LegacyImportReport {
   /// Values that could not be read.
   final List<String> skipped = [];
 
+  /// Cookies and WebDAV passwords ([SecretRefs] names) that could not be
+  /// encrypted on this device (its keystore failed). The rest of the source
+  /// is imported and recorded, so these are not tried again: the user signs
+  /// in again.
+  final List<String> skippedSecrets = [];
+
   @override
   String toString() =>
       'LegacyImportReport(imported: $importedSources, before: $alreadyImported, failed: ${failedSources.length}, '
-      'follows: $follows, history: $history, skipped: ${skipped.length})';
+      'follows: $follows, history: $history, skipped: ${skipped.length}, skippedSecrets: ${skippedSecrets.length})';
 }
 
 /// Imports 3.x data into a [LiveStore].
@@ -150,10 +157,11 @@ abstract final class LegacyMigration {
         report.failedSources.add(path);
         continue;
       }
-      await merge(store, snapshot);
+      final unsealed = await merge(store, snapshot);
       report
         ..importedSources += 1
-        ..skipped.addAll(snapshot.skipped);
+        ..skipped.addAll(snapshot.skipped)
+        ..skippedSecrets.addAll(unsealed);
       imported.add(fingerprint);
       ledger.add(fingerprint);
     }
@@ -200,17 +208,22 @@ abstract final class LegacyMigration {
   /// Joins [snapshot] into [store]: settings, cookies and WebDAV servers only
   /// where the store has none; collections joined by identity, stored
   /// entries first.
-  static Future<void> merge(LiveStore store, LegacySnapshot snapshot) async {
+  ///
+  /// What needs no encryption is written first (settings, follows, history,
+  /// groups, block lists, the WebDAV servers without their passwords, the
+  /// kept 3.x values); the cookies and the new servers' passwords last, in
+  /// one write. When the platform cipher fails (some devices' Android
+  /// Keystore), that write alone is skipped: returns the names it could not
+  /// store, empty when all went in.
+  static Future<List<String>> merge(LiveStore store, LegacySnapshot snapshot) async {
     await store.settings.setAll({
       for (final entry in snapshot.settings.entries)
         if (!store.settings.isSet(entry.key)) entry.key: entry.value,
     });
-    if (snapshot.secrets case final secrets?) {
-      await store.secrets.writeAll({
-        for (final entry in secrets.entries)
-          if (store.secrets.read(entry.key) == null && entry.value.isNotEmpty) entry.key: entry.value,
-      });
-    }
+    final secrets = <String, String>{
+      for (final entry in (snapshot.secrets ?? const <String, String>{}).entries)
+        if (store.secrets.read(entry.key) == null && entry.value.isNotEmpty) entry.key: entry.value,
+    };
     if (snapshot.follows case final rooms?) {
       await store.follows.replaceAll(_join(await store.follows.all(), rooms));
     }
@@ -241,15 +254,29 @@ abstract final class LegacyMigration {
     if (snapshot.webdav case final configs?) {
       final stored = await store.webdav.all();
       final names = {for (final config in stored) config.name};
+      final added = configs.where((config) => !names.contains(config.name)).toList();
       final current = await store.webdav.current();
       await store.webdav.replaceAll(
-        [...stored, ...configs.where((config) => !names.contains(config.name))],
+        [...stored, ...added],
         current:
             current ??
             (snapshot.currentWebDav == null ? null : WebDavConfig(name: snapshot.currentWebDav!, address: '')),
+        withPasswords: false,
       );
+      for (final config in added) {
+        if (config.name.isNotEmpty && config.password.isNotEmpty) {
+          secrets.putIfAbsent(SecretRefs.webdav(config.name), () => config.password);
+        }
+      }
     }
     await store.meta.keepLegacyValues(snapshot.otherValues);
+    if (secrets.isEmpty) return const [];
+    try {
+      await store.secrets.writeAll(secrets);
+      return const [];
+    } on Object {
+      return secrets.keys.toList()..sort();
+    }
   }
 
   static List<LiveRoom> _join(List<LiveRoom> stored, List<LiveRoom> incoming) {

@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/account/account_services.dart';
 import 'package:pure_live/features/favorite/favorite_controller.dart';
@@ -22,11 +23,33 @@ const Duration splashFollowWait = Duration(milliseconds: 350);
 /// `BiliBiliAccountService.initialLoadDelay`).
 const Duration bilibiliCheckDelay = Duration(seconds: 1);
 
+/// The sign-ins the 3.x import could not keep: the platform cipher failed
+/// on this device ([LegacyImportReport.skippedSecrets]), so the user is told
+/// once to sign in again.
+abstract final class LegacyReloginNotice {
+  /// The meta record of a notice still owed.
+  static const String key = 'app.legacyReloginNotice';
+
+  /// Records after the import that [report] owes the notice.
+  static Future<void> record(MetaStore meta, LegacyImportReport report) async {
+    if (report.skippedSecrets.isNotEmpty) await meta.set(key, '${report.skippedSecrets.length}');
+  }
+
+  /// Shows the owed notice once ([toast] by default the app's); whether it
+  /// was shown.
+  static Future<bool> showOnce(MetaStore meta, {void Function(String message)? toast}) async {
+    if (await meta.get(key) == null) return false;
+    await meta.set(key, null);
+    (toast ?? AppNavigator.toast)(i18n('legacy_import_relogin'));
+    return true;
+  }
+}
+
 /// What the app starts once its first frame is up (3.x started these with
 /// its services, in every window): the first check of every follow, the
 /// exit timer, the timed cover refresh, Android 17's local-network
 /// permission for a LAN proxy, the display mode, and one second later the
-/// Bilibili login check.
+/// Bilibili login check and the 3.x import's [LegacyReloginNotice].
 final class AppStartup {
   /// Creates the start-up over [_ref]'s providers.
   new(this._ref);
@@ -51,12 +74,12 @@ final class AppStartup {
     if (Platform.isAndroid) _localNetwork = LocalNetworkGuard(store.settings)..start();
     unawaited(DisplayMode.refresh());
     followCheck = _ref.read(favoriteControllerProvider).firstCheck;
-    _bilibili = Timer(
-      bilibiliCheckDelay,
-      () => unawaited(
+    _bilibili = Timer(bilibiliCheckDelay, () {
+      unawaited(LegacyReloginNotice.showOnce(store.meta).catchError((Object _) => false));
+      unawaited(
         verifyBilibiliLogin(actions: _ref.read(accountActionsProvider), verify: _ref.read(accountVerifierProvider)),
-      ),
-    );
+      );
+    });
   }
 
   /// Stops what is still waiting.

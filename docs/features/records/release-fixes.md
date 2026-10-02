@@ -23,6 +23,19 @@
 - **测试**：`test/intake_test.dart`“an outside intent opens only the shortcut pages, anything else is ignored quietly”：`/settings`、`/backup`、`/web_dav`、`/live_play`、`/search/../settings` 都返回 `unsupported`、不导航、不提示；`/search` 照常打开。改之前失败（`/settings` 返回 `opened`）。
 - **验证**：release 构建编译通过（见文末）。没有在手机上用 `am start` 试。
 
+## 2. 3.x 导入：加密失败时关注等都导不进来
+
+- **根因**：`LegacyMigration.merge` 先写设置，接着 `secrets.writeAll`（Cookie 用 Android Keystore 加密），之后才写关注、历史、分组、屏蔽和 WebDAV；`importHiveFiles` 只捕获读文件的 `FileSystemException`，全部成功才记账本。AndroidKeyStore 坏掉的机器上 `seal` 抛异常，`merge` 中途退出、账本不记，每次启动都重来、每次都在同一处失败，关注等永远导不进来。WebDAV 服务器也一样：`WebDavStore.replaceAll` 先加密密码再写服务器。
+- **改动**：
+  - `merge` 先写不需要加密的：设置、关注、历史、关注分区、屏蔽词和用户、分组、WebDAV 服务器（地址、用户名，不带密码）、留给其他模块的 3.x 值；最后把 Cookie 和新服务器的密码合成一次 `secrets.writeAll`，单独 `try/catch`，失败时返回没存下的名字，不再抛出。
+  - `LegacyImportReport.skippedSecrets` 带上这些名字，其余照常记账本（不会每次启动重试）。
+  - `WebDavStore.replaceAll` 加 `withPasswords`（默认 true）；false 时不加密、不动已存的密码（删除服务器时照样删它的密码）。
+  - 应用侧：启动时导入后若有 `skippedSecrets`，在 meta 记一条（`app.legacyReloginNotice`）；首帧后 1 秒（和哔哩哔哩登录检查同一时刻）提示一次“部分平台需要重新登录：从 3.x 导入的登录信息和 WebDAV 密码无法在本机加密保存。”，然后删掉记录。中英文都加了（`legacy_import_relogin`）。
+- **测试**：
+  - `packages/live_store/test/migration_test.dart`“a keystore that cannot encrypt: everything else is imported, the sign-ins are skipped once”：加密器 `seal`/`open` 都抛异常，导入后关注、历史、分区、分组、屏蔽、设置、WebDAV 地址和保留的 3.x 值都在，Cookie 和 WebDAV 密码在 `skippedSecrets` 里；第二次导入按账本跳过。改之前失败（`Bad state: KeyStore unavailable` 直接抛出）。
+  - `apps/pure_live/test/services_test.dart`：有跳过才记，提示只出现一次。
+- **验证**：live_store 全部测试、应用相关测试通过。
+
 ## 3. 播放会话释放时引擎还在创建
 
 - **根因**：`PlaybackSession.dispose()` 只释放已经有的 `_engine`；`_engineNow()` 在 `await` 引擎创建之后不看 `_disposed`。打开直播间后很快离开（引擎还在创建）时，`dispose()` 先结束，随后创建好的引擎被接上并订阅事件，再也没人释放（原生播放器和纹理泄漏）。

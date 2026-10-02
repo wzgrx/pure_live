@@ -726,6 +726,7 @@
     "kilakila_directory_scope": "Kilakila's popular and rising-star picks, not every stream; only free public streams play. Follows keep the streamer; search takes a streamer ID, profile link or name.",
     "kugoulive_directory_scope": "Kugou Live's recommendations and categories come from its website and keep loading as you scroll. Search finds streamers live or not; a room number or Kugou Live link opens a room directly.",
     "language": "Language",
+    "legacy_import_relogin": "Some platforms need you to sign in again: the sign-ins and WebDAV passwords from 3.x could not be encrypted on this device.",
     "license": "License",
     "live": "Live",
     "live_now": "Live",

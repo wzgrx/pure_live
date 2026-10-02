@@ -9,6 +9,26 @@
 - **测试**：`test/platform/system_surfaces_test.dart`“every drawable named only from Dart survives the release resource shrinker”：从 `mediaControls` 取出全部图标名，加上通知小图标，逐个检查 `keep.xml` 里有。改之前失败（缺 `audio_service_*`）。
 - **验证**：见文末“release 构建”。
 
+## 2. 3.x 导入：加密失败时关注等都导不进来
+
+- **根因**：`LegacyMigration.merge` 先写设置，接着 `secrets.writeAll`（Cookie 用 Android Keystore 加密），之后才写关注、历史、分组、屏蔽和 WebDAV；`importHiveFiles` 只捕获读文件的 `FileSystemException`，全部成功才记账本。AndroidKeyStore 坏掉的机器上 `seal` 抛异常，`merge` 中途退出、账本不记，每次启动都重来、每次都在同一处失败，关注等永远导不进来。WebDAV 服务器也一样：`WebDavStore.replaceAll` 先加密密码再写服务器。
+- **改动**：
+  - `merge` 先写不需要加密的：设置、关注、历史、关注分区、屏蔽词和用户、分组、WebDAV 服务器（地址、用户名，不带密码）、留给其他模块的 3.x 值；最后把 Cookie 和新服务器的密码合成一次 `secrets.writeAll`，单独 `try/catch`，失败时返回没存下的名字，不再抛出。
+  - `LegacyImportReport.skippedSecrets` 带上这些名字，其余照常记账本（不会每次启动重试）。
+  - `WebDavStore.replaceAll` 加 `withPasswords`（默认 true）；false 时不加密、不动已存的密码（删除服务器时照样删它的密码）。
+  - 应用侧：启动时导入后若有 `skippedSecrets`，在 meta 记一条（`app.legacyReloginNotice`）；首帧后 1 秒（和哔哩哔哩登录检查同一时刻）提示一次“部分平台需要重新登录：从 3.x 导入的登录信息和 WebDAV 密码无法在本机加密保存。”，然后删掉记录。中英文都加了（`legacy_import_relogin`）。
+- **测试**：
+  - `packages/live_store/test/migration_test.dart`“a keystore that cannot encrypt: everything else is imported, the sign-ins are skipped once”：加密器 `seal`/`open` 都抛异常，导入后关注、历史、分区、分组、屏蔽、设置、WebDAV 地址和保留的 3.x 值都在，Cookie 和 WebDAV 密码在 `skippedSecrets` 里；第二次导入按账本跳过。改之前失败（`Bad state: KeyStore unavailable` 直接抛出）。
+  - `apps/pure_live/test/services_test.dart`：有跳过才记，提示只出现一次。
+- **验证**：live_store 全部测试、应用相关测试通过。
+
+## 3. 播放会话释放时引擎还在创建
+
+- **根因**：`PlaybackSession.dispose()` 只释放已经有的 `_engine`；`_engineNow()` 在 `await` 引擎创建之后不看 `_disposed`。打开直播间后很快离开（引擎还在创建）时，`dispose()` 先结束，随后创建好的引擎被接上并订阅事件，再也没人释放（原生播放器和纹理泄漏）。
+- **改动**（`packages/live_player/lib/src/session.dart`）：`_engineNow()` 等到引擎后先检查会话还在，已释放就不接上（抛出，`open` 那边会话已过期，直接忽略）；`dispose()` 若有正在创建的引擎，等它完成，没被接上就释放它，创建失败则忽略，然后照常释放。
+- **测试**：`packages/live_player/test/session_test.dart`“disposed while the engine is still being created: dispose waits for it and releases it”（假引擎用 `Completer` 延迟创建，期间 `dispose`：`dispose` 要等到创建完成，引擎被释放、没有打开过、`session.engine` 为空；改之前失败，`dispose` 提前结束）；“disposed while the engine creation fails: dispose still completes”。
+- **验证**：live_player 全部测试通过。
+
 ## 4. Android 17 本地网络权限：投屏和局域网直播源没有申请
 
 - **根因**：`AndroidManifest.xml` 声明了 `ACCESS_LOCAL_NETWORK`（targetSdk 37），但只有局域网代理（`LocalNetworkGuard`）和设备同步会申请。投屏对话框（`stream_dialogs.dart` 的 `CastDialog`）打开就搜 SSDP，局域网 IPTV 源（`192.168.x`、`10.x`、`.local` 等）直接交给播放器；Android 17 上没有权限时套接字被拒，用户只看到“搜索失败”或播放失败，不知道原因。
@@ -37,25 +57,15 @@
 - **测试**：`test/intake_test.dart`“an outside intent opens only the shortcut pages, anything else is ignored quietly”：`/settings`、`/backup`、`/web_dav`、`/live_play`、`/search/../settings` 都返回 `unsupported`、不导航、不提示；`/search` 照常打开。改之前失败（`/settings` 返回 `opened`）。
 - **验证**：release 构建编译通过（见文末）。没有在手机上用 `am start` 试。
 
-## 2. 3.x 导入：加密失败时关注等都导不进来
+## 7. 启动链没有兜底
 
-- **根因**：`LegacyMigration.merge` 先写设置，接着 `secrets.writeAll`（Cookie 用 Android Keystore 加密），之后才写关注、历史、分组、屏蔽和 WebDAV；`importHiveFiles` 只捕获读文件的 `FileSystemException`，全部成功才记账本。AndroidKeyStore 坏掉的机器上 `seal` 抛异常，`merge` 中途退出、账本不记，每次启动都重来、每次都在同一处失败，关注等永远导不进来。WebDAV 服务器也一样：`WebDavStore.replaceAll` 先加密密码再写服务器。
+- **根因**：`main.dart` 直接 `await AppBootstrap.start(args)`，没有捕获。`LiveStore.open`（`bootstrap.dart`）在存储满、数据库损坏或被锁时抛异常，`main` 就此结束，`runApp` 从未调用，用户一直停在系统启动画面，日志也没处看。
 - **改动**：
-  - `merge` 先写不需要加密的：设置、关注、历史、关注分区、屏蔽词和用户、分组、WebDAV 服务器（地址、用户名，不带密码）、留给其他模块的 3.x 值；最后把 Cookie 和新服务器的密码合成一次 `secrets.writeAll`，单独 `try/catch`，失败时返回没存下的名字，不再抛出。
-  - `LegacyImportReport.skippedSecrets` 带上这些名字，其余照常记账本（不会每次启动重试）。
-  - `WebDavStore.replaceAll` 加 `withPasswords`（默认 true）；false 时不加密、不动已存的密码（删除服务器时照样删它的密码）。
-  - 应用侧：启动时导入后若有 `skippedSecrets`，在 meta 记一条（`app.legacyReloginNotice`）；首帧后 1 秒（和哔哩哔哩登录检查同一时刻）提示一次“部分平台需要重新登录：从 3.x 导入的登录信息和 WebDAV 密码无法在本机加密保存。”，然后删掉记录。中英文都加了（`legacy_import_relogin`）。
-- **测试**：
-  - `packages/live_store/test/migration_test.dart`“a keystore that cannot encrypt: everything else is imported, the sign-ins are skipped once”：加密器 `seal`/`open` 都抛异常，导入后关注、历史、分区、分组、屏蔽、设置、WebDAV 地址和保留的 3.x 值都在，Cookie 和 WebDAV 密码在 `skippedSecrets` 里；第二次导入按账本跳过。改之前失败（`Bad state: KeyStore unavailable` 直接抛出）。
-  - `apps/pure_live/test/services_test.dart`：有跳过才记，提示只出现一次。
-- **验证**：live_store 全部测试、应用相关测试通过。
-
-## 3. 播放会话释放时引擎还在创建
-
-- **根因**：`PlaybackSession.dispose()` 只释放已经有的 `_engine`；`_engineNow()` 在 `await` 引擎创建之后不看 `_disposed`。打开直播间后很快离开（引擎还在创建）时，`dispose()` 先结束，随后创建好的引擎被接上并订阅事件，再也没人释放（原生播放器和纹理泄漏）。
-- **改动**（`packages/live_player/lib/src/session.dart`）：`_engineNow()` 等到引擎后先检查会话还在，已释放就不接上（抛出，`open` 那边会话已过期，直接忽略）；`dispose()` 若有正在创建的引擎，等它完成，没被接上就释放它，创建失败则忽略，然后照常释放。
-- **测试**：`packages/live_player/test/session_test.dart`“disposed while the engine is still being created: dispose waits for it and releases it”（假引擎用 `Completer` 延迟创建，期间 `dispose`：`dispose` 要等到创建完成，引擎被释放、没有打开过、`session.engine` 为空；改之前失败，`dispose` 提前结束）；“disposed while the engine creation fails: dispose still completes”。
-- **验证**：live_player 全部测试通过。
+  - 新文件 `app/launch_failure.dart`：`launchOrExplain(start, show, retry, exportLog)` 运行启动；抛异常时写进应用日志（`startup`，含堆栈），语言设置还没读到时按系统语言加载文字，然后 `runApp` 一个简单的错误页 `LaunchFailureApp`：live_ui 的 `AppStatusView`，标题“纯粹直播没能启动”，原因（文件错误写出文件夹和系统给的原因，例如“无法读写数据文件夹 …：No space left on device。可能是存储空间不足，或者没有权限。”；其他写“应用数据无法打开：…”，过长截断）和“可以点‘重试’；一直这样的话，请导出日志反馈给我们。”，两个按钮“重试”“导出日志”。
+  - `main.dart`：首帧前的步骤（服务、日志、文字、字体、桌面窗口）放进 `_prepare`，由 `launchOrExplain` 运行；后面的步骤失败时先关掉已打开的服务。“重试”重新走一遍启动，成功就换成正常的应用。“导出日志”沿用日志页的导出（`AppLog.export`）：手机上弹系统分享，桌面上存到临时文件夹并显示路径；失败提示“日志导出失败”。
+  - 中英文各加 6 条（`launch_failed_*`）。
+- **测试**：`test/launch_failure_test.dart`：启动抛 `FileSystemException`（空间不足）→ 返回 null、错误写进日志、错误页显示标题、路径和原因，点“重试”“导出日志”各调用一次并显示导出结果；其他错误的原因文字；启动成功时照常返回、不显示错误页。（新函数，改之前没法跑出失败。）
+- **验证**：上述测试和应用全部测试通过。没在真机上制造启动失败。
 
 ## 8. 3.x 默认目录里的录像
 
@@ -84,3 +94,9 @@
   - `drawable/ic_stat_playback`（0x7f0700b7）在；
   - 没保留的 `audio_service_skip_next`、`audio_service_fast_forward` 等不在资源表里，说明压缩器确实会删掉没保留的 audio_service 图标（改之前这三个也是这样被删的）。
 - 构建后 `gradlew --stop` 停了 Gradle 守护进程，Kotlin 编译守护进程也已退出。
+
+## 检查（最后一次提交前）
+
+- `apps/pure_live`：`flutter analyze` 无问题，`dart format` 无改动，`flutter test` 729 个全部通过（开始前 721 个）。
+- `packages/live_player`：analyze、format 通过，34 个测试通过；`packages/live_store`：analyze、format 通过，44 个测试通过。
+- `tools/gate/check_ui_structure.py`、`check_deps.py` 通过。没跑完整门禁。

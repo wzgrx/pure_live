@@ -217,6 +217,12 @@ void main() {
         find.ancestor(of: find.byKey(const ValueKey('area-grid')), matching: find.byType(AppRefreshView)),
         findsWidgets,
       );
+      // P03: the category pages turn like Android's ViewPager; the
+      // platforms only by their tabs (3.x).
+      expect(
+        tester.widgetList<TabBarView>(find.byType(TabBarView)).map((view) => view.physics.runtimeType),
+        unorderedEquals([NeverScrollableScrollPhysics, PureLivePageScrollPhysics]),
+      );
 
       // U.4d c2: the categories in the secondary style; c3: the cards name only the area.
       final categories = tester.widget<ScrollableTabBar>(find.byKey(const ValueKey('area-category-tabs')));
@@ -269,6 +275,13 @@ void main() {
       expect(find.descendant(of: tabs, matching: find.text('斗鱼')), findsNothing);
       expect(find.text('原神'), findsOneWidget);
       expect(find.text('虎牙 · 分类'), findsOneWidget);
+      // P03: these pages turn like Android's ViewPager too.
+      expect(
+        tester
+            .widget<TabBarView>(find.descendant(of: find.byType(FavoriteAreasView), matching: find.byType(TabBarView)))
+            .physics,
+        isA<PureLivePageScrollPhysics>(),
+      );
       await tester.runAsync(services.close);
     });
 

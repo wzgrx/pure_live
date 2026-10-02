@@ -175,7 +175,7 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
     } else {
       content = TabBarView(
         controller: tabs,
-        physics: const PureLiveBoundedScrollPhysics(),
+        physics: const PureLivePageScrollPhysics(),
         children: [
           for (final category in categories)
             _AreaPages(

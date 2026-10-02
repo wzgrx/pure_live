@@ -210,7 +210,7 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
             )
           : TabBarView(
               controller: tabs,
-              physics: const PureLiveBoundedScrollPhysics(),
+              physics: const PureLivePageScrollPhysics(),
               children: [for (final id in ids) PopularPlatformView(key: ValueKey('popular-$id'), platform: id)],
             ),
     );

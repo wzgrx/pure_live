@@ -29,12 +29,49 @@ import 'package:pure_live/platform/twitch_webview_http.dart';
 import 'package:pure_live/shared/permission_prompts.dart';
 
 /// Keeps decoded covers and avatars bounded apart from the HTTP cache (3.x
-/// `configureDecodedImageCache`): a 960x540 cover is about 2 MiB decoded.
-void configureDecodedImageCache({required bool desktop}) {
+/// `configureDecodedImageCache`), sized by [decodedImageBudget] for a device
+/// with [totalMemoryBytes] of memory (null: unknown).
+void configureDecodedImageCache({required bool desktop, int? totalMemoryBytes}) {
+  final budget = decodedImageBudget(desktop: desktop, totalMemoryBytes: totalMemoryBytes);
   final cache = PaintingBinding.instance.imageCache
-    ..maximumSize = desktop ? 240 : 160
-    ..maximumSizeBytes = (desktop ? 72 : 48) * 1024 * 1024;
+    ..maximumSize = budget.count
+    ..maximumSizeBytes = budget.bytes;
   assert(cache.maximumSize > 0, 'image cache disabled');
+}
+
+/// Phones and tablets with more memory than this get the larger budget.
+const int largeImageBudgetAbove = 4 * 1024 * 1024 * 1024;
+
+/// How many decoded pictures and bytes the image cache keeps (P05, research
+/// 2026-10-02 D2). A card's cover decodes at most 720 wide, about 1.1 MiB.
+///
+/// * Desktops: 3.x's 240 pictures and 72 MiB.
+/// * Phones and tablets with 4 GiB or less, or unknown memory: 3.x's 160
+///   pictures and 48 MiB, about 40 covers, so low-end devices use no more
+///   than before.
+/// * More memory: 320 pictures and 128 MiB, about 110 covers, so a hot list
+///   scrolled back and forth decodes its covers again less often.
+({int count, int bytes}) decodedImageBudget({required bool desktop, int? totalMemoryBytes}) {
+  const mebibyte = 1024 * 1024;
+  if (desktop) return (count: 240, bytes: 72 * mebibyte);
+  if (totalMemoryBytes == null || totalMemoryBytes <= largeImageBudgetAbove) return (count: 160, bytes: 48 * mebibyte);
+  return (count: 320, bytes: 128 * mebibyte);
+}
+
+/// The device's memory from Linux's `MemTotal` in [path] (Android lets apps
+/// read /proc/meminfo); null when it cannot be read. The figure is a little
+/// under the advertised size (the kernel keeps some), so a "4 GB" phone reads
+/// about 3.6 GiB.
+int? readTotalMemoryBytes({String path = '/proc/meminfo'}) {
+  try {
+    for (final line in File(path).readAsLinesSync()) {
+      final match = RegExp(r'^MemTotal:\s+(\d+)\s*kB', caseSensitive: false).firstMatch(line);
+      if (match != null) return int.parse(match.group(1)!) * 1024;
+    }
+  } on Object {
+    // Unreadable: the small budget.
+  }
+  return null;
 }
 
 /// The start of the app (3.x `AppInitializer.initialize`), in order:
@@ -60,7 +97,10 @@ abstract final class AppBootstrap {
   /// Starts the services for [args].
   static Future<AppServices> start(List<String> args) async {
     WidgetsFlutterBinding.ensureInitialized();
-    configureDecodedImageCache(desktop: Platform.isWindows);
+    configureDecodedImageCache(
+      desktop: Platform.isWindows,
+      totalMemoryBytes: Platform.isAndroid ? readTotalMemoryBytes() : null,
+    );
     // Which interface `auto` picks (M14.1): asked before the first frame.
     await TvDevice.detect();
     final launch = LaunchArgs.parse(args);

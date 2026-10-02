@@ -232,6 +232,22 @@ void main() {
       }
     });
 
+    test("the plugins' permission and activity request codes are unique", () {
+      // Flutter hands every result to every plugin's listener; a shared code
+      // lets one plugin answer another's request (release fixes, item 5).
+      final codes = <String, String>{};
+      final plugins = Directory('android/app/src/main/kotlin').listSync(recursive: true).whereType<File>();
+      for (final file in plugins.where((file) => file.path.endsWith('.kt'))) {
+        final source = file.readAsStringSync();
+        for (final match in RegExp(r'const val (\w+_REQUEST) = (\d+)').allMatches(source)) {
+          final name = '${file.uri.pathSegments.last} ${match[1]}';
+          expect(codes[match[2]!], isNull, reason: '$name reuses ${match[2]}');
+          codes[match[2]!] = name;
+        }
+      }
+      expect(codes, hasLength(greaterThanOrEqualTo(4)));
+    });
+
     test("the system splash screen in the splash page's colours, no white circle", () {
       expect(res('values/colors.xml'), contains('<color name="splash_background">#FAF8FF</color>'));
       expect(res('values-night/colors.xml'), contains('<color name="splash_background">#121318</color>'));

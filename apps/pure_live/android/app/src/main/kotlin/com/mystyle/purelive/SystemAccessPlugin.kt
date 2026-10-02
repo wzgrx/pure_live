@@ -31,7 +31,10 @@ internal class SystemAccessPlugin :
         private const val CHANNEL = "pure_live/system_access"
         private const val LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
         private const val LOCAL_NETWORK_SDK = 37
-        private const val LOCAL_NETWORK_REQUEST = 20261001
+        // Every listener sees every permission result: request codes must be
+        // unique across the app's plugins (PermissionsPlugin has 20261001,
+        // 20261002; RecorderPlugin 20260907).
+        private const val LOCAL_NETWORK_REQUEST = 20261003
     }
 
     private var channel: MethodChannel? = null

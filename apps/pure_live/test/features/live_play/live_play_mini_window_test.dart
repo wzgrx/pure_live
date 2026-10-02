@@ -850,7 +850,13 @@ void main() {
       await _settle(tester);
       expect(find.text('无法打开画中画'), findsOneWidget);
       expect(find.text('系统设置里关掉了“纯粹直播”的画中画。打开后再点小窗按钮。'), findsOneWidget);
-      expect(find.text('取消'), findsOneWidget);
+      // U.2n: the app's message dialog, "知道了" and "去设置".
+      expect(find.byType(AppDialog), findsOneWidget);
+      expect(find.text('知道了'), findsOneWidget);
+      expect(
+        find.descendant(of: find.byKey(const ValueKey('pip-open-settings')), matching: find.text('去设置')),
+        findsOne,
+      );
       await tester.tap(find.byKey(const ValueKey('pip-open-settings')));
       await _settle(tester);
       expect(calls.map((call) => call.method), contains('openSettings'));

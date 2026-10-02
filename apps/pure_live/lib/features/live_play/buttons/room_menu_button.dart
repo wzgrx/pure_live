@@ -192,8 +192,10 @@ Set<RoomMenuEntry> menuEntriesOnBars({required bool landscape, required bool cas
 };
 
 /// The room menu of the bar (3.x `LivePlayMenuButton`, its four-square
-/// icon kept, U.2a choice B): a menu next to the button, grouped (U.2f),
-/// with 3.x's icons.
+/// icon kept, U.2a choice B): the app's small menu next to the button
+/// ([AppMenuButton], docs/ui/compare/U.2n c7, B-7), grouped (U.2f), with
+/// 3.x's icons; the sleep timer's time left and the picture's fit on a
+/// second line.
 class RoomMenuButton extends ConsumerWidget {
   /// Creates the menu.
   const new({
@@ -221,7 +223,8 @@ class RoomMenuButton extends ConsumerWidget {
   /// Told when the menu opens (true) and closes: the controls stay up.
   final ValueChanged<bool>? onMenu;
 
-  /// Runs [entry] for [controller].
+  /// Runs [entry] for [controller]; [context] is the menu's button, which
+  /// the picture's fit menu opens next to (U.2n c5).
   static Future<void> run(
     BuildContext context,
     WidgetRef ref,
@@ -231,19 +234,19 @@ class RoomMenuButton extends ConsumerWidget {
     final room = controller.room;
     switch (entry) {
       case RoomMenuEntry.videoFit:
-        await showVideoFitPicker(context, ref.read(storeProvider).settings);
+        await showVideoFitMenu(context, ref.read(storeProvider).settings);
       case RoomMenuEntry.external:
         await openRoomExternally(room);
       case RoomMenuEntry.switchRoom:
         showRoomSwitchPanel(context, controller);
       case RoomMenuEntry.cast:
-        await showStreamPicker(context, controller, StreamUse.cast);
+        showStreamPanel(context, controller, StreamUse.cast);
       case RoomMenuEntry.timer:
-        await showSleepTimerDialog(context, controller);
+        showSleepTimer(context, controller);
       case RoomMenuEntry.volume:
-        await showRoomVolumeDialog(context, controller);
+        showRoomVolume(context, controller);
       case RoomMenuEntry.streamLink:
-        await showStreamPicker(context, controller, StreamUse.copy);
+        showStreamPanel(context, controller, StreamUse.copy);
       case RoomMenuEntry.share:
         await shareRoom(room);
       case RoomMenuEntry.localInteraction:
@@ -262,8 +265,13 @@ class RoomMenuButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final iptv = controller.site.id == SiteIds.iptv;
-    PopupMenuItem<RoomMenuEntry> item(RoomMenuEntry entry, {required bool playing, DateTime? deadline}) {
-      final (icon, text, subtitle) = switch (entry) {
+    AppMenuEntry<RoomMenuEntry> item(
+      RoomMenuEntry entry, {
+      required bool playing,
+      required bool divider,
+      DateTime? deadline,
+    }) {
+      final (icon, text, description) = switch (entry) {
         RoomMenuEntry.switchRoom => (AppIcons.switchRoom, i18n('switch_live_room'), null),
         RoomMenuEntry.timer => (
           AppIcons.sleepTimer,
@@ -292,56 +300,45 @@ class RoomMenuButton extends ConsumerWidget {
         RoomMenuEntry.newWindow => (AppIcons.newWindow, i18n('open_room_in_new_window'), null),
         RoomMenuEntry.localInteraction => (AppIcons.localInteraction, i18n('local_interaction_title'), null),
       };
-      // Cast and the stream address need a stream (as before).
-      final enabled = playing || (entry != RoomMenuEntry.cast && entry != RoomMenuEntry.streamLink);
-      return PopupMenuItem(
+      return AppMenuEntry(
         key: ValueKey('room-menu-${entry.name}'),
         value: entry,
-        enabled: enabled,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: ListTile(
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-          leading: Icon(icon, size: 20),
-          title: Text(text),
-          subtitle: subtitle == null ? null : Text(subtitle),
-        ),
+        icon: icon,
+        label: text,
+        description: description,
+        divider: divider,
+        // Cast and the stream address need a stream (as before).
+        enabled: playing || (entry != RoomMenuEntry.cast && entry != RoomMenuEntry.streamLink),
       );
     }
 
-    return PopupMenuButton<RoomMenuEntry>(
-      key: const ValueKey('live-play-menu'),
-      tooltip: i18n('menu'),
-      position: PopupMenuPosition.under,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      icon: const Icon(AppIcons.roomMenu),
-      iconColor: onVideo ? OnVideoColors.foreground : null,
-      onOpened: () => onMenu?.call(true),
-      onCanceled: () => onMenu?.call(false),
-      onSelected: (entry) {
-        onMenu?.call(false);
-        unawaited(run(context, ref, controller, entry));
-      },
-      // Read when the menu opens: the bar does not rebuild for the room's
-      // changes.
-      itemBuilder: (context) {
-        final playing = controller.stage == RoomStage.playing;
-        final deadline = controller.sleepDeadline;
-        final local = ref.read(storeProvider).settings.get(Settings.localInteractionEnabled);
-        final groups = roomMenuGroups(
-          iptv: iptv,
-          windows: windows,
-          local: local,
-          cast: castSupported(defaultTargetPlatform),
-          onBars: onBars,
-        ).where((group) => group.isNotEmpty).toList();
-        return [
-          for (final (index, group) in groups.indexed) ...[
-            if (index > 0) PopupMenuDivider(key: ValueKey('room-menu-divider-$index')),
-            for (final entry in group) item(entry, playing: playing, deadline: deadline),
-          ],
-        ];
-      },
+    return Builder(
+      builder: (anchor) => AppMenuButton<RoomMenuEntry>(
+        key: const ValueKey('live-play-menu'),
+        tooltip: i18n('menu'),
+        icon: Icon(AppIcons.roomMenu, color: onVideo ? OnVideoColors.foreground : null),
+        onMenu: onMenu,
+        onSelected: (entry) => unawaited(run(anchor, ref, controller, entry)),
+        // Read when the menu opens: the bar does not rebuild for the room's
+        // changes.
+        entries: () {
+          final playing = controller.stage == RoomStage.playing;
+          final deadline = controller.sleepDeadline;
+          final local = ref.read(storeProvider).settings.get(Settings.localInteractionEnabled);
+          final groups = roomMenuGroups(
+            iptv: iptv,
+            windows: windows,
+            local: local,
+            cast: castSupported(defaultTargetPlatform),
+            onBars: onBars,
+          ).where((group) => group.isNotEmpty).toList();
+          return [
+            for (final (index, group) in groups.indexed)
+              for (final (row, entry) in group.indexed)
+                item(entry, playing: playing, deadline: deadline, divider: index > 0 && row == 0),
+          ];
+        },
+      ),
     );
   }
 }

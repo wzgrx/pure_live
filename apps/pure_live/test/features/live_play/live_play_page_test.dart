@@ -118,13 +118,32 @@ void main() {
     expect(find.descendant(of: find.byKey(const ValueKey('live-play-follow')), matching: find.text('已关注')), findsOne);
     expect(find.byIcon(AppIcons.followed), findsOneWidget);
 
+    // U.2n c8 (B-15): a small menu under the button says who and offers
+    // "取消关注" in red; no centred dialog.
     await tester.tap(find.byKey(const ValueKey('live-play-follow')));
     await tester.pumpAndSettle();
-    expect(find.text('取消关注'), findsOneWidget);
-    await tester.tap(find.text('确认'));
+    expect(find.byType(Dialog), findsNothing);
+    expect(find.text('主播 · 哔哩哔哩'), findsOneWidget);
+    final confirm = find.byKey(const ValueKey('unfollow-confirm'));
+    expect(find.descendant(of: confirm, matching: find.text('取消关注')), findsOneWidget);
+    final scheme = Theme.of(tester.element(confirm)).colorScheme;
+    expect(tester.widget<Text>(find.descendant(of: confirm, matching: find.text('取消关注'))).style?.color, scheme.error);
+    expect(
+      tester.getRect(confirm).top,
+      greaterThan(tester.getRect(find.byKey(const ValueKey('live-play-follow'))).bottom),
+      reason: 'under the button',
+    );
+    await tester.tap(confirm);
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(await tester.runAsync(services.store.follows.all), isEmpty);
+    // Then a toast with "撤销", which puts the room back.
+    expect(find.text('已取消关注 主播'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('app-toast-action')));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pumpAndSettle();
-    expect(await tester.runAsync(services.store.follows.all), isEmpty);
+    expect((await tester.runAsync(services.store.follows.all))!.single.title, '今晚开黑');
 
     await _close(tester, services);
   });
@@ -268,7 +287,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       expect(state.debugFlying.last.$2, rect, reason: 'held');
 
-      await tester.tap(find.byKey(const ValueKey('live-play-message-close')));
+      await tester.tap(find.byKey(const ValueKey('room-panel-close')));
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.byKey(const ValueKey('live-play-message-sheet')), findsNothing);
@@ -279,7 +298,7 @@ void main() {
       await tester.longPressAt(again);
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('live-play-message-close')));
+      await tester.tap(find.byKey(const ValueKey('room-panel-close')));
       await tester.pump(const Duration(milliseconds: 400));
       await _close(tester, services);
     });
@@ -295,7 +314,7 @@ void main() {
       expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget);
       expect(find.byKey(const ValueKey('live-play-block-user')), findsNothing);
       expect(find.byKey(const ValueKey('live-play-block-keyword')), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('live-play-message-close')));
+      await tester.tap(find.byKey(const ValueKey('room-panel-close')));
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pump(const Duration(milliseconds: 400));
       await _close(tester, services);

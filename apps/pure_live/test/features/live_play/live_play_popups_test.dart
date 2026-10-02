@@ -846,13 +846,11 @@ void main() {
         'room-menu-timer',
         'room-menu-volume',
         'room-menu-videoFit',
-        'room-menu-divider-1',
         'room-menu-cast',
         'room-menu-streamLink',
         'room-menu-share',
         'room-menu-external',
         'room-menu-newWindow',
-        'room-menu-divider-2',
         'room-menu-localInteraction',
       ]),
       [
@@ -860,16 +858,21 @@ void main() {
         'room-menu-timer',
         'room-menu-volume',
         'room-menu-videoFit',
-        'room-menu-divider-1',
         'room-menu-cast',
         'room-menu-streamLink',
         'room-menu-share',
         'room-menu-external',
         // U.2k: the third group, the local interaction (on by default).
-        'room-menu-divider-2',
         'room-menu-localInteraction',
       ],
     );
+    // U.2n c7: the app's small menu, its groups split by lines; the fit
+    // says which one is in use.
+    expect(find.byType(PopupMenuDivider), findsNWidgets(2));
+    final divider = tester.getRect(find.byType(PopupMenuDivider).first);
+    expect(divider.top, greaterThanOrEqualTo(tester.getRect(find.byKey(const ValueKey('room-menu-videoFit'))).bottom));
+    expect(divider.bottom, lessThanOrEqualTo(tester.getRect(find.byKey(const ValueKey('room-menu-cast'))).top));
+    expect(_in('room-menu-videoFit', find.text('默认比例')), findsOneWidget);
     const icons = {
       'switchRoom': AppIcons.switchRoom,
       'timer': AppIcons.sleepTimer,
@@ -909,9 +912,10 @@ void main() {
     await tester.pump();
     await tester.longPress(find.byKey(const ValueKey('live-play-chat-line')).last);
     await tester.pumpAndSettle();
-    final sheet = find.byKey(const ValueKey('live-play-message-sheet'));
-    expect(find.descendant(of: sheet, matching: find.text('弹幕')), findsOneWidget);
-    expect(find.byKey(const ValueKey('live-play-message-close')), findsOneWidget);
+    // U.2n c1: a panel under the picture (UI_PLAN §7), "弹幕" and ✕ on top.
+    expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget);
+    expect(_in('live-play-message-panel', find.text('弹幕')), findsOneWidget);
+    expect(_in('live-play-message-panel', find.byKey(const ValueKey('room-panel-close'))), findsOneWidget);
     expect(_in('live-play-message-card', find.textContaining('路人：剧透警告', findRichText: true)), findsOneWidget);
     expect(_column(tester, ['live-play-copy-message', 'live-play-block-user', 'live-play-block-keyword']), [
       'live-play-copy-message',
@@ -933,6 +937,11 @@ void main() {
     await tester.pumpAndSettle();
     final input = tester.widget<TextField>(find.byKey(const ValueKey('live-play-keyword-input')));
     expect(input.controller?.text, '剧透警告', reason: 'filled with the message, to cut down to the word');
+    // U.2n c9: the app's input dialog: one line, at most 40, "屏蔽".
+    expect(input.maxLines, 1);
+    expect(input.maxLength, 40);
+    expect(_in('live-play-keyword-confirm', find.text('屏蔽')), findsOneWidget);
+    expect(find.byKey(const ValueKey('live-play-message-panel')), findsNothing);
     await tester.tap(find.text('取消'));
     await tester.pumpAndSettle();
     await _close(tester, room);
@@ -952,7 +961,7 @@ void main() {
       expect(find.text('屏蔽此用户'), findsNothing);
       expect(find.byKey(const ValueKey('live-play-copy-message')), findsOneWidget);
       expect(find.byKey(const ValueKey('live-play-block-keyword')), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('live-play-message-close')));
+      await tester.tap(find.byKey(const ValueKey('room-panel-close')));
       await tester.pumpAndSettle();
     }
     // A full name is still blockable.

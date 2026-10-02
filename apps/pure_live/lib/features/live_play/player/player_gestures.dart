@@ -82,6 +82,10 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
   GestureLevel? _dragging;
   double? _restoring;
 
+  /// The level a drag starts from is being read (the system's volume or
+  /// brightness): moves wait for it, so the first one never starts from 0.
+  bool _reading = false;
+
   /// A drag in the middle third moves between rooms (U.2b2).
   bool _switching = false;
 
@@ -155,7 +159,13 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
     if (!DeviceControls.available) return;
     final kind = drag == PictureDrag.brightness ? GestureLevel.brightness : GestureLevel.volume;
     _dragging = kind;
-    unawaited(_current(kind).then((value) => _level = value));
+    _reading = true;
+    unawaited(
+      _current(kind).then((value) {
+        _level = value;
+        _reading = false;
+      }),
+    );
   }
 
   void _onDragEnd(DragEndDetails details) {
@@ -183,7 +193,7 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
     }
     final kind = _dragging;
     final height = context.size?.height ?? 0;
-    if (kind == null || height <= 0) return;
+    if (kind == null || height <= 0 || _reading) return;
     // A full-height drag moves the level by 1.2 (3.x).
     _level = (_level - details.delta.dy / height * 1.2).clamp(0.0, 1.0);
     unawaited(_apply(kind, _level));

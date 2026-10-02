@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/mini_window.dart';
@@ -309,25 +310,18 @@ class RoomMiniScope extends InheritedNotifier<RoomMiniWindow> {
 }
 
 /// c9: the system settings turned picture-in-picture off for this app; "去设置"
-/// opens this app's page there (3.x ignored the refusal).
+/// opens this app's page there (3.x ignored the refusal). The app's message
+/// dialog (docs/ui/compare/U.1d: "知道了" and "去设置").
 Future<void> showPipDisabledDialog(BuildContext context) async {
-  final open = await showDialog<bool>(
+  final open = await showAppMessageDialog(
     context: context,
-    builder: (context) => AlertDialog(
-      key: const ValueKey('pip-disabled-dialog'),
-      title: Text(i18n('pip_disabled_title')),
-      content: Text(i18n('pip_disabled_body', args: {'app': i18n('app_name')})),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(i18n('cancel'))),
-        FilledButton(
-          key: const ValueKey('pip-open-settings'),
-          onPressed: () => Navigator.pop(context, true),
-          child: Text(i18n('pip_open_settings')),
-        ),
-      ],
-    ),
+    key: const ValueKey('pip-disabled-dialog'),
+    title: i18n('pip_disabled_title'),
+    message: i18n('pip_disabled_body', args: {'app': i18n('app_name')}),
+    actionLabel: i18n('pip_open_settings'),
+    actionKey: const ValueKey('pip-open-settings'),
   );
-  if (open ?? false) {
+  if (open) {
     if (!await PictureInPicture.openSettings()) AppNavigator.toast(i18n('pip_enter_failed'));
   }
 }

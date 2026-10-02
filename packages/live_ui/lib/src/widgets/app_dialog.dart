@@ -317,6 +317,7 @@ class DialogOptionRow extends StatelessWidget {
     this.enabled = true,
     this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
     this.descriptionMaxLines,
+    this.trailing,
     super.key,
   });
 
@@ -343,6 +344,9 @@ class DialogOptionRow extends StatelessWidget {
 
   /// At most this many lines of [description] (an address: one).
   final int? descriptionMaxLines;
+
+  /// In place of the tick at the end (a spinner while the option works).
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -390,7 +394,10 @@ class DialogOptionRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                SizedBox(width: 24, child: selected ? Icon(AppIcons.selected, size: 22, color: colors.primary) : null),
+                SizedBox(
+                  width: 24,
+                  child: trailing ?? (selected ? Icon(AppIcons.selected, size: 22, color: colors.primary) : null),
+                ),
               ],
             ),
           ),

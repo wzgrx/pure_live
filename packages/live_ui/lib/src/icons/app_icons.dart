@@ -267,6 +267,21 @@ abstract final class AppIcons {
   /// The room's own volume (3.x's room menu).
   static const IconData roomVolume = Remix.volume_up_line;
 
+  /// The room volume panel's mute button, silent (3.x `volumeIcon`).
+  static const IconData volumeMuted = Icons.volume_off_rounded;
+
+  /// The room volume panel's mute button, below half.
+  static const IconData volumeLow = Icons.volume_down_rounded;
+
+  /// The room volume panel's mute button, half and above.
+  static const IconData volumeHigh = Icons.volume_up_rounded;
+
+  /// A DLNA receiver in the cast panel (3.x `LiveDlnaPage`).
+  static const IconData castDevice = Icons.tv_rounded;
+
+  /// Unfollow, in the follow button's menu (docs/ui/compare/U.2n c8).
+  static const IconData unfollow = Remix.heart_3_line;
+
   /// Copy a stream address ("获取直链", 3.x's room menu).
   static const IconData streamLink = Remix.link_m;
 

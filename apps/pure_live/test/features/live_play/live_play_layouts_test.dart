@@ -606,21 +606,26 @@ void main() {
       await _close(tester, room);
     });
 
-    testWidgets('orientation: each with its line, a tick; 记住 applies when switched; 关闭', (tester) async {
+    testWidgets('orientation: a titled small menu, each with its line, a tick; 记住 applies when switched', (
+      tester,
+    ) async {
       final room = await _pump(tester, portrait: true);
       await _tap(tester, 'live-play-orientation');
+      // U.2n c6: next to the button like the picture mode, not a dialog.
+      expect(find.byType(Dialog), findsNothing);
+      expect(_key('small-menu-title'), findsOneWidget);
+      expect(find.text('本直播间画面方向'), findsOneWidget);
       expect(find.text('按画面的实际尺寸判断是竖屏还是横屏直播'), findsOneWidget);
       expect(find.text('当作竖屏直播：画面加高、下面是可拖的面板，能进竖屏全屏'), findsOneWidget);
-      expect(
-        find.descendant(of: _key('room-orientation-automatic'), matching: find.byIcon(AppIcons.selected)),
-        findsOneWidget,
-      );
+      expect(find.descendant(of: _key('room-orientation-0'), matching: find.byIcon(AppIcons.selected)), findsOneWidget);
       await tester.tap(_key('room-orientation-remember'));
       await _settle(tester);
       expect(room.services.store.settings.get(Settings.rememberPortraitRoomOverride), isFalse, reason: 'at once');
-      expect(find.text('关闭'), findsOneWidget);
-      await _tap(tester, 'room-orientation-close');
-      expect(_key('room-orientation-close'), findsNothing);
+      expect(_key('room-orientation-0'), findsOneWidget, reason: 'the switch leaves the menu open');
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(_key('room-orientation-0'), findsNothing, reason: 'Back closes it');
       await _close(tester, room);
     });
 
@@ -779,24 +784,16 @@ void main() {
     // docs/ui/compare/U.2c, U.2d: "投屏只有 Android" (the menu as well as the
     // top bar; U.17a for iOS); U.13: "在新窗口打开" on Windows.
     const group1 = ['room-menu-switchRoom', 'room-menu-timer', 'room-menu-volume', 'room-menu-videoFit'];
-    const local = ['room-menu-divider-2', 'room-menu-localInteraction'];
+    const local = ['room-menu-localInteraction'];
     const passOn = ['room-menu-streamLink', 'room-menu-share', 'room-menu-external'];
     const cases = <(TargetPlatform, Size, List<String>)>[
-      (
-        TargetPlatform.android,
-        Size(393, 852),
-        [...group1, 'room-menu-divider-1', 'room-menu-cast', ...passOn, ...local],
-      ),
-      (TargetPlatform.iOS, Size(393, 852), [...group1, 'room-menu-divider-1', ...passOn, ...local]),
-      (
-        TargetPlatform.windows,
-        Size(1280, 800),
-        [...group1, 'room-menu-divider-1', ...passOn, 'room-menu-newWindow', ...local],
-      ),
-      (TargetPlatform.linux, Size(1280, 800), [...group1, 'room-menu-divider-1', ...passOn, ...local]),
-      (TargetPlatform.macOS, Size(1280, 800), [...group1, 'room-menu-divider-1', ...passOn, ...local]),
+      (TargetPlatform.android, Size(393, 852), [...group1, 'room-menu-cast', ...passOn, ...local]),
+      (TargetPlatform.iOS, Size(393, 852), [...group1, ...passOn, ...local]),
+      (TargetPlatform.windows, Size(1280, 800), [...group1, ...passOn, 'room-menu-newWindow', ...local]),
+      (TargetPlatform.linux, Size(1280, 800), [...group1, ...passOn, ...local]),
+      (TargetPlatform.macOS, Size(1280, 800), [...group1, ...passOn, ...local]),
     ];
-    const all = [...group1, 'room-menu-divider-1', 'room-menu-cast', ...passOn, 'room-menu-newWindow', ...local];
+    const all = [...group1, 'room-menu-cast', ...passOn, 'room-menu-newWindow', ...local];
     List<String> menu() => [
       for (final key in all)
         if (_key(key).evaluate().isNotEmpty) key,

@@ -6,6 +6,7 @@ import 'package:live_iptv/live_iptv.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/logic/iptv_guide_rows.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -59,13 +60,11 @@ Future<void> showIptvGuide(BuildContext context, LiveRoomController controller) 
     scope.reveal();
     return;
   }
-  await showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    builder: (sheetContext) => SizedBox(
-      height: MediaQuery.sizeOf(sheetContext).height * 0.7,
-      child: IptvGuideView(controller: controller, onClose: () => Navigator.of(sheetContext).pop()),
-    ),
+  // The app's panel for a page without a picture (docs/ui/compare/U.1d c10).
+  await showRoomPanelSheet(
+    context,
+    heightFactor: 0.7,
+    builder: (_, close) => IptvGuideView(controller: controller, onClose: close),
   );
 }
 

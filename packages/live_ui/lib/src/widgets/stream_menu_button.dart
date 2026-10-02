@@ -167,8 +167,10 @@ class _StreamMenuButtonState extends State<StreamMenuButton> {
 /// least 48, an optional line of [descriptions] under each and a [title] row
 /// on top; `surfaceContainerHighest`, 8-point corners, [width] wide or at
 /// least [streamMenuMinWidth]; the [current] entry in the primary colour,
-/// bold, with a tick, and scrolled into view in a long list. The picture is
-/// not dimmed. Returns the chosen index, or null.
+/// bold, with a tick, and scrolled into view in a long list. A [footer]
+/// (a switch that applies at once) sits under a line after the entries and
+/// does not close the menu. The picture is not dimmed. Returns the chosen
+/// index, or null.
 Future<int?> showSmallMenu(
   BuildContext anchor, {
   required List<String> entries,
@@ -178,6 +180,7 @@ Future<int?> showSmallMenu(
   String entryKey = 'stream-menu-item',
   bool preferAbove = false,
   double? width,
+  Widget? footer,
 }) {
   final theme = Theme.of(anchor);
   final scheme = theme.colorScheme;
@@ -229,6 +232,7 @@ Future<int?> showSmallMenu(
             ),
           ),
         ),
+      if (footer != null) ...[const PopupMenuDivider(), footer],
     ],
   );
 }

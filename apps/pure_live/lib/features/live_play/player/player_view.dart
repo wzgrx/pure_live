@@ -9,7 +9,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
-import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
+import 'package:pure_live/features/live_play/danmaku/message_panel.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_gift_effect.dart';

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
@@ -177,6 +178,22 @@ class _ChatListState extends ConsumerState<ChatList> {
     await showRoomMessageActions(context, widget.controller, message);
   }
 
+  /// B06 c1: Bilibili's names for a guest, or for an expired login, with
+  /// the way to log in; null when there is nothing to say.
+  Widget? _nameHint() => switch (widget.controller.nameHint) {
+    ChatNameHint.none => null,
+    ChatNameHint.guest => ChatNameHintBar(
+      text: i18n('bilibili_guest_names_hidden'),
+      action: i18n('live_play_go_login'),
+      onAction: () => unawaited(AppNavigator.toBiliBiliLogin()),
+    ),
+    ChatNameHint.loginExpired => ChatNameHintBar(
+      text: i18n('bilibili_login_expired_short'),
+      action: i18n('bilibili_login_again'),
+      onAction: () => unawaited(AppNavigator.toBiliBiliLogin()),
+    ),
+  };
+
   @override
   Widget build(BuildContext context) {
     final display = watchSetting(ref, Settings.enableDanmakuDisplay);
@@ -192,6 +209,20 @@ class _ChatListState extends ConsumerState<ChatList> {
       );
     }
     final style = ChatListStyle.of(watchSetting(ref, Settings.danmakuListStyle));
+    final hint = _nameHint();
+    // B06 c1: the hint stays above the lines (and the empty states); the
+    // list keeps its place in the tree, so its scroll position, when the
+    // hint comes or goes.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ?hint,
+        Expanded(key: const ValueKey('live-play-chat-body'), child: _content(style)),
+      ],
+    );
+  }
+
+  Widget _content(ChatListStyle style) {
     final lines = widget.controller.chat.lines;
     if (!lines.any((line) => line.kind != ChatLineKind.system)) {
       // U.2e c2, U.2g c7: until the first message the list says where the
@@ -243,6 +274,50 @@ class _ChatListState extends ConsumerState<ChatList> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// The line above the chat list about Bilibili's names (B06 c1): an info
+/// mark, [text] and a [action] button that logs in.
+class ChatNameHintBar extends StatelessWidget {
+  /// Creates the line.
+  const new({required this.text, required this.action, required this.onAction, super.key});
+
+  /// What happens to the names.
+  final String text;
+
+  /// The button's label.
+  final String action;
+
+  /// Opens the login.
+  final VoidCallback onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      key: const ValueKey('live-play-name-hint'),
+      color: scheme.secondaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 12, right: 4),
+        child: Row(
+          children: [
+            Icon(AppIcons.info, size: 16, color: scheme.onSecondaryContainer),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                text,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSecondaryContainer),
+              ),
+            ),
+            TextButton(key: const ValueKey('live-play-name-hint-login'), onPressed: onAction, child: Text(action)),
+          ],
+        ),
       ),
     );
   }
@@ -443,11 +518,18 @@ class ChatLineView extends StatelessWidget {
   }
 
   /// 3.x `DanmakuItem`, on the theme's surfaces instead of fixed white.
+  /// With the sender's avatar (B06 c2: Bilibili's `user.base.face`) the
+  /// avatar takes the dot's place and the name takes its colour.
   Widget _card(BuildContext context, LiveMessage message, TextStyle? body) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final dot = chatNameColor(message.color, theme.brightness) ?? scheme.onSurface;
+    final colour = chatNameColor(message.color, theme.brightness);
+    final dot = colour ?? scheme.onSurface;
     final name = message.userName.trim();
+    final avatar = switch (message.data) {
+      DanmakuSender(:final avatar) when avatar.isNotEmpty => avatar,
+      _ => '',
+    };
     return Padding(
       key: const ValueKey('live-play-chat-card'),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -462,12 +544,19 @@ class ChatLineView extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 8,
-                height: 8,
-                margin: const EdgeInsets.only(top: 6, right: 10),
-                decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
-              ),
+              if (avatar.isEmpty)
+                Container(
+                  width: 8,
+                  height: 8,
+                  margin: const EdgeInsets.only(top: 6, right: 10),
+                  decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+                )
+              else
+                Padding(
+                  key: const ValueKey('live-play-chat-avatar'),
+                  padding: const EdgeInsets.only(right: 8),
+                  child: CommonAvatar(avatarUrl: avatar, radius: 12, fallbackName: name),
+                ),
               Expanded(
                 child: Text.rich(
                   TextSpan(
@@ -477,7 +566,9 @@ class ChatLineView extends StatelessWidget {
                       if (name.isNotEmpty)
                         TextSpan(
                           text: '$name: ',
-                          style: body?.emphasis.copyWith(color: scheme.onSurface),
+                          style: body?.emphasis.copyWith(
+                            color: avatar.isEmpty ? scheme.onSurface : colour ?? scheme.onSurface,
+                          ),
                         ),
                       WidgetSpan(
                         alignment: PlaceholderAlignment.baseline,

@@ -61,6 +61,21 @@ enum ChatConnection {
   unsupported,
 }
 
+/// What the chat list says above its lines about Bilibili's names (task
+/// B06 c1): the server masks every name (`观***`) for a connection that is
+/// not logged in, whatever the client reads.
+enum ChatNameHint {
+  /// Nothing to say: not Bilibili, no danmaku, or full names.
+  none,
+
+  /// No Bilibili login: "访客模式下哔哩哔哩会隐藏昵称 · 去登录".
+  guest,
+
+  /// A login is stored but the names still come masked: "登录已失效 ·
+  /// 重新登录".
+  loginExpired,
+}
+
 /// The room page's logic (3.x `LivePlayController`, `PlayerController` and
 /// `DanmakuController` without GetX): room detail, qualities and lines,
 /// playback, danmaku, super chats, audience and the periodic refresh.
@@ -147,7 +162,8 @@ class LiveRoomController extends ChangeNotifier {
   int _epoch = 0;
   int _danmakuEpoch = 0;
   bool _disposed = false;
-  bool _maskedNameShown = false;
+  int _maskedChats = 0;
+  int _namedChats = 0;
   bool _unsupportedShown = false;
   bool _historyRecorded = false;
 
@@ -237,6 +253,47 @@ class LiveRoomController extends ChangeNotifier {
   /// list's "重新连接", U.2e c2).
   Future<void> reconnectDanmaku() => _syncDanmaku(force: true);
 
+  /// Masked chats in one connection, with no full name among them, after
+  /// which a stored Bilibili login counts as expired ([ChatNameHint]).
+  static const int maskedChatsForExpiredLogin = 3;
+
+  /// What the chat list says about Bilibili's names (B06 c1): [ChatNameHint.guest]
+  /// while a Bilibili room's danmaku is on without a login,
+  /// [ChatNameHint.loginExpired] when a login is stored but this connection
+  /// got [maskedChatsForExpiredLogin] masked names and no full one.
+  ChatNameHint get nameHint {
+    if (_room.platform != SiteIds.bilibili) return ChatNameHint.none;
+    if (_chatConnection == ChatConnection.idle || _chatConnection == ChatConnection.unsupported) {
+      return ChatNameHint.none;
+    }
+    if (!_signedIn) return ChatNameHint.guest;
+    return _maskedChats >= maskedChatsForExpiredLogin && _namedChats == 0
+        ? ChatNameHint.loginExpired
+        : ChatNameHint.none;
+  }
+
+  bool get _signedIn => store.secrets.cookieFor(SiteIds.bilibili)?.trim().isNotEmpty ?? false;
+
+  /// The Bilibili login changed (signed in from the hint, signed out, or
+  /// renewed): fresh danmaku credentials for the new login, then the
+  /// danmaku again, so the names come as the new login sees them (B06 c1).
+  Future<void> _onLoginChanged(String platform) async {
+    if (_disposed || platform != SiteIds.bilibili || _room.platform != SiteIds.bilibili) return;
+    _notify();
+    if (!_danmakuStage || !_wantsDanmaku) return;
+    final epoch = _epoch;
+    try {
+      final fetched = await site.getRoomDetail(roomId: _room.roomId);
+      if (!_current(epoch)) return;
+      if (fetched.danmakuData case final Object data) _room = _room.copyWith(danmakuData: data);
+    } on Object catch (error) {
+      // The connection still renews a missing token itself.
+      developer.log('Danmaku credentials after a login change failed', name: 'LivePlay', error: error);
+      if (!_current(epoch)) return;
+    }
+    await _syncDanmaku(force: true);
+  }
+
   void _notify() {
     if (!_disposed) notifyListeners();
   }
@@ -247,7 +304,8 @@ class LiveRoomController extends ChangeNotifier {
     _subscriptions
       ..add(danmaku.events.listen(_onDanmaku))
       ..add(store.blockLists.watch(BlockKind.keyword).listen((_) => unawaited(_reloadFilter())))
-      ..add(store.blockLists.watch(BlockKind.user).listen((_) => unawaited(_reloadFilter())));
+      ..add(store.blockLists.watch(BlockKind.user).listen((_) => unawaited(_reloadFilter())))
+      ..add(store.secrets.cookieChanges.listen((platform) => unawaited(_onLoginChanged(platform))));
     for (final setting in _filterSettings) {
       _subscriptions.add(store.settings.watch(setting).skip(1).listen((_) => unawaited(_reloadFilter())));
     }
@@ -764,7 +822,8 @@ class LiveRoomController extends ChangeNotifier {
     }
     if (!force && danmaku.status != DanmakuStatus.idle && danmaku.status != DanmakuStatus.closed) return;
     final epoch = ++_danmakuEpoch;
-    _maskedNameShown = false;
+    _maskedChats = 0;
+    _namedChats = 0;
     _setChat(ChatConnection.connecting);
     if (_room.isRecord) _system(i18n('recording_mode_notice'));
     _system(i18n('connect_danmaku_server'));
@@ -805,13 +864,16 @@ class LiveRoomController extends ChangeNotifier {
   void _onMessage(LiveMessage message) {
     switch (message.type) {
       case LiveMessageType.chat:
-        if (!_filter.accepts(message)) return;
-        if (!_maskedNameShown &&
-            _room.platform == SiteIds.bilibili &&
-            RegExp(r'\*{2,}|＊{2,}').hasMatch(message.userName)) {
-          _maskedNameShown = true;
-          _system(i18n('bilibili_guest_name_masked'));
+        // B06: the names tell whether this connection is a guest's
+        // ([nameHint]); 3.x added a system line here every connection.
+        if (_room.platform == SiteIds.bilibili && message.userName.trim().isNotEmpty) {
+          if (BilibiliDanmakuProtocol.isMaskedName(message.userName)) {
+            _maskedChats++;
+          } else {
+            _namedChats++;
+          }
         }
+        if (!_filter.accepts(message)) return;
         chat.add(ChatLine.chat(message));
         _flying.add(message);
         _notify();

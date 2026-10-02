@@ -225,7 +225,7 @@ class _RoomTagPickerState extends State<RoomTagPicker> {
         DialogCancelButton(key: const ValueKey('room-tags-cancel'), enabled: !_busy),
         DialogActionButton(
           key: const ValueKey('room-tags-save'),
-          label: i18n('confirm'),
+          label: i18n('save'),
           busy: _busy,
           onPressed: () => unawaited(_save()),
         ),

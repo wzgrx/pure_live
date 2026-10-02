@@ -241,8 +241,13 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('room-tags-add')));
       await settle(tester);
       expect(find.text(i18n('tag_name_duplicate_error')), findsOneWidget);
-      // "确认" first makes a name still typed into a tag, then saves.
+      // "保存" first makes a name still typed into a tag, then saves.
       await tester.enterText(find.byKey(const ValueKey('room-tags-name')), '睡前听');
+      // The main button says what it does (U.1d; not "确认").
+      expect(
+        find.descendant(of: find.byKey(const ValueKey('room-tags-save')), matching: find.text('保存')),
+        findsOneWidget,
+      );
       await tester.tap(find.byKey(const ValueKey('room-tags-save')));
       await settle(tester);
       expect(find.byKey(const ValueKey('room-tags')), findsNothing);

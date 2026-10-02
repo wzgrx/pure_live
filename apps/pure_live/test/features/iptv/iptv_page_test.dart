@@ -488,6 +488,11 @@ void main() {
     await _tap(tester, find.byKey(const ValueKey('iptv-origin-file')));
     expect(find.text('选择播放列表文件'), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('iptv-file-path')), '"${file.path}"');
+    // The main button says what it does (U.1d; not "确认").
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('iptv-file-path-confirm')), matching: find.text('导入')),
+      findsOneWidget,
+    );
     await _tap(tester, find.byKey(const ValueKey('iptv-file-path-confirm')));
     expect(h.toasts.last, '已导入播放列表“local”');
 

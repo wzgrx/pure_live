@@ -230,7 +230,7 @@ class _FilePathDialogState extends State<_FilePathDialog> {
     ),
     actions: [
       const DialogCancelButton(),
-      DialogActionButton(key: const ValueKey('iptv-file-path-confirm'), label: i18n('confirm'), onPressed: _submit),
+      DialogActionButton(key: const ValueKey('iptv-file-path-confirm'), label: i18n('iptv_import'), onPressed: _submit),
     ],
   );
 }

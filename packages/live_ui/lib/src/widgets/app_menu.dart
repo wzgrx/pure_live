@@ -18,6 +18,8 @@ final class AppMenuEntry<T> {
     this.enabled = true,
     this.danger = false,
     this.divider = false,
+    this.switchValue,
+    this.switchKey,
   });
 
   /// What choosing the row returns.
@@ -40,6 +42,14 @@ final class AppMenuEntry<T> {
 
   /// A line above the row (sets the destructive row apart).
   final bool divider;
+
+  /// A switch at the end showing an on/off setting the row toggles (the
+  /// recording card's "开播自动录"); null: none. The row takes the tap, the
+  /// switch only shows the state.
+  final bool? switchValue;
+
+  /// Key of [switchValue]'s switch (tests).
+  final Key? switchKey;
 }
 
 /// The height of [AppMenuEntry.divider]'s line (Material's menu divider).
@@ -117,6 +127,14 @@ Future<T?> showAppMenu<T>(
                   const SizedBox(width: 16),
                   Icon(AppIcons.selected, size: 18, color: scheme.primary),
                 ],
+                if (entry.switchValue case final on?) ...[
+                  const SizedBox(width: 16),
+                  ExcludeFocus(
+                    child: IgnorePointer(
+                      child: Switch(key: entry.switchKey, value: on, onChanged: entry.enabled ? (_) {} : null),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -137,8 +155,16 @@ class AppMenuButton<T> extends StatefulWidget {
     required this.entries,
     required this.onSelected,
     this.preferAbove = false,
+    this.enabled = true,
+    this.buttonKey,
     super.key,
   });
+
+  /// Whether the button takes taps.
+  final bool enabled;
+
+  /// Key of the icon button (tests).
+  final Key? buttonKey;
 
   /// The button's icon.
   final Widget icon;
@@ -156,14 +182,19 @@ class AppMenuButton<T> extends StatefulWidget {
   final bool preferAbove;
 
   @override
-  State<AppMenuButton<T>> createState() => _AppMenuButtonState<T>();
+  State<AppMenuButton<T>> createState() => AppMenuButtonState<T>();
 }
 
-class _AppMenuButtonState<T> extends State<AppMenuButton<T>> {
+/// The state of an [AppMenuButton]: [show] opens the menu from elsewhere
+/// (a long press on the card the button sits on).
+class AppMenuButtonState<T> extends State<AppMenuButton<T>> {
   bool _open = false;
 
+  /// Opens the menu at the button.
+  Future<void> show() => _show();
+
   Future<void> _show() async {
-    if (_open) return;
+    if (_open || !widget.enabled) return;
     _open = true;
     try {
       final chosen = await showAppMenu<T>(context, entries: widget.entries(), preferAbove: widget.preferAbove);
@@ -174,6 +205,10 @@ class _AppMenuButtonState<T> extends State<AppMenuButton<T>> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      IconButton(tooltip: widget.tooltip, onPressed: () => unawaited(_show()), icon: widget.icon);
+  Widget build(BuildContext context) => IconButton(
+    key: widget.buttonKey,
+    tooltip: widget.tooltip,
+    onPressed: widget.enabled ? () => unawaited(_show()) : null,
+    icon: widget.icon,
+  );
 }

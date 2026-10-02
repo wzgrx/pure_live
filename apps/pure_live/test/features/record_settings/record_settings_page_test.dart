@@ -408,6 +408,11 @@ void main() {
     await _tap(tester, find.text('Pure Live 录制文件目录'));
     expect(find.byKey(const ValueKey('record-directory-default')), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('record-directory-input')), harness.folder.path);
+    // The main button says what it does (U.1d; not "确认").
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('record-directory-confirm')), matching: find.text('保存')),
+      findsOneWidget,
+    );
     await _tap(tester, find.byKey(const ValueKey('record-directory-confirm')));
     expect(harness.settings.savePath, harness.folder.path);
   });

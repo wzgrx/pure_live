@@ -138,7 +138,9 @@ int danmakuFrameDivisor({required double refreshRate, int? cap}) {
 ///
 /// Each danmaku keeps the time it entered and its own speed, and its place
 /// is speed × (this frame's vsync time − that time) in microseconds, so it
-/// covers the same distance per second at 60, 90, 120 or 144 Hz; a new look
+/// covers the same distance per second at 60, 90, 120 or 144 Hz (a frame
+/// that comes with the last one's time moves nothing, and the next one
+/// moves a single step, not two: R5); a new look
 /// applies to the danmaku that come next, the ones on screen fly on (c2). A
 /// message is laid out once and recorded as a picture, cached by content and
 /// look (c6); a frame only moves the pictures. The opacity goes into the
@@ -242,6 +244,12 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
   /// The ticker's time at the last frame and at the last painting.
   Duration _last = Duration.zero;
   Duration? _paintedAt;
+
+  /// A frame came since the ticker started; the last step the clocks moved;
+  /// the last frame came with the same time as the one before it (R5).
+  bool _ticked = false;
+  Duration _step = Duration.zero;
+  bool _repeated = false;
   int _paints = 0;
   int _records = 0;
   TextStyle? _lastStyle;
@@ -380,13 +388,33 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
   void _wake() {
     if (!mounted || _ticker.isActive || !_busy) return;
     _last = Duration.zero;
+    _ticked = false;
+    _step = Duration.zero;
+    _repeated = false;
     _paintedAt = null;
     _ticker.start();
   }
 
   void _tick(Duration elapsed) {
-    final delta = elapsed - _last;
-    _last = elapsed;
+    var delta = elapsed - _last;
+    final repeated = _ticked && delta <= Duration.zero;
+    _ticked = true;
+    if (repeated) {
+      // R5: with a variable refresh rate the engine clamps a time that went
+      // back, so two frames can come with the same time (Flutter #190372).
+      // Nothing moves in that frame (a message may still enter) ...
+      delta = Duration.zero;
+      _repeated = true;
+    } else {
+      _last = elapsed;
+      if (_repeated) {
+        // ... and the next one does not make up for it with a double step:
+        // it moves as far as a frame did before.
+        _repeated = false;
+        if (_step > Duration.zero && delta > _step) delta = _step;
+      }
+      if (delta > Duration.zero) _step = delta;
+    }
     if (!widget.held) {
       _free += delta;
       if (widget.running) _media += delta;

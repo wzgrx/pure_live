@@ -862,7 +862,7 @@ void main() {
       final browser = tester.getCenter(find.byKey(const ValueKey('webview2-browser')));
       expect(cancel.dx, lessThan(download.dx));
       expect(download.dx, lessThan(browser.dx));
-      expect(find.widgetWithText(FilledButton, '用系统浏览器打开'), findsOneWidget);
+      expect(find.widgetWithText(DialogActionButton, '用系统浏览器打开'), findsOneWidget);
 
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();

@@ -187,7 +187,7 @@ enum TagDetailsAction {
 /// `_showTagDetails`; c6): "编辑标签" opens the editor, "关闭" closes (3.x
 /// had only "确认").
 Future<TagDetailsAction?> showTagDetails(BuildContext context, {required StoreTag tag, required int rooms}) =>
-    showDialog<TagDetailsAction>(
+    showAppDialog<TagDetailsAction>(
       context: context,
       builder: (dialogContext) {
         final colors = Theme.of(dialogContext).colorScheme;
@@ -196,60 +196,40 @@ Future<TagDetailsAction?> showTagDetails(BuildContext context, {required StoreTa
           padding: const EdgeInsets.only(top: 16, bottom: 6),
           child: Text(text, style: styles.t12Bold.copyWith(color: colors.primary)),
         );
-        return DialogButtonsTheme(
-          child: AlertDialog(
-            key: const ValueKey('tag-details'),
-            scrollable: true,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            title: Text(i18n('tag_detail'), style: tagDialogTitle(dialogContext)),
-            content: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(i18n('tag_name_label'), style: styles.t12Bold.copyWith(color: colors.primary)),
-                  const SizedBox(height: 6),
-                  Text(tag.name, style: styles.t16.copyWith(fontWeight: FontWeight.w600)),
-                  if (tag.description.isNotEmpty) ...[
-                    label(i18n('tag_desc_label')),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: colors.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(tag.description, style: styles.t14.copyWith(height: 1.4)),
-                    ),
-                  ],
-                  label(i18n('tags_rooms_label')),
-                  Text(i18n('tags_room_count', args: {'count': '$rooms'}), style: styles.t14),
-                ],
-              ),
-            ),
-            actionsOverflowDirection: VerticalDirection.down,
-            actionsOverflowButtonSpacing: 8,
-            actions: [
-              TextButton(
-                key: const ValueKey('tag-details-edit'),
-                style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-                onPressed: () => Navigator.pop(dialogContext, TagDetailsAction.edit),
-                child: Text(i18n('edit_tag')),
-              ),
-              FilledButton(
-                key: const ValueKey('tag-details-close'),
-                style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
-                onPressed: () => Navigator.pop(dialogContext),
-                child: Text(i18n('close')),
-              ),
+        return AppDialog(
+          key: const ValueKey('tag-details'),
+          title: i18n('tag_detail'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(i18n('tag_name_label'), style: styles.t12Bold.copyWith(color: colors.primary)),
+              const SizedBox(height: 6),
+              Text(tag.name, style: styles.t16.copyWith(fontWeight: FontWeight.w600)),
+              if (tag.description.isNotEmpty) ...[
+                label(i18n('tag_desc_label')),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(tag.description, style: styles.t14.copyWith(height: 1.4)),
+                ),
+              ],
+              label(i18n('tags_rooms_label')),
+              Text(i18n('tags_room_count', args: {'count': '$rooms'}), style: styles.t14),
             ],
           ),
+          actions: [
+            DialogCancelButton(key: const ValueKey('tag-details-close'), label: i18n('close')),
+            DialogActionButton(
+              key: const ValueKey('tag-details-edit'),
+              label: i18n('edit_tag'),
+              onPressed: () => Navigator.pop(dialogContext, TagDetailsAction.edit),
+            ),
+          ],
         );
       },
     );
-
-/// The title of the tag dialogs (20 px, semi-bold; the other dialogs of
-/// U.12).
-TextStyle tagDialogTitle(BuildContext context) =>
-    context.textStyles.t18.copyWith(fontSize: 20, fontWeight: FontWeight.w600);

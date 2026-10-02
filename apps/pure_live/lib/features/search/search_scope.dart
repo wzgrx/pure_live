@@ -153,50 +153,46 @@ class SearchScopePanel extends StatelessWidget {
               onChanged: (value) => _set(value ? ({...excluded}..remove(site.id)) : {...excluded, site.id}),
             ),
         ];
-        return Column(
+        // The panel's frame (U.1d): a line under the header once scrolled.
+        return PanelFrame(
           key: const ValueKey('search-scope-panel'),
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            PanelHeader(title: i18n('search_scope_title'), closeTooltip: i18n('close')),
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                physics: const PureLiveScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 16),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                    child: Text(
-                      '${i18n('search_scope_hint')}\n${i18n('search_scope_tags_hint')}',
-                      style: styles.t13.copyWith(color: scheme.onSurfaceVariant, height: 1.5),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        OutlinedButton(
-                          key: const ValueKey('search-scope-domestic'),
-                          onPressed: domestic.isEmpty ? null : () => _set({for (final site in overseas) site.id}),
-                          child: Text(i18n('search_scope_domestic_only')),
-                        ),
-                        OutlinedButton(
-                          key: const ValueKey('search-scope-all'),
-                          onPressed: () => _set(const {}),
-                          child: Text(i18n('search_scope_select_all')),
-                        ),
-                      ],
-                    ),
-                  ),
-                  ...group(i18n('account_group_domestic'), domestic),
-                  ...group(i18n('account_group_overseas'), overseas),
-                ],
+          expand: false,
+          header: PanelHeader(title: i18n('search_scope_title'), closeTooltip: i18n('close')),
+          child: ListView(
+            shrinkWrap: true,
+            physics: const PureLiveScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 16),
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                child: Text(
+                  '${i18n('search_scope_hint')}\n${i18n('search_scope_tags_hint')}',
+                  style: styles.t13.copyWith(color: scheme.onSurfaceVariant, height: 1.5),
+                ),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    OutlinedButton(
+                      key: const ValueKey('search-scope-domestic'),
+                      onPressed: domestic.isEmpty ? null : () => _set({for (final site in overseas) site.id}),
+                      child: Text(i18n('search_scope_domestic_only')),
+                    ),
+                    OutlinedButton(
+                      key: const ValueKey('search-scope-all'),
+                      onPressed: () => _set(const {}),
+                      child: Text(i18n('search_scope_select_all')),
+                    ),
+                  ],
+                ),
+              ),
+              ...group(i18n('account_group_domestic'), domestic),
+              ...group(i18n('account_group_overseas'), overseas),
+            ],
+          ),
         );
       },
     );

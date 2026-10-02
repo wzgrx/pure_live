@@ -255,9 +255,10 @@ void main() {
     final tag = await _tag(tester, h.tags, '音乐');
     await _tap(tester, find.byKey(ValueKey('tag-open-${tag.id}')));
     expect(find.text('关注中带此标签的直播间'), findsOneWidget);
+    // U.1d: "关闭" first, the main button ("编辑标签") at the end.
     final edit = tester.getRect(find.byKey(const ValueKey('tag-details-edit')));
     final close = tester.getRect(find.byKey(const ValueKey('tag-details-close')));
-    expect(edit.right, lessThan(close.left));
+    expect(close.right, lessThan(edit.left));
     expect(
       find.descendant(of: find.byKey(const ValueKey('tag-details-close')), matching: find.text('关闭')),
       findsOneWidget,

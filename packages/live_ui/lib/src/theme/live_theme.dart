@@ -254,18 +254,34 @@ final class LiveTheme {
           borderSide: BorderSide(color: colors.primary, width: 1.5),
         ),
       ),
+      // A panel from the bottom (docs/ui/compare/U.1d c10, U.2f): the
+      // surface colour, 16-point top corners, a handle.
       bottomSheetTheme: BottomSheetThemeData(
-        elevation: 0,
+        elevation: 1,
         showDragHandle: true,
-        backgroundColor: colors.surfaceContainer,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        backgroundColor: colors.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       ),
+      // The dialog (U.1d c1, c5): title 20/600, text 14 (3.x had 13).
       dialogTheme: DialogThemeData(
         elevation: 0,
         backgroundColor: colors.surfaceContainerHigh,
-        titleTextStyle: textTheme.titleLarge?.copyWith(fontWeight: semiBold),
-        contentTextStyle: textTheme.bodyMedium,
+        titleTextStyle: textTheme.titleLarge?.copyWith(fontWeight: semiBold, color: colors.onSurface),
+        contentTextStyle: textTheme.bodyLarge?.copyWith(color: colors.onSurfaceVariant),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        insetPadding: const EdgeInsets.all(16),
+      ),
+      // The toast (U.1d c11–c13): floating, the inverse colours, 8-point
+      // corners, 14-point text, 16 above the bottom bar.
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: colors.inverseSurface,
+        contentTextStyle: textTheme.bodyLarge?.copyWith(color: colors.onInverseSurface),
+        actionTextColor: colors.inversePrimary,
+        closeIconColor: colors.onInverseSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        insetPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       ),
     );
   }

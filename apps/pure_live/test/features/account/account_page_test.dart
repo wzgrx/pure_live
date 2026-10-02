@@ -188,7 +188,7 @@ double _top(WidgetTester tester, Finder finder) => tester.getTopLeft(finder).dy;
 /// The sign-out question for [name] (3.x `account_page.dart:244`): "退出登录",
 /// "确定退出“[name]”账号吗？", "取消" and a red "退出登录".
 void _expectSignOutQuestion(String name) {
-  final dialog = find.byType(AlertDialog);
+  final dialog = find.byType(AppDialog);
   expect(dialog, findsOneWidget);
   expect(find.descendant(of: dialog, matching: find.text('退出登录')), findsNWidgets(2));
   expect(find.descendant(of: dialog, matching: find.text('确定退出“$name”账号吗？')), findsOneWidget);
@@ -299,7 +299,7 @@ void main() {
       expect(harness.store.secrets.cookieFor(SiteIds.soop), 'x=y');
 
       await _tap(tester, find.byKey(const ValueKey('account-soop-sign-out')));
-      expect(find.widgetWithText(FilledButton, '退出登录'), findsOneWidget);
+      expect(find.widgetWithText(DialogActionButton, '退出登录'), findsOneWidget);
       await _tap(tester, find.byKey(const ValueKey('account-confirm-ok')));
       expect(harness.store.secrets.cookieFor(SiteIds.soop), isNull);
       expect(harness.toasts.last, '已退出SOOP');

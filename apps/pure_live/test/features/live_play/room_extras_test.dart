@@ -20,7 +20,6 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/app.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
-import 'package:pure_live/features/live_play/dialogs/room_switcher.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/features/live_play/logic/mini_window.dart';
 import 'package:pure_live/features/live_play/logic/predictive_back.dart';
@@ -28,6 +27,7 @@ import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/features/live_play/logic/room_runtime.dart';
 import 'package:pure_live/features/live_play/mini/floating_window.dart';
 import 'package:pure_live/features/live_play/player/portrait_diagnostics.dart';
+import 'package:pure_live/features/live_play/switch_room/room_switch_panel.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/app_router.dart';
 import 'package:pure_live/routes/route_args.dart';
@@ -253,66 +253,6 @@ void main() {
       expect(externalRoomTarget(room(data: const KuaishouRoomData()))!.native, isNull, reason: 'off air: the web');
     });
 
-    testWidgets('c2: the switcher refreshes the follows; greyed with a spinner meanwhile; no hook, no button', (
-      tester,
-    ) async {
-      final services = (await tester.runAsync(testServices))!;
-      await tester.runAsync(loadStrings);
-      final follow = liveRoom(status: LiveStatus.offline);
-      await tester.runAsync(() => services.store.follows.add(follow));
-      Future<void> pump() async {
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [appServicesProvider.overrideWithValue(services)],
-            child: MaterialApp(
-              theme: const LiveTheme().light,
-              home: Scaffold(
-                body: RoomSwitcher(
-                  current: LiveRoom(platform: SiteIds.douyu, roomId: '1'),
-                ),
-              ),
-            ),
-          ),
-        );
-        for (var i = 0; i < 3; i++) {
-          await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
-          await tester.pump();
-        }
-      }
-
-      RoomSwitcher.refreshFollows = null;
-      await pump();
-      expect(_key('switch-refresh'), findsNothing);
-
-      var calls = 0;
-      final done = Completer<void>();
-      RoomSwitcher.refreshFollows = () async {
-        calls++;
-        await done.future;
-      };
-      addTearDown(() => RoomSwitcher.refreshFollows = null);
-      await pump();
-      expect(find.byKey(const ValueKey('switch-room-bilibili-6')), findsNothing, reason: 'not on air yet');
-      await tester.tap(_key('switch-refresh'));
-      await tester.pump();
-      expect(calls, 1);
-      expect(_key('switch-refreshing'), findsOneWidget);
-      await tester.tap(_key('switch-refresh'), warnIfMissed: false);
-      await tester.pump();
-      expect(calls, 1, reason: 'greyed while refreshing');
-      // The refresh writes the fresh details; the list follows the store.
-      await tester.runAsync(() => services.store.follows.update([liveRoom()]));
-      done.complete();
-      for (var i = 0; i < 3; i++) {
-        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
-        await tester.pump();
-      }
-      expect(_key('switch-refreshing'), findsNothing);
-      expect(find.byKey(const ValueKey('switch-room-bilibili-6')), findsOneWidget);
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.runAsync(services.close);
-    });
-
     testWidgets("c2: the app links the switcher's refresh to the follows", (tester) async {
       final services = (await tester.runAsync(() async {
         final services = await testServices();
@@ -327,9 +267,12 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(RoomSwitcher.refreshFollows, isNotNull);
+      // B05: the switch panel's refresh and its last time (room_switch_test).
+      final follows = RoomSwitchPanel.follows;
+      expect(follows, isNotNull);
+      expect(follows!.lastRefreshedAt(), isNull, reason: 'nothing refreshed yet');
       await tester.pumpWidget(const SizedBox.shrink());
-      expect(RoomSwitcher.refreshFollows, isNull);
+      expect(RoomSwitchPanel.follows, isNull);
       await tester.pump(const Duration(seconds: 5));
       await tester.runAsync(services.close);
     });

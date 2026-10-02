@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 export 'package:pure_live/shared/panels/side_panel.dart';
 
 /// The panels the live room opens beside the picture (docs/ui/compare/U.2f,
-/// 统一规则): recording and the danmaku settings. One at a time.
+/// 统一规则): recording, the danmaku settings, switching rooms (U.2m). One
+/// at a time.
 enum RoomPanelKind {
   /// The record panel (the bar's record button, the "● 录制中" mark).
   record,
@@ -22,6 +23,10 @@ enum RoomPanelKind {
 
   /// The local danmaku style (a local composer's star, U.2k).
   localStyle,
+
+  /// "切换直播间" (docs/ui/compare/U.2m): the room menu's first entry, the
+  /// fullscreen bars' ⇄ and the picture states' button.
+  switchRoom,
 }
 
 /// The panel open in the room, or null.

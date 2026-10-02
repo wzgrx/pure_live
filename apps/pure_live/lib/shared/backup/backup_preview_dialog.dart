@@ -29,7 +29,7 @@ String restorePartText(RestorePart part) {
 /// Shows what restoring [fileName] changes and asks to go on; true to
 /// restore.
 Future<bool> confirmRestore(BuildContext context, {required String fileName, required RestorePreview preview}) async {
-  final confirmed = await showDialog<bool>(
+  final confirmed = await showAppDialog<bool>(
     context: context,
     builder: (dialogContext) {
       final styles = dialogContext.textStyles;
@@ -54,88 +54,77 @@ Future<bool> confirmRestore(BuildContext context, {required String fileName, req
           ],
         ),
       );
-      return AlertDialog(
-        scrollable: true,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-        title: Text(i18n(follows ? 'recover_favorite_backup' : 'recover_backup'), style: styles.t16Bold),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 440),
-          child: Column(
-            key: const ValueKey('backup-preview'),
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(fileName, style: styles.t14SemiBold, maxLines: 3, overflow: TextOverflow.ellipsis),
-              const SizedBox(height: 2),
-              Text(backupSourceText(preview), style: styles.t12Muted),
-              if (preview.followsOnlyFile)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(i18n('backup_preview_follows_file'), style: styles.t13Primary),
+      return AppDialog(
+        title: i18n(follows ? 'recover_favorite_backup' : 'recover_backup'),
+        onEnter: () => Navigator.pop(dialogContext, true),
+        content: Column(
+          key: const ValueKey('backup-preview'),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(fileName, style: styles.t14SemiBold, maxLines: 3, overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 2),
+            Text(backupSourceText(preview), style: styles.t12Muted),
+            if (preview.followsOnlyFile)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(i18n('backup_preview_follows_file'), style: styles.t13Primary),
+              ),
+            const SizedBox(height: 12),
+            Text(i18n('backup_preview_title'), style: styles.t13SemiBold),
+            const SizedBox(height: 4),
+            if (preview.settingsInFile > 0)
+              line(
+                i18n(
+                  'backup_preview_settings',
+                  args: {'count': '${preview.settingsInFile}', 'changed': '${preview.settingsChanged}'},
                 ),
-              const SizedBox(height: 12),
-              Text(i18n('backup_preview_title'), style: styles.t13SemiBold),
-              const SizedBox(height: 4),
-              if (preview.settingsInFile > 0)
-                line(
-                  i18n(
-                    'backup_preview_settings',
-                    args: {'count': '${preview.settingsInFile}', 'changed': '${preview.settingsChanged}'},
-                  ),
-                ),
-              for (final part in preview.parts) line(restorePartText(part)),
-              if (preview.accounts > 0) line(i18n('backup_preview_accounts', args: {'count': '${preview.accounts}'})),
-              if (preview.kept.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                line(
-                  i18n(
-                    'backup_preview_kept',
-                    args: {
-                      'parts': [for (final kind in preview.kept) i18n(kind.labelKey)].join('、'),
-                    },
-                  ),
-                  color: colors.onSurfaceVariant,
-                  icon: AppIcons.selected,
-                  iconSize: 14,
-                ),
-              ],
-              if (follows)
-                line(
-                  i18n('webdav_favorites_unchanged_hint'),
-                  color: colors.onSurfaceVariant,
-                  icon: AppIcons.selected,
-                  iconSize: 14,
-                ),
-              if (preview.skipped > 0)
-                line(
-                  i18n('backup_preview_skipped', args: {'count': '${preview.skipped}'}),
-                  color: colors.error,
-                  icon: AppIcons.warning,
-                  iconSize: 14,
-                ),
-              if (!preview.changesSomething)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(i18n('backup_preview_nothing'), style: styles.t13Muted),
-                ),
+              ),
+            for (final part in preview.parts) line(restorePartText(part)),
+            if (preview.accounts > 0) line(i18n('backup_preview_accounts', args: {'count': '${preview.accounts}'})),
+            if (preview.kept.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text(i18n('backup_preview_warning'), style: styles.t12Muted),
+              line(
+                i18n(
+                  'backup_preview_kept',
+                  args: {
+                    'parts': [for (final kind in preview.kept) i18n(kind.labelKey)].join('、'),
+                  },
+                ),
+                color: colors.onSurfaceVariant,
+                icon: AppIcons.selected,
+                iconSize: 14,
+              ),
             ],
-          ),
+            if (follows)
+              line(
+                i18n('webdav_favorites_unchanged_hint'),
+                color: colors.onSurfaceVariant,
+                icon: AppIcons.selected,
+                iconSize: 14,
+              ),
+            if (preview.skipped > 0)
+              line(
+                i18n('backup_preview_skipped', args: {'count': '${preview.skipped}'}),
+                color: colors.error,
+                icon: AppIcons.warning,
+                iconSize: 14,
+              ),
+            if (!preview.changesSomething)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(i18n('backup_preview_nothing'), style: styles.t13Muted),
+              ),
+            const SizedBox(height: 8),
+            Text(i18n('backup_preview_warning'), style: styles.t12Muted),
+          ],
         ),
-        actionsOverflowDirection: VerticalDirection.down,
-        actionsOverflowButtonSpacing: 8,
         actions: [
-          TextButton(
-            style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(i18n('cancel')),
-          ),
-          FilledButton(
+          DialogCancelButton(onPressed: () => Navigator.pop(dialogContext, false)),
+          DialogActionButton(
             key: const ValueKey('backup-restore-confirm'),
-            style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
+            label: i18n('backup_restore_now'),
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(i18n('backup_restore_now')),
           ),
         ],
       );

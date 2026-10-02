@@ -514,87 +514,70 @@ class _PackageState extends State<_Package> {
   /// One mirror (c8): "ARM64 (64位) · 下载源 3", the file and the address,
   /// then download in the app, in the browser, or copy (3.x needed another
   /// "点击下载" inside).
-  Future<void> _showSource(BuildContext pageContext, int index, String url) => showDialog<void>(
+  Future<void> _showSource(BuildContext pageContext, int index, String url) => showAppDialog<void>(
     context: pageContext,
     builder: (dialogContext) {
       final colors = Theme.of(dialogContext).colorScheme;
       final styles = dialogContext.textStyles;
       final file = widget.file;
       const wide = ButtonStyle(minimumSize: WidgetStatePropertyAll(Size.fromHeight(48)));
-      return DialogButtonsTheme(
-        child: AlertDialog(
-          key: const ValueKey('version-source-dialog'),
-          scrollable: true,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          title: Text(
-            '${widget.title} · ${_sourceName(index)}',
-            style: styles.t18.copyWith(fontSize: 20, fontWeight: FontWeight.w600),
-          ),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(file.name, style: styles.t14.copyWith(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 8),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colors.surfaceContainerHighest,
-                    borderRadius: const BorderRadius.all(Radius.circular(12)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: SelectableText(url, style: styles.t12.copyWith(color: colors.onSurfaceVariant)),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  key: const ValueKey('version-source-download'),
-                  style: wide,
-                  onPressed: () {
-                    Navigator.of(dialogContext).pop();
-                    unawaited(showUpdateDownload(pageContext, file: file, sources: [url], version: widget.version));
-                  },
-                  icon: const Icon(AppIcons.downloadPackage, size: 20),
-                  label: Text(i18n('update_download_in_app')),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  key: const ValueKey('version-source-browser'),
-                  style: wide,
-                  onPressed: () {
-                    Navigator.of(dialogContext).pop();
-                    final uri = updateDownloadUri(url);
-                    if (uri != null) unawaited(_openExternal(uri));
-                  },
-                  icon: const Icon(AppIcons.openInBrowser, size: 20),
-                  label: Text(i18n('update_open_in_browser')),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  key: const ValueKey('version-source-copy'),
-                  style: wide,
-                  onPressed: () async {
-                    Navigator.of(dialogContext).pop();
-                    await Clipboard.setData(ClipboardData(text: url));
-                    AppNavigator.toast(i18n('copied_to_clipboard'));
-                  },
-                  icon: const Icon(AppIcons.copy, size: 20),
-                  label: Text(i18n('copy_link')),
-                ),
-              ],
+      return AppDialog(
+        key: const ValueKey('version-source-dialog'),
+        title: '${widget.title} · ${_sourceName(index)}',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(file.name, style: styles.t14.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHighest,
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: SelectableText(url, style: styles.t12.copyWith(color: colors.onSurfaceVariant)),
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              key: const ValueKey('version-source-cancel'),
-              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(i18n('cancel')),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              key: const ValueKey('version-source-download'),
+              style: wide,
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                unawaited(showUpdateDownload(pageContext, file: file, sources: [url], version: widget.version));
+              },
+              icon: const Icon(AppIcons.downloadPackage, size: 20),
+              label: Text(i18n('update_download_in_app')),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              key: const ValueKey('version-source-browser'),
+              style: wide,
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                final uri = updateDownloadUri(url);
+                if (uri != null) unawaited(_openExternal(uri));
+              },
+              icon: const Icon(AppIcons.openInBrowser, size: 20),
+              label: Text(i18n('update_open_in_browser')),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              key: const ValueKey('version-source-copy'),
+              style: wide,
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                await Clipboard.setData(ClipboardData(text: url));
+                AppNavigator.toast(i18n('copied_to_clipboard'));
+              },
+              icon: const Icon(AppIcons.copy, size: 20),
+              label: Text(i18n('copy_link')),
             ),
           ],
         ),
+        actions: const [DialogCancelButton(key: ValueKey('version-source-cancel'))],
       );
     },
   );

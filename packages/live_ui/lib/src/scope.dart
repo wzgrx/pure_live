@@ -24,6 +24,9 @@ final class LiveUiStrings {
     required this.verifying,
     required this.delete,
     this.offline = '未开播',
+    this.cancel = '取消',
+    this.close = '关闭',
+    this.gotIt = '知道了',
     this.refreshPull = '下拉刷新',
     this.refreshRelease = '松开刷新',
     this.refreshRefreshing = '正在刷新...',
@@ -67,6 +70,9 @@ final class LiveUiStrings {
     verifying: 'Verifying',
     delete: 'Delete',
     offline: 'Offline',
+    cancel: 'Cancel',
+    close: 'Close',
+    gotIt: 'Got it',
     refreshPull: 'Pull to refresh',
     refreshRelease: 'Release to refresh',
     refreshRefreshing: 'Refreshing...',
@@ -120,6 +126,15 @@ final class LiveUiStrings {
   /// The mark of a room that is not live, on its cover (U.4a c4,
   /// `offline_room_title`).
   final String offline;
+
+  /// The dialogs' "取消" (`cancel`).
+  final String cancel;
+
+  /// "关闭": a panel's ✕, a toast's ✕ (`close`).
+  final String close;
+
+  /// The one button of a message dialog, "知道了" (`got_it`, U.1d c14).
+  final String gotIt;
 
   /// The refresh header while pulled (`refresh_pull_to_refresh`; 3.x's
   /// header said "上拉刷新", U.1c P19).

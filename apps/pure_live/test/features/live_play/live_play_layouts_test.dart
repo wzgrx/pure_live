@@ -809,7 +809,9 @@ void main() {
       if (castSupported(platform)) {
         expect(_in('room-menu-cast', find.byIcon(AppIcons.cast)), findsOneWidget);
       }
-      // The fullscreen bars carry the same menu.
+      // The fullscreen bars carry the same menu, less what the bars show
+      // (B05, docs/ui/compare/U.2m c12: ⇄ and cast on the top bar; the fit on
+      // the landscape bottom bar, not on the upright fullscreen's).
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump(const Duration(seconds: 1));
       await _tap(tester, 'live-play-fullscreen');
@@ -817,7 +819,11 @@ void main() {
       await tester.tap(find.descendant(of: _key('live-play-top-bar'), matching: _key('live-play-menu')));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
-      expect(menu(), expected, reason: '$platform fullscreen');
+      final onBars = {'room-menu-switchRoom', 'room-menu-cast', if (size.width > size.height) 'room-menu-videoFit'};
+      expect(menu(), [
+        for (final key in expected)
+          if (!onBars.contains(key)) key,
+      ], reason: '$platform fullscreen');
       await _close(tester, room);
     }
   });

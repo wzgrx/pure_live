@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
+import 'package:live_ui/src/widgets/app_dialog.dart';
 
 /// A button of a [CardDialog] (outlined, with its words).
 @immutable
@@ -72,8 +73,9 @@ class CardDialog extends StatelessWidget {
   /// The button after "关闭".
   final Widget? trailing;
 
-  /// The widest the dialog gets (3.x's room dialog on wide screens).
-  static const double maxWidth = 428;
+  /// The widest the dialog gets (the one dialog's width, U.1d c7; 3.x's
+  /// room dialog was 428).
+  static const double maxWidth = appDialogMaxWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -98,90 +100,71 @@ class CardDialog extends StatelessWidget {
     );
 
     final body = this.body;
-    return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: maxWidth),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    // The one dialog's frame (docs/ui/compare/U.1d): its width, corners,
+    // keys and buttons at the bottom right.
+    return AppDialog(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            spacing: 12,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-                child: Row(
-                  spacing: 12,
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(color: scheme.surface, shape: BoxShape.circle),
-                      child: ClipRRect(borderRadius: BorderRadius.circular(7), child: leading),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            key: const ValueKey('card-dialog-title'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: styles.t16.copyWith(fontWeight: FontWeight.w600, color: scheme.onSurface),
-                          ),
-                          if (subtitle case final text? when text.isNotEmpty)
-                            SelectableText(
-                              text,
-                              key: const ValueKey('card-dialog-subtitle'),
-                              maxLines: 1,
-                              style: muted,
-                            ),
-                          if (detail case final text? when text.isNotEmpty)
-                            Text(text, key: const ValueKey('card-dialog-detail'), style: muted),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: scheme.surface, shape: BoxShape.circle),
+                child: ClipRRect(borderRadius: BorderRadius.circular(7), child: leading),
               ),
-              if (body != null)
-                Container(
-                  key: const ValueKey('card-dialog-body'),
-                  margin: const EdgeInsets.fromLTRB(24, 14, 24, 0),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  decoration: BoxDecoration(color: scheme.surface, borderRadius: BorderRadius.circular(12)),
-                  child: Text(
-                    body,
-                    style: styles.t14.copyWith(color: scheme.onSurface, fontWeight: FontWeight.w500, height: 1.45),
-                  ),
-                ),
-              for (final (index, row) in actions.indexed)
-                Padding(
-                  padding: EdgeInsets.fromLTRB(24, index == 0 ? 14 : 8, 24, 0),
-                  child: Row(spacing: 8, children: [for (final action in row) Expanded(child: button(action))]),
-                ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  spacing: 8,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextButton(
-                      key: const ValueKey('card-dialog-close'),
-                      style: TextButton.styleFrom(foregroundColor: scheme.onSurfaceVariant),
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(closeLabel),
+                    Text(
+                      title,
+                      key: const ValueKey('card-dialog-title'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: styles.t16.copyWith(fontWeight: FontWeight.w600, color: scheme.onSurface),
                     ),
-                    ?trailing,
+                    if (subtitle case final text? when text.isNotEmpty)
+                      SelectableText(text, key: const ValueKey('card-dialog-subtitle'), maxLines: 1, style: muted),
+                    if (detail case final text? when text.isNotEmpty)
+                      Text(text, key: const ValueKey('card-dialog-detail'), style: muted),
                   ],
                 ),
               ),
             ],
           ),
-        ),
+          if (body != null)
+            Container(
+              key: const ValueKey('card-dialog-body'),
+              margin: const EdgeInsets.only(top: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(color: scheme.surface, borderRadius: BorderRadius.circular(12)),
+              child: Text(
+                body,
+                style: styles.t14.copyWith(color: scheme.onSurface, fontWeight: FontWeight.w500, height: 1.45),
+              ),
+            ),
+          for (final (index, row) in actions.indexed)
+            Padding(
+              padding: EdgeInsets.only(top: index == 0 ? 14 : 8),
+              child: Row(spacing: 8, children: [for (final action in row) Expanded(child: button(action))]),
+            ),
+        ],
       ),
+      actions: [
+        TextButton(
+          key: const ValueKey('card-dialog-close'),
+          style: TextButton.styleFrom(foregroundColor: scheme.onSurfaceVariant),
+          onPressed: () => Navigator.pop(context),
+          child: Text(closeLabel),
+        ),
+        ?trailing,
+      ],
     );
   }
 }

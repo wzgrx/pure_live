@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
 import 'package:pure_live/routes/route_path.dart';
@@ -38,7 +37,7 @@ void main() {
       // The dialog: each policy with its energy use and explanation.
       await tapSettings(tester, settingsRow('refresh_rate'));
       expect(_text('省电（默认） · 低耗电'), findsOneWidget);
-      expect(find.byType(SettingsChoiceRow), findsNWidgets(3));
+      expect(find.byType(DialogOptionRow), findsNWidgets(3));
       await tapSettings(tester, find.byKey(const ValueKey('settings-choice-balanced')));
       expect(h.settings.get(Settings.refreshRateMode), 'balanced');
       expect(_inRow('refresh_rate', _text('均衡')), findsOneWidget);
@@ -166,7 +165,7 @@ void main() {
       await tapSettings(tester, settingsRow('auto_refresh'));
       expect(_rowWidget(tester, 'refresh_interval').enabled, isTrue);
       await tapSettings(tester, settingsRow('refresh_interval'));
-      expect(find.byType(SettingsChoiceRow), findsNWidgets(12));
+      expect(find.byType(DialogOptionRow), findsNWidgets(12));
       await tapSettings(tester, find.byKey(const ValueKey('settings-choice-90')));
       expect(h.settings.get(Settings.autoRefreshInterval), 90);
       expect(_inRow('refresh_interval', _text('1.5 小时')), findsOneWidget);

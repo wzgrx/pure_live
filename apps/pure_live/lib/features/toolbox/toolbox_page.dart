@@ -303,59 +303,28 @@ class ToolboxChoiceDialog<T> extends StatelessWidget {
   final String Function(T item)? subtitle;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final styles = context.textStyles;
-    return AlertDialog(
-      key: const ValueKey('toolbox-choice-dialog'),
-      scrollable: true,
-      insetPadding: const EdgeInsets.all(16),
-      title: Text(title, style: styles.t18.copyWith(fontSize: 20, fontWeight: FontWeight.w600)),
-      contentPadding: const EdgeInsets.only(top: 8),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 280, maxWidth: 520),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final (index, item) in items.indexed)
-              InkWell(
-                key: ValueKey('toolbox-choice-$index'),
-                onTap: () => Navigator.of(context).pop(item),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 56),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(label(item, index), style: styles.t15),
-                        if (subtitle case final subtitle?)
-                          Text(
-                            subtitle(item),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: styles.t12.copyWith(color: colors.onSurfaceVariant),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          key: const ValueKey('toolbox-choice-cancel'),
-          style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(i18n('cancel')),
-        ),
+  Widget build(BuildContext context) => AppDialog(
+    key: const ValueKey('toolbox-choice-dialog'),
+    title: title,
+    wide: true,
+    contentPadding: EdgeInsets.zero,
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (index, item) in items.indexed)
+          DialogOptionRow(
+            key: ValueKey('toolbox-choice-$index'),
+            label: label(item, index),
+            description: subtitle?.call(item),
+            descriptionMaxLines: 1,
+            selected: false,
+            onTap: () => Navigator.of(context).pop(item),
+          ),
       ],
-    );
-  }
+    ),
+    actions: const [DialogCancelButton(key: ValueKey('toolbox-choice-cancel'))],
+  );
 }
 
 class _ActionButtons extends StatelessWidget {

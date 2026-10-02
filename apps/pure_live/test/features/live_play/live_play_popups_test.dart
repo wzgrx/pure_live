@@ -266,6 +266,15 @@ void main() {
       await tester.pumpAndSettle();
       final last = tester.getRect(find.byKey(const ValueKey('live-play-quality-item-2')));
       expect(last.bottom, lessThanOrEqualTo(button.top), reason: 'above the button, where it fits');
+      // Right on the button's outline (B03): 4 apart, by the measured height.
+      final outline = tester.getRect(_in('live-play-quality', find.byType(DecoratedBox)).first);
+      final menu = tester.getRect(
+        find
+            .ancestor(of: find.byKey(const ValueKey('live-play-quality-item-0')), matching: find.byType(Material))
+            .first,
+      );
+      expect(menu.bottom, moreOrLessEquals(outline.top - 4, epsilon: 0.5));
+      expect(menu.top, greaterThanOrEqualTo(0));
       expect(_in('live-play-quality-item-0', find.byIcon(AppIcons.selected)), findsOneWidget);
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();

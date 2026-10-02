@@ -64,6 +64,12 @@ Future<_Room> _pump(
     return null;
   });
   addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+  const systemAccess = MethodChannel('pure_live/system_access');
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(systemAccess, (call) async {
+    if (call.method == 'sensorLandscape') orientations.add(call.method);
+    return true;
+  });
+  addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(systemAccess, null));
   final engine = FakeEngine();
   final previous = AppNavigator.toast;
   AppNavigator.toast = (_) {};
@@ -621,7 +627,10 @@ void main() {
     testWidgets('横屏全屏: once sideways with the ambient sides; leaving turns the phone back upright', (tester) async {
       final room = await _pump(tester, portrait: true);
       await _tap(tester, 'portrait-landscape-fullscreen');
-      expect(room.orientations.last, ['DeviceOrientation.landscapeLeft', 'DeviceOrientation.landscapeRight']);
+      expect(room.orientations.reversed.take(2), [
+        'sensorLandscape',
+        ['DeviceOrientation.landscapeLeft', 'DeviceOrientation.landscapeRight'],
+      ], reason: 'turning over with the phone even while auto-rotate is off (issue #36)');
       tester.view.physicalSize = const Size(852, 393);
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));

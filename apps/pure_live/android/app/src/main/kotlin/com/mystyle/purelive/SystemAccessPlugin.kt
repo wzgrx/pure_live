@@ -2,6 +2,7 @@ package com.mystyle.purelive
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -20,7 +21,11 @@ import io.flutter.plugin.common.PluginRegistry
  * - `openInstallSettings`: the system page that grants it;
  * - `localNetworkGranted`: whether sockets to the local network are allowed
  *   (Android 17 / API 37 `ACCESS_LOCAL_NETWORK`; true before API 37);
- * - `requestLocalNetwork`: asks for it and answers whether it is granted.
+ * - `requestLocalNetwork`: asks for it and answers whether it is granted;
+ * - `sensorLandscape`: holds the activity sideways turning over with the
+ *   phone even while auto-rotate is off (issue #36; Flutter's two landscapes
+ *   are USER_LANDSCAPE, which stays put then). Flutter's next preferred
+ *   orientations replace it.
  */
 internal class SystemAccessPlugin :
     FlutterPlugin,
@@ -75,6 +80,7 @@ internal class SystemAccessPlugin :
             "openInstallSettings" -> result.success(openInstallSettings())
             "localNetworkGranted" -> result.success(localNetworkGranted())
             "requestLocalNetwork" -> requestLocalNetwork(result)
+            "sensorLandscape" -> result.success(sensorLandscape())
             else -> result.notImplemented()
         }
     }
@@ -101,6 +107,12 @@ internal class SystemAccessPlugin :
         val context = context ?: return true
         if (Build.VERSION.SDK_INT < LOCAL_NETWORK_SDK) return true
         return context.checkSelfPermission(LOCAL_NETWORK) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun sensorLandscape(): Boolean {
+        val host = activity?.activity ?: return false
+        host.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        return true
     }
 
     private fun requestLocalNetwork(result: MethodChannel.Result) {

@@ -40,6 +40,7 @@ import 'package:pure_live/features/live_play/player/player_view.dart';
 import 'package:pure_live/features/live_play/player/room_swipe.dart';
 import 'package:pure_live/features/live_play/record/record_panel.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/platform/screen_orientation.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_observer.dart';
@@ -507,13 +508,13 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     }
     _restorePortrait = landscape;
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    await SystemChrome.setPreferredOrientations(
-      portrait
-          ? [DeviceOrientation.portraitUp]
-          : !landscape && orientation == FullscreenOrientation.followSystem
-          ? const []
-          : [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight],
-    );
+    if (portrait) {
+      await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    } else if (!landscape && orientation == FullscreenOrientation.followSystem) {
+      await SystemChrome.setPreferredOrientations(const []);
+    } else {
+      await ScreenOrientation.landscape();
+    }
   }
 
   /// The portrait room's panel pulled down or its handle tapped: the

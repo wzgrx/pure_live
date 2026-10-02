@@ -21,6 +21,7 @@ import 'package:pure_live/features/multiview/widgets/room_picker.dart';
 import 'package:pure_live/features/multiview/widgets/toolbar.dart';
 import 'package:pure_live/features/multiview/widgets/wall.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/platform/screen_orientation.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
@@ -399,10 +400,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
     try {
       if (mode == _DisplayMode.fullscreen) {
         await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-        await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight,
-        ]);
+        await ScreenOrientation.landscape();
       } else if (previous == _DisplayMode.fullscreen) {
         await _restoreSystemUi();
       }

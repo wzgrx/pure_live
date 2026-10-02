@@ -166,6 +166,16 @@ void main() {
       expect(Settings.byKey('uiMode'), Settings.uiMode);
     });
 
+    test('B05: the switch-room panel shows a grid by default; grid or list, backed up', () async {
+      expect(store.settings.get(Settings.roomSwitcherLayout), 'grid');
+      await store.settings.set(Settings.roomSwitcherLayout, 'list');
+      expect(store.settings.get(Settings.roomSwitcherLayout), 'list');
+      await store.settings.set(Settings.roomSwitcherLayout, 'cards');
+      expect(store.settings.get(Settings.roomSwitcherLayout), 'grid');
+      expect(Settings.byKey('roomSwitcherLayout'), Settings.roomSwitcherLayout);
+      expect(Settings.roomSwitcherLayout.scope, isNot(SettingScope.internal));
+    });
+
     test('B02: "暂停时的弹幕" stands with the video by default; two choices, backed up', () async {
       expect(store.settings.get(Settings.danmakuPausedBehavior), 'pause');
       await store.settings.set(Settings.danmakuPausedBehavior, 'continue');

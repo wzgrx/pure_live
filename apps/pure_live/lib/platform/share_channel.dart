@@ -9,19 +9,22 @@ import 'package:path/path.dart' as p;
 /// What arrived from outside the app (Android): another app's share or
 /// "open with" (`SEND`, `SEND_MULTIPLE`, `VIEW`: the text and the files,
 /// copied into the app's cache by the native side), or a launcher shortcut
-/// or notification that opens a page ([route]) or a room ([room]).
+/// or notification that opens a page ([route], the recording centre at a
+/// [task]) or a room ([room]).
 @immutable
 final class SharedPayload {
   /// Creates a payload.
-  const new({this.text, this.files = const [], this.route, this.room});
+  const new({this.text, this.files = const [], this.route, this.task, this.room});
 
-  /// Reads the channel's map `{text, files: [{path, name}], route, room:
-  /// {platform, roomId, title, nick}}`; anything else is an empty payload.
+  /// Reads the channel's map `{text, files: [{path, name}], route, task,
+  /// room: {platform, roomId, title, nick}}`; anything else is an empty
+  /// payload.
   factory fromChannel(Object? value) {
     if (value is! Map) return const SharedPayload();
     final text = value['text'];
     final files = value['files'];
     final route = value['route'];
+    final task = value['task'];
     final room = value['room'];
     return SharedPayload(
       text: text is String && text.trim().isNotEmpty ? text : null,
@@ -31,6 +34,7 @@ final class SharedPayload {
             if (file is Map && file['path'] is String && (file['path'] as String).isNotEmpty) file['path'] as String,
       ],
       route: route is String && route.startsWith('/') ? route : null,
+      task: task is String && task.trim().isNotEmpty ? task.trim() : null,
       room: room is Map
           ? {
               for (final MapEntry(:key, :value) in room.entries)
@@ -48,6 +52,10 @@ final class SharedPayload {
 
   /// A page to open (a shortcut or a notification), or null.
   final String? route;
+
+  /// The recording task the page points at (the "录制已停止" reminder opens
+  /// the recording centre at its task, F02 c2), or null.
+  final String? task;
 
   /// A room to open (`platform`, `roomId`, `title`, `nick`; a recent-room
   /// shortcut), or null.

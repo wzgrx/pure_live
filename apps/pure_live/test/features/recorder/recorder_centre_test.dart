@@ -140,6 +140,7 @@ Future<(AppRecording, _Outside)> _pump(
   WidgetTester tester, {
   Size size = const Size(393, 852),
   bool inHome = false,
+  Object? arguments,
   List<RecordTask> tasks = const [],
   void Function(AppRecording recording)? prepare,
 }) async {
@@ -206,7 +207,7 @@ Future<(AppRecording, _Outside)> _pump(
               MaterialPageRoute<void>(builder: (_) => const Scaffold()),
               MaterialPageRoute<void>(
                 builder: (_) => RecorderPage(
-                  route: RouteArgs(RoutePath.kRecordPage, inHome: inHome),
+                  route: RouteArgs(RoutePath.kRecordPage, arguments: arguments, inHome: inHome),
                   now: () => _now,
                 ),
               ),
@@ -747,5 +748,77 @@ void main() {
       reason: 'once',
     );
     expect(File(p.join(from, 'later.mp4')).existsSync(), isTrue);
+  });
+
+  group('opened at a task: the "录制已停止" reminder (F02 c2)', () {
+    /// Twelve tasks that are not recording, newest first: t11 is far below
+    /// the first screen of a phone.
+    List<RecordTask> twelve() => [for (var index = 0; index < 12; index++) _task('t$index', minutesAgo: index)];
+
+    BoxDecoration highlight(WidgetTester tester) =>
+        tester.widget<DecoratedBox>(_key('recorder-task-highlight')).decoration as BoxDecoration;
+
+    testWidgets('a phone: the list scrolls to the task and highlights it for a moment', (tester) async {
+      await _pump(tester, tasks: twelve(), arguments: 'bilibili_t11');
+      final list = tester.getRect(_key('recorder-list'));
+      final card = tester.getRect(_card('t11'));
+      expect(card.top, greaterThanOrEqualTo(list.top));
+      expect(card.bottom, lessThanOrEqualTo(list.bottom));
+      expect(_card('t0'), findsNothing, reason: 'scrolled away from the top');
+      expect(find.descendant(of: _key('recorder-task-highlight'), matching: _card('t11')), findsOneWidget);
+      expect(highlight(tester).border!.top.color.a, 1);
+
+      // It fades within a few seconds; the card stays where it is.
+      await tester.pump(const Duration(seconds: 3));
+      expect(highlight(tester).border!.top.color.a, 0);
+      expect(tester.getRect(_card('t11')), card);
+    });
+
+    testWidgets('a task on the first screen is highlighted where it is', (tester) async {
+      await _pump(tester, tasks: twelve(), arguments: 'bilibili_t0');
+      expect(find.descendant(of: _key('recorder-task-highlight'), matching: _card('t0')), findsOneWidget);
+      expect(tester.getRect(_card('t0')).top, lessThan(200));
+      await tester.pump(const Duration(seconds: 3));
+    });
+
+    testWidgets('wide: the row of the task comes into view', (tester) async {
+      await _pump(
+        tester,
+        size: const Size(1280, 800),
+        tasks: [...twelve(), ...twelve().map((task) => _task('w${task.roomId}', minutesAgo: 20))],
+        arguments: 'bilibili_t11',
+      );
+      final list = tester.getRect(_key('recorder-list'));
+      final card = tester.getRect(_card('t11'));
+      expect(card.top, greaterThanOrEqualTo(list.top));
+      expect(card.bottom, lessThanOrEqualTo(list.bottom));
+      expect(_key('recorder-task-highlight'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 3));
+    });
+
+    testWidgets('a task the recorder brings in later (still restoring) is shown when it comes', (tester) async {
+      final (recording, _) = await _pump(tester, tasks: twelve(), arguments: 'bilibili_late');
+      expect(_key('recorder-task-highlight'), findsNothing);
+      await tester.runAsync(() => recording.recorder!.restore(jsonEncode([_task('late', minutesAgo: 30).toJson()])));
+      await _settle(tester);
+      final list = tester.getRect(_key('recorder-list'));
+      expect(tester.getRect(_card('late')).bottom, lessThanOrEqualTo(list.bottom));
+      expect(find.descendant(of: _key('recorder-task-highlight'), matching: _card('late')), findsOneWidget);
+      await _drain(tester);
+    });
+
+    testWidgets('a task that is gone: the list stays at the top, nothing is highlighted', (tester) async {
+      await _pump(tester, tasks: twelve(), arguments: 'bilibili_gone');
+      expect(_card('t0'), findsOneWidget);
+      expect(_key('recorder-task-highlight'), findsNothing);
+    });
+  });
+
+  test('the arguments name the task', () {
+    expect(recorderTaskOf('bilibili_1'), 'bilibili_1');
+    expect(recorderTaskOf(' bilibili_1 '), 'bilibili_1');
+    expect(recorderTaskOf(''), isNull);
+    expect(recorderTaskOf(null), isNull);
+    expect(recorderTaskOf(42), isNull);
   });
 }

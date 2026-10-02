@@ -18,7 +18,5 @@
     "search -> settings/settings_model.dart",
     "settings -> home/home_menu.dart"
   ],
-  "raw_styles": {
-    "settings": 25
-  }
+  "raw_styles": {}
 }

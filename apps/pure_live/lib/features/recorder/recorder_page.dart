@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -87,7 +88,9 @@ String? recordTaskFolder(RecordTask task) {
 /// least 400 as the page's width holds otherwise.
 ///
 /// Routes: `RoutePath.kRecordPage`; also the home's "record" tab (the menu
-/// at the top left instead of back).
+/// at the top left instead of back). The arguments may be a task id
+/// (`RecordTask.taskId`): the list scrolls to that task and highlights it
+/// for a moment ("录制已停止" reminder, F02 c2; [recorderTaskOf]).
 class RecorderPage extends ConsumerStatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, this.now, super.key});
@@ -102,6 +105,13 @@ class RecorderPage extends ConsumerStatefulWidget {
   ConsumerState<RecorderPage> createState() => _RecorderPageState();
 }
 
+/// The task the recording centre opens at: [arguments] when it is a task id,
+/// else null.
+String? recorderTaskOf(Object? arguments) => switch (arguments) {
+  final String id when id.trim().isNotEmpty => id.trim(),
+  _ => null,
+};
+
 /// Announces the recorder's and the settings' changes to the page's parts.
 final class _Changes extends ChangeNotifier {
   void changed() => notifyListeners();
@@ -114,6 +124,14 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
   StreamSubscription<RecordSettings>? _settings;
   StreamSubscription<RecordNotice>? _notices;
   RecorderFilter _filter = RecorderFilter.all;
+  final ScrollController _scroll = ScrollController();
+
+  /// The task the page was opened at (F02 c2), its card's key, whether it
+  /// was found yet, and the highlight's run (0 before it shows).
+  late final String? _target = recorderTaskOf(widget.route.arguments);
+  final GlobalKey _targetKey = GlobalKey(debugLabel: 'recorder-target');
+  bool _found = false;
+  int _highlight = 0;
 
   AppRecording? get _recording => ref.read(recordingProvider);
 
@@ -123,9 +141,14 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
     final recording = _recording;
     final recorder = recording?.recorder;
     if (recording == null || recorder == null) return;
-    _tasks = recorder.changes.listen((_) => _changes.changed());
+    _tasks = recorder.changes.listen((_) {
+      _changes.changed();
+      // A task that was not in the list yet (the recorder still restoring).
+      if (_target != null && !_found) WidgetsBinding.instance.addPostFrameCallback((_) => _seek());
+    });
     _settings = recording.settings.changes.listen((_) => _changes.changed());
     _notices = recorder.notices.listen(_onNotice);
+    if (_target != null) WidgetsBinding.instance.addPostFrameCallback((_) => _seek());
   }
 
   @override
@@ -134,7 +157,44 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
     unawaited(_settings?.cancel());
     unawaited(_notices?.cancel());
     _changes.dispose();
+    _scroll.dispose();
     super.dispose();
+  }
+
+  /// Brings the target task into view once it is in the list, then
+  /// highlights it.
+  void _seek() {
+    final id = _target;
+    if (id == null || _found || !mounted) return;
+    if (!recorderVisible(_taskList, _states(), _filter).any((task) => task.taskId == id)) return;
+    _found = true;
+    _reveal(0);
+  }
+
+  /// The cards are built as they scroll in: until the target's is built,
+  /// go down a screen at a time.
+  void _reveal(int step) {
+    if (!mounted) return;
+    final card = _targetKey.currentContext;
+    if (card != null) {
+      final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+      unawaited(
+        Scrollable.ensureVisible(
+          card,
+          alignment: 0.2,
+          duration: still ? Duration.zero : const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+        ).then((_) {
+          if (mounted) setState(() => _highlight++);
+        }),
+      );
+      return;
+    }
+    if (step >= 100 || !_scroll.hasClients) return;
+    final position = _scroll.positions.last;
+    if (position.pixels >= position.maxScrollExtent) return;
+    _scroll.jumpTo(math.min(position.pixels + position.viewportDimension, position.maxScrollExtent));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reveal(step + 1));
   }
 
   void _onNotice(RecordNotice notice) {
@@ -275,18 +335,24 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
                         columns: recorderColumns(constraints.maxWidth - 2 * gutter),
                         gutter: gutter,
                         wide: wide,
+                        controller: _scroll,
                         onEnablePolling: () => unawaited(enableRecordPolling(recording)),
-                        card: (task) => RecorderTaskCard(
-                          key: ValueKey(task.taskId),
-                          taskId: task.taskId,
-                          task: () => _taskOf(task.taskId),
-                          facts: _facts,
-                          changes: _changes,
-                          chatCount: (task) => recording.chat?.countOf(task) ?? 0,
-                          actions: _actions(recording, recorder),
-                          wide: wide,
-                          now: widget.now,
-                        ),
+                        card: (task) {
+                          final card = RecorderTaskCard(
+                            key: ValueKey(task.taskId),
+                            taskId: task.taskId,
+                            task: () => _taskOf(task.taskId),
+                            facts: _facts,
+                            changes: _changes,
+                            chatCount: (task) => recording.chat?.countOf(task) ?? 0,
+                            actions: _actions(recording, recorder),
+                            wide: wide,
+                            now: widget.now,
+                          );
+                          return task.taskId == _target
+                              ? RecorderTaskHighlight(key: _targetKey, run: _highlight, child: card)
+                              : card;
+                        },
                       ),
                     ),
                   ],
@@ -431,12 +497,14 @@ class _TaskGrid extends StatelessWidget {
     required this.columns,
     required this.gutter,
     required this.wide,
+    required this.controller,
     required this.onEnablePolling,
     required this.card,
     super.key,
   });
 
   final Listenable changes;
+  final ScrollController controller;
   final RecorderFilter filter;
   final List<RecordTask> Function() visible;
 
@@ -476,6 +544,7 @@ class _TaskGrid extends StatelessWidget {
       final rows = (tasks.length + columns - 1) ~/ columns;
       return ListView.builder(
         key: const ValueKey('recorder-list'),
+        controller: controller,
         physics: const PureLiveBoundedScrollPhysics(),
         padding: EdgeInsets.fromLTRB(gutter, wide ? 16 : 12, gutter, 24),
         itemCount: rows + (banner ? 1 : 0),
@@ -528,4 +597,41 @@ class _PollingOffBanner extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// The card the page was opened at (F02 c2): once it is in view ([run] 1
+/// and on), a primary-coloured frame and tint that hold for a moment, then
+/// fade.
+class RecorderTaskHighlight extends StatelessWidget {
+  /// Creates the highlight around [child].
+  const new({required this.run, required this.child, super.key});
+
+  /// How many times it has shown; 0 before the card is in view.
+  final int run;
+
+  /// The card.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (run == 0) return child;
+    final primary = Theme.of(context).colorScheme.primary;
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(run),
+      tween: Tween(begin: 1, end: 0),
+      duration: const Duration(milliseconds: 2400),
+      curve: const Interval(0.5, 1, curve: Curves.easeIn),
+      child: child,
+      builder: (context, strength, child) => DecoratedBox(
+        key: const ValueKey('recorder-task-highlight'),
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          color: primary.withValues(alpha: 0.12 * strength),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: primary.withValues(alpha: strength), width: 2),
+        ),
+        child: child,
+      ),
+    );
+  }
 }

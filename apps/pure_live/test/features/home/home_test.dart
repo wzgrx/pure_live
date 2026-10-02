@@ -69,6 +69,8 @@ void main() {
         RoutePath.kLocalInteraction,
         // U.11a: the log page moved out of the backup page (3.x) into settings.
         RoutePath.kLogs,
+        // F02 c1: 设置 → 弹幕, the live room's danmaku settings on a page of their own.
+        RoutePath.kDanmakuSettings,
       },
     );
   });

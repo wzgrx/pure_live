@@ -67,6 +67,10 @@ abstract final class RoutePath {
   /// Danmaku block list.
   static const kSettingsDanmuShield = '/shield';
 
+  /// 设置 → 弹幕: the live room's danmaku settings on a page of their own
+  /// (new in v4, F02 c1; 3.x changed them only in a room).
+  static const kDanmakuSettings = '/danmaku_settings';
+
   /// Platform list.
   static const kSettingsHotAreas = '/hot_areas';
 

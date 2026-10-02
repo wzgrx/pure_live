@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:path/path.dart' as p;
@@ -13,6 +14,9 @@ import 'package:pure_live/app/intake/share_intake.dart';
 import 'package:pure_live/app/intake/system_intake.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/platform/share_channel.dart';
+import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/routes/route_observer.dart';
+import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/room_prompt.dart';
 import 'package:pure_live/shared/rooms/share_code.dart';
 
@@ -182,6 +186,7 @@ void main() {
     late List<String> notes;
     late List<LiveRoom> opened;
     late List<String> routes;
+    late List<Object?> arguments;
     late List<(LiveRoom, RoomPromptChoice)> prompts;
     late List<String> released;
     late ShareIntake intake;
@@ -191,6 +196,7 @@ void main() {
       notes = [];
       opened = [];
       routes = [];
+      arguments = [];
       prompts = [];
       released = [];
       intake = ShareIntake(
@@ -198,7 +204,10 @@ void main() {
         importer: services.iptvImporter,
         navigator: () async => _Context(),
         openRoom: (room) async => opened.add(room),
-        openRoute: (route) async => routes.add(route),
+        openRoute: (route, argument) async {
+          routes.add(route);
+          arguments.add(argument);
+        },
         notify: notes.add,
         prompt: (context, room) async {
           prompts.add((room, RoomPromptChoice.enter));
@@ -217,7 +226,20 @@ void main() {
       );
       await pumpEventQueue();
       expect(routes, ['/record_mannager']);
+      expect(arguments, [null]);
       expect((opened.single.platform, opened.single.roomId, opened.single.nick), ('douyu', '8888', '主播'));
+    });
+
+    test('the "录制已停止" reminder opens the recording centre at its task (F02 c2)', () async {
+      expect(
+        await intake.ingest(const SharedPayload(route: '/record_mannager', task: 'bilibili_6')),
+        ShareOutcome.opened,
+      );
+      // Only the recording centre takes a task.
+      expect(await intake.ingest(const SharedPayload(route: '/search', task: 'bilibili_6')), ShareOutcome.opened);
+      await pumpEventQueue();
+      expect(routes, ['/record_mannager', '/search']);
+      expect(arguments, ['bilibili_6', null]);
     });
 
     test('an outside intent opens only the shortcut pages, anything else is ignored quietly', () async {
@@ -308,6 +330,46 @@ void main() {
     expect((calls.single.arguments as List).first, {'platform': 'huya', 'roomId': '2', 'title': '', 'nick': '乙'});
   });
 
+  testWidgets('a page opened from outside replaces the same page on top instead of stacking (F02 c2)', (tester) async {
+    Page<void> page(GoRouterState state, String path) => MaterialPage<void>(
+      key: state.pageKey,
+      name: path,
+      child: Scaffold(body: Text('$path ${state.extra}')),
+    );
+    final router = GoRouter(
+      observers: [liveRouteObserver],
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (_, _) => const Scaffold(body: Text('home')),
+        ),
+        for (final path in [RoutePath.kRecordPage, RoutePath.kSearch])
+          GoRoute(path: path, pageBuilder: (_, state) => page(state, path)),
+      ],
+    );
+    AppNavigator.router = router;
+    addTearDown(() => AppNavigator.router = null);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+
+    unawaited(openOutsidePage(RoutePath.kRecordPage, null));
+    await tester.pumpAndSettle();
+    expect(find.text('/record_mannager null'), findsOneWidget);
+    // The reminder of a task while the centre shows: the centre at the task.
+    unawaited(openOutsidePage(RoutePath.kRecordPage, 'bilibili_6'));
+    await tester.pumpAndSettle();
+    expect(find.text('/record_mannager bilibili_6'), findsOneWidget);
+    // Another page goes on top.
+    unawaited(openOutsidePage(RoutePath.kSearch, null));
+    await tester.pumpAndSettle();
+    expect(find.text('/search null'), findsOneWidget);
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('/record_mannager bilibili_6'), findsOneWidget);
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('home'), findsOneWidget, reason: 'one recording centre');
+  });
+
   test('payloads from the channel: shares, pages and rooms', () {
     final share = SharedPayload.fromChannel(const {
       'text': ' https://live.bilibili.com/6 ',
@@ -320,6 +382,10 @@ void main() {
     expect(share.files, ['/cache/share_intake/x/a.m3u']);
     expect(SharedPayload.fromChannel(const {'route': '/search'}).route, '/search');
     expect(SharedPayload.fromChannel(const {'route': 'search'}).route, isNull, reason: 'routes start with /');
+    final reminder = SharedPayload.fromChannel(const {'route': '/record_mannager', 'task': ' bilibili_6 '});
+    expect((reminder.route, reminder.task), ('/record_mannager', 'bilibili_6'));
+    expect(SharedPayload.fromChannel(const {'route': '/record_mannager', 'task': '  '}).task, isNull);
+    expect(SharedPayload.fromChannel(const {'route': '/record_mannager', 'task': 6}).task, isNull);
     expect(
       SharedPayload.fromChannel(const {
         'room': {'platform': 'douyu', 'roomId': '1'},

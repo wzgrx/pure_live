@@ -33,6 +33,8 @@ import java.util.concurrent.Executors
  *   c15): `route` opens a page (only [OPENABLE_ROUTES]), `platform` +
  *   `roomId` a room; delivered as
  *   `shared {route}` or `shared {room: {platform, roomId, title, nick}}`.
+ *   With the recording centre, [EXTRA_TASK] (a task id, the "录制已停止"
+ *   reminder, F02 c2) comes along as `shared {route, task}`.
  * - `setRecentRooms [{platform, roomId, title, nick}]`: the launcher icon's
  *   long press shows "搜索直播", "录制中心" and these rooms (dynamic
  *   shortcuts, so the debug build's own id works too).
@@ -59,6 +61,9 @@ internal class ShareIntakePlugin :
         /** Opens a page (`route`) or a room (`platform`, `roomId`, `title`, `nick`). */
         internal const val ACTION_OPEN = "com.mystyle.purelive.OPEN"
         internal const val EXTRA_ROUTE = "route"
+
+        /** The recording task the recording centre points at. */
+        internal const val EXTRA_TASK = "task"
         internal const val ROUTE_SEARCH = "/search"
         internal const val ROUTE_RECORDINGS = "/record_mannager"
 
@@ -83,6 +88,7 @@ internal class ShareIntakePlugin :
         private const val MAX_FILE_BYTES = 256L * 1024 * 1024
         private const val MAX_TEXT = 64 * 1024
         private const val MAX_NAME = 120
+        private const val MAX_TASK_ID = 200
     }
 
     private var channel: MethodChannel? = null
@@ -228,7 +234,7 @@ internal class ShareIntakePlugin :
             val platform = intent.getStringExtra("platform")
             val roomId = intent.getStringExtra("roomId")
             when {
-                route != null -> if (route in OPENABLE_ROUTES) deliver(mapOf("route" to route))
+                route != null -> if (route in OPENABLE_ROUTES) deliver(openPage(route, intent))
                 platform != null && roomId != null -> deliver(
                     mapOf(
                         "room" to mapOf(
@@ -252,6 +258,16 @@ internal class ShareIntakePlugin :
             val payload = mapOf("text" to text, "files" to files)
             handler.post { deliver(payload) }
         }
+    }
+
+    /**
+     * `{route}`, with `task` for the recording centre (any app may send the
+     * action, so it is only an id the page looks for).
+     */
+    private fun openPage(route: String, intent: Intent): Map<String, Any?> {
+        val task = intent.getStringExtra(EXTRA_TASK)?.trim()?.takeIf { it.isNotEmpty() && it.length <= MAX_TASK_ID }
+        if (route != ROUTE_RECORDINGS || task == null) return mapOf("route" to route)
+        return mapOf("route" to route, "task" to task)
     }
 
     private fun deliver(payload: Map<String, Any?>) {

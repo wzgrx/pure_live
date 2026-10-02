@@ -14,14 +14,14 @@ HTTP 和 WebSocket、请求头、压缩、代理和镜像、原生 HTTP 通道�
 |---|---|---|---:|
 | [Q01 请求和编码](Q01-请求和编码/README.md) | HTTP 客户端、拦截器、请求头策略、压缩（含 Brotli）。 | `████████████████████` 100% | 2 / 2 |
 | [Q02 代理和镜像](Q02-代理和镜像/README.md) | 系统代理、自定义代理、局域网代理、GitHub 镜像。 | — | 0 / 0 |
-| [Q03 原生HTTP和WebSocket](Q03-原生HTTP和WebSocket/README.md) | 系统 TLS 的原生 HTTP（Twitch、Kick）、WebSocket。 | — | 0 / 0 |
-| [Q04 网络状态和权限](Q04-网络状态和权限/README.md) | 离线检测、本地网络权限。 | `░░░░░░░░░░░░░░░░░░░░` 0% | 0 / 1 |
+| [Q03 原生HTTP和WebSocket](Q03-原生HTTP和WebSocket/README.md) | 系统 TLS 的原生 HTTP（Twitch、Kick）、WebSocket。 | `░░░░░░░░░░░░░░░░░░░░` 0% | 0 / 1 |
+| [Q04 网络状态和权限](Q04-网络状态和权限/README.md) | 离线检测、本地网络权限。 | — | 0 / 0 |
 
 ## 还没完成的（1）
 
 | 任务 | 状态 | 档位 | 阶段 |
 |---|---|---|---|
-| [Q04.1](Q04-网络状态和权限/README.md) 网络余项：功能清点里网络部分的 1 项缺失、1 项没验证 | 未开始 | 第二档 | — |
+| [Q03.1](Q03-原生HTTP和WebSocket/README.md) 弹幕握手的 User-Agent 去掉 Dart 前缀：在 K90 上逐平台验证后默认打开（UPGRADES B-2） | 未开始 | 第三档 | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
 

@@ -894,6 +894,16 @@ commit = "6e00ef1dc"
 old = ["U.3c", "T07i.2"]
 
 [[task]]
+id = "A06.5"
+title = "首页的状态栏和导航栏颜色和 3.x 核对（3.x 启动时全局设透明，v4 没有对应代码）"
+type = "界面"
+status = "未开始"
+size = "小"
+tier = 2
+note = "上一次（没留下来的）核对记下“首页导航栏是主题色、3.x 是透明”，要在 K90 上确认是不是有意改的"
+from = "V03.3 功能清点 F-APP-23"
+
+[[task]]
 id = "A07.1"
 title = "竖屏普通布局"
 type = "界面"
@@ -1028,6 +1038,15 @@ size = "小"
 tier = 2
 old = ["T05f.4"]
 note = "参考上游 pure_live 1cdcb7b2a；用系统给的手势区高度"
+
+[[task]]
+id = "A07.16"
+title = "京东直播间用模糊封面作背景（UPGRADES 28-3，先改直播间设计）"
+type = "界面"
+status = "未开始"
+size = "小"
+tier = 3
+from = "UPGRADES 28-3（V03.3 核对）"
 
 [[task]]
 id = "A08.1"
@@ -1181,6 +1200,15 @@ status = "完成"
 date = "2026-10-01"
 commit = "3b00b519f"
 old = ["U.12c", "T07h.2"]
+
+[[task]]
+id = "A09.11"
+title = "Picarto 搜索卡片显示频道简介（UPGRADES 11-5，先改卡片设计）"
+type = "界面"
+status = "未开始"
+size = "小"
+tier = 3
+from = "UPGRADES 11-5（V03.3 核对；E06.1 第 3 条 c2 没做）"
 
 [[task]]
 id = "A10.1"
@@ -1500,10 +1528,20 @@ old = ["M13.14", "T05a.2"]
 id = "C01.3"
 title = "直播间功能余项：功能清点里直播间部分的 6 项缺失、1 项有问题"
 type = "功能"
-status = "未开始"
+status = "不做"
 size = "中"
-tier = 2
 old = ["T05a.4"]
+note = "要补的 7 项都由别的任务做完了（V03.3 核对，D-029）：F-ROOM-21、F-PORT-05、F-PORT-06 → C02.1；F-ROOM-22 → G04.1；F-RT-05、F-RT-07 → C03.1；F-ROOM-13 → O05.1（真机 → S02.6）"
+
+[[task]]
+id = "C01.4"
+title = "直播间清晰度显示平台实际给的档：确认的编号不在列表里时按平台编号命名（和录制一致）"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+note = "和 E06.2 的“实际清晰度”阶段改同一处，最好一起做"
+from = "H01.3 记录“没做的”第 1 条（V03.3 核对）"
 
 [[task]]
 id = "C02.1"
@@ -1862,10 +1900,10 @@ old = ["F.2a", "T06e.1"]
 id = "D06.1"
 title = "弹幕功能余项：功能清点里弹幕部分的 3 项缺失、2 项有问题"
 type = "功能"
-status = "未开始"
+status = "不做"
 size = "中"
-tier = 2
 old = ["T06c.4"]
+note = "要补的 5 项都由别的任务做完了（V03.3 核对，D-029）：F-DM-04、F-DM-05、F-DM-06 → D05.1；F-DM-16 → D03.2；F-DM-13 → A08.4"
 
 [[task]]
 id = "E01.1"
@@ -2242,6 +2280,16 @@ stages = ["哔哩哔哩轮播", "名字颜色和徽章", "酷狗 PK", "Twitch", 
 done = 0
 next = "按任务书从头做；旧工作区里的半成品可参考"
 branch = "worktree-agent-af6f5e80c4e19804f（半成品，未提交）"
+note = "UPGRADES 1-1、8-8、11-1、B-7、B-14、B-16 和 26-2 的界面余项都在这里（V03.3 核对）；“实际清晰度”阶段和 C01.4 改同一处（room_controller.dart 的取流和刷新），最好一起做"
+
+[[task]]
+id = "E06.3"
+title = "YY 优先用 FLV：应用打开 YySite.flvFirst，换算存下的画质 id（UPGRADES 6-1）"
+type = "平台"
+status = "未开始"
+size = "小"
+tier = 2
+from = "UPGRADES 6-1（V03.3 核对）"
 
 [[task]]
 id = "E07.1"
@@ -2262,6 +2310,17 @@ status = "完成"
 date = "2026-10-01"
 commit = "b4fb966e8"
 old = ["M7.1", "T04a.1"]
+
+[[task]]
+id = "G01.2"
+title = "高通硬解评估：在 K90 上看 HEVC 硬解，定“优先 H.264”的默认值（UPGRADES 22-3）"
+type = "验证"
+status = "未开始"
+size = "中"
+tier = 2
+stages = ["K90 上逐平台测 HEVC 硬解", "定默认值并写进 DECISIONS"]
+done = 0
+from = "UPGRADES 统一原则“默认编码”、22-3（V03.3 核对：S02.3 没有做这一项）"
 
 [[task]]
 id = "G02.1"
@@ -2331,12 +2390,15 @@ old = ["F.3a", "T08a.3"]
 
 [[task]]
 id = "H01.4"
-title = "录制余项：功能清点里录制部分的 1 项缺失、5 项没验证"
-type = "功能"
+title = "录制的 4 项真机验证：划掉应用后继续录、所有文件访问权限、同时录弹幕 XML、HLS 预取"
+type = "验证"
 status = "未开始"
 size = "中"
 tier = 2
 old = ["T08a.4"]
+stages = ["划掉应用后继续录和所有文件访问权限", "弹幕 XML 和 HLS 预取"]
+done = 0
+note = "原来的 1 项缺失（合并进度 F-REC-13）已由 H01.3 做完；剩下 F-REC-06、F-REC-07、F-REC-10、F-REC-11（CHECKLIST 3 第 2、3、6、7 条），顺带看合并进度的显示（V03.3 核对）"
 
 [[task]]
 id = "H01.5"
@@ -2376,6 +2438,15 @@ status = "未开始"
 size = "小"
 tier = 3
 old = ["T08e.2"]
+
+[[task]]
+id = "H05.3"
+title = "录制通知在合并时显示进度（H01.3 记录“没做的”第 2 条）"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 3
+from = "H01.3 记录“没做的”第 2 条（V03.3 核对）"
 
 [[task]]
 id = "I01.1"
@@ -2478,12 +2549,13 @@ old = ["M13.7", "T09a.1"]
 
 [[task]]
 id = "J01.2"
-title = "设置项逐条核对（功能清点第 15 节）"
+title = "设置项逐条核对：218 个设置的默认值、取值范围和生效位置对照 3.x"
 type = "功能"
 status = "未开始"
 size = "中"
 tier = 2
 old = ["T09a.7"]
+note = "读取检查（功能清点第 15 节）2026-10-03 重做过，没人读的只剩 3.x 也不读的 3 个和不做的播放内核；剩下默认值：能直接比的 172 个里 96 个一样、76 个要展开 3.x 的常量，另 46 个 3.x 不是 hive 字面值（V03.3）"
 
 [[task]]
 id = "J02.1"
@@ -2587,6 +2659,15 @@ commit = "6ac31a036"
 old = ["M13.12", "T12a.1"]
 
 [[task]]
+id = "N01.2"
+title = "多画面的飞行弹幕跟随弹幕帧率设置（3.x 跟随，v4 每个刷新周期都画）"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+from = "V03.3 功能清点 F-MV-05；D05.1 记录“合并时注意”"
+
+[[task]]
 id = "N02.1"
 title = "投屏"
 type = "功能"
@@ -2624,12 +2705,13 @@ old = ["F.0a", "T13c.2"]
 
 [[task]]
 id = "O04.1"
-title = "Android 17 本地网络权限验证（要另找 Android 17 设备）"
+title = "Android 17 本地网络权限在 K90 上验证：局域网代理、设备同步、投屏、局域网直播源"
 type = "验证"
 status = "未开始"
 size = "小"
-tier = 3
+tier = 2
 old = ["T13d.1"]
+note = "K90 就是 Android 17（S02.2 记录），不用另找设备；投屏和局域网直播源的申请是 Y01.1 第 4 节加的（V03.3 核对）"
 
 [[task]]
 id = "O05.1"
@@ -2678,13 +2760,22 @@ commit = "a2b5c0610"
 old = ["M1.1", "T03a.2"]
 
 [[task]]
-id = "Q04.1"
-title = "网络余项：功能清点里网络部分的 1 项缺失、1 项没验证"
+id = "Q03.1"
+title = "弹幕握手的 User-Agent 去掉 Dart 前缀：在 K90 上逐平台验证后默认打开（UPGRADES B-2）"
 type = "功能"
 status = "未开始"
 size = "小"
-tier = 2
+tier = 3
+from = "UPGRADES 附录 B-2（V03.3 核对）"
+
+[[task]]
+id = "Q04.1"
+title = "网络余项：功能清点里网络部分的 1 项缺失、1 项没验证"
+type = "功能"
+status = "不做"
+size = "小"
 old = ["T03d.1"]
+note = "缺的播放代理（F-NET-02）由 O03.2 做完；F-NET-02、F-NET-04 的真机验证并入 S02.4（V03.3 核对，D-029）"
 
 [[task]]
 id = "R01.1"
@@ -2800,12 +2891,13 @@ old = ["F.9", "F.9a", "F.9b", "F.9c", "T15b.3"]
 
 [[task]]
 id = "S02.4"
-title = "K90 验证：备份恢复、WebDAV、设备同步、扫码、应用内更新、字体、Twitch 和 Kick"
+title = "K90 验证：备份恢复、WebDAV、设备同步、扫码、应用内更新、字体、播放代理、Twitch 和 Kick"
 type = "验证"
 status = "未开始"
 size = "中"
 tier = 2
 old = ["F.9d", "T15b.4"]
+note = "并入原 Q04.1 的验证：F-NET-02 播放代理（CHECKLIST 5 第 6 条）、F-NET-04 Twitch 令牌（第 7 条）（V03.3）"
 
 [[task]]
 id = "S02.5"
@@ -2817,6 +2909,17 @@ tier = 1
 old = ["T15b.5"]
 stages = ["直播间（暂停、菜单、切换直播间、弹窗）", "弹幕和录制", "列表手感和刷新率", "设置和通知"]
 done = 0
+
+[[task]]
+id = "S02.6"
+title = "K90 补验：S02.3 漏掉的 8 项（常亮、预测返回、剪贴板口令、网页搜索、投屏、多画面、哔哩哔哩网页登录、登录后画质）"
+type = "验证"
+status = "未开始"
+size = "中"
+tier = 1
+stages = ["直播间：常亮、预测返回、断网重连、投屏", "多画面和网络电视", "账号和搜索：网页登录、登录后画质、网页搜索、剪贴板口令和文件分享"]
+done = 0
+from = "V03.3 功能清点：S02.3 记录“没测的”和“没验证”的功能点"
 
 [[task]]
 id = "S03.1"
@@ -2905,10 +3008,11 @@ note = "参考上游 pure_live 9483ccf03"
 id = "V02.1"
 title = "回复并关闭 issue #36、#37"
 type = "发布"
-status = "未开始"
+status = "完成"
 size = "小"
-tier = 1
+date = "2026-10-02"
 old = ["T16d.1"]
+note = "维护者 2026-10-02 在 #36、#37 回复“已经修复”并关闭（GitHub，V03.3 核对）；修复本身 O05.2、A07.13 还待真机"
 
 [[task]]
 id = "V02.2"
@@ -2950,6 +3054,16 @@ title = "流畅度、刷新率、分辨率调研（2026-10-02）"
 type = "性能"
 status = "完成"
 date = "2026-10-02"
+
+[[task]]
+id = "V03.3"
+title = "2026-10-03 功能清点和已批准升级核对"
+type = "文档"
+status = "完成"
+size = "中"
+date = "2026-10-03"
+from = "docs v2：重做维护者本地做过但没推送的那次核对"
+to = ["S02.6", "E06.3", "A06.5", "Z05.2", "G01.2", "Q03.1", "A09.11", "A07.16", "N01.2", "C01.4", "H05.3"]
 
 [[task]]
 id = "V04.1"
@@ -3193,6 +3307,17 @@ tier = 3
 old = ["T00e.1"]
 stages = ["列出拼接键", "核对 18 个键", "删除并跑全部测试"]
 done = 0
+
+[[task]]
+id = "Z05.2"
+title = "英文界面下平台层给的文字还是中文：公告、分区名（UPGRADES 20-10、25-7、25-8、26-6、29-6、30-10）"
+type = "功能"
+status = "未开始"
+size = "中"
+tier = 3
+stages = ["列出平台层给界面的中文文字", "改成键或按界面语言给出"]
+done = 0
+from = "UPGRADES 20-10、25-7、25-8、26-6、29-6、30-10（V03.3 核对）"
 
 [[task]]
 id = "Z06.1"

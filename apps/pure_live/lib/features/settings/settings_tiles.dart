@@ -655,7 +655,6 @@ PreferredSizeWidget settingsAppBar(
       title,
       style: context.textStyles.t18.copyWith(fontSize: embedded ? 18 : 20, fontWeight: FontWeight.w600),
     ),
-    centerTitle: !embedded,
     leading: leading,
     automaticallyImplyLeading: leading == null,
     toolbarHeight: short ? 48 : kToolbarHeight,

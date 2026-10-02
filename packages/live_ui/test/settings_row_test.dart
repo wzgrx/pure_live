@@ -112,7 +112,7 @@ void main() {
       expect(tester.widget<HighlightedText>(find.byType(HighlightedText).last).maxLines, isNull);
     });
 
-    testWidgets('the frame of settings-like pages: a centred 720 column, a centred title, 48 high when short', (
+    testWidgets('the frame of settings-like pages: a centred 720 column, the title at the start, 48 high when short', (
       tester,
     ) async {
       tester.view
@@ -131,7 +131,8 @@ void main() {
         ),
       );
       expect(tester.getSize(find.byType(AppBar)).height, 48);
-      expect(tester.getCenter(find.text('录制设置')).dx, closeTo(426, 1));
+      // 3.x's titles sat at the platform's place (the start on Android).
+      expect(tester.getTopLeft(find.text('录制设置')).dx, lessThan(80));
       expect(find.text('我的网盘'), findsOneWidget);
       final column = tester.getRect(find.byKey(const ValueKey('c')));
       expect(column.width, 720);

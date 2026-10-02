@@ -216,6 +216,7 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
     final phoneTab = showsHomeBarButtons(context, inHome: widget.route.inHome);
     return Scaffold(
       appBar: AppBar(
+        centerTitle: centredPageTitle,
         // The home's tab has the menu (3.x); opened from the rail or a room,
         // back. This follows the home's layout, not the screen's width (U.7a
         // P11, U.3a).

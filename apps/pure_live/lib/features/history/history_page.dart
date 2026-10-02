@@ -231,10 +231,11 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
         onEscape: _back,
         child: Scaffold(
           appBar: AppBar(
-            centerTitle: false,
+            centerTitle: centredPageTitle,
             titleSpacing: 4,
-            // "观看记录" with "18 / 50 条" under it (c2, Z1 A).
+            // "观看记录" with "18 / 50 条" under it (c2, Z1 A), centred as 3.x.
             title: PageTitle(
+              centred: true,
               title: i18n('watch_history'),
               subtitle: limit == unlimitedHistoryLimit
                   ? i18n('history_count_unlimited', args: {'count': '${all.length}'})

@@ -16,6 +16,13 @@ const PageTransitionsTheme appPageTransitionsTheme = PageTransitionsTheme(
   },
 );
 
+/// `AppBar.centerTitle` of the pages whose title 3.x centred: the recorder,
+/// the follows, the areas, popular, the history and the toolbox (3.x set
+/// `centerTitle: true` on each; its theme's own `centerTitle` never took
+/// effect, `main.dart:162-169` replaced the whole app bar theme). Every
+/// other page keeps the platform's alignment, the start on Android.
+const bool centredPageTitle = true;
+
 /// A button's outline: the keyboard focus frame (2 points in the primary
 /// colour, docs/ui/compare/U.1c c21) while the keyboard focus is on it,
 /// else [outline] ([disabledOutline] when disabled), or none. Equal frames
@@ -259,12 +266,11 @@ final class LiveTheme {
     final colors = base.colorScheme;
     return base.copyWith(
       splashFactory: NoSplash.splashFactory,
-      // Every title centred (3.x `MyTheme`, docs/ui/TASKS.md §7 from U.9 and
-      // U.10, U.1c); 3.x's main.dart dropped it again by replacing the app
-      // bar theme, so only the pages that asked for it were centred. Pages
-      // with a title and a line under it ([PageTitle]) or tabs in the title
-      // turn it off themselves.
-      appBarTheme: const AppBarTheme(surfaceTintColor: Colors.transparent, centerTitle: true),
+      // 3.x's main.dart (:162-169) replaced MyTheme's app bar theme (flat,
+      // centred title, theme.dart:119) with this one, so app bars keep the
+      // platform's title alignment (the start on Android); the pages 3.x
+      // centred say so with [centredPageTitle].
+      appBarTheme: const AppBarTheme(surfaceTintColor: Colors.transparent),
       pageTransitionsTheme: appPageTransitionsTheme,
       // U.1c c12, c21: the tab's own 8-point block lights up under the
       // pointer and when pressed; the keyboard frame comes from `TabLabel`.

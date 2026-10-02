@@ -378,8 +378,10 @@ void main() {
     final count = tester.getRect(find.byKey(const ValueKey('page-subtitle')));
     expect(find.text('观看记录'), findsOneWidget);
     expect(find.text('2 / 50 条'), findsOneWidget);
-    expect(title.left, lessThan(40), reason: 'left-aligned, not centred like 3.x');
-    expect(count.left, title.left);
+    // Centred like 3.x (the history is one of the six pages 3.x centred).
+    final bar = tester.getRect(find.byType(AppBar));
+    expect(title.center.dx, closeTo(bar.center.dx, 60));
+    expect(count.center.dx, closeTo(title.center.dx, 1));
     expect(count.top, greaterThanOrEqualTo(title.bottom - 1));
 
     const buttons = [

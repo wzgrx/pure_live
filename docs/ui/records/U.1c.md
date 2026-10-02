@@ -21,7 +21,7 @@
 | c19 | （P02 的 `AppRefreshView`） | 只检查：没有 `RefreshIndicator`，能下拉刷新的列表都用它 |
 | c20 回到顶部 / 底部 | `ScrollJumpButtons`（`jump_buttons.dart`） | 看起来 40 圆形、点击 48；表面容器最高色 + 浮层阴影；悬停、键盘焦点框 |
 | c21 状态 | `FocusRing`（`focus_ring.dart`）、`FocusFrame`（主题） | 键盘焦点框 2 像素主色，只在用键盘时显示：主题里的实心、描边、文字、图标按钮，芯片，标签，头像、计数、回到顶部 |
-| 第 7 节 | `EscapeBack`（`escape_back.dart`）；主题 `appBarTheme.centerTitle` | 页面 Esc = 返回（可先做页面自己的一步）；标题栏统一居中 |
+| 第 7 节 | `EscapeBack`（`escape_back.dart`）；`centredPageTitle`（`live_theme.dart`） | 页面 Esc = 返回（可先做页面自己的一步）；标题照 3.x 实际运行的样子：主题不设居中，3.x 自己居中的 6 页（录制中心、关注、分区、热门、观看记录、工具箱）用 `centredPageTitle` |
 
 ## 和设计不同的地方
 

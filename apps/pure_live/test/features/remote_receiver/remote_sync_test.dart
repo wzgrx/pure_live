@@ -265,7 +265,8 @@ void _pageTests() {
     // The bar: no scanner here (no camera), start / stop.
     expect(find.byKey(const ValueKey('remote-sync-scan-bar')), findsNothing);
     expect(find.byIcon(AppIcons.syncStop), findsOneWidget);
-    expect(tester.getCenter(find.text('设备同步')).dx, closeTo(393 / 2, 1));
+    // The title at the start, as 3.x showed it on Android.
+    expect(tester.getTopLeft(find.text('设备同步')).dx, lessThan(80));
 
     // Devices: platform icon, name, "address · version" (c7), a line between.
     expect(find.text('192.168.1.101:39888 · v4'), findsOneWidget);

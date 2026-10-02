@@ -216,7 +216,7 @@ class _FavoritePageState extends ConsumerState<FavoritePage> with TickerProvider
       }
       return Scaffold(
         appBar: AppBar(
-          centerTitle: !oneRow,
+          centerTitle: centredPageTitle && !oneRow,
           automaticallyImplyLeading: !widget.route.inHome,
           leading: phoneTab ? const MenuButton() : null,
           actions: phoneTab ? const [CommonAppBarActions()] : null,

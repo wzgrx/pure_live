@@ -150,6 +150,7 @@ class _AreasViewState extends ConsumerState<AreasView> with TickerProviderStateM
     final tabs = _tabs;
     return Scaffold(
       appBar: AppBar(
+        centerTitle: centredPageTitle,
         automaticallyImplyLeading: !widget.route.inHome,
         leading: phoneTab ? const MenuButton() : null,
         actions: phoneTab ? const [CommonAppBarActions()] : null,

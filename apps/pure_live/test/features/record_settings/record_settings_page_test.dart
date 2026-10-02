@@ -425,12 +425,13 @@ void main() {
     expect(tester.getSize(find.byType(AppBar)).height, 48);
   });
 
-  testWidgets('wide: one column 720 wide, centred, the title in the middle', (tester) async {
+  testWidgets('wide: one column 720 wide, centred, the title at the start (3.x)', (tester) async {
     await _pump(tester, size: const Size(1280, 800));
     final card = tester.getRect(_row('默认录制清晰度'));
     expect(card.width, 720);
     expect((card.left - (1280 - card.right)).abs(), lessThan(1));
     expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
-    expect(tester.getCenter(find.text('录制设置')).dx, closeTo(640, 1), reason: 'the title is centred (3.x)');
+    // 3.x's main.dart replaced the centred app bar theme: the start on Android.
+    expect(tester.getTopLeft(find.text('录制设置')).dx, lessThan(80));
   });
 }

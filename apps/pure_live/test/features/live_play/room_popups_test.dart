@@ -227,7 +227,21 @@ void main() {
       _noDialog(tester);
       expect(tester.getRect(_key('live-play-message-panel')), const Rect.fromLTRB(852.0 - 360, 0, 852, 393));
       expect(_in('live-play-message-card', find.textContaining('路人：前排', findRichText: true)), findsOneWidget);
-      await _closePanel(tester);
+      // B09 c8: the keyword is the panel's second page, still on the right;
+      // no dialog in the middle of the picture.
+      await tester.tap(_key('live-play-block-keyword'));
+      await tester.pumpAndSettle();
+      _noDialog(tester);
+      expect(tester.getRect(_key('live-play-message-panel')), const Rect.fromLTRB(852.0 - 360, 0, 852, 393));
+      expect(_in('live-play-message-panel', _key('live-play-keyword-input')), findsOneWidget);
+      expect(_key('live-play-back'), findsOneWidget, reason: 'still in the fullscreen');
+      await tester.enterText(_key('live-play-keyword-input'), '前');
+      await tester.tap(_key('live-play-keyword-confirm'));
+      await _settle(tester);
+      await tester.pumpAndSettle();
+      expect(await tester.runAsync(() => room.services.store.blockLists.list(BlockKind.keyword)), ['前']);
+      expect(_key('live-play-message-panel'), findsNothing);
+      expect(room.toasts, contains('关键词已加入弹幕屏蔽列表'));
       await _close(tester, room);
     });
   });

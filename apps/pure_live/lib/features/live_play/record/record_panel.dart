@@ -80,6 +80,49 @@ class RoomRecordPanel extends StatelessWidget {
   );
 }
 
+/// The whole failure of the last recording, in the panel (B09 c8).
+class _FailureReason extends StatelessWidget {
+  const new({required this.text, required this.onClose});
+
+  final ({String summary, String? detail}) text;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return DecoratedBox(
+      key: const ValueKey('record-panel-reason-text'),
+      decoration: BoxDecoration(color: scheme.surfaceContainerHigh, borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 4, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(child: Text(i18n('record_panel_reason_title'), style: theme.textTheme.titleSmall?.emphasis)),
+                TextButton(
+                  key: const ValueKey('record-panel-reason-close'),
+                  onPressed: onClose,
+                  child: Text(i18n('live_play_details_fold')),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: SelectableText(
+                [text.summary, ?text.detail].join('\n\n'),
+                style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Announces the recorder's and the settings' changes to the panel's parts.
 final class _Changes extends ChangeNotifier {
   void changed() => notifyListeners();
@@ -257,11 +300,12 @@ class _RecordPanelBodyState extends ConsumerState<RecordPanelBody> {
     }
   }
 
-  Future<void> _showReason() async {
-    final task = _task;
-    if (task == null) return;
-    await showRecordFailureReason(context, recordFailureText(task));
-  }
+  /// "查看原因" opens the whole failure under the card, selectable (B09 c8:
+  /// the centred dialog lay over the picture, which is often in
+  /// fullscreen); "收起" or the button again closes it.
+  bool _reasonOpen = false;
+
+  void _toggleReason() => setState(() => _reasonOpen = !_reasonOpen);
 
   @override
   Widget build(BuildContext context) {
@@ -300,9 +344,14 @@ class _RecordPanelBodyState extends ConsumerState<RecordPanelBody> {
                 _ => null,
               },
               onCentre: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kRecordPage)),
-              onReason: () => unawaited(_showReason()),
+              onReason: _toggleReason,
             ),
           ),
+          if (_task case final task? when _reasonOpen && task.status == RecordStatus.failed)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: _FailureReason(text: recordFailureText(task), onClose: _toggleReason),
+            ),
           PanelGroupTitle(i18n('record_panel_this_time')),
           _ThisRecording(
             view: view,

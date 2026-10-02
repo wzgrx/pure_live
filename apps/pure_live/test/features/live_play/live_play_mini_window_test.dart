@@ -836,22 +836,23 @@ void main() {
       );
     });
 
-    testWidgets('c9: turned off in the system settings: the dialog and "去设置"', (tester) async {
+    testWidgets('c9: turned off in the system settings: a toast with "去设置" and ✕, no dialog (B09 c8)', (tester) async {
       status = 'disabled';
+      final shown = <AppToast>[];
+      final previous = AppNavigator.showToast;
+      AppNavigator.showToast = shown.add;
+      addTearDown(() => AppNavigator.showToast = previous);
       final app = await _app(tester);
       await _openRoom(tester);
       await tester.tap(find.byKey(const ValueKey('live-play-pip')));
       await _settle(tester);
-      expect(find.text('无法打开画中画'), findsOneWidget);
-      expect(find.text('系统设置里关掉了“纯粹直播”的画中画。打开后再点小窗按钮。'), findsOneWidget);
-      // U.2n: the app's message dialog, "知道了" and "去设置".
-      expect(find.byType(AppDialog), findsOneWidget);
-      expect(find.text('知道了'), findsOneWidget);
-      expect(
-        find.descendant(of: find.byKey(const ValueKey('pip-open-settings')), matching: find.text('去设置')),
-        findsOne,
-      );
-      await tester.tap(find.byKey(const ValueKey('pip-open-settings')));
+      // The room is often in fullscreen: nothing in the middle of the picture.
+      expect(find.byType(AppDialog), findsNothing);
+      final toast = shown.single;
+      expect(toast.message, '无法打开画中画：系统设置里关掉了“纯粹直播”的画中画');
+      expect(toast.actionLabel, '去设置');
+      expect(toast.persistent, isTrue, reason: 'one to answer: it waits for "去设置" or ✕');
+      toast.onAction!();
       await _settle(tester);
       expect(calls.map((call) => call.method), contains('openSettings'));
       expect(calls.map((call) => call.method), isNot(contains('enter')));

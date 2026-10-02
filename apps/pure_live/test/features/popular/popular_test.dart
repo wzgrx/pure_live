@@ -12,6 +12,7 @@ import 'package:pure_live/app/app.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_feed.dart';
 import 'package:pure_live/shared/rooms/share_code.dart';
@@ -268,9 +269,14 @@ void main() {
     expect(find.byType(LiveRoomCard), findsNWidgets(3));
     expect(find.text('付费'), findsOneWidget);
 
+    final shown = tester.widgetList<LiveRoomCard>(find.byType(LiveRoomCard)).map((card) => card.data.title).toList();
     await tester.tap(find.text('title 2'));
     await tester.pumpAndSettle();
     expect(find.byType(LivePlayPage), findsOneWidget);
+    // U.2b2 c1: the feed's rooms go along, in its order.
+    final args = tester.widget<LivePlayPage>(find.byType(LivePlayPage)).route.arguments! as LiveRoomArgs;
+    expect(args.room.roomId, '2');
+    expect(args.playlist.map((room) => room.title), shown);
     AppNavigator.back();
     await tester.pumpAndSettle();
     await tester.pump(AppNavigator.openGuard);

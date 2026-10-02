@@ -183,12 +183,13 @@ class _SearchViewState extends ConsumerState<SearchView> {
 
   void _toast(String message) => AppNavigator.toast(message);
 
-  void _openRoom(LiveRoom room) {
+  /// Opens [room]; [playlist] is the list it was picked from (U.2b2).
+  void _openRoom(LiveRoom room, {List<LiveRoom> playlist = const []}) {
     final open = widget.openRoom;
     if (open != null) {
       open(room);
     } else {
-      unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room));
+      unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room, playlist: playlist));
     }
   }
 
@@ -589,7 +590,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
                 room: room,
                 // "All" mixes platforms: the badge shows which (c14, U.4a c2).
                 mixedPlatforms: _model.selected == 0,
-                onOpen: () => _openRoom(room),
+                onOpen: () => _openRoom(room, playlist: rooms),
               );
             },
           ),

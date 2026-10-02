@@ -28,6 +28,7 @@ import 'package:pure_live/features/live_play/player/player_gestures.dart';
 import 'package:pure_live/features/live_play/player/player_status.dart';
 import 'package:pure_live/features/live_play/player/portrait_diagnostics.dart';
 import 'package:pure_live/features/live_play/player/recording_badge.dart';
+import 'package:pure_live/features/live_play/player/room_swipe.dart';
 import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
@@ -82,8 +83,13 @@ class RoomPlayer extends ConsumerStatefulWidget {
     this.onSwipeUp,
     this.entryHint = false,
     this.onOpenGuide,
+    this.swipe,
     super.key,
   });
+
+  /// The portrait fullscreen's swipe between rooms (U.2b2): the middle third
+  /// of the picture drags it; null without one.
+  final RoomSwipeController? swipe;
 
   /// Opens or reveals the IPTV guide (the replay mark, U.2g c18).
   final VoidCallback? onOpenGuide;
@@ -487,71 +493,81 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     if (portraitRows && widget.onSwipeUp != null) {
       bottomBar = _SwipeUpRegion(onSwipeUp: widget.onSwipeUp!, child: bottomBar);
     }
+    // The status of the picture (loading, offline, reconnecting, ...): one
+    // layer over the visible part of the picture (U.2g).
+    final status = ListenableSelector<(RoomStage, Object?, LiveStatus, LiveRestriction, String, bool, int, bool)>(
+      listenable: _statusSources,
+      selector: () {
+        final room = _room.room;
+        return (
+          _room.stage,
+          _room.failure,
+          room.effectiveLiveStatus,
+          room.effectiveRestriction,
+          room.cover,
+          widget.reconnect.reconnecting,
+          widget.reconnect.attempts,
+          _room.audioOnly,
+        );
+      },
+      builder: (context, _, _) => StreamBuilder<PlaybackState>(
+        stream: _room.session.states,
+        initialData: _room.session.state,
+        builder: (context, snapshot) => RoomStatusLayer(
+          controller: _room,
+          playback: snapshot.data ?? _room.session.state,
+          reconnect: widget.reconnect,
+        ),
+      ),
+    );
     final overlay = Stack(
       fit: StackFit.expand,
       children: [
+        // The status layer sits inside the gestures: its views take taps
+        // (their buttons), and a drag over them still reaches the gestures,
+        // so a room still loading or off the air can be swiped past (U.2b2).
         PlayerGestureLayer(
           controller: _room,
           enabled: !_locked,
           onSwipeUp: portraitRows ? widget.onSwipeUp : null,
-          // Only the picture takes the double tap: on the buttons it would
-          // hold every tap back by the double-tap timeout.
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTapDown: (details) => _tapHit = _danmakuAt(details.globalPosition, longPress: false),
-            onTap: _onTap,
-            // F.2b: only with its switch on, so it never holds a drag back.
-            onLongPressStart: longPress
-                ? (details) {
-                    if (_danmakuAt(details.globalPosition, longPress: true) case final hit?) {
-                      unawaited(_openMessage(hit));
-                    }
-                  }
-                : null,
-            onDoubleTap: _locked ? null : widget.onToggleFullscreen,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                ListenableSelector<bool>(
-                  listenable: _room,
-                  selector: () => _room.audioOnly,
-                  builder: (context, audioOnly, _) =>
-                      audioOnly ? AudioOnlyCover(room: _room.room) : const SizedBox.shrink(),
+          swipe: portraitRows ? widget.swipe : null,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Only the picture takes the double tap: on the buttons it
+              // would hold every tap back by the double-tap timeout.
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (details) => _tapHit = _danmakuAt(details.globalPosition, longPress: false),
+                onTap: _onTap,
+                // F.2b: only with its switch on, so it never holds a drag back.
+                onLongPressStart: longPress
+                    ? (details) {
+                        if (_danmakuAt(details.globalPosition, longPress: true) case final hit?) {
+                          unawaited(_openMessage(hit));
+                        }
+                      }
+                    : null,
+                onDoubleTap: _locked ? null : widget.onToggleFullscreen,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ListenableSelector<bool>(
+                      listenable: _room,
+                      selector: () => _room.audioOnly,
+                      builder: (context, audioOnly, _) =>
+                          audioOnly ? AudioOnlyCover(room: _room.room) : const SizedBox.shrink(),
+                    ),
+                    _danmaku(
+                      look: widget.portraitStream ? _portraitLook(look, portraitDanmaku) : look,
+                      visible: showDanmaku && !(widget.portraitStream && portraitDanmaku == 'hidden'),
+                      fps: fps,
+                    ),
+                  ],
                 ),
-                _danmaku(
-                  look: widget.portraitStream ? _portraitLook(look, portraitDanmaku) : look,
-                  visible: showDanmaku && !(widget.portraitStream && portraitDanmaku == 'hidden'),
-                  fps: fps,
-                ),
-              ],
-            ),
-          ),
-        ),
-        // The status of the picture (loading, offline, reconnecting, ...):
-        // one layer over the visible part of the picture (U.2g).
-        ListenableSelector<(RoomStage, Object?, LiveStatus, LiveRestriction, String, bool, int, bool)>(
-          listenable: _statusSources,
-          selector: () {
-            final room = _room.room;
-            return (
-              _room.stage,
-              _room.failure,
-              room.effectiveLiveStatus,
-              room.effectiveRestriction,
-              room.cover,
-              widget.reconnect.reconnecting,
-              widget.reconnect.attempts,
-              _room.audioOnly,
-            );
-          },
-          builder: (context, _, _) => StreamBuilder<PlaybackState>(
-            stream: _room.session.states,
-            initialData: _room.session.state,
-            builder: (context, snapshot) => RoomStatusLayer(
-              controller: _room,
-              playback: snapshot.data ?? _room.session.state,
-              reconnect: widget.reconnect,
-            ),
+              ),
+              status,
+            ],
           ),
         ),
         // U.2k c9: the local gift banner, on its own layer in the middle of

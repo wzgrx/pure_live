@@ -178,6 +178,42 @@ const double portraitRestoreZone = 96;
 bool swipeRestoresPanel({required double upward, required double velocity}) =>
     upward >= 64 || (velocity <= -850 && upward >= 24);
 
+/// What a vertical drag on the picture changes.
+enum PictureDrag {
+  /// The window's brightness.
+  brightness,
+
+  /// The volume.
+  volume,
+
+  /// The room: the next one upwards, the previous one downwards (U.2b2).
+  switchRoom,
+}
+
+/// What a vertical drag starting [x] across a picture [width] wide changes:
+/// the left half the brightness and the right half the volume (3.x); with
+/// [switchRooms] (the portrait fullscreen's swipe, U.2b2) the picture is in
+/// thirds and the middle one switches rooms.
+PictureDrag pictureDragAt({required double x, required double width, bool switchRooms = false}) {
+  if (!switchRooms) return x < width / 2 ? PictureDrag.brightness : PictureDrag.volume;
+  if (x < width / 3) return PictureDrag.brightness;
+  return x > width * 2 / 3 ? PictureDrag.volume : PictureDrag.switchRoom;
+}
+
+/// Where a swipe between rooms that moved the picture by [offset] (upwards
+/// negative) of a screen [extent] high and ended at [velocity] (upwards
+/// negative) goes (U.2b2): 1 to the next room (upwards), -1 to the previous
+/// (downwards), 0 back to this one. A third of the screen or a fling of 800
+/// after 48 switches; a fling back the other way keeps the room.
+int swipeSwitchStep({required double offset, required double extent, required double velocity}) {
+  if (extent <= 0 || offset == 0) return 0;
+  final fling = velocity.abs() >= 800;
+  if (fling && velocity.sign != offset.sign) return 0;
+  final far = offset.abs() >= extent / 3 || (fling && offset.abs() >= 48);
+  if (!far) return 0;
+  return offset < 0 ? 1 : -1;
+}
+
 /// How a portrait stream fills the upright fullscreen (3.x
 /// `PortraitFullscreenDisplayMode`, the setting `portraitFullscreenDisplayMode`).
 enum PortraitDisplayMode {

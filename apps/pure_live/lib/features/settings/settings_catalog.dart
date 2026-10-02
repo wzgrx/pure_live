@@ -970,6 +970,16 @@ List<SettingsEntry> _build() {
       valueBelow: true,
       keywords: ['竖屏', 'portrait', '全屏'],
     )
+    // U.2b2 (U.2b c14, X1 A): new, off by default; phones only.
+    ..toggle(
+      'portrait_swipe',
+      'portrait_fullscreen_swipe_switch',
+      Settings.portraitFullscreenSwipeSwitch,
+      AppIcons.switchRoom,
+      desc: 'portrait_fullscreen_swipe_switch_desc',
+      keywords: ['竖屏', 'portrait', '全屏', '换台', '上下滑', 'swipe'],
+      when: _mobile,
+    )
     ..toggle(
       'portrait_pip',
       'portrait_pip_follow_source',
@@ -1789,6 +1799,7 @@ const List<Setting<Object>> portraitSettings = [
   Settings.portraitPipFollowSource,
   Settings.portraitDanmakuMode,
   Settings.rememberPortraitRoomOverride,
+  Settings.portraitFullscreenSwipeSwitch,
   Settings.showPortraitDiagnostics,
   Settings.portraitRoomOverrides,
 ];

@@ -604,8 +604,14 @@ class _RoomFeedViewState extends ConsumerState<RoomFeedView> {
                 sliver: SliverGrid.builder(
                   gridDelegate: geometry.delegate(spacing: spacing, mainSpacing: mainSpacing),
                   itemCount: rooms.length,
-                  itemBuilder: (context, index) =>
-                      RoomGridCard(key: ValueKey(rooms[index].identityKey), room: rooms[index]),
+                  itemBuilder: (context, index) => RoomGridCard(
+                    key: ValueKey(rooms[index].identityKey),
+                    room: rooms[index],
+                    // The feed's rooms go along: the portrait fullscreen
+                    // swipes through them (U.2b2).
+                    onOpen: () =>
+                        unawaited(AppNavigator.toLiveRoomDetail(liveRoom: rooms[index], playlist: _feed.rooms)),
+                  ),
                 ),
               ),
               if (desktop ? _hiddenNote(context) : _phoneFooter(context) case final footer?)

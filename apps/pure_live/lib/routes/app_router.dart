@@ -108,7 +108,13 @@ GoRouter buildAppRouter({
           // 3.x wrapped every secondary page in its smooth-scroll scope.
           final child = PureLiveRouteScrollScope(child: builder(RouteArgs(path, arguments: state.extra)));
           return path == RoutePath.kLivePlay
-              ? liveRoomPage(key: state.pageKey, arguments: state.extra, child: child)
+              // The page's settings carry the room itself (the window title
+              // reads it), not the list it came with (U.2b2).
+              ? liveRoomPage(
+                  key: state.pageKey,
+                  arguments: LiveRoomArgs.roomOf(state.extra) ?? state.extra,
+                  child: child,
+                )
               : MaterialPage<Object?>(key: state.pageKey, name: path, arguments: state.extra, child: child);
         },
       ),

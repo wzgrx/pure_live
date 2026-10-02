@@ -367,6 +367,16 @@ abstract final class Settings {
     defaultValue: true,
   );
 
+  /// New (docs/ui/compare/U.2b c14, U.2b2; 3.x has no such setting): in the
+  /// portrait fullscreen an upward swipe in the middle of the picture opens
+  /// the next room of the list the room was opened from, a downward one the
+  /// previous. Off by default.
+  static const portraitFullscreenSwipeSwitch = BoolSetting(
+    'portraitFullscreenSwipeSwitch',
+    section: 'player',
+    defaultValue: false,
+  );
+
   /// Portrait diagnostics overlay.
   static const showPortraitDiagnostics = BoolSetting('showPortraitDiagnostics', section: 'player', defaultValue: false);
 
@@ -1447,6 +1457,7 @@ abstract final class Settings {
     portraitPipFollowSource,
     portraitDanmakuMode,
     rememberPortraitRoomOverride,
+    portraitFullscreenSwipeSwitch,
     showPortraitDiagnostics,
     portraitRoomOverrides,
     livePlayChatCollapsed,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
@@ -14,8 +15,10 @@ import 'package:pure_live/features/favorite/favorite_rules.dart';
 import 'package:pure_live/features/favorite/follow_refresher.dart';
 import 'package:pure_live/features/home/home_menu.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/rooms/room_grid.dart';
 
 import '../../support.dart';
 
@@ -253,6 +256,7 @@ void main() {
       Map<String, LiveRoom> details = const {},
       bool inHome = false,
       double width = 400,
+      List<Object?>? opened,
     }) async {
       tester.view
         ..physicalSize = Size(width, 900)
@@ -282,15 +286,40 @@ void main() {
               return controller..start();
             }),
           ],
-          child: MaterialApp(
-            theme: const LiveTheme(primaryColor: Colors.blue).light,
-            home: LiveUiScope(
-              config: LiveUiConfig(strings: strings.ui),
-              child: FavoritePage(route: RouteArgs(RoutePath.kFavorite, inHome: inHome)),
-            ),
-          ),
+          child: opened == null
+              ? MaterialApp(
+                  theme: const LiveTheme(primaryColor: Colors.blue).light,
+                  home: LiveUiScope(
+                    config: LiveUiConfig(strings: strings.ui),
+                    child: FavoritePage(route: RouteArgs(RoutePath.kFavorite, inHome: inHome)),
+                  ),
+                )
+              // The rooms it opens are noted instead of shown (U.2b2).
+              : MaterialApp.router(
+                  theme: const LiveTheme(primaryColor: Colors.blue).light,
+                  routerConfig: AppNavigator.router = GoRouter(
+                    initialLocation: RoutePath.kInitial,
+                    routes: [
+                      GoRoute(
+                        path: RoutePath.kInitial,
+                        builder: (context, state) => LiveUiScope(
+                          config: LiveUiConfig(strings: strings.ui),
+                          child: FavoritePage(route: RouteArgs(RoutePath.kFavorite, inHome: inHome)),
+                        ),
+                      ),
+                      GoRoute(
+                        path: RoutePath.kLivePlay,
+                        builder: (context, state) {
+                          opened.add(state.extra);
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
         ),
       );
+      if (opened != null) addTearDown(() => AppNavigator.router = null);
       await tester.pumpAndSettle();
       return (services, controller, douyu);
     }
@@ -502,6 +531,51 @@ void main() {
       expect(find.text('丙'), findsWidgets); // the name and the avatar's letter
       expect(find.text('上次的标题'), findsOneWidget);
       expect(tester.getSize(find.byType(RoomRow)).height, greaterThanOrEqualTo(RoomRow.height));
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets("U.2b2 c1: a card opens its room with the group's rooms in their order; an offline row too", (
+      tester,
+    ) async {
+      final opened = <Object?>[];
+      final (services, _, _) = await pumpPage(
+        tester,
+        opened: opened,
+        follows: [
+          room('douyu', '1', nick: '甲', status: LiveStatus.live),
+          room('douyu', '2', nick: '乙', status: LiveStatus.live),
+          room('douyu', '3', nick: '丙', status: LiveStatus.offline),
+          room('douyu', '4', nick: '丁', status: LiveStatus.offline),
+        ],
+        details: {
+          '1': room('douyu', '1', nick: '甲', status: LiveStatus.live, popularity: '10'),
+          '2': room('douyu', '2', nick: '乙', status: LiveStatus.live, popularity: '20'),
+          '3': room('douyu', '3', nick: '丙', status: LiveStatus.offline),
+          '4': room('douyu', '4', nick: '丁', status: LiveStatus.offline),
+        },
+      );
+      final shown = tester.widgetList<RoomGridCard>(find.byType(RoomGridCard)).map((card) => card.room.roomId);
+      expect(shown, hasLength(2));
+      await tester.tap(find.byWidgetPredicate((widget) => widget is RoomGridCard && widget.room.roomId == '1'));
+      await tester.pumpAndSettle();
+      final live = opened.last! as LiveRoomArgs;
+      expect(live.room.roomId, '1');
+      expect(live.playlist.map((item) => item.roomId), shown);
+      AppNavigator.back();
+      await tester.pumpAndSettle();
+      await tester.pump(AppNavigator.openGuard);
+
+      await tester.tap(find.textContaining(i18n('offline_room_title')));
+      await tester.pumpAndSettle();
+      final rows = tester.widgetList<RoomRow>(find.byType(RoomRow)).map((row) => row.data.title).toList();
+      expect(rows, hasLength(2));
+      await tester.tap(find.byType(RoomRow).last);
+      await tester.pumpAndSettle();
+      final offline = opened.last! as LiveRoomArgs;
+      expect(offline.playlist.map((item) => item.roomId).toSet(), {'3', '4'});
+      AppNavigator.back();
+      await tester.pumpAndSettle();
+      await tester.pump(AppNavigator.openGuard);
       await tester.runAsync(services.close);
     });
 

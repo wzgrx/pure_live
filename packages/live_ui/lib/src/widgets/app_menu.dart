@@ -14,6 +14,7 @@ final class AppMenuEntry<T> {
     required this.value,
     required this.label,
     this.icon,
+    this.description,
     this.key,
     this.enabled = true,
     this.danger = false,
@@ -30,6 +31,10 @@ final class AppMenuEntry<T> {
 
   /// The icon in front of the text.
   final IconData? icon;
+
+  /// A second line under [label] (12 points, the variant ink, U.1d c4):
+  /// what the entry is set to now ("默认比例", "28 分钟后暂停").
+  final String? description;
 
   /// The row's key (tests find rows by it).
   final Key? key;
@@ -78,17 +83,20 @@ const double appMenuGap = anchoredMenuGap;
 ///
 /// A menu of choices passes the current one as [selected]: its row is in
 /// the primary colour, semibold, with a tick at the end (docs/ui/UI_PLAN.md
-/// §7: the current entry is always "primary + tick").
+/// §7: the current entry is always "primary + tick"). A [title] row on top
+/// says what the menu is about (U.1d c4: not a choice).
 Future<T?> showAppMenu<T>(
   BuildContext context, {
   required List<AppMenuEntry<T>> entries,
   bool preferAbove = false,
   T? selected,
+  String? title,
 }) {
   if (entries.isEmpty) return Future.value();
   final scheme = Theme.of(context).colorScheme;
   final text = context.textStyles.t14.copyWith(color: scheme.onSurface);
   final current = text.emphasis.copyWith(color: scheme.primary);
+  final small = context.textStyles.t12.copyWith(color: scheme.onSurfaceVariant);
   final currentRow = GlobalKey();
   final currentIndex = selected == null ? -1 : entries.indexWhere((entry) => entry.value == selected);
   return showAnchoredMenu<T>(
@@ -97,6 +105,17 @@ Future<T?> showAppMenu<T>(
     current: currentIndex < 0 ? null : currentRow,
     constraints: const BoxConstraints(minWidth: appMenuMinWidth, maxWidth: 280),
     children: [
+      if (title != null)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+          child: Text(
+            title,
+            key: const ValueKey('app-menu-title'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.t13SemiBold.copyWith(color: scheme.onSurfaceVariant),
+          ),
+        ),
       for (final (index, entry) in entries.indexed) ...[
         if (entry.divider) const PopupMenuDivider(),
         KeyedSubtree(
@@ -114,13 +133,21 @@ Future<T?> showAppMenu<T>(
                   const SizedBox(width: 12),
                 ],
                 Flexible(
-                  child: Text(
-                    entry.label,
-                    style: entry.danger
-                        ? text.copyWith(color: scheme.error)
-                        : (selected != null && entry.value == selected ? current : text),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        entry.label,
+                        style: entry.danger
+                            ? text.copyWith(color: scheme.error)
+                            : (selected != null && entry.value == selected ? current : text),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (entry.description case final description?)
+                        Text(description, style: small, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ],
                   ),
                 ),
                 if (selected != null && entry.value == selected) ...[
@@ -157,6 +184,7 @@ class AppMenuButton<T> extends StatefulWidget {
     this.preferAbove = false,
     this.enabled = true,
     this.buttonKey,
+    this.onMenu,
     super.key,
   });
 
@@ -181,6 +209,10 @@ class AppMenuButton<T> extends StatefulWidget {
   /// Open above the button when the menu fits there.
   final bool preferAbove;
 
+  /// Told when the menu opens (true) and closes (false), before
+  /// [onSelected] (a player keeps its controls up meanwhile).
+  final ValueChanged<bool>? onMenu;
+
   @override
   State<AppMenuButton<T>> createState() => AppMenuButtonState<T>();
 }
@@ -196,12 +228,15 @@ class AppMenuButtonState<T> extends State<AppMenuButton<T>> {
   Future<void> _show() async {
     if (_open || !widget.enabled) return;
     _open = true;
+    widget.onMenu?.call(true);
+    T? chosen;
     try {
-      final chosen = await showAppMenu<T>(context, entries: widget.entries(), preferAbove: widget.preferAbove);
-      if (chosen != null && mounted) widget.onSelected(chosen);
+      chosen = await showAppMenu<T>(context, entries: widget.entries(), preferAbove: widget.preferAbove);
     } finally {
       _open = false;
+      widget.onMenu?.call(false);
     }
+    if (chosen != null && mounted) widget.onSelected(chosen);
   }
 
   @override

@@ -7,6 +7,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/rooms/room_menu.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Where a [FollowButton] sits, which decides its look.
@@ -24,7 +25,8 @@ enum FollowButtonPlace {
 }
 
 /// Follow and unfollow (3.x `FavoriteFloatingButton`, `FavoriteButton`):
-/// unfollowing asks first; the state follows the store, so every button of
+/// unfollowing asks first in a small menu next to the button and then
+/// offers "撤销" (docs/ui/compare/U.2n c8); the state follows the store, so every button of
 /// the room (bar, details, fullscreen) shows the same and a change made
 /// elsewhere shows here; a spinner replaces the mark while saving.
 class FollowButton extends ConsumerStatefulWidget {
@@ -70,33 +72,40 @@ class _FollowButtonState extends ConsumerState<FollowButton> {
   Future<void> _toggle(bool followed) async {
     if (_pending || _asking) return;
     final room = widget.latest?.call() ?? widget.room;
-    final follows = ref.read(storeProvider).follows;
+    final store = ref.read(storeProvider);
     if (followed) {
-      // U.2a choice D: unfollowing asks first (no spinner while asking).
+      // U.2a choice D: unfollowing asks first (no spinner while asking), in
+      // a small menu next to the button, which never covers the picture's
+      // middle (docs/ui/compare/U.2n c8, N3): who it is, then "取消关注" in
+      // red (B-15: the button says what it does).
       _asking = true;
-      final bool? confirmed;
+      final bool? chosen;
       try {
-        confirmed = await showDialog<bool>(
-          context: context,
-          builder: (dialogContext) => AlertDialog(
-            title: Text(i18n('unfollow')),
-            content: Text(i18n('unfollow_message', args: {'name': room.displayNick(platformName(room.platform))})),
-            actions: [
-              TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(i18n('cancel'))),
-              TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(i18n('confirm'))),
-            ],
-          ),
+        chosen = await showAppMenu<bool>(
+          context,
+          title: '${room.displayNick(platformName(room.platform))} · ${platformName(room.platform)}',
+          preferAbove: widget.place == FollowButtonPlace.video,
+          entries: [
+            AppMenuEntry(
+              key: const ValueKey('unfollow-confirm'),
+              value: true,
+              icon: AppIcons.unfollow,
+              label: i18n('unfollow'),
+              danger: true,
+            ),
+          ],
         );
       } finally {
         _asking = false;
       }
-      if (!(confirmed ?? false) || !mounted) return;
+      if (!(chosen ?? false) || !mounted) return;
     }
     setState(() => _pending = true);
     try {
       if (followed) {
-        await follows.remove(room);
-      } else if (await follows.add(room)) {
+        // "已取消关注 X · 撤销" puts it back in its place (B-15).
+        await unfollowRoom(context, store: store, room: room, confirmed: true);
+      } else if (await store.follows.add(room)) {
         AppNavigator.toast(i18n('live_play_followed_toast'));
       }
     } on Object {

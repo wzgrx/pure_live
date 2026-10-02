@@ -1,4 +1,4 @@
-# Pure Live workspace (docs/PLAN.md §3). Members are added one refactored
+# Pure Live workspace (docs/specs/ENGINEERING.md §3). Members are added one refactored
 # module at a time and share this directory's pubspec.lock. Dependency
 # overrides may only be declared here.
 name: pure_live_workspace

@@ -1,8 +1,8 @@
 // NetEase CC parsing against the recorded samples, compared field by field
 // with 3.x's frozen output (expected.json, written by
 // fixtures/cc/legacy_expected.dart from 3.x's parsers). Every intended
-// difference is listed with its reason (a docs/modules/M4.09-cc.md
-// difference, or an approved upgrade of docs/UPGRADES.md: 9-1 to 9-7);
+// difference is listed with its reason (a docs/T02/T02b/T02b.2/record.md
+// difference, or an approved upgrade of docs/specs/UPGRADES.md: 9-1 to 9-7);
 // everything else must match.
 import 'dart:convert';
 

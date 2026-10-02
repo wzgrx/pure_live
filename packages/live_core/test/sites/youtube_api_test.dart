@@ -2,7 +2,7 @@
 // 3.x's frozen output (expected.json, written by
 // fixtures/youtube/legacy_expected.dart from 3.x's YouTubeApi, YouTubeSite
 // and YouTubeLink). Every intended difference is listed with its reason
-// (the M4.U upgrade row, docs/UPGRADES.md); everything else must match. The
+// (the M4.U upgrade row, docs/specs/UPGRADES.md); everything else must match. The
 // archived samples (S01–S05, InnerTube requests 3.x never sent) and the
 // M4.U.23 ones (S03-resolve-*-live/-upcoming/-custom/-missing, S13) have no
 // expected values; they are read as the adapter reads them now. The

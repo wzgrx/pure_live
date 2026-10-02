@@ -5,15 +5,15 @@ import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/widgets/anchored_menu.dart';
 
-// Moved from the live room (docs/ui/compare/U.2f) so the multi-view page
-// (docs/ui/compare/U.8) shows the same quality and line menus.
+// Moved from the live room (docs/T05/T05g/T05g.1) so the multi-view page
+// (docs/T12/T12a/T12a.2) shows the same quality and line menus.
 
-/// The width a stream menu never goes below (docs/ui/compare/U.2f).
+/// The width a stream menu never goes below (docs/T05/T05g/T05g.1).
 const double streamMenuMinWidth = 128;
 
 /// A button with the current choice and a drop-down mark that opens a small
 /// menu of [entries] next to itself (3.x's `PopupMenuButton` of the room
-/// strip, docs/ui/compare/U.2f): 14-point text on 48-high rows, at least
+/// strip, docs/T05/T05g/T05g.1): 14-point text on 48-high rows, at least
 /// [streamMenuMinWidth] wide and otherwise as wide as its text, on
 /// `surfaceContainerHighest` with 8-point corners; the current entry in the
 /// primary colour, bold, with a tick. A choice applies at once and closes
@@ -160,7 +160,7 @@ class _StreamMenuButtonState extends State<StreamMenuButton> {
   }
 }
 
-/// The small menu of the room (docs/ui/compare/U.2f) next to the box of
+/// The small menu of the room (docs/T05/T05g/T05g.1) next to the box of
 /// [anchor] ([showAnchoredMenu]: placed by its measured height, below the
 /// box unless only the space above takes it, or [preferAbove] and it fits
 /// there; unfolding from the box's side); 14-point [entries] on rows of at

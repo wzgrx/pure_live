@@ -3,7 +3,7 @@
 // fixtures/17live/legacy_expected.dart from 3.x's SeventeenLiveApi,
 // SeventeenLiveLink and SeventeenLiveSite). Every intended difference is
 // listed with its reason (M4.33 differences, and the M4.U rows 33-1 to 33-7
-// of docs/UPGRADES.md); everything else must match. The synthetic cases
+// of docs/specs/UPGRADES.md); everything else must match. The synthetic cases
 // port 3.x's seventeenlive_public_catalog_test.dart and cover the regression
 // entries of the archived spec (REG-17LIVE-001–004) and the shapes 3.x
 // refused. S02-sections-hk and S04-live-army (M4.U.33) have no 3.x output.

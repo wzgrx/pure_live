@@ -6,7 +6,7 @@ import 'package:live_record/live_record.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-// What Android's recording notifications say (docs/ui/compare/U.14 c3–c5;
+// What Android's recording notifications say (docs/T13/T13a/T13a.1 c3–c5;
 // 3.x always showed "直播录制进行中 / 录制与封装由独立后台服务保护…").
 
 /// The words of the recording notification.

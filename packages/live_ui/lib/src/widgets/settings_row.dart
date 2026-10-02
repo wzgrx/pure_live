@@ -3,7 +3,7 @@ import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/widgets/app_chip.dart';
 import 'package:live_ui/src/widgets/count_button.dart';
 
-// The settings row of every settings page (docs/ui/compare/U.6a, "设置行";
+// The settings row of every settings page (docs/T09/T09a/T09a.2, "设置行";
 // U.1c c14–c17): one look for link, switch, choice, slider and counter rows,
 // with pressed, keyboard-focus, hover, disabled and busy states. 3.x had
 // four builders (`buildTile`, `buildSwitchTile`, `buildMenuTile`,

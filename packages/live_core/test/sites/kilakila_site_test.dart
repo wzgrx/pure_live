@@ -5,7 +5,7 @@
 // leases and recovery onto a new broadcast, cancellation, links through the
 // link parser and the error mapping. The synthetic worlds port 3.x's
 // kilakila_application_test.dart. Tests named with an M4.U item number
-// (docs/UPGRADES.md, 15-x) cover the approved upgrades.
+// (docs/specs/UPGRADES.md, 15-x) cover the approved upgrades.
 import 'dart:convert';
 import 'dart:io';
 

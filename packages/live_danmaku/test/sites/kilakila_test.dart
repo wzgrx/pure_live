@@ -1,4 +1,4 @@
-// KilaKila danmaku (docs/modules/M5.13-kilakila.md): the protocol and the
+// KilaKila danmaku (docs/T06/T06a/T06a.14/record.md): the protocol and the
 // connection against the archived v4's output for the recorded sessions
 // (S07-live, S08-live-full) and the synthetic frames (S09-synthetic), written
 // by fixtures/kilakila/danmaku/v4_expected.dart.
@@ -141,7 +141,7 @@ Map<String, Object?> _online(int value) => {
 List<Object?> _events(Object? v4) => (v4! as Map<String, Object?>)['events']! as List<Object?>;
 
 /// The differences of the new decoder from v4 in the synthetic cases
-/// (docs/modules/M5.13-kilakila.md, "与归档 v4 的差异"): v4's results (with
+/// (docs/T06/T06a/T06a.14/record.md, "与归档 v4 的差异"): v4's results (with
 /// `dropped: false`) → the new ones, per case. Cases not listed decode as v4
 /// did.
 final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {

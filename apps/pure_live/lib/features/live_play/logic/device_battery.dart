@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// The battery level the fullscreen bars show beside the clock (3.x
-/// `BatteryInfo` via battery_plus; docs/ui/compare/U.2c change 4): Android
+/// `BatteryInfo` via battery_plus; docs/T05/T05d/T05d.1 change 4): Android
 /// from the activity (`pure_live/device_controls`), Windows from
 /// `GetSystemPowerStatus`, Linux from `/sys/class/power_supply`. Null where
 /// the device has no battery (most desktops) or it cannot be read: the bars

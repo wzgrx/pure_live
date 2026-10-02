@@ -48,7 +48,7 @@ final class DouyuGift {
   String toString() => 'DouyuGift($name ×$count, combo $combo)';
 }
 
-/// Douyu's STT text format (3.x `sttToJObject`, docs/modules/M5.2-douyu.md):
+/// Douyu's STT text format (3.x `sttToJObject`, docs/T06/T06a/T06a.3/record.md):
 /// `key@=value/` pairs; a list is its items, each followed by `/`; inside a
 /// value `@` is written `@A` and `/` is written `@S`, once per nesting level.
 ///

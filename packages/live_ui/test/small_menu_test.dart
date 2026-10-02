@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_ui/live_ui.dart';
 
-// The small menu next to its button (docs/4.0.x/tasks/B03.md): where it goes
+// The small menu next to its button (docs/T01/T01d/T01d.2/brief.md): where it goes
 // by its measured height, which way it unfolds, scrolling and keys, on a
 // landscape phone (852 × 393), a portrait phone (393 × 852) and a tablet
 // (1280 × 800).

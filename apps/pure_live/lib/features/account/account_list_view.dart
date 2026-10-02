@@ -13,7 +13,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
 
-/// "平台账号" (3.x `AccountPage` "三方认证", docs/ui/compare/U.10a): every
+/// "平台账号" (3.x `AccountPage` "三方认证", docs/T10/T10a/T10a.2): every
 /// platform's login state in two groups; a tap opens the platform's page,
 /// the trailing button signs out after asking.
 ///

@@ -41,7 +41,7 @@ const double portraitRowHeight = 48;
 
 /// How far the fullscreen's bottom bar reaches up from the safe area: the
 /// landscape bar, or the portrait fullscreen's two rows (toasts go above
-/// it, docs/ui/compare/U.2n c10).
+/// it, docs/T05/T05g/T05g.2 c10).
 double fullscreenBottomBarHeight({required bool portrait}) =>
     portrait ? portraitRowHeight * 2 + 4 + 8 : controlBarHeight;
 
@@ -99,7 +99,7 @@ List<TopBarSlot> topBarSlots({required TargetPlatform platform}) => [
   if (platform != TargetPlatform.fuchsia) TopBarSlot.pip,
 ];
 
-/// Extras of the wide room's bottom bar (docs/ui/compare/U.2d change 6).
+/// Extras of the wide room's bottom bar (docs/T05/T05e/T05e.1 change 6).
 final class WideBarActions {
   /// Creates the extras.
   const new({required this.chatCollapsed, required this.onToggleChat});
@@ -188,7 +188,7 @@ final class PlayerBarActions {
 
   /// Nothing plays (loading, offline, failed, restricted): the top bar keeps
   /// the way out and the room's buttons, without audio only, cast and the
-  /// mini window that need a picture (docs/ui/compare/U.2g c6).
+  /// mini window that need a picture (docs/T05/T05i/T05i.1 c6).
   final bool reduced;
 
   /// These actions for the [reduced] top bar.
@@ -852,7 +852,7 @@ class _WindowFullscreenButton extends StatelessWidget {
 
 /// The room's orientation (3.x `PortraitOrientationButton`): yellow when it
 /// is not "自动识别"; a long press shows the current choice (E6); a tap opens
-/// the orientation menu above it (docs/ui/compare/U.2n c6).
+/// the orientation menu above it (docs/T05/T05g/T05g.2 c6).
 class _OrientationButton extends StatelessWidget {
   const new({required this.choice, this.onMenu});
 

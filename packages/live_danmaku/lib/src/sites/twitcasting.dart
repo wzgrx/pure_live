@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 /// TwitCasting's comment stream: the web player's `eventpubsuburl.php` and
 /// `event.pubsub` socket (the archived v4's spec/sites/twitcasting.md §7,
 /// checked against the recording `fixtures/twitcasting/danmaku/S08-live` and
-/// the player script; docs/modules/M5.11-twitcasting.md), without I/O.
+/// the player script; docs/T06/T06a/T06a.12/record.md), without I/O.
 ///
 /// - A broadcast's socket URL is asked for with a form POST of its
 ///   `movie_id`. The answer is a JSON object whose `url` is

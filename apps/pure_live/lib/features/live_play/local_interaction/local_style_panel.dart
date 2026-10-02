@@ -67,7 +67,7 @@ class LocalDanmakuStylePanel extends ConsumerWidget {
 }
 
 /// Opens [LocalDanmakuStylePanel] where there is no picture (the settings
-/// page): the app's panel for such pages (docs/ui/compare/U.1d c10, UI_PLAN
+/// page): the app's panel for such pages (docs/T01/T01d/T01d.1 c10, UI_PLAN
 /// §7), from the bottom on a phone, on the right on a wide screen.
 Future<void> showLocalDanmakuStyleSheet(BuildContext context) =>
     showRoomPanelSheet(context, heightFactor: 0.86, builder: (_, close) => LocalDanmakuStylePanel(onClose: close));

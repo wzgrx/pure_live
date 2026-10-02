@@ -22,7 +22,7 @@ const Duration recordLimitHighlight = Duration(seconds: 2);
 
 /// Recording settings (3.x `lib/recorder/pages/record_settings`): quality,
 /// folder naming, the recording folder and its size limit, FFmpeg options,
-/// reconnection and live checks; docs/ui/compare/U.7b.
+/// reconnection and live checks; docs/T08/T08c/T08c.1.
 ///
 /// Routes: `RoutePath.kRecordSettings`; the argument
 /// [recordSettingsMaxTasks] scrolls to "最大同时录制任务数" and highlights it.

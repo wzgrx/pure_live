@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/readme/banner.jpg" alt="纯粹直播 Pure Live" width="100%">
+  <img src="docs/T16/T16c/readme/banner.jpg" alt="纯粹直播 Pure Live" width="100%">
 </p>
 
 <h1 align="center">纯粹直播 Pure Live</h1>
@@ -17,7 +17,7 @@
 
 <p align="center">
   <a href="https://github.com/wzgrx/pure_live/releases/latest"><b>下载 4.0.0</b></a>
-  &nbsp;·&nbsp; <a href="docs/releases/v4.0.0.md">更新说明</a>
+  &nbsp;·&nbsp; <a href="docs/T16/T16c/releases/v4.0.0.md">更新说明</a>
   &nbsp;·&nbsp; <a href="#功能详解">功能</a>
   &nbsp;·&nbsp; <a href="#支持的平台">支持的平台</a>
   &nbsp;·&nbsp; <a href="#从源码构建">从源码构建</a>
@@ -85,15 +85,15 @@
 
 <table>
   <tr>
-    <td align="center" width="33%"><img src="docs/readme/room-portrait.jpg" width="240" alt="竖屏直播间"><br><sub>竖屏：画面、信息行、弹幕列表和醒目留言</sub></td>
-    <td align="center" width="33%"><img src="docs/readme/room-vertical.jpg" width="240" alt="竖屏直播流全屏"><br><sub>竖屏直播流：全屏观看，上滑恢复弹幕栏</sub></td>
-    <td align="center" width="33%"><img src="docs/readme/room-dark.jpg" width="240" alt="深色模式"><br><sub>深色模式：新弹幕提示、本地弹幕输入</sub></td>
+    <td align="center" width="33%"><img src="docs/T16/T16c/readme/room-portrait.jpg" width="240" alt="竖屏直播间"><br><sub>竖屏：画面、信息行、弹幕列表和醒目留言</sub></td>
+    <td align="center" width="33%"><img src="docs/T16/T16c/readme/room-vertical.jpg" width="240" alt="竖屏直播流全屏"><br><sub>竖屏直播流：全屏观看，上滑恢复弹幕栏</sub></td>
+    <td align="center" width="33%"><img src="docs/T16/T16c/readme/room-dark.jpg" width="240" alt="深色模式"><br><sub>深色模式：新弹幕提示、本地弹幕输入</sub></td>
   </tr>
   <tr>
-    <td align="center" colspan="3"><img src="docs/readme/room-landscape.jpg" width="760" alt="横屏全屏"><br><sub>横屏全屏：时间和电量、录制标记、锁定、本地弹幕、清晰度和线路</sub></td>
+    <td align="center" colspan="3"><img src="docs/T16/T16c/readme/room-landscape.jpg" width="760" alt="横屏全屏"><br><sub>横屏全屏：时间和电量、录制标记、锁定、本地弹幕、清晰度和线路</sub></td>
   </tr>
   <tr>
-    <td align="center" colspan="3"><img src="docs/readme/room-tablet.jpg" width="760" alt="平板分栏"><br><sub>平板和宽屏：画面加右侧聊天栏，聊天栏可以收起</sub></td>
+    <td align="center" colspan="3"><img src="docs/T16/T16c/readme/room-tablet.jpg" width="760" alt="平板分栏"><br><sub>平板和宽屏：画面加右侧聊天栏，聊天栏可以收起</sub></td>
   </tr>
 </table>
 
@@ -101,12 +101,12 @@
 
 <table>
   <tr>
-    <td align="center" colspan="3"><img src="docs/readme/danmaku-flying.jpg" width="760" alt="飞行弹幕"><br><sub>飞行弹幕：描边文字、彩色弹幕和表情图片</sub></td>
+    <td align="center" colspan="3"><img src="docs/T16/T16c/readme/danmaku-flying.jpg" width="760" alt="飞行弹幕"><br><sub>飞行弹幕：描边文字、彩色弹幕和表情图片</sub></td>
   </tr>
   <tr>
-    <td align="center" width="33%"><img src="docs/readme/danmaku-settings.jpg" width="240" alt="弹幕设置"><br><sub>弹幕设置：观看模板、显示范围、样式，改动立即生效</sub></td>
-    <td align="center" width="33%"><img src="docs/readme/local-interaction.jpg" width="240" alt="本地互动"><br><sub>本地互动：只有自己看得到的弹幕和礼物特效</sub></td>
-    <td align="center" width="33%"><img src="docs/readme/multiview.jpg" width="240" alt="多画面"><br><sub>多画面：2×2 布局，点格子切换声音来源</sub></td>
+    <td align="center" width="33%"><img src="docs/T16/T16c/readme/danmaku-settings.jpg" width="240" alt="弹幕设置"><br><sub>弹幕设置：观看模板、显示范围、样式，改动立即生效</sub></td>
+    <td align="center" width="33%"><img src="docs/T16/T16c/readme/local-interaction.jpg" width="240" alt="本地互动"><br><sub>本地互动：只有自己看得到的弹幕和礼物特效</sub></td>
+    <td align="center" width="33%"><img src="docs/T16/T16c/readme/multiview.jpg" width="240" alt="多画面"><br><sub>多画面：2×2 布局，点格子切换声音来源</sub></td>
   </tr>
 </table>
 
@@ -114,9 +114,9 @@
 
 <table>
   <tr>
-    <td align="center" width="33%"><img src="docs/readme/home-follow.jpg" width="240" alt="关注"><br><sub>关注：已开播、录播、未开播三组，按平台筛选</sub></td>
-    <td align="center" width="33%"><img src="docs/readme/areas.jpg" width="240" alt="分区"><br><sub>分区：按平台和大类浏览，可关注分区</sub></td>
-    <td align="center" width="33%"><img src="docs/readme/search.jpg" width="240" alt="搜索"><br><sub>搜索：所有平台同时搜，结果标出平台</sub></td>
+    <td align="center" width="33%"><img src="docs/T16/T16c/readme/home-follow.jpg" width="240" alt="关注"><br><sub>关注：已开播、录播、未开播三组，按平台筛选</sub></td>
+    <td align="center" width="33%"><img src="docs/T16/T16c/readme/areas.jpg" width="240" alt="分区"><br><sub>分区：按平台和大类浏览，可关注分区</sub></td>
+    <td align="center" width="33%"><img src="docs/T16/T16c/readme/search.jpg" width="240" alt="搜索"><br><sub>搜索：所有平台同时搜，结果标出平台</sub></td>
   </tr>
 </table>
 
@@ -124,12 +124,12 @@
 
 <table>
   <tr>
-    <td align="center" width="33%"><img src="docs/readme/record-panel.jpg" width="240" alt="录制面板"><br><sub>直播间里的录制面板：计时、大小、码率、弹幕条数</sub></td>
-    <td align="center" width="33%"><img src="docs/readme/recorder.jpg" width="240" alt="录制中心"><br><sub>录制中心：按状态筛选，断线自动重连</sub></td>
-    <td align="center" width="33%"><img src="docs/readme/iptv-guide.jpg" width="240" alt="网络电视节目单"><br><sub>网络电视：节目单、回看、返回直播</sub></td>
+    <td align="center" width="33%"><img src="docs/T16/T16c/readme/record-panel.jpg" width="240" alt="录制面板"><br><sub>直播间里的录制面板：计时、大小、码率、弹幕条数</sub></td>
+    <td align="center" width="33%"><img src="docs/T16/T16c/readme/recorder.jpg" width="240" alt="录制中心"><br><sub>录制中心：按状态筛选，断线自动重连</sub></td>
+    <td align="center" width="33%"><img src="docs/T16/T16c/readme/iptv-guide.jpg" width="240" alt="网络电视节目单"><br><sub>网络电视：节目单、回看、返回直播</sub></td>
   </tr>
   <tr>
-    <td align="center" colspan="3"><img src="docs/readme/settings-tablet.jpg" width="760" alt="设置"><br><sub>设置：五组分类、按名字搜索，宽屏左右两栏</sub></td>
+    <td align="center" colspan="3"><img src="docs/T16/T16c/readme/settings-tablet.jpg" width="760" alt="设置"><br><sub>设置：五组分类、按名字搜索，宽屏左右两栏</sub></td>
   </tr>
 </table>
 
@@ -378,7 +378,7 @@ tools/                  门禁、工具链检查、FFmpeg 原生包、效果图�
 docs/                   开发计划、模块记录、界面设计和功能清点
 ```
 
-开发计划和进度见 [docs/PLAN.md](docs/PLAN.md)，界面设计见 [docs/ui/](docs/ui/UI_PLAN.md)，功能清点见 [docs/features/](docs/features/INVENTORY.md)。
+开发计划和进度见 [docs/PLAN.md](docs/PLAN.md)，界面设计见 [docs/README.md/](docs/specs/UI.md)，功能清点见 [docs/README.md/](docs/inventory/FEATURES.md)。
 
 ## 路线图
 
@@ -386,7 +386,7 @@ docs/                   开发计划、模块记录、界面设计和功能清�
 
 | 客户端 | 现状 | 计划 |
 |---|---|---|
-| **Android 手机和平板** | 4.0.0 正式版 | 补齐余下的小功能（见[更新说明](docs/releases/v4.0.0.md)的“以后要做的”），持续修平台变化 |
+| **Android 手机和平板** | 4.0.0 正式版 | 补齐余下的小功能（见[更新说明](docs/T16/T16c/releases/v4.0.0.md)的“以后要做的”），持续修平台变化 |
 | **Windows** | 界面已按同一套设计做好，包括自绘标题栏、托盘、关闭时的选择、桌面小窗置顶 | 补上 Windows 专属的功能（开机启动、单实例、在新窗口打开直播间等），然后发布 Windows 版 |
 | **Linux** | 和 Windows 共用桌面界面 | 在 Windows 之后 |
 | **电视（Android TV）** | 遥控器操作的电视界面已经设计好；电视外壳、焦点导航、直播浏览和基本直播间已有代码 | 补全电视直播间、网络电视、设置，以及哔哩哔哩点播和音乐 |

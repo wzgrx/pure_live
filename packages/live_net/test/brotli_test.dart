@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 import 'support/digests.dart';
 
 // Vectors written by tools/brotli/gen_test_vectors.py with the reference
-// implementation (docs/modules/M1.1-brotli.md).
+// implementation (docs/T03/T03a/T03a.2/record.md).
 const _data = 'test/data/brotli';
 
 /// Streams of one vector group with the reference decoder's verdict:

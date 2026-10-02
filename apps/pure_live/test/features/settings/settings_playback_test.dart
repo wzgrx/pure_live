@@ -1,6 +1,6 @@
 // U.6c: the video page, the portrait and audience pages it opens, the
 // player page and its mpv option pages, the floating-window danmaku page
-// (docs/ui/compare/U.6c).
+// (docs/T09/T09a/T09a.4).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_store/live_store.dart';

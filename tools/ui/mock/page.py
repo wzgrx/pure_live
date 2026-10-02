@@ -1,4 +1,4 @@
-"""Builds a comparison / review page from a task's spec (docs/ui/compare/<id>/page.json).
+"""Builds a comparison / review page from a task's spec (docs/TASKS.md/<id>/page.json).
 
 The page is one self-contained HTML file (pictures embedded) to publish as a
 claude.ai page with the `db` capability. On that page every change has
@@ -9,7 +9,7 @@ database (collection `review`, one document per item id:
 export) the controls stay hidden, so tools/ui/export_compare.py exports the
 same file as clean section pictures.
 
-usage: python3 tools/ui/mock/page.py docs/ui/compare/U.2c/page.json [--out FILE]
+usage: python3 tools/ui/mock/page.py docs/T05/T05d/T05d.1/page.json [--out FILE]
   default out: ~/ref/design/compare/<id>.html
 
 Spec (JSON; strings may contain HTML):

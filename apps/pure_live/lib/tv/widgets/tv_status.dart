@@ -28,7 +28,7 @@ final class TvStatusAction {
   final VoidCallback onTap;
 }
 
-/// The state of a TV list that has no rooms to show (docs/ui/compare/U.15a
+/// The state of a TV list that has no rooms to show (docs/T18/T18a/T18a.2
 /// c14, the phone's status page in the TV style): an icon in a soft circle
 /// (no bounce, P15), the title (22, 600), a line saying what to do with
 /// the remote (16, secondary) and up to two buttons; the first is where the

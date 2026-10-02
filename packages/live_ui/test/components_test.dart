@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_ui/live_ui.dart';
 
-// docs/ui/compare/U.1c: the common components in every state (default,
+// docs/T01/T01c/T01c.1: the common components in every state (default,
 // hover, keyboard focus, pressed, disabled, busy), both themes, contrast.
 
 const _theme = LiveTheme(primaryColor: LiveTheme.brandBlue, schemeVariant: DynamicSchemeVariant.fidelity);

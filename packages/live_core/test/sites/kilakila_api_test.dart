@@ -2,7 +2,7 @@
 // with 3.x's frozen output (expected.json, written by
 // fixtures/kilakila/legacy_expected.dart from 3.x's KilakilaApi, KilakilaLink
 // and KilakilaSite). Every intended difference is listed with its reason
-// (an M4.U item number, docs/UPGRADES.md, for the approved upgrades);
+// (an M4.U item number, docs/specs/UPGRADES.md, for the approved upgrades);
 // everything else must match. The synthetic cases port 3.x's
 // kilakila_api_test.dart, kilakila_owner_test.dart, kilakila_link_test.dart
 // and kilakila_directory_contract_test.dart.

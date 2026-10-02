@@ -1,4 +1,4 @@
-/// DLNA casting of Pure Live (docs/modules/M10-cast.md): SSDP search for
+/// DLNA casting of Pure Live (docs/T12/T12c/T12c.1/record.md): SSDP search for
 /// media renderers, device descriptions, AVTransport control over SOAP and
 /// the cast dialog's logic. Pure Dart on `dart:io`; sockets and HTTP are
 /// injectable so tests never touch the network.

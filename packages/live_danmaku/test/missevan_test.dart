@@ -1,4 +1,4 @@
-// Missevan danmaku (docs/modules/M5.12-missevan.md): the protocol and the
+// Missevan danmaku (docs/T06/T06a/T06a.13/record.md): the protocol and the
 // connection against the archived v4's output for the recorded sessions
 // (S06-live, S07-brotli) and the synthetic frames (S08-synthetic), written by
 // fixtures/missevan/danmaku/v4_expected.dart; the follow-ups of M5.F (B-1, B-9)
@@ -393,7 +393,7 @@ Future<void> _fastTimers(List<Duration> delays, Future<void> Function() body) =>
 );
 
 /// The differences of the new decoder from v4 in the synthetic cases
-/// (docs/modules/M5.12-missevan.md, "与归档 v4 的差异"): v4's reading → the
+/// (docs/T06/T06a/T06a.13/record.md, "与归档 v4 的差异"): v4's reading → the
 /// new one, per case. Cases not listed read as v4 read them.
 ///
 /// Difference 2 (gifts not reported) is gone with B-9: gifts are reported

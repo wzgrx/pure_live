@@ -8,13 +8,13 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Platforms whose links are understood (a pasted room link, short link or
 /// app share text), in display order. The toolbox and the TV's link player
-/// show the same list (docs/ui/TASKS.md §7, U.15e → U.12a).
+/// show the same list (docs/TASKS.md §7, U.15e → U.12a).
 List<LiveSite> linkPlatforms(SiteRegistry registry) => [
   for (final site in registry.sites)
     if (site is LiveSiteLinks && site.id != SiteIds.iptv) site,
 ];
 
-/// "支持解析列表 · 共 N 个平台" (docs/ui/compare/U.12a c4): a card of its
+/// "支持解析列表 · 共 N 个平台" (docs/T07/T07i/T07i.3 c4): a card of its
 /// own, folded by default; unfolded, a line on what can be pasted and a
 /// labelled logo for each platform of [linkPlatforms] (3.x showed a fixed
 /// text of seventy lines that no longer matched the platforms).

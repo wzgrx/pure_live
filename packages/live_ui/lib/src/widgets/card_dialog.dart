@@ -26,7 +26,7 @@ final class CardDialogAction {
 }
 
 /// The dialog a card opens on long press or right click, the same for room
-/// cards (docs/ui/compare/U.4a c10, choice A1: in the middle of the screen,
+/// cards (docs/T07/T07d/T07d.1 c10, choice A1: in the middle of the screen,
 /// like 3.x) and area cards (U.4d X3, coordinator 2026-10-01; UI_PLAN §3
 /// rule 7: one component for one action everywhere).
 ///
@@ -100,7 +100,7 @@ class CardDialog extends StatelessWidget {
     );
 
     final body = this.body;
-    // The one dialog's frame (docs/ui/compare/U.1d): its width, corners,
+    // The one dialog's frame (docs/T01/T01d/T01d.1): its width, corners,
     // keys and buttons at the bottom right.
     return AppDialog(
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),

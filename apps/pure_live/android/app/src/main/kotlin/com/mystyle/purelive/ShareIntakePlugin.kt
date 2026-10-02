@@ -29,7 +29,7 @@ import java.util.concurrent.Executors
  * AGP patch; M12.5 → F.0a): what other apps hand to Pure Live, and what the
  * launcher shortcuts and the recording notifications open.
  *
- * - [ACTION_OPEN] (shortcuts, notifications; docs/ui/compare/U.14 c3, c5,
+ * - [ACTION_OPEN] (shortcuts, notifications; docs/T13/T13a/T13a.1 c3, c5,
  *   c15): `route` opens a page (only [OPENABLE_ROUTES]), `platform` +
  *   `roomId` a room; delivered as
  *   `shared {route}` or `shared {room: {platform, roomId, title, nick}}`.

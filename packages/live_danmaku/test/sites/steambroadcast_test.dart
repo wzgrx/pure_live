@@ -1,4 +1,4 @@
-// Steam broadcast chat (docs/modules/M5.23-steambroadcast.md): the protocol
+// Steam broadcast chat (docs/T06/T06a/T06a.24/record.md): the protocol
 // against the archived v4's reading of the recording
 // (fixtures/steambroadcast/danmaku/S07-live, expected.json written by
 // danmaku/v4_expected.dart), synthetic answers for everything the recording

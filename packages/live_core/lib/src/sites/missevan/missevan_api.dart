@@ -71,7 +71,7 @@ final class MissevanDanmakuArgs {
 /// picture. As in 3.x nothing here calls a room audio-only; the player goes
 /// by the tracks it finds.
 ///
-/// The M4.U upgrades (docs/UPGRADES.md rows 13-1 to 13-4 and the unified
+/// The M4.U upgrades (docs/specs/UPGRADES.md rows 13-1 to 13-4 and the unified
 /// principles): one 原画 quality with FLV and HLS lines, the danmaku
 /// arguments, the catalog grouped by namespace, long keywords cut, start
 /// times, no restriction for a playable live room, unreadable rows skipped

@@ -15,7 +15,7 @@ import 'package:pure_live/tv/widgets/tv_focusable.dart';
 Future<T?> showTvDialog<T>(BuildContext context, {required WidgetBuilder builder}) =>
     showDialog<T>(context: context, barrierColor: TvColors.scrim, builder: builder);
 
-/// The frame of every TV dialog (docs/ui/compare/U.15a c16, the phone's
+/// The frame of every TV dialog (docs/T18/T18a/T18a.2 c16, the phone's
 /// dialog in the TV style): the high surface container, corners of 24, no
 /// ring and no glow (P17); the title (22, 600), an optional line under it
 /// (14, secondary), the content and the buttons on the right, cancel before

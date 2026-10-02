@@ -3,7 +3,7 @@
 // fixtures/bigo/legacy_expected.dart from 3.x's BigoApi, BigoSite, BigoLink,
 // BigoTokenCodec and BigoHlsProtection). Every intended difference is listed
 // with its reason (M4.24 differences, M4.U items 24-1…24-7 and the unified
-// rules of docs/UPGRADES.md); everything else must match. The synthetic cases
+// rules of docs/specs/UPGRADES.md); everything else must match. The synthetic cases
 // port 3.x's bigo_api_test.dart, bigo_media_test.dart and bigo_site_test.dart
 // (link rules) and pin 3.x's checks where they still hold. The samples
 // S03-studio-reused, S03-studio-offline and S03-studio-unknown were recorded

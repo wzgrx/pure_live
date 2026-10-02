@@ -179,7 +179,7 @@ void main() {
     expect(position.pixels, greaterThan(0));
   });
 
-  group('VideoStateView (docs/ui/compare/U.2g c2)', () {
+  group('VideoStateView (docs/T05/T05i/T05i.1 c2)', () {
     Widget host(Widget child, {double height = 300}) => MaterialApp(
       theme: const LiveTheme().light,
       home: Scaffold(

@@ -38,7 +38,7 @@ import 'package:pure_live/shared/danmaku/emotes.dart';
 
 export 'package:pure_live/features/live_play/dialogs/player_dialogs.dart' show videoFits;
 
-/// How the picture itself is drawn (docs/ui/compare/U.2b).
+/// How the picture itself is drawn (docs/T05/T05c/T05c.1).
 enum PicturePresentation {
   /// The stream as the "画面比例" setting fits it, on black.
   plain,

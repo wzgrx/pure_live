@@ -202,7 +202,7 @@ final class ChzzkLivesPage {
 typedef ChzzkCategoryPage = ({List<LiveArea> areas, Map<String, String>? next});
 
 /// Pure parsing of CHZZK (치지직, NAVER) responses (3.x's `ChzzkApi` and the
-/// card rules of `ChzzkSite`, with the upgrades of docs/UPGRADES.md 20-x).
+/// card rules of `ChzzkSite`, with the upgrades of docs/specs/UPGRADES.md 20-x).
 /// Each function takes the response text and status and returns 3.x's
 /// models or throws a `SiteError`.
 ///

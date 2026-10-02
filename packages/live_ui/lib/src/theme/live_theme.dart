@@ -24,7 +24,7 @@ const PageTransitionsTheme appPageTransitionsTheme = PageTransitionsTheme(
 const bool centredPageTitle = true;
 
 /// A button's outline: the keyboard focus frame (2 points in the primary
-/// colour, docs/ui/compare/U.1c c21) while the keyboard focus is on it,
+/// colour, docs/T01/T01c/T01c.1 c21) while the keyboard focus is on it,
 /// else [outline] ([disabledOutline] when disabled), or none. Equal frames
 /// compare equal, so a rebuilt theme does not animate.
 @immutable
@@ -347,7 +347,7 @@ final class LiveTheme {
           borderSide: BorderSide(color: colors.primary, width: 1.5),
         ),
       ),
-      // A panel from the bottom (docs/ui/compare/U.1d c10, U.2f): the
+      // A panel from the bottom (docs/T01/T01d/T01d.1 c10, U.2f): the
       // surface colour, 16-point top corners, a handle.
       bottomSheetTheme: BottomSheetThemeData(
         elevation: 1,

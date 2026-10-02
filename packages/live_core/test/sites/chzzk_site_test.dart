@@ -1,7 +1,7 @@
 // ChzzkSite over the recorded CHZZK responses (ReplayHttp) and a few
 // synthetic ones: the requests (URL, headers, redirects) and their counts,
 // compared with the requests 3.x made (expected.json) where the upgrades
-// (docs/UPGRADES.md 20-x) leave them, the catalog of the platform's areas,
+// (docs/specs/UPGRADES.md 20-x) leave them, the catalog of the platform's areas,
 // the cursor directory with its page-number replay and deadline, channel
 // search, room details for entry, refresh and recording, qualities read
 // from the masters with their lines, reuse and recovery, cancellation, links

@@ -1,5 +1,5 @@
 """Counts the screens of v3 (v3.2.11) and pure_live_TV and assigns every UI
-file to a task of docs/ui/TASKS.md, so no screen is left out.
+file to a task of docs/TASKS.md, so no screen is left out.
 
 A UI file is a Dart file that declares a widget class or opens a dialog,
 sheet or menu. RULES maps path prefixes to task ids, first match wins; a UI
@@ -7,9 +7,9 @@ file no rule matches is printed as unassigned and the script exits 1.
 
 usage: python3 tools/ui/inventory.py [--v3 ~/ref/v3ref] [--tv ~/ref/pure_live_TV] [--files | --items]
   default output: per-task counts as a Markdown table
-  --files: Markdown list of files per task (docs/ui/TASK_FILES.md)
+  --files: Markdown list of files per task (docs/inventory/UI_FILES.md)
   --items: every page, dialog, sheet, menu and overlay per task, with the
-           Chinese title found next to it (docs/ui/INVENTORY.md)
+           Chinese title found next to it (docs/inventory/UI.md)
 """
 import argparse, os, re, sys
 from collections import Counter, defaultdict

@@ -1,6 +1,6 @@
 /// Compares the pinned toolchain (`toolchain.env`), the self-maintained forks and
 /// the direct pub dependencies (`pubspec.lock`) with the latest official stable
-/// releases (docs/PLAN.md §3).
+/// releases (docs/specs/ENGINEERING.md §3).
 library;
 
 import 'dart:convert';

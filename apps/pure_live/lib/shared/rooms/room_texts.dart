@@ -119,7 +119,7 @@ String _restrictionKey(LiveRestriction restriction) => switch (restriction) {
 String? restrictionLabel(LiveRestriction restriction) =>
     restriction == LiveRestriction.none ? null : i18n('room_mark_${_restrictionKey(restriction)}');
 
-/// Why a restricted room may not play (docs/UPGRADES.md "统一原则").
+/// Why a restricted room may not play (docs/specs/UPGRADES.md "统一原则").
 String restrictionReason(LiveRestriction restriction) =>
     restriction == LiveRestriction.none ? '' : i18n('room_mark_${_restrictionKey(restriction)}_hint');
 

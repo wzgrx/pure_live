@@ -5,7 +5,7 @@ import 'package:live_ui/live_ui.dart';
 // The panel itself moved to lib/shared (the multi-view page shows it too).
 export 'package:pure_live/shared/panels/side_panel.dart';
 
-/// The panels the live room opens beside the picture (docs/ui/compare/U.2f,
+/// The panels the live room opens beside the picture (docs/T05/T05g/T05g.1,
 /// 统一规则): recording, the danmaku settings, switching rooms (U.2m), the
 /// room menu's settings and a long-pressed danmaku (U.2n). One at a time.
 enum RoomPanelKind {
@@ -15,7 +15,7 @@ enum RoomPanelKind {
   /// The danmaku settings (the picture's settings button).
   danmaku,
 
-  /// The IPTV programme guide in landscape fullscreen (docs/ui/compare/U.2g
+  /// The IPTV programme guide in landscape fullscreen (docs/T05/T05i/T05i.1
   /// c16: under the picture in portrait, in the right column on wide
   /// windows, here on the right).
   guide,
@@ -26,11 +26,11 @@ enum RoomPanelKind {
   /// The local danmaku style (a local composer's star, U.2k).
   localStyle,
 
-  /// "切换直播间" (docs/ui/compare/U.2m): the room menu's first entry, the
+  /// "切换直播间" (docs/T05/T05h/T05h.2): the room menu's first entry, the
   /// fullscreen bars' ⇄ and the picture states' button.
   switchRoom,
 
-  /// "定时关闭" (docs/ui/compare/U.2n c1): the room menu.
+  /// "定时关闭" (docs/T05/T05g/T05g.2 c1): the room menu.
   sleepTimer,
 
   /// "房间音量" (U.2n c1, c2): the room menu.
@@ -77,7 +77,7 @@ final class RoomPanelController extends ValueNotifier<RoomPanelKind?> {
 
 /// Opens a room panel where there is no room page around [context] (a lone
 /// button, the settings page): the app's panel for pages without a picture
-/// (docs/ui/compare/U.1d c10: from the bottom with a handle on phones,
+/// (docs/T01/T01d/T01d.1 c10: from the bottom with a handle on phones,
 /// [heightFactor] of the screen high; on the right from
 /// [sidePanelBreakpoint]). [builder] gets the sheet's context and what
 /// closes it.

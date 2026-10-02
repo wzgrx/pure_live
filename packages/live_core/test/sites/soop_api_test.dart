@@ -1,8 +1,8 @@
 // SOOP parsing against the recorded samples, compared field by field with
 // 3.x's frozen output (expected.json: 3.x's soop_site.dart run over the same
-// samples, docs/modules/M4.07-soop.md). Every intended difference is listed
+// samples, docs/T02/T02c/T02c.1/record.md). Every intended difference is listed
 // with its reason (the M4.U upgrades by item number, 7-1 … 7-9 in
-// docs/UPGRADES.md); everything else must match. Samples recorded for M4.U
+// docs/specs/UPGRADES.md); everything else must match. Samples recorded for M4.U
 // (password, subscribers-only, 1440p) have no 3.x output.
 import 'dart:convert';
 import 'dart:io';

@@ -32,7 +32,7 @@ final class FollowsRefresher {
   final DateTime? Function() lastRefreshedAt;
 }
 
-/// Opens the "切换直播间" panel of [controller]'s room (docs/ui/compare/U.2m):
+/// Opens the "切换直播间" panel of [controller]'s room (docs/T05/T05h/T05h.2):
 /// the room page's panel, or the same panel in a sheet where there is no
 /// room page around [context] (the app's adaptive panel, U.1d; picking a
 /// room then replaces the page).
@@ -61,7 +61,7 @@ void showRoomSwitchPanel(BuildContext context, LiveRoomController controller) {
   );
 }
 
-/// The live room's "切换直播间" panel (docs/ui/compare/U.2m; 3.x
+/// The live room's "切换直播间" panel (docs/T05/T05h/T05h.2; 3.x
 /// `PlayOther`): one panel for every layout, placed by the page like the
 /// record and danmaku panels (U.2f).
 ///

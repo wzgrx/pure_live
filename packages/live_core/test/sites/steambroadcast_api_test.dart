@@ -2,7 +2,7 @@
 // field with 3.x's frozen output (expected.json, written by
 // fixtures/steambroadcast/legacy_expected.dart from 3.x's SteamBroadcastApi,
 // SteamBroadcastLink and SteamBroadcastSite). Every intended difference is
-// listed with its reason (`changed`, with the upgrade item: docs/UPGRADES.md
+// listed with its reason (`changed`, with the upgrade item: docs/specs/UPGRADES.md
 // 27-x, X-2 placeholders, "说明文字" notices); everything else must match.
 // The synthetic cases port 3.x's steam_broadcast_site_test.dart and pin 3.x's
 // checks. No test compares a sample's time with the clock.

@@ -2,7 +2,7 @@
 // 3.x's frozen output (expected.json, written by
 // fixtures/weibo/legacy_expected.dart from 3.x's WeiboApi, WeiboLink and
 // WeiboSite). Every intended difference is listed with its reason (the
-// upgrade ids of docs/UPGRADES.md for M4.U); everything else must match.
+// upgrade ids of docs/specs/UPGRADES.md for M4.U); everything else must match.
 // The synthetic cases port 3.x's weibo_api_test.dart, the link cases of
 // weibo_site_test.dart and weibo_application_test.dart. The S04 samples
 // (2026-09-28) have no 3.x output.

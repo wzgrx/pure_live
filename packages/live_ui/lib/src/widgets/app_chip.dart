@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/widgets/focus_ring.dart';
 
-/// The chip's height (docs/ui/compare/U.1c c13); 48 to tap.
+/// The chip's height (docs/T01/T01c/T01c.1 c13); 48 to tap.
 const double appChipHeight = 36;
 
 /// The one chip of the app (U.1c c13; 3.x had three looks): 36 high, 8-point

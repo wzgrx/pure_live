@@ -3,7 +3,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/record/record_state.dart';
 
-/// How a room's recording looks (docs/ui/compare/U.2a2): one glyph in
+/// How a room's recording looks (docs/T08/T08b/T08b.3): one glyph in
 /// seven states for the room bar's record button, the fullscreen bars, the
 /// record panel's status card and the recording centre, chosen from the
 /// task's card state — never from `RecordStatus.isActive`, which counts

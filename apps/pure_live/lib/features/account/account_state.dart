@@ -121,7 +121,7 @@ AccountStatus accountStatus(
   final cookie = stored.cookie;
   if (cookie.isEmpty) {
     if (stored.unreadable) return AccountStatus(i18n('account_status_unreadable'), tone: AccountTone.error);
-    // 3.x: "设置cookie", and "未登录" for Bilibili (docs/ui/compare/U.10a c5).
+    // 3.x: "设置cookie", and "未登录" for Bilibili (docs/T10/T10a/T10a.2 c5).
     return AccountStatus(i18n('account_status_none'));
   }
   switch (platform.check) {
@@ -175,7 +175,7 @@ AccountStatus accountStatus(
 }
 
 /// The status card of a platform's own page: the list's [status], but an
-/// empty one says what to do ("未设置：粘贴登录后的 Cookie", docs/ui/compare/
+/// empty one says what to do ("未设置：粘贴登录后的 Cookie", docs/TASKS.md/
 /// U.10b c2).
 AccountStatus accountPageStatus(AccountStatus status, AccountSnapshot stored) =>
     stored.cookie.isEmpty && !stored.unreadable && status.tone == AccountTone.idle

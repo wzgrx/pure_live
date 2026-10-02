@@ -5,7 +5,7 @@ import 'package:live_ui/src/widgets/focus_ring.dart';
 const double jumpButtonsThreshold = 400;
 
 /// "To top" and "to bottom" over a list once it scrolls (3.x
-/// `BasePageView`'s mini buttons, docs/ui/compare/U.1c c20): "to top" past
+/// `BasePageView`'s mini buttons, docs/T01/T01c/T01c.1 c20): "to top" past
 /// [jumpButtonsThreshold], "to bottom" while more than that remains. Each
 /// looks 40 round on `surfaceContainerHighest` with a floating shadow and
 /// takes taps on 48 (3.x's 40 was too small); hover, press and the keyboard

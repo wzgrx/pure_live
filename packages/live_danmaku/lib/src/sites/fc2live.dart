@@ -15,7 +15,7 @@ typedef Fc2LiveControlMessage = ({String name, Object? id, Map<String, Object?> 
 /// FC2 Live's comments on a control socket of their own (the archived v4's
 /// spec/sites/fc2live.md §7, checked against the recording
 /// `fixtures/fc2live/danmaku/S06-live` and the site's `liveView.bundle.js`;
-/// docs/modules/M5.22-fc2live.md), without I/O.
+/// docs/T06/T06a/T06a.23/record.md), without I/O.
 ///
 /// - The socket is the media control socket of M4.26: a fresh grant
 ///   (`Fc2LiveSite.controlGrant`) names it and its session cookie.

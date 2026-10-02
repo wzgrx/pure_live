@@ -8,7 +8,7 @@ import 'package:live_ui/src/widgets/app_dialog.dart';
 import 'package:live_ui/src/widgets/app_toast.dart';
 import 'package:live_ui/src/widgets/loading_styles.dart';
 
-// The one status component (docs/ui/compare/U.1c c2–c7): six states
+// The one status component (docs/T01/T01c/T01c.1 c2–c7): six states
 // (skeleton, loading, empty, error, restricted, offline) in four places
 // (a page, a block, a card cover, on the video; the video has its own
 // `VideoStateView`), always the same structure: an icon, one sentence, one
@@ -39,7 +39,7 @@ enum AppStatusType {
 const double statusSideBySideHeight = 480;
 
 /// Loading, empty, error, restricted and offline states of a page, a block
-/// or a card cover (3.x `AppStatusView`, docs/ui/compare/U.1c).
+/// or a card cover (3.x `AppStatusView`, docs/T01/T01c/T01c.1).
 ///
 /// A page's state: a solid 80 circle (`surfaceContainer`) with a 40 icon in
 /// the primary colour (no pop-in bounce, c6), the title 15/600, the reason

@@ -1,4 +1,4 @@
-// B05 (docs/ui/compare/U.2m): the "切换直播间" panel, the same in every
+// B05 (docs/T05/T05h/T05h.2): the "切换直播间" panel, the same in every
 // layout; v3's small cards with at least as many on screen as v3 (GitHub
 // issue #37), a list style that is remembered; switching in place; the
 // fullscreen menus without what their bars show.

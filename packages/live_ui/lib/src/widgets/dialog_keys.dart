@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-/// The keyboard of a dialog on computers (docs/ui/UI_PLAN.md §5.4): Enter
+/// The keyboard of a dialog on computers (docs/specs/UI.md §5.4): Enter
 /// presses the main button ([onEnter]) and, when given, Esc runs [onEscape]
 /// (a dialog that a tap outside does not close gets no Esc from the route).
 ///

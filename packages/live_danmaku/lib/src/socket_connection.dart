@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 
 /// Timing of one platform's danmaku socket: 3.x's `WebScoketUtils`
 /// parameters plus the platform's join timer. Each platform fills it from its
-/// 3.x values (docs/modules/M5.0-framework.md lists them); the defaults are
+/// 3.x values (docs/T06/T06a/T06a.1/record.md lists them); the defaults are
 /// the ones every 3.x platform shared.
 @immutable
 final class DanmakuSocketPolicy {

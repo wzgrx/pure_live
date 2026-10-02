@@ -8,7 +8,7 @@ typedef ProtoField = ({int number, int wireType, Object value});
 
 /// A protobuf message read one level deep, without a schema: the few fields
 /// Douyin's danmaku needs of the classes 3.x generated from its
-/// `douyin.proto` (docs/modules/M5.4-douyin.md). Nested messages are read
+/// `douyin.proto` (docs/T06/T06a/T06a.5/record.md). Nested messages are read
 /// when asked for.
 ///
 /// The reading follows 3.x's runtime (`package:protobuf` 6.1.0) where it

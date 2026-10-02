@@ -7,7 +7,7 @@ import 'package:pure_live/i18n/i18n.dart';
 const List<int> syncIntervalOptions = [2, 6, 12, 24, 48, 72];
 
 /// Asks for the automatic sync interval (3.x `_showIntervalSelectionMenu`,
-/// docs/ui/compare/U.9 c17): one row per interval, the current one filled
+/// docs/T11/T11a/T11a.4 c17): one row per interval, the current one filled
 /// and tinted; no buttons, a tap chooses. Null when dismissed.
 Future<int?> chooseSyncInterval(BuildContext context, int current) => showAppOptionDialog<int>(
   context: context,
@@ -28,7 +28,7 @@ Future<int?> chooseSyncInterval(BuildContext context, int current) => showAppOpt
 /// The longest User-Agent accepted (3.x).
 const int maxUserAgentLength = 500;
 
-/// Edits the IPTV User-Agent (3.x `_UserAgentDialog`, docs/ui/compare/U.9
+/// Edits the IPTV User-Agent (3.x `_UserAgentDialog`, docs/T11/T11a/T11a.4
 /// c14): the field grows with its text (up to 8 lines; 3.x's "－ 144 px ＋"
 /// bar is gone), a clear button, "留空使用默认请求头". The trimmed text, or
 /// null when cancelled; an empty text means the player's default.

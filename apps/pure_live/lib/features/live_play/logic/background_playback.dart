@@ -58,7 +58,7 @@ abstract final class PictureInPicture {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'changed') active.value = call.arguments == true;
       // The pause / play action of the system's picture-in-picture window
-      // (docs/ui/compare/U.14 c7).
+      // (docs/T13/T13a/T13a.1 c7).
       if (call.method == 'togglePlay') await _toggle?.call();
     });
   }

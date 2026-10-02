@@ -27,7 +27,7 @@ final class TvTab {
 }
 
 /// A row of tabs for the remote (pure_live_TV `TvTabBar` in the style of
-/// docs/ui/compare/U.15a): pills 36 high, the current one filled with the
+/// docs/T18/T18a/T18a.2): pills 36 high, the current one filled with the
 /// primary container, the focused one ringed and grown; a count after the
 /// label in equal-width figures. Walking across the tabs only moves the
 /// focus, OK switches (so browsing does not load every platform), OK on the

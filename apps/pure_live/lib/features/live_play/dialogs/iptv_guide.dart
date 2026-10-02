@@ -32,7 +32,7 @@ Future<List<EpgProgramme>> loadChannelGuide(
   return [...programmes]..sort((a, b) => a.start.compareTo(b.start));
 }
 
-/// Where the room keeps its guide (docs/ui/compare/U.2g c16): under the
+/// Where the room keeps its guide (docs/T05/T05i/T05i.1 c16): under the
 /// picture in portrait, on the right in landscape fullscreen, in the right
 /// column of a wide window. The picture's guide button and the replay mark
 /// call [reveal]; the page decides what that means in its layout (scroll to
@@ -60,7 +60,7 @@ Future<void> showIptvGuide(BuildContext context, LiveRoomController controller) 
     scope.reveal();
     return;
   }
-  // The app's panel for a page without a picture (docs/ui/compare/U.1d c10).
+  // The app's panel for a page without a picture (docs/T01/T01d/T01d.1 c10).
   await showRoomPanelSheet(
     context,
     heightFactor: 0.7,
@@ -68,7 +68,7 @@ Future<void> showIptvGuide(BuildContext context, LiveRoomController controller) 
   );
 }
 
-/// The channel's programme guide with catch-up (docs/ui/compare/U.2g c16–c19,
+/// The channel's programme guide with catch-up (docs/T05/T05i/T05i.1 c16–c19,
 /// 3.x `IptvScheduleDialog`): one component wherever it is placed. The head
 /// says "节目单" and how long the channel keeps programmes; while a programme
 /// is replayed, a bar says which and offers "返回直播"; the programmes are

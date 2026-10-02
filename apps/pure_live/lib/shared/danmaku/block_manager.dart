@@ -13,11 +13,11 @@ import 'package:pure_live/shared/danmaku/setting_rows.dart';
 /// The longest keyword (3.x `KeywordBlockPage`'s field).
 const int blockKeywordMaxLength = 40;
 
-/// How long a removal can be undone (docs/ui/compare/U.2e c15; a SnackBar's
+/// How long a removal can be undone (docs/T06/T06d/T06d.1 c15; a SnackBar's
 /// own default).
 const Duration blockUndoDuration = Duration(seconds: 4);
 
-/// The block list (3.x `KeywordBlockPage`, docs/ui/compare/U.2e c11–c16):
+/// The block list (3.x `KeywordBlockPage`, docs/T06/T06d/T06d.1 c11–c16):
 /// the keyword field and the blocked words, the blocked viewers, then the
 /// platform's filter and the similarity filter ([showFilters]). Words and
 /// viewers are chips removed only by their ×, each removal undoable for

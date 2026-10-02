@@ -158,7 +158,7 @@ const MethodChannel _recorderChannel = MethodChannel('pure_live/recorder');
 /// recorder's tasks stop with the reason, and later starts are refused until
 /// the user starts a task again ([allowUserRetry]).
 ///
-/// The notification (docs/ui/compare/U.14 c3–c5): [title] and [text], and
+/// The notification (docs/T13/T13a/T13a.1 c3–c5): [title] and [text], and
 /// from [extra] the clock's start (`since`), the button words and the
 /// channel names; [refresh] sends changed words while it shows, [alert]
 /// posts a "录制已停止" reminder, and the notification's "停止录制" arrives

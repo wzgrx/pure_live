@@ -1,4 +1,4 @@
-// Picarto danmaku (docs/modules/M5.10-picarto.md): the protocol and the
+// Picarto danmaku (docs/T06/T06a/T06a.11/record.md): the protocol and the
 // connection against the archived v4's output for the recorded sessions
 // (S07-live, S09-keepalive, S10-token-refused) and the synthetic frames
 // (S11-synthetic), written by fixtures/picarto/danmaku/v4_expected.dart;
@@ -297,7 +297,7 @@ Future<void> _withoutBackoff(Future<void> Function() body) async {
 }
 
 /// The differences of the new decoder from v4 in the synthetic cases
-/// (docs/modules/M5.10-picarto.md, "与归档 v4 的差异"): v4's output → the new
+/// (docs/T06/T06a/T06a.11/record.md, "与归档 v4 的差异"): v4's output → the new
 /// output, per case. Cases not listed decode as v4 did.
 final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
   // Difference 2: `_id` stands in for a missing `id`, as the site reads it.

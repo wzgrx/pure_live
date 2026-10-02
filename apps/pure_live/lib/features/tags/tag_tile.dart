@@ -17,7 +17,7 @@ Map<String, int> followedTagCounts(Map<String, List<String>> assignments, Iterab
   return counts;
 }
 
-/// One tag in the list (docs/ui/compare/U.12c c2–c4): drag handle, name
+/// One tag in the list (docs/T07/T07h/T07h.2 c2–c4): drag handle, name
 /// (15/600), description (12 px, secondary colour) and the followed rooms,
 /// then pin, edit and delete as 48 px buttons with 3.x's icons. The first
 /// tag shows a filled pin that does nothing. A long press anywhere on the

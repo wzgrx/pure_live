@@ -363,7 +363,7 @@ final class KilakilaDanmakuArgs {
 /// A room is an anchor: its id is the anchor's uid, and every broadcast has
 /// a new `roomIdStr` (REG-KILAKILA-001). Answers are checked as strictly as
 /// 3.x did, except that one broken row of a list only drops that row
-/// (docs/UPGRADES.md, "容错"): a page whose echo or identity does not
+/// (docs/specs/UPGRADES.md, "容错"): a page whose echo or identity does not
 /// match, or whose rows are all broken, is still `ApiChanged`. An anchor
 /// the platform says has no broadcast, or whose broadcast ended, is
 /// offline (15-1); any other state the platform does not name stays

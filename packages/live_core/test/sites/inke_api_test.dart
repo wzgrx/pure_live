@@ -2,7 +2,7 @@
 // 3.x's frozen output (expected.json, written by
 // fixtures/inke/legacy_expected.dart from 3.x's InkeApi and InkeSite). Every
 // intended difference is listed with its reason (M4.14's, and the M4.U
-// upgrades by their docs/UPGRADES.md numbers); everything else must match.
+// upgrades by their docs/specs/UPGRADES.md numbers); everything else must match.
 // The synthetic cases port 3.x's inke_api_test.dart and
 // inke_application_test.dart.
 import 'dart:convert';

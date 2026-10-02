@@ -15,7 +15,7 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 const double searchPlatformStripHeight = 56;
 
 /// The page width from which the search field and the platform row share
-/// one line and the filters and the scope line another (docs/ui/compare/
+/// one line and the filters and the scope line another (docs/TASKS.md/
 /// U.5a c12: phones held sideways and wide windows).
 const double searchOneRowWidth = 600;
 

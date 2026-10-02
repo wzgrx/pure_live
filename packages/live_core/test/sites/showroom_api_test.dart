@@ -2,7 +2,7 @@
 // 3.x's frozen output (expected.json, written by
 // fixtures/showroom/legacy_expected.dart from 3.x's ShowroomApi, ShowroomSite
 // and ShowroomLink). Every intended difference is listed with its reason
-// (`changed:`, with the upgrade row of docs/UPGRADES.md); everything else
+// (`changed:`, with the upgrade row of docs/specs/UPGRADES.md); everything else
 // must match. The M2.1 keys 3.x never wrote are checked apart (`added:`).
 // The synthetic cases port 3.x's showroom_catalog_test.dart and pin 3.x's
 // checks, as far as the upgrades kept them.

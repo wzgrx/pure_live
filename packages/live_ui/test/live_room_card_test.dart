@@ -24,7 +24,7 @@ Widget _host(Widget child, {double width = 188, ThemeData? theme}) => MaterialAp
 );
 
 void main() {
-  group('LiveRoomCard (docs/ui/compare/U.4a)', () {
+  group('LiveRoomCard (docs/T07/T07d/T07d.1)', () {
     testWidgets('c1, c6: cover, avatar, one-line title, streamer; the audience bottom right in 12-point figures', (
       tester,
     ) async {

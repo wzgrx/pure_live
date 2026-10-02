@@ -6,7 +6,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
 
 // The springs and fling thresholds of every drag, paged view and panel
-// (research 2026-10-02 §2.3, docs/4.0.x/tasks/P03.md), named once here
+// (research 2026-10-02 §2.3, docs/T14/T14c/T14c.2/brief.md), named once here
 // instead of written at each use. A settling time is how long a spring
 // takes to come within 1 % of the distance from its target, how §2.3
 // counts it; Flutter's own fling (`AnimationController.fling`) stops there

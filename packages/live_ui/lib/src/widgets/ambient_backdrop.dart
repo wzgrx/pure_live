@@ -7,7 +7,7 @@ import 'package:live_ui/src/widgets/network_image.dart';
 const int ambientCoverDecodeWidth = 24;
 
 /// The "沉浸背景" behind a portrait picture (3.x
-/// `PortraitFullscreenPresentation`, docs/ui/compare/U.2b change 12): 3.x's
+/// `PortraitFullscreenPresentation`, docs/T05/T05c/T05c.1 change 12): 3.x's
 /// dark gradient, the room's cover blown up 1.14 times over it, and a 15 %
 /// black veil. The cover is decoded once at [ambientCoverDecodeWidth] and
 /// drawn large with a smooth filter, which blurs it once; nothing is blurred

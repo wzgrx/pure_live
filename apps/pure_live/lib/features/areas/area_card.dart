@@ -9,7 +9,7 @@ import 'package:pure_live/features/areas/areas_common.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-/// What an area card says under its name (docs/ui/compare/U.4d c3, U.4f c3).
+/// What an area card says under its name (docs/T07/T07c/T07c.2 c3, U.4f c3).
 enum AreaCaption {
   /// The name only: the category tab above says the rest.
   nameOnly,

@@ -38,7 +38,7 @@ enum HomeMenu {
 }
 
 /// Widths from this up use the side rail (Android's medium window class,
-/// docs/ui/compare/U.3b c6; 3.x switched above 680).
+/// docs/T07/T07a/T07a.5 c6; 3.x switched above 680).
 const double homeTabletBreakpoint = 600;
 
 /// Whether a home of [width] uses the side rail ([homeTabletBreakpoint]).

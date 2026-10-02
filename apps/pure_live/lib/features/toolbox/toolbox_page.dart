@@ -23,7 +23,7 @@ final Provider<Future<String?> Function()> toolboxClipboardProvider = Provider<F
   },
 );
 
-/// Open a link (3.x `lib/modules/toolbox`, docs/ui/compare/U.12a).
+/// Open a link (3.x `lib/modules/toolbox`, docs/T07/T07i/T07i.3).
 ///
 /// Routes: `RoutePath.kToolbox`.
 ///

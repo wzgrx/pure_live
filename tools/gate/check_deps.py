@@ -1,4 +1,4 @@
-"""Dependency-direction check for the workspace (docs/PLAN.md §4).
+"""Dependency-direction check for the workspace (docs/specs/ENGINEERING.md §4).
 
 Reads every workspace member's pubspec.yaml and Dart imports and fails when a
 member depends on a live_* package it is not allowed to, or when a pure-Dart
@@ -12,7 +12,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 
 # Allowed internal (live_*) dependencies per member, following the layering in
-# docs/PLAN.md §4. A member missing from this table fails the check, so adding
+# docs/specs/ENGINEERING.md §4. A member missing from this table fails the check, so adding
 # a package forces a decision here. Entries for packages that do not exist yet
 # document the intended direction.
 ALLOWED = {

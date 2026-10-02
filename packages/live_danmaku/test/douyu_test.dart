@@ -397,7 +397,7 @@ void main() {
           name: [for (final message in messages) message! as Map<String, Object?>],
     };
 
-    /// The intentional differences (docs/modules/M5.2-douyu.md), applied to
+    /// The intentional differences (docs/T06/T06a/T06a.3/record.md), applied to
     /// 3.x's output of the case they concern.
     final differences = <String, List<Map<String, Object?>> Function(List<Map<String, Object?>>)>{
       // 3.x ignored gifts (`dgb`); they are reported now (M4.D).

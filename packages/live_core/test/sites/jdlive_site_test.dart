@@ -6,7 +6,7 @@
 // mapping. Requests are compared with the ones 3.x sent (expected.json
 // records them without the clock: `v`, `t` and the list's `timestamp`).
 // Rooms differ from 3.x's only where listed with `changed:` and the reason
-// (the M4.U upgrades by item number, docs/UPGRADES.md 28-1 to 28-7).
+// (the M4.U upgrades by item number, docs/specs/UPGRADES.md 28-1 to 28-7).
 import 'dart:async';
 import 'dart:convert';
 

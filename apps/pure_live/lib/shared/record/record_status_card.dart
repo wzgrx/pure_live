@@ -153,11 +153,11 @@ class _TickingState extends State<_Ticking> {
   Widget build(BuildContext context) => RepaintBoundary(child: widget.builder(context, (widget.now ?? DateTime.now)()));
 }
 
-/// The status card of a record task (docs/ui/compare/U.2f, 录制): what the
+/// The status card of a record task (docs/T05/T05g/T05g.1, 录制): what the
 /// task is doing and the one or two things that can be done now (R2, R5).
 ///
 /// The live room's record panel shows it in full size; the recording centre
-/// (docs/ui/compare/U.7a, c2) shows the same card [compact]: the clock at 24
+/// (docs/T08/T08b/T08b.2, c2) shows the same card [compact]: the clock at 24
 /// instead of 36, the buttons 40 high in one row, no explanation under "没在
 /// 录制" and "等待开播" (the waiting card says when the room is checked
 /// instead), and the recording's gaps under the figures (3.x's warning).
@@ -258,7 +258,7 @@ class RecordStatusCard extends StatelessWidget {
       ],
     );
     final quality = facts.quality;
-    // The head's glyph (docs/ui/compare/U.2a2 c9): the room bar's picture of
+    // The head's glyph (docs/T08/T08b/T08b.3 c9): the room bar's picture of
     // the state, in the card's ink (amber when queued or reconnecting); a
     // join draws its progress.
     final ink = tone == _Tone.yellow ? accent : scheme.onSurfaceVariant;

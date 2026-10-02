@@ -1,4 +1,4 @@
-"""UI structure check for apps/pure_live (docs/ui/UI_PLAN.md §5.2).
+"""UI structure check for apps/pure_live (docs/specs/UI.md §5.2).
 
 Three rules:
 

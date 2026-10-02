@@ -115,7 +115,7 @@ final class SteamBroadcastChatClock {
   static int _clamp(int milliseconds) => milliseconds.clamp(0, SteamBroadcastDanmakuProtocol.maxWait.inMilliseconds);
 }
 
-/// Steam broadcast chat (docs/modules/M5.23-steambroadcast.md), without I/O:
+/// Steam broadcast chat (docs/T06/T06a/T06a.24/record.md), without I/O:
 /// read-only and anonymous, as the watch page reads it (`broadcast_chat.js`).
 ///
 /// - `getbroadcastmpd` names the current broadcast (`broadcastid`); room

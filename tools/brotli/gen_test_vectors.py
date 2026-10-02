@@ -997,7 +997,7 @@ def reference_group(rng, testdata):
         'byte-ff': b'\xff',
         'ascii': b'Hello, Brotli! Hello, Brotli! Hello!',
         'text-en': alice[:16384],
-        'text-zh': (ROOT / 'docs/modules/M4.13-missevan.md').read_bytes()[:12288],
+        'text-zh': (ROOT / 'docs/T02/T02b/T02b.4/record.md').read_bytes()[:12288],
         'json-danmaku': missevan_messages(),
         'random': rng.randbytes(2048),
         'repeat-abc': b'abc' * 50000,

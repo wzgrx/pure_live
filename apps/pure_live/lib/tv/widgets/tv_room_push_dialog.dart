@@ -16,7 +16,7 @@ enum TvRoomPushChoice {
   search,
 }
 
-/// Asks whether to open a room a phone pushed to the TV (docs/ui/compare/
+/// Asks whether to open a room a phone pushed to the TV (docs/TASKS.md/
 /// U.15a c15): the phone's "口令导入" dialog of U.3d in the TV style, so the
 /// room is recognised before asking (pure_live_TV showed the raw link, P16).
 ///
@@ -26,7 +26,7 @@ enum TvRoomPushChoice {
 ///
 /// The TV has no receiver for phone pushes yet (pure_live_TV
 /// `GlobalRoomPushOverlay`); this is the dialog it will show, the parsing is
-/// U.3d's share-code import (docs/ui/records/U.15a.md).
+/// U.3d's share-code import (docs/T18/T18a/T18a.2/record.md).
 Future<TvRoomPushChoice?> showTvRoomPush(BuildContext context, {required String text, LiveRoom? room}) =>
     showTvDialog<TvRoomPushChoice>(
       context,

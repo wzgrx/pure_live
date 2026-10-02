@@ -66,7 +66,7 @@ const double appMenuMinWidth = 128;
 /// The gap between the button and the menu.
 const double appMenuGap = anchoredMenuGap;
 
-/// Opens the small menu (docs/ui/UI_PLAN.md §7, the look U.2f confirmed for
+/// Opens the small menu (docs/specs/UI.md §7, the look U.2f confirmed for
 /// the quality and line menus) next to the widget of [context], usually the
 /// button that opens it: rows 48 high with a 24-point icon in the variant
 /// colour, 12 apart from 14-point text; `surfaceContainerHighest`, 8-point
@@ -82,7 +82,7 @@ const double appMenuGap = anchoredMenuGap;
 /// menu.
 ///
 /// A menu of choices passes the current one as [selected]: its row is in
-/// the primary colour, semibold, with a tick at the end (docs/ui/UI_PLAN.md
+/// the primary colour, semibold, with a tick at the end (docs/specs/UI.md
 /// §7: the current entry is always "primary + tick"). A [title] row on top
 /// says what the menu is about (U.1d c4: not a choice).
 Future<T?> showAppMenu<T>(

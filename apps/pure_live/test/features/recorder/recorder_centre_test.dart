@@ -1,4 +1,4 @@
-// The recording centre (docs/ui/compare/U.7a, confirmed): the bar, the five
+// The recording centre (docs/T08/T08b/T08b.2, confirmed): the bar, the five
 // filters with counts, the cards with the live room's status card in its
 // compact size, the menu, deleting, the live check's warning, the empty
 // states and the columns of each form.
@@ -430,7 +430,7 @@ void main() {
     expect(_inCard('i', _key('record-panel-start')), findsOneWidget);
   });
 
-  // docs/ui/compare/U.2a2 c9: the card heads draw the room bar's glyph.
+  // docs/T08/T08b/T08b.3 c9: the card heads draw the room bar's glyph.
   testWidgets("U.2a2: each card head draws the room bar's glyph; red only while recording", (tester) async {
     await _pumpNine(tester, size: const Size(393, 6000));
     RecordGlyphPainter painterIn(Finder glyph) =>

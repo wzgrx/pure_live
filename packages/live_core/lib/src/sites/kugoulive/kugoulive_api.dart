@@ -145,7 +145,7 @@ abstract final class KugouLiveApi {
 
   /// Media request headers of room [roomId] (3.x's `mediaHeaders`, which it
   /// wrote into every room's `httpHeaders`; its player never sent them, see
-  /// docs/modules/M4.29-kugoulive.md). The CDN serves the FLV with and
+  /// docs/T02/T02b/T02b.10/record.md). The CDN serves the FLV with and
   /// without them.
   static Map<String, String> mediaHeaders(String roomId) => {
     'user-agent': userAgent,

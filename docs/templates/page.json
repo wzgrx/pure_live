@@ -1,0 +1,131 @@
+{
+  "id": "Txxy.n",
+  "short": "对比",
+  "title": "Txxy.n 名称：3.x 与新设计对比",
+  "version": 1,
+  "date": "2026-10-02",
+  "status": "待你确认",
+  "intro": "<p>这一屏是什么、从哪进来。左边照 3.x（v3.2.11）代码还原，右边是新设计。</p>",
+  "notes": [
+    {
+      "kind": "info",
+      "html": "<b>这一版改了什么</b>：……（第 1 版可以不写）"
+    }
+  ],
+  "sections": [
+    {
+      "h": "对比",
+      "cols": 2,
+      "figs": [
+        {
+          "img": "v3-phone.jpg",
+          "cap": "v3",
+          "sub": "竖屏",
+          "frame": "phone"
+        },
+        {
+          "img": "v4-phone.jpg",
+          "cap": "新设计",
+          "sub": "竖屏",
+          "frame": "phone"
+        }
+      ]
+    },
+    {
+      "h": "v3 的问题",
+      "problems": [
+        [
+          "P1",
+          "问题写清楚是什么、为什么是问题",
+          "<code>lib/modules/xxx/xxx.dart:120</code>"
+        ]
+      ]
+    },
+    {
+      "h": "改了什么",
+      "changes": [
+        {
+          "id": "c1",
+          "type": "保留",
+          "text": "……"
+        },
+        {
+          "id": "c2",
+          "type": "修改",
+          "text": "……（修 P1）"
+        },
+        {
+          "id": "c3",
+          "type": "增强",
+          "text": "……"
+        }
+      ]
+    },
+    {
+      "h": "每个按钮是干什么的、怎么用",
+      "cols": 1,
+      "figs": [
+        {
+          "img": "v4-phone-n.jpg",
+          "cap": "新设计",
+          "sub": "编号对应下表",
+          "frame": "phone"
+        }
+      ],
+      "usage": [
+        [
+          "1",
+          "返回",
+          "……"
+        ]
+      ]
+    },
+    {
+      "h": "各客户端",
+      "cols": 2,
+      "figs": [
+        {
+          "img": "v4-wide.jpg",
+          "cap": "宽屏",
+          "sub": "平板、Windows、Linux、iPad、macOS",
+          "frame": "land"
+        }
+      ],
+      "table": {
+        "hdr": [
+          "客户端",
+          "怎么做"
+        ],
+        "rows": [
+          [
+            "电视",
+            "……"
+          ],
+          [
+            "苹果平台",
+            "同宽屏"
+          ]
+        ]
+      }
+    },
+    {
+      "h": "需要你选的",
+      "choices": [
+        {
+          "id": "X1",
+          "title": "……",
+          "options": [
+            "建议：……",
+            "另一种：……"
+          ]
+        }
+      ]
+    },
+    {
+      "h": "性能要点",
+      "list": [
+        "……"
+      ]
+    }
+  ]
+}

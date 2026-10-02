@@ -25,7 +25,7 @@ enum BackupScope {
 }
 
 /// The backup section the pages add for the search words (new in v4, see
-/// docs/modules/M13.10-backup.md): `{"search": {"history": [...]}}`. 3.x and
+/// docs/T09/T09c/T09c.1/record.md): `{"search": {"history": [...]}}`. 3.x and
 /// `BackupService` ignore sections they do not know.
 const String searchSection = 'search';
 

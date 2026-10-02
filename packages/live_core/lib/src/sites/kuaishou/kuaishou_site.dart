@@ -239,7 +239,7 @@ final class KuaishouSite extends LiveSite
   /// A room already listed on an earlier page since page 1 was last read,
   /// or earlier on the same page, is left out: the live ranking shifts
   /// between requests and a room moving down shows up again on the next
-  /// page (docs/UPGRADES.md, "翻页"). Reading page 1 again starts over.
+  /// page (docs/specs/UPGRADES.md, "翻页"). Reading page 1 again starts over.
   @override
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) =>
       _areaRooms(category.areaId.trim(), page < 1 ? 1 : page);

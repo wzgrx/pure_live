@@ -74,7 +74,7 @@ final class LookLiveGuest {
   final String session;
 }
 
-/// LOOK's chat, without I/O (docs/modules/M5.28-looklive.md): a NetEase
+/// LOOK's chat, without I/O (docs/T06/T06a/T06a.29/record.md): a NetEase
 /// Yunxin (网易云信) chatroom, joined anonymously the way LOOK's website does
 /// it with the Yunxin web SDK 5.0.1 (`look.163.com`'s `Chatroom` chunk).
 ///

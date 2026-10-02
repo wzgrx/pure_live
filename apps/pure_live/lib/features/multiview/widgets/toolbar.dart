@@ -5,7 +5,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/multiview/logic/multiview_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
-/// The four layouts (3.x's segmented button, docs/ui/compare/U.8 c10): the
+/// The four layouts (3.x's segmented button, docs/T12/T12a/T12a.2 c10): the
 /// words alone on phones, with 3.x's icons on wide screens ([icons]).
 class LayoutSegments extends StatelessWidget {
   /// Creates the segments.
@@ -68,7 +68,7 @@ class LayoutSegments extends StatelessWidget {
   }
 }
 
-/// The page's switches (docs/ui/compare/U.8 c10): danmaku on the audible
+/// The page's switches (docs/T12/T12a/T12a.2 c10): danmaku on the audible
 /// cell and the danmaku settings (the live room's two pictures), mute all,
 /// and in the 1+3 layout the small-cell saver. One that is on has a light
 /// background.
@@ -132,7 +132,7 @@ class ToolbarToggles extends StatelessWidget {
   );
 }
 
-/// The visible size of a toolbar switch (docs/ui/compare/U.8, `.tg`).
+/// The visible size of a toolbar switch (docs/T12/T12a/T12a.2, `.tg`).
 const double toolbarToggleSize = 38;
 
 /// How far a switch's 48-point tap target reaches past its circle on each

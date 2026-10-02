@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
-// The rows of the danmaku settings (docs/ui/compare/U.2f) shared by the
+// The rows of the danmaku settings (docs/T05/T05g/T05g.1) shared by the
 // room's danmaku settings, its block list (U.2e c16: "行样式和弹幕设置组件统
 // 一") and the settings page's block list (U.12d, choice E4).
 

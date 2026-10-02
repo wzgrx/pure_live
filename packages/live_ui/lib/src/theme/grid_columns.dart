@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-/// The window width classes (docs/ui/UI_PLAN.md §5.1, Android's window size
+/// The window width classes (docs/specs/UI.md §5.1, Android's window size
 /// classes).
 enum WindowWidthClass {
   /// Narrower than 600 (phones held upright).
@@ -28,7 +28,7 @@ enum WindowWidthClass {
   }
 }
 
-/// How many columns a grid takes (docs/ui/UI_PLAN.md §5.3, U.4a c15):
+/// How many columns a grid takes (docs/specs/UI.md §5.3, U.4a c15):
 /// `clamp(⌊(content + gap) ÷ (smallest item + gap)⌋, min, max)`, where the
 /// content is the grid's own width less its padding on both sides.
 ///

@@ -843,7 +843,7 @@ String superChatPrice(LiveSuperChatMessage superChat) =>
     superChat.priceText.trim().isNotEmpty ? superChat.priceText.trim() : '￥${superChat.price}';
 
 /// The chat list's state before its first message, and with the danmaku
-/// display off (docs/ui/compare/U.2e c2, c3): an icon or a spinner, a line,
+/// display off (docs/T06/T06d/T06d.1 c2, c3): an icon or a spinner, a line,
 /// a reason and at most one button.
 class ChatListState extends StatelessWidget {
   /// Creates the state.
@@ -924,7 +924,7 @@ class ChatListState extends StatelessWidget {
   }
 }
 
-/// The chat area of a room that is not on air (docs/ui/compare/U.2g c7): the
+/// The chat area of a room that is not on air (docs/T05/T05i/T05i.1 c7): the
 /// streamer's announcement when the platform gave one (folded to three
 /// lines, "展开" shows it all), and "开播后这里显示弹幕".
 class RoomNoticeState extends StatefulWidget {

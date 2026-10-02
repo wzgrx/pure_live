@@ -1,4 +1,4 @@
-// Kuaishou danmaku (docs/modules/M5.5-kuaishou.md): the feed parser and the
+// Kuaishou danmaku (docs/T06/T06a/T06a.6/record.md): the feed parser and the
 // polling connection against 3.x's output for the recorded answers
 // (S16-live) and the synthetic answers and sessions (S17-synthetic), written
 // by fixtures/kuaishou/danmaku/legacy_expected.dart.

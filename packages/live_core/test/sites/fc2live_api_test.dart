@@ -3,7 +3,7 @@
 // fixtures/fc2live/legacy_expected.dart from 3.x's Fc2Api, Fc2Link, Fc2Site
 // and Fc2ControlSession). Every intended difference is listed with its
 // reason (`changed:`, with the 差异 of the M4.26 record or the upgrade row of
-// docs/UPGRADES.md); everything else must match. The M2.1 keys 3.x never
+// docs/specs/UPGRADES.md); everything else must match. The M2.1 keys 3.x never
 // wrote are checked apart (`added:`). The synthetic cases port the payloads
 // of 3.x's fc2live_site_test.dart and pin 3.x's checks, as far as the
 // upgrades kept them.

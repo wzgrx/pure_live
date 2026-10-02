@@ -1,6 +1,6 @@
 /// IPTV of Pure Live: playlist and programme guide parsing, imports and
 /// syncs over a storage interface, guide matching, catch-up URLs and the
-/// IPTV platform adapter (docs/modules/M6-iptv.md).
+/// IPTV platform adapter (docs/T11/T11a/T11a.1/record.md).
 library;
 
 export 'src/catchup.dart';

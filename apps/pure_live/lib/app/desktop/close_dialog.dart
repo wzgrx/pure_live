@@ -36,7 +36,7 @@ typedef CloseAsk = Future<CloseChoice?> Function({
 });
 
 /// What closing a window does (3.x `Utils.showExitDialog`, `handleWindowClose`
-/// and the tray's exit; docs/ui/compare/U.13 c7–c10):
+/// and the tray's exit; docs/T17/T17a/T17a.1 c7–c10):
 ///
 /// - the main window's ✕ and Alt+F4 ([close]) do the remembered action when
 ///   "不再询问" is on, else ask; quitting while recording always asks (c9);
@@ -163,7 +163,7 @@ Future<CloseChoice?> showCloseWindowDialog(
   builder: (_) => CloseWindowDialog(tray: tray, recording: recording, askRemember: askRemember, remember: remember),
 );
 
-/// The close dialog (3.x `_ExitDecisionDialog`; docs/ui/compare/U.13
+/// The close dialog (3.x `_ExitDecisionDialog`; docs/T17/T17a/T17a.1
 /// c7–c9): "关闭窗口", the question, a red note while recording, "不再询问"
 /// with where to change it later, and at the two ends "最小化到托盘" (or
 /// "最小化" without a tray) and a red "退出应用".

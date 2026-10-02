@@ -133,7 +133,7 @@ final class _Refused implements Exception {
 /// as asked for; the broadcaster's `userID` is a UUID and names the pull
 /// streams. The pull URLs carry no signature and do not expire.
 ///
-/// M4.U (docs/UPGRADES.md 33-1 to 33-7): the Japan, Taiwan and Hong Kong
+/// M4.U (docs/specs/UPGRADES.md 33-1 to 33-7): the Japan, Taiwan and Hong Kong
 /// recommendations are the areas of one category; 3.x's 标准 is 原画 and
 /// comes first, and "优先 H.264" puts the H.264 transcode before it; pull
 /// URLs are https; keywords with a colon are searched and long ones cut;

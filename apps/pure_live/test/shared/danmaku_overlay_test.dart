@@ -8,7 +8,7 @@ import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
 
-// U.2h (docs/ui/compare/U.2h) c1-c10 and F.2a on the flying layer.
+// U.2h (docs/T06/T06c/T06c.1) c1-c10 and F.2a on the flying layer.
 
 LiveMessage _chat(String text, {String id = ''}) =>
     LiveMessage(type: LiveMessageType.chat, userName: 'u', message: text, color: LiveMessageColor.white, messageId: id);

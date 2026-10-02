@@ -2,7 +2,7 @@
 // 3.x's frozen output (expected.json, written by
 // fixtures/pandalive/legacy_expected.dart from 3.x's PandaLiveApi,
 // PandaLiveLink and PandaLiveSite). Every intended difference is listed
-// with its reason (an M4.U item number of docs/UPGRADES.md for the approved
+// with its reason (an M4.U item number of docs/specs/UPGRADES.md for the approved
 // upgrades); everything else must match. The synthetic cases port 3.x's
 // pandalive_site_test.dart and pandalive_native_search_test.dart (the
 // parsing parts) and cover the regression entries of the archived spec

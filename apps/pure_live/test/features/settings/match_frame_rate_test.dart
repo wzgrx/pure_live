@@ -10,7 +10,7 @@ import 'package:pure_live/platform/display_mode.dart';
 
 import '../../support.dart';
 
-// docs/ui/compare/U.2i c2, c6: "播放时匹配视频帧率" under the refresh rate.
+// docs/T14/T14b/T14b.1 c2, c6: "播放时匹配视频帧率" under the refresh rate.
 
 void main() {
   tearDown(DisplayMode.debugReset);

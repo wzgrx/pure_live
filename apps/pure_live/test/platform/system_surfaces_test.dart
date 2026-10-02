@@ -11,7 +11,7 @@ import 'package:pure_live/platform/recording_platform.dart';
 
 import '../support.dart';
 
-// docs/ui/compare/U.14 (Android): what the system draws with the app's
+// docs/T13/T13a/T13a.1 (Android): what the system draws with the app's
 // words — the notifications, the picture-in-picture action, the icons and
 // the splash screen.
 

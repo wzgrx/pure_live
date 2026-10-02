@@ -1,7 +1,7 @@
 import 'package:live_core/live_core.dart';
 import 'package:live_store/src/settings/settings.dart';
 
-/// Conversions 3.x data needs before v4 uses it (docs/UPGRADES.md, rows
+/// Conversions 3.x data needs before v4 uses it (docs/specs/UPGRADES.md, rows
 /// whose module column has M9).
 abstract final class LegacyRules {
   /// Notices 3.x stored for platforms whose chat was not connected yet

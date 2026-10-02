@@ -1,4 +1,4 @@
-// The room model's upgrade fields (docs/modules/M2.1-model.md): start time,
+// The room model's upgrade fields (docs/T02/T02g/T02g.2/record.md): start time,
 // restriction, carousel, case-insensitive identity and the placeholder rule,
 // and that 3.x's JSON still reads as before.
 import 'dart:convert';

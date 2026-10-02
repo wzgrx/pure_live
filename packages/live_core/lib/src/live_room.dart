@@ -32,7 +32,7 @@ enum LiveStatus {
 
 /// Why a room that is on air cannot simply be played. Lists and the room
 /// page still show the room as live and mark the kind; playback explains it
-/// (docs/UPGRADES.md, "统一原则").
+/// (docs/specs/UPGRADES.md, "统一原则").
 ///
 /// Stored by **name** in room JSON, so kinds can be added in any position;
 /// a name this build does not know reads as [none].

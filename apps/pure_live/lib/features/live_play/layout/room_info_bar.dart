@@ -17,7 +17,7 @@ IconData audienceIcon(AudienceMetricType type) => switch (type) {
   _ => AppIcons.audienceHeat,
 };
 
-/// The strip under the video (docs/ui/compare/U.2a, changes 6–8): the
+/// The strip under the video (docs/T05/T05b/T05b.1, changes 6–8): the
 /// replay or restriction mark, the title and "详情 ⌄" on the first line
 /// (a tap anywhere on it opens or closes the room details); the platform's
 /// audience figures and the time on air on the second, with the quality and

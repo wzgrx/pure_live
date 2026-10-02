@@ -48,7 +48,7 @@ final class WebSearchRequest {
   }
 }
 
-/// The web search route (`RoutePath.kWebSearch`, docs/ui/compare/U.5b): the
+/// The web search route (`RoutePath.kWebSearch`, docs/T07/T07f/T07f.3): the
 /// platform's search page in the app (3.x `WebSearchPage`; [InAppWeb]),
 /// shown as the desktop site like 3.x (c8). When a page shows a room, a bar
 /// at the bottom names the platform and the room and opens it (c4; 3.x

@@ -11,7 +11,7 @@ import 'package:pure_live/platform/display_mode.dart';
 import '../../support.dart';
 import 'live_play_support.dart';
 
-// docs/ui/compare/U.2i: the display's refresh rate follows the video;
+// docs/T14/T14b/T14b.1: the display's refresh rate follows the video;
 // revised in 4.0.x by P01 (the README's "4.0.x 修订").
 
 const _rates = [60.0, 90.0, 120.0];

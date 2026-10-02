@@ -2,7 +2,7 @@
 // 3.x's output (expected.json, written by the transcribed 3.x parser in
 // fixtures/yy/legacy_expected.dart: the 3.x app no longer builds). Every
 // intended difference is listed with its reason (the M4.06 review, or the
-// upgrade number of docs/UPGRADES.md); everything else must match.
+// upgrade number of docs/specs/UPGRADES.md); everything else must match.
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';

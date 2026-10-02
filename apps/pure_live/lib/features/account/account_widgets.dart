@@ -4,7 +4,7 @@ import 'package:pure_live/features/account/account_state.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 
-/// The colour of [tone] (docs/ui/compare/U.10a c2): fine in the primary
+/// The colour of [tone] (docs/T10/T10a/T10a.2 c2): fine in the primary
 /// colour, a warning in yellow, a failure in red, nothing stored or a check
 /// on its way in the quiet text colour.
 Color accountToneColor(ThemeData theme, AccountTone tone) => switch (tone) {
@@ -14,7 +14,7 @@ Color accountToneColor(ThemeData theme, AccountTone tone) => switch (tone) {
   AccountTone.error => theme.colorScheme.error,
 };
 
-/// The state of one platform's login at the top of its page (docs/ui/
+/// The state of one platform's login at the top of its page (docs/README.md/
 /// compare/U.10b c2): the logo, the name and the same sentence as the
 /// accounts list, with an optional action ("重新核验").
 class AccountStatusCard extends StatelessWidget {
@@ -95,7 +95,7 @@ class AccountNotice extends StatelessWidget {
 }
 
 /// The instructions banner (3.x `_buildTipBanner`), with a link that opens
-/// the platform's website (docs/ui/compare/U.10b c4).
+/// the platform's website (docs/T10/T10a/T10a.3 c4).
 class AccountTipBanner extends StatelessWidget {
   /// Creates the banner.
   const new({this.text, this.body, this.website, this.websiteLabel, super.key});

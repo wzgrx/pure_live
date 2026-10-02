@@ -1,4 +1,4 @@
-/// Danmaku (live chat) of Pure Live (docs/modules/M5.0-framework.md): the
+/// Danmaku (live chat) of Pure Live (docs/T06/T06a/T06a.1/record.md): the
 /// connection interface and its shared lifecycle, the WebSocket runtime on
 /// `live_net`'s `LiveSocket`, the platform table, binary tools, the message
 /// filters and the emoji model. Pure Dart; the platform protocols follow in

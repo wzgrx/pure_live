@@ -59,7 +59,7 @@ final class SearchScopeStore {
       _meta.set(key, excluded.isEmpty ? null : jsonEncode(excluded.toList()..sort()));
 }
 
-/// Opens the search scope panel (docs/ui/compare/U.5a c6, choice X3 A: one
+/// Opens the search scope panel (docs/T07/T07f/T07f.2 c6, choice X3 A: one
 /// panel instead of v4's explanation sheet and choice dialog): what every
 /// platform finds, and which of [sites] "all" searches, domestic and
 /// overseas apart, with "domestic only" and "select all". It rises from the

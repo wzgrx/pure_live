@@ -47,7 +47,7 @@ final class TvRoomAction {
   final String? confirmMessage;
 }
 
-/// The card dialog of the TV (docs/ui/compare/U.15a c9): a held OK or the
+/// The card dialog of the TV (docs/T18/T18a/T18a.2 c9): a held OK or the
 /// menu key on any room card opens it, on every page (pure_live_TV had a
 /// follow question, a follows menu and a history menu, P10). It is the
 /// phone's card dialog (U.4a) in the TV style:

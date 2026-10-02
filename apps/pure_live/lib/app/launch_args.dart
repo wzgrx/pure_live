@@ -10,7 +10,7 @@ import 'package:live_store/live_store.dart';
 /// id (its own window and log folder) and may open a room right away
 /// (`--open-room`). It shares the main window's data folder: follows,
 /// history, settings and sign-ins are one copy for all windows
-/// (docs/ui/compare/U.13 c14; 3.x handed a copy over in `--config-file`,
+/// (docs/T17/T17a/T17a.1 c14; 3.x handed a copy over in `--config-file`,
 /// which is ignored now).
 final class LaunchArgs {
   /// Creates the parsed arguments.

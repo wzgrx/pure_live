@@ -4,7 +4,7 @@
 // recording, the live status, streams read again for every playback,
 // cancellation, links and the error mapping. The synthetic cases port 3.x's
 // weibo_site_test.dart and weibo_application_test.dart. Differences from
-// 3.x's frozen output name their upgrade (docs/UPGRADES.md, 18-x).
+// 3.x's frozen output name their upgrade (docs/specs/UPGRADES.md, 18-x).
 import 'dart:async';
 import 'dart:convert';
 

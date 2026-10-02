@@ -12,7 +12,7 @@ String portraitPanelStopName(int index) => i18n(switch (index) {
   _ => 'portrait_panel_stop_high',
 });
 
-/// The portrait room (3.x `PortraitLiveRoomLayout`, docs/ui/compare/U.2b):
+/// The portrait room (3.x `PortraitLiveRoomLayout`, docs/T05/T05c/T05c.1):
 /// the picture fills the area and a panel with the room strip and the chat
 /// covers its lower part at one of three heights ([portraitPanelStops]).
 ///

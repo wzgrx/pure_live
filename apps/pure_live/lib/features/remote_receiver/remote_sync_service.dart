@@ -390,7 +390,7 @@ class RemoteSyncService extends ChangeNotifier {
   }
 
   /// Reads the settings of `ip:port` with [code] without applying them (the
-  /// page previews what they change first, docs/ui/compare/U.11c S1); null
+  /// page previews what they change first, docs/T09/T09e/T09e.1 S1); null
   /// when the other device refused or did not answer.
   Future<Map<String, Object?>?> fetch(String ip, int port, String code) async {
     Map<String, Object?>? settings;

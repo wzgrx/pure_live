@@ -809,7 +809,7 @@ void main() {
       // A chat to someone in public is its text.
       expect(read(_chat(chatReceiver: 2454242816, receiverName: '姜拾七er'))?.message, '主播好');
       // The page's separators and direction marks go; spaces stay (the page
-      // removes every space, see docs/modules/M5.25-kugoulive.md).
+      // removes every space, see docs/T06/T06a/T06a.26/record.md).
       final marks = read(
         _chat(text: ' a\u2027b\u2028c\u2029d\u202Ae\u202Bf\u202Cg\u202Dh\u202Ei j ', name: '\u202E观众 1'),
       )!;

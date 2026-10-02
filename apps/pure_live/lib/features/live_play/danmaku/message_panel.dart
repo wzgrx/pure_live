@@ -12,7 +12,7 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/danmaku/masked_blocks.dart';
 
 /// The room's actions on [message] (UI_PLAN §7: a long-pressed danmaku is a
-/// panel; docs/ui/compare/U.2n c1): the chat list's long press and a tap or
+/// panel; docs/T05/T05g/T05g.2 c1): the chat list's long press and a tap or
 /// long press on a flying danmaku (F.2b) open the same panel, under the
 /// picture in portrait and on the right in landscape; where there is no
 /// room page around [context], in a sheet. Completes when the panel closes
@@ -39,7 +39,7 @@ Future<void> showRoomMessageActions(BuildContext context, LiveRoomController con
 }
 
 /// The panel of a long-pressed danmaku (3.x `DanmakuMessageActions`,
-/// docs/ui/compare/U.2f 长按弹幕): "弹幕" and ✕, the message in a card (the
+/// docs/T05/T05g/T05g.1 长按弹幕): "弹幕" and ✕, the message in a card (the
 /// name in its colour), then copy, block the viewer and block a keyword,
 /// each saying what it does. "屏蔽关键词…" turns to the panel's second page
 /// (B09 c8: no centred dialog over the picture, which is often in

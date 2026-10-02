@@ -21,7 +21,7 @@ class TvBackIntent extends Intent {
 /// - text lifted on panels below 1080 lines ([TvScale.legibilityLift]) on
 ///   top of the user's text size;
 /// - the TV palette: the phone's dark colour roles from the app theme
-///   ([TvTheme], docs/ui/compare/U.15a c4; the app shows its dark theme on
+///   ([TvTheme], docs/T18/T18a/T18a.2 c4; the app shows its dark theme on
 ///   the TV), whether focused items grow (`tvFocusZoom`), and the toast in
 ///   the TV's sizes (16, corners of 12, U.15a's toast);
 /// - Escape as Back.

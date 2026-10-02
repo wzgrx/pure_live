@@ -1,5 +1,5 @@
 name: pure_live
-description: Pure Live, a third-party live stream aggregator (docs/PLAN.md). The app shell (M12) - entry, routes, home, languages, Android and Windows.
+description: Pure Live, a third-party live stream aggregator (docs/specs/ENGINEERING.md). The app shell (M12) - entry, routes, home, languages, Android and Windows.
 publish_to: none
 # 3.x's version until the first v4 release (AGENTS.md: changed only when releasing).
 version: 4.0.0+5001
@@ -47,7 +47,7 @@ dependencies:
   # Material's own words (dialogs, pickers) in Chinese and English.
   flutter_localizations:
     sdk: flutter
-  # State and routes (docs/PLAN.md §4).
+  # State and routes (docs/specs/ENGINEERING.md §4).
   flutter_riverpod: ^3.4.3
   go_router: ^18.0.2
   # DLNA casting from the live room (M10).

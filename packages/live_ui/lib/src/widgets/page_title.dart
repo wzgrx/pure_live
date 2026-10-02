@@ -3,7 +3,7 @@ import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
 
 /// A page's name with a short line under it, for an app bar's title
-/// (docs/ui/compare/U.5b, U.5c: "网页搜索 / 哔哩哔哩 · 晚风", "观看记录 /
+/// (docs/T07/T07f/T07f.3, U.5c: "网页搜索 / 哔哩哔哩 · 晚风", "观看记录 /
 /// 18 / 50 条"): the name 17 points semibold, the line 12 points in the
 /// variant colour, both on one line each and left-aligned (give the app bar
 /// `centerTitle: false`), or both centred with [centred] (the history, whose

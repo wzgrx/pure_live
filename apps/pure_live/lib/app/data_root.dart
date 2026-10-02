@@ -14,7 +14,7 @@ import 'package:win32_registry/win32_registry.dart';
 /// - Android: the application support folder (`files`).
 ///
 /// Every desktop window uses this folder: an extra window shares the main
-/// window's data (docs/ui/compare/U.13 c14; 3.x gave it a copy under
+/// window's data (docs/T17/T17a/T17a.1 c14; 3.x gave it a copy under
 /// `instances\<id>`, which was lost when it closed). Only its log goes to
 /// [instanceFolder].
 /// Design borrowed from the archived v4 (`apps/pure_live/lib/core/data_root.dart`).

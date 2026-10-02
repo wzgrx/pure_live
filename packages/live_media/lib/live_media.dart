@@ -1,5 +1,5 @@
 /// Playback core of Pure Live, independent of the player engine
-/// (docs/modules/M7.1-media.md): sources and plans, engine inputs, the
+/// (docs/T04/T04a/T04a.1/record.md): sources and plans, engine inputs, the
 /// loopback relay (FLV splicing and HEVC rewriting, HLS with cookies,
 /// descrambling and renewal), the source transaction, line and decoder
 /// fallback, error classification and the source event fence. Pure Dart.

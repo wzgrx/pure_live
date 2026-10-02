@@ -33,7 +33,7 @@ bool isWebPage(Uri? uri) => uri != null && (uri.scheme == 'http' || uri.scheme =
 /// The User-Agent of a desktop browser (3.x `WebSearchController
 /// .getDynamicUserAgent`): the web search shows the platforms' desktop
 /// sites on phones too, which do not push their apps and whose room links
-/// the app reads (docs/ui/compare/U.5b c8).
+/// the app reads (docs/T07/T07f/T07f.3 c8).
 const String desktopUserAgent =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
     'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36';

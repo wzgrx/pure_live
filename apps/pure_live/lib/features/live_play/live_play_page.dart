@@ -58,7 +58,7 @@ import 'package:pure_live/routes/route_path.dart';
 /// Routes: `RoutePath.kLivePlay`.
 ///
 /// One room, one picture: the player is mounted once and moves between the
-/// layouts ([RoomDisplay], docs/ui/UI_PLAN.md §5.3), which follow the space
+/// layouts ([RoomDisplay], docs/specs/UI.md §5.3), which follow the space
 /// the page gets ([roomPageLayout]):
 ///
 /// - 840 and wider: the picture beside the chat column (U.2d), which folds
@@ -962,7 +962,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   );
 
   /// The fullscreen's toasts sit above its bottom bar instead of on it
-  /// (docs/ui/compare/U.1d c12, U.2n c10): 16 over the landscape bar, or
+  /// (docs/T01/T01d/T01d.1 c12, U.2n c10): 16 over the landscape bar, or
   /// over the portrait fullscreen's two rows.
   Widget _toastsAboveBars(Widget page) {
     final size = MediaQuery.sizeOf(context);
@@ -1126,7 +1126,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     },
   );
 
-  /// An IPTV channel (docs/ui/compare/U.2g c16, Z1): the guide where a room
+  /// An IPTV channel (docs/T05/T05i/T05i.1 c16, Z1): the guide where a room
   /// has its chat. Phone layout: the picture at 16:9 and the guide under it
   /// (3.x left that space empty); wide: the guide in the right column, which
   /// the same edge handle as the chat column's folds away (U.2d).

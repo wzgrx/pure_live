@@ -5,7 +5,7 @@
 // and the error mapping. Requests are compared with the ones 3.x sent
 // (expected.json records each as `POST <url> <plaintext payload>`); rooms
 // with 3.x's projection but for the keys listed as `changed:` with the
-// upgrade item (docs/UPGRADES.md 32-x).
+// upgrade item (docs/specs/UPGRADES.md 32-x).
 import 'dart:async';
 import 'dart:convert';
 

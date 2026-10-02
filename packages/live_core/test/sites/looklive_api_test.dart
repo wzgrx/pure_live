@@ -2,7 +2,7 @@
 // with 3.x's frozen output (expected.json, written by
 // fixtures/looklive/legacy_expected.dart from 3.x's LookLiveApi, LookLiveLink
 // and LookLiveSite). Every intended difference is listed with its reason
-// (`changed:` and the upgrade item, docs/UPGRADES.md 32-x); everything else
+// (`changed:` and the upgrade item, docs/specs/UPGRADES.md 32-x); everything else
 // must match. The synthetic cases are the edited copies the generator ran
 // through 3.x (`variants`) and 3.x's look_live_site_test.dart.
 import 'dart:convert';

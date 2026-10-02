@@ -22,7 +22,7 @@ enum StreamUse {
 }
 
 /// Opens "获取直链" ([StreamUse.copy]) or "投屏" ([StreamUse.cast]) for the
-/// room of [controller] (docs/ui/compare/U.2n c1, c4): the room's panel, or
+/// room of [controller] (docs/T05/T05g/T05g.2 c1, c4): the room's panel, or
 /// the same panel in a sheet where there is no room page around [context].
 void showStreamPanel(BuildContext context, LiveRoomController controller, StreamUse use) {
   final panels = RoomPanelScope.maybeOf(context);
@@ -41,7 +41,7 @@ void showStreamPanel(BuildContext context, LiveRoomController controller, Stream
 enum _Page { qualities, lines, devices }
 
 /// "获取直链" and "投屏" (3.x `KnownRoomLinkDialog`, `LiveDlnaPage`;
-/// docs/ui/compare/U.2n c4, B-13): pick a quality, then a line, then (to
+/// docs/T05/T05g/T05g.2 c4, B-13): pick a quality, then a line, then (to
 /// cast) a receiver; the header's ← goes back a page. The quality and line
 /// that play are in the primary colour with a tick. One quality goes
 /// straight to its lines, one line straight on (copied, or to the

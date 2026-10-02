@@ -17,7 +17,7 @@ String splashInitialLocation(SettingsStore settings) =>
     settings.get(Settings.showSplashPage) ? RoutePath.kSplash : RoutePath.kInitial;
 
 /// Splash page (3.x `lib/modules/splash` and its route in `app_pages.dart`,
-/// docs/ui/compare/U.3c).
+/// docs/T07/T07i/T07i.2).
 ///
 /// Routes: `RoutePath.kSplash`.
 ///

@@ -7,7 +7,7 @@ import 'package:pure_live/tv/tv_theme.dart';
 import 'package:pure_live/tv/widgets/tv_dialogs.dart';
 import 'package:pure_live/tv/widgets/tv_focusable.dart';
 
-/// A group of settings rows (docs/ui/compare/U.15a, rows): the group's name
+/// A group of settings rows (docs/T18/T18a/T18a.2, rows): the group's name
 /// in the primary colour (14, 600) above a card of the lowest container.
 class TvSettingsGroup extends StatelessWidget {
   /// Creates the group.

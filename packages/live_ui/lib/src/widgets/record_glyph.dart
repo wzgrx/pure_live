@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 
 /// What [RecordGlyph] shows: the state of a room's recording
-/// (docs/ui/compare/U.2a2). Only [recording] is red; every state that does
+/// (docs/T08/T08b/T08b.3). Only [recording] is red; every state that does
 /// not write a file is drawn in the surrounding icons' colour, so the picture
 /// alone tells "not recording" from "recording".
 enum RecordGlyphState {
@@ -34,7 +34,7 @@ enum RecordGlyphState {
   failed,
 }
 
-/// The record picture (docs/ui/compare/U.2a2) of the room bar's record
+/// The record picture (docs/T08/T08b/T08b.3) of the room bar's record
 /// button, the fullscreen bars, the record panel's status card, the
 /// recording centre and the marks on the picture: one drawing in seven
 /// states, in a box of [size] (24 by default; strokes scale with it).
@@ -321,7 +321,7 @@ String formatRecordingTime(Duration elapsed) {
 }
 
 /// The mark in the picture's corner while a room's recording is busy
-/// (docs/ui/compare/U.2a2 c7): "● 录制中 12:34" on red while it records,
+/// (docs/T08/T08b/T08b.3 c7): "● 录制中 12:34" on red while it records,
 /// "重连中 12:34" and "合成中 45%" with their glyph on a dark pill
 /// otherwise. [compact] keeps the mark and the figure (controls hidden,
 /// small windows).

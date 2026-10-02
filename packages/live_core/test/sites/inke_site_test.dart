@@ -5,7 +5,7 @@
 // app's broadcast, streams from the app API (the H.264 and original lines)
 // with the showcase fallback, the entry answer's reuse, leases and
 // recovery, cancellation, links and the error mapping. M4.U changes are
-// named by their docs/UPGRADES.md numbers.
+// named by their docs/specs/UPGRADES.md numbers.
 import 'dart:async';
 import 'dart:convert';
 

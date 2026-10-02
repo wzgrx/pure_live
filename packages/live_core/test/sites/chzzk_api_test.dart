@@ -2,7 +2,7 @@
 // 3.x's frozen output (expected.json, written by
 // fixtures/chzzk/legacy_expected.dart from 3.x's ChzzkApi, ChzzkLink and
 // ChzzkSite). Every intended difference is listed with its reason (an M4.U
-// item number of docs/UPGRADES.md for the approved upgrades); everything
+// item number of docs/specs/UPGRADES.md for the approved upgrades); everything
 // else must match. The synthetic cases port 3.x's chzzk_live_detail_test.dart
 // and cover the regression entries of the archived spec (REG-CHZZK-001–004)
 // and the shapes 3.x refused.

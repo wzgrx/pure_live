@@ -1,0 +1,27 @@
+# T05f.1 暂停状态：中间 ▶、控制层常显、暂停时的弹幕设置、重连误报、锁定后无法解锁
+
+- 规模：中；分组：直播间；依赖：—；能否和别的任务同时做：和 T05h.2、T05g.2、T05f.2 改同一批文件，**不要同时开**；可以和 T06b.2、T01d.2、T08b.3、T06d.2、T02f.2 同时
+- 出设计：不用（照已确认的设计和本任务单）
+- 先读：审查报告 A-01、A-05、A-07、B-2、B-4、B-9；已做：`f24ca8540`（中间改 ▶ 可点、点画面不再继续播放）
+- 可以改：`features/live_play/`、`features/multiview/`（只接弹幕运行状态）、`shared/danmaku/`、`packages/live_ui`（只添加）、`packages/live_store`（只添加设置）；其他目录不改。
+
+## 要做的
+
+- c1 暂停时控制层不自动隐藏（`_scheduleHide` 遇到 paused 直接返回）；点画面照旧只显示或隐藏控制层。
+- c2 中间 ▶ 做成一个共用组件：64dp 圆形 45% 黑底（`OnVideoColors`），白色 ▶；暂停期间一直显示；缓冲时换成转圈；直播间和应用内小窗（`features/live_play/mini/mini_player.dart`，不是系统画中画）用同一个组件；纯音频暂停时也显示（B-9：纯音频封面区分“播放中 / 已暂停”）。
+- c3 新设置“暂停时的弹幕”：随视频暂停（默认）/ 继续飘过。键名 `danmakuPausedBehavior`，放进弹幕设置的“显示”组（直播间弹幕设置面板和设置页是同一个组件 `shared/danmaku/danmaku_settings_content.dart`）。写公共函数 `danmakuRunning(status, setting)`，主画面（`player/player_view.dart`）、小窗和画中画的弹幕（`mini/compact_danmaku.dart`，订阅 `controller.session.states`，暂停时清掉待发队列）、多画面（`features/multiview/multiview_page.dart`，用格子的播放状态）三处都用它。
+- c4 B-2：暂停后继续播放不再显示“正在重连（第 N 次）”（`logic/reconnect_watch.dart`：paused、completed 时清掉 `_playingSince`，或恢复前 `expectReopen()`）。
+- c5 B-4：全屏锁定后房间下播或加载失败，锁按钮仍要显示（只要锁着就显示），或离开播放时自动解锁。
+
+## 验收
+
+- 暂停后：控制层常显、中间 ▶ 有黑底、点 ▶ 继续；三处弹幕按设置停或飘；继续播放不出现“重连”；锁定后任何状态都能解锁。
+- 测试：每条 c 至少一个（含三处弹幕 × 两种设置）。
+
+## 真机上看的（写进记录，维护者在 K90 上看）
+
+- 暂停后等 10 秒，控制层还在；▶ 在亮画面上看得清。
+- 弹幕多的房间暂停：默认弹幕停住；改成“继续飘过”后照飞。画中画里暂停同样。
+- 暂停 10 秒再继续，不出现“正在重连”。
+- 全屏锁定后让房间下播（或断网），锁按钮还在。
+

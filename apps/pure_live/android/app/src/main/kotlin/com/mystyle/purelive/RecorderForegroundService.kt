@@ -18,7 +18,7 @@ import android.os.Looper
 import android.os.PowerManager
 
 /**
- * What the recording notifications say (docs/ui/compare/U.14 c3–c5), sent
+ * What the recording notifications say (docs/T13/T13a/T13a.1 c3–c5), sent
  * by Dart with every change: [title] and [text] ("正在录制 · 晚风" over the
  * title and quality, or "正在录制 N 个直播间" over the streamers), [since]
  * for the system's clock (no refresh every second), the button words and

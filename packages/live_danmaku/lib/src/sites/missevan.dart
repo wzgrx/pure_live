@@ -80,7 +80,7 @@ final class MissevanDanmakuFrame {
   final String refusal;
 }
 
-/// Missevan's (猫耳 FM) chat (docs/modules/M5.12-missevan.md), without I/O.
+/// Missevan's (猫耳 FM) chat (docs/T06/T06a/T06a.13/record.md), without I/O.
 ///
 /// 3.x had no Missevan danmaku; this follows the archived v4 connector and
 /// the site's own IM client (`maoer-static/assets/fm/js/bundle.*.js`):

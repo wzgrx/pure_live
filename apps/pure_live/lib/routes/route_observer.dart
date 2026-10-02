@@ -22,7 +22,7 @@ final class LiveRouteObserver extends RouteObserver<PageRoute<dynamic>> {
   ValueListenable<String> get currentRoute => _current;
 
   /// The page on top, menus and dialogs over it not counted (its name and
-  /// arguments: the window's title names the room, docs/ui/compare/U.13
+  /// arguments: the window's title names the room, docs/T17/T17a/T17a.1
   /// c11); null before the first page.
   ValueListenable<RouteSettings?> get topPage => _topPage;
 

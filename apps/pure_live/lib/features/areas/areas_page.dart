@@ -199,7 +199,7 @@ bool _listEquals(List<String> a, List<String> b) {
   return true;
 }
 
-/// The "followed areas" button (3.x's floating pill, docs/ui/compare/U.4d
+/// The "followed areas" button (3.x's floating pill, docs/T07/T07c/T07c.2
 /// c1); on desktops above the page bar (c7).
 class _FollowedAreasButton extends StatelessWidget {
   const new();

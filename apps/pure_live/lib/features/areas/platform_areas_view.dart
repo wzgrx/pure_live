@@ -14,7 +14,7 @@ import 'package:pure_live/shared/rooms/room_grid.dart';
 /// Room under the grid for the floating "关注分区" button.
 const double areasButtonClearance = 80;
 
-/// One platform's areas (3.x `AreaGridView`, docs/ui/compare/U.4d): a tab
+/// One platform's areas (3.x `AreaGridView`, docs/T07/T07c/T07c.2): a tab
 /// per category in the secondary style (c2), swiped horizontally; no tabs
 /// when the platform has one category (c4); Douyin has category tabs too
 /// (3.x put its few areas in one grid; with C-12's ~156 game areas that grid

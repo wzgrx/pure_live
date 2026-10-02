@@ -101,7 +101,7 @@ final class YouTubeChatPoll {
   bool get ended => continuation == null;
 }
 
-/// YouTube's live chat (docs/modules/M5.19-youtube.md), without I/O: the
+/// YouTube's live chat (docs/T06/T06a/T06a.20/record.md), without I/O: the
 /// archived v4's spec/sites/youtube.md §7. The web client's InnerTube calls,
 /// anonymous, as the adapter makes them (`YouTubeApi.webContext`,
 /// `YouTubeApi.apiHeaders`):

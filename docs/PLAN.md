@@ -1,150 +1,70 @@
-# 纯粹直播 v4：在 v3 代码上重构
+# 项目计划
 
-> 状态：执行中（2026-09-28 起）。进度见下方“模块顺序与进度”表，每完成一个模块更新一次。
+- 更新：2026-10-02（第 1 版：20 组、三档优先顺序）
+- 进度：[STATUS.md](STATUS.md)；做法：[PROCESS.md](PROCESS.md)；任务：[TASKS.md](TASKS.md)；决定：[DECISIONS.md](DECISIONS.md)
 
 ## 1. 目标
 
-- v4 是 v3 的改进版：在 v3 的代码上逐模块审查、重构、优化、完善、增强。
-- **界面、布局、操作逻辑和功能以 v3 为准。** 改变外观或操作习惯的改动，先征得用户同意。
-- 代码质量、稳定性、性能、安全和许可证合规要明显好于 v3，并补上 v3 缺的功能。
-- 正式版覆盖安装 3.x，保留用户的全部数据。
+- **4.x 是 3.x 的改进版。** 在 3.x（`v3.2.11`）的代码上逐块审查、重构、完善、增强：功能一个不少，3.x 用户的操作习惯不变，代码质量、稳定性、性能、安全明显更好，并补上 3.x 缺的功能。
+- **覆盖安装 3.x，数据全部保留**：关注、历史、设置、账号自动导入（[T09f](T09/T09f/README.md)）。
+- **客户端顺序**：Android（手机、平板）→ Windows → 电视 → Linux → 苹果平台。4.0.0（Android）已在 2026-10-02 发布（[T16a](T16/T16a/README.md)）。
 
-## 2. 原则
+## 2. 原则（做决定时按这个顺序）
 
-1. **行为不变**：每个模块重构前后对照 v3 的行为，依据是 v3 原有的测试、平台接口样本和实机。
-2. **先找根因**：审查出的每个问题都写清根因（文件:行），再动手修。
-3. **一个模块一次上传**：
-   - 按第 6 节的顺序，工程底座优先，然后自底向上逐个模块重构；
-   - 每个模块都走完第 7 节的流程后，推送一次到 GitHub。
-4. **核心依赖和工具链沿用 v4 的设计**（第 4 节），环境依赖一律用最新稳定版。
-5. **参考上游**：做每个模块前，先更新并阅读第 8 节的参考仓库里对应的部分，借鉴代码时注明来源。
-6. **不照搬**：v3 的代码是起点，但不原样搬运。GetX、全局单例、界面线程上的重活等结构问题，在各自的模块里一并改掉，不留到最后一次性替换。
+1. **3.x 的行为和习惯是基线。** 功能以 3.x 为准；改变外观或操作习惯的改动要有依据，并写进 [DECISIONS.md](DECISIONS.md)。3.x 实际运行的样子比 3.x 代码里写的更重要（例如标题位置，见 D-011）。
+2. **先找根因再改。** 修问题时先写一个改之前会失败的测试，再改代码；原因写进任务记录。
+3. **各处一致。** 同一个功能在竖屏、横屏、平板、电脑上是同一个组件、同样的操作，屏幕大小只决定放在哪。
+4. **天天用的先做。** 同一档里按使用频率排；国内平台优先；速度（起播、滑动、响应）优先。
+5. **安全和隐私。** 不收集数据；密钥、签名文件、Cookie、真实账号不进仓库；样本脱敏（[specs/ENGINEERING.md](specs/ENGINEERING.md)）。
+6. **能分阶段就分阶段。** 每个阶段能单独合并、单独验证；额度或时间不够时停在阶段边界，写清怎么接着做（[PROCESS.md](PROCESS.md) 第 5 节）。
 
-## 3. 工程底座
+## 3. 20 组
 
-- **工具链**：`toolchain.env` 是唯一来源。
-  - `tools/check_latest` 对照官方渠道检查 Flutter、Dart、Gradle、AGP、Kotlin、JDK、NDK、Android SDK、mpv、FFmpeg 和 pub 依赖的最新稳定版。
-  - 升级时连同本机环境一起验证。
-- **结构**：pub workspace，全部成员共用根目录的 `pubspec.lock`；依赖覆盖只能写在根 `pubspec.yaml`。
-- **门禁**：`tools/gate/gate.sh`，依次检查格式、依赖方向（`tools/gate/check_deps.py`）、`dart analyze --fatal-infos` 和测试。`--all` 是每次推送前必跑的。
-- **构建**：只在本机构建。Android 在 WSL，Windows 在主机。不用 GitHub Actions。
-- **安全**：签名文件和密钥不进 Git；GitHub 保留 4 个签名密钥。
-- **不强推**，版本号只在发布时改。
+全项目按用户看到的区域和支撑它们的底座分成 20 组、109 个子分类。每组管什么见 [README.md](README.md#20-组)，每组的子分类和进度见各组页面，例如 [T05 直播间](T05/README.md)。分组规则：
 
-## 4. 核心依赖（沿用 v4 的设计）
+- 每段代码、每个功能点、每个设置项、每个平台、每个原生插件，只归一个子分类（清点脚本见 [T00c](T00/T00c/README.md)）。
+- 横跨多组的事（性能、验证、发布）有自己的组，但改代码时以代码所在的组为准，在任务里写明关联。
+- 客户端专属的放在 T17（桌面）、T18（电视）、T19（苹果）；共用的界面和功能放在各自的组里，客户端差异写在任务的“各客户端”一节。
 
-| 方面 | 选择 |
-|---|---|
-| 语言和框架 | Flutter、Dart 最新稳定版；Dart 主构造函数写 `const new(...)` |
-| 代码检查 | very_good_analysis，行宽 120，公开接口要有文档注释 |
-| 分层 | 内核是纯 Dart 包（可以用 `dart test` 测，也可以给命令行工具用）；Flutter 只出现在播放绑定、界面组件和应用里；依赖方向由门禁强制 |
-| 播放 | 全平台只用 mpv：自维护的 media_kit 分支（`third_party/media_kit`），libmpv 0.41.0、FFmpeg 9.0.2 原生包（GitHub Releases 里的 `native-*`），有新版就跟进 |
-| 状态和路由 | Riverpod 3（手写 provider）、go_router |
-| 多语言 | slang：简体、繁体、英文 |
-| 存储 | drift + sqlite3；3.x 的 Hive 数据在首次启动时自动迁移；Cookie 和密码加密存储 |
-| 网络 | 纯 Dart 的 `dart:io` HTTP 客户端，按平台分配代理 |
+## 4. 优先顺序
 
-包的划分（依赖只能从上往下）：
+每个没完成的任务都有档位（[STATUS.md](STATUS.md#按档位还没完成的任务)）：
 
-```text
-apps/pure_live
-  ├─ live_ui（主题、通用组件）
-  ├─ live_player（media_kit 绑定） → live_media（取流管线、中继、恢复）
-  ├─ live_record → live_media
-  ├─ live_danmaku、live_iptv、live_cast
-  ├─ live_store（存储、设置、迁移）
-  └─ live_core（模型、平台接口、平台适配器） → live_net（HTTP、WebSocket、代理）
-tools/live_cli（平台探针、样本录制）、tools/check_latest、tools/gate
-```
-
-## 5. v3 的现状（审查起点）
-
-- **规模**：`lib/` 约 18 万行，测试 486 个文件，约 3565 个用例。其中：
-  - 平台适配器 2.9 万行；
-  - 弹幕 1.2 万行；
-  - 播放 1.35 万行（PlayerManager 一个类就有 5028 行）；
-  - 录制 1.42 万行；
-  - 直播间 1.85 万行；
-  - 另有内置的 GetX 1.57 万行。
-- **已知的主要问题**：
-  - GetX 和全局单例让平台层、播放层、界面层互相引用；
-  - 弹幕解码和过滤在界面线程；
-  - PlayerManager 职责过多，单房间和多画面各有一套恢复规则；
-  - 录制在续期时产生缺口，还有 FFmpegKit 截断的补丁；
-  - 所有数据在一个 Hive box，Cookie 和密码是明文；
-  - 专有组件和许可证问题：fvp/libmdk、Syncfusion、ML Kit、GMS；
-  - 启动串行，整页 `Obx` 重建。
-- v3 源码在归档分支 `archive/v4` 的 `legacy/` 目录下，比标签 `v3.2.11` 还多几处修复。本机有一份只读副本：`~/ref/pure_live_archive/legacy`。
-
-## 6. 模块顺序与进度
-
-每个模块的审查记录写在 `docs/modules/<编号>-<名称>.md`。
-
-| 编号 | 模块 | v3 来源 | 目标 | 状态 |
-|---|---|---|---|---|
-| M0 | 工程底座 | 工具链、门禁、代码规范 | 根目录、`tools/` | 完成（2026-09-28，[记录](modules/M0-foundation.md)） |
-| M1 | 网络 | `core/common` 中的 HTTP 客户端、拦截器、请求头策略、代理路由、请求作用域和 WebSocket，`plugins/race_http`、`fake_useragent` | live_net | 完成（2026-09-28，[记录](modules/M1-network.md)） |
-| M1.1 | Brotli 解码（给猫耳弹幕、哔哩哔哩 protover 3 用） | — | live_net | 完成（2026-09-29，[记录](modules/M1.1-brotli.md)） |
-| M2 | 基础模型与接口 | `core/interface`、`common/models`（直播间、分区、弹幕消息）、`model/`、画质标签、HLS 查询策略 | live_core | 完成（2026-09-28，[记录](modules/M2-core.md)） |
-| M2.1 | 模型扩展（[升级决定](UPGRADES.md)）：开播时间、受限类型、轮播和“不可播放”状态、房间身份比较、合并时不被占位值覆盖 | `common/models` | live_core | 完成（2026-09-28，[记录](modules/M2.1-model.md)） |
-| M3 | 平台框架与链接解析 | `core/sites.dart`，站点注册，`common/utils` 中的链接工具和短链 | live_core | 完成（2026-09-28，[记录](modules/M3-sites-links.md)） |
-| M4.x | 各直播平台，一个平台一次上传（含该平台的链接规则、样本） | `core/site/<平台>` | live_core | 完成（2026-09-28，33 个平台）：M4.1 哔哩哔哩完成（[记录](modules/M4.01-bilibili.md)）、M4.2 斗鱼完成（[记录](modules/M4.02-douyu.md)）、M4.3 虎牙完成（[记录](modules/M4.03-huya.md)）、M4.4 抖音完成（[记录](modules/M4.04-douyin.md)）、M4.5 快手完成（[记录](modules/M4.05-kuaishou.md)）、M4.6 YY 直播完成（[记录](modules/M4.06-yy.md)）、M4.7 SOOP完成（[记录](modules/M4.07-soop.md)）、M4.8 Twitch完成（[记录](modules/M4.08-twitch.md)）、M4.9 网易 CC完成（[记录](modules/M4.09-cc.md)）、M4.10 AcFun 直播完成（[记录](modules/M4.10-acfun.md)）、M4.11 Picarto完成（[记录](modules/M4.11-picarto.md)）、M4.12 TwitCasting完成（[记录](modules/M4.12-twitcasting.md)）、M4.13 猫耳 FM完成（[记录](modules/M4.13-missevan.md)）、M4.14 映客完成（[记录](modules/M4.14-inke.md)）、M4.15 克拉克拉完成（[记录](modules/M4.15-kilakila.md)）、M4.16 小红书完成（[记录](modules/M4.16-xiaohongshu.md)）、M4.17 niconico完成（[记录](modules/M4.17-niconico.md)）、M4.18 微博直播完成（[记录](modules/M4.18-weibo.md)）、M4.19 SHOWROOM完成（[记录](modules/M4.19-showroom.md)）、M4.20 CHZZK完成（[记录](modules/M4.20-chzzk.md)）、M4.21 LiveMe完成（[记录](modules/M4.21-liveme.md)）、M4.22 TikTok完成（[记录](modules/M4.22-tiktok.md)）、M4.23 YouTube完成（[记录](modules/M4.23-youtube.md)）、M4.24 BIGO LIVE完成（[记录](modules/M4.24-bigo.md)）、M4.25 PandaTV完成（[记录](modules/M4.25-pandalive.md)）、M4.26 FC2 LIVE完成（[记录](modules/M4.26-fc2live.md)）、M4.27 Steam 直播完成（[记录](modules/M4.27-steambroadcast.md)）、M4.28 京东直播完成（[记录](modules/M4.28-jdlive.md)）、M4.29 酷狗直播完成（[记录](modules/M4.29-kugoulive.md)）、M4.30 百度直播完成（[记录](modules/M4.30-baidulive.md)）、M4.31 六间房完成（[记录](modules/M4.31-sixroom.md)）、M4.32 LOOK 直播完成（[记录](modules/M4.32-looklive.md)）、M4.33 17LIVE完成（[记录](modules/M4.33-17live.md)）；后续：M4.34 Kick 恢复完成（[记录](modules/M4.34-kick.md)，仅 Android） |
-| M4.U | 平台层升级：把 [升级决定](UPGRADES.md) 里标 M4.U 的条目逐平台做进适配器，一个平台一次上传 | `core/site/<平台>` | live_core | 进行中：M4.U.1 哔哩哔哩完成、M4.U.2 斗鱼完成、M4.U.3 虎牙完成、M4.U.4 抖音完成、M4.U.5 快手完成、M4.U.6 YY 直播完成、M4.U.7 SOOP完成、M4.U.8 Twitch完成、M4.U.9 网易 CC完成、M4.U.10 AcFun 直播完成、M4.U.11 Picarto完成、M4.U.12 TwitCasting完成、M4.U.13 猫耳 FM完成、M4.U.14 映客完成、M4.U.15 克拉克拉完成、M4.U.16 小红书完成、M4.U.17 niconico完成、M4.U.18 微博直播完成、M4.U.19 SHOWROOM完成、M4.U.20 CHZZK完成、M4.U.21 LiveMe完成、M4.U.22 TikTok完成、M4.U.23 YouTube完成、M4.U.24 BIGO LIVE完成、M4.U.25 PandaTV完成、M4.U.26 FC2 LIVE完成、M4.U.27 Steam 直播完成、M4.U.28 京东直播完成、M4.U.29 酷狗直播完成、M4.U.30 百度直播完成、M4.U.31 六间房完成、M4.U.32 LOOK 直播完成、M4.U.33 17LIVE完成 |
-| M5.x | 弹幕：先框架和过滤，再一个平台一次 | `core/danmaku`、`core/emoji`、`plugins/emoji_manager` | live_danmaku | 完成（2026-10-01）：M5.0 框架完成（[记录](modules/M5.0-framework.md)）、M5.1 哔哩哔哩完成（[记录](modules/M5.1-bilibili.md)）、M5.2 斗鱼完成（[记录](modules/M5.2-douyu.md)）、M5.3 虎牙完成（[记录](modules/M5.3-huya.md)）、M5.4 抖音完成（[记录](modules/M5.4-douyin.md)）、M5.5 快手完成（[记录](modules/M5.5-kuaishou.md)）、M5.6 YY 直播完成（[记录](modules/M5.6-yy.md)）、M5.7 SOOP完成（[记录](modules/M5.7-soop.md)）、M5.8 Twitch完成（[记录](modules/M5.8-twitch.md)）、M5.9 AcFun完成（[记录](modules/M5.9-acfun.md)）、M5.10 Picarto完成（[记录](modules/M5.10-picarto.md)）、M5.11 TwitCasting完成（[记录](modules/M5.11-twitcasting.md)）、M5.12 猫耳 FM完成（[记录](modules/M5.12-missevan.md)）、M5.13 克拉克拉完成（[记录](modules/M5.13-kilakila.md)）、M5.14 niconico完成（[记录](modules/M5.14-niconico.md)）、M5.15 SHOWROOM完成（[记录](modules/M5.15-showroom.md)）、M5.16 CHZZK完成（[记录](modules/M5.16-chzzk.md)）、M5.17 LiveMe受阻（要登录），调查完成（[记录](modules/M5.17-liveme.md)）、M5.18 TikTok受阻（要签名），调查完成（[记录](modules/M5.18-tiktok.md)）、M5.19 YouTube完成（[记录](modules/M5.19-youtube.md)）、M5.20 BIGO LIVE完成（[记录](modules/M5.20-bigo.md)）、M5.21 PandaTV完成（[记录](modules/M5.21-pandalive.md)）、M5.22 FC2 LIVE完成（[记录](modules/M5.22-fc2live.md)）、M5.23 Steam 直播完成（[记录](modules/M5.23-steambroadcast.md)）、M5.24 京东直播完成（[记录](modules/M5.24-jdlive.md)）、M5.25 酷狗直播完成（[记录](modules/M5.25-kugoulive.md)）、M5.26 百度直播完成（[记录](modules/M5.26-baidulive.md)）、M5.27 六间房完成（[记录](modules/M5.27-sixroom.md)）、M5.28 LOOK 直播完成（[记录](modules/M5.28-looklive.md)）、M5.29 17LIVE完成（[记录](modules/M5.29-17live.md)）、M5.F 后续升级完成（[升级决定](UPGRADES.md)附录 B：B-1、B-3～B-15、B-22、B-23、B-25、B-26 在弹幕层完成，B-2 移到 M12，B-16、B-21、B-24 在 M13，B-17～B-20 不做；做法见各平台记录末尾“后续升级（M5.F）”一节）；收尾时三档时间前移检查全部通过；后续：M5.34 Kick完成（[记录](modules/M5.34-kick.md)） |
-| M6 | IPTV 内核 | `core/iptv`、`core/site/iptv` | live_iptv | 完成（2026-10-01，[记录](modules/M6-iptv.md)） |
-| M7 | 播放：media_kit 分支和原生包 → 播放核心（拆分 PlayerManager） → Flutter 绑定 | `player/` | live_media、live_player | 完成（2026-10-01：M7.1 播放核心（[记录](modules/M7.1-media.md)）、M7.2 播放器（[记录](modules/M7.2-player.md)）） |
-| M8 | 录制 | `recorder/` 的内核部分 | live_record | 完成（2026-10-01，[记录](modules/M8-record.md)）；后续：M8.1 录制补全完成（[记录](modules/M8.1-record-more.md)） |
-| M9 | 存储、设置、备份、3.x 数据迁移 | `plugins/db_service`、`common/services/settings`、`plugins/backup_recovery_service` | live_store | 完成（2026-10-01，[记录](modules/M9-store.md)） |
-| M10 | 投屏 | 直播间的 DLNA 部分 | live_cast | 完成（2026-10-01，[记录](modules/M10-cast.md)） |
-| M11 | 界面基础：主题、通用组件、图标 | `common/style`、`common/styles`、`common/widgets` | live_ui | 完成（2026-10-01，[记录](modules/M11-ui.md)） |
-| M12 | 应用骨架：入口、路由、首页外壳、多语言、Android 和 Windows 原生部分 | `main.dart`、`routes/`、`modules/home`、`assets/translations`、`android/`、`windows/`、`plugins/built_in_kotlin` | apps/pure_live | 完成（2026-10-01，[记录](modules/M12-app.md)）；后续：M12.4 应用服务补全完成（[记录](modules/M12.4-services.md)） |
-| M13.x | 各页面，一个页面一次上传 | `modules/*`、`recorder/pages` | apps/pure_live | 进行中：M13.1 推荐首页完成（[记录](modules/M13.1-popular.md)）、M13.2 关注完成（[记录](modules/M13.2-favorite.md)）、M13.3 直播间（主要流程）完成（[记录](modules/M13.3-live_play.md)）、M13.4 搜索完成（[记录](modules/M13.4-search.md)）、M13.5 分区（分区列表、分区房间、热门分区）完成（[记录](modules/M13.5-areas.md)）、M13.6 观看历史完成（[记录](modules/M13.6-history.md)）、M13.7 设置完成（[记录](modules/M13.7-settings.md)）、M13.8 账号与登录完成（[记录](modules/M13.8-account.md)）、M13.9 分组与屏蔽完成（[记录](modules/M13.9-tags.md)）、M13.10 备份与 WebDAV完成（[记录](modules/M13.10-backup.md)）、M13.11 网络电视完成（[记录](modules/M13.11-iptv.md)）、M13.12 多画面完成（[记录](modules/M13.12-multiview.md)）、M13.13 小页面：工具箱、远程接收、关于、版本、启动页完成（[记录](modules/M13.13-misc.md)）、M13.14 直播间（第二部分）完成（[记录](modules/M13.14-live_play_2.md)）、M13.15 录制中心与录制设置（含录制接入）完成（[记录](modules/M13.15-recorder.md)）、M13.16 真机问题修复完成（[记录](modules/M13.16-device-fixes.md)） |
-| M14 | 电视端：以 pure_live_TV 的代码为基础并入 | pure_live_TV | apps/pure_live 的电视模式、packages/live_vod | 进行中：M14.0 哔哩哔哩点播和音乐核心包完成（[记录](modules/M14.0-vod.md)）、M14.1 电视外壳、焦点导航、直播浏览和基本直播间完成（[记录](modules/M14.1-tv-shell.md)） |
-| U.x | 界面重构：以 v3 为基线，逐个界面出对比图、用户确认后实现（[计划书](ui/UI_PLAN.md)、[v3 界面清单](ui/V3_UI_INVENTORY.md)） | `modules/*`、`common/widgets`、`common/style` 的界面部分 | apps/pure_live、live_ui | 进行中（[任务清单](ui/TASKS.md)，62 个任务）：U.0 搬目录完成；U.2a 竖屏直播间完成（[对比图](ui/compare/U.2a/README.md)、[记录](ui/records/U.2a.md)）；U.2f 直播间弹窗完成（[对比图](ui/compare/U.2f/README.md)、[记录](ui/records/U.2f.md)）；U.1 设计系统中直播间要用的部分随之完成；U.2c、U.2d 待确认；U.2b、U.2e、U.2g、U.2j、U.3、U.4、U.5 设计中 |
-| F.x | 功能开发（只做 Android，2026-10-02 起）：清点 176 个功能点，按日常使用频率分“必须 / 应该 / 以后”三档，按界面那套流程做（对比、开发、K90 验证） | — | [docs/features/](features/FEATURE_PLAN.md) | 进行中：清点和计划完成（[任务](features/TASKS.md)） |
-| M15 | 发布：正式签名、Windows 安装包、覆盖安装 3.x 验证 | — | — | 未开始 |
-
-补充说明：
-- **网络在模型之前**：v3 的模型和接口依赖网络层（取消令牌、请求头规则），所以网络是最底层，先做（2026-09-28 调整）。
-- **虎牙的 tars 编解码**（`pkg/tars`、`core/tars`）随虎牙一起做（M4）。
-- **二进制写入和列表工具**（`binary_writer`、`list_util`）只有弹幕协议使用，随 M5 一起做。
-- **平台的顺序**：先哔哩哔哩、斗鱼、虎牙、抖音、快手，再 YY、SOOP、Twitch、网易 CC、AcFun，其余按使用量依次做。Kick 等 v3 没有的平台放在 M4 最后，作为增强。
-- **页面的顺序**：关注 → 热门 → 分区（含分区房间、热门分区） → 搜索 → 直播间（分成几次上传） → 多画面 → 录制中心 → 网络电视 → 设置（分成几次上传） → 账号 → 历史、标签、屏蔽 → 备份和 WebDAV → 关于和版本 → 工具箱 → 远程同步 → 启动页。
-- **应用何时能跑**：M12 之后应用就能运行，之后每上传一个页面，就在 Windows 和手机上对照 v3 实测。
-
-## 7. 每个模块的流程
-
-1. **读**：
-   - v3 的代码和它的测试；
-   - 归档 v4 的对应实现（如果有）；
-   - 参考仓库的对应部分（先 `git pull`）。
-2. **审查**：在 `docs/modules/<编号>-<名称>.md` 写清三件事：
-   - v3 的问题：根因和位置；
-   - 要保留的行为；
-   - 从归档 v4 或参考仓库借鉴什么，为什么。
-3. **重构**：
-   - 按第 4 节的分层写进目标包，行为和 v3 一致，顺手修掉审查出的 bug；
-   - 归档 v4 里有更好实现的，按这个模块接进来，并对照 v3 的行为验证。
-4. **测试**：
-   - 把 v3 测试中固定行为的部分移植过来，补上缺的；
-   - 平台模块用真实接口样本和探针验证。
-5. **门禁**：`tools/gate/gate.sh --all` 通过。
-6. **上传**：更新第 6 节的进度表，提交（英文提交信息），推送。
-
-## 8. 参考
-
-| 仓库 | 许可证 | 用途 |
+| 档位 | 什么样的任务 | 现在的重点 |
 |---|---|---|
-| [liuchuancong/pure_live_TV](https://github.com/liuchuancong/pure_live_TV) | AGPL-3.0 | 电视端的代码基础（M14）；平台层的新修复（M4、M5），比如 Kick |
-| [liuchuancong/flame_barrage](https://github.com/liuchuancong/flame_barrage) | MIT | 弹幕渲染和交互（M5、直播间） |
-| [liuchuancong/media_core](https://github.com/liuchuancong/media_core) | AGPL-3.0 | 播放器会话、恢复、池化、系统媒体控制（M7、多画面） |
-| [liuchuancong/flv_lzc](https://github.com/liuchuancong/flv_lzc) | MIT | FLV 和 H.265 的低延迟经验，换算成 mpv 的选项（M7） |
-| 归档 v4（分支 `archive/v4`） | AGPL-3.0 | 已写好并测过的各包实现，按模块借鉴 |
+| 第一档 | 影响已发布的版本、会丢数据、天天用的功能坏了 | 3.x 迁移的真机验证（[T09f.1](T09/T09f/README.md)、[T15d.1](T15/T15d/README.md)）；这一批改动的真机验证（[T15b.5](T15/T15b/README.md)）；国内五大平台巡检（[T02a.6](T02/T02a/README.md)、[T02e.1](T02/T02e/README.md)）；起播速度和弱网（[T04c.1](T04/T04c/README.md)）；回复 issue（[T16d.1](T16/T16d/README.md)） |
+| 第二档 | 这一轮的收尾和常用功能的余项 | 暂停的三个任务（[T05k.1](T05/T05k/README.md)、[T14g.1](T14/T14g/README.md)、[T02f.2](T02/T02f/README.md)）；各组功能清点里的缺失和没验证的；K90 上跑基准、启动速度 |
+| 第三档 | 新客户端、冷门功能、增强 | Windows 和 Linux（T17）、电视（T18）、苹果平台（T19）、无障碍、耗电、开播提醒 |
 
-- 本机副本在 `~/ref/`，平台对照笔记在 `~/ref/notes/`。
-- AGPL-3.0 的代码借鉴时，注明来源仓库和提交；MIT 的保留版权声明。
+额度紧时只做第一档；第一档里优先做验证类任务（改代码少、发现的问题影响大）。
 
-## 9. 测试包和正式包
+## 5. 版本路线
 
-- **测试包**：Android 包名加 `.next`，和手机上用户正在用的 3.x 并存，不碰它和它的数据。Windows 测试版放在工作目录，不碰 `D:\Soft` 下的安装。
-- **正式包**：包名 `com.mystyle.purelive`，覆盖安装 3.x，数据由 M9 的迁移保留。
+版本号在发布时才定（[DECISIONS.md](DECISIONS.md) D-007），下面是计划：
+
+| 版本 | 内容 | 主要的组 |
+|---|---|---|
+| 4.0.x | Android 修整：第一档、第二档 | T02、T04、T05、T06、T09、T14、T15 |
+| 4.1 | Windows | T17 和各组的桌面差异 |
+| 4.2 | 电视 | T18、T11c |
+| 4.3 | Linux | T17e |
+| 以后 | iOS、iPadOS、macOS | T19 |
+
+**同一个版本号不再换安装包**：应用内更新只比较版本号，换包不改版本号时已安装的人收不到提示（[T16b.1](T16/T16b/README.md)、D-008）。
+
+## 6. 风险和对策
+
+| 风险 | 对策 |
+|---|---|
+| 平台改接口，看不了直播 | 定期巡检（T02e），国内五大优先修；平台记录里写清接口和样本 |
+| 3.x 数据迁移出错，用户丢关注和设置 | 覆盖安装真机验证（T09f.1、T15d.1）；迁移有单元测试；失败的部分单独记录不影响其余 |
+| 改动大但真机验证不够 | “待真机”状态单独列出（[STATUS.md](STATUS.md)）；完成必须写真机结果 |
+| 额度或时间不够，任务做一半 | 按阶段做，停在阶段边界，写接手说明（PROCESS 第 5 节） |
+| 换人或换 AI 接手时上下文丢失 | 任务书自包含；决定写进 DECISIONS；记录写清根因和偏差（PROCESS 第 6 节） |
+| 并行开发互相冲突 | 同一组同时只开一个开发；合并时两边都保留后重跑测试（PROCESS 第 7 节） |
+| 厂商限制刷新率、权限 | 读回实际值，限制时提示用户（T14b、T13d） |
+| 正式签名 | 现在用维护者调试密钥（和 3.x 同一证书）；正式密钥方案见 T16a.4 |
+
+## 7. 和以前的计划
+
+2026-10-02 之前的计划分在三处：模块重构计划（M0～M15，2026-09-28 起）、界面重构计划（U.0～U.17）、功能计划（F.0～F.9），以及 4.0.0 更新的任务（B、P）。它们做完的部分都已登记为各组的任务，还有效的规则并进了 [specs/](specs/README.md)；对照见 [MAPPING.md](MAPPING.md)，原文在 git 标签 `docs-archive-2026-10-02`。

@@ -19,7 +19,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 
 // The appearance page and the pages it opens (3.x theme_settings_page.dart
-// and its sub-pages; docs/ui/compare/U.6b).
+// and its sub-pages; docs/T09/T09a/T09a.3).
 
 Widget _noRow(BuildContext context, SettingsEntry entry) => const SizedBox.shrink();
 

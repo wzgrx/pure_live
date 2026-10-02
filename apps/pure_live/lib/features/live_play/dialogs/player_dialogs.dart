@@ -6,7 +6,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
-// The small menus the video's buttons open (docs/ui/compare/U.2n c5, c6):
+// The small menus the video's buttons open (docs/T05/T05g/T05g.2 c5, c6):
 // "画面比例" from the room menu and the fullscreen bar, "本直播间画面方向" (U.2b
 // change 10) from the orientation button; next to the button, the picture
 // not dimmed.
@@ -41,7 +41,7 @@ String videoFitName(int index) => i18n(videoFitKeys[index.clamp(0, videoFitKeys.
 Future<void> advanceVideoFit(SettingsStore settings) =>
     settings.set(Settings.videoFitIndex, (videoFitIndexOf(settings) + 1) % videoFits.length);
 
-/// Picks the picture's fit in the small menu next to [anchor] (docs/ui/
+/// Picks the picture's fit in the small menu next to [anchor] (docs/README.md/
 /// compare/U.2n c5): the room menu's "画面比例" and the fullscreen bar's
 /// button open this same menu; the current fit in the primary colour with
 /// a tick; a choice applies at once. [preferAbove] on a bar along the
@@ -74,7 +74,7 @@ String roomOrientationDescription(RoomOrientation orientation) => i18n(switch (o
 });
 
 /// "本直播间画面方向" (3.x `PortraitOrientationPickerDialog`, U.2b change 10;
-/// docs/ui/compare/U.2n c6): a small menu next to [anchor] (the
+/// docs/T05/T05g/T05g.2 c6): a small menu next to [anchor] (the
 /// orientation button, on a bar along the bottom: above it), titled, each
 /// option with its line, the current one in the primary colour with a
 /// tick; a tap applies it and closes the menu. "记住单个直播间方向" under a

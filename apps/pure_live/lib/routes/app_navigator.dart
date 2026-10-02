@@ -11,7 +11,7 @@ import 'package:pure_live/routes/route_path.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// How a short message is shown (3.x `ToastUtil.show`); the app sets it to
-/// the one toast ([AppToast], docs/ui/compare/U.1d) on the root messenger.
+/// the one toast ([AppToast], docs/T01/T01d/T01d.1) on the root messenger.
 typedef ToastPresenter = void Function(String message);
 
 /// Navigation without a [BuildContext] (3.x `AppNavigator` plus the
@@ -161,6 +161,6 @@ abstract final class AppNavigator {
 
   /// Opens the Bilibili login (3.x `toBiliBiliLogin`): the QR code page,
   /// which offers the web login (phones) and the cookie under the code
-  /// (docs/ui/compare/U.10a K2 A; 3.x first asked "请选择登陆方式").
+  /// (docs/T10/T10a/T10a.2 K2 A; 3.x first asked "请选择登陆方式").
   static Future<void> toBiliBiliLogin() => toNamed<void>(RoutePath.kBiliBiliQRLogin);
 }

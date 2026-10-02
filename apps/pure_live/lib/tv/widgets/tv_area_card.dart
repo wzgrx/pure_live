@@ -4,7 +4,7 @@ import 'package:pure_live/tv/tv_theme.dart';
 import 'package:pure_live/tv/widgets/tv_focusable.dart';
 import 'package:pure_live/tv/widgets/tv_room_card.dart';
 
-/// An area on the TV (docs/ui/compare/U.15a c6): a card of its own colour
+/// An area on the TV (docs/T18/T18a/T18a.2 c6): a card of its own colour
 /// (pure_live_TV drew it on the page colour, P7) with the picture filling
 /// the top, the name (16, 600) and an optional second line (the platform in
 /// the followed areas); a heart top right when the area is followed. Focus

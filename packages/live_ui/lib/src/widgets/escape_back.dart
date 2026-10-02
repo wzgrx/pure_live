@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Esc does on a page what Back does (UI_PLAN §5.4, docs/ui/TASKS.md §7 from
+/// Esc does on a page what Back does (UI_PLAN §5.4, docs/TASKS.md §7 from
 /// U.5a–U.5c): [onEscape] (close a filter first, then leave), by default the
 /// route's `maybePop`. Put it around the page's [Scaffold]: the binding has
 /// to sit outside it, since a [Scaffold] keeps Esc for its drawers, and the

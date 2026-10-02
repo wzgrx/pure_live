@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:live_store/live_store.dart';
 import 'package:path/path.dart' as p;
 
-/// Keeps this window's view of the shared data current (docs/ui/compare/
+/// Keeps this window's view of the shared data current (docs/TASKS.md/
 /// U.13 c14): every desktop window opens the same database, and when
 /// another window writes to it, this one takes the change in (settings,
 /// sign-ins, follows, history; [LiveStore.syncExternal]).

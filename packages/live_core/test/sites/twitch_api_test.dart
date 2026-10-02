@@ -11,7 +11,7 @@
 // M4.U (8-3; 3.x recommended from the Just Chatting directory), so they have
 // no 3.x output either.
 //
-// M4.U differences from 3.x's output, by upgrade (docs/UPGRADES.md):
+// M4.U differences from 3.x's output, by upgrade (docs/specs/UPGRADES.md):
 // - 8-7: images come straight from Twitch's CDN, not through `i2.wp.com`
 //   (`avatar`, `cover`, `areaPic`);
 // - 8-6: an unknown directory is NotFound instead of an empty list;

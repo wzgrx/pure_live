@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/src/icons/custom_icons.dart';
 import 'package:remixicon/remixicon.dart';
 
-/// The app's icons by what they are for (docs/ui/UI_PLAN.md §6.4).
+/// The app's icons by what they are for (docs/specs/UI.md §6.4).
 ///
 /// Each use maps to the icon 3.x showed in that place (`Remix.*`,
 /// Material's `Icons.*` or 3.x's own `CustomIcons`), so pages name the use,
@@ -10,7 +10,7 @@ import 'package:remixicon/remixicon.dart';
 /// Danmaku on, off and settings are pictures, see `DanmakuIcon`; the record
 /// button's ring and dot are drawn by `RecordGlyph`.
 abstract final class AppIcons {
-  // ---- the home shell (docs/ui/compare/U.3a, U.3b) ----
+  // ---- the home shell (docs/T07/T07a/T07a.4, U.3b) ----
 
   /// The home destination "关注".
   static const IconData homeFavorites = Remix.heart_3_line;
@@ -67,7 +67,7 @@ abstract final class AppIcons {
   /// An independent player window (Windows, 3.x's menu).
   static const IconData newPlayerWindow = Icons.add_to_photos_outlined;
 
-  // ---- the global dialogs (docs/ui/compare/U.3d) ----
+  // ---- the global dialogs (docs/T07/T07a/T07a.6) ----
 
   /// A finished download.
   static const IconData downloadDone = Icons.check_circle_rounded;
@@ -256,7 +256,7 @@ abstract final class AppIcons {
   /// tap does, like the play key).
   static const IconData pausedOverlay = Icons.play_circle_outline_rounded;
 
-  // ---- the live room's popups (docs/ui/compare/U.2f) ----
+  // ---- the live room's popups (docs/T05/T05g/T05g.1) ----
 
   /// Close a panel or a sheet (✕).
   static const IconData close = Icons.close_rounded;
@@ -279,7 +279,7 @@ abstract final class AppIcons {
   /// A DLNA receiver in the cast panel (3.x `LiveDlnaPage`).
   static const IconData castDevice = Icons.tv_rounded;
 
-  /// Unfollow, in the follow button's menu (docs/ui/compare/U.2n c8).
+  /// Unfollow, in the follow button's menu (docs/T05/T05g/T05g.2 c8).
   static const IconData unfollow = Remix.heart_3_line;
 
   /// Copy a stream address ("获取直链", 3.x's room menu).
@@ -309,7 +309,7 @@ abstract final class AppIcons {
   /// A recording failed.
   static const IconData recordFailed = Icons.error_outline_rounded;
 
-  // ---- the recording centre (3.x recorder_page.dart; docs/ui/compare/U.7a) ----
+  // ---- the recording centre (3.x recorder_page.dart; docs/T08/T08b/T08b.2) ----
 
   /// Open the recording folder (3.x's app bar).
   static const IconData recordFolder = Remix.folder_video_line;
@@ -335,7 +335,7 @@ abstract final class AppIcons {
   /// Something will not work as the user expects (a switched-off setting).
   static const IconData warning = Icons.warning_amber_rounded;
 
-  // ---- portrait streams, fullscreen and the wide room (docs/ui/compare/U.2b-U.2d) ----
+  // ---- portrait streams, fullscreen and the wide room (docs/TASKS.md) ----
 
   /// The portrait room's handle: swipe down into the portrait fullscreen.
   static const IconData portraitFullscreenEnter = Icons.keyboard_arrow_down_rounded;
@@ -362,7 +362,7 @@ abstract final class AppIcons {
   /// The edge handle while the column is folded (bring it back).
   static const IconData chatColumnUnfold = Remix.arrow_left_s_line;
 
-  // ---- the room's states (docs/ui/compare/U.2g) ----
+  // ---- the room's states (docs/T05/T05i/T05i.1) ----
 
   /// Play the next line ("换线路"; U.2g note 6: Material's alt route).
   static const IconData switchLine = Icons.alt_route_rounded;
@@ -397,7 +397,7 @@ abstract final class AppIcons {
   /// Unfold a column folded to the right (the wide channel's guide).
   static const IconData unfoldLeft = Remix.arrow_left_s_line;
 
-  // ---- the room's tabs (docs/ui/compare/U.2e) ----
+  // ---- the room's tabs (docs/T06/T06d/T06d.1) ----
 
   /// No chat, no super chats yet (3.x `SuperChatPage`'s empty state).
   static const IconData chatEmpty = Remix.chat_smile_3_line;
@@ -495,7 +495,7 @@ abstract final class AppIcons {
   /// The desktop mini window does not stay on top.
   static const IconData unpinned = Remix.pushpin_line;
 
-  // ---- room cards, browsing pages and their dialogs (docs/ui/compare/U.4a–U.4f) ----
+  // ---- room cards, browsing pages and their dialogs (docs/T07/T07d/T07d.1–U.4f) ----
 
   /// A cover that is loading or failed to load (3.x's cover placeholder).
   static const IconData coverPlaceholder = Icons.live_tv_rounded;
@@ -586,7 +586,7 @@ abstract final class AppIcons {
   /// The next page of the desktop pager.
   static const IconData nextPage = Icons.chevron_right_rounded;
 
-  // ---- multi-view (docs/ui/compare/U.8; 3.x lib/modules/multiview) ----
+  // ---- multi-view (docs/T12/T12a/T12a.2; 3.x lib/modules/multiview) ----
 
   /// Keep only the cells on screen (沉浸模式).
   static const IconData immersive = Remix.expand_diagonal_line;
@@ -657,7 +657,7 @@ abstract final class AppIcons {
   /// Fold the right column away.
   static const IconData foldRight = Icons.chevron_right_rounded;
 
-  // ---- IPTV settings (docs/ui/compare/U.9; 3.x iptv_page.dart, iptv_manage.dart) ----
+  // ---- IPTV settings (docs/T11/T11a/T11a.4; 3.x iptv_page.dart, iptv_manage.dart) ----
 
   /// Sync every network playlist and guide (the title bar), and the
   /// "sync at start" switch.
@@ -723,7 +723,7 @@ abstract final class AppIcons {
   /// A row that opens another page (›).
   static const IconData navigate = Icons.chevron_right_rounded;
 
-  // ---- platform accounts and cookies (docs/ui/compare/U.10a, U.10b; 3.x modules/account) ----
+  // ---- platform accounts and cookies (docs/T10/T10a/T10a.2, U.10b; 3.x modules/account) ----
 
   /// Sign out of a platform.
   static const IconData signOut = Remix.logout_box_r_line;
@@ -746,7 +746,7 @@ abstract final class AppIcons {
   /// Sign in on a web page.
   static const IconData webLogin = Remix.global_line;
 
-  // ---- the retired cloud account (docs/ui/compare/U.10c) ----
+  // ---- the retired cloud account (docs/T10/T10c/T10c.1) ----
 
   /// The cloud account is gone.
   static const IconData cloudOff = Remix.cloud_off_line;
@@ -923,7 +923,7 @@ abstract final class AppIcons {
   /// The chosen item of a gallery (a loading style).
   static const IconData chosen = Icons.check_circle_rounded;
 
-  // ---- the desktop window's title bar (docs/ui/compare/U.13; 3.x
+  // ---- the desktop window's title bar (docs/T17/T17a/T17a.1; 3.x
   // `CustomTitleBar`, desktop_manager.dart:572-580) ----
 
   /// Minimize the window (3.x `Icons.remove`).
@@ -938,7 +938,7 @@ abstract final class AppIcons {
   /// Close the window (3.x `Icons.close`).
   static const IconData windowClose = Icons.close;
 
-  // ---- search, web search and the watch history (docs/ui/compare/U.5a–U.5c) ----
+  // ---- search, web search and the watch history (docs/T07/T07f/T07f.2–U.5c) ----
 
   /// Search the words in the search field (3.x's field, `Icons.search`).
   static const IconData submitSearch = Icons.search;
@@ -1285,7 +1285,7 @@ abstract final class AppIcons {
   /// Backup and restore, from the configuration preview.
   static const IconData settingsToBackup = Icons.settings_backup_restore_rounded;
 
-  // ---- the recording settings (3.x record_settings_page.dart; docs/ui/compare/U.7b) ----
+  // ---- the recording settings (3.x record_settings_page.dart; docs/T08/T08c/T08c.1) ----
 
   /// The default recording quality.
   static const IconData recordQuality = Remix.hd_line;
@@ -1350,7 +1350,7 @@ abstract final class AppIcons {
   /// One more (the counter rows).
   static const IconData increase = Icons.add_rounded;
 
-  // ---- backup and restore (3.x backup_page.dart, scan_page.dart; docs/ui/compare/U.11a) ----
+  // ---- backup and restore (3.x backup_page.dart, scan_page.dart; docs/T09/T09c/T09c.2) ----
 
   /// Send the data to the TV.
   static const IconData syncTv = Remix.qr_code_line;
@@ -1403,7 +1403,7 @@ abstract final class AppIcons {
   /// A sync failed.
   static const IconData syncFailed = Icons.error_outline_rounded;
 
-  // ---- WebDAV (3.x web_dav_page.dart, web_dav_help.dart; docs/ui/compare/U.11b) ----
+  // ---- WebDAV (3.x web_dav_page.dart, web_dav_help.dart; docs/T09/T09d/T09d.1) ----
 
   /// The servers.
   static const IconData webDavServers = Remix.server_line;
@@ -1465,7 +1465,7 @@ abstract final class AppIcons {
   /// An e-mail address (the help's account).
   static const IconData mail = Remix.mail_line;
 
-  // ---- device sync (3.x remote_sync_page.dart; docs/ui/compare/U.11c) ----
+  // ---- device sync (3.x remote_sync_page.dart; docs/T09/T09e/T09e.1) ----
 
   /// Start the sync service.
   static const IconData syncStart = Remix.play_circle_line;
@@ -1520,7 +1520,7 @@ abstract final class AppIcons {
   /// The title of the dialog that edits a WebDAV server.
   static const IconData webDavEditConfig = Remix.edit_box_line;
 
-  // ---- the live room's switch-room panel (docs/ui/compare/U.2m) ----
+  // ---- the live room's switch-room panel (docs/T05/T05h/T05h.2) ----
 
   /// Show the rooms as v3's small cards (the panel's style button while it
   /// shows the list).

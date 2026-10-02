@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Quality gate (docs/PLAN.md §3): format, dependency direction, analyze, tests.
+# Quality gate (docs/specs/ENGINEERING.md §3): format, dependency direction, docs, analyze, tests.
 #
 #   tools/gate/gate.sh           workspace members changed against origin/master, plus uncommitted work
 #   tools/gate/gate.sh --all     every member and the gate's own tests; required before every push
@@ -113,6 +113,7 @@ fi
 step "dependency direction" python3 tools/gate/check_deps.py
 step "fixture privacy" python3 tools/gate/check_fixtures.py
 step "ui structure" python3 tools/gate/check_ui_structure.py
+step "docs" python3 tools/docs/docs.py --check
 for member in "${selected[@]}"; do
   step "$member format" dart format --output=none --set-exit-if-changed "$member"
   step "$member analyze" in_dir "$member" dart analyze --fatal-infos

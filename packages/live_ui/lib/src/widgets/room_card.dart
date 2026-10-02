@@ -82,7 +82,7 @@ final class RoomCardData {
   final RoomAudience? audience;
 
   /// Why the room cannot simply be played (paid, password, app only, region
-  /// …), as the words to show; null shows nothing (docs/UPGRADES.md: "卡片
+  /// …), as the words to show; null shows nothing (docs/specs/UPGRADES.md: "卡片
   /// 标出受限类型").
   final String? restrictionLabel;
 

@@ -3,7 +3,7 @@
 // detail (entry and refresh: live, offline, unknown, short numbers), mobile
 // HLS first and stream-manager standing in, FLV first (6-1), the second CDN
 // line (6-4), cookies, links and error mapping; the M4.U upgrades are named
-// by their number in docs/UPGRADES.md. The stream-manager body carries clock
+// by their number in docs/specs/UPGRADES.md. The stream-manager body carries clock
 // values (seq, send_time, the URL's sequence) and the recording's browser
 // (osversion, width, height), left out of matching.
 import 'dart:convert';

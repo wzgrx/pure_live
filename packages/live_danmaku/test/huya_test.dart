@@ -543,7 +543,7 @@ void main() {
       'data': null,
     };
 
-    /// The intentional differences (docs/modules/M5.3-huya.md), applied to
+    /// The intentional differences (docs/T06/T06a/T06a.4/record.md), applied to
     /// 3.x's output of the case they concern.
     final differences = <String, List<Map<String, Object?>> Function(List<Map<String, Object?>>)>{
       // M2: 3.x parsed the colour's hexadecimal text and understood only 4,

@@ -65,7 +65,7 @@ final class StoreDatabase extends GeneratedDatabase {
   /// The database file at [file], opened on a background isolate.
   ///
   /// [shared]: other processes open the same file (another desktop window,
-  /// docs/ui/compare/U.13 c14), so a write waits up to [busyTimeout] for
+  /// docs/T17/T17a/T17a.1 c14), so a write waits up to [busyTimeout] for
   /// theirs instead of failing at once.
   factory file(File file, {bool shared = false}) => StoreDatabase(
     NativeDatabase.createInBackground(

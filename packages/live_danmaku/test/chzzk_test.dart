@@ -1,4 +1,4 @@
-// CHZZK danmaku (docs/modules/M5.16-chzzk.md): the protocol and the connection
+// CHZZK danmaku (docs/T06/T06a/T06a.17/record.md): the protocol and the connection
 // against the archived v4's output for the recordings (S09-live, S10-live,
 // S11-recent) and the synthetic frames (S12-synthetic), written by
 // fixtures/chzzk/danmaku/v4_expected.dart; and the follow-ups of M5.F
@@ -262,7 +262,7 @@ String _user(int n) => n.toRadixString(16).padLeft(32, '0');
 const int _t = 1790612400123;
 
 /// The differences of the new decoder from v4 in the synthetic cases, beyond
-/// [_shared] (docs/modules/M5.16-chzzk.md, "与归档 v4 的差异", and "后续升级"
+/// [_shared] (docs/T06/T06a/T06a.17/record.md, "与归档 v4 的差异", and "后续升级"
 /// for B-12): v4's reading → the new one, per case. Cases not listed read as
 /// v4 read them (donations included: [_asV4] projects a super chat back to
 /// v4's gift and chat).

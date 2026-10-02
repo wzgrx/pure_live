@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Colours of everything drawn over the video: the control bars, their text
-/// and icons, the status messages and the gesture cards (docs/ui/UI_PLAN.md
+/// and icons, the status messages and the gesture cards (docs/specs/UI.md
 /// §6.1: the picture area is black with white controls in every theme).
 ///
 /// Pages use these roles instead of `Colors.white` and friends, so the look
@@ -119,7 +119,7 @@ abstract final class OnVideoColors {
   static const IconThemeData icons = IconThemeData(color: foreground, size: 24, shadows: shadows);
 
   /// The lighter dimming of a state over a moving picture (45 %: the
-  /// reconnecting message, docs/ui/compare/U.2g c13).
+  /// reconnecting message, docs/T05/T05i/T05i.1 c13).
   static const Color dimLight = Color(0x73000000);
 
   /// The text of a state's main button (on a [foreground] fill, U.2g c2).
@@ -163,7 +163,7 @@ abstract final class LiveSemanticColors {
   static const Color live = Color(0xFFD92D20);
 
   /// The gold of a super chat's price and "SC" mark (3.x `SuperChatCard`'s
-  /// amber icons, docs/ui/compare/U.2e).
+  /// amber icons, docs/T06/T06d/T06d.1).
   static const Color superChatGold = Color(0xFFFFC107);
 
   /// Text and dots on [live].
@@ -176,7 +176,7 @@ abstract final class LiveSemanticColors {
   static const Color onRecording = Color(0xFFFFFFFF);
 
   /// The soft ring around a recording button (its resting tone: the halo
-  /// breathes between 15 % and 45 % of [recording], docs/ui/compare/U.2a2).
+  /// breathes between 15 % and 45 % of [recording], docs/T08/T08b/T08b.3).
   static const Color recordingHalo = Color(0x4DD92D20);
 
   /// Success text and icons in light themes (4.6:1 on every surface).
@@ -197,7 +197,7 @@ abstract final class LiveSemanticColors {
   /// The warning colour for [brightness].
   static Color warning(Brightness brightness) => brightness == Brightness.dark ? warningDark : warningLight;
 
-  /// The ground of a reminder bar (mobile data, docs/ui/compare/U.1c c8),
+  /// The ground of a reminder bar (mobile data, docs/T01/T01c/T01c.1 c8),
   /// light themes; its text is the theme's `onSurface`.
   static const Color warningContainerLight = Color(0xFFFFF4E5);
 
@@ -209,7 +209,7 @@ abstract final class LiveSemanticColors {
       brightness == Brightness.dark ? warningContainerDark : warningContainerLight;
 
   /// A warm container next to the theme's primary container (IPTV guides
-  /// beside playlists, docs/ui/compare/U.9), light themes.
+  /// beside playlists, docs/T11/T11a/T11a.4), light themes.
   static const Color warmContainerLight = Color(0xFFFFDDB8);
 
   /// Text and icons on [warmContainerLight].
@@ -230,7 +230,7 @@ abstract final class LiveSemanticColors {
       brightness == Brightness.dark ? onWarmContainerDark : onWarmContainerLight;
 
   /// The soft ground of a "recording" note in light themes (the close
-  /// dialog's "正在录制 2 个直播间", docs/ui/compare/U.13 c9); its text is the
+  /// dialog's "正在录制 2 个直播间", docs/T17/T17a/T17a.1 c9); its text is the
   /// theme's error colour.
   static const Color recordingNoteLight = Color(0xFFFCEEEE);
 
@@ -242,7 +242,7 @@ abstract final class LiveSemanticColors {
       brightness == Brightness.dark ? recordingNoteDark : recordingNoteLight;
 }
 
-/// The desktop title bar's fixed colours (docs/ui/compare/U.13): its close
+/// The desktop title bar's fixed colours (docs/T17/T17a/T17a.1): its close
 /// button turns Windows' red under the pointer in every theme (3.x
 /// `CustomTitleBar`).
 abstract final class WindowButtonColors {
@@ -280,7 +280,7 @@ abstract final class InkOnColor {
 
   /// Whether dark [ink] has the higher contrast on [background] (WCAG
   /// ratios). 3.x split at a luminance of 0.55, which put white on mid
-  /// golds at 1.9:1 (docs/ui/compare/U.2e S2).
+  /// golds at 1.9:1 (docs/T06/T06d/T06d.1 S2).
   static bool darkInkOn(Color background) {
     final luminance = background.withValues(alpha: 1).computeLuminance();
     final darkRatio = (luminance + 0.05) / (ink.computeLuminance() + 0.05);

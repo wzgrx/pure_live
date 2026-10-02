@@ -2,7 +2,7 @@
 // with 3.x's frozen output (expected.json, written by
 // fixtures/missevan/legacy_expected.dart from 3.x's MissevanApi and
 // MissevanSite). Every intended difference is listed with its reason (an
-// upgrade row of docs/UPGRADES.md, or a unified principle); everything else
+// upgrade row of docs/specs/UPGRADES.md, or a unified principle); everything else
 // must match. The synthetic cases port 3.x's missevan_adapter_test.dart.
 import 'dart:convert';
 

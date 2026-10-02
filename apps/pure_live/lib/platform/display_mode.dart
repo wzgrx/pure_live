@@ -124,7 +124,7 @@ List<double> frameRateMultiples(double fps, List<double> supported) {
 }
 
 /// The rate declared on Flutter's surface while [playback] plays (U.2i,
-/// revised in 4.0.x by P01: docs/ui/compare/U.2i/README.md "4.0.x 修订"),
+/// revised in 4.0.x by P01: docs/T14/T14b/T14b.1/README.md "4.0.x 修订"),
 /// [high] being what the refresh-rate mode asks now (touching in balanced,
 /// always in performance):
 ///
@@ -137,7 +137,7 @@ List<double> frameRateMultiples(double fps, List<double> supported) {
 ///   not 144, for 60 frames);
 /// - no rate of the display is a whole multiple (25 and 50 frames at
 ///   60/90/120 Hz): the highest rate. A frame then stays one period more or
-///   less, and the shortest period judders least (docs/4.0.x/
+///   less, and the shortest period judders least (docs/README.md/
 ///   research-smoothness-2026-10-02.md 1.4).
 ///
 /// 0 too while the display's rates are not known.
@@ -154,7 +154,7 @@ double playbackRefreshRate({required PlaybackRefresh playback, required bool hig
 /// native `displayModeChanged` reports (Android display changes; Windows
 /// moves to another monitor or a mode switch).
 ///
-/// How the rate is asked for (P01, docs/ui/compare/U.2i "4.0.x 修订"; the
+/// How the rate is asked for (P01, docs/T14/T14b/T14b.1 "4.0.x 修订"; the
 /// activity's `applyRefreshRate`), always as a number, never a category:
 ///
 /// - the live room plays ([setPlayback]): only [playbackRefreshRate] (the

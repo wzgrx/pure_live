@@ -6,13 +6,13 @@ import 'package:pure_live/i18n/i18n.dart';
 
 export 'package:pure_live/shared/danmaku/setting_rows.dart' show PanelCard, PanelGroupTitle;
 
-// The panel the live room opens beside the picture (docs/ui/compare/U.2f,
-// 统一规则); the multi-view page (docs/ui/compare/U.8) opens the same one.
+// The panel the live room opens beside the picture (docs/T05/T05g/T05g.1,
+// 统一规则); the multi-view page (docs/T12/T12a/T12a.2) opens the same one.
 
 /// The width of a panel on the right (landscape, tablets, desktops).
 const double roomSidePanelWidth = 360;
 
-/// A panel of the room (U.2f; docs/ui/compare/U.1d c10: the same
+/// A panel of the room (U.2f; docs/T01/T01d/T01d.1 c10: the same
 /// [PanelFrame] and [PanelHeader] as the panels of the pages without a
 /// picture): the same look in every layout, only its place changes; under
 /// the picture in portrait (rising from its lower edge, all the height below
@@ -135,7 +135,7 @@ class _RoomSidePanelState extends State<RoomSidePanel> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    // The header every panel has (live_ui PanelHeader, docs/ui/compare/U.1d:
+    // The header every panel has (live_ui PanelHeader, docs/T01/T01d/T01d.1:
     // 52 high, 17/600, ✕ in the variant ink).
     final header = PanelHeader(
       title: widget.title,

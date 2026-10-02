@@ -21,7 +21,7 @@ import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
 import 'package:pure_live/shared/permission_prompts.dart';
 
 // The rows of the playback pages that draw more than a plain switch, slider
-// or choice (docs/ui/compare/U.6c): the video page, the player page, the
+// or choice (docs/T09/T09a/T09a.4): the video page, the player page, the
 // mpv option pages, the floating-window danmaku page.
 
 /// Global mute: the icon follows the switch (3.x `volume_mute_line` /

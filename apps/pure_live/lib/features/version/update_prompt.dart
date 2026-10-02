@@ -96,7 +96,7 @@ bool _wanted(SettingsStore settings, UpdateInfo info) =>
 /// c5), so a landscape phone shows the whole log.
 const double newVersionWideFrom = 480;
 
-/// "A new version is out" (3.x `NewVersionDialog`, docs/ui/compare/U.3d):
+/// "A new version is out" (3.x `NewVersionDialog`, docs/T07/T07a/T07a.6):
 /// "发现新版本 v…", the installed version and the project link (which keeps
 /// the dialog open), the update notes under "更新内容" (scrolling on their
 /// own when long), "不再提醒这个版本" when [settings] are given, and the

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- "录制已停止" reminder small icon (docs/ui/compare/U.2a2 X4): the
+<!-- "录制已停止" reminder small icon (docs/T08/T08b/T08b.3 X4): the
      not-recording ring and dot, opened at the lower right for a "!" badge,
      so it does not look like a recording still going. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"

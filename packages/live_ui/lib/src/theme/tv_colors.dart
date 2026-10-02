@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// The fixed colours of the TV interface (docs/ui/compare/U.15a). Everything
+/// The fixed colours of the TV interface (docs/T18/T18a/T18a.2). Everything
 /// else on the TV comes from the phone's dark colour roles, seeded with the
 /// user's theme colour (U.15a choice A2).
 abstract final class TvColors {

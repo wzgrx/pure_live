@@ -34,7 +34,7 @@ final class CcRoomData {
 /// fallbacks where 3.x had nothing). Each function takes the response text
 /// and status and returns 3.x's models or throws a `SiteError`.
 ///
-/// Approved upgrades (docs/UPGRADES.md, M4.U 9-1 to 9-7): qualities from
+/// Approved upgrades (docs/specs/UPGRADES.md, M4.U 9-1 to 9-7): qualities from
 /// `video_play_url`, the mobile catalog beside the official entries, areas
 /// on recommended cards, "【重播】" rebroadcasts as replays, live covers and
 /// heat on search cards, followers on details and unknown ids told apart

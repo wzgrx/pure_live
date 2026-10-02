@@ -7,7 +7,7 @@
 // cancellation, links through the link parser and the error mapping. Ports
 // the orchestration parts of 3.x's pandalive_site_test.dart and
 // pandalive_native_search_test.dart. The M4.U upgrades are named by their
-// item of docs/UPGRADES.md; the room fields they change are checked value
+// item of docs/specs/UPGRADES.md; the room fields they change are checked value
 // by value in pandalive_api_test.dart.
 import 'dart:async';
 import 'dart:convert';

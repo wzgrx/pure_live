@@ -19,7 +19,7 @@ enum StatusBannerKind {
 /// One action of a [StatusBanner]: a short text button under the words.
 typedef StatusBannerAction = ({String label, VoidCallback? onPressed, Key? key});
 
-/// The bar at the top of a page whose content still shows (docs/ui/compare/
+/// The bar at the top of a page whose content still shows (docs/TASKS.md/
 /// U.1c c8): one component in three colours for an explanation, a reminder
 /// and a failure (3.x had an unstyled line, a primary-tinted card and a
 /// `MaterialBanner`).

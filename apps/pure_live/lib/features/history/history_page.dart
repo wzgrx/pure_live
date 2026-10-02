@@ -31,7 +31,7 @@ final Provider<HistoryRoomLoader> historyLoaderProvider = Provider<HistoryRoomLo
 /// The page's clock, for the day sections (tests replace it).
 final Provider<DateTime Function()> historyClockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
-/// Watch history (3.x `lib/modules/history`, docs/ui/compare/U.5c).
+/// Watch history (3.x `lib/modules/history`, docs/T07/T07g/T07g.2).
 ///
 /// Routes: `RoutePath.kHistory`.
 ///
@@ -364,7 +364,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
   }
 
   /// The rooms by day (c3): each day's heading with its count, then a grid
-  /// whose columns follow the width (c8, docs/ui/UI_PLAN.md §5.3).
+  /// whose columns follow the width (c8, docs/specs/UI.md §5.3).
   Widget _grid(BuildContext context, List<LiveRoom> rooms, {required bool mixed}) {
     final appearance = watchCardAppearance(ref);
     final fontSizes = watchFontSizes(ref);

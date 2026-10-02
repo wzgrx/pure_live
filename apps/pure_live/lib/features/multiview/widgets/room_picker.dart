@@ -36,7 +36,7 @@ int compareMultiviewRooms(
 
 /// The rooms of [rooms] the picker lists for [query]: platforms that still
 /// exist, a room id, the words in the name or title; 3.x's order, and the
-/// rooms already in a cell ([shown]) last (docs/ui/compare/U.8 c9).
+/// rooms already in a cell ([shown]) last (docs/T12/T12a/T12a.2 c9).
 List<LiveRoom> pickerRooms(
   List<LiveRoom> rooms, {
   required String query,

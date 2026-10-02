@@ -22,14 +22,14 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 ///
 /// Routes: `RoutePath.kPopular`; also the home tab.
 ///
-/// Kept from 3.x (docs/ui/compare/U.4b c1): the platform tabs sit where the
+/// Kept from 3.x (docs/T07/T07b/T07b.2 c1): the platform tabs sit where the
 /// title would be, the first tab is the preferred platform, a changed
 /// platform list keeps the platform shown, a tab loads once it settles
 /// (80 ms) and the next platform is fetched 700 ms later, a changed
 /// audience setting refreshes the platform shown, and a return after 15 s
 /// in the background refreshes it. New: the ⌄ at the end of the tabs opens
 /// "all platforms" (c2), and an empty platform list says where to choose
-/// them (c3). See docs/modules/M13.1-popular.md for earlier changes.
+/// them (c3). See docs/T07/T07b/T07b.1/record.md for earlier changes.
 class PopularPage extends ConsumerStatefulWidget {
   /// Creates the page for [route].
   const new({required this.route, super.key});

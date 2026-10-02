@@ -12,7 +12,7 @@ import 'package:live_ui/src/widgets/network_image.dart';
 import 'package:live_ui/src/widgets/room_card.dart';
 import 'package:live_ui/src/widgets/room_card_appearance.dart';
 
-/// The room card of the browsing pages (docs/ui/compare/U.4a): popular,
+/// The room card of the browsing pages (docs/T07/T07d/T07d.1): popular,
 /// follows, area rooms, and later search and history (U.5).
 ///
 /// 3.x's structure is kept (`RoomCard`: a 16:9 cover with its badges above

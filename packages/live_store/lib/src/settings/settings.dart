@@ -3,7 +3,7 @@ import 'package:live_store/src/settings/setting.dart';
 
 /// Every setting the app stores, with 3.x's keys and defaults
 /// (`lib/common/services/settings/*_controller.dart` at v3.2.11) plus the
-/// settings added by approved upgrades (docs/UPGRADES.md).
+/// settings added by approved upgrades (docs/specs/UPGRADES.md).
 ///
 /// Accounts (cookies, WebDAV passwords) are not settings: they live in the
 /// encrypted `SecretStore`. Follows, history, tags and block lists have their
@@ -42,7 +42,7 @@ abstract final class Settings {
     defaultValue: false,
   );
 
-  /// New (docs/ui/compare/U.3d c4): the version the user asked not to be
+  /// New (docs/T07/T07a/T07a.6 c4): the version the user asked not to be
   /// reminded of ("不再提醒这个版本"); the start-up check stays quiet for it
   /// and speaks again for a newer one. Empty: none. A choice of this device,
   /// so backups do not carry it.
@@ -367,7 +367,7 @@ abstract final class Settings {
     defaultValue: true,
   );
 
-  /// New (docs/ui/compare/U.2b c14, U.2b2; 3.x has no such setting): in the
+  /// New (docs/T05/T05c/T05c.1 c14, U.2b2; 3.x has no such setting): in the
   /// portrait fullscreen an upward swipe in the middle of the picture opens
   /// the next room of the list the room was opened from, a downward one the
   /// previous. Off by default.
@@ -383,11 +383,11 @@ abstract final class Settings {
   /// Per-room portrait layout, `{"platform:roomId": "<layout>"}`.
   static const portraitRoomOverrides = JsonSetting('portraitRoomOverrides', section: 'player', defaultValue: {});
 
-  /// The wide room's chat column is folded away (docs/ui/compare/U.2d
+  /// The wide room's chat column is folded away (docs/T05/T05e/T05e.1
   /// change 7; new in v4, remembered for the next room).
   static const livePlayChatCollapsed = BoolSetting('livePlayChatCollapsed', section: 'player', defaultValue: false);
 
-  /// New (docs/4.0.x/tasks/B05.md, docs/ui/compare/U.2m c4; 3.x has no such
+  /// New (docs/T05/T05h/T05h.2/brief.md, docs/T05/T05h/T05h.2 c4; 3.x has no such
   /// setting): how the live room's "切换直播间" panel shows the rooms, kept
   /// from the panel's style button: `grid` (the default, 3.x's small cards,
   /// GitHub issue #37) or `list` (rows with a 16:9 cover).
@@ -461,7 +461,7 @@ abstract final class Settings {
     allowed: {'compact', 'card'},
   );
 
-  /// New (docs/4.0.x/tasks/B02.md c3; 3.x has no such setting): what the
+  /// New (docs/T05/T05f/T05f.1/brief.md c3; 3.x has no such setting): what the
   /// platform's flying danmaku do while the video is paused ("暂停时的弹幕"):
   /// `pause` stands them with the video (the default, as 3.x's main
   /// picture), `continue` lets them fly on and new ones in. Danmaku composed
@@ -1394,7 +1394,7 @@ abstract final class Settings {
     scope: SettingScope.internal,
   );
 
-  /// New (docs/ui/compare/U.15a c2): the TV interface grows the focused card,
+  /// New (docs/T18/T18a/T18a.2 c2): the TV interface grows the focused card,
   /// button or tab by 5 %; a slow box can switch it off and keep only the
   /// focus ring.
   static const tvFocusZoom = BoolSetting('tvFocusZoom', section: 'app', defaultValue: true);

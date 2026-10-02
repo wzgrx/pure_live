@@ -1,6 +1,6 @@
 # 效果图工具
 
-界面重构用的效果图、按钮编号示意图和对比评审页，都从这里生成。做法见 [docs/ui/PROCESS.md](../../../docs/ui/PROCESS.md)。
+界面重构用的效果图、按钮编号示意图和对比评审页，都从这里生成。做法见 [docs/PROCESS.md](../../../docs/PROCESS.md)。
 
 ## 准备（每台机器一次）
 
@@ -27,7 +27,7 @@ bash tools/ui/mock/fetch.sh     # 字体（Material Icons、Geist）和示意图
 
 ## 写一张效果图
 
-`docs/ui/compare/<编号>/src/v4-phone.html`：
+`docs/TASKS.md/<编号>/src/v4-phone.html`：
 
 ```html
 <!doctype html><html><head><meta charset="utf-8">
@@ -57,10 +57,10 @@ bash tools/ui/mock/fetch.sh     # 字体（Material Icons、Geist）和示意图
 ## 生成
 
 ```bash
-python3 tools/ui/mock/render.py docs/ui/compare/U.2c/src/                 # 整个目录
-python3 tools/ui/mock/render.py docs/ui/compare/U.2c/src/v4-phone.html --annotate --dark
-python3 tools/ui/mock/page.py docs/ui/compare/U.2c/page.json              # → ~/ref/design/compare/U.2c.html
-python3 tools/ui/export_compare.py ~/ref/design/compare/U.2c.html docs/ui/compare/U.2c/page
+python3 tools/ui/mock/render.py docs/T05/T05d/T05d.1/src/                 # 整个目录
+python3 tools/ui/mock/render.py docs/T05/T05d/T05d.1/src/v4-phone.html --annotate --dark
+python3 tools/ui/mock/page.py docs/T05/T05d/T05d.1/page.json              # → ~/ref/design/compare/U.2c.html
+python3 tools/ui/export_compare.py ~/ref/design/compare/U.2c.html docs/T05/T05d/T05d.1/page
 ```
 
 `render.py` 把图写到 `src/` 的上一级（任务文件夹）：`v4-phone.jpg`，加 `--annotate` 多一张 `v4-phone-n.jpg`，加 `--dark` 多一张 `v4-phone-dark.jpg`。

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 
-/// The follow button of the live room's app bar (docs/ui/compare/U.2a,
+/// The follow button of the live room's app bar (docs/T05/T05b/T05b.1,
 /// change 12), for every other place that follows something (the card
 /// dialog U.4a c11, the area rooms' app bar U.4e c3): "＋ 关注" filled with
 /// the primary colour, "✓ 已关注" grey. While [busy] a spinner replaces the

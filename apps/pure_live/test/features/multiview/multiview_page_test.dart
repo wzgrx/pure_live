@@ -1,4 +1,4 @@
-// docs/ui/compare/U.8: the multi-view page in portrait, landscape and wide
+// docs/T12/T12a/T12a.2: the multi-view page in portrait, landscape and wide
 // windows; the order, icons and places of its controls; the cells' states;
 // UI_PLAN appendix A 7 (Back and Esc) and 13 (tap, 1+3, long press, empty
 // cells).

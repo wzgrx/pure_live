@@ -5,7 +5,7 @@ import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/platform/display_mode.dart';
 
-/// Tells the display what the room plays (docs/ui/compare/U.2i c2-c4): the
+/// Tells the display what the room plays (docs/T14/T14b/T14b.1 c2-c4): the
 /// video's frame rate while it plays or buffers with "播放时匹配视频帧率" on
 /// and the app in front or in picture-in-picture (Flutter reports that as
 /// inactive); nothing while paused, in the background, with the switch off

@@ -5,7 +5,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:pure_live/routes/route_observer.dart';
 
 /// The prompts the app shows by itself, not from a tap, in the order they
-/// go first when several wait (docs/ui/compare/U.3c c7).
+/// go first when several wait (docs/T07/T07i/T07i.2 c7).
 enum AppPromptKind {
   /// "打开分享的直播间": a share code was found on the clipboard (U.3d).
   share,

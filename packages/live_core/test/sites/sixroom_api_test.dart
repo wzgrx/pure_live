@@ -2,7 +2,7 @@
 // with 3.x's frozen output (expected.json, written by
 // fixtures/sixroom/legacy_expected.dart from 3.x's SixRoomApi, SixRoomLink
 // and SixRoomSite). Every intended difference is listed with its reason
-// (`changed:` with the upgrade's number, docs/UPGRADES.md); everything else
+// (`changed:` with the upgrade's number, docs/specs/UPGRADES.md); everything else
 // must match. The synthetic cases are the harness's changed copies of the
 // samples, and 3.x's own sixroom_site_test.dart fixtures. The mobile lists
 // and the web subarea (M4.U.31, 31-4) have no 3.x output; their samples

@@ -32,7 +32,7 @@ String startedText(DateTime startedAt, DateTime now) {
   return i18n('live_play_started_on', args: {'date': date});
 }
 
-/// The room details (docs/ui/compare/U.2a, "直播间详情"): laid over the tabs
+/// The room details (docs/T05/T05b/T05b.1, "直播间详情"): laid over the tabs
 /// and the chat, never over the picture, without a screen-wide shade. The
 /// streamer with the platform, a tappable area and the follow button; the
 /// state (live, replay, offline, restricted with the reason); the full

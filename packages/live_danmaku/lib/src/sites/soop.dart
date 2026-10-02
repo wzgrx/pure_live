@@ -15,7 +15,7 @@ import 'package:live_net/live_net.dart';
 typedef SoopPacket = ({int service, Uint8List body});
 
 /// SOOP's chat protocol (the codec of 3.x `SoopDanmaku`,
-/// docs/modules/M5.7-soop.md), without I/O.
+/// docs/T06/T06a/T06a.8/record.md), without I/O.
 ///
 /// A packet is `ESC TAB`, a 4-digit decimal service, a 6-digit decimal body
 /// length in bytes, `00` and the body, whose fields are separated by form

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/src/widgets/focus_ring.dart';
 import 'package:live_ui/src/widgets/network_image.dart';
 
-/// A round avatar (3.x `CommonAvatar`, docs/ui/compare/U.1c c9): the
+/// A round avatar (3.x `CommonAvatar`, docs/T01/T01c/T01c.1 c9): the
 /// picture (decoded at its shown size); while it loads a light grey disc;
 /// without a picture, or when it fails, the first letter of [fallbackName]
 /// on the secondary container, or a person when there is no name either.

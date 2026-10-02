@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:live_core/live_core.dart';
 
-// The live room's "切换直播间" panel (docs/ui/compare/U.2m): its groups, the
+// The live room's "切换直播间" panel (docs/T05/T05h/T05h.2): its groups, the
 // rooms in each, and v3's grid of small cards (3.x
 // `content_first_panel_layout.dart:214-310`, `play_other.dart:229-268`).
 

@@ -764,7 +764,7 @@ class MainActivity : AudioServiceActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) display else windowManager.defaultDisplay
 
     /**
-     * Asks the display for a refresh rate (P01, docs/ui/compare/U.2i
+     * Asks the display for a refresh rate (P01, docs/T14/T14b/T14b.1
      * "4.0.x 修订"; Dart decides which rate, this decides how):
      *
      * - the live room plays: Android 12+ only declares Dart's rate on

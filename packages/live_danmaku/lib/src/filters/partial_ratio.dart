@@ -26,7 +26,7 @@ import 'dart:typed_data';
 ///    times 100, rounded. Two empty texts score 0.
 ///
 /// The scores were checked against fuzzywuzzy 1.2.0 on random texts (see
-/// docs/modules/M5.0-framework.md); the package itself is not a dependency.
+/// docs/T06/T06a/T06a.1/record.md); the package itself is not a dependency.
 int partialRatio(String s1, String s2) {
   final (shorter, longer) = s1.length < s2.length ? (s1, s2) : (s2, s1);
   final a = shorter.codeUnits;

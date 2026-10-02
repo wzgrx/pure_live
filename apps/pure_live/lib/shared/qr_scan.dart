@@ -131,7 +131,7 @@ Future<String?> scanQrCode(
   return text;
 }
 
-/// The scanner page of TV sync and device sync (docs/ui/compare/U.11a c8,
+/// The scanner page of TV sync and device sync (docs/T09/T09c/T09c.2 c8,
 /// U.11c c9): "扫描二维码", the torch and the camera switch in the bar
 /// (icons in the bar's colour), the picture with corner marks, [hint] and
 /// "手动输入地址" ([onManual]) under it. A camera that cannot start says

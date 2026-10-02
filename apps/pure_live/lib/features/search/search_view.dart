@@ -29,7 +29,7 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 final Uri webView2DownloadPage = Uri.parse('https://developer.microsoft.com/microsoft-edge/webview2/');
 
 /// The search page (3.x `SearchPage` with `SearchController`,
-/// docs/ui/compare/U.5a): a search field that also takes room links, the
+/// docs/T07/T07f/T07f.2): a search field that also takes room links, the
 /// platform row, the filters, rooms or streamers from every platform as
 /// they answer, paging, recent searches.
 ///

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Puts the buttons of a dialog below it on the 14-point role (docs/ui/
+/// Puts the buttons of a dialog below it on the 14-point role (docs/README.md/
 /// UI_PLAN.md §7: no text in a popup under 14; the theme's buttons use the
 /// 13-point label, as 3.x did). Weight and shape stay the theme's.
 class DialogButtonsTheme extends StatelessWidget {

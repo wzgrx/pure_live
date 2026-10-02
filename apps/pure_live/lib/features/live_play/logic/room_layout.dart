@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-/// How the live room is shown (docs/ui/UI_PLAN.md §5.3: one state for the
+/// How the live room is shown (docs/specs/UI.md §5.3: one state for the
 /// room; the picture is mounted once and moves between them). Android's
 /// picture-in-picture is followed separately (the system's window).
 enum RoomDisplay {
@@ -14,7 +14,7 @@ enum RoomDisplay {
   fullscreen,
 
   /// A portrait stream filling an upright phone (3.x
-  /// `VideoMode.portraitFullscreen`, docs/ui/compare/U.2b).
+  /// `VideoMode.portraitFullscreen`, docs/T05/T05c/T05c.1).
   portraitFullscreen,
 
   /// Desktops: the picture fills the window, the header and the chat hidden

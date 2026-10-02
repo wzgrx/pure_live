@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
-/// What the more menu of a card does (docs/ui/compare/U.9 c5).
+/// What the more menu of a card does (docs/T11/T11a/T11a.4 c5).
 enum IptvCardAction {
   /// Opens the address (browser) or file (system app).
   open,
@@ -17,7 +17,7 @@ enum IptvCardAction {
 const double iptvCardOneRowWidth = 520;
 
 /// One playlist or guide source (3.x `iptv_manage.dart` `_buildItemCard`,
-/// docs/ui/compare/U.9 c3–c6): the icon with the format badge, the name,
+/// docs/T11/T11a/T11a.4 c3–c6): the icon with the format badge, the name,
 /// "网络 / 本地", the channel count and last update, the address; "更多"
 /// (open, copy; a right click opens it too); sync, delete and automatic
 /// sync for network sources, delete only for local ones.
@@ -422,7 +422,7 @@ class _MenuRow extends StatelessWidget {
   );
 }
 
-/// The counts at the top (docs/ui/compare/U.9 c8): playlists, channels,
+/// The counts at the top (docs/T11/T11a/T11a.4 c8): playlists, channels,
 /// guides, 20 px tabular numbers.
 class IptvStats extends StatelessWidget {
   /// Creates the counts.

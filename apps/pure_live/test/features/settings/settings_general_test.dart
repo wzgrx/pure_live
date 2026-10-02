@@ -1,4 +1,4 @@
-// U.6d: general, platforms, refresh and network (docs/ui/compare/U.6d).
+// U.6d: general, platforms, refresh and network (docs/T09/T09a/T09a.5).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_store/live_store.dart';

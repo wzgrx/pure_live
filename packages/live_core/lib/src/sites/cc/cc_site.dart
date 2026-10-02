@@ -28,7 +28,7 @@ const Map<String, String> _dashenHeaders = {
 /// then `live/channel`. Where 3.x had nothing the fixes step in: an anchor
 /// without a live channel is offline (room entry reads its room page, a
 /// follow refresh asks whether the id exists, 9-7). With the approved
-/// upgrades (docs/UPGRADES.md) the catalog is the mobile site's (with 3.x's
+/// upgrades (docs/specs/UPGRADES.md) the catalog is the mobile site's (with 3.x's
 /// official entries from the Dashen configuration, 9-4) and the qualities
 /// are `video_play_url`'s real tiers (9-1), 3.x's redirect playlist being
 /// the fallback. Lists send no more requests than 3.x. Failures are

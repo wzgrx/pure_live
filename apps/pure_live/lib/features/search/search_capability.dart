@@ -189,7 +189,7 @@ String searchCoverageText(SearchCapability capability, String siteName) {
 }
 
 /// What [capability] finds, without the platform's name: one line of the
-/// scope panel (docs/ui/compare/U.5a c6), such as "只能搜到正在直播的房间".
+/// scope panel (docs/T07/T07f/T07f.2 c6), such as "只能搜到正在直播的房间".
 String searchCoverageShortText(SearchCapability capability) {
   final note = capability.noteKey;
   if (note != null) return i18n('${note}_short');

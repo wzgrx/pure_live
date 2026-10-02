@@ -1,4 +1,4 @@
-// The room's small features of F.1b-F.1d (docs/features/F.1b..F.1d): the
+// The room's small features of F.1b-F.1d (docs/README.md): the
 // portrait layout before the first frame, the Kuaishou app link, the room
 // switcher's refresh, Android's back held by the room, the player kept for
 // the next room, the mini windows' portrait ratio, the portrait

@@ -74,7 +74,7 @@ final class SeventeenLiveAblyError {
 }
 
 /// The connection a `CONNECTED` names ([SeventeenLiveDanmakuFrame.connection]):
-/// what a later socket resumes (Ably's `resume`, docs/modules/M5.29-17live.md,
+/// what a later socket resumes (Ably's `resume`, docs/T06/T06a/T06a.30/record.md,
 /// B-14).
 @immutable
 final class SeventeenLiveConnectionDetails {
@@ -212,7 +212,7 @@ final class SeventeenLiveChatRefusal implements Exception {
 /// 17LIVE's chat (the archived v4's spec/sites/17live.md §7, checked
 /// against the recordings `fixtures/17live/danmaku/S05-live`, `S06-live`,
 /// the website's scripts and read-only sessions of 2026-09-28 to 09-30;
-/// docs/modules/M5.29-17live.md), without I/O.
+/// docs/T06/T06a/T06a.30/record.md), without I/O.
 ///
 /// - The website's push service is Ably (ably-js with `environment:
 ///   "17media"`). An anonymous token comes from `POST messenger/auth`

@@ -5,7 +5,7 @@
 // keyword, room details for entry, refresh and recording, streams with their
 // lines, "优先 H.264" and recovery, locked lives, cancellation, links through
 // the link parser and the error mapping. Differences from 3.x name their
-// docs/UPGRADES.md row (33-x).
+// docs/specs/UPGRADES.md row (33-x).
 import 'dart:async';
 import 'dart:convert';
 

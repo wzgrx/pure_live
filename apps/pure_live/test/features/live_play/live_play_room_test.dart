@@ -1,4 +1,4 @@
-// The portrait live room of U.2a (docs/ui/compare/U.2a/README.md): the
+// The portrait live room of U.2a (docs/T05/T05b/T05b.1/README.md): the
 // order, icons and states the confirmed design fixes.
 import 'dart:async';
 

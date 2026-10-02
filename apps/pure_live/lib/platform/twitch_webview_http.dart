@@ -32,7 +32,7 @@ final class TwitchIntegrityToken {
 
 /// Twitch GraphQL sent from inside a headless WebView (3.x
 /// `TwitchWebIntegrityProvider.postGraphQl`), the last of TwitchSite's
-/// `gqlFallbacks` on Android (docs/modules/M4.08-twitch.md, "GraphQL 传输的接口约定").
+/// `gqlFallbacks` on Android (docs/T02/T02c/T02c.2/record.md, "GraphQL 传输的接口约定").
 ///
 /// When dart:io and Android's system TLS are refused or asked for an
 /// integrity token, the page's own `fetch` sends the request: Chromium's

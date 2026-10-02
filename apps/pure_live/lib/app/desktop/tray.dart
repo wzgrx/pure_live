@@ -4,7 +4,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
-/// The rows of the tray menu (3.x `DesktopTrayService`; docs/ui/compare/U.13
+/// The rows of the tray menu (3.x `DesktopTrayService`; docs/T17/T17a/T17a.1
 /// c9, T4): while recording, "正在录制 N 个直播间" (greyed) and a separator
 /// first; then "隐藏窗口 / 显示窗口", a separator and "退出应用".
 enum TrayRow {

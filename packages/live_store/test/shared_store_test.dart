@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 import 'support.dart';
 
-/// Two desktop windows on one data folder (docs/ui/compare/U.13 c14): each
+/// Two desktop windows on one data folder (docs/T17/T17a/T17a.1 c14): each
 /// process opens the same database file; what one writes the other takes in
 /// with `syncExternal`.
 void main() {

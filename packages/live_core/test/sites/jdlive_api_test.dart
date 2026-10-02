@@ -2,7 +2,7 @@
 // 3.x's frozen output (expected.json, written by
 // fixtures/jdlive/legacy_expected.dart from 3.x's JdLiveApi, JdLiveLink and
 // JdLiveSite). Every intended difference is listed with its reason (the
-// M4.28 differences, and the M4.U upgrades by item number, docs/UPGRADES.md
+// M4.28 differences, and the M4.U upgrades by item number, docs/specs/UPGRADES.md
 // 28-1 to 28-7); everything else must match. The synthetic cases are the
 // edited copies the generator ran through 3.x (`variants`) and 3.x's
 // jd_live_site_test.dart. The S05 samples (M4.U.28) have no 3.x output.

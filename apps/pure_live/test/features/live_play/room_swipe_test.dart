@@ -1,4 +1,4 @@
-// U.2b2 (docs/ui/compare/U.2b c14, X1 A): the list a room was opened from
+// U.2b2 (docs/T05/T05c/T05c.1 c14, X1 A): the list a room was opened from
 // goes along, and the portrait fullscreen swipes through it on the same
 // player.
 

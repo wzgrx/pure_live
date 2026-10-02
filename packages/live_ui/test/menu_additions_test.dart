@@ -1,5 +1,5 @@
 // The small menu's description lines, title row and footer, and the option
-// row's trailing slot (docs/ui/compare/U.2n: the room menu, the unfollow
+// row's trailing slot (docs/T05/T05g/T05g.2: the room menu, the unfollow
 // and orientation menus, the cast receivers).
 
 import 'package:flutter/material.dart';

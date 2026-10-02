@@ -1,6 +1,6 @@
 /// Domain model and platform interfaces of Pure Live: rooms, areas,
 /// qualities, danmaku messages and what a platform adapter offers
-/// (docs/modules/M2-core.md).
+/// (docs/T02/T02g/T02g.1/record.md).
 library;
 
 export 'src/aes.dart';

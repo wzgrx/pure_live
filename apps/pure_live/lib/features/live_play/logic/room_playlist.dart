@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:live_core/live_core.dart';
 
-/// The rooms a live room was opened from (docs/ui/compare/U.2b U.2b2), in
+/// The rooms a live room was opened from (docs/T05/T05c/T05c.1 U.2b2), in
 /// that page's order, and where the room is among them: the portrait
 /// fullscreen swipes up to the next and down to the previous, wrapping
 /// around at either end (the TV's Up and Down, `TvLivePlayPage.switchBy`).

@@ -183,7 +183,7 @@ enum UpdateDownloadPhase {
 const double updateDownloadStackedScale = 1.5;
 
 /// The download dialog of [showUpdateDownload] (3.x `DownloadApkDialog`,
-/// docs/ui/compare/U.3d): a round icon, a title that follows the state
+/// docs/T07/T07a/T07a.6): a round icon, a title that follows the state
 /// ("正在下载 v…", "v… 已下载", "下载没有完成"), a status line, the progress
 /// box with the percentage, and the buttons of the state; the same layout
 /// at every width (c10). Back and Esc are the dialog's own cancel or close

@@ -13,7 +13,7 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 /// Where a [FollowButton] sits, which decides its look.
 enum FollowButtonPlace {
   /// The room's app bar: "＋ 关注" filled with the theme colour, "✓ 已关注"
-  /// grey (docs/ui/compare/U.2a, change 12).
+  /// grey (docs/T05/T05b/T05b.1, change 12).
   bar,
 
   /// The room details: 3.x's heart on a tonal button.
@@ -26,7 +26,7 @@ enum FollowButtonPlace {
 
 /// Follow and unfollow (3.x `FavoriteFloatingButton`, `FavoriteButton`):
 /// unfollowing asks first in a small menu next to the button and then
-/// offers "撤销" (docs/ui/compare/U.2n c8); the state follows the store, so every button of
+/// offers "撤销" (docs/T05/T05g/T05g.2 c8); the state follows the store, so every button of
 /// the room (bar, details, fullscreen) shows the same and a change made
 /// elsewhere shows here; a spinner replaces the mark while saving.
 class FollowButton extends ConsumerStatefulWidget {
@@ -76,7 +76,7 @@ class _FollowButtonState extends ConsumerState<FollowButton> {
     if (followed) {
       // U.2a choice D: unfollowing asks first (no spinner while asking), in
       // a small menu next to the button, which never covers the picture's
-      // middle (docs/ui/compare/U.2n c8, N3): who it is, then "取消关注" in
+      // middle (docs/T05/T05g/T05g.2 c8, N3): who it is, then "取消关注" in
       // red (B-15: the button says what it does).
       _asking = true;
       final bool? chosen;
@@ -200,7 +200,7 @@ class _FollowButtonState extends ConsumerState<FollowButton> {
     );
   }
 
-  /// The fullscreen bars' pill (docs/ui/compare/U.2c change 6, U.2b change
+  /// The fullscreen bars' pill (docs/T05/T05d/T05d.1 change 6, U.2b change
   /// 6): the bar's look on the picture, "✓ 已关注" on a light chip, "＋ 关注"
   /// filled with the theme colour; 32 high, 48 to touch.
   Widget _video(BuildContext context, {required bool followed, required VoidCallback? onPressed}) {

@@ -5,7 +5,7 @@ import 'package:pure_live/shared/panels/side_panel.dart';
 
 import '../support.dart';
 
-// docs/4.0.x/tasks/P03.md c3 (research 2026-10-02 S2): the room panel's
+// docs/T14/T14c/T14c.2/brief.md c3 (research 2026-10-02 S2): the room panel's
 // header pulled down follows the finger, and when let go a spring takes it
 // on at the finger's speed, out of sight and closed or back to its place.
 // On the K90 (400 × 869 dp at 3×) at 120 Hz, the panel under a 225 dp

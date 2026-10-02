@@ -1,4 +1,4 @@
-/// Storage of Pure Live (docs/modules/M9-store.md): follows, history,
+/// Storage of Pure Live (docs/T09/T09b/T09b.1/record.md): follows, history,
 /// followed areas, groups, danmaku block lists, typed settings, sealed
 /// secrets, WebDAV servers, backups in 3.x's file layout and the import of
 /// 3.x's data. Pure Dart.

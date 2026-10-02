@@ -6,7 +6,7 @@
 // streams with their lines, restrictions and recovery, the lease queries,
 // "优先 H.264", cancellation, links through the link parser and the error
 // mapping. Ports the orchestration parts of 3.x's kugou_live_site_test.dart;
-// the M4.U items are named by their docs/UPGRADES.md numbers.
+// the M4.U items are named by their docs/specs/UPGRADES.md numbers.
 import 'dart:async';
 import 'dart:convert';
 

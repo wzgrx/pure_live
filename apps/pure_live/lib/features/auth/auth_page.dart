@@ -8,7 +8,7 @@ import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 
 /// "云端账号": where 3.x's sign in, mine and user management lead now
-/// (3.x `lib/modules/auth`, docs/ui/compare/U.10c).
+/// (3.x `lib/modules/auth`, docs/T10/T10c/T10c.1).
 ///
 /// Routes: `RoutePath.kSignIn`, `RoutePath.kMine`, `RoutePath.kUserManage`.
 ///

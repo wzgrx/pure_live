@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 // The route behind the small menu ([showSmallMenu], [showAppMenu];
-// docs/4.0.x/tasks/B03.md). Flutter's `showMenu` only takes the menu's top
+// docs/T01/T01d/T01d.2/brief.md). Flutter's `showMenu` only takes the menu's top
 // edge and always grows downwards from it, so a menu meant to sit above its
 // button first showed as a line far above it and then dropped onto it; and
 // the side was chosen from a guessed height. Here the menu is laid out first
@@ -17,7 +17,7 @@ const double anchoredMenuGap = 4;
 /// How far a small menu keeps from the screen's edges and unsafe areas.
 const double anchoredMenuMargin = 8;
 
-/// How long the small menu takes to unfold (docs/ui/UI_PLAN.md §8.6:
+/// How long the small menu takes to unfold (docs/specs/UI.md §8.6:
 /// instant feedback, 100–150 ms).
 const Duration anchoredMenuOpenDuration = Duration(milliseconds: 150);
 
@@ -29,7 +29,7 @@ const Duration anchoredMenuCloseDuration = Duration(milliseconds: 100);
 const double _leastHeight = kMinInteractiveDimension + 16;
 
 /// Opens [children] in the small menu next to the box of [anchor]
-/// (docs/ui/UI_PLAN.md §7, the look U.2f confirmed): on
+/// (docs/specs/UI.md §7, the look U.2f confirmed): on
 /// `surfaceContainerHighest` with 8-point corners, 8 above and below the
 /// rows, [constraints] on its width and otherwise as wide as its rows.
 ///

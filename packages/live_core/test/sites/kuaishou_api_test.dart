@@ -19,7 +19,7 @@ const _v4Keys = ['startedAt', 'restriction'];
 /// 3.x wrote, except [changed] (intended differences) and the projections
 /// compared separately (`danmakuData`, `qualities`). 3.x wrote null where the
 /// immutable model writes ''. The v4 keys must be exactly [added] (M4.U.5,
-/// the unified principles of docs/UPGRADES.md).
+/// the unified principles of docs/specs/UPGRADES.md).
 void _expectParity(
   Map<String, Object?> actual,
   Map<String, dynamic> legacy, {

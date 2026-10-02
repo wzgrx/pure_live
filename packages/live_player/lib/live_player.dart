@@ -1,4 +1,4 @@
-/// Pure Live's player (docs/modules/M7.2-player.md): the engine contract,
+/// Pure Live's player (docs/T04/T04b/T04b.1/record.md): the engine contract,
 /// the playback session state machine over live_media, the mpv engine over
 /// the media_kit fork in `third_party/`, and the video view.
 library;

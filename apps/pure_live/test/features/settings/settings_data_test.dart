@@ -1,4 +1,4 @@
-// U.6e: cache and data, the configuration preview (docs/ui/compare/U.6e);
+// U.6e: cache and data, the configuration preview (docs/T09/T09a/T09a.6);
 // the log row of the overview's data group (U.11a Q1).
 import 'dart:io';
 

@@ -51,7 +51,7 @@ class HomeMobileView extends StatelessWidget {
   }
 }
 
-/// Sizes of the side rail (docs/ui/compare/U.3b, Material 3's rail).
+/// Sizes of the side rail (docs/T07/T07a/T07a.5, Material 3's rail).
 abstract final class HomeRailMetrics {
   /// The rail's width.
   static const double width = 80;

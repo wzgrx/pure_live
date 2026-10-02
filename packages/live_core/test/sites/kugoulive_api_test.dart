@@ -2,7 +2,7 @@
 // with 3.x's frozen output (expected.json, written by
 // fixtures/kugoulive/legacy_expected.dart from 3.x's KugouLiveApi,
 // KugouLiveLink and KugouLiveSite). Every intended difference is listed
-// with its reason (an M4.U item number of docs/UPGRADES.md for the approved
+// with its reason (an M4.U item number of docs/specs/UPGRADES.md for the approved
 // upgrades); everything else must match. The synthetic cases port the
 // parsing parts of 3.x's kugou_live_site_test.dart and cover the pitfalls of
 // the archived spec (§10) and the shapes 3.x refused. S04-room-chatlimit and

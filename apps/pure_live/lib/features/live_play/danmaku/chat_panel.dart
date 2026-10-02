@@ -109,7 +109,7 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
       Expanded(
         child: TabBarView(
           controller: _tabs,
-          physics: const PureLiveBoundedScrollPhysics(),
+          physics: const PureLivePageScrollPhysics(),
           children: [
             // U.2k-a: the local danmaku composer under the list (while the
             // local interaction is on).

@@ -355,6 +355,8 @@ void main() {
       // Material circle on this page).
       expect(find.byType(RefreshIndicator), findsNothing);
       expect(find.byType(AppRefreshView), findsWidgets);
+      // P03: the platform pages turn like Android's ViewPager.
+      expect(tester.widget<TabBarView>(find.byType(TabBarView)).physics, isA<PureLivePageScrollPhysics>());
       // Live: the paid room, marked; its audience shortened as 3.x did.
       expect(find.text('主播一'), findsOneWidget);
       expect(find.text(i18n('room_mark_paid')), findsOneWidget);

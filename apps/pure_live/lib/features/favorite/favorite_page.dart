@@ -257,7 +257,7 @@ class _FavoritePageState extends ConsumerState<FavoritePage> with TickerProvider
           Expanded(
             child: TabBarView(
               controller: tabs,
-              physics: const PureLiveBoundedScrollPhysics(),
+              physics: const PureLivePageScrollPhysics(),
               children: [
                 for (final id in _platforms)
                   _FollowGrid(

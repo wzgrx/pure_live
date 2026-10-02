@@ -266,7 +266,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       controller: controller,
       session: session,
       orientation: RoomOrientationChoice(settings: store.settings, room: room),
-      reconnect: ReconnectWatch(session.states, now: controller.now),
+      reconnect: ReconnectWatch(session.states),
       background: RoomBackgroundPolicy(controller: controller, settings: store.settings)..start(),
       playerConfig: playerConfig,
     );
@@ -922,12 +922,8 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     ),
   );
 
-  Widget _infoBar(LiveRoomController controller) => RoomInfoBar(
-    controller: controller,
-    detailsOpen: _details,
-    onToggleDetails: _toggleDetails,
-    onReopen: _reconnect.expectReopen,
-  );
+  Widget _infoBar(LiveRoomController controller) =>
+      RoomInfoBar(controller: controller, detailsOpen: _details, onToggleDetails: _toggleDetails);
 
   /// The details over [below] (the chat), sliding in unless the system asks
   /// for less motion.

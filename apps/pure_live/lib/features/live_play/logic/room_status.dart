@@ -11,8 +11,13 @@ enum PictureStateKind {
   /// Playing: nothing over the picture.
   none,
 
-  /// Paused by the user (v4's large pause mark).
+  /// Paused by the user: the play mark on its disc in the middle, which
+  /// resumes (A-01, B02 c2); over an audio-only room's cover too (B-9).
   paused,
+
+  /// The picture is there and the stream waits for data (a short stall, a
+  /// resume after a pause): the middle mark turns, no words (B02 c2, c4).
+  buffering,
 
   /// The room detail is being fetched: "正在进入直播间…" (c3).
   entering,
@@ -133,7 +138,8 @@ final class PictureState {
     PictureStateKind.connecting ||
     PictureStateKind.slow ||
     PictureStateKind.reconnecting ||
-    PictureStateKind.restoring => true,
+    PictureStateKind.restoring ||
+    PictureStateKind.buffering => true,
     _ => false,
   };
 
@@ -167,6 +173,12 @@ bool _sameActions(List<PictureAction> a, List<PictureAction> b) {
 /// How long the stream may open before the picture says it is slow (c4).
 const Duration slowAfter = Duration(seconds: 8);
 
+/// Whether [playback] waits for data with its picture already there (a
+/// short stall, a resume after a pause; B02): a new source has no picture
+/// size yet, and says it connects instead.
+bool pictureBuffering(PlaybackState playback) =>
+    playback.status == PlaybackStatus.buffering && playback.videoWidth != null;
+
 /// Whether the picture's control bars belong on screen: only once a stream
 /// is open (c5: no bars over loading, offline, failed or restricted rooms;
 /// fullscreen keeps a reduced top bar, c6).
@@ -174,8 +186,11 @@ bool pictureHasControls(RoomStage stage) => stage == RoomStage.playing;
 
 /// The picture state of a room (docs/ui/compare/U.2g): [stage] and [failure]
 /// of the room, [room] as known, the session's [playback], the stream's
-/// drops ([reconnecting], [attempts]), [audioOnly], [restoring] (back from
-/// audio only, no picture yet) and [slow] (opening for [slowAfter]).
+/// recovery ([reconnecting], [attempts]: the session's own, B02 c4),
+/// [audioOnly], [restoring] (back from audio only, no picture yet) and
+/// [slow] (opening for [slowAfter]). Paused, the play mark shows over an
+/// audio-only cover too (B-9); a stream that buffers with its picture there
+/// turns the middle mark ([pictureBuffering]).
 PictureState pictureStateOf({
   required RoomStage stage,
   required Object? failure,
@@ -229,10 +244,13 @@ PictureState pictureStateOf({
       dim: PictureDim.light,
     );
   }
+  // B-9: paused before audio only, which said "纯音频播放中" while paused.
+  if (playback.status == PlaybackStatus.paused) return const PictureState(kind: PictureStateKind.paused);
   if (audioOnly) return const PictureState(kind: PictureStateKind.audioOnly);
   if (restoring) {
     return PictureState(kind: PictureStateKind.restoring, title: i18n('restoring_live_video'), dim: PictureDim.cover);
   }
+  if (pictureBuffering(playback)) return const PictureState(kind: PictureStateKind.buffering);
   return switch (playback.status) {
     PlaybackStatus.idle || PlaybackStatus.opening || PlaybackStatus.buffering =>
       slow

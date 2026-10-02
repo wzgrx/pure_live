@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_player/live_player.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
+import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
 
 // U.2h (docs/ui/compare/U.2h) c1-c10 and F.2a on the flying layer.
@@ -262,6 +264,18 @@ void main() {
     await layer.run(60, 0.5);
     expect(layer.rect(message).left, closeTo(rect.left - 60, 1));
     await layer.close();
+  });
+
+  test('B02 c3: danmakuRunning: playing; paused only with "继续飘过"; never while it opens, buffers or failed', () {
+    for (final behavior in [DanmakuPausedBehavior.pause, DanmakuPausedBehavior.fly]) {
+      expect(danmakuRunning(PlaybackStatus.playing, behavior), isTrue, reason: behavior);
+      for (final status in [PlaybackStatus.opening, PlaybackStatus.buffering, PlaybackStatus.error]) {
+        expect(danmakuRunning(status, behavior), isFalse, reason: '$status $behavior');
+      }
+    }
+    expect(danmakuRunning(PlaybackStatus.paused, DanmakuPausedBehavior.pause), isFalse);
+    expect(danmakuRunning(PlaybackStatus.paused, DanmakuPausedBehavior.fly), isTrue);
+    expect(danmakuRunning(PlaybackStatus.paused, 'anything else'), isFalse, reason: 'the default');
   });
 
   testWidgets("c10: a paused video stops the platform's danmaku; a local one still enters and flies", (tester) async {

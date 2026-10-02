@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
+import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
@@ -536,10 +537,15 @@ void main() {
 
   testWidgets('E3: a dropped stream says it reconnects and offers the next line; E5 audio only', (tester) async {
     final room = await _pump(tester);
-    room.engine.emit(const EngineBuffering(buffering: true));
-    await tester.pump();
+    // B02 c4: the session's recovery is the drop (its reopening hangs here).
+    final hang = Completer<void>();
+    room.engine.onOpen = (_) => hang.future;
+    room.engine.emit(const EngineError(PlayerException(message: 'reset', type: PlayerErrorType.network, code: 'drop')));
+    await _settle(tester);
     expect(find.text('正在重连（第 1 次）'), findsOneWidget);
+    room.engine.onOpen = null;
     await tester.tap(find.text('换线路'));
+    hang.complete();
     await _settle(tester);
     expect(find.byKey(const ValueKey('live-play-reconnecting')), findsNothing);
     expect(room.engine.opens.last.toString(), contains('b.example'));
@@ -556,33 +562,40 @@ void main() {
   group('room logic of U.2a', () {
     setUpAll(loadStrings);
 
-    test('ReconnectWatch counts drops of a playing stream, not the user asking for another', () {
+    test('B02 c4: ReconnectWatch says what the session says: its recovery, not a buffering or a resume', () {
       final states = StreamController<PlaybackState>(sync: true);
       addTearDown(states.close);
-      var now = DateTime(2026, 10, 1, 20);
-      final watch = ReconnectWatch(states.stream, now: () => now);
+      final watch = ReconnectWatch(states.stream);
       addTearDown(watch.dispose);
-      PlaybackState status(PlaybackStatus value) => PlaybackState(status: value);
+      var notified = 0;
+      watch.addListener(() => notified++);
+      PlaybackState status(PlaybackStatus value, [int recovery = 0]) =>
+          PlaybackState(status: value, recovery: recovery, videoWidth: 1920, videoHeight: 1080);
       states
         ..add(status(PlaybackStatus.opening))
-        ..add(status(PlaybackStatus.playing));
-      expect(watch.reconnecting, isFalse, reason: 'the first open is no drop');
-      states.add(status(PlaybackStatus.buffering));
-      expect((watch.reconnecting, watch.attempts), (true, 1));
+        ..add(status(PlaybackStatus.playing))
+        // A YY room right after it starts: it buffers, it has not failed.
+        ..add(status(PlaybackStatus.buffering));
+      expect(watch.reconnecting, isFalse, reason: 'a buffering stream is no drop');
+      // Paused for a while, then resumed: buffering again, no drop (B-2).
       states
         ..add(status(PlaybackStatus.playing))
+        ..add(status(PlaybackStatus.paused))
         ..add(status(PlaybackStatus.buffering));
-      expect(watch.attempts, 2, reason: 'again soon after');
+      expect(watch.reconnecting, isFalse, reason: 'a resume is no drop');
+      expect(notified, 0);
+      // The session recovers: the attempt as it counts it.
+      states.add(status(PlaybackStatus.buffering, 1));
+      expect((watch.reconnecting, watch.attempts), (true, 1));
+      states.add(status(PlaybackStatus.opening, 2));
+      expect((watch.reconnecting, watch.attempts), (true, 2));
       states.add(status(PlaybackStatus.playing));
-      now = now.add(const Duration(minutes: 1));
-      states.add(status(PlaybackStatus.buffering));
-      expect(watch.attempts, 1, reason: 'after a settled minute it counts from one');
-      states.add(status(PlaybackStatus.playing));
-      watch.expectReopen();
-      states.add(status(PlaybackStatus.buffering));
-      expect(watch.reconnecting, isFalse, reason: 'another line or quality');
-      states.add(status(PlaybackStatus.stopped));
-      expect(watch.attempts, 0);
+      expect((watch.reconnecting, watch.attempts), (false, 0));
+      states
+        ..add(status(PlaybackStatus.buffering, 3))
+        ..add(status(PlaybackStatus.error));
+      expect(watch.reconnecting, isFalse, reason: 'failed: the error says so');
+      expect(notified, 5);
     });
 
     test('orientation choice: remembered under the room, or for this run only', () async {

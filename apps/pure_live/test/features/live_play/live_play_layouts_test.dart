@@ -696,24 +696,73 @@ void main() {
   testWidgets('paused: a tap on the picture only shows the controls; the play mark resumes', (tester) async {
     // 2026-10-02 (user): a stray tap no longer starts a paused stream, and the
     // mark in the middle shows what a tap does (play), not the paused state.
+    // B02 c1, c2: paused, the controls stay; the mark sits on a 64 disc of
+    // 45 % black and turns while the stream comes back.
     final room = await _pump(tester);
     final session = tester.widget<RoomPlayer>(find.byType(RoomPlayer)).controller.session;
+    Finder controls() => find.ancestor(of: _key('live-play-fullscreen'), matching: find.byType(AnimatedOpacity));
+    double shown() => tester.widget<AnimatedOpacity>(controls()).opacity;
+    room.engine.emit(const EngineVideoSize(1920, 1080));
     await tester.runAsync(session.togglePlayPause);
     await tester.pump();
     expect(session.state.status, PlaybackStatus.paused);
-    expect(
-      find.descendant(of: _key('picture-paused-play'), matching: find.byIcon(Icons.play_circle_outline_rounded)),
-      findsOneWidget,
+    expect(find.descendant(of: _key('picture-paused-play'), matching: find.byIcon(AppIcons.play)), findsOneWidget);
+    expect(tester.getSize(_key('picture-paused-play')), const Size(64, 64));
+    final disc = tester.widget<IconButton>(
+      find.descendant(of: _key('picture-paused-play'), matching: find.byType(IconButton)),
     );
+    expect(disc.style!.backgroundColor!.resolve({}), OnVideoColors.button);
 
-    await tester.tapAt(tester.getTopLeft(find.byType(LiveVideoView)) + const Offset(40, 40));
+    // c1: the controls do not hide by themselves while paused.
+    await tester.pump(const Duration(seconds: 10));
+    expect(shown(), 1);
+    // A tap on the picture hides or shows them; it never resumes, and the
+    // mark stays.
+    final picture = tester.getRect(find.byType(LiveVideoView));
+    final away = Offset(picture.left + 40, picture.center.dy);
+    await tester.tapAt(away);
     await tester.pump(const Duration(seconds: 1));
+    expect(shown(), 0);
     expect(session.state.status, PlaybackStatus.paused, reason: 'a tap elsewhere does not resume');
+    expect(_key('picture-paused-play'), findsOneWidget);
+    await tester.tapAt(away);
+    await tester.pump(const Duration(seconds: 1));
+    expect(shown(), 1);
+    await tester.pump(const Duration(seconds: 10));
+    expect(shown(), 1);
 
     await tester.tap(_key('picture-paused-play'));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
     await tester.pump();
     expect(session.state.status, isNot(PlaybackStatus.paused));
+    // The picture waits for data: the same disc turns, nothing says
+    // "正在重连" (B02 c4).
+    room.engine.emit(const EngineBuffering(buffering: true));
+    await tester.pump();
+    expect(_in('picture-buffering', find.byKey(const ValueKey('video-centre-busy'))), findsOneWidget);
+    expect(find.textContaining('正在重连'), findsNothing);
+    room.engine.emit(const EngineBuffering(buffering: false));
+    await tester.pump();
+    expect(_key('picture-buffering'), findsNothing);
+    // Playing again, the controls hide after the quiet as before.
+    await tester.pump(const Duration(seconds: 5));
+    expect(shown(), 0);
+    await _close(tester, room);
+  });
+
+  testWidgets('B02 c1: a pause from elsewhere (the notification, a headset) brings the controls and keeps them', (
+    tester,
+  ) async {
+    final room = await _pump(tester);
+    final session = tester.widget<RoomPlayer>(find.byType(RoomPlayer)).controller.session;
+    Finder controls() => find.ancestor(of: _key('live-play-fullscreen'), matching: find.byType(AnimatedOpacity));
+    await tester.pump(const Duration(seconds: 5));
+    expect(tester.widget<AnimatedOpacity>(controls()).opacity, 0);
+    await tester.runAsync(session.pause);
+    await tester.pump();
+    expect(tester.widget<AnimatedOpacity>(controls()).opacity, 1);
+    await tester.pump(const Duration(seconds: 10));
+    expect(tester.widget<AnimatedOpacity>(controls()).opacity, 1);
     await _close(tester, room);
   });
 

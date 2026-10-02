@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
+import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
@@ -51,15 +52,18 @@ class _GatedSite extends FakeSite {
 }
 
 final class _App {
-  new(this.services, this.site, this.engines, this.toasts, this.router);
+  new(this.services, this.site, this.engines, this.toasts, this.router, this.danmakus);
 
   final AppServices services;
   final FakeSite site;
   final List<FakeEngine> engines;
   final List<String> toasts;
   final GoRouter router;
+  final List<FakeDanmaku> danmakus;
 
   FakeEngine get engine => engines.last;
+
+  FakeDanmaku get danmaku => danmakus.last;
 }
 
 /// The app's shape: a home page, the room and multi-view, with the floating
@@ -79,6 +83,7 @@ Future<_App> _app(
   await tester.runAsync(loadStrings);
   await tester.runAsync(() => services.store.settings.set(Settings.floatPlay, floatPlay));
   final engines = <FakeEngine>[];
+  final danmakus = <FakeDanmaku>[];
   final toasts = <String>[];
   final previousToast = AppNavigator.toast;
   AppNavigator.toast = toasts.add;
@@ -121,7 +126,15 @@ Future<_App> _app(
       overrides: [
         appServicesProvider.overrideWithValue(services),
         sitesProvider.overrideWithValue(SiteRegistry({SiteIds.bilibili: () => platform})),
-        danmakuProvider.overrideWithValue(DanmakuRegistry({SiteIds.bilibili: FakeDanmaku.new})),
+        danmakuProvider.overrideWithValue(
+          DanmakuRegistry({
+            SiteIds.bilibili: () {
+              final danmaku = FakeDanmaku();
+              danmakus.add(danmaku);
+              return danmaku;
+            },
+          }),
+        ),
         playbackSessionFactoryProvider.overrideWithValue(({config}) {
           final engine = FakeEngine();
           engines.add(engine);
@@ -142,7 +155,7 @@ Future<_App> _app(
     ),
   );
   await _settle(tester);
-  return _App(services, platform, engines, toasts, router);
+  return _App(services, platform, engines, toasts, router, danmakus);
 }
 
 Future<void> _settle(WidgetTester tester, {int rounds = 5}) async {
@@ -389,7 +402,7 @@ void main() {
       // c2: back top left, close top right, pause in the centre; 45 % black.
       expect(_inKey('mini-back', find.byIcon(AppIcons.backToRoom)), findsOneWidget);
       expect(_inKey('mini-close', find.byIcon(AppIcons.close)), findsOneWidget);
-      expect(_inKey('mini-play-pause', find.byIcon(AppIcons.miniPause)), findsOneWidget);
+      expect(_inKey('mini-play-pause', find.byIcon(AppIcons.pause)), findsOneWidget);
       final back = tester.getRect(find.byKey(const ValueKey('mini-back')));
       final close = tester.getRect(find.byKey(const ValueKey('mini-close')));
       final centre = tester.getRect(find.byKey(const ValueKey('mini-play-pause')));
@@ -437,24 +450,46 @@ void main() {
       await _leaveRoom(tester, app);
       final engine = app.engine;
 
+      // B02 c2: the room's play mark, on the same 45 % disc.
       await tester.tap(find.byKey(const ValueKey('mini-play-pause')));
       await _settle(tester);
-      expect(_inKey('mini-play-pause', find.byIcon(AppIcons.miniPlay)), findsOneWidget);
+      expect(_inKey('mini-play-pause', find.byIcon(AppIcons.play)), findsOneWidget);
+      expect(tester.widget<VideoCentreButton>(find.byKey(const ValueKey('mini-play-pause'))).size, miniCentreSize);
       await tester.pump(const Duration(seconds: 4));
       await tester.pump(const Duration(milliseconds: 300));
       expect(_opacityOf(tester, 'mini-play-pause'), 1, reason: 'paused: always shown');
       expect(_opacityOf(tester, 'mini-back'), 0);
       await tester.tap(find.byKey(const ValueKey('mini-play-pause')));
       await _settle(tester);
-      expect(_inKey('mini-play-pause', find.byIcon(AppIcons.miniPause)), findsOneWidget);
+      expect(_inKey('mini-play-pause', find.byIcon(AppIcons.pause)), findsOneWidget);
 
-      // A playing stream that drops.
-      engine.emit(const EngineBuffering(buffering: true));
+      // B02 c2, c4: a stream that buffers is no drop; the centre turns.
+      engine
+        ..emit(const EngineVideoSize(1920, 1080))
+        ..emit(const EngineBuffering(buffering: true));
       await tester.pump();
-      expect(find.byKey(const ValueKey('mini-reconnecting')), findsOneWidget);
-      expect(_inKey('mini-reconnecting', find.text('正在重连')), findsOneWidget);
+      expect(find.byKey(const ValueKey('mini-reconnecting')), findsNothing);
+      expect(_inKey('mini-play-pause', find.byKey(const ValueKey('video-centre-busy'))), findsOneWidget);
+      expect(_opacityOf(tester, 'mini-play-pause'), 1);
       engine.emit(const EngineBuffering(buffering: false));
       await tester.pump();
+      expect(_inKey('mini-play-pause', find.byKey(const ValueKey('video-centre-busy'))), findsNothing);
+
+      // A playing stream that drops: the session's recovery (its reopening
+      // hangs here).
+      final hang = Completer<void>();
+      engine
+        ..onOpen = ((_) => hang.future)
+        ..emit(const EngineError(PlayerException(message: 'reset', type: PlayerErrorType.network, code: 'drop')));
+      await _settle(tester);
+      expect(find.byKey(const ValueKey('mini-reconnecting')), findsOneWidget);
+      expect(_inKey('mini-reconnecting', find.text('正在重连')), findsOneWidget);
+      engine.onOpen = null;
+      hang.complete();
+      engine
+        ..emit(const EngineBuffering(buffering: false))
+        ..emit(const EnginePlaying(playing: true));
+      await _settle(tester);
       expect(find.byKey(const ValueKey('mini-reconnecting')), findsNothing);
 
       // Audio only: the streamer's picture and "纯音频模式", inside 124.
@@ -480,6 +515,35 @@ void main() {
       await tester.runAsync(() => app.services.store.settings.set(Settings.enablePipDanmaku, false));
       await _settle(tester);
       expect(tester.widget<DanmakuOverlay>(_inWindow(find.byType(DanmakuOverlay))).visible, isFalse);
+      await _close(tester, app);
+    });
+
+    testWidgets('B02 c3: its danmaku stand while paused, or fly on as "暂停时的弹幕" says', (tester) async {
+      final app = await _app(tester);
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      DanmakuOverlay overlay() => tester.widget<DanmakuOverlay>(_inWindow(find.byType(DanmakuOverlay)));
+      DanmakuOverlayState layer() => tester.state<DanmakuOverlayState>(_inWindow(find.byType(DanmakuOverlay)));
+      expect(overlay().running, isTrue);
+      app.danmaku.chat('播放时飞');
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(layer().flyingCount, 1);
+
+      await tester.tap(find.byKey(const ValueKey('mini-play-pause')));
+      await _settle(tester);
+      expect(overlay().running, isFalse, reason: 'with the video, the default');
+      app.danmaku
+        ..chat('暂停时不飞')
+        ..chat('也不排队');
+      await tester.pump(const Duration(seconds: 1));
+      expect((layer().flyingCount, layer().pendingCount), (1, 0), reason: 'the one before the pause stands');
+
+      await tester.runAsync(() => app.services.store.settings.set(Settings.danmakuPausedBehavior, 'continue'));
+      await _settle(tester);
+      expect(overlay().running, isTrue);
+      app.danmaku.chat('暂停时照飞');
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(layer().flyingCount, 2);
       await _close(tester, app);
     });
 

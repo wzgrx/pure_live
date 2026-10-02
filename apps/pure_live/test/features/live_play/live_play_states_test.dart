@@ -21,6 +21,7 @@ import 'package:pure_live/features/live_play/logic/iptv_guide_rows.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/features/live_play/logic/room_status.dart';
+import 'package:pure_live/features/live_play/player/player_view.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
@@ -317,6 +318,28 @@ void main() {
       expect(_state().kind, PictureStateKind.none);
     });
 
+    test('B02: paused shows the play mark, over audio only too (B-9); a picture that buffers turns it', () {
+      const paused = PlaybackState(status: PlaybackStatus.paused, videoWidth: 1920, videoHeight: 1080);
+      expect(_state(playback: paused).kind, PictureStateKind.paused);
+      expect(_state(playback: paused, audioOnly: true).kind, PictureStateKind.paused, reason: 'B-9');
+      expect(_state(audioOnly: true).kind, PictureStateKind.audioOnly);
+      // A stall or a resume: the picture is there, the mark turns, no words.
+      const stalled = PlaybackState(
+        status: PlaybackStatus.buffering,
+        lineCount: 2,
+        videoWidth: 1920,
+        videoHeight: 1080,
+      );
+      final buffering = _state(playback: stalled);
+      expect((buffering.kind, buffering.title, buffering.busy), (PictureStateKind.buffering, '', true));
+      expect(buffering.actions, isEmpty);
+      expect(pictureBuffering(stalled), isTrue);
+      // A new source has no picture yet: it connects.
+      expect(_state(playback: const PlaybackState(status: PlaybackStatus.buffering)).kind, PictureStateKind.connecting);
+      // The session's recovery is the drop.
+      expect(_state(playback: stalled, reconnecting: true, attempts: 1).kind, PictureStateKind.reconnecting);
+    });
+
     test('bars only once a stream is open (c5)', () {
       expect(pictureHasControls(RoomStage.playing), isTrue);
       for (final stage in [RoomStage.loading, RoomStage.offline, RoomStage.failed, RoomStage.unplayable]) {
@@ -465,6 +488,31 @@ void main() {
       expect(find.byKey(const ValueKey('live-play-switch-room')), findsOneWidget);
       expect(find.byKey(const ValueKey('live-play-audio-only')), findsNothing);
       expect(find.text('当前主播未开播或已下播'), findsOneWidget);
+      await _close(tester, room);
+    });
+
+    testWidgets('B-4: locked in fullscreen, the unlock button stays when the room goes off the air', (tester) async {
+      final site = FakeSite(liveRoom());
+      final room = await _pump(tester, site: site, width: 852, height: 393);
+      await tester.tap(find.byKey(const ValueKey('live-play-fullscreen')));
+      await _settle(tester);
+      await tester.tap(find.byKey(const ValueKey('live-play-lock')));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('live-play-top-bar')), findsNothing);
+      // The broadcast ends: no bars belong on the picture any more.
+      final controller = tester.widget<RoomPlayer>(find.byType(RoomPlayer)).controller;
+      site.room = liveRoom(status: LiveStatus.offline);
+      await tester.runAsync(controller.load);
+      await _settle(tester);
+      expect(find.text('当前主播未开播或已下播'), findsOneWidget);
+      // Hidden by the quiet: a tap brings the unlock button, which unlocks.
+      await tester.pump(const Duration(seconds: 5));
+      await tester.tapAt(const Offset(200, 60));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byKey(const ValueKey('live-play-unlock')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('live-play-unlock')));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byKey(const ValueKey('live-play-back')), findsOneWidget, reason: 'the reduced top bar is back');
       await _close(tester, room);
     });
 

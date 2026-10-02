@@ -702,6 +702,24 @@ void main() {
     for (final MapEntry(:key, :value) in items.entries) {
       expect(_in('danmaku-setting-$key', find.text(value)), findsOneWidget, reason: key);
     }
+    // B02 c3: "暂停时的弹幕" in 显示范围 (after its last row), with the video by
+    // default; the choice applies at once.
+    expect(_in('danmaku-setting-pausedBehavior', find.text('暂停时的弹幕')), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byKey(const ValueKey('danmaku-setting-pausedBehavior'))).dy,
+      allOf(
+        greaterThan(tester.getTopLeft(find.byKey(const ValueKey('danmaku-setting-bottom'))).dy),
+        lessThan(tester.getTopLeft(find.descendant(of: panel, matching: find.text('样式'))).dy),
+      ),
+    );
+    final paused = tester.widget<SegmentedButton<String>>(find.byKey(const ValueKey('danmaku-paused-behavior')));
+    expect(paused.selected, {'pause'});
+    await tester.tap(_in('danmaku-paused-behavior', find.text('继续飘过')));
+    await _settle(tester);
+    expect(room.services.store.settings.get(Settings.danmakuPausedBehavior), 'continue');
+    expect(tester.widget<SegmentedButton<String>>(find.byKey(const ValueKey('danmaku-paused-behavior'))).selected, {
+      'continue',
+    });
     // 3.x's ranges.
     final speed = tester.widget<Slider>(find.byKey(const ValueKey('danmaku-slider-speed')));
     expect((speed.min, speed.max), (20, 400));

@@ -95,9 +95,12 @@ class _RoomStatusLayerState extends State<RoomStatusLayer> {
     super.dispose();
   }
 
+  /// A source is opening (no picture yet): a stall of a picture that is
+  /// there is no opening, the session's own watchdog takes it over.
   bool get _opening =>
       _room.stage == RoomStage.playing &&
       !widget.reconnect.reconnecting &&
+      !pictureBuffering(widget.playback) &&
       switch (widget.playback.status) {
         PlaybackStatus.idle || PlaybackStatus.opening || PlaybackStatus.buffering => true,
         _ => false,
@@ -142,7 +145,6 @@ class _RoomStatusLayerState extends State<RoomStatusLayer> {
         controller: _room,
         compact: constraints.maxHeight < compactPictureHeight,
         onSwitchLine: () {
-          widget.reconnect.expectReopen();
           final lines = widget.playback.lineCount;
           return _room.selectLine((widget.playback.lineIndex + 1) % (lines < 1 ? 1 : lines));
         },
@@ -246,19 +248,23 @@ class PictureStateView extends StatelessWidget {
       case PictureStateKind.none || PictureStateKind.audioOnly:
         return const SizedBox.shrink();
       case PictureStateKind.paused:
-        // The play mark (what a tap does, as on the play key); it resumes.
+        // The play mark (what a tap does, as on the play key) on its disc;
+        // it resumes (A-01, B02 c2: the in-app floating window's button).
         return Center(
-          child: Semantics(
-            button: true,
-            label: i18n('live_play_play'),
-            child: GestureDetector(
-              key: const ValueKey('picture-paused-play'),
-              behavior: HitTestBehavior.opaque,
-              onTap: () => unawaited(controller.session.togglePlayPause()),
-              child: const Padding(
-                padding: EdgeInsets.all(12),
-                child: Icon(AppIcons.pausedOverlay, size: 64, color: OnVideoColors.secondary),
-              ),
+          child: VideoCentreButton(
+            key: const ValueKey('picture-paused-play'),
+            tooltip: i18n('live_play_play'),
+            onPressed: () => unawaited(controller.session.togglePlayPause()),
+          ),
+        );
+      case PictureStateKind.buffering:
+        // The same disc turns while the picture waits for data (B02 c2).
+        return Center(
+          child: IgnorePointer(
+            child: VideoCentreButton(
+              key: const ValueKey('picture-buffering'),
+              tooltip: i18n('live_play_buffering'),
+              busy: true,
             ),
           ),
         );
@@ -322,35 +328,58 @@ class PictureStateView extends StatelessWidget {
 /// E5: the picture of an audio-only room: its cover under a dark veil, the
 /// headphone and "纯音频播放中" (3.x showed the streamer's picture with
 /// opacity, a colour filter, a blurred glow and a zoom; U.2g c14 drops them).
+/// [paused] (B-9): the status layer's play mark takes the middle and
+/// "纯音频已暂停" sits under it.
 class AudioOnlyCover extends StatelessWidget {
   /// Creates the cover of [room].
-  const new({required this.room, super.key});
+  const new({required this.room, this.paused = false, super.key});
 
   /// The room.
   final LiveRoom room;
 
+  /// The sound is paused.
+  final bool paused;
+
   @override
-  Widget build(BuildContext context) => Stack(
-    key: const ValueKey('live-play-audio-cover'),
-    fit: StackFit.expand,
-    children: [
-      const ColoredBox(color: OnVideoColors.ground),
-      _DimmedCover(url: room.cover),
-      Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(AppIcons.audioOnlyActive, color: OnVideoColors.secondary, size: 40),
-            const SizedBox(height: 8),
-            Text(
-              i18n('live_play_audio_only_playing'),
-              style: Theme.of(context).textTheme.bodyLarge?.regular.copyWith(color: OnVideoColors.secondary),
+  Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.bodyLarge?.regular.copyWith(color: OnVideoColors.secondary);
+    return Stack(
+      key: const ValueKey('live-play-audio-cover'),
+      fit: StackFit.expand,
+      children: [
+        const ColoredBox(color: OnVideoColors.ground),
+        _DimmedCover(url: room.cover),
+        if (paused)
+          // Under the mark, which is in the middle of the same area.
+          Positioned.fill(
+            child: LayoutBuilder(
+              builder: (context, constraints) => Padding(
+                padding: EdgeInsets.only(top: constraints.maxHeight / 2 + videoCentreButtonSize / 2 + 8),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Text(
+                    i18n('live_play_audio_only_paused'),
+                    key: const ValueKey('live-play-audio-paused'),
+                    style: style,
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
-      ),
-    ],
-  );
+          )
+        else
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(AppIcons.audioOnlyActive, color: OnVideoColors.secondary, size: 40),
+                const SizedBox(height: 8),
+                Text(i18n('live_play_audio_only_playing'), style: style),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
 }
 
 /// The replay mark on the picture (U.2g c18): "回看 19:30" and "返回直播", in

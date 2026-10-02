@@ -4,19 +4,23 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/logic/mini_window.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
+import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
 
 /// The danmaku of the mini windows (3.x `CompactDanmakuOverlay`, U.2j-e):
 /// the "小窗弹幕" settings (size with automatic scaling, at least 10 since
 /// c7; weight, speed, opacity, area, how many at once, the gap between two,
 /// the frame rate, one colour or the platform's, text only), the main
 /// danmaku's outline. Nothing when "小窗显示弹幕" is off or the room hides its
-/// danmaku. Its own layer: it never repaints the picture.
+/// danmaku. Its own layer: it never repaints the picture. While the video
+/// does not play they stand as on the room's picture ("暂停时的弹幕",
+/// [danmakuRunning], B02 c3), and the waiting line is dropped.
 class CompactDanmakuLayer extends ConsumerStatefulWidget {
   /// Creates the layer for [controller]'s messages.
   const new({required this.controller, super.key});
@@ -32,6 +36,9 @@ class _CompactDanmakuLayerState extends ConsumerState<CompactDanmakuLayer> {
   final StreamController<LiveMessage> _out = StreamController.broadcast(sync: true);
   final Queue<(LiveMessage, DateTime)> _pending = Queue();
   StreamSubscription<LiveMessage>? _in;
+  StreamSubscription<PlaybackState>? _states;
+  PlaybackStatus _status = PlaybackStatus.idle;
+  String _pausedBehavior = DanmakuPausedBehavior.pause;
   Timer? _next;
   DateTime? _last;
   Duration _gap = const Duration(milliseconds: 350);
@@ -41,10 +48,12 @@ class _CompactDanmakuLayerState extends ConsumerState<CompactDanmakuLayer> {
   static const int _maxPending = 36;
   static const Duration _maxAge = Duration(seconds: 3);
 
+  bool get _running => danmakuRunning(_status, _pausedBehavior);
+
   @override
   void initState() {
     super.initState();
-    _in = widget.controller.flying.listen(_take);
+    _listen();
   }
 
   @override
@@ -52,19 +61,46 @@ class _CompactDanmakuLayerState extends ConsumerState<CompactDanmakuLayer> {
     super.didUpdateWidget(oldWidget);
     if (identical(oldWidget.controller, widget.controller)) return;
     unawaited(_in?.cancel());
-    _pending.clear();
-    _in = widget.controller.flying.listen(_take);
+    unawaited(_states?.cancel());
+    _drop();
+    _listen();
   }
 
   @override
   void dispose() {
     _next?.cancel();
     unawaited(_in?.cancel());
+    unawaited(_states?.cancel());
     unawaited(_out.close());
     super.dispose();
   }
 
+  void _listen() {
+    final session = widget.controller.session;
+    _status = session.state.status;
+    _in = widget.controller.flying.listen(_take);
+    _states = session.states.listen(_onPlayback);
+  }
+
+  /// The video's state: stopping drops the waiting line (it would fly
+  /// stale messages on resume) and rebuilds the overlay's `running`.
+  void _onPlayback(PlaybackState state) {
+    if (state.status == _status || !mounted) return;
+    final wasRunning = _running;
+    _status = state.status;
+    if (wasRunning == _running) return;
+    if (!_running) _drop();
+    setState(() {});
+  }
+
+  void _drop() {
+    _next?.cancel();
+    _pending.clear();
+  }
+
   void _take(LiveMessage message) {
+    // Danmaku composed here fly on, as on the room's picture.
+    if (!_running && !(message.isLocal && message.style != null)) return;
     var text = message.message;
     if (_textOnly) text = withoutEmoteCodes(text, [for (final emote in message.emotes) emote.code]);
     if (text.trim().isEmpty) return;
@@ -134,6 +170,11 @@ class _CompactDanmakuLayerState extends ConsumerState<CompactDanmakuLayer> {
     _textOnly = watchSetting(ref, Settings.pipDanmakuNoEmojiMode);
     final interval = watchSetting(ref, Settings.pipDanmakuEmitInterval);
     _gap = Duration(milliseconds: (interval.clamp(0, 5) * 1000).round());
+    final pausedBehavior = watchSetting(ref, Settings.danmakuPausedBehavior);
+    if (pausedBehavior != _pausedBehavior) {
+      _pausedBehavior = pausedBehavior;
+      if (!_running) _drop();
+    }
     return ValueListenableBuilder(
       valueListenable: DisplayMode.info,
       builder: (context, display, _) => LayoutBuilder(
@@ -150,6 +191,7 @@ class _CompactDanmakuLayerState extends ConsumerState<CompactDanmakuLayer> {
               messages: _out.stream,
               retractions: widget.controller.retractions,
               visible: shown,
+              running: _running,
               maxVisible: maxVisible,
               color: original ? null : Color(color),
               fps: compactDanmakuFps(

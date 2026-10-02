@@ -156,6 +156,10 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   int _hintEpoch = 0;
   Timer? _hide;
 
+  /// The stream is paused: the controls stay on (B02 c1).
+  bool _paused = false;
+  StreamSubscription<PlaybackState>? _playback;
+
   /// Menus of the bars that are open, a focused composer and the room's
   /// panels: the controls do not hide by themselves meanwhile (U.2f,
   /// 统一规则).
@@ -194,6 +198,8 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   void initState() {
     super.initState();
     if (widget.entryHint) _hintEpoch++;
+    _paused = _room.session.state.status == PlaybackStatus.paused;
+    _playback = _room.session.states.listen(_onPlayback);
     _scheduleHide();
     // The bundled emoticons, read once per platform (as the chat list).
     final library = ref.read(emoteLibraryProvider);
@@ -250,8 +256,25 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   @override
   void dispose() {
     _hide?.cancel();
+    unawaited(_playback?.cancel());
     _panels?.removeListener(_scheduleHide);
     super.dispose();
+  }
+
+  /// B02 c1: pausing shows the controls and keeps them (however the stream
+  /// was paused: the play key, the notification, a headset); playing again
+  /// lets them hide as usual.
+  void _onPlayback(PlaybackState state) {
+    final paused = state.status == PlaybackStatus.paused;
+    if (paused == _paused || !mounted) return;
+    _paused = paused;
+    if (widget.pip) return;
+    if (paused) {
+      _hide?.cancel();
+      if (!_controls) setState(() => _controls = true);
+    } else {
+      _scheduleHide();
+    }
   }
 
   bool get _holding => _menus > 0 || _panels?.value != null;
@@ -263,16 +286,19 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
 
   void _scheduleHide() {
     _hide?.cancel();
-    if (_holding) return;
+    // B02 c1: paused, the controls stay until a tap hides them.
+    if (_holding || _paused) return;
     _hide = Timer(const Duration(seconds: 4), () {
       if (mounted) setState(() => _controls = false);
     });
   }
 
   /// A tap on the picture (appendix A 1): on phones it hides visible
-  /// controls while playing and shows them otherwise; on desktops it only
-  /// shows them. It never resumes a paused stream: the play key and the
-  /// picture's play mark do (a stray tap used to start it again).
+  /// controls while playing or paused and shows them otherwise; on desktops
+  /// it only shows them. It never resumes a paused stream: the play key and
+  /// the picture's play mark do (a stray tap used to start it again).
+  /// Paused, the controls stay until a tap hides them (B02 c1), so the
+  /// still picture can be seen without them.
   void _onTap() {
     final hit = _tapHit;
     _tapHit = null;
@@ -280,8 +306,9 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       unawaited(_openMessage(hit));
       return;
     }
-    final playing = _room.session.state.status == PlaybackStatus.playing;
-    if (widget.platform.mobile && _controls && (playing || _locked)) {
+    final status = _room.session.state.status;
+    final shown = status == PlaybackStatus.playing || status == PlaybackStatus.paused;
+    if (widget.platform.mobile && _controls && (shown || _locked)) {
       setState(() => _controls = false);
       return;
     }
@@ -344,9 +371,15 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
 
   /// The flying danmaku, kept inside the picture: they enter from beyond its
   /// right edge, which in the wide room is the chat column. They stand while
-  /// the video does not play (U.2h c10) and move at the danmaku frame rate as
-  /// a whole fraction of the display's (c3).
-  Widget _danmaku({required DanmakuLook look, required bool visible, required _FpsSettings fps}) => ClipRect(
+  /// the video does not play (U.2h c10; paused, as "暂停时的弹幕" says, B02 c3)
+  /// and move at the danmaku frame rate as a whole fraction of the
+  /// display's (c3).
+  Widget _danmaku({
+    required DanmakuLook look,
+    required bool visible,
+    required _FpsSettings fps,
+    required String pausedBehavior,
+  }) => ClipRect(
     child: RepaintBoundary(
       child: ValueListenableBuilder<DisplayModeInfo?>(
         valueListenable: DisplayMode.info,
@@ -367,7 +400,8 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
               currentRefreshRate: display?.currentRefreshRate,
             ),
             refreshRate: (display?.currentRefreshRate ?? 0) > 0 ? display!.currentRefreshRate : null,
-            running: (snapshot.data ?? _room.session.state).status == PlaybackStatus.playing,
+            // B02 c3: paused, as "暂停时的弹幕" says.
+            running: danmakuRunning((snapshot.data ?? _room.session.state).status, pausedBehavior),
             held: _danmakuHeld,
             emotes: _emotes,
           ),
@@ -441,6 +475,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     );
     final longPress = showDanmaku && watchSetting(ref, Settings.enableDanmakuLongPressInteraction);
     final diagnostics = watchSetting(ref, Settings.showPortraitDiagnostics);
+    final pausedBehavior = watchSetting(ref, Settings.danmakuPausedBehavior);
     final video = RepaintBoundary(child: _picture(fit));
     if (pip) {
       // U.2j: the same surface as the in-app floating window; the picture
@@ -477,7 +512,6 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       onPip: () => unawaited(_enterPip()),
       onInteract: _scheduleHide,
       onMenu: _onMenu,
-      onReopen: widget.reconnect.expectReopen,
       onWindowFullscreen: widget.onWindowFullscreen,
       wide: widget.wide,
     );
@@ -553,13 +587,23 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                     ListenableSelector<bool>(
                       listenable: _room,
                       selector: () => _room.audioOnly,
-                      builder: (context, audioOnly, _) =>
-                          audioOnly ? AudioOnlyCover(room: _room.room) : const SizedBox.shrink(),
+                      builder: (context, audioOnly, _) => audioOnly
+                          ? StreamBuilder<PlaybackState>(
+                              stream: _room.session.states,
+                              initialData: _room.session.state,
+                              // B-9: "纯音频已暂停" under the play mark.
+                              builder: (context, snapshot) => AudioOnlyCover(
+                                room: _room.room,
+                                paused: (snapshot.data ?? _room.session.state).status == PlaybackStatus.paused,
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                     _danmaku(
                       look: widget.portraitStream ? _portraitLook(look, portraitDanmaku) : look,
                       visible: showDanmaku && !(widget.portraitStream && portraitDanmaku == 'hidden'),
                       fps: fps,
+                      pausedBehavior: pausedBehavior,
                     ),
                   ],
                 ),
@@ -632,7 +676,10 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                               if (controls) bottomBar,
                             ],
                           ),
-                        if (lockable && controls)
+                        // B-4: while locked the unlock button stays whatever
+                        // the room does (off the air, failed), or nothing
+                        // on screen could unlock it.
+                        if (lockable && (controls || _locked))
                           Positioned(
                             right: 20 + padding.right,
                             top: 0,

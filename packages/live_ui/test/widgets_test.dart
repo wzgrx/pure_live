@@ -326,6 +326,49 @@ void main() {
     });
   });
 
+  testWidgets('VideoCentreButton (B02 c2): a white play mark on a 64 disc of 45 % black; busy, a spinner', (
+    tester,
+  ) async {
+    var taps = 0;
+    await tester.pumpWidget(
+      _app(
+        Center(
+          child: VideoCentreButton(key: const ValueKey('centre'), tooltip: '播放', onPressed: () => taps++),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byKey(const ValueKey('centre'))), const Size(64, 64));
+    final style = tester.widget<IconButton>(find.byType(IconButton)).style!;
+    expect(style.backgroundColor!.resolve({}), OnVideoColors.button);
+    expect(OnVideoColors.button.a, closeTo(0.45, 0.01));
+    expect(style.foregroundColor!.resolve({}), OnVideoColors.foreground);
+    expect(find.byIcon(AppIcons.play), findsOneWidget);
+    expect(find.byTooltip('播放'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('centre')));
+    expect(taps, 1);
+
+    await tester.pumpWidget(
+      _app(
+        Center(
+          child: VideoCentreButton(
+            key: const ValueKey('centre'),
+            tooltip: '缓冲中',
+            busy: true,
+            size: 58,
+            onPressed: () => taps++,
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byKey(const ValueKey('centre'))), const Size(58, 58));
+    final disc = tester.widget<DecoratedBox>(find.byKey(const ValueKey('video-centre-busy')));
+    expect((disc.decoration as BoxDecoration).color, OnVideoColors.button);
+    expect(find.byType(DefaultLoadingIndicator), findsOneWidget);
+    expect(find.byIcon(AppIcons.play), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('centre')), warnIfMissed: false);
+    expect(taps, 1, reason: 'busy: no tap');
+  });
+
   test('InkOnColor.contrastOn picks the ink with the higher contrast (U.2e S2)', () {
     // 3.x put white on Bilibili's 100 yuan gold at about 1.9:1.
     expect(InkOnColor.contrastOn(const Color(0xFFE2B52B)), InkOnColor.ink);

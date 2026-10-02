@@ -128,7 +128,8 @@ void main() {
     final grid = find.byKey(const ValueKey('popular-grid'));
     await measure(tester, 'hot_scroll', () async {
       await flingBothWays(tester, grid, _flings);
-      return {'roomsLoaded': app.site.roomsServed};
+      // Rooms the platform handed out, repeats included (the list holds 300).
+      return {'roomsServed': app.site.roomsServed};
     });
     await app.close(tester);
   });

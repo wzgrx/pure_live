@@ -15,7 +15,8 @@ typedef RecordNotificationContent = ({String title, String text, String stop, Da
 String _nick(RecordTask task) => task.nick.trim().isEmpty ? platformName(task.platform) : task.nick.trim();
 
 /// The notification for [tasks] (U.14 c3, c4): one room "正在录制 · 晚风"
-/// over its title and quality; several "正在录制 N 个直播间" over the
+/// over its title and quality (or what it does instead of writing:
+/// preparing, reconnecting, joining; U.2a2 X4); several "正在录制 N 个直播间" over the
 /// streamers. Its `since` is the first recording's
 /// start, from which the system's clock counts (no refresh every second).
 RecordNotificationContent recordNotificationContent(Iterable<RecordTask> tasks) {
@@ -39,7 +40,7 @@ RecordNotificationContent recordNotificationContent(Iterable<RecordTask> tasks) 
   if (active.length == 1) {
     final task = active.single;
     return (
-      title: i18n('record_notify_one', args: {'name': _nick(task)}),
+      title: i18n(_oneTitleKey(task.status), args: {'name': _nick(task)}),
       text: [task.title.trim(), task.selectedQuality?.trim() ?? ''].where((part) => part.isNotEmpty).join(' · '),
       stop: i18n('record_notify_stop'),
       since: since,
@@ -52,6 +53,15 @@ RecordNotificationContent recordNotificationContent(Iterable<RecordTask> tasks) 
     since: since,
   );
 }
+
+/// One room's headline: only a stream being written says "正在录制" (U.2a2
+/// X4; 3.x and 4.0.0 said so while preparing and joining too).
+String _oneTitleKey(RecordStatus status) => switch (status) {
+  RecordStatus.preparing => 'record_notify_one_preparing',
+  RecordStatus.reconnecting => 'record_notify_one_reconnecting',
+  RecordStatus.processing => 'record_notify_one_processing',
+  _ => 'record_notify_one',
+};
 
 /// "5:52:10", "12:34" (the recording centre's duration).
 String formatRecordDuration(int seconds) {

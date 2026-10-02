@@ -49,6 +49,14 @@ void main() {
       expect((two.title, two.text, two.stop, two.since), ('正在录制 2 个直播间', '晚风、星河长明', '全部停止', first));
     });
 
+    test('one room says what it does: only writing is "正在录制" (U.2a2 X4)', () {
+      String title(RecordStatus status) => recordNotificationContent([_task('a', '晚风', status: status)]).title;
+      expect(title(RecordStatus.running), '正在录制 · 晚风');
+      expect(title(RecordStatus.preparing), '准备录制 · 晚风');
+      expect(title(RecordStatus.reconnecting), '正在重连 · 晚风');
+      expect(title(RecordStatus.processing), '正在整理录像 · 晚风');
+    });
+
     test('the keep-alive sends the words, again only when they change, and "停止录制" stops all', () async {
       const channel = MethodChannel('pure_live/recorder');
       final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;

@@ -15,3 +15,10 @@
 - **改动**：本地网络改成 `20261003`（通知 `20261001`、电池 `20261002`、录制存储 `20260907` 不变；依赖插件用的都是小数值，不冲突）。
 - **测试**：`system_surfaces_test.dart`“the plugins' permission and activity request codes are unique”扫描 `android/app/src/main/kotlin` 里所有 `*_REQUEST` 常量，值不能重复。改之前失败（`NOTIFICATION_REQUEST reuses 20261001`）。
 - **验证**：release 构建编译通过（见文末）。没有装到手机上试。
+
+## 6. 外部意图可以打开任意页面
+
+- **根因**：`MainActivity` 是启动图标的界面，必须导出，任何应用都能给它发 `com.mystyle.purelive.OPEN`。`ShareIntakePlugin.kt` 把 `route` 原样交给 Dart，`share_intake.dart` 直接 `openRoute` → `AppNavigator.toNamed`，别的应用因此能直接打开设置、备份、WebDAV 等任何页面。
+- **改动**：只允许启动图标快捷方式（U.14 c15）和录制通知用到的两个页面：`/search`（搜索直播）、`/record_mannager`（录制中心）。Dart 侧 `ShareIntake.openableRoutes`，其他路由记日志后忽略（不提示）；Kotlin 侧 `OPENABLE_ROUTES` 在入口先丢掉，两边都挡。打开直播间的快捷方式（`platform` + `roomId`）不变，和分享链接一样。
+- **测试**：`test/intake_test.dart`“an outside intent opens only the shortcut pages, anything else is ignored quietly”：`/settings`、`/backup`、`/web_dav`、`/live_play`、`/search/../settings` 都返回 `unsupported`、不导航、不提示；`/search` 照常打开。改之前失败（`/settings` 返回 `opened`）。
+- **验证**：release 构建编译通过（见文末）。没有在手机上用 `am start` 试。

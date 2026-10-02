@@ -10,6 +10,7 @@ import 'package:pure_live/features/iptv/iptv_data.dart';
 import 'package:pure_live/features/iptv/iptv_import.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/share_channel.dart';
+import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/room_prompt.dart';
 import 'package:pure_live/shared/rooms/share_code.dart';
 
@@ -33,7 +34,9 @@ enum ShareOutcome {
 /// M12.5 → F.0a, docs/ui/compare/U.14), one payload at a time, in 3.x's
 /// order:
 ///
-/// 1. a shortcut's or notification's page or room opens;
+/// 1. a shortcut's or notification's page or room opens; only the pages of
+///    [openableRoutes] (the launcher's and the recording notification's),
+///    since any app can send the intent;
 /// 2. a share code asks "打开分享的直播间" (U.3d's dialog, as 3.x);
 /// 3. playlists (`.m3u`, `.m3u8`, `.txt`) and guides (`.xml`, `.gz`,
 ///    `.json`) are imported into IPTV: shared files, or a shared text that
@@ -63,6 +66,12 @@ final class ShareIntake {
 
   /// Guide extensions (3.x `SharedMediaIntake.epgExtensions`).
   static const Set<String> guideExtensions = {'.xml', '.gz', '.json'};
+
+  /// The pages an outside intent may open: the launcher shortcuts' "搜索直播"
+  /// and "录制中心" (U.14 c15; the recording notification opens the latter).
+  /// The open intent is exported with the launcher activity, so another app
+  /// could name any route; the rest are ignored.
+  static const Set<String> openableRoutes = {RoutePath.kSearch, RoutePath.kRecordPage};
 
   /// Finds rooms in shared text.
   final LinkParser links;
@@ -102,6 +111,10 @@ final class ShareIntake {
     try {
       final route = payload.route;
       final shortcut = payload.room;
+      if (route != null && !openableRoutes.contains(route)) {
+        log('Ignored an outside request for $route', name: 'ShareIntake');
+        return ShareOutcome.unsupported;
+      }
       if (route != null || shortcut != null) {
         final context = await navigator();
         if (context == null) return ShareOutcome.notFound;

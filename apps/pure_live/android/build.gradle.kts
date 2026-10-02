@@ -1,11 +1,8 @@
-// toolchain.env (repository root) is the single source of the Android
-// platform, build-tools and NDK versions (docs/PLAN.md §3): every module,
-// the app and each plugin, builds with the versions it names.
-val toolchain: Map<String, String> =
-    rootDir.resolve("../../../toolchain.env").readLines()
-        .map { it.trim() }
-        .filter { it.isNotEmpty() && !it.startsWith("#") && "=" in it }
-        .associate { it.substringBefore("=").trim() to it.substringAfter("=").trim() }
+// toolchain.env (repository root, read in settings.gradle.kts) is the single
+// source of the Android platform, build-tools and NDK versions (docs/PLAN.md
+// §3): every module, the app and each plugin, builds with the versions it names.
+@Suppress("UNCHECKED_CAST")
+val toolchain = gradle.extra["toolchain"] as Map<String, String>
 
 /** Applies toolchain.env's platform (ANDROID_COMPILE_SDK, e.g. 37.2), build-tools and NDK. */
 fun com.android.build.api.dsl.CommonExtension.useToolchain() {

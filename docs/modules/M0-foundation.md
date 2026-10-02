@@ -60,7 +60,8 @@
 | build-tools | 36.0.0 | 没写 `buildToolsVersion`，用 AGP 9.4.1 的默认值 |
 | NDK | 28.2.13676358 | `ndkVersion = flutter.ndkVersion`，即 Flutter 3.47.5 的默认值；要编原生代码的三个插件（`ffmpeg_kit_extended_flutter`、`cnativeapi`、`jni`）也都用它 |
 
-- 做法：`apps/pure_live/android/build.gradle.kts` 读仓库根目录的 `toolchain.env`，用 `ANDROID_COMPILE_SDK`（主版本加 `compileSdkMinor`）、`ANDROID_BUILD_TOOLS`、`ANDROID_NDK_VERSION` 设置应用和每个插件。以后升级只改 `toolchain.env`。
+- 做法：`apps/pure_live/android/settings.gradle.kts` 读仓库根目录的 `toolchain.env`，`build.gradle.kts` 用 `ANDROID_COMPILE_SDK`（主版本加 `compileSdkMinor`）、`ANDROID_BUILD_TOOLS`、`ANDROID_NDK_VERSION` 设置应用和每个插件。以后升级只改 `toolchain.env`。
 - 验证（云端容器，`flutter build apk --debug --target-platform android-arm64`）：先把 NDK 28.2、build-tools 36.0.0、platform 37.0 移出 SDK，并关掉 AGP 的自动下载，构建照样成功（约 7.7 分钟）；三个插件的 CMake 缓存都指向 `ndk/30.0.16248370`，`.so` 里是 NDK 30 的编译器（clang 21.0.0，r574158c）。同一次改动上 `apps/pure_live` 的 `flutter test` 779 个通过，1 个失败是容器以 root 运行造成的（`backup_page_test.dart` 用 `chmod 000` 造“读不了”，root 不受限制），与本改动无关。
-- 要在 K90 上看：三个插件的原生代码换了编译器，录制（FFmpegKit）、播放、`jni` 相关功能各走一遍。
-- 还没处理：`KOTLIN_VERSION=2.4.20`，但 AGP 9.4.1 内置 Kotlin 实际解析到的 Kotlin Gradle 插件是 2.4.10。
+- Kotlin：`KOTLIN_VERSION=2.4.20`，但应用实际用 2.2.10 编译。Flutter 的 `kgpVersion` 任务报 `KGP Version: 2.2.10`，`:app` 的 `kotlinCompilerClasspath` 是 `kotlin-compiler-embeddable:2.2.10`。根因：AGP 9 的内置 Kotlin 用和它同一 classpath 上的 Kotlin Gradle 插件，`settings.gradle.kts` 只放了 AGP，于是用的是 AGP 9.4.1 自己依赖的最低版本 2.2.10。改法：`settings.gradle.kts` 读 `toolchain.env`（`build.gradle.kts` 改为用它读出的结果），在插件声明里加上 `org.jetbrains.kotlin.android`（只放进 classpath，不应用），版本取 `KOTLIN_VERSION`。改后 `kgpVersion` 报 2.4.20，编译器是 `kotlin-compiler-embeddable:2.4.20`。APK 里的 Kotlin 标准库随之从 2.2.20 变为 2.4.20（`debugRuntimeClasspath` 的 `kotlin-stdlib` 全部解析到 2.4.20）；arm64 调试包构建通过。
+- AGP 的版本仍然写在 `settings.gradle.kts` 里（和 `AGP_VERSION` 一致）：flutter_tools 用正则从这个文件读 AGP 版本，换成从 `toolchain.env` 读取后它会认不出来。升级 AGP 时两处一起改。
+- 要在 K90 上看：三个插件的原生代码换了编译器，Kotlin 代码换了编译器和标准库，录制（FFmpegKit）、播放、`jni` 相关功能和原生部分（通知、画中画、分享接收、悬浮窗）各走一遍。

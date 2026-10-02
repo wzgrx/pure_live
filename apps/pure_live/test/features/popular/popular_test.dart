@@ -392,6 +392,8 @@ void main() {
     expect(find.byType(RefreshIndicator), findsNothing);
     expect(find.ancestor(of: grid, matching: find.byType(AppRefreshView)), findsOneWidget);
     expect(find.descendant(of: grid, matching: find.byType(StretchingOverscrollIndicator)), findsNothing);
+    // P03: the platform pages turn like Android's ViewPager.
+    expect(tester.widget<TabBarView>(find.byType(TabBarView)).physics, isA<PureLivePageScrollPhysics>());
 
     final gesture = await tester.startGesture(tester.getCenter(grid));
     for (var i = 0; i < 40; i++) {

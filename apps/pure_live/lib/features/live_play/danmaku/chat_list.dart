@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,13 +32,47 @@ enum ChatListStyle {
   static ChatListStyle of(String name) => name == card.name ? card : compact;
 }
 
-/// The colour a viewer gave their message, made readable on the theme's
-/// surface (3.x lifted the lightness the same way for its dots); null for
-/// plain white or black messages, which take the theme's colours.
-Color? chatNameColor(LiveMessageColor color, Brightness brightness) {
+/// The contrast a name in a viewer's colour keeps on its background (WCAG
+/// AA for body text).
+const double chatNameContrast = 4.5;
+
+/// The WCAG contrast ratio of [a] and [b] (1 to 21), both taken opaque.
+double contrastRatio(Color a, Color b) {
+  final la = a.withValues(alpha: 1).computeLuminance();
+  final lb = b.withValues(alpha: 1).computeLuminance();
+  return (math.max(la, lb) + 0.05) / (math.min(la, lb) + 0.05);
+}
+
+final Map<(int, int), Color> _readableNames = {};
+
+/// The colour a viewer gave their message, for their name on [background]
+/// (B08, audit B-5): the colour itself when it reads at [chatNameContrast],
+/// else darker step by step on a light background (lighter on a dark one)
+/// until it does. 3.x set every colour to one lightness, which left yellow
+/// at 1.6:1 on white. Null for plain white or black messages, which take
+/// the theme's colours.
+Color? chatNameColor(LiveMessageColor color, Color background) {
   if (color == LiveMessageColor.white || (color.r == 0 && color.g == 0 && color.b == 0)) return null;
-  final hsl = HSLColor.fromColor(Color.fromARGB(255, color.r, color.g, color.b));
-  return hsl.withLightness(brightness == Brightness.dark ? 0.72 : 0.42).toColor();
+  final ground = background.withValues(alpha: 1);
+  final key = ((color.r << 16) | (color.g << 8) | color.b, ground.toARGB32());
+  if (_readableNames[key] case final known?) return known;
+  if (_readableNames.length >= 512) _readableNames.clear();
+  return _readableNames[key] = _readableOn(Color.fromARGB(255, color.r, color.g, color.b), ground);
+}
+
+Color _readableOn(Color color, Color background) {
+  if (contrastRatio(color, background) >= chatNameContrast) return color;
+  // Towards black or white, whichever the background stands further from
+  // (one of them always reaches 4.5:1).
+  final luminance = background.computeLuminance();
+  final darker = (luminance + 0.05) / 0.05 >= 1.05 / (luminance + 0.05);
+  final hsl = HSLColor.fromColor(color);
+  var lightness = hsl.lightness;
+  while (true) {
+    lightness = (lightness + (darker ? -0.01 : 0.01)).clamp(0.0, 1.0);
+    final next = hsl.withLightness(lightness).toColor();
+    if (contrastRatio(next, background) >= chatNameContrast || lightness == 0 || lightness == 1) return next;
+  }
 }
 
 /// The text a double tap copies (3.x: "用户名: 内容").
@@ -50,6 +85,14 @@ String chatCopyText(LiveMessage message) {
 /// bottom; scrolled up it stays put and offers "N 条新弹幕" (3.x's button).
 /// A long press or right click on a message opens copy and block; a double
 /// tap copies it.
+///
+/// B08: it listens to the room's [ChatFeed] (at most once a frame) rather
+/// than to the whole room. The list is reversed, the newest line at the
+/// bottom as index 0, so following needs no jump, and a line already built
+/// is not built again. From the moment a finger drags it, or it is moved
+/// away from the bottom, it holds the lines it shows (3.x's snapshot: they
+/// stay where they are, new ones are counted) and follows the feed again
+/// when a scroll ends at the bottom or "N 条新弹幕" is pressed.
 class ChatList extends ConsumerStatefulWidget {
   /// Creates the list.
   const new({required this.controller, this.onTouched, super.key});
@@ -65,35 +108,112 @@ class ChatList extends ConsumerStatefulWidget {
 }
 
 class _ChatListState extends ConsumerState<ChatList> {
+  /// This close to the newest line the list is at the bottom.
+  static const double _bottomSlack = 24;
+
   final ScrollController _scroll = ScrollController();
+
+  /// Lines added since the list last showed the newest one.
+  final ValueNotifier<int> _unseen = ValueNotifier(0);
+
+  /// Each line's widget, made once for the list's look and emoticons: the
+  /// same widget is not built again when the list rebuilds (B08).
+  final Expando<ChatLineView> _views = Expando('chat line views');
+
+  /// The lines shown, oldest first: the feed's while following, else the
+  /// ones that were shown when the list stopped following. A new batch
+  /// rebuilds only the list, not the hint above it.
+  final ValueNotifier<List<ChatLine>> _shown = ValueNotifier(const []);
   bool _following = true;
   int _seen = 0;
+  int _removals = 0;
   EmoteTable _emotes = EmoteTable.empty;
+
+  /// What the list shows of the room besides its lines.
+  late _RoomFacts _facts;
+
+  ChatFeed get _feed => widget.controller.chat;
 
   @override
   void initState() {
     super.initState();
     _scroll.addListener(_onScroll);
-    widget.controller.addListener(_onChange);
-    _seen = widget.controller.chat.added;
+    _attach(widget.controller);
+  }
+
+  @override
+  void didUpdateWidget(ChatList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (identical(oldWidget.controller, widget.controller)) return;
+    _detach(oldWidget.controller);
+    _following = true;
+    _attach(widget.controller);
+  }
+
+  @override
+  void dispose() {
+    _detach(widget.controller);
+    _scroll.dispose();
+    _unseen.dispose();
+    _shown.dispose();
+    super.dispose();
+  }
+
+  void _attach(LiveRoomController controller) {
+    controller.addListener(_onRoom);
+    controller.chat.addListener(_onLines);
+    _shown.value = controller.chat.lines;
+    _seen = controller.chat.added;
+    _removals = controller.chat.removals;
+    _unseen.value = 0;
+    _facts = _RoomFacts.of(controller);
     // The platform's bundled emoticons (M13.16), read once per platform.
     final library = ref.read(emoteLibraryProvider);
-    final platform = widget.controller.site.id;
+    final platform = controller.site.id;
     _emotes = library.tableOf(platform);
     if (_emotes.codes.isEmpty) {
       unawaited(
         library.load(platform).then((table) {
-          if (mounted && table.codes.isNotEmpty) setState(() => _emotes = table);
+          if (mounted && identical(widget.controller, controller) && table.codes.isNotEmpty) {
+            setState(() => _emotes = table);
+          }
         }),
       );
     }
   }
 
-  @override
-  void dispose() {
-    widget.controller.removeListener(_onChange);
-    _scroll.dispose();
-    super.dispose();
+  void _detach(LiveRoomController controller) {
+    controller.removeListener(_onRoom);
+    controller.chat.removeListener(_onLines);
+  }
+
+  /// The room changed: the list rebuilds only for what it shows of it.
+  void _onRoom() {
+    if (!mounted) return;
+    final facts = _RoomFacts.of(widget.controller);
+    if (facts != _facts) setState(() => _facts = facts);
+  }
+
+  /// The feed changed (at most once a frame).
+  void _onLines() {
+    if (!mounted) return;
+    final feed = _feed;
+    if (_following) {
+      _shown.value = feed.lines;
+      _seen = feed.added;
+      return;
+    }
+    // Held: taken-back and blocked lines still go, also those the feed has
+    // already let go of (3.x); new ones are counted.
+    if (feed.removals != _removals) {
+      final tests = feed.removalsSince(_removals) ?? const [];
+      _removals = feed.removals;
+      _shown.value = [
+        for (final line in _shown.value)
+          if (!line.removed && !tests.any((test) => test(line))) line,
+      ];
+    }
+    _unseen.value = feed.added - _seen;
   }
 
   /// What the list says before its first message, or null for the list.
@@ -143,28 +263,58 @@ class _ChatListState extends ConsumerState<ChatList> {
     };
   }
 
+  /// Reversed: 0 is the newest line.
+  bool get _atBottom => !_scroll.hasClients || _scroll.position.pixels <= _bottomSlack;
+
   void _onScroll() {
-    if (!_scroll.hasClients) return;
-    final atBottom = _scroll.position.pixels >= _scroll.position.maxScrollExtent - 24;
-    if (atBottom != _following) setState(() => _following = atBottom);
-    if (atBottom) _seen = widget.controller.chat.added;
+    if (_following && !_atBottom) _hold();
   }
 
-  void _onChange() {
-    if (!mounted) return;
-    if (_following) {
-      _seen = widget.controller.chat.added;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scroll.hasClients && _following) _scroll.jumpTo(_scroll.position.maxScrollExtent);
-      });
+  bool _onScrollNotification(ScrollNotification notification) {
+    if (notification.depth != 0) return false;
+    if (notification is ScrollStartNotification && notification.dragDetails != null) {
+      // A finger on the list: the lines under it stay where they are.
+      _hold();
+    } else if (notification is ScrollEndNotification && _atBottom) {
+      _follow();
     }
-    setState(() {});
+    return false;
+  }
+
+  /// Stops following: the lines shown stay, new ones are counted.
+  void _hold() {
+    if (!_following) return;
+    setState(() => _following = false);
+    _removals = _feed.removals;
+    _unseen.value = _feed.added - _seen;
+  }
+
+  /// Follows the feed again, from its newest line.
+  void _follow() {
+    if (_following) return;
+    setState(() => _following = true);
+    _shown.value = _feed.lines;
+    _seen = _feed.added;
+    _unseen.value = 0;
   }
 
   void _toBottom() {
-    setState(() => _following = true);
-    _seen = widget.controller.chat.added;
-    if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
+    _follow();
+    if (_scroll.hasClients) _scroll.jumpTo(0);
+  }
+
+  ChatLineView _view(ChatLine line, ChatListStyle style) {
+    final made = _views[line];
+    if (made != null && made.style == style && identical(made.emotes, _emotes)) return made;
+    final message = line.kind == ChatLineKind.chat ? line.message : null;
+    return _views[line] = ChatLineView(
+      key: ValueKey(line.id),
+      line: line,
+      style: style,
+      emotes: _emotes,
+      onActions: message == null ? null : () => unawaited(_actions(line)),
+      onCopy: message == null ? null : () => unawaited(_copy(message)),
+    );
   }
 
   Future<void> _copy(LiveMessage message) async {
@@ -180,7 +330,7 @@ class _ChatListState extends ConsumerState<ChatList> {
 
   /// B06 c1: Bilibili's names for a guest, or for an expired login, with
   /// the way to log in; null when there is nothing to say.
-  Widget? _nameHint() => switch (widget.controller.nameHint) {
+  Widget? _nameHint() => switch (_facts.nameHint) {
     ChatNameHint.none => null,
     ChatNameHint.guest => ChatNameHintBar(
       text: i18n('bilibili_guest_names_hidden'),
@@ -217,42 +367,52 @@ class _ChatListState extends ConsumerState<ChatList> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ?hint,
-        Expanded(key: const ValueKey('live-play-chat-body'), child: _content(style)),
+        Expanded(
+          key: const ValueKey('live-play-chat-body'),
+          child: ValueListenableBuilder<List<ChatLine>>(
+            valueListenable: _shown,
+            builder: (context, lines, _) => _content(style, lines),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _content(ChatListStyle style) {
-    final lines = widget.controller.chat.lines;
+  Widget _content(ChatListStyle style, List<ChatLine> lines) {
     if (!lines.any((line) => line.kind != ChatLineKind.system)) {
       // U.2e c2, U.2g c7: until the first message the list says where the
       // danmaku is (3.x: blank, or a few "系统消息" cards).
       final empty = _emptyState(lines);
       if (empty != null) return empty;
     }
-    final unseen = widget.controller.chat.added - _seen;
+    final count = lines.length;
     final scheme = Theme.of(context).colorScheme;
     return Listener(
       onPointerDown: (_) => widget.onTouched?.call(),
       child: Stack(
         children: [
-          ListView.builder(
-            key: const ValueKey('live-play-chat'),
-            controller: _scroll,
-            padding: EdgeInsets.symmetric(horizontal: style == ChatListStyle.card ? 6 : 16, vertical: 6),
-            itemCount: lines.length,
-            itemBuilder: (context, index) {
-              final line = lines[index];
-              final message = line.kind == ChatLineKind.chat ? line.message : null;
-              return ChatLineView(
-                key: ValueKey(line.id),
-                line: line,
-                style: style,
-                emotes: _emotes,
-                onActions: message == null ? null : () => unawaited(_actions(line)),
-                onCopy: message == null ? null : () => unawaited(_copy(message)),
-              );
-            },
+          NotificationListener<ScrollNotification>(
+            onNotification: _onScrollNotification,
+            child: ListView.builder(
+              key: const ValueKey('live-play-chat'),
+              controller: _scroll,
+              // B08: the newest line is index 0 at the bottom; new lines
+              // come in under the others without a jump.
+              reverse: true,
+              padding: EdgeInsets.symmetric(horizontal: style == ChatListStyle.card ? 6 : 16, vertical: 6),
+              itemCount: count,
+              // Nothing in a line is worth keeping off screen, and the
+              // keep-alive wrappers were built again for every line on
+              // every new batch (3.x turned them off too).
+              addAutomaticKeepAlives: false,
+              // A line keeps its element when lines come in under it.
+              findChildIndexCallback: (key) {
+                if (key is! ValueKey<int>) return null;
+                final at = _indexOfId(lines, key.value);
+                return at < 0 ? null : count - 1 - at;
+              },
+              itemBuilder: (context, index) => _view(lines[count - 1 - index], style),
+            ),
           ),
           if (!_following)
             Positioned(
@@ -267,8 +427,11 @@ class _ChatListState extends ConsumerState<ChatList> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 icon: const Icon(AppIcons.newMessages, size: 18),
-                label: Text(
-                  unseen > 0 ? i18n('danmaku_new_messages', args: {'count': '$unseen'}) : i18n('scroll_to_bottom'),
+                label: ValueListenableBuilder<int>(
+                  valueListenable: _unseen,
+                  builder: (context, unseen, _) => Text(
+                    unseen > 0 ? i18n('danmaku_new_messages', args: {'count': '$unseen'}) : i18n('scroll_to_bottom'),
+                  ),
                 ),
                 onPressed: _toBottom,
               ),
@@ -277,6 +440,55 @@ class _ChatListState extends ConsumerState<ChatList> {
       ),
     );
   }
+}
+
+/// Where the line with [id] is in [lines] (in id order), or -1.
+int _indexOfId(List<ChatLine> lines, int id) {
+  var low = 0;
+  var high = lines.length - 1;
+  while (low <= high) {
+    final middle = (low + high) >> 1;
+    final at = lines[middle].id;
+    if (at == id) return middle;
+    if (at < id) {
+      low = middle + 1;
+    } else {
+      high = middle - 1;
+    }
+  }
+  return -1;
+}
+
+/// What the chat list shows of the room besides its lines: the empty
+/// states and the Bilibili names hint. The room's other changes (audience,
+/// volume, the player) leave the list alone.
+@immutable
+final class _RoomFacts {
+  const new({required this.stage, required this.connection, required this.nameHint, required this.room});
+
+  factory of(LiveRoomController controller) => _RoomFacts(
+    stage: controller.stage,
+    connection: controller.chatConnection,
+    nameHint: controller.nameHint,
+    // The offline state shows the room's notice.
+    room: controller.stage == RoomStage.offline ? controller.room : null,
+  );
+
+  final RoomStage stage;
+  final ChatConnection connection;
+  final ChatNameHint nameHint;
+  final LiveRoom? room;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _RoomFacts &&
+      other.stage == stage &&
+      other.connection == connection &&
+      other.nameHint == nameHint &&
+      identical(other.room, room);
+
+  @override
+  int get hashCode => Object.hash(stage, connection, nameHint, room == null ? null : identityHashCode(room));
 }
 
 /// The line above the chat list about Bilibili's names (B06 c1): an info
@@ -485,11 +697,12 @@ class ChatLineView extends StatelessWidget {
   }
 
   /// U.2a change 11: "用户名：" in the secondary colour (or the message's own
-  /// colour), the message in the normal colour.
+  /// colour, B08: readable on the panel's surface), the message in the
+  /// normal colour.
   Widget _compact(BuildContext context, LiveMessage message, TextStyle? body) {
     final theme = Theme.of(context);
     final name = message.userName.trim();
-    final nameColor = chatNameColor(message.color, theme.brightness) ?? theme.colorScheme.onSurfaceVariant;
+    final nameColor = chatNameColor(message.color, theme.colorScheme.surface) ?? theme.colorScheme.onSurfaceVariant;
     return Padding(
       key: const ValueKey('live-play-chat-line'),
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -506,10 +719,7 @@ class ChatLineView extends StatelessWidget {
             WidgetSpan(
               alignment: PlaceholderAlignment.baseline,
               baseline: TextBaseline.alphabetic,
-              child: EmoteText(
-                chatSegments(message, emotes),
-                style: body?.copyWith(color: theme.colorScheme.onSurface),
-              ),
+              child: EmoteText(line.segments(emotes), style: body?.copyWith(color: theme.colorScheme.onSurface)),
             ),
           ],
         ),
@@ -523,7 +733,7 @@ class ChatLineView extends StatelessWidget {
   Widget _card(BuildContext context, LiveMessage message, TextStyle? body) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final colour = chatNameColor(message.color, theme.brightness);
+    final colour = chatNameColor(message.color, scheme.surfaceContainerLowest);
     final dot = colour ?? scheme.onSurface;
     final name = message.userName.trim();
     final avatar = switch (message.data) {
@@ -573,7 +783,7 @@ class ChatLineView extends StatelessWidget {
                       WidgetSpan(
                         alignment: PlaceholderAlignment.baseline,
                         baseline: TextBaseline.alphabetic,
-                        child: EmoteText(chatSegments(message, emotes), style: body?.copyWith(color: scheme.onSurface)),
+                        child: EmoteText(line.segments(emotes), style: body?.copyWith(color: scheme.onSurface)),
                       ),
                     ],
                   ),
@@ -676,7 +886,9 @@ Future<void> showChatMessageActions(
                           TextSpan(
                             text: '$name：',
                             style: body?.copyWith(
-                              color: chatNameColor(message.color, theme.brightness) ?? scheme.onSurfaceVariant,
+                              color:
+                                  chatNameColor(message.color, scheme.surfaceContainerLowest) ??
+                                  scheme.onSurfaceVariant,
                             ),
                           ),
                         TextSpan(

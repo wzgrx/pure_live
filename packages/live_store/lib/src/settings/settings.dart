@@ -387,6 +387,17 @@ abstract final class Settings {
   /// change 7; new in v4, remembered for the next room).
   static const livePlayChatCollapsed = BoolSetting('livePlayChatCollapsed', section: 'player', defaultValue: false);
 
+  /// New (docs/cloud/tasks/B05.md, docs/ui/compare/U.2m c4; 3.x has no such
+  /// setting): how the live room's "切换直播间" panel shows the rooms, kept
+  /// from the panel's style button: `grid` (the default, 3.x's small cards,
+  /// GitHub issue #37) or `list` (rows with a 16:9 cover).
+  static const roomSwitcherLayout = StringSetting(
+    'roomSwitcherLayout',
+    section: 'player',
+    defaultValue: 'grid',
+    allowed: {'grid', 'list'},
+  );
+
   // ---- danmaku (danmaku_settings_controller.dart:58-111) ----
 
   /// Hide danmaku.
@@ -1473,6 +1484,7 @@ abstract final class Settings {
     showPortraitDiagnostics,
     portraitRoomOverrides,
     livePlayChatCollapsed,
+    roomSwitcherLayout,
     hideDanmaku,
     noEmojiMode,
     danmakuTopArea,

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:live_ui/src/theme/motion.dart';
 import 'package:scroll_animator/scroll_animator.dart';
 
 /// Short enough to feel immediate on high-refresh displays while leaving the
@@ -83,6 +84,35 @@ class PureLiveBoundedScrollPhysics extends ClampingScrollPhysics {
     );
     return adjusted.clamp(newPosition.minScrollExtent, newPosition.maxScrollExtent);
   }
+}
+
+/// The pages of a `TabBarView`: [PureLiveBoundedScrollPhysics]'s edges, a
+/// firmer spring and Android ViewPager's fling rule (research 2026-10-02
+/// S3). A release turns the page by itself only when at least
+/// [AppMotion.pageFlingVelocity] fast after [AppMotion.pageFlingDistance];
+/// otherwise the page turns only when dragged past half, so the sideways
+/// part of an upward scroll does not turn it. The page settles with
+/// [AppMotion.pageSpring] in about 0.27 s, in step with a tapped tab
+/// ([pureLiveTabTransitionDuration]).
+class PureLivePageScrollPhysics extends PureLiveBoundedScrollPhysics {
+  /// Creates the physics.
+  const new({super.parent});
+
+  @override
+  PureLivePageScrollPhysics applyTo(ScrollPhysics? ancestor) =>
+      PureLivePageScrollPhysics(parent: buildParent(ancestor));
+
+  // The page physics `TabBarView` and `PageView` wrap this in read these
+  // from their parent.
+
+  @override
+  SpringDescription get spring => AppMotion.pageSpring;
+
+  @override
+  double get minFlingVelocity => AppMotion.pageFlingVelocity;
+
+  @override
+  double get minFlingDistance => AppMotion.pageFlingDistance;
 }
 
 /// A scroll controller that turns discrete mouse-wheel steps on Windows into

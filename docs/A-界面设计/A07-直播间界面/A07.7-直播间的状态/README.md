@@ -1,10 +1,11 @@
-# A07.7 直播间的状态：设计（第 1 版）
+# A07.7 直播间的状态：设计（第 1 版，已确认并完成）
 
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：直播间没在正常播放时画面区域和信息行、弹幕区的样子——加载中、未开播（含封禁、轮播、状态未知）、获取失败、播放中断、断流重连、受限、纯音频、回放播完；网络电视的节目单和回看。下面的界面清点表是这一批出图的清单
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a077)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a077)；依赖 [A07.1](../A07.1-竖屏普通布局/README.md)（E2、E3、E5 已确认，直接沿用），全屏照 [A07.4](../A07.4-横屏全屏/README.md)，宽屏照 [A07.5](../A07.5-宽屏左右分栏/README.md)，弹法照 [A07.6](../A07.6-直播间弹窗/README.md)
-- 评审页：`page.json` 生成（`tools/ui/mock/page.py`），待发布；效果图源文件 [src/gen.py](src/gen.py)
+- 评审页：claude.ai 私有页面；源文件 [page.json](page.json)（`tools/ui/mock/page.py` 生成），效果图源文件 [src/gen.py](src/gen.py)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`，`tools/ui/strings.py`）；画面、头像、频道图标是示意图片
+- 旧编号：U.2g、T05i.1；相关决定 D-003（Z1～Z4 按建议 A）
 
 ## 界面清点表
 
@@ -22,7 +23,9 @@
 | A07.7-10 | 网络电视回看中 | 点节目单里过去的节目 | 三种 | 回看中；返回直播 |
 | A07.7-11 | 状态附带的提示条 | 上面各状态 | 三种 | 见“提示条”一节 |
 
-## v3 的样子
+## 3.x 的样子和问题
+
+文件在 `git show v3.2.11:lib/modules/live_play/...`（下面省略这个前缀）。
 
 **画面区域选哪个占位**（`widgets/layout/live_play_video.dart:33-41,63-73`）：还没有播放器时，`isLoading` → 加载；有 `loadError` → 获取失败；`isLiving` 为真 → 加载，否则 → 未开播。有播放器以后画面由 `VideoPlayer` 画，播放器报错时盖一层 `PlaybackFailureOverlay`（`video_player.dart:45-57`）。
 
@@ -58,9 +61,9 @@
 
 **按宽度分支**：未开播头部只在全屏时有返回、切换直播间、时间；节目单对话框宽度以 600 为界；纯音频以画面高 500 为界；宽屏（>680）时这些画面放在左侧画面区，右栏在没成功时空白。
 
-**v4 现在**（`apps/pure_live/lib/features/live_play/player/player_status.dart`）：已经有 `RoomStatusLayer`：“正在进入直播间…”、未开播（封面 + 头像 + 刷新）、获取失败按原因、受限原因、E3 重连、E5 纯音频封面、回放已播完、暂停时画面中间大暂停图标（v3 没有）；网络电视节目单是底部面板（`dialogs/iptv_guide.dart:35-41`，v3 是对话框），网络电视画面撑满剩余高度、下面放信息行（`live_play_page.dart:320-342`）；网络电视顶栏不显示录制按钮（`layout/room_header.dart:77-80`，v3 有）。
+**设计时 v4 的样子**（2026-10-01，`apps/pure_live/lib/features/live_play/player/player_status.dart`，行号是当时的）：已经有 `RoomStatusLayer`：“正在进入直播间…”、未开播（封面 + 头像 + 刷新）、获取失败按原因、受限原因、E3 重连、E5 纯音频封面、回放已播完、暂停时画面中间大暂停图标（v3 没有）；网络电视节目单是底部面板（`dialogs/iptv_guide.dart:35-41`，v3 是对话框），网络电视画面撑满剩余高度、下面放信息行（`live_play_page.dart:320-342`）；网络电视顶栏不显示录制按钮（`layout/room_header.dart:77-80`，v3 有）。
 
-## v3 的问题
+**3.x 的问题**
 
 | 编号 | 问题 | 位置 |
 |---|---|---|
@@ -83,11 +86,13 @@
 | S17 | 没配置节目单来源也显示“暂无后续节目排班信息” | `video_controller.dart:1013-1017`、`iptv_schedule_dialog.dart:95-100` |
 | S18 | 画面上写了还弹提示条（未开播、获取失败） | `live_play_controller.dart:732,788-790` |
 
+必须保留的操作习惯（[specs/UI.md](../../../specs/UI.md) 附录 A）：第 7 条（返回链：节目单面板也先关）、第 16 条（R 刷新；没在播放时也能用）。
+
 ## 各版的经过
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 18 种画面状态一个组件；三种形态的整屏对比；网络电视节目单和回看；四处选择 | 待评审 |
+| 第 1 版 | 18 种画面状态一个组件；三种形态的整屏对比；网络电视节目单和回看；四处选择 | 2026-10-01 确认全部设计，Z1～Z4 按建议 A |
 
 ## 对比页（按章节导出）
 
@@ -123,7 +128,7 @@
 | [v3-w-iptv-guide.jpg](v3-w-iptv-guide.jpg)、[v4-w-iptv.jpg](v4-w-iptv.jpg)（及 `-n`） | 网络电视宽屏 |
 | [v3-guide-states.jpg](v3-guide-states.jpg)、[v4-guide-states.jpg](v4-guide-states.jpg)（及 `-n`） | 节目单的加载、失败、空、没配置来源 |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -177,12 +182,12 @@
 | 电视 | 同一组件的电视样式（字号大一级、按钮可聚焦、默认焦点在第一个按钮）；未开播的“切换直播间”“刷新”对应 pure_live_TV 的未开播页；节目单放进右键打开的设置面板（A17.4、A17.5） |
 | 苹果平台差异 | 同宽屏；iPhone 全屏时避开灵动岛一侧安全区；macOS Cmd+R |
 
-## 待选（A 是建议）
+## 待选和决定
 
-- Z1 网络电视节目单：A 竖屏画面下方、横屏右侧、宽屏右栏；B 照 v3 弹对话框。
-- Z2 未开播时：A 每 60 秒查一次、开播自动播放；B 照 v3 手动刷新。
-- Z3 全屏时下播：A 留在全屏；B 照 v3 退出全屏。
-- Z4 加载较慢：A 8 秒后提示并给换线路、重试；B 照 v3 只转圈。
+- Z1 网络电视节目单：**A** 竖屏画面下方、横屏右侧、宽屏右栏；B 照 v3 弹对话框。→ 选 A（2026-10-01）。
+- Z2 未开播时：**A** 每 60 秒查一次、开播自动播放；B 照 v3 手动刷新。→ 选 A。
+- Z3 全屏时下播：**A** 留在全屏；B 照 v3 退出全屏。→ 选 A。
+- Z4 加载较慢：**A** 8 秒后提示并给换线路、重试；B 照 v3 只转圈。→ 选 A。
 
 ## 提示条
 
@@ -202,7 +207,7 @@
 
 正在连接直播流…；比平时慢，可以换一条线路试试；去登录；开播后这里显示弹幕；节目单；可回看 {n} 天；不支持回看；正在回看: {节目}；正在回看 · {日期} {时间}；回看；回看中；回看 {时间}；今天 / 昨天 / 明天 · {M}月{d}日 {周几}；正在读取节目单…；节目单读取失败；去导入节目单；这个频道在节目单里没有节目。其余文字是 v3 或 v4 已有的词条（`stream_not_live`、`live_play_offline_hint`、`live_play_banned`、`live_play_carousel`、`live_play_status_unknown`、`live_play_error_*`、`room_mark_*_hint`、`live_play_reconnecting`、`live_play_switch_line`、`live_play_open_in`、`live_play_audio_only_playing`、`restoring_live_video`、`live_play_replay_ended`、`live_play_replay_again`、`playback_failure_title`、`error_*`、`live_tag`、`return_to_live`、`iptv_no_guides`、`iptv_no_guides_desc`、`no_upcoming_programs`、`load_failed`、`program_scheduled_hint`、`catchup_unavailable`）。
 
-## 拿不准的地方
+## 拿不准的地方（设计时记下的）
 
 1. **v3 断流时有没有转圈**：代码里播放中的缓冲没有任何指示（`NoVideoControls`），只有播放器被彻底释放后重建时才显示占位转圈（`player_manager.dart:3501-3502,3575-3579`）。A07.1 的 E3 写的“v3 只显示转圈”可能指进房和重建；图里按代码画成“画面停住、没有提示”，请对照 3.x 真机。
 2. **v3 全屏未开播头部什么时候出现**：判定未开播时会先退出全屏（`live_play_controller.dart:782-784`），带返回和切换直播间的头部（`not_living_video_widget.dart:47,62-82`）只在退出前一瞬或电脑窗口内全屏时可能看到；图里照代码画了。
@@ -215,7 +220,7 @@
 9. **v4 现在暂停时画面中间的大暂停图标**（`player_status.dart`）v3 没有，不在本任务范围，留给 A07.1/U.2c 决定。
 10. **“画面矮时省掉图标”的界线**：图里竖屏 16:9（221 高）省掉了加载、播放中断的图标，但未开播的头像、受限的锁保留；开发时按画面高度 <260 省掉图标、受限和未开播保留头像或锁，具体数值待开发时按 1.3 倍字体验证。
 
-## 文件对照
+## 文件对照（v3 → v4）
 
 | v3 | v4 |
 |---|---|
@@ -224,3 +229,43 @@
 | `widgets/video_player/iptv_schedule_dialog.dart`、`iptv_programme_policy.dart` | `features/live_play/dialogs/iptv_guide.dart`；`packages/live_iptv` |
 | `controllers/live_play_controller.dart`（`_handleNotLiveRoom`、`_handleUnknownStatus`）、`controllers/player_controller.dart`（`getPlayQualites`） | `features/live_play/logic/room_controller.dart`（`RoomStage`）、`logic/reconnect_watch.dart` |
 | `resolution_selector/resolutions_row.dart`（没成功时空白） | `features/live_play/layout/room_info_bar.dart`（E2 占位） |
+
+## 实现和验证
+
+**实现**（详见 [record.md](record.md)；2026-10-01，和 A08.1（弹幕标签的状态）一起合并，合并提交 `381ff16f1`“Merge U.2e and U.2g: chat tab states and room states”；登记表记的是记录提交 `05793a4c8`）
+
+分工：竖屏、横屏全屏、宽屏的排法当时由 A07.2～A07.5 同时改；这里只做画面状态组件、状态逻辑和接入点，以及网络电视的节目单和回看（包括它在三种布局的位置）。
+
+| 编号 | 做到 | 现在的代码和说明 |
+|---|---|---|
+| c1 | ✅ | 转圈用用户的“加载样式”（`LoadingStyles`，没设颜色时白色） |
+| c2 | ✅ | `packages/live_ui/lib/src/widgets/video_state_view.dart:38` 的 `VideoStateView`（转圈或图标或主播头像 → 一句话 → 原因 → 最多两个按钮，第一个白底、第二个描边；可选 45% / 60% 暗化；`compact` 省掉图标）；画面高 <260 省图标，未开播的头像和受限的锁保留 |
+| c3 | ✅ | “正在进入直播间…”→“正在连接直播流…”（`live_play_connecting_stream`） |
+| c4 | ✅ | `apps/pure_live/lib/features/live_play/player/player_status.dart:32` 的 `RoomStatusLayer` 里 8 秒计时（`slowAfter`）；只有一条线路时只有“重试”；A07.10 后“画面已经出来后的缓冲”不再算加载较慢 |
+| c5 | ✅ | 上下栏按 `logic/room_status.dart:185` 的 `pictureHasControls`（只有打开了直播流才显示） |
+| c6 | ✅（当时部分） | 全屏精简上栏 `PlayerTopBar.reduced`：去掉纯音频、投屏、小窗；时间电量、录制、菜单由 A07.4 合并时接上 |
+| c7 | ✅ | 未开播：封面 + 头像 + 一句话 + 切换直播间、刷新；不弹提示条；信息行“未开播”标签（`layout/room_info_bar.dart:80` 的 `offlineMark`）；弹幕区公告卡片 + “开播后这里显示弹幕”（`danmaku/chat_list.dart:930` 的 `RoomNoticeState`） |
+| c8 | ✅ | v4 原有的 `refreshDetail`（`logic/room_controller.dart:325-327` 的 60 秒定时器，`:758`）；“进后台时停止”没有另做 |
+| c9 | ✅ | v4 本来就不退出全屏；有测试 |
+| c10 | ✅ | 不存在只给“切换直播间”；状态未知“刷新”在前 |
+| c11 | ✅ | 需要登录：去登录、重试；付费、订阅、私密、仅 App、密码、年龄：在{平台}打开、切换直播间（网络电视改为重试、切换直播间）；地区、没给地址：重试、切换直播间；受限房间弹幕照常连、不再每 60 秒整个重新加载 |
+| c12 | ✅ | 播放中断：原因写在画面上，重试、换线路；暗化 60% 不盖控制栏（状态层在控制层下面） |
+| c13 | ✅ | 重连 45% 暗化；次数后来按 A07.10 c4 由播放会话报告 |
+| c14 | ✅（有偏差） | `player_status.dart:333` 的 `AudioOnlyCover`；播放会话不报告“第一帧”，“正在恢复实时画面”显示到画面尺寸重新报告或最多 3 秒 |
+| c15 | ✅ | 从头播放、切换直播间 |
+| c16 | ✅ | `dialogs/iptv_guide.dart:78` 的 `IptvGuideView` 一个组件三处：竖屏 16:9 画面下（`live_play_page.dart:1174-1198`）、宽屏右栏可收起（`:1144-1172`）、全屏右侧面板 `RoomPanelKind.guide`；上栏节目单按钮 `_revealGuide`（`:678`） |
+| c17 | ✅ | `logic/iptv_guide_rows.dart:59` 的 `guideEntries`：按日期分组、行高 52、正在看的在第三行；每 30 秒刷新标记；频道没写天数时不显示天数，不支持回看时写“不支持回看” |
+| c18 | ✅ | 回看角标 `CatchupBadge`（`player_status.dart:388`，“回看 19:30 · 返回直播”）；回看失败显示为画面上的播放中断 |
+| c19 | ✅ | “还没有节目单”+ 去导入节目单（路由 `/iptv`），和“这个频道在节目单里没有节目”分开 |
+
+- Z1～Z4 都按 A（见 c16、c8、c9、c4）。
+- `live_ui` 的添加：`VideoStateView`；`AppIcons.switchLine`（`alt_route`）、`banned`、`statusUnknown`、`login`、`guideTitle`、`catchup`、`liveNow`、`guideEmpty`、`guideFailed`、`add`、`unfoldLeft` 等；颜色角色 `OnVideoColors.dimLight`（45%）、`buttonInk`、`buttonFill`、`buttonOutline`、`avatarRing`，`InkOnColor.contrastOn` / `contrastMutedOn`。
+- 新增的文字：`live_play_connecting_stream`、`live_play_slow_hint`、`live_play_go_login`、`live_play_catchup_badge`、`live_play_guide_*`（节目单 13 条）、`live_play_weekday_1`～`7`、`live_play_chat_after_live`；改了 `live_play_guide_failed` 的中文（“读取节目单失败”→“节目单读取失败”）。
+- 门禁：`live_play` 直接写的颜色和图标 9 → 8（和 A08.1 合计）。
+- 没做的（记录）：全屏精简上栏的时间电量、录制、菜单（A07.4 接上）；宽屏节目单栏的把手（A07.5 合并后换成同一个 `_ColumnHandle`）；未开播检查在应用进后台时停止（现在仍在后台照查，见子分类 README 已知问题）；“去登录”先跳账号页，回来自动重试（具体到平台的登录在 A12.2）；暂停时画面中间的大暂停图标（后来 A07.10 定为 ▶ 圆底）；网络电视顶栏的录制按钮；电视（A17.4、A17.5）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/live_play/live_play_states_test.dart`（新，当时 19 个，现在 21 个）：逻辑（加载、连接、较慢；未开播、封禁、轮播、状态未知的文字和按钮顺序；获取失败和不存在；受限各类型；播放中断、重连、纯音频、恢复、播完；只有打开了直播流才有上下栏；节目单分组、各行状态、第三行、日期、可回看天数）；直播间里（加载时文字和转圈、没有上下栏、标签可用；未开播的头像、按钮、不弹提示条、“未开播”标签、公告；受限的按钮和弹幕照常；较慢 8 秒；全屏未开播的精简上栏；宽屏状态在左边）；网络电视（竖屏节目单在画面下面、宽屏右栏收起和展开、全屏右侧 360 面板、Esc 先关面板、节目单四种状态）。`packages/live_ui` +3（`VideoStateView`）。改了 1 处原有断言（不存在的直播间没有“重试”）。当时 `apps/pure_live` 310 个全部通过。
+- 真机：没有逐项看（S02.2、S02.3 没测网络电视；[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1 节第 3 条（断网重连）、第 4 条（未开播）、第 9 条（纯音频）、第 17 条（网络电视节目单和回看）还没有结果）。
+- 留下的问题和去向：真机验证 → 和直播间其他真机一起补；未开播检查在后台照跑 → 无任务（逻辑归 C01，见报告）；“去登录”到具体平台 → A12.2。

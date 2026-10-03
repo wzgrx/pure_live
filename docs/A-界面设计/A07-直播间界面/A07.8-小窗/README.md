@@ -1,10 +1,11 @@
-# A07.8 小窗：设计（第 1 版）
+# A07.8 小窗：设计（第 1 版，已确认并完成）
 
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：应用内悬浮小窗、Android 系统画中画、桌面小窗（Windows；新设计加 Linux、macOS）和置顶、小窗弹幕、iOS 画中画的差异；候选 C-13（离开应用时自动画中画）
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a078)（A07.8-01 小窗弹幕）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a078)
 - 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；画面、头像、桌面和主屏是示意图片；小窗后面的首页是简化示意（首页本身在 I、A09.2）
+- 旧编号：U.2j、T05j.1；相关决定 D-003（J1～J4 按建议 A）
 
 ## 界面清点表
 
@@ -20,7 +21,9 @@
 
 画中画窗口上系统画的按钮在 A14.1；桌面窗口本身（标题栏、托盘、在新窗口打开）在 A16.1；iOS 在 A18.1。
 
-## v3 的样子
+## 3.x 的样子和问题
+
+文件在 `git show v3.2.11:lib/...`（`modules/live_play/`、`player/`）。
 
 **小窗按钮**：画面上栏 `CustomIcons.float_window`，48×48 白色，提示“小窗播放”；只在 Android 和 Windows 出现（`video_controller_panel.dart:56-66`、`:563-600`）；准备中变灰；出异常时提示“打开画中画失败，请重试”（`:589-593`）。Android 进系统画中画，Windows 把主窗口缩成小窗，其他平台没有。
 
@@ -46,11 +49,29 @@
 
 **小窗弹幕**（`compact_danmaku_overlay.dart:13-92`，默认值 `danmaku_settings_controller.dart:17-31`）：三种小窗共用；默认开、自动缩放、12 号、字重 500、速度 90、透明度 0.9、占画面上半（0.5）、同时最多 6 条、间隔 0.35 秒、帧率 30 或跟随刷新率档位、保留平台颜色；字体和描边跟主弹幕设置；直播间关了弹幕（`hideDanmaku`）时也不显示。自动缩放 = 小窗宽 ÷ 350，限制在 0.65–1（`compact_danmaku_metrics.dart:27-31`），所以 220 宽的小窗弹幕是 7.8 号字。
 
+**3.x 的问题**
+
+| 编号 | 问题 | 位置 |
+|---|---|---|
+| Q01.1 | 同一个 ✕ 两种后果：应用内小窗的 ✕ 是停止播放、关掉小窗；Windows 小窗的 ✕ 是恢复主窗口、接着播，提示文字都是“关闭”。Windows 小窗里没有停止的办法 | `player_manager.dart:3099-3110`、`:3270-3281` |
+| E05.1 | 回到直播间没有按钮：应用内小窗要点两下（第一下出按钮），Windows 小窗要双击或点写着“关闭”的 ✕，看不出来 | `:3039-3048`、`:3233` |
+| E04.1 | Windows 小窗的 ✕ 没有底色，亮的画面上看不清；应用内小窗同样的按钮有 45% 黑底 | `:3276-3280`、`:3105` |
+| E | Linux 上应用内小窗的按钮永远出不来（悬停只认 Windows、macOS），一点就回直播间，暂停和关闭都点不到；Linux、macOS 没有小窗按钮 | `:2999-3004`；`video_controller_panel.dart:56-66` |
+| D01 | 应用内小窗大小只按平台分（Windows 350，其他 220），平板 1280 宽也是 220；位置按手机底部导航栏抬高 96，横屏和平板没有底部导航栏，小窗悬在半空挡住内容 | `:2978`、`:3150-3155` |
+| L01.1 | 小窗弹幕按 350 宽缩放、最低 0.65 倍，手机应用内小窗（220 宽）只有 7.8 号字，看不清 | `compact_danmaku_metrics.dart:27-31` |
+| G | 纯音频时小窗放不下：小窗高 124，纯音频卡片要约 140，底下的“纯音频模式”被截掉一半 | `player_manager.dart:3292-3460` |
+| H01.1 | 小窗看不出状态：录制中没有角标（A07.1 已定“小窗也显示”）；暂停后按钮 3 秒就消失，看不出停着；断流时停在最后一帧，没有提示 | `:2984-2990`、`:3575-3580` |
+| J02.1 | Android 系统设置关掉了本应用的画中画时，点小窗按钮没有任何反应（系统返回“不可用”被忽略）；出异常时的提示“请重试”也没用 | `player_manager.dart:2850-2861`、`video_controller_panel.dart:589-593` |
+| N02.1 | 应用内小窗 12 圆角是整块裁剪视频，违反计划书 9.3“视频不圆角不裁剪” | `player_manager.dart:3013-3015` |
+| A01.1 | 桌面小窗默认不置顶，只能到设置里改；小窗里滚轮不能调音量（直播间里可以），Esc 没有作用 | `player_settings_controller.dart:47`、`player_manager.dart:3215-3287`、`video_keyboard.dart:93-97` |
+
+必须保留的操作习惯（[specs/UI.md](../../../specs/UI.md) 附录 A）：第 8 条（应用内小窗：有弹层时隐藏；手机第一次点击显示控件、再点回到直播间；只有有画面且没有加载错误时才转为小窗）、第 15 条（小窗可选置顶）。
+
 ## 各版的经过
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 三种小窗同一套按钮、桌面小窗加置顶和音量、Linux 和 macOS 加桌面小窗、状态补齐、四个选择 | 待评审 |
+| 第 1 版 | 三种小窗同一套按钮、桌面小窗加置顶和音量、Linux 和 macOS 加桌面小窗、状态补齐、四个选择 | 2026-10-01 确认，J1～J4 按建议 A |
 
 ## 对比页（按章节导出）
 
@@ -82,23 +103,7 @@
 | [v3-desktop-mini.jpg](v3-desktop-mini.jpg)、[v4-desktop-mini.jpg](v4-desktop-mini.jpg) | Windows 桌面小窗，整个屏幕 1280×800 |
 | [v3-desktop-zoom.jpg](v3-desktop-zoom.jpg)、[v4-desktop-zoom.jpg](v4-desktop-zoom.jpg)、[v4-desktop-zoom-n.jpg](v4-desktop-zoom-n.jpg) | 桌面小窗放大（鼠标悬停）：v3 / 新设计 / 按钮编号 |
 
-## v3 的问题
-
-| 编号 | 问题 | 位置 |
-|---|---|---|
-| Q01.1 | 同一个 ✕ 两种后果：应用内小窗的 ✕ 是停止播放、关掉小窗；Windows 小窗的 ✕ 是恢复主窗口、接着播，提示文字都是“关闭”。Windows 小窗里没有停止的办法 | `player_manager.dart:3099-3110`、`:3270-3281` |
-| E05.1 | 回到直播间没有按钮：应用内小窗要点两下（第一下出按钮），Windows 小窗要双击或点写着“关闭”的 ✕，看不出来 | `:3039-3048`、`:3233` |
-| E04.1 | Windows 小窗的 ✕ 没有底色，亮的画面上看不清；应用内小窗同样的按钮有 45% 黑底 | `:3276-3280`、`:3105` |
-| E | Linux 上应用内小窗的按钮永远出不来（悬停只认 Windows、macOS），一点就回直播间，暂停和关闭都点不到；Linux、macOS 没有小窗按钮 | `:2999-3004`；`video_controller_panel.dart:56-66` |
-| D01 | 应用内小窗大小只按平台分（Windows 350，其他 220），平板 1280 宽也是 220；位置按手机底部导航栏抬高 96，横屏和平板没有底部导航栏，小窗悬在半空挡住内容 | `:2978`、`:3150-3155` |
-| L01.1 | 小窗弹幕按 350 宽缩放、最低 0.65 倍，手机应用内小窗（220 宽）只有 7.8 号字，看不清 | `compact_danmaku_metrics.dart:27-31` |
-| G | 纯音频时小窗放不下：小窗高 124，纯音频卡片要约 140，底下的“纯音频模式”被截掉一半 | `player_manager.dart:3292-3460` |
-| H01.1 | 小窗看不出状态：录制中没有角标（A07.1 已定“小窗也显示”）；暂停后按钮 3 秒就消失，看不出停着；断流时停在最后一帧，没有提示 | `:2984-2990`、`:3575-3580` |
-| J02.1 | Android 系统设置关掉了本应用的画中画时，点小窗按钮没有任何反应（系统返回“不可用”被忽略）；出异常时的提示“请重试”也没用 | `player_manager.dart:2850-2861`、`video_controller_panel.dart:589-593` |
-| N02.1 | 应用内小窗 12 圆角是整块裁剪视频，违反计划书 9.3“视频不圆角不裁剪” | `player_manager.dart:3013-3015` |
-| A01.1 | 桌面小窗默认不置顶，只能到设置里改；小窗里滚轮不能调音量（直播间里可以），Esc 没有作用 | `player_settings_controller.dart:47`、`player_manager.dart:3215-3287`、`video_keyboard.dart:93-97` |
-
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -137,14 +142,14 @@
 | 电视 | 不适用：电视的直播间一直全屏，pure_live_TV 没有画中画，设置里也去掉了画中画和小窗的选项（`features/settings/pages/video_settings_section.dart:15`） |
 | 苹果平台 | iOS、iPadOS 用系统画中画：里面只有画面，没有小窗弹幕、录制角标和我们的按钮（系统只画视频层），按钮是系统的；J1 的开关同样适用（还受系统“自动开启画中画”影响）；应用内小窗同 Android。macOS 同 Windows |
 
-## 待选
+## 待选和决定
 
-- J1 离开应用时自动画中画（C-13）：建议 A 加开关，默认关；B 不加。
-- J2 桌面小窗的置顶：建议 A 小窗上加图钉；B 照 v3 只在设置里改。
-- J3 桌面小窗点“关闭”：建议 A 停止播放，主窗口回到进直播间前的页面并最小化到任务栏；B 停止播放，主窗口恢复原大小显示在前面。
-- J4 应用内小窗改大小：建议 A 不加，大小按屏幕定；B 手机双指缩放、电脑拖角，记住大小。
+- J1 离开应用时自动画中画（C-13）：**A** 加开关，默认关；B 不加。→ 选 A（2026-10-01）。
+- J2 桌面小窗的置顶：**A** 小窗上加图钉；B 照 v3 只在设置里改。→ 选 A。
+- J3 桌面小窗点“关闭”：**A** 停止播放，主窗口回到进直播间前的页面并最小化到任务栏；B 停止播放，主窗口恢复原大小显示在前面。→ 选 A。
+- J4 应用内小窗改大小：**A** 不加，大小按屏幕定；B 手机双指缩放、电脑拖角，记住大小。→ 选 A（以后的提议见 V01.5）。
 
-## 拿不准的地方
+## 拿不准的地方（设计时记下的）
 
 1. Android 画中画默认多大（图里按 240×135 画）、点开后系统按钮里有没有播放 / 暂停（取决于媒体会话），要在 K90 上看，归 A14.1。
 2. v3 的 Windows 小窗里空格、R、上下键是否生效：`video_keyboard.dart` 只写了小窗时 Esc 不处理（`:93-97`），其余没在真机上确认。
@@ -158,3 +163,37 @@
 - A11.3：设置“退出小窗播放 / 返回时是否保留悬浮窗”字面意思反了，建议改成“离开直播间时小窗播放”；“Windows 小窗始终置顶”“记住小窗位置和大小”“重置小窗位置和大小”去掉“Windows”（Linux、macOS 也有）；J1 的开关放在“播放”里；“小窗弹幕”页本身。
 - A07.1、A07.4、A07.5：上栏的小窗按钮在 Linux、macOS、iOS 也显示，位置不变；使用说明里的“（Android、Windows）”跟着改。
 - A16.1：桌面窗口本身（标题栏、托盘、在新窗口打开）。A14.1：画中画里系统画的按钮。A18.1：iOS 画中画。
+
+## 实现和验证
+
+**实现**（详见 [record.md](record.md)；2026-10-01，合并提交 `7caa7be25`“Merge U.2j: the room's mini windows”；登记表记的是记录提交 `62e8b34dd`）
+
+| 编号 | 做到 | 现在的代码和说明 |
+|---|---|---|
+| c1 | ✅ | 入口按钮由 A07.2～A07.5 放在上栏（`player/player_controls.dart:96` 的 `topBarSlots`，显不显示由 `RoomMiniScope.supported()` 决定）；桌面小窗尺寸和位置照 v3（`apps/pure_live/lib/app/desktop/mini_window.dart` 的 `resolveMiniWindowBounds`：横 360、竖高 380、近方形 280，工作区右下 20，记住的位置校正到还在的显示器，最小 140×90）；小窗弹幕 13 项设置全部生效 |
+| c2 | ✅ | `apps/pure_live/lib/features/live_play/mini/mini_player.dart:47` 的 `MiniPlayerSurface`：角上 48、中间 58（A07.10 后换成共用的 `VideoCentreButton`），位置 4；悬停按指针类型判断（`MouseRegion` 只对鼠标起作用），不按平台；系统画中画里没有我们的按钮 |
+| c3 | ✅ | 图钉改了会写回 `windowsPipAlwaysOnTop`，下次进入小窗沿用 |
+| c4 | ✅ | 滚轮改的是房间音量（停 600 毫秒后存为该房间音量）；音量一变底部出 1.5 秒音量条；空格、上下键、R 沿用页面的快捷键，Esc 在小窗里先回到直播间，F 在小窗里不进全屏 |
+| c5 | ⚠️ 代码完成 | 桌面小窗只看有没有桌面外壳（`DesktopWindow.miniHost`），现在只有 Windows 启动桌面外壳（Linux 桌面版暂停，macOS 不构建）；Wayland 一律当作不能置顶；macOS 进小窗时隐藏左上角三个窗口按钮 |
+| c6 | ✅ | `logic/mini_window.dart:98-120`（`inAppMiniBase`、`inAppMiniSize`）、`:132`（离底边：首页且宽 <600 时让开底部导航栏，600 是另存的一份首页分界 `:127`）、`:142`（位置，拖到哪里记住哪里，窗口变小时夹回） |
+| c7 | ✅ | `logic/mini_window.dart:195` 的 `CompactDanmakuMetrics`：10 号字一行 20，124 高的一半排 3 行 |
+| c8 | ✅ | 另有：打开中（黑底转圈）、播放中缓冲（只转圈不压暗）、主播下播（压暗、显示原因、刷新键）；状态映射 `logic/mini_window.dart:49` 的 `miniStatusOf` |
+| c9 | ✅（后来改了） | 当时是“无法打开画中画”对话框 + “去设置”；A07.11 c8 改成带“去设置”的提示条（`mini/room_mini_window.dart:316` 的 `showPipDisabledToast`），全屏里不再有居中对话框 |
+| c10 | ✅ | 阴影 0 8 24 38% 黑（`OnVideoColors.floatingShadow`），视频不裁剪（`mini/floating_window.dart:172-178`） |
+| c11 | ✅ | 新设置 `autoPipOnLeave`（默认关）；Android 12 起 `setAutoEnterEnabled`，8–11 在 `onUserLeaveHint` 里进入（`logic/mini_window.dart:178` 的 `shouldAutoEnterPip`）；设置页的开关行当时交给 A11.3，现在已经在设置页（`features/settings/settings_catalog.dart:833`） |
+| J1～J4 | ✅ | 按建议 A；J3 桌面小窗关闭：暂停 → 先隐藏窗口再恢复原大小 → 关掉直播间（不转成应用内小窗）→ 最小化到任务栏 |
+
+- 性能：播放器只有一份，进出小窗不重建——`RoomRuntime`（`logic/room_runtime.dart:19`）装着直播间的逻辑、播放器、弹幕连接、后台策略、方向选择；直播间页关闭时交给 `FloatingRoom`（`:90`），再打开同一直播间时拿回来，不新建播放器、不重新打开流；进画中画前先画好只有画面的一帧；小窗弹幕单独一层（`mini/compact_danmaku.dart:24`）；按钮底色 45% 黑、不用模糊；有弹层时 `Offstage`、不停播。拖动时原来照 3.x 80% 不透明，后来 R01.1（旧编号 P05，待真机）改成拖动时不透明（`floating_window.dart:169-171` 的注释：半透明的视频每帧要离屏绘制）。
+- 原生：Android 画中画状态、“去设置”、离开时自动进入（`MainActivity.kt`，构建过 debug APK）；Windows 用 window_manager 已有的接口。
+- 新设置：`autoPipOnLeave`（`player` 段，默认关，随备份；3.x 没有这个键）。其余用 3.x 已有的 `floatPlay`、`windowsPipAlwaysOnTop`、`rememberPipPosition`、`windows_pip_*`、`enablePipDanmaku`、`pipDanmaku*`。
+- 新增的文字：中英各 10 条（回到直播间、置顶、取消置顶、这个桌面不支持置顶、正在重连、无法打开画中画、去设置、离开应用时自动小窗和说明）。
+- 门禁：`live_play` 仍是 9；应用外壳 `app/app.dart` 引用 `features/live_play/mini/floating_window.dart`（外壳不算功能目录）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/live_play/live_play_mini_window_test.dart`（新，当时 22 个，现在 23 个）：规则 9 个（大小、位置、底部导航栏、夹回、弹幕字号和帧率、八种状态、什么时候转成小窗、J1、桌面小窗大小）；应用内小窗 7 个（右下角、直角阴影、同一个播放器、按钮顺序和底色、3 秒隐藏、再点回直播间不新建播放器、✕ 停止、暂停常显、断流、纯音频、弹幕、对话框时隐藏、进别的直播间或多画面时关掉、横屏和平板、旋转、加载、下播、鼠标悬停和双击）；桌面小窗 2 个；Android 画中画 3 个。附录 A 第 8 条、第 15 条写成了测试。当时 `apps/pure_live` 300 个全部通过。
+- 真机：[S02.3](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)（2026-10-02，K90）：上栏小窗按钮 → 系统画中画（任务 `mode=pinned`），画面在别的应用上方继续播，通过。应用内小窗（[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1 节第 12 条）、系统关了画中画时的提示（第 11 条）、自动画中画、Windows 桌面小窗都没有在真机上看过；记录“没有在真机上看的”：系统画中画设置页能不能直接打开、Android 12 起自动进入的动画、8–11 用 `onUserLeaveHint` 时跳出的系统界面也会触发；Windows 的拉边改大小、隐藏后最小化、置顶切换、记住位置、Windows 11 是否自动加圆角。
+- 留下的问题和去向：
+  - 应用内小窗拖动时每次移动都整层重建、松手没有惯性（单元 2 发现，核对代码确认）：`mini/floating_window.dart:191-194` 的 `onDragStart`、`onDragUpdate`、`onDragEnd` 都是 `setState`，每次指针移动都让 `_FloatingWindowState.build` 整个重跑（`LayoutBuilder` → `ListenableBuilder` → `StreamBuilder` → `Stack` → `MiniPlayerSurface` 和 `LiveVideoView`，还重读 `watchSetting`）；松手时只把位置记成当前位置（`:194`），没有速度、不吸边、没有动画。应该只改位置（例如 `ValueNotifier<Offset>` 配 `Positioned` 或 `Transform`，画面那棵子树不动），松手按速度滑一段、贴近边缘时吸边。→ 无任务，建议在 R01 开新任务（拖动帧时间要在 K90 上量）或并进 A03.3 的手感；V01.5（小窗拖角改尺寸，提议）会改同一个文件，先做这条。
+  - Linux、macOS 的桌面小窗要等桌面外壳接上（X）；iOS 画中画在 A18.1。
+  - 设置“退出小窗播放”字面意思反了等文字问题交给 A11.3（见上面“交给其他任务的”）。

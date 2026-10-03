@@ -1,10 +1,12 @@
-# A09.10 标签管理：设计（第 1 版）
+# A09.10 标签管理：设计（第 1 版，已定稿并实现）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；K90 上没有记录，见“实现和验证”）
+- 旧编号：U.12c、T07h.2（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：标签管理页（列表、空、拖动排序）、标签详情、添加 / 编辑标签、删除确认、提示条
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a0910)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a0910)
-- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a0910)（A09.10-01～05）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a0910)；功能点 F-TAG-01（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；标签和分组的存储在 [I07](../../../I-浏览和发现/I07-标签和分组/README.md)；给直播间设标签的对话框在 [A09.1](../A09.1-房间卡片/README.md)；相关决定 D-003（J1、J2 按建议 A）
+- 评审页：claude.ai 私有页面；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；标签名、描述、直播间数是示例
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -16,9 +18,9 @@
 | A09.10-04 | 删除确认（`_confirmDelete`） | 删除按钮 | 同上 | — |
 | — | 提示条 | 保存失败“标签更改未保存，请重试” | 全部 | v4 另有“已删除标签“…”” |
 
-## v3 的样子
+## 3.x 的样子和问题
 
-文件 `lib/modules/tags/tag_management_page.dart`。
+### 3.x 的样子（`git show v3.2.11:lib/modules/tags/tag_management_page.dart`，736 行）
 
 - **顶栏**：“标签管理”居中，右边 `Remix.add_line`“添加标签”（`:28-42`）。
 - **说明条**（`:345-371`）：主色 5% 底、圆角 16，`Remix.information_line` 18 +“长按任意标签卡片，即可自由拖拽以动态调整它们的排列展示顺序。”13 号。
@@ -30,7 +32,7 @@
 - **删除**：“删除标签 / 确定要永久删除标签“{name}”吗？/ 取消、红色删除”。
 - **手势**：长按卡片拖动排序。没有快捷键。
 
-## v3 的问题
+### 问题
 
 | 编号 | 问题 | 位置 |
 |---|---|---|
@@ -44,7 +46,7 @@
 | G8 | 详情按钮叫“确认”，不能直接编辑 | `:277-343` |
 | G9 | 编辑对话框按钮样式另一套，没有字数提示 | `:600-732` |
 
-## v4 现在的偏差（`apps/pure_live/lib/features/tags/`）
+### 设计时 v4 的偏差（`apps/pure_live/lib/features/tags/`）
 
 一列卡片：拖动把手、名字、描述、“N 个直播间”、置顶 / 编辑 / 删除图标按钮（Material 图标）；顶部说明“拖动左侧把手调整顺序……”；空状态说明；删除确认说影响几个直播间，删除后提示；详情加直播间数。新设计保留，图标回到 v3 的 Remix 图标，宽度 720。
 
@@ -52,7 +54,7 @@
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 对比、状态和对话框、两处待选 | 待评审 |
+| 第 1 版 | 对比、状态和对话框、两处待选 | 用户确认；J1、J2 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -76,7 +78,9 @@
 | [v3-tags-land.jpg](v3-tags-land.jpg)、[v4-tags-land.jpg](v4-tags-land.jpg) | 手机横屏 852×393 |
 | [v3-tags-wide.jpg](v3-tags-wide.jpg)、[v4-tags-wide.jpg](v4-tags-wide.jpg) | 宽屏 1280×800 |
 
-## 改动（待确认）
+## 确认的改动
+
+用户确认（第 1 版的“改动（待确认）”原样）：
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -110,16 +114,38 @@
 | 电视 | A17.9：pure_live_TV 有标签列表、添加和详情，内容和顺序对齐这里；遥控器排序在 A17.9 定 |
 | 苹果平台差异 | 无，同手机和宽屏 |
 
-## 待选（A 是建议）
+## 待选和决定
 
-- J1 排法：A 所有宽度一列（v4 已有）；B 照 v3 宽屏多列小卡片。
-- J2 删除以后：A 提示“已删除”，不能撤销（v4 已有）；B 提示条带“撤销”。
+- J1 排法：A 所有宽度一列（v4 已有）；B 照 v3 宽屏多列小卡片。**用了 A**（D-003），最宽 720。
+- J2 删除以后：A 提示“已删除”，不能撤销（v4 已有）；B 提示条带“撤销”。**用了 A**。
 
-## 拿不准的地方
+### 设计时拿不准的地方
 
 1. 直播间数是按关注列表里带这个标签的直播间数的，v3 没有这个数；数法以 v4 `tags_page.dart` 为准。
 2. 置顶在第一个标签上：v4 是灰色不可点，新设计画成实心图标（照 v3 的状态表达），开发时两者取一，评审时可以说。
 
-## 需要改工具的地方
+结论：第 1 条照 v4 `tags_page.dart` 的数法（关注列表里带这个标签的直播间数，`features/tags/tag_tile.dart:10` 的 `followedTagCounts`）；第 2 条取设计图的样子（实心）同时保留 v4 的“不能点”（见“实现和验证”）。
+
+### 需要改工具的地方
 
 - 无。
+
+### 性能要点（评审页）
+
+- 直播间数在进入页面时算一次（关注列表里数一遍），不随每次重建重新算。
+- 拖动只移动卡片的合成层，松手才保存一次。
+
+## 实现和验证
+
+- 实现：c1～c7、J1、J2 都做了（逐条见 [record.md](record.md)）。现在的代码（`apps/pure_live/lib/features/tags/`）：
+  - `tags_page.dart`（298 行）：`tagListProvider`（`:18`）、`TagsPage`（`:39`，所有宽度一列、最宽 720 居中 `:238`，窗口高 <480 时顶栏 48 `:185`；空状态 `AppStatusView` 加“＋ 添加标签”；删除确认说影响几个直播间、删除后提示），路由 `RoutePath.kSettingsTags`（`routes/app_router.dart:81`，入口在设置 → 平台显示与授权的“账号和标签”组，`features/settings/settings_catalog.dart:565-572`）。
+  - `tag_tile.dart`（235 行）：`followedTagCounts`（`:10`）、`TagTile`（`:25`，把手、名字 15/600、描述 12 号次要色或“暂无描述”斜体、“N 个直播间”、置顶 / 编辑 / 删除三个 48 的按钮；第一个标签的置顶是实心 `AppIcons.pinned`、不能点、悬停“‘名字’已位于顶部”（`tag_already_at_top_named`，`tag_tile.dart:149`），其余是线框 `AppIcons.unpinned` `:150`）、`showTagDetails`（`:189`，加直播间数，“编辑标签”“关闭”）。
+  - `tag_editor_dialog.dart`（249 行）：`tagNameMaxLength` 15（`:10`）、`tagDescriptionMaxLength` 40（`:13`）、`showTagEditor`（`:18`，标签名放在输入框的边框上、下面字数 0/15、0/40、名字的错误写在框下，“取消”普通文字按钮、“确认”实心，按钮 14 号，清除按钮 `AppIcons.clearField`）。
+  - 卡片 `surfaceContainerLow`、圆角 16、无描边；说明是列表上方一行 13 号次要色字；把手悬停“拖动排序”，拖起的卡片只加阴影（`shadow` 角色）；图标回到 3.x 的 Remix（`AppIcons.pinned/unpinned`、新 `AppIcons.edit`、`AppIcons.delete`、添加、空状态的标签图标）。
+- 偏差：空状态按钮跟 `AppStatusView`（A02.1 C1：第一个按钮浅色实心），不是设计图的深色实心。
+- 新文字：中英各加 1 条 `tags_empty_title`（“暂无自定义标签。”），其余用已有的键；`live_ui` 加 `AppIcons.edit`、`AppIcons.tagRooms`。没有新设置。门禁：`tags` 直接写的颜色和图标 13 → 0。
+- 提交：`3b00b519f`（`feat(tags): tag management per the U.12c design`，登记表写的是这个）；合并 `6f13ced71`（2026-10-02，和 A15.1、A15.2、A08.3 一起）。
+- 后来的变化：A02.1（`914784264`）、A02.2（`fc5bcdd46`）的共用组件；D-011（`e320e0e72`）：标签管理不在 D-011 的居中名单里，标题靠左。
+- 自动测试：`apps/pure_live/test/features/tags/tags_page_test.dart`（4 → 7 个）：竖屏（说明在列表上方、一行一个、宽度、把手 → 文字 → 置顶 → 编辑 → 删除的顺序、三个按钮 ≥48、名字 600、“暂无描述”、五个图标、第一个的实心置顶不能点）；详情（“编辑标签”在“关闭”左边）和编辑对话框（标签在框上、0/15 和 0/40、错误在名字框和描述框之间、按钮顺序）；852×393 和 1280×800 最宽 720 居中、顶栏高度。
+- 真机：**没有记录**（S02.2、S02.3 都没看标签管理；没有 `verify.md`）。要看的：设置 → 平台显示与授权 → 标签管理：添加、编辑（字数和错误提示）、按住把手或长按卡片拖动排序、置顶、删除先确认并说影响几个直播间；卡片长按“设置标签”里新建的标签在这里出现。登记表问题见[子分类页](../README.md)“已知问题”。
+- 留下的问题：真机（上一条）；电视的标签（A17.9）；电脑上 Esc 不返回（A05.1）。

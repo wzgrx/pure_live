@@ -1,11 +1,13 @@
-# A09.5 分区房间：设计（第 1 版）
+# A09.5 分区房间：设计（第 1 版，已定稿并实现）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；S02.3 在 K90 上看过，见“实现和验证”）
+- 旧编号：U.4e、T07c.3（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：点分区卡片打开的“一个分区里的房间”页：顶栏、房间网格、关注分区、取消关注确认框、各种状态
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a095)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a095)
-- 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（`python3 docs/A-界面设计/A09-浏览界面/A09.5-分区房间/src/gen.py && python3 tools/ui/mock/render.py docs/A-界面设计/A09-浏览界面/A09.5-分区房间/src --annotate`）
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a095)（A09.5-01、02）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a095)；功能点 F-BRW-05、F-BRW-06（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；房间列表的来源（`areaRoomLoader`、`AreaRoomSource`，`apps/pure_live/lib/shared/rooms/room_feed.dart:179`、`:215`）在 [I03](../../../I-浏览和发现/I03-分区/README.md)；相关决定 D-003（Y1、Y2 按建议 A）、D-009
+- 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（`python3 docs/A-界面设计/A09-浏览界面/A09.5-分区房间/src/gen.py && python3 tools/ui/mock/render.py docs/A-界面设计/A09-浏览界面/A09.5-分区房间/src --annotate`）；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；封面、头像是示意图片，房间标题和人数是示意数据
-- **房间卡片照 A09.1**：A09.1（房间卡片）正在同时设计，这里的新设计图里用的是 v3 的房间卡片原样（`common/widgets/room_card.dart`，默认“标准”外观、紧凑尺寸），长按菜单也归 A09.1；A09.1 定稿后这一页换成它的卡片。房间网格的列数这里先按计划书 5.3，最终以 A09.1 为准
+- **房间卡片照 A09.1**：设计时 A09.1（房间卡片）在同时设计，新设计图里用的是 v3 的房间卡片原样（`common/widgets/room_card.dart`，默认“标准”外观、紧凑尺寸），长按菜单也归 A09.1；实现时用的是 A09.1 定稿的 `LiveRoomCard` 和它的列数规则
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -17,11 +19,41 @@
 | — | 房间卡片、卡片长按菜单 | 网格 | — | 属于 A09.1 |
 | — | 翻页条、回到顶部和底部、移动流量提示 | 列表共用的 `BasePageView` | — | 照 v3，属于 A02.1 |
 
+## 3.x 的样子和问题
+
+### 3.x 的样子（标签 `v3.2.11`，路径从 `lib/` 起）
+
+页面：`lib/modules/area_rooms/area_rooms_page.dart`、`area_rooms_controller.dart`、`area_rooms_binding.dart`；列表外壳：`common/base/base_page_view.dart`、`base_page_view_extension.dart`、`desktop_components.dart`、`live_directory_controller.dart`；卡片：`common/widgets/room_card.dart`。
+
+- **顶栏**（`area_rooms_page.dart:35`）：返回 `Icons.arrow_back`；标题只有分区名（空名“未命名分区”），20 号半粗居中（主题 `theme.dart:115-121`）；右边没有按钮。
+- **网格**（:46-81）：按页面宽度 >1280 五列、>960 四列、>640 三列、其余两列（:52）；外边距 6，行列间距来自设置（默认 6）；卡片 `RoomCard(dense: true)`，高 = 卡片宽 × 9/16 + 72（`room_card_layout.dart:25-40`）；底部留 80。
+- **房间卡片**（默认“标准”外观，`room_card_settings_controller.dart:51-60`；`room_card.dart:1054-1229`）：白底（深色 `grey[900]`）、圆角 20、无阴影；16:9 封面，右下人数标（黑 48% 底、圆角 10、`Icons.whatshot_rounded` 14 加 11 号粗体，平台热度；在线人数是 `Icons.people_alt_rounded`）；下面头像 34、标题 13 号 600 字重一行、主播名 12 号 500 字重一行（`grey[700]`）。紧凑尺寸下不显示平台标（:1066-1067）。点按进直播间，长按或右键弹出菜单（A09.1）。
+- **关注分区按钮**（:90-288）：右下角浮动，离底部 12（有手势条时是安全区高度）、宽屏 24（:204-210）；表面色 95% 底、主色 15% 描边、淡阴影，内边距 12/8，最小高 48。左边分区小图 32 圆形（没有图时主色容器底加首字）；**未关注**时右边两行：“关注”（12 号提示色）和分区名（12 号粗体主色，最宽 80，宽屏 120）；**已关注**时文字收起、只剩小图，圆角变 24、描边变淡（:241-277）。点了：未关注直接关注；已关注先弹确认框（:115-141），确认后取消；处理中不可点；失败弹提示条“收藏更改未保存，请重试”（:143-146）。
+- **取消关注确认框**（:115-141）：标题“取消关注”，内容“确定要取消关注{分区名}吗？”，按钮“取消”（文字按钮）、“确认”（`ElevatedButton`），最小高 48；对话框圆角 24、表面容器高底（`theme.dart:177-183`）。
+- **状态**（`base_page_view.dart`）：加载中一个转圈（:170）；没有直播 `Icons.live_tv_rounded`、“无数据”、没有说明和按钮（`area_rooms_page.dart:45`）；出错 `Icons.wifi_off_rounded`、“网络请求失败”、错误信息、“重试”（:215-224）；哔哩哔哩风控（错误含 -352）“需要登录账号”“该平台数据已被风控隐藏，请登录账号后重试”“前往登录”（:204-213，`area_rooms_controller.dart:25-28`），按钮图标固定是刷新（`app_status_view.dart:472-476`）；有内容时刷新失败，内容上方出错条（:103-132）；部分平台（YouTube、TikTok、CHZZK 等）的目录顶上一行说明（`live_directory_controller.dart:60-61`）。
+- **翻页和刷新**：手机和 Android 平板下拉刷新、上拉加载更多；电脑（宽度 >680 且不是手机系统）底部翻页条，← → 键翻页（`base_page_view_extension.dart:7-41`）。滚过 400 右下出现回到顶部、回到底部两个小按钮（`base_page_view.dart:179`，手机离底 85、电脑 135，设置可关）。
+
+### 问题
+
+| 编号 | 问题 | 位置 |
+|---|---|---|
+| R1 | 顶栏只有分区名，看不出是哪个平台、哪个大类；同名分区很多平台都有（英雄联盟在哔哩哔哩、斗鱼、虎牙都有），从关注分区的“全部”进来更分不清；紧凑卡片上也不显示平台 | `area_rooms_page.dart:35`、`room_card.dart:1066-1067` |
+| R2 | 关注后按钮缩成一个 32 的分区小图，看不出已经关注；未关注时“关注”是 12 号提示色小字，不像按钮 | `area_rooms_page.dart:204-283` |
+| R3 | 关注是右下角的浮动按钮，滚动后上面再叠回到顶部、回到底部两个，右下角三个浮动按钮盖住最后一列卡片 | `base_page_view.dart:179`、`area_rooms_page.dart:84` |
+| R4 | 没有直播时只写“无数据”，没有说明，也没有刷新按钮（只能下拉；电脑上只能点翻页条的刷新） | `area_rooms_page.dart:45` |
+| R5 | “需要登录账号”的“前往登录”按钮用的是刷新图标 | `app_status_view.dart:472-476` |
+| R6 | 列数按固定断点 2/3/4/5：横屏手机 3 列（卡片 276 宽）、1280 窗口 4 列（312 宽），一屏只看到两行多 | `area_rooms_page.dart:52` |
+| R7 | 加载中只有一个转圈，看不出页面结构 | `base_page_view.dart:170` |
+
+### 设计时 v4 的偏差（参考）
+
+`apps/pure_live/lib/features/area_rooms/`：顶栏右边多了刷新按钮；关注按钮已关注时小图上加心形；隐藏了不能播放的房间并提示数量；列表底部有“加载更多 / 已经到底了”；电脑上没有翻页条。
+
 ## 各版的经过
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 竖屏（未关注、已关注并滚动后）、取消关注确认框、横屏手机、宽屏；加载、没有直播、出错、需要登录 | 待评审 |
+| 第 1 版 | 竖屏（未关注、已关注并滚动后）、取消关注确认框、横屏手机、宽屏；加载、没有直播、出错、需要登录 | 用户确认；Y1、Y2 按建议 A（D-003）；协调员补充：取消关注分区的确认按钮写“取消关注”（A02.2 D2，和 A09.1 一致） |
 
 ## 对比页（按章节导出）
 
@@ -49,31 +81,9 @@
 | [v3-wide.jpg](v3-wide.jpg)、[v4-wide.jpg](v4-wide.jpg)、[v4-wide-n.jpg](v4-wide-n.jpg) | 宽屏 1280×800（Windows，有翻页条） |
 | [v3-states.jpg](v3-states.jpg)、[v4-states.jpg](v4-states.jpg) | 加载中、没有直播、出错、需要登录 |
 
-## v3 的样子
+## 确认的改动
 
-页面：`lib/modules/area_rooms/area_rooms_page.dart`、`area_rooms_controller.dart`、`area_rooms_binding.dart`；列表外壳：`common/base/base_page_view.dart`、`base_page_view_extension.dart`、`desktop_components.dart`、`live_directory_controller.dart`；卡片：`common/widgets/room_card.dart`。
-
-- **顶栏**（`area_rooms_page.dart:35`）：返回 `Icons.arrow_back`；标题只有分区名（空名“未命名分区”），20 号半粗居中（主题 `theme.dart:115-121`）；右边没有按钮。
-- **网格**（:46-81）：按页面宽度 >1280 五列、>960 四列、>640 三列、其余两列（:52）；外边距 6，行列间距来自设置（默认 6）；卡片 `RoomCard(dense: true)`，高 = 卡片宽 × 9/16 + 72（`room_card_layout.dart:25-40`）；底部留 80。
-- **房间卡片**（默认“标准”外观，`room_card_settings_controller.dart:51-60`；`room_card.dart:1054-1229`）：白底（深色 `grey[900]`）、圆角 20、无阴影；16:9 封面，右下人数标（黑 48% 底、圆角 10、`Icons.whatshot_rounded` 14 加 11 号粗体，平台热度；在线人数是 `Icons.people_alt_rounded`）；下面头像 34、标题 13 号 600 字重一行、主播名 12 号 500 字重一行（`grey[700]`）。紧凑尺寸下不显示平台标（:1066-1067）。点按进直播间，长按或右键弹出菜单（A09.1）。
-- **关注分区按钮**（:90-288）：右下角浮动，离底部 12（有手势条时是安全区高度）、宽屏 24（:204-210）；表面色 95% 底、主色 15% 描边、淡阴影，内边距 12/8，最小高 48。左边分区小图 32 圆形（没有图时主色容器底加首字）；**未关注**时右边两行：“关注”（12 号提示色）和分区名（12 号粗体主色，最宽 80，宽屏 120）；**已关注**时文字收起、只剩小图，圆角变 24、描边变淡（:241-277）。点了：未关注直接关注；已关注先弹确认框（:115-141），确认后取消；处理中不可点；失败弹提示条“收藏更改未保存，请重试”（:143-146）。
-- **取消关注确认框**（:115-141）：标题“取消关注”，内容“确定要取消关注{分区名}吗？”，按钮“取消”（文字按钮）、“确认”（`ElevatedButton`），最小高 48；对话框圆角 24、表面容器高底（`theme.dart:177-183`）。
-- **状态**（`base_page_view.dart`）：加载中一个转圈（:170）；没有直播 `Icons.live_tv_rounded`、“无数据”、没有说明和按钮（`area_rooms_page.dart:45`）；出错 `Icons.wifi_off_rounded`、“网络请求失败”、错误信息、“重试”（:215-224）；哔哩哔哩风控（错误含 -352）“需要登录账号”“该平台数据已被风控隐藏，请登录账号后重试”“前往登录”（:204-213，`area_rooms_controller.dart:25-28`），按钮图标固定是刷新（`app_status_view.dart:472-476`）；有内容时刷新失败，内容上方出错条（:103-132）；部分平台（YouTube、TikTok、CHZZK 等）的目录顶上一行说明（`live_directory_controller.dart:60-61`）。
-- **翻页和刷新**：手机和 Android 平板下拉刷新、上拉加载更多；电脑（宽度 >680 且不是手机系统）底部翻页条，← → 键翻页（`base_page_view_extension.dart:7-41`）。滚过 400 右下出现回到顶部、回到底部两个小按钮（`base_page_view.dart:179`，手机离底 85、电脑 135，设置可关）。
-
-## v3 的问题
-
-| 编号 | 问题 | 位置 |
-|---|---|---|
-| R1 | 顶栏只有分区名，看不出是哪个平台、哪个大类；同名分区很多平台都有（英雄联盟在哔哩哔哩、斗鱼、虎牙都有），从关注分区的“全部”进来更分不清；紧凑卡片上也不显示平台 | `area_rooms_page.dart:35`、`room_card.dart:1066-1067` |
-| R2 | 关注后按钮缩成一个 32 的分区小图，看不出已经关注；未关注时“关注”是 12 号提示色小字，不像按钮 | `area_rooms_page.dart:204-283` |
-| R3 | 关注是右下角的浮动按钮，滚动后上面再叠回到顶部、回到底部两个，右下角三个浮动按钮盖住最后一列卡片 | `base_page_view.dart:179`、`area_rooms_page.dart:84` |
-| R4 | 没有直播时只写“无数据”，没有说明，也没有刷新按钮（只能下拉；电脑上只能点翻页条的刷新） | `area_rooms_page.dart:45` |
-| R5 | “需要登录账号”的“前往登录”按钮用的是刷新图标 | `app_status_view.dart:472-476` |
-| R6 | 列数按固定断点 2/3/4/5：横屏手机 3 列（卡片 276 宽）、1280 窗口 4 列（312 宽），一屏只看到两行多 | `area_rooms_page.dart:52` |
-| R7 | 加载中只有一个转圈，看不出页面结构 | `base_page_view.dart:170` |
-
-## 改动（待确认）
+用户确认（第 1 版的“改动（待确认）”原样；c1 的确认框按钮按协调员补充写“取消关注”）：
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -120,18 +130,38 @@
 | 电视 | 这个任务不出图。电视的分区房间页在 A17.3（pure_live_TV `modules/live/areas/area_rooms_page.dart`），用同一个房间卡片的电视样式；关注分区在电视上同样放在顶部，焦点可达 |
 | 苹果平台 | iPhone 同 Android 手机，左边缘滑动返回；iPad 同平板；macOS 同 Windows（翻页条、右键菜单）。没有别的差异 |
 
-## 待选（A 是建议）
+## 待选和决定
 
-- Y1 关注按钮：A 移到顶栏右边，和直播间顶栏同一个“＋ 关注 / ✓ 已关注”胶囊；B 留在右下角浮动，但已关注时显示“✓ 已关注”文字，不再缩成小图。
-- Y2 顶栏的“平台 · 大类”：A 加在标题下面；B 照 v3 只写分区名。
+- Y1 关注按钮：A 移到顶栏右边，和直播间顶栏同一个“＋ 关注 / ✓ 已关注”胶囊；B 留在右下角浮动，但已关注时显示“✓ 已关注”文字，不再缩成小图。**用了 A**（D-003）。
+- Y2 顶栏的“平台 · 大类”：A 加在标题下面；B 照 v3 只写分区名。**用了 A**。
 
-## 拿不准的地方
+### 设计时拿不准的地方
 
 - 哔哩哔哩以外的平台人数口径不同（在线人数用 `Icons.people_alt_rounded`），这里只画了热度。
 - `Icons.account_circle_outlined` 在效果图里用实心的 `account_circle` 近似（效果图工具只有 Material 常规和圆角两套字体）。
 - 部分平台目录顶上的说明文字（`*_directory_scope`）没有画，照 v3 保留。
 - 房间网格的列数和卡片样子以 A09.1 为准；如果 A09.1 定的列数规则不同，这一页跟着改。
 
-## v4 现在的偏差（参考）
+结论：列数和卡片照 A09.1 定稿（393 两列、852 四列、1280 六列）；目录说明文字照 v3 保留（`RoomFeedView` 的页顶说明）。
 
-`apps/pure_live/lib/features/area_rooms/`：顶栏右边多了刷新按钮；关注按钮已关注时小图上加心形；隐藏了不能播放的房间并提示数量；列表底部有“加载更多 / 已经到底了”；电脑上没有翻页条。
+### 性能要点（评审页）
+
+- 网格用固定行高（卡片宽 × 9/16 + 72），只建看得见的卡片；封面按显示宽度解码（v3 已有 240–720 的上限），不做淡入。
+- 列数只用父组件给的宽度算；窗口尺寸变化只改列数，不重新请求。
+- 关注胶囊只订阅这个分区的关注状态，关注或取消时只刷新胶囊。
+- 骨架屏是静态灰块，不做扫光动画。
+- 加载更多照 v3：滚到底才请求下一页，有条数上限（v3 每个目录最多 20000 条）。
+
+## 实现和验证
+
+- 实现：c1～c8、Y1、Y2 都做了（逐条见 [record.md](record.md)）。现在的代码：
+  - `apps/pure_live/lib/features/area_rooms/area_rooms_page.dart`：`AreaRoomsPage`（`:20`）、`AreaRoomsView`（`:46`）：标题分区名，下面一行“平台 · 大类”（键 `area-rooms-subtitle`，`:118`；大类为空时只写平台），顶栏右边 `FollowAreaButton`（`:125`），页面主体是和热门同一个 `RoomFeedView`（`:127`，`apps/pure_live/lib/shared/rooms/room_grid.dart:357`），没有直播时的说明 `area_rooms_empty_hint`（`:135`）。
+  - `features/area_rooms/follow_area_button.dart`：`FollowAreaButton`（`:14`，`FollowPill` `:44`；处理中变灰不可点；取消先确认，确认框是 `features/areas/areas_common.dart:131` 的 `confirmUnfollow` → `shared/rooms/room_menu.dart:158` 的 `confirmUnfollowRoom`，红色“取消关注”）。
+  - 去掉了 v4 顶栏的刷新按钮和右下角的分区小图按钮；回到顶部、回到底部在右下角最下面（电脑在翻页栏上方）；电脑翻页栏是 v4 之前没有的，这次补上；有被隐藏的不能播放的直播时说明数量，第一个按钮“显示”、第二个“刷新”；“前往登录”用登录图标。
+- 偏差：列表底部的文字统一成热门的“没有更多数据了”“加载更多”（两页共用一个列表组件）。
+- 没有新设置。门禁：`area_rooms` 直接写的颜色和图标 12 → 0；跨功能引用 `area_rooms -> home/home_menu.dart` 去掉，`area_rooms -> areas/areas_common.dart` 仍在基线里（`tools/gate/ui_baseline.json`）。
+- 提交：代码 `8b66eed6b`（`feat(ui): U.4d areas, U.4e area rooms, U.4f followed areas and platform display`）；合并 `0e46099b2`（2026-10-01）；登记表写的是记录提交 `7daeb3805`。
+- 后来的变化：A03.1（`a048ea540`）下拉刷新用 `AppRefreshView`（D-009）；E06.1（`1239eb087`）卡片加“· 已播 N”；A07.3（`5a43d18b5`）竖屏全屏上下滑换台用的就是这一页的房间列表。
+- 自动测试：`apps/pure_live/test/features/areas/areas_test.dart` 的分区房间用例照实改：底部文字用共用列表的“没有更多数据了”；新增“虎牙 · 分类”副标题；隐藏和显示不能播放的房间、关注胶囊照旧；列数在 `packages/live_ui/test/live_room_card_test.dart` 的表里。
+- 真机：没有单独的 `verify.md`。S02.3（2026-10-02，K90，`288fec0ec`）“分区、分区房间（平台 · 大类、关注按钮）”通过，返回逐级退出到分区房间也看过（[S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)）。取消关注的确认框、需要登录、电脑翻页栏没有记录。
+- 留下的问题：跨功能引用 `area_rooms -> areas/areas_common.dart`（分区共用部分挪到 `shared/` 时一起处理）；电脑上 Esc 不返回（A05.1）；电视（A17.3）。

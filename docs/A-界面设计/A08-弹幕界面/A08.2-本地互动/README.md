@@ -1,11 +1,13 @@
-# A08.2 本地互动：设计（第 1 版）
+# A08.2 本地互动：设计（第 1 版，已定稿并实现）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
-- 范围：v3 的本地互动体验：弹幕列表下的本地弹幕输入框、全屏下栏的输入框、本地弹幕样式、模拟礼物和礼物特效、本地互动面板、设置里的“本地用户与互动”页。v4 还没有这个功能，定稿后设计和实现一起做
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a082)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a082)；设置页在 TASK_FILES 里归 A11.4，这里一起设计，A11.4 只管设置总览里的入口
-- 依赖：[A07.1](../../A07-直播间界面/A07.1-竖屏普通布局/README.md)（顶栏、信息行、弹幕紧凑行）、[A07.6](../../A07-直播间界面/A07.6-直播间弹窗/README.md)（菜单第三组“本地互动体验”、面板位置规则）、[A07.4](../../A07-直播间界面/A07.4-横屏全屏/README.md)（全屏下栏，输入框在中间、窄屏收成星形按钮；评审中）
-- 评审页：claude.ai 私有页面；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
-- 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；画面和头像是示意图片；礼物和平台徽章用 Noto 彩色 emoji 子集字体 [src/emoji.woff2](src/emoji.woff2)（OFL，约 30 KB，渲染机没有彩色 emoji 字体）
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；真机只看过输入框和菜单项，见“实现和验证”）
+- 旧编号：U.2k、T06f.1（见 [MAPPING.md](../../../MAPPING.md)）
+- 范围：v3 的本地互动体验：弹幕列表下的本地弹幕输入框、全屏下栏的输入框、本地弹幕样式、模拟礼物和礼物特效、本地互动面板、设置里的“本地用户与互动”页。v4 原来没有这个功能，定稿后设计和实现一起做
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a082)（A08.2-01～03）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a082)；设置页在 UI_FILES 里归 A11.4，这里一起设计，A11.4 只管设置总览里的入口；相关决定 D-003（K1～K4 按建议 A）
+- 依赖：[A07.1](../../A07-直播间界面/A07.1-竖屏普通布局/README.md)（顶栏、信息行、弹幕紧凑行）、[A07.6](../../A07-直播间界面/A07.6-直播间弹窗/README.md)（菜单第三组“本地互动体验”、面板位置规则）、[A07.4](../../A07-直播间界面/A07.4-横屏全屏/README.md)（全屏下栏，输入框在中间、窄屏收成星形按钮）
+- 评审页：claude.ai 私有页面；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；按章节导出在 [page/](page/01-说明.jpg)
+- 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；画面和头像是示意图片；礼物和平台徽章用 Noto 彩色 emoji 子集字体 [src/emoji.woff2](src/emoji.woff2)（OFL，约 30 KB，渲染机没有彩色 emoji 字体；来源说明 [src/emoji-NOTICE.txt](src/emoji-NOTICE.txt)）
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -21,7 +23,11 @@
 | A08.2-h | 提示条 | 发送后“发送成功，将在 2 秒后同步显示”；点礼物“体验币余额不足” | 全部 | — |
 | — | 电视 | pure_live_TV 只有一个没用到的路由常量（`app_routes.dart:171`），没有页面 | — | 不适用 |
 
-## v3 的样子
+## 3.x 的样子和问题
+
+### 3.x 的样子
+
+文件在 `git show v3.2.11:lib/modules/` 下：直播间里的在 `live_play/` 里——本地互动的 `local_interaction_controller.dart`、`local_interaction_sheet.dart`、`local_danmaku_style_editor.dart` 在 `live_play/widgets/local_interaction/`，`content_first_panel_layout.dart` 在 `live_play/widgets/`，`danmaku/…`、`video_player/…`、`button/…` 在 `live_play/widgets/` 下，`danmaku_list_view.dart`、`danmaku_message_actions.dart` 在 `live_play/widgets/danmaku/`，`video_controller_panel.dart` 在 `live_play/widgets/video_player/`，`live_play_controller.dart` 在 `live_play/controllers/`，`pages/…` 是 `live_play/pages/`；设置页是 `settings/pages/…`、`settings/settings_page.dart`。
 
 - **数据和默认值**（`widgets/local_interaction/local_interaction_controller.dart`）：总开关默认开（:86）；昵称“Pure Live”（:87，最多 20 字 :821-830）；头衔“听众”（:88，四个：听众、守夜人、应援团、守护者 :718）；在画面显示（:89）、平台徽章（:90）、等级（:91）、礼物特效（:92）默认都开；体验币 1000（:94）；等级 = 经验 ÷ 500 + 1（:724）；记录最多 30 条、新的在前（:905-908）。本地弹幕样式默认“清爽”：白色、19、130 px/s、600、描边 1.5 黑（:97-114）。6 个模板（:116-192）、12 种弹幕颜色（:194-207）、7 种描边阴影颜色（:209）、4 种字体（:211）、3 个位置（:212）。34 个平台资源包，各有主题色、等级称呼、币名、徽章 emoji（:248-521）；8 个平台各有 3 个礼物（每个平台一个高价值礼物是大特效），其他平台用通用的爱心 10、鲜花 50、火箭 500、城堡 2000（:214-237、:523-716）。
 - **本地弹幕**：名字是“徽章 emoji 徽章名 · 头衔 · 昵称”（:857-874）；礼物消息是“礼物 emoji 徽章 · 头衔 · 昵称 送出 礼物名 ×1”，名字另存为昵称（:876-903）。在弹幕列表里和别人一样是卡片“名字: 内容”（`danmaku/danmaku_list_view.dart:504-519`），等级只在长按弹幕的面板里显示“Lv.N”（`danmaku_message_actions.dart:19`），长按没有“屏蔽用户”（:30）。画面上飞过的只有内容，带本地样式，画面弹幕关着时不飞（`video_player/video_controller.dart:183-223`）。
@@ -32,11 +38,68 @@
 - **礼物特效**（`pages/live_play_page.dart:47-92`、`live_play_controller.dart:594-597`）：盖在整页中间，从 0.72 放大到 1（420 毫秒，回弹曲线），礼物色 94% 到黑 78% 的横向渐变、圆角 24、白 45% 描边、礼物色模糊发光；普通礼物最宽 320、16 号，大特效最宽 440、20 号；内容就是整条礼物消息；3 秒后消失，新的顶替旧的；只看“显示本地礼物特效”。
 - **设置页**（`settings/pages/local_interaction_settings_page.dart`，入口 `settings/settings_page.dart:124-133`）：标题“本地用户与互动”。组“本地用户与互动”：启用本地互动体验。关掉时下面全部隐藏（:49-50）。开着时：组“平台体验资源包”（说明、34 个平台选择片、预览卡“徽章 平台名 / 等级称呼 Lv.1 · 1000 币名 / 礼物片”，:55-85、:211-245）→ 组“本地用户资料”（本地昵称、本地头衔、在画面显示本地字幕与礼物特效、显示平台身份徽章、显示本地体验等级、显示本地礼物特效、体验币与等级“1000 · Lv.1”，:87-159）→ 组“本地弹幕样式”（完整编辑器，:161-167）→ 说明“启用后可从直播间右上角菜单进入本地互动面板。”（:168-172）→ 组“本地体验币与记录”（说明、+500 +2000 +10000、“清空本地互动记录”，记录空时不可点，:174-201）。
 
+### 问题
+
+| 编号 | 问题 | 位置 |
+|---|---|---|
+| L1 | 互动面板竖屏几乎盖满整屏，发的弹幕和礼物特效被挡住 | `live_play_menu_button.dart:152-165`、`local_interaction_sheet.dart:46-219` |
+| L2 | 样式编辑竖屏是 86% 高的底部面板盖住画面，预览随内容滚走；横屏换成右半边对话框加分栏 | `local_danmaku_style_editor.dart:7-44`、`:139-144`、`:162` |
+| L3 | 宽屏互动面板 640 宽居中，盖住画面和聊天栏；全屏打不开 | `live_play_menu_button.dart:152`、A07.4 F1 |
+| L4 | 输入框等 2 秒并提示，面板里立即出现，同一件事两种表现 | `danmaku_list_view.dart:255-266`、`video_controller_panel.dart:1643-1655`、`live_play_menu_button.dart:160-162` |
+| L5 | “本地字幕”“本地弹幕”混用；提示没说只有自己看得到 | `zh.json`：`local_message_hint`、`local_overlay_message`、`local_send_message` |
+| L6 | “在画面显示本地字幕与礼物特效”管不了礼物特效 | `live_play_controller.dart:593-597` |
+| L7 | 礼物特效在整页中间，竖屏落在列表上 | `pages/live_play_page.dart:58-63` |
+| L8 | 礼物特效让直播间整页重建；模糊发光压在视频上 | `pages/live_play_page.dart:28`、`:47-58`、`:79` |
+| L9 | 礼物在列表里名字出现两次，画面上飞一长串 | `local_interaction_controller.dart:883-888` |
+| L10 | 本地弹幕和别人的一个样；等级开着也看不到 | `danmaku_list_view.dart:504-519`、`danmaku_message_actions.dart:19` |
+| L11 | 余额不够的礼物看不出来；价钱没单位 | `local_interaction_sheet.dart:158-180` |
+| L12 | 样式展开项把发送框和礼物推到很下面；同步说明出现两次 | `local_interaction_sheet.dart:113-125` |
+| L13 | 记录只能在面板看、只能在设置页清空；体验币和等级三种写法 | `local_interaction_sheet.dart:81`、`:203-214`、`local_interaction_settings_page.dart:155`、`:193-197`、`:230` |
+| L14 | 不适用的样式项直接消失，和 A07.6 不一致；“恢复默认”只有图标且等于“清爽” | `local_danmaku_style_editor.dart:577-650`、`:90-99` |
+| L15 | 全屏输入框焦点边框深蓝，画面上看不出 | `video_controller_panel.dart:1741-1744` |
+| L16 | 设置页分组混杂、编辑器嵌在中间、入口说明离开关远且没提输入框 | `local_interaction_settings_page.dart:86-172` |
+| L17 | 系统 emoji 各平台不一样，Linux 可能是方框 | `local_interaction_controller.dart:214-716` |
+
+### v3 的每一项在新设计里的位置（评审页“v3 的每一项在哪”一节）
+
+| v3 | v3 位置 | 新设计 |
+|---|---|---|
+| 弹幕列表下的输入框（星形、输入、发送） | `danmaku_list_view.dart:386-436` | 原位，提示改名（c6、c7） |
+| 全屏下栏中间的输入框；竖屏全屏下栏上方一行 | `video_controller_panel.dart:1443-1463`、`:1508-1527` | 原位（A07.4、A07.2），窄屏收成星形（c14） |
+| 菜单“本地互动体验”（开了才有） | `live_play_menu_button.dart:203-204` | 菜单第三组（A07.6），全屏也有（A07.4） |
+| 面板：标题、关闭、说明 | `local_interaction_sheet.dart:54-64` | 面板标题栏，多一个“设置 ›” |
+| 面板：本地昵称、体验币与等级标签 | `:66-85` | “我的资料”和身份卡 |
+| 面板：本地头衔（听众、守夜人、应援团、守护者） | `:87-103` | “我的资料” |
+| 面板：在画面显示本地字幕与礼物特效 | `:104-112` | “画面上”：本地弹幕在画面上飞过（c7） |
+| 面板：本地弹幕样式（展开项） | `:113-125` | “画面上”：本地弹幕样式 ›，进下一页（c4） |
+| 面板：发送框 | `:126-142` | 身份卡下面（c3） |
+| 面板：本地礼物（每行 4 个） | `:144-184` | 发送框下面，余额不够的变淡（c11） |
+| 面板：本地体验币 +500 +2000 +10000 | `:186-201` | 礼物下面 |
+| 面板：本地互动记录（展开项，最近 10 条） | `:203-214` | 最后一组，多“清空记录”（c12） |
+| 样式：标题、恢复默认、关闭 | `local_danmaku_style_editor.dart:67-113` | 面板标题栏，“恢复默认”是文字（c5） |
+| 样式：实时预览 | `:170-282` | 固定在面板顶上（c4） |
+| 样式：样式模板 6 个、显示位置 3 个、字体 4 个、弹幕颜色 12 个 | `:403-478` | 同顺序 |
+| 样式：字体大小 14–32、滚动速度 60–260、不透明度 35–100%、字间距 -0.5–3 | `:480-534` | 同范围，一列 |
+| 样式：粗体、斜体、描边、阴影 / 微光 | `:536-576` | 同 |
+| 样式：描边颜色 7 个、描边宽度 0.5–4 | `:577-598` | 描边关着时变灰（c5） |
+| 样式：阴影颜色 7 个、模糊强度 0–6、阴影偏移 0–4 | `:599-637` | 阴影关着时变灰（c5） |
+| 样式：固定弹幕停留时间 2–10 秒 | `:638-650` | 位置是滚动时变灰（c5） |
+| 样式：同步说明 | `:651-661` | 面板最下面 |
+| 设置页：启用本地互动体验 | `local_interaction_settings_page.dart:39-48` | 第一组（c15） |
+| 设置页：平台体验资源包（34 个平台、预览卡） | `:55-85`、`:211-245` | 第四组，顺序不变 |
+| 设置页：本地昵称、本地头衔、体验币与等级 | `:87-123`、`:152-158` | “本地用户资料” |
+| 设置页：四个显示开关 | `:124-151` | “画面上” |
+| 设置页：本地弹幕样式（嵌入的编辑器） | `:161-167` | “画面上”：本地弹幕样式 ›（同一个样式页） |
+| 设置页：入口说明 | `:168-172` | 总开关下面，补上输入框（c15） |
+| 设置页：+500 +2000 +10000、清空本地互动记录 | `:174-201` | 最后一组，加记录列表（c12） |
+| 礼物特效（3 秒，两档） | `pages/live_play_page.dart:47-92`、`live_play_controller.dart:594-597` | 画面中间（c9） |
+| 提示：发送成功，将在 2 秒后同步显示；体验币余额不足 | `danmaku_list_view.dart:265`、`local_interaction_sheet.dart:163` | 前者看 K1；后者保留 |
+
 ## 各版的经过
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | v3 还原（11 张）和新设计（15 张，6 张编号图）；17 个问题、16 条改动、四处待选 | 待评审 |
+| 第 1 版 | v3 还原（11 张）和新设计（15 张，6 张编号图）；17 个问题、16 条改动、四处待选 | 用户确认；K1～K4 都按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -77,29 +140,9 @@
 | [v3-settings-off.jpg](v3-settings-off.jpg)、[v4-settings-off.jpg](v4-settings-off.jpg) | 设置页：总开关关闭 |
 | [v4-settings-wide.jpg](v4-settings-wide.jpg) | 设置页宽屏（内容最宽 720） |
 
-## v3 的问题
+## 确认的改动
 
-| 编号 | 问题 | 位置 |
-|---|---|---|
-| L1 | 互动面板竖屏几乎盖满整屏，发的弹幕和礼物特效被挡住 | `live_play_menu_button.dart:152-165`、`local_interaction_sheet.dart:46-219` |
-| L2 | 样式编辑竖屏是 86% 高的底部面板盖住画面，预览随内容滚走；横屏换成右半边对话框加分栏 | `local_danmaku_style_editor.dart:7-44`、`:139-144`、`:162` |
-| L3 | 宽屏互动面板 640 宽居中，盖住画面和聊天栏；全屏打不开 | `live_play_menu_button.dart:152`、A07.4 F1 |
-| L4 | 输入框等 2 秒并提示，面板里立即出现，同一件事两种表现 | `danmaku_list_view.dart:255-266`、`video_controller_panel.dart:1643-1655`、`live_play_menu_button.dart:160-162` |
-| L5 | “本地字幕”“本地弹幕”混用；提示没说只有自己看得到 | `zh.json`：`local_message_hint`、`local_overlay_message`、`local_send_message` |
-| L6 | “在画面显示本地字幕与礼物特效”管不了礼物特效 | `live_play_controller.dart:593-597` |
-| L7 | 礼物特效在整页中间，竖屏落在列表上 | `pages/live_play_page.dart:58-63` |
-| L8 | 礼物特效让直播间整页重建；模糊发光压在视频上 | `pages/live_play_page.dart:28`、`:47-58`、`:79` |
-| L9 | 礼物在列表里名字出现两次，画面上飞一长串 | `local_interaction_controller.dart:883-888` |
-| L10 | 本地弹幕和别人的一个样；等级开着也看不到 | `danmaku_list_view.dart:504-519`、`danmaku_message_actions.dart:19` |
-| L11 | 余额不够的礼物看不出来；价钱没单位 | `local_interaction_sheet.dart:158-180` |
-| L12 | 样式展开项把发送框和礼物推到很下面；同步说明出现两次 | `local_interaction_sheet.dart:113-125` |
-| L13 | 记录只能在面板看、只能在设置页清空；体验币和等级三种写法 | `local_interaction_sheet.dart:81`、`:203-214`、`local_interaction_settings_page.dart:155`、`:193-197`、`:230` |
-| L14 | 不适用的样式项直接消失，和 A07.6 不一致；“恢复默认”只有图标且等于“清爽” | `local_danmaku_style_editor.dart:577-650`、`:90-99` |
-| L15 | 全屏输入框焦点边框深蓝，画面上看不出 | `video_controller_panel.dart:1741-1744` |
-| L16 | 设置页分组混杂、编辑器嵌在中间、入口说明离开关远且没提输入框 | `local_interaction_settings_page.dart:86-172` |
-| L17 | 系统 emoji 各平台不一样，Linux 可能是方框 | `local_interaction_controller.dart:214-716` |
-
-## 改动（待确认）
+用户确认（第 1 版的“改动（待确认）”原样，每条的完整说明见评审页“改了什么”）：
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -122,7 +165,41 @@
 
 ## 按钮的作用和用法
 
-编号 1–31 见对比页“每个按钮是干什么的、怎么用”一节（编号图：v4-room-n、v4-panel-full-n、v4-style-full-n、v4-settings-n、v4-fullscreen-n、v4-narrow-open-n）。同一个功能在不同图里用同一个编号（例如昵称在面板和设置页都是 10）。
+编号图：v4-room-n、v4-panel-full-n、v4-style-full-n、v4-settings-n、v4-fullscreen-n、v4-narrow-open-n。同一个功能在不同图里用同一个编号（例如昵称在面板和设置页都是 10）。
+
+| 编号 | 控件 | 怎么用 |
+|---|---|---|
+| 1 | 星形（本地弹幕样式） | 打开本地弹幕样式面板。全屏时星形是当前本地弹幕颜色（默认白色），浅色背景上是主色。 |
+| 2 | 输入框 | 输入一条只有自己看得到的弹幕；回车（电脑）或键盘上的发送也能发。全屏时输入中控制栏不隐藏。 |
+| 3 | 发送 | 发出：进弹幕列表，“本地弹幕在画面上飞过”开着时也在画面上飞过（按本地弹幕样式）。空的不发。 |
+| 4 | 本地弹幕（列表里） | “本地”标签 + 平台徽章和等级 + 头衔 · 昵称。双击复制，长按或右键：复制、屏蔽关键词（照 v3）。 |
+| 5 | 四宫格菜单 → 本地互动体验 | 打开互动面板（总开关关着时没有这一项）。 |
+| 6 | 设置 › | 进设置里的“本地用户与互动”（徽章、等级开关和平台资源包在那里）。 |
+| 7 | 关闭 | 关掉面板；返回键、Esc、竖屏下拉也可以。 |
+| 8 | 礼物 | 送出：扣体验币、加经验，画面中间出现 3 秒横幅（开着“显示本地礼物特效”时），列表里加一行。余额不够的变淡，点了提示“体验币余额不足”。 |
+| 9 | +500 / +2000 / +10000 | 加本地体验币，记一条记录。 |
+| 10 | 本地昵称 | 最多 20 个字，边输边保存；空的不保存。 |
+| 11 | 本地头衔 | 听众、守夜人、应援团、守护者，选一个，出现在本地弹幕和礼物里。 |
+| 12 | 本地弹幕在画面上飞过 | 关掉后本地弹幕只进弹幕列表。 |
+| 13 | 显示本地礼物特效 | 关掉后送礼物不出横幅。 |
+| 14 | 本地弹幕样式 › | 进样式页（右边是当前模板名，改过显示“自定义”）。 |
+| 15 | 本地互动记录 / 清空 | 最近的送礼和加币记录（最多 30 条）；清空记录不动体验币和等级。 |
+| 16 | 恢复默认 | 回到“清爽”模板。 |
+| 17 | 返回 | 从互动面板进来时回到互动面板。 |
+| 18 | 样式模板 | 清爽（默认）、醒目、霓虹、极简、底部字幕、赛博：一次设好颜色、大小、速度和效果；之后改任一项变成自定义（不选中任何模板）。 |
+| 19 | 显示位置 | 滚动、顶部固定、底部固定。 |
+| 20 | 字体 | 系统、圆润、衬线、等宽（按钮上的字就是那种字体）。 |
+| 21 | 弹幕颜色 | 12 种。 |
+| 22 | 大小、速度、不透明度、字间距 | 拖动，预览马上变。 |
+| 23 | 文字效果 | 粗体、斜体、描边、阴影 / 微光，可多选。 |
+| 24 | 描边颜色、描边宽度 | 描边开着时可调。 |
+| 25 | 阴影颜色、模糊强度、阴影偏移 | “阴影 / 微光”开着时可调，关着变灰。 |
+| 26 | 固定弹幕停留时间 | 位置是顶部固定或底部固定时可调，滚动时变灰。 |
+| 27 | 星形按钮（窄屏全屏） | 宽度不够时输入框收成这个按钮；点开后下栏上方出现输入行并弹出键盘，发出或点别处收起。 |
+| 28 | 启用本地互动体验 | 总开关。关掉后直播间里的输入框、菜单项和本地弹幕、礼物特效都没有了，设置页只剩这一项。 |
+| 29 | 显示平台身份徽章 | 本地弹幕和礼物前的平台徽章（例如“舰队等级”）。 |
+| 30 | 显示本地体验等级 | 徽章里的 Lv.N。 |
+| 31 | 平台资源包 | 预览各平台的主题色、等级称呼、币名和礼物；直播间自动用当前平台的。 |
 
 ## 各客户端
 
@@ -133,22 +210,44 @@
 | 电视 | 不适用（pure_live_TV 没有这个功能，遥控器输入文字不便） |
 | 苹果平台差异 | iOS 键盘弹出时输入行贴键盘上方；macOS 回车发送；其余同手机和宽屏 |
 
-## 待选（A 是建议）
+## 待选和决定
 
-- K1 点发送以后：A 三个输入框都立即显示，画面弹幕关着时提示一次；B 都照 v3 输入框等 2 秒并提示。
-- K2 新装默认值：A 照 v3 默认开；B 新装默认关，3.x 升级的照旧。
-- K3 从互动面板进样式：A 面板里的下一页；B 照 v3 展开。
-- K4 礼物和徽章图案：A 保留 emoji、应用自带子集字体；B 换成应用图标。
+- K1 点发送以后：A 三个输入框都立即显示，画面弹幕关着时提示一次；B 都照 v3 输入框等 2 秒并提示。**用了 A**（D-003）：每个直播间第一次提示“画面弹幕已关闭，只加到了弹幕列表”。
+- K2 新装默认值：A 照 v3 默认开；B 新装默认关，3.x 升级的照旧。**用了 A**。
+- K3 从互动面板进样式：A 面板里的下一页；B 照 v3 展开。**用了 A**。
+- K4 礼物和徽章图案：A 保留 emoji、应用自带子集字体；B 换成应用图标。**用了 A**（iOS、macOS 用系统 emoji，见“实现和验证”）。
 
-## 拿不准的地方
+### 设计时拿不准的地方
 
 1. 提示条的样子按 `flutter_smart_dialog` 默认近似画（深色圆角、底部居中），v3 没有自定义（`common/utils/toast_util.dart:23`）。
 2. v3 互动面板的高度按内容估（约 770，加拖动条区 48）；宽屏底部面板最宽 640 是 Flutter 默认值，v3 没有另设。
-3. E04.1 选择片选中时有头像（颜色点、平台徽章）的画法按“勾代替头像”画。
+3. M3（Material 3）选择片选中时有头像（颜色点、平台徽章）的画法按“勾代替头像”画。
 4. A07.1、A07.5 的 v3 还原图和新设计都没画弹幕列表下的输入框（v3 默认开着），这里补上；A07.1、A07.5 的开发要留出这一行（总开关开着时）。
 5. 横屏全屏弹出键盘时画面和下栏怎么让位，v3 代码里没有专门处理，没有真机核对；新设计要求输入行贴在键盘上方。
 6. 竖屏全屏的输入框位置（下栏上方一行）属于 A07.2，这里没有单独出图，组件和行为同本任务。
 
-## 给工具的建议
+### 给工具的建议
 
 - `src/emoji.woff2` 是 Noto Color Emoji 的子集（Google Fonts `text=` 取的），放在任务文件夹里只为这一个任务能渲染 emoji。以后别的任务也要 emoji 时，建议把它加进 `tools/ui/mock/fetch.sh` 和 `kit.css`（`font-family` 回退加上它）。
+
+## 实现和验证
+
+- 实现：c1～c16 和 K1～K4 都做了；逻辑和界面一起做（v4 原来没有这个功能）。逐条对照、各客户端、“v3 的每一项在哪”见 [record.md](record.md)。现在的代码：
+  - 输入框：`apps/pure_live/lib/features/live_play/local_interaction/local_composer.dart`（`LocalDanmakuComposer` `:49`，`place` 为列表下、面板、画面；窄于 `localComposerCollapseWidth` 180（`:26`）收成星形；画面上最宽 `localComposerVideoMaxWidth` 420（`:29`）；焦点边框 `localVideoFocusColor` `:314`；接在列表下的 `LocalComposerBelow` `:437`）。全屏下栏里 A07.4 放的是 `LocalDanmakuComposer.onVideo(onHold: actions.onMenu)`（`features/live_play/player/player_controls.dart:678`、`:734`）。
+  - 面板：`local_interaction_panel.dart`（`LocalInteractionPanel` `:24`、`LocalIdentityCard` `:151`、`LocalRechargeRow` `:322`、`LocalProfileEditor` `:368`、`LocalHistory` `:447`），由 `RoomPanelKind.localInteraction` / `localStyle` 打开（`features/live_play/live_play_page.dart:832`、`:837`），菜单第三组在 `buttons/room_menu_button.dart:253`。
+  - 样式：`local_style_panel.dart`（`LocalDanmakuStylePanel` `:19`，设置页用 `showLocalDanmakuStyleSheet` `:72`）。
+  - 礼物特效：`local_gift_effect.dart`（`LocalGiftLayer` `:13`、`LocalGiftBanner` `:54`），挂在 `player/player_view.dart:699`。
+  - 列表里的本地弹幕：`local_chat_line.dart`（`LocalChatLine` `:11`），由 `features/live_play/danmaku/chat_list.dart:609` 的本地分支接入；飞过的本地弹幕在 `shared/danmaku/danmaku_overlay.dart` 的 `_placeLocal`（`:513`，记录里写的 `_addLocal` 在 D03.1 重写弹幕层后改了名）；本地弹幕进 `ChatFeed` 走 `logic/room_controller.dart:918` 的 `addLocal`。
+  - 设置页：`local_interaction_settings_page.dart`（`LocalInteractionSettingsPage` `:24`，最宽 720），路由 `RoutePath.kLocalInteraction`（`routes/route_path.dart:141`），设置总览入口 `features/settings/settings_model.dart:90`（提交 `0eb94e4b1`）。
+  - 逻辑（不引 material）：`local_interaction/logic/local_catalog.dart`（资料库）、`local_interaction.dart`（`LocalInteraction` `:113`）、`local_room_session.dart`（`LocalRoomSession` `:32`）。
+- 设置：`packages/live_store` 注册了 29 个 `localInteraction.*`（键名、默认值、范围照 3.x）；已经在 `legacy_values` 里的由 `LegacyMigration.adoptLegacyValues` 接过来；v4 备份带上这一节。
+- emoji 字体：`apps/pure_live/assets/fonts/emoji/NotoColorEmoji-Subset.ttf`（56 KB，40 个 emoji，COLRv1）、`OFL.txt`、`NOTICE.txt`；字体族 `PureLiveEmoji`；iOS、macOS 不用它（`local_interaction_scope.dart:58` 的 `_bundledEmoji`）。
+- 偏差：礼物横幅的缩放用减速曲线（`easeOutCubic`，420 毫秒），不用 v3 的回弹（规范 8.6“不回弹”）；描边组的条件说明“打开‘描边’后可调”是照阴影组补的。
+- 新文字：中英各新增 12 条、改了 6 条已有文字（键名见记录“新增的文字”）。门禁：`live_play` 直接写的颜色和图标仍是 9，新图标全部走 `AppIcons`（新增 18 个）、画面颜色走 `OnVideoColors`（新增 6 个）。
+- 提交：`08b956982`（`live_store` 注册设置）、`8787b3be5`（`live_ui` 图标、画面颜色、emoji 子集）、`08b4dc6ab`（逻辑）、`02d6d5187`（面板、输入框、样式、礼物横幅、设置页）、`b97a92410`（测试）；合并 `459754622`（2026-10-01）；登记表写的是记录提交 `e704b933a`；设置总览入口 `0eb94e4b1`。
+- 自动测试：`apps/pure_live/test/features/live_play/local_interaction_test.dart`（15 个，内容见记录“测试”）；改了 `live_play_popups_test`（菜单第三组）、`home_test`（路由表）、`live_store` 的 `migration_test` 和 `backup_test`、`live_ui` 图标对照表。合并时 `apps/pure_live` 293 个、`live_store` 33 个、`live_ui` 45 个通过。
+- 真机：没有单独的 `verify.md`。S02.2 冒烟（2026-10-02，K90，`288fec0ec`）“进直播间……本地弹幕输入框”通过；S02.3 看过右上角菜单里的“本地互动体验”（只看了菜单）。发本地弹幕、送礼特效、样式面板、设置页在真机上没有记录，对应 [CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 2 节第 8 条。Windows 上的礼物 emoji（Windows 10 可能空白）没看过。
+- 留下的问题：
+  - 本地礼物在列表里那一行没有长按菜单（3.x 的礼物和弹幕同一种卡片可以长按）：影响小，不做。
+  - Windows 10 的 COLRv1 emoji：在 X01（Windows）验证，有问题就让 `_bundledEmoji` 对 Windows 也返回假。
+  - 本地互动的逻辑没有登记归属（见[子分类页](../README.md)“已知问题”）。

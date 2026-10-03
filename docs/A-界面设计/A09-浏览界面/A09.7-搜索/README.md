@@ -1,11 +1,13 @@
-# A09.7 搜索：设计（第 1 版）
+# A09.7 搜索：设计（第 1 版，已定稿并实现）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-02；S02.3 在 K90 上看过，见“实现和验证”）
+- 旧编号：U.5a、T07f.2（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：搜索页（搜索框、平台条、筛选、结果、各种状态）、排序菜单、搜索范围面板、Windows 缺 WebView2 的提示；见下面的界面清点表
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a097)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a097)
-- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a097)（A09.7-01～03）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a097)；功能点 F-SRC-01～03、F-SRC-05（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；搜索的请求、并发、排序、范围、历史在 [I05](../../../I-浏览和发现/I05-搜索/README.md)（I05.1、S02.1 做的“v4 新增”部分）；相关决定 D-003（X1～X4 按建议 A）
+- 评审页：claude.ai 私有页面；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`，`tools/ui/strings.py` 列出）；封面和头像是示意图片
-- 结果卡片：画的是 v3 的卡片原样（`lib/common/widgets/room_card.dart`，默认“标准”样式、`dense: true`）；**卡片的新样子跟 A09.1 走**，这里只定页面的排法
+- 结果卡片：设计图画的是 v3 的卡片原样（`lib/common/widgets/room_card.dart`，默认“标准”样式、`dense: true`）；**卡片的新样子跟 A09.1 走**，这里只定页面的排法（实现时用的是 A09.1 的 `LiveRoomCard`）
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -20,7 +22,9 @@
 | — | 卡片长按菜单 | 长按或右键卡片 | — | 在 A09.1 |
 | v4 新增 | 搜索历史、识别到直播链接、搜索范围（说明面板 + 勾选对话框）、骨架卡片、失败说明卡 | I05.1、S02.1 | 竖屏、横屏、宽屏 | 这一版都保留，搜索范围的两个窗口合成一个 |
 
-## v3 的样子
+## 3.x 的样子和问题
+
+### 3.x 的样子（`git show v3.2.11:lib/modules/search/`，`search_page.dart` 370 行、`search_platform_strip.dart` 105 行、`search_controller.dart`）
 
 - **顶栏**：`AppBar(automaticallyImplyLeading: false)`，标题是输入框：提示“输入直播关键字”，圆角 24 描边、底色 surfaceContainerLow（主题 `filled`），左边返回 `Icons.arrow_back`，右边搜索 `Icons.search`（提示“搜索直播”）；自动获得焦点，回车搜索（`search_page.dart:20-48`）。获得焦点时边框换成主题的 focusedBorder：圆角 12、主色 1.5（`common/style/theme.dart:160-174`）。输入字 14 号（bodyLarge），提示 13 号、onSurfaceVariant 60%。
 - **平台条**：高 56，横向列表，左右 12、间距 8；`ChoiceChip` 不带勾，选中描边主色、底色 secondaryContainer，未选描边 outlineVariant，字 13 号 500（`search_platform_strip.dart:63-95`）。第一项“全部”，其后是“平台显示”（`hotAreasList`）里的平台，默认 34 个：哔哩哔哩、斗鱼、虎牙、抖音、快手、网易CC、Twitch、Soop、YY、AcFun 直播、Picarto、TwitCasting、猫耳 FM、映客、克拉克拉、小红书、niconico、微博直播、SHOWROOM、CHZZK……网络（`core/sites.dart:217-280`、`:419-433`）。选中项自动滚到中间（`:49-61`）。
@@ -33,7 +37,7 @@
 - **按宽度分支**：只有列数（`:77`）和预加载距离 320 / 480（`:66`）；排法不变。
 - **手势和键盘**：拖动结果收起键盘（`:67`）；回车搜索；iOS 回弹（`:7-12`）；电脑上鼠标不能拖动（`desktop_manager.dart:830-847`）。
 
-## v3 的问题
+### 问题
 
 | 编号 | 问题 | 位置 |
 |---|---|---|
@@ -51,9 +55,15 @@
 | P12 | Windows 缺 WebView2 时每次打开搜索页都弹框，点外面关不掉 | `search_controller.dart:616-629` |
 | P13 | 电脑上平台条鼠标拖不动、滚轮不能横滚（推断，待核对） | `desktop_manager.dart:830-847`、`search_platform_strip.dart:66-75` |
 
-## v4 现在的偏差
+### 设计时 v4 的偏差
 
 I05.1、S02.1 已经加了：粘贴 / 清除按钮、识别直播链接直接进房、搜索历史、直播间 / 主播切换、搜索范围（说明面板 + 勾选对话框两个窗口）、平台芯片带标志、骨架卡片、“还有 N 个平台在搜索…”、失败说明卡、四种空状态。这一版全部保留；搜索范围的两个窗口合成一个；排法回到 v3（顶栏、平台条、筛选区），筛选行改成换行。
+
+## 各版的经过
+
+| 版 | 内容 | 用户意见 |
+|---|---|---|
+| 第 1 版 | 竖屏（全部、单个平台）、刚打开、各种状态、排序菜单、搜索范围面板、横屏手机、宽屏、Windows 缺 WebView2；13 个问题、16 条改动、四处待选 | 用户确认；X1～X4 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -85,7 +95,9 @@ I05.1、S02.1 已经加了：粘贴 / 清除按钮、识别直播链接直接进
 | [v3-wide.jpg](v3-wide.jpg)、[v4-wide.jpg](v4-wide.jpg)、[v4-wide-n.jpg](v4-wide-n.jpg) | 宽屏 1280×800 |
 | [v3-webview2.jpg](v3-webview2.jpg)、[v4-webview2.jpg](v4-webview2.jpg) | Windows 缺 WebView2 |
 
-## 改动（待确认）
+## 确认的改动
+
+用户确认（第 1 版的“改动（待确认）”原样，每条的完整说明见评审页“改了什么”）：
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -132,17 +144,44 @@ I05.1、S02.1 已经加了：粘贴 / 清除按钮、识别直播链接直接进
 | 电视 | 在 A17.3（pure_live_TV 搜索页也有直播间 / 主播和搜索历史）；内容和顺序对齐本页 |
 | 苹果平台差异 | iPhone 同手机（滑动返回）；iPad、macOS 同宽屏，Cmd 快捷键；macOS 没有 WebView2 问题 |
 
-## 待选（A 是建议）
+## 待选和决定
 
-- X1 往下滑时收起什么：A 所有尺寸一样收起筛选行（竖屏连平台条）；B 只在横屏手机收起。
-- X2 排序按钮的字：A 短名“综合 ⌄”；B 照 v3 完整文字。
-- X3 搜索范围：A 合成一个面板；B 照 v4 分开两个窗口。
-- X4 缺 WebView2 时点网页搜索：A 弹对话框（取消、下载、用系统浏览器打开）；B 直接用系统浏览器打开。
+- X1 往下滑时收起什么：A 所有尺寸一样收起筛选行（竖屏连平台条）；B 只在横屏手机收起。**用了 A**（D-003）。
+- X2 排序按钮的字：A 短名“综合 ⌄”；B 照 v3 完整文字。**用了 A**。
+- X3 搜索范围：A 合成一个面板；B 照 v4 分开两个窗口。**用了 A**。
+- X4 缺 WebView2 时点网页搜索：A 弹对话框（取消、下载、用系统浏览器打开）；B 直接用系统浏览器打开。**用了 A**。
 
-## 拿不准的地方
+### 设计时拿不准的地方
 
 - P13：电脑上鼠标滚轮能不能横滚平台条，是按 Flutter 默认行为和 `MyCustomScrollBehavior` 推断的，没在 Windows 上试。
 - 选中的 `FilterChip` 带头像时，v3 是在图标上盖一个勾（带暗色底）；图里简化成勾。
 - 排序菜单的当前项在 v3 有没有底色（`PopupMenuButton.initialValue`），图里没画 v3 的菜单。
 - 横屏手机的状态栏按显示画（24 高）；全面屏手机横屏时可能藏起来。
 - 新文字（排序短名“综合”、WebView2 对话框的新说明、搜索框新提示、排除平台后的说明）定稿后要加进翻译。
+
+结论：P13 实现了“平台条上竖向滚轮横着滚”，有测试，Windows 真机没看；新文字（排序短名、WebView2 新说明、搜索框新提示“搜索直播间、主播或粘贴链接”、排除平台后的说明）都加进了翻译。
+
+### 性能要点（评审页）
+
+- 结果网格一行一行懒加载（v3 已是）；卡片高度可预估，封面按显示尺寸解码（A09.1）。
+- 各平台先回来先显示，只更新网格；“还有 N 个平台在搜索”单独刷新，不整页重建。
+- 骨架卡片是静态的，不做扫光动画。
+- 筛选行收起和出现只做位移（浮动的顶栏），滚动时不重建结果。
+- 打开搜索页不再启动两次 reg.exe 查 WebView2（v3 在 Windows 上每次都查）。
+- 平台标志 18 像素，按显示尺寸解码。
+
+## 实现和验证
+
+- 实现：c1～c16、X1～X4 都做了（逐条见 [record.md](record.md)）。现在的代码（`apps/pure_live/lib/features/search/`）：
+  - `search_view.dart`：`webView2DownloadPage`（`:29`，下载页地址同 v3）、`SearchView`（`:41`）；搜索范围面板 `showSearchScopePanel`（`:233` 调用，关闭时生效、重搜“全部”）；点网页搜索时才问 WebView2（`_askWithoutWebView2` `:300`、`:312`）；Esc 返回（`EscapeBack` `:371`）；页宽 ≥600 一行（`:376`），框宽 = 页宽 × 0.38、夹在 280～480（`:408`）；往下滑收起用 `SliverFloatingHeader`（`:423`）；骨架 `RoomGridSkeleton`（`:545`）；结果卡片 `RoomGridCard`（`:569`，“全部”传 `mixedPlatforms: true`）。
+  - `search_widgets.dart`：`searchPlatformStripHeight` 56（`:15`）、`searchOneRowWidth` 600（`:20`）、`searchFieldMaxWidth` 480（`:23`）、`SearchPlatformStrip`（`:28`，选中项滚到中间、有字时换平台自动重搜、竖向滚轮横滚）、`SearchOptionsBar`（`:141`，`Wrap` 换行）、`_SortButton`（`:235`，“≡ 综合 ⌄”，菜单用 `showAppMenu(selected:)`）、`SearchCoverageLine`（`:276`）、`_LeadThenRest`（`:354`，筛选和说明一行、放不下换行）、`SearchLinkBanner`（`:453`，次色容器底）、`SearchPendingRow`（`:505`，“还有 N 个平台在搜索…”）、`SearchHistoryPanel`（`:535`，最近 20 条）、`AnchorResultTile`（`:597`，“平台 · 房间号 N”）。
+  - `search_scope.dart`：`overseasPlatforms`（`:14`）、`showSearchScopePanel`（`:71`，竖屏底部、宽 600 起右侧 360）、`SearchScopePanel`（`:92`，“只搜国内平台”“全选”、国内 / 海外分组“已选 N / M”、每行勾选框 + 标志 + 名称 +“主播”“网页”标签 + 一句能搜到什么；最后一个选中的不能取消）。
+  - 入口：`search_page.dart:12` 的 `SearchPage` 按路由分给 `SearchView` 或 `WebSearchView`（`RoutePath.kSearch` `/search`、`kWebSearch` `/web_search`）。
+- `live_ui` 里加的（记录“live_ui 里加的东西”）：`AppIcons` 17 个用途、`showAppMenu` 的 `selected`、`PageTitle`（A09.8、A09.9 用）。
+- 和设计 / v3 不一样（记录）：Esc 用 `CallbackShortcuts` + `FocusScope`（`Scaffold` 的 `DismissIntent` 会挡住外层），后来做成 `live_ui` 的 `EscapeBack`（A02.1）；Linux 点“继续网页搜索”先进网页搜索页再开系统浏览器（A09.8 c7）；搜索范围面板关闭时才生效；852 宽时框宽 324（设计图 330，按比例算）。
+- 没有新设置（`search.allExcluded`、`search.history` 照旧存在 meta）。门禁：`search` 直接写的颜色和图标 33 → 0；跨功能引用 `search -> settings/settings_model.dart`（代理设置跳到“网络”分组）照旧在基线里。
+- 提交：`480a8d8ac`（`feat(app): U.5a search page as designed`，登记表写的是这个）；合并 `f294308a3`（2026-10-02，和 A09.8、A09.9 一起）。
+- 后来的变化：`a048ea540`（搜索的平台条拉伸、下拉刷新组件，A03.1）；A02.1（`914784264`）`EscapeBack`、状态页；A02.2（`fc5bcdd46`）对话框和面板换成共用组件。
+- 自动测试：`apps/pure_live/test/features/search/search_test.dart`（记录写的是合并时 29 个；现在按 `testWidgets(`、`test(` 数是 27 个用例声明，有的用例按尺寸循环，差别没有逐个核对）：每个平台的范围说明；搜索框（焦点时圆角 24、回车键“搜索”、按钮顺序和图标）；竖屏排法、852 和 1280 一行、框宽、排序悬停提示；393 / 852 / 1280 的列数和“全部”标平台；往下滑收起；排序菜单；搜索范围面板；骨架和“还有 1 个平台在搜索…”；空状态；网页搜索传参；WebView2 只在点网页搜索时问；滚轮横滚；右键 = 长按（附录 A 第 14 条）；Esc 返回。`live_ui` 的 `app_menu_test.dart` +2。合并时 `apps/pure_live` 417 个、`live_ui` 69 个通过。
+- 真机：没有单独的 `verify.md`。S02.3（2026-10-02，K90，`288fec0ec`）“搜索：全部平台同时搜、卡片标平台、‘还有 N 个平台在搜索…’”通过（[S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)）；功能清点 F-SRC-01 记“K90 第一轮看过国内平台”。横屏一行排法、搜索范围面板、WebView2（要 Windows）没有记录，对应 [CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 4 节第 2 条。
+- 留下的问题：Windows 上的 WebView2 提问和滚轮横滚要在 Windows 上看（X01、S03.1）；没在 profile 模式看帧时间；Picarto、CHZZK 频道搜索的卡片两行都是频道名（[A09.11](../A09.11-Picarto搜索卡片简介/README.md)）；电视搜索（A17.3）。

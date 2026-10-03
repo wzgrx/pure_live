@@ -18,6 +18,7 @@
 
 - `packages/live_core/lib/src/sites/picarto/picarto_api.dart:295-331` 的 `PicartoApi.searchRooms`：`title: name`、`nick: name`、`introduction: bio.isEmpty ? null : bio`（`:310` 解码 HTML 字符）。
 - `packages/live_core/lib/src/sites/chzzk/chzzk_api.dart:725-730`：CHZZK 频道搜索同样 `nick`、`title` 都是频道名，`introduction` 是频道说明（规则通用时也会受影响，见 README 待选 X1）。
+- 2026-10-03 粗查（README“v4 现在”的表）：`nick`、`title` 同一个表达式且带简介的还有快手主播搜索 `kuaishou/kuaishou_api.dart:190-206`（`_searchRoom`，简介是 `author['description']`）、SHOWROOM `showroom/showroom_api.dart:493-509`（`room`，简介是 `profile.description`）；映客 `inke/inke_api.dart:353-364`、PandaTV `pandalive/pandalive_api.dart:676-696`、微博 `weibo/weibo_api.dart:280-297` 没有简介，规则通用也不受影响。第 1 阶段要再核一遍（只查了字面相同的表达式）。
 - `apps/pure_live/lib/shared/rooms/room_cards.dart:82-99` 的 `AudiencePolicy.cardOf`：`title`（空时“未命名直播间”）、`anchorName`（`displayNick`，在播时加“· 已播 N”）。
 - `packages/live_ui/lib/src/widgets/room_card.dart:44-126` 的 `RoomCardData`（`title`、`anchorName` 等，没有简介）；`packages/live_ui/lib/src/widgets/live_room_card.dart:309-330` 的 `title()`、`anchorName()` 两行。
 - 搜索页：`apps/pure_live/lib/features/search/search_view.dart:569` 的 `RoomGridCard` → `apps/pure_live/lib/shared/rooms/room_grid.dart:131` 的 `policy.cardOf(...)`。
@@ -64,7 +65,7 @@
 
 ## 风险和注意
 
-- 通用规则会影响 CHZZK 频道搜索等其他来源：第 1 阶段要列全，写进 README 和评审页，用户看过再定。
+- 通用规则会影响 CHZZK 频道搜索、快手主播搜索、SHOWROOM 等其他来源（README 的粗查表）：第 1 阶段要列全，写进 README 和评审页，用户（或维护者按 D-003）看过再定；选了通用规则时，真机步骤加一条“CHZZK 搜一个频道，第二行是频道说明”。
 - 简介可能很长或带表情：只取第一行、`maxLines: 1` 省略，不要让卡片变高。
 - 可能冲突的文件：`room_cards.dart`（E06.2 的卡片标记也可能改它）。
 
